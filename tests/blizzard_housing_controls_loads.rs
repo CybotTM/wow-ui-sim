@@ -315,7 +315,7 @@ fn blizzard_housing_controls_visitor_control_frame_button_container_publishes_fo
 }
 
 prefork_full_ui_case! {
-fn blizzard_housing_controls_mixin_publishes_eight_methods(env: &WowLuaEnv) {
+fn blizzard_housing_controls_mixin_publishes_seven_methods(env: &WowLuaEnv) {
     load_housing_controls(env);
 
     for method in [
@@ -324,7 +324,6 @@ fn blizzard_housing_controls_mixin_publishes_eight_methods(env: &WowLuaEnv) {
         "UpdateControlVisibility",
         "OnShow",
         "OnHide",
-        "UpdateActiveFrame",
         "GetActiveFrame",
         "UpdateButtons",
     ] {
@@ -335,31 +334,10 @@ fn blizzard_housing_controls_mixin_publishes_eight_methods(env: &WowLuaEnv) {
             .expect("HousingControlsMixin method existence query should succeed");
         assert!(
             exists,
-            "HousingControlsMixin must expose `:{method}()` — the mixin drives the \
-             housing-decor controls top-strip: OnLoad calls UpdateControlVisibility with the \
-             current C_Housing.IsInsideHouseOrPlot() result, then \
-             FrameUtil.RegisterFrameForEvents(self, HousingControlsEvents) for the 4 \
-             always-on events (HOUSE_PLOT_ENTERED, HOUSE_PLOT_EXITED, \
-             HOUSE_EDITOR_AVAILABILITY_CHANGED, CURRENT_HOUSE_INFO_RECIEVED), and \
-             FrameUtil.RegisterForTopLevelParentChanged; OnEvent dispatches the 7 events \
-             across the 2 event tables (PLOT_ENTERED → UpdateControlVisibility(true), \
-             PLOT_EXITED → UpdateControlVisibility(false), AVAILABILITY_CHANGED / \
-             HOUSE_INFO_UPDATED / CURRENT_HOUSE_INFO_RECIEVED → \
-             UpdateControlVisibility(IsInsideHouseOrPlot), UPDATE_BINDINGS / \
-             HOUSE_EDITOR_MODE_CHANGED → UpdateButtons); UpdateControlVisibility shows the \
-             frame only when isInsideHouseOrPlot AND \
-             C_HouseEditor.IsHouseEditorStatusAvailable() (avoids partial-state flash before \
-             editor is ready), then calls UpdateActiveFrame + UpdateButtons; OnShow calls \
-             UpdateButtons + RegisterFrameForEvents for the 3 shown-only events + registers \
-             EventRegistry callbacks for HousingInspectMode.{{Activated,Deactivated}}; OnHide \
-             unregisters both; UpdateActiveFrame swaps OwnerControlFrame ↔ VisitorControlFrame \
-             based on C_HousingNeighborhood.IsPlayerInOtherPlayersPlot OR (IsInsideHouse AND \
-             NOT IsInsideOwnHouse), calls VisitorControlFrame:UpdateOwnerInfomation [sic — \
-             Blizzard's typo \"Infomation\" preserved verbatim], stores the chosen frame on \
-             self.activeFrame; GetActiveFrame returns self.activeFrame; UpdateButtons \
-             iterates activeFrame.Buttons (the parentArray collected by \
-             BaseHousingControlButtonTemplate's `parentArray=\"Buttons\"`) and calls \
-             :UpdateState() on each"
+            "HousingControlsMixin must expose `:{method}()` — retail 12.1 updates visibility \
+             from C_HouseEditor.GetHouseEditorPlayerType(), selects OwnerControlFrame or \
+             VisitorControlFrame directly in UpdateControlVisibility, and updates the selected \
+             frame's buttons through GetActiveFrame()"
         );
     }
 }
@@ -404,10 +382,10 @@ fn blizzard_housing_controls_publishes_six_button_mixins_globally(env: &WowLuaEn
              (WHITE_FONT_COLOR vs DARKGRAY_COLOR), IsActive default-not-implemented assert, \
              CheckEnabled with Kiosk + nyiLabel guards, OnClick with Kiosk skip + sound + \
              BaseHousingModeButtonMixin.OnClick chain), HouseEditorButtonMixin (CheckEnabled \
-             via C_HouseEditor.GetHouseEditorAvailability + HousingControlsUtil + \
-             HOUSING_CONTROLS_EDITOR_UNAVAILABLE_FMT, IsActive via \
-             C_HouseEditor.IsHouseEditorActive, EnterMode via C_HouseEditor.EnterHouseEditor + \
-             UIErrorsFrame fallback, LeaveMode via HousingFramesUtil.LeaveHouseEditor), \
+             directly compares C_HouseEditor.GetHouseEditorAvailability with \
+             Enum.HousingResult.Success, IsActive queries C_HouseEditor.IsHouseEditorActive, \
+             EnterMode uses C_HouseEditor.EnterHouseEditor, and LeaveMode calls \
+             HousingFramesUtil.LeaveHouseEditor), \
              HouseExitButtonMixin (OnClick with Kiosk skip + C_Housing.LeaveHouse, IsActive \
              always false, CheckEnabled via IsInsideHouse AND \
              GetActiveHouseEditorMode==Enum.HouseEditorMode.None), HouseInfoButtonMixin \
@@ -428,21 +406,16 @@ fn blizzard_housing_controls_publishes_six_button_mixins_globally(env: &WowLuaEn
 }
 
 prefork_full_ui_case! {
-fn blizzard_housing_controls_util_publishes_can_activate_helper(env: &WowLuaEnv) {
+fn blizzard_housing_controls_does_not_publish_retired_util_helper(env: &WowLuaEnv) {
     load_housing_controls(env);
 
-    let exists: bool = env
-        .eval("return type(HousingControlsUtil) == 'table' and type(HousingControlsUtil.CanActivateHousingControls) == 'function'")
+    let retired: bool = env
+        .eval("return HousingControlsUtil == nil")
         .expect("HousingControlsUtil global lookup should succeed");
     assert!(
-        exists,
-        "HousingControlsUtil global table must publish with the CanActivateHousingControls \
-         helper — Blizzard_HousingControlsUtil.lua line 4 defines \
-         `function HousingControlsUtil.CanActivateHousingControls(availabilityResult)` which \
-         maps `Enum.HousingResult.Success` to `(true, nil)` and otherwise returns \
-         `(false, HousingResultToErrorText[availabilityResult])`. This helper is consumed by \
-         HouseEditorButtonMixin:CheckEnabled and HouseSettingsButtonMixin:CheckEnabled to \
-         decide whether the editor / settings buttons are clickable"
+        retired,
+        "Retail 12.1 Blizzard_HousingControls ships only bootstrap, button, and controls modules; \
+         it no longer publishes the retired HousingControlsUtil helper table"
     );
 }
 }

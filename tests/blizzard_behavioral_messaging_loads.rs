@@ -15,6 +15,10 @@ fn behavioral_messaging_dependency_chain() -> Vec<(&'static str, PathBuf)> {
     let ui = blizzard_ui_dir();
     vec![
         (
+            "Blizzard_StatusTrayManager",
+            ui.join("Blizzard_StatusTrayManager/Blizzard_StatusTrayManager.toc"),
+        ),
+        (
             "Blizzard_StatusUI",
             ui.join("Blizzard_StatusUI/Blizzard_StatusUI.toc"),
         ),

@@ -458,25 +458,24 @@ fn blizzard_housing_dashboard_house_level_track_mixin_extends_reward_track(env: 
 }
 
 prefork_full_ui_case! {
-fn blizzard_housing_dashboard_house_info_mixin_publishes_nine_methods(env: &WowLuaEnv) {
+fn blizzard_housing_dashboard_house_info_mixin_publishes_eight_methods(env: &WowLuaEnv) {
     load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "HousingDashboardHouseInfoMixin",
         &[
             "OnLoad",
-            "OnShow",
             "UpdateNoHousesDashboard",
-            "LoadHouses",
             "OnEvent",
+            "OnHouseListLoading",
             "OnHouseListUpdated",
-            "RefreshHouseDropdown",
+            "OnHouseSelected",
             "OnHouseFinderButtonClicked",
             "OnTutorialButtonClicked",
         ],
-        "the umbrella house-info tab; reacts to PLAYER_HOUSE_LIST_UPDATED via LoadHouses, swaps \
-         in DashboardNoHousesFrame when the player owns zero houses (driving \
-         Dashboard:UpdateSizeToContent), routes the HouseFinder + tutorial button clicks",
+        "the retail 12.1 house-info tab; it receives house-list loading, update, and selection \
+         callbacks from HouseDropdown, swaps DashboardNoHousesFrame, and routes HouseFinder and \
+         tutorial button clicks",
     );
 }
 }
@@ -527,13 +526,14 @@ fn blizzard_housing_dashboard_house_xp_cap_icon_mixin_publishes_three_methods(en
 }
 
 prefork_full_ui_case! {
-fn blizzard_housing_dashboard_initiatives_tab_mixin_publishes_seventeen_methods(env: &WowLuaEnv) {
+fn blizzard_housing_dashboard_initiatives_tab_mixin_publishes_eighteen_methods(env: &WowLuaEnv) {
     load_housing_dashboard(env);
     assert_mixin_methods(
         &env,
         "InitiativesTabMixin",
         &[
             "OnLoad",
+            "OnEvent",
             "OnShow",
             "OnHide",
             "OnUpdate",
@@ -548,11 +548,11 @@ fn blizzard_housing_dashboard_initiatives_tab_mixin_publishes_seventeen_methods(
             "SetCurrentPoints",
             "ScrollToInitiativeTaskID",
             "OnHouseSelected",
-            "RefreshHouseDropdown",
             "UpdateBackground",
+            "OnSetActiveNeighborhoodClicked",
         ],
-        "endeavors / weekly tasks tab; the biggest mixin (17 methods) drives the activity log \
-         + task list scrollboxes plus the threshold reward animation tied to the progress bar",
+        "the retail 12.1 endeavors tab drives the activity-log and task-list scrollboxes, \
+         threshold progress, and active-neighborhood selection",
     );
 }
 }
@@ -596,14 +596,15 @@ fn blizzard_housing_dashboard_progress_threshold_mixin_publishes_four_methods(en
 }
 
 prefork_full_ui_case! {
-fn blizzard_housing_dashboard_initiative_neighborhood_switcher_mixin_publishes_one_method(env: &WowLuaEnv) {
+fn blizzard_housing_dashboard_does_not_publish_retired_neighborhood_switcher_mixin(env: &WowLuaEnv) {
     load_housing_dashboard(env);
-    assert_mixin_methods(
-        &env,
-        "InitiativeActiveNeighborhoodSwitcherMixin",
-        &["OnClick"],
-        "single-method mixin that calls C_HousingNeighborhood.SetActiveNeighborhood when the \
-         player has multiple eligible neighborhoods to earn favor in",
+    let retired: bool = env
+        .eval("return InitiativeActiveNeighborhoodSwitcherMixin == nil")
+        .expect("InitiativeActiveNeighborhoodSwitcherMixin lookup should succeed");
+    assert!(
+        retired,
+        "Retail 12.1 wires the switcher button to InitiativesTabMixin:OnSetActiveNeighborhoodClicked \
+         instead of publishing the retired InitiativeActiveNeighborhoodSwitcherMixin"
     );
 }
 }
@@ -644,8 +645,10 @@ fn blizzard_housing_dashboard_frame_publishes_tab_buttons_and_content_children(e
     for child in [
         "HouseInfoContent",
         "CatalogContent",
+        "CollectionContent",
         "HouseInfoTabButton",
         "CatalogTabButton",
+        "CollectionTabButton",
     ] {
         let exists: bool = env
             .eval(&format!(
@@ -654,26 +657,24 @@ fn blizzard_housing_dashboard_frame_publishes_tab_buttons_and_content_children(e
             .expect("HousingDashboardFrame parentKey lookup should succeed");
         assert!(
             exists,
-            "HousingDashboardFrame.{child} must publish via parentKey — Dashboard XML wires four \
-             child frames: HouseInfoContent (HousingDashboardHouseInfoTemplate), CatalogContent \
-             (HousingCatalogFrameTemplate), and the two side-tab buttons that drive SetTab"
+            "HousingDashboardFrame.{child} must publish via parentKey — retail 12.1 wires house \
+             info, catalog, and collection content plus their three side-tab buttons"
         );
     }
 }
 }
 
 prefork_full_ui_case! {
-fn blizzard_housing_dashboard_tab_buttons_array_holds_two_entries(env: &WowLuaEnv) {
+fn blizzard_housing_dashboard_tab_buttons_array_holds_three_entries(env: &WowLuaEnv) {
     load_housing_dashboard(env);
 
     let count: i64 = env
         .eval("local arr = HousingDashboardFrame.TabButtons; return arr and #arr or -1")
         .expect("TabButtons parentArray lookup should succeed");
     assert_eq!(
-        count, 2,
-        "HousingDashboardFrame.TabButtons parentArray must collect exactly 2 entries — both side \
-         tab buttons inherit `parentArray=\"TabButtons\"` from HousingDashboardSideTabTemplate so \
-         they auto-collect into the array OnLoad iterates to wire SetCustomOnMouseUpHandler. Got \
+        count, 3,
+        "HousingDashboardFrame.TabButtons parentArray must collect the house-info, catalog, and \
+         collection side-tab buttons that OnLoad iterates to wire SetCustomOnMouseUpHandler. Got \
          length {count}"
     );
 }

@@ -27,8 +27,6 @@ const ALL_FOUR_SCREENS: &[ScreenKind] = &[
 ];
 
 const PUBLISHED_GLOBAL_FUNCTIONS: &[&str] = &[
-    "ClassTrainerFrame_Show",
-    "ClassTrainerFrame_Hide",
     "ClassTrainerFrame_OnLoad",
     "ClassTrainerFrame_OnShow",
     "ClassTrainerFrame_OnHide",
@@ -305,14 +303,10 @@ fn explicit_load_publishes_global_functions(env: &WowLuaEnv) {
         assert_eq!(
             kind, "function",
             "Global function `{fn_name}` must be defined after LoD load. \
-             These cover the 4 frame scripts (OnLoad/OnShow/OnHide/\
-             OnEvent at lua:50-130), 2 panel-manager entry points \
-             (ClassTrainerFrame_Show/Hide at lua:38-48), the train-\
-             button enable wrapper (lua:132-151), the data-provider \
-             rebuild (lua:153-207), per-row init (lua:209-331), \
-             auto-selection (lua:333-364), selection state (lua:366-\
-             402), and the 2 button click handlers (lua:404-416). Got \
-             type={kind} for {fn_name}"
+             These cover the frame scripts, train-button enable wrapper, data-provider rebuild, \
+             per-row initialization, auto-selection, selection state, and button click handlers. \
+             ClassTrainerFrame_Show and ClassTrainerFrame_Hide are local bootstrap callbacks, not \
+             addon globals. Got type={kind} for {fn_name}"
         );
     }
 }

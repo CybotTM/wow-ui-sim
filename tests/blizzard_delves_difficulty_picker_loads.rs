@@ -200,20 +200,17 @@ fn blizzard_delves_difficulty_picker_secondary_mixins_are_published(env: &WowLua
 }
 
 prefork_full_ui_case! {
-fn blizzard_delves_difficulty_picker_publishes_get_player_key_state_global(env: &WowLuaEnv) {
+fn blizzard_delves_difficulty_picker_keeps_player_key_state_local(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &delves_difficulty_picker_toc())
         .expect("LOD load should succeed");
 
-    let helper_present: bool = env
-        .eval("return type(GetPlayerKeyState) == 'function'")
+    let helper_is_local: bool = env
+        .eval("return GetPlayerKeyState == nil")
         .expect("GetPlayerKeyState query should succeed");
     assert!(
-        helper_present,
-        "Blizzard_DelvesDifficultyPicker.lua line 40 should publish a global \
-         `GetPlayerKeyState()` helper that maps the player's delve-key currency quantity to \
-         the local DelvesKeyState enum (None / Normal). It's a global (not local) so the \
-         bountiful-widget tooltip handlers in this same addon and any companion Blizzard \
-         delves addons can read the current key-tier state"
+        helper_is_local,
+        "Retail 12.1 declares GetPlayerKeyState as a local helper in \
+         Blizzard_DelvesDifficultyPicker.lua; loading the addon must not publish it globally"
     );
 }
 }

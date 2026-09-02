@@ -36,43 +36,6 @@ const MIXINS: &[&str] = &[
     "ManagedFrameContainerMixin",
 ];
 
-const MODULE_LOAD_TABLES: &[&str] = &[
-    "PULSEBUTTONS",
-    "SHINES_TO_ANIMATE",
-    "UIChildWindows",
-    "UISpecialFrames",
-    "UIMenus",
-];
-
-const MODULE_LOAD_NUMBER_CONSTANTS: &[(&str, f64)] = &[
-    ("TOOLTIP_UPDATE_TIME", 0.2),
-    ("BOSS_FRAME_CASTBAR_HEIGHT", 16.0),
-    ("MAX_ACCOUNT_MACROS", 120.0),
-    ("MAX_CHARACTER_MACROS", 30.0),
-    ("FRAMERATE_FREQUENCY", 0.25),
-];
-
-const FREE_FUNCTIONS: &[&str] = &[
-    "UIParent_OnLoad",
-    "UIParent_OnEvent",
-    "UIParent_OnShow",
-    "UIParent_OnHide",
-    "UIParent_Shared_OnLoad",
-    "UIParent_Shared_OnEvent",
-    "UIParent_UpdateTopFramePositions",
-    "WorldFrame_OnLoad",
-    "WorldFrame_OnUpdate",
-    "UpdateUIElementsForClientScene",
-    "ToggleAchievementFrame",
-    "ToggleGuildFrame",
-    "ToggleEncounterJournal",
-    "ToggleCollectionsJournal",
-    "OpenAchievementFrameToAchievement",
-    "ToggleLFGFrame",
-    "InClickBindingMode",
-    "ReverseQuestObjective",
-];
-
 const VIRTUAL_TEMPLATES: &[&str] = &[
     "ChatBubbleTemplate",
     "ManagedFrameTemplate",
@@ -372,69 +335,47 @@ fn full_game_load_publishes_mixins(env: &WowLuaEnv) {
 }
 
 prefork_full_ui_case! {
-fn full_game_load_publishes_module_load_tables(env: &WowLuaEnv) {
-
-    for table in MODULE_LOAD_TABLES {
-        let kind: String = env
-            .eval(&format!("return type({table})"))
-            .unwrap_or_else(|err| panic!("{table} probe failed: {err}"));
-        assert_eq!(
-            kind, "table",
-            "{table} must be a global table. PULSEBUTTONS / \
-             SHINES_TO_ANIMATE feed the OnUpdate-driven pulse/shine \
-             animation drivers (ButtonPulse_OnUpdate, \
-             AnimatedShine_OnUpdate). UIChildWindows is the list of \
-             windows that must close when their parent does (OpenMail, \
-             GuildMemberDetail, GuildBankPopup, GearManagerDialog). \
-             UISpecialFrames is the ESC-closes list (ItemRefTooltip, \
-             ColorPickerFrame, the floating tooltips). UIMenus is the \
-             dropdown-list registry (DropDownList1..3)"
-        );
-    }
+fn full_game_load_keeps_ui_parent_visible(env: &WowLuaEnv) {
+    let visible: bool = env
+        .eval("return UIParent:IsShown()")
+        .expect("UIParent visibility query should succeed");
+    assert!(
+        visible,
+        "Retail 12.1 Blizzard_UIParent asserts that the top-level UIParent is already shown when \
+         its visibility callbacks are installed"
+    );
 }
 }
 
 prefork_full_ui_case! {
-fn full_game_load_publishes_module_load_number_constants(env: &WowLuaEnv) {
-
-    for (name, expected) in MODULE_LOAD_NUMBER_CONSTANTS {
-        let value: f64 = env
-            .eval(&format!("return {name}"))
-            .unwrap_or_else(|err| panic!("{name} probe failed: {err}"));
-        assert!(
-            (value - expected).abs() < 1e-9,
-            "{name} must equal {expected} after load (got {value}). \
-             TOOLTIP_UPDATE_TIME and BOSS_FRAME_CASTBAR_HEIGHT come from \
-             Mainline/UIParent.lua:1-2; MAX_ACCOUNT_MACROS / \
-             MAX_CHARACTER_MACROS come from lines 11-12; \
-             FRAMERATE_FREQUENCY comes from Mainline/WorldFrame.lua:2 \
-             and is the throttle for the framerate-meter sample window"
-        );
-    }
+fn full_game_load_installs_top_level_parent_visibility_scripts(env: &WowLuaEnv) {
+    let scripts_installed: bool = env
+        .eval(
+            "return type(UIParent:GetScript('OnShow')) == 'function' \
+                and type(UIParent:GetScript('OnHide')) == 'function'",
+        )
+        .expect("UIParent visibility script query should succeed");
+    assert!(
+        scripts_installed,
+        "Retail 12.1 Blizzard_UIParent installs OnShow and OnHide callbacks directly on UIParent \
+         to publish UI.TopLevelParentShown and UI.TopLevelParentHidden EventRegistry events"
+    );
 }
 }
 
 prefork_full_ui_case! {
-fn full_game_load_publishes_free_functions(env: &WowLuaEnv) {
-
-    for func in FREE_FUNCTIONS {
-        let kind: String = env
-            .eval(&format!("return type({func})"))
-            .unwrap_or_else(|err| panic!("{func} probe failed: {err}"));
-        assert_eq!(
-            kind, "function",
-            "{func} must be a global function. UIParent_OnLoad / OnEvent \
-             / OnShow / OnHide are the singleton frame's script handlers \
-             wired in UIParent.xml:18-32. The `_Shared_` variants are the \
-             cross-flavor handlers in Shared/UIParent.lua invoked at the \
-             top of the Mainline handler. WorldFrame_OnLoad / OnUpdate are the world-render \
-             container's tick driver (StaticPopup_UpdateAll, \
-             MirrorTimerContainer:ForceUpdateTimers, the tutorial polling). \
-             UpdateUIElementsForClientScene flips PlayerFrame / TargetFrame visibility based \
-             on Enum.ClientSceneType. The Toggle* / Open* family are the public API for \
-             opening addon-side panels"
-        );
-    }
+fn full_game_load_does_not_restore_retired_uiparent_globals(env: &WowLuaEnv) {
+    let retired_globals_absent: bool = env
+        .eval(
+            "return PULSEBUTTONS == nil and TOOLTIP_UPDATE_TIME == nil and UIParent_OnLoad == nil",
+        )
+        .expect("retired UIParent globals query should succeed");
+    assert!(
+        retired_globals_absent,
+        "Retail 12.1 replaces the legacy table, constant, and named-handler surface with direct \
+         script installation on UIParent; loading Blizzard_UIParent must not restore the retired \
+         globals"
+    );
 }
 }
 
