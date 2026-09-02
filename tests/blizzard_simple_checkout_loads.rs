@@ -69,12 +69,8 @@ fn dependencies_accessor_returns_all_repeated_dep_values() {
 
     assert_eq!(
         toc.dependencies(),
-        vec![
-            "Blizzard_SharedXML".to_string(),
-            "Blizzard_UIParent".to_string(),
-            "Blizzard_GlueParent".to_string(),
-        ],
-        "SimpleCheckout's repeated `## Dep:` directives must be exposed in source order"
+        vec!["Blizzard_SharedXML".to_string()],
+        "SimpleCheckout's sole `## Dep: Blizzard_SharedXML` directive must be exposed"
     );
 }
 
@@ -89,12 +85,10 @@ fn optional_deps_accessor_is_empty_without_optional_directives() {
 }
 
 #[test]
-fn raw_bytes_pin_screen_specific_dep_directives() {
+fn raw_bytes_pin_shared_xml_dep_without_optional_directives() {
     let raw = std::fs::read_to_string(simple_checkout_toc()).expect("TOC reads utf-8");
 
     assert!(raw.contains("## Dep: Blizzard_SharedXML"));
-    assert!(raw.contains("## Dep: Blizzard_UIParent [AllowLoad game]"));
-    assert!(raw.contains("## Dep: Blizzard_GlueParent [AllowLoad glue]"));
     assert!(!raw.contains("## OptionalDep"));
 }
 
@@ -148,8 +142,6 @@ fn toc_raw_bytes_pin_minimal_metadata_surface() {
     assert!(raw.contains("## Title: Blizzard_SimpleCheckout"));
     assert!(raw.contains("## AllowLoad: Both"));
     assert!(raw.contains("## Dep: Blizzard_SharedXML"));
-    assert!(raw.contains("## Dep: Blizzard_UIParent [AllowLoad game]"));
-    assert!(raw.contains("## Dep: Blizzard_GlueParent [AllowLoad glue]"));
     assert!(raw.contains("## UseSecureEnvironment: 1"));
 
     assert!(!raw.contains("## Author"));

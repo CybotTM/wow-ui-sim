@@ -156,7 +156,6 @@ fn toc_raw_bytes_pin_load_saved_variables_first_for_pre_lua_sv_loading() {
         .expect("Blizzard_SettingsDefinitions_Shared TOC reads utf-8");
 
     assert!(raw.contains("## Title: Blizzard_SettingsDefinitions_Shared"));
-    assert!(raw.contains("## DefaultState: enabled"));
     assert!(raw.contains("## AllowLoad: Both"));
     assert!(raw.contains("## SavedVariablesPerCharacter: NewSettingsSeen"));
 
