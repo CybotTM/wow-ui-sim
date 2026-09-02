@@ -258,6 +258,16 @@ fn allow_load_game_restricts_to_in_world() {
 }
 
 #[test]
+fn toc_omits_game_type_restriction() {
+    let toc = TocFile::from_file(&ui_widgets_toc()).expect("TOC parses");
+
+    assert!(
+        !toc.is_game_type_restricted(),
+        "The current bare TOC has no `## AllowLoadGameType` directive, so it must remain unrestricted"
+    );
+}
+
+#[test]
 fn toc_raw_bytes_pin_directives_and_representative_body_files() {
     let raw = std::fs::read_to_string(ui_widgets_toc()).expect("TOC reads utf-8");
 
