@@ -66,10 +66,14 @@ local function __wow_install_frame_helpers(frame)
     end
   end
 
+  -- A frame without edit-mode systemInfo counts as in its default position:
+  -- the client has the method only on edit-mode systems, and its callers
+  -- outside the mixin (AlertFrames.lua:416, EditModeUtil.lua:22) treat a
+  -- missing method that way.
   if frame.IsInDefaultPosition == nil then
     function frame:IsInDefaultPosition()
       local info = self.systemInfo
-      return type(info) == "table" and info.isInDefaultPosition == true
+      return type(info) ~= "table" or info.isInDefaultPosition == true
     end
   end
 
@@ -162,7 +166,7 @@ do
     if frameIndex.IsInDefaultPosition == nil then
       function frameIndex:IsInDefaultPosition()
         local info = self.systemInfo
-        return type(info) == "table" and info.isInDefaultPosition == true
+        return type(info) ~= "table" or info.isInDefaultPosition == true
       end
     end
   end
@@ -210,7 +214,7 @@ local function __wow_register_core_frame_methods()
       if type(systemInfo) == "table" and systemInfo.isInDefaultPosition ~= nil then
         return systemInfo.isInDefaultPosition == true
       end
-      return false
+      return type(systemInfo) ~= "table"
     end
   end
 
