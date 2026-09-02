@@ -366,15 +366,14 @@ fn full_game_load_installs_top_level_parent_visibility_scripts(env: &WowLuaEnv) 
 prefork_full_ui_case! {
 fn full_game_load_does_not_restore_retired_uiparent_globals(env: &WowLuaEnv) {
     let retired_globals_absent: bool = env
-        .eval(
-            "return PULSEBUTTONS == nil and TOOLTIP_UPDATE_TIME == nil and UIParent_OnLoad == nil",
-        )
+        .eval("return PULSEBUTTONS == nil and UIParent_OnLoad == nil")
         .expect("retired UIParent globals query should succeed");
     assert!(
         retired_globals_absent,
-        "Retail 12.1 replaces the legacy table, constant, and named-handler surface with direct \
-         script installation on UIParent; loading Blizzard_UIParent must not restore the retired \
-         globals"
+        "Retail 12.1 replaces the legacy UIParent-owned table and named-handler surface with \
+         direct script installation; loading Blizzard_UIParent must not restore those retired \
+         globals. TOOLTIP_UPDATE_TIME remains a valid SharedXML constant and is intentionally \
+         outside this assertion"
     );
 }
 }

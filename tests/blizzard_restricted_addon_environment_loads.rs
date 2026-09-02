@@ -86,15 +86,6 @@ const SECURE_GROUP_HEADER_GLOBALS: &[&str] = &[
     "SecureGroupPetHeader_OnEvent",
     "SecureGroupPetHeader_OnAttributeChanged",
     "SecureGroupPetHeader_Update",
-    "SecureAuraHeader_OnLoad",
-    "SecureAuraHeader_OnShow",
-    "SecureAuraHeader_OnHide",
-    "SecureAuraHeader_OnUpdate",
-    "SecureAuraHeader_OnEvent",
-    "SecureAuraHeader_OnAttributeChanged",
-    "SecureAuraHeader_GetUnit",
-    "SecureAuraHeader_UpdateEventRegistrations",
-    "SecureAuraHeader_Update",
 ];
 
 const VIRTUAL_TEMPLATES: &[&str] = &[
@@ -601,13 +592,12 @@ fn secure_group_headers_publish_full_lifecycle_surface(env: &WowLuaEnv) {
             .unwrap_or_else(|err| panic!("type(_G.{fname}) probe failed: {err}"));
         assert_eq!(
             kind, "function",
-            "{fname} must publish at `_G` as a function — SecureGroupHeaders.lua wires 17 \
-             globals across three header types. SecureGroupHeader_* (party/raid frames) sort \
-             group members and create child unit frames matching the showParty/showRaid \
-             attributes. SecureGroupPetHeader_* mirrors the structure for group pets. \
-             SecureAuraHeader_* manages the 40-slot aura auto-layout grid (used by \
-             BuffFrame.xml + DebuffFrame.xml). All six are dispatched via the matching XML \
-             <Scripts> blocks in SecureGroupHeaders.xml"
+            "{fname} must publish at `_G` as a function — retail SecureGroupHeaders.lua wires \
+             eight lifecycle globals across group and pet headers. SecureGroupHeader_* \
+             (party/raid frames) sort group members and create child unit frames matching the \
+             showParty/showRaid attributes; SecureGroupPetHeader_* mirrors the structure for \
+             group pets. SecureAuraHeader.lua is classic-only in the current TOC and is not part \
+             of the retail publication contract"
         );
     }
 }

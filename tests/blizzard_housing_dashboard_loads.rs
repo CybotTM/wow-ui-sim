@@ -294,15 +294,15 @@ fn blizzard_housing_dashboard_umbrella_mixin_publishes_nine_methods(env: &WowLua
             "OnShow",
             "OnHide",
             "OnTabButtonClicked",
-            "OnOpenToCatalogFrame",
+            "OpenToTab",
             "SetTab",
             "GetPanelExtraWidth",
             "OpenInitiativesFrameToTaskID",
             "UpdateSizeToContent",
         ],
-        "umbrella dashboard frame mixin owns the 2-tab system (HouseInfoContent + \
-         CatalogContent), the OpenToCatalogFrame EventRegistry callback, and the size-swap-on-\
-         no-houses behaviour driven by UpdateSizeToContent",
+        "umbrella dashboard frame mixin owns the 3-tab system (HouseInfoContent + \
+         CatalogContent + CollectionContent), routes both EventRegistry callbacks through \
+         OpenToTab, and swaps size for the no-houses state via UpdateSizeToContent",
     );
 }
 }
