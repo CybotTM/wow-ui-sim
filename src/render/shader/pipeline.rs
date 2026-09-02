@@ -26,7 +26,33 @@ struct Uniforms {
 /// "false" disables the lift (divisor 1.0), any other number is used as the
 /// divisor directly.
 pub fn brightness_boost_divisor() -> f32 {
-    brightness_boost_divisor_from(std::env::var("WOW_SIM_BRIGHTNESS_BOOST").ok().as_deref())
+    brightness_boost_divisor_with(
+        override_divisor(),
+        std::env::var("WOW_SIM_BRIGHTNESS_BOOST").ok().as_deref(),
+    )
+}
+
+/// Process-wide override of the divisor, set by a command that wants a
+/// particular tone regardless of the environment (the screenshot command
+/// captures texel-for-texel unless `WOW_SIM_BRIGHTNESS_BOOST` says
+/// otherwise). Stored as the f32's bits; 0 means "no override".
+static BRIGHTNESS_BOOST_OVERRIDE: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+pub fn set_brightness_boost_divisor(divisor: Option<f32>) {
+    let bits = divisor.filter(|d| *d > 0.0).map(f32::to_bits).unwrap_or(0);
+    BRIGHTNESS_BOOST_OVERRIDE.store(bits, std::sync::atomic::Ordering::Relaxed);
+}
+
+fn override_divisor() -> Option<f32> {
+    match BRIGHTNESS_BOOST_OVERRIDE.load(std::sync::atomic::Ordering::Relaxed) {
+        0 => None,
+        bits => Some(f32::from_bits(bits)),
+    }
+}
+
+/// An explicit override wins; otherwise the environment decides.
+fn brightness_boost_divisor_with(override_divisor: Option<f32>, env_value: Option<&str>) -> f32 {
+    override_divisor.unwrap_or_else(|| brightness_boost_divisor_from(env_value))
 }
 
 fn brightness_boost_divisor_from(value: Option<&str>) -> f32 {
@@ -537,7 +563,15 @@ fn create_uniform_resources(
 
 #[cfg(test)]
 mod brightness_boost_tests {
-    use super::brightness_boost_divisor_from;
+    use super::{brightness_boost_divisor_from, brightness_boost_divisor_with};
+
+    #[test]
+    fn explicit_divisor_override_wins_over_the_environment() {
+        assert_eq!(brightness_boost_divisor_with(Some(1.0), None), 1.0);
+        assert_eq!(brightness_boost_divisor_with(Some(1.0), Some("2.2")), 1.0);
+        assert_eq!(brightness_boost_divisor_with(None, Some("2.2")), 2.2);
+        assert_eq!(brightness_boost_divisor_with(None, None), 1.5);
+    }
 
     #[test]
     fn unset_keeps_the_historical_lift() {
