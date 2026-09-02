@@ -118,12 +118,54 @@ pub fn load_addon_internal(
         EnvironmentPass::Normal,
         &mut result,
     );
+    load_shared_xml_list_templates(env, toc, folder_name, &ctx, &mut result);
     maybe_replay_blizzard_lua_in_secure_env(env, toc, folder_name, &ctx, &mut result);
     maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
     apply_blizzard_post_load_patches(env, folder_name, &mut result);
     append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
     mark_addon_loaded(env, folder_name);
     Ok(result)
+}
+
+/// Load `ListTemplates.lua` / `ListTemplates.xml` for `Blizzard_SharedXML` when
+/// the TOC that was picked does not list them.
+///
+/// `find_toc_file` prefers `Blizzard_SharedXML_Mainline.toc`, the legacy flavor
+/// variant, and that one omits the pair the bare `Blizzard_SharedXML.toc` lists
+/// at lines 233-234. Nothing else defines `ListHeaderMixin`: without the file,
+/// `QuestMapFrame.lua:417` raises when the world map opens and ten files that
+/// inherit `ListHeaderThreeSliceTemplate` render bare headers. Flipping the
+/// whole addon to the bare TOC was measured to abort the Tutorial subsystem
+/// (30 -> 70 startup errors), so only the missing pair is appended, in the
+/// bare TOC's order, after the picked TOC's files.
+fn load_shared_xml_list_templates(
+    env: &LoaderEnv<'_>,
+    toc: &TocFile,
+    folder_name: &str,
+    ctx: &AddonContext<'_>,
+    result: &mut LoadResult,
+) {
+    if folder_name != "Blizzard_SharedXML" {
+        return;
+    }
+    let listed = toc.files.iter().any(|f| {
+        f.file_name()
+            .and_then(|n| n.to_str())
+            .is_some_and(|n| n.eq_ignore_ascii_case("ListTemplates.lua"))
+    });
+    if listed {
+        return;
+    }
+    for name in ["ListTemplates.lua", "ListTemplates.xml"] {
+        let file = toc.addon_dir.join(name);
+        if !file.is_file() {
+            result
+                .warnings
+                .push(format!("{folder_name}: {name} missing next to the TOC"));
+            continue;
+        }
+        load_addon_file(env, ctx, result, &file, EnvironmentPass::Normal);
+    }
 }
 
 /// Run hand-written workarounds that must fire after specific Blizzard addons
