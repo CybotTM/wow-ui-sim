@@ -78,8 +78,8 @@ fn achievement_ui_load_emits_no_lane_specific_lua_errors() {
 }
 
 const CURRENT_TOC_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil", "Blizzard_Plunderstorm"];
-const PANEL_ADDON_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil"];
-const CLOSURE_LOADED_ADDONS: &[&str] = &["Blizzard_Plunderstorm", ROOT];
+const PANEL_ADDON_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil", "Blizzard_Plunderstorm"];
+const CLOSURE_LOADED_ADDONS: &[&str] = &[ROOT];
 
 #[test]
 fn achievement_ui_dependency_closure_includes_current_declared_dependencies() {
@@ -100,9 +100,9 @@ fn achievement_ui_dependency_closure_includes_current_declared_dependencies() {
         for required in CLOSURE_LOADED_ADDONS {
             assert!(
                 loaded.iter().any(|entry| entry == required),
-                "The AchievementUI closure must newly load `{required}`. Retail 12.1 declares \
-                 Blizzard_Plunderstorm directly, then loads Blizzard_AchievementUI as the root. \
-                 Got: {loaded:?}"
+                "The AchievementUI closure must newly load its requested root `{required}`. \
+                 Its required and optional TOC dependencies are already part of PANEL_ADDONS, so \
+                 their state is verified through C_AddOns above. Got: {loaded:?}"
             );
         }
     });
@@ -207,24 +207,15 @@ fn achievement_ui_loaded_set_contains_every_declared_toc_dependency() {
 
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
         for dep in &declared_deps {
-            if PANEL_ADDON_DEPENDENCIES.contains(&dep.as_str()) {
-                let is_loaded: bool = env
-                    .eval(&format!(r#"return C_AddOns.IsAddOnLoaded("{dep}")"#))
-                    .expect("panel baseline dependency load-state probe must run cleanly");
+            let is_loaded: bool = env
+                .eval(&format!(r#"return C_AddOns.IsAddOnLoaded("{dep}")"#))
+                .expect("panel baseline dependency load-state probe must run cleanly");
 
-                assert!(
-                    is_loaded,
-                    "Declared TOC dependency `{dep}` is already loaded by PANEL_ADDONS, so \
-                     C_AddOns.IsAddOnLoaded must report it at runtime."
-                );
-            } else {
-                assert!(
-                    loaded.iter().any(|name| name == dep),
-                    "Declared TOC dependency `{dep}` (parsed from \
-                     `{ROOT_TOC_FILE}` via `TocFile::from_file`) MUST appear in the \
-                     newly-loaded closure set. Got: {loaded:?}"
-                );
-            }
+            assert!(
+                is_loaded,
+                "Declared TOC dependency `{dep}` is already loaded by PANEL_ADDONS, so \
+                 C_AddOns.IsAddOnLoaded must report it at runtime."
+            );
         }
 
         assert!(
