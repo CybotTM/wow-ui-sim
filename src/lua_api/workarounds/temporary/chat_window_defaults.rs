@@ -80,16 +80,20 @@ if GetChatWindowInfo == nil then
     if chat and chat.docked ~= nil then
       docked = chat.docked == true
     end
-    -- The client's default chat cache names window 1 GENERAL and window 2
-    -- COMBAT_LOG; any other window has no name and FloatingChatFrame.lua
-    -- formats CHAT_NAME_TEMPLATE ("Chat %d") for it.
-    local name = ""
-    if realId == 1 then
-      name = rawget(_G, "GENERAL") or "General"
-    elseif realId == 2 then
-      name = rawget(_G, "COMBAT_LOG") or "Combat Log"
-    end
+    -- An unnamed window answers "" as the client's cache does;
+    -- FCF_SetWindowName (FloatingChatFrame.lua:812-830) then names windows
+    -- 1..3 GENERAL / COMBAT_LOG / VOICE, formats CHAT_NAME_TEMPLATE for the
+    -- rest, and stores the result through SetChatWindowName.
+    local name = chat and chat.name or ""
     return name, 12, 0, 0, 0, 0.25, shown, false, docked, false
+  end
+end
+
+if SetChatWindowName == nil then
+  function SetChatWindowName(id, name)
+    local chat = __wow_chat_window_state[id] or {}
+    chat.name = name
+    __wow_chat_window_state[id] = chat
   end
 end
 
@@ -151,18 +155,24 @@ mod tests {
     use crate::lua_api::WowLuaEnv;
 
     #[test]
-    fn default_chat_windows_carry_the_client_names() {
+    fn chat_window_names_start_empty_and_round_trip() {
+        // FCF_SetWindowName names an unnamed window itself (GENERAL for 1,
+        // COMBAT_LOG for 2, VOICE for 3) and stores it with SetChatWindowName;
+        // a stub name such as "Chat 3" kept that branch from ever running,
+        // and without SetChatWindowName the branch raised.
         let env = WowLuaEnv::new().expect("lua env should initialize");
-        let (general, combat_log, third): (String, String, String) = env
+        let (before, after, other): (String, String, String) = env
             .eval(
                 r#"
-                return (GetChatWindowInfo(1)), (GetChatWindowInfo(2)), (GetChatWindowInfo(3))
+                local before = (GetChatWindowInfo(1))
+                SetChatWindowName(1, GENERAL or "General")
+                return before, (GetChatWindowInfo(1)), (GetChatWindowInfo(3))
                 "#,
             )
             .expect("chat window info");
-        assert_eq!(general, "General", "window 1 is the General tab, as in the client's default cache");
-        assert_eq!(combat_log, "Combat Log");
-        assert_eq!(third, "", "an unnamed window gets CHAT_NAME_TEMPLATE from Blizzard's code");
+        assert_eq!(before, "", "an unnamed window answers an empty name");
+        assert_eq!(after, "General", "SetChatWindowName is read back by GetChatWindowInfo");
+        assert_eq!(other, "", "other windows are untouched");
     }
 
     #[test]
@@ -191,7 +201,7 @@ mod tests {
                 if ChatFrameUtil.GetCommunitiesChannelLocalID(nil, nil) ~= nil then return "community_local_id" end
 
                 local name, fontSize, r, g, b, alpha, shown, locked, docked = GetChatWindowInfo(2)
-                if name ~= "Combat Log" or fontSize ~= 12 then return "info_shape" end
+                if name ~= "" or fontSize ~= 12 then return "info_shape" end
                 if r ~= 0 or g ~= 0 or b ~= 0 or alpha ~= 0.25 then return "info_color" end
                 if shown ~= false or locked ~= false or docked ~= false then return "hidden_defaults" end
 
