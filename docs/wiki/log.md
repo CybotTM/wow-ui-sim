@@ -1696,6 +1696,9 @@ Extended the patch-audit manifest schema to preserve `changed:symbol` occurrence
 ## [2026-08-06] investigation | 12.1 broader fidelity re-triage
 
 Reconciled the completed 432-row FrameXML register with eight broader 12.1 fidelity families that are outside that manifest. Aura containers, DurationTextBinding, and service-backed structures retain explicit best-effort contracts. UnitAura secrecy, private/forbidden security enforcement, standalone RadialProgress construction, and strict-removal timing are individually identified as unapproved unsafe/impossible exception candidates. Removed contradictory wording that described the same candidates as both approved and pending; no approval was requested or recorded.
+## [2026-09-02] update | Blizzard_CombatLogBase replays into secureenv
+
+Updated `systems/taint-system.md`: `Blizzard_CombatLogBase` joined the secure replay library list. PTR startup raised `Blizzard_CombatLogProcessor.lua:337: attempt to index global 'CombatLogUtil'` from `ChatConfigFrame`'s PLAYER_ENTERING_WORLD handler because the secure processor reads `CombatLogUtil`, `COMBATLOG_FILTER_MINE` and `COMBATLOG_DEFAULT_COLORS` from its plain dependency, which had only reached `_G`; the handler aborted before `hasEnteredWorld`. A generalized rule (replay every direct `## Dependencies` of a `UseSecureEnvironment` addon) was implemented first and rejected: secure TOCs declare `Blizzard_FrameXMLBase`, `Blizzard_ObjectAPI`, `Blizzard_SharedXMLGame`, `Blizzard_VisualAlerts` and others as `## Dep`, and re-running those in secureenv re-executed their top-level code — `Constants.lua` and `VisualAlertTemplates.lua` load errors doubled and `PrivateVisualAlertsManager` OnLoad gained a new `attempt to call a nil value`.
 
 ## [2026-07-16] update | FrameStrata before/after observations
 
