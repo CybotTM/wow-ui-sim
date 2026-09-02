@@ -453,6 +453,10 @@ pub(super) fn is_secure_replay_library_addon(folder_name: &str) -> bool {
             | "Blizzard_AsyncRequest"
             | "Blizzard_GameTooltip"
             | "Blizzard_CombatLogBase"
+            // AuraUtil (DefaultAuraCompare, filter strings) for the secure
+            // Blizzard_AuraContainer; the secure environment otherwise keeps
+            // the simulator's init-time AuraUtil stub.
+            | "Blizzard_FrameXMLUtil"
     )
 }
 

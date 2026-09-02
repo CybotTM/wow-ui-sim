@@ -28,7 +28,16 @@ if CreateAndInitFromMixin == nil then
   end
 end
 
-local __wow_forbidden_object_tables = setmetatable({}, { __mode = "k" })
+-- One registry for the whole process. This file is executed again by
+-- restore_post_cleanup_globals (after Blizzard_EnvironmentCleanup and once
+-- more after the load); a fresh table there would orphan every partition
+-- created before, and GetForbiddenObjectTable would hand out empty tables
+-- for frames like the unit-frame aura containers built earlier.
+local __wow_forbidden_object_tables = rawget(_G, "__wow_forbidden_object_tables")
+if __wow_forbidden_object_tables == nil then
+  __wow_forbidden_object_tables = setmetatable({}, { __mode = "k" })
+  rawset(_G, "__wow_forbidden_object_tables", __wow_forbidden_object_tables)
+end
 
 local function __wow_frame_fields(object)
   local ok, env = pcall(debug.getfenv, object)
@@ -59,7 +68,29 @@ function GetForbiddenObjectTable(object)
   end
   local forbidden = __wow_forbidden_object_tables[object]
   if forbidden == nil then
-    forbidden = { __wowPublicObject = object }
+    -- In the client the forbidden partition is the same widget seen from
+    -- the private side: a private mixin's `self:RegisterEvent(...)` or
+    -- `self:GetParent()` works on it. Missing keys fall through to the
+    -- public object, with methods rebound so the widget, not this table,
+    -- is what the Rust method receives. Fields the private side sets stay
+    -- in the partition (rawset above), as in the client.
+    -- Key 0 is the widget identity the Rust side reads from a frame table
+    -- (`frame_identity_backing`); carrying it here makes the partition an
+    -- acceptable frame argument to every Rust API (CreateFrame's parent,
+    -- SetPoint's relativeTo, ...), as the client's private object is.
+    forbidden = setmetatable({ __wowPublicObject = object, [0] = rawget(object, 0) }, {
+      __index = function(partition, key)
+        local value = object[key]
+        if type(value) ~= "function" then
+          return value
+        end
+        local bound = function(_self, ...)
+          return value(object, ...)
+        end
+        rawset(partition, key, bound)
+        return bound
+      end,
+    })
     __wow_forbidden_object_tables[object] = forbidden
   end
   return forbidden
@@ -97,6 +128,18 @@ local function __wow_resolve_forbidden_xml_method(object, methodName)
   end
 
   return nil, nil
+end
+
+-- Miss path of the fast `<OnX method="..."/>` handlers: a method a secure
+-- mixin installed on the object's forbidden partition, called with that
+-- partition as self; otherwise the original call, so a genuinely missing
+-- method still raises "attempt to call field".
+function __wow_call_xml_method_fallback(object, methodName, ...)
+  local method, forbidden = __wow_resolve_forbidden_xml_method(object, methodName)
+  if method ~= nil then
+    return method(forbidden, ...)
+  end
+  return object[methodName](object, ...)
 end
 
 function __wow_bind_xml_method(object, methodName)

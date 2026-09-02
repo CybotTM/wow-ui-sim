@@ -194,7 +194,11 @@ fn build_method_with_value_arg_handler(
         r#"
             local method_name, value = ...
             return function(self, ...)
-                return self[method_name](self, value)
+                local method = self[method_name]
+                if method ~= nil then
+                    return method(self, value)
+                end
+                return __wow_call_xml_method_fallback(self, method_name, value)
             end
         "#,
         "template-method-value-arg",
@@ -218,7 +222,11 @@ fn build_method_with_two_number_args_handler(
         r#"
             local method_name, first, second = ...
             return function(self, ...)
-                return self[method_name](self, first, second)
+                local method = self[method_name]
+                if method ~= nil then
+                    return method(self, first, second)
+                end
+                return __wow_call_xml_method_fallback(self, method_name, first, second)
             end
         "#,
         "template-method-two-number-args",
@@ -231,13 +239,22 @@ fn build_method_with_two_number_args_handler(
     )
 }
 
+/// `<OnLoad method="X"/>` and friends. The public object is tried first
+/// (no global lookup on the hot path); a miss goes through the shared
+/// bootstrap's fallback, which finds methods a secure mixin installed on the
+/// frame's forbidden partition (the unit-frame aura containers keep their
+/// OnLoad / OnUpdate there) and otherwise raises the same error as before.
 fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Val> {
     let builder = load_template(
         state,
         r#"
             local method_name = ...
             return function(self, ...)
-                return self[method_name](self, ...)
+                local method = self[method_name]
+                if method ~= nil then
+                    return method(self, ...)
+                end
+                return __wow_call_xml_method_fallback(self, method_name, ...)
             end
         "#,
         "template-method-handler",
@@ -260,7 +277,11 @@ fn build_method_with_string_arg_handler(
         r#"
             local method_name, literal_arg = ...
             return function(self, ...)
-                return self[method_name](self, literal_arg)
+                local method = self[method_name]
+                if method ~= nil then
+                    return method(self, literal_arg)
+                end
+                return __wow_call_xml_method_fallback(self, method_name, literal_arg)
             end
         "#,
         "template-method-string-handler",
