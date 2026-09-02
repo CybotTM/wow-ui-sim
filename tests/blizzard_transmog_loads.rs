@@ -71,11 +71,7 @@ const MIXINS_FROM_TEMPLATES_LUA: &[&str] = &[
     "TransmogSituationMixin",
 ];
 
-const MAINLINE_OVERRIDE_GLOBALS: &[&str] = &[
-    "DressUpFrameLinkingSupported",
-    "DisplayTypeUnassignedSupported",
-    "HelpPlatesSupported",
-];
+const MAINLINE_OVERRIDE_GLOBALS: &[&str] = &["DressUpFrameLinkingSupported"];
 
 fn fresh_game_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -187,53 +183,23 @@ fn allow_load_game_restricts_to_in_world_only() {
 }
 
 #[test]
-fn toc_raw_bytes_pin_three_directives_and_family_token() {
+fn toc_raw_bytes_pin_current_directives_and_body() {
     let raw = std::fs::read_to_string(transmog_toc()).expect("TOC reads utf-8");
-
-    let expected_lines = [
-        "## Title: Blizzard_Transmog",
-        "## LoadOnDemand: 1",
-        "## AllowLoad: Game",
-        "## Dependencies: Blizzard_SharedXML",
-        "[Family]\\Blizzard_TransmogOverrides.lua",
-        "Blizzard_TransmogTemplates.xml",
-        "Blizzard_Transmog.xml",
-        "Blizzard_TransmogRegistration.lua",
-    ];
-
-    for line in expected_lines {
-        assert!(
-            raw.contains(line),
-            "Raw TOC must pin `{line}` — note the `[Family]\\` token \
-             which the toc parser at toc.rs:145 substitutes for \
-             `Mainline\\` (resolved to `Mainline/...` after \
-             backslash-to-slash normalization). The 2 listed XML \
-             files transitively pull `Blizzard_Transmog.lua` (3165 \
-             lines) and `Blizzard_TransmogTemplates.lua` (1878 lines) \
-             via their `<Script file=...>` directives — neither .lua \
-             is listed directly in the TOC body"
-        );
-    }
-
-    assert!(!raw.contains("## Author"));
-    assert!(!raw.contains("## Version"));
-    assert!(!raw.contains("## DefaultState"));
-    assert!(!raw.contains("## RequiredDep"));
-    assert!(!raw.contains("## OptionalDep"));
-    assert!(!raw.contains("## SavedVariables"));
-    assert!(!raw.contains("## AllowLoadGameType"));
-    assert!(!raw.contains("## UseSecureEnvironment"));
-    assert!(!raw.contains("## LoadFirst"));
-
-    assert!(
-        !raw.contains("Blizzard_Transmog.lua"),
-        "TOC body must NOT list the main lua file directly — it's \
-         loaded only via Blizzard_Transmog.xml's <Script file=...> \
-         directive"
-    );
-    assert!(
-        !raw.contains("Blizzard_TransmogTemplates.lua"),
-        "TOC body must NOT list the templates lua file directly"
+    assert_eq!(
+        raw.lines().collect::<Vec<_>>(),
+        [
+            "## Title: Blizzard_Transmog",
+            "## LoadOnDemand: 1",
+            "## AllowLoad: Game",
+            "## Dependencies: Blizzard_SharedXML, Blizzard_SharedXMLGame, Blizzard_FrameXMLBase, Blizzard_FrameXMLUtil, Blizzard_UIPanelTemplates, Blizzard_StaticPopup_Game, Blizzard_TransmogShared, Blizzard_PagedContent, Blizzard_GameTooltip, Blizzard_MoneyFrame, Blizzard_Menu, Blizzard_HelpPlate, Blizzard_FrameEffects",
+            "Blizzard_Transmog_Bootstrap.lua [Bootstrap]",
+            "Blizzard_TransmogTemplates.xml",
+            "Blizzard_Transmog.lua",
+            "[Family]\\Blizzard_TransmogOverrides.lua",
+            "Blizzard_Transmog.xml",
+            "Blizzard_TransmogRegistration.lua",
+        ],
+        "Retail 12.1 Transmog TOC must retain its current directives and six ordered body entries"
     );
 }
 
@@ -250,15 +216,14 @@ fn family_token_substitutes_to_mainline_override_path() {
     assert_eq!(
         body,
         vec![
-            "Mainline/Blizzard_TransmogOverrides.lua".to_string(),
+            "Blizzard_Transmog_Bootstrap.lua".to_string(),
             "Blizzard_TransmogTemplates.xml".to_string(),
+            "Blizzard_Transmog.lua".to_string(),
+            "Mainline/Blizzard_TransmogOverrides.lua".to_string(),
             "Blizzard_Transmog.xml".to_string(),
             "Blizzard_TransmogRegistration.lua".to_string(),
         ],
-        "Body must be exactly 4 entries with `[Family]\\` substituted \
-         to `Mainline/` (toc.rs:145 hardcodes the substitution since \
-         this codebase only targets the Mainline flavor; toc.rs:147 \
-         normalizes backslashes to forward slashes). Got: {body:?}"
+        "Retail 12.1 body must retain six ordered entries, including the bootstrap and direct main Lua entry. Got: {body:?}"
     );
 }
 
@@ -287,26 +252,26 @@ fn classic_override_file_remains_on_disk_for_other_flavors() {
         assert!(
             raw.contains(&needle),
             "Mainline/Blizzard_TransmogOverrides.lua must define \
-             `{fn_name}()` — the override pattern lets the main \
-             Blizzard_Transmog.lua call these flavor-gated predicates \
-             without an inline if/else. Mainline returns true for \
-             DressUpFrameLinkingSupported, DisplayTypeUnassignedSupported, \
-             and HelpPlatesSupported"
+             `{fn_name}()` — current Mainline override source exports the direct dress-up-linking predicate"
         );
     }
 }
 
 #[test]
-fn absent_from_every_screen_eager_discovery() {
-    for screen in ALL_FOUR_SCREENS {
-        let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), *screen);
-        let found = addons.iter().any(|(name, _)| name == "Blizzard_Transmog");
+fn implicit_startup_dependency_promotes_transmog_only_for_game() {
+    let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
+    assert!(
+        game_addons
+            .iter()
+            .any(|(name, _)| name == "Blizzard_Transmog"),
+        "Transmog remains LoadOnDemand, but current Game discovery promotes its bootstrap through implicit startup dependencies"
+    );
+
+    for screen in ALL_FOUR_SCREENS.iter().copied().filter(|screen| *screen != ScreenKind::Game) {
+        let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), screen);
         assert!(
-            !found,
-            "Blizzard_Transmog must be absent from {screen:?} eager \
-             discovery — `## LoadOnDemand: 1` excludes LoD addons \
-             from the eager sweep. Game restriction (AllowLoad: Game) \
-             additionally rules out Login/CharacterSelect/CharacterCreate"
+            !addons.iter().any(|(name, _)| name == "Blizzard_Transmog"),
+            "AllowLoad: Game excludes Transmog from {screen:?} discovery"
         );
     }
 }

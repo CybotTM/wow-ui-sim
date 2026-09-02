@@ -30,6 +30,8 @@ const TOC_FILES: &[&str] = &[
     "SecureHoverDriver.lua",
     "SecureGroupHeaders.lua",
     "SecureGroupHeaders.xml",
+    "SecureAuraHeader.lua",
+    "SecureAuraHeader.xml",
 ];
 
 const HARD_DEPENDENCIES: &[&str] = &["Blizzard_FrameXML"];
@@ -105,8 +107,6 @@ const VIRTUAL_TEMPLATES: &[&str] = &[
     "SecureGroupPetHeaderTemplate",
     "SecurePartyPetHeaderTemplate",
     "SecureRaidPetHeaderTemplate",
-    "SecureAuraHeaderTemplate",
-    "SecureAuraButtonTemplate",
 ];
 
 const NAMED_MANAGER_FRAMES: &[&str] = &[
@@ -215,7 +215,7 @@ fn toc_declares_eager_game_only_with_classic_standard_allowlist() {
 }
 
 #[test]
-fn toc_lists_ten_files_in_documented_order() {
+fn toc_lists_twelve_files_in_documented_order() {
     let toc = TocFile::from_file(&restricted_toc())
         .expect("Blizzard_RestrictedAddOnEnvironment TOC should parse");
     let listed: Vec<String> = toc
@@ -225,16 +225,7 @@ fn toc_lists_ten_files_in_documented_order() {
         .collect();
     assert_eq!(
         listed, TOC_FILES,
-        "TOC body must list these 10 files in this EXACT order — order matters for dependency \
-         flow. RestrictedInfrastructure.lua loads first to publish IsFrameHandle / \
-         GetFrameHandle / GetManagedEnvironment / rtable, then RestrictedEnvironment.lua \
-         (under the secure env override) builds the RESTRICTED_FUNCTIONS_SCOPE addon-table \
-         export consumed by RestrictedExecution.lua's CallRestrictedClosure body. \
-         RestrictedFrames.lua publishes the FrameHandle:* method namespace via \
-         InitFrameHandleNamespace before SecureHandlers.lua wires the wrap-script machinery, \
-         and the SecureHandlerTemplates.xml registry lookup happens AFTER its OnLoad function \
-         names are global. SecureGroupHeaders/SecureAuraHeaders depend on the wrap-script \
-         globals so they go LAST"
+        "Retail 12.1 TOC must retain the current twelve ordered secure-environment files, including the classic-gated SecureAuraHeader pair"
     );
 }
 
@@ -344,36 +335,21 @@ fn excluded_from_eager_discovery_on_glue_screens() {
 }
 
 #[test]
-fn root_directory_holds_eight_lua_and_two_xml_files() {
+fn root_directory_holds_ten_lua_and_two_xml_files() {
     let mut entries: Vec<String> = std::fs::read_dir(restricted_dir())
         .expect("Blizzard_RestrictedAddOnEnvironment directory should read")
         .flatten()
-        .filter_map(|e| e.file_name().into_string().ok())
+        .filter_map(|entry| entry.file_name().into_string().ok())
         .filter(|name| name != "Blizzard_RestrictedAddOnEnvironment.toc")
         .collect();
     entries.sort();
-    let expected: Vec<String> = vec![
-        "RestrictedEnvironment.lua",
-        "RestrictedExecution.lua",
-        "RestrictedFrames.lua",
-        "RestrictedInfrastructure.lua",
-        "SecureGroupHeaders.lua",
-        "SecureGroupHeaders.xml",
-        "SecureHandlerTemplates.xml",
-        "SecureHandlers.lua",
-        "SecureHoverDriver.lua",
-        "SecureStateDriver.lua",
-    ]
-    .into_iter()
-    .map(String::from)
-    .collect();
+
+    let mut expected: Vec<String> = TOC_FILES.iter().map(|name| (*name).to_string()).collect();
+    expected.sort();
+
     assert_eq!(
         entries, expected,
-        "Blizzard_RestrictedAddOnEnvironment/ root must hold 8 lua files plus 2 xml files next \
-         to the TOC — no per-flavor subdirectory and no localization stub. The split is by \
-         subsystem: 4 Restricted* files for the closure sandbox, 4 Secure* lua files for \
-         the public handler/driver/header machinery, plus 2 xml files for the \
-         SecureHandlerTemplates and SecureGroupHeaders virtual templates"
+        "Retail 12.1 root must contain exactly its ten Lua and two XML TOC body files"
     );
 }
 
@@ -729,12 +705,12 @@ fn xml_files_declare_only_virtual_templates() {
          party/raid header all four PartyHeader / RaidGroupHeader / PartyPetHeader / \
          RaidPetHeader templates inherit from"
     );
+    let aura_xml = std::fs::read_to_string(restricted_dir().join("SecureAuraHeader.xml"))
+        .expect("SecureAuraHeader.xml should read");
     assert!(
-        header_xml.contains("name=\"SecureAuraHeaderTemplate\"")
-            && header_xml.contains("name=\"SecureAuraButtonTemplate\""),
-        "SecureGroupHeaders.xml must declare both SecureAuraHeaderTemplate (the multi-aura \
-         layout grid wired with OnShow/OnHide/OnUpdate/OnAttributeChanged via SecureAuraHeader_*) \
-         and SecureAuraButtonTemplate (the per-aura RightButtonDown CheckButton with \
-         type2=\"cancelaura\" attribute that lets right-click cancel the aura)"
+        aura_xml.contains("name=\"SecureAuraHeaderTemplate\"")
+            && aura_xml.contains("name=\"SecureAuraButtonTemplate\"")
+            && aura_xml.contains("virtual=\"true\""),
+        "Retail 12.1 keeps the virtual aura header and button templates in SecureAuraHeader.xml, separate from group-header templates"
     );
 }

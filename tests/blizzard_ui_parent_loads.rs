@@ -16,7 +16,7 @@ fn ui_parent_dir() -> PathBuf {
 }
 
 fn ui_parent_toc() -> PathBuf {
-    ui_parent_dir().join("Blizzard_UIParent_Mainline.toc")
+    ui_parent_dir().join("Blizzard_UIParent.toc")
 }
 
 const GLUE_SCREENS: &[ScreenKind] = &[
@@ -25,11 +25,7 @@ const GLUE_SCREENS: &[ScreenKind] = &[
     ScreenKind::CharacterCreate,
 ];
 
-const TOC_DEPENDENCIES: &[&str] = &[
-    "Blizzard_FrameXMLBase",
-    "Blizzard_ObjectAPI",
-    "Blizzard_Colors",
-];
+const TOC_DEPENDENCIES: &[&str] = &["Blizzard_SharedXMLBase"];
 
 const MIXINS: &[&str] = &[
     "ManagedFrameMixin",
@@ -78,201 +74,41 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
-#[cfg(feature = "client-ptr")]
 #[test]
-fn ptr_mainline_excludes_mists_time_string_helper() {
-    let mainline_toc = std::fs::read_to_string(ui_parent_toc()).expect("mainline TOC should read");
-    let mists_toc = std::fs::read_to_string(ui_parent_dir().join("Blizzard_UIParent_Mists.toc"))
-        .expect("mists TOC should read");
-    assert!(!mainline_toc.contains("Mists\\UIParent.lua"));
-    assert!(mists_toc.contains("Mists\\UIParent.lua"));
-
-    let env = fresh_game_env();
-    let assert_helper_absent = |stage: &str| {
-        let helper_is_absent: bool = env
-            .eval("return GetTimeStringFromSeconds == nil")
-            .expect("time string helper visibility should be queryable");
-        assert!(
-            helper_is_absent,
-            "Mists-only GetTimeStringFromSeconds leaked into PTR mainline during {stage}"
-        );
-    };
-    assert_helper_absent("environment initialization");
-
-    let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
-    for (name, toc_path) in &addons {
-        load_addon(&env.loader_env(), toc_path)
-            .unwrap_or_else(|err| panic!("[load {name}] FAILED: {err}"));
-    }
-    env.apply_post_load_workarounds();
-    assert_helper_absent("Blizzard loading or post-load compatibility");
-
-    fire_startup_events_for_screen(&env, ScreenKind::Game);
-    assert_helper_absent("settled startup");
-}
-
-#[test]
-fn find_toc_file_resolves_mainline_variant() {
+fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&ui_parent_dir()).expect("UIParent TOC resolves");
     assert_eq!(
         resolved,
         ui_parent_toc(),
-        "find_toc_file at src/loader/mod.rs:65-95 prefers \
-         `<addon>_Mainline.toc` first. Blizzard_UIParent ships TWO TOCs: \
-         `_Mainline.toc` and `_Mists.toc` (the latter carries \
-         `## LoadFirst: 1` and a Classic body); the Mainline preference \
-         wins on a mainline build"
+        "Retail 12.1 ships one bare Blizzard_UIParent.toc; loader discovery must select it"
     );
 }
 
 #[test]
-fn toc_is_eager_with_three_dependencies() {
+fn toc_is_eager_with_shared_xml_base_dependency() {
     let toc = TocFile::from_file(&ui_parent_toc()).expect("TOC parses");
 
-    assert!(
-        !toc.is_load_on_demand(),
-        "No `## LoadOnDemand` directive → eagerly loaded on Game. The \
-         UIParent singleton frame is the protected root parent for every \
-         in-world UI surface; it MUST be created before any sibling \
-         addon's `parent=\"UIParent\"` resolution"
-    );
-
-    let deps = toc.dependencies();
-    assert_eq!(
-        deps.len(),
-        TOC_DEPENDENCIES.len(),
-        "Mainline TOC must declare exactly {} hard deps. Got {}: {:?}",
-        TOC_DEPENDENCIES.len(),
-        deps.len(),
-        deps
-    );
-    for expected in TOC_DEPENDENCIES {
-        assert!(
-            deps.iter().any(|d| d == expected),
-            "TOC must declare `{expected}` — UIParent leans on \
-             Blizzard_FrameXMLBase (Mixin/CreateFromMixins/EventRegistry \
-             plumbing), Blizzard_ObjectAPI (the C_* shim layer including \
-             C_GameRules.IsGameRuleActive used by \
-             UpdateUIElementsForClientScene), and Blizzard_Colors (named \
-             color globals consumed by the templates). Got: {deps:?}"
-        );
-    }
-
+    assert!(!toc.is_load_on_demand());
+    assert_eq!(toc.dependencies(), vec!["Blizzard_SharedXMLBase".to_string()]);
     assert!(toc.optional_deps().is_empty());
     assert!(toc.saved_variables().is_empty());
     assert!(toc.saved_variables_per_character().is_empty());
-    assert!(
-        !toc.is_load_first(),
-        "Mainline does NOT carry `## LoadFirst: 1` — that is a Classic-only \
-         directive in the `_Mists.toc` companion. On Mainline the dep \
-         graph (FrameXMLBase + ObjectAPI + Colors → UIParent) handles \
-         load order"
-    );
+    assert!(!toc.is_load_first());
+    assert!(!toc.is_game_type_restricted());
     assert!(toc.default_enabled());
 }
 
 #[test]
-fn allow_load_game_restricts_to_in_world() {
-    let toc = TocFile::from_file(&ui_parent_toc()).expect("TOC parses");
-
-    assert!(
-        toc.allows_screen(ScreenKind::Game),
-        "`## AllowLoad: game` (lowercase) hits the `eq_ignore_ascii_case` \
-         branch at toc.rs:308 → Game-only. The UIParent root frame and \
-         WorldFrame world-render container only exist in-world; glue \
-         screens use GlueParent / TitleScreen instead"
-    );
-    for screen in GLUE_SCREENS {
-        assert!(
-            !toc.allows_screen(*screen),
-            "Glue screen {screen:?} must be excluded — `AllowLoad: game` \
-             matches only the Game variant via toc.rs:308"
-        );
-    }
-}
-
-#[test]
-fn allow_load_game_type_mainline_is_not_restricted() {
-    let toc = TocFile::from_file(&ui_parent_toc()).expect("TOC parses");
-
-    assert!(
-        !toc.is_game_type_restricted(),
-        "`## AllowLoadGameType: mainline` is recognised as a non-restricting \
-         flavor at toc.rs:294-302 (standard|mainline). The Mists companion \
-         TOC carries `mists` which IS restricting on a mainline build"
-    );
-}
-
-#[test]
-fn toc_raw_bytes_pin_six_directives_and_seven_body_files() {
+fn toc_raw_bytes_pin_current_three_line_contract() {
     let raw = std::fs::read_to_string(ui_parent_toc()).expect("TOC reads utf-8");
-
-    let expected_lines = [
-        "## Title: Blizzard_UIParent",
-        "## Author: Blizzard Entertainment",
-        "## DefaultState: enabled",
-        "## Dependencies: Blizzard_FrameXMLBase, Blizzard_ObjectAPI, Blizzard_Colors",
-        "## AllowLoad: game",
-        "## AllowLoadGameType: mainline",
-        "ChatBubbleTemplates.xml",
-        "Mainline\\WorldFrame.lua",
-        "Mainline\\WorldFrame.xml",
-        "Shared\\UIParent.lua",
-        "Mainline\\UIParent.lua",
-        "Mainline\\UIParent.xml",
-        "Shared\\Localization.lua",
-    ];
-
-    for line in expected_lines {
-        assert!(
-            raw.contains(line),
-            "Raw TOC must pin `{line}` — body order matters: \
-             ChatBubbleTemplates.xml first publishes ChatBubbleTemplate \
-             before any consumer; then the WorldFrame lua/xml pair (so \
-             WorldFrame_OnLoad/_OnUpdate exist when the singleton is \
-             created); then Shared/UIParent.lua publishes the 2 mixins \
-             and UIParent_Shared_OnLoad/OnEvent helpers BEFORE \
-             Mainline/UIParent.lua adds the per-flavor handlers and \
-             Mainline/UIParent.xml instantiates the singleton; finally \
-             Shared/Localization.lua overlays localized strings AFTER \
-             everything else has loaded"
-        );
-    }
-
-    assert!(!raw.contains("## LoadOnDemand"));
-    assert!(
-        !raw.contains("## LoadFirst"),
-        "Mainline TOC must NOT carry LoadFirst — that's the Mists/Classic-only \
-         companion directive"
-    );
-    assert!(!raw.contains("## OptionalDeps"));
-    assert!(!raw.contains("## SavedVariables"));
-    assert!(!raw.contains("## RequiredDep"));
-    assert!(!raw.contains("[Family]"));
-}
-
-#[test]
-fn mists_companion_toc_carries_load_first_and_classic_gametype() {
-    let mists_toc = ui_parent_dir().join("Blizzard_UIParent_Mists.toc");
-    assert!(
-        mists_toc.is_file(),
-        "Mists companion TOC must exist on disk"
-    );
-
-    let raw = std::fs::read_to_string(&mists_toc).expect("Mists TOC reads utf-8");
-    assert!(
-        raw.contains("## LoadFirst: 1"),
-        "Mists companion TOC carries `## LoadFirst: 1` because Classic \
-         lacks the FrameXML graph that promotes UIParent eagerly via deps"
-    );
-    assert!(
-        raw.contains("## AllowLoadGameType: mists"),
-        "Mists companion is gametype-restricted to `mists` — gated out \
-         on a mainline build by toc.rs:294-302"
-    );
-    assert!(
-        raw.contains("## Dependencies: Blizzard_FrameXMLBase, Blizzard_ObjectAPI"),
-        "Mists drops the Blizzard_Colors hard dep that Mainline carries"
+    assert_eq!(
+        raw.lines().collect::<Vec<_>>(),
+        [
+            "## Title: Blizzard_UIParent",
+            "## Dep: Blizzard_SharedXMLBase",
+            "UIParent.lua",
+        ],
+        "Retail 12.1 UIParent TOC must remain the current two-directive, one-body-file contract"
     );
 }
 

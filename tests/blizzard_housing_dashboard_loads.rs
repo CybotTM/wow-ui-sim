@@ -51,7 +51,7 @@ fn blizzard_housing_dashboard_find_toc_resolves_bare_variant() {
 }
 
 #[test]
-fn blizzard_housing_dashboard_toc_declares_lod_with_two_dependencies() {
+fn blizzard_housing_dashboard_toc_declares_lod_with_four_dependencies() {
     let toc = parse_dashboard_toc();
     assert!(
         toc.is_load_on_demand(),
@@ -66,10 +66,10 @@ fn blizzard_housing_dashboard_toc_declares_lod_with_two_dependencies() {
         vec![
             "Blizzard_HousingTemplates".to_string(),
             "Blizzard_HousingModelPreview".to_string(),
+            "Blizzard_FrameXMLUtil".to_string(),
+            "Blizzard_HousingBlueprint".to_string(),
         ],
-        "Two `## Dependencies:` entries: HousingTemplates (atlases + housing utility surface) plus \
-         HousingModelPreview (provides HousingModelPreviewTemplate inherited by the Catalog \
-         PreviewFrame)"
+        "Retail 12.1 declares the four current HousingDashboard dependencies in TOC order"
     );
 }
 
@@ -95,7 +95,7 @@ fn blizzard_housing_dashboard_toc_is_retail_only_and_omits_allow_load() {
 }
 
 #[test]
-fn blizzard_housing_dashboard_toc_lists_nine_files_in_order() {
+fn blizzard_housing_dashboard_toc_lists_fifteen_files_in_order() {
     let toc = parse_dashboard_toc();
     let files: Vec<String> = toc
         .files
@@ -105,37 +105,48 @@ fn blizzard_housing_dashboard_toc_lists_nine_files_in_order() {
     assert_eq!(
         files,
         vec![
+            "Blizzard_HousingDashboardHouseDropdown.lua".to_string(),
+            "Blizzard_HousingDashboardHouseDropdown.xml".to_string(),
             "Blizzard_HousingDashboardHouseUpgrade.lua".to_string(),
             "Blizzard_HousingDashboardHouseUpgrade.xml".to_string(),
+            "Blizzard_HousingDashboardInitiatives.lua".to_string(),
+            "Blizzard_HousingDashboardInitiatives.xml".to_string(),
             "Blizzard_HousingDashboardHouseInfoContent.lua".to_string(),
             "Blizzard_HousingDashboardHouseInfoContent.xml".to_string(),
             "Blizzard_HousingDashboardCatalog.lua".to_string(),
             "Blizzard_HousingDashboardCatalog.xml".to_string(),
+            "Blizzard_HousingDashboardCollection.lua".to_string(),
+            "Blizzard_HousingDashboardCollection.xml".to_string(),
             "Blizzard_HousingDashboard.lua".to_string(),
             "Blizzard_HousingDashboard.xml".to_string(),
             "Blizzard_HousingDashboardRegistration.lua".to_string(),
         ],
-        "TOC body lists exactly 9 source files in this order — three pairs of feature .lua/.xml \
-         (HouseUpgrade, HouseInfoContent, Catalog) declare the per-tab template mixins first, \
-         then the umbrella .lua/.xml that wires the dashboard frame, then Registration.lua last"
+        "Retail 12.1 TOC body must retain its current fifteen files in order"
     );
 }
 
 #[test]
-fn blizzard_housing_dashboard_directory_holds_ten_entries() {
-    let dir = dashboard_dir();
-    let entries: Vec<String> = std::fs::read_dir(&dir)
+fn blizzard_housing_dashboard_directory_holds_sixteen_entries() {
+    let mut entries: Vec<String> = std::fs::read_dir(dashboard_dir())
         .expect("Blizzard_HousingDashboard directory should exist")
-        .filter_map(|e| e.ok())
-        .map(|e| e.file_name().to_string_lossy().into_owned())
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.file_name().to_string_lossy().into_owned())
         .collect();
+    entries.sort();
+
+    let mut expected = vec!["Blizzard_HousingDashboard.toc".to_string()];
+    expected.extend(parse_dashboard_toc().files.iter().map(|path| {
+        path.file_name()
+            .expect("TOC body entries are file names")
+            .to_string_lossy()
+            .into_owned()
+    }));
+    expected.sort();
+
     assert_eq!(
-        entries.len(),
-        10,
-        "Directory ships exactly 10 entries (9 source files + 1 TOC). Got: {entries:?}"
+        entries, expected,
+        "Retail 12.1 HousingDashboard directory must contain exactly its TOC and fifteen body files"
     );
-    assert!(entries.contains(&"Blizzard_HousingDashboard.toc".to_string()));
-    assert!(entries.contains(&"Blizzard_HousingDashboardRegistration.lua".to_string()));
 }
 
 #[test]

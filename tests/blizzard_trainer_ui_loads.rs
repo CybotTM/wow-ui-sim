@@ -114,23 +114,16 @@ fn toc_is_load_on_demand_with_no_dependencies() {
     assert!(!toc.is_secure_env());
     assert!(
         !toc.is_game_type_restricted(),
-        "AllowLoadGameType absent → not restricted (false). \
-         Class trainers exist on every flavor (mainline, classic, mists, \
-         etc.) so the addon stays unrestricted."
+        "AllowLoadGameType: mainline is the active profile's non-restricting game type"
     );
     assert!(toc.default_enabled());
 }
 
 #[test]
-fn allow_load_absent_defaults_to_game_only_screen() {
+fn allow_load_game_restricts_to_in_world_screen() {
     let toc = TocFile::from_file(&trainer_toc()).expect("TOC parses");
 
-    assert!(
-        toc.allows_screen(ScreenKind::Game),
-        "AllowLoad absent → toc.rs:305-313 None branch defaults to \
-         Game-only — class-trainer dialogs only open via in-world NPC \
-         interaction, so the panel is meaningless on glue screens"
-    );
+    assert!(toc.allows_screen(ScreenKind::Game));
     for screen in [
         ScreenKind::Login,
         ScreenKind::CharacterSelect,
@@ -138,56 +131,31 @@ fn allow_load_absent_defaults_to_game_only_screen() {
     ] {
         assert!(
             !toc.allows_screen(screen),
-            "Glue screen {screen:?} must be excluded — trainers are \
-             world-NPC-driven and cannot exist before character entry"
+            "AllowLoad: game excludes TrainerUI from {screen:?}"
         );
     }
 }
 
 #[test]
-fn toc_raw_bytes_pin_minimal_two_directive_shape() {
+fn toc_raw_bytes_pin_current_mainline_contract() {
     let raw = std::fs::read_to_string(trainer_toc()).expect("TOC reads utf-8");
-
-    let expected_lines = [
-        "## Title: Blizzard Trainer UI",
-        "## LoadOnDemand: 1",
-        "Blizzard_TrainerUI.xml",
-        "Localization.lua",
-    ];
-
-    for line in expected_lines {
-        assert!(
-            raw.contains(line),
-            "Raw TOC must pin `{line}` — minimal 2-directive shape \
-             (Title + LoadOnDemand) plus 2 body files. Note: \
-             `Blizzard_TrainerUI.lua` is NOT listed in the TOC body — \
-             it's pulled in via the XML's `<Script \
-             file=\"Blizzard_TrainerUI.lua\"/>` directive at xml:3 \
-             (lua-via-XML-Script body shape, same pattern as \
-             TorghastLevelPicker)"
-        );
-    }
-
-    assert!(!raw.contains("## Author"));
-    assert!(!raw.contains("## Version"));
-    assert!(!raw.contains("## DefaultState"));
-    assert!(!raw.contains("## Dependencies"));
-    assert!(!raw.contains("## RequiredDep"));
-    assert!(!raw.contains("## OptionalDep"));
-    assert!(!raw.contains("## SavedVariables"));
-    assert!(!raw.contains("## AllowLoad"));
-    assert!(!raw.contains("## AllowLoadGameType"));
-    assert!(!raw.contains("## UseSecureEnvironment"));
-    assert!(!raw.contains("## LoadFirst"));
-    assert!(
-        !raw.contains("Blizzard_TrainerUI.lua\n") && !raw.ends_with("Blizzard_TrainerUI.lua"),
-        "TOC body must NOT list Blizzard_TrainerUI.lua directly — the \
-         lua is loaded only via the XML <Script file=...> directive"
+    assert_eq!(
+        raw.lines().collect::<Vec<_>>(),
+        [
+            "## Title: Blizzard Trainer UI",
+            "## LoadOnDemand: 1",
+            "## AllowLoad: game",
+            "## AllowLoadGameType: mainline",
+            "Blizzard_TrainerUI_Bootstrap.lua [Bootstrap]",
+            "Mainline\\Blizzard_TrainerUI.xml",
+            "Localization.lua",
+        ],
+        "Retail 12.1 TrainerUI TOC must retain its current directives, bootstrap, and Mainline XML body"
     );
 }
 
 #[test]
-fn body_resolves_to_xml_and_localization_lua() {
+fn body_resolves_to_bootstrap_mainline_xml_and_localization_lua() {
     let toc = TocFile::from_file(&trainer_toc()).expect("TOC parses");
 
     let body: Vec<String> = toc
@@ -199,13 +167,11 @@ fn body_resolves_to_xml_and_localization_lua() {
     assert_eq!(
         body,
         vec![
-            "Blizzard_TrainerUI.xml".to_string(),
+            "Blizzard_TrainerUI_Bootstrap.lua".to_string(),
+            "Mainline/Blizzard_TrainerUI.xml".to_string(),
             "Localization.lua".to_string(),
         ],
-        "Body must be exactly 2 entries in this order — XML first \
-         (which transitively pulls Blizzard_TrainerUI.lua via <Script \
-         file=...>) then the empty Localization.lua trailer (just a \
-         single comment line at Localization.lua:1). Got: {body:?}"
+        "Retail 12.1 body must retain the bootstrap, Mainline XML, and localization trailer in order. Got: {body:?}"
     );
 }
 
@@ -368,31 +334,21 @@ fn explicit_load_registers_ui_panel_windows_entry(env: &WowLuaEnv) {
 }
 
 #[test]
-fn player_interaction_frame_manager_routes_trainer_via_load_addon() {
+fn bootstrap_registers_trainer_interaction() {
     let raw = std::fs::read_to_string(
-        blizzard_ui_dir().join("Blizzard_UIPanels_Game/Shared/PlayerInteractionFrameManager.lua"),
+        trainer_toc()
+            .parent()
+            .expect("Trainer TOC has an addon directory")
+            .join("Blizzard_TrainerUI_Bootstrap.lua"),
     )
-    .expect("PlayerInteractionFrameManager.lua reads utf-8");
+    .expect("Trainer bootstrap reads utf-8");
 
     assert!(
-        raw.contains("[Enum.PlayerInteractionType.Trainer]"),
-        "PlayerInteractionFrameManager must key the trainer entry by \
-         `Enum.PlayerInteractionType.Trainer` (line 29) — this is the \
-         single dispatch point that the C side hits when the player \
-         engages an NPC trainer"
-    );
-    assert!(
-        raw.contains("frame = \"ClassTrainerFrame\"")
-            && raw.contains("showFunc = \"ClassTrainerFrame_Show\"")
-            && raw.contains("hideFunc = \"ClassTrainerFrame_Hide\"")
+        raw.contains("function ClassTrainerFrame_LoadUI()")
+            && raw.contains("RegisterPlayerInteraction(Enum.PlayerInteractionType.Trainer")
+            && raw.contains("frame = \"ClassTrainerFrame\"")
             && raw.contains("loadFunc = ClassTrainerFrame_LoadUI"),
-        "Trainer interaction entry at \
-         PlayerInteractionFrameManager.lua:29-35 must wire all 4 keys \
-         — frame, showFunc, hideFunc (string lookups so the manager \
-         tolerates the addon being unloaded) plus loadFunc (a direct \
-         function reference resolved at boot from UIParent.lua:265-\
-         267 BEFORE Blizzard_TrainerUI itself loads, so first \
-         interaction can lazily load the addon)"
+        "Retail 12.1 TrainerUI bootstrap owns its lazy-load wrapper and PlayerInteraction registration"
     );
 }
 
