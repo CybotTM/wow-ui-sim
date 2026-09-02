@@ -262,20 +262,19 @@ prefork_full_ui_case! {
 fn blizzard_gm_chat_ui_publishes_gm_chat_frame_global(env: &WowLuaEnv) {
     load_gm_chat_ui_with_dependencies(env);
 
-    let exists: bool = env
+    let frames_exist: bool = env
         .eval(
-            "local f = _G['GMChatFrame']; return type(f) == 'table' and type(f.GetName) == 'function'",
+            "local chat = _G['GMChatFrame']; local status = _G['GMChatStatusFrame']; \
+             return type(chat) == 'table' and type(chat.GetName) == 'function' \
+                and type(status) == 'table' and type(status.GetName) == 'function'",
         )
-        .expect("GMChatFrame existence query should succeed");
+        .expect("GM chat frame existence query should succeed");
     assert!(
-        exists,
-        "After LoadAddOn, `GMChatFrame` should publish as a global frame instance — XML line 3 \
-         declares `<ScrollingMessageFrame name=\"GMChatFrame\" \
-         inherits=\"FloatingChatFrameTemplate\">` so the named non-virtual scrolling-message frame \
-         materializes as a runtime frame published under its declared name. \
-         GMChatStatusFrame is verified indirectly via the GMChatStatusMixin assertions above — \
-         its inherited StatusUIFrame template is virtual, and the simulator's XML loader does not \
-         publish that nested-virtual-Button-template chain as a `_G` global"
+        frames_exist,
+        "After LoadAddOn, both named XML roots must publish globally. GMChatFrame is the \
+         ScrollingMessageFrame root; GMChatStatusFrame is the Button root inheriting the virtual \
+         StatusUIFrame template. A failure while finalizing GMChatFrame must not abort processing \
+         before the status frame is created"
     );
 }
 }
