@@ -1,6 +1,7 @@
 #![cfg(feature = "client-retail")]
 use std::path::PathBuf;
 
+use crate::common::load_required_blizzard_addon;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
@@ -25,6 +26,16 @@ fn parse_dashboard_toc() -> TocFile {
 }
 
 fn load_housing_dashboard(env: &WowLuaEnv) {
+    let ui = blizzard_ui_dir();
+    for addon_name in [
+        "Blizzard_HousingTemplates",
+        "Blizzard_HousingModelPreview",
+        "Blizzard_FrameXMLUtil",
+        "Blizzard_HousingBlueprint",
+    ] {
+        load_required_blizzard_addon(env, &ui, addon_name);
+    }
+
     load_addon(&env.loader_env(), &dashboard_toc())
         .expect("Blizzard_HousingDashboard should load via explicit Rust loader call");
 }
@@ -231,17 +242,21 @@ prefork_full_ui_case! {
 fn blizzard_housing_dashboard_template_dependency_loads_via_game_screen_pass(env: &WowLuaEnv) {
     load_housing_dashboard(env);
 
-    let templates_loaded: bool = env
-        .eval("return C_AddOns.IsAddOnLoaded('Blizzard_HousingTemplates')")
-        .expect("IsAddOnLoaded query should succeed");
-    assert!(
-        templates_loaded,
-        "Blizzard_HousingTemplates must be auto-loaded via Game-screen discovery — first \
-         dependency on Dashboard's TOC, must already be present before the explicit LoD load \
-         runs. The other declared dep Blizzard_HousingModelPreview is itself LoadOnDemand so it \
-         is NOT transitively pulled by the explicit LoD load — consumers must LoadAddOn it \
-         separately when they need the model preview frame"
-    );
+    for addon_name in [
+        "Blizzard_HousingTemplates",
+        "Blizzard_HousingModelPreview",
+        "Blizzard_FrameXMLUtil",
+        "Blizzard_HousingBlueprint",
+    ] {
+        let loaded: bool = env
+            .eval(&format!("return C_AddOns.IsAddOnLoaded('{addon_name}')"))
+            .expect("IsAddOnLoaded query should succeed");
+        assert!(
+            loaded,
+            "Blizzard_HousingDashboard's declared dependency {addon_name} must load before the \
+             explicit Dashboard LoD root"
+        );
+    }
 }
 }
 
