@@ -1,6 +1,23 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[test]
+fn test_set_shown_boolean_transitions_update_frame_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        local frame = CreateFrame("Frame", nil, UIParent)
+        frame:Hide()
+        assert(not frame:IsShown(), "frame must start hidden")
+        frame:SetShown(true)
+        assert(frame:IsShown(), "SetShown(true) must show the frame")
+        frame:SetShown(false)
+        assert(not frame:IsShown(), "SetShown(false) must hide the frame")
+        "#,
+    )
+    .expect("SetShown boolean transitions update frame state");
+}
+
+#[test]
 fn test_cross_frame_show_recursion_does_not_overflow() {
     let env = WowLuaEnv::new().unwrap();
     env.eval::<()>(
