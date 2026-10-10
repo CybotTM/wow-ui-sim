@@ -58,6 +58,12 @@ Toolchain label: **reported timing-HTML rustc 1.99.0**, not independent Rustc/AB
 
 The 299 CPU samples average53.1513 and peak78.5714 on Cargo's report scale; CPU-core denominator and core utilization remain unknown. Compiler version1.99.0 is HTML-recorded metadata. This HTML-only admission establishes neither invocation/source endpoints/exit status nor a controlled jobs12 speedup; earlier build evidence remains separate. [Retention hash](../data/test-perf/evidence/jobs12-mists-trace-2026-10-10/hash-manifest.json).
 
+### Five-profile saved compile receipts — jobs12, different workloads
+
+[Independent compiler-message report](../data/test-perf/evidence/jobs12-five-profile-2026-10-10/report.md) admits each profile's **663 artifact records:655 fresh/8 nonfresh**. Eight nonfresh targets are one library, **six binaries**, and one integration test; benchmark-named binaries were compiled, not benchmarked. Submission-to-compile-end wall seconds: Wrath190.922430, Mists106.577779, Era128.349182, Anniversary142.407461, Forever73.417071. Compile exits0; six dependency manifest deprecations each.
+
+Features differ (including Mists prefork and Forever capabilities); recorded revisions also differ. Source/artifact admission and ordinary runtime proof remain separate. These intervals establish no CPU attribution, matched cache state, controlled speedup or whole-profile acceptance. [Report hash](../data/test-perf/evidence/jobs12-five-profile-2026-10-10/hash-manifest.json).
+
 ## Asynchronous full suite
 
 `python3 tools/full_suite.py submit [REF]` schedules the detached worker;
