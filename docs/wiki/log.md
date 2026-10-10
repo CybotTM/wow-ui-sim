@@ -1,3 +1,7 @@
+## [2026-10-10] observation | Installed product identities, not native acceptance
+
+[Client-profile SSOT](systems/client-profiles.md#installed-identity-metadata--october-10-2026) retains six selected local `.build.info` product/version rows and a payload hash. `wow_classic` is observed as Mists5.5.4, not Wrath; beta1.60.1 is metadata, not key/API readiness. No raw keys, product.db cross-check, native launch or global installation-absence claim.
+
 ## [2026-10-10] audit | Saved714 four failures; bounded isolated control and compiler gates
 
 [714 SSOT](investigations/fullsuite-714-2026-10-10.md) records15,017PASS4FAIL19skips/15,021executions withoutdedup, originalscalar/control/auxiliary passes included. NewProjectConstants1.36soutlier plus historicalmethodpair/GarrisonFAIL; isolatedsame714control1logicalPASS206.47ms notcause/repair evidence. Retained smallcounts/checks/control payloads only. b061seven-profilecompilerchecksPASS0, sixdependencywarnings each/no simulatorwarnings; historicalordinaryruntime batchpending. Native/fullhandoffOPEN; no broadreplay or frozenhistory changes.
