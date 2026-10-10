@@ -57,33 +57,7 @@ fn fire_handler(
     fire: fn(&mut rilua::vm::state::LuaState, rilua::Val) -> rilua::LuaResult<()>,
     frame: rilua::Val,
 ) {
-    let observed_id = if handler_name == "OnLoad" {
-        let id = crate::lua_api::methods::extract_frame_id(state, frame);
-        if let Some(id) = id {
-            crate::lua_api::frame::methods::core_state::visibility::log_temp_player_casting_bar_lua_state(
-                state, id, "xml_onload_before",
-            );
-        } else if frame_name == "PlayerCastingBarFrame" {
-            eprintln!(
-                "[temp-casting-bar] phase=xml_onload_before observation_failed=frame_value_id"
-            );
-        }
-        id
-    } else {
-        None
-    };
-    let result = fire(state, frame);
-    if let Some(id) = observed_id {
-        let phase = if result.is_ok() {
-            "xml_onload_after success=true"
-        } else {
-            "xml_onload_after success=false"
-        };
-        crate::lua_api::frame::methods::core_state::visibility::log_temp_player_casting_bar_lua_state(
-            state, id, phase,
-        );
-    }
-    if let Err(error_text) = result {
+    if let Err(error_text) = fire(state, frame) {
         let message = format!("[{handler_name}] {frame_name}: {error_text}");
         if collect_lua_error(state, &message) {
             eprintln!("Lua error: {message}");
