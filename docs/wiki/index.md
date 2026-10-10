@@ -1,3 +1,7 @@
+## [2026-10-10] observation | Historical visibility controls, partial coverage
+
+[5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof) separates saved Mists/Era controls from unproved boolean Frame transitions, optionalunit2 and native identity. Historical accounting unchanged; Mists startup assertion still FAIL.
+
 ## [2026-10-10] audit | Five-profile ordinary scalar preservation
 
 [Map evidence](investigations/map-display-info-model.md#five-other-profiles--ordinary-preservation-only): Wrath/Mists/Era/Anniversary/Forever each2/2 ordinary PASS, ten executions of two distinct unchanged tests. Current-secret tests excluded; source/artifact/feature receipts independently admitted. Native/whole-profile acceptance and suite714 four failures remain open.

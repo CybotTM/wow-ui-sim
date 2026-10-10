@@ -12,6 +12,8 @@
 
 626 current observations: 469 bounded publication/absence rows, 157 exact mismatches. Merged 5.1.0 pet-ID retirements resolve two historical gaps (159 → 157), without new retirements or gap silencing. All 73 extract rows and five separate signatures are classified; 704 total IDs. Mismatches include probe-category limitations, not just missing APIs. One new [pet-type state read](pet-battle-pet-type.md) has concrete RED/GREEN proof. No retirements; current consumers and four later readditions preserved. Source TOC is 50001, not 50004.
 
+[Later partial visibility controls and remaining identity/unit2 limits](../wiki/investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof) do not promote historical publication/signature counts.
+
 ## Tests
 
 - `tests/patch_5_0_4_publication_sweep.rs`

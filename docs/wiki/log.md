@@ -1,3 +1,7 @@
+## [2026-10-10] observation | Partial historical visibility proof
+
+[5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof) links new saved controls and distinguishes source, simulator and native boundaries without changing historical ledger rows.
+
 ## [2026-10-10] audit | Five-profile ordinary scalar receipts admitted
 
 [Map SSOT](investigations/map-display-info-model.md#five-other-profiles--ordinary-preservation-only) records Wrath/Mists/Era/Anniversary/Forever2PASS each, ten executions of two distinct unchanged tests. Saved epoch225705 compile/execution exits0; feature/artifact/source admission independent, no replay. Current-secret tests excluded; native/startup/widerprofile acceptance and suite714 four failures unchanged.

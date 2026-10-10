@@ -8,6 +8,12 @@ Audit verified 2026-10-09. Pinned main revision 3706382 and separate diff 392376
 
 The cheap meaningful gap is `C_PetBattles.GetPetType`: existing per-side `PetBattlePet.pet_type` now backs reads. Concrete RED returns `(nil,nil)` instead of `(7,9)`; GREEN proves ally/enemy, mutation to 8, cleared roster, nonpositive slot and invalid owner in the cached environment. Bare-environment proof is an independent acceptance boundary. Code stays in `src/c_api/`; no new state, synthetic species-to-display mapping or Lua shim. Full pet battle, journal filtering, old challenge/talent/map workflows, POI geometry and historical observed bugs remain unproved.
 
+### Current visibility follow-up — partial historical-artifact proof
+
+[Saved Mists/Era controls](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/historical-visibility-controls/final-report.md) record12 logical cases per profile: nine Show/Hide script regressions plus texture-false, Frame nil/string and Frame same-true no-op SetShown controls. Parent/child timeout summaries are one logical sample, not independent runs. No rebuild; sealed225705 artifacts and232641 executions are distinct receipts. This does not establish literal Frame boolean transitions/callbacks, every Region kind, historical2012/native parity or full-profile acceptance. Original Mists cast-startup hidden assertion remains [FAIL](mists-cast-startup-visibility.md).
+
+Retained5.0.4 source also specifies `Frame:RegisterUnitEvent(event, unit1[, unit2])` and MapID as `GetInstanceInfo` result8. Source-inspected frame registration retains only one unit; optionalunit2 failure has not been executed. The [global unit-callback contract](../../specs/unit-event-callbacks.md) is a different API. `WorldState.instance_id` is documented as mapID and forwarded at slot8; the supplied2657 fixture proves forwarding, not catalog provenance or automatic world identity selection. A separate missing MapID model is not established. Historical ledger rows, pending signatures and publication counts remain unchanged.
+
 ## Probe limitations and preserved compatibility
 
 `LE_PARTY_CATEGORY_HOME`/`INSTANCE` are numeric constants rejected by the function-only probe. `UIPanelButtonTemplate` is a template, not a global API. `SPELL_CAST_SUCCESS` is a combat-log sub-event, not a frame event. These remain explicit probe/semantic limits, not invented absent APIs.
