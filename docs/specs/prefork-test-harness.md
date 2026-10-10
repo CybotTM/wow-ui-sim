@@ -72,6 +72,12 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 
 [Bounded proof SSOT](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#exact-startup-fixtures-retained-redgreen-epoch) links immutable RED/GREEN reports and byte retention. At `3de874658`, four original bodies pass after fork; prefork lists 2,325 names with each selected case once, Retail integration lists 10,681 with all four absent. These counts are a new epoch, not replacements for historical sealed counts. Fresh single-fixture parent processes preserve one-shot global bytecode sealing; no reset, normalization or callback framework. Original constructors, bodies and gates remain unchanged. Non-Retail execution is UNVERIFIED; no speedup or parent completion credit. Full suite `unitfull-suite-1791563703.service` completed FAIL; proof SSOT records unchanged failure sets and saved-log execution of all four migrated cases, reported separately from the base-group summary. Bounded proof is not full-suite acceptance.
 
+#### Later saved original-group executions — default Retail956
+
+[Accepted saved956 suite](../wiki/investigations/fullsuite-956-2026-10-10.md) remains overall FAIL. Its saved log lines13983–13999 record the original chat pair2/2PASS, cast-bar1/1PASS and Mainline spellbook1/1PASS in the default Retail build. Thus matching-profile spellbook execution is retained, not absent. The enclosing prefork step exits1 because a different Game-group case fails; four auxiliary passes do not make the target pass. This later source epoch supplements historical3de evidence without replacing original constructors/assertions or proving every cache/process/native invariant. Later scalar/export changes and pending714 suite are separate scopes.
+
+[Mists222248 diagnostic](../wiki/investigations/mists-cast-startup-visibility.md#temporary-simulator-trace--original-assertion-still-fail) executes only the original cast case0PASS/1FAIL; older084353 chat2PASS remain a distinct receipt. Later cast assertions stay unreached; no all-profile/current-source acceptance follows.
+
 ### Retail and Mists target eligibility
 
 - [ ] Admit `prefork_full_ui` for the Retail and Mists client bundles without admitting other profiles through their bundles.

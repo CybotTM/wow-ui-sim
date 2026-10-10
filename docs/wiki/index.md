@@ -4,7 +4,7 @@
 
 ## [2026-10-10] investigation | Mists cast startup visibility — original FAIL
 
-[Mists visibility investigation](investigations/mists-cast-startup-visibility.md): original084353 hidden-at-startup assertion FAIL; shown already after addon load, later assertions unreached. Historical hidden epoch separate; final player OnLoad lookup corrects nil-unit inference. Conditional deferred idle fade is source-supported only; executed root call/native parity UNKNOWN, no assertion replacement or fix accepted.
+[Mists visibility investigation](investigations/mists-cast-startup-visibility.md): original084353 FAIL preserved; diagnostic222248 reproduces0PASS/1FAIL with four stored-visible records before/after XML properties and outerOnLoad. Source/cache/artifact proof admitted; temporary logs removed. Initial-visible source interpretation is not native parity; no caller/fadecompletion/behavior repair claimed. [Later Retail original groups](../specs/prefork-test-harness.md#later-saved-original-group-executions--default-retail956) pass4/4 at956 while enclosing target/suiteFAIL remain.
 
 ## [2026-10-10] audit | Map scalar arguments — bounded GREEN
 
