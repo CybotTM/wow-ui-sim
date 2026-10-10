@@ -28,6 +28,7 @@ These are engine script/lifecycle requirements, not guessed aura data. The visib
 
 ## Tests asserting this spec
 
+- `tests/frame_creation/visibility_scripts.rs::test_set_shown_boolean_transitions_update_frame_state` — direct `SetShown(true)`/`SetShown(false)` local shown-state assertions; RED/GREEN pending, no production setter change or native-parity claim.
 - `tests/blizzard_restricted_addon_environment_loads.rs` — unchanged secure Show/Hide snippets from addon callers, combat denial, and addon-origin callback taint preservation.
 - `tests/frame_creation/visibility_scripts.rs` — real XML intrinsic bindings, children-first ordering, hidden-child exclusion, reentrant hide, error continuation, and existing recursion/depth controls.
 - `tests/methods_hierarchy.rs` — pure Lua public reparenting transitions, no-op and hidden-child controls, redirect, and handler-error continuation.
