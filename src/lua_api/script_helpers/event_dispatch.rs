@@ -39,12 +39,13 @@ pub(crate) fn event_matches_unit_filter(
         .widgets
         .get(widget_id)
         .and_then(|frame| frame.registered_unit_events.get(event_name));
-    Ok(filter.is_none_or(|unit| {
-        args.first()
-            .and_then(|value| val_to_string(state, *value))
-            .as_deref()
-            == Some(unit.as_str())
-    }))
+    let Some((first, second)) = filter else {
+        return Ok(true);
+    };
+    let Some(unit) = args.first().and_then(|value| val_to_string(state, *value)) else {
+        return Ok(false);
+    };
+    Ok(unit == first.as_str() || second.as_deref() == Some(unit.as_str()))
 }
 
 pub fn fire_named_event_state(state: &mut LuaState, event_name: &str, args: &[Val]) {

@@ -1,6 +1,6 @@
 # Frame unit-event filter
 
-`Frame:RegisterUnitEvent(event, unit1[, unit2])` must retain both supplied valid literal unit tokens for frame-script delivery. Registration lives under `src/lua_api/frame/methods/text_attribute_event/`; see the [event system](../event-system.md) for dispatch architecture. This bounded repair is approved for `player` and `target`; it is not native-client proof.
+`Frame:RegisterUnitEvent(event, unit1[, unit2])` must retain both supplied valid literal unit tokens for frame-script delivery. Registration lives under `src/lua_api/frame/methods/text_attribute_event/`; see the [event system](../event-system.md) for dispatch architecture. This bounded repair is approved for `player` and `target`; it is not native-client proof. The [retained 5.0.4 source](../../data/patch-api/sources/5.0.4-api-changes.txt) specifies `unit1[, unit2]`; no unlimited-argument or native query-return contract is inferred.
 
 ## What it must do
 
@@ -16,8 +16,11 @@
 
 ## Implementation inventory
 
-- `src/lua_api/frame/methods/text_attribute_event/` — frame event registration and query methods.
+- `src/lua_api/frame/methods/text_attribute_event/events.rs` — first/second registration and unchanged first-unit query.
 - `src/lua_api/frame/methods/text_attribute_event/unit_event.rs` — existing literal-token validation and registered-unit query helper.
+- `src/widget/frame.rs` and `src/widget/registry/mod.rs` — first string plus optional second string per event; registration index and lifecycle.
+- `src/lua_api/script_helpers/event_dispatch.rs` — first-payload matching against either stored token.
+- `src/widget/frame_size.rs` — storage estimate includes both token strings.
 
 ## Tests asserting this spec
 

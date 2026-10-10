@@ -50,21 +50,31 @@ pub(super) fn register_unit_event(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Bool(false));
         return Ok(1);
     };
-    let valid_unit = super::unit_event::is_valid_unit_filter(&unit);
-    let newly_registered = {
-        let mut sim = borrow_state_mut(state)?;
-        if valid_unit {
-            sim.widgets.register_unit_event_listener(id, &event, &unit)
-        } else {
-            sim.widgets.register_event_listener(id, &event)
-        }
-    };
+    let newly_registered = register_unit_event_filter(state, id, &event, &unit)?;
     if newly_registered {
         rilua_hlist_register_individual(state, id, &event)?;
     }
     state.push(Val::Bool(newly_registered));
     Ok(1)
 }
+fn register_unit_event_filter(
+    state: &mut LuaState,
+    id: u64,
+    event: &str,
+    unit: &str,
+) -> LuaResult<bool> {
+    if !super::unit_event::is_valid_unit_filter(unit) {
+        return Ok(borrow_state_mut(state)?
+            .widgets
+            .register_event_listener(id, event));
+    }
+    let second_unit = val_to_string(state, stack_val(state, 4))
+        .filter(|unit| super::unit_event::is_valid_unit_filter(unit));
+    Ok(borrow_state_mut(state)?
+        .widgets
+        .register_unit_event_listener(id, event, unit, second_unit.as_deref()))
+}
+
 pub(super) fn unregister_event(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     ensure_forbidden_aspect_absent(state, id, "EventRegistrations", "UnregisterEvent")?;
@@ -155,7 +165,9 @@ pub(super) fn is_event_registered(state: &mut LuaState) -> LuaResult<u32> {
     let registered = frame
         .map(|frame| frame_has_registered_event(frame, &event))
         .unwrap_or(false);
-    let unit = frame.and_then(|frame| frame.registered_unit_events.get(&event).cloned());
+    let unit = frame
+        .and_then(|frame| frame.registered_unit_events.get(&event))
+        .map(|(first, _)| first.clone());
     drop(sim);
     state.push(Val::Bool(registered));
     super::unit_event::push_registered_unit(state, unit.as_deref());

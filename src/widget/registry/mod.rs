@@ -299,14 +299,21 @@ impl WidgetRegistry {
         was_inserted
     }
 
-    pub fn register_unit_event_listener(&mut self, id: u64, event: &str, unit: &str) -> bool {
+    pub fn register_unit_event_listener(
+        &mut self,
+        id: u64,
+        event: &str,
+        unit: &str,
+        second_unit: Option<&str>,
+    ) -> bool {
         let was_inserted = self
             .widgets
             .get_mut(&id)
             .map(|frame| {
-                frame
-                    .registered_unit_events
-                    .insert(event.to_string(), unit.to_string());
+                frame.registered_unit_events.insert(
+                    event.to_string(),
+                    (unit.to_string(), second_unit.map(str::to_string)),
+                );
                 frame.registered_events.insert(event.to_string())
             })
             .unwrap_or(false);
