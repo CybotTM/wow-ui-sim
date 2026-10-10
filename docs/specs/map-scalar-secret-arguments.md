@@ -6,7 +6,7 @@ Cached Retail and PTR `AddOns/Blizzard_APIDocumentationGenerated/MapDocumentatio
 
 ## What it must do
 
-Saved d97 epoch `20261010T214515Z` reaches six tests: two authentic untainted-secret parser failures, four compatibility PASS. Producer changes follow this RED; GREEN remains pending. Checkboxes remain **UNVERIFIED** until final evidence covers the changed producer. Existing MapDisplay proof is not proof for these two functions.
+Saved d97 epoch `20261010T214515Z` reaches six tests: two authentic untainted-secret parser failures, four compatibility PASS. Producer `fae775099c3cd8b4f412547b6dc70cb09d89c20e` implements the approved selector change after this RED; GREEN remains pending. Checkboxes remain **UNVERIFIED** until final evidence covers the changed producer. Existing MapDisplay proof is not proof for these two functions.
 
 ### Current Retail/PTR secret arguments
 
@@ -35,11 +35,11 @@ Saved d97 epoch `20261010T214515Z` reaches six tests: two authentic untainted-se
 - `src/lua_bridge/mod.rs` — crate-private conversion export; no new public API.
 - `Cargo.toml` — current Retail/PTR capability selection and historical epoch feature boundaries.
 - `tests/c_map_probes.rs` — existing ordinary map controls and authentic host-secret/tainted-caller precedent.
-- `tests/map_scalar_secret_inputs.rs` — four current-epoch secret-input tests and two ungated ordinary compatibility tests; execution remains unverified.
+- `tests/map_scalar_secret_inputs.rs` — four current-epoch secret-input tests and two ungated ordinary compatibility tests, executed under the generated `integration` target as `map_scalar_secret_inputs::*`; saved pre-producer RED reaches all six, but changed-producer GREEN remains unverified.
 
 ## Tests asserting this spec
 
-`tests/map_scalar_secret_inputs.rs` supplies new target coverage. Existing `tests/c_map_probes.rs` ordinary target tests and MapDisplay security tests are controls/precedent, not admitted RED/GREEN for this slice. No new target test execution is claimed.
+`tests/map_scalar_secret_inputs.rs` supplies new target coverage. Existing `tests/c_map_probes.rs` ordinary target tests and MapDisplay security tests are controls/precedent, not admitted RED/GREEN for this slice. The saved pre-producer RED executes six actual target tests: two untainted-secret FAIL and four compatibility PASS. This does not establish changed-producer GREEN.
 
 Required main-thread evidence must use a deliberately seeded map row with distinctive art ID/name and an authentic host-VM secret numeric selector, not a Lua lookalike. For both APIs, assert exact result count and fixture values, untainted secret acceptance, tainted ordinary acceptance, tainted secret rejection, and wrapper/caller preservation. Retain known/absent-map controls, `GetMapInfo` generic-range controls, ordinary invalid-selector controls, and historical-profile compatibility coverage. Fixture values are simulator test data, not native catalog facts.
 
