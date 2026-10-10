@@ -106,7 +106,7 @@ Updated [proof SSOT](investigations/integrated-source-and-factory-proof-2026-10-
 
 ## [2026-10-09] audit | File-error diagnostics and count fixture
 
-Updated [pipeline diagnostic SSOT](../addon-loading-pipeline.md#top-level-file-error-diagnostics), [preserved RED/source status](investigations/integrated-source-and-factory-proof-2026-10-09.md#startup-file-budget-diagnostic--preserved-red-source-change-runtime-pending), and [count-fixture delta](investigations/integrated-source-and-factory-proof-2026-10-09.md#retailmists-count-fixture-delta--source-only-runtime-pending) for `fc824cb92`, `3a4f54da4`/`29307f243`. Runtime pending; compiler-running status is handoff only. Docs-only inspection, no builds/tests/delegation/operations or raw/private copies.
+Updated [pipeline diagnostic SSOT](../addon-loading-pipeline.md#top-level-file-budget-diagnostics), [preserved RED/source status](investigations/integrated-source-and-factory-proof-2026-10-09.md#startup-file-budget-diagnostic--preserved-red-source-change-runtime-pending), and [count-fixture delta](investigations/integrated-source-and-factory-proof-2026-10-09.md#retailmists-count-fixture-delta--source-only-runtime-pending) for `fc824cb92`, `3a4f54da4`/`29307f243`. Runtime pending; compiler-running status is handoff only. Docs-only inspection, no builds/tests/delegation/operations or raw/private copies.
 
 ## [2026-10-09] audit | Required table hint and standalone Maw epoch — runtime pending
 
@@ -126,7 +126,7 @@ Updated [pipeline diagnostic SSOT](../addon-loading-pipeline.md#top-level-file-e
 
 ## [2026-10-09] audit | Cooldown epoch and charge fixture proof pending
 
-[Proof SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#cooldown-epoch-and-explicit-charge-fixtures--proof-pending): category spec matches epoch-gated initialization/unconditional publisher; charge commit is tests-only and matches existing explicit-input contract. Main-reported `40d2epochverification/marker-and-three-fixtures/20261009T233707Z` compiler exit0/source equal excludes later `0769f7b99`. Fixture GREEN awaits main results; no new coverage/source credit. Docs only; `.code-index.db` preserved.
+[Proof SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#cooldown-epoch-and-explicit-charge-fixtures--bounded-epoch-proof): category spec matches epoch-gated initialization/unconditional publisher; charge commit is tests-only and matches existing explicit-input contract. Main-reported `40d2epochverification/marker-and-three-fixtures/20261009T233707Z` compiler exit0/source equal excludes later `0769f7b99`. Fixture GREEN awaits main results; no new coverage/source credit. Docs only; `.code-index.db` preserved.
 
 ## [2026-10-09] ingest | Bounded Lua/startup warning audit
 
@@ -182,7 +182,7 @@ Updated [pipeline diagnostic SSOT](../addon-loading-pipeline.md#top-level-file-e
 
 ## [2026-10-09] fix | Keep headless collection test independent of GUI
 
-[Proof SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#headless-hittable-order-fixture--dependency-repair-proof-pending) records optional-dependency errors and GUI-only block gating. Common headless order assertion retained; no rendering/runtime or assertion-value changes. Historical and enabled-GUI proof pending.
+[Proof SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#headless--gui-hittable-order-fixture--bounded-execution-proof) records optional-dependency errors and GUI-only block gating. Common headless order assertion retained; no rendering/runtime or assertion-value changes. Historical and enabled-GUI proof pending.
 
 ## [2026-10-09] fix | Restore adjacent Era target feature gate
 
@@ -190,7 +190,7 @@ Updated [pipeline diagnostic SSOT](../addon-loading-pipeline.md#top-level-file-e
 
 ## [2026-10-09] fix | Historical TransmogSituation test epoch
 
-[Proof SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#historical-transmogsituation-fixture--exact-epoch-proof-pending) records an exact historical gate without changing assertions or runtime values. Different-test attribution and the unsupported BigDefensiveIconSize gate proposal rejected; targeted historical/current proof pending.
+[Proof SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#historical-transmogsituation-fixture--exact-epoch-partial-proof-preserved) records an exact historical gate without changing assertions or runtime values. Different-test attribution and the unsupported BigDefensiveIconSize gate proposal rejected; targeted historical/current proof pending.
 
 ## [2026-10-09] investigation | Patch 1.10.1 frozen redirect SOURCE audit
 
@@ -218,7 +218,7 @@ Updated [pipeline diagnostic SSOT](../addon-loading-pipeline.md#top-level-file-e
 
 ## [2026-10-09] ingest | Independent Era1.14.1/1.14.0 and Forever standalone epochs
 
-[Proof SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#era11411era1140-independent-bounded-epoch) retains Era SOURCE8/10, portable3/3 each, getter1/1 and unchanged160+10/92+5 seals. [Forever function gates](investigations/forever-cfg-failure-and-function-gates.md#independent-standalone-proof-epoch) retains3/3 ordered records/one-way environment isolation, two rejection results with one shared final snapshot, exact raw/public/legacy getter nil, fmt/manual readability PASS and14 warnings. Separate integrated `era1141-1140` and `forever-runtime` manifests bind95 files/1,449,178 bytes and14 files/933,071 bytes; all hashes match, original seals unchanged. Actual045e396b0 compiled scope equals requestedf611a6752; later SOURCE merges earn no latest prefork acceptance. Historical unproven epochs preserved. No tests/code edits/native/security/inbound-delivery/Retail restriction or migration credit; existing pages only, index unchanged.
+[Proof SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#era11411140-independent-bounded-epoch) retains Era SOURCE8/10, portable3/3 each, getter1/1 and unchanged160+10/92+5 seals. [Forever function gates](investigations/forever-cfg-failure-and-function-gates.md#independent-standalone-proof-epoch) retains3/3 ordered records/one-way environment isolation, two rejection results with one shared final snapshot, exact raw/public/legacy getter nil, fmt/manual readability PASS and14 warnings. Separate integrated `era1141-1140` and `forever-runtime` manifests bind95 files/1,449,178 bytes and14 files/933,071 bytes; all hashes match, original seals unchanged. Actual045e396b0 compiled scope equals requestedf611a6752; later SOURCE merges earn no latest prefork acceptance. Historical unproven epochs preserved. No tests/code edits/native/security/inbound-delivery/Retail restriction or migration credit; existing pages only, index unchanged.
 
 ## [2026-10-09] investigation | Patch 1.13.3 literal SOURCE accounting
 
