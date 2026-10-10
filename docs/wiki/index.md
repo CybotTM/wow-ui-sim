@@ -1,3 +1,7 @@
+## [2026-10-10] audit | Five-profile ordinary scalar preservation
+
+[Map evidence](investigations/map-display-info-model.md#five-other-profiles--ordinary-preservation-only): Wrath/Mists/Era/Anniversary/Forever each2/2 ordinary PASS, ten executions of two distinct unchanged tests. Current-secret tests excluded; source/artifact/feature receipts independently admitted. Native/whole-profile acceptance and suite714 four failures remain open.
+
 ## [2026-10-10] audit | Saved714 suite — FAIL; isolated timing control separate
 
 [714 SSOT](investigations/fullsuite-714-2026-10-10.md):15,017PASS4FAIL19skips/15,021executions, scalar6+controls+auxiliary4PASS. Historicalmethodpair/Garrison plus newProjectConstants1.36s/1soutlierFAIL. Isolatedsame-source control1logicalPASS/206.47ms doesnotprove loaded-condition repair/causality. Later seven-profileexportchecksPASS0, sixdependencywarnings/zero simulatorwarnings each; no runtime/native/fullhandoff completion.
@@ -12,7 +16,7 @@
 
 ## [2026-10-10] audit | Map scalar arguments — bounded GREEN
 
-[Scalar proof SSOT](investigations/map-display-info-model.md#scalar-map-selectors--bounded-retailptr-green): unchangedfae/d97, authentic RED2FAIL/4PASS; independent Retail93/PTR91PASS, all6targets each, distinct CASC-disabledCLI[]0 and fmt/default/PTRcheck0. Historical Retail12.0.7 only2ordinaryPASS/current secret gate excluded. [Contract](../specs/map-scalar-secret-arguments.md) retains untested branches; other-profile/native/fullhandoff OPEN. Fresh714b62455 suite submitted22:09UTC, no admitted result; older956/b048 failures unchanged.
+[Scalar proof SSOT](investigations/map-display-info-model.md#scalar-map-selectors--bounded-retailptr-green): unchangedfae/d97, authentic RED2FAIL/4PASS; independent Retail93/PTR91PASS, all6targets each, distinct CASC-disabledCLI[]0 and fmt/default/PTRcheck0. Historical Retail12.0.7 only2ordinaryPASS/current secret gate excluded. [Contract](../specs/map-scalar-secret-arguments.md) retains untested branches; other-profile/native/fullhandoff OPEN. At714 submission22:09UTC no result was admitted; [later saved714 result](investigations/fullsuite-714-2026-10-10.md) admits15,017PASS/4FAIL/19skips. Older956/b048 failures unchanged.
 
 ## [2026-10-10] audit | MapDisplay bounded Retail/PTR GREEN
 

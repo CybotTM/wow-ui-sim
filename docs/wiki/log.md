@@ -1,3 +1,7 @@
+## [2026-10-10] audit | Five-profile ordinary scalar receipts admitted
+
+[Map SSOT](investigations/map-display-info-model.md#five-other-profiles--ordinary-preservation-only) records Wrath/Mists/Era/Anniversary/Forever2PASS each, ten executions of two distinct unchanged tests. Saved epoch225705 compile/execution exits0; feature/artifact/source admission independent, no replay. Current-secret tests excluded; native/startup/widerprofile acceptance and suite714 four failures unchanged.
+
 ## [2026-10-10] audit | Mists Cargo HTML timing, not a speedup
 
 [Build evidence](../remote-builds.md#mists-trace-compile--separate-jobs12-observation) retains independently admitted timestamped HTML values:148.2s wall, library130.25s,737units/728fresh/9dirty, maxcompiler concurrency7/jobs12. CPU samples do not establish core utilization; benchmark-named bins are compile-only. No new build, controlled comparison or native/runtime acceptance.
