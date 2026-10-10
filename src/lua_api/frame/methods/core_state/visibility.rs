@@ -19,6 +19,37 @@ const SHOW_HIDE_HANDLER_LIMIT: usize = 12;
 /// Maximum cross-frame Show/Hide dispatch depth.
 const GLOBAL_SHOW_HIDE_DEPTH_LIMIT: u32 = 40;
 
+/// Temporary exact-name observation; remove after the casting-bar capture.
+pub(crate) fn log_temp_player_casting_bar_state(
+    state: &std::cell::RefCell<crate::lua_api::SimState>,
+    id: u64,
+    phase: &str,
+) {
+    let Ok(sim) = state.try_borrow() else {
+        eprintln!("[temp-casting-bar] phase={phase} id={id} observation_failed=sim_state_borrow");
+        return;
+    };
+    let Some(frame) = sim.widgets.get(id) else {
+        eprintln!("[temp-casting-bar] phase={phase} id={id} observation_failed=missing_frame");
+        return;
+    };
+    if frame.name.as_deref() == Some("PlayerCastingBarFrame") {
+        eprintln!(
+            "[temp-casting-bar] phase={phase} id={id} parent_id={:?} visible={} alpha={}",
+            frame.parent_id, frame.visible, frame.alpha
+        );
+    }
+}
+
+pub(crate) fn log_temp_player_casting_bar_lua_state(state: &LuaState, id: u64, phase: &str) {
+    match crate::lua_api::methods::state_handle(state) {
+        Ok(handle) => log_temp_player_casting_bar_state(&handle, id, phase),
+        Err(_) => eprintln!(
+            "[temp-casting-bar] phase={phase} id={id} observation_failed=missing_sim_state"
+        ),
+    }
+}
+
 pub fn show(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     if !can_change_protected_state_for(state, id) {
@@ -65,6 +96,11 @@ fn show_or_hide(state: &mut LuaState, id: u64, shown: bool) -> LuaResult<()> {
     if !shown {
         release_tooltip_owner(state, id)?;
     }
+    log_temp_player_casting_bar_lua_state(
+        state,
+        id,
+        if shown { "show_before" } else { "hide_before" },
+    );
     if !needs_change {
         return Ok(());
     }
@@ -81,6 +117,11 @@ fn show_or_hide(state: &mut LuaState, id: u64, shown: bool) -> LuaResult<()> {
         let mut sim = borrow_state_mut(state)?;
         sim.set_frame_visible(id, shown);
     }
+    log_temp_player_casting_bar_lua_state(
+        state,
+        id,
+        if shown { "show_after" } else { "hide_after" },
+    );
 
     if in_handler || !parent_visible {
         return Ok(());

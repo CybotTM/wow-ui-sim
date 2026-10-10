@@ -52,6 +52,12 @@ Direct comparison of saved `source-before.json` / `source-after.json` found all 
 
 Root call trace remains unknown: actual method lookup, handler entries/exits, query results, cast/edit-mode state, and first visibility-changing operation lack execution evidence. Native acceptance remains blocked. Call-level replay/instrumentation was not run for this audit.
 
+## Temporary simulator trace — capture pending
+
+A temporary exact-name observer for `PlayerCastingBarFrame` records stored visibility, alpha, numeric identity and parent at XML property application, outer OnLoad dispatch and Show/Hide mutations. It changes no vendor source or original assertions. OnLoad `success=true` describes the outer dispatcher result only: internally caught handler failures remain possible. No-op visibility attempts have a before record but no mutation record; ancestor visibility and unobserved direct state writes remain outside this trace.
+
+This diagnostic is not a public feature or behavior repair. Its stderr overhead prevents performance conclusions. Remove the observer after the bounded original-fixture capture; retain source-bound receipts and analysis separately. Compilation, execution and causal interpretation are pending; native parity remains unknown.
+
 ## Sources
 
 - Private `handoff/mists-load-visibility-final.md` — earliest shown state, XML/loader observations, identity limits.

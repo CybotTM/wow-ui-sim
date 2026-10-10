@@ -51,12 +51,24 @@ pub(super) fn setup_frame(
     let props_start = Instant::now();
     let frame_id = created_frame_id(env, setup.name)?;
     ensure_parent_refs_registered(env, &setup, frame_id)?;
-    apply_xml_properties_direct(env, frame_id, setup.frame, setup.inherits, setup.parent)?;
+    log_temp_xml_properties(env, frame_id, "xml_properties_before");
+    let properties_result =
+        apply_xml_properties_direct(env, frame_id, setup.frame, setup.inherits, setup.parent);
+    log_temp_xml_properties(env, frame_id, "xml_properties_after");
+    properties_result?;
     apply_intrinsic_property(env, setup.intrinsic_base, frame_id);
     timing.frame_apply_props_time += props_start.elapsed();
     timing.xml_frame_setup_time += setup_start.elapsed();
     timing.frame_count += 1;
     Ok(())
+}
+
+fn log_temp_xml_properties(env: &LoaderEnv<'_>, frame_id: u64, phase: &str) {
+    crate::lua_api::frame::methods::core_state::visibility::log_temp_player_casting_bar_state(
+        env.state(),
+        frame_id,
+        phase,
+    );
 }
 
 pub(super) fn created_frame_id(env: &LoaderEnv<'_>, name: &str) -> Result<u64, LoadError> {
