@@ -4,7 +4,7 @@
 
 [Existing map investigation](map-display-info-model.md#scalar-map-selectors--bounded-retailptr-green) is scalar proof SSOT; [contract](../../specs/map-scalar-secret-arguments.md) maps assertions without crediting untested secret absent/generic branches. Unchanged producerfae/tests d97: authentic RED2FAIL/4PASS preserved; independent Retail93/PTR91 actualPASS, all6target tests each. Distinct CLI `[]`/exit0 uses CASC disabled; fmt/default/PTRcheck0, six inherited iced deprecations. Historical `profile-retail,retail-12-0-7` ONLY compile0/ordinary2PASS; current secret gate excluded, no all-historical/native claim. Retained RED/default/PTR/historical actual `final-report.md` filenames verified before linking in scalar SSOT; private terminal reports supply admission.
 
-Fresh714b62455 suite `full-suite-1791670170` submitted asynchronously2026-10-10 22:09UTC; no admitted result or claim, no rerun for docs. Older956 FAIL3/b048 FAIL4 unchanged. Native, other-profile/runtime-asset/dependency provenance and full handoff/parent acceptance remain OPEN.
+[Completed714 suite](fullsuite-714-2026-10-10.md):15,017PASS/4FAIL/19skips,15,021runner executions includingauxiliary4; scalar6/controlsPASS alreadycounted. Methodpair/Garrison plus newlyobservedProjectConstants1.36soutlierFAIL. Isolatedsame714control1logicalPASS/206.47ms neitherrepairsloadedcondition norprovescausality. Sevenlaterb061profilecompilerchecksPASS0, sixdependencywarnings/zero simulatorwarnings each; runtime/nativeacceptance separate. Older956FAIL3/b048FAIL4 unchanged; fullhandoffOPEN.
 
 ## Successful file-budget diagnostics — bounded GREEN and attribution, startup unfixed
 

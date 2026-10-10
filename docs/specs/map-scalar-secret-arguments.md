@@ -47,7 +47,7 @@ Required main-thread evidence must use a deliberately seeded map row with distin
 
 - [x] Authentic RED2FAIL/4PASS preserved; unchanged d97 target assertions reach GREEN6/6 under current Retail and PTR.
 - [x] Bounded historical Retail12.0.7 ordinary preservation reaches2/2; not all historical profiles.
-- [ ] Other-profile runtime/native acceptance and full handoff remain OPEN. Fresh714b62455 suite `full-suite-1791670170` submitted asynchronously at2026-10-10 22:09UTC has no admitted result. Older956 FAIL3/b048 FAIL4 unchanged; no rerun for docs.
+- [ ] Other-profile runtime/native acceptance and full handoff remain OPEN. [Saved714 suite](../wiki/investigations/fullsuite-714-2026-10-10.md) FAIL15,017PASS/4FAIL/19skips includes allsix scalarPASS; later b061 export-only correction passes seven profilecompilerchecks, not runtime. Historical ordinary fixtures under five other profiles are queued separately, not admitted here. Older956FAIL3/b048FAIL4 unchanged; no broad rerun for docs.
 
 ## Out of scope
 

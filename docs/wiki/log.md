@@ -1,3 +1,7 @@
+## [2026-10-10] audit | Saved714 four failures; bounded isolated control and compiler gates
+
+[714 SSOT](investigations/fullsuite-714-2026-10-10.md) records15,017PASS4FAIL19skips/15,021executions withoutdedup, originalscalar/control/auxiliary passes included. NewProjectConstants1.36soutlier plus historicalmethodpair/GarrisonFAIL; isolatedsame714control1logicalPASS206.47ms notcause/repair evidence. Retained smallcounts/checks/control payloads only. b061seven-profilecompilerchecksPASS0, sixdependencywarnings each/no simulatorwarnings; historicalordinaryruntime batchpending. Native/fullhandoffOPEN; no broadreplay or frozenhistory changes.
+
 ## [2026-10-10] investigation | Mists original cast trace retained; logger removed
 
 [Mists trace SSOT](investigations/mists-cast-startup-visibility.md#temporary-simulator-trace--original-assertion-still-fail): diagnostic5bc/222248 compile0, original0PASS1FAIL, fourstored-visible records, independently checked3854source/2977cache entries and artifactseal. OuterOnLoadsuccess not individualhandler proof; no native/caller/fadecompletion or repair claim. Temporary3-file loggerremoved20d6. Check exposed unused scalar re-export; b061 gates export only, separate profilechecks pending. [Retail956 originalgroups](../specs/prefork-test-harness.md#later-saved-original-group-executions--default-retail956) retained4/4PASS; enclosingtarget/suiteFAIL unchanged. Native/fullhandoffOPEN.

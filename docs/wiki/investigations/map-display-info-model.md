@@ -31,7 +31,7 @@ Six target assertions cover fixture84/art620104/name, exact present-map count, w
 
 Verified actual retained filenames: [default final report](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/map-scalar-default-green/final-report.md), [PTR final report](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/map-scalar-ptr-green/final-report.md), [historical final report](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/map-scalar-historical-green/final-report.md). PTR/historical retention appeared between initial and final directory inspections; private terminal reports remain the admission basis. Six inherited iced manifest deprecations remain; compile success is not warning-free. Endpoint seals do not establish continuous immutability or complete external dependency/environment/runtime-asset provenance.
 
-Fresh714b62455 full suite `full-suite-1791670170` submitted asynchronously2026-10-10 22:09UTC: no admitted result, no completion claim, no docs-triggered rerun. Older956 FAIL3 and b048 FAIL4 remain unchanged. Native, other-profile runtime and full handoff/parent acceptance OPEN.
+[Saved714 suite](fullsuite-714-2026-10-10.md) independentlyFAIL15,017PASS/4FAIL/19skips; scalar six and original controlsPASS, counts already included. New timing outlier is not established causal regression; isolated controlPASS does not erase it. Later b061 re-export compiler checks pass all seven profiles with six dependency warnings/zero simulator warnings each; these are not runtime tests. Older956FAIL3/b048FAIL4 unchanged. Native, other-profile runtime and full handoff/parent acceptance OPEN.
 
 ## Sources
 
