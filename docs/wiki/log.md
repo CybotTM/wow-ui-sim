@@ -4,7 +4,7 @@ Added [exact956 investigation](investigations/fullsuite-956-2026-10-10.md), link
 
 ## [2026-10-10] ingest | Mists startup visibility investigation linked
 
-Added index/log links to [Mists investigation](investigations/mists-cast-startup-visibility.md). Original084353 hidden assertion FAIL and later unreached assertions explicit; historical hidden observations not substituted. Corrected dynamic OnLoad interpretation and conditional source-only fade candidate do not establish executed root/native parity or authorize assertion replacement. No investigation-page/source/evidence edits or execution.
+Added index/log links to [Mists investigation](investigations/mists-cast-startup-visibility.md). Original084353 hidden assertion FAIL and later unreached assertions explicit; historical hidden observations not substituted. Corrected dynamic OnLoad interpretation and conditional source-only fade candidate do not establish executed root/native parity or authorize assertion replacement. Original investigation and saved execution evidence retained.
 
 ## [2026-10-10] audit | Forever post-event stock — bounded PASS
 
