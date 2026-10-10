@@ -52,6 +52,12 @@ Cargo job limit **12**, observed peak **8 concurrent Cargo units**; cgroup ceili
 
 Toolchain label: **reported timing-HTML rustc 1.99.0**, not independent Rustc/ABI proof or hermetic dependency provenance. See the [existing compile brief](rust-integration-test-target-size-brief.md) and [sanitized timing summary and hash receipts](../data/test-perf/evidence/jobs12-map-display-2026-10-10/summary.json). Native goal remains open; this retention adds no acceptance gate.
 
+### Mists trace compile — separate jobs12 observation
+
+[Timestamped Cargo HTML summary](../data/test-perf/evidence/jobs12-mists-trace-2026-10-10/summary.json), start October10 at22:22:48UTC, independently admits **148.2s wall**, **737 units /728 fresh /9 dirty**, and a **130.25s library** (69.05s frontend +61.20s codegen). Seven final targets overlap after library completion; peak compiler-unit concurrency is **7** with jobs12. Benchmark-named bins record compilation, not benchmark execution.
+
+The 299 CPU samples average53.1513 and peak78.5714 on Cargo's report scale; CPU-core denominator and core utilization remain unknown. Compiler version1.99.0 is HTML-recorded metadata. This HTML-only admission establishes neither invocation/source endpoints/exit status nor a controlled jobs12 speedup; earlier build evidence remains separate. [Retention hash](../data/test-perf/evidence/jobs12-mists-trace-2026-10-10/hash-manifest.json).
+
 ## Asynchronous full suite
 
 `python3 tools/full_suite.py submit [REF]` schedules the detached worker;

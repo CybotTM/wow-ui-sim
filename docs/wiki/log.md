@@ -1,3 +1,7 @@
+## [2026-10-10] audit | Mists Cargo HTML timing, not a speedup
+
+[Build evidence](../remote-builds.md#mists-trace-compile--separate-jobs12-observation) retains independently admitted timestamped HTML values:148.2s wall, library130.25s,737units/728fresh/9dirty, maxcompiler concurrency7/jobs12. CPU samples do not establish core utilization; benchmark-named bins are compile-only. No new build, controlled comparison or native/runtime acceptance.
+
 ## [2026-10-10] observation | Installed product identities, not native acceptance
 
 [Client-profile SSOT](systems/client-profiles.md#installed-identity-metadata--october-10-2026) retains six selected local `.build.info` product/version rows and a payload hash. `wow_classic` is observed as Mists5.5.4, not Wrath; beta1.60.1 is metadata, not key/API readiness. No raw keys, product.db cross-check, native launch or global installation-absence claim.
