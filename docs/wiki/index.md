@@ -6,6 +6,10 @@
 
 [Mists visibility investigation](investigations/mists-cast-startup-visibility.md): original084353 hidden-at-startup assertion FAIL; shown already after addon load, later assertions unreached. Historical hidden epoch separate; final player OnLoad lookup corrects nil-unit inference. Conditional deferred idle fade is source-supported only; executed root call/native parity UNKNOWN, no assertion replacement or fix accepted.
 
+## [2026-10-10] audit | Map scalar arguments — bounded GREEN
+
+[Scalar proof SSOT](investigations/map-display-info-model.md#scalar-map-selectors--bounded-retailptr-green): unchangedfae/d97, authentic RED2FAIL/4PASS; independent Retail93/PTR91PASS, all6targets each, distinct CASC-disabledCLI[]0 and fmt/default/PTRcheck0. Historical Retail12.0.7 only2ordinaryPASS/current secret gate excluded. [Contract](../specs/map-scalar-secret-arguments.md) retains untested branches; other-profile/native/fullhandoff OPEN. Fresh714b62455 suite submitted22:09UTC, no admitted result; older956/b048 failures unchanged.
+
 ## [2026-10-10] audit | MapDisplay bounded Retail/PTR GREEN
 
 [MapDisplay SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#mapdisplay-supplied-input--bounded-retailptr-and-p801-green): independent default86 PASS/fmt+default+PTRcheck0/CLIzero; P8011 PASS with validatorPASS/frozen17/live16. PTR main-observed33+51=84 PASS/five targets/CLI[]0; original count error corrected without rewriting receipts. Final PTR independent audit admits84/84 PASS; five other shared-state compile checks exit0/source equality, getter excluded and six dependency deprecations each. Native/runtime acceptance unknown; parent OPEN.

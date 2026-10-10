@@ -1,3 +1,7 @@
+## [2026-10-10] audit | Map scalar terminal proof documented
+
+Updated [contract](../specs/map-scalar-secret-arguments.md), [existing map investigation](investigations/map-display-info-model.md#scalar-map-selectors--bounded-retailptr-green), integrated SSOT/index from three independent final reports. Retail93/PTR91PASS include6targets each; historical Retail12.0.7 only2ordinaryPASS, secret gate excluded. RED2FAIL/4PASS preserved; checkbox partial gaps explicit. Verified actual RED/default/PTR/historical `final-report.md` filenames before linking; PTR/historical retention appeared during documentation stage. Fresh714b62455 suite submitted22:09UTC/no admitted result; older956/b048 FAIL unchanged. Docs only: no tests/builds/operations/commits/delegation; native/other-profile/fullhandoff OPEN.
+
 ## [2026-10-10] audit | Saved 956 small evidence retained
 
 Added [exact956 investigation](investigations/fullsuite-956-2026-10-10.md), linked integrated SSOT/index, retained sanitized independent report/small results JSON/derived count proof/hash manifest only. Accepted15,012PASS/3FAIL/19recorded skips,15,015executions including auxiliary prefork without deduplication. Two historical methods/Garrison FAIL; CPU PASS this execution, mutable-baseline 'new' not regression evidence. Pinned956 excludes later d97 scalar-secret/future producer; b048 FAIL history unchanged. No logs/binaries/source inventories/private payloads retained. Native UNKNOWN; parent OPEN.

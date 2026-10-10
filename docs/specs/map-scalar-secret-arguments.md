@@ -1,25 +1,25 @@
 # Map scalar secret arguments
 
-`C_Map.GetMapInfo(uiMapID)` and `C_Map.GetMapArtID(uiMapID)` must accept authentic secret-number selectors from untainted callers in current Retail/PTR while preserving existing ordinary-input and historical-profile behavior. Their source lives in `src/c_api/c_map.rs`; see the [existing map investigation](../wiki/investigations/map-display-info-model.md) for related secret-input behavior and evidence boundaries. Implementation is user-approved; this document records the contract, not implementation or runtime proof.
+`C_Map.GetMapInfo(uiMapID)` and `C_Map.GetMapArtID(uiMapID)` must accept authentic secret-number selectors from untainted callers in current Retail/PTR while preserving existing ordinary-input and historical-profile behavior. Their source lives in `src/c_api/c_map.rs`; see the [existing map investigation](../wiki/investigations/map-display-info-model.md) for related secret-input behavior and evidence boundaries. Implementation is user-approved; bounded runtime proof and remaining limits are recorded below.
 
 Cached Retail and PTR `AddOns/Blizzard_APIDocumentationGenerated/MapDocumentation.lua` both declare these two functions with required numeric `uiMapID`, `MayReturnNothing = true`, and `SecretArguments = "AllowedWhenUntainted"`. This is declaration evidence, not native parity. `client-retail` enables `retail-12-1-0`; `client-ptr` enables `retail-12-1-5`, which includes `retail-12-1-0`. Historical builds without that capability retain their existing behavior; this contract does not infer historical native secret policy.
 
 ## What it must do
 
-Saved d97 epoch `20261010T214515Z` reaches six tests: two authentic untainted-secret parser failures, four compatibility PASS. Producer `fae775099c3cd8b4f412547b6dc70cb09d89c20e` implements the approved selector change after this RED; GREEN remains pending. Checkboxes remain **UNVERIFIED** until final evidence covers the changed producer. Existing MapDisplay proof is not proof for these two functions.
+Saved d97 epoch `20261010T214515Z` reaches six tests: two authentic untainted-secret parser failures, four compatibility PASS. Unchanged producer `fae775099c3cd8b4f412547b6dc70cb09d89c20e` and unchanged d97 tests receive independent bounded Retail93/PTR91 PASS, including all six target tests in each. Historical `profile-retail,retail-12-0-7` passes only the two ordinary tests; current secret tests are capability-excluded. See [scalar proof](../wiki/investigations/map-display-info-model.md#scalar-map-selectors--bounded-retailptr-green) for exact scopes and retained reports. Existing MapDisplay proof is separate.
 
 ### Current Retail/PTR secret arguments
 
-- [ ] UNVERIFIED: For each target API, an untainted caller supplying an authentic host-VM secret number containing an accepted integer map ID receives the same result values and return count as with the corresponding ordinary selector.
-- [ ] UNVERIFIED: For each target API, a tainted caller's authentic secret selector is rejected under `pcall`; an ordinary selector remains accepted with unchanged results.
-- [ ] UNVERIFIED: Successful and rejected calls preserve the original secret wrapper. Untainted callers remain untainted; addon-tainted callers retain their taint, and parent caller taint is restored after the addon call.
+- [x] Bounded fixture coverage: both `*_untainted_secret_returns_one_fixture_*` tests assert authentic host-secret map84, one result and distinctive art620104/name; ordinary fixture tests assert corresponding values/count. Arbitrary integer IDs/native equivalence remain unproved.
+- [x] Both `*_tainted_addon_accepts_ordinary_and_rejects_secret` tests assert ordinary fixture output/count and authentic secret rejection under `pcall`.
+- [x] Four current secret/taint tests assert rooted-wrapper identity/secrecy and caller taint preservation; addon tests also assert parent restoration.
 
 ### Existing compatibility
 
-- [ ] UNVERIFIED: `GetMapArtID` returns exactly one existing catalog art ID for a present map and zero values for an absent map, regardless of permitted ordinary/secret representation of the same selector.
-- [ ] UNVERIFIED: `GetMapInfo` returns exactly one unchanged details table for a present map, retains existing generic details for absent IDs in 1–10,000, and returns zero values for absent IDs outside that range. Permitted secret selectors do not alter these branches or their values.
-- [ ] UNVERIFIED: Ordinary parsing remains unchanged: the current `i32::from_stack` exact-integer parser rejects fractional values, strings, and i32 overflow. Secret acceptance does not broaden selector validation or change ordinary diagnostics.
-- [ ] UNVERIFIED: Historical profiles/epochs without `retail-12-1-0` retain existing parsing, registrations, catalog/default handling, and zero-return behavior; no secret-policy backport is introduced.
+- [ ] PARTIAL: art ordinary compatibility test covers one fixture result and zero returns for absent9999/999999; current secret test covers present84 only. Secret absent-map branches are not directly tested.
+- [ ] PARTIAL: info ordinary compatibility test covers fixture84, generic9999 fields and zero returns for999999; current secret test covers fixture identity/name/count only. Full table equality and secret generic/absent branches are not directly tested.
+- [x] Both ordinary compatibility tests assert fractional/string/missing/boolean/table and both i32-overflow rejection diagnostics in Retail, PTR and historical12.0.7.
+- [ ] PARTIAL: historical Retail12.0.7 compile and two ordinary tests PASS; inspected historical branch retains `i32::from_stack`, with current secret tests excluded. Other historical profiles/epochs and native secret policy remain unproved.
 
 ## How it works
 
@@ -35,19 +35,20 @@ Saved d97 epoch `20261010T214515Z` reaches six tests: two authentic untainted-se
 - `src/lua_bridge/mod.rs` — crate-private conversion export; no new public API.
 - `Cargo.toml` — current Retail/PTR capability selection and historical epoch feature boundaries.
 - `tests/c_map_probes.rs` — existing ordinary map controls and authentic host-secret/tainted-caller precedent.
-- `tests/map_scalar_secret_inputs.rs` — four current-epoch secret-input tests and two ungated ordinary compatibility tests, executed under the generated `integration` target as `map_scalar_secret_inputs::*`; saved pre-producer RED reaches all six, but changed-producer GREEN remains unverified.
+- `tests/map_scalar_secret_inputs.rs` — four current-epoch secret-input tests and two ungated ordinary compatibility tests, executed under the generated `integration` target as `map_scalar_secret_inputs::*`; saved pre-producer RED reaches all six; unchanged tests pass all six in current Retail/PTR and only two ordinary tests in historical Retail12.0.7.
 
 ## Tests asserting this spec
 
-`tests/map_scalar_secret_inputs.rs` supplies new target coverage. Existing `tests/c_map_probes.rs` ordinary target tests and MapDisplay security tests are controls/precedent, not admitted RED/GREEN for this slice. The saved pre-producer RED executes six actual target tests: two untainted-secret FAIL and four compatibility PASS. This does not establish changed-producer GREEN.
+`tests/map_scalar_secret_inputs.rs` supplies new target coverage. Existing `tests/c_map_probes.rs` ordinary target tests and MapDisplay security tests are controls/precedent, not admitted RED/GREEN for this slice. The saved pre-producer RED executes six actual target tests: two untainted-secret FAIL and four compatibility PASS. Final independent reports admit changed-producer Retail93/PTR91 PASS, all six targets included; historical12.0.7 admits two ordinary PASS only.
 
 Required main-thread evidence must use a deliberately seeded map row with distinctive art ID/name and an authentic host-VM secret numeric selector, not a Lua lookalike. For both APIs, assert exact result count and fixture values, untainted secret acceptance, tainted ordinary acceptance, tainted secret rejection, and wrapper/caller preservation. Retain known/absent-map controls, `GetMapInfo` generic-range controls, ordinary invalid-selector controls, and historical-profile compatibility coverage. Fixture values are simulator test data, not native catalog facts.
 
 ## Known gaps (current cycle)
 
-- [ ] UNVERIFIED: Main observes targeted authentic-secret RED before production changes, then GREEN with the same behavioral assertions and compatibility controls.
-- [ ] UNVERIFIED: Current Retail and PTR target execution and historical-profile preservation receive explicit bounded evidence; compilation or related API proof alone does not close these requirements.
+- [x] Authentic RED2FAIL/4PASS preserved; unchanged d97 target assertions reach GREEN6/6 under current Retail and PTR.
+- [x] Bounded historical Retail12.0.7 ordinary preservation reaches2/2; not all historical profiles.
+- [ ] Other-profile runtime/native acceptance and full handoff remain OPEN. Fresh714b62455 suite `full-suite-1791670170` submitted asynchronously at2026-10-10 22:09UTC has no admitted result. Older956 FAIL3/b048 FAIL4 unchanged; no rerun for docs.
 
 ## Out of scope
 
-Native parity and historical native secret-policy claims; guessed or refreshed map catalogs; parser-validation changes; changes to established generic/default/zero-return behavior; other `C_Map` members or other APIs; generic bridge redesign. This docs-only stage runs no builds/tests and supplies no implementation-completion claim.
+Native parity and historical native secret-policy claims; guessed or refreshed map catalogs; parser-validation changes; changes to established generic/default/zero-return behavior; other `C_Map` members or other APIs; generic bridge redesign. This docs-only stage runs no builds/tests; bounded simulator PASS is not full implementation, native or handoff completion.

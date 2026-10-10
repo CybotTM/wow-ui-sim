@@ -1,5 +1,11 @@
 # Integrated source and factory proof — 2026-10-09
 
+## Map scalar arguments — bounded Retail/PTR and historical ordinary GREEN
+
+[Existing map investigation](map-display-info-model.md#scalar-map-selectors--bounded-retailptr-green) is scalar proof SSOT; [contract](../../specs/map-scalar-secret-arguments.md) maps assertions without crediting untested secret absent/generic branches. Unchanged producerfae/tests d97: authentic RED2FAIL/4PASS preserved; independent Retail93/PTR91 actualPASS, all6target tests each. Distinct CLI `[]`/exit0 uses CASC disabled; fmt/default/PTRcheck0, six inherited iced deprecations. Historical `profile-retail,retail-12-0-7` ONLY compile0/ordinary2PASS; current secret gate excluded, no all-historical/native claim. Retained RED/default/PTR/historical actual `final-report.md` filenames verified before linking in scalar SSOT; private terminal reports supply admission.
+
+Fresh714b62455 suite `full-suite-1791670170` submitted asynchronously2026-10-10 22:09UTC; no admitted result or claim, no rerun for docs. Older956 FAIL3/b048 FAIL4 unchanged. Native, other-profile/runtime-asset/dependency provenance and full handoff/parent acceptance remain OPEN.
+
 ## Successful file-budget diagnostics — bounded GREEN and attribution, startup unfixed
 
 [Diagnostic spec](../../specs/startup-file-instruction-diagnostics.md) and retained [RED audit](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/success-file-budget-red/independent-report.md) / [GREEN audit](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/success-file-budget-green/independent-report.md) bind implementation0e4bf4161: compile-valid loader fixture1PASS emitted0of2required records before repair. After repair,12passing executions/11distinct cases include actual counters0→4→16, opt-in-off0records, original failure propagation/exhaustion and9formatter controls; fmt/default-check0 and source/artifact equality independently checked. Six inherited iced manifest deprecations remain. Existing quota/reset/exemption/vendor behavior unchanged; diagnostics are cumulative owner charges, not self-time/native quota parity.
