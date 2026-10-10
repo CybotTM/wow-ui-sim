@@ -1,3 +1,7 @@
+## [2026-10-10] audit | Saved 956 small evidence retained
+
+Added [exact956 investigation](investigations/fullsuite-956-2026-10-10.md), linked integrated SSOT/index, retained sanitized independent report/small results JSON/derived count proof/hash manifest only. Accepted15,012PASS/3FAIL/19recorded skips,15,015executions including auxiliary prefork without deduplication. Two historical methods/Garrison FAIL; CPU PASS this execution, mutable-baseline 'new' not regression evidence. Pinned956 excludes later d97 scalar-secret/future producer; b048 FAIL history unchanged. No logs/binaries/source inventories/private payloads retained. Native UNKNOWN; parent OPEN.
+
 ## [2026-10-10] ingest | Mists startup visibility investigation linked
 
 Added index/log links to [Mists investigation](investigations/mists-cast-startup-visibility.md). Original084353 hidden assertion FAIL and later unreached assertions explicit; historical hidden observations not substituted. Corrected dynamic OnLoad interpretation and conditional source-only fade candidate do not establish executed root/native parity or authorize assertion replacement. No investigation-page/source/evidence edits or execution.

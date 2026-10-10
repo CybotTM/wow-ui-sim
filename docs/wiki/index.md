@@ -1,3 +1,7 @@
+## [2026-10-10] audit | Saved 956 suite — FAIL
+
+[Exact956 investigation](investigations/fullsuite-956-2026-10-10.md):15,012PASS/3FAIL/19recorded skips;15,015actual executions including auxiliary prefork, no deduplication. Two historical method snapshots/Garrison FAIL; CPU target PASS this execution. Mutable-baseline 'new' is not regression evidence; later d97 scalar-secret/future producer excluded. Small sanitized evidence/hashes retained; b048 history unchanged, native UNKNOWN, parent OPEN.
+
 ## [2026-10-10] investigation | Mists cast startup visibility — original FAIL
 
 [Mists visibility investigation](investigations/mists-cast-startup-visibility.md): original084353 hidden-at-startup assertion FAIL; shown already after addon load, later assertions unreached. Historical hidden epoch separate; final player OnLoad lookup corrects nil-unit inference. Conditional deferred idle fade is source-supported only; executed root call/native parity UNKNOWN, no assertion replacement or fix accepted.
