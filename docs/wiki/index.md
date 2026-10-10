@@ -1,6 +1,6 @@
 ## [2026-10-10] observation | Historical visibility controls, partial coverage
 
-[5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof) separates saved Mists/Era controls from unproved boolean Frame transitions, optionalunit2 and native identity. Historical accounting unchanged; Mists startup assertion still FAIL.
+[Five-profile shared controls](investigations/patch-5-0-4-api-audit.md#five-profile-shared-system-preservation) supplement the separate [5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof), which separates saved Mists/Era controls from unproved boolean Frame transitions, optionalunit2 and native identity. Historical accounting unchanged; Mists startup assertion still FAIL.
 
 ## [2026-10-10] audit | Five-profile ordinary scalar preservation
 

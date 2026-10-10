@@ -16,6 +16,10 @@ Retained5.0.4 source also specifies `Frame:RegisterUnitEvent(event, unit1[, unit
 
 [Later instance/unit controls](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/historical-instance-unit-controls/final-report.md): saved retry233235 records6/6 cases across Mists/Era, three distinct tests. Two verify synchronous injected single-unit script filtering and separation from a callback's filter; one verifies supplied `WorldState.instance_id` (documented mapID) forwarding at slot8. Initial233020 admission rejected both profiles,0cases; blocked history preserved. No optionalunit2, modeled health producer, catalog/automatic identity or native2012 credit. No rebuild or historical count promotion.
 
+### Five-profile shared-system preservation
+
+[Wrath/Anniversary/Forever shared controls](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/shared-controls-three-profiles/final-report.md) record45 logical cases over15 distinct tests, supplementing separate Mists/Era24visibility+6instance/unit receipts above. This is shared simulator preservation, not literal5.0.4 historical/native behavior. Wrath's artifact submission records0ed37cd1a; Anniversary/Forever recordd19b4cf09; feature workloads differ. No rebuild/single-revision claim. Partial setter, single-unit injected dispatch and supplied-mapID limits remain; original startup/suite failures and historical counts unchanged.
+
 ## Probe limitations and preserved compatibility
 
 `LE_PARTY_CATEGORY_HOME`/`INSTANCE` are numeric constants rejected by the function-only probe. `UIPanelButtonTemplate` is a template, not a global API. `SPELL_CAST_SUCCESS` is a combat-log sub-event, not a frame event. These remain explicit probe/semantic limits, not invented absent APIs.

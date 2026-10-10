@@ -1,6 +1,6 @@
 ## [2026-10-10] observation | Partial historical visibility proof
 
-[5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof) links new saved controls and distinguishes source, simulator and native boundaries without changing historical ledger rows.
+[Five-profile preservation](investigations/patch-5-0-4-api-audit.md#five-profile-shared-system-preservation) and [5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof) link separate saved controls and distinguishes source, simulator and native boundaries without changing historical ledger rows.
 
 ## [2026-10-10] audit | Five-profile ordinary scalar receipts admitted
 

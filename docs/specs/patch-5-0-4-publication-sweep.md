@@ -14,6 +14,8 @@
 
 [Later partial visibility controls and remaining identity/unit2 limits](../wiki/investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof) do not promote historical publication/signature counts.
 
+[Five-profile shared-system preservation](../wiki/investigations/patch-5-0-4-api-audit.md#five-profile-shared-system-preservation) supplements simulator compatibility coverage only; historical publication rows, pending signatures and counts remain unchanged.
+
 ## Tests
 
 - `tests/patch_5_0_4_publication_sweep.rs`
