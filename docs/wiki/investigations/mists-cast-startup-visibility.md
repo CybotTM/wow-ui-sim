@@ -1,0 +1,66 @@
+# Mists Cast-Bar Startup Visibility
+
+Verified: 2026-10-10. Bounded documentation of saved Mists epoch `20261010T084353Z`: the original hidden-at-startup assertion **FAILS**, with `PlayerCastingBarFrame:IsShown()` already true after addon load. Historical hidden observations belong to a different epoch. Cached source suggests a conditional deferred idle fade; neither the executed root call nor native parity is established. No assertion replacement, fix, or public API change is authorized by this investigation.
+
+## Exact execution boundary
+
+Saved receipt root (private): `/home/osso/.local/state/wow-ui-sim/verification/mists-prefork-admission-fixed/20261010T084353Z/`. Submission revision: `845bea6d5e378a893e6d9945f46ce7b5163b6b19`; selected profile `client-mists`. `execution/results.json` records the original selector `spell_casting::cast_bar_respects_edit_mode_lock_setting_after_startup_fix`, one execution, exit 1. Its stdout records 0 passed / 1 failed; stderr identifies `tests/spell_casting.rs:489:13`, “Mists startup cast bar should remain hidden”. These are saved receipts, not a new run.
+
+| Captured phase | IsShown | Parent / showingFrames | Proof |
+|---|---|---|---|
+| After addon load, before post-load workarounds | true | UIParent / absent | Exact 084353 stderr |
+| After post-load workarounds, before startup events | true | UIParent / absent | Exact 084353 stderr |
+| Before EDIT_MODE_LAYOUTS_UPDATED | true | UIParent / absent | Exact 084353 stderr |
+| After EDIT_MODE_LAYOUTS_UPDATED | true | UIParentBottomManagedFrameContainer / present | Exact 084353 stderr |
+| After startup events; before original assertions | true | UIParentBottomManagedFrameContainer / present | Exact 084353 stderr |
+
+The first captured shown state precedes post-load workarounds and startup events. This bounds investigation toward addon-load creation/lifecycle initialization; it does **not** identify the operation responsible, prove a hidden→shown transition, or rule out uncaptured intermediate changes. The later parent/membership transition is observed, not a proven visibility root cause.
+
+The preceding lock-zero and unattached assertions did not stop this execution. The Mists hidden assertion fails. Later original Mists parent, layout-parent, and showingFrames assertions are **unreached**, as are subsequent player-anchor and locked cast-anchor assertions. Their input values may appear in diagnostics, but that does not turn unreached assertions into passes or failures. The non-Mists parent assertion is inapplicable.
+
+## Historical epoch is not current evidence
+
+The older private diagnostic `mists-cast-diagnostic/20261009T221327Z/exact-run.stderr`, summarized in `mists-visibility-phase-final.md`, records `IsShown=false` across its captured phases, UIParent parenting, and absent showingFrames membership. Its recorded service exit 101 is not the 084353 original assertion receipt. Do not import its hidden observation or `firstIsShown=false` into the current failure, or infer cross-epoch source/cache identity. The earlier assertion-matrix report's contradictory assertion numbering does not override the exact current panic and source assertion order.
+
+## Corrected OnLoad source interpretation
+
+The private `mists-onload-main-errata.md` corrects the earlier nil-unit inference:
+
+- Cached `Classic/CastingBarFrame.xml` supplies inherited inline `self:OnLoad(nil, true, false)` and concrete `PlayerCastingBarMixin` with a method OnLoad handler using `inherit="append"`.
+- The inline expression dynamically looks up the final frame method; it is not a lexical call to `CastingBarMixin.OnLoad`. With the final player method installed and reached, it resolves `PlayerCastingBarMixin:OnLoad()`, whose extra arguments are ignored and whose explicit base delegation supplies `"player"`.
+- Thus this expression proves no second `SetUnit(nil)` or player→nil transition. A repeated player initializer enters SetUnit's changed-unit body only if intervening state makes its guard true.
+
+Local handler emission supports instance-before-inherited append ordering and preserves the inline lookup. This is static source interpretation, not proof of the actual runtime method table, successful handler completion, call count, or unit state.
+
+## Conditional FinishSpell evidence
+
+`mists-finishspell-final.md` reports the cached idle sequence: base OnLoad → changed-unit SetUnit → PLAYER_ENTERING_WORLD handler → no channel/cast → FinishSpell → PlayFadeAnim. FinishSpell does not synchronously hide on that described path. When the animation exists, alpha is positive, visibility permits it, and earlier operations succeed, PlayFadeAnim may start FadeOutAnim. Cached animation XML specifies **0.2-second start delay and 0.3-second duration**.
+
+This supports a source-level deferred-fade candidate, not native timing/visibility parity or proof that 084353 reached FinishSpell or started the fade. The handoff leaves direct completion-callback inspection unresolved; no completion semantics or source-timed probe is credited here as acceptance of the original assertion. Earlier fill-update failures could prevent later calls. No assertion replacement follows from this candidate.
+
+## Identity and acceptance limits
+
+Direct comparison of saved `source-before.json` / `source-after.json` found all 3,851 captured entries equal. Saved `execution/cache-before.json` / `cache-after.json` found all 3,055 entries equal; `results.json` also records `cache_equal=true` and no changed paths. This establishes captured within-084353 stability only. Submission exclusions include external path dependencies, uncaptured data/runtime inputs, inherited environment, and untracked index. It establishes neither cross-epoch identity nor native parity.
+
+| Feature / boundary | Status | Proof level |
+|---|---|---|
+| Original hidden-at-startup assertion | FAIL | Saved exact 084353 execution |
+| Later original assertions | Unreached | Panic boundary plus assertion order |
+| Final player OnLoad lookup; nil argument ignored | Conditional source interpretation | Private main erratum / cached source inspection |
+| Idle FinishSpell deferred fade parameters | Source-supported candidate | Private Lua/XML inspection; executed root unknown |
+| First visibility operation / native acceptance | UNKNOWN / BLOCKED | No call-level trace or matching native evidence |
+
+Root call trace remains unknown: actual method lookup, handler entries/exits, query results, cast/edit-mode state, and first visibility-changing operation lack execution evidence. Native acceptance remains blocked. Call-level replay/instrumentation was not run for this audit.
+
+## Sources
+
+- Private `handoff/mists-load-visibility-final.md` — earliest shown state, XML/loader observations, identity limits.
+- Private `handoff/mists-finishspell-final.md` — conditional idle fade and unresolved callback/native limits.
+- Private `handoff/mists-onload-main-errata.md` — dynamic method lookup correction; withdrawn SetUnit(nil) inference.
+- Private 084353 receipts named above — submission, exact stdout/stderr, execution results, source/cache before/after captures. Private handoffs and receipts live under `/home/osso/.local/state/wow-ui-sim/`; raw vendor payloads are not copied here.
+- [Original assertion source](../../../tests/spell_casting.rs) — assertion ordering; current source read is not a cross-epoch execution claim.
+
+## See Also
+
+- [[prefork-test-harness]] — profile admission differs from original fixture acceptance.
+- [[integrated-source-and-factory-proof-2026-10-09]] — broader proof ledger; unchanged by this task.

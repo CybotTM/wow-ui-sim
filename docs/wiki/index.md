@@ -1,3 +1,7 @@
+## [2026-10-10] investigation | Mists cast startup visibility — original FAIL
+
+[Mists visibility investigation](investigations/mists-cast-startup-visibility.md): original084353 hidden-at-startup assertion FAIL; shown already after addon load, later assertions unreached. Historical hidden epoch separate; final player OnLoad lookup corrects nil-unit inference. Conditional deferred idle fade is source-supported only; executed root call/native parity UNKNOWN, no assertion replacement or fix accepted.
+
 ## [2026-10-10] audit | MapDisplay bounded Retail/PTR GREEN
 
 [MapDisplay SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#mapdisplay-supplied-input--bounded-retailptr-and-p801-green): independent default86 PASS/fmt+default+PTRcheck0/CLIzero; P8011 PASS with validatorPASS/frozen17/live16. PTR main-observed33+51=84 PASS/five targets/CLI[]0; original count error corrected without rewriting receipts. Final PTR independent audit admits84/84 PASS; five other shared-state compile checks exit0/source equality, getter excluded and six dependency deprecations each. Native/runtime acceptance unknown; parent OPEN.
