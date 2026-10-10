@@ -226,7 +226,7 @@ Sets `frame.register_all_events = true` (line 243 of `src/widget/frame.rs`), whi
 
 ### IsEventRegistered
 
-Returns `frame.register_all_events || frame.registered_events.contains(event)`.
+Returns two values: registration status and the first registered unit (or nil). The optional second unit is not returned; this existing query behavior is unchanged by the unit2 repair. Native query parity remains unknown.
 
 ### UnregisterAllEvents
 
@@ -234,7 +234,9 @@ Clears `frame.registered_events` (does not reset `register_all_events`).
 
 ### RegisterUnitEvent
 
-Accepts an event name plus variadic args (unit IDs in WoW, ignored here). Delegates to `register_event()`.
+`Frame:RegisterUnitEvent(event, unit1[, unit2])` stores each filter in `Frame.registered_unit_events` as `(String, Option<String>)`: first string plus optional second string. `src/lua_api/frame/methods/text_attribute_event/events.rs` reads the second unit from registration stack slot 4. `src/lua_api/script_helpers/event_dispatch.rs` matches the first event payload against either stored literal token (OR), preserving the original payload. Single-unit replacement and unregister operations remove the former second-unit filter.
+
+See the [frame unit-event filter contract](specs/frame-unit-event-filter.md). At `cc4f4c782`, current implementation retains the approved valid `player`/`target` pair; authentic pre-repair RED records two new cases, 1 FAIL/1 PASS (missing target damage after modeled player healing, with single-unit controls). Seven-profile `unit2-green-current` verification is pending, not admitted PASS. Native query behavior, generic aliases, invalid-unit behavior and third-argument contracts are not established by this bounded repair.
 
 ## Event Dispatch
 

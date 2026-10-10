@@ -10,6 +10,10 @@
 
 [714 SSOT](investigations/fullsuite-714-2026-10-10.md):15,017PASS4FAIL19skips/15,021executions, scalar6+controls+auxiliary4PASS. Historicalmethodpair/Garrison plus newProjectConstants1.36s/1soutlierFAIL. Isolatedsame-source control1logicalPASS/206.47ms doesnotprove loaded-condition repair/causality. Later seven-profileexportchecksPASS0, sixdependencywarnings/zero simulatorwarnings each; no runtime/native/fullhandoff completion.
 
+## [2026-10-10] observation | Frame unit2 repair — GREEN pending
+
+[5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof) records authentic unit2 RED1FAIL/1PASS and separate Frame boolean1PASS; [event system](../event-system.md#registerunitevent) describes current pair storage/OR filtering. Seven-profile GREEN pending; historical counts and native unknowns unchanged.
+
 ## [2026-10-10] audit | Saved 956 suite — FAIL
 
 [Exact956 investigation](investigations/fullsuite-956-2026-10-10.md):15,012PASS/3FAIL/19recorded skips;15,015actual executions including auxiliary prefork, no deduplication. Two historical method snapshots/Garrison FAIL; CPU target PASS this execution. Mutable-baseline 'new' is not regression evidence; later d97 scalar-secret/future producer excluded. Small sanitized evidence/hashes retained; b048 history unchanged, native UNKNOWN, parent OPEN.

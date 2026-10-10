@@ -1,3 +1,7 @@
+## [2026-10-10] observation | Frame unit2 repair — GREEN pending
+
+[5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof) distinguishes pre-`cc4f4c782` single-unit gap, authentic RED1FAIL/1PASS and separate Frame boolean1PASS from current [pair storage/OR dispatch](../event-system.md#registerunitevent). Seven-profile `unit2-green-current` verification pending, not admitted PASS; historical counts/native boundaries preserved.
+
 ## [2026-10-10] observation | Partial historical visibility proof
 
 [Five-profile preservation](investigations/patch-5-0-4-api-audit.md#five-profile-shared-system-preservation) and [5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof) link separate saved controls and distinguishes source, simulator and native boundaries without changing historical ledger rows.
