@@ -14,6 +14,8 @@ The cheap meaningful gap is `C_PetBattles.GetPetType`: existing per-side `PetBat
 
 Retained5.0.4 source also specifies `Frame:RegisterUnitEvent(event, unit1[, unit2])` and MapID as `GetInstanceInfo` result8. Source-inspected frame registration retains only one unit; optionalunit2 failure has not been executed. The [global unit-callback contract](../../specs/unit-event-callbacks.md) is a different API. `WorldState.instance_id` is documented as mapID and forwarded at slot8; the supplied2657 fixture proves forwarding, not catalog provenance or automatic world identity selection. A separate missing MapID model is not established. Historical ledger rows, pending signatures and publication counts remain unchanged.
 
+[Later instance/unit controls](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/historical-instance-unit-controls/final-report.md): saved retry233235 records6/6 cases across Mists/Era, three distinct tests. Two verify synchronous injected single-unit script filtering and separation from a callback's filter; one verifies supplied `WorldState.instance_id` (documented mapID) forwarding at slot8. Initial233020 admission rejected both profiles,0cases; blocked history preserved. No optionalunit2, modeled health producer, catalog/automatic identity or native2012 credit. No rebuild or historical count promotion.
+
 ## Probe limitations and preserved compatibility
 
 `LE_PARTY_CATEGORY_HOME`/`INSTANCE` are numeric constants rejected by the function-only probe. `UIPanelButtonTemplate` is a template, not a global API. `SPELL_CAST_SUCCESS` is a combat-log sub-event, not a frame event. These remain explicit probe/semantic limits, not invented absent APIs.
