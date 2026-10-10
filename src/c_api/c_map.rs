@@ -45,6 +45,8 @@ use crate::lua_api::methods::{
     table_get, table_set, table_set_static, val_to_string,
 };
 use crate::lua_api::state::MapData;
+#[cfg(feature = "retail-12-1-0")]
+use crate::lua_bridge::val_to_i32;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -115,8 +117,20 @@ fn c_map_get_map_art_background_atlas(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn read_scalar_map_id(state: &LuaState) -> LuaResult<i32> {
+    #[cfg(feature = "retail-12-1-0")]
+    {
+        let value = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
+        val_to_i32(value, 1)
+    }
+    #[cfg(not(feature = "retail-12-1-0"))]
+    {
+        i32::from_stack(state, 1)
+    }
+}
+
 fn c_map_get_map_art_id(state: &mut LuaState) -> LuaResult<u32> {
-    let ui_map_id = i32::from_stack(state, 1)?;
+    let ui_map_id = read_scalar_map_id(state)?;
     let art_id = borrow_state(state)?.maps.get(&ui_map_id).map(|m| m.art_id);
     let Some(art_id) = art_id else {
         return Ok(0);
@@ -222,7 +236,7 @@ fn c_map_get_map_display_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_map_get_map_info(state: &mut LuaState) -> LuaResult<u32> {
-    let ui_map_id = i32::from_stack(state, 1)?;
+    let ui_map_id = read_scalar_map_id(state)?;
     let map = borrow_state(state)?.maps.get(&ui_map_id).cloned();
     let details = match map {
         Some(map) => push_map_details_table(state, &map),

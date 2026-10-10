@@ -265,14 +265,18 @@ impl FromStack for i64 {
     }
 }
 
+pub(crate) fn val_to_i32(value: Val, index: i32) -> LuaResult<i32> {
+    let n = num_to_int(value, index)?;
+    i32::try_from(n).map_err(|_| {
+        runtime_error(format!(
+            "expected i32, value {n} out of range at argument {index}"
+        ))
+    })
+}
+
 impl FromStack for i32 {
     fn from_stack(state: &LuaState, index: i32) -> LuaResult<Self> {
-        let n = num_to_int(stack_val(state, index), index)?;
-        i32::try_from(n).map_err(|_| {
-            runtime_error(format!(
-                "expected i32, value {n} out of range at argument {index}"
-            ))
-        })
+        val_to_i32(stack_val(state, index), index)
     }
 }
 

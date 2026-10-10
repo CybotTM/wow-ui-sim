@@ -6,7 +6,7 @@ Cached Retail and PTR `AddOns/Blizzard_APIDocumentationGenerated/MapDocumentatio
 
 ## What it must do
 
-All checkboxes below are **UNVERIFIED** until actual main-thread RED/GREEN evidence covers them. Existing MapDisplay proof is not proof for these two functions.
+Saved d97 epoch `20261010T214515Z` reaches six tests: two authentic untainted-secret parser failures, four compatibility PASS. Producer changes follow this RED; GREEN remains pending. Checkboxes remain **UNVERIFIED** until final evidence covers the changed producer. Existing MapDisplay proof is not proof for these two functions.
 
 ### Current Retail/PTR secret arguments
 
@@ -31,7 +31,8 @@ All checkboxes below are **UNVERIFIED** until actual main-thread RED/GREEN evide
 ## Implementation inventory
 
 - `src/c_api/c_map.rs` — existing target registrations, scalar selector parsing, catalog lookups, generic map details, and related MapDisplay secret-aware precedent.
-- `src/lua_bridge/from_stack.rs` — existing typed selector conversion contract; parser-validation changes are excluded.
+- `src/lua_bridge/from_stack.rs` — unchanged i32 conversion and diagnostics extracted into a pure value conversion used by stack extraction and the two current-epoch selectors.
+- `src/lua_bridge/mod.rs` — crate-private conversion export; no new public API.
 - `Cargo.toml` — current Retail/PTR capability selection and historical epoch feature boundaries.
 - `tests/c_map_probes.rs` — existing ordinary map controls and authentic host-secret/tainted-caller precedent.
 - `tests/map_scalar_secret_inputs.rs` — four current-epoch secret-input tests and two ungated ordinary compatibility tests; execution remains unverified.
