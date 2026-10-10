@@ -32,7 +32,7 @@ Saved d97 epoch `20261010T214515Z` reaches six tests: two authentic untainted-se
 
 - `src/c_api/c_map.rs` — existing target registrations, scalar selector parsing, catalog lookups, generic map details, and related MapDisplay secret-aware precedent.
 - `src/lua_bridge/from_stack.rs` — unchanged i32 conversion and diagnostics extracted into a pure value conversion used by stack extraction and the two current-epoch selectors.
-- `src/lua_bridge/mod.rs` — crate-private conversion export; no new public API.
+- `src/lua_bridge/mod.rs` — crate-private conversion re-export gated to its `retail-12-1-0` consumer; internal ordinary conversion remains available in every profile. Ungated re-export produced a Mists unused-import warning; no warning suppression or new public API.
 - `Cargo.toml` — current Retail/PTR capability selection and historical epoch feature boundaries.
 - `tests/c_map_probes.rs` — existing ordinary map controls and authentic host-secret/tainted-caller precedent.
 - `tests/map_scalar_secret_inputs.rs` — four current-epoch secret-input tests and two ungated ordinary compatibility tests, executed under the generated `integration` target as `map_scalar_secret_inputs::*`; saved pre-producer RED reaches all six; unchanged tests pass all six in current Retail/PTR and only two ordinary tests in historical Retail12.0.7.

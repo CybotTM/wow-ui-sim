@@ -23,6 +23,7 @@ pub use from_stack::FrameRef;
 pub use from_stack::FromMethodSelf;
 pub use from_stack::FromStack;
 pub(crate) use from_stack::stack_val;
+#[cfg(feature = "retail-12-1-0")]
 pub(crate) use from_stack::val_to_i32;
 pub use into_stack::IntoStack;
 #[doc(hidden)]
