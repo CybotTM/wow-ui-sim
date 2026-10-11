@@ -31,11 +31,10 @@ COPY .cargo/config.toml .cargo/config.toml
 COPY iced-wgpu-patched/ iced-wgpu-patched/
 COPY iced-dynamic/ iced-dynamic/
 COPY xtask/ xtask/
+# Cargo resolves workspace/dev-dependency manifests even for binary-only builds.
+COPY crates/test-harness/ crates/test-harness/
 
-# Copy test targets referenced by Cargo.toml's [[test]] sections.
-COPY tests/ tests/
-
-# Fetch all dependencies (cached layer — only invalidated by Cargo.toml/lock changes).
+# Fetch all dependencies (cached dependency-input layer).
 RUN cargo fetch --locked
 
 # Copy the full source tree and build the simulator binary.

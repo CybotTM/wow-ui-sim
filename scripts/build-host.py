@@ -21,6 +21,7 @@ COMMON_SCRIPTS = Path("/syncthing/Sync/Projects/world-of-osso/game-engine/script
 PROJECT_NAME = "wow-ui-sim"
 SOURCE_DIRS = (
     "src",
+    "crates",
     "build",
     "native",
     "iced-dynamic",
@@ -213,7 +214,7 @@ def snapshot(root, context):
         destination = source_root / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(validate_source(root, relative), destination)
-    # build.rs reads these directories even when building a bin, not tests.
+    # Dev-only harness generation reads these directories for test targets.
     for directory in ("tests", "tests/perf"):
         (source_root / directory).mkdir(parents=True, exist_ok=True)
 

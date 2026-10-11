@@ -155,6 +155,8 @@ Retained small evidence: `/home/osso/Projects/wow/wow-ui-sim/data/test-perf/evid
 - `Cargo.toml` — declares the dedicated Linux prefork conformance target contract.
 - `crates/test-harness/` — internal unpublished workspace crate, used only as a root dev-dependency. Its build script owns automatic module/marker generation and test-source watches; `syn`/`quote` are its build dependencies. Exported macros emit module items in both test entry points and the caller-resolved Retail registry expression in `GENERATED_FULL_UI_CASES`.
 - `build.rs` — production-only compiler-revision/Cargo.lock, optional native ICU, and Windows resource responsibilities; no test generation or test-source watches. An explicit workspace-wide build may still select the helper independently.
+- `scripts/build-host.py` — includes `crates/` in native snapshots; Cargo requires the helper workspace manifest even when only a production binary is selected.
+- `Dockerfile` — copies the helper crate before dependency fetching, without copying the test tree into that layer. Staged Cargo metadata covers workspace resolution, not container/native build acceptance.
 - `tests/common/prefork.rs` — reusable eager and lazy-state test-only runner APIs and execution behavior.
 - `tests/common/prefork_full_ui_preload.rs` — target-only normal retail game-screen preload and migrated-case helpers.
 - `tests/prefork_full_ui.rs` — custom target entry point, real-case registry, fixture cases, and behavioral conformance checks.
