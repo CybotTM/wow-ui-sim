@@ -70,6 +70,12 @@ Features differ (including Mists prefork and Forever capabilities); recorded rev
 
 Actual cgroup counters yield5.70–6.45 coarse logical CPU equivalents per compile window under a12-CPU quota, including compiler/worker stream handling, not frontend/codegen or exclusive-rustc attribution. Recorded memory limit16GiB; cumulative unit peak reaches about16GiB after PTR, not per-profile peaks or proof of OOM. Throttling counters have no assigned cause. No resource-limit change or extra build experiment.
 
+### Remaining currency profiles — bounded jobs12 observation
+
+[Saved retry2 packet](../data/patch-api/evidence/currency-seven-profile-2026-10-11/README.md#compilation-observation) records already-required Era/Anniversary/Forever builds:131.890/135.727/143.911s submission-to-compile-end, each665 artifacts/656fresh/9nonfresh (build script, library, six bins, integration). Six dependency manifest deprecations per lane remain. These are different profile/cache workloads, not a controlled speedup comparison.
+
+A completed19-snapshot sampler observes90.178s across late Era/early Anniversary:241.883cgroupCPU-s,2.682CPU equivalents and maximum4rustc processes sampled. Interval includes worker/linker/test work; peak is a lower bound, not actual concurrency maximum. No whole-build utilization, twelve-busy-core exclusion or causal bottleneck claim. Earlier aligned unit2/timing-HTML evidence remains separate; no extra rebuild was submitted for sampling.
+
 ### Approved dev-only generation boundary — bounded saved proof
 
 The [harness contract](specs/prefork-test-harness.md#dev-only-automatic-harness-generation-approved-2026-10-11-verification-pending) requires automatic integration/prefork generation in an internal dev-only crate, with no test generation/watches in the root production build script. This changes cache invalidation, not native host selection or Cargo's underlying six-binary integration selection; no unsupported CLI exclusion flag is part of the change.

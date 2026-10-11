@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Seven-profile currency probes — bounded GREEN
+
+[Current handoff matrix](investigations/integrated-source-and-factory-proof-2026-10-09.md#currency-supplied-state-projection--partial-cross-profile-handoff):116 passing executions/seven configurations/20 names. Remaining-only retry2 and partial jobs12 CPU/process observation retained; earlier Era blocks preserved. Broad suite still FAIL; vendor/native/external/full handoff OPEN.
+
 ## [2026-10-11] audit | Currency integration suite — FAIL
 
 [Saved suite packet](../../data/patch-api/evidence/currency-fullsuite-2026-10-11/README.md): 15,028 PASS/1 Garrison FAIL/19 skips/15,029 executions. Four new currency regressions PASS within totals; independent accounting/source audit, not native or full-handoff acceptance. c75 FAIL remains history.

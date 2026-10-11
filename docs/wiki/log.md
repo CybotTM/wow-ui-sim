@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Remaining currency profiles and partial compile sampling
+
+[Seven-profile packet](../../data/patch-api/evidence/currency-seven-profile-2026-10-11/README.md) adds independently admitted Era/Anniversary/Forever16/16 each;116 executions/seven configurations/20 names. Preserved prior resource blocks and source/native gaps. Retained44 exact copies/215,373 bytes, including initial suite-copy FAIL and refresh PASS. Updated contract/handoff SSOT/build docs; partial90.178s sampler2.682 CPU equivalents/observedrustcpeak4 is not whole-build utilization or speedup. Enclosing suite and parent remain open.
+
 ## [2026-10-11] audit | Completed currency integration suite — FAIL
 
 Reconciled [saved 1dcc suite](../../data/patch-api/evidence/currency-fullsuite-2026-10-11/README.md), contract and handoff SSOT: 15,028 PASS/1 Garrison FAIL/19 skips/15,029 executions, auxiliary2+1+1 counted once. Four new currency regressions PASS; historical c75 FAIL/native/source/external gaps preserved. Five small exact copies and derived count summary retained; raw logs remain private. No runtime rerun.

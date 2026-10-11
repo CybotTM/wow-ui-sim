@@ -1,5 +1,7 @@
 # Currency profile follow-up — partial pure-model matrix
 
+Historical captures below retain two Era resource blocks and initially unattempted Anniversary/Forever. [Later seven-profile proof](../currency-seven-profile-2026-10-11/README.md) supersedes current targeted-matrix status without rewriting these receipts or unblocking vendor/native lanes.
+
 [Independent PTR/Wrath gate](gate/report.md): 16/16 named cases each, 32 actual PASS, compile/execution exits0. Both selected binary seals and eight scoped before/after/current inputs match. Code scope matches `1dcc59c07`; later changes through `ae6c25bae` are docs/data only. Six unique external manifest deprecations remain. Fixtures include supplied Retail metadata; passing a build profile does not establish that profile's native catalog.
 
 | Lane | Execution | Limit |
