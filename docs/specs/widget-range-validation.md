@@ -26,7 +26,7 @@ These are simulator policies corroborated in part by Solarity source, not native
 
 ## Known gaps (current cycle)
 
-- [ ] Reversed-range interpolation clamping is retained in code but lacks a direct behavioral assertion. The existing interpolation lifecycle control passes.
+- [ ] Authenticate `statusbar_reversed_range_clamps_pending_interpolation`: new direct assertion starts with target7/displayed1/pending, then reversed `(8,2)` must synchronously collapse both bounds/values to2 and clear interpolation. Test authored; execution/check proof pending. Existing interpolation lifecycle control remains separate. No producer or native-policy change.
 
 RED at `0e3c8157c`: four Rust panic failures and one passing control. Independent GREEN after `c72db371d`: 15 widget tests and one interpolation control, plus `cargo check`; `/tmp/cross-version-range-validation-verification-ledger.md` records exact scope and the formatting-only follow-up.
 

@@ -68,6 +68,30 @@ fn statusbar_reversed_range_collapses_to_max_and_clamps_value() {
 }
 
 #[test]
+fn statusbar_reversed_range_clamps_pending_interpolation() {
+    env()
+        .exec(
+            r#"
+        local bar = CreateFrame('StatusBar')
+        bar:SetMinMaxValues(0, 10)
+        bar:SetValue(1)
+        bar:SetValue(7, 'Smooth')
+        assert(bar:GetValue() == 7 and bar:GetInterpolatedValue() == 1,
+            'pending interpolation must have distinct target and displayed values')
+        assert(bar:IsInterpolating(), 'interpolation must be pending before the range change')
+
+        bar:SetMinMaxValues(8, 2)
+        local min, max = bar:GetMinMaxValues()
+        assert(min == 2 and max == 2, 'reversed range must collapse to its supplied maximum')
+        assert(bar:GetValue() == 2 and bar:GetInterpolatedValue() == 2,
+            'range change must clamp target and displayed value in opposite directions')
+        assert(not bar:IsInterpolating(), 'collapsed range must settle the pending interpolation')
+    "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn slider_nan_bounds_error_atomically_and_allow_later_valid_updates() {
     env()
         .exec(
