@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Shared legacy-aura controls — limited assertions
+
+[Legacy-aura receipt](investigations/patch-3-1-0-api-audit.md#later-shared-legacy-aura-controls--2026-10-11-utc):16/16 executions admitted,8distinct existing tests×Wrath/Mists, no rebuild. Initial0case resource block preserved. Default-fixture presence/nil/count/three-field checks do not prove exact tuple/caster/order/native contracts; historical ledger and parent OPEN unchanged.
+
 ## [2026-10-11] observation | Four-profile stock startup — not clean
 
 [Stock receipt matrix](investigations/stock-api-startup-2026-10-10.md#later-four-profile-normal-captures--2026-10-11-utc): provenance admitted; Mists completes marker/exit0 but Lua-error invocation has2signatures/2occurrences. Wrath/Era/Anniversary abort on missing source/install, not zero-error startup. Four cached normal builds exit0; original Mists hidden assertion/native/full handoff remain OPEN.

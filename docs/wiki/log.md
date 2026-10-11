@@ -1481,3 +1481,7 @@ Added separate [Wrath receipt boundary](investigations/patch-3-4-2-api-audit.md#
 ## [2026-10-11] observation | Four-profile stock startup — not clean
 
 Added separate [stock receipt matrix](investigations/stock-api-startup-2026-10-10.md#later-four-profile-normal-captures--2026-10-11-utc): provenance admitted, Mists marker/exit0 with2Lua signatures/2occurrences; Wrath/Era/Anniversary missing-source/install aborts. Four cached normal artifact materializations exit0;653fresh each, not fresh compilation/speedup. Original Mists hidden assertion, native/full-addon/all-profile cleanliness and parent remain OPEN.
+
+## [2026-10-11] audit | Shared legacy-aura controls — limited assertions
+
+Added separate [retry receipt](investigations/patch-3-1-0-api-audit.md#later-shared-legacy-aura-controls--2026-10-11-utc):16/16 executions admitted,8distinct existing controls×Wrath/Mists, initial0case resource block preserved. Previously sealed artifacts, no rebuild; only default-fixture existence/nil/count/three non-nil fields. Tuple/caster/order/native gaps, frozen historical ledger and parent OPEN unchanged.
