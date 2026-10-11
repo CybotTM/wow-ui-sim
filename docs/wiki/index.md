@@ -1,3 +1,7 @@
+## [2026-10-11] investigation | Reduced anchor result and isolated performance controls
+
+[ProductChoice](../../data/patch-api/evidence/productchoice-declaration-probe-2026-10-11/README.md): reduced Icon returns self-anchor Err despite recorded[]; separate control resolves parent/sibling points. [Exact ba controls](../../data/patch-api/evidence/ba-isolated-perf-controls-2026-10-11/README.md): one startup and one talent case PASS; independent artifact gates2430/2438. No full-startup/native repair or causal attribution; loaded suite remains FAIL3 and handoffOPEN.
+
 ## [2026-10-11] audit | Frozen ba full suite — FAIL
 
 [Authenticated result](investigations/fullsuite-ba-2026-10-11.md):15,038PASS/3FAIL/19skips/15,041executed. Original Garrison and eight achievement/four Garrison cases PASS inside totals; startup/talent timing and cold CASC encoding lookup fail. Prefork phase passes, runner0 is not suite success. Full handoffOPEN; no causal regression or native proof.

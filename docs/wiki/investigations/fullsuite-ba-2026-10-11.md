@@ -22,7 +22,9 @@ Both performance selectors and the asset selector passed in saved1dcc. Compared 
 
 ## Next diagnostics
 
-ProductChoice's broad-job completion prerequisite is met, but its separate capacity guard still controls launch; no compiled/runtime result exists. After that ordered diagnostic and fresh admission, unchanged exact performance controls may run once using the existing frozen binary and whole-cgroup90s cleanup. An isolated PASS neither repairs the loaded-suite failure nor proves resource causality. Preserve thresholds, assertions and vendor behavior; measure narrowed simulator-side costs before proposing fixes. No broad-suite replay for docs or these diagnostics.
+[Reduced ProductChoice result](../../../data/patch-api/evidence/productchoice-declaration-probe-2026-10-11/README.md) is independently authenticated: compile0/run0; declaration returns self-anchor Err, separate sibling control resolves its points. No full-template/startup/native repair follows.
+
+[Two isolated exact controls](../../../data/patch-api/evidence/ba-isolated-perf-controls-2026-10-11/README.md) independently pass once each on one sealed existing ba executable: startup3.68s<20s; talent average501.18µs/max595.91µs/rounded delta59.66µs within35/75/20ms. Saved units exit0 under90s whole-cgroup limits; no remaining processes observed. No timeout was exercised. Environment inherited without overrides, but historical input/environment equality is unproved. An isolated PASS neither repairs the loaded-suite failure nor proves resource causality. Preserve thresholds, assertions and vendor behavior; measure narrowed simulator-side costs before proposing fixes. No broad-suite replay for docs or these diagnostics.
 
 ## Sources
 

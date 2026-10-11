@@ -70,6 +70,10 @@ The initial XML declaration and inspected ancestor templates contain no parent `
 
 Temporary logging was removed after the sealed capture; three Rust files restore their pre-diagnostic contents. This is not a public feature or behavior repair. Stderr overhead prevents performance conclusions. Original assertion and later unreached assertions remain unchanged; native expectations, any need for startup settling, and root behavior contract remain unresolved. No new full suite is warranted by temporary instrumentation followed by exact source restoration.
 
+## Related reduced ProductChoice diagnostic — 2026-10-11
+
+[Separate packet](../../../data/patch-api/evidence/productchoice-declaration-probe-2026-10-11/README.md), epoch215919/independent2430, observes a returned self-anchor loader error for the copied Icon declaration and valid parent/sibling anchor identities in a separate control. Compile/run0 describe diagnostic completion, not successful declaration loading. This does not change the cast/fade fixture, repair Mists startup, identify its full-template error ordering or establish native semantics.
+
 ## Sources
 
 - Private `handoff/mists-load-visibility-final.md` — earliest shown state, XML/loader observations, identity limits.

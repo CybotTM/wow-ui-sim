@@ -1585,3 +1585,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] audit | Frozen ba suite complete — FAIL
 
 [Final packet](../../data/patch-api/evidence/query-final-suite-result-2026-10-11/README.md): independent2406 authenticates15,038PASS/3FAIL/19skips/15,041executed, phase exits100/0/100. Original Garrison plus8achievement/4Garrison-bootstrap PASS already inside totals. Startup/talent budget assertions and cold CASC encoding-key lookup fail; unchanged relevant test/source paths and priorPASS do not establish causality. Native/input/resource provenance remains bounded; full handoffOPEN. No broad replay for docs.
+
+## [2026-10-11] investigation | Reduced ProductChoice and isolated ba controls
+
+[Anchor packet](../../data/patch-api/evidence/productchoice-declaration-probe-2026-10-11/README.md) retains215919 compile/run0 and two fresh reduced inputs: returned self-anchor Err/recorded[] versus parent/sibling controlOk. [Controls](../../data/patch-api/evidence/ba-isolated-perf-controls-2026-10-11/README.md) retain220436 two logicalPASS, startup3.68s and talent rounded delta59.66µs; shared existing binary/no Cargo rebuild. Independent2430/2438 authenticate new artifacts once. LoadedFAIL3 remains; no source fix/native claim/causality, full handoffOPEN.
