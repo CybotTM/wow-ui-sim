@@ -8,6 +8,8 @@ use wow_ui_sim::lua_api::state::{AchievementGuildRep, AchievementInfo, Achieveme
 mod comparison;
 #[path = "c_achievement_info_probes/search.rs"]
 mod search;
+#[path = "c_achievement_info_probes/superceding.rs"]
+mod superceding;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
