@@ -1569,3 +1569,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] audit | Shared query matrix completes pure-model coverage
 
 [Final packet](../../data/patch-api/evidence/shared-query-profiles-2026-10-11/README.md):2336authenticatesForever9PASS afterfivefailedadmissions;56new+Retail11=67pure/sevenconfigs, matrixFINISHED/fmt0. Earlierpartial58 preserved. Six unitcompileCPUwindows retained, notnative/loadedaddon/controlledspeedup. Finalbroad stillcapacity-gated, handoffOPEN.
+
+## [2026-10-11] audit | Final-suite queue exhausts capacity admission
+
+[Admission packet](../../data/patch-api/evidence/query-final-suite-admission-2026-10-11/README.md): ten checks declined, RESOURCE_BLOCKED/zero cases/no submission. Last load63 exceeds required<24; guards preserved. Historical suite failures,67 pure query executions and separate116 currency executions remain revision-scoped. Final broad proof and handoffOPEN.
