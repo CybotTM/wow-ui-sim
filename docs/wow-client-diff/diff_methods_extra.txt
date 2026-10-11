@@ -1,3 +1,4 @@
+Button:AddAccessRestrictions
 Button:AddAtlas
 Button:AddDoubleLine
 Button:AddFontStrings
@@ -9,6 +10,7 @@ Button:AddMessage
 Button:AddMsg
 Button:AddOnDisplayRefreshedCallback
 Button:AddRoleset
+Button:AddSecretAspect
 Button:AddStaticEventMethod
 Button:AddTexture
 Button:AddUnit
@@ -24,6 +26,7 @@ Button:AttachTexture
 Button:BackFillMessage
 Button:CalculateAction
 Button:CallMethod
+Button:CanBeAccessedInContext
 Button:CanNonSpaceWrap
 Button:CanSetUnit
 Button:CanWordWrap
@@ -56,14 +59,17 @@ Button:CycleVariation
 Button:DrawBlob
 Button:DrawNone
 Button:EnableRegenerateOnResponse
+Button:EnableSubtitles
 Button:FadeOut
 Button:FinalizeUnits
 Button:Finish
 Button:ForceUpdateTimers
 Button:FreezeAnimation
+Button:GetAccessRestrictions
 Button:GetActorAtIndex
 Button:GetActorByTag
 Button:GetAdditionalRegions
+Button:GetAlphaGradient
 Button:GetAltArrowKeyMode
 Button:GetAnchorType
 Button:GetAnimationSpeedMultiplier
@@ -98,7 +104,10 @@ Button:GetContentHeight
 Button:GetCooldownDisplayDuration
 Button:GetCooldownDuration
 Button:GetCooldownTimes
+Button:GetCountdownAbbrevThreshold
 Button:GetCountdownFontString
+Button:GetCountdownFormatter
+Button:GetCountdownMillisecondsThreshold
 Button:GetCursorPosition
 Button:GetCustomLineSpacing
 Button:GetDesaturation
@@ -139,6 +148,7 @@ Button:GetFontStringByID
 Button:GetForbiddenAspects
 Button:GetFrameRef
 Button:GetFromAlpha
+Button:GetFromPercent
 Button:GetHideCountdownNumbers
 Button:GetHighlightColor
 Button:GetHistoryLines
@@ -184,6 +194,7 @@ Button:GetModelAlpha
 Button:GetModelFileID
 Button:GetModelScale
 Button:GetModelSceneID
+Button:GetModelUnitGUID
 Button:GetMouseOverUnits
 Button:GetNumActors
 Button:GetNumLetters
@@ -222,6 +233,7 @@ Button:GetRoll
 Button:GetRotatesTexture
 Button:GetRotation
 Button:GetSVGFileID
+Button:GetScaleAnimationMode
 Button:GetScaledDesiredHeight
 Button:GetScaledDesiredWidth
 Button:GetScrollPercentage
@@ -230,6 +242,7 @@ Button:GetShadowColor
 Button:GetShadowEffect
 Button:GetShadowOffset
 Button:GetSmoothProgress
+Button:GetSmoothScaling
 Button:GetSmoothing
 Button:GetSpacing
 Button:GetSpell
@@ -260,10 +273,12 @@ Button:GetTimeVisible
 Button:GetTimerDuration
 Button:GetToAlpha
 Button:GetToFinalAlpha
+Button:GetToPercent
 Button:GetTooltipIndex
 Button:GetUTF8CursorPosition
 Button:GetUiMapID
 Button:GetUnboundedStringWidth
+Button:GetUnboundedStringWidthForText
 Button:GetUnit
 Button:GetUpperEmblemTexture
 Button:GetUseAuraDisplayTime
@@ -282,6 +297,7 @@ Button:GetZoom
 Button:GetZoomLevels
 Button:HasAccessConstraints
 Button:HasAnimation
+Button:HasAnyAccessRestrictions
 Button:HasAnyForbiddenAspects
 Button:HasAttachmentPoints
 Button:HasCustomCamera
@@ -321,7 +337,9 @@ Button:IsPassword
 Button:IsPaused
 Button:IsPendingFinish
 Button:IsPlaying
+Button:IsPreferringModelCollisionBounds
 Button:IsReverse
+Button:IsRolesetFiltered
 Button:IsSecureText
 Button:IsSetToFinalAlpha
 Button:IsSlotAllowed
@@ -367,6 +385,7 @@ Button:ResetLights
 Button:ResetMessageFadeByID
 Button:ResetSecondaryCompareItem
 Button:ResetTexCoord
+Button:ResizeToBoundsRect
 Button:Restart
 Button:Resume
 Button:ScaleTextToFit
@@ -436,6 +455,8 @@ Button:SetCooldownUNIX
 Button:SetCountInvisibleLetters
 Button:SetCountdownAbbrevThreshold
 Button:SetCountdownFont
+Button:SetCountdownFormatter
+Button:SetCountdownMillisecondsThreshold
 Button:SetCreature
 Button:SetCurrencyToken
 Button:SetCursorPosition
@@ -445,6 +466,7 @@ Button:SetCustomWordWrapMinWidth
 Button:SetDefaultCallback
 Button:SetDefaultText
 Button:SetDegrees
+Button:SetDesaturateEmbeddedTextures
 Button:SetDesaturated
 Button:SetDesaturation
 Button:SetDesiredWidth
@@ -490,10 +512,12 @@ Button:SetFrameRef
 Button:SetFrameStack
 Button:SetFromAlpha
 Button:SetFromModelSceneID
+Button:SetFromPercent
 Button:SetGlow
 Button:SetGlyph
 Button:SetGradient
 Button:SetGradientMask
+Button:SetGradientMaskWithDyes
 Button:SetHeirloomByItemID
 Button:SetHideCountdownNumbers
 Button:SetHighlightColor
@@ -575,6 +599,7 @@ Button:SetPlayerPingTexture
 Button:SetPlaying
 Button:SetPortraitZoom
 Button:SetPosition
+Button:SetPreferModelCollisionBounds
 Button:SetQuestBlobInsideAlpha
 Button:SetQuestBlobInsideTexture
 Button:SetQuestBlobOutsideAlpha
@@ -598,6 +623,7 @@ Button:SetRoll
 Button:SetRotatesTexture
 Button:SetRotation
 Button:SetSVG
+Button:SetScaleAnimationMode
 Button:SetScaleFrom
 Button:SetScaleTo
 Button:SetScrollPercentage
@@ -613,7 +639,9 @@ Button:SetShadowColor
 Button:SetShadowEffect
 Button:SetShadowOffset
 Button:SetShapeshift
+Button:SetSheathedCategory
 Button:SetShrinkToFitWrapped
+Button:SetSmoothScaling
 Button:SetSmoothing
 Button:SetSnapToPixelGrid
 Button:SetSocketGem
@@ -661,6 +689,7 @@ Button:SetTimeVisible
 Button:SetTimerDuration
 Button:SetToAlpha
 Button:SetToFinalAlpha
+Button:SetToPercent
 Button:SetToTargetValue
 Button:SetToyByItemID
 Button:SetTradePlayerItem
@@ -686,6 +715,7 @@ Button:SetValue
 Button:SetValueStep
 Button:SetVertTile
 Button:SetVertexColor
+Button:SetVertexColorFromBoolean
 Button:SetVertexOffset
 Button:SetViewInsets
 Button:SetViewTranslation
@@ -721,7 +751,9 @@ Button:UpdateMouseOverTooltip
 Button:UpdateToMenuSelections
 Button:UpdateWidth
 Button:UseModelCenterToTransform
+Button:UseUnitSheatheCategory
 Button:_AddMessageSilent
+CheckButton:AddAccessRestrictions
 CheckButton:AddAtlas
 CheckButton:AddDoubleLine
 CheckButton:AddFontStrings
@@ -733,6 +765,7 @@ CheckButton:AddMessage
 CheckButton:AddMsg
 CheckButton:AddOnDisplayRefreshedCallback
 CheckButton:AddRoleset
+CheckButton:AddSecretAspect
 CheckButton:AddStaticEventMethod
 CheckButton:AddTexture
 CheckButton:AddUnit
@@ -748,6 +781,7 @@ CheckButton:AttachTexture
 CheckButton:BackFillMessage
 CheckButton:CalculateAction
 CheckButton:CallMethod
+CheckButton:CanBeAccessedInContext
 CheckButton:CanNonSpaceWrap
 CheckButton:CanSetUnit
 CheckButton:CanWordWrap
@@ -780,14 +814,17 @@ CheckButton:CycleVariation
 CheckButton:DrawBlob
 CheckButton:DrawNone
 CheckButton:EnableRegenerateOnResponse
+CheckButton:EnableSubtitles
 CheckButton:FadeOut
 CheckButton:FinalizeUnits
 CheckButton:Finish
 CheckButton:ForceUpdateTimers
 CheckButton:FreezeAnimation
+CheckButton:GetAccessRestrictions
 CheckButton:GetActorAtIndex
 CheckButton:GetActorByTag
 CheckButton:GetAdditionalRegions
+CheckButton:GetAlphaGradient
 CheckButton:GetAltArrowKeyMode
 CheckButton:GetAnchorType
 CheckButton:GetAnimationSpeedMultiplier
@@ -820,7 +857,10 @@ CheckButton:GetContentHeight
 CheckButton:GetCooldownDisplayDuration
 CheckButton:GetCooldownDuration
 CheckButton:GetCooldownTimes
+CheckButton:GetCountdownAbbrevThreshold
 CheckButton:GetCountdownFontString
+CheckButton:GetCountdownFormatter
+CheckButton:GetCountdownMillisecondsThreshold
 CheckButton:GetCursorPosition
 CheckButton:GetCustomLineSpacing
 CheckButton:GetDesaturation
@@ -860,6 +900,7 @@ CheckButton:GetFontStringByID
 CheckButton:GetForbiddenAspects
 CheckButton:GetFrameRef
 CheckButton:GetFromAlpha
+CheckButton:GetFromPercent
 CheckButton:GetHideCountdownNumbers
 CheckButton:GetHighlightColor
 CheckButton:GetHistoryLines
@@ -905,6 +946,7 @@ CheckButton:GetModelAlpha
 CheckButton:GetModelFileID
 CheckButton:GetModelScale
 CheckButton:GetModelSceneID
+CheckButton:GetModelUnitGUID
 CheckButton:GetMouseOverUnits
 CheckButton:GetNumActors
 CheckButton:GetNumLetters
@@ -943,6 +985,7 @@ CheckButton:GetRoll
 CheckButton:GetRotatesTexture
 CheckButton:GetRotation
 CheckButton:GetSVGFileID
+CheckButton:GetScaleAnimationMode
 CheckButton:GetScaledDesiredHeight
 CheckButton:GetScaledDesiredWidth
 CheckButton:GetScrollPercentage
@@ -951,6 +994,7 @@ CheckButton:GetShadowColor
 CheckButton:GetShadowEffect
 CheckButton:GetShadowOffset
 CheckButton:GetSmoothProgress
+CheckButton:GetSmoothScaling
 CheckButton:GetSmoothing
 CheckButton:GetSpacing
 CheckButton:GetSpell
@@ -981,10 +1025,12 @@ CheckButton:GetTimeVisible
 CheckButton:GetTimerDuration
 CheckButton:GetToAlpha
 CheckButton:GetToFinalAlpha
+CheckButton:GetToPercent
 CheckButton:GetTooltipIndex
 CheckButton:GetUTF8CursorPosition
 CheckButton:GetUiMapID
 CheckButton:GetUnboundedStringWidth
+CheckButton:GetUnboundedStringWidthForText
 CheckButton:GetUnit
 CheckButton:GetUpperEmblemTexture
 CheckButton:GetUseAuraDisplayTime
@@ -1003,6 +1049,7 @@ CheckButton:GetZoom
 CheckButton:GetZoomLevels
 CheckButton:HasAccessConstraints
 CheckButton:HasAnimation
+CheckButton:HasAnyAccessRestrictions
 CheckButton:HasAnyForbiddenAspects
 CheckButton:HasAttachmentPoints
 CheckButton:HasCustomCamera
@@ -1042,7 +1089,9 @@ CheckButton:IsPassword
 CheckButton:IsPaused
 CheckButton:IsPendingFinish
 CheckButton:IsPlaying
+CheckButton:IsPreferringModelCollisionBounds
 CheckButton:IsReverse
+CheckButton:IsRolesetFiltered
 CheckButton:IsSecureText
 CheckButton:IsSetToFinalAlpha
 CheckButton:IsSlotAllowed
@@ -1088,6 +1137,7 @@ CheckButton:ResetLights
 CheckButton:ResetMessageFadeByID
 CheckButton:ResetSecondaryCompareItem
 CheckButton:ResetTexCoord
+CheckButton:ResizeToBoundsRect
 CheckButton:Restart
 CheckButton:Resume
 CheckButton:ScaleTextToFit
@@ -1155,6 +1205,8 @@ CheckButton:SetCooldownUNIX
 CheckButton:SetCountInvisibleLetters
 CheckButton:SetCountdownAbbrevThreshold
 CheckButton:SetCountdownFont
+CheckButton:SetCountdownFormatter
+CheckButton:SetCountdownMillisecondsThreshold
 CheckButton:SetCreature
 CheckButton:SetCurrencyToken
 CheckButton:SetCursorPosition
@@ -1164,6 +1216,7 @@ CheckButton:SetCustomWordWrapMinWidth
 CheckButton:SetDefaultCallback
 CheckButton:SetDefaultText
 CheckButton:SetDegrees
+CheckButton:SetDesaturateEmbeddedTextures
 CheckButton:SetDesaturated
 CheckButton:SetDesaturation
 CheckButton:SetDesiredWidth
@@ -1208,10 +1261,12 @@ CheckButton:SetFrameRef
 CheckButton:SetFrameStack
 CheckButton:SetFromAlpha
 CheckButton:SetFromModelSceneID
+CheckButton:SetFromPercent
 CheckButton:SetGlow
 CheckButton:SetGlyph
 CheckButton:SetGradient
 CheckButton:SetGradientMask
+CheckButton:SetGradientMaskWithDyes
 CheckButton:SetHeirloomByItemID
 CheckButton:SetHideCountdownNumbers
 CheckButton:SetHighlightColor
@@ -1293,6 +1348,7 @@ CheckButton:SetPlayerPingTexture
 CheckButton:SetPlaying
 CheckButton:SetPortraitZoom
 CheckButton:SetPosition
+CheckButton:SetPreferModelCollisionBounds
 CheckButton:SetQuestBlobInsideAlpha
 CheckButton:SetQuestBlobInsideTexture
 CheckButton:SetQuestBlobOutsideAlpha
@@ -1316,6 +1372,7 @@ CheckButton:SetRoll
 CheckButton:SetRotatesTexture
 CheckButton:SetRotation
 CheckButton:SetSVG
+CheckButton:SetScaleAnimationMode
 CheckButton:SetScaleFrom
 CheckButton:SetScaleTo
 CheckButton:SetScrollPercentage
@@ -1331,7 +1388,9 @@ CheckButton:SetShadowColor
 CheckButton:SetShadowEffect
 CheckButton:SetShadowOffset
 CheckButton:SetShapeshift
+CheckButton:SetSheathedCategory
 CheckButton:SetShrinkToFitWrapped
+CheckButton:SetSmoothScaling
 CheckButton:SetSmoothing
 CheckButton:SetSnapToPixelGrid
 CheckButton:SetSocketGem
@@ -1379,6 +1438,7 @@ CheckButton:SetTimeVisible
 CheckButton:SetTimerDuration
 CheckButton:SetToAlpha
 CheckButton:SetToFinalAlpha
+CheckButton:SetToPercent
 CheckButton:SetToTargetValue
 CheckButton:SetToyByItemID
 CheckButton:SetTradePlayerItem
@@ -1404,6 +1464,7 @@ CheckButton:SetValue
 CheckButton:SetValueStep
 CheckButton:SetVertTile
 CheckButton:SetVertexColor
+CheckButton:SetVertexColorFromBoolean
 CheckButton:SetVertexOffset
 CheckButton:SetViewInsets
 CheckButton:SetViewTranslation
@@ -1439,7 +1500,9 @@ CheckButton:UpdateMouseOverTooltip
 CheckButton:UpdateToMenuSelections
 CheckButton:UpdateWidth
 CheckButton:UseModelCenterToTransform
+CheckButton:UseUnitSheatheCategory
 CheckButton:_AddMessageSilent
+ColorSelect:AddAccessRestrictions
 ColorSelect:AddAtlas
 ColorSelect:AddDoubleLine
 ColorSelect:AddFontStrings
@@ -1451,6 +1514,7 @@ ColorSelect:AddMessage
 ColorSelect:AddMsg
 ColorSelect:AddOnDisplayRefreshedCallback
 ColorSelect:AddRoleset
+ColorSelect:AddSecretAspect
 ColorSelect:AddStaticEventMethod
 ColorSelect:AddTexture
 ColorSelect:AddUnit
@@ -1466,6 +1530,7 @@ ColorSelect:AttachTexture
 ColorSelect:BackFillMessage
 ColorSelect:CalculateAction
 ColorSelect:CallMethod
+ColorSelect:CanBeAccessedInContext
 ColorSelect:CanNonSpaceWrap
 ColorSelect:CanSetUnit
 ColorSelect:CanWordWrap
@@ -1504,14 +1569,17 @@ ColorSelect:DrawBlob
 ColorSelect:DrawNone
 ColorSelect:Enable
 ColorSelect:EnableRegenerateOnResponse
+ColorSelect:EnableSubtitles
 ColorSelect:FadeOut
 ColorSelect:FinalizeUnits
 ColorSelect:Finish
 ColorSelect:ForceUpdateTimers
 ColorSelect:FreezeAnimation
+ColorSelect:GetAccessRestrictions
 ColorSelect:GetActorAtIndex
 ColorSelect:GetActorByTag
 ColorSelect:GetAdditionalRegions
+ColorSelect:GetAlphaGradient
 ColorSelect:GetAltArrowKeyMode
 ColorSelect:GetAnchorType
 ColorSelect:GetAnimationSpeedMultiplier
@@ -1538,7 +1606,10 @@ ColorSelect:GetContentHeight
 ColorSelect:GetCooldownDisplayDuration
 ColorSelect:GetCooldownDuration
 ColorSelect:GetCooldownTimes
+ColorSelect:GetCountdownAbbrevThreshold
 ColorSelect:GetCountdownFontString
+ColorSelect:GetCountdownFormatter
+ColorSelect:GetCountdownMillisecondsThreshold
 ColorSelect:GetCursorPosition
 ColorSelect:GetCustomLineSpacing
 ColorSelect:GetDesaturation
@@ -1582,6 +1653,7 @@ ColorSelect:GetFontStringByID
 ColorSelect:GetForbiddenAspects
 ColorSelect:GetFrameRef
 ColorSelect:GetFromAlpha
+ColorSelect:GetFromPercent
 ColorSelect:GetHideCountdownNumbers
 ColorSelect:GetHighlightColor
 ColorSelect:GetHighlightFontObject
@@ -1629,6 +1701,7 @@ ColorSelect:GetModelAlpha
 ColorSelect:GetModelFileID
 ColorSelect:GetModelScale
 ColorSelect:GetModelSceneID
+ColorSelect:GetModelUnitGUID
 ColorSelect:GetMotionScriptsWhileDisabled
 ColorSelect:GetMouseOverUnits
 ColorSelect:GetNormalFontObject
@@ -1672,6 +1745,7 @@ ColorSelect:GetRoll
 ColorSelect:GetRotatesTexture
 ColorSelect:GetRotation
 ColorSelect:GetSVGFileID
+ColorSelect:GetScaleAnimationMode
 ColorSelect:GetScaledDesiredHeight
 ColorSelect:GetScaledDesiredWidth
 ColorSelect:GetScrollPercentage
@@ -1680,6 +1754,7 @@ ColorSelect:GetShadowColor
 ColorSelect:GetShadowEffect
 ColorSelect:GetShadowOffset
 ColorSelect:GetSmoothProgress
+ColorSelect:GetSmoothScaling
 ColorSelect:GetSmoothing
 ColorSelect:GetSpacing
 ColorSelect:GetSpell
@@ -1713,10 +1788,12 @@ ColorSelect:GetTimeVisible
 ColorSelect:GetTimerDuration
 ColorSelect:GetToAlpha
 ColorSelect:GetToFinalAlpha
+ColorSelect:GetToPercent
 ColorSelect:GetTooltipIndex
 ColorSelect:GetUTF8CursorPosition
 ColorSelect:GetUiMapID
 ColorSelect:GetUnboundedStringWidth
+ColorSelect:GetUnboundedStringWidthForText
 ColorSelect:GetUnit
 ColorSelect:GetUpperEmblemTexture
 ColorSelect:GetUseAuraDisplayTime
@@ -1735,6 +1812,7 @@ ColorSelect:GetZoom
 ColorSelect:GetZoomLevels
 ColorSelect:HasAccessConstraints
 ColorSelect:HasAnimation
+ColorSelect:HasAnyAccessRestrictions
 ColorSelect:HasAnyForbiddenAspects
 ColorSelect:HasAttachmentPoints
 ColorSelect:HasCustomCamera
@@ -1775,7 +1853,9 @@ ColorSelect:IsPassword
 ColorSelect:IsPaused
 ColorSelect:IsPendingFinish
 ColorSelect:IsPlaying
+ColorSelect:IsPreferringModelCollisionBounds
 ColorSelect:IsReverse
+ColorSelect:IsRolesetFiltered
 ColorSelect:IsSecureText
 ColorSelect:IsSetToFinalAlpha
 ColorSelect:IsSlotAllowed
@@ -1823,6 +1903,7 @@ ColorSelect:ResetLights
 ColorSelect:ResetMessageFadeByID
 ColorSelect:ResetSecondaryCompareItem
 ColorSelect:ResetTexCoord
+ColorSelect:ResizeToBoundsRect
 ColorSelect:Restart
 ColorSelect:Resume
 ColorSelect:ScaleTextToFit
@@ -1884,6 +1965,8 @@ ColorSelect:SetCooldownUNIX
 ColorSelect:SetCountInvisibleLetters
 ColorSelect:SetCountdownAbbrevThreshold
 ColorSelect:SetCountdownFont
+ColorSelect:SetCountdownFormatter
+ColorSelect:SetCountdownMillisecondsThreshold
 ColorSelect:SetCreature
 ColorSelect:SetCurrencyToken
 ColorSelect:SetCursorPosition
@@ -1893,6 +1976,7 @@ ColorSelect:SetCustomWordWrapMinWidth
 ColorSelect:SetDefaultCallback
 ColorSelect:SetDefaultText
 ColorSelect:SetDegrees
+ColorSelect:SetDesaturateEmbeddedTextures
 ColorSelect:SetDesaturated
 ColorSelect:SetDesaturation
 ColorSelect:SetDesiredWidth
@@ -1944,10 +2028,12 @@ ColorSelect:SetFrameRef
 ColorSelect:SetFrameStack
 ColorSelect:SetFromAlpha
 ColorSelect:SetFromModelSceneID
+ColorSelect:SetFromPercent
 ColorSelect:SetGlow
 ColorSelect:SetGlyph
 ColorSelect:SetGradient
 ColorSelect:SetGradientMask
+ColorSelect:SetGradientMaskWithDyes
 ColorSelect:SetHeirloomByItemID
 ColorSelect:SetHideCountdownNumbers
 ColorSelect:SetHighlightAtlas
@@ -2036,6 +2122,7 @@ ColorSelect:SetPlayerPingTexture
 ColorSelect:SetPlaying
 ColorSelect:SetPortraitZoom
 ColorSelect:SetPosition
+ColorSelect:SetPreferModelCollisionBounds
 ColorSelect:SetPushedAtlas
 ColorSelect:SetPushedTextOffset
 ColorSelect:SetPushedTexture
@@ -2062,6 +2149,7 @@ ColorSelect:SetRoll
 ColorSelect:SetRotatesTexture
 ColorSelect:SetRotation
 ColorSelect:SetSVG
+ColorSelect:SetScaleAnimationMode
 ColorSelect:SetScaleFrom
 ColorSelect:SetScaleTo
 ColorSelect:SetScrollPercentage
@@ -2077,7 +2165,9 @@ ColorSelect:SetShadowColor
 ColorSelect:SetShadowEffect
 ColorSelect:SetShadowOffset
 ColorSelect:SetShapeshift
+ColorSelect:SetSheathedCategory
 ColorSelect:SetShrinkToFitWrapped
+ColorSelect:SetSmoothScaling
 ColorSelect:SetSmoothing
 ColorSelect:SetSnapToPixelGrid
 ColorSelect:SetSocketGem
@@ -2126,6 +2216,7 @@ ColorSelect:SetTimeVisible
 ColorSelect:SetTimerDuration
 ColorSelect:SetToAlpha
 ColorSelect:SetToFinalAlpha
+ColorSelect:SetToPercent
 ColorSelect:SetToTargetValue
 ColorSelect:SetToyByItemID
 ColorSelect:SetTradePlayerItem
@@ -2151,6 +2242,7 @@ ColorSelect:SetValue
 ColorSelect:SetValueStep
 ColorSelect:SetVertTile
 ColorSelect:SetVertexColor
+ColorSelect:SetVertexColorFromBoolean
 ColorSelect:SetVertexOffset
 ColorSelect:SetViewInsets
 ColorSelect:SetViewTranslation
@@ -2186,7 +2278,9 @@ ColorSelect:UpdateMouseOverTooltip
 ColorSelect:UpdateToMenuSelections
 ColorSelect:UpdateWidth
 ColorSelect:UseModelCenterToTransform
+ColorSelect:UseUnitSheatheCategory
 ColorSelect:_AddMessageSilent
+Cooldown:AddAccessRestrictions
 Cooldown:AddAtlas
 Cooldown:AddDoubleLine
 Cooldown:AddFontStrings
@@ -2198,6 +2292,7 @@ Cooldown:AddMessage
 Cooldown:AddMsg
 Cooldown:AddOnDisplayRefreshedCallback
 Cooldown:AddRoleset
+Cooldown:AddSecretAspect
 Cooldown:AddStaticEventMethod
 Cooldown:AddTexture
 Cooldown:AddUnit
@@ -2213,6 +2308,7 @@ Cooldown:AttachTexture
 Cooldown:BackFillMessage
 Cooldown:CalculateAction
 Cooldown:CallMethod
+Cooldown:CanBeAccessedInContext
 Cooldown:CanNonSpaceWrap
 Cooldown:CanSetUnit
 Cooldown:CanWordWrap
@@ -2251,14 +2347,17 @@ Cooldown:DrawBlob
 Cooldown:DrawNone
 Cooldown:Enable
 Cooldown:EnableRegenerateOnResponse
+Cooldown:EnableSubtitles
 Cooldown:FadeOut
 Cooldown:FinalizeUnits
 Cooldown:Finish
 Cooldown:ForceUpdateTimers
 Cooldown:FreezeAnimation
+Cooldown:GetAccessRestrictions
 Cooldown:GetActorAtIndex
 Cooldown:GetActorByTag
 Cooldown:GetAdditionalRegions
+Cooldown:GetAlphaGradient
 Cooldown:GetAltArrowKeyMode
 Cooldown:GetAnchorType
 Cooldown:GetAnimationSpeedMultiplier
@@ -2291,6 +2390,9 @@ Cooldown:GetColorValueThumbTexture
 Cooldown:GetColorWheelTexture
 Cooldown:GetColorWheelThumbTexture
 Cooldown:GetContentHeight
+Cooldown:GetCountdownAbbrevThreshold
+Cooldown:GetCountdownFormatter
+Cooldown:GetCountdownMillisecondsThreshold
 Cooldown:GetCursorPosition
 Cooldown:GetCustomLineSpacing
 Cooldown:GetDesaturation
@@ -2330,6 +2432,7 @@ Cooldown:GetFontStringByID
 Cooldown:GetForbiddenAspects
 Cooldown:GetFrameRef
 Cooldown:GetFromAlpha
+Cooldown:GetFromPercent
 Cooldown:GetHighlightColor
 Cooldown:GetHighlightFontObject
 Cooldown:GetHighlightTexture
@@ -2375,6 +2478,7 @@ Cooldown:GetModelAlpha
 Cooldown:GetModelFileID
 Cooldown:GetModelScale
 Cooldown:GetModelSceneID
+Cooldown:GetModelUnitGUID
 Cooldown:GetMotionScriptsWhileDisabled
 Cooldown:GetMouseOverUnits
 Cooldown:GetNormalFontObject
@@ -2416,6 +2520,7 @@ Cooldown:GetRolesetNames
 Cooldown:GetRoll
 Cooldown:GetRotatesTexture
 Cooldown:GetSVGFileID
+Cooldown:GetScaleAnimationMode
 Cooldown:GetScaledDesiredHeight
 Cooldown:GetScaledDesiredWidth
 Cooldown:GetScrollPercentage
@@ -2424,6 +2529,7 @@ Cooldown:GetShadowColor
 Cooldown:GetShadowEffect
 Cooldown:GetShadowOffset
 Cooldown:GetSmoothProgress
+Cooldown:GetSmoothScaling
 Cooldown:GetSmoothing
 Cooldown:GetSpacing
 Cooldown:GetSpell
@@ -2457,10 +2563,12 @@ Cooldown:GetTimeVisible
 Cooldown:GetTimerDuration
 Cooldown:GetToAlpha
 Cooldown:GetToFinalAlpha
+Cooldown:GetToPercent
 Cooldown:GetTooltipIndex
 Cooldown:GetUTF8CursorPosition
 Cooldown:GetUiMapID
 Cooldown:GetUnboundedStringWidth
+Cooldown:GetUnboundedStringWidthForText
 Cooldown:GetUnit
 Cooldown:GetUpperEmblemTexture
 Cooldown:GetValue
@@ -2478,6 +2586,7 @@ Cooldown:GetZoom
 Cooldown:GetZoomLevels
 Cooldown:HasAccessConstraints
 Cooldown:HasAnimation
+Cooldown:HasAnyAccessRestrictions
 Cooldown:HasAnyForbiddenAspects
 Cooldown:HasAttachmentPoints
 Cooldown:HasCustomCamera
@@ -2517,7 +2626,9 @@ Cooldown:IsOwned
 Cooldown:IsPassword
 Cooldown:IsPendingFinish
 Cooldown:IsPlaying
+Cooldown:IsPreferringModelCollisionBounds
 Cooldown:IsReverse
+Cooldown:IsRolesetFiltered
 Cooldown:IsSecureText
 Cooldown:IsSetToFinalAlpha
 Cooldown:IsSlotAllowed
@@ -2564,6 +2675,7 @@ Cooldown:ResetLights
 Cooldown:ResetMessageFadeByID
 Cooldown:ResetSecondaryCompareItem
 Cooldown:ResetTexCoord
+Cooldown:ResizeToBoundsRect
 Cooldown:Restart
 Cooldown:ScaleTextToFit
 Cooldown:ScrollStepInDirection
@@ -2625,6 +2737,8 @@ Cooldown:SetColorWheelThumbTexture
 Cooldown:SetCompanionPet
 Cooldown:SetCompareItem
 Cooldown:SetCountInvisibleLetters
+Cooldown:SetCountdownFormatter
+Cooldown:SetCountdownMillisecondsThreshold
 Cooldown:SetCreature
 Cooldown:SetCurrencyToken
 Cooldown:SetCursorPosition
@@ -2634,6 +2748,7 @@ Cooldown:SetCustomWordWrapMinWidth
 Cooldown:SetDefaultCallback
 Cooldown:SetDefaultText
 Cooldown:SetDegrees
+Cooldown:SetDesaturateEmbeddedTextures
 Cooldown:SetDesaturated
 Cooldown:SetDesaturation
 Cooldown:SetDesiredWidth
@@ -2679,10 +2794,12 @@ Cooldown:SetFrameRef
 Cooldown:SetFrameStack
 Cooldown:SetFromAlpha
 Cooldown:SetFromModelSceneID
+Cooldown:SetFromPercent
 Cooldown:SetGlow
 Cooldown:SetGlyph
 Cooldown:SetGradient
 Cooldown:SetGradientMask
+Cooldown:SetGradientMaskWithDyes
 Cooldown:SetHeirloomByItemID
 Cooldown:SetHighlightAtlas
 Cooldown:SetHighlightColor
@@ -2768,6 +2885,7 @@ Cooldown:SetPlayerPingTexture
 Cooldown:SetPlaying
 Cooldown:SetPortraitZoom
 Cooldown:SetPosition
+Cooldown:SetPreferModelCollisionBounds
 Cooldown:SetPushedAtlas
 Cooldown:SetPushedTextOffset
 Cooldown:SetPushedTexture
@@ -2792,6 +2910,7 @@ Cooldown:SetRolesets
 Cooldown:SetRoll
 Cooldown:SetRotatesTexture
 Cooldown:SetSVG
+Cooldown:SetScaleAnimationMode
 Cooldown:SetScaleFrom
 Cooldown:SetScaleTo
 Cooldown:SetScrollPercentage
@@ -2807,7 +2926,9 @@ Cooldown:SetShadowColor
 Cooldown:SetShadowEffect
 Cooldown:SetShadowOffset
 Cooldown:SetShapeshift
+Cooldown:SetSheathedCategory
 Cooldown:SetShrinkToFitWrapped
+Cooldown:SetSmoothScaling
 Cooldown:SetSmoothing
 Cooldown:SetSnapToPixelGrid
 Cooldown:SetSocketGem
@@ -2853,6 +2974,7 @@ Cooldown:SetTimeVisible
 Cooldown:SetTimerDuration
 Cooldown:SetToAlpha
 Cooldown:SetToFinalAlpha
+Cooldown:SetToPercent
 Cooldown:SetToTargetValue
 Cooldown:SetToyByItemID
 Cooldown:SetTradePlayerItem
@@ -2876,6 +2998,7 @@ Cooldown:SetValue
 Cooldown:SetValueStep
 Cooldown:SetVertTile
 Cooldown:SetVertexColor
+Cooldown:SetVertexColorFromBoolean
 Cooldown:SetVertexOffset
 Cooldown:SetViewInsets
 Cooldown:SetViewTranslation
@@ -2911,7 +3034,9 @@ Cooldown:UpdateMouseOverTooltip
 Cooldown:UpdateToMenuSelections
 Cooldown:UpdateWidth
 Cooldown:UseModelCenterToTransform
+Cooldown:UseUnitSheatheCategory
 Cooldown:_AddMessageSilent
+EditBox:AddAccessRestrictions
 EditBox:AddAtlas
 EditBox:AddDoubleLine
 EditBox:AddFontStrings
@@ -2922,6 +3047,7 @@ EditBox:AddMessage
 EditBox:AddMsg
 EditBox:AddOnDisplayRefreshedCallback
 EditBox:AddRoleset
+EditBox:AddSecretAspect
 EditBox:AddStaticEventMethod
 EditBox:AddTexture
 EditBox:AddUnit
@@ -2937,6 +3063,7 @@ EditBox:AttachTexture
 EditBox:BackFillMessage
 EditBox:CalculateAction
 EditBox:CallMethod
+EditBox:CanBeAccessedInContext
 EditBox:CanNonSpaceWrap
 EditBox:CanSetUnit
 EditBox:CanWordWrap
@@ -2971,14 +3098,17 @@ EditBox:CycleVariation
 EditBox:DrawBlob
 EditBox:DrawNone
 EditBox:EnableRegenerateOnResponse
+EditBox:EnableSubtitles
 EditBox:FadeOut
 EditBox:FinalizeUnits
 EditBox:Finish
 EditBox:ForceUpdateTimers
 EditBox:FreezeAnimation
+EditBox:GetAccessRestrictions
 EditBox:GetActorAtIndex
 EditBox:GetActorByTag
 EditBox:GetAdditionalRegions
+EditBox:GetAlphaGradient
 EditBox:GetAnchorType
 EditBox:GetAnimationSpeedMultiplier
 EditBox:GetAnimations
@@ -3012,7 +3142,10 @@ EditBox:GetContentHeight
 EditBox:GetCooldownDisplayDuration
 EditBox:GetCooldownDuration
 EditBox:GetCooldownTimes
+EditBox:GetCountdownAbbrevThreshold
 EditBox:GetCountdownFontString
+EditBox:GetCountdownFormatter
+EditBox:GetCountdownMillisecondsThreshold
 EditBox:GetCustomLineSpacing
 EditBox:GetDesaturation
 EditBox:GetDesiredHeight
@@ -3052,6 +3185,7 @@ EditBox:GetFontStringByID
 EditBox:GetForbiddenAspects
 EditBox:GetFrameRef
 EditBox:GetFromAlpha
+EditBox:GetFromPercent
 EditBox:GetHideCountdownNumbers
 EditBox:GetHighlightFontObject
 EditBox:GetHighlightTexture
@@ -3091,6 +3225,7 @@ EditBox:GetModelAlpha
 EditBox:GetModelFileID
 EditBox:GetModelScale
 EditBox:GetModelSceneID
+EditBox:GetModelUnitGUID
 EditBox:GetMotionScriptsWhileDisabled
 EditBox:GetMouseOverUnits
 EditBox:GetNormalFontObject
@@ -3131,12 +3266,14 @@ EditBox:GetRoll
 EditBox:GetRotatesTexture
 EditBox:GetRotation
 EditBox:GetSVGFileID
+EditBox:GetScaleAnimationMode
 EditBox:GetScaledDesiredHeight
 EditBox:GetScaledDesiredWidth
 EditBox:GetScrollPercentage
 EditBox:GetSelectionText
 EditBox:GetShadowEffect
 EditBox:GetSmoothProgress
+EditBox:GetSmoothScaling
 EditBox:GetSmoothing
 EditBox:GetSpell
 EditBox:GetStartDelay
@@ -3166,9 +3303,11 @@ EditBox:GetTimeVisible
 EditBox:GetTimerDuration
 EditBox:GetToAlpha
 EditBox:GetToFinalAlpha
+EditBox:GetToPercent
 EditBox:GetTooltipIndex
 EditBox:GetUiMapID
 EditBox:GetUnboundedStringWidth
+EditBox:GetUnboundedStringWidthForText
 EditBox:GetUnit
 EditBox:GetUpperEmblemTexture
 EditBox:GetUseAuraDisplayTime
@@ -3186,6 +3325,7 @@ EditBox:GetZoom
 EditBox:GetZoomLevels
 EditBox:HasAccessConstraints
 EditBox:HasAnimation
+EditBox:HasAnyAccessRestrictions
 EditBox:HasAnyForbiddenAspects
 EditBox:HasAttachmentPoints
 EditBox:HasCustomCamera
@@ -3213,7 +3353,9 @@ EditBox:IsOwned
 EditBox:IsPaused
 EditBox:IsPendingFinish
 EditBox:IsPlaying
+EditBox:IsPreferringModelCollisionBounds
 EditBox:IsReverse
+EditBox:IsRolesetFiltered
 EditBox:IsSetToFinalAlpha
 EditBox:IsSlotAllowed
 EditBox:IsSnappingToPixelGrid
@@ -3259,6 +3401,7 @@ EditBox:ResetLights
 EditBox:ResetMessageFadeByID
 EditBox:ResetSecondaryCompareItem
 EditBox:ResetTexCoord
+EditBox:ResizeToBoundsRect
 EditBox:Restart
 EditBox:Resume
 EditBox:ScaleTextToFit
@@ -3324,6 +3467,8 @@ EditBox:SetCooldownFromExpirationTime
 EditBox:SetCooldownUNIX
 EditBox:SetCountdownAbbrevThreshold
 EditBox:SetCountdownFont
+EditBox:SetCountdownFormatter
+EditBox:SetCountdownMillisecondsThreshold
 EditBox:SetCreature
 EditBox:SetCurrencyToken
 EditBox:SetCustomCamera
@@ -3332,6 +3477,7 @@ EditBox:SetCustomWordWrapMinWidth
 EditBox:SetDefaultCallback
 EditBox:SetDefaultText
 EditBox:SetDegrees
+EditBox:SetDesaturateEmbeddedTextures
 EditBox:SetDesaturated
 EditBox:SetDesaturation
 EditBox:SetDesiredWidth
@@ -3379,10 +3525,12 @@ EditBox:SetFrameRef
 EditBox:SetFrameStack
 EditBox:SetFromAlpha
 EditBox:SetFromModelSceneID
+EditBox:SetFromPercent
 EditBox:SetGlow
 EditBox:SetGlyph
 EditBox:SetGradient
 EditBox:SetGradientMask
+EditBox:SetGradientMaskWithDyes
 EditBox:SetHeirloomByItemID
 EditBox:SetHideCountdownNumbers
 EditBox:SetHighlightAtlas
@@ -3459,6 +3607,7 @@ EditBox:SetPlayerPingTexture
 EditBox:SetPlaying
 EditBox:SetPortraitZoom
 EditBox:SetPosition
+EditBox:SetPreferModelCollisionBounds
 EditBox:SetPushedAtlas
 EditBox:SetPushedTextOffset
 EditBox:SetPushedTexture
@@ -3485,6 +3634,7 @@ EditBox:SetRoll
 EditBox:SetRotatesTexture
 EditBox:SetRotation
 EditBox:SetSVG
+EditBox:SetScaleAnimationMode
 EditBox:SetScaleFrom
 EditBox:SetScaleTo
 EditBox:SetScrollPercentage
@@ -3495,7 +3645,9 @@ EditBox:SetSequence
 EditBox:SetSequenceTime
 EditBox:SetShadowEffect
 EditBox:SetShapeshift
+EditBox:SetSheathedCategory
 EditBox:SetShrinkToFitWrapped
+EditBox:SetSmoothScaling
 EditBox:SetSmoothing
 EditBox:SetSnapToPixelGrid
 EditBox:SetSocketGem
@@ -3540,6 +3692,7 @@ EditBox:SetTimeVisible
 EditBox:SetTimerDuration
 EditBox:SetToAlpha
 EditBox:SetToFinalAlpha
+EditBox:SetToPercent
 EditBox:SetToTargetValue
 EditBox:SetToyByItemID
 EditBox:SetTradePlayerItem
@@ -3565,6 +3718,7 @@ EditBox:SetValue
 EditBox:SetValueStep
 EditBox:SetVertTile
 EditBox:SetVertexColor
+EditBox:SetVertexColorFromBoolean
 EditBox:SetVertexOffset
 EditBox:SetViewInsets
 EditBox:SetViewTranslation
@@ -3598,8 +3752,10 @@ EditBox:UpdateMouseOverTooltip
 EditBox:UpdateToMenuSelections
 EditBox:UpdateWidth
 EditBox:UseModelCenterToTransform
+EditBox:UseUnitSheatheCategory
 EditBox:_AddMessageSilent
 FontString:AbortDrag
+FontString:AddAccessRestrictions
 FontString:AddAtlas
 FontString:AddDoubleLine
 FontString:AddFontStrings
@@ -3611,6 +3767,7 @@ FontString:AddMessage
 FontString:AddMsg
 FontString:AddOnDisplayRefreshedCallback
 FontString:AddRoleset
+FontString:AddSecretAspect
 FontString:AddStaticEventMethod
 FontString:AddTexture
 FontString:AddUnit
@@ -3626,6 +3783,7 @@ FontString:AttachTexture
 FontString:BackFillMessage
 FontString:CalculateAction
 FontString:CallMethod
+FontString:CanBeAccessedInContext
 FontString:CanChangeAttribute
 FontString:CanSetUnit
 FontString:CancelOpenCheckout
@@ -3677,12 +3835,14 @@ FontString:EnableGamePadButton
 FontString:EnableGamePadStick
 FontString:EnableKeyboard
 FontString:EnableRegenerateOnResponse
+FontString:EnableSubtitles
 FontString:ExecuteAttribute
 FontString:FadeOut
 FontString:FinalizeUnits
 FontString:Finish
 FontString:ForceUpdateTimers
 FontString:FreezeAnimation
+FontString:GetAccessRestrictions
 FontString:GetActorAtIndex
 FontString:GetActorByTag
 FontString:GetAdditionalRegions
@@ -3725,7 +3885,10 @@ FontString:GetContentHeight
 FontString:GetCooldownDisplayDuration
 FontString:GetCooldownDuration
 FontString:GetCooldownTimes
+FontString:GetCountdownAbbrevThreshold
 FontString:GetCountdownFontString
+FontString:GetCountdownFormatter
+FontString:GetCountdownMillisecondsThreshold
 FontString:GetCursorPosition
 FontString:GetCustomLineSpacing
 FontString:GetDesaturation
@@ -3771,6 +3934,7 @@ FontString:GetFrameLevel
 FontString:GetFrameRef
 FontString:GetFrameStrata
 FontString:GetFromAlpha
+FontString:GetFromPercent
 FontString:GetHideCountdownNumbers
 FontString:GetHighestFrameLevel
 FontString:GetHighlightColor
@@ -3817,6 +3981,7 @@ FontString:GetModelAlpha
 FontString:GetModelFileID
 FontString:GetModelScale
 FontString:GetModelSceneID
+FontString:GetModelUnitGUID
 FontString:GetMotionScriptsWhileDisabled
 FontString:GetMouseOverUnits
 FontString:GetNormalFontObject
@@ -3870,6 +4035,7 @@ FontString:GetScrollPercentage
 FontString:GetSelectionText
 FontString:GetShadowEffect
 FontString:GetSmoothProgress
+FontString:GetSmoothScaling
 FontString:GetSmoothing
 FontString:GetSpell
 FontString:GetStartDelay
@@ -3897,9 +4063,11 @@ FontString:GetTimeVisible
 FontString:GetTimerDuration
 FontString:GetToAlpha
 FontString:GetToFinalAlpha
+FontString:GetToPercent
 FontString:GetTooltipIndex
 FontString:GetUTF8CursorPosition
 FontString:GetUiMapID
+FontString:GetUnboundedStringWidthForText
 FontString:GetUnit
 FontString:GetUpperEmblemTexture
 FontString:GetUseAuraDisplayTime
@@ -3918,6 +4086,7 @@ FontString:GetZoomLevels
 FontString:HasAccessConstraints
 FontString:HasAlphaGradient
 FontString:HasAnimation
+FontString:HasAnyAccessRestrictions
 FontString:HasAnyForbiddenAspects
 FontString:HasAttachmentPoints
 FontString:HasCustomCamera
@@ -3971,8 +4140,10 @@ FontString:IsPassword
 FontString:IsPaused
 FontString:IsPendingFinish
 FontString:IsPlaying
+FontString:IsPreferringModelCollisionBounds
 FontString:IsResizable
 FontString:IsReverse
+FontString:IsRolesetFiltered
 FontString:IsSecureText
 FontString:IsSetToFinalAlpha
 FontString:IsSlotAllowed
@@ -4031,6 +4202,7 @@ FontString:ResetLights
 FontString:ResetMessageFadeByID
 FontString:ResetSecondaryCompareItem
 FontString:ResetTexCoord
+FontString:ResizeToBoundsRect
 FontString:Restart
 FontString:Resume
 FontString:RotateTextures
@@ -4107,6 +4279,8 @@ FontString:SetCooldownUNIX
 FontString:SetCountInvisibleLetters
 FontString:SetCountdownAbbrevThreshold
 FontString:SetCountdownFont
+FontString:SetCountdownFormatter
+FontString:SetCountdownMillisecondsThreshold
 FontString:SetCreature
 FontString:SetCurrencyToken
 FontString:SetCursorPosition
@@ -4116,6 +4290,7 @@ FontString:SetCustomWordWrapMinWidth
 FontString:SetDefaultCallback
 FontString:SetDefaultText
 FontString:SetDegrees
+FontString:SetDesaturateEmbeddedTextures
 FontString:SetDesaturated
 FontString:SetDesaturation
 FontString:SetDesiredWidth
@@ -4168,10 +4343,12 @@ FontString:SetFrameStack
 FontString:SetFrameStrata
 FontString:SetFromAlpha
 FontString:SetFromModelSceneID
+FontString:SetFromPercent
 FontString:SetGlow
 FontString:SetGlyph
 FontString:SetGradient
 FontString:SetGradientMask
+FontString:SetGradientMaskWithDyes
 FontString:SetHeirloomByItemID
 FontString:SetHideCountdownNumbers
 FontString:SetHighlightAtlas
@@ -4263,6 +4440,7 @@ FontString:SetPlayerPingTexture
 FontString:SetPlaying
 FontString:SetPortraitZoom
 FontString:SetPosition
+FontString:SetPreferModelCollisionBounds
 FontString:SetPropagateKeyboardInput
 FontString:SetPushedAtlas
 FontString:SetPushedTextOffset
@@ -4304,7 +4482,9 @@ FontString:SetSequence
 FontString:SetSequenceTime
 FontString:SetShadowEffect
 FontString:SetShapeshift
+FontString:SetSheathedCategory
 FontString:SetShrinkToFitWrapped
+FontString:SetSmoothScaling
 FontString:SetSmoothing
 FontString:SetSnapToPixelGrid
 FontString:SetSocketGem
@@ -4347,6 +4527,7 @@ FontString:SetTimeVisible
 FontString:SetTimerDuration
 FontString:SetToAlpha
 FontString:SetToFinalAlpha
+FontString:SetToPercent
 FontString:SetToTargetValue
 FontString:SetToplevel
 FontString:SetToyByItemID
@@ -4415,7 +4596,9 @@ FontString:UpdateMouseOverTooltip
 FontString:UpdateToMenuSelections
 FontString:UpdateWidth
 FontString:UseModelCenterToTransform
+FontString:UseUnitSheatheCategory
 FontString:_AddMessageSilent
+Frame:AddAccessRestrictions
 Frame:AddAtlas
 Frame:AddDataProvider
 Frame:AddDoubleLine
@@ -4429,6 +4612,7 @@ Frame:AddModule
 Frame:AddMsg
 Frame:AddOnDisplayRefreshedCallback
 Frame:AddRoleset
+Frame:AddSecretAspect
 Frame:AddStaticEventMethod
 Frame:AddTexture
 Frame:AddUnit
@@ -4444,6 +4628,7 @@ Frame:AttachTexture
 Frame:BackFillMessage
 Frame:CalculateAction
 Frame:CallMethod
+Frame:CanBeAccessedInContext
 Frame:CanInterpolateScroll
 Frame:CanNonSpaceWrap
 Frame:CanSetUnit
@@ -4484,14 +4669,17 @@ Frame:DrawBlob
 Frame:DrawNone
 Frame:Enable
 Frame:EnableRegenerateOnResponse
+Frame:EnableSubtitles
 Frame:FadeOut
 Frame:FinalizeUnits
 Frame:Finish
 Frame:ForceUpdateTimers
 Frame:FreezeAnimation
+Frame:GetAccessRestrictions
 Frame:GetActorAtIndex
 Frame:GetActorByTag
 Frame:GetAdditionalRegions
+Frame:GetAlphaGradient
 Frame:GetAltArrowKeyMode
 Frame:GetAnchorType
 Frame:GetAnimationSpeedMultiplier
@@ -4527,7 +4715,10 @@ Frame:GetContentHeight
 Frame:GetCooldownDisplayDuration
 Frame:GetCooldownDuration
 Frame:GetCooldownTimes
+Frame:GetCountdownAbbrevThreshold
 Frame:GetCountdownFontString
+Frame:GetCountdownFormatter
+Frame:GetCountdownMillisecondsThreshold
 Frame:GetCursorPosition
 Frame:GetCustomLineSpacing
 Frame:GetDesaturation
@@ -4571,6 +4762,7 @@ Frame:GetFontStringByID
 Frame:GetForbiddenAspects
 Frame:GetFrameRef
 Frame:GetFromAlpha
+Frame:GetFromPercent
 Frame:GetHideCountdownNumbers
 Frame:GetHighlightColor
 Frame:GetHighlightFontObject
@@ -4618,6 +4810,7 @@ Frame:GetModelAlpha
 Frame:GetModelFileID
 Frame:GetModelScale
 Frame:GetModelSceneID
+Frame:GetModelUnitGUID
 Frame:GetMotionScriptsWhileDisabled
 Frame:GetMouseOverUnits
 Frame:GetNormalFontObject
@@ -4661,6 +4854,7 @@ Frame:GetRoll
 Frame:GetRotatesTexture
 Frame:GetRotation
 Frame:GetSVGFileID
+Frame:GetScaleAnimationMode
 Frame:GetScaledDesiredHeight
 Frame:GetScaledDesiredWidth
 Frame:GetScrollPercentage
@@ -4669,6 +4863,7 @@ Frame:GetShadowColor
 Frame:GetShadowEffect
 Frame:GetShadowOffset
 Frame:GetSmoothProgress
+Frame:GetSmoothScaling
 Frame:GetSmoothing
 Frame:GetSpacing
 Frame:GetSpell
@@ -4702,10 +4897,12 @@ Frame:GetTimeVisible
 Frame:GetTimerDuration
 Frame:GetToAlpha
 Frame:GetToFinalAlpha
+Frame:GetToPercent
 Frame:GetTooltipIndex
 Frame:GetUTF8CursorPosition
 Frame:GetUiMapID
 Frame:GetUnboundedStringWidth
+Frame:GetUnboundedStringWidthForText
 Frame:GetUnit
 Frame:GetUpperEmblemTexture
 Frame:GetUseAuraDisplayTime
@@ -4724,6 +4921,7 @@ Frame:GetZoom
 Frame:GetZoomLevels
 Frame:HasAccessConstraints
 Frame:HasAnimation
+Frame:HasAnyAccessRestrictions
 Frame:HasAnyForbiddenAspects
 Frame:HasAttachmentPoints
 Frame:HasCustomCamera
@@ -4766,7 +4964,9 @@ Frame:IsPassword
 Frame:IsPaused
 Frame:IsPendingFinish
 Frame:IsPlaying
+Frame:IsPreferringModelCollisionBounds
 Frame:IsReverse
+Frame:IsRolesetFiltered
 Frame:IsSecureText
 Frame:IsSetToFinalAlpha
 Frame:IsSlotAllowed
@@ -4818,6 +5018,7 @@ Frame:ResetLights
 Frame:ResetMessageFadeByID
 Frame:ResetSecondaryCompareItem
 Frame:ResetTexCoord
+Frame:ResizeToBoundsRect
 Frame:Restart
 Frame:Resume
 Frame:ScaleTextToFit
@@ -4888,6 +5089,8 @@ Frame:SetCooldownUNIX
 Frame:SetCountInvisibleLetters
 Frame:SetCountdownAbbrevThreshold
 Frame:SetCountdownFont
+Frame:SetCountdownFormatter
+Frame:SetCountdownMillisecondsThreshold
 Frame:SetCreature
 Frame:SetCurrencyToken
 Frame:SetCursorPosition
@@ -4897,6 +5100,7 @@ Frame:SetCustomWordWrapMinWidth
 Frame:SetDefaultCallback
 Frame:SetDefaultText
 Frame:SetDegrees
+Frame:SetDesaturateEmbeddedTextures
 Frame:SetDesaturated
 Frame:SetDesaturation
 Frame:SetDesiredWidth
@@ -4949,10 +5153,12 @@ Frame:SetFrameRef
 Frame:SetFrameStack
 Frame:SetFromAlpha
 Frame:SetFromModelSceneID
+Frame:SetFromPercent
 Frame:SetGlow
 Frame:SetGlyph
 Frame:SetGradient
 Frame:SetGradientMask
+Frame:SetGradientMaskWithDyes
 Frame:SetHeirloomByItemID
 Frame:SetHideCountdownNumbers
 Frame:SetHighlightAtlas
@@ -5043,6 +5249,7 @@ Frame:SetPlaying
 Frame:SetPortraitToAsset
 Frame:SetPortraitZoom
 Frame:SetPosition
+Frame:SetPreferModelCollisionBounds
 Frame:SetPushedAtlas
 Frame:SetPushedTextOffset
 Frame:SetPushedTexture
@@ -5069,6 +5276,7 @@ Frame:SetRoll
 Frame:SetRotatesTexture
 Frame:SetRotation
 Frame:SetSVG
+Frame:SetScaleAnimationMode
 Frame:SetScaleFrom
 Frame:SetScaleTo
 Frame:SetScrollPercentage
@@ -5084,7 +5292,9 @@ Frame:SetShadowColor
 Frame:SetShadowEffect
 Frame:SetShadowOffset
 Frame:SetShapeshift
+Frame:SetSheathedCategory
 Frame:SetShrinkToFitWrapped
+Frame:SetSmoothScaling
 Frame:SetSmoothing
 Frame:SetSnapToPixelGrid
 Frame:SetSocketGem
@@ -5134,6 +5344,7 @@ Frame:SetTimerDuration
 Frame:SetTitle
 Frame:SetToAlpha
 Frame:SetToFinalAlpha
+Frame:SetToPercent
 Frame:SetToTargetValue
 Frame:SetToyByItemID
 Frame:SetTradePlayerItem
@@ -5159,6 +5370,7 @@ Frame:SetValue
 Frame:SetValueStep
 Frame:SetVertTile
 Frame:SetVertexColor
+Frame:SetVertexColorFromBoolean
 Frame:SetVertexOffset
 Frame:SetViewInsets
 Frame:SetViewTranslation
@@ -5195,7 +5407,9 @@ Frame:UpdateMouseOverTooltip
 Frame:UpdateToMenuSelections
 Frame:UpdateWidth
 Frame:UseModelCenterToTransform
+Frame:UseUnitSheatheCategory
 Frame:_AddMessageSilent
+GameTooltip:AddAccessRestrictions
 GameTooltip:AddForbiddenAspects
 GameTooltip:AddHistoryLine
 GameTooltip:AddMaskTexture
@@ -5203,6 +5417,7 @@ GameTooltip:AddMessage
 GameTooltip:AddMsg
 GameTooltip:AddOnDisplayRefreshedCallback
 GameTooltip:AddRoleset
+GameTooltip:AddSecretAspect
 GameTooltip:AddStaticEventMethod
 GameTooltip:AddUnit
 GameTooltip:AdjustMessageColors
@@ -5216,6 +5431,7 @@ GameTooltip:AttachTexture
 GameTooltip:BackFillMessage
 GameTooltip:CalculateAction
 GameTooltip:CallMethod
+GameTooltip:CanBeAccessedInContext
 GameTooltip:CanNonSpaceWrap
 GameTooltip:CanSetUnit
 GameTooltip:CanWordWrap
@@ -5252,13 +5468,16 @@ GameTooltip:DrawBlob
 GameTooltip:DrawNone
 GameTooltip:Enable
 GameTooltip:EnableRegenerateOnResponse
+GameTooltip:EnableSubtitles
 GameTooltip:FinalizeUnits
 GameTooltip:Finish
 GameTooltip:ForceUpdateTimers
 GameTooltip:FreezeAnimation
+GameTooltip:GetAccessRestrictions
 GameTooltip:GetActorAtIndex
 GameTooltip:GetActorByTag
 GameTooltip:GetAdditionalRegions
+GameTooltip:GetAlphaGradient
 GameTooltip:GetAltArrowKeyMode
 GameTooltip:GetAnimationSpeedMultiplier
 GameTooltip:GetAnimations
@@ -5293,7 +5512,10 @@ GameTooltip:GetContentHeight
 GameTooltip:GetCooldownDisplayDuration
 GameTooltip:GetCooldownDuration
 GameTooltip:GetCooldownTimes
+GameTooltip:GetCountdownAbbrevThreshold
 GameTooltip:GetCountdownFontString
+GameTooltip:GetCountdownFormatter
+GameTooltip:GetCountdownMillisecondsThreshold
 GameTooltip:GetCursorPosition
 GameTooltip:GetDesaturation
 GameTooltip:GetDesiredHeight
@@ -5336,6 +5558,7 @@ GameTooltip:GetFontStringByID
 GameTooltip:GetForbiddenAspects
 GameTooltip:GetFrameRef
 GameTooltip:GetFromAlpha
+GameTooltip:GetFromPercent
 GameTooltip:GetHideCountdownNumbers
 GameTooltip:GetHighlightColor
 GameTooltip:GetHighlightFontObject
@@ -5381,6 +5604,7 @@ GameTooltip:GetModelAlpha
 GameTooltip:GetModelFileID
 GameTooltip:GetModelScale
 GameTooltip:GetModelSceneID
+GameTooltip:GetModelUnitGUID
 GameTooltip:GetMotionScriptsWhileDisabled
 GameTooltip:GetMouseOverUnits
 GameTooltip:GetNormalFontObject
@@ -5421,6 +5645,7 @@ GameTooltip:GetRoll
 GameTooltip:GetRotatesTexture
 GameTooltip:GetRotation
 GameTooltip:GetSVGFileID
+GameTooltip:GetScaleAnimationMode
 GameTooltip:GetScaledDesiredHeight
 GameTooltip:GetScaledDesiredWidth
 GameTooltip:GetScrollPercentage
@@ -5429,6 +5654,7 @@ GameTooltip:GetShadowColor
 GameTooltip:GetShadowEffect
 GameTooltip:GetShadowOffset
 GameTooltip:GetSmoothProgress
+GameTooltip:GetSmoothScaling
 GameTooltip:GetSmoothing
 GameTooltip:GetSpacing
 GameTooltip:GetSpell
@@ -5462,10 +5688,12 @@ GameTooltip:GetTimeVisible
 GameTooltip:GetTimerDuration
 GameTooltip:GetToAlpha
 GameTooltip:GetToFinalAlpha
+GameTooltip:GetToPercent
 GameTooltip:GetTooltipIndex
 GameTooltip:GetUTF8CursorPosition
 GameTooltip:GetUiMapID
 GameTooltip:GetUnboundedStringWidth
+GameTooltip:GetUnboundedStringWidthForText
 GameTooltip:GetUnit
 GameTooltip:GetUpperEmblemTexture
 GameTooltip:GetUseAuraDisplayTime
@@ -5484,6 +5712,7 @@ GameTooltip:GetZoom
 GameTooltip:GetZoomLevels
 GameTooltip:HasAccessConstraints
 GameTooltip:HasAnimation
+GameTooltip:HasAnyAccessRestrictions
 GameTooltip:HasAnyForbiddenAspects
 GameTooltip:HasAttachmentPoints
 GameTooltip:HasCustomCamera
@@ -5523,7 +5752,9 @@ GameTooltip:IsPassword
 GameTooltip:IsPaused
 GameTooltip:IsPendingFinish
 GameTooltip:IsPlaying
+GameTooltip:IsPreferringModelCollisionBounds
 GameTooltip:IsReverse
+GameTooltip:IsRolesetFiltered
 GameTooltip:IsSecureText
 GameTooltip:IsSetToFinalAlpha
 GameTooltip:IsSlotAllowed
@@ -5570,6 +5801,7 @@ GameTooltip:ResetLights
 GameTooltip:ResetMessageFadeByID
 GameTooltip:ResetSecondaryCompareItem
 GameTooltip:ResetTexCoord
+GameTooltip:ResizeToBoundsRect
 GameTooltip:Restart
 GameTooltip:Resume
 GameTooltip:ScaleTextToFit
@@ -5638,6 +5870,8 @@ GameTooltip:SetCooldownUNIX
 GameTooltip:SetCountInvisibleLetters
 GameTooltip:SetCountdownAbbrevThreshold
 GameTooltip:SetCountdownFont
+GameTooltip:SetCountdownFormatter
+GameTooltip:SetCountdownMillisecondsThreshold
 GameTooltip:SetCreature
 GameTooltip:SetCurrencyToken
 GameTooltip:SetCursorPosition
@@ -5645,6 +5879,7 @@ GameTooltip:SetCustomCamera
 GameTooltip:SetDefaultCallback
 GameTooltip:SetDefaultText
 GameTooltip:SetDegrees
+GameTooltip:SetDesaturateEmbeddedTextures
 GameTooltip:SetDesaturated
 GameTooltip:SetDesaturation
 GameTooltip:SetDesiredWidth
@@ -5695,10 +5930,12 @@ GameTooltip:SetFormattedText
 GameTooltip:SetFrameRef
 GameTooltip:SetFromAlpha
 GameTooltip:SetFromModelSceneID
+GameTooltip:SetFromPercent
 GameTooltip:SetGlow
 GameTooltip:SetGlyph
 GameTooltip:SetGradient
 GameTooltip:SetGradientMask
+GameTooltip:SetGradientMaskWithDyes
 GameTooltip:SetHeirloomByItemID
 GameTooltip:SetHideCountdownNumbers
 GameTooltip:SetHighlightAtlas
@@ -5783,6 +6020,7 @@ GameTooltip:SetPlayerPingTexture
 GameTooltip:SetPlaying
 GameTooltip:SetPortraitZoom
 GameTooltip:SetPosition
+GameTooltip:SetPreferModelCollisionBounds
 GameTooltip:SetPushedAtlas
 GameTooltip:SetPushedTextOffset
 GameTooltip:SetPushedTexture
@@ -5809,6 +6047,7 @@ GameTooltip:SetRoll
 GameTooltip:SetRotatesTexture
 GameTooltip:SetRotation
 GameTooltip:SetSVG
+GameTooltip:SetScaleAnimationMode
 GameTooltip:SetScaleFrom
 GameTooltip:SetScaleTo
 GameTooltip:SetScrollPercentage
@@ -5824,6 +6063,8 @@ GameTooltip:SetShadowColor
 GameTooltip:SetShadowEffect
 GameTooltip:SetShadowOffset
 GameTooltip:SetShapeshift
+GameTooltip:SetSheathedCategory
+GameTooltip:SetSmoothScaling
 GameTooltip:SetSmoothing
 GameTooltip:SetSnapToPixelGrid
 GameTooltip:SetSocketGem
@@ -5871,6 +6112,7 @@ GameTooltip:SetTimeVisible
 GameTooltip:SetTimerDuration
 GameTooltip:SetToAlpha
 GameTooltip:SetToFinalAlpha
+GameTooltip:SetToPercent
 GameTooltip:SetToTargetValue
 GameTooltip:SetToyByItemID
 GameTooltip:SetTradePlayerItem
@@ -5896,6 +6138,7 @@ GameTooltip:SetValue
 GameTooltip:SetValueStep
 GameTooltip:SetVertTile
 GameTooltip:SetVertexColor
+GameTooltip:SetVertexColorFromBoolean
 GameTooltip:SetVertexOffset
 GameTooltip:SetViewInsets
 GameTooltip:SetViewTranslation
@@ -5931,7 +6174,9 @@ GameTooltip:UpdateMouseOverTooltip
 GameTooltip:UpdateToMenuSelections
 GameTooltip:UpdateWidth
 GameTooltip:UseModelCenterToTransform
+GameTooltip:UseUnitSheatheCategory
 GameTooltip:_AddMessageSilent
+MessageFrame:AddAccessRestrictions
 MessageFrame:AddAtlas
 MessageFrame:AddDoubleLine
 MessageFrame:AddFontStrings
@@ -5942,6 +6187,7 @@ MessageFrame:AddMaskTexture
 MessageFrame:AddMsg
 MessageFrame:AddOnDisplayRefreshedCallback
 MessageFrame:AddRoleset
+MessageFrame:AddSecretAspect
 MessageFrame:AddStaticEventMethod
 MessageFrame:AddTexture
 MessageFrame:AddUnit
@@ -5959,6 +6205,7 @@ MessageFrame:AttachTexture
 MessageFrame:BackFillMessage
 MessageFrame:CalculateAction
 MessageFrame:CallMethod
+MessageFrame:CanBeAccessedInContext
 MessageFrame:CanNonSpaceWrap
 MessageFrame:CanSetUnit
 MessageFrame:CanWordWrap
@@ -5997,14 +6244,17 @@ MessageFrame:DrawBlob
 MessageFrame:DrawNone
 MessageFrame:Enable
 MessageFrame:EnableRegenerateOnResponse
+MessageFrame:EnableSubtitles
 MessageFrame:FadeOut
 MessageFrame:FinalizeUnits
 MessageFrame:Finish
 MessageFrame:ForceUpdateTimers
 MessageFrame:FreezeAnimation
+MessageFrame:GetAccessRestrictions
 MessageFrame:GetActorAtIndex
 MessageFrame:GetActorByTag
 MessageFrame:GetAdditionalRegions
+MessageFrame:GetAlphaGradient
 MessageFrame:GetAltArrowKeyMode
 MessageFrame:GetAnchorType
 MessageFrame:GetAnimationSpeedMultiplier
@@ -6040,7 +6290,10 @@ MessageFrame:GetContentHeight
 MessageFrame:GetCooldownDisplayDuration
 MessageFrame:GetCooldownDuration
 MessageFrame:GetCooldownTimes
+MessageFrame:GetCountdownAbbrevThreshold
 MessageFrame:GetCountdownFontString
+MessageFrame:GetCountdownFormatter
+MessageFrame:GetCountdownMillisecondsThreshold
 MessageFrame:GetCursorPosition
 MessageFrame:GetCustomLineSpacing
 MessageFrame:GetDesaturation
@@ -6078,6 +6331,7 @@ MessageFrame:GetFontString
 MessageFrame:GetForbiddenAspects
 MessageFrame:GetFrameRef
 MessageFrame:GetFromAlpha
+MessageFrame:GetFromPercent
 MessageFrame:GetHideCountdownNumbers
 MessageFrame:GetHighlightColor
 MessageFrame:GetHighlightFontObject
@@ -6122,6 +6376,7 @@ MessageFrame:GetModelAlpha
 MessageFrame:GetModelFileID
 MessageFrame:GetModelScale
 MessageFrame:GetModelSceneID
+MessageFrame:GetModelUnitGUID
 MessageFrame:GetMotionScriptsWhileDisabled
 MessageFrame:GetMouseOverUnits
 MessageFrame:GetNormalFontObject
@@ -6165,6 +6420,7 @@ MessageFrame:GetRoll
 MessageFrame:GetRotatesTexture
 MessageFrame:GetRotation
 MessageFrame:GetSVGFileID
+MessageFrame:GetScaleAnimationMode
 MessageFrame:GetScaledDesiredHeight
 MessageFrame:GetScaledDesiredWidth
 MessageFrame:GetScrollOffset
@@ -6172,6 +6428,7 @@ MessageFrame:GetScrollPercentage
 MessageFrame:GetSelectionText
 MessageFrame:GetShadowEffect
 MessageFrame:GetSmoothProgress
+MessageFrame:GetSmoothScaling
 MessageFrame:GetSmoothing
 MessageFrame:GetSpell
 MessageFrame:GetStartDelay
@@ -6202,10 +6459,12 @@ MessageFrame:GetThumbTexture
 MessageFrame:GetTimerDuration
 MessageFrame:GetToAlpha
 MessageFrame:GetToFinalAlpha
+MessageFrame:GetToPercent
 MessageFrame:GetTooltipIndex
 MessageFrame:GetUTF8CursorPosition
 MessageFrame:GetUiMapID
 MessageFrame:GetUnboundedStringWidth
+MessageFrame:GetUnboundedStringWidthForText
 MessageFrame:GetUnit
 MessageFrame:GetUpperEmblemTexture
 MessageFrame:GetUseAuraDisplayTime
@@ -6224,6 +6483,7 @@ MessageFrame:GetZoom
 MessageFrame:GetZoomLevels
 MessageFrame:HasAccessConstraints
 MessageFrame:HasAnimation
+MessageFrame:HasAnyAccessRestrictions
 MessageFrame:HasAnyForbiddenAspects
 MessageFrame:HasAttachmentPoints
 MessageFrame:HasCustomCamera
@@ -6263,7 +6523,9 @@ MessageFrame:IsPassword
 MessageFrame:IsPaused
 MessageFrame:IsPendingFinish
 MessageFrame:IsPlaying
+MessageFrame:IsPreferringModelCollisionBounds
 MessageFrame:IsReverse
+MessageFrame:IsRolesetFiltered
 MessageFrame:IsScrollAllowed
 MessageFrame:IsSecureText
 MessageFrame:IsSetToFinalAlpha
@@ -6313,6 +6575,7 @@ MessageFrame:ResetInputMode
 MessageFrame:ResetLights
 MessageFrame:ResetSecondaryCompareItem
 MessageFrame:ResetTexCoord
+MessageFrame:ResizeToBoundsRect
 MessageFrame:Restart
 MessageFrame:Resume
 MessageFrame:ScaleTextToFit
@@ -6387,6 +6650,8 @@ MessageFrame:SetCooldownUNIX
 MessageFrame:SetCountInvisibleLetters
 MessageFrame:SetCountdownAbbrevThreshold
 MessageFrame:SetCountdownFont
+MessageFrame:SetCountdownFormatter
+MessageFrame:SetCountdownMillisecondsThreshold
 MessageFrame:SetCreature
 MessageFrame:SetCurrencyToken
 MessageFrame:SetCursorPosition
@@ -6396,6 +6661,7 @@ MessageFrame:SetCustomWordWrapMinWidth
 MessageFrame:SetDefaultCallback
 MessageFrame:SetDefaultText
 MessageFrame:SetDegrees
+MessageFrame:SetDesaturateEmbeddedTextures
 MessageFrame:SetDesaturated
 MessageFrame:SetDesaturation
 MessageFrame:SetDesiredWidth
@@ -6442,10 +6708,12 @@ MessageFrame:SetFrameRef
 MessageFrame:SetFrameStack
 MessageFrame:SetFromAlpha
 MessageFrame:SetFromModelSceneID
+MessageFrame:SetFromPercent
 MessageFrame:SetGlow
 MessageFrame:SetGlyph
 MessageFrame:SetGradient
 MessageFrame:SetGradientMask
+MessageFrame:SetGradientMaskWithDyes
 MessageFrame:SetHeirloomByItemID
 MessageFrame:SetHideCountdownNumbers
 MessageFrame:SetHighlightAtlas
@@ -6530,6 +6798,7 @@ MessageFrame:SetPlayerPingTexture
 MessageFrame:SetPlaying
 MessageFrame:SetPortraitZoom
 MessageFrame:SetPosition
+MessageFrame:SetPreferModelCollisionBounds
 MessageFrame:SetPushedAtlas
 MessageFrame:SetPushedTextOffset
 MessageFrame:SetPushedTexture
@@ -6556,6 +6825,7 @@ MessageFrame:SetRoll
 MessageFrame:SetRotatesTexture
 MessageFrame:SetRotation
 MessageFrame:SetSVG
+MessageFrame:SetScaleAnimationMode
 MessageFrame:SetScaleFrom
 MessageFrame:SetScaleTo
 MessageFrame:SetScrollAllowed
@@ -6571,7 +6841,9 @@ MessageFrame:SetSequence
 MessageFrame:SetSequenceTime
 MessageFrame:SetShadowEffect
 MessageFrame:SetShapeshift
+MessageFrame:SetSheathedCategory
 MessageFrame:SetShrinkToFitWrapped
+MessageFrame:SetSmoothScaling
 MessageFrame:SetSmoothing
 MessageFrame:SetSnapToPixelGrid
 MessageFrame:SetSocketGem
@@ -6617,6 +6889,7 @@ MessageFrame:SetThumbTexture
 MessageFrame:SetTimerDuration
 MessageFrame:SetToAlpha
 MessageFrame:SetToFinalAlpha
+MessageFrame:SetToPercent
 MessageFrame:SetToTargetValue
 MessageFrame:SetToyByItemID
 MessageFrame:SetTradePlayerItem
@@ -6642,6 +6915,7 @@ MessageFrame:SetValue
 MessageFrame:SetValueStep
 MessageFrame:SetVertTile
 MessageFrame:SetVertexColor
+MessageFrame:SetVertexColorFromBoolean
 MessageFrame:SetVertexOffset
 MessageFrame:SetViewInsets
 MessageFrame:SetViewTranslation
@@ -6677,7 +6951,9 @@ MessageFrame:UpdateMouseOverTooltip
 MessageFrame:UpdateToMenuSelections
 MessageFrame:UpdateWidth
 MessageFrame:UseModelCenterToTransform
+MessageFrame:UseUnitSheatheCategory
 MessageFrame:_AddMessageSilent
+Model:AddAccessRestrictions
 Model:AddAtlas
 Model:AddDoubleLine
 Model:AddFontStrings
@@ -6689,6 +6965,7 @@ Model:AddMessage
 Model:AddMsg
 Model:AddOnDisplayRefreshedCallback
 Model:AddRoleset
+Model:AddSecretAspect
 Model:AddStaticEventMethod
 Model:AddTexture
 Model:AddUnit
@@ -6703,6 +6980,7 @@ Model:AttachTexture
 Model:BackFillMessage
 Model:CalculateAction
 Model:CallMethod
+Model:CanBeAccessedInContext
 Model:CanNonSpaceWrap
 Model:CanSetUnit
 Model:CanWordWrap
@@ -6739,14 +7017,17 @@ Model:DrawBlob
 Model:DrawNone
 Model:Enable
 Model:EnableRegenerateOnResponse
+Model:EnableSubtitles
 Model:FadeOut
 Model:FinalizeUnits
 Model:Finish
 Model:ForceUpdateTimers
 Model:FreezeAnimation
+Model:GetAccessRestrictions
 Model:GetActorAtIndex
 Model:GetActorByTag
 Model:GetAdditionalRegions
+Model:GetAlphaGradient
 Model:GetAltArrowKeyMode
 Model:GetAnchorType
 Model:GetAnimationSpeedMultiplier
@@ -6777,7 +7058,10 @@ Model:GetContentHeight
 Model:GetCooldownDisplayDuration
 Model:GetCooldownDuration
 Model:GetCooldownTimes
+Model:GetCountdownAbbrevThreshold
 Model:GetCountdownFontString
+Model:GetCountdownFormatter
+Model:GetCountdownMillisecondsThreshold
 Model:GetCursorPosition
 Model:GetCustomLineSpacing
 Model:GetDesiredHeight
@@ -6816,6 +7100,7 @@ Model:GetFontStringByID
 Model:GetForbiddenAspects
 Model:GetFrameRef
 Model:GetFromAlpha
+Model:GetFromPercent
 Model:GetHideCountdownNumbers
 Model:GetHighlightColor
 Model:GetHighlightFontObject
@@ -6859,6 +7144,7 @@ Model:GetMinimumCountdownDuration
 Model:GetMinimumWidth
 Model:GetModel
 Model:GetModelSceneID
+Model:GetModelUnitGUID
 Model:GetMotionScriptsWhileDisabled
 Model:GetMouseOverUnits
 Model:GetNormalFontObject
@@ -6898,6 +7184,7 @@ Model:GetRolesetNames
 Model:GetRotatesTexture
 Model:GetRotation
 Model:GetSVGFileID
+Model:GetScaleAnimationMode
 Model:GetScaledDesiredHeight
 Model:GetScaledDesiredWidth
 Model:GetScrollPercentage
@@ -6905,6 +7192,7 @@ Model:GetSelectionText
 Model:GetShadowColor
 Model:GetShadowOffset
 Model:GetSmoothProgress
+Model:GetSmoothScaling
 Model:GetSmoothing
 Model:GetSpacing
 Model:GetSpell
@@ -6938,10 +7226,12 @@ Model:GetTimeVisible
 Model:GetTimerDuration
 Model:GetToAlpha
 Model:GetToFinalAlpha
+Model:GetToPercent
 Model:GetTooltipIndex
 Model:GetUTF8CursorPosition
 Model:GetUiMapID
 Model:GetUnboundedStringWidth
+Model:GetUnboundedStringWidthForText
 Model:GetUnit
 Model:GetUpperEmblemTexture
 Model:GetUseAuraDisplayTime
@@ -6958,6 +7248,7 @@ Model:GetZoom
 Model:GetZoomLevels
 Model:HasAccessConstraints
 Model:HasAnimation
+Model:HasAnyAccessRestrictions
 Model:HasAnyForbiddenAspects
 Model:HasFocus
 Model:HasMessageByID
@@ -6996,7 +7287,9 @@ Model:IsPassword
 Model:IsPaused
 Model:IsPendingFinish
 Model:IsPlaying
+Model:IsPreferringModelCollisionBounds
 Model:IsReverse
+Model:IsRolesetFiltered
 Model:IsSecureText
 Model:IsSetToFinalAlpha
 Model:IsSlotAllowed
@@ -7041,6 +7334,7 @@ Model:ResetLights
 Model:ResetMessageFadeByID
 Model:ResetSecondaryCompareItem
 Model:ResetTexCoord
+Model:ResizeToBoundsRect
 Model:Restart
 Model:Resume
 Model:ScaleTextToFit
@@ -7105,6 +7399,8 @@ Model:SetCooldownUNIX
 Model:SetCountInvisibleLetters
 Model:SetCountdownAbbrevThreshold
 Model:SetCountdownFont
+Model:SetCountdownFormatter
+Model:SetCountdownMillisecondsThreshold
 Model:SetCreature
 Model:SetCurrencyToken
 Model:SetCursorPosition
@@ -7113,6 +7409,7 @@ Model:SetCustomWordWrapMinWidth
 Model:SetDefaultCallback
 Model:SetDefaultText
 Model:SetDegrees
+Model:SetDesaturateEmbeddedTextures
 Model:SetDesaturated
 Model:SetDesiredWidth
 Model:SetDisabledAtlas
@@ -7159,8 +7456,10 @@ Model:SetFrameRef
 Model:SetFrameStack
 Model:SetFromAlpha
 Model:SetFromModelSceneID
+Model:SetFromPercent
 Model:SetGlyph
 Model:SetGradient
+Model:SetGradientMaskWithDyes
 Model:SetHeirloomByItemID
 Model:SetHideCountdownNumbers
 Model:SetHighlightAtlas
@@ -7240,6 +7539,7 @@ Model:SetPlayerPingScale
 Model:SetPlayerPingTexture
 Model:SetPlaying
 Model:SetPortraitZoom
+Model:SetPreferModelCollisionBounds
 Model:SetPushedAtlas
 Model:SetPushedTextOffset
 Model:SetPushedTexture
@@ -7265,6 +7565,7 @@ Model:SetRolesets
 Model:SetRotatesTexture
 Model:SetRotation
 Model:SetSVG
+Model:SetScaleAnimationMode
 Model:SetScaleFrom
 Model:SetScaleTo
 Model:SetScrollPercentage
@@ -7277,7 +7578,9 @@ Model:SetSendMailItem
 Model:SetShadowColor
 Model:SetShadowOffset
 Model:SetShapeshift
+Model:SetSheathedCategory
 Model:SetShrinkToFitWrapped
+Model:SetSmoothScaling
 Model:SetSmoothing
 Model:SetSnapToPixelGrid
 Model:SetSocketGem
@@ -7326,6 +7629,7 @@ Model:SetTimeVisible
 Model:SetTimerDuration
 Model:SetToAlpha
 Model:SetToFinalAlpha
+Model:SetToPercent
 Model:SetToTargetValue
 Model:SetToyByItemID
 Model:SetTradePlayerItem
@@ -7349,6 +7653,7 @@ Model:SetValue
 Model:SetValueStep
 Model:SetVertTile
 Model:SetVertexColor
+Model:SetVertexColorFromBoolean
 Model:SetVertexOffset
 Model:SetVisibleExtentPercentage
 Model:SetVisibleTextByteLimit
@@ -7380,7 +7685,9 @@ Model:UpdateItemContextMatching
 Model:UpdateMouseOverTooltip
 Model:UpdateToMenuSelections
 Model:UpdateWidth
+Model:UseUnitSheatheCategory
 Model:_AddMessageSilent
+PlayerModel:AddAccessRestrictions
 PlayerModel:AddAtlas
 PlayerModel:AddDoubleLine
 PlayerModel:AddFontStrings
@@ -7392,6 +7699,7 @@ PlayerModel:AddMessage
 PlayerModel:AddMsg
 PlayerModel:AddOnDisplayRefreshedCallback
 PlayerModel:AddRoleset
+PlayerModel:AddSecretAspect
 PlayerModel:AddStaticEventMethod
 PlayerModel:AddTexture
 PlayerModel:AddUnit
@@ -7405,6 +7713,7 @@ PlayerModel:AttachTexture
 PlayerModel:BackFillMessage
 PlayerModel:CalculateAction
 PlayerModel:CallMethod
+PlayerModel:CanBeAccessedInContext
 PlayerModel:CanNonSpaceWrap
 PlayerModel:CanWordWrap
 PlayerModel:CancelOpenCheckout
@@ -7440,13 +7749,16 @@ PlayerModel:DrawBlob
 PlayerModel:DrawNone
 PlayerModel:Enable
 PlayerModel:EnableRegenerateOnResponse
+PlayerModel:EnableSubtitles
 PlayerModel:FadeOut
 PlayerModel:FinalizeUnits
 PlayerModel:Finish
 PlayerModel:ForceUpdateTimers
+PlayerModel:GetAccessRestrictions
 PlayerModel:GetActorAtIndex
 PlayerModel:GetActorByTag
 PlayerModel:GetAdditionalRegions
+PlayerModel:GetAlphaGradient
 PlayerModel:GetAltArrowKeyMode
 PlayerModel:GetAnchorType
 PlayerModel:GetAnimationSpeedMultiplier
@@ -7477,7 +7789,10 @@ PlayerModel:GetContentHeight
 PlayerModel:GetCooldownDisplayDuration
 PlayerModel:GetCooldownDuration
 PlayerModel:GetCooldownTimes
+PlayerModel:GetCountdownAbbrevThreshold
 PlayerModel:GetCountdownFontString
+PlayerModel:GetCountdownFormatter
+PlayerModel:GetCountdownMillisecondsThreshold
 PlayerModel:GetCursorPosition
 PlayerModel:GetCustomLineSpacing
 PlayerModel:GetDesiredHeight
@@ -7514,6 +7829,7 @@ PlayerModel:GetFontStringByID
 PlayerModel:GetForbiddenAspects
 PlayerModel:GetFrameRef
 PlayerModel:GetFromAlpha
+PlayerModel:GetFromPercent
 PlayerModel:GetHideCountdownNumbers
 PlayerModel:GetHighlightColor
 PlayerModel:GetHighlightFontObject
@@ -7556,6 +7872,7 @@ PlayerModel:GetMinimumCountdownDuration
 PlayerModel:GetMinimumWidth
 PlayerModel:GetModel
 PlayerModel:GetModelSceneID
+PlayerModel:GetModelUnitGUID
 PlayerModel:GetMotionScriptsWhileDisabled
 PlayerModel:GetMouseOverUnits
 PlayerModel:GetNormalFontObject
@@ -7595,6 +7912,7 @@ PlayerModel:GetRolesetNames
 PlayerModel:GetRotatesTexture
 PlayerModel:GetRotation
 PlayerModel:GetSVGFileID
+PlayerModel:GetScaleAnimationMode
 PlayerModel:GetScaledDesiredHeight
 PlayerModel:GetScaledDesiredWidth
 PlayerModel:GetScrollPercentage
@@ -7602,6 +7920,7 @@ PlayerModel:GetSelectionText
 PlayerModel:GetShadowColor
 PlayerModel:GetShadowOffset
 PlayerModel:GetSmoothProgress
+PlayerModel:GetSmoothScaling
 PlayerModel:GetSmoothing
 PlayerModel:GetSpacing
 PlayerModel:GetSpell
@@ -7635,10 +7954,12 @@ PlayerModel:GetTimeVisible
 PlayerModel:GetTimerDuration
 PlayerModel:GetToAlpha
 PlayerModel:GetToFinalAlpha
+PlayerModel:GetToPercent
 PlayerModel:GetTooltipIndex
 PlayerModel:GetUTF8CursorPosition
 PlayerModel:GetUiMapID
 PlayerModel:GetUnboundedStringWidth
+PlayerModel:GetUnboundedStringWidthForText
 PlayerModel:GetUnit
 PlayerModel:GetUpperEmblemTexture
 PlayerModel:GetUseAuraDisplayTime
@@ -7654,6 +7975,7 @@ PlayerModel:GetWrappedWidth
 PlayerModel:GetZoom
 PlayerModel:GetZoomLevels
 PlayerModel:HasAccessConstraints
+PlayerModel:HasAnyAccessRestrictions
 PlayerModel:HasAnyForbiddenAspects
 PlayerModel:HasFocus
 PlayerModel:HasMessageByID
@@ -7692,7 +8014,9 @@ PlayerModel:IsPassword
 PlayerModel:IsPaused
 PlayerModel:IsPendingFinish
 PlayerModel:IsPlaying
+PlayerModel:IsPreferringModelCollisionBounds
 PlayerModel:IsReverse
+PlayerModel:IsRolesetFiltered
 PlayerModel:IsSecureText
 PlayerModel:IsSetToFinalAlpha
 PlayerModel:IsSlotAllowed
@@ -7734,6 +8058,7 @@ PlayerModel:ResetLights
 PlayerModel:ResetMessageFadeByID
 PlayerModel:ResetSecondaryCompareItem
 PlayerModel:ResetTexCoord
+PlayerModel:ResizeToBoundsRect
 PlayerModel:Restart
 PlayerModel:Resume
 PlayerModel:ScaleTextToFit
@@ -7796,6 +8121,8 @@ PlayerModel:SetCooldownUNIX
 PlayerModel:SetCountInvisibleLetters
 PlayerModel:SetCountdownAbbrevThreshold
 PlayerModel:SetCountdownFont
+PlayerModel:SetCountdownFormatter
+PlayerModel:SetCountdownMillisecondsThreshold
 PlayerModel:SetCurrencyToken
 PlayerModel:SetCursorPosition
 PlayerModel:SetCustomLineSpacing
@@ -7803,6 +8130,7 @@ PlayerModel:SetCustomWordWrapMinWidth
 PlayerModel:SetDefaultCallback
 PlayerModel:SetDefaultText
 PlayerModel:SetDegrees
+PlayerModel:SetDesaturateEmbeddedTextures
 PlayerModel:SetDesaturated
 PlayerModel:SetDesiredWidth
 PlayerModel:SetDisabledAtlas
@@ -7847,8 +8175,10 @@ PlayerModel:SetFrameRef
 PlayerModel:SetFrameStack
 PlayerModel:SetFromAlpha
 PlayerModel:SetFromModelSceneID
+PlayerModel:SetFromPercent
 PlayerModel:SetGlyph
 PlayerModel:SetGradient
+PlayerModel:SetGradientMaskWithDyes
 PlayerModel:SetHeirloomByItemID
 PlayerModel:SetHideCountdownNumbers
 PlayerModel:SetHighlightAtlas
@@ -7924,6 +8254,7 @@ PlayerModel:SetPassword
 PlayerModel:SetPlayerPingScale
 PlayerModel:SetPlayerPingTexture
 PlayerModel:SetPlaying
+PlayerModel:SetPreferModelCollisionBounds
 PlayerModel:SetPushedAtlas
 PlayerModel:SetPushedTextOffset
 PlayerModel:SetPushedTexture
@@ -7948,6 +8279,7 @@ PlayerModel:SetRightTexture
 PlayerModel:SetRolesets
 PlayerModel:SetRotatesTexture
 PlayerModel:SetSVG
+PlayerModel:SetScaleAnimationMode
 PlayerModel:SetScaleFrom
 PlayerModel:SetScaleTo
 PlayerModel:SetScrollPercentage
@@ -7960,7 +8292,9 @@ PlayerModel:SetSendMailItem
 PlayerModel:SetShadowColor
 PlayerModel:SetShadowOffset
 PlayerModel:SetShapeshift
+PlayerModel:SetSheathedCategory
 PlayerModel:SetShrinkToFitWrapped
+PlayerModel:SetSmoothScaling
 PlayerModel:SetSmoothing
 PlayerModel:SetSnapToPixelGrid
 PlayerModel:SetSocketGem
@@ -8009,6 +8343,7 @@ PlayerModel:SetTimeVisible
 PlayerModel:SetTimerDuration
 PlayerModel:SetToAlpha
 PlayerModel:SetToFinalAlpha
+PlayerModel:SetToPercent
 PlayerModel:SetToTargetValue
 PlayerModel:SetToyByItemID
 PlayerModel:SetTradePlayerItem
@@ -8031,6 +8366,7 @@ PlayerModel:SetValue
 PlayerModel:SetValueStep
 PlayerModel:SetVertTile
 PlayerModel:SetVertexColor
+PlayerModel:SetVertexColorFromBoolean
 PlayerModel:SetVertexOffset
 PlayerModel:SetVisibleExtentPercentage
 PlayerModel:SetVisibleTextByteLimit
@@ -8061,7 +8397,9 @@ PlayerModel:UpdateItemContextMatching
 PlayerModel:UpdateMouseOverTooltip
 PlayerModel:UpdateToMenuSelections
 PlayerModel:UpdateWidth
+PlayerModel:UseUnitSheatheCategory
 PlayerModel:_AddMessageSilent
+ScrollFrame:AddAccessRestrictions
 ScrollFrame:AddAtlas
 ScrollFrame:AddDoubleLine
 ScrollFrame:AddFontStrings
@@ -8073,6 +8411,7 @@ ScrollFrame:AddMessage
 ScrollFrame:AddMsg
 ScrollFrame:AddOnDisplayRefreshedCallback
 ScrollFrame:AddRoleset
+ScrollFrame:AddSecretAspect
 ScrollFrame:AddStaticEventMethod
 ScrollFrame:AddTexture
 ScrollFrame:AddUnit
@@ -8088,6 +8427,7 @@ ScrollFrame:AttachTexture
 ScrollFrame:BackFillMessage
 ScrollFrame:CalculateAction
 ScrollFrame:CallMethod
+ScrollFrame:CanBeAccessedInContext
 ScrollFrame:CanNonSpaceWrap
 ScrollFrame:CanSetUnit
 ScrollFrame:CanWordWrap
@@ -8127,14 +8467,17 @@ ScrollFrame:DrawBlob
 ScrollFrame:DrawNone
 ScrollFrame:Enable
 ScrollFrame:EnableRegenerateOnResponse
+ScrollFrame:EnableSubtitles
 ScrollFrame:FadeOut
 ScrollFrame:FinalizeUnits
 ScrollFrame:Finish
 ScrollFrame:ForceUpdateTimers
 ScrollFrame:FreezeAnimation
+ScrollFrame:GetAccessRestrictions
 ScrollFrame:GetActorAtIndex
 ScrollFrame:GetActorByTag
 ScrollFrame:GetAdditionalRegions
+ScrollFrame:GetAlphaGradient
 ScrollFrame:GetAltArrowKeyMode
 ScrollFrame:GetAnchorType
 ScrollFrame:GetAnimationSpeedMultiplier
@@ -8170,7 +8513,10 @@ ScrollFrame:GetContentHeight
 ScrollFrame:GetCooldownDisplayDuration
 ScrollFrame:GetCooldownDuration
 ScrollFrame:GetCooldownTimes
+ScrollFrame:GetCountdownAbbrevThreshold
 ScrollFrame:GetCountdownFontString
+ScrollFrame:GetCountdownFormatter
+ScrollFrame:GetCountdownMillisecondsThreshold
 ScrollFrame:GetCursorPosition
 ScrollFrame:GetCustomLineSpacing
 ScrollFrame:GetDesaturation
@@ -8214,6 +8560,7 @@ ScrollFrame:GetFontStringByID
 ScrollFrame:GetForbiddenAspects
 ScrollFrame:GetFrameRef
 ScrollFrame:GetFromAlpha
+ScrollFrame:GetFromPercent
 ScrollFrame:GetHideCountdownNumbers
 ScrollFrame:GetHighlightColor
 ScrollFrame:GetHighlightFontObject
@@ -8259,6 +8606,7 @@ ScrollFrame:GetModelAlpha
 ScrollFrame:GetModelFileID
 ScrollFrame:GetModelScale
 ScrollFrame:GetModelSceneID
+ScrollFrame:GetModelUnitGUID
 ScrollFrame:GetMotionScriptsWhileDisabled
 ScrollFrame:GetMouseOverUnits
 ScrollFrame:GetNormalFontObject
@@ -8302,6 +8650,7 @@ ScrollFrame:GetRoll
 ScrollFrame:GetRotatesTexture
 ScrollFrame:GetRotation
 ScrollFrame:GetSVGFileID
+ScrollFrame:GetScaleAnimationMode
 ScrollFrame:GetScaledDesiredHeight
 ScrollFrame:GetScaledDesiredWidth
 ScrollFrame:GetScrollPercentage
@@ -8310,6 +8659,7 @@ ScrollFrame:GetShadowColor
 ScrollFrame:GetShadowEffect
 ScrollFrame:GetShadowOffset
 ScrollFrame:GetSmoothProgress
+ScrollFrame:GetSmoothScaling
 ScrollFrame:GetSmoothing
 ScrollFrame:GetSpacing
 ScrollFrame:GetSpell
@@ -8343,10 +8693,12 @@ ScrollFrame:GetTimeVisible
 ScrollFrame:GetTimerDuration
 ScrollFrame:GetToAlpha
 ScrollFrame:GetToFinalAlpha
+ScrollFrame:GetToPercent
 ScrollFrame:GetTooltipIndex
 ScrollFrame:GetUTF8CursorPosition
 ScrollFrame:GetUiMapID
 ScrollFrame:GetUnboundedStringWidth
+ScrollFrame:GetUnboundedStringWidthForText
 ScrollFrame:GetUnit
 ScrollFrame:GetUpperEmblemTexture
 ScrollFrame:GetUseAuraDisplayTime
@@ -8365,6 +8717,7 @@ ScrollFrame:GetZoom
 ScrollFrame:GetZoomLevels
 ScrollFrame:HasAccessConstraints
 ScrollFrame:HasAnimation
+ScrollFrame:HasAnyAccessRestrictions
 ScrollFrame:HasAnyForbiddenAspects
 ScrollFrame:HasAttachmentPoints
 ScrollFrame:HasCustomCamera
@@ -8405,7 +8758,9 @@ ScrollFrame:IsPassword
 ScrollFrame:IsPaused
 ScrollFrame:IsPendingFinish
 ScrollFrame:IsPlaying
+ScrollFrame:IsPreferringModelCollisionBounds
 ScrollFrame:IsReverse
+ScrollFrame:IsRolesetFiltered
 ScrollFrame:IsSecureText
 ScrollFrame:IsSetToFinalAlpha
 ScrollFrame:IsSlotAllowed
@@ -8453,6 +8808,7 @@ ScrollFrame:ResetLights
 ScrollFrame:ResetMessageFadeByID
 ScrollFrame:ResetSecondaryCompareItem
 ScrollFrame:ResetTexCoord
+ScrollFrame:ResizeToBoundsRect
 ScrollFrame:Restart
 ScrollFrame:Resume
 ScrollFrame:ScaleTextToFit
@@ -8523,6 +8879,8 @@ ScrollFrame:SetCooldownUNIX
 ScrollFrame:SetCountInvisibleLetters
 ScrollFrame:SetCountdownAbbrevThreshold
 ScrollFrame:SetCountdownFont
+ScrollFrame:SetCountdownFormatter
+ScrollFrame:SetCountdownMillisecondsThreshold
 ScrollFrame:SetCreature
 ScrollFrame:SetCurrencyToken
 ScrollFrame:SetCursorPosition
@@ -8532,6 +8890,7 @@ ScrollFrame:SetCustomWordWrapMinWidth
 ScrollFrame:SetDefaultCallback
 ScrollFrame:SetDefaultText
 ScrollFrame:SetDegrees
+ScrollFrame:SetDesaturateEmbeddedTextures
 ScrollFrame:SetDesaturated
 ScrollFrame:SetDesaturation
 ScrollFrame:SetDesiredWidth
@@ -8583,10 +8942,12 @@ ScrollFrame:SetFrameRef
 ScrollFrame:SetFrameStack
 ScrollFrame:SetFromAlpha
 ScrollFrame:SetFromModelSceneID
+ScrollFrame:SetFromPercent
 ScrollFrame:SetGlow
 ScrollFrame:SetGlyph
 ScrollFrame:SetGradient
 ScrollFrame:SetGradientMask
+ScrollFrame:SetGradientMaskWithDyes
 ScrollFrame:SetHeirloomByItemID
 ScrollFrame:SetHideCountdownNumbers
 ScrollFrame:SetHighlightAtlas
@@ -8673,6 +9034,7 @@ ScrollFrame:SetPlayerPingTexture
 ScrollFrame:SetPlaying
 ScrollFrame:SetPortraitZoom
 ScrollFrame:SetPosition
+ScrollFrame:SetPreferModelCollisionBounds
 ScrollFrame:SetPushedAtlas
 ScrollFrame:SetPushedTextOffset
 ScrollFrame:SetPushedTexture
@@ -8699,6 +9061,7 @@ ScrollFrame:SetRoll
 ScrollFrame:SetRotatesTexture
 ScrollFrame:SetRotation
 ScrollFrame:SetSVG
+ScrollFrame:SetScaleAnimationMode
 ScrollFrame:SetScaleFrom
 ScrollFrame:SetScaleTo
 ScrollFrame:SetScrollPercentage
@@ -8714,7 +9077,9 @@ ScrollFrame:SetShadowColor
 ScrollFrame:SetShadowEffect
 ScrollFrame:SetShadowOffset
 ScrollFrame:SetShapeshift
+ScrollFrame:SetSheathedCategory
 ScrollFrame:SetShrinkToFitWrapped
+ScrollFrame:SetSmoothScaling
 ScrollFrame:SetSmoothing
 ScrollFrame:SetSnapToPixelGrid
 ScrollFrame:SetSocketGem
@@ -8763,6 +9128,7 @@ ScrollFrame:SetTimeVisible
 ScrollFrame:SetTimerDuration
 ScrollFrame:SetToAlpha
 ScrollFrame:SetToFinalAlpha
+ScrollFrame:SetToPercent
 ScrollFrame:SetToTargetValue
 ScrollFrame:SetToyByItemID
 ScrollFrame:SetTradePlayerItem
@@ -8788,6 +9154,7 @@ ScrollFrame:SetValue
 ScrollFrame:SetValueStep
 ScrollFrame:SetVertTile
 ScrollFrame:SetVertexColor
+ScrollFrame:SetVertexColorFromBoolean
 ScrollFrame:SetVertexOffset
 ScrollFrame:SetViewInsets
 ScrollFrame:SetViewTranslation
@@ -8823,7 +9190,9 @@ ScrollFrame:UpdateMouseOverTooltip
 ScrollFrame:UpdateToMenuSelections
 ScrollFrame:UpdateWidth
 ScrollFrame:UseModelCenterToTransform
+ScrollFrame:UseUnitSheatheCategory
 ScrollFrame:_AddMessageSilent
+SimpleHTML:AddAccessRestrictions
 SimpleHTML:AddAtlas
 SimpleHTML:AddDoubleLine
 SimpleHTML:AddFontStrings
@@ -8835,6 +9204,7 @@ SimpleHTML:AddMessage
 SimpleHTML:AddMsg
 SimpleHTML:AddOnDisplayRefreshedCallback
 SimpleHTML:AddRoleset
+SimpleHTML:AddSecretAspect
 SimpleHTML:AddStaticEventMethod
 SimpleHTML:AddTexture
 SimpleHTML:AddUnit
@@ -8850,6 +9220,7 @@ SimpleHTML:AttachTexture
 SimpleHTML:BackFillMessage
 SimpleHTML:CalculateAction
 SimpleHTML:CallMethod
+SimpleHTML:CanBeAccessedInContext
 SimpleHTML:CanNonSpaceWrap
 SimpleHTML:CanSetUnit
 SimpleHTML:CanWordWrap
@@ -8889,14 +9260,17 @@ SimpleHTML:DrawBlob
 SimpleHTML:DrawNone
 SimpleHTML:Enable
 SimpleHTML:EnableRegenerateOnResponse
+SimpleHTML:EnableSubtitles
 SimpleHTML:FadeOut
 SimpleHTML:FinalizeUnits
 SimpleHTML:Finish
 SimpleHTML:ForceUpdateTimers
 SimpleHTML:FreezeAnimation
+SimpleHTML:GetAccessRestrictions
 SimpleHTML:GetActorAtIndex
 SimpleHTML:GetActorByTag
 SimpleHTML:GetAdditionalRegions
+SimpleHTML:GetAlphaGradient
 SimpleHTML:GetAltArrowKeyMode
 SimpleHTML:GetAnchorType
 SimpleHTML:GetAnimationSpeedMultiplier
@@ -8931,7 +9305,10 @@ SimpleHTML:GetColorWheelThumbTexture
 SimpleHTML:GetCooldownDisplayDuration
 SimpleHTML:GetCooldownDuration
 SimpleHTML:GetCooldownTimes
+SimpleHTML:GetCountdownAbbrevThreshold
 SimpleHTML:GetCountdownFontString
+SimpleHTML:GetCountdownFormatter
+SimpleHTML:GetCountdownMillisecondsThreshold
 SimpleHTML:GetCursorPosition
 SimpleHTML:GetCustomLineSpacing
 SimpleHTML:GetDesaturation
@@ -8973,6 +9350,7 @@ SimpleHTML:GetFontStringByID
 SimpleHTML:GetForbiddenAspects
 SimpleHTML:GetFrameRef
 SimpleHTML:GetFromAlpha
+SimpleHTML:GetFromPercent
 SimpleHTML:GetHideCountdownNumbers
 SimpleHTML:GetHighlightColor
 SimpleHTML:GetHighlightFontObject
@@ -9016,6 +9394,7 @@ SimpleHTML:GetModelAlpha
 SimpleHTML:GetModelFileID
 SimpleHTML:GetModelScale
 SimpleHTML:GetModelSceneID
+SimpleHTML:GetModelUnitGUID
 SimpleHTML:GetMotionScriptsWhileDisabled
 SimpleHTML:GetMouseOverUnits
 SimpleHTML:GetNormalFontObject
@@ -9059,12 +9438,14 @@ SimpleHTML:GetRoll
 SimpleHTML:GetRotatesTexture
 SimpleHTML:GetRotation
 SimpleHTML:GetSVGFileID
+SimpleHTML:GetScaleAnimationMode
 SimpleHTML:GetScaledDesiredHeight
 SimpleHTML:GetScaledDesiredWidth
 SimpleHTML:GetScrollPercentage
 SimpleHTML:GetSelectionText
 SimpleHTML:GetShadowEffect
 SimpleHTML:GetSmoothProgress
+SimpleHTML:GetSmoothScaling
 SimpleHTML:GetSmoothing
 SimpleHTML:GetSpell
 SimpleHTML:GetStartDelay
@@ -9095,10 +9476,12 @@ SimpleHTML:GetTimeVisible
 SimpleHTML:GetTimerDuration
 SimpleHTML:GetToAlpha
 SimpleHTML:GetToFinalAlpha
+SimpleHTML:GetToPercent
 SimpleHTML:GetTooltipIndex
 SimpleHTML:GetUTF8CursorPosition
 SimpleHTML:GetUiMapID
 SimpleHTML:GetUnboundedStringWidth
+SimpleHTML:GetUnboundedStringWidthForText
 SimpleHTML:GetUnit
 SimpleHTML:GetUpperEmblemTexture
 SimpleHTML:GetUseAuraDisplayTime
@@ -9117,6 +9500,7 @@ SimpleHTML:GetZoom
 SimpleHTML:GetZoomLevels
 SimpleHTML:HasAccessConstraints
 SimpleHTML:HasAnimation
+SimpleHTML:HasAnyAccessRestrictions
 SimpleHTML:HasAnyForbiddenAspects
 SimpleHTML:HasAttachmentPoints
 SimpleHTML:HasCustomCamera
@@ -9157,7 +9541,9 @@ SimpleHTML:IsPassword
 SimpleHTML:IsPaused
 SimpleHTML:IsPendingFinish
 SimpleHTML:IsPlaying
+SimpleHTML:IsPreferringModelCollisionBounds
 SimpleHTML:IsReverse
+SimpleHTML:IsRolesetFiltered
 SimpleHTML:IsSecureText
 SimpleHTML:IsSetToFinalAlpha
 SimpleHTML:IsSlotAllowed
@@ -9205,6 +9591,7 @@ SimpleHTML:ResetLights
 SimpleHTML:ResetMessageFadeByID
 SimpleHTML:ResetSecondaryCompareItem
 SimpleHTML:ResetTexCoord
+SimpleHTML:ResizeToBoundsRect
 SimpleHTML:Restart
 SimpleHTML:Resume
 SimpleHTML:ScaleTextToFit
@@ -9275,6 +9662,8 @@ SimpleHTML:SetCooldownUNIX
 SimpleHTML:SetCountInvisibleLetters
 SimpleHTML:SetCountdownAbbrevThreshold
 SimpleHTML:SetCountdownFont
+SimpleHTML:SetCountdownFormatter
+SimpleHTML:SetCountdownMillisecondsThreshold
 SimpleHTML:SetCreature
 SimpleHTML:SetCurrencyToken
 SimpleHTML:SetCursorPosition
@@ -9284,6 +9673,7 @@ SimpleHTML:SetCustomWordWrapMinWidth
 SimpleHTML:SetDefaultCallback
 SimpleHTML:SetDefaultText
 SimpleHTML:SetDegrees
+SimpleHTML:SetDesaturateEmbeddedTextures
 SimpleHTML:SetDesaturated
 SimpleHTML:SetDesaturation
 SimpleHTML:SetDesiredWidth
@@ -9333,10 +9723,12 @@ SimpleHTML:SetFrameRef
 SimpleHTML:SetFrameStack
 SimpleHTML:SetFromAlpha
 SimpleHTML:SetFromModelSceneID
+SimpleHTML:SetFromPercent
 SimpleHTML:SetGlow
 SimpleHTML:SetGlyph
 SimpleHTML:SetGradient
 SimpleHTML:SetGradientMask
+SimpleHTML:SetGradientMaskWithDyes
 SimpleHTML:SetHeirloomByItemID
 SimpleHTML:SetHideCountdownNumbers
 SimpleHTML:SetHighlightAtlas
@@ -9421,6 +9813,7 @@ SimpleHTML:SetPlayerPingTexture
 SimpleHTML:SetPlaying
 SimpleHTML:SetPortraitZoom
 SimpleHTML:SetPosition
+SimpleHTML:SetPreferModelCollisionBounds
 SimpleHTML:SetPushedAtlas
 SimpleHTML:SetPushedTextOffset
 SimpleHTML:SetPushedTexture
@@ -9447,6 +9840,7 @@ SimpleHTML:SetRoll
 SimpleHTML:SetRotatesTexture
 SimpleHTML:SetRotation
 SimpleHTML:SetSVG
+SimpleHTML:SetScaleAnimationMode
 SimpleHTML:SetScaleFrom
 SimpleHTML:SetScaleTo
 SimpleHTML:SetScrollPercentage
@@ -9460,7 +9854,9 @@ SimpleHTML:SetSequence
 SimpleHTML:SetSequenceTime
 SimpleHTML:SetShadowEffect
 SimpleHTML:SetShapeshift
+SimpleHTML:SetSheathedCategory
 SimpleHTML:SetShrinkToFitWrapped
+SimpleHTML:SetSmoothScaling
 SimpleHTML:SetSmoothing
 SimpleHTML:SetSnapToPixelGrid
 SimpleHTML:SetSocketGem
@@ -9506,6 +9902,7 @@ SimpleHTML:SetTimeVisible
 SimpleHTML:SetTimerDuration
 SimpleHTML:SetToAlpha
 SimpleHTML:SetToFinalAlpha
+SimpleHTML:SetToPercent
 SimpleHTML:SetToTargetValue
 SimpleHTML:SetToyByItemID
 SimpleHTML:SetTradePlayerItem
@@ -9531,6 +9928,7 @@ SimpleHTML:SetValue
 SimpleHTML:SetValueStep
 SimpleHTML:SetVertTile
 SimpleHTML:SetVertexColor
+SimpleHTML:SetVertexColorFromBoolean
 SimpleHTML:SetVertexOffset
 SimpleHTML:SetViewInsets
 SimpleHTML:SetViewTranslation
@@ -9566,7 +9964,9 @@ SimpleHTML:UpdateMouseOverTooltip
 SimpleHTML:UpdateToMenuSelections
 SimpleHTML:UpdateWidth
 SimpleHTML:UseModelCenterToTransform
+SimpleHTML:UseUnitSheatheCategory
 SimpleHTML:_AddMessageSilent
+Slider:AddAccessRestrictions
 Slider:AddAtlas
 Slider:AddDoubleLine
 Slider:AddFontStrings
@@ -9578,6 +9978,7 @@ Slider:AddMessage
 Slider:AddMsg
 Slider:AddOnDisplayRefreshedCallback
 Slider:AddRoleset
+Slider:AddSecretAspect
 Slider:AddStaticEventMethod
 Slider:AddTexture
 Slider:AddUnit
@@ -9593,6 +9994,7 @@ Slider:AttachTexture
 Slider:BackFillMessage
 Slider:CalculateAction
 Slider:CallMethod
+Slider:CanBeAccessedInContext
 Slider:CanNonSpaceWrap
 Slider:CanSetUnit
 Slider:CanWordWrap
@@ -9630,14 +10032,17 @@ Slider:CycleVariation
 Slider:DrawBlob
 Slider:DrawNone
 Slider:EnableRegenerateOnResponse
+Slider:EnableSubtitles
 Slider:FadeOut
 Slider:FinalizeUnits
 Slider:Finish
 Slider:ForceUpdateTimers
 Slider:FreezeAnimation
+Slider:GetAccessRestrictions
 Slider:GetActorAtIndex
 Slider:GetActorByTag
 Slider:GetAdditionalRegions
+Slider:GetAlphaGradient
 Slider:GetAltArrowKeyMode
 Slider:GetAnchorType
 Slider:GetAnimationSpeedMultiplier
@@ -9673,7 +10078,10 @@ Slider:GetContentHeight
 Slider:GetCooldownDisplayDuration
 Slider:GetCooldownDuration
 Slider:GetCooldownTimes
+Slider:GetCountdownAbbrevThreshold
 Slider:GetCountdownFontString
+Slider:GetCountdownFormatter
+Slider:GetCountdownMillisecondsThreshold
 Slider:GetCursorPosition
 Slider:GetCustomLineSpacing
 Slider:GetDesaturation
@@ -9717,6 +10125,7 @@ Slider:GetFontStringByID
 Slider:GetForbiddenAspects
 Slider:GetFrameRef
 Slider:GetFromAlpha
+Slider:GetFromPercent
 Slider:GetHideCountdownNumbers
 Slider:GetHighlightColor
 Slider:GetHighlightFontObject
@@ -9763,6 +10172,7 @@ Slider:GetModelAlpha
 Slider:GetModelFileID
 Slider:GetModelScale
 Slider:GetModelSceneID
+Slider:GetModelUnitGUID
 Slider:GetMotionScriptsWhileDisabled
 Slider:GetMouseOverUnits
 Slider:GetNormalFontObject
@@ -9804,6 +10214,7 @@ Slider:GetRoll
 Slider:GetRotatesTexture
 Slider:GetRotation
 Slider:GetSVGFileID
+Slider:GetScaleAnimationMode
 Slider:GetScaledDesiredHeight
 Slider:GetScaledDesiredWidth
 Slider:GetScrollPercentage
@@ -9812,6 +10223,7 @@ Slider:GetShadowColor
 Slider:GetShadowEffect
 Slider:GetShadowOffset
 Slider:GetSmoothProgress
+Slider:GetSmoothScaling
 Slider:GetSmoothing
 Slider:GetSpacing
 Slider:GetSpell
@@ -9843,10 +10255,12 @@ Slider:GetTimeVisible
 Slider:GetTimerDuration
 Slider:GetToAlpha
 Slider:GetToFinalAlpha
+Slider:GetToPercent
 Slider:GetTooltipIndex
 Slider:GetUTF8CursorPosition
 Slider:GetUiMapID
 Slider:GetUnboundedStringWidth
+Slider:GetUnboundedStringWidthForText
 Slider:GetUnit
 Slider:GetUpperEmblemTexture
 Slider:GetUseAuraDisplayTime
@@ -9863,6 +10277,7 @@ Slider:GetZoom
 Slider:GetZoomLevels
 Slider:HasAccessConstraints
 Slider:HasAnimation
+Slider:HasAnyAccessRestrictions
 Slider:HasAnyForbiddenAspects
 Slider:HasAttachmentPoints
 Slider:HasCustomCamera
@@ -9901,7 +10316,9 @@ Slider:IsPassword
 Slider:IsPaused
 Slider:IsPendingFinish
 Slider:IsPlaying
+Slider:IsPreferringModelCollisionBounds
 Slider:IsReverse
+Slider:IsRolesetFiltered
 Slider:IsSecureText
 Slider:IsSetToFinalAlpha
 Slider:IsSlotAllowed
@@ -9949,6 +10366,7 @@ Slider:ResetLights
 Slider:ResetMessageFadeByID
 Slider:ResetSecondaryCompareItem
 Slider:ResetTexCoord
+Slider:ResizeToBoundsRect
 Slider:Restart
 Slider:Resume
 Slider:ScaleTextToFit
@@ -10019,6 +10437,8 @@ Slider:SetCooldownUNIX
 Slider:SetCountInvisibleLetters
 Slider:SetCountdownAbbrevThreshold
 Slider:SetCountdownFont
+Slider:SetCountdownFormatter
+Slider:SetCountdownMillisecondsThreshold
 Slider:SetCreature
 Slider:SetCurrencyToken
 Slider:SetCursorPosition
@@ -10028,6 +10448,7 @@ Slider:SetCustomWordWrapMinWidth
 Slider:SetDefaultCallback
 Slider:SetDefaultText
 Slider:SetDegrees
+Slider:SetDesaturateEmbeddedTextures
 Slider:SetDesaturated
 Slider:SetDesaturation
 Slider:SetDesiredWidth
@@ -10078,10 +10499,12 @@ Slider:SetFrameRef
 Slider:SetFrameStack
 Slider:SetFromAlpha
 Slider:SetFromModelSceneID
+Slider:SetFromPercent
 Slider:SetGlow
 Slider:SetGlyph
 Slider:SetGradient
 Slider:SetGradientMask
+Slider:SetGradientMaskWithDyes
 Slider:SetHeirloomByItemID
 Slider:SetHideCountdownNumbers
 Slider:SetHighlightAtlas
@@ -10167,6 +10590,7 @@ Slider:SetPlayerPingTexture
 Slider:SetPlaying
 Slider:SetPortraitZoom
 Slider:SetPosition
+Slider:SetPreferModelCollisionBounds
 Slider:SetPushedAtlas
 Slider:SetPushedTextOffset
 Slider:SetPushedTexture
@@ -10193,6 +10617,7 @@ Slider:SetRoll
 Slider:SetRotatesTexture
 Slider:SetRotation
 Slider:SetSVG
+Slider:SetScaleAnimationMode
 Slider:SetScaleFrom
 Slider:SetScaleTo
 Slider:SetScrollPercentage
@@ -10208,7 +10633,9 @@ Slider:SetShadowColor
 Slider:SetShadowEffect
 Slider:SetShadowOffset
 Slider:SetShapeshift
+Slider:SetSheathedCategory
 Slider:SetShrinkToFitWrapped
+Slider:SetSmoothScaling
 Slider:SetSmoothing
 Slider:SetSnapToPixelGrid
 Slider:SetSocketGem
@@ -10255,6 +10682,7 @@ Slider:SetTimeVisible
 Slider:SetTimerDuration
 Slider:SetToAlpha
 Slider:SetToFinalAlpha
+Slider:SetToPercent
 Slider:SetToTargetValue
 Slider:SetToyByItemID
 Slider:SetTradePlayerItem
@@ -10278,6 +10706,7 @@ Slider:SetUseTransmogChoices
 Slider:SetUseTransmogSkin
 Slider:SetVertTile
 Slider:SetVertexColor
+Slider:SetVertexColorFromBoolean
 Slider:SetVertexOffset
 Slider:SetViewInsets
 Slider:SetViewTranslation
@@ -10313,7 +10742,9 @@ Slider:UpdateMouseOverTooltip
 Slider:UpdateToMenuSelections
 Slider:UpdateWidth
 Slider:UseModelCenterToTransform
+Slider:UseUnitSheatheCategory
 Slider:_AddMessageSilent
+StatusBar:AddAccessRestrictions
 StatusBar:AddAtlas
 StatusBar:AddDoubleLine
 StatusBar:AddFontStrings
@@ -10325,6 +10756,7 @@ StatusBar:AddMessage
 StatusBar:AddMsg
 StatusBar:AddOnDisplayRefreshedCallback
 StatusBar:AddRoleset
+StatusBar:AddSecretAspect
 StatusBar:AddStaticEventMethod
 StatusBar:AddTexture
 StatusBar:AddUnit
@@ -10342,6 +10774,7 @@ StatusBar:AttachTexture
 StatusBar:BackFillMessage
 StatusBar:CalculateAction
 StatusBar:CallMethod
+StatusBar:CanBeAccessedInContext
 StatusBar:CanNonSpaceWrap
 StatusBar:CanSetUnit
 StatusBar:CanWordWrap
@@ -10381,14 +10814,17 @@ StatusBar:DrawBlob
 StatusBar:DrawNone
 StatusBar:Enable
 StatusBar:EnableRegenerateOnResponse
+StatusBar:EnableSubtitles
 StatusBar:FadeOut
 StatusBar:FinalizeUnits
 StatusBar:Finish
 StatusBar:ForceUpdateTimers
 StatusBar:FreezeAnimation
+StatusBar:GetAccessRestrictions
 StatusBar:GetActorAtIndex
 StatusBar:GetActorByTag
 StatusBar:GetAdditionalRegions
+StatusBar:GetAlphaGradient
 StatusBar:GetAltArrowKeyMode
 StatusBar:GetAnchorType
 StatusBar:GetAnimationSpeedMultiplier
@@ -10424,7 +10860,10 @@ StatusBar:GetContentHeight
 StatusBar:GetCooldownDisplayDuration
 StatusBar:GetCooldownDuration
 StatusBar:GetCooldownTimes
+StatusBar:GetCountdownAbbrevThreshold
 StatusBar:GetCountdownFontString
+StatusBar:GetCountdownFormatter
+StatusBar:GetCountdownMillisecondsThreshold
 StatusBar:GetCursorPosition
 StatusBar:GetCustomLineSpacing
 StatusBar:GetDesaturation
@@ -10467,6 +10906,7 @@ StatusBar:GetFontStringByID
 StatusBar:GetForbiddenAspects
 StatusBar:GetFrameRef
 StatusBar:GetFromAlpha
+StatusBar:GetFromPercent
 StatusBar:GetHideCountdownNumbers
 StatusBar:GetHighlightColor
 StatusBar:GetHighlightFontObject
@@ -10513,6 +10953,7 @@ StatusBar:GetModelAlpha
 StatusBar:GetModelFileID
 StatusBar:GetModelScale
 StatusBar:GetModelSceneID
+StatusBar:GetModelUnitGUID
 StatusBar:GetMotionScriptsWhileDisabled
 StatusBar:GetMouseOverUnits
 StatusBar:GetNormalFontObject
@@ -10553,6 +10994,7 @@ StatusBar:GetRolesetNames
 StatusBar:GetRoll
 StatusBar:GetRotation
 StatusBar:GetSVGFileID
+StatusBar:GetScaleAnimationMode
 StatusBar:GetScaledDesiredHeight
 StatusBar:GetScaledDesiredWidth
 StatusBar:GetScrollOffset
@@ -10562,6 +11004,7 @@ StatusBar:GetShadowColor
 StatusBar:GetShadowEffect
 StatusBar:GetShadowOffset
 StatusBar:GetSmoothProgress
+StatusBar:GetSmoothScaling
 StatusBar:GetSmoothing
 StatusBar:GetSpacing
 StatusBar:GetSpell
@@ -10591,10 +11034,12 @@ StatusBar:GetThumbTexture
 StatusBar:GetTimeVisible
 StatusBar:GetToAlpha
 StatusBar:GetToFinalAlpha
+StatusBar:GetToPercent
 StatusBar:GetTooltipIndex
 StatusBar:GetUTF8CursorPosition
 StatusBar:GetUiMapID
 StatusBar:GetUnboundedStringWidth
+StatusBar:GetUnboundedStringWidthForText
 StatusBar:GetUnit
 StatusBar:GetUpperEmblemTexture
 StatusBar:GetUseAuraDisplayTime
@@ -10612,6 +11057,7 @@ StatusBar:GetZoom
 StatusBar:GetZoomLevels
 StatusBar:HasAccessConstraints
 StatusBar:HasAnimation
+StatusBar:HasAnyAccessRestrictions
 StatusBar:HasAnyForbiddenAspects
 StatusBar:HasAttachmentPoints
 StatusBar:HasCustomCamera
@@ -10651,7 +11097,9 @@ StatusBar:IsPassword
 StatusBar:IsPaused
 StatusBar:IsPendingFinish
 StatusBar:IsPlaying
+StatusBar:IsPreferringModelCollisionBounds
 StatusBar:IsReverse
+StatusBar:IsRolesetFiltered
 StatusBar:IsScrollAllowed
 StatusBar:IsSecureText
 StatusBar:IsSetToFinalAlpha
@@ -10701,6 +11149,7 @@ StatusBar:ResetLights
 StatusBar:ResetMessageFadeByID
 StatusBar:ResetSecondaryCompareItem
 StatusBar:ResetTexCoord
+StatusBar:ResizeToBoundsRect
 StatusBar:Restart
 StatusBar:Resume
 StatusBar:ScaleTextToFit
@@ -10733,7 +11182,6 @@ StatusBar:SetBagItem
 StatusBar:SetBlendMode
 StatusBar:SetBlingTexture
 StatusBar:SetBlinkSpeed
-StatusBar:SetBlipTexture
 StatusBar:SetBlockingLoadsRequested
 StatusBar:SetBorderAlpha
 StatusBar:SetBorderScalar
@@ -10772,10 +11220,11 @@ StatusBar:SetCooldownDuration
 StatusBar:SetCooldownFromDurationObject
 StatusBar:SetCooldownFromExpirationTime
 StatusBar:SetCooldownUNIX
-StatusBar:SetCorpsePOIArrowTexture
 StatusBar:SetCountInvisibleLetters
 StatusBar:SetCountdownAbbrevThreshold
 StatusBar:SetCountdownFont
+StatusBar:SetCountdownFormatter
+StatusBar:SetCountdownMillisecondsThreshold
 StatusBar:SetCreature
 StatusBar:SetCurrencyToken
 StatusBar:SetCursorPosition
@@ -10785,6 +11234,7 @@ StatusBar:SetCustomWordWrapMinWidth
 StatusBar:SetDefaultCallback
 StatusBar:SetDefaultText
 StatusBar:SetDegrees
+StatusBar:SetDesaturateEmbeddedTextures
 StatusBar:SetDesaturated
 StatusBar:SetDesaturation
 StatusBar:SetDesiredWidth
@@ -10835,10 +11285,12 @@ StatusBar:SetFrameRef
 StatusBar:SetFrameStack
 StatusBar:SetFromAlpha
 StatusBar:SetFromModelSceneID
+StatusBar:SetFromPercent
 StatusBar:SetGlow
 StatusBar:SetGlyph
 StatusBar:SetGradient
 StatusBar:SetGradientMask
+StatusBar:SetGradientMaskWithDyes
 StatusBar:SetHeirloomByItemID
 StatusBar:SetHideCountdownNumbers
 StatusBar:SetHighlightAtlas
@@ -10851,7 +11303,6 @@ StatusBar:SetHorizontalScroll
 StatusBar:SetHyperlink
 StatusBar:SetHyperlinkFormat
 StatusBar:SetIconScale
-StatusBar:SetIconTexture
 StatusBar:SetInboxItem
 StatusBar:SetIndentedWordWrap
 StatusBar:SetInsertMode
@@ -10915,7 +11366,6 @@ StatusBar:SetOrder
 StatusBar:SetOrigin
 StatusBar:SetOwner
 StatusBar:SetOwningDialog
-StatusBar:SetPOIArrowTexture
 StatusBar:SetPadding
 StatusBar:SetPanExtentPercentage
 StatusBar:SetParticlesEnabled
@@ -10924,10 +11374,10 @@ StatusBar:SetPaused
 StatusBar:SetPitch
 StatusBar:SetPlayerPingScale
 StatusBar:SetPlayerPingTexture
-StatusBar:SetPlayerTexture
 StatusBar:SetPlaying
 StatusBar:SetPortraitZoom
 StatusBar:SetPosition
+StatusBar:SetPreferModelCollisionBounds
 StatusBar:SetPushedAtlas
 StatusBar:SetPushedTextOffset
 StatusBar:SetPushedTexture
@@ -10952,6 +11402,7 @@ StatusBar:SetRolesets
 StatusBar:SetRoll
 StatusBar:SetRotation
 StatusBar:SetSVG
+StatusBar:SetScaleAnimationMode
 StatusBar:SetScaleFrom
 StatusBar:SetScaleTo
 StatusBar:SetScrollAllowed
@@ -10969,7 +11420,9 @@ StatusBar:SetShadowColor
 StatusBar:SetShadowEffect
 StatusBar:SetShadowOffset
 StatusBar:SetShapeshift
+StatusBar:SetSheathedCategory
 StatusBar:SetShrinkToFitWrapped
+StatusBar:SetSmoothScaling
 StatusBar:SetSmoothing
 StatusBar:SetSnapToPixelGrid
 StatusBar:SetSocketGem
@@ -10980,7 +11433,6 @@ StatusBar:SetSpellByID
 StatusBar:SetSpriteSheetCell
 StatusBar:SetStartDelay
 StatusBar:SetStartPoint
-StatusBar:SetStaticPOIArrowTexture
 StatusBar:SetStepsPerPage
 StatusBar:SetSwipeColor
 StatusBar:SetSwipeTexture
@@ -11014,6 +11466,7 @@ StatusBar:SetThumbTexture
 StatusBar:SetTimeVisible
 StatusBar:SetToAlpha
 StatusBar:SetToFinalAlpha
+StatusBar:SetToPercent
 StatusBar:SetToyByItemID
 StatusBar:SetTradePlayerItem
 StatusBar:SetTradeSkillItem
@@ -11037,6 +11490,7 @@ StatusBar:SetUseTransmogSkin
 StatusBar:SetValueStep
 StatusBar:SetVertTile
 StatusBar:SetVertexColor
+StatusBar:SetVertexColorFromBoolean
 StatusBar:SetVertexOffset
 StatusBar:SetViewInsets
 StatusBar:SetViewTranslation
@@ -11072,8 +11526,10 @@ StatusBar:UpdateMouseOverTooltip
 StatusBar:UpdateToMenuSelections
 StatusBar:UpdateWidth
 StatusBar:UseModelCenterToTransform
+StatusBar:UseUnitSheatheCategory
 StatusBar:_AddMessageSilent
 Texture:AbortDrag
+Texture:AddAccessRestrictions
 Texture:AddAtlas
 Texture:AddDoubleLine
 Texture:AddFontStrings
@@ -11084,6 +11540,7 @@ Texture:AddMessage
 Texture:AddMsg
 Texture:AddOnDisplayRefreshedCallback
 Texture:AddRoleset
+Texture:AddSecretAspect
 Texture:AddStaticEventMethod
 Texture:AddTexture
 Texture:AddUnit
@@ -11099,6 +11556,7 @@ Texture:AttachTexture
 Texture:BackFillMessage
 Texture:CalculateAction
 Texture:CallMethod
+Texture:CanBeAccessedInContext
 Texture:CanChangeAttribute
 Texture:CanNonSpaceWrap
 Texture:CanSetUnit
@@ -11152,15 +11610,18 @@ Texture:EnableGamePadButton
 Texture:EnableGamePadStick
 Texture:EnableKeyboard
 Texture:EnableRegenerateOnResponse
+Texture:EnableSubtitles
 Texture:ExecuteAttribute
 Texture:FadeOut
 Texture:FinalizeUnits
 Texture:Finish
 Texture:ForceUpdateTimers
 Texture:FreezeAnimation
+Texture:GetAccessRestrictions
 Texture:GetActorAtIndex
 Texture:GetActorByTag
 Texture:GetAdditionalRegions
+Texture:GetAlphaGradient
 Texture:GetAltArrowKeyMode
 Texture:GetAnchorType
 Texture:GetAnimationSpeedMultiplier
@@ -11198,7 +11659,10 @@ Texture:GetContentHeight
 Texture:GetCooldownDisplayDuration
 Texture:GetCooldownDuration
 Texture:GetCooldownTimes
+Texture:GetCountdownAbbrevThreshold
 Texture:GetCountdownFontString
+Texture:GetCountdownFormatter
+Texture:GetCountdownMillisecondsThreshold
 Texture:GetCursorPosition
 Texture:GetCustomLineSpacing
 Texture:GetDesiredHeight
@@ -11246,6 +11710,7 @@ Texture:GetFrameLevel
 Texture:GetFrameRef
 Texture:GetFrameStrata
 Texture:GetFromAlpha
+Texture:GetFromPercent
 Texture:GetHideCountdownNumbers
 Texture:GetHighestFrameLevel
 Texture:GetHighlightColor
@@ -11295,6 +11760,7 @@ Texture:GetModelAlpha
 Texture:GetModelFileID
 Texture:GetModelScale
 Texture:GetModelSceneID
+Texture:GetModelUnitGUID
 Texture:GetMotionScriptsWhileDisabled
 Texture:GetMouseOverUnits
 Texture:GetNormalFontObject
@@ -11342,6 +11808,7 @@ Texture:GetRolesetNames
 Texture:GetRoll
 Texture:GetRotatesTexture
 Texture:GetSVGFileID
+Texture:GetScaleAnimationMode
 Texture:GetScaledDesiredHeight
 Texture:GetScaledDesiredWidth
 Texture:GetScrollPercentage
@@ -11350,6 +11817,7 @@ Texture:GetShadowColor
 Texture:GetShadowEffect
 Texture:GetShadowOffset
 Texture:GetSmoothProgress
+Texture:GetSmoothScaling
 Texture:GetSmoothing
 Texture:GetSpacing
 Texture:GetSpell
@@ -11376,10 +11844,12 @@ Texture:GetTimeVisible
 Texture:GetTimerDuration
 Texture:GetToAlpha
 Texture:GetToFinalAlpha
+Texture:GetToPercent
 Texture:GetTooltipIndex
 Texture:GetUTF8CursorPosition
 Texture:GetUiMapID
 Texture:GetUnboundedStringWidth
+Texture:GetUnboundedStringWidthForText
 Texture:GetUnit
 Texture:GetUpperEmblemTexture
 Texture:GetUseAuraDisplayTime
@@ -11397,6 +11867,7 @@ Texture:GetZoomLevels
 Texture:HasAccessConstraints
 Texture:HasAlphaGradient
 Texture:HasAnimation
+Texture:HasAnyAccessRestrictions
 Texture:HasAnyForbiddenAspects
 Texture:HasAttachmentPoints
 Texture:HasCustomCamera
@@ -11448,8 +11919,10 @@ Texture:IsPassword
 Texture:IsPaused
 Texture:IsPendingFinish
 Texture:IsPlaying
+Texture:IsPreferringModelCollisionBounds
 Texture:IsResizable
 Texture:IsReverse
+Texture:IsRolesetFiltered
 Texture:IsSecureText
 Texture:IsSetToFinalAlpha
 Texture:IsSlotAllowed
@@ -11506,6 +11979,7 @@ Texture:ResetInputMode
 Texture:ResetLights
 Texture:ResetMessageFadeByID
 Texture:ResetSecondaryCompareItem
+Texture:ResizeToBoundsRect
 Texture:Restart
 Texture:Resume
 Texture:RotateTextures
@@ -11536,7 +12010,6 @@ Texture:SetBackpackToken
 Texture:SetBagItem
 Texture:SetBlingTexture
 Texture:SetBlinkSpeed
-Texture:SetBlipTexture
 Texture:SetBorderAlpha
 Texture:SetBorderScalar
 Texture:SetBorderTexture
@@ -11577,10 +12050,11 @@ Texture:SetCooldownDuration
 Texture:SetCooldownFromDurationObject
 Texture:SetCooldownFromExpirationTime
 Texture:SetCooldownUNIX
-Texture:SetCorpsePOIArrowTexture
 Texture:SetCountInvisibleLetters
 Texture:SetCountdownAbbrevThreshold
 Texture:SetCountdownFont
+Texture:SetCountdownFormatter
+Texture:SetCountdownMillisecondsThreshold
 Texture:SetCreature
 Texture:SetCurrencyToken
 Texture:SetCursorPosition
@@ -11590,6 +12064,7 @@ Texture:SetCustomWordWrapMinWidth
 Texture:SetDefaultCallback
 Texture:SetDefaultText
 Texture:SetDegrees
+Texture:SetDesaturateEmbeddedTextures
 Texture:SetDesiredWidth
 Texture:SetDisabledAtlas
 Texture:SetDisabledCheckedTexture
@@ -11645,9 +12120,11 @@ Texture:SetFrameStack
 Texture:SetFrameStrata
 Texture:SetFromAlpha
 Texture:SetFromModelSceneID
+Texture:SetFromPercent
 Texture:SetGlow
 Texture:SetGlyph
 Texture:SetGradientMask
+Texture:SetGradientMaskWithDyes
 Texture:SetHeirloomByItemID
 Texture:SetHideCountdownNumbers
 Texture:SetHighlightAtlas
@@ -11664,7 +12141,6 @@ Texture:SetHyperlinkPropagateToParent
 Texture:SetHyperlinksEnabled
 Texture:SetID
 Texture:SetIconScale
-Texture:SetIconTexture
 Texture:SetIgnoringChildrenForBounds
 Texture:SetInboxItem
 Texture:SetIndentedWordWrap
@@ -11732,7 +12208,6 @@ Texture:SetOrientation
 Texture:SetOrigin
 Texture:SetOwner
 Texture:SetOwningDialog
-Texture:SetPOIArrowTexture
 Texture:SetPadding
 Texture:SetPanExtentPercentage
 Texture:SetParticlesEnabled
@@ -11741,10 +12216,10 @@ Texture:SetPaused
 Texture:SetPitch
 Texture:SetPlayerPingScale
 Texture:SetPlayerPingTexture
-Texture:SetPlayerTexture
 Texture:SetPlaying
 Texture:SetPortraitZoom
 Texture:SetPosition
+Texture:SetPreferModelCollisionBounds
 Texture:SetPropagateKeyboardInput
 Texture:SetPushedAtlas
 Texture:SetPushedTextOffset
@@ -11773,6 +12248,7 @@ Texture:SetRolesets
 Texture:SetRoll
 Texture:SetRotatesTexture
 Texture:SetSVG
+Texture:SetScaleAnimationMode
 Texture:SetScaleFrom
 Texture:SetScaleTo
 Texture:SetScrollPercentage
@@ -11788,7 +12264,9 @@ Texture:SetShadowColor
 Texture:SetShadowEffect
 Texture:SetShadowOffset
 Texture:SetShapeshift
+Texture:SetSheathedCategory
 Texture:SetShrinkToFitWrapped
+Texture:SetSmoothScaling
 Texture:SetSmoothing
 Texture:SetSocketGem
 Texture:SetSocketedItem
@@ -11797,7 +12275,6 @@ Texture:SetSpellBookItem
 Texture:SetSpellByID
 Texture:SetStartDelay
 Texture:SetStartPoint
-Texture:SetStaticPOIArrowTexture
 Texture:SetStatusBarColor
 Texture:SetStatusBarDesaturated
 Texture:SetStatusBarDesaturation
@@ -11831,6 +12308,7 @@ Texture:SetTimeVisible
 Texture:SetTimerDuration
 Texture:SetToAlpha
 Texture:SetToFinalAlpha
+Texture:SetToPercent
 Texture:SetToTargetValue
 Texture:SetToplevel
 Texture:SetToyByItemID
@@ -11898,4 +12376,5 @@ Texture:UpdateMouseOverTooltip
 Texture:UpdateToMenuSelections
 Texture:UpdateWidth
 Texture:UseModelCenterToTransform
+Texture:UseUnitSheatheCategory
 Texture:_AddMessageSilent
