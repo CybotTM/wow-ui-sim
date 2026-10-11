@@ -33,7 +33,7 @@ Observed treatment windows: before 33.483108 s wall / 82.580194 CPU-s (~2.4663 c
 
 ## Retention and acceptance
 
-178 text copies (13,392,139 bytes) are recorded in [retention-manifest.json](retention-manifest.json), covering `compile-controls/`, `cache-before/`, `cache-after/`, `original-cases/`, `new-input/`, `stock-startup/`, `reports/` and generated-source snapshots. Private original receipts remain unchanged. The selected receipt pattern screen found no credential-pattern hits; that is not exhaustive secret detection. Independent retention verification remains pending and prevents claiming the tracked packet complete.
+178 text copies (13,392,139 bytes) are recorded in [retention-manifest.json](retention-manifest.json), covering `compile-controls/`, `cache-before/`, `cache-after/`, `original-cases/`, `new-input/`, `stock-startup/`, `reports/` and generated-source snapshots. Private original receipts remain unchanged. The selected receipt pattern screen found no credential-pattern hits; that is not exhaustive secret detection. [Independent retention/doc gate](../dev-only-harness-retention-2026-10-11/independent-report.md) accepts all 178 copies and 23 scoped links at `a36b8e047`; this later status update adds no code acceptance. One final-source integration/prefork/lib suite at `c75ccfe02` was submitted asynchronously as `full-suite-1791697246.service`; no result is admitted here.
 
 Source, selected simulator execution and local cache isolation have separate bounded proof. Desktop/native acceptance, original Mists hidden-startup behavior, Garrison authentic catalog, source-blocked Wrath/Era/Anniversary, historical full-suite failures and broader handoff remain OPEN. No provider/model change, vendor/cache acquisition, binary deployment or push.
 

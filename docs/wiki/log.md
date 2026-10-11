@@ -1,6 +1,6 @@
 ## [2026-10-11] audit | Dev-only harness ownership
 
-Updated [harness SSOT](systems/prefork-test-harness.md#dev-only-automatic-generation--2026-10-11) and index; corrected generation-source links after helper extraction. Linked bounded source/execution/cache evidence without promoting it to native/full-profile acceptance or rewriting historical failures.
+Updated [harness SSOT](systems/prefork-test-harness.md#dev-only-automatic-generation--2026-10-11) and index; corrected generation-source links after helper extraction. Linked bounded source/execution/cache evidence, later temporary-marker discovery/cleanup and stock CLI proof, plus independent retention acceptance. No native/full-profile promotion or historical failure rewrite.
 
 ## [2026-10-11] audit | MovieFrame arity gap
 
