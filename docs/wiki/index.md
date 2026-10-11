@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Seven-profile legacy-aura controls — limited scope
+
+[Seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-profile-aura-controls--2026-10-11-utc): same8existing limited tests pass8/8 each;56profile cases, not56unique/semantic/native passes. Retail8 already inside suite469; other six use separate sealed captures. Explicit blocked source-input lanes, tuple/caster gaps and parent OPEN preserved.
+
 ## [2026-10-11] audit | Saved469 suite — FAIL
 
 [469 investigation](investigations/fullsuite-469-2026-10-11.md):15,021PASS/3FAIL/19skips,15,024executed; unit2/Boolean3, Retail aura8, original prefork auxiliary4 allPASS inside totals. Method snapshots/Garrison stillFAIL; mutable new-failure label not regression evidence. Timing-budget PASS this execution is not a repair/stability claim. Native/other-profile/full handoff OPEN.

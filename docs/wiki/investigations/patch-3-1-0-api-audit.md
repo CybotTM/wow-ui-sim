@@ -86,6 +86,22 @@ Existing [assertions](../../../tests/aura_api.rs) check default-fixture player-b
 
 [Source summary](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/legacy-aura-controls/source-summary.json) composes prior accepted artifact identities with recorded retry pre/post guards and equal3,846-entry source maps. Actual saved retry cgroup quota12/16GiB is separate from normal wow-sim affinity policy; endpoint counters are not exclusive test costs. Historical publication/fragment ledger counts and all original receipts remain unchanged. Other profiles, full Blizzard startup, exact legacy tuple/caster contracts and parent handoff remain OPEN.
 
+## Remaining-profile aura controls — 2026-10-11 UTC
+
+Four separate saved-partition audits admit32/32 exact executions of the same eight limited assertions on PTR/Era/Anniversary/Forever: [PTR](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/legacy-aura-other-profiles/ptr-independent-report.md), [Era](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/legacy-aura-other-profiles/era-independent-report.md), [Anniversary](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/legacy-aura-other-profiles/anniversary-independent-report.md), [Forever](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/legacy-aura-other-profiles/forever-independent-report.md). No rebuild or source-dependent startup; accepted unit2 binaries and3,846-entry maps compose with recorded pre/post guards. [Summary](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/legacy-aura-other-profiles/source-summary.json) keeps this separate from full input/hermetic closure.
+
+| Profile | Exact limited cases | Receipt |
+|---|---:|---|
+| Retail | 8/8 | Actual integration events in [suite469](fullsuite-469-2026-10-11.md); already inside15,024executions |
+| PTR | 8/8 | Sealed-binary partition015231 |
+| Wrath | 8/8 | Earlier retry004047 |
+| Mists | 8/8 | Earlier retry004047 |
+| Era | 8/8 | Sealed-binary partition015231 |
+| Anniversary | 8/8 | Sealed-binary partition015231 |
+| Forever | 8/8 | Sealed-binary partition015231 |
+
+56profile cases of eight distinct tests across seven named builds, **not56unique tests or full aura compatibility**. Retail cases are not extra suite executions; other six-profile captures are not part of that suite. Artifact feature sets/revisions and capture times differ; no single whole-tree/hermetic/native proof. Exact tuple/caster/controller/arena/ordering/populated-harmful contracts remain unproved. Historical source ledger unchanged. User explicitly keeps missing Wrath/Era/Anniversary Blizzard UI input lanes BLOCKED: no transfer/sync, and bare-library PASS does not lift startup/native blockers. Parent handoff OPEN.
+
 ## Sources
 
 - Local handoffs: `/home/osso/.local/state/wow-ui-sim/handoff/autohide-vendor-driver-current.md` — cached driver source audit; `autohide-contract-root-current.md` in the same directory — main erratum, historical caveat and unexecuted fixture.

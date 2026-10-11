@@ -1489,3 +1489,7 @@ Added separate [retry receipt](investigations/patch-3-1-0-api-audit.md#later-sha
 ## [2026-10-11] audit | Saved469 suite — FAIL
 
 Added [469 investigation](investigations/fullsuite-469-2026-10-11.md) and small sanitized receipts:15,021PASS/3FAIL/19skips,15,024executed, no deduplication. Unit2/Boolean3, Retail aura8 and original prefork auxiliary4 PASS are already inside totals. Same three failure identities as956; Garrison new-label not regression evidence. Budget test PASS this execution not timing repair/stability. Parent/native/other-profile acceptance OPEN; no replay.
+
+## [2026-10-11] audit | Seven-profile legacy-aura controls — limited scope
+
+Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-profile-aura-controls--2026-10-11-utc) with four admitted32case partitions; combined separate Wrath/Mists16 and Retail8alreadyinside suite469 yields56profile cases of8distinct limited tests. No rebuild/native/tuple/caster/fullhandoff claim. User-directed source-input blocks remain, no transfer/sync; frozen historical ledger unchanged.
