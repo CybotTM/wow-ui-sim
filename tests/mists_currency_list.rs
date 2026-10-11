@@ -224,6 +224,92 @@ fn currency_list_info_preserves_max_quantity_in_namespace_and_legacy_tuple() {
 }
 
 #[test]
+fn legacy_currency_display_updates_preserve_static_rows_and_backpack_membership() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+    env.exec(
+        r#"
+        currencyPreservationBaseline = {
+            size = GetCurrencyListSize(),
+            header = { GetCurrencyListInfo(1) },
+            unwatched = { GetCurrencyListInfo(3) },
+            neighbor = { GetBackpackCurrencyInfo(2) },
+        }
+        assert(currencyPreservationBaseline.neighbor[4] == 3089)
+        "#,
+    )
+    .expect("static currency rows should be available without loading addons");
+
+    for (name, quantity, max_quantity, icon_file_id) in [
+        ("Updated Valorstones", 123, 456, 134400),
+        ("Zero Valorstones", 0, 0, 134401),
+    ] {
+        {
+            let state = env.state();
+            let mut state = state.borrow_mut();
+            let info = state
+                .currency_info
+                .get_mut(&2245)
+                .expect("Valorstones should already exist in the currency map");
+            info.name = name.to_string();
+            info.quantity = quantity;
+            info.max_quantity = max_quantity;
+            info.icon_file_id = icon_file_id;
+            info.is_show_in_backpack = false;
+        }
+
+        env.exec(&format!(
+            r#"
+            local info = C_CurrencyInfo.GetCurrencyListInfo(2)
+            local legacy = {{ GetCurrencyListInfo(2) }}
+            assert(select('#', GetCurrencyListInfo(2)) == 12)
+            assert(legacy[1] == "{name}" and legacy[1] == info.name)
+            assert(legacy[5] == true and info.isShowInBackpack == true)
+            assert(legacy[6] == {quantity} and legacy[6] == info.quantity)
+            assert(legacy[7] == {icon_file_id} and legacy[7] == info.iconFileID)
+            assert(legacy[8] == {max_quantity} and legacy[8] == info.maxQuantity)
+            assert(legacy[12] == 2245 and legacy[12] == info.currencyTypesID)
+            assert(legacy[2] == false and info.isHeader == false)
+            assert(legacy[3] == false and info.isHeaderExpanded == false)
+            assert(legacy[4] == false and legacy[11] == false)
+
+            local backpack = C_CurrencyInfo.GetBackpackCurrencyInfo(1)
+            local legacyBackpack = {{ GetBackpackCurrencyInfo(1) }}
+            assert(select('#', GetBackpackCurrencyInfo(1)) == 4)
+            assert(legacyBackpack[1] == "{name}" and legacyBackpack[1] == backpack.name)
+            assert(legacyBackpack[2] == {quantity} and legacyBackpack[2] == backpack.quantity)
+            assert(legacyBackpack[3] == {icon_file_id} and legacyBackpack[3] == backpack.iconFileID)
+            assert(legacyBackpack[4] == 2245 and legacyBackpack[4] == backpack.currencyTypesID)
+
+            local baseline = currencyPreservationBaseline
+            assert(GetCurrencyListSize() == baseline.size)
+            for _, row in ipairs({{ {{1, baseline.header}}, {{3, baseline.unwatched}} }}) do
+                local unchanged = {{ GetCurrencyListInfo(row[1]) }}
+                assert(select('#', GetCurrencyListInfo(row[1])) == 12)
+                for slot = 1, 12 do
+                    assert(unchanged[slot] == row[2][slot])
+                end
+                local unchangedInfo = C_CurrencyInfo.GetCurrencyListInfo(row[1])
+                assert(unchangedInfo.isHeader == unchanged[2])
+                assert(unchangedInfo.isHeaderExpanded == unchanged[3])
+                assert(unchangedInfo.isShowInBackpack == unchanged[5])
+            end
+            local neighbor = {{ GetBackpackCurrencyInfo(2) }}
+            assert(select('#', GetBackpackCurrencyInfo(2)) == 4)
+            for slot = 1, 4 do
+                assert(neighbor[slot] == baseline.neighbor[slot])
+            end
+            local neighborInfo = C_CurrencyInfo.GetBackpackCurrencyInfo(2)
+            assert(neighborInfo.currencyTypesID == 3089)
+            assert(neighborInfo.name == neighbor[1])
+            assert(neighborInfo.quantity == neighbor[2])
+            assert(neighborInfo.iconFileID == neighbor[3])
+            "#,
+        ))
+        .expect("legacy display tuples should update without changing static currency rows");
+    }
+}
+
+#[test]
 fn legacy_currency_list_size_wraps_c_currency_info() {
     let env = load_mists_token_ui_env();
 

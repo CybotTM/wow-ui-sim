@@ -47,6 +47,10 @@ Four supplied-state regressions in `tests/currency_info_probes.rs`, introduced a
 - `get_currency_list_info_returns_nil_when_existing_currency_row_is_removed`
 - `get_backpack_currency_info_returns_nothing_when_existing_currency_row_is_removed`
 
+Mists wrapper preservation probe in `tests/mists_currency_list.rs`:
+
+- `legacy_currency_display_updates_preserve_static_rows_and_backpack_membership` — successive positive/zero display updates, exact legacy tuple arity/slots and static watched membership despite a conflicting supplied backpack flag; execution pending.
+
 ## Known gaps (current cycle)
 
 - [ ] Targeted GREEN and preservation controls remain pending. Authentic default Retail RED at `20261011T073849Z`, revision `f4a6fb2e4`, compiled successfully and executed 12 existing controls PASS / four new regressions FAIL / exit 101 with seven scoped inputs unchanged. Initial `085f7d799` attempt failed compilation because the test decoder does not support `u32`; zero cases executed. Historical static-field proof does not cover mutation behavior.
