@@ -1,5 +1,9 @@
 # Integrated source and factory proof — 2026-10-09
 
+## Acceptance authority — 2026-10-11
+
+User changed acceptance: “as long as we have coherent behavior that works with the addons we are good”. Coherent simulator-defined addon-compatible behavior is sufficient; native parity/captures no longer block its acceptance. This supersedes native-evidence completion requirements in older handoff/plan entries, not their evidence records or other approved scope. Source declarations, simulator runtime proof and native observations remain distinct: simulator acceptance does not establish native parity. Incomplete, failed, resource-blocked or unattempted tests keep their recorded status; this decision alone closes no implementation or test gap. Missing Wrath/Era/Anniversary vendor-input lanes remain BLOCKED; no transfer/sync or vendor-lane reopening is authorized.
+
 ## Currency supplied-state projection — partial cross-profile handoff
 
 [Contract](../../specs/currency-list-field-projection.md) records the explicitly approved display projection: existing listed rows read current supplied state; static headers/order/watched membership remain. [Default/Mists packet](../../../data/patch-api/evidence/currency-supplied-state-2026-10-11/README.md) preserves authentic RED before producer repair, bounded runtime/check/startup gates and independent retention. [Earlier profile follow-up](../../../data/patch-api/evidence/currency-profile-followup-2026-10-11/README.md) preserves two zero-case Era resource blocks and initially unattempted Anniversary/Forever. [Seven-profile packet](../../../data/patch-api/evidence/currency-seven-profile-2026-10-11/README.md) adds independently accepted remaining-only retry2: Era/Anniversary/Forever16/16 each. Partial handoff describes overall acceptance, not an incomplete targeted-profile matrix.

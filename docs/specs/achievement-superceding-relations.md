@@ -30,7 +30,7 @@
 ## Known gaps (current cycle)
 
 - [ ] Implement query after expanded behavioral RED; obtain targeted GREEN, relevant format/check/startup and independent proof.
-- [ ] Native catalogs, native ordering and absent-ID semantics remain unverified; supplied-state policy does not complete historical or all-profile acceptance.
+- Native catalogs, native ordering and absent-ID semantics remain unverified, not blockers for coherent addon-compatible supplied-state behavior under the [current acceptance authority](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#acceptance-authority--2026-10-11). Historical/all-profile runtime coverage is not established by this policy.
 - [ ] Numeric IDs use the existing signed-i32 model. Other numeric values cannot alias a stored key; no native coercion/range policy is claimed.
 
 ## Out of scope
