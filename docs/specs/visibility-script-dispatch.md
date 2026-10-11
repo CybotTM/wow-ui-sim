@@ -4,6 +4,7 @@ Runtime `Show`, `Hide`, and `SetShown` transitions in `src/lua_api/frame/methods
 
 ## What it must do
 
+- [x] Direct Frame `SetShown(true)` and `SetShown(false)` update local shown state.
 - [x] Deliver intrinsic precall, normal, and intrinsic postcall bindings for each affected frame, in that order.
 - [x] Preserve children-first traversal and exclude children whose own shown state is false. Ancestor hiding must not change a shown child's own shown state.
 - [x] Preserve existing parent transitions, unchanged-state no-ops, reentrant show/hide draining, and depth/cycle limits. A handler-selected opposite state is processed after the current frame's binding sequence completes.
@@ -28,13 +29,15 @@ These are engine script/lifecycle requirements, not guessed aura data. The visib
 
 ## Tests asserting this spec
 
-- `tests/frame_creation/visibility_scripts.rs::test_set_shown_boolean_transitions_update_frame_state` — direct `SetShown(true)`/`SetShown(false)` local shown-state assertions; RED/GREEN pending, no production setter change or native-parity claim.
+- `tests/frame_creation/visibility_scripts.rs::test_set_shown_boolean_transitions_update_frame_state` — direct `SetShown(true)`/`SetShown(false)` local shown-state assertions; 1 PASS before production repair and PASS in all seven final profiles, with no production setter change or native-parity claim.
 - `tests/blizzard_restricted_addon_environment_loads.rs` — unchanged secure Show/Hide snippets from addon callers, combat denial, and addon-origin callback taint preservation.
 - `tests/frame_creation/visibility_scripts.rs` — real XML intrinsic bindings, children-first ordering, hidden-child exclusion, reentrant hide, error continuation, and existing recursion/depth controls.
 - `tests/methods_hierarchy.rs` — pure Lua public reparenting transitions, no-op and hidden-child controls, redirect, and handler-error continuation.
 - `tests/forever_forbidden_consumers.rs` — real native container configured while its parent is hidden, followed by two show/add/remove/hide cycles and registration/assignment assertions.
 
 ## Proof
+
+[Accepted independent unit2/boolean matrix](../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/unit2-green/final-report.md): direct boolean control passed before production repair (1 PASS), then in all seven profiles; visibility group passes 10/10 per profile (70/70). Each profile deliberately emits one `visibility precall failure` for error-continuation coverage; passing tests do not mean error-free test stderr. This does not close the protected/forbidden taint requirement or establish native parity.
 
 At `9c223f8b7`, `frame_creation::visibility_scripts::` passes 9/9 and constructs synthetic bindings with explicit `Frame` templates after the earlier unknown-custom-frame-type fixture failure. `forever_forbidden_consumers::` passed 5/5 at `1582438c6`, including the real hidden-parent AuraContainer lifecycle; that unchanged proof remains valid after the synthetic-fixture-only correction. `/tmp/ellesmere-forever/visibility-gui-acceptance-ledger.json` records the unchanged addon completing all five existing interaction groups plus trusted aura paint, removal, and cleanup, with zero Lua-error lines during the 90-second run; exit 124 is expected teardown.
 

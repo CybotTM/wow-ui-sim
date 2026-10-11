@@ -4,11 +4,12 @@
 
 ## What it must do
 
-- [ ] Match the first event payload against either registered literal token (OR), delivering the original payload to `OnEvent`. With `"player", "target"`, both player and target health events must arrive; an unmatched token must not arrive.
-- [ ] Preserve single-unit filtering: player-only registration suppresses target events and target-only registration suppresses player events.
-- [ ] Re-registering with one unit replaces the two-unit filter; the former second unit no longer matches.
-- [ ] `UnregisterEvent` and `UnregisterAllEvents` remove the complete filter and prevent delivery for both units.
-- [ ] Keep existing `IsEventRegistered` first-unit reporting and query return arity unchanged. Keep the existing invalid-first-unit policy unchanged; neither behavior is newly established native parity.
+- [x] Match the first event payload against either registered literal token (OR), delivering the original payload to `OnEvent`. With `"player", "target"`, both player and target health events must arrive; an unmatched token must not arrive.
+- [x] Preserve single-unit filtering: player-only registration suppresses target events and target-only registration suppresses player events.
+- [x] Re-registering with one unit replaces the two-unit filter; the former second unit no longer matches.
+- [x] `UnregisterEvent` and `UnregisterAllEvents` remove the complete filter and prevent delivery for both units.
+- [x] Keep existing `IsEventRegistered` first-unit reporting and invalid-first-unit policy unchanged; neither behavior is newly established native parity.
+- [x] Keep exact query return arity unchanged for the bounded current model. [Independent Retail CLI proof](../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/unit2-query-arity/final-report.md) passes 5/5 states with exactly two values: fresh, pair registration, single-target replacement, unregister, and invalid-first policy. Marker plus trailing `[]` and exit 0 establish execution; no other-profile arity or native query-parity claim.
 
 ## How it works
 
@@ -27,9 +28,13 @@
 - `tests/unit_event_second_unit.rs::second_unit_filter_receives_modeled_player_and_target_health_events` — modeled player healing and target damage, single-unit controls, original first payload, and existing first-unit query control.
 - `tests/unit_event_second_unit.rs::reregistering_and_unregistering_clear_the_second_unit_filter` — unmatched-token suppression, one-unit replacement, unregister, and unregister-all controls.
 
+## Accepted bounded proof
+
+[Authentic RED](../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/unit2-red/final-report.md) records 1 FAIL/1 PASS: missing second-unit target damage delivery. [Independent GREEN](../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/unit2-green/final-report.md) accepts 119/119 cases across seven profiles and 49 commands, including both unit2 cases and first-unit/invalid-first query controls per profile. The separate Retail query receipt closes bounded current-model exact arity (5/5 states), not native query parity. Native query behavior, aliases, catalog identity, Mists startup and full handoff remain OPEN.
+
 ## Known gaps (current cycle)
 
-- [ ] RED/GREEN and verification for `tests/unit_event_second_unit.rs` remain pending; this document records no passing execution.
+No remaining gap in the approved player/target repair and bounded query-preservation slice. Broader native contracts remain separate.
 
 ## Out of scope
 

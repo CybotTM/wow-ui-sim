@@ -1,6 +1,6 @@
 ## [2026-10-10] observation | Historical visibility controls, partial coverage
 
-[Five-profile shared controls](investigations/patch-5-0-4-api-audit.md#five-profile-shared-system-preservation) supplement the separate [5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof), which separates saved Mists/Era controls from unproved boolean Frame transitions, optionalunit2 and native identity. Historical accounting unchanged; Mists startup assertion still FAIL.
+[Five-profile shared controls](investigations/patch-5-0-4-api-audit.md#five-profile-shared-system-preservation) supplement the separate [5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof), which separates historical Mists/Era receipts from accepted bounded seven-profile unit2/boolean proof and still-unproved native identity. Historical accounting unchanged; Mists startup assertion still FAIL.
 
 ## [2026-10-10] audit | Five-profile ordinary scalar preservation
 
@@ -10,9 +10,9 @@
 
 [714 SSOT](investigations/fullsuite-714-2026-10-10.md):15,017PASS4FAIL19skips/15,021executions, scalar6+controls+auxiliary4PASS. Historicalmethodpair/Garrison plus newProjectConstants1.36s/1soutlierFAIL. Isolatedsame-source control1logicalPASS/206.47ms doesnotprove loaded-condition repair/causality. Later seven-profileexportchecksPASS0, sixdependencywarnings/zero simulatorwarnings each; no runtime/native/fullhandoff completion.
 
-## [2026-10-10] observation | Frame unit2 repair — GREEN pending
+## [2026-10-10] observation | Frame unit2/boolean — bounded GREEN accepted
 
-[5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof) records authentic unit2 RED1FAIL/1PASS and separate Frame boolean1PASS; [event system](../event-system.md#registerunitevent) describes current pair storage/OR filtering. Seven-profile GREEN pending; historical counts and native unknowns unchanged.
+[Accepted matrix](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof): authentic RED1FAIL/1PASS; independent GREEN119/119 across seven profiles/49 commands; direct boolean1PASS before repair and seven-profile PASS; compile7/fmt/default+PTR checks exit0; three distinct CASC-disabled stock CLI captures `[]`/exit0. Separate Retail query receipt passes five exact-two-value states. All3846 source inputs match despite cc4f4c782 vs docs-only24c727075 artifact revisions. Warnings/intentional visibility errors retained. Native query, aliases, catalog, Mists startup and full handoff OPEN; historical accounting unchanged. [Event system](../event-system.md#registerunitevent).
 
 ## [2026-10-10] audit | Saved 956 suite — FAIL
 

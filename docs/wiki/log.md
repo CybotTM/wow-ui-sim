@@ -1,6 +1,6 @@
-## [2026-10-10] observation | Frame unit2 repair — GREEN pending
+## [2026-10-10] observation | Frame unit2/boolean — bounded GREEN accepted
 
-[5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof) distinguishes pre-`cc4f4c782` single-unit gap, authentic RED1FAIL/1PASS and separate Frame boolean1PASS from current [pair storage/OR dispatch](../event-system.md#registerunitevent). Seven-profile `unit2-green-current` verification pending, not admitted PASS; historical counts/native boundaries preserved.
+Updated [accepted matrix](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof), [unit filter](../specs/frame-unit-event-filter.md), [visibility](../specs/visibility-script-dispatch.md), and [event system](../event-system.md#registerunitevent) from independent receipts: RED1FAIL/1PASS; GREEN119/119, seven profiles/49 commands; direct boolean1PASS before repair plus seven-profile PASS; compile7/fmt/default+PTR checks exit0; three distinct CASC-disabled stock CLI captures `[]`/exit0. Separate Retail exact-query receipt passes5/5 states with marker/trailing`[]`/exit0. Artifact source revisions cc4f4c782 and docs-only24c727075 share identical3846 proof inputs. Dependency/test-helper warnings and expected visibility injection retained. Native query, aliases, catalog, Mists startup/full handoff remain OPEN; historical accounting unchanged. Receipts executed October11 UTC; entry retains October10 local work date.
 
 ## [2026-10-10] observation | Partial historical visibility proof
 

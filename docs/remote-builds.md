@@ -64,6 +64,12 @@ The 299 CPU samples average53.1513 and peak78.5714 on Cargo's report scale; CPU-
 
 Features differ (including Mists prefork and Forever capabilities); recorded revisions also differ. Source/artifact admission and ordinary runtime proof remain separate. These intervals establish no CPU attribution, matched cache state, controlled speedup or whole-profile acceptance. [Report hash](../data/test-perf/evidence/jobs12-five-profile-2026-10-10/hash-manifest.json).
 
+### Required unit2 builds — measured cgroup CPU window
+
+[Seven-profile cost/resource evidence](../data/test-perf/evidence/unit2-jobs12-2026-10-10/final-report.md) retains already-required jobs12 builds: each663artifact records/655fresh/8nonfresh, one library+sixbins+integration. Compile intervals sum552.436541s; features/revisions/cache states differ, no controlled speedup comparison.
+
+Actual cgroup counters yield5.70–6.45 coarse logical CPU equivalents per compile window under a12-CPU quota, including compiler/worker stream handling, not frontend/codegen or exclusive-rustc attribution. Recorded memory limit16GiB; cumulative unit peak reaches about16GiB after PTR, not per-profile peaks or proof of OOM. Throttling counters have no assigned cause. No resource-limit change or extra build experiment.
+
 ## Asynchronous full suite
 
 `python3 tools/full_suite.py submit [REF]` schedules the detached worker;
