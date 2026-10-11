@@ -9,7 +9,7 @@ build = "build.rs"
 autotests = false
 
 [workspace]
-members = [".", "xtask"]
+members = [".", "xtask", "crates/test-harness"]
 
 [dependencies]
 icu_casemap = { version = "=2.1.1", default-features = false, features = ["compiled_data"] }
@@ -95,6 +95,8 @@ path = "examples/casc_smoke.rs"
 required-features = ["casc"]
 
 [dev-dependencies]
+# Keep automatic test discovery out of the production build-script dependency graph.
+wow-ui-sim-test-harness = { path = "crates/test-harness" }
 insta = "1.42"
 pollster = "0.4"
 tempfile = "3"
@@ -329,9 +331,6 @@ cc = { version = "=1.2.52", optional = true }
 pkg-config = { version = "=0.3.32", optional = true }
 vcpkg = { version = "=0.2.15", optional = true }
 winresource = "0.1"
-# Parse explicit prefork test marker items in build.rs instead of maintaining a bespoke Rust lexer.
-syn = { version = "2", features = ["full", "parsing"] }
-quote = "1"
 
 [patch.crates-io]
 iced_wgpu = { path = "iced-wgpu-patched" }

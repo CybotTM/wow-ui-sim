@@ -1,1 +1,1 @@
-include!(concat!(env!("OUT_DIR"), "/integration_tests.rs"));
+wow_ui_sim_test_harness::integration_tests!();

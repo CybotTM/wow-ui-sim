@@ -14,7 +14,7 @@ mod prefork_workload_gate;
 #[path = "test_keybindings_panels_detail.rs"]
 mod test_keybindings_panels_detail;
 
-include!(concat!(env!("OUT_DIR"), "/integration_tests.rs"));
+wow_ui_sim_test_harness::integration_tests!();
 
 use prefork::{Case, Config};
 use std::env;
@@ -221,7 +221,7 @@ const MANUAL_FULL_UI_CASES: &[Case<WowLuaEnv>] = &[
 
 #[cfg(feature = "client-retail")]
 const GENERATED_FULL_UI_CASES: &[Case<WowLuaEnv>] =
-    include!(concat!(env!("OUT_DIR"), "/prefork_full_ui_cases.rs"));
+    wow_ui_sim_test_harness::prefork_full_ui_cases!();
 
 #[cfg(feature = "gui")]
 const CHAT_FIXTURE_CASES: &[Case<WowLuaEnv>] = &[

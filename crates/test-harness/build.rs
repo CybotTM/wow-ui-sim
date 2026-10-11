@@ -30,14 +30,6 @@ fn generate_integration_test_harness() {
     let tests_dir = project_root().join("tests");
     let out_dir = PathBuf::from(std::env::var("OUT_DIR").expect("out dir"));
     let harness_path = out_dir.join("integration_tests.rs");
-    for source_path in [
-        tests_dir.join("common/mod.rs"),
-        tests_dir.join("c_item_api/support.rs"),
-        tests_dir.join("common/token_ui_fixtures.rs"),
-    ] {
-        println!("cargo:rerun-if-changed={}", source_path.display());
-    }
-
     let mut module_files = discover_top_level_test_modules(&tests_dir);
     module_files.sort();
 
@@ -47,7 +39,6 @@ fn generate_integration_test_harness() {
         tests_dir.join("common/mod.rs")
     ));
     for perf_module in discover_perf_helper_modules(&tests_dir.join("perf")) {
-        println!("cargo:rerun-if-changed={}", perf_module.display());
         let module_name = format!("perf_{}", module_name_for_path(&perf_module));
         contents.push_str(&format!(
             "#[cfg(feature = \"gui\")]\n#[allow(dead_code, unused_imports)]\n#[path = {perf_module:?}]\npub(crate) mod {module_name};\n\n"
