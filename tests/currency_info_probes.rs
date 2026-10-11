@@ -288,7 +288,7 @@ fn get_currency_list_info_reflects_successive_existing_currency_updates() {
             info.icon_file_id = icon;
             info.quality = quality;
         }
-        let actual: (String, i32, i32, u32, i32) = env
+        let actual: (String, i32, i32, i64, i32) = env
             .eval(
                 r#"
                 local listed = C_CurrencyInfo.GetCurrencyListInfo(2)
@@ -311,7 +311,16 @@ fn get_currency_list_info_reflects_successive_existing_currency_updates() {
                 "#,
             )
             .unwrap();
-        assert_eq!(actual, (name.into(), quantity, max_quantity, icon, quality));
+        assert_eq!(
+            actual,
+            (
+                name.into(),
+                quantity,
+                max_quantity,
+                i64::from(icon),
+                quality
+            )
+        );
         assert_currency_membership_preserved(&env);
     }
 }
@@ -332,7 +341,7 @@ fn get_backpack_currency_info_reflects_successive_existing_currency_updates() {
             info.icon_file_id = icon;
             info.quality = quality;
         }
-        let actual: (String, i32, u32, i32, i32) = env
+        let actual: (String, i32, i64, i32, i32) = env
             .eval(
                 r#"
                 local watched = C_CurrencyInfo.GetBackpackCurrencyInfo(1)
@@ -353,7 +362,16 @@ fn get_backpack_currency_info_reflects_successive_existing_currency_updates() {
                 "#,
             )
             .unwrap();
-        assert_eq!(actual, (name.into(), quantity, icon, max_quantity, quality));
+        assert_eq!(
+            actual,
+            (
+                name.into(),
+                quantity,
+                i64::from(icon),
+                max_quantity,
+                quality
+            )
+        );
         assert_currency_membership_preserved(&env);
     }
 }
