@@ -12,6 +12,6 @@ New selector: `achievements_api::test_reward_item_id_tracks_supplied_achievement
 | Compilation/check | exit 0 each | Offline/locked/default integration build and `cargo check --offline --locked --tests`, jobs12; existing warnings remain |
 | Input stability | Six recorded hashes unchanged | Test, existing producer/registration, Cargo manifest/lock, build script; not all dependency provenance |
 
-`retention-manifest.json` names ten exact copies with hashes/sizes and untouched private source paths. Full compiler/check streams and sealed binary remain private. Final independent acceptance and retention/document audit are pending.
+`retention-manifest.json` names ten exact copies with hashes/sizes and untouched private source paths. Full compiler/check streams and sealed binary remain private. [Final independent gate](final-report.md) accepted: 1/1 case, compilation/format/check exit 0, ten exact retained copies and scoped documentation links. Check emitted 13 existing warning diagnostics; not warning-free.
 
 Synthetic IDs are explicitly inserted fixtures, not catalog assertions. Both nil observations query existing records; unknown-ID behavior is outside this test. No native reward mapping, secrecy/taint contract, other-profile GREEN, full suite or whole-handoff acceptance follows. No production code changed and no RED/GREEN bug-fix claim is made.
