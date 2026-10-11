@@ -473,10 +473,10 @@ fn cast_bar_respects_edit_mode_lock_setting_after_startup_fix(env: &WowLuaEnv) {
             "unlocked startup cast bar should stay under the frame manager"
         );
         if cfg!(feature = "client-mists") {
-            // AddManagedFrame returns before membership and reparenting while hidden.
+            // Fade hides an already-managed bar; removal preserves its parent.
             let (
                 hidden,
-                parent_is_ui_parent,
+                parent_is_bottom,
                 layout_parent_is_bottom,
                 absent_from_showing_frames,
             ): (bool, bool, bool, bool) = env
@@ -485,7 +485,7 @@ fn cast_bar_respects_edit_mode_lock_setting_after_startup_fix(env: &WowLuaEnv) {
                     local cast = PlayerCastingBarFrame
                     local bottom = UIParentBottomManagedFrameContainer
                     return not cast:IsShown(),
-                        cast:GetParent() == UIParent,
+                        cast:GetParent() == bottom,
                         cast.layoutParent == bottom,
                         bottom.showingFrames[cast] == nil
                     "#,
@@ -493,8 +493,8 @@ fn cast_bar_respects_edit_mode_lock_setting_after_startup_fix(env: &WowLuaEnv) {
                 .unwrap();
             assert!(hidden, "Mists startup cast bar should remain hidden");
             assert!(
-                parent_is_ui_parent,
-                "hidden Mists cast bar should remain parented to UIParent"
+                parent_is_bottom,
+                "hidden Mists cast bar should retain its managed-frame parent after fading"
             );
             assert!(
                 layout_parent_is_bottom,

@@ -1,3 +1,7 @@
+## [2026-10-11] staging | Mists settled parent contract
+
+[Current fixture](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified) records the exact parent failure after hidden-state reconciliation and a separate one-execution fade control. Follow-up corrects the parent expectation to cached manager semantics; strict layout/lock checks and both failure histories remain. Follow-up unexecuted, no production/vendor patch.
+
 ## [2026-10-11] staging | Mists original fixture observes settled fade
 
 [Fixture phase](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified) now advances the normal source fade before unchanged original idle-layout and anchor assertions. No vendor/production patch; uncompiled/unexecuted, historical failure preserved and later assertions still require proof.

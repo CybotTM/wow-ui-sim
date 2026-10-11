@@ -1,6 +1,6 @@
 ## [2026-10-11] staging | Mists original fixture — settled-fade checks unverified
 
-[Current phase](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified) advances normal animation time before all unchanged original layout/anchor assertions; uncompiled/unexecuted, original failure and later unreached status preserved.
+[Current phase](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified): settled-fade run reached hidden then failed the old `UIParent` expectation. Follow-up requires the source-consistent retained manager parent, keeps strict layout/anchor checks, and remains unexecuted; both historical failures preserved.
 
 ## [2026-10-11] staging | Garrison addon-compatible catalog — unexecuted tests
 
