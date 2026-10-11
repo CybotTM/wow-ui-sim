@@ -33,7 +33,7 @@ Observed treatment windows: before 33.483108 s wall / 82.580194 CPU-s (~2.4663 c
 
 ## Retention and acceptance
 
-Text receipts will be retained in `compile-controls/`, `cache-before/`, `cache-after/`, `original-cases/`, `new-input/`, `stock-startup/`, and `reports/`, with an exact copy/hash manifest. Private original receipts remain unchanged. Pending retention verification does not invalidate already accepted original proof; it does prevent claiming the tracked packet complete.
+178 text copies (13,392,139 bytes) are recorded in [retention-manifest.json](retention-manifest.json), covering `compile-controls/`, `cache-before/`, `cache-after/`, `original-cases/`, `new-input/`, `stock-startup/`, `reports/` and generated-source snapshots. Private original receipts remain unchanged. The selected receipt pattern screen found no credential-pattern hits; that is not exhaustive secret detection. Independent retention verification remains pending and prevents claiming the tracked packet complete.
 
 Source, selected simulator execution and local cache isolation have separate bounded proof. Desktop/native acceptance, original Mists hidden-startup behavior, Garrison authentic catalog, source-blocked Wrath/Era/Anniversary, historical full-suite failures and broader handoff remain OPEN. No provider/model change, vendor/cache acquisition, binary deployment or push.
 
