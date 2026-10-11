@@ -1,7 +1,7 @@
 //! Simulator-defined enUS school-mask labels, not a native catalog/order baseline.
 #![cfg(feature = "client-retail")]
 
-mod common;
+use crate::common;
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
