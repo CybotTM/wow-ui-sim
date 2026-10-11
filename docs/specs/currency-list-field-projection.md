@@ -4,18 +4,18 @@ Expose existing currency-list backing fields through `C_CurrencyInfo.GetCurrency
 
 ## What it must do
 
-- [ ] Return non-nil boolean `isShowInBackpack` from `CurrencyEntry.is_show_in_backpack`, preserving true and false.
-- [ ] Return non-nil number `maxQuantity`, preserving zero and positive caps. Static header values come from `CurrencyEntry`; ordinary rows use supplied-state values.
-- [ ] Forward those fields directly through Mists `GetCurrencyListInfo` tuple positions 5 and 8.
+- [x] Return non-nil boolean `isShowInBackpack` from `CurrencyEntry.is_show_in_backpack`, preserving true and false.
+- [x] Return non-nil number `maxQuantity`, preserving zero and positive caps. Static header values come from `CurrencyEntry`; ordinary rows use supplied-state values.
+- [x] Forward those fields directly through Mists `GetCurrencyListInfo` tuple positions 5 and 8.
 - [ ] Preserve all other fields, unsupported tuple slots, catalog data, defaults, and registrations.
 
 ### Supplied-state display projection
 
-- [ ] For existing non-header list rows, project current name, quantity, icon, quality and maximum quantity from `SimState.currency_info` selected by the static currency ID.
-- [ ] For existing watched rows, backpack info projects current name, quantity and icon from that same supplied row.
-- [ ] Observe successive supplied-state updates without changing list size/order, header records, currency IDs, static status flags or watched membership.
-- [ ] Do not resurrect static display values when a listed currency is removed from supplied state: list info returns nil and backpack info returns no values. Headers do not require a supplied map row.
-- [ ] Preserve invalid-index behavior and existing Mists tuple mapping. This is simulator policy, not a claim about native update timing.
+- [x] For existing non-header list rows, project current name, quantity, icon, quality and maximum quantity from `SimState.currency_info` selected by the static currency ID.
+- [x] For existing watched rows, backpack info projects current name, quantity and icon from that same supplied row.
+- [x] Observe successive supplied-state updates without changing list size/order, header records, currency IDs, static status flags or watched membership.
+- [x] Do not resurrect static display values when a listed currency is removed from supplied state: list info returns nil and backpack info returns no values. Headers do not require a supplied map row.
+- [x] Preserve invalid-index behavior and existing Mists supported tuple slots/arity. This is simulator policy, not a claim about native update timing.
 
 ## How it works
 
@@ -49,11 +49,14 @@ Four supplied-state regressions in `tests/currency_info_probes.rs`, introduced a
 
 Mists wrapper preservation probe in `tests/mists_currency_list.rs`:
 
-- `legacy_currency_display_updates_preserve_static_rows_and_backpack_membership` — successive positive/zero display updates, exact legacy tuple arity/slots and static watched membership despite a conflicting supplied backpack flag; execution pending.
+- `legacy_currency_display_updates_preserve_static_rows_and_backpack_membership` — successive positive/zero display updates, exact legacy tuple arity/supported slots and static watched membership despite a conflicting supplied backpack flag; PASS in the bounded Mists capture.
 
 ## Known gaps (current cycle)
 
-- [ ] Targeted GREEN and preservation controls remain pending. Authentic default Retail RED at `20261011T073849Z`, revision `f4a6fb2e4`, compiled successfully and executed 12 existing controls PASS / four new regressions FAIL / exit 101 with seven scoped inputs unchanged. Initial `085f7d799` attempt failed compilation because the test decoder does not support `u32`; zero cases executed. Historical static-field proof does not cover mutation behavior.
+[Bounded proof packet](../../data/patch-api/evidence/currency-supplied-state-2026-10-11/README.md): authentic default RED12PASS/fournewFAIL at `f4a6fb2e4`; default16/16 and Mists20/20 GREEN at `1dcc59c07`, independent gates, fmt/check0 and cached default stock `[]`/exit0. Initial unsupported test-decoder compile failure has zero executions. No broad test rerun supplies these targeted results.
+
+- [ ] Exhaustive catalog/default/order acceptance and native parity remain unproved. Mutated Mists unsupported slots9/10 are not explicitly asserted; wrapper source is unchanged and header/unwatched baseline comparisons cover all12 slots.
+- [ ] Other five pure-model profile captures and the new `1dcc59c07` full suite are asynchronous, not accepted here. Existing c75 Garrison FAIL remains history.
 
 ## Out of scope
 

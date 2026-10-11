@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/usr/bin/cargo",
+    "check",
+    "--offline",
+    "--locked",
+    "--jobs",
+    "12"
+  ],
+  "exit": 0
+}
