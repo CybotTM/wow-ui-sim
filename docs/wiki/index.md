@@ -1,6 +1,6 @@
 ## [2026-10-11] audit | Dev-only harness generation and cache isolation
 
-[Harness ownership](systems/prefork-test-harness.md#dev-only-automatic-generation--2026-10-11): automatic discovery moves into a dev-only helper; bounded compile/list, selected/original execution and local timestamp-cache proof retained separately. Dynamic new-input and native/full handoff gaps remain open; historical failures preserved.
+[Harness ownership](systems/prefork-test-harness.md#dev-only-automatic-generation--2026-10-11): automatic discovery moves into a dev-only helper; bounded compile/list, selected/original execution and local timestamp-cache proof retained separately. One temporary new-input control is admitted separately; native/full handoff gaps remain open and historical failures are preserved.
 
 ## [2026-10-11] audit | MovieFrame receiver and exact return arity
 

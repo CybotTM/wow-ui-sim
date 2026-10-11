@@ -76,9 +76,9 @@ The [harness contract](specs/prefork-test-harness.md#dev-only-automatic-harness-
 
 Source `256e54ef1` extracts generation/watches into unpublished dev-dependency `crates/test-harness`, leaving production responsibilities in root `build.rs`. Two item macros populate integration/prefork module trees; an expression macro supplies the Retail registry. Explicit workspace builds may select the helper; Cargo.lock retains its root watch.
 
-[Retained local evidence](../data/test-perf/evidence/dev-only-harness-2026-10-11/README.md) admits Retail/Mists compile/list parity, 13 selected cases, two original Retail prefork bodies, generated-inner-byte preservation, and warning-bearing format/check exits 0. The existing-test timestamp trial keeps the root library and six binaries fresh, rebuilding only helper library and integration; native output snapshots are unchanged.
+[Retained local evidence](../data/test-perf/evidence/dev-only-harness-2026-10-11/README.md) admits Retail/Mists compile/list parity, 13 selected cases, two original Retail prefork bodies, generated-inner-byte preservation, format exit 0 and default-profile check exit 0 with existing warnings. The existing-test timestamp trial keeps the root library and six binaries fresh, rebuilding only helper library and integration; native output snapshots are unchanged.
 
-These local results do not establish dynamic new-input discovery, desktop cache invalidation or native-client acceptance. Changed revisions/cache graphs prohibit normalized speedup or CPU-saturation claims. Historical Mists cast-bar RED, full-suite failures, desktop GUI failure and broader handoff gaps remain open.
+A separate local temporary-marker discovery/execution/cleanup control passes, and cached Retail stock startup reports zero Lua errors with audio diagnostics. These results do not establish desktop cache invalidation or native-client acceptance. Changed revisions/cache graphs prohibit normalized speedup or CPU-saturation claims. Historical Mists cast-bar RED, full-suite failures, desktop GUI failure and broader handoff gaps remain open.
 
 ## Asynchronous full suite
 

@@ -171,7 +171,7 @@ Source ownership is confirmed at `256e54ef1`: unpublished workspace crate `crate
 
 [Retained evidence](../data/test-perf/evidence/dev-only-harness-2026-10-11/README.md) separates compile/list parity, 13 selected cases, two original prefork bodies and generated-inner-byte preservation from the unchanged-content timestamp trial. That trial keeps the root library and six binaries 7/7 fresh; only helper library and integration are nonfresh, versus eight root artifacts before extraction. Helper RunCustomBuild is dirty while its compiled build-script artifact stays fresh.
 
-Changed revisions and artifact graphs preclude normalized speedup. Cgroup CPU/wall ratios do not establish saturation, per-binary cost or native-host acceptance. New-input discovery is source-preserved but unexecuted; historical Mists cast-bar RED, full-suite/native gaps and parent handoff remain open.
+Changed revisions and artifact graphs preclude normalized speedup. Cgroup CPU/wall ratios do not establish saturation, per-binary cost or native-host acceptance. One temporary new top-level marker is discovered, executed and removed with baseline registries restored; production artifacts stay fresh. Historical Mists cast-bar RED, full-suite/native gaps and parent handoff remain open.
 
 ## Worktree Target Strategy
 
