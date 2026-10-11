@@ -146,6 +146,8 @@ fn secret_relation_env() -> WowLuaEnv {
     {
         let loader = env.loader_env();
         let mut lua = loader.rilua_mut();
+        rilua::table_security::register_table_security(&mut lua)
+            .expect("install authentic VM secret helpers for host-secret assertions");
         let secret = wrap_host_secret_number(lua.state_mut(), 6.0);
         lua.state_mut().push(secret);
         lua.set_global_val("AchievementRelationSecret6", secret)
