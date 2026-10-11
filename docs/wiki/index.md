@@ -1,3 +1,7 @@
+## [2026-10-11] observation | CASC encoding candidate prefix
+
+[Current prefix](investigations/integrated-source-and-factory-proof-2026-10-09.md#casc-encoding-candidate--current-prefix-2026-10-11):34-byte main read, BLTE/matching9-byte key prefix in data174; no new index/payload reads or historical/root-cause proof. Cached metadata/retention gate pending. Cold-cache/broad FAIL/full handoff OPEN unchanged.
+
 ## [2026-10-11] observation | Talent tick stage ledger
 
 [Private diagnostic](investigations/integrated-source-and-factory-proof-2026-10-09.md#talent-stage-diagnostic--private-observations-2026-10-11):54 observational rows, compile/runtime0; total delta49.52µs/whole OnUpdate49.30µs. Independent2459 authenticates the new artifact once and verifies source/counts/aggregates (OBSERVATIONAL_COHERENCE_PASS). Stored tracked/cache counts are not callbacks/visible counts; no loaded-failure attribution or acceptance promotion. Broad FAIL/full handoff OPEN.

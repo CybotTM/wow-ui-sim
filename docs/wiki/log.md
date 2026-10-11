@@ -1601,3 +1601,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] verification | Talent observational coherence
 
 [Independent gate](../../data/test-perf/evidence/talent-stage-diagnostic-2026-10-11/independent-report.md)2459 authenticates only the new probe once and verifies54 raw observations/source/readability/exact aggregates. Total steady-baseline mean594197/12ns; all visible-cache snapshotsnull, tracked647→653 not fired counts. Reports copied; no runtime/check/hash rerun. This closes observational coherence only, not loaded ba FAIL, native or full handoff acceptance.
+
+## [2026-10-11] observation | Current CASC encoding prefix
+
+[Prefix SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#casc-encoding-candidate--current-prefix-2026-10-11) retains one34-byte main observation and cached interpretation. Rejected old11186 absence claim; currentdata174 has BLTE/+30 and matching9-byte key prefix. Full-key/BE-size differences are ignored by asset-resolver, not failure cause. Zero new index/payload reads; metadata/retention gate pending. Effective historical lookup/decode/cold-cache and broad FAIL/full goal OPEN unchanged.
