@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Dev-only harness ownership
+
+Updated [harness SSOT](systems/prefork-test-harness.md#dev-only-automatic-generation--2026-10-11) and index; corrected generation-source links after helper extraction. Linked bounded source/execution/cache evidence without promoting it to native/full-profile acceptance or rewriting historical failures.
+
 ## [2026-10-11] audit | MovieFrame arity gap
 
 [MovieFrame evidence](investigations/method-dispatch-refactor.md#movieframe-receiver-and-return-arity--2026-10-11-utc): saved469case7781 reused, new034451single CLI independently proves four zero-return calls/two receiver rejections/public hidden-state preservation. No replay/newbuild/native/playback claim; source/exposure/behavior scopes separate.

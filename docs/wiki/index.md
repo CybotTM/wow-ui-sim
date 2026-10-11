@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Dev-only harness generation and cache isolation
+
+[Harness ownership](systems/prefork-test-harness.md#dev-only-automatic-generation--2026-10-11): automatic discovery moves into a dev-only helper; bounded compile/list, selected/original execution and local timestamp-cache proof retained separately. Dynamic new-input and native/full handoff gaps remain open; historical failures preserved.
+
 ## [2026-10-11] audit | MovieFrame receiver and exact return arity
 
 [Receiver evidence](investigations/method-dispatch-refactor.md#movieframe-receiver-and-return-arity--2026-10-11-utc): one Retail CLI capture, four exact-zero calls and two rejected receivers; prior XML-state test reused, native/full-profile/handoff OPEN.
