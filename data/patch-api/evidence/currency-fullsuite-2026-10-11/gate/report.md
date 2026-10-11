@@ -2,6 +2,14 @@
 
 **Overall suite: FAIL. Saved-artifact accounting/consistency gate: PASS.**
 
+## Read-only reuse audit — 2026-10-11
+
+Existing report/countproof reused. Both complete raw-log byte hashes still match countproof. Every saved outcome identity/status and batch summary rechecked against its private raw-log line; outcome counts recomputed for all six batches per run, including auxiliary prefork 2 + 1 + 1. Metadata full SHAs match artifact names. PASS execution multisets differ by exactly the four currency identities below; no removed PASS executions; FAIL execution multisets equal.
+
+Current filesystem Git blob/tree hashes independently match the tested revision's saved object IDs for `src`, `tests`, `Cargo.toml`, `Cargo.lock`, `build.rs`, and `.cargo`. Directory hashing includes all present entries, symlinks and executable modes. This refreshes source parity without Git command execution; expected IDs are reused from prior saved Git evidence, not newly extracted from the object database. Binary/runtime provenance remains unproven.
+
+Sanitized refresh evidence: `reuse-audit.json`; existing `countproof.json` retained unchanged. Only file reads, in-process parsing/hashing and authorized report writes performed; no commands, tests, builds, delegation or operations. Raw payloads remain private. No regression inferred from mutable baseline.
+
 Tested `1dcc59c0788d0e09ee3d02516123df965ba8dc63`; prior accepted artifact `c75ccfe02c52f76a0456ae393581a3b9ca601ce7`.
 
 ## Counts (executions, not deduplicated selectors)

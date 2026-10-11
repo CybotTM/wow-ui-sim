@@ -3,8 +3,8 @@
     {
       "source": "/home/osso/.local/state/wow-ui-sim/verification/currency-fullsuite-final-gate/report.md",
       "path": "gate/report.md",
-      "bytes": 5131,
-      "sha256": "b3fe97645d803249447da618c0e14ac58b3d870068802beb09e6f3d8e720d621"
+      "bytes": 6405,
+      "sha256": "c433d6552e9324c489e87e9fe94d4a9931e1989a26c3aa8b22ffe9d0cb3ae164"
     },
     {
       "source": "/home/osso/.local/state/wow-ui-sim/verification/currency-fullsuite-final-gate/report.json",
@@ -29,10 +29,16 @@
       "path": "suite-result.json",
       "bytes": 747,
       "sha256": "174e1cd7ef3ff535429058791cf6a0a23a1d588844730228581c85c79693a7c5"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/currency-fullsuite-final-gate/reuse-audit.json",
+      "path": "gate/reuse-audit.json",
+      "bytes": 5807,
+      "sha256": "58030235177f713d68d80a39f818acb58c28e39bfc4d005798549edc9fb9bcb3"
     }
   ],
-  "copy_count": 5,
-  "copy_bytes": 21193,
+  "copy_count": 6,
+  "copy_bytes": 28274,
   "derived": [
     "count-summary.json"
   ],
@@ -41,5 +47,6 @@
     "full private countproof outcome rows",
     "binaries",
     "session/provider payloads"
-  ]
+  ],
+  "history": "Initial842098a4e packet5copies21193bytes; endpoint gate detected private report appended reuse audit after initial copy. Later refresh retains appended report and reuse-audit.json; initial endpoint FAIL remains private currency-suite-retention-final."
 }
