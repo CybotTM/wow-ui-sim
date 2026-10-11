@@ -1485,3 +1485,7 @@ Added separate [stock receipt matrix](investigations/stock-api-startup-2026-10-1
 ## [2026-10-11] audit | Shared legacy-aura controls — limited assertions
 
 Added separate [retry receipt](investigations/patch-3-1-0-api-audit.md#later-shared-legacy-aura-controls--2026-10-11-utc):16/16 executions admitted,8distinct existing controls×Wrath/Mists, initial0case resource block preserved. Previously sealed artifacts, no rebuild; only default-fixture existence/nil/count/three non-nil fields. Tuple/caster/order/native gaps, frozen historical ledger and parent OPEN unchanged.
+
+## [2026-10-11] audit | Saved469 suite — FAIL
+
+Added [469 investigation](investigations/fullsuite-469-2026-10-11.md) and small sanitized receipts:15,021PASS/3FAIL/19skips,15,024executed, no deduplication. Unit2/Boolean3, Retail aura8 and original prefork auxiliary4 PASS are already inside totals. Same three failure identities as956; Garrison new-label not regression evidence. Budget test PASS this execution not timing repair/stability. Parent/native/other-profile acceptance OPEN; no replay.

@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Saved469 suite — FAIL
+
+[469 investigation](investigations/fullsuite-469-2026-10-11.md):15,021PASS/3FAIL/19skips,15,024executed; unit2/Boolean3, Retail aura8, original prefork auxiliary4 allPASS inside totals. Method snapshots/Garrison stillFAIL; mutable new-failure label not regression evidence. Timing-budget PASS this execution is not a repair/stability claim. Native/other-profile/full handoff OPEN.
+
 ## [2026-10-11] audit | Shared legacy-aura controls — limited assertions
 
 [Legacy-aura receipt](investigations/patch-3-1-0-api-audit.md#later-shared-legacy-aura-controls--2026-10-11-utc):16/16 executions admitted,8distinct existing tests×Wrath/Mists, no rebuild. Initial0case resource block preserved. Default-fixture presence/nil/count/three-field checks do not prove exact tuple/caster/order/native contracts; historical ledger and parent OPEN unchanged.
