@@ -1,3 +1,7 @@
+## [2026-10-11] staging | Explicit achievement relation policy
+
+Added [contract](../specs/achievement-superceding-relations.md) and retained [initial RED/resource block](../../data/patch-api/evidence/achievement-superceding-red-2026-10-11/README.md). User approved explicit map/absent empty table;37d initial64PASS1FAIL before query, c9f state/eight-test stage followed. Expanded attempt0 cases/load guard blocked, not runtime failure or GREEN. Query producer and native/catalog/parent acceptance remain pending.
+
 ## [2026-10-11] audit | Remaining currency profiles and partial compile sampling
 
 [Seven-profile packet](../../data/patch-api/evidence/currency-seven-profile-2026-10-11/README.md) adds independently admitted Era/Anniversary/Forever16/16 each;116 executions/seven configurations/20 names. Preserved prior resource blocks and source/native gaps. Retained44 exact copies/215,373 bytes, including initial suite-copy FAIL and refresh PASS. Updated contract/handoff SSOT/build docs; partial90.178s sampler2.682 CPU equivalents/observedrustcpeak4 is not whole-build utilization or speedup. Enclosing suite and parent remain open.

@@ -25,7 +25,7 @@
 
 `tests/c_achievement_info_probes/superceding.rs`; existing `c_achievement_info_probes` and reward update tests provide separate preservation evidence.
 
-Initial absent-table RED at `37d17371b`: 64 existing PASS/1 new FAIL/65 executed, exit101; query returned nil instead of a table. No query producer change preceded that capture. Expanded provided-state/security tests still require actual runtime proof.
+[Retained initial RED](../../data/patch-api/evidence/achievement-superceding-red-2026-10-11/README.md) at `37d17371b`:64 existing PASS/1 new FAIL/65 executed, exit101; exactly one non-table result failed the relation-table assertion. Exact result value was not recorded. No query producer change preceded that capture. Expanded eight-case attempt at `c9f3043bf` is RESOURCE_BLOCKED/zero executions, not behavioral RED or PASS; shared map/initializer and expanded cases still require actual runtime proof.
 
 ## Known gaps (current cycle)
 

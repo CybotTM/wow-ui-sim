@@ -1,3 +1,7 @@
+## [2026-10-11] staging | Achievement relation policy — RED, expanded run blocked
+
+[Relation contract](../specs/achievement-superceding-relations.md): user-selected explicit map/absent empty table; initial64PASS1FAIL, expanded0-case resource block. State/test stage committed; query not implemented. Native/catalog/full handoff remain open.
+
 ## [2026-10-11] audit | Seven-profile currency probes — bounded GREEN
 
 [Current handoff matrix](investigations/integrated-source-and-factory-proof-2026-10-09.md#currency-supplied-state-projection--partial-cross-profile-handoff):116 passing executions/seven configurations/20 names. Remaining-only retry2 and partial jobs12 CPU/process observation retained; earlier Era blocks preserved. Broad suite still FAIL; vendor/native/external/full handoff OPEN.
