@@ -1573,3 +1573,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] audit | Final-suite queue exhausts capacity admission
 
 [Admission packet](../../data/patch-api/evidence/query-final-suite-admission-2026-10-11/README.md): ten checks declined, RESOURCE_BLOCKED/zero cases/no submission. Last load63 exceeds required<24; guards preserved. Historical suite failures,67 pure query executions and separate116 currency executions remain revision-scoped. Final broad proof and handoffOPEN.
+
+## [2026-10-11] audit | Inline XML scroll saved proof reconciled
+
+[Contract](../specs/xml-scroll-arguments.md) and [packet](../../data/patch-api/evidence/xml-scroll-saved-suite-2026-10-11/README.md): three exact saved1dcc PASS rows, already within totals. Two reports retain selected source comparison, not fresh current-HEAD/cache/native proof. Historical RED, unrelated prefork failure and parentOPEN preserved; no build or suite rerun.
