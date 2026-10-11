@@ -1545,3 +1545,7 @@ Added [469 investigation](investigations/fullsuite-469-2026-10-11.md) and small 
 ## [2026-10-11] audit | Seven-profile legacy-aura controls — limited scope
 
 Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-profile-aura-controls--2026-10-11-utc) with four admitted32case partitions; combined separate Wrath/Mists16 and Retail8alreadyinside suite469 yields56profile cases of8distinct limited tests. No rebuild/native/tuple/caster/fullhandoff claim. User-directed source-input blocks remain, no transfer/sync; frozen historical ledger unchanged.
+
+## [2026-10-11] audit | Mists corrected-parent follow-up
+
+[Retained follow-up](../../data/patch-api/evidence/mists-source-fade-phase-2026-10-11/parent-followup/README.md): authenticated171434 epoch, corrected original1PASS and fade-control1PASS, two unique executions. Later strict lock/anchor checks pass; earlier4e parentFAIL/fade1PASS preserved. Startup errors/native uncertainty/full handoff remain open. Garrison7635fef91 import repair follows duplicate-macro COMPILE_FAILED/zero cases, not query RED.

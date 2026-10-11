@@ -1,6 +1,6 @@
-## [2026-10-11] staging | Mists original fixture — settled-fade checks unverified
+## [2026-10-11] audit | Mists original fixture — two bounded passes
 
-[Current phase](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified): settled-fade run reached hidden then failed the old `UIParent` expectation. Follow-up requires the source-consistent retained manager parent, keeps strict layout/anchor checks, and remains unexecuted; both historical failures preserved.
+[Current phase](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified): corrected retained-parent original case and separate source-fade control each pass once. Strict lock/anchor checks execute; earlier hidden/parent failures preserved. Startup errors, vendor-identity/native uncertainty and full handoff remain open.
 
 ## [2026-10-11] staging | Garrison addon-compatible catalog — unexecuted tests
 

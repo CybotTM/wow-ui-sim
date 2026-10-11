@@ -28,7 +28,7 @@
 - `garrison_damage_classes_returns_fresh_tables_and_rows_without_mutation_leaks`
 - `garrison_adventures_combat_log_consumes_fire_school_mask_not_damage_ordinal`
 
-Tests were inspected, not executed for this docs-only slice; all requirements remain unchecked pending passing proof.
+Tests were inspected, not executed for this docs-only slice; all requirements remain unchecked pending passing proof. Initial joint default attempt `20261011T165520Z` was COMPILE_FAILED with zero executed cases: a duplicate `common` module exported four macros twice, not query RED. Commit `7635fef91` reuses the root integration harness via `use crate::common`; this import repair establishes no catalog/runtime PASS. Guarded retry is separate.
 
 ## Known gaps (current cycle)
 
