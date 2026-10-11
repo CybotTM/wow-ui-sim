@@ -494,6 +494,7 @@ macro_rules! build_empty_sim_state {
             map_display_hide_icons: HashMap::new(),
             map_world_rects: HashMap::new(),
             achievements: default_achievements(),
+            achievement_superceding: HashMap::new(),
             achievement_guild_rep: ::std::collections::HashMap::new(),
             achievement_statistics: ::std::collections::HashMap::new(),
             achievement_comparison_unit: None,

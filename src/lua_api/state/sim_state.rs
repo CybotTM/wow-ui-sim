@@ -576,6 +576,8 @@ pub struct SimState {
     /// Explicit continent/world rectangles; never guessed from map art pixels.
     pub map_world_rects: HashMap<i32, crate::c_api::map_world_coordinates::MapWorldRect>,
     pub achievements: HashMap<i32, AchievementInfo>,
+    /// Explicit supplied relations; no native catalog or inferred chain.
+    pub achievement_superceding: HashMap<i32, Vec<i32>>,
     pub achievement_guild_rep: HashMap<i32, AchievementGuildRep>,
     pub achievement_statistics: HashMap<i32, AchievementStatistic>,
     pub achievement_comparison_unit: Option<String>,
