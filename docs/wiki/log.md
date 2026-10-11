@@ -1565,3 +1565,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] audit | Shared query profile partial matrix and compile CPU
 
 [Retained packet](../../data/patch-api/evidence/shared-query-profiles-2026-10-11/README.md):five remaining-profile lanes47PASS plus earlierRetail11=58/sixconfigs; independent2316/2326. Forever pending,67conditional. Five compile-window unit-cgroup samples/freshness records retained; logicalCPU-eq notexclusiveRust/physicalcores/controlledspeedup. No old builds rerun or vendor-input acquisition; broad/handoffOPEN.
+
+## [2026-10-11] audit | Shared query matrix completes pure-model coverage
+
+[Final packet](../../data/patch-api/evidence/shared-query-profiles-2026-10-11/README.md):2336authenticatesForever9PASS afterfivefailedadmissions;56new+Retail11=67pure/sevenconfigs, matrixFINISHED/fmt0. Earlierpartial58 preserved. Six unitcompileCPUwindows retained, notnative/loadedaddon/controlledspeedup. Finalbroad stillcapacity-gated, handoffOPEN.

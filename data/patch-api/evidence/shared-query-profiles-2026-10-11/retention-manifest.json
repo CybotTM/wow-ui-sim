@@ -377,16 +377,113 @@
       "retained": "remaining-report.md",
       "bytes": 6601,
       "sha256": "346c20d4b92bc3b5f1cac9453be10dfba6a43e13e9551ff292dbd90283e3b9cd"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/wowforever/admission.json",
+      "retained": "wowforever/admission.json",
+      "bytes": 1092,
+      "sha256": "5a53c38238b1e14729b4b8a334818c0468afe5078be344115da185f638768f8f"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/wowforever/compile-submission.json",
+      "retained": "wowforever/compile-submission.json",
+      "bytes": 1677,
+      "sha256": "22625254066a4afb918238364234a336660e1032190009d252c637fcdbbe47e0"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/wowforever/compile-result.json",
+      "retained": "wowforever/compile-result.json",
+      "bytes": 63,
+      "sha256": "fd47f9688770e670403dcd97a80d16bbf76c45e7b3888276abba8704a974bdd0"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/wowforever/artifact.json",
+      "retained": "wowforever/artifact.json",
+      "bytes": 919,
+      "sha256": "34e7ccde211bc23445225958692ba1fe4cd24c0ef95dd2171da34e53709fee78"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/wowforever/execution-results.json",
+      "retained": "wowforever/execution-results.json",
+      "bytes": 838,
+      "sha256": "2940415609413fa875db09c09dd8e2cb07c51b4191980eb3a69cee7cabc1e192"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/wowforever/outcome.json",
+      "retained": "wowforever/outcome.json",
+      "bytes": 1311,
+      "sha256": "012d93192c3956d44e0adaa1e498d3f0ea437db08693b741c63318f39db8b255"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/wowforever/achievement.stdout",
+      "retained": "wowforever/achievement.stdout",
+      "bytes": 791,
+      "sha256": "137f69281fdd9d0effbd64194f7dccca0afd8ef016992b44e73b37316ea29b6f"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/wowforever/achievement.stderr",
+      "retained": "wowforever/achievement.stderr",
+      "bytes": 3831,
+      "sha256": "9f19aa9c5b8c085f6c4c85c6de88e92b24af31c29214f80d40b7760e021c064d"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/wowforever/garrison-pure.stdout",
+      "retained": "wowforever/garrison-pure.stdout",
+      "bytes": 441,
+      "sha256": "edd2aef64d7106d35cef41fff74be9db3e64adf1126aa88eaba09a71de4114e1"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/wowforever/garrison-pure.stderr",
+      "retained": "wowforever/garrison-pure.stderr",
+      "bytes": 1917,
+      "sha256": "15ef8b2a26b084105b5dadd7012319713e72f8abecf4907c691ec67b896025d0"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/wowforever/compile-cpu-samples.json",
+      "retained": "wowforever/compile-cpu-samples.json",
+      "bytes": 57185,
+      "sha256": "577ca3623d7f2d5f01e9577ea966e9c0591196089dbadece45c0e1214c018407"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/wowforever/compile.stderr",
+      "retained": "wowforever/compile.stderr",
+      "bytes": 1275,
+      "sha256": "a222b37f60bf5b8a33601c99fa97e97d9d839480cad65db0026ae1e17b5a5b8e"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/fmt.json",
+      "retained": "fmt.json",
+      "bytes": 48,
+      "sha256": "b77ae44f8082a157e2bca7eca134f5ec32b191cc495d0541e710a9e01965864a"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/results.json",
+      "retained": "results.json",
+      "bytes": 6342,
+      "sha256": "20dff91ca4b90b0834c6ca76536069d8e9814413ea222a4e32f1c87574ab250f"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/20261011T181742Z/outcome.json",
+      "retained": "matrix-outcome.json",
+      "bytes": 6926,
+      "sha256": "2ceed7db94ee534858699aa54e5273c4c74029640fc9010f4810b89854ede415"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/shared-query-profiles-current/final-forever-report.md",
+      "retained": "final-forever-report.md",
+      "bytes": 9792,
+      "sha256": "683ae724edc7b2128fad43383dc1cda008b4b71477e5c9feebcffb2a6a1f383f"
     }
   ],
-  "total_bytes": 302577,
+  "total_bytes": 397025,
   "derived_files": [
     "ptr/selected-cargo-artifacts.json",
     "wrath/selected-cargo-artifacts.json",
     "mists/selected-cargo-artifacts.json",
     "era/selected-cargo-artifacts.json",
     "anniversary/selected-cargo-artifacts.json",
-    "compile-cpu-summary.json"
+    "compile-cpu-summary.json",
+    "wowforever/selected-cargo-artifacts.json"
   ],
-  "scope": "First five remaining-profile raw receipts; acceptance/authentication is separate, Forever unfinished; no binaries/vendor payloads"
+  "scope": "Six remaining-profile raw receipts plus prior gates/final outcome; pure model matrix only, no binaries/vendor payloads"
 }

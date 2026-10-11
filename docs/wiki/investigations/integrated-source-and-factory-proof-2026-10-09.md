@@ -10,9 +10,11 @@ Commit `215d20236` adds three **unexecuted** tests in `tests/garrison_damage_cla
 
 [Catalog spec](../../specs/garrison-damage-class-catalog.md) owns the requirements; [acceptance authority](#acceptance-authority--2026-10-11) governs acceptance. Native catalog capture is not a blocker for this stage. At that test/spec commit, no producer was implemented or executed. Later epoch173738 at `a0833b2dd` compiled successfully: achievement0PASS/8FAIL and Garrison0PASS/3FAIL, independently authenticated by2289. Garrison's authentic consumer reaches `ipairs(nil)` at cached line90; generic secret-fixture assertion boundaries remain unproved. `b58020420` implements both C API queries and removes only their two current publication-gap rows. [Retained partial integration packet](../../../data/patch-api/evidence/achievement-garrison-policy-2026-10-11/README.md), independently authenticated2295, proves72 achievement+44 reward+2 catalog/isolation+1 original Garrison+2 publication PASS:121PASS/1consumerFAIL among122 unique tests, normal non-test Retail startup[]/exit0 and fmt/check0. The consumer advances to AddCombatEvent line129, failing on absent engine textColor; final formatted Fire/Holy assertions remain unreached. The closure already follows Blizzard_Colors, whose Lua scripts do not define these four engine globals. `33cd07687` adds literal retained Mists rows86–89 as a shared simulator palette and a concrete RGB-bootstrap test; [Retained color follow-up](../../../data/patch-api/evidence/adventures-color-green-2026-10-11/README.md), independently authenticated2314, passes four catalog/color/consumer cases plus original Garrison load:five unique tests, normal non-test startup[]/exit0 and fmt/check0. Strict final formatted Fire/Holy assertions execute; other load diagnostics are not erased. ba413e8e1 moves only test gating, retaining Retail bodies while enabling three pure probes for other profiles; six-profile execution and the exact-ref final suite remain queued/pending, not current Retail-native RGB/RGBA or full-handoff proof. Native parity remains optional, blocked vendor KEEP lanes remain blocked, and full handoff stays OPEN. Original full-suite Garrison FAIL remains historical; recorder proof below is separate and proves neither catalog behavior nor repair.
 
-## Shared query/bootstrap pure profiles — partial 2026-10-11
+<a id="shared-querybootstrap-pure-profiles--partial-2026-10-11"></a>
 
-[Retained profile packet](../../../data/patch-api/evidence/shared-query-profiles-2026-10-11/README.md) authenticates47 new pure executions across PTR/Wrath/Mists/Era/Anniversary, plus11 earlier Retail cases: **58 accepted executions/six configurations**. Forever remains pending;67/seven configurations is conditional, not current acceptance. These calls prove simulator endpoints/model behavior under the recorded feature configurations, not profile-native API publication or cached-addon coverage.
+## Shared query/bootstrap pure profiles — bounded 2026-10-11
+
+[Retained profile packet](../../../data/patch-api/evidence/shared-query-profiles-2026-10-11/README.md) authenticates56 new pure executions across PTR/Wrath/Mists/Era/Anniversary/Forever, plus11 earlier Retail cases: **67 accepted executions/seven configurations**. Final Forever gate2336 verifies its9 cases, seal/features/eleven stable inputs and completed matrix/fmt0; prior partial58/six proof remains historical. These calls prove simulator endpoints/model behavior under the recorded feature configurations, not profile-native API publication or cached-addon coverage.
 
 | Configuration | Achievement cases | Pure catalog/isolation/color cases | Proof |
 |---|---:|---:|---|
@@ -20,11 +22,11 @@ Commit `215d20236` adds three **unexecuted** tests in `tests/garrison_damage_cla
 | PTR | 8 | 3 | Independent2316 saved-artifact gate |
 | Wrath / Mists / Era | 6 each | 3 each | Independent2316 gate |
 | Anniversary | 6 | 3 | Independent2326 remaining gate |
-| Forever | Pending | Pending | No result credited here |
+| Forever | 6 | 3 | Independent2336 final gate |
 
 The authentic Retail consumer and original load are two separate extras, not counted in67. No vendor input acquisition; Wrath/Era/Anniversary KEEP lanes stay blocked. Native palette/catalog parity remains optional/unverified; final broad-suite submission/completion is not established by this matrix and full handoff remains OPEN. This is separate from the116 currency executions below.
 
-Five compile windows captured jobs12/unit-cgroup CPU samples: mean5.294–5.845 logical CPU-equivalents with observed adjacent-sample peaks11.759–12.039. Python/Cargo/Rust costs are combined, subsecond coverage gaps remain, and profile/cache/revision differences prevent controlled speedup or whole-build saturation claims. Raw Cargo freshness counts are retained; no old builds were rerun to obtain them.
+Six compile windows captured jobs12/unit-cgroup CPU samples: mean5.295–6.022 logical CPU-equivalents with observed adjacent-sample peaks11.759–12.039. Python/Cargo/Rust costs are combined, subsecond coverage gaps remain, and profile/cache/revision differences prevent controlled speedup or whole-build saturation claims. Raw Cargo freshness counts are retained; no old builds were rerun to obtain them.
 
 ## Currency supplied-state projection — partial cross-profile handoff
 

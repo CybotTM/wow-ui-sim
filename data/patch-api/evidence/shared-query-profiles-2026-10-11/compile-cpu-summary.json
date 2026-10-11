@@ -65,6 +65,19 @@
       "nr_throttled_delta": 35,
       "fresh_artifact_records": 657,
       "rebuilt_artifact_records": 8
+    },
+    {
+      "profile": "wowforever",
+      "samples": 150,
+      "sampled_seconds": 149.11849974200595,
+      "compile_window_seconds": 149.19770786198205,
+      "sample_cpu_seconds": 897.9973,
+      "mean_logical_cpu_equivalents": 6.022038188109792,
+      "max_adjacent_sample_logical_cpu_equivalents": 12.037206208867422,
+      "throttled_usec_delta": 10653366,
+      "nr_throttled_delta": 108,
+      "fresh_artifact_records": 657,
+      "rebuilt_artifact_records": 8
     }
   ]
 }

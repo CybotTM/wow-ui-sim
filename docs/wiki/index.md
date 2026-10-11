@@ -1,6 +1,6 @@
-## [2026-10-11] audit | Shared query/bootstrap — six configurations admitted
+## [2026-10-11] audit | Shared query/bootstrap — seven configurations admitted
 
-[Pure-profile matrix](investigations/integrated-source-and-factory-proof-2026-10-09.md#shared-querybootstrap-pure-profiles--partial-2026-10-11):58 accepted executions/six configurations, including earlierRetail11 and remaining47. Forever pending; no native/catalog/vendor-input or final broad-suite acceptance. Currency116 matrix remains separate.
+[Pure-profile matrix](investigations/integrated-source-and-factory-proof-2026-10-09.md#shared-querybootstrap-pure-profiles--partial-2026-10-11):67 accepted pure executions/seven configurations, including earlierRetail11 and remaining56. Matrix finished/fmt0; no native/catalog/vendor-input or final broad-suite acceptance. Currency116 matrix remains separate.
 
 ## [2026-10-11] audit | Mists original fixture — two bounded passes
 

@@ -24,7 +24,7 @@
 
 ## Tests asserting this spec
 
-`tests/garrison_damage_classes.rs` exposes the catalog, isolation and RGB-bootstrap probes under every profile configuration. Only the authentic cached-addon consumer remains Retail-gated. This supports pure simulator-model verification without acquiring blocked vendor inputs; it is not evidence of native API publication across profiles. [Pure-profile matrix](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#shared-querybootstrap-pure-profiles--partial-2026-10-11) admits the three pure cases under Retail/PTR/Wrath/Mists/Era/Anniversary; Forever remains pending. Retail proof is retained below; cfg-only gating preserves its four test bodies.
+`tests/garrison_damage_classes.rs` exposes the catalog, isolation and RGB-bootstrap probes under every profile configuration. Only the authentic cached-addon consumer remains Retail-gated. This supports pure simulator-model verification without acquiring blocked vendor inputs; it is not evidence of native API publication across profiles. [Pure-profile matrix](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#shared-querybootstrap-pure-profiles--partial-2026-10-11) admits the three pure cases under all seven configurations, including independently authenticated Forever. This does not credit native API publication or loaded-addon behavior outside the separate Retail consumer proof. Retail proof is retained below; cfg-only gating preserves its four test bodies.
 
 Tests:
 
@@ -39,7 +39,8 @@ Initial test/spec slice was unexecuted; subsequent proof is revision-scoped belo
 
 - [x] Establish passing catalog and mutation-isolation proof at b58020420; see [retained packet](../../data/patch-api/evidence/achievement-garrison-policy-2026-10-11/README.md).
 - [x] Complete authentic AddCombatEvent and concrete color-bootstrap follow-up at33cd07687; see retained five-case proof.
-- [ ] Verify remaining pure-profile configurations and relevant final broad integration scope; vendor-input/native/all-profile addon coverage stays separate.
+- [x] Verify three pure catalog/isolation/color cases under all seven configurations; no vendor input acquired.
+- [ ] Obtain relevant final broad integration outcome; native/all-profile loaded-addon coverage stays separate.
 - [x] Pass the unchanged `tests/blizzard_garrison_ui_loads.rs::blizzard_garrison_ui_loads_explicitly_via_load_addon_without_errors` assertion; preserve its historical failures.
 
 ## Out of scope
