@@ -10,6 +10,16 @@ Verified by source inspection on 2026-10-09: `env_init/frames.rs` registers meth
 
 The reported historical **491-row delta across 31 names** and the **11,985-row baseline file total** measure different scopes, not contradictory totals. The historical delta was not independently reproduced here. Neither count alone justifies snapshot replacement, a native allowlist, or a new publication contract.
 
+## Current Investigation — Saved469 and Alpha Receiver (2026-10-10)
+
+Saved suite revision `469a92d27` (not 469 tests) remains **FAIL**; parent goal **OPEN**. Raw log lines 6874–6957 confirm 84 stale extra-snapshot rows: six retired minimap setters × 14 widget types (`SetBlipTexture`, `SetCorpsePOIArrowTexture`, `SetIconTexture`, `SetPOIArrowTexture`, `SetPlayerTexture`, `SetStaticPOIArrowTexture`). Lines 7494–7518 identify five stale missing-snapshot rows: FontString `GetAlphaGradient`, `GetScaleAnimationMode`, `SetScaleAnimationMode`, `SetVertexColorFromBoolean`, and Texture `SetVertexColorFromBoolean`; plus 16 newly missing `SetPreventSecretValues` rows. “Remove stale entries” means those five keys are now exposed, not that they remain absent; line 7495 specifically names **FontString**, not Frame.
+
+Epoch gates intentionally retire the six minimap setters from `retail-12-0-7` and `SetPreventSecretValues` from `retail-12-0-5`. Main source inspection places the minimap gates in `map_frames.rs:62–83`, epoch lookup checks in `tests/global_frames.rs:605–615`, and absence checks in `tests/patch_12_0_7_removed_native_surface.rs:165–168`. Do not restore retired methods or change snapshots to erase these failures. Valid native Minimap invocation on the current epoch is not proven: the setters are absent there. Native discovery README date **2026-02-23** supplies no build/profile identity; snapshot consistency is not native parity.
+
+**Main observation; independent audit pending:** diagnostic `20261011T023000Z` (October 10 local work date) reused a sealed normal Retail artifact. Six FontString states returned exactly two values; Frame lookup returned a function and explicit invocation returned `true, 0, 0`; plain-table `pcall` returned false. Exit 0, completion marker and trailing JSON `[]` were reported. These observations do not establish native wrong-type rejection or a semantic repair. Shared source representation is `Val::Table`, not userdata. Unsupported 3D remains unsupported; no full-suite or parent closure follows.
+
+[Method/alpha/receiver packet](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/method-alpha-receiver/) retains stdout, privacy-redacted stderr, probe and small receipts/hashes; no binary or private identity is copied. [Saved469 evidence](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/fullsuite-469/evidence.json) records original raw-log location and suite failure boundaries.
+
 ## Current Source Representation
 
 - Shared registration/index construction: `src/lua_api/env_init/frames.rs`
