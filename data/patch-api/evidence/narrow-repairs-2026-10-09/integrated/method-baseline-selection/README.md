@@ -1,6 +1,6 @@
 # Configuration-baseline selection receipts
 
-Implementation revision: `67598f4303d0dc7c4a8ad1abd202531a9c705d20`. Selected builds only; no automatic profile matrix. [Selection contract](../../../../../docs/specs/method-surface-baselines.md).
+Implementation revision: `67598f4303d0dc7c4a8ad1abd202531a9c705d20`. Selected builds only; no automatic profile matrix. [Selection contract](../../../../../../docs/specs/method-surface-baselines.md).
 
 | Boundary | Saved result | Proof scope |
 |---|---|---|
