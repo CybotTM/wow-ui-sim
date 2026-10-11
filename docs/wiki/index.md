@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Saved c75 suite — FAIL
+
+[c75 investigation](investigations/fullsuite-c75-2026-10-11.md):15,024PASS/1GarrisonFAIL/19skips/15,025executed. Both method snapshots and added reward case PASS inside totals; older469FAIL preserved. Native/catalog/full handoff OPEN; Docker/native staging has separate bounded proof.
+
 ## [2026-10-11] audit | Dev-only harness generation and cache isolation
 
 [Harness ownership](systems/prefork-test-harness.md#dev-only-automatic-generation--2026-10-11): automatic discovery moves into a dev-only helper; bounded compile/list, selected/original execution and local timestamp-cache proof retained separately. One temporary new-input control is admitted separately; native/full handoff gaps remain open and historical failures are preserved.

@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Saved c75 full suite — FAIL
+
+Added [c75 SSOT](investigations/fullsuite-c75-2026-10-11.md):15,024PASS/1FAIL/19skips/15,025executed, four auxiliary cases included once. Method pair/reward PASS; same Garrison nil-table boundary as469. Small exact result/audit copies retained, whole original logs unchanged. Later staging workflow proof remains separate; native/full handoff OPEN.
+
 ## [2026-10-11] audit | Dev-only harness ownership
 
 Updated [harness SSOT](systems/prefork-test-harness.md#dev-only-automatic-generation--2026-10-11) and index; corrected generation-source links after helper extraction. Later [staging proof](../../data/test-perf/evidence/dev-harness-build-inputs-2026-10-11/README.md) covers omitted helper inputs in Docker/native snapshots, not actual container/desktop builds. Linked bounded source/execution/cache evidence, later temporary-marker discovery/cleanup and stock CLI proof, plus independent retention acceptance. No native/full-profile promotion or historical failure rewrite.
