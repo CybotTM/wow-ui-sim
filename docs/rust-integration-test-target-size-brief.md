@@ -139,6 +139,30 @@ reusing each loaded UI environment within the family. Do not create one
 full-UI startup per audited symbol. If the full target approaches 60 seconds,
 optimize fixture sharing or grouping before adding another target.
 
+## Compile Selection Findings
+
+Official [Cargo test target-selection documentation](https://doc.rust-lang.org/cargo/commands/cargo-test.html)
+says selecting integration tests or benchmarks
+automatically builds binary targets. The [Cargo target reference](https://doc.rust-lang.org/cargo/reference/cargo-targets.html)
+distinguishes `test = false` disabling default testing from disabling normal
+binary builds. Sources verified by main on 2026-10-11 UTC (October 10 local);
+not fetched again for this update.
+
+The [existing jobs12 evidence](remote-builds.md#required-unit2-builds--measured-cgroup-cpu-window)
+and [seven-profile receipts](../data/test-perf/evidence/unit2-jobs12-2026-10-10/final-report.md)
+retain unchanged compile selection: each saved unit2 compile built six
+production binaries, the library, and integration target. Neither worker nor
+helper supplied `--bin` selectors. A direct integration-test consumer of
+`wow-sim` is established; automatic compilation of the other binaries does not
+establish test invocation of them. Tests do invoke `wow-sim`.
+
+Main preserved integration, prefork, and library acceptance scopes, plus distinct
+normal-startup proof. Existing per-command CPU/wall measurements cannot allocate
+per-binary link cost. No supported CLI exclusion mechanism was established from
+these docs; no flags, manifest, or product changes were applied, and no speedup
+is claimed. The seven-profile receipts remain whole-command measurements, not
+per-target attribution.
+
 ## Worktree Target Strategy
 
 Per-worktree `target/` directories avoid Cargo lock contention but multiply this
