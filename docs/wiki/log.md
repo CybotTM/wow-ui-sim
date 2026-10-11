@@ -1,3 +1,7 @@
+## [2026-10-11] staging | Mists original fixture observes settled fade
+
+[Fixture phase](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified) now advances the normal source fade before unchanged original idle-layout and anchor assertions. No vendor/production patch; uncompiled/unexecuted, historical failure preserved and later assertions still require proof.
+
 ## [2026-10-11] docs | Garrison addon-compatible test/spec stage
 
 Added [current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11) and index reference for `215d20236`'s three unexecuted tests; linked catalog spec and acceptance SSOT. Recorded school-mask consumer/enUS labels, no producer or GREEN, historical full-suite Garrison FAIL still open. Wiki-only update; no runtime proof generated.

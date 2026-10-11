@@ -1,3 +1,7 @@
+## [2026-10-11] staging | Mists original fixture — settled-fade checks unverified
+
+[Current phase](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified) advances normal animation time before all unchanged original layout/anchor assertions; uncompiled/unexecuted, original failure and later unreached status preserved.
+
 ## [2026-10-11] staging | Garrison addon-compatible catalog — unexecuted tests
 
 [Current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): `215d20236` adds three unexecuted catalog/isolation/authentic-consumer tests using school-mask keys and simulator enUS labels. Spec and acceptance SSOT linked there; native catalog not blocker, producer/GREEN absent, historical full-suite Garrison FAIL open.

@@ -446,6 +446,11 @@ fn cast_bar_visible_during_cast() {
 prefork_fixture_case! {
 fn cast_bar_respects_edit_mode_lock_setting_after_startup_fix(env: &WowLuaEnv) {
 
+        if cfg!(feature = "client-mists") {
+            // Idle FinishSpell starts the source's 0.2s delay + 0.3s fade.
+            env.fire_on_update(0.55)
+                .expect("settle the source startup fade before idle layout assertions");
+        }
         probe_mists_cast_parent(env, "cast-case-before-original-assertions");
         let (lock_value, attached_after_post_event, parent_after_post_event): (i64, bool, String) = env
             .eval(

@@ -2,6 +2,12 @@
 
 Verified: 2026-10-10. Bounded documentation of saved Mists epoch `20261010T084353Z`: the original hidden-at-startup assertion **FAILS**, with `PlayerCastingBarFrame:IsShown()` already true after addon load. Historical hidden observations belong to a different epoch. Cached source suggests a conditional deferred idle fade; neither the executed root call nor native parity is established. No assertion replacement, fix, or public API change is authorized by this investigation.
 
+## Current fixture phase — 2026-10-11, unverified
+
+[Current acceptance authority](integrated-source-and-factory-proof-2026-10-09.md#acceptance-authority--2026-10-11) requires coherent addon-compatible simulator behavior, not native timing parity. The original edit-mode case now advances the normal animation pipeline by 0.55 simulated seconds before its idle-layout assertions, allowing the source-defined 0.2-second delay plus 0.3-second fade to finish. Every existing visibility, parent, layout-parent, membership and later anchor-transition assertion remains intact; no unconditional `Hide` or vendor/production timing change was added. This fixture correction is **uncompiled and unexecuted**, not a passing result. Parent/membership effects and the previously unreached assertions still require actual execution; a later failure must remain visible rather than be weakened.
+
+`tests/mists_cast_fade.rs` supplies separate previously accepted source-fade sequence evidence, not proof for this changed original case. Earlier failure receipts below stay historical. Native uncertainty no longer blocks simulator acceptance, but does not turn the phase correction into a verified fix.
+
 ## Exact execution boundary
 
 Saved receipt root (private): `/home/osso/.local/state/wow-ui-sim/verification/mists-prefork-admission-fixed/20261010T084353Z/`. Submission revision: `845bea6d5e378a893e6d9945f46ce7b5163b6b19`; selected profile `client-mists`. `execution/results.json` records the original selector `spell_casting::cast_bar_respects_edit_mode_lock_setting_after_startup_fix`, one execution, exit 1. Its stdout records 0 passed / 1 failed; stderr identifies `tests/spell_casting.rs:489:13`, “Mists startup cast bar should remain hidden”. These are saved receipts, not a new run.
