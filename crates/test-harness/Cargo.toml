@@ -1,0 +1,10 @@
+[package]
+name = "wow-ui-sim-test-harness"
+version = "0.1.0"
+edition = "2024"
+publish = false
+license = "GPL-3.0-only"
+
+[build-dependencies]
+quote = "1"
+syn = { version = "2", features = ["full", "parsing"] }
