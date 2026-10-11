@@ -1,6 +1,6 @@
 # Dev-only automatic test harness — bounded proof
 
-Implementation: helper `ab95adb95`, wiring `c14ccbc4c`, lock `256e54ef1`. Source-only follow-ups `f0e5f64ac`/`a3d6de1ac` change documentation, not the nine sealed compile inputs. Automatic discovery moves into unpublished workspace crate `crates/test-harness`, used as a root dev-dependency. Production build script retains locked-Rilua identity, native ICU and Windows resources. Explicit workspace builds may select the helper; Cargo.lock still has a root watch.
+Implementation: helper `ab95adb95`, wiring `c14ccbc4c`, lock `256e54ef1`. Source-only follow-ups `f0e5f64ac`/`a3d6de1ac` change documentation, not the nine sealed compile inputs. Automatic discovery moves into unpublished workspace crate `crates/test-harness`, used as a root dev-dependency. Production build script retains locked-Rilua identity, native ICU and Windows resources. Explicit workspace builds may select the helper; Cargo.lock still has a root watch. [Ordinary production selection](../dev-harness-production-2026-10-11/README.md) independently records 653 fresh compiler artifacts and zero helper/test/bench records for the default `wow-sim` build.
 
 ## Coverage
 
