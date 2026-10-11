@@ -349,11 +349,13 @@ anim:SetFromAlpha() / SetToAlpha() / SetDuration()
 | C_ChromieTime | `c_chromie_time.rs` | Empty expansion-option queries; CloseUI/SelectChromieTimeOption no-ops (retail/PTR) |
 | C_StringUtil | `c_string_util.rs` | Retail-family `EscapeLuaFormatString` doubles `%`; `EscapeLuaPatterns` escapes Lua pattern characters; `WrapString` joins optional affixes only for nonempty infix |
 | C_Quest | `c_quest_api.rs` | IsQuestFlaggedCompleted -> false |
-| C_AchievementInfo | `c_stubs_api.rs` | GetRewardItemID, GetAchievementInfo (nil) |
+| C_AchievementInfo | `globals/missing_surface/achievement_info.rs` (legacy location) | State-backed GetRewardItemID; GetAchievementInfo |
 | C_ClassTalents | `c_stubs_api.rs` | GetActiveConfigID (nil) |
 | C_Guild | `c_stubs_api.rs` | GetNumMembers (0), IsInGuild (false) |
 | C_LFGList | `c_stubs_api.rs` | GetActiveEntryInfo (nil) |
 | C_Mail, C_Stable, C_Tutorial, C_ActionBar | `c_stubs_api.rs` | All return stub values |
+
+**C_AchievementInfo reward coverage** — existing [probe tests](../tests/c_achievement_info_probes.rs) cover basic supplied/seeded reward values. The additional [reward update test](../tests/achievements_api.rs) checks two explicitly supplied records changing between item IDs and nil, with exactly one return value in each state. [Saved default-Retail receipt](../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/achievement-reward-projection/) records one exact case at `069f1cfbd`; final independent acceptance is pending. This tests an existing C API backing model, not a new Lua-global shim, native catalog, unknown-ID contract or all-profile acceptance.
 
 **C_StringUtil boundary** — `EscapeLuaFormatString(text)` replaces every `%` with `%%`. `EscapeLuaPatterns(text)` prefixes each Lua pattern character (`^`, `$`, `(`, `)`, `%`, `.`, `[`, `]`, `*`, `+`, `-`, `?`) with `%`. `WrapString(infix, prefix, suffix)` treats missing optional affixes as empty strings and returns `""` for an empty infix. These helpers are published on retail and PTR and preserve other Lua string bytes, including NUL and invalid UTF-8. Local `StringUtilDocumentation.lua` establishes signatures and transformations; it is not live-client error, taint, or secret-value evidence.
 
