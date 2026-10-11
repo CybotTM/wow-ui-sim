@@ -4,6 +4,6 @@ At `e27aa007d`, ordinary default root `cargo build --offline --locked --bin wow-
 
 This establishes the captured ordinary production selection does not select the helper. Cargo still loads the helper manifest as a workspace/path dev-dependency input. Explicit workspace builds may select it. Cached build-script output is not proof of execution; no rebuild speedup, other-target/profile, Docker/native-host, runtime or full-branch readiness claim follows.
 
-[Retention manifest](retention-manifest.json) records ten exact text copies, 587,161 bytes; binaries and private session/provider payloads excluded. No private original mutation. Copy preservation is direct caller evidence, not a separate independent retention gate.
+[Retention manifest](retention-manifest.json) records ten exact text copies, 587,161 bytes; binaries and private session/provider payloads excluded. No private original mutation. Initial copy preservation was direct caller evidence. The later [independent packet endpoint gate](retention-final.md) admits 10/10 copies and four original README links; it adds no compilation, binary-seal or native acceptance proof.
 
 Related: [core extraction](../dev-only-harness-2026-10-11/README.md), [staging input repair](../dev-harness-build-inputs-2026-10-11/README.md). Completed Rust suite remains FAIL on Garrison; native/full handoff remains OPEN.
