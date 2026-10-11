@@ -1,3 +1,7 @@
+## [2026-10-11] observation | Four-profile stock startup — not clean
+
+[Stock receipt matrix](investigations/stock-api-startup-2026-10-10.md#later-four-profile-normal-captures--2026-10-11-utc): provenance admitted; Mists completes marker/exit0 but Lua-error invocation has2signatures/2occurrences. Wrath/Era/Anniversary abort on missing source/install, not zero-error startup. Four cached normal builds exit0; original Mists hidden assertion/native/full handoff remain OPEN.
+
 ## [2026-10-11] observation | Fresh Wrath factory/control capture
 
 [Wrath receipt](investigations/patch-3-4-2-api-audit.md#fresh-simulator-factorycontrol-capture--2026-10-11-utc): six actual factory/control cases independently admitted PASS/exit0 on a previously sealed integration artifact;155 observations byte-identical,72matches/83pinned mismatches. Separate capture, no fresh build or155behavior/native/loaded-UI acceptance. Historical accounting and parent OPEN unchanged.
