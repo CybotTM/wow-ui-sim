@@ -1557,3 +1557,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] audit | Query partial GREEN and color-root correction
 
 [Retained packet](../../data/patch-api/evidence/achievement-garrison-policy-2026-10-11/README.md): authenticated b580174814,121PASS/1consumerFAIL/122unique; achievement/reward/catalog/originalGarrison/publications PASS, normal[]0,fmt/check0. Authentic consumer advances to niltextColor129.33 restores four missing engine globals using explicitMists-source simulatorpalette, notfakefixturedependency/Retail-nativeclaim; follow-up pending. EarlierRED/zero-case/fullsuitFAIL records preserved; handoffOPEN.
+
+## [2026-10-11] audit | Authentic Garrison consumer reaches strict messages
+
+[Color follow-up](../../data/patch-api/evidence/adventures-color-green-2026-10-11/README.md): authenticated33/180245,fourGarrcolor/catalognames+original1PASS,fiveunique,normal[]0,fmt/check0. StrictFire/Holyformattedmessagesexecute; oldnilcatalog/niltextColor failures preserved. ba413gatingkeepsRetailbodiesandenablessixremainingpureprofiles;matrix/finalasynchronoussuitepending,notnative/fullhandoffcompletion.

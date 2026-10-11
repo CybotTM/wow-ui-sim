@@ -2,9 +2,9 @@
 
 [Current phase](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified): corrected retained-parent original case and separate source-fade control each pass once. Strict lock/anchor checks execute; earlier hidden/parent failures preserved. Startup errors, vendor-identity/native uncertainty and full handoff remain open.
 
-## [2026-10-11] audit | Garrison catalog GREEN; consumer palette follow-up pending
+## [2026-10-11] audit | Garrison catalog and authentic consumer — bounded Retail GREEN
 
-[Current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): catalog/isolation and original Garrison load PASS at b580; authentic consumer progresses to missing engine textColor.33 adds source-backed simulator palette and bootstrap test; follow-up pending. Historical failures/native limits/full handoff preserved.
+[Current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): four catalog/color/consumer cases plus original load PASS; strict Fire/Holy messages reached after source-backed engine palette repair. Normal startup[] and checks0; six-profile pure matrix/final suite pending. Historical failures/native limits/full handoff preserved.
 
 ## [2026-10-11] audit | Achievement relations — bounded GREEN/preservation
 
