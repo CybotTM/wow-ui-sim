@@ -5,7 +5,8 @@ Bounded simulator proof for [prose-2026-06-18-058; prose-2026-06-18-059](../../d
 ## What it must do
 
 - [x] L58/L59: all five numeric modes round-trip, invalid modes reject, default is RunWhenVisible; actual dispatch follows ancestor visibility, hidden RunAlways, one-shot reset/rearm and XML mode selection.
-- [ ] Actual managed-aura dirty processing must retain native registration, remain armed while hidden, then clear dirty state and stay Disabled after visible dispatch. Earlier synthetic-phase failure remains historical RED evidence; corrected execution pending.
+- [x] Actual managed-aura dirty processing remains armed while hidden, then clears dirty state and stays Disabled after visible dispatch. Corrected fixture PASS is recorded in saved c75.
+- [ ] Registration retention is not directly asserted by that fixture; populated aura/registration and native parity evidence remain separate.
 
 ## How it works
 
@@ -20,11 +21,11 @@ Bounded simulator proof for [prose-2026-06-18-058; prose-2026-06-18-059](../../d
 
 ## Tests asserting this spec
 
-- `tests/on_update_modes.rs` — prior proof had four passing tests and one ManagedAura failure. The 2026-10-09 fixture preserves native phases and uses `UpdateAllAuras()`; fresh runtime proof pending.
+- `tests/on_update_modes.rs` — prior proof had four passing tests and one ManagedAura failure. The 2026-10-09 fixture preserves Blizzard phases and uses `UpdateAllAuras()`. [Saved c75 audit](../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/fullsuite-c75/independent-report.md) records its named PASS at raw line7176; current test body/Cargo pin match. Assertions cover dirty flags and mode2 while hidden, then clean/mode0 after visible dispatch and another clean/disabled update, plus empty captured Lua errors. No rerun, registration-retention or native-client credit; enclosing suite remains FAIL.
 
 ## Known gaps (current cycle)
 
-- [ ] Earlier fixture replaced six native phases with only flag 1, leaving flags 18 after showing requested the full rebuild. Exact 2026-10-09 RED reproduces that boundary. Fixture now observes actual hidden/visible dirty-state transitions without replacing phases; no vendor/runtime patch or ManagedAura PASS yet credited.
+- [ ] Earlier fixture replaced six native phases with only flag 1, leaving flags 18 after showing requested the full rebuild. Exact 2026-10-09 RED reproduces that boundary. Corrected fixture observes hidden/visible dirty-state transitions without replacing phases; its saved c75 PASS is now credited only for those assertions. Earlier synthetic-phase RED remains historical evidence; no vendor/runtime patch, registration-retention or native-client acceptance follows.
 
 ## Out of scope
 

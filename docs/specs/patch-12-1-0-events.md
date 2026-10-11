@@ -4,8 +4,8 @@ Bounded simulator proof for [prose-2026-06-23-083; prose-2026-06-23-088](../../d
 
 ## What it must do
 
-- [x] L83: EventRegistrations rejects seven mutation operations for secure and tainted callers; existing individual/unit/all listeners and callbacks retain queries and actual event delivery; unrestricted controls continue to work.
-- [ ] L88: real AuraContainer/CustomAuraContainerTemplate has forbidden mask 0, failing intrinsic EventRegistrations assertion. Failing test excluded from commit; full reproduction and logs in persistent result file. Recommend modelable / audit-pending, not bounded.
+- [x] L83: current EventRegistrations guards reject tainted callers and allow secure callers; eight event APIs, retained listener/callback delivery and unrestricted controls have simulator proof. This is not native parity for every guarded operation.
+- [x] L88: the real AuraContainer intrinsic has EventRegistrations applied; Blizzard's registration survives, addon registration/query/clear is rejected, secure registration succeeds and plain-frame controls remain unrestricted. Named c75 PASS supersedes pending status, not the historical mask-zero RED.
 
 ## How it works
 
@@ -14,16 +14,20 @@ Bounded simulator proof for [prose-2026-06-23-083; prose-2026-06-23-088](../../d
 
 ## Implementation inventory
 
-- `src/lua_api/frame/methods/text_attribute_event/events.rs — event registration restriction`
-- `cached Blizzard_AuraContainer/Blizzard_AuraContainer.xml — intrinsic template lacks EventRegistrations declaration`
+- `src/lua_api/frame/methods/forbidden_aspects/events.rs` — caller-sensitive event guards
+- `src/lua_api/frame/methods/forbidden_aspects.rs` — intrinsic default and stored mask
+- Cached `Blizzard_AuraContainer/Blizzard_AuraContainer.xml` — intrinsic constructor; default aspect is simulator-side, not a vendor XML patch
 
 ## Tests asserting this spec
 
-- `tests/forbidden_aspect_creation.rs — five event_registration_aspect tests`
+- `tests/forbidden_aspect_creation.rs` — generic caller/guard and listener controls
+- `tests/forbidden_aspect_enforcement.rs::aura_container_intrinsic_event_registrations_block_addons_not_blizzard` — actual intrinsic and secure/addon controls
+
+[Saved c75 proof](../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/fullsuite-c75/independent-report.md): intrinsic case PASS at raw line5837; related guard cases PASS at5792–5793. Current requested source/test bodies match c75. These executions are already in the suite totals, not new reruns. The enclosing suite remains FAIL on Garrison.
 
 ## Known gaps (current cycle)
 
-- [ ] L88: real AuraContainer/CustomAuraContainerTemplate has forbidden mask 0, failing intrinsic EventRegistrations assertion. Failing test excluded from commit; full reproduction and logs in persistent result file. Recommend modelable / audit-pending, not bounded.
+- [ ] Native-client/default-aspect and per-operation parity remain unverified. Earlier mask-zero failure/excluded-test history is preserved; c75 establishes the bounded current intrinsic/control assertions only. Do not infer a ManagedAuraContainer obligation solely from its name.
 
 ## Out of scope
 
