@@ -235,6 +235,171 @@ fn get_currency_info_reflects_sim_state_mutation() {
     assert_eq!(quality, 4);
 }
 
+fn assert_currency_membership_preserved(env: &WowLuaEnv) {
+    env.eval::<()>(
+        r#"
+        assert(C_CurrencyInfo.GetCurrencyListSize() == 19)
+        local header = C_CurrencyInfo.GetCurrencyListInfo(1)
+        assert(header.currencyTypesID == 0)
+        assert(header.name == "The War Within")
+        assert(header.quantity == 0 and header.maxQuantity == 0)
+        assert(header.iconFileID == 0 and header.quality == 0)
+        assert(header.isHeader == true and header.isHeaderExpanded == true)
+        assert(header.isShowInBackpack == false)
+
+        local listed = C_CurrencyInfo.GetCurrencyListInfo(6)
+        assert(listed.currencyTypesID == 3089)
+        assert(listed.name == "Resonance Crystals" and listed.quantity == 620)
+        assert(listed.maxQuantity == 4000)
+        assert(listed.iconFileID == 3528287 and listed.quality == 3)
+        assert(listed.isHeader == false and listed.isHeaderExpanded == false)
+        assert(listed.isShowInBackpack == true)
+        local watched = C_CurrencyInfo.GetBackpackCurrencyInfo(2)
+        assert(watched.currencyTypesID == 3089)
+        assert(watched.name == "Resonance Crystals" and watched.quantity == 620)
+        assert(watched.iconFileID == 3528287)
+        assert(C_CurrencyInfo.GetBackpackCurrencyInfo(3).currencyTypesID == 1792)
+
+        for _, index in ipairs({0, 20}) do
+            assert(select('#', C_CurrencyInfo.GetCurrencyListInfo(index)) == 1)
+            assert(C_CurrencyInfo.GetCurrencyListInfo(index) == nil)
+        end
+        for _, index in ipairs({0, 4}) do
+            assert(select('#', C_CurrencyInfo.GetBackpackCurrencyInfo(index)) == 0)
+        end
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn get_currency_list_info_reflects_successive_existing_currency_updates() {
+    let env = env();
+    for (name, quantity, max_quantity, icon, quality) in [
+        ("Updated Valorstones", 73, 250, 134400, 4),
+        ("Revised Valorstones", 0, 0, 134401, 0),
+    ] {
+        {
+            let mut state = env.state().borrow_mut();
+            let info = state.currency_info.get_mut(&2245).unwrap();
+            info.name = name.into();
+            info.quantity = quantity;
+            info.max_quantity = max_quantity;
+            info.icon_file_id = icon;
+            info.quality = quality;
+        }
+        let actual: (String, i32, i32, u32, i32) = env
+            .eval(
+                r#"
+                local listed = C_CurrencyInfo.GetCurrencyListInfo(2)
+                assert(listed.currencyTypesID == 2245)
+                assert(listed.isHeader == false)
+                assert(listed.isHeaderExpanded == false)
+                assert(listed.isShowInBackpack == true)
+                local fieldCount = 0
+                for _ in pairs(listed) do fieldCount = fieldCount + 1 end
+                assert(fieldCount == 9)
+                local detail = C_CurrencyInfo.GetCurrencyInfo(2245)
+                assert(detail.currencyID == 2245)
+                assert(listed.name == detail.name)
+                assert(listed.quantity == detail.quantity)
+                assert(listed.maxQuantity == detail.maxQuantity)
+                assert(listed.iconFileID == detail.iconFileID)
+                assert(listed.quality == detail.quality)
+                return listed.name, listed.quantity, listed.maxQuantity,
+                       listed.iconFileID, listed.quality
+                "#,
+            )
+            .unwrap();
+        assert_eq!(actual, (name.into(), quantity, max_quantity, icon, quality));
+        assert_currency_membership_preserved(&env);
+    }
+}
+
+#[test]
+fn get_backpack_currency_info_reflects_successive_existing_currency_updates() {
+    let env = env();
+    for (name, quantity, max_quantity, icon, quality) in [
+        ("Updated Valorstones", 73, 250, 134400, 4),
+        ("Revised Valorstones", 0, 0, 134401, 0),
+    ] {
+        {
+            let mut state = env.state().borrow_mut();
+            let info = state.currency_info.get_mut(&2245).unwrap();
+            info.name = name.into();
+            info.quantity = quantity;
+            info.max_quantity = max_quantity;
+            info.icon_file_id = icon;
+            info.quality = quality;
+        }
+        let actual: (String, i32, u32, i32, i32) = env
+            .eval(
+                r#"
+                local watched = C_CurrencyInfo.GetBackpackCurrencyInfo(1)
+                assert(watched.currencyTypesID == 2245)
+                assert(watched.maxQuantity == nil and watched.quality == nil)
+                assert(watched.isHeader == nil and watched.isHeaderExpanded == nil)
+                assert(watched.isShowInBackpack == nil and watched.currencyID == nil)
+                local fieldCount = 0
+                for _ in pairs(watched) do fieldCount = fieldCount + 1 end
+                assert(fieldCount == 4)
+                local detail = C_CurrencyInfo.GetCurrencyInfo(2245)
+                assert(detail.currencyID == 2245)
+                assert(watched.name == detail.name)
+                assert(watched.quantity == detail.quantity)
+                assert(watched.iconFileID == detail.iconFileID)
+                return watched.name, watched.quantity, watched.iconFileID,
+                       detail.maxQuantity, detail.quality
+                "#,
+            )
+            .unwrap();
+        assert_eq!(actual, (name.into(), quantity, icon, max_quantity, quality));
+        assert_currency_membership_preserved(&env);
+    }
+}
+
+#[test]
+fn get_currency_list_info_returns_nil_when_existing_currency_row_is_removed() {
+    let env = env();
+    assert!(
+        env.state()
+            .borrow_mut()
+            .currency_info
+            .remove(&2245)
+            .is_some()
+    );
+    env.eval::<()>(
+        r#"
+        assert(select('#', C_CurrencyInfo.GetCurrencyListInfo(2)) == 1)
+        assert(C_CurrencyInfo.GetCurrencyListInfo(2) == nil)
+        assert(select('#', C_CurrencyInfo.GetCurrencyInfo(2245)) == 0)
+        "#,
+    )
+    .unwrap();
+    assert_currency_membership_preserved(&env);
+}
+
+#[test]
+fn get_backpack_currency_info_returns_nothing_when_existing_currency_row_is_removed() {
+    let env = env();
+    assert!(
+        env.state()
+            .borrow_mut()
+            .currency_info
+            .remove(&2245)
+            .is_some()
+    );
+    env.eval::<()>(
+        r#"
+        assert(select('#', C_CurrencyInfo.GetBackpackCurrencyInfo(1)) == 0)
+        assert(C_CurrencyInfo.GetBackpackCurrencyInfo(1) == nil)
+        assert(select('#', C_CurrencyInfo.GetCurrencyInfo(2245)) == 0)
+        "#,
+    )
+    .unwrap();
+    assert_currency_membership_preserved(&env);
+}
+
 #[test]
 fn get_currency_info_from_link_parses_currency_hyperlink() {
     let env = env();
