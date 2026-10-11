@@ -14,7 +14,7 @@ Bounded simulator proof for [prose-2026-06-23-083; prose-2026-06-23-088](../../d
 
 ## Implementation inventory
 
-- `src/lua_api/frame/methods/forbidden_aspects/events.rs` — caller-sensitive event guards
+- `src/lua_api/frame/methods/text_attribute_event/events.rs` — caller-sensitive event guards
 - `src/lua_api/frame/methods/forbidden_aspects.rs` — intrinsic default and stored mask
 - Cached `Blizzard_AuraContainer/Blizzard_AuraContainer.xml` — intrinsic constructor; default aspect is simulator-side, not a vendor XML patch
 
