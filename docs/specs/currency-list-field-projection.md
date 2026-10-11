@@ -5,7 +5,7 @@ Expose existing currency-list backing fields through `C_CurrencyInfo.GetCurrency
 ## What it must do
 
 - [ ] Return non-nil boolean `isShowInBackpack` from `CurrencyEntry.is_show_in_backpack`, preserving true and false.
-- [ ] Return non-nil number `maxQuantity` from `CurrencyEntry.max_quantity`, preserving zero and positive caps.
+- [ ] Return non-nil number `maxQuantity`, preserving zero and positive caps. Static header values come from `CurrencyEntry`; ordinary rows use supplied-state values.
 - [ ] Forward those fields directly through Mists `GetCurrencyListInfo` tuple positions 5 and 8.
 - [ ] Preserve all other fields, unsupported tuple slots, catalog data, defaults, and registrations.
 
@@ -26,16 +26,21 @@ Expose existing currency-list backing fields through `C_CurrencyInfo.GetCurrency
 - `src/lua_api/globals/currency_data.rs` — existing `CurrencyEntry` fields and static list; unchanged.
 - `src/c_api/item_spell/c_currency.rs` — namespaced list-info projection with capacity for nine fields.
 - `src/mists/compat_bootstrap.lua` — existing Mists legacy tuple adapter.
-- `tests/mists_currency_list.rs` — existing currency-list integration test file; owned by the separate fixture actor.
+- `tests/mists_currency_list.rs` — existing Mists namespace and legacy-tuple controls.
+- `tests/currency_info_probes.rs` — shared supplied-state display and missing-row regressions.
 
 ## Tests asserting this spec
 
-Two new test names in `tests/mists_currency_list.rs` (GREEN unverified here):
+Two existing static-field tests in `tests/mists_currency_list.rs` (historical bounded GREEN, not supplied-state mutation proof):
 
 - `currency_list_info_preserves_watched_flags_in_namespace_and_legacy_tuple`
 - `currency_list_info_preserves_max_quantity_in_namespace_and_legacy_tuple`
 
-Four supplied-state regressions in `tests/currency_info_probes.rs` (RED execution pending):
+Saved static Mists audit `20261010T051236Z`, compiled revision `a62f7a95ba22857ec48cd9e115fc15eb77df12e6`: five tests PASS, zero FAIL, exit 0. Field assertions prove strict boolean true/false at namespace `isShowInBackpack` and legacy slot 5, and strict numeric cap 90 at namespace `maxQuantity` and legacy slot 8; they do not prove zero-cap or mutation behavior. The other three tests cover numeric singleton list size, populated real TokenUI update, and injected missing-size failure after dependency loading. Warnings and loader diagnostics remain; no native, catalog, full-profile or full-suite acceptance.
+
+Historical RED `0148437a7868b0a25d0ce2fca504378d4558b5ee` (`20261010T043019Z`) and supplemental RED `5184a8cf8feea9a820a15264604a6af303bb5a9d` (`20261010T045459Z`) each recorded one PASS / four FAIL / exit 101. Their field failures establish nil/false versus true/true and nil/nil versus 90/90. Earlier TokenUI fixture failures occurred before the intended size lookup, not successful missing-size reproductions. Private receipt: `/home/osso/.local/state/wow-ui-sim/verification/mists-currency-green-current/20261010T051236Z/audit/report.md`.
+
+Four supplied-state regressions in `tests/currency_info_probes.rs`, committed with this contract at `085f7d799` (RED queued, result not observed; no producer changes or mutation GREEN claimed):
 
 - `get_currency_list_info_reflects_successive_existing_currency_updates`
 - `get_backpack_currency_info_reflects_successive_existing_currency_updates`
