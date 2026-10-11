@@ -4,12 +4,12 @@ Status: historical target fan-out fixed in `02f1d5a6 Consolidate integration tes
 
 ## Root Cause
 
-The large fresh `target/` directories are caused by Rust integration-test target
+The historical large fresh `target/` directories were caused by Rust integration-test target
 fan-out, not by incremental compilation or stale build accumulation.
 
 Cargo treats every top-level `tests/*.rs` file as a separate integration-test
-crate. This repository currently exposes hundreds of those top-level test
-targets, so a full `cargo test` or `cargo test --no-run` links hundreds of
+crate. Before consolidation, this repository exposed hundreds of those top-level test
+targets, so a full `cargo test` or `cargo test --no-run` linked hundreds of
 standalone executables. Each executable pulls in the simulator library plus the
 large GUI, CASC, rendering, and Lua/runtime dependency graph.
 
@@ -34,7 +34,7 @@ hundreds of integration-test binaries * ~220 MiB each = ~200 GiB target
 
 This is normal Cargo behavior, but it is the wrong test layout at this scale.
 
-The current shape is effectively:
+The pre-consolidation shape was effectively:
 
 ```text
 tests/a.rs
