@@ -2,13 +2,13 @@
 
 [Current phase](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified): corrected retained-parent original case and separate source-fade control each pass once. Strict lock/anchor checks execute; earlier hidden/parent failures preserved. Startup errors, vendor-identity/native uncertainty and full handoff remain open.
 
-## [2026-10-11] staging | Garrison addon-compatible catalog — unexecuted tests
+## [2026-10-11] staging | Garrison catalog — producer implemented, GREEN pending
 
-[Current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): `215d20236` adds three unexecuted catalog/isolation/authentic-consumer tests using school-mask keys and simulator enUS labels. Spec and acceptance SSOT linked there; native catalog not blocker, producer/GREEN absent, historical full-suite Garrison FAIL open.
+[Current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): authenticated0PASS/3FAIL runtime RED precedes `b58020420`'s immutable school-mask/enUS catalog. Freshness and authentic consumer GREEN remain pending; historical full-suite Garrison FAIL preserved, native parity not gate.
 
-## [2026-10-11] staging | Achievement relation policy — RED, expanded run blocked
+## [2026-10-11] staging | Achievement relations — producer implemented, GREEN pending
 
-[Relation contract](../specs/achievement-superceding-relations.md): user-selected explicit map/absent empty table; initial64PASS1FAIL, expanded0-case resource block. State/test stage committed; query not implemented. Native/catalog/full handoff remain open.
+[Relation contract](../specs/achievement-superceding-relations.md) and [current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): explicit map/absent empty table; authenticated expanded0PASS/8FAIL precedes `b58020420` query. Initial64PASS1FAIL and zero-case resource/compile attempts preserved; GREEN/preservation/startup pending, full handoff open.
 
 ## [2026-10-11] audit | Seven-profile currency probes — bounded GREEN
 

@@ -1549,3 +1549,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] audit | Mists corrected-parent follow-up
 
 [Retained follow-up](../../data/patch-api/evidence/mists-source-fade-phase-2026-10-11/parent-followup/README.md): authenticated171434 epoch, corrected original1PASS and fade-control1PASS, two unique executions. Later strict lock/anchor checks pass; earlier4e parentFAIL/fade1PASS preserved. Startup errors/native uncertainty/full handoff remain open. Garrison7635fef91 import repair follows duplicate-macro COMPILE_FAILED/zero cases, not query RED.
+
+## [2026-10-11] implementation | Approved C API query producers
+
+[Current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): b58020420 implements explicit achievement relation projection and seven school-mask/enUS Garrison labels after authenticated runtime RED8+3 failures. Only two current publication-gap rows removed; frozen history unchanged. GREEN/preservation/startup pending; generic secret RED boundaries remain unproved. Full handoff OPEN.
