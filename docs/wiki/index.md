@@ -1,3 +1,7 @@
+## [2026-10-11] observation | Talent tick stage ledger
+
+[Private diagnostic](investigations/integrated-source-and-factory-proof-2026-10-09.md#talent-stage-diagnostic--private-observations-2026-10-11):54 observational rows, compile/runtime0; preliminary total delta49.52µs/whole OnUpdate49.30µs. Independent2459 pending. Stored tracked/cache counts are not callbacks/visible counts; no loaded-failure attribution or acceptance promotion. Broad FAIL/full handoff OPEN.
+
 ## [2026-10-11] investigation | Reduced anchor result and isolated performance controls
 
 [ProductChoice](../../data/patch-api/evidence/productchoice-declaration-probe-2026-10-11/README.md): reduced Icon returns self-anchor Err despite recorded[]; separate control resolves parent/sibling points. [Exact ba controls](../../data/patch-api/evidence/ba-isolated-perf-controls-2026-10-11/README.md): one startup and one talent case PASS; independent artifact gates2430/2438. No full-startup/native repair or causal attribution; loaded suite remains FAIL3 and handoffOPEN.

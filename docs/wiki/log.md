@@ -1593,3 +1593,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] verification | Reversed StatusBar range preservation
 
 [Contract](../specs/widget-range-validation.md) and [SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#reversed-statusbar-range--preservation-coverage-2026-10-11): test-only6a4801a40 adds pending interpolation/reversed bounds assertion. Independent2445 authenticates16 widget +1 distinct lifecycle PASS, compile/fmt/check0 and readability; new seal authenticated once. No producer/native-policy change; ba broad FAIL unchanged, full handoff OPEN. Nonbinary packet retained; no rerun.
+
+## [2026-10-11] observation | Talent tick stage ledger
+
+[SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#talent-stage-diagnostic--private-observations-2026-10-11) records one private compile/runtime0 and54 observations, not tests. Retained absent-cache/count/whole-call and Cargo-metadata identity limits; independent2459 pending. Initial epoch collision occurred before Rust; retry1 compiled once. No production/vendor/threshold change, rerun or loaded-failure repair. Broad FAIL/full handoff OPEN.
