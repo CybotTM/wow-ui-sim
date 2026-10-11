@@ -8,6 +8,60 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
 
+/// Supplied simulator state only; no native reward catalog or unknown-ID contract.
+#[test]
+fn test_reward_item_id_tracks_supplied_achievement_state() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        for (achievement_id, reward_item_id) in [(700001, Some(180001)), (700002, None)] {
+            state.achievements.insert(
+                achievement_id,
+                AchievementInfo {
+                    achievement_id,
+                    name: format!("Reward fixture {achievement_id}"),
+                    points: 10,
+                    description: String::new(),
+                    flags: 0,
+                    icon: 0,
+                    reward_text: String::new(),
+                    is_guild: false,
+                    is_statistic: false,
+                    reward_item_id,
+                },
+            );
+        }
+    }
+    let initial: (i64, bool, i64, i64) = env
+        .eval(
+            r#"
+            return C_AchievementInfo.GetRewardItemID(700001),
+                   C_AchievementInfo.GetRewardItemID(700002) == nil,
+                   select('#', C_AchievementInfo.GetRewardItemID(700001)),
+                   select('#', C_AchievementInfo.GetRewardItemID(700002))
+            "#,
+        )
+        .unwrap();
+    assert_eq!(initial, (180001, true, 1, 1));
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.achievements.get_mut(&700001).unwrap().reward_item_id = None;
+        state.achievements.get_mut(&700002).unwrap().reward_item_id = Some(180002);
+    }
+    let updated: (bool, i64, i64, i64) = env
+        .eval(
+            r#"
+            return C_AchievementInfo.GetRewardItemID(700001) == nil,
+                   C_AchievementInfo.GetRewardItemID(700002),
+                   select('#', C_AchievementInfo.GetRewardItemID(700001)),
+                   select('#', C_AchievementInfo.GetRewardItemID(700002))
+            "#,
+        )
+        .unwrap();
+    assert_eq!(updated, (true, 180002, 1, 1));
+}
+
 #[test]
 fn test_achievement_not_completed_by_default() {
     let env = env();
