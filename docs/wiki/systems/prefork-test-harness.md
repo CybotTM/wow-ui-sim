@@ -101,6 +101,7 @@ Sampled process-tree RSS rose from 1,196,596 KiB to 1,523,432 KiB. This metric d
 - [Timeout re-exec conformance](../../../tests/timeout_reexec.rs) — panic/timeout aggregation, fixture-capacity reservation, sibling continuation, visible output, and descendant cleanup proofs
 - [Dev-only build registry](../../../crates/test-harness/build.rs) — `syn`/`quote` marker parsing and stable case generation
 - [Dev-only evidence](../../../data/test-perf/evidence/dev-only-harness-2026-10-11/README.md) — source, selected execution and local cache-isolation proof
+- [Build-input staging](../../../data/test-perf/evidence/dev-harness-build-inputs-2026-10-11/README.md) — Docker/native workspace inputs and bounded missing-manifest resolution proof
 - [Behavioral-messaging cases](../../../tests/blizzard_behavioral_messaging_loads.rs) — two marker-defined cases with remaining libtest tests
 - [Nested registry fixture](../../../tests/prefork_full_ui_nested/fixture.rs) — nested path and inherited-startup proof
 
