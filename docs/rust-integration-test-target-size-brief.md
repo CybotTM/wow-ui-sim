@@ -1,6 +1,6 @@
 # Rust Integration Test Target Size Brief
 
-Status: fixed in `02f1d5a6 Consolidate integration test harness`
+Status: historical target fan-out fixed in `02f1d5a6 Consolidate integration test harness`; dev-only generation/cache-invalidation change approved, verification pending.
 
 ## Root Cause
 
@@ -54,7 +54,7 @@ hundreds of standalone binaries would still consume excessive space.
 
 ## Preferred Test Layout
 
-Current implementation:
+Historical consolidation implementation (not source proof of the approved generation move):
 
 - `Cargo.toml` sets `autotests = false`.
 - `Cargo.toml` declares the custom `frame_positions` target and one
@@ -162,6 +162,12 @@ per-binary link cost. No supported CLI exclusion mechanism was established from
 these docs; no flags, manifest, or product changes were applied, and no speedup
 is claimed. The seven-profile receipts remain whole-command measurements, not
 per-target attribution.
+
+### Approved generation boundary — 2026-10-11
+
+The [harness contract](specs/prefork-test-harness.md#dev-only-automatic-harness-generation-approved-2026-10-11-verification-pending) assigns automatic integration/prefork generation to an internal dev-only crate and removes test generation/watches from the root production build script. Discovery, cfg, original constructors/assertions and CLI case identities must remain unchanged. The change targets test-input cache invalidation, not Cargo target selection: the underlying six production binaries remain selected for integration builds; no unsupported exclusion flag is proposed.
+
+Implementation ownership, generated-case equivalence, runtime discovery and native invalidation proof are pending and distinct. Existing whole-command timings cannot establish a speedup for this change; historical receipts and failures are unchanged.
 
 ## Worktree Target Strategy
 

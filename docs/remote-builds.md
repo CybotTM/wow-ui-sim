@@ -70,6 +70,12 @@ Features differ (including Mists prefork and Forever capabilities); recorded rev
 
 Actual cgroup counters yield5.70–6.45 coarse logical CPU equivalents per compile window under a12-CPU quota, including compiler/worker stream handling, not frontend/codegen or exclusive-rustc attribution. Recorded memory limit16GiB; cumulative unit peak reaches about16GiB after PTR, not per-profile peaks or proof of OOM. Throttling counters have no assigned cause. No resource-limit change or extra build experiment.
 
+### Approved dev-only generation boundary — verification pending
+
+The [harness contract](specs/prefork-test-harness.md#dev-only-automatic-harness-generation-approved-2026-10-11-verification-pending) requires automatic integration/prefork generation in an internal dev-only crate, with no test generation/watches in the root production build script. This changes cache invalidation, not native host selection or Cargo's underlying six-binary integration selection; no unsupported CLI exclusion flag is part of the change.
+
+Pending evidence must distinguish source dependency/watch ownership and preserved discovery/cfg/case identities from original-constructor/assertion runtime execution, then from native host cache-invalidation proof. Existing compile receipts do not verify the new boundary or establish optimization/timing gains. Historical suite failures, desktop GUI failure and native unknowns remain unchanged; no build or runtime gate was run for this documentation audit.
+
 ## Asynchronous full suite
 
 `python3 tools/full_suite.py submit [REF]` schedules the detached worker;

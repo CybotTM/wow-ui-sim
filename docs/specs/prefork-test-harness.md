@@ -4,6 +4,16 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 
 ## What it must do
 
+### Dev-only automatic harness generation (approved 2026-10-11; verification pending)
+
+- [ ] Generate the integration module tree and prefork marker registry automatically in an internal dev-only crate; production builds must not depend on that crate.
+- [ ] Remove test generation and test-source watches from the root production build script; retain unrelated production build responsibilities.
+- [ ] Preserve automatic test discovery, recursive literal `#[path]` module discovery, cfg/profile eligibility, and stable public CLI `<module>::<function>` case identities without manual registration.
+- [ ] Preserve original fixture constructors, case bodies/assertions, and integration/prefork partitioning; moving generation must not normalize fixture state or change runner behavior.
+- [ ] Invalidate dev-only generated harness outputs when discovery inputs change, without test-only edits invalidating the production build script/library through generation or watches. Preserve Cargo's underlying six-binary integration-test selection; this is a cache-invalidation change, not a CLI exclusion flag.
+
+These are approved requirements, not implementation or passing-test claims. Source inspection must establish dependency/watch ownership and unchanged generated identities/cfg/constructors/assertions. Separate runtime receipts must prove discovery after input changes and original case execution; native host build/cache receipts must establish invalidation boundaries. Timing evidence, if later supplied, needs its own revision/workload/cache attribution. Existing historical failures, Mists cast-bar RED, and native unknowns below remain unchanged.
+
 ### Platform and lifecycle
 
 - [x] Run only on Linux.
@@ -141,7 +151,7 @@ Retained small evidence: `/home/osso/Projects/wow/wow-ui-sim/data/test-perf/evid
 ## Implementation inventory
 
 - `Cargo.toml` — declares the dedicated Linux prefork conformance target contract.
-- `build.rs` — keeps the custom target root out of the generated integration harness and builds the stable marker registry with `syn`/`quote`, including literal `#[path]` child modules.
+- `build.rs` — documented pre-change generation owner: excludes the custom target root and builds the stable marker registry with `syn`/`quote`, including literal `#[path]` child modules. The approved contract above moves test generation/watches out; the internal dev-only crate path and implemented ownership remain pending source confirmation.
 - `tests/common/prefork.rs` — reusable eager and lazy-state test-only runner APIs and execution behavior.
 - `tests/common/prefork_full_ui_preload.rs` — target-only normal retail game-screen preload and migrated-case helpers.
 - `tests/prefork_full_ui.rs` — custom target entry point, real-case registry, fixture cases, and behavioral conformance checks.
@@ -158,6 +168,9 @@ Retained small evidence: `/home/osso/Projects/wow/wow-ui-sim/data/test-perf/evid
 - `tests/prefork_full_ui.rs`
 
 ## Known gaps (current cycle)
+
+- [ ] Confirm internal dev-only crate placement, dependency boundary, and removal of root test generation/watches against the implemented source.
+- [ ] Record revision-scoped source equivalence, automatic-discovery/runtime results, and native cache-invalidation evidence separately; no generation optimization acceptance or speedup is established by this docs-only audit.
 
 - [x] Migrate the initial nine `test_keybindings_panels_detail` `WowLuaEnv` cases onto the reusable runner.
 - [x] Add the two behavioral-messaging cases and one nested registry/preloaded-startup fixture.
