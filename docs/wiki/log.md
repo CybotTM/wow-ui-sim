@@ -1,3 +1,7 @@
+## [2026-10-11] docs | Garrison addon-compatible test/spec stage
+
+Added [current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11) and index reference for `215d20236`'s three unexecuted tests; linked catalog spec and acceptance SSOT. Recorded school-mask consumer/enUS labels, no producer or GREEN, historical full-suite Garrison FAIL still open. Wiki-only update; no runtime proof generated.
+
 ## [2026-10-11] staging | Explicit achievement relation policy
 
 Added [contract](../specs/achievement-superceding-relations.md) and retained [initial RED/resource block](../../data/patch-api/evidence/achievement-superceding-red-2026-10-11/README.md). User approved explicit map/absent empty table;37d initial64PASS1FAIL before query, c9f state/eight-test stage followed. Expanded attempt0 cases/load guard blocked, not runtime failure or GREEN. Query producer and native/catalog/parent acceptance remain pending.

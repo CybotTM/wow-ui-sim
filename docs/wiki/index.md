@@ -1,3 +1,7 @@
+## [2026-10-11] staging | Garrison addon-compatible catalog — unexecuted tests
+
+[Current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): `215d20236` adds three unexecuted catalog/isolation/authentic-consumer tests using school-mask keys and simulator enUS labels. Spec and acceptance SSOT linked there; native catalog not blocker, producer/GREEN absent, historical full-suite Garrison FAIL open.
+
 ## [2026-10-11] staging | Achievement relation policy — RED, expanded run blocked
 
 [Relation contract](../specs/achievement-superceding-relations.md): user-selected explicit map/absent empty table; initial64PASS1FAIL, expanded0-case resource block. State/test stage committed; query not implemented. Native/catalog/full handoff remain open.
