@@ -70,11 +70,15 @@ Features differ (including Mists prefork and Forever capabilities); recorded rev
 
 Actual cgroup counters yield5.70–6.45 coarse logical CPU equivalents per compile window under a12-CPU quota, including compiler/worker stream handling, not frontend/codegen or exclusive-rustc attribution. Recorded memory limit16GiB; cumulative unit peak reaches about16GiB after PTR, not per-profile peaks or proof of OOM. Throttling counters have no assigned cause. No resource-limit change or extra build experiment.
 
-### Approved dev-only generation boundary — verification pending
+### Approved dev-only generation boundary — bounded saved proof
 
 The [harness contract](specs/prefork-test-harness.md#dev-only-automatic-harness-generation-approved-2026-10-11-verification-pending) requires automatic integration/prefork generation in an internal dev-only crate, with no test generation/watches in the root production build script. This changes cache invalidation, not native host selection or Cargo's underlying six-binary integration selection; no unsupported CLI exclusion flag is part of the change.
 
-Source audit at `256e54ef1` confirms the unpublished `crates/test-harness` workspace crate is a root dev-dependency, owns test generation/watches, and leaves production build responsibilities in root `build.rs`. Two item-macro calls populate integration/prefork module trees; the Retail registry initializer uses an expression macro. Explicit workspace builds may select the helper; Cargo.lock changes still invalidate the root's existing watch. Pending evidence must distinguish these source facts from compiled discovery/cfg/case identities, original-constructor/assertion runtime execution, and native host cache-invalidation proof. Existing compile receipts do not verify the new boundary or establish optimization/timing gains. Historical suite failures, desktop GUI failure and native unknowns remain unchanged; no build or runtime gate was run for this documentation audit.
+Source `256e54ef1` extracts generation/watches into unpublished dev-dependency `crates/test-harness`, leaving production responsibilities in root `build.rs`. Two item macros populate integration/prefork module trees; an expression macro supplies the Retail registry. Explicit workspace builds may select the helper; Cargo.lock retains its root watch.
+
+[Retained local evidence](../data/test-perf/evidence/dev-only-harness-2026-10-11/README.md) admits Retail/Mists compile/list parity, 13 selected cases, two original Retail prefork bodies, generated-inner-byte preservation, and warning-bearing format/check exits 0. The existing-test timestamp trial keeps the root library and six binaries fresh, rebuilding only helper library and integration; native output snapshots are unchanged.
+
+These local results do not establish dynamic new-input discovery, desktop cache invalidation or native-client acceptance. Changed revisions/cache graphs prohibit normalized speedup or CPU-saturation claims. Historical Mists cast-bar RED, full-suite failures, desktop GUI failure and broader handoff gaps remain open.
 
 ## Asynchronous full suite
 

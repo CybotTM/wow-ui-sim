@@ -1,6 +1,6 @@
 # Rust Integration Test Target Size Brief
 
-Status: historical target fan-out fixed in `02f1d5a6 Consolidate integration test harness`; dev-only generation/cache-invalidation change approved, verification pending.
+Status: historical target fan-out fixed in `02f1d5a6 Consolidate integration test harness`; dev-only helper extracted at `256e54ef1`, bounded saved compile/list/selected-case and timestamp-cache proof admitted; parent OPEN.
 
 ## Root Cause
 
@@ -167,7 +167,11 @@ per-target attribution.
 
 The [harness contract](specs/prefork-test-harness.md#dev-only-automatic-harness-generation-approved-2026-10-11-verification-pending) assigns automatic integration/prefork generation to an internal dev-only crate and removes test generation/watches from the root production build script. Discovery, cfg, original constructors/assertions and CLI case identities must remain unchanged. The change targets test-input cache invalidation, not Cargo target selection: the underlying six production binaries remain selected for integration builds; no unsupported exclusion flag is proposed.
 
-Source ownership is confirmed at `256e54ef1`: unpublished workspace crate `crates/test-harness` is a root dev-dependency; its build script owns test discovery/watches, while root `build.rs` retains production responsibilities. Macros expand at both integration/prefork item sites and the Retail registry expression. Generated-case equivalence, runtime discovery and native invalidation proof remain pending and distinct. Existing whole-command timings cannot establish a speedup for this change; historical receipts and failures are unchanged.
+Source ownership is confirmed at `256e54ef1`: unpublished workspace crate `crates/test-harness` is a root dev-dependency; its build script owns discovery/watches, while root `build.rs` retains production responsibilities. Macros expand at both integration/prefork item sites and the Retail registry expression.
+
+[Retained evidence](../data/test-perf/evidence/dev-only-harness-2026-10-11/README.md) separates compile/list parity, 13 selected cases, two original prefork bodies and generated-inner-byte preservation from the unchanged-content timestamp trial. That trial keeps the root library and six binaries 7/7 fresh; only helper library and integration are nonfresh, versus eight root artifacts before extraction. Helper RunCustomBuild is dirty while its compiled build-script artifact stays fresh.
+
+Changed revisions and artifact graphs preclude normalized speedup. Cgroup CPU/wall ratios do not establish saturation, per-binary cost or native-host acceptance. New-input discovery is source-preserved but unexecuted; historical Mists cast-bar RED, full-suite/native gaps and parent handoff remain open.
 
 ## Worktree Target Strategy
 

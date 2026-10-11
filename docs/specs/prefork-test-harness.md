@@ -6,13 +6,15 @@ The Linux prefork test harness provides a reusable custom test-runner contract f
 
 ### Dev-only automatic harness generation (approved 2026-10-11; verification pending)
 
-- [ ] Generate the integration module tree and prefork marker registry automatically in an internal dev-only crate; production builds must not depend on that crate.
-- [ ] Remove test generation and test-source watches from the root production build script; retain unrelated production build responsibilities.
+- [x] Generate the integration module tree and prefork marker registry automatically in an internal dev-only crate; production builds must not depend on that crate.
+- [x] Remove test generation and test-source watches from the root production build script; retain unrelated production build responsibilities.
 - [ ] Preserve automatic test discovery, recursive literal `#[path]` module discovery, cfg/profile eligibility, and stable public CLI `<module>::<function>` case identities without manual registration.
 - [ ] Preserve original fixture constructors, case bodies/assertions, and integration/prefork partitioning; moving generation must not normalize fixture state or change runner behavior.
 - [ ] Invalidate dev-only generated harness outputs when discovery inputs change, without test-only edits invalidating the production build script/library through generation or watches. Preserve Cargo's underlying six-binary integration-test selection; this is a cache-invalidation change, not a CLI exclusion flag.
 
-These are approved requirements, not implementation or passing-test claims. Source inspection must establish dependency/watch ownership and unchanged generated identities/cfg/constructors/assertions. Separate runtime receipts must prove discovery after input changes and original case execution; native host build/cache receipts must establish invalidation boundaries. Timing evidence, if later supplied, needs its own revision/workload/cache attribution. Existing historical failures, Mists cast-bar RED, and native unknowns below remain unchanged.
+[Retained bounded proof](../../data/test-perf/evidence/dev-only-harness-2026-10-11/README.md): source `256e54ef1`, Retail/Mists compilation/listings and 13 selected cases pass; format and default-profile check exit 0 with existing warnings. Generated inner bodies match the original snapshots apart from macro envelopes. Two additional original Retail bodies pass through the ordinary prefork runner, including the generated nested startup case; constructors/assertions are unchanged.
+
+The existing-test timestamp trial keeps the root library and six binaries fresh while rebuilding only the helper library and integration test. This proves that measured invalidation boundary, not discovery of a newly added input. Source discovery is preserved; dynamic new-module/marker discovery remains unexecuted, not an additional user-mandated gate. Changed revisions/cache graphs prohibit normalized speedup or saturation claims. Historical Mists cast-bar RED, full-suite failures, native-host and broader handoff gaps remain open.
 
 ### Platform and lifecycle
 
@@ -171,7 +173,7 @@ Retained small evidence: `/home/osso/Projects/wow/wow-ui-sim/data/test-perf/evid
 ## Known gaps (current cycle)
 
 - [x] Source audit at `256e54ef1`: confirmed internal dev-only crate placement, dependency boundary, and removal of root test generation/watches. Copied discovery/parser/render bodies and original fixture inputs are unchanged apart from root lookup and macro envelopes; this is not compiled expansion or cache acceptance.
-- [ ] Record revision-scoped source equivalence, automatic-discovery/runtime results, and native cache-invalidation evidence separately; no generation optimization acceptance or speedup is established by this docs-only audit.
+- [ ] Dynamic new-module/marker discovery is not executed; native-host and wider fixture/profile acceptance remain open. Retained compile/list, 13 selected cases, two original bodies, generated-byte parity and timestamp-cache proof have distinct bounded scopes; no full-suite or parent completion follows.
 
 - [x] Migrate the initial nine `test_keybindings_panels_detail` `WowLuaEnv` cases onto the reusable runner.
 - [x] Add the two behavioral-messaging cases and one nested registry/preloaded-startup fixture.
