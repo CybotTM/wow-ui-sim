@@ -1,6 +1,6 @@
 # CASC encoding candidate — current prefix evidence
 
-Main observed exactly **34 bytes in one read**, 2026-10-11T23:46:39Z, from existing `/syncthing/World of Warcraft/Data/data/data.174` at offset849,023,636. No new index reads, payload/decode, acquisition or cache mutation. [Observation](header-observation.json), [cached interpretation](interpretation.json), [packed-entry correction](packed-entry-disposition.json), [source seam](source-seam.md), [exact-copy manifest](retention-manifest.json). Independent cached-metadata/source/retention gate pending; not independent archive authentication.
+Main observed exactly **34 bytes in one read**, 2026-10-11T23:46:39Z, from existing `/syncthing/World of Warcraft/Data/data/data.174` at offset849,023,636. No new index reads, payload/decode, acquisition or cache mutation. [Observation](header-observation.json), [cached interpretation](interpretation.json), [packed-entry correction](packed-entry-disposition.json), [source seam](source-seam.md), [exact-copy manifest](retention-manifest.json). Independent2463 [gate](report.md)/[proof](proof.json) PASS for cached coherence, primary-source limits and initial4-copy retention only; not independent archive authentication. Report/proof follow-up copies checked by main.
 
 | Current candidate check | Observation |
 |---|---|

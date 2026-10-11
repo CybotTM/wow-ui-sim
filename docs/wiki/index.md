@@ -1,6 +1,6 @@
 ## [2026-10-11] observation | CASC encoding candidate prefix
 
-[Current prefix](investigations/integrated-source-and-factory-proof-2026-10-09.md#casc-encoding-candidate--current-prefix-2026-10-11):34-byte main read, BLTE/matching9-byte key prefix in data174; no new index/payload reads or historical/root-cause proof. Cached metadata/retention gate pending. Cold-cache/broad FAIL/full handoff OPEN unchanged.
+[Current prefix](investigations/integrated-source-and-factory-proof-2026-10-09.md#casc-encoding-candidate--current-prefix-2026-10-11):34-byte main read, BLTE/matching9-byte key prefix in data174; no new index/payload reads or historical/root-cause proof. Independent2463 verifies cached coherence/initial retention only, not physical archive identity or repair. Cold-cache/broad FAIL/full handoff OPEN unchanged.
 
 ## [2026-10-11] observation | Talent tick stage ledger
 
