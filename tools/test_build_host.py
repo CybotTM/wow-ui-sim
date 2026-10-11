@@ -1,10 +1,10 @@
 """Behavioral coverage for the native source snapshot boundary."""
 
 import importlib.util
-from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from pathlib import Path
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "build-host.py"
