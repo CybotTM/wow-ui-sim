@@ -15,6 +15,12 @@ Source files in this directory:
 - `diff_global_functions_missing.txt` / `diff_global_functions_extra.txt` — global function gaps
 - `generated_data_refresh_manifest.json` — tracked hash/size manifest for the two large generated Lua data files; bulk refreshes must update this in the same commit
 
+## Current Method Snapshot Refresh (2026-10-10)
+
+Complete outputs must replace `diff_methods_extra.txt` and `diff_methods_missing.txt`; the 105-row reviewed delta is not a replacement snapshot. Existing complete files contain **11,985 extra + 22 missing = 12,007 rows**. Reviewed changes remove 84 extra and five missing rows and add 16 missing rows, predicting **11,901 extra + 33 missing = 11,934 rows**. These are predictions until full regeneration proves the outcome.
+
+Full regeneration capture `20261011T025508Z` is queued; its first admission failed (load1 40.23 > required 24), so no completed output was admitted at that point. Frozen native discovery remains unchanged; its native epoch is unknown. Snapshot consistency does not prove native compatibility or completion of the whole handoff. See the [method-dispatch investigation and prior captures](../wiki/investigations/method-dispatch-refactor.md#current-investigation--saved469-and-alpha-receiver-2026-10-10). Historical counts below are unchanged.
+
 Summary of gaps:
 
 | Category | Missing | Extra |
