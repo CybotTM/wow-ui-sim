@@ -6,7 +6,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "build-host.py"
 spec = importlib.util.spec_from_file_location("wow_build_host", SCRIPT)
 build_host = importlib.util.module_from_spec(spec)
