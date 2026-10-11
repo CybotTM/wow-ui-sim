@@ -23,6 +23,10 @@ The earlier excerpt omitted 12 extra removals and all 491 extra additions. Main4
 
 [Corrected packet](../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/method-full-snapshots-complete/) retains full original/complete files, complete saved469 panic and interim FAIL receipts. Full generator `030142` completed **one named helper case, exit0**, independently audited, producing **12,380 extra + 33 missing = 12,413 rows**; original discovery and source artifact seal unchanged. Older packet is annotated superseded. Generation is not assertion proof. Corrected extra assertion `030409` passes after fifth-attempt resource admission; unchanged missing assertion reuses its `030002` PASS. Both original assertions are covered by one fresh plus one reused saved execution, not two new executions. Native discovery's **625 names / 3,522 type pairs / 16 types** is distinct from 12,413 comparison rows; native epoch/parity remains unknown. Historical suite FAIL and full handoff OPEN remain. See the [method investigation](../wiki/investigations/method-dispatch-refactor.md#current-investigation--saved469-and-alpha-receiver-2026-10-10). Historical counts below are unchanged.
 
+### Cross-profile comparison follow-up
+
+[Method comparison SSOT](../wiki/investigations/method-dispatch-refactor.md#cross-profile-comparisons--2026-10-11-utc) links the retained `031711` packet and exact six-profile matrix. Runtime capture audit PASS is separate from 1 PASS/11 FAIL comparator outcomes; shared Retail expectations are not a native/profile oracle. Retention audit pending; historical suite FAIL and parent OPEN.
+
 Summary of gaps:
 
 | Category | Missing | Extra |

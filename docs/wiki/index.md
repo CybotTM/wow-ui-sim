@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Cross-profile method comparisons
+
+[Method comparison SSOT](investigations/method-dispatch-refactor.md#cross-profile-comparisons--2026-10-11-utc): runtime capture audit PASS; comparator outcomes 1 PASS/11 FAIL, retention audit pending. Native/profile oracle and parent acceptance remain open.
+
 ## [2026-10-11] audit | Seven-profile legacy-aura controls — limited scope
 
 [Seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-profile-aura-controls--2026-10-11-utc): same8existing limited tests pass8/8 each;56profile cases, not56unique/semantic/native passes. Retail8 already inside suite469; other six use separate sealed captures. Explicit blocked source-input lanes, tuple/caster gaps and parent OPEN preserved.

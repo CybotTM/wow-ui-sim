@@ -32,6 +32,20 @@ Main4528's interim **11,901 extra + 33 missing = 11,934** reconstruction and 105
 
 [Corrected retained packet](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/method-full-snapshots-complete/) includes full original/complete files, complete saved469 panic and interim FAIL receipts. Full generator `030142` completed **one named helper case, exit0**, independently audited, producing **12,380 extra + 33 missing = 12,413 rows**; original discovery and source artifact seal unchanged. Main annotated the older packet as superseded. Generation is not assertion proof. Corrected extra assertion `030409` passes after fifth-attempt resource admission; unchanged missing assertion reuses `030002` PASS without replay. Independent audit covers both original assertions: one fresh plus one reused saved case, not two new executions. No runtime/native behavior repair follows from these counts. Native epoch/parity unknown; original saved469 FAIL and parent OPEN remain.
 
+## Cross-profile Comparisons — 2026-10-11 UTC
+
+[Retained packet](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/method-profile-comparisons/) (`7d4019472`): saved `031711` **runtime capture audit PASS**, separately from comparator outcomes **1 PASS / 11 FAIL across 12 actual cases**. Complete diagnostic parsing and all 12 full profile comparison files are retained; retention audit remains pending. Independent report: `/home/osso/.local/state/wow-ui-sim/verification/method-profile-comparisons-current/independent-report.md`.
+
+| Profile | Extra assertion / full rows | Missing assertion / full rows |
+|---|---|---|
+| PTR | FAIL / 12,412 | PASS / 33 |
+| Wrath, Mists, Era, Anniversary — each | FAIL / 11,633 | FAIL / 38 |
+| Forever | FAIL / 11,825 | FAIL / 38 |
+
+Prior Retail's two covered PASS cases—fresh extra `030409` and saved missing `030002`—are excluded from these 12. Source inputs stayed unchanged; no rebuild, cached Blizzard UI load or acquisition occurred. Shared default-Retail expected files are **not a native/profile oracle**: these are fixture disagreements, not 11 runtime implementation bugs or all-profile PASS. Four classic profiles' equal row counts do not establish byte equality; that confirmation remains pending.
+
+PTR's 32 extra additions are `SetRoundLayoutToNearestPixel` and `GetRoundLayoutToNearestPixel` × 16 enumerated types. Actual [source gate](../../../src/lua_api/frame/methods/core_state/mod.rs) is `retail-12-1-5` **OR** `client-wowforever`; the [versioned pixel-rounding contract](../../specs/pixel-layout-rounding.md) links native PTR proof limited to Frame/Texture/FontString, not all 16 types and not merely source-only evidence for those three. Enumeration does not prove dispatch or native semantics. Native build/product remains unknown; source lanes **KEEP BLOCKED**, historical full suite **FAIL**, parent **OPEN**.
+
 ## Current Source Representation
 
 - Shared registration/index construction: `src/lua_api/env_init/frames.rs`
