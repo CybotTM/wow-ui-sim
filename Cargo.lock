@@ -7678,7 +7678,6 @@ dependencies = [
  "pkg-config",
  "pollster",
  "quick-xml 0.37.5",
- "quote",
  "regex",
  "reqwest 0.12.28",
  "rilua",
@@ -7687,7 +7686,6 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
- "syn",
  "tar",
  "tempfile",
  "thiserror 2.0.17",
@@ -7701,6 +7699,15 @@ dependencies = [
  "wgpu",
  "winapi",
  "winresource",
+ "wow-ui-sim-test-harness",
+]
+
+[[package]]
+name = "wow-ui-sim-test-harness"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
 ]
 
 [[package]]
