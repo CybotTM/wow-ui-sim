@@ -167,7 +167,7 @@ per-target attribution.
 
 The [harness contract](specs/prefork-test-harness.md#dev-only-automatic-harness-generation-approved-2026-10-11-verification-pending) assigns automatic integration/prefork generation to an internal dev-only crate and removes test generation/watches from the root production build script. Discovery, cfg, original constructors/assertions and CLI case identities must remain unchanged. The change targets test-input cache invalidation, not Cargo target selection: the underlying six production binaries remain selected for integration builds; no unsupported exclusion flag is proposed.
 
-Implementation ownership, generated-case equivalence, runtime discovery and native invalidation proof are pending and distinct. Existing whole-command timings cannot establish a speedup for this change; historical receipts and failures are unchanged.
+Source ownership is confirmed at `256e54ef1`: unpublished workspace crate `crates/test-harness` is a root dev-dependency; its build script owns test discovery/watches, while root `build.rs` retains production responsibilities. Macros expand at both integration/prefork item sites and the Retail registry expression. Generated-case equivalence, runtime discovery and native invalidation proof remain pending and distinct. Existing whole-command timings cannot establish a speedup for this change; historical receipts and failures are unchanged.
 
 ## Worktree Target Strategy
 

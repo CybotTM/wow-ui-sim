@@ -55,7 +55,7 @@ These are approved requirements, not implementation or passing-test claims. Sour
 - [x] After successful startup, when bytecode caching is enabled, seal the bypassed cache as empty and initialized so read-only children cannot reload the disk pack; preserve whether `pack.bin` exists, return a successful zero-byte release outcome, and fail if cache state was initialized or populated before sealing. Disabled caching returns a successful no-op.
 - [x] Fail setup explicitly with addon context on addon-load, `ADDON_LOADED`, EnvironmentCleanup restoration, startup Lua, bootstrap-GC, or bytecode-cache sealing errors instead of continuing with a partial parent snapshot.
 - [x] Run registered full-UI cases as immutable `fn(&WowLuaEnv)` children with a 120-second child timeout and read-only bytecode-cache child setup.
-- [x] Define migrated cases with the explicit `prefork_full_ui_case!` marker; `build.rs` parses marker items with `syn`, recursively follows literal `#[path = "..."] mod` children, renders the registry with `quote`, and assigns stable `<module>::<function>` names. Patch-manifest test references accept these generated marker cases alongside ordinary `#[test]` functions.
+- [x] Define migrated cases with the explicit `prefork_full_ui_case!` marker; the dev-only harness build script parses marker items with `syn`, recursively follows literal `#[path = "..."] mod` children, renders the registry with `quote`, and assigns stable `<module>::<function>` names. Patch-manifest test references accept these generated marker cases alongside ordinary `#[test]` functions.
 - [x] Include the generated integration module tree in the prefork target so mixed modules compile once while unmarked tests remain under libtest.
 - [x] Prove nested-module discovery and inherited startup state with `prefork_full_ui_nested::fixture::preloaded_parent_has_normal_game_startup`.
 - [x] Register the generated default-retail full-UI registry with stable `<module>::<function>` names and retain 9 manual/nested prefork cases.
@@ -151,7 +151,8 @@ Retained small evidence: `/home/osso/Projects/wow/wow-ui-sim/data/test-perf/evid
 ## Implementation inventory
 
 - `Cargo.toml` — declares the dedicated Linux prefork conformance target contract.
-- `build.rs` — documented pre-change generation owner: excludes the custom target root and builds the stable marker registry with `syn`/`quote`, including literal `#[path]` child modules. The approved contract above moves test generation/watches out; the internal dev-only crate path and implemented ownership remain pending source confirmation.
+- `crates/test-harness/` — internal unpublished workspace crate, used only as a root dev-dependency. Its build script owns automatic module/marker generation and test-source watches; `syn`/`quote` are its build dependencies. Exported macros emit module items in both test entry points and the caller-resolved Retail registry expression in `GENERATED_FULL_UI_CASES`.
+- `build.rs` — production-only compiler-revision/Cargo.lock, optional native ICU, and Windows resource responsibilities; no test generation or test-source watches. An explicit workspace-wide build may still select the helper independently.
 - `tests/common/prefork.rs` — reusable eager and lazy-state test-only runner APIs and execution behavior.
 - `tests/common/prefork_full_ui_preload.rs` — target-only normal retail game-screen preload and migrated-case helpers.
 - `tests/prefork_full_ui.rs` — custom target entry point, real-case registry, fixture cases, and behavioral conformance checks.
@@ -169,7 +170,7 @@ Retained small evidence: `/home/osso/Projects/wow/wow-ui-sim/data/test-perf/evid
 
 ## Known gaps (current cycle)
 
-- [ ] Confirm internal dev-only crate placement, dependency boundary, and removal of root test generation/watches against the implemented source.
+- [x] Source audit at `256e54ef1`: confirmed internal dev-only crate placement, dependency boundary, and removal of root test generation/watches. Copied discovery/parser/render bodies and original fixture inputs are unchanged apart from root lookup and macro envelopes; this is not compiled expansion or cache acceptance.
 - [ ] Record revision-scoped source equivalence, automatic-discovery/runtime results, and native cache-invalidation evidence separately; no generation optimization acceptance or speedup is established by this docs-only audit.
 
 - [x] Migrate the initial nine `test_keybindings_panels_detail` `WowLuaEnv` cases onto the reusable runner.
