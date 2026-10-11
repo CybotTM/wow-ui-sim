@@ -1,3 +1,7 @@
+## [2026-10-11] audit | MovieFrame arity gap
+
+[MovieFrame evidence](investigations/method-dispatch-refactor.md#movieframe-receiver-and-return-arity--2026-10-11-utc): saved469case7781 reused, new034451single CLI independently proves four zero-return calls/two receiver rejections/public hidden-state preservation. No replay/newbuild/native/playback claim; source/exposure/behavior scopes separate.
+
 ## [2026-10-11] audit | Cross-profile method comparison boundaries
 
 Added [comparison SSOT](investigations/method-dispatch-refactor.md#cross-profile-comparisons--2026-10-11-utc) and short index/README links: saved capture audit separated from fixture failures; retention/native/source-lane limits preserved. Docs only.

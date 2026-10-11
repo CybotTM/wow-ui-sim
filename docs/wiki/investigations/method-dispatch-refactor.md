@@ -46,6 +46,10 @@ Prior Retail's two covered PASS cases—fresh extra `030409` and saved missing `
 
 PTR's 32 extra additions are `SetRoundLayoutToNearestPixel` and `GetRoundLayoutToNearestPixel` × 16 enumerated types. Actual [source gate](../../../src/lua_api/frame/methods/core_state/mod.rs) is `retail-12-1-5` **OR** `client-wowforever`; the [versioned pixel-rounding contract](../../specs/pixel-layout-rounding.md) links native PTR proof limited to Frame/Texture/FontString, not all 16 types and not merely source-only evidence for those three. Enumeration does not prove dispatch or native semantics. Native build/product remains unknown; source lanes **KEEP BLOCKED**, historical full suite **FAIL**, parent **OPEN**.
 
+## MovieFrame Receiver and Return Arity — 2026-10-11 UTC
+
+`EnableSubtitles` appears among the491extra exposure rows, but its body requires `object_type_name == Some("MovieFrame")`. Existing saved469 test7781 passes valid XML-frame state transitions/isolation and ordinary-Frame/bad-argument rejection; nil-expression checks alone did not prove zero returns. [New arity packet](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/movie-subtitle-arity/) independently passes four exact-zero-return calls on two Lua-created MovieFrames and two explicit receiver rejections, plus public hidden-state preservation. One CLI capture, not six test executions; native receiver/default/playback semantics unproved. See [subtitle contract](../../specs/movie-subtitles.md). Exposure, invocation, state and return arity are separate coverage levels; unsupported3D and full handoff remain unchanged.
+
 ## Current Source Representation
 
 - Shared registration/index construction: `src/lua_api/env_init/frames.rs`

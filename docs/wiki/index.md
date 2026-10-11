@@ -1,3 +1,7 @@
+## [2026-10-11] audit | MovieFrame receiver and exact return arity
+
+[Receiver evidence](investigations/method-dispatch-refactor.md#movieframe-receiver-and-return-arity--2026-10-11-utc): one Retail CLI capture, four exact-zero calls and two rejected receivers; prior XML-state test reused, native/full-profile/handoff OPEN.
+
 ## [2026-10-11] audit | Cross-profile method comparisons
 
 [Method comparison SSOT](investigations/method-dispatch-refactor.md#cross-profile-comparisons--2026-10-11-utc): runtime capture and retention audits PASS; comparator outcomes1PASS/11FAIL. Native/profile oracle and parent acceptance remain open.
