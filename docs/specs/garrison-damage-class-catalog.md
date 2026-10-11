@@ -18,6 +18,7 @@
 
 - Profile cache `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_GarrisonUI/Mainline/Blizzard_AdventuresCombatLog.lua`: authentic row-to-mask map and combat-event label consumer; not simulator-owned code.
 - Profile cache `Blizzard_APIDocumentationGenerated/GarrisonInfoDocumentation.lua`: declares the catalog query and row fields, not native catalog contents or ordering.
+- `src/c_api/c_garrison_damage_classes.rs`: immutable simulator enUS labels with fresh outer/row tables, registered by the canonical C API utility bootstrap. No native catalog claim.
 - `tests/garrison_damage_classes.rs`: simulator enUS catalog, result-isolation and authentic addon-path assertions.
 
 ## Tests asserting this spec
@@ -28,7 +29,7 @@
 - `garrison_damage_classes_returns_fresh_tables_and_rows_without_mutation_leaks`
 - `garrison_adventures_combat_log_consumes_fire_school_mask_not_damage_ordinal`
 
-Tests were inspected, not executed for this docs-only slice; all requirements remain unchecked pending passing proof. Initial joint default attempt `20261011T165520Z` was COMPILE_FAILED with zero executed cases: a duplicate `common` module exported four macros twice, not query RED. Commit `7635fef91` reuses the root integration harness via `use crate::common`; this import repair establishes no catalog/runtime PASS. Guarded retry is separate.
+Tests were inspected, not executed for this docs-only slice; all requirements remain unchecked pending passing proof. Initial joint default attempt `20261011T165520Z` was COMPILE_FAILED with zero executed cases: a duplicate `common` module exported four macros twice, not query RED. Commit `7635fef91` reuses the root integration harness via `use crate::common`; this import repair establishes no catalog/runtime PASS. Retry epoch173738 at `a0833b2dd` compiles successfully and executes three unique cases:0PASS/3FAIL, exit101, eleven endpoint hashes unchanged, before producer changes. Nested timeout summaries describe the same consumer case. Authentic combat-log OnLoad reaches `ipairs` with nil at cached line90; the pure schema case fails its table assertion. Other printed addon-load errors are not erased by this RED. Producer implemented afterward; GREEN/preservation/startup proof remains pending.
 
 ## Known gaps (current cycle)
 

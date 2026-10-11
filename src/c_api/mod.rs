@@ -22,6 +22,7 @@ pub mod aura_entry_ids;
 pub(crate) mod aura_filter;
 pub mod bag_info;
 pub mod c_account_services;
+pub(crate) mod c_achievement_info_relations;
 pub(crate) mod c_action_bar;
 #[cfg(feature = "retail-12-0-5")]
 pub(crate) mod c_action_bar_counts;
@@ -94,6 +95,7 @@ pub(crate) mod c_encounter_timeline;
 #[cfg(feature = "retail-12-0-0")]
 pub(crate) mod c_encounter_warnings;
 pub(crate) mod c_event_scheduler;
+pub(crate) mod c_garrison_damage_classes;
 #[cfg(feature = "client-retail")]
 pub mod c_garrison_trees;
 pub mod c_glue;
@@ -337,6 +339,8 @@ pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResu
     #[cfg(feature = "retail-12-0-5")]
     c_navigation::register(state)?;
     c_weather::register(state)?;
+    c_achievement_info_relations::register(state)?;
+    c_garrison_damage_classes::register(state)?;
     #[cfg(feature = "client-retail")]
     c_garrison_trees::register(state)?;
     c_damage_meter::register(state)?;

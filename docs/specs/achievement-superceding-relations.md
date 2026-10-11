@@ -18,14 +18,14 @@
 
 - `src/lua_api/state/sim_state.rs` — explicit `HashMap<i32, Vec<i32>>` relation input alongside existing achievement state.
 - `src/lua_api/state.rs` — empty relation-map initialization, no native defaults.
-- `src/c_api/c_achievement_info_relations.rs` — planned real namespace query and registration; legacy achievement registrar stays unchanged.
+- `src/c_api/c_achievement_info_relations.rs` — real namespace query, registered by the canonical C API utility bootstrap; legacy achievement registrar stays unchanged. Producer is implemented after runtime RED; GREEN remains pending.
 - `tests/c_achievement_info_probes/superceding.rs` — absent/populated/update/removal/isolation/type/security behavior.
 
 ## Tests asserting this spec
 
 `tests/c_achievement_info_probes/superceding.rs`; existing `c_achievement_info_probes` and reward update tests provide separate preservation evidence.
 
-[Retained initial RED](../../data/patch-api/evidence/achievement-superceding-red-2026-10-11/README.md) at `37d17371b`:64 existing PASS/1 new FAIL/65 executed, exit101; exactly one non-table result failed the relation-table assertion. Exact result value was not recorded. No query producer change preceded that capture. Expanded eight-case attempt at `c9f3043bf` is RESOURCE_BLOCKED/zero executions, not behavioral RED or PASS; shared map/initializer and expanded cases still require actual runtime proof.
+[Retained initial RED](../../data/patch-api/evidence/achievement-superceding-red-2026-10-11/README.md) at `37d17371b`:64 existing PASS/1 new FAIL/65 executed, exit101; exactly one non-table result failed the relation-table assertion. Exact result value was not recorded. No query producer change preceded that capture. Expanded attempt at `c9f3043bf` was RESOURCE_BLOCKED/zero executions. Later joint attempt165520 was COMPILE_FAILED/zero cases from duplicate harness macros, repaired by7635fef91. Epoch173738 at `a0833b2dd` compiles successfully and executes all eight expanded cases:0PASS/8FAIL, exit101, eleven endpoint hashes unchanged, before either query producer. Generic assertion messages do not establish each secret fixture's exact internal assertion boundary. Current producer and preservation/GREEN proof remain pending.
 
 ## Known gaps (current cycle)
 

@@ -68,7 +68,6 @@
   "wt-global-api-C_GamePad.IsEnabled-283",
   "wt-global-api-C_GamePad.SetConfig-284",
   "wt-global-api-C_GamePad.StickIndexToConfigName-285",
-  "wt-global-api-C_Garrison.GetAutoCombatDamageClassValues-286",
   "wt-global-api-C_Garrison.GetAutoMissionBoardState-287",
   "wt-global-api-C_Garrison.GetAutoMissionTargetingInfo-288",
   "wt-global-api-C_Garrison.GetAutoTroops-289",
