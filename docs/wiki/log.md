@@ -1589,3 +1589,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] investigation | Reduced ProductChoice and isolated ba controls
 
 [Anchor packet](../../data/patch-api/evidence/productchoice-declaration-probe-2026-10-11/README.md) retains215919 compile/run0 and two fresh reduced inputs: returned self-anchor Err/recorded[] versus parent/sibling controlOk. [Controls](../../data/patch-api/evidence/ba-isolated-perf-controls-2026-10-11/README.md) retain220436 two logicalPASS, startup3.68s and talent rounded delta59.66µs; shared existing binary/no Cargo rebuild. Independent2430/2438 authenticate new artifacts once. LoadedFAIL3 remains; no source fix/native claim/causality, full handoffOPEN.
+
+## [2026-10-11] verification | Reversed StatusBar range preservation
+
+[Contract](../specs/widget-range-validation.md) and [SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#reversed-statusbar-range--preservation-coverage-2026-10-11): test-only6a4801a40 adds pending interpolation/reversed bounds assertion. Independent2445 authenticates16 widget +1 distinct lifecycle PASS, compile/fmt/check0 and readability; new seal authenticated once. No producer/native-policy change; ba broad FAIL unchanged, full handoff OPEN. Nonbinary packet retained; no rerun.

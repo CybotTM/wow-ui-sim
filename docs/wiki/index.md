@@ -1398,7 +1398,7 @@ Tests-only `6e2f65346` uses cached Blizzard sources, the normal addon harness, a
 
 ## [2026-09-26] audit | Verify Slider/StatusBar range validation
 
-[[wrath-statusbar-value-callback]] records the `SetMinMaxValues` panic repair and [range contract](../specs/widget-range-validation.md). Independent proof: 15 widget cases + one interpolation control, format/check and changed-function readability pass after `90c4f189b`; `/tmp/cross-version-range-validation-verification-ledger.md`. Native behavior and reversed-range interpolation assertions remain unverified.
+[[wrath-statusbar-value-callback]] records the `SetMinMaxValues` panic repair and [range contract](../specs/widget-range-validation.md). Independent proof: 15 widget cases + one interpolation control, format/check and changed-function readability pass after `90c4f189b`; `/tmp/cross-version-range-validation-verification-ledger.md`. Native behavior remains unverified. [Later preservation proof](investigations/integrated-source-and-factory-proof-2026-10-09.md#reversed-statusbar-range--preservation-coverage-2026-10-11) at test-only `6a4801a40` authenticates 16 widget cases plus one separate lifecycle control PASS, including pending interpolation settling after reversed bounds; compile/fmt/check0 and readability clean. Production unchanged; frozen broad FAIL/full handoff OPEN.
 
 ## [2026-09-26] audit | Record ScrollFrame requested-offset boundary
 

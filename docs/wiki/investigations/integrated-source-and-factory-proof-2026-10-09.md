@@ -4,6 +4,10 @@
 
 User changed acceptance: “as long as we have coherent behavior that works with the addons we are good”. Coherent simulator-defined addon-compatible behavior is sufficient; native parity/captures no longer block its acceptance. This supersedes native-evidence completion requirements in older handoff/plan entries, not their evidence records or other approved scope. Source declarations, simulator runtime proof and native observations remain distinct: simulator acceptance does not establish native parity. Incomplete, failed, resource-blocked or unattempted tests keep their recorded status; this decision alone closes no implementation or test gap. Missing Wrath/Era/Anniversary vendor-input lanes remain BLOCKED; no transfer/sync or vendor-lane reopening is authorized.
 
+## Reversed StatusBar range — preservation coverage 2026-10-11
+
+[Range contract](../../specs/widget-range-validation.md) and [retained proof](../../../data/patch-api/evidence/reversed-range-interpolation-2026-10-11/README.md): test-only `6a4801a40` asserts target7/displayed1/pending before reversed `(8,2)`, then immediate bounds2/value2/displayed2/not interpolating. Independent2445 authenticates the new seal once and 16 widget cases plus one distinct lifecycle control PASS; compile/fmt/check0 and manual readability clean. First outcome PASS, not new bugfix RED/GREEN. No production/vendor/native-policy change or profile-matrix proof. Frozen ba broad FAIL remains unchanged; it does not cover this new test. Full handoff OPEN.
+
 ## Garrison addon-compatible catalog — test/spec stage 2026-10-11
 
 Commit `215d20236` adds three **unexecuted** tests in `tests/garrison_damage_classes.rs`: pure-school catalog shape/labels, independent returned tables/rows without mutation leaks, and authentic cached addon `OnLoad` → `AddCombatEvent` consumption. The consumer indexes by `spellInfo.schoolMask`: `1=Physical`, `2=Holy`, `4=Fire`, `8=Nature`, `16=Frost`, `32=Shadow`, `64=Arcane` are simulator enUS labels, not damage-class ordinals; the consumer test distinguishes Fire mask4 from Holy mask2.

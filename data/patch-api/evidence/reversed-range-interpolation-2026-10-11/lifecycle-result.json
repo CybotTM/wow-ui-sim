@@ -1,0 +1,5 @@
+{
+  "status": "OBSERVED_PASS",
+  "logical_cases": 1,
+  "scope": "Existing exact StatusBar interpolation lifecycle control once"
+}
