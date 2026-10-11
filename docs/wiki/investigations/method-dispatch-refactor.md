@@ -34,7 +34,7 @@ Main4528's interim **11,901 extra + 33 missing = 11,934** reconstruction and 105
 
 ## Cross-profile Comparisons — 2026-10-11 UTC
 
-[Retained packet](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/method-profile-comparisons/) (`7d4019472`): saved `031711` **runtime capture audit PASS**, separately from comparator outcomes **1 PASS / 11 FAIL across 12 actual cases**. Complete diagnostic parsing and all 12 full profile comparison files are retained; retention audit remains pending. Independent report: `/home/osso/.local/state/wow-ui-sim/verification/method-profile-comparisons-current/independent-report.md`.
+[Retained packet](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/method-profile-comparisons/) (`7d4019472`): saved `031711` **runtime capture audit PASS**, separately from comparator outcomes **1 PASS / 11 FAIL across 12 actual cases**. Complete diagnostic parsing and all 12 full profile comparison files are retained; independent retention audit PASS:64hashes/50exactcopies/six sanitized receipts/12argv records. Capture PASS does not change comparator FAIL outcomes.
 
 | Profile | Extra assertion / full rows | Missing assertion / full rows |
 |---|---|---|
@@ -42,7 +42,7 @@ Main4528's interim **11,901 extra + 33 missing = 11,934** reconstruction and 105
 | Wrath, Mists, Era, Anniversary — each | FAIL / 11,633 | FAIL / 38 |
 | Forever | FAIL / 11,825 | FAIL / 38 |
 
-Prior Retail's two covered PASS cases—fresh extra `030409` and saved missing `030002`—are excluded from these 12. Source inputs stayed unchanged; no rebuild, cached Blizzard UI load or acquisition occurred. Shared default-Retail expected files are **not a native/profile oracle**: these are fixture disagreements, not 11 runtime implementation bugs or all-profile PASS. Four classic profiles' equal row counts do not establish byte equality; that confirmation remains pending.
+Prior Retail's two covered PASS cases—fresh extra `030409` and saved missing `030002`—are excluded from these 12. Source inputs stayed unchanged; no rebuild, cached Blizzard UI load or acquisition occurred. Shared default-Retail expected files are **not a native/profile oracle**: these are fixture disagreements, not 11 runtime implementation bugs or all-profile PASS. Main SHA256 comparison confirms both complete files are byte-identical across the four classic builds; this is method-set equality only, not behavioral/native profile equivalence.
 
 PTR's 32 extra additions are `SetRoundLayoutToNearestPixel` and `GetRoundLayoutToNearestPixel` × 16 enumerated types. Actual [source gate](../../../src/lua_api/frame/methods/core_state/mod.rs) is `retail-12-1-5` **OR** `client-wowforever`; the [versioned pixel-rounding contract](../../specs/pixel-layout-rounding.md) links native PTR proof limited to Frame/Texture/FontString, not all 16 types and not merely source-only evidence for those three. Enumeration does not prove dispatch or native semantics. Native build/product remains unknown; source lanes **KEEP BLOCKED**, historical full suite **FAIL**, parent **OPEN**.
 

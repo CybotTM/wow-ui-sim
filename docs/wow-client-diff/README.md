@@ -25,7 +25,7 @@ The earlier excerpt omitted 12 extra removals and all 491 extra additions. Main4
 
 ### Cross-profile comparison follow-up
 
-[Method comparison SSOT](../wiki/investigations/method-dispatch-refactor.md#cross-profile-comparisons--2026-10-11-utc) links the retained `031711` packet and exact six-profile matrix. Runtime capture audit PASS is separate from 1 PASS/11 FAIL comparator outcomes; shared Retail expectations are not a native/profile oracle. Retention audit pending; historical suite FAIL and parent OPEN.
+[Method comparison SSOT](../wiki/investigations/method-dispatch-refactor.md#cross-profile-comparisons--2026-10-11-utc) links the retained `031711` packet and exact six-profile matrix. Runtime capture audit PASS is separate from 1 PASS/11 FAIL comparator outcomes; shared Retail expectations are not a native/profile oracle. Retention audit PASS; historical suite FAIL and parent OPEN.
 
 Summary of gaps:
 

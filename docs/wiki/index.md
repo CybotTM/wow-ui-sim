@@ -1,6 +1,6 @@
 ## [2026-10-11] audit | Cross-profile method comparisons
 
-[Method comparison SSOT](investigations/method-dispatch-refactor.md#cross-profile-comparisons--2026-10-11-utc): runtime capture audit PASS; comparator outcomes 1 PASS/11 FAIL, retention audit pending. Native/profile oracle and parent acceptance remain open.
+[Method comparison SSOT](investigations/method-dispatch-refactor.md#cross-profile-comparisons--2026-10-11-utc): runtime capture and retention audits PASS; comparator outcomes1PASS/11FAIL. Native/profile oracle and parent acceptance remain open.
 
 ## [2026-10-11] audit | Seven-profile legacy-aura controls — limited scope
 

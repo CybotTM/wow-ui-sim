@@ -1,6 +1,6 @@
 # Shared method-fixture comparison: profile evidence
 
-Main capture `20261011T031711Z`: **12 actual cases, 1 PASS / 11 FAIL**, two original bare comparator assertions per PTR/Wrath/Mists/Era/Anniversary/Forever build. All profiles admitted; no rebuild or Blizzard UI loading/source acquisition. Canonical Retail snapshot files and frozen discovery unchanged. Independent audit pending.
+Main capture `20261011T031711Z`: **12 actual cases, 1 PASS / 11 FAIL**, two original bare comparator assertions per PTR/Wrath/Mists/Era/Anniversary/Forever build. All profiles admitted; no rebuild or Blizzard UI loading/source acquisition. Canonical Retail snapshot files and frozen discovery unchanged. Independent saved-capture audit PASS; retention audit PASS64hashes/50exactcopies/six sanitized receipts/12argv records. Comparator verdict remains1PASS/11FAIL.
 
 | Simulator build | Complete extra rows | Complete missing rows | Extra assertion | Missing assertion |
 |---|---:|---:|---|---|
