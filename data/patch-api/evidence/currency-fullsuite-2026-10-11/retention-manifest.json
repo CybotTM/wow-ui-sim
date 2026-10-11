@@ -48,5 +48,5 @@
     "binaries",
     "session/provider payloads"
   ],
-  "history": "Initial842098a4e packet5copies21193bytes; endpoint gate detected private report appended reuse audit after initial copy. Later refresh retains appended report and reuse-audit.json; initial endpoint FAIL remains private currency-suite-retention-final."
+  "history": "Initial842098a4e packet5copies21193bytes; endpoint gate detected retained/private report mismatch without authenticating timing or cause. Later refresh retains current report and reuse-audit.json; initial endpoint FAIL remains private currency-suite-retention-final."
 }
