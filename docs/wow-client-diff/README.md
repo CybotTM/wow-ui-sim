@@ -27,6 +27,14 @@ The earlier excerpt omitted 12 extra removals and all 491 extra additions. Main4
 
 [Method comparison SSOT](../wiki/investigations/method-dispatch-refactor.md#cross-profile-comparisons--2026-10-11-utc) links the retained `031711` packet and exact six-profile matrix. Runtime capture audit PASS is separate from 1 PASS/11 FAIL comparator outcomes; shared Retail expectations are not a native/profile oracle. Retention audit PASS; historical suite FAIL and parent OPEN.
 
+### Compiled-configuration method baselines
+
+The [baseline selection contract](../specs/method-surface-baselines.md) requires each build to use only its own baseline: `ACTIVE.cache_subdir`, the highest actually enabled `retail-*` epoch cfg, and the `forbidden-aspects` / `on-update-modes` flags. No enabled Retail epoch means `no-retail-epoch`, not a metadata-derived epoch or a `1207` fallback. Default execution uses one Retail baseline; it does not loop over every profile or epoch.
+
+`retail` / `retail-12.1.0` with both flags enabled retains the root `diff_methods_extra.txt` and `diff_methods_missing.txt`. Other configurations use `method-baselines/<profile>/<epoch>/forbidden-<N>-on-update-<N>/`, with flags encoded as `0` or `1`. The two existing exact assertions and discovery remain unchanged. The ignored refresh helper must write only the selected configuration; absent data must fail explicitly without fallback or guessed fixtures.
+
+**Proof pending:** main-thread verification of selection, assertions, refresh isolation, and missing-data failure has not completed. Six current fixtures derive from copied, verified diagnostics; copying is not assertion proof. Older Retail epochs lack current baseline data. This selection change establishes no native parity, model correctness, or receiver semantics. Historical suite FAIL and parent OPEN remain.
+
 Summary of gaps:
 
 | Category | Missing | Extra |

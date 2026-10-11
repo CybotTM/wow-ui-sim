@@ -47,6 +47,7 @@ return snapshot
 "#;
 
 const FRAME_METHODS_SECTION_START: &str = "[\"frame_methods\"] = {";
+const DEFAULT_METHOD_BASELINE: &str = "retail/retail-12-1-0/forbidden-1-on-update-1";
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
@@ -59,6 +60,43 @@ fn diff_path(file_name: &str) -> String {
         .join(file_name)
         .display()
         .to_string()
+}
+
+fn compiled_retail_epoch() -> &'static str {
+    let epochs = [
+        (cfg!(feature = "retail-12-1-5"), "retail-12-1-5"),
+        (cfg!(feature = "retail-12-1-0"), "retail-12-1-0"),
+        (cfg!(feature = "retail-12-0-7"), "retail-12-0-7"),
+        (cfg!(feature = "retail-12-0-5"), "retail-12-0-5"),
+        (cfg!(feature = "retail-12-0-0"), "retail-12-0-0"),
+    ];
+    epochs
+        .into_iter()
+        .find_map(|(enabled, name)| enabled.then_some(name))
+        .unwrap_or("no-retail-epoch")
+}
+
+fn method_baseline_key() -> String {
+    let profile = wow_ui_sim::client_profile::ACTIVE.cache_subdir();
+    let epoch = compiled_retail_epoch();
+    let forbidden = u8::from(cfg!(feature = "forbidden-aspects"));
+    let on_update = u8::from(cfg!(feature = "on-update-modes"));
+    format!("{profile}/{epoch}/forbidden-{forbidden}-on-update-{on_update}")
+}
+
+fn method_baseline_dir() -> std::path::PathBuf {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("docs")
+        .join("wow-client-diff");
+    let key = method_baseline_key();
+    if key == DEFAULT_METHOD_BASELINE {
+        return root;
+    }
+    root.join("method-baselines").join(key)
+}
+
+fn method_baseline_path(file_name: &str) -> String {
+    method_baseline_dir().join(file_name).display().to_string()
 }
 
 fn load_method_snapshot(env: &WowLuaEnv) -> BTreeMap<String, BTreeSet<String>> {
@@ -275,7 +313,7 @@ fn diff_methods_missing_snapshot_matches_current_metatable_surface() {
     let env = env();
     let snapshot = load_method_snapshot(&env);
     let discovered = parse_discovery_frame_methods(&diff_path("WowDiscovery.lua"));
-    let expected_missing = parse_diff_file(&diff_path("diff_methods_missing.txt"));
+    let expected_missing = parse_diff_file(&method_baseline_path("diff_methods_missing.txt"));
     let (actual_missing, _) = compute_method_diff(&snapshot, &discovered);
 
     assert_diff_file_matches_current_surface(
@@ -290,7 +328,7 @@ fn diff_methods_extra_snapshot_matches_current_metatable_surface() {
     let env = env();
     let snapshot = load_method_snapshot(&env);
     let discovered = parse_discovery_frame_methods(&diff_path("WowDiscovery.lua"));
-    let expected_extra = parse_diff_file(&diff_path("diff_methods_extra.txt"));
+    let expected_extra = parse_diff_file(&method_baseline_path("diff_methods_extra.txt"));
     let (_, actual_extra) = compute_method_diff(&snapshot, &discovered);
 
     assert_diff_file_matches_current_surface(
@@ -301,20 +339,27 @@ fn diff_methods_extra_snapshot_matches_current_metatable_surface() {
 }
 
 #[test]
-#[ignore = "helper for intentionally refreshing diff_methods_missing.txt and diff_methods_extra.txt"]
+#[ignore = "helper for refreshing only the active configuration's two method baselines"]
 fn refresh_method_diff_files() {
     let env = env();
     let snapshot = load_method_snapshot(&env);
     let discovered = parse_discovery_frame_methods(&diff_path("WowDiscovery.lua"));
     let (actual_missing, actual_extra) = compute_method_diff(&snapshot, &discovered);
 
+    let directory = method_baseline_dir();
+    fs::create_dir_all(&directory).unwrap_or_else(|error| {
+        panic!(
+            "failed to create method baseline directory {}: {error}",
+            directory.display()
+        )
+    });
     fs::write(
-        diff_path("diff_methods_missing.txt"),
+        method_baseline_path("diff_methods_missing.txt"),
         serialize_diff_file(&actual_missing),
     )
     .expect("failed to write diff_methods_missing.txt");
     fs::write(
-        diff_path("diff_methods_extra.txt"),
+        method_baseline_path("diff_methods_extra.txt"),
         serialize_diff_file(&actual_extra),
     )
     .expect("failed to write diff_methods_extra.txt");
