@@ -1473,3 +1473,7 @@ Updated [saved b048 investigation](investigations/fullsuite-b048-2026-10-10.md),
 ## 2026-10-10 — MapDisplay bounded docs/retention
 
 Reconciled [contract](../specs/map-display-info.md), [existing model investigation](investigations/map-display-info-model.md), integrated SSOT/index with independent default86 PASS and P8011 PASS/historical validatorPASS; retained sanitized PTR33+51=84 receipts/correction/hashes. Final PTR independent audit admits84/84 PASS; other five shared-state compile checks exit0/source equality, current getter excluded, six dependency manifest deprecations each. Native/runtime acceptance unknown; parent OPEN. No tests/check/build/source edits/commit/delegation; frozen history untouched.
+
+## [2026-10-11] observation | Fresh Wrath factory/control capture
+
+Added separate [Wrath receipt boundary](investigations/patch-3-4-2-api-audit.md#fresh-simulator-factorycontrol-capture--2026-10-11-utc): six actual factory/control cases independently admitted PASS/exit0 on a previously sealed integration artifact;155 observations byte-identical,72matches/83pinned mismatches. No fresh compilation or155behavior/native/loaded-UI acceptance; historical accounting and parent OPEN unchanged.

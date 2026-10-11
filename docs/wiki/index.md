@@ -1,3 +1,7 @@
+## [2026-10-11] observation | Fresh Wrath factory/control capture
+
+[Wrath receipt](investigations/patch-3-4-2-api-audit.md#fresh-simulator-factorycontrol-capture--2026-10-11-utc): six actual factory/control cases independently admitted PASS/exit0 on a previously sealed integration artifact;155 observations byte-identical,72matches/83pinned mismatches. Separate capture, no fresh build or155behavior/native/loaded-UI acceptance. Historical accounting and parent OPEN unchanged.
+
 ## [2026-10-10] observation | Historical visibility controls, partial coverage
 
 [Five-profile shared controls](investigations/patch-5-0-4-api-audit.md#five-profile-shared-system-preservation) supplement the separate [5.0.4 follow-up](investigations/patch-5-0-4-api-audit.md#current-visibility-follow-up--partial-historical-artifact-proof), which separates historical Mists/Era receipts from accepted bounded seven-profile unit2/boolean proof and still-unproved native identity. Historical accounting unchanged; Mists startup assertion still FAIL.
