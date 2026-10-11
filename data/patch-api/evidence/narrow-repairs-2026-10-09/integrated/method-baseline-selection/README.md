@@ -15,6 +15,6 @@ Implementation revision: `67598f4303d0dc7c4a8ad1abd202531a9c705d20`. Selected bu
 
 The initial negative worker stopped before mutation (`Negative-control row not uniquely present`); that private failed attempt remains preserved. Corrected worker uses exact complete-line matching, not substring matching. `042623/results.json` contains only the completed Retail aggregate because the initial controller later stopped; Wrath evidence comes from its two complete per-case outputs and `execution-results.json`, not an invented aggregate.
 
-Independent audit of positive source/build/case evidence exists; final controls and retained-document audit are pending. Copying receipts is not independent verification.
+[Independent audit](independent-report.md) accepted: source/build/case evidence, strict controls, 12/12 fixture copies, 33/33 retained receipt copies and corrected documentation link at `998b2dd22`. Source wiring and unchanged-byte runtime proof remain distinct; no broader closure follows.
 
 Older Retail configurations and uncaptured flag combinations lack fixtures and are not claimed passing. PTR/Mists/Era/Anniversary/Forever selection has copied source data, not fresh comparator GREEN. Frozen discovery and default fixtures remain unchanged. Historical `031711` results remain 1 PASS/11 FAIL against the former shared default, and suite469 remains FAIL. Native parity UNKNOWN; parent handoff OPEN.
