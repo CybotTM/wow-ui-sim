@@ -1,4 +1,4 @@
-# Frozen final-suite retry — submitted, outcome pending
+# Frozen final-suite retry — submission history
 
 [Admission](admission.json) at October 11, 2026, 20:07:30.483003 UTC: load1 16.76, available memory 29.622642517 GiB, no relevant Cargo, no existing exact-ref result or successful retry receipt. Capacity admitted.
 
@@ -6,4 +6,4 @@
 
 [Manifest](retention-manifest.json) retains two exact receipts, 564 bytes. This is actual asynchronous submission, not a PASS/FAIL result or full-handoff acceptance. [Earlier ten-check block](../query-final-suite-admission-2026-10-11/README.md) remains frozen zero-case history. Later docs do not change the requested source or justify a duplicate suite.
 
-[Acceptance SSOT](../../../../docs/wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#final-suite-capacity-admission--2026-10-11) keeps results pending. ProductChoice diagnostic may run only after this broad job ends and its separate capacity guard admits it. Native parity remains optional; full handoff OPEN.
+[Acceptance SSOT](../../../../docs/wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#final-suite-capacity-admission--2026-10-11) links the separately [authenticated FAIL result](../query-final-suite-result-2026-10-11/README.md). ProductChoice diagnostic may run only after this broad job ends and its separate capacity guard admits it. Native parity remains optional; full handoff OPEN.

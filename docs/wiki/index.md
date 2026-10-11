@@ -1,10 +1,14 @@
+## [2026-10-11] audit | Frozen ba full suite — FAIL
+
+[Authenticated result](investigations/fullsuite-ba-2026-10-11.md):15,038PASS/3FAIL/19skips/15,041executed. Original Garrison and eight achievement/four Garrison cases PASS inside totals; startup/talent timing and cold CASC encoding lookup fail. Prefork phase passes, runner0 is not suite success. Full handoffOPEN; no causal regression or native proof.
+
 ## [2026-10-11] audit | Inline XML scroll — saved proof reconciled
 
 [Contract](../specs/xml-scroll-arguments.md): ordinary/runtime locals and cached FauxScrollFrame synchronization3/3 PASS inside saved1dcc suite; selected loader/test source unchanged through21e1. Historical RED and enclosing suite FAIL preserved. No new run, physical-wheel/native/full-handoff proof.
 
 ## [2026-10-11] audit | Shared query/bootstrap — seven configurations admitted
 
-[Pure-profile matrix](investigations/integrated-source-and-factory-proof-2026-10-09.md#shared-querybootstrap-pure-profiles--partial-2026-10-11):67 accepted pure executions/seven configurations, including earlierRetail11 and remaining56. Matrix finished/fmt0; no native/catalog/vendor-input or final broad-suite acceptance. Initial [suite admission](investigations/integrated-source-and-factory-proof-2026-10-09.md#final-suite-capacity-admission--2026-10-11) exhausted ten checks: RESOURCE_BLOCKED/zero cases. Later frozen-source retry was submitted; outcome pending. Currency116 matrix remains separate; full handoff OPEN.
+[Pure-profile matrix](investigations/integrated-source-and-factory-proof-2026-10-09.md#shared-querybootstrap-pure-profiles--partial-2026-10-11):67 accepted pure executions/seven configurations, including earlierRetail11 and remaining56. Matrix finished/fmt0; no native/catalog/vendor-input or final broad-suite acceptance. Initial [suite admission](investigations/integrated-source-and-factory-proof-2026-10-09.md#final-suite-capacity-admission--2026-10-11) exhausted ten checks: RESOURCE_BLOCKED/zero cases. Later frozen-source retry completed [FAIL](investigations/fullsuite-ba-2026-10-11.md); initial block remains history. Currency116 matrix remains separate; full handoff OPEN.
 
 ## [2026-10-11] audit | Mists original fixture — two bounded passes
 

@@ -40,7 +40,7 @@ Initial test/spec slice was unexecuted; subsequent proof is revision-scoped belo
 - [x] Establish passing catalog and mutation-isolation proof at b58020420; see [retained packet](../../data/patch-api/evidence/achievement-garrison-policy-2026-10-11/README.md).
 - [x] Complete authentic AddCombatEvent and concrete color-bootstrap follow-up at33cd07687; see retained five-case proof.
 - [x] Verify three pure catalog/isolation/color cases under all seven configurations; no vendor input acquired.
-- [ ] Obtain relevant final broad integration outcome; [initial admission](../../data/patch-api/evidence/query-final-suite-admission-2026-10-11/README.md) ended RESOURCE_BLOCKED after ten checks, zero cases and no submission. [Later retry](../../data/patch-api/evidence/query-final-suite-submission-2026-10-11/README.md) was submitted; result remains pending. Native/all-profile loaded-addon coverage stays separate.
+- [ ] Relevant final broad integration acceptance remains FAIL: [authenticated outcome](../../data/patch-api/evidence/query-final-suite-result-2026-10-11/README.md) has three performance/asset failures; original Garrison load and four catalog/color/consumer cases PASS inside totals. Initial zero-case capacity block and actual retry submission remain preserved; native/all-profile loaded-addon coverage stays separate.
 - [x] Pass the unchanged `tests/blizzard_garrison_ui_loads.rs::blizzard_garrison_ui_loads_explicitly_via_load_addon_without_errors` assertion; preserve its historical failures.
 
 ## Out of scope
