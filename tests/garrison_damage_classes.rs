@@ -6,6 +6,34 @@ use crate::common;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[test]
+fn adventures_combat_log_colors_bootstrap_with_mists_row_rgb_palette() {
+    let env = WowLuaEnv::new().expect("create combat-log color bootstrap environment");
+    env.exec(
+        r#"
+        local expected = {
+            ADVENTURES_COMBAT_LOG_GREY = {185 / 255, 185 / 255, 185 / 255},
+            ADVENTURES_COMBAT_LOG_BLUE = {78 / 255, 173 / 255, 215 / 255},
+            ADVENTURES_COMBAT_LOG_ORANGE = {198 / 255, 100 / 255, 75 / 255},
+            ADVENTURES_COMBAT_LOG_YELLOW = {1, 210 / 255, 0},
+        }
+        for name, channels in pairs(expected) do
+            local color = _G[name]
+            assert(color ~= nil, name .. ' must exist in a fresh environment')
+            assert(select('#', color:GetRGB()) == 3,
+                name .. ':GetRGB() must return exactly three channels')
+            local actual = {color:GetRGB()}
+            for index = 1, 3 do
+                assert(type(actual[index]) == 'number', name .. ' channel must be numeric')
+                assert(math.abs(actual[index] - channels[index]) < 1e-12,
+                    name .. ' channel mismatch at ' .. index)
+            end
+        end
+        "#,
+    )
+    .expect("fresh bootstrap exposes combat-log colors with the simulator Mists row RGB palette");
+}
+
+#[test]
 fn garrison_damage_classes_returns_one_table_with_en_us_pure_school_masks() {
     let env = WowLuaEnv::new().expect("create damage-class query environment");
     env.exec(

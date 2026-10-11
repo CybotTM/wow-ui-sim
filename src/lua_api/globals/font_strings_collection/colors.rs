@@ -25,6 +25,24 @@ pub(super) const NAMED_COLOR_GLOBALS: &[(&'static str, (f64, f64, f64, f64))] = 
         "PLAYER_FACTION_COLOR_ALLIANCE",
         (0.29412, 0.33333, 0.91373, 1.0),
     ),
+    // Shared simulator palette: retained Mists 5.5.4.70268 GlobalColor rows 86–89,
+    // literal AARRGGBB; current Retail native RGB parity is unproved.
+    (
+        "ADVENTURES_COMBAT_LOG_GREY",
+        (185.0 / 255.0, 185.0 / 255.0, 185.0 / 255.0, 1.0),
+    ), // 0xffb9b9b9
+    (
+        "ADVENTURES_COMBAT_LOG_BLUE",
+        (78.0 / 255.0, 173.0 / 255.0, 215.0 / 255.0, 1.0),
+    ), // 0xff4eadd7
+    (
+        "ADVENTURES_COMBAT_LOG_ORANGE",
+        (198.0 / 255.0, 100.0 / 255.0, 75.0 / 255.0, 1.0),
+    ), // 0xffc6644b
+    (
+        "ADVENTURES_COMBAT_LOG_YELLOW",
+        (1.0, 210.0 / 255.0, 0.0, 1.0),
+    ), // 0xffffd200
     ("NORMAL_FONT_COLOR", (1.0, 0.82, 0.0, 1.0)),
     ("HIGHLIGHT_FONT_COLOR", (1.0, 1.0, 1.0, 1.0)),
     ("RED_FONT_COLOR", (1.0, 0.1, 0.1, 1.0)),
