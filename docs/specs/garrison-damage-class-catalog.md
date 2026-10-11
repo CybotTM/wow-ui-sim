@@ -24,7 +24,7 @@
 
 ## Tests asserting this spec
 
-`tests/garrison_damage_classes.rs` exposes the catalog, isolation and RGB-bootstrap probes under every profile configuration. Only the authentic cached-addon consumer remains Retail-gated. This supports pure simulator-model verification without acquiring blocked vendor inputs; it is not evidence of native API publication across profiles. Remaining six-profile execution is queued separately. Retail proof is retained below; cfg-only gating preserves its four test bodies.
+`tests/garrison_damage_classes.rs` exposes the catalog, isolation and RGB-bootstrap probes under every profile configuration. Only the authentic cached-addon consumer remains Retail-gated. This supports pure simulator-model verification without acquiring blocked vendor inputs; it is not evidence of native API publication across profiles. [Pure-profile matrix](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#shared-querybootstrap-pure-profiles--partial-2026-10-11) admits the three pure cases under Retail/PTR/Wrath/Mists/Era/Anniversary; Forever remains pending. Retail proof is retained below; cfg-only gating preserves its four test bodies.
 
 Tests:
 

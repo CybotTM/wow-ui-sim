@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Shared query/bootstrap — six configurations admitted
+
+[Pure-profile matrix](investigations/integrated-source-and-factory-proof-2026-10-09.md#shared-querybootstrap-pure-profiles--partial-2026-10-11):58 accepted executions/six configurations, including earlierRetail11 and remaining47. Forever pending; no native/catalog/vendor-input or final broad-suite acceptance. Currency116 matrix remains separate.
+
 ## [2026-10-11] audit | Mists original fixture — two bounded passes
 
 [Current phase](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified): corrected retained-parent original case and separate source-fade control each pass once. Strict lock/anchor checks execute; earlier hidden/parent failures preserved. Startup errors, vendor-identity/native uncertainty and full handoff remain open.

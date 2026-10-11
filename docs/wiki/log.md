@@ -1561,3 +1561,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] audit | Authentic Garrison consumer reaches strict messages
 
 [Color follow-up](../../data/patch-api/evidence/adventures-color-green-2026-10-11/README.md): authenticated33/180245,fourGarrcolor/catalognames+original1PASS,fiveunique,normal[]0,fmt/check0. StrictFire/Holyformattedmessagesexecute; oldnilcatalog/niltextColor failures preserved. ba413gatingkeepsRetailbodiesandenablessixremainingpureprofiles;matrix/finalasynchronoussuitepending,notnative/fullhandoffcompletion.
+
+## [2026-10-11] audit | Shared query profile partial matrix and compile CPU
+
+[Retained packet](../../data/patch-api/evidence/shared-query-profiles-2026-10-11/README.md):five remaining-profile lanes47PASS plus earlierRetail11=58/sixconfigs; independent2316/2326. Forever pending,67conditional. Five compile-window unit-cgroup samples/freshness records retained; logicalCPU-eq notexclusiveRust/physicalcores/controlledspeedup. No old builds rerun or vendor-input acquisition; broad/handoffOPEN.

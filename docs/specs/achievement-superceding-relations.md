@@ -30,7 +30,7 @@
 ## Known gaps (current cycle)
 
 - [x] Implement query after expanded behavioral RED; obtain bounded default Retail GREEN, preservation, format/check/startup and independent proof at b58020420. Relevant final integration/full-profile proof remains separate.
-- Native catalogs, native ordering and absent-ID semantics remain unverified, not blockers for coherent addon-compatible supplied-state behavior under the [current acceptance authority](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#acceptance-authority--2026-10-11). Historical/all-profile runtime coverage is not established by this policy.
+- Native catalogs, native ordering and absent-ID semantics remain unverified, not blockers for coherent addon-compatible supplied-state behavior under the [current acceptance authority](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#acceptance-authority--2026-10-11). [Pure-profile matrix](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#shared-querybootstrap-pure-profiles--partial-2026-10-11) adds recorded supplied-state behavior for PTR/Wrath/Mists/Era/Anniversary; Forever remains pending. Those simulator calls do not establish profile-native publication/catalogs, loaded-addon coverage or full handoff acceptance.
 - [x] Numeric IDs use the existing signed-i32 model. Other numeric values cannot alias a stored key; no native coercion/range policy is claimed.
 
 ## Out of scope
