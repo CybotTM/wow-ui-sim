@@ -56,7 +56,10 @@ Mists wrapper preservation probe in `tests/mists_currency_list.rs`:
 [Bounded proof packet](../../data/patch-api/evidence/currency-supplied-state-2026-10-11/README.md): authentic default RED12PASS/fournewFAIL at `f4a6fb2e4`; default16/16 and Mists20/20 GREEN at `1dcc59c07`, independent gates, fmt/check0 and cached default stock `[]`/exit0. Initial unsupported test-decoder compile failure has zero executions. No broad test rerun supplies these targeted results.
 
 - [ ] Exhaustive catalog/default/order acceptance and native parity remain unproved. Mutated Mists unsupported slots9/10 are not explicitly asserted; wrapper source is unchanged and header/unwatched baseline comparisons cover all12 slots.
-- [ ] Other five pure-model profile captures and the new `1dcc59c07` full suite are asynchronous, not accepted here. Existing c75 Garrison FAIL remains history.
+[Partial profile follow-up](../../data/patch-api/evidence/currency-profile-followup-2026-10-11/README.md): PTR/Wrath16/16 each independently accepted as shared pure-model proof, not native-profile catalogs.
+
+- [ ] Era remains zero-execution resource-blocked after two guarded attempts; Anniversary/Forever unattempted. Blocked vendor-input lanes are not reopened by pure-model proof.
+- [ ] The new `1dcc59c07` full suite remains asynchronous. Existing c75 Garrison FAIL remains history.
 
 ## Out of scope
 

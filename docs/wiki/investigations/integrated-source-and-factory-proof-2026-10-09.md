@@ -1,5 +1,19 @@
 # Integrated source and factory proof — 2026-10-09
 
+## Currency supplied-state projection — partial cross-profile handoff
+
+[Contract](../../specs/currency-list-field-projection.md) records the explicitly approved display projection: existing listed rows read current supplied state; static headers/order/watched membership remain. [Default/Mists packet](../../../data/patch-api/evidence/currency-supplied-state-2026-10-11/README.md) preserves authentic RED before producer repair, bounded runtime/check/startup gates and independent retention. [Profile follow-up](../../../data/patch-api/evidence/currency-profile-followup-2026-10-11/README.md) separates later pure-model execution from resource blocks.
+
+| Profile lane | Simulator proof | Native/source boundary |
+|---|---|---|
+| Retail | 16/16 targeted PASS; cached stock error capture `[]`/exit0 | Warm cache, CASC/addons/SavedVariables disabled; not native/audio acceptance |
+| Mists | 20/20 targeted PASS, including unchanged legacy tuple mapping/static watch despite conflicting supplied flag | No loaded TokenUI/startup/native/catalog acceptance |
+| PTR / Wrath | 16/16 each, independent saved-artifact gates | Shared supplied Retail metadata, not native-profile catalogs; Wrath vendor-input lane stays blocked |
+| Era | Zero cases in original and remaining-only guarded attempts | Resource block, not a source failure or PASS; vendor-input lane stays blocked |
+| Anniversary / Forever | Unattempted in those attempts | No new compile/runtime acceptance; Anniversary vendor-input lane stays blocked |
+
+Four configurations total68 GREEN executions of20 distinct named tests, not68 distinct behaviors. Sampled preservation is not exhaustive catalog/default/order/native parity. The `1dcc59c07` full suite is asynchronous; [c75 FAIL](fullsuite-c75-2026-10-11.md), authentic Garrison-row gap, original Mists assertion/native uncertainty and full handoff remain open. Completed bounded source/model work does not discharge original prefork/profile, historical behavior, native or external acceptance work.
+
 ## Map scalar arguments — bounded Retail/PTR and historical ordinary GREEN
 
 [Existing map investigation](map-display-info-model.md#scalar-map-selectors--bounded-retailptr-green) is scalar proof SSOT; [contract](../../specs/map-scalar-secret-arguments.md) maps assertions without crediting untested secret absent/generic branches. Unchanged producerfae/tests d97: authentic RED2FAIL/4PASS preserved; independent Retail93/PTR91 actualPASS, all6target tests each. Distinct CLI `[]`/exit0 uses CASC disabled; fmt/default/PTRcheck0, six inherited iced deprecations. Historical `profile-retail,retail-12-0-7` ONLY compile0/ordinary2PASS; current secret gate excluded, no all-historical/native claim. Retained RED/default/PTR/historical actual `final-report.md` filenames verified before linking in scalar SSOT; private terminal reports supply admission.
@@ -571,6 +585,8 @@ Compiler exit0,739 JSON records/no parse errors/build-finished success; **six ma
 Warning-report source/docs commit `a2d301531` is separate from this earlier audit; its later compiled and two synthetic-case proof is recorded in the [bounded epoch](#completed-fc824-bounded-proof--parent-open). Existing debug-warning flag remains documented. Neither this earlier audit nor the fixture correction establishes clean startup. Historical startup-warning failure remains unchanged. Source-goal **OPEN**; docs/evidence only, no builds/tests/checks/network/operations/delegation/push.
 
 ## Sources
+
+- [Currency default/Mists packet](../../../data/patch-api/evidence/currency-supplied-state-2026-10-11/README.md) and [partial profile follow-up](../../../data/patch-api/evidence/currency-profile-followup-2026-10-11/README.md) — supplied-state model proof, not native catalogs or full-profile acceptance.
 
 - [Completed TOC runtime audit](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/toc-startup-root-fixes/20261010T021055Z/audit/runtime-report.md), aggregate and hash manifest linked below — sanitized historical receipts only.
 - Retained independent reports, comparisons, hash evidence and retention manifests linked above — bounded execution epochs, not latest-HEAD blanket proof.

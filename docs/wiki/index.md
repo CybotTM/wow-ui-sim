@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Currency model — partial cross-profile handoff
+
+[Handoff matrix](investigations/integrated-source-and-factory-proof-2026-10-09.md#currency-supplied-state-projection--partial-cross-profile-handoff): four configurations have bounded supplied-state proof; three remaining lanes are resource-blocked/unattempted, not source failures. Vendor-input/native/external/full-handoff acceptance remains separate and open.
+
 ## [2026-10-11] audit | Saved c75 suite — FAIL
 
 [c75 investigation](investigations/fullsuite-c75-2026-10-11.md):15,024PASS/1GarrisonFAIL/19skips/15,025executed. Both method snapshots and added reward case PASS inside totals; older469FAIL preserved. Native/catalog/full handoff OPEN; Docker/native staging has separate bounded proof.
