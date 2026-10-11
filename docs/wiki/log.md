@@ -1577,3 +1577,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] audit | Inline XML scroll saved proof reconciled
 
 [Contract](../specs/xml-scroll-arguments.md) and [packet](../../data/patch-api/evidence/xml-scroll-saved-suite-2026-10-11/README.md): three exact saved1dcc PASS rows, already within totals. Two reports retain selected source comparison, not fresh current-HEAD/cache/native proof. Historical RED, unrelated prefork failure and parentOPEN preserved; no build or suite rerun.
+
+## [2026-10-11] audit | Frozen final-suite retry submitted
+
+[Submission packet](../../data/patch-api/evidence/query-final-suite-submission-2026-10-11/README.md): admitted20:07:30Z/load16.76/RAM29.62GiB/no relevant Cargo or duplicate. Installed runner submitted frozenba413e8e1 as full-suite-1791749250.service; outcome pending, not PASS/FAIL or acceptance. Initial ten-check zero-case block and67/116/XML3 scopes preserved. ProductChoice waits for actual job completion and its own capacity guard; parentOPEN.
