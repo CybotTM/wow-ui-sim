@@ -1,3 +1,7 @@
+## [2026-10-11] data | Complete method comparison results
+
+Retained [full files](investigations/method-dispatch-refactor.md#complete-method-result-files--2026-10-11-utc):11,901extra+33missing=11,934rows, not105rowfragment. Reconstructed exact saved469delta with unchanged source/discovery/inputs; original12,007rows preserved. Fresh generation resource-blocked five admissions/zero cases; unchanged assertions pending fresh proof. Native unknown, saved suiteFAIL/parentOPEN; no runtime changes.
+
 ## [2026-10-10] investigation | Method snapshot and receiver boundaries
 
 Updated [method investigation](investigations/method-dispatch-refactor.md#current-investigation--saved469-and-alpha-receiver-2026-10-10) and index: read saved469 raw log6874–6957 and7491–7522; confirmed84 stale extra rows, five newly exposed keys and16 missing setters. Retained independently audited diagnostic023000: six exact-arity FontString states, observational Frame/plain-table calls, marker/JSON[]/exit0. Ten prior behavioral PASS lines reused, not added to suite totals. Linked sanitized packet and disclosed private-evidence mutation/restoration custody limit. Intentional retirements, unsupported3D, suite FAIL and parent OPEN preserved. No native wrong-type/semantic repair or snapshot replacement claimed.

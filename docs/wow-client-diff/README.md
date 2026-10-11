@@ -17,9 +17,9 @@ Source files in this directory:
 
 ## Current Method Snapshot Refresh (2026-10-10)
 
-Complete outputs must replace `diff_methods_extra.txt` and `diff_methods_missing.txt`; the 105-row reviewed delta is not a replacement snapshot. Existing complete files contain **11,985 extra + 22 missing = 12,007 rows**. Reviewed changes remove 84 extra and five missing rows and add 16 missing rows, predicting **11,901 extra + 33 missing = 11,934 rows**. These are predictions until full regeneration proves the outcome.
+The two complete output files contain **11,901 extra + 33 missing = 11,934 rows**, not a 105-row fragment. Before this update they contained 11,985 extra + 22 missing = 12,007 rows. The saved comparator reports exactly 84 extra removals, five missing removals and 16 missing additions: **105 changed rows**. Every unchanged row is retained.
 
-Full regeneration capture `20261011T025508Z` is queued; its first admission failed (load1 40.23 > required 24), so no completed output was admitted at that point. Frozen native discovery remains unchanged; its native epoch is unknown. Snapshot consistency does not prove native compatibility or completion of the whole handoff. See the [method-dispatch investigation and prior captures](../wiki/investigations/method-dispatch-refactor.md#current-investigation--saved469-and-alpha-receiver-2026-10-10). Historical counts below are unchanged.
+Complete sets were reconstructed from the saved469 runtime comparator output; relevant tracked source, discovery and original snapshot inputs were unchanged since that run. [Full before/after files, delta and provenance](../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/method-full-snapshots/) are retained. Fresh regeneration capture `20261011T025508Z` was resource-blocked on all five admissions and executed zero cases; fresh assertion verification remains pending. Frozen native discovery is unchanged, with native epoch unknown. These files are comparison results, not native contracts; historical suite FAIL and full handoff OPEN remain. See the [method investigation](../wiki/investigations/method-dispatch-refactor.md#current-investigation--saved469-and-alpha-receiver-2026-10-10). Historical counts below are unchanged.
 
 Summary of gaps:
 

@@ -395,7 +395,6 @@ Button:SetBagItem
 Button:SetBlendMode
 Button:SetBlingTexture
 Button:SetBlinkSpeed
-Button:SetBlipTexture
 Button:SetBlockingLoadsRequested
 Button:SetBorderAlpha
 Button:SetBorderScalar
@@ -434,7 +433,6 @@ Button:SetCooldownDuration
 Button:SetCooldownFromDurationObject
 Button:SetCooldownFromExpirationTime
 Button:SetCooldownUNIX
-Button:SetCorpsePOIArrowTexture
 Button:SetCountInvisibleLetters
 Button:SetCountdownAbbrevThreshold
 Button:SetCountdownFont
@@ -505,7 +503,6 @@ Button:SetHorizontalScroll
 Button:SetHyperlink
 Button:SetHyperlinkFormat
 Button:SetIconScale
-Button:SetIconTexture
 Button:SetInboxItem
 Button:SetIndentedWordWrap
 Button:SetInsertMode
@@ -567,7 +564,6 @@ Button:SetOrientation
 Button:SetOrigin
 Button:SetOwner
 Button:SetOwningDialog
-Button:SetPOIArrowTexture
 Button:SetPadding
 Button:SetPanExtentPercentage
 Button:SetParticlesEnabled
@@ -576,7 +572,6 @@ Button:SetPaused
 Button:SetPitch
 Button:SetPlayerPingScale
 Button:SetPlayerPingTexture
-Button:SetPlayerTexture
 Button:SetPlaying
 Button:SetPortraitZoom
 Button:SetPosition
@@ -629,7 +624,6 @@ Button:SetSpellByID
 Button:SetSpriteSheetCell
 Button:SetStartDelay
 Button:SetStartPoint
-Button:SetStaticPOIArrowTexture
 Button:SetStatusBarColor
 Button:SetStatusBarDesaturated
 Button:SetStatusBarDesaturation
@@ -1122,7 +1116,6 @@ CheckButton:SetBagItem
 CheckButton:SetBlendMode
 CheckButton:SetBlingTexture
 CheckButton:SetBlinkSpeed
-CheckButton:SetBlipTexture
 CheckButton:SetBlockingLoadsRequested
 CheckButton:SetBorderAlpha
 CheckButton:SetBorderScalar
@@ -1159,7 +1152,6 @@ CheckButton:SetCooldownDuration
 CheckButton:SetCooldownFromDurationObject
 CheckButton:SetCooldownFromExpirationTime
 CheckButton:SetCooldownUNIX
-CheckButton:SetCorpsePOIArrowTexture
 CheckButton:SetCountInvisibleLetters
 CheckButton:SetCountdownAbbrevThreshold
 CheckButton:SetCountdownFont
@@ -1229,7 +1221,6 @@ CheckButton:SetHorizontalScroll
 CheckButton:SetHyperlink
 CheckButton:SetHyperlinkFormat
 CheckButton:SetIconScale
-CheckButton:SetIconTexture
 CheckButton:SetInboxItem
 CheckButton:SetIndentedWordWrap
 CheckButton:SetInsertMode
@@ -1291,7 +1282,6 @@ CheckButton:SetOrientation
 CheckButton:SetOrigin
 CheckButton:SetOwner
 CheckButton:SetOwningDialog
-CheckButton:SetPOIArrowTexture
 CheckButton:SetPadding
 CheckButton:SetPanExtentPercentage
 CheckButton:SetParticlesEnabled
@@ -1300,7 +1290,6 @@ CheckButton:SetPaused
 CheckButton:SetPitch
 CheckButton:SetPlayerPingScale
 CheckButton:SetPlayerPingTexture
-CheckButton:SetPlayerTexture
 CheckButton:SetPlaying
 CheckButton:SetPortraitZoom
 CheckButton:SetPosition
@@ -1353,7 +1342,6 @@ CheckButton:SetSpellByID
 CheckButton:SetSpriteSheetCell
 CheckButton:SetStartDelay
 CheckButton:SetStartPoint
-CheckButton:SetStaticPOIArrowTexture
 CheckButton:SetStatusBarColor
 CheckButton:SetStatusBarDesaturated
 CheckButton:SetStatusBarDesaturation
@@ -1863,7 +1851,6 @@ ColorSelect:SetBagItem
 ColorSelect:SetBlendMode
 ColorSelect:SetBlingTexture
 ColorSelect:SetBlinkSpeed
-ColorSelect:SetBlipTexture
 ColorSelect:SetBlockingLoadsRequested
 ColorSelect:SetBorderAlpha
 ColorSelect:SetBorderScalar
@@ -1894,7 +1881,6 @@ ColorSelect:SetCooldownDuration
 ColorSelect:SetCooldownFromDurationObject
 ColorSelect:SetCooldownFromExpirationTime
 ColorSelect:SetCooldownUNIX
-ColorSelect:SetCorpsePOIArrowTexture
 ColorSelect:SetCountInvisibleLetters
 ColorSelect:SetCountdownAbbrevThreshold
 ColorSelect:SetCountdownFont
@@ -1974,7 +1960,6 @@ ColorSelect:SetHorizontalScroll
 ColorSelect:SetHyperlink
 ColorSelect:SetHyperlinkFormat
 ColorSelect:SetIconScale
-ColorSelect:SetIconTexture
 ColorSelect:SetInboxItem
 ColorSelect:SetIndentedWordWrap
 ColorSelect:SetInsertMode
@@ -2040,7 +2025,6 @@ ColorSelect:SetOrientation
 ColorSelect:SetOrigin
 ColorSelect:SetOwner
 ColorSelect:SetOwningDialog
-ColorSelect:SetPOIArrowTexture
 ColorSelect:SetPadding
 ColorSelect:SetPanExtentPercentage
 ColorSelect:SetParticlesEnabled
@@ -2049,7 +2033,6 @@ ColorSelect:SetPaused
 ColorSelect:SetPitch
 ColorSelect:SetPlayerPingScale
 ColorSelect:SetPlayerPingTexture
-ColorSelect:SetPlayerTexture
 ColorSelect:SetPlaying
 ColorSelect:SetPortraitZoom
 ColorSelect:SetPosition
@@ -2105,7 +2088,6 @@ ColorSelect:SetSpellByID
 ColorSelect:SetSpriteSheetCell
 ColorSelect:SetStartDelay
 ColorSelect:SetStartPoint
-ColorSelect:SetStaticPOIArrowTexture
 ColorSelect:SetStatusBarColor
 ColorSelect:SetStatusBarDesaturated
 ColorSelect:SetStatusBarDesaturation
@@ -2608,7 +2590,6 @@ Cooldown:SetBackpackToken
 Cooldown:SetBagItem
 Cooldown:SetBlendMode
 Cooldown:SetBlinkSpeed
-Cooldown:SetBlipTexture
 Cooldown:SetBlockingLoadsRequested
 Cooldown:SetBorderAlpha
 Cooldown:SetBorderScalar
@@ -2643,7 +2624,6 @@ Cooldown:SetColorWheelTexture
 Cooldown:SetColorWheelThumbTexture
 Cooldown:SetCompanionPet
 Cooldown:SetCompareItem
-Cooldown:SetCorpsePOIArrowTexture
 Cooldown:SetCountInvisibleLetters
 Cooldown:SetCreature
 Cooldown:SetCurrencyToken
@@ -2714,7 +2694,6 @@ Cooldown:SetHorizontalScroll
 Cooldown:SetHyperlink
 Cooldown:SetHyperlinkFormat
 Cooldown:SetIconScale
-Cooldown:SetIconTexture
 Cooldown:SetInboxItem
 Cooldown:SetIndentedWordWrap
 Cooldown:SetInsertMode
@@ -2779,7 +2758,6 @@ Cooldown:SetOrientation
 Cooldown:SetOrigin
 Cooldown:SetOwner
 Cooldown:SetOwningDialog
-Cooldown:SetPOIArrowTexture
 Cooldown:SetPadding
 Cooldown:SetPanExtentPercentage
 Cooldown:SetParticlesEnabled
@@ -2787,7 +2765,6 @@ Cooldown:SetPassword
 Cooldown:SetPitch
 Cooldown:SetPlayerPingScale
 Cooldown:SetPlayerPingTexture
-Cooldown:SetPlayerTexture
 Cooldown:SetPlaying
 Cooldown:SetPortraitZoom
 Cooldown:SetPosition
@@ -2841,7 +2818,6 @@ Cooldown:SetSpellByID
 Cooldown:SetSpriteSheetCell
 Cooldown:SetStartDelay
 Cooldown:SetStartPoint
-Cooldown:SetStaticPOIArrowTexture
 Cooldown:SetStatusBarColor
 Cooldown:SetStatusBarDesaturated
 Cooldown:SetStatusBarDesaturation
@@ -3307,7 +3283,6 @@ EditBox:SetBackpackToken
 EditBox:SetBagItem
 EditBox:SetBlendMode
 EditBox:SetBlingTexture
-EditBox:SetBlipTexture
 EditBox:SetBlockingLoadsRequested
 EditBox:SetBorderAlpha
 EditBox:SetBorderScalar
@@ -3347,7 +3322,6 @@ EditBox:SetCooldownDuration
 EditBox:SetCooldownFromDurationObject
 EditBox:SetCooldownFromExpirationTime
 EditBox:SetCooldownUNIX
-EditBox:SetCorpsePOIArrowTexture
 EditBox:SetCountdownAbbrevThreshold
 EditBox:SetCountdownFont
 EditBox:SetCreature
@@ -3419,7 +3393,6 @@ EditBox:SetHorizontalScroll
 EditBox:SetHyperlink
 EditBox:SetHyperlinkFormat
 EditBox:SetIconScale
-EditBox:SetIconTexture
 EditBox:SetInboxItem
 EditBox:SetInsertMode
 EditBox:SetInventoryItem
@@ -3476,7 +3449,6 @@ EditBox:SetOrientation
 EditBox:SetOrigin
 EditBox:SetOwner
 EditBox:SetOwningDialog
-EditBox:SetPOIArrowTexture
 EditBox:SetPadding
 EditBox:SetPanExtentPercentage
 EditBox:SetParticlesEnabled
@@ -3484,7 +3456,6 @@ EditBox:SetPaused
 EditBox:SetPitch
 EditBox:SetPlayerPingScale
 EditBox:SetPlayerPingTexture
-EditBox:SetPlayerTexture
 EditBox:SetPlaying
 EditBox:SetPortraitZoom
 EditBox:SetPosition
@@ -3534,7 +3505,6 @@ EditBox:SetSpellByID
 EditBox:SetSpriteSheetCell
 EditBox:SetStartDelay
 EditBox:SetStartPoint
-EditBox:SetStaticPOIArrowTexture
 EditBox:SetStatusBarColor
 EditBox:SetStatusBarDesaturated
 EditBox:SetStatusBarDesaturation
@@ -4092,7 +4062,6 @@ FontString:SetBagItem
 FontString:SetBlendMode
 FontString:SetBlingTexture
 FontString:SetBlinkSpeed
-FontString:SetBlipTexture
 FontString:SetBlockingLoadsRequested
 FontString:SetBorderAlpha
 FontString:SetBorderScalar
@@ -4135,7 +4104,6 @@ FontString:SetCooldownDuration
 FontString:SetCooldownFromDurationObject
 FontString:SetCooldownFromExpirationTime
 FontString:SetCooldownUNIX
-FontString:SetCorpsePOIArrowTexture
 FontString:SetCountInvisibleLetters
 FontString:SetCountdownAbbrevThreshold
 FontString:SetCountdownFont
@@ -4221,7 +4189,6 @@ FontString:SetHyperlinkPropagateToParent
 FontString:SetHyperlinksEnabled
 FontString:SetID
 FontString:SetIconScale
-FontString:SetIconTexture
 FontString:SetIgnoringChildrenForBounds
 FontString:SetInboxItem
 FontString:SetInsertMode
@@ -4285,7 +4252,6 @@ FontString:SetOrientation
 FontString:SetOrigin
 FontString:SetOwner
 FontString:SetOwningDialog
-FontString:SetPOIArrowTexture
 FontString:SetPadding
 FontString:SetPanExtentPercentage
 FontString:SetParticlesEnabled
@@ -4294,7 +4260,6 @@ FontString:SetPaused
 FontString:SetPitch
 FontString:SetPlayerPingScale
 FontString:SetPlayerPingTexture
-FontString:SetPlayerTexture
 FontString:SetPlaying
 FontString:SetPortraitZoom
 FontString:SetPosition
@@ -4349,7 +4314,6 @@ FontString:SetSpellByID
 FontString:SetSpriteSheetCell
 FontString:SetStartDelay
 FontString:SetStartPoint
-FontString:SetStaticPOIArrowTexture
 FontString:SetStatusBarColor
 FontString:SetStatusBarDesaturated
 FontString:SetStatusBarDesaturation
@@ -4882,7 +4846,6 @@ Frame:SetBagItem
 Frame:SetBlendMode
 Frame:SetBlingTexture
 Frame:SetBlinkSpeed
-Frame:SetBlipTexture
 Frame:SetBlockingLoadsRequested
 Frame:SetBorderAlpha
 Frame:SetBorderScalar
@@ -4922,7 +4885,6 @@ Frame:SetCooldownDuration
 Frame:SetCooldownFromDurationObject
 Frame:SetCooldownFromExpirationTime
 Frame:SetCooldownUNIX
-Frame:SetCorpsePOIArrowTexture
 Frame:SetCountInvisibleLetters
 Frame:SetCountdownAbbrevThreshold
 Frame:SetCountdownFont
@@ -5003,7 +4965,6 @@ Frame:SetHorizontalScroll
 Frame:SetHyperlink
 Frame:SetHyperlinkFormat
 Frame:SetIconScale
-Frame:SetIconTexture
 Frame:SetInboxItem
 Frame:SetIndentedWordWrap
 Frame:SetInsertMode
@@ -5070,7 +5031,6 @@ Frame:SetOrientation
 Frame:SetOrigin
 Frame:SetOwner
 Frame:SetOwningDialog
-Frame:SetPOIArrowTexture
 Frame:SetPadding
 Frame:SetPanExtentPercentage
 Frame:SetParticlesEnabled
@@ -5079,7 +5039,6 @@ Frame:SetPaused
 Frame:SetPitch
 Frame:SetPlayerPingScale
 Frame:SetPlayerPingTexture
-Frame:SetPlayerTexture
 Frame:SetPlaying
 Frame:SetPortraitToAsset
 Frame:SetPortraitZoom
@@ -5136,7 +5095,6 @@ Frame:SetSpellByID
 Frame:SetSpriteSheetCell
 Frame:SetStartDelay
 Frame:SetStartPoint
-Frame:SetStaticPOIArrowTexture
 Frame:SetStatusBarColor
 Frame:SetStatusBarDesaturated
 Frame:SetStatusBarDesaturation
@@ -5638,7 +5596,6 @@ GameTooltip:SetBagItem
 GameTooltip:SetBlendMode
 GameTooltip:SetBlingTexture
 GameTooltip:SetBlinkSpeed
-GameTooltip:SetBlipTexture
 GameTooltip:SetBlockingLoadsRequested
 GameTooltip:SetBorderAlpha
 GameTooltip:SetBorderScalar
@@ -5678,7 +5635,6 @@ GameTooltip:SetCooldownDuration
 GameTooltip:SetCooldownFromDurationObject
 GameTooltip:SetCooldownFromExpirationTime
 GameTooltip:SetCooldownUNIX
-GameTooltip:SetCorpsePOIArrowTexture
 GameTooltip:SetCountInvisibleLetters
 GameTooltip:SetCountdownAbbrevThreshold
 GameTooltip:SetCountdownFont
@@ -5755,7 +5711,6 @@ GameTooltip:SetHorizontalScroll
 GameTooltip:SetHyperlink
 GameTooltip:SetHyperlinkFormat
 GameTooltip:SetIconScale
-GameTooltip:SetIconTexture
 GameTooltip:SetInboxItem
 GameTooltip:SetIndentedWordWrap
 GameTooltip:SetInsertMode
@@ -5818,7 +5773,6 @@ GameTooltip:SetOrder
 GameTooltip:SetOrientation
 GameTooltip:SetOrigin
 GameTooltip:SetOwningDialog
-GameTooltip:SetPOIArrowTexture
 GameTooltip:SetPanExtentPercentage
 GameTooltip:SetParticlesEnabled
 GameTooltip:SetPassword
@@ -5826,7 +5780,6 @@ GameTooltip:SetPaused
 GameTooltip:SetPitch
 GameTooltip:SetPlayerPingScale
 GameTooltip:SetPlayerPingTexture
-GameTooltip:SetPlayerTexture
 GameTooltip:SetPlaying
 GameTooltip:SetPortraitZoom
 GameTooltip:SetPosition
@@ -5881,7 +5834,6 @@ GameTooltip:SetSpellByID
 GameTooltip:SetSpriteSheetCell
 GameTooltip:SetStartDelay
 GameTooltip:SetStartPoint
-GameTooltip:SetStaticPOIArrowTexture
 GameTooltip:SetStatusBarColor
 GameTooltip:SetStatusBarDesaturated
 GameTooltip:SetStatusBarDesaturation
@@ -6393,7 +6345,6 @@ MessageFrame:SetBagItem
 MessageFrame:SetBlendMode
 MessageFrame:SetBlingTexture
 MessageFrame:SetBlinkSpeed
-MessageFrame:SetBlipTexture
 MessageFrame:SetBlockingLoadsRequested
 MessageFrame:SetBorderAlpha
 MessageFrame:SetBorderScalar
@@ -6433,7 +6384,6 @@ MessageFrame:SetCooldownDuration
 MessageFrame:SetCooldownFromDurationObject
 MessageFrame:SetCooldownFromExpirationTime
 MessageFrame:SetCooldownUNIX
-MessageFrame:SetCorpsePOIArrowTexture
 MessageFrame:SetCountInvisibleLetters
 MessageFrame:SetCountdownAbbrevThreshold
 MessageFrame:SetCountdownFont
@@ -6508,7 +6458,6 @@ MessageFrame:SetHorizontalScroll
 MessageFrame:SetHyperlink
 MessageFrame:SetHyperlinkFormat
 MessageFrame:SetIconScale
-MessageFrame:SetIconTexture
 MessageFrame:SetInboxItem
 MessageFrame:SetInventoryItem
 MessageFrame:SetIsDefaultCallback
@@ -6570,7 +6519,6 @@ MessageFrame:SetOrientation
 MessageFrame:SetOrigin
 MessageFrame:SetOwner
 MessageFrame:SetOwningDialog
-MessageFrame:SetPOIArrowTexture
 MessageFrame:SetPadding
 MessageFrame:SetPanExtentPercentage
 MessageFrame:SetParticlesEnabled
@@ -6579,7 +6527,6 @@ MessageFrame:SetPaused
 MessageFrame:SetPitch
 MessageFrame:SetPlayerPingScale
 MessageFrame:SetPlayerPingTexture
-MessageFrame:SetPlayerTexture
 MessageFrame:SetPlaying
 MessageFrame:SetPortraitZoom
 MessageFrame:SetPosition
@@ -6634,7 +6581,6 @@ MessageFrame:SetSpellByID
 MessageFrame:SetSpriteSheetCell
 MessageFrame:SetStartDelay
 MessageFrame:SetStartPoint
-MessageFrame:SetStaticPOIArrowTexture
 MessageFrame:SetStatusBarColor
 MessageFrame:SetStatusBarDesaturated
 MessageFrame:SetStatusBarDesaturation
@@ -7123,7 +7069,6 @@ Model:SetBagItem
 Model:SetBlendMode
 Model:SetBlingTexture
 Model:SetBlinkSpeed
-Model:SetBlipTexture
 Model:SetBlockingLoadsRequested
 Model:SetBorderAlpha
 Model:SetBorderScalar
@@ -7157,7 +7102,6 @@ Model:SetCooldownDuration
 Model:SetCooldownFromDurationObject
 Model:SetCooldownFromExpirationTime
 Model:SetCooldownUNIX
-Model:SetCorpsePOIArrowTexture
 Model:SetCountInvisibleLetters
 Model:SetCountdownAbbrevThreshold
 Model:SetCountdownFont
@@ -7229,7 +7173,6 @@ Model:SetHorizontalScroll
 Model:SetHyperlink
 Model:SetHyperlinkFormat
 Model:SetIconScale
-Model:SetIconTexture
 Model:SetInboxItem
 Model:SetIndentedWordWrap
 Model:SetInsertMode
@@ -7290,13 +7233,11 @@ Model:SetOrientation
 Model:SetOrigin
 Model:SetOwner
 Model:SetOwningDialog
-Model:SetPOIArrowTexture
 Model:SetPadding
 Model:SetPanExtentPercentage
 Model:SetPassword
 Model:SetPlayerPingScale
 Model:SetPlayerPingTexture
-Model:SetPlayerTexture
 Model:SetPlaying
 Model:SetPortraitZoom
 Model:SetPushedAtlas
@@ -7347,7 +7288,6 @@ Model:SetSpellByID
 Model:SetSpriteSheetCell
 Model:SetStartDelay
 Model:SetStartPoint
-Model:SetStaticPOIArrowTexture
 Model:SetStatusBarColor
 Model:SetStatusBarDesaturated
 Model:SetStatusBarDesaturation
@@ -7821,7 +7761,6 @@ PlayerModel:SetBagItem
 PlayerModel:SetBlendMode
 PlayerModel:SetBlingTexture
 PlayerModel:SetBlinkSpeed
-PlayerModel:SetBlipTexture
 PlayerModel:SetBlockingLoadsRequested
 PlayerModel:SetBorderAlpha
 PlayerModel:SetBorderScalar
@@ -7854,7 +7793,6 @@ PlayerModel:SetCooldownDuration
 PlayerModel:SetCooldownFromDurationObject
 PlayerModel:SetCooldownFromExpirationTime
 PlayerModel:SetCooldownUNIX
-PlayerModel:SetCorpsePOIArrowTexture
 PlayerModel:SetCountInvisibleLetters
 PlayerModel:SetCountdownAbbrevThreshold
 PlayerModel:SetCountdownFont
@@ -7923,7 +7861,6 @@ PlayerModel:SetHorizontalScroll
 PlayerModel:SetHyperlink
 PlayerModel:SetHyperlinkFormat
 PlayerModel:SetIconScale
-PlayerModel:SetIconTexture
 PlayerModel:SetInboxItem
 PlayerModel:SetIndentedWordWrap
 PlayerModel:SetInsertMode
@@ -7981,13 +7918,11 @@ PlayerModel:SetOrientation
 PlayerModel:SetOrigin
 PlayerModel:SetOwner
 PlayerModel:SetOwningDialog
-PlayerModel:SetPOIArrowTexture
 PlayerModel:SetPadding
 PlayerModel:SetPanExtentPercentage
 PlayerModel:SetPassword
 PlayerModel:SetPlayerPingScale
 PlayerModel:SetPlayerPingTexture
-PlayerModel:SetPlayerTexture
 PlayerModel:SetPlaying
 PlayerModel:SetPushedAtlas
 PlayerModel:SetPushedTextOffset
@@ -8036,7 +7971,6 @@ PlayerModel:SetSpellByID
 PlayerModel:SetSpriteSheetCell
 PlayerModel:SetStartDelay
 PlayerModel:SetStartPoint
-PlayerModel:SetStaticPOIArrowTexture
 PlayerModel:SetStatusBarColor
 PlayerModel:SetStatusBarDesaturated
 PlayerModel:SetStatusBarDesaturation
@@ -8547,7 +8481,6 @@ ScrollFrame:SetBagItem
 ScrollFrame:SetBlendMode
 ScrollFrame:SetBlingTexture
 ScrollFrame:SetBlinkSpeed
-ScrollFrame:SetBlipTexture
 ScrollFrame:SetBlockingLoadsRequested
 ScrollFrame:SetBorderAlpha
 ScrollFrame:SetBorderScalar
@@ -8587,7 +8520,6 @@ ScrollFrame:SetCooldownDuration
 ScrollFrame:SetCooldownFromDurationObject
 ScrollFrame:SetCooldownFromExpirationTime
 ScrollFrame:SetCooldownUNIX
-ScrollFrame:SetCorpsePOIArrowTexture
 ScrollFrame:SetCountInvisibleLetters
 ScrollFrame:SetCountdownAbbrevThreshold
 ScrollFrame:SetCountdownFont
@@ -8666,7 +8598,6 @@ ScrollFrame:SetHorizTile
 ScrollFrame:SetHyperlink
 ScrollFrame:SetHyperlinkFormat
 ScrollFrame:SetIconScale
-ScrollFrame:SetIconTexture
 ScrollFrame:SetInboxItem
 ScrollFrame:SetIndentedWordWrap
 ScrollFrame:SetInsertMode
@@ -8731,7 +8662,6 @@ ScrollFrame:SetOrientation
 ScrollFrame:SetOrigin
 ScrollFrame:SetOwner
 ScrollFrame:SetOwningDialog
-ScrollFrame:SetPOIArrowTexture
 ScrollFrame:SetPadding
 ScrollFrame:SetPanExtentPercentage
 ScrollFrame:SetParticlesEnabled
@@ -8740,7 +8670,6 @@ ScrollFrame:SetPaused
 ScrollFrame:SetPitch
 ScrollFrame:SetPlayerPingScale
 ScrollFrame:SetPlayerPingTexture
-ScrollFrame:SetPlayerTexture
 ScrollFrame:SetPlaying
 ScrollFrame:SetPortraitZoom
 ScrollFrame:SetPosition
@@ -8796,7 +8725,6 @@ ScrollFrame:SetSpellByID
 ScrollFrame:SetSpriteSheetCell
 ScrollFrame:SetStartDelay
 ScrollFrame:SetStartPoint
-ScrollFrame:SetStaticPOIArrowTexture
 ScrollFrame:SetStatusBarColor
 ScrollFrame:SetStatusBarDesaturated
 ScrollFrame:SetStatusBarDesaturation
@@ -9305,7 +9233,6 @@ SimpleHTML:SetBagItem
 SimpleHTML:SetBlendMode
 SimpleHTML:SetBlingTexture
 SimpleHTML:SetBlinkSpeed
-SimpleHTML:SetBlipTexture
 SimpleHTML:SetBlockingLoadsRequested
 SimpleHTML:SetBorderAlpha
 SimpleHTML:SetBorderScalar
@@ -9345,7 +9272,6 @@ SimpleHTML:SetCooldownDuration
 SimpleHTML:SetCooldownFromDurationObject
 SimpleHTML:SetCooldownFromExpirationTime
 SimpleHTML:SetCooldownUNIX
-SimpleHTML:SetCorpsePOIArrowTexture
 SimpleHTML:SetCountInvisibleLetters
 SimpleHTML:SetCountdownAbbrevThreshold
 SimpleHTML:SetCountdownFont
@@ -9422,7 +9348,6 @@ SimpleHTML:SetHorizTile
 SimpleHTML:SetHorizontalScroll
 SimpleHTML:SetHyperlink
 SimpleHTML:SetIconScale
-SimpleHTML:SetIconTexture
 SimpleHTML:SetInboxItem
 SimpleHTML:SetInsertMode
 SimpleHTML:SetInventoryItem
@@ -9485,7 +9410,6 @@ SimpleHTML:SetOrientation
 SimpleHTML:SetOrigin
 SimpleHTML:SetOwner
 SimpleHTML:SetOwningDialog
-SimpleHTML:SetPOIArrowTexture
 SimpleHTML:SetPadding
 SimpleHTML:SetPanExtentPercentage
 SimpleHTML:SetParticlesEnabled
@@ -9494,7 +9418,6 @@ SimpleHTML:SetPaused
 SimpleHTML:SetPitch
 SimpleHTML:SetPlayerPingScale
 SimpleHTML:SetPlayerPingTexture
-SimpleHTML:SetPlayerTexture
 SimpleHTML:SetPlaying
 SimpleHTML:SetPortraitZoom
 SimpleHTML:SetPosition
@@ -9547,7 +9470,6 @@ SimpleHTML:SetSpellByID
 SimpleHTML:SetSpriteSheetCell
 SimpleHTML:SetStartDelay
 SimpleHTML:SetStartPoint
-SimpleHTML:SetStaticPOIArrowTexture
 SimpleHTML:SetStatusBarColor
 SimpleHTML:SetStatusBarDesaturated
 SimpleHTML:SetStatusBarDesaturation
@@ -10055,7 +9977,6 @@ Slider:SetBagItem
 Slider:SetBlendMode
 Slider:SetBlingTexture
 Slider:SetBlinkSpeed
-Slider:SetBlipTexture
 Slider:SetBlockingLoadsRequested
 Slider:SetBorderAlpha
 Slider:SetBorderScalar
@@ -10095,7 +10016,6 @@ Slider:SetCooldownDuration
 Slider:SetCooldownFromDurationObject
 Slider:SetCooldownFromExpirationTime
 Slider:SetCooldownUNIX
-Slider:SetCorpsePOIArrowTexture
 Slider:SetCountInvisibleLetters
 Slider:SetCountdownAbbrevThreshold
 Slider:SetCountdownFont
@@ -10174,7 +10094,6 @@ Slider:SetHorizontalScroll
 Slider:SetHyperlink
 Slider:SetHyperlinkFormat
 Slider:SetIconScale
-Slider:SetIconTexture
 Slider:SetInboxItem
 Slider:SetIndentedWordWrap
 Slider:SetInsertMode
@@ -10237,7 +10156,6 @@ Slider:SetOrder
 Slider:SetOrigin
 Slider:SetOwner
 Slider:SetOwningDialog
-Slider:SetPOIArrowTexture
 Slider:SetPadding
 Slider:SetPanExtentPercentage
 Slider:SetParticlesEnabled
@@ -10246,7 +10164,6 @@ Slider:SetPaused
 Slider:SetPitch
 Slider:SetPlayerPingScale
 Slider:SetPlayerPingTexture
-Slider:SetPlayerTexture
 Slider:SetPlaying
 Slider:SetPortraitZoom
 Slider:SetPosition
@@ -10302,7 +10219,6 @@ Slider:SetSpellByID
 Slider:SetSpriteSheetCell
 Slider:SetStartDelay
 Slider:SetStartPoint
-Slider:SetStaticPOIArrowTexture
 Slider:SetStatusBarColor
 Slider:SetStatusBarDesaturated
 Slider:SetStatusBarDesaturation

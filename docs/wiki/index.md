@@ -12,7 +12,7 @@
 
 ## [2026-10-10] investigation | Saved469 method snapshots and alpha receiver
 
-[Method investigation](investigations/method-dispatch-refactor.md#current-investigation--saved469-and-alpha-receiver-2026-10-10): raw-log stale rows classified; intentional epoch retirements preserved. Diagnostic023000 independently passes six FontString states/exact arity and observational Frame/plain-table receivers; custody-restoration caveat retained. Native parity unproved, snapshots untouched, suite FAIL/parent OPEN.
+[Method investigation](investigations/method-dispatch-refactor.md#current-investigation--saved469-and-alpha-receiver-2026-10-10): raw-log stale rows classified; intentional epoch retirements preserved. Diagnostic023000 independently passes six FontString states/exact arity and observational Frame/plain-table receivers; custody-restoration caveat retained. Native parity unproved; [complete result files](investigations/method-dispatch-refactor.md#complete-method-result-files--2026-10-11-utc) now retain11,934rows/105changes from saved runtime data, fresh assertion checks pending. Saved suite FAIL/parent OPEN.
 
 ## [2026-10-11] observation | Four-profile stock startup — not clean
 
