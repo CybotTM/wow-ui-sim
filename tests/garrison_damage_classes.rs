@@ -1,6 +1,5 @@
 //! Simulator-defined enUS school-mask labels, not a native catalog/order baseline.
-#![cfg(feature = "client-retail")]
-
+#[cfg(feature = "client-retail")]
 use crate::common;
 
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -132,6 +131,7 @@ fn garrison_damage_classes_returns_fresh_tables_and_rows_without_mutation_leaks(
 }
 
 #[test]
+#[cfg(feature = "client-retail")]
 fn garrison_adventures_combat_log_consumes_fire_school_mask_not_damage_ordinal() {
     test_timeout! {
         common::blizzard_addon_harness::with_blizzard_addon_closure(

@@ -24,7 +24,9 @@
 
 ## Tests asserting this spec
 
-`tests/garrison_damage_classes.rs` contains:
+`tests/garrison_damage_classes.rs` exposes the catalog, isolation and RGB-bootstrap probes under every profile configuration. Only the authentic cached-addon consumer remains Retail-gated. This supports pure simulator-model verification without acquiring blocked vendor inputs; it is not evidence of native API publication across profiles. Remaining profile execution is pending.
+
+Tests:
 
 - `garrison_damage_classes_returns_one_table_with_en_us_pure_school_masks`
 - `garrison_damage_classes_returns_fresh_tables_and_rows_without_mutation_leaks`
