@@ -40,7 +40,7 @@ Saved static Mists audit `20261010T051236Z`, compiled revision `a62f7a95ba22857e
 
 Historical RED `0148437a7868b0a25d0ce2fca504378d4558b5ee` (`20261010T043019Z`) and supplemental RED `5184a8cf8feea9a820a15264604a6af303bb5a9d` (`20261010T045459Z`) each recorded one PASS / four FAIL / exit 101. Their field failures establish nil/false versus true/true and nil/nil versus 90/90. Earlier TokenUI fixture failures occurred before the intended size lookup, not successful missing-size reproductions. Private receipt: `/home/osso/.local/state/wow-ui-sim/verification/mists-currency-green-current/20261010T051236Z/audit/report.md`.
 
-Four supplied-state regressions in `tests/currency_info_probes.rs`, committed with this contract at `085f7d799` (RED queued, result not observed; no producer changes or mutation GREEN claimed):
+Four supplied-state regressions in `tests/currency_info_probes.rs`, introduced at `085f7d799` and decoder-corrected at `f4a6fb2e4`:
 
 - `get_currency_list_info_reflects_successive_existing_currency_updates`
 - `get_backpack_currency_info_reflects_successive_existing_currency_updates`
@@ -49,7 +49,7 @@ Four supplied-state regressions in `tests/currency_info_probes.rs`, committed wi
 
 ## Known gaps (current cycle)
 
-- [ ] Supplied-state projection requires authentic RED before producer changes, then targeted GREEN and preservation controls. Historical static-field proof does not cover mutation behavior.
+- [ ] Targeted GREEN and preservation controls remain pending. Authentic default Retail RED at `20261011T073849Z`, revision `f4a6fb2e4`, compiled successfully and executed 12 existing controls PASS / four new regressions FAIL / exit 101 with seven scoped inputs unchanged. Initial `085f7d799` attempt failed compilation because the test decoder does not support `u32`; zero cases executed. Historical static-field proof does not cover mutation behavior.
 
 ## Out of scope
 

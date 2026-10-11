@@ -68,26 +68,60 @@ fn c_currency_get_list_info(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
+    let Some(display) = read_currency_list_display_info(state, entry)? else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
     let info = create_table_with_capacity(state, CURRENCY_LIST_INFO_HASH_FIELDS);
-    let name = create_string(state, entry.name);
     table_set_static(
         state,
         info,
         "currencyTypesID",
         Val::Num(entry.currency_id as f64),
     );
-    table_set_static(state, info, "name", name);
-    table_set_static(state, info, "quantity", Val::Num(entry.quantity as f64));
+    write_currency_row_display_fields(state, info, &display);
+    write_currency_list_status_fields(state, info, entry);
     table_set_static(
         state,
         info,
-        "iconFileID",
-        Val::Num(entry.icon_file_id as f64),
+        "maxQuantity",
+        Val::Num(display.max_quantity as f64),
     );
-    write_currency_list_status_fields(state, info, entry);
-    table_set_static(state, info, "quality", Val::Num(entry.quality as f64));
+    table_set_static(state, info, "quality", Val::Num(display.quality as f64));
     state.push(info);
     Ok(1)
+}
+
+fn read_currency_list_display_info(
+    state: &LuaState,
+    entry: &currency_data::CurrencyEntry,
+) -> LuaResult<Option<CurrencyInfo>> {
+    if entry.is_header {
+        return Ok(Some(CurrencyInfo {
+            name: entry.name.to_string(),
+            quantity: entry.quantity,
+            max_quantity: entry.max_quantity,
+            icon_file_id: entry.icon_file_id,
+            quality: entry.quality,
+            ..CurrencyInfo::default()
+        }));
+    }
+    Ok(borrow_state(state)?
+        .currency_info
+        .get(&entry.currency_id)
+        .cloned())
+}
+
+fn write_currency_row_display_fields(state: &mut LuaState, table: Val, display: &CurrencyInfo) {
+    let name = create_string(state, &display.name);
+    table_set_static(state, table, "name", name);
+    table_set_static(state, table, "quantity", Val::Num(display.quantity as f64));
+    table_set_static(
+        state,
+        table,
+        "iconFileID",
+        Val::Num(display.icon_file_id as f64),
+    );
 }
 
 fn write_currency_list_status_fields(
@@ -107,12 +141,6 @@ fn write_currency_list_status_fields(
         info,
         "isShowInBackpack",
         Val::Bool(entry.is_show_in_backpack),
-    );
-    table_set_static(
-        state,
-        info,
-        "maxQuantity",
-        Val::Num(entry.max_quantity as f64),
     );
 }
 
@@ -176,22 +204,21 @@ fn c_currency_get_backpack_currency_info(state: &mut LuaState) -> LuaResult<u32>
     else {
         return Ok(0);
     };
+    let display = borrow_state(state)?
+        .currency_info
+        .get(&entry.currency_id)
+        .cloned();
+    let Some(display) = display else {
+        return Ok(0);
+    };
     let info = create_table(state);
-    let name = create_string(state, entry.name);
     table_set(
         state,
         info,
         "currencyTypesID",
         Val::Num(entry.currency_id as f64),
     );
-    table_set(state, info, "name", name);
-    table_set(state, info, "quantity", Val::Num(entry.quantity as f64));
-    table_set(
-        state,
-        info,
-        "iconFileID",
-        Val::Num(entry.icon_file_id as f64),
-    );
+    write_currency_row_display_fields(state, info, &display);
     state.push(info);
     Ok(1)
 }
