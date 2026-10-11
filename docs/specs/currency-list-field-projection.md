@@ -59,7 +59,8 @@ Mists wrapper preservation probe in `tests/mists_currency_list.rs`:
 [Partial profile follow-up](../../data/patch-api/evidence/currency-profile-followup-2026-10-11/README.md): PTR/Wrath16/16 each independently accepted as shared pure-model proof, not native-profile catalogs.
 
 - [ ] Era remains zero-execution resource-blocked after two guarded attempts; Anniversary/Forever unattempted. Blocked vendor-input lanes are not reopened by pure-model proof.
-- [ ] The new `1dcc59c07` full suite remains asynchronous. Existing c75 Garrison FAIL remains history.
+- [x] Reconcile completed `1dcc59c07` [saved full suite](../../data/patch-api/evidence/currency-fullsuite-2026-10-11/README.md): 15,028 PASS/1 Garrison FAIL/19 skips/15,029 executions. Four new currency regressions PASS inside totals; source equality and accounting independently audited. Existing c75 FAIL remains history.
+- [ ] Full-suite acceptance remains open: Garrison FAIL, skipped/native/other-profile behavior and external acceptance are not discharged by bounded currency proof.
 
 ## Out of scope
 

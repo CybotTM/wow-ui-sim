@@ -1,0 +1,45 @@
+{
+  "exact_copies": [
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/currency-fullsuite-final-gate/report.md",
+      "path": "gate/report.md",
+      "bytes": 5131,
+      "sha256": "b3fe97645d803249447da618c0e14ac58b3d870068802beb09e6f3d8e720d621"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/currency-fullsuite-final-gate/report.json",
+      "path": "gate/report.json",
+      "bytes": 10143,
+      "sha256": "f585dd00e85f5e20ffd3644ff3a08631ea4d0afff5e25b9f80d36671b63f0112"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/currency-matrix-retention-final/report.md",
+      "path": "matrix-gate/report.md",
+      "bytes": 1967,
+      "sha256": "93dc1c2822ca6471d919c2975f4c3230d504ad5d3d909993121ddc260203e803"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/currency-matrix-retention-final/report.json",
+      "path": "matrix-gate/report.json",
+      "bytes": 3205,
+      "sha256": "75145aae1c70732c6519ef8bcde0769330c5470aef0ac04bba9f1d28a03fc798"
+    },
+    {
+      "source": "/home/osso/Projects/wow/full-suite-results/1dcc59c0788d0e09ee3d02516123df965ba8dc63.json",
+      "path": "suite-result.json",
+      "bytes": 747,
+      "sha256": "174e1cd7ef3ff535429058791cf6a0a23a1d588844730228581c85c79693a7c5"
+    }
+  ],
+  "copy_count": 5,
+  "copy_bytes": 21193,
+  "derived": [
+    "count-summary.json"
+  ],
+  "excluded": [
+    "raw suite logs",
+    "full private countproof outcome rows",
+    "binaries",
+    "session/provider payloads"
+  ]
+}

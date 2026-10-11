@@ -1,3 +1,7 @@
+## [2026-10-11] audit | Currency integration suite — FAIL
+
+[Saved suite packet](../../data/patch-api/evidence/currency-fullsuite-2026-10-11/README.md): 15,028 PASS/1 Garrison FAIL/19 skips/15,029 executions. Four new currency regressions PASS within totals; independent accounting/source audit, not native or full-handoff acceptance. c75 FAIL remains history.
+
 ## [2026-10-11] audit | Currency model — partial cross-profile handoff
 
 [Handoff matrix](investigations/integrated-source-and-factory-proof-2026-10-09.md#currency-supplied-state-projection--partial-cross-profile-handoff): four configurations have bounded supplied-state proof; three remaining lanes are resource-blocked/unattempted, not source failures. Vendor-input/native/external/full-handoff acceptance remains separate and open.
