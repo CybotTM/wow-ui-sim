@@ -169,7 +169,19 @@
       "path": "source-readiness.json",
       "bytes": 729,
       "sha256": "da0aad443f5d582914e91fb35c9e66612cd11499a17e5be7a10d9397e8458e5c"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/talent-stage-diagnostic-current/independent-report.md",
+      "path": "independent-report.md",
+      "bytes": 5564,
+      "sha256": "591a7a48bc7d01e13dc65b35e34a1ebd03926e2f2ea96cce96ea0d7ce7a15958"
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/talent-stage-diagnostic-current/proof.json",
+      "path": "proof.json",
+      "bytes": 8843,
+      "sha256": "c0da766328b779f6a790be1725195a4e44ad8840189cae62f7c7159480d77f24"
     }
   ],
-  "pending_report": "Independent2459 report/proof to be copied after accepted report"
+  "independent_gate": "2459 OBSERVATIONAL_COHERENCE_PASS; new artifact auth once,54rows/aggregates/source/readability; not acceptance"
 }
