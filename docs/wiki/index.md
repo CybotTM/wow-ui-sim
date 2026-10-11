@@ -2,13 +2,13 @@
 
 [Current phase](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified): corrected retained-parent original case and separate source-fade control each pass once. Strict lock/anchor checks execute; earlier hidden/parent failures preserved. Startup errors, vendor-identity/native uncertainty and full handoff remain open.
 
-## [2026-10-11] staging | Garrison catalog — producer implemented, GREEN pending
+## [2026-10-11] audit | Garrison catalog GREEN; consumer palette follow-up pending
 
-[Current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): authenticated0PASS/3FAIL runtime RED precedes `b58020420`'s immutable school-mask/enUS catalog. Freshness and authentic consumer GREEN remain pending; historical full-suite Garrison FAIL preserved, native parity not gate.
+[Current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): catalog/isolation and original Garrison load PASS at b580; authentic consumer progresses to missing engine textColor.33 adds source-backed simulator palette and bootstrap test; follow-up pending. Historical failures/native limits/full handoff preserved.
 
-## [2026-10-11] staging | Achievement relations — producer implemented, GREEN pending
+## [2026-10-11] audit | Achievement relations — bounded GREEN/preservation
 
-[Relation contract](../specs/achievement-superceding-relations.md) and [current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): explicit map/absent empty table; authenticated expanded0PASS/8FAIL precedes `b58020420` query. Initial64PASS1FAIL and zero-case resource/compile attempts preserved; GREEN/preservation/startup pending, full handoff open.
+[Relation contract](../specs/achievement-superceding-relations.md) and [current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): eight supplied-state/security regressions PASS inside72 achievement probes;44 reward probes, publication and normal startup/checks PASS. Initial/expanded RED and zero-case attempts preserved; only bounded Retail proof, full handoff open.
 
 ## [2026-10-11] audit | Seven-profile currency probes — bounded GREEN
 

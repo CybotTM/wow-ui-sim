@@ -4,9 +4,9 @@
 
 ## What it must do
 
-- [ ] Return exactly one table containing an `ipairs`-iterable catalog of rows with numeric `damageClassValue` school-mask keys and nonempty readable string `locString` labels; keys must be unambiguous.
-- [ ] Include pure school masks `1=Physical`, `2=Holy`, `4=Fire`, `8=Nature`, `16=Frost`, `32=Shadow`, `64=Arcane` under simulator enUS policy. These are masks, not damage-class ordinals; seven entries are required coverage, not an exact row-count ceiling.
-- [ ] Return a fresh outer table and independent fresh row tables on every call. Mutating or removing returned rows or adding fields must not affect another existing result or later queries.
+- [x] Return exactly one table containing an `ipairs`-iterable catalog of rows with numeric `damageClassValue` school-mask keys and nonempty readable string `locString` labels; keys must be unambiguous.
+- [x] Include pure school masks `1=Physical`, `2=Holy`, `4=Fire`, `8=Nature`, `16=Frost`, `32=Shadow`, `64=Arcane` under simulator enUS policy. These are masks, not damage-class ordinals; seven entries are required coverage, not an exact row-count ceiling.
+- [x] Return a fresh outer table and independent fresh row tables on every call. Mutating or removing returned rows or adding fields must not affect another existing result or later queries.
 - [ ] Exercise the authentic cached addon `OnLoad` → `AddCombatEvent` path with the real catalog query intact. Observable combat-log entries must distinguish mask `4` as Fire from mask `2` as Holy; UI wiring and supplied spell metadata may be test collaborators.
 
 ## How it works
@@ -31,12 +31,13 @@
 - `garrison_adventures_combat_log_consumes_fire_school_mask_not_damage_ordinal`
 - `adventures_combat_log_colors_bootstrap_with_mists_row_rgb_palette`
 
-Tests were inspected, not executed for this docs-only slice; all requirements remain unchecked pending passing proof. Initial joint default attempt `20261011T165520Z` was COMPILE_FAILED with zero executed cases: a duplicate `common` module exported four macros twice, not query RED. Commit `7635fef91` reuses the root integration harness via `use crate::common`; this import repair establishes no catalog/runtime PASS. Retry epoch173738 at `a0833b2dd` compiles successfully and executes three unique cases:0PASS/3FAIL, exit101, eleven endpoint hashes unchanged, before producer changes. Nested timeout summaries describe the same consumer case. Authentic combat-log OnLoad reaches `ipairs` with nil at cached line90; the pure schema case fails its table assertion. Other printed addon-load errors are not erased by this RED. Producer implemented afterward. Independent saved-artifact gate2295 at b58020420/epoch174814 authenticates two catalog/isolation PASS, original Garrison load PASS, both publication checks PASS and normal Retail startup[]/exit0; overall121PASS/1consumerFAIL among122 unique tests. Authentic AddCombatEvent now reaches line129 and fails on niltextColor because the four engine color globals are absent from the simulator bootstrap; closure discovery already follows the declared Blizzard_Colors dependency, whose scripts do not define these engine globals. Final Fire/Holy formatted-message assertions remain unreached. This is the behavioral RED preceding the four literal named-color rows; current color/consumer follow-up proof is pending. No fake fixture color or weakened consumer assertion.
+Initial test/spec slice was unexecuted; subsequent proof is revision-scoped below. Catalog requirements are checked against b58020420's bounded passes, not current consumer completion. Initial joint default attempt `20261011T165520Z` was COMPILE_FAILED with zero executed cases: a duplicate `common` module exported four macros twice, not query RED. Commit `7635fef91` reuses the root integration harness via `use crate::common`; this import repair establishes no catalog/runtime PASS. Retry epoch173738 at `a0833b2dd` compiles successfully and executes three unique cases:0PASS/3FAIL, exit101, eleven endpoint hashes unchanged, before producer changes. Nested timeout summaries describe the same consumer case. Authentic combat-log OnLoad reaches `ipairs` with nil at cached line90; the pure schema case fails its table assertion. Other printed addon-load errors are not erased by this RED. Producer implemented afterward. Independent saved-artifact gate2295 at b58020420/epoch174814 authenticates two catalog/isolation PASS, original Garrison load PASS, both publication checks PASS and normal Retail startup[]/exit0; overall121PASS/1consumerFAIL among122 unique tests. Authentic AddCombatEvent now reaches line129 and fails on niltextColor because the four engine color globals are absent from the simulator bootstrap; closure discovery already follows the declared Blizzard_Colors dependency, whose scripts do not define these engine globals. Final Fire/Holy formatted-message assertions remain unreached. This is the behavioral RED preceding the four literal named-color rows; current color/consumer follow-up proof is pending. No fake fixture color or weakened consumer assertion.
 
 ## Known gaps (current cycle)
 
-- [ ] Establish passing runtime proof for the catalog, mutation isolation and authentic addon consumer path.
-- [ ] Pass the unchanged `tests/blizzard_garrison_ui_loads.rs::blizzard_garrison_ui_loads_explicitly_via_load_addon_without_errors` assertion; preserve its historical failures.
+- [x] Establish passing catalog and mutation-isolation proof at b58020420; see [retained packet](../../data/patch-api/evidence/achievement-garrison-policy-2026-10-11/README.md).
+- [ ] Complete authentic AddCombatEvent and concrete color-bootstrap follow-up after the named-color repair.
+- [x] Pass the unchanged `tests/blizzard_garrison_ui_loads.rs::blizzard_garrison_ui_loads_explicitly_via_load_addon_without_errors` assertion; preserve its historical failures.
 
 ## Out of scope
 

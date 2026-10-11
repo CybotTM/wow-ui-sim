@@ -1553,3 +1553,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] implementation | Approved C API query producers
 
 [Current stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#garrison-addon-compatible-catalog--testspec-stage-2026-10-11): b58020420 implements explicit achievement relation projection and seven school-mask/enUS Garrison labels after authenticated runtime RED8+3 failures. Only two current publication-gap rows removed; frozen history unchanged. GREEN/preservation/startup pending; generic secret RED boundaries remain unproved. Full handoff OPEN.
+
+## [2026-10-11] audit | Query partial GREEN and color-root correction
+
+[Retained packet](../../data/patch-api/evidence/achievement-garrison-policy-2026-10-11/README.md): authenticated b580174814,121PASS/1consumerFAIL/122unique; achievement/reward/catalog/originalGarrison/publications PASS, normal[]0,fmt/check0. Authentic consumer advances to niltextColor129.33 restores four missing engine globals using explicitMists-source simulatorpalette, notfakefixturedependency/Retail-nativeclaim; follow-up pending. EarlierRED/zero-case/fullsuitFAIL records preserved; handoffOPEN.
