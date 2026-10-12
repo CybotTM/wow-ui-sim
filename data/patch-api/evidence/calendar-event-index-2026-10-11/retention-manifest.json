@@ -1,0 +1,235 @@
+{
+  "scope": "New Calendar receipts only, no binaries/libraries/cache payloads; GREEN independently verified; correct owning-target publication proof pending; zero-test probe is not evidence of acceptance",
+  "copies": [
+    {
+      "path": "red/revision.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/red-compile-20261012T014953198487Z/revision.json",
+      "bytes": 231,
+      "sha256": "bf9568a6899b9992e4dbebdcbd084939261e13e750c995035ede89df92956e47"
+    },
+    {
+      "path": "red/toolchain.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/red-compile-20261012T014953198487Z/toolchain.json",
+      "bytes": 550,
+      "sha256": "5262e1d2567ee710c6796b8fa30c0f285bdaa7a5c94ebae29bf432602697417e"
+    },
+    {
+      "path": "red/compile-result.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/red-compile-20261012T014953198487Z/compile-result.json",
+      "bytes": 44,
+      "sha256": "1a624cd31be036b0b2ade5e37ff7a5e48353b9d55166d65c6ec51cc343308fc2"
+    },
+    {
+      "path": "red/compile.stderr",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/red-compile-20261012T014953198487Z/compile.stderr",
+      "bytes": 1376,
+      "sha256": "a786a7c4796ff4ea5aab5ac7409fae87b0b0b760dceda8f90f934a2c5f3abbc1"
+    },
+    {
+      "path": "red/artifact.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/red-compile-20261012T014953198487Z/artifact.json",
+      "bytes": 1794,
+      "sha256": "13fb29aa4e455d6767a5a8af0d20c95eb127b704485561775309bce9b2f4e144"
+    },
+    {
+      "path": "red/runtime-submission.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/red-compile-20261012T014953198487Z/runtime-submission.json",
+      "bytes": 365,
+      "sha256": "c022e6721e0a5f695f843d473c0b8a509a58a6426f53e32dd64a5ce72331a908"
+    },
+    {
+      "path": "red/runtime.stdout",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/red-compile-20261012T014953198487Z/runtime.stdout",
+      "bytes": 1955,
+      "sha256": "d58938287bfa712b9202f81f1981ae63ade9bb6af91901a273d23d101828362c"
+    },
+    {
+      "path": "red/runtime.stderr",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/red-compile-20261012T014953198487Z/runtime.stderr",
+      "bytes": 8919,
+      "sha256": "20a7a4c99b6956d548e2de0b395146ad525f2f7ac2aa6384d23fae87004c7f4c"
+    },
+    {
+      "path": "red/runtime-outcome.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/red-compile-20261012T014953198487Z/runtime-outcome.json",
+      "bytes": 213,
+      "sha256": "d50b57c0ed77aee209bb066e8bf45b1ba15ae5084faf10ffa4b80ae6a797de2f"
+    },
+    {
+      "path": "red/report.md",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/red-compile-20261012T014953198487Z/report.md",
+      "bytes": 4207,
+      "sha256": "fca76700aec467cf3dfb28d6fc1337b7fa2fbf0a2bcffb7914f0b55506e7b669"
+    },
+    {
+      "path": "red/proof.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/red-compile-20261012T014953198487Z/proof.json",
+      "bytes": 7917,
+      "sha256": "7c60b8c4484b4122baec4011bf36d31c374164ee3b15330c69b2962b011985e9"
+    },
+    {
+      "path": "green/revision.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/revision.json",
+      "bytes": 233,
+      "sha256": "da8ad3fd7b453b0c30ea91fb9f85274e6808ee0372ff884f4cc1ddac29c9d3d6"
+    },
+    {
+      "path": "green/toolchain.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/toolchain.json",
+      "bytes": 550,
+      "sha256": "5262e1d2567ee710c6796b8fa30c0f285bdaa7a5c94ebae29bf432602697417e"
+    },
+    {
+      "path": "green/compile-result.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/compile-result.json",
+      "bytes": 44,
+      "sha256": "1a624cd31be036b0b2ade5e37ff7a5e48353b9d55166d65c6ec51cc343308fc2"
+    },
+    {
+      "path": "green/compile.stderr",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/compile.stderr",
+      "bytes": 1376,
+      "sha256": "014b625e5f1af955c911b824b6148385427cf4dec2064b29a0e3bf414f26f8d4"
+    },
+    {
+      "path": "green/artifact.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/artifact.json",
+      "bytes": 1796,
+      "sha256": "782cea637aaf54c66af9890854f42cef847971e7b547415f6baa0cf6de68bcb4"
+    },
+    {
+      "path": "green/runtime-submission.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/runtime-submission.json",
+      "bytes": 367,
+      "sha256": "0c5dea92549b097403bcc429fedddf4fbe9c49c64e3a209f056f4d1c48c13e92"
+    },
+    {
+      "path": "green/runtime.stdout",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/runtime.stdout",
+      "bytes": 1260,
+      "sha256": "9f06e0cfbb9100c9f8ae23ab3054f1f72a674a46bfc8ab1451d274a95e1dbc54"
+    },
+    {
+      "path": "green/runtime.stderr",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/runtime.stderr",
+      "bytes": 7036,
+      "sha256": "56bd8e3ed0fe9c9cc331f83c0b2d3354a9c4384d14f7c5e09174b5b749c05f0f"
+    },
+    {
+      "path": "green/runtime-outcome.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/runtime-outcome.json",
+      "bytes": 208,
+      "sha256": "f93b3bd4e1671ffd18cc29e022e5da65d32707b206e946c0e66a6e0cf33770dc"
+    },
+    {
+      "path": "green/normal-artifact.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/normal-artifact.json",
+      "bytes": 1712,
+      "sha256": "6c66d6fd12ba2ebcce08de7ce6aea35f4f96e3eb20513b8bb109e5a24010e4f2"
+    },
+    {
+      "path": "green/normal-submission.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/normal-submission.json",
+      "bytes": 683,
+      "sha256": "ed847f0ba5ae2d7bd9e52e4864ef3beaf80ae06f026ef3d6cf260d177513b334"
+    },
+    {
+      "path": "green/normal.stdout",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/normal.stdout",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "green/normal.stderr",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/normal.stderr",
+      "bytes": 15502,
+      "sha256": "d55f52940c3e54a244f0b26b6dd3f605ca3fc4a2c704fa47cdd51d98982e5099"
+    },
+    {
+      "path": "green/normal-outcome.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/normal-outcome.json",
+      "bytes": 68,
+      "sha256": "5feb51f42f64badff0bc916020a4a6b98cb90ff3ebfb54aaf23385fd99d42e7a"
+    },
+    {
+      "path": "check/submission.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/check-20261012T020203777168Z/submission.json",
+      "bytes": 880,
+      "sha256": "918c47cd21ce6cf8f7d28e5c9d35344e5f9d04159b4aded082783220be1d9d8c"
+    },
+    {
+      "path": "check/check.stdout",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/check-20261012T020203777168Z/check.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "check/check.stderr",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/check-20261012T020203777168Z/check.stderr",
+      "bytes": 1274,
+      "sha256": "ccf178d6684c19c8815cdf56156bb556988cab66879251885f2fc4b820f31385"
+    },
+    {
+      "path": "check/outcome.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/check-20261012T020203777168Z/outcome.json",
+      "bytes": 659,
+      "sha256": "0d5ed3ba15c29de00293fbddd2e2802b3da48803ee4e6c5abfbfcff8e04f4b6c"
+    },
+    {
+      "path": "final-fmt.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/final-fmt.json",
+      "bytes": 170,
+      "sha256": "b70b363a10a5df8c7fed2f3ab227f0f07c26f5798da825ecd62a20c46f0339eb"
+    },
+    {
+      "path": "producer-readability.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/producer-readability.json",
+      "bytes": 663,
+      "sha256": "465868c40f4501c76ab9066390a18e21cfa725ea7aaa0ced8984587893a01914"
+    },
+    {
+      "path": "green/green-independent-report.md",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-independent-report.md",
+      "bytes": 8793,
+      "sha256": "6f1fe41cb8a127dc3f927d4a66d3b7a3643c993af38e8a24ae0db9b0ba80c50e"
+    },
+    {
+      "path": "green/green-independent-auth.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-independent-auth.json",
+      "bytes": 753,
+      "sha256": "ede2591d8d9d5d6fb65243dc3598c8b8ac614be41c16dbf50d05dbc3287f0c4d"
+    },
+    {
+      "path": "green/green-source-attribution.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-source-attribution.json",
+      "bytes": 1290,
+      "sha256": "427620d14dc88266f4865cda2b5f2ae8f4bb879a3ffdf67793b9874162c637f1"
+    },
+    {
+      "path": "green/proof.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/proof.json",
+      "bytes": 17383,
+      "sha256": "5a1d4d3348af4716e408021adcc30ac41bdd81a9731b113faa8781805834ee6f"
+    },
+    {
+      "path": "publication-zero-selection/runtime-submission.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-compile-20261012T020315025172Z/runtime-submission.json",
+      "bytes": 377,
+      "sha256": "b50ae8623e8ec07fd80a137805d898805611071f1c64f619df00e5ccdc3b7846"
+    },
+    {
+      "path": "publication-zero-selection/runtime.stdout",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-compile-20261012T020315025172Z/runtime.stdout",
+      "bytes": 117,
+      "sha256": "4c5720ab06c1553e15e6dba8746e9aa06247287edaede6b74addd01e35501ecb"
+    },
+    {
+      "path": "publication-zero-selection/runtime-outcome.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-compile-20261012T020315025172Z/runtime-outcome.json",
+      "bytes": 197,
+      "sha256": "9060d5f2ee15a613766c64bcaf8ffd9e4434893f29d293eae42a8b682638d044"
+    }
+  ],
+  "copy_count": 38,
+  "copy_bytes": 90965
+}

@@ -4,12 +4,12 @@
 
 ## What it must do
 
-- [ ] Seed normal simulator sessions with demo IDs910001/910002/910003 and positions `(0,15,1)`, `(0,15,2)`, `(1,4,1)` from the committed dataset.
-- [ ] Return one DTO for a configured numeric simulator ID; return one nil for no configured identity. Nil-on-miss is simulator policy, not native verification.
-- [ ] Accept omitted/nil location inputs; each supplied monthOffset/monthDay must match the stored offsetMonths/monthDay or the result is nil. User-selected filtering policy.
-- [ ] Return independent result snapshots; caller table mutation cannot change the owned records. Backing-state changes affect later lookups without adding a Lua calendar editor API.
-- [ ] Validate required numeric simulator IDs and optional numeric location inputs without lossy ID aliasing or silently coercing wrong types. Numeric ID representation is fixture-model policy, not native typedef proof.
-- [ ] Apply the documented `AllowedWhenUntainted` input policy using the VM's existing authentication behavior; secret wrappers/caller taint remain intact.
+- [x] Seed normal simulator sessions with demo IDs910001/910002/910003 and positions `(0,15,1)`, `(0,15,2)`, `(1,4,1)` from the committed dataset.
+- [x] Return one DTO for a configured numeric simulator ID; return one nil for no configured identity. Nil-on-miss is simulator policy, not native verification.
+- [x] Accept omitted/nil location inputs; each supplied monthOffset/monthDay must match the stored offsetMonths/monthDay or the result is nil. User-selected filtering policy.
+- [x] Return independent result snapshots; caller table mutation cannot change the owned records. Backing-state changes affect later lookups without adding a Lua calendar editor API.
+- [x] Validate required numeric simulator IDs and optional numeric location inputs without lossy ID aliasing or silently coercing wrong types. Numeric ID representation is fixture-model policy, not native typedef proof.
+- [x] Apply the documented `AllowedWhenUntainted` input policy using the VM's existing authentication behavior; secret wrappers/caller taint remain intact.
 
 ## How it works
 
@@ -25,11 +25,11 @@
 ## Tests asserting this spec
 
 - `tests/calendar_event_index_info.rs`: public Lua defaults/filtering/absence/snapshots/security, owned-state update/removal and cleanup restoration.
-- Test-stage `a4159ce53` executed authentic RED: nine failures; first positive fixture query returned no DTO. This does not prove later branches. Producer `fa66dd878` focused execution reports 11 passed; normal loaded demo/publication assertions and Lua-error smoke report exit0/`[]`. Independent GREEN/final acceptance remain pending.
+- Test-stage `a4159ce53` executed authentic RED: nine failures; first positive fixture query returned no DTO. This does not prove later branches. Producer `fa66dd878` focused execution reports 11 passed; normal loaded demo/publication assertions and Lua-error smoke report exit0/`[]`. Independent GREEN verification PASS; [retained evidence](../../data/patch-api/evidence/calendar-event-index-2026-10-11/README.md). Relevant publication sweep/final acceptance remain pending.
 
 ## Known gaps (current cycle)
 
-- [ ] Independent GREEN/final acceptance pending. Authentic test-stage RED reached the public query/DTO boundary; setup/compilation succeeded.
+- [ ] Relevant publication sweep/final acceptance pending; independent GREEN verification PASS. Authentic test-stage RED reached the public query/DTO boundary; setup/compilation succeeded.
 - [ ] Loaded normal-session publication assertion passed; removed only the current event-index gap row. Relevant publication sweep execution remains pending; frozen historical accounting is preserved.
 
 ## Out of scope
