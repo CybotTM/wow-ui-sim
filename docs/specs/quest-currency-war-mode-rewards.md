@@ -18,7 +18,7 @@ Current cached Retail/PTR `QuestUtils.lua` exposes `QuestUtils_AddQuestCurrencyR
 
 ## Implementation inventory
 
-- `tests/quest_currency_war_mode.rs`: initial public query contracts and actual ordinary vendor-tooltip fixture; initial RED observed1 ordinary-baseline PASS/4 contractFAIL; positive supplied-input controls follow real owned scaffold.
+- `tests/quest_currency_war_mode.rs`: initial public query contracts and actual ordinary vendor-tooltip fixture; initial RED1 ordinary-baseline PASS/4 contractFAIL; expanded controls use real input scaffold, actual gate/percentage outputs and duplicate-currency first instances.
 - `src/c_api/c_pvp.rs`: existing namespace seam; `war_mode.rs::WarModeState` owns desired/reward inputs, getters not yet implemented.
 - `src/c_api/item_spell/c_currency.rs`: existing currency query seam; faction relation not yet modeled.
 - `src/lua_api/globals/quest_surface/register.rs`: existing false eligibility placeholder; no independent eligibility getter yet.
@@ -26,11 +26,11 @@ Current cached Retail/PTR `QuestUtils.lua` exposes `QuestUtils_AddQuestCurrencyR
 
 ## Tests asserting this spec
 
-`tests/quest_currency_war_mode.rs`; initial RED1PASS/4FAIL before owned scaffold; ordinary vendor baseline passes, positive supplied caller and new getters remain unproved.
+`tests/quest_currency_war_mode.rs`; initial RED1PASS/4FAIL independently authenticated before owned scaffold;13-case expanded controls await RED execution. Ordinary vendor baseline passes; positive caller/new getters remain unproved.
 
 ## Known gaps (current cycle)
 
-- [ ] Initial RED independent authentication; expanded positive RED after real input scaffold; producers, current-profile GREEN, startup/publication and independent Rust/readability/retention proof. Ordinary vendor baseline1PASS/4contractFAIL retained.
+- [ ] Expanded positive RED, producers, current-profile GREEN, startup/publication and independent Rust/readability/retention proof. Initial authenticated1PASS/4contractFAIL retained; no getter producer before positive RED.
 
 ## Out of scope
 
