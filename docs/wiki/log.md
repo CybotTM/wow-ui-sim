@@ -1714,3 +1714,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 
 [Existing API investigation](investigations/patch-8-1-0-api-audit.md#guidisplayer--source-stage-2026-10-12) links modeled source `d6d8de29a`, Retail/PTR registration gates and owning spec without duplicating its contract. Retail RED0/9 at `76f405e1d` retained; GREEN async pending. Required-string/closed-world policy is not native validation; no runtime/publication credit or changes to 533c FAIL, frozen BA or gap captures. Wiki-only update; no tests/build/ops/commit.
 
+## [2026-10-12] docs | GUID bounded final reconciliation
+
+Updated [GUID contract](../specs/guid-is-player.md), [publication spec](../specs/patch-8-1-0-publication-sweep.md) and [current audit](investigations/patch-8-1-0-api-audit.md#guidisplayer--bounded-current-verification-2026-10-12) from main-verified reports: bounded behavior/publication/check/retry-validator PASS, historical failures preserved. Packet owns details; retention/disclosure reconciliation and async broad-suite result PENDING. Reconstructed RED JSON not byte-exact/original NOT_RECOVERED; native/earlier-profile/external/gaps/full handoff OPEN. Only five authorized docs edited; no execution, authentication, delegation or commit.
+

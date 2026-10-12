@@ -124,7 +124,23 @@ Source `d6d8de29a` adds modeled `C_PlayerInfo.GUIDIsPlayer` in [c_player_info_gu
 
 Retail RED at `76f405e1d`: **0/9 PASS**, eight missing raw-provider guards plus one original whole-consumer exact-true mismatch. Downstream assertions after the guards receive no behavioral credit. GREEN async pending; source inspection establishes no runtime, native or publication success. Historical [533c FAIL](fullsuite-533c-2026-10-12.md), frozen [BA FAIL](fullsuite-ba-2026-10-11.md), and historical/current gap captures below remain unchanged; full handoff OPEN.
 
+## GUIDIsPlayer — bounded current verification, 2026-10-12
+
+[GUID contract](../../specs/guid-is-player.md) owns explicit local/active populated party/target-focus unit-model scope: neither prefix classification nor all offline/social catalogs. [Current packet](../../../data/patch-api/evidence/guid-is-player-current-2026-10-12/README.md) owns detailed evidence; retention remains pending. The source-stage pending observation above remains chronological history.
+
+| Boundary | Main-verified proof | Limit |
+|---|---|---|
+| Direct/security/whole ObjectAPI consumer and normal startup | `d6d8de29a` Retail9/9 +PTR9/9, normal `[]`, fmt/readability PASS | Unchanged account operand nil for misses; no native account classification; invalid UTF-8 source-inspected only |
+| Owning strict publication | `a555f927a` original prefork case PASS; current145/94OK/51gaps | Seven producer closures separate from frozen87/58/two supersessions and old533c93/52/six closures |
+| Default check | `d7a34be4a` exit0 | Six inherited manifest deprecations retained; no warning-free claim |
+| Current validator and capture isolation | `d21ca3f64` retry9/9 and actual validator exit0; both captures/frozen inputs unchanged | Earlier8/9FAIL and standalone NOT RUN retained; no synthetic-map substitution |
+| Retention/native/earlier-profile/external/full handoff | OPEN; retention PENDING | Broad suite `d21ca3f64388d49b367803434ff1b0404b86c640` / `full-suite-1791833706`, async submission October 12, 2026, 19:35 UTC; result PENDING |
+
+Historical RED9FAIL, initial publication1FAIL/exit1 plus wrong101 worker guard, and publication-before fixture-race/coherenceFAIL remain failures. GREEN overwrote generic structured RED JSON; original report/raw/auth survive, reconstruction is not byte-exact and original JSON NOT_RECOVERED. Public packet collision-disclosure reconciliation remains pending. No replay or authentication performed for this docs update; historical533cFAIL/BA3FAIL unchanged.
+
 ## Current publication reconciliation — 2026-10-12
+
+Historical533c stage; the later GUID cycle above owns the active classification.
 
 [Current packet](../../../data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/README.md) and [direct map](../../../data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/current-publication-results.json) own current classification:145 rows93OK/52gaps. Frozen8.1 **87OK/58gaps** is unchanged. [Suite533c investigation](fullsuite-533c-2026-10-12.md) links full-count SSOT: saved suite remains FAIL, sole strict publication mismatch known54/observed52 with no new gaps. Frozen BA **15,038PASS/3FAIL/19skips** remains history.
 

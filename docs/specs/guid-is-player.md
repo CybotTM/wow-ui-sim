@@ -1,6 +1,6 @@
 # GUID player identity query
 
-Current Retail/PTR `C_PlayerInfo.GUIDIsPlayer` must project existing represented identity and player-kind facts, not GUID syntax or a native catalog. Cached `PlayerLocationDocumentation.lua` declares a required `WOWGUID`, one boolean result and `AllowedWhenUntainted`. Strict string/no-coercion and closed-world unknown handling below are simulator policy, not native validation evidence. See [API architecture](../lua-api.md).
+Current Retail/PTR `C_PlayerInfo.GUIDIsPlayer` must project explicit local, active populated party and target/focus unit-model identity/player-kind facts, not GUID syntax or all offline/social catalogs. Cached `PlayerLocationDocumentation.lua` declares a required `WOWGUID`, one boolean result and `AllowedWhenUntainted`. Strict string/no-coercion and closed-world unknown handling below are simulator policy, not native validation evidence. See [API architecture](../lua-api.md).
 
 ## What it must do
 
@@ -32,8 +32,11 @@ Current Retail/PTR `C_PlayerInfo.GUIDIsPlayer` must project existing represented
 
 - [x] Genuine RED observed before producer; assertions unreached after missing-provider guards receive no behavioral credit.
 - [x] Implement and verify Retail/PTR direct/consumer/startup checks, preserve diagnostics and account predicate provenance.
-- [ ] Fresh default library check and separate owning publication/current-validator/retention gates.
-- [ ] Retain proof-path collision disclosure: GREEN overwrote generic structured RED `proof.json`; original RED report/raw logs/auth receipt survive, reconstructed structured evidence must be labeled rather than claimed byte-exact history.
+- [x] Fresh default library check, owning strict publication and current-validator gates: main-verified `d7a34be4a` check exit0, `a555f927a` strict case PASS and `d21ca3f64` validator retry9/9 plus actual validator exit0. [Current packet](../../data/patch-api/evidence/guid-is-player-current-2026-10-12/README.md) owns detailed evidence; retention remains pending.
+- [ ] Public retention/link/privacy gate and packet collision-disclosure reconciliation remain PENDING. GREEN overwrote generic structured RED `proof.json`; original RED report/raw/auth receipt survive. Reconstruction is not byte-exact; original JSON NOT_RECOVERED.
+- [ ] Full broad suite remains PENDING: `d21ca3f64388d49b367803434ff1b0404b86c640` / `full-suite-1791833706`, submitted asynchronously October 12, 2026, 19:35 UTC. Historical533cFAIL/BA3FAIL unchanged.
+
+Initial publication1FAIL/exit1 and wrong101 worker guard, publication-before fixture-race/coherenceFAIL, and earlier validator8/9FAIL with standalone NOT RUN remain historical. Retry does not relabel them. Native, earlier-profile, external and whole-handoff acceptance remain OPEN.
 
 ## Out of scope
 

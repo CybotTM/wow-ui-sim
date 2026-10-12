@@ -1,6 +1,6 @@
-## [2026-10-12] source | GUIDIsPlayer modeled query
+## [2026-10-12] verification | GUIDIsPlayer bounded current proof
 
-[Source stage](investigations/patch-8-1-0-api-audit.md#guidisplayer--source-stage-2026-10-12) links source `d6d8de29a` and owning spec. Retail/PTR gates inspected; Retail RED0/9 at `76f405e1d`, GREEN async pending. No runtime/native/publication credit; frozen failures/gap captures unchanged.
+[Current audit](investigations/patch-8-1-0-api-audit.md#guidisplayer--bounded-current-verification-2026-10-12) links contract and packet-owned details: main-verified Retail/PTR behavior, strict publication, default check and retry validator PASS. Historical source stage/failures preserved; retention/disclosure reconciliation and new async broad-suite result PENDING. Native/earlier-profile/external/full handoff OPEN;533cFAIL/BA3FAIL unchanged.
 
 ## [2026-10-12] observation | Live Retail GUI publication
 

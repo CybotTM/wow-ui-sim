@@ -1,0 +1,12 @@
+[
+  {
+    "exit": 0,
+    "invocations": 1,
+    "label": "validator-tests"
+  },
+  {
+    "exit": 0,
+    "invocations": 1,
+    "label": "validator"
+  }
+]
