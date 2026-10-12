@@ -28,8 +28,8 @@ Current cached Retail/PTR `FriendListDocumentation.lua` declares `C_FriendList.G
 
 ## Known gaps (current cycle)
 
-- [ ] Execute and authenticate genuine pre-producer RED. Source preparation is not an executed failure; downstream assertions after a failing positive guard are unreached.
-- [ ] Establish real popup closure readiness and actual failure boundary; a prerequisite failure is not missing-query consumer evidence.
+- [x] Initial pre-producer RED executed and authenticated: four cases0PASS/4FAIL; three stop at absent exact query, popup stops at an overbroad diagnostic-readiness assertion. Downstream assertions remain unreached.
+- [ ] Establish real popup closure readiness and actual failure boundary. Initial `C_Reveal` observation is a guarded optional debug probe, not an actual load error; retain observations without requiring every nil probe to exist. Keep real load/error/provenance/prefill assertions, then re-execute before consumer credit.
 - [ ] Implement the exact C API over existing state after RED, then independently verify affected behavior, loaded startup, formatting/default check and readability; retain scoped proof.
 
 ## Out of scope
