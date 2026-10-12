@@ -106,6 +106,8 @@ Targeted integrated gates are recorded in `p810-proof.json`; acceptance is retai
 
 ## Sources
 
+- [Live Retail GUI publication packet — 2026-10-12](../../../data/patch-api/evidence/live-retail-gui-providers-2026-10-12/README.md).
+
 - [Pinned page/provenance](../../../data/patch-api/sources/8.1.0-api-changes.provenance.json).
 - [Retained Blizzard DateAndTime documentation](../../../data/patch-api/evidence/8.1.0-session-2026-10-08/DateAndTimeDocumentation.lua) and its fetch receipt.
 - [Occurrence ledger](../../../data/patch-api/sources/8.1.0-page-coverage.json).

@@ -20,5 +20,5 @@ Stop only these units when finished: `systemctl --user stop wow-ui-vnc-app.servi
 
 ## Current bounded GUI publication — 2026-10-12
 
-[New90-second WoW API publication only; not Pi/LLM provider diagnostics](../live-retail-gui-providers-2026-10-12/README.md) · [Independent publication gate; logged event, not pixels; intentional124 expiry, not assertion failure or service repair](../live-retail-gui-providers-2026-10-12/live-provider-report.md). [Owned-process/socket cleanup, existing display preserved;15 copies/39,405 bytes retention PENDING; native/visual/authenticated-remote/user acceptance OPEN](../live-retail-gui-providers-2026-10-12/README.md).
+[New90-second WoW API publication only; not Pi/LLM provider diagnostics](../live-retail-gui-providers-2026-10-12/README.md) · [Independent publication gate; logged event, not pixels; intentional124 expiry, not assertion failure or service repair](../live-retail-gui-providers-2026-10-12/live-provider-report.md). [Owned-process/socket cleanup, existing display preserved;15 copies/39,405 bytes retention independently2905 PASS at5e1b7bab4; native/visual/authenticated-remote/user acceptance OPEN](../live-retail-gui-providers-2026-10-12/README.md).
 

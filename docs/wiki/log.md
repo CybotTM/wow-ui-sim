@@ -1706,3 +1706,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 
 [Suite investigation](investigations/fullsuite-533c-2026-10-12.md) links public full-count/limit SSOT; [dated publication subsection](investigations/patch-8-1-0-api-audit.md#current-publication-reconciliation--2026-10-12) separates saved FAIL, independent2877 original-prefork bounded PASS and frozen8.1/BA history. Current direct map owns classification; validator9424/e48 final9/9 tests and real validator independently2879 PASS/capture unchanged; combined retention/link/privacy independently2886 PASS, parent OPEN. Old BA selectors PASS without causal repair/body-time/cache-provenance or historical-equivalence credit. Four-file wiki-only ingest; no commits, builds, tests, seals, operations or delegation.
 
+## 2026-10-12 — Live Retail GUI publication packet
+
+[Packet](../../data/patch-api/evidence/live-retail-gui-providers-2026-10-12/README.md) · [Existing publication investigation](investigations/patch-8-1-0-api-audit.md#current-publication-reconciliation--2026-10-12).
+
