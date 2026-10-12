@@ -27,7 +27,7 @@ Current Retail/PTR simulator default Enter dispatch must open the unchanged Bliz
 ## Known gaps (current cycle)
 
 - [x] Bounded Retail3 GREEN after genuine default-activation RED; typing/submission unreached in RED, completed in GREEN. Formatter/default check PASS at the recorded source scope.
-- [ ] PTR runtime, native GUI keypress smoke and intended-user keyboard acceptance remain unproved. Owned service now uses the authenticated current artifact; observing layout is not key-delivery proof. Public packet retention gate pending.
+- [ ] PTR runtime, native GUI keypress smoke and intended-user keyboard acceptance remain unproved. Owned GUI query used the authenticated current artifact; the bounded90s app expired naturally. Observing layout is not key-delivery proof. Public packet retention gate pending.
 
 ## Out of scope
 

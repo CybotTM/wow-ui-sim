@@ -90,8 +90,9 @@ and four explicit Widescreen/vertical override variants), cache10 and Enter3.
 Corrected normal startup reports Classic329×40 with zero Lua errors; fmt/default
 check PASS. [Packet](../../../data/patch-api/evidence/edit-mode-enter-2026-10-12/README.md)
 retains initial fixture compile failure, genuine RED and invalid binding-lookup
-probe failure separately. Owned current-artifact GUI query observes Classic2,
-MicroMenu329×40 and native1920×1080 window; actual keyboard/pixel/intended-user
+probe failure separately. Owned current-artifact GUI query observed Classic2,
+MicroMenu329×40 and native1920×1080 window; the bounded90s app expired naturally.
+Actual keyboard/pixel/intended-user
 acceptance, PTR/native parity and full handoff remain open. See [selection contract](../../specs/edit-mode-layout-selection.md).
 
 Follow-up: selecting the saved layout still was not enough for the visible UI.

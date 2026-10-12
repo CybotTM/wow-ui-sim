@@ -146,11 +146,15 @@ GUID9, original strict8.1 publication, original startup and both talent selector
 
 Old533c15,102PASS/1FAIL and frozen BA3FAIL remain unchanged historical results. Existing GUID254/21 packet retention independent2939 PASS is unchanged and does not cover the new broad packet. Original RED JSON NOT_RECOVERED/disclosure remains unchanged. GUI authenticated-user review, native/other-profile acceptance, credits, Pi provenance and full handoff remain OPEN; broad PASS does not close them. Source contract unchanged; no replay, authentication or new execution from this docs update.
 
+## Friend setter — bounded current evidence, 2026-10-12
+
+[Setter contract](../../specs/friend-note-mutation.md) links the [retained packet](../../../data/patch-api/evidence/friend-note-mutation-2026-10-12/README.md), which owns bounded Retail/PTR mutation/security/unchanged-popup proof, strict publication reconciliation and independent validator/capture-preservation/privacy results. Initial retention failure and historical captures remain preserved; new public projection gate pending. Later default check/fmt belongs to the separate [Edit Mode / Enter packet](../../../data/patch-api/evidence/edit-mode-enter-2026-10-12/README.md), not the earlier setter epoch. No native, broader-suite or whole-handoff acceptance.
+
 ## Current publication reconciliation — 2026-10-12
 
-Historical533c stage; the later GUID cycle above owns the active classification.
+Historical533c stage; later GUID and Friend-setter cycles above own their separate subsequent classifications.
 
-[Current packet](../../../data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/README.md) and [direct map](../../../data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/current-publication-results.json) own current classification:145 rows93OK/52gaps. Frozen8.1 **87OK/58gaps** is unchanged. [Suite533c investigation](fullsuite-533c-2026-10-12.md) links full-count SSOT: saved suite remains FAIL, sole strict publication mismatch known54/observed52 with no new gaps. Frozen BA **15,038PASS/3FAIL/19skips** remains history.
+[Current packet](../../../data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/README.md) and [direct map](../../../data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/current-publication-results.json) own that historical stage's classification:145 rows93OK/52gaps. Frozen8.1 **87OK/58gaps** is unchanged. [Suite533c investigation](fullsuite-533c-2026-10-12.md) links full-count SSOT: saved suite remains FAIL, sole strict publication mismatch known54/observed52 with no new gaps. Frozen BA **15,038PASS/3FAIL/19skips** remains history.
 
 `61cd81963` removes only `wt-global-api-C_FriendList.GetFriendInfo-44` and `wt-global-api-C_MountJournal.GetMountFromItem-78` from current expectations. Accepted main evidence: private `/home/osso/.local/state/wow-ui-sim/verification/publication-533c-reconciliation/prefork-current-report.md`, independent2877 original Game-parent-preloaded/forked case1PASS; zero auxiliary executions. Both providers are `raw=function; lookup=function`, thirteen input hashes unchanged; original assertion/provider/vendor behavior unchanged. Publication/absence proof is not signature/output/security/native behavior credit or a new full-suite PASS.
 

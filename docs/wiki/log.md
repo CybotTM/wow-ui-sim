@@ -1,3 +1,7 @@
+## [2026-10-12] docs | Bounded Edit Mode / Enter and Friend-setter reconciliation
+
+[Friend-setter audit](investigations/patch-8-1-0-api-audit.md#friend-setter--bounded-current-evidence-2026-10-12) links packet-owned evidence and pending projection gate. Selection/chat docs and coverage links preserve GUI observation versus user-keypress acceptance; bounded app expired naturally. Historical failures/profile limits unchanged. Docs only; no execution, source edits or completion promotion.
+
 ## [2026-10-12] operation | User-approved private-LAN VNC binding
 
 Updated [VNC guide](../../data/patch-api/evidence/private-vnc-simulator-2026-10-12/README.md) and existing investigation: specific private IPv4 listener, no IPv6/password, VNC-only restart and preserved display. Historical loopback/SSH receipts unchanged; address-bearing receipts stay private. Setup observation is not rendered-user/native acceptance.
