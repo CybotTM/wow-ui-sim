@@ -576,6 +576,8 @@ pub struct SimState {
     pub currency_war_mode_bonus: HashMap<i32, (Option<bool>, Option<bool>)>,
     /// Explicit immediate reputation grants; no inferred currency/faction catalog.
     pub currency_faction_grants: HashMap<i32, i32>,
+    /// Explicit item-to-mount identities; independent of journal records or ownership.
+    pub mount_item_relations: HashMap<i32, i32>,
     pub equipment_manager: EquipmentManagerState,
     pub maps: HashMap<i32, MapData>,
     /// Explicit per-map hideIcons input; absence is not a native unknown-ID claim.

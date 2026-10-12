@@ -104,3 +104,119 @@ fn mount_item_authenticates_secret_input_before_type_or_lookup() {
     )
     .expect("authentic secret permission before malformed input parsing");
 }
+
+fn fresh_mount_item_fixture_env() -> WowLuaEnv {
+    let env = empty_env();
+    assert!(env.state().borrow().mount_item_relations.is_empty());
+    env
+}
+
+fn assert_mount_item_query(env: &WowLuaEnv, numeric_argument: &str, expected: Option<i32>) {
+    let expected = expected.map_or_else(|| "nil".to_owned(), |id| id.to_string());
+    let script = format!(
+        r#"
+        local query = rawget(C_MountJournal, 'GetMountFromItem')
+        assert(type(query) == 'function', 'missing C_MountJournal.GetMountFromItem')
+        local function check(...)
+            assert(select('#', ...) == 1, 'mount query must return exactly ONE value')
+            assert((...) == {expected}, 'wrong mount relation for {numeric_argument}')
+        end
+        check(query({numeric_argument}))
+        "#
+    );
+    env.exec(&script)
+        .expect("real mount-item query must match explicit fixture state");
+}
+
+#[test]
+fn supplied_mount_item_mapping_needs_no_catalog_target_or_ownership() {
+    let env = fresh_mount_item_fixture_env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.world.mounts.clear();
+        state.mount_item_relations.insert(901001, 401);
+    }
+    assert!(env.state().borrow().world.mounts.is_empty());
+    assert_mount_item_query(&env, "901001", Some(401));
+    assert!(env.state().borrow().world.mounts.is_empty());
+}
+
+#[test]
+fn supplied_mount_item_mapping_replacement_and_removal_are_live() {
+    let env = fresh_mount_item_fixture_env();
+    env.state()
+        .borrow_mut()
+        .mount_item_relations
+        .insert(901001, 401);
+    assert_mount_item_query(&env, "901001", Some(401));
+
+    env.state()
+        .borrow_mut()
+        .mount_item_relations
+        .insert(901001, 402);
+    assert_mount_item_query(&env, "901001", Some(402));
+
+    env.state()
+        .borrow_mut()
+        .mount_item_relations
+        .remove(&901001);
+    assert_mount_item_query(&env, "901001", None);
+}
+
+#[test]
+fn supplied_mount_item_mapping_does_not_leak_into_independent_fresh_environment() {
+    let first = fresh_mount_item_fixture_env();
+    first
+        .state()
+        .borrow_mut()
+        .mount_item_relations
+        .insert(901001, 401);
+    assert_mount_item_query(&first, "901001", Some(401));
+
+    let second = fresh_mount_item_fixture_env();
+    assert_mount_item_query(&second, "901001", None);
+    assert_mount_item_query(&first, "901001", Some(401));
+    assert!(second.state().borrow().mount_item_relations.is_empty());
+}
+
+#[test]
+fn supplied_mount_item_numeric_identities_are_distinct_without_truncation_aliases() {
+    let env = fresh_mount_item_fixture_env();
+    env.state().borrow_mut().mount_item_relations.extend([
+        (901000, 400),
+        (901001, 401),
+        (901002, 402),
+        (i32::MIN, 403),
+        (i32::MAX, 404),
+        (0, 405),
+    ]);
+    for (argument, expected) in [
+        ("901000", 400),
+        ("901001", 401),
+        ("901002", 402),
+        ("-2147483648", 403),
+        ("2147483647", 404),
+        ("0", 405),
+    ] {
+        assert_mount_item_query(&env, argument, Some(expected));
+    }
+    // Populated neighbors, boundaries and zero expose truncation or saturation.
+    for argument in [
+        "900999",
+        "901003",
+        "901000.5",
+        "901001.5",
+        "901002.5",
+        "-0.5",
+        "0.5",
+        "-2147483648.5",
+        "2147483647.5",
+        "0/0",
+        "1/0",
+        "-1/0",
+        "-2147483649",
+        "2147483648",
+    ] {
+        assert_mount_item_query(&env, argument, None);
+    }
+}
