@@ -1,4 +1,4 @@
-//! Exact current-profile friend-name query over environment-owned social state.
+//! Exact current-profile friend-name queries and note mutation over owned social state.
 //! Indexed and earlier name queries share the existing simulator projection.
 
 use crate::lua_api::methods::{create_string, create_table, table_set_static};
@@ -10,7 +10,7 @@ use rilua::vm::state::LuaState;
 pub(crate) mod current {
     use super::build_friend_info_table;
     use crate::c_api::helpers::{ensure_namespace, mark_namespace_keys_removed};
-    use crate::lua_api::methods::{borrow_state, val_to_string};
+    use crate::lua_api::methods::{borrow_state, borrow_state_mut, val_to_string};
     use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
     use rilua::vm::state::LuaState;
     use rilua::{LuaResult, Val};
@@ -18,7 +18,35 @@ pub(crate) mod current {
     pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         let namespace = ensure_namespace(state, "C_FriendList")?;
         mark_namespace_keys_removed(state, namespace, &["GetFriendInfoByName"]);
-        table_set_rust_fn_static(state, namespace, "GetFriendInfo", get_friend_info)
+        table_set_rust_fn_static(state, namespace, "GetFriendInfo", get_friend_info)?;
+        table_set_rust_fn_static(state, namespace, "SetFriendNotes", set_friend_notes)
+    }
+
+    fn set_friend_notes(state: &mut LuaState) -> LuaResult<u32> {
+        let name_argument = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
+        let notes_argument = rilua::table_security::unwrap_secret(state, stack_val(state, 2))?;
+        let name = val_to_string(state, name_argument).ok_or_else(|| {
+            rilua::runtime_error("C_FriendList.SetFriendNotes: argument 1 must be a UTF-8 string")
+        })?;
+        let notes = val_to_string(state, notes_argument).ok_or_else(|| {
+            rilua::runtime_error("C_FriendList.SetFriendNotes: argument 2 must be a UTF-8 string")
+        })?;
+        let found = {
+            let mut sim = borrow_state_mut(state)?;
+            match sim
+                .social_friends
+                .iter_mut()
+                .find(|friend| friend.name == name)
+            {
+                Some(friend) => {
+                    friend.note = notes;
+                    true
+                }
+                None => false,
+            }
+        };
+        state.push(Val::Bool(found));
+        Ok(1)
     }
 
     fn get_friend_info(state: &mut LuaState) -> LuaResult<u32> {
