@@ -59,12 +59,35 @@ compact system/anchor/settings rows, and seeds `C_EditMode`. Blizzard addons
 are also loaded through the saved-variable-aware loader so Blizzard-owned WTF
 SavedVariables participate in full UI startup.
 
-Follow-up: `EditModeManagerFrame.layoutInfo` prepends Blizzard preset layouts
-before appending saved layouts. The active value from the character cache is an
-index into the saved layouts, so startup must remap it after the prepend; without
-that remap, `C_EditMode` selected `Widescreen` while `EditModeManagerFrame`
-activated the `Classic` preset. Preset-only compatibility tweaks must also avoid
-rewriting saved layout settings.
+### Active selection correction — 2026-10-12
+
+**Superseded rationale:** the earlier investigation treated character-cache
+index2 as a saved-layout ordinal and required remapping after preset insertion,
+claiming that otherwise `C_EditMode` selected Widescreen while the manager
+activated Classic. That interpretation was wrong; retained here as the rationale
+for the simulator remap, not the current selection contract.
+
+**Source:** unchanged Blizzard `UpdateLayoutInfo()` prepends Modern/Classic
+without offsetting `activeLayout`. Character-cache active2 is already in that
+combined selection space and selects Classic. The simulator remap incorrectly
+offset it to4/Widescreen. The user reports horizontal Micro Menu in the actual
+WoW client; this report is not native acceptance of the simulator repair.
+
+**RED:** genuine fresh file-import whole-startup regression at `653e829f1`
+failed the selected-layout assertion; geometry was unreached. Low-level cache
+proof does not replace this original-consumer boundary.
+
+**Committed source:** `057b65d3d` removes the remap from simulator setup.
+Cache import resolves explicit saved-layout names as
+`Enum.EditModePresetLayoutsMeta.NumValues + savedordinal`. Supported existing
+positive numeric custom ordinal/ID resolution moves into the override producer;
+no extra provenance flag or fallback. Named/snapshot tests and a fresh override
+full-consumer control were added. Preset-only compatibility tweaks must still
+avoid rewriting saved layout settings.
+
+**Pending:** GREEN compile active at `7d9d9f621`; compile/runtime GREEN is not
+yet established. Corrected live GUI, native parity and full handoff acceptance
+remain open. See [selection contract](../../specs/edit-mode-layout-selection.md).
 
 Follow-up: selecting the saved layout still was not enough for the visible UI.
 The startup fast path for action bars seeded Widescreen `systemInfo` and replayed
@@ -187,7 +210,8 @@ Regression coverage lives in `tests/edit_mode_api.rs`.
 
 ## Sources
 
-- [editmode-layout-fixes.md](../../editmode-layout-fixes.md) — full investigation
+- [editmode-layout-fixes.md](../../editmode-layout-fixes.md) — historical investigation
+- [edit-mode-layout-selection.md](../../specs/edit-mode-layout-selection.md) — current selection contract and proof limits
 - [runtime_surface_bootstrap.lua](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — `C_EditMode` fallback state
 - [saved_variables.rs](../../../src/saved_variables.rs) — WTF cache import bridge
 - [instance_info.rs](../../../src/lua_api/globals/instance_info.rs) — mirror-timer API and `MIRRORTIMER_NUMTIMERS`
