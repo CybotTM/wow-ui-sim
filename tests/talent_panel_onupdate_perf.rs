@@ -99,6 +99,105 @@ fn max_duration(samples: &[Duration]) -> Duration {
 }
 
 #[test]
+fn visible_onupdate_collector_tracks_child_parent_visibility() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.fire_on_update(0.016)
+        .expect("Initial OnUpdate tick should settle registration");
+    let baseline_count = capture_visible_onupdate(&env).0;
+
+    env.exec(
+        r#"
+        VisibleOnUpdateRegressionTicks = 0
+        local parent = CreateFrame("Frame", "VisibleOnUpdateRegressionParent", UIParent)
+        local child = CreateFrame("Frame", "VisibleOnUpdateRegressionChild", parent)
+        parent:Show()
+        child:Show()
+        child:SetScript("OnUpdate", function()
+            VisibleOnUpdateRegressionTicks = VisibleOnUpdateRegressionTicks + 1
+        end)
+        assert(child:IsVisible(), "Shown child under shown parent should be visible")
+        assert(type(child:GetScript("OnUpdate")) == "function", "Child should have an OnUpdate callback")
+        "#,
+    )
+    .expect("Visible child OnUpdate fixture should register successfully");
+    let child_name: String = env
+        .eval("return VisibleOnUpdateRegressionChild:GetName()")
+        .expect("Child should expose its actual global name");
+    assert_eq!(child_name, "VisibleOnUpdateRegressionChild");
+
+    env.fire_on_update(0.016)
+        .expect("Visible child OnUpdate tick should succeed");
+    let ticks: i32 = env
+        .eval("return VisibleOnUpdateRegressionTicks")
+        .expect("Visible child callback count should be readable");
+    assert_eq!(ticks, 1, "Visible child should receive its first OnUpdate");
+    let (visible_count, visible_names) = capture_visible_onupdate(&env);
+    assert_eq!(
+        visible_count,
+        baseline_count + 1,
+        "Collector should count the visible child that received OnUpdate: {visible_names:?}"
+    );
+    assert!(
+        visible_names.contains(&child_name),
+        "Collector should include the visible child's actual global name: {visible_names:?}"
+    );
+
+    env.exec(
+        r#"
+        VisibleOnUpdateRegressionParent:Hide()
+        assert(VisibleOnUpdateRegressionChild:IsShown(), "Hiding parent should leave child locally shown")
+        assert(not VisibleOnUpdateRegressionChild:IsVisible(), "Child under hidden parent should not be visible")
+        "#,
+    )
+    .expect("Parent hide should make the locally shown child invisible");
+    env.fire_on_update(0.016)
+        .expect("Hidden parent OnUpdate tick should succeed");
+    let ticks: i32 = env
+        .eval("return VisibleOnUpdateRegressionTicks")
+        .expect("Hidden child callback count should be readable");
+    assert_eq!(
+        ticks, 1,
+        "Child under hidden parent should not receive OnUpdate"
+    );
+    let (hidden_count, hidden_names) = capture_visible_onupdate(&env);
+    assert_eq!(
+        hidden_count, baseline_count,
+        "Collector should return to baseline when parent hides the child: {hidden_names:?}"
+    );
+    assert!(
+        !hidden_names.contains(&child_name),
+        "Collector should exclude the child under a hidden parent: {hidden_names:?}"
+    );
+
+    env.exec(
+        r#"
+        VisibleOnUpdateRegressionParent:Show()
+        assert(VisibleOnUpdateRegressionChild:IsVisible(), "Re-showing parent should restore child visibility")
+        "#,
+    )
+    .expect("Parent show should restore child visibility");
+    env.fire_on_update(0.016)
+        .expect("Restored visible child OnUpdate tick should succeed");
+    let ticks: i32 = env
+        .eval("return VisibleOnUpdateRegressionTicks")
+        .expect("Restored child callback count should be readable");
+    assert_eq!(
+        ticks, 2,
+        "Restored visible child should receive its second OnUpdate"
+    );
+    let (restored_count, restored_names) = capture_visible_onupdate(&env);
+    assert_eq!(
+        restored_count,
+        baseline_count + 1,
+        "Collector should count the restored visible child: {restored_names:?}"
+    );
+    assert!(
+        restored_names.contains(&child_name),
+        "Collector should include the restored child's actual global name: {restored_names:?}"
+    );
+}
+
+#[test]
 fn talent_panel_open_visible_onupdate_handlers_stay_within_ceiling() {
     perf_test_timeout! {
             let env = load_settled_game_ui();
