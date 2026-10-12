@@ -47,6 +47,14 @@ pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
     for &(name, func) in CURRENCY_INFO_METHODS {
         table_set_rust_fn_static(state, table_ref, name, func)?;
     }
+    if cfg!(any(feature = "client-retail", feature = "client-ptr")) {
+        table_set_rust_fn_static(
+            state,
+            table_ref,
+            "DoesWarModeBonusApply",
+            query_currency_war_mode_bonus,
+        )?;
+    }
     #[cfg(feature = "client-mists")]
     table_set_rust_fn_static(
         state,
@@ -55,6 +63,35 @@ pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
         c_currency_get_list_size,
     )?;
     Ok(())
+}
+
+fn validate_war_mode_currency_id(value: Val) -> LuaResult<Option<i32>> {
+    let Val::Num(number) = value else {
+        return Err(rilua::runtime_error(
+            "C_CurrencyInfo.DoesWarModeBonusApply: currencyID must be a number",
+        ));
+    };
+    let in_range = (f64::from(i32::MIN)..=f64::from(i32::MAX)).contains(&number);
+    let represented = number.is_finite() && number.fract() == 0.0 && in_range;
+    Ok(represented.then(|| number as i32))
+}
+
+fn query_currency_war_mode_bonus(state: &mut LuaState) -> LuaResult<u32> {
+    let value = stack_val(state, 1);
+    // Authenticate before type validation or lookup without declassifying the input.
+    #[cfg(feature = "retail-12-1-0")]
+    let value = rilua::table_security::unwrap_secret(state, value)?;
+    let currency_id = validate_war_mode_currency_id(value)?;
+    let (applies, once) = {
+        let sim = borrow_state(state)?;
+        currency_id
+            .and_then(|id| sim.currency_war_mode_bonus.get(&id))
+            .copied()
+            .unwrap_or((None, None))
+    };
+    state.push(applies.map_or(Val::Nil, Val::Bool));
+    state.push(once.map_or(Val::Nil, Val::Bool));
+    Ok(2)
 }
 
 fn c_currency_get_list_size(state: &mut LuaState) -> LuaResult<u32> {
