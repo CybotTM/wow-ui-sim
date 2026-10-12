@@ -18,13 +18,13 @@
 
 ## Implementation inventory
 
-- `SimState.bounty_set_maps`: explicit membership input, initialized empty after authentic initial public-query RED; no default associations. Getter producer remains unimplemented.
+- `SimState.bounty_set_maps`: explicit membership input, initialized empty after authentic initial public-query RED; no default associations. `src/c_api/c_map_bounties.rs` projects those explicit inputs through guarded C API registration and a fresh sequence result; GREEN remains unverified.
 - `src/c_api/c_map.rs`: existing map surface registration seam.
 
 ## Tests asserting this spec
 
 - `tests/c_map_bounty_set_maps.rs`: initial six public-query absence/shape, snapshots, validation/security tests executed RED at `e09b0c1d1`: 0 passed / 6 failed, exit101. Public query violates required non-nil table; setup/compile succeeded.
-- Five explicit-association/update/mutation/anti-alias/actual-MapUtil controls now target real owned inputs. Expanded positive RED must execute before getter producer; not yet executed.
+- Five explicit-association/update/mutation/anti-alias/actual-MapUtil controls now target real owned inputs. Expanded `9602fa8fb` RED executed before getter producer: 0 passed / 11 failed, exit101, including the actual unmodified MapUtil consumer's non-table result after source execution. Later assertions remain unproved until GREEN.
 
 ## Known gaps (current cycle)
 

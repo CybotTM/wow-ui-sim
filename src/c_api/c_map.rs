@@ -92,6 +92,7 @@ const C_MAP_METHODS: &[(&str, RustLuaFn)] = &[
 pub(crate) fn register_c_map_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Map")?;
     register_c_map_methods(state, table_ref)?;
+    super::c_map_bounties::register(state)?;
     super::map_world_coordinates::register(state)
 }
 

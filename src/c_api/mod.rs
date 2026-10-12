@@ -123,6 +123,7 @@ pub mod c_login;
 pub mod c_loot_history;
 pub mod c_major_factions;
 pub mod c_map;
+pub(crate) mod c_map_bounties;
 pub mod c_map_exploration_info;
 pub mod c_merchant_frame;
 #[cfg(feature = "retail-12-0-5")]
