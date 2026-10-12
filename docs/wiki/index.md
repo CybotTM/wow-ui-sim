@@ -516,7 +516,7 @@
 
 ## [2026-10-11] staging | Current Calendar event index
 
-[Source/spec stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#calendar-event-index--current-sourcespec-stage-2026-10-11), `a4159ce53`, follows the [Calendar spec](../specs/calendar-event-index-info.md): user-authorized normal-session demo records/optional location filters; synthetic numeric IDs, not native type evidence. Producer `fa66dd878` implemented; authentic RED9 independently verified (exit101), focused GREEN/final verification pending. Private report/service references live in the linked handoff; no GREEN claim. Historical87OK/58gaps/current publication gap unchanged; collector3PASS separate from broad3FAIL.
+[Stage handoff](investigations/integrated-source-and-factory-proof-2026-10-09.md#calendar-event-index--current-sourcespec-stage-2026-10-11): producer `fa66dd878` independent bounded GREEN **PASS11/11** ([report](../../data/patch-api/evidence/calendar-event-index-2026-10-11/green/green-independent-report.md)); source `a4159ce53` RED9 preserved. Current gap removed by `296b9ac77` after normal raw-publication assertion; actual prefork publication sweep pending, zero-test selector not proof. Frozen87OK/58gaps unchanged; broad3FAIL/full handoff OPEN.
 
 ## [2026-10-08] evidence | 8.1.0 page audit
 
