@@ -27,7 +27,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Final independent proof/retention gate pending; initial/expanded RED and both profile GREENs, owning publication and Rust checks retained.
+- [x] Final independent bounded gate PASS: both profile GREENs, owning publication, Rust/readability checks and105 copies independently verified; four final report/receipt copies main byte-compared. No old binary rehash or unrelated case replay.
 
 ## Out of scope
 
