@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = Path('data/patch-api/evidence/8.1.0-session-2026-10-08')
@@ -37,7 +38,7 @@ class ValidationTests(unittest.TestCase):
             if path.is_file():
                 (self.evidence / path.name).symlink_to(path)
         for path in (ROOT / 'data/patch-api/evidence').iterdir():
-            if path.is_dir() and path.name != EVIDENCE.name:
+            if path.is_dir() and path.name not in (EVIDENCE.name, CURRENT_RESULTS.parent.name):
                 (self.root / 'data/patch-api/evidence' / path.name).symlink_to(path, target_is_directory=True)
         (self.root / 'data/patch-api/sources').symlink_to(ROOT / 'data/patch-api/sources', target_is_directory=True)
         (self.root / 'docs').symlink_to(ROOT / 'docs', target_is_directory=True)
@@ -105,6 +106,34 @@ class ValidationTests(unittest.TestCase):
         self.assertEqual(self.validator.check_supersessions()['integrated_gap_closures'], 2)
         self.publish_current()
         self.assertEqual(self.validator.check_current_producer_closures()['current_producer_closures'], 6)
+
+    def test_fixture_writes_leave_existing_source_capture_unchanged(self):
+        source_root = ROOT
+        source_capture = source_root / CURRENT_RESULTS
+        with tempfile.TemporaryDirectory(prefix='p810-reference-') as directory:
+            reference = Path(directory)
+            for name in ('.git', 'tools', 'docs', 'tests'):
+                (reference / name).symlink_to(source_root / name, target_is_directory=True)
+            (reference / 'data/patch-api').mkdir(parents=True)
+            (reference / 'data/patch-api/sources').symlink_to(
+                source_root / 'data/patch-api/sources', target_is_directory=True)
+            evidence = reference / 'data/patch-api/evidence'
+            evidence.mkdir()
+            for path in (source_root / 'data/patch-api/evidence').iterdir():
+                if path.is_dir() and path.name != CURRENT_RESULTS.parent.name:
+                    (evidence / path.name).symlink_to(path, target_is_directory=True)
+            capture = reference / CURRENT_RESULTS
+            capture.parent.mkdir()
+            original = source_capture.read_bytes()
+            capture.write_bytes(original)
+            case = ValidationTests('test_missing_current_packet_fails_without_historical_fallback')
+            with patch.dict(globals(), ROOT=reference):
+                try:
+                    case.setUp()
+                    case.publish_current()
+                    self.assertEqual(capture.read_bytes(), original)
+                finally:
+                    case.doCleanups()
 
     def test_missing_current_packet_fails_without_historical_fallback(self):
         with self.assertRaisesRegex(FileNotFoundError, 'current-publication-results.json'):

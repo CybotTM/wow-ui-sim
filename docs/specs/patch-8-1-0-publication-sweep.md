@@ -34,7 +34,7 @@ Audit pinned Warcraft Wiki page 464337, revision 4462737 against current retail,
 - `tests/patch_8_1_0_publication_fixes.rs`, `tests/patch_8_1_0_cached_surfaces.rs`.
 - `tools/test_extract_patch_non_inventory.py`, `tools/test_gen_patch_wikitext_register.py`.
 - Evidence `validate.py` and recorded scoped calendar/map/date-provider/configuration-provider/Mists gates.
-- `tools/test_patch_8_1_0_validation.py` — historical/current acceptance and concrete rejection of rewritten frozen data, missing current capture, stale/unreviewed closures and invalid current observations; final validation pending.
+- `tools/test_patch_8_1_0_validation.py` — historical/current acceptance and concrete rejection of rewritten frozen data, missing current capture, stale/unreviewed closures and invalid current observations. Fixture writes must leave an existing source capture byte-exact; isolation regression reproduced safely in scratch storage before excluding the current packet directory. Final validation pending.
 
 ## Known gaps (current cycle)
 
