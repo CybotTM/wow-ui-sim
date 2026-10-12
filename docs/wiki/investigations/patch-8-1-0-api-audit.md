@@ -90,9 +90,9 @@ Current913 BOUNDED PASS is separate from historical a5e44 executions/22 names an
 
 ## Current Retail/PTR friend-name query — 2026-10-12
 
-[Friend-name spec](../../specs/friend-info-name-query.md) owns contract and acceptance status. Producer `be9c734a4` commits exact Retail/PTR `C_FriendList.GetFriendInfo` and the shared unchanged simulator DTO. Current alternate-name provider is removed without fallback; indexed/earlier providers remain, C_Social unchanged. No native FriendInfo parity or change to historical **87 OK / 58 gaps** or later publication snapshots.
+[Friend-name spec](../../specs/friend-info-name-query.md) owns contract/status; [retained proof](../../../data/patch-api/evidence/friend-info-exact-2026-10-12/README.md) distinguishes new and reused executions, actual popup acceptance and all preserved failures. Exact Retail/PTR `C_FriendList.GetFriendInfo` lives with the shared existing projection in `src/c_api/c_friend_list.rs`. VM authentication precedes strict string validation; current alternate publication is removed without fallback. Indexed/earlier providers remain source-equivalent, C_Social unchanged; no native DTO/catalog claim or change to historical **87 OK / 58 gaps** or later publication snapshots.
 
-Corrected pre-producer `41fb` RED reaches actual public Mainline `OnShow` nil-info failure; initial readiness RED remains separate. First producer security failure is an unrelated `canaccessvalue` fixture prerequisite; diagnostic epoch122455 reaches successful exact secret lookup first. `6ec0c1cb8` changes only prerequisites/messages and spec, retaining actual getter controls. Independent2722 producer source/readability PASS is separate from pending secret-fixture verification and running retry122910. No current-retry GREEN or public packet; runtime/native/full-handoff acceptance remains open.
+Whole unchanged Mainline `SET_FRIENDNOTE` now has bounded prefill/hide/live-reopen proof on both current profiles. Optional nil probes remain diagnostic observations, not fabricated globals or suppressed errors. Corrected secret fixture tests getter outcomes directly; the separate caller-sensitive `canaccessvalue` gap is not repaired. Final independent behavioral/source/check gate PASS; packet retention audit pending. Native/all-profile/performance/external and parent full handoff remain OPEN.
 
 ## Proof and integration
 

@@ -1,0 +1,17 @@
+[
+  {
+    "exit": 0,
+    "expected_cases": 1,
+    "group": "exact"
+  },
+  {
+    "exit": 0,
+    "expected_cases": 2,
+    "group": "legacy-state"
+  },
+  {
+    "exit": 0,
+    "expected_cases": 1,
+    "group": "seeded-state"
+  }
+]

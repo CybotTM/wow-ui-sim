@@ -1,6 +1,6 @@
-## [2026-10-12] docs | Friend-name query — acceptance pending
+## [2026-10-12] verification | Friend-name query — bounded current proof
 
-[Current Friend audit](investigations/patch-8-1-0-api-audit.md#current-retailptr-friend-name-query--2026-10-12) links the [status spec](../specs/friend-info-name-query.md): committed producer, retained RED/security failure, running corrected retry; no current-retry GREEN.
+[Current Friend audit](investigations/patch-8-1-0-api-audit.md#current-retailptr-friend-name-query--2026-10-12) links the [status spec](../specs/friend-info-name-query.md): exact supplied-state query and unchanged note-popup accepted on Retail/PTR; new/reused counts and original failures separate. Packet retention pending; native/full handoff OPEN.
 
 ## [2026-10-11] docs | Bounty current stage
 

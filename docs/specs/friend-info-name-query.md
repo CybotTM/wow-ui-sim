@@ -1,14 +1,14 @@
 # Friend info by name
 
-Current cached Retail/PTR `FriendListDocumentation.lua` declares `C_FriendList.GetFriendInfo(name: cstring)` with `AllowedWhenUntainted`. Unchanged Mainline `GameDialogDefs.lua` uses it to prefill `SET_FRIENDNOTE` from `info.notes`. Producer `be9c734a4` commits the exact Retail/PTR query over environment-owned `SocialFriend` records with the shared unchanged simulator DTO; the current alternate-name provider is removed, indexed/earlier providers retained, and C_Social unchanged. Current runtime acceptance remains pending, not native friend-system parity.
+Current cached Retail/PTR `FriendListDocumentation.lua` declares `C_FriendList.GetFriendInfo(name: cstring)` with `AllowedWhenUntainted`. Unchanged Mainline `GameDialogDefs.lua` uses it to prefill `SET_FRIENDNOTE` from `info.notes`. Producer `be9c734a4` commits the exact Retail/PTR query over environment-owned `SocialFriend` records with the shared unchanged simulator DTO; the current alternate-name provider is removed, indexed/earlier providers retained, and C_Social unchanged. [Independent bounded Retail/PTR proof](../../data/patch-api/evidence/friend-info-exact-2026-10-12/README.md) accepts the query and unchanged popup, not native friend-system parity.
 
 ## What it must do
 
-- [ ] Publish the exact current-profile query and project supplied friend name/note from the owning environment; live note changes must be visible without leaking across environments.
-- [ ] Return one info table for a matching supplied name and one nil for a miss. Exact string matching and miss arity preserve existing simulator lookup policy, not independently established native normalization or arity.
-- [ ] Retain the existing strict string-input policy. Authenticate wrapped values before validation: untainted secret names work, tainted secret arguments fail without clearing caller taint, ordinary names remain usable by tainted callers.
-- [ ] Load the whole unchanged current-profile popup/FriendsFrame dependency closure and exercise real `StaticPopup_Show("SET_FRIENDNOTE", name)`: the actual Mainline handler must prefill the real edit box and reflect a changed supplied note on reopening, without recorded Lua errors.
-- [ ] Preserve existing indexed/earlier-provider behavior while replacing the current non-native alternate-name provider; do not add an alternate-name fallback.
+- [x] Publish the exact current-profile query and project supplied friend name/note from the owning environment; live note changes must be visible without leaking across environments.
+- [x] Return one info table for a matching supplied name and one nil for a miss. Exact string matching and miss arity preserve existing simulator lookup policy, not independently established native normalization or arity.
+- [x] Retain the existing strict string-input policy. Authenticate wrapped values before validation: untainted secret names work, tainted secret arguments fail without clearing caller taint, ordinary names remain usable by tainted callers.
+- [x] Load the whole unchanged current-profile popup/FriendsFrame dependency closure and exercise real `StaticPopup_Show("SET_FRIENDNOTE", name)`: the actual Mainline handler must prefill the real edit box and reflect a changed supplied note on reopening, without recorded Lua errors.
+- [x] Preserve existing indexed/earlier-provider behavior while replacing the current non-native alternate-name provider; do not add an alternate-name fallback. Earlier providers/C_Social retain inspected source-equivalent behavior; new indexed/state runtime proof is Retail/PTR only.
 
 ## How it works
 
@@ -31,7 +31,9 @@ Current cached Retail/PTR `FriendListDocumentation.lua` declares `C_FriendList.G
 
 - [x] Initial pre-producer RED executed and authenticated: four cases0PASS/4FAIL; three stop at absent exact query, popup stops at an overbroad diagnostic-readiness assertion. Downstream assertions remain unreached.
 - [x] Corrected pre-producer RED independently authenticated: four cases0PASS/4FAIL. Whole closure and Mainline provenance assertions reach unchanged `OnShow`; nil `info` causes the actual note-prefill failure. Reopen remains unreached. Optional nil-probe observations remain logged, not replaced with fabricated globals.
-- [ ] Complete affected runtime/startup/check proof. First producer Retail run is4PASS/1FAIL: actual popup/live-state/miss/alias cases pass, security fixture stops at an unrelated `canaccessvalue` prerequisite. A separate diagnostic proves exact secret lookup succeeds before that helper fails. Security fixture now asserts secret identity and actual query outcomes directly; original failure is retained. Source/readability audit passes for `be9c734a4`, not runtime/native/full acceptance.
+- [x] Independent current gate:12 newer passing executions (Retail4+PTR8), plus4 unchanged Retail passes reused;16 scope executions/eight names, not16 new runs. Normal291/283 addons exit0/`[]`/CLEAN0; fmt/default check0, nine source hashes unchanged; source/readability and fixture-delta proofs admitted separately. Six inherited dependency warnings remain. First producer4PASS/1FAIL, helper diagnostic, parser failure and resource refusals remain retained.
+- [ ] Packet retention/link/privacy audit; behavioral PASS does not itself verify every copied record.
+- [ ] Separate helper/native parity, ordinary numeric/userdata/malformed-UTF8 runtime coverage, all-profile runtime and parent full-handoff acceptance remain outside this bounded proof.
 
 ## Out of scope
 
