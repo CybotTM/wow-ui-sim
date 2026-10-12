@@ -21,7 +21,7 @@ pub struct BindingAction {
     pub lua_code: &'static str,
 }
 
-/// A default key→action assignment seeded into `SimState.keybindings` on init.
+/// A simulator default key→action assignment, separate from user bindings.
 struct DefaultKey {
     key: &'static str,
     action: &'static str,
@@ -82,6 +82,10 @@ fn dispatch_noarg_function_path(lua: &mut rilua::Lua, path: &[&str]) -> crate::R
 
 /// Full set of binding actions (mirrors master `keybindings.rs`).
 pub const BINDING_ACTIONS: &[BindingAction] = &[
+    BindingAction {
+        action: "OPENCHAT",
+        lua_code: "ChatFrame_OpenChat(\"\")",
+    },
     BindingAction {
         action: "TOGGLEGAMEMENU",
         lua_code: "ToggleGameMenu()",
@@ -269,6 +273,10 @@ fn push_binding_row(state: &mut LuaState, action: &str) -> LuaResult<u32> {
 
 /// Default key→action assignments seeded by `init_keybindings`.
 const DEFAULT_KEYS: &[DefaultKey] = &[
+    DefaultKey {
+        key: "ENTER",
+        action: "OPENCHAT",
+    },
     DefaultKey {
         key: "ESCAPE",
         action: "TOGGLEGAMEMENU",

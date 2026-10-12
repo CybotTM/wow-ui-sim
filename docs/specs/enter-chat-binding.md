@@ -15,18 +15,18 @@ Current Retail/PTR simulator default Enter dispatch must open the unchanged Bliz
 
 ## Implementation inventory
 
-- `src/lua_api/globals/keybindings.rs`: existing binding actions/default-key dispatch; Enter action/default pending.
+- `src/lua_api/globals/keybindings.rs`: existing binding actions/default-key dispatch; Enter uses `OPENCHAT` and the unchanged `ChatFrame_OpenChat` consumer.
 - `src/lua_api/key_dispatch.rs`: existing focused EditBox and general key dispatch; unchanged.
 - `src/iced_app/view.rs`: existing native/toolkit keyboard subscription; unchanged.
 
 ## Tests asserting this spec
 
-- [chat_enter_binding.rs](../../tests/chat_enter_binding.rs): three loaded Game-parent/fork cases; not compiled or executed yet. Default activation is expected RED; configured/cleared cases are preservation controls.
+- [chat_enter_binding.rs](../../tests/chat_enter_binding.rs): three loaded Game-parent/fork cases. At `7e8c5ffb6`, default activation failed before downstream typing/submission, while configured/cleared preservation controls passed; prefork exit1. GREEN remains pending.
 - [chat_frame.rs](../../tests/chat_frame.rs): existing click/type/submit consumer proof; not a default Enter activation test.
 
 ## Known gaps (current cycle)
 
-- [ ] Observe genuine default-activation RED before production binding changes; no downstream proof until assertions execute.
+- [ ] Complete focused GREEN after genuine default-activation RED; typing/submission assertions remain unreached in RED.
 - [ ] Focused GREEN, native GUI keypress smoke and intended-user keyboard acceptance remain pending.
 
 ## Out of scope
