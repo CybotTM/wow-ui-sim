@@ -127,6 +127,8 @@ pub mod c_map;
 pub(crate) mod c_map_bounties;
 pub mod c_map_exploration_info;
 pub mod c_merchant_frame;
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+mod c_mount_item;
 #[cfg(feature = "retail-12-0-5")]
 pub(crate) mod c_mount_spell_lookup;
 #[cfg(feature = "retail-12-0-7")]
