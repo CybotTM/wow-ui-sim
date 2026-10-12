@@ -2,7 +2,7 @@
   "catalog_repository": "https://github.com/wowdev/TACTKeys",
   "observed_head": "f800811762b2e9ea638bf6dfdb4707382c497943",
   "readme_url": "https://github.com/wowdev/TACTKeys/blob/f800811762b2e9ea638bf6dfdb4707382c497943/README.md",
-  "readme_scope": "Primary public README only, lines190-209; no WoW.txt/key data fetched",
+  "readme_scope": "Pinned public README text only; no WoW.txt/key data",
   "documented_fields": [
     "hex lookup/name",
     "hex key value"
@@ -11,5 +11,6 @@
   "forever_availability": "Unknown; no matched product/build/key lookup observation",
   "resolver_source": "Local configured tactkeys/WoW.txt; provenance to this public catalog not independently linked",
   "network_limits": "Metadata-only remote HEAD and README, no clone/fetch/keys/install/native/decode/cache operations",
-  "tool_failure": "web API inaccessible; gh executable absent; no tool installed. Remote HEAD succeeded via read-only git ls-remote."
+  "tool_failure": "gh executable absent; no tool installed. Remote HEAD via read-only git ls-remote.",
+  "primary_readme_verified": "Pinned primary README fetched via curl; see pinned-readme-source.json, no key-data file"
 }

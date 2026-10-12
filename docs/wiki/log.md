@@ -1,3 +1,7 @@
+## [2026-10-12] docs | Dedicated simulator VNC — local evidence, remote acceptance open
+
+[Dedicated VNC guide](../../data/patch-api/evidence/private-vnc-simulator-2026-10-12/README.md): new loopback5904/display22, existing sessions untouched. Independent operational/copy/90-second teardown checks pass; visual tool omitted pixels, so visual/remote acceptance remains PARTIAL. User-approved runtime dependency/readiness fix and artifact-auth reuse recorded. No403blocker after user clarification; frozen BA3FAIL/full handoff OPEN.
+
 ## [2026-10-12] evidence | Future full-suite step metadata PASS
 
 [Workflow schema](../remote-builds.md#asynchronous-full-suite) and [BA limits](investigations/fullsuite-ba-2026-10-11.md#future-step-metadata--2026-10-12): independent2567 metadata-only PASS3 new/6 existing sandbox cases; installed controller matches source/mode0755. Exact argv and capacity-only null/empty/reserved values retained without scheduling or suite rerun. No historical reconstruction/causal repair; BA3FAIL/full handoff OPEN.

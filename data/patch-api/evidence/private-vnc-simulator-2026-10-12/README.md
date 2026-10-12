@@ -1,8 +1,8 @@
-# Dedicated simulator VNC — pending independent setup gate
+# Dedicated simulator VNC — operational checks, visual/remote proof partial
 
 User selected new WoW simulator display, native VNC over SSH, and90-second simulator launch only. New display`:22`/1280×960; VNC binds loopback5904 (IPv4/IPv6), no public listener. Existing5902/5903 sessions unchanged. New user units are on-demand, not enabled at boot.
 
-Main observed mapped1024×768 "WoW UI Simulator" window and actual UI frame in `frame-retry.png`; local RFB3.8 ServerInit reports1280×960. This is local setup/frame evidence, not authenticated remote-user viewing or native/whole-profile acceptance.
+Saved mapped1024×768 "WoW UI Simulator" window/capture and FIRST_FRAME_RENDERED receipts; local RFB3.8 ServerInit reports1280×960. [Independent operational gate](independent-report.md) confirms loopback/service/teardown/copy checks. [Visual gate](visual-report.md) remains PARTIAL because image-tool pixels were omitted; saved-image statistics establish nonuniform pixels only, not visual UI identification. No authenticated remote-view/user/native acceptance claim.
 
 Initial display-readiness race corrected with bounded socket readiness helper. First app launch failed on missing `libxkbcommon-x11.so`; user approved official matching1.13.2-1 runtime package only, installed successfully. No simulator build, system/kernel/GPU-driver upgrade or provider change. Existing Retail GUI artifact/authentication reused, not rehashed.
 
