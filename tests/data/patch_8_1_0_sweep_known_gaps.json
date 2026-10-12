@@ -36,7 +36,6 @@
   "wt-global-api-C_Item.CanScrapItem-71",
   "wt-global-api-C_Item.CanViewItemPowers-72",
   "wt-global-api-C_Loot.IsLegacyLootModeEnabled-76",
-  "wt-global-api-C_Map.GetBountySetMaps-77",
   "wt-global-api-C_MountJournal.GetMountFromItem-78",
   "wt-global-api-C_PartyInfo.GetInviteReferralInfo-81",
   "wt-global-api-C_PetJournal.GetPetInfoByItemID-82",

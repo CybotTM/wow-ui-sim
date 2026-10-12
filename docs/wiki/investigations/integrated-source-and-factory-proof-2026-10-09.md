@@ -8,6 +8,20 @@ User changed acceptance: “as long as we have coherent behavior that works with
 
 [Range contract](../../specs/widget-range-validation.md) and [retained proof](../../../data/patch-api/evidence/reversed-range-interpolation-2026-10-11/README.md): test-only `6a4801a40` asserts target7/displayed1/pending before reversed `(8,2)`, then immediate bounds2/value2/displayed2/not interpolating. Independent2445 authenticates the new seal once and 16 widget cases plus one distinct lifecycle control PASS; compile/fmt/check0 and manual readability clean. First outcome PASS, not new bugfix RED/GREEN. No production/vendor/native-policy change or profile-matrix proof. Frozen ba broad FAIL remains unchanged; it does not cover this new test. Full handoff OPEN.
 
+## Bounty set maps — current stage 2026-10-11
+
+[Current source boundary](patch-8-1-0-api-audit.md#current-retailptr-bounty-query-contract--2026-10-11) and [Bounty spec](../../specs/bounty-set-map-relations.md) remain separate from historical8.1 name-only accounting and Calendar acceptance.
+
+| Stage | Observed scope | Proof boundary |
+|---|---|---|
+| Initial `e09b0c1d1` | Six actual RED failures | Independently fully authenticated |
+| Expanded `9602fa8fb` | Eleven actual RED failures; real empty input field, four test-supplied relations; entire unmodified `MapUtil` executes before first public non-table failure | Independent verifier computed hash once, but digest-comparison output was lost: explicit authentication-receipt gap, not full authentication; no reread/reauthentication |
+| Producer `262987b1a65f049d5c3e158b18a8eb73cc22e4ba` | Minimal C API query guarded for current `client-retail`/`client-ptr`; required numeric, secret-first validation; explicit state Vec projected freshly | Absent input returns an empty sequence as technical simulator policy; no invented normal memberships or Calendar approval carryover |
+| Default execution | Reported11 PASS, including actual `MapUtil` cache control; normal raw Bounty/empty/fresh/retired-old-ID absence and joint Calendar three-row assertions exit0/`[]`; fmt check0 | Independent GREEN pending |
+| PTR / final check | PTR focused run reports11 PASS; normal publication/model/retired-ID/Calendar preservation exit0/`[]`; final default check queued after both profiles | Independent GREEN/final-check proof pending |
+
+After actual Retail/PTR normal-session raw publication assertions, only the current `GetBountySetMaps-77` gap row is removed; owning prefork publication sweep remains pending. Calendar's accepted11, normal291/`[]`, exact publication one case with145 rows/89 OK/56 gaps and52 copies remain frozen bounded history. Historical8.1 **87 OK / 58 gaps**, broad **3 FAIL** and parent **OPEN** are unchanged. Sequence consumers do not establish native order; native catalog/unknown-ID fidelity and full Bounty lifecycle remain unproved. No retired `GetBountySetIDForMap` revival or unrelated QuestLog model. Documentation-only status from supplied handoff; no new execution, authentication or evidence generated.
+
 ## Calendar event index — current source/spec stage 2026-10-11
 
 Test/spec source `a4159ce53` links the [current Calendar source boundary](patch-8-1-0-api-audit.md#current-retail-calendar-query-contract--2026-10-10) to the [Calendar contract](../../specs/calendar-event-index-info.md); [dataset README](../../../data/calendar/README.md) records the authorized fixture policy. Producer scope `fa66dd878420fec0f67aab473cc91eebadf1c090` now has independent bounded GREEN **PASS11/11**, including owned mutation/removal and namespace-preserving restoration. [Retained independent report](../../../data/patch-api/evidence/calendar-event-index-2026-10-11/green/green-independent-report.md) and [evidence README](../../../data/patch-api/evidence/calendar-event-index-2026-10-11/README.md) own detailed proof: normal291-Blizzard-addon startup rawgetter/demo assertions **exit0/[]**, format/default check **exit0**, six existing manifest warnings retained. Authentic independent RED at `a4159ce53`: **9 logical FAIL, exit101**; unreached RED assertions are not promoted to proof.

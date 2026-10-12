@@ -18,7 +18,7 @@
 
 ## Implementation inventory
 
-- `SimState.bounty_set_maps`: explicit membership input, initialized empty after authentic initial public-query RED; no default associations. `src/c_api/c_map_bounties.rs` projects those explicit inputs through guarded C API registration and a fresh sequence result; GREEN remains unverified.
+- `SimState.bounty_set_maps`: explicit membership input, initialized empty after authentic initial public-query RED; no default associations. `src/c_api/c_map_bounties.rs` projects those explicit inputs through guarded C API registration and a fresh sequence result; Retail and PTR focused runs each report 11 passed; both normal-session publication/empty-model/retired-ID/Calendar-preservation probes report exit0/`[]`. Independent GREEN remains pending.
 - `src/c_api/c_map.rs`: existing map surface registration seam.
 
 ## Tests asserting this spec
@@ -28,8 +28,8 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Authentic RED, producer and focused GREEN/default checks/independent proof pending.
-- [ ] Current publication gap retained until real runtime publication and relevant owning-target sweep proof; frozen historical evidence unchanged.
+- [ ] Independent GREEN/default-check proof pending; authentic initial RED6 and expanded positive RED11 executed before getter. Expanded RED's independently computed digest-comparison output was lost; authentication receipt gap remains explicit.
+- [ ] Normal-session publication verified in Retail/PTR; removed only the current Bounty map row. Owning prefork publication sweep pending; frozen historical evidence and earlier Calendar classification remain unchanged.
 
 ## Out of scope
 

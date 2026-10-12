@@ -1,3 +1,7 @@
+## [2026-10-11] docs | Bounty current stage
+
+[Bounty stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#bounty-set-maps--current-stage-2026-10-11) links the [relation spec](../specs/bounty-set-map-relations.md): authenticated initial RED6; expanded actual RED11 retains lost digest-comparison receipt, not full authentication. Producer reports11 PASS on each Retail/PTR profile and normal assertions `[]`; independent GREEN/final check pending. Current Bounty gap removed after actual normal publication; owning sweep pending; Calendar/history/broad3FAIL/parentOPEN preserved.
+
 ## [2026-10-11] verification | Visible registered-update counter
 
 [Counter regression](investigations/integrated-source-and-factory-proof-2026-10-09.md#talent-visible-count--authentic-regression-red-2026-10-11-local): independent2469 authenticates one new-case failure, collector0/expected1 after public callback1. Test-only5d correction now independently2472 GREEN3/3, fmt/defaultcheck0; first2470 artifact/source proof reused. Registration set includesOnUpdate OR OnPostUpdate, not fired callbacks. Original192/timing assertions and production/vendor unchanged; not loaded-latency/native/addon acceptance.
