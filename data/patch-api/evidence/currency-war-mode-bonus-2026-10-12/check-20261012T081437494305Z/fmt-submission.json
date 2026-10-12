@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "/usr/bin/cargo",
+    "fmt",
+    "--check"
+  ],
+  "cwd": "/home/osso/Projects/wow/wow-ui-sim"
+}

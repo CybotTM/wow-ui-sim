@@ -4,11 +4,11 @@
 
 ## What it must do
 
-- [ ] Return exactly two values, preserving both independently nullable boolean inputs for the requested modeled currency.
-- [ ] Return `(nil, nil)` for absent modeled records without seeding normal eligibility. This is selected simulator policy, not native absence/catalog proof.
-- [ ] Reflect owned updates/removal on subsequent calls without changing previously returned scalar observations or other currency records.
-- [ ] Require numeric IDs without string coercion or lossy identity aliasing; authenticate secret inputs before validation/lookup and preserve wrappers/caller taint.
-- [ ] Publish the modeled query on current Retail/PTR surfaces without inferring earlier-profile backports or deriving flags from quantities, factions or global PvP state.
+- [x] Return exactly two values, preserving both independently nullable boolean inputs for the requested modeled currency.
+- [x] Return `(nil, nil)` for absent modeled records without seeding normal eligibility. This is selected simulator policy, not native absence/catalog proof.
+- [x] Reflect owned updates/removal on subsequent calls without changing previously returned scalar observations or other currency records.
+- [x] Require numeric IDs without string coercion or lossy identity aliasing; authenticate secret inputs before validation/lookup and preserve wrappers/caller taint.
+- [x] Publish the modeled query on current Retail/PTR surfaces without inferring earlier-profile backports or deriving flags from quantities, factions or global PvP state.
 
 ## How it works
 
@@ -23,11 +23,11 @@
 
 ## Tests asserting this spec
 
-`tests/currency_war_mode_bonus.rs`. Initial five controls have authenticated RED; expanded nine cases execute0PASS/9FAIL before getter. GREEN and loaded publication remain pending.
+`tests/currency_war_mode_bonus.rs`. Initial five controls have authenticated RED; expanded nine cases execute0PASS/9FAIL before getter. Nine logical tests pass under both Retail/PTR (18 executions). Both normal loaded query assertion runs exit0/`[]`; owning publication sweep passes one case with145 rows91OK/54gaps. Formatting/default check exit0; retained proof linked from the [evidence packet](../../data/patch-api/evidence/currency-war-mode-bonus-2026-10-12/README.md).
 
 ## Known gaps (current cycle)
 
-- [ ] Retail focused nine cases and normal startup query assertions pass (291 addons, exit0/`[]`); independent gate pending. PTR, owning publication sweep and final Rust/independent proof pending; initial and expanded RED retained.
+- [ ] Final independent proof/retention gate pending; initial/expanded RED and both profile GREENs, owning publication and Rust checks retained.
 
 ## Out of scope
 
