@@ -28,8 +28,13 @@ Both performance selectors and the asset selector passed in saved1dcc. Compared 
 
 [Separate talent-stage observations](../../../data/test-perf/evidence/talent-stage-diagnostic-2026-10-11/README.md) now have independent coherence proof:54 observations, not acceptance cases; isolated total delta49.52µs/whole public OnUpdate49.30µs does not explain loaded failure. [Current CASC candidate prefix](../../../data/patch-api/evidence/casc-encoding-header-2026-10-11/README.md): one34-byte read finds BLTE at+30 and matching9-byte key prefix in data174; full-key/size layout differences are not checked by the asset-resolver. Independent2463 verifies cached metadata/primary-source limits/initial retention only; no effective historical lookup/payload/decode/root cause proved. Both diagnostics leave this frozen verdict unchanged.
 
+### Pending startup attribution — 2026-10-11
+
+`d85b88936` commits the [observation-only startup wrapper](../../../data/test-perf/evidence/startup-cost-diagnostic-2026-10-11/README.md) (`probe.rs`, `worker.py`, `runtime-worker.py` in that packet). Async controller submitted; first capacity guard denied compilation (load28.95, RAM22.001GiB, no relevant Cargo). No rustc or runtime executed. Pending phase/file measurements cover environment initialization, addon discovery/ordered loads, post-load workarounds and startup events; nested timings are not exclusive costs or additive attribution. Phase clocks exclude snapshots; enclosing clock includes observer overhead. Library Cargo metadata/path/stat is neither hermetic provenance nor frozen-BA artifact provenance. No production/vendor/threshold change or loaded-failure attribution. Frozen **15,038 PASS / 3 FAIL / 19 skipped / 15,041 executed**, original failures and isolated controls remain unchanged; talent54 observations and collector3 done remain separate, Calendar/Bounty accepted scopes preserved. Full handoff OPEN.
+
 ## Sources
 
+- [Pending startup observation wrapper](../../../data/test-perf/evidence/startup-cost-diagnostic-2026-10-11/README.md)
 - [Saved report/counts/selected failures](../../../data/patch-api/evidence/query-final-suite-result-2026-10-11/README.md)
 - [Startup fixture](../../../tests/startup_perf.rs)
 - [Talent tick fixture](../../../tests/talent_panel_onupdate_perf.rs)
