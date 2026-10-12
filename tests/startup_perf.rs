@@ -5,6 +5,7 @@ use crate::perf_base_game;
 
 use std::time::Duration;
 
+#[path = "startup_perf/observation.rs"]
 mod observation;
 use observation::{AddonLoadObservation, encode_addon_observation};
 
