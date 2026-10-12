@@ -115,3 +115,20 @@ Targeted integrated gates are recorded in `p810-proof.json`; acceptance is retai
 
 - [[patch-8-2-5-api-audit]] — reproduction/accounting template.
 - [[patch-8-1-5-api-audit]] — reused bullet parser and next integration register.
+
+## Current publication reconciliation — 2026-10-12
+
+[Current packet](../../../data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/README.md) and [direct map](../../../data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/current-publication-results.json) own current classification:145 rows93OK/52gaps. Frozen8.1 **87OK/58gaps** is unchanged. [Suite533c investigation](fullsuite-533c-2026-10-12.md) links full-count SSOT: saved suite remains FAIL, sole strict publication mismatch known54/observed52 with no new gaps. Frozen BA **15,038PASS/3FAIL/19skips** remains history.
+
+`61cd81963` removes only `wt-global-api-C_FriendList.GetFriendInfo-44` and `wt-global-api-C_MountJournal.GetMountFromItem-78` from current expectations. Accepted main evidence: private `/home/osso/.local/state/wow-ui-sim/verification/publication-533c-reconciliation/prefork-current-report.md`, independent2877 original Game-parent-preloaded/forked case1PASS; zero auxiliary executions. Both providers are `raw=function; lookup=function`, thirteen input hashes unchanged; original assertion/provider/vendor behavior unchanged. Publication/absence proof is not signature/output/security/native behavior credit or a new full-suite PASS.
+
+| Boundary | Current state | Limit |
+|---|---|---|
+| Direct current runtime publication | Bounded PASS | Real capture; not native behavior |
+| Historical/current validator separation `9424d1981` | Independent2879 bounded PASS | Frozen results/removal supersessions preserved; six explicit producer closures, no generic replacement exceptions |
+| Capture isolation `e48ec18a0` | RED retained; final9/9 tests PASS, source capture unchanged | Current packet excluded after symlink preflight failure; scratch regression left committed capture byte-exact |
+| Retention gate | PENDING | Actual independent report required before promotion |
+| Native/external/full handoff | OPEN | Targeted reconciliation does not close parent acceptance |
+
+Original validator line81/preflight FAILs remain history. Main admits independent2879 final9/9 tests and real-validator exit0, current145/93/52 vs historical145/87/58, byte-exact unchanged capture; no synthetic observation substitutes for the runtime capture. Old BA startup/talent/CASC selectors now PASS, but successful body timings/cache provenance were not retained; thresholds unchanged, observation source changed, no causal repair or historical-equivalence claim. Documentation adds no execution or authentication credit.
+
