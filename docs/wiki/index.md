@@ -1,6 +1,6 @@
 ## [2026-10-12] docs | Bounded seven-profile coverage matrix
 
-[Coverage matrix](reference/coverage-matrix.md) separates runtime, compile, publication and historical/native/external proof. d21 is Retail only; retained GUID publication145/94/51; corrected Mists assertions and old failures remain distinct. Friend setter bounded Retail8/PTR8 GREEN at `a883157c49`; its default check NEVER INVOKED. Setter strict AFTER145/95/50 PASS at `7d9d9f621`; final check/validator/after-retention pending; whole handoff OPEN.
+[Coverage matrix](reference/coverage-matrix.md) separates runtime, compile, publication and historical/native/external proof. d21 is Retail only; retained GUID publication145/94/51; corrected Mists assertions and old failures remain distinct. Friend setter bounded Retail8/PTR8 GREEN at `a883157c49`; its default check NEVER INVOKED. Setter strict AFTER145/95/50 PASS at `7d9d9f621`; later default check/fmt PASS; independent validator9/real validator/capture-preservation PASS at `cb77de086`; new public projection gate pending. Retail startup2/cache10/Enter3 GREEN; GUI-user/PTR/native and whole handoff OPEN.
 
 ## [2026-10-12] verification | GUIDIsPlayer bounded current proof
 
