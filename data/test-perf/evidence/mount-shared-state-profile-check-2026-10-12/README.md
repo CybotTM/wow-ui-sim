@@ -8,6 +8,6 @@ Main observed unit `wow-mount-earlier-check-20261012t155710349378z` terminal act
 
 ## Retention and limits
 
-[Manifest](retention-manifest.json): **88 byte-exact nonbinary copies /125,378 bytes**. Complete commands/results/stdout/stderr/toolchains/admission/source metadata and independent proof retained; no images/executables/old seals. Independent retention/link/privacy gate pending.
+[Manifest](retention-manifest.json): **88 byte-exact nonbinary copies /125,378 bytes**. Complete commands/results/stdout/stderr/toolchains/admission/source metadata and independent proof retained; no images/executables/old seals. Independent2867 retention/privacy PASS at `d92ba814f`:88/88 copies byte-exact; all three README links and the spec packet link resolve. Its overall FAIL label reflects main's mistaken four-README-links expectation, not a broken link or missing artifact; main rejected that noncontract count requirement without altering the report or adding a redundant link.
 
 Retail/PTR mount-item API is cfg-excluded from these profiles. Checks prove shared-state compilation, **not earlier-profile runtime preservation, API absence/behavior, native equivalence or full handoff**. Current full suite `533c086e0` submitted separately as `full-suite-1791821148`; no result admitted here. Frozen BA3FAIL and parent **OPEN** remain.
