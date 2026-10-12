@@ -17,18 +17,18 @@ Current Retail/PTR startup must preserve the active-layout index supplied by the
 
 - `src/saved_variables.rs`: existing file import into the modeled cache API.
 - `src/lua_api/workarounds/temporary/edit_mode_cache_defaults.rs`: existing Lua-owned cache state, active selection and explicit override resolution.
-- `src/lua_api/workarounds/editmode/setup_layout_info.lua`: manager initialization preserves the active index while prepending presets; explicit override conversion belongs to cache import. GREEN pending.
+- `src/lua_api/workarounds/editmode/setup_layout_info.lua`: manager initialization preserves the active index while prepending presets; explicit override conversion belongs to cache import. Bounded Retail GREEN below; PTR runtime unproved.
 
 ## Tests asserting this spec
 
-- [edit_mode_cache_startup.rs](../../tests/edit_mode_cache_startup.rs): fresh environment, isolated real-format file inputs, import before whole Game loading, original startup, selected Classic and public Micro Menu geometry. Native selection genuinely failed at `653e829f1`; override identity/geometry controls and selection repair GREEN pending.
-- [edit_mode_api/cache.rs](../../tests/edit_mode_api/cache.rs): existing parser and named override controls; low-level cache proof is not whole consumer proof.
+- [edit_mode_cache_startup.rs](../../tests/edit_mode_cache_startup.rs): fresh environment, isolated real-format file inputs, import before whole Game loading, original startup, selected Classic and public Micro Menu geometry. Native selection genuinely failed at `653e829f1`. At `7d9d9f621`, Retail native Classic/horizontal and four explicit Widescreen/vertical variants completed in two test names; parent/child recaps count once.
+- [edit_mode_api/cache.rs](../../tests/edit_mode_api/cache.rs): 10/10 Retail cache/parser/env/snapshot controls PASS at `7d9d9f621`; low-level cache proof is not whole consumer proof.
 
 ## Known gaps (current cycle)
 
 - [x] Genuine fresh-startup RED at `653e829f1`: selected-layout assertion failed after real file import/full startup; geometry unreached. Enter3 GREEN and separate strict publication stale-row FAIL do not establish selection GREEN.
-- [ ] Correct model/helper index handling, then focused GREEN and selected named-override preservation.
-- [ ] Corrected live GUI and intended-user acceptance; diagnostic runtime mismatch is not fixed/native parity proof.
+- [x] Corrected source and bounded Retail startup2/cache10 GREEN; corrected normal startup Classic329×40/zero Lua errors, fmt/default check PASS. [Packet](../../data/patch-api/evidence/edit-mode-enter-2026-10-12/README.md). PTR runtime remains unproved.
+- [ ] Current-artifact owned GUI query observes Classic/horizontal329×40 at native1920×1080 window; intended-user keyboard/layout acceptance and native/PTR parity remain unproved. Public packet retention gate pending.
 
 ## Out of scope
 

@@ -85,9 +85,14 @@ no extra provenance flag or fallback. Named/snapshot tests and a fresh override
 full-consumer control were added. Preset-only compatibility tweaks must still
 avoid rewriting saved layout settings.
 
-**Pending:** GREEN compile active at `7d9d9f621`; compile/runtime GREEN is not
-yet established. Corrected live GUI, native parity and full handoff acceptance
-remain open. See [selection contract](../../specs/edit-mode-layout-selection.md).
+**Bounded Retail GREEN:** `7d9d9f621` executed startup2 (native Classic/horizontal
+and four explicit Widescreen/vertical override variants), cache10 and Enter3.
+Corrected normal startup reports Classic329×40 with zero Lua errors; fmt/default
+check PASS. [Packet](../../../data/patch-api/evidence/edit-mode-enter-2026-10-12/README.md)
+retains initial fixture compile failure, genuine RED and invalid binding-lookup
+probe failure separately. Owned current-artifact GUI query observes Classic2,
+MicroMenu329×40 and native1920×1080 window; actual keyboard/pixel/intended-user
+acceptance, PTR/native parity and full handoff remain open. See [selection contract](../../specs/edit-mode-layout-selection.md).
 
 Follow-up: selecting the saved layout still was not enough for the visible UI.
 The startup fast path for action bars seeded Widescreen `systemInfo` and replayed

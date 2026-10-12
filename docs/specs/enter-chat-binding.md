@@ -21,13 +21,13 @@ Current Retail/PTR simulator default Enter dispatch must open the unchanged Bliz
 
 ## Tests asserting this spec
 
-- [chat_enter_binding.rs](../../tests/chat_enter_binding.rs): three loaded Game-parent/fork cases. At `7e8c5ffb6`, default activation failed before downstream typing/submission, while configured/cleared preservation controls passed; prefork exit1. GREEN remains pending.
+- [chat_enter_binding.rs](../../tests/chat_enter_binding.rs): three loaded Game-parent/fork cases. At `7e8c5ffb6`, default activation failed before downstream typing/submission, while configured/cleared preservation controls passed; prefork exit1. Retail3/3 completed at `7d9d9f621`, including downstream typing/submission and override/unbind controls. [Packet](../../data/patch-api/evidence/edit-mode-enter-2026-10-12/README.md). No PTR execution credit.
 - [chat_frame.rs](../../tests/chat_frame.rs): existing click/type/submit consumer proof; not a default Enter activation test.
 
 ## Known gaps (current cycle)
 
-- [ ] Complete focused GREEN after genuine default-activation RED; typing/submission assertions remain unreached in RED.
-- [ ] Focused GREEN, native GUI keypress smoke and intended-user keyboard acceptance remain pending.
+- [x] Bounded Retail3 GREEN after genuine default-activation RED; typing/submission unreached in RED, completed in GREEN. Formatter/default check PASS at the recorded source scope.
+- [ ] PTR runtime, native GUI keypress smoke and intended-user keyboard acceptance remain unproved. Owned service now uses the authenticated current artifact; observing layout is not key-delivery proof. Public packet retention gate pending.
 
 ## Out of scope
 
