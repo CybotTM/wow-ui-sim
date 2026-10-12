@@ -10,6 +10,6 @@
 
 ## Open gates
 
-Requested default cargo check **NEVER INVOKED**, admission blocked, zero credit. Fresh test compilation does not satisfy that gate. Actual setter row60 publication remains pending; current retained publication145/94OK/51gaps unchanged. No native/network/events/persistence, earlier-profile, broad-suite or whole-handoff acceptance.
+Requested default cargo check **NEVER INVOKED**, admission blocked, zero credit. Fresh test compilation does not satisfy that gate. Original strict [before capture](publication-before-results.json) actually observed145/95OK/50gaps and failed solely on stale setter60 ([proof](publication-before-proof.json)); other144 full records unchanged versus GUID145/94/51. Removed that one stale fixture ID. Distinct real strict AFTER capture and validator acceptance remain pending; old GUID145/94/51 stays immutable. No native/network/events/persistence, earlier-profile, broad-suite or whole-handoff acceptance.
 
 Six vendor-manifest deprecations per producer and optional guarded nil-probe diagnostics were preserved privately, not suppressed. Packet contains selective behavioral logs/proof, not binaries or private startup diagnostics. Retained hashes cover text only; no old executable/library reauthentication. Independent packet retention/privacy gate pending.

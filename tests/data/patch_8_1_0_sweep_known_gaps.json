@@ -25,7 +25,6 @@
   "wt-global-api-C_FriendList.RemoveFriend-57",
   "wt-global-api-C_FriendList.RemoveFriendByIndex-58",
   "wt-global-api-C_FriendList.SendWho-59",
-  "wt-global-api-C_FriendList.SetFriendNotes-60",
   "wt-global-api-C_FriendList.SetFriendNotesByIndex-61",
   "wt-global-api-C_FriendList.SetSelectedFriend-62",
   "wt-global-api-C_FriendList.SetSelectedIgnore-63",
