@@ -76,6 +76,10 @@ const ORIGINAL_ITEM_CONSUMER: &str = r#"
     local value = reward:IsDressupReward({itemId=6948})
     assert(type(value) == 'boolean', 'actual original consumer must return a boolean')
     print('[mount-item consumer result]', value)
+    local predicateValue = C_Item.IsDressableItemByID(reward.itemButton.itemLink)
+    print('[mount-item consumer predicate observation]',
+        type(rawget(C_Item, 'IsDressableItemByID')), type(predicateValue), predicateValue)
+    return value
 "#;
 
 #[test]
@@ -87,6 +91,26 @@ fn mount_item_player_choice_real_item_consumer_returns_boolean() {
     let env = crate::common::blizzard_addon_harness::new_blizzard_addon_env(&ui);
     load_player_choice_closure(&env, &ui);
     invoke_original_item_consumer(&env);
+}
+
+#[test]
+fn mount_item_player_choice_original_consumer_tracks_live_supplied_relation() {
+    let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
+    let env = crate::common::blizzard_addon_harness::new_blizzard_addon_env(&ui);
+    load_player_choice_closure(&env, &ui);
+    let baseline = invoke_original_item_consumer(&env);
+    env.state()
+        .borrow_mut()
+        .mount_item_relations
+        .insert(6948, 401);
+    let mapped = invoke_original_item_consumer(&env);
+    assert!(mapped, "supplied relation should produce a dress-up reward");
+    assert_ne!(
+        baseline, mapped,
+        "actual consumer must depend on the supplied mount relation"
+    );
+    env.state().borrow_mut().mount_item_relations.remove(&6948);
+    assert_eq!(invoke_original_item_consumer(&env), baseline);
 }
 
 fn load_player_choice_closure(env: &WowLuaEnv, ui: &Path) {
@@ -163,12 +187,23 @@ fn assert_no_recorded_errors(env: &WowLuaEnv, boundary: &str) {
     );
 }
 
-fn invoke_original_item_consumer(env: &WowLuaEnv) {
-    let result = env.exec(ORIGINAL_ITEM_CONSUMER);
+fn invoke_original_item_consumer(env: &WowLuaEnv) -> bool {
+    let console_before = env.state().borrow().console_output.len();
+    let result = env.eval::<bool>(ORIGINAL_ITEM_CONSUMER);
+    for line in env
+        .state()
+        .borrow()
+        .console_output
+        .iter()
+        .skip(console_before)
+    {
+        eprintln!("[mount-item consumer console] {line}");
+    }
     print_recorded_errors(env, "original SetItem / IsDressupReward invocation");
     if let Err(error) = &result {
         eprintln!("[mount-item consumer original invocation error] {error}");
     }
-    result.expect("original real-item consumer call must succeed and return a boolean");
+    let value = result.expect("original real-item consumer call must succeed and return a boolean");
     assert_no_recorded_errors(env, "original SetItem / IsDressupReward invocation");
+    value
 }
