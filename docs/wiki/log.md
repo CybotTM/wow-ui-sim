@@ -1,10 +1,14 @@
+## [2026-10-11] evidence | Startup observation coherence PASS
+
+[Startup observations](investigations/fullsuite-ba-2026-10-11.md#startup-observations--2026-10-11): independent2549 verifies225 JSON observations/1497 file records, complete ordered sequence/readiness and terminal success. Enclosing3.948s includes observer overhead; no returned/explicit stream errors, internal error collector unmeasured. First artifact authentication reused, denied guards retained. Profiled/CASC0/warm-cache observations are not loaded-failure repair or acceptance; BA3FAIL/full handoff OPEN.
+
 ## [2026-10-11] evidence | Startup wrapper compile/source partial
 
 [Startup packet](../../data/test-perf/evidence/startup-cost-diagnostic-2026-10-11/README.md): independent2542 supports compile0/unchanged diagnostic source and first-new-probe authentication once; old library provenance stays Cargo-record/path-stat only. Runtime guards04:06/04:09UTC denied; no behavior/repair proof. Reuse authentication, no rebuild; BA/full handoff remain FAIL/OPEN.
 
 ## [2026-10-11] docs | BA pending startup attribution
 
-Linked `d85b88936`'s [observation-only wrapper](../../data/test-perf/evidence/startup-cost-diagnostic-2026-10-11/README.md) in [BA investigation](investigations/fullsuite-ba-2026-10-11.md#pending-startup-attribution--2026-10-11): async controller's first guard blocked compile (load28.95/RAM22.001GiB/noCargo), no rustc/runtime; phase clocks exclude snapshots, enclosing clock includes observer overhead; no exclusive-cost attribution or hermetic/frozen-BA library provenance. Frozen15,038PASS/3FAIL/19skip/15,041executed, original failures/isolated controls, talent54 observations, collector3 done and accepted Calendar/Bounty scopes preserved; full handoff OPEN. Docs only; no execution, proof finalization or production/vendor/threshold change.
+Linked `d85b88936`'s [observation-only wrapper](../../data/test-perf/evidence/startup-cost-diagnostic-2026-10-11/README.md) in [BA investigation](investigations/fullsuite-ba-2026-10-11.md#startup-observations--2026-10-11): async controller's first guard blocked compile (load28.95/RAM22.001GiB/noCargo), no rustc/runtime; phase clocks exclude snapshots, enclosing clock includes observer overhead; no exclusive-cost attribution or hermetic/frozen-BA library provenance. Frozen15,038PASS/3FAIL/19skip/15,041executed, original failures/isolated controls, talent54 observations, collector3 done and accepted Calendar/Bounty scopes preserved; full handoff OPEN. Docs only; no execution, proof finalization or production/vendor/threshold change.
 
 ## [2026-10-11] docs | Bounty current source/spec stage
 
