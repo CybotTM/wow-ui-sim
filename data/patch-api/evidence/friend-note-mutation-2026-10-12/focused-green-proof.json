@@ -96,7 +96,7 @@
       "status": "PASS"
     }
   ],
-  "ledger": "/home/osso/.local/state/wow-ui-sim/verification/friend-note-mutation-current/command-proof-ledger.json",
+  "ledger": "private command-proof-ledger.json; not retained publicly",
   "exclusive_evidence": true,
   "seal_authentication_count_per_new_executable": 1,
   "old_red": "Accepted supplied missing raw registration boundary; never opened old executable or reran/reauthenticated old seals",

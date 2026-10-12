@@ -36,9 +36,9 @@
       "path": "focused-green-proof.json",
       "source_stage": "focused-green-current-proof.json",
       "source_sha256": "f132e1144a4f6048c62f5d87ca118a3412e64e3ee7e6db30827f2e6e21902a50",
-      "retained_sha256": "43ee7e0d85e97934c65f4dbae4ef0e327b6b2d575498519ce712d1fba4851a72",
-      "transformation": "explicit sanitized projection/excerpt",
-      "bytes": 4494
+      "retained_sha256": "62f806467a243b09c839a755a4a79dcd2087cb3f88d82ddaa46434ad221a28cc",
+      "transformation": "JSON projection excludes epoch/admission paths and replaces private ledger path with a nonpublic-ledger label",
+      "bytes": 4448
     },
     {
       "path": "retail-red-proof.json",
@@ -53,7 +53,7 @@
       "source_stage": "focused-green-current-report.md",
       "source_sha256": "b0b65cb67061a8328fbecfeeaee9d38dc92bcf28a449ce2f945c978943d3b6a2",
       "retained_sha256": "bc471cad4e0e3462e9ed97115694309bea3086d4df5d2e604f1fec6f9f3baede",
-      "transformation": "explicit sanitized projection/excerpt",
+      "transformation": "Report sentence reworded to distinguish original pending-spec epoch from later documentation reconciliation", 
       "bytes": 5853
     }
   ],
