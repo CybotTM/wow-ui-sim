@@ -36,7 +36,8 @@ Audit pinned Warcraft Wiki page 464337, revision 4462737 against current retail,
 
 ## Known gaps (current cycle)
 
-- [ ] 58 exact publication gaps retain per-ID model, identity, metadata, policy, request-lifecycle or protected-provider reasons.
+- [ ] Frozen audit's 58 exact publication gaps retain historical per-ID model, identity, metadata, policy, request-lifecycle or protected-provider reasons. Current producer closures are recorded separately, not retroactively applied to that snapshot.
+- [ ] Current expected-gap reconciliation: `533c086e0` prefork reports no new gaps and two stale IDs, `C_FriendList.GetFriendInfo` and `C_MountJournal.GetMountFromItem`, after their verified providers. Remove only those entries (54→52 current expected gaps); original prefork sweep and historical/current validator separation verification pending. Strict set comparison and frozen 87 OK /58 gaps remain unchanged.
 - [ ] Two literal `?` source statements specify no implementable contract; retained as uncertainty, never behavioral credit.
 - [ ] Current publication is not signature, populated-output, payload, security or historical parity proof. Calendar invalid civil-date/native security parity remains unverified.
 - [ ] Inherited 12.0.5/12.0.7/12.1.0 saved extracts remain non-reproducible; unchanged failure boundaries are recorded.
