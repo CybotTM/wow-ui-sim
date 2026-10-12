@@ -493,6 +493,7 @@ macro_rules! build_empty_sim_state {
             maps: default_maps(),
             map_display_hide_icons: HashMap::new(),
             map_world_rects: HashMap::new(),
+            bounty_set_maps: HashMap::new(),
             achievements: default_achievements(),
             achievement_superceding: HashMap::new(),
             calendar_event_indices: HashMap::new(),

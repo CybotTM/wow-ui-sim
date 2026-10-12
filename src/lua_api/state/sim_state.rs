@@ -575,6 +575,8 @@ pub struct SimState {
     pub map_display_hide_icons: HashMap<i32, bool>,
     /// Explicit continent/world rectangles; never guessed from map art pixels.
     pub map_world_rects: HashMap<i32, crate::c_api::map_world_coordinates::MapWorldRect>,
+    /// Explicit bounty-set membership in supplied order; no inferred/default catalog.
+    pub bounty_set_maps: HashMap<i32, Vec<i32>>,
     pub achievements: HashMap<i32, AchievementInfo>,
     /// Explicit supplied relations; no native catalog or inferred chain.
     pub achievement_superceding: HashMap<i32, Vec<i32>>,
