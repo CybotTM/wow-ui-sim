@@ -19,18 +19,19 @@ Current cached Retail/PTR `QuestUtils.lua` exposes `QuestUtils_AddQuestCurrencyR
 ## Implementation inventory
 
 - `tests/quest_currency_war_mode.rs`: initial public query contracts and actual ordinary vendor-tooltip fixture; initial RED1 ordinary-baseline PASS/4 contractFAIL; expanded controls use real input scaffold, actual gate/percentage outputs and duplicate-currency first instances.
-- `src/c_api/c_pvp.rs`: existing namespace seam; `war_mode.rs::WarModeState` owns desired/reward inputs, getters not yet implemented.
-- `src/c_api/item_spell/c_currency.rs`: existing currency query seam; faction relation not yet modeled.
-- `src/lua_api/globals/quest_surface/register.rs`: existing false eligibility placeholder; no independent eligibility getter yet.
+- `src/c_api/c_pvp.rs`: existing namespace seam; `war_mode.rs::WarModeState` owns desired/reward inputs and live current-profile getters.
+- `src/c_api/item_spell/c_currency.rs`: current-profile faction getter projects the independently supplied relation.
+- `src/c_api/c_quest_log.rs`: current-profile eligibility getter; earlier-profile false placeholder remains isolated in `quest_surface/register.rs`.
 - `SimState.quest_war_mode_eligibility` and `currency_faction_grants`: empty supplied relations, independent of classification/display fields.
 
 ## Tests asserting this spec
 
-`tests/quest_currency_war_mode.rs`; initial RED1PASS/4FAIL independently authenticated before owned scaffold;13-case expanded controls await RED execution. Ordinary vendor baseline passes; positive caller/new getters remain unproved.
+`tests/quest_currency_war_mode.rs`; initial five-case RED1PASS/4FAIL remains separate. Expanded pre-producer RED executed at `/home/osso/.local/state/wow-ui-sim/verification/quest-currency-war-mode-current/positive-red-compile-20261012T091819552684Z`: compile exit0; runtime13 cases,1PASS/12FAIL, exit101,2.15s. Tests pinned to `9e3fd32551e67e06653e6224e94be8f56a6da33b`; docs HEAD `8a10302064ed91b8f0944eef475871902b311bf0`. First independent authentication saved matching467982416 bytes, digest `4e6d1f18bec3b6c186d9380e128c8a1881fe45165034d9bdb5d22f4e70dd0dbf`; reused without artifact reread or rehash. Main terminal failed exit101/MainPID0. Ordinary vendor caller baseline is the sole PASS; supplied-input contracts and positive bonus controls fail. Later gates/duplicate downstream assertions were not reached, not independently falsified.
 
 ## Known gaps (current cycle)
 
-- [ ] Expanded positive RED, producers, current-profile GREEN, startup/publication and independent Rust/readability/retention proof. Initial authenticated1PASS/4contractFAIL retained; no getter producer before positive RED.
+- [x] Expanded pre-producer RED executed and independently authenticated; initial five-case RED retained separately.
+- [ ] Producers committed (`bea55a2ae`, `a295a7d72`, `067fdbb90`); current-profile GREEN, startup/publication and independent Rust/readability/retention proof remain pending. No GREEN, native parity or full handoff closure claim.
 
 ## Out of scope
 
