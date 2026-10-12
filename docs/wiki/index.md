@@ -1,6 +1,6 @@
 ## [2026-10-11] docs | Bounty current stage
 
-[Bounty stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#bounty-set-maps--current-stage-2026-10-11) links the [relation spec](../specs/bounty-set-map-relations.md): authenticated initial RED6; expanded actual RED11 retains lost digest-comparison receipt, not full authentication. Producer reports11 PASS on each Retail/PTR profile and normal assertions `[]`; independent GREEN/final check pending. Current Bounty gap removed after actual normal publication; owning sweep pending; Calendar/history/broad3FAIL/parentOPEN preserved.
+[Bounty SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#bounty-set-maps--current-stage-2026-10-11): independent GREEN PASS11 logical features × Retail/PTR = 22 scope executions; both normal assertions exit0/`[]`, fmt/default check0. Independent2531 publication/retention PASS: one exact case/0FAIL,145 rows90OK/55current gaps,77 nonbinary copies/250064bytes and14 valid links/anchors. Initial RED6 authenticated; expanded RED11 lost digest-comparison output/authreceipt GAP remains, no reauth. Simulator policy is not native proof; earlier Calendar89/56 and historical87/58 preserved, broad3FAIL/parentOPEN unchanged.
 
 ## [2026-10-11] verification | Visible registered-update counter
 

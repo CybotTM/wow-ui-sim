@@ -4,12 +4,12 @@
 
 ## What it must do
 
-- [ ] Return exactly one fresh numeric sequence for explicitly supplied set membership, preserving supplied values/order rather than deriving membership from map hierarchy/faction metadata.
-- [ ] Return an empty sequence when no modeled association exists. This is simulator absence policy respecting the non-nil sequence contract, not native unknown-ID evidence.
-- [ ] Keep normal defaults free of invented bounty memberships; a test's supplied relation is not production/native catalog data.
-- [ ] Reflect owned-input updates/removal in subsequent queries while preserving previous snapshots and caller mutation isolation.
-- [ ] Validate required numeric inputs without wrong-type coercion or lossy identity aliasing; apply documented secret authentication before validation/lookup and preserve wrappers/caller taint.
-- [ ] Register the modeled query for current Retail/PTR channels. No inferred earlier-profile backport or revival of retired `GetBountySetIDForMap`.
+- [x] Return exactly one fresh numeric sequence for explicitly supplied set membership, preserving supplied values/order rather than deriving membership from map hierarchy/faction metadata.
+- [x] Return an empty sequence when no modeled association exists. This is simulator absence policy respecting the non-nil sequence contract, not native unknown-ID evidence.
+- [x] Keep normal defaults free of invented bounty memberships; a test's supplied relation is not production/native catalog data.
+- [x] Reflect owned-input updates/removal in subsequent queries while preserving previous snapshots and caller mutation isolation.
+- [x] Validate required numeric inputs without wrong-type coercion or lossy identity aliasing; apply documented secret authentication before validation/lookup and preserve wrappers/caller taint.
+- [x] Register the modeled query for current Retail/PTR channels. No inferred earlier-profile backport or revival of retired `GetBountySetIDForMap`.
 
 ## How it works
 
@@ -18,7 +18,7 @@
 
 ## Implementation inventory
 
-- `SimState.bounty_set_maps`: explicit membership input, initialized empty after authentic initial public-query RED; no default associations. `src/c_api/c_map_bounties.rs` projects those explicit inputs through guarded C API registration and a fresh sequence result; Retail and PTR focused runs each report 11 passed; both normal-session publication/empty-model/retired-ID/Calendar-preservation probes report exit0/`[]`. Independent GREEN remains pending.
+- `SimState.bounty_set_maps`: explicit membership input, initialized empty after authentic initial public-query RED; no default associations. `src/c_api/c_map_bounties.rs` projects those explicit inputs through guarded C API registration and a fresh sequence result; Retail and PTR focused runs each report 11 passed; both normal-session publication/empty-model/retired-ID/Calendar-preservation probes report exit0/`[]`. [Independent GREEN](../../data/patch-api/evidence/bounty-set-map-relations-2026-10-11/green-independent-report.md) PASS: 11 logical cases across Retail/PTR, 22 executions; normal assertions and Rust checks verified.
 - `src/c_api/c_map.rs`: existing map surface registration seam.
 
 ## Tests asserting this spec
@@ -28,8 +28,8 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Independent GREEN/default-check proof pending; authentic initial RED6 and expanded positive RED11 executed before getter. Expanded RED's independently computed digest-comparison output was lost; authentication receipt gap remains explicit.
-- [ ] Normal-session publication verified in Retail/PTR; removed only the current Bounty map row. Owning prefork publication sweep pending; frozen historical evidence and earlier Calendar classification remain unchanged.
+- [ ] Expanded RED's independently computed digest-comparison output was lost; authentication receipt gap remains explicit. Behavioral RED11 is confirmed; initial RED6 and all GREEN/publication artifact authentication are verified. No gap concealment or old-payload reread.
+- [x] Normal-session publication verified in Retail/PTR; only current Bounty row removed. [Independent owning-prefork proof](../../data/patch-api/evidence/bounty-set-map-relations-2026-10-11/publication/publication-independent-report.md): one case, 145 classified rows/90 OK/55 current gaps; frozen historical and earlier Calendar receipts unchanged.
 
 ## Out of scope
 

@@ -1,5 +1,5 @@
 {
-  "scope": "Bounty Retail/PTR independent GREEN and actual owning-target publication receipts; expanded RED authentication output GAP remains, publication/retention independent gate pending",
+  "scope": "Independent gate checks original77copies250064bytes; six final gate artifacts added with main exact-copy checks. Expanded RED authentication receipt GAP remains; no executable/library/cache payload copied or full-handoff completion",
   "copies": [
     {
       "path": "initial-red/revision.json",
@@ -462,8 +462,44 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/bounty-set-maps-current/publication-prefork-compile-20261012T030415401015Z/publication.json",
       "bytes": 67838,
       "sha256": "b65dba467b80ef005ddab8b116ed38b6e53171625866caab0f8f2c8d81892698"
+    },
+    {
+      "path": "publication/publication-independent-report.md",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/bounty-set-maps-current/publication-independent-report.md",
+      "bytes": 5709,
+      "sha256": "63dcd6c6f9736ade24a25bb5a8236c74e10fb790bc360676a8649b258729dbaa"
+    },
+    {
+      "path": "publication/publication-independent-proof.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/bounty-set-maps-current/publication-independent-proof.json",
+      "bytes": 62770,
+      "sha256": "01945bcb7f23691082e4121576caa73c9d191d5556176fecdfc7ac202d845bc4"
+    },
+    {
+      "path": "publication/publication-independent-auth.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/bounty-set-maps-current/publication-independent-auth.json",
+      "bytes": 726,
+      "sha256": "3f791df02fde93ef7ed91782659fd4ca893ac85cafe13d34e08ace5ae02be9ec"
+    },
+    {
+      "path": "publication/publication-independent-source.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/bounty-set-maps-current/publication-independent-source.json",
+      "bytes": 1496,
+      "sha256": "32c749f8004c2b7221761da29da1a59299b182f49a6b1b127012267332943266"
+    },
+    {
+      "path": "publication/publication-independent-retention.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/bounty-set-maps-current/publication-independent-retention.json",
+      "bytes": 44712,
+      "sha256": "35051fdffae11f8294fc230ff23e42b3e07902c93b617ad1802b95ac4f98bbbe"
+    },
+    {
+      "path": "publication/publication-independent-linkaudit.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/bounty-set-maps-current/publication-independent-linkaudit.json",
+      "bytes": 5999,
+      "sha256": "fe309d7cb318c307f107d5a08144c2e7795950ef7c8748794cc0fd65007a9b99"
     }
   ],
-  "copy_count": 77,
-  "copy_bytes": 250064
+  "copy_count": 83,
+  "copy_bytes": 371476
 }
