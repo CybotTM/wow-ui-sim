@@ -2,7 +2,9 @@
 #![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 
 use std::path::Path;
-use wow_ui_sim::loader::{discover_blizzard_startup_addons_for_screen, load_addon};
+use wow_ui_sim::loader::{
+    StartupAddonLoadKind, discover_blizzard_startup_addons_for_screen, load_startup_addon,
+};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::{SavedVariablesManager, WtfConfig};
 use wow_ui_sim::screen::ScreenKind;
@@ -39,25 +41,56 @@ fn import_fixture_cache(env: &WowLuaEnv, root: &Path) {
         .expect("unaltered character-cache active index");
 }
 
-fn load_whole_game_ui(env: &WowLuaEnv) {
+fn load_and_dispatch_startup_addon(
+    env: &WowLuaEnv,
+    name: &str,
+    toc: &Path,
+    kind: StartupAddonLoadKind,
+) -> Vec<String> {
+    let result = load_startup_addon(&env.loader_env(), toc, kind, None)
+        .unwrap_or_else(|error| panic!("whole Game startup load {name}: {error}"));
+    for warning in &result.warnings {
+        eprintln!("startup {name}: {warning}");
+    }
+    if kind == StartupAddonLoadKind::Full {
+        env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(name)])
+            .unwrap_or_else(|error| panic!("startup ADDON_LOADED {name}: {error}"));
+    }
+    if name == "Blizzard_EnvironmentCleanup" {
+        env.restore_post_cleanup_globals();
+    }
+    result.warnings
+}
+
+fn load_whole_game_ui(env: &WowLuaEnv) -> Vec<String> {
     let ui = wow_ui_sim::client_profile::blizzard_ui_addons_dir();
     env.set_screen_mode(ScreenKind::Game);
     env.state().borrow_mut().addon_base_paths = vec![ui.clone()];
     wow_ui_sim::xml::register_intrinsic_templates();
-    let addons = discover_blizzard_startup_addons_for_screen(&ui, ScreenKind::Game);
-    for (name, toc) in addons {
-        let result = load_addon(&env.loader_env(), &toc)
-            .unwrap_or_else(|error| panic!("whole Game startup load {name}: {error}"));
-        assert!(
-            result.warnings.is_empty(),
-            "startup {name}: {:?}",
-            result.warnings
-        );
+    let mut warnings = Vec::new();
+    if let Some(toc) = wow_ui_sim::client_profile::blizzard_ui_framexml_toc() {
+        warnings.extend(load_and_dispatch_startup_addon(
+            env,
+            "FrameXML",
+            &toc,
+            StartupAddonLoadKind::Full,
+        ));
     }
+    for addon in discover_blizzard_startup_addons_for_screen(&ui, ScreenKind::Game) {
+        warnings.extend(load_and_dispatch_startup_addon(
+            env,
+            &addon.name,
+            &addon.toc_path,
+            addon.kind,
+        ));
+    }
+    env.sync_string_metatable_to_global_string();
+    env.sync_addon_names_to_lua();
     env.apply_post_load_workarounds();
     wow_ui_sim::startup::fire_startup_events(env);
     wow_ui_sim::startup::process_pending_timers(env);
     wow_ui_sim::startup::fire_one_on_update_tick(env);
+    warnings
 }
 
 #[test]
@@ -67,7 +100,7 @@ fn native_preset_index_two_keeps_classic_and_horizontal_micro_menu() {
         let env = WowLuaEnv::new().expect("fresh pre-addon environment");
         env.set_display_size(1920.0, 1080.0).expect("display input");
         import_fixture_cache(&env, temp.path());
-        load_whole_game_ui(&env);
+        let warnings = load_whole_game_ui(&env);
         env.exec(r#"
             local layout = EditModeManagerFrame:GetActiveLayoutInfo()
             local classic = EditModePresetLayoutManager:GetCopyOfPresetLayouts()[2]
@@ -81,5 +114,6 @@ fn native_preset_index_two_keeps_classic_and_horizontal_micro_menu() {
             assert(firstY and secondY and math.abs(firstY - secondY) <= 1,
                 'first microbuttons must share a horizontal row')
         "#).expect("unchanged Classic/micro-menu consumer result");
+        assert!(warnings.is_empty(), "startup warnings retained: {warnings:?}");
     }
 }
