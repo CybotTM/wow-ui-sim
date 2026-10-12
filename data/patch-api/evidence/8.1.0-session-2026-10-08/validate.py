@@ -21,6 +21,23 @@ from patch_audit_validation import (
 # Integrated 8.1.5/8.2.0 registers and the complete 8.1.0 sweep source set.
 AUDIT_REVISION = 'ba7e46ad6'
 
+# Bounded modeled-producer acceptance, not historical/native behavior parity.
+# Each exact source ID names its governing spec and retained public proof.
+CURRENT_PRODUCER_CLOSURES = {
+    'wt-global-api-C_AchievementInfo.GetSupercedingAchievements-13': (
+        'achievement-superceding-relations', 'achievement-garrison-policy-2026-10-11/README.md'),
+    'wt-global-api-C_Calendar.GetEventIndexInfo-20': (
+        'calendar-event-index-info', 'calendar-event-index-2026-10-11/publication/publication-independent-report.md'),
+    'wt-global-api-C_CurrencyInfo.DoesWarModeBonusApply-29': (
+        'currency-war-mode-bonus', 'currency-war-mode-bonus-2026-10-12/README.md'),
+    'wt-global-api-C_FriendList.GetFriendInfo-44': (
+        'friend-info-name-query', 'friend-info-exact-2026-10-12/README.md'),
+    'wt-global-api-C_Map.GetBountySetMaps-77': (
+        'bounty-set-map-relations', 'bounty-set-map-relations-2026-10-11/publication/publication-independent-report.md'),
+    'wt-global-api-C_MountJournal.GetMountFromItem-78': (
+        'mount-item-relations', 'mount-item-relations-2026-10-12/README.md'),
+}
+
 
 def audit_patches():
     return {path.name.removesuffix('-wikitext-register.json')
@@ -73,10 +90,24 @@ def check_source():
     return register, extractor, raw.splitlines(), text
 
 
+def read_historical_known_gaps(patch):
+    fixture = f"tests/data/patch_{patch.replace('.', '_')}_sweep_known_gaps.json"
+    known = set(json.loads(git_blob(AUDIT_REVISION, fixture)))
+    if patch == PATCH:
+        closures = read(EVIDENCE / 'p810-later-gap-closures.json')
+        assert len(closures) == 1 and closures[0]['patch'] == PATCH
+        resolved = set(closures[0]['resolved'])
+        assert resolved <= known
+        known -= resolved
+    return known
+
+
 def check_accounting(register, extractor, raw_lines, text):
     results = read(EVIDENCE / 'patch_8_1_0_publication_sweep-results.json')
     inventory = {row['id']: row for row in register['entries']}
-    known = set(read(ROOT / 'tests/data/patch_8_1_0_sweep_known_gaps.json'))
+    known = read_historical_known_gaps(PATCH)
+    assert len(results) == 145 and len(known) == 58
+    assert sum(row['ok'] for row in results.values()) == 87
     assert set(results) == set(inventory)
     assert {key for key, row in results.items() if not row['ok']} == known
     review = read(EVIDENCE / 'p810-gap-review.json')
@@ -195,8 +226,8 @@ def check_proof():
         results = read(EVIDENCE / row['file'])
         assert row['rows'] == len(results)
         assert row['gaps'] == sum(not value['ok'] for value in results.values())
-        fixture = ROOT / f"tests/data/patch_{row['patch'].replace('.', '_')}_sweep_known_gaps.json"
-        assert {key for key, value in results.items() if not value['ok']} == set(read(fixture))
+        assert row['ok'] == sum(value['ok'] for value in results.values())
+        assert {key for key, value in results.items() if not value['ok']} == read_historical_known_gaps(row['patch'])
     receipt = read(EVIDENCE / 'p810-integration-all-sweeps.proof.json')
     log = (EVIDENCE / receipt['log']).read_text()
     passing = set(re.findall(r'test patch_([\d_]+)_publication_sweep::patch_[\d_]+_publication_sweep \.\.\. ok', log))
@@ -209,7 +240,7 @@ def check_proof():
 def check_supersessions():
     fixture = 'tests/data/patch_8_1_0_sweep_known_gaps.json'
     previous = set(json.loads(git_blob(AUDIT_REVISION, fixture)))
-    current = set(read(ROOT / fixture))
+    current = read_historical_known_gaps(PATCH)
     closures = read(EVIDENCE / 'p810-later-gap-closures.json')
     assert len(closures) == 1 and closures[0]['patch'] == PATCH
     assert set(closures[0]['resolved']) == previous - current
@@ -229,9 +260,33 @@ def check_supersessions():
     return {'integrated_gap_closures': len(previous - current)}
 
 
+def check_current_producer_closures():
+    historical = read_historical_known_gaps(PATCH)
+    known = set(read(ROOT / 'tests/data/patch_8_1_0_sweep_known_gaps.json'))
+    closed = set(CURRENT_PRODUCER_CLOSURES)
+    assert closed <= historical
+    assert historical - known == closed, 'unreviewed or stale current producer closures'
+    assert not known - historical, 'new current fixture gaps'
+    frozen = read(EVIDENCE / 'patch_8_1_0_publication_sweep-results.json')
+    # Required new capture; never substitute frozen observations when absent.
+    results = read(ROOT / 'data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/current-publication-results.json')
+    assert set(results) == set(frozen), 'current publication row identities changed'
+    assert {key for key, row in results.items() if not row['ok']} == known
+    for identifier, (spec, proof) in CURRENT_PRODUCER_CLOSURES.items():
+        assert (ROOT / 'docs/specs' / (spec + '.md')).is_file(), spec
+        assert (ROOT / 'data/patch-api/evidence' / proof).is_file(), proof
+        assert not frozen[identifier]['ok'] and results[identifier]['ok']
+        assert results[identifier]['expected'] == frozen[identifier]['expected']
+        observed = results[identifier]['observed']
+        assert observed['kind'] == 'member'
+        assert observed['detail'] == 'raw=function; lookup=function'
+    return {'current_producer_closures': len(closed), 'current_gaps': len(known)}
+
+
 if __name__ == '__main__':
     register, extractor, lines, text = check_source()
     summary = {**check_accounting(register, extractor, lines, text),
                **check_preservation(), **check_scans(register),
-               **check_negative(register), **check_proof(), **check_supersessions()}
+               **check_negative(register), **check_proof(), **check_supersessions(),
+               **check_current_producer_closures()}
     print(json.dumps({'status': 'PASS', **summary}, indent=2))

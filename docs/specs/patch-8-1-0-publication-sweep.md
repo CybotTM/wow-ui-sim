@@ -24,7 +24,8 @@ Audit pinned Warcraft Wiki page 464337, revision 4462737 against current retail,
 - `src/c_api/c_date_and_time.rs` — supplied civil-time value model and comparison.
 - `src/c_api/patch_retired_members.rs` — retail-only three-member list.
 - `tests/patch_8_1_0_*.rs`, `tests/data/patch_8_1_0_sweep_known_gaps.json` — bare/cached/classic behavior and exact publication gap enforcement.
-- `data/patch-api/evidence/8.1.0-session-2026-10-08/` — exhaustive scans, gap review, reproduction, validator and command receipts.
+- `data/patch-api/evidence/8.1.0-session-2026-10-08/` — exhaustive scans, frozen gap review/results, reproduction, validator and command receipts. Validator separates pinned historical fixtures from six explicit current modeled-producer closures.
+- `data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/current-publication-results.json` — required direct current 145-row sweep capture; never substituted by historical observations.
 
 ## Tests asserting this spec
 
@@ -33,6 +34,7 @@ Audit pinned Warcraft Wiki page 464337, revision 4462737 against current retail,
 - `tests/patch_8_1_0_publication_fixes.rs`, `tests/patch_8_1_0_cached_surfaces.rs`.
 - `tools/test_extract_patch_non_inventory.py`, `tools/test_gen_patch_wikitext_register.py`.
 - Evidence `validate.py` and recorded scoped calendar/map/date-provider/configuration-provider/Mists gates.
+- `tools/test_patch_8_1_0_validation.py` — historical/current acceptance and concrete rejection of rewritten frozen data, missing current capture, stale/unreviewed closures and invalid current observations; final validation pending.
 
 ## Known gaps (current cycle)
 
