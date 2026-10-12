@@ -1,6 +1,6 @@
 ## [2026-10-12] docs | Bounded seven-profile coverage matrix
 
-[Coverage matrix](reference/coverage-matrix.md) separates runtime, compile, publication and historical/native/external proof. d21 is Retail only; current GUID publication145/94/51; corrected Mists assertions and old failures remain distinct. Friend setter preparation unexecuted; whole handoff OPEN.
+[Coverage matrix](reference/coverage-matrix.md) separates runtime, compile, publication and historical/native/external proof. d21 is Retail only; current GUID publication145/94/51; corrected Mists assertions and old failures remain distinct. Friend setter bounded Retail8/PTR8 GREEN at `a883157c49`; default check NEVER INVOKED, actual row60 publication/retention pending; whole handoff OPEN.
 
 ## [2026-10-12] verification | GUIDIsPlayer bounded current proof
 

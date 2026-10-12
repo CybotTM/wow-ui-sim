@@ -1,14 +1,14 @@
 # Friend note mutation
 
-Retail/PTR `C_FriendList.SetFriendNotes` contract over existing environment-owned friends. Cached `Blizzard_APIDocumentationGenerated/FriendListDocumentation.lua` declares two non-nil `cstring` arguments, one non-nil `found: bool`, `RequiresFriendList`, and `AllowedWhenUntainted`. Local exact matching, synchronous note mutation, and strict UTF-8 validation below are bounded model policy, not independently established native behavior. Ordinary unchanged `SET_FRIENDNOTE` Accept/Enter callers motivate the seam. Setter implementation uses the existing owned records; focused GREEN and consumer/security proof remain pending.
+Retail/PTR `C_FriendList.SetFriendNotes` contract over existing environment-owned friends. Cached `Blizzard_APIDocumentationGenerated/FriendListDocumentation.lua` declares two non-nil `cstring` arguments, one non-nil `found: bool`, `RequiresFriendList`, and `AllowedWhenUntainted`. Local exact matching, synchronous note mutation, and strict UTF-8 validation below are bounded model policy, not independently established native behavior. Ordinary unchanged `SET_FRIENDNOTE` Accept/Enter callers motivate the seam. Setter implementation uses existing owned records; bounded private evidence at `a883157c49` records Retail8/PTR8 GREEN, including consumer/security assertions, and both normal probes PASS. Publication and native acceptance remain separate.
 
 ## What it must do
 
-- [ ] Publish exact `C_FriendList.SetFriendNotes(name, notes)` on Retail/PTR; return exactly one boolean. Find by the same exact supplied name as the getter; return true even when the matching note is unchanged, update its existing note, and clear on empty string. Miss returns false without creating/reordering/mutating records.
-- [ ] Expose updated `notes` through existing `C_FriendList.GetFriendInfo`, `GetFriendInfoByIndex`, `C_Social.GetFriendInfo`, and `C_Social.GetFriends`; preserve unrelated represented friend fields and independent environments. Respect current indexed display sorting, not vector-index assumptions.
-- [ ] Require two actual UTF-8 strings without numeric/other coercion. Authenticate both original arguments before any type validation, lookup, or mutation. Genuine untainted secret strings work in either/both positions; wrapped nonstrings/invalid UTF-8 produce positional string errors without destroying wrappers.
-- [ ] Deny any tainted secret argument on hit, miss, or invalid payload, retaining wrappers/caller taint and friend state. In particular, tainted invalid plain arg1 plus secret arg2 must fail for secret access before arg1 type. Plain strings remain usable under taint.
-- [ ] Load the whole unchanged StaticPopup_Game/FriendsFrame closure. Use real edit-box SetText and actual Accept button Click/original whole Enter handler, preserving vendor handler identity and void return/root-hide behavior; reopen and read updated/cleared notes through the source getter.
+- [x] Publish exact `C_FriendList.SetFriendNotes(name, notes)` on Retail/PTR; return exactly one boolean. Find by the same exact supplied name as the getter; return true even when the matching note is unchanged, update its existing note, and clear on empty string. Miss returns false without creating/reordering/mutating records.
+- [x] Expose updated `notes` through existing `C_FriendList.GetFriendInfo`, `GetFriendInfoByIndex`, `C_Social.GetFriendInfo`, and `C_Social.GetFriends`; preserve unrelated represented friend fields and independent environments. Respect current indexed display sorting, not vector-index assumptions.
+- [x] Require two actual UTF-8 strings without numeric/other coercion. Authenticate both original arguments before any type validation, lookup, or mutation. Genuine untainted secret strings work in either/both positions; wrapped nonstrings/invalid UTF-8 produce positional string errors without destroying wrappers.
+- [x] Deny any tainted secret argument on hit, miss, or invalid payload, retaining wrappers/caller taint and friend state. In particular, tainted invalid plain arg1 plus secret arg2 must fail for secret access before arg1 type. Plain strings remain usable under taint.
+- [x] Load the whole unchanged StaticPopup_Game/FriendsFrame closure. Use real edit-box SetText and actual Accept button Click/original whole Enter handler, preserving vendor handler identity and void return/root-hide behavior; reopen and read updated/cleared notes through the source getter.
 
 ## How it works
 
@@ -25,12 +25,12 @@ Retail/PTR `C_FriendList.SetFriendNotes` contract over existing environment-owne
 
 ## Tests asserting this spec
 
-- [friend_note_mutation.rs](../../tests/friend_note_mutation.rs): eight integrated Rust cases; genuine Retail RED failed8/8 at missing raw setter on `d61c78a2b`. Downstream assertions were unreached; GREEN remains pending.
+- [friend_note_mutation.rs](../../tests/friend_note_mutation.rs): eight integrated Rust cases; genuine Retail RED failed8/8 at missing raw setter on `d61c78a2b`. Downstream assertions were unreached in RED. At `a883157c49`, all eight cases completed on each of Retail/PTR, including mutation/security/whole-popup assertions. Both normal probes exit0 with marker and literal `[]`; fmt exit0. Public packet retention remains pending.
 
 ## Known gaps (current cycle)
 
-- [ ] Complete focused Retail/PTR GREEN after authenticated Retail RED at the absent raw registration boundary; downstream mutation/security/popup assertions have no proof until executed.
-- [ ] Whole-closure readiness, actual Click dispatch, genuine-secret/type-error assertions, and successful reopen remain runtime-unproved; report dependency failures separately, never fabricate dependencies or patch vendor handlers.
+- [ ] Requested default cargo check NEVER INVOKED: capacity BLOCKED, invocations0/credit0. Test producers and fmt do not satisfy this gate.
+- [ ] Actual row60 publication and public evidence retention pending; current publication145/94OK/51gaps unchanged. No native, broad-suite or whole-handoff acceptance.
 
 ## Out of scope
 
