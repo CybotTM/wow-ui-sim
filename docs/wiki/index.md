@@ -1,6 +1,6 @@
 ## [2026-10-12] verification | Mount-item bounded current evidence
 
-[Mount-item evidence](../specs/mount-item-relations.md#current-bounded-evidence--2026-10-12) reconciles current query/spell preservation and corrected original-consumer observations. Historical raw-console FAIL/native gaps preserved; earlier-profile preservation unverified. Independent2865 packet retention/link/privacy PASS; parent OPEN.
+[Mount-item evidence](../specs/mount-item-relations.md#current-bounded-evidence--2026-10-12) reconciles current query/spell preservation and corrected original-consumer observations. Historical raw-console FAIL/native gaps preserved. Five earlier-profile shared-state checks independently pass; runtime preservation unverified. Independent2865 main packet retention/link/privacy PASS; parent OPEN.
 
 ## [2026-10-12] observation | Canonical paired startup
 

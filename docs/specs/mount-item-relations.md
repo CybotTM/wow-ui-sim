@@ -9,7 +9,7 @@ Current Retail/PTR `C_MountJournal.GetMountFromItem(itemID)` queries an explicit
 - [x] Missing/nil and nonnumeric inputs fail the required-number contract. Item links and numeric strings are not this API's numeric argument. Simulator policy reuses existing supplied-relation identities: finite integral signed32-bit values may match, while fractional/nonfinite/out-of-range numbers miss without truncation or saturation. This is not a native range claim.
 - [x] Authenticate the original VM secret argument before type validation or lookup. Secure callers can query wrapped numeric inputs; tainted callers cannot inspect wrapped inputs, including malformed values. Ordinary numbers remain usable from tainted callers. Preserve wrapper identity and caller taint.
 - [x] Preserve existing mount spell lookup; do not transfer `GetMountFromSpell`'s separate `SpellIdentifier`/`AllowedWhenTainted` contract.
-- [ ] Preserve earlier-profile surfaces; API exclusion is source-inspected only, earlier-profile runtime preservation unverified and shared-state compile refresh pending.
+- [ ] Preserve earlier-profile surfaces; API exclusion is source-inspected only, earlier-profile runtime preservation unverified. Shared-state compile refresh is independently verified, not runtime proof.
 
 ## How it works
 
@@ -31,7 +31,7 @@ Current Retail/PTR `C_MountJournal.GetMountFromItem(itemID)` queries an explicit
 
 ## Known gaps (current cycle)
 
-- [ ] Earlier-profile runtime preservation and shared-state compile refresh remain unverified.
+- [ ] Earlier-profile runtime preservation remains unverified.
 
 ### Current bounded evidence — 2026-10-12
 
@@ -41,7 +41,7 @@ Independent observation at `609033535` is bounded PASS: four new consumer execut
 
 Each profile executes the unsliced original PlayerChoice live contrast first: false→true→false for absent, supplied `6948→401`, then removed relation; standalone baseline follows with false. Original ItemButton `SetItem(6948)` and vendor method provenance/input/stage observations are retained. Actual predicate observations are raw registered function / nil return type / nil value, Lua `=(string):72–74`, matching the existing unmodeled namespace fallback. This proves supplied-relation consumer dependence in this simulator context, not modeled/native dressability or native Hearthstone classification. No vendor predicate replacement or normal-session relation seeding.
 
-The original raw-console observation FAIL in the final report remains unchanged; corrected test-owned observation transport supplies the later PASS. Initial RED3 and expanded RED7 failed at missing-API guards; downstream assertions were unreached. Eighth mapped-secret query and consumer contrast first executed GREEN, with no invented RED credit. Earlier-profile API exclusion remains source-only; no blanket earlier-profile preservation acceptance. Native/catalog/range/classification/ownership, external and full-handoff acceptance remain open.
+The original raw-console observation FAIL in the final report remains unchanged; corrected test-owned observation transport supplies the later PASS. Initial RED3 and expanded RED7 failed at missing-API guards; downstream assertions were unreached. Eighth mapped-secret query and consumer contrast first executed GREEN, with no invented RED credit. [Earlier-profile compile refresh](../../data/test-perf/evidence/mount-shared-state-profile-check-2026-10-12/README.md) independently verifies five existing checks at `dceb4c751`; shared-state compile compatibility only. Earlier-profile API exclusion remains source-only; no blanket earlier-profile runtime preservation acceptance. Native/catalog/range/classification/ownership, external and full-handoff acceptance remain open.
 
 ## Out of scope
 

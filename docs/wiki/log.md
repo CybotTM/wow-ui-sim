@@ -1,6 +1,6 @@
 ## [2026-10-12] docs | Mount-item bounded evidence reconciliation
 
-Updated [mount-item spec](../specs/mount-item-relations.md#current-bounded-evidence--2026-10-12) from retained public reports; linked bounded preservation in [spell spec](../specs/mount-spell-identifier.md#tests-asserting-this-spec). Proven query requirements checked; earlier-profile preservation split and left unverified. Historical failures/native gaps retained; independent2865 packet retention/link/privacy PASS at587a22e38. Saved-evidence audit only; no new execution or authentication.
+Updated [mount-item spec](../specs/mount-item-relations.md#current-bounded-evidence--2026-10-12) from retained public reports; linked bounded preservation in [spell spec](../specs/mount-spell-identifier.md#tests-asserting-this-spec). Proven query requirements checked; five earlier-profile shared-state checks independently verified, runtime preservation left unverified. Historical failures/native gaps retained; independent2865 packet retention/link/privacy PASS at587a22e38. Saved-evidence audit only; no new execution or authentication.
 
 ## [2026-10-12] observation | Canonical paired startup
 
