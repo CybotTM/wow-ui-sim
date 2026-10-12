@@ -42,7 +42,11 @@ Profiled/CASC0/warm-cache clocks and nested file timings are not exclusive costs
 
 [Independent2556 compile/source gate](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/compile-independent-report.md): **PARTIAL_COMPILE_SOURCE**, rustc0/source unchanged; new artifact authenticated once. Reuse receipt, no rebuild/rehash. Library provenance remains Cargo-record/path-stat. Earlier preparation report's wrong-destination [output gap](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/preflight-output-gap.json) is retained, not invented PASS.
 
-[Source boundary](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/source-boundary.md): read-only bytecode mode before environment creation; profiling0/load-only, no startup events/readiness/old phase-file fields. Buckets overlap; zero fields are not skipped; diagnostic counts do not establish global errorlessness. Runtime05:04UTC guard denied (load33.79/RAM21.600GiB/no Cargo), **no submission/observations**. Old coherence proof, frozen BA and broader OPEN limits unchanged.
+[Source boundary](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/source-boundary.md): read-only bytecode mode before environment creation; profiling0/load-only, no post-load workarounds/startup events/readiness. Earlier05:04UTC guard denied (load33.79/RAM21.600GiB/no Cargo), with no submission/observations at that stage; preparation output GAP remains history.
+
+[Independent2558 coherence PASS](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/runtime-independent-report.md):220 returned results plus complete summary,7260 nonnegative values, both timing identities220/220. Diagnostics:90 missing requirements/185 nil observations/zero warnings across49 rows—not unique identities or global errorlessness. First authentication/source/format reused; terminal success0/no remaining probe.
+
+Accounting total4.112s, XML processing2.225s, Lua execution0.891s=compile+call. [XML timing source scopes](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/xml-timing-scope.md) explain inclusive recursive finalize counters versus top-level create timers; aggregate subset labels do not define an exclusive hierarchy. Distinct discovery/result names and zero rows retained literally. Load-only observations are not paired with old clocks or loaded-failure/native/repair proof. Frozen BA3FAIL/full goal OPEN unchanged.
 
 ## Sources
 
