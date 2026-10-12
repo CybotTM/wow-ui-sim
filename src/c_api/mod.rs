@@ -144,6 +144,8 @@ pub mod c_pet_battles;
 pub mod c_photo_sharing;
 pub mod c_ping_secure;
 pub mod c_player_choice;
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+pub(crate) mod c_player_info_guid;
 pub mod c_player_interaction_manager;
 #[cfg(feature = "retail-12-0-0")]
 pub mod c_prey;

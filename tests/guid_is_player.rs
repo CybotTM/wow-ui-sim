@@ -273,7 +273,9 @@ fn guid_is_player_authenticates_real_secrets_before_type_and_lookup() {
             assert(debug.getstacktaint() == 'GUIDPlayerProbe', 'actual tainted closure')
             denied(hit)
             denied(miss)
-            for _, value in ipairs(invalid) do denied(value) end
+            for _, value in ipairs(invalid) do
+                denied(value)
+            end
             check(true, query({PLAYER_TARGET:?}))
             check(false, query({UNKNOWN:?}))
             stringError(901001)

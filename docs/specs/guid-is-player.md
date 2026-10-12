@@ -18,7 +18,7 @@ Current Retail/PTR `C_PlayerInfo.GUIDIsPlayer` must project existing represented
 
 ## Implementation inventory
 
-- `src/c_api/c_player_info_guid.rs` — planned modeled provider; absent at RED stage.
+- `src/c_api/c_player_info_guid.rs` — modeled query over current identity/kind facts; current profile registration in `src/c_api/mod.rs`/`registration.rs`.
 - `src/lua_api/globals/unit_misc.rs` — existing represented identity projection.
 - `src/lua_api/globals/unit_probes.rs` — existing target/focus player-kind facts.
 - `src/lua_api/state_types/social.rs` — existing local identity constant.
@@ -26,11 +26,11 @@ Current Retail/PTR `C_PlayerInfo.GUIDIsPlayer` must project existing represented
 
 ## Tests asserting this spec
 
-`tests/guid_is_player.rs`: local/misses, target/focus replacement, kind/removal, party lifecycle, environment isolation, strict type, authentic secret boundary and two original ObjectAPI consumer cases. No execution claimed yet; requirements remain unchecked.
+`tests/guid_is_player.rs`: local/misses, target/focus replacement, kind/removal, party lifecycle, environment isolation, strict type, authentic secret boundary and two original ObjectAPI consumer cases. Initial Retail RED at `76f405e1d`:0/9 PASS, exit101, eight missing raw-provider guards and one original whole-consumer exact-true mismatch. Ordinary closure/provenance reached; downstream query/security/account diagnostics unreached. Compile/fmt0 and source unchanged independently verified; requirements remain unchecked pending GREEN.
 
 ## Known gaps (current cycle)
 
-- [ ] Observe genuine RED before producer; assertions unreached after missing-provider guards receive no behavioral credit.
+- [x] Genuine RED observed before producer; assertions unreached after missing-provider guards receive no behavioral credit.
 - [ ] Implement and verify Retail/PTR direct/consumer/startup checks, preserve diagnostics and account predicate provenance.
 
 ## Out of scope

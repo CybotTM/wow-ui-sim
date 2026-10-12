@@ -44,6 +44,8 @@ pub(crate) fn register_item_power_tables(state: &mut LuaState) -> LuaResult<()> 
 }
 
 pub(crate) fn register_character_progression_tables(state: &mut LuaState) -> LuaResult<()> {
+    #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+    super::c_player_info_guid::register(state)?;
     c_barber_shop::register_c_barber_shop_surface(state)?;
     c_cursor::register_c_cursor_surface(state)?;
     c_major_factions::register_c_major_factions_surface(state)?;
