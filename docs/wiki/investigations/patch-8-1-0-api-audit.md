@@ -118,6 +118,12 @@ Targeted integrated gates are recorded in `p810-proof.json`; acceptance is retai
 - [[patch-8-2-5-api-audit]] — reproduction/accounting template.
 - [[patch-8-1-5-api-audit]] — reused bullet parser and next integration register.
 
+## GUIDIsPlayer — source stage, 2026-10-12
+
+Source `d6d8de29a` adds modeled `C_PlayerInfo.GUIDIsPlayer` in [c_player_info_guid.rs](../../../src/c_api/c_player_info_guid.rs); [module](../../../src/c_api/mod.rs) and [registration](../../../src/c_api/registration.rs) gates select only `client-retail`/`client-ptr`. The source unwraps the secret argument before string extraction and projects existing local/target/focus identity and player-kind facts plus active populated party identities. [GUID spec](../../specs/guid-is-player.md) owns the contract; required-string/no-coercion and closed-world unknown handling are simulator policy, not native validation.
+
+Retail RED at `76f405e1d`: **0/9 PASS**, eight missing raw-provider guards plus one original whole-consumer exact-true mismatch. Downstream assertions after the guards receive no behavioral credit. GREEN async pending; source inspection establishes no runtime, native or publication success. Historical [533c FAIL](fullsuite-533c-2026-10-12.md), frozen [BA FAIL](fullsuite-ba-2026-10-11.md), and historical/current gap captures below remain unchanged; full handoff OPEN.
+
 ## Current publication reconciliation — 2026-10-12
 
 [Current packet](../../../data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/README.md) and [direct map](../../../data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/current-publication-results.json) own current classification:145 rows93OK/52gaps. Frozen8.1 **87OK/58gaps** is unchanged. [Suite533c investigation](fullsuite-533c-2026-10-12.md) links full-count SSOT: saved suite remains FAIL, sole strict publication mismatch known54/observed52 with no new gaps. Frozen BA **15,038PASS/3FAIL/19skips** remains history.

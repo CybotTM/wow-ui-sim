@@ -1710,3 +1710,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 
 [Packet](../../data/patch-api/evidence/live-retail-gui-providers-2026-10-12/README.md) · [Existing publication investigation](investigations/patch-8-1-0-api-audit.md#current-publication-reconciliation--2026-10-12).
 
+## 2026-10-12 — GUIDIsPlayer source-stage inventory
+
+[Existing API investigation](investigations/patch-8-1-0-api-audit.md#guidisplayer--source-stage-2026-10-12) links modeled source `d6d8de29a`, Retail/PTR registration gates and owning spec without duplicating its contract. Retail RED0/9 at `76f405e1d` retained; GREEN async pending. Required-string/closed-world policy is not native validation; no runtime/publication credit or changes to 533c FAIL, frozen BA or gap captures. Wiki-only update; no tests/build/ops/commit.
+

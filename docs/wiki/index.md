@@ -1,3 +1,7 @@
+## [2026-10-12] source | GUIDIsPlayer modeled query
+
+[Source stage](investigations/patch-8-1-0-api-audit.md#guidisplayer--source-stage-2026-10-12) links source `d6d8de29a` and owning spec. Retail/PTR gates inspected; Retail RED0/9 at `76f405e1d`, GREEN async pending. No runtime/native/publication credit; frozen failures/gap captures unchanged.
+
 ## [2026-10-12] observation | Live Retail GUI publication
 
 [Packet](../../data/patch-api/evidence/live-retail-gui-providers-2026-10-12/README.md) · [Existing publication investigation](investigations/patch-8-1-0-api-audit.md#current-publication-reconciliation--2026-10-12).
