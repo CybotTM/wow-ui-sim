@@ -1,3 +1,7 @@
+## [2026-10-12] observation | Talent handler-log capture
+
+[BA meaning/limits](investigations/fullsuite-ba-2026-10-11.md#talent-handler-log-observation--2026-10-12) admits independent2779 bounded capture coherence and one selector body PASS; detailed ledger remains packet-owned. Compile/fmt PASS; default check scoped REUSED. No replay/authentication/source edits; retention/link/privacy pending, frozen3FAIL/full handoff OPEN.
+
 ## [2026-10-12] source | War Mode profile-gate consolidation
 
 `91324b103` removes five repeated cfg attributes from shared-input getters, publishing them through one current-only namespace decision. Independent2663 source-equivalence/readability PASS; older canned/default paths unchanged. [Caller stage](investigations/patch-8-1-0-api-audit.md#questutils-current-final-stage--2026-10-12) retains a5e bounded runtime PASS separately; affected Quest13/profile/startup/check follow-up is queued. No unchanged flag-query replay or full handoff closure.

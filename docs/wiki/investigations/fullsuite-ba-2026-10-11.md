@@ -28,6 +28,16 @@ Both performance selectors and the asset selector passed in saved1dcc. Compared 
 
 [Separate talent-stage observations](../../../data/test-perf/evidence/talent-stage-diagnostic-2026-10-11/README.md) now have independent coherence proof:54 observations, not acceptance cases; isolated total delta49.52µs/whole public OnUpdate49.30µs does not explain loaded failure. [Current CASC candidate prefix](../../../data/patch-api/evidence/casc-encoding-header-2026-10-11/README.md): one34-byte read finds BLTE at+30 and matching9-byte key prefix in data174; full-key/size layout differences are not checked by the asset-resolver. Independent2463 verifies cached metadata/primary-source limits/initial retention only; no effective historical lookup/payload/decode/root cause proved. Both diagnostics leave this frozen verdict unchanged.
 
+### Talent handler-log observation — 2026-10-12
+
+[Packet](../../../data/test-perf/evidence/talent-handler-log-2026-10-12/README.md) owns detailed counts/timings and the final capture report; main retention/link/privacy gate remains pending. Independent2779 reports **bounded capture coherence PASS** by independent raw reconstruction for epoch `diagnostic-20261012T134247318942Z`, source `1d2b0ea30`. Original exact selector body PASS is credited once, not twice from parent/child summaries. New seal first authenticated once; actual compile/fmt PASS, default check REUSED only for unchanged production/library scope. Existing manifest deprecations remain; no warning-free claim.
+
+Actual54 windows preserve20 baseline/10 settle/24 steady order. Counts are rounded inclusive attempted-dispatch records, including repeats and outside-window records; **zero OnPostUpdate records observed**, not proof none registered. Packet separates phase aggregates from outer tick averages and the first-settle ClassTalents spike outside STEADY. Neither counts nor sums are unique/top-level callbacks or pure Lua-body cost: helper/error/nested intervals can double-count, and logging perturbs measurement.
+
+Existing logger0 override precedes parent process creation; source-backed environment inheritance reaches child before OnceLock initialization. No independent child environment/PID or cache-contents attestation; cache metadata is narrower proof. Parser `all_attempts_verified=false` remains conservative. Original setup/order and35/75/+20ms assertions unchanged; no vendor/production metrics or new runtime configuration. [Spec](../../specs/talent-handler-log-observation.md) records backed bounded requirements and saved development RED46/GREEN12 limits, excluding initial syntax error and cryptographic historical-RED implementation provenance.
+
+Isolated one-thread conditions are not recorded equivalent to original16-slot suite inputs/scheduling. Observed PASS does not repair frozen24.47ms delta, identify root cause or establish native/performance acceptance. Frozen **15,038 PASS / 3 FAIL / 19 skipped** unchanged; full handoff OPEN.
+
 ### Startup observations — 2026-10-11
 
 [Retained runtime packet](../../../data/test-perf/evidence/startup-cost-diagnostic-2026-10-11/README.md) preserves earlier denied guards and one admitted execution. Independent2542's first-new-probe authentication, preflight/readability/format and Cargo-record/path-stat library limits are reused, not repeated.

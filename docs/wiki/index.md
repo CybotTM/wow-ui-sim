@@ -1,3 +1,7 @@
+## [2026-10-12] observation | Talent handler-log capture
+
+[BA meaning/limits](investigations/fullsuite-ba-2026-10-11.md#talent-handler-log-observation--2026-10-12): independent2779 capture coherence PASS, one original selector body PASS; no performance repair. Packet retention/link/privacy pending; frozen3FAIL/full handoff OPEN.
+
 ## [2026-10-12] verification | Friend-name query — bounded current proof
 
 [Current Friend audit](investigations/patch-8-1-0-api-audit.md#current-retailptr-friend-name-query--2026-10-12) links the [status spec](../specs/friend-info-name-query.md): exact supplied-state query and unchanged note-popup accepted on Retail/PTR; new/reused counts and original failures separate. Packet retention independently verified; native/full handoff OPEN.

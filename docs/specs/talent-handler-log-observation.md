@@ -4,10 +4,10 @@ Test-scoped observations associate existing handler logs with the canonical tale
 
 ## What it must do
 
-- [ ] Mark each original tick outside its measured timer, preserving20 baseline/10 settle/24 steady samples, setup/order and existing35ms average/75ms max/+20ms delta assertions.
-- [ ] Parse complete ordered begin/end windows and existing handler records. Preserve repeated OnUpdate/OnPostUpdate/other attempts, identities, zero intervals, grouped sums/maxima, and outside-window/unparsed-line counts.
-- [ ] Reject malformed records, invalid durations, mismatched/overlapping/out-of-order/duplicate/missing/unclosed windows; emit deterministic JSON for a complete canonical log and explicit failure for invalid input.
-- [ ] Retain actual diagnostic input/resource/source/command identity and original selector outcome. Completeness requires threshold-zero handler logging enabled before process initialization; a logged-run threshold result is not repair evidence.
+- [x] Mark each original tick outside its measured timer, preserving20 baseline/10 settle/24 steady samples, setup/order and existing35ms average/75ms max/+20ms delta assertions.
+- [x] Parse complete ordered begin/end windows and existing handler records in input order; JSON exports grouped/tick summaries, not per-tick ordered record identities. Preserve repeated OnUpdate/OnPostUpdate/other attempts, identities, zero intervals, grouped sums/maxima, and outside-window/unparsed-line counts.
+- [x] Reject malformed records, invalid durations, mismatched/overlapping/out-of-order/duplicate/missing/unclosed windows; emit deterministic JSON for a complete canonical log and explicit failure for invalid input.
+- [x] Retain actual diagnostic input/resource/source/command identity and original selector outcome. Completeness requires existing `WOW_SIM_LOG_HANDLER_TIMINGS=0` before process/OnceLock initialization; launcher metadata and child-inheritance source support this, not independent child environment/PID attestation. Parser `all_attempts_verified=false` remains conservative; a logged-run threshold result is not repair evidence.
 
 ## How it works
 
@@ -23,13 +23,17 @@ Test-scoped observations associate existing handler logs with the canonical tale
 
 ## Tests asserting this spec
 
-- `tools/test_talent_handler_log.py`: concrete parser/CLI fixtures; development RED46 assertion failures then GREEN12 tests. Independent proof pending; initial syntax error excluded from RED credit.
-- `tests/talent_panel_onupdate_perf.rs::talent_panel_open_onupdate_tick_latency_stays_under_budget`: original assertions retained; new marked/logged capture pending.
+- `tools/test_talent_handler_log.py`: concrete parser/CLI fixtures; development RED46 assertion failures then GREEN12 tests. Independent source/parser-development PASS authenticates saved outcomes and current GREEN scope, not independently witnessed past execution or cryptographic provenance of historical RED implementation; initial syntax error excluded from RED credit.
+- `tests/talent_panel_onupdate_perf.rs::talent_panel_open_onupdate_tick_latency_stays_under_budget`: original assertions retained; actual marked/logged selector PASS once, independent2779 capture coherence PASS via raw reconstruction. Parent/child summaries are one body execution.
 
 ## Known gaps (current cycle)
 
-- [ ] Execute genuine parser RED/GREEN, then authenticate one new targeted diagnostic and verify all54 sample windows and aggregate coherence.
-- [ ] Source/readability, applicable checks, retention and documented interpretation limits.
+- [x] Saved development RED46/GREEN12 reviewed within historical-provenance limits; new seal first authenticated once and actual54 windows/aggregate coherence independently verified.
+- [x] Source/readability and interpretation limits verified; actual compile/fmt PASS. Default check REUSED for unchanged production/library scope only, not new instrumentation.
+- [ ] Packet retention/link/privacy gate pending main integration; no cache-contents attestation.
+- [ ] Native/performance/root-cause/full-handoff acceptance remains open.
+
+[Current meaning and limits](../wiki/investigations/fullsuite-ba-2026-10-11.md#talent-handler-log-observation--2026-10-12) link the detailed packet rather than duplicating its numerical ledger.
 
 ## Out of scope
 
