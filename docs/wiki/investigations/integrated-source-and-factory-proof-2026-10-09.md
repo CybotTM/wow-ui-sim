@@ -8,6 +8,12 @@ User changed acceptance: “as long as we have coherent behavior that works with
 
 [Range contract](../../specs/widget-range-validation.md) and [retained proof](../../../data/patch-api/evidence/reversed-range-interpolation-2026-10-11/README.md): test-only `6a4801a40` asserts target7/displayed1/pending before reversed `(8,2)`, then immediate bounds2/value2/displayed2/not interpolating. Independent2445 authenticates the new seal once and 16 widget cases plus one distinct lifecycle control PASS; compile/fmt/check0 and manual readability clean. First outcome PASS, not new bugfix RED/GREEN. No production/vendor/native-policy change or profile-matrix proof. Frozen ba broad FAIL remains unchanged; it does not cover this new test. Full handoff OPEN.
 
+## Calendar event index — current source/spec stage 2026-10-11
+
+Test/spec commit `a4159ce53` links the [current Calendar source boundary](patch-8-1-0-api-audit.md#current-retail-calendar-query-contract--2026-10-10) to the [Calendar contract](../../specs/calendar-event-index-info.md). User explicitly authorized generated demo records in normal sessions and optional location filtering; numeric IDs are synthetic simulator policy, not native type evidence. Test stage only: producer absent, authentic RED/GREEN pending, current publication-gap row and historical **87 OK / 58 gaps** unchanged.
+
+Reported compile is asynchronously active after load22.4/RAM24.37 admission in the private `calendar-event-index-current` root. Admission/active compile is not execution or proof; this documentation entry generates neither. Separate collector **3 PASS** does not repair or replace broad-suite **3 FAIL**; full handoff remains OPEN.
+
 ## Garrison addon-compatible catalog — test/spec stage 2026-10-11
 
 Commit `215d20236` adds three **unexecuted** tests in `tests/garrison_damage_classes.rs`: pure-school catalog shape/labels, independent returned tables/rows without mutation leaks, and authentic cached addon `OnLoad` → `AddCombatEvent` consumption. The consumer indexes by `spellInfo.schoolMask`: `1=Physical`, `2=Holy`, `4=Fire`, `8=Nature`, `16=Frost`, `32=Shadow`, `64=Arcane` are simulator enUS labels, not damage-class ordinals; the consumer test distinguishes Fire mask4 from Holy mask2.

@@ -1,3 +1,7 @@
+## [2026-10-11] docs | Calendar current source/spec stage
+
+Updated [source boundary](investigations/patch-8-1-0-api-audit.md#current-retail-calendar-query-contract--2026-10-10), [stage handoff](investigations/integrated-source-and-factory-proof-2026-10-09.md#calendar-event-index--current-sourcespec-stage-2026-10-11) and index for `a4159ce53`/[Calendar spec](../specs/calendar-event-index-info.md). Recorded user-authorized normal-session demo records/optional location filters, synthetic-ID policy and reported private async compile admission load22.4/RAM24.37. Test stage only; producer absent, authentic RED/GREEN pending. Historical87OK/58gaps/current publication gap preserved; collector3PASS remains separate from broad3FAIL. Documentation only, no execution/proof generated.
+
 ## [2026-10-11] staging | Mists settled parent contract
 
 [Current fixture](investigations/mists-cast-startup-visibility.md#current-fixture-phase--2026-10-11-unverified) records the exact parent failure after hidden-state reconciliation and a separate one-execution fade control. Follow-up corrects the parent expectation to cached manager semantics; strict layout/lock checks and both failure histories remain. Follow-up unexecuted, no production/vendor patch.

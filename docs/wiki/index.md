@@ -514,6 +514,10 @@
 
 [Audit](investigations/patch-8-1-5-api-audit.md): revision 3789732, all 85 IDs accounted (66 inventory / 19 extract). Toy acquisition/fanfare model, twelve consumer-free retail retirements, 24 exact gaps. All 38 sweeps plus factory, 24 → 25 negative control, bare/cached/Mists behavior, scoped regressions, 51 parser fixtures, warning-clean non-vendor checks and startup `[]` pass. Dynamic validator passes; 38 registers, 194 prior inputs and 74 mode outcomes preserved. Three inherited extract failures unchanged; 8.2.0 integration placeholder remains.
 
+## [2026-10-11] staging | Current Calendar event index
+
+[Source/spec stage](investigations/integrated-source-and-factory-proof-2026-10-09.md#calendar-event-index--current-sourcespec-stage-2026-10-11), `a4159ce53`, follows the [Calendar spec](../specs/calendar-event-index-info.md): user-authorized normal-session demo records/optional location filters; synthetic numeric IDs, not native type evidence. Producer absent, authentic RED/GREEN pending; reported private async compile is not proof. Historical87OK/58gaps/current publication gap unchanged; collector3PASS separate from broad3FAIL.
+
 ## [2026-10-08] evidence | 8.1.0 page audit
 
 [Audit](investigations/patch-8-1-0-api-audit.md): revision 4462737; 145 inventory / 28 extract identities. Integrated 8.1.5/8.2.0 removals close two gaps (60 → 58); no later-page closures. Modeled civil-calendar comparison and three retail member absences; two source unknowns retained. Forty sweeps plus factory, 58 → 59 negative control, requested regressions and all seventeen historical validators pass; exact-preservation portability proof rejects tampering.
