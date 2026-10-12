@@ -457,6 +457,7 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-5")]
     pub aura_entry_ids: crate::c_api::aura_entry_ids::AuraEntryIds,
     pub player: PlayerState,
+    pub war_mode: crate::c_api::c_pvp::war_mode::WarModeState,
     pub player_xp: PlayerXpState,
     pub bind_location: String,
     pub pvp_honor: PvpHonorState,
@@ -518,6 +519,8 @@ pub struct SimState {
     pub artifact_relic_items: HashSet<i32>,
     pub quest_log: Vec<u32>,
     pub quest_log_entries: QuestLogState,
+    /// Explicit eligible IDs, independent of world-quest classification.
+    pub quest_war_mode_eligibility: std::collections::HashSet<i32>,
     pub pending_quest_offer: Option<u32>,
     pub quest_choice_id: Option<u32>,
     pub quest_choice_response_id: Option<u32>,
@@ -571,6 +574,8 @@ pub struct SimState {
     pub currency_info: HashMap<i32, CurrencyInfo>,
     /// Explicit (War Mode applies, limit once per tooltip) flags; no inferred catalog.
     pub currency_war_mode_bonus: HashMap<i32, (Option<bool>, Option<bool>)>,
+    /// Explicit immediate reputation grants; no inferred currency/faction catalog.
+    pub currency_faction_grants: HashMap<i32, i32>,
     pub equipment_manager: EquipmentManagerState,
     pub maps: HashMap<i32, MapData>,
     /// Explicit per-map hideIcons input; absence is not a native unknown-ID claim.

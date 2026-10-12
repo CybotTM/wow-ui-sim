@@ -380,6 +380,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-5")]
             aura_entry_ids: crate::c_api::aura_entry_ids::AuraEntryIds::default(),
             player: PlayerState::seeded(),
+            war_mode: crate::c_api::c_pvp::war_mode::WarModeState::default(),
             player_xp: PlayerXpState::default(),
             bind_location: "Stormwind City".into(),
             pvp_honor: PvpHonorState::default(),
@@ -438,6 +439,7 @@ macro_rules! build_empty_sim_state {
             artifact_relic_items: HashSet::new(),
             quest_log: Vec::new(),
             quest_log_entries: QuestLogState::seeded(),
+            quest_war_mode_eligibility: HashSet::new(),
             pending_quest_offer: None,
             quest_choice_id: None,
             quest_choice_response_id: None,
@@ -490,6 +492,7 @@ macro_rules! build_empty_sim_state {
             glyph: GlyphState::default(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
             currency_war_mode_bonus: HashMap::new(),
+            currency_faction_grants: HashMap::new(),
             equipment_manager: EquipmentManagerState::new(),
             maps: default_maps(),
             map_display_hide_icons: HashMap::new(),

@@ -18,18 +18,19 @@ Current cached Retail/PTR `QuestUtils.lua` exposes `QuestUtils_AddQuestCurrencyR
 
 ## Implementation inventory
 
-- `tests/quest_currency_war_mode.rs`: initial public query contracts and actual ordinary vendor-tooltip fixture; positive supplied-input controls follow real RED.
-- `src/c_api/c_pvp.rs`: existing C_PvP namespace seam; desired/reward state not yet modeled.
+- `tests/quest_currency_war_mode.rs`: initial public query contracts and actual ordinary vendor-tooltip fixture; initial RED observed1 ordinary-baseline PASS/4 contractFAIL; positive supplied-input controls follow real owned scaffold.
+- `src/c_api/c_pvp.rs`: existing namespace seam; `war_mode.rs::WarModeState` owns desired/reward inputs, getters not yet implemented.
 - `src/c_api/item_spell/c_currency.rs`: existing currency query seam; faction relation not yet modeled.
-- `src/lua_api/globals/quest_surface/register.rs`: existing false eligibility placeholder; no independent eligibility producer yet.
+- `src/lua_api/globals/quest_surface/register.rs`: existing false eligibility placeholder; no independent eligibility getter yet.
+- `SimState.quest_war_mode_eligibility` and `currency_faction_grants`: empty supplied relations, independent of classification/display fields.
 
 ## Tests asserting this spec
 
-`tests/quest_currency_war_mode.rs`; initial test stage only, no RED execution or positive caller proof yet.
+`tests/quest_currency_war_mode.rs`; initial RED1PASS/4FAIL before owned scaffold; ordinary vendor baseline passes, positive supplied caller and new getters remain unproved.
 
 ## Known gaps (current cycle)
 
-- [ ] Initial genuine RED and ordinary vendor baseline, real owned-input scaffold/expanded positive RED, producers, current-profile GREEN, startup/publication and independent Rust/readability/retention proof.
+- [ ] Initial RED independent authentication; expanded positive RED after real input scaffold; producers, current-profile GREEN, startup/publication and independent Rust/readability/retention proof. Ordinary vendor baseline1PASS/4contractFAIL retained.
 
 ## Out of scope
 

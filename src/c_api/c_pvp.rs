@@ -1,3 +1,5 @@
+pub mod war_mode;
+
 #[cfg(all(
     feature = "retail-12-0-5",
     any(feature = "profile-retail", feature = "client-ptr")
