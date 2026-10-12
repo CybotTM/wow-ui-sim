@@ -54,6 +54,12 @@ pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
             "DoesWarModeBonusApply",
             query_currency_war_mode_bonus,
         )?;
+        table_set_rust_fn_static(
+            state,
+            table_ref,
+            "GetFactionGrantedByCurrency",
+            query_currency_faction_grant,
+        )?;
     }
     #[cfg(feature = "client-mists")]
     table_set_rust_fn_static(
@@ -92,6 +98,22 @@ fn query_currency_war_mode_bonus(state: &mut LuaState) -> LuaResult<u32> {
     state.push(applies.map_or(Val::Nil, Val::Bool));
     state.push(once.map_or(Val::Nil, Val::Bool));
     Ok(2)
+}
+
+fn query_currency_faction_grant(state: &mut LuaState) -> LuaResult<u32> {
+    let value = stack_val(state, 1);
+    #[cfg(feature = "retail-12-1-0")]
+    let value = rilua::table_security::unwrap_secret(state, value)?;
+    let currency_id = crate::c_api::helpers::validate_supplied_relation_id(
+        value,
+        "C_CurrencyInfo.GetFactionGrantedByCurrency: currencyID must be a number",
+    )?;
+    let faction_id = {
+        let sim = borrow_state(state)?;
+        currency_id.and_then(|id| sim.currency_faction_grants.get(&id).copied())
+    };
+    state.push(faction_id.map_or(Val::Nil, |id| Val::Num(f64::from(id))));
+    Ok(1)
 }
 
 fn c_currency_get_list_size(state: &mut LuaState) -> LuaResult<u32> {

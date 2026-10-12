@@ -3,6 +3,19 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
+/// Reject nonnumeric inputs; unrepresented numeric identities cannot match supplied rows.
+pub(crate) fn validate_supplied_relation_id(
+    value: Val,
+    error_message: &'static str,
+) -> LuaResult<Option<i32>> {
+    let Val::Num(number) = value else {
+        return Err(rilua::runtime_error(error_message));
+    };
+    let in_range = (f64::from(i32::MIN)..=f64::from(i32::MAX)).contains(&number);
+    let represented = number.is_finite() && number.fract() == 0.0 && in_range;
+    Ok(represented.then(|| number as i32))
+}
+
 pub(crate) fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
     let key = state.gc.intern_string(name.as_bytes());
     let global = state.global;
