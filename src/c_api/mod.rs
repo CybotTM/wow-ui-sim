@@ -52,6 +52,7 @@ pub mod c_battle_net;
 pub(crate) mod c_battle_net_friend_search;
 #[cfg(feature = "retail-12-0-7")]
 pub(crate) mod c_battle_net_invite;
+pub mod c_calendar;
 pub mod c_catalog_shop;
 pub mod c_catalog_shop_products;
 #[cfg(feature = "retail-12-0-0")]
@@ -340,6 +341,7 @@ pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResu
     c_navigation::register(state)?;
     c_weather::register(state)?;
     c_achievement_info_relations::register(state)?;
+    c_calendar::register(state)?;
     c_garrison_damage_classes::register(state)?;
     #[cfg(feature = "client-retail")]
     c_garrison_trees::register(state)?;

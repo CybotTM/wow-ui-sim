@@ -495,6 +495,7 @@ macro_rules! build_empty_sim_state {
             map_world_rects: HashMap::new(),
             achievements: default_achievements(),
             achievement_superceding: HashMap::new(),
+            calendar_event_indices: HashMap::new(),
             achievement_guild_rep: ::std::collections::HashMap::new(),
             achievement_statistics: ::std::collections::HashMap::new(),
             achievement_comparison_unit: None,
@@ -947,6 +948,7 @@ impl Default for SimState {
 
 impl SimState {
     fn seed_default_game_state(&mut self) {
+        self.calendar_event_indices = crate::c_api::c_calendar::seeded_event_indices();
         self.action_bars = default_action_bars();
         self.party_members = default_party();
         self.party_group_active = false;

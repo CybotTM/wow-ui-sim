@@ -19,16 +19,17 @@
 ## Implementation inventory
 
 - `data/calendar/demo-event-indices.json`: generated fixture source.
-- Planned `src/c_api/c_calendar.rs`: modeled DTO/query/registration.
-- Planned `SimState` owned index records and normal default seeding.
+- `src/c_api/c_calendar.rs`: modeled DTO/query/registration.
+- `SimState.calendar_event_indices`: owned positions, seeded from the demo dataset in normal defaults.
 
 ## Tests asserting this spec
 
-- `tests/calendar_event_index_info.rs`: public Lua defaults/filtering/absence/snapshots/security; authored, RED execution pending. Owned-state update coverage will be added with the model.
+- `tests/calendar_event_index_info.rs`: public Lua defaults/filtering/absence/snapshots/security, owned-state update/removal and cleanup restoration.
+- Test-stage `a4159ce53` executed authentic RED: nine failures; first positive fixture query returned no DTO. This does not prove later branches. Producer GREEN and final acceptance remain pending.
 
 ## Known gaps (current cycle)
 
-- [ ] Producer, authentic RED/GREEN and preservation proof pending. Dataset alone does not implement the query.
+- [ ] Producer GREEN and preservation proof pending. Authentic test-stage RED reached the public query/DTO boundary; setup/compilation succeeded.
 - [ ] Current publication-gap row remains until the real producer and publication assertion are verified.
 
 ## Out of scope

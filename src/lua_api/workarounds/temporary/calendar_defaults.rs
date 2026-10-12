@@ -1,9 +1,8 @@
 //! Temporary calendar defaults.
 //!
-//! Calendar event, invite, and holiday state is not modeled yet. The Blizzard
-//! Calendar UI can load against an empty calendar, so expose that inert
-//! compatibility surface outside the C API implementation until real calendar
-//! state exists.
+//! Only event identity positions are modeled in `c_api::c_calendar`; event
+//! catalog, invite, and holiday state remain unmodeled. Expose the remaining
+//! inert compatibility surface without replacing modeled Calendar functions.
 
 const CALENDAR_DEFAULTS_LUA: &str = r#"
 C_Calendar = C_Calendar or __wow_namespace()

@@ -1,0 +1,101 @@
+//! Calendar event positions supplied by synthetic fixtures, not a native event catalog.
+use super::helpers::ensure_namespace;
+use crate::lua_api::methods::{borrow_state, create_table, table_set};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
+use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
+use std::collections::HashMap;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CalendarEventIndexInfo {
+    pub offset_months: i32,
+    pub month_day: i32,
+    pub event_index: i32,
+}
+
+pub(crate) fn seeded_event_indices() -> HashMap<i32, CalendarEventIndexInfo> {
+    serde_json::from_str(include_str!("../../data/calendar/demo-event-indices.json")).expect(
+        "failed to parse calendar event index fixture data/calendar/demo-event-indices.json",
+    )
+}
+
+pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
+    let namespace = ensure_namespace(state, "C_Calendar")?;
+    table_set_rust_fn_static(
+        state,
+        namespace,
+        "GetEventIndexInfo",
+        query_event_index_info,
+    )
+}
+
+fn read_query_arguments(state: &LuaState) -> LuaResult<(f64, Option<f64>, Option<f64>)> {
+    let event_id = stack_val(state, 1);
+    let month_offset = stack_val(state, 2);
+    let month_day = stack_val(state, 3);
+    // Authenticate every argument before any type validation or identity lookup.
+    #[cfg(feature = "retail-12-1-0")]
+    let (event_id, month_offset, month_day) = (
+        rilua::table_security::unwrap_secret(state, event_id)?,
+        rilua::table_security::unwrap_secret(state, month_offset)?,
+        rilua::table_security::unwrap_secret(state, month_day)?,
+    );
+    let Val::Num(event_id) = event_id else {
+        return Err(rilua::runtime_error(
+            "C_Calendar.GetEventIndexInfo: eventID must be a number",
+        ));
+    };
+    Ok((
+        event_id,
+        validate_optional_number(month_offset, "monthOffset")?,
+        validate_optional_number(month_day, "monthDay")?,
+    ))
+}
+
+fn validate_optional_number(value: Val, name: &str) -> LuaResult<Option<f64>> {
+    match value {
+        Val::Nil => Ok(None),
+        Val::Num(number) => Ok(Some(number)),
+        _ => Err(rilua::runtime_error(format!(
+            "C_Calendar.GetEventIndexInfo: {name} must be a number or nil"
+        ))),
+    }
+}
+
+fn query_event_index_info(state: &mut LuaState) -> LuaResult<u32> {
+    let (event_id, month_offset, month_day) = read_query_arguments(state)?;
+    let in_range = (f64::from(i32::MIN)..=f64::from(i32::MAX)).contains(&event_id);
+    let represented = event_id.is_finite() && event_id.fract() == 0.0 && in_range;
+    let record = if represented {
+        borrow_state(state)?
+            .calendar_event_indices
+            .get(&(event_id as i32))
+            .copied()
+    } else {
+        None
+    };
+    let record = record.filter(|info| {
+        let offset_matches = month_offset.is_none_or(|n| n == f64::from(info.offset_months));
+        let day_matches = month_day.is_none_or(|n| n == f64::from(info.month_day));
+        offset_matches && day_matches
+    });
+    push_event_index_info(state, record);
+    Ok(1)
+}
+
+fn push_event_index_info(state: &mut LuaState, record: Option<CalendarEventIndexInfo>) {
+    let Some(info) = record else {
+        state.push(Val::Nil);
+        return;
+    };
+    let result = create_table(state);
+    state.push(result);
+    for (key, value) in [
+        ("offsetMonths", info.offset_months),
+        ("monthDay", info.month_day),
+        ("eventIndex", info.event_index),
+    ] {
+        table_set(state, result, key, Val::Num(f64::from(value)));
+    }
+}

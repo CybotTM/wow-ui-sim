@@ -129,6 +129,68 @@ fn calendar_event_index_result_tables_are_independent_snapshots() {
 }
 
 #[test]
+fn calendar_event_index_observes_owned_state_updates_and_removal() {
+    let env = WowLuaEnv::new().expect("calendar environment");
+    env.exec(&format!(
+        "{QUERY_ASSERTIONS}\nCalendarBefore = get(910001)\nindex(0, 15, 1, CalendarBefore)"
+    ))
+    .expect("initial owned record");
+    {
+        let mut state = env.state().borrow_mut();
+        let record = state
+            .calendar_event_indices
+            .get_mut(&910001)
+            .expect("seeded record");
+        record.offset_months = 2;
+        record.month_day = 20;
+        record.event_index = 4;
+    }
+    env.exec(&format!(
+        r#"{QUERY_ASSERTIONS}
+        index(2, 20, 4, get(910001, 2, 20))
+        missing(get(910001, 0, 15))
+        index(0, 15, 1, CalendarBefore)
+        index(0, 15, 2, get(910002))
+        "#
+    ))
+    .expect("updated position and preserved snapshots");
+    env.state()
+        .borrow_mut()
+        .calendar_event_indices
+        .remove(&910001);
+    env.exec(&format!(
+        r#"{QUERY_ASSERTIONS}
+        missing(get(910001))
+        missing(get(910001, 2, 20))
+        index(0, 15, 1, CalendarBefore)
+        index(1, 4, 1, get(910003))
+        "#
+    ))
+    .expect("removed record without affecting other identities");
+}
+
+#[test]
+fn calendar_event_index_restoration_preserves_namespace_and_unrelated_functions() {
+    let env = WowLuaEnv::new().expect("calendar environment");
+    env.exec(
+        r#"
+        CalendarNamespaceBefore = C_Calendar
+        CalendarInviteSentinel = function() return 7 end
+        C_Calendar.GetNumInvites = CalendarInviteSentinel
+        C_Calendar.GetEventIndexInfo = nil
+    "#,
+    )
+    .expect("calendar cleanup fixture");
+    env.restore_post_cleanup_globals();
+    env.exec(&format!(r#"{QUERY_ASSERTIONS}
+        index(0, 15, 1, get(910001))
+        assert(rawequal(C_Calendar, CalendarNamespaceBefore), 'namespace preserved')
+        assert(rawequal(C_Calendar.GetNumInvites, CalendarInviteSentinel), 'unrelated function preserved')
+        assert(C_Calendar.GetNumInvites() == 7)
+        "#)).expect("restored real getter and preserved Calendar namespace");
+}
+
+#[test]
 fn calendar_event_index_required_and_optional_numbers_reject_wrong_types() {
     query_probe(
         r#"

@@ -578,6 +578,8 @@ pub struct SimState {
     pub achievements: HashMap<i32, AchievementInfo>,
     /// Explicit supplied relations; no native catalog or inferred chain.
     pub achievement_superceding: HashMap<i32, Vec<i32>>,
+    /// Explicit event identity positions; default records are simulator demo data.
+    pub calendar_event_indices: HashMap<i32, crate::c_api::c_calendar::CalendarEventIndexInfo>,
     pub achievement_guild_rep: HashMap<i32, AchievementGuildRep>,
     pub achievement_statistics: HashMap<i32, AchievementStatistic>,
     pub achievement_comparison_unit: Option<String>,
