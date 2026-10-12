@@ -36,8 +36,17 @@ Both performance selectors and the asset selector passed in saved1dcc. Compared 
 
 Profiled/CASC0/warm-cache clocks and nested file timings are not exclusive costs, benchmark equivalence or loaded-failure attribution. The first cache hit's compile bucket includes lookup/replay and potentially pack initialization ([source boundary](../../../data/test-perf/evidence/startup-cost-diagnostic-2026-10-11/first-cache-hit-boundary.md)); component durations remain unmeasured. No native/current-production/frozen-BA payload proof or repair. Frozen **15,038 PASS / 3 FAIL / 19 skipped / 15,041 executed** and separate accepted scopes remain unchanged; full handoff OPEN.
 
+### Returned addon-load fields — 2026-10-12
+
+[Distinct inner-timing packet](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/README.md) captures existing `LoadResult` timing/frame/cache fields and diagnostic counts discarded by the completed outer probe. No production/API/vendor instrumentation or old-probe replay.
+
+[Independent2556 compile/source gate](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/compile-independent-report.md): **PARTIAL_COMPILE_SOURCE**, rustc0/source unchanged; new artifact authenticated once. Reuse receipt, no rebuild/rehash. Library provenance remains Cargo-record/path-stat. Earlier preparation report's wrong-destination [output gap](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/preflight-output-gap.json) is retained, not invented PASS.
+
+[Source boundary](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/source-boundary.md): read-only bytecode mode before environment creation; profiling0/load-only, no startup events/readiness/old phase-file fields. Buckets overlap; zero fields are not skipped; diagnostic counts do not establish global errorlessness. Runtime05:04UTC guard denied (load33.79/RAM21.600GiB/no Cargo), **no submission/observations**. Old coherence proof, frozen BA and broader OPEN limits unchanged.
+
 ## Sources
 
+- [Distinct returned-field preparation and compile/source evidence](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/README.md)
 - [Startup observation wrapper and public runtime packet](../../../data/test-perf/evidence/startup-cost-diagnostic-2026-10-11/README.md)
 - [Saved report/counts/selected failures](../../../data/patch-api/evidence/query-final-suite-result-2026-10-11/README.md)
 - [Startup fixture](../../../tests/startup_perf.rs)

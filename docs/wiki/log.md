@@ -1,3 +1,7 @@
+## [2026-10-12] docs | Distinct returned addon-load fields — runtime blocked
+
+[Returned-field boundary](investigations/fullsuite-ba-2026-10-11.md#returned-addon-load-fields--2026-10-12): independent2556 PARTIAL_COMPILE_SOURCE supports new wrapper rustc0/source unchanged and first artifact authentication once. Runtime guard denied; no observations. Load-only/read-only-cache/overlapping-bucket limits and preparation output gap retained. Old coherence scope and frozen BA3FAIL/full-handoff OPEN unchanged.
+
 ## [2026-10-11] evidence | Startup observation coherence PASS
 
 [Startup observations](investigations/fullsuite-ba-2026-10-11.md#startup-observations--2026-10-11): independent2549 verifies225 JSON observations/1497 file records, complete ordered sequence/readiness and terminal success. Enclosing3.948s includes observer overhead; no returned/explicit stream errors, internal error collector unmeasured. First artifact authentication reused, denied guards retained. Profiled/CASC0/warm-cache observations are not loaded-failure repair or acceptance; BA3FAIL/full handoff OPEN.
