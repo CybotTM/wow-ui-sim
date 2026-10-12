@@ -1,6 +1,6 @@
 # Startup addon paired observation
 
-Test-only observation in [`tests/startup_perf.rs`](../../tests/startup_perf.rs) pairs each successful canonical addon load result with that same call's outer wall time. This is an observation contract, not a startup optimization. Independent2794 accepts bounded current-run proof at source `490bc1080`; [packet](../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md) owns exact results and provenance. Public retention remains pending.
+Test-only observation in [`tests/startup_perf.rs`](../../tests/startup_perf.rs) pairs each successful canonical addon load result with that same call's outer wall time. This is an observation contract, not a startup optimization. Independent2794 accepts bounded current-run proof at source `490bc1080`; [packet](../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md) owns exact results and provenance. Public retention/link/privacy independently passed at `da4bbc442` within retained-text scope.
 
 ## What it must do
 
@@ -25,7 +25,7 @@ Test-only observation in [`tests/startup_perf.rs`](../../tests/startup_perf.rs) 
 - [x] Implement observation and focused concrete serialization coverage; saved compilation and formatting PASS. Production check reuse covers unchanged production/library scope only, not new tests.
 - [x] Obtain bounded current-run evidence for canonical ordering and same-call pairing; source audit establishes clock/emission boundaries.
 - [ ] Execute emission-before-failing-assertion behavior: source order is established, but this passing run did not exercise assertion failure.
-- [ ] Complete public packet retention gate.
+- [x] Public packet retention/link/privacy independently verified at `da4bbc442`; native/causal/historical acceptance remains separate.
 
 Initial compile E0583 at `59f3ff136` remains historical failure, separate from current PASS. Diagnostic collection counts do not establish compatibility-clean startup. Captured allowlist values are null, including `WOW_SIM_LOG_HANDLER_TIMINGS` and `XDG_CACHE_HOME`; actual bytecode enable/disable controls, `ASSET_RESOLVER_CACHE_DIR`, and `WOW_SIM_VERBOSE` child values are unknown. Captured `WOW_SIM_BYTECODE_CACHE_DIR` is not an actual reader. No full cache-policy or cache-contents attestation.
 

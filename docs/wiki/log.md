@@ -1,6 +1,6 @@
 ## [2026-10-12] observation | Canonical paired startup
 
-Ingested accepted independent2794 bounded current-run proof into [contract](../specs/startup-addon-paired-observation.md), loading pipeline and [BA boundary](investigations/fullsuite-ba-2026-10-11.md#canonical-paired-startup--2026-10-12); [packet](../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md) owns details. Public retention pending; initial compile failure retained, parent/child recap credit corrected, environment limits explicit. Failed-assertion emission source-only; frozen BA FAIL/full handoff OPEN unchanged. Docs only; no replay, authentication, source changes or commit.
+Ingested accepted independent2794 bounded current-run proof into [contract](../specs/startup-addon-paired-observation.md), loading pipeline and [BA boundary](investigations/fullsuite-ba-2026-10-11.md#canonical-paired-startup--2026-10-12); [packet](../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md) owns details. Public retention/link/privacy independently passed at `da4bbc442`; initial compile failure retained, parent/child recap credit corrected, environment limits explicit. Failed-assertion emission source-only; frozen BA FAIL/full handoff OPEN unchanged. Docs only; no replay, authentication, source changes or commit.
 
 ## [2026-10-12] observation | Talent handler-log capture
 

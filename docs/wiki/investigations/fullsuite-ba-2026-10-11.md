@@ -60,7 +60,7 @@ Accounting total4.112s, XML processing2.225s, Lua execution0.891s=compile+call. 
 
 ### Canonical paired startup — 2026-10-12
 
-[Current packet](../../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md) owns exact results/provenance; independent2794 accepts bounded current-run coherence at source `490bc1080`. One focused serializer and one canonical startup body PASS; parent/child recaps are not additional body executions. Compilation/formatting PASS; default check reused only for unchanged production/library scope. Initial `59f3ff136` compile E0583 remains separate; new seal first authenticated once. Public retention pending.
+[Current packet](../../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md) owns exact results/provenance; independent2794 accepts bounded current-run coherence at source `490bc1080`. One focused serializer and one canonical startup body PASS; parent/child recaps are not additional body executions. Compilation/formatting PASS; default check reused only for unchanged production/library scope. Initial `59f3ff136` compile E0583 remains separate; new seal first authenticated once. Public retention/link/privacy independently passed at `da4bbc442` within retained-text scope.
 
 [Contract](../../specs/startup-addon-paired-observation.md) preserves original path/readiness/strict budget. Same-call rows are now paired in this current execution, not combined from earlier outer/load-only probes. Allocation/recording remain inside startup time; JSON emission is outside it. Emission before failed assertions is source-only: this passing run did not execute that failure boundary. Diagnostic counts are not compatibility-clean proof; overlapping loader buckets are not exclusive elapsed costs.
 

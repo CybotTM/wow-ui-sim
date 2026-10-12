@@ -6,7 +6,7 @@ User changed acceptance: “as long as we have coherent behavior that works with
 
 ## Canonical paired startup — bounded current proof 2026-10-12
 
-[BA observation boundary](fullsuite-ba-2026-10-11.md#canonical-paired-startup--2026-10-12) records independent2794 bounded PASS at `490bc1080`; [contract](../../specs/startup-addon-paired-observation.md) owns requirements and [packet](../../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md) owns exact results/provenance. Serializer and canonical body are separate executions; parent/child recaps do not multiply body credit. Initial compile failure retained, first new-seal authentication reused, public retention pending. Failed-assertion emission has source-order proof only. No compatibility-clean/cache-contents/native/historical-equivalence/performance-repair claim; frozen BA FAIL and full handoff OPEN unchanged.
+[BA observation boundary](fullsuite-ba-2026-10-11.md#canonical-paired-startup--2026-10-12) records independent2794 bounded PASS at `490bc1080`; [contract](../../specs/startup-addon-paired-observation.md) owns requirements and [packet](../../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md) owns exact results/provenance. Serializer and canonical body are separate executions; parent/child recaps do not multiply body credit. Initial compile failure retained, first new-seal authentication reused, public retention/link/privacy independently passed at `da4bbc442` within retained-text scope. Failed-assertion emission has source-order proof only. No compatibility-clean/cache-contents/native/historical-equivalence/performance-repair claim; frozen BA FAIL and full handoff OPEN unchanged.
 
 ## Reversed StatusBar range — preservation coverage 2026-10-11
 
