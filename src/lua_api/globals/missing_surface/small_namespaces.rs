@@ -126,6 +126,7 @@ const C_PVP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
         "GetWarModeRewardBonusDefault",
         c_pvp_get_war_mode_reward_bonus_default,
     ),
+    #[cfg(not(any(feature = "client-retail", feature = "client-ptr")))]
     ("GetWarModeRewardBonus", c_pvp_get_war_mode_reward_bonus),
     ("SetLocklistMap", super::super::pvp_probes::set_locklist_map),
     (
@@ -324,6 +325,7 @@ fn c_pvp_get_war_mode_reward_bonus_default(state: &mut LuaState) -> LuaResult<u3
     Ok(1)
 }
 
+#[cfg(not(any(feature = "client-retail", feature = "client-ptr")))]
 fn c_pvp_get_war_mode_reward_bonus(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(10.0));
     Ok(1)
