@@ -25,12 +25,12 @@
 ## Tests asserting this spec
 
 - `tests/calendar_event_index_info.rs`: public Lua defaults/filtering/absence/snapshots/security, owned-state update/removal and cleanup restoration.
-- Test-stage `a4159ce53` executed authentic RED: nine failures; first positive fixture query returned no DTO. This does not prove later branches. Producer GREEN and final acceptance remain pending.
+- Test-stage `a4159ce53` executed authentic RED: nine failures; first positive fixture query returned no DTO. This does not prove later branches. Producer `fa66dd878` focused execution reports 11 passed; normal loaded demo/publication assertions and Lua-error smoke report exit0/`[]`. Independent GREEN/final acceptance remain pending.
 
 ## Known gaps (current cycle)
 
-- [ ] Producer GREEN and preservation proof pending. Authentic test-stage RED reached the public query/DTO boundary; setup/compilation succeeded.
-- [ ] Current publication-gap row remains until the real producer and publication assertion are verified.
+- [ ] Independent GREEN/final acceptance pending. Authentic test-stage RED reached the public query/DTO boundary; setup/compilation succeeded.
+- [ ] Loaded normal-session publication assertion passed; removed only the current event-index gap row. Relevant publication sweep execution remains pending; frozen historical accounting is preserved.
 
 ## Out of scope
 
