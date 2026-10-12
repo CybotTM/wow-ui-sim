@@ -42,6 +42,9 @@ class ValidationTests(unittest.TestCase):
         for path in (ROOT / 'data/patch-api/evidence').iterdir():
             if path.is_dir() and path.name not in (EVIDENCE.name, CURRENT_RESULTS.parent.name, PREVIOUS_RESULTS.parent.name):
                 (self.root / 'data/patch-api/evidence' / path.name).symlink_to(path, target_is_directory=True)
+        current_packet = self.root / CURRENT_RESULTS.parent
+        current_packet.mkdir(parents=True)
+        (current_packet / 'README.md').symlink_to(ROOT / CURRENT_RESULTS.parent / 'README.md')
         (self.root / 'data/patch-api/sources').symlink_to(ROOT / 'data/patch-api/sources', target_is_directory=True)
         (self.root / 'docs').symlink_to(ROOT / 'docs', target_is_directory=True)
         (self.root / 'tools').symlink_to(ROOT / 'tools', target_is_directory=True)
@@ -132,6 +135,8 @@ class ValidationTests(unittest.TestCase):
                 capture = reference / path
                 capture.parent.mkdir(parents=True)
                 capture.write_bytes(original)
+            (reference / CURRENT_RESULTS.parent / 'README.md').write_bytes(
+                (source_root / CURRENT_RESULTS.parent / 'README.md').read_bytes())
             case = ValidationTests('test_missing_current_packet_fails_without_historical_fallback')
             with patch.dict(globals(), ROOT=reference):
                 try:
@@ -150,14 +155,17 @@ class ValidationTests(unittest.TestCase):
 
     def test_current_fixture_rejects_unreviewed_extra_closure_and_stale_gap(self):
         self.publish_current()
+        self.assertEqual(self.validator.check_current_producer_closures()['current_producer_closures'], 7)
         extra = sorted(self.current_gaps)[0]
-        for gaps in (self.current_gaps - {extra}, self.current_gaps | {sorted(CLOSED)[0]}, self.current_gaps | {'invented-id'}):
+        for gaps in (self.current_gaps - {extra}, self.current_gaps | {sorted(CLOSED)[0]}, self.current_gaps | {'wt-global-api-C_PlayerInfo.GUIDIsPlayer-83'}, self.current_gaps | {'invented-id'}):
             with self.subTest(gaps=len(gaps)):
                 self.store(self.fixture, sorted(gaps))
                 with self.assertRaises(AssertionError):
                     self.validator.check_current_producer_closures()
 
     def test_current_results_reject_failed_closure_missing_row_and_new_gap(self):
+        self.publish_current()
+        self.assertEqual(self.validator.check_current_producer_closures()['current_producer_closures'], 7)
         for key in (sorted(CLOSED)[0], 'wt-global-api-C_PlayerInfo.GUIDIsPlayer-83'):
             for mutation in ('failed-closure', 'missing-row', 'new-gap', 'wrong-symbol', 'fallback-only'):
                 results = self.publish_current()
