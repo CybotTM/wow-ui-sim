@@ -46,3 +46,8 @@ The original raw-console observation FAIL in the final report remains unchanged;
 ## Out of scope
 
 Native catalog/range/classification rules, ownership inference and normal relation population: absent source authority or user seeding authorization. Native/external/full-handoff acceptance remains separate and open; this query slice cannot close the parent goal.
+
+## Current bounded GUI publication — 2026-10-12
+
+[New90-second WoW API publication only; not Pi/LLM provider diagnostics](../../data/patch-api/evidence/live-retail-gui-providers-2026-10-12/README.md) · [Independent publication gate; logged event, not pixels; intentional124 expiry, not assertion failure or service repair](../../data/patch-api/evidence/live-retail-gui-providers-2026-10-12/live-provider-report.md). [Owned-process/socket cleanup, existing display preserved;15 copies/39,405 bytes retention PENDING; native/visual/authenticated-remote/user acceptance OPEN](../../data/patch-api/evidence/live-retail-gui-providers-2026-10-12/README.md).
+

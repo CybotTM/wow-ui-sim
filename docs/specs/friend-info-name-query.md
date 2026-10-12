@@ -38,3 +38,8 @@ Current cached Retail/PTR `FriendListDocumentation.lua` declares `C_FriendList.G
 ## Out of scope
 
 This bounded caller fix does not establish native catalogs, name normalization/coercion, complete native `FriendInfo` fields, note mutation APIs, network friend lifecycle or new earlier-profile contracts. Those remain separate parent-handoff gaps; no new normal-session seeding follows from fixtures. Existing synthetic records are simulator inputs, not native facts.
+
+## Current bounded GUI publication — 2026-10-12
+
+[New90-second WoW API publication only; not Pi/LLM provider diagnostics](../../data/patch-api/evidence/live-retail-gui-providers-2026-10-12/README.md) · [Independent publication gate; logged event, not pixels; intentional124 expiry, not assertion failure or service repair](../../data/patch-api/evidence/live-retail-gui-providers-2026-10-12/live-provider-report.md). [Owned-process/socket cleanup, existing display preserved;15 copies/39,405 bytes retention PENDING; native/visual/authenticated-remote/user acceptance OPEN](../../data/patch-api/evidence/live-retail-gui-providers-2026-10-12/README.md).
+
