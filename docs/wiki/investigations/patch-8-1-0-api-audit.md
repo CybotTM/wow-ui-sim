@@ -134,9 +134,17 @@ Retail RED at `76f405e1d`: **0/9 PASS**, eight missing raw-provider guards plus 
 | Owning strict publication | `a555f927a` original prefork case PASS; current145/94OK/51gaps | Seven producer closures separate from frozen87/58/two supersessions and old533c93/52/six closures |
 | Default check | `d7a34be4a` exit0 | Six inherited manifest deprecations retained; no warning-free claim |
 | Current validator and capture isolation | `d21ca3f64` retry9/9 and actual validator exit0; both captures/frozen inputs unchanged | Earlier8/9FAIL and standalone NOT RUN retained; no synthetic-map substitution |
-| Retention/native/earlier-profile/external/full handoff | Retention independently2939 PASS at19988; other gates OPEN | Broad suite `d21ca3f64388d49b367803434ff1b0404b86c640` / `full-suite-1791833706`, async submission October 12, 2026, 19:35 UTC; result PENDING |
+| Retention/native/earlier-profile/external/full handoff | GUID retention independently2939 PASS at19988 unchanged; other gates OPEN | Saved d21 broad PASS below; new broad packet retention PENDING, not full-handoff completion |
 
 Historical RED9FAIL, initial publication1FAIL/exit1 plus wrong101 worker guard, and publication-before fixture-race/coherenceFAIL remain failures. GREEN overwrote generic structured RED JSON; original report/raw/auth survive, reconstruction is not byte-exact and original JSON NOT_RECOVERED. Public packet collision disclosure independently2939 verified; original structured RED JSON remains NOT_RECOVERED. No replay or authentication performed for this docs update; historical533cFAIL/BA3FAIL unchanged.
+
+## Saved d21 broad result — 2026-10-12
+
+[New broad packet](../../../data/test-perf/evidence/fullsuite-d21-2026-10-12/README.md) owns raw result/log/proof, phase accounting and exact selected outcomes for `d21ca3f64388d49b367803434ff1b0404b86c640` / `full-suite-1791833706`: **15,112 executed PASS, 0 FAIL, 19 reported skips**, all phase exits0. Started October 12, 2026, 19:35:07 UTC; finished20:11:50 UTC. Integration10,786, primary prefork2,321 plus auxiliary4, library2,001; auxiliary rows counted once. Saved private verification report supplies this observation; public packet creation belongs to main and new packet retention remains PENDING.
+
+GUID9, original strict8.1 publication, original startup and both talent selectors are present PASS. Main's log confirmation additionally finds original BA `asset_resolver_config::tests::gui_resolution_cache_preparation` PASS at line14472 and auxiliary chat2/cast1/spellbook1 all PASS at lines13204/13205/13209/13213. Runner elapsed values do not establish successful body timings; no cache-content, historical-equivalence, causal or native claim. Inherited manifest warnings remain, not warning-free proof.
+
+Old533c15,102PASS/1FAIL and frozen BA3FAIL remain unchanged historical results. Existing GUID254/21 packet retention independent2939 PASS is unchanged and does not cover the new broad packet. Original RED JSON NOT_RECOVERED/disclosure remains unchanged. GUI authenticated-user review, native/other-profile acceptance, credits, Pi provenance and full handoff remain OPEN; broad PASS does not close them. Source contract unchanged; no replay, authentication or new execution from this docs update.
 
 ## Current publication reconciliation — 2026-10-12
 

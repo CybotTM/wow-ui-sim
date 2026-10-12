@@ -1,6 +1,6 @@
 ## [2026-10-12] verification | GUIDIsPlayer bounded current proof
 
-[Current audit](investigations/patch-8-1-0-api-audit.md#guidisplayer--bounded-current-verification-2026-10-12) links contract and packet-owned details: main-verified Retail/PTR behavior, strict publication, default check and retry validator PASS. Historical source stage/failures preserved; independent2939 retention/link/privacy PASS at19988; original RED JSON NOT_RECOVERED and new async broad-suite result PENDING. Native/earlier-profile/external/full handoff OPEN;533cFAIL/BA3FAIL unchanged.
+[Current audit](investigations/patch-8-1-0-api-audit.md#guidisplayer--bounded-current-verification-2026-10-12) links contract and packet-owned details: main-verified Retail/PTR behavior, strict publication, default check and retry validator PASS. Historical source stage/failures preserved; independent2939 retention/link/privacy PASS at19988; original RED JSON NOT_RECOVERED. [Saved d21 broad PASS](investigations/patch-8-1-0-api-audit.md#saved-d21-broad-result--2026-10-12) links packet-owned counts/proof; new packet retention PENDING. GUI authenticated-user review, native/other-profile/external acceptance, credits, Pi provenance and full handoff OPEN;533cFAIL/BA3FAIL unchanged. No body-timing/cache-content/historical-equivalence/causal credit.
 
 ## [2026-10-12] observation | Live Retail GUI publication
 
