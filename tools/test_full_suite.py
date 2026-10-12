@@ -71,7 +71,8 @@ class FullSuiteWorkerTests(unittest.TestCase):
             "prefix = os.environ['WORKER'] + '.' + name\n"
             "(root / (prefix + '.started')).write_text(json.dumps({\n"
             "    'argv': sys.argv[1:], 'jobs': os.environ.get('CARGO_BUILD_JOBS'),\n"
-            "    'cwd': os.getcwd()}))\n"
+            "    'cwd': os.getcwd(),\n"
+            "    'fixture_capacity': os.environ.get('WOW_SIM_TIMEOUT_FIXTURE_CAPACITY')}))\n"
             "deadline = time.monotonic() + 5\n"
             "while not (root / (prefix + '.release')).exists():\n"
             "    if time.monotonic() > deadline: sys.exit(98)\n"
@@ -202,6 +203,40 @@ class FullSuiteWorkerTests(unittest.TestCase):
             self.assertIn("exit 7", log)
             self.assertIn("exit 8", log)
             self.assertIn("test sandbox::prefork_failure ... FAILED", log)
+
+    def assert_step_metadata(self, fixture_capacity):
+        self.env.pop("WOW_SIM_TIMEOUT_FIXTURE_CAPACITY", None)
+        if fixture_capacity is not None:
+            self.env["WOW_SIM_TIMEOUT_FIXTURE_CAPACITY"] = fixture_capacity
+        process = self.start_worker()
+        stdout = self.finish_scopes(process)
+        result = json.loads((self.results / "sandbox-sha.json").read_text())
+        steps = (
+            ("integration", "integration"),
+            ("prefork", "prefork_full_ui"),
+            ("lib", "lib"),
+        )
+        for step, child in steps:
+            actual = json.loads((self.root / f"first.{child}.started").read_text())
+            self.assertIn("command", result["steps"][step])
+            self.assertEqual(
+                result["steps"][step]["command"], ["cargo", *actual["argv"]]
+            )
+            self.assertEqual(
+                result["steps"][step]["environment"],
+                {"WOW_SIM_TIMEOUT_FIXTURE_CAPACITY": actual["fixture_capacity"]},
+            )
+            self.assertEqual(actual["fixture_capacity"], fixture_capacity)
+        self.assertEqual(json.loads(stdout)["steps"], result["steps"])
+
+    def test_step_metadata_records_unset_reservation_as_null(self):
+        self.assert_step_metadata(None)
+
+    def test_step_metadata_records_reserved_value_without_changing_children(self):
+        self.assert_step_metadata("reserved")
+
+    def test_step_metadata_preserves_empty_reservation_distinct_from_unset(self):
+        self.assert_step_metadata("")
 
     def test_direct_children_run_while_old_builder_lock_held(self):
         self.exercise_worker(False)
