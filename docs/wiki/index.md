@@ -1,6 +1,6 @@
 ## [2026-10-12] audit | Current full suite533c FAIL; publication reconciliation bounded PASS
 
-[Suite533c investigation](investigations/fullsuite-533c-2026-10-12.md) links packet-owned counts/limits and separate original-prefork publication PASS. [Dated current publication](investigations/patch-8-1-0-api-audit.md#current-publication-reconciliation--2026-10-12) preserves frozen history; validator/isolation final9/9 tests and real validator independently PASS; retention gate PENDING. Exact old BA selectors now PASS without retained successful body timings/cache provenance or causal/historical-equivalence credit; parent OPEN.
+[Suite533c investigation](investigations/fullsuite-533c-2026-10-12.md) links packet-owned counts/limits and separate original-prefork publication PASS. [Dated current publication](investigations/patch-8-1-0-api-audit.md#current-publication-reconciliation--2026-10-12) preserves frozen history; validator/isolation final9/9 tests and real validator independently PASS; combined retention/link/privacy independently2886 PASS. Exact old BA selectors now PASS without retained successful body timings/cache provenance or causal/historical-equivalence credit; parent OPEN.
 
 ## [2026-10-12] verification | Mount-item bounded current evidence
 

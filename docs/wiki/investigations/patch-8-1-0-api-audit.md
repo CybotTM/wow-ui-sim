@@ -127,7 +127,7 @@ Targeted integrated gates are recorded in `p810-proof.json`; acceptance is retai
 | Direct current runtime publication | Bounded PASS | Real capture; not native behavior |
 | Historical/current validator separation `9424d1981` | Independent2879 bounded PASS | Frozen results/removal supersessions preserved; six explicit producer closures, no generic replacement exceptions |
 | Capture isolation `e48ec18a0` | RED retained; final9/9 tests PASS, source capture unchanged | Current packet excluded after symlink preflight failure; scratch regression left committed capture byte-exact |
-| Retention gate | PENDING | Actual independent report required before promotion |
+| Retention gate | Independent2886 scoped PASS | 77 copies across both packets,74 links/six anchors,zero concrete privacy leaks; no runtime rerun |
 | Native/external/full handoff | OPEN | Targeted reconciliation does not close parent acceptance |
 
 Original validator line81/preflight FAILs remain history. Main admits independent2879 final9/9 tests and real-validator exit0, current145/93/52 vs historical145/87/58, byte-exact unchanged capture; no synthetic observation substitutes for the runtime capture. Old BA startup/talent/CASC selectors now PASS, but successful body timings/cache provenance were not retained; thresholds unchanged, observation source changed, no causal repair or historical-equivalence claim. Documentation adds no execution or authentication credit.
