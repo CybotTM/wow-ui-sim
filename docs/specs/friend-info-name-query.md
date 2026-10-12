@@ -31,7 +31,7 @@ Current cached Retail/PTR `FriendListDocumentation.lua` declares `C_FriendList.G
 
 - [x] Initial pre-producer RED executed and authenticated: four cases0PASS/4FAIL; three stop at absent exact query, popup stops at an overbroad diagnostic-readiness assertion. Downstream assertions remain unreached.
 - [x] Corrected pre-producer RED independently authenticated: four cases0PASS/4FAIL. Whole closure and Mainline provenance assertions reach unchanged `OnShow`; nil `info` causes the actual note-prefill failure. Reopen remains unreached. Optional nil-probe observations remain logged, not replaced with fabricated globals.
-- [ ] Implement the exact C API over existing state after RED, then independently verify affected behavior, loaded startup, formatting/default check and readability; retain scoped proof.
+- [ ] Complete affected runtime/startup/check proof. First producer Retail run is4PASS/1FAIL: actual popup/live-state/miss/alias cases pass, security fixture stops at an unrelated `canaccessvalue` prerequisite. A separate diagnostic proves exact secret lookup succeeds before that helper fails. Security fixture now asserts secret identity and actual query outcomes directly; original failure is retained. Source/readability audit passes for `be9c734a4`, not runtime/native/full acceptance.
 
 ## Out of scope
 
