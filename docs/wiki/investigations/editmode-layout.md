@@ -98,6 +98,14 @@ artifact produced deliveries and user confirmation both worked. Automatic focus
 setup/fresh-startup and independent3045 ownership/socket/focus/geometry/wiring/lifetime gate PASS ([packet](../../../data/patch-api/evidence/native-window-focus-2026-10-12/README.md)); user authorized stopping after each test, without automatic
 expiry; main stopped the test app after the gate. This is a native-focus runtime configuration fix, not new Rust keyboard logic after `7d9d9f621`. Later PTR `f3145424c` startup2/cache10/Enter3 and normal zero-errors/fmt/PTR-check PASS ([packet](../../../data/patch-api/evidence/edit-mode-enter-ptr-2026-10-12/README.md)); same Enter bodies run through a fresh whole Game constructor, not Retail prefork/cache-process proof. Universal pixel/native/all-key/all-profile parity and whole handoff remain OPEN. See [selection contract](../../specs/edit-mode-layout-selection.md).
 
+### PTR packet and current-suite submission — 2026-10-12
+
+[PTR packet](../../../data/patch-api/evidence/edit-mode-enter-ptr-2026-10-12/README.md), committed at `41cbf5005`, owns the main-verified `f3145424c` runtime/check evidence. Retail `7d9d9f621` proof remains reused, not replayed. PTR runtime PASS is not PTR GUI, earlier-profile, prefork cache/process, causal-performance or broad-current-suite acceptance.
+
+Later public native-focus gate3049 at `3fce068f0` passed its exact-stream retention/link/anchor/privacy scope, separately from private native gate3045 and user acceptance; the [native packet](../../../data/patch-api/evidence/native-window-focus-2026-10-12/README.md) now retains that gate's bounded result. Earlier pending labels and separate PTR execution epochs are not retroactive native parity proof.
+
+The private stage-qualified submission receipt records asynchronous `full-suite submit 41cbf5005d4fec8dba98538e425e6d8fd7f0f5c3`, exit0, unit `full-suite-1791847608.service`, invocation `ef206e594ed4485cbc0c1d4e9bbef291`. Acceptance is **SUBMISSION ONLY**: no current build/suite result or PASS count admitted. Historical receipts remain unchanged; whole handoff OPEN.
+
 Follow-up: selecting the saved layout still was not enough for the visible UI.
 The startup fast path for action bars seeded Widescreen `systemInfo` and replayed
 settings, but skipped `ApplySystemAnchor`, leaving bars at the temporary

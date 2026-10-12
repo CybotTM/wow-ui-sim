@@ -14,4 +14,4 @@ User authorized stopping the app after each test instead of automatic90s expiry.
 
 Earlier historical-artifact focus-only failure, zero-delivery XTest attempt, invalid binding-lookup normal probe, unsupported diagnostic getter and expiry black screen remain distinct retained observations. They are not discarded or relabeled application GREEN. Earlier public gate’s user-acceptance exclusion remains historical; this later packet supplies only bounded current layout/chat/command-field acceptance.
 
-No universal native/pixel/all-key/all-profile, causal-performance, command-execution or whole-handoff acceptance. Public packet retention/link/privacy gate pending.
+No universal native/pixel/all-key/all-profile, causal-performance, command-execution or whole-handoff acceptance. [Independent public retention/link/privacy gate](public-retention-gate.json) PASS at `3fce068f0`: 20 checks, two exact RED streams, 27 links/two anchors, zero privacy findings; no runtime replay.

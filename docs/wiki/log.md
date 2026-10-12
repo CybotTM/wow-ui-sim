@@ -1,6 +1,10 @@
+## [2026-10-12] docs | PTR packet and asynchronous submission reconciliation
+
+Linked [committed PTR packet](../../data/patch-api/evidence/edit-mode-enter-ptr-2026-10-12/README.md) and recorded [submission-only metadata](investigations/editmode-layout.md#ptr-packet-and-current-suite-submission--2026-10-12). Reconciled current PTR execution and native publication wording; packet labels and immutable receipts unchanged. No suite result/count admitted, proof replay, ops, tests, checks, builds, source/runtime edits, delegation or commits. Whole handoff OPEN.
+
 ## [2026-10-12] docs | Bounded native-focus reconciliation
 
-[Native-focus packet](../../data/patch-api/evidence/native-window-focus-2026-10-12/README.md) owns bounded user acceptance, fresh-startup/native-input and lifetime proof. Linked current prose reconciled; stop-after-test replaces expiry. Historical receipts unchanged; PTR execution, universal pixel/all-key/all-profile and whole handoff OPEN.
+[Native-focus packet](../../data/patch-api/evidence/native-window-focus-2026-10-12/README.md) owns bounded user acceptance, fresh-startup/native-input and lifetime proof. Linked current prose reconciled; stop-after-test replaces expiry. Historical receipts unchanged; PTR GUI acceptance, universal pixel/all-key/all-profile and whole handoff OPEN.
 
 ## [2026-10-12] docs | Bounded Edit Mode / Enter and Friend-setter reconciliation
 
