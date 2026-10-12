@@ -48,6 +48,10 @@ Profiled/CASC0/warm-cache clocks and nested file timings are not exclusive costs
 
 Accounting total4.112s, XML processing2.225s, Lua execution0.891s=compile+call. [XML timing source scopes](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/xml-timing-scope.md) explain inclusive recursive finalize counters versus top-level create timers; aggregate subset labels do not define an exclusive hierarchy. Distinct discovery/result names and zero rows retained literally. Load-only observations are not paired with old clocks or loaded-failure/native/repair proof. Frozen BA3FAIL/full goal OPEN unchanged.
 
+### Performance scheduling boundary — 2026-10-12
+
+[Bounded source interpretation](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/perf-scheduling-boundary.md): retained command header confirms16 Nextest slots. Linux performance wrappers request exclusive workload gates, but `WOW_SIM_TIMEOUT_FIXTURE_CAPACITY=reserved` bypasses acquisition. Original reservation state/competitor scopes unrecorded; no assertion that these tests raced or contention caused failure. Named scheduling sources unchanged since frozen BA. No rerun or scheduler/threshold fix justified by isolated passes alone.
+
 ## Sources
 
 - [Distinct returned-field preparation and compile/source evidence](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/README.md)
