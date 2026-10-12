@@ -22,7 +22,7 @@ Producer `be9c734a4`; corrected security fixture `6ec0c1cb8`. [Contract](../../.
 
 ## Retention
 
-[Manifest](retention-manifest.json):258 byte-exact nonbinary copies,3,816,250 bytes. Raw commands/results/stdout/stderr, source/toolchain metadata and one-time seal authentication receipts retained separately. No executable copied or rehashed; existing receipts reused. Retention/link/privacy audit pending; its private report will not be recursively copied into this packet.
+[Manifest](retention-manifest.json):258 byte-exact nonbinary copies,3,816,250 bytes. Raw commands/results/stdout/stderr, source/toolchain metadata and one-time seal authentication receipts retained separately. No executable copied or rehashed; existing receipts reused. Independent2756 retention/link/privacy PASS at `466807009`:258/258 copies,3,816,250 bytes;24 valid links including2 anchors;zero privacy blockers. Private gate reports are not recursively copied into this packet.
 
 Line-reference erratum: the final audit's `tests/friend_info_exact.rs:128–238` range extends past the file; actual helper/test block ends at218. Typographical reference only; source hashes, assertions and runtime outcomes unchanged.
 

@@ -32,7 +32,7 @@ Current cached Retail/PTR `FriendListDocumentation.lua` declares `C_FriendList.G
 - [x] Initial pre-producer RED executed and authenticated: four cases0PASS/4FAIL; three stop at absent exact query, popup stops at an overbroad diagnostic-readiness assertion. Downstream assertions remain unreached.
 - [x] Corrected pre-producer RED independently authenticated: four cases0PASS/4FAIL. Whole closure and Mainline provenance assertions reach unchanged `OnShow`; nil `info` causes the actual note-prefill failure. Reopen remains unreached. Optional nil-probe observations remain logged, not replaced with fabricated globals.
 - [x] Independent current gate:12 newer passing executions (Retail4+PTR8), plus4 unchanged Retail passes reused;16 scope executions/eight names, not16 new runs. Normal291/283 addons exit0/`[]`/CLEAN0; fmt/default check0, nine source hashes unchanged; source/readability and fixture-delta proofs admitted separately. Six inherited dependency warnings remain. First producer4PASS/1FAIL, helper diagnostic, parser failure and resource refusals remain retained.
-- [ ] Packet retention/link/privacy audit; behavioral PASS does not itself verify every copied record.
+- [x] Independent packet retention/link/privacy PASS:258 byte-exact copies/3,816,250 bytes,24 links including2 anchors,zero privacy blockers. Private gate reports excluded from recursive copies; original behavioral failures remain preserved.
 - [ ] Separate helper/native parity, ordinary numeric/userdata/malformed-UTF8 runtime coverage, all-profile runtime and parent full-handoff acceptance remain outside this bounded proof.
 
 ## Out of scope

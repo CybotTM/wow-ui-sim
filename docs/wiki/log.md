@@ -1688,4 +1688,4 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 
 ## 2026-10-12 — Friend query and unchanged popup bounded proof
 
-[Status spec](../specs/friend-info-name-query.md) records independent current behavioral/source/check acceptance; [packet](../../data/patch-api/evidence/friend-info-exact-2026-10-12/README.md) keeps new/reused executions, original failures and authentication receipts separate. Retention gate pending; no native/full-handoff promotion.
+[Status spec](../specs/friend-info-name-query.md) records independent current behavioral/source/check acceptance; [packet](../../data/patch-api/evidence/friend-info-exact-2026-10-12/README.md) keeps new/reused executions, original failures and authentication receipts separate. Retention gate independently PASS; no native/full-handoff promotion.

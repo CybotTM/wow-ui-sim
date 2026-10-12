@@ -92,7 +92,7 @@ Current913 BOUNDED PASS is separate from historical a5e44 executions/22 names an
 
 [Friend-name spec](../../specs/friend-info-name-query.md) owns contract/status; [retained proof](../../../data/patch-api/evidence/friend-info-exact-2026-10-12/README.md) distinguishes new and reused executions, actual popup acceptance and all preserved failures. Exact Retail/PTR `C_FriendList.GetFriendInfo` lives with the shared existing projection in `src/c_api/c_friend_list.rs`. VM authentication precedes strict string validation; current alternate publication is removed without fallback. Indexed/earlier providers remain source-equivalent, C_Social unchanged; no native DTO/catalog claim or change to historical **87 OK / 58 gaps** or later publication snapshots.
 
-Whole unchanged Mainline `SET_FRIENDNOTE` now has bounded prefill/hide/live-reopen proof on both current profiles. Optional nil probes remain diagnostic observations, not fabricated globals or suppressed errors. Corrected secret fixture tests getter outcomes directly; the separate caller-sensitive `canaccessvalue` gap is not repaired. Final independent behavioral/source/check gate PASS; packet retention audit pending. Native/all-profile/performance/external and parent full handoff remain OPEN.
+Whole unchanged Mainline `SET_FRIENDNOTE` now has bounded prefill/hide/live-reopen proof on both current profiles. Optional nil probes remain diagnostic observations, not fabricated globals or suppressed errors. Corrected secret fixture tests getter outcomes directly; the separate caller-sensitive `canaccessvalue` gap is not repaired. Final independent behavioral/source/check and packet retention gates PASS. Native/all-profile/performance/external and parent full handoff remain OPEN.
 
 ## Proof and integration
 
