@@ -349,18 +349,11 @@ Original p302 36+1+2 seals, p303 16 seals, factory p302 112 seals and p303 16 se
 
 ## Browser readiness handoff
 
-**Dedicated simulator VNC — 2026-10-12:** user selected new simulator display/VNC over SSH/90-second app launch. [Setup guide and receipts](../../../data/patch-api/evidence/private-vnc-simulator-2026-10-12/README.md):display`:22`/1280×960, loopback5904, on-demand user units; existing5902/5903 untouched. Mapped1024×768 window and saved frame recorded.
+**Dedicated simulator VNC — 2026-10-12:** historical setup selected new simulator display/VNC over SSH/90-second app launch. [Setup guide and receipts](../../../data/patch-api/evidence/private-vnc-simulator-2026-10-12/README.md):display`:22`/1280×960, originally loopback5904, on-demand user units; existing5902/5903 untouched. Mapped1024×768 window and saved frame recorded. Later user-approved access policy is LAN-only unauthenticated VNC on one specific RFC1918 IPv4 interface (`-noipv6`, `-nopw`). VNC-only restart preserved original display PID635115; private-interface listener observed active. No app launch in this binding change; setup observation is not remote viewing/render/native/user acceptance. Endpoint and address-bearing metadata remain private; receipt location is recorded in the linked guide.
 
 Initial readiness race/missing X11 library failures preserved. User-approved matching `libxkbcommon-x11`1.13.2-1 installed; bounded readiness helper added. GUI artifact authentication reused/no rebuild. App's selected90-second limit ended with timeout/MainPID0/empty cgroup—not a clean natural exit; display/VNC continue.
 
-Local RFB3.8 ServerInit advertises security type1 (None): **no separate VNC password**, not VNC authentication. Privacy relies on loopback binding plus authenticated SSH transport; protected Xauthority cookie was not copied. Safe client forwarding and explicit bounded app start from the linked guide:
-
-```text
-ssh -N -L 127.0.0.1:5904:127.0.0.1:5904 osso@agent-server
-systemctl --user start wow-ui-vnc-app.service
-```
-
-Second command runs on agent-server for another bounded launch. [Independent operational checks](../../../data/patch-api/evidence/private-vnc-simulator-2026-10-12/independent-report.md) pass; [visual review](../../../data/patch-api/evidence/private-vnc-simulator-2026-10-12/visual-report.md) remains PARTIAL because tool omitted pixels. No remote SSH/viewer/user acceptance claim. User clarified no403issue; old reports are historical, not a current blocker. Frozen BA3FAIL/full handoff OPEN.
+Historical local RFB3.8 ServerInit advertises security type1 (None): **no separate VNC password**, not VNC authentication. That receipt relied on loopback plus authenticated SSH; it is not current access policy or a current forwarding instruction. Protected Xauthority cookie was not copied. Current LAN listener requires no VNC authentication from clients that can reach it. [Historical independent operational checks](../../../data/patch-api/evidence/private-vnc-simulator-2026-10-12/independent-report.md) pass; [visual review](../../../data/patch-api/evidence/private-vnc-simulator-2026-10-12/visual-report.md) remains PARTIAL because tool omitted pixels. No remote SSH/viewer/user acceptance claim. User clarified no403issue; old reports are historical, not a current blocker. Frozen BA3FAIL/full handoff OPEN.
 
 **Historical private browser observation:** existing loopback CDP returned the Patch1.0.0/API changes title, URL and article DOM with no 403 heading. Read-only observation, no navigation or authentication. This establishes DOM/CDP access at that observation only: not HTTP status, authentication, remote viewing or acceptance. Earlier navigation200 and VNC receipts below remain separate epochs. Source: private `handoff/browser-current-observe.md`; no DOM payload copied.
 

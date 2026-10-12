@@ -1,3 +1,7 @@
+## [2026-10-12] operation | User-approved private-LAN VNC binding
+
+Updated [VNC guide](../../data/patch-api/evidence/private-vnc-simulator-2026-10-12/README.md) and existing investigation: specific private IPv4 listener, no IPv6/password, VNC-only restart and preserved display. Historical loopback/SSH receipts unchanged; address-bearing receipts stay private. Setup observation is not rendered-user/native acceptance.
+
 ## [2026-10-12] docs | Bounded seven-profile coverage matrix
 
 Published [matrix](reference/coverage-matrix.md) from individually scoped retained receipts and independent docs audit. Current GUID publication145/94/51, default-Retail-only d21, compile-only earlier mount state and corrected Mists history remain distinct. No new runtime/native/causal or whole-handoff acceptance claim. Friend setter tests/spec preparation unexecuted.

@@ -8,7 +8,7 @@
 
 ## [2026-10-12] observation | Live Retail GUI publication
 
-[Packet](../../data/patch-api/evidence/live-retail-gui-providers-2026-10-12/README.md) · [Existing publication investigation](investigations/patch-8-1-0-api-audit.md#current-publication-reconciliation--2026-10-12).
+[Packet](../../data/patch-api/evidence/live-retail-gui-providers-2026-10-12/README.md) · [Current VNC access policy](../../data/patch-api/evidence/private-vnc-simulator-2026-10-12/README.md): user-approved LAN-only passwordless listener; historical loopback receipts unchanged, rendered-user acceptance separate. [Existing publication investigation](investigations/patch-8-1-0-api-audit.md#current-publication-reconciliation--2026-10-12).
 
 ## [2026-10-12] audit | Current full suite533c FAIL; publication reconciliation bounded PASS
 
