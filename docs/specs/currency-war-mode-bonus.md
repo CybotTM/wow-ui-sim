@@ -27,7 +27,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Current-profile GREEN, normal publication/startup and final Rust/independent proof pending; initial and expanded RED retained.
+- [ ] Retail focused nine cases and normal startup query assertions pass (291 addons, exit0/`[]`); independent gate pending. PTR, owning publication sweep and final Rust/independent proof pending; initial and expanded RED retained.
 
 ## Out of scope
 

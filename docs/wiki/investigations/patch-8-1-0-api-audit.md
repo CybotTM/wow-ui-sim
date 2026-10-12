@@ -54,7 +54,7 @@ User-selected scope is only the explicit `C_CurrencyInfo.DoesWarModeBonusApply` 
 
 Reported cached Retail/PTR `CurrencyInfoDocumentation` lines32–51 declare a required number and two nullable booleans, `AllowedWhenUntainted`. Reported `QuestUtils` lines683–695 consume both outputs, but first check currently missing `C_PvP.IsWarModeDesired`; `QuestCanHaveWarModeBonus` is a false placeholder, reward `firstInstance` has no model, and the faction query is unverified. These source observations do not establish positive public QuestUtils consumer behavior or authorize fake getters/model expansion.
 
-`wt-global-api-C_CurrencyInfo.DoesWarModeBonusApply-29` remains a gap until actual normal publication proof. Existing currency116 projection and Calendar/Bounty proof remain unchanged; historical87/58, Calendar89/56 and Bounty90/55 are separate snapshots, not query-stage results.
+Retail focused GREEN nine cases and normal291-addon raw query/arity/unseeded/type assertions exit0/`[]`; independent GREEN gate pending. `wt-global-api-C_CurrencyInfo.DoesWarModeBonusApply-29` is removed from the expected gap fixture on this actual loaded observation; owning `prefork_full_ui` sweep remains pending, so no new145-row accepted classification yet. Existing currency116 projection and Calendar/Bounty proof remain unchanged; historical87/58, Calendar89/56 and Bounty90/55 are separate snapshots, not query-stage results.
 
 ## Proof and integration
 
