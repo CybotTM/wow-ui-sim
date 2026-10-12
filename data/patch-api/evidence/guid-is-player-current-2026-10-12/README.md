@@ -1,0 +1,13 @@
+# GUID player query — current bounded evidence
+
+[Contract](../../../../docs/specs/guid-is-player.md) owns exact represented-identity/player-kind projection and closed-world unknown handling. Not native arbitrary-GUID classification or prefix inference; no new catalog, fields, normal seeding, account producer or vendor override.
+
+Initial Retail `76f405e1d` RED:0/9 PASS, eight missing raw-provider guards and one original whole PlayerLocation exact-true mismatch; downstream assertions unreached. `d6d8de29a` independent2929 Retail9/9 +PTR9/9 PASS; two normal raw-query/startup markers with `[]`, fmt0/readability clean. Original full ObjectAPI constructor/IsValid provenance verified: player true, direct NPC/unknown false, unchanged Lua account operand and miss consumer nil. Invalid UTF-8 byte rejection is source-inspected only. Four new seals authenticated once; no old executable reauthentication.
+
+[First actual owning sweep map](pre-reconciliation-current-publication-results.json):145 rows94OK51gaps, unchanged IDs/expectations, only GUID83 changes to `raw=function; lookup=function`. Strict initial case FAIL/exit1 solely stale expected52/observed51; capture worker erroneously expected integration exit101 and therefore also failed its guard. Neither failure relabeled PASS. Exact current expectation removes only GUID83; [post-reconciliation current map](current-publication-results.json) and independent original-prefork/Python-validator/default-check/retention gates pending.
+
+The active validator requires this packet's new map, never substitutes [old533c map](../publication-533c-reconciliation-2026-10-12/current-publication-results.json) or frozen observations. Historical145/87/58/two removal supersessions and old533c145/93/52/six producer closures remain immutable; new seven-closure/51-gap validation is separate. Scratch tests exclude both flat packet directories and preserve both source captures; no synthetic test observations exported as direct evidence.
+
+Evidence preservation gap: GREEN verifier overwrote generic structured RED `proof.json`. Original RED report,38 text records and auth receipt survive. Explicitly labeled reconstructed RED JSON is not byte-exact original history; original JSON bytes NOT_RECOVERED. GREEN preserved under a separate stage-qualified filename. Subsequent proofs use exclusive stage-qualified paths; collision disclosure retained with the packet.
+
+Raw-text/source retention manifest and independent link/privacy gate pending; no executable/library/image/Xauthority payloads planned. Native/account classification, earlier-profile contracts, saved full-suite PASS, authenticated viewing, causal performance and whole handoff remain **OPEN**. Saved533c full-suite FAIL and frozen BA3FAIL unchanged.

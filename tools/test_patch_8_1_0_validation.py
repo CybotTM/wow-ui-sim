@@ -8,7 +8,8 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = Path('data/patch-api/evidence/8.1.0-session-2026-10-08')
-CURRENT_RESULTS = Path('data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/current-publication-results.json')
+PREVIOUS_RESULTS = Path('data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/current-publication-results.json')
+CURRENT_RESULTS = Path('data/patch-api/evidence/guid-is-player-current-2026-10-12/current-publication-results.json')
 CLOSED = {
     'wt-global-api-C_AchievementInfo.GetSupercedingAchievements-13',
     'wt-global-api-C_Calendar.GetEventIndexInfo-20',
@@ -16,6 +17,7 @@ CLOSED = {
     'wt-global-api-C_FriendList.GetFriendInfo-44',
     'wt-global-api-C_Map.GetBountySetMaps-77',
     'wt-global-api-C_MountJournal.GetMountFromItem-78',
+    'wt-global-api-C_PlayerInfo.GUIDIsPlayer-83',
 }
 
 
@@ -38,7 +40,7 @@ class ValidationTests(unittest.TestCase):
             if path.is_file():
                 (self.evidence / path.name).symlink_to(path)
         for path in (ROOT / 'data/patch-api/evidence').iterdir():
-            if path.is_dir() and path.name not in (EVIDENCE.name, CURRENT_RESULTS.parent.name):
+            if path.is_dir() and path.name not in (EVIDENCE.name, CURRENT_RESULTS.parent.name, PREVIOUS_RESULTS.parent.name):
                 (self.root / 'data/patch-api/evidence' / path.name).symlink_to(path, target_is_directory=True)
         (self.root / 'data/patch-api/sources').symlink_to(ROOT / 'data/patch-api/sources', target_is_directory=True)
         (self.root / 'docs').symlink_to(ROOT / 'docs', target_is_directory=True)
@@ -77,8 +79,8 @@ class ValidationTests(unittest.TestCase):
         text = (ROOT / 'data/patch-api/sources/8.1.0-api-changes.txt').read_text()
         return self.validator.check_accounting(register, self.validator.load_extractor(), lines, text)
 
-    def test_frozen_accounting_remains_87_ok_58_gaps_with_52_current_gaps(self):
-        self.assertEqual(len(self.current_gaps), 52)
+    def test_frozen_accounting_remains_87_ok_58_gaps_with_51_current_gaps(self):
+        self.assertEqual(len(self.current_gaps), 51)
         self.assertEqual(self.accounting()['gaps'], 58)
         self.assertEqual(sum(row['ok'] for row in self.frozen.values()), 87)
         self.assertEqual(self.validator.check_proof()['publication_sweeps'], 40)
@@ -94,22 +96,26 @@ class ValidationTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.accounting()
 
-    def test_frozen_summary_cannot_be_rewritten_to_93_ok_52_gaps(self):
-        summary = load(self.evidence / 'p810-sweep-summary.json')
-        row = next(row for row in summary if row['patch'] == '8.1.0')
-        row.update(ok=93, gaps=52)
-        self.store(self.evidence / 'p810-sweep-summary.json', summary)
-        with self.assertRaises(AssertionError):
-            self.validator.check_proof()
+    def test_frozen_summary_cannot_adopt_either_current_cycle(self):
+        for ok, gaps in ((93, 52), (94, 51)):
+            summary = load(ROOT / EVIDENCE / 'p810-sweep-summary.json')
+            row = next(row for row in summary if row['patch'] == '8.1.0')
+            row.update(ok=ok, gaps=gaps)
+            self.store(self.evidence / 'p810-sweep-summary.json', summary)
+            with self.subTest(ok=ok, gaps=gaps), self.assertRaises(AssertionError):
+                self.validator.check_proof()
 
-    def test_original_two_removals_are_separate_from_six_producers(self):
+    def test_original_two_removals_are_separate_from_seven_producers(self):
         self.assertEqual(self.validator.check_supersessions()['integrated_gap_closures'], 2)
         self.publish_current()
-        self.assertEqual(self.validator.check_current_producer_closures()['current_producer_closures'], 6)
+        self.assertEqual(self.validator.check_current_producer_closures()['current_producer_closures'], 7)
 
-    def test_fixture_writes_leave_existing_source_capture_unchanged(self):
+    def test_fixture_writes_leave_both_source_captures_unchanged(self):
         source_root = ROOT
-        source_capture = source_root / CURRENT_RESULTS
+        source_captures = {
+            path: (source_root / path).read_bytes()
+            for path in (PREVIOUS_RESULTS, CURRENT_RESULTS)
+        }
         with tempfile.TemporaryDirectory(prefix='p810-reference-') as directory:
             reference = Path(directory)
             for name in ('.git', 'tools', 'docs', 'tests'):
@@ -120,22 +126,25 @@ class ValidationTests(unittest.TestCase):
             evidence = reference / 'data/patch-api/evidence'
             evidence.mkdir()
             for path in (source_root / 'data/patch-api/evidence').iterdir():
-                if path.is_dir() and path.name != CURRENT_RESULTS.parent.name:
+                if path.is_dir() and path.name not in (CURRENT_RESULTS.parent.name, PREVIOUS_RESULTS.parent.name):
                     (evidence / path.name).symlink_to(path, target_is_directory=True)
-            capture = reference / CURRENT_RESULTS
-            capture.parent.mkdir()
-            original = source_capture.read_bytes()
-            capture.write_bytes(original)
+            for path, original in source_captures.items():
+                capture = reference / path
+                capture.parent.mkdir(parents=True)
+                capture.write_bytes(original)
             case = ValidationTests('test_missing_current_packet_fails_without_historical_fallback')
             with patch.dict(globals(), ROOT=reference):
                 try:
                     case.setUp()
                     case.publish_current()
-                    self.assertEqual(capture.read_bytes(), original)
+                    for path, original in source_captures.items():
+                        self.assertEqual((reference / path).read_bytes(), original)
+                        self.assertEqual((source_root / path).read_bytes(), original)
                 finally:
                     case.doCleanups()
 
     def test_missing_current_packet_fails_without_historical_fallback(self):
+        self.store(self.root / PREVIOUS_RESULTS, load(ROOT / PREVIOUS_RESULTS))
         with self.assertRaisesRegex(FileNotFoundError, 'current-publication-results.json'):
             self.validator.check_current_producer_closures()
 
@@ -149,22 +158,22 @@ class ValidationTests(unittest.TestCase):
                     self.validator.check_current_producer_closures()
 
     def test_current_results_reject_failed_closure_missing_row_and_new_gap(self):
-        for mutation in ('failed-closure', 'missing-row', 'new-gap', 'wrong-symbol', 'fallback-only'):
-            results = self.publish_current()
-            key = sorted(CLOSED)[0]
-            if mutation == 'failed-closure':
-                results[key]['ok'] = False
-            elif mutation == 'missing-row':
-                del results[key]
-            elif mutation == 'new-gap':
-                results[next(k for k, row in results.items() if row['ok'] and k not in CLOSED)]['ok'] = False
-            elif mutation == 'wrong-symbol':
-                results[key]['expected']['symbol'] = 'C_Invented.Query'
-            else:
-                results[key]['observed']['detail'] = 'raw=nil; lookup=function'
-            self.store(self.root / CURRENT_RESULTS, results)
-            with self.subTest(mutation=mutation), self.assertRaises(AssertionError):
-                self.validator.check_current_producer_closures()
+        for key in (sorted(CLOSED)[0], 'wt-global-api-C_PlayerInfo.GUIDIsPlayer-83'):
+            for mutation in ('failed-closure', 'missing-row', 'new-gap', 'wrong-symbol', 'fallback-only'):
+                results = self.publish_current()
+                if mutation == 'failed-closure':
+                    results[key]['ok'] = False
+                elif mutation == 'missing-row':
+                    del results[key]
+                elif mutation == 'new-gap':
+                    results[next(k for k, row in results.items() if row['ok'] and k not in CLOSED)]['ok'] = False
+                elif mutation == 'wrong-symbol':
+                    results[key]['expected']['symbol'] = 'C_Invented.Query'
+                else:
+                    results[key]['observed']['detail'] = 'raw=nil; lookup=function'
+                self.store(self.root / CURRENT_RESULTS, results)
+                with self.subTest(key=key, mutation=mutation), self.assertRaises(AssertionError):
+                    self.validator.check_current_producer_closures()
 
 
 if __name__ == '__main__':
