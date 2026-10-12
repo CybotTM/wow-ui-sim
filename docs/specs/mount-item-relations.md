@@ -19,7 +19,7 @@ Current Retail/PTR `C_MountJournal.GetMountFromItem(itemID)` queries an explicit
 - `src/lua_api/state/sim_state.rs` — explicit environment-owned `mount_item_relations` field.
 - `src/lua_api/state.rs` — empty default; no normal catalog population.
 - `tests/mount_from_item.rs` — initial/expanded direct queries and mapped-secret recovery coverage.
-- `tests/mount_item_player_choice.rs` — original whole-template baseline and live relation contrast; captures actual supplier/result console observations without guessing classification.
+- `tests/mount_item_player_choice.rs` — original whole-template baseline and live relation contrast; returns test-owned supplier/result observations alongside the boolean, independent of vendor print routing and without guessing classification.
 - `src/c_api/c_mount_item.rs` — current-profile secret-authenticated supplied-relation query.
 - `src/c_api/mod.rs` and `src/c_api/registration.rs` — Retail/PTR module and namespace wiring.
 

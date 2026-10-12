@@ -16,6 +16,15 @@ const ROOTS: &[&str] = &[
 ];
 
 const ORIGINAL_ITEM_CONSUMER: &str = r#"
+    local observations = {}
+    local function observe(...)
+        local fields = {}
+        for index = 1, select('#', ...) do
+            local value = select(index, ...)
+            fields[index] = tostring(value)
+        end
+        observations[#observations + 1] = table.concat(fields, '\t')
+    end
     for _, addon in ipairs({
         'Blizzard_PlayerChoice', 'Blizzard_ItemButton', 'Blizzard_SharedXML'
     }) do
@@ -42,7 +51,7 @@ const ORIGINAL_ITEM_CONSUMER: &str = r#"
     local function provenance(fn, suffix)
         local info = debug.getinfo(fn, 'S')
         local source = info.source:gsub('\\', '/')
-        print('[mount-item consumer provenance]', info.what, source,
+        observe('[mount-item consumer provenance]', info.what, source,
             info.linedefined, info.lastlinedefined)
         assert(info.what == 'Lua', 'expected cached vendor Lua method')
         assert(source:sub(-#suffix) == suffix, 'wrong vendor source: ' .. source)
@@ -57,8 +66,8 @@ const ORIGINAL_ITEM_CONSUMER: &str = r#"
     local name, link = C_Item.GetItemInfo(6948)
     assert(name == 'Hearthstone' and type(link) == 'string' and link ~= '',
         'generated real item metadata/link required')
-    print('[mount-item consumer input]', name, link)
-    print('[mount-item consumer stage]', 'original ItemButton:SetItem(6948)')
+    observe('[mount-item consumer input]', name, link)
+    observe('[mount-item consumer stage]', 'original ItemButton:SetItem(6948)')
     reward.itemButton:SetItem(6948)
     assert(reward.itemButton.itemLink == link, 'real SetItem must store generated item link')
     assert(reward.itemButton:GetItemID() == 6948, 'real ItemButton item identity')
@@ -68,18 +77,22 @@ const ORIGINAL_ITEM_CONSUMER: &str = r#"
         'reward method identity unchanged before actual invocation')
 
     -- Observations only: no missing-API guard replaces the actual vendor call.
-    print('[mount-item consumer API observations]',
+    observe('[mount-item consumer API observations]',
         type(C_Item.IsDressableItemByID),
         type(C_MountJournal and C_MountJournal.GetMountFromItem),
         type(C_PetJournal and C_PetJournal.GetPetInfoByItemID))
-    print('[mount-item consumer stage]', 'original reward:IsDressupReward({itemId=6948})')
+    observe('[mount-item consumer stage]', 'original reward:IsDressupReward({itemId=6948})')
     local value = reward:IsDressupReward({itemId=6948})
     assert(type(value) == 'boolean', 'actual original consumer must return a boolean')
-    print('[mount-item consumer result]', value)
-    local predicateValue = C_Item.IsDressableItemByID(reward.itemButton.itemLink)
-    print('[mount-item consumer predicate observation]',
+    observe('[mount-item consumer result]', value)
+    local predicate = C_Item.IsDressableItemByID
+    local predicateValue = predicate(reward.itemButton.itemLink)
+    observe('[mount-item consumer predicate observation]',
         type(rawget(C_Item, 'IsDressableItemByID')), type(predicateValue), predicateValue)
-    return value
+    local predicateSource = debug.getinfo(predicate, 'S')
+    observe('[mount-item consumer predicate source]', predicateSource.what,
+        predicateSource.source, predicateSource.linedefined, predicateSource.lastlinedefined)
+    return value, table.concat(observations, '\n')
 "#;
 
 #[test]
@@ -188,22 +201,22 @@ fn assert_no_recorded_errors(env: &WowLuaEnv, boundary: &str) {
 }
 
 fn invoke_original_item_consumer(env: &WowLuaEnv) -> bool {
-    let console_before = env.state().borrow().console_output.len();
-    let result = env.eval::<bool>(ORIGINAL_ITEM_CONSUMER);
-    for line in env
-        .state()
-        .borrow()
-        .console_output
-        .iter()
-        .skip(console_before)
-    {
-        eprintln!("[mount-item consumer console] {line}");
+    let result = env.eval::<(bool, String)>(ORIGINAL_ITEM_CONSUMER);
+    if let Ok((_, observations)) = &result {
+        assert!(
+            !observations.is_empty(),
+            "consumer observations must be retained"
+        );
+        for line in observations.lines() {
+            eprintln!("[mount-item consumer observation] {line}");
+        }
     }
     print_recorded_errors(env, "original SetItem / IsDressupReward invocation");
     if let Err(error) = &result {
         eprintln!("[mount-item consumer original invocation error] {error}");
     }
-    let value = result.expect("original real-item consumer call must succeed and return a boolean");
+    let (value, _) =
+        result.expect("original real-item consumer call must succeed and return a boolean");
     assert_no_recorded_errors(env, "original SetItem / IsDressupReward invocation");
     value
 }
