@@ -77,7 +77,7 @@ Completed currency query `23166cd1a` remains separate:18GREEN, normal291+283 add
 - **Current final queued:** `wow-quest-currency-final-20261012t094132611905z` covers13 Quest +9 changed currency-flag regressions per profile because the validator changed, plus normal five-query/startup checks. No final execution yet; host admission pending.
 - **Checks queued after final:** `wow-quest-currency-check-20261012t094226265038z` covers final fmt/default check. Spec requirements remain unchecked until final acceptance.
 
-[New public packet](../../../data/patch-api/evidence/quest-currency-war-mode-rewards-2026-10-12/README.md) retains RED/source and pinned precursor evidence separately, main byte-compared; independent retention gate pending. Historical RED, completed query proof and parent OPEN remain unchanged; this docs-only stage adds no execution or authentication credit.
+[New public packet](../../../data/patch-api/evidence/quest-currency-war-mode-rewards-2026-10-12/README.md) retains RED/source and pinned precursor evidence separately; independent through-precursor retention PASS. Current-source final acceptance remains pending. Historical RED, completed query proof and parent OPEN remain unchanged; this docs-only stage adds no execution or authentication credit.
 
 ## Proof and integration
 

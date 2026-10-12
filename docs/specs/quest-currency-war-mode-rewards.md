@@ -46,7 +46,7 @@ Current source `a5eaf4fc6` consolidates the accepted duplicate validator after P
 | Current final | `wow-quest-currency-final-20261012t094132611905z`: 13 Quest + 9 changed currency-flag regressions per profile, justified by validator change; normal five-query/startup checks | Queued; no final execution yet |
 | Current checks | `wow-quest-currency-check-20261012t094226265038z`: final fmt/default check after final unit | Queued; host admission pending |
 
-[Public packet](../../data/patch-api/evidence/quest-currency-war-mode-rewards-2026-10-12/README.md) retains RED/source and separate pinned precursor evidence, main byte-compared; independent retention gate pending. [Wiki stage](../wiki/investigations/patch-8-1-0-api-audit.md#questutils-current-final-stage--2026-10-12) records the same acceptance boundary.
+[Public packet](../../data/patch-api/evidence/quest-currency-war-mode-rewards-2026-10-12/README.md) retains RED/source and separate pinned precursor evidence; independent through-precursor retention PASS. Current-source final acceptance remains pending. [Wiki stage](../wiki/investigations/patch-8-1-0-api-audit.md#questutils-current-final-stage--2026-10-12) records the same acceptance boundary.
 
 ## Out of scope
 
