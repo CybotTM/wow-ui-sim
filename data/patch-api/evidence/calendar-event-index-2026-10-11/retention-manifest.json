@@ -1,5 +1,5 @@
 {
-  "scope": "Calendar RED/GREEN/default-check receipts plus actual owning-target publication; publication-independent gate pending; no binaries/libraries/cache payloads",
+  "scope": "Bounded Calendar query/publication verified; independent gate authenticates original48copies172495bytes, main exact-copy verification adds four final gate artifacts; no binary/library/cache payload retention or full-handoff completion",
   "copies": [
     {
       "path": "red/revision.json",
@@ -288,8 +288,32 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-prefork-compile-20261012T020631000464Z/publication.json",
       "bytes": 67834,
       "sha256": "a5ef67d4be3762ade75604ab1a705fdf1e695a6fcc3c77ae3c4c98e1b1535215"
+    },
+    {
+      "path": "publication/publication-independent-report.md",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-independent-report.md",
+      "bytes": 5487,
+      "sha256": "a6c84ede2b214adb2cff6a75b33969aca4b03eea14e87b5e4318eec80517e5cc"
+    },
+    {
+      "path": "publication/publication-independent-proof.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-independent-proof.json",
+      "bytes": 34371,
+      "sha256": "b184f4e07df2c2d457a5d11b51bc59d26635627d11e7f51166ba5f51254722cb"
+    },
+    {
+      "path": "publication/publication-independent-auth.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-independent-auth.json",
+      "bytes": 347,
+      "sha256": "919937e7f6cfcdf446c7a3e5591c8e468c2cf42666666b462cf1e2e10c308c5f"
+    },
+    {
+      "path": "publication/publication-link-audit.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-link-audit.json",
+      "bytes": 5411,
+      "sha256": "a9f967a95e29959ce537008094409c2788e1a7b487d8775c66e387f7f38079aa"
     }
   ],
-  "copy_count": 48,
-  "copy_bytes": 172495
+  "copy_count": 52,
+  "copy_bytes": 218111
 }

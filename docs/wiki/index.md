@@ -516,7 +516,7 @@
 
 ## [2026-10-11] staging | Current Calendar event index
 
-[Stage handoff](investigations/integrated-source-and-factory-proof-2026-10-09.md#calendar-event-index--current-sourcespec-stage-2026-10-11): producer `fa66dd878` independent bounded GREEN **PASS11/11** ([report](../../data/patch-api/evidence/calendar-event-index-2026-10-11/green/green-independent-report.md)); source `a4159ce53` RED9 preserved. Current gap removed by `296b9ac77` after normal raw-publication assertion; actual prefork publication sweep pending, zero-test selector not proof. Frozen87OK/58gaps unchanged; broad3FAIL/full handoff OPEN.
+[Stage handoff](investigations/integrated-source-and-factory-proof-2026-10-09.md#calendar-event-index--current-sourcespec-stage-2026-10-11): producer `fa66dd878` independent bounded GREEN **PASS11/11** ([report](../../data/patch-api/evidence/calendar-event-index-2026-10-11/green/green-independent-report.md)); source `a4159ce53` RED9 preserved. Current gap removed by `296b9ac77` after normal raw-publication assertion; independent publication/retention PASS ([public report](../../data/patch-api/evidence/calendar-event-index-2026-10-11/publication/publication-independent-report.md)), zero-test selector not proof. Frozen87OK/58gaps unchanged; broad3FAIL/full handoff OPEN.
 
 ## [2026-10-08] evidence | 8.1.0 page audit
 

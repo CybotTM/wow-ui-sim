@@ -25,12 +25,12 @@
 ## Tests asserting this spec
 
 - `tests/calendar_event_index_info.rs`: public Lua defaults/filtering/absence/snapshots/security, owned-state update/removal and cleanup restoration.
-- Test-stage `a4159ce53` executed authentic RED: nine failures; first positive fixture query returned no DTO. This does not prove later branches. Producer `fa66dd878` focused execution reports 11 passed; normal loaded demo/publication assertions and Lua-error smoke report exit0/`[]`. Independent GREEN verification PASS; [retained evidence](../../data/patch-api/evidence/calendar-event-index-2026-10-11/README.md). Relevant publication sweep/final acceptance remain pending.
+- Test-stage `a4159ce53` executed authentic RED: nine failures; first positive fixture query returned no DTO. This does not prove later branches. Producer `fa66dd878` focused execution reports 11 passed; normal loaded demo/publication assertions and Lua-error smoke report exit0/`[]`. Independent GREEN verification PASS; [retained evidence](../../data/patch-api/evidence/calendar-event-index-2026-10-11/README.md). Independent publication verification PASS: one exact case, 145 classified identities (89 OK / 56 current known gaps). Bounded lookup acceptance verified; parent full handoff remains open.
 
-## Known gaps (current cycle)
+## Verification
 
-- [ ] Relevant publication sweep/final acceptance pending; independent GREEN verification PASS. Authentic test-stage RED reached the public query/DTO boundary; setup/compilation succeeded.
-- [ ] Loaded normal-session publication assertion passed; removed only the current event-index gap row. Relevant publication sweep execution remains pending; frozen historical accounting is preserved.
+- [x] Independent GREEN verification PASS: 11 behavioral cases, loaded normal-session assertions and required Rust checks.
+- [x] Loaded normal-session publication assertion and owning prefork sweep verified; only the current event-index gap row removed. Frozen historical accounting preserved; [publication proof](../../data/patch-api/evidence/calendar-event-index-2026-10-11/publication/publication-independent-report.md).
 
 ## Out of scope
 
