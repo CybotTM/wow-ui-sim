@@ -60,7 +60,7 @@ fn load_and_dispatch_startup_addon(
     result.warnings
 }
 
-fn load_whole_game_ui(env: &WowLuaEnv) -> Vec<String> {
+pub(crate) fn load_whole_game_ui(env: &WowLuaEnv) -> Vec<String> {
     let ui = wow_ui_sim::client_profile::blizzard_ui_addons_dir();
     env.set_screen_mode(ScreenKind::Game);
     env.state().borrow_mut().addon_base_paths = vec![ui.clone()];

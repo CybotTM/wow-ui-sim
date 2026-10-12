@@ -3,6 +3,35 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+#[cfg(feature = "client-ptr")]
+fn run_ptr_chat_case(run_case: fn(&WowLuaEnv)) {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("fresh pre-addon environment");
+        env.set_display_size(1920.0, 1080.0).expect("display input");
+        let warnings = crate::edit_mode_cache_startup::load_whole_game_ui(&env);
+        run_case(&env);
+        assert!(warnings.is_empty(), "startup warnings retained: {warnings:?}");
+    }
+}
+
+#[test]
+#[cfg(feature = "client-ptr")]
+fn ptr_default_enter_opens_real_chat_for_typing_and_submission() {
+    run_ptr_chat_case(default_enter_opens_real_chat_for_typing_and_submission::run);
+}
+
+#[test]
+#[cfg(feature = "client-ptr")]
+fn ptr_explicit_enter_binding_overrides_default_chat_action() {
+    run_ptr_chat_case(explicit_enter_binding_overrides_default_chat_action::run);
+}
+
+#[test]
+#[cfg(feature = "client-ptr")]
+fn ptr_explicitly_cleared_enter_binding_stays_unbound() {
+    run_ptr_chat_case(explicitly_cleared_enter_binding_stays_unbound::run);
+}
+
 fn clear_chat_focus(env: &WowLuaEnv) {
     env.exec(
         r#"
