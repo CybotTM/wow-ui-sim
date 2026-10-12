@@ -4,12 +4,12 @@ Current Retail/PTR `C_PlayerInfo.GUIDIsPlayer` must project existing represented
 
 ## What it must do
 
-- [ ] Authenticate the original secret argument before type validation or lookup; require an actual UTF-8 string and return exactly one boolean. Missing/nil/nonstring values error without coercion.
-- [ ] Return true for exact local identity and currently active populated party identities; target/focus use their explicit player-kind facts. Text prefixes never classify input.
-- [ ] Reflect live identity replacement, kind changes, removal, roster activation/population and independent environments without stale results.
-- [ ] Return false for unrepresented strings, including player-looking GUIDs and empty strings: “not represented as a player in current model state,” not native non-player classification.
-- [ ] Preserve authentic secret wrappers/caller taint: wrapped strings allowed when untainted, wrapped hits/misses/malformed values denied when tainted; ordinary strings remain usable.
-- [ ] Load the ordinary ObjectAPI addon closure and exercise original whole `PlayerLocation:CreateFromGUID`/`PlayerLocationMixin:IsValid`, with vendor source provenance. Represented players yield true; misses retain the unchanged account operand's observed result, not a native account-type claim. No account mocks or sliced consumers.
+- [x] Authenticate the original secret argument before type validation or lookup; require an actual UTF-8 string and return exactly one boolean. Missing/nil/nonstring values error without coercion.
+- [x] Return true for exact local identity and currently active populated party identities; target/focus use their explicit player-kind facts. Text prefixes never classify input.
+- [x] Reflect live identity replacement, kind changes, removal, roster activation/population and independent environments without stale results.
+- [x] Return false for unrepresented strings, including player-looking GUIDs and empty strings: “not represented as a player in current model state,” not native non-player classification.
+- [x] Preserve authentic secret wrappers/caller taint: wrapped strings allowed when untainted, wrapped hits/misses/malformed values denied when tainted; ordinary strings remain usable.
+- [x] Load the ordinary ObjectAPI addon closure and exercise original whole `PlayerLocation:CreateFromGUID`/`PlayerLocationMixin:IsValid`, with vendor source provenance. Represented players yield true; misses retain the unchanged account operand's observed result, not a native account-type claim. No account mocks or sliced consumers.
 
 ## How it works
 
@@ -26,12 +26,14 @@ Current Retail/PTR `C_PlayerInfo.GUIDIsPlayer` must project existing represented
 
 ## Tests asserting this spec
 
-`tests/guid_is_player.rs`: local/misses, target/focus replacement, kind/removal, party lifecycle, environment isolation, strict type, authentic secret boundary and two original ObjectAPI consumer cases. Initial Retail RED at `76f405e1d`:0/9 PASS, exit101, eight missing raw-provider guards and one original whole-consumer exact-true mismatch. Ordinary closure/provenance reached; downstream query/security/account diagnostics unreached. Compile/fmt0 and source unchanged independently verified; requirements remain unchecked pending GREEN.
+`tests/guid_is_player.rs`: local/misses, target/focus replacement, kind/removal, party lifecycle, environment isolation, strict type, authentic secret boundary and two original ObjectAPI consumer cases. Initial Retail RED at `76f405e1d`:0/9 PASS, exit101, eight missing raw-provider guards and one original whole-consumer exact-true mismatch. Ordinary closure/provenance reached; downstream query/security/account diagnostics unreached. Compile/fmt0 and source unchanged independently verified. At `d6d8de29a`, independent2929 confirms Retail9/9 and PTR9/9 PASS, two normal raw-query/startup markers with `[]`, fmt0/readability clean and four newly authenticated seals. Original whole consumer accepts represented players as true; NPC/unknown direct query is false while unchanged account operand and miss consumer return nil. Account provenance is Lua `=(string)`, not a modeled/native account classifier. Invalid UTF-8 byte rejection is source-inspected, not a separately executed regression.
 
 ## Known gaps (current cycle)
 
 - [x] Genuine RED observed before producer; assertions unreached after missing-provider guards receive no behavioral credit.
-- [ ] Implement and verify Retail/PTR direct/consumer/startup checks, preserve diagnostics and account predicate provenance.
+- [x] Implement and verify Retail/PTR direct/consumer/startup checks, preserve diagnostics and account predicate provenance.
+- [ ] Fresh default library check and separate owning publication/current-validator/retention gates.
+- [ ] Retain proof-path collision disclosure: GREEN overwrote generic structured RED `proof.json`; original RED report/raw logs/auth receipt survive, reconstructed structured evidence must be labeled rather than claimed byte-exact history.
 
 ## Out of scope
 
