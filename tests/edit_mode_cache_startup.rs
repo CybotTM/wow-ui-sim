@@ -13,7 +13,7 @@ const ACCOUNT_CACHE: &[u8] =
     include_bytes!("fixtures/frame_position_replay/edit-mode-cache-account.txt");
 const CHARACTER_CACHE: &[u8] = b"2 2 2 2 0 0\0";
 
-fn import_fixture_cache(env: &WowLuaEnv, root: &Path) {
+fn import_fixture_cache(env: &WowLuaEnv, root: &Path, snapshot: Option<&str>) {
     let wtf = root.join("WTF");
     let account = wtf.join("Account/TestAccount");
     let character = account.join("Test Realm/Testchar");
@@ -34,11 +34,9 @@ fn import_fixture_cache(env: &WowLuaEnv, root: &Path) {
     ));
     let loaded = env
         .loader_env()
-        .with_state(|state| manager.load_edit_mode_cache(state, 2, None))
+        .with_state(|state| manager.load_edit_mode_cache(state, 2, snapshot))
         .expect("production file-cache import");
     assert!(loaded, "provided cache must be imported");
-    env.exec("assert(C_EditMode.GetLayouts().activeLayout == 2, 'native cache-index readiness')")
-        .expect("unaltered character-cache active index");
 }
 
 fn load_and_dispatch_startup_addon(
@@ -99,7 +97,9 @@ fn native_preset_index_two_keeps_classic_and_horizontal_micro_menu() {
         let temp = tempfile::tempdir().expect("create isolated cache fixture");
         let env = WowLuaEnv::new().expect("fresh pre-addon environment");
         env.set_display_size(1920.0, 1080.0).expect("display input");
-        import_fixture_cache(&env, temp.path());
+        import_fixture_cache(&env, temp.path(), None);
+        env.exec("assert(C_EditMode.GetLayouts().activeLayout == 2, 'native cache-index readiness')")
+            .expect("unaltered character-cache active index");
         let warnings = load_whole_game_ui(&env);
         env.exec(r#"
             local layout = EditModeManagerFrame:GetActiveLayoutInfo()
@@ -115,5 +115,28 @@ fn native_preset_index_two_keeps_classic_and_horizontal_micro_menu() {
                 'first microbuttons must share a horizontal row')
         "#).expect("unchanged Classic/micro-menu consumer result");
         assert!(warnings.is_empty(), "startup warnings retained: {warnings:?}");
+    }
+}
+
+#[test]
+fn explicit_layout_overrides_keep_widescreen_through_whole_startup() {
+    test_timeout! {
+        for preferred in ["Widescreen", "wIdEsCrEeN", "2", "10"] {
+            let temp = tempfile::tempdir().expect("create isolated override fixture");
+            let env = WowLuaEnv::new().expect("fresh pre-addon environment");
+            env.set_display_size(1920.0, 1080.0).expect("display input");
+            import_fixture_cache(&env, temp.path(), Some(preferred));
+            let warnings = load_whole_game_ui(&env);
+            env.exec(r#"
+                assert(EditModeManagerFrame.layoutInfo.activeLayout == 4,
+                    'explicit Widescreen override must address the combined list')
+                assert(EditModeManagerFrame:GetActiveLayoutInfo().layoutName == 'Widescreen',
+                    'explicit override identity must survive preset insertion')
+                local width, height = MicroMenu:GetSize()
+                assert(width > 0 and height > width,
+                    'explicit Widescreen retains its vertical Micro Menu')
+            "#).unwrap_or_else(|error| panic!("whole startup override {preferred}: {error}"));
+            assert!(warnings.is_empty(), "startup warnings for {preferred}: {warnings:?}");
+        }
     }
 }

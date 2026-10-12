@@ -229,12 +229,13 @@ fn edit_mode_wtf_cache_can_override_active_layout_by_name() {
         .eval(
             r#"
             local info = C_EditMode.GetLayouts()
-            return info.activeLayout, info.layouts[info.activeLayout].layoutName
+            local savedIndex = info.activeLayout - Enum.EditModePresetLayoutsMeta.NumValues
+            return info.activeLayout, info.layouts[savedIndex].layoutName
             "#,
         )
         .expect("read overridden active edit mode layout");
 
-    assert_eq!(active, 1);
+    assert_eq!(active, 3);
     assert_eq!(active_name, "Ultrawide");
 }
 
@@ -257,8 +258,8 @@ fn edit_mode_snapshot_layout_selects_active_layout_by_name() {
         ),
     )
     .expect("write account edit mode cache");
-    // Character cache resolves to layout index 2 (Widescreen); the snapshot
-    // name must win and select Ultrawide instead.
+    // Native combined index 2 selects Classic; the snapshot name must win
+    // and select the custom Ultrawide layout instead.
     std::fs::write(
         character_path.join("edit-mode-cache-character.txt"),
         "2 2 2 2 0 0\0",
@@ -282,12 +283,13 @@ fn edit_mode_snapshot_layout_selects_active_layout_by_name() {
         .eval(
             r#"
             local info = C_EditMode.GetLayouts()
-            return info.activeLayout, info.layouts[info.activeLayout].layoutName
+            local savedIndex = info.activeLayout - Enum.EditModePresetLayoutsMeta.NumValues
+            return info.activeLayout, info.layouts[savedIndex].layoutName
             "#,
         )
         .expect("read snapshot-selected active edit mode layout");
 
-    assert_eq!(active, 1);
+    assert_eq!(active, 3);
     assert_eq!(active_name, "Ultrawide");
 }
 
@@ -335,7 +337,8 @@ fn edit_mode_env_override_beats_snapshot_layout() {
         .eval(
             r#"
             local info = C_EditMode.GetLayouts()
-            return info.layouts[info.activeLayout].layoutName
+            local savedIndex = info.activeLayout - Enum.EditModePresetLayoutsMeta.NumValues
+            return info.layouts[savedIndex].layoutName
             "#,
         )
         .expect("read active edit mode layout");

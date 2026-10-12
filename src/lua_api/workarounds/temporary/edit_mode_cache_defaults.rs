@@ -235,14 +235,25 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
       return nil
     end
 
+    local presetCount = Enum.EditModePresetLayoutsMeta.NumValues
     local preferredIndex = tonumber(preferredLayout)
     if preferredIndex and preferredIndex > 0 then
+      -- Preserve explicit custom ordinal/ID selection; character-cache indices
+      -- already address the combined preset-plus-custom list and never enter here.
+      if layouts[preferredIndex] then
+        return presetCount + preferredIndex
+      end
+      for index, layout in ipairs(layouts) do
+        if layout.layoutIndex == preferredIndex then
+          return presetCount + index
+        end
+      end
       return preferredIndex
     end
 
     for index, layout in ipairs(layouts or {}) do
       if layout.layoutName == preferredLayout then
-        return index
+        return presetCount + index
       end
     end
 
@@ -250,7 +261,7 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     for index, layout in ipairs(layouts or {}) do
       local layoutName = type(layout.layoutName) == "string" and layout.layoutName or ""
       if string.lower(layoutName) == loweredPreferredLayout then
-        return index
+        return presetCount + index
       end
     end
 

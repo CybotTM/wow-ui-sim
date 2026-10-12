@@ -170,24 +170,6 @@
         end
     end
 
-    local function remapActiveLayoutAfterPresetPrepend(layoutInfo, savedLayouts, presetCount)
-        if not layoutInfo or type(layoutInfo.activeLayout) ~= "number" then
-            return 1
-        end
-        if type((savedLayouts or {})[layoutInfo.activeLayout]) == "table" then
-            return presetCount + layoutInfo.activeLayout
-        end
-        for savedIndex, savedLayout in ipairs(savedLayouts or {}) do
-            if type(savedLayout) == "table" and savedLayout.layoutIndex == layoutInfo.activeLayout then
-                return presetCount + savedIndex
-            end
-        end
-        if layoutInfo.activeLayout >= 1 and layoutInfo.activeLayout <= #(layoutInfo.layouts or {}) then
-            return layoutInfo.activeLayout
-        end
-        return 1
-    end
-
     if not EditModeManagerFrame then return end
     local emm = EditModeManagerFrame
 
@@ -243,9 +225,7 @@
         local savedLayouts = copyLayouts(emm.layoutInfo.layouts)
         savedLayoutsForCounts = copyLayouts(savedLayouts)
         emm.layoutInfo.layouts = copyLayouts(EditModePresetLayoutManager.presetLayoutInfo)
-        local presetCount = #emm.layoutInfo.layouts
         tAppendAll(emm.layoutInfo.layouts, savedLayouts)
-        emm.layoutInfo.activeLayout = remapActiveLayoutAfterPresetPrepend(emm.layoutInfo, savedLayouts, presetCount)
     else
         savedLayoutsForCounts = copyLayouts(savedLayoutsFromLayoutInfo(emm.layoutInfo))
     end
