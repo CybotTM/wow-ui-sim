@@ -96,6 +96,7 @@ pub(crate) mod c_encounter_timeline;
 #[cfg(feature = "retail-12-0-0")]
 pub(crate) mod c_encounter_warnings;
 pub(crate) mod c_event_scheduler;
+pub(crate) mod c_friend_list;
 pub(crate) mod c_garrison_damage_classes;
 #[cfg(feature = "client-retail")]
 pub mod c_garrison_trees;

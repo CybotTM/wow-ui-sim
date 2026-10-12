@@ -1,5 +1,10 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+const FRIEND_INFO_API: &str = "C_FriendList.GetFriendInfo";
+#[cfg(not(any(feature = "client-retail", feature = "client-ptr")))]
+const FRIEND_INFO_API: &str = "C_FriendList.GetFriendInfoByName";
+
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
@@ -57,7 +62,7 @@ fn friend_list_get_who_info_returns_seeded_who_rows() {
 fn friend_list_friend_info_uses_social_friend_state() {
     let env = env();
     let result: String = env
-        .eval(
+        .eval(&format!(
             r#"
             local first = C_FriendList.GetFriendInfoByIndex(1)
             if not first then
@@ -73,20 +78,20 @@ fn friend_list_friend_info_uses_social_friend_state() {
                 return "expected_online_social_friend"
             end
 
-            local byName = C_FriendList.GetFriendInfoByName("Durotan")
+            local byName = {FRIEND_INFO_API}("Durotan")
             if not byName then
                 return "expected_name_lookup"
             end
             if byName.connected then
                 return "expected_offline_social_friend"
             end
-            if C_FriendList.GetFriendInfoByName("Alyth") ~= nil then
+            if {FRIEND_INFO_API}("Alyth") ~= nil then
                 return "hardcoded_friend_row_leaked"
             end
 
             return "ok"
-            "#,
-        )
+            "#
+        ))
         .unwrap();
 
     assert_eq!(

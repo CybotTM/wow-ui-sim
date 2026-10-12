@@ -5,6 +5,7 @@
 //! probe used by the search UI.
 
 use super::ensure_namespace;
+use crate::c_api::c_friend_list::build_friend_info_table;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_set_static,
 };
@@ -62,6 +63,7 @@ pub(super) fn register_friend_list_surface(state: &mut LuaState) -> LuaResult<()
         "GetFriendInfoByIndex",
         get_friend_info_by_index,
     )?;
+    #[cfg(not(any(feature = "client-retail", feature = "client-ptr")))]
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -114,6 +116,7 @@ fn get_friend_info_by_index(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+#[cfg(not(any(feature = "client-retail", feature = "client-ptr")))]
 fn get_friend_info_by_name(state: &mut LuaState) -> LuaResult<u32> {
     let name = String::from_stack(state, 1)?;
     let friend = {
@@ -187,34 +190,6 @@ fn social_friend_by_display_index(
     let mut friends = borrow_state(state)?.social_friends.clone();
     friends.sort_by_key(|friend| !friend.is_online);
     Ok(friends.get(zero_based).cloned())
-}
-
-fn build_friend_info_table(state: &mut LuaState, friend: &SocialFriend) -> Val {
-    let table = create_table(state);
-    let name = create_string(state, &friend.name);
-    let full_name = create_string(state, &friend.name);
-    let area = create_string(state, &friend.area);
-    let class_name = create_string(state, &friend.class_name);
-    let class_str = create_string(state, &friend.class_name);
-    let filename = create_string(state, &friend.class_name.to_uppercase());
-    let notes = create_string(state, &friend.note);
-    let guid = create_string(state, &friend.guid);
-    let race_str = create_string(state, "Human");
-    let full_guild_name = create_string(state, "Heroes of Azeroth");
-    table_set_static(state, table, "name", name);
-    table_set_static(state, table, "fullName", full_name);
-    table_set_static(state, table, "level", Val::Num(friend.level as f64));
-    table_set_static(state, table, "area", area);
-    table_set_static(state, table, "className", class_name);
-    table_set_static(state, table, "classStr", class_str);
-    table_set_static(state, table, "filename", filename);
-    table_set_static(state, table, "notes", notes);
-    table_set_static(state, table, "connected", Val::Bool(friend.is_online));
-    table_set_static(state, table, "guid", guid);
-    table_set_static(state, table, "raceStr", race_str);
-    table_set_static(state, table, "gender", Val::Num(2.0));
-    table_set_static(state, table, "fullGuildName", full_guild_name);
-    table
 }
 
 fn build_who_info_table(state: &mut LuaState, row: &FriendListRow) -> Val {

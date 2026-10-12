@@ -18,18 +18,19 @@ Current cached Retail/PTR `FriendListDocumentation.lua` declares `C_FriendList.G
 ## Implementation inventory
 
 - `src/lua_api/state_types/social.rs`: existing supplied `SocialFriend` name/note and other represented fields.
-- `src/lua_api/globals/missing_surface/friend_list.rs`: existing lookup/DTO and registration; exact current query absent at test/spec stage.
+- `src/c_api/c_friend_list.rs`: exact current query, VM-authenticated string input and shared existing simulator projection.
+- `src/lua_api/globals/missing_surface/friend_list.rs`: indexed/earlier-provider registration; current alternate-name provider replaced.
 - `tests/friend_info_exact.rs`: focused current-profile behavioral and real public-popup fixtures.
 
 ## Tests asserting this spec
 
 - `tests/friend_info_exact.rs`, registered by `tests/integration.rs`: exact query, live environment-owned state, miss/type/security controls and actual popup prefill/reopen.
-- `tests/friend_list_who.rs`: existing indexed/alias-backed state baseline; not exact-name acceptance yet.
+- `tests/friend_list_who.rs` and `tests/system_api_seeded.rs`: preserved indexed/name state assertions using the profile's provider; no runtime fallback.
 
 ## Known gaps (current cycle)
 
 - [x] Initial pre-producer RED executed and authenticated: four cases0PASS/4FAIL; three stop at absent exact query, popup stops at an overbroad diagnostic-readiness assertion. Downstream assertions remain unreached.
-- [ ] Establish real popup closure readiness and actual failure boundary. Initial `C_Reveal` observation is a guarded optional debug probe, not an actual load error; retain observations without requiring every nil probe to exist. Keep real load/error/provenance/prefill assertions, then re-execute before consumer credit.
+- [x] Corrected pre-producer RED independently authenticated: four cases0PASS/4FAIL. Whole closure and Mainline provenance assertions reach unchanged `OnShow`; nil `info` causes the actual note-prefill failure. Reopen remains unreached. Optional nil-probe observations remain logged, not replaced with fabricated globals.
 - [ ] Implement the exact C API over existing state after RED, then independently verify affected behavior, loaded startup, formatting/default check and readability; retain scoped proof.
 
 ## Out of scope

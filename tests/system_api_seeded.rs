@@ -169,8 +169,12 @@ fn test_bn_get_friend_info_nil() {
 #[test]
 fn test_c_friend_list_returns_seeded_wow_friends() {
     let env = env();
+    #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+    let friend_info_api = "C_FriendList.GetFriendInfo";
+    #[cfg(not(any(feature = "client-retail", feature = "client-ptr")))]
+    let friend_info_api = "C_FriendList.GetFriendInfoByName";
     let result: String = env
-        .eval(
+        .eval(&format!(
             r#"
         if type(C_FriendList.ShowFriends) ~= "function" then
             return "missing_show_friends"
@@ -216,7 +220,7 @@ fn test_c_friend_list_returns_seeded_wow_friends() {
             return "guid=" .. tostring(info.guid)
         end
 
-        local by_name = C_FriendList.GetFriendInfoByName("Arthax")
+        local by_name = {friend_info_api}("Arthax")
         if not by_name or by_name.guid ~= info.guid then
             return "name_lookup_failed"
         end
@@ -247,8 +251,8 @@ fn test_c_friend_list_returns_seeded_wow_friends() {
             return "unexpected_friend_at_99"
         end
         return "ok"
-    "#,
-        )
+    "#
+        ))
         .unwrap();
     assert_eq!(
         result, "ok",

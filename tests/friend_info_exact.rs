@@ -44,6 +44,19 @@ fn assert_exact_info(env: &WowLuaEnv, note: &str) {
 }
 
 #[test]
+fn current_friend_list_does_not_fabricate_earlier_name_alias() {
+    let env = supplied_env(NOTE);
+    env.exec(
+        r#"
+        assert(rawget(C_FriendList, 'GetFriendInfoByName') == nil, 'raw earlier alias')
+        assert(C_FriendList.GetFriendInfoByName == nil, 'fabricated earlier alias')
+        assert(rawget(C_FriendList, 'GetFriendInfoByName') == nil, 'cached earlier alias')
+        "#,
+    )
+    .expect("current profile must expose no earlier friend-name alias");
+}
+
+#[test]
 fn exact_friend_lookup_reads_live_notes_without_environment_leaks() {
     let first = supplied_env(NOTE);
     let second = supplied_env("Independent environment note");
