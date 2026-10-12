@@ -2,6 +2,8 @@
 
 Current cached Retail/PTR `QuestUtils.lua` exposes `QuestUtils_AddQuestCurrencyRewardsToTooltip`. Its ordinary currency path consumes separate desired-mode, percentage, quest eligibility, currency bonus and faction-grant inputs. The [supplied currency bonus query](currency-war-mode-bonus.md) is already verified; that does not establish this public caller.
 
+**Latest-revision acceptance pending:** six checked behavioral requirements below are proved at `a5eaf4fc6` (44 executions/22 names), not at `91324b103`. The latter has source-only equivalence; affected Quest13/profile +normal/check remain pending.
+
 ## What it must do
 
 - [x] Project live supplied desired War Mode and reward percentage as one boolean and one number, independent of generic `player.pvp_enabled`. Initial disabled/10-percent state is chosen simulator policy preserving existing percentage compatibility, not native state/catalog evidence; separate default-percentage getter remains unchanged.
@@ -34,7 +36,7 @@ Committed producers `bea55a2ae` (faction/shared numeric helper), `a295a7d72` (Pv
 
 - [x] Expanded pre-producer RED executed and independently authenticated; initial five-case RED retained separately.
 - [x] Source `a5eaf4fc6` Retail/PTR execution and fmt/default check independently verified: bounded PASS, not native parity or full handoff closure.
-- [ ] Subsequent profile-gate cleanup `91324b103`: affected caller/startup/check follow-up and final public retention pending.
+- [ ] Subsequent profile-gate cleanup `91324b103`: affected Quest13/profile +normal/check acceptance and independent later-stream retention pending.
 
 ## Current stage — 2026-10-12
 
@@ -50,7 +52,7 @@ Verified source `a5eaf4fc6` consolidates the accepted duplicate validator after 
 
 Independent2656 `final-independent-report.md` and `proof.json` in `/home/osso/.local/state/wow-ui-sim/verification/quest-currency-war-mode-current/` record **BOUNDED PASS** for source `a5eaf4fc63e44027b1e9757b146b398c62e3a4b3`: 26 Quest + 18 changed-flag = 44 executions/22 unique names, excluding RED and precursor results. Four new seals first authenticated once; receipts retained in their epochs. Actual unmodified public vendor controls reach exact +25%→+40%, every bonus gate, duplicates, independent environments and secret-first validation. Default10 remains unchanged; its raw publication/arity is not separately asserted.
 
-[Public packet](../../data/patch-api/evidence/quest-currency-war-mode-rewards-2026-10-12/README.md) owns retention accounting; through-precursor retention PASS does not cover final streams. Final a5e streams are copied; independent later-stream retention remains pending. Current `91324b103` removes five repeated profile guards and keeps one current-only namespace publication decision; independent source-equivalence/readability PASS. Affected Quest13/profile, loaded publication/startup and check follow-up are queued; unchanged flag-query9/profile proof is reused. [Wiki stage](../wiki/investigations/patch-8-1-0-api-audit.md#questutils-current-final-stage--2026-10-12) links this current bounded matrix; native/external/full-handoff acceptance remains separate.
+[Public packet](../../data/patch-api/evidence/quest-currency-war-mode-rewards-2026-10-12/README.md) owns retention accounting; through-precursor retention PASS does not cover final streams. Final a5e streams and distinct source-only records are retained; packet owns counts and excludes unproduced proof. Independent later-stream retention remains pending. Current `91324b103` removes five repeated profile guards and keeps one current-only namespace publication decision; [source-only equivalence/readability PASS](../../data/patch-api/evidence/quest-currency-war-mode-rewards-2026-10-12/profile-gate-source-report.md), not runtime acceptance. [Packet status](../../data/patch-api/evidence/quest-currency-war-mode-rewards-2026-10-12/README.md) records rejected admissions and the pending guarded retry; submission adds no execution credit. Affected Quest13/profile +normal/check remain pending; unchanged flag-query9/profile proof is reused. [Wiki stage](../wiki/investigations/patch-8-1-0-api-audit.md#questutils-current-final-stage--2026-10-12) links this current bounded matrix; native/external/full-handoff acceptance remains separate.
 
 ## Out of scope
 
