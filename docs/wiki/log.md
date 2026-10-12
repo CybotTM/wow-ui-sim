@@ -1,3 +1,7 @@
+## [2026-10-12] staging | Currency WarMode query — initial RED
+
+[Existing 8.1 source handoff](investigations/patch-8-1-0-api-audit.md#currency-warmode-query--testspec-stage-2026-10-12) records user-selected explicit query/unseeded `(nil, nil)` policy, supplied test `4a6f5ad45` and spec `4d4b80c43` stages. No producer; initial RED independently authenticated: compile0, five cases0PASS/5FAIL, runtime101. Empty supplied state and positive controls staged; expanded RED pending. PvP/quest models separate; cached-source consumer prerequisites do not prove public QuestUtils success. Exact query gap retained; currency116 and historical Calendar/Bounty snapshots unchanged. Wiki-only ingest; no execution or proof generated.
+
 ## [2026-10-12] docs | Dedicated simulator VNC — local evidence, remote acceptance open
 
 [Dedicated VNC guide](../../data/patch-api/evidence/private-vnc-simulator-2026-10-12/README.md): new loopback5904/display22, existing sessions untouched. Independent operational/copy/90-second teardown checks pass; visual tool omitted pixels, so visual/remote acceptance remains PARTIAL. User-approved runtime dependency/readiness fix and artifact-auth reuse recorded. No403blocker after user clarification; frozen BA3FAIL/full handoff OPEN.

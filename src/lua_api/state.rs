@@ -489,6 +489,7 @@ macro_rules! build_empty_sim_state {
             pet_actions: vec![PetActionSlot::default(); 10],
             glyph: GlyphState::default(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
+            currency_war_mode_bonus: HashMap::new(),
             equipment_manager: EquipmentManagerState::new(),
             maps: default_maps(),
             map_display_hide_icons: HashMap::new(),

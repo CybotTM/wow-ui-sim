@@ -20,7 +20,11 @@ const QUERY_ASSERTIONS: &str = r#"
 
 fn query_probe(body: &str) {
     let env = WowLuaEnv::new().expect("currency query environment");
-    env.exec(&format!("{QUERY_ASSERTIONS}\n{body}"))
+    supplied_probe(&env, body);
+}
+
+fn supplied_probe(env: &WowLuaEnv, body: &str) {
+    env.exec(&format!("{QUERY_ASSERTIONS}\n{FLAG_ASSERTIONS}\n{body}"))
         .expect("public currency War Mode query behavior");
 }
 
@@ -105,5 +109,135 @@ fn currency_war_mode_bonus_tainted_secrets_denied_before_validation() {
         assert(debug.getstacktaint() == nil, 'caller restored')
         absent(get(valid))
         "#,
+    );
+}
+
+const FLAG_ASSERTIONS: &str = r#"
+    local function flags(expectedApplies, expectedOnce, ...)
+        assert(select('#', ...) == 2, 'supplied query returns exactly two values')
+        local applies, once = ...
+        assert(applies == expectedApplies, 'supplied applies flag preserved')
+        assert(once == expectedOnce, 'supplied once flag preserved')
+    end
+"#;
+
+#[test]
+fn currency_war_mode_bonus_supplied_independent_nullable_combinations() {
+    let env = WowLuaEnv::new().expect("supplied currency environment");
+    assert!(env.state().borrow().currency_war_mode_bonus.is_empty());
+    let nullable_flags = [None, Some(false), Some(true)];
+    for (first_index, applies) in nullable_flags.into_iter().enumerate() {
+        for (second_index, once) in nullable_flags.into_iter().enumerate() {
+            let id = 90001 + (first_index * 3 + second_index) as i32;
+            env.state()
+                .borrow_mut()
+                .currency_war_mode_bonus
+                .insert(id, (applies, once));
+        }
+    }
+    supplied_probe(
+        &env,
+        r#"
+        flags(nil, nil, get(90001))
+        flags(nil, false, get(90002))
+        flags(nil, true, get(90003))
+        flags(false, nil, get(90004))
+        flags(false, false, get(90005))
+        flags(false, true, get(90006))
+        flags(true, nil, get(90007))
+        flags(true, false, get(90008))
+        flags(true, true, get(90009))
+        absent(get(90010))
+    "#,
+    );
+}
+
+#[test]
+fn currency_war_mode_bonus_owned_updates_removal_and_currency_isolation() {
+    let env = WowLuaEnv::new().expect("supplied currency environment");
+    env.state().borrow_mut().currency_war_mode_bonus.extend([
+        (90001, (Some(true), Some(false))),
+        (90002, (Some(false), Some(true))),
+    ]);
+    supplied_probe(
+        &env,
+        r#"
+        originalApplies, originalOnce = get(90001)
+        flags(true, false, originalApplies, originalOnce)
+        flags(false, true, get(90002))
+    "#,
+    );
+    env.state()
+        .borrow_mut()
+        .currency_war_mode_bonus
+        .insert(90001, (None, Some(true)));
+    supplied_probe(
+        &env,
+        r#"
+        flags(nil, true, get(90001))
+        flags(true, false, originalApplies, originalOnce)
+        flags(false, true, get(90002))
+    "#,
+    );
+    env.state()
+        .borrow_mut()
+        .currency_war_mode_bonus
+        .remove(&90001);
+    supplied_probe(
+        &env,
+        r#"
+        absent(get(90001))
+        flags(true, false, originalApplies, originalOnce)
+        flags(false, true, get(90002))
+    "#,
+    );
+}
+
+#[test]
+fn currency_war_mode_bonus_positive_identity_does_not_alias_numeric_edges() {
+    let env = WowLuaEnv::new().expect("supplied currency environment");
+    env.state().borrow_mut().currency_war_mode_bonus.extend([
+        (90001, (Some(true), Some(false))),
+        (i32::MIN, (Some(false), Some(true))),
+        (i32::MAX, (Some(true), Some(true))),
+    ]);
+    supplied_probe(
+        &env,
+        r#"
+        flags(true, false, get(90001))
+        flags(false, true, get(-2147483648))
+        flags(true, true, get(2147483647))
+        for _, value in ipairs({90001.5, 90000.5, 2147483647.5,
+            -2147483648.5, 2147483648, -2147483649, 4295057297,
+            0/0, math.huge, -math.huge, 1e308, -1e308}) do
+            absent(get(value))
+        end
+        rejected('90001')
+        flags(true, false, get(90001))
+    "#,
+    );
+}
+
+#[test]
+#[cfg(feature = "retail-12-1-0")]
+fn currency_war_mode_bonus_supplied_secret_identity_and_invalid_type() {
+    let env = WowLuaEnv::new().expect("supplied currency environment");
+    env.state()
+        .borrow_mut()
+        .currency_war_mode_bonus
+        .insert(90001, (Some(true), Some(false)));
+    supplied_probe(
+        &env,
+        r#"
+        debug.settaintmode(true)
+        local id, fractional = secretwrap(90001), secretwrap(90001.5)
+        flags(true, false, get(id))
+        absent(get(fractional))
+        rejected(secretwrap('90001'))
+        assert(issecretvalue(id) and issecretvalue(fractional), 'wrappers remain secret')
+        assert(secretunwrap(id) == 90001 and secretunwrap(fractional) == 90001.5,
+            'wrapped identity unchanged')
+        assert(debug.getstacktaint() == nil, 'untainted caller preserved')
+    "#,
     );
 }

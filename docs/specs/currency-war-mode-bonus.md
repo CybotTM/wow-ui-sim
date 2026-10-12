@@ -17,16 +17,17 @@
 
 ## Implementation inventory
 
-- `tests/currency_war_mode_bonus.rs`: initial public absence/type/security controls; getter and owned flag inputs not implemented at this stage.
+- `tests/currency_war_mode_bonus.rs`: public absence/type/security controls plus nine nullable combinations, owned updates/removal and positive identity controls; getter not implemented at this stage.
 - `src/c_api/item_spell/c_currency.rs`: existing currency registration seam.
+- `SimState.currency_war_mode_bonus`: empty owned map of currency IDs to two independently nullable flags.
 
 ## Tests asserting this spec
 
-`tests/currency_war_mode_bonus.rs`. Initial controls do not prove positive identity mapping or updates; supplied-state tests follow actual RED.
+`tests/currency_war_mode_bonus.rs`. Initial five controls have authenticated RED. Supplied-state controls await expanded RED; no positive behavior proven yet.
 
 ## Known gaps (current cycle)
 
-- [ ] Authentic initial/positive RED, producer, current-profile GREEN, normal publication/startup and final Rust/independent proof pending.
+- [ ] Expanded positive RED, producer, current-profile GREEN, normal publication/startup and final Rust/independent proof pending; initial RED retained.
 
 ## Out of scope
 

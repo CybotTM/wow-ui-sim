@@ -569,6 +569,8 @@ pub struct SimState {
     pub pet_actions: Vec<PetActionSlot>,
     pub glyph: GlyphState,
     pub currency_info: HashMap<i32, CurrencyInfo>,
+    /// Explicit (War Mode applies, limit once per tooltip) flags; no inferred catalog.
+    pub currency_war_mode_bonus: HashMap<i32, (Option<bool>, Option<bool>)>,
     pub equipment_manager: EquipmentManagerState,
     pub maps: HashMap<i32, MapData>,
     /// Explicit per-map hideIcons input; absence is not a native unknown-ID claim.
