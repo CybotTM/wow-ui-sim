@@ -6,4 +6,4 @@ Same game environment/profile-cache setup; only discovery and ordered loader cal
 
 `lua_exec` includes compile/call; XML frame details overlap documented parent buckets. Returned `total()` uses the loader's defined independent buckets, not every reported field. Zero-file/zero-time rows are preserved, not labeled skipped. Diagnostic counts do not establish global error-collector state or full UI acceptance.
 
-Compile/runtime and independent proof pending. Main owns guarded async operations against existing library Cargo-record/path-stat, not a current-source/hermetic/frozen-BA rebuild. Source formatted once/manual readability recorded. Completed scope proof untouched; BA3FAIL/full handoff OPEN.
+First async controller finished without compilation: guard2026-10-12 04:53:53UTC denied (load29.95/RAM17.520GiB/no relevant Cargo). `blocked/` preserves this attempt. Compile/runtime and independent proof pending. Main owns guarded async operations against existing library Cargo-record/path-stat, not a current-source/hermetic/frozen-BA rebuild. Source formatted once/manual readability recorded. Completed scope proof untouched; BA3FAIL/full handoff OPEN.
