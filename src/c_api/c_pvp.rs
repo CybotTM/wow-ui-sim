@@ -31,8 +31,9 @@ pub enum TrainingGroundKind {
 
 pub(crate) fn register_c_pvp_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_PvP")?;
-    #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
-    war_mode::register(state, ns)?;
+    if cfg!(any(feature = "client-retail", feature = "client-ptr")) {
+        war_mode::register(state, ns)?;
+    }
     #[cfg(feature = "retail-12-0-0")]
     catalog::register(state, ns)?;
     #[cfg(all(

@@ -1,8 +1,6 @@
 //! Explicit War Mode inputs, independent of generic PvP and active phase state.
 
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 use crate::{lua_api::methods::borrow_state, lua_bridge::table_set_rust_fn_static};
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 use rilua::{LuaResult, Val, vm::gc::arena::GcRef, vm::state::LuaState, vm::table::Table};
 
 #[derive(Debug, Clone)]
@@ -11,7 +9,6 @@ pub struct WarModeState {
     pub reward_bonus: f64,
 }
 
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 pub(crate) fn register(state: &mut LuaState, ns: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, ns, "IsWarModeDesired", is_war_mode_desired)?;
     table_set_rust_fn_static(
@@ -22,14 +19,12 @@ pub(crate) fn register(state: &mut LuaState, ns: GcRef<Table>) -> LuaResult<()> 
     )
 }
 
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 fn is_war_mode_desired(state: &mut LuaState) -> LuaResult<u32> {
     let desired = borrow_state(state)?.war_mode.desired;
     state.push(Val::Bool(desired));
     Ok(1)
 }
 
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 fn get_war_mode_reward_bonus(state: &mut LuaState) -> LuaResult<u32> {
     let reward_bonus = borrow_state(state)?.war_mode.reward_bonus;
     state.push(Val::Num(reward_bonus));
