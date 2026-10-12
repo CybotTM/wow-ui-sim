@@ -52,7 +52,13 @@ fn open_talent_panel(env: &WowLuaEnv) {
 
 fn capture_visible_onupdate(env: &WowLuaEnv) -> (usize, Vec<String>) {
     let state = env.state().borrow();
-    let visible_ids = state.visible_on_update_cache.clone().unwrap_or_default();
+    let mut visible_ids = state
+        .on_update_frames
+        .iter()
+        .copied()
+        .filter(|id| state.widgets.is_ancestor_visible(*id))
+        .collect::<Vec<_>>();
+    visible_ids.sort_unstable();
     let names = visible_ids
         .iter()
         .map(|id| {

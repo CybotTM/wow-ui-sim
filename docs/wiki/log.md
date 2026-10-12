@@ -1609,3 +1609,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11] verification | CASC cached-prefix coherence
 
 [Independent gate](../../data/patch-api/evidence/casc-encoding-header-2026-10-11/report.md)2463 verifies cached34-byte math/packed decoding/primary-source limits and initial4copies6439bytes/10paths. ZERO game-file reads by verifier; archive existence/read-count/stat remain main snapshot metadata. Reports copied by main; no historical/effective lookup/payload/root repair or native acceptance. Broad FAIL/full handoff OPEN.
+
+## [2026-10-11 local] regression | Authentic visible-count RED
+
+[Counter packet](../../data/test-perf/evidence/talent-visible-count-2026-10-11/README.md) retains c7/newcase0PASS1FAIL: collector0vs1 after public visibility/name/script/callback1 preconditions, independent2469 newartifactauthonce. Hidden/re-show assertions unreached; oldperformancecontrols0executions. Replaced optional-cache default with visible registered IDs through existing ancestor predicate, test-only; GREEN/final checks pending. No vendor/production/threshold change or loaded/native acceptance.

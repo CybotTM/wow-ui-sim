@@ -1,3 +1,7 @@
+## [2026-10-11] regression | Visible OnUpdate collector RED
+
+[Counter regression](investigations/integrated-source-and-factory-proof-2026-10-09.md#talent-visible-count--authentic-regression-red-2026-10-11-local): independent2469 authenticates one new-case failure, collector0/expected1 after public callback1. Test-only live visible registered-frame correction implemented; GREEN pending. Original192/timing assertions and production/vendor unchanged; not loaded-latency/native/addon acceptance.
+
 ## [2026-10-11] observation | CASC encoding candidate prefix
 
 [Current prefix](investigations/integrated-source-and-factory-proof-2026-10-09.md#casc-encoding-candidate--current-prefix-2026-10-11):34-byte main read, BLTE/matching9-byte key prefix in data174; no new index/payload reads or historical/root-cause proof. Independent2463 verifies cached coherence/initial retention only, not physical archive identity or repair. Cold-cache/broad FAIL/full handoff OPEN unchanged.
