@@ -25,12 +25,12 @@ Retail/PTR `C_FriendList.SetFriendNotes` contract over existing environment-owne
 
 ## Tests asserting this spec
 
-- [friend_note_mutation.rs](../../tests/friend_note_mutation.rs): eight integrated Rust cases; genuine Retail RED failed8/8 at missing raw setter on `d61c78a2b`. Downstream assertions were unreached in RED. At `a883157c49`, all eight cases completed on each of Retail/PTR, including mutation/security/whole-popup assertions. Both normal probes exit0 with marker and literal `[]`; fmt exit0. Public packet retention remains pending.
+- [friend_note_mutation.rs](../../tests/friend_note_mutation.rs): eight integrated Rust cases; genuine Retail RED failed8/8 at missing raw setter on `d61c78a2b`. Downstream assertions were unreached in RED. At `a883157c49`, all eight cases completed on each of Retail/PTR, including mutation/security/whole-popup assertions. Both normal probes exit0 with marker and literal `[]`; fmt exit0. [Retained packet](../../data/patch-api/evidence/friend-note-mutation-2026-10-12/README.md); independent retention gate pending.
 
 ## Known gaps (current cycle)
 
 - [ ] Requested default cargo check NEVER INVOKED: capacity BLOCKED, invocations0/credit0. Test producers and fmt do not satisfy this gate.
-- [ ] Actual row60 publication and public evidence retention pending; current publication145/94OK/51gaps unchanged. No native, broad-suite or whole-handoff acceptance.
+- [ ] Actual row60 publication and independent packet retention gate pending; current publication145/94OK/51gaps unchanged. No native, broad-suite or whole-handoff acceptance.
 
 ## Out of scope
 
