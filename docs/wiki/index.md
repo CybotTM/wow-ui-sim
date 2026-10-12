@@ -1,3 +1,7 @@
+## [2026-10-12] observation | Canonical paired startup
+
+[BA boundary](investigations/fullsuite-ba-2026-10-11.md#canonical-paired-startup--2026-10-12): independent2794 bounded current-run PASS; [packet](../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md) owns details, public retention pending. Original compile failure retained; failed-assertion emission source-only. No historical equivalence, compatibility-clean/native or repair claim; frozen BA FAIL/full handoff OPEN.
+
 ## [2026-10-12] observation | Talent handler-log capture
 
 [BA meaning/limits](investigations/fullsuite-ba-2026-10-11.md#talent-handler-log-observation--2026-10-12): independent2779 capture coherence PASS, one original selector body PASS; no performance repair. Independent packet retention/link/privacy bounded PASS at e95:57 copies/2,845,419 bytes,19 links/4 anchors,zero privacy findings; no binaries/images/replays, retained-text scope only; frozen3FAIL/full handoff OPEN.

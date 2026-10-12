@@ -74,6 +74,12 @@ pub struct LoadTiming {
 }
 ```
 
+### Test-only canonical paired startup observation
+
+[`tests/startup_perf.rs`](../tests/startup_perf.rs) stores each successful `LoadResult` beside its same-call outer clock, stopping immediately after `load_addon` returns (including argument evaluation), before unwrap/recording. Typed rows and allocation remain inside canonical startup elapsed time; JSON encoding/emission follows the stopped startup clock and precedes original assertions. Returned timings overlap; diagnostic collection lengths are counts, not diagnostic text or compatibility-clean proof. Production loader behavior is unchanged.
+
+[Contract](specs/startup-addon-paired-observation.md) records independent2794 bounded current-run proof; [packet](../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md) owns exact results/provenance, public retention pending. Passing runtime evidence does not exercise failed-assertion emission, establish cache contents/historical equivalence/native parity, or repair frozen BA failures.
+
 ### Removed API compatibility
 
 Retail 12.1 removes public `GetInventorySlotInfo`. Current `Blizzard_TransmogShared` calls `C_PaperDollInfo.GetInventorySlotInfo` directly, so its loader needs no legacy-global compatibility scope. The legacy global remains unavailable to general addon code; see [[transmog-inventory-slot-scope]] for the retired stale-source workaround.

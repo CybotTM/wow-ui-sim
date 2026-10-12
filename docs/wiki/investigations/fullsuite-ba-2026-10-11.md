@@ -58,6 +58,14 @@ Profiled/CASC0/warm-cache clocks and nested file timings are not exclusive costs
 
 Accounting total4.112s, XML processing2.225s, Lua execution0.891s=compile+call. [XML timing source scopes](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/xml-timing-scope.md) explain inclusive recursive finalize counters versus top-level create timers; aggregate subset labels do not define an exclusive hierarchy. Distinct discovery/result names and zero rows retained literally. Load-only observations are not paired with old clocks or loaded-failure/native/repair proof. Frozen BA3FAIL/full goal OPEN unchanged.
 
+### Canonical paired startup — 2026-10-12
+
+[Current packet](../../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md) owns exact results/provenance; independent2794 accepts bounded current-run coherence at source `490bc1080`. One focused serializer and one canonical startup body PASS; parent/child recaps are not additional body executions. Compilation/formatting PASS; default check reused only for unchanged production/library scope. Initial `59f3ff136` compile E0583 remains separate; new seal first authenticated once. Public retention pending.
+
+[Contract](../../specs/startup-addon-paired-observation.md) preserves original path/readiness/strict budget. Same-call rows are now paired in this current execution, not combined from earlier outer/load-only probes. Allocation/recording remain inside startup time; JSON emission is outside it. Emission before failed assertions is source-only: this passing run did not execute that failure boundary. Diagnostic counts are not compatibility-clean proof; overlapping loader buckets are not exclusive elapsed costs.
+
+Captured allowlist values are null, including `WOW_SIM_LOG_HANDLER_TIMINGS` and `XDG_CACHE_HOME`. Actual bytecode enable/disable controls, `ASSET_RESOLVER_CACHE_DIR`, and `WOW_SIM_VERBOSE` child values are unknown; captured `WOW_SIM_BYTECODE_CACHE_DIR` is not an actual reader. No cache-contents/full-policy attestation, historical equivalence, loaded-failure cause/repair or native acceptance. Frozen BA verdict and full handoff OPEN unchanged.
+
 ### Performance scheduling boundary — 2026-10-12
 
 [Bounded source interpretation](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/perf-scheduling-boundary.md): retained command header confirms16 Nextest slots. Linux performance wrappers request exclusive workload gates, but `WOW_SIM_TIMEOUT_FIXTURE_CAPACITY=reserved` bypasses acquisition. Original reservation state/competitor scopes unrecorded; no assertion that these tests raced or contention caused failure. Named scheduling sources unchanged since frozen BA. No rerun or scheduler/threshold fix justified by isolated passes alone.
@@ -67,6 +75,8 @@ Accounting total4.112s, XML processing2.225s, Lua execution0.891s=compile+call. 
 [Full-suite workflow](../../remote-builds.md#asynchronous-full-suite) documents `3eab34fb9`'s per-step `command` argv and single-key `environment` record. Unset capacity serializes as `null`; empty and literal `reserved` remain distinct strings. No other inherited environment is captured. This future source addition cannot reconstruct original BA reservation state, explain its failures, or establish current suite acceptance. [Independent metadata-only PASS](../../../data/test-perf/evidence/full-suite-result-metadata-2026-10-12/independent-report.md): three new cases/six existing sandbox controls; installed controller byte-equal/mode0755. No scheduling change or suite rerun; frozen BA3FAIL/full handoff OPEN unchanged.
 
 ## Sources
+
+- [Canonical paired observation contract](../../specs/startup-addon-paired-observation.md) and [current packet](../../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md)
 
 - [Full-suite workflow and metadata limits](../../remote-builds.md#asynchronous-full-suite)
 
