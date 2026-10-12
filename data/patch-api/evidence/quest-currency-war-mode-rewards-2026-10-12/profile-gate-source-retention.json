@@ -1,0 +1,19 @@
+{
+  "scope": "Source-only profile-gate equivalence; no new runtime proof; additive source record preserved separately from immutable originala5e proof",
+  "rows": [
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/quest-currency-war-mode-current/profile-gate-source-report.md",
+      "destination": "profile-gate-source-report.md",
+      "bytes": 7037,
+      "byte_equal": true
+    },
+    {
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/quest-currency-war-mode-current/profile-gate-source-proof.json",
+      "destination": "profile-gate-source-proof.json",
+      "bytes": 130115,
+      "byte_equal": true
+    }
+  ],
+  "copies": 2,
+  "bytes": 137152
+}
