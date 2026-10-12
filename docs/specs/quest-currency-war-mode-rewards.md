@@ -33,7 +33,20 @@ Committed producers `bea55a2ae` (faction/shared numeric helper), `a295a7d72` (Pv
 ## Known gaps (current cycle)
 
 - [x] Expanded pre-producer RED executed and independently authenticated; initial five-case RED retained separately.
-- [ ] Current-profile GREEN async pending after committed producers; startup/publication and independent Rust/readability/retention proof remain pending. No GREEN, native parity or full handoff closure claim.
+- [ ] Current-source final execution and fmt/default check remain queued, host admission pending. Independent source equivalence/readability PASS is not runtime acceptance; all requirements above remain unchecked. No current-final GREEN, native parity or full handoff closure claim.
+
+## Current stage — 2026-10-12
+
+Current source `a5eaf4fc6` consolidates the accepted duplicate validator after PTR compilation finished; no source edit during that build. Independent2643 source-equivalence/readability PASS (manual metrics unavailable); prior2635 getter/wiring source proof reused.
+
+| Pinned scope | Evidence | Limit |
+|---|---|---|
+| Precursor `4e19a8bad`, Retail epoch `retail-green-compile-20261012T092906296861Z` | 13 PASS/0 FAIL, 4.74s; normal four raw getters, arity, unseeded/default/type assertions, `[]`/0; independent2642 authenticates new integration and normal artifacts once | Precursor only, not current final proof |
+| Same precursor, PTR epoch `ptr-green-compile-20261012T093314261880Z` | Compile0; integration artifact authenticated once by2644; six rejected admissions, zero runtime executions, resource-blocked; no normal binary | Independent2645 confirms worker JSON error despite controller systemd success |
+| Current final | `wow-quest-currency-final-20261012t094132611905z`: 13 Quest + 9 changed currency-flag regressions per profile, justified by validator change; normal five-query/startup checks | Queued; no final execution yet |
+| Current checks | `wow-quest-currency-check-20261012t094226265038z`: final fmt/default check after final unit | Queued; host admission pending |
+
+[Public packet](../../data/patch-api/evidence/quest-currency-war-mode-rewards-2026-10-12/README.md) retains RED/source and separate pinned precursor evidence, main byte-compared; independent retention gate pending. [Wiki stage](../wiki/investigations/patch-8-1-0-api-audit.md#questutils-current-final-stage--2026-10-12) records the same acceptance boundary.
 
 ## Out of scope
 
