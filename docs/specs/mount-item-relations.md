@@ -31,14 +31,13 @@ Current Retail/PTR `C_MountJournal.GetMountFromItem(itemID)` queries an explicit
 
 ## Known gaps (current cycle)
 
-- [ ] Independent packet retention/link/privacy gate PENDING; public reports and full streams retained, not independent retention acceptance.
 - [ ] Earlier-profile runtime preservation and shared-state compile refresh remain unverified.
 
 ### Current bounded evidence — 2026-10-12
 
 The [final query report](../../data/patch-api/evidence/mount-item-relations-2026-10-12/final-current-report.md) records historical `7487c8bec`: 28 new +24 reused =52 scoped test executions, zero test failures. Retail/PTR normal probes each reached the actual marker followed by `[]`, exit0. Fresh default library check at that stage passed; the [current observation report](../../data/patch-api/evidence/mount-item-relations-2026-10-12/observation-current-report.md) retains its applicability via an empty production/query/spell/normal/check-scope diff. Current formatting exits0. Six inherited dependency-manifest deprecations remain; nil/missing-requirement diagnostics are retained, not assertion failures.
 
-Independent observation at `609033535` is bounded PASS: four new consumer executions, eight original invocations and 88 raw rows. Current scope is 4 new +48 reused query/spell executions =52: eight query and sixteen spell-preservation cases per profile. Earlier consumer executions remain historical, not double-counted. Runtime units are terminal; CLI/check/fmt operations are separate from test counts.
+Independent observation at `609033535` is bounded PASS: four new consumer executions, eight original invocations and 88 raw rows. Current scope is 4 new +48 reused query/spell executions =52: eight query and sixteen spell-preservation cases per profile. Earlier consumer executions remain historical, not double-counted. Runtime units are terminal; CLI/check/fmt operations are separate from test counts. Independent2865 packet retention/link/privacy PASS at `587a22e38`:303 copies/9,996,495 bytes plus13 snapshots/411,010 bytes,20 links/four anchors,zero privacy findings.
 
 Each profile executes the unsliced original PlayerChoice live contrast first: false→true→false for absent, supplied `6948→401`, then removed relation; standalone baseline follows with false. Original ItemButton `SetItem(6948)` and vendor method provenance/input/stage observations are retained. Actual predicate observations are raw registered function / nil return type / nil value, Lua `=(string):72–74`, matching the existing unmodeled namespace fallback. This proves supplied-relation consumer dependence in this simulator context, not modeled/native dressability or native Hearthstone classification. No vendor predicate replacement or normal-session relation seeding.
 

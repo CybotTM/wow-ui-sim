@@ -22,6 +22,6 @@ Eighth mapped-secret query and live consumer contrast first executed GREEN; neit
 
 ## Retention
 
-[Manifest](retention-manifest.json): **303 byte-exact nonbinary copies /9,996,495 bytes**, plus **13 source snapshots /411,010 bytes** at `609033535`. Full compiler/command/raw phase streams, original failures, inputs, source identity metadata and existing one-time authentication receipts retained. No executable/image copied, read or rehashed during retention. Duplicate controller stdout and private retention reports excluded. Independent retention/link/privacy gate pending.
+[Manifest](retention-manifest.json): **303 byte-exact nonbinary copies /9,996,495 bytes**, plus **13 source snapshots /411,010 bytes** at `609033535`. Full compiler/command/raw phase streams, original failures, inputs, source identity metadata and existing one-time authentication receipts retained. No executable/image copied, read or rehashed during retention. Duplicate controller stdout and private retention reports excluded. Independent2865 retention/link/privacy PASS at `587a22e38`: 303/303 copies and13/13 snapshots byte-exact;20 links/four anchors resolve;zero privacy findings. Private gate reports remain outside this packet.
 
 Earlier-profile API exclusion is source-inspected only; current shared-state compile refresh is separate. Native catalog/range/classification/ownership, historical environment equivalence, performance causation, external acceptance and full handoff remain **OPEN**.
