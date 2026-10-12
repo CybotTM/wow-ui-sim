@@ -220,3 +220,42 @@ fn supplied_mount_item_numeric_identities_are_distinct_without_truncation_aliase
         assert_mount_item_query(&env, argument, None);
     }
 }
+
+#[test]
+fn supplied_mount_item_secret_identity_hits_and_recovers_across_callers() {
+    let env = fresh_mount_item_fixture_env();
+    env.state()
+        .borrow_mut()
+        .mount_item_relations
+        .insert(901001, 401);
+    env.exec(
+        r#"
+        debug.settaintmode(true)
+        local query = C_MountJournal.GetMountFromItem
+        local key = secretwrap(901001)
+        assert(issecretvalue(key), 'authentic mapped secret key')
+        local function hit(...)
+            assert(select('#', ...) == 1 and (...) == 401, 'mapped identity and exact return arity')
+        end
+        hit(query(key))
+        local function addon()
+            assert(debug.getstacktaint() == 'MountMappedSecret', 'genuine tainted caller')
+            local ok, message = pcall(query, key)
+            assert(not ok and message:find('untainted caller', 1, true),
+                'mapped secret input denied before lookup')
+            assert(issecretvalue(key), 'denial retains original wrapper')
+            hit(query(901001))
+            assert(debug.getstacktaint() == 'MountMappedSecret', 'ordinary mapped lookup preserves taint')
+        end
+        debug.setobjecttaint(addon, 'MountMappedSecret')
+        addon()
+        assert(debug.getstacktaint() == nil and issecretvalue(key), 'secure caller and wrapper restored')
+        hit(query(key))
+        "#,
+    )
+    .expect("secure wrapped hits, tainted denial and ordinary mapped recovery");
+    assert_eq!(
+        env.state().borrow().mount_item_relations.get(&901001),
+        Some(&401)
+    );
+}
