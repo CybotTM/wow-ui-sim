@@ -14,6 +14,12 @@ fn probe(env: &WowLuaEnv, body: &str) {
 }
 
 fn currency_reward_env() -> WowLuaEnv {
+    let env = load_currency_reward_consumer();
+    supply_currency_reward(&env);
+    env
+}
+
+fn load_currency_reward_consumer() -> WowLuaEnv {
     let ui = wow_ui_sim::blizzard_ui_sync::default_cache_addons_path()
         .expect("current profile Blizzard cache");
     let (env, loaded) = crate::common::blizzard_addon_harness::build_blizzard_addon_closure_env(
@@ -22,34 +28,39 @@ fn currency_reward_env() -> WowLuaEnv {
         &[],
     );
     assert!(loaded.iter().any(|name| name == "Blizzard_FrameXMLUtil"));
-    let mut quest = env.state().borrow().quest_log_entries.entries[0].clone();
-    quest.quest_id = QUEST_ID;
-    quest.title = "War Mode currency fixture".to_string();
-    quest.is_world_quest = true;
-    quest.currency_rewards = vec![QuestRewardCurrency {
-        currency_id: CURRENCY_ID,
-        name: "Fixture Marks".to_string(),
-        texture: REWARD_ICON.to_string(),
-        total_reward_amount: 7,
-        base_reward_amount: None,
-    }];
-    {
-        let mut sim = env.state().borrow_mut();
-        sim.quest_log_entries.entries.push(quest);
-        sim.currency_info.insert(
-            CURRENCY_ID,
-            CurrencyInfo {
-                name: "Fixture Marks".to_string(),
-                quality: 2,
-                ..CurrencyInfo::default()
-            },
-        );
-    }
     let source: String = env
         .eval("return debug.getinfo(QuestUtils_AddQuestCurrencyRewardsToTooltip, 'S').source")
         .expect("loaded public QuestUtils closure provenance");
     eprintln!("Loaded public currency reward consumer: {source}");
     env
+}
+
+fn supply_currency_reward(env: &WowLuaEnv) {
+    let mut quest = env.state().borrow().quest_log_entries.entries[0].clone();
+    quest.quest_id = QUEST_ID;
+    quest.title = "War Mode currency fixture".to_string();
+    quest.is_world_quest = true;
+    quest.currency_rewards = vec![build_currency_reward(CURRENCY_ID, 7, "Fixture Marks")];
+    let mut sim = env.state().borrow_mut();
+    sim.quest_log_entries.entries.push(quest);
+    sim.currency_info.insert(
+        CURRENCY_ID,
+        CurrencyInfo {
+            name: "Fixture Marks".to_string(),
+            quality: 2,
+            ..CurrencyInfo::default()
+        },
+    );
+}
+
+fn build_currency_reward(currency_id: i32, amount: i32, name: &str) -> QuestRewardCurrency {
+    QuestRewardCurrency {
+        currency_id,
+        name: name.to_string(),
+        texture: REWARD_ICON.to_string(),
+        total_reward_amount: amount,
+        base_reward_amount: None,
+    }
 }
 
 fn reward_lines(env: &WowLuaEnv) -> Vec<String> {
