@@ -1,3 +1,7 @@
+## [2026-10-12] docs | Bounded native-focus reconciliation
+
+[Native-focus packet](../../data/patch-api/evidence/native-window-focus-2026-10-12/README.md) owns bounded user acceptance, fresh-startup/native-input and lifetime proof. Linked current prose reconciled; stop-after-test replaces expiry. Historical receipts unchanged; PTR execution, universal pixel/all-key/all-profile and whole handoff OPEN.
+
 ## [2026-10-12] docs | Bounded Edit Mode / Enter and Friend-setter reconciliation
 
 [Friend-setter audit](investigations/patch-8-1-0-api-audit.md#friend-setter--bounded-current-evidence-2026-10-12) links packet-owned evidence and the later bounded projection/link/privacy gate PASS through `b1c7c4348`. Selection/chat docs and coverage links preserve GUI observation versus user-keypress acceptance; bounded app expired naturally. Historical failures/profile limits unchanged. Docs only; no execution, source edits or completion promotion.

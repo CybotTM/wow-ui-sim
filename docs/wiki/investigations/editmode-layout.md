@@ -95,8 +95,8 @@ MicroMenu329×40 and native1920×1080 window; initial90s viewing app expired nat
 User later accepted layout. Both keyboard fields initially failed with native
 PointerRoot focus/zero Enter deliveries; native focus assignment on the same
 artifact produced deliveries and user confirmation both worked. Automatic focus
-setup/owned-native-input gate PASS ([packet](../../../data/patch-api/evidence/native-window-focus-2026-10-12/README.md)); user authorized stopping after each test, without automatic
-expiry. Universal pixel/native/PTR parity and full handoff remain open. See [selection contract](../../specs/edit-mode-layout-selection.md).
+setup/fresh-startup and independent3045 ownership/socket/focus/geometry/wiring/lifetime gate PASS ([packet](../../../data/patch-api/evidence/native-window-focus-2026-10-12/README.md)); user authorized stopping after each test, without automatic
+expiry; main stopped the test app after the gate. This is a native-focus runtime configuration fix, not new Rust keyboard logic after `7d9d9f621`. Later PTR `f3145424c` startup2/cache10/Enter3 and normal zero-errors/fmt/PTR-check PASS ([packet](../../../data/patch-api/evidence/edit-mode-enter-ptr-2026-10-12/README.md)); same Enter bodies run through a fresh whole Game constructor, not Retail prefork/cache-process proof. Universal pixel/native/all-key/all-profile parity and whole handoff remain OPEN. See [selection contract](../../specs/edit-mode-layout-selection.md).
 
 Follow-up: selecting the saved layout still was not enough for the visible UI.
 The startup fast path for action bars seeded Widescreen `systemInfo` and replayed
