@@ -31,4 +31,4 @@
 
 ## Out of scope
 
-Native eligibility catalogs, generated normal-session memberships, PvP desired/active state, quest eligibility, faction-grant relationships and tooltip first-instance production. These are separate caller dependencies: no mocked getter/vendor rewrite or end-to-end quest-display claim substitutes for those models. Completed currency field-projection proof remains separate; parent handoff OPEN.
+Native eligibility catalogs, generated normal-session memberships, PvP desired/active state, quest eligibility, faction-grant relationships. Vendor `QuestUtils` computes first-instance status locally from repeated currency IDs; this is not a missing simulator field. These are separate caller dependencies: no mocked getter/vendor rewrite or end-to-end quest-display claim substitutes for those models. Completed currency field-projection proof remains separate; parent handoff OPEN.
