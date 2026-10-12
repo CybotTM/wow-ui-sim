@@ -31,7 +31,7 @@ Retail/PTR `C_FriendList.SetFriendNotes` contract over existing environment-owne
 
 - [x] Later default check and formatter each PASS once at `7d9d9f621`; [check packet](../../data/patch-api/evidence/edit-mode-enter-2026-10-12/README.md). The `a883157c49` attempt remains NEVER INVOKED (capacity BLOCKED, zero credit); no retroactive credit.
 - [x] Real strict row60 BEFORE145/95OK/50gaps failed solely stale setter; exact one-ID reconciliation followed by distinct strict AFTER PASS with identical full records. Independent validator9/real validator/capture-preservation PASS at `cb77de086`; historical GUID145/94/51 unchanged.
-- [ ] New retained validator-stream projection gate pending. Native, broader current-suite and whole-handoff acceptance remain excluded.
+- [x] New retained validator-stream projection gate independently PASS through `b1c7c4348`; [gate](../../data/patch-api/evidence/edit-mode-enter-2026-10-12/public-retention-gate.json). Native, broader current-suite and whole-handoff acceptance remain excluded.
 
 ## Out of scope
 

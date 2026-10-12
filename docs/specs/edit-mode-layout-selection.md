@@ -28,7 +28,7 @@ Current Retail/PTR startup must preserve the active-layout index supplied by the
 
 - [x] Genuine fresh-startup RED at `653e829f1`: selected-layout assertion failed after real file import/full startup; geometry unreached. Enter3 GREEN and separate strict publication stale-row FAIL do not establish selection GREEN.
 - [x] Corrected source and bounded Retail startup2/cache10 GREEN; corrected normal startup Classic329×40/zero Lua errors, fmt/default check PASS. [Packet](../../data/patch-api/evidence/edit-mode-enter-2026-10-12/README.md). PTR runtime remains unproved.
-- [ ] Current-artifact owned GUI query observed Classic/horizontal329×40 at native1920×1080 window; the bounded90s app expired naturally. Intended-user keyboard/layout acceptance and native/PTR parity remain unproved. Public packet retention gate pending.
+- [ ] Current-artifact owned GUI query observed Classic/horizontal329×40 at native1920×1080 window; the bounded90s app expired naturally. Intended-user keyboard/layout acceptance and native/PTR parity remain unproved. Public packet retention/link/privacy gate PASS through `b1c7c4348`; [gate](../../data/patch-api/evidence/edit-mode-enter-2026-10-12/public-retention-gate.json).
 
 ## Out of scope
 

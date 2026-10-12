@@ -148,7 +148,7 @@ Old533c15,102PASS/1FAIL and frozen BA3FAIL remain unchanged historical results. 
 
 ## Friend setter — bounded current evidence, 2026-10-12
 
-[Setter contract](../../specs/friend-note-mutation.md) links the [retained packet](../../../data/patch-api/evidence/friend-note-mutation-2026-10-12/README.md), which owns bounded Retail/PTR mutation/security/unchanged-popup proof, strict publication reconciliation and independent validator/capture-preservation/privacy results. Initial retention failure and historical captures remain preserved; new public projection gate pending. Later default check/fmt belongs to the separate [Edit Mode / Enter packet](../../../data/patch-api/evidence/edit-mode-enter-2026-10-12/README.md), not the earlier setter epoch. No native, broader-suite or whole-handoff acceptance.
+[Setter contract](../../specs/friend-note-mutation.md) links the [retained packet](../../../data/patch-api/evidence/friend-note-mutation-2026-10-12/README.md), which owns bounded Retail/PTR mutation/security/unchanged-popup proof, strict publication reconciliation and independent validator/capture-preservation/privacy results. Initial retention failure and historical captures remain preserved; new public projection/link/privacy gate PASS through `b1c7c4348`. Later default check/fmt belongs to the separate [Edit Mode / Enter packet](../../../data/patch-api/evidence/edit-mode-enter-2026-10-12/README.md), not the earlier setter epoch. No native, broader-suite or whole-handoff acceptance.
 
 ## Current publication reconciliation — 2026-10-12
 

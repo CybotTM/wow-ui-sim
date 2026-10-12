@@ -20,4 +20,4 @@ Corrected normal startup [reports Classic329×40 and `[]`](normal-corrected.stdo
 
 Owned viewing service switched from historical bounty artifact to the authenticated `7d9d9f621` artifact. Private owned-PID query observed Classic2, MicroMenu329×40 and native1920×1080 window. Read-only state/window observations do not prove actual key delivery, pixel/native parity or intended-user acceptance. Viewing runs remain bounded90s; VNC listener policy and original WTF files unchanged.
 
-PTR/earlier-profile runtime, native/GUI-user acceptance, broad current-HEAD suite and full handoff remain OPEN. Separate [Friend publication](../friend-note-mutation-2026-10-12/README.md) preserves its own historical/after scopes. New public packet retention/link/privacy gate pending.
+PTR/earlier-profile runtime, native/GUI-user acceptance, broad current-HEAD suite and full handoff remain OPEN. Separate [Friend publication](../friend-note-mutation-2026-10-12/README.md) preserves its own historical/after scopes. [Independent public retention/link/privacy gate](public-retention-gate.json) PASS through `b1c7c4348`; bounded proof only.
