@@ -52,7 +52,13 @@ Accounting total4.112s, XML processing2.225s, Lua execution0.891s=compile+call. 
 
 [Bounded source interpretation](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/perf-scheduling-boundary.md): retained command header confirms16 Nextest slots. Linux performance wrappers request exclusive workload gates, but `WOW_SIM_TIMEOUT_FIXTURE_CAPACITY=reserved` bypasses acquisition. Original reservation state/competitor scopes unrecorded; no assertion that these tests raced or contention caused failure. Named scheduling sources unchanged since frozen BA. No rerun or scheduler/threshold fix justified by isolated passes alone.
 
+### Future step metadata — 2026-10-12
+
+[Full-suite workflow](../../remote-builds.md#asynchronous-full-suite) documents `3eab34fb9`'s per-step `command` argv and single-key `environment` record. Unset capacity serializes as `null`; empty and literal `reserved` remain distinct strings. No other inherited environment is captured. This future source addition cannot reconstruct original BA reservation state, explain its failures, or establish current suite acceptance. [Independent metadata-only PASS](../../../data/test-perf/evidence/full-suite-result-metadata-2026-10-12/independent-report.md): three new cases/six existing sandbox controls; installed controller byte-equal/mode0755. No scheduling change or suite rerun; frozen BA3FAIL/full handoff OPEN unchanged.
+
 ## Sources
+
+- [Full-suite workflow and metadata limits](../../remote-builds.md#asynchronous-full-suite)
 
 - [Distinct returned-field preparation and compile/source evidence](../../../data/test-perf/evidence/startup-addon-inner-timing-2026-10-11/README.md)
 - [Startup observation wrapper and public runtime packet](../../../data/test-perf/evidence/startup-cost-diagnostic-2026-10-11/README.md)

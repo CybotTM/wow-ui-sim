@@ -1,3 +1,7 @@
+## [2026-10-12] evidence | Future full-suite step metadata PASS
+
+[Workflow schema](../remote-builds.md#asynchronous-full-suite) and [BA limits](investigations/fullsuite-ba-2026-10-11.md#future-step-metadata--2026-10-12): independent2567 metadata-only PASS3 new/6 existing sandbox cases; installed controller matches source/mode0755. Exact argv and capacity-only null/empty/reserved values retained without scheduling or suite rerun. No historical reconstruction/causal repair; BA3FAIL/full handoff OPEN.
+
 ## [2026-10-12] investigation | Frozen performance scheduling boundary
 
 [Scheduling source limits](investigations/fullsuite-ba-2026-10-11.md#performance-scheduling-boundary--2026-10-12): recorded Nextest cap16; exclusive performance gates conditional on reservation state. Original environment/competitor scopes unrecorded, so no race/causal fix claim. Frozen failures and full handoff OPEN unchanged.

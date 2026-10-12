@@ -1,9 +1,9 @@
-# Full-suite result metadata — pending final proof
+# Full-suite result metadata — verified
 
-Explicit user approval: record only actual executed command and `WOW_SIM_TIMEOUT_FIXTURE_CAPACITY` in future result files; no scheduling or suite rerun.
+[Independent metadata-only PASS](independent-report.md): three new sandbox subprocess/result cases and six existing execution controls. Original three RED failures reproduce the missing command field; GREEN preserves unset/null, empty string and literal `reserved`. No real Cargo/full suite executed.
 
-`steps.<name>.command` is the argv passed to the child, including `--offline --locked`. `steps.<name>.environment` contains only the reservation key: JSON null when absent; explicit empty string and `reserved` preserved. Existing execution argv/environment are unchanged.
+`steps.<name>.command` records exact argv passed to the child, including `--offline --locked`. `steps.<name>.environment` contains only `WOW_SIM_TIMEOUT_FIXTURE_CAPACITY`; no other inherited environment. Existing execution/scheduling/resource parameters unchanged.
 
-New sandbox subprocess tests: RED0/3 atb2cabc0e1 (missing command field); GREEN3/3 at3eab34fb9. Child stubs record actual argv/environment and result JSON is read from disk/stdout. No real Cargo or full suite executed. Existing deploy script installed only the user-owned controller; source-byte equality/mode0755 recorded. Independent remaining-six-regression/install proof pending.
+User approved this metadata-only change. Existing `deploy.sh` installed only `/home/osso/bin/full-suite`; source-byte equality/mode0755 independently confirmed. No simulator build/service restart/provider change or push.
 
-Future metadata cannot reconstruct frozen BA's original environment or prove contention causality. Frozen15,038PASS/3FAIL/19skip/15,041executions and full handoff OPEN unchanged. No simulator/vendor/threshold/service/provider changes.
+Future metadata cannot reconstruct frozen BA's original reservation state or establish contention causality. Frozen15,038PASS/3FAIL/19skip/15,041executions/full handoff OPEN unchanged. Raw new RED/GREEN, six remaining controls and install receipts retained; report copies preserve original private-directory link meaning.

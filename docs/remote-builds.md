@@ -104,6 +104,13 @@ integration and library scopes use nextest with `--no-fail-fast`; the complete
 and both stdout/stderr remain in the stored JSON/log; later steps still run.
 Submission/status behavior is unchanged.
 
+Source revision `3eab34fb9` adds two fields to each executed step's JSON:
+`command` is the exact argv passed to the subprocess, including `--offline`
+and `--locked` where passed; `environment` contains only
+`WOW_SIM_TIMEOUT_FIXTURE_CAPACITY`. Its value is JSON `null` when unset,
+`""` when empty, or the literal string (including `"reserved"`). No other
+inherited environment is recorded. [Bounded metadata proof](../data/test-perf/evidence/full-suite-result-metadata-2026-10-12/README.md) covers three new cases, six existing sandbox controls and the installed controller's source-byte equality/mode0755. No suite was rerun. Future metadata cannot reconstruct historical environment or establish contention, failure cause or current full-suite acceptance.
+
 Submit resource policy aligned October 10, 2026: detached `systemd-run --user`
 uses `agents.slice`, `CPUQuota=1200%`, `MemoryHigh=16G` and `MemoryMax=16G`,
 matching the bounded native units' operational CPU/memory limits. Unlike the guarded units in the
