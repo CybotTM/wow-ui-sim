@@ -24,6 +24,6 @@ Historical145/87/58/two removal supersessions and [old533c145/93/52/six-producer
 
 ## Retention and remaining gates
 
-[Manifest](retention-manifest.json):254 byte-exact text copies/5,766,526 bytes plus21 committed-source snapshots/579,295 bytes; independent retention/link/privacy gate PENDING. No executable/library/image/Xauthority payloads or recursive private retention outputs.
+[Manifest](retention-manifest.json):254 byte-exact text copies/5,766,526 bytes plus21 committed-source snapshots/579,295 bytes; independent2939 retention/link/privacy PASS at `19988cd6c`:254/254 copies,21/21 snapshots,61 active links,zero privacy candidates. Private retention outputs not recursively copied; original structured RED JSON remains NOT_RECOVERED. No executable/library/image/Xauthority payloads or recursive private retention outputs.
 
 New full suite at `d21ca3f64388d49b367803434ff1b0404b86c640`, unit `full-suite-1791833706`, submitted once asynchronously19:35UTC; [receipt](operations/full-suite-submission-d21ca3f64388d49b367803434ff1b0404b86c640.json), result PENDING. No synchronous wait/poll or resubmission. Native/account classification, earlier-profile contracts, historical equivalence/causal performance, authenticated viewing and whole handoff remain **OPEN**.

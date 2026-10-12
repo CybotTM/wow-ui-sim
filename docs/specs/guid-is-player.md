@@ -32,8 +32,9 @@ Current Retail/PTR `C_PlayerInfo.GUIDIsPlayer` must project explicit local, acti
 
 - [x] Genuine RED observed before producer; assertions unreached after missing-provider guards receive no behavioral credit.
 - [x] Implement and verify Retail/PTR direct/consumer/startup checks, preserve diagnostics and account predicate provenance.
-- [x] Fresh default library check, owning strict publication and current-validator gates: main-verified `d7a34be4a` check exit0, `a555f927a` strict case PASS and `d21ca3f64` validator retry9/9 plus actual validator exit0. [Current packet](../../data/patch-api/evidence/guid-is-player-current-2026-10-12/README.md) owns detailed evidence; retention remains pending.
-- [ ] Public retention/link/privacy gate and packet collision-disclosure reconciliation remain PENDING. GREEN overwrote generic structured RED `proof.json`; original RED report/raw/auth receipt survive. Reconstruction is not byte-exact; original JSON NOT_RECOVERED.
+- [x] Fresh default library check, owning strict publication and current-validator gates: main-verified `d7a34be4a` check exit0, `a555f927a` strict case PASS and `d21ca3f64` validator retry9/9 plus actual validator exit0. [Current packet](../../data/patch-api/evidence/guid-is-player-current-2026-10-12/README.md) owns detailed evidence; independent2939 retention/link/privacy PASS at19988.
+- [x] Public retention/link/privacy and collision disclosure independently2939 verified at19988; raw packet unchanged.
+- [ ] Original structured RED JSON NOT_RECOVERED: GREEN overwrote generic `proof.json`; original RED report/raw/auth receipt survive. Reconstruction is not byte-exact.
 - [ ] Full broad suite remains PENDING: `d21ca3f64388d49b367803434ff1b0404b86c640` / `full-suite-1791833706`, submitted asynchronously October 12, 2026, 19:35 UTC. Historical533cFAIL/BA3FAIL unchanged.
 
 Initial publication1FAIL/exit1 and wrong101 worker guard, publication-before fixture-race/coherenceFAIL, and earlier validator8/9FAIL with standalone NOT RUN remain historical. Retry does not relabel them. Native, earlier-profile, external and whole-handoff acceptance remain OPEN.

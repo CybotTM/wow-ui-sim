@@ -126,7 +126,7 @@ Retail RED at `76f405e1d`: **0/9 PASS**, eight missing raw-provider guards plus 
 
 ## GUIDIsPlayer — bounded current verification, 2026-10-12
 
-[GUID contract](../../specs/guid-is-player.md) owns explicit local/active populated party/target-focus unit-model scope: neither prefix classification nor all offline/social catalogs. [Current packet](../../../data/patch-api/evidence/guid-is-player-current-2026-10-12/README.md) owns detailed evidence; retention remains pending. The source-stage pending observation above remains chronological history.
+[GUID contract](../../specs/guid-is-player.md) owns explicit local/active populated party/target-focus unit-model scope: neither prefix classification nor all offline/social catalogs. [Current packet](../../../data/patch-api/evidence/guid-is-player-current-2026-10-12/README.md) owns detailed evidence; independent2939 retention/link/privacy PASS at19988. The source-stage pending observation above remains chronological history.
 
 | Boundary | Main-verified proof | Limit |
 |---|---|---|
@@ -134,9 +134,9 @@ Retail RED at `76f405e1d`: **0/9 PASS**, eight missing raw-provider guards plus 
 | Owning strict publication | `a555f927a` original prefork case PASS; current145/94OK/51gaps | Seven producer closures separate from frozen87/58/two supersessions and old533c93/52/six closures |
 | Default check | `d7a34be4a` exit0 | Six inherited manifest deprecations retained; no warning-free claim |
 | Current validator and capture isolation | `d21ca3f64` retry9/9 and actual validator exit0; both captures/frozen inputs unchanged | Earlier8/9FAIL and standalone NOT RUN retained; no synthetic-map substitution |
-| Retention/native/earlier-profile/external/full handoff | OPEN; retention PENDING | Broad suite `d21ca3f64388d49b367803434ff1b0404b86c640` / `full-suite-1791833706`, async submission October 12, 2026, 19:35 UTC; result PENDING |
+| Retention/native/earlier-profile/external/full handoff | Retention independently2939 PASS at19988; other gates OPEN | Broad suite `d21ca3f64388d49b367803434ff1b0404b86c640` / `full-suite-1791833706`, async submission October 12, 2026, 19:35 UTC; result PENDING |
 
-Historical RED9FAIL, initial publication1FAIL/exit1 plus wrong101 worker guard, and publication-before fixture-race/coherenceFAIL remain failures. GREEN overwrote generic structured RED JSON; original report/raw/auth survive, reconstruction is not byte-exact and original JSON NOT_RECOVERED. Public packet collision-disclosure reconciliation remains pending. No replay or authentication performed for this docs update; historical533cFAIL/BA3FAIL unchanged.
+Historical RED9FAIL, initial publication1FAIL/exit1 plus wrong101 worker guard, and publication-before fixture-race/coherenceFAIL remain failures. GREEN overwrote generic structured RED JSON; original report/raw/auth survive, reconstruction is not byte-exact and original JSON NOT_RECOVERED. Public packet collision disclosure independently2939 verified; original structured RED JSON remains NOT_RECOVERED. No replay or authentication performed for this docs update; historical533cFAIL/BA3FAIL unchanged.
 
 ## Current publication reconciliation — 2026-10-12
 
