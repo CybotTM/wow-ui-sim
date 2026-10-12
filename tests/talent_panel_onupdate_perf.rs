@@ -72,12 +72,17 @@ fn capture_visible_onupdate(env: &WowLuaEnv) -> (usize, Vec<String>) {
     (visible_ids.len(), names)
 }
 
-fn sample_on_update_ticks(env: &WowLuaEnv, samples: usize) -> Vec<Duration> {
-    let mut durations = Vec::with_capacity(samples);
-    for _ in 0..samples {
-        durations.push(run_headless_tick(env));
-    }
-    durations
+fn sample_on_update_ticks(env: &WowLuaEnv, samples: usize, phase: &str) -> Vec<Duration> {
+    (0..samples)
+        .map(|tick| run_logged_headless_tick(env, phase, tick))
+        .collect()
+}
+
+fn run_logged_headless_tick(env: &WowLuaEnv, phase: &str, tick: usize) -> Duration {
+    eprintln!("[talent-tick] phase={phase} tick={tick} begin");
+    let duration = run_headless_tick(env);
+    eprintln!("[talent-tick] phase={phase} tick={tick} end");
+    duration
 }
 
 fn run_headless_tick(env: &WowLuaEnv) -> Duration {
@@ -234,15 +239,15 @@ fn talent_panel_open_visible_onupdate_handlers_stay_within_ceiling() {
 fn talent_panel_open_onupdate_tick_latency_stays_under_budget() {
     perf_test_timeout! {
             let env = load_settled_game_ui();
-            let baseline_samples = sample_on_update_ticks(&env, BASELINE_TICKS);
+            let baseline_samples = sample_on_update_ticks(&env, BASELINE_TICKS, "baseline");
             let baseline_avg = mean_duration(&baseline_samples);
 
             open_talent_panel(&env);
-            for _ in 0..TALENT_SETTLE_TICKS {
-                run_headless_tick(&env);
+            for tick in 0..TALENT_SETTLE_TICKS {
+                run_logged_headless_tick(&env, "settle", tick);
             }
 
-            let talent_samples = sample_on_update_ticks(&env, TALENT_STEADY_TICKS);
+            let talent_samples = sample_on_update_ticks(&env, TALENT_STEADY_TICKS, "steady");
             let talent_avg = mean_duration(&talent_samples);
             let talent_max = max_duration(&talent_samples);
 
