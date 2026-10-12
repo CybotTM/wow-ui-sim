@@ -71,23 +71,15 @@ pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
     Ok(())
 }
 
-fn validate_war_mode_currency_id(value: Val) -> LuaResult<Option<i32>> {
-    let Val::Num(number) = value else {
-        return Err(rilua::runtime_error(
-            "C_CurrencyInfo.DoesWarModeBonusApply: currencyID must be a number",
-        ));
-    };
-    let in_range = (f64::from(i32::MIN)..=f64::from(i32::MAX)).contains(&number);
-    let represented = number.is_finite() && number.fract() == 0.0 && in_range;
-    Ok(represented.then(|| number as i32))
-}
-
 fn query_currency_war_mode_bonus(state: &mut LuaState) -> LuaResult<u32> {
     let value = stack_val(state, 1);
     // Authenticate before type validation or lookup without declassifying the input.
     #[cfg(feature = "retail-12-1-0")]
     let value = rilua::table_security::unwrap_secret(state, value)?;
-    let currency_id = validate_war_mode_currency_id(value)?;
+    let currency_id = crate::c_api::helpers::validate_supplied_relation_id(
+        value,
+        "C_CurrencyInfo.DoesWarModeBonusApply: currencyID must be a number",
+    )?;
     let (applies, once) = {
         let sim = borrow_state(state)?;
         currency_id
