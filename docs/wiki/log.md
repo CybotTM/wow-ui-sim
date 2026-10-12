@@ -1,6 +1,6 @@
 ## [2026-10-12] observation | Talent handler-log capture
 
-[BA meaning/limits](investigations/fullsuite-ba-2026-10-11.md#talent-handler-log-observation--2026-10-12) admits independent2779 bounded capture coherence and one selector body PASS; detailed ledger remains packet-owned. Compile/fmt PASS; default check scoped REUSED. No replay/authentication/source edits; retention/link/privacy pending, frozen3FAIL/full handoff OPEN.
+[BA meaning/limits](investigations/fullsuite-ba-2026-10-11.md#talent-handler-log-observation--2026-10-12) admits independent2779 bounded capture coherence and one selector body PASS; detailed ledger remains packet-owned. Compile/fmt PASS; default check scoped REUSED. No replay/authentication/source edits; independent retention/link/privacy bounded PASS at e95:57 copies/2,845,419 bytes,19 links/4 anchors,zero privacy findings; no binaries/images/replays, retained-text scope only. Private reports remain outside packet; frozen3FAIL/full handoff OPEN.
 
 ## [2026-10-12] source | War Mode profile-gate consolidation
 

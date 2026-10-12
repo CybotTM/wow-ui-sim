@@ -66,7 +66,7 @@ Authenticated steady-minus-baseline mean total49.52µs, whole public OnUpdate49.
 
 ## Talent handler-log observation — bounded capture 2026-10-12
 
-[BA meaning/limits](fullsuite-ba-2026-10-11.md#talent-handler-log-observation--2026-10-12) owns interpretation; [packet](../../../data/test-perf/evidence/talent-handler-log-2026-10-12/README.md) owns detailed numerical evidence. Independent2779 capture coherence PASS and one original selector body PASS remain distinct from prior stage rows and registered-frame counts. Compile/fmt PASS; default check REUSED for unchanged production/library only. Packet retention/link/privacy gate pending; frozen BA3FAIL, native/performance/root-cause/full handoff OPEN unchanged.
+[BA meaning/limits](fullsuite-ba-2026-10-11.md#talent-handler-log-observation--2026-10-12) owns interpretation; [packet](../../../data/test-perf/evidence/talent-handler-log-2026-10-12/README.md) owns detailed numerical evidence. Independent2779 capture coherence PASS and one original selector body PASS remain distinct from prior stage rows and registered-frame counts. Compile/fmt PASS; default check REUSED for unchanged production/library only. Independent packet retention/link/privacy bounded PASS at `e95d9f1901ef270058f18dac788814863f070423`:57 copies/2,845,419 bytes,19 links/4 anchors,zero privacy findings; no binaries/images/replays, retained-text scope only, not universal secret detection; frozen BA3FAIL, native/performance/root-cause/full handoff OPEN unchanged.
 
 ## Talent visible count — authentic regression RED 2026-10-11 local
 

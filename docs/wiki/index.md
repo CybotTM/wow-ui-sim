@@ -1,6 +1,6 @@
 ## [2026-10-12] observation | Talent handler-log capture
 
-[BA meaning/limits](investigations/fullsuite-ba-2026-10-11.md#talent-handler-log-observation--2026-10-12): independent2779 capture coherence PASS, one original selector body PASS; no performance repair. Packet retention/link/privacy pending; frozen3FAIL/full handoff OPEN.
+[BA meaning/limits](investigations/fullsuite-ba-2026-10-11.md#talent-handler-log-observation--2026-10-12): independent2779 capture coherence PASS, one original selector body PASS; no performance repair. Independent packet retention/link/privacy bounded PASS at e95:57 copies/2,845,419 bytes,19 links/4 anchors,zero privacy findings; no binaries/images/replays, retained-text scope only; frozen3FAIL/full handoff OPEN.
 
 ## [2026-10-12] verification | Friend-name query — bounded current proof
 

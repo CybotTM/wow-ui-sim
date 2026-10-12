@@ -30,6 +30,6 @@ Parser development: genuine RED46 assertion failures, then12 tests pass; [source
 
 ## Retention
 
-[Manifest](retention-manifest.json):57 byte-exact nonbinary copies,2,845,419 bytes. Root source-only `proof.json` is explicitly retained as `source-parser-proof.json`, not a runtime/final proof. Original capture/metadata/protocol/TDD reports remain separate. Retention/link/privacy audit pending; its private reports will not be recursively copied.
+[Manifest](retention-manifest.json):57 byte-exact nonbinary copies,2,845,419 bytes. Root source-only `proof.json` is explicitly retained as `source-parser-proof.json`, not a runtime/final proof. Original capture/metadata/protocol/TDD reports remain separate. Independent retention/link/privacy audit at `e95d9f1901ef270058f18dac788814863f070423`: **bounded PASS**,57/57 copies/2,845,419 bytes,19/19 links/4/4 anchors,zero privacy findings; no binaries/images/replays. Actual retained-text inspection is not a universal secret-detection guarantee. Private reports remain outside the packet.
 
 Frozen BA15,038PASS/3FAIL/19skips, startup96.24s/talent24.47ms-delta/cold-CASC failures and full handoff remain OPEN.
