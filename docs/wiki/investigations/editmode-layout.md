@@ -95,7 +95,7 @@ MicroMenu329×40 and native1920×1080 window; initial90s viewing app expired nat
 User later accepted layout. Both keyboard fields initially failed with native
 PointerRoot focus/zero Enter deliveries; native focus assignment on the same
 artifact produced deliveries and user confirmation both worked. Automatic focus
-setup gate pending; user authorized stopping after each test, without automatic
+setup/owned-native-input gate PASS ([packet](../../../data/patch-api/evidence/native-window-focus-2026-10-12/README.md)); user authorized stopping after each test, without automatic
 expiry. Universal pixel/native/PTR parity and full handoff remain open. See [selection contract](../../specs/edit-mode-layout-selection.md).
 
 Follow-up: selecting the saved layout still was not enough for the visible UI.
