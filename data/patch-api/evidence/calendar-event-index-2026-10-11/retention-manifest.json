@@ -1,5 +1,5 @@
 {
-  "scope": "New Calendar receipts only, no binaries/libraries/cache payloads; GREEN independently verified; correct owning-target publication proof pending; zero-test probe is not evidence of acceptance",
+  "scope": "Calendar RED/GREEN/default-check receipts plus actual owning-target publication; publication-independent gate pending; no binaries/libraries/cache payloads",
   "copies": [
     {
       "path": "red/revision.json",
@@ -228,8 +228,68 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-compile-20261012T020315025172Z/runtime-outcome.json",
       "bytes": 197,
       "sha256": "9060d5f2ee15a613766c64bcaf8ffd9e4434893f29d293eae42a8b682638d044"
+    },
+    {
+      "path": "publication/revision.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-prefork-compile-20261012T020631000464Z/revision.json",
+      "bytes": 262,
+      "sha256": "68e30c61a3267365c1658a39aa9a8ac30abea9ddd614e0c18d2fc31c5032f54b"
+    },
+    {
+      "path": "publication/toolchain.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-prefork-compile-20261012T020631000464Z/toolchain.json",
+      "bytes": 550,
+      "sha256": "5262e1d2567ee710c6796b8fa30c0f285bdaa7a5c94ebae29bf432602697417e"
+    },
+    {
+      "path": "publication/compile-result.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-prefork-compile-20261012T020631000464Z/compile-result.json",
+      "bytes": 44,
+      "sha256": "1a624cd31be036b0b2ade5e37ff7a5e48353b9d55166d65c6ec51cc343308fc2"
+    },
+    {
+      "path": "publication/compile.stderr",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-prefork-compile-20261012T020631000464Z/compile.stderr",
+      "bytes": 1275,
+      "sha256": "e31a290764a160833442745454b8c173fead74183a4e4f40c44e0d8f7d07e5f4"
+    },
+    {
+      "path": "publication/artifact.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-prefork-compile-20261012T020631000464Z/artifact.json",
+      "bytes": 1890,
+      "sha256": "ba92a7186ebfd319953eb9f75c6809ee6cb6de47a657bed1322202874d69f8fb"
+    },
+    {
+      "path": "publication/runtime-submission.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-prefork-compile-20261012T020631000464Z/runtime-submission.json",
+      "bytes": 425,
+      "sha256": "1a4bad8a7408660c59f458c60afce4f3c59b448afccbb6842a82c6898feac7ce"
+    },
+    {
+      "path": "publication/runtime.stdout",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-prefork-compile-20261012T020631000464Z/runtime.stdout",
+      "bytes": 321,
+      "sha256": "af2ce42cae1efafdd8079903e20d05e2535ced023114d00229d02bdb5966f971"
+    },
+    {
+      "path": "publication/runtime.stderr",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-prefork-compile-20261012T020631000464Z/runtime.stderr",
+      "bytes": 8778,
+      "sha256": "4b8db4d3d0aa1c9738930d92a76eec599a8e29dbb3e1bc877cd3923cceab6d98"
+    },
+    {
+      "path": "publication/runtime-outcome.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-prefork-compile-20261012T020631000464Z/runtime-outcome.json",
+      "bytes": 151,
+      "sha256": "2da8b8b520053667a16f5ab2822053717e25449acb96d0ff9467e99c7f1a2508"
+    },
+    {
+      "path": "publication/publication.json",
+      "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/publication-prefork-compile-20261012T020631000464Z/publication.json",
+      "bytes": 67834,
+      "sha256": "a5ef67d4be3762ade75604ab1a705fdf1e695a6fcc3c77ae3c4c98e1b1535215"
     }
   ],
-  "copy_count": 38,
-  "copy_bytes": 90965
+  "copy_count": 48,
+  "copy_bytes": 172495
 }
