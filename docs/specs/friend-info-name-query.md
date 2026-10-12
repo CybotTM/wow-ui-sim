@@ -1,6 +1,6 @@
 # Friend info by name
 
-Current cached Retail/PTR `FriendListDocumentation.lua` declares `C_FriendList.GetFriendInfo(name: cstring)` with `AllowedWhenUntainted`. Unchanged Mainline `GameDialogDefs.lua` uses it to prefill `SET_FRIENDNOTE` from `info.notes`. Existing `SocialFriend` records and name lookup are modeled under a differently named simulator member; this slice exposes the exact query and verifies that public consumer, not native friend-system parity.
+Current cached Retail/PTR `FriendListDocumentation.lua` declares `C_FriendList.GetFriendInfo(name: cstring)` with `AllowedWhenUntainted`. Unchanged Mainline `GameDialogDefs.lua` uses it to prefill `SET_FRIENDNOTE` from `info.notes`. Producer `be9c734a4` commits the exact Retail/PTR query over environment-owned `SocialFriend` records with the shared unchanged simulator DTO; the current alternate-name provider is removed, indexed/earlier providers retained, and C_Social unchanged. Current runtime acceptance remains pending, not native friend-system parity.
 
 ## What it must do
 

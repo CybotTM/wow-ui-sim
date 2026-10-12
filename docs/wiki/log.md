@@ -1681,3 +1681,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11 local] verification | Registered-update collector GREEN
 
 [Final gate](../../data/test-perf/evidence/talent-visible-count-2026-10-11/green/green-independent-report.md)2472 closes boundedcollectorrepair:3logicalPASS0FAIL (newcallback/ancestorvisibility/name regression+original2), not5recapcases. First2470source/artifact/readability/fmt proof reused; defaultcheck0/six inheritedwarnings. Literalregisteredset includesOnUpdate OR OnPostUpdate andancestorvisibility, not mode/firedcounts. Rawlatency baseline435.58µs/talent450.17µs/max489.31µs/roundeddelta14.59µs; no loadedcause/native/addon/fullhandoff acceptance. GREENpacket retained, no rebuild/rerun/rehash.
+
+## 2026-10-12 — Friend-name committed source; acceptance pending
+
+[Current Friend audit](investigations/patch-8-1-0-api-audit.md#current-retailptr-friend-name-query--2026-10-12) links [status spec](../specs/friend-info-name-query.md). Docs-only reconciliation; requirements/historical counts unchanged, no current-retry GREEN or public packet.

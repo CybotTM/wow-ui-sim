@@ -88,6 +88,12 @@ Completed currency query `23166cd1a` remains separate:18GREEN, normal291+283 add
 
 Current913 BOUNDED PASS is separate from historical a5e44 executions/22 names and authentic REDs. Unchanged flag-query9/profile proof is reused with zero new flag/other-profile runs. Four new seals first authenticated exactly once; receipts reused, old a5e seals never rehashed. Actual retry2 worker completed, terminal MainPID0/empty group; both earlier admission blocks retained. Original root/epoch partial PENDING reports remain untouched; actual-runtime/final reports are additive and supersede only pending runtime/normal/check sections. Original six bounded requirements remain checked; native catalogs, other reward paths, active-mode lifecycle, earlier profiles and external verification remain open. Authentic REDs, completed query proof, frozen suite3FAIL and parent full handoff OPEN preserved; documentation adds no execution/authentication credit.
 
+## Current Retail/PTR friend-name query — 2026-10-12
+
+[Friend-name spec](../../specs/friend-info-name-query.md) owns contract and acceptance status. Producer `be9c734a4` commits exact Retail/PTR `C_FriendList.GetFriendInfo` and the shared unchanged simulator DTO. Current alternate-name provider is removed without fallback; indexed/earlier providers remain, C_Social unchanged. No native FriendInfo parity or change to historical **87 OK / 58 gaps** or later publication snapshots.
+
+Corrected pre-producer `41fb` RED reaches actual public Mainline `OnShow` nil-info failure; initial readiness RED remains separate. First producer security failure is an unrelated `canaccessvalue` fixture prerequisite; diagnostic epoch122455 reaches successful exact secret lookup first. `6ec0c1cb8` changes only prerequisites/messages and spec, retaining actual getter controls. Independent2722 producer source/readability PASS is separate from pending secret-fixture verification and running retry122910. No current-retry GREEN or public packet; runtime/native/full-handoff acceptance remains open.
+
 ## Proof and integration
 
 [Evidence directory](../../../data/patch-api/evidence/8.1.0-session-2026-10-08/) contains streamed command logs, receipts, discovery/negative controls, reproduction and accounting scripts. Long Cargo work runs asynchronously with the dedicated p810 target; no polling waits, full integration suite, agents/models, session-cwd changes, push or merge.

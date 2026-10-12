@@ -1,3 +1,7 @@
+## [2026-10-12] docs | Friend-name query — acceptance pending
+
+[Current Friend audit](investigations/patch-8-1-0-api-audit.md#current-retailptr-friend-name-query--2026-10-12) links the [status spec](../specs/friend-info-name-query.md): committed producer, retained RED/security failure, running corrected retry; no current-retry GREEN.
+
 ## [2026-10-11] docs | Bounty current stage
 
 [Bounty SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#bounty-set-maps--current-stage-2026-10-11): independent GREEN PASS11 logical features × Retail/PTR = 22 scope executions; both normal assertions exit0/`[]`, fmt/default check0. Independent2531 publication/retention PASS: one exact case/0FAIL,145 rows90OK/55current gaps,77 nonbinary copies/250064bytes and14 valid links/anchors. Initial RED6 authenticated; expanded RED11 lost digest-comparison output/authreceipt GAP remains, no reauth. Simulator policy is not native proof; earlier Calendar89/56 and historical87/58 preserved, broad3FAIL/parentOPEN unchanged.
