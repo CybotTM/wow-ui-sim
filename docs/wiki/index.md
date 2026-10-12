@@ -1,6 +1,6 @@
-## [2026-10-11] regression | Visible OnUpdate collector RED
+## [2026-10-11] verification | Visible registered-update counter
 
-[Counter regression](investigations/integrated-source-and-factory-proof-2026-10-09.md#talent-visible-count--authentic-regression-red-2026-10-11-local): independent2469 authenticates one new-case failure, collector0/expected1 after public callback1. Test-only live visible registered-frame correction implemented; GREEN pending. Original192/timing assertions and production/vendor unchanged; not loaded-latency/native/addon acceptance.
+[Counter regression](investigations/integrated-source-and-factory-proof-2026-10-09.md#talent-visible-count--authentic-regression-red-2026-10-11-local): independent2469 authenticates one new-case failure, collector0/expected1 after public callback1. Test-only5d correction now independently2472 GREEN3/3, fmt/defaultcheck0; first2470 artifact/source proof reused. Registration set includesOnUpdate OR OnPostUpdate, not fired callbacks. Original192/timing assertions and production/vendor unchanged; not loaded-latency/native/addon acceptance.
 
 ## [2026-10-11] observation | CASC encoding candidate prefix
 

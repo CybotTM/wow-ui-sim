@@ -1613,3 +1613,7 @@ Added [seven-build matrix](investigations/patch-3-1-0-api-audit.md#remaining-pro
 ## [2026-10-11 local] regression | Authentic visible-count RED
 
 [Counter packet](../../data/test-perf/evidence/talent-visible-count-2026-10-11/README.md) retains c7/newcase0PASS1FAIL: collector0vs1 after public visibility/name/script/callback1 preconditions, independent2469 newartifactauthonce. Hidden/re-show assertions unreached; oldperformancecontrols0executions. Replaced optional-cache default with visible registered IDs through existing ancestor predicate, test-only; GREEN/final checks pending. No vendor/production/threshold change or loaded/native acceptance.
+
+## [2026-10-11 local] verification | Registered-update collector GREEN
+
+[Final gate](../../data/test-perf/evidence/talent-visible-count-2026-10-11/green/green-independent-report.md)2472 closes boundedcollectorrepair:3logicalPASS0FAIL (newcallback/ancestorvisibility/name regression+original2), not5recapcases. First2470source/artifact/readability/fmt proof reused; defaultcheck0/six inheritedwarnings. Literalregisteredset includesOnUpdate OR OnPostUpdate andancestorvisibility, not mode/firedcounts. Rawlatency baseline435.58µs/talent450.17µs/max489.31µs/roundeddelta14.59µs; no loadedcause/native/addon/fullhandoff acceptance. GREENpacket retained, no rebuild/rerun/rehash.
