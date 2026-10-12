@@ -64,6 +64,8 @@ Main adds one bounded capability, `mount-spell-identifier`: **83 capabilities** 
 - `tests/action_spell_slot_identifiers.rs` — source reference for explicit lowercase alias keys, alias precedence, and rooted actual VM secrets; not mount-specific proof.
 - `tests/c_spell_probes.rs` — unchanged numeric 458→6 control on the distinct `C_Spell` companion; not proof for the journal namespace.
 
+[Later mount-item evidence](mount-item-relations.md#current-bounded-evidence--2026-10-12) retains sixteen existing spell-policy cases per Retail/PTR, reused within current query/consumer scope. Bounded simulator preservation only; historical acceptance, failures, earlier-profile limits and native `AllowedWhenTainted` gap remain unchanged.
+
 ### Fixture types and assumptions
 
 `world.mounts` is `Vec<MountData>`; tests use real records, not a separate spell-to-mount test map. `spell_id_aliases` is the existing `HashMap<String, u32>`. The test snapshot contains `Vec<(u32, u32)>` spell/mount relations and the alias map; readonly assertions cover those inputs, not every world field. Relation lifecycle tests mutate an existing record to mount 6006 / spell 999998 or remove mount 6; they add no records. Host secrets are actual rilua NUMBER/STRING wrappers, rooted in globals and a Lua table before GC, not public values relabeled by a test stub.
@@ -85,3 +87,4 @@ Primary source: `/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard
 - Native alias grammar/parity, special link parsing, native intent claims, duplicate-spell mount selection policy, and other mount APIs.
 - Protected aura paths, additional Cargo targets, broader audit accounting, legacy profile parity, and native probes.
 - Whole-suite acceptance and desktop readiness inferred solely from focused tests/checks.
+

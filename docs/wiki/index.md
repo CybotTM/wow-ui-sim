@@ -1,3 +1,7 @@
+## [2026-10-12] verification | Mount-item bounded current evidence
+
+[Mount-item evidence](../specs/mount-item-relations.md#current-bounded-evidence--2026-10-12) reconciles current query/spell preservation and corrected original-consumer observations. Historical raw-console FAIL/native gaps preserved; earlier-profile preservation unverified and packet retention gate PENDING.
+
 ## [2026-10-12] observation | Canonical paired startup
 
 [BA boundary](investigations/fullsuite-ba-2026-10-11.md#canonical-paired-startup--2026-10-12): independent2794 bounded current-run PASS; [packet](../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/README.md) owns details, public retention/link/privacy independently passed at `da4bbc442`. Original compile failure retained; failed-assertion emission source-only. No historical equivalence, compatibility-clean/native or repair claim; frozen BA FAIL/full handoff OPEN.
