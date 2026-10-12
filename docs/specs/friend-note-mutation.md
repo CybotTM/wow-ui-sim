@@ -29,8 +29,8 @@ Retail/PTR `C_FriendList.SetFriendNotes` contract over existing environment-owne
 
 ## Known gaps (current cycle)
 
-- [ ] Requested default cargo check NEVER INVOKED: capacity BLOCKED, invocations0/credit0. Test producers and fmt do not satisfy this gate.
-- [ ] Actual row60 publication and independent packet retention gate pending; current publication145/94OK/51gaps unchanged. No native, broad-suite or whole-handoff acceptance.
+- [ ] Final default-check gate pending; the `a883157c49` attempt was NEVER INVOKED (capacity BLOCKED, zero credit). Test producers and fmt do not satisfy this gate.
+- [ ] Real strict row60 BEFORE captured145/95OK/50gaps and failed solely on the stale setter ID; one-ID reconciliation followed by distinct strict AFTER PASS with identical full records. Validator/after-packet retention gate pending; historical GUID145/94/51 unchanged. No native, broad-suite or whole-handoff acceptance.
 
 ## Out of scope
 
