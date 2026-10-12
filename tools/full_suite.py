@@ -62,6 +62,10 @@ def run_step(name, cmd, log, env):
     return {
         "exit": proc.returncode,
         "seconds": round(time.monotonic() - start, 1),
+        "command": cmd,
+        "environment": {
+            "WOW_SIM_TIMEOUT_FIXTURE_CAPACITY": env.get("WOW_SIM_TIMEOUT_FIXTURE_CAPACITY")
+        },
     }, output
 
 
