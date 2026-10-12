@@ -32,6 +32,8 @@ CURRENT_PRODUCER_CLOSURES = {
         'currency-war-mode-bonus', 'currency-war-mode-bonus-2026-10-12/README.md'),
     'wt-global-api-C_FriendList.GetFriendInfo-44': (
         'friend-info-name-query', 'friend-info-exact-2026-10-12/README.md'),
+    'wt-global-api-C_FriendList.SetFriendNotes-60': (
+        'friend-note-mutation', 'friend-note-mutation-2026-10-12/README.md'),
     'wt-global-api-C_Map.GetBountySetMaps-77': (
         'bounty-set-map-relations', 'bounty-set-map-relations-2026-10-11/publication/publication-independent-report.md'),
     'wt-global-api-C_MountJournal.GetMountFromItem-78': (
@@ -271,7 +273,7 @@ def check_current_producer_closures():
     assert not known - historical, 'new current fixture gaps'
     frozen = read(EVIDENCE / 'patch_8_1_0_publication_sweep-results.json')
     # Required new capture; never substitute frozen observations when absent.
-    results = read(ROOT / 'data/patch-api/evidence/guid-is-player-current-2026-10-12/current-publication-results.json')
+    results = read(ROOT / 'data/patch-api/evidence/friend-note-mutation-2026-10-12/current-publication-results.json')
     assert set(results) == set(frozen), 'current publication row identities changed'
     assert {key for key, row in results.items() if not row['ok']} == known
     for identifier, (spec, proof) in CURRENT_PRODUCER_CLOSURES.items():

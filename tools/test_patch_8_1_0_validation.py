@@ -9,12 +9,15 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = Path('data/patch-api/evidence/8.1.0-session-2026-10-08')
 PREVIOUS_RESULTS = Path('data/patch-api/evidence/publication-533c-reconciliation-2026-10-12/current-publication-results.json')
-CURRENT_RESULTS = Path('data/patch-api/evidence/guid-is-player-current-2026-10-12/current-publication-results.json')
+GUID_RESULTS = Path('data/patch-api/evidence/guid-is-player-current-2026-10-12/current-publication-results.json')
+CURRENT_RESULTS = Path('data/patch-api/evidence/friend-note-mutation-2026-10-12/current-publication-results.json')
+SOURCE_CAPTURES = (PREVIOUS_RESULTS, GUID_RESULTS, CURRENT_RESULTS)
 CLOSED = {
     'wt-global-api-C_AchievementInfo.GetSupercedingAchievements-13',
     'wt-global-api-C_Calendar.GetEventIndexInfo-20',
     'wt-global-api-C_CurrencyInfo.DoesWarModeBonusApply-29',
     'wt-global-api-C_FriendList.GetFriendInfo-44',
+    'wt-global-api-C_FriendList.SetFriendNotes-60',
     'wt-global-api-C_Map.GetBountySetMaps-77',
     'wt-global-api-C_MountJournal.GetMountFromItem-78',
     'wt-global-api-C_PlayerInfo.GUIDIsPlayer-83',
@@ -40,11 +43,15 @@ class ValidationTests(unittest.TestCase):
             if path.is_file():
                 (self.evidence / path.name).symlink_to(path)
         for path in (ROOT / 'data/patch-api/evidence').iterdir():
-            if path.is_dir() and path.name not in (EVIDENCE.name, CURRENT_RESULTS.parent.name, PREVIOUS_RESULTS.parent.name):
+            if path.is_dir() and path.name not in (EVIDENCE.name, *(capture.parent.name for capture in SOURCE_CAPTURES)):
                 (self.root / 'data/patch-api/evidence' / path.name).symlink_to(path, target_is_directory=True)
-        current_packet = self.root / CURRENT_RESULTS.parent
-        current_packet.mkdir(parents=True)
-        (current_packet / 'README.md').symlink_to(ROOT / CURRENT_RESULTS.parent / 'README.md')
+        for capture in SOURCE_CAPTURES:
+            packet = self.root / capture.parent
+            packet.mkdir(parents=True)
+            readme = ROOT / capture.parent / 'README.md'
+            leaf = packet / 'README.md'
+            leaf.write_bytes(readme.read_bytes())
+            leaf.chmod(0o444)
         (self.root / 'data/patch-api/sources').symlink_to(ROOT / 'data/patch-api/sources', target_is_directory=True)
         (self.root / 'docs').symlink_to(ROOT / 'docs', target_is_directory=True)
         (self.root / 'tools').symlink_to(ROOT / 'tools', target_is_directory=True)
@@ -82,8 +89,8 @@ class ValidationTests(unittest.TestCase):
         text = (ROOT / 'data/patch-api/sources/8.1.0-api-changes.txt').read_text()
         return self.validator.check_accounting(register, self.validator.load_extractor(), lines, text)
 
-    def test_frozen_accounting_remains_87_ok_58_gaps_with_51_current_gaps(self):
-        self.assertEqual(len(self.current_gaps), 51)
+    def test_frozen_accounting_remains_87_ok_58_gaps_with_50_current_gaps(self):
+        self.assertEqual(len(self.current_gaps), 50)
         self.assertEqual(self.accounting()['gaps'], 58)
         self.assertEqual(sum(row['ok'] for row in self.frozen.values()), 87)
         self.assertEqual(self.validator.check_proof()['publication_sweeps'], 40)
@@ -99,8 +106,8 @@ class ValidationTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.accounting()
 
-    def test_frozen_summary_cannot_adopt_either_current_cycle(self):
-        for ok, gaps in ((93, 52), (94, 51)):
+    def test_frozen_summary_cannot_adopt_any_current_cycle(self):
+        for ok, gaps in ((93, 52), (94, 51), (95, 50)):
             summary = load(ROOT / EVIDENCE / 'p810-sweep-summary.json')
             row = next(row for row in summary if row['patch'] == '8.1.0')
             row.update(ok=ok, gaps=gaps)
@@ -108,16 +115,16 @@ class ValidationTests(unittest.TestCase):
             with self.subTest(ok=ok, gaps=gaps), self.assertRaises(AssertionError):
                 self.validator.check_proof()
 
-    def test_original_two_removals_are_separate_from_seven_producers(self):
+    def test_original_two_removals_are_separate_from_eight_producers(self):
         self.assertEqual(self.validator.check_supersessions()['integrated_gap_closures'], 2)
         self.publish_current()
-        self.assertEqual(self.validator.check_current_producer_closures()['current_producer_closures'], 7)
+        self.assertEqual(self.validator.check_current_producer_closures()['current_producer_closures'], 8)
 
-    def test_fixture_writes_leave_both_source_captures_unchanged(self):
+    def test_fixture_writes_leave_all_three_source_captures_unchanged(self):
         source_root = ROOT
         source_captures = {
             path: (source_root / path).read_bytes()
-            for path in (PREVIOUS_RESULTS, CURRENT_RESULTS)
+            for path in SOURCE_CAPTURES
         }
         with tempfile.TemporaryDirectory(prefix='p810-reference-') as directory:
             reference = Path(directory)
@@ -129,35 +136,42 @@ class ValidationTests(unittest.TestCase):
             evidence = reference / 'data/patch-api/evidence'
             evidence.mkdir()
             for path in (source_root / 'data/patch-api/evidence').iterdir():
-                if path.is_dir() and path.name not in (CURRENT_RESULTS.parent.name, PREVIOUS_RESULTS.parent.name):
+                if path.is_dir() and path.name not in {capture.parent.name for capture in SOURCE_CAPTURES}:
                     (evidence / path.name).symlink_to(path, target_is_directory=True)
             for path, original in source_captures.items():
                 capture = reference / path
                 capture.parent.mkdir(parents=True)
                 capture.write_bytes(original)
-            (reference / CURRENT_RESULTS.parent / 'README.md').write_bytes(
-                (source_root / CURRENT_RESULTS.parent / 'README.md').read_bytes())
+            for capture in SOURCE_CAPTURES:
+                (reference / capture.parent / 'README.md').write_bytes(
+                    (source_root / capture.parent / 'README.md').read_bytes())
             case = ValidationTests('test_missing_current_packet_fails_without_historical_fallback')
             with patch.dict(globals(), ROOT=reference):
                 try:
                     case.setUp()
                     case.publish_current()
                     for path, original in source_captures.items():
+                        self.assertFalse((case.root / path.parent).is_symlink())
+                        self.assertFalse((case.root / path).is_symlink())
+                        readme = case.root / path.parent / 'README.md'
+                        self.assertFalse(readme.is_symlink())
+                        self.assertEqual(readme.stat().st_mode & 0o222, 0)
                         self.assertEqual((reference / path).read_bytes(), original)
                         self.assertEqual((source_root / path).read_bytes(), original)
                 finally:
                     case.doCleanups()
 
     def test_missing_current_packet_fails_without_historical_fallback(self):
-        self.store(self.root / PREVIOUS_RESULTS, load(ROOT / PREVIOUS_RESULTS))
+        for capture in (PREVIOUS_RESULTS, GUID_RESULTS):
+            self.store(self.root / capture, load(ROOT / capture))
         with self.assertRaisesRegex(FileNotFoundError, 'current-publication-results.json'):
             self.validator.check_current_producer_closures()
 
     def test_current_fixture_rejects_unreviewed_extra_closure_and_stale_gap(self):
         self.publish_current()
-        self.assertEqual(self.validator.check_current_producer_closures()['current_producer_closures'], 7)
+        self.assertEqual(self.validator.check_current_producer_closures()['current_producer_closures'], 8)
         extra = sorted(self.current_gaps)[0]
-        for gaps in (self.current_gaps - {extra}, self.current_gaps | {sorted(CLOSED)[0]}, self.current_gaps | {'wt-global-api-C_PlayerInfo.GUIDIsPlayer-83'}, self.current_gaps | {'invented-id'}):
+        for gaps in (self.current_gaps - {extra}, self.current_gaps | {sorted(CLOSED)[0]}, self.current_gaps | {'wt-global-api-C_PlayerInfo.GUIDIsPlayer-83'}, self.current_gaps | {'wt-global-api-C_FriendList.SetFriendNotes-60'}, self.current_gaps | {'invented-id'}):
             with self.subTest(gaps=len(gaps)):
                 self.store(self.fixture, sorted(gaps))
                 with self.assertRaises(AssertionError):
@@ -165,8 +179,8 @@ class ValidationTests(unittest.TestCase):
 
     def test_current_results_reject_failed_closure_missing_row_and_new_gap(self):
         self.publish_current()
-        self.assertEqual(self.validator.check_current_producer_closures()['current_producer_closures'], 7)
-        for key in (sorted(CLOSED)[0], 'wt-global-api-C_PlayerInfo.GUIDIsPlayer-83'):
+        self.assertEqual(self.validator.check_current_producer_closures()['current_producer_closures'], 8)
+        for key in (sorted(CLOSED)[0], 'wt-global-api-C_PlayerInfo.GUIDIsPlayer-83', 'wt-global-api-C_FriendList.SetFriendNotes-60'):
             for mutation in ('failed-closure', 'missing-row', 'new-gap', 'wrong-symbol', 'fallback-only'):
                 results = self.publish_current()
                 if mutation == 'failed-closure':
