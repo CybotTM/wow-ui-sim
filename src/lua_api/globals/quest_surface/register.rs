@@ -48,6 +48,7 @@ pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
     ("GetSuggestedGroupSize", get_suggested_group_size),
     ("ShouldShowQuestRewards", should_show_quest_rewards),
     ("QuestHasWarModeBonus", return_false),
+    #[cfg(not(any(feature = "client-retail", feature = "client-ptr")))]
     ("QuestCanHaveWarModeBonus", return_false),
     ("QuestHasQuestSessionBonus", return_false),
     ("GetNextWaypointText", get_next_waypoint_text),
