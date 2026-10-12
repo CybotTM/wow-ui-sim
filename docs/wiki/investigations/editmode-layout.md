@@ -91,9 +91,12 @@ Corrected normal startup reports Classic329×40 with zero Lua errors; fmt/defaul
 check PASS. [Packet](../../../data/patch-api/evidence/edit-mode-enter-2026-10-12/README.md)
 retains initial fixture compile failure, genuine RED and invalid binding-lookup
 probe failure separately. Owned current-artifact GUI query observed Classic2,
-MicroMenu329×40 and native1920×1080 window; the bounded90s app expired naturally.
-Actual keyboard/pixel/intended-user
-acceptance, PTR/native parity and full handoff remain open. See [selection contract](../../specs/edit-mode-layout-selection.md).
+MicroMenu329×40 and native1920×1080 window; initial90s viewing app expired naturally.
+User later accepted layout. Both keyboard fields initially failed with native
+PointerRoot focus/zero Enter deliveries; native focus assignment on the same
+artifact produced deliveries and user confirmation both worked. Automatic focus
+setup gate pending; user authorized stopping after each test, without automatic
+expiry. Universal pixel/native/PTR parity and full handoff remain open. See [selection contract](../../specs/edit-mode-layout-selection.md).
 
 Follow-up: selecting the saved layout still was not enough for the visible UI.
 The startup fast path for action bars seeded Widescreen `systemInfo` and replayed
