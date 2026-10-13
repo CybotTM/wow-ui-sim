@@ -1,5 +1,9 @@
 # Speak For Me RED and separate animation controls — 2026-10-13
 
+## Initial GREEN retention and current path follow-up — 2026-10-13
+
+Initial independent GREEN gate at `5504cd5cb`: artifact retention **81 TEXT / 594,604 public bytes / 51 JSON PASS**; actual identity absence PASS, but full-six-doc path hygiene **FAIL: 69 inherited prefix occurrences**. Historical broken-link FAIL remains **7 preexisting broken links (1 file, 6 anchors)**. Main normalized 29 private-root and 11 remaining HOME locations at `5f1c521c6` (two files, 34 lines; 69 counts double nested prefixes). Current follow-up gate **PENDING**; no unconditional privacy PASS. Historical RED50/CCD unchanged. [Public report](retention-gate-current/report.md), [proof](retention-gate-current/proof.json), [retention manifest](retention-gate-current/retention-manifest.json): **2 TEXT / 90,187 public bytes**.
+
 [Retention manifest](red-current/red-retention-manifest.json): **50 selected complete TEXT payloads / 64,772 public bytes**. Independent bounded RED retention PASS at `b35b5580f`:50 complete transforms,31 JSON equivalents,23 changed links and mapped-token privacy. This is selected retention, not whole-tree authentication or general secret-absence proof.
 
 ## Speak query: result-boundary RED
@@ -8,15 +12,15 @@ Initial `159998966` and refined `c81f10375` each record **0 PASS / 2 FAIL, actua
 
 Refined Rust function-type checks pass on reached paths; these are not additional passing tests. Source establishes the generic callable's one-nil projection. Generic Lua assertion logs do not reveal exact actual values, type or arity. Default/boolean result assertions fail; later supplied-input transitions, retained/direct true checks, independence and final environment transitions are unreached.
 
-Production `a8a148e98` adds the explicit state-backed query later. Separately saved bounded Retail query2/transcription-preservation3, fresh CLEAN startup and default check pass; the [contract](../../../../docs/specs/voice-speak-for-me-active-input.md) records exact scopes. Current GREEN text retention remains pending; the retained RED manifest preserves its earlier temporal claims. [Contract](../../../../docs/specs/voice-speak-for-me-active-input.md) owns the supplied-input requirements.
+Production `a8a148e98` adds the explicit state-backed query later. Separately saved bounded Retail query2/transcription-preservation3, fresh CLEAN startup and default check pass; the [contract](../../../../docs/specs/voice-speak-for-me-active-input.md) records exact scopes. Initial GREEN retention PASS is distinct from failed full-six-doc path hygiene and the pending follow-up; the retained RED manifest preserves its earlier temporal claims. [Contract](../../../../docs/specs/voice-speak-for-me-active-input.md) owns the supplied-input requirements.
 
 ## Current cached consumer checkpoint — 2026-10-13
 
-Independent bounded consumer PASS: compiled `978e9bcd15b47ad53dcdfd7aadb0f9ae0afb95b8`, production `a8a148e98`, exactly 1 real cached EditBox decision case, actual wait exit0. The [owning contract](../../../../docs/specs/voice-speak-for-me-active-input.md#cached-consumer-checkpoint--2026-10-13) records false/true/muted-red/restoration and entire empty error collection; query2/transcription3/startup/default-check remain separate PASS scopes. **GREEN retention PENDING**; public copied reports now linked below. No independent consumer RED, true-Show, event-producer/native/render claim. Historical RED50 retention PASS above remains distinct.
+Independent bounded consumer PASS: compiled `978e9bcd15b47ad53dcdfd7aadb0f9ae0afb95b8`, production `a8a148e98`, exactly 1 real cached EditBox decision case, actual wait exit0. The [owning contract](../../../../docs/specs/voice-speak-for-me-active-input.md#cached-consumer-checkpoint--2026-10-13) records false/true/muted-red/restoration and entire empty error collection; query2/transcription3/startup/default-check remain separate PASS scopes. **Initial GREEN artifact retention PASS; path hygiene FAIL; follow-up PENDING**; public copied reports now linked below. No independent consumer RED, true-Show, event-producer/native/render claim. Historical RED50 retention PASS above remains distinct.
 
 ## Current GREEN public packet — 2026-10-13
 
-[GREEN retention manifest](green-current/green-retention-manifest.json): **81 selected complete TEXT payloads / 594,604 public bytes**. Independent source/runtime reports below record bounded PASS; the **new independent retention/privacy gate is PENDING**. Private helper/mapping used for projection are not retained. Existing sealed digest strings are text, not new executable authentication. Historical RED50 manifest/payloads and temporal claims remain unchanged.
+[GREEN retention manifest](green-current/green-retention-manifest.json): **81 selected complete TEXT payloads / 594,604 public bytes**. Independent source/runtime reports below record bounded PASS; the **initial artifact-retention gate PASS is not unconditional privacy PASS; path hygiene FAIL, current follow-up PENDING**. Private helper/mapping used for projection are not retained. Existing sealed digest strings are text, not new executable authentication. Historical RED50 manifest/payloads and temporal claims remain unchanged.
 
 | Scope | Exact code point | Public copied proof / result |
 | --- | --- | --- |
