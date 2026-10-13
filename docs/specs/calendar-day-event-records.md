@@ -1,6 +1,6 @@
 # Host-supplied Calendar day-event records
 
-`C_Calendar.GetDayEvent` and `GetNumDayEvents` expose host-owned day records with empty defaults. Passive DTO source: `src/c_api/c_calendar/day_event_record.rs`; storage: `SimState.calendar_day_events`. This test-first, unexecuted contract is distinct from [numeric event-index lookup](calendar-event-index-info.md). See [Calendar source boundary](../wiki/investigations/patch-8-1-0-api-audit.md#current-retail-calendar-query-contract--2026-10-10) for provenance limits.
+`C_Calendar.GetDayEvent` and `GetNumDayEvents` expose host-owned day records with empty defaults. Passive DTO source: `src/c_api/c_calendar/day_event_record.rs`; storage: `SimState.calendar_day_events`. This bounded model contract is distinct from [numeric event-index lookup](calendar-event-index-info.md). See [Calendar source boundary](../wiki/investigations/patch-8-1-0-api-audit.md#current-retail-calendar-query-contract--2026-10-10) for provenance limits.
 
 Primary identifier reference: upstream wowless `data/products/wow/structures.yaml`, `C_Calendar.CalendarDayEvent`, inspected 2026-10-13: `eventID` and `clubID` are strings. Cached Retail/PTR `Blizzard_APIDocumentationGenerated/CalendarDocumentation.lua` declares the same 21-field inventory via named ID typedefs; `TimeDocumentation.lua` declares six CalendarTime fields. These sources are declarations, not native behavior evidence. Local profile cache files remain external runtime inputs, not tracked implementation.
 
@@ -57,14 +57,16 @@ Time field inventory, independently required for each time:
 
 ## Implementation inventory
 
-- `src/c_api/c_calendar/day_event_record.rs`: passive owned DTOs; no projection/query behavior.
+- `src/c_api/c_calendar/day_event_record.rs`: passive owned DTOs.
+- `src/c_api/c_calendar/day_event_queries.rs`: strict numeric/secret arguments, exact host lookups and cloned results.
+- `src/c_api/c_calendar/day_event_projection.rs`: fresh rooted outer and independent time-table snapshots.
 - `SimState.calendar_day_events`: `HashMap<(i32,u32),Vec<CalendarDayEventRecord>>`, empty default.
-- `src/c_api/c_calendar.rs`: owning Calendar namespace; existing event-index lookup unchanged; day-query producers pending.
+- `src/c_api/c_calendar.rs`: owning Calendar namespace; existing event-index lookup unchanged; day queries registered. Only the replaced constant-zero day-count workaround is removed.
 - Active profile cache `Blizzard_UIPanels_Game/Mainline/ItemRef.lua` and `Blizzard_FrameXMLUtil/CalendarUtil.lua`: unchanged consumer dependencies.
 
 ## Tests asserting this spec
 
-Integrated tests, execution pending:
+Pre-producer RED executed separately on Retail (`122e272bb`) and PTR (`48902323e`, documentation-only changes over the same source): each 0 PASS / 9 FAIL, actual runtime exit101. Eight cases stop at the missing supplied DTO and one at the positive day count. Downstream DTO/security/snapshot/cached-consumer assertions remain unreached. Each separate no-run compile completed with 741 records, terminal exit0 and six manifest deprecations; compilation is not runtime acceptance. Producer GREEN and regression acceptance remain pending:
 
 - `tests/calendar_day_events.rs`: Retail/PTR-only root module, automatically discovered by test harness.
 - `tests/calendar_day_events/queries.rs`: five cases for projection/lifetime, exact count/order/defaults, isolation, required types and nonrepresented numeric policy.
@@ -77,8 +79,9 @@ Each seeded case first requires a supplied DTO before security/consumer setup. C
 ## Known gaps (current cycle)
 
 - [x] Integrate passive DTO/map and nine tests before the day-query producer; formatting/integration are not executed RED evidence.
-- [ ] Compile and execute nine targeted cases separately on Retail and PTR after main integrates tests; no build/runtime execution occurred here.
-- [ ] Implement day-query producers only after genuine behavioral RED; GREEN remains unproved.
+- [x] Compile and execute nine targeted cases separately on Retail and PTR before producers; both reached genuine seeded-result/count RED, not setup/admission/compiler failure.
+- [x] Implement day-query producers after genuine behavioral RED; implementation is not GREEN evidence.
+- [ ] Execute producer GREEN on both profiles, including real cached consumers and authentic secrets; preserve existing numeric-index regressions.
 - [ ] Consumer closure dependencies must load unchanged and real required localization/colors must exist; fail visibly rather than skip or patch them.
 
 ## Out of scope

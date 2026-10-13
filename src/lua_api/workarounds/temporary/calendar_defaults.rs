@@ -1,7 +1,7 @@
 //! Temporary calendar defaults.
 //!
-//! Only event identity positions are modeled in `c_api::c_calendar`; event
-//! catalog, invite, and holiday state remain unmodeled. Expose the remaining
+//! Host-supplied day records and event positions are modeled in `c_api::c_calendar`;
+//! native catalogs, invite, and holiday state remain unmodeled. Expose the remaining
 //! inert compatibility surface without replacing modeled Calendar functions.
 
 const CALENDAR_DEFAULTS_LUA: &str = r#"
@@ -55,11 +55,6 @@ end
 if rawget(C_Calendar, "GetClubCalendarEvents") == nil then
     function C_Calendar.GetClubCalendarEvents()
         return {}
-    end
-end
-if rawget(C_Calendar, "GetNumDayEvents") == nil then
-    function C_Calendar.GetNumDayEvents(_monthOffset, _monthDay)
-        return 0
     end
 end
 if rawget(C_Calendar, "GetNumGuildEvents") == nil then

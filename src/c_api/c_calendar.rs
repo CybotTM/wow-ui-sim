@@ -1,4 +1,6 @@
-//! Calendar event positions supplied by synthetic fixtures, not a native event catalog.
+//! Host-supplied Calendar day records and synthetic event-index relations.
+mod day_event_projection;
+mod day_event_queries;
 pub mod day_event_record;
 
 use super::helpers::ensure_namespace;
@@ -29,6 +31,18 @@ pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
         namespace,
         "GetEventIndexInfo",
         query_event_index_info,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        namespace,
+        "GetNumDayEvents",
+        day_event_queries::query_num_day_events,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        namespace,
+        "GetDayEvent",
+        day_event_queries::query_day_event,
     )
 }
 
