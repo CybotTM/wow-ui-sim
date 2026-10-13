@@ -1,0 +1,240 @@
+//! Real cached constructor/manager/events; no provider, Setup, pool, spell or vendor overrides.
+use super::discrete_fixtures::assert_lua;
+use super::feed::supply_empty_set;
+use super::fixtures::{ID, SET_ID, assert_initial_snapshot, entry, seed_record, supplied_record};
+use crate::common::blizzard_addon_harness::{
+    load_blizzard_addon_closure_into_env, new_blizzard_addon_env,
+};
+use wow_ui_sim::c_api::ui_widget_manager::{SpellDisplayRecord, WidgetVisualization};
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn consumer_env(attached: bool) -> WowLuaEnv {
+    let cache = wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("active profile cache");
+    let env = new_blizzard_addon_env(&cache);
+    seed_record(&env, ID, supplied_record());
+    assert_initial_snapshot(&env);
+    // No cached construction before supplied getter result boundary.
+    supply_empty_set(&env);
+    wow_ui_sim::xml::register_intrinsic_templates();
+    let loaded = load_blizzard_addon_closure_into_env(
+        &env,
+        &cache,
+        &[
+            "Blizzard_SharedXMLGame",
+            "Blizzard_Fonts_Shared",
+            "Blizzard_FrameEffects",
+            "Blizzard_UIWidgets",
+        ],
+        &[],
+    );
+    assert!(loaded.iter().any(|name| name == "Blizzard_UIWidgets"));
+    assert_lua(
+        &env,
+        "grounded scalar and cached template",
+        r#"
+        assert(Enum.UIWidgetVisualizationType.SpellDisplay == 13)
+        assert(Enum.UIWidgetVisualizationType.DoubleStateIconRow == 14)
+        assert(UIWidgetManager:GetWidgetTypeInfo(13))
+        assert(Enum.WidgetShownState.Shown == 1 and Enum.WidgetShownState.Hidden == 0)
+        assert(Enum.WidgetEnabledState.White == 3)
+        assert(Enum.WidgetIconSizeType.Large == 2)
+        assert(Enum.SpellDisplayIconDisplayType.Buff == 0)
+        assert(Enum.SpellDisplayTextShownStateType.Shown == 0)
+        assert(Enum.SpellDisplayBorderColor.Blue == 8)
+        assert(Enum.SpellDisplayTint.None == 0 and Enum.SpellDisplayTint.Red == 1)
+        assert(Enum.WidgetShowGlowState.HideGlow == 0)
+        assert(Enum.UIWidgetFontType.Normal == 0 and Enum.UIWidgetTextSizeType.Medium16Pt == 1)
+        assert(Enum.WidgetTextHorizontalAlignmentType.Left == 0)
+        assert(Enum.UIWidgetTooltipLocation.Top == 4 and Enum.WidgetAnimationType.None == 0)
+        assert(Enum.UIWidgetScale.OneHundred == 0 and Enum.UIWidgetLayoutDirection.Vertical == 1)
+        assert(Enum.UIWidgetModelSceneLayer.None == 0 and Enum.UIWidgetSetLayoutDirection.Vertical == 0)
+        local spell = assert(C_Spell.GetSpellInfo(35395), 'existing repository spell catalog prerequisite')
+        assert(spell.name == 'Crusader Strike' and spell.iconID == 135891)
+        SpellContainer = CreateFrame('Frame', nil, UIParent, 'UIWidgetContainerTemplate')
+        SpellContainer:SetPoint('CENTER', UIParent, 'CENTER')
+    "#,
+    );
+    let unit = if attached { "'player'" } else { "nil" };
+    assert_lua(
+        &env,
+        "registered real empty container",
+        &format!(
+            r#"
+        SpellContainer:RegisterForWidgetSet(431, nil, nil, {unit})
+        assert(SpellContainer:IsRegisteredForWidgetSet(431))
+        assert(UIWidgetManager.registeredWidgetContainers[SpellContainer])
+        assert(SpellContainer:IsEventRegistered('UPDATE_UI_WIDGET'))
+        assert(SpellContainer:IsEventRegistered('UPDATE_ALL_UI_WIDGETS'))
+        assert(next(SpellContainer.widgetFrames) == nil)
+    "#
+        ),
+    );
+    flush(&env, 0);
+    env
+}
+
+fn supply(env: &WowLuaEnv, record: SpellDisplayRecord, attached: bool) {
+    let mut membership = entry();
+    if attached {
+        membership.unit_token = Some("player".into());
+    }
+    env.update_ui_widget(
+        SET_ID,
+        membership,
+        WidgetVisualization::SpellDisplay(record),
+    )
+    .expect("typed feed");
+}
+
+fn flush(env: &WowLuaEnv, count: usize) {
+    env.fire_on_update(0.0).expect("actual cached OnUpdate");
+    assert_lua(
+        env,
+        "real layout and pool counts",
+        &format!(
+            r#"
+        assert(not SpellContainer.dirtyLayout)
+        assert(SpellContainer:GetNumWidgetsShowing() == {count})
+        assert(SpellContainer.widgetPools:GetNumActive() == {count})
+        assert(SpellContainer.numTimers == 0 and SpellContainer.ticker == nil)
+    "#
+        ),
+    );
+}
+
+#[test]
+fn spell_display_cached_activation_update_hidden_restore_remove() {
+    let env = consumer_env(false);
+    supply(&env, supplied_record(), false);
+    assert_lua(
+        &env,
+        "actual event activation",
+        r#"
+        SpellFrame = assert(SpellContainer.widgetFrames[761301])
+        assert(SpellFrame:IsShown() and SpellFrame.hadSpellID)
+        assert(SpellFrame.Spell.spellID == 35395)
+        assert(SpellFrame.Spell.Text:GetText() == 'Supplied spell')
+        assert(SpellFrame.Spell.StackCount:GetText() == '3')
+        assert(SpellFrame.Spell.tooltip == 'Supplied spell tooltip')
+        assert(SpellFrame:GetWidth() == SpellFrame.Spell:GetWidth() and SpellFrame:GetWidth() > 1)
+        assert(SpellFrame:GetHeight() == SpellFrame.Spell:GetHeight() + 2)
+        assert(SpellFrame.Spell.Icon:GetWidth() == 36)
+        assert(not SpellFrame.Spell.EarnedCheck:IsShown())
+        assert(SpellFrame.rarityPipPool:GetNumActive() == 0, 'non-world-loot branch only')
+    "#,
+    );
+    flush(&env, 1);
+    let mut row = supplied_record();
+    row.spell_info.text = "Updated spell".into();
+    row.spell_info.tooltip = "Updated tooltip".into();
+    row.spell_info.stack_display = 4.0;
+    row.spell_info.tint = 1;
+    row.spell_info.show_as_earned = true;
+    row.widget_size_setting = 206.25;
+    supply(&env, row.clone(), false);
+    assert_lua(
+        &env,
+        "actual incremental nested presentation",
+        r#"
+        assert(SpellContainer.widgetFrames[761301] == SpellFrame)
+        assert(SpellFrame.Spell.Text:GetText() == 'Updated spell')
+        assert(SpellFrame.Spell.tooltip == 'Updated tooltip')
+        assert(SpellFrame.Spell.StackCount:GetText() == '4')
+        assert(SpellFrame.Spell.EarnedCheck:IsShown())
+        local r,g,b = SpellFrame.Spell.Icon:GetVertexColor()
+        assert(r == 1 and g == 0 and b == 0)
+        assert(SpellFrame.Spell.Text:GetWidth() == 206.25 - 36)
+        assert(savedSpell.spellInfo.text == 'Supplied spell' and savedSpell.spellInfo.tint == 0)
+    "#,
+    );
+    flush(&env, 1);
+    row.spell_info.shown_state = 0;
+    supply(&env, row.clone(), false);
+    assert_lua(
+        &env,
+        "nested Hidden releases actual consumer",
+        r#"
+        assert(SpellContainer.widgetFrames[761301] == nil and not SpellFrame:IsShown())
+        assert(C_UIWidgetManager.GetSpellDisplayVisualizationInfo(761301).spellInfo.shownState == 0)
+    "#,
+    );
+    flush(&env, 0);
+    row.spell_info.shown_state = 1;
+    supply(&env, row, false);
+    assert_lua(
+        &env,
+        "restored from real manager pool",
+        r#"
+        RestoredSpell = assert(SpellContainer.widgetFrames[761301])
+        assert(RestoredSpell:IsShown() and RestoredSpell.Spell.Text:GetText() == 'Updated spell')
+    "#,
+    );
+    flush(&env, 1);
+    assert!(
+        env.remove_ui_widget(SET_ID, ID)
+            .expect("membership removal")
+    );
+    assert_lua(
+        &env,
+        "actual full reconciliation retains supplied record",
+        r#"
+        assert(next(SpellContainer.widgetFrames) == nil and not RestoredSpell:IsShown())
+        assert(#C_UIWidgetManager.GetAllWidgetsBySetID(431) == 0)
+        assert(C_UIWidgetManager.GetSpellDisplayVisualizationInfo(761301).spellInfo.text == 'Updated spell')
+        assert(savedSpell.spellInfo.text == 'Supplied spell')
+    "#,
+    );
+    flush(&env, 0);
+}
+
+#[test]
+fn spell_display_attached_player_context_separate_from_world_loot_policy() {
+    let env = consumer_env(true);
+    supply(&env, supplied_record(), true);
+    assert_lua(
+        &env,
+        "container attachedUnit propagation only",
+        r#"
+        local frame = assert(SpellContainer.widgetFrames[761301])
+        assert(SpellContainer.attachedUnit == 'player' and frame.attachedUnit == 'player')
+        assert(frame.Spell.spellInfo.text == 'Supplied spell')
+        assert(C_UIWidgetManager.GetSpellDisplayVisualizationInfo(761301).attachedUnit == nil,
+            'attachedUnit is cached context, not a supplied API field')
+    "#,
+    );
+    flush(&env, 1);
+}
+
+#[test]
+fn spell_display_zero_spell_polling_uses_real_on_update_without_feed_notification() {
+    let env = consumer_env(false);
+    let mut row = supplied_record();
+    row.spell_info.spell_id = 0.0;
+    supply(&env, row, false);
+    assert_lua(
+        &env,
+        "zero-spell consumer before poll",
+        r#"
+        PollingSpell = assert(SpellContainer.widgetFrames[761301])
+        assert(not PollingSpell.hadSpellID and PollingSpell.Spell.spellID == 0)
+    "#,
+    );
+    // Explicit host map replacement without event isolates polling from event Setup.
+    seed_record(&env, ID, supplied_record());
+    assert_lua(
+        &env,
+        "poll has not run",
+        "assert(PollingSpell.Spell.spellID == 0 and not PollingSpell.hadSpellID)",
+    );
+    env.fire_on_update(0.01)
+        .expect("actual XML OnUpdate polling");
+    assert_lua(
+        &env,
+        "zero-spell becomes supplied catalog spell",
+        r#"
+        assert(SpellContainer.widgetFrames[761301] == PollingSpell)
+        assert(PollingSpell.hadSpellID and PollingSpell.Spell.spellID == 35395)
+        assert(PollingSpell.Spell.Text:GetText() == 'Supplied spell')
+    "#,
+    );
+}
