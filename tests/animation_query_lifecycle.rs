@@ -194,8 +194,10 @@ fn bounce_loop_callback_observes_direction_change() {
     )
     .unwrap();
     env.fire_on_update(1.25).unwrap();
-    env.exec("assert(loops == 1 and group:IsReverse())").unwrap();
-    env.fire_on_update(0.5).unwrap();
+    env.exec("assert(loops == 1 and group:IsReverse())")
+        .unwrap();
+    // First bounce leaves elapsed 0.75; advance through zero to bounce again.
+    env.fire_on_update(1.0).unwrap();
     env.exec("assert(loops == 2 and not group:IsReverse())")
         .unwrap();
 }
@@ -307,4 +309,24 @@ fn delaying_uses_order_start_and_longest_parallel_duration() {
             .unwrap();
         assert_eq!(actual, (time, delaying), "reverse timeline at {time}");
     }
+    env.exec(
+        r#"
+        group:Pause(); group:Play()
+        assert(group:IsReverse(), 'omitted direction preserves paused playback')
+        near(group:GetElapsed(), 0.75)
+        group:Pause(); group:Play(false)
+        assert(not group:IsReverse(), 'explicit false switches paused playback forward')
+        near(group:GetElapsed(), 0.75)
+        "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.5).unwrap();
+    let actual: (f64, bool) = env
+        .eval("return group:GetElapsed(), animation:IsDelaying()")
+        .unwrap();
+    assert_eq!(
+        actual,
+        (1.25, true),
+        "forward resume preserves elapsed origin"
+    );
 }

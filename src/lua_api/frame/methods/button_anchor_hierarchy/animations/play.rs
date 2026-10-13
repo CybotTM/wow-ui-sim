@@ -11,7 +11,10 @@ use rilua::{LuaResult, Val};
 
 pub(crate) fn animation_group_play(state: &mut LuaState) -> LuaResult<u32> {
     let caller_id = frame_id_from_stack(state, 1)?;
-    let reverse = !matches!(stack_val(state, 2), Val::Nil | Val::Bool(false));
+    let reverse = match stack_val(state, 2) {
+        Val::Nil => None,
+        value => Some(!matches!(value, Val::Bool(false))),
+    };
     let notification = start_group(state, caller_id, reverse)?;
     if let Some(frame_id) = notification {
         let frame = frame_ref(state, frame_id)?;
@@ -22,7 +25,7 @@ pub(crate) fn animation_group_play(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn start_group(state: &LuaState, caller_id: u64, reverse: bool) -> LuaResult<Option<u64>> {
+fn start_group(state: &LuaState, caller_id: u64, reverse: Option<bool>) -> LuaResult<Option<u64>> {
     let mut sim = borrow_state_mut(state)?;
     let Some(group_id) = resolve_animation_group_id(&sim, caller_id) else {
         return Ok(None);
@@ -30,6 +33,7 @@ fn start_group(state: &LuaState, caller_id: u64, reverse: bool) -> LuaResult<Opt
     let notification = if let Some(group) = sim.animation_groups.get_mut(&group_id) {
         let started = !group.playing;
         let resuming = group.paused;
+        let reverse = reverse.unwrap_or(resuming && group.reverse);
         if started && !resuming {
             group.elapsed = if reverse { group.total_duration() } else { 0.0 };
             for animation in &mut group.animations {
@@ -40,9 +44,7 @@ fn start_group(state: &LuaState, caller_id: u64, reverse: bool) -> LuaResult<Opt
         group.paused = false;
         group.done = false;
         group.pending_finish = false;
-        if !resuming {
-            group.reverse = reverse;
-        }
+        group.reverse = reverse;
         if started { group.frame_id } else { None }
     } else {
         None
