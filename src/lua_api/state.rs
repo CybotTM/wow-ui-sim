@@ -86,6 +86,8 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-0")]
             ping_cooldown_interval: crate::c_api::PingCooldownInterval::default(),
             #[cfg(feature = "retail-12-0-0")]
+            ping_texture_kits: crate::c_api::PingTextureKits::default(),
+            #[cfg(feature = "retail-12-0-0")]
             party_ai_guids: HashSet::new(),
             #[cfg(feature = "retail-12-0-5")]
             item_tooltip_levels: ::std::collections::HashMap::new(),
