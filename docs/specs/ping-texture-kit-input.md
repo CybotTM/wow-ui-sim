@@ -1,6 +1,6 @@
 # Host-supplied ping texture kits
 
-`C_Ping.GetTextureKitForType(type)` must project a whole host-supplied type-to-string mapping, not an invented native catalog. Input/export/default and six tests are staged; getter/registrar unchanged, tests uncompiled/unexecuted. Architecture: [Lua API](../lua-api.md).
+`C_Ping.GetTextureKitForType(type)` must project a whole host-supplied type-to-string mapping, not an invented native catalog. Input/export/default and getter/registrar are implemented; six pre-producer cases executed RED, current producer GREEN remains pending. Architecture: [Lua API](../lua-api.md).
 
 ## What it must do
 
@@ -11,7 +11,7 @@
 - [ ] Authenticate secret inputs before ordinary validation/lookup using `AllowedWhenUntainted`: an untainted secret numeric key may select a mapped entry; tainted secrets (including unmapped and malformed payloads) are denied without leaking/declassifying input. Public keys remain usable by tainted callers. Returned mapped strings are public by simulator policy; caller taint is preserved.
 - [ ] Actual cached `PingManager:ShowPingSpot(type,posX,posY)` consumes the real query and passes exact `Ping_SpotGlw_<kit>_In`/`_Out` atlas names with use-size true to both sinks.
 
-Cached `PingManagerDocumentation.lua` declares required PingSubjectType, non-nil textureKit and AllowedWhenUntainted secret arguments. It does not provide mappings or miss behavior. Arbitrary synthetic keys/kits in tests are host fixtures, not native pairs. Secret-input authentication has prospective tests but still needs executed behavioral evidence before producer completion; no native security parity claimed by this stage.
+Cached `PingManagerDocumentation.lua` declares required PingSubjectType, non-nil textureKit and AllowedWhenUntainted secret arguments. It does not provide mappings or miss behavior. Arbitrary synthetic keys/kits in tests are host fixtures, not native pairs. Secret-input authentication has executed failing tests but still needs current GREEN evidence before producer completion; no native security parity claimed by this stage.
 
 ## How it works
 
@@ -22,19 +22,20 @@ Cached `PingManagerDocumentation.lua` declares required PingSubjectType, non-nil
 
 | Path | Role |
 |---|---|
-| `src/c_api/c_ping_texture_kits.rs`, `src/c_api/mod.rs` | Input map/export only; no query or registrar. |
+| `src/c_api/c_ping_texture_kits.rs`, `src/c_api/mod.rs` | Input map/export and exact lookup provider; registrar wired under `retail-12-0-0`. |
 | `src/lua_api/state/sim_state.rs`, `src/lua_api/state.rs` | Environment input/default under retail-12-0-0. |
-| `tests/ping_texture_kits.rs` | Six prospective tests selected on Retail/PTR, generated integration module. |
+| `tests/ping_texture_kits.rs` | Six query/argument tests selected on Retail/PTR, generated integration module. |
 
 ## Tests asserting this spec
 
-Generated `--test integration` filter `ping_texture_kits::` (expected six): configured exact strings/live replacement/isolation; empty/absent/cleared input error policy; invalid public key matrix; untainted actual VM secret numeric input; tainted actual VM secret numeric/unmapped/fractional/string denial plus public-input recovery; actual cached ShowPingSpot atlas arguments through controlled pool/frame/animation sinks. Secret fixtures assert query publication before setup. Consumer asserts real query before cache discovery or vendor loading. Sink spies prove call arguments only, not rendering/assets/lifecycle. All six UNCOMPILED/UNRUN; cache/setup failures are not query RED.
+Generated `--test integration` filter `ping_texture_kits::` (expected six): configured exact strings/live replacement/isolation; empty/absent/cleared input error policy; invalid public key matrix; untainted actual VM secret numeric input; tainted actual VM secret numeric/unmapped/fractional/string denial plus public-input recovery; actual cached ShowPingSpot atlas arguments through controlled pool/frame/animation sinks. Secret fixtures assert query publication before setup. Consumer asserts real query before cache discovery or vendor loading. Sink spies prove call arguments only, not rendering/assets/lifecycle. At `ff72f3c3b`, all six fail real output, miss/invalid-input error or secret-policy assertions; no observed fixture/setup failures. Cached consumer loading and later authentication/recovery assertions remain unreached where prior assertions fail. Current producer GREEN is pending; cache/setup failures are not query RED.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile and obtain executed behavioral RED before implementing getter.
+- [x] Compile and obtain executed behavioral RED before implementing getter.
 - [x] Stage source-backed ordinary/secret argument policy tests; execution remains pending.
-- [ ] Implement minimal getter and prove GREEN plus applicable startup/profile checks.
+- [x] Implement minimal getter after genuine RED.
+- [ ] Prove GREEN plus applicable startup/profile checks.
 - [ ] Verify cached consumer prerequisite sufficiency in execution.
 
 ## Out of scope
