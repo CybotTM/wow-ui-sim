@@ -6,7 +6,7 @@
 
 ## DiscreteProgressSteps query-boundary RED — 2026-10-13
 
-[Retained RED packet](../../../data/patch-api/evidence/ui-widget-discrete-progress-2026-10-13/README.md) owns five genuine missing-record failures at42 before cached prerequisites; later50 source producer has separately retained actual Retail/PTR seven-case Discrete GREEN, five preservation cases per profile, fresh normal startup and default check. [Current packet](../../../data/patch-api/evidence/ui-widget-discrete-progress-2026-10-13/README.md#retail-and-ptr-current-proof) owns exact scopes; text-retention gate pending. [Contract](../../specs/ui-widget-discrete-progress-steps.md) owns full19-field/type19 requirements and direct-input/typed-feed boundaries. Neither RED/source presence nor earlier bar/HUD success completes widget-system/native/parent acceptance.
+[Retained RED packet](../../../data/patch-api/evidence/ui-widget-discrete-progress-2026-10-13/README.md) owns five genuine missing-record failures at42 before cached prerequisites; later50 source producer has separately retained actual Retail/PTR seven-case Discrete GREEN, five preservation cases per profile, fresh normal startup and default check. [Current packet](../../../data/patch-api/evidence/ui-widget-discrete-progress-2026-10-13/README.md#retail-and-ptr-current-proof) owns exact scopes; bounded GREEN text-retention audit PASS at `a6723200be40145ec352666b538998bf4035a608`, original RED and other packets not rechecked. [Contract](../../specs/ui-widget-discrete-progress-steps.md) owns full19-field/type19 requirements and direct-input/typed-feed boundaries. Neither RED/source presence nor earlier bar/HUD success completes widget-system/native/parent acceptance.
 
 ## Separate PTR and owning checkpoints — 2026-10-13
 

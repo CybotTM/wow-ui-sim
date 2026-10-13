@@ -4,7 +4,7 @@
 
 ## [2026-10-13] evidence | Actual Retail/PTR DiscreteProgressSteps
 
-[Contract/current packet](../specs/ui-widget-discrete-progress-steps.md) records distinct current scopes and retained five-case RED; no new native/render/tutorial/unit-context or whole-parent acceptance. Current retention gate pending.
+[Contract/current packet](../specs/ui-widget-discrete-progress-steps.md) records distinct current scopes and retained five-case RED; no new native/render/tutorial/unit-context or whole-parent acceptance. Bounded GREEN retention audit PASS at `a6723200be40145ec352666b538998bf4035a608` (scope/counts in current packet); original RED and other packets not rechecked.
 
 ## [2026-10-13] evidence | DiscreteProgressSteps query-boundary RED
 
