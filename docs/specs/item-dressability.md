@@ -46,6 +46,8 @@ Initial PTR API RED at `13a818ba5` executed two cases: 0 PASS / 2 FAIL, exit101,
 
 The input-only successor authors three additional direct cases for supplied numeric/bare/generated-link booleans and uncatalogued identity, replacement/removal/isolation, and independent mount/equipment/consumable inputs. The security case now exercises supplied false and true. One added original PlayerChoice case preserves whole closure/template/method provenance and supplies false/true/false plus independent mount controls. All successor tests remain unexecuted; getter implementation requires genuine supplied-record/consumer RED.
 
+[Initial selected packet](../../data/patch-api/evidence/bullet-dress-initial-api-red-2026-10-13/README.md) retains whole Retail/PTR initial API streams and independent classification; public-copy/privacy acceptance remains pending.
+
 ## Known gaps (current cycle)
 
 - [x] Independently classify initial Retail RED; both profiles executed before passive input changes. Classification does not establish passing API, supplied-record, security or consumer coverage.
