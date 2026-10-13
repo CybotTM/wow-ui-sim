@@ -4,7 +4,7 @@ Approved simulator policy: an XML layer Texture anchor whose `relativeKey` resol
 
 ## What it must do
 
-- [ ] Instantiate unchanged cached Mists `ProductChoiceItemDisplayTemplate` through real `CreateFrame` inheritance, preserving layers, decorations, scripts and child-frame subtrees with actual cached ModelScene prerequisites.
+- [ ] Instantiate unchanged cached Mists `ProductChoiceItemDisplayTemplate` through real `CreateFrame` inheritance, preserving layers, decorations, scripts and child-frame subtrees with actual cached ModelScene and ProductChoice Lua prerequisites. Mouse handlers must bind to their real cached functions, not missing-global substitutes.
 - [ ] Preserve Icon size 63 × 63 and its single CENTER anchor: target exactly parent card, relative point CENTER, offsets (0, 15). Resolving `$parent.Icon` to Icon itself must not install a self-target or abort production.
 - [ ] Create later distinct IconBorder with parent card and a single CENTER anchor targeting sibling Icon, relative point CENTER, offsets (0, -5); complete following child-frame production with the entire Lua error accumulator empty.
 - [ ] Direct Lua self-`SetPoint` fails under `pcall` without changing any existing point; a distinct-target call succeeds with exact identity, relative point and offsets, preserving the untouched point.

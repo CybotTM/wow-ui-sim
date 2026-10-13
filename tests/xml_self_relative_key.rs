@@ -4,7 +4,7 @@ use std::path::Path;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::xml::{self, UiXml, XmlElement};
 
-fn parse_cached_xml(path: &Path) -> UiXml {
+fn read_and_parse_cached_xml(path: &Path) -> UiXml {
     xml::parse_xml_file(path)
         .unwrap_or_else(|error| panic!("required cached XML {}: {error}", path.display()))
 }
@@ -55,8 +55,17 @@ fn xml_self_relative_key_product_choice_targets_parent_and_preserves_later_sibli
     let env = WowLuaEnv::new().expect("create Mists Lua environment");
     let addons = wow_ui_sim::client_profile::blizzard_ui_addons_dir();
     let product_choice =
-        parse_cached_xml(&addons.join("Blizzard_UIPanels_Game/Classic/ProductChoice.xml"));
-    let model_scene = parse_cached_xml(&addons.join("Blizzard_SharedXML/ModelSceneMixin.xml"));
+        read_and_parse_cached_xml(&addons.join("Blizzard_UIPanels_Game/Classic/ProductChoice.xml"));
+    let model_scene =
+        read_and_parse_cached_xml(&addons.join("Blizzard_SharedXML/ModelSceneMixin.xml"));
+    let product_choice_lua_path = addons.join("Blizzard_UIPanels_Game/Classic/ProductChoice.lua");
+    let product_choice_lua = std::fs::read_to_string(&product_choice_lua_path)
+        .expect("read actual cached ProductChoice script definitions");
+    env.exec_named(
+        &product_choice_lua,
+        &product_choice_lua_path.to_string_lossy(),
+    )
+    .expect("load unchanged cached ProductChoice script definitions");
     let model_scene_lua_path = addons.join("Blizzard_SharedXML/ModelSceneMixin.lua");
     let model_scene_lua = std::fs::read_to_string(&model_scene_lua_path).unwrap_or_else(|error| {
         panic!(
@@ -80,6 +89,8 @@ fn xml_self_relative_key_product_choice_targets_parent_and_preserves_later_sibli
         assert(type(CreateFromMixins) == "function", "builtin mixin support required")
         assert(GameFontHighlight and GameFontNormalSmall, "builtin font objects required")
         assert(type(ModelSceneMixin.OnLoad) == "function", "real ModelScene OnLoad required")
+        assert(type(ProductChoiceItemDisplay_OnMouseDown) == "function", "real mouse-down handler required")
+        assert(type(ProductChoiceItemDisplay_OnMouseUp) == "function", "real mouse-up handler required")
         "#,
     )
     .expect("satisfy real template prerequisites before disputed anchor");
@@ -121,6 +132,8 @@ fn xml_self_relative_key_product_choice_targets_parent_and_preserves_later_sibli
         assert(card.ModelScene.PreviewButton:GetParent() == card.ModelScene, "preview subtree preserved")
         assert(card.ModelScene.PreviewButton:GetNormalTexture(), "preview inherited texture preserved")
         assert(card.Covers and card.Covers.CheckMark and card.Covers.Disabled, "later Covers subtree preserved")
+        assert(card:GetScript("OnMouseDown") == ProductChoiceItemDisplay_OnMouseDown, "real mouse-down binding preserved")
+        assert(card:GetScript("OnMouseUp") == ProductChoiceItemDisplay_OnMouseUp, "real mouse-up binding preserved")
         "#,
     )
     .expect("observe parent-relative Icon, later sibling anchor, and unchanged subtree progress");
