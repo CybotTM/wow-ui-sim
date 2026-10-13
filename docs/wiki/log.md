@@ -1,3 +1,11 @@
+## [2026-10-12] docs | Explicit unit role API links
+
+Updated existing [Lua/group inventory](systems/lua-api.md#global-functions), [event producer](systems/event-system.md#explicit-unit-role-notification) and [API docs](../lua-api.md#explicit-unit-role-assignment); [role contract](../specs/unit-role-assignment.md) retains policies, exact callers and proof ownership. Parent-reported RED13; GREEN pending, status unchecked. No runtime/native acceptance, vendor change, tests, builds or commits; main owns commits.
+
+## [2026-10-12] docs | VertexColor source inventory and pending runtime proof
+
+Updated [existing animation](systems/lua-api.md#vertexcolor-animation--implementation-runtime-proof-pending), [widget target state](systems/widget-system.md#vertexcolor-animation-target-state) and API docs with bounded source links and [contract/evidence SSOT](../specs/vertex-color-animation.md). Qualified the historical four-endpoint publication gap without changing frozen accounting. Six selected tests reached missing `SetStartColor` RED; production GREEN not yet run. Modeled defaults/snapshots/smoothing/restoration are not native facts. Docs only; main owns commits.
+
 ## [2026-10-12] docs | EditMode source-suite failure and pending fixture repair
 
 [Existing investigation](investigations/editmode-layout.md#test-only-fixture-repair--pending-verification-2026-10-12) and [selection status](../specs/edit-mode-layout-selection.md#current-broad-suite-status--2026-10-12) distinguish main-read source `41cbf5005` terminal FAIL (integration0/prefork0/lib100, two named fixture failures) from test-only `b41b42fc1` plus cached-fixture correction `ac170ecbf`; focused runtime remains resource-BLOCKED. [Terminal packet](../../data/test-perf/evidence/fullsuite-41cb-2026-10-12/README.md) records independently reconciled 15,123 PASS / 2 FAIL / 19 reported skips; artifact verification PASS is not suite PASS. Combined-index production behavior and older bounded Retail/PTR/native-user proof scopes unchanged; no repaired-test PASS or broad acceptance. Docs only; parent owns commits.

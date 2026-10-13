@@ -237,6 +237,12 @@ Retail 12.1 `GetBuildOption("RestrictedAuraAPI")` returns `true`, selecting curr
 
 `ClearTarget()` clears the current target and returns `true` iff a target existed; it returns `false` when no target was set and preserves the `PLAYER_TARGET_CHANGED` event.
 
+### Explicit unit role assignment
+
+**Files:** `src/lua_api/globals/real/unit_roles.rs`, `unit_roles_assignment.rs`
+
+Source-inspected 2026-10-12: environment-owned `SimState.unit_roles` maps existing GUIDs to optional `UnitRole` values (Tank, Healer, Damage). Current Retail/PTR enum/string setters and existing group-role getters share this live state. Setters authenticate original VM arguments before parsing; getters retain existing identity-secrecy finishing. Changed assignments commit before synchronous `ROLE_CHANGED_INFORM` through the existing named-event dispatcher. [Role assignment contract](specs/unit-role-assignment.md) owns exact sources/callers, inferred policies and evidence limits. Parent reports 13 genuine missing-raw-setter RED cases; current GREEN pending, no PASS admitted here. No native parity or checked-None popup claim; vendor unchanged.
+
 ### Shared unit vitals
 **File:** `src/lua_api/globals/utility_system_spell/spell_api.rs`
 
@@ -308,7 +314,7 @@ POIButtonMixin, TaggableObjectMixin, MapCanvasPinMixin, Menu (GetOpenMenu, Popup
 
 ## Animation System
 
-**File:** `src/lua_api/animation/`
+**State:** [animation.rs](../src/lua_api/animation.rs); **methods/lifecycle:** [animations.rs](../src/lua_api/frame/methods/button_anchor_hierarchy/animations.rs).
 
 ### Types
 
@@ -324,6 +330,10 @@ group:SetLooping("NONE" | "REPEAT" | "BOUNCE")
 group:SetScript("OnFinished", callback)
 anim:SetFromAlpha() / SetToAlpha() / SetDuration()
 ```
+
+### VertexColor endpoints
+
+`SetStartColor(colorRGBA)` / `SetEndColor(colorRGBA)` and `GetStartColor()` / `GetEndColor()` are implemented with ColorMixin objects, XML endpoint loading and texture-target ticks. [VertexColor contract](specs/vertex-color-animation.md) owns requirements and evidence; [existing animation documentation](wiki/systems/lua-api.md#vertexcolor-animation--implementation-runtime-proof-pending) links exact source paths and distinguishes modeled defaults/snapshots/smoothing/restoration from native facts. Six selected tests reached RED at missing `SetStartColor`; production GREEN has not yet run.
 
 ### OnUpdate Integration (`env.rs:517-555`)
 

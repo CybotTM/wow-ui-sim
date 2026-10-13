@@ -262,6 +262,8 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 ## Global Functions
 
+**Explicit unit roles** — Source-inspected 2026-10-12: `globals/real/unit_roles.rs` defines three `UnitRole` values; environment-owned GUID-to-optional-role state backs existing group-role getters and current Retail/PTR enum/string setters in `unit_roles_assignment.rs`. Original VM arguments are authenticated before setter parsing; getter outputs retain existing identity-secrecy finishing. Mutation precedes synchronous notification through [[event-system#Explicit unit role notification]]. [Contract/source/caller SSOT](../../specs/unit-role-assignment.md) owns policies and proof limits: parent-reported 13 genuine missing-raw-setter RED cases, current GREEN pending, no PASS or new native claim. Vendor None-radio behavior unchanged.
+
 **Pending spell confirmations** — `globals/real/spell_confirmation_prompts.rs` copies validated host fields into an empty-default `SimState` map before synchronous dispatch, then returns fresh stack-rooted query snapshots. Accept/decline delete only the numeric spell identity. Mainline 12.0.5+ registration excludes the separately cfg-selected historical/nonmainline inert query. [Contract](../../specs/spell-confirmation-prompts.md) owns mapping, inferred policies and saved missing-surface RED and bounded independent six-case PASS; producer `b07fc61f6` has bounded independent acceptance at compiled/docs snapshot `329eabfbb`, with default fmt/check recorded in the contract. Security/rooting remain source-only; parent startup is separate from independent proof, and combined batch16 test compilation still failed. No native or whole-page completion.
 
 **Party connection input** — Active `admin.rs` registration exposes the shared setter; `PartyMember.connected` feeds party-token and aggregate queries. Mutation precedes synchronous edge dispatch with no state borrow held. Non-party token behavior remains unchanged. [Contract](../../specs/party-connection.md) owns cached payload evidence, inferred semantics, actual six-case RED, eight-case GREEN plus 47 controls, independent bounded acceptance and snapshot-scoped default Rust gates; parent startup is saved evidence, not independently verified, and concurrent unrelated test edits are excluded; no native or source-accounting completion credit.
@@ -344,7 +346,17 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 
 `CreateAnimationGroup()` returns a group supporting `Play()`, `Stop()`, `Pause()`, `SetLooping()`, and `SetScript("OnFinished")`. Animation types: Alpha, Translation, Scale, Rotation, FlipBook, VertexColor, Path. `fire_on_update()` ticks animation groups after OnUpdate handlers.
 
+### VertexColor animation — implementation, runtime proof pending
+
+The committed implementation supplies `SetStartColor`, `SetEndColor`, `GetStartColor`, and `GetEndColor` as ColorMixin endpoints, endpoint state, XML configuration and texture-target tick application. [Contract and evidence SSOT](../../specs/vertex-color-animation.md) owns the literal patch 10.2.5 RGBA-linear/two-second BOUNCE Lua/XML requirement and native limits; the implementation is not native proof.
+
+[Endpoint/application implementation](../../../src/lua_api/frame/methods/button_anchor_hierarchy/animations/vertex_color.rs) snapshots channels, returns independent color objects, smooths time progress and saves/restores target colors. Opaque-white defaults, snapshot/validation policy, smoothing curves and restoration are **modeled inferences**, not established native behavior. [Animation state](../../../src/lua_api/animation.rs), [method registration](../../../src/lua_api/frame/methods/button_anchor_hierarchy/mod.rs), [playback lifecycle](../../../src/lua_api/frame/methods/button_anchor_hierarchy/animations.rs), [tick runtime](../../../src/lua_api/frame/methods/button_anchor_hierarchy/animations/runtime.rs), [XML endpoint types](../../../src/xml/types_animation.rs) and [XML endpoint application](../../../src/loader/helpers_anim.rs) bound the source inventory.
+
+Parent-reported six-test RED reached missing `SetStartColor`; downstream assertions were not reached. Production GREEN has **not yet run**. No feature acceptance, current-suite acceptance, full compatibility or native restoration/smoothing parity follows from source inspection.
+
 ## Sources
+
+- [VertexColor animation](../../specs/vertex-color-animation.md) — contract, modeled policies and bounded RED/pending GREEN evidence
 
 - [Spell and spellbook cooldown outputs](../../specs/spell-book-cooldown-outputs.md) — EXACT305/322 SSOT; real interval/book provider, VM selector boundary, rooted NUM/public BOOL policy, cached metadata limits, historical RED and independent537+541 bounded output acceptance; native/input/type/profile gaps retained
 

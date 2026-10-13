@@ -36,6 +36,10 @@ Handlers stored in the `__scripts` global table keyed as `"{widget_id}_{handler_
 
 `FireEvent(event, ...)` — Lua-callable global that performs the same dispatch, useful for tests.
 
+## Explicit unit role notification
+
+Source-inspected 2026-10-12: `globals/real/unit_roles_assignment.rs` commits changed GUID-backed role state, releases its state borrow, then calls existing `script_helpers::fire_named_event_state` for synchronous `ROLE_CHANGED_INFORM` before returning the setter boolean. This is not a new queue or dispatcher. [Role assignment contract](../../specs/unit-role-assignment.md) owns payload/caller requirements, modeled policies and pending runtime proof; no PASS or native-delivery claim here. [[lua-api#Global Functions]] links the group-role API inventory.
+
 ## OnUpdate Tick
 
 `fire_on_update()` sequence each render tick:
@@ -61,6 +65,8 @@ After all addons load, the simulator fires in order: `ADDON_LOADED("WoWUISim")`,
 Three handler forms: `function="X"` uses X directly, `method="X"` wraps as `self:X(...)`, inline body wraps as `function(self, ...) body end`. `inherit="prepend"` or `"append"` chains handlers with pcall wrapping.
 
 ## Sources
+
+- [Unit role assignment](../../specs/unit-role-assignment.md) — role producer, original callers and proof limits
 
 - [event-system.md](../../event-system.md) — EventQueue, ScriptHandler types, dispatch, OnUpdate, input flow, startup sequence
 - [EditBox focus callbacks](../../specs/editbox-focus-callbacks.md) — Lua focus-transition contract and limits

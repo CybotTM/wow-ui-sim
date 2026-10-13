@@ -18,6 +18,10 @@ Key field groups:
 
 **Widget-specific** — Slider, StatusBar, EditBox, ScrollFrame, Cooldown each have dedicated field groups. Model-family state is grouped in one lazy `Option<Box<ModelWidgetState>>`; absent payloads preserve getter defaults, while mutating methods allocate only when needed and remain globally callable.
 
+### VertexColor animation target state
+
+The implemented texture-target path writes `Frame.vertex_color`; [animation state](../../../src/lua_api/animation.rs) stores per-playback baselines, and [application/restoration](../../../src/lua_api/frame/methods/button_anchor_hierarchy/animations/vertex_color.rs) updates the selected texture. [Contract](../../specs/vertex-color-animation.md) and [existing animation section](lua-api.md#vertexcolor-animation--implementation-runtime-proof-pending) own modeled policies and RED/pending GREEN limits; no rendering or native acceptance is implied.
+
 ### ColorSelect RGB callback boundary
 
 `3397eeec9` makes changed `SetColorRGB` commit RGB while retaining alpha, then dispatch `OnColorSelect(self, r, g, b)` through registered scripts and hooks; same RGB remains a no-event call. `69e4bd61d`/`579770559` load the six XML texture slots across ordinary, inherited-template, and runtime-template paths. Final bounded proof at `e586e6d30` covers 35 behavioral cases, including the unchanged Retail ColorPicker setup/hex-entry consumer with zero recorded Lua errors. Native HSV-only/alpha-only callbacks, reentry, GPU parity, and non-Retail profiles remain unverified. [ColorSelect RGB callback](../../specs/colorselect-rgb-callback.md) is the SSOT.

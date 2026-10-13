@@ -1,3 +1,7 @@
+## [2026-10-12] docs | Explicit unit role source inventory
+
+[Existing Lua/group API](systems/lua-api.md#global-functions) and [synchronous role producer](systems/event-system.md#explicit-unit-role-notification) link [contract/source/caller SSOT](../specs/unit-role-assignment.md). GUID-backed optional three-value roles, current Retail/PTR setters and live getters source-inspected; parent reports 13 genuine missing-setter RED cases. GREEN pending, no PASS/native or checked-None popup claim; vendor unchanged.
+
 ## [2026-10-12] docs | PTR packet and current-suite submission
 
 [PTR packet](../../data/patch-api/evidence/edit-mode-enter-ptr-2026-10-12/README.md), committed at `41cbf5005`, owns bounded runtime/check details; [current reconciliation](investigations/editmode-layout.md#ptr-packet-and-current-suite-submission--2026-10-12) retains submission metadata and later main-read terminal state: source `41cbf5005` broad suite FAIL, two EditMode fixture failures; [terminal packet](../../data/test-perf/evidence/fullsuite-41cb-2026-10-12/README.md) records 15,123 PASS / 2 FAIL / 19 reported skips. [Test-only repair](investigations/editmode-layout.md#test-only-fixture-repair--pending-verification-2026-10-12) `b41b42fc1` plus cached-fixture correction `ac170ecbf` remains runtime-BLOCKED, not repaired-test PASS. Earlier bounded proofs retain their scopes; whole handoff OPEN.
@@ -5,6 +9,10 @@
 ## [2026-10-12] docs | Bounded seven-profile coverage matrix
 
 [Coverage matrix](reference/coverage-matrix.md) separates runtime, compile, publication and historical/native/external proof. d21 is Retail only; retained GUID publication145/94/51; corrected Mists assertions and old failures remain distinct. Friend setter bounded Retail8/PTR8 GREEN at `a883157c49`; its default check NEVER INVOKED. Setter strict AFTER145/95/50 PASS at `7d9d9f621`; later default check/fmt PASS; independent validator9/real validator/capture-preservation PASS at `cb77de086`; new public projection/link/privacy gate PASS through `b1c7c4348`. Retail startup2/cache10/Enter3 GREEN and later PTR each same2/10/3 at `f3145424c`;  user accepted current GUI layout and both keyboard fields after native window focus assignment; automatic-focus/owned-native-input gate PASS, test-controlled stop replaces90s expiry. PTR GUI/universal native and whole handoff OPEN. [Friend-setter audit](investigations/patch-8-1-0-api-audit.md#friend-setter--bounded-current-evidence-2026-10-12) links packet-owned details.
+
+## [2026-10-12] docs | VertexColor implementation, runtime proof pending
+
+[Existing animation section](systems/lua-api.md#vertexcolor-animation--implementation-runtime-proof-pending) links the [contract/evidence SSOT](../specs/vertex-color-animation.md) and exact endpoint/state/XML/tick sources. [Widget target state](systems/widget-system.md#vertexcolor-animation-target-state) links the same boundary. Six-test RED reached missing `SetStartColor`; production GREEN not yet run. Modeled policies and historical publication accounting remain separate from native or suite acceptance.
 
 ## [2026-10-12] verification | GUIDIsPlayer bounded current proof
 

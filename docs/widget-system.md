@@ -63,7 +63,7 @@ The `Frame` struct is the fundamental data structure representing any widget in 
 
 - **`texture: Option<String>`** -- File path for Texture widget
 - **`color_texture: Option<Color>`** -- Solid color (from SetColorTexture)
-- **`vertex_color: Option<Color>`** -- Tint color
+- **`vertex_color: Option<Color>`** -- Tint color. VertexColor animation now writes texture-target tint through [endpoint/application code](../src/lua_api/frame/methods/button_anchor_hierarchy/animations/vertex_color.rs); saved playback colors live in [animation state](../src/lua_api/animation.rs), not a second widget color model. [Contract](specs/vertex-color-animation.md) and [animation documentation](wiki/systems/lua-api.md#vertexcolor-animation--implementation-runtime-proof-pending) own modeled restoration policy and pending runtime proof.
 - **`normal_texture`** / **`pushed_texture`** / **`highlight_texture`** / **`disabled_texture`** -- Button state textures (each with `_tex_coords` UV companion)
 - **`checked_texture`** / **`disabled_checked_texture`** -- CheckButton variants
 - **`tex_coords: Option<(f32, f32, f32, f32)>`** -- Final UV coordinates (left, right, top, bottom)
