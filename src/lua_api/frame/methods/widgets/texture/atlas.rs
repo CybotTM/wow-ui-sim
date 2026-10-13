@@ -24,12 +24,13 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
         _ => return set_atlas_usage_error(),
     };
     let Some(atlas_name) = atlas_name else {
-        return Ok(0);
+        return push_atlas_application_result(state, false);
     };
     if atlas_name.trim().is_empty() {
         let mut sim = borrow_state_mut(state)?;
         clear_atlas_texture(&mut sim.widgets, id);
-        return Ok(0);
+        drop(sim);
+        return push_atlas_application_result(state, false);
     }
     let Some(lookup) = crate::atlas::get_render_atlas_info(&atlas_name) else {
         let mut sim = borrow_state_mut(state)?;
@@ -39,12 +40,22 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
             frame.tex_coords = None;
             frame.atlas_tex_coords = None;
         }
-        return Ok(0);
+        drop(sim);
+        return push_atlas_application_result(state, false);
     };
     let use_atlas_size = opt_bool(state, 3).unwrap_or(false);
     let mut sim = borrow_state_mut(state)?;
     apply_atlas(&mut sim.widgets, id, &atlas_name, &lookup, use_atlas_size);
-    Ok(0)
+    drop(sim);
+    push_atlas_application_result(state, true)
+}
+
+fn push_atlas_application_result(state: &mut LuaState, applied: bool) -> LuaResult<u32> {
+    // Simulator compatibility policy for cached TextureKit visibility consumers.
+    // Generated docs/Wowless omit returns; native parity is not established.
+    // See docs/specs/texture-atlas-application-result.md.
+    state.push(Val::Bool(applied));
+    Ok(1)
 }
 
 fn set_atlas_usage_error() -> LuaResult<u32> {

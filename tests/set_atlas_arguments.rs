@@ -18,6 +18,15 @@ fn test_set_atlas_reports_application_success_to_texture_kit_consumers() {
         assert(texture:GetAtlas() == atlas, "known atlas remains applied")
         local missingCount, missingApplied = CaptureReturns(texture:SetAtlas("sim-missing-texture-kit-atlas"))
         assert(missingCount == 1 and missingApplied == false, "missing atlas must report not applied")
+        for _, input in ipairs({ "", "   ", 0 }) do
+            local inactiveCount, inactiveApplied = CaptureReturns(texture:SetAtlas(input))
+            assert(inactiveCount == 1 and inactiveApplied == false, "accepted inactive input must report not applied")
+        end
+        local nilCount, nilApplied = CaptureReturns(texture:SetAtlas(nil))
+        assert(nilCount == 1 and nilApplied == false, "nil atlas must report not applied")
+        local restoredCount, restoredApplied = CaptureReturns(texture:SetAtlas(atlas))
+        assert(restoredCount == 1 and restoredApplied == true, "known atlas must report applied after inactive inputs")
+        assert(texture:GetAtlas() == atlas, "restored atlas remains applied")
         "##,
     )
     .unwrap();

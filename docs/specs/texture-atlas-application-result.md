@@ -24,7 +24,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Focused application-result RED and visibility diagnostics pending execution; production remains unchanged.
+- [ ] GREEN pending after genuine focused RED at `21aabeaf1`: existing argument validation PASS, application-result assertion FAIL with `actual=0`. Actual cached bar assertion59 observes NeutralBar=true, Glow3=false and SparkNeutral=false despite both expected atlases being applied. Subsequent bar lifecycle remains unreached; initial delimiter compilation failure at `d1c5b4cb8` executed zero cases and is not behavioral RED.
 - [ ] Consumer GREEN, texture-call regressions, startup and affected profile acceptance pending.
 
 ## Out of scope
