@@ -413,7 +413,7 @@ Historical six-test RED reached missing `SetStartColor`; downstream assertions w
 - [unit_misc.rs](../../../src/lua_api/globals/unit_misc.rs) — UnitGUID and UnitIsUnit registration through the existing-identity resolver
 - [Unit GUID presence](../../specs/unit-guid-presence.md) — bounded GUID-presence contract and exclusions
 - [Modeled unit identity equality](../../specs/unit-identity-equality.md) — equality contract, RED evidence, and exclusions
-- `/home/osso/Repos/wowless/data/impl/UnitGUID.lua` — modeled nil-on-missing-identity reference
+- `<HOME>/Repos/wowless/data/impl/UnitGUID.lua` — modeled nil-on-missing-identity reference
 - `Blizzard_Deprecated_ArenaUI/Deprecated_ArenaUI.lua` in cached retail and Mists UI — GUID-truthiness consumer and remote-update boundary
 - [spell_base.rs](../../../src/c_api/spell_base.rs) — explicit specialization relationship model and public/secret boundary
 - [Base-spell specialization security](../../specs/base-spell-specialization-security.md) — exact295 requirements/proof SSOT, shared capability/publication, Retail-only raw arg2 boundary and unverified producer warning clearance
@@ -484,7 +484,7 @@ Historical six-test RED reached missing `SetStartColor`; downstream assertions w
 - [panel_toggle_verbs.rs tests](../../../tests/panel_toggle_verbs.rs) — bare-environment retail/non-retail registration proof
 - [targeting_verbs.rs](../../../tests/targeting_verbs.rs) — targeting global behavior proofs
 - [test_showuipanel_toggles.rs](../../../tests/test_showuipanel_toggles.rs) — retail `Blizzard_Communities` load and guild-panel toggle proof
-- `/home/osso/Repos/simc/SpellDataDump/allspells.txt` — coefficient and variable formulas used for AP/health-scaled spell text
+- `<HOME>/Repos/simc/SpellDataDump/allspells.txt` — coefficient and variable formulas used for AP/health-scaled spell text
 
 ## See Also
 
