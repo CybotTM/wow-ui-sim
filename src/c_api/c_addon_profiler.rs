@@ -13,6 +13,8 @@ use super::helpers::set_global_val;
 type LuaTableRef = rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>;
 type RustLuaFn = rilua::vm::closure::RustFn;
 
+#[cfg(feature = "retail-12-0-0")]
+const PROFILER_TICKS_PER_SECOND: f64 = 1_000_000_000.0;
 const ADDON_PROFILER_METRIC_RECENT_AVERAGE_TIME: i32 = 1;
 const ADDON_PERFORMANCE_MESSAGE_TYPE_SPECIFIC_CHAT_WARNING: i32 = 0;
 const ADDON_PERFORMANCE_MESSAGE_TYPE_SPECIFIC_ERROR_DIALOG: i32 = 1;
@@ -22,6 +24,8 @@ const ADDON_PERFORMANCE_ERROR_CVAR: &str = "addonPerformanceMsgError";
 const ADDON_PERFORMANCE_OVERALL_CVAR: &str = "addonPerformanceMsgOverall";
 
 const C_ADDON_PROFILER_METHODS: &[(&str, RustLuaFn)] = &[
+    #[cfg(feature = "retail-12-0-0")]
+    ("GetTicksPerSecond", query_ticks_per_second),
     (
         "GetApplicationMetric",
         c_addon_profiler_get_application_metric,
@@ -58,6 +62,13 @@ fn register_c_addon_profiler_methods(state: &mut LuaState, t: LuaTableRef) -> Lu
         table_set_rust_fn_static(state, t, name, *rust_fn)?;
     }
     Ok(())
+}
+
+#[cfg(feature = "retail-12-0-0")]
+fn query_ticks_per_second(state: &mut LuaState) -> LuaResult<u32> {
+    // Simulator nanosecond-unit policy, not native CPU/hardware clock frequency.
+    state.push(Val::Num(PROFILER_TICKS_PER_SECOND));
+    Ok(1)
 }
 
 // ── metric computation helpers ────────────────────────────────────────────────

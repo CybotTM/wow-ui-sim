@@ -1,6 +1,6 @@
 # Profiler clock frequency
 
-Standalone `C_AddOnProfiler.GetTicksPerSecond()` reports an explicitly modeled nanosecond-unit frequency. Producer remains absent in `src/c_api/c_addon_profiler.rs`; three tests are staged, uncompiled and unexecuted. Architecture: [Lua API](../lua-api.md).
+Standalone `C_AddOnProfiler.GetTicksPerSecond()` reports an explicitly modeled nanosecond-unit frequency. Producer is registered in `src/c_api/c_addon_profiler.rs`; three pre-producer cases executed RED, current producer GREEN remains pending. Architecture: [Lua API](../lua-api.md).
 
 ## What it must do
 
@@ -18,17 +18,18 @@ Cached `Blizzard_APIDocumentationGenerated/AddOnProfilerDocumentation.lua` decla
 
 | Path | Role |
 |---|---|
-| `src/c_api/c_addon_profiler.rs` | Existing profiler namespace; frequency getter not yet registered. |
-| `tests/get_ticks_per_second.rs` | Three prospective tests, shared `retail-12-0-0` gate. |
+| `src/c_api/c_addon_profiler.rs` | Existing profiler namespace; nanosecond-policy frequency getter registered. |
+| `tests/get_ticks_per_second.rs` | Three frequency tests, shared `retail-12-0-0` gate. |
 
 ## Tests asserting this spec
 
-Generated `--test integration` filter `get_ticks_per_second::`: exact return count/type/finite positivity; repeated exact frequency across environments; fixed zero, 1ns, fractional-, whole- and multi-second conversions. All three tests UNCOMPILED/UNRUN. No RED or GREEN evidence.
+Generated `--test integration` filter `get_ticks_per_second::`: exact return count/type/finite positivity; repeated exact frequency across environments; fixed zero, 1ns, fractional-, whole- and multi-second conversions. All three fail at the real query at `ff72f3c3b` (nil instead of a finite positive number), with no observed fixture failures. Fixed-duration conversion assertions remain unreached in RED; current producer GREEN is pending.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile and execute behavioral RED against unchanged namespace.
-- [ ] Register standalone frequency getter after genuine RED, then bounded GREEN and applicable startup/check proof.
+- [x] Compile and execute behavioral RED against unchanged namespace.
+- [x] Register standalone frequency getter after genuine RED.
+- [ ] Execute bounded GREEN and applicable startup/check proof.
 
 ## Out of scope
 
