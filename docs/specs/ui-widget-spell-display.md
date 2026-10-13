@@ -1,6 +1,6 @@
 # Supplied SpellDisplay visualization
 
-Contract for environment-owned supplied SpellDisplay input, fresh complete nested snapshots, and existing cached Retail/PTR consumers. Passive input scaffold and nine tests are integrated. Genuine pre-producer supplied-result RED was observed in Retail and PTR. The bounded producer is present. [Current bounded gate](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13) owns independent Retail PASS, independently accepted PTR execution and separate selected retention PENDING. Both independent profile scopes cover all ten bounded requirements. Source belongs under `src/c_api/ui_widget_manager/`; [manager architecture](../wiki/systems/ui-widget-manager-state.md) owns mechanism.
+Contract for environment-owned supplied SpellDisplay input, fresh complete nested snapshots, and existing cached Retail/PTR consumers. Passive input scaffold and nine tests are integrated. Genuine pre-producer supplied-result RED was observed in Retail and PTR. The bounded producer is present. [Current bounded gate](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13) owns independent Retail PASS, independently accepted PTR execution and separate selected retention PASS. Both independent profile scopes cover all ten bounded requirements. Source belongs under `src/c_api/ui_widget_manager/`; [manager architecture](../wiki/systems/ui-widget-manager-state.md) owns mechanism.
 
 ## What it must do
 
@@ -48,7 +48,7 @@ Contract for environment-owned supplied SpellDisplay input, fresh complete neste
 
 ## Known gaps (current cycle)
 
-- [ ] Complete new selected-retention integrity; independent Retail/PTR bounded runtime PASS is separate.
+- [x] Complete new selected-retention integrity, including full gate copies; independent Retail/PTR bounded runtime PASS is separate.
 - [x] Combined independent Retail/PTR bounded acceptance: both reach all nine cases including cached lifecycle/context/polling. Native/catalog/world-loot/render/full-parent unproved.
 - [ ] World-loot click, rarity-pip counts and ObjectShown/ObjectHidden/WorldLootObjectList interaction need a separately grounded backing fixture seam; none invented here.
 - [ ] Nested color-object requirement is unresolved against these pinned schemas: they declare numeric `borderColor`/`tint` enums, no RGBA/tint objects or nullable nested fields. Consumer uses ColorManager atlas overrides and font-color objects downstream, not DTO color objects. No new color default model or opaque `Val` input added.

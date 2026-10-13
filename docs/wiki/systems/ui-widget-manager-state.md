@@ -57,7 +57,7 @@ Historical input-only stage `64a2a57b2` is superseded by producer `2bb6cdde1`. T
 
 ### SpellDisplay input-only checkpoint — 2026-10-13
 
-[Current bounded gate](../../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13) owns independent Retail PASS, PTR independently accepted and separate retention PENDING. [Spell contract](../../specs/ui-widget-spell-display.md) and [removal contract](../../specs/frame-event-removal.md) own requirements. Following input-stage checkpoint is historical, not current status; native/world-loot/render/full-parent unproved.
+[Current bounded gate](../../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13) owns independent Retail PASS, PTR independently accepted and separate retention PASS. [Spell contract](../../specs/ui-widget-spell-display.md) and [removal contract](../../specs/frame-event-removal.md) own requirements. Following input-stage checkpoint is historical, not current status; native/world-loot/render/full-parent unproved.
 
 At `85b5494d2`, the [SpellDisplay contract](../../specs/ui-widget-spell-display.md) owns passive supplied DTOs, environment-local storage, type13 feed and nine tests. [Retail result-boundary RED](../../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md) is independently verified; selected-copy integrity and PTR RED remain pending; getter/query/serializer registration and GREEN/consumer acceptance remain absent. Parent OPEN.
 
