@@ -1,6 +1,6 @@
 //! Supplied ButtonHeader projection and cached-provider behavior.
 //! Input scaffold staged; query and executed behavioral proof remain pending.
-#![cfg(feature = "client-retail")]
+#![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 
 use std::path::Path;
 
@@ -303,7 +303,7 @@ fn load_cached_lua(env: &WowLuaEnv, path: &Path) {
 
 fn load_bounded_cached_button_header_provider(env: &WowLuaEnv) {
     let addons = wow_ui_sim::paths::default_blizzard_ui_addons_path()
-        .expect("active Retail profile cache required; no alternate source");
+        .expect("active Retail/PTR profile cache required; no alternate source");
     let widgets = addons.join("Blizzard_UIWidgets");
     // Exact existing draft sequence, no guessed additional prerequisites.
     // GREEN-side dependency sufficiency remains pending runtime evidence.

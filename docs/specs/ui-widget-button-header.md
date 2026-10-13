@@ -25,7 +25,7 @@ Snapshot, absence and isolation requirements are simulator policy, not native-ca
 
 ## Tests asserting this spec
 
-`tests/c_ui_widget_manager_button_header.rs`: nine staged cases; Retail-only, secret case additionally gated by `retail-12-1-0`. That gate is not historical availability evidence. All cases remain uncompiled/unexecuted, not behavioral RED.
+`tests/c_ui_widget_manager_button_header.rs`: nine staged cases selected for Retail and PTR; secret cases additionally gated by `retail-12-1-0`. Both cached metadata declarations match exactly for the query, all 17 header fields and all five nested button fields. Cached header Lua/XML source also matches; the bounded consumer resolves the active profile cache, not a hardcoded Retail path. This supports shared test selection, not historical availability, compilation or runtime parity. All cases remain uncompiled/unexecuted, not behavioral RED.
 
 ## Known gaps (current cycle)
 
@@ -35,4 +35,4 @@ Snapshot, absence and isolation requirements are simulator policy, not native-ca
 
 ## Out of scope
 
-Native widget feed/catalog, invented numeric ranges, other-profile/native parity, unrelated quest paths, full widget Setup/pools/anchors/atlases/timers/rendering. Provider filtering is not rendered visibility. Parent startup/profile acceptance remains separate and open.
+Native widget feed/catalog, invented numeric ranges, Classic/other-profile or native parity, unrelated quest paths, full widget Setup/pools/anchors/atlases/timers/rendering. Provider filtering is not rendered visibility. Parent startup/profile acceptance remains separate and open.
