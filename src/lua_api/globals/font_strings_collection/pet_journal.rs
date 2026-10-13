@@ -393,7 +393,7 @@ pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
     let t = tb.build();
 
     set_global_val(lua.state_mut(), "C_PetJournal", t);
-    Ok(())
+    crate::c_api::c_pet_journal_hover::register(lua.state_mut())
 }
 
 fn register_pet_fanfare_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
@@ -498,8 +498,7 @@ fn register_pet_summon_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
 }
 
 fn register_pet_journal_state_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
-    tb.set_function("ClearHoveredBattlePet", |_state| Ok(0))?
-        .set_function("HasFavoritePets", |state| false.into_stack(state))?
+    tb.set_function("HasFavoritePets", |state| false.into_stack(state))?
         .set_function("IsFindBattleEnabled", |state| false.into_stack(state))?
         .set_function("IsJournalUnlocked", |state| true.into_stack(state))
 }
@@ -507,7 +506,6 @@ fn register_pet_journal_state_stubs(tb: TableBuilder) -> LuaResult<TableBuilder>
 fn register_pet_mutation_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
     tb.set_function("SetCustomName", |_state| Ok(0))?
         .set_function("SetFavorite", |_state| Ok(0))?
-        .set_function("SetHoveredBattlePet", |_state| Ok(0))?
         .set_function("PickupPet", |_state| Ok(0))?
         .set_function("PickupSummonRandomPet", |_state| Ok(0))?
         .set_function("ReleasePetByID", |_state| Ok(0))?
