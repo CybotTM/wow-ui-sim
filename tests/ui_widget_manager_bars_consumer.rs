@@ -56,6 +56,8 @@ fn assert_lua(env: &WowLuaEnv, phase: &str, code: &str) {
     // Label fixture-local assertions without replacing vendor/global assert.
     let diagnostic_code = format!(
         r#"
+        -- Widget dimensions and anchor offsets are f32; values remain f64.
+        local geometryEpsilon = 0.0001
         local originalAssert = assert
         local assertionIndex = 0
         local function assert(value, message)
@@ -212,9 +214,9 @@ fn register_and_assert_actual_templates(env: &WowLuaEnv) {
         assert(not StatusFrame.Bar.GlowPulseAnim:IsPlaying())
         assert(CaptureFrame.tooltip == 'Supplied capture tooltip')
         assert(CaptureFrame:GetHeight() == 37)
-        assert(math.abs(CaptureFrame.NeutralBar:GetWidth() - 27.8) < 0.000001, string.format('initial NeutralBar width: actual=%.17g expected=27.8', CaptureFrame.NeutralBar:GetWidth()))
-        assert(math.abs(CaptureFrame.LeftBar:GetWidth() - 55.6) < 0.000001, string.format('initial LeftBar width: actual=%.17g expected=55.6', CaptureFrame.LeftBar:GetWidth()))
-        assert(math.abs(CaptureFrame.RightBar:GetWidth() - 55.6) < 0.000001, string.format('initial RightBar width: actual=%.17g expected=55.6', CaptureFrame.RightBar:GetWidth()))
+        assert(math.abs(CaptureFrame.NeutralBar:GetWidth() - 27.8) < geometryEpsilon, string.format('initial NeutralBar width: actual=%.17g expected=27.8', CaptureFrame.NeutralBar:GetWidth()))
+        assert(math.abs(CaptureFrame.LeftBar:GetWidth() - 55.6) < geometryEpsilon, string.format('initial LeftBar width: actual=%.17g expected=55.6', CaptureFrame.LeftBar:GetWidth()))
+        assert(math.abs(CaptureFrame.RightBar:GetWidth() - 55.6) < geometryEpsilon, string.format('initial RightBar width: actual=%.17g expected=55.6', CaptureFrame.RightBar:GetWidth()))
         local point, relative, relativePoint, x, y = CaptureFrame.Spark:GetPoint(1)
         assert(point == 'CENTER' and relative == CaptureFrame and relativePoint == 'LEFT', string.format('initial Spark anchor: actual=(%s, %s, %s) expected=(CENTER, %s, LEFT)', tostring(point), tostring(relative), tostring(relativePoint), tostring(CaptureFrame)))
         assert(x == 97.5 and y == 2, string.format('initial Spark offsets: actual=(%.17g, %.17g) expected=(97.5, 2)', x, y))
@@ -270,12 +272,12 @@ fn update_and_assert_live_bars(env: &WowLuaEnv) -> (StatusBarRecord, CaptureBarR
         -- Range=200, value=75 -> .375, RightToLeft -> .625.
         -- Cached bastionarmor barOffset=28, barWidth=139, spark y=2.
         local _, relative, _, x, y = CaptureFrame.Spark:GetPoint(1)
-        assert(relative == CaptureFrame and math.abs(x - 114.875) < 0.000001 and y == 2)
+        assert(relative == CaptureFrame and math.abs(x - 114.875) < geometryEpsilon and y == 2)
         local _, nr, _, nx, ny = CaptureFrame.NeutralBar:GetPoint(1)
-        assert(nr == CaptureFrame and math.abs(nx - 111.4) < 0.000001 and ny == 0)
-        assert(math.abs(CaptureFrame.NeutralBar:GetWidth() - 27.8) < 0.000001)
-        assert(math.abs(CaptureFrame.LeftBar:GetWidth() - 69.5) < 0.000001)
-        assert(math.abs(CaptureFrame.RightBar:GetWidth() - 41.7) < 0.000001)
+        assert(nr == CaptureFrame and math.abs(nx - 111.4) < geometryEpsilon and ny == 0)
+        assert(math.abs(CaptureFrame.NeutralBar:GetWidth() - 27.8) < geometryEpsilon)
+        assert(math.abs(CaptureFrame.LeftBar:GetWidth() - 69.5) < geometryEpsilon)
+        assert(math.abs(CaptureFrame.RightBar:GetWidth() - 41.7) < geometryEpsilon)
         assert(CaptureFrame.NeutralBar:IsShown() and CaptureFrame.Glow3:IsShown())
         assert(CaptureFrame.SparkNeutral:IsShown() and not CaptureFrame.Spark:IsShown())
     "#,
@@ -305,9 +307,9 @@ fn update_and_assert_zero_neutral_zone(env: &WowLuaEnv, capture: &mut CaptureBar
         assert(not CaptureFrame.Glow3:IsShown())
         assert(not CaptureFrame.SparkNeutral:IsShown() and CaptureFrame.Spark:IsShown())
         local _, relative, _, x, y = CaptureFrame.Spark:GetPoint(1)
-        assert(relative == CaptureFrame and math.abs(x - 41.9) < 0.000001 and y == 2)
-        assert(math.abs(CaptureFrame.LeftBar:GetWidth() - 83.4) < 0.000001)
-        assert(math.abs(CaptureFrame.RightBar:GetWidth() - 55.6) < 0.000001)
+        assert(relative == CaptureFrame and math.abs(x - 41.9) < geometryEpsilon and y == 2)
+        assert(math.abs(CaptureFrame.LeftBar:GetWidth() - 83.4) < geometryEpsilon)
+        assert(math.abs(CaptureFrame.RightBar:GetWidth() - 55.6) < geometryEpsilon)
     "#,
     );
     flush_and_assert_counts(env, 2, 1);

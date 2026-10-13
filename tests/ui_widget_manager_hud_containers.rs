@@ -102,11 +102,14 @@ fn load_standard_containers(env: &WowLuaEnv) {
         &[],
     );
     assert!(prerequisites.iter().any(|name| name == "Blizzard_UnitFrame"));
-    env.exec(
-        "assert(EncounterBar and EncounterBar.Layout, 'real EncounterBar prerequisite'); \
-         assert(AuraContainerUtil, 'real AuraContainerUtil prerequisite')",
-    )
-    .expect("cached prerequisite publishers must precede selected HUD loading");
+    env.exec("assert(EncounterBar and EncounterBar.Layout, 'real EncounterBar prerequisite')")
+        .expect("cached EncounterBar must precede selected HUD loading");
+    // AuraContainerUtil belongs to the secure environment, not ordinary globals.
+    assert!(
+        env.state().borrow().lua_errors.is_empty(),
+        "real prerequisite consumers must load cleanly: {:?}",
+        env.state().borrow().lua_errors
+    );
     // Empty overrides: no patched manager, providers, templates, or OnLoad.
     let loaded = load_blizzard_addon_closure_into_env(
         env,
