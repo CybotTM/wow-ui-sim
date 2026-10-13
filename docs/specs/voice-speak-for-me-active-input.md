@@ -33,6 +33,14 @@ Generated integration filter `voice_speak_for_me_active_input::` selects default
 
 Independent saved-evidence verification PASS at compiled `978e9bcd15b47ad53dcdfd7aadb0f9ae0afb95b8`, production `a8a148e98`: exactly one real cached ChatFrame3 EditBox decision case PASS, 0 FAIL/ignored, actual wait exit0. Existing full constructor/startup and unchanged cached function reached false/unmuted (disabled, empty prompt, hidden after confirmed Show), true/unmuted (enabled, `REMOTE_TEXT_TO_SPEECH`), true/muted (activity still true, disabled, `VOICE_TRANSCRIPTION_MUTED`, RGB matches `RED_FONT_COLOR` within 0.000001), then false/unmuted restoration (disabled, empty prompt, hidden after confirmed Show). Entire runtime-error collection asserted empty after construction, prerequisites and each stage, without reset, clear or filter. Complete stderr contains no loader failure or Lua/runtime warning/error. No independent consumer RED, true-Show, event-producer, native or rendering claim. Query2/transcription3/startup/default-check PASS above remain separate scopes. [Public GREEN packet](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#current-green-public-packet--2026-10-13) now links copied independent source/runtime PASS reports and the 81-TEXT/594,604-byte manifest. New independent retention/privacy gate PENDING; execution/source PASS does not close it. Six voice cases (query2/transcription3/consumer1), not six new features. Separate PERF2 is not normal-query CLEAN startup or voice acceptance.
 
+## Documented-profile publication
+
+Cached `VoiceChatDocumentation.lua` directly declares the zero-argument, one non-nil boolean query for Retail, PTR, Mists and WoW Forever. Manifest membership does not establish contents for unavailable Wrath/Era/Anniversary files; their query contract remains unknown. This slice publishes only the existing independent activity input, not transcription or channel selectors, and preserves their current gates.
+
+- [ ] Expose the modeled query for the four directly documented profiles through `src/c_api/`.
+- [ ] Execute Mists result-boundary RED before changing publication; `tests/voice_speak_for_me_profile_input.rs` asserts supplied false, supplied true through a retained query, environment isolation and false restoration. Tests also apply to WoW Forever; staged, not executed.
+- [ ] Verify Mists/WoW Forever GREEN and Retail/PTR preservation, with independent source/runtime proof. Earlier Retail evidence remains revision-scoped.
+
 ## Known gaps (current cycle)
 
 - [x] Execute genuine result-boundary RED; add explicit state-backed getter instead of the generic one-nil namespace result.
