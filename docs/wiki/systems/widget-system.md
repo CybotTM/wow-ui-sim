@@ -24,7 +24,7 @@ Key field groups:
 
 ### VertexColor animation target state
 
-The implemented texture-target path writes `Frame.vertex_color`; [animation state](../../../src/lua_api/animation.rs) stores per-playback baselines, and [application/restoration](../../../src/lua_api/frame/methods/button_anchor_hierarchy/animations/vertex_color.rs) updates the selected texture. [Contract](../../specs/vertex-color-animation.md) and [existing animation section](lua-api.md#vertexcolor-animation--bounded-runtime-proof) own modeled policies, historical RED and bounded 6/6 GREEN at `080833f1d`; no rendering or native acceptance is implied.
+The implemented texture-target path writes `Frame.vertex_color`; [animation state](../../../src/lua_api/animation.rs) stores per-playback baselines, and [application/restoration](../../../src/lua_api/frame/methods/button_anchor_hierarchy/animations/vertex_color.rs) updates the selected texture. Receiver repair `7ec9c049a` attaches four raw endpoint methods only to the `VertexColor` table at `CreateAnimation`, removing shared widget-index registration without changing this target state or introducing a widget category. Ordinary Frame/Texture, group and other-animation method absence is intended, not newly runtime-proved. [Contract](../../specs/vertex-color-animation.md) and [existing animation section](lua-api.md#vertexcolor-animation--bounded-runtime-proof) own the evidence boundary: historical 6/6 GREEN at `080833f1d` and 64-extras receiver-leak RED remain unchanged; baseline/discovery captures were never refreshed; repair runtime is pending. No rendering or native acceptance is implied.
 
 ### ColorSelect RGB callback boundary
 

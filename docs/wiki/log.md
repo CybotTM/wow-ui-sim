@@ -1,3 +1,7 @@
+## [2026-10-12] docs | VertexColor receiver-scope repair
+
+Updated existing [animation](systems/lua-api.md#vertexcolor-animation--bounded-runtime-proof) and [widget target-state](systems/widget-system.md#vertexcolor-animation-target-state) sections after `7ec9c049a`; index links retained. Four raw endpoints attach only to VertexColor at creation, not the shared widget index; no new widget category. [Spec](../specs/vertex-color-animation.md#tests-asserting-this-spec) retains historical six GREEN at `080833f1d` and 64-extras RED; baseline/discovery never refreshed and new runtime pending. Docs only; no commits, builds, tests, operations or delegation.
+
 ## [2026-10-12] docs | Current proof-summary audit
 
 Corrected current VertexColor6/role13 summaries to spec-recorded GREEN at `080833f1d`; historical RED remains distinct. Main reports EditMode5/5 GREEN, separate from frozen broad-suite FAIL. Four producer implementations through `e3978fd48` still await GREEN. Flagged private absolute report paths in `docs/specs/addon-local-table.md` for its owner; specs remain outside this six-file edit scope. No new runtime, build, operations, delegation or commit.
