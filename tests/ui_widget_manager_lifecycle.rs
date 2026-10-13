@@ -1,0 +1,393 @@
+//! Real cached Lua/XML widget lifecycle over explicitly supplied host records.
+#![cfg(any(feature = "client-retail", feature = "client-ptr"))]
+
+use crate::common;
+use common::blizzard_addon_harness::with_blizzard_addon_closure;
+use wow_ui_sim::c_api::ui_widget_manager::{
+    ButtonHeaderRecord, IconAndTextRecord, WidgetId, WidgetSetEntry, WidgetSetRecord,
+    WidgetSpellButtonRecord,
+};
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+const SET_ID: f64 = 417.0;
+const ICON_ID: f64 = 760_101.0;
+const HIDDEN_ICON_ID: f64 = 760_102.0;
+const HEADER_ID: f64 = 760_103.0;
+// Cached UIWidgetManagerSharedDocumentation.lua, not ID-derived visualization types.
+const ICON_AND_TEXT: u32 = 0;
+const BUTTON_HEADER: u32 = 30;
+const SHOWN: u32 = 1;
+const HIDDEN: u32 = 0;
+
+fn icon_record(text: &str, state: u32) -> IconAndTextRecord {
+    IconAndTextRecord {
+        state,
+        text: text.into(),
+        tooltip: "Supplied icon tooltip".into(),
+        dynamic_tooltip: "Supplied dynamic tooltip".into(),
+        tooltip_loc: 3,     // TopLeft
+        shift_text_type: 0, // NoShift
+        widget_size_setting: 160.0,
+        texture_kit: String::new(),
+        frame_texture_kit: String::new(),
+        has_timer: true,
+        order_index: 10.0,
+        widget_tag: "lifecycle-icon".into(),
+        in_anim_type: 0, // None: removal is synchronous, not an animation/tick test.
+        out_anim_type: 0,
+        widget_scale: 0,      // OneHundred
+        layout_direction: 1,  // Vertical
+        model_scene_layer: 0, // None
+        scripted_animation_effect_id: 0.0,
+    }
+}
+
+fn spell_button(spell_id: f64, tooltip: &str) -> WidgetSpellButtonRecord {
+    WidgetSpellButtonRecord {
+        spell_id,
+        tooltip: tooltip.into(),
+        icon: 3,          // Checkmark
+        enabled_state: 1, // Enabled
+        cooldown_type: 0, // HideCooldown
+    }
+}
+
+fn header_record() -> ButtonHeaderRecord {
+    ButtonHeaderRecord {
+        shown_state: SHOWN,
+        header_text: "Supplied header".into(),
+        tooltip: "Supplied header tooltip".into(),
+        tooltip_loc: 3,
+        buttons: vec![
+            spell_button(190_001.0, "Supplied first button"),
+            spell_button(190_002.0, "Supplied second button"),
+        ],
+        widget_size_setting: 180.0,
+        texture_kit: String::new(),
+        frame_texture_kit: "evergreen-scenario-widget-short".into(),
+        has_timer: false,
+        order_index: 20.0,
+        widget_tag: "lifecycle-header".into(),
+        in_anim_type: 0,
+        out_anim_type: 0,
+        widget_scale: 0,
+        layout_direction: 1,
+        model_scene_layer: 0,
+        scripted_animation_effect_id: 0.0,
+    }
+}
+
+fn supply_inputs(env: &WowLuaEnv) {
+    let mut state = env.state().borrow_mut();
+    let entries = [
+        (ICON_ID, ICON_AND_TEXT),
+        (HIDDEN_ICON_ID, ICON_AND_TEXT),
+        (HEADER_ID, BUTTON_HEADER),
+    ]
+    .into_iter()
+    .map(|(widget_id, widget_type)| WidgetSetEntry {
+        widget_id,
+        widget_type,
+        unit_token: None,
+    })
+    .collect();
+    state.ui_widget_inputs.sets.insert(
+        WidgetId::from_number(SET_ID),
+        WidgetSetRecord {
+            layout_direction: 0, // UIWidgetSetLayoutDirection.Vertical
+            vertical_padding: 7.0,
+            widgets: entries,
+        },
+    );
+    state.ui_widget_inputs.icon_and_text.insert(
+        WidgetId::from_number(ICON_ID),
+        icon_record("Supplied icon text", SHOWN),
+    );
+    state.ui_widget_inputs.icon_and_text.insert(
+        WidgetId::from_number(HIDDEN_ICON_ID),
+        icon_record("Initially hidden text", HIDDEN),
+    );
+    // Preserve the separate existing ButtonHeaderInputs contract.
+    state
+        .button_header_inputs
+        .widgets
+        .insert(WidgetId::from_number(HEADER_ID), header_record());
+}
+
+fn fire_widget_update(env: &WowLuaEnv, set_id: f64, widget_id: f64, widget_type: u32) {
+    let payload = env
+        .eval::<rilua::Val>(&format!(
+            "return {{widgetSetID={set_id}, widgetID={widget_id}, widgetType={widget_type}}}"
+        ))
+        .expect("create actual UPDATE_UI_WIDGET payload table");
+    env.fire_event_with_args("UPDATE_UI_WIDGET", &[payload])
+        .expect("dispatch UPDATE_UI_WIDGET through registered frame events");
+}
+
+fn assert_lua(env: &WowLuaEnv, phase: &str, assertions: &str) {
+    env.exec(assertions)
+        .unwrap_or_else(|error| panic!("cached widget lifecycle [{phase}]: {error}"));
+    let errors = env.state().borrow().lua_errors.clone();
+    assert!(
+        errors.is_empty(),
+        "[{phase}] recorded Lua failures: {errors:?}"
+    );
+}
+
+fn register_container(env: &WowLuaEnv) {
+    assert_lua(
+        env,
+        "real XML container registration and template acquisition",
+        r#"
+        assert(Enum.UIWidgetVisualizationType.IconAndText == 0)
+        assert(Enum.UIWidgetVisualizationType.ButtonHeader == 30)
+        assert(UIWidgetManager and UIWidgetManager:GetWidgetTypeInfo(0))
+        assert(UIWidgetManager:GetWidgetTypeInfo(30))
+        LifecycleContainer = CreateFrame('Frame', nil, UIParent, 'UIWidgetContainerTemplate')
+        LifecycleContainer:SetPoint('CENTER', UIParent, 'CENTER')
+        LifecycleContainer:RegisterForWidgetSet(417)
+        local container = LifecycleContainer
+        assert(container:IsRegisteredForWidgetSet(417), 'supplied set must register')
+        assert(container.widgetSetLayoutDirection == Enum.UIWidgetSetLayoutDirection.Vertical)
+        assert(container.verticalAnchorYOffset == 7)
+        assert(container:IsEventRegistered('UPDATE_UI_WIDGET'))
+        assert(container:IsEventRegistered('UPDATE_ALL_UI_WIDGETS'))
+        assert(UIWidgetManager.registeredWidgetContainers[container])
+        LifecycleIcon = assert(container.widgetFrames[760101], 'acquire IconAndText XML frame')
+        LifecycleHeader = assert(container.widgetFrames[760103], 'acquire ButtonHeader XML frame')
+        assert(LifecycleIcon.Text:GetText() == 'Supplied icon text')
+        assert(LifecycleIcon.tooltip == 'Supplied icon tooltip')
+        assert(LifecycleIcon.DynamicIconButton.tooltip == 'Supplied dynamic tooltip')
+        assert(LifecycleIcon:GetWidth() == 160)
+        assert(LifecycleIcon:IsShown() and LifecycleHeader:IsShown())
+        assert(LifecycleHeader.HeaderText:GetText() == 'Supplied header')
+        assert(LifecycleHeader.tooltip == 'Supplied header tooltip')
+        local buttons = {}
+        for button in LifecycleHeader.buttonPool:EnumerateActive() do
+            assert(button:IsShown())
+            buttons[button.layoutIndex] = button
+        end
+        assert(LifecycleHeader.buttonPool:GetNumActive() == 2)
+        assert(buttons[1].spellID == 190001 and buttons[1].tooltip == 'Supplied first button')
+        assert(buttons[2].spellID == 190002 and buttons[2].tooltip == 'Supplied second button')
+        assert(container.widgetFrames[760102] == nil, 'actual provider filters hidden input')
+        assert(container:GetNumWidgetsShowing() == 2)
+        assert(container.widgetPools:GetNumActive() == 2)
+        assert(container.numTimers == 1 and container.ticker)
+        "#,
+    );
+}
+
+fn update_supplied_records(env: &WowLuaEnv) {
+    let mut state = env.state().borrow_mut();
+    let icon = state
+        .ui_widget_inputs
+        .icon_and_text
+        .get_mut(&WidgetId::from_number(ICON_ID))
+        .unwrap();
+    icon.text = "Updated supplied icon".into();
+    icon.tooltip = "Updated icon tooltip".into();
+    icon.order_index = 30.0;
+    let header = state
+        .button_header_inputs
+        .widgets
+        .get_mut(&WidgetId::from_number(HEADER_ID))
+        .unwrap();
+    header.header_text = "Updated supplied header".into();
+    header.buttons = vec![spell_button(290_003.0, "Updated supplied button")];
+}
+
+#[test]
+fn cached_ui_widget_container_refreshes_removes_and_unregisters_supplied_widgets() {
+    common::with_timeout(88, || {
+        wow_ui_sim::xml::register_intrinsic_templates();
+        // Real TOC closure only. No manager/provider/template/pool/Setup overrides.
+        // Implicit cached prerequisites are intentionally not claimed runtime-proven.
+        with_blizzard_addon_closure(
+            &[
+                "Blizzard_SharedXMLGame",
+                "Blizzard_Fonts_Shared",
+                "Blizzard_FrameEffects",
+                "Blizzard_UIWidgets",
+            ],
+            &[],
+            |env, loaded| {
+                assert!(loaded.iter().any(|name| name == "Blizzard_UIWidgets"));
+                supply_inputs(env);
+                register_container(env);
+                update_supplied_records(env);
+
+                fire_widget_update(env, SET_ID + 1.0, ICON_ID, ICON_AND_TEXT);
+                fire_widget_update(env, SET_ID + 1.0, HEADER_ID, BUTTON_HEADER);
+                assert_lua(
+                    env,
+                    "wrong-set events ignored",
+                    r#"
+                    assert(LifecycleIcon.Text:GetText() == 'Supplied icon text')
+                    assert(LifecycleHeader.HeaderText:GetText() == 'Supplied header')
+                    assert(LifecycleHeader.buttonPool:GetNumActive() == 2)
+                "#,
+                );
+
+                fire_widget_update(env, SET_ID, ICON_ID, ICON_AND_TEXT);
+                fire_widget_update(env, SET_ID, HEADER_ID, BUTTON_HEADER);
+                assert_lua(
+                    env,
+                    "event refresh executes real Setup and nested pool",
+                    r#"
+                    local container = LifecycleContainer
+                    assert(container.widgetFrames[760101] == LifecycleIcon)
+                    assert(container.widgetFrames[760103] == LifecycleHeader)
+                    assert(LifecycleIcon.Text:GetText() == 'Updated supplied icon')
+                    assert(LifecycleIcon.tooltip == 'Updated icon tooltip')
+                    assert(LifecycleIcon.orderIndex == 30)
+                    assert(LifecycleHeader.HeaderText:GetText() == 'Updated supplied header')
+                    assert(LifecycleHeader.buttonPool:GetNumActive() == 1)
+                    for button in LifecycleHeader.buttonPool:EnumerateActive() do
+                        assert(button.spellID == 290003 and button:IsShown())
+                        assert(button.tooltip == 'Updated supplied button' and button.layoutIndex == 1)
+                    end
+                "#,
+                );
+
+                env.state()
+                    .borrow_mut()
+                    .ui_widget_inputs
+                    .sets
+                    .get_mut(&WidgetId::from_number(SET_ID))
+                    .unwrap()
+                    .widgets
+                    .retain(|entry| entry.widget_id != ICON_ID);
+                env.fire_event("UPDATE_ALL_UI_WIDGETS")
+                    .expect("full membership refresh");
+                assert_lua(
+                    env,
+                    "membership removal releases existing frame and timer",
+                    r#"
+                    assert(C_UIWidgetManager.GetIconAndTextWidgetVisualizationInfo(760101).text
+                        == 'Updated supplied icon', 'record still exists; only membership removed')
+                    assert(LifecycleContainer.widgetFrames[760101] == nil)
+                    assert(not LifecycleIcon:IsShown(), 'removed pool frame is hidden')
+                    assert(LifecycleContainer.widgetFrames[760103] == LifecycleHeader)
+                    assert(LifecycleContainer:GetNumWidgetsShowing() == 1)
+                    assert(LifecycleContainer.widgetPools:GetNumActive() == 1)
+                    assert(LifecycleContainer.numTimers == 0 and LifecycleContainer.ticker == nil)
+                "#,
+                );
+
+                env.state()
+                    .borrow_mut()
+                    .button_header_inputs
+                    .widgets
+                    .get_mut(&WidgetId::from_number(HEADER_ID))
+                    .unwrap()
+                    .shown_state = HIDDEN;
+                fire_widget_update(env, SET_ID, HEADER_ID, BUTTON_HEADER);
+                assert_lua(
+                    env,
+                    "hidden ButtonHeader provider removes existing frame",
+                    r#"
+                    assert(C_UIWidgetManager.GetButtonHeaderWidgetVisualizationInfo(760103).shownState
+                        == Enum.WidgetShownState.Hidden)
+                    assert(LifecycleContainer.widgetFrames[760103] == nil)
+                    assert(not LifecycleHeader:IsShown())
+                    assert(LifecycleContainer.widgetPools:GetNumActive() == 0)
+                "#,
+                );
+
+                env.state()
+                    .borrow_mut()
+                    .ui_widget_inputs
+                    .icon_and_text
+                    .get_mut(&WidgetId::from_number(HIDDEN_ICON_ID))
+                    .unwrap()
+                    .state = SHOWN;
+                fire_widget_update(env, SET_ID, HIDDEN_ICON_ID, ICON_AND_TEXT);
+                assert_lua(
+                    env,
+                    "previously hidden member acquires real template",
+                    r#"
+                    LifecycleRestoredIcon = assert(LifecycleContainer.widgetFrames[760102])
+                    assert(LifecycleRestoredIcon.Text:GetText() == 'Initially hidden text')
+                    assert(LifecycleRestoredIcon:IsShown())
+                    assert(LifecycleContainer.widgetPools:GetNumActive() == 1)
+                    assert(LifecycleContainer.numTimers == 1 and LifecycleContainer.ticker)
+                "#,
+                );
+                env.state()
+                    .borrow_mut()
+                    .ui_widget_inputs
+                    .icon_and_text
+                    .get_mut(&WidgetId::from_number(HIDDEN_ICON_ID))
+                    .unwrap()
+                    .state = HIDDEN;
+                fire_widget_update(env, SET_ID, HIDDEN_ICON_ID, ICON_AND_TEXT);
+                assert_lua(
+                    env,
+                    "hidden IconAndText releases frame",
+                    r#"
+                    assert(LifecycleContainer.widgetFrames[760102] == nil)
+                    assert(not LifecycleRestoredIcon:IsShown())
+                    assert(LifecycleContainer.widgetPools:GetNumActive() == 0)
+                "#,
+                );
+
+                env.state()
+                    .borrow_mut()
+                    .ui_widget_inputs
+                    .icon_and_text
+                    .get_mut(&WidgetId::from_number(HIDDEN_ICON_ID))
+                    .unwrap()
+                    .state = SHOWN;
+                env.state()
+                    .borrow_mut()
+                    .button_header_inputs
+                    .widgets
+                    .get_mut(&WidgetId::from_number(HEADER_ID))
+                    .unwrap()
+                    .shown_state = SHOWN;
+                env.fire_event("UPDATE_ALL_UI_WIDGETS")
+                    .expect("restore members before cleanup");
+                assert_lua(
+                    env,
+                    "unregister cleans active pools events manager and timer",
+                    r#"
+                    local container = LifecycleContainer
+                    assert(container:GetNumWidgetsShowing() == 2)
+                    local icon, header = container.widgetFrames[760102], container.widgetFrames[760103]
+                    assert(icon:IsShown() and header:IsShown())
+                    assert(container.numTimers == 1 and container.ticker)
+                    container:UnregisterForWidgetSet()
+                    assert(not container:IsRegisteredForWidgetSet())
+                    assert(not container:IsShown())
+                    assert(not icon:IsShown() and not header:IsShown())
+                    assert(next(container.widgetFrames) == nil)
+                    assert(container:GetNumWidgetsShowing() == 0)
+                    assert(container.widgetPools:GetNumActive() == 0)
+                    assert(container.horizontalRowContainerPool:GetNumActive() == 0)
+                    assert(container.numTimers == 0 and container.ticker == nil)
+                    assert(next(container.timerWidgets) == nil)
+                    assert(not container:IsEventRegistered('UPDATE_UI_WIDGET'))
+                    assert(not container:IsEventRegistered('UPDATE_ALL_UI_WIDGETS'))
+                    assert(UIWidgetManager.registeredWidgetContainers[container] == nil)
+                    for _ in UIWidgetManager:EnumerateWidgetsByWidgetTag('lifecycle-icon') do
+                        error('unregistered container must not publish tagged widgets')
+                    end
+                "#,
+                );
+                fire_widget_update(env, SET_ID, HIDDEN_ICON_ID, ICON_AND_TEXT);
+                env.fire_event("UPDATE_ALL_UI_WIDGETS")
+                    .expect("post-unregister refresh ignored");
+                assert_lua(
+                    env,
+                    "unregistered events cannot reacquire widgets",
+                    r#"
+                    assert(next(LifecycleContainer.widgetFrames) == nil)
+                    assert(LifecycleContainer.widgetPools:GetNumActive() == 0)
+                    assert(not LifecycleContainer:IsShown())
+                "#,
+                );
+            },
+        );
+    });
+}
