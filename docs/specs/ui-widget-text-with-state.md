@@ -1,6 +1,6 @@
 # Supplied TextWithState visualization
 
-Host-supplied TextWithState input belongs to `src/c_api/ui_widget_manager/`; the [widget manager architecture](../wiki/systems/ui-widget-manager-state.md) owns supplied-record/event behavior. Complete getter projection and Retail/PTR publication follow genuine supplied-record RED at input stage `64a2a57b2`. Independent supplied-record GREEN and real cached-consumer acceptance pass for Retail/PTR at `2bb6cdde1`; the [owning packet](../../data/patch-api/evidence/ui-widget-text-with-state-2026-10-13/README.md#bounded-saved-green) separates runtime, startup/check and pending publication integrity. Host policy is not native catalog or transport parity.
+Host-supplied TextWithState input belongs to `src/c_api/ui_widget_manager/`; the [widget manager architecture](../wiki/systems/ui-widget-manager-state.md) owns supplied-record/event behavior. Complete getter projection and Retail/PTR publication follow genuine supplied-record RED at input stage `64a2a57b2`. Independent supplied-record GREEN and real cached-consumer acceptance pass for Retail/PTR at `2bb6cdde1`; the [owning packet](../../data/patch-api/evidence/ui-widget-text-with-state-2026-10-13/README.md#bounded-saved-green) separates runtime, startup/check and bounded publication integrity. Host policy is not native catalog or transport parity.
 
 ## What it must do
 
@@ -39,7 +39,7 @@ Six unconditional cases under Retail/PTR: complete snapshot1, strict numeric1, e
 
 - [x] Execute and independently verify supplied-record RED before adding getter projection; preserve the passed rejection control and exact unreached boundaries.
 - [x] Independently verify complete21 projection, numeric/secret validation and actual Retail/PTR cached lifecycle through saved GREEN; [owning proof](../../data/patch-api/evidence/ui-widget-text-with-state-2026-10-13/README.md#bounded-saved-green) records exact scopes and diagnostics.
-- [ ] Complete separate GREEN publication retention/privacy/link gate; runtime PASS does not establish copied TEXT integrity.
+- [x] Independently verify separate GREEN publication retention/privacy/link gate; the [owning packet](../../data/patch-api/evidence/ui-widget-text-with-state-2026-10-13/README.md#bounded-saved-green) distinguishes copied TEXT integrity from runtime PASS.
 
 ## Out of scope
 
