@@ -1,6 +1,6 @@
 # Supplied Path points and modeled curve playback
 
-Path/ControlPoint configuration, XML loading and actual computed layout must agree. Four pre-producer cases executed RED and current point/XML/NONE playback cases executed GREEN. Two SMOOTH regressions are staged, not executed. Fresh startup still emits 12 SMOOTH Path setup errors despite exit0 and an empty Lua-error list. This is current API behavior, not a historical 3.3.0 publication row. Architecture: [layout](../layout-system.md), [loading](../addon-loading-pipeline.md).
+Path/ControlPoint configuration, XML loading and actual computed layout must agree. Four pre-producer cases executed RED and current point/XML/NONE playback cases executed GREEN. At `fcb0b7823`, six cases executed: four NONE/control PASS and two SMOOTH behavioral FAIL at setter/XML configuration; motion assertions remained unreached. Configuration and modeled SMOOTH interpolation are now implemented; GREEN and fresh startup remain pending. The retained pre-fix startup emits 12 SMOOTH Path setup errors despite exit0 and an empty Lua-error list. This is current API behavior, not a historical 3.3.0 publication row. Architecture: [layout](../layout-system.md), [loading](../addon-loading-pipeline.md).
 
 ## What it must do
 
@@ -26,15 +26,15 @@ Cached `SimpleAnimPathAPIDocumentation.lua` declares optional order and stride r
 | Path | Current role / pending gap |
 |---|---|
 | `src/lua_api/animation.rs` | Path curve/ordered point state and saved per-target offsets. |
-| `src/lua_api/frame/methods/button_anchor_hierarchy/animations/{creation,path,path_runtime}.rs` | Path-only/control-point methods, named point creation, NONE interpolation and restoration. |
+| `src/lua_api/frame/methods/button_anchor_hierarchy/animations/{creation,path,path_runtime}.rs` | Path-only/control-point methods, named point creation, NONE/SMOOTH interpolation and restoration. |
 | `src/xml/types_animation.rs` | Parses curve, point names and offsets. |
 | `src/loader/helpers_anim.rs` | Emits Path curve and declaration-ordered point configuration through the same API. |
 | `src/layout.rs` | Existing animation offsets project into computed rectangles. |
-| `tests/path_control_point.rs` | Four real API/XML/tick/layout tests, `retail-12-0-0` gate. |
+| `tests/path_control_point.rs` | Six real API/XML/tick/layout tests, `retail-12-0-0` gate; SMOOTH geometry is modeled policy. |
 
 ## Tests asserting this spec
 
-Generated `--test integration` filter `path_control_point::` (expected four): order9/2→1/2 and signed offset mutations; actual named two-point XML loading and midpoint/restoration; three-point sorted NONE progression with child/owner/sibling isolation; Stop and finish restoration across changed baselines. At `ff72f3c3b`, all four fail on missing SetCurveType/GetCurveType or supplied-order behavior, with no observed fixture failures; named XML loading succeeds before its missing-query assertion. Movement, XML point projection and restoration assertions remain unreached where earlier API assertions fail. Current producer GREEN is pending. Fixture failure is not behavior proof.
+Generated `--test integration` filter `path_control_point::` (expected six): order9/2→1/2 and signed offset mutations; actual named two-point XML loading and midpoint/restoration; three-point sorted NONE progression with child/owner/sibling isolation; Stop and finish restoration across changed baselines. At `ff72f3c3b`, all four fail on missing SetCurveType/GetCurveType or supplied-order behavior, with no observed fixture failures; named XML loading succeeds before its missing-query assertion. Movement, XML point projection and restoration assertions remain unreached where earlier API assertions fail. The four NONE cases pass at `6b522c595`; two added SMOOTH cases fail at `fcb0b7823`. SMOOTH tests cover three-point modeled geometry and unchanged cached bag-slot Path XML configuration, child motion and restoration. Current SMOOTH GREEN remains pending. Fixture failure is not behavior proof.
 
 ## Known gaps (current cycle)
 
@@ -46,4 +46,4 @@ Generated `--test integration` filter `path_control_point::` (expected four): or
 
 ## Out of scope
 
-Native/historical parity, zero/one point, duplicate/default/invalid orders, SetParent, templates, broader receiver repair, delays/loops/reverse/pause, callbacks, large-delta semantics, non-unit scale, competing animations and GPU/pixels. No vendor patches. NONE playback is implemented; SMOOTH configuration and modeled motion remain failing startup acceptance until executed proof. Unsupported curves must not be silently substituted.
+Native/historical parity, zero/one point, duplicate/default/invalid orders, SetParent, templates, broader receiver repair, delays/loops/reverse/pause, callbacks, large-delta semantics, non-unit scale, competing animations and GPU/pixels. No vendor patches. NONE/SMOOTH playback is implemented; SMOOTH and diagnostics-clean startup acceptance remain pending until executed proof. Unsupported curves must not be silently substituted.

@@ -1,4 +1,4 @@
-//! Supplied Path points. Ordering and NONE are explicit simulator policies.
+//! Supplied Path points. Ordering and curve motion are simulator policies.
 use crate::lua_api::animation::{AnimState, AnimationType, ControlPointState};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, frame_id_from_stack, frame_ref,
@@ -151,8 +151,8 @@ fn get_max_control_point_order(state: &mut LuaState) -> LuaResult<u32> {
 fn set_curve_type(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let curve = String::from_stack(state, 2)?;
-    if curve != "NONE" {
-        return Err(runtime_error("only Path curve NONE is supported"));
+    if !matches!(curve.as_str(), "NONE" | "SMOOTH") {
+        return Err(runtime_error("Path curve must be NONE or SMOOTH"));
     }
     mutate_path(state, frame_id, |animation| {
         animation.curve = curve;
