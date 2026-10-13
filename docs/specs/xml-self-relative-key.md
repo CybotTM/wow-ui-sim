@@ -38,7 +38,9 @@ Approved simulator policy for the observed ProductChoice path: a Texture XML dir
 - [x] Independently accept focused Mists producer `480b9f934` GREEN: 2/2, actual exit0. Both real cached construction and direct Lua atomic rejection assertions reached.
 - [x] Independently accept normal Mists CLI startup: 142 cached Blizzard addons, CLEAN, zero observed Lua errors, actual exit0. CASC/sound and third-party addons/SavedVariables disabled; existing WTF EditMode cache still read read-only. Not rendered/native/installed-CASC or broader normal-session acceptance.
 - [x] Independently accept shared runtime anchor controls 33/33 and Frame inherited/inline child-anchor controls 3/3. Historical expected counts15/2 were incorrect; actual results and additive corrections preserved, no reruns.
-- [ ] Accept named prefork cast-bar and final default-check/format gates independently; execution completed, publication pending.
+- [x] Independently accept named Mists cast-bar exact prefork control: 1/1, actual exit0 after explicit 0.55s fade settlement. Source `2d4b7e56a` contains documentation changes over producer480; original empty summary-regex output and historical immediate-hidden FAIL remain unchanged.
+- [x] Independently accept final default lib/binaries check: 733 records, build-finished success, terminal exit0, zero source compiler-message records; six manifest deprecations remain. Project `cargo fmt --check` exit0. These are compile/format gates, not runtime acceptance; Mists builds separately retain a UnitRole source warning.
+- [ ] Complete selected evidence publication and independent privacy/link gates; the 77-text initial packet preserves historical pending labels and Store failure, not current acceptance.
 - [ ] Resolve Store preservation applicability: Mists `store_anchor_regression::` executed 0/2, exit101 (RightInset point2 identity assertion and nil card iteration). Root attribution pending; focused GREEN does not establish global anchor preservation.
 
 ## Out of scope
