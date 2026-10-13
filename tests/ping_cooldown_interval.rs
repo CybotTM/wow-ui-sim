@@ -3,6 +3,7 @@
 
 use wow_ui_sim::c_api::PingCooldownInterval;
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 
 fn ping_env() -> WowLuaEnv {
     WowLuaEnv::new().expect("create ping environment")
@@ -121,10 +122,9 @@ fn simultaneous_environments_do_not_share_interval_or_reset_state() {
 fn actual_vendor_onenter_uses_absolute_end_ms_and_requests_three_point_five_seconds() {
     let env = ping_env();
     // Require the active profile cache; no alternate source.
-    let source_path = std::path::PathBuf::from(std::env::var_os("HOME").expect("HOME"))
-        .join(".cache/wow-ui-sim/blizzard-ui")
-        .join(wow_ui_sim::client_profile::ACTIVE.subdir())
-        .join("AddOns/Blizzard_PingUI/Blizzard_PingUI.lua");
+    let source_path = default_blizzard_ui_addons_path()
+        .expect("active profile cache already synced")
+        .join("Blizzard_PingUI/Blizzard_PingUI.lua");
     let source =
         std::fs::read_to_string(&source_path).expect("cached active-profile PingUI source");
     env.exec_named(&source, &source_path.to_string_lossy())
