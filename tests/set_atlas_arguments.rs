@@ -4,7 +4,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 fn test_set_atlas_reports_application_success_to_texture_kit_consumers() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(
-        r#"
+        r##"
         local parent = CreateFrame("Frame", nil, UIParent)
         local texture = parent:CreateTexture()
         local atlas = "worldstate-capturebar-neutralglow-bastionarmor"
@@ -18,7 +18,7 @@ fn test_set_atlas_reports_application_success_to_texture_kit_consumers() {
         assert(texture:GetAtlas() == atlas, "known atlas remains applied")
         local missingCount, missingApplied = CaptureReturns(texture:SetAtlas("sim-missing-texture-kit-atlas"))
         assert(missingCount == 1 and missingApplied == false, "missing atlas must report not applied")
-        "#,
+        "##,
     )
     .unwrap();
 }
