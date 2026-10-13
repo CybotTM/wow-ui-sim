@@ -1,5 +1,15 @@
 # Integrated source and factory proof — 2026-10-09
 
+## Five-producer and receiver source checkpoint — 2026-10-12
+
+Source implemented/wired through `c490d77f1`: [exact-link item stats and deltas](../../specs/item-stats-supplied.md), [specialization/item-set spell lists](../../specs/item-set-bonuses-supplied.md), [absolute-millisecond Ping DTO](../../specs/ping-cooldown-interval.md), [GUID classification intersected with active party roster](../../specs/party-ai-membership.md), and [seven Retail secure-CVar combat-policy names](../../specs/secure-cvars-10-2-5.md). Specs own policies and known unknowns; this is a source checkpoint, not a complete API inventory or completed goal.
+
+Main-reported sealed pre-producer `76cf33ef3` batch: **37 cases, 4 PASS / 32 behavioral FAIL / 1 Ping cache-fixture FAIL**. CVar matrices: **60 completed / 1 failed / 27 unreached** of 88 intended cases. Failed assertions do not prove downstream behavior. Separate receiver-stage results: **VertexColor 7 PASS**; method comparisons **1 PASS / 1 FAIL**, with **32 file-getter extra rows** remaining. These results are not GREEN for the later source.
+
+`b003ec183` contains file getters to Texture, gives WorldFrame a distinct cached index while retaining its other lookups, and adds only the two legitimate Texture rows to the default comparison fixture; native captures remain untouched. `a2a9606f9` extracts VertexColor-only raw-method attachment before template application. `346590852` corrects active-cache discovery and modeled permission-error fixtures. Current-source GREEN, check and startup remain pending. Earlier sealed `e3978fd48196` **47 PASS / zero Lua errors** belongs to old source and does not cover these changes. Native parity, real scheduler/clock behavior and handler body-cost proof are not established.
+
+[API inventory](../systems/lua-api.md#five-producer-source-inventory--2026-10-12) · [receiver representation and comparison boundary](method-dispatch-refactor.md#texture-receiver-containment--2026-10-12).
+
 ## Acceptance authority — 2026-10-11
 
 User changed acceptance: “as long as we have coherent behavior that works with the addons we are good”. Coherent simulator-defined addon-compatible behavior is sufficient; native parity/captures no longer block its acceptance. This supersedes native-evidence completion requirements in older handoff/plan entries, not their evidence records or other approved scope. Source declarations, simulator runtime proof and native observations remain distinct: simulator acceptance does not establish native parity. Incomplete, failed, resource-blocked or unattempted tests keep their recorded status; this decision alone closes no implementation or test gap. Missing Wrath/Era/Anniversary vendor-input lanes remain BLOCKED; no transfer/sync or vendor-lane reopening is authorized.

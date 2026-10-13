@@ -155,7 +155,7 @@ The image is optimized for headless test commands (`run-tests`, `self-test`, `lu
 
 ### Method/Property Lookup on Frame Tables
 
-`env_init/frames.rs` registers method groups on one base frame metatable and clones its method entries into a shared `__index`, excluding `__*` keys. `methods/frame_metatable.rs` caches per-widget metatable clones whose `__index` omits named scroll/message methods and `SetStatusBarAtlas` for StatusBar; WorldFrame uses the base metatable. `methods.rs::attach_frame_metatable` attaches the selected metatable to the Lua frame table, so the filtered index participates in ordinary method lookup as well as `getmetatable(frame).__index` enumeration. There is no `is_method_allowed` registry. Shared registration alone does not establish that every method dispatches on every widget type; inspect the attached index and instance fields when diagnosing a nil method.
+`env_init/frames.rs` builds the base method index without `__*` keys. `methods/frame_metatable.rs` caches per-widget clones, filtering named scroll/message methods, StatusBar's `SetStatusBarAtlas`, and file-dimension getters on non-Textures. WorldFrame uses a distinct cache key because its object-type name is Frame; its clone preserves all other base methods. `attach_frame_metatable` makes that index participate in lookup and enumeration. VertexColor endpoints instead live directly on its frame table, installed by `CreateAnimation` before templates. No `is_method_allowed` registry exists. Diagnose nil methods using the attached index AND instance fields; shared registration does not prove all-type dispatch.
 
 ### Frame Representation and Debug Fields
 

@@ -6,6 +6,10 @@
 
 [Pet-hover/follower-instance APIs](systems/lua-api.md#current-pet-hover-and-follower-instance-models--bounded-runtime-proof), [actual texture file dimensions](systems/widget-system.md#actual-texture-file-dimensions--bounded-runtime-proof) and [opted-in addon namespaces](systems/addon-loading.md#opted-in-addon-namespace-access--bounded-runtime-proof) link existing spec SSOTs. Genuine pre-fix `080833f1d` RED: 28 cases, 1 PASS / 27 FAIL; the historical checkpoint awaited GREEN; sealed `e3978fd48196` bounded proof above supersedes that pending status only. Earlier VertexColor6/role13 GREEN is separate, not four-producer proof; native/whole acceptance unclaimed.
 
+## [2026-10-12] docs | Five-producer source checkpoint and Texture containment
+
+[Integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) separates implemented/wired five producers, pre-producer RED and later receiver/fixture fixes. [API inventory](systems/lua-api.md#five-producer-source-inventory--2026-10-12) links five contracts; [method representation](investigations/method-dispatch-refactor.md#texture-receiver-containment--2026-10-12) records WorldFrame's distinct cache and Texture-only getter index. Default fixture retains two legitimate Texture extras; native capture untouched. Current-source GREEN/check/startup pending; earlier e397 proof belongs to old source. Goal OPEN.
+
 ## [2026-10-12] docs | Explicit unit role source inventory
 
 [Existing Lua/group API](systems/lua-api.md#global-functions) and [synchronous role producer](systems/event-system.md#explicit-unit-role-notification) link [contract/source/caller SSOT](../specs/unit-role-assignment.md). GUID-backed optional three-value roles, current Retail/PTR setters and live getters source-inspected; historical 13 genuine missing-setter RED cases; bounded 13/13 GREEN, exit0, at `080833f1d`. No native/full-startup or checked-None popup claim; vendor unchanged.

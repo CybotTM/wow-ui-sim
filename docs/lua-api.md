@@ -4,9 +4,13 @@
 
 Existing wiki systems describe implemented [pet-hover/follower-instance APIs](wiki/systems/lua-api.md#current-pet-hover-and-follower-instance-models--bounded-runtime-proof), [actual texture file dimensions](wiki/systems/widget-system.md#actual-texture-file-dimensions--bounded-runtime-proof) and [opted-in addon namespace access](wiki/systems/addon-loading.md#opted-in-addon-namespace-access--bounded-runtime-proof). Linked specs own contracts and proof limits. Four-producer RED at `080833f1d`: 28 cases, 1 PASS / 27 FAIL; sealed Retail `e3978fd48196` now passes all 28, exit0 each selector. [Bounded proof](wiki/systems/lua-api.md#current-pet-hover-and-follower-instance-models--bounded-runtime-proof) owns separate 19/19 regression and one normal-binary startup results; later receiver repair/new scaffolding, native and full-suite acceptance are excluded. Earlier VertexColor/role GREEN does not cover these four.
 
+## Five-producer source checkpoint — 2026-10-12
+
+Implemented/wired: C_Item [exact-link stats/deltas](specs/item-stats-supplied.md), [specialization/item-set lists](specs/item-set-bonuses-supplied.md), C_Ping [absolute-ms DTO](specs/ping-cooldown-interval.md), [GUID/live-party AI membership](specs/party-ai-membership.md), and [seven-name Retail secure-CVar combat policy](specs/secure-cvars-10-2-5.md). [Existing system inventory](wiki/systems/lua-api.md#five-producer-source-inventory--2026-10-12) links contracts; [integrated SSOT](wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) owns RED/receiver-stage results and later fixes. Current-source GREEN/check/startup pending; earlier e397 PASS/zero-errors does not transfer. No complete-inventory/native-parity claim.
+
 ## Overview
 
-The WoW UI Simulator provides a Lua API that mirrors World of Warcraft's frame, event, and utility systems. Implementation spans: environment setup, frame userdata with metatables, global functions, widget methods, animations, and API stubs.
+The WoW UI Simulator provides a Lua API that mirrors World of Warcraft's frame, event, and utility systems. Implementation spans: environment setup, frame-backed Lua tables with metatables, global functions, widget methods, animations, and API stubs.
 
 **Key Files:**
 - `src/lua_api/env.rs` - Main Lua environment (WowLuaEnv)

@@ -4,7 +4,7 @@ Refactor of frame method dispatch to fix runtime pollution (wrong-type methods e
 
 ## Current State (Fixed)
 
-Verified by source inspection on 2026-10-09: `env_init/frames.rs` registers method groups on a base frame metatable, then builds a shallow shared `__index` without `__*` keys. `methods/frame_metatable.rs` clones that index into cached per-widget metatables, excluding explicitly named scroll/message methods and `SetStatusBarAtlas` for StatusBar. WorldFrame uses the base metatable. No `is_method_allowed` registry or positive per-type allowlist exists.
+Verified by source inspection on 2026-10-09: `env_init/frames.rs` registers method groups on a base frame metatable, then builds a shallow shared `__index` without `__*` keys. `methods/frame_metatable.rs` clones that index into cached per-widget metatables, excluding explicitly named scroll/message methods and `SetStatusBarAtlas` for StatusBar. That inspected revision gave WorldFrame the base metatable; `b003ec183` now gives it a separately cached clone, described below. No `is_method_allowed` registry or positive per-type allowlist exists.
 
 `methods.rs::attach_frame_metatable` attaches the selected metatable to each Lua frame table. Its filtered `__index` therefore participates in ordinary lookup, not just introspection. Shared registration does not prove all-type dispatch. These inspected files do not support the former introspection-only filter claim; no invocation tests or native parity proof were run for this correction.
 
@@ -49,6 +49,12 @@ PTR's 32 extra additions are `SetRoundLayoutToNearestPixel` and `GetRoundLayoutT
 ## MovieFrame Receiver and Return Arity — 2026-10-11 UTC
 
 `EnableSubtitles` appears among the491extra exposure rows, but its body requires `object_type_name == Some("MovieFrame")`. Existing saved469 test7781 passes valid XML-frame state transitions/isolation and ordinary-Frame/bad-argument rejection; nil-expression checks alone did not prove zero returns. [New arity packet](../../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/movie-subtitle-arity/) independently passes four exact-zero-return calls on two Lua-created MovieFrames and two explicit receiver rejections, plus public hidden-state preservation. One CLI capture, not six test executions; native receiver/default/playback semantics unproved. See [subtitle contract](../../specs/movie-subtitles.md). Exposure, invocation, state and return arity are separate coverage levels; unsupported3D and full handoff remain unchanged.
+
+## Texture receiver containment — 2026-10-12
+
+`b003ec183` filters `GetFileWidth`/`GetFileHeight` from every non-Texture index before existing widget-specific exclusions. WorldFrame now uses the same clone/cache mechanism with distinct key `WorldFrame` (its reported type name is Frame), preserving all other base-index entries. Frame values remain native-backed Lua tables, not userdata; index enumeration and method invocation are separate proof levels.
+
+Main reports the preceding receiver-stage method comparison **1 PASS / 1 FAIL**, with **32 file-getter extra rows**. The default comparison fixture now retains only the two intended Texture extras; no native capture was modified. New receiver-scope test and current-source GREEN/check/startup remain pending. [Texture contract](../../specs/texture-file-dimensions.md) owns metadata/receiver gaps; [integrated checkpoint](integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) owns stage reconciliation. Earlier historical comparison totals remain historical, not a refreshed complete inventory.
 
 ## Current Source Representation
 
