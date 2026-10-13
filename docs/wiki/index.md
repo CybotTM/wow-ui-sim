@@ -1,14 +1,14 @@
+## [2026-10-13] docs | Speak four-profile publication
+
+[Voice inventory](systems/lua-api.md) links the [profile-publication scope](../specs/voice-speak-for-me-active-input.md#documented-profile-publication): query-only `2630c0ccf`, Retail/PTR floor preserved, Mists/Forever introduced, three unknown profiles unchanged. Mists `abb979c44` RED2 reached `got nil` type failures only; GREEN/source3781 pending. Older Retail proof remains revision-scoped.
+
 ## [2026-10-13] evidence | Current cached Speak consumer
 
 [Owning contract checkpoint](../specs/voice-speak-for-me-active-input.md#cached-consumer-checkpoint--2026-10-13) owns independent real cached decision PASS at compiled978/productiona8; separate query/transcription/startup/default-check PASS. [Voice inventory](systems/lua-api.md) links the same SSOT. [Public GREEN reports](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#current-green-public-packet--2026-10-13) copied; initial artifact retention PASS; path hygiene FAIL, current follow-up PENDING. [Separate PERF2 SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-perf2-checkpoint--2026-10-13) preserves frozen CCD FAIL; no independent consumer RED, true-Show, event-producer/native/render acceptance.
 
 ## [2026-10-13] evidence | Speak RED and exact animation controls
 
-[Public packet](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md) retains initial159/refinedc81 Speak 0 PASS/2 FAI## [2026-10-13] docs | Speak four-profile publication
-
-[Voice inventory](systems/lua-api.md) links the [profile-publication scope](../specs/voice-speak-for-me-active-input.md#documented-profile-publication): query-only `2630c0ccf`, Retail/PTR floor preserved, Mists/Forever introduced, three unknown profiles unchanged. Mists abb RED2 reached `got nil` type failures only; GREEN/source3781 pending. Older Retail proof remains revision-scoped.
-
-L, exit101; exact Lua actual values unknown, later transitions unreached. Separate c81 ordered-delay/reverse1 PASS and bounce1 PASS controls update only bounded [animation requirements](../specs/animation-query-lifecycle.md). Wider reverse/repeat, current full six-case, native and parent acceptance remain open; Speak GREEN was pending at this historical RED-retention checkpoint; current status above.
+[Public packet](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md) retains initial159/refinedc81 Speak 0 PASS/2 FAIL, exit101; exact Lua actual values unknown, later transitions unreached. Separate c81 ordered-delay/reverse1 PASS and bounce1 PASS controls update only bounded [animation requirements](../specs/animation-query-lifecycle.md). Wider reverse/repeat, current full six-case, native and parent acceptance remain open; Speak GREEN was pending at this historical RED-retention checkpoint; current status above.
 
 ## [2026-10-13] docs | Speak For Me activity source checkpoint
 
