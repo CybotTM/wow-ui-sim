@@ -1,6 +1,6 @@
 # Current LFG follower dungeon
 
-`C_LFGInfo.IsInLFGFollowerDungeon()` reports current instance membership from existing world LFG ID and dungeon classification. [Patch 10.2.5 source](../../data/patch-api/sources/10.2.5-api-changes.txt) publishes the function; cached `LFGInfoDocumentation.lua` declares zero arguments and one nonnil boolean. The modeled query replaces the former constant-false compatibility path.
+`C_LFGInfo.IsInLFGFollowerDungeon()` reports current instance membership from existing world LFG ID and dungeon classification. [Patch 10.2.5 source](../../data/patch-api/sources/10.2.5-api-changes.wikitext) publishes the function; cached `LFGInfoDocumentation.lua` declares zero arguments and one nonnil boolean. The modeled query replaces the former constant-false compatibility path.
 
 ## What it must do
 

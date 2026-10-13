@@ -40,18 +40,7 @@ pub(crate) fn retain_namespace(state: &mut LuaState, name: &str, namespace: Val,
 
 /// No target loading or fabricated namespace. Absence errors are modeled policy.
 pub(super) fn get_namespace(state: &mut LuaState, name: &str) -> LuaResult<Val> {
-    let loaded = {
-        let sim = borrow_state(state)?;
-        sim.addons
-            .iter()
-            .any(|addon| addon.folder_name == name && addon.loaded)
-    };
-    if !loaded {
-        return Err(rilua::runtime_error(
-            "C_AddOns.GetAddOnLocalTable requires a loaded addon",
-        ));
-    }
-
+    require_loaded_addon(state, name)?;
     let records = registry_get(state, LOCAL_TABLES);
     let record = table_get(state, records, name);
     if !matches!(table_get_static(state, record, "opted_in"), Val::Bool(true)) {
@@ -71,4 +60,18 @@ pub(super) fn get_namespace(state: &mut LuaState, name: &str) -> LuaResult<Val> 
         return Err(rilua::runtime_error("addon namespace is unavailable"));
     }
     Ok(namespace)
+}
+
+fn require_loaded_addon(state: &LuaState, name: &str) -> LuaResult<()> {
+    let loaded = borrow_state(state)?
+        .addons
+        .iter()
+        .any(|addon| addon.folder_name == name && addon.loaded);
+    if loaded {
+        Ok(())
+    } else {
+        Err(rilua::runtime_error(
+            "C_AddOns.GetAddOnLocalTable requires a loaded addon",
+        ))
+    }
 }
