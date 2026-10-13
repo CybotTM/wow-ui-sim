@@ -1,6 +1,6 @@
 {
   "scope": "New selected complete TEXT only; earlier444 payloads/manifests untouched and not rehashed. No executables/libraries/archives/source snapshots/giant compile.stdout read or hashed. Historical executable digest strings retained, not authentication.",
-  "transforms": "Consistent private root/repo/home/actual startup account/realm/player substitutions; CRLF/CR to LF; exactly one finalLF; no omissions/excerpts.",
+  "transforms": "Consistent private root/repo/home plus actual Retail AND PTR startup account/realm/player substitutions; CRLF/CR to LF; exactly one finalLF; no omissions/excerpts. PTR identity correction updates two payloads only; original bytes/digests and runtime evidence unchanged.",
   "claims": {
     "ptr_earlier": "source34ef production5bd:26 unique PASS and one fresh normal startup full219 stderr CLEAN, independent3618 PASS; excludes later3 consumers",
     "owning": "sourceb2f production5bd:4 owning tests PASS rows11/419/59/48 ok11/305/56/46 known119 zero new/stale, independent3620 PASS; publication only",
@@ -191,8 +191,8 @@
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102802192152Z/runtime-green/startup-enum-diagnostic.stderr",
       "original_bytes": 14696,
       "original_text_sha256": "fcaf013c588481dcc9494674a36df2768c1cc5d3c881a2413a37da333b451bb6",
-      "payload_bytes": 14696,
-      "payload_sha256": "fcaf013c588481dcc9494674a36df2768c1cc5d3c881a2413a37da333b451bb6"
+      "payload_bytes": 14711,
+      "payload_sha256": "23d7c4c965298844f80261ebd13e70c111e686fd4583374a6be90434611a3faf"
     },
     {
       "path": "20261013T102802192152Z/runtime-green/startup-enum-diagnostic.stdout",
@@ -1119,8 +1119,8 @@
       "source": "<REPO>/verification/widget-atlas-ptr-proof/proof.json",
       "original_bytes": 143722,
       "original_text_sha256": "43bb428d00545f39a47a080998f74d62df494d671e72b552da594472588bbdee",
-      "payload_bytes": 141454,
-      "payload_sha256": "3a4defc69cf499bd7908e299427a4bb93844c4e2f06522a3f5e0600fe91c087d"
+      "payload_bytes": 141469,
+      "payload_sha256": "dcf25a17939243e8e2c70cb4d2eaa43dc7de41cb2b1daed8942b7ea0f41aa18a"
     },
     {
       "path": "independent/owning-after-widget-proof/report.md",
