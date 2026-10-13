@@ -93,6 +93,20 @@ fn load_standard_containers(env: &WowLuaEnv) {
     env.set_screen_size(1024.0, 768.0);
     env.set_screen_mode(ScreenKind::Game);
     env.state().borrow_mut().addon_base_paths = vec![ui_dir.clone()];
+    // These globals are implicit prerequisites, not declared UIWidgets TOC deps.
+    // Separate real-addon loading establishes them before selected HUD OnLoad.
+    let prerequisites = load_blizzard_addon_closure_into_env(
+        env,
+        &ui_dir,
+        &["Blizzard_AuraContainer", "Blizzard_UnitFrame"],
+        &[],
+    );
+    assert!(prerequisites.iter().any(|name| name == "Blizzard_UnitFrame"));
+    env.exec(
+        "assert(EncounterBar and EncounterBar.Layout, 'real EncounterBar prerequisite'); \
+         assert(AuraContainerUtil, 'real AuraContainerUtil prerequisite')",
+    )
+    .expect("cached prerequisite publishers must precede selected HUD loading");
     // Empty overrides: no patched manager, providers, templates, or OnLoad.
     let loaded = load_blizzard_addon_closure_into_env(
         env,
@@ -101,8 +115,6 @@ fn load_standard_containers(env: &WowLuaEnv) {
             "Blizzard_SharedXMLGame",
             "Blizzard_Fonts_Shared",
             "Blizzard_FrameEffects",
-            // Power-bar OnLoad lays out its real EncounterBar parent.
-            "Blizzard_UnitFrame",
             "Blizzard_UIWidgets",
             "Blizzard_ObjectiveTracker",
         ],
