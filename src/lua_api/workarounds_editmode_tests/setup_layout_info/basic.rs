@@ -281,7 +281,7 @@ fn setup_layout_info_preserves_saved_cast_bar_lock_settings() {
 }
 
 #[test]
-fn setup_layout_info_remaps_active_saved_layout_after_prepending_presets() {
+fn setup_layout_info_preserves_active_combined_index_after_prepending_presets() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(
         r#"
@@ -310,7 +310,7 @@ fn setup_layout_info_remaps_active_saved_layout_after_prepending_presets() {
         C_EditMode = {
             GetLayouts = function()
                 return {
-                    activeLayout = 2,
+                    activeLayout = 4,
                     layouts = {
                         {
                             layoutIndex = 99,
@@ -384,17 +384,41 @@ fn setup_layout_info_remaps_active_saved_layout_after_prepending_presets() {
                 party.settings[1].value
             "#,
         )
-        .expect("read remapped active layout");
+        .expect("read active combined layout");
 
     assert_eq!(
         active_layout, 4,
-        "second saved layout should be active after two presets are prepended"
+        "combined index four must continue selecting the second saved layout"
     );
     assert_eq!(active_name, "Saved Wide");
     assert_eq!(
         saved_party_value, 1,
         "saved party-frame settings must not be overwritten by preset startup compatibility"
     );
+
+    env.exec(
+        r#"
+        local getLayouts = C_EditMode.GetLayouts
+        C_EditMode.GetLayouts = function()
+            local info = getLayouts()
+            info.activeLayout = 2
+            return info
+        end
+        "#,
+    )
+    .expect("select the native combined preset index");
+    env.exec(SETUP_LAYOUT_INFO_LUA)
+        .expect("run setup for native preset selection");
+    let (preset_index, preset_name): (i32, String) = env
+        .eval(
+            r#"
+            local info = EditModeManagerFrame.layoutInfo
+            return info.activeLayout, info.layouts[info.activeLayout].layoutName
+            "#,
+        )
+        .expect("read selected preset");
+    assert_eq!(preset_index, 2);
+    assert_eq!(preset_name, "Classic");
 }
 
 #[test]
@@ -503,7 +527,7 @@ fn setup_layout_info_preserves_distinct_saved_action_bar_profile_settings() {
         C_EditMode = {
             GetLayouts = function()
                 return {
-                    activeLayout = 9,
+                    activeLayout = 3,
                     layouts = {
                         {
                             layoutIndex = 9,
@@ -604,7 +628,7 @@ fn setup_layout_info_preserves_distinct_saved_action_bar_profile_settings() {
 
     assert_eq!(
         active_name, "Ultrawide",
-        "active layout ID should select the matching saved profile after presets are prepended"
+        "combined index three must select the first saved profile, independently of layout ID"
     );
     assert_eq!(ultrawide_summary, "Ultrawide:1:2:1");
     assert_eq!(widescreen_summary, "Widescreen:1:4:1");
