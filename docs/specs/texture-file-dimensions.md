@@ -1,0 +1,60 @@
+# Texture actual-file dimensions
+
+`Texture:GetFileWidth()` and `Texture:GetFileHeight()` report dimensions of the actual source image, not the Texture widget. The frozen [3.3.0 source](../../data/patch-api/sources/3.3.0-api-changes.wikitext), Texture section, lines 27–28, literally introduces both methods and describes “width/height of the actual file in use by the texture” and “0 if we can't access the texture for some reason”. It also warns that some Blizzard UI images returned incorrect values; this spec does not reproduce undocumented historical bugs. See [texture loading](../texture-atlas-system.md) for existing resolution behavior.
+
+## What it must do
+
+### Literal source contract
+
+- [ ] Publish callable `GetFileWidth()` and `GetFileHeight()` on Texture objects; each returns the corresponding actual source-image dimension.
+- [ ] Return zero when the source image cannot be accessed. Widget dimensions are not a substitute for file metadata.
+
+### Inferred simulator integration contract
+
+These requirements apply the literal contract to existing simulator state; they are not independent native-client observations.
+
+- [ ] Resolve local addon files through the configured `addon_base_paths`, including later roots, without requiring GPU initialization or CASC for those fixtures.
+- [ ] Return `(7, 5)` for the concrete wide WebP fixture and `(3, 11)` for the tall fixture, while independent widget dimensions remain `(101, 103)`; changing widget width/height does not change file dimensions.
+- [ ] Follow `SetTexture` source changes; absent, cleared, missing, undecodable, and color-only sources return zero rather than retaining previous dimensions.
+- [ ] UV cropping and tiling do not change actual-file dimensions. For an accessible atlas backing image, use full backing-file dimensions, not atlas-slot dimensions.
+- [ ] Numeric fileDataID assignments use the existing manifest path resolution and actual accessible source metadata; unresolved/inaccessible files return zero. Merely preserving the ID does not prove dimensions.
+- [ ] Apply the existing secret-texture read policy before metadata lookup: an untainted caller may read; a tainted caller receives the same secret-origin denial as existing texture getters. A subsequent plain `SetTexture` assignment restores plain reads under existing policy.
+- [ ] Shared Texture method exposure is the proposed simulator placement, not proof of historical or seven-profile native availability. Runtime evidence must name the selected profile.
+
+## How it works
+
+- [Texture loading and atlas resolution](../texture-atlas-system.md)
+- [Lua API architecture](../lua-api.md)
+
+## Implementation inventory
+
+- `src/lua_api/frame/methods/widgets/texture/atlas.rs` — existing `SetTexture`, manifest path resolution, and readable texture getters; future adapter belongs beside these methods. Neither new getter is implemented in this stage.
+- `src/lua_api/frame/methods/secret_origin.rs` — existing `require_texture_readable` policy and denial message.
+- `src/texture.rs` — `TextureManager::new` initializes empty CPU maps; `with_addons_paths` stores configured roots without GPU initialization.
+- `src/texture/resolve.rs` — existing `get_or_load_texture_size` resolves source metadata without populating the RGBA cache.
+- `data/manifest_interface_data.rs` — existing fileDataID-to-path mapping.
+- `tests/texture_file_dimensions.rs` — new public integration assertions with temporary local source files.
+
+The simplest future adapter checks readability, snapshots the frame's texture path/fileDataID and addon roots, releases the simulator borrow, resolves IDs through the existing manifest, and queries source metadata with a temporary TextureManager. Return only the requested component, or zero for unknown metadata. No new state, subsystem, or headless exclusion is needed. A temporary manager discards its metadata cache between calls, so separate width/height calls can repeat path resolution and file-header I/O; this is an explicit cost of this simple choice, not a user-mandated no-cache policy.
+
+## Tests asserting this spec
+
+All new tests are drafted and unrun; none has demonstrated RED or GREEN.
+
+- `tests/texture_file_dimensions.rs::texture_get_file_width_reads_actual_source_not_widget_width` and `texture_get_file_height_reads_actual_source_not_widget_height` — independently call each missing public method against two exact WebP files and separate widget-size controls.
+- `tests/texture_file_dimensions.rs::texture_file_dimensions_follow_source_changes_and_clearing` — source replacement, missing path, recovery, nil/empty/no-argument clearing.
+- `tests/texture_file_dimensions.rs::texture_file_dimensions_are_zero_without_accessible_image_metadata` — unset, missing, invalid-image, and color-only sources.
+- `tests/texture_file_dimensions.rs::texture_file_dimensions_ignore_uv_crop_and_tiling` — real file dimensions remain unchanged after verified UV, tiling, and widget-size changes.
+- `tests/texture_file_dimensions.rs::texture_file_dimensions_obey_existing_secret_texture_read_policy` — sets only the existing `secret_texture` backing flag as a fixture, checks secure reads and exact tainted denial with an existing getter control, then restores plain reads through public `SetTexture`. No wrapper mutation or new secret state; secret ingestion is not tested.
+
+## Known gaps (current cycle)
+
+- [ ] Parent must commit the test/spec stage and run targeted RED. Expected missing-method failures are not observed runtime evidence yet.
+- [ ] Implement the two production getters and establish GREEN separately; this stage changes no producer.
+- [ ] Numeric fileDataID actual-file coverage has no established CASC-independent accessible fixture in this stage. Existing ID/path round-trip tests do not cover metadata dimensions; no synthetic manifest/state mutation or conditional skip substitutes for that proof.
+- [ ] Atlas full-file versus slot dimensions remain untested: the existing `checkbox-minimal` mapping uses a Blizzard Interface path, which is not resolved from the temporary addon roots. No vendor/cache writes or manufactured atlas mapping are used to claim this boundary.
+- [ ] Native-client parity and cross-profile runtime proof remain unestablished.
+
+## Out of scope
+
+New caches or texture subsystems, renderer/GPU changes, new secret policy or ingestion, historical Blizzard-image bugs, vendor/cache/Wowless writes, producer implementation, compilation/tests/checks/deployment in this stage, and final integration acceptance.
