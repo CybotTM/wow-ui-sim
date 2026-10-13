@@ -18,6 +18,6 @@ Independent [Retail gate](gates-current/independent/calendar-day-retail-producer
 - [Retail RED](red-retail/README.md) / [PTR RED](red-ptr/README.md): 21 texts each; genuine pre-producer 0/9, exit101. Downstream consumer/security assertions unreached.
 - [Retail GREEN](green-retail/README.md) / [PTR GREEN](green-ptr/README.md): 37 + 39 texts. PTR's three receipt-schema blocks are zero-launch records, separate from successful retries.
 - [Runtime/check gates](gates-current/README.md): 19 texts; original erroneous README-size FAIL and additive correction preserved whole.
-- [Final copy-retention reports](retention-current/README.md): four texts; preceding 76-text GREEN and 19-text gate-copy checks passed. Independent verification of these four new copies remains PENDING.
+- [Final copy-retention reports](retention-current/README.md): four texts; preceding 76-text GREEN and 19-text gate-copy checks passed. Corrected independent bounded gate PASS (4/4), reusing 49 valid historical checks; all eleven owner links resolve. Original 49/50 FAIL rejected only the unsupported nine-link premise and remains preserved.
 
 141 complete selected TEXT payloads, plus generated metadata. Historical packet PENDING labels describe their publication/selection checkpoint, not current runtime results. Exact ordered literal privacy substitutions and LF only; no clipping or historical JSON/JSONL reserialization. Private originals and maps remain mode0600. Copy integrity does not establish source/native provenance.
