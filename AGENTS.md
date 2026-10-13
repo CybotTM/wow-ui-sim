@@ -10,6 +10,8 @@
 
 ## Development build/run
 
+- Reuse the canonical `target/` by default. Alternate `CARGO_TARGET_DIR` caches are limited to four reusable slots: `~/.cache/wow-ui-sim-targets/slot-{0,1,2,3}`. Never create per-task, per-revision, or per-worktree target directories. Check active use before reassigning or pruning a slot; preserve proof logs and sealed artifacts outside build caches.
+
 - `python3 scripts/build-host.py --build-host desktop --run -- <args>` builds and runs in desktop WSL; `--build-host local` does both here. Bare Cargo remains local.
 - `--bin wow-cli`, `--release`, `--features`, and `--no-default-features` preserve their Cargo meanings. Alternate client profiles require `--no-default-features`.
 - `python3 scripts/build-host.py --test --test integration FILTER -- --nocapture` runs targeted Rust tests; `--test` must be the last helper option. `python3 scripts/build-host.py --check` checks without launching.
