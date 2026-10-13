@@ -1,6 +1,6 @@
 # Item dressability
 
-Retail/PTR `C_Item.IsDressableItemByID(itemInfo)` projects an explicit host-supplied per-item boolean. Its C API home is `src/c_api/item_spell/c_item.rs`; no implementation is added by this private test/spec stage. Profile-scoped native declarations establish a required `ItemInfo`, `AllowedWhenUntainted`, and one non-nil boolean result. Empty defaults and supplied classification are user-approved simulator policy, not a native item catalog claim.
+Retail/PTR `C_Item.IsDressableItemByID(itemInfo)` projects an explicit host-supplied per-item boolean. Its C API home is `src/c_api/item_spell/c_item.rs`; no implementation is added by the integrated test/spec checkpoint `13a818ba5`. Profile-scoped native declarations establish a required `ItemInfo`, `AllowedWhenUntainted`, and one non-nil boolean result. Empty defaults and supplied classification are user-approved simulator policy, not a native item catalog claim.
 
 ## What it must do
 
@@ -31,21 +31,21 @@ Retail/PTR `C_Item.IsDressableItemByID(itemInfo)` projects an explicit host-supp
 
 - `src/c_api/item_spell/c_item.rs` — existing C_Item registration and numeric/link parsing context; new predicate not implemented by this stage.
 - `src/c_api/item_spell/helpers.rs` — existing metadata projections; not authoritative dressability inputs.
-- `tests/item_dressability.rs` — two initial real-WowLuaEnv API cases integrated without production behavior; not yet executed. Public lookup, not raw registration-table shape, is the contract.
+- `tests/item_dressability.rs` — two initial real-WowLuaEnv API cases integrated without production behavior; PTR initial RED independently classified, Retail execution pending. Public lookup, not raw registration-table shape, is the contract.
 - `tests/mount_item_player_choice.rs` — existing whole cached consumer; later supplier contrast must retain its original loader/method path.
 
 ## Tests asserting this spec
 
-Proposed `tests/item_dressability.rs` contains exactly two initial cases:
+Integrated `tests/item_dressability.rs` contains exactly two initial cases:
 
 - `item_dressability_empty_input_returns_exactly_one_boolean_false` — numeric ID and supported bare/generated item-link defaults, type and arity.
 - `item_dressability_requires_item_info_and_authenticates_vm_secrets` — required argument/type rejection, authentic wrapped numeric/link queries, malformed wrapped payloads, tainted denial and secure recovery.
 
-Main integrated this stage; no cases have yet been compiled or executed. No RED credit or passing contract checkboxes claimed. Existing mount consumer tests do not establish modeled/native dressability.
+Initial PTR API RED at `13a818ba5` executed two cases: 0 PASS / 2 FAIL, exit101, independently classified with successful environment initialization. First numeric miss passed exact-one-return arity then failed `empty supplied classification must return boolean false`; actual value/type was not printed. First no-argument call failed the combined rejection/string-message assertion `required ItemInfo must reject input`; successful return versus non-string error is not distinguished by output. Later selectors and all secret/taint assertions were unreached. Retail execution remains pending. No passing contract checkboxes or modeled/native consumer coverage follow from this RED.
 
 ## Known gaps (current cycle)
 
-- [ ] Main integrates/commits and executes both initial cases under Retail/PTR before adding production behavior; retain actual failure boundary and unreached assertions.
+- [ ] Execute initial Retail cases before adding production behavior; PTR genuine RED is recorded above with actual boundaries and unreached assertions.
 - [ ] After passive host inputs exist, add and execute host-state RED for explicit true/false, uncatalogued supplied identity, link identity, replacement/removal, environment isolation and independent mount/equipment/consumable state. No new production types/state are staged now.
 - [ ] After passive host inputs exist, add and execute real-consumer RED through the unchanged whole cached closure with supplied classification and independent mount controls. No sliced/recreated/mocked consumer.
 - [ ] Producer, mapped-secret proof, earlier-profile preservation and broader acceptance remain main-owned later work.
