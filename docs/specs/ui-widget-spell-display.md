@@ -1,6 +1,6 @@
 # Supplied SpellDisplay visualization
 
-Contract for environment-owned supplied SpellDisplay input, fresh complete nested snapshots, and existing cached Retail/PTR consumers. Passive input scaffold and nine tests are integrated; no executed RED/GREEN or getter/query/serializer producer yet. Source belongs under `src/c_api/ui_widget_manager/`; [manager architecture](../wiki/systems/ui-widget-manager-state.md) owns mechanism.
+Contract for environment-owned supplied SpellDisplay input, fresh complete nested snapshots, and existing cached Retail/PTR consumers. Passive input scaffold and nine tests are integrated. Retail supplied-result RED is saved; PTR RED and getter/query/serializer producer remain pending. No GREEN or consumer acceptance. Source belongs under `src/c_api/ui_widget_manager/`; [manager architecture](../wiki/systems/ui-widget-manager-state.md) owns mechanism.
 
 ## What it must do
 
@@ -43,12 +43,13 @@ Contract for environment-owned supplied SpellDisplay input, fresh complete neste
 - `tests/widget_spell_display/security.rs`: 1 real host secret-policy test, enabled in both Retail/PTR test modules.
 - `tests/widget_spell_display/consumer.rs`: 3 separate tests for lifecycle, attached context and zero-spell polling.
 
-All nine tests are integrated but unexecuted; no RED/GREEN result is recorded. No requirement checked complete.
+Retail `85b5494d2`: all nine cases execute and fail with `missing supplied SpellDisplay record` after the callable check, actual wait exit101, 1.55s. Exact returned value/arity is not exposed by these diagnostics. Cached construction, complete snapshots, numeric/security/feed and consumer assertions remain unreached. Independent saved-RED review pending; PTR has no executed RED yet. Retail compilation is separate:741 JSON records, terminal0, six manifest deprecations, zero compiler-message records. No requirement checked complete.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile integrated input scaffold/tests and retain actual result-boundary RED independently for Retail/PTR before any query/serializer producer.
+- [ ] Retain independently reviewed Retail/PTR result-boundary RED before any query/serializer producer. Retail observed RED above; initial PTR compile admission denied with zero launch, separately admitted retry compilation pending.
 - [ ] Every boundary after the first getter result remains unexecuted, including cached prerequisites and enum/catalog assertions.
+- [ ] Rename the consumer loading helper to reveal its cached I/O/setup side effects without changing first-result ordering; source-stage readability finding remains open.
 - [ ] World-loot click, rarity-pip counts and ObjectShown/ObjectHidden/WorldLootObjectList interaction need a separately grounded backing fixture seam; none invented here.
 - [ ] Nested color-object requirement is unresolved against these pinned schemas: they declare numeric `borderColor`/`tint` enums, no RGBA/tint objects or nullable nested fields. Consumer uses ColorManager atlas overrides and font-color objects downstream, not DTO color objects. No new color default model or opaque `Val` input added.
 

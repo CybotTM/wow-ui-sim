@@ -1,3 +1,7 @@
+## [2026-10-13] docs | Bounded evidence owners and SpellDisplay input inventory
+
+[TextWithState packet](../../data/patch-api/evidence/ui-widget-text-with-state-2026-10-13/README.md#bounded-saved-green) and [voice contract](../specs/voice-speak-for-me-active-input.md) own separate execution/retention status. [SpellDisplay inventory](systems/ui-widget-manager-state.md#spelldisplay-input-only-checkpoint--2026-10-13) links input stage85b and saved Retail RED; independent review and PTR RED pending. Historical proof retained; parent OPEN.
+
 ## [2026-10-13] docs | Current TextWithState and Speak proof pointers
 
 Reconciled [widget inventory](systems/ui-widget-manager-state.md#textwithstate-input-only-checkpoint--2026-10-13), [voice inventory](systems/lua-api.md), index and [coverage matrix](reference/coverage-matrix.md) with their owning evidence. Bounded execution and selected retention remain separate; current voice preservation TEXT gate pending, historical failures preserved, parent OPEN.

@@ -55,6 +55,10 @@ No native catalog, server transport, interpolation parity, dynamic HUD rebinding
 
 Historical input-only stage `64a2a57b2` is superseded by producer `2bb6cdde1`. The [contract](../../specs/ui-widget-text-with-state.md) owns complete21-field projection, existing numeric/secret validation, Retail/PTR publication and type8 feeds. [Bounded saved GREEN](../../../data/patch-api/evidence/ui-widget-text-with-state-2026-10-13/README.md#bounded-saved-green) owns independent Retail/PTR supplied-record and actual cached lifecycle PASS, separate startup/check and selected publication integrity PASS. Historical RED/source-gate FAIL remain retained; native/render/full-parent acceptance remains unproved.
 
+### SpellDisplay input-only checkpoint — 2026-10-13
+
+At `85b5494d2`, the [SpellDisplay contract](../../specs/ui-widget-spell-display.md) owns passive supplied DTOs, environment-local storage, type13 feed and nine tests. Retail result-boundary RED is saved, independent review and PTR RED remain pending; getter/query/serializer registration and GREEN/consumer acceptance remain absent. Parent OPEN.
+
 ## Sources
 
 - [UIWidgetManager contract](../../specs/ui-widget-manager-state.md) — required behavior, staged tests, and historical RED boundary.
