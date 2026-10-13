@@ -18,7 +18,13 @@ Stop only these units when finished: `systemctl --user stop wow-ui-vnc-app.servi
 
 ## Later native input checkpoint — 2026-10-13
 
-[Bounded LFDMicroButton packet](../native-lfd-click-2026-10-13/README.md) retains actual XTest press/release and PVE activation on Retail5bd. Ctrl-held limitation and intended user-view size UNKNOWN remain; saved metadata is not current liveness proof. Retention does not stop or alter the protected app/display/VNC. Earlier runs and cleanup observations below remain historical, not current app ownership/source evidence.
+[Bounded LFDMicroButton packet](../native-lfd-click-2026-10-13/README.md) retains actual XTest press/release and PVE activation on Retail5bd. Ctrl-held limitation remains; the later user-owned viewing-size answer below supersedes only the size-acceptance UNKNOWN. Saved metadata is not current liveness proof. Retention does not stop or alter the protected app/display/VNC. Earlier runs and cleanup observations below remain historical, not current app ownership/source evidence.
+
+## User-reported viewing-size acceptance — 2026-10-13
+
+User selected **“Yes, usable”** for the current Retail preview at **1920×1080**, in response to the explicit question whether that viewing size was usable. Receipt identifier: `call_gmJQUkF16QTkRBBoT6RW0TdC|fc_0350b518ea6c4f36016ace0ea4470887d1ad7c1cb6ef2d54e7`. This closes the user-owned viewing-size preference for that preview only. The earlier rejected-size observation is historical and superseded only for size acceptance.
+
+This answer is not a fresh service, viewport, frame-dimension, input or liveness observation; it establishes no current source-to-installed build equivalence, native parity, broader GUI/external acceptance or full-parent acceptance. Other parent acceptance remains OPEN. No protected app/display/VNC/services/settings were changed for this documentation update.
 
 ## Current bounded GUI publication — 2026-10-12
 
