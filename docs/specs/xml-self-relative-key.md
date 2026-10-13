@@ -4,10 +4,10 @@ Approved simulator policy for the observed ProductChoice path: a Texture XML dir
 
 ## What it must do
 
-- [ ] Instantiate unchanged cached Mists `ProductChoiceItemDisplayTemplate` through real `CreateFrame` inheritance, preserving layers, decorations, scripts and child-frame subtrees with actual cached ModelScene and ProductChoice Lua prerequisites. Mouse handlers must bind to their real cached functions, not missing-global substitutes.
-- [ ] Preserve Icon size 63 × 63 and its single CENTER anchor: target exactly parent card, relative point CENTER, offsets (0, 15). Resolving `$parent.Icon` to Icon itself must not install a self-target or abort production.
-- [ ] Create later distinct IconBorder with parent card and a single CENTER anchor targeting sibling Icon, relative point CENTER, offsets (0, -5); complete following child-frame production with the entire Lua error accumulator empty.
-- [ ] Direct Lua self-`SetPoint` fails under `pcall` without changing any existing point; a distinct-target call succeeds with exact identity, relative point and offsets, preserving the untouched point.
+- [x] Instantiate unchanged cached Mists `ProductChoiceItemDisplayTemplate` through real `CreateFrame` inheritance, preserving layers, decorations, scripts and child-frame subtrees with actual cached ModelScene and ProductChoice Lua prerequisites. Mouse handlers must bind to their real cached functions, not missing-global substitutes.
+- [x] Preserve Icon size 63 × 63 and its single CENTER anchor: target exactly parent card, relative point CENTER, offsets (0, 15). Resolving `$parent.Icon` to Icon itself must not install a self-target or abort production.
+- [x] Create later distinct IconBorder with parent card and a single CENTER anchor targeting sibling Icon, relative point CENTER, offsets (0, -5); complete following child-frame production with the entire Lua error accumulator empty.
+- [x] Direct Lua self-`SetPoint` fails under `pcall` without changing any existing point; a distinct-target call succeeds with exact identity, relative point and offsets, preserving the untouched point.
 
 ## How it works
 
@@ -35,7 +35,11 @@ Approved simulator policy for the observed ProductChoice path: a Texture XML dir
 
 - [x] Execute focused pre-producer Mists RED at `a90f84c5d`: 1 PASS / 1 FAIL, actual exit101. Real prerequisites load; ProductChoice creation fails at layer-child SetPoint self-anchor. Direct Lua rejection/preservation/distinct-target control passes. Two prior admission denials are separate zero-launch records.
 - [x] Implement bounded Texture XML direct self-key normalization after executed RED; runtime SetPoint validation and shared frame/font-string generation remain unchanged.
-- [ ] Execute both targeted cases against the producer revision, then check Mists normal startup and named prefork control. Implementation is not GREEN or native proof.
+- [x] Independently accept focused Mists producer `480b9f934` GREEN: 2/2, actual exit0. Both real cached construction and direct Lua atomic rejection assertions reached.
+- [x] Independently accept normal Mists CLI startup: 142 cached Blizzard addons, CLEAN, zero observed Lua errors, actual exit0. CASC/sound and third-party addons/SavedVariables disabled; existing WTF EditMode cache still read read-only. Not rendered/native/installed-CASC or broader normal-session acceptance.
+- [x] Independently accept shared runtime anchor controls 33/33 and Frame inherited/inline child-anchor controls 3/3. Historical expected counts15/2 were incorrect; actual results and additive corrections preserved, no reruns.
+- [ ] Accept named prefork cast-bar and final default-check/format gates independently; execution completed, publication pending.
+- [ ] Resolve Store preservation applicability: Mists `store_anchor_regression::` executed 0/2, exit101 (RightInset point2 identity assertion and nil card iteration). Root attribution pending; focused GREEN does not establish global anchor preservation.
 
 ## Out of scope
 
