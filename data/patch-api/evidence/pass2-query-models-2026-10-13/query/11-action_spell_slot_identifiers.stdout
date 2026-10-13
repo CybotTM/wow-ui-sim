@@ -19,4 +19,3 @@ test action_spell_slot_identifiers::unknown_and_known_unslotted_spells_and_unsee
 test action_spell_slot_identifiers::unrelated_spell_is_excluded_from_singleton_query ... ok
 
 test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 10930 filtered out; finished in 1.13s
-

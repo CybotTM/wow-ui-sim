@@ -24,12 +24,12 @@
     },
     {
       "path": "query/00-cooldown_viewer_availability.stdout",
-      "bytes": 950,
-      "sha256": "af2f8fca8fd1639556d52a6c23fb8e8c4cb03c9514ed4cc07780f33bdd82eeb2",
+      "bytes": 949,
+      "sha256": "16ec53f1ddeb3a76b9ea1ef3964e8a5481c9d63e533c2b1a40f93451471f3577",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/00-cooldown_viewer_availability.stdout",
       "original_text_bytes": 950,
       "original_text_sha256": "af2f8fca8fd1639556d52a6c23fb8e8c4cb03c9514ed4cc07780f33bdd82eeb2",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/01-currency_transfer_activity.result.json",
@@ -51,12 +51,12 @@
     },
     {
       "path": "query/01-currency_transfer_activity.stdout",
-      "bytes": 438,
-      "sha256": "2cbe6aec8d18d9fbbd95af2304ad3ee4ef17371a4436cbdb1cd223b98db6fdaa",
+      "bytes": 437,
+      "sha256": "a21aecba10b7f259aff82562d20e65f8157db4c10152b21f61b8de4962c2af15",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/01-currency_transfer_activity.stdout",
       "original_text_bytes": 438,
       "original_text_sha256": "2cbe6aec8d18d9fbbd95af2304ad3ee4ef17371a4436cbdb1cd223b98db6fdaa",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/02-zone_ability_icon.result.json",
@@ -78,12 +78,12 @@
     },
     {
       "path": "query/02-zone_ability_icon.stdout",
-      "bytes": 485,
-      "sha256": "201874fbd7b92a6eb3e41f42a928f3e2cc0277231a92b357fbc141bb80877985",
+      "bytes": 484,
+      "sha256": "6560052466874592e8b527f5009e9c364a41b59b7dbded2fbc57e17e8b98f20c",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/02-zone_ability_icon.stdout",
       "original_text_bytes": 485,
       "original_text_sha256": "201874fbd7b92a6eb3e41f42a928f3e2cc0277231a92b357fbc141bb80877985",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/03-c_ui_widget_manager_button_header.result.json",
@@ -105,12 +105,12 @@
     },
     {
       "path": "query/03-c_ui_widget_manager_button_header.stdout",
-      "bytes": 1159,
-      "sha256": "fd383f978bc8a8f8cea083324dddf3f7e257096ab631baa9e7670bfa42ff149c",
+      "bytes": 1158,
+      "sha256": "4956d91a7094184d196d180f9dffd297b3f9b3ee36cc1f00e015b352f3fbf7f3",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/03-c_ui_widget_manager_button_header.stdout",
       "original_text_bytes": 1159,
       "original_text_sha256": "fd383f978bc8a8f8cea083324dddf3f7e257096ab631baa9e7670bfa42ff149c",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/04-assisted_action_input.result.json",
@@ -132,12 +132,12 @@
     },
     {
       "path": "query/04-assisted_action_input.stdout",
-      "bytes": 737,
-      "sha256": "f4b6de82e7acce5a7abbf669d386c0bce80c741516f37d2efa5c32296c31f109",
+      "bytes": 736,
+      "sha256": "b953824ecd52e006d44dcdbe3322c8fd20107e7aa0ddc26dcf61eec8816ac13e",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/04-assisted_action_input.stdout",
       "original_text_bytes": 737,
       "original_text_sha256": "f4b6de82e7acce5a7abbf669d386c0bce80c741516f37d2efa5c32296c31f109",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/05-get_ticks_per_second.result.json",
@@ -159,12 +159,12 @@
     },
     {
       "path": "query/05-get_ticks_per_second.stdout",
-      "bytes": 389,
-      "sha256": "56f640e1b0b34e633290faaa14e0f5777a3d1a0844afae11fce085f1d7743778",
+      "bytes": 388,
+      "sha256": "f571f9e4724ac0b7e36f25d3182a5aee0717c3e9ac34a2801c846076fee66008",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/05-get_ticks_per_second.stdout",
       "original_text_bytes": 389,
       "original_text_sha256": "56f640e1b0b34e633290faaa14e0f5777a3d1a0844afae11fce085f1d7743778",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/06-voice_transcribing_input.result.json",
@@ -186,12 +186,12 @@
     },
     {
       "path": "query/06-voice_transcribing_input.stdout",
-      "bytes": 403,
-      "sha256": "718d64b8143ba6509f8b8d338493eeb4bb454d8afaf9a14e5b8e2b67ca14c79d",
+      "bytes": 402,
+      "sha256": "e4f5eff664a4192f2e99d8cf4472296c4175e9f9c686b03e11d06f91d34210c5",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/06-voice_transcribing_input.stdout",
       "original_text_bytes": 403,
       "original_text_sha256": "718d64b8143ba6509f8b8d338493eeb4bb454d8afaf9a14e5b8e2b67ca14c79d",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/07-path_control_point.result.json",
@@ -213,12 +213,12 @@
     },
     {
       "path": "query/07-path_control_point.stdout",
-      "bytes": 516,
-      "sha256": "1e555cca42eddff1c514a946eb308a6e948f79de7948f673d01b1487def92266",
+      "bytes": 515,
+      "sha256": "d62b0e6d652141f003793296848f8771d292514924aaa400230321524bafc45e",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/07-path_control_point.stdout",
       "original_text_bytes": 516,
       "original_text_sha256": "1e555cca42eddff1c514a946eb308a6e948f79de7948f673d01b1487def92266",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/08-ping_texture_kits.result.json",
@@ -240,12 +240,12 @@
     },
     {
       "path": "query/08-ping_texture_kits.stdout",
-      "bytes": 716,
-      "sha256": "b77ccbea7567b0832a978f2610f7235f67268595ac91324435c1cd8582a01fe0",
+      "bytes": 715,
+      "sha256": "aade682a52fd404ae7e8e519eab14652792fe6456f59de1584a17aa15354432f",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/08-ping_texture_kits.stdout",
       "original_text_bytes": 716,
       "original_text_sha256": "b77ccbea7567b0832a978f2610f7235f67268595ac91324435c1cd8582a01fe0",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/09-animation_query_lifecycle.result.json",
@@ -267,12 +267,12 @@
     },
     {
       "path": "query/09-animation_query_lifecycle.stdout",
-      "bytes": 661,
-      "sha256": "bce0e6ee8c90a465b28f9b2f844615639868907c1aa2f7e835bf6695b387ba85",
+      "bytes": 660,
+      "sha256": "4bdce0e01302c563bb859a9074c178b6503b36eeac189030ca81d5b011a90cbc",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/09-animation_query_lifecycle.stdout",
       "original_text_bytes": 661,
       "original_text_sha256": "bce0e6ee8c90a465b28f9b2f844615639868907c1aa2f7e835bf6695b387ba85",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/10-patch_10_2_5_probe_factory.result.json",
@@ -294,12 +294,12 @@
     },
     {
       "path": "query/10-patch_10_2_5_probe_factory.stdout",
-      "bytes": 221,
-      "sha256": "15524f2d0481f2321a36ec56efe93b729e39afb56ace41ab170ee8e285e15556",
+      "bytes": 220,
+      "sha256": "06e4635822d182c45ba2f37b8f4b8e3b1f26f620db02d4153e350cbff356b09d",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/10-patch_10_2_5_probe_factory.stdout",
       "original_text_bytes": 221,
       "original_text_sha256": "15524f2d0481f2321a36ec56efe93b729e39afb56ace41ab170ee8e285e15556",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/11-action_spell_slot_identifiers.result.json",
@@ -321,12 +321,12 @@
     },
     {
       "path": "query/11-action_spell_slot_identifiers.stdout",
-      "bytes": 1848,
-      "sha256": "5c0c77f2de019cbaa4b7dec46d0e2fc768472fd085e6f59083fbed71211ef058",
+      "bytes": 1847,
+      "sha256": "009bb4a1b9255a499421cffdedd40c07cd628ad81510ad80b6bb51a196d636a4",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/11-action_spell_slot_identifiers.stdout",
       "original_text_bytes": 1848,
       "original_text_sha256": "5c0c77f2de019cbaa4b7dec46d0e2fc768472fd085e6f59083fbed71211ef058",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/12-method_diff_coverage.result.json",
@@ -348,12 +348,12 @@
     },
     {
       "path": "query/12-method_diff_coverage.stdout",
-      "bytes": 570,
-      "sha256": "771d4283bba353579d8cc56110a6f5c1e836bb771eb7f01aeced8e11b9dd4547",
+      "bytes": 569,
+      "sha256": "290e3518f0cbeef047947e17e395dffc4208f28a4c54b327f96c31525aa3edad",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/12-method_diff_coverage.stdout",
       "original_text_bytes": 570,
       "original_text_sha256": "771d4283bba353579d8cc56110a6f5c1e836bb771eb7f01aeced8e11b9dd4547",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/13-vertex_color_animation.result.json",
@@ -375,21 +375,21 @@
     },
     {
       "path": "query/13-vertex_color_animation.stdout",
-      "bytes": 854,
-      "sha256": "6dfa1deaf9a031ab0c3c2a6bf841e6ebf0aff6899b7a1fa293f9570f99a19cec",
+      "bytes": 853,
+      "sha256": "99eb6e83118db30090f944bea81be6fe090f9b8c2f1919bfdb603d8e31184b2a",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/13-vertex_color_animation.stdout",
       "original_text_bytes": 854,
       "original_text_sha256": "6dfa1deaf9a031ab0c3c2a6bf841e6ebf0aff6899b7a1fa293f9570f99a19cec",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/method-extra-reconciled.stdout",
-      "bytes": 212,
-      "sha256": "b654317a364a60bd8fa82bafcffe2525011737bec7b0effd6ecc41f556703a4b",
+      "bytes": 211,
+      "sha256": "b929c52610da6882f0f11dbba0cb71d6a5a17ce07c71745027fa6de42f6a32c9",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/method-extra-reconciled.stdout",
       "original_text_bytes": 212,
       "original_text_sha256": "b654317a364a60bd8fa82bafcffe2525011737bec7b0effd6ecc41f556703a4b",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "query/method-extra-reconciled.stderr",
@@ -456,12 +456,12 @@
     },
     {
       "path": "smooth-red/red.stdout",
-      "bytes": 944,
-      "sha256": "891021c62e0be5bf5811770c67654fa8c706af5e82caea4be880c5f538f9b0a0",
+      "bytes": 943,
+      "sha256": "917c4a519733a340cbf1c7f2f393abfbd43637e8ae831a6e9b4285bb4674c246",
       "source": "<VERIFICATION>/pass2-smooth-red-current/20261013T064250739560Z/red.stdout",
       "original_text_bytes": 944,
       "original_text_sha256": "891021c62e0be5bf5811770c67654fa8c706af5e82caea4be880c5f538f9b0a0",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "smooth-red/red.stderr",
@@ -501,12 +501,12 @@
     },
     {
       "path": "smooth-green/path-runtime.stdout",
-      "bytes": 721,
-      "sha256": "ccc32cf0c18e319b19bc5c2d02cdbd5821a5123e85ab8c5da501f4a5edb58d56",
+      "bytes": 720,
+      "sha256": "8e9b86cc2db10cf7e6c5d493117af1818c4dd99b23c3fbc2a61f9c912ebf43a2",
       "source": "<VERIFICATION>/pass2-smooth-green-current/20261013T070941017540Z/path-runtime.stdout",
       "original_text_bytes": 721,
       "original_text_sha256": "ccc32cf0c18e319b19bc5c2d02cdbd5821a5123e85ab8c5da501f4a5edb58d56",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "smooth-green/path-runtime.stderr",
@@ -537,12 +537,12 @@
     },
     {
       "path": "smooth-green/lifecycle-runtime.stdout",
-      "bytes": 661,
-      "sha256": "72c711de78e750aba337e05a1e935e0ae220a66e6db3451aa6ab86a8ce1fc860",
+      "bytes": 660,
+      "sha256": "2cc916dd82d2a0ee95a0c27e601ce331c7f334f1d1c951bfcfb888ec0a9a5529",
       "source": "<VERIFICATION>/pass2-smooth-green-current/20261013T070941017540Z/lifecycle-runtime.stdout",
       "original_text_bytes": 661,
       "original_text_sha256": "72c711de78e750aba337e05a1e935e0ae220a66e6db3451aa6ab86a8ce1fc860",
-      "transformation": "complete text stream/data; redactions only"
+      "transformation": "complete text stream/data; redactions only; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "smooth-green/lifecycle-runtime.stderr",
@@ -591,26 +591,26 @@
     },
     {
       "path": "query/runtime-summary.md",
-      "bytes": 7243,
-      "sha256": "2a727da86d2ace5b3e03917d26020949c57bb4e63d734864cc2fecd847005182",
+      "bytes": 7242,
+      "sha256": "4f6444be91d0e79f8503469ba1b864f06a9fda21ffe08de22503470dae245c94",
       "source": "<VERIFICATION>/pass2-query-green-current/20261013T053532421312Z/runtime-independent/report.md",
       "original_text_bytes": 102877,
       "original_text_sha256": "3a2c65c9490a49c6c5a83776d93868d0b30ca064919803972e28a2753ed3fb3e",
-      "transformation": "report preamble excerpt plus redactions"
+      "transformation": "report preamble excerpt plus redactions; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "smooth-green/runtime-summary.md",
-      "bytes": 6712,
-      "sha256": "72436fbf19b0a7d04a962c1367af71213fc47b9e4578e1eb7ac426fa16ca76d9",
+      "bytes": 6711,
+      "sha256": "cb9685f6778150fa356500306f2fd2a1bb34309e454e79fe218e7578419d541d",
       "source": "<VERIFICATION>/pass2-smooth-green-current/20261013T070941017540Z/sealed-runtime-verification.md",
       "original_text_bytes": 19543,
       "original_text_sha256": "d540361a403bd53a013dc05070a24ee7d544c547a3f5cccef0e7b19a62c23f6b",
-      "transformation": "report preamble excerpt plus redactions"
+      "transformation": "report preamble excerpt plus redactions; EOF blank normalization in addition to path redaction (remove only trailing blank LF lines; preserve final nonblank line newline and all preceding content; private original TEXT unchanged)"
     },
     {
       "path": "README.md",
-      "bytes": 4681,
-      "sha256": "7ccd162499e88cdde0327500dcb13df1ba8d3d5f82f78fe712128f9db32b2e21",
+      "bytes": 5348,
+      "sha256": "09cd485e622b8c8ffc9960b4fe57457b9400a8faa2293e7fb34703504d10c2e5",
       "source": null,
       "transformation": "authored summary of inspected evidence and user scope"
     }

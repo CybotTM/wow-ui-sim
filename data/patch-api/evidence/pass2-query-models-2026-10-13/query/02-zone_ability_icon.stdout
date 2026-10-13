@@ -6,4 +6,3 @@ test zone_ability_icon::zone_ability_icon_preserves_ordinary_numeric_u32_rejecti
 test zone_ability_icon::zone_ability_icon_returns_catalog_file_id_for_known_spell ... ok
 
 test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 10943 filtered out; finished in 0.31s
-

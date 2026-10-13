@@ -33,7 +33,8 @@ root; exact epoch names preserve provenance. query/runtime-summary.md is only
 report.md's pre-output preamble; smooth-green/runtime-summary.md is only the
 sealed-runtime-verification.md pre-command preamble. Original whole TEXT report
 sizes/digests are recorded, but giant aggregate reports/compile stdout are not
-copied. Complete selected small streams/data are otherwise retained.
+copied. Selected small streams/data retain all actual output content; public
+copies normalize excess EOF blank lines in addition to path redaction.
 
 Query assertion-reach categories overlap: actual VM secret 5, cached consumer 4,
 XML/playback 2, computed layout 3, secret rejection/recovery 4. These are reported
@@ -66,9 +67,17 @@ No binaries, settings, raw personal fixtures or aggregate source diffs copied.
 
 manifest.json inventories every public payload, including this README, with
 relative path, byte size and SHA-256. Source-derived entries also record SHA-256
-of ORIGINAL TEXT bytes and original size before excerpting/redaction. Digests
+of ORIGINAL TEXT bytes and original size before excerpting/redaction or EOF
+blank normalization. Original TEXT sizes/hashes remain unchanged. Each affected
+payload records EOF blank normalization in addition to path redaction: remove
+only trailing blank LF lines, retaining the final nonblank line's newline and
+all preceding content. Private originals remain untouched; normalized public
+copies are not byte-identical to unnormalized sources. Digests
 cover only text/public payloads; no executable read or rehash. Existing hash
 strings in retained reports are historical claims only. Manifest is the inventory
 container, excluded from its own digest to avoid self-reference. Local checks
 verify payload sizes/digests, JSON parsing, counts and absence of private paths;
 they do not rerun behavioral tests or authenticate historical build provenance.
+This EOF correction runs only bounded packet `git diff --check` as a formatting
+development check, not an independent retention gate. Main commits precede that
+independent gate; this correction performs no commit.

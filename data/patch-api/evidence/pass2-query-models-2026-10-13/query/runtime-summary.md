@@ -46,4 +46,3 @@ Stale source comments saying staged/unrun do not override current named results;
 Reused all **3 current auth receipts**, PASS, under `compile-auth-current/`; **zero new executable hash reads**. Receipt artifact consistency is not independently signed historical source/build attestation. Runtime rows declare compiled source `6b522c595274906b7304dd302123e2e1f3561038`; correction is a later external baseline edit. Existing compile/auth report retains six manifest deprecation warnings; no warning-free claim.
 
 **Current startup Lua-error gate now PASS with model-error diagnostics (below); default check and PTR remain pending.** No tests, builds, checks, formatting, startup, runtime operations, binary reads/hashes, tracked edits or delegation performed here. Read-only Git inspection confirmed correction content and no current helper diff relative to correction commit. Reports written only in epoch/runtime-independent.
-

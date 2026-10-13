@@ -8,4 +8,3 @@ test assisted_action_input::assisted_action_input_results_are_fresh_and_reflect_
 test assisted_action_input::assisted_action_input_sparse_matches_use_ascending_simulator_policy ... ok
 
 test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 10941 filtered out; finished in 0.48s
-

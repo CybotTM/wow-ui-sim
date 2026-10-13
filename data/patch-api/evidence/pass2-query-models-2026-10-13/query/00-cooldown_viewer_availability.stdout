@@ -10,4 +10,3 @@ test cooldown_viewer_availability::availability_unsupplied_state_is_explicitly_u
 test cooldown_viewer_availability::availability_zero_argument_query_returns_exactly_bool_and_string ... ok
 
 test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 10939 filtered out; finished in 0.65s
-

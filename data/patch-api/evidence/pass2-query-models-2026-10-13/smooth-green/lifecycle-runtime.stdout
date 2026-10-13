@@ -8,4 +8,3 @@ test animation_query_lifecycle::pending_finish_queries_are_settled_before_callba
 test animation_query_lifecycle::reverse_and_repeat_queries_follow_playback_direction ... ok
 
 test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 10943 filtered out; finished in 0.42s
-

@@ -9,4 +9,3 @@ test vertex_color_animation::vertex_color_animation_source_bounce_and_reverse_us
 test vertex_color_animation::vertex_color_animation_xml_matches_lua_source_example ... ok
 
 test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 10940 filtered out; finished in 1.24s
-

@@ -14,4 +14,3 @@ failures:
     path_control_point::path_smooth_uses_declared_catmull_rom_geometry_through_supplied_points
 
 test result: FAILED. 4 passed; 2 failed; 0 ignored; 0 measured; 10943 filtered out; finished in 0.68s
-

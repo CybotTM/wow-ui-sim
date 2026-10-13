@@ -8,4 +8,3 @@ test ping_texture_kits::pass2_ping_kit_tainted_secret_denial_precedes_validation
 test ping_texture_kits::pass2_ping_kit_untainted_secret_key_returns_exact_public_string ... ok
 
 test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 10941 filtered out; finished in 0.46s
-

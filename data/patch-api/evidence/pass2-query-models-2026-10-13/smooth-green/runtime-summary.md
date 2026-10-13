@@ -44,4 +44,3 @@ Four initial git inspection commands (status --short; show --stat 0c947a298; sho
 ## Scope boundaries
 No fresh normal startup binary supplied or run. NO startup-clean claim; retained old 12 SMOOTH errors remain historical pre-fix evidence until separately verified. No native curve parity, full-suite/profile, GPU, hidden-subtree, unsupported-order, nonunit-scale, competing-animation or broad acceptance claims.
 Full production, staged-test and cumulative source diffs saved; exact proof commands/outputs/exits retained. Concurrent worktree changed from initial widget scaffolding dirt to only untracked .code-index.db and verification/ at final observation; verifier made no tracked writes and did not commit others' work. final-head.txt records observed final HEAD independently of sealed scope.
-
