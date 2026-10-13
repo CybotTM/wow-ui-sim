@@ -23,6 +23,8 @@ Two behavioral tests reproduce all four defects before implementation. An earlie
 
 The owning run at `f3a7dcb84` observed 41 OK / 7 gaps. Its old eight-gap fixture failed solely because `C_AddOns.GetAddOnLocalTable` now raw-publishes a function; no new gaps appeared. Current fixture removes that one observed resolution. Recompiled owning execution at `ccd526c6c`: one selected case PASS, exact seven-gap fixture; independent bounded [proof](../../data/patch-api/evidence/pass2-owning-sweeps-2026-10-12/README.md) retained. This is publication evidence only; retained historical receipts below are unchanged.
 
+Later owning execution at `72a8d83a8` observes 46 OK / 2 gaps; the seven-gap fixture fails solely on five resolved query IDs (assisted buttons, clock frequency, availability, transfer activity, ButtonHeader), with no new gaps. The current fixture retains only `AddMeasuredCallEvent` and `MeasureCall`; post-reconciliation execution remains pending. Original full row maps and stale-fixture failures are preserved. Startup at that source still has12 SMOOTH setup errors, separate from publication failures.
+
 ## Local proof
 
 Runtime/test revision `210e4e23c`; later changes are evidence/docs/validation only. [Proof ledger](../../data/patch-api/evidence/11.1.7-session-2026-10-06/p1117-proof.json) preserves exact commands, revisions, initial RED and withdrawn compile-failing candidate. No independent/native acceptance.
