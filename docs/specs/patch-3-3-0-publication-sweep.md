@@ -27,7 +27,7 @@ Audit frozen page 522376/revision 6055853, not Wrath Classic 3.4.x. [Audit](../w
 - `src/iced_app/mouse_hover_tests.rs`: existing real-pointer disabled enter/leave flag behavior.
 
 ## Known gaps (current cycle)
-- [ ] Current fixture reconciliation: frozen `ccd526c6c` prefork run reports no new gaps and exactly two resolved entries, Texture:GetFileHeight/Width. Remove only those two current gap IDs; corrected execution pending. [Texture contract](texture-file-dimensions.md) owns actual-file behavior and limitations; historical missing-method receipts remain unchanged. No Path publication row inferred.
+- [ ] Current fixture reconciliation: frozen `ccd526c6c` prefork run reports no new gaps and exactly two resolved entries, Texture:GetFileHeight/Width. Current fixture removes only those two gap IDs; corrected execution pending. [Texture contract](texture-file-dimensions.md) owns actual-file behavior and limitations; historical missing-method receipts remain unchanged. No Path publication row inferred.
 - [ ] Fifteen current prose rows and seven signature contracts lack bounded behavioral/native proof; occurrence-specific reasons remain in ledger.
 - [x] Main supplies actual ordered 3.3.3/3.3.5/4.0.1 successors; none overlaps the 11 own section/symbol pairs.
 - [ ] Main current integration acceptance remains separate from historical development proof.
