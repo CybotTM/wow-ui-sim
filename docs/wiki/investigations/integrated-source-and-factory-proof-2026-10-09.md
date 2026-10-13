@@ -1,5 +1,9 @@
 # Integrated source and factory proof — 2026-10-09
 
+## Current public-copy privacy corrections — 2026-10-13
+
+[Redaction overlay](../../../data/patch-api/evidence/privacy-corrections-2026-10-13/README.md) explicitly supersedes current public-byte/privacy integrity for67 additional Retail identity-bearing TEXT files; two widget/PTR followup and13 earlier PTR corrections are separate stages. Private originals, runtime proof and executable/source seals remain unchanged; safe owning public-copy metadata is updated without generic hash replacement. Historical manifests/reports stay revision-scoped where not updated. Prior Git history is not erased; no rewrite/push/deployment. Root publisher now discovers identities from all selected actual streams and validates residual tokens. All-profile current tracked-text and independent gates pending; no general-secret-absence or whole-parent claim.
+
 ## DiscreteProgressSteps query-boundary RED — 2026-10-13
 
 [Retained RED packet](../../../data/patch-api/evidence/ui-widget-discrete-progress-2026-10-13/README.md) owns five genuine missing-record failures at42 before cached prerequisites; later50 source producer has separately retained actual Retail/PTR seven-case Discrete GREEN, five preservation cases per profile, fresh normal startup and default check. [Current packet](../../../data/patch-api/evidence/ui-widget-discrete-progress-2026-10-13/README.md#retail-and-ptr-current-proof) owns exact scopes; text-retention gate pending. [Contract](../../specs/ui-widget-discrete-progress-steps.md) owns full19-field/type19 requirements and direct-input/typed-feed boundaries. Neither RED/source presence nor earlier bar/HUD success completes widget-system/native/parent acceptance.

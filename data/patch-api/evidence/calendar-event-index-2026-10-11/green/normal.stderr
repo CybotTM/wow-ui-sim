@@ -35,7 +35,7 @@ ALSA lib pcm.c:2722:(snd_pcm_open_noupdate) [error.pcm] Unknown PCM default
 [  0.482s] [Startup] begin load keybindings
 [  0.482s] [Startup] end load keybindings in 151.00ns
 [  0.482s] [Startup] begin configure edit mode cache
-[  0.483s] EditMode cache source (read-only): 50868465#2 @ Burning Blade/Haky
+[  0.483s] EditMode cache source (read-only): <ACCOUNT> @ <REALM>/<PLAYER>
 [  0.483s] [Startup] end configure edit mode cache in 834.81µs
 [  0.483s] [Startup] begin read ServerSnapshot edit mode layout
 [  0.483s] [Startup] end read ServerSnapshot edit mode layout in 40.00ns

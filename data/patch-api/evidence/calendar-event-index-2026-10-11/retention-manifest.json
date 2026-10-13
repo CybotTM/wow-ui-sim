@@ -142,8 +142,8 @@
     {
       "path": "green/normal.stderr",
       "source": "/home/osso/.local/state/wow-ui-sim/verification/calendar-event-index-current/green-compile-20261012T015843780330Z/normal.stderr",
-      "bytes": 15502,
-      "sha256": "d55f52940c3e54a244f0b26b6dd3f605ca3fc4a2c704fa47cdd51d98982e5099"
+      "bytes": 15499,
+      "sha256": "7b458a061d4ab49ccf635a6a57be959549c518072320bf02cca3a2478011d43e"
     },
     {
       "path": "green/normal-outcome.json",
@@ -315,5 +315,6 @@
     }
   ],
   "copy_count": 52,
-  "copy_bytes": 218111
+  "copy_bytes": 218108,
+  "current_public_redaction_overlay": "../privacy-corrections-2026-10-13/retail-correction-manifest.json"
 }

@@ -325,9 +325,9 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/mount-item-current/expanded-red-terminal-report.md"
     },
     {
-      "bytes": 1763930,
+      "bytes": 1763927,
       "path": "final-current-proof.json",
-      "sha256": "4180ba4ba66de934ab0513664ef784c763455da70dd266f431860b020640e0cf",
+      "sha256": "32c9f297f64d37c4b2245d811df353dffb2fa6c27642d43ec914b97f569f69bf",
       "source": "/home/osso/.local/state/wow-ui-sim/verification/mount-item-current/final-current-proof.json"
     },
     {
@@ -1087,9 +1087,9 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/mount-item-current/request-retail-green-20261012T152010350279Z.jsonl"
     },
     {
-      "bytes": 772541,
+      "bytes": 772538,
       "path": "retail-current-proof.json",
-      "sha256": "cbf8d1b3959a064f1226594b2255c5bbdc2b70e0647a8dd8eabafd6372509553",
+      "sha256": "5ef2068c021741deb529985b682afac578c57e1e2088ff2b7cacc09d60fadc58",
       "source": "/home/osso/.local/state/wow-ui-sim/verification/mount-item-current/retail-current-proof.json"
     },
     {
@@ -1453,9 +1453,9 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/mount-item-current/retail-green-20261012T152010421981Z/normal-submission.json"
     },
     {
-      "bytes": 14712,
+      "bytes": 14709,
       "path": "retail-green-20261012T152010421981Z/normal.stderr",
-      "sha256": "9b23cccb6576841916f2b63be8cd69cbfc816bed67a77fb8acea1fc25c09058f",
+      "sha256": "2b71fe9f7d38a7bd7e50720a2f10d41dd277bdea283ad8dec9b847826523fd6d",
       "source": "/home/osso/.local/state/wow-ui-sim/verification/mount-item-current/retail-green-20261012T152010421981Z/normal.stderr"
     },
     {
@@ -1819,7 +1819,7 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/mount-item-current/submission-retail-green-20261012T152010350279Z.json"
     }
   ],
-  "copy_bytes": 9996525,
+  "copy_bytes": 9996516,
   "copy_count": 303,
   "parent": "OPEN",
   "scope": "Byte-exact nonbinary evidence copies; no seal or image reads/copies/hashes; private retention reports excluded. Controller stdout duplicate excluded; compiler/raw phase streams and failures retained. Current source snapshots separate from initial/expanded source identity receipts.",
@@ -1918,5 +1918,6 @@
       "source_path": "Cargo.lock"
     }
   ],
-  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies"
+  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies",
+  "current_public_redaction_overlay": "../privacy-corrections-2026-10-13/retail-correction-manifest.json"
 }

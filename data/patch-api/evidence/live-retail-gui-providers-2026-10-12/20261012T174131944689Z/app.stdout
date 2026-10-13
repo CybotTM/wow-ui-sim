@@ -1,6 +1,6 @@
 [  0.575s] Sound disabled
 [  0.577s] SavedVariables loading disabled
-[  0.578s] EditMode cache source (read-only): 50868465#2 @ Burning Blade/Haky
+[  0.578s] EditMode cache source (read-only): <ACCOUNT> @ <REALM>/<PLAYER>
 [  0.581s] Loaded EditMode layout cache from WTF
 [  0.648s] Loading 291 Blizzard addons...
 [  4.636s] Blizzard addons loaded in 4.06s (io=124.79ms xml=281.99ms xmlproc=1.99s frames⊂xmlproc=1.97s lua=1.36s [compile=1.22s call=144.13ms] gc=deferred, bytecode cache: 1569/1569 hits (100%, lookup_miss=0 replay_fail=0 stored=0 store_fail=0))

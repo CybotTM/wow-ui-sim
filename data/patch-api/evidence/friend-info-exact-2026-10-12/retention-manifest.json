@@ -173,8 +173,8 @@
     {
       "source_relative": "final-independent-proof.json",
       "retained": "final-independent-proof.json",
-      "bytes": 423351,
-      "sha256": "e90e551ebb87ad1b72531139b80faa16bc3bd3ed41927cb4744646c3dba0c87c"
+      "bytes": 423342,
+      "sha256": "539b70be10d595018cf44ad1bdca4f5d1b9d6d74cbab11946b8f27bf6a276bdf"
     },
     {
       "source_relative": "final-independent-report.md",
@@ -761,8 +761,8 @@
     {
       "source_relative": "retail-green-20261012T122455266641Z/secret-helper-diagnostic.stderr",
       "retained": "retail-green-20261012T122455266641Z/secret-helper-diagnostic.stderr",
-      "bytes": 15259,
-      "sha256": "9b307d08b1a6cc372590d73c547135ce96ba5ef6e97ad3bde9e94e963e2541f4"
+      "bytes": 15256,
+      "sha256": "702059e923891aac8a1844b36a9f3d9a53e0f85c5d500f1ec1d653aab7ec2580"
     },
     {
       "source_relative": "retail-green-20261012T122455266641Z/secret-helper-diagnostic.stdout",
@@ -1079,8 +1079,8 @@
     {
       "source_relative": "retail-normal-retry-20261012T123242035822Z/normal-retry-independent-proof.json",
       "retained": "retail-normal-retry-20261012T123242035822Z/normal-retry-independent-proof.json",
-      "bytes": 18747,
-      "sha256": "dde1dcc2887e61592f2ebc84bf37d2a26b00c4ca0f799dc3187a783f3fff3957"
+      "bytes": 18744,
+      "sha256": "68bab47bd09c50ca01ec4cc0b25596b84e1ab2b83056d936b324e19a615ddb94"
     },
     {
       "source_relative": "retail-normal-retry-20261012T123242035822Z/normal-retry-independent-report.md",
@@ -1103,8 +1103,8 @@
     {
       "source_relative": "retail-normal-retry-20261012T123242035822Z/normal.stderr",
       "retained": "retail-normal-retry-20261012T123242035822Z/normal.stderr",
-      "bytes": 14678,
-      "sha256": "230d5e91922a9a21b3945c995ec921d125e9ed7f03230429d32bb75c72d1c320"
+      "bytes": 14675,
+      "sha256": "4dea6f17735e7fb391aa65dda716d842f9b4ec16c25a5aaa67a34cb058ebf18a"
     },
     {
       "source_relative": "retail-normal-retry-20261012T123242035822Z/normal.stdout",
@@ -1552,6 +1552,7 @@
     }
   ],
   "copies": 258,
-  "bytes": 3816280,
-  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies"
+  "bytes": 3816262,
+  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies",
+  "current_public_redaction_overlay": "../privacy-corrections-2026-10-13/retail-correction-manifest.json"
 }

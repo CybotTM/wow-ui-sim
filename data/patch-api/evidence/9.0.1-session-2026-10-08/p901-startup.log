@@ -28,7 +28,7 @@
 [  0.961s] [Startup] begin load keybindings
 [  0.961s] [Startup] end load keybindings in 331.00ns
 [  0.961s] [Startup] begin configure edit mode cache
-[  0.962s] EditMode cache source (read-only): 50868465#2 @ Burning Blade/Haky
+[  0.962s] EditMode cache source (read-only): <ACCOUNT> @ <REALM>/<PLAYER>
 [  0.962s] [Startup] end configure edit mode cache in 672.46µs
 [  0.962s] [Startup] begin read ServerSnapshot edit mode layout
 [  0.962s] [Startup] end read ServerSnapshot edit mode layout in 61.00ns

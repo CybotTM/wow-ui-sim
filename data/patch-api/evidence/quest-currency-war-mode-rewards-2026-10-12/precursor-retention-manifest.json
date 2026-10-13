@@ -82,8 +82,9 @@
     {
       "source": "/home/osso/.local/state/wow-ui-sim/verification/quest-currency-war-mode-current/retail-green-compile-20261012T092906296861Z/normal.stderr",
       "destination": "retail-green-compile-20261012T092906296861Z/normal.stderr",
-      "bytes": 14702,
-      "byte_equal": true
+      "bytes": 14699,
+      "byte_equal": false,
+      "additional_redaction_equal": true
     },
     {
       "source": "/home/osso/.local/state/wow-ui-sim/verification/quest-currency-war-mode-current/retail-green-compile-20261012T092906296861Z/normal.stdout",
@@ -351,5 +352,6 @@
     }
   ],
   "copies": 58,
-  "bytes": 1357232
+  "bytes": 1357229,
+  "current_public_redaction_overlay": "../privacy-corrections-2026-10-13/retail-correction-manifest.json"
 }

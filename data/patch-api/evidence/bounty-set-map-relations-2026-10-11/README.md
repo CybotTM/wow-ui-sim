@@ -1,5 +1,7 @@
 # Bounty-set map relation evidence
 
+Current public copies also use the [all-profile privacy overlay](../privacy-corrections-2026-10-13/README.md); it supersedes current after hashes for overlapping files, not private originals or historical runtime proof. Current all-profile gate pending.
+
 ## PTR privacy correction — 2026-10-13
 
 [Correction ledger](privacy-correction.json) supersedes byte/privacy claims for the changed PTR text only. Actual-profile identity substitutions replace the incomplete Retail-only mapping; runtime evidence and original private sources remain unchanged. Registered payload digests/bytes and totals are updated; historical reports remain revision-scoped. Current privacy gate pending.

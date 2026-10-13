@@ -1,3 +1,7 @@
+## [2026-10-13] correction | Current public-copy privacy
+
+[Correction SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#current-public-copy-privacy-corrections--2026-10-13) records current-copy remediation without rewriting runtime proof, private originals or Git history; current all-profile gate pending.
+
 ## [2026-10-13] evidence | Actual Retail/PTR DiscreteProgressSteps
 
 [Contract/current packet](../specs/ui-widget-discrete-progress-steps.md) records distinct current scopes and retained five-case RED; no new native/render/tutorial/unit-context or whole-parent acceptance. Current retention gate pending.

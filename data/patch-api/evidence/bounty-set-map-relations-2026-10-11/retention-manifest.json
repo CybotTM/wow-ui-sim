@@ -220,8 +220,8 @@
     {
       "path": "retail/normal.stderr",
       "source": "/home/osso/.local/state/wow-ui-sim/verification/bounty-set-maps-current/default-green-compile-20261012T025403623595Z/normal.stderr",
-      "bytes": 15480,
-      "sha256": "6702515982065fb6b39603b48e6fbbfae7c01331ce9bf589914ed7d4610c16ee"
+      "bytes": 15477,
+      "sha256": "26da4399977081afe6f0e3489077f0885db161c6dd624bea7510df8699e93222"
     },
     {
       "path": "retail/normal-outcome.json",
@@ -501,6 +501,7 @@
     }
   ],
   "copy_count": 83,
-  "copy_bytes": 371491,
-  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies"
+  "copy_bytes": 371488,
+  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies",
+  "current_public_redaction_overlay": "../privacy-corrections-2026-10-13/retail-correction-manifest.json"
 }

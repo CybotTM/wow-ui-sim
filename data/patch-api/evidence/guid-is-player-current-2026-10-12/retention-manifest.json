@@ -433,9 +433,9 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/guid-is-player-current/retail-green-20261012T191109578339Z/normal-submission.json"
     },
     {
-      "bytes": 14704,
+      "bytes": 14701,
       "path": "retail-green-20261012T191109578339Z/normal.stderr",
-      "sha256": "db86c2078651671e83d34d851786a89a5ea3acace52527728d67062422a63340",
+      "sha256": "2d18da2e76ad69716b0ed5a3d0c16ee32ecc738cc617c199442a2d62b26b4bc5",
       "source": "/home/osso/.local/state/wow-ui-sim/verification/guid-is-player-current/retail-green-20261012T191109578339Z/normal.stderr"
     },
     {
@@ -1525,7 +1525,7 @@
       "source": "/home/osso/.local/state/wow-ui-sim/handoff/guid-publication-stage-race-disposition.md"
     }
   ],
-  "copy_bytes": 5766541,
+  "copy_bytes": 5766538,
   "copy_count": 254,
   "full_suite": "d21 submitted asynchronously, PENDING",
   "parent": "OPEN",
@@ -1702,5 +1702,6 @@
       "sha256": "c9729f24539c2695f50c5ab8d0d3ff65e922dc66733e31ca96b9b08b9e030c83"
     }
   ],
-  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies"
+  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies",
+  "current_public_redaction_overlay": "../privacy-corrections-2026-10-13/retail-correction-manifest.json"
 }

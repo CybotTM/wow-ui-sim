@@ -41,7 +41,7 @@ Known remaining observations from the smoke runs:
 - Cargo prints `warn: could not canonicalize path: 'C:\Users\adeia'` in this environment.
 - The app still reports the existing `StoreFrame_CheckForFree` Lua startup error during `VARIABLES_LOADED`.
 - Vulkan validation/Galaxy overlay layer warnings can appear during screenshot creation, but rendering still completes.
-- `target\debug\wow-sim.exe --no-addons lua-errors` now logs `WTF import source (read-only): 50868465#2 @ Burning Blade/Haky`, confirming the Windows WTF path is found without making it a write target.
+- `target\debug\wow-sim.exe --no-addons lua-errors` now logs `WTF import source (read-only): <ACCOUNT> @ <REALM>/<PLAYER>`, confirming the Windows WTF path is found without making it a write target.
 
 ## Sources
 

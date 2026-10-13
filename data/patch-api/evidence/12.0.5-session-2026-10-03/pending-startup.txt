@@ -38,7 +38,7 @@ warning: `iced_wgpu` (manifest) generated 6 warnings
 [  2.094s] [Startup] begin load keybindings
 [  2.094s] [Startup] end load keybindings in 210.00ns
 [  2.094s] [Startup] begin configure edit mode cache
-[  2.099s] EditMode cache source (read-only): 50868465#2 @ Burning Blade/Haky
+[  2.099s] EditMode cache source (read-only): <ACCOUNT> @ <REALM>/<PLAYER>
 [  2.099s] [Startup] end configure edit mode cache in 4.98ms
 [  2.099s] [Startup] begin read ServerSnapshot edit mode layout
 [  2.099s] [Startup] end read ServerSnapshot edit mode layout in 281.00ns

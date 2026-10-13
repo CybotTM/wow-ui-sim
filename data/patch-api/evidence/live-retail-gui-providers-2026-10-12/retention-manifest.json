@@ -13,9 +13,9 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/vnc-current-provider-binding/20261012T174131944689Z/app.stderr"
     },
     {
-      "bytes": 1240,
+      "bytes": 1237,
       "path": "20261012T174131944689Z/app.stdout",
-      "sha256": "9d8400305b9508210a6d5d06934e8c3015b947513636146d9c246a6d1e0857a1",
+      "sha256": "212687e33398f63990613f99b090bf05f55d0b4ab7915153925cb7b66df52caa",
       "source": "/home/osso/.local/state/wow-ui-sim/verification/vnc-current-provider-binding/20261012T174131944689Z/app.stdout"
     },
     {
@@ -91,8 +91,9 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/vnc-current-provider-binding/owned-socket-cleanup-20261012.json"
     }
   ],
-  "copy_bytes": 39405,
+  "copy_bytes": 39402,
   "copy_count": 15,
   "parent": "OPEN",
-  "scope": "Byte-exact current boundedGUI/providerpublication textonly; originalsealedbinary/authreceipt reused, no binary/library/image/Xauthoritypayload read/copy/hash; no private retentionreport recursion"
+  "scope": "Byte-exact current boundedGUI/providerpublication textonly; originalsealedbinary/authreceipt reused, no binary/library/image/Xauthoritypayload read/copy/hash; no private retentionreport recursion",
+  "current_public_redaction_overlay": "../privacy-corrections-2026-10-13/retail-correction-manifest.json"
 }

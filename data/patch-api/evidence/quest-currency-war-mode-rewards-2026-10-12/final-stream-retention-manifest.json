@@ -130,8 +130,9 @@
     {
       "source": "/home/osso/.local/state/wow-ui-sim/verification/quest-currency-war-mode-current/retail-final-compile-20261012T094557134417Z/normal.stderr",
       "destination": "retail-final-compile-20261012T094557134417Z/normal.stderr",
-      "bytes": 14702,
-      "byte_equal": true
+      "bytes": 14699,
+      "byte_equal": false,
+      "additional_redaction_equal": true
     },
     {
       "source": "/home/osso/.local/state/wow-ui-sim/verification/quest-currency-war-mode-current/retail-final-compile-20261012T094557134417Z/normal.stdout",
@@ -479,7 +480,7 @@
     {
       "source": "/home/osso/.local/state/wow-ui-sim/verification/quest-currency-war-mode-current/proof.json",
       "destination": "proof.json",
-      "bytes": 123601,
+      "bytes": 123598,
       "byte_equal": false,
       "additional_redaction_equal": true
     },
@@ -521,6 +522,7 @@
     }
   ],
   "copies": 86,
-  "bytes": 1406590,
-  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies"
+  "bytes": 1406584,
+  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies",
+  "current_public_redaction_overlay": "../privacy-corrections-2026-10-13/retail-correction-manifest.json"
 }

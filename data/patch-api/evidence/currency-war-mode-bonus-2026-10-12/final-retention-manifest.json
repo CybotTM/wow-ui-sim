@@ -375,9 +375,10 @@
     {
       "source": "/home/osso/.local/state/wow-ui-sim/verification/currency-war-mode-current/default-green-compile-20261012T080433884374Z/normal.stderr",
       "path": "default-green-compile-20261012T080433884374Z/normal.stderr",
-      "bytes": 14698,
-      "sha256": "a6f9b25aa9c25c98f615651542f36cff48a2d3c18af9fb27f80dba2a1b2a552b",
-      "copy_equal": true
+      "bytes": 14695,
+      "sha256": "9d0d264e79b6c9f23836468fa79237b0b148af65d511be27d4033f9239a2fa0c",
+      "copy_equal": false,
+      "additional_redaction_equal": true
     },
     {
       "source": "/home/osso/.local/state/wow-ui-sim/verification/currency-war-mode-current/ptr-green-independent-auth-integration.json",
@@ -767,7 +768,8 @@
     }
   ],
   "count": 109,
-  "bytes": 1044846,
+  "bytes": 1044843,
   "prior_independent_gate": "105/105 copies895538bytes; four final follow-up copies main byte-compared; no old binary rehash",
-  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies"
+  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies",
+  "current_public_redaction_overlay": "../privacy-corrections-2026-10-13/retail-correction-manifest.json"
 }

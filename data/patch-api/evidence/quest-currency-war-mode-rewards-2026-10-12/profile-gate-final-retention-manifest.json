@@ -270,7 +270,7 @@
     {
       "source": "/home/osso/.local/state/wow-ui-sim/verification/quest-currency-war-mode-current/profile-gate-final-independent-proof.json",
       "destination": "profile-gate-final-independent-proof.json",
-      "bytes": 108183,
+      "bytes": 108180,
       "byte_equal": false,
       "additional_redaction_equal": true
     },
@@ -312,10 +312,11 @@
     }
   ],
   "copied_files": 51,
-  "copied_bytes": 827621,
+  "copied_bytes": 827618,
   "prior_copied_files": 242,
-  "prior_copied_bytes": 5350828,
+  "prior_copied_bytes": 5350810,
   "total_copied_files": 293,
-  "total_copied_bytes": 6178449,
-  "privacy_correction": "privacy-correction.json; earlier changed batches add45 bytes to cumulative prior/total accounting; historical reports remain revision-scoped"
+  "total_copied_bytes": 6178428,
+  "privacy_correction": "privacy-correction.json; earlier changed batches add45 bytes to cumulative prior/total accounting; historical reports remain revision-scoped",
+  "current_public_redaction_overlay": "../privacy-corrections-2026-10-13/retail-correction-manifest.json"
 }

@@ -27,7 +27,7 @@
 [  3.975s] [Startup] begin load keybindings
 [  3.975s] [Startup] end load keybindings in 531.00ns
 [  3.975s] [Startup] begin configure edit mode cache
-[  3.977s] EditMode cache source (read-only): 50868465#2 @ Bloodsail Buccaneers/Haky
+[  3.977s] EditMode cache source (read-only): <ACCOUNT> @ Bloodsail Buccaneers/<PLAYER>
 [  3.977s] [Startup] end configure edit mode cache in 1.80ms
 [  3.977s] [Startup] begin read ServerSnapshot edit mode layout
 [  3.977s] [Startup] end read ServerSnapshot edit mode layout in 240.00ns

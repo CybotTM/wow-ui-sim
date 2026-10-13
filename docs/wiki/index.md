@@ -1,3 +1,7 @@
+## [2026-10-13] correction | Current public-copy privacy
+
+[Correction SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#current-public-copy-privacy-corrections--2026-10-13) links scoped redaction overlays and original-evidence/history boundaries; current all-profile gate pending.
+
 ## [2026-10-13] evidence | Actual Retail/PTR DiscreteProgressSteps
 
 [Contract/current packet](../specs/ui-widget-discrete-progress-steps.md) separates seven Discrete and five preservation cases per profile, fresh clean startups and default check. Native/render/tutorial/unit-context and full-parent limits remain; current retention gate pending.
