@@ -1,5 +1,6 @@
 {
-  "status": "PUBLISHED_PENDING_INDEPENDENT_COPY_PRIVACY_GATE",
+  "status": "PUBLISHED_PENDING_ADDITIVE_ONE_FILE_GATE",
+  "historical_gate": "FAIL: one unredacted systemd invocation identifier; 26 exact copies, file count, links and historical labels passed. Single launcher corrected; other25 selected texts reused without reopening." ,
   "integration_owner": "Main",
   "selection_count": 26,
   "runtime_files": 18,

@@ -1,6 +1,6 @@
 # Initial BulletTextList and item-dressability API RED
 
-Historical initial API runs only. Twenty-six selected evidence files retain complete UTF-8 TEXT, ordered literal substitutions and LF normalization; selected JSON was not reserialized. This directory has 28 files including this owner and new publication metadata. Independent public-copy/privacy/link acceptance is pending; prior runtime classification is separate.
+Historical initial API runs only. Twenty-six selected evidence files retain complete UTF-8 TEXT, ordered literal substitutions and LF normalization; selected JSON was not reserialized. This directory has 28 files including this owner and new publication metadata. Original public gate FAIL: one unredacted systemd invocation identifier, despite 26/26 exact-copy and link/count/label PASS. Only that launcher text is corrected; additive one-file/privacy and metadata-reuse acceptance remains pending. Original FAIL is preserved; prior runtime classification is separate.
 
 | Profile/source | Actual run | Reached boundary |
 |---|---|---|
