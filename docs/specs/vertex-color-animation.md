@@ -4,6 +4,7 @@ Patch 10.2.5 introduces texture vertex-color interpolation. [Literal source](../
 
 ## What it must do
 
+- [ ] Receiver-scope repair, pending new runtime proof: the four endpoint methods are available only on actual `VertexColor` animation tables, not ordinary widgets, animation groups or other animation types. Applicable Retail method-diff baseline and discovery captures remain unchanged.
 - [x] `SetStartColor`/`SetEndColor` accept complete RGBA color objects; `GetStartColor`/`GetEndColor` return color objects exposing `GetRGBA`, not four numbers. Endpoint state is independent of texture state.
 - [x] Animate each RGBA component from start to end without color-space conversion; apply to texture owner or resolved animation child target, leaving other textures unchanged.
 - [x] Run the literal two-second BOUNCE example through both directions and repeat; reverse playback starts at the end of the existing group timeline.
@@ -24,13 +25,17 @@ Patch 10.2.5 introduces texture vertex-color interpolation. [Literal source](../
 - `src/lua_api/animation.rs`: animation/group endpoint and saved-target state.
 - `src/lua_api/frame/methods/button_anchor_hierarchy/animations/vertex_color.rs`: RGBA endpoint snapshots, independent color objects, smoothing and texture target application/restoration.
 - `src/lua_api/frame/methods/button_anchor_hierarchy/animations/`: playback lifecycle and direction-aware boundary reflection; `animations.rs` connects stop/restart.
-- `src/lua_api/frame/methods/button_anchor_hierarchy/mod.rs`: method registration.
+- `src/lua_api/frame/methods/button_anchor_hierarchy/mod.rs`: retains the four-method static Rust-function registration helper, no longer called on the shared animation method table.
+- `src/lua_api/frame/methods/button_anchor_hierarchy/animations/creation.rs`: attaches those methods directly to the rooted, cached `VertexColor` Lua frame table during `CreateAnimation`, before template application. XML creation uses the same factory. Ordinary-widget metatable enumeration remains unchanged; animation/group frames still use `WidgetType::Frame` plus `object_type_name`.
 - `src/xml/types_animation.rs`: parsed endpoint elements.
 - `src/loader/helpers_anim.rs`: shared XML endpoint application.
 
 ## Tests asserting this spec
 
 - `tests/vertex_color_animation.rs`: **6/6 GREEN**, exit0, at source `080833f1d182caaa762c734a988847edd20f633b`; endpoint objects, channel interpolation, bounce/reverse, smoothing/delays, target isolation, pause/resume/restoration/replay and actual addon XML loading. GREEN3176 runtime `runtime-scoped-20261013T013111696766Z`, artifact epoch `admitted-native-20261013T011400020026Z`; recorded compile/runtime source maps equal and saved seals unchanged by stat receipt. Public packet not yet retained; no public evidence link claimed.
+
+- `vertex_color_animation_endpoints_are_scoped_to_vertex_color_receivers`: new focused actual-lookup test checks four usable VertexColor endpoints, RGBA snapshots and absent methods on Frame, Texture, AnimationGroup and every other modeled animation type. Not executed; compilation admission and new runtime proof are parent-owned. Prior 6/6 GREEN above does not cover this repair.
+- Retained receiver-leak RED at `080833f1d`: `method_diff_coverage` missing snapshot PASS, extra snapshot FAIL with 64 extras (four endpoints × 16 ordinary widget types), exit 101. Receipt retained privately; no public packet claimed. New focused lookup, existing six VertexColor controls and applicable Retail method snapshots require fresh bounded runtime proof; no new PASS claimed.
 
 ## Known gaps (current cycle)
 

@@ -84,6 +84,12 @@ pub(in crate::lua_api::frame::methods::button_anchor_hierarchy) fn create_animat
         bind_named_child_global(state, name, child_id)?;
     }
     let val = frame_ref(state, child_id)?;
+    if anim_type == AnimationType::VertexColor {
+        let rilua::Val::Table(table) = val else {
+            return Err(runtime_error("VertexColor frame reference must be a table"));
+        };
+        super::super::register_animation_vertex_color(state, table)?;
+    }
     super::templates::apply_template(state, template, val)?;
     state.push(val);
     Ok(1)

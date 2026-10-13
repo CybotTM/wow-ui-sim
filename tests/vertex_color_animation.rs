@@ -40,6 +40,42 @@ fn configure(env: &WowLuaEnv) {
 }
 
 #[test]
+fn vertex_color_animation_endpoints_are_scoped_to_vertex_color_receivers() {
+    let env = setup();
+    env.exec(
+        r#"
+        local methods = {'SetStartColor', 'SetEndColor', 'GetStartColor', 'GetEndColor'}
+        for _, method in ipairs(methods) do
+            assert(type(animation[method]) == 'function', 'VertexColor missing ' .. method)
+        end
+        local start = CreateColor(0.1, 0.2, 0.3, 0.4)
+        local finish = CreateColor(0.9, 0.8, 0.7, 0.6)
+        animation:SetStartColor(start)
+        animation:SetEndColor(finish)
+        start.r = 1
+        finish.a = 1
+        rgba(animation:GetStartColor(), 0.1, 0.2, 0.3, 0.4)
+        rgba(animation:GetEndColor(), 0.9, 0.8, 0.7, 0.6)
+
+        local receivers = {CreateFrame('Frame'), texture, group}
+        for _, animationType in ipairs({
+            'Animation', 'Alpha', 'Translation', 'Scale', 'Rotation',
+            'LineTranslation', 'LineScale', 'Path', 'FlipBook',
+            'TextureCoordTranslation', 'RadialProgress',
+        }) do
+            receivers[#receivers + 1] = group:CreateAnimation(animationType)
+        end
+        for _, receiver in ipairs(receivers) do
+            for _, method in ipairs(methods) do
+                assert(receiver[method] == nil, receiver:GetObjectType() .. ' exposes ' .. method)
+            end
+        end
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn vertex_color_animation_endpoints_are_independent_color_objects() {
     let env = setup();
     env.exec(
