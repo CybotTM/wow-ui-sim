@@ -1,3 +1,7 @@
+## [2026-10-13] docs | SpellDisplay and removal current bounded gate
+
+[Current owner](../specs/ui-widget-spell-display.md) links [runtime gate](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13): independent Retail PASS; PTR independent review and selected retention PENDING. Historical RED/partial and 741-record erratum preserved; Classic/native/world-loot/render/full-parent unproved.
+
 ## [2026-10-13] source | State-based frame cleanup, execution pending
 
 [Event inventory](systems/event-system.md#state-based-removal-source-checkpoint--2026-10-13) links [current policy/status owner](../specs/frame-event-removal.md#current-source-checkpoint--2026-10-13). `621649e56` keeps registration strict and removes cleanup catalog validation; retained fixture/consumer failures remain separate from pending post-fix proof. Model policy, not native parity; historical checkpoints retained.

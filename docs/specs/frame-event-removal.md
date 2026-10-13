@@ -30,15 +30,15 @@
 
 ## Current source checkpoint — 2026-10-13
 
-At `621649e56`, deleting the shared `Op` enum leaves catalog validation on insertion only. Selected removal policy is state-based: absent/unknown names return false; `RegisterEvent`/`RegisterUnitEvent` remain strict. This is model policy, not native parity; catalog, forbidden-aspect and callback gates are unchanged in source, not newly preservation-tested.
+At `621649e56`, deleting the shared `Op` enum leaves catalog validation on insertion only. Selected removal policy is state-based: absent/unknown names return false; `RegisterEvent`/`RegisterUnitEvent` remain strict. This is model policy, not native parity; catalog and guards remain unchanged in source; current bounded preservation proof below does not prove Classic policy.
 
-Retained sealed `38ecbd8ee` direct shared-fixture execution: actual wait exit1 at the first unknown cleanup no-throw assertion; subsequent assertions unreached. Separate supplied Retail/PTR SpellDisplay producer results at `38ec`: each 6 model/query/feed/secret PASS and 3 cached-consumer FAIL at cleanup. Neither result proves post-fix behavior. Fresh post-`621649e56` execution remains pending. [SpellDisplay owner](ui-widget-spell-display.md) retains its earlier checkpoint; [forbidden policy owner](forbidden-aspect-event-input.md) retains separate preservation scope.
+Retained sealed `38ecbd8ee` direct shared-fixture execution: actual wait exit1 at the first unknown cleanup no-throw assertion; subsequent assertions unreached. Separate supplied Retail/PTR SpellDisplay producer results at `38ec`: each 6 model/query/feed/secret PASS and 3 cached-consumer FAIL at cleanup. Neither result proves post-fix behavior. [Current bounded gate](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13) owns independent Retail removal/preservation PASS and main-observed identical PTR execution awaiting independent review; selected retention remains PENDING. [SpellDisplay owner](ui-widget-spell-display.md) retains its earlier checkpoint; [forbidden policy owner](forbidden-aspect-event-input.md) retains separate preservation scope.
 
 ## Known gaps (current cycle)
 
 - [x] Execute the identical shared Lua fixture against sealed normal `38ecbd8ee` before the fix: actual wait exit1, first cached-name no-throw assertion fails; later controls unreached. JSON contains two error entries for the original error and ScriptErrors wrapper, not two independent failures. Executable receipt reused stat-only.
-- [ ] Establish bounded Retail/PTR post-fix proof; state-based removal is implemented in source, not yet verified in a fresh binary.
-- [ ] Establish preservation of forbidden aspects, callback gates, unit filters, and Classic policy separately; this fixture covers ordinary Retail/PTR frames only.
+- [ ] Accept both independent post-fix profile scopes; Retail independent PASS, PTR independent review pending.
+- [ ] Fully check preservation: independent Retail aspect5/filter2/callback-lifecycle1 PASS; PTR independent pending, Classic policy unproved. Last requirement not fully checked.
 
 At source revision `38ecbd8ee5dfae4315ca98001b7e794e324b1066`, the shared registration mutation validates the event name before either insertion or removal. The supplied prior actual Retail/PTR Spell-producer result is 6 PASS / 3 FAIL at cached `Base.lua:697` calling `UnregisterEvent('PLAYER_EQUIPED_SPELLS_CHANGED')`; that report is not execution evidence for this new fixture.
 

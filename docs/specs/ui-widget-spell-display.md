@@ -1,6 +1,6 @@
 # Supplied SpellDisplay visualization
 
-Contract for environment-owned supplied SpellDisplay input, fresh complete nested snapshots, and existing cached Retail/PTR consumers. Passive input scaffold and nine tests are integrated. Genuine pre-producer supplied-result RED was observed in Retail and PTR. The bounded getter/query/serializer producer is now present in source; fresh-binary verification remains pending. No GREEN or consumer acceptance. Source belongs under `src/c_api/ui_widget_manager/`; [manager architecture](../wiki/systems/ui-widget-manager-state.md) owns mechanism.
+Contract for environment-owned supplied SpellDisplay input, fresh complete nested snapshots, and existing cached Retail/PTR consumers. Passive input scaffold and nine tests are integrated. Genuine pre-producer supplied-result RED was observed in Retail and PTR. The bounded producer is present. [Current bounded gate](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13) owns independent Retail PASS, main-observed PTR execution awaiting independent review and separate selected retention PENDING. Ten bounded requirements require both independent profiles; no combined acceptance yet. Source belongs under `src/c_api/ui_widget_manager/`; [manager architecture](../wiki/systems/ui-widget-manager-state.md) owns mechanism.
 
 ## What it must do
 
@@ -44,12 +44,12 @@ Contract for environment-owned supplied SpellDisplay input, fresh complete neste
 - `tests/widget_spell_display/security.rs`: 1 real host secret-policy test, enabled in both Retail/PTR test modules.
 - `tests/widget_spell_display/consumer.rs`: 3 separate tests for lifecycle, attached context and zero-spell polling.
 
-Retail `85b5494d2`: all nine cases execute and fail with `missing supplied SpellDisplay record` after the callable check, actual wait exit101, 1.55s. Exact returned value/arity is not exposed by these diagnostics. Cached construction, complete snapshots, numeric/security/feed and consumer assertions remain unreached. Independent saved-RED verification PASS; [owning packet](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md) retains source/compile/runtime streams with separate selected-copy integrity pending. PTR `5ad` (docs/data over `85b`): zero PASS, nine FAIL at the same supplied-record boundary, actual wait exit101, 1.73s; main reviewed complete logs. Fresh producer execution remains pending in both profiles. Retail compilation is separate:741 JSON records, terminal0, six manifest deprecations, zero compiler-message records. No requirement checked complete.
+[Current bounded gate](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13) preserves pre-getter Retail/PTR 0 PASS / 9 FAIL, historical `38ec` partial 6 PASS / 3 FAIL and removal-fixture RED. Current independent Retail28/28 eight integration scopes plus normal CLEAN is separate from pending PTR independent review, default-check proof and selected retention integrity. Historical 741 counts compiler JSON records, not seconds; original report unchanged.
 
 ## Known gaps (current cycle)
 
-- [ ] Complete main-owned Retail/PTR saved-proof retention and fresh-binary producer verification; pre-producer RED observed in both profiles.
-- [ ] Every boundary after the first getter result remains unexecuted, including cached prerequisites and enum/catalog assertions.
+- [ ] Complete independent PTR acceptance and new selected-retention integrity; independent Retail runtime PASS does not close either gate.
+- [ ] Combined independent Retail/PTR acceptance: Retail reaches all nine cases including actual cached lifecycle/context/polling; PTR independent report pending. Native/catalog/world-loot/render/full-parent unproved.
 - [ ] World-loot click, rarity-pip counts and ObjectShown/ObjectHidden/WorldLootObjectList interaction need a separately grounded backing fixture seam; none invented here.
 - [ ] Nested color-object requirement is unresolved against these pinned schemas: they declare numeric `borderColor`/`tint` enums, no RGBA/tint objects or nullable nested fields. Consumer uses ColorManager atlas overrides and font-color objects downstream, not DTO color objects. No new color default model or opaque `Val` input added.
 

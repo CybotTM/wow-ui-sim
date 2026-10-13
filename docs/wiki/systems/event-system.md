@@ -17,7 +17,7 @@ Registerability does not model an event producer, payload, or `C_ExternalEventUR
 
 ## State-based removal source checkpoint — 2026-10-13
 
-[Removal policy/current status](../../specs/frame-event-removal.md#current-source-checkpoint--2026-10-13) owns `621649e56` insertion-only validation, retained sealed-fixture failure and pending post-fix execution. Unknown/absent cleanup returns false by selected model policy, not native parity; Register/RegisterUnit remain strict. [Forbidden event policy](../../specs/forbidden-aspect-event-input.md) and callback/catalog gates are unchanged; no new preservation PASS.
+[Removal owner](../../specs/frame-event-removal.md#current-source-checkpoint--2026-10-13) links [Current bounded gate](../../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13): independent Retail PASS; PTR independent review and selected retention PENDING. Strict insertion/state-based removal are simulator policy; Classic preservation and native parity unproved, last requirement not fully checked.
 
 ## Script Handler Types (36+, `src/event/mod.rs`)
 
