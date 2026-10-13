@@ -18,7 +18,7 @@
 
 - `src/lua_api/state/sim_state.rs`: environment-local `bool` input for the C API query; not a separate transfer lifecycle model.
 - `src/lua_api/state.rs`: false default.
-- `src/c_api/item_spell/c_currency.rs`: existing namespace owner; query registration pending.
+- `src/c_api/item_spell/c_currency.rs`: existing namespace owner; live boolean query registered under `retail-12-0-0`.
 
 ## Tests asserting this spec
 
@@ -26,7 +26,8 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Input/tests staged, getter unchanged; genuine behavioral RED unrun.
+- [x] Execute genuine RED at `ff72f3c3b`: three failures reach the boolean contract, live true-state comparison and actual cached spinner-state assertion; no observed fixture failures.
+- [ ] Recompile current producer and prove targeted GREEN.
 - [ ] Runtime/profile/startup and independent verification pending.
 
 ## Out of scope

@@ -10,6 +10,8 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
+    #[cfg(feature = "retail-12-0-0")]
+    ("IsCurrencyTransferInProgress", query_transfer_activity),
     ("GetCurrencyListSize", c_currency_get_list_size),
     ("GetCurrencyListInfo", c_currency_get_list_info),
     (
@@ -69,6 +71,13 @@ pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
         c_currency_get_list_size,
     )?;
     Ok(())
+}
+
+#[cfg(feature = "retail-12-0-0")]
+fn query_transfer_activity(state: &mut LuaState) -> LuaResult<u32> {
+    let active = borrow_state(state)?.currency_transfer_in_progress;
+    state.push(Val::Bool(active));
+    Ok(1)
 }
 
 fn query_currency_war_mode_bonus(state: &mut LuaState) -> LuaResult<u32> {
