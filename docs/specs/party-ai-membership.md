@@ -28,7 +28,7 @@
 
 The modern producer authenticates the original first argument through the VM, then validates nullable UTF-8 string input. It borrows live state with propagated errors, gates on `party_group_active`, and reuses `unit_roles::represented_identity` (existing GUID resolution plus active roster GUID comparison) before looking up supplied classification. Retained target/focus snapshots do not bypass live roster membership. Result is a plain boolean; no state, wrappers, or taint are changed.
 
-Earlier profiles retain the original `Option<String>` extraction and false result in a separate temporary workaround. No modern secret policy or AI backport is added.
+Earlier profiles retain the original `Option<String>` extraction and false result in a separate temporary workaround. Its crate-visible re-export is exposed through the `workarounds` module, not the private `temporary` module. A Mists no-run compile at `be2fa83fb` reproduced `E0603` on that private-module import before any test ran; the import-boundary repair changes no query semantics. Post-repair compilation and runtime proof remain pending. No modern secret policy or AI backport is added.
 
 ## Implementation inventory
 

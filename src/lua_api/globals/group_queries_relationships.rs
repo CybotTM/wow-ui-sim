@@ -90,7 +90,7 @@ pub(super) fn unit_realm_relationship(state: &mut LuaState) -> LuaResult<u32> {
 #[cfg(feature = "retail-12-0-0")]
 pub(super) use super::super::real::party_ai::unit_in_party_is_ai;
 #[cfg(not(feature = "retail-12-0-0"))]
-pub(super) use crate::lua_api::workarounds::temporary::party_ai_legacy::unit_in_party_is_ai;
+pub(super) use crate::lua_api::workarounds::unit_in_party_is_ai;
 
 /// `UnitIsPVPFreeForAll(unit)` — FFA PVP is not modeled.
 pub(super) fn unit_is_pvp_free_for_all(state: &mut LuaState) -> LuaResult<u32> {
