@@ -1,3 +1,7 @@
+## [2026-10-13] evidence | Separate Mists and performance receipts
+
+[Mists](investigations/mists-cast-startup-visibility.md#current-selected-body-receipt--2026-10-13) and [performance](investigations/test-suite-performance.md#separate-current-phase-observation--2026-10-13) link distinct evidence owners; historical failures and acceptance limits remain separate.
+
 ## [2026-10-13] docs | SpellDisplay and removal current bounded gate
 
 [Current owner](../specs/ui-widget-spell-display.md) links [runtime gate](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13): independent Retail PASS; PTR independent PASS; selected retention PASS. Historical RED/partial and 741-record erratum preserved; Classic/native/world-loot/render/full-parent unproved.

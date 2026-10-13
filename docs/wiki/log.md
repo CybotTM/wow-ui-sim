@@ -1886,3 +1886,7 @@ Updated [GUID contract](../specs/guid-is-player.md), [publication spec](../specs
 ## [2026-10-13] docs | UI widget manager state
 
 Added [bounded system inventory](systems/ui-widget-manager-state.md) and index link for `67775404d`: C_API records versus ordinary frames, cached Blizzard manager ownership, exact 36-set demo initializer, and synchronous membership feeds with independent snapshots. Preserved `6a852c322` cached-container RED, pending current validation, and remaining HUD/unit/StatusBar/CaptureBar gaps. Only page/index/log changed; no tests, builds, source/spec edits, commits, or delegation. Main owns immediate docs commit.
+
+## 2026-10-13 — Separate saved receipts
+
+Linked [Mists](investigations/mists-cast-startup-visibility.md#current-selected-body-receipt--2026-10-13) and [performance](investigations/test-suite-performance.md#separate-current-phase-observation--2026-10-13) owning checkpoints without changing historical payloads.

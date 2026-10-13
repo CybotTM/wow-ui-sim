@@ -86,3 +86,7 @@ Temporary logging was removed after the sealed capture; three Rust files restore
 
 - [[prefork-test-harness]] — profile admission differs from original fixture acceptance.
 - [[integrated-source-and-factory-proof-2026-10-09]] — broader proof ledger; unchanged by this task.
+
+## Current selected-body receipt — 2026-10-13
+
+[Owning current packet](../../../data/patch-api/evidence/mists-source-fade-phase-2026-10-11/current-844-2026-10-13/README.md) separates phase-adjusted execution from historical immediate-hidden failure and unresolved acceptance.

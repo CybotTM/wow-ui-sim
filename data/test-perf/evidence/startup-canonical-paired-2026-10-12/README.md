@@ -29,3 +29,7 @@ Original environment/discovery/ordered loads/post-workarounds/events/readiness/2
 [Manifest](retention-manifest.json):69 nonbinary copies/1,893,138 bytes plus4 source snapshots/14,582 bytes at490bc1080. No executable/images/cache/userdata payloads; future private retention gates excluded to prevent recursive copying. Independent2805 retention/link/privacy bounded PASS at `da4bbc442`:69/69 copies and4/4 source snapshots exact,34 links/3 anchors valid,zero privacy findings. Actual retained-text scope only; private gate reports remain outside packet.
 
 Frozen BA15,038PASS/3FAIL/19skips remains FAIL: startup96.24s, talentdelta24.47ms and cold-CASC lookup. This isolated current observation does not repair or causally explain those failures. Native/external/full-handoff acceptance remains OPEN.
+
+## Separate ProjectConstants checkpoint — 2026-10-13
+
+[Current 621 observation](projectconstants-621-2026-10-13/README.md) owns normal verbose phase evidence and separate exact-fixture failure; it does not extend or replace the paired canonical observation above.

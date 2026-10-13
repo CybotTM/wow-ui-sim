@@ -8,3 +8,7 @@ Revision `4e3848a77747bfdfe048f68fca9cc1e231c5750f`, epoch `20261011T155435Z`. [
 - [Independent saved-evidence audit](runtime-report.md) authenticates those scopes. [Manifest](retention-manifest.json) inventories twelve exact private metadata/stream/report copies, 89,844 bytes. No executable or vendor Lua payload copied.
 
 The earlier immediate-hidden failure remains historical. Follow-up `83acf239e` changes the parent expectation to source-consistent retained manager identity; this packet does not prove that changed case. The separately [retained parent follow-up](parent-followup/README.md) passes the corrected original case, including remaining lock/layout/anchor checks, and the fade control once each; this historical packet remains the earlier failure scope. No production reparenting or vendor patch follows from this proof.
+
+## Current selected-body checkpoint — 2026-10-13
+
+[Current 844 packet](current-844-2026-10-13/README.md) owns the newer phase-adjusted execution. Earlier failure and parent-follow-up payloads remain historical and unchanged.
