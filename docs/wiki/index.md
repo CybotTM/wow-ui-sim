@@ -1,10 +1,14 @@
+## [2026-10-13] evidence | Speak RED and exact animation controls
+
+[Public packet](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md) retains initial159/refinedc81 Speak 0 PASS/2 FAIL, exit101; exact Lua actual values unknown, later transitions unreached. Separate c81 ordered-delay/reverse1 PASS and bounce1 PASS controls update only bounded [animation requirements](../specs/animation-query-lifecycle.md). Wider reverse/repeat, current full six-case, native and parent acceptance remain open; Speak GREEN pending.
+
 ## [2026-10-13] docs | Speak For Me activity source checkpoint
 
 [Existing voice inventory](systems/lua-api.md) links the [supplied activity contract/proof SSOT](../specs/voice-speak-for-me-active-input.md): independent false host input is simulator policy, genuine two-case result-boundary RED is retained, actual GREEN and consumer acceptance pending.
 
 ## [2026-10-13] evidence | Original Retail prefork four-case checkpoint
 
-[Prefork checkpoint](systems/prefork-test-harness.md#original-retail-four-case-checkpoint--2026-10-13-bounded) links public retained original4 results and independent report; current retention gate PENDING. Historical RED/Mists and conformance/cache/native/performance/all-profile/full-parent limits remain separate.
+[Prefork checkpoint](systems/prefork-test-harness.md#original-retail-four-case-checkpoint--2026-10-13-bounded) links public retained original4 results and independent report; Current bounded retention PASS after `4308beb6d` historical-path normalization; original verifier FAIL preserved. Prior 32 TEXT transforms/104,446 public bytes, 20 JSON equivalents and 37 links reused without rehash. Local saved followup: `verification/original4-retention/privacy-followup.md`. Historical RED/Mists and conformance/cache/native/performance/all-profile/full-parent limits remain separate.
 
 ## [2026-10-13] correction | Current public-copy privacy
 
