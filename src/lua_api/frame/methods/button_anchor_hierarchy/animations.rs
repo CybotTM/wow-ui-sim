@@ -15,6 +15,12 @@ mod parent;
 mod play;
 mod runtime;
 mod templates;
+mod vertex_color;
+
+pub(super) use vertex_color::{
+    animation_get_end_color, animation_get_start_color, animation_set_end_color,
+    animation_set_start_color,
+};
 
 pub(super) use ownership::resolve_animation_group_id;
 pub(super) use parent::reparent_animation;
@@ -36,6 +42,7 @@ pub(crate) use runtime::{advance_animation_groups, stop_animation_groups_for_hid
 
 use fields::{push_anim_field, with_animation_state_mut};
 use runtime::{apply_group_flipbook_state, sync_action_bar_busy_for_group};
+use vertex_color::apply_group_vertex_color_state;
 
 // ── Resolve helpers ───────────────────────────────────────────────────────────
 
@@ -212,6 +219,7 @@ pub(super) fn animation_group_stop(state: &mut LuaState) -> LuaResult<u32> {
         };
         refresh_active_animation_group(&mut sim, group_id);
         apply_group_flipbook_state(&mut sim, group_id);
+        apply_group_vertex_color_state(&mut sim, group_id);
         sync_action_bar_busy_for_group(&mut sim, group_id);
         notification
     };
@@ -287,6 +295,7 @@ pub(super) fn animation_group_restart(state: &mut LuaState) -> LuaResult<u32> {
         }
         refresh_active_animation_group(&mut sim, group_id);
         apply_group_flipbook_state(&mut sim, group_id);
+        apply_group_vertex_color_state(&mut sim, group_id);
     }
     Ok(0)
 }

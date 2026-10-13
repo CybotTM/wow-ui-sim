@@ -1,7 +1,7 @@
 //! Playback state is committed before dispatching reentrant OnPlay handlers.
 use super::{
-    apply_group_flipbook_state, refresh_active_animation_group, resolve_animation_group_id,
-    sync_action_bar_busy_for_group,
+    apply_group_flipbook_state, apply_group_vertex_color_state, refresh_active_animation_group,
+    resolve_animation_group_id, sync_action_bar_busy_for_group,
 };
 use crate::lua_api::methods::{borrow_state_mut, frame_id_from_stack, frame_ref};
 use crate::lua_api::script_helpers::{call_void_function_state, get_scripts_for_dispatch};
@@ -29,17 +29,27 @@ fn start_group(state: &LuaState, caller_id: u64, reverse: bool) -> LuaResult<Opt
     };
     let notification = if let Some(group) = sim.animation_groups.get_mut(&group_id) {
         let started = !group.playing;
+        let resuming = group.paused;
+        if started && !resuming {
+            group.elapsed = if reverse { group.total_duration() } else { 0.0 };
+            for animation in &mut group.animations {
+                animation.elapsed = 0.0;
+            }
+        }
         group.playing = true;
         group.paused = false;
         group.done = false;
         group.pending_finish = false;
-        group.reverse = reverse;
+        if !resuming {
+            group.reverse = reverse;
+        }
         if started { group.frame_id } else { None }
     } else {
         None
     };
     refresh_active_animation_group(&mut sim, group_id);
     apply_group_flipbook_state(&mut sim, group_id);
+    apply_group_vertex_color_state(&mut sim, group_id);
     sync_action_bar_busy_for_group(&mut sim, group_id);
     Ok(notification)
 }

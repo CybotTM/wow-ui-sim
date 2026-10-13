@@ -21,7 +21,8 @@ Patch 10.2.5 introduces texture vertex-color interpolation. [Literal source](../
 ## Implementation inventory
 
 - `src/lua_api/animation.rs`: animation/group endpoint and saved-target state.
-- `src/lua_api/frame/methods/button_anchor_hierarchy/animations/`: API producer, lifecycle, scheduler and target application.
+- `src/lua_api/frame/methods/button_anchor_hierarchy/animations/vertex_color.rs`: RGBA endpoint snapshots, independent color objects, smoothing and texture target application/restoration.
+- `src/lua_api/frame/methods/button_anchor_hierarchy/animations/`: playback lifecycle and direction-aware boundary reflection; `animations.rs` connects stop/restart.
 - `src/lua_api/frame/methods/button_anchor_hierarchy/mod.rs`: method registration.
 - `src/xml/types_animation.rs`: parsed endpoint elements.
 - `src/loader/helpers_anim.rs`: shared XML endpoint application.
@@ -32,7 +33,7 @@ Patch 10.2.5 introduces texture vertex-color interpolation. [Literal source](../
 
 ## Known gaps (current cycle)
 
-- [ ] Targeted RED not yet invoked; production implementation not started.
+- [ ] Parent-confirmed RED at `6c4f39abc3b8a3987e7d45baca80271fa233091d`: six selected tests failed at missing `SetStartColor`; no downstream assertions reached. Parent artifact: `verification/patch-pass2-red-current/red-20261013T002128.187277Z/` (not available in this implementer's local checkout). Production implementation awaiting logical commit and authorized targeted GREEN; no PASS claim.
 - [ ] Explicit XML alpha, ordered-group composition and large-delta crossing proof require bounded tests before claiming those boundaries.
 
 ## Out of scope

@@ -281,6 +281,7 @@ fn emit_animation_header(code: &mut String, anim: &crate::xml::AnimationXml, ani
 fn emit_animation_common_props(code: &mut String, anim: &crate::xml::AnimationXml) {
     emit_animation_timing_props(code, anim);
     emit_animation_alpha_props(code, anim);
+    emit_animation_color_props(code, anim);
     emit_animation_transform_props(code, anim);
     emit_animation_target_props(code, anim);
 }
@@ -298,6 +299,23 @@ fn emit_animation_timing_props(code: &mut String, anim: &crate::xml::AnimationXm
 fn emit_animation_alpha_props(code: &mut String, anim: &crate::xml::AnimationXml) {
     emit_num_call(code, "__anim", "SetFromAlpha", anim.from_alpha);
     emit_num_call(code, "__anim", "SetToAlpha", anim.to_alpha);
+}
+
+fn emit_animation_color_props(code: &mut String, anim: &crate::xml::AnimationXml) {
+    for (method, color) in [
+        ("SetStartColor", &anim.start_color),
+        ("SetEndColor", &anim.end_color),
+    ] {
+        if let Some(color) = color {
+            code.push_str(&format!(
+                "\n__anim:{method}(CreateColor({}, {}, {}, {}))\n",
+                color.r.unwrap_or(1.0),
+                color.g.unwrap_or(1.0),
+                color.b.unwrap_or(1.0),
+                color.a.unwrap_or(1.0),
+            ));
+        }
+    }
 }
 
 fn emit_animation_transform_props(code: &mut String, anim: &crate::xml::AnimationXml) {

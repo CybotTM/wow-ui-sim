@@ -2,7 +2,7 @@
 
 use serde::Deserialize;
 
-use super::types_support::{KeyValuesXml, ScriptsXml};
+use super::types_support::{ColorXml, KeyValuesXml, ScriptsXml};
 
 /// Animation group definition.
 #[derive(Debug, Deserialize, Default, Clone)]
@@ -84,6 +84,11 @@ pub struct AnimationXml {
     pub from_alpha: Option<f32>,
     #[serde(rename = "@toAlpha")]
     pub to_alpha: Option<f32>,
+    // VertexColor
+    #[serde(rename = "StartColor")]
+    pub start_color: Option<ColorXml>,
+    #[serde(rename = "EndColor")]
+    pub end_color: Option<ColorXml>,
     // Translation
     #[serde(rename = "@offsetX")]
     pub offset_x: Option<f32>,

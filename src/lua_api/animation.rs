@@ -85,6 +85,9 @@ pub struct AnimState {
     /// RadialProgress sweep endpoints; INFERRED defaults cover the full circle.
     pub from_percent: f64,
     pub to_percent: f64,
+    /// INFERRED opaque-white defaults; endpoint aliasing/default parity is unknown.
+    pub start_color: [f64; 4],
+    pub end_color: [f64; 4],
     pub smoothing: String,
     pub flipbook_rows: u32,
     pub flipbook_columns: u32,
@@ -109,6 +112,8 @@ impl AnimState {
             to_alpha: 1.0,
             from_percent: 0.0,
             to_percent: 1.0,
+            start_color: [1.0; 4],
+            end_color: [1.0; 4],
             smoothing: "NONE".to_string(),
             flipbook_rows: 0,
             flipbook_columns: 0,
@@ -141,6 +146,8 @@ pub struct AnimGroupState {
     pub animations: Vec<AnimState>,
     pub scripts: HashMap<String, ()>,
     pub saved_alphas: HashMap<u64, f32>,
+    /// INFERRED restoration policy, preserving absence of an explicit tint.
+    pub saved_vertex_colors: HashMap<u64, Option<crate::widget::Color>>,
 }
 
 impl AnimGroupState {
@@ -161,6 +168,7 @@ impl AnimGroupState {
             animations: Vec::new(),
             scripts: HashMap::new(),
             saved_alphas: HashMap::new(),
+            saved_vertex_colors: HashMap::new(),
         }
     }
 

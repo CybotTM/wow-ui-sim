@@ -33,6 +33,7 @@ pub(crate) fn advance_animation_groups(
             continue;
         };
         apply_animation_group_outcome(&mut sim, &result);
+        super::apply_group_vertex_color_state(&mut sim, group_id);
         sync_action_bar_busy_for_group(&mut sim, group_id);
         super::refresh_active_animation_group(&mut sim, group_id);
         for _ in 0..result.loop_count {
@@ -66,6 +67,7 @@ pub(crate) fn stop_animation_groups_for_hidden_subtree(
             stop_group(group);
         }
         apply_group_flipbook_state(sim, group_id);
+        super::apply_group_vertex_color_state(sim, group_id);
         sync_action_bar_busy_for_group(sim, group_id);
         super::refresh_active_animation_group(sim, group_id);
     }
@@ -393,26 +395,33 @@ fn bounce_group_elapsed_at_boundaries(
     total_duration: f64,
     loop_count: &mut u32,
 ) {
-    while is_group_elapsed_outside_bounds(group.elapsed, total_duration) {
+    while reached_bounce_boundary(group, total_duration) {
         reflect_bouncing_group_elapsed(group, total_duration);
         group.reverse = !group.reverse;
         *loop_count += 1;
     }
 }
 
-fn is_group_elapsed_outside_bounds(elapsed: f64, total_duration: f64) -> bool {
-    elapsed >= total_duration || elapsed < 0.0
+fn reached_bounce_boundary(
+    group: &crate::lua_api::animation::AnimGroupState,
+    total_duration: f64,
+) -> bool {
+    if group.reverse {
+        group.elapsed <= 0.0
+    } else {
+        group.elapsed >= total_duration
+    }
 }
 
 fn reflect_bouncing_group_elapsed(
     group: &mut crate::lua_api::animation::AnimGroupState,
     total_duration: f64,
 ) {
-    if group.elapsed >= total_duration {
-        group.elapsed = (group.elapsed - total_duration).max(0.0);
+    group.elapsed = if group.reverse {
+        -group.elapsed
     } else {
-        group.elapsed = (-group.elapsed).min(total_duration);
-    }
+        2.0 * total_duration - group.elapsed
+    };
 }
 
 fn apply_animation_group_outcome(

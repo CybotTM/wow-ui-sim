@@ -336,6 +336,7 @@ fn register_animations(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<(
     register_animation_config(state, table)?;
     register_animation_target(state, table)?;
     register_animation_flipbook(state, table)?;
+    register_animation_vertex_color(state, table)?;
     table_set_rust_fn_static(
         state,
         table,
@@ -637,6 +638,19 @@ const ANIMATION_TARGET_METHODS: &[MethodBinding] = &[
         func: animations::animation_config_noop,
     },
 ];
+
+fn register_animation_vertex_color(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    let entries: &[(&'static str, RustFn)] = &[
+        ("SetStartColor", animations::animation_set_start_color),
+        ("SetEndColor", animations::animation_set_end_color),
+        ("GetStartColor", animations::animation_get_start_color),
+        ("GetEndColor", animations::animation_get_end_color),
+    ];
+    for (name, function) in entries {
+        table_set_rust_fn_static(state, table, name, *function)?;
+    }
+    Ok(())
+}
 
 fn register_animation_flipbook(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     register_flipbook_grid(state, table)?;
