@@ -1,6 +1,6 @@
 # Zone ability spell icon
 
-`C_ZoneAbility.GetZoneAbilityIcon(zoneAbilitySpellID)` returns a numeric icon file ID for a known spell from the existing spell catalog. Cached metadata establishes spell-ID input and numeric file-ID output; the current string placeholder contradicts that shape. [Lua API architecture](../lua-api.md).
+`C_ZoneAbility.GetZoneAbilityIcon(zoneAbilitySpellID)` must return a numeric icon file ID for the concrete known spell below from the existing spell catalog. Cached metadata establishes spell-ID input and numeric file-ID output; the current string placeholder contradicts that shape. [C API architecture](../lua-api.md) describes query ownership; current implementation remains in the legacy Lua surface path.
 
 ## What it must do
 
@@ -26,4 +26,4 @@
 
 ## Out of scope
 
-Unknown/invalid spell behavior, active-ability membership, zone lifecycle, external addon caller acceptance and native parity are not established by this positive test. No new catalog or generated-data edits.
+Native unknown/invalid spell behavior and native parity remain unknown. Active-ability membership, zone lifecycle and external addon caller acceptance are not established by this staged positive test. No new catalog or generated-data edits.

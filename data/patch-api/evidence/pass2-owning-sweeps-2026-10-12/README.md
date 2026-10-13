@@ -1,6 +1,6 @@
 # Owning publication gap reconciliation
 
-Recorded October 12, 2026 local / October 13 UTC. Bounded independent runtime/fixture audit PASS at `ccd526c6c9f783cf7d3fe15eda05c42c6cabab59`; public retention audit pending.
+Recorded October 12, 2026 local / October 13 UTC. Bounded independent runtime/fixture audit PASS at `ccd526c6c9f783cf7d3fe15eda05c42c6cabab59`; public retention audit PASS: 18/18 complete copies, unchanged before/after rows, preserved failures, zero privacy/fidelity defects.
 
 | Patch | Rows | OK / gaps | Old-fixture run at f3a7 | Reconciled run at ccd526 |
 |---|---:|---:|---|---|

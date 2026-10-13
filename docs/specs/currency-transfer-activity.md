@@ -16,7 +16,7 @@
 
 ## Implementation inventory
 
-- `src/lua_api/state/sim_state.rs`: explicit activity input.
+- `src/lua_api/state/sim_state.rs`: environment-local `bool` input for the C API query; not a separate transfer lifecycle model.
 - `src/lua_api/state.rs`: false default.
 - `src/c_api/item_spell/c_currency.rs`: existing namespace owner; query registration pending.
 
@@ -31,4 +31,4 @@
 
 ## Out of scope
 
-Transfer requests, account roster, balances, costs, transaction log, readiness, timers, completion/failure/events and persistence require separate contracts. A supplied boolean does not implement transfer lifecycle or prove native semantics; consumer proof is immediate spinner methods, not full addon or timer behavior.
+Transfer requests, account roster, balances, costs, transaction log, readiness, timers, completion/failure/events and persistence require separate contracts. A supplied boolean does not implement transfer lifecycle or prove native semantics. Native activity derivation and secret-return classification remain unknown. Staged consumer assertions cover immediate spinner methods, not full addon or timer behavior; runtime proof is pending.
