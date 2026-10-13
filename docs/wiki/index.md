@@ -1,6 +1,6 @@
 ## [2026-10-13] evidence | Texture XML bounded Mists acceptance
 
-[Owning contract](../specs/xml-self-relative-key.md#known-gaps-current-cycle) and [current evidence](../../data/patch-api/evidence/xml-self-relative-key-2026-10-13/README.md) separate accepted focused/startup/anchor/named-prefork gates from initial77-copy PASS and pending follow-up publication. Store fixture mismatches retain real FAILs and unproved target/card bounds; native/render/first-writer/full-parent gaps remain.
+[Owning contract](../specs/xml-self-relative-key.md#known-gaps-current-cycle) and [current evidence](../../data/patch-api/evidence/xml-self-relative-key-2026-10-13/README.md) separate accepted focused/startup/anchor/named-prefork gates from initial77-copy PASS and the corrected follow-up42 metadata-reuse frontier; historical process/metadata FAILs remain. Store fixture mismatches retain real FAILs and unproved target/card bounds; native/render/first-writer/full-parent gaps remain.
 
 ## [2026-10-13] source | Texture XML published self-key producer
 

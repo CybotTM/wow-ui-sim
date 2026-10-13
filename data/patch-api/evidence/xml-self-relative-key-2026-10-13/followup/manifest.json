@@ -1,7 +1,7 @@
 {
   "selected_text_count": 42,
   "projection": "Exact stored ordered literal substitutions then LF only; whole selected TEXT; no JSON reserialization",
-  "independent_copy_gate": "PENDING",
+  "independent_copy_gate": "Technical42/42 PASS; corrected metadata-reuse4/4 PASS. Historical process and metadata FAILs unchanged; original no-read compliance and exact mtime history not established.",
   "inventory": [
     {
       "id": "followup-001",

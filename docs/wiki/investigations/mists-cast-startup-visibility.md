@@ -82,7 +82,7 @@ Producer GREEN, normal startup and named prefork acceptance are pending. The [hi
 
 ## XML producer bounded runtime checkpoint — 2026-10-13
 
-[Owning acceptance](../../specs/xml-self-relative-key.md#known-gaps-current-cycle) and [evidence index](../../../data/patch-api/evidence/xml-self-relative-key-2026-10-13/README.md) own current focused/normal/shared-anchor/named-prefork gates. Normal cached Mists startup is independently CLEAN; named cast control still settles0.55s before hidden assertions and retains captured diagnostic read errors. This does not attribute the original first visibility writer, erase immediate-hidden FAIL, prove native parity, or establish full-parent acceptance. Initial77-copy gate PASS is separate from pending follow-up publication.
+[Owning acceptance](../../specs/xml-self-relative-key.md#known-gaps-current-cycle) and [evidence index](../../../data/patch-api/evidence/xml-self-relative-key-2026-10-13/README.md) own current focused/normal/shared-anchor/named-prefork gates. Normal cached Mists startup is independently CLEAN; named cast control still settles0.55s before hidden assertions and retains captured diagnostic read errors. This does not attribute the original first visibility writer, erase immediate-hidden FAIL, prove native parity, or establish full-parent acceptance. Initial77-copy PASS and follow-up42 technical/corrected-metadata reuse PASS remain separate from runtime proof; historical process/metadata FAILs are preserved.
 
 ## Sources
 

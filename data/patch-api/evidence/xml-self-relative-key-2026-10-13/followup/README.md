@@ -1,6 +1,6 @@
 # XML bounded follow-up — complete selected TEXT
 
-42 complete selected texts; independent copy/privacy/link gate PENDING. Initial77 accepted copies and the separately accepted Store counterexample remain unchanged. [Current owner](../README.md) / [contract](../../../../../docs/specs/xml-self-relative-key.md).
+42 complete selected texts; technical copy/privacy checks42/42 PASS, corrected metadata-reuse frontier4/4 PASS. Original gate process FAIL (accepted Store payload read) and stale-label metadata FAIL remain unchanged; no original-protocol compliance or exact historical mtime continuity claimed. Initial77 accepted copies and the separately accepted Store counterexample remain unchanged. [Current owner](../README.md) / [contract](../../../../../docs/specs/xml-self-relative-key.md).
 
 | Proof | Exact retained scope |
 | --- | --- |
