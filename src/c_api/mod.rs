@@ -405,6 +405,8 @@ fn register_token_texture_xml_tables(state: &mut LuaState) -> LuaResult<()> {
     c_string_util_decimal::register_escape_decimal_non_printables(state)?;
     c_pvp::register_c_pvp_surface(state)?;
     c_ping_secure::register_c_ping_secure_surface(state)?;
+    #[cfg(feature = "retail-12-0-0")]
+    c_ping_cooldown::register(state)?;
     c_wowtoken_secure::register_c_wowtoken_secure(state)?;
     c_wow_token_public::register_c_wow_token_public(state)?;
     c_texture::register_c_texture(state)?;

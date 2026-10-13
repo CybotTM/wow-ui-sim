@@ -28,6 +28,11 @@ pub(crate) use helpers::item_class_name;
 
 pub(crate) fn register_item_and_spell_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_item::register_c_item(state)?;
+    #[cfg(feature = "retail-12-0-0")]
+    {
+        super::item_stats::register(state)?;
+        super::item_set_bonuses::register(state)?;
+    }
     c_container::register_c_item_upgrade(state)?;
     c_container::register_c_container(state)?;
     c_currency::register_c_currency_info(state)?;

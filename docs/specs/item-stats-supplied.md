@@ -2,7 +2,7 @@
 
 **Producer stage: implemented source; no compiled GREEN yet.**
 
-`C_Item.GetItemStats(itemLink)` and `C_Item.GetItemStatDelta(itemLink1, itemLink2)` expose environment-local supplied numeric maps. Genuine behavioral RED: all nine item-stat tests failed against sealed executable revision `76cf33ef327bbd9305706d8dd3f375b609e824d4`. Evidence: `/home/osso/.local/state/wow-ui-sim/verification/pass2-next-red-receiver-current/20261013T023820371830Z/verification-report.md`. That report is pre-producer proof, not validation of this implementation. Tests target `client-retail`/`client-ptr`; backing state and producer use their shared `retail-12-0-0` module floor. Parent owns central registration wiring and subsequent compilation/GREEN.
+`C_Item.GetItemStats(itemLink)` and `C_Item.GetItemStatDelta(itemLink1, itemLink2)` expose environment-local supplied numeric maps. Genuine behavioral RED: all nine item-stat tests failed against sealed executable revision `76cf33ef327bbd9305706d8dd3f375b609e824d4`. The retained private report is pre-producer proof, not validation of this implementation. Tests target `client-retail`/`client-ptr`; backing state and producer use their shared `retail-12-0-0` module floor. Registration follows existing C_Item setup; compiled GREEN remains pending.
 
 Cached Retail evidence recorded by the accepted draft: `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_APIDocumentationGenerated/ItemDocumentation.lua:965–995` declares required `cstring` arguments, `MayReturnNothing = true`, `SecretArguments = "AllowedWhenUntainted"`, and `LuaValueVariant` named `statTable`. Numeric maps, fresh allocation, arithmetic, and missing-link rules below are accepted simulator assumptions, not native facts established by that declaration. No native/PTR parity proof.
 
@@ -32,7 +32,7 @@ Cached Retail evidence recorded by the accepted draft: `~/.cache/wow-ui-sim/bliz
 
 - `src/c_api/item_stats.rs`: public `ItemStatsState { by_link: HashMap<String, HashMap<String, f64>> }`, empty default; `pub(crate) register(state)` ensures existing `C_Item` and installs exactly `GetItemStats` / `GetItemStatDelta` using Rust functions `c_item_get_item_stats` / `c_item_get_item_stat_delta`. Queries authenticate original required operands before strict string validation, clone supplied maps while borrowing state, then project independent results after releasing the borrow. Delta uses the key union and omits zero differences; result tables remain stack-rooted across key allocations.
 - `src/c_api/mod.rs`: existing C_API model re-export and modern-floor module gate; unchanged in this producer stage.
-- `src/c_api/registration.rs`: parent-owned central registration wiring; not edited in this stage.
+- `src/c_api/item_spell/mod.rs`: registers both stat getters after existing C_Item setup under the shared modern feature floor.
 - `src/lua_api/state/sim_state.rs`: public `item_stats` fixture field.
 - `src/lua_api/state.rs`: independent empty initialization.
 - `src/c_api/item_spell/c_item.rs`: existing C_Item registration boundary; unchanged in this stage.
@@ -45,7 +45,7 @@ Cached Retail evidence recorded by the accepted draft: `~/.cache/wow-ui-sim/bliz
 
 Genuine compiled behavioral RED is recorded in the report above: supplied-map/union/freshness assertions failed on nil output; plain invalid-type and tainted-secret assertions failed because calls did not error. Later assertions beyond each failure are not executed proof. Remaining requirement checkboxes await post-producer GREEN.
 
-- [ ] Complete parent-owned central registration wiring and obtain bounded compiled GREEN for all nine tests. Producer source exists; no builds/tests/checks were run in this stage.
+- [ ] Obtain bounded compiled GREEN for all nine tests after registration wiring. No post-producer build/test result yet.
 - [ ] Native catalog/arithmetic/error wording/return arity/output security and PTR equivalence remain unverified.
 
 ## Out of scope

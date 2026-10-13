@@ -1,6 +1,6 @@
 # Explicit ping cooldown interval
 
-`C_Ping.GetCooldownInfo()` projects an explicit per-environment interval from `src/c_api/c_ping_cooldown.rs`. Getter implementation is source-complete; central registration is parent-owned and bounded GREEN is pending. Tests target `client-retail`/`client-ptr`; backing state uses their shared `retail-12-0-0` feature floor.
+`C_Ping.GetCooldownInfo()` projects an explicit per-environment interval from `src/c_api/c_ping_cooldown.rs`. Getter and utility-table registration are implemented; bounded GREEN is pending. Tests target `client-retail`/`client-ptr`; backing state uses their shared `retail-12-0-0` feature floor.
 
 Accepted draft cached Retail evidence: `Blizzard_APIDocumentationGenerated/PingManagerDocumentation.lua` declares no arguments and nonnil `PingCooldownInfo`, without secret/restriction annotations on this getter. `PingManagerSharedDocumentation.lua` requires numeric nonnil `startTimeMs`/`endTimeMs`. `Blizzard_PingUI/Blizzard_PingUI.lua:127–141,194–205` compares `GetTime()*1000 < endTimeMs` and requests `(endTimeMs/1000)-GetTime()` seconds. Sources are under `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns`; documentation and consumer lines were locally re-read on 2026-10-12, not freshly fetched or native-observed. Fresh DTO allocation and inactive `(0,0)` are accepted simulator assumptions; PTR/native parity is unverified.
 
@@ -20,7 +20,7 @@ Accepted draft cached Retail evidence: `Blizzard_APIDocumentationGenerated/PingM
 ## Implementation inventory
 
 - `src/c_api/c_ping_cooldown.rs`: public `PingCooldownInterval { start_time_ms: f64, end_time_ms: f64 }`; zero default. `pub(crate) register(state)` preserves the existing `C_Ping` namespace and installs the exact Rust `GetCooldownInfo` function. Getter copies both `f64` values, drops the state borrow before allocation, roots a fresh result table before setting its two fields, and returns one DTO. No argument/security checks or producer/clock/timer fields.
-- `src/c_api/mod.rs`: model re-export; central getter registration is parent-owned, untouched by this scoped implementation.
+- `src/c_api/mod.rs`: model re-export and getter registration alongside existing ping utility tables under the shared modern feature floor.
 - `src/lua_api/state/sim_state.rs`: public `ping_cooldown_interval` fixture field.
 - `src/lua_api/state.rs`: independent zero initialization.
 
@@ -34,7 +34,7 @@ Vendor test reads the active profile cache without fallback and executes the unc
 
 - [x] Main reports five genuine public-getter RED failures; the separate consumer cache-path failure is not behavioral RED.
 - [x] Implement the getter projection and namespace-local registration after reported RED; no interval producer exists or is added.
-- [ ] Parent wires central registration and obtains bounded GREEN, including the corrected cached consumer fixture.
+- [ ] Obtain bounded GREEN after registration wiring, including the corrected cached consumer fixture.
 - [ ] Native default/fresh allocation, output security and PTR consumer equivalence remain unverified.
 
 ## Out of scope

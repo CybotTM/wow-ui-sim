@@ -1,6 +1,6 @@
 # Supplied item-set bonuses
 
-`C_Item.GetSetBonusesForSpecializationByItemID(specID, itemID)` must project an explicit environment-local mapping to ordered spell IDs. C_API ownership lives in `src/c_api/item_set_bonuses.rs`; the producer is implemented after genuine behavioral RED. Central registration wiring belongs to main. Tests target `client-retail`/`client-ptr`; backing state uses their shared `retail-12-0-0` feature floor. GREEN remains pending; implementation is not native acceptance.
+`C_Item.GetSetBonusesForSpecializationByItemID(specID, itemID)` must project an explicit environment-local mapping to ordered spell IDs. C_API ownership lives in `src/c_api/item_set_bonuses.rs`; the producer is implemented after genuine behavioral RED. Registration follows existing C_Item setup. Tests target `client-retail`/`client-ptr`; backing state uses their shared `retail-12-0-0` feature floor. GREEN remains pending; implementation is not native acceptance.
 
 Accepted draft evidence: cached Retail `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_APIDocumentationGenerated/ItemDocumentation.lua:1087–1101` declares required numeric `specID`, `itemID`, `MayReturnNothing = true`, `SecretArguments = "AllowedWhenUntainted"`, and nonnil table `itemSetSpellIDs` with numeric inner type. Supplied mapping, ordering/duplicates, fresh allocation and signed32 matching below are accepted simulator policies, not native execution or historical-build evidence. PTR gating does not establish parity.
 
@@ -33,7 +33,7 @@ Accepted draft evidence: cached Retail `~/.cache/wow-ui-sim/blizzard-ui/retail/A
 - `src/lua_api/state/sim_state.rs`: public `item_set_bonuses` field.
 - `src/lua_api/state.rs`: independent empty initialization.
 - `src/c_api/item_spell/c_item.rs`: existing namespace boundary, unchanged in this stage.
-- Central producer wiring is main-owned; no shared registration, state, other modules or tests changed by this implementation.
+- `src/c_api/item_spell/mod.rs`: installs this query after existing C_Item setup under the shared modern feature floor.
 
 ## Tests asserting this spec
 
@@ -43,7 +43,7 @@ Accepted draft evidence: cached Retail `~/.cache/wow-ui-sim/blizzard-ui/retail/A
 
 - [x] Obtain compiled behavioral RED; main supplied 76 RED evidence, not unresolved symbols/compile errors.
 - [x] Implement producer after RED, within the C_API module only.
-- [ ] Main wires central registration and obtains bounded GREEN; requirement checkboxes above remain pending that proof.
+- [ ] Obtain bounded GREEN after registration wiring; requirement checkboxes remain pending that proof.
 - [ ] Native numeric-domain, list semantics, return arity and Retail/PTR parity remain unverified.
 
 ## Out of scope
