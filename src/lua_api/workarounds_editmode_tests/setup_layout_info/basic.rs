@@ -398,6 +398,7 @@ fn setup_layout_info_preserves_active_combined_index_after_prepending_presets() 
 
     env.exec(
         r#"
+        EditModeManagerFrame.layoutInfo = nil
         local getLayouts = C_EditMode.GetLayouts
         C_EditMode.GetLayouts = function()
             local info = getLayouts()
