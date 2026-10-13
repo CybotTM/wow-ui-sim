@@ -1,6 +1,6 @@
-# Supplied Path points and NONE playback
+# Supplied Path points and modeled curve playback
 
-Path/ControlPoint configuration, XML loading and actual computed layout must agree. Four pre-producer cases executed RED; point/XML/NONE playback producers are implemented, current GREEN remains pending. This is current API behavior, not a historical 3.3.0 publication row. Architecture: [layout](../layout-system.md), [loading](../addon-loading-pipeline.md).
+Path/ControlPoint configuration, XML loading and actual computed layout must agree. Four pre-producer cases executed RED and current point/XML/NONE playback cases executed GREEN. Two SMOOTH regressions are staged, not executed. Fresh startup still emits 12 SMOOTH Path setup errors despite exit0 and an empty Lua-error list. This is current API behavior, not a historical 3.3.0 publication row. Architecture: [layout](../layout-system.md), [loading](../addon-loading-pipeline.md).
 
 ## What it must do
 
@@ -8,6 +8,8 @@ Path/ControlPoint configuration, XML loading and actual computed layout must agr
 - [ ] **Simulator policy:** `GetControlPoints` returns multiple point values in ascending distinct positive order, not creation order; maximum query returns greatest order, not count.
 - [ ] Normal addon TOC/XML loading preserves Path `curve="NONE"`, point names and offsets. **Simulator policy:** declaration position assigns orders 1/2; no XML order attribute invented.
 - [ ] **Simulator policy:** curve token NONE is a round-tripping string. With smoothing/looping NONE and duration2, playback immediately starts at first point, interpolates each adjacent ordered pair over equal time regardless of distance/order gaps, and has no implicit origin point.
+- [ ] Accept and round-trip SMOOTH without aborting XML point configuration. Reject unknown curve tokens explicitly.
+- [ ] **Simulator policy, not native parity:** SMOOTH uses uniform Catmull–Rom interpolation through ordered supplied points, duplicating endpoints for missing neighbors. Adjacent segments receive equal time; no implicit origin. Existing smoothing/looping NONE requirements remain.
 - [ ] **Simulator policy:** displacement adds to saved pre-play presentation offset at unit scale using existing screen-layout axes. Child-key target alone moves; owner/sibling positions and target dimensions remain unchanged. XML case targets group owner.
 - [ ] **Simulator policy:** Stop/natural finish restore pre-play offsets; replay snapshots a changed baseline. Duration-expiry post-tick state is restored, not retained terminal point. No callback ordering specified.
 
@@ -44,4 +46,4 @@ Generated `--test integration` filter `path_control_point::` (expected four): or
 
 ## Out of scope
 
-SMOOTH, native/historical parity, zero/one point, duplicate/default/invalid orders, SetParent, templates, broader receiver repair, delays/loops/reverse/pause, callbacks, large-delta semantics, non-unit scale, competing animations and GPU/pixels. No vendor patches. Only NONE curve playback is modeled; unsupported curves are not silently substituted.
+Native/historical parity, zero/one point, duplicate/default/invalid orders, SetParent, templates, broader receiver repair, delays/loops/reverse/pause, callbacks, large-delta semantics, non-unit scale, competing animations and GPU/pixels. No vendor patches. NONE playback is implemented; SMOOTH configuration and modeled motion remain failing startup acceptance until executed proof. Unsupported curves must not be silently substituted.

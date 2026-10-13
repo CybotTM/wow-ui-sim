@@ -1,5 +1,5 @@
-//! Supplied Path points and NONE playback; explicit simulator assumptions.
-//! Uncompiled and unexecuted. No native curve or historical publication claim.
+//! Supplied Path points and modeled NONE/SMOOTH playback.
+//! Catmull–Rom geometry is simulator policy, not native or historical parity.
 #![cfg(feature = "retail-12-0-0")]
 
 use wow_ui_sim::LayoutRect;
@@ -202,6 +202,98 @@ fn path_none_walks_sorted_supplied_points_without_moving_owner_or_sibling() {
         assert_shift(&env, "PathStageOwner", owner, 0.0, 0.0);
         assert_shift(&env, "PathStageOther", sibling, 0.0, 0.0);
     }
+}
+
+#[test]
+fn path_smooth_uses_declared_catmull_rom_geometry_through_supplied_points() {
+    let env = new_env();
+    create_path_scene(&env);
+    env.exec(
+        r#"
+        path:SetCurveType('SMOOTH')
+        assert(path:GetCurveType() == 'SMOOTH')
+        for order, offset in ipairs({{0, 0}, {10, 10}, {20, 0}}) do
+            local point = path:CreateControlPoint(nil, nil, order)
+            point:SetOffset(offset[1], offset[2])
+        end
+        "#,
+    )
+    .expect("SMOOTH configuration, not a NONE substitution");
+    let icon = frame_rect(&env, "PathStageIcon");
+    let owner = frame_rect(&env, "PathStageOwner");
+    let sibling = frame_rect(&env, "PathStageOther");
+    env.exec("group:Play()").unwrap();
+    assert_shift(&env, "PathStageIcon", icon, 0.0, 0.0);
+    for (delta, x, y) in [(0.5, 4.375, 5.625), (0.5, 10.0, 10.0), (0.5, 15.625, 5.625)] {
+        env.fire_on_update(delta).unwrap();
+        assert_shift(&env, "PathStageIcon", icon, x, y);
+        assert_shift(&env, "PathStageOwner", owner, 0.0, 0.0);
+        assert_shift(&env, "PathStageOther", sibling, 0.0, 0.0);
+    }
+    env.exec("group:Stop()").unwrap();
+    assert_shift(&env, "PathStageIcon", icon, 0.0, 0.0);
+}
+
+#[test]
+fn path_actual_cached_smooth_xml_configures_points_and_restores_playback() {
+    let env = new_env();
+    let source_path = wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("active profile cache required")
+        .join("Blizzard_MainMenuBarBagButtons/Mainline/MainMenuBarBagButtons.xml");
+    let source = std::fs::read_to_string(source_path).expect("actual cached bag-button XML");
+    // Preserve the actual first Path element unchanged; unrelated template dependencies
+    // are not this failure boundary. Assertions below observe configuration/layout.
+    let template = source
+        .find("<ItemButton name=\"BaseBagSlotButtonTemplate\"")
+        .expect("cached bag-slot template");
+    let template_end = template + source[template..].find("</ItemButton>").unwrap();
+    let path_start = source[template..template_end]
+        .find("<Path ")
+        .expect("bag-slot Path fixture");
+    let start = template + path_start;
+    let end = start
+        + source[start..]
+            .find("</Path>")
+            .expect("closed Path element")
+        + "</Path>".len();
+    let path_xml = &source[start..end];
+    let addon = tempfile::tempdir().unwrap();
+    std::fs::write(
+        addon.path().join("SmoothVendor.toc"),
+        "## Title: SmoothVendor\nSmoothVendor.xml\n",
+    )
+    .unwrap();
+    std::fs::write(
+        addon.path().join("SmoothVendor.xml"),
+        format!(r#"<Ui><Frame name="SmoothVendorOwner" parent="UIParent">
+        <Size x="20" y="20"/>
+        <Anchors><Anchor point="TOPLEFT" relativeTo="UIParent" relativePoint="TOPLEFT" x="100" y="-100"/></Anchors>
+        <Layers><Layer level="ARTWORK"><Texture name="SmoothVendorIcon" parentKey="AnimIcon" setAllPoints="true"/></Layer></Layers>
+        <Animations><AnimationGroup parentKey="Motion" looping="NONE">{path_xml}</AnimationGroup></Animations>
+        </Frame></Ui>"#),
+    ).unwrap();
+    load_addon(&env.loader_env(), &addon.path().join("SmoothVendor.toc")).unwrap();
+    env.exec(
+        r#"
+        local route = SmoothVendorOwner.Motion:GetAnimations()
+        assert(route:GetCurveType() == 'SMOOTH', 'actual XML curve survives setup')
+        assert(select('#', route:GetControlPoints()) == 2, 'setup reaches both points')
+        local first, second = route:GetControlPoints()
+        point_offset(first, -15, 30)
+        point_offset(second, -75, 60)
+        assert(first:GetOrder() == 1 and second:GetOrder() == 2)
+        "#,
+    )
+    .expect("actual SMOOTH XML must not abort configuration before its points");
+    let icon = frame_rect(&env, "SmoothVendorIcon");
+    env.exec("SmoothVendorOwner.Motion:Play()").unwrap();
+    assert_shift(&env, "SmoothVendorIcon", icon, -15.0, 30.0);
+    env.fire_on_update(0.25).unwrap();
+    assert_shift(&env, "SmoothVendorIcon", icon, -27.1875, 36.09375);
+    env.fire_on_update(0.25).unwrap();
+    assert_shift(&env, "SmoothVendorIcon", icon, -45.0, 45.0);
+    env.fire_on_update(0.5).unwrap();
+    assert_shift(&env, "SmoothVendorIcon", icon, 0.0, 0.0);
 }
 
 #[test]
