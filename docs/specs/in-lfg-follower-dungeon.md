@@ -4,13 +4,13 @@
 
 ## What it must do
 
-- [ ] Return one boolean: true when `world.in_instance` and its `instance_lfg_dungeon_id` identifies an existing follower-classified dungeon.
-- [ ] **Modeled policy:** known non-follower, unknown/missing ID and outside-instance states return false, including stale follower IDs outside an instance.
-- [ ] Observe live ID/classification updates and removal; isolate environments. Never infer ID from name, map, difficulty or party makeup.
-- [ ] Extend existing host `A_Admin.SetInstanceInfo(name, type, difficulty, maxPlayers, lfgDungeonID?)` with optional fifth input, preserving earlier outputs and existing instance flag behavior.
-- [ ] **Host replacement policy:** omitted/nil ID clears prior current LFG ID; an unknown numeric ID may be stored but does not become a follower. `SetInInstance` remains a flag-only toggle.
-- [ ] Keep existing `GetInstanceInfo` tenth result and generic LFG membership consistent with supplied state.
-- [ ] Exercise unchanged cached compact-frame name logic with controlled AI/walk-in/spectator inputs. This is a bounded caller fixture, not AI modeling or rendered/native acceptance.
+- [x] Return one boolean: true when `world.in_instance` and its `instance_lfg_dungeon_id` identifies an existing follower-classified dungeon.
+- [x] **Modeled policy:** known non-follower, unknown/missing ID and outside-instance states return false, including stale follower IDs outside an instance.
+- [x] Observe live ID/classification updates and removal; isolate environments. Never infer ID from name, map, difficulty or party makeup.
+- [x] Extend existing host `A_Admin.SetInstanceInfo(name, type, difficulty, maxPlayers, lfgDungeonID?)` with optional fifth input, preserving earlier outputs and existing instance flag behavior.
+- [x] **Host replacement policy:** omitted/nil ID clears prior current LFG ID; an unknown numeric ID may be stored but does not become a follower. `SetInInstance` remains a flag-only toggle.
+- [x] Keep existing `GetInstanceInfo` tenth result and generic LFG membership consistent with supplied state.
+- [x] Exercise unchanged cached compact-frame name logic with controlled AI/walk-in/spectator inputs. This is a bounded caller fixture, not AI modeling or rendered/native acceptance.
 
 ## How it works
 
@@ -26,14 +26,15 @@
 
 ## Tests asserting this spec
 
-`tests/lfg_follower_instance.rs`: eight cases for positive/false matrices, live mutation/isolation, optional host input/clearing, existing projections and exact cached caller logic. Genuine RED at `080833f1d`, read from `/home/osso/.local/state/wow-ui-sim/verification/patch-pass2-main-build-current/admitted-native-20261013T011400020026Z/runtime-scoped-20261013T013111696766Z/report.md`: one false-control pass, seven failures at the constant-false query, unstored optional host ID and cached caller name (`Uther` versus `Follower: Uther`); downstream transitions were not reached. GREEN pending.
+`tests/lfg_follower_instance.rs`: eight cases for positive/false matrices, live mutation/isolation, optional host input/clearing, existing projections and exact cached caller logic. Historical genuine RED at `080833f1d`: one false-control PASS / seven FAIL; downstream transitions were not reached. Sealed Retail integration at `e3978fd48196`: eight PASS / zero FAIL, exit0, including the cached caller fixture. Existing instance-output regressions pass 3+1 cases, exit0 each.
 
 The cached caller fixture executes unchanged contiguous `CompactUnitFrame.lua` function definitions. Fixture-only probes control AI membership, walk-in and spectator inputs, with a formatting sentinel; this does not model AI state or establish native/localized wording.
 
 ## Known gaps (current cycle)
 
-- [ ] Targeted GREEN and verification after implementation handoff; genuine pre-fix RED recorded in the report above.
-- [ ] Validate narrow cached-caller fixture at execution; no full UnitFrame/startup claim.
+- [x] Targeted eight-case GREEN at sealed `e3978fd48196`; historical RED retained above.
+- [x] Execute narrow cached-caller fixture; no full UnitFrame claim.
+- [ ] Actual AI membership query remains a stub; fixture-controlled AI inputs do not prove it.
 
 ## Out of scope
 

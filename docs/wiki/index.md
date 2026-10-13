@@ -1,6 +1,10 @@
+## [2026-10-12] docs | Four-model sealed Retail proof
+
+[Bounded four-model proof](systems/lua-api.md#current-pet-hover-and-follower-instance-models--bounded-runtime-proof): compiled `e3978fd48196`, 28/28 requested and 19/19 regressions PASS, exit0 each; separate one-shot normal startup exit0/`[]`, zero unique Lua errors, no warnings reported. [Namespace](../specs/addon-local-table.md), [follower](../specs/in-lfg-follower-dungeon.md), [pet hover](../specs/pet-journal-hover.md) and [texture dimensions](../specs/texture-file-dimensions.md) check only tested boundaries. Historical RED28 (1 PASS/27 FAIL) and separate 64-method-exposure FAIL remain unchanged; receiver repair/new scaffolding excluded. Numeric-ID/atlas metadata, numeric namespace selectors/unload/native, actual AI query and Collections-consumer execution remain unverified; public receipts pending retention.
+
 ## [2026-10-12] docs | Four producer models — runtime unverified
 
-[Pet-hover/follower-instance APIs](systems/lua-api.md#current-pet-hover-and-follower-instance-models--runtime-unverified), [actual texture file dimensions](systems/widget-system.md#actual-texture-file-dimensions--runtime-unverified) and [opted-in addon namespaces](systems/addon-loading.md#opted-in-addon-namespace-access--runtime-unverified) link existing spec SSOTs. Genuine pre-fix `080833f1d` RED: 28 cases, 1 PASS / 27 FAIL; four production implementations await GREEN. Earlier VertexColor6/role13 GREEN is separate, not four-producer proof; native/whole acceptance unclaimed.
+[Pet-hover/follower-instance APIs](systems/lua-api.md#current-pet-hover-and-follower-instance-models--bounded-runtime-proof), [actual texture file dimensions](systems/widget-system.md#actual-texture-file-dimensions--bounded-runtime-proof) and [opted-in addon namespaces](systems/addon-loading.md#opted-in-addon-namespace-access--bounded-runtime-proof) link existing spec SSOTs. Genuine pre-fix `080833f1d` RED: 28 cases, 1 PASS / 27 FAIL; the historical checkpoint awaited GREEN; sealed `e3978fd48196` bounded proof above supersedes that pending status only. Earlier VertexColor6/role13 GREEN is separate, not four-producer proof; native/whole acceptance unclaimed.
 
 ## [2026-10-12] docs | Explicit unit role source inventory
 

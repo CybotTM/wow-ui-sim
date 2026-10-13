@@ -1,8 +1,8 @@
 # Lua API Implementation
 
-## Current producer inventory — runtime unverified
+## Current producer inventory — bounded runtime proof
 
-Existing wiki systems describe implemented [pet-hover/follower-instance APIs](wiki/systems/lua-api.md#current-pet-hover-and-follower-instance-models--runtime-unverified), [actual texture file dimensions](wiki/systems/widget-system.md#actual-texture-file-dimensions--runtime-unverified) and [opted-in addon namespace access](wiki/systems/addon-loading.md#opted-in-addon-namespace-access--runtime-unverified). Linked specs own contracts and proof limits. Four-producer RED at `080833f1d`: 28 cases, 1 PASS / 27 FAIL; production GREEN pending. Earlier VertexColor/role GREEN does not cover these four.
+Existing wiki systems describe implemented [pet-hover/follower-instance APIs](wiki/systems/lua-api.md#current-pet-hover-and-follower-instance-models--bounded-runtime-proof), [actual texture file dimensions](wiki/systems/widget-system.md#actual-texture-file-dimensions--bounded-runtime-proof) and [opted-in addon namespace access](wiki/systems/addon-loading.md#opted-in-addon-namespace-access--bounded-runtime-proof). Linked specs own contracts and proof limits. Four-producer RED at `080833f1d`: 28 cases, 1 PASS / 27 FAIL; sealed Retail `e3978fd48196` now passes all 28, exit0 each selector. [Bounded proof](wiki/systems/lua-api.md#current-pet-hover-and-follower-instance-models--bounded-runtime-proof) owns separate 19/19 regression and one normal-binary startup results; later receiver repair/new scaffolding, native and full-suite acceptance are excluded. Earlier VertexColor/role GREEN does not cover these four.
 
 ## Overview
 

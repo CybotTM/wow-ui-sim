@@ -18,9 +18,9 @@ Key field groups:
 
 **Widget-specific** — Slider, StatusBar, EditBox, ScrollFrame, Cooldown each have dedicated field groups. Model-family state is grouped in one lazy `Option<Box<ModelWidgetState>>`; absent payloads preserve getter defaults, while mutating methods allocate only when needed and remain globally callable.
 
-### Actual texture file dimensions — runtime unverified
+### Actual texture file dimensions — bounded runtime proof
 
-`271793bc6` adds Texture `GetFileWidth`/`GetFileHeight` in [texture adapters](../../../src/lua_api/frame/methods/widgets/texture/atlas.rs). Existing secret-origin readability is checked before resolving actual source metadata through a CPU-only TextureManager with configured addon roots; widget geometry is not the metadata source. No new widget state or GPU dependency. The temporary manager does not retain metadata between getter calls. [Texture-file spec](../../specs/texture-file-dimensions.md) owns source/ID/atlas policies and remaining coverage; [API evidence boundary](lua-api.md#current-pet-hover-and-follower-instance-models--runtime-unverified) records genuine six-case RED and pending GREEN. Source inspection is not runtime/native proof.
+`271793bc6` adds Texture `GetFileWidth`/`GetFileHeight` in [texture adapters](../../../src/lua_api/frame/methods/widgets/texture/atlas.rs). Existing secret-origin readability is checked before resolving actual source metadata through a CPU-only TextureManager with configured addon roots; widget geometry is not the metadata source. No new widget state or GPU dependency. The temporary manager does not retain metadata between getter calls. [Texture-file spec](../../specs/texture-file-dimensions.md) owns source/ID/atlas policies and remaining coverage; [API evidence boundary](lua-api.md#current-pet-hover-and-follower-instance-models--bounded-runtime-proof) records historical six-case RED and sealed Retail `e3978fd48196` six-case GREEN, exit0. Local-file metadata, clearing, geometry independence and existing secret-read policy pass; numeric-ID/atlas actual metadata and native parity remain unverified.
 
 ### VertexColor animation target state
 

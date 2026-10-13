@@ -6,19 +6,20 @@
 
 ### Literal source contract
 
-- [ ] Publish callable `GetFileWidth()` and `GetFileHeight()` on Texture objects; each returns the corresponding actual source-image dimension.
-- [ ] Return zero when the source image cannot be accessed. Widget dimensions are not a substitute for file metadata.
+- [x] Publish callable `GetFileWidth()` and `GetFileHeight()` on Texture objects; each returns the corresponding actual source-image dimension.
+- [x] Return zero when the source image cannot be accessed. Widget dimensions are not a substitute for file metadata.
 
 ### Inferred simulator integration contract
 
 These requirements apply the literal contract to existing simulator state; they are not independent native-client observations.
 
-- [ ] Resolve local addon files through the configured `addon_base_paths`, including later roots, without requiring GPU initialization or CASC for those fixtures.
-- [ ] Return `(7, 5)` for the concrete wide WebP fixture and `(3, 11)` for the tall fixture, while independent widget dimensions remain `(101, 103)`; changing widget width/height does not change file dimensions.
-- [ ] Follow `SetTexture` source changes; absent, cleared, missing, undecodable, and color-only sources return zero rather than retaining previous dimensions.
-- [ ] UV cropping and tiling do not change actual-file dimensions. For an accessible atlas backing image, use full backing-file dimensions, not atlas-slot dimensions.
+- [x] Resolve local addon files through the configured `addon_base_paths`, including later roots, without requiring GPU initialization or CASC for those fixtures.
+- [x] Return `(7, 5)` for the concrete wide WebP fixture and `(3, 11)` for the tall fixture, while independent widget dimensions remain `(101, 103)`; changing widget width/height does not change file dimensions.
+- [x] Follow `SetTexture` source changes; absent, cleared, missing, undecodable, and color-only sources return zero rather than retaining previous dimensions.
+- [x] UV cropping and tiling do not change actual-file dimensions.
+- [ ] For an accessible atlas backing image, use full backing-file dimensions, not atlas-slot dimensions.
 - [ ] Numeric fileDataID assignments use the existing manifest path resolution and actual accessible source metadata; unresolved/inaccessible files return zero. Merely preserving the ID does not prove dimensions.
-- [ ] Apply the existing secret-texture read policy before metadata lookup: an untainted caller may read; a tainted caller receives the same secret-origin denial as existing texture getters. A subsequent plain `SetTexture` assignment restores plain reads under existing policy.
+- [x] Apply the existing secret-texture read policy before metadata lookup: an untainted caller may read; a tainted caller receives the same secret-origin denial as existing texture getters. A subsequent plain `SetTexture` assignment restores plain reads under existing policy.
 - [ ] Shared Texture method exposure is the proposed simulator placement, not proof of historical or seven-profile native availability. Runtime evidence must name the selected profile.
 
 ## How it works
@@ -28,7 +29,7 @@ These requirements apply the literal contract to existing simulator state; they 
 
 ## Implementation inventory
 
-- `src/lua_api/frame/methods/widgets/texture/atlas.rs` — `GetFileWidth`/`GetFileHeight` adapters beside `SetTexture` and existing readable getters; implemented, GREEN unchecked.
+- `src/lua_api/frame/methods/widgets/texture/atlas.rs` — `GetFileWidth`/`GetFileHeight` adapters beside `SetTexture` and existing readable getters; implemented; six local-file tests GREEN at sealed `e3978fd48196`.
 - `src/lua_api/frame/methods/widgets/texture/mod.rs` — both getters registered with current shared Texture method exposure; native cross-profile availability remains unproved.
 - `src/lua_api/frame/methods/secret_origin.rs` — existing `require_texture_readable` policy and denial message.
 - `src/texture.rs` — `TextureManager::new` initializes empty CPU maps; `with_addons_paths` stores configured roots without GPU initialization.
@@ -40,7 +41,7 @@ The adapter checks readability, snapshots the frame's actual texture path/fileDa
 
 ## Tests asserting this spec
 
-Parent reports six genuine RED results at revision `080`: fixture images and Texture construction reached, then missing `GetFileWidth`/`GetFileHeight` failures. Downstream geometry and secret cases were not reached. This adapter stage runs formatting only; GREEN remains unchecked.
+Parent reports six genuine RED results at revision `080`: fixture images and Texture construction reached, then missing `GetFileWidth`/`GetFileHeight` failures. Downstream geometry and secret cases were not reached. Sealed Retail integration at `e3978fd48196` passes all six local-file cases, exit0, reaching geometry/source/clearing and existing secret-read-policy assertions. Numeric-ID and atlas actual metadata remain untested; atlas10 + empty-clear1 regression passes do not establish them.
 
 - `tests/texture_file_dimensions.rs::texture_get_file_width_reads_actual_source_not_widget_width` and `texture_get_file_height_reads_actual_source_not_widget_height` — independently call each missing public method against two exact WebP files and separate widget-size controls.
 - `tests/texture_file_dimensions.rs::texture_file_dimensions_follow_source_changes_and_clearing` — source replacement, missing path, recovery, nil/empty/no-argument clearing.
@@ -50,7 +51,7 @@ Parent reports six genuine RED results at revision `080`: fixture images and Tex
 
 ## Known gaps (current cycle)
 
-- [ ] Parent must commit the formatted production adapters and establish targeted GREEN. Implementation is present but not compiled or tested in this stage.
+- [x] Targeted local-file GREEN: six PASS / zero FAIL at sealed `e3978fd48196`, exit0.
 - [ ] Numeric fileDataID actual-file coverage has no established CASC-independent accessible fixture in this stage. Existing ID/path round-trip tests do not cover metadata dimensions; no synthetic manifest/state mutation or conditional skip substitutes for that proof.
 - [ ] Atlas full-file versus slot dimensions remain untested: the existing `checkbox-minimal` mapping uses a Blizzard Interface path, which is not resolved from the temporary addon roots. No vendor/cache writes or manufactured atlas mapping are used to claim this boundary.
 - [ ] Native-client parity and cross-profile runtime proof remain unestablished.

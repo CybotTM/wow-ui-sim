@@ -4,12 +4,12 @@
 
 ## What it must do
 
-- [ ] Return the same nonnil namespace table used by all files of the opted-in addon; preserve identity across repeated calls and later addon loads. Caller mutation is visible to original target closures.
-- [ ] Retain that namespace through garbage collection after chunks return, including when only a weak test witness remains.
-- [ ] Resolve canonical loaded addon names, not display titles; never implicitly load a target or return a fabricated/copied table.
-- [ ] **Modeled policy:** unknown, registered-but-unloaded, title-only and unopted targets raise errors. Missing or zero opt-in does not expose the table.
-- [ ] Enforce documented `AllowedWhenUntainted` arguments using genuine VM secret authentication; preserve wrappers and caller taint.
-- [ ] Deny an insecure caller access to a Blizzard-classified target even with a plain name. Secure access to a loaded opted-in Blizzard target remains possible. Error shape is modeled; denial itself is sourced.
+- [x] Return the same nonnil namespace table used by all files of the opted-in addon; preserve identity across repeated calls and later addon loads. Caller mutation is visible to original target closures.
+- [x] Retain that namespace through garbage collection after chunks return, including when only a weak test witness remains.
+- [x] Resolve canonical loaded addon names, not display titles; never implicitly load a target or return a fabricated/copied table.
+- [x] **Modeled policy:** unknown, registered-but-unloaded, title-only and unopted targets raise errors. Missing or zero opt-in does not expose the table.
+- [x] Enforce documented `AllowedWhenUntainted` arguments using genuine VM secret authentication; preserve wrappers and caller taint.
+- [x] Deny an insecure caller access to a Blizzard-classified target even with a plain name. Secure access to a loaded opted-in Blizzard target remains possible. Error shape is modeled; denial itself is sourced.
 
 ## How it works
 
@@ -26,11 +26,11 @@
 
 ## Tests asserting this spec
 
-`tests/addon_local_table.rs`: six behavioral tests with real temporary two-addon loading, original namespace identity/mutation, GC lifetime, opt-in/absence and genuine security boundaries. The parent runtime report at `080833f1d` records six genuine RED failures at the initial raw-registration assertion; namespace/security/GC assertions were not reached. Implementation is pending actual GREEN; all requirement checkboxes remain unchecked.
+`tests/addon_local_table.rs`: six behavioral tests with real temporary two-addon loading, original namespace identity/mutation, GC lifetime, opt-in/absence and genuine security boundaries. The parent runtime report at `080833f1d` records six genuine RED failures at the initial raw-registration assertion; namespace/security/GC assertions were not reached. Sealed Retail integration at `e3978fd48196` passes all six tests, exit0; identity, mutation, GC retention and access/security boundaries are now reached. Numeric selectors, unload and native behavior remain unverified.
 
 ## Known gaps (current cycle)
 
-- [ ] Verify the implemented retained rooted namespaces and opt-in access against all six tests. [Bounded second-pass evidence](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md) separates the retained pre-fix RED from pending production GREEN.
+- [x] Verify retained rooted namespaces and opt-in access: six tests PASS at sealed `e3978fd48196`. [Bounded second-pass evidence](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md) retains the pre-fix RED; the six-case GREEN above is bounded production proof.
 - [ ] Native absent-target behavior and error text remain unverified.
 
 ## Out of scope
