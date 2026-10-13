@@ -1,6 +1,6 @@
 ## [2026-10-13] source | SpellDisplay input and result-boundary RED
 
-[Widget inventory](systems/ui-widget-manager-state.md#spelldisplay-input-only-checkpoint--2026-10-13) links the [owning contract](../specs/ui-widget-spell-display.md). Retail RED saved; independent review and PTR RED pending. Getter/GREEN/consumer acceptance absent; parent OPEN.
+[Widget inventory](systems/ui-widget-manager-state.md#spelldisplay-input-only-checkpoint--2026-10-13) links the [owning contract](../specs/ui-widget-spell-display.md). Retail saved RED independently verified; selected-copy integrity and PTR RED pending. Getter/GREEN/consumer acceptance absent; parent OPEN.
 
 ## [2026-10-13] source | TextWithState input-only stage
 

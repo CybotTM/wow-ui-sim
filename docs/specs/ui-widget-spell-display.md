@@ -43,7 +43,7 @@ Contract for environment-owned supplied SpellDisplay input, fresh complete neste
 - `tests/widget_spell_display/security.rs`: 1 real host secret-policy test, enabled in both Retail/PTR test modules.
 - `tests/widget_spell_display/consumer.rs`: 3 separate tests for lifecycle, attached context and zero-spell polling.
 
-Retail `85b5494d2`: all nine cases execute and fail with `missing supplied SpellDisplay record` after the callable check, actual wait exit101, 1.55s. Exact returned value/arity is not exposed by these diagnostics. Cached construction, complete snapshots, numeric/security/feed and consumer assertions remain unreached. Independent saved-RED review pending; PTR has no executed RED yet. Retail compilation is separate:741 JSON records, terminal0, six manifest deprecations, zero compiler-message records. No requirement checked complete.
+Retail `85b5494d2`: all nine cases execute and fail with `missing supplied SpellDisplay record` after the callable check, actual wait exit101, 1.55s. Exact returned value/arity is not exposed by these diagnostics. Cached construction, complete snapshots, numeric/security/feed and consumer assertions remain unreached. Independent saved-RED verification PASS; [owning packet](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md) retains source/compile/runtime streams with separate selected-copy integrity pending. PTR has no executed RED yet. Retail compilation is separate:741 JSON records, terminal0, six manifest deprecations, zero compiler-message records. No requirement checked complete.
 
 ## Known gaps (current cycle)
 
