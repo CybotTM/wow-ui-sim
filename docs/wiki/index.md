@@ -1,3 +1,7 @@
+## [2026-10-13] evidence | Original Retail prefork four-case checkpoint
+
+[Prefork checkpoint](systems/prefork-test-harness.md#original-retail-four-case-checkpoint--2026-10-13-bounded) links public retained original4 results and independent report; current retention gate PENDING. Historical RED/Mists and conformance/cache/native/performance/all-profile/full-parent limits remain separate.
+
 ## [2026-10-13] correction | Current public-copy privacy
 
 [Correction SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#current-public-copy-privacy-corrections--2026-10-13) links scoped redaction overlays and original-evidence/history boundaries; current all-profile gate pending.

@@ -90,6 +90,10 @@ The existing-test timestamp trial keeps the root library and six binaries fresh 
 
 [Mists222248 diagnostic](../wiki/investigations/mists-cast-startup-visibility.md#temporary-simulator-trace--original-assertion-still-fail) executes only the original cast case0PASS/1FAIL; older084353 chat2PASS remain a distinct receipt. Later cast assertions stay unreached; no all-profile/current-source acceptance follows.
 
+#### Original Retail four-case checkpoint — 2026-10-13 (bounded)
+
+[Public packet](../../data/test-perf/evidence/original-retail-prefork-2026-10-13/README.md) retains the exact four-selector matrix and [independent report](../../data/test-perf/evidence/original-retail-prefork-2026-10-13/independent/report.md): original chat2/cast-bar1/spellbook1 PASS, actual wait exits0/0/0 at recorded compiled `a6723200be40145ec352666b538998bf4035a608`, production `50f6f0ea8`. Full captured runtime stderr has no observed failure diagnostics; compiler retains six inherited manifest deprecations. Selected retention is 32 complete TEXT payloads/104,446 public bytes; current retention gate PENDING. Saved evidence only: no new body audit, conformance or cache-equality credit. Historical RED/Mists cast-bar FAIL, all-profile, performance, native GUI and full-parent limits remain unchanged; no requirement boxes closed by this checkpoint.
+
 ### Retail and Mists target eligibility
 
 - [ ] Admit `prefork_full_ui` for the Retail and Mists client bundles without admitting other profiles through their bundles.

@@ -1,3 +1,7 @@
+## [2026-10-13] docs | Original Retail prefork four-case checkpoint
+
+Added [public packet README](../../data/test-perf/evidence/original-retail-prefork-2026-10-13/README.md) and separate bounded [contract](../specs/prefork-test-harness.md#original-retail-four-case-checkpoint--2026-10-13-bounded)/[system](systems/prefork-test-harness.md#original-retail-four-case-checkpoint--2026-10-13-bounded) checkpoints. Independent saved-evidence original4 PASS and actual wait exits remain distinct from pending retention and broader acceptance. Historical RED/Mists/native/performance/all-profile/full-parent limits preserved; documentation only, main owns commit.
+
 ## [2026-10-13] correction | Current public-copy privacy
 
 [Correction SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#current-public-copy-privacy-corrections--2026-10-13) records current-copy remediation without rewriting runtime proof, private originals or Git history; current all-profile gate pending.

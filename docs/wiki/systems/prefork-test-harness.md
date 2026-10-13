@@ -16,6 +16,10 @@ Linux-only custom test-runner core for reusing immutable parent-owned test state
 
 ## Content
 
+### Original Retail four-case checkpoint — 2026-10-13 (bounded)
+
+[Public packet](../../../data/test-perf/evidence/original-retail-prefork-2026-10-13/README.md) owns the exact selector matrix, retained streams and [independent saved-evidence report](../../../data/test-perf/evidence/original-retail-prefork-2026-10-13/independent/report.md). Original chat2/cast-bar1/spellbook1 PASS; actual wait exits0/0/0. Recorded compiled source `a6723200be40145ec352666b538998bf4035a608`, production `50f6f0ea8`; full captured runtime stderr has no observed failure diagnostics, compiler six inherited manifest deprecations. Selected retention: 32 complete TEXT payloads/104,446 public bytes; current retention gate PENDING. This supplements historical Retail epochs only: no new body audit, conformance, cache equality, performance, native GUI or full-parent proof; historical RED, Mists cast-bar FAIL and all-profile gaps remain separate. [Contract checkpoint](../../specs/prefork-test-harness.md#original-retail-four-case-checkpoint--2026-10-13-bounded) closes no broader gate.
+
 ### Dev-only automatic generation — 2026-10-11
 
 `crates/test-harness` is an unpublished workspace crate used only as a root dev-dependency. Its build script owns automatic module/marker discovery and test-source watches. Exported macros supply module items to both integration and prefork entry points, and the Retail case-array expression in the prefork caller. Root `build.rs` retains only production responsibilities; explicit workspace builds may still select the helper. [Retained source, execution and cache evidence](../../../data/test-perf/evidence/dev-only-harness-2026-10-11/README.md) includes one local new-input discovery/execution/cleanup control while keeping desktop/native and broader handoff gaps open. Original Mists cast-bar RED and historical suite failures are not superseded.
