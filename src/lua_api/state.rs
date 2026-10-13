@@ -54,6 +54,7 @@ macro_rules! build_empty_sim_state {
             system_chat_log: Vec::new(),
             adventure_map: AdventureMapState::default(),
             encounter_journal: EncounterJournalState::default(),
+            pet_journal_hover: crate::c_api::c_pet_journal_hover::PetJournalHoverState::default(),
             anima_diversion: AnimaDiversionState::default(),
             garrison_talents: GarrisonTalentState::default(),
             #[cfg(feature = "client-retail")]

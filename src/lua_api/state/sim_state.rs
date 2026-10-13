@@ -42,6 +42,7 @@ pub struct SimState {
     pub system_chat_log: Vec<String>,
     pub adventure_map: AdventureMapState,
     pub encounter_journal: EncounterJournalState,
+    pub pet_journal_hover: crate::c_api::c_pet_journal_hover::PetJournalHoverState,
     pub anima_diversion: AnimaDiversionState,
     pub garrison_talents: GarrisonTalentState,
     #[cfg(feature = "client-retail")]
