@@ -358,23 +358,23 @@ fn cached_ui_widget_container_refreshes_removes_and_unregisters_supplied_widgets
                     "unregister cleans active pools events manager and timer",
                     r#"
                     local container = LifecycleContainer
-                    assert(container:GetNumWidgetsShowing() == 2)
+                    assert(container:GetNumWidgetsShowing() == 2, 'restore showing count=' .. tostring(container:GetNumWidgetsShowing()))
                     local icon, header = container.widgetFrames[760102], container.widgetFrames[760103]
-                    assert(icon:IsShown() and header:IsShown())
-                    assert(container.numTimers == 1 and container.ticker)
+                    assert(icon:IsShown() and header:IsShown(), 'restored children shown')
+                    assert(container.numTimers == 1 and container.ticker, 'restore timers=' .. tostring(container.numTimers))
                     container:UnregisterForWidgetSet()
-                    assert(not container:IsRegisteredForWidgetSet())
-                    assert(not container:IsShown())
-                    assert(not icon:IsShown() and not header:IsShown())
-                    assert(next(container.widgetFrames) == nil)
-                    assert(container:GetNumWidgetsShowing() == 0)
-                    assert(container.widgetPools:GetNumActive() == 0)
-                    assert(container.horizontalRowContainerPool:GetNumActive() == 0)
-                    assert(container.numTimers == 0 and container.ticker == nil)
-                    assert(next(container.timerWidgets) == nil)
-                    assert(not container:IsEventRegistered('UPDATE_UI_WIDGET'))
-                    assert(not container:IsEventRegistered('UPDATE_ALL_UI_WIDGETS'))
-                    assert(UIWidgetManager.registeredWidgetContainers[container] == nil)
+                    assert(not container:IsRegisteredForWidgetSet(), 'unregistered set=' .. tostring(container.widgetSetID))
+                    assert(not container:IsShown(), 'unregistered container hidden')
+                    assert(not icon:IsShown() and not header:IsShown(), 'released children hidden')
+                    assert(next(container.widgetFrames) == nil, 'widget map cleared')
+                    assert(container:GetNumWidgetsShowing() == 0, 'unregistered showing count')
+                    assert(container.widgetPools:GetNumActive() == 0, 'widget pool released')
+                    assert(container.horizontalRowContainerPool:GetNumActive() == 0, 'row pool released')
+                    assert(container.numTimers == 0 and container.ticker == nil, 'unregistered timers=' .. tostring(container.numTimers) .. ', ticker=' .. tostring(container.ticker))
+                    assert(next(container.timerWidgets) == nil, 'timer widget map cleared')
+                    assert(not container:IsEventRegistered('UPDATE_UI_WIDGET'), 'incremental event removed')
+                    assert(not container:IsEventRegistered('UPDATE_ALL_UI_WIDGETS'), 'full refresh event removed')
+                    assert(UIWidgetManager.registeredWidgetContainers[container] == nil, 'manager registration removed')
                     for _ in UIWidgetManager:EnumerateWidgetsByWidgetTag('lifecycle-icon') do
                         error('unregistered container must not publish tagged widgets')
                     end
