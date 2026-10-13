@@ -1,6 +1,6 @@
-# Supplied TextWithState visualization — unexecuted input stage
+# Supplied TextWithState visualization
 
-Host-supplied TextWithState input belongs to `src/c_api/ui_widget_manager/`; the [widget manager architecture](../wiki/systems/ui-widget-manager-state.md) owns existing supplied-record/event behavior. This staged input adds only a complete DTO, environment-local map and typed host-feed insertion. Getter projection and Lua query registration are intentionally absent. No executed RED, GREEN, compiler or cached-consumer acceptance exists for this stage.
+Host-supplied TextWithState input belongs to `src/c_api/ui_widget_manager/`; the [widget manager architecture](../wiki/systems/ui-widget-manager-state.md) owns supplied-record/event behavior. Complete getter projection and Retail/PTR publication follow genuine supplied-record RED at input stage `64a2a57b2`. GREEN and real cached-consumer acceptance remain pending; host policy is not native catalog or transport parity.
 
 ## What it must do
 
@@ -26,19 +26,19 @@ Explicit fixtures are host-input test policy, not native catalog records. Consum
 - `src/c_api/ui_widget_manager/feed.rs`: public `WidgetVisualization::TextWithState` type8 and insertion in existing feed before notification; no new transport/event implementation.
 - `src/c_api/ui_widget_manager.rs`: public DTO export/module wiring.
 
-No getter producer or query registration is added to this stage. Main owns those after actual RED.
+- `src/c_api/ui_widget_manager/text_state.rs`: complete fresh projection, existing numeric/secret validator and Retail/PTR publication via the active-profile constant. No padding clamping.
+- `src/c_api/ui_widget_manager/queries.rs`: registration beside existing supplied visualization queries.
 
 ## Tests asserting this spec
 
 `tests/ui_widget_manager_text_state.rs` is discovered by existing `integration_tests!()` build harness; it explicitly includes `tests/widget_text_state/{fixtures,queries,security,feed,consumer}.rs`. Reuses existing `tests/widget_discrete/fixtures.rs::assert_lua` error capture and `common::blizzard_addon_harness` isolated Game environment/closure loader; no copied broad harness, vendor behavior replacement or fake global consumer.
 
-Six unconditional cases under Retail/PTR: complete snapshot1, strict numeric1, environment isolation1, feed2, cached consumer1. A seventh real-secret case follows existing Discrete `retail-12-1-0` gate. No case has been compiled or executed. Intended first supplied-query failures precede cache loading, constructor and security wrapper prerequisites; the first feed callback checks a supplied table immediately, before later transitions. Rejected-feed test can already pass with the passive scaffold; it is not expected to prove missing-query RED. If the getter itself is absent rather than an existing nil compatibility closure, the publication assertion fails first; preserve that result separately and do not call it supplied-result RED.
+Six unconditional cases under Retail/PTR: complete snapshot1, strict numeric1, environment isolation1, feed2, cached consumer1. A seventh real-secret case follows existing Discrete `retail-12-1-0` gate. All seven compiled and executed at `64a2a57b2`: one rejected-feed preservation PASS and six FAIL, actual wait exit101, 0.72s. Five seeded cases pass the function-publication assertion, then fail the supplied-table assertion before cached/security prerequisites. The feed callback fails its supplied-table assertion; its immediate event-result assertion fails separately. Later snapshot, numeric, isolation, security and consumer lifecycle assertions remain unreached. These are supplied-record failures, not compile or missing-publication RED. Independent local report: `verification/text-state-genuine-red/report.md`.
 
 ## Known gaps (current cycle)
 
-- [ ] New source-coverage gap baseline: no supplied TextWithState producer/registration or previous cached type8 lifecycle coverage was found in the inspected source. This is not a test result or native-availability conclusion.
-- [ ] Main must integrate/reconcile this candidate and physically execute bounded RED before implementing a getter/registration; preserve exact reached failure boundary and unreached assertions.
-- [ ] Main owns subsequent fresh complete21 projection with existing numeric/secret validator, GREEN and actual Retail/PTR cached-consumer acceptance. This input stage performs no implementation or proof at that layer.
+- [x] Execute and independently verify supplied-record RED before adding getter projection; preserve the passed rejection control and exact unreached boundaries.
+- [ ] Verify complete21 fresh projection, numeric/secret validation and actual Retail/PTR cached-consumer lifecycle through GREEN. Source implementation alone is not acceptance.
 
 ## Out of scope
 

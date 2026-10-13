@@ -11,6 +11,7 @@ pub use bar_records::{CaptureBarRecord, StatusBarRecord};
 mod feed;
 mod fixtures;
 mod inputs;
+mod text_state;
 mod text_state_record;
 pub use feed::WidgetVisualization;
 pub use text_state_record::TextWithStateRecord;
