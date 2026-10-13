@@ -90,6 +90,10 @@ Intrinsic default scripts use the precall binding; ordinary XML scripts use the 
 
 [`480b9f934` policy contract](../../specs/xml-self-relative-key.md) owns the approved, user-correlated simulator behavior: a Texture XML direct `$parent.<ownParentKey>` published single-segment self-key targets its parent. Direct Lua validation, shared Frame/FontString generation, sibling and missing-key handling remain unchanged; this is not native WoW parity. Executed pre-producer Mists `a90f84c5d` RED is 1 PASS / 1 FAIL, actual exit101: real cached ModelScene/ProductChoice prerequisites reach the layer-child self-anchor failure, while direct Lua rejection preserves two points and the distinct-target control passes. Producer GREEN, normal startup and named prefork acceptance remain pending.
 
+## Texture XML bounded runtime checkpoint — 2026-10-13
+
+[Owning acceptance](../../specs/xml-self-relative-key.md#known-gaps-current-cycle) and [evidence index](../../../data/patch-api/evidence/xml-self-relative-key-2026-10-13/README.md) separate focused Mists GREEN, cached normal startup, shared anchor controls and named prefork proof from publication integrity. Historical source-only pending labels remain above. Store fixture mismatches retain both FAILs; actual sibling identity/card bounds, native/rendered and full-parent acceptance remain unproved.
+
 ## Sources
 
 - [xml-template-system.md](../../xml-template-system.md) — XML types, registry, inheritance, conversion pipeline, inline scripts

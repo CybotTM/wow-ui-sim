@@ -80,6 +80,10 @@ Temporary logging was removed after the sealed capture; three Rust files restore
 
 Producer GREEN, normal startup and named prefork acceptance are pending. The [historical source844 packet](../../../data/patch-api/evidence/mists-source-fade-phase-2026-10-11/current-844-2026-10-13/README.md) retains one selected cast PASS after 0.55 seconds and separate normal CLI self-anchor FAIL; neither attributes the anonymous baseline frame to ProductChoice. Two earlier admission denials are separate zero-launch records, not behavioral RED.
 
+## XML producer bounded runtime checkpoint — 2026-10-13
+
+[Owning acceptance](../../specs/xml-self-relative-key.md#known-gaps-current-cycle) and [evidence index](../../../data/patch-api/evidence/xml-self-relative-key-2026-10-13/README.md) own current focused/normal/shared-anchor/named-prefork gates. Normal cached Mists startup is independently CLEAN; named cast control still settles0.55s before hidden assertions and retains captured diagnostic read errors. This does not attribute the original first visibility writer, erase immediate-hidden FAIL, prove native parity, or establish full-parent acceptance. Initial77-copy gate PASS is separate from pending follow-up publication.
+
 ## Sources
 
 - Private `handoff/mists-load-visibility-final.md` — earliest shown state, XML/loader observations, identity limits.
