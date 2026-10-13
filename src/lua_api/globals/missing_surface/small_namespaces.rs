@@ -63,7 +63,10 @@ const C_GARRISON_INFO_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &
 ];
 
 const C_ASSISTED_COMBAT_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
-    ("GetActionSpell", c_assisted_combat_get_action_spell),
+    (
+        "GetActionSpell",
+        crate::c_api::c_assisted_combat_action::query_action_spell,
+    ),
     ("GetNextCastSpell", c_assisted_combat_get_next_cast_spell),
     ("GetRotationSpells", c_assisted_combat_get_rotation_spells),
     ("IsAvailable", c_assisted_combat_is_available),
@@ -214,11 +217,6 @@ fn c_garrison_info_has_garrison(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_garrison_info_get_garrison_type(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
-    Ok(1)
-}
-
-fn c_assisted_combat_get_action_spell(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
     Ok(1)
 }
 

@@ -43,6 +43,7 @@ pub mod c_area_poi_info;
 pub mod c_arrow_callout_manager;
 pub mod c_artifact_relic_forge_ui;
 pub mod c_artifact_ui;
+pub(crate) mod c_assisted_combat_action;
 #[cfg(feature = "aura-containers")]
 pub mod c_aura_container_util;
 pub mod c_auto_complete;

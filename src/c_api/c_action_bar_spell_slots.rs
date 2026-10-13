@@ -10,6 +10,12 @@ pub(crate) fn register(state: &mut LuaState, namespace: GcRef<Table>) -> LuaResu
     table_set_rust_fn_static(
         state,
         namespace,
+        "FindAssistedCombatActionButtons",
+        find_assisted_combat_action_buttons,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        namespace,
         "FindSpellActionButtons",
         find_spell_action_buttons,
     )?;
@@ -46,19 +52,49 @@ fn find_spell_action_buttons(state: &mut LuaState) -> LuaResult<u32> {
         1,
         "C_ActionBar.FindSpellActionButtons",
     )?;
-    let mut slots = match spell_id {
+    let slots = match spell_id {
         Some(id) => {
             let sim = borrow_state(state)?;
-            effective_spell_slots(&sim, id).collect::<Vec<_>>()
+            collect_sorted_spell_slots(&sim, id)
         }
         None => Vec::new(),
     };
-    // Deterministic ascending order and one empty table on miss are inferred policies.
-    slots.sort_unstable();
+    // One empty table on miss is an inferred direct-query policy.
     let table = create_table(state);
     state.push(table);
     for (index, slot) in slots.into_iter().enumerate() {
         super::helpers::set_table_array(state, table, (index + 1) as i64, Val::Num(slot as f64));
+    }
+    Ok(1)
+}
+
+fn collect_sorted_spell_slots(sim: &SimState, spell_id: u32) -> Vec<u32> {
+    let mut slots: Vec<_> = effective_spell_slots(sim, spell_id).collect();
+    // Deterministic ascending order is simulator policy, not native ordering.
+    slots.sort_unstable();
+    slots
+}
+
+fn find_assisted_combat_action_buttons(state: &mut LuaState) -> LuaResult<u32> {
+    let slots = {
+        let sim = borrow_state(state)?;
+        sim.assisted_combat
+            .action_spell_id
+            .map(|id| collect_sorted_spell_slots(&sim, id))
+    };
+    let Some(slots) = slots.filter(|slots| !slots.is_empty()) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let table = create_table(state);
+    state.push(table);
+    for (index, slot) in slots.into_iter().enumerate() {
+        super::helpers::set_table_array(
+            state,
+            table,
+            (index + 1) as i64,
+            Val::Num(f64::from(slot)),
+        );
     }
     Ok(1)
 }
