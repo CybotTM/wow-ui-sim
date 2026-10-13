@@ -1,6 +1,6 @@
 # Current LFG follower dungeon
 
-`C_LFGInfo.IsInLFGFollowerDungeon()` reports current instance membership from existing world LFG ID and dungeon classification. [Patch 10.2.5 source](../../data/patch-api/sources/10.2.5-api-changes.txt) publishes the function; cached `LFGInfoDocumentation.lua` declares zero arguments and one nonnil boolean. Current constant-false compatibility behavior is not a modeled query.
+`C_LFGInfo.IsInLFGFollowerDungeon()` reports current instance membership from existing world LFG ID and dungeon classification. [Patch 10.2.5 source](../../data/patch-api/sources/10.2.5-api-changes.txt) publishes the function; cached `LFGInfoDocumentation.lua` declares zero arguments and one nonnil boolean. The modeled query replaces the former constant-false compatibility path.
 
 ## What it must do
 
@@ -19,18 +19,20 @@
 
 ## Implementation inventory
 
-- `src/c_api/c_lfg_info.rs`: existing dungeon classification and new query destination.
-- `src/lua_api/workarounds/temporary/lfg_legacy_defaults.rs`: current constant-false path to replace.
-- `src/lua_api/globals/admin_zone_economy.rs`: existing host instance setter.
+- `src/c_api/c_lfg_info.rs`: live query over existing world ID and dungeon classification, retaining the former stub's registration/profile applicability.
+- `src/lua_api/workarounds/temporary/lfg_legacy_defaults.rs`: constant-false path removed; fallback-shape test no longer clears or asserts the modeled method.
+- `src/lua_api/globals/admin_zone_economy.rs`: optional fifth `Option<i32>` host input replaces the current LFG ID; omitted/nil clears it.
 - Existing world `instance_lfg_dungeon_id` and `lfd_dungeons` classification: no new catalog needed.
 
 ## Tests asserting this spec
 
-`tests/lfg_follower_instance.rs`: eight unrun cases for positive/false matrices, live mutation/isolation, optional host input/clearing, existing projections and exact cached caller logic. No RED/GREEN claim yet.
+`tests/lfg_follower_instance.rs`: eight cases for positive/false matrices, live mutation/isolation, optional host input/clearing, existing projections and exact cached caller logic. Genuine RED at `080833f1d`, read from `/home/osso/.local/state/wow-ui-sim/verification/patch-pass2-main-build-current/admitted-native-20261013T011400020026Z/runtime-scoped-20261013T013111696766Z/report.md`: one false-control pass, seven failures at the constant-false query, unstored optional host ID and cached caller name (`Uther` versus `Follower: Uther`); downstream transitions were not reached. GREEN pending.
+
+The cached caller fixture executes unchanged contiguous `CompactUnitFrame.lua` function definitions. Fixture-only probes control AI membership, walk-in and spectator inputs, with a formatting sentinel; this does not model AI state or establish native/localized wording.
 
 ## Known gaps (current cycle)
 
-- [ ] Execute genuine RED before new query/host input production, then targeted GREEN and verification.
+- [ ] Targeted GREEN and verification after implementation handoff; genuine pre-fix RED recorded in the report above.
 - [ ] Validate narrow cached-caller fixture at execution; no full UnitFrame/startup claim.
 
 ## Out of scope

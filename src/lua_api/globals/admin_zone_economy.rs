@@ -38,11 +38,13 @@ pub(super) fn set_instance_info(state: &mut LuaState) -> LuaResult<u32> {
     let inst_type = String::from_stack(state, 2)?;
     let difficulty = i32::from_stack(state, 3)?;
     let max_players = i32::from_stack(state, 4)?;
+    let lfg_dungeon_id = Option::<i32>::from_stack(state, 5)?;
     let mut st = borrow_state_mut(state)?;
     st.world.instance_name = name;
     st.world.instance_type = inst_type;
     st.world.instance_difficulty = difficulty;
     st.world.instance_max_players = max_players;
+    st.world.instance_lfg_dungeon_id = lfg_dungeon_id;
     st.world.in_instance = true;
     Ok(0)
 }

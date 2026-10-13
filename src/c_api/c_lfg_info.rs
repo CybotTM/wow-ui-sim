@@ -120,6 +120,12 @@ fn register_dungeon_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> Lu
     table_set_rust_fn_static(
         state,
         table_ref,
+        "IsInLFGFollowerDungeon",
+        is_in_lfg_follower_dungeon,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
         "IsLFGFollowerDungeon",
         is_lfg_follower_dungeon,
     )?;
@@ -254,6 +260,22 @@ fn is_lfg_mode_active_for_category(state: &mut LuaState) -> LuaResult<u32> {
 
 fn is_lfg_category_active(active_categories: &HashSet<i32>, category_id: i32) -> bool {
     active_categories.contains(&category_id)
+}
+
+/// `C_LFGInfo.IsInLFGFollowerDungeon()` -> bool.
+fn is_in_lfg_follower_dungeon(state: &mut LuaState) -> LuaResult<u32> {
+    let is_follower = {
+        let sim = borrow_state(state)?;
+        sim.world.in_instance
+            && sim.world.instance_lfg_dungeon_id.is_some_and(|id| {
+                sim.lfd_dungeons
+                    .iter()
+                    .find(|dungeon| dungeon.dungeon_id == id)
+                    .is_some_and(|dungeon| dungeon.is_follower_dungeon)
+            })
+    };
+    state.push(Val::Bool(is_follower));
+    Ok(1)
 }
 
 /// `C_LFGInfo.IsLFGFollowerDungeon(dungeonID)` -> bool.

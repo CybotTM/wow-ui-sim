@@ -27,15 +27,16 @@ A_Admin.SetSubZone("The Valley of Strength")
 print(GetSubZoneText())     -- "The Valley of Strength"
 ```
 
-### A_Admin.SetInstanceInfo(name, instanceType, difficulty, maxPlayers)
+### A_Admin.SetInstanceInfo(name, instanceType, difficulty, maxPlayers, lfgDungeonID?)
 
-Configures the current instance information.
+Configures the current instance information and sets `in_instance` to true.
 
 - **name** `string` -- Instance name (e.g., `"Blackrock Depths"`)
 - **instanceType** `string` -- Instance category: `"none"`, `"party"`, `"raid"`, `"pvp"`, `"arena"`, `"scenario"`
 - **difficulty** `number` -- Difficulty ID (e.g., `1` = Normal, `2` = Heroic, `14` = Normal Raid)
 - **maxPlayers** `number` -- Maximum group size for this instance
-- **Affects:** `GetInstanceInfo()` -- returns name, instanceType, difficultyID, difficultyName, maxPlayers, ...
+- **lfgDungeonID** `number?` -- Current LFG dungeon ID; omitted or nil clears the previous ID. Stored without catalog validation or inference from other inputs.
+- **Affects:** `GetInstanceInfo()` -- existing first four inputs retain their outputs; tenth result is the supplied LFG ID or nil. `IsInLFGDungeon()` reports active instance with any supplied ID. `C_LFGInfo.IsInLFGFollowerDungeon()` reports active instance with a known follower-classified ID; unknown/missing/non-follower IDs return false.
 - **Example:**
 ```lua
 A_Admin.SetInstanceInfo("Blackrock Depths", "party", 1, 5)
@@ -45,10 +46,10 @@ local name, itype, diff, diffName, max = GetInstanceInfo()
 
 ### A_Admin.SetInInstance(inInstance)
 
-Toggles the IsInInstance() return value.
+Toggles the IsInInstance() return value without clearing the current LFG dungeon ID.
 
 - **inInstance** `boolean`
-- **Affects:** `IsInInstance()`
+- **Affects:** `IsInInstance()`, `IsInLFGDungeon()`, `C_LFGInfo.IsInLFGFollowerDungeon()`; outside-instance membership is false even with a retained LFG ID.
 - **Example:**
 ```lua
 A_Admin.SetInInstance(true)

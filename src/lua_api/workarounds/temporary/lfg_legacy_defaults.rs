@@ -101,12 +101,6 @@ if rawget(C_LFGInfo or {}, "CanPlayerUseGroupFinder") == nil then
         return false, ""
     end
 end
-if rawget(C_LFGInfo or {}, "IsInLFGFollowerDungeon") == nil then
-    C_LFGInfo = C_LFGInfo or __wow_namespace()
-    function C_LFGInfo.IsInLFGFollowerDungeon()
-        return false
-    end
-end
 if rawget(C_LFGInfo or {}, "CanPlayerUseLFR") == nil then
     C_LFGInfo = C_LFGInfo or __wow_namespace()
     function C_LFGInfo.CanPlayerUseLFR()
@@ -317,7 +311,6 @@ mod tests {
         env.exec(
             r#"
             C_LFGInfo.CanPlayerUseGroupFinder = nil
-            C_LFGInfo.IsInLFGFollowerDungeon = nil
             C_LFGInfo.CanPlayerUseLFR = nil
             C_LFGInfo.GetDungeonInfo = nil
             C_LFGInfo.GetLFDLockStates = nil
@@ -344,7 +337,6 @@ mod tests {
                 r#"
                 local canUse, reason = C_LFGInfo.CanPlayerUseGroupFinder()
                 if canUse ~= false or reason ~= "" then return "group_finder" end
-                if C_LFGInfo.IsInLFGFollowerDungeon() ~= false then return "follower" end
                 local canUseLfr, lfrReason = C_LFGInfo.CanPlayerUseLFR()
                 if canUseLfr ~= true or lfrReason ~= nil then return "lfr" end
                 if #C_LFGInfo.GetDungeonInfo(1) ~= 0 then return "dungeon_info" end
