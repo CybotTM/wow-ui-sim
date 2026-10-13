@@ -1,3 +1,7 @@
+## [2026-10-13] docs | Speak four-profile publication
+
+Updated only [voice inventory](systems/lua-api.md) and index to link [profile-publication scope](../specs/voice-speak-for-me-active-input.md#documented-profile-publication) after query-only `2630c0ccf`. Retail/PTR floor and other channel gates preserved; Mists/Forever introduced; three unknown profiles unchanged/unproved. Main-observed Mists abb RED2 proves nil type failures, not later values/isolation/restoration; E0603 and bwrap setup failures separate. GREEN/source3781 pending; older Retail a8/978 proof revision-scoped. Privacy follow-up3779 unchanged. Main owns commit.
+
 ## [2026-10-13] docs | Public Speak GREEN and separate PERF2
 
 [Public GREEN packet](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#current-green-public-packet--2026-10-13) links copied source/runtime PASS reports; initial artifact retention PASS; path hygiene FAIL, current follow-up PENDING. [Owning contract](../specs/voice-speak-for-me-active-input.md) separates six voice cases from startup/check/source scopes. [PERF2 SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-perf2-checkpoint--2026-10-13) retains two exact budget cases, not CLEAN/global coverage or historical CCD comparability. Frozen RED/CCD unchanged; docs only, main owns commit.
