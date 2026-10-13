@@ -1,0 +1,8 @@
+{
+  "status": "FAIL beforepublicwrites",
+  "error": "unparseable nested JSON encoding",
+  "questionable_assumption": "JSONlookingprooftextisnecessarilyserializedJSON",
+  "action": "Stoppedscannereditsafterthreefailedfixiterations; independentread-onlyexactvalueclassificationagent4057pending",
+  "public_writes": 0,
+  "historical_originals": "unchanged"
+}
