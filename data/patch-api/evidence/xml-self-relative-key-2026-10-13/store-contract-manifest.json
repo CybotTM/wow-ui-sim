@@ -7,5 +7,5 @@
   "projected_text_sha256": "f01c7a8f15cc020d5f6191c40a9c085c796a5cbb96d82d7c109281dc22a22564",
   "destination": "store-contract-counterexample.md",
   "line_count": 48,
-  "copy_gate": "PENDING"
+  "copy_gate": "PASS: independent whole-TEXT/privacy/link gate; initial77 proof reused unchanged"
 }
