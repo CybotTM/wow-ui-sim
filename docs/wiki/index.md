@@ -1,3 +1,7 @@
+## [2026-10-13] source | TextWithState input-only stage
+
+[State inventory](systems/ui-widget-manager-state.md#textwithstate-input-only-checkpoint--2026-10-13) links the [staged contract](../specs/ui-widget-text-with-state.md); no completion claim.
+
 ## [2026-10-13] docs | Speak four-profile publication
 
 [Voice inventory](systems/lua-api.md) links the [profile-publication scope](../specs/voice-speak-for-me-active-input.md#documented-profile-publication): query-only `2630c0ccf`, Retail/PTR floor preserved, Mists/Forever introduced, three unknown profiles unchanged. Mists `abb979c44` RED2 reached `got nil` type failures only; GREEN/source3781 pending. Older Retail proof remains revision-scoped.

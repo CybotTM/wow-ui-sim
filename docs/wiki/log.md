@@ -1,3 +1,7 @@
+## [2026-10-13] docs | TextWithState input-only stage
+
+Added [owning inventory](systems/ui-widget-manager-state.md#textwithstate-input-only-checkpoint--2026-10-13) and index pointer to the [staged contract](../specs/ui-widget-text-with-state.md); execution remains unverified.
+
 ## [2026-10-13] docs | Speak four-profile publication
 
 Updated only [voice inventory](systems/lua-api.md) and index to link [profile-publication scope](../specs/voice-speak-for-me-active-input.md#documented-profile-publication) after query-only `2630c0ccf`. Retail/PTR floor and other channel gates preserved; Mists/Forever introduced; three unknown profiles unchanged/unproved. Main-observed Mists abb RED2 proves nil type failures, not later values/isolation/restoration; E0603 and bwrap setup failures separate. GREEN/source3781 pending; older Retail a8/978 proof revision-scoped. Privacy follow-up3779 unchanged. Main owns commit.

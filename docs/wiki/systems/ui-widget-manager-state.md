@@ -51,6 +51,10 @@ No native catalog, server transport, interpolation parity, dynamic HUD rebinding
 
 [Discrete contract](../../specs/ui-widget-discrete-progress-steps.md) owns the complete19-field supplied-record/type19 slice. Historical `42f206f66` stage added DTO, empty keyed map and five direct-seeded query/security/actual-cache cases only. Getter, registration and typed feed were absent at that stage; initial compilation/RED were unrun. Later genuine RED and producer source are recorded above. Initial supplied-record assertions precede cache/atlas prerequisites; downstream lifecycle assertions are not evidence until reached. Existing `eyeofthejailer` atlas metadata grounds fixture names, not asset extraction/render/native parity. No vendor or demo catalog changes.
 
+### TextWithState input-only checkpoint — 2026-10-13
+
+[TextWithState staged contract](../../specs/ui-widget-text-with-state.md) owns the type8 supplied-input inventory and unexecuted test boundaries at `64a2a57b2`. Getter projection/registration and real cached-consumer acceptance remain unverified; this is input staging, not a completed producer.
+
 ## Sources
 
 - [UIWidgetManager contract](../../specs/ui-widget-manager-state.md) — required behavior, staged tests, and historical RED boundary.
