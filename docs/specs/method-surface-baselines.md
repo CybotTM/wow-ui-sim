@@ -26,6 +26,10 @@ Method-surface comparisons must select the baseline for the current compiled con
 
 - `tests/method_diff_coverage.rs` — both exact assertions pass for default Retail and explicitly selected Wrath (four cases). Wrath controls detect one deleted row and one absent fixture; ignored refresh passes with all protected bytes unchanged. Selected-only writes are additionally source-inspected. See [retained receipts](../../data/patch-api/evidence/narrow-repairs-2026-10-09/integrated/method-baseline-selection/).
 
+## Path receiver reconciliation
+
+Current `6b522c595` default-Retail comparison executes missing PASS and extra FAIL solely on sixteen stale `CreateControlPoint` entries (Button, CheckButton, ColorSelect, Cooldown, EditBox, FontString, Frame, GameTooltip, MessageFrame, Model, PlayerModel, ScrollFrame, SimpleHTML, Slider, StatusBar, Texture). Path creation now attaches that method only to Path tables, rather than the shared ordinary-frame index. Remove exactly those observed resolved entries from the selected root extra fixture; discovery, missing fixture, other configurations and native captures remain unchanged. This records simulator surface, not native parity. The baseline is read at runtime; corrected extra assertion remains pending without rebuilding unchanged source or rerunning unaffected tests.
+
 ## Known gaps (current cycle)
 
 - [x] Verify selection, exact assertions, selected-only refresh, and explicit missing-baseline failure at `67598f430`: source audit, Retail/Wrath positives and Wrath controls independently accepted; formatting/check exit 0 with existing warnings.

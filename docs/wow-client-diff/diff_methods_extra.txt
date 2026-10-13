@@ -53,7 +53,6 @@ Button:CloseCheckout
 Button:CopyTooltip
 Button:CreateActor
 Button:CreateAnimation
-Button:CreateControlPoint
 Button:CreateVectorGraphics
 Button:CycleVariation
 Button:DrawBlob
@@ -808,7 +807,6 @@ CheckButton:CloseCheckout
 CheckButton:CopyTooltip
 CheckButton:CreateActor
 CheckButton:CreateAnimation
-CheckButton:CreateControlPoint
 CheckButton:CreateVectorGraphics
 CheckButton:CycleVariation
 CheckButton:DrawBlob
@@ -1561,7 +1559,6 @@ ColorSelect:CloseCheckout
 ColorSelect:CopyTooltip
 ColorSelect:CreateActor
 ColorSelect:CreateAnimation
-ColorSelect:CreateControlPoint
 ColorSelect:CreateVectorGraphics
 ColorSelect:CycleVariation
 ColorSelect:Disable
@@ -2339,7 +2336,6 @@ Cooldown:CloseCheckout
 Cooldown:CopyTooltip
 Cooldown:CreateActor
 Cooldown:CreateAnimation
-Cooldown:CreateControlPoint
 Cooldown:CreateVectorGraphics
 Cooldown:CycleVariation
 Cooldown:Disable
@@ -3092,7 +3088,6 @@ EditBox:CloseCheckout
 EditBox:CopyTooltip
 EditBox:CreateActor
 EditBox:CreateAnimation
-EditBox:CreateControlPoint
 EditBox:CreateVectorGraphics
 EditBox:CycleVariation
 EditBox:DrawBlob
@@ -3815,7 +3810,6 @@ FontString:CloseCheckout
 FontString:CopyTooltip
 FontString:CreateActor
 FontString:CreateAnimation
-FontString:CreateControlPoint
 FontString:CreateFontString
 FontString:CreateLine
 FontString:CreateMaskTexture
@@ -4661,7 +4655,6 @@ Frame:CloseCheckout
 Frame:CopyTooltip
 Frame:CreateActor
 Frame:CreateAnimation
-Frame:CreateControlPoint
 Frame:CreateVectorGraphics
 Frame:CycleVariation
 Frame:Disable
@@ -5460,7 +5453,6 @@ GameTooltip:Click
 GameTooltip:CloseCheckout
 GameTooltip:CreateActor
 GameTooltip:CreateAnimation
-GameTooltip:CreateControlPoint
 GameTooltip:CreateVectorGraphics
 GameTooltip:CycleVariation
 GameTooltip:Disable
@@ -6236,7 +6228,6 @@ MessageFrame:CloseCheckout
 MessageFrame:CopyTooltip
 MessageFrame:CreateActor
 MessageFrame:CreateAnimation
-MessageFrame:CreateControlPoint
 MessageFrame:CreateVectorGraphics
 MessageFrame:CycleVariation
 MessageFrame:Disable
@@ -7009,7 +7000,6 @@ Model:CloseCheckout
 Model:CopyTooltip
 Model:CreateActor
 Model:CreateAnimation
-Model:CreateControlPoint
 Model:CreateVectorGraphics
 Model:CycleVariation
 Model:Disable
@@ -7741,7 +7731,6 @@ PlayerModel:CloseCheckout
 PlayerModel:CopyTooltip
 PlayerModel:CreateActor
 PlayerModel:CreateAnimation
-PlayerModel:CreateControlPoint
 PlayerModel:CreateVectorGraphics
 PlayerModel:CycleVariation
 PlayerModel:Disable
@@ -8459,7 +8448,6 @@ ScrollFrame:CloseCheckout
 ScrollFrame:CopyTooltip
 ScrollFrame:CreateActor
 ScrollFrame:CreateAnimation
-ScrollFrame:CreateControlPoint
 ScrollFrame:CreateVectorGraphics
 ScrollFrame:CycleVariation
 ScrollFrame:Disable
@@ -9252,7 +9240,6 @@ SimpleHTML:CloseCheckout
 SimpleHTML:CopyTooltip
 SimpleHTML:CreateActor
 SimpleHTML:CreateAnimation
-SimpleHTML:CreateControlPoint
 SimpleHTML:CreateVectorGraphics
 SimpleHTML:CycleVariation
 SimpleHTML:Disable
@@ -10026,7 +10013,6 @@ Slider:CloseCheckout
 Slider:CopyTooltip
 Slider:CreateActor
 Slider:CreateAnimation
-Slider:CreateControlPoint
 Slider:CreateVectorGraphics
 Slider:CycleVariation
 Slider:DrawBlob
@@ -10806,7 +10792,6 @@ StatusBar:CloseCheckout
 StatusBar:CopyTooltip
 StatusBar:CreateActor
 StatusBar:CreateAnimation
-StatusBar:CreateControlPoint
 StatusBar:CreateVectorGraphics
 StatusBar:CycleVariation
 StatusBar:Disable
@@ -11590,7 +11575,6 @@ Texture:CloseCheckout
 Texture:CopyTooltip
 Texture:CreateActor
 Texture:CreateAnimation
-Texture:CreateControlPoint
 Texture:CreateFontString
 Texture:CreateLine
 Texture:CreateMaskTexture
