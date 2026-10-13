@@ -1,6 +1,6 @@
 # Global voice transcription activity
 
-`VoiceChatState.is_transcribing: bool` supplies global transcription activity independently of permission and channel snapshots. False default is simulator policy, not native default or aggregation. Query producer remains absent; three prospective tests are uncompiled/unexecuted. Architecture: [Lua API](../lua-api.md).
+`VoiceChatState.is_transcribing: bool` supplies global transcription activity independently of permission and channel snapshots. False default is simulator policy, not native default or aggregation. Query producer is registered; three pre-producer cases executed RED, current producer GREEN remains pending. Architecture: [Lua API](../lua-api.md).
 
 ## What it must do
 
@@ -20,18 +20,19 @@
 |---|---|
 | `src/lua_api/sim_substates/mod.rs` | Explicit global input/default; no getter. |
 | `src/lua_api/state/sim_state.rs`, `src/lua_api/state.rs` | Existing environment-owned voice state and separate channel collection. |
-| `src/c_api/c_voice_chat_channels.rs` | Existing channel selectors and fresh DTO snapshots, unchanged. |
+| `src/c_api/c_voice_chat_channels.rs` | Existing channel selectors/fresh DTO snapshots plus the independent global activity getter. |
 | `src/lua_api/globals/missing_surface/voice_chat.rs` | Existing voice/permission queries, unchanged. |
-| `tests/voice_transcribing_input.rs` | Three prospective tests under shared `retail-12-0-5` capability. |
+| `tests/voice_transcribing_input.rs` | Three query tests under shared `retail-12-0-5` capability. |
 
 ## Tests asserting this spec
 
-Generated `--test integration` filter `voice_transcribing_input::` (expected three): default/publication/arity/type; live retained query and environment isolation; permission/channel snapshot independence, conflicting inputs and disconnected/empty state. Existing `GetChannelForChannelType` and `GetChannelForCommunityStream` providers supply full snapshots including `isTranscribing`. Missing new query is an intended behavioral boundary, not a setup workaround. All tests UNCOMPILED/UNRUN.
+Generated `--test integration` filter `voice_transcribing_input::` (expected three): default/publication/arity/type; live retained query and environment isolation; permission/channel snapshot independence, conflicting inputs and disconnected/empty state. Existing `GetChannelForChannelType` and `GetChannelForCommunityStream` providers supply full snapshots including `isTranscribing`. Missing new query is an intended behavioral boundary, not a setup workaround. All three fail their real activity-query assertions at `ff72f3c3b`; no observed fixture failures. Later channel/conflict/transition assertions remain unreached where earlier assertions fail. Current producer GREEN is pending.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile and execute tests against unchanged query surface; fixture/compile failures are not behavioral RED.
-- [ ] Add minimal C_API getter after genuine RED, then bounded GREEN and applicable startup/check proof.
+- [x] Compile and execute genuine query-boundary RED against unchanged surface; fixture/compile failures are not behavioral RED.
+- [x] Add minimal C_API getter after genuine RED.
+- [ ] Execute bounded GREEN and applicable startup/check proof.
 - [ ] Actual cached caller test withheld until `IsSpeakForMeActive()` prerequisite is source-established.
 
 ## Out of scope

@@ -1,4 +1,5 @@
-//! Host channel snapshots; selectors preserve opaque community identifiers.
+//! Host channel snapshots and independent global transcription activity.
+//! Channel selectors preserve opaque community identifiers.
 //! No voice transport, membership mutation or chat-lockdown secrecy model.
 
 use crate::lua_api::methods::{
@@ -35,8 +36,15 @@ pub struct VoiceMember {
 
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = super::ensure_namespace(state, "C_VoiceChat")?;
+    table_set_rust_fn_static(state, namespace, "IsTranscribing", query_transcribing)?;
     table_set_rust_fn_static(state, namespace, "GetChannelForChannelType", by_type)?;
     table_set_rust_fn_static(state, namespace, "GetChannelForCommunityStream", by_stream)
+}
+
+fn query_transcribing(state: &mut LuaState) -> LuaResult<u32> {
+    let transcribing = borrow_state(state)?.voice_chat.is_transcribing;
+    state.push(Val::Bool(transcribing));
+    Ok(1)
 }
 
 fn by_type(state: &mut LuaState) -> LuaResult<u32> {
