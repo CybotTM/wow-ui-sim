@@ -339,6 +339,9 @@ pub struct VoiceChatState {
     /// Whether the local player is currently transmitting voice.
     /// Drives `VoiceChat_IsTalking`.
     pub talking: bool,
+    /// Explicit global transcription activity; false default is simulator policy.
+    /// Independent of permission and per-channel snapshots, not native aggregation.
+    pub is_transcribing: bool,
     /// Simulated channel list. Drives `GetChannels`, `GetChannel`, etc.
     pub channels: Vec<VoiceChannel>,
     /// ID of the currently active channel, or None. Drives `GetActiveChannelID`.
@@ -365,6 +368,7 @@ impl Default for VoiceChatState {
             using: false,
             connecting: false,
             talking: false,
+            is_transcribing: false,
             channels: seeded_voice_channels(),
             active_channel_id: Some(1),
             connection_status: 2,
