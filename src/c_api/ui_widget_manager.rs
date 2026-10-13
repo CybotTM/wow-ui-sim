@@ -11,6 +11,7 @@ pub use bar_records::{CaptureBarRecord, StatusBarRecord};
 mod feed;
 mod fixtures;
 mod inputs;
+mod spell_display;
 mod spell_display_record;
 mod text_state;
 mod text_state_record;

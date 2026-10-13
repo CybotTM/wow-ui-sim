@@ -8,7 +8,7 @@ use crate::common::blizzard_addon_harness::{
 use wow_ui_sim::c_api::ui_widget_manager::{SpellDisplayRecord, WidgetVisualization};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-fn consumer_env(attached: bool) -> WowLuaEnv {
+fn load_and_register_spell_container_env(attached: bool) -> WowLuaEnv {
     let cache = wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("active profile cache");
     let env = new_blizzard_addon_env(&cache);
     seed_record(&env, ID, supplied_record());
@@ -104,7 +104,7 @@ fn flush(env: &WowLuaEnv, count: usize) {
 
 #[test]
 fn spell_display_cached_activation_update_hidden_restore_remove() {
-    let env = consumer_env(false);
+    let env = load_and_register_spell_container_env(false);
     supply(&env, supplied_record(), false);
     assert_lua(
         &env,
@@ -189,7 +189,7 @@ fn spell_display_cached_activation_update_hidden_restore_remove() {
 
 #[test]
 fn spell_display_attached_player_context_separate_from_world_loot_policy() {
-    let env = consumer_env(true);
+    let env = load_and_register_spell_container_env(true);
     supply(&env, supplied_record(), true);
     assert_lua(
         &env,
@@ -207,7 +207,7 @@ fn spell_display_attached_player_context_separate_from_world_loot_policy() {
 
 #[test]
 fn spell_display_zero_spell_polling_uses_real_on_update_without_feed_notification() {
-    let env = consumer_env(false);
+    let env = load_and_register_spell_container_env(false);
     let mut row = supplied_record();
     row.spell_info.spell_id = 0.0;
     supply(&env, row, false);

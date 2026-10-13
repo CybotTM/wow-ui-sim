@@ -1,4 +1,4 @@
-//! SpellDisplay input-scaffold tests. No getter implementation; execution proof lives in the spec.
+//! Supplied SpellDisplay getter/feed/consumer tests; execution proof lives in the spec.
 #![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 #[path = "widget_spell_display/consumer.rs"]
 mod consumer;

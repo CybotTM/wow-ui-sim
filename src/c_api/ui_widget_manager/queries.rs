@@ -20,6 +20,7 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     super::bars::register(state)?;
     super::discrete::register(state)?;
     super::text_state::register(state)?;
+    super::spell_display::register(state)?;
     super::hud::register(state)
 }
 
