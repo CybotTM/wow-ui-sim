@@ -40,7 +40,7 @@ Cached `VoiceChatDocumentation.lua` directly declares the zero-argument, one non
 
 - [x] Expose only the modeled activity query for the four directly documented profiles through `src/c_api/`; preserve the existing Retail/PTR `retail-12-0-5` epoch floor and unrelated channel gates. No new publication on unproved Wrath/Era/Anniversary profiles.
 - [x] Execute Mists result-boundary RED before changing publication at `abb979c44`: 0 PASS / 2 FAIL, actual wait exit101. Both supplied false and retained supplied true calls reach arity checks then fail boolean assertions with explicit `got nil` diagnostics; later value/isolation/restoration assertions are unreached. Initial missing bwrap target mountpoint failed before execution (wait1, zero tests), separately retained; the earlier `be2fa83fb` private-module E0603 compile failure is not RED. `tests/voice_speak_for_me_profile_input.rs` also applies to WoW Forever, not yet executed there.
-- [ ] Verify Mists/WoW Forever GREEN and Retail/PTR preservation, with independent source/runtime proof. Earlier Retail evidence remains revision-scoped.
+- [ ] Verify Mists/WoW Forever GREEN and Retail/PTR preservation, with independent source/runtime proof. Earlier Retail evidence remains revision-scoped. [Profile packet](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#documented-profile-query-publication--2026-10-13) owns reached RED boundaries, setup failures, source proof, warnings and pending retained-text gate.
 
 ## Known gaps (current cycle)
 
