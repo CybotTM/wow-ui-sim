@@ -29,7 +29,8 @@ At `5bd208dba`, seventeen scoped cases pass (argument2, bar1, atlas-regression10
 
 Historical genuine RED at `21aabeaf1`: existing argument validation PASS, application-result assertion FAIL with `actual=0`; cached bar assertion59 observes NeutralBar=true, Glow3=false and SparkNeutral=false despite expected atlases. Later phases were unreached in that attempt. Initial delimiter compilation failure at `d1c5b4cb8` executed zero cases and is not behavioral RED. Later Retail GREEN does not rewrite either failure.
 
-- [ ] Affected PTR/profile acceptance and broader parent gates remain pending.
+- [x] Bounded PTR argument2/atlas-regression10 and actual cached bar1/HUD2 pass in separate executed scopes; [checkpoint](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-ptr-and-owning-checkpoints--2026-10-13) owns receipts and reuse boundaries.
+- [ ] Other-profile, native return parity and broader parent gates remain pending.
 
 ## Out of scope
 

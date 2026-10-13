@@ -63,7 +63,7 @@ Latest bounded core evidence: two lifecycle cases physically pass at `e887` (sco
 
 ## Next-slice tests and proof gaps
 
-PTR source checkpoint: consumer files now admit `client-ptr` and print their actual active-cache path. Both route through `default_blizzard_ui_addons_path` → active-profile cache; no Retail pin, vendor changes or assertion changes. Previous PTR26 PASS excludes these three consumer cases; new PTR bar1/HUD2 execution remains UNRUN until its own compiled artifact and runtime receipts exist.
+At `1804d1c49`, actual active-PTR-cache bar1/HUD2 pass: three unique cases, both wait exits0, independent saved-evidence audit PASS. The tests use `default_blizzard_ui_addons_path` → active-profile cache, with no Retail pin or vendor/assertion changes. Earlier source34ef/production5bd PTR26/startup remains separate, reused proof, excluding these three consumers. [PTR and owning checkpoint](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-ptr-and-owning-checkpoints--2026-10-13) owns current evidence boundaries; native parity and full-parent acceptance remain OPEN.
 
 Main-reported genuine RED at source `87fecfd31`: eight executed cases, all FAIL. Preserve each failure boundary:
 

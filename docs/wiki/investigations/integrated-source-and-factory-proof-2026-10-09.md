@@ -1,5 +1,17 @@
 # Integrated source and factory proof — 2026-10-09
 
+## Separate PTR and owning checkpoints — 2026-10-13
+
+[Retained followup](../../../data/patch-api/evidence/ui-widget-manager-state-2026-10-13/README.md#ptr-and-owning-followup) preserves three separate executed scopes over production `5bd208dba`:
+
+| Scope | Compiled source | Bounded proof |
+| --- | --- | --- |
+| Earlier PTR query/state/lifecycle/atlas + normal startup | `34ef9235d` | 26 unique PASS; one normal startup, full219 stderr CLEAN; independent audit PASS |
+| Actual active-PTR-cache bar/HUD consumers | `1804d1c49` | bar1/HUD2 = three unique PASS; both actual wait exits0; independent audit PASS |
+| Owning publication sweeps | `b2f161e68` | 3.3.0:11/11 OK; 4.0.1:305/419 OK; 10.2.5:56/59 OK; 11.1.7:46/48 OK; four tests PASS against119 known row gaps, zero new/stale |
+
+Do not combine overlapping scopes or claim all rows GREEN. Latest consumer enablement changes tests/docs only; earlier PTR26/startup and owning sweeps are reused evidence, not rerun at1804. Timeout-child summaries are duplicates, not extra cases. Post-GC service defaults are not exit proof. Runtime filesystem snapshot39ce is distinct from compiled-test identity. [Widget contract](../../specs/ui-widget-manager-state.md) and [atlas policy](../../specs/texture-atlas-application-result.md) own supplied-state and inferred application-result semantics. Native catalogs, native return/unit parity, other-profile and full-parent acceptance remain OPEN; historical failures and frozen CCD suite FAIL remain unchanged.
+
 ## Five-producer and receiver source checkpoint — 2026-10-12
 
 Source implemented/wired through `c490d77f1`: [exact-link item stats and deltas](../../specs/item-stats-supplied.md), [specialization/item-set spell lists](../../specs/item-set-bonuses-supplied.md), [absolute-millisecond Ping DTO](../../specs/ping-cooldown-interval.md), [GUID classification intersected with active party roster](../../specs/party-ai-membership.md), and [seven Retail secure-CVar combat-policy names](../../specs/secure-cvars-10-2-5.md). Specs own policies and known unknowns; this is a source checkpoint, not a complete API inventory or completed goal.

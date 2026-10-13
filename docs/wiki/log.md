@@ -1,3 +1,7 @@
+## [2026-10-13] evidence | Separate PTR consumer and owning checkpoints
+
+[Checkpoint SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-ptr-and-owning-checkpoints--2026-10-13) records separate bounded runtime and publication scopes, without rewriting historical failures or native/full-parent acceptance.
+
 ## [2026-10-13] evidence | Retail cached bar lifecycle and atlas-result policy
 
 [Retained RED/GREEN](../../data/patch-api/evidence/ui-widget-manager-state-2026-10-13/README.md#atlas-application-result-red-and-retail-green) owns current Retail20 PASS, actual cached bar/HUD lifecycle and fresh clean startup/check. [Policy](../specs/texture-atlas-application-result.md) preserves native no-return conflict; historical failures remain unchanged. Affected profiles and full handoff OPEN.
