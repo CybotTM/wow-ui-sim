@@ -282,6 +282,18 @@ pub(crate) mod duration_text_binding;
 #[cfg(feature = "retail-12-0-5")]
 pub mod intl_native;
 pub mod item_spell;
+#[cfg(feature = "retail-12-0-0")]
+mod item_stats;
+#[cfg(feature = "retail-12-0-0")]
+pub use item_stats::ItemStatsState;
+#[cfg(feature = "retail-12-0-0")]
+mod item_set_bonuses;
+#[cfg(feature = "retail-12-0-0")]
+pub use item_set_bonuses::ItemSetBonuses;
+#[cfg(feature = "retail-12-0-0")]
+mod c_ping_cooldown;
+#[cfg(feature = "retail-12-0-0")]
+pub use c_ping_cooldown::PingCooldownInterval;
 #[cfg(feature = "client-mists")]
 pub mod legacy_spell_book;
 pub(crate) mod loss_of_control;

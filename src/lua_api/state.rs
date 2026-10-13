@@ -79,6 +79,14 @@ macro_rules! build_empty_sim_state {
             party_countdown_request: None,
             quest_portrait_state: None,
             tooltips: $collections.tooltips,
+            #[cfg(feature = "retail-12-0-0")]
+            item_stats: crate::c_api::ItemStatsState::default(),
+            #[cfg(feature = "retail-12-0-0")]
+            item_set_bonuses: crate::c_api::ItemSetBonuses::default(),
+            #[cfg(feature = "retail-12-0-0")]
+            ping_cooldown_interval: crate::c_api::PingCooldownInterval::default(),
+            #[cfg(feature = "retail-12-0-0")]
+            party_ai_guids: HashSet::new(),
             #[cfg(feature = "retail-12-0-5")]
             item_tooltip_levels: ::std::collections::HashMap::new(),
             blocked_auras_by_unit: $collections.blocked_auras_by_unit,

@@ -74,6 +74,18 @@ pub struct SimState {
     pub quest_portrait_state: Option<QuestPortraitState>,
     pub cvars: CVarStorage,
     pub tooltips: HashMap<u64, TooltipData>,
+    /// Explicit exact-link fixtures only; initially empty, no catalog producer.
+    #[cfg(feature = "retail-12-0-0")]
+    pub item_stats: crate::c_api::ItemStatsState,
+    /// Explicit (specialization, item) lists only; initially empty.
+    #[cfg(feature = "retail-12-0-0")]
+    pub item_set_bonuses: crate::c_api::ItemSetBonuses,
+    /// Explicit absolute milliseconds; (0, 0) default is simulator policy.
+    #[cfg(feature = "retail-12-0-0")]
+    pub ping_cooldown_interval: crate::c_api::PingCooldownInterval,
+    /// Explicit AI identities only; initially empty, no membership producer.
+    #[cfg(feature = "retail-12-0-0")]
+    pub party_ai_guids: HashSet<String>,
     /// Explicit item-level overrides only; empty default, no native variant catalog.
     #[cfg(feature = "retail-12-0-5")]
     pub item_tooltip_levels: HashMap<crate::c_api::ItemTooltipContext, u16>,
