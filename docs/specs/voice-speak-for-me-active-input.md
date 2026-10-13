@@ -1,6 +1,6 @@
 # Supplied Speak For Me activity
 
-`VoiceChatState.is_speak_for_me_active` supplies independent Speak For Me activity. False initialization is simulator policy, not a native default. Input/test-only stage; query producer and behavioral execution pending. Existing [voice transcription contract](voice-transcribing-input.md) remains distinct.
+`VoiceChatState.is_speak_for_me_active` supplies independent Speak For Me activity. False initialization is simulator policy, not a native default. State-backed query registered after genuine result-boundary RED; GREEN execution pending. Existing [voice transcription contract](voice-transcribing-input.md) remains distinct.
 
 ## What it must do
 
@@ -15,16 +15,16 @@
 ## Implementation inventory
 
 - `src/lua_api/sim_substates/mod.rs`: independent supplied input/default.
-- `src/c_api/c_voice_chat_channels.rs`: intended C_API query/registration; not implemented in input-only stage.
+- `src/c_api/c_voice_chat_channels.rs`: explicit state-backed C_API query/registration.
 - `tests/voice_speak_for_me_active_input.rs`: two behavioral cases under `retail-12-0-5`.
 
 ## Tests asserting this spec
 
-Generated integration filter `voice_speak_for_me_active_input::` selects default/arity/type and retained-query/transition/environment/independence cases. Both begin with an explicit missing-query type assertion; later assertions are not proven until reached. Input-only159998966 executed 0 PASS/2 assertion FAIL, exit101 after successful compilation/setup; Lua errors omitted assertion text. The refined Rust-side type assertions expose the actual missing value before producer implementation; that execution remains pending. No GREEN yet.
+Generated integration filter `voice_speak_for_me_active_input::` selects default/arity/type and retained-query/transition/environment/independence cases. Input-only159998966 and refinedc81f10375 each execute 0 PASS/2 assertion FAIL, exit101 after successful compilation/setup. Refined Rust type assertions pass: the existing generic namespace metatable manufactures a callable returning one nil, not a state-backed activity query. Later Lua boolean/default assertions fail; transitions/independence are unreached in RED. Source path `runtime_surface_bootstrap.lua` establishes the nil projection; no exact-value claim derives from generic assertion messages alone. Explicit C_API producer now reads only the independent input and pushes one boolean. GREEN remains pending.
 
 ## Known gaps (current cycle)
 
-- [ ] Execute genuine query-boundary RED, then implement minimal state-backed getter.
+- [x] Execute genuine result-boundary RED; add explicit state-backed getter instead of the generic one-nil namespace result.
 - [ ] Targeted GREEN/preservation, applicable startup diagnostics/check/format/readability and independent proof.
 - [ ] Actual cached consumer behavior remains unverified; source query references do not establish runtime acceptance.
 
