@@ -4,11 +4,11 @@
 
 ## [2026-10-13] docs | Speak four-profile publication
 
-[Voice inventory](systems/lua-api.md) links the [profile-publication scope](../specs/voice-speak-for-me-active-input.md#documented-profile-publication): query-only `2630c0ccf`, Retail/PTR floor preserved, Mists/Forever introduced, three unknown profiles unchanged. Mists `abb979c44` RED2 reached `got nil` type failures only; GREEN/source3781 pending. Older Retail proof remains revision-scoped.
+[Voice inventory](systems/lua-api.md) links the [profile-publication contract](../specs/voice-speak-for-me-active-input.md#documented-profile-publication) and [current profile proof](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#new-profile-green-runtime--2026-10-13). Query-only source and independent Mists/WoW Forever GREEN are recorded there; fresh Retail/PTR preservation and new publication integrity remain pending. Older Retail proof remains revision-scoped.
 
 ## [2026-10-13] evidence | Current cached Speak consumer
 
-[Owning contract checkpoint](../specs/voice-speak-for-me-active-input.md#cached-consumer-checkpoint--2026-10-13) owns independent real cached decision PASS at compiled978/productiona8; separate query/transcription/startup/default-check PASS. [Voice inventory](systems/lua-api.md) links the same SSOT. [Public GREEN reports](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#current-green-public-packet--2026-10-13) copied; initial artifact retention PASS; path hygiene FAIL, current follow-up PENDING. [Separate PERF2 SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-perf2-checkpoint--2026-10-13) preserves frozen CCD FAIL; no independent consumer RED, true-Show, event-producer/native/render acceptance.
+[Owning contract checkpoint](../specs/voice-speak-for-me-active-input.md#cached-consumer-checkpoint--2026-10-13) and [public GREEN packet](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#current-green-public-packet--2026-10-13) own bounded cached-consumer and separate query/transcription/startup/check proof. [Original retention checkpoint](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#initial-green-retention-and-current-path-follow-up--2026-10-13) owns bounded follow-up2 PASS and preserved historical failures; new profile publication integrity remains separate. [Separate PERF2 SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-perf2-checkpoint--2026-10-13) preserves frozen CCD FAIL; no independent consumer RED, true-Show, event-producer/native/render acceptance.
 
 ## [2026-10-13] evidence | Speak RED and exact animation controls
 
