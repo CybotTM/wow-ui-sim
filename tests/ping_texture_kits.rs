@@ -1,6 +1,8 @@
 //! Host-supplied kit tests staged; no executed RED/GREEN or native proof.
 #![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 
+use rilua::LuaApiMut;
+use rilua::table_security::{wrap_host_secret_number, wrap_host_secret_string};
 use wow_ui_sim::c_api::PingTextureKits;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::paths::default_blizzard_ui_addons_path;
@@ -81,6 +83,121 @@ fn pass2_ping_kit_missing_mapping_errors_by_simulator_policy_not_native_parity()
     "#,
     )
     .expect("cleared input does not keep a cached kit");
+}
+
+#[test]
+fn pass2_ping_kit_public_invalid_keys_do_not_coerce_or_reach_lookup() {
+    let env = WowLuaEnv::new().expect("ping validation environment");
+    supply_kits(&env, &[(70001, "ConfiguredOnly")]);
+    env.exec(
+        r#"
+        local query = C_Ping.GetTextureKitForType
+        assert(type(query) == 'function', 'real query must be published')
+        local function reject(...)
+            local ok, message = pcall(query, ...)
+            assert(not ok and type(message) == 'string', 'invalid key rejected')
+            assert(message:find('ping type', 1, true), 'argument error context')
+            assert(not message:find('unmapped ping type', 1, true),
+                'invalid keys must not become map lookups')
+        end
+        reject()
+        reject(nil)
+        for _, value in ipairs({'70001', true, false, {}, 70001.5,
+                0/0, math.huge, -math.huge, 2147483648, -2147483649}) do
+            reject(value)
+        end
+        assert(query(70001) == 'ConfiguredOnly', 'failed calls preserve input')
+        "#,
+    )
+    .expect("explicit i32 key policy, not native coercion or enum bounds");
+}
+
+fn install_secret_ping_inputs(env: &WowLuaEnv) {
+    let loader = env.loader_env();
+    let mut lua = loader.rilua_mut();
+    rilua::table_security::register_table_security(&mut lua).expect("VM security helpers");
+    for (name, number) in [
+        ("PingSecretConfigured", 70001.0),
+        ("PingSecretUnmapped", 70002.0),
+        ("PingSecretFractional", 70001.5),
+    ] {
+        let value = wrap_host_secret_number(lua.state_mut(), number);
+        lua.state_mut().push(value);
+        let inserted = lua.set_global_val(name, value);
+        lua.state_mut().pop();
+        inserted.expect("root actual secret number");
+    }
+    let value = wrap_host_secret_string(lua.state_mut(), "PRIVATE-PingInput");
+    lua.state_mut().push(value);
+    let inserted = lua.set_global_val("PingSecretString", value);
+    lua.state_mut().pop();
+    inserted.expect("root actual secret string");
+}
+
+fn create_secret_ping_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("ping secret environment");
+    supply_kits(&env, &[(70001, "ConfiguredOnly")]);
+    env.exec("assert(type(C_Ping.GetTextureKitForType) == 'function', 'real query required')")
+        .expect("publication before secret fixture setup");
+    install_secret_ping_inputs(&env);
+    env
+}
+
+#[test]
+fn pass2_ping_kit_untainted_secret_key_returns_exact_public_string() {
+    let env = create_secret_ping_env();
+    env.exec(
+        r#"
+        debug.settaintmode(true)
+        assert(debug.getstacktaint() == nil)
+        local key = PingSecretConfigured
+        assert(issecretvalue(key), 'actual secret numeric input')
+        local function check(...)
+            assert(select('#', ...) == 1)
+            local value = ...
+            assert(not issecretvalue(value), 'public output model policy')
+            assert(type(value) == 'string' and value == 'ConfiguredOnly')
+        end
+        check(C_Ping.GetTextureKitForType(key))
+        assert(issecretvalue(key) and secretunwrap(key) == 70001)
+        assert(debug.getstacktaint() == nil, 'query preserves caller context')
+        "#,
+    )
+    .expect("AllowedWhenUntainted acceptance with public mapped output");
+}
+
+#[test]
+fn pass2_ping_kit_tainted_secret_denial_precedes_validation_and_lookup() {
+    let env = create_secret_ping_env();
+    env.exec(
+        r#"
+        debug.settaintmode(true)
+        assert(debug.getstacktaint() == nil)
+        local keys = {PingSecretConfigured, PingSecretUnmapped,
+            PingSecretFractional, PingSecretString}
+        local query = C_Ping.GetTextureKitForType
+        local function addon()
+            assert(debug.getstacktaint() == 'PingInputFixture')
+            for _, key in ipairs(keys) do
+                assert(issecretvalue(key), 'actual VM secret fixture')
+                local ok, message = pcall(query, key)
+                assert(not ok and type(message) == 'string', 'tainted secret denied')
+                assert(message:find('untainted caller', 1, true),
+                    'authentication precedes validation and map lookup')
+                assert(not message:find('PRIVATE-PingInput', 1, true), 'no payload leak')
+                assert(issecretvalue(key), 'original input remains wrapped')
+                assert(not pcall(secretunwrap, key), 'no tainted declassification')
+                assert(debug.getstacktaint() == 'PingInputFixture')
+            end
+            assert(query(70001) == 'ConfiguredOnly', 'tainted public input permitted')
+        end
+        debug.setobjecttaint(addon, 'PingInputFixture')
+        addon()
+        assert(debug.getstacktaint() == nil, 'outer context restored')
+        assert(query(PingSecretConfigured) == 'ConfiguredOnly', 'secure recovery')
+        "#,
+    )
+    .expect("metadata authentication ordering, not native taint parity");
 }
 
 #[test]
