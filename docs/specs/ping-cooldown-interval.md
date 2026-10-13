@@ -1,8 +1,8 @@
 # Explicit ping cooldown interval
 
-`C_Ping.GetCooldownInfo()` must project an explicit per-environment interval from `src/c_api/c_ping_cooldown.rs`. Only pure type/zero-state scaffolding is integrated; getter implementation is deferred until genuine RED. Tests target `client-retail`/`client-ptr`; backing state uses their shared `retail-12-0-0` feature floor. Integration is uncompiled/unexecuted.
+`C_Ping.GetCooldownInfo()` projects an explicit per-environment interval from `src/c_api/c_ping_cooldown.rs`. Getter implementation is source-complete; central registration is parent-owned and bounded GREEN is pending. Tests target `client-retail`/`client-ptr`; backing state uses their shared `retail-12-0-0` feature floor.
 
-Accepted draft cached Retail evidence: `Blizzard_APIDocumentationGenerated/PingManagerDocumentation.lua` declares no arguments and nonnil `PingCooldownInfo`, without secret/restriction annotations on this getter. `PingManagerSharedDocumentation.lua` requires numeric nonnil `startTimeMs`/`endTimeMs`. `Blizzard_PingUI/Blizzard_PingUI.lua:127–141,194–205` compares `GetTime()*1000 < endTimeMs` and requests `(endTimeMs/1000)-GetTime()` seconds. Sources are under `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns`, as recorded by the draft, not freshly fetched or native-observed. Fresh DTO allocation and inactive `(0,0)` are accepted simulator assumptions; PTR/native parity is unverified.
+Accepted draft cached Retail evidence: `Blizzard_APIDocumentationGenerated/PingManagerDocumentation.lua` declares no arguments and nonnil `PingCooldownInfo`, without secret/restriction annotations on this getter. `PingManagerSharedDocumentation.lua` requires numeric nonnil `startTimeMs`/`endTimeMs`. `Blizzard_PingUI/Blizzard_PingUI.lua:127–141,194–205` compares `GetTime()*1000 < endTimeMs` and requests `(endTimeMs/1000)-GetTime()` seconds. Sources are under `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns`; documentation and consumer lines were locally re-read on 2026-10-12, not freshly fetched or native-observed. Fresh DTO allocation and inactive `(0,0)` are accepted simulator assumptions; PTR/native parity is unverified.
 
 ## What it must do
 
@@ -19,21 +19,22 @@ Accepted draft cached Retail evidence: `Blizzard_APIDocumentationGenerated/PingM
 
 ## Implementation inventory
 
-- `src/c_api/c_ping_cooldown.rs`: public `PingCooldownInterval { start_time_ms: f64, end_time_ms: f64 }`; zero default, no producer/clock/timer fields.
-- `src/c_api/mod.rs`: model re-export, no getter registration change.
+- `src/c_api/c_ping_cooldown.rs`: public `PingCooldownInterval { start_time_ms: f64, end_time_ms: f64 }`; zero default. `pub(crate) register(state)` preserves the existing `C_Ping` namespace and installs the exact Rust `GetCooldownInfo` function. Getter copies both `f64` values, drops the state borrow before allocation, roots a fresh result table before setting its two fields, and returns one DTO. No argument/security checks or producer/clock/timer fields.
+- `src/c_api/mod.rs`: model re-export; central getter registration is parent-owned, untouched by this scoped implementation.
 - `src/lua_api/state/sim_state.rs`: public `ping_cooldown_interval` fixture field.
 - `src/lua_api/state.rs`: independent zero initialization.
 
 ## Tests asserting this spec
 
-[tests/ping_cooldown_interval.rs](../../tests/ping_cooldown_interval.rs): six unexecuted cases for default/tainted reads, supplied milliseconds, fresh DTO/mutation, live replacement/reset, environment isolation, and bounded actual vendor consumer.
+[tests/ping_cooldown_interval.rs](../../tests/ping_cooldown_interval.rs): six cases for default/tainted reads, supplied milliseconds, fresh DTO/mutation, live replacement/reset, environment isolation, and bounded actual vendor consumer. Main reports Genuine76 RED: five public-getter behavioral failures plus one known consumer-fixture cache-path failure; the fixture failure is not getter RED. Main corrected the source-cache fixture path at `346590852`. No tests were run for this scoped implementation; GREEN remains pending.
 
 Vendor test reads the active profile cache without fallback and executes the unchanged Lua definition file, not XML/startup. Only clock/cursor/timer sinks are controlled; getter and vendor methods remain real. Direct callback delivery proves requested delay and closure effects, not real scheduler behavior. No tooltip operation exists on the chosen path. Active PTR cache routing is an integration adaptation, not PTR proof.
 
 ## Known gaps (current cycle)
 
-- [ ] Obtain compiled behavioral RED; missing symbols/cache or load failures are not getter behavioral RED.
-- [ ] Add getter producer/registration only after RED, then obtain bounded GREEN.
+- [x] Main reports five genuine public-getter RED failures; the separate consumer cache-path failure is not behavioral RED.
+- [x] Implement the getter projection and namespace-local registration after reported RED; no interval producer exists or is added.
+- [ ] Parent wires central registration and obtains bounded GREEN, including the corrected cached consumer fixture.
 - [ ] Native default/fresh allocation, output security and PTR consumer equivalence remain unverified.
 
 ## Out of scope
