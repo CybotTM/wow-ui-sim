@@ -238,8 +238,9 @@ fn addon_local_table_vm_allowed_when_untainted_secret_name_policy() {
         r#"
         assert(issecure(), 'untainted control caller required')
         assert(issecretvalue(SecretTargetName))
-        assert(rawequal(C_AddOns.GetAddOnLocalTable(SecretTargetName), NamespaceWitness.original))
+        local namespace = C_AddOns.GetAddOnLocalTable(SecretTargetName)
         assert(issecure(), 'accepted secret lookup preserves untainted state')
+        assert(rawequal(namespace, NamespaceWitness.original))
         "#,
     )
     .expect("genuine VM secret name accepted from untainted code");
@@ -283,12 +284,13 @@ fn addon_local_table_blizzard_plain_name_denied_to_tainted_caller_but_allowed_un
     )
     .expect("untainted caller may query opted-in loader-classified Blizzard target");
     fixture.load(&env, CALLER);
+    env.exec("assert(CallerObserved == true)")
+        .expect("observe the tainted caller's completed denial check");
     env.exec(
         r#"
-        assert(CallerObserved == true)
         assert(issecure())
         assert(rawequal(C_AddOns.GetAddOnLocalTable('LocalTableTarget'), NamespaceWitness.original))
         "#,
     )
-    .expect("tainted plain-name denial did not revoke untainted access");
+    .expect("tainted plain-name denial did not revoke a fresh untainted caller's access");
 }
