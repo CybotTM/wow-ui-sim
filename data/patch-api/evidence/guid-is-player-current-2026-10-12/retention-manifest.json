@@ -685,9 +685,9 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/guid-is-player-current/ptr-green-20261012T191247449812Z/normal-submission.json"
     },
     {
-      "bytes": 14687,
+      "bytes": 14702,
       "path": "ptr-green-20261012T191247449812Z/normal.stderr",
-      "sha256": "b23ce7733975657e373f2792bec350690f5db6c3ff7a0a4c4c2b0372d6a6d799",
+      "sha256": "d021299c8ec977e5fe11bec4e6c4c23db2da1ac77ac42c267d6e81d0f54fbf5e",
       "source": "/home/osso/.local/state/wow-ui-sim/verification/guid-is-player-current/ptr-green-20261012T191247449812Z/normal.stderr"
     },
     {
@@ -1525,7 +1525,7 @@
       "source": "/home/osso/.local/state/wow-ui-sim/handoff/guid-publication-stage-race-disposition.md"
     }
   ],
-  "copy_bytes": 5766526,
+  "copy_bytes": 5766541,
   "copy_count": 254,
   "full_suite": "d21 submitted asynchronously, PENDING",
   "parent": "OPEN",
@@ -1701,5 +1701,6 @@
       "scope": "Committed source text, not executable attestation",
       "sha256": "c9729f24539c2695f50c5ab8d0d3ff65e922dc66733e31ca96b9b08b9e030c83"
     }
-  ]
+  ],
+  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies"
 }

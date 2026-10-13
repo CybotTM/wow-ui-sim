@@ -1,5 +1,9 @@
 # Bounty-set map relation evidence
 
+## PTR privacy correction — 2026-10-13
+
+[Correction ledger](privacy-correction.json) supersedes byte/privacy claims for the changed PTR text only. Actual-profile identity substitutions replace the incomplete Retail-only mapping; runtime evidence and original private sources remain unchanged. Registered payload digests/bytes and totals are updated; historical reports remain revision-scoped. Current privacy gate pending.
+
 [Contract](../../../../docs/specs/bounty-set-map-relations.md) · [Handoff](../../../../docs/wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md)
 
 - Initial `e09b0c1d1`: authentic public-query RED6, compile0/runtime101; first sealed artifact independently authenticated once.

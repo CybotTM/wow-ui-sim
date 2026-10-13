@@ -197,7 +197,8 @@
   "copied_files": 32,
   "copied_bytes": 683077,
   "prior_copied_files": 210,
-  "prior_copied_bytes": 4667706,
+  "prior_copied_bytes": 4667751,
   "total_copied_files": 242,
-  "total_copied_bytes": 5350783
+  "total_copied_bytes": 5350828,
+  "privacy_correction": "privacy-correction.json; earlier changed batches add45 bytes to cumulative prior/total accounting; historical reports remain revision-scoped"
 }

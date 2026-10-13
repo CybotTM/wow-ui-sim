@@ -1,5 +1,9 @@
 # Exact Friend name query — bounded Retail/PTR proof
 
+## PTR privacy correction — 2026-10-13
+
+[Correction ledger](privacy-correction.json) supersedes byte/privacy claims for the changed PTR startup text and embedded proof only. Actual-profile substitutions replace the incomplete Retail-only mapping; runtime evidence and original private sources remain unchanged. Registered public digests/bytes and totals are updated; historical reports remain revision-scoped. Current privacy gate pending.
+
 Producer `be9c734a4`; corrected security fixture `6ec0c1cb8`. [Contract](../../../../docs/specs/friend-info-name-query.md) and [final independent audit](final-independent-report.md) establish the supplied-state exact query and unchanged Mainline friend-note popup, not native/full-handoff acceptance.
 
 | Scope | Accepted evidence |

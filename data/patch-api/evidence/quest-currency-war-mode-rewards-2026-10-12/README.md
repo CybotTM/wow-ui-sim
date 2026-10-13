@@ -1,5 +1,9 @@
 # Ordinary QuestUtils currency War Mode rewards — 2026-10-12
 
+## PTR privacy correction — 2026-10-13
+
+[Correction ledger](privacy-correction.json) supersedes byte/privacy claims for changed PTR startup text and embedded proofs only. Actual-profile substitutions replace the incomplete Retail-only mapping; runtime evidence and original private sources remain unchanged. Registered bytes and cumulative totals are updated: final additive total6,178,449 bytes. Changed byte-copy equality is superseded by transformed equality; historical reports remain revision-scoped. Current privacy gate pending.
+
 [Contract](../../../../docs/specs/quest-currency-war-mode-rewards.md) · [Patch investigation](../../../../docs/wiki/investigations/patch-8-1-0-api-audit.md#questutils-ordinary-currency-consumer--initial-testspec-stage-2026-10-12)
 
 | Boundary | Evidence | Result |

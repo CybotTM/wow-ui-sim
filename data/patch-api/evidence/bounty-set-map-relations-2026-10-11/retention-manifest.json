@@ -316,8 +316,8 @@
     {
       "path": "ptr/normal.stderr",
       "source": "/home/osso/.local/state/wow-ui-sim/verification/bounty-set-maps-current/ptr-green-compile-20261012T025546330152Z/normal.stderr",
-      "bytes": 15481,
-      "sha256": "ce43678f387a74abaf586316629aa3b49cd7fb3075cdba0c866c719cf4234dda"
+      "bytes": 15496,
+      "sha256": "f1949580ed6168583fa86d69da301bd220b7b832a1e83867aac99eeae828f6c9"
     },
     {
       "path": "ptr/normal-outcome.json",
@@ -501,5 +501,6 @@
     }
   ],
   "copy_count": 83,
-  "copy_bytes": 371476
+  "copy_bytes": 371491,
+  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies"
 }

@@ -1,5 +1,9 @@
 # GUID player query — bounded current evidence
 
+## PTR privacy correction — 2026-10-13
+
+[Correction ledger](privacy-correction.json) supersedes byte/privacy claims for changed PTR startup text only. Actual-profile substitutions replace the incomplete Retail-only mapping; runtime evidence and original private sources remain unchanged. Registered public digest/bytes and totals are updated; historical reports remain revision-scoped. Current privacy gate pending.
+
 [Contract](../../../../docs/specs/guid-is-player.md) owns exact local/active-populated-party/target/focus unit identity and player-kind projection. Closed-world unknown false is simulator policy, not native arbitrary-GUID classification or prefix inference. No new catalog, fields, normal seeding, account producer or vendor override.
 
 ## Behavior and original consumer

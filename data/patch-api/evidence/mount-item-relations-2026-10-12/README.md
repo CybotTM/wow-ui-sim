@@ -1,5 +1,9 @@
 # Mount item relations — bounded Retail/PTR proof
 
+## PTR privacy correction — 2026-10-13
+
+[Correction ledger](privacy-correction.json) supersedes byte/privacy claims for changed PTR startup text and embedded proof only. Actual-profile substitutions replace the incomplete Retail-only mapping; runtime evidence and original private sources remain unchanged. Registered public digests/bytes and totals are updated; historical reports remain revision-scoped. Current privacy gate pending.
+
 [Contract](../../../../docs/specs/mount-item-relations.md). Producer `afc6f34bc`; consumer observation transport `609033535`. [Final query audit](final-current-report.md) and [corrected observation audit](observation-current-report.md) prove supplied-state queries and the unsliced original PlayerChoice consumer, not native dressability or whole-handoff completion.
 
 | Scope | Accepted evidence |

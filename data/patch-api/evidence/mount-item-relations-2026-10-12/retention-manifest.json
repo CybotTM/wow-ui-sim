@@ -325,9 +325,9 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/mount-item-current/expanded-red-terminal-report.md"
     },
     {
-      "bytes": 1763915,
+      "bytes": 1763930,
       "path": "final-current-proof.json",
-      "sha256": "8dbbc423936849a4161c04458ae373963d71898d23d1e8553afd456d983eb8a3",
+      "sha256": "4180ba4ba66de934ab0513664ef784c763455da70dd266f431860b020640e0cf",
       "source": "/home/osso/.local/state/wow-ui-sim/verification/mount-item-current/final-current-proof.json"
     },
     {
@@ -535,9 +535,9 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/mount-item-current/ptr-final-20261012T153817103750Z/normal-submission.json"
     },
     {
-      "bytes": 14684,
+      "bytes": 14699,
       "path": "ptr-final-20261012T153817103750Z/normal.stderr",
-      "sha256": "2316107e6c5560ac6418534df9c7ca3c1270320863224feb8bbed9100aa70c64",
+      "sha256": "cead10be93208e7fe130bf1fd35593bf962bc605c8d4c7f69bac199e5d308b3c",
       "source": "/home/osso/.local/state/wow-ui-sim/verification/mount-item-current/ptr-final-20261012T153817103750Z/normal.stderr"
     },
     {
@@ -1819,7 +1819,7 @@
       "source": "/home/osso/.local/state/wow-ui-sim/verification/mount-item-current/submission-retail-green-20261012T152010350279Z.json"
     }
   ],
-  "copy_bytes": 9996495,
+  "copy_bytes": 9996525,
   "copy_count": 303,
   "parent": "OPEN",
   "scope": "Byte-exact nonbinary evidence copies; no seal or image reads/copies/hashes; private retention reports excluded. Controller stdout duplicate excluded; compiler/raw phase streams and failures retained. Current source snapshots separate from initial/expanded source identity receipts.",
@@ -1917,5 +1917,6 @@
       "sha256": "5577f98dd1c7b7124a51dae1ab30429366b58b2b065b54ac56dc1d0d69bc26f1",
       "source_path": "Cargo.lock"
     }
-  ]
+  ],
+  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies"
 }

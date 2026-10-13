@@ -173,8 +173,8 @@
     {
       "source_relative": "final-independent-proof.json",
       "retained": "final-independent-proof.json",
-      "bytes": 423336,
-      "sha256": "07c69f4772f3ce2a1ca7f37a009b951add53aec5936ad7427005aaf36b0ff91b"
+      "bytes": 423351,
+      "sha256": "e90e551ebb87ad1b72531139b80faa16bc3bd3ed41927cb4744646c3dba0c87c"
     },
     {
       "source_relative": "final-independent-report.md",
@@ -443,8 +443,8 @@
     {
       "source_relative": "ptr-runtime-retry-20261012T124813520393Z/normal.stderr",
       "retained": "ptr-runtime-retry-20261012T124813520393Z/normal.stderr",
-      "bytes": 14684,
-      "sha256": "fd662b5e105465fd6f9d80d48b05450be531453aec3da33c353454a5551a6705"
+      "bytes": 14699,
+      "sha256": "8f29c64a3945f34998a35566a683be565c99f9a36b9284ec7130d274515ca820"
     },
     {
       "source_relative": "ptr-runtime-retry-20261012T124813520393Z/normal.stdout",
@@ -1552,5 +1552,6 @@
     }
   ],
   "copies": 258,
-  "bytes": 3816250
+  "bytes": 3816280,
+  "privacy_correction": "privacy-correction.json; three additional actual PTR identity substitutions; original runtime evidence unchanged; byte-equality claims superseded for changed copies"
 }
