@@ -11688,6 +11688,8 @@ Texture:GetFacing
 Texture:GetFadeDuration
 Texture:GetFadePower
 Texture:GetFading
+Texture:GetFileHeight
+Texture:GetFileWidth
 Texture:GetFillStyle
 Texture:GetFlattensRenderLayers
 Texture:GetFlipBookColumns

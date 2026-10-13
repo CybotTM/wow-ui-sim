@@ -20,7 +20,8 @@ These requirements apply the literal contract to existing simulator state; they 
 - [ ] For an accessible atlas backing image, use full backing-file dimensions, not atlas-slot dimensions.
 - [ ] Numeric fileDataID assignments use the existing manifest path resolution and actual accessible source metadata; unresolved/inaccessible files return zero. Merely preserving the ID does not prove dimensions.
 - [x] Apply the existing secret-texture read policy before metadata lookup: an untainted caller may read; a tainted caller receives the same secret-origin denial as existing texture getters. A subsequent plain `SetTexture` assignment restores plain reads under existing policy.
-- [ ] Shared Texture method exposure is the proposed simulator placement, not proof of historical or seven-profile native availability. Runtime evidence must name the selected profile.
+- [ ] Receiver scope: expose both getters in Texture's actual index, not ordinary widgets, WorldFrame, FontString or animations. Preserve all earlier WorldFrame lookups. Repair runtime remains pending.
+- [ ] Historical Texture placement is not seven-profile native availability. Retained native discovery omits both names without establishing removal; it remains unchanged.
 
 ## How it works
 
@@ -30,12 +31,14 @@ These requirements apply the literal contract to existing simulator state; they 
 ## Implementation inventory
 
 - `src/lua_api/frame/methods/widgets/texture/atlas.rs` — `GetFileWidth`/`GetFileHeight` adapters beside `SetTexture` and existing readable getters; implemented; six local-file tests GREEN at sealed `e3978fd48196`.
-- `src/lua_api/frame/methods/widgets/texture/mod.rs` — both getters registered with current shared Texture method exposure; native cross-profile availability remains unproved.
+- `src/lua_api/frame/methods/widgets/texture/mod.rs` — both modeled getters remain registered.
+- `src/lua_api/methods/frame_metatable.rs` — excludes the two names from non-Texture indexes. WorldFrame preserves all other base entries and has a separate key in the same cache because its object-type name is Frame.
+- `docs/wow-client-diff/diff_methods_extra.txt` — exactly two expected Texture rows added to the default comparison fixture; no native capture or unrelated row changes.
 - `src/lua_api/frame/methods/secret_origin.rs` — existing `require_texture_readable` policy and denial message.
 - `src/texture.rs` — `TextureManager::new` initializes empty CPU maps; `with_addons_paths` stores configured roots without GPU initialization.
 - `src/texture/resolve.rs` — existing `get_or_load_texture_size` resolves source metadata without populating the RGBA cache.
 - `data/manifest_interface_data.rs` — existing fileDataID-to-path mapping.
-- `tests/texture_file_dimensions.rs` — new public integration assertions with temporary local source files.
+- `tests/texture_file_dimensions.rs` — six verified local-file tests and one new, unexecuted receiver-scope test.
 
 The adapter checks readability, snapshots the frame's actual texture path/fileDataID and addon roots, releases the simulator borrow, resolves numeric sources through SetTexture's existing manifest route, and queries source metadata with a temporary TextureManager. An actual nonnumeric path takes precedence over a retained fileDataID, including atlas assignments. Color-only sources are excluded. Each getter returns only the requested component, or zero for unknown metadata. No new state, subsystem, or headless exclusion is added. A temporary manager discards its metadata cache between calls, so separate width/height calls can repeat path resolution and file-header I/O; this is an explicit cost of this simple choice, not a user-mandated no-cache policy.
 
@@ -48,6 +51,10 @@ Parent reports six genuine RED results at revision `080`: fixture images and Tex
 - `tests/texture_file_dimensions.rs::texture_file_dimensions_are_zero_without_accessible_image_metadata` — unset, missing, invalid-image, and color-only sources.
 - `tests/texture_file_dimensions.rs::texture_file_dimensions_ignore_uv_crop_and_tiling` — real file dimensions remain unchanged after verified UV, tiling, and widget-size changes.
 - `tests/texture_file_dimensions.rs::texture_file_dimensions_obey_existing_secret_texture_read_policy` — sets only the existing `secret_texture` backing flag as a fixture, checks secure reads and exact tainted denial with an existing getter control, then restores plain reads through public `SetTexture`. No wrapper mutation or new secret state; secret ingestion is not tested.
+
+### Receiver repair — runtime pending
+
+Separate e397 comparison: missing snapshot PASS; extra snapshot FAIL with 96 rows (64 VertexColor, 30 non-Texture file-getter leaks, two intended Texture additions). VertexColor repair is separate. `texture_file_dimension_lookup_is_texture_only_and_preserves_world_frame_scroll` checks actual lookup, public index enumeration, usable metadata getters and preserved WorldFrame scroll behavior. WorldFrame is engine-created; lookup sequences do not force fresh cache construction. No new PASS claimed.
 
 ## Known gaps (current cycle)
 

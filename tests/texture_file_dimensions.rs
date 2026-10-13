@@ -240,3 +240,55 @@ fn texture_file_dimensions_obey_existing_secret_texture_read_policy() {
         )
         .unwrap();
 }
+
+#[test]
+fn texture_file_dimension_lookup_is_texture_only_and_preserves_world_frame_scroll() {
+    let fixture = Fixture::new();
+    fixture.set_texture(WIDE_PATH);
+    fixture
+        .env
+        .exec(
+            r#"
+            local methods = {'GetFileWidth', 'GetFileHeight'}
+            local function assert_absent(object, label)
+                local index = getmetatable(object).__index
+                for _, method in ipairs(methods) do
+                    assert(object[method] == nil, label .. ':' .. method .. ' leaked in lookup')
+                    assert(index[method] == nil, label .. ':' .. method .. ' leaked in index')
+                end
+            end
+            local function assert_world_scroll()
+                assert(type(WorldFrame.GetVerticalScroll) == 'function')
+                assert(WorldFrame:GetVerticalScroll() == 0)
+                assert(type(WorldFrame.GetScrollOffset) == 'function')
+                assert(WorldFrame:GetScrollOffset() == 0)
+            end
+            assert_absent(WorldFrame, 'WorldFrame')
+            assert_world_scroll()
+            for _, kind in ipairs({
+                'Frame', 'Button', 'EditBox', 'ScrollFrame', 'Slider', 'CheckButton',
+                'StatusBar', 'Cooldown', 'Model', 'ModelScene', 'PlayerModel',
+                'ColorSelect', 'MessageFrame', 'SimpleHTML', 'GameTooltip', 'Minimap',
+            }) do
+                assert_absent(CreateFrame(kind), kind)
+            end
+            local parent = CreateFrame('Frame')
+            assert_absent(parent:CreateFontString(), 'FontString')
+            assert_absent(parent:CreateLine(), 'Line')
+            local texture = FileDimensionTexture
+            local group = texture:CreateAnimationGroup()
+            assert_absent(group, 'AnimationGroup')
+            assert_absent(group:CreateAnimation(), 'Animation')
+            assert_absent(group:CreateAnimation('VertexColor'), 'VertexColor')
+            assert_absent(WorldFrame, 'WorldFrame after Frame construction')
+            assert_world_scroll()
+            local index = getmetatable(texture).__index
+            assert(type(index.GetFileWidth) == 'function')
+            assert(type(index.GetFileHeight) == 'function')
+            assert(index.GetFileWidth(texture) == 7)
+            assert(index.GetFileHeight(texture) == 5)
+            "#,
+        )
+        .unwrap();
+    fixture.assert_dimensions((7, 5));
+}

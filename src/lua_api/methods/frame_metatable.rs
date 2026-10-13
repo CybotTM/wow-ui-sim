@@ -12,12 +12,12 @@ pub(super) fn frame_metatable_for_widget_type(
     base_mt_ref: GcRef<Table>,
     widget_type: WidgetType,
 ) -> Val {
-    if matches!(widget_type, WidgetType::WorldFrame) {
-        return Val::Table(base_mt_ref);
-    }
-
     let cache = registry_table_or_create(state, FRAME_MT_CACHE_KEY);
-    let key = widget_type.as_str();
+    // WorldFrame reports Frame but retains the otherwise complete base index.
+    let key = match widget_type {
+        WidgetType::WorldFrame => "WorldFrame",
+        _ => widget_type.as_str(),
+    };
     if let cached @ Val::Table(_) = table_get_static(state, cache, key) {
         return cached;
     }
@@ -80,7 +80,11 @@ fn hidden_message_frame_method(name: &str) -> bool {
 }
 
 fn hidden_method_for_widget(widget_type: WidgetType, name: &str) -> bool {
+    if matches!(name, "GetFileWidth" | "GetFileHeight") {
+        return widget_type != WidgetType::Texture;
+    }
     match widget_type {
+        WidgetType::WorldFrame => false,
         WidgetType::MessageFrame => hidden_scroll_frame_method(name),
         WidgetType::ScrollFrame => name == "SetMaxLines" || hidden_message_frame_method(name),
         WidgetType::StatusBar => hidden_scroll_frame_method(name) || name == "SetStatusBarAtlas",
