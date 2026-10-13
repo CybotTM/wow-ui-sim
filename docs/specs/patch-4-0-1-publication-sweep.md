@@ -41,7 +41,7 @@ Account for the complete pinned historical retail page, revision 1271877, in `da
 
 ## Known gaps (current cycle)
 
-- [ ] Four source breaking statements and the separate GetItemCooldown numeric-only signature remain UNPROVEN. Current accounting: 419 publication rows, 304 current matches and 115 gaps. Only CanTransform/Transform additions are superseded by 4.1 removal; this earns no model credit. Sealed historical accounting remains 302/117, with negative 118.
+- [ ] Four source breaking statements and the separate GetItemCooldown numeric-only signature remain UNPROVEN. Prior accounting: 419 publication rows, 304 matches and 115 gaps. Frozen `ccd526c6c` prefork run reports no new gaps and exactly one resolved ID, `wt-global-api-UnitSetRole-348`; current fixture removes only that ID (114 expected gaps), corrected execution pending. No complete current per-row map or runtime behavior proof claimed by this fixture edit. Only CanTransform/Transform additions are superseded by 4.1 removal; this earns no model credit. Sealed historical accounting remains 302/117, with negative 118.
 
 ## Current receipts and acceptance boundary
 
