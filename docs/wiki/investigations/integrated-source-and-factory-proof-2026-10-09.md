@@ -1,5 +1,9 @@
 # Integrated source and factory proof — 2026-10-09
 
+## Separate PERF2 checkpoint — 2026-10-13
+
+[Public checkpoint and independent report](../../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#separate-perf2-checkpoint) retain two logical exact cases PASS at `a8a148e98d8dc32cf81e789fc8926830c9ed0161`, actual wait exit0 each: `startup_perf::full_game_startup_stays_under_budget` 7.083142179 seconds <20; `addon_loading_perf::loading_phase_breakdown_stays_within_budgets` XML202.59 ms / compile564.32 ms / lifecycle831.59 ms under2.5/2/7 seconds. Duplicate child recaps excluded. Startup diagnostics88 missing requirements/185 nil-symbol observations/0 warnings are not CLEAN or global coverage. Normal-query startup CLEAN is a separate scope. No causal fix, global exclusivity, historical CCD comparability, broad-suite or native claim. Frozen CCD **15,204 PASS / 7 FAIL / 19 skips**, zero runner timeouts, remains unchanged FAIL; no addition to those totals. New GREEN text retention/privacy gate PENDING, independently of saved source/runtime PASS.
+
 ## Current public-copy privacy corrections — 2026-10-13
 
 [Redaction overlay](../../../data/patch-api/evidence/privacy-corrections-2026-10-13/README.md) explicitly supersedes current public-byte/privacy integrity for67 additional Retail identity-bearing TEXT files; two widget/PTR followup and13 earlier PTR corrections are separate stages. Private originals, runtime proof and executable/source seals remain unchanged; safe owning public-copy metadata is updated without generic hash replacement. Historical manifests/reports stay revision-scoped where not updated. Prior Git history is not erased; no rewrite/push/deployment. Root publisher now discovers identities from all selected actual streams and validates residual tokens. All-profile current tracked-text and independent gates pending; no general-secret-absence or whole-parent claim.

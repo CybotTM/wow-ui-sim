@@ -1,6 +1,6 @@
 ## [2026-10-13] evidence | Current cached Speak consumer
 
-[Owning contract checkpoint](../specs/voice-speak-for-me-active-input.md#cached-consumer-checkpoint--2026-10-13) owns independent real cached decision PASS at compiled978/productiona8; separate query/transcription/startup/default-check PASS. [Voice inventory](systems/lua-api.md) links the same SSOT. Public GREEN retention pending; no independent consumer RED, true-Show, event-producer/native/render acceptance.
+[Owning contract checkpoint](../specs/voice-speak-for-me-active-input.md#cached-consumer-checkpoint--2026-10-13) owns independent real cached decision PASS at compiled978/productiona8; separate query/transcription/startup/default-check PASS. [Voice inventory](systems/lua-api.md) links the same SSOT. [Public GREEN reports](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#current-green-public-packet--2026-10-13) copied; new retention gate PENDING. [Separate PERF2 SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-perf2-checkpoint--2026-10-13) preserves frozen CCD FAIL; no independent consumer RED, true-Show, event-producer/native/render acceptance.
 
 ## [2026-10-13] evidence | Speak RED and exact animation controls
 

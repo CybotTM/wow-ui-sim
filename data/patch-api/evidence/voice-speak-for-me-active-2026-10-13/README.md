@@ -12,7 +12,33 @@ Production `a8a148e98` adds the explicit state-backed query later. Separately sa
 
 ## Current cached consumer checkpoint — 2026-10-13
 
-Independent bounded consumer PASS: compiled `978e9bcd15b47ad53dcdfd7aadb0f9ae0afb95b8`, production `a8a148e98`, exactly 1 real cached EditBox decision case, actual wait exit0. The [owning contract](../../../../docs/specs/voice-speak-for-me-active-input.md#cached-consumer-checkpoint--2026-10-13) records false/true/muted-red/restoration and entire empty error collection; query2/transcription3/startup/default-check remain separate PASS scopes. **GREEN retention PENDING**; no public consumer reports retained yet. No independent consumer RED, true-Show, event-producer/native/render claim. Historical RED50 retention PASS above remains distinct.
+Independent bounded consumer PASS: compiled `978e9bcd15b47ad53dcdfd7aadb0f9ae0afb95b8`, production `a8a148e98`, exactly 1 real cached EditBox decision case, actual wait exit0. The [owning contract](../../../../docs/specs/voice-speak-for-me-active-input.md#cached-consumer-checkpoint--2026-10-13) records false/true/muted-red/restoration and entire empty error collection; query2/transcription3/startup/default-check remain separate PASS scopes. **GREEN retention PENDING**; public copied reports now linked below. No independent consumer RED, true-Show, event-producer/native/render claim. Historical RED50 retention PASS above remains distinct.
+
+## Current GREEN public packet — 2026-10-13
+
+[GREEN retention manifest](green-current/green-retention-manifest.json): **81 selected complete TEXT payloads / 594,604 public bytes**. Independent source/runtime reports below record bounded PASS; the **new independent retention/privacy gate is PENDING**. Private helper/mapping used for projection are not retained. Existing sealed digest strings are text, not new executable authentication. Historical RED50 manifest/payloads and temporal claims remain unchanged.
+
+| Scope | Exact code point | Public copied proof / result |
+| --- | --- | --- |
+| Query | `a8a148e98d8dc32cf81e789fc8926830c9ed0161` | [Runtime report](green-current/independent/speak-query-current-proof/report.md): 2 PASS, wait exit0 |
+| Transcription preservation | same a8 | Same report: 3 PASS, wait exit0 |
+| Actual cached EditBox consumer | `978e9bcd15b47ad53dcdfd7aadb0f9ae0afb95b8`, production a8 | [Consumer runtime report](green-current/independent/speak-cached-consumer-proof/report.md): 1 PASS, wait exit0 |
+| Separate normal startup | a8 | [Query/startup report](green-current/independent/speak-query-current-proof/report.md): function/1/boolean/false then `[]`, exit0; full stderr 14,714 bytes, 219 content lines / 220 LF entries, CLEAN within this normal-query scope |
+| Default library/bin check | `9b027baaf8931e1e3780a33b0a7fd098e9476f87` (docs-only over a8) | Same report: exit0, 733 JSON records, no source compiler messages; six inherited manifest deprecations, not warning-free; excludes integration-test targets |
+| Source/format/readability | producer a8; consumer978 | [Producer source report](green-current/independent/speak-active-producer-source/report.md) and [consumer source report](green-current/independent/speak-consumer-source/report.md): independent bounded PASS; distinct from runtime and retention |
+
+Query2 + transcription3 + consumer1 = **six voice cases, not six new features**. GREEN and consumer no-run compilation each retain terminal0 / successful build-finished / 741 JSON records; compilation is not a broad test run. No independent consumer RED, true-Show, event-producer/native/render acceptance.
+
+## Separate PERF2 checkpoint
+
+[Independent saved-artifact report](green-current/independent/current-two-perf-budgets/report.md) records **two logical exact cases PASS** at a8, actual wait exit0 each; duplicate child/parent summaries are not extra cases:
+
+| Exact case | Observation | Budget |
+| --- | --- | --- |
+| `startup_perf::full_game_startup_stays_under_budget` | 7.083142179 seconds | <20 seconds |
+| `addon_loading_perf::loading_phase_breakdown_stays_within_budgets` | XML 202.59 ms / compile 564.32 ms / lifecycle 831.59 ms | <2.5 / <2 / <7 seconds respectively |
+
+Startup diagnostics: **88 missing requirements / 185 nil-symbol observations / 0 warnings**; observations, not unique API gaps. **Not CLEAN or global API coverage**; distinct from normal-query startup above. Nested phase counters are not exclusive wall-clock partitions. No forced CASC/sound disable in saved performance argv; effective activity unknown. No causal fix, global exclusivity, historical CCD comparability, broad-suite or native claim. [Integrated proof SSOT](../../../../docs/wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-perf2-checkpoint--2026-10-13) preserves frozen CCD FAIL.
 
 ## Separate executed animation controls
 
@@ -22,4 +48,4 @@ The first covers ordered/parallel delay boundaries, forward/reverse traversal an
 
 ## Limits
 
-Frozen CCD failure remains unchanged. No native defaults/events/transport/security parity, broad suite, other-profile, rendering, performance, whole-animation or parent acceptance. Saved compiler success retains six inherited manifest deprecations, not warning-free compilation. No new runtime, build, hash, authentication or operational action accompanies this documentation.
+Frozen CCD failure remains unchanged. No native defaults/events/transport/security parity, broad suite, other-profile, rendering, broader performance, whole-animation or parent acceptance. Saved compiler success retains six inherited manifest deprecations, not warning-free compilation. No new runtime, build, hash, authentication or operational action accompanies this documentation.

@@ -1,3 +1,7 @@
+## [2026-10-13] docs | Public Speak GREEN and separate PERF2
+
+[Public GREEN packet](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#current-green-public-packet--2026-10-13) links copied source/runtime PASS reports; new retention/privacy gate PENDING. [Owning contract](../specs/voice-speak-for-me-active-input.md) separates six voice cases from startup/check/source scopes. [PERF2 SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-perf2-checkpoint--2026-10-13) retains two exact budget cases, not CLEAN/global coverage or historical CCD comparability. Frozen RED/CCD unchanged; docs only, main owns commit.
+
 ## [2026-10-13] docs | Current cached Speak consumer
 
 Updated [owning contract checkpoint](../specs/voice-speak-for-me-active-input.md#cached-consumer-checkpoint--2026-10-13), packet and voice/index pointers after independent compiled978/productiona8 cached decision PASS. Three consumer requirements checked; public GREEN retention pending. Separate query/transcription/startup/default-check PASS preserved; no independent consumer RED, true-Show, event-producer/native/render claim. Docs only; main owns commit.
