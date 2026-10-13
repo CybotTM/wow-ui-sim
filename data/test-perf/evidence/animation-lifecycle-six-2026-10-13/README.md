@@ -11,7 +11,7 @@ Saved execution at sealed `a8a148e98d8dc32cf81e789fc8926830c9ed0161`: **6 PASS /
 | `animation_query_lifecycle::delayed_animation_queries_use_local_active_elapsed` | Start-delay flag, local active elapsed/progress, end-delay clamp and completion |
 | `animation_query_lifecycle::delaying_uses_order_start_and_longest_parallel_duration` | Ordered/parallel maximum including end delay; forward/reverse exact boundaries; paused omitted direction and explicit-false resume |
 
-[Retention manifest](retention-manifest.json): **9 selected complete TEXT projections / 27,208 public bytes**. **Retention gate PENDING**; independent runtime/source inspection is not retention/privacy acceptance. Existing receipt/stat evidence is reused, not fresh binary/library authentication.
+[Retention manifest](retention-manifest.json): **9 selected complete TEXT projections / 27,208 public bytes**. **Bounded retention gate PASS**: [full report](retention-gate-pass/report.md), [proof](retention-gate-pass/proof.json). Independent runtime/source inspection remains separate from retention/privacy acceptance. Existing receipt/stat evidence is reused, not fresh binary/library authentication.
 
 Full saved stderr inspected: **3,831 bytes / 66 VM startup diagnostic lines**, six initialization sequences; **not full Blizzard CLEAN**. Saved argv disables CASC and sound. Check and full Blizzard startup remain pending for this scope.
 
