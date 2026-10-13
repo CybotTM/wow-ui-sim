@@ -8,7 +8,11 @@ Initial `159998966` and refined `c81f10375` each record **0 PASS / 2 FAIL, actua
 
 Refined Rust function-type checks pass on reached paths; these are not additional passing tests. Source establishes the generic callable's one-nil projection. Generic Lua assertion logs do not reveal exact actual values, type or arity. Default/boolean result assertions fail; later supplied-input transitions, retained/direct true checks, independence and final environment transitions are unreached.
 
-Production `a8a148e98` adds the explicit state-backed query later. Separately saved bounded Retail query2/transcription-preservation3, fresh CLEAN startup and default check pass; the [contract](../../../../docs/specs/voice-speak-for-me-active-input.md) records exact scopes. Current GREEN text retention and real cached edit-box execution remain pending; the retained RED manifest preserves its earlier temporal claims. [Contract](../../../../docs/specs/voice-speak-for-me-active-input.md) owns the supplied-input requirements.
+Production `a8a148e98` adds the explicit state-backed query later. Separately saved bounded Retail query2/transcription-preservation3, fresh CLEAN startup and default check pass; the [contract](../../../../docs/specs/voice-speak-for-me-active-input.md) records exact scopes. Current GREEN text retention remains pending; the retained RED manifest preserves its earlier temporal claims. [Contract](../../../../docs/specs/voice-speak-for-me-active-input.md) owns the supplied-input requirements.
+
+## Current cached consumer checkpoint — 2026-10-13
+
+Independent bounded consumer PASS: compiled `978e9bcd15b47ad53dcdfd7aadb0f9ae0afb95b8`, production `a8a148e98`, exactly 1 real cached EditBox decision case, actual wait exit0. The [owning contract](../../../../docs/specs/voice-speak-for-me-active-input.md#cached-consumer-checkpoint--2026-10-13) records false/true/muted-red/restoration and entire empty error collection; query2/transcription3/startup/default-check remain separate PASS scopes. **GREEN retention PENDING**; no public consumer reports retained yet. No independent consumer RED, true-Show, event-producer/native/render claim. Historical RED50 retention PASS above remains distinct.
 
 ## Separate executed animation controls
 

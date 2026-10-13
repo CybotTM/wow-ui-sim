@@ -1,10 +1,14 @@
+## [2026-10-13] docs | Current cached Speak consumer
+
+Updated [owning contract checkpoint](../specs/voice-speak-for-me-active-input.md#cached-consumer-checkpoint--2026-10-13), packet and voice/index pointers after independent compiled978/productiona8 cached decision PASS. Three consumer requirements checked; public GREEN retention pending. Separate query/transcription/startup/default-check PASS preserved; no independent consumer RED, true-Show, event-producer/native/render claim. Docs only; main owns commit.
+
 ## [2026-10-13] evidence | Speak RED and exact animation controls
 
-[Public packet](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md) retains initial159/refinedc81 Speak 0 PASS/2 FAIL, exit101; exact Lua actual values unknown, later transitions unreached. Separate c81 ordered-delay/reverse1 PASS and bounce1 PASS controls update only bounded [animation requirements](../specs/animation-query-lifecycle.md). Wider reverse/repeat, current full six-case, native and parent acceptance remain open; Speak GREEN pending.
+[Public packet](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md) retains initial159/refinedc81 Speak 0 PASS/2 FAIL, exit101; exact Lua actual values unknown, later transitions unreached. Separate c81 ordered-delay/reverse1 PASS and bounce1 PASS controls update only bounded [animation requirements](../specs/animation-query-lifecycle.md). Wider reverse/repeat, current full six-case, native and parent acceptance remain open; Speak GREEN was pending at this historical RED-retention checkpoint; current status above.
 
 ## [2026-10-13] docs | Speak For Me activity source checkpoint
 
-Updated [existing voice inventory](systems/lua-api.md) after `a8a148e98`, linking the [contract/proof SSOT](../specs/voice-speak-for-me-active-input.md). Explicit independent false input is simulator policy, not native default; genuine two-case RED distinguishes an existing function returning one nil from the state-backed producer. Actual GREEN/consumer acceptance pending; no native, events or transport acceptance. Documentation only; main owns commit.
+Updated [existing voice inventory](systems/lua-api.md) after `a8a148e98`, linking the [contract/proof SSOT](../specs/voice-speak-for-me-active-input.md). Explicit independent false input is simulator policy, not native default; genuine two-case RED distinguishes an existing function returning one nil from the state-backed producer. GREEN/consumer acceptance were pending at this historical source-stage checkpoint; no native, events or transport acceptance. Documentation only; main owns commit.
 
 ## [2026-10-13] docs | Original Retail prefork four-case checkpoint
 
