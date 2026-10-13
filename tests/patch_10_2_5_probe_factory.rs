@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[test]
-fn patch_10_2_5_vertex_color_probe_reaches_missing_endpoint_methods() {
+fn patch_10_2_5_vertex_color_probe_reaches_modeled_endpoint_methods() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(
         r#"
@@ -24,6 +24,9 @@ fn patch_10_2_5_vertex_color_probe_reaches_missing_endpoint_methods() {
     .unwrap();
     let (kind, detail, ok, _, _) = sweep::probe_entry(&env, &entry, false, &BTreeMap::new());
     assert_eq!(kind, "object-method");
-    assert_eq!(detail, "VertexColor; lookup=nil");
-    assert!(!ok, "Missing endpoints must remain an explicit publication gap");
+    assert_eq!(detail, "VertexColor; lookup=function");
+    assert!(
+        ok,
+        "Modeled endpoints must be published on the actual animation"
+    );
 }

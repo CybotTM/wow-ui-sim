@@ -6,7 +6,7 @@ Account for Warcraft Wiki page 564286, revision 5993852 (2024-03-24T16:20:32Z), 
 
 - [x] Probe all 59 inventory occurrences in isolated cached Game UI; failures exactly equal the reviewed gap fixture.
 - [x] Apply seventeen later registers (10.2.6 through 12.1.0) chronologically.
-- [x] Construct VertexColor as a texture animation, not an invented frame kind; query its actual endpoint methods.
+- [ ] Construct VertexColor as a texture animation, not an invented frame kind; classify its modeled endpoint lookup as published. Historical missing-endpoint proof is separate from current reconciled test, execution pending.
 - [x] Retain all 356 extract occurrences, including verbatim Lua/XML examples; account for all 415 source IDs exactly once. Documentary backfill gives no runtime credit.
 - [x] Negative control changes one published, unsuperseded API to removed and produces exactly one additional gap.
 
@@ -25,7 +25,7 @@ Account for Warcraft Wiki page 564286, revision 5993852 (2024-03-24T16:20:32Z), 
 ## Tests asserting this spec
 
 - `tests/patch_10_2_5_publication_sweep.rs`.
-- `tests/patch_10_2_5_probe_factory.rs`: animation constructor and real missing endpoint result.
+- `tests/patch_10_2_5_probe_factory.rs`: animation constructor and actual modeled endpoint publication result. Frozen `ccd526c6c` suite fails the old nil expectation with actual `VertexColor; lookup=function`; fixture expectation reconciled, current execution pending.
 - `tests/patch_10_2_5_cached_surfaces.rs`: cached Game color-picker callback/hex input consumer; no historical optional-parameter parity claim.
 - `tools/test_extract_patch_non_inventory.py`: XML/Lua literal retention and legacy-output fixtures.
 - `data/patch-api/evidence/10.2.5-session-2026-10-07/p1025-validate.py`: exhaustive IDs, source hashes, chronological expectations and retained inputs.
