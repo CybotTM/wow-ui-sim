@@ -49,7 +49,7 @@ No native catalog, server transport, interpolation parity, dynamic HUD rebinding
 
 ### DiscreteProgressSteps input-only checkpoint — 2026-10-13
 
-[Discrete contract](../../specs/ui-widget-discrete-progress-steps.md) owns the complete19-field supplied-record/type19 slice. Current source adds DTO, empty keyed map and five intended query/security/actual-cache cases only. Getter, registration and typed feed remain absent; compilation and behavioral RED are unrun. Initial supplied-record assertions precede cache/atlas prerequisites; downstream lifecycle assertions are not evidence until reached. Existing `eyeofthejailer` atlas metadata grounds fixture names, not asset extraction/render/native parity. No vendor or demo catalog changes.
+[Discrete contract](../../specs/ui-widget-discrete-progress-steps.md) owns the complete19-field supplied-record/type19 slice. Historical `42f206f66` stage added DTO, empty keyed map and five direct-seeded query/security/actual-cache cases only. Getter, registration and typed feed were absent at that stage; initial compilation/RED were unrun. Later genuine RED and producer source are recorded above. Initial supplied-record assertions precede cache/atlas prerequisites; downstream lifecycle assertions are not evidence until reached. Existing `eyeofthejailer` atlas metadata grounds fixture names, not asset extraction/render/native parity. No vendor or demo catalog changes.
 
 ## Sources
 

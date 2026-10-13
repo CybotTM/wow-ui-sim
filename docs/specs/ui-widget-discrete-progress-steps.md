@@ -6,7 +6,7 @@ Host-supplied DiscreteProgressSteps records belong to `src/c_api/ui_widget_manag
 
 - [ ] `C_UIWidgetManager.GetDiscreteProgressStepsVisualizationInfo(number)` returns nil without supplied data, otherwise a fresh, complete 19-field cached-schema snapshot preserving supplied numbers/enums/strings/bool without inferred defaults or consumer clamping; caller mutation cannot alter retained snapshots or input state.
 - [ ] Supplied replacement/removal and independent environments are observable; numeric IDs and non-number rejection match existing bars. Actual host-secret numbers are allowed when untainted, denied before supplied/absent lookup when tainted, with public recovery and public snapshot fields.
-- [ ] Existing typed host update feed accepts visualization19, validates matching membership before mutation, stores the supplied record before synchronous notification, and preserves independent record lookup after membership removal.
+- [ ] Existing typed host update feed accepts visualization19, validates entry/visualization type and supplied-set existence before mutation, stores the supplied record before synchronous notification, and preserves independent record lookup after membership removal.
 - [ ] Unchanged active Retail/PTR cached manager/template consumes the supplied record and observes actual progress/numSteps geometry, incremental updates, hidden/restore, record/membership removal, pool cleanup and unregister/no reacquisition. Atlas application is established through real catalog-backed texture state, never injected data.
 
 Complete snapshot fields: `shownState`, `tooltip`, `progressMin`, `progressMax`, `progressVal`, `numSteps`, `tooltipLoc`, `widgetSizeSetting`, `textureKit`, `frameTextureKit`, `hasTimer`, `orderIndex`, `widgetTag`, `inAnimType`, `outAnimType`, `widgetScale`, `layoutDirection`, `modelSceneLayer`, `scriptedAnimationEffectID`. Numeric key/snapshot policies follow the [manager contract](ui-widget-manager-state.md); no native acceptance range is inferred.
@@ -30,7 +30,7 @@ Complete snapshot fields: `shownState`, `tooltip`, `progressMin`, `progressMax`,
 
 ## Known gaps (current cycle)
 
-- [ ] Retain complete genuine42 RED/compiler/authentication/launcher evidence; compiler exit0 with six inherited manifest deprecations and no source compiler messages, runtime exit101 is behavioral failure, not setup/timeout.
+- [ ] Complete independent TEXT-retention gate for [genuine42 RED packet](../../data/patch-api/evidence/ui-widget-discrete-progress-2026-10-13/README.md); compile exit0 with six inherited manifest deprecations and no source compiler messages, runtime exit101 is behavioral failure, not setup/timeout.
 - [ ] Execute current query/feed/security and actual cached lifecycle GREEN, inspect full diagnostics, then applicable startup/check/PTR scopes. Current cached lifecycle/atlas/primitive assertions remain unexecuted after producer changes.
 
 ## Out of scope

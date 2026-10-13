@@ -1,3 +1,7 @@
+## [2026-10-13] evidence | DiscreteProgressSteps query-boundary RED
+
+[Checkpoint SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#discreteprogresssteps-query-boundary-red--2026-10-13) links complete five-case failure/compiler/authentication streams; later source producer and unrun GREEN remain distinct.
+
 ## [2026-10-13] source | DiscreteProgressSteps producer after genuine RED
 
 [Producer checkpoint](systems/ui-widget-manager-state.md#discreteprogresssteps-producer-checkpoint--2026-10-13) links complete record/query/type19 feeds and historical five-case RED. Current GREEN/startup/PTR remains pending; parent OPEN.

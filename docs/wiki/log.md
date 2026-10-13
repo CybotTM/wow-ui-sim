@@ -1,3 +1,7 @@
+## [2026-10-13] evidence | DiscreteProgressSteps query-boundary RED
+
+[Checkpoint SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#discreteprogresssteps-query-boundary-red--2026-10-13) retains exact pre-cache failure boundaries and compiler warnings, without promoting current producer source to acceptance.
+
 ## [2026-10-13] source | DiscreteProgressSteps producer after genuine RED
 
 [Producer checkpoint](systems/ui-widget-manager-state.md#discreteprogresssteps-producer-checkpoint--2026-10-13) records query/typed-feed integration without vendor changes; historical RED and current unexecuted GREEN scopes remain separate.
