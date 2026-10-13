@@ -17,7 +17,7 @@ UIWidgetManager must expose environment-local supplied widget-set state and driv
 
 - [ ] Host `replace_ui_widget_set`, `update_ui_widget`, and `remove_ui_widget` publish new state before synchronous events. Unknown-set/type-mismatched updates fail without mutation or notification; membership removal preserves independent visualization snapshots.
 - [ ] Host state updates become visible through the existing cached manager: `UPDATE_UI_WIDGET` performs incremental updates and `UPDATE_ALL_UI_WIDGETS` performs full reconciliation against current supplied state.
-- [ ] Incremental updates activate newly available widgets and update existing consumers using their supplied type, unit token, and visualization record.
+- [ ] Incremental updates activate newly available widgets and update existing consumers using their supplied type and visualization record. **Modeled event adapter:** preserve documented `unitToken` and also publish its supplied string as `unit`, because the current cached container filters that field against `attachedUnit`. Remove this adapter when the cached consumer uses `unitToken`; native event aliases and unit registration/data isolation are not established.
 - [ ] Full reconciliation activates current members and removes consumers whose membership has been removed, preserving supplied ordering.
 - [ ] Hidden visualization state and subsequent activation are handled by actual manager consumers, rather than only by query snapshots.
 - [ ] Unregistering a consumer stops its updates; removal and reactivation leave no stale consumer state.
@@ -38,7 +38,7 @@ UIWidgetManager must expose environment-local supplied widget-set state and driv
 
 ## Tests asserting this spec
 
-At `d11908dcf`, five supplied-state cases execute 0 PASS / 5 query-boundary FAIL, without fixture/setup failures. At `6a852c322`, actual cached XML container registration fails because supplied set417 is not returned; host-secret query fails on the old numeric extractor. Later lifecycle and secret-recovery assertions remain unreached in RED. A sixth state case covers host feed publication/error handling; no current producer GREEN is claimed.
+At `d11908dcf`, five supplied-state cases execute 0 PASS / 5 query-boundary FAIL, without fixture/setup failures. At `6a852c322`, actual cached XML container registration fails because supplied set417 is not returned; host-secret query fails on the old numeric extractor. Later lifecycle and secret-recovery assertions remain unreached in RED. The six state cases, one security case, nine ButtonHeader controls, six Path cases and one Prey control pass at `67775404d` (23/24 selected). Actual cached lifecycle reaches its cleanup phase then fails an unlabeled assertion; diagnostic labels are staged, not a proven producer defect. Normal startup has zero Lua errors, runtime warnings and AnimSetup diagnostics. At `96a44bb1f`, a separate actual-container unit notification test fails target-text preservation while player refresh passes; the event adapter correction is implemented but GREEN remains pending.
 
 - `tests/ui_widget_manager_state.rs` — supplied-state isolation, metadata, ordered membership, complete records, and exact mappings.
 - `tests/ui_widget_manager_lifecycle.rs` — cached manager incremental/full reconciliation and actual consumer lifecycle behavior.

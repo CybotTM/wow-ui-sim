@@ -94,6 +94,12 @@ impl WowLuaEnv {
             let saved_top = state.top;
             let payload = super::queries::build_widget_info(state, set_id, entry);
             state.push(payload);
+            // Cached containers filter `unit`, while API documentation names
+            // `unitToken`. Model this event adapter until that consumer changes.
+            if let Some(unit) = &entry.unit_token {
+                let value = crate::lua_api::methods::create_string(state, unit);
+                crate::lua_api::methods::table_set(state, payload, "unit", value);
+            }
             (payload, saved_top)
         };
         let result = self.fire_event_with_args("UPDATE_UI_WIDGET", &[payload]);
