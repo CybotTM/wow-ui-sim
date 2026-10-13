@@ -220,3 +220,42 @@ fn invoke_original_item_consumer(env: &WowLuaEnv) -> bool {
     assert_no_recorded_errors(env, "original SetItem / IsDressupReward invocation");
     value
 }
+
+#[test]
+fn item_dressability_original_player_choice_tracks_supplied_boolean_and_mount() {
+    let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
+    let env = crate::common::blizzard_addon_harness::new_blizzard_addon_env(&ui);
+    load_player_choice_closure(&env, &ui);
+    env.state().borrow_mut().mount_item_relations.remove(&6948);
+    for expected in [false, true, false] {
+        env.state()
+            .borrow_mut()
+            .item_dressability
+            .insert(6948, expected);
+        assert_eq!(invoke_original_item_consumer(&env), expected);
+    }
+    env.state()
+        .borrow_mut()
+        .mount_item_relations
+        .insert(6948, 401);
+    assert_real_consumer_predicate(&env, false);
+    assert!(invoke_original_item_consumer(&env));
+    env.state().borrow_mut().mount_item_relations.remove(&6948);
+    assert_real_consumer_predicate(&env, false);
+    assert!(!invoke_original_item_consumer(&env));
+    env.state().borrow_mut().item_dressability.remove(&6948);
+    assert!(!invoke_original_item_consumer(&env));
+}
+
+fn assert_real_consumer_predicate(env: &WowLuaEnv, expected: bool) {
+    let value = env
+        .eval::<bool>(
+            r#"
+            local _, link = C_Item.GetItemInfo(6948)
+            assert(type(link) == 'string' and link:find('|Hitem:6948:', 1, true))
+            return C_Item.IsDressableItemByID(link)
+            "#,
+        )
+        .expect("independent supplied predicate through real generated item link");
+    assert_eq!(value, expected);
+}

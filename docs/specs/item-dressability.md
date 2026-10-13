@@ -31,25 +31,28 @@ Retail/PTR `C_Item.IsDressableItemByID(itemInfo)` projects an explicit host-supp
 
 - `src/c_api/item_spell/c_item.rs` — existing C_Item registration and numeric/link parsing context; new predicate not implemented by this stage.
 - `src/c_api/item_spell/helpers.rs` — existing metadata projections; not authoritative dressability inputs.
-- `tests/item_dressability.rs` — two initial real-WowLuaEnv API cases integrated without production behavior; PTR initial RED independently classified, Retail execution pending. Public lookup, not raw registration-table shape, is the contract.
-- `tests/mount_item_player_choice.rs` — existing whole cached consumer; later supplier contrast must retain its original loader/method path.
+- `src/lua_api/state/sim_state.rs` / `src/lua_api/state.rs` — passive Retail/PTR `item_dressability: HashMap<u32, bool>`, initialized empty. Public predicate remains unchanged at the input-only stage.
+- `tests/item_dressability.rs` — five authored API/input cases; initial two-case RED checkpoint below. Public lookup, not raw registration-table shape, is the contract.
+- `tests/mount_item_player_choice.rs` — unchanged whole cached consumer helper plus authored supplied false/true/false and independent mount contrast; execution pending.
 
 ## Tests asserting this spec
 
-Integrated `tests/item_dressability.rs` contains exactly two initial cases:
+Initial `13a818ba5` tests contained exactly two cases:
 
 - `item_dressability_empty_input_returns_exactly_one_boolean_false` — numeric ID and supported bare/generated item-link defaults, type and arity.
 - `item_dressability_requires_item_info_and_authenticates_vm_secrets` — required argument/type rejection, authentic wrapped numeric/link queries, malformed wrapped payloads, tainted denial and secure recovery.
 
-Initial PTR API RED at `13a818ba5` executed two cases: 0 PASS / 2 FAIL, exit101, independently classified with successful environment initialization. First numeric miss passed exact-one-return arity then failed `empty supplied classification must return boolean false`; actual value/type was not printed. First no-argument call failed the combined rejection/string-message assertion `required ItemInfo must reject input`; successful return versus non-string error is not distinguished by output. Later selectors and all secret/taint assertions were unreached. Retail execution remains pending. No passing contract checkboxes or modeled/native consumer coverage follow from this RED.
+Initial PTR API RED at `13a818ba5` executed two cases: 0 PASS / 2 FAIL, exit101, independently classified with successful environment initialization. First numeric miss passed exact-one-return arity then failed `empty supplied classification must return boolean false`; actual value/type was not printed. First no-argument call failed the combined rejection/string-message assertion `required ItemInfo must reject input`; successful return versus non-string error is not distinguished by output. Later selectors and all secret/taint assertions were unreached. Retail at source `c7ba479fe` subsequently executed the same 0 PASS / 2 FAIL, exit101 and first assertion messages; independent classification pending. No passing contract checkboxes or modeled/native consumer coverage follow from initial RED.
+
+The input-only successor authors three additional direct cases for supplied numeric/bare/generated-link booleans and uncatalogued identity, replacement/removal/isolation, and independent mount/equipment/consumable inputs. The security case now exercises supplied false and true. One added original PlayerChoice case preserves whole closure/template/method provenance and supplies false/true/false plus independent mount controls. All successor tests remain unexecuted; getter implementation requires genuine supplied-record/consumer RED.
 
 ## Known gaps (current cycle)
 
-- [ ] Execute initial Retail cases before adding production behavior; PTR genuine RED is recorded above with actual boundaries and unreached assertions.
-- [ ] After passive host inputs exist, add and execute host-state RED for explicit true/false, uncatalogued supplied identity, link identity, replacement/removal, environment isolation and independent mount/equipment/consumable state. No new production types/state are staged now.
-- [ ] After passive host inputs exist, add and execute real-consumer RED through the unchanged whole cached closure with supplied classification and independent mount controls. No sliced/recreated/mocked consumer.
+- [ ] Finish independent classification of initial Retail RED; both profiles executed before passive input changes.
+- [ ] Execute authored host-state RED for explicit true/false, uncatalogued supplied identity, link identity, replacement/removal, environment isolation and independent mount/equipment/consumable state.
+- [ ] Execute authored real-consumer RED through the unchanged whole cached closure with supplied classification and independent mount controls. No sliced/recreated/mocked consumer.
 - [ ] Producer, mapped-secret proof, earlier-profile preservation and broader acceptance remain main-owned later work.
 
 ## Out of scope
 
-Native catalog/classification, ownership or transmog eligibility inference and 3D rendering: not authorized or established by declarations. No inference from Hearthstone metadata, inventory type, equipment sets or mount membership. Numeric-domain/coercion/name grammar and malformed-string outcomes are not specified by this bounded declaration evidence. This stage excludes production changes and all operational execution; C API implementation remains in the broader approved scope.
+Native catalog/classification, ownership or transmog eligibility inference and 3D rendering: not authorized or established by declarations. No inference from Hearthstone metadata, inventory type, equipment sets or mount membership. Numeric-domain/coercion/name grammar and malformed-string outcomes are not specified by this bounded declaration evidence. Input-only successor adds passive storage and authored tests, not the production predicate. Native classification, 3D and broader acceptance remain separate gaps.

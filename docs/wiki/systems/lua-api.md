@@ -376,7 +376,13 @@ At `7ec9c049a`, `SetStartColor`, `SetEndColor`, `GetStartColor`, and `GetEndColo
 
 Historical six-test RED reached missing `SetStartColor`; downstream assertions were not reached then. Historical bounded **6/6 GREEN**, exit0, at `080833f1d`, including actual addon XML loading, is unchanged and does not verify the receiver repair. The separate receiver-leak RED at that revision remains **64 extras** (four endpoints × 16 ordinary widget types); its missing-method snapshot passed. Native discovery captures remain untouched. Main reports seven receiver-stage PASS; the separate method comparison still fails on 32 file-getter extra rows. `b003ec183` adds only two intended Texture rows to the default comparison fixture, not a native capture. Current bounded VertexColor7/Texture7/method2 PASS; [current checkpoint](../investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) owns the stage boundary. [The spec](../../specs/vertex-color-animation.md#tests-asserting-this-spec) owns that evidence boundary; public packet retention, current-suite acceptance, full compatibility and native parity remain unclaimed.
 
+## Supplied item dressability — input checkpoint
+
+[Owning C API contract](../../specs/item-dressability.md) records approved empty environment-local per-item booleans and missing=false policy. Passive storage and authored direct/security/whole cached PlayerChoice tests are not predicate or consumer acceptance. Catalog, equipment, consumable and mount state do not infer dressability; native classification and rendering remain unproved.
+
 ## Sources
+
+- [Item dressability](../../specs/item-dressability.md) — supplied C API model and revision-scoped proof limits.
 
 - [VertexColor animation](../../specs/vertex-color-animation.md) — contract, modeled policies and historical RED/bounded 6/6 GREEN evidence
 

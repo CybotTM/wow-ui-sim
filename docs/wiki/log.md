@@ -1,3 +1,7 @@
+## [2026-10-13] source | Supplied item dressability input
+
+[Existing API inventory](systems/lua-api.md#supplied-item-dressability--input-checkpoint) links the [owning C API contract](../specs/item-dressability.md). Passive boolean storage and authored whole cached PlayerChoice/input tests leave predicate and supplied-record/consumer RED pending; native/render/full-parent unproved.
+
 ## [2026-10-13] evidence | Texture XML bounded Mists acceptance
 
 [Owning contract](../specs/xml-self-relative-key.md#known-gaps-current-cycle) and [current evidence](../../data/patch-api/evidence/xml-self-relative-key-2026-10-13/README.md) separate accepted focused/startup/anchor/named-prefork gates from initial77-copy PASS and the corrected follow-up42 metadata-reuse frontier; historical process/metadata FAILs remain. Store fixture mismatches retain real FAILs and unproved target/card bounds; native/render/first-writer/full-parent gaps remain.

@@ -31,8 +31,21 @@ fn item_dressability_empty_input_returns_exactly_one_boolean_false() {
 #[test]
 fn item_dressability_requires_item_info_and_authenticates_vm_secrets() {
     let env = WowLuaEnv::new().expect("fresh dressability argument environment");
-    env.exec(
-        r#"
+    for expected in [false, true] {
+        env.state()
+            .borrow_mut()
+            .item_dressability
+            .insert(6948, expected);
+        let script = format!(
+            "local expectedDressability = {expected}\n{}",
+            SECURITY_CONTRACT
+        );
+        env.exec(&script)
+            .expect("required ItemInfo and AllowedWhenUntainted use real VM security");
+    }
+}
+
+const SECURITY_CONTRACT: &str = r#"
         debug.settaintmode(true)
         assert(debug.getstacktaint() == nil, 'untainted setup required')
         local query = C_Item.IsDressableItemByID
@@ -56,15 +69,16 @@ fn item_dressability_requires_item_info_and_authenticates_vm_secrets() {
         local hyperlink = secretwrap(link)
         local malformed = secretwrap(false)
         local missing = secretwrap(nil)
-        local function miss(...)
-            assert(select('#', ...) == 1, 'exact secret/ordinary miss arity')
-            assert(type((...)) == 'boolean' and (...) == false, 'approved false miss')
+        local function suppliedValue(...)
+            assert(select('#', ...) == 1, 'exact secret/ordinary supplied arity')
+            assert(type((...)) == 'boolean' and (...) == expectedDressability,
+                'supplied boolean must project through VM secret boundary')
         end
         for _, value in ipairs({numeric, hyperlink, malformed, missing}) do
             assert(issecretvalue(value), 'authentic VM secret required')
         end
-        miss(query(numeric))
-        miss(query(hyperlink))
+        suppliedValue(query(numeric))
+        suppliedValue(query(hyperlink))
         argumentError(malformed)
         argumentError(missing)
 
@@ -84,8 +98,8 @@ fn item_dressability_requires_item_info_and_authenticates_vm_secrets() {
             denied(hyperlink)
             denied(malformed)
             denied(missing)
-            miss(query(6948))
-            miss(query(link))
+            suppliedValue(query(6948))
+            suppliedValue(query(link))
             argumentError(false)
             assert(debug.getstacktaint() == 'DressabilityTest', 'ordinary queries preserve taint')
         end
@@ -93,9 +107,135 @@ fn item_dressability_requires_item_info_and_authenticates_vm_secrets() {
         addon()
         assert(debug.getstacktaint() == nil, 'outer untainted caller restored')
         assert(issecretvalue(numeric) and issecretvalue(hyperlink), 'wrappers survive round trip')
-        miss(query(numeric))
-        miss(query(hyperlink))
-        "#,
-    )
-    .expect("required ItemInfo and AllowedWhenUntainted use real VM security");
+        suppliedValue(query(numeric))
+        suppliedValue(query(hyperlink))
+        "#;
+
+const REAL_ITEM: u32 = 6948;
+const UNCATALOGUED_ITEM: u32 = 901001;
+
+#[test]
+fn item_dressability_projects_explicit_numeric_and_link_booleans() {
+    let env = WowLuaEnv::new().expect("supplied dressability environment");
+    assert!(env.state().borrow().item_dressability.is_empty());
+    assert!(wow_ui_sim::items::get_item(UNCATALOGUED_ITEM).is_none());
+    for expected in [false, true, false] {
+        {
+            let mut state = env.state().borrow_mut();
+            state.item_dressability.insert(REAL_ITEM, expected);
+            state.item_dressability.insert(UNCATALOGUED_ITEM, expected);
+        }
+        assert_supplied_dressability(&env, expected);
+    }
+}
+
+#[test]
+fn item_dressability_replacement_removal_and_environment_isolation() {
+    let supplied = WowLuaEnv::new().expect("supplied dressability environment");
+    let isolated = WowLuaEnv::new().expect("isolated dressability environment");
+    supplied
+        .state()
+        .borrow_mut()
+        .item_dressability
+        .insert(REAL_ITEM, true);
+    assert_real_item_dressability(&supplied, true);
+    assert_real_item_dressability(&isolated, false);
+    supplied
+        .state()
+        .borrow_mut()
+        .item_dressability
+        .insert(REAL_ITEM, false);
+    assert_real_item_dressability(&supplied, false);
+    supplied
+        .state()
+        .borrow_mut()
+        .item_dressability
+        .insert(REAL_ITEM, true);
+    assert_real_item_dressability(&supplied, true);
+    supplied
+        .state()
+        .borrow_mut()
+        .item_dressability
+        .remove(&REAL_ITEM);
+    assert_real_item_dressability(&supplied, false);
+    assert_real_item_dressability(&isolated, false);
+    assert!(supplied.state().borrow().item_dressability.is_empty());
+    assert!(isolated.state().borrow().item_dressability.is_empty());
+}
+
+#[test]
+fn item_dressability_is_independent_of_mount_equipment_and_consumable_inputs() {
+    let env = WowLuaEnv::new().expect("independent item inputs environment");
+    {
+        let mut state = env.state().borrow_mut();
+        state.equippable_items.insert(REAL_ITEM);
+        state.consumable_items.insert(REAL_ITEM);
+        state.mount_item_relations.insert(REAL_ITEM as i32, 401);
+    }
+    assert_real_item_dressability(&env, false);
+    for expected in [true, false] {
+        env.state()
+            .borrow_mut()
+            .item_dressability
+            .insert(REAL_ITEM, expected);
+        assert_real_item_dressability(&env, expected);
+        env.exec(
+            r#"
+            assert(C_Item.IsEquippableItem(6948) == true)
+            assert(C_Item.IsConsumableItem(6948) == true)
+            assert(C_MountJournal.GetMountFromItem(6948) == 401)
+            "#,
+        )
+        .expect("dressability insertion does not mutate independent item inputs");
+    }
+    {
+        let mut state = env.state().borrow_mut();
+        state.equippable_items.remove(&REAL_ITEM);
+        state.consumable_items.remove(&REAL_ITEM);
+        state.mount_item_relations.remove(&(REAL_ITEM as i32));
+        state.item_dressability.insert(REAL_ITEM, true);
+    }
+    assert_real_item_dressability(&env, true);
+    let state = env.state().borrow();
+    assert!(!state.equippable_items.contains(&REAL_ITEM));
+    assert!(!state.consumable_items.contains(&REAL_ITEM));
+    assert!(!state.mount_item_relations.contains_key(&(REAL_ITEM as i32)));
+}
+
+fn assert_real_item_dressability(env: &WowLuaEnv, expected: bool) {
+    let results = env
+        .eval::<(bool, bool, bool)>(
+            r#"
+            local query = C_Item.IsDressableItemByID
+            local _, link = C_Item.GetItemInfo(6948)
+            assert(type(link) == 'string' and link:find('|Hitem:6948:', 1, true))
+            local function booleanResult(...)
+                assert(select('#', ...) == 1, 'exact supplied result arity')
+                assert(type((...)) == 'boolean', 'supplied result must be boolean')
+                return ...
+            end
+            return booleanResult(query(6948)), booleanResult(query('item:6948')),
+                booleanResult(query(link))
+            "#,
+        )
+        .expect("real numeric, bare-link and generated-link dressability queries");
+    assert_eq!(results, (expected, expected, expected));
+}
+
+fn assert_supplied_dressability(env: &WowLuaEnv, expected: bool) {
+    assert_real_item_dressability(env, expected);
+    let results = env
+        .eval::<(bool, bool)>(
+            r#"
+            local function booleanResult(...)
+                assert(select('#', ...) == 1, 'exact uncatalogued result arity')
+                assert(type((...)) == 'boolean', 'uncatalogued result must be boolean')
+                return ...
+            end
+            return booleanResult(C_Item.IsDressableItemByID(901001)),
+                booleanResult(C_Item.IsDressableItemByID('item:901001'))
+            "#,
+        )
+        .expect("explicit uncatalogued numeric and link dressability queries");
+    assert_eq!(results, (expected, expected));
 }
