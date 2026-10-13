@@ -18,7 +18,7 @@
 
 ## Implementation inventory
 
-- `src/c_api/c_cooldown_viewer.rs`: owned availability input, default and planned query provider.
+- `src/c_api/c_cooldown_viewer.rs`: owned availability input, default and live two-value query provider.
 - `src/lua_api/state/sim_state.rs`: environment-local input field.
 - `src/lua_api/state.rs`: default initialization.
 
@@ -28,7 +28,8 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Input scaffold and tests staged; query producer unchanged. Behavioral RED unrun; compilation is not RED.
+- [x] Execute genuine query-boundary RED: all eight cases fail at `ff72f3c3b` on missing bool/string projection, including actual cached settings reason and visibility checks. No observed fixture failures.
+- [ ] Execute current producer GREEN; implementation is source-only until recompiled.
 - [ ] Retail/PTR runtime, startup and independent verification pending.
 
 ## Out of scope

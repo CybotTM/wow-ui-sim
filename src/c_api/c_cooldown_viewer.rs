@@ -56,12 +56,20 @@ impl Default for CooldownViewerAvailability {
 pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = ensure_namespace(state, "C_CooldownViewer")?;
     #[cfg(feature = "retail-12-0-0")]
-    table_set_rust_fn_static(
-        state,
-        namespace,
-        "GetValidAlertTypes",
-        get_valid_alert_types,
-    )?;
+    {
+        table_set_rust_fn_static(
+            state,
+            namespace,
+            "IsCooldownViewerAvailable",
+            query_availability,
+        )?;
+        table_set_rust_fn_static(
+            state,
+            namespace,
+            "GetValidAlertTypes",
+            get_valid_alert_types,
+        )?;
+    }
     table_set_rust_fn_static(
         state,
         namespace,
@@ -74,6 +82,15 @@ pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
         "GetCooldownViewerCooldownInfo",
         get_cooldown_info,
     )
+}
+
+#[cfg(feature = "retail-12-0-0")]
+fn query_availability(state: &mut LuaState) -> LuaResult<u32> {
+    let availability = borrow_state(state)?.cooldown_viewer_availability.clone();
+    state.push(Val::Bool(availability.is_available));
+    let reason = crate::lua_api::methods::create_string(state, &availability.failure_reason);
+    state.push(reason);
+    Ok(2)
 }
 
 #[cfg(feature = "retail-12-0-0")]
