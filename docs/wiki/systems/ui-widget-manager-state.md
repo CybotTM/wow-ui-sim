@@ -39,7 +39,7 @@ The [contract proof ledger](../../specs/ui-widget-manager-state.md#tests-asserti
 
 The [eight-case RED ledger](../../specs/ui-widget-manager-state.md#next-slice-tests-and-proof-gaps) at `87fecfd31` separates two wrong-type bar snapshot failures, three TopCenter exactly-one-return failures, one supplied-record query failure after a cached closure, and two numeric-query failures before cached HUD OnLoad. Later bar lifecycle and HUD consumer assertions were not reached. Earlier four bwrap missing-target launch failures executed zero cases and remain separate.
 
-Later `39ce8969a` and `174b86505` each retain three consumer failures. At `b28a45f91`, HUD2 pass actual cached OnLoad; bar assertion59 fails initial neutral-glow visibility. Subsequent incremental bar updates, hidden/restore, membership removal and unregister remain unreached. The [atlas application-result policy](../../specs/texture-atlas-application-result.md) records the next investigation, not an implemented fix or native parity.
+Later `39ce8969a` and `174b86505` each retain three consumer failures. At `b28a45f91`, HUD2 pass actual cached OnLoad; bar assertion59 fails initial neutral-glow visibility. Subsequent incremental bar updates, hidden/restore, membership removal and unregister remain unreached. The [atlas application-result policy](../../specs/texture-atlas-application-result.md) now has source implementation; compiler/GREEN and subsequent cached-bar lifecycle proof remain pending. It does not establish native return parity.
 
 No native catalog, server transport, interpolation parity, dynamic HUD rebinding or unit-context proof is established. Query freshness does not prove rebinding of loaded containers. Consumer and broader parent acceptance remain OPEN.
 

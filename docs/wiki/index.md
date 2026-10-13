@@ -1,3 +1,7 @@
+## [2026-10-13] docs | Explicit SetAtlas application-result policy
+
+[Atlas system](systems/texture-atlas.md#setatlas-lua-api) links the [policy/proof SSOT](../specs/texture-atlas-application-result.md). Source implementation present; compiler/GREEN pending. Native no-return evidence remains conflicting; unchanged TextureKit visibility and historical cached-bar failure remain separate from acceptance.
+
 ## [2026-10-13] evidence | Cached HUD OnLoad and remaining bar boundary
 
 [Retained consumer attempts](../../data/patch-api/evidence/ui-widget-manager-state-2026-10-13/README.md#later-consumer-attempts) own exact outcomes: b28 HUD2 PASS, bar1 FAIL at initial neutral visibility; later bar lifecycle unreached. [UI widget state](systems/ui-widget-manager-state.md) links the contract and separate atlas application-result investigation. Earlier failures and reused proof scopes remain distinct; parent OPEN.

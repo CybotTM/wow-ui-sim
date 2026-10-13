@@ -154,25 +154,13 @@ Result: `(0.5, 0.625, 0.2, 0.4)`
 
 ## SetAtlas Lua API
 
-**File:** `src/lua_api/frame/methods/methods_texture.rs:125-171`
+**Source:** [atlas methods](../src/lua_api/frame/methods/widgets/texture/atlas.rs).
 
-### SetAtlas(atlasName, useAtlasSize, filterMode, resetTexCoords)
+`SetAtlas` validates the atlas argument, resolves names or supported numeric element IDs, clears texture/atlas state for blank names, and applies resolved atlas metadata through `apply_atlas()`. Unknown names retain the requested name while clearing texture/UV state. `useAtlasSize` applies resolved dimensions.
 
-1. Look up atlas info
-2. Prefer nine-slice kits over 2x fallbacks
-3. If nine-slice kit detected: store in `frame.nine_slice_atlas`
-4. If standard atlas: apply via `apply_atlas_to_frame()`, propagate to button parent if applicable
-5. If atlas not found: store name anyway
+The explicit [application-result policy](specs/texture-atlas-application-result.md) returns exactly one boolean: true for a resolved/applied atlas, false for accepted inactive inputs. Argument errors and mutation behavior remain unchanged. This is simulator compatibility policy, not native return parity; the spec owns conflicting generated-documentation/Wowless evidence and pending runtime proof.
 
-### apply_atlas_to_frame (lines 227-254)
-
-Sets texture path, UV coordinates, and tiling hints on the frame. If `use_atlas_size` is true, sets frame width/height from atlas dimensions.
-
-### Button Texture Propagation (lines 256-319)
-
-When a child texture with parentKey `NormalTexture`, `PushedTexture`, etc. calls `SetAtlas()`, the texture path and UVs propagate to the parent button's state fields.
-
-**Custom parentKeys do NOT propagate** -- the child renders independently.
+Only recognized Button/CheckButton state-slot children propagate texture/UV state and button-owned visibility. Other children retain independent visibility. Unchanged cached `TextureUtil.lua::SetupTextureKitOnFrame` separately consumes the result for `SetShown`; this is not a renderer visibility override. See [atlas visibility contract](specs/texture-atlas-visibility.md).
 
 ---
 
