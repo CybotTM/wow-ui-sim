@@ -1,3 +1,7 @@
+## [2026-10-13] evidence | Cached HUD OnLoad and remaining bar boundary
+
+[Retained consumer attempts](../../data/patch-api/evidence/ui-widget-manager-state-2026-10-13/README.md#later-consumer-attempts) own exact outcomes: b28 HUD2 PASS, bar1 FAIL at initial neutral visibility; later bar lifecycle unreached. [UI widget state](systems/ui-widget-manager-state.md) links the contract and separate atlas application-result investigation. Earlier failures and reused proof scopes remain distinct; parent OPEN.
+
 ## [2026-10-13] docs | UI widget manager source checkpoint
 
 [UI widget manager state](systems/ui-widget-manager-state.md) describes `67775404d` supplied sets, complete records, exact demo associations, and synchronous feeds; cached-container RED and pending validation remain distinct from implementation. Links contract and existing architecture; no native/full-autoload acceptance.

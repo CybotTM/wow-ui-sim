@@ -1,6 +1,6 @@
 # UI Widget Manager State
 
-Environment-local supplied UI widget sets, visualization snapshots, exact quest associations, and synchronous host feeds form the core model. Main is implementing full supplied bars, HUD selectors, and feed integration after genuine eight-case RED at source `87fecfd31`; new-implementation GREEN and startup are UNRUN. The [contract](../../specs/ui-widget-manager-state.md) owns requirements and exact test evidence; this page records main-reported implementation scope, not independently inspected new source or native parity.
+Environment-local supplied UI widget sets, visualization snapshots, exact quest associations and synchronous host feeds form the core model. Production `0745fe84f` adds supplied bars and HUD selectors. The [contract](../../specs/ui-widget-manager-state.md) owns requirements; the [retained attempts](../../../data/patch-api/evidence/ui-widget-manager-state-2026-10-13/README.md#later-consumer-attempts) own current outcomes and historical failures. At test-only `b28a45f91`, HUD OnLoad2 PASS; bar initial visibility fails, later lifecycle unreached. No native or whole-goal acceptance follows.
 
 ## State and representation
 
@@ -33,20 +33,22 @@ The [contract proof ledger](../../specs/ui-widget-manager-state.md#tests-asserti
 - `bars.rs` supplies full 35-field StatusBar and 22-field CaptureBar DTO snapshots, including a fresh ordered StatusBar partition array.
 - `hud.rs` exposes four live environment-local `f64` selectors. Each query returns exactly one number; default zero is simulator model policy, not a proven native default.
 - `queries::register` calls both modules. Feed integration supplies StatusBar type2 and CaptureBar type1; the actual bar-consumer adaptation uses host feeds rather than direct state mutation/manual events.
-- The old PowerBar bootstrap is removed without fallback. This is main-reported implementation scope; GREEN/startup remain UNRUN.
+- The old PowerBar bootstrap is removed without fallback. Query5/core19 and normal-startup/default-check proofs are reused within their original source scopes, not rerun for later fixture corrections.
 
-### Current RED boundary
+### Historical RED and current consumer boundary
 
 The [eight-case RED ledger](../../specs/ui-widget-manager-state.md#next-slice-tests-and-proof-gaps) at `87fecfd31` separates two wrong-type bar snapshot failures, three TopCenter exactly-one-return failures, one supplied-record query failure after a cached closure, and two numeric-query failures before cached HUD OnLoad. Later bar lifecycle and HUD consumer assertions were not reached. Earlier four bwrap missing-target launch failures executed zero cases and remain separate.
 
-No native catalog, server transport, interpolation parity, dynamic HUD rebinding, or unit-context proof is established. Query freshness does not prove rebinding of loaded containers. New implementation verification is not complete.
+Later `39ce8969a` and `174b86505` each retain three consumer failures. At `b28a45f91`, HUD2 pass actual cached OnLoad; bar assertion59 fails initial neutral-glow visibility. Subsequent incremental bar updates, hidden/restore, membership removal and unregister remain unreached. The [atlas application-result policy](../../specs/texture-atlas-application-result.md) records the next investigation, not an implemented fix or native parity.
+
+No native catalog, server transport, interpolation parity, dynamic HUD rebinding or unit-context proof is established. Query freshness does not prove rebinding of loaded containers. Consumer and broader parent acceptance remain OPEN.
 
 ## Sources
 
 - [UIWidgetManager contract](../../specs/ui-widget-manager-state.md) — required behavior, staged tests, and historical RED boundary.
 - [Manager module](../../../src/c_api/ui_widget_manager.rs) and [inputs](../../../src/c_api/ui_widget_manager/inputs.rs) — numeric identities, set/membership records, and complete supplied DTOs.
 - [Queries](../../../src/c_api/ui_widget_manager/queries.rs), [feed](../../../src/c_api/ui_widget_manager/feed.rs), and [fixtures](../../../src/c_api/ui_widget_manager/fixtures.rs) — snapshot registration, synchronous producers, and bounded demo initialization.
-- `src/c_api/ui_widget_manager/bars.rs` and `src/c_api/ui_widget_manager/hud.rs` — main-reported new producer paths; implementation in progress, new GREEN/startup UNRUN.
+- `src/c_api/ui_widget_manager/bars.rs` and `src/c_api/ui_widget_manager/hud.rs` — implemented producer paths; exact query/consumer proof boundaries remain separate.
 - [Task quest lookup](../../../src/lua_api/globals/quest_surface/task_quest.rs) — stored quest/set association lookup.
 - [Widget architecture](../../widget-system.md), [loading pipeline](../../addon-loading-pipeline.md), and [events](../../event-system.md) — existing frame, cached Lua consumer, and dispatch boundaries.
 

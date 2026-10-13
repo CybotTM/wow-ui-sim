@@ -1,3 +1,7 @@
+## [2026-10-13] evidence | UIWidget later consumer attempts
+
+[Attempt packet](../../data/patch-api/evidence/ui-widget-manager-state-2026-10-13/README.md#later-consumer-attempts) retains b28 actual HUD OnLoad2 PASS, bar1 FAIL at initial neutral visibility, later lifecycle unreached. Contract/system/SSOT link exact outcomes and separate atlas-result investigation; historical failures/reused proofs and parent OPEN preserved.
+
 ## [2026-10-13] docs | UIWidgetManager bars/HUD genuine RED boundary
 
 Updated the [contract](../specs/ui-widget-manager-state.md) and [system page](systems/ui-widget-manager-state.md) with main-reported full-bar/HUD/feed implementation scope and genuine eight-case RED at `87fecfd31`. Exact query failure boundaries and unreached consumer assertions remain separate from four bwrap launch failures with zero cases. Prior two actual `e887` lifecycle passes and 23 reused core cases retain separate scopes; new GREEN/startup UNRUN. No requirement boxes checked or native catalog/server/interpolation/dynamic-rebinding/unit-context proof claimed. Documentation only; main owns commit.

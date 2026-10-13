@@ -51,3 +51,19 @@ Fresh normal startup was **one execution**: **23 enum comparisons true**, propor
 Exact `systemd --wait` launcher records preserve `Finished with result: success` and `Main processes terminated with: code=exited, status=0/SUCCESS` where present. Successful units' post-show GC/default fields have no exit timestamp and `MemoryPeak=[not set]`; `ExecMainCode=0` defaults are not invented terminal proof. Failure terminal records remain complete.
 
 Selected compile.stderr, compile-terminal, admission/revision/toolchain/submission/artifact-seals/receipt-integration/receipt-wow-sim, all four runtime-green test groups plus aggregate, startup diagnostic group/probe, and all five runtime-core groups plus aggregate are retained without excerpts or truncation. Original/public TEXT SHA-256 and sizes are registered per payload; parsed JSON fidelity checked after consistent private identity/home/repo redaction. No temporary paths occurred. CRLF/CR normalized to LF; exactly one final LF, including empty text. No giant compile.stdout, archives, source trees, executables or libraries read/hashed. Historical seal text is not new authentication. Public ownership is UID 1000; root ownership correction not needed. No specs/wiki/source changes, commit, build/test, delegation or operational action performed.
+
+## Later consumer attempts
+
+[Additive manifest](later-consumer-attempts/later-consumer-manifest.json) retains **72 new complete sanitized text payloads**, 94,350 public bytes. Previous259 payloads/manifests remain unchanged and were not rehashed. Compiler stderr/terminal, selected provenance/admission/authentication text and each actual consumer invocation's complete streams/argv/results/launcher/terminal are retained. No binary/library/archive/source tree or giant compile stdout is included; executable digest strings remain historical text only.
+
+| Source / epoch | Unique cases | Reached boundary |
+| --- | --- | --- |
+| 39ce8969a / 093318797417Z | 0 PASS / 3 FAIL | Bar initial width assertion53; HUD prerequisite/combined load ordering. |
+| 174b86505 / 095514586740Z | 0 PASS / 3 FAIL | Bar width actual55.599998474121094 vs55.6; HUD ordinary-global secure publisher assumption. |
+| b28a45f91 / 100434449483Z | 2 PASS / 1 FAIL | HUD2 actual OnLoad PASS; bar initial neutral visibility assertion59 FAIL after geometry passed. |
+
+All epochs are 20261013T-prefixed. Failed bar launcher exits101; b28 HUD launcher exits0 with exact successful process record. Timeout-child summaries are duplicate observations, not extra cases. Post-GC systemctl default fields do not replace that successful launcher receipt. Later bar incremental updates, hidden/restore, membership removal and unregister remain unreached. b28 compiler exits0, six inherited manifest deprecations, no source warnings/errors. Independent bounded runtime gate: `verification/ui-widget-b28-runtime-proof`.
+
+The frozen initial append's 39ce PENDING statement remains historical preparation status, superseded only by the later attempt rows above. Production0745 is unchanged through b28. Query5/core19/normal-startup/defaultcheck proof is reused within original scopes, not newly executed here or added to overlapping historical core25. [Atlas application-result policy](../../../../docs/specs/texture-atlas-application-result.md) is a subsequent investigation, not a fix or native parity proof. Actual bar and broader parent acceptance remain OPEN.
+
+Transforms: consistent private verification/repository/home prefix substitutions, CRLF/CR to LF, exactly one final LF including empty text; no truncation or omitted lines. New payload originals and public copies have recorded SHA-256/size; parsed JSON remains intact after substitutions. Main commits this append before independent retention verification; retention itself makes no new execution claim.
