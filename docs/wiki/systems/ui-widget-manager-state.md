@@ -57,6 +57,8 @@ Historical input-only stage `64a2a57b2` is superseded by producer `2bb6cdde1`. T
 
 ### SpellDisplay input-only checkpoint — 2026-10-13
 
+Current [removal checkpoint](../../specs/frame-event-removal.md#current-source-checkpoint--2026-10-13) owns the later `38ec` Retail/PTR producer PASS/consumer FAIL split and `621649e56` source repair awaiting execution; no cached-consumer GREEN. Historical input-stage checkpoint follows unchanged.
+
 At `85b5494d2`, the [SpellDisplay contract](../../specs/ui-widget-spell-display.md) owns passive supplied DTOs, environment-local storage, type13 feed and nine tests. [Retail result-boundary RED](../../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md) is independently verified; selected-copy integrity and PTR RED remain pending; getter/query/serializer registration and GREEN/consumer acceptance remain absent. Parent OPEN.
 
 ## Sources

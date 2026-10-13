@@ -1,3 +1,7 @@
+## [2026-10-13] docs | Frame cleanup source checkpoint after retained failures
+
+Linked [event inventory](systems/event-system.md#state-based-removal-source-checkpoint--2026-10-13), widget inventory and coverage to [current owner](../specs/frame-event-removal.md#current-source-checkpoint--2026-10-13): selected state-based cleanup, strict registration, retained sealed `38ec` fixture and consumer failures, source repair `621649e56`, post-fix execution pending. Historical checkpoint anchors preserved; no native parity or new preservation/consumer PASS. Private documentation stage only.
+
 ## [2026-10-13] docs | Bounded evidence owners and SpellDisplay input inventory
 
 [TextWithState packet](../../data/patch-api/evidence/ui-widget-text-with-state-2026-10-13/README.md#bounded-saved-green) and [voice contract](../specs/voice-speak-for-me-active-input.md) own separate execution/retention status. [SpellDisplay inventory](systems/ui-widget-manager-state.md#spelldisplay-input-only-checkpoint--2026-10-13) links input stage85b and saved Retail RED; independent review and PTR RED pending. Historical proof retained; parent OPEN.

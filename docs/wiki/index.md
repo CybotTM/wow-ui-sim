@@ -1,3 +1,7 @@
+## [2026-10-13] source | State-based frame cleanup, execution pending
+
+[Event inventory](systems/event-system.md#state-based-removal-source-checkpoint--2026-10-13) links [current policy/status owner](../specs/frame-event-removal.md#current-source-checkpoint--2026-10-13). `621649e56` keeps registration strict and removes cleanup catalog validation; retained fixture/consumer failures remain separate from pending post-fix proof. Model policy, not native parity; historical checkpoints retained.
+
 ## [2026-10-13] source | SpellDisplay input and result-boundary RED
 
 [Widget inventory](systems/ui-widget-manager-state.md#spelldisplay-input-only-checkpoint--2026-10-13) links the [owning contract](../specs/ui-widget-spell-display.md). Retail saved RED independently verified; selected-copy integrity and PTR RED pending. Getter/GREEN/consumer acceptance absent; parent OPEN.

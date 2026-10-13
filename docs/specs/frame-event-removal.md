@@ -28,6 +28,12 @@
 - `tests/fixtures/frame_unregister_unknown.lua` — reusable ordered behavioral fixture; first assertion checks the exact cached unregister call through `pcall`, followed by unknown-name return arity, strict registration rejection, and real registration/delivery/removal controls.
 - `tests/frame_unregister_unknown.rs::unregister_unknown_preserves_known_event_delivery_and_strict_registration` — loads the same `include_str!` fixture in bare `WowLuaEnv`, enabled only for Retail/PTR.
 
+## Current source checkpoint — 2026-10-13
+
+At `621649e56`, deleting the shared `Op` enum leaves catalog validation on insertion only. Selected removal policy is state-based: absent/unknown names return false; `RegisterEvent`/`RegisterUnitEvent` remain strict. This is model policy, not native parity; catalog, forbidden-aspect and callback gates are unchanged in source, not newly preservation-tested.
+
+Retained sealed `38ecbd8ee` direct shared-fixture execution: actual wait exit1 at the first unknown cleanup no-throw assertion; subsequent assertions unreached. Separate supplied Retail/PTR SpellDisplay producer results at `38ec`: each 6 model/query/feed/secret PASS and 3 cached-consumer FAIL at cleanup. Neither result proves post-fix behavior. Fresh post-`621649e56` execution remains pending. [SpellDisplay owner](ui-widget-spell-display.md) retains its earlier checkpoint; [forbidden policy owner](forbidden-aspect-event-input.md) retains separate preservation scope.
+
 ## Known gaps (current cycle)
 
 - [x] Execute the identical shared Lua fixture against sealed normal `38ecbd8ee` before the fix: actual wait exit1, first cached-name no-throw assertion fails; later controls unreached. JSON contains two error entries for the original error and ScriptErrors wrapper, not two independent failures. Executable receipt reused stat-only.

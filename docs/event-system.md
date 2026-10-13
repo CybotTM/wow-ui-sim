@@ -218,7 +218,7 @@ Frames must explicitly register for game events to receive them via OnEvent.
 
 ### RegisterEvent / UnregisterEvent
 
-Adds/removes registerable event names from `frame.registered_events` (`HashSet<String>` on the Rust `Frame` struct, line 126 of `src/widget/frame.rs`). Retail/PTR validate names against generated and epoch-specific strict tables; `EXTERNAL_EVENT_LAUNCH_URL_FAILED` is registerable at retail 12.1 for current `Blizzard_GameMenu` loading. Classic profiles accept any non-empty name. Registration does not model an event producer, payload, or `C_ExternalEventURL` behavior.
+Registration adds registerable names; [state-based removal](specs/frame-event-removal.md#current-source-checkpoint--2026-10-13) removes existing membership without catalog validation (selected model policy; post-fix execution pending). Registration uses `frame.registered_events` (`HashSet<String>` on the Rust `Frame` struct, line 126 of `src/widget/frame.rs`). Retail/PTR validate names against generated and epoch-specific strict tables; `EXTERNAL_EVENT_LAUNCH_URL_FAILED` is registerable at retail 12.1 for current `Blizzard_GameMenu` loading. Classic profiles accept any non-empty name. Registration does not model an event producer, payload, or `C_ExternalEventURL` behavior.
 
 ### RegisterAllEvents
 

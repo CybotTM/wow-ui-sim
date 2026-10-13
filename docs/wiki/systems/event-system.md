@@ -15,6 +15,10 @@ Predefined constants include PLAYER_LOGIN, PLAYER_ENTERING_WORLD, ADDON_LOADED, 
 
 Registerability does not model an event producer, payload, or `C_ExternalEventURL` behavior.
 
+## State-based removal source checkpoint — 2026-10-13
+
+[Removal policy/current status](../../specs/frame-event-removal.md#current-source-checkpoint--2026-10-13) owns `621649e56` insertion-only validation, retained sealed-fixture failure and pending post-fix execution. Unknown/absent cleanup returns false by selected model policy, not native parity; Register/RegisterUnit remain strict. [Forbidden event policy](../../specs/forbidden-aspect-event-input.md) and callback/catalog gates are unchanged; no new preservation PASS.
+
 ## Script Handler Types (36+, `src/event/mod.rs`)
 
 Per-frame, per-type (at most one active handler): OnEvent, OnUpdate, OnPostUpdate, OnShow, OnHide, OnPostShow, OnPostHide, OnClick, OnPostClick, OnEnter, OnLeave, OnMouseDown, OnMouseUp, OnMouseWheel, OnDragStart, OnDragStop, OnReceiveDrag, OnSizeChanged, OnLoad, OnAttributeChanged, OnKeyDown, OnKeyUp, OnChar, OnEnterPressed, OnEscapePressed, OnTabPressed, OnSpacePressed, OnEditFocusGained/Lost, OnTextSet, OnTextChanged, OnValueChanged, OnMinMaxChanged, OnTooltipCleared/SetItem/SetUnit/SetSpell.
