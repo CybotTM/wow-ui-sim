@@ -1,3 +1,7 @@
+## [2026-10-13] evidence | Retail cached bar lifecycle and atlas-result policy
+
+[Retained RED/GREEN](../../data/patch-api/evidence/ui-widget-manager-state-2026-10-13/README.md#atlas-application-result-red-and-retail-green) owns current Retail20 PASS, actual cached bar/HUD lifecycle and fresh clean startup/check. [Policy](../specs/texture-atlas-application-result.md) preserves native no-return conflict; historical failures remain unchanged. Affected profiles and full handoff OPEN.
+
 ## [2026-10-13] docs | Explicit SetAtlas application-result policy
 
 [Atlas system](systems/texture-atlas.md#setatlas-lua-api) links the [policy/proof SSOT](../specs/texture-atlas-application-result.md). Source implementation present; compiler/GREEN pending. Native no-return evidence remains conflicting; unchanged TextureKit visibility and historical cached-bar failure remain separate from acceptance.

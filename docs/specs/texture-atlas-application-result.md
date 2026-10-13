@@ -4,9 +4,9 @@
 
 ## What it must do
 
-- [ ] A successfully resolved and applied atlas returns exactly one boolean `true`.
-- [ ] An accepted input that does not apply an atlas returns exactly one boolean `false`; existing argument errors and mutation behavior remain unchanged.
-- [ ] Real cached CaptureBar TextureKit consumers keep available neutral glow/spark textures visible, then consume updates, hidden/restored records, removal and unregister without vendor changes.
+- [x] A successfully resolved and applied atlas returns exactly one boolean `true`.
+- [x] An accepted input that does not apply an atlas returns exactly one boolean `false`; existing argument errors and mutation behavior remain unchanged.
+- [x] Real cached CaptureBar TextureKit consumers keep available neutral glow/spark textures visible, then consume updates, hidden/restored records, removal and unregister without vendor changes.
 
 ## How it works
 
@@ -19,13 +19,17 @@
 
 ## Tests asserting this spec
 
-- `tests/set_atlas_arguments.rs`: exact return count, known application, missing application and existing argument-validation regression.
-- `tests/ui_widget_manager_bars_consumer.rs`: actual cached Lua/XML bar consumer; assertion59 currently fails, later lifecycle phases remain unreached.
+- `tests/set_atlas_arguments.rs`: exact return count, known/missing/inactive/restored application and existing argument-validation regression.
+- `tests/ui_widget_manager_bars_consumer.rs`: actual cached Lua/XML initial geometry/visibility, updates, zero neutral zone, hidden/restore, removal and unregister.
+- `tests/texture_atlas_regressions.rs`: ten mutation/button-slot controls; additional known/unknown/numeric atlas controls preserve their original scopes.
+
+At `5bd208dba`, seventeen scoped cases pass (argument2, bar1, atlas-regression10, HUD2, lifecycle2); three separate known/unknown/numeric controls also pass. Fresh normal startup is clean across all219 stderr lines; default offline/locked check exits0 with six inherited manifest deprecations and no source warnings. [Retained evidence](../../data/patch-api/evidence/ui-widget-manager-state-2026-10-13/README.md#atlas-application-result-red-and-retail-green) owns exact receipts and historical failures. Native and parent acceptance remain OPEN.
 
 ## Known gaps (current cycle)
 
-- [ ] GREEN pending after genuine focused RED at `21aabeaf1`: existing argument validation PASS, application-result assertion FAIL with `actual=0`. Actual cached bar assertion59 observes NeutralBar=true, Glow3=false and SparkNeutral=false despite both expected atlases being applied. Subsequent bar lifecycle remains unreached; initial delimiter compilation failure at `d1c5b4cb8` executed zero cases and is not behavioral RED.
-- [ ] Consumer GREEN, texture-call regressions, startup and affected profile acceptance pending.
+Historical genuine RED at `21aabeaf1`: existing argument validation PASS, application-result assertion FAIL with `actual=0`; cached bar assertion59 observes NeutralBar=true, Glow3=false and SparkNeutral=false despite expected atlases. Later phases were unreached in that attempt. Initial delimiter compilation failure at `d1c5b4cb8` executed zero cases and is not behavioral RED. Later Retail GREEN does not rewrite either failure.
+
+- [ ] Affected PTR/profile acceptance and broader parent gates remain pending.
 
 ## Out of scope
 

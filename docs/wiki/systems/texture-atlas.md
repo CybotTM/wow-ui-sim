@@ -65,7 +65,7 @@ result_left = atlas_left + user_left * (atlas_right - atlas_left)
 
 `SetAtlas` resolves names or supported numeric element IDs, applies texture/UV/tiling metadata through `apply_atlas()`, and optionally applies atlas dimensions. Unknown names retain the requested name while clearing texture/UV state.
 
-The explicit [application-result policy](../../specs/texture-atlas-application-result.md) returns exactly one boolean: true for resolved/applied atlases, false for accepted inactive inputs. Source implementation is present; compiler/GREEN proof remains pending. Unchanged cached TextureKit consumers use this result for `SetShown`. Native return parity remains unresolved; the spec owns conflicting evidence and proof boundaries.
+The explicit [application-result policy](../../specs/texture-atlas-application-result.md) returns exactly one boolean: true for resolved/applied atlases, false for accepted inactive inputs. Source `5bd208dba` has bounded Retail GREEN; exact tests/check/startup receipts and remaining profile gates belong to the linked spec. Unchanged cached TextureKit consumers use this result for `SetShown`. Native return parity remains unresolved; the spec owns conflicting evidence and proof boundaries.
 
 `SetAtlas("")` is a clear operation. This matters because ElvUI's `StripTextures()` calls `SetTexture(E.ClearTexture)` followed by `SetAtlas("")`; the generated atlas database contains an accidental empty-name entry pointing at a casting-bar flipbook, but the Lua API must treat the empty atlas name as clearing texture/atlas state rather than resolving that entry.
 
