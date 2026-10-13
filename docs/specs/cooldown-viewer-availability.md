@@ -29,8 +29,8 @@
 ## Known gaps (current cycle)
 
 - [x] Execute genuine query-boundary RED: all eight cases fail at `ff72f3c3b` on missing bool/string projection, including failure converting the actual cached settings predicate result; downstream visibility assertions remain unreached. No observed fixture failures.
-- [ ] Execute current producer GREEN; producer behavior remains unverified until targeted GREEN.
-- [ ] Retail/PTR runtime, startup and independent verification pending.
+- [x] Executed scoped Retail producer GREEN: 8/8 PASS at `6b522c595`; [investigation SSOT](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers).
+- [ ] Broader Retail/PTR runtime and default-check acceptance remain open; startup still fails with 12 SMOOTH setup errors, not clean.
 
 ## Out of scope
 

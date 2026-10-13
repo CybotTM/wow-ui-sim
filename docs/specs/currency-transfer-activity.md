@@ -27,9 +27,9 @@
 ## Known gaps (current cycle)
 
 - [x] Execute genuine RED at `ff72f3c3b`: three failures reach the boolean contract, live true-state comparison and actual cached spinner-state assertion; no observed fixture failures.
-- [ ] Recompile current producer and prove targeted GREEN.
-- [ ] Runtime/profile/startup and independent verification pending.
+- [x] Executed scoped Retail producer GREEN: 3/3 PASS at `6b522c595`; [investigation SSOT](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers).
+- [ ] Broader runtime/profile and default-check acceptance remain open; startup still fails with 12 SMOOTH setup errors, not clean.
 
 ## Out of scope
 
-Transfer requests, account roster, balances, costs, transaction log, readiness, timers, completion/failure/events and persistence require separate contracts. A supplied boolean does not implement transfer lifecycle or prove native semantics. Native activity derivation and secret-return classification remain unknown. Staged consumer assertions cover immediate spinner methods, not full addon or timer behavior; runtime proof is pending.
+Transfer requests, account roster, balances, costs, transaction log, readiness, timers, completion/failure/events and persistence require separate contracts. A supplied boolean does not implement transfer lifecycle or prove native semantics. Native activity derivation and secret-return classification remain unknown. Executed bounded cached-consumer assertions cover immediate spinner methods, not full addon or timer behavior.

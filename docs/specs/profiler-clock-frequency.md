@@ -1,6 +1,6 @@
 # Profiler clock frequency
 
-Standalone `C_AddOnProfiler.GetTicksPerSecond()` reports an explicitly modeled nanosecond-unit frequency. Producer is registered in `src/c_api/c_addon_profiler.rs`; three pre-producer cases executed RED, current producer GREEN remains pending. Architecture: [Lua API](../lua-api.md).
+Standalone `C_AddOnProfiler.GetTicksPerSecond()` reports an explicitly modeled nanosecond-unit frequency. Producer is registered in `src/c_api/c_addon_profiler.rs`; three pre-producer cases executed RED, bounded Retail execution is recorded below. Architecture: [Lua API](../lua-api.md).
 
 ## What it must do
 
@@ -23,13 +23,13 @@ Cached `Blizzard_APIDocumentationGenerated/AddOnProfilerDocumentation.lua` decla
 
 ## Tests asserting this spec
 
-Generated `--test integration` filter `get_ticks_per_second::`: exact return count/type/finite positivity; repeated exact frequency across environments; fixed zero, 1ns, fractional-, whole- and multi-second conversions. All three fail at the real query at `ff72f3c3b` (nil instead of a finite positive number), with no observed fixture failures. Fixed-duration conversion assertions remain unreached in RED; current producer GREEN is pending.
+Generated `--test integration` filter `get_ticks_per_second::`: exact return count/type/finite positivity; repeated exact frequency across environments; fixed zero, 1ns, fractional-, whole- and multi-second conversions. All three fail at the real query at `ff72f3c3b` (nil instead of a finite positive number), with no observed fixture failures. Fixed-duration conversion assertions remain unreached in RED; executed scoped Retail producer GREEN is 3/3 PASS at `6b522c595`, covering fixed conversions, not production elapsed timing ([investigation SSOT](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers)).
 
 ## Known gaps (current cycle)
 
 - [x] Compile and execute behavioral RED against unchanged namespace.
 - [x] Register standalone frequency getter after genuine RED.
-- [ ] Execute bounded GREEN and applicable startup/check proof.
+- [ ] Mixed GREEN/startup/check gate remains open: startup still fails with 12 SMOOTH setup errors, not clean; default-check/PTR acceptance remains pending.
 
 ## Out of scope
 

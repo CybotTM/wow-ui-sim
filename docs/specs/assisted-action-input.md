@@ -1,6 +1,6 @@
 # Assisted action identity and slot lookup
 
-Explicit optional assisted action identity is independent of the next-cast recommendation. Input state lives in `src/lua_api/state/support_types.rs`; query producers now project that input. Six pre-producer cases executed (one PASS/five behavioral FAIL); current producer GREEN remains pending. Architecture: [Lua API](../lua-api.md).
+Explicit optional assisted action identity is independent of the next-cast recommendation. Input state lives in `src/lua_api/state/support_types.rs`; query producers now project that input. Six pre-producer cases executed (one PASS/five behavioral FAIL); bounded Retail execution is recorded below. Architecture: [Lua API](../lua-api.md).
 
 ## What it must do
 
@@ -28,13 +28,13 @@ Contract grounding: cached `Blizzard_APIDocumentationGenerated/ActionBarFrameDoc
 
 ## Tests asserting this spec
 
-`tests/assisted_action_input.rs` stages live optional identity, independent environments, sparse ascending matches, absent/unmatched identity, fresh/live snapshots and recommendation independence. Fixtures use explicit semantic spellIDs and clear macros/outfits; map values are not universally spellIDs. The assertion helper declares Find calls but does not execute them during setup. Generated `--test integration` filter: `assisted_action_input::` (expected six cases). At `ff72f3c3b`, six selected cases produce one absent/miss-policy PASS and five behavioral failures on supplied identity or matching-slot results; no observed fixture failures. Later snapshot/transition assertions remain unreached where earlier results fail. Current producer GREEN is pending.
+`tests/assisted_action_input.rs` covers live optional identity, independent environments, sparse ascending matches, absent/unmatched identity, fresh/live snapshots and recommendation independence. Fixtures use explicit semantic spellIDs and clear macros/outfits; map values are not universally spellIDs. The assertion helper declares Find calls but does not execute them during setup. Generated `--test integration` filter: `assisted_action_input::` (expected six cases). At `ff72f3c3b`, six selected cases produce one absent/miss-policy PASS and five behavioral failures on supplied identity or matching-slot results; no observed fixture failures. Later snapshot/transition assertions remain unreached in that RED where earlier results fail. Executed scoped Retail producer GREEN: 6/6 PASS at `6b522c595`; [investigation SSOT](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers).
 
 ## Known gaps (current cycle)
 
 - [x] Compile and execute genuine RED against unchanged producers; compilation or fixture failure is not behavioral RED.
 - [x] Implement minimal action getter and assisted slot query after relevant behavioral failures.
-- [ ] Execute bounded GREEN, required startup/API-registration checks and applicable profile checks.
+- [ ] Mixed GREEN/startup/API-registration/profile gate remains open: startup still fails with 12 SMOOTH setup errors, not clean; default-check/PTR acceptance remains pending.
 
 ## Out of scope
 

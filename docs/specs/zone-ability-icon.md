@@ -22,13 +22,13 @@
 
 ## Tests asserting this spec
 
-`tests/zone_ability_icon.rs`: four behavioral cases for positive lookup, modeled miss, ordinary rejection and actual host-secret caller policy. Secret case uses existing `retail-12-0-5` VM-secret fixture gate. At `ff72f3c3b`, ordinary rejection passes; positive numeric result, modeled nil miss and untainted host-secret input fail at their real query boundaries. No observed fixture failures; later secret/taint assertions remain unreached. Current producer GREEN remains pending.
+`tests/zone_ability_icon.rs`: four behavioral cases for positive lookup, modeled miss, ordinary rejection and actual host-secret caller policy. Secret case uses existing `retail-12-0-5` VM-secret fixture gate. At `ff72f3c3b`, ordinary rejection passes; positive numeric result, modeled nil miss and untainted host-secret input fail at their real query boundaries. No observed fixture failures; later secret/taint assertions remain unreached in that RED. Executed scoped Retail producer GREEN: 4/4 PASS at `6b522c595`, including host-secret caller policy; [investigation SSOT](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers).
 
 ## Known gaps (current cycle)
 
 - [x] Compile/execute genuine RED and distinguish behavioral failures from fixture barriers.
 - [x] Replace the string placeholder with one C_API-owned producer.
-- [ ] Obtain independent behavior/startup/check proof.
+- [ ] Broader startup/default-check/PTR proof remains open; startup still fails with 12 SMOOTH setup errors, not clean.
 
 ## Out of scope
 

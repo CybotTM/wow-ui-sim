@@ -1,6 +1,6 @@
 # Global voice transcription activity
 
-`VoiceChatState.is_transcribing: bool` supplies global transcription activity independently of permission and channel snapshots. False default is simulator policy, not native default or aggregation. Query producer is registered; three pre-producer cases executed RED, current producer GREEN remains pending. Architecture: [Lua API](../lua-api.md).
+`VoiceChatState.is_transcribing: bool` supplies global transcription activity independently of permission and channel snapshots. False default is simulator policy, not native default or aggregation. Query producer is registered; three pre-producer cases executed RED, bounded Retail execution is recorded below. Architecture: [Lua API](../lua-api.md).
 
 ## What it must do
 
@@ -26,13 +26,13 @@
 
 ## Tests asserting this spec
 
-Generated `--test integration` filter `voice_transcribing_input::` (expected three): default/publication/arity/type; live retained query and environment isolation; permission/channel snapshot independence, conflicting inputs and disconnected/empty state. Existing `GetChannelForChannelType` and `GetChannelForCommunityStream` providers supply full snapshots including `isTranscribing`. Missing new query is an intended behavioral boundary, not a setup workaround. All three fail their real activity-query assertions at `ff72f3c3b`; no observed fixture failures. Later channel/conflict/transition assertions remain unreached where earlier assertions fail. Current producer GREEN is pending.
+Generated `--test integration` filter `voice_transcribing_input::` (expected three): default/publication/arity/type; live retained query and environment isolation; permission/channel snapshot independence, conflicting inputs and disconnected/empty state. Existing `GetChannelForChannelType` and `GetChannelForCommunityStream` providers supply full snapshots including `isTranscribing`. Missing new query is an intended behavioral boundary, not a setup workaround. All three fail their real activity-query assertions at `ff72f3c3b`; no observed fixture failures. Later channel/conflict/transition assertions remain unreached in that RED where earlier assertions fail. Executed scoped Retail producer GREEN: 3/3 PASS at `6b522c595`; [investigation SSOT](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers).
 
 ## Known gaps (current cycle)
 
 - [x] Compile and execute genuine query-boundary RED against unchanged surface; fixture/compile failures are not behavioral RED.
 - [x] Add minimal C_API getter after genuine RED.
-- [ ] Execute bounded GREEN and applicable startup/check proof.
+- [ ] Mixed GREEN/startup/check gate remains open: startup still fails with 12 SMOOTH setup errors, not clean; default-check/PTR acceptance remains pending.
 - [ ] Actual cached caller test withheld until `IsSpeakForMeActive()` prerequisite is source-established.
 
 ## Out of scope

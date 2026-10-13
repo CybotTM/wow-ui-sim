@@ -1,6 +1,6 @@
 # Host-supplied ping texture kits
 
-`C_Ping.GetTextureKitForType(type)` must project a whole host-supplied type-to-string mapping, not an invented native catalog. Input/export/default and getter/registrar are implemented; six pre-producer tests failed at observed query boundaries; later assertions and current producer GREEN remain pending. Architecture: [Lua API](../lua-api.md).
+`C_Ping.GetTextureKitForType(type)` must project a whole host-supplied type-to-string mapping, not an invented native catalog. Input/export/default and getter/registrar are implemented; six pre-producer tests failed at observed query boundaries; bounded Retail execution is recorded below. Architecture: [Lua API](../lua-api.md).
 
 ## What it must do
 
@@ -11,7 +11,7 @@
 - [ ] Authenticate secret inputs before ordinary validation/lookup using `AllowedWhenUntainted`: an untainted secret numeric key may select a mapped entry; tainted secrets (including unmapped and malformed payloads) are denied without leaking/declassifying input. Public keys remain usable by tainted callers. Returned mapped strings are public by simulator policy; caller taint is preserved.
 - [ ] Actual cached `PingManager:ShowPingSpot(type,posX,posY)` consumes the real query and passes exact `Ping_SpotGlw_<kit>_In`/`_Out` atlas names with use-size true to both sinks.
 
-Cached `PingManagerDocumentation.lua` declares required PingSubjectType, non-nil textureKit and AllowedWhenUntainted secret arguments. It does not provide mappings or miss behavior. Arbitrary synthetic keys/kits in tests are host fixtures, not native pairs. Secret-input tests failed at initial query assertions; successful authentication and later recovery/ordering assertions still need current GREEN evidence before producer completion; no native security parity claimed by this stage.
+Cached `PingManagerDocumentation.lua` declares required PingSubjectType, non-nil textureKit and AllowedWhenUntainted secret arguments. It does not provide mappings or miss behavior. Arbitrary synthetic keys/kits in tests are host fixtures, not native pairs. Pre-producer secret-input tests failed at initial query assertions; bounded current GREEN reaches authentication and recovery/ordering assertions, without native security parity.
 
 ## How it works
 
@@ -28,15 +28,15 @@ Cached `PingManagerDocumentation.lua` declares required PingSubjectType, non-nil
 
 ## Tests asserting this spec
 
-Generated `--test integration` filter `ping_texture_kits::` (expected six): configured exact strings/live replacement/isolation; empty/absent/cleared input error policy; invalid public key matrix; untainted actual VM secret numeric input; tainted actual VM secret numeric/unmapped/fractional/string denial plus public-input recovery; actual cached ShowPingSpot atlas arguments through controlled pool/frame/animation sinks. Secret fixtures assert query publication before setup. Consumer asserts real query before cache discovery or vendor loading. Sink spies prove call arguments only, not rendering/assets/lifecycle. At `ff72f3c3b`, all six fail real output, miss/invalid-input error or secret-policy assertions; no observed fixture/setup failures. Cached consumer loading and later authentication/recovery assertions remain unreached where prior assertions fail. Current producer GREEN is pending; cache/setup failures are not query RED.
+Generated `--test integration` filter `ping_texture_kits::` (expected six): configured exact strings/live replacement/isolation; empty/absent/cleared input error policy; invalid public key matrix; untainted actual VM secret numeric input; tainted actual VM secret numeric/unmapped/fractional/string denial plus public-input recovery; actual cached ShowPingSpot atlas arguments through controlled pool/frame/animation sinks. Secret fixtures assert query publication before setup. Consumer asserts real query before cache discovery or vendor loading. Sink spies prove call arguments only, not rendering/assets/lifecycle. At `ff72f3c3b`, all six fail real output, miss/invalid-input error or secret-policy assertions; no observed fixture/setup failures. Cached consumer loading and later authentication/recovery assertions remain unreached in that RED where prior assertions fail. Executed scoped Retail producer GREEN: 6/6 PASS at `6b522c595`, including VM-secret rejection/recovery and both exact cached-consumer atlas names; [investigation SSOT](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers). Cache/setup failures are not query RED.
 
 ## Known gaps (current cycle)
 
 - [x] Compile and obtain executed behavioral RED before implementing getter.
-- [x] Stage source-backed ordinary/secret argument policy tests; pre-producer tests executed, downstream assertions and current GREEN pending.
+- [x] Execute source-backed ordinary/secret argument policy tests; retain pre-producer failures and bounded current downstream assertion reach.
 - [x] Implement minimal getter after genuine RED.
-- [ ] Prove GREEN plus applicable startup/profile checks.
-- [ ] Verify cached consumer prerequisite sufficiency in execution.
+- [ ] Mixed GREEN/startup/profile gate remains open: startup still fails with 12 SMOOTH setup errors, not clean; default-check/PTR acceptance remains pending.
+- [x] Verify cached consumer prerequisite sufficiency in bounded execution, not full startup.
 
 ## Out of scope
 
