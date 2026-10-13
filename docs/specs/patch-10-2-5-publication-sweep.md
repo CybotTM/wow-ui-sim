@@ -6,7 +6,7 @@ Account for Warcraft Wiki page 564286, revision 5993852 (2024-03-24T16:20:32Z), 
 
 - [x] Probe all 59 inventory occurrences in isolated cached Game UI; failures exactly equal the reviewed gap fixture.
 - [x] Apply seventeen later registers (10.2.6 through 12.1.0) chronologically.
-- [x] Construct VertexColor as a texture animation, not an invented frame kind; missing endpoint methods remain gaps.
+- [x] Construct VertexColor as a texture animation, not an invented frame kind; query its actual endpoint methods.
 - [x] Retain all 356 extract occurrences, including verbatim Lua/XML examples; account for all 415 source IDs exactly once. Documentary backfill gives no runtime credit.
 - [x] Negative control changes one published, unsuperseded API to removed and produces exactly one additional gap.
 
@@ -32,7 +32,7 @@ Account for Warcraft Wiki page 564286, revision 5993852 (2024-03-24T16:20:32Z), 
 
 ## Known gaps (current cycle)
 
-- [ ] Fourteen exact publication gaps: three item queries, two ping queries, transcription activity, role assignment, three legacy aura retirements and four VertexColor endpoints. [Per-ID boundaries](../../data/patch-api/evidence/10.2.5-session-2026-10-07/p1025-gap-review.json).
+- [ ] Five current publication gaps: ping texture kits, transcription activity and three legacy aura retirements. The owning run at `f3a7dcb84` observed 54 OK / 5 gaps; its old 14-gap fixture failed because nine IDs resolved, with no new gaps. Current fixture removes only those nine observed resolutions. Reconciled-fixture execution remains pending. Historical [per-ID boundaries](../../data/patch-api/evidence/10.2.5-session-2026-10-07/p1025-gap-review.json) and receipts retain their original scope.
 - [ ] Eighty-two substantive extract occurrences require distinct behavior/security/DTO/enum or historical proof. [Scout](../../data/patch-api/evidence/10.2.5-session-2026-10-07/p1025-extract-scout.json).
 
 ## Out of scope

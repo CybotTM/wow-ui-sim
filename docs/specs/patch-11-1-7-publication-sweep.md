@@ -19,6 +19,10 @@ Two removed C_Debug members were registered unconditionally. Move the retained p
 
 Two behavioral tests reproduce all four defects before implementation. An earlier assisted-slot candidate did not compile: AssistedCombatState contains only next_cast_spell_id, not an assisted action spell identity. Next-cast recommendation is not the rotation action spell; defer that producer rather than fabricate it.
 
+## Current fixture reconciliation
+
+The owning run at `f3a7dcb84` observed 41 OK / 7 gaps. Its old eight-gap fixture failed solely because `C_AddOns.GetAddOnLocalTable` now raw-publishes a function; no new gaps appeared. Current fixture removes that one observed resolution. Reconciled-fixture execution remains pending. This is publication evidence only; retained historical receipts below are unchanged.
+
 ## Local proof
 
 Runtime/test revision `210e4e23c`; later changes are evidence/docs/validation only. [Proof ledger](../../data/patch-api/evidence/11.1.7-session-2026-10-06/p1117-proof.json) preserves exact commands, revisions, initial RED and withdrawn compile-failing candidate. No independent/native acceptance.
