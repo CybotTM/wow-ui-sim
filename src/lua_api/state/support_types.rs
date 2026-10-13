@@ -166,11 +166,14 @@ impl Default for ActionBarStateInfo {
     }
 }
 
-/// Minimal assisted-combat recommendation state exposed through
-/// `C_AssistedCombat`. `next_cast_spell_id` is the spell Blizzard highlights
-/// when assisted combat asks the player to cast a specific action-bar spell.
+/// Explicit assisted-combat inputs exposed through `C_AssistedCombat`.
+/// Action identity and next-cast recommendation are independent inputs;
+/// no recommendation engine or automatic action identity is modeled here.
 #[derive(Clone, Debug, Default)]
 pub struct AssistedCombatState {
+    /// Supplied assisted action spell identity; unconfigured means absent.
+    /// Never inferred from recommendations or action-bar contents.
+    pub action_spell_id: Option<u32>,
     pub next_cast_spell_id: Option<u32>,
 }
 
