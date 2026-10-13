@@ -30,7 +30,7 @@ The [contract proof ledger](../../specs/ui-widget-manager-state.md#tests-asserti
 
 ### Bars, HUD, and feed implementation scope
 
-- `newbars.rs` supplies full 35-field StatusBar and 22-field CaptureBar DTO snapshots, including a fresh ordered StatusBar partition array.
+- `bars.rs` supplies full 35-field StatusBar and 22-field CaptureBar DTO snapshots, including a fresh ordered StatusBar partition array.
 - `hud.rs` exposes four live environment-local `f64` selectors. Each query returns exactly one number; default zero is simulator model policy, not a proven native default.
 - `queries::register` calls both modules. Feed integration supplies StatusBar type2 and CaptureBar type1; the actual bar-consumer adaptation uses host feeds rather than direct state mutation/manual events.
 - The old PowerBar bootstrap is removed without fallback. This is main-reported implementation scope; GREEN/startup remain UNRUN.
@@ -46,7 +46,7 @@ No native catalog, server transport, interpolation parity, dynamic HUD rebinding
 - [UIWidgetManager contract](../../specs/ui-widget-manager-state.md) — required behavior, staged tests, and historical RED boundary.
 - [Manager module](../../../src/c_api/ui_widget_manager.rs) and [inputs](../../../src/c_api/ui_widget_manager/inputs.rs) — numeric identities, set/membership records, and complete supplied DTOs.
 - [Queries](../../../src/c_api/ui_widget_manager/queries.rs), [feed](../../../src/c_api/ui_widget_manager/feed.rs), and [fixtures](../../../src/c_api/ui_widget_manager/fixtures.rs) — snapshot registration, synchronous producers, and bounded demo initialization.
-- `src/c_api/ui_widget_manager/newbars.rs` and `src/c_api/ui_widget_manager/hud.rs` — main-reported new producer paths; implementation in progress, new GREEN/startup UNRUN.
+- `src/c_api/ui_widget_manager/bars.rs` and `src/c_api/ui_widget_manager/hud.rs` — main-reported new producer paths; implementation in progress, new GREEN/startup UNRUN.
 - [Task quest lookup](../../../src/lua_api/globals/quest_surface/task_quest.rs) — stored quest/set association lookup.
 - [Widget architecture](../../widget-system.md), [loading pipeline](../../addon-loading-pipeline.md), and [events](../../event-system.md) — existing frame, cached Lua consumer, and dispatch boundaries.
 

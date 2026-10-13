@@ -43,9 +43,9 @@ Main is implementing full bar producers, HUD selectors, and feed integration aft
 - `src/c_api/ui_widget_manager.rs` — modeled widget identities and existing ButtonHeader records; exports manager input records.
 - `src/c_api/ui_widget_manager/inputs.rs` — supplied set membership and IconAndText inputs; staged StatusBar/CaptureBar maps and four `f64` HUD selections with default-zero model policy.
 - `src/c_api/ui_widget_manager/bar_records.rs` — complete supplied 35-field StatusBarRecord and 22-field CaptureBarRecord DTOs.
-- `src/c_api/ui_widget_manager/newbars.rs` — full supplied bar snapshot producers, including fresh StatusBar partition arrays; implementation in progress.
+- `src/c_api/ui_widget_manager/bars.rs` — full supplied bar snapshot producers, including fresh StatusBar partition arrays; implementation in progress.
 - `src/c_api/ui_widget_manager/hud.rs` — four live `f64` selectors, exactly one numeric return each, with default-zero model policy; implementation in progress.
-- `src/c_api/ui_widget_manager/queries.rs` — registration calls both `newbars` and `hud`; main-reported implementation scope.
+- `src/c_api/ui_widget_manager/queries.rs` — registration calls both `bars` and `hud`; main-reported implementation scope.
 - `src/c_api/ui_widget_manager/feed.rs` — `WidgetVisualization` integration for StatusBar type2 and CaptureBar type1; actual bar-consumer adaptation uses host feeds instead of direct state changes or manual events.
 - `src/c_api/ui_widget_manager/fixtures.rs` — existing demo initialization. The old PowerBar bootstrap is removed without fallback in the new implementation scope.
 - `src/lua_api/state/sim_state.rs` — environment-owned manager, ButtonHeader, and Prey input state.
