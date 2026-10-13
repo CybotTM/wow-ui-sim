@@ -1,7 +1,7 @@
 //! Environment-owned widget sets and visualization inputs. No native feed inference.
 use std::collections::HashMap;
 
-use super::{CaptureBarRecord, StatusBarRecord, WidgetId};
+use super::{CaptureBarRecord, DiscreteProgressStepsRecord, StatusBarRecord, WidgetId};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct WidgetSetEntry {
@@ -47,6 +47,7 @@ pub struct UiWidgetInputs {
     pub quest_sets: HashMap<(i32, i32), f64>,
     pub status_bars: HashMap<WidgetId, StatusBarRecord>,
     pub capture_bars: HashMap<WidgetId, CaptureBarRecord>,
+    pub discrete_progress_steps: HashMap<WidgetId, DiscreteProgressStepsRecord>,
     /// Zero means no selected HUD set in this simulator fixture, not a native default.
     pub top_center_widget_set_id: f64,
     pub below_minimap_widget_set_id: f64,

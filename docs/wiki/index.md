@@ -1,3 +1,7 @@
+## [2026-10-13] source | DiscreteProgressSteps input-only RED stage
+
+[Discrete contract](../specs/ui-widget-discrete-progress-steps.md) and [state checkpoint](systems/ui-widget-manager-state.md#discreteprogresssteps-input-only-checkpoint--2026-10-13) describe DTO/map/tests only; no query/feed producer or executed RED/GREEN yet.
+
 ## [2026-10-13] evidence | Separate PTR consumer and owning checkpoints
 
 [Checkpoint SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-ptr-and-owning-checkpoints--2026-10-13) separates actual PTR consumers, earlier PTR/startup reuse and reconciled owning publication sweeps. Native and full-parent acceptance remain OPEN.

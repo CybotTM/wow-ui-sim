@@ -2,6 +2,8 @@
 use std::collections::HashMap;
 
 mod bar_records;
+mod discrete_record;
+pub use discrete_record::DiscreteProgressStepsRecord;
 mod bars;
 mod hud;
 pub use bar_records::{CaptureBarRecord, StatusBarRecord};

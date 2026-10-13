@@ -1,3 +1,7 @@
+## [2026-10-13] source | DiscreteProgressSteps input-only RED stage
+
+[Discrete contract](../specs/ui-widget-discrete-progress-steps.md) adds complete supplied19-field requirements and intended tests before query/feed implementation. [State checkpoint](systems/ui-widget-manager-state.md#discreteprogresssteps-input-only-checkpoint--2026-10-13) preserves unrun/native boundaries.
+
 ## [2026-10-13] evidence | Separate PTR consumer and owning checkpoints
 
 [Checkpoint SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-ptr-and-owning-checkpoints--2026-10-13) records separate bounded runtime and publication scopes, without rewriting historical failures or native/full-parent acceptance.
