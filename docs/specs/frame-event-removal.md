@@ -4,10 +4,10 @@
 
 ## What it must do
 
-- [ ] On an ordinary frame, removing absent `PLAYER_EQUIPED_SPELLS_CHANGED` must not throw and must return exactly one `false` value, matching the selected cleanup policy for the cached `Base.lua:697` call.
-- [ ] Removing an absent synthetic unknown name must return exactly one `false` without installing that name or altering existing registrations; registered `PLAYER_LOGIN` must still deliver afterward.
-- [ ] Retail/PTR `RegisterEvent` and `RegisterUnitEvent` must retain strict existing registration gates: the synthetic unknown name must throw and remain unregistered, without disrupting known-event delivery.
-- [ ] Registered `PLAYER_LOGIN` must deliver before removal; its removal must return exactly one `true`, clear registration, and stop delivery. Repeated removal must return exactly one `false`.
+- [x] On an ordinary frame, removing absent `PLAYER_EQUIPED_SPELLS_CHANGED` must not throw and must return exactly one `false` value, matching the selected cleanup policy for the cached `Base.lua:697` call.
+- [x] Removing an absent synthetic unknown name must return exactly one `false` without installing that name or altering existing registrations; registered `PLAYER_LOGIN` must still deliver afterward.
+- [x] Retail/PTR `RegisterEvent` and `RegisterUnitEvent` must retain strict existing registration gates: the synthetic unknown name must throw and remain unregistered, without disrupting known-event delivery.
+- [x] Registered `PLAYER_LOGIN` must deliver before removal; its removal must return exactly one `true`, clear registration, and stop delivery. Repeated removal must return exactly one `false`.
 - [ ] Preserve existing forbidden `EventRegistrations` aspect restrictions, callback API gates, unit-event filter behavior, and permissive Classic-profile registration policy. This scaffold does not establish their preservation.
 
 ## How it works
@@ -32,13 +32,13 @@
 
 At `621649e56`, deleting the shared `Op` enum leaves catalog validation on insertion only. Selected removal policy is state-based: absent/unknown names return false; `RegisterEvent`/`RegisterUnitEvent` remain strict. This is model policy, not native parity; catalog and guards remain unchanged in source; current bounded preservation proof below does not prove Classic policy.
 
-Retained sealed `38ecbd8ee` direct shared-fixture execution: actual wait exit1 at the first unknown cleanup no-throw assertion; subsequent assertions unreached. Separate supplied Retail/PTR SpellDisplay producer results at `38ec`: each 6 model/query/feed/secret PASS and 3 cached-consumer FAIL at cleanup. Neither result proves post-fix behavior. [Current bounded gate](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13) owns independent Retail removal/preservation PASS and main-observed identical PTR execution awaiting independent review; selected retention remains PENDING. [SpellDisplay owner](ui-widget-spell-display.md) retains its earlier checkpoint; [forbidden policy owner](forbidden-aspect-event-input.md) retains separate preservation scope.
+Retained sealed `38ecbd8ee` direct shared-fixture execution: actual wait exit1 at the first unknown cleanup no-throw assertion; subsequent assertions unreached. Separate supplied Retail/PTR SpellDisplay producer results at `38ec`: each 6 model/query/feed/secret PASS and 3 cached-consumer FAIL at cleanup. Neither result proves post-fix behavior. [Current bounded gate](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13) owns independent Retail removal/preservation PASS and independently accepted identical PTR execution; selected retention remains PENDING. [SpellDisplay owner](ui-widget-spell-display.md) retains its earlier checkpoint; [forbidden policy owner](forbidden-aspect-event-input.md) retains separate preservation scope.
 
 ## Known gaps (current cycle)
 
 - [x] Execute the identical shared Lua fixture against sealed normal `38ecbd8ee` before the fix: actual wait exit1, first cached-name no-throw assertion fails; later controls unreached. JSON contains two error entries for the original error and ScriptErrors wrapper, not two independent failures. Executable receipt reused stat-only.
-- [ ] Accept both independent post-fix profile scopes; Retail independent PASS, PTR independent review pending.
-- [ ] Fully check preservation: independent Retail aspect5/filter2/callback-lifecycle1 PASS; PTR independent pending, Classic policy unproved. Last requirement not fully checked.
+- [x] Accept independent bounded Retail/PTR post-fix scopes; both PASS.
+- [ ] Fully check preservation: independent Retail/PTR aspect5/filter2/callback-lifecycle1 PASS; Classic policy unproved. Last requirement not fully checked.
 
 At source revision `38ecbd8ee5dfae4315ca98001b7e794e324b1066`, the shared registration mutation validates the event name before either insertion or removal. The supplied prior actual Retail/PTR Spell-producer result is 6 PASS / 3 FAIL at cached `Base.lua:697` calling `UnregisterEvent('PLAYER_EQUIPED_SPELLS_CHANGED')`; that report is not execution evidence for this new fixture.
 

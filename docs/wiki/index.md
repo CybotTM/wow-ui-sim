@@ -1,6 +1,6 @@
 ## [2026-10-13] docs | SpellDisplay and removal current bounded gate
 
-[Current owner](../specs/ui-widget-spell-display.md) links [runtime gate](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13): independent Retail PASS; PTR independent review and selected retention PENDING. Historical RED/partial and 741-record erratum preserved; Classic/native/world-loot/render/full-parent unproved.
+[Current owner](../specs/ui-widget-spell-display.md) links [runtime gate](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13): independent Retail PASS; PTR independent PASS; selected retention PENDING. Historical RED/partial and 741-record erratum preserved; Classic/native/world-loot/render/full-parent unproved.
 
 ## [2026-10-13] source | State-based frame cleanup, execution pending
 

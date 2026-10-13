@@ -28,7 +28,7 @@ Historical report erratum: `741-second terminal` is incorrect; 741 is compiler J
 
 [Independent Retail report](publication-followup/independent/retail-post-removal-runtime/report.md) verifies source `621649e56`: 28/28 cases across eight integration scopes plus normal startup CLEAN, 0 unique/0 occurrences. SpellDisplay9, removal1, registration-aspect5, unit-filter2, TextWithState7, Speak-consumer1, Speak-input2, callback-lifecycle1. Normal stdout33 bytes (`SPELL_DISPLAY_NORMAL_PROBE_OK` plus `[]`), stderr14705 bytes.
 
-PTR independent runtime review remains **PENDING**; no report exists at this staging checkpoint. Main reports identical eight scopes 28/28 plus normal startup, stdout33/stderr14690 bytes, wait exit0 at source `844a63adb` (documentation over `621649e56`); first five admissions denied, zero launches. Main execution is not independent acceptance.
+[Independent PTR report](publication-followup/independent/ptr-runtime-current/report.md) verifies identical eight scopes 28/28 plus normal startup CLEAN. Main reports identical eight scopes 28/28 plus normal startup, stdout33/stderr14690 bytes, wait exit0 at source `844a63adb` (documentation over `621649e56`); first five admissions denied, zero launches. Main execution remains separate from independent review.
 
 [Independent default check](publication-followup/independent/defaultcheck/report.md): 733 compiler JSON records, exit0, zero source warnings/errors, six unsuppressed manifest deprecations. Main fmt-check exit0 is caller evidence, not independently artifact-confirmed formatting.
 
