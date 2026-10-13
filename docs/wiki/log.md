@@ -1,3 +1,7 @@
+## [2026-10-13] docs | TextWithState producer checkpoint
+
+Updated [existing inventory](systems/ui-widget-manager-state.md#textwithstate-input-only-checkpoint--2026-10-13) after `2bb6cdde1`, retaining the incoming anchor and linking the [contract proof ledger](../specs/ui-widget-text-with-state.md#tests-asserting-this-spec). Historical input stage below remains revision-scoped; GREEN and parent acceptance unclaimed.
+
 ## [2026-10-13] docs | TextWithState input-only stage
 
 Added [owning inventory](systems/ui-widget-manager-state.md#textwithstate-input-only-checkpoint--2026-10-13) and index pointer to the [staged contract](../specs/ui-widget-text-with-state.md); execution remains unverified.

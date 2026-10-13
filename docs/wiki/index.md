@@ -1,6 +1,6 @@
 ## [2026-10-13] source | TextWithState input-only stage
 
-[State inventory](systems/ui-widget-manager-state.md#textwithstate-input-only-checkpoint--2026-10-13) links the [staged contract](../specs/ui-widget-text-with-state.md); no completion claim.
+[State inventory](systems/ui-widget-manager-state.md#textwithstate-input-only-checkpoint--2026-10-13) links current producer scope and the [contract proof ledger](../specs/ui-widget-text-with-state.md#tests-asserting-this-spec); GREEN and parent acceptance remain unclaimed.
 
 ## [2026-10-13] docs | Speak four-profile publication
 

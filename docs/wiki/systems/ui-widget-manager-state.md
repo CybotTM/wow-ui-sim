@@ -53,7 +53,7 @@ No native catalog, server transport, interpolation parity, dynamic HUD rebinding
 
 ### TextWithState input-only checkpoint — 2026-10-13
 
-[TextWithState staged contract](../../specs/ui-widget-text-with-state.md) owns the type8 supplied-input inventory and unexecuted test boundaries at `64a2a57b2`. Getter projection/registration and real cached-consumer acceptance remain unverified; this is input staging, not a completed producer.
+Historical input-only stage `64a2a57b2` is superseded by producer source `2bb6cdde1`: [`text_state.rs`](../../../src/c_api/ui_widget_manager/text_state.rs) projects fresh complete21-field snapshots without input clamping; core queries publish through the Retail/PTR active-profile constant gate. The [contract proof ledger](../../specs/ui-widget-text-with-state.md#tests-asserting-this-spec) owns genuine supplied-record RED and unreached downstream boundaries. GREEN and parent acceptance remain pending.
 
 ## Sources
 
