@@ -49,6 +49,8 @@ pub(crate) mod nameplate_display;
 #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
 pub mod neighborhood_invites;
 pub mod net_stats;
+#[cfg(feature = "retail-12-0-0")]
+pub(crate) mod party_ai;
 #[cfg(feature = "retail-12-0-7")]
 pub(crate) mod performance_inputs;
 pub mod pet_bar;

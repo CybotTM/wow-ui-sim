@@ -87,12 +87,10 @@ pub(super) fn unit_realm_relationship(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-/// `UnitInPartyIsAI(unit)` — follower/AI party members are not modeled.
-pub(super) fn unit_in_party_is_ai(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = Option::<String>::from_stack(state, 1)?;
-    state.push(Val::Bool(false));
-    Ok(1)
-}
+#[cfg(feature = "retail-12-0-0")]
+pub(super) use super::super::real::party_ai::unit_in_party_is_ai;
+#[cfg(not(feature = "retail-12-0-0"))]
+pub(super) use crate::lua_api::workarounds::temporary::party_ai_legacy::unit_in_party_is_ai;
 
 /// `UnitIsPVPFreeForAll(unit)` — FFA PVP is not modeled.
 pub(super) fn unit_is_pvp_free_for_all(state: &mut LuaState) -> LuaResult<u32> {

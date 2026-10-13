@@ -116,6 +116,8 @@ pub(crate) mod navigation_defaults;
 pub(crate) mod object_api_request_load_callbacks;
 pub(crate) mod objective_tracker_quest_header;
 pub(crate) mod paging_controls_page_text;
+#[cfg(not(feature = "retail-12-0-0"))]
+pub(crate) mod party_ai_legacy;
 pub(crate) mod party_info_instance_abandon_defaults;
 pub(crate) mod party_info_static_defaults;
 pub(crate) mod patch_12_1_inert_defaults;
