@@ -396,3 +396,69 @@ fn cached_ui_widget_container_refreshes_removes_and_unregisters_supplied_widgets
         );
     });
 }
+
+#[test]
+fn cached_ui_widget_container_filters_supplied_unit_updates() {
+    common::with_timeout(88, || {
+        wow_ui_sim::xml::register_intrinsic_templates();
+        with_blizzard_addon_closure(
+            &[
+                "Blizzard_SharedXMLGame",
+                "Blizzard_Fonts_Shared",
+                "Blizzard_FrameEffects",
+                "Blizzard_UIWidgets",
+            ],
+            &[],
+            |env, loaded| {
+                assert!(loaded.iter().any(|name| name == "Blizzard_UIWidgets"));
+                supply_inputs(env);
+                assert_lua(
+                    env,
+                    "two real containers with explicit attached-unit fixture state",
+                    r#"
+                    UnitFilterPlayer = CreateFrame('Frame', nil, UIParent, 'UIWidgetContainerTemplate')
+                    UnitFilterTarget = CreateFrame('Frame', nil, UIParent, 'UIWidgetContainerTemplate')
+                    UnitFilterPlayer:RegisterForWidgetSet(417)
+                    UnitFilterTarget:RegisterForWidgetSet(417)
+                    -- Fixture injection only; this does not prove native unit registration.
+                    UnitFilterPlayer.attachedUnit = 'player'
+                    UnitFilterTarget.attachedUnit = 'target'
+                    assert(UnitFilterPlayer.widgetFrames[760101].Text:GetText() == 'Supplied icon text')
+                    assert(UnitFilterTarget.widgetFrames[760101].Text:GetText() == 'Supplied icon text')
+                    "#,
+                );
+                let mut icon = env
+                    .state()
+                    .borrow()
+                    .ui_widget_inputs
+                    .icon_and_text
+                    .get(&WidgetId::from_number(ICON_ID))
+                    .expect("initial supplied icon record")
+                    .clone();
+                icon.text = "Player-only supplied icon text".into();
+                let mut entry = widget_entry(ICON_ID, ICON_AND_TEXT);
+                entry.unit_token = Some("player".into());
+                env.update_ui_widget(SET_ID, entry, WidgetVisualization::IconAndText(icon))
+                    .expect("update supplied player icon through host feed");
+                assert_lua(
+                    env,
+                    "real OnEvent unit filter preserves target text",
+                    r#"
+                    local playerText = UnitFilterPlayer.widgetFrames[760101].Text:GetText()
+                    local targetText = UnitFilterTarget.widgetFrames[760101].Text:GetText()
+                    -- Restore injected fixture fields before normal cleanup; unit
+                    -- registration/unregistration itself is outside this test.
+                    UnitFilterPlayer.attachedUnit = nil
+                    UnitFilterTarget.attachedUnit = nil
+                    UnitFilterPlayer:UnregisterForWidgetSet()
+                    UnitFilterTarget:UnregisterForWidgetSet()
+                    assert(not UnitFilterPlayer:IsRegisteredForWidgetSet())
+                    assert(not UnitFilterTarget:IsRegisteredForWidgetSet())
+                    assert(playerText == 'Player-only supplied icon text', 'player widget must refresh')
+                    assert(targetText == 'Supplied icon text', 'target widget must retain old text')
+                    "#,
+                );
+            },
+        );
+    });
+}
