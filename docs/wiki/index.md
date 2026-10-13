@@ -1,3 +1,7 @@
+## [2026-10-13] docs | Speak For Me activity source checkpoint
+
+[Existing voice inventory](systems/lua-api.md) links the [supplied activity contract/proof SSOT](../specs/voice-speak-for-me-active-input.md): independent false host input is simulator policy, genuine two-case result-boundary RED is retained, actual GREEN and consumer acceptance pending.
+
 ## [2026-10-13] evidence | Original Retail prefork four-case checkpoint
 
 [Prefork checkpoint](systems/prefork-test-harness.md#original-retail-four-case-checkpoint--2026-10-13-bounded) links public retained original4 results and independent report; current retention gate PENDING. Historical RED/Mists and conformance/cache/native/performance/all-profile/full-parent limits remain separate.

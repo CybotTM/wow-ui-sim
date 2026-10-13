@@ -1,3 +1,7 @@
+## [2026-10-13] docs | Speak For Me activity source checkpoint
+
+Updated [existing voice inventory](systems/lua-api.md) after `a8a148e98`, linking the [contract/proof SSOT](../specs/voice-speak-for-me-active-input.md). Explicit independent false input is simulator policy, not native default; genuine two-case RED distinguishes an existing function returning one nil from the state-backed producer. Actual GREEN/consumer acceptance pending; no native, events or transport acceptance. Documentation only; main owns commit.
+
 ## [2026-10-13] docs | Original Retail prefork four-case checkpoint
 
 Added [public packet README](../../data/test-perf/evidence/original-retail-prefork-2026-10-13/README.md) and separate bounded [contract](../specs/prefork-test-harness.md#original-retail-four-case-checkpoint--2026-10-13-bounded)/[system](systems/prefork-test-harness.md#original-retail-four-case-checkpoint--2026-10-13-bounded) checkpoints. Independent saved-evidence original4 PASS and actual wait exits remain distinct from pending retention and broader acceptance. Historical RED/Mists/native/performance/all-profile/full-parent limits preserved; documentation only, main owns commit.
