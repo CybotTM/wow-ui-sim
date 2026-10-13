@@ -223,7 +223,7 @@ fn register_and_assert_actual_templates(env: &WowLuaEnv) {
         local np, nr, nrp, nx, ny = CaptureFrame.NeutralBar:GetPoint(1)
         assert(np == 'CENTER' and nr == CaptureFrame and nrp == 'LEFT', string.format('initial NeutralBar anchor: actual=(%s, %s, %s) expected=(CENTER, %s, LEFT)', tostring(np), tostring(nr), tostring(nrp), tostring(CaptureFrame)))
         assert(nx == 97.5 and ny == 0, string.format('initial NeutralBar offsets: actual=(%.17g, %.17g) expected=(97.5, 0)', nx, ny))
-        assert(CaptureFrame.NeutralBar:IsShown() and CaptureFrame.Glow3:IsShown())
+        assert(CaptureFrame.NeutralBar:IsShown() and CaptureFrame.Glow3:IsShown(), string.format('initial neutral visibility: NeutralBar=%s Glow3=%s Glow3Atlas=%s SparkNeutral=%s SparkNeutralAtlas=%s', tostring(CaptureFrame.NeutralBar:IsShown()), tostring(CaptureFrame.Glow3:IsShown()), tostring(CaptureFrame.Glow3:GetAtlas()), tostring(CaptureFrame.SparkNeutral:IsShown()), tostring(CaptureFrame.SparkNeutral:GetAtlas())))
         assert(not CaptureFrame.Glow1:IsShown() and not CaptureFrame.Glow2:IsShown())
         assert(CaptureFrame.SparkNeutral:IsShown() and not CaptureFrame.Spark:IsShown())
         assert(not CaptureFrame.LeftLine:IsShown() and not CaptureFrame.RightLine:IsShown())
