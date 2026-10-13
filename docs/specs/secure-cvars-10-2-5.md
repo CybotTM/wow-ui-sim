@@ -1,6 +1,6 @@
 # 10.2.5 secure-CVar combat policy
 
-Seven secure-CVar names must extend the existing Retail combat-protected-name policy in `src/c_api/cvar_combat_policy.rs`. This stage integrates tests/spec only: no state scaffold, predicate/default/registration changes. Existing behavior remains until genuine RED. Tests are Retail-only, matching current policy; integration is uncompiled/unexecuted.
+Seven secure-CVar names must extend the existing Retail combat-protected-name policy in `src/c_api/cvar_combat_policy.rs`. Genuine Retail RED at `76cf33ef3` reached the first insecure-combat `autoStand` write; it succeeded instead of being denied. The predicate now includes the seven names; defaults and registrations remain unchanged. GREEN is pending. Tests are Retail-only, matching current policy; integration is uncompiled/unexecuted.
 
 Accepted draft grounding: [local 10.2.5 publication source](../../data/patch-api/sources/10.2.5-api-changes.wikitext):67–76 attributes the hotfix to build 53441, February 23, 2024. Names: `autoStand`, `autoUnshift`, `SoftTargetEnemy`, `SoftTargetEnemyRange`, `SoftTargetForce`, `SoftTargetInteract`, `SoftTargetInteractRange`. Interpreting “secure” as denial of insecure writes only during player combat is an explicitly accepted simulator policy, not native security/error/timing or all-write-surface proof.
 
@@ -20,23 +20,23 @@ Accepted draft grounding: [local 10.2.5 publication source](../../data/patch-api
 ## Implementation inventory
 
 - `tests/patch_10_2_5_secure_cvars.rs`: four tests, 88 matrix cases, preserved pre-construction executable-location storage guard.
-- `src/c_api/cvar_combat_policy.rs`: existing Retail-only name predicate; unchanged in this stage.
+- `src/c_api/cvar_combat_policy.rs`: Retail-only case-insensitive membership in the complete historical list plus the seven hotfix names.
 - `src/lua_api/globals/set_cvar_verb.rs`: existing permission/storage/event path; unchanged.
 - `src/cvars.rs`: existing temporary-store selection and persistence; unchanged.
 
 ## Tests asserting this spec
 
-[tests/patch_10_2_5_secure_cvars.rs](../../tests/patch_10_2_5_secure_cvars.rs): three matrices of 7 names × 2 public setters × 2 spellings (28 each), plus 4 historical nameplate denial cases = 88 cases across four unexecuted tests. Each gets a bare environment and concrete secure out-of-combat old value 0 before listener installation, then attempts 1. Genuine stamped closure execution/stack taint is asserted independently of pcall outcome so taint setup failure cannot masquerade as denial. Accepted events must observe committed storage.
+[tests/patch_10_2_5_secure_cvars.rs](../../tests/patch_10_2_5_secure_cvars.rs): three matrices of 7 names × 2 public setters × 2 spellings (28 each), plus 4 historical nameplate denial cases = 88 intended cases. At `76cf33ef3`, three tests passed and one failed: 60 matrix cases completed, one failed and 27 were unreached. Later test correction classifies the modeled permission error and uses named contexts; its new proof remains pending. Each gets a bare environment and concrete secure out-of-combat old value 0 before listener installation, then attempts 1. Genuine stamped closure execution/stack taint is asserted independently of pcall outcome so taint setup failure cannot masquerade as denial. Accepted events must observe committed storage.
 
 The executable-parent deps guard stays before environment creation. No HOME/XDG mutation, real configuration writes or standalone execution permitted. Temporary-file cleanup is not claimed; store path is not publicly exposed. No matrix name is skipped as unreadable; seeding does not prove native defaults/value domains.
 
 ## Known gaps (current cycle)
 
-- [ ] Obtain genuine permission-assertion RED, not fixture/import/compile failure; no build/tests ran during integration.
-- [ ] Extend only the existing predicate after RED, then obtain bounded GREEN.
+- [x] Genuine permission-assertion RED at `76cf33ef3`; not fixture/import/compile failure.
+- [ ] Verify the extended predicate against all four tests and all 88 matrix cases.
 - [ ] Any unreadable seeded fixture is a separate blocker, not permission evidence or authorization to alter defaults/removal semantics.
 - [ ] Native parity, exact errors/hotfix timing, whole historical list and other write surfaces remain unverified.
 
 ## Out of scope
 
-synchronizeMacros/synchronizeSettings removal rows, defaults/publication, profile/epoch changes, bitfield writes, historical list replacement, UI/vendor/config/WTF changes, native probes, runtime infrastructure. No new state or predicate change in this stage.
+synchronizeMacros/synchronizeSettings removal rows, defaults/publication, profile/epoch changes, bitfield writes, historical list replacement, UI/vendor/config/WTF changes, native probes, runtime infrastructure. No new state, defaults or registration change.
