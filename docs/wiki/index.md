@@ -1,6 +1,6 @@
-## [2026-10-13] source | Calendar day-record input checkpoint
+## [2026-10-13] evidence | Calendar day-record bounded acceptance
 
-[Calendar inventory](investigations/patch-8-1-0-api-audit.md#calendar-day-records--input-only-checkpoint-2026-10-13) now distinguishes the historical input-only checkpoint from the host-only day-query implementation. [Owning contract](../specs/calendar-day-event-records.md) records executed RED and pending producer acceptance; [coverage](reference/coverage-matrix.md) retains bounded proof and native/lifecycle gaps.
+[Calendar inventory](investigations/patch-8-1-0-api-audit.md#calendar-day-records--input-only-checkpoint-2026-10-13) preserves historical source/RED checkpoints. [Owning acceptance SSOT](../specs/calendar-day-event-records.md#current-bounded-acceptance--2026-10-13) owns current independent Retail/PTR gates and pending publication retention; [coverage](reference/coverage-matrix.md) retains native/lifecycle/full-parent gaps.
 
 ## [2026-10-13] evidence | Separate Mists and performance receipts
 
