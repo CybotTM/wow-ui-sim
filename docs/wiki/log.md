@@ -1,3 +1,7 @@
+## [2026-10-13] source | Texture XML published self-key producer
+
+[Existing XML inventory](systems/xml-template-system.md#texture-xml-self-key-source-checkpoint--2026-10-13) and [Mists investigation](investigations/mists-cast-startup-visibility.md#texture-xml-self-key-producer-checkpoint--2026-10-13) link the [owning policy](../specs/xml-self-relative-key.md). Source `480b9f934` follows genuine Mists RED; GREEN/startup/prefork pending. Historical source844 cast PASS after0.55 and normal self-anchor FAIL remain separate; no native parity or anonymous baseline-frame attribution.
+
 ## [2026-10-13] evidence | Calendar day-record bounded acceptance
 
 [Calendar inventory](investigations/patch-8-1-0-api-audit.md#calendar-day-records--input-only-checkpoint-2026-10-13) preserves historical source/RED checkpoints. [Owning acceptance SSOT](../specs/calendar-day-event-records.md#current-bounded-acceptance--2026-10-13) owns current independent Retail/PTR gates and pending publication retention; [coverage](reference/coverage-matrix.md) retains native/lifecycle/full-parent gaps.

@@ -74,6 +74,12 @@ Temporary logging was removed after the sealed capture; three Rust files restore
 
 [Separate packet](../../../data/patch-api/evidence/productchoice-declaration-probe-2026-10-11/README.md), epoch215919/independent2430, observes a returned self-anchor loader error for the copied Icon declaration and valid parent/sibling anchor identities in a separate control. Compile/run0 describe diagnostic completion, not successful declaration loading. This does not change the cast/fade fixture, repair Mists startup, identify its full-template error ordering or establish native semantics.
 
+## Texture XML self-key producer checkpoint — 2026-10-13
+
+[Owning policy and pending gates](../../specs/xml-self-relative-key.md) record source `480b9f934` after genuine Mists `a90f84c5d` RED (1 PASS / 1 FAIL, actual exit101). With real cached ModelScene/ProductChoice prerequisites, creation reaches the layer-child self-anchor failure; the separate direct Lua guard preserves two points and passes its distinct-target control. Texture XML published direct single-segment self-key normalization is approved simulator policy, not native parity. Shared Frame/FontString generation and missing-key handling remain unchanged.
+
+Producer GREEN, normal startup and named prefork acceptance are pending. The [historical source844 packet](../../../data/patch-api/evidence/mists-source-fade-phase-2026-10-11/current-844-2026-10-13/README.md) retains one selected cast PASS after 0.55 seconds and separate normal CLI self-anchor FAIL; neither attributes the anonymous baseline frame to ProductChoice. Two earlier admission denials are separate zero-launch records, not behavioral RED.
+
 ## Sources
 
 - Private `handoff/mists-load-visibility-final.md` — earliest shown state, XML/loader observations, identity limits.

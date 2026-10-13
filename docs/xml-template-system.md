@@ -554,6 +554,9 @@ The `$parent` placeholder appears in frame names, anchor `relativeTo`, and `rela
 - **Anchor relativeTo**: `relativeTo="$parent"` resolves to the parent frame (`src/loader/helpers.rs:152-170`)
 - **Anchor relativeKey**: `relativeKey="$parent.ScrollBox"` resolves to `parent["ScrollBox"]` via `resolve_relative_key()` (`src/loader/helpers.rs:128-145`). Chained `$parent.$parent.X` produces `parent:GetParent()["X"]`
 
+
+Texture XML source `480b9f934` normalizes only an immediately published direct single-segment own parentKey (`$parent.<ownParentKey>`) to the parent before anchor emission. Direct Lua self-anchoring, shared Frame/FontString generation, sibling and missing-key handling are unchanged. [Owning contract](specs/xml-self-relative-key.md) records approved simulator policy, genuine pre-producer Mists RED and pending GREEN/startup/prefork gates; not native parity.
+
 ### Anonymous Frame Naming
 
 When a frame has no `name` attribute:

@@ -86,6 +86,10 @@ Intrinsic default scripts use the precall binding; ordinary XML scripts use the 
 
 `parentKey="Title"` produces `parent.Title = frame`. `parentArray="Buttons"` appends to `parent.Buttons`. Both resolved via template inheritance.
 
+## Texture XML self-key source checkpoint — 2026-10-13
+
+[`480b9f934` policy contract](../../specs/xml-self-relative-key.md) owns the approved, user-correlated simulator behavior: a Texture XML direct `$parent.<ownParentKey>` published single-segment self-key targets its parent. Direct Lua validation, shared Frame/FontString generation, sibling and missing-key handling remain unchanged; this is not native WoW parity. Executed pre-producer Mists `a90f84c5d` RED is 1 PASS / 1 FAIL, actual exit101: real cached ModelScene/ProductChoice prerequisites reach the layer-child self-anchor failure, while direct Lua rejection preserves two points and the distinct-target control passes. Producer GREEN, normal startup and named prefork acceptance remain pending.
+
 ## Sources
 
 - [xml-template-system.md](../../xml-template-system.md) — XML types, registry, inheritance, conversion pipeline, inline scripts
