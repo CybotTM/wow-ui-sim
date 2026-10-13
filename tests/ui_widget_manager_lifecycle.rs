@@ -353,6 +353,9 @@ fn cached_ui_widget_container_refreshes_removes_and_unregisters_supplied_widgets
                     WidgetVisualization::ButtonHeader(header),
                 )
                 .expect("restore header through host feed before cleanup");
+                // Incremental events mark cached layout dirty; counts refresh on OnUpdate.
+                env.fire_on_update(0.0)
+                    .expect("flush actual cached container layout before count assertions");
                 assert_lua(
                     env,
                     "unregister cleans active pools events manager and timer",
