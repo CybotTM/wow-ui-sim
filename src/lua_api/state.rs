@@ -519,6 +519,7 @@ macro_rules! build_empty_sim_state {
             achievements: default_achievements(),
             achievement_superceding: HashMap::new(),
             calendar_event_indices: HashMap::new(),
+            calendar_day_events: HashMap::new(),
             achievement_guild_rep: ::std::collections::HashMap::new(),
             achievement_statistics: ::std::collections::HashMap::new(),
             achievement_comparison_unit: None,

@@ -1,4 +1,6 @@
 //! Calendar event positions supplied by synthetic fixtures, not a native event catalog.
+pub mod day_event_record;
+
 use super::helpers::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_table, table_set};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};

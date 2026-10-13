@@ -616,6 +616,12 @@ pub struct SimState {
     pub achievement_superceding: HashMap<i32, Vec<i32>>,
     /// Explicit event identity positions; default records are simulator demo data.
     pub calendar_event_indices: HashMap<i32, crate::c_api::c_calendar::CalendarEventIndexInfo>,
+    /// Host storage keyed by (offset_months, month_day); Vec order gives dense positions.
+    /// Key widths and ordering policy do not establish native argument bounds.
+    pub calendar_day_events: HashMap<
+        (i32, u32),
+        Vec<crate::c_api::c_calendar::day_event_record::CalendarDayEventRecord>,
+    >,
     pub achievement_guild_rep: HashMap<i32, AchievementGuildRep>,
     pub achievement_statistics: HashMap<i32, AchievementStatistic>,
     pub achievement_comparison_unit: Option<String>,
