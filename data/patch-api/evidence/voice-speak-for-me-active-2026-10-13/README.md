@@ -48,7 +48,7 @@ Startup diagnostics: **88 missing requirements / 185 nil-symbol observations / 0
 
 At saved `c81f10375`, exact `animation_query_lifecycle::delaying_uses_order_start_and_longest_parallel_duration` records **1 PASS / 0 FAIL, wait exit0**; exact `animation_query_lifecycle::bounce_loop_callback_observes_direction_change` independently records **1 PASS / 0 FAIL, wait exit0**. The [public independent report](red-current/independent/speak-red-animation-proof/report.md) is retained from local `verification/speak-red-animation-proof/report.md`.
 
-The first covers ordered/parallel delay boundaries, forward/reverse traversal and paused direction/resume assertions. The second covers two reached OnLoop boundaries and alternating direction. Neither is a wider reverse/repeat suite or current full six-case lifecycle proof. [Animation contract](../../../../docs/specs/animation-query-lifecycle.md) keeps broader requirements separate.
+The first covers ordered/parallel delay boundaries, forward/reverse traversal and paused direction/resume assertions. The second covers two reached OnLoop boundaries and alternating direction. These historical c81 controls remain separate from the [new full-six packet](../../../test-perf/evidence/animation-lifecycle-six-2026-10-13/README.md), which owns current execution, diagnostic and retained-text status. [Animation contract](../../../../docs/specs/animation-query-lifecycle.md) keeps broader requirements, frozen CCD failures and security limits separate.
 
 ## Limits
 
