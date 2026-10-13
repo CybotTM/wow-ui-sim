@@ -1,3 +1,7 @@
+## [2026-10-12] docs | Ping argument staging
+
+[Integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#continued-staged-inputs--source-only-checkpoint-2026-10-12) records staged46, including six [ping-kit tests](../specs/ping-texture-kit-input.md). Ordinary/secret argument assertions remain uncompiled/unrun; getter unchanged. Index links current SSOT instead of duplicating stale gate status; historical proof unchanged.
+
 ## [2026-10-12] docs | Current bounded producer and receiver proof
 
 [Integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) owns current bounded counts, startup and saved format proof. Existing producer/receiver specs mark tested boundaries only. Historical RED retained; default check PENDING, current full suite/owning sweeps/profile gates UNRUN. Native/catalog/ABI/allocation-free unknowns and public packet retention remain open; no whole-pass claim.

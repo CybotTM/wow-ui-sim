@@ -1,6 +1,6 @@
 ## [2026-10-12] docs | Current bounded producer and receiver proof
 
-[Integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) owns current bounded counts, startup and saved format proof. Existing producer/receiver specs mark tested boundaries only. Historical RED retained; default check PENDING, current full suite/owning sweeps/profile gates UNRUN. Native/catalog/ABI/allocation-free unknowns and public packet retention remain open; no whole-pass claim.
+[Integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) owns current bounded counts, startup and saved format proof. Existing producer/receiver specs mark tested boundaries only. Historical RED retained; the [integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#continued-staged-inputs--source-only-checkpoint-2026-10-12) owns current staging and outstanding gates; linked packets own retained proof. Native/catalog/ABI/allocation-free unknowns remain open; no whole-pass claim.
 
 ## [2026-10-12] docs | Four-model sealed Retail proof
 
