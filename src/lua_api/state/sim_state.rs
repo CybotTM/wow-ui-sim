@@ -402,6 +402,9 @@ pub struct SimState {
     pub encounter_warning_settings: crate::c_api::c_encounter_warnings::WarningSettings,
     pub cooldown_viewer_cooldowns:
         std::collections::BTreeMap<i32, crate::c_api::c_cooldown_viewer::CooldownViewerCooldown>,
+    /// Explicit supplied availability; independent of cooldown catalog and UI settings.
+    #[cfg(feature = "retail-12-0-0")]
+    pub cooldown_viewer_availability: crate::c_api::c_cooldown_viewer::CooldownViewerAvailability,
     #[cfg(feature = "retail-12-1-0")]
     pub last_sound_request: Option<crate::c_api::c_sound::PlaySoundRequest>,
     pub last_sound_file_requested: Option<String>,

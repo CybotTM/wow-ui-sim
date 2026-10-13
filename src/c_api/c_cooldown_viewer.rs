@@ -35,6 +35,24 @@ pub struct CooldownViewerCooldown {
     pub valid_alert_types: Vec<u8>,
 }
 
+/// Explicit host availability, not a class/spec eligibility inference.
+#[cfg(feature = "retail-12-0-0")]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CooldownViewerAvailability {
+    pub is_available: bool,
+    pub failure_reason: String,
+}
+
+#[cfg(feature = "retail-12-0-0")]
+impl Default for CooldownViewerAvailability {
+    fn default() -> Self {
+        Self {
+            is_available: false,
+            failure_reason: "Availability not supplied".to_owned(),
+        }
+    }
+}
+
 pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = ensure_namespace(state, "C_CooldownViewer")?;
     #[cfg(feature = "retail-12-0-0")]
