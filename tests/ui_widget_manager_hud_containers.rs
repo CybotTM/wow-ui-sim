@@ -1,5 +1,5 @@
-//! Actual cached Retail HUD OnLoad consumers; no vendor overrides or fixture stubs.
-#![cfg(feature = "client-retail")]
+//! Actual active-profile Retail/PTR HUD OnLoad consumers; no vendor overrides or stubs.
+#![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 
 use crate::common;
 use common::blizzard_addon_harness::{blizzard_ui_dir, load_blizzard_addon_closure_into_env};
@@ -82,6 +82,11 @@ fn load_standard_containers(env: &WowLuaEnv) {
     // Query assertions precede even cache discovery: cache failures are prerequisites,
     // not evidence of a failing selector or OnLoad consumer.
     let ui_dir = blizzard_ui_dir();
+    eprintln!(
+        "[ui-widget-cache] profile={} path={}",
+        wow_ui_sim::client_profile::ACTIVE.cache_subdir(),
+        ui_dir.display()
+    );
     for name in ["Blizzard_UIWidgets", "Blizzard_ObjectiveTracker"] {
         assert!(
             ui_dir.join(name).is_dir(),
@@ -101,7 +106,11 @@ fn load_standard_containers(env: &WowLuaEnv) {
         &["Blizzard_AuraContainer", "Blizzard_UnitFrame"],
         &[],
     );
-    assert!(prerequisites.iter().any(|name| name == "Blizzard_UnitFrame"));
+    assert!(
+        prerequisites
+            .iter()
+            .any(|name| name == "Blizzard_UnitFrame")
+    );
     env.exec("assert(EncounterBar and EncounterBar.Layout, 'real EncounterBar prerequisite')")
         .expect("cached EncounterBar must precede selected HUD loading");
     // AuraContainerUtil belongs to the secure environment, not ordinary globals.

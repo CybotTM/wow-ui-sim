@@ -1,6 +1,6 @@
 # UI Widget Manager State
 
-Environment-local supplied UI widget sets, visualization snapshots, exact quest associations and synchronous host feeds form the core model. Production `0745fe84f` adds supplied bars and HUD selectors. The [contract](../../specs/ui-widget-manager-state.md) owns requirements; the [retained attempts](../../../data/patch-api/evidence/ui-widget-manager-state-2026-10-13/README.md#later-consumer-attempts) own current outcomes and historical failures. At test-only `b28a45f91`, HUD OnLoad2 PASS; bar initial visibility fails, later lifecycle unreached. No native or whole-goal acceptance follows.
+Environment-local supplied UI widget sets, visualization snapshots, exact quest associations and synchronous host feeds form the core model. Production `0745fe84f` adds supplied bars and HUD selectors. The [contract](../../specs/ui-widget-manager-state.md) owns requirements; the [retained attempts](../../../data/patch-api/evidence/ui-widget-manager-state-2026-10-13/README.md#later-consumer-attempts) own current outcomes and historical failures. Historical test-only `b28a45f91` has HUD OnLoad2 PASS and bar initial visibility FAIL; later `5bd208dba` closes the bounded Retail consumer assertions below. No native or whole-goal acceptance follows.
 
 ## State and representation
 

@@ -1,7 +1,7 @@
 //! Cached Lua/XML consumers over supplied bar records; getters are the first RED boundary.
-//! Retail-only: inspected DTO/consumer sources do not establish PTR cache equivalence.
+//! Retail/PTR fixtures load the active profile cache; source parity is not runtime proof.
 //! Host bar feeds commit supplied records before notifying actual cached consumers.
-#![cfg(feature = "client-retail")]
+#![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 
 use crate::common;
 use common::blizzard_addon_harness::with_blizzard_addon_closure_in_dir;
@@ -453,6 +453,11 @@ fn actual_cached_status_and_capture_bar_lifecycle() {
         // Real TOC dependency closure only; no API/template/manager/pool/Setup overrides.
         let cache = wow_ui_sim::paths::default_blizzard_ui_addons_path()
             .expect("[active profile cache] synced Blizzard UI addon tree is required");
+        eprintln!(
+            "[ui-widget-cache] profile={} path={}",
+            wow_ui_sim::client_profile::ACTIVE.cache_subdir(),
+            cache.display()
+        );
         with_blizzard_addon_closure_in_dir(
             &cache,
             &[

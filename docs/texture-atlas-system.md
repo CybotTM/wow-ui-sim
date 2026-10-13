@@ -158,7 +158,7 @@ Result: `(0.5, 0.625, 0.2, 0.4)`
 
 `SetAtlas` validates the atlas argument, resolves names or supported numeric element IDs, clears texture/atlas state for blank names, and applies resolved atlas metadata through `apply_atlas()`. Unknown names retain the requested name while clearing texture/UV state. `useAtlasSize` applies resolved dimensions.
 
-The explicit [application-result policy](specs/texture-atlas-application-result.md) returns exactly one boolean: true for a resolved/applied atlas, false for accepted inactive inputs. Argument errors and mutation behavior remain unchanged. This is simulator compatibility policy, not native return parity; the spec owns conflicting generated-documentation/Wowless evidence and pending runtime proof.
+The explicit [application-result policy](specs/texture-atlas-application-result.md) returns exactly one boolean: true for a resolved/applied atlas, false for accepted inactive inputs. Argument errors and mutation behavior remain unchanged. This is simulator compatibility policy, not native return parity; the spec owns conflicting generated-documentation/Wowless evidence, bounded Retail runtime proof and remaining profile gates.
 
 Only recognized Button/CheckButton state-slot children propagate texture/UV state and button-owned visibility. Other children retain independent visibility. Unchanged cached `TextureUtil.lua::SetupTextureKitOnFrame` separately consumes the result for `SetShown`; this is not a renderer visibility override. See [atlas visibility contract](specs/texture-atlas-visibility.md).
 
