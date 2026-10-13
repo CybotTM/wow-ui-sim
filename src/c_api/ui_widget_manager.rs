@@ -1,5 +1,8 @@
-//! Supplied ButtonHeader inputs only; no Lua query or registrar.
+//! Complete supplied ButtonHeader inputs and their current-profile snapshot query.
 use std::collections::HashMap;
+
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+pub(crate) mod button_header;
 
 /// Modeled numeric key, not a native widget-ID range or availability claim.
 /// Preserve f64 bits except that equal numeric signed zeroes share one key.

@@ -1,6 +1,6 @@
 # UI widget ButtonHeader supplied records
 
-`C_UIWidgetManager.GetButtonHeaderWidgetVisualizationInfo(widgetID)` must expose complete supplied records as independent Lua snapshots. Inputs live in `src/c_api/ui_widget_manager.rs`; query implementation is pending. See [C API architecture](../lua-api.md) and [cache provenance](../updating-blizzard-ui-to-a-new-patch.md).
+`C_UIWidgetManager.GetButtonHeaderWidgetVisualizationInfo(widgetID)` must expose complete supplied records as independent Lua snapshots. Inputs live in `src/c_api/ui_widget_manager.rs`; the C API query is registered for Retail/PTR. Current producer GREEN remains pending. See [C API architecture](../lua-api.md) and [cache provenance](../updating-blizzard-ui-to-a-new-patch.md).
 
 ## What it must do
 
@@ -20,17 +20,19 @@ Snapshot, absence and isolation requirements are simulator policy, not native-ca
 
 ## Implementation inventory
 
-- `src/c_api/ui_widget_manager.rs`, `src/c_api/mod.rs`: public complete records and numeric-key inputs; no query/registrar yet.
+- `src/c_api/ui_widget_manager.rs`, `src/c_api/mod.rs`: public complete records and numeric-key inputs.
+- `src/c_api/ui_widget_manager/button_header.rs`, `src/lua_api/globals/missing_surface.rs`: authenticated query and fresh complete snapshot projection, registered for Retail/PTR.
 - `src/lua_api/state/sim_state.rs`, `src/lua_api/state.rs`: environment field and empty initialization.
 
 ## Tests asserting this spec
 
-`tests/c_ui_widget_manager_button_header.rs`: nine staged cases selected for Retail and PTR; secret cases additionally gated by `retail-12-1-0`. Both cached metadata declarations match exactly for the query, all 17 header fields and all five nested button fields. Cached header Lua/XML source also matches; the bounded consumer resolves the active profile cache, not a hardcoded Retail path. This supports shared test selection, not historical availability, compilation or runtime parity. All cases remain uncompiled/unexecuted, not behavioral RED.
+`tests/c_ui_widget_manager_button_header.rs`: nine staged cases selected for Retail and PTR; secret cases additionally gated by `retail-12-1-0`. Both cached metadata declarations match exactly for the query, all 17 header fields and all five nested button fields. Cached header Lua/XML source also matches; the bounded consumer resolves the active profile cache, not a hardcoded Retail path. This supports shared test selection, not historical availability, compilation or runtime parity. At `ff72f3c3b`, nine selected cases produce one unsupplied-ID PASS and eight behavioral failures on supplied-result type/snapshot behavior, including the untainted secret result. No observed fixture failures; cached provider dependencies and later tainted-secret assertions remain unreached where the query fails. Current producer GREEN remains pending.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile and obtain genuine query-boundary RED before implementing the producer.
-- [ ] Implement query and verify supplied projection, snapshots, isolation and secret policy.
+- [x] Compile and obtain genuine query-boundary RED before implementing the producer.
+- [x] Implement the query after genuine RED.
+- [ ] Verify supplied projection, snapshots, isolation and secret policy.
 - [ ] Execute actual cached manager/base/header dependencies; setup failures are not query RED or provider acceptance.
 
 ## Out of scope
