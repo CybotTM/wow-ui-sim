@@ -30,6 +30,7 @@
 ## Verification
 
 - [x] Independent GREEN verification PASS: 11 behavioral cases, loaded normal-session assertions and required Rust checks.
+- [x] Separate [PTR behavioral execution](../../data/patch-api/evidence/calendar-event-index-2026-10-11/ptr-2026-10-12/README.md) reaches all eleven cases at the applicable f314 artifact, including secret-input controls; not a current-HEAD build or native/editor/catalog claim.
 - [x] Loaded normal-session publication assertion and owning prefork sweep verified; only the current event-index gap row removed. Frozen historical accounting preserved; [publication proof](../../data/patch-api/evidence/calendar-event-index-2026-10-11/publication/publication-independent-report.md).
 
 ## Out of scope

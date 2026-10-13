@@ -1,3 +1,7 @@
+## [2026-10-12] docs | EditMode source-suite failure and pending fixture repair
+
+[Existing investigation](investigations/editmode-layout.md#test-only-fixture-repair--pending-verification-2026-10-12) and [selection status](../specs/edit-mode-layout-selection.md#current-broad-suite-status--2026-10-12) distinguish main-read source `41cbf5005` terminal FAIL (integration0/prefork0/lib100, two named fixture failures) from test-only `b41b42fc1` plus cached-fixture correction `ac170ecbf`; focused runtime remains resource-BLOCKED. [Terminal packet](../../data/test-perf/evidence/fullsuite-41cb-2026-10-12/README.md) records independently reconciled 15,123 PASS / 2 FAIL / 19 reported skips; artifact verification PASS is not suite PASS. Combined-index production behavior and older bounded Retail/PTR/native-user proof scopes unchanged; no repaired-test PASS or broad acceptance. Docs only; parent owns commits.
+
 ## [2026-10-12] docs | PTR packet and asynchronous submission reconciliation
 
 Linked [committed PTR packet](../../data/patch-api/evidence/edit-mode-enter-ptr-2026-10-12/README.md) and recorded [submission-only metadata](investigations/editmode-layout.md#ptr-packet-and-current-suite-submission--2026-10-12). Reconciled current PTR execution and native publication wording; packet labels and immutable receipts unchanged. No suite result/count admitted, proof replay, ops, tests, checks, builds, source/runtime edits, delegation or commits. Whole handoff OPEN.

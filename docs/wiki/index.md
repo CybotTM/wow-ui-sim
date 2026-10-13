@@ -1,6 +1,6 @@
 ## [2026-10-12] docs | PTR packet and current-suite submission
 
-[PTR packet](../../data/patch-api/evidence/edit-mode-enter-ptr-2026-10-12/README.md), committed at `41cbf5005`, owns bounded runtime/check details; [current reconciliation](investigations/editmode-layout.md#ptr-packet-and-current-suite-submission--2026-10-12) records submission metadata only. No current suite result admitted; whole handoff OPEN.
+[PTR packet](../../data/patch-api/evidence/edit-mode-enter-ptr-2026-10-12/README.md), committed at `41cbf5005`, owns bounded runtime/check details; [current reconciliation](investigations/editmode-layout.md#ptr-packet-and-current-suite-submission--2026-10-12) retains submission metadata and later main-read terminal state: source `41cbf5005` broad suite FAIL, two EditMode fixture failures; [terminal packet](../../data/test-perf/evidence/fullsuite-41cb-2026-10-12/README.md) records 15,123 PASS / 2 FAIL / 19 reported skips. [Test-only repair](investigations/editmode-layout.md#test-only-fixture-repair--pending-verification-2026-10-12) `b41b42fc1` plus cached-fixture correction `ac170ecbf` remains runtime-BLOCKED, not repaired-test PASS. Earlier bounded proofs retain their scopes; whole handoff OPEN.
 
 ## [2026-10-12] docs | Bounded seven-profile coverage matrix
 

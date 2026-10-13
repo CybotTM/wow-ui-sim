@@ -24,6 +24,12 @@ Current Retail/PTR startup must preserve the active-layout index supplied by the
 - [edit_mode_cache_startup.rs](../../tests/edit_mode_cache_startup.rs): fresh environment, isolated real-format file inputs, import before whole Game loading, original startup, selected Classic and public Micro Menu geometry. Native selection genuinely failed at `653e829f1`. At `7d9d9f621`, Retail native Classic/horizontal and four explicit Widescreen/vertical variants completed in two test names; parent/child recaps count once.
 - [edit_mode_api/cache.rs](../../tests/edit_mode_api/cache.rs): 10/10 Retail cache/parser/env/snapshot controls PASS at `7d9d9f621`; low-level cache proof is not whole consumer proof.
 
+## Current broad-suite status — 2026-10-12
+
+[Source-suite terminal state and fixture repair](../wiki/investigations/editmode-layout.md#test-only-fixture-repair--pending-verification-2026-10-12): main independently read source `41cbf5005` terminal JSON, integration exit0/prefork exit0/lib exit100. Broad suite FAIL: `setup_layout_info_remaps_active_saved_layout_after_prepending_presets` and `setup_layout_info_preserves_distinct_saved_action_bar_profile_settings`; [retained terminal packet](../../data/test-perf/evidence/fullsuite-41cb-2026-10-12/README.md) records 15,123 PASS / 2 FAIL / 19 reported skips, independently reconciled without replay.
+
+Test-only `b41b42fc1` sets active4 for the second custom layout, active3 for the first custom layout (not layoutID9), and retains native active2/Classic control. Production combined-index behavior is unchanged. Gate3095 found cached manager state invalidated the new preset control; follow-up `ac170ecbf` resets it. Runtime remained resource-BLOCKED, zero tests invoked; repaired tests are not credited PASS. Earlier bounded Retail/PTR and native-user evidence below retains its scope, not broad-suite acceptance.
+
 ## Known gaps (current cycle)
 
 - [x] Genuine fresh-startup RED at `653e829f1`: selected-layout assertion failed after real file import/full startup; geometry unreached. Enter3 GREEN and separate strict publication stale-row FAIL do not establish selection GREEN.
