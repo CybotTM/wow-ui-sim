@@ -1,10 +1,10 @@
 ## [2026-10-13] source | TextWithState input-only stage
 
-[State inventory](systems/ui-widget-manager-state.md#textwithstate-input-only-checkpoint--2026-10-13) links current producer scope and the [contract proof ledger](../specs/ui-widget-text-with-state.md#tests-asserting-this-spec); GREEN and parent acceptance remain unclaimed.
+[State inventory](systems/ui-widget-manager-state.md#textwithstate-input-only-checkpoint--2026-10-13) preserves the historical input-stage anchor and links [bounded saved GREEN](../../data/patch-api/evidence/ui-widget-text-with-state-2026-10-13/README.md#bounded-saved-green). Runtime and selected publication integrity PASS remain separate; parent OPEN.
 
 ## [2026-10-13] docs | Speak four-profile publication
 
-[Voice inventory](systems/lua-api.md) links the [profile-publication contract](../specs/voice-speak-for-me-active-input.md#documented-profile-publication) and [current profile proof](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#new-profile-green-runtime--2026-10-13). Query-only source and independent Mists/WoW Forever GREEN are recorded there; fresh Retail/PTR preservation and new publication integrity remain pending. Older Retail proof remains revision-scoped.
+[Voice inventory](systems/lua-api.md) links the [profile-publication contract](../specs/voice-speak-for-me-active-input.md#documented-profile-publication) and [current profile proof](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#new-profile-green-runtime--2026-10-13). Query-only source, independent Mists/WoW Forever GREEN and profile publication integrity PASS are recorded there. [Current preservation](../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#current-preservation-checkpoint--2026-10-13) owns revision-scoped Retail/PTR execution PASS and the separate pending preservation TEXT gate; no PTR cached voice-consumer claim.
 
 ## [2026-10-13] evidence | Current cached Speak consumer
 

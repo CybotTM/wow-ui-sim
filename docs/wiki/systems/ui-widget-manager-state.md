@@ -53,7 +53,7 @@ No native catalog, server transport, interpolation parity, dynamic HUD rebinding
 
 ### TextWithState input-only checkpoint — 2026-10-13
 
-Historical input-only stage `64a2a57b2` is superseded by producer source `2bb6cdde1`: [`text_state.rs`](../../../src/c_api/ui_widget_manager/text_state.rs) projects fresh complete21-field snapshots without input clamping; core queries publish through the Retail/PTR active-profile constant gate. The [contract proof ledger](../../specs/ui-widget-text-with-state.md#tests-asserting-this-spec) owns genuine supplied-record RED and unreached downstream boundaries. GREEN and parent acceptance remain pending.
+Historical input-only stage `64a2a57b2` is superseded by producer `2bb6cdde1`. The [contract](../../specs/ui-widget-text-with-state.md) owns complete21-field projection, existing numeric/secret validation, Retail/PTR publication and type8 feeds. [Bounded saved GREEN](../../../data/patch-api/evidence/ui-widget-text-with-state-2026-10-13/README.md#bounded-saved-green) owns independent Retail/PTR supplied-record and actual cached lifecycle PASS, separate startup/check and selected publication integrity PASS. Historical RED/source-gate FAIL remain retained; native/render/full-parent acceptance remains unproved.
 
 ## Sources
 
