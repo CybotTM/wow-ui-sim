@@ -53,7 +53,19 @@ fn inject_capture(env: &WowLuaEnv, record: CaptureBarRecord) {
 }
 
 fn assert_lua(env: &WowLuaEnv, phase: &str, code: &str) {
-    env.exec(code)
+    // Label fixture-local assertions without replacing vendor/global assert.
+    let diagnostic_code = format!(
+        r#"
+        local originalAssert = assert
+        local assertionIndex = 0
+        local function assert(value, message)
+            assertionIndex = assertionIndex + 1
+            return originalAssert(value, 'fixture assertion ' .. assertionIndex .. ': ' .. tostring(message))
+        end
+        {code}
+        "#
+    );
+    env.exec(&diagnostic_code)
         .unwrap_or_else(|error| panic!("cached bar consumer [{phase}]: {error}"));
     let errors = env.state().borrow().lua_errors.clone();
     assert!(

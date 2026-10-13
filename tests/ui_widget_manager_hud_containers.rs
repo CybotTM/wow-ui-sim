@@ -101,6 +101,8 @@ fn load_standard_containers(env: &WowLuaEnv) {
             "Blizzard_SharedXMLGame",
             "Blizzard_Fonts_Shared",
             "Blizzard_FrameEffects",
+            // Power-bar OnLoad lays out its real EncounterBar parent.
+            "Blizzard_UnitFrame",
             "Blizzard_UIWidgets",
             "Blizzard_ObjectiveTracker",
         ],
@@ -171,7 +173,12 @@ fn cached_standard_hud_default_zero_leaves_no_active_widget_set() {
             for _, name in ipairs(names) do
                 local container = assert(_G[name], name .. ' missing')
                 assert(not container:IsRegisteredForWidgetSet(), name .. ' activated default HUD')
-                assert(next(container.widgetFrames) == nil, name .. ' consumed unsupplied records')
+                assert(container.widgetFrames == nil or next(container.widgetFrames) == nil,
+                    name .. ' consumed unsupplied records')
+                assert(container.widgetPools:GetNumActive() == 0, name .. ' acquired unsupplied widgets')
+                assert(container.horizontalRowContainerPool:GetNumActive() == 0, name .. ' acquired rows')
+                assert(UIWidgetManager.registeredWidgetContainers[container] == nil,
+                    name .. ' published default HUD')
             end
         "#,
         )
