@@ -32,7 +32,7 @@ Account for Warcraft Wiki page 564286, revision 5993852 (2024-03-24T16:20:32Z), 
 
 ## Known gaps (current cycle)
 
-- [ ] Five current publication gaps: ping texture kits, transcription activity and three legacy aura retirements. The owning run at `f3a7dcb84` observed 54 OK / 5 gaps; its old 14-gap fixture failed because nine IDs resolved, with no new gaps. Current fixture removes only those nine observed resolutions. Reconciled-fixture execution remains pending. Historical [per-ID boundaries](../../data/patch-api/evidence/10.2.5-session-2026-10-07/p1025-gap-review.json) and receipts retain their original scope.
+- [ ] Five current publication gaps: ping texture kits, transcription activity and three legacy aura retirements. The owning run at `f3a7dcb84` observed 54 OK / 5 gaps; its old 14-gap fixture failed because nine IDs resolved, with no new gaps. Current fixture removes only those nine observed resolutions. Recompiled owning execution at `ccd526c6c`: one selected case PASS, exact five-gap fixture; independent bounded [proof](../../data/patch-api/evidence/pass2-owning-sweeps-2026-10-12/README.md) retained. Historical [per-ID boundaries](../../data/patch-api/evidence/10.2.5-session-2026-10-07/p1025-gap-review.json) and receipts retain their original scope.
 - [ ] Eighty-two substantive extract occurrences require distinct behavior/security/DTO/enum or historical proof. [Scout](../../data/patch-api/evidence/10.2.5-session-2026-10-07/p1025-extract-scout.json).
 
 ## Out of scope

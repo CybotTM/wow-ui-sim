@@ -21,7 +21,7 @@ Two behavioral tests reproduce all four defects before implementation. An earlie
 
 ## Current fixture reconciliation
 
-The owning run at `f3a7dcb84` observed 41 OK / 7 gaps. Its old eight-gap fixture failed solely because `C_AddOns.GetAddOnLocalTable` now raw-publishes a function; no new gaps appeared. Current fixture removes that one observed resolution. Reconciled-fixture execution remains pending. This is publication evidence only; retained historical receipts below are unchanged.
+The owning run at `f3a7dcb84` observed 41 OK / 7 gaps. Its old eight-gap fixture failed solely because `C_AddOns.GetAddOnLocalTable` now raw-publishes a function; no new gaps appeared. Current fixture removes that one observed resolution. Recompiled owning execution at `ccd526c6c`: one selected case PASS, exact seven-gap fixture; independent bounded [proof](../../data/patch-api/evidence/pass2-owning-sweeps-2026-10-12/README.md) retained. This is publication evidence only; retained historical receipts below are unchanged.
 
 ## Local proof
 
