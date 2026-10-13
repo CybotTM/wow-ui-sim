@@ -84,22 +84,30 @@ fn interpolate_path(animation: &AnimState) -> Option<[f32; 2]> {
     let segment_position = progress * segment_count as f64;
     let index = (segment_position.floor() as usize).min(segment_count - 1);
     let fraction = segment_position - index as f64;
-    let start = points[index].offset;
-    let end = points[index + 1].offset;
-    match animation.curve.as_str() {
+    let offsets = [
+        points[index.saturating_sub(1)].offset,
+        points[index].offset,
+        points[index + 1].offset,
+        points[(index + 2).min(points.len() - 1)].offset,
+    ];
+    interpolate_segment(&animation.curve, offsets, fraction)
+}
+
+fn interpolate_segment(
+    curve: &str,
+    [previous, start, end, next]: [[f64; 2]; 4],
+    fraction: f64,
+) -> Option<[f32; 2]> {
+    match curve {
         "NONE" => Some(std::array::from_fn(|axis| {
             (start[axis] + (end[axis] - start[axis]) * fraction) as f32
         })),
-        "SMOOTH" => {
-            let previous = points[index.saturating_sub(1)].offset;
-            let next = points[(index + 2).min(points.len() - 1)].offset;
-            Some(std::array::from_fn(|axis| {
-                catmull_rom(
-                    [previous[axis], start[axis], end[axis], next[axis]],
-                    fraction,
-                ) as f32
-            }))
-        }
+        "SMOOTH" => Some(std::array::from_fn(|axis| {
+            catmull_rom(
+                [previous[axis], start[axis], end[axis], next[axis]],
+                fraction,
+            ) as f32
+        })),
         _ => None,
     }
 }
