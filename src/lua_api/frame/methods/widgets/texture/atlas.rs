@@ -428,6 +428,56 @@ pub(super) fn get_texture(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub(super) fn get_file_width(state: &mut LuaState) -> LuaResult<u32> {
+    let (width, _) = load_texture_file_dimensions(state)?;
+    state.push(Val::Num(f64::from(width)));
+    Ok(1)
+}
+
+pub(super) fn get_file_height(state: &mut LuaState) -> LuaResult<u32> {
+    let (_, height) = load_texture_file_dimensions(state)?;
+    state.push(Val::Num(f64::from(height)));
+    Ok(1)
+}
+
+fn load_texture_file_dimensions(state: &mut LuaState) -> LuaResult<(u32, u32)> {
+    let id = frame_id_from_stack(state, 1)?;
+    crate::lua_api::frame::methods::secret_origin::require_texture_readable(state, id)?;
+    let (path, file_id, addon_paths) = {
+        let sim = borrow_state(state)?;
+        let frame = sim
+            .widgets
+            .get(id)
+            .filter(|frame| frame.color_texture.is_none());
+        (
+            frame.and_then(|frame| frame.texture.clone()),
+            frame.and_then(|frame| frame.texture_file_data_id),
+            sim.addon_base_paths.clone(),
+        )
+    };
+    let Some(path) = resolve_texture_source_path(path, file_id) else {
+        return Ok((0, 0));
+    };
+    // A per-call CPU-only manager reads metadata, never RGBA pixels. Its size
+    // cache is discarded; separate getters can repeat file-header I/O.
+    let mut textures = crate::texture::TextureManager::new().with_addons_paths(addon_paths);
+    Ok(textures.get_or_load_texture_size(&path).unwrap_or((0, 0)))
+}
+
+fn resolve_texture_source_path(path: Option<String>, file_id: Option<i64>) -> Option<String> {
+    // The stored path is authoritative for atlas assignments, which may retain
+    // an earlier file ID. Numeric sources use SetTexture's manifest route.
+    match path {
+        Some(path) => Some(match path.parse::<u32>() {
+            Ok(file_id) => resolve_file_data_id_path(file_id),
+            Err(_) => path,
+        }),
+        None => file_id
+            .and_then(|file_id| u32::try_from(file_id).ok())
+            .map(resolve_file_data_id_path),
+    }
+}
+
 pub(super) fn get_texture_file_id(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     crate::lua_api::frame::methods::secret_origin::require_texture_readable(state, id)?;

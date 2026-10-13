@@ -34,6 +34,8 @@ const TEXTURE_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetAtlas", atlas::get_atlas),
     ("SetTexture", atlas::set_texture),
     ("GetTexture", atlas::get_texture),
+    ("GetFileWidth", atlas::get_file_width),
+    ("GetFileHeight", atlas::get_file_height),
     ("GetTextureFileID", atlas::get_texture_file_id),
     ("GetTextureFilePath", atlas::get_texture_file_path),
     // Desaturation
