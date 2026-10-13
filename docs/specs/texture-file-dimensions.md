@@ -20,7 +20,8 @@ These requirements apply the literal contract to existing simulator state; they 
 - [ ] For an accessible atlas backing image, use full backing-file dimensions, not atlas-slot dimensions.
 - [ ] Numeric fileDataID assignments use the existing manifest path resolution and actual accessible source metadata; unresolved/inaccessible files return zero. Merely preserving the ID does not prove dimensions.
 - [x] Apply the existing secret-texture read policy before metadata lookup: an untainted caller may read; a tainted caller receives the same secret-origin denial as existing texture getters. A subsequent plain `SetTexture` assignment restores plain reads under existing policy.
-- [ ] Receiver scope: expose both getters in Texture's actual index, not ordinary widgets, WorldFrame, FontString or animations. Preserve all earlier WorldFrame lookups. Repair runtime remains pending.
+- [x] Receiver scope: expose both getters in Texture's actual index, not ordinary widgets, WorldFrame, FontString or animations. Current bounded receiver/runtime proof passes 7/7, including WorldFrame scroll controls.
+- [ ] Preserve all earlier WorldFrame lookups. Bounded scroll controls pass; exhaustive lookup preservation and opposite fresh-cache order remain unproved.
 - [ ] Historical Texture placement is not seven-profile native availability. Retained native discovery omits both names without establishing removal; it remains unchanged.
 
 ## How it works
@@ -38,7 +39,7 @@ These requirements apply the literal contract to existing simulator state; they 
 - `src/texture.rs` — `TextureManager::new` initializes empty CPU maps; `with_addons_paths` stores configured roots without GPU initialization.
 - `src/texture/resolve.rs` — existing `get_or_load_texture_size` resolves source metadata without populating the RGBA cache.
 - `data/manifest_interface_data.rs` — existing fileDataID-to-path mapping.
-- `tests/texture_file_dimensions.rs` — six verified local-file tests and one new, unexecuted receiver-scope test.
+- `tests/texture_file_dimensions.rs` — seven current bounded PASS tests: six local-file controls and one receiver-scope test.
 
 The adapter checks readability, snapshots the frame's actual texture path/fileDataID and addon roots, releases the simulator borrow, resolves numeric sources through SetTexture's existing manifest route, and queries source metadata with a temporary TextureManager. An actual nonnumeric path takes precedence over a retained fileDataID, including atlas assignments. Color-only sources are excluded. Each getter returns only the requested component, or zero for unknown metadata. No new state, subsystem, or headless exclusion is added. A temporary manager discards its metadata cache between calls, so separate width/height calls can repeat path resolution and file-header I/O; this is an explicit cost of this simple choice, not a user-mandated no-cache policy.
 
@@ -52,9 +53,9 @@ Parent reports six genuine RED results at revision `080`: fixture images and Tex
 - `tests/texture_file_dimensions.rs::texture_file_dimensions_ignore_uv_crop_and_tiling` — real file dimensions remain unchanged after verified UV, tiling, and widget-size changes.
 - `tests/texture_file_dimensions.rs::texture_file_dimensions_obey_existing_secret_texture_read_policy` — sets only the existing `secret_texture` backing flag as a fixture, checks secure reads and exact tainted denial with an existing getter control, then restores plain reads through public `SetTexture`. No wrapper mutation or new secret state; secret ingestion is not tested.
 
-### Receiver repair — runtime pending
+### Receiver repair — bounded runtime proof
 
-Separate e397 comparison: missing snapshot PASS; extra snapshot FAIL with 96 rows (64 VertexColor, 30 non-Texture file-getter leaks, two intended Texture additions). VertexColor repair is separate. `texture_file_dimension_lookup_is_texture_only_and_preserves_world_frame_scroll` checks actual lookup, public index enumeration, usable metadata getters and preserved WorldFrame scroll behavior. WorldFrame is engine-created; lookup sequences do not force fresh cache construction. No new PASS claimed.
+Separate e397 comparison: missing snapshot PASS; extra snapshot FAIL with 96 rows (64 VertexColor, 30 non-Texture file-getter leaks, two intended Texture additions). VertexColor repair is separate. `texture_file_dimension_lookup_is_texture_only_and_preserves_world_frame_scroll` checks actual lookup, public index enumeration, usable metadata getters and preserved WorldFrame scroll behavior. WorldFrame is engine-created; lookup sequences do not force fresh cache construction. Current bounded tests pass 7/7, exit0; both method comparisons pass 2/2. Native capture remains unchanged with exactly two legitimate modeled Texture extras. Graph PASS is not native parity; opposite fresh WorldFrame cache order remains untested.
 
 ## Known gaps (current cycle)
 

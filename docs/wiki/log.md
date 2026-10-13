@@ -1,3 +1,7 @@
+## [2026-10-12] docs | Current bounded producer and receiver proof
+
+[Integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) owns current bounded counts, startup and saved format proof. Existing producer/receiver specs mark tested boundaries only. Historical RED retained; default check PENDING, current full suite/owning sweeps/profile gates UNRUN. Native/catalog/ABI/allocation-free unknowns and public packet retention remain open; no whole-pass claim.
+
 ## [2026-10-12] docs | Supplied producers and receiver containment source checkpoint
 
 [API inventory](systems/lua-api.md#five-producer-source-inventory--2026-10-12) links exact-link stats/deltas, specialization/item-set lists, absolute-ms Ping DTO, GUID/live-roster AI and seven-name Retail combat-CVar policy. [Integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) separates pre-producer behavioral/fixture failures from later source fixes and pending GREEN/check/startup. [Method representation](investigations/method-dispatch-refactor.md#texture-receiver-containment--2026-10-12) records Texture-only file getters, WorldFrame's distinct cached index and two intended default-fixture Texture extras; native captures untouched. Earlier e397 proof remains old-source only; goal OPEN.

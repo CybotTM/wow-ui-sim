@@ -1,8 +1,8 @@
 # Supplied exact-link item stats
 
-**Producer stage: implemented source; no compiled GREEN yet.**
+**Producer stage: bounded Retail runtime GREEN; native acceptance unclaimed.**
 
-`C_Item.GetItemStats(itemLink)` and `C_Item.GetItemStatDelta(itemLink1, itemLink2)` expose environment-local supplied numeric maps. Genuine behavioral RED: all nine item-stat tests failed against sealed executable revision `76cf33ef327bbd9305706d8dd3f375b609e824d4`. The retained private report is pre-producer proof, not validation of this implementation. Tests target `client-retail`/`client-ptr`; backing state and producer use their shared `retail-12-0-0` module floor. Registration follows existing C_Item setup; compiled GREEN remains pending.
+`C_Item.GetItemStats(itemLink)` and `C_Item.GetItemStatDelta(itemLink1, itemLink2)` expose environment-local supplied numeric maps. Genuine behavioral RED: all nine item-stat tests failed against sealed executable revision `76cf33ef327bbd9305706d8dd3f375b609e824d4`. The retained private report is pre-producer proof, not validation of this implementation. Tests target `client-retail`/`client-ptr`; backing state and producer use their shared `retail-12-0-0` module floor. Registration follows existing C_Item setup; compiled Bounded Retail GREEN passes.
 
 Cached Retail evidence recorded by the accepted draft: `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_APIDocumentationGenerated/ItemDocumentation.lua:965–995` declares required `cstring` arguments, `MayReturnNothing = true`, `SecretArguments = "AllowedWhenUntainted"`, and `LuaValueVariant` named `statTable`. Numeric maps, fresh allocation, arithmetic, and missing-link rules below are accepted simulator assumptions, not native facts established by that declaration. No native/PTR parity proof.
 
@@ -11,17 +11,17 @@ Cached Retail evidence recorded by the accepted draft: `~/.cache/wow-ui-sim/bliz
 ### Supplied state and queries
 
 - [x] Initialize each environment with empty supplied maps; direct Rust population suffices, without new host Lua commands. Prior source proof: `ItemStatsState::default()` in `src/c_api/item_stats.rs` and environment initialization in `src/lua_api/state.rs`; not a compiled producer GREEN claim.
-- [ ] Match complete strings exactly; distinct full links for one item ID remain distinct. Unknown strings, bare IDs/links, changed names or whitespace yield nil unless supplied independently.
-- [ ] Return exact string-keyed numeric values, including explicit zeros, in fresh tables; caller mutation cannot affect other results or later queries.
-- [ ] Compute first minus second over the union of supplied keys, treating missing keys as zero. Preserve positive/negative/fractional differences; omit exactly zero differences. Identical supplied links yield an empty table.
-- [ ] Return nil if either delta operand is absent, including two identical absent strings. Missing-result tests do not constrain zero-versus-one-nil return arity.
+- [x] Match complete strings exactly; distinct full links for one item ID remain distinct. Unknown strings, bare IDs/links, changed names or whitespace yield nil unless supplied independently.
+- [x] Return exact string-keyed numeric values, including explicit zeros, in fresh tables; caller mutation cannot affect other results or later queries.
+- [x] Compute first minus second over the union of supplied keys, treating missing keys as zero. Preserve positive/negative/fractional differences; omit exactly zero differences. Identical supplied links yield an empty table.
+- [x] Return nil if either delta operand is absent, including two identical absent strings. Missing-result tests do not constrain zero-versus-one-nil return arity.
 
 ### Original-argument security and validation
 
-- [ ] Authenticate all original required arguments before parsing/type validation; an invalid plain first operand cannot mask a secret second operand's denial.
-- [ ] Untainted callers may unwrap genuine VM secrets, then apply ordinary required-string validation, lookup and arithmetic.
-- [ ] Tainted callers must reject secrets before lookup/type validation, including malformed/missing payloads; retain wrappers and caller taint, without payload disclosure. Permission errors identify `untainted caller`.
-- [ ] Missing/nil and non-string plain values, including numbers, must error explicitly with the required string contract. Tainted callers may query ordinary strings; no blanket addon denial.
+- [x] Authenticate all original required arguments before parsing/type validation; an invalid plain first operand cannot mask a secret second operand's denial.
+- [x] Untainted callers may unwrap genuine VM secrets, then apply ordinary required-string validation, lookup and arithmetic.
+- [x] Tainted callers must reject secrets before lookup/type validation, including malformed/missing payloads; retain wrappers and caller taint, without payload disclosure. Permission errors identify `untainted caller`.
+- [x] Missing/nil and non-string plain values, including numbers, must error explicitly with the required string contract. Tainted callers may query ordinary strings; no blanket addon denial.
 
 ## How it works
 
@@ -39,13 +39,15 @@ Cached Retail evidence recorded by the accepted draft: `~/.cache/wow-ui-sim/bliz
 
 ## Tests asserting this spec
 
-[tests/item_stats_supplied.rs](../../tests/item_stats_supplied.rs): nine existing behavioral tests, all observed failing against sealed pre-producer revision `76cf33ef`; no post-producer run yet. Covers exact supplied maps; bidirectional union delta; misses in either position; zero omission/empty delta; fresh results; environment isolation; required-string errors; secure genuine-secret validation; tainted permission-before-validation and public-call recovery. Fixtures use same item ID with distinct full links and concrete fractional/zero stats.
+Current bounded proof: **9/9 PASS**, zero selected failures, fixture failures, skips or timeouts. [Integrated current proof](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) owns aggregate gates and retention status.
+
+[tests/item_stats_supplied.rs](../../tests/item_stats_supplied.rs): nine existing behavioral tests, all observed failing against sealed pre-producer revision `76cf33ef`; current bounded Retail run passes all nine. Covers exact supplied maps; bidirectional union delta; misses in either position; zero omission/empty delta; fresh results; environment isolation; required-string errors; secure genuine-secret validation; tainted permission-before-validation and public-call recovery. Fixtures use same item ID with distinct full links and concrete fractional/zero stats.
 
 ## Known gaps (current cycle)
 
-Genuine compiled behavioral RED is recorded in the report above: supplied-map/union/freshness assertions failed on nil output; plain invalid-type and tainted-secret assertions failed because calls did not error. Later assertions beyond each failure are not executed proof. Remaining requirement checkboxes await post-producer GREEN.
+Genuine compiled behavioral RED is recorded in the report above: supplied-map/union/freshness assertions failed on nil output; plain invalid-type and tainted-secret assertions failed because calls did not error. Later assertions beyond each failure are not executed proof. Current bounded GREEN reaches these modeled requirements.
 
-- [ ] Obtain bounded compiled GREEN for all nine tests after registration wiring. No post-producer build/test result yet.
+- [x] Current bounded Retail GREEN: 9/9 tests, exit0.
 - [ ] Native catalog/arithmetic/error wording/return arity/output security and PTR equivalence remain unverified.
 
 ## Out of scope

@@ -4,7 +4,7 @@ Patch 10.2.5 introduces texture vertex-color interpolation. [Literal source](../
 
 ## What it must do
 
-- [ ] Receiver-scope repair, pending new runtime proof: the four endpoint methods are available only on actual `VertexColor` animation tables, not ordinary widgets, animation groups or other animation types. Applicable Retail method-diff baseline and discovery captures remain unchanged.
+- [x] Receiver-scope repair, current bounded 7/7 runtime proof: the four endpoint methods are available only on actual `VertexColor` animation tables, not ordinary widgets, animation groups or other animation types. Applicable Retail method-diff baseline and discovery captures remain unchanged.
 - [x] `SetStartColor`/`SetEndColor` accept complete RGBA color objects; `GetStartColor`/`GetEndColor` return color objects exposing `GetRGBA`, not four numbers. Endpoint state is independent of texture state.
 - [x] Animate each RGBA component from start to end without color-space conversion; apply to texture owner or resolved animation child target, leaving other textures unchanged.
 - [x] Run the literal two-second BOUNCE example through both directions and repeat; reverse playback starts at the end of the existing group timeline.
@@ -34,8 +34,8 @@ Patch 10.2.5 introduces texture vertex-color interpolation. [Literal source](../
 
 - `tests/vertex_color_animation.rs`: **6/6 GREEN**, exit0, at source `080833f1d182caaa762c734a988847edd20f633b`; endpoint objects, channel interpolation, bounce/reverse, smoothing/delays, target isolation, pause/resume/restoration/replay and actual addon XML loading. GREEN3176 runtime `runtime-scoped-20261013T013111696766Z`, artifact epoch `admitted-native-20261013T011400020026Z`; recorded compile/runtime source maps equal and saved seals unchanged by stat receipt. Public packet not yet retained; no public evidence link claimed.
 
-- `vertex_color_animation_endpoints_are_scoped_to_vertex_color_receivers`: new focused actual-lookup test checks four usable VertexColor endpoints, RGBA snapshots and absent methods on Frame, Texture, AnimationGroup and every other modeled animation type. Not executed; compilation admission and new runtime proof are parent-owned. Prior 6/6 GREEN above does not cover this repair.
-- Retained receiver-leak RED at `080833f1d`: `method_diff_coverage` missing snapshot PASS, extra snapshot FAIL with 64 extras (four endpoints × 16 ordinary widget types), exit 101. Receipt retained privately; no public packet claimed. New focused lookup, existing six VertexColor controls and applicable Retail method snapshots require fresh bounded runtime proof; no new PASS claimed.
+- `vertex_color_animation_endpoints_are_scoped_to_vertex_color_receivers`: new focused actual-lookup test checks four usable VertexColor endpoints, RGBA snapshots and absent methods on Frame, Texture, AnimationGroup and every other modeled animation type. Current bounded run passes this receiver test and six existing controls, 7/7, exit0. Prior 6/6 GREEN remains historical.
+- Retained receiver-leak RED at `080833f1d`: `method_diff_coverage` missing snapshot PASS, extra snapshot FAIL with 64 extras (four endpoints × 16 ordinary widget types), exit 101. Receipt retained privately; no public packet claimed. Current focused lookup plus six controls pass 7/7; both applicable method comparisons pass 2/2. Graph consistency is not native parity; public packet retention awaits main publication.
 
 ## Known gaps (current cycle)
 

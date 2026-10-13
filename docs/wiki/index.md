@@ -1,3 +1,7 @@
+## [2026-10-12] docs | Current bounded producer and receiver proof
+
+[Integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) owns current bounded counts, startup and saved format proof. Existing producer/receiver specs mark tested boundaries only. Historical RED retained; default check PENDING, current full suite/owning sweeps/profile gates UNRUN. Native/catalog/ABI/allocation-free unknowns and public packet retention remain open; no whole-pass claim.
+
 ## [2026-10-12] docs | Four-model sealed Retail proof
 
 [Bounded four-model proof](systems/lua-api.md#current-pet-hover-and-follower-instance-models--bounded-runtime-proof): compiled `e3978fd48196`, 28/28 requested and 19/19 regressions PASS, exit0 each; separate one-shot normal startup exit0/`[]`, zero unique Lua errors, no warnings reported. [Namespace](../specs/addon-local-table.md), [follower](../specs/in-lfg-follower-dungeon.md), [pet hover](../specs/pet-journal-hover.md) and [texture dimensions](../specs/texture-file-dimensions.md) check only tested boundaries. Historical RED28 (1 PASS/27 FAIL) and separate 64-method-exposure FAIL remain unchanged; receiver repair/new scaffolding excluded. Numeric-ID/atlas metadata, numeric namespace selectors/unload/native, actual AI query and Collections-consumer execution remain unverified; public receipts pending retention.
@@ -8,7 +12,7 @@
 
 ## [2026-10-12] docs | Five-producer source checkpoint and Texture containment
 
-[Integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) separates implemented/wired five producers, pre-producer RED and later receiver/fixture fixes. [API inventory](systems/lua-api.md#five-producer-source-inventory--2026-10-12) links five contracts; [method representation](investigations/method-dispatch-refactor.md#texture-receiver-containment--2026-10-12) records WorldFrame's distinct cache and Texture-only getter index. Default fixture retains two legitimate Texture extras; native capture untouched. Current-source GREEN/check/startup pending; earlier e397 proof belongs to old source. Goal OPEN.
+[Integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) separates implemented/wired five producers, pre-producer RED and later receiver/fixture fixes. [API inventory](systems/lua-api.md#five-producer-source-inventory--2026-10-12) links five contracts; [method representation](investigations/method-dispatch-refactor.md#texture-receiver-containment--2026-10-12) records WorldFrame's distinct cache and Texture-only getter index. Default fixture retains two legitimate Texture extras; native capture untouched. Current bounded GREEN/startup PASS; default check pending, broader gates unrun; earlier e397 proof historical. Goal OPEN.
 
 ## [2026-10-12] docs | Explicit unit role source inventory
 
@@ -24,7 +28,7 @@
 
 ## [2026-10-12] docs | VertexColor receiver repair — runtime pending
 
-[Existing animation section](systems/lua-api.md#vertexcolor-animation--bounded-runtime-proof) and [widget target state](systems/widget-system.md#vertexcolor-animation-target-state) describe `7ec9c049a` raw VertexColor-only endpoint attachment and removal from the shared index. [Spec evidence boundary](../specs/vertex-color-animation.md#tests-asserting-this-spec): fresh runtime pending; historical six GREEN and 64-extras RED unchanged; baseline/discovery never refreshed. No native parity claim.
+[Existing animation section](systems/lua-api.md#vertexcolor-animation--bounded-runtime-proof) and [widget target state](systems/widget-system.md#vertexcolor-animation-target-state) describe `7ec9c049a` raw VertexColor-only endpoint attachment and removal from the shared index. [Spec evidence boundary](../specs/vertex-color-animation.md#tests-asserting-this-spec): current receiver7/method2 bounded PASS; historical six GREEN and 64-extras RED unchanged; baseline/discovery never refreshed. No native parity claim.
 
 ## [2026-10-12] docs | VertexColor bounded runtime proof
 

@@ -1,24 +1,24 @@
 # Supplied party AI membership
 
-`UnitInPartyIsAI(unit)` must expose explicit GUID classification intersected with the live active-party representation. `SimState.party_ai_guids` is an independent empty GUID set; the modeled producer uses the shared `retail-12-0-0` feature floor. Tests target `client-retail`/`client-ptr`. Producer implementation follows main's reported genuine 9/9 behavioral RED (including argument failures and the actual cached name consumer); GREEN remains pending. This is current modeled behavior, not a historical 10.2.5 emulator.
+`UnitInPartyIsAI(unit)` must expose explicit GUID classification intersected with the live active-party representation. `SimState.party_ai_guids` is an independent empty GUID set; the modeled producer uses the shared `retail-12-0-0` feature floor. Tests target `client-retail`/`client-ptr`. Producer implementation follows main's reported genuine 9/9 behavioral RED (including argument failures and the actual cached name consumer); Bounded Retail GREEN passes. This is current modeled behavior, not a historical 10.2.5 emulator.
 
 ## What it must do
 
 ### Supplied membership
 
-- [ ] Initialize an independent empty GUID set per environment; supplying a GUID creates no unit, roster member, target, dungeon or follower.
-- [ ] Resolve existing modeled identity and return true only if its GUID is both supplied and currently part of the active party representation. Unknown/absent/nonparty identities are false even when supplied; ordinary unsupplied members are false.
-- [ ] Same-GUID aliases agree; matching display names do not create equality. Retargeting does not transfer classification; retained focus remains classified only while its GUID belongs to the live roster.
-- [ ] Query live activity/roster each time; inactivation/removal clears effective membership immediately even with retained snapshots/metadata. Explicit set removal is reversible; environments remain independent.
-- [ ] Follower-dungeon state alone neither supplies nor spawns AI; supplied active-party AI does not require an instance. Classification does not remodel human/player identity.
+- [x] Initialize an independent empty GUID set per environment; supplying a GUID creates no unit, roster member, target, dungeon or follower.
+- [x] Resolve existing modeled identity and return true only if its GUID is both supplied and currently part of the active party representation. Unknown/absent/nonparty identities are false even when supplied; ordinary unsupplied members are false.
+- [x] Same-GUID aliases agree; matching display names do not create equality. Retargeting does not transfer classification; retained focus remains classified only while its GUID belongs to the live roster.
+- [x] Query live activity/roster each time; inactivation/removal clears effective membership immediately even with retained snapshots/metadata. Explicit set removal is reversible; environments remain independent.
+- [x] Follower-dungeon state alone neither supplies nor spawns AI; supplied active-party AI does not require an instance. Classification does not remodel human/player identity.
 
 ### Accepted inferred policies
 
-- [ ] Include an explicitly supplied existing player GUID while the party is active, following current UnitInParty's player inclusion. Unsupplied/solo/inactive player is false. This is an inferred simulator policy, not native AI-player proof.
-- [ ] Use the existing active-party representation, without a new roster-size exclusion or party/raid taxonomy. Tests use two roster entries; raid-token/conversion behavior is not claimed.
-- [ ] Preserve nil/missing -> one false, strict string-or-nil inputs, ignored extra arguments and one plain nonnil boolean. No number coercion/token normalization or new result-secret policy.
-- [ ] Authenticate genuine VM secret inputs for untainted callers before state lookup, then enforce string/nil validation; reject tainted secret callers while preserving wrappers and caller taint. Ordinary tainted queries remain usable; authentic wrong-type secret numbers error.
-- [ ] Actual cached CompactUnitFrame name consumer, with a real FontString and real query, adds follower prefix only for supplied live AI in follower-dungeon context; ordinary members/context and removed retained aliases lose the prefix.
+- [x] Include an explicitly supplied existing player GUID while the party is active, following current UnitInParty's player inclusion. Unsupplied/solo/inactive player is false. This is an inferred simulator policy, not native AI-player proof.
+- [x] Use the existing active-party representation, without a new roster-size exclusion or party/raid taxonomy. Tests use two roster entries; raid-token/conversion behavior is not claimed.
+- [x] Preserve nil/missing -> one false, strict string-or-nil inputs, ignored extra arguments and one plain nonnil boolean. No number coercion/token normalization or new result-secret policy.
+- [x] Authenticate genuine VM secret inputs for untainted callers before state lookup, then enforce string/nil validation; reject tainted secret callers while preserving wrappers and caller taint. Ordinary tainted queries remain usable; authentic wrong-type secret numbers error.
+- [x] Actual cached CompactUnitFrame name consumer, with a real FontString and real query, adds follower prefix only for supplied live AI in follower-dungeon context; ordinary members/context and removed retained aliases lose the prefix.
 
 ## How it works
 
@@ -40,7 +40,9 @@ Earlier profiles retain the original `Option<String>` extraction and false resul
 
 ## Tests asserting this spec
 
-[tests/party_ai_membership.rs](../../tests/party_ai_membership.rs): nine cases with main-reported behavioral RED; post-implementation GREEN pending for supplied/ordinary/player classification, aliases and equal-name controls, absent/nonparty identities, live inactivation/removal, reversible independent state, dungeon independence, nullable/plain type policy, authentic host-secret security, and cached real name consumer.
+Current bounded proof: **9/9 PASS**, zero selected failures, fixture failures, skips or timeouts. Corrected active-cache AI name consumer reaches actual assertions. [Integrated current proof](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) owns aggregate gates and retention status.
+
+[tests/party_ai_membership.rs](../../tests/party_ai_membership.rs): nine cases with main-reported behavioral RED; current bounded Retail GREEN passes for supplied/ordinary/player classification, aliases and equal-name controls, absent/nonparty identities, live inactivation/removal, reversible independent state, dungeon independence, nullable/plain type policy, authentic host-secret security, and cached real name consumer.
 
 Consumer fixture loads unchanged contiguous CompactUnitFrame_UpdateName/IsTapDenied definitions from the active profile cache. Only visibility fixture input and localization sentinel are supplied; AI getter, walk-in/spectating predicates and actual FontString remain real. Walk-in TRUE is unmodeled and excluded. No vendor/cache changes or query overrides.
 
@@ -48,7 +50,7 @@ Consumer fixture loads unchanged contiguous CompactUnitFrame_UpdateName/IsTapDen
 
 - [x] Main reports genuine compiled behavioral RED, 9/9, including source-false/argument failures and the reached cached consumer; field/import/cache/fixture failures do not count.
 - [x] Implement modern membership/authentication after genuine RED. No builds or runtime tests ran during this implementation slice.
-- [ ] Obtain bounded GREEN from main on the strengthened error-class tests.
+- [x] Current bounded Retail GREEN: 9/9 tests, exit0.
 - [x] Replace modern raw extraction with original-value VM authentication before nullable strict UTF-8 string validation. Cached current Retail UnitDocumentation.lua:1579–1592 declares AllowedWhenUntainted, nullable UnitToken, nonnil bool; this is not historical 10.2.5 secret-policy evidence.
 - [ ] Native/PTR parity and slot lifetimes remain unverified. PartyMember has no GUID; current identity is slot-derived, so regrowth can reuse a GUID. No epoch/generation or slot-reuse contract is introduced.
 
