@@ -342,6 +342,9 @@ pub struct VoiceChatState {
     /// Explicit global transcription activity; false default is simulator policy.
     /// Independent of permission and per-channel snapshots, not native aggregation.
     pub is_transcribing: bool,
+    /// Explicit Speak For Me activity; false default is simulator policy.
+    /// Independent of transcription, permission and channel state.
+    pub is_speak_for_me_active: bool,
     /// Simulated channel list. Drives `GetChannels`, `GetChannel`, etc.
     pub channels: Vec<VoiceChannel>,
     /// ID of the currently active channel, or None. Drives `GetActiveChannelID`.
@@ -369,6 +372,7 @@ impl Default for VoiceChatState {
             connecting: false,
             talking: false,
             is_transcribing: false,
+            is_speak_for_me_active: false,
             channels: seeded_voice_channels(),
             active_channel_id: Some(1),
             connection_status: 2,
