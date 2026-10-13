@@ -8,6 +8,7 @@ use super::helpers::{
     lua_table_field_ref,
 };
 use super::helpers_anim::generate_animation_group_code;
+use std::borrow::Cow;
 
 fn emit_file_code(texture: &crate::xml::TextureXml) -> String {
     if let Some(file) = &texture.file {
@@ -328,8 +329,9 @@ pub(super) fn build_texture_lua(
 /// Append anchor or SetAllPoints code for a texture.
 fn append_texture_anchors(code: &mut String, texture: &crate::xml::TextureXml, parent_name: &str) {
     if let Some(anchors) = &texture.anchors {
+        let anchors = normalize_published_texture_self_key(texture, anchors);
         code.push_str(&generate_set_point_code(
-            anchors,
+            &anchors,
             "tex",
             "parent",
             parent_name,
@@ -338,6 +340,34 @@ fn append_texture_anchors(code: &mut String, texture: &crate::xml::TextureXml, p
     } else if texture.set_all_points != Some(true) {
         code.push_str("\n        tex:SetAllPoints(true)\n        ");
     }
+}
+
+/// Own parentKey is published immediately before these anchors are emitted.
+/// Only that direct self-key becomes parent-relative; sibling/missing keys stay unchanged.
+fn normalize_published_texture_self_key<'a>(
+    texture: &crate::xml::TextureXml,
+    anchors: &'a crate::xml::AnchorsXml,
+) -> Cow<'a, crate::xml::AnchorsXml> {
+    let Some(parent_key) = texture.parent_key.as_deref() else {
+        return Cow::Borrowed(anchors);
+    };
+    if parent_key.contains('.') {
+        return Cow::Borrowed(anchors);
+    }
+    let self_key = format!("$parent.{parent_key}");
+    let is_self_key =
+        |anchor: &crate::xml::AnchorXml| anchor.relative_key.as_deref() == Some(self_key.as_str());
+    if !anchors.anchors.iter().any(is_self_key) {
+        return Cow::Borrowed(anchors);
+    }
+    let mut normalized = anchors.clone();
+    for anchor in &mut normalized.anchors {
+        if is_self_key(anchor) {
+            anchor.relative_key = None;
+            anchor.relative_to = Some("$parent".into());
+        }
+    }
+    Cow::Owned(normalized)
 }
 
 /// Process animation groups on a texture created from XML.
