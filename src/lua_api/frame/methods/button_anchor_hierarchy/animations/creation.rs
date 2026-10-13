@@ -1,7 +1,8 @@
+use crate::lua_api::animation::AnimationType;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack, frame_ref};
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
-use rilua::{LuaResult, runtime_error};
+use rilua::{LuaResult, Val, runtime_error};
 
 use super::super::font_strings::resolve_child_name;
 use super::super::shared::bind_named_child_global;
@@ -62,7 +63,6 @@ pub(in crate::lua_api::frame::methods::button_anchor_hierarchy) fn create_animat
 pub(in crate::lua_api::frame::methods::button_anchor_hierarchy) fn create_animation(
     state: &mut LuaState,
 ) -> LuaResult<u32> {
-    use crate::lua_api::animation::AnimationType;
     let group_frame_id = frame_id_from_stack(state, 1)?;
     let anim_type_str = super::super::shared::opt_string(state, 2);
     let anim_name_raw: Option<String> = Option::<String>::from_stack(state, 3)?;
@@ -84,15 +84,24 @@ pub(in crate::lua_api::frame::methods::button_anchor_hierarchy) fn create_animat
         bind_named_child_global(state, name, child_id)?;
     }
     let val = frame_ref(state, child_id)?;
+    attach_vertex_color_methods(state, val, anim_type)?;
+    super::templates::apply_template(state, template, val)?;
+    state.push(val);
+    Ok(1)
+}
+
+fn attach_vertex_color_methods(
+    state: &mut LuaState,
+    val: Val,
+    anim_type: AnimationType,
+) -> LuaResult<()> {
     if anim_type == AnimationType::VertexColor {
-        let rilua::Val::Table(table) = val else {
+        let Val::Table(table) = val else {
             return Err(runtime_error("VertexColor frame reference must be a table"));
         };
         super::super::register_animation_vertex_color(state, table)?;
     }
-    super::templates::apply_template(state, template, val)?;
-    state.push(val);
-    Ok(1)
+    Ok(())
 }
 
 fn lookup_anim_group_id(state: &mut LuaState, group_frame_id: u64) -> LuaResult<u64> {
