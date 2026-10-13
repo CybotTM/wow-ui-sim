@@ -1,3 +1,7 @@
+## [2026-10-13] docs | UI widget manager source checkpoint
+
+[UI widget manager state](systems/ui-widget-manager-state.md) describes `67775404d` supplied sets, complete records, exact demo associations, and synchronous feeds; cached-container RED and pending validation remain distinct from implementation. Links contract and existing architecture; no native/full-autoload acceptance.
+
 ## [2026-10-12] docs | Executed query baseline and new source models
 
 [Integrated current checkpoint](investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers) separates executed pre-producer failures, selected lifecycle/Vertex controls and committed query/Path source awaiting GREEN/startup/profile acceptance. [Frozen ccd packet](../../data/test-perf/evidence/fullsuite-ccd-2026-10-12/README.md) preserves broad FAIL; text retention verification is separate. Whole handoff OPEN.
