@@ -1,12 +1,12 @@
 //! Cached Lua/XML consumers over supplied bar records; getters are the first RED boundary.
 //! Retail-only: inspected DTO/consumer sources do not establish PTR cache equivalence.
-//! Updates inject fixture state and dispatch real events until the bar host feed exists.
+//! Host bar feeds commit supplied records before notifying actual cached consumers.
 #![cfg(feature = "client-retail")]
 
 use crate::common;
 use common::blizzard_addon_harness::with_blizzard_addon_closure_in_dir;
 use wow_ui_sim::c_api::ui_widget_manager::{
-    CaptureBarRecord, StatusBarRecord, WidgetId, WidgetSetEntry, WidgetSetRecord,
+    CaptureBarRecord, StatusBarRecord, WidgetSetEntry, WidgetSetRecord, WidgetVisualization,
 };
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -34,32 +34,22 @@ fn bar_set() -> WidgetSetRecord {
     }
 }
 
-fn fire_widget_update(env: &WowLuaEnv, widget_id: f64, widget_type: u32) {
-    let payload = env
-        .eval::<rilua::Val>(&format!(
-            "return {{widgetSetID={SET_ID}, widgetID={widget_id}, widgetType={widget_type}}}"
-        ))
-        .expect("[incremental event payload] create real UPDATE_UI_WIDGET table");
-    env.fire_event_with_args("UPDATE_UI_WIDGET", &[payload])
-        .expect("[incremental event dispatch] notify registered cached container");
-}
-
 fn inject_status(env: &WowLuaEnv, record: StatusBarRecord) {
-    env.state()
-        .borrow_mut()
-        .ui_widget_inputs
-        .status_bars
-        .insert(WidgetId::from_number(STATUS_ID), record);
-    fire_widget_update(env, STATUS_ID, STATUS_BAR);
+    env.update_ui_widget(
+        SET_ID,
+        entry(STATUS_ID, STATUS_BAR),
+        WidgetVisualization::StatusBar(record),
+    )
+    .expect("host status feed commits record before incremental notification");
 }
 
 fn inject_capture(env: &WowLuaEnv, record: CaptureBarRecord) {
-    env.state()
-        .borrow_mut()
-        .ui_widget_inputs
-        .capture_bars
-        .insert(WidgetId::from_number(CAPTURE_ID), record);
-    fire_widget_update(env, CAPTURE_ID, CAPTURE_BAR);
+    env.update_ui_widget(
+        SET_ID,
+        entry(CAPTURE_ID, CAPTURE_BAR),
+        WidgetVisualization::CaptureBar(record),
+    )
+    .expect("host capture feed commits record before incremental notification");
 }
 
 fn assert_lua(env: &WowLuaEnv, phase: &str, code: &str) {
@@ -94,19 +84,10 @@ fn flush_and_assert_counts(env: &WowLuaEnv, showing: usize, timers: usize) {
 }
 
 fn supply_initial_set_and_records(env: &WowLuaEnv) {
-    {
-        let mut state = env.state().borrow_mut();
-        state
-            .ui_widget_inputs
-            .status_bars
-            .insert(WidgetId::from_number(STATUS_ID), supplied_status());
-        state
-            .ui_widget_inputs
-            .capture_bars
-            .insert(WidgetId::from_number(CAPTURE_ID), supplied_capture());
-    }
     env.replace_ui_widget_set(SET_ID, Some(bar_set()))
-        .expect("existing host feed supplies membership before real registration");
+        .expect("host feed supplies membership before real registration");
+    inject_status(env, supplied_status());
+    inject_capture(env, supplied_capture());
 }
 
 fn assert_supplied_query_boundary(env: &WowLuaEnv) {

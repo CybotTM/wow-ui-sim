@@ -1,3 +1,7 @@
+## [2026-10-13] docs | UIWidgetManager bars/HUD genuine RED boundary
+
+Updated the [contract](../specs/ui-widget-manager-state.md) and [system page](systems/ui-widget-manager-state.md) with main-reported full-bar/HUD/feed implementation scope and genuine eight-case RED at `87fecfd31`. Exact query failure boundaries and unreached consumer assertions remain separate from four bwrap launch failures with zero cases. Prior two actual `e887` lifecycle passes and 23 reused core cases retain separate scopes; new GREEN/startup UNRUN. No requirement boxes checked or native catalog/server/interpolation/dynamic-rebinding/unit-context proof claimed. Documentation only; main owns commit.
+
 ## [2026-10-12] docs | Executed query baseline and new source models
 
 [Integrated checkpoint](investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers) owns baseline RED, selected controls, source implementations and pending current gates. [Frozen ccd evidence](../../data/test-perf/evidence/fullsuite-ccd-2026-10-12/README.md) retains terminal FAIL and bounded sanitized excerpts; no rerun or broad acceptance.

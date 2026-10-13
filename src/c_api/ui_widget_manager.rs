@@ -2,6 +2,8 @@
 use std::collections::HashMap;
 
 mod bar_records;
+mod bars;
+mod hud;
 pub use bar_records::{CaptureBarRecord, StatusBarRecord};
 mod feed;
 mod fixtures;

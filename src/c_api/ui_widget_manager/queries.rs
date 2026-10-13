@@ -16,10 +16,12 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         namespace,
         "GetIconAndTextWidgetVisualizationInfo",
         query_icon_and_text,
-    )
+    )?;
+    super::bars::register(state)?;
+    super::hud::register(state)
 }
 
-fn read_numeric_id(state: &mut LuaState, error_message: &'static str) -> LuaResult<f64> {
+pub(super) fn read_numeric_id(state: &mut LuaState, error_message: &'static str) -> LuaResult<f64> {
     let value = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
     let Val::Num(number) = value else {
         return Err(runtime_error(error_message));

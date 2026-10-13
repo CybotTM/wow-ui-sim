@@ -15,7 +15,7 @@ UIWidgetManager must expose environment-local supplied widget-set state and driv
 
 ### Next slice: supplied bars and HUD selection
 
-Source-input-only staging follows core `e887`; query producers remain unchanged and next-slice RED has not run. These requirements are not passing claims.
+Main is implementing full bar producers, HUD selectors, and feed integration after genuine eight-case RED at source `87fecfd31`. The implementation inventory below records main-reported scope, not independently inspected source or runtime proof. New-implementation GREEN and startup are UNRUN; these requirements are not passing claims.
 
 - [ ] `GetStatusBarWidgetVisualizationInfo` and `GetCaptureBarWidgetVisualizationInfo` return complete supplied 35-field StatusBar and 22-field CaptureBar records respectively, preserving field names, Lua types, enum scalars, and values from the current Retail/PTR documented schemas (equivalent except a blank line). Absent IDs return nil; IDs never infer records or catalog entries.
 - [ ] Every bar query returns a fresh record. StatusBar `partitionValues` preserves supplied array order and is a fresh nested array: caller element edits, insertion/removal, and outer-record mutation cannot alter host inputs, retained snapshots, or later queries. Supplied replacements affect later queries only; environments remain independent.
@@ -42,8 +42,12 @@ Source-input-only staging follows core `e887`; query producers remain unchanged 
 
 - `src/c_api/ui_widget_manager.rs` — modeled widget identities and existing ButtonHeader records; exports manager input records.
 - `src/c_api/ui_widget_manager/inputs.rs` — supplied set membership and IconAndText inputs; staged StatusBar/CaptureBar maps and four `f64` HUD selections with default-zero model policy.
-- `src/c_api/ui_widget_manager/bar_records.rs` — staged complete 35-field StatusBarRecord and 22-field CaptureBarRecord; source inputs only, not implemented query producers.
-- `src/c_api/ui_widget_manager/{queries,feed,fixtures}.rs` — fresh snapshots, synchronous host updates and existing demo initialization.
+- `src/c_api/ui_widget_manager/bar_records.rs` — complete supplied 35-field StatusBarRecord and 22-field CaptureBarRecord DTOs.
+- `src/c_api/ui_widget_manager/newbars.rs` — full supplied bar snapshot producers, including fresh StatusBar partition arrays; implementation in progress.
+- `src/c_api/ui_widget_manager/hud.rs` — four live `f64` selectors, exactly one numeric return each, with default-zero model policy; implementation in progress.
+- `src/c_api/ui_widget_manager/queries.rs` — registration calls both `newbars` and `hud`; main-reported implementation scope.
+- `src/c_api/ui_widget_manager/feed.rs` — `WidgetVisualization` integration for StatusBar type2 and CaptureBar type1; actual bar-consumer adaptation uses host feeds instead of direct state changes or manual events.
+- `src/c_api/ui_widget_manager/fixtures.rs` — existing demo initialization. The old PowerBar bootstrap is removed without fallback in the new implementation scope.
 - `src/lua_api/state/sim_state.rs` — environment-owned manager, ButtonHeader, and Prey input state.
 - `src/lua_api/globals/quest_surface/task_quest.rs` — exact supplied quest/type lookup.
 
@@ -51,7 +55,7 @@ Source-input-only staging follows core `e887`; query producers remain unchanged 
 
 At `d11908dcf`, five supplied-state cases execute 0 PASS / 5 query-boundary FAIL, without fixture/setup failures. At `6a852c322`, actual cached XML container registration fails because supplied set417 is not returned; host-secret query fails on the old numeric extractor. Later lifecycle and secret-recovery assertions remain unreached in RED. The six state cases, one security case, nine ButtonHeader controls, six Path cases and one Prey control pass at `67775404d` (23/24 selected). Actual cached lifecycle initially fails a pre-unregister count assertion: incremental updates mark layout dirty, but the fixture expected a recomputed count before OnUpdate. Diagnostic execution at `3a7c3650d` identifies `restore showing count=1`; cached source defers layout. The fixture subsequently flushes actual OnUpdate before count-dependent cleanup assertions; retain this failed attempt as deferred-layout evidence. Normal startup has zero Lua errors, runtime warnings and AnimSetup diagnostics. At `96a44bb1f`, a separate actual-container unit notification test fails target-text preservation while player refresh passes; the event adapter correction follows that failed attempt. The unit fixture does not prove unit registration or context-data isolation.
 
-Latest bounded core evidence: two lifecycle cases physically pass at `e887` (scoped PASS 2); the prior 23 passing state/security/control cases at `67775404d` are reused unchanged, not rerun at `e887`. This is 25 logical cases with separate proof scopes, not a fresh 25-case execution. No bar/HUD next-slice result is included. Requirement checkboxes remain conservative: only assertions backed by those tests qualify; unit registration/context-data isolation remains unproven.
+Latest bounded core evidence: two lifecycle cases physically pass at `e887` (scoped PASS 2); the prior 23 passing state/security/control cases at `67775404d` are reused unchanged, not rerun at `e887`. This is 25 logical cases with separate proof scopes, not a fresh 25-case execution. No bar/HUD next-slice GREEN is included. Requirement checkboxes remain conservative: only assertions backed by those tests qualify; unit registration/context-data isolation remains unproven.
 
 - `tests/ui_widget_manager_state.rs` — supplied-state isolation, metadata, ordered membership, complete records, and exact mappings.
 - `tests/ui_widget_manager_lifecycle.rs` — cached manager incremental/full reconciliation and actual consumer lifecycle behavior.
@@ -59,8 +63,16 @@ Latest bounded core evidence: two lifecycle cases physically pass at `e887` (sco
 
 ## Next-slice tests and proof gaps
 
-- `tests/ui_widget_manager_bars.rs` — two staged bar-query cases; `tests/ui_widget_manager_hud_selections.rs` — three staged HUD-query cases. Next RED unrun; query producers unchanged.
-- `tests/ui_widget_manager_bars_consumer.rs` and `tests/ui_widget_manager_hud_containers.rs` — actual cached-consumer drafts being integrated, not execution proof.
+Main-reported genuine RED at source `87fecfd31`: eight executed cases, all FAIL. Preserve each failure boundary:
+
+| Scope | Cases | Reached failure | Unreached boundary |
+| --- | ---: | --- | --- |
+| `tests/ui_widget_manager_bars.rs` | 2 | Wrong-type bar snapshot | Later complete-record/freshness assertions |
+| `tests/ui_widget_manager_hud_selections.rs` | 3 | TopCenter exactly-one-return assertion | Later selector assertions |
+| `tests/ui_widget_manager_bars_consumer.rs` | 1 | Supplied-record query after cached closure | Later consumer lifecycle |
+| `tests/ui_widget_manager_hud_containers.rs` | 2 | Numeric query before cached OnLoad | Later HUD consumer assertions |
+
+Earlier four sandbox-launch failures executed zero cases because bwrap could not find the target. They remain separate launch failures, not genuine RED cases. New-implementation GREEN and startup are UNRUN; no passing requirement or later consumer coverage is inferred from RED. Actual bar-consumer adaptation now uses host feeds rather than direct state mutation/manual events; that adaptation has no new runtime proof.
 - [ ] Implement and prove complete fresh bar queries and supplied HUD-selection queries against the staged requirements.
 - [ ] Integrate and execute actual cached bar/HUD consumer tests; distinguish query-boundary failure from later consumer assertions not reached.
 - [ ] Prove unit registration and context-data isolation separately if brought into scope; the current unit notification fixture is insufficient.
@@ -68,7 +80,7 @@ Latest bounded core evidence: two lifecycle cases physically pass at `e887` (sco
 ## Out of scope
 
 - Native DB2 widget catalogs: unknown; no catalog completeness or fabricated catalog entries.
-- Native server wire protocol: unknown; supplied host state is not a claim of native transport compatibility.
+- Native server wire protocol and native interpolation parity: unknown; supplied host state is not proof of native transport or interpolation behavior.
 - Whole native visualization coverage: core models manager state and full supplied IconAndText while preserving existing ButtonHeader/Prey support; the next slice adds only supplied StatusBar/CaptureBar records and HUD selections.
 - Dynamic HUD rebinding events, native DB2 catalogs, and native fixed HUD/set/widget IDs: not established or required by this slice.
 - Unrelated demo seeds or replacement Blizzard manager behavior: neither is needed for this bounded model contract.
