@@ -308,6 +308,7 @@ macro_rules! build_empty_sim_state {
             pvp_catalog: Default::default(),
             #[cfg(feature = "retail-12-0-0")]
             prey_inputs: Default::default(),
+            button_header_inputs: Default::default(),
             #[cfg(feature = "retail-12-0-0")]
             combat_log_restricted: false,
             #[cfg(feature = "retail-12-0-0")]

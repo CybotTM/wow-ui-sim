@@ -1,0 +1,38 @@
+# UI widget ButtonHeader supplied records
+
+`C_UIWidgetManager.GetButtonHeaderWidgetVisualizationInfo(widgetID)` must expose complete supplied records as independent Lua snapshots. Inputs live in `src/c_api/ui_widget_manager.rs`; query implementation is pending. See [C API architecture](../lua-api.md) and [cache provenance](../updating-blizzard-ui-to-a-new-patch.md).
+
+## What it must do
+
+- [ ] Keep supplied records environment-local. Empty inputs contain no records; never fabricate default records or derive a catalog from ID thresholds.
+- [ ] Return nil for unsupplied numeric IDs and select exact supplied keys without integer narrowing. Numeric-key storage is simulator policy, not a native acceptance-range claim.
+- [ ] Preserve all 17 required header fields and five required nested button fields from cached `UIWidgetManagerDocumentation.lua`, including false, enum zeroes, empty strings, empty arrays and supplied button order. Records represent strings, numbers, booleans and enum values literally; only the complete result is nullable.
+- [ ] Return fresh outer, button-array and nested button tables. Lua mutation cannot change supplied state, other widgets, retained snapshots or later results. Live environments remain independent.
+- [ ] Apply documented `AllowedWhenUntainted` to original secret arguments before numeric extraction/lookup. Untainted secret supplied/absent IDs may query; tainted secret IDs fail. Ordinary numeric IDs remain usable under taint. Preserve wrappers and caller context.
+- [ ] Exercise the actual registered cached ButtonHeader provider: reject hidden/unknown records and preserve shown/empty records. Raw query must still return supplied hidden records. Never replace the query or copy provider logic.
+
+Snapshot, absence and isolation requirements are simulator policy, not native-captured semantics.
+
+## How it works
+
+- [Lua API architecture](../wiki/systems/lua-api.md).
+- [Addon loading](../addon-loading-pipeline.md).
+
+## Implementation inventory
+
+- `src/c_api/ui_widget_manager.rs`, `src/c_api/mod.rs`: public complete records and numeric-key inputs; no query/registrar yet.
+- `src/lua_api/state/sim_state.rs`, `src/lua_api/state.rs`: environment field and empty initialization.
+
+## Tests asserting this spec
+
+`tests/c_ui_widget_manager_button_header.rs`: nine staged cases; Retail-only, secret case additionally gated by `retail-12-1-0`. That gate is not historical availability evidence. All cases remain uncompiled/unexecuted, not behavioral RED.
+
+## Known gaps (current cycle)
+
+- [ ] Compile and obtain genuine query-boundary RED before implementing the producer.
+- [ ] Implement query and verify supplied projection, snapshots, isolation and secret policy.
+- [ ] Execute actual cached manager/base/header dependencies; setup failures are not query RED or provider acceptance.
+
+## Out of scope
+
+Native widget feed/catalog, invented numeric ranges, other-profile/native parity, unrelated quest paths, full widget Setup/pools/anchors/atlases/timers/rendering. Provider filtering is not rendered visibility. Parent startup/profile acceptance remains separate and open.
