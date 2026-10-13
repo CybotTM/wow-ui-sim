@@ -974,4 +974,19 @@ Each profile log has **six individual iced-wgpu-patched manifest deprecated Clip
 
 Compiled scope is shared `SimState.map_display_hide_icons: HashMap<i32, bool>` and unconditional `build_empty_sim_state!` initializer/construction chain. These five feature sets exclude `retail-12-1-0`, so current `GetMapDisplayInfo` registration, selector and getter are **excluded**, not behaviorally tested. Default/PTR prior checks retained without rerun or new acceptance. No runtime/cache/native acceptance follows from these five checks.
 
+## Second-pass progress — bounded GREEN3176, 2026-10-12
+
+Structural inventory contains 100 coverage files with 24,413 row occurrences and an index of 138 API-change pages. These counts establish neither complete source accounting nor completed behavioral review. Only two feature slices are GREEN here: [VertexColor animation](../../specs/vertex-color-animation.md) **6/6** and [unit role assignment](../../specs/unit-role-assignment.md) **13/13**, each exit0. Source `080833f1d182caaa762c734a988847edd20f633b`, artifact epoch `admitted-native-20261013T011400020026Z`, runtime `runtime-scoped-20261013T013111696766Z`; report records matching compile/runtime source maps and unchanged saved seals by stat receipt. Public packet not yet retained; no public evidence link claimed.
+
+| Scoped slice | Actual result | Boundary |
+|---|---|---|
+| VertexColor / role assignment | 6/6 and 13/13 GREEN | Reached simulator assertions only; inferred policies remain models. Vertex initial defaults/invalid arguments, explicit XML alpha, ordered composition and large-delta crossings untested; role full XML/menu/native proof and -1-versus-nil None-radio mismatch remain open. |
+| EditMode repaired fixtures / existing animation regression | 5/5 and 18/18 GREEN | Separate fixture repair and bounded scheduler regression, not additional feature acceptance or comprehensive scheduler proof. |
+| Addon-local table / follower instance | 0/6 and 1/8 (7 failed), genuine RED | Missing registration / missing behavior; follower false control passes. Assertions behind first failures remain unproved. |
+| Pet hover / texture dimensions | 0/8 and 0/6, genuine RED | Pet validation/state failures and missing texture methods, not fixture defects. Later assertions remain unproved. |
+
+Production `1ac`/`961` committed; default compilation and source gate covering20 files, readability and formatting PASS. Full Cargo CHECK and normal startup Lua-errors **NOT RUN** in this epoch; pending after the other four producers settle. Runtime total70:43 PASS/27 FAIL; no zero selections or timeout exits. No whole-pass completion, native parity or current-HEAD full-suite PASS claim.
+
+Historical `41cb` full suite remains **FAIL: 15,123 PASS / 2 FAIL / 19 skipped**; repaired EditMode5 PASS does not rewrite that suite. Public packet is not yet retained. Four subsequent producers are committed but not yet GREEN: addon namespace access `d91ac3476`, follower instance detection `e9f6a81a3`, pet hover `8a2f7daf9`, and texture file dimensions `271793bc6`. Their initial RED receipts remain unchanged. No whole second-pass completion or current-HEAD acceptance.
+
 Handled: supplied boolean/false arity, updates/isolation, empty/removal simulator policy, authentic-secret/tainted controls and bounded publication. Bounded PTR audit and five other-profile shared-state compiler gates complete; other-profile runtime/native acceptance remains unverified. Native unknown: unknown-ID/no-return selection, malformed/revoked-context parity and return secrecy. No full handoff, all-profile, API quota/key, GUI, native WoW or whole-patch claim; parent OPEN.
