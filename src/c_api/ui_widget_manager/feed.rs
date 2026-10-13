@@ -1,0 +1,149 @@
+//! Host feed operations mutate supplied state before synchronous consumer events.
+use super::{ButtonHeaderRecord, IconAndTextRecord, WidgetId, WidgetSetEntry, WidgetSetRecord};
+use crate::lua_api::WowLuaEnv;
+use crate::{Error, Result};
+use rilua::LuaApiMut;
+
+#[derive(Debug, Clone)]
+pub enum WidgetVisualization {
+    IconAndText(IconAndTextRecord),
+    ButtonHeader(ButtonHeaderRecord),
+    #[cfg(feature = "retail-12-0-0")]
+    PreyHuntProgress(crate::c_api::c_prey::PreyHuntProgressWidget),
+}
+
+impl WidgetVisualization {
+    fn widget_type(&self) -> u32 {
+        match self {
+            Self::IconAndText(_) => 0,
+            Self::ButtonHeader(_) => 30,
+            #[cfg(feature = "retail-12-0-0")]
+            Self::PreyHuntProgress(_) => 31,
+        }
+    }
+}
+
+impl WowLuaEnv {
+    /// Replace/remove set membership, then reconcile registered containers.
+    /// Visualization records survive membership removal for independent lookup.
+    pub fn replace_ui_widget_set(
+        &self,
+        set_id: f64,
+        record: Option<WidgetSetRecord>,
+    ) -> Result<()> {
+        {
+            let mut sim = self.state.borrow_mut();
+            let key = WidgetId::from_number(set_id);
+            if let Some(record) = record {
+                sim.ui_widget_inputs.sets.insert(key, record);
+            } else {
+                sim.ui_widget_inputs.sets.remove(&key);
+            }
+        }
+        self.fire_event("UPDATE_ALL_UI_WIDGETS")
+    }
+
+    /// Supply a visualization and activate/update its membership before notification.
+    pub fn update_ui_widget(
+        &self,
+        set_id: f64,
+        entry: WidgetSetEntry,
+        record: WidgetVisualization,
+    ) -> Result<()> {
+        validate_visualization(&entry, &record)?;
+        {
+            let mut sim = self.state.borrow_mut();
+            let set = sim
+                .ui_widget_inputs
+                .sets
+                .get_mut(&WidgetId::from_number(set_id))
+                .ok_or_else(|| Error::Other("UI widget update requires a supplied set".into()))?;
+            upsert_membership(&mut set.widgets, &entry);
+            supply_visualization(&mut sim, entry.widget_id, record);
+        }
+        self.fire_ui_widget_update(set_id, &entry)
+    }
+
+    /// Remove membership without deleting a record shared by other containers.
+    pub fn remove_ui_widget(&self, set_id: f64, widget_id: f64) -> Result<bool> {
+        let removed = {
+            let mut sim = self.state.borrow_mut();
+            let Some(set) = sim
+                .ui_widget_inputs
+                .sets
+                .get_mut(&WidgetId::from_number(set_id))
+            else {
+                return Ok(false);
+            };
+            let previous_count = set.widgets.len();
+            let key = WidgetId::from_number(widget_id);
+            set.widgets
+                .retain(|entry| WidgetId::from_number(entry.widget_id) != key);
+            set.widgets.len() != previous_count
+        };
+        if removed {
+            self.fire_event("UPDATE_ALL_UI_WIDGETS")?;
+        }
+        Ok(removed)
+    }
+
+    fn fire_ui_widget_update(&self, set_id: f64, entry: &WidgetSetEntry) -> Result<()> {
+        let (payload, saved_top) = {
+            let mut lua = self.lua.borrow_mut();
+            let state = lua.state_mut();
+            let saved_top = state.top;
+            let payload = super::queries::build_widget_info(state, set_id, entry);
+            state.push(payload);
+            (payload, saved_top)
+        };
+        let result = self.fire_event_with_args("UPDATE_UI_WIDGET", &[payload]);
+        self.lua.borrow_mut().state_mut().top = saved_top;
+        result
+    }
+}
+
+fn validate_visualization(entry: &WidgetSetEntry, record: &WidgetVisualization) -> Result<()> {
+    if entry.widget_type != record.widget_type() {
+        return Err(Error::Other(
+            "UI widget type does not match its visualization".into(),
+        ));
+    }
+    #[cfg(feature = "retail-12-0-0")]
+    if matches!(record, WidgetVisualization::PreyHuntProgress(_)) {
+        let id = entry.widget_id;
+        if id <= 0.0 || id > u32::MAX as f64 || !id.is_finite() || id.fract() != 0.0 {
+            return Err(Error::Other(
+                "Prey widgetID must be a positive integer".into(),
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn upsert_membership(entries: &mut Vec<WidgetSetEntry>, entry: &WidgetSetEntry) {
+    let key = WidgetId::from_number(entry.widget_id);
+    if let Some(existing) = entries
+        .iter_mut()
+        .find(|item| WidgetId::from_number(item.widget_id) == key)
+    {
+        *existing = entry.clone();
+    } else {
+        entries.push(entry.clone());
+    }
+}
+
+fn supply_visualization(sim: &mut crate::lua_api::SimState, id: f64, record: WidgetVisualization) {
+    let key = WidgetId::from_number(id);
+    match record {
+        WidgetVisualization::IconAndText(record) => {
+            sim.ui_widget_inputs.icon_and_text.insert(key, record);
+        }
+        WidgetVisualization::ButtonHeader(record) => {
+            sim.button_header_inputs.widgets.insert(key, record);
+        }
+        #[cfg(feature = "retail-12-0-0")]
+        WidgetVisualization::PreyHuntProgress(record) => {
+            sim.prey_inputs.widgets.insert(id as u32, record);
+        }
+    }
+}

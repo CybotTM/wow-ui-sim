@@ -2,6 +2,7 @@
 
 use wow_ui_sim::c_api::ui_widget_manager::{
     IconAndTextRecord, UiWidgetInputs, WidgetId, WidgetSetEntry, WidgetSetRecord,
+    WidgetVisualization,
 };
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -194,6 +195,71 @@ fn icon_and_text_returns_complete_fresh_isolated_supplied_snapshots() {
     other
         .exec("assert(C_UIWidgetManager.GetIconAndTextWidgetVisualizationInfo(812) == nil)")
         .unwrap();
+}
+
+#[test]
+fn host_widget_feed_publishes_state_before_events_and_rejects_invalid_updates() {
+    let env = supplied_env(UiWidgetInputs::default());
+    env.exec(r#"
+        feedAll, feedUpdates = 0, 0
+        local listener = CreateFrame('Frame')
+        listener:RegisterEvent('UPDATE_ALL_UI_WIDGETS')
+        listener:RegisterEvent('UPDATE_UI_WIDGET')
+        listener:SetScript('OnEvent', function(_, event, info)
+            if event == 'UPDATE_ALL_UI_WIDGETS' then
+                feedAll = feedAll + 1
+                assert(C_UIWidgetManager.GetWidgetSetInfo(417).verticalPadding == 7.5)
+            else
+                feedUpdates = feedUpdates + 1
+                assert(info.widgetSetID == 417 and info.widgetID == 812 and info.widgetType == 0)
+                assert(C_UIWidgetManager.GetIconAndTextWidgetVisualizationInfo(812).text == 'Supplied text')
+                assert(#C_UIWidgetManager.GetAllWidgetsBySetID(417) == 1)
+            end
+        end)
+    "#).unwrap();
+    let mut set = supplied_set();
+    set.widgets.clear();
+    env.replace_ui_widget_set(417.0, Some(set)).unwrap();
+    let entry = WidgetSetEntry {
+        widget_id: 812.0,
+        widget_type: 0,
+        unit_token: None,
+    };
+    env.update_ui_widget(
+        417.0,
+        entry.clone(),
+        WidgetVisualization::IconAndText(supplied_icon()),
+    )
+    .unwrap();
+    let mut wrong_type = entry.clone();
+    wrong_type.widget_type = 30;
+    assert!(
+        env.update_ui_widget(
+            417.0,
+            wrong_type,
+            WidgetVisualization::IconAndText(supplied_icon())
+        )
+        .is_err()
+    );
+    assert!(
+        env.update_ui_widget(
+            418.0,
+            entry,
+            WidgetVisualization::IconAndText(supplied_icon())
+        )
+        .is_err()
+    );
+    assert!(!env.remove_ui_widget(417.0, 999.0).unwrap());
+    env.exec("assert(feedAll == 1 and feedUpdates == 1); assert(#C_UIWidgetManager.GetAllWidgetsBySetID(417) == 1)").unwrap();
+    assert!(env.remove_ui_widget(417.0, 812.0).unwrap());
+    env.exec(
+        r#"
+        assert(feedAll == 2 and feedUpdates == 1)
+        assert(#C_UIWidgetManager.GetAllWidgetsBySetID(417) == 0)
+        assert(C_UIWidgetManager.GetIconAndTextWidgetVisualizationInfo(812).text == 'Supplied text')
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]

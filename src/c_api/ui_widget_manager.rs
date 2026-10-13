@@ -1,7 +1,12 @@
-//! Complete supplied ButtonHeader inputs and their current-profile snapshot query.
+//! Supplied widget sets, visualizations, and synchronous host update feeds.
 use std::collections::HashMap;
 
+mod feed;
+mod fixtures;
 mod inputs;
+pub use feed::WidgetVisualization;
+pub(crate) mod queries;
+pub(crate) use fixtures::seed_demo_world_quest_widgets;
 pub use inputs::{IconAndTextRecord, UiWidgetInputs, WidgetSetEntry, WidgetSetRecord};
 
 #[cfg(any(feature = "client-retail", feature = "client-ptr"))]

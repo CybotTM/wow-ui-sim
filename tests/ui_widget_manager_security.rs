@@ -1,6 +1,5 @@
-//! PRIVATE TEST DRAFT ONLY: not compiled or executed; no native-parity claim.
-//! Planned queries unwrap_secret before lookup, then use WidgetId::from_number
-//! (exact f64 bits, signed-zero normalization), matching ButtonHeader.
+//! Actual host-secret wrappers and caller-taint policy over supplied widget state.
+//! Simulator contract; no native-parity claim.
 #![cfg(all(
     any(feature = "client-retail", feature = "client-ptr"),
     feature = "retail-12-1-0"

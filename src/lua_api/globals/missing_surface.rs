@@ -33,8 +33,6 @@ mod traits;
 mod transmog;
 mod transmog_collection;
 mod tutorial;
-#[path = "missing_surface/ui_widget_manager.rs"]
-mod ui_widget_manager;
 mod voice_chat;
 mod warband_scene;
 mod zone_ability;
@@ -257,7 +255,7 @@ fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_api::c_housing::register_c_housing_surface(state)?;
     c_api::c_housing_bundles::register_c_housing_bundles(state)?;
     c_api::c_settings_util::register_c_settings_util_surface(state)?;
-    ui_widget_manager::register_ui_widget_manager_surface(state)?;
+    c_api::ui_widget_manager::queries::register(state)?;
     #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
     c_api::ui_widget_manager::button_header::register(state)?;
     anima_diversion::register_anima_diversion_surface(state)?;

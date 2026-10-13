@@ -5,7 +5,7 @@ use crate::common;
 use common::blizzard_addon_harness::with_blizzard_addon_closure;
 use wow_ui_sim::c_api::ui_widget_manager::{
     ButtonHeaderRecord, IconAndTextRecord, WidgetId, WidgetSetEntry, WidgetSetRecord,
-    WidgetSpellButtonRecord,
+    WidgetSpellButtonRecord, WidgetVisualization,
 };
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -77,6 +77,14 @@ fn header_record() -> ButtonHeaderRecord {
     }
 }
 
+fn widget_entry(widget_id: f64, widget_type: u32) -> WidgetSetEntry {
+    WidgetSetEntry {
+        widget_id,
+        widget_type,
+        unit_token: None,
+    }
+}
+
 fn supply_inputs(env: &WowLuaEnv) {
     let mut state = env.state().borrow_mut();
     let entries = [
@@ -85,20 +93,8 @@ fn supply_inputs(env: &WowLuaEnv) {
         (HEADER_ID, BUTTON_HEADER),
     ]
     .into_iter()
-    .map(|(widget_id, widget_type)| WidgetSetEntry {
-        widget_id,
-        widget_type,
-        unit_token: None,
-    })
+    .map(|(widget_id, widget_type)| widget_entry(widget_id, widget_type))
     .collect();
-    state.ui_widget_inputs.sets.insert(
-        WidgetId::from_number(SET_ID),
-        WidgetSetRecord {
-            layout_direction: 0, // UIWidgetSetLayoutDirection.Vertical
-            vertical_padding: 7.0,
-            widgets: entries,
-        },
-    );
     state.ui_widget_inputs.icon_and_text.insert(
         WidgetId::from_number(ICON_ID),
         icon_record("Supplied icon text", SHOWN),
@@ -112,6 +108,16 @@ fn supply_inputs(env: &WowLuaEnv) {
         .button_header_inputs
         .widgets
         .insert(WidgetId::from_number(HEADER_ID), header_record());
+    drop(state);
+    env.replace_ui_widget_set(
+        SET_ID,
+        Some(WidgetSetRecord {
+            layout_direction: 0, // UIWidgetSetLayoutDirection.Vertical
+            vertical_padding: 7.0,
+            widgets: entries,
+        }),
+    )
+    .expect("supply initial membership through host feed");
 }
 
 fn fire_widget_update(env: &WowLuaEnv, set_id: f64, widget_id: f64, widget_type: u32) {
@@ -178,23 +184,26 @@ fn register_container(env: &WowLuaEnv) {
     );
 }
 
-fn update_supplied_records(env: &WowLuaEnv) {
-    let mut state = env.state().borrow_mut();
-    let icon = state
+fn update_supplied_records(env: &WowLuaEnv) -> (IconAndTextRecord, ButtonHeaderRecord) {
+    let state = env.state().borrow();
+    let mut icon = state
         .ui_widget_inputs
         .icon_and_text
-        .get_mut(&WidgetId::from_number(ICON_ID))
-        .unwrap();
+        .get(&WidgetId::from_number(ICON_ID))
+        .unwrap()
+        .clone();
     icon.text = "Updated supplied icon".into();
     icon.tooltip = "Updated icon tooltip".into();
     icon.order_index = 30.0;
-    let header = state
+    let mut header = state
         .button_header_inputs
         .widgets
-        .get_mut(&WidgetId::from_number(HEADER_ID))
-        .unwrap();
+        .get(&WidgetId::from_number(HEADER_ID))
+        .unwrap()
+        .clone();
     header.header_text = "Updated supplied header".into();
     header.buttons = vec![spell_button(290_003.0, "Updated supplied button")];
+    (icon, header)
 }
 
 #[test]
@@ -215,7 +224,7 @@ fn cached_ui_widget_container_refreshes_removes_and_unregisters_supplied_widgets
                 assert!(loaded.iter().any(|name| name == "Blizzard_UIWidgets"));
                 supply_inputs(env);
                 register_container(env);
-                update_supplied_records(env);
+                let (icon, mut header) = update_supplied_records(env);
 
                 fire_widget_update(env, SET_ID + 1.0, ICON_ID, ICON_AND_TEXT);
                 fire_widget_update(env, SET_ID + 1.0, HEADER_ID, BUTTON_HEADER);
@@ -229,8 +238,18 @@ fn cached_ui_widget_container_refreshes_removes_and_unregisters_supplied_widgets
                 "#,
                 );
 
-                fire_widget_update(env, SET_ID, ICON_ID, ICON_AND_TEXT);
-                fire_widget_update(env, SET_ID, HEADER_ID, BUTTON_HEADER);
+                env.update_ui_widget(
+                    SET_ID,
+                    widget_entry(ICON_ID, ICON_AND_TEXT),
+                    WidgetVisualization::IconAndText(icon),
+                )
+                .expect("update icon snapshot and notify through host feed");
+                env.update_ui_widget(
+                    SET_ID,
+                    widget_entry(HEADER_ID, BUTTON_HEADER),
+                    WidgetVisualization::ButtonHeader(header.clone()),
+                )
+                .expect("update header snapshot and notify through host feed");
                 assert_lua(
                     env,
                     "event refresh executes real Setup and nested pool",
@@ -250,16 +269,10 @@ fn cached_ui_widget_container_refreshes_removes_and_unregisters_supplied_widgets
                 "#,
                 );
 
-                env.state()
-                    .borrow_mut()
-                    .ui_widget_inputs
-                    .sets
-                    .get_mut(&WidgetId::from_number(SET_ID))
-                    .unwrap()
-                    .widgets
-                    .retain(|entry| entry.widget_id != ICON_ID);
-                env.fire_event("UPDATE_ALL_UI_WIDGETS")
-                    .expect("full membership refresh");
+                assert!(
+                    env.remove_ui_widget(SET_ID, ICON_ID)
+                        .expect("remove membership and reconcile through host feed")
+                );
                 assert_lua(
                     env,
                     "membership removal releases existing frame and timer",
@@ -275,14 +288,13 @@ fn cached_ui_widget_container_refreshes_removes_and_unregisters_supplied_widgets
                 "#,
                 );
 
-                env.state()
-                    .borrow_mut()
-                    .button_header_inputs
-                    .widgets
-                    .get_mut(&WidgetId::from_number(HEADER_ID))
-                    .unwrap()
-                    .shown_state = HIDDEN;
-                fire_widget_update(env, SET_ID, HEADER_ID, BUTTON_HEADER);
+                header.shown_state = HIDDEN;
+                env.update_ui_widget(
+                    SET_ID,
+                    widget_entry(HEADER_ID, BUTTON_HEADER),
+                    WidgetVisualization::ButtonHeader(header.clone()),
+                )
+                .expect("supply hidden header through host feed");
                 assert_lua(
                     env,
                     "hidden ButtonHeader provider removes existing frame",
@@ -295,14 +307,12 @@ fn cached_ui_widget_container_refreshes_removes_and_unregisters_supplied_widgets
                 "#,
                 );
 
-                env.state()
-                    .borrow_mut()
-                    .ui_widget_inputs
-                    .icon_and_text
-                    .get_mut(&WidgetId::from_number(HIDDEN_ICON_ID))
-                    .unwrap()
-                    .state = SHOWN;
-                fire_widget_update(env, SET_ID, HIDDEN_ICON_ID, ICON_AND_TEXT);
+                env.update_ui_widget(
+                    SET_ID,
+                    widget_entry(HIDDEN_ICON_ID, ICON_AND_TEXT),
+                    WidgetVisualization::IconAndText(icon_record("Initially hidden text", SHOWN)),
+                )
+                .expect("activate hidden icon through host feed");
                 assert_lua(
                     env,
                     "previously hidden member acquires real template",
@@ -314,14 +324,12 @@ fn cached_ui_widget_container_refreshes_removes_and_unregisters_supplied_widgets
                     assert(LifecycleContainer.numTimers == 1 and LifecycleContainer.ticker)
                 "#,
                 );
-                env.state()
-                    .borrow_mut()
-                    .ui_widget_inputs
-                    .icon_and_text
-                    .get_mut(&WidgetId::from_number(HIDDEN_ICON_ID))
-                    .unwrap()
-                    .state = HIDDEN;
-                fire_widget_update(env, SET_ID, HIDDEN_ICON_ID, ICON_AND_TEXT);
+                env.update_ui_widget(
+                    SET_ID,
+                    widget_entry(HIDDEN_ICON_ID, ICON_AND_TEXT),
+                    WidgetVisualization::IconAndText(icon_record("Initially hidden text", HIDDEN)),
+                )
+                .expect("hide icon through host feed");
                 assert_lua(
                     env,
                     "hidden IconAndText releases frame",
@@ -332,22 +340,19 @@ fn cached_ui_widget_container_refreshes_removes_and_unregisters_supplied_widgets
                 "#,
                 );
 
-                env.state()
-                    .borrow_mut()
-                    .ui_widget_inputs
-                    .icon_and_text
-                    .get_mut(&WidgetId::from_number(HIDDEN_ICON_ID))
-                    .unwrap()
-                    .state = SHOWN;
-                env.state()
-                    .borrow_mut()
-                    .button_header_inputs
-                    .widgets
-                    .get_mut(&WidgetId::from_number(HEADER_ID))
-                    .unwrap()
-                    .shown_state = SHOWN;
-                env.fire_event("UPDATE_ALL_UI_WIDGETS")
-                    .expect("restore members before cleanup");
+                env.update_ui_widget(
+                    SET_ID,
+                    widget_entry(HIDDEN_ICON_ID, ICON_AND_TEXT),
+                    WidgetVisualization::IconAndText(icon_record("Initially hidden text", SHOWN)),
+                )
+                .expect("restore icon through host feed before cleanup");
+                header.shown_state = SHOWN;
+                env.update_ui_widget(
+                    SET_ID,
+                    widget_entry(HEADER_ID, BUTTON_HEADER),
+                    WidgetVisualization::ButtonHeader(header),
+                )
+                .expect("restore header through host feed before cleanup");
                 assert_lua(
                     env,
                     "unregister cleans active pools events manager and timer",

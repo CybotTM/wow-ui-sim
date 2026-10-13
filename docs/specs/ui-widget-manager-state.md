@@ -11,10 +11,11 @@ UIWidgetManager must expose environment-local supplied widget-set state and driv
 - [ ] IconAndText queries return the full supplied record, without filling missing fields with plausible defaults.
 - [ ] Existing complete supplied ButtonHeader and Prey behavior remains intact; manager state does not replace or truncate those records.
 - [ ] Quest-to-set and widget-to-type mappings use exact supplied associations, never numeric thresholds or inferred ID ranges.
-- [ ] Existing demo world-quest records may be explicitly seeded to preserve current behavior. No unrelated sets, widgets, or quest records are seeded.
+- [ ] Existing twelve demo world quests retain explicitly stored Tooltip/BehindIcon/AdventureMapDetails sets, with their previous fixture IDs and Worldquest texture kit. Initialization derives only these fixture associations; queries never infer associations or invent IDs. No unrelated records are seeded.
 
 ### Host updates and consumer lifecycle
 
+- [ ] Host `replace_ui_widget_set`, `update_ui_widget`, and `remove_ui_widget` publish new state before synchronous events. Unknown-set/type-mismatched updates fail without mutation or notification; membership removal preserves independent visualization snapshots.
 - [ ] Host state updates become visible through the existing cached manager: `UPDATE_UI_WIDGET` performs incremental updates and `UPDATE_ALL_UI_WIDGETS` performs full reconciliation against current supplied state.
 - [ ] Incremental updates activate newly available widgets and update existing consumers using their supplied type, unit token, and visualization record.
 - [ ] Full reconciliation activates current members and removes consumers whose membership has been removed, preserving supplied ordering.
@@ -31,14 +32,17 @@ UIWidgetManager must expose environment-local supplied widget-set state and driv
 
 - `src/c_api/ui_widget_manager.rs` — modeled widget identities and existing ButtonHeader records; exports manager input records.
 - `src/c_api/ui_widget_manager/inputs.rs` — currently referenced supplied set membership and IconAndText input records.
+- `src/c_api/ui_widget_manager/{queries,feed,fixtures}.rs` — fresh snapshots, synchronous host updates and existing demo initialization.
 - `src/lua_api/state/sim_state.rs` — environment-owned manager, ButtonHeader, and Prey input state.
+- `src/lua_api/globals/quest_surface/task_quest.rs` — exact supplied quest/type lookup.
 
 ## Tests asserting this spec
 
-Five supplied-state tests are staged; compilation/behavioral RED remain pending. Lifecycle tests are being prepared; no passing evidence is claimed here.
+At `d11908dcf`, five supplied-state cases execute 0 PASS / 5 query-boundary FAIL, without fixture/setup failures. At `6a852c322`, actual cached XML container registration fails because supplied set417 is not returned; host-secret query fails on the old numeric extractor. Later lifecycle and secret-recovery assertions remain unreached in RED. A sixth state case covers host feed publication/error handling; no current producer GREEN is claimed.
 
 - `tests/ui_widget_manager_state.rs` — supplied-state isolation, metadata, ordered membership, complete records, and exact mappings.
 - `tests/ui_widget_manager_lifecycle.rs` — cached manager incremental/full reconciliation and actual consumer lifecycle behavior.
+- `tests/ui_widget_manager_security.rs` — actual host-secret caller policy and public recovery.
 
 ## Known gaps (current cycle)
 

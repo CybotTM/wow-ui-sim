@@ -8,8 +8,6 @@ use rilua::{LuaResult, Val};
 use super::data::{SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES, WORLD_QUESTS};
 use super::handlers::{find_world_quest, is_world_quest, set_array_value};
 
-const QUEST_WIDGET_SET_BASE_ID: i32 = 1_000_000;
-
 pub fn quest_map_frame_get_focused_quest_id(state: &mut LuaState) -> LuaResult<u32> {
     let selected_quest_log_id = borrow_state(state)?.selected_quest_log_id;
     match selected_quest_log_id {
@@ -141,13 +139,18 @@ pub fn task_quest_time_left_seconds(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn resolve_quest_ui_widget_set_by_type(state: &mut LuaState) -> LuaResult<u32> {
-    let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
-    if !is_world_quest(quest_id) {
-        return Ok(0);
+    let quest_id = Option::<i32>::from_stack(state, 1)?.unwrap_or(0);
+    let widget_type = Option::<i32>::from_stack(state, 2)?.unwrap_or(0);
+    let set_id = borrow_state(state)?
+        .ui_widget_inputs
+        .quest_sets
+        .get(&(quest_id, widget_type))
+        .copied();
+    match set_id {
+        Some(set_id) => {
+            state.push(Val::Num(set_id));
+            Ok(1)
+        }
+        None => Ok(0),
     }
-
-    let widget_type = Option::<f64>::from_stack(state, 2)?.unwrap_or(0.0) as i32;
-    let widget_set_id = QUEST_WIDGET_SET_BASE_ID + (quest_id * 10) + widget_type;
-    state.push(Val::Num(widget_set_id as f64));
-    Ok(1)
 }
