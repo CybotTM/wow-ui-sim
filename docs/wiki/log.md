@@ -1,6 +1,6 @@
 ## [2026-10-13] source | Calendar day-record input checkpoint
 
-[Existing Calendar inventory](investigations/patch-8-1-0-api-audit.md#calendar-day-records--input-only-checkpoint-2026-10-13) links the [first day-record spec](../specs/calendar-day-event-records.md): passive DTO/empty map and nine staged cases at `3df756436`, no producer or RuntimePass. String day IDs and numeric index fixtures remain separate; parent index proof unchanged. [Coverage](reference/coverage-matrix.md) records pending execution and native/lockdown/full-lifecycle limits.
+[Calendar inventory](investigations/patch-8-1-0-api-audit.md#calendar-day-records--input-only-checkpoint-2026-10-13) now distinguishes the historical input-only checkpoint from the host-only day-query implementation. [Owning contract](../specs/calendar-day-event-records.md) records executed RED and pending producer acceptance; [coverage](reference/coverage-matrix.md) retains bounded proof and native/lifecycle gaps.
 
 ## [2026-10-13] docs | SpellDisplay and removal current bounded gate
 
