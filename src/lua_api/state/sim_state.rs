@@ -592,6 +592,9 @@ pub struct SimState {
     pub currency_war_mode_bonus: HashMap<i32, (Option<bool>, Option<bool>)>,
     /// Explicit immediate reputation grants; no inferred currency/faction catalog.
     pub currency_faction_grants: HashMap<i32, i32>,
+    /// Explicit transfer activity; query input only, not a transaction lifecycle.
+    #[cfg(feature = "retail-12-0-0")]
+    pub currency_transfer_in_progress: bool,
     /// Explicit item-to-mount identities; independent of journal records or ownership.
     pub mount_item_relations: HashMap<i32, i32>,
     pub equipment_manager: EquipmentManagerState,

@@ -504,6 +504,8 @@ macro_rules! build_empty_sim_state {
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
             currency_war_mode_bonus: HashMap::new(),
             currency_faction_grants: HashMap::new(),
+            #[cfg(feature = "retail-12-0-0")]
+            currency_transfer_in_progress: false,
             mount_item_relations: HashMap::new(),
             equipment_manager: EquipmentManagerState::new(),
             maps: default_maps(),
