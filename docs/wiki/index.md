@@ -1,3 +1,7 @@
+## [2026-10-13] evidence | Actual Retail/PTR DiscreteProgressSteps
+
+[Contract/current packet](../specs/ui-widget-discrete-progress-steps.md) separates seven Discrete and five preservation cases per profile, fresh clean startups and default check. Native/render/tutorial/unit-context and full-parent limits remain; current retention gate pending.
+
 ## [2026-10-13] evidence | DiscreteProgressSteps query-boundary RED
 
 [Checkpoint SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#discreteprogresssteps-query-boundary-red--2026-10-13) links complete five-case failure/compiler/authentication streams; later source producer and unrun GREEN remain distinct.

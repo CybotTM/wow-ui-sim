@@ -1,3 +1,7 @@
+## [2026-10-13] evidence | Actual Retail/PTR DiscreteProgressSteps
+
+[Contract/current packet](../specs/ui-widget-discrete-progress-steps.md) records distinct current scopes and retained five-case RED; no new native/render/tutorial/unit-context or whole-parent acceptance. Current retention gate pending.
+
 ## [2026-10-13] evidence | DiscreteProgressSteps query-boundary RED
 
 [Checkpoint SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#discreteprogresssteps-query-boundary-red--2026-10-13) retains exact pre-cache failure boundaries and compiler warnings, without promoting current producer source to acceptance.

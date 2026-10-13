@@ -45,7 +45,7 @@ No native catalog, server transport, interpolation parity, dynamic HUD rebinding
 
 ### DiscreteProgressSteps producer checkpoint — 2026-10-13
 
-[Discrete contract](../../specs/ui-widget-discrete-progress-steps.md) owns current producer and exact proof ledger. Historical42 input stage physically fails five cases on missing supplied record before cache/atlas. Current source registers complete fresh snapshots and type19 host-feed storage; query/security direct inputs and actual cached consumer typed feeds remain distinct. New feed tests observe committed state inside real callbacks. GREEN/startup/PTR acceptance is pending; no catalog/vendor/default-record fabrication or native parity claim.
+[Discrete contract](../../specs/ui-widget-discrete-progress-steps.md) owns current producer and exact proof ledger. Historical42 input stage physically fails five cases on missing supplied record before cache/atlas. Current source registers complete fresh snapshots and type19 host-feed storage; query/security direct inputs and actual cached consumer typed feeds remain distinct. New feed tests observe committed state inside real callbacks. [Current retained proof](../../../data/patch-api/evidence/ui-widget-discrete-progress-2026-10-13/README.md#retail-and-ptr-current-proof) separates actual Retail/PTR seven-case Discrete GREEN, five preservation cases per profile, fresh normal startup and default check. Source/root compatibility policy is not catalog, rendered/native/tutorial or full-parent acceptance; current text-retention gate remains pending.
 
 ### DiscreteProgressSteps input-only checkpoint — 2026-10-13
 
