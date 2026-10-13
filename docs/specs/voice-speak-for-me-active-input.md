@@ -20,7 +20,7 @@
 
 ## Tests asserting this spec
 
-Generated integration filter `voice_speak_for_me_active_input::` selects default/arity/type and retained-query/transition/environment/independence cases. Both begin with an explicit missing-query assertion; later assertions are not proven until reached. No executed RED/GREEN yet.
+Generated integration filter `voice_speak_for_me_active_input::` selects default/arity/type and retained-query/transition/environment/independence cases. Both begin with an explicit missing-query type assertion; later assertions are not proven until reached. Input-only159998966 executed 0 PASS/2 assertion FAIL, exit101 after successful compilation/setup; Lua errors omitted assertion text. The refined Rust-side type assertions expose the actual missing value before producer implementation; that execution remains pending. No GREEN yet.
 
 ## Known gaps (current cycle)
 
