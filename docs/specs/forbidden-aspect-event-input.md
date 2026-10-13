@@ -8,7 +8,7 @@ Patch 12.1 names `EventRegistrations` and `AlwaysPropagateInput` in `Enum.Forbid
 
 - [x] Reject `RegisterEvent`, `RegisterUnitEvent`, `RegisterAllEvents`, `RegisterEventCallback`, `RegisterUnitEventCallback`, `UnregisterEvent`, `UnregisterAllEvents`, and `IsEventRegistered` (all annotated `ChecksForbiddenAspects`) when a tainted caller targets a receiver with `EventRegistrations`.
 - [x] Reject before changing membership, unit filters, all-event listeners, callback storage, or dispatch indexes. Existing registrations and callbacks continue to deliver events; secure callers keep queries and mutations.
-- [x] Secure callers are exempt: Blizzard's `AuraContainerPrivateMixin` registers events on AuraContainers, which carry `EventRegistrations`. Unrestricted frames retain existing validation, return values, registration, and delivery behavior. Engine-owned cleanup is not a Lua registration mutation.
+- [x] Secure callers are exempt: Blizzard's `AuraContainerPrivateMixin` registers events on AuraContainers, which carry `EventRegistrations`. Unrestricted frames retain existing registration validation, return values and delivery behavior; removal follows the [state-based cleanup policy](frame-event-removal.md). Engine-owned cleanup is not a Lua registration mutation.
 - [x] The `AuraContainer` intrinsic natively owns `EventRegistrations` (its XML declares none; 12.1.0: "Aura Containers have had the EventRegistrations Forbidden Aspect applied").
 
 ### Keyboard and mouse propagation — modeled policy

@@ -19,7 +19,7 @@
 
 ## Implementation inventory
 
-- `src/lua_api/frame/methods/text_attribute_event/events.rs` — frame registration/removal and aspect/callback gates; unchanged in this scaffold.
+- `src/lua_api/frame/methods/text_attribute_event/events.rs` — registration keeps catalog validation; removal queries/mutates existing listener state after the unchanged forbidden-aspect guard. Callback/unit-registration gates unchanged.
 - `src/lua_api/globals/admin.rs` — registers existing `A_Admin.FireEvent`.
 - `src/lua_api/globals/admin_events.rs` — existing synchronous modeled event-dispatch input used by the fixture, not a mock or native-client API.
 
@@ -30,12 +30,12 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Execute this fixture against the sealed normal `38ecbd8ee` binary before any production fix; no fixture RED or GREEN execution is claimed here.
-- [ ] Implement selected removal policy and establish bounded Retail/PTR proof separately; production behavior is unchanged by this scaffold.
+- [x] Execute the identical shared Lua fixture against sealed normal `38ecbd8ee` before the fix: actual wait exit1, first cached-name no-throw assertion fails; later controls unreached. JSON contains two error entries for the original error and ScriptErrors wrapper, not two independent failures. Executable receipt reused stat-only.
+- [ ] Establish bounded Retail/PTR post-fix proof; state-based removal is implemented in source, not yet verified in a fresh binary.
 - [ ] Establish preservation of forbidden aspects, callback gates, unit filters, and Classic policy separately; this fixture covers ordinary Retail/PTR frames only.
 
 At source revision `38ecbd8ee5dfae4315ca98001b7e794e324b1066`, the shared registration mutation validates the event name before either insertion or removal. The supplied prior actual Retail/PTR Spell-producer result is 6 PASS / 3 FAIL at cached `Base.lua:697` calling `UnregisterEvent('PLAYER_EQUIPED_SPELLS_CHANGED')`; that report is not execution evidence for this new fixture.
 
 ## Out of scope
 
-Native removal/return parity, all-profile acceptance, changing registration catalog or callback gates, production implementation, default shims, vendor changes, builds, runtime execution, and acceptance gates. The private normal `--exec-lua` probe is an identical copy of the shared fixture, not a separate test contract.
+Native removal/return parity, all-profile acceptance, changing registration catalog or callback gates, default shims and vendor changes. The private normal `--exec-lua` probe is an identical copy of the shared fixture, not a separate test contract.

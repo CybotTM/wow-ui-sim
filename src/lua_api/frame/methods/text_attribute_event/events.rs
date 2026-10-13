@@ -36,7 +36,10 @@ pub(super) fn register_event(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 fn insert_registered_event_checked(state: &mut LuaState, id: u64, event: &str) -> LuaResult<bool> {
-    mutate_registered_event_checked(state, id, event, RegisteredEventOp::Insert)
+    ensure_registerable_event(state, id, event)?;
+    Ok(borrow_state_mut(state)?
+        .widgets
+        .register_event_listener(id, event))
 }
 pub(super) fn register_unit_event(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
@@ -82,33 +85,17 @@ pub(super) fn unregister_event(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Bool(false));
         return Ok(1);
     };
-    let was_registered = remove_registered_event_checked(state, id, &event)?;
+    let was_registered = remove_registered_event(state, id, &event)?;
     if was_registered {
         rilua_hlist_unregister_individual(state, id, &event)?;
     }
     state.push(Val::Bool(was_registered));
     Ok(1)
 }
-fn remove_registered_event_checked(state: &mut LuaState, id: u64, event: &str) -> LuaResult<bool> {
-    mutate_registered_event_checked(state, id, event, RegisteredEventOp::Remove)
-}
-enum RegisteredEventOp {
-    Insert,
-    Remove,
-}
-
-fn mutate_registered_event_checked(
-    state: &mut LuaState,
-    id: u64,
-    event: &str,
-    op: RegisteredEventOp,
-) -> LuaResult<bool> {
-    ensure_registerable_event(state, id, event)?;
-    let mut sim = borrow_state_mut(state)?;
-    Ok(match op {
-        RegisteredEventOp::Insert => sim.widgets.register_event_listener(id, event),
-        RegisteredEventOp::Remove => sim.widgets.unregister_event_listener(id, event),
-    })
+fn remove_registered_event(state: &mut LuaState, id: u64, event: &str) -> LuaResult<bool> {
+    Ok(borrow_state_mut(state)?
+        .widgets
+        .unregister_event_listener(id, event))
 }
 fn ensure_registerable_event(state: &mut LuaState, id: u64, event: &str) -> LuaResult<()> {
     if crate::event::is_registerable_event(event) {
