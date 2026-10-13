@@ -1,6 +1,6 @@
 {
   "schema": "perf-sampling-whole-text-projection-v1",
-  "status": "PRIVATE STAGE ONLY; main integration and independent verifier PENDING",
+  "status": "Published selected TEXT; payload retention PASS; corrected publication metadata verification PENDING",
   "algorithm": "Whole UTF-8 text; exact ordered literal identity/path substitutions then CRLF/CR to LF only; no clipping, record omission or JSON reserialization",
   "selected_text_count": 23,
   "files": [
@@ -533,8 +533,8 @@
       "destination": "data/test-perf/evidence/startup-canonical-paired-2026-10-12/projectconstants-621-2026-10-13/sampling-current/README.md",
       "role": "scoped README and corrective-erratum links; not a new symbolizer report",
       "projection": {
-        "bytes": 2801,
-        "sha256": "499840690df9b19dc920d615589dda848fe925be9e2ed5d79f1f482ad75c23dc"
+        "bytes": 2780,
+        "sha256": "2cc7a3b0f654c3074e17c7da24e161ee26e4f9329b592dfe9e99ac3c96a22c2f"
       }
     }
   ],
