@@ -1,3 +1,7 @@
+## [2026-10-13] source | Calendar day-record input checkpoint
+
+[Existing Calendar inventory](investigations/patch-8-1-0-api-audit.md#calendar-day-records--input-only-checkpoint-2026-10-13) links the [first day-record spec](../specs/calendar-day-event-records.md): passive DTO/empty map and nine staged cases at `3df756436`, no producer or RuntimePass. String day IDs and numeric index fixtures remain separate; parent index proof unchanged. [Coverage](reference/coverage-matrix.md) records pending execution and native/lockdown/full-lifecycle limits.
+
 ## [2026-10-13] docs | SpellDisplay and removal current bounded gate
 
 [Current owner](../specs/ui-widget-spell-display.md) links [runtime gate](../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13): independent Retail PASS; PTR independent PASS; selected retention PASS. Historical RED/partial and 741-record erratum preserved; Classic/native/world-loot/render/full-parent unproved.

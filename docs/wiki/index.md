@@ -1,3 +1,7 @@
+## [2026-10-13] source | Calendar day-record input checkpoint
+
+[Existing Calendar inventory](investigations/patch-8-1-0-api-audit.md#calendar-day-records--input-only-checkpoint-2026-10-13) links the [first day-record spec](../specs/calendar-day-event-records.md): passive DTO/empty map and nine staged cases at `3df756436`, no producer or RuntimePass. String day IDs and numeric index fixtures remain separate; parent index proof unchanged. [Coverage](reference/coverage-matrix.md) records pending execution and native/lockdown/full-lifecycle limits.
+
 ## [2026-10-13] evidence | Separate Mists and performance receipts
 
 [Mists](investigations/mists-cast-startup-visibility.md#current-selected-body-receipt--2026-10-13) and [performance](investigations/test-suite-performance.md#separate-current-phase-observation--2026-10-13) link distinct evidence owners; historical failures and acceptance limits remain separate.
