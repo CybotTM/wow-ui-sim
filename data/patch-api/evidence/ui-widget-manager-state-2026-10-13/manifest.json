@@ -1211,6 +1211,203 @@
         "consistent identity/home/repo redactions",
         "CRLF/CR to LF; exactly one terminal LF"
       ]
+    },
+    {
+      "path": "finaldelta-green/report.json",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/finaldelta-20261013T081449Z/report.json",
+      "original_bytes": 3854,
+      "original_text_sha256": "b551828a288e93c1dddb1c7017a1e2f26875e3629e793dc1ac320788e26a2980",
+      "payload_bytes": 3835,
+      "payload_sha256": "5a7f6fc21c2759d90cd6758367abe1ab4996155594a8b32dec580742ed2b359f",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/integration.stdout",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/finaldelta-20261013T081449Z/integration.stdout",
+      "original_bytes": 783,
+      "original_text_sha256": "cf194fe6a629d602efe2276dd7b21d6f41275cb993ea74b76bb38a8dcbbaaab0",
+      "payload_bytes": 782,
+      "payload_sha256": "72140f2f57393b6c19f043782750bda0ec790f44f2a19e7b67b1dd2b45ce9c79",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/integration.stderr",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/finaldelta-20261013T081449Z/integration.stderr",
+      "original_bytes": 1280,
+      "original_text_sha256": "5bc9729c4fe5dd60dbb1af8114a5b9a36ca1084b81a8b1731c0610725a5360c8",
+      "payload_bytes": 1280,
+      "payload_sha256": "5bc9729c4fe5dd60dbb1af8114a5b9a36ca1084b81a8b1731c0610725a5360c8",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/integration-submission.json",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/finaldelta-20261013T081449Z/integration-submission.json",
+      "original_bytes": 2315,
+      "original_text_sha256": "a6d97e8fbf70be78671eff6d3ffbdb739817f1c385ac560b8c478e5e00ee9716",
+      "payload_bytes": 2182,
+      "payload_sha256": "c13afd5625845995fee617adf6551f646ee8eca06db5435f821b6933157d50fc",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/integration-terminal.txt",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/finaldelta-20261013T081449Z/integration-terminal.txt",
+      "original_bytes": 178,
+      "original_text_sha256": "40de648b019e4921bc0e0c1fcdba3278911b6b5c96dbf8a8953dc1fdb5ced956",
+      "payload_bytes": 178,
+      "payload_sha256": "40de648b019e4921bc0e0c1fcdba3278911b6b5c96dbf8a8953dc1fdb5ced956",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/lua-errors.stdout",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/finaldelta-20261013T081449Z/lua-errors.stdout",
+      "original_bytes": 3,
+      "original_text_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "payload_bytes": 3,
+      "payload_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/lua-errors.stderr",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/finaldelta-20261013T081449Z/lua-errors.stderr",
+      "original_bytes": 14704,
+      "original_text_sha256": "9f0644bd5e5f6ed4e86c5424268a8a50164050c6e55ca0c7353322ed16bac9b8",
+      "payload_bytes": 14701,
+      "payload_sha256": "6624657e0af48a483c8f2d012570af5764ac4b7bc9320442a4c6977a3d9dd3f0",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/lua-errors-submission.json",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/finaldelta-20261013T081449Z/lua-errors-submission.json",
+      "original_bytes": 5154,
+      "original_text_sha256": "880190d8c9467b5f66f62f966df552ffcbd40c52b359a16e75c4e764933cd246",
+      "payload_bytes": 4909,
+      "payload_sha256": "074011be62494f290e5b944230aa34880cf6114a719b6c41fc3a8e6cd61fa3ce",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/lua-errors-terminal-inspection.txt",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/finaldelta-20261013T081449Z/lua-errors-terminal-inspection.txt",
+      "original_bytes": 178,
+      "original_text_sha256": "563a16ea816c8c059d435855bff8a16f2edf63437f8275a84c1f0225b3e98a7c",
+      "payload_bytes": 178,
+      "payload_sha256": "563a16ea816c8c059d435855bff8a16f2edf63437f8275a84c1f0225b3e98a7c",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/receipt-integration.json",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/finaldelta-20261013T081449Z/receipt-integration.json",
+      "original_bytes": 586,
+      "original_text_sha256": "f27421b65ddf03b4494342aa05d547b1a478a903c08f26a537a38bc0722ba095",
+      "payload_bytes": 547,
+      "payload_sha256": "5b9c88b2d640deb027b6e36e1596eb5adaf7ca3718c304b9bb4d82f7f8c5548d",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/receipt-wow-sim.json",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/finaldelta-20261013T081449Z/receipt-wow-sim.json",
+      "original_bytes": 565,
+      "original_text_sha256": "7d10bd862f8423f7e38ff190c8124738bf24f098b43ef177708179499e642f61",
+      "payload_bytes": 526,
+      "payload_sha256": "75766a2f04294d4e53536403ed3b5037a71a347fbf46e261b942368a1d975519",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/compile.stderr",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/compile.stderr",
+      "original_bytes": 1376,
+      "original_text_sha256": "ff1d8d790b1874ea1a529a086316e9cf57c70cb65a6dc2ef82d991cbe58d19b3",
+      "payload_bytes": 1320,
+      "payload_sha256": "f89dfbbcd8443318f80e758bc3edfcf62390a913252d3bcbeb69200bfbdffb8b",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/terminal-systemd.txt",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/terminal-systemd.txt",
+      "original_bytes": 154,
+      "original_text_sha256": "336cad58f442041e589f4fa4f0cd2f1b97b6faacdd7181781610d292fd4645a3",
+      "payload_bytes": 154,
+      "payload_sha256": "336cad58f442041e589f4fa4f0cd2f1b97b6faacdd7181781610d292fd4645a3",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
+    },
+    {
+      "path": "finaldelta-green/artifact-seals.json",
+      "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-unit-green-current/20261013T080428649641Z/artifact-seals.json",
+      "original_bytes": 3771,
+      "original_text_sha256": "03f1c1d8a5c84e565e6e9798b98d3ff08cd7a242f2345cccd8712043810c8a73",
+      "payload_bytes": 3452,
+      "payload_sha256": "10e3494baf8d6c6cf079190ef3c3cb39a1ec0139d1b5330eafc3d62cf5b88a47",
+      "transforms": [
+        "consistent account/realm/player substitutions extracted from actual EditMode cache source startup lines and WTF paths",
+        "repo/home/temp path substitution",
+        "CRLF/CR to LF; terminal newline run replaced with exactly one LF (empty text becomes LF)"
+      ]
     }
-  ]
+  ],
+  "finaldelta_scope": {
+    "compiled_revision": "e8879ea74",
+    "executed_unique_lifecycle_pass": 2,
+    "fresh_startup": "zero Lua errors, warnings and AnimSetup diagnostics; exit 0",
+    "reused_prior_unique_pass": 23,
+    "prior_revision": "67775404d",
+    "latest_logical_scoped_unique_pass": 25,
+    "all_25_executed_at_e887": false,
+    "exclusions": [
+      "native unit registration/unregistration",
+      "unit data isolation",
+      "whole handoff acceptance"
+    ],
+    "binary_authentication": "Existing seal/receipt hash strings copied only; no binary reads or hashes."
+  }
 }
