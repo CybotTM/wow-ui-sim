@@ -7,6 +7,7 @@
 use std::fs;
 use std::path::Path;
 
+use rilua::LuaApiMut;
 use rilua::table_security::wrap_host_secret_string;
 use tempfile::TempDir;
 use wow_ui_sim::loader::load_addon;
