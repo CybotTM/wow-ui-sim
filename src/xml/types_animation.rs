@@ -152,6 +152,8 @@ pub struct ControlPointsXml {
 
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct ControlPointXml {
+    #[serde(rename = "@name")]
+    pub name: Option<String>,
     #[serde(rename = "@offsetX")]
     pub offset_x: Option<f32>,
     #[serde(rename = "@offsetY")]

@@ -12,6 +12,8 @@ mod creation;
 mod fields;
 mod ownership;
 mod parent;
+mod path;
+mod path_runtime;
 mod play;
 mod runtime;
 mod templates;
@@ -27,8 +29,7 @@ pub(super) use parent::reparent_animation;
 pub(super) use play::animation_group_play;
 
 pub(super) use creation::{
-    animation_config_noop, create_animation, create_animation_group, create_control_point,
-    set_scale_dispatch,
+    animation_config_noop, create_animation, create_animation_group, set_scale_dispatch,
 };
 pub(super) use fields::{
     animation_get_duration, animation_get_flipbook_columns, animation_get_flipbook_frame_height,
@@ -41,6 +42,7 @@ pub(super) use fields::{
 pub(crate) use runtime::{advance_animation_groups, stop_animation_groups_for_hidden_subtree};
 
 use fields::{push_anim_field, with_animation_state_mut};
+use path_runtime::apply_group_path_state;
 use runtime::{apply_group_flipbook_state, sync_action_bar_busy_for_group};
 use vertex_color::apply_group_vertex_color_state;
 
@@ -220,6 +222,7 @@ pub(super) fn animation_group_stop(state: &mut LuaState) -> LuaResult<u32> {
         refresh_active_animation_group(&mut sim, group_id);
         apply_group_flipbook_state(&mut sim, group_id);
         apply_group_vertex_color_state(&mut sim, group_id);
+        apply_group_path_state(&mut sim, group_id);
         sync_action_bar_busy_for_group(&mut sim, group_id);
         notification
     };

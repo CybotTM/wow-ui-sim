@@ -84,24 +84,27 @@ pub(in crate::lua_api::frame::methods::button_anchor_hierarchy) fn create_animat
         bind_named_child_global(state, name, child_id)?;
     }
     let val = frame_ref(state, child_id)?;
-    attach_vertex_color_methods(state, val, anim_type)?;
+    attach_animation_specific_methods(state, val, anim_type)?;
     super::templates::apply_template(state, template, val)?;
     state.push(val);
     Ok(1)
 }
 
-fn attach_vertex_color_methods(
+fn attach_animation_specific_methods(
     state: &mut LuaState,
     val: Val,
     anim_type: AnimationType,
 ) -> LuaResult<()> {
-    if anim_type == AnimationType::VertexColor {
-        let Val::Table(table) = val else {
-            return Err(runtime_error("VertexColor frame reference must be a table"));
-        };
-        super::super::register_animation_vertex_color(state, table)?;
+    match anim_type {
+        AnimationType::VertexColor => {
+            let Val::Table(table) = val else {
+                return Err(runtime_error("VertexColor frame reference must be a table"));
+            };
+            super::super::register_animation_vertex_color(state, table)
+        }
+        AnimationType::Path => super::path::attach_path_methods(state, val),
+        _ => Ok(()),
     }
-    Ok(())
 }
 
 fn lookup_anim_group_id(state: &mut LuaState, group_frame_id: u64) -> LuaResult<u64> {
@@ -150,26 +153,4 @@ fn register_animation(
     sim.widgets.add_child(group_frame_id, child_id);
     sim.invalidate_strata_buckets();
     Ok(())
-}
-
-/// CreateControlPoint([name]) -> controlPoint
-pub(in crate::lua_api::frame::methods::button_anchor_hierarchy) fn create_control_point(
-    state: &mut LuaState,
-) -> LuaResult<u32> {
-    use crate::widget::{Frame, WidgetType};
-    let parent_id = frame_id_from_stack(state, 1)?;
-    let name_raw: Option<String> = Option::<String>::from_stack(state, 2)?;
-    let name = resolve_child_name(state, name_raw, parent_id);
-    let mut child = Frame::new(WidgetType::Frame, name.clone(), Some(parent_id));
-    child.object_type_name = Some("ControlPoint".to_string());
-    let child_id = child.id;
-    {
-        let mut sim = borrow_state_mut(state)?;
-        sim.widgets.register(child);
-        sim.widgets.add_child(parent_id, child_id);
-        sim.invalidate_strata_buckets();
-    }
-    let val = frame_ref(state, child_id)?;
-    state.push(val);
-    Ok(1)
 }

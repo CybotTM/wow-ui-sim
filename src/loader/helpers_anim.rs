@@ -244,6 +244,7 @@ fn animation_template_layers(
 fn emit_animation_properties(code: &mut String, anim: &crate::xml::AnimationXml) {
     emit_animation_common_props(code, anim);
     emit_animation_flipbook_props(code, anim);
+    emit_animation_path_props(code, anim);
     if let Some(origin) = &anim.origin {
         code.push_str(&format!(
             "\n__anim:SetOrigin({}, {}, {})\n",
@@ -260,6 +261,22 @@ fn emit_animation_properties(code: &mut String, anim: &crate::xml::AnimationXml)
     }
     if let Some(scripts) = &anim.scripts {
         code.push_str(&generate_anim_group_scripts_code(scripts, "__anim"));
+    }
+}
+
+fn emit_animation_path_props(code: &mut String, anim: &crate::xml::AnimationXml) {
+    emit_str_call(code, "__anim", "SetCurveType", anim.curve.as_deref());
+    let Some(points) = &anim.control_points else {
+        return;
+    };
+    for (index, point) in points.points.iter().enumerate() {
+        let order = index + 1;
+        code.push_str(&format!(
+            "\ndo local __point = __anim:CreateControlPoint({}, nil, {order})\n__point:SetOffset({}, {})\nend\n",
+            lua_opt_str(point.name.as_deref()),
+            point.offset_x.unwrap_or(0.0),
+            point.offset_y.unwrap_or(0.0),
+        ));
     }
 }
 

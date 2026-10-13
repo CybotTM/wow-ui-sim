@@ -336,12 +336,6 @@ fn register_animations(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<(
     register_animation_config(state, table)?;
     register_animation_target(state, table)?;
     register_animation_flipbook(state, table)?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "CreateControlPoint",
-        animations::create_control_point,
-    )?;
     Ok(())
 }
 

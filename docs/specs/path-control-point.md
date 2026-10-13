@@ -1,6 +1,6 @@
 # Supplied Path points and NONE playback
 
-Path/ControlPoint configuration, XML loading and actual computed layout must agree. Four tests are staged; producers unchanged, tests uncompiled/unexecuted. This is current API behavior, not a historical 3.3.0 publication row. Architecture: [layout](../layout-system.md), [loading](../addon-loading-pipeline.md).
+Path/ControlPoint configuration, XML loading and actual computed layout must agree. Four pre-producer cases executed RED; point/XML/NONE playback producers are implemented, current GREEN remains pending. This is current API behavior, not a historical 3.3.0 publication row. Architecture: [layout](../layout-system.md), [loading](../addon-loading-pipeline.md).
 
 ## What it must do
 
@@ -23,23 +23,25 @@ Cached `SimpleAnimPathAPIDocumentation.lua` declares optional order and stride r
 
 | Path | Current role / pending gap |
 |---|---|
-| `src/lua_api/animation.rs` | Existing Path type/timing; point/curve and offset restoration state absent. |
-| `src/lua_api/frame/methods/button_anchor_hierarchy/animations/creation.rs` | Generic ControlPoint factory, no modeled point state. |
-| `src/xml/types_animation.rs` | Parses curve/offsets; schema-supported point name is not represented. |
-| `src/loader/helpers_anim.rs` | Path fields/points not emitted into runtime. |
+| `src/lua_api/animation.rs` | Path curve/ordered point state and saved per-target offsets. |
+| `src/lua_api/frame/methods/button_anchor_hierarchy/animations/{creation,path,path_runtime}.rs` | Path-only/control-point methods, named point creation, NONE interpolation and restoration. |
+| `src/xml/types_animation.rs` | Parses curve, point names and offsets. |
+| `src/loader/helpers_anim.rs` | Emits Path curve and declaration-ordered point configuration through the same API. |
 | `src/layout.rs` | Existing animation offsets project into computed rectangles. |
-| `tests/path_control_point.rs` | Four prospective real API/XML/tick/layout tests, `retail-12-0-0` gate. |
+| `tests/path_control_point.rs` | Four real API/XML/tick/layout tests, `retail-12-0-0` gate. |
 
 ## Tests asserting this spec
 
-Generated `--test integration` filter `path_control_point::` (expected four): order9/2→1/2 and signed offset mutations; actual named two-point XML loading and midpoint/restoration; three-point sorted NONE progression with child/owner/sibling isolation; Stop and finish restoration across changed baselines. All UNCOMPILED/UNRUN. Missing requested methods are prospective behavioral boundaries, not executed RED. Fixture failure is not behavior proof.
+Generated `--test integration` filter `path_control_point::` (expected four): order9/2→1/2 and signed offset mutations; actual named two-point XML loading and midpoint/restoration; three-point sorted NONE progression with child/owner/sibling isolation; Stop and finish restoration across changed baselines. At `ff72f3c3b`, all four fail on missing SetCurveType/GetCurveType or supplied-order behavior, with no observed fixture failures; named XML loading succeeds before its missing-query assertion. Movement, XML point projection and restoration assertions remain unreached where earlier API assertions fail. Current producer GREEN is pending. Fixture failure is not behavior proof.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile and execute genuine behavioral failures before point/XML/tick producers.
-- [ ] Model point/curve state and apply complete XML configuration.
-- [ ] Implement NONE movement/restoration and execute real layout-output GREEN.
+- [x] Compile and execute genuine behavioral failures before point/XML/tick producers.
+- [x] Model point/curve state and apply XML configuration.
+- [x] Implement NONE movement/restoration after genuine API-boundary RED.
+- [ ] Execute real API/XML/layout-output GREEN plus applicable startup/profile checks.
+- [ ] Existing hidden-subtree stop restoration hook is source-only; no separate behavioral acceptance claimed.
 
 ## Out of scope
 
-SMOOTH, native/historical parity, zero/one point, duplicate/default/invalid orders, SetParent, templates, broader receiver repair, delays/loops/reverse/pause, callbacks, large-delta semantics, non-unit scale, competing animations and GPU/pixels. No vendor patches or production changes in this stage.
+SMOOTH, native/historical parity, zero/one point, duplicate/default/invalid orders, SetParent, templates, broader receiver repair, delays/loops/reverse/pause, callbacks, large-delta semantics, non-unit scale, competing animations and GPU/pixels. No vendor patches. Only NONE curve playback is modeled; unsupported curves are not silently substituted.

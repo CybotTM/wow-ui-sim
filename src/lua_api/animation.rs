@@ -71,6 +71,13 @@ impl LoopType {
 }
 
 #[derive(Debug, Clone)]
+pub struct ControlPointState {
+    pub frame_id: u64,
+    pub order: u32,
+    pub offset: [f64; 2],
+}
+
+#[derive(Debug, Clone)]
 pub struct AnimState {
     pub anim_type: AnimationType,
     pub name: Option<String>,
@@ -89,6 +96,8 @@ pub struct AnimState {
     pub start_color: [f64; 4],
     pub end_color: [f64; 4],
     pub smoothing: String,
+    pub curve: String,
+    pub control_points: Vec<ControlPointState>,
     pub flipbook_rows: u32,
     pub flipbook_columns: u32,
     pub flipbook_frames: u32,
@@ -115,6 +124,8 @@ impl AnimState {
             start_color: [1.0; 4],
             end_color: [1.0; 4],
             smoothing: "NONE".to_string(),
+            curve: "NONE".to_string(),
+            control_points: Vec::new(),
             flipbook_rows: 0,
             flipbook_columns: 0,
             flipbook_frames: 0,
@@ -122,6 +133,12 @@ impl AnimState {
             flipbook_frame_height: 0.0,
             scripts: HashMap::new(),
         }
+    }
+
+    pub fn ordered_control_points(&self) -> Vec<&ControlPointState> {
+        let mut points: Vec<_> = self.control_points.iter().collect();
+        points.sort_by_key(|point| point.order);
+        points
     }
 
     pub fn total_time(&self) -> f64 {
@@ -148,6 +165,8 @@ pub struct AnimGroupState {
     pub saved_alphas: HashMap<u64, f32>,
     /// INFERRED restoration policy, preserving absence of an explicit tint.
     pub saved_vertex_colors: HashMap<u64, Option<crate::widget::Color>>,
+    /// Simulator policy: each Path playback restores its pre-play presentation offset.
+    pub saved_path_offsets: HashMap<u64, [f32; 2]>,
 }
 
 impl AnimGroupState {
@@ -169,6 +188,7 @@ impl AnimGroupState {
             scripts: HashMap::new(),
             saved_alphas: HashMap::new(),
             saved_vertex_colors: HashMap::new(),
+            saved_path_offsets: HashMap::new(),
         }
     }
 
