@@ -3,28 +3,36 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 pub const KEY: (i32, u32) = (0, 15);
 
+fn start_time() -> CalendarTimeRecord {
+    CalendarTimeRecord {
+        month_day: 15,
+        month: 10,
+        weekday: 5,
+        year: 2026.0,
+        hour: 18.0,
+        minute: 30.0,
+    }
+}
+
+fn end_time() -> CalendarTimeRecord {
+    CalendarTimeRecord {
+        month_day: 16,
+        month: 10,
+        weekday: 6,
+        year: 2026.0,
+        hour: 1.0,
+        minute: 45.0,
+    }
+}
+
 pub fn record() -> CalendarDayEventRecord {
     CalendarDayEventRecord {
         event_id: "9007199254740997".into(),
         club_id: "9007199254740995".into(),
         title: "Host raid".into(),
         is_custom_title: true,
-        start_time: CalendarTimeRecord {
-            month_day: 15,
-            month: 10,
-            weekday: 5,
-            year: 2026.0,
-            hour: 18.0,
-            minute: 30.0,
-        },
-        end_time: CalendarTimeRecord {
-            month_day: 16,
-            month: 10,
-            weekday: 6,
-            year: 2026.0,
-            hour: 1.0,
-            minute: 45.0,
-        },
+        start_time: start_time(),
+        end_time: end_time(),
         calendar_type: "GUILD_EVENT".into(),
         sequence_type: "START".into(),
         event_type: 1,

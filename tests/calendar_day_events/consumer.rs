@@ -1,6 +1,7 @@
 //! Unchanged cached ItemRef.lua and CalendarUtil; no synthetic consumer or Club producer.
 use super::fixtures::{KEY, assert_lua, erase, record, supplied_env, supply};
 use crate::common::blizzard_addon_harness::load_blizzard_addon_closure_into_env;
+use std::path::Path;
 use wow_ui_sim::c_api::c_calendar::CalendarEventIndexInfo;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -22,12 +23,7 @@ fn load_consumers(env: &WowLuaEnv) {
         ],
         &[],
     );
-    // Load the ENTIRE real file, not extracted/recreated GetCalendarEventLink.
-    // Its full UIPanels TOC pulls unrelated panels; callable needs only real LinkUtil.
-    let path = cache.join("Blizzard_UIPanels_Game/Mainline/ItemRef.lua");
-    let source = std::fs::read_to_string(&path).expect("cached complete ItemRef.lua");
-    env.exec(&source)
-        .expect("load unchanged complete cached ItemRef.lua");
+    load_item_ref(env, &cache);
     assert_lua(
         env,
         r#"
@@ -36,6 +32,14 @@ fn load_consumers(env: &WowLuaEnv) {
         assert(LinkTypes.CalendarEvent=='calendarEvent')
     "#,
     );
+}
+
+fn load_item_ref(env: &WowLuaEnv, cache: &Path) {
+    // Load the entire real file, not extracted/recreated GetCalendarEventLink.
+    let path = cache.join("Blizzard_UIPanels_Game/Mainline/ItemRef.lua");
+    let source = std::fs::read_to_string(&path).expect("cached complete ItemRef.lua");
+    env.exec(&source)
+        .expect("load unchanged complete cached ItemRef.lua");
 }
 
 #[test]
