@@ -1,6 +1,9 @@
 //! Complete supplied ButtonHeader inputs and their current-profile snapshot query.
 use std::collections::HashMap;
 
+mod inputs;
+pub use inputs::{IconAndTextRecord, UiWidgetInputs, WidgetSetEntry, WidgetSetRecord};
+
 #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 pub(crate) mod button_header;
 

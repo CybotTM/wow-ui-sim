@@ -157,6 +157,7 @@ pub struct SimState {
     pub prey_inputs: crate::c_api::c_prey::PreyInputs,
     /// Explicit supplied ButtonHeader records; no generated catalog/default DTOs.
     pub button_header_inputs: crate::c_api::ui_widget_manager::ButtonHeaderInputs,
+    pub ui_widget_inputs: crate::c_api::ui_widget_manager::UiWidgetInputs,
     /// INFERRED host policy snapshots, initially inactive; not combat-derived.
     #[cfg(feature = "retail-12-0-0")]
     pub combat_log_restricted: bool,
