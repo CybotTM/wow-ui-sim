@@ -674,6 +674,9 @@ pub struct SimState {
     /// INFERRED identity latch reset on observed exit, not a server formation epoch.
     #[cfg(feature = "retail-12-0-7")]
     pub(crate) solo_group_last: Option<(i32, String)>,
+    /// Explicit optional display role by existing player/party GUID; unset by default.
+    pub(crate) unit_roles:
+        HashMap<String, Option<crate::lua_api::globals::real::unit_roles::UnitRole>>,
     pub party_leader_index: Option<usize>,
     pub ready_check: ReadyCheckState,
     pub voice_chat: VoiceChatState,

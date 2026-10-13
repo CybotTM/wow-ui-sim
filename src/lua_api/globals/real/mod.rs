@@ -91,6 +91,9 @@ pub mod ui_widget_container;
 pub mod unit_interaction;
 #[cfg(feature = "aura-containers")]
 pub mod unit_relationships;
+pub(crate) mod unit_roles;
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+pub(crate) mod unit_roles_assignment;
 pub(crate) mod unit_secret_predicates;
 #[cfg(any(feature = "client-retail", feature = "client-wowforever"))]
 pub mod unit_speed;

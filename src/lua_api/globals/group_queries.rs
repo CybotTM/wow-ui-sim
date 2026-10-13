@@ -16,7 +16,7 @@
 //! share no code with it.
 
 #[path = "group_queries_relationships.rs"]
-mod relationships;
+pub(super) mod relationships;
 
 use super::unit_misc::identity_output;
 use crate::lua_api::game_data::CLASS_LABELS;
@@ -167,12 +167,12 @@ fn register_unit_group_roles(state: &mut LuaState) {
     set_global(
         state,
         "UnitGroupRolesAssigned",
-        relationships::unit_group_roles_assigned,
+        super::real::unit_roles::unit_group_roles_assigned,
     );
     set_global(
         state,
         "UnitGroupRolesAssignedEnum",
-        relationships::unit_group_roles_assigned_enum,
+        super::real::unit_roles::unit_group_roles_assigned_enum,
     );
     set_global(
         state,

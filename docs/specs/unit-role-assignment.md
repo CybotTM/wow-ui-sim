@@ -41,21 +41,23 @@
 ## Implementation inventory
 
 - `src/lua_api/globals/group_queries.rs` — current getter registration.
-- `src/lua_api/globals/group_queries_relationships.rs` — current constant getter/default eligibility behavior; parent owns replacement/integration.
+- `src/lua_api/globals/real/unit_roles.rs` — live role getters, three-value role representation and existing GUID comparison.
+- `src/lua_api/globals/real/unit_roles_assignment.rs` — strict authenticated Retail/PTR setters and changed-only synchronous event; earlier profiles do not gain setters.
+- `src/lua_api/globals/group_queries_relationships.rs` — existing leader/assistant authority helpers and default eligibility; constant role getters removed.
 - `src/lua_api/globals/targeting_verbs.rs` and `unit_misc.rs` — existing represented snapshot/GUID resolution.
 - `src/lua_api/globals/real/unit_secret_predicates.rs` — existing getter identity-secrecy finishing.
-- `src/lua_api/state/sim_state.rs` and `src/lua_api/game_data.rs` — existing player/party/authority inputs; new role backing location remains parent-owned.
+- `src/lua_api/state/sim_state.rs` and `src/lua_api/state.rs` — environment-owned GUID-to-optional-role map, initially empty; existing player/party/authority inputs unchanged.
 - `src/lua_api/globals/enum_data/widget.rs` and `constants_values.lua` — existing LFGRole enumeration and unset constant.
 
 ## Tests asserting this spec
 
-- `tests/unit_role_assignment.rs` — staged public round-trip/default/clear, identity aliases, environment/party isolation, domain/type/authority policies, synchronous event, authentic secrets, conditional getter secrecy and unchanged cached handlers. **NOT RUN**: parent commits then authorizes targeted RED.
+- `tests/unit_role_assignment.rs` — staged public round-trip/default/clear, identity aliases, environment/party isolation, domain/type/authority policies, synchronous event, authentic secrets, conditional getter secrecy and unchanged cached handlers. **RED receipt retained by parent:** all 13 cases failed at missing raw `UnitSetRoleEnum`; downstream assertions were not reached. Production implemented; GREEN proof pending parent commit and execution.
 - `tests/admin_pvp_guild_api.rs::test_unit_group_roles_assigned_returns_none` — existing string default preservation; no new run or acceptance credit here.
 - `tests/patch_12_1_0_unit_secrecy.rs` — existing getter identity-restriction rows; no new run or acceptance credit here.
 
 ## Known gaps (current cycle)
 
-- [ ] Parent-owned production registration/backing/integration and targeted RED/GREEN still pending; all contract checkboxes intentionally unverified.
+- [ ] Production registration/backing implemented; parent commit/integration and targeted GREEN pending. Contract checkboxes remain unverified until actual GREEN proof.
 - [ ] Cached popup None radio compares numeric getter with nil `GetRole()`, unlike the declared nonnil getter and existing -1 sentinel. Preserve vendor behavior and numeric contract; do not claim checked-None behavior or patch Blizzard Lua in this scope.
 - [ ] Native invalid-domain/authority/no-op/name/clear policies remain assumptions, with no native capture.
 

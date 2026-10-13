@@ -241,7 +241,7 @@ pub(super) fn unit_is_group_leader(state: &mut LuaState) -> LuaResult<u32> {
     finish_identity_restricted(state, &[&unit], 1)
 }
 
-fn is_group_leader(st: &crate::lua_api::state::SimState, unit: &str) -> bool {
+pub(crate) fn is_group_leader(st: &crate::lua_api::state::SimState, unit: &str) -> bool {
     let active = st.party_group_active && !st.party_members.is_empty();
     if !active {
         false
@@ -265,30 +265,15 @@ pub(super) fn unit_is_group_assistant(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 #[cfg(feature = "retail-12-0-7")]
-fn is_group_assistant(st: &crate::lua_api::state::SimState, unit: &str) -> bool {
+pub(crate) fn is_group_assistant(st: &crate::lua_api::state::SimState, unit: &str) -> bool {
     crate::c_api::c_party_info::roles_1207::is_assistant(st, unit)
 }
 
 #[cfg(not(feature = "retail-12-0-7"))]
-fn is_group_assistant(st: &crate::lua_api::state::SimState, unit: &str) -> bool {
+pub(crate) fn is_group_assistant(st: &crate::lua_api::state::SimState, unit: &str) -> bool {
     st.everyone_assistant
         && (matches!(unit, "player" | "pet" | "vehicle")
             || visible_party_member(st, unit).is_some())
-}
-
-/// `UnitGroupRolesAssigned(unit)` — group roles are not modeled; `"NONE"`.
-pub(super) fn unit_group_roles_assigned(state: &mut LuaState) -> LuaResult<u32> {
-    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
-    let role = create_string(state, "NONE");
-    state.push(role);
-    finish_identity_restricted(state, &[&unit], 1)
-}
-
-/// `UnitGroupRolesAssignedEnum(unit)` — group roles are not modeled; `-1`.
-pub(super) fn unit_group_roles_assigned_enum(state: &mut LuaState) -> LuaResult<u32> {
-    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
-    state.push(Val::Num(-1.0));
-    finish_identity_restricted(state, &[&unit], 1)
 }
 
 /// `UnitGetAvailableRoles(unit)` — role eligibility is not modeled; every
