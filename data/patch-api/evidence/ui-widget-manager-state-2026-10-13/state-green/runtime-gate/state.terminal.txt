@@ -1,0 +1,10 @@
+ActiveState=inactive
+SubState=dead
+Result=success
+ExecMainCode=0
+ExecMainStatus=0
+MemoryPeak=[not set]
+CPUUsageNSec=[not set]
+CPUQuotaPerSecUSec=infinity
+MemoryHigh=infinity
+MemoryMax=infinity
