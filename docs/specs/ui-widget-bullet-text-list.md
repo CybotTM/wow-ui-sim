@@ -1,6 +1,6 @@
 # Supplied BulletTextList visualization
 
-BulletTextList type10 belongs to the `src/c_api/ui_widget_manager/` supplied-state subsystem; the [widget manager wiki](../wiki/systems/ui-widget-manager-state.md) owns how records, cached consumers and events work. Contract sources are the active Retail/PTR caches under `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns/`: `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumentation.lua` declares the getter and fifteen fields; `Blizzard_UIWidgets/Blizzard_UIWidgetTemplateBulletTextList.lua` registers type10 and consumes pooled lines. These are cached declarations/consumer source, not native runtime proof. This stage adds tests/spec only: no BulletTextList DTO, map, feed or implemented getter. Empty host backing is planned simulator policy, not production state yet.
+BulletTextList type10 belongs to the `src/c_api/ui_widget_manager/` supplied-state subsystem; the [widget manager wiki](../wiki/systems/ui-widget-manager-state.md) owns how records, cached consumers and events work. Contract sources are the active Retail/PTR caches under `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns/`: `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumentation.lua` declares the getter and fifteen fields; `Blizzard_UIWidgets/Blizzard_UIWidgetTemplateBulletTextList.lua` registers type10 and consumes pooled lines. These are cached declarations/consumer source, not native runtime proof. The original `3bd83b432` checkpoint added tests/spec only. Current input-only successor adds a complete passive DTO, empty environment-owned map, type10 host feed and authored supplied-data/cached-consumer tests. Getter projection remains unimplemented pending genuinely executed supplied-record/consumer RED; empty backing is simulator policy, not a native catalog.
 
 ## What it must do
 
@@ -57,9 +57,10 @@ These requirements are driven by unchanged Retail/PTR cached source, not evidenc
 
 - `tests/ui_widget_bullet_text_list_api_red.rs`: two Retail/PTR-only public-API cases using real `WowLuaEnv::new`/`eval`; no host producer, stubs, mocks or replaced globals.
 - `src/c_api/ui_widget_manager/queries.rs`: existing numeric validation/query owner; inspected source has no BulletTextList getter registration.
-- `src/c_api/ui_widget_manager/inputs.rs`: existing environment-owned backing; inspected source has no BulletTextList map/DTO.
-- `src/c_api/ui_widget_manager/feed.rs`: existing typed producer owner; BulletTextList extension is planned, not implemented in this stage.
-- Cached Retail/PTR API documentation and BulletTextList Lua/XML templates: external declaration/consumer owners, unchanged. No new production file exists for this feature.
+- `src/c_api/ui_widget_manager/bullet_record.rs` and `inputs.rs`: complete fifteen-field `BulletTextListRecord` and empty `bullet_text_lists` map; no default DTO, filler or seeds.
+- `src/c_api/ui_widget_manager/feed.rs`: `WidgetVisualization::BulletTextList`, type10 and existing state-before-event update path. Callback outcome is unproved at the source stage.
+- `tests/ui_widget_manager_bullet_text_list.rs` / `tests/widget_bullet/`: seven authored supplied-record, snapshot/lifetime/numeric-key/security/feed and unchanged cached pooled-line lifecycle cases.
+- Cached Retail/PTR API documentation and BulletTextList Lua/XML templates: external declaration/consumer owners, unchanged.
 
 ## Tests asserting this spec
 
@@ -70,13 +71,18 @@ These requirements are driven by unchanged Retail/PTR cached source, not evidenc
 
 Helper follows existing TextWithState/Discrete phase-tagged Lua error capture, using `eval::<()>` as required here. No source-substring or raw-registration assertions. Compilation and execution were unrun at the original test/spec checkpoint `3bd83b432`. Initial API RED is now independently classified for Retail at that source and PTR at `13a818ba5`: each executed two cases, 1 PASS / 1 FAIL, exit101. Empty unknown numeric one-nil policy passed; supplied nil was accepted, failing `nil: expected widgetID validation error`. String/bool/table and subsequent message checks were unreached. This proves the initial validation/default boundary only; fields, freshness, real-secret policy, feed and cached consumer have no new behavioral proof.
 
+### Passive supplied-record tests
+
+Seven successor cases are authored, not executed: three query cases cover all fifteen fields, ordered fresh lines, replacement/deletion/isolation and existing numeric identity; one real VM-secret case covers untainted/tainted present/absent lookup; two feed cases cover committed-data callbacks and atomic rejection; one cached lifecycle case loads the unchanged closure/container and observes lines through their anchor chain, enabled-state FontStrings, replacement/hide/restore/removal/unregister. Missing prerequisites are setup failures, not result-boundary RED. First intended consumer-data assertion is inside a real event callback; no globals or vendor methods are replaced.
+
 ## Known gaps (current cycle)
 
 - [x] Initial Retail/PTR API RED executed before production edits: each 1 PASS / 1 FAIL, exit101, independently classified; exact boundary above.
-- [ ] Add empty host DTO/backing, complete getter projection and type10 feed only after that RED boundary is observed.
-- [ ] Add supplied-record field/freshness/isolation/security/feed tests and real cached pooled-line lifecycle proof; the current two cases do not cover these requirements.
+- [x] Add passive complete DTO/empty backing/type10 feed and authored supplied-record/security/real cached lifecycle tests after initial API RED; source only, not runtime acceptance.
+- [ ] Execute genuine supplied-record/callback/consumer RED for Retail/PTR with getter unchanged, then implement complete getter projection.
+- [ ] Establish field/freshness/isolation/security/feed and real cached pooled-line lifecycle proof; authored successor tests do not establish it.
 - [ ] Establish bounded GREEN and integration proof separately; no native/render/full-widget acceptance follows from cached declarations or this test-stage source.
 
 ## Out of scope
 
-Other widget types, vendor/cache/Wowless modifications, new normal/demo seeds and new transport are excluded from this slice. Native catalogs, native unknown-ID arity, native enum admissibility, native event/allocation/lifetime parity, rendered/pixel parity and full widget-system acceptance remain unproved. No production DTO/state/feed/getter edits, build/integration harness changes or runtime execution belong to this test/spec-only stage.
+Other widget types, vendor/cache/Wowless modifications, new normal/demo seeds and new transport are excluded from this slice. Native catalogs, native unknown-ID arity, native enum admissibility, native event/allocation/lifetime parity, rendered/pixel parity and full widget-system acceptance remain unproved. Current passive stage deliberately excludes getter implementation until supplied-record/consumer RED. No build/integration harness changes, new transport or vendor modification is needed.

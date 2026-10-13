@@ -2,6 +2,8 @@
 use std::collections::HashMap;
 
 mod bar_records;
+mod bullet_record;
+pub use bullet_record::BulletTextListRecord;
 mod discrete;
 mod discrete_record;
 pub use discrete_record::DiscreteProgressStepsRecord;

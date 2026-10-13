@@ -1,3 +1,7 @@
+## [2026-10-13] source | BulletTextList passive input
+
+[Widget inventory](systems/ui-widget-manager-state.md#bullettextlist-input-only-checkpoint--2026-10-13) links the [owning contract](../specs/ui-widget-bullet-text-list.md). Fifteen-field type10 backing/feed and authored snapshot/security/real-cache tests leave getter and supplied-record/consumer acceptance pending; native/render/full-parent unproved.
+
 ## [2026-10-13] source | Supplied item dressability input
 
 [Existing API inventory](systems/lua-api.md#supplied-item-dressability--input-checkpoint) links the [owning C API contract](../specs/item-dressability.md). Passive boolean storage and authored whole cached PlayerChoice/input tests leave predicate and supplied-record/consumer RED pending; native/render/full-parent unproved.

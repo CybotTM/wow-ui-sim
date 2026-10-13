@@ -61,7 +61,13 @@ Historical input-only stage `64a2a57b2` is superseded by producer `2bb6cdde1`. T
 
 At `85b5494d2`, the [SpellDisplay contract](../../specs/ui-widget-spell-display.md) owns passive supplied DTOs, environment-local storage, type13 feed and nine tests. [Retail result-boundary RED](../../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md) is independently verified; selected-copy integrity and PTR RED remain pending; getter/query/serializer registration and GREEN/consumer acceptance remain absent. Parent OPEN.
 
+### BulletTextList input-only checkpoint — 2026-10-13
+
+[Owning contract](../../specs/ui-widget-bullet-text-list.md) records supplied type10 fifteen-field records, empty environment-local backing and the existing typed feed extension. Authored direct/snapshot/security/callback/unchanged-cache lifecycle tests remain unexecuted; getter projection is deliberately absent until genuine supplied-record RED. No new seeds or native/render/full-parent acceptance.
+
 ## Sources
+
+- [BulletTextList](../../specs/ui-widget-bullet-text-list.md) — supplied-record contract and revision-scoped proof limits.
 
 - [UIWidgetManager contract](../../specs/ui-widget-manager-state.md) — required behavior, staged tests, and historical RED boundary.
 - [Manager module](../../../src/c_api/ui_widget_manager.rs) and [inputs](../../../src/c_api/ui_widget_manager/inputs.rs) — numeric identities, set/membership records, and complete supplied DTOs.

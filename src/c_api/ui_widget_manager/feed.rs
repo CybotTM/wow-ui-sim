@@ -1,8 +1,8 @@
 //! Host feed operations mutate supplied state before synchronous consumer events.
 use super::{
-    ButtonHeaderRecord, CaptureBarRecord, DiscreteProgressStepsRecord, IconAndTextRecord,
-    SpellDisplayRecord, StatusBarRecord, TextWithStateRecord, WidgetId, WidgetSetEntry,
-    WidgetSetRecord,
+    BulletTextListRecord, ButtonHeaderRecord, CaptureBarRecord, DiscreteProgressStepsRecord,
+    IconAndTextRecord, SpellDisplayRecord, StatusBarRecord, TextWithStateRecord, WidgetId,
+    WidgetSetEntry, WidgetSetRecord,
 };
 use crate::lua_api::WowLuaEnv;
 use crate::{Error, Result};
@@ -14,6 +14,7 @@ pub enum WidgetVisualization {
     CaptureBar(CaptureBarRecord),
     StatusBar(StatusBarRecord),
     TextWithState(TextWithStateRecord),
+    BulletTextList(BulletTextListRecord),
     SpellDisplay(SpellDisplayRecord),
     DiscreteProgressSteps(DiscreteProgressStepsRecord),
     ButtonHeader(ButtonHeaderRecord),
@@ -28,6 +29,7 @@ impl WidgetVisualization {
             Self::CaptureBar(_) => 1,
             Self::StatusBar(_) => 2,
             Self::TextWithState(_) => 8,
+            Self::BulletTextList(_) => 10,
             Self::SpellDisplay(_) => 13,
             Self::DiscreteProgressSteps(_) => 19,
             Self::ButtonHeader(_) => 30,
@@ -174,6 +176,9 @@ fn supply_visualization(sim: &mut crate::lua_api::SimState, id: f64, record: Wid
             sim.ui_widget_inputs
                 .discrete_progress_steps
                 .insert(key, record);
+        }
+        WidgetVisualization::BulletTextList(record) => {
+            sim.ui_widget_inputs.bullet_text_lists.insert(key, record);
         }
         WidgetVisualization::ButtonHeader(record) => {
             sim.button_header_inputs.widgets.insert(key, record);
