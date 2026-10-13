@@ -21,7 +21,8 @@
 ## Implementation inventory
 
 - `src/lua_api/sim_substates/mod.rs`: independent supplied input/default.
-- `src/c_api/c_voice_chat_channels.rs`: explicit state-backed C_API query/registration.
+- `src/c_api/c_voice_chat_activity.rs`: query-only shared registration; Retail/PTR retain `retail-12-0-5`, Mists/WoW Forever expose the documented query, other profiles remain unchanged.
+- `src/c_api/c_voice_chat_channels.rs`: existing transcription/channel selectors retain their original gate.
 - `tests/voice_speak_for_me_active_input.rs`: two behavioral cases under `retail-12-0-5`.
 - `tests/voice_speak_for_me_consumer.rs`: one GUI/capability-gated real cached edit-box consumer case.
 
@@ -37,8 +38,8 @@ Independent saved-evidence verification PASS at compiled `978e9bcd15b47ad53dcdfd
 
 Cached `VoiceChatDocumentation.lua` directly declares the zero-argument, one non-nil boolean query for Retail, PTR, Mists and WoW Forever. Manifest membership does not establish contents for unavailable Wrath/Era/Anniversary files; their query contract remains unknown. This slice publishes only the existing independent activity input, not transcription or channel selectors, and preserves their current gates.
 
-- [ ] Expose the modeled query for the four directly documented profiles through `src/c_api/`.
-- [ ] Execute Mists result-boundary RED before changing publication; `tests/voice_speak_for_me_profile_input.rs` asserts supplied false, supplied true through a retained query, environment isolation and false restoration. Tests also apply to WoW Forever; staged, not executed.
+- [x] Expose only the modeled activity query for the four directly documented profiles through `src/c_api/`; preserve the existing Retail/PTR `retail-12-0-5` epoch floor and unrelated channel gates. No new publication on unproved Wrath/Era/Anniversary profiles.
+- [x] Execute Mists result-boundary RED before changing publication at `abb979c44`: 0 PASS / 2 FAIL, actual wait exit101. Both supplied false and retained supplied true calls reach arity checks then fail boolean assertions with explicit `got nil` diagnostics; later value/isolation/restoration assertions are unreached. Initial missing bwrap target mountpoint failed before execution (wait1, zero tests), separately retained; the earlier `be2fa83fb` private-module E0603 compile failure is not RED. `tests/voice_speak_for_me_profile_input.rs` also applies to WoW Forever, not yet executed there.
 - [ ] Verify Mists/WoW Forever GREEN and Retail/PTR preservation, with independent source/runtime proof. Earlier Retail evidence remains revision-scoped.
 
 ## Known gaps (current cycle)

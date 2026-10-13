@@ -37,12 +37,6 @@ pub struct VoiceMember {
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = super::ensure_namespace(state, "C_VoiceChat")?;
     table_set_rust_fn_static(state, namespace, "IsTranscribing", query_transcribing)?;
-    table_set_rust_fn_static(
-        state,
-        namespace,
-        "IsSpeakForMeActive",
-        query_speak_for_me_active,
-    )?;
     table_set_rust_fn_static(state, namespace, "GetChannelForChannelType", by_type)?;
     table_set_rust_fn_static(state, namespace, "GetChannelForCommunityStream", by_stream)
 }
@@ -50,12 +44,6 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
 fn query_transcribing(state: &mut LuaState) -> LuaResult<u32> {
     let transcribing = borrow_state(state)?.voice_chat.is_transcribing;
     state.push(Val::Bool(transcribing));
-    Ok(1)
-}
-
-fn query_speak_for_me_active(state: &mut LuaState) -> LuaResult<u32> {
-    let active = borrow_state(state)?.voice_chat.is_speak_for_me_active;
-    state.push(Val::Bool(active));
     Ok(1)
 }
 

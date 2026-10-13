@@ -207,6 +207,7 @@ pub(crate) mod c_trade_skill_filter;
 pub mod c_trade_skill_quality;
 #[cfg(feature = "retail-12-0-0")]
 pub(crate) mod c_transmog_collection;
+pub(crate) mod c_voice_chat_activity;
 #[cfg(feature = "retail-12-0-5")]
 pub mod c_voice_chat_channels;
 #[cfg(feature = "retail-12-0-0")]
