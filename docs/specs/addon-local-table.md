@@ -30,7 +30,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Verify the implemented retained rooted namespaces and opt-in access against all six tests. Parent retained RED report: `/home/osso/.local/state/wow-ui-sim/verification/patch-pass2-main-build-current/admitted-native-20261013T011400020026Z/runtime-scoped-20261013T013111696766Z/report.md`. No post-change test or compile has run.
+- [ ] Verify the implemented retained rooted namespaces and opt-in access against all six tests. [Bounded second-pass evidence](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md) separates the retained pre-fix RED from pending production GREEN.
 - [ ] Native absent-target behavior and error text remain unverified.
 
 ## Out of scope
