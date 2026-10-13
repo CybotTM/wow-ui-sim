@@ -1,25 +1,39 @@
-//! Actual cache consumer; directly seeded DTOs + real event dispatch, not future feed APIs.
-use super::fixtures::{
-    ID, SET_ID, assert_initial_snapshot, assert_lua, seed_record, supplied_record,
-};
+//! Actual cache consumer over typed host feeds; explicit record deletion uses a real event.
+use super::fixtures::{ID, SET_ID, assert_initial_snapshot, assert_lua, supplied_record};
 use crate::common;
 use common::blizzard_addon_harness::load_blizzard_addon_closure_into_env;
-use wow_ui_sim::c_api::ui_widget_manager::{WidgetId, WidgetSetEntry, WidgetSetRecord};
+use wow_ui_sim::c_api::ui_widget_manager::{
+    DiscreteProgressStepsRecord, WidgetId, WidgetSetEntry, WidgetSetRecord, WidgetVisualization,
+};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-fn seed_membership(env: &WowLuaEnv) {
-    env.state().borrow_mut().ui_widget_inputs.sets.insert(
-        WidgetId::from_number(SET_ID),
-        WidgetSetRecord {
+fn discrete_entry() -> WidgetSetEntry {
+    WidgetSetEntry {
+        widget_id: ID,
+        widget_type: 19,
+        unit_token: None,
+    }
+}
+
+fn supply_membership(env: &WowLuaEnv) {
+    env.replace_ui_widget_set(
+        SET_ID,
+        Some(WidgetSetRecord {
             layout_direction: 0,
             vertical_padding: 7.0,
-            widgets: vec![WidgetSetEntry {
-                widget_id: ID,
-                widget_type: 19,
-                unit_token: None,
-            }],
-        },
-    );
+            widgets: vec![discrete_entry()],
+        }),
+    )
+    .expect("host membership supplied before cached registration");
+}
+
+fn inject_discrete(env: &WowLuaEnv, record: DiscreteProgressStepsRecord) {
+    env.update_ui_widget(
+        SET_ID,
+        discrete_entry(),
+        WidgetVisualization::DiscreteProgressSteps(record),
+    )
+    .expect("host discrete feed commits record before notification");
 }
 
 fn dispatch_incremental_update(env: &WowLuaEnv) {
@@ -142,8 +156,7 @@ fn update_hide_restore(env: &WowLuaEnv) {
     record.progress_val = 52.0;
     record.num_steps = 6.0;
     record.tooltip = "Updated discrete tooltip".into();
-    seed_record(env, ID, record.clone());
-    dispatch_incremental_update(env);
+    inject_discrete(env, record.clone());
     assert_lua(
         env,
         "incremental progress and step geometry",
@@ -157,8 +170,7 @@ fn update_hide_restore(env: &WowLuaEnv) {
     );
     flush_and_assert_counts(env, 1);
     record.shown_state = 0;
-    seed_record(env, ID, record.clone());
-    dispatch_incremental_update(env);
+    inject_discrete(env, record.clone());
     assert_lua(
         env,
         "hidden adapter releases actual frame",
@@ -175,8 +187,7 @@ fn update_hide_restore(env: &WowLuaEnv) {
     record.shown_state = 1;
     record.progress_val = 16.0;
     record.num_steps = 2.0;
-    seed_record(env, ID, record);
-    dispatch_incremental_update(env);
+    inject_discrete(env, record);
     assert_lua(
         env,
         "shown restores pooled template with changed geometry",
@@ -207,19 +218,12 @@ fn remove_and_unregister(env: &WowLuaEnv) {
     "#,
     );
     flush_and_assert_counts(env, 0);
-    seed_record(env, ID, supplied_record());
-    dispatch_incremental_update(env);
+    inject_discrete(env, supplied_record());
     flush_and_assert_counts(env, 1);
-    env.state()
-        .borrow_mut()
-        .ui_widget_inputs
-        .sets
-        .get_mut(&WidgetId::from_number(SET_ID))
-        .unwrap()
-        .widgets
-        .clear();
-    env.fire_event("UPDATE_ALL_UI_WIDGETS")
-        .expect("actual membership refresh");
+    assert!(
+        env.remove_ui_widget(SET_ID, ID)
+            .expect("host membership removal triggers real reconciliation")
+    );
     assert_lua(
         env,
         "membership removal",
@@ -228,9 +232,7 @@ fn remove_and_unregister(env: &WowLuaEnv) {
     "#,
     );
     flush_and_assert_counts(env, 0);
-    seed_membership(env);
-    env.fire_event("UPDATE_ALL_UI_WIDGETS")
-        .expect("restore membership for unregister");
+    inject_discrete(env, supplied_record());
     flush_and_assert_counts(env, 1);
     assert_lua(
         env,
@@ -246,7 +248,7 @@ fn remove_and_unregister(env: &WowLuaEnv) {
         assert(not DiscreteBeforeUnregister:IsShown())
     "#,
     );
-    dispatch_incremental_update(env);
+    inject_discrete(env, supplied_record());
     env.fire_event("UPDATE_ALL_UI_WIDGETS")
         .expect("unregistered full event ignored");
     flush_and_assert_counts(env, 0);
@@ -264,10 +266,10 @@ fn remove_and_unregister(env: &WowLuaEnv) {
 fn discrete_actual_cached_manager_updates_hides_restores_removes_unregisters() {
     common::with_timeout(88, || {
         let env = WowLuaEnv::new().expect("isolated consumer environment");
-        seed_record(&env, ID, supplied_record());
+        supply_membership(&env);
+        inject_discrete(&env, supplied_record());
         assert_initial_snapshot(&env);
-        // Everything below is UNREACHED until missing-getter/supplied-record RED passes.
-        seed_membership(&env);
+        // Query still precedes cached-template/atlas prerequisites.
         load_cached_consumer(&env);
         register_and_assert_geometry(&env);
         update_hide_restore(&env);

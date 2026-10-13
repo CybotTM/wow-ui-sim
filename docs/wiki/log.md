@@ -1,3 +1,7 @@
+## [2026-10-13] source | DiscreteProgressSteps producer after genuine RED
+
+[Producer checkpoint](systems/ui-widget-manager-state.md#discreteprogresssteps-producer-checkpoint--2026-10-13) records query/typed-feed integration without vendor changes; historical RED and current unexecuted GREEN scopes remain separate.
+
 ## [2026-10-13] evidence | Bounded native simulator input
 
 [Checkpoint SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-ptr-and-owning-checkpoints--2026-10-13) links sanitized saved OS-input receipts without pixels, endpoint or current-liveness claims; viewing-size acceptance UNKNOWN.

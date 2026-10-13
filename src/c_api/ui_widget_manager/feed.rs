@@ -1,7 +1,7 @@
 //! Host feed operations mutate supplied state before synchronous consumer events.
 use super::{
-    ButtonHeaderRecord, CaptureBarRecord, IconAndTextRecord, StatusBarRecord, WidgetId,
-    WidgetSetEntry, WidgetSetRecord,
+    ButtonHeaderRecord, CaptureBarRecord, DiscreteProgressStepsRecord, IconAndTextRecord,
+    StatusBarRecord, WidgetId, WidgetSetEntry, WidgetSetRecord,
 };
 use crate::lua_api::WowLuaEnv;
 use crate::{Error, Result};
@@ -12,6 +12,7 @@ pub enum WidgetVisualization {
     IconAndText(IconAndTextRecord),
     CaptureBar(CaptureBarRecord),
     StatusBar(StatusBarRecord),
+    DiscreteProgressSteps(DiscreteProgressStepsRecord),
     ButtonHeader(ButtonHeaderRecord),
     #[cfg(feature = "retail-12-0-0")]
     PreyHuntProgress(crate::c_api::c_prey::PreyHuntProgressWidget),
@@ -23,6 +24,7 @@ impl WidgetVisualization {
             Self::IconAndText(_) => 0,
             Self::CaptureBar(_) => 1,
             Self::StatusBar(_) => 2,
+            Self::DiscreteProgressSteps(_) => 19,
             Self::ButtonHeader(_) => 30,
             #[cfg(feature = "retail-12-0-0")]
             Self::PreyHuntProgress(_) => 31,
@@ -156,6 +158,11 @@ fn supply_visualization(sim: &mut crate::lua_api::SimState, id: f64, record: Wid
         }
         WidgetVisualization::StatusBar(record) => {
             sim.ui_widget_inputs.status_bars.insert(key, record);
+        }
+        WidgetVisualization::DiscreteProgressSteps(record) => {
+            sim.ui_widget_inputs
+                .discrete_progress_steps
+                .insert(key, record);
         }
         WidgetVisualization::ButtonHeader(record) => {
             sim.button_header_inputs.widgets.insert(key, record);

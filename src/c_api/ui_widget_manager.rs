@@ -2,6 +2,7 @@
 use std::collections::HashMap;
 
 mod bar_records;
+mod discrete;
 mod discrete_record;
 pub use discrete_record::DiscreteProgressStepsRecord;
 mod bars;

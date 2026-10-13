@@ -1,6 +1,6 @@
 # Supplied DiscreteProgressSteps visualization
 
-Host-supplied DiscreteProgressSteps records belong to `src/c_api/ui_widget_manager/`; [widget manager architecture](../wiki/systems/ui-widget-manager-state.md) describes existing supplied-record behavior. Only DTO/map/test scaffolding is staged; no getter/registration/feed producer or executed RED yet. Cached Retail/PTR schema identifies visualization19 and all19 nonnil fields; native runtime/catalog/render parity remains unknown.
+Host-supplied DiscreteProgressSteps records belong to `src/c_api/ui_widget_manager/`; [widget manager architecture](../wiki/systems/ui-widget-manager-state.md) describes existing supplied-record behavior. Complete snapshot producer and typed host-feed variant are implemented after genuine five-case RED at `42f206f66`: 0 PASS / 5 missing-supplied-record FAIL, before cache/atlas prerequisites. Current GREEN/startup/profile acceptance is pending. Cached Retail/PTR schema identifies visualization19 and all19 nonnil fields; native runtime/catalog/render parity remains unknown.
 
 ## What it must do
 
@@ -17,18 +17,21 @@ Complete snapshot fields: `shownState`, `tooltip`, `progressMin`, `progressMax`,
 
 ## Implementation inventory
 
-- `src/c_api/ui_widget_manager/discrete_record.rs`: staged complete input DTO only.
-- `src/c_api/ui_widget_manager/inputs.rs`: staged keyed input map only.
-- `src/c_api/ui_widget_manager.rs`: staged public DTO export only.
+- `src/c_api/ui_widget_manager/discrete_record.rs`: complete explicit input DTO.
+- `src/c_api/ui_widget_manager/inputs.rs`: environment-owned keyed map, empty by default.
+- `src/c_api/ui_widget_manager/discrete.rs`: authenticated numeric lookup and fresh complete19-field snapshot projection.
+- `src/c_api/ui_widget_manager/queries.rs`: registers the query in the existing namespace.
+- `src/c_api/ui_widget_manager/feed.rs`: typed visualization19 validation/storage before existing synchronous notification.
+- `src/c_api/ui_widget_manager.rs`: module wiring and public DTO export.
 
 ## Tests asserting this spec
 
-`tests/ui_widget_manager_discrete.rs` is automatically included by existing integration macro; its explicit child paths cover `tests/widget_discrete/{queries,consumer,security,fixtures}.rs`. Five cases: three query cases, one cached consumer lifecycle, one actual-secret case gated by `retail-12-1-0`. All are unrun; initial getter/supplied-record assertions precede cache/prerequisite work. Direct input seeding is not host-feed proof.
+`tests/ui_widget_manager_discrete.rs` is automatically included by existing integration macro; explicit child paths cover `tests/widget_discrete/{queries,consumer,security,feed,fixtures}.rs`. Seven intended cases: query3, actual cached consumer1, actual-secret1 gated by `retail-12-1-0`, typed-feed2. At `42f206f66`, original five cases physically fail on missing supplied record; one timeout-child summary is duplicate, not a sixth case. Later fields/numeric/security/cache assertions were unreached. Original RED does not establish an independent feed RED. Query/security tests directly seed inputs; current consumer activation/update/hidden/restore/membership removal uses typed feeds, with explicit direct record deletion plus actual event for the separate record-removal boundary. Feed cases assert state visible inside real event callbacks and rejection without mutation/notification. Current seven-case GREEN remains unrun.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile candidates and retain genuine missing-getter/supplied-record RED before implementing getter/registration or host-feed variant/storage.
-- [ ] Implement/verify producer only after RED; adapt host-feed tests separately. All cached lifecycle/atlas/primitive assertions currently unreached.
+- [ ] Retain complete genuine42 RED/compiler/authentication/launcher evidence; compiler exit0 with six inherited manifest deprecations and no source compiler messages, runtime exit101 is behavioral failure, not setup/timeout.
+- [ ] Execute current query/feed/security and actual cached lifecycle GREEN, inspect full diagnostics, then applicable startup/check/PTR scopes. Current cached lifecycle/atlas/primitive assertions remain unexecuted after producer changes.
 
 ## Out of scope
 

@@ -18,6 +18,7 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         query_icon_and_text,
     )?;
     super::bars::register(state)?;
+    super::discrete::register(state)?;
     super::hud::register(state)
 }
 
