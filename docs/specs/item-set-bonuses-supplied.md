@@ -1,6 +1,6 @@
 # Supplied item-set bonuses
 
-`C_Item.GetSetBonusesForSpecializationByItemID(specID, itemID)` must project an explicit environment-local mapping to ordered spell IDs. C_API ownership lives in `src/c_api/item_set_bonuses.rs`; only an empty alias-backed fixture field is integrated. Producers are deferred until genuine RED. Tests target `client-retail`/`client-ptr`; backing state uses their shared `retail-12-0-0` feature floor; integration is uncompiled/unexecuted.
+`C_Item.GetSetBonusesForSpecializationByItemID(specID, itemID)` must project an explicit environment-local mapping to ordered spell IDs. C_API ownership lives in `src/c_api/item_set_bonuses.rs`; the producer is implemented after genuine behavioral RED. Central registration wiring belongs to main. Tests target `client-retail`/`client-ptr`; backing state uses their shared `retail-12-0-0` feature floor. GREEN remains pending; implementation is not native acceptance.
 
 Accepted draft evidence: cached Retail `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_APIDocumentationGenerated/ItemDocumentation.lua:1087–1101` declares required numeric `specID`, `itemID`, `MayReturnNothing = true`, `SecretArguments = "AllowedWhenUntainted"`, and nonnil table `itemSetSpellIDs` with numeric inner type. Supplied mapping, ordering/duplicates, fresh allocation and signed32 matching below are accepted simulator policies, not native execution or historical-build evidence. PTR gating does not establish parity.
 
@@ -28,22 +28,24 @@ Accepted draft evidence: cached Retail `~/.cache/wow-ui-sim/blizzard-ui/retail/A
 
 ## Implementation inventory
 
-- `src/c_api/item_set_bonuses.rs`: `ItemSetBonuses = HashMap<(i32, i32), Vec<i32>>`; C_API alias ownership only.
+- `src/c_api/item_set_bonuses.rs`: `ItemSetBonuses = HashMap<(i32, i32), Vec<i32>>`; producer and `pub(crate) register(state)` ensure `C_Item` and publish only `GetSetBonusesForSpecializationByItemID`. Both original arguments undergo VM secret authentication before strict numeric parsing or lookup. Exact signed32 selectors query cloned supplied rows; missing pairs return nil. Supplied rows become fresh stack-rooted sequence tables, preserving order/duplicates and releasing the state borrow before VM allocation. Pending GREEN.
 - `src/c_api/mod.rs`: public alias re-export, no registration change.
 - `src/lua_api/state/sim_state.rs`: public `item_set_bonuses` field.
 - `src/lua_api/state.rs`: independent empty initialization.
 - `src/c_api/item_spell/c_item.rs`: existing namespace boundary, unchanged in this stage.
+- Central producer wiring is main-owned; no shared registration, state, other modules or tests changed by this implementation.
 
 ## Tests asserting this spec
 
-[tests/item_set_bonuses_supplied.rs](../../tests/item_set_bonuses_supplied.rs): nine unexecuted behavioral tests covering absent pairs; exact order/duplicates; supplied empty rows; mutation/fresh tables; independent environments; signed32 endpoints and invalid numeric misses; required-number validation; secure secrets; tainted permission-before-validation/miss and recovery. All supplied spec/item/spell relationships are artificial fixtures, not native relationships.
+[tests/item_set_bonuses_supplied.rs](../../tests/item_set_bonuses_supplied.rs): nine behavioral tests covering absent pairs; exact order/duplicates; supplied empty rows; mutation/fresh tables; independent environments; signed32 endpoints and invalid numeric misses; required-number validation; secure secrets; tainted permission-before-validation/miss and recovery. Main supplied genuine 76 RED evidence: one absence test passed; eight supplied/public-type/security tests failed at actual behavioral assertions. No tests were run in this implementation stage; bounded GREEN remains pending with main. All supplied spec/item/spell relationships are artificial fixtures, not native relationships.
 
 ## Known gaps (current cycle)
 
-- [ ] Obtain compiled behavioral RED; unresolved symbols/compile errors are not RED.
-- [ ] Add producer only after RED, then obtain bounded GREEN.
+- [x] Obtain compiled behavioral RED; main supplied 76 RED evidence, not unresolved symbols/compile errors.
+- [x] Implement producer after RED, within the C_API module only.
+- [ ] Main wires central registration and obtains bounded GREEN; requirement checkboxes above remain pending that proof.
 - [ ] Native numeric-domain, list semantics, return arity and Retail/PTR parity remain unverified.
 
 ## Out of scope
 
-Equipment/active-bonus thresholds/catalog inference, normal-session population, Lua supplier/Admin commands, fallback, native probes, other profiles, vendor/config/WTF changes. No producer or registration implementation in this stage.
+Equipment/active-bonus thresholds/catalog inference, normal-session population, Lua supplier/Admin commands, fallback, native probes, other profiles, vendor/config/WTF changes. Shared wiring/state/modules/tests, commits, builds/checks/runtime/final gates, operations and delegation are excluded from this implementation stage.
