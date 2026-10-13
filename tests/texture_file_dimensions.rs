@@ -54,8 +54,8 @@ impl Fixture {
             .unwrap();
     }
 
-    fn assert_dimensions(&self, expected: (u32, u32)) {
-        let dimensions: (u32, u32) = self
+    fn assert_dimensions(&self, expected: (i32, i32)) {
+        let dimensions: (i32, i32) = self
             .env
             .eval(
                 "return FileDimensionTexture:GetFileWidth(), FileDimensionTexture:GetFileHeight()",
@@ -70,7 +70,7 @@ fn texture_get_file_width_reads_actual_source_not_widget_width() {
     let fixture = Fixture::new();
     for (path, expected) in [(WIDE_PATH, 7), (TALL_PATH, 3)] {
         fixture.set_texture(path);
-        let (file_width, widget_width): (u32, u32) = fixture
+        let (file_width, widget_width): (i32, i32) = fixture
             .env
             .eval("return FileDimensionTexture:GetFileWidth(), FileDimensionTexture:GetWidth()")
             .expect("GetFileWidth must be published on the public Texture object");
@@ -81,7 +81,7 @@ fn texture_get_file_width_reads_actual_source_not_widget_width() {
         .env
         .exec("FileDimensionTexture:SetWidth(211)")
         .unwrap();
-    let (file_width, widget_width): (u32, u32) = fixture
+    let (file_width, widget_width): (i32, i32) = fixture
         .env
         .eval("return FileDimensionTexture:GetFileWidth(), FileDimensionTexture:GetWidth()")
         .unwrap();
@@ -93,7 +93,7 @@ fn texture_get_file_height_reads_actual_source_not_widget_height() {
     let fixture = Fixture::new();
     for (path, expected) in [(WIDE_PATH, 5), (TALL_PATH, 11)] {
         fixture.set_texture(path);
-        let (file_height, widget_height): (u32, u32) = fixture
+        let (file_height, widget_height): (i32, i32) = fixture
             .env
             .eval("return FileDimensionTexture:GetFileHeight(), FileDimensionTexture:GetHeight()")
             .expect("GetFileHeight must be published on the public Texture object");
@@ -104,7 +104,7 @@ fn texture_get_file_height_reads_actual_source_not_widget_height() {
         .env
         .exec("FileDimensionTexture:SetHeight(223)")
         .unwrap();
-    let (file_height, widget_height): (u32, u32) = fixture
+    let (file_height, widget_height): (i32, i32) = fixture
         .env
         .eval("return FileDimensionTexture:GetFileHeight(), FileDimensionTexture:GetHeight()")
         .unwrap();
@@ -169,7 +169,7 @@ fn texture_file_dimensions_ignore_uv_crop_and_tiling() {
             "#,
         )
         .unwrap();
-    let controls: (f64, f64, f64, f64, u32, u32, bool, bool) = fixture
+    let controls: (f64, f64, f64, f64, i32, i32, bool, bool) = fixture
         .env
         .eval(
             r#"
