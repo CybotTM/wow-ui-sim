@@ -1,6 +1,6 @@
 # Speak For Me RED and separate animation controls — 2026-10-13
 
-[Retention manifest](red-current/red-retention-manifest.json): **50 selected complete TEXT payloads / 64,772 public bytes**. This is selected retention, not whole-tree authentication.
+[Retention manifest](red-current/red-retention-manifest.json): **50 selected complete TEXT payloads / 64,772 public bytes**. Independent bounded RED retention PASS at `b35b5580f`:50 complete transforms,31 JSON equivalents,23 changed links and mapped-token privacy. This is selected retention, not whole-tree authentication or general secret-absence proof.
 
 ## Speak query: result-boundary RED
 
@@ -8,7 +8,7 @@ Initial `159998966` and refined `c81f10375` each record **0 PASS / 2 FAIL, actua
 
 Refined Rust function-type checks pass on reached paths; these are not additional passing tests. Source establishes the generic callable's one-nil projection. Generic Lua assertion logs do not reveal exact actual values, type or arity. Default/boolean result assertions fail; later supplied-input transitions, retained/direct true checks, independence and final environment transitions are unreached.
 
-Production `a8a148e98` adds the explicit state-backed query later. GREEN compilation/execution is pending; this packet makes no GREEN claim. [Contract](../../../../docs/specs/voice-speak-for-me-active-input.md) owns the supplied-input requirements.
+Production `a8a148e98` adds the explicit state-backed query later. Separately saved bounded Retail query2/transcription-preservation3, fresh CLEAN startup and default check pass; the [contract](../../../../docs/specs/voice-speak-for-me-active-input.md) records exact scopes. Current GREEN text retention and real cached edit-box execution remain pending; the retained RED manifest preserves its earlier temporal claims. [Contract](../../../../docs/specs/voice-speak-for-me-active-input.md) owns the supplied-input requirements.
 
 ## Separate executed animation controls
 
