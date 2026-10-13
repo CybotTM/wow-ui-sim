@@ -254,6 +254,17 @@ fn addon_exists(state: &LuaState, addon_name: &str) -> bool {
 
 // ── C_AddOns function implementations ────────────────────────────────────────
 
+fn c_addons_get_addon_local_table(state: &mut LuaState) -> LuaResult<u32> {
+    // Authenticate before selector parsing; VM revocation and caller taint remain intact.
+    let addon = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
+    let name = addon_name_from_value(state, addon).ok_or_else(|| {
+        rilua::runtime_error("C_AddOns.GetAddOnLocalTable requires an addon name or index")
+    })?;
+    let namespace = super::c_addons_local_table::get_namespace(state, &name)?;
+    state.push(namespace);
+    Ok(1)
+}
+
 fn c_addons_get_num_addons(state: &mut LuaState) -> LuaResult<u32> {
     let count = borrow_state(state)?.addons.len() as f64;
     state.push(Val::Num(count));

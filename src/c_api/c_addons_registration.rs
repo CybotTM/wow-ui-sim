@@ -6,6 +6,7 @@ type RustLuaFn = rilua::vm::closure::RustFn;
 const C_ADDONS_QUERY_METHODS: &[(&str, RustLuaFn)] = &[
     ("GetNumAddOns", c_addons_get_num_addons),
     ("GetAddOnInfo", c_addons_get_addon_info),
+    ("GetAddOnLocalTable", c_addons_get_addon_local_table),
     ("IsAddOnLoaded", c_addons_is_addon_loaded),
     ("IsAddOnLoadable", c_addons_is_addon_loadable),
     ("IsAddOnLoadOnDemand", c_addons_is_addon_load_on_demand),

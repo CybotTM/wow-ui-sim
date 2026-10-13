@@ -20,17 +20,19 @@
 
 - `src/loader/addon.rs`, `src/loader/lua_file.rs`: actual shared namespace creation/chunk arguments.
 - `src/toc/mod.rs`: metadata and Blizzard classification.
-- `src/c_api/c_addons.rs`, `c_addons_registration.rs`: namespace access API destination; producer/retention not implemented yet.
+- `src/c_api/c_addons_local_table.rs`: VM-registry-rooted records retain the original namespace, TOC opt-in and actual `loads_as_blizzard_code()` classification. Namespace and record are stack-rooted during construction; no Lua GC handles live in `SimState`.
+- `src/loader/addon.rs`: retain the namespace before compiling/executing files; existing `AddonInfo.loaded` marks gate publication. No `SimState` borrow crosses registry allocation.
+- `src/c_api/c_addons.rs`, `c_addons_registration.rs`: direct registration and existing name/index parser. VM `unwrap_secret` authenticates the original selector before parsing, including revoked-secret-context denial; `state_is_secure` independently rejects tainted plain-name Blizzard queries. Neither changes caller taint.
 
 ## Tests asserting this spec
 
-`tests/addon_local_table.rs`: six unrun behavioral tests with real temporary two-addon loading, original namespace identity/mutation, GC lifetime, opt-in/absence and genuine security boundaries. No RED/GREEN claim until executed.
+`tests/addon_local_table.rs`: six behavioral tests with real temporary two-addon loading, original namespace identity/mutation, GC lifetime, opt-in/absence and genuine security boundaries. The parent runtime report at `080833f1d` records six genuine RED failures at the initial raw-registration assertion; namespace/security/GC assertions were not reached. Implementation is pending actual GREEN; all requirement checkboxes remain unchecked.
 
 ## Known gaps (current cycle)
 
-- [ ] Obtain genuine behavioral RED, implement retained rooted namespaces and opt-in access, then verify.
+- [ ] Verify the implemented retained rooted namespaces and opt-in access against all six tests. Parent retained RED report: `/home/osso/.local/state/wow-ui-sim/verification/patch-pass2-main-build-current/admitted-native-20261013T011400020026Z/runtime-scoped-20261013T013111696766Z/report.md`. No post-change test or compile has run.
 - [ ] Native absent-target behavior and error text remain unverified.
 
 ## Out of scope
 
-Reload/unload, failed-load/bootstrap-only publication, numeric selectors, aliases/case normalization and native/earlier-profile parity are separate contracts. No vendor edits or copied/empty namespace compatibility paths.
+Reload/unload, failed-load/bootstrap-only publication, aliases/case normalization and native/earlier-profile parity are separate contracts. Numeric selectors reuse the existing addon parser but lie outside the six-test proof. No vendor edits or copied/empty namespace compatibility paths.

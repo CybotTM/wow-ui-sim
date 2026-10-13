@@ -390,6 +390,10 @@ fn build_addon_context<'a>(
     let addon_table = env
         .create_addon_table()
         .map_err(|e| LoadError::Lua(e.to_string()))?;
+    env.with_state(|state| {
+        crate::c_api::c_addons_local_table::retain_namespace(state, folder_name, addon_table, toc);
+        Ok::<(), LoadError>(())
+    })?;
 
     Ok(AddonContext {
         name: folder_name,

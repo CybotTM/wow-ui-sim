@@ -34,6 +34,7 @@ pub mod c_action_bar_queries;
 pub(crate) mod c_action_bar_spell_slots;
 pub mod c_addon_profiler;
 pub mod c_addons;
+pub(crate) mod c_addons_local_table;
 pub mod c_allied_races;
 pub mod c_ardenweald_gardening;
 pub mod c_area_poi_info;
