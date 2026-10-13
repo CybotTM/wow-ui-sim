@@ -1,6 +1,8 @@
 //! Supplied widget sets, visualizations, and synchronous host update feeds.
 use std::collections::HashMap;
 
+mod bar_records;
+pub use bar_records::{CaptureBarRecord, StatusBarRecord};
 mod feed;
 mod fixtures;
 mod inputs;

@@ -1,7 +1,7 @@
 //! Environment-owned widget sets and visualization inputs. No native feed inference.
 use std::collections::HashMap;
 
-use super::WidgetId;
+use super::{CaptureBarRecord, StatusBarRecord, WidgetId};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct WidgetSetEntry {
@@ -45,4 +45,11 @@ pub struct UiWidgetInputs {
     pub sets: HashMap<WidgetId, WidgetSetRecord>,
     pub icon_and_text: HashMap<WidgetId, IconAndTextRecord>,
     pub quest_sets: HashMap<(i32, i32), f64>,
+    pub status_bars: HashMap<WidgetId, StatusBarRecord>,
+    pub capture_bars: HashMap<WidgetId, CaptureBarRecord>,
+    /// Zero means no selected HUD set in this simulator fixture, not a native default.
+    pub top_center_widget_set_id: f64,
+    pub below_minimap_widget_set_id: f64,
+    pub power_bar_widget_set_id: f64,
+    pub objective_tracker_widget_set_id: f64,
 }
