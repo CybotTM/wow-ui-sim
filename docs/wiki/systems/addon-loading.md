@@ -61,6 +61,10 @@ During startup, discovery loads non-LoadOnDemand roots plus explicit LoadOnDeman
 
 `LoadResult` includes per-addon timing breakdown: `io_time`, `xml_parse_time`, `lua_exec_time`, `saved_vars_time`.
 
+### Opted-in addon namespace access — runtime unverified
+
+`d91ac3476` retains the actual shared second chunk argument before file execution in [addon loading](../../../src/loader/addon.rs). [c_addons_local_table.rs](../../../src/c_api/c_addons_local_table.rs) roots namespace records in the VM registry, not SimState, and gates `C_AddOns.GetAddOnLocalTable` on loaded state, TOC opt-in and actual Blizzard-code classification. The query authenticates the original selector and rejects insecure Blizzard access without loading a target or manufacturing a table. [Addon-local-table spec](../../specs/addon-local-table.md) owns identity/lifetime/access policies and native unknowns. All six pre-fix tests reached missing registration; later GC/security assertions were unreached. Production GREEN remains pending; [shared four-producer evidence boundary](lua-api.md#current-pet-hover-and-follower-instance-models--runtime-unverified) separates earlier animation/role proof.
+
 ### Idempotent Loaded-Addon Loads
 
 `load_addon_internal()` checks the `SimState` addon record before executing files. If the same addon is already marked loaded, the call returns an empty `LoadResult` without re-running Lua/XML files or post-load patches. This preserves mutable registries created by earlier files, including `StaticPopupDialogs`, and prevents repeated dependency encounters from replacing state. The separate loading transaction still handles in-progress re-entry: an addon is not marked loaded until its files and post-load work complete.

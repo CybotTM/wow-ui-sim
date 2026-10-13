@@ -262,7 +262,7 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 
 ## Global Functions
 
-**Explicit unit roles** — Source-inspected 2026-10-12: `globals/real/unit_roles.rs` defines three `UnitRole` values; environment-owned GUID-to-optional-role state backs existing group-role getters and current Retail/PTR enum/string setters in `unit_roles_assignment.rs`. Original VM arguments are authenticated before setter parsing; getter outputs retain existing identity-secrecy finishing. Mutation precedes synchronous notification through [[event-system#Explicit unit role notification]]. [Contract/source/caller SSOT](../../specs/unit-role-assignment.md) owns policies and proof limits: parent-reported 13 genuine missing-raw-setter RED cases, current GREEN pending, no PASS or new native claim. Vendor None-radio behavior unchanged.
+**Explicit unit roles** — Source-inspected 2026-10-12: `globals/real/unit_roles.rs` defines three `UnitRole` values; environment-owned GUID-to-optional-role state backs existing group-role getters and current Retail/PTR enum/string setters in `unit_roles_assignment.rs`. Original VM arguments are authenticated before setter parsing; getter outputs retain existing identity-secrecy finishing. Mutation precedes synchronous notification through [[event-system#Explicit unit role notification]]. [Contract/source/caller SSOT](../../specs/unit-role-assignment.md) owns policies and proof limits: historical 13 genuine missing-raw-setter RED cases; bounded 13/13 GREEN, exit0, at `080833f1d`, including unchanged popup and whole RolePoll accept handlers. No native or full XML/menu/startup acceptance claim. Vendor None-radio behavior unchanged.
 
 **Pending spell confirmations** — `globals/real/spell_confirmation_prompts.rs` copies validated host fields into an empty-default `SimState` map before synchronous dispatch, then returns fresh stack-rooted query snapshots. Accept/decline delete only the numeric spell identity. Mainline 12.0.5+ registration excludes the separately cfg-selected historical/nonmainline inert query. [Contract](../../specs/spell-confirmation-prompts.md) owns mapping, inferred policies and saved missing-surface RED and bounded independent six-case PASS; producer `b07fc61f6` has bounded independent acceptance at compiled/docs snapshot `329eabfbb`, with default fmt/check recorded in the contract. Security/rooting remain source-only; parent startup is separate from independent proof, and combined batch16 test compilation still failed. No native or whole-page completion.
 
@@ -299,6 +299,14 @@ For known WoW texture paths resolved by the bundled texture manifest, `Texture:G
 **Settings panel surface** — The post-load temporary workaround in `settings_surface_defaults.rs` reconciles the canonical `_G.SettingsPanel`/`Settings` pair when Blizzard replaces either surface. It adds only absent category IDs and `Settings.OpenToCategory`, preserving existing members; reapplying it is idempotent for the same panel identity. Retail 12.1 also pins the 13 housing Settings labels/tooltips required for the canonical Interface registrant to finish. `C_SettingsUtil.OpenSettingsPanel(categoryID, scrollTarget)` is modeled: it forwards to `SettingsPanelMixin.OpenToCategory(SettingsPanel, categoryID, scrollTarget)`, defaults an absent category ID to `0`, and is a no-op if either required surface is absent. `C_SettingsUtil.NotifySettingsLoaded` remains unsupported; category/element scrolling semantics beyond the supplied target remain unmodeled.
 
 **Focused compatibility boundaries** — `EJ_SetLootFilter()` accepts integer Lua values and numeric strings locally; nil, invalid, and non-integral inputs become zero without changing global argument coercion. Chat startup assigns `DEFAULT_CHAT_FRAME` whenever `ChatFrame1` exists, while `ChatFrame1.editBox` remains conditional on `ChatFrame1EditBox`. Temporary chat-window state also backs `SetChatWindowName()` and `SetChatWindowDocked()` round-trips through `GetChatWindowInfo()`; these fields remain in the compatibility table until saved chat-layout state is modeled.
+
+## Current pet-hover and follower-instance models — runtime unverified
+
+`8a2f7daf9` replaces PetJournal hover no-ops with environment-owned selection in [c_pet_journal_hover.rs](../../../src/c_api/c_pet_journal_hover.rs), installed after the existing namespace registration. Original VM argument authentication and strict string extraction precede mutation; [pet-hover spec](../../specs/pet-journal-hover.md) owns policies, consumers and evidence.
+
+`e9f6a81a3` replaces constant-false follower membership with a live read of existing instance ID and dungeon classification in [c_lfg_info.rs](../../../src/c_api/c_lfg_info.rs). The existing [host zone API](../../admin-api/zone.md) supplies the optional current ID; [follower-instance spec](../../specs/in-lfg-follower-dungeon.md) owns replacement policy and bounded cached-caller coverage.
+
+The four-producer pre-fix run at `080833f1d` selected 28 cases: 1 PASS / 27 genuine missing-behavior FAIL. Pet8, texture6 and addon6 all failed; follower had 1 control PASS / 7 FAIL. Downstream assertions were not all reached. Current production runtime is unverified: no post-implementation GREEN for these four. Earlier VertexColor6/role13 GREEN is separate proof, not evidence for these producers. [Texture model](widget-system.md#actual-texture-file-dimensions--runtime-unverified) and [addon namespace model](addon-loading.md#opted-in-addon-namespace-access--runtime-unverified) complete this scope; specs own contracts and native unknowns. No whole-suite or completion claim.
 
 ## C_* Namespaces
 
@@ -346,17 +354,17 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 
 `CreateAnimationGroup()` returns a group supporting `Play()`, `Stop()`, `Pause()`, `SetLooping()`, and `SetScript("OnFinished")`. Animation types: Alpha, Translation, Scale, Rotation, FlipBook, VertexColor, Path. `fire_on_update()` ticks animation groups after OnUpdate handlers.
 
-### VertexColor animation — implementation, runtime proof pending
+### VertexColor animation — bounded runtime proof
 
 The committed implementation supplies `SetStartColor`, `SetEndColor`, `GetStartColor`, and `GetEndColor` as ColorMixin endpoints, endpoint state, XML configuration and texture-target tick application. [Contract and evidence SSOT](../../specs/vertex-color-animation.md) owns the literal patch 10.2.5 RGBA-linear/two-second BOUNCE Lua/XML requirement and native limits; the implementation is not native proof.
 
 [Endpoint/application implementation](../../../src/lua_api/frame/methods/button_anchor_hierarchy/animations/vertex_color.rs) snapshots channels, returns independent color objects, smooths time progress and saves/restores target colors. Opaque-white defaults, snapshot/validation policy, smoothing curves and restoration are **modeled inferences**, not established native behavior. [Animation state](../../../src/lua_api/animation.rs), [method registration](../../../src/lua_api/frame/methods/button_anchor_hierarchy/mod.rs), [playback lifecycle](../../../src/lua_api/frame/methods/button_anchor_hierarchy/animations.rs), [tick runtime](../../../src/lua_api/frame/methods/button_anchor_hierarchy/animations/runtime.rs), [XML endpoint types](../../../src/xml/types_animation.rs) and [XML endpoint application](../../../src/loader/helpers_anim.rs) bound the source inventory.
 
-Parent-reported six-test RED reached missing `SetStartColor`; downstream assertions were not reached. Production GREEN has **not yet run**. No feature acceptance, current-suite acceptance, full compatibility or native restoration/smoothing parity follows from source inspection.
+Historical six-test RED reached missing `SetStartColor`; downstream assertions were not reached then. The spec records bounded **6/6 GREEN**, exit0, at `080833f1d`, including actual addon XML loading. Public packet retention, current-suite acceptance, full compatibility and native restoration/smoothing parity remain unclaimed.
 
 ## Sources
 
-- [VertexColor animation](../../specs/vertex-color-animation.md) — contract, modeled policies and bounded RED/pending GREEN evidence
+- [VertexColor animation](../../specs/vertex-color-animation.md) — contract, modeled policies and historical RED/bounded 6/6 GREEN evidence
 
 - [Spell and spellbook cooldown outputs](../../specs/spell-book-cooldown-outputs.md) — EXACT305/322 SSOT; real interval/book provider, VM selector boundary, rooted NUM/public BOOL policy, cached metadata limits, historical RED and independent537+541 bounded output acceptance; native/input/type/profile gaps retained
 

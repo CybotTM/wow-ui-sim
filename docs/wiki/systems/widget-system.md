@@ -18,9 +18,13 @@ Key field groups:
 
 **Widget-specific** — Slider, StatusBar, EditBox, ScrollFrame, Cooldown each have dedicated field groups. Model-family state is grouped in one lazy `Option<Box<ModelWidgetState>>`; absent payloads preserve getter defaults, while mutating methods allocate only when needed and remain globally callable.
 
+### Actual texture file dimensions — runtime unverified
+
+`271793bc6` adds Texture `GetFileWidth`/`GetFileHeight` in [texture adapters](../../../src/lua_api/frame/methods/widgets/texture/atlas.rs). Existing secret-origin readability is checked before resolving actual source metadata through a CPU-only TextureManager with configured addon roots; widget geometry is not the metadata source. No new widget state or GPU dependency. The temporary manager does not retain metadata between getter calls. [Texture-file spec](../../specs/texture-file-dimensions.md) owns source/ID/atlas policies and remaining coverage; [API evidence boundary](lua-api.md#current-pet-hover-and-follower-instance-models--runtime-unverified) records genuine six-case RED and pending GREEN. Source inspection is not runtime/native proof.
+
 ### VertexColor animation target state
 
-The implemented texture-target path writes `Frame.vertex_color`; [animation state](../../../src/lua_api/animation.rs) stores per-playback baselines, and [application/restoration](../../../src/lua_api/frame/methods/button_anchor_hierarchy/animations/vertex_color.rs) updates the selected texture. [Contract](../../specs/vertex-color-animation.md) and [existing animation section](lua-api.md#vertexcolor-animation--implementation-runtime-proof-pending) own modeled policies and RED/pending GREEN limits; no rendering or native acceptance is implied.
+The implemented texture-target path writes `Frame.vertex_color`; [animation state](../../../src/lua_api/animation.rs) stores per-playback baselines, and [application/restoration](../../../src/lua_api/frame/methods/button_anchor_hierarchy/animations/vertex_color.rs) updates the selected texture. [Contract](../../specs/vertex-color-animation.md) and [existing animation section](lua-api.md#vertexcolor-animation--bounded-runtime-proof) own modeled policies, historical RED and bounded 6/6 GREEN at `080833f1d`; no rendering or native acceptance is implied.
 
 ### ColorSelect RGB callback boundary
 

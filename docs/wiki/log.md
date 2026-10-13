@@ -1,10 +1,18 @@
+## [2026-10-12] docs | Current proof-summary audit
+
+Corrected current VertexColor6/role13 summaries to spec-recorded GREEN at `080833f1d`; historical RED remains distinct. Main reports EditMode5/5 GREEN, separate from frozen broad-suite FAIL. Four producer implementations through `e3978fd48` still await GREEN. Flagged private absolute report paths in `docs/specs/addon-local-table.md` for its owner; specs remain outside this six-file edit scope. No new runtime, build, operations, delegation or commit.
+
+## [2026-10-12] docs | Four producer models and pending runtime boundary
+
+Updated existing [API](systems/lua-api.md#current-pet-hover-and-follower-instance-models--runtime-unverified), [widget](systems/widget-system.md#actual-texture-file-dimensions--runtime-unverified), [addon-loading](systems/addon-loading.md#opted-in-addon-namespace-access--runtime-unverified) and [root API inventory](../lua-api.md#current-producer-inventory--runtime-unverified), linking spec-owned contracts rather than duplicating them. Four producers have genuine pre-fix RED at `080833f1d` (28 cases, 1 PASS / 27 FAIL); production GREEN pending, downstream assertions not all reached. Earlier VertexColor6/role13 GREEN remains separate. Zone signature and parent-owned integrated proof unchanged; docs only, no runtime/check/build/ops or completion claim. Parent owns commit.
+
 ## [2026-10-12] docs | Explicit unit role API links
 
-Updated existing [Lua/group inventory](systems/lua-api.md#global-functions), [event producer](systems/event-system.md#explicit-unit-role-notification) and [API docs](../lua-api.md#explicit-unit-role-assignment); [role contract](../specs/unit-role-assignment.md) retains policies, exact callers and proof ownership. Parent-reported RED13; GREEN pending, status unchecked. No runtime/native acceptance, vendor change, tests, builds or commits; main owns commits.
+Updated existing [Lua/group inventory](systems/lua-api.md#global-functions), [event producer](systems/event-system.md#explicit-unit-role-notification) and [API docs](../lua-api.md#explicit-unit-role-assignment); [role contract](../specs/unit-role-assignment.md) retains policies, exact callers and proof ownership. Historical parent-reported RED13; spec now records bounded 13/13 GREEN, exit0, at `080833f1d`. Public packet retention remains pending. No runtime/native acceptance, vendor change, tests, builds or commits; main owns commits.
 
-## [2026-10-12] docs | VertexColor source inventory and pending runtime proof
+## [2026-10-12] docs | VertexColor source inventory and bounded runtime proof
 
-Updated [existing animation](systems/lua-api.md#vertexcolor-animation--implementation-runtime-proof-pending), [widget target state](systems/widget-system.md#vertexcolor-animation-target-state) and API docs with bounded source links and [contract/evidence SSOT](../specs/vertex-color-animation.md). Qualified the historical four-endpoint publication gap without changing frozen accounting. Six selected tests reached missing `SetStartColor` RED; production GREEN not yet run. Modeled defaults/snapshots/smoothing/restoration are not native facts. Docs only; main owns commits.
+Updated [existing animation](systems/lua-api.md#vertexcolor-animation--bounded-runtime-proof), [widget target state](systems/widget-system.md#vertexcolor-animation-target-state) and API docs with bounded source links and [contract/evidence SSOT](../specs/vertex-color-animation.md). Qualified the historical four-endpoint publication gap without changing frozen accounting. Historical six selected tests reached missing `SetStartColor` RED; spec now records bounded 6/6 GREEN, exit0, at `080833f1d`, including actual addon XML loading. Public packet retention remains pending. Modeled defaults/snapshots/smoothing/restoration are not native facts. Docs only; main owns commits.
 
 ## [2026-10-12] docs | EditMode source-suite failure and pending fixture repair
 

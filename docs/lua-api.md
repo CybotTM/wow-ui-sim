@@ -1,5 +1,9 @@
 # Lua API Implementation
 
+## Current producer inventory — runtime unverified
+
+Existing wiki systems describe implemented [pet-hover/follower-instance APIs](wiki/systems/lua-api.md#current-pet-hover-and-follower-instance-models--runtime-unverified), [actual texture file dimensions](wiki/systems/widget-system.md#actual-texture-file-dimensions--runtime-unverified) and [opted-in addon namespace access](wiki/systems/addon-loading.md#opted-in-addon-namespace-access--runtime-unverified). Linked specs own contracts and proof limits. Four-producer RED at `080833f1d`: 28 cases, 1 PASS / 27 FAIL; production GREEN pending. Earlier VertexColor/role GREEN does not cover these four.
+
 ## Overview
 
 The WoW UI Simulator provides a Lua API that mirrors World of Warcraft's frame, event, and utility systems. Implementation spans: environment setup, frame userdata with metatables, global functions, widget methods, animations, and API stubs.
@@ -241,7 +245,7 @@ Retail 12.1 `GetBuildOption("RestrictedAuraAPI")` returns `true`, selecting curr
 
 **Files:** `src/lua_api/globals/real/unit_roles.rs`, `unit_roles_assignment.rs`
 
-Source-inspected 2026-10-12: environment-owned `SimState.unit_roles` maps existing GUIDs to optional `UnitRole` values (Tank, Healer, Damage). Current Retail/PTR enum/string setters and existing group-role getters share this live state. Setters authenticate original VM arguments before parsing; getters retain existing identity-secrecy finishing. Changed assignments commit before synchronous `ROLE_CHANGED_INFORM` through the existing named-event dispatcher. [Role assignment contract](specs/unit-role-assignment.md) owns exact sources/callers, inferred policies and evidence limits. Parent reports 13 genuine missing-raw-setter RED cases; current GREEN pending, no PASS admitted here. No native parity or checked-None popup claim; vendor unchanged.
+Source-inspected 2026-10-12: environment-owned `SimState.unit_roles` maps existing GUIDs to optional `UnitRole` values (Tank, Healer, Damage). Current Retail/PTR enum/string setters and existing group-role getters share this live state. Setters authenticate original VM arguments before parsing; getters retain existing identity-secrecy finishing. Changed assignments commit before synchronous `ROLE_CHANGED_INFORM` through the existing named-event dispatcher. [Role assignment contract](specs/unit-role-assignment.md) owns exact sources/callers, inferred policies and evidence limits. Historical 13 genuine missing-raw-setter RED cases are separate from spec-recorded bounded 13/13 GREEN, exit0, at `080833f1d`. No native parity or checked-None popup claim; vendor unchanged.
 
 ### Shared unit vitals
 **File:** `src/lua_api/globals/utility_system_spell/spell_api.rs`
@@ -333,7 +337,7 @@ anim:SetFromAlpha() / SetToAlpha() / SetDuration()
 
 ### VertexColor endpoints
 
-`SetStartColor(colorRGBA)` / `SetEndColor(colorRGBA)` and `GetStartColor()` / `GetEndColor()` are implemented with ColorMixin objects, XML endpoint loading and texture-target ticks. [VertexColor contract](specs/vertex-color-animation.md) owns requirements and evidence; [existing animation documentation](wiki/systems/lua-api.md#vertexcolor-animation--implementation-runtime-proof-pending) links exact source paths and distinguishes modeled defaults/snapshots/smoothing/restoration from native facts. Six selected tests reached RED at missing `SetStartColor`; production GREEN has not yet run.
+`SetStartColor(colorRGBA)` / `SetEndColor(colorRGBA)` and `GetStartColor()` / `GetEndColor()` are implemented with ColorMixin objects, XML endpoint loading and texture-target ticks. [VertexColor contract](specs/vertex-color-animation.md) owns requirements and evidence; [existing animation documentation](wiki/systems/lua-api.md#vertexcolor-animation--bounded-runtime-proof) links exact source paths and distinguishes modeled defaults/snapshots/smoothing/restoration from native facts. Historical six selected tests reached RED at missing `SetStartColor`; the spec records bounded 6/6 GREEN, exit0, at `080833f1d`, including actual addon XML loading. Public packet retention and native/whole-suite acceptance remain unclaimed.
 
 ### OnUpdate Integration (`env.rs:517-555`)
 
