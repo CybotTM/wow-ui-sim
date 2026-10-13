@@ -3,6 +3,12 @@
 The Lua API layer bridges Lua addon code with the Rust simulation engine. It provides WoW-compatible globals, 300+ frame methods, C_* namespaces, and a timer system — all backed by `WowLuaEnv` and `SimState`.
 
 
+## Supplied query models and NONE Path — source only
+
+The [integrated checkpoint](../investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers) owns executed baseline and current verification status. C API contracts: [availability/reason](../../specs/cooldown-viewer-availability.md), [transfer activity](../../specs/currency-transfer-activity.md), [catalog icon](../../specs/zone-ability-icon.md), [complete ButtonHeader snapshots](../../specs/ui-widget-button-header.md), [independent assisted identity/slots](../../specs/assisted-action-input.md), [modeled frequency](../../specs/profiler-clock-frequency.md), [global transcription](../../specs/voice-transcribing-input.md), and [supplied ping kits](../../specs/ping-texture-kit-input.md). Their implementations live under `src/c_api/`; specs distinguish explicit inputs, catalog lookup and simulator policies from native evidence.
+
+[Path/ControlPoint](../../specs/path-control-point.md) belongs to the animation/XML subsystem, using existing target offsets and layout axes. Current query/Path source is committed; current GREEN, startup and profile acceptance remain pending. Neither source inventory nor historical controls establish native or whole-handoff acceptance.
+
 ## Retail 12.0.5 spell and spellbook loss-of-control outputs
 
 Producer `cc69ac3c4` covers **EXACT313/326 only**: `C_Spell.GetSpellLossOfControlCooldownInfo` and `C_SpellBook.GetSpellBookItemLossOfControlCooldownInfo`. [Contract, inventory and proof SSOT](../../specs/spell-book-loss-of-control-outputs.md) records authored requirements and inferred policies. Both read the existing typed LoC map; book lookup resolves actual player-book bank0 entries, authenticating both original selectors before parsing/model access. Shared rooted DTO writer copies explicit records into a fresh ordinary five-field table: restricted `startTime`, `duration`, `modRate` are private NUMs under `cooldowns_restricted`; `isActive` and `shouldReplaceNormalCooldown` remain public NeverSecret BOOLs. Existing Action serialization shares the writer without changing its inactive-default policy; spell/book absence remains nil. No new acquisition/state/catalog/time model.

@@ -1,3 +1,7 @@
+## [2026-10-12] docs | Executed query baseline and new source models
+
+[Integrated current checkpoint](investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers) separates executed pre-producer failures, selected lifecycle/Vertex controls and committed query/Path source awaiting GREEN/startup/profile acceptance. [Frozen ccd packet](../../data/test-perf/evidence/fullsuite-ccd-2026-10-12/README.md) preserves broad FAIL; text retention verification is separate. Whole handoff OPEN.
+
 ## [2026-10-12] docs | Current bounded producer and receiver proof
 
 [Integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#five-producer-and-receiver-source-checkpoint--2026-10-12) owns current bounded counts, startup and saved format proof. Existing producer/receiver specs mark tested boundaries only. Historical RED retained; the [integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#continued-staged-inputs--source-only-checkpoint-2026-10-12) owns current staging and outstanding gates; linked packets own retained proof. Native/catalog/ABI/allocation-free unknowns remain open; no whole-pass claim.

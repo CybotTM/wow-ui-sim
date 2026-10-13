@@ -28,8 +28,8 @@
 
 ## Known gaps (current cycle)
 
-- [x] Execute genuine query-boundary RED: all eight cases fail at `ff72f3c3b` on missing bool/string projection, including actual cached settings reason and visibility checks. No observed fixture failures.
-- [ ] Execute current producer GREEN; implementation is source-only until recompiled.
+- [x] Execute genuine query-boundary RED: all eight cases fail at `ff72f3c3b` on missing bool/string projection, including failure converting the actual cached settings predicate result; downstream visibility assertions remain unreached. No observed fixture failures.
+- [ ] Execute current producer GREEN; producer behavior remains unverified until targeted GREEN.
 - [ ] Retail/PTR runtime, startup and independent verification pending.
 
 ## Out of scope

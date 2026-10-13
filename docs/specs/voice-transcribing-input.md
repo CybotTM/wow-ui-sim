@@ -18,7 +18,7 @@
 
 | Path | Role |
 |---|---|
-| `src/lua_api/sim_substates/mod.rs` | Explicit global input/default; no getter. |
+| `src/lua_api/sim_substates/mod.rs` | Explicit global input/default; getter lives in `c_voice_chat_channels.rs`. |
 | `src/lua_api/state/sim_state.rs`, `src/lua_api/state.rs` | Existing environment-owned voice state and separate channel collection. |
 | `src/c_api/c_voice_chat_channels.rs` | Existing channel selectors/fresh DTO snapshots plus the independent global activity getter. |
 | `src/lua_api/globals/missing_surface/voice_chat.rs` | Existing voice/permission queries, unchanged. |

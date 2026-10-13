@@ -1,6 +1,6 @@
 # Host-supplied ping texture kits
 
-`C_Ping.GetTextureKitForType(type)` must project a whole host-supplied type-to-string mapping, not an invented native catalog. Input/export/default and getter/registrar are implemented; six pre-producer cases executed RED, current producer GREEN remains pending. Architecture: [Lua API](../lua-api.md).
+`C_Ping.GetTextureKitForType(type)` must project a whole host-supplied type-to-string mapping, not an invented native catalog. Input/export/default and getter/registrar are implemented; six pre-producer tests failed at observed query boundaries; later assertions and current producer GREEN remain pending. Architecture: [Lua API](../lua-api.md).
 
 ## What it must do
 
@@ -11,7 +11,7 @@
 - [ ] Authenticate secret inputs before ordinary validation/lookup using `AllowedWhenUntainted`: an untainted secret numeric key may select a mapped entry; tainted secrets (including unmapped and malformed payloads) are denied without leaking/declassifying input. Public keys remain usable by tainted callers. Returned mapped strings are public by simulator policy; caller taint is preserved.
 - [ ] Actual cached `PingManager:ShowPingSpot(type,posX,posY)` consumes the real query and passes exact `Ping_SpotGlw_<kit>_In`/`_Out` atlas names with use-size true to both sinks.
 
-Cached `PingManagerDocumentation.lua` declares required PingSubjectType, non-nil textureKit and AllowedWhenUntainted secret arguments. It does not provide mappings or miss behavior. Arbitrary synthetic keys/kits in tests are host fixtures, not native pairs. Secret-input authentication has executed failing tests but still needs current GREEN evidence before producer completion; no native security parity claimed by this stage.
+Cached `PingManagerDocumentation.lua` declares required PingSubjectType, non-nil textureKit and AllowedWhenUntainted secret arguments. It does not provide mappings or miss behavior. Arbitrary synthetic keys/kits in tests are host fixtures, not native pairs. Secret-input tests failed at initial query assertions; successful authentication and later recovery/ordering assertions still need current GREEN evidence before producer completion; no native security parity claimed by this stage.
 
 ## How it works
 
@@ -33,7 +33,7 @@ Generated `--test integration` filter `ping_texture_kits::` (expected six): conf
 ## Known gaps (current cycle)
 
 - [x] Compile and obtain executed behavioral RED before implementing getter.
-- [x] Stage source-backed ordinary/secret argument policy tests; execution remains pending.
+- [x] Stage source-backed ordinary/secret argument policy tests; pre-producer tests executed, downstream assertions and current GREEN pending.
 - [x] Implement minimal getter after genuine RED.
 - [ ] Prove GREEN plus applicable startup/profile checks.
 - [ ] Verify cached consumer prerequisite sufficiency in execution.

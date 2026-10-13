@@ -1,3 +1,7 @@
+## [2026-10-12] docs | Executed query baseline and new source models
+
+[Integrated checkpoint](investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers) owns baseline RED, selected controls, source implementations and pending current gates. [Frozen ccd evidence](../../data/test-perf/evidence/fullsuite-ccd-2026-10-12/README.md) retains terminal FAIL and bounded sanitized excerpts; no rerun or broad acceptance.
+
 ## [2026-10-12] docs | Ping argument staging
 
 [Integrated SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#continued-staged-inputs--source-only-checkpoint-2026-10-12) records staged46, including six [ping-kit tests](../specs/ping-texture-kit-input.md). Ordinary/secret argument assertions remain uncompiled/unrun; getter unchanged. Index links current SSOT instead of duplicating stale gate status; historical proof unchanged.

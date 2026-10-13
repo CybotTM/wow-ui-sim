@@ -7,7 +7,7 @@
 - [ ] Known Fireball spell 133 returns exactly one ordinary numeric value matching catalog `icon_file_data_id`, not a texture path.
 - [ ] A valid u32 absent from the catalog returns exactly one nil. Fixture 4,000,000,000 has absence asserted. This is explicit simulator policy consistent with nilable output, not native-observed miss behavior.
 - [ ] Preserve existing ordinary input rejection: missing/nil, non-numbers including numeric strings, non-integral/non-finite numbers and numbers outside u32 range fail explicitly. This preserves current extraction, not native parity.
-- [ ] Authenticate original secret arguments before numeric extraction/lookup: native host-secret known and absent IDs work untainted and fail tainted; plain known numeric IDs remain permitted tainted. Preserve wrapper identity/secrecy and caller taint across success, rejection and subsequent untainted reuse. Input secrecy does not imply secret output propagation.
+- [ ] Authenticate original secret arguments before numeric extraction/lookup: authentic VM host-secret known and absent IDs work untainted and fail tainted; plain known numeric IDs remain permitted tainted. Preserve wrapper identity/secrecy and caller taint across success, rejection and subsequent untainted reuse. Input secrecy does not imply secret output propagation.
 
 ## How it works
 
@@ -22,7 +22,7 @@
 
 ## Tests asserting this spec
 
-`tests/zone_ability_icon.rs`: four behavioral cases for positive lookup, modeled miss, ordinary rejection and actual host-secret caller policy. Secret case uses existing `retail-12-0-5` native fixture gate. At `ff72f3c3b`, ordinary rejection passes; positive numeric result, modeled nil miss and untainted host-secret input fail at their real query boundaries. No observed fixture failures; later secret/taint assertions remain unreached. Current producer GREEN remains pending.
+`tests/zone_ability_icon.rs`: four behavioral cases for positive lookup, modeled miss, ordinary rejection and actual host-secret caller policy. Secret case uses existing `retail-12-0-5` VM-secret fixture gate. At `ff72f3c3b`, ordinary rejection passes; positive numeric result, modeled nil miss and untainted host-secret input fail at their real query boundaries. No observed fixture failures; later secret/taint assertions remain unreached. Current producer GREEN remains pending.
 
 ## Known gaps (current cycle)
 
