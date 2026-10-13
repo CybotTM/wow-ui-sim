@@ -12,6 +12,8 @@
 
 Do not combine overlapping scopes or claim all rows GREEN. Latest consumer enablement changes tests/docs only; earlier PTR26/startup and owning sweeps are reused evidence, not rerun at1804. Timeout-child summaries are duplicates, not extra cases. Post-GC service defaults are not exit proof. Runtime filesystem snapshot39ce is distinct from compiled-test identity. [Widget contract](../../specs/ui-widget-manager-state.md) and [atlas policy](../../specs/texture-atlas-application-result.md) own supplied-state and inferred application-result semantics. Native catalogs, native return/unit parity, other-profile and full-parent acceptance remain OPEN; historical failures and frozen CCD suite FAIL remain unchanged.
 
+Separate [native input packet](../../../data/patch-api/evidence/native-lfd-click-2026-10-13/README.md) retains the independently inspected actual XTest LFDMicroButton press/release/PVE activation on Retail5bd. Ctrlmask4 persists; intended viewing-size acceptance UNKNOWN. This is simulator OS-input proof, not native WoW or broad GUI parity; private pixels/endpoint/mapping remain excluded.
+
 ## Five-producer and receiver source checkpoint — 2026-10-12
 
 Source implemented/wired through `c490d77f1`: [exact-link item stats and deltas](../../specs/item-stats-supplied.md), [specialization/item-set spell lists](../../specs/item-set-bonuses-supplied.md), [absolute-millisecond Ping DTO](../../specs/ping-cooldown-interval.md), [GUID classification intersected with active party roster](../../specs/party-ai-membership.md), and [seven Retail secure-CVar combat-policy names](../../specs/secure-cvars-10-2-5.md). Specs own policies and known unknowns; this is a source checkpoint, not a complete API inventory or completed goal.

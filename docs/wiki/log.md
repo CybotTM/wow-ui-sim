@@ -1,3 +1,7 @@
+## [2026-10-13] evidence | Bounded native simulator input
+
+[Checkpoint SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#separate-ptr-and-owning-checkpoints--2026-10-13) links sanitized saved OS-input receipts without pixels, endpoint or current-liveness claims; viewing-size acceptance UNKNOWN.
+
 ## [2026-10-13] source | DiscreteProgressSteps input-only RED stage
 
 [Discrete contract](../specs/ui-widget-discrete-progress-steps.md) adds complete supplied19-field requirements and intended tests before query/feed implementation. [State checkpoint](systems/ui-widget-manager-state.md#discreteprogresssteps-input-only-checkpoint--2026-10-13) preserves unrun/native boundaries.
