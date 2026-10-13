@@ -1,6 +1,6 @@
 # Zone ability spell icon
 
-`C_ZoneAbility.GetZoneAbilityIcon(zoneAbilitySpellID)` must query the existing spell catalog. Cached Retail `ZoneAbilityDocumentation.lua` declares a required number argument, nilable numeric result and `SecretArguments = "AllowedWhenUntainted"`. Current legacy producer returns a placeholder string; replacement belongs in [C API architecture](../lua-api.md).
+`C_ZoneAbility.GetZoneAbilityIcon(zoneAbilitySpellID)` must query the existing spell catalog. Cached Retail `ZoneAbilityDocumentation.lua` declares a required number argument, nilable numeric result and `SecretArguments = "AllowedWhenUntainted"`. C API-owned producer returns a catalog file ID or modeled nil miss; old placeholder-string path is removed. See [C API architecture](../lua-api.md).
 
 ## What it must do
 
@@ -16,18 +16,19 @@
 
 ## Implementation inventory
 
-- `src/lua_api/globals/missing_surface/zone_ability.rs`: existing query, still placeholder.
-- `src/lua_bridge/from_stack.rs`: existing exact integer/u32 extraction.
+- `src/c_api/c_zone_ability_icon.rs`: catalog query, secret authentication and exact u32 validation.
+- `src/lua_api/globals/missing_surface/zone_ability.rs`: existing namespace/state setup calls the modeled registrar; placeholder query removed.
 - `data/spells.rs`: existing generated catalog; not edited.
 
 ## Tests asserting this spec
 
-`tests/zone_ability_icon.rs`: four staged cases for positive lookup, modeled miss, ordinary rejection and actual host-secret caller policy. Secret case uses existing `retail-12-0-5` native fixture gate. All remain uncompiled/unexecuted, not behavioral RED.
+`tests/zone_ability_icon.rs`: four behavioral cases for positive lookup, modeled miss, ordinary rejection and actual host-secret caller policy. Secret case uses existing `retail-12-0-5` native fixture gate. At `ff72f3c3b`, ordinary rejection passes; positive numeric result, modeled nil miss and untainted host-secret input fail at their real query boundaries. No observed fixture failures; later secret/taint assertions remain unreached. Current producer GREEN remains pending.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile/execute staged tests and distinguish behavioral RED from fixture barriers.
-- [ ] Replace the string placeholder with one C_API-owned producer and obtain independent behavior/startup/check proof.
+- [x] Compile/execute genuine RED and distinguish behavioral failures from fixture barriers.
+- [x] Replace the string placeholder with one C_API-owned producer.
+- [ ] Obtain independent behavior/startup/check proof.
 
 ## Out of scope
 

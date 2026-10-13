@@ -277,6 +277,7 @@ pub mod c_widget;
 pub mod c_wow_token_public;
 pub mod c_wowtoken_secure;
 pub mod c_xml_util;
+pub(crate) mod c_zone_ability_icon;
 pub mod charge_state;
 pub(crate) mod container_inventory;
 pub(crate) mod cooldown_duration;

@@ -5,18 +5,16 @@
 //! Tests seed the active list directly through `C_ZoneAbility._state`.
 
 use super::{ensure_namespace, set_table_array};
-use crate::lua_api::methods::{create_string, create_table, table_get, table_set};
-use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::lua_api::methods::{create_table, table_get, table_set};
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
-
-const ZONE_ABILITY_ICON: &str = "Interface\\ICONS\\INV_Misc_QuestionMark";
 
 pub(super) fn register_zone_ability_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns_ref = ensure_namespace(state, "C_ZoneAbility")?;
     ensure_zone_ability_state(state);
     table_set_rust_fn_static(state, ns_ref, "GetActiveAbilities", get_active_abilities)?;
-    table_set_rust_fn_static(state, ns_ref, "GetZoneAbilityIcon", get_zone_ability_icon)?;
+    crate::c_api::c_zone_ability_icon::register(state)?;
     Ok(())
 }
 
@@ -71,13 +69,6 @@ fn get_active_abilities(state: &mut LuaState) -> LuaResult<u32> {
     let abilities = table_get(state, state_table, "activeAbilities");
     let clone = clone_active_abilities(state, abilities);
     state.push(clone);
-    Ok(1)
-}
-
-fn get_zone_ability_icon(state: &mut LuaState) -> LuaResult<u32> {
-    let _spell_id = u32::from_stack(state, 1)?;
-    let texture = create_string(state, ZONE_ABILITY_ICON);
-    state.push(texture);
     Ok(1)
 }
 
