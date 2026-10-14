@@ -1,5 +1,7 @@
 {
-  "status": "PUBLISHED_PENDING_ADDITIVE_ONE_FILE_GATE",
+  "status": "PUBLISHED_CORRECTED_BOUNDED_PASS",
+  "corrected_gate_revision": "a7439281a",
+  "corrected_gate_scope": "Complete affected launcher/privacy PASS; other25 selected payload checks reused by unchanged Gitobject/stat with zero other-payload reads; original gate staysFAIL.",
   "historical_gate": "FAIL: one unredacted systemd invocation identifier; 26 exact copies, file count, links and historical labels passed. Single launcher corrected; other25 selected texts reused without reopening." ,
   "integration_owner": "Main",
   "selection_count": 26,
