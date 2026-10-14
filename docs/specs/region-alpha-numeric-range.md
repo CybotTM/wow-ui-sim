@@ -22,11 +22,11 @@ Ordinary numeric `Region:SetAlpha` inputs follow the [10.0.0 change-note summary
 
 ## Tests asserting this spec
 
-Two new Retail/PTR Rust cases are authored, not yet compiled/executed. Their complete shared Lua fixture executed on existing normal binaries before the producer: valid boundaries completed on both profiles; invalid mode failed at the first Frame `SetAlpha(-0.25)` rejection assertion on both profiles. Later rejection/state-preservation and Texture/FontString assertions were unreached. Independent RED audit and producer GREEN remain pending. The shared complete Lua fixture can also run through normal startup without replacing methods or getters. Historical clamping expectations must remain distinguished from modern range rejection.
+Two new Retail/PTR Rust cases are authored, not yet compiled/executed. Their complete shared Lua fixture executed on existing normal binaries before the producer: valid boundaries completed on both profiles; invalid mode failed at the first Frame `SetAlpha(-0.25)` rejection assertion on both profiles. Later rejection/state-preservation and Texture/FontString assertions were unreached. Independent normal-Lua RED/valid-baseline audit passes at those scopes; producer GREEN remains pending. The shared complete Lua fixture can also run through normal startup without replacing methods or getters. Historical clamping expectations must remain distinguished from modern range rejection.
 
 ## Known gaps (current cycle)
 
-- [ ] Execute behavioral RED before changing the setter; verify modern GREEN, preservation, startup diagnostics and check/format afterward.
+- [ ] Compile/run the authored Rust tests; verify producer GREEN, preservation, startup diagnostics and check/format. Pre-producer normal-Lua RED is independently verified; it does not establish new Rust execution or producer GREEN.
 
 ## Out of scope
 
