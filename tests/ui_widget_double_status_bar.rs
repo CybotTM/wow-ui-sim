@@ -53,6 +53,30 @@ fn double_status_bar_complete_26_field_snapshots_are_fresh_and_replacements_isol
     });
 }
 
+#[cfg(feature = "retail-12-1-0")]
+#[test]
+fn double_status_bar_secret_selectors_preserve_wrappers_and_deny_tainted_callers() {
+    common::with_timeout(88, || {
+        let env = WowLuaEnv::new().unwrap();
+        initialize_set(&env);
+        inject(&env, WIDGET_ID, records::supplied());
+        install_snapshot_assertion(&env, records::GETTER, records::EXPECTED);
+        let (sets, records) = {
+            let state = env.state();
+            let state = state.borrow();
+            (
+                state.ui_widget_inputs.sets.clone(),
+                state.ui_widget_inputs.double_status_bars.clone(),
+            )
+        };
+        helpers::assert_secret_selector_contract(&env, WIDGET_ID);
+        let state = env.state();
+        let state = state.borrow();
+        assert_eq!(state.ui_widget_inputs.sets, sets);
+        assert_eq!(state.ui_widget_inputs.double_status_bars, records);
+    });
+}
+
 #[test]
 fn double_status_bar_supplied_records_are_environment_local() {
     common::with_timeout(88, || {

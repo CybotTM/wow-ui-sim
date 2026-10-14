@@ -118,6 +118,84 @@ pub fn assert_selector_policy(env: &WowLuaEnv, id: f64) {
     );
 }
 
+/// Simulator sibling of the existing manager-security contract; no native-parity claim.
+#[cfg(all(
+    any(feature = "client-retail", feature = "client-ptr"),
+    feature = "retail-12-1-0"
+))]
+pub fn assert_secret_selector_contract(env: &WowLuaEnv, id: f64) {
+    use rilua::table_security::wrap_host_secret_number;
+    use rilua::LuaApiMut;
+
+    {
+        let loader = env.loader_env();
+        let mut lua = loader.rilua_mut();
+        rilua::table_security::register_table_security(&mut lua).expect("VM security helpers");
+        for (name, number) in [
+            ("FixtureSecretPresent", id),
+            ("FixtureSecretAbsent", id + 1.0),
+        ] {
+            let value = wrap_host_secret_number(lua.state_mut(), number);
+            lua.state_mut().push(value);
+            let inserted = lua.set_global_val(name, value);
+            lua.state_mut().pop();
+            inserted.expect("root actual secret NUMBER");
+        }
+    }
+    assert_lua(
+        env,
+        "wrapped selectors, tainted denial and secure recovery",
+        &format!(
+            r#"
+            debug.settaintmode(true)
+            assert(debug.getstacktaint() == nil)
+            local present, absent = FixtureSecretPresent, FixtureSecretAbsent
+            local function assertPublicSnapshot(...)
+                local snapshot = AssertSuppliedSnapshot(...)
+                assert(not issecretvalue(snapshot), 'public snapshot table')
+                for key, value in pairs(snapshot) do
+                    assert(not issecretvalue(key), 'public snapshot key')
+                    assert(not issecretvalue(value), 'public snapshot field')
+                end
+            end
+            local function oneNil(...)
+                assert(select('#', ...) == 1 and select(1, ...) == nil)
+            end
+            assert(issecretvalue(present) and issecretvalue(absent), 'actual host wrappers')
+            assertPublicSnapshot(FixtureGetter(present))
+            oneNil(FixtureGetter(absent))
+            assert(issecretvalue(present) and issecretvalue(absent), 'secure queries retain wrappers')
+            assert(secretunwrap(present) == {id} and secretunwrap(absent) == {id} + 1)
+            local function addon()
+                assert(debug.getstacktaint() == 'WidgetTwoRecordsSecurityProbe')
+                for _, selector in ipairs({{present, absent}}) do
+                    local ok, message = pcall(FixtureGetter, selector)
+                    assert(not ok and type(message) == 'string', 'secret selector denied')
+                    assert(string.find(message, 'untainted caller', 1, true),
+                        'denial before present/absent lookup: ' .. tostring(message))
+                    assert(issecretvalue(selector), 'denied query retains wrapper')
+                    assert(not pcall(secretunwrap, selector), 'tainted declassification denied')
+                    assert(debug.getstacktaint() == 'WidgetTwoRecordsSecurityProbe',
+                        'denial preserves cumulative caller taint')
+                    assertPublicSnapshot(FixtureGetter({id}))
+                    oneNil(FixtureGetter({id} + 1))
+                    assert(debug.getstacktaint() == 'WidgetTwoRecordsSecurityProbe',
+                        'public query preserves cumulative caller taint')
+                end
+            end
+            debug.setobjecttaint(addon, 'WidgetTwoRecordsSecurityProbe')
+            addon()
+            assert(debug.getstacktaint() == nil, 'secure outer caller restored')
+            assertPublicSnapshot(FixtureGetter(present))
+            oneNil(FixtureGetter(absent))
+            assert(issecretvalue(present) and issecretvalue(absent), 'post-call wrappers preserved')
+            assert(secretunwrap(present) == {id} and secretunwrap(absent) == {id} + 1)
+            assert(debug.getstacktaint() == nil)
+            "#
+        ),
+    );
+}
+
 pub fn flush_counts(env: &WowLuaEnv, count: usize) {
     env.fire_on_update(0.0)
         .expect("flush actual cached deferred container layout");
