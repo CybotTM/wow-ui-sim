@@ -41,6 +41,10 @@
 
 [Initial whole-text evidence](../../data/patch-api/evidence/crafted-item-quality-initial-api-red-2026-10-13/README.md) owns the Retail/PTR required-input failure matrix and reached/unreached boundaries. Both profiles have executed first-call rejection failures; both profiles subsequently reached five positive-query failures and one genuine original ItemButton consumer failure, after successful closure/empty-input baselines. Downstream field/security/visibility/clear assertions remained unreached. Initial public-copy and retained-gate copy checks pass at their recorded scopes; producer GREEN remains pending.
 
+### Supplied-record RED checkpoint
+
+[Whole supplied-record RED](../../data/patch-api/evidence/crafted-item-quality-host-records-2026-10-13/red-current/README.md) retains five query and one original-consumer failure per profile, with successful closure/baseline and unreached downstream assertions distinguished. Public-copy acceptance is pending; later GREEN does not rewrite these failures.
+
 ## Known gaps (current cycle)
 
 - [ ] Verify producer GREEN on Retail/PTR for the two initial, five owned and one whole-consumer cases. Preserve executed initial/positive RED and its exact reached boundaries; do not infer downstream security or visibility acceptance from earlier failures.
