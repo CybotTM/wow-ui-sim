@@ -28,3 +28,9 @@ Regression coverage:
 
 - [[addon-load-order]] — addon load timing can require post-load repairs
 - [[lib-test-failure-sweep-2026-06]] — records why post-load repairs must not rely on `hooksecurefunc(C_AddOns, "LoadAddOn")`
+
+## Store group shape — source checkpoint 2026-10-14
+
+`85d8d7bd4` registers the modeled `C_StoreSecure.GetProductGroups` query under `src/c_api/`. Registration precedes runtime bootstrap; the getter reads the already-published `__wow_store_state.productGroups` at call time. Mists receives numeric IDs; other profiles retain the existing record table. Both bootstrap Lua definitions of this getter are removed. Demo backing, other queries and transactions remain legacy bootstrap Lua; no additional state bridge.
+
+[Owning contract/status](../../specs/store-product-group-shape.md) separates cached-consumer inference and simulator demo policy from native evidence. New Rust execution, postproducer runtime preservation and Store UI population remain unproved. Historical pool-constructor proof above does not cover this producer.

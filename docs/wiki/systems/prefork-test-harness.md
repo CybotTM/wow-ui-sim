@@ -16,6 +16,10 @@ Linux-only custom test-runner core for reusing immutable parent-owned test state
 
 ## Content
 
+### Current original Retail four-case checkpoint (bounded)
+
+[Owning bounded status](../../specs/prefork-test-harness.md#current-original-retail-four-case-checkpoint-bounded) owns current original chat2/cast-bar1/spellbook1 PASS4 and exact diagnostic/cache/acceptance limits. Historical four-case evidence below remains separate.
+
 ### Original Retail four-case checkpoint — 2026-10-13 (bounded)
 
 [Public packet](../../../data/test-perf/evidence/original-retail-prefork-2026-10-13/README.md) owns the exact selector matrix, retained streams and [independent saved-evidence report](../../../data/test-perf/evidence/original-retail-prefork-2026-10-13/independent/report.md). Original chat2/cast-bar1/spellbook1 PASS; actual wait exits0/0/0. Recorded compiled source `a6723200be40145ec352666b538998bf4035a608`, production `50f6f0ea8`; full captured runtime stderr has no observed failure diagnostics, compiler six inherited manifest deprecations. Selected retention: 32 complete TEXT payloads/104,446 public bytes; Current bounded retention PASS after `4308beb6d` historical-path normalization; original verifier FAIL preserved. Prior 32 TEXT transforms/104,446 public bytes, 20 JSON equivalents and 37 links reused without rehash. Local saved followup: `verification/original4-retention/privacy-followup.md`. This supplements historical Retail epochs only: no new body audit, conformance, cache equality, performance, native GUI or full-parent proof; historical RED, Mists cast-bar FAIL and all-profile gaps remain separate. [Contract checkpoint](../../specs/prefork-test-harness.md#original-retail-four-case-checkpoint--2026-10-13-bounded) closes no broader gate.

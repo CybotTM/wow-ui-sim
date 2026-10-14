@@ -1,6 +1,6 @@
 # Store product group query shape
 
-`C_StoreSecure.GetProductGroups` exposes existing simulator demo groups in the shape consumed by each audited profile. Current seed/query code lives in `src/lua_api/env_init/runtime_surface_bootstrap.lua`; modeled C_* query ownership belongs in `src/c_api/`. See [Lua API architecture](../lua-api.md).
+`C_StoreSecure.GetProductGroups` exposes existing simulator demo groups in the shape consumed by each audited profile. Demo backing and other queries remain in `src/lua_api/env_init/runtime_surface_bootstrap.lua`; the modeled group getter lives in `src/c_api/c_store_secure.rs`. See [Store source checkpoint](../wiki/investigations/store-secure-pool-constructors.md#store-group-shape--source-checkpoint-2026-10-14).
 
 Evidence is inferred from original cached consumers plus explicit simulator policy, **not native proof**. Cached official StoreSecure declarations are absent. Retail/PTR cached shared Store consumers read `groupID`/`parentGroupID`; the Mists TBC consumer treats each entry as an ID.
 
@@ -21,7 +21,7 @@ Concrete fresh demo values above are explicit simulator policy, not claims about
 ## Implementation inventory
 
 - `src/lua_api/env_init/runtime_surface_bootstrap.lua`: existing demo Lua table remains published as `__wow_store_state`; replaced Lua GetProductGroups definitions are removed.
-- `src/c_api/c_store_secure.rs`: native group query reads the existing table and projects IDs only on Mists; other profiles retain their record path. No duplicated catalog or initialization bridge.
+- `src/c_api/c_store_secure.rs`: modeled group query reads the existing table and projects IDs only on Mists; other profiles retain their record path. No duplicated catalog or initialization bridge.
 
 ## Tests asserting this spec
 
@@ -30,9 +30,13 @@ Concrete fresh demo values above are explicit simulator policy, not claims about
 
 ## Known gaps (current cycle)
 
-- [x] Shared Mists preproducer normal-Lua fixture fails at `Mists GetProductGroups[1] must be numeric` (CLI1), before group/product lookups. Authored Rust case remains unexecuted; independent existing-artifact audit pending.
+- [x] Shared Mists preproducer normal-Lua fixture fails at `Mists GetProductGroups[1] must be numeric` (CLI1), before group/product lookups. Authored Rust case remains unexecuted. Independent existing-artifact audit read all 18 selected artifacts: Mists first-shape RED and Retail/PTR complete baseline lookups accepted. Source-audit ENOENT was a separate agent visibility limitation; main read the delivered report.
 - [ ] Postproducer Rust/runtime GREEN and modern record preservation. Preproducer normal-Lua Retail/PTR record/lookup fixture completed with marker and `[]`; no Store UI acceptance follows.
 - [ ] Evaluate separate public UI proposal only after API shape passes; it is not current API-test acceptance.
+
+## Source checkpoint — 2026-10-14
+
+Producer `85d8d7bd4`, tests `f199e9424`: modeled getter ownership and initialization order are source-inspected, not runtime acceptance. Mists no-run compilation finished successfully with 741 JSON records and no compiler-message records; stderr retains six manifest deprecations and one `UnitRole` dead-code warning. New copied executables await independent authentication; Rust execution and postproducer API/UI acceptance remain open. Preproducer modern preservation does not cover this producer.
 
 ## Out of scope
 

@@ -36,6 +36,10 @@ Separate supplied-state matrices: currency116 =16 Retail+20 Mists+16 each other 
 | Speak current preservation | [Preservation owner](../../../data/patch-api/evidence/voice-speak-for-me-active-2026-10-13/README.md#current-preservation-checkpoint--2026-10-13) owns revision-scoped Retail/PTR execution PASS and links the single Text GREEN owner for PTR/startup/check. | Recovered selected TEXT and new recovery gate-copy integrity bounded PASS; missing original3837 output UNKNOWN. No PTR cached voice-consumer or Retail cached consumer at2bb claim. |
 | SpellDisplay | [Current bounded gate](../../../data/patch-api/evidence/ui-widget-spell-display-2026-10-13/README.md#current-bounded-runtime-gate--2026-10-13): independent Retail28/28 eight integration scopes plus normal CLEAN; independent PTR scopes PASS. | Both independent profiles cover ten Spell and first four removal requirements. Last removal preservation requirement not fully checked; Classic/native/world-loot/render/full-parent unproved; selected retention PASS. |
 
+## Current original Retail fixture coverage
+
+[Owning bounded status](../../specs/prefork-test-harness.md#current-original-retail-four-case-checkpoint-bounded): chat2/cast-bar1/spellbook1 PASS4 distinct at compiled1b707b28b/reused docs-only6b epoch; no current85d8 Store proof. Cast-only observed cache fields are not byte equivalence. Startup/full-registry/conformance/native/profile/parent acceptance remains open.
+
 ## Suite and acceptance boundaries
 
 [Original submission metadata](../investigations/editmode-layout.md#ptr-packet-and-current-suite-submission--2026-10-12) remains historical. [Source41cb terminal result](../../../data/test-perf/evidence/fullsuite-41cb-2026-10-12/README.md) records **15,123 PASS / 2 FAIL / 19 reported skips**: integration10,796, prefork primary2,324 plus auxiliary4, library1,999PASS/2FAIL. Two EditMode library fixtures used superseded index assumptions; test-only repairs b41/ac170 are not yet runtime-verified. New VertexColor tests/spec1887 are outside that suite source. No current-HEAD full acceptance; saved d21 proof was not replayed.

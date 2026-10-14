@@ -1,3 +1,11 @@
+## [2026-10-14] source | Profile-specific Store group query
+
+[Store checkpoint](investigations/store-secure-pool-constructors.md#store-group-shape--source-checkpoint-2026-10-14) links the [owning contract/status](../specs/store-product-group-shape.md). Modeled getter reads existing Lua backing; only Mists projects IDs. Runtime/Rust/native/UI acceptance remains open.
+
+## [2026-10-14] evidence | Current original Retail four-case bounded proof
+
+[Prefork status](systems/prefork-test-harness.md#current-original-retail-four-case-checkpoint-bounded) links the owning combined4 checkpoint; historical original4 remains separate. Broader acceptance remains open.
+
 ## [2026-10-13] runtime | CreateTexture bounded runtime status
 
 [Owning status](../specs/texture-draw-layer-validation.md#current-bounded-runtime-status) records 10 Retail/PTR outcomes, two separate startups and OLD480 Mists observation; warnings and soft-high crossing retained. Public retention and broader acceptance remain open.
