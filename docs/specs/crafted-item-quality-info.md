@@ -51,7 +51,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Native ItemInfo name lookup/validation, item catalogs, callback event delivery and original professions-panel/rendered acceptance remain unproved; passing host-model queries do not establish them.
+- [ ] Native ItemInfo name lookup/validation, item catalogs, callback event delivery and original professions-panel/rendered acceptance remain unproved; passing host-model queries do not establish them. Earlier-profile coverage and full-parent acceptance also remain unproved.
 
 ## Out of scope
 
