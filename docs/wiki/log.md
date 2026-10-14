@@ -1,3 +1,7 @@
+## [2026-10-14] docs | TextureAndTextRow public TEXT packet
+
+[Row publication ledger](../specs/texture-and-text-row.md#known-gaps-current-cycle) records committed publication and separate bounded candidate/canonical integrity/privacy/navigation PASS. Existing behavior gates and historical entries preserved; no new runtime or broader acceptance.
+
 ## [2026-10-14] evidence | TextureAndTextRow bounded Retail checkpoint
 
 [Current manager checkpoint](systems/ui-widget-manager-state.md#textureandtextrow-current-bounded-checkpoint--2026-10-14) adds independent source/saved Retail evidence and pending gates while retaining the historical passive checkpoint.

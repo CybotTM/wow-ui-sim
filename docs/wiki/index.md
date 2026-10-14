@@ -10,6 +10,10 @@
 
 [Manager checkpoint](../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14) records `e37f5426a` complete27 projection/shared selector policy after independent Retail1 PASS/7 FAIL. Cached activation was not reached in that RED. [Current bounded verification](../specs/ui-widget-manager-state.md#current-bounded-textwithsubtext-verification--2026-10-14): independent Retail/PTR11 each, full cached lifecycle, limited normal startup and format/default check. Historical failures retained; [owning publication status](../specs/patch-10-0-2-publication-sweep.md#owning-after-checkpoint--2026-10-14) is separate from broader acceptance.
 
+## [2026-10-14] evidence | TextureAndTextRow public TEXT packet
+
+[Row publication ledger](../specs/texture-and-text-row.md#known-gaps-current-cycle) links the committed packet and bounded candidate/canonical integrity/privacy/navigation PASS. Historical evidence retained; no new runtime or broader acceptance.
+
 ## [2026-10-14] evidence | Terminal broad run independently accounted
 
 [Suite owner](investigations/fullsuite-983f02-2026-10-14.md#terminal-broad-run-4fc115b93--2026-10-14): `4fc115b93` integration11039 PASS/19 unidentified skips, prefork2324 primary+4 supplemental PASS, lib1999 PASS. Warnings and historical983 FAIL preserved; later TextWithSubtext and broader acceptance remain separate.
