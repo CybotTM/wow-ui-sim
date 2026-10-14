@@ -366,6 +366,7 @@ macro_rules! build_empty_sim_state {
             aura_filter_facts: Default::default(),
             target_auras: crate::lua_api::globals::auras::target_fixture_auras(),
             inventory_item_cooldowns: ::std::collections::HashMap::new(),
+            item_cooldowns: ::std::collections::HashMap::new(),
             action_ui_buttons: $collections.action_ui_buttons,
             cursor_item: $runtime.cursor_item,
             loading_addon_index: $runtime.loading_addon_index,
