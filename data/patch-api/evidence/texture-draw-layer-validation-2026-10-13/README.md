@@ -1,6 +1,6 @@
 # CreateTexture draw-layer validation — bounded evidence
 
-15 complete original proof texts, transformed by 28 ordered exact literals and terminal LF only when absent. No regex rewriting, newline normalization, clipping or JSON reserialization. Embedded JSON was decoded for privacy audit only. Functional `thread-count=4` remains. Independent public-copy/privacy gate pending; full-parent acceptance remains open.
+15 complete original proof texts, transformed by 28 ordered exact literals and terminal LF only when absent. No regex rewriting, newline normalization, clipping or JSON reserialization. Embedded JSON was decoded for privacy audit only. Functional `thread-count=4` remains. Independent public-copy/privacy gate passed at `d86c01f98`: 15/15 whole copies, zero raw/decoded privacy findings and 17 public Git/stat receipts. This closes bounded retention only; full-parent acceptance remains open.
 
 | Selected boundary | Retained texts |
 |---|---|

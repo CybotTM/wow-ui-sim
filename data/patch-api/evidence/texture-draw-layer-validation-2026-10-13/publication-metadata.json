@@ -86,5 +86,5 @@
     "initial schema failure preserved; numeric label means string names",
     "OLD480 returned ARTWORK/0, not current Mists/native/all-Classic"
   ],
-  "copy_gate": "pending"
+  "copy_gate": "PASS at d86c01f98: 15/15 literal copies, raw/decoded privacy and 17 public Git/stat receipts; retention only"
 }
