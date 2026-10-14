@@ -4,7 +4,8 @@ Account for Warcraft Wiki page 303146, revision 2926754 (2023-01-27T02:58:55Z), 
 
 ## What it must do
 
-- [x] Probe all 416 inventory occurrences with all 24 chronological later registers, 10.0.5 through 12.1.0; require the exact reviewed gap set (currently148 after the TextWithSubtext follow-up below).
+- [x] Historically probe all416 inventory occurrences with all24 chronological later registers, 10.0.5 through12.1.0; match the then-reviewed149-item gap set.
+- [ ] Replay against the current148-item expected set after TextWithSubtext row309 reconciliation; the pre-reconciliation run failed exact-set comparison.
 - [x] Keep twenty unused namespace members absent under repeated lookup in bare and unmodified cached Game environments. Preserve modeled crafting-order/item-tooltip successor publication.
 - [x] Preserve Mists legacy namespace lookup. The existing retail epoch module gate excludes Wrath, Mists, Era and Anniversary; no 10.x epoch is introduced.
 - [x] Detect an exact one-row negative control: UnitTokenFromGUID added → removed produces only that new failure, 149 → 150.
