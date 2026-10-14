@@ -1,6 +1,6 @@
 # Current original Retail four-case proof
 
-14 complete original UTF-8 texts, 11 ordered literal substitutions, terminal LF only when absent. No regex rewriting, newline normalization, clipping or JSON reserialization. [Inventory](publication-metadata.json); independent public-copy/privacy gate pending.
+14 complete original UTF-8 texts, 11 ordered literal substitutions, terminal LF only when absent. No regex rewriting, newline normalization, clipping or JSON reserialization. [Inventory](publication-metadata.json); independent public-copy/privacy gate passed at `2585517f4`: 14 whole matches, zero privacy findings and 16 Git/stat receipts. Bounded retention only; no fresh runtime acceptance.
 
 | Current original group | Retained evidence | Cases |
 |---|---|---|

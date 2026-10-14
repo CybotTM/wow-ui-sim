@@ -62,5 +62,5 @@
     }
   ],
   "scope": "4 distinct originalRetailcases compiled1b707b28b/reused6bdb02b06; historical results separate",
-  "copy_gate": "pending"
+  "copy_gate": "PASS at 2585517f4: 14 whole-text matches, 40061 bytes, zero privacy findings; 16 Git/stat receipts; retention only"
 }
