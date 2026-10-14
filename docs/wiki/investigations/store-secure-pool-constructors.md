@@ -39,6 +39,10 @@ Regression coverage:
 
 `ffb6d7d7d` observes before/after binding counts around existing trust filtering. [Diagnostic limits](../../debug-tools.md#temporary-store-script-selection-trace) define default-off activation and retirement; counts do not establish callback success, filter-specific cause or populated cards. Mists root/runtime proof remains pending.
 
+## Featured display metadata — source checkpoint 2026-10-14
+
+[Owning source checkpoint](../../specs/store-product-group-shape.md#featured-display-metadata--source-checkpoint-2026-10-14) records the single legacy Lua initializer field at `bf1b61f10`, shared `e472` assertion-first normal Mists447 numeric-display RED (CLI1), and observed original TBC nil-equality. Numeric zero is regular-group simulator policy, not native enum evidence; no aliases retained. Compilation succeeded; recorded original public lifecycle reaches one shown entry1003 card; independent runtime gate pending; earlier query PASS/UI FAIL and historical Retail Show PASS keep their old-source scopes.
+
 ## Current bounded Retail receipt — 2026-10-14
 
 [Public historical packet](../../../data/patch-api/evidence/store-macro-lifecycle-2026-10-14/README.md) retains Store receipts and failures; [owning status](../../specs/store-product-group-shape.md#current-bounded-retail-receipt--2026-10-14) owns their scope and separate accepted copy/privacy limits. No later item/display, PTR, current UI, native/render or full-parent acceptance follows.

@@ -429,12 +429,7 @@ C_StoreSecure.GetCurrencyID = function()
   return 1
 end
 C_StoreSecure.GetCurrencyInfo = function()
-  local currency = __wow_store_state.currencyInfo
-  if __wow_trace_store_inputs then
-    local data = type(currency) == "table" and currency.sharedData
-    print("STORE_QUERY_INPUT", "GetCurrencyInfo", type(currency), type(data) == "table" and data.regionID)
-  end
-  return currency
+  return __wow_store_state.currencyInfo
 end
 C_StoreSecure.GetPurchaseList = function()
   if StoreFrame and type(StoreFrame.IsShown) == "function" and StoreFrame:IsShown() then
@@ -460,25 +455,13 @@ C_StoreSecure.GetProductList = function()
   return true
 end
 C_StoreSecure.GetProductGroupInfo = function(groupID)
-  local group = __wow_store_state.productGroupInfo[groupID]
-  if __wow_trace_store_inputs then
-    print("STORE_QUERY_INPUT", "GetProductGroupInfo", type(groupID), type(groupID) == "number" and groupID, type(group))
-  end
-  return group
+  return __wow_store_state.productGroupInfo[groupID]
 end
 C_StoreSecure.GetProducts = function(groupID)
-  local products = __wow_store_state.productsByGroup[groupID] or {}
-  if __wow_trace_store_inputs then
-    print("STORE_QUERY_INPUT", "GetProducts", type(groupID), type(groupID) == "number" and groupID, type(products), type(products) == "table" and #products)
-  end
-  return products
+  return __wow_store_state.productsByGroup[groupID] or {}
 end
 C_StoreSecure.GetEntryInfo = function(entryID)
-  local entry = __wow_store_state.entriesByID[entryID]
-  if __wow_trace_store_inputs then
-    print("STORE_QUERY_INPUT", "GetEntryInfo", type(entryID), type(entryID) == "number" and entryID, type(entry))
-  end
-  return entry
+  return __wow_store_state.entriesByID[entryID]
 end
 C_StoreSecure.GetProductInfo = function(productID)
   return __wow_store_state.productsByID[productID]

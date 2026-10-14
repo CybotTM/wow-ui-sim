@@ -46,6 +46,14 @@ Source inspection identifies an original lifecycle gap: cached Mists `Blizzard_E
 
 Independent restored-Mists runtime gate: **two unique Rust cases**, fresh query and real cached cleanup with the second post-load assertion reached; one timeout child is not a third case. Full normal session completes all numeric-ID/group/product/entry/name assertions, marker `ids`, `[]` and CLEAN/zero observed errors. Source label3e includes restore04d83 and passive target-input0b; not later macro source acceptance. At that checkpoint Retail/PTR fresh preservation remained pending; current bounded Retail receipt status follows below, while PTR remains pending. Original public Mists Store population separately fails as recorded above; no native/render/whole-parent acceptance.
 
+## Featured display metadata — source checkpoint 2026-10-14
+
+`bf1b61f10` adds only `displayType = 0` to the existing featured `productGroupInfo` record initializer in legacy `runtime_surface_bootstrap.lua`. This is explicit regular-group simulator policy, not a new typed model, catalog or native enum-value claim. No legacy enum aliases are retained; Blizzard/vendor Lua and renderer behavior are unchanged.
+
+Shared fixture assertions at `e472` preceded this source change. The actual preproducer normal Mists447 run reached `featured group displayType must be numeric` as its first failure (CLI1); the zero-value and later product/entry assertions were unreached. Original TBC `SetCategory` at line720 compares missing group metadata with missing legacy `Splash`/`DoubleWide` fields: observed post-Show metadata made both nil comparisons true. Explicit numeric zero avoids that nil-equality; it does not establish native layout semantics.
+
+Mists integration compiled at `bf1b61f10` (741 JSON records, 1m41; six manifest deprecations and one UnitRole warning). Recorded current execution reaches the shared contract and original public lifecycle completion: one shown entry1003 card, rectangle `(615,633.5,146,209)`, seven hidden ID0 cards; CLI0, CLEAN/zero errors. Independent runtime gate remains pending; native/render/full-parent acceptance is not established. Earlier Mists query PASS/UI FAIL and historical Retail public Show PASS at `a6b572732` retain their old-source scopes and do not cover these new display assertions or this initializer change.
+
 ## Current bounded Retail receipt — 2026-10-14
 
 [Public historical Store/macro packet](../../data/patch-api/evidence/store-macro-lifecycle-2026-10-14/README.md) retains the recorded Mists query PASS/public Store UI FAIL and Retail query/public Show receipt through `a6b572732`, including earlier compile/setup/admission failures. Accepted copy/privacy verification covers 170/170 candidate byte pairs and bounded known-literal privacy only; it adds no executable/source authentication or behavioral acceptance. Later item/display changes, PTR preservation, current UI closure, native/render and full-parent acceptance remain excluded.

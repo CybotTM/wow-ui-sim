@@ -2,6 +2,10 @@
 
 [Store owner](../specs/store-product-group-shape.md#current-bounded-retail-receipt--2026-10-14) and [macro owner](../specs/macro-vehicle-ui-conditions.md#current-bounded-runtime-follow-up--2026-10-14) link the [public packet](../../data/patch-api/evidence/store-macro-lifecycle-2026-10-14/README.md). Accepted copy/privacy only; recorded revision scopes and historical failures retained. Current item/display/PTR/UI, native/render and full-parent acceptance excluded.
 
+## [2026-10-14] source | Featured Store display metadata
+
+[Existing Store investigation](investigations/store-secure-pool-constructors.md#featured-display-metadata--source-checkpoint-2026-10-14) links the [owning source checkpoint](../specs/store-product-group-shape.md#featured-display-metadata--source-checkpoint-2026-10-14): `bf1b61f10` adds only legacy featured-record `displayType=0` after shared `e472` normal Mists447 numeric-display RED, CLI1. Explicit regular-group policy avoids observed nil-equality; no native enum aliases/value claims. Compilation succeeded; recorded public lifecycle reaches one shown entry1003 card; independent runtime gate pending; prior query PASS/UI FAIL and historical Retail Show PASS remain old-source evidence.
+
 ## [2026-10-14] source | Item producer and Store selection observation
 
 [Item producer checkpoint](systems/lua-api.md#supplied-item-cooldowns--producer-checkpoint-2026-10-14) links owning RED/GREEN limits. [Store selection checkpoint](investigations/store-secure-pool-constructors.md#temporary-store-selection-trace--source-checkpoint-2026-10-14) links opt-in diagnostic limits; no callback/root proof.

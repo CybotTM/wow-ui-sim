@@ -183,21 +183,3 @@ The connected dump-tree and inspector use `compute_frame_rect()` which resolves 
 4. Derive width/height from opposite edges, or fall back to stored `frame.width`/`frame.height`
 
 The standalone dump-tree uses stored `frame.width`/`frame.height` directly without anchor resolution.
-
-## Temporary Store script selection trace
-
-`WOW_SIM_TRACE_EVENT_DISPATCH=OnShow,OnEvent` logs StoreFrame's script counts
-before/after existing dispatch trust filtering. No callback, taint, error handling,
-getter, vendor code or dispatch order changes. Missing diagnostic state emits
-`trace-unavailable`; no record alone cannot prove dispatch absence. Counts show
-selected bindings, not successful callbacks or populated cards. The synchronous
-public FireEvent path uses this same selector; bootstrap direct handler calls do
-not. Remove this diagnostic once the unresolved Mists boundary is located.
-
-The same `OnEvent` opt-in emits `STORE_QUERY_INPUT` records from the simulator's
-existing Store group/product/entry/currency queries when the original consumer
-naturally calls them. Records contain query names, numeric IDs, value types,
-product-list lengths and currency region; no arguments/payloads beyond these
-fields. Returned values are unchanged; no private handler/getter is forced or
-replaced to fabricate results. This is input observation, not callback, UI or
-native proof. Retire these records and their private flag with the selection trace.
