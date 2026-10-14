@@ -18,6 +18,10 @@ Key field groups:
 
 **Widget-specific** — Slider, StatusBar, EditBox, ScrollFrame, Cooldown each have dedicated field groups. Model-family state is grouped in one lazy `Option<Box<ModelWidgetState>>`; absent payloads preserve getter defaults, while mutating methods allocate only when needed and remain globally callable.
 
+### CreateTexture draw-layer bounded runtime status
+
+[Owning runtime status](../../specs/texture-draw-layer-validation.md#current-bounded-runtime-status) records 10 Retail/PTR outcomes, two separate startups, retained check/format caveats and OLD480 Mists observation. Public retention, fresh earlier-profile and native/render/full-parent acceptance remain open. The source checkpoint below remains historical.
+
 ### CreateTexture draw-layer source checkpoint — 2026-10-13
 
 `6e085fce9` validates supplied ordinary draw-layer names for Retail/PTR before Texture construction and registration. VectorGraphics bypasses the new validation; earlier profiles retain their existing path. [Owning contract/status](../../specs/texture-draw-layer-validation.md) separates complete preproducer shared-fixture normal-Lua RED from authored, uncompiled Rust cases (`ab0`, formatting `6bdb02b06`). Producer GREEN remains pending; no native/render/full-parent acceptance is established.

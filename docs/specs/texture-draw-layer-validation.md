@@ -4,9 +4,9 @@ Ordinary explicit draw-layer names passed to `Frame:CreateTexture` must be valid
 
 ## What it must do
 
-- [ ] Accept `BACKGROUND`, `BORDER`, `ARTWORK`, `OVERLAY` and `HIGHLIGHT`; each created Texture returns that name from `GetDrawLayer` and adds one region.
-- [ ] Reject an ordinary invalid name such as `INVALID` through the real Lua API without increasing the parent's `GetNumRegions` count.
-- [ ] Apply this new rejection contract only to Retail/PTR; leave earlier-profile behavior unchanged.
+- [x] Accept `BACKGROUND`, `BORDER`, `ARTWORK`, `OVERLAY` and `HIGHLIGHT`; each created Texture returns that name from `GetDrawLayer` and adds one region.
+- [x] Reject an ordinary invalid name such as `INVALID` through the real Lua API without increasing the parent's `GetNumRegions` count.
+- [x] Apply this new rejection contract only to Retail/PTR; leave earlier-profile behavior unchanged. Profile containment is source-inspected; earlier-profile fresh runtime coverage remains open.
 
 ## How it works
 
@@ -24,12 +24,22 @@ Ordinary explicit draw-layer names passed to `Frame:CreateTexture` must be valid
 - `create_texture_accepts_all_five_draw_layers`: five explicit creation/getter roundtrips and region count.
 - `create_texture_rejects_invalid_draw_layer_without_adding_region`: five valid baseline creations, then invalid-name rejection and unchanged region count.
 
-Source producer `6e085fce9` and test formatting `6bdb02b06` follow tests/spec `ab0`. These authored Rust tests have not been built or executed. The complete shared Lua fixture ran before the producer on frozen Retail/PTR normal executables: valid mode completed five roundtrips and region-count assertions; invalid mode accepted `INVALID` and changed the region count from 5 to 6. The rejection assertion failed (CLI1); unchanged-count assertion and invalid completion marker were unreached. This is shared normal-Lua RED, not new Rust-case execution or producer GREEN. Initial independent Retail RED audit retains its separate first-failure boundary.
+Source producer `6e085fce9` and test formatting `6bdb02b06` follow tests/spec `ab0af8126`. Pre-producer shared normal-Lua fixtures completed valid mode on frozen Retail/PTR binaries, then accepted `INVALID` and changed regions 5 → 6. First rejection assertion failed (CLI1); unchanged-count assertion and invalid completion marker were unreached. Initial independent Retail RED retains its separate failure boundary.
+
+## Current bounded runtime status
+
+Independent runtime acceptance: **five unique Rust cases/profile, 10 Retail/PTR outcomes**, comprising two name-validation cases and three creation-preservation cases. Invalid creation now returns `pcall=false`, regions remain 5 → 5 and both rejection assertions complete. Five layer iterations are not five tests. Two separate normal startups complete both fixture modes with `[]` and CLEAN diagnostics; CASC, sound, third-party addons and SavedVariables are disabled.
+
+Preservation covers explicit `OVERLAY`/sublevel 7, explicit `BACKGROUND`/sublevel 0 supplied by the helper, and XML anonymous-wrapper Texture parentKey publication/object type. Neither omitted/nil-layer behavior nor an XML draw-layer getter is asserted by those controls.
+
+Separate OLD480 Mists observation accepts the invalid name, adds a region (5 → 6), returns `ARTWORK`/sublevel 0 and completes with CLEAN diagnostics. Not current-Mists, all-Classic or native-history proof. The proposed BACKGROUND description was contradicted by observed output; no BACKGROUND assertion failed.
+
+Retained full format and default Retail library/six-bin check pass: 733 JSON records, zero compiler-message records, six manifest deprecations. Format peak 567672832 bytes exceeds soft high 536870912 by **30801920 bytes**, below the 1 GiB hard maximum. Initial copy-authentication schema `KeyError('compiler_executable')` remains preserved; corrected metadata lookup did not rehash integration. Copy integrity is not source/archive/library authenticity.
 
 ## Known gaps (current cycle)
 
-- [ ] Executed Retail/PTR Rust cases and shared-fixture GREEN.
-- [ ] Producer GREEN, valid creation preservation, startup diagnostics and check/format remain unverified. Earlier-profile behavior is source-preserved, not freshly executed or native-history proof.
+- [ ] Publish and independently verify privacy-safe evidence retention.
+- [ ] Fresh earlier-profile coverage and native/render/full-parent acceptance remain open.
 
 ## Out of scope
 
