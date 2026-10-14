@@ -6,7 +6,8 @@
 - `securecopy` copies surrounding option tables without copying curve handles or losing their methods.
 - `Copy()` creates a distinct handle with independent points and the same interpolation configuration. Per-instance addon fields remain writable; methods remain read-only.
 - Aura option processors accept registered curve handles of the required kind, not tables impersonating curves with `Evaluate` and `Copy` fields.
-- Numeric linear interpolation remains unchanged. Color linear interpolation operates on RGBA channels, returning a ColorMixin value. Color Step interpolation holds the preceding point and switches at the next point, covering BetterBlizzFrames' duration-color initialization.
+- Numeric interpolation selects adjacent points by ascending x, independent of `AddPoint` insertion order. The cached EncounterTimeline alpha curve adds descending track keys; Short must evaluate to its configured1.0, not insertion-order extrapolation1.4. Copy retains ordered evaluation and independent later point insertion. This is a simulator requirement grounded in that real consumer, not complete native curve-ordering/extrapolation parity.
+- Color linear interpolation operates on RGBA channels, returning a ColorMixin value. Color Step interpolation holds the preceding point and switches at the next point, covering BetterBlizzFrames' duration-color initialization. Existing color insertion-order snapshot policy is unchanged.
 
 - `GetType()` returns the stored interpolation mode as one number for scalar and color curves: default Linear (`0`), changes to Step (`1`) and back, and independently copied mode state. This is a best-effort simulator storage contract, not proof of native defaults or non-linear evaluation.
 
@@ -19,6 +20,10 @@
 - Color `SetPoints(points)` replaces stored points from an array of `{x, y}` records with zero return values; empty input clears points. Stored order and copied input records/RGBA colors are simulator policies. Input mutation and replacement on one copied curve must not change the other curve's points or evaluation. Native validation, identity and failure semantics remain unverified.
 
 - Color `EvaluateUnpacked(x)` returns exactly four numeric RGBA channels from existing curve evaluation. Empty, single-point, Linear interior and Step interior values follow existing simulator policies; this does not establish native interpolation, extrapolation, coercion/error or security semantics.
+
+## Current numeric ordering regression — 2026-10-14
+
+Saved suite `983f02fbf` fails the original EncounterTimeline consumer at `UpdateIconAlpha` → `SetAlpha`. Source adds `(3,0.6),(2,1),(1,1),(0,1),(4,1)`; the insertion-order evaluator's first segment yields1.4 at x=1. `tests/curve_point_order.rs` retains these actual numeric inputs, exact node/interior values and Copy isolation. New targeted RED/GREEN execution remains pending; no vendor or alpha-range policy change is proposed.
 
 ## Proof boundary
 
