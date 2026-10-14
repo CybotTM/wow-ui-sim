@@ -27,7 +27,7 @@
 [  0.788s] [Startup] begin load keybindings
 [  0.788s] [Startup] end load keybindings in 91.00ns
 [  0.788s] [Startup] begin configure edit mode cache
-[  0.790s] EditMode cache source (read-only): 50868465#1 @ Zekhan/Rakto
+[  0.790s] EditMode cache source (read-only): <ACCOUNT_ID_PTR> @ <REALM_PTR>/<CHARACTER_PTR>
 [  0.790s] [Startup] end configure edit mode cache in 1.64ms
 [  0.790s] [Startup] begin read ServerSnapshot edit mode layout
 [  0.790s] [Startup] end read ServerSnapshot edit mode layout in 51.00ns

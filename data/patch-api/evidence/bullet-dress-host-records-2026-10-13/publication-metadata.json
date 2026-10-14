@@ -861,8 +861,8 @@
     },
     {
       "path": "epochs/bullet-dress-ptr-green-20261014T004551190529Z/runtime-normal-bullet-dress-defaults/stderr",
-      "bytes": 14697,
-      "sha256": "6a6c3dd600c1f344fd2783531ffd836a48f1a58e1156a3acac68556c50ff77a7"
+      "bytes": 14718,
+      "sha256": "ef723e5ae75deb64b87b6f8928e9c709257bf7dfc639e7d3414e0f21738a7fff"
     },
     {
       "path": "epochs/bullet-dress-ptr-green-20261014T004551190529Z/runtime-normal-bullet-dress-defaults/stdout",
@@ -1476,8 +1476,8 @@
     },
     {
       "path": "gates-current/runtime/proof.json",
-      "bytes": 2519482,
-      "sha256": "9b8104d1b0e483c0883aa2abc3125ef835055761022ef3b702b100fb8c8c7e7e"
+      "bytes": 2519524,
+      "sha256": "4f624a7505807b124d4803b4bca190b7d3d64566988a9b34454a5d75ec6cb11f"
     },
     {
       "path": "gates-current/check-format/report.md",
@@ -1489,5 +1489,6 @@
       "bytes": 571257,
       "sha256": "f1b6b263abc6da4137e759f2eaa499a57f4172b7942ec913b1c6cfb48e28446c"
     }
-  ]
+  ],
+  "privacy_correction": "Alternate PTR EditMode account/realm/character values now redacted; original privacy FAIL retained privately; corrected gate pending."
 }
