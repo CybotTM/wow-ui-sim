@@ -110,6 +110,7 @@ fn can_loot_unit_requires_dead_enemy_target() {
         classification: "normal".into(),
         creature_type: "Humanoid".into(),
         reaction: 2,
+        has_vehicle_ui: false,
         interaction: Default::default(),
     });
     let b: bool = env.eval(r#"return CanLootUnit("target")"#).unwrap();

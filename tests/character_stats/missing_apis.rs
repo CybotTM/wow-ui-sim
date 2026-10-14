@@ -224,6 +224,7 @@ fn weapon_attack_power_uses_existing_guid_and_never_creates_entities() {
         classification: "normal".into(),
         creature_type: "Humanoid".into(),
         reaction: 2,
+        has_vehicle_ui: false,
         interaction: Default::default(),
     });
     {

@@ -22,6 +22,7 @@ fn npc(health: i32, health_max: i32) -> TargetInfo {
         classification: "normal".into(),
         creature_type: "Humanoid".into(),
         reaction: 1,
+        has_vehicle_ui: false,
         interaction: Default::default(),
     }
 }

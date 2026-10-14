@@ -56,6 +56,7 @@ fn hyperlink_unit_guid_uses_modeled_player_and_target_tooltips() {
             is_enemy: true,
             classification: "normal".into(),
             reaction: 2,
+            has_vehicle_ui: false,
             interaction: Default::default(),
         });
     }

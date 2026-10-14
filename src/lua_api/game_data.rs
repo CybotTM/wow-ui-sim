@@ -36,6 +36,8 @@ pub struct TargetInfo {
     pub power_type_name: String,
     pub is_player: bool,
     pub is_enemy: bool,
+    /// Explicit vehicle-UI fact for this unit snapshot, independent of hostility.
+    pub has_vehicle_ui: bool,
     pub guid: String,
     /// "normal", "elite", "rare", "rareelite", "worldboss", "trivial", "minus".
     pub classification: String,

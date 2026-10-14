@@ -89,6 +89,7 @@ mod retail {
                 classification: "normal".into(),
                 creature_type: "Humanoid".into(),
                 reaction: 1,
+                has_vehicle_ui: false,
                 interaction: Default::default(),
             });
             sim.party_group_active = true;

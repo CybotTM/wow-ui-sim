@@ -110,6 +110,7 @@ mod forever {
             classification: "normal".into(),
             creature_type: "Humanoid".into(),
             reaction: 2,
+            has_vehicle_ui: false,
             interaction: Default::default(),
         });
         let (target, target_mod, missing, missing_mod): (i32, i32, i32, i32) = env
@@ -161,6 +162,7 @@ mod forever {
                 classification: "normal".into(),
                 creature_type: "Humanoid".into(),
                 reaction: 5,
+                has_vehicle_ui: false,
                 interaction: Default::default(),
             });
             let mut focus = sim.current_target.as_ref().unwrap().clone();

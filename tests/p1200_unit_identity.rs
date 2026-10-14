@@ -20,6 +20,7 @@ fn npc(guid: &str) -> TargetInfo {
         classification: "elite".into(),
         creature_type: "Humanoid".into(),
         reaction: 2,
+        has_vehicle_ui: false,
         interaction: Default::default(),
     }
 }

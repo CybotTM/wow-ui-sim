@@ -146,6 +146,7 @@ fn selected_target_changes_do_not_reinterpret_cast_snapshot() {
         classification: "normal".into(),
         creature_type: "Humanoid".into(),
         reaction: 5,
+        has_vehicle_ui: false,
         interaction: Default::default(),
     });
     query_player_name(&env);
