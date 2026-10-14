@@ -1,6 +1,6 @@
 {
   "scope": "ordinary numeric Region:SetAlpha Retail/PTR bounded evidence; not parent/native/render acceptance",
-  "selected_complete_texts": 14,
+  "selected_complete_texts": 16,
   "literal_rules": 50,
   "operation": "ordered literal replacement and append terminal LF only when absent; no clipping or JSON reserialization",
   "privacy_rule_labels": [
@@ -830,7 +830,40 @@
         }
       ],
       "terminal_lf_appended": false
+    },
+    {
+      "source_reference": "<PRIVATE_V>/region-alpha-public-copy-current/report.md",
+      "destination": "evidence/gates/public-copy-initial/report.md",
+      "role": "independent initial fourteen-payload public-copy/privacy gate; historical PENDING packet status retained in gate text",
+      "type": "complete UTF-8 TEXT",
+      "original_bytes": 3926,
+      "published_bytes": 3926,
+      "published_sha256": "f4e0c5fdd8ca05952521b4794f44008dc6d2b2f3ae0edc1926dad6dc196076cd",
+      "literal_substitutions": [],
+      "terminal_lf_appended": false
+    },
+    {
+      "source_reference": "<PRIVATE_V>/region-alpha-public-copy-current/proof.json",
+      "destination": "evidence/gates/public-copy-initial/proof.json",
+      "role": "independent initial fourteen-payload public-copy/privacy gate; historical PENDING packet status retained in gate text",
+      "type": "complete UTF-8 TEXT",
+      "original_bytes": 65287,
+      "published_bytes": 64783,
+      "published_sha256": "3ad0fe555e276884fcaf485707e9d3e1c627037176dccfc2803b358eeba4ae21",
+      "literal_substitutions": [
+        {
+          "rule": 1,
+          "count": 14
+        }
+      ],
+      "terminal_lf_appended": false
     }
   ],
-  "public_copy_gate": "PENDING independent verification"
+  "public_copy_gate": {
+    "initial_14_payloads": "PASS; accepted at89f9a88d9",
+    "initial_gate_report": "evidence/gates/public-copy-initial/report.md",
+    "initial_gate_proof": "evidence/gates/public-copy-initial/proof.json",
+    "new_gate_copy_closing_verification": "PENDING; prior14payloads must reuse Git/stat proof"
+  },
+  "public_file_count": 18
 }
