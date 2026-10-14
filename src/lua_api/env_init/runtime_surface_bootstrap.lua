@@ -343,6 +343,7 @@ if type(__wow_store_state) ~= "table" then
         texture = "Interface\\Icons\\INV_Misc_Coin_01",
         flags = 0,
         disabledTooltip = nil,
+        displayType = 0,
       },
     },
     productsByGroup = {
