@@ -1,3 +1,7 @@
+## [2026-10-14] source | Supplied item cooldown passive input
+
+[Existing API inventory](systems/lua-api.md#supplied-item-cooldowns--passive-input-checkpoint) links the [unchecked contract](../specs/item-cooldowns.md). Committed passive input and authored tests are separate from source-predicted mismatches; compile/runtime acceptance pending.
+
 ## [2026-10-14] source | Profile-specific Store group query
 
 [Store checkpoint](investigations/store-secure-pool-constructors.md#store-group-shape--source-checkpoint-2026-10-14) links the [owning contract/status](../specs/store-product-group-shape.md). Modeled getter reads existing Lua backing; only Mists projects IDs. Runtime/Rust/native/UI acceptance remains open.

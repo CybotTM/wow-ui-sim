@@ -384,7 +384,13 @@ Historical six-test RED reached missing `SetStartColor`; downstream assertions w
 
 [Owning C API contract](../../specs/item-dressability.md) retains Retail/PTR supplied-input and original PlayerChoice RED. Native registration now publishes the numeric/link predicate only for Retail/PTR, authenticates original secrets before parsing and reads explicit per-environment booleans; misses are false. Uniform empty storage replaces repeated profile cfg lists without publishing an earlier-profile query. GREEN/security/complete state and mount controls remain pending; no native catalog or rendered parity.
 
+## Supplied item cooldowns — passive input checkpoint
+
+[Owning contract](../../specs/item-cooldowns.md) remains unchecked. `e4caa4899` adds empty-default `SimState.item_cooldowns: HashMap<u32, SpellCooldownState>`, independent of equipment-slot input, and four authored route tests. C_Item and both Container getters still return constant ready tuples; legacy equipment-slot lookup is unchanged. Supplied nonzero item assertions are predicted to fail if reached, not observed RED. Compile, execution and producer acceptance remain pending.
+
 ## Sources
+
+- [Supplied item cooldowns](../../specs/item-cooldowns.md) — unchecked contract; passive input and authored tests, runtime proof pending.
 
 - [Item dressability](../../specs/item-dressability.md) — supplied C API model and revision-scoped proof limits.
 

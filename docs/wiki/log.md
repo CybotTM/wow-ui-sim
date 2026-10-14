@@ -1,3 +1,7 @@
+## [2026-10-14] source | Supplied item cooldown passive input
+
+[API inventory](systems/lua-api.md#supplied-item-cooldowns--passive-input-checkpoint) links the [unchecked contract](../specs/item-cooldowns.md) at `e4caa4899`. Four tests are authored; constant-getter mismatches remain predictions until the running compilation and runtime RED are inspected.
+
 ## [2026-10-14] evidence | Bounded public Retail Store receipt
 
 [Existing Store investigation](investigations/store-secure-pool-constructors.md#current-bounded-retail-receipt--2026-10-14) links [owning receipt status](../specs/store-product-group-shape.md#current-bounded-retail-receipt--2026-10-14): independent recorded Retail PASS at `a6b572732`, normal public Show and nonvacuous visible card bounds; startup workarounds retained. Mists query PASS/UI FAIL separate; PTR pending; no native/render/parent acceptance.

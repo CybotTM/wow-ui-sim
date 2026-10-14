@@ -27,7 +27,7 @@ Item cooldown queries must project independently supplied start/duration pairs u
 
 ## Known gaps (current cycle)
 
-- [ ] Main commits passive input/tests/spec, then obtains actual compile and query-boundary RED before producer changes. A constant-stub mismatch is valid preproducer RED, not evidence of successful cooldown selection.
+- [ ] Passive input/tests/spec committed as `e4caa4899`; actual compile and query-boundary RED remain pending before producer changes. A constant-stub mismatch is valid preproducer RED, not evidence of successful cooldown selection.
 - [ ] Implement producers and obtain GREEN; acceptance remains unchecked.
 - [ ] Native behavior, expiry/elapsed-time rules, enable derivation, secret validation, name selection, profile preservation, and wider consumer/runtime proof remain pending. These are not exclusions from the parent goal.
 
