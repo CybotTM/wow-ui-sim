@@ -386,11 +386,15 @@ Historical six-test RED reached missing `SetStartColor`; downstream assertions w
 
 ## Supplied item cooldowns — passive input checkpoint
 
-[Owning contract](../../specs/item-cooldowns.md) remains unchecked. `e4caa4899` adds empty-default `SimState.item_cooldowns: HashMap<u32, SpellCooldownState>`, independent of equipment-slot input, and four authored route tests. C_Item and both Container getters still return constant ready tuples; legacy equipment-slot lookup is unchanged. Supplied nonzero item assertions are predicted to fail if reached, not observed RED. Compile, execution and producer acceptance remain pending.
+Historical `e4caa4899` adds empty-default `SimState.item_cooldowns: HashMap<u32, SpellCooldownState>`, independent of equipment-slot input, and four route tests. Getters were constant at that checkpoint. [Owning status](../../specs/item-cooldowns.md) records subsequent genuine query3 FAIL/legacy1 PASS, first start-value failures with later tuples unreached.
+
+## Supplied item cooldowns — producer checkpoint 2026-10-14
+
+`ee1bc9038` projects supplied pairs unchanged through distinct ItemInfo, item-ID and bag/slot selectors; namespace enable types differ. Missing pairs are an explicit simulator policy, not native parity. Legacy equipment-slot state is unchanged. GREEN/profile acceptance remains pending in the [owning contract](../../specs/item-cooldowns.md).
 
 ## Sources
 
-- [Supplied item cooldowns](../../specs/item-cooldowns.md) — unchecked contract; passive input and authored tests, runtime proof pending.
+- [Supplied item cooldowns](../../specs/item-cooldowns.md) — supplied-pair producer, historical RED and pending GREEN/profile acceptance.
 
 - [Item dressability](../../specs/item-dressability.md) — supplied C API model and revision-scoped proof limits.
 

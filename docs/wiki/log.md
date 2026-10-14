@@ -1,3 +1,7 @@
+## [2026-10-14] source | Item producer and Store selection observation
+
+[Item producer checkpoint](systems/lua-api.md#supplied-item-cooldowns--producer-checkpoint-2026-10-14) links owning RED/GREEN limits. [Store selection checkpoint](investigations/store-secure-pool-constructors.md#temporary-store-selection-trace--source-checkpoint-2026-10-14) links opt-in diagnostic limits; no callback/root proof.
+
 ## [2026-10-14] evidence | Immediate-EOF symbolization control
 
 [Existing performance investigation](investigations/test-suite-performance.md#separate-immediate-eof-symbolization-control--2026-10-14) records the sibling deadline failure. Exact input/metadata reused; no address response, independent delivery timing or causal performance conclusion.

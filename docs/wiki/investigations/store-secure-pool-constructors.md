@@ -35,6 +35,10 @@ Regression coverage:
 
 [Owning contract/status](../../specs/store-product-group-shape.md) separates cached-consumer inference and simulator demo policy from native evidence. At this source checkpoint new Rust execution, postproducer runtime preservation and Store UI population were unproved. Historical pool-constructor proof above does not cover this producer.
 
+## Temporary Store selection trace — source checkpoint 2026-10-14
+
+`ffb6d7d7d` observes before/after binding counts around existing trust filtering. [Diagnostic limits](../../debug-tools.md#temporary-store-script-selection-trace) define default-off activation and retirement; counts do not establish callback success, filter-specific cause or populated cards. Mists root/runtime proof remains pending.
+
 ## Current bounded Retail receipt — 2026-10-14
 
 [Owning current status](../../specs/store-product-group-shape.md#current-bounded-retail-receipt--2026-10-14) records independent existing-artifact PASS at `a6b572732`: normal public Show, record-contract/completion markers, one shown/visible Apprentice Rider Bundle card with positive reported bounds inside the shown/visible Store, CLI0/CLEAN/zero errors. Startup workarounds remain present; this is not vendor-free, native, rendering or parent proof. Mists query PASS remains separate from public Store UI FAIL; PTR preservation pending.

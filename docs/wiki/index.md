@@ -1,3 +1,7 @@
+## [2026-10-14] source | Item producer and Store selection observation
+
+[Item producer checkpoint](systems/lua-api.md#supplied-item-cooldowns--producer-checkpoint-2026-10-14) links owning RED/GREEN limits. [Store selection checkpoint](investigations/store-secure-pool-constructors.md#temporary-store-selection-trace--source-checkpoint-2026-10-14) links opt-in diagnostic limits; no callback/root proof.
+
 ## [2026-10-14] source | Supplied item cooldown passive input
 
 [Existing API inventory](systems/lua-api.md#supplied-item-cooldowns--passive-input-checkpoint) links the [unchecked contract](../specs/item-cooldowns.md). Committed passive input and authored tests are separate from source-predicted mismatches; compile/runtime acceptance pending.
