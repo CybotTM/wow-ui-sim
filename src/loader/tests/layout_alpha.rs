@@ -1,4 +1,4 @@
-//! Tests for alpha: SetAlpha, GetAlpha, GetEffectiveAlpha, propagation, clamping.
+//! Tests for alpha storage, propagation, and profile-specific numeric bounds.
 
 use super::*;
 
@@ -44,30 +44,45 @@ fn test_set_alpha_zero() {
     assert_eq!(t.env.eval::<f64>("return ALPHA").unwrap(), 0.0);
 }
 
-#[test]
-fn test_set_alpha_clamps_above_1() {
-    let (t, _) = load_test_lua(
-        "layout-alpha-clamp-hi",
-        r#"
-        local f = CreateFrame("Frame")
-        f:SetAlpha(2.0)
-        ALPHA = f:GetAlpha()
-    "#,
-    );
-    assert_eq!(t.env.eval::<f64>("return ALPHA").unwrap(), 1.0);
+fn rejects_out_of_range_alpha() -> bool {
+    matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail | crate::client_profile::ClientProfile::Ptr
+    )
 }
 
 #[test]
-fn test_set_alpha_clamps_below_0() {
+fn test_set_alpha_above_1_obeys_profile_policy() {
     let (t, _) = load_test_lua(
-        "layout-alpha-clamp-lo",
+        "layout-alpha-range-hi",
         r#"
         local f = CreateFrame("Frame")
-        f:SetAlpha(-0.5)
+        f:SetAlpha(0.5)
+        ACCEPTED = pcall(f.SetAlpha, f, 2.0)
         ALPHA = f:GetAlpha()
     "#,
     );
-    assert_eq!(t.env.eval::<f64>("return ALPHA").unwrap(), 0.0);
+    let (accepted, alpha) = t.env.eval::<(bool, f64)>("return ACCEPTED, ALPHA").unwrap();
+    let rejected = rejects_out_of_range_alpha();
+    assert_eq!(accepted, !rejected);
+    assert_eq!(alpha, if rejected { 0.5 } else { 1.0 });
+}
+
+#[test]
+fn test_set_alpha_below_0_obeys_profile_policy() {
+    let (t, _) = load_test_lua(
+        "layout-alpha-range-lo",
+        r#"
+        local f = CreateFrame("Frame")
+        f:SetAlpha(0.5)
+        ACCEPTED = pcall(f.SetAlpha, f, -0.5)
+        ALPHA = f:GetAlpha()
+    "#,
+    );
+    let (accepted, alpha) = t.env.eval::<(bool, f64)>("return ACCEPTED, ALPHA").unwrap();
+    let rejected = rejects_out_of_range_alpha();
+    assert_eq!(accepted, !rejected);
+    assert_eq!(alpha, if rejected { 0.5 } else { 0.0 });
 }
 
 #[test]

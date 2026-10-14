@@ -19,6 +19,7 @@ Ordinary numeric `Region:SetAlpha` inputs follow the [10.0.0 change-note summary
 - `src/lua_api/frame/methods/core_state/alpha.rs`: public alpha setters and effective-alpha propagation; ordinary Retail/PTR numeric range validation precedes narrowing/mutation, while earlier profiles retain clamping.
 - `tests/region_alpha_validation.rs` and `region_alpha_validation/ordinary_range.lua`: concrete ordinary-numeric boundaries and rejection/state-preservation contracts.
 - `tests/noop_hot_setters.rs`: existing valid-value dirty/no-op behavior and historical clamping expectation.
+- `src/loader/tests/layout_alpha.rs`: Lua-file loading boundary asserts Retail/PTR rejection leaves the seeded alpha unchanged, while earlier profiles retain clamping. The old unconditional clamp assertions failed in the default Retail suite; setter policy is unchanged.
 
 ## Tests asserting this spec
 
