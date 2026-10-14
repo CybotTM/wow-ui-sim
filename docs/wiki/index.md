@@ -1,3 +1,7 @@
+## [2026-10-14] source | Spacer passive input and authored tests
+
+[Spacer contract](../specs/ui-widget-spacer.md) records passive type22 inputs, authored tests and selector RED; populated behavior remains unverified.
+
 ## [2026-10-14] evidence | TextureAndTextRow bounded Retail checkpoint
 
 [Current manager checkpoint](systems/ui-widget-manager-state.md#textureandtextrow-current-bounded-checkpoint--2026-10-14) links bounded Retail/source evidence, historical RED and remaining acceptance gates.

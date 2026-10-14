@@ -111,6 +111,10 @@ Three unchanged Retail sibling controls independently PASS separately from the e
 
 The [row ledger](../../specs/texture-and-text-row.md#known-gaps-current-cycle) owns separate independent Retail normal-before/PTR normal diagnostic PASS, PTR feature/cache-selection semantics, non-cold compile evidence, and final format/default-check PASS with six warnings and the high-threshold crossing retained. Source LuaErrors collection suppresses startup-event stderr; complete saved logs cannot recover suppressed messages or establish universal startup-clean behavior. Read-only WTF/layout-cache dependencies persist despite SavedVariables disabled. Compile is not runtime proof. Public [whole-TEXT packet](../../../data/patch-api/evidence/ui-widget-texture-and-text-row-2026-10-14/README.md) is committed at `33cbb6baee0e8665770d1d678062eb37b92e6f09`; the row ledger owns counts, accepted-candidate byte equality, opaque `.txt` payload semantics and the Retail stderr metadata correction. Candidate/canonical public-copy integrity, bounded privacy and generated navigation independently PASS. Publication adds no code/runtime proof. Native/render parity, all-profile/broad/provider/performance/credit acceptance, cache-byte authentication, independent executable-byte authentication and full-parent closure remain unproved.
 
+### Spacer passive-input checkpoint — 2026-10-14
+
+[Spacer contract](../../specs/ui-widget-spacer.md) owns current passive-input, selector-RED and authored-test scope. Populated getter and consumer lifecycle acceptance remain open.
+
 ## Sources
 
 - [TextureAndTextRow contract](../../specs/texture-and-text-row.md) — single-source supplied-row contract, historical RED, bounded independent Retail/PTR/source gates, independent final owning/check/format PASS, separate Retail/PTR diagnostic audits and suppression limits; committed public packet with bounded candidate/canonical integrity/privacy/navigation PASS; broader acceptance remains open.

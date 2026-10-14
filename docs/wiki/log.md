@@ -1,3 +1,7 @@
+## [2026-10-14] source | Spacer passive input and authored tests
+
+[Spacer contract](../specs/ui-widget-spacer.md) now linked from manager documentation and index; no populated behavior or getter acceptance claimed.
+
 ## [2026-10-14] docs | TextureAndTextRow public TEXT packet
 
 [Row publication ledger](../specs/texture-and-text-row.md#known-gaps-current-cycle) records committed publication and separate bounded candidate/canonical integrity/privacy/navigation PASS. Existing behavior gates and historical entries preserved; no new runtime or broader acceptance.
