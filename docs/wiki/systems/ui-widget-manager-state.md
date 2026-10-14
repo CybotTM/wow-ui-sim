@@ -73,6 +73,14 @@ At `85b5494d2`, the [SpellDisplay contract](../../specs/ui-widget-spell-display.
 
 [Whole host records](../../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md) retain the Retail/PTR supplied-model matrix, historical fixture failures, complete compatibility diagnostics and separate startup/check/format gates. Public-copy and retained-gate copy checks pass at their recorded scopes; native/render and parent acceptance remain open. Owning contracts: [BulletTextList](../../specs/ui-widget-bullet-text-list.md) and [item dressability](../../specs/item-dressability.md).
 
+### DoubleStatusBar / TextureAndText scaffold checkpoint — 2026-10-14
+
+Owning contracts: [DoubleStatusBar](../../specs/ui-widget-double-status-bar.md) and [TextureAndText](../../specs/ui-widget-texture-and-text.md). Source `2b13a7c57` supplies explicit 26/19-field DTOs; `bd48d6ce8` adds initially empty environment-local maps and type3/type12 typed-feed storage. Neither implements getter projection/serialization or modeled registration. No inferred catalog or demo seeds were added.
+
+The generic namespace `__index` in `runtime_surface_bootstrap.lua:64–79` fabricates and caches a function returning nil; namespace attachment is at lines112–129. Thus initial callable/nil getters are not evidence of modeled getters or native availability. Independent saved-outcome verification at `/home/osso/.local/state/wow-ui-sim/verification/widget-two-api-initial-outcome-current/` confirms four distinct Retail PASS only: absent IDs and actual cached-provider skipping with no visualization. No genuine RED or populated behavior was observed.
+
+`fb7a1c243` authors twelve cases (six per module), adding populated snapshot/replacement, isolation, selector/security and cached feed lifecycle coverage. Saved epoch `widget-two-populated-retail-red-20261014T161619034690Z` under `verification/widget-discrete-progress-current/` now records successful no-run compilation; runtime remains pending. An epoch name is not RED proof. Owning specs retain the exact receipt path and current proof boundary. Known-gap count remains **54**, unchanged until implementation; no new parent criteria. Populated runtime RED/GREEN, native/render parity and full-parent acceptance remain unestablished.
+
 ## Sources
 
 - [BulletTextList](../../specs/ui-widget-bullet-text-list.md) — supplied-record contract and revision-scoped proof limits.

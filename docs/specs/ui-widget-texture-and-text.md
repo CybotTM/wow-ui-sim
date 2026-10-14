@@ -36,7 +36,7 @@ Retail and PTR cached `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumen
 | `modelSceneLayer` | `UIWidgetModelSceneLayer` |
 | `scriptedAnimationEffectID` | `number` |
 
-Full supplied-record projection, fresh snapshots, validation/security, typed update feeds and visible Setup/update/removal need separately authored behavioral tests before implementation/acceptance. This staging introduces no new production record, map, or visualization variant.
+Scaffolds `2b13a7c57` and `bd48d6ce8` add explicit 19-field `TextureAndTextRecord`, an initially empty environment-local keyed map and type12 typed host-feed storage. They do not add getter projection/serialization or modeled getter registration. No inferred records or demo seeds are added. Populated behavior remains unproved.
 
 ## How it works
 
@@ -45,6 +45,8 @@ Full supplied-record projection, fresh snapshots, validation/security, typed upd
 - [Event dispatch](../event-system.md)
 
 ## Implementation inventory
+
+Source inspection: `src/lua_api/env_init/runtime_surface_bootstrap.lua:64–79` defines a generic namespace `__index` that logs missing keys, creates a function returning nil and caches it with `rawset`; lines112–129 attach that namespace metatable. The inspected `queries::register` has no modeled getter for this record. Callable absent-ID behavior therefore does not establish a modeled getter or native API availability.
 
 - `src/c_api/ui_widget_manager/inputs.rs` — existing `WidgetSetEntry` and `WidgetSetRecord`, independent supplied membership.
 - `src/c_api/ui_widget_manager/feed.rs` — existing `replace_ui_widget_set` publishes normal full reconciliation after storing membership.
@@ -61,12 +63,16 @@ Full supplied-record projection, fresh snapshots, validation/security, typed upd
 
 First retail execution on 2026-10-14 passed both tests for this model: **4 primary PASS across both models**, zero failures. Nested timeout-harness repeats are nonadditive. Callability, exactly one nil for absent records and safe cached-provider skipping passed as existing behavior on first execution. No genuine RED was observed, despite the artifact directory name.
 
-Evidence: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/widget-two-api-retail-initial-red-20261014T155629504982Z/runtime-two-widget-initial-red/stdout`. Main verifier `agent4682` independently gates the report; its report remains pending. These are observed execution results, not independent acceptance.
+Independent saved-outcome verification: `/home/osso/.local/state/wow-ui-sim/verification/widget-two-api-initial-outcome-current/report.md` and `proof.json`, source `758dfdf5d8c49a1ca8d49fa518c01c7da9e65a1a`. It confirms four distinct Retail PASS, no genuine RED, and no populated-record coverage; timeout child summaries are not additional cases. This is bounded saved-evidence verification, not broad acceptance.
+
+Current authored revision `fb7a1c243` contains twelve cases across both modules (six each): the two initial cases per module plus complete fresh/replaced snapshots, environment isolation, numeric/secret selector policy and actual cached populated feed lifecycle. Saved epoch `verification/widget-discrete-progress-current/widget-two-populated-retail-red-20261014T161619034690Z/compile-result.json` now records successful no-run compilation of `fb7a1c24370fca440a68709e0a70b5a0e9c428f8`, with runtime pending. The epoch name is not RED evidence. No populated runtime RED/GREEN or lifecycle acceptance is established.
 
 ## Known gaps (current cycle)
 
 - [x] Execute both initial retail boundaries and preserve the PASS artifact above; no genuine RED observed.
-- [ ] Independent gating report from main verifier `agent4682` remains pending.
+- [x] Independent saved-outcome report confirms initial four PASS only.
+- [ ] Obtain genuine populated-record runtime evidence for the twelve authored cases; no RED/GREEN claimed.
+- [ ] Implement modeled getter projection/registration; scaffolds and successful no-run compilation are not behavior proof.
 - [ ] Populated full-record projection and visible activation/update/removal remain unproved by this initial evidence; the documented field frontier is unchanged.
 
 ## Out of scope
