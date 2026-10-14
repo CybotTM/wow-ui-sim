@@ -454,6 +454,22 @@ fn apply_draw_layer(frame: &mut crate::widget::Frame, layer: Option<String>) {
     }
 }
 
+fn validate_texture_draw_layer(layer: Option<&str>) -> LuaResult<()> {
+    use crate::client_profile::{ACTIVE, ClientProfile};
+
+    if !matches!(ACTIVE, ClientProfile::Retail | ClientProfile::Ptr) {
+        return Ok(());
+    }
+    if let Some(layer) = layer
+        && crate::widget::DrawLayer::from_str(layer).is_none()
+    {
+        return Err(runtime_error(
+            "CreateTexture draw layer must be a valid draw layer name",
+        ));
+    }
+    Ok(())
+}
+
 fn register_child_with_strata(
     state: &mut LuaState,
     parent_id: u64,
@@ -491,6 +507,9 @@ fn create_texture_like(state: &mut LuaState, object_type_name: Option<&str>) -> 
     let parent_id = frame_id_from_stack(state, 1)?;
     let name_raw: Option<String> = Option::<String>::from_stack(state, 2)?;
     let layer = opt_string(state, 3);
+    if object_type_name.is_none() {
+        validate_texture_draw_layer(layer.as_deref())?;
+    }
     let inherits = opt_string(state, 4);
     let sub_level = super::shared::opt_f32(state, 5).map(|n| n as i32);
 

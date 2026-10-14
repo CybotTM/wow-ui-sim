@@ -15,7 +15,7 @@ Ordinary explicit draw-layer names passed to `Frame:CreateTexture` must be valid
 
 ## Implementation inventory
 
-- `src/lua_api/frame/methods/button_anchor_hierarchy/hierarchy.rs`: existing `CreateTexture` entry point; producer validation is not part of this stage.
+- `src/lua_api/frame/methods/button_anchor_hierarchy/hierarchy.rs`: ordinary Retail/PTR `CreateTexture` validates supplied names before constructing/registering a region; other creation entry points and earlier profiles are unchanged.
 - `tests/texture_draw_layer_validation.rs`: profile-gated integration cases using the region-alpha test pattern.
 - `tests/texture_draw_layer_validation/ordinary_names.lua`: shared real-API valid and invalid modes.
 
@@ -24,12 +24,12 @@ Ordinary explicit draw-layer names passed to `Frame:CreateTexture` must be valid
 - `create_texture_accepts_all_five_draw_layers`: five explicit creation/getter roundtrips and region count.
 - `create_texture_rejects_invalid_draw_layer_without_adding_region`: five valid baseline creations, then invalid-name rejection and unchanged region count.
 
-These authored Rust tests have not been built or executed. Separate pre-producer normal-Lua Retail evidence reached all five valid roundtrips, then accepted `INVALID` and changed the region count from 5 to 6. The rejection assertion failed; the unchanged-count assertion was unreached. That observation is not executed proof for these new tests or PTR.
+These authored Rust tests have not been built or executed. The complete shared Lua fixture ran before the producer on frozen Retail/PTR normal executables: valid mode completed five roundtrips and region-count assertions; invalid mode accepted `INVALID` and changed the region count from 5 to 6. The rejection assertion failed (CLI1); unchanged-count assertion and invalid completion marker were unreached. This is shared normal-Lua RED, not new Rust-case execution or producer GREEN. Initial independent Retail RED audit retains its separate first-failure boundary.
 
 ## Known gaps (current cycle)
 
 - [ ] Executed Retail/PTR Rust cases and shared-fixture GREEN.
-- [ ] Producer rejection and earlier-profile preservation remain unverified by this stage.
+- [ ] Producer GREEN, valid creation preservation, startup diagnostics and check/format remain unverified. Earlier-profile behavior is source-preserved, not freshly executed or native-history proof.
 
 ## Out of scope
 
