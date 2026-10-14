@@ -209,7 +209,7 @@ fn test_c_container_get_item_cooldown_zero_when_ready() {
 #[test]
 fn test_c_container_get_container_item_cooldown_zero_when_ready() {
     let env = env();
-    let item_id: u32 = env
+    let item_id: i32 = env
         .eval("return C_Container.GetContainerItemID(0, 1)")
         .unwrap();
     assert_eq!(item_id, 6948);
