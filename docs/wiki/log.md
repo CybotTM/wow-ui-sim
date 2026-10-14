@@ -1,3 +1,7 @@
+## [2026-10-14] evidence | Bounded public Retail Store receipt
+
+[Existing Store investigation](investigations/store-secure-pool-constructors.md#current-bounded-retail-receipt--2026-10-14) links [owning receipt status](../specs/store-product-group-shape.md#current-bounded-retail-receipt--2026-10-14): independent recorded Retail PASS at `a6b572732`, normal public Show and nonvacuous visible card bounds; startup workarounds retained. Mists query PASS/UI FAIL separate; PTR pending; no native/render/parent acceptance.
+
 ## [2026-10-14] source | Macro vehicle producer checkpoint
 
 [Existing investigation](investigations/patch-3-3-0-api-audit.md#macro-vehicle-producer-source-checkpoint--2026-10-14) records five-line source `a6b572732`, preproducer RED5 (1 PASS/4 FAIL; later three rows unreached), and observed compilation separately from pending independent authentication/runtime proof. Owning contract unchanged; no runtime/native acceptance or new exclusions.

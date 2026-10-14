@@ -33,4 +33,8 @@ Regression coverage:
 
 `85d8d7bd4` registers the modeled `C_StoreSecure.GetProductGroups` query under `src/c_api/`. Registration precedes runtime bootstrap; the getter reads the already-published `__wow_store_state.productGroups` at call time. Mists receives numeric IDs; other profiles retain the existing record table. Both bootstrap Lua definitions of this getter are removed. Demo backing, other queries and transactions remain legacy bootstrap Lua; no additional state bridge.
 
-[Owning contract/status](../../specs/store-product-group-shape.md) separates cached-consumer inference and simulator demo policy from native evidence. New Rust execution, postproducer runtime preservation and Store UI population remain unproved. Historical pool-constructor proof above does not cover this producer.
+[Owning contract/status](../../specs/store-product-group-shape.md) separates cached-consumer inference and simulator demo policy from native evidence. At this source checkpoint new Rust execution, postproducer runtime preservation and Store UI population were unproved. Historical pool-constructor proof above does not cover this producer.
+
+## Current bounded Retail receipt — 2026-10-14
+
+[Owning current status](../../specs/store-product-group-shape.md#current-bounded-retail-receipt--2026-10-14) records independent existing-artifact PASS at `a6b572732`: normal public Show, record-contract/completion markers, one shown/visible Apprentice Rider Bundle card with positive reported bounds inside the shown/visible Store, CLI0/CLEAN/zero errors. Startup workarounds remain present; this is not vendor-free, native, rendering or parent proof. Mists query PASS remains separate from public Store UI FAIL; PTR preservation pending.
