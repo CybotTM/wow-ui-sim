@@ -37,6 +37,10 @@
 
 `tests/crafted_quality_api.rs` authors two cases: omitted/nil contextual rejection and secret-nil ordering/taint recovery. Both executed on Retail and PTR: each profile has two first-call rejection failures (actual exit 101). Explicit-nil/context and later tainted-denial/recovery assertions were unreached; return payloads were not printed. Five supplied-model cases and one whole-consumer candidate are authored but unexecuted. Both use statement-chunk execution, without query overrides or synthetic secrets.
 
+### Initial crafted API RED checkpoint
+
+[Initial whole-text evidence](../../data/patch-api/evidence/crafted-item-quality-initial-api-red-2026-10-13/README.md) owns the Retail/PTR required-input failure matrix and reached/unreached boundaries. Both profiles have executed first-call rejection failures; positive-data and whole-consumer proof remain separate. Public-copy acceptance is pending.
+
 ## Known gaps (current cycle)
 
 - [ ] Execute positive supplied-record and whole-consumer RED on Retail/PTR before getter implementation; establish fixture baselines first. Initial required-input RED is verified separately, not positive-data or downstream security proof.
