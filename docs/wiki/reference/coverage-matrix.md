@@ -2,6 +2,12 @@
 
 Evidence summary: 2026-10-12. Counts denote executed simulator cases at the linked receipts' recorded revisions/configurations, including explicitly reused receipts—not unique capabilities or current-HEAD acceptance. Details and history remain in the linked packets/specs. Whole handoff remains **OPEN**. Friend setter tests/spec were added at `d61c78a2b`; bounded private proof at `a883157c49` records Retail8/PTR8 GREEN and both normal probes PASS. That epoch's default cargo check NEVER INVOKED (capacity BLOCKED, zero credit); later default check/fmt PASS once at `7d9d9f621`. Actual row60 publication BEFORE145/95OK/50gaps failed solely stale setter; reconciled AFTER strictPASS at `7d9d9f621`, identical full records. Independent `cb77de086` validator9/real validator/capture-preservation PASS; historical GUID145/94/51 unchanged. New public projection/link/privacy gate PASS through `b1c7c4348`. The d21 source-applicability audit ends at `bd4fe8059`, not the current tests epoch.
 
+## Two supplied widget producers — bounded update, 2026-10-14
+
+[Owning DoubleStatusBar26](../../specs/ui-widget-double-status-bar.md#tests-asserting-this-spec) and [TextureAndText19](../../specs/ui-widget-texture-and-text.md#tests-asserting-this-spec) retain exact snapshot, environment-local, selector, cached lifecycle and actual secret-wrapper scope. Independent Retail/PTR final receipts each PASS17 primary (widget14 including security2 + controls3); Retail owning prefork1 separate, no PTR owning-sweep claim. Normal `[]` summaries do not establish globally clean startup. Final format/default check exit0 retains six manifest warnings/lock waits and earlier pressure5.50 zero-launch denial. Shared registration is not earlier-profile/native availability.
+
+Initial4 PASS was not RED; genuine populated RED4 PASS/8 FAIL and first GREEN15 (not16, omitted sweep) remain historical. [8.2.0 owner](../../specs/patch-8-2-0-publication-sweep.md#widget-producer-source-checkpoint--2026-10-14) removes row135 only,53→52; row134 remains. [Historical983 FAIL and bounded public packet](../investigations/fullsuite-983f02-2026-10-14.md) remain separate from asynchronous broad submission at `4fc115b93`: submission is not a result. Existing accepted preview is unchanged; provider-stream/native/credit unknowns and full-parent closure remain separate.
+
 ## Seven-profile coverage
 
 | Configuration | Retained simulator runtime proof | Compile/source proof | Remaining boundary |

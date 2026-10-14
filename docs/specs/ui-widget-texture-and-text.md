@@ -1,6 +1,6 @@
 # UI Widget TextureAndText
 
-Draft owning contract for `C_UIWidgetManager.GetTextureAndTextVisualizationInfo` and its actual cached `UIWidgetTemplateTextureAndText` consumer. Existing supplied-set state/feed lives in `src/c_api/ui_widget_manager/`; earlier inspection at `2c843ad2c45fae07d3098a7fb39eacbde85c770d` conflated missing modeled backing with an absent runtime getter. First retail execution passed callable absent-record getters and safe provider skipping as existing behavior; populated Retail records and cached lifecycle now have bounded first-GREEN proof; latest security evidence awaits independent final gate. See [manager architecture](../wiki/systems/ui-widget-manager-state.md).
+Draft owning contract for `C_UIWidgetManager.GetTextureAndTextVisualizationInfo` and its actual cached `UIWidgetTemplateTextureAndText` consumer. Existing supplied-set state/feed lives in `src/c_api/ui_widget_manager/`; earlier inspection at `2c843ad2c45fae07d3098a7fb39eacbde85c770d` conflated missing modeled backing with an absent runtime getter. First retail execution passed callable absent-record getters and safe provider skipping as existing behavior; populated Retail records and cached lifecycle now have bounded first-GREEN proof; bounded Retail/PTR security and lifecycle evidence independently passes. See [manager architecture](../wiki/systems/ui-widget-manager-state.md).
 
 ## What it must do
 
@@ -12,7 +12,7 @@ Draft owning contract for `C_UIWidgetManager.GetTextureAndTextVisualizationInfo`
 
 ### Documented record frontier (not covered by the initial tests)
 
-Retail and PTR cached `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumentation.lua` name `TextureAndTextVisualizationInfo` as the getter's single nilable result and `widgetID` as a required number. The following **19 fields**, each non-nilable in those generated docs, define the grounded future full-record frontier; no default values or numeric enum policies are inferred. Secret argument metadata is `AllowedWhenUntainted`; latest host-secret scope is observed below, pending independent final gate. Native parity remains unproved.
+Retail and PTR cached `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumentation.lua` name `TextureAndTextVisualizationInfo` as the getter's single nilable result and `widgetID` as a required number. The following **19 fields**, each non-nilable in those generated docs, define the grounded future full-record frontier; no default values or numeric enum policies are inferred. Secret argument metadata is `AllowedWhenUntainted`; bounded host-secret scope is independently accepted below. Native parity remains unproved.
 
 | Field | Generated API type |
 |---|---|
@@ -36,7 +36,7 @@ Retail and PTR cached `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumen
 | `modelSceneLayer` | `UIWidgetModelSceneLayer` |
 | `scriptedAnimationEffectID` | `number` |
 
-Scaffolds `2b13a7c57` and `bd48d6ce8` add explicit 19-field `TextureAndTextRecord`, an initially empty environment-local keyed map and type12 typed host-feed storage. Those scaffold revisions did not add projection or modeled registration. `8645aaf0a` adds the complete 19-field fresh snapshot projection; `a62c81768` wires its module and registration. Selectors use shared `read_numeric_id` policy; no new validation, defaults, inferred records or demo seeds. Bounded Retail producer and cached lifecycle PASS at `a62c81768`; latest security scope at `a68dcda54` awaits independent final gate.
+Scaffolds `2b13a7c57` and `bd48d6ce8` add explicit 19-field `TextureAndTextRecord`, an initially empty environment-local keyed map and type12 typed host-feed storage. Those scaffold revisions did not add projection or modeled registration. `8645aaf0a` adds the complete 19-field fresh snapshot projection; `a62c81768` wires its module and registration. Selectors use shared `read_numeric_id` policy; no new validation, defaults, inferred records or demo seeds. Bounded Retail producer and cached lifecycle PASS at `a62c81768`; bounded Retail/PTR security scope at `a68dcda54` independently passes.
 
 ## How it works
 
@@ -67,7 +67,11 @@ Private saved-outcome verification (`widget-two-api-initial-outcome-current`), s
 
 Current authored revision `fb7a1c243` contains twelve cases across both modules (six each): the two initial cases per module plus complete fresh/replaced snapshots, environment isolation, ordinary numeric selector policy and actual cached populated feed lifecycle. Genuine observed Retail RED at `fb7a1c24370fca440a68709e0a70b5a0e9c428f8`: 12 primary outcomes, **4 PASS / 8 FAIL**. Supplied queries return nil, missing-selector acceptance fails rejection expectations, and cached consumers acquire no populated widget; later lifecycle assertions are unreached. Private saved receipt `runtime-two-widget-populated-red`; independent classification confirms this bounded genuine RED. Bounded saved first GREEN at `a62c81768` (`widget-two-retail-first-green-current`) independently confirms **15 primary PASS: twelve two-widget cases plus three existing lifecycle controls**. Complete supplied snapshots, isolation, selectors and actual cached activation/update/hide/restore/removal/unregister pass. Requested owning sweep used the wrong integration target: zero executed cases, zero coverage credit.
 
-Latest saved runtime at `a68dcda54` (`widget-two-retail-security-owning`) has **17 primary PASS: fourteen two-widget cases, including two real host-secret selector cases, plus three controls**. Secret wrappers and denial of tainted callers pass within tested scope. Separate correct `prefork_full_ui` owning sweep has one PASS; three auxiliary zero-test summaries add no coverage. Main observed these results; independent final gate remains pending, not independently accepted latest evidence. Native/PTR/render/full-parent acceptance remains unproved. PTR compile and default check are running, not PASS; default admission denial at 5.50 memory pressure launched zero workloads before a fresh retry.
+Independent final receipts `widget-two-retail-final-runtime-current` and `widget-two-ptr-final-runtime-current` accept saved `a68dcda54` runtime: **17 primary PASS per profile: fourteen two-widget cases (including two actual host-secret selector cases) plus three old lifecycle controls**. Nested child summaries are nonadditive. Complete 26/19-field fresh snapshots, retained replacement snapshots, environment-local maps, shared required-number selectors and actual cached activation/update/hidden restore/removal/unregister pass. Actual present/absent host-secret wrappers survive untainted queries; tainted callers are denied before lookup and cannot declassify, public selectors remain usable, secure recovery and unchanged state pass. This is simulator security behavior, not native policy parity.
+
+Retail additionally passes one separate owning `prefork_full_ui` sweep; three auxiliary zero-case summaries add no coverage. No fresh PTR owning sweep is claimed. Normal CLI stdout is `[]` per profile, with complete stderr retained: Retail291 addons/1569 cache hits; PTR283/1568. These bounded disabled-sound/addon/SavedVariables/CASC probes retain font fallback, read-only EditMode cache and post-load workaround restoration; zero reported Lua errors is not globally clean startup. Retail normal CLI reuses the unchanged-production `a62c81768` executable, not an a68 rebuild.
+
+`widget-two-final-check-current` records format/default check exit0, zero compiler-message records, six manifest deprecation warnings and package/build lock waits. Initial admission at memory pressure5.50 launched zero workloads; PTR original receipt-schema setup failures also launched zero workloads. Corrected saved gates do not overwrite those failures. Shared registration does not prove native or earlier-profile availability; all-seven/runtime/render/native/full-parent closure remains unproved. Current broad suite at `4fc115b93` was submitted asynchronously; submission is not a result. Historical983 FAIL remains unchanged.
 
 ## Known gaps (current cycle)
 
@@ -76,8 +80,8 @@ Latest saved runtime at `a68dcda54` (`widget-two-retail-security-owning`) has **
 - [x] Observe genuine populated Retail RED: four primary PASS / eight FAIL; independent saved-evidence classification PASS.
 - [x] Implement complete modeled getter projection/registration at `8645aaf0a` + `a62c81768`.
 - [x] Independently verify bounded Retail producer12 and full cached activation/update/hide/restore/removal/unregister at `a62c81768`.
-- [ ] Independently accept latest `a68dcda54` security2 and separate owning-sweep evidence; observed PASS only, final gate pending.
-- [ ] Establish native/PTR/render/full-parent acceptance; compile/default check remain running, not proof.
+- [x] Independently accept Retail/PTR security2 within each17-case runtime gate and separate Retail owning-sweep1; no PTR owning sweep credit.
+- [ ] Establish other-profile/native/render/full-parent acceptance; bounded PTR runtime and final default check are accepted, not broad closure.
 
 ## Out of scope
 

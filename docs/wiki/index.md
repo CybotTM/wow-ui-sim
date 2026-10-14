@@ -1,6 +1,6 @@
 ## [2026-10-14] source | Two supplied widget producers registered
 
-[Manager checkpoint](systems/ui-widget-manager-state.md#doublestatusbar--textureandtext-scaffold-checkpoint--2026-10-14) links owning26/19-field contracts: genuine Retail4 PASS /8 FAIL, initial absence-only4 PASS retained, independent classification pending. Projection/registration implemented but unverified; no behavioral GREEN. [8.2.0 owner](../specs/patch-8-2-0-publication-sweep.md#widget-producer-source-checkpoint--2026-10-14) retains row135-only reconciliation and count discrepancy; no invented DoubleStatusBar rows.
+[Manager checkpoint](systems/ui-widget-manager-state.md#doublestatusbar--textureandtext-scaffold-checkpoint--2026-10-14) links owning26/19-field contracts and independent bounded Retail/PTR17-case runtime gates, separate Retail owning1 and final format/default check. [Coverage matrix](reference/coverage-matrix.md#two-supplied-widget-producers--bounded-update-2026-10-14) preserves historical RED/first GREEN15, row135-only reconciliation and remaining native/render/full-parent gaps.
 
 ## [2026-10-14] evidence | Final983f02 suite FAIL
 
