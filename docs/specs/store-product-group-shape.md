@@ -9,6 +9,7 @@ Evidence is inferred from original cached consumers plus explicit simulator poli
 - [ ] Retail/PTR: return one demo record in a fresh simulator with `groupID=501`, `parentGroupID=0`.
 - [x] Mists: return one demo numeric ID in a fresh simulator, `501`; no record adapter in the consumer. Two Rust cases and full normal-session contract passed at compiled3e0cba6d4/restore04d83; this is not Store UI acceptance.
 - [ ] Resolve the returned actual ID through `GetProductGroupInfo` to `groupName="Featured"` and through `GetProducts` to the single entry `1003`.
+- [ ] Fresh featured group publishes numeric `displayType=0`, an explicit regular-group simulator policy, not a claim about native legacy enum numbers. Absent metadata must not match absent legacy layout enum fields.
 - [ ] Resolve returned entry `1003` through `GetEntryInfo` to `entryID=1003`, `productID=2003`, and `sharedData.name="Apprentice Rider Bundle"`.
 
 Concrete fresh demo values above are explicit simulator policy, not claims about a live/native catalog.
@@ -26,7 +27,7 @@ Concrete fresh demo values above are explicit simulator policy, not claims about
 ## Tests asserting this spec
 
 - `tests/store_group_contract.rs`: active-profile API contract in a fresh `WowLuaEnv` and after original cached EnvironmentCleanup loading, then explicit post-load workarounds; auto-discovered by integration harness. The second post-load check was unreached in retained cleanup RED.
-- `tests/fixtures/store_group_contract.lua`: shared behavioral assertions; directly executable via normal `--exec-lua` with explicit mode prefix.
+- `tests/fixtures/store_group_contract.lua`: shared behavioral assertions; directly executable via normal `--exec-lua` with explicit mode prefix. New numeric/zero display-type assertions are authored before changing backing; earlier group-shape passes do not cover them.
 
 ## Known gaps (current cycle)
 
