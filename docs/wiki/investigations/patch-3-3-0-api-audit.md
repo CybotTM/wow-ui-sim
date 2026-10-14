@@ -32,6 +32,12 @@ Read-only source/code inspection, 2026-10-10. Frozen source says the AddOn's Lua
 | Handled; existing behavior proof | `motionScriptsWhileDisabled`: current `FrameXml` field feeds real loader and CreateFrame template application; `tests/patch_3_3_0_motion_xml.rs` covers true/false, inheritance, pre-OnLoad state and Lua mutation. | Existing saved execution receipts below remain the proof; current test inspected, not rerun. No new native parity claim. |
 | Blocked / applicability unresolved | Historical `Texture:GetFileWidth/GetFileHeight`: actual-file dimensions and inaccessible-file zero semantics; active-profile publication/retirement under investigation. Packed historical GUID formatting, server query throttling/transport, target-specific vehicle state and seven signature contracts remain unproved at this boundary. | Do not substitute layout/atlas size for file metadata or label texture methods generically missing native APIs. Saved gap oracles remain unchanged. |
 
+## Macro vehicle input-only checkpoint — 2026-10-14
+
+Source `0b365f20e` adds `TargetInfo.has_vehicle_ui`, fifteen existing constructor assignments and four authored public parser cases. Existing non-player constructors explicitly initialize false as simulator policy; the literal player snapshot copies `player.has_vehicle_ui`. The fixture supplies an independent target fact with fixed identity/hostility. [Owning contract](../../specs/macro-vehicle-ui-conditions.md) retains all four requirements unchecked.
+
+`condition_matches` is unchanged and has neither vehicle predicate. Fixture compilation and behavioral RED remain pending; this source checkpoint is not model closure, runtime acceptance or native/default/absent-target/negation evidence. The separate player-only `UnitHasVehicleUI` getter is unchanged. Historical ledgers and receipts remain separate.
+
 ## Development proof (historical saved receipts; not rerun in this reconciliation)
 - Source parser RED → GREEN 2/2; current fixture 2/2. Default parser outputs/errors match base on all 77 retained raw inputs; no claim that previously unsupported default parsing now succeeds.
 - Own publication RED exposes two texture gaps → known-gap GREEN 1/1. Impossible-method serialized negative changes two gaps to three and fails exactly as required.
