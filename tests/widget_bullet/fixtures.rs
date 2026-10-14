@@ -75,7 +75,7 @@ pub(super) fn update(env: &WowLuaEnv, record: BulletTextListRecord) {
 }
 
 pub(super) fn assert_lua(env: &WowLuaEnv, phase: &str, code: &str) {
-    env.eval::<()>(code)
+    env.exec(code)
         .unwrap_or_else(|error| panic!("bullet-text-list [{phase}]: {error}"));
     let errors = env.state().borrow().lua_errors.clone();
     assert!(
