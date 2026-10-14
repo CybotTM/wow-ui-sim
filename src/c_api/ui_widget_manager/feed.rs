@@ -2,7 +2,8 @@
 use super::{
     BulletTextListRecord, ButtonHeaderRecord, CaptureBarRecord, DiscreteProgressStepsRecord,
     DoubleStatusBarRecord, IconAndTextRecord, SpellDisplayRecord, StatusBarRecord,
-    TextWithStateRecord, TextureAndTextRecord, WidgetId, WidgetSetEntry, WidgetSetRecord,
+    TextWithStateRecord, TextWithSubtextRecord, TextureAndTextRecord, WidgetId, WidgetSetEntry,
+    WidgetSetRecord,
 };
 use crate::lua_api::WowLuaEnv;
 use crate::{Error, Result};
@@ -16,6 +17,7 @@ pub enum WidgetVisualization {
     DoubleStatusBar(DoubleStatusBarRecord),
     TextureAndText(TextureAndTextRecord),
     TextWithState(TextWithStateRecord),
+    TextWithSubtext(TextWithSubtextRecord),
     BulletTextList(BulletTextListRecord),
     SpellDisplay(SpellDisplayRecord),
     DiscreteProgressSteps(DiscreteProgressStepsRecord),
@@ -33,6 +35,7 @@ impl WidgetVisualization {
             Self::DoubleStatusBar(_) => 3,
             Self::TextureAndText(_) => 12,
             Self::TextWithState(_) => 8,
+            Self::TextWithSubtext(_) => 25,
             Self::BulletTextList(_) => 10,
             Self::SpellDisplay(_) => 13,
             Self::DiscreteProgressSteps(_) => 19,
@@ -181,6 +184,9 @@ fn supply_visualization(sim: &mut crate::lua_api::SimState, id: f64, record: Wid
         }
         WidgetVisualization::TextWithState(record) => {
             sim.ui_widget_inputs.text_with_state.insert(key, record);
+        }
+        WidgetVisualization::TextWithSubtext(record) => {
+            sim.ui_widget_inputs.text_with_subtext.insert(key, record);
         }
         WidgetVisualization::DiscreteProgressSteps(record) => {
             sim.ui_widget_inputs

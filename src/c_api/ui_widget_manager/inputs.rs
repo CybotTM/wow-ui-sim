@@ -3,7 +3,8 @@ use std::collections::HashMap;
 
 use super::{
     BulletTextListRecord, CaptureBarRecord, DiscreteProgressStepsRecord, DoubleStatusBarRecord,
-    SpellDisplayRecord, StatusBarRecord, TextWithStateRecord, TextureAndTextRecord, WidgetId,
+    SpellDisplayRecord, StatusBarRecord, TextWithStateRecord, TextWithSubtextRecord,
+    TextureAndTextRecord, WidgetId,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -55,6 +56,7 @@ pub struct UiWidgetInputs {
     pub discrete_progress_steps: HashMap<WidgetId, DiscreteProgressStepsRecord>,
     pub spell_display: HashMap<WidgetId, SpellDisplayRecord>,
     pub text_with_state: HashMap<WidgetId, TextWithStateRecord>,
+    pub text_with_subtext: HashMap<WidgetId, TextWithSubtextRecord>,
     pub bullet_text_lists: HashMap<WidgetId, BulletTextListRecord>,
     /// Zero means no selected HUD set in this simulator fixture, not a native default.
     pub top_center_widget_set_id: f64,
