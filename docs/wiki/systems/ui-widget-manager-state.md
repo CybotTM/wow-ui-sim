@@ -95,7 +95,13 @@ The [manager checkpoint](../../specs/ui-widget-manager-state.md#textwithsubtext-
 
 [Manager checkpoint](../../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14) and [owning contract](../../specs/ui-widget-text-with-subtext.md) record source `e37f5426a` and independently accepted preproduction Retail RED: control1 PASS / six populated-getter and one selector FAIL. Consumer stopped before cached setup in that RED. The [current bounded manager gate](../../specs/ui-widget-manager-state.md#current-bounded-textwithsubtext-verification--2026-10-14) now records independent Retail/PTR11 each, complete supplied queries and actual cached two-line lifecycle, normal-startup limits and format/default check. Acquisition tag is retained during ordinary setup and refreshed on reacquisition; no model/vendor patch. Historical scaffold/failures remain; [owning publication](../../specs/patch-10-0-2-publication-sweep.md#owning-after-checkpoint--2026-10-14) and broader acceptance stay separate.
 
+### TextureAndTextRow passive checkpoint — 2026-10-14
+
+[Owning row contract](../../specs/texture-and-text-row.md) records `89dca152d`: complete supplied 18-field DTO with two-field ordered entries, initially empty environment-local map and public type15 typed feed. Only fixedWidth is nullable. Eight authored cases include live row/nested-pool unregister; modeled getter/projector and behavioral RED/GREEN remain unproved; source audit and no-run compilation do not prove behavior. Callable nil compatibility is not populated API or native catalog evidence.
+
 ## Sources
+
+- [TextureAndTextRow contract](../../specs/texture-and-text-row.md) — passive supplied inputs and authored, unproved cases.
 
 - [TextWithSubtext projection](../../../src/c_api/ui_widget_manager/text_with_subtext.rs) — complete supplied producer; bounded profile evidence and remaining limits owned by manager checkpoint.
 

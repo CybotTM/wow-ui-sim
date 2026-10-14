@@ -1,3 +1,7 @@
+## [2026-10-14] source | TextureAndTextRow passive scaffold
+
+[Manager checkpoint](systems/ui-widget-manager-state.md#textureandtextrow-passive-checkpoint--2026-10-14) links owning input-stage contract; runtime acceptance pending.
+
 ## [2026-10-14] source | TextWithSubtext producer after populated RED
 
 [Manager checkpoint](../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14) records `e37f5426a` complete27 projection/shared selector policy after independent Retail1 PASS/7 FAIL. Cached activation was not reached in that RED. [Current bounded verification](../specs/ui-widget-manager-state.md#current-bounded-textwithsubtext-verification--2026-10-14): independent Retail/PTR11 each, full cached lifecycle, limited normal startup and format/default check. Historical failures retained; [owning publication status](../specs/patch-10-0-2-publication-sweep.md#owning-after-checkpoint--2026-10-14) is separate from broader acceptance.
