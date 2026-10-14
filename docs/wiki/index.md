@@ -1,3 +1,7 @@
+## [2026-10-14] evidence | Terminal broad run independently accounted
+
+[Suite owner](investigations/fullsuite-983f02-2026-10-14.md#terminal-broad-run-4fc115b93--2026-10-14): `4fc115b93` integration11039 PASS/19 unidentified skips, prefork2324 primary+4 supplemental PASS, lib1999 PASS. Warnings and historical983 FAIL preserved; later TextWithSubtext and broader acceptance remain separate.
+
 ## [2026-10-14] source | Two supplied widget producers registered
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#doublestatusbar--textureandtext-scaffold-checkpoint--2026-10-14) links owning26/19-field contracts and independent bounded Retail/PTR17-case runtime gates, separate Retail owning1 and final format/default check. [Coverage matrix](reference/coverage-matrix.md#two-supplied-widget-producers--bounded-update-2026-10-14) preserves historical RED/first GREEN15, row135-only reconciliation and remaining native/render/full-parent gaps.

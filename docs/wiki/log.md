@@ -1996,3 +1996,7 @@ Updated [manager inventory](systems/ui-widget-manager-state.md#doublestatusbar--
 ## [2026-10-14] evidence | Two-widget bounded final documentation
 
 [Manager](systems/ui-widget-manager-state.md#doublestatusbar--textureandtext-scaffold-checkpoint--2026-10-14) and [coverage](reference/coverage-matrix.md#two-supplied-widget-producers--bounded-update-2026-10-14) link independent Retail/PTR17-case gates, Retail owning1 and format/default check; historical failures/zero-launch receipts retained. [983 page](investigations/fullsuite-983f02-2026-10-14.md) links new215-text packet without replacing historical FAIL. Async broad submission has no result credit.
+
+## [2026-10-14] evidence | Terminal broad run independently accounted
+
+[Suite owner](investigations/fullsuite-983f02-2026-10-14.md#terminal-broad-run-4fc115b93--2026-10-14) records `4fc115b93` integration11039 PASS/19 unidentified skips, prefork2324 primary+4 supplemental PASS, lib1999 PASS, exact argv and sampled resource limits. Warnings, historical983 FAIL and artifact-identity limits preserved; later TextWithSubtext and broader acceptance remain separate.
