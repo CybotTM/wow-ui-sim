@@ -247,9 +247,9 @@ fn cached_texture_and_text_row_normal_feed_activation_update_hide_reacquire_memb
                     RowExpected.scriptedAnimationEffectID = 0; RowExpected.fixedWidth = nil
                     "#,
                 );
-                flush_counts(env, 0);
+                flush_counts(env, "initial absent-record flush", 0);
                 inject(env, consumer_record());
-                flush_counts(env, 1);
+                flush_counts(env, "initial activation flush", 1);
                 assert_lua(
                     env,
                     "activation through real row pool and base entry Setup",
@@ -276,7 +276,7 @@ fn cached_texture_and_text_row_normal_feed_activation_update_hide_reacquire_memb
                 updated.widget_size_setting = 29.5;
                 updated.widget_scale = 0;
                 inject(env, updated.clone());
-                flush_counts(env, 1);
+                flush_counts(env, "updated row flush", 1);
                 assert_lua(
                     env,
                     "incremental same-row update replaces ordered entry content and nullable width",
@@ -300,7 +300,7 @@ fn cached_texture_and_text_row_normal_feed_activation_update_hide_reacquire_memb
                 let mut hidden = updated.clone();
                 hidden.shown_state = 0;
                 inject(env, hidden);
-                flush_counts(env, 0);
+                flush_counts(env, "hidden row flush", 0);
                 assert_lua(
                     env,
                     "hidden provider releases actual row and its nested entries, not membership",
@@ -315,7 +315,7 @@ fn cached_texture_and_text_row_normal_feed_activation_update_hide_reacquire_memb
                 );
                 updated.fixed_width = None;
                 inject(env, updated.clone());
-                flush_counts(env, 1);
+                flush_counts(env, "reacquired row flush", 1);
                 assert_lua(
                     env,
                     "ordinary feed reacquires real row and two correct entries without stale width",
@@ -328,7 +328,7 @@ fn cached_texture_and_text_row_normal_feed_activation_update_hide_reacquire_memb
                     "#,
                 );
                 assert!(env.remove_ui_widget(SET_ID, WIDGET_ID).unwrap());
-                flush_counts(env, 0);
+                flush_counts(env, "membership removal flush", 0);
                 assert_lua(
                     env,
                     "membership removal releases row and nested pool but retains independent record",
@@ -340,7 +340,7 @@ fn cached_texture_and_text_row_normal_feed_activation_update_hide_reacquire_memb
                     "#,
                 );
                 inject(env, updated);
-                flush_counts(env, 1);
+                flush_counts(env, "live unregister setup flush", 1);
                 assert_lua(
                     env,
                     "active unregister releases actual row and nested entries while preserving supplied membership",

@@ -131,17 +131,20 @@ pub fn install_snapshot_assertions(env: &WowLuaEnv) {
     );
 }
 
-pub fn flush_counts(env: &WowLuaEnv, count: usize) {
+pub fn flush_counts(env: &WowLuaEnv, phase: &str, count: usize) {
     env.fire_on_update(0.0)
         .expect("flush actual cached deferred layout without manual widget events");
     assert_lua(
         env,
-        "actual container counts",
+        phase,
         &format!(
             r#"
-            assert(RowContainer.widgetPools:GetNumActive() == {count})
-            assert(RowContainer:GetNumWidgetsShowing() == {count})
-            assert(RowContainer.numTimers == 0 and RowContainer.ticker == nil)
+            local active = RowContainer.widgetPools:GetNumActive()
+            assert(active == {count}, 'active pool expected {count}, got ' .. tostring(active))
+            local showing = RowContainer:GetNumWidgetsShowing()
+            assert(showing == {count}, 'showing expected {count}, got ' .. tostring(showing))
+            assert(RowContainer.numTimers == 0, 'timers expected 0, got ' .. tostring(RowContainer.numTimers))
+            assert(RowContainer.ticker == nil, 'ticker expected nil, got ' .. tostring(RowContainer.ticker))
             "#
         ),
     );
