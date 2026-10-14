@@ -65,6 +65,10 @@ At `85b5494d2`, the [SpellDisplay contract](../../specs/ui-widget-spell-display.
 
 [Owning contract](../../specs/ui-widget-bullet-text-list.md) records supplied type10 fifteen-field records, empty environment-local backing and the existing typed feed extension. Authored direct/snapshot/security/callback/unchanged-cache lifecycle tests remain unexecuted; getter projection is deliberately absent until genuine supplied-record RED. No new seeds or native/render/full-parent acceptance.
 
+### BulletTextList producer checkpoint — 2026-10-13
+
+[Owning contract](../../specs/ui-widget-bullet-text-list.md) retains actual Retail/PTR supplied-record/callback RED and the independent Retail split between six feature failures and one seeded-set fixture defect. The native getter now authenticates numeric selectors and projects complete cloned records into rooted fresh row/line arrays. Corrected rejection tests and GREEN remain pending; no native/render/full-parent acceptance.
+
 ## Sources
 
 - [BulletTextList](../../specs/ui-widget-bullet-text-list.md) — supplied-record contract and revision-scoped proof limits.

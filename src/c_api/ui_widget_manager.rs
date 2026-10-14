@@ -2,6 +2,7 @@
 use std::collections::HashMap;
 
 mod bar_records;
+mod bullet;
 mod bullet_record;
 pub use bullet_record::BulletTextListRecord;
 mod discrete;

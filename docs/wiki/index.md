@@ -1,3 +1,7 @@
+## [2026-10-13] source | BulletTextList getter after reached RED
+
+[Widget producer checkpoint](systems/ui-widget-manager-state.md#bullettextlist-producer-checkpoint--2026-10-13) links the [owning contract](../specs/ui-widget-bullet-text-list.md). Fresh fifteen-field snapshots follow actual supplied-record/callback/cached-consumer RED; fixture defect preserved separately. GREEN/native/render/full-parent pending.
+
 ## [2026-10-13] source | BulletTextList passive input
 
 [Widget inventory](systems/ui-widget-manager-state.md#bullettextlist-input-only-checkpoint--2026-10-13) links the [owning contract](../specs/ui-widget-bullet-text-list.md). Fifteen-field type10 backing/feed and authored snapshot/security/real-cache tests leave getter and supplied-record/consumer acceptance pending; native/render/full-parent unproved.
