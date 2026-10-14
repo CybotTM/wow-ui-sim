@@ -1,6 +1,6 @@
 # Crafted item quality information
 
-`C_TradeSkillUI.GetItemCraftedQualityInfo` queries crafted-item quality on Retail/PTR. Current cached declarations require `itemInfo: ItemInfo`, allow secret arguments only when untainted, and return nullable `CraftingQualityInfo`. See [Lua API architecture](../lua-api.md). This stage adds boundary tests only; no crafted-item producer exists yet.
+`C_TradeSkillUI.GetItemCraftedQualityInfo` queries crafted-item quality on Retail/PTR. Current cached declarations require `itemInfo: ItemInfo`, allow secret arguments only when untainted, and return nullable `CraftingQualityInfo`. See [Lua API architecture](../lua-api.md). An empty environment-owned per-item map now supplies passive inputs using the existing thirteen-field record. No crafted-item getter exists yet.
 
 ## What it must do
 
@@ -11,6 +11,13 @@
 ### Declared result
 - [ ] A present result supplies all thirteen non-nil declared fields: numeric `quality`; texture-atlas strings `icon`, `iconSmall`, `iconInventory`, `iconMixed`, `iconAppear`, `iconDissolve`, `barFill`, `barBackground`, `barBackgroundCap`, `barHighlight`, `iconChat`, `iconQuestObjective`.
 
+### Supplied-model policy — unverified
+- [ ] Query explicit `crafted_item_quality` records independently of recipe-pair inputs. Reuse the existing numeric/decimal-string/item-string/hyperlink parser; no name catalog or native validation claim.
+- [ ] Return one nil for accepted selectors without supplied data; project present records into fresh detached tables with all thirteen fields.
+- [ ] Preserve retained snapshots through returned-table mutation, replacement/removal and independent environments.
+- [ ] Authenticate present/absent VM-secret selectors before type/lookup and preserve wrapper/taint recovery.
+- [ ] Let the whole original cached ItemButton handler consume supplied `iconInventory`, flags, anchors and visibility. Its visibility input is a real host-created Frame, not the original professions panel; native/rendered panel acceptance remains separate.
+
 ## How it works
 
 - [C API and Lua surface inventory](../wiki/systems/lua-api.md)
@@ -20,16 +27,19 @@
 
 - `src/c_api/c_trade_skill_quality.rs`: existing recipe-keyed quality queries; no crafted-item query model.
 - `src/lua_api/env_init/runtime_surface_bootstrap.lua`: missing namespace functions may become nil-returning compatibility callables; callability is not modeled behavior.
+- `src/lua_api/state/sim_state.rs` and `state.rs`: separate per-item input map, empty by default.
 - `tests/crafted_quality_api.rs`: public required-input and authentic VM-secret-nil boundary tests.
+- `tests/crafted_quality_owned.rs` and `crafted_quality_owned/assertions.lua`: positive projection, selector, lifecycle, isolation and secret-selector tests.
+- `tests/crafted_quality_item_button.rs`: whole original cached consumer candidate with real Button/Texture; fixture validity unproved.
 - `Cargo.toml`: pins rilua; `rilua::table_security::unwrap_secret` supplies the existing secret-access guard.
 
 ## Tests asserting this spec
 
-`tests/crafted_quality_api.rs` authors two cases: omitted/nil contextual rejection and secret-nil ordering/taint recovery. Neither has executed yet. Both use statement-chunk execution, without query overrides or synthetic secrets.
+`tests/crafted_quality_api.rs` authors two cases: omitted/nil contextual rejection and secret-nil ordering/taint recovery. Both executed on Retail and PTR: each profile has two first-call rejection failures (actual exit 101). Explicit-nil/context and later tainted-denial/recovery assertions were unreached; return payloads were not printed. Five supplied-model cases and one whole-consumer candidate are authored but unexecuted. Both use statement-chunk execution, without query overrides or synthetic secrets.
 
 ## Known gaps (current cycle)
 
-- [ ] Capture genuine public-call RED on Retail/PTR before producer edits; distinguish assertion failures from setup/compiler/admission failures.
+- [ ] Execute positive supplied-record and whole-consumer RED on Retail/PTR before getter implementation; establish fixture baselines first. Initial required-input RED is verified separately, not positive-data or downstream security proof.
 - [ ] Establish accepted ItemInfo selector representations and valid secret-selector behavior from declarations, existing parsers and real callers.
 - [ ] Establish positive-data RED for complete results before implementing projection. A separate explicit per-item supplied record is a proposed simulator model, not a declared native catalog.
 - [ ] Verify detached results, replacement/removal, retained snapshots, isolation and the whole original ItemButton overlay consumer. These are planned, not passing tests.
