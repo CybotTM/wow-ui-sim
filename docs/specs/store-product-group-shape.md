@@ -25,7 +25,7 @@ Concrete fresh demo values above are explicit simulator policy, not claims about
 
 ## Tests asserting this spec
 
-- `tests/store_group_contract.rs`: active-profile API contract in a fresh `WowLuaEnv`; auto-discovered by integration harness.
+- `tests/store_group_contract.rs`: active-profile API contract in a fresh `WowLuaEnv` and after original cached EnvironmentCleanup loading, then explicit post-load workarounds; auto-discovered by integration harness. The second post-load check was unreached in retained cleanup RED.
 - `tests/fixtures/store_group_contract.lua`: shared behavioral assertions; directly executable via normal `--exec-lua` with explicit mode prefix.
 
 ## Known gaps (current cycle)
@@ -40,7 +40,7 @@ Producer `85d8d7bd4`, tests `f199e9424`: modeled getter ownership and initializa
 
 Source inspection identifies an original lifecycle gap: cached Mists `Blizzard_EnvironmentCleanup` clears `C_StoreSecure`; simulator restoration reruns the Lua bootstrap without re-registering the modeled getter. That is source-grounded explanation, not proof of the exact dynamically returned value/dispatch. Commit `d9c7c6aa1` adds a real cached-cleanup regression, checking the shared contract after original addon loading and post-load workarounds; Mists execution reached the first post-cleanup contract and failed at `GetProductGroups must return a list` (one unique Rust case, exit101); the second post-load assertion was unreached. Initial admission denial was zero-launch, not RED. No getter override, artificial namespace clearing or forced vendor handler.
 
-The simulator now re-registers the same modeled Store getter immediately after runtime-bootstrap restoration. This repairs both immediate cleanup and later post-load restoration paths without restoring unrelated interaction namespaces. Source repair only: fresh compilation, Mists real-cleanup/full-normal GREEN and modern preservation remain pending.
+`04d83e2a5` re-registers the same Rust `GetProductGroups` implementation immediately after runtime-bootstrap restoration, through the existing namespace registrar. Both immediate cleanup and later post-load restoration call this path. This is a source repair intended to close lost registration, not proof either runtime path passes. Recreating the public namespace does not itself republish it into the secure environment; post-cleanup secure/public identity and vendor dispatch remain unproved. Independent original-cleanup RED gate confirms one unique failure and separate zero-launch denial. Fresh compilation, Mists real-cleanup/full-normal GREEN and Retail/PTR preservation remain pending; two compile admissions were denied without launching. No native or Store UI acceptance.
 
 ## Out of scope
 
