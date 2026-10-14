@@ -4,11 +4,11 @@ The contract requires `C_UIWidgetManager.GetTextWithSubtextWidgetVisualizationIn
 
 ## What it must do
 
-- [ ] Unknown numeric ID returns exactly one nil; missing/non-number selectors reject through the shared required-number policy. Fractional supplied IDs remain exact numeric keys.
-- [ ] Populated getter returns exactly one fresh table with precisely the 27 documented non-nil keys, types and supplied values. Caller mutation cannot alter input or retained snapshots; replacement changes all fields without mutating old snapshots; environments remain isolated.
-- [ ] Normal type25 feeds publish complete records and membership before synchronous notifications. Wrong visualization type or absent set rejects without changing stored records/membership or notifying subscribers. Membership removal retains the independent visualization record.
-- [ ] Actual cached type25 registration and `UIWidgetContainerTemplate` activate both text lines through normal feeds, apply independent fonts/colors/justification, tooltip metadata, spacing, width, vertical line order, order index, tag and scale; updates preserve frame identity. Hidden releases, Shown reacquires; removal and active unregister release frames and subscriptions.
-- [ ] With `retail-12-1-0`, real present/absent secret-number wrappers permit untainted queries, reject tainted queries before lookup, preserve wrappers/caller taint and leave supplied state unchanged. Public output stays non-secret.
+- [x] Unknown numeric ID returns exactly one nil; missing/non-number selectors reject through the shared required-number policy. Fractional supplied IDs remain exact numeric keys.
+- [x] Populated getter returns exactly one fresh table with precisely the 27 documented non-nil keys, types and supplied values. Caller mutation cannot alter input or retained snapshots; replacement changes all fields without mutating old snapshots; environments remain isolated.
+- [x] Normal type25 feeds publish complete records and membership before synchronous notifications. Wrong visualization type or absent set rejects without changing stored records/membership or notifying subscribers. Membership removal retains the independent visualization record.
+- [x] Actual cached type25 registration and `UIWidgetContainerTemplate` activate both text lines through normal feeds, apply independent fonts/colors/justification, tooltip metadata, spacing, width, vertical line order, order index, layout and scale. Updates preserve frame identity and its acquisition tag while the getter projects the replacement tag. Hidden releases; Shown reacquires with the current tag; removal and active unregister release frames and subscriptions.
+- [x] With `retail-12-1-0`, real present/absent secret-number wrappers permit untainted queries, reject tainted queries before lookup, preserve wrappers/caller taint and leave supplied state unchanged. Public output stays non-secret.
 
 ## How it works
 
@@ -34,7 +34,11 @@ The contract requires `C_UIWidgetManager.GetTextWithSubtextWidgetVisualizationIn
 
 ## Known gaps (current cycle)
 
-- [ ] Test checkpoint `0a3a5ac20` executed before getter implementation: one unknown-ID control passed, seven populated/selector candidates failed. Consumer stopped at the populated getter before cached setup; no consumer activation result is inferred. Independent RED accounting and post-projection GREEN remain pending.
+- [x] Independent bounded Retail and PTR gates each passed11 unique cases at `62f115d26`: eight type25 cases including actual secret wrappers, plus three unchanged lifecycle controls. Complete snapshots, ordinary feeds and actual cached two-line lifecycle are proved only at that scope.
+- [x] Default format/check gates passed; six existing manifest deprecations and reported memory-limit crossings retained. Retail normal startup at unchanged producer `e37f5426a` and fresh PTR startup at `62f115d26` returned `[]`, exit0; complete informational diagnostics and disabled-CASC/sound/addon/SavedVariables/WTF/cache limitations remain.
+- [ ] Owning normal Retail10.0.2 publication sweep/row309 reconciliation remains pending. Earlier broad suite `4fc115b93` does not cover this new slice; broader/native/render/parent acceptance remains open.
+- Historical results preserved: preproduction `0a3a5ac20`1 PASS/7 FAIL; producer `e37f5426a`10 PASS/1 FAIL; diagnostic `e948624b0`1 FAIL. Update failure was a fixture expectation of tag refresh during ordinary setup; cached acquisition-only tag assignment is retained, without model/vendor changes.
+- Original extra-copy/path/mode and status-schema setup discrepancies remain recorded separately; corrections reuse authenticated bytes and stable metadata, with no hash reruns or invented runtime failures.
 
 ## Out of scope
 
