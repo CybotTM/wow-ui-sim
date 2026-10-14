@@ -15,6 +15,7 @@ pub(crate) fn restore_post_cleanup_globals(
 ) -> crate::Result<()> {
     crate::lua_api::env_init::init_shared_bootstrap(lua)?;
     crate::lua_api::env_init::init_runtime_surface_bootstrap(lua)?;
+    crate::c_api::register_store_secure_table(lua.state_mut())?;
     crate::lua_api::env_init::init_enum_globals(lua)?;
     crate::lua_api::globals::strings::restore_missing_ui_strings(lua)?;
     crate::c_api::register_utility_bootstrap_tables(lua.state_mut())?;

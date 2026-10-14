@@ -9,7 +9,7 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
-pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
+pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = super::ensure_namespace(state, "C_StoreSecure")?;
     table_set_rust_fn_static(state, namespace, "GetProductGroups", get_product_groups)
 }

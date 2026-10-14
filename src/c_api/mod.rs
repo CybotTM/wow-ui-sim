@@ -351,6 +351,7 @@ mod patch_retired_members;
 pub(crate) use patch_retired_members::RETIRED_4_0_1_GLOBALS;
 mod registration;
 
+pub(crate) use c_store_secure::register as register_store_secure_table;
 pub(crate) use helpers::{
     ensure_global_table, ensure_namespace, global_val, mark_namespace_keys_removed, set_global_val,
 };
