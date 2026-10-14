@@ -23,6 +23,7 @@ pub use bar_records::{CaptureBarRecord, StatusBarRecord};
 mod feed;
 mod fixtures;
 mod inputs;
+mod spacer;
 mod spacer_record;
 mod spell_display;
 mod spell_display_record;
