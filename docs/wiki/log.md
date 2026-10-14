@@ -1,3 +1,7 @@
+## [2026-10-14] evidence | Final983f02 suite FAIL
+
+[Acceptance matrix](investigations/fullsuite-983f02-2026-10-14.md) preserves the terminal three-step failure: integration2, prefork6, library2. Alpha test-policy and eight resolved gap rows reconciled in source; original timeline curve ordering RED and zone372610 icon provenance remain open. No broad rerun or historical PASS substitution.
+
 ## [2026-10-14] evidence | Seven-profile bounded runtime matrix
 
 [Owning matrix](../specs/store-product-group-shape.md#seven-profile-saved-runtime-matrix--2026-10-14) records item4 and vehicle5 PASS on seven profiles at named compiled revisions, plus three-profile Store/bag and two-profile selected-unit preservation. Mists authentication remains PARTIAL; cleanup diagnostics, native/render and full-parent gaps remain open. [Separate495-text packet](../../data/patch-api/evidence/item-display-profile-preservation-2026-10-14/README.md) retains complete text after ordered privacy replacements and independent private-copy PASS; post-commit gate342b64c independently passes495/495 pairs and497/497 tracked files, links and bounded decoded privacy. Packet CLOSED; Git/stat reuse only. Universal privacy/unlinkability and Mists numerical pre-copy association remain unproved. Closed historical packet unchanged.

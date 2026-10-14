@@ -1,3 +1,7 @@
+## [2026-10-14] evidence | Final983f02 suite FAIL
+
+[Failed acceptance matrix](investigations/fullsuite-983f02-2026-10-14.md) records integration11020/2/19, prefork2318/6 and library1997/2 primary outcomes, preserved raw failures, bounded stale-expectation repairs and unresolved curve/catalog consumer boundaries. No repaired-source runtime or native/full-parent PASS implied.
+
 ## [2026-10-14] evidence | Seven-profile runtime revision/gate matrix
 
 [Owning matrix](../specs/store-product-group-shape.md#seven-profile-saved-runtime-matrix--2026-10-14) separates named item/vehicle and Store/bag/selected-unit outcomes, Mists authentication PARTIAL, seven-profile bounded runtime PASS, retained failures and classic consumer limits. [Separate495-text packet](../../data/patch-api/evidence/item-display-profile-preservation-2026-10-14/README.md) has independent private/public whole-copy integrity and bounded decoded privacy PASS;497 tracked files, packet CLOSED. Universal privacy and Mists authentication remain unproved. Historical public170-copy packet unchanged.
