@@ -18,11 +18,18 @@
 
 - `src/c_api/c_zone_ability_icon.rs`: catalog query, secret authentication and exact u32 validation.
 - `src/lua_api/globals/missing_surface/zone_ability.rs`: existing namespace/state setup calls the modeled registrar; placeholder query removed.
-- `data/spells.rs`: existing generated catalog; not edited.
+- `data/spells.rs`: generated catalog, including required Skyward Ascent372610 sourced through `SpellMisc.SpellID`, not the unrelated row-ID372610.
+- `src/bin/wow_cli/gen_spells.rs`: baseline required-ID selection retains372610 for normal regeneration; no new runtime fallback or CLI flag.
 
 ## Tests asserting this spec
 
 `tests/zone_ability_icon.rs`: four behavioral cases for positive lookup, modeled miss, ordinary rejection and actual host-secret caller policy. Secret case uses existing `retail-12-0-5` VM-secret fixture gate. At `ff72f3c3b`, ordinary rejection passes; positive numeric result, modeled nil miss and untainted host-secret input fail at their real query boundaries. No observed fixture failures; later secret/taint assertions remain unreached in that RED. Executed scoped Retail producer GREEN: 4/4 PASS at `6b522c595`, including host-secret caller policy; [investigation SSOT](../wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers).
+
+## Original consumer catalog repair — 2026-10-14
+
+The saved `983f02fbf` original zone-ability fixture retains spell372610 and requires a visible icon. Its catalog miss produced modeled nil. Installed-build CSV TEXT for12.1.5.70391 matches the earlier applied export manifest; header-aware joins establish name `Skyward Ascent`, subtext `Skyriding`, SpellMisc row631333/difficulty0, icon4640498/school1, and SpellEffect row997338/index0/target18. This recorded source-build relationship is not native profile/epoch equality.
+
+Scoped generation reuses the existing PHF writer with a typed snapshot of the original catalog and precisely this sourced record; no fabricated CSVs, hand-editing of generated entries, broad data swap, vendor override or replacement test spell. A separate compiled typed comparison passes:5505 existing records retain all five semantic fields; only372610 is added. Physical PHF ordering/displacements may change. Descriptions/power catalogs are untouched. New original-consumer execution and independent final proof remain pending; prior startup diagnostics are not erased by a narrow icon pass.
 
 ## Known gaps (current cycle)
 

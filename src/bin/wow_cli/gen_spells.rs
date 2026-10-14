@@ -389,8 +389,8 @@ fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Err
 }
 
 const BASELINE_SPELL_IDS: &[u32] = &[
-    100, 116, 2018, 2575, 2576, 2657, 395296, 1230084, 1232418, 1232421, 1234430, 1242031, 1247534,
-    1272143, 1279510,
+    100, 116, 2018, 2575, 2576, 2657, 372610, 395296, 1230084, 1232418, 1232421, 1234430, 1242031,
+    1247534, 1272143, 1279510,
 ];
 
 /// Retail addons sometimes build lookup tables keyed by localized spell names

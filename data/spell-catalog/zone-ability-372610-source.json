@@ -1,0 +1,55 @@
+{
+  "schema": "required-spell-source-v1",
+  "record": {
+    "spell_id": 372610,
+    "name": "Skyward Ascent",
+    "subtext": "Skyriding",
+    "spell_misc_id": 631333,
+    "difficulty_id": 0,
+    "icon_file_data_id": 4640498,
+    "school_mask": 1,
+    "spell_effect_id": 997338,
+    "effect_index": 0,
+    "implicit_target": 18
+  },
+  "source_build": {
+    "product": "wow",
+    "build": "12.1.5.70391",
+    "build_key": "334a36cf5f3c32a5f7a167405487fa14"
+  },
+  "schema_commit": "d6f50d4f351193e84226aa62a36faa0f58528afa",
+  "input_csvs": [
+    {
+      "file": "SpellName.csv",
+      "bytes": 11070842,
+      "sha256": "a6b1af7f9075d88edd2584ab69f7613f3f5faeecd6f6407912f37e4e92ebbd72",
+      "matches_apply_manifest_after": true,
+      "scope": "CSV TEXT bytes only; recorded extraction/build lineage, not independent native observation"
+    },
+    {
+      "file": "SpellMisc.csv",
+      "bytes": 46315248,
+      "sha256": "f09e793705340f96cb8941ddafcbe6c2e0328bb1d25c6f02c1422fde16469658",
+      "matches_apply_manifest_after": true,
+      "scope": "CSV TEXT bytes only; recorded extraction/build lineage, not independent native observation"
+    },
+    {
+      "file": "Spell.csv",
+      "bytes": 23940598,
+      "sha256": "2d3bdfef700fc8e762a20a5430bdb6402cdeada48a4f0ccd2b92c431cf61f772",
+      "matches_apply_manifest_after": true,
+      "scope": "CSV TEXT bytes only; recorded extraction/build lineage, not independent native observation"
+    },
+    {
+      "file": "SpellEffect.csv",
+      "bytes": 57702094,
+      "sha256": "cfeb5b99be323da7e3c23f7d6b956247eafeb255d41135e57aac6b3abe16a115",
+      "matches_apply_manifest_after": true,
+      "scope": "CSV TEXT bytes only; recorded extraction/build lineage, not independent native observation"
+    }
+  ],
+  "join": "SpellName/Spell by ID; SpellMisc/SpellEffect by SpellID, not row ID",
+  "lineage": "Earlier applied local-CASC export manifest, not the later755-table supplement",
+  "generation": "Existing PHF writer reused with typed original catalog and this one sourced record;5505 existing five-field records preserved. Normal required-ID baseline includes372610.",
+  "limits": "Recorded source-build lineage is not native profile/epoch equality; descriptions/power unchanged; original consumer runtime proof pending."
+}
