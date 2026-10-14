@@ -1,6 +1,6 @@
 # Supplied item cooldowns
 
-Item cooldown queries must project independently supplied start/duration pairs unchanged. Passive input lives in `src/lua_api/state/`; C API queries live in `src/c_api/item_spell/`. See the [API inventory](../wiki/systems/lua-api.md) for architecture. Independent archived source `ffb6d7d7d8ab5a13be9bdd5c603b963380002656` proves the five literal requirements below in bounded Retail and Mists tests; corrected-fixture GREEN, current-HEAD, PTR, native and full-parent acceptance remain pending.
+Item cooldown queries must project independently supplied start/duration pairs unchanged. Passive input lives in `src/lua_api/state/`; C API queries live in `src/c_api/item_spell/`. See the [API inventory](../wiki/systems/lua-api.md) for architecture. Independent archived source `ffb6d7d7d8ab5a13be9bdd5c603b963380002656` proves the five literal requirements below in bounded Retail and Mists tests; corrected-fixture Mists GREEN is recorded at `bf1b61f10` below; current post-retirement HEAD, PTR, native and full-parent acceptance remain pending.
 
 ## What it must do
 
@@ -38,13 +38,13 @@ Independent concise reports bind execution to source `ffb6d7d7d8ab5a13be9bdd5c60
 
 Core producer `ee1bc9038` remains unchanged; association with that producer does not extend `ffb` execution coverage to later source. Retail visibility includes a passing intentional precall-error handling case, not globally clean Lua execution. Zero `[store-dispatch]` output does not establish the inherited trace flag was unset: inherited environment was not captured.
 
-[Store lifecycle status](store-product-group-shape.md) remains separate from item query acceptance. [Opt-in Store diagnostics](../debug-tools.md#temporary-store-script-selection-trace) are observations, not an item or storefront root fix.
+[Store lifecycle status](store-product-group-shape.md) remains separate from item query acceptance. Temporary Store diagnostics were retired at `bc5cecffb`; their historical observations are not item query acceptance.
 
 ## Known gaps (current cycle)
 
 - [x] Passive input/tests/spec committed as `e4caa4899`; independent full-stream gate confirms genuine Retail RED (legacy 1 PASS, query 3 FAIL, exit 101). First start-value assertions fail; exact actual starts were not printed. Later cooldown tuples remain unreached, not successful selection proof.
 - [x] Five literal requirements have bounded archived `ffb` Retail/Mists GREEN above; this does not grant current-HEAD, PTR or full-parent proof.
-- [ ] Existing one-argument bag fixture at source `ffb` genuinely FAILs: argument 2 is nil. `baec` fixes the source fixture to a valid bag/slot pair; its first PTR compile failed E0277 because `u32` results lack `FromRiluaResults`. `2d13` changes that result to `i32`. Corrected-fixture GREEN remains pending; neither source fix is executed proof.
+- [x] Existing one-argument bag fixture at source `ffb` genuinely FAILs: argument2 is nil. `baec` fixes the source fixture to a valid bag/slot pair; its first PTR compile failed E0277 because `u32` results lack `FromRiluaResults`. `2d13` changes that result to `i32`. Independent Mists gate at compiled `bf1b61f10` passes corrected bag **1/1** and item **4/4**, all assertions reached. This is not PTR or post-retirement current-HEAD proof.
 - [ ] Native behavior, expiry/elapsed-time rules, enable derivation, secret validation, name selection, profile preservation, and wider consumer/runtime proof remain pending. These are not exclusions from the parent goal.
 
 ## Out of scope
