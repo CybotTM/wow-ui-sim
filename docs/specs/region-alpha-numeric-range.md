@@ -33,6 +33,8 @@ Retained full format and default Retail library/six-bin check pass: 733 JSON rec
 
 Pre-producer valid modes passed; invalid modes failed at the first Frame `SetAlpha(-0.25)` rejection assertion, leaving later assertions unreached. Original Retail admission denial and PTR setup failure remain zero-launch. Prior PTR4258 authentication/delivery and global historical hash-read total remain UNKNOWN; fresh4259 copy-integrity evidence does not recover them. Public retention is verified at this bounded scope.
 
+Current default Retail repair at compiled`1b94ffff3` additionally passes4 loader Lua-file cases, including both above/below rejection/state-preservation bodies and2 unaffected controls. The [bounded repair matrix](../wiki/investigations/fullsuite-983f02-2026-10-14.md#bounded-repair-follow-up) records independent49-case/default-check/full-format proof and retained diagnostics; earlier-profile/native/full-parent limits are not upgraded.
+
 ## Known gaps (current cycle)
 
 - [x] Publish and independently verify privacy-safe evidence retention; this does not close native/render or parent acceptance.

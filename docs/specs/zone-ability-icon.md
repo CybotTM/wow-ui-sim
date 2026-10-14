@@ -4,10 +4,10 @@
 
 ## What it must do
 
-- [ ] Known Fireball spell 133 returns exactly one ordinary numeric value matching catalog `icon_file_data_id`, not a texture path.
-- [ ] A valid u32 absent from the catalog returns exactly one nil. Fixture 4,000,000,000 has absence asserted. This is explicit simulator policy consistent with nilable output, not native-observed miss behavior.
-- [ ] Preserve existing ordinary input rejection: missing/nil, non-numbers including numeric strings, non-integral/non-finite numbers and numbers outside u32 range fail explicitly. This preserves current extraction, not native parity.
-- [ ] Authenticate original secret arguments before numeric extraction/lookup: authentic VM host-secret known and absent IDs work untainted and fail tainted; plain known numeric IDs remain permitted tainted. Preserve wrapper identity/secrecy and caller taint across success, rejection and subsequent untainted reuse. Input secrecy does not imply secret output propagation.
+- [x] Known Fireball spell 133 returns exactly one ordinary numeric value matching catalog `icon_file_data_id`, not a texture path.
+- [x] A valid u32 absent from the catalog returns exactly one nil. Fixture 4,000,000,000 has absence asserted. This is explicit simulator policy consistent with nilable output, not native-observed miss behavior.
+- [x] Preserve existing ordinary input rejection: missing/nil, non-numbers including numeric strings, non-integral/non-finite numbers and numbers outside u32 range fail explicitly. This preserves current extraction, not native parity.
+- [x] Authenticate original secret arguments before numeric extraction/lookup: authentic VM host-secret known and absent IDs work untainted and fail tainted; plain known numeric IDs remain permitted tainted. Preserve wrapper identity/secrecy and caller taint across success, rejection and subsequent untainted reuse. Input secrecy does not imply secret output propagation.
 
 ## How it works
 
@@ -29,13 +29,13 @@
 
 The saved `983f02fbf` original zone-ability fixture retains spell372610 and requires a visible icon. Its catalog miss produced modeled nil. Installed-build CSV TEXT for12.1.5.70391 matches the earlier applied export manifest; header-aware joins establish name `Skyward Ascent`, subtext `Skyriding`, SpellMisc row631333/difficulty0, icon4640498/school1, and SpellEffect row997338/index0/target18. This recorded source-build relationship is not native profile/epoch equality.
 
-Scoped generation reuses the existing PHF writer with a typed snapshot of the original catalog and precisely this sourced record; no fabricated CSVs, hand-editing of generated entries, broad data swap, vendor override or replacement test spell. A separate compiled typed comparison passes:5505 existing records retain all five semantic fields; only372610 is added. Physical PHF ordering/displacements may change. Descriptions/power catalogs are untouched. New original-consumer execution and independent final proof remain pending; prior startup diagnostics are not erased by a narrow icon pass.
+Scoped generation reuses the existing PHF writer with a typed snapshot of the original catalog and precisely this sourced record; no fabricated CSVs, hand-editing of generated entries, broad data swap, vendor override or replacement test spell. A separate compiled typed comparison passes:5505 existing records retain all five semantic fields; only372610 is added. Physical PHF ordering/displacements may change. Descriptions/power catalogs are untouched. Independent default Retail proof at compiled`1b94ffff3` passes the unchanged original zone consumer and4 existing positive/miss/input/secret policy cases, plus typed canonical comparison. [Repair matrix](../wiki/investigations/fullsuite-983f02-2026-10-14.md#bounded-repair-follow-up) owns the current49-case gate and diagnostics. Original zone startup/load errors remain recorded; the icon PASS is not globally clean startup.
 
 ## Known gaps (current cycle)
 
 - [x] Compile/execute genuine RED and distinguish behavioral failures from fixture barriers.
 - [x] Replace the string placeholder with one C_API-owned producer.
-- [ ] Broader startup/default-check/PTR proof remains open; startup still fails with 12 SMOOTH setup errors, not clean.
+- [ ] Broader startup/PTR/native acceptance remains open; historical12 SMOOTH setup errors remain history. Current default733-record library/six-bin check and full format pass, with six manifest warnings and the format soft-high crossing retained; no clean-startup implication.
 
 ## Out of scope
 

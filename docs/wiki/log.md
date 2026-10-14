@@ -1,6 +1,6 @@
 ## [2026-10-14] evidence | Final983f02 suite FAIL
 
-[Acceptance matrix](investigations/fullsuite-983f02-2026-10-14.md) preserves the terminal three-step failure: integration2, prefork6, library2. Alpha test-policy and eight resolved gap rows reconciled in source; original timeline curve ordering RED and zone372610 icon provenance remain open. No broad rerun or historical PASS substitution.
+[Acceptance matrix](investigations/fullsuite-983f02-2026-10-14.md) preserves the terminal three-step failure: integration2, prefork6, library2. Alpha policy/eight resolved rows, numeric curve ordering and sourcedzone372610 repair independently pass49 current Retail cases;5505 older records/all27525 field values preserved. Original fixtures unchanged; startup diagnostics, native/other-profile/currentbroad gaps retained. No historical PASS substitution.
 
 ## [2026-10-14] evidence | Seven-profile bounded runtime matrix
 

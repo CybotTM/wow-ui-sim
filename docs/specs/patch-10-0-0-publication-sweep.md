@@ -14,7 +14,7 @@ Account for Warcraft Wiki page 530068, revision 6789768 (2026-07-31T04:32:53Z), 
 
 ## Current gap reconciliation — 2026-10-14
 
-The saved `983f02fbf` default prefork sweep failed only on resolved/stale entries for `Path:GetCurveType, GetMaxControlPointOrder and SetCurveType`; no new gap was reported. Reconcile the current known-gap fixture (173 → 170) with the already-modeled [Path/control-point contract](path-control-point.md). Source rows, IDs, later-register ordering and exact set equality remain unchanged. Historical reviewed captures/counts remain historical, not rewritten. This closes only obsolete missing-endpoint expectations; native/signature/payload parity is not inferred. Current-revision targeted execution remains pending.
+The saved `983f02fbf` default prefork sweep failed only on resolved/stale entries for `Path:GetCurveType, GetMaxControlPointOrder and SetCurveType`; no new gap was reported. Reconcile the current known-gap fixture (173 → 170) with the already-modeled [Path/control-point contract](path-control-point.md). Source rows, IDs, later-register ordering and exact set equality remain unchanged. Historical reviewed captures/counts remain historical, not rewritten. This closes only obsolete missing-endpoint expectations; native/signature/payload parity is not inferred. The original default Retail prefork body passes at compiled`1b94ffff3`; [bounded repair matrix](../wiki/investigations/fullsuite-983f02-2026-10-14.md#bounded-repair-follow-up) owns the independent proof and retained diagnostics. Historical broad FAIL is unchanged.
 
 ## How it works
 

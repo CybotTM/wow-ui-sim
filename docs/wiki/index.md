@@ -1,6 +1,6 @@
 ## [2026-10-14] evidence | Final983f02 suite FAIL
 
-[Failed acceptance matrix](investigations/fullsuite-983f02-2026-10-14.md) records integration11020/2/19, prefork2318/6 and library1997/2 primary outcomes, preserved raw failures, bounded stale-expectation repairs and unresolved curve/catalog consumer boundaries. No repaired-source runtime or native/full-parent PASS implied.
+[Failed acceptance matrix](investigations/fullsuite-983f02-2026-10-14.md) records integration11020/2/19, prefork2318/6 and library1997/2 primary outcomes, preserved raw failures, bounded stale-expectation repairs and unresolved curve/catalog consumer boundaries. [Bounded repair follow-up](investigations/fullsuite-983f02-2026-10-14.md#bounded-repair-follow-up) independently passes49 current Retail cases, preserves original fixtures/5505 older spell records and retains startup diagnostics. Historical broad FAIL, other-profile/native/full-parent gaps remain open.
 
 ## [2026-10-14] evidence | Seven-profile runtime revision/gate matrix
 
