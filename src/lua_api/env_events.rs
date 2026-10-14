@@ -18,7 +18,7 @@ use std::time::{Duration, Instant};
 
 type EventTraceLabel = (String, Instant);
 
-fn event_dispatch_trace_enabled(event: &str) -> bool {
+pub(crate) fn event_dispatch_trace_enabled(event: &str) -> bool {
     let Some(filter) = env::var_os("WOW_SIM_TRACE_EVENT_DISPATCH") else {
         return false;
     };

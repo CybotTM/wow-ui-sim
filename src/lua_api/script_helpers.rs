@@ -339,6 +339,31 @@ pub fn get_scripts_for_dispatch(
         .collect()
 }
 
+/// Temporary observation of the unresolved original Store dispatch boundary.
+fn trace_store_selection_enabled(state: &LuaState, widget_id: u64, handler_name: &str) -> bool {
+    if !matches!(handler_name, "OnShow" | "OnEvent")
+        || !crate::lua_api::env_events::event_dispatch_trace_enabled(handler_name)
+    {
+        return false;
+    }
+    let Some(app) = state.app_data::<crate::lua_api::env::WowLuaAppData>() else {
+        eprintln!(
+            "[store-dispatch] id={widget_id} handler={handler_name} phase=trace-unavailable reason=app-data"
+        );
+        return false;
+    };
+    let Ok(sim) = app.sim_state.try_borrow() else {
+        eprintln!(
+            "[store-dispatch] id={widget_id} handler={handler_name} phase=trace-unavailable reason=state-borrow"
+        );
+        return false;
+    };
+    sim.widgets
+        .get(widget_id)
+        .and_then(|frame| frame.name.as_deref())
+        == Some("StoreFrame")
+}
+
 pub fn get_script_handlers_for_dispatch(
     state: &mut LuaState,
     widget_id: u64,
@@ -359,7 +384,15 @@ pub fn get_script_handlers_for_dispatch(
         }
     }
     let layout_handler = is_layout_script_handler(handler_name);
+    let trace_store = trace_store_selection_enabled(state, widget_id, handler_name);
+    let before_filter = scripts.len();
     retain_trusted_dispatch_handlers(state, widget_id, layout_handler, &mut scripts);
+    if trace_store {
+        eprintln!(
+            "[store-dispatch] frame=StoreFrame id={widget_id} handler={handler_name} phase=selection before={before_filter} after={}",
+            scripts.len()
+        );
+    }
     scripts
 }
 
