@@ -207,10 +207,14 @@ fn test_c_container_get_item_cooldown_zero_when_ready() {
 }
 
 #[test]
-fn test_c_container_get_container_item_cooldown_aliases_item_cooldown() {
+fn test_c_container_get_container_item_cooldown_zero_when_ready() {
     let env = env();
+    let item_id: u32 = env
+        .eval("return C_Container.GetContainerItemID(0, 1)")
+        .unwrap();
+    assert_eq!(item_id, 6948);
     let (start, duration, enable): (f64, f64, i32) = env
-        .eval("return C_Container.GetContainerItemCooldown(6948)")
+        .eval("return C_Container.GetContainerItemCooldown(0, 1)")
         .unwrap();
     assert_eq!(start, 0.0);
     assert_eq!(duration, 0.0);
