@@ -423,6 +423,10 @@ Original p302 36+1+2 seals, p303 16 seals, factory p302 112 seals and p303 16 se
 
 ## Browser readiness handoff
 
+### Current Retail preview acceptance — 2026-10-14
+
+User clarified: “Preview already accepted”. Existing Retail preview acceptance is no longer an unanswered user-decision blocker; the prior size-only interpretation was too narrow. This does not establish new widget-preview inspection, native/all-profile/render parity, provider-stream/source-install proof or current runtime state. Historical observations below remain unchanged.
+
 **Dedicated simulator VNC — 2026-10-12:** historical setup selected new simulator display/VNC over SSH/90-second app launch. [Setup guide and receipts](../../../data/patch-api/evidence/private-vnc-simulator-2026-10-12/README.md):display`:22`/1280×960, originally loopback5904, on-demand user units; existing5902/5903 untouched. Mapped1024×768 window and saved frame recorded. Later user-approved access policy is LAN-only unauthenticated VNC on one specific RFC1918 IPv4 interface (`-noipv6`, `-nopw`). VNC-only restart preserved original display PID635115; private-interface listener observed active. No app launch in this binding change; setup observation is not remote viewing/render/native/user acceptance. Endpoint and address-bearing metadata remain private; receipt location is recorded in the linked guide.
 
 Initial readiness race/missing X11 library failures preserved. User-approved matching `libxkbcommon-x11`1.13.2-1 installed; bounded readiness helper added. GUI artifact authentication reused/no rebuild. App's selected90-second limit ended with timeout/MainPID0/empty cgroup—not a clean natural exit; display/VNC continue.
