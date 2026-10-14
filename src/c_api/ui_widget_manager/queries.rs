@@ -22,6 +22,7 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     super::texture_and_text::register(state)?;
     super::discrete::register(state)?;
     super::text_state::register(state)?;
+    super::text_with_subtext::register(state)?;
     super::bullet::register(state)?;
     super::spell_display::register(state)?;
     super::hud::register(state)

@@ -20,7 +20,9 @@ The contract requires `C_UIWidgetManager.GetTextWithSubtextWidgetVisualizationIn
 - `src/c_api/ui_widget_manager/text_with_subtext_record.rs`: complete `TextWithSubtextRecord` (enum `u32`, numeric `f64`, strings `String`, timer `bool`).
 - `src/c_api/ui_widget_manager/inputs.rs`: `UiWidgetInputs.text_with_subtext` keyed by `WidgetId`.
 - `src/c_api/ui_widget_manager/feed.rs`: `WidgetVisualization::TextWithSubtext` normal type25 update feed.
-- `src/c_api/ui_widget_manager.rs`: record exports and namespace subsystem; getter projection/registration remains parent integration work.
+- `src/c_api/ui_widget_manager/text_with_subtext.rs`: fresh complete projection and shared selector-policy getter.
+- `src/c_api/ui_widget_manager/queries.rs`: shared namespace registration.
+- `src/c_api/ui_widget_manager.rs`: record exports and namespace subsystem.
 
 ## Tests asserting this spec
 
@@ -32,7 +34,7 @@ The contract requires `C_UIWidgetManager.GetTextWithSubtextWidgetVisualizationIn
 
 ## Known gaps (current cycle)
 
-- [ ] Populated tests are integrated before getter implementation; execution and RED/GREEN evidence remain pending. Getter intentionally absent at scaffold revision `39a454d09` and test checkpoint `0a3a5ac20`.
+- [ ] Test checkpoint `0a3a5ac20` executed before getter implementation: one unknown-ID control passed, seven populated/selector candidates failed. Consumer stopped at the populated getter before cached setup; no consumer activation result is inferred. Independent RED accounting and post-projection GREEN remain pending.
 
 ## Out of scope
 

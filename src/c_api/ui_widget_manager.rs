@@ -24,6 +24,7 @@ mod spell_display;
 mod spell_display_record;
 mod text_state;
 mod text_state_record;
+mod text_with_subtext;
 mod text_with_subtext_record;
 pub use feed::WidgetVisualization;
 pub use spell_display_record::{SpellDisplayRecord, WidgetSpellInfoRecord};
