@@ -80,6 +80,7 @@ fn bullet_feed_commits_complete_record_and_membership_before_synchronous_event()
 #[test]
 fn bullet_feed_rejects_missing_set_and_type_mismatch_without_state_or_events() {
     let env = WowLuaEnv::new().expect("bullet rejected feed environment");
+    let initial_sets = env.state().borrow().ui_widget_inputs.sets.clone();
     assert_lua(
         &env,
         "real rejection event observers",
@@ -108,7 +109,7 @@ fn bullet_feed_rejects_missing_set_and_type_mismatch_without_state_or_events() {
             .bullet_text_lists
             .is_empty()
     );
-    assert!(env.state().borrow().ui_widget_inputs.sets.is_empty());
+    assert_eq!(env.state().borrow().ui_widget_inputs.sets, initial_sets);
     assert_lua(
         &env,
         "missing set has no notification",
@@ -120,6 +121,7 @@ fn bullet_feed_rejects_missing_set_and_type_mismatch_without_state_or_events() {
         "reset observation after authorized set event",
         "bulletRejectedEvents = 0",
     );
+    let supplied_sets = env.state().borrow().ui_widget_inputs.sets.clone();
     let mut wrong_entry = entry();
     wrong_entry.widget_type = 8;
     let error = env
@@ -132,6 +134,7 @@ fn bullet_feed_rejects_missing_set_and_type_mismatch_without_state_or_events() {
     assert!(error.to_string().contains("does not match"));
     let state = env.state().borrow();
     assert!(state.ui_widget_inputs.bullet_text_lists.is_empty());
+    assert_eq!(state.ui_widget_inputs.sets, supplied_sets);
     assert!(
         state
             .ui_widget_inputs
