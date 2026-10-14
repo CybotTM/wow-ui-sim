@@ -67,7 +67,7 @@ At `85b5494d2`, the [SpellDisplay contract](../../specs/ui-widget-spell-display.
 
 ### BulletTextList producer checkpoint — 2026-10-13
 
-[Owning contract](../../specs/ui-widget-bullet-text-list.md) retains actual Retail/PTR supplied-record/callback RED and the independent Retail split between six feature failures and one seeded-set fixture defect. The native getter now authenticates numeric selectors and projects complete cloned records into rooted fresh row/line arrays. Corrected rejection tests and GREEN remain pending; no native/render/full-parent acceptance.
+[Owning contract](../../specs/ui-widget-bullet-text-list.md) retains actual Retail/PTR supplied-record/callback RED and the independent Retail/PTR split between six feature failures and one seeded-set fixture defect. The native getter now authenticates numeric selectors and projects complete cloned records into rooted fresh row/line arrays. Corrected rejection tests and GREEN remain pending; no native/render/full-parent acceptance.
 
 ## Sources
 
