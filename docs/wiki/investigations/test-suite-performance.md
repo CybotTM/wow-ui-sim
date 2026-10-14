@@ -87,3 +87,9 @@ Three additional cases remain integration after failed equivalence probes: cast-
 ## Separate current phase observation — 2026-10-13
 
 [Owning ProjectConstants packet](../../../data/test-perf/evidence/startup-canonical-paired-2026-10-12/projectconstants-621-2026-10-13/README.md) separates normal verbose bucket timing from the still-failing exact fixture; no causal repair claim.
+
+## Separate immediate-EOF symbolization control — 2026-10-14
+
+Independent saved-artifact verification PASS is separate from control FAIL: one immediate-EOF sibling used the prior exact 21-byte comma/address/comma input and GNU addr2line argv. Main exit1, child exit-9, absolute8-second worker deadline; captured27 bytes contain only the zero-address unknown function/location response, no requested-address header. Capture incomplete; no complete-output claim.
+
+Frozen ELF identity reused stored/stat metadata, not new byte authentication. Worker write/flush/close precedes output drain, but no independent milestone proves delivery or child EOF timing. EOF was insufficient within this tested deadline; buffering, OOM, protocol defect, indefinite symbolization failure and perf causality remain unproved. The old first-record warning remains unresolved. Prior persistent timeout and unexecuted-plan checkpoints remain historical; their earlier “no EOF control” statements are not current inventory claims.

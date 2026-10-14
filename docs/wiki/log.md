@@ -1,3 +1,7 @@
+## [2026-10-14] evidence | Immediate-EOF symbolization control
+
+[Existing performance investigation](investigations/test-suite-performance.md#separate-immediate-eof-symbolization-control--2026-10-14) records the sibling deadline failure. Exact input/metadata reused; no address response, independent delivery timing or causal performance conclusion.
+
 ## [2026-10-14] source | Supplied item cooldown passive input
 
 [API inventory](systems/lua-api.md#supplied-item-cooldowns--passive-input-checkpoint) links the [unchecked contract](../specs/item-cooldowns.md) at `e4caa4899`. Four tests are authored; constant-getter mismatches remain predictions until the running compilation and runtime RED are inspected.
