@@ -1984,6 +1984,10 @@ Added [bounded system inventory](systems/ui-widget-manager-state.md) and index l
 Linked [Mists](investigations/mists-cast-startup-visibility.md#current-selected-body-receipt--2026-10-13) and [performance](investigations/test-suite-performance.md#separate-current-phase-observation--2026-10-13) owning checkpoints without changing historical payloads.
 
 
+## [2026-10-14] docs | Registered supplied widget source checkpoint
+
+Updated [manager inventory](systems/ui-widget-manager-state.md#doublestatusbar--textureandtext-scaffold-checkpoint--2026-10-14), both owning contracts and 8.2.0 owner/audit after `8645aaf0a` + `a62c81768`. Preserved initial absence-only4 PASS versus genuine populated Retail4 PASS /8 FAIL, pending independent4706 classification and no behavioral GREEN. Row135 alone reconciled; requested54→53 differs from committed53→52, explicitly retained. Row134 unchanged; zero evidenced DoubleStatusBar publication rows. Docs-only; no workloads/builds/delegation.
+
 ## [2026-10-14] source | Tagged symbolizer protocol
 
 [Performance source checkpoint](investigations/test-suite-performance.md#upstream-tagged-symbolizer-source--2026-10-14) establishes upstream v7.2.10 framing/default5000ms only. Installed-build equivalence and execution cause remain unproved; failed controls retained.

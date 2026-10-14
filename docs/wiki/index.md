@@ -1,3 +1,7 @@
+## [2026-10-14] source | Two supplied widget producers registered
+
+[Manager checkpoint](systems/ui-widget-manager-state.md#doublestatusbar--textureandtext-scaffold-checkpoint--2026-10-14) links owning26/19-field contracts: genuine Retail4 PASS /8 FAIL, initial absence-only4 PASS retained, independent classification pending. Projection/registration implemented but unverified; no behavioral GREEN. [8.2.0 owner](../specs/patch-8-2-0-publication-sweep.md#widget-producer-source-checkpoint--2026-10-14) retains row135-only reconciliation and count discrepancy; no invented DoubleStatusBar rows.
+
 ## [2026-10-14] evidence | Final983f02 suite FAIL
 
 [Failed acceptance matrix](investigations/fullsuite-983f02-2026-10-14.md) records integration11020/2/19, prefork2318/6 and library1997/2 primary outcomes, preserved raw failures, bounded stale-expectation repairs and later bounded curve/catalog consumer repairs. [Bounded repair follow-up](investigations/fullsuite-983f02-2026-10-14.md#bounded-repair-follow-up) independently passes49 current Retail cases, preserves original fixtures/5505 older spell records and retains startup diagnostics. The same owner records separate saved Mists32/PTR38 preservation and exact copied1b94-list-minus-four equality to2324 historical observed primary names, not preload/source completeness/historical binary authentication. Separate `2c843ad2c` Retail/PTR three-case lifecycle gates pass; private publication remains pending; historical broad FAIL/19 unknown skips and native/full-parent gaps remain open.

@@ -36,7 +36,7 @@ Retail and PTR cached `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumen
 | `modelSceneLayer` | `UIWidgetModelSceneLayer` |
 | `scriptedAnimationEffectID` | `number` |
 
-Scaffolds `2b13a7c57` and `bd48d6ce8` add explicit 19-field `TextureAndTextRecord`, an initially empty environment-local keyed map and type12 typed host-feed storage. They do not add getter projection/serialization or modeled getter registration. No inferred records or demo seeds are added. Populated behavior remains unproved.
+Scaffolds `2b13a7c57` and `bd48d6ce8` add explicit 19-field `TextureAndTextRecord`, an initially empty environment-local keyed map and type12 typed host-feed storage. Those scaffold revisions did not add projection or modeled registration. `8645aaf0a` adds the complete 19-field fresh snapshot projection; `a62c81768` wires its module and registration. Selectors use shared `read_numeric_id` policy; no new validation, defaults, inferred records or demo seeds. Implemented but behaviorally unverified.
 
 ## How it works
 
@@ -46,7 +46,7 @@ Scaffolds `2b13a7c57` and `bd48d6ce8` add explicit 19-field `TextureAndTextRecor
 
 ## Implementation inventory
 
-Source inspection: `src/lua_api/env_init/runtime_surface_bootstrap.lua:64–79` defines a generic namespace `__index` that logs missing keys, creates a function returning nil and caches it with `rawset`; lines112–129 attach that namespace metatable. The inspected `queries::register` has no modeled getter for this record. Callable absent-ID behavior therefore does not establish a modeled getter or native API availability.
+Source inspection: `src/lua_api/env_init/runtime_surface_bootstrap.lua:64–79` defines a generic namespace `__index` that logs missing keys, creates a function returning nil and caches it with `rawset`; lines112–129 attach that namespace metatable. That historical inspection predates modeled registration at `a62c81768`; `texture_and_text.rs` now supplies the producer. Callable absent-ID behavior therefore does not establish a modeled getter or native API availability.
 
 - `src/c_api/ui_widget_manager/inputs.rs` — existing `WidgetSetEntry` and `WidgetSetRecord`, independent supplied membership.
 - `src/c_api/ui_widget_manager/feed.rs` — existing `replace_ui_widget_set` publishes normal full reconciliation after storing membership.
@@ -65,14 +65,15 @@ First retail execution on 2026-10-14 passed both tests for this model: **4 prima
 
 Independent saved-outcome verification: `/home/osso/.local/state/wow-ui-sim/verification/widget-two-api-initial-outcome-current/report.md` and `proof.json`, source `758dfdf5d8c49a1ca8d49fa518c01c7da9e65a1a`. It confirms four distinct Retail PASS, no genuine RED, and no populated-record coverage; timeout child summaries are not additional cases. This is bounded saved-evidence verification, not broad acceptance.
 
-Current authored revision `fb7a1c243` contains twelve cases across both modules (six each): the two initial cases per module plus complete fresh/replaced snapshots, environment isolation, numeric/secret selector policy and actual cached populated feed lifecycle. Saved epoch `verification/widget-discrete-progress-current/widget-two-populated-retail-red-20261014T161619034690Z/compile-result.json` now records successful no-run compilation of `fb7a1c24370fca440a68709e0a70b5a0e9c428f8`, with runtime pending. The epoch name is not RED evidence. No populated runtime RED/GREEN or lifecycle acceptance is established.
+Current authored revision `fb7a1c243` contains twelve cases across both modules (six each): the two initial cases per module plus complete fresh/replaced snapshots, environment isolation, numeric/secret selector policy and actual cached populated feed lifecycle. Genuine observed Retail RED at `fb7a1c24370fca440a68709e0a70b5a0e9c428f8`: 12 primary outcomes, **4 PASS / 8 FAIL**. Supplied queries return nil, missing-selector acceptance fails rejection expectations, and cached consumers acquire no populated widget; later lifecycle assertions are unreached. Receipt: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/widget-two-populated-retail-red-20261014T161619034690Z/runtime-two-widget-populated-red`. Independent agent4706 classification remains pending. Subsequent complete projection and registration are source implementation only: no behavioral GREEN yet; producer compile/GREEN work is running, not accepted evidence.
 
 ## Known gaps (current cycle)
 
 - [x] Execute both initial retail boundaries and preserve the PASS artifact above; no genuine RED observed.
 - [x] Independent saved-outcome report confirms initial four PASS only.
-- [ ] Obtain genuine populated-record runtime evidence for the twelve authored cases; no RED/GREEN claimed.
-- [ ] Implement modeled getter projection/registration; scaffolds and successful no-run compilation are not behavior proof.
+- [x] Observe genuine populated Retail RED: four primary PASS / eight FAIL; independent classification pending.
+- [x] Implement complete modeled getter projection/registration at `8645aaf0a` + `a62c81768`; source-only, not behavioral GREEN.
+- [ ] Verify implemented producer and populated cached lifecycle; native and earlier-profile availability remain UNKNOWN.
 - [ ] Populated full-record projection and visible activation/update/removal remain unproved by this initial evidence; the documented field frontier is unchanged.
 
 ## Out of scope

@@ -8,6 +8,10 @@ Warcraft Wiki page **533235**, current revision **5142162** (2021-04-23T01:19:12
 
 Register contains **193 inventory occurrences**, including six Checkout handlers and five console commands. Every header count agrees with its own table. [Ledger](../../../data/patch-api/sources/8.2.0-page-coverage.json) accounts for **223 unique IDs**: 193 inventory, 24 extract and six comparison-caption contexts. Statuses: 107 partial-development-green, 33 bounded-coverage, 63 audit-pending, 20 metadata-only. Ten substantive prose contracts remain pending; source/build/TOC links carry no runtime credit. [Extract scout](../../../data/patch-api/evidence/8.2.0-session-2026-10-08/p820-extract-scout.json) maps every retained statement to literal raw/extract lines.
 
+## Widget producer source checkpoint — 2026-10-14
+
+[Owning checkpoint](../../specs/patch-8-2-0-publication-sweep.md#widget-producer-source-checkpoint--2026-10-14) records full26/19 projections `8645aaf0a`, registration `a62c81768`, row135-only gap removal, and requested54→53 versus literal committed53→52 count discrepancy. Row134 unchanged; DoubleStatusBar zero evidenced publication rows. Source implemented but unverified, observed Retail4 PASS /8 FAIL and independent classification pending; no behavioral GREEN or native/earlier availability claim. Following matrix and command receipts are historical, not rerun for this producer.
+
 ## Concrete coverage matrix
 
 | Boundary | Handled | Still missing / disabled | Proof |

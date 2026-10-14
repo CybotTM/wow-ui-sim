@@ -17,6 +17,12 @@ Audit Warcraft Wiki page 533235 revision 5142162 against current retail. Source:
 - [x] Apply the merged 8.2.5 register; its six removals supersede six 8.2.0 publication gaps with bounded absence coverage.
 - [ ] Inherited 12.0.5, 12.0.7 and 12.1.0 saved-extract reproduction failures remain unchanged, as in the completed 8.3.0 audit.
 
+## Widget producer source checkpoint — 2026-10-14
+
+`8645aaf0a` implements complete DoubleStatusBar26 / TextureAndText19 projections; `a62c81768` registers both and removes only `wt-global-api-C_UIWidgetManager.GetTextureAndTextVisualizationInfo-135` from known gaps. Requested ledger reconciliation is **54→53**; literal committed JSON arrays instead contain **53→52** entries across `a62c81768^`→`a62c81768`. This discrepancy is retained, not silently normalized or represented as a fresh sweep PASS. Historical counts below retain their original proof scope.
+
+Row134 (`GetTextureAndTextRowVisualizationInfo`) is unchanged. DoubleStatusBar has zero evidenced publication rows; none invented. [TextureAndText owner](ui-widget-texture-and-text.md) and [DoubleStatusBar owner](ui-widget-double-status-bar.md) retain observed Retail RED4 PASS /8 FAIL, initial absence-only4 PASS, synthetic-fallback distinction and pending independent classification. Source is implemented but unverified: no behavioral GREEN, native/earlier availability UNKNOWN, no completion claim.
+
 ## Tests
 
 `tests/patch_8_2_0_publication_sweep.rs`, `patch_8_2_0_publication_fixes.rs`, `patch_8_2_0_cached_surfaces.rs`, `patch_8_2_0_classic_surfaces.rs`; extractor/generator behavioral fixtures. Evidence and dynamic validator: `data/patch-api/evidence/8.2.0-session-2026-10-08/`.
