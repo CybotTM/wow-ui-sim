@@ -201,7 +201,6 @@
   "wt-global-api-C_TradeSkillUI.GetOptionalReagentBonusText-502",
   "wt-global-api-C_TradeSkillUI.GetOptionalReagentInfo-503",
   "wt-global-api-C_Transmog.GetItemIDForSource-506",
-  "wt-global-api-C_UIWidgetManager.GetDiscreteProgressStepsVisualizationInfo-509",
   "wt-global-api-C_UIWidgetManager.GetScenarioHeaderTimerWidgetVisualizationInfo-510",
   "wt-global-api-C_UIWidgetManager.GetTextureWithAnimationVisualizationInfo-511",
   "wt-global-api-C_UIWidgetManager.RegisterUnitForWidgetUpdates-513",

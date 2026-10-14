@@ -13,7 +13,6 @@
   "wt-global-api-C_Garrison.GetAutoMissionTargetingInfoForSpell-37",
   "wt-global-api-C_Item.GetAppliedItemTransmogInfo-39",
   "wt-global-api-C_Item.GetBaseItemTransmogInfo-40",
-  "wt-global-api-C_Item.IsDressableItemByID-41",
   "wt-global-api-C_ItemUpgrade.GetItemUpgradeEffect-43",
   "wt-global-api-C_ItemUpgrade.GetNumItemUpgradeEffects-44",
   "wt-global-api-C_LFGList.GetApplicantDungeonScoreForListing-47",

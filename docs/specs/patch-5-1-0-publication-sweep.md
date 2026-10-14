@@ -10,6 +10,10 @@ Audit the pinned 2012 retail [source](../../data/patch-api/sources/5.1.0-api-cha
 - [x] Read/update/clear a concrete existing action/spell loss-control interval through the cached legacy global wrapper.
 - [x] Reproduce saved sources/registers and pass clean-checkout/later-audit validators using committed, pinned inputs.
 
+## Current gap reconciliation — 2026-10-14
+
+The saved `983f02fbf` default prefork sweep failed only on resolved/stale entries for `Path:GetControlPoints`; no new gap was reported. Reconcile the current known-gap fixture (17 → 16) with the already-modeled [Path/control-point contract](path-control-point.md). Source rows, IDs, later-register ordering and exact set equality remain unchanged. Historical reviewed captures/counts remain historical, not rewritten. This closes only obsolete missing-endpoint expectations; native/signature/payload parity is not inferred. Current-revision targeted execution remains pending.
+
 ## How it works
 
 - [Audit and evidence](../wiki/investigations/patch-5-1-0-api-audit.md).

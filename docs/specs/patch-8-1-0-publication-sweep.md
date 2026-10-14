@@ -15,6 +15,10 @@ Audit pinned Warcraft Wiki page 464337, revision 4462737 against current retail,
 - [x] Separate frozen145/87/58 results and two removal supersessions from old533c145/93/52/six-producer evidence; original validation9/9 passed.
 - [x] New GUID cycle uses its own direct145-row capture and exact51-gap/seven-producer set; verified strict publication and retry validator reject old-map substitution, missing captures, stale/unreviewed closures and rewritten history while preserving both source captures.
 
+## Current gap reconciliation — 2026-10-14
+
+The saved `983f02fbf` default prefork sweep failed only on resolved/stale entries for `C_UIWidgetManager.GetSpellDisplayVisualizationInfo`; no new gap was reported. Reconcile the current known-gap fixture (50 → 49) with the already-modeled [SpellDisplay contract](ui-widget-spell-display.md). Source rows, IDs, later-register ordering and exact set equality remain unchanged. Historical reviewed captures/counts remain historical, not rewritten. This closes only obsolete missing-endpoint expectations; native/signature/payload parity is not inferred. Current-revision targeted execution remains pending.
+
 ## How it works
 
 - [Page audit, coverage matrix and proof boundaries](../wiki/investigations/patch-8-1-0-api-audit.md).

@@ -18,6 +18,10 @@ Historical client reconstruction, guessed constants/defaults, placeholder public
 
 Exact gap identities and reasons live in the fixture and per-ID review; counts are derived, not a fixed compatibility contract. Substantive extract targets receive no behavior credit. At integration main thread prepends 9.0.2, then regenerates current observations, fixtures and coverage/evidence; placeholder excludes it on this branch.
 
+## Current gap reconciliation — 2026-10-14
+
+The saved `983f02fbf` default prefork sweep failed only on resolved/stale entries for `C_UIWidgetManager.GetDiscreteProgressStepsVisualizationInfo`; no new gap was reported. Reconcile the current known-gap fixture (262 → 261) with the already-modeled [discrete-progress contract](ui-widget-discrete-progress-steps.md). Source rows, IDs, later-register ordering and exact set equality remain unchanged. Historical reviewed captures/counts remain historical, not rewritten. This closes only obsolete missing-endpoint expectations; native/signature/payload parity is not inferred. Current-revision targeted execution remains pending.
+
 ## Sources
 
 - `tests/patch_9_0_1_publication_sweep.rs`

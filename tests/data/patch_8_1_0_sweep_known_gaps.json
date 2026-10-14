@@ -47,6 +47,5 @@
   "wt-global-api-C_SummonInfo.ConfirmSummon-105",
   "wt-global-api-C_SummonInfo.GetSummonConfirmAreaName-106",
   "wt-global-api-C_SummonInfo.GetSummonConfirmSummoner-107",
-  "wt-global-api-C_TradeSkillUI.GetTradeSkillLineInfoByID-113",
-  "wt-global-api-C_UIWidgetManager.GetSpellDisplayVisualizationInfo-114"
+  "wt-global-api-C_TradeSkillUI.GetTradeSkillLineInfoByID-113"
 ]

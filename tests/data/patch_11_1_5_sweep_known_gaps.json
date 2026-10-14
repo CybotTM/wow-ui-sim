@@ -4,7 +4,6 @@
   "wt-global-api-C_ColorOverrides.GetDefaultColorForQuality-75",
   "wt-global-api-C_ColorOverrides.RemoveColorOverride-76",
   "wt-global-api-C_ColorOverrides.SetColorOverride-77",
-  "wt-global-api-C_CooldownViewer.IsCooldownViewerAvailable-80",
   "wt-global-api-C_GameRules.AutoConnectToGameModeRealm-95",
   "wt-global-api-C_GameRules.GetCurrentGameModeDisplayInfo-99",
   "wt-global-api-C_GameRules.GetCurrentGameModeRecordID-100",

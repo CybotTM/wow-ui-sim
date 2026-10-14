@@ -6,6 +6,10 @@ Probe all 125 inventory occurrences from page 621744, revision 6726775 in unmodi
 
 Exact non-OK IDs must equal the reviewed known-gap fixture. `P1115_SWEEP_OUT` writes every observation before assertion; `P1115_SWEEP_REGISTER` allows a full same-sized negative control. Publication/absence does not establish signatures, outputs, security, behavior or native parity. Current consumers take precedence over historical removals: retain UpdateUIParentPosition, defined in cached `Blizzard_UIParentUtil/UIParentUtil.lua:13` and called in `Blizzard_Game/Shared/EventImplementation.lua:48,304`. Never delete cached deprecation wrappers.
 
+## Current gap reconciliation — 2026-10-14
+
+The saved `983f02fbf` default prefork sweep failed only on resolved/stale entries for `C_CooldownViewer.IsCooldownViewerAvailable`; no new gap was reported. Reconcile the current known-gap fixture (36 → 35) with the already-modeled [availability contract](cooldown-viewer-availability.md). Source rows, IDs, later-register ordering and exact set equality remain unchanged. Historical reviewed captures/counts remain historical, not rewritten. This closes only obsolete missing-endpoint expectations; native/signature/payload parity is not inferred. Current-revision targeted execution remains pending.
+
 ## Bounded behavior
 
 Seven retired namespace members must remain nil under repeated ordinary/raw lookup. Current cached retail Lua has no references to the three old GameEnvironmentManager members, three old GameModeManager members or SpellBook.GetTrackedNameplateCooldownSpells. Existing retail epoch gates preserve classic publication.

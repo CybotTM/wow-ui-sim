@@ -4,13 +4,17 @@ Account for Warcraft Wiki page 530068, revision 6789768 (2026-07-31T04:32:53Z), 
 
 ## What it must do
 
-- [x] Probe all 639 inventory occurrences using all 25 chronological later registers, 10.0.2 through 12.1.0, requiring exactly 173 reviewed gaps.
+- [x] Probe all 639 inventory occurrences using all 25 chronological later registers, 10.0.2 through 12.1.0, requiring the exact reviewed current gap fixture; the retained historical checkpoint had 173 gaps.
 - [x] Account for all 439 nonblank extract occurrences and four inventory-context lines; preserve Lua examples and distinguish pending statements from publication proof.
 - [x] Construct Scale, Path and FlipBook through animation owners; recognize owner-qualified widget-script links without changing source identities. Missing endpoints remain gaps.
 - [x] Account for every API on shared changed lines with its source line and annotations; preserve prior generation through explicit expansion mode.
 - [x] Detect the exact single-row GetUnitEmpowerHoldAtMaxTime negative control: 173 → 174 gaps, unchanged row count/IDs.
 - [x] Preserve all 158 prior inputs, 50 extraction-mode outcomes and byte-identical regeneration of all 26 registers.
 - [x] Verify all publication sweeps, factory/helper regressions, formatting, Mists tests check and exit-0 retail startup `[]`.
+
+## Current gap reconciliation — 2026-10-14
+
+The saved `983f02fbf` default prefork sweep failed only on resolved/stale entries for `Path:GetCurveType, GetMaxControlPointOrder and SetCurveType`; no new gap was reported. Reconcile the current known-gap fixture (173 → 170) with the already-modeled [Path/control-point contract](path-control-point.md). Source rows, IDs, later-register ordering and exact set equality remain unchanged. Historical reviewed captures/counts remain historical, not rewritten. This closes only obsolete missing-endpoint expectations; native/signature/payload parity is not inferred. Current-revision targeted execution remains pending.
 
 ## How it works
 
@@ -35,7 +39,7 @@ Account for Warcraft Wiki page 530068, revision 6789768 (2026-07-31T04:32:53Z), 
 
 ## Known gaps
 
-- [ ] 173 publication gaps: [per-ID review](../../data/patch-api/evidence/10.0.0-session-2026-10-07/p1000-gap-review.json) owns reasons.
+- [ ] Current170 publication gaps; historical173-gap review unchanged: [per-ID review](../../data/patch-api/evidence/10.0.0-session-2026-10-07/p1000-gap-review.json) owns reasons.
 - [ ] 424 pending extract statements/examples and three inventory-section migration summaries; no signature, populated output, payload, security, native or historical parity credit.
 - [ ] Eleven serialized CVar default comparisons differ from the historical page, including two absent variables. Publication accounting does not erase these differences.
 
