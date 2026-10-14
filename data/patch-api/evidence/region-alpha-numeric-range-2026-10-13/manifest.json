@@ -863,7 +863,7 @@
     "initial_14_payloads": "PASS; accepted at89f9a88d9",
     "initial_gate_report": "evidence/gates/public-copy-initial/report.md",
     "initial_gate_proof": "evidence/gates/public-copy-initial/proof.json",
-    "new_gate_copy_closing_verification": "PENDING; prior14payloads must reuse Git/stat proof"
+    "new_gate_copy_closing_verification": "PASS at6a5358325; two new whole TEXT checked, prior14 reused via accepted Git/stat metadata only; closing report retained privately"
   },
   "public_file_count": 18
 }

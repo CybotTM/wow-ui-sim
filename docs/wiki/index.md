@@ -8,7 +8,7 @@
 
 ## [2026-10-13] evidence | Region alpha numeric runtime
 
-[Owning contract](../specs/region-alpha-numeric-range.md) records 10 Retail/PTR outcomes, two separate startups and OLD480 legacy observation. Public retention and full-parent acceptance remain open.
+[Owning contract](../specs/region-alpha-numeric-range.md) records 10 Retail/PTR outcomes, two separate startups and OLD480 legacy observation. Bounded public retention is verified; full-parent acceptance remains open.
 
 ## [2026-10-13] source | Crafted-item quality producer
 

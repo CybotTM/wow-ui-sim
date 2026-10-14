@@ -22,7 +22,7 @@ Ordinary numeric `Region:SetAlpha` inputs follow the [10.0.0 change-note summary
 
 ## Tests asserting this spec
 
-[Retained evidence packet](../../data/patch-api/evidence/region-alpha-numeric-range-2026-10-13/README.md): whole-text publication; independent public-copy verification pending.
+[Retained evidence packet](../../data/patch-api/evidence/region-alpha-numeric-range-2026-10-13/README.md): 16 whole-text payloads/18 files; initial and closing public-copy/privacy gates passed. Prior 14 payload proofs were reused through Git/stat metadata at closing, not reopened.
 
 Producer `71127a8e1` has bounded Retail/PTR runtime acceptance: five unique Rust cases/profile, **10 passing outcomes**, comprising two numeric contracts and three no-op/dirty-state preservation cases. Frame, Texture and FontString reach all 9 valid and 21 invalid combinations/profile, including near-boundary numbers, infinities and NaN. Rejection preserves stored and effective alpha; getters are not replaced. Nested child summaries are not additional tests.
 
@@ -30,11 +30,11 @@ Two separate normal startups complete both fixture modes with CLEAN diagnostics 
 
 Retained full format and default Retail library/six-bin check pass: 733 JSON records, zero compiler-message records, six manifest lint-key deprecations. Format peak 566022144 bytes exceeds soft high 536870912 by 29151232 bytes, below the 1 GiB hard maximum.
 
-Pre-producer valid modes passed; invalid modes failed at the first Frame `SetAlpha(-0.25)` rejection assertion, leaving later assertions unreached. Original Retail admission denial and PTR setup failure remain zero-launch. Prior PTR4258 authentication/delivery and global historical hash-read total remain UNKNOWN; fresh4259 copy-integrity evidence does not recover them. Public retention is pending.
+Pre-producer valid modes passed; invalid modes failed at the first Frame `SetAlpha(-0.25)` rejection assertion, leaving later assertions unreached. Original Retail admission denial and PTR setup failure remain zero-launch. Prior PTR4258 authentication/delivery and global historical hash-read total remain UNKNOWN; fresh4259 copy-integrity evidence does not recover them. Public retention is verified at this bounded scope.
 
 ## Known gaps (current cycle)
 
-- [ ] Publish and independently verify privacy-safe evidence retention.
+- [x] Publish and independently verify privacy-safe evidence retention; this does not close native/render or parent acceptance.
 - [ ] Current-Mists/all-Classic and native/render/full-parent acceptance remain unproved; dirty-state assertions are not rendered-pixel proof.
 
 ## Out of scope
