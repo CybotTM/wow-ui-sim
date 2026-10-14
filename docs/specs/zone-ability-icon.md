@@ -39,4 +39,4 @@ Scoped generation reuses the existing PHF writer with a typed snapshot of the or
 
 ## Out of scope
 
-Native miss/malformed-input behavior and native parity remain unknown. Active-ability membership, zone lifecycle, external addon caller acceptance and catalog/generated-data edits are not covered. Secret tests assert observable authentication failures, not internal lookup calls.
+Native miss/malformed-input behavior and native parity remain unknown. Active-ability membership, zone lifecycle, external addon caller acceptance and broader catalog/generated-data changes are not covered; the single sourced spell372610 repair above is included. Secret tests assert observable authentication failures, not internal lookup calls.
