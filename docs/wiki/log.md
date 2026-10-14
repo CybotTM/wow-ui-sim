@@ -1,3 +1,7 @@
+## [2026-10-13] source | Crafted-item quality producer
+
+[Crafting inventory](systems/crafting-reagents.md#crafted-item-quality-source-checkpoint--2026-10-13) links the owning contract and evidence. Item inputs stay separate from recipe pairs; producer GREEN and native/render/original-panel proof remain unverified at this checkpoint.
+
 ## [2026-10-13] runtime | Bullet / dressability supplied-model proof
 
 [Host-record matrix](../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md): bounded Retail/PTR runtime, preservation, startup and check/format gates; historical failures retained. Public-copy and retained-gate copy checks pass; parent/native/render acceptance open.
