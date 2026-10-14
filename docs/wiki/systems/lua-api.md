@@ -390,11 +390,11 @@ Historical `e4caa4899` adds empty-default `SimState.item_cooldowns: HashMap<u32,
 
 ## Supplied item cooldowns — producer checkpoint 2026-10-14
 
-`ee1bc9038` projects supplied pairs unchanged through distinct ItemInfo, item-ID and bag/slot selectors; namespace enable types differ. Missing pairs are an explicit simulator policy, not native parity. Legacy equipment-slot state is unchanged. GREEN/profile acceptance remains pending in the [owning contract](../../specs/item-cooldowns.md).
+`ee1bc9038` projects supplied pairs unchanged through distinct ItemInfo, item-ID and bag/slot selectors; namespace enable types differ. Missing pairs are an explicit simulator policy, not native parity. Legacy equipment-slot state is unchanged. The [owning contract and bounded proof SSOT](../../specs/item-cooldowns.md#bounded-archived-green--2026-10-14) records independent archived `ffb` Retail/Mists execution, preserving genuine historical RED and later fixture/compile failures. Producer association is not current-HEAD coverage. Corrected-fixture GREEN, PTR/native/full-parent acceptance remain pending; Store query diagnostics are source-only, not a root fix. Trace-environment and intentional visibility-error limits remain with the owning proof.
 
 ## Sources
 
-- [Supplied item cooldowns](../../specs/item-cooldowns.md) — supplied-pair producer, historical RED and pending GREEN/profile acceptance.
+- [Supplied item cooldowns](../../specs/item-cooldowns.md) — supplied-pair producer, bounded archived Retail/Mists GREEN, historical RED and pending corrected-fixture/current-HEAD/PTR acceptance.
 
 - [Item dressability](../../specs/item-dressability.md) — supplied C API model and revision-scoped proof limits.
 
