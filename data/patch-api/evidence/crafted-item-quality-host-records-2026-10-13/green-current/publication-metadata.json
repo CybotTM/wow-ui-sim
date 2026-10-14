@@ -762,5 +762,6 @@
       "bytes": 331,
       "sha256": "f249bdcf5117f63071fbf830da47894a3df10049294e1e2e8292e7ed06a4527d"
     }
-  ]
+  ],
+  "historical_payload_scope": "Five owned RED query payloads were unprinted; final-runtime report historical nil wording is source inference, not an observed payload. Raw report preserved; current24GREEN unaffected."
 }
