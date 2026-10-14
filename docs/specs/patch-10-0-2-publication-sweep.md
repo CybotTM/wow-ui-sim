@@ -5,7 +5,7 @@ Account for Warcraft Wiki page 303146, revision 2926754 (2023-01-27T02:58:55Z), 
 ## What it must do
 
 - [x] Historically probe all416 inventory occurrences with all24 chronological later registers, 10.0.5 through12.1.0; match the then-reviewed149-item gap set.
-- [ ] Replay against the current148-item expected set after TextWithSubtext row309 reconciliation; the pre-reconciliation run failed exact-set comparison.
+- [x] Replay against the current148-item expected set after TextWithSubtext row309 reconciliation; see the owning-after checkpoint below. Historical pre-reconciliation exact-set FAIL remains preserved.
 - [x] Keep twenty unused namespace members absent under repeated lookup in bare and unmodified cached Game environments. Preserve modeled crafting-order/item-tooltip successor publication.
 - [x] Preserve Mists legacy namespace lookup. The existing retail epoch module gate excludes Wrath, Mists, Era and Anniversary; no 10.x epoch is introduced.
 - [x] Detect an exact one-row negative control: UnitTokenFromGUID added → removed produces only that new failure, 149 → 150.
@@ -36,7 +36,15 @@ Account for Warcraft Wiki page 303146, revision 2926754 (2023-01-27T02:58:55Z), 
 
 ## TextWithSubtext follow-up — 2026-10-14
 
-[TextWithSubtext](ui-widget-text-with-subtext.md) owns separate complete supplied-record and actual cached Retail/PTR lifecycle evidence. The normal Retail pre-reconciliation sweep observed416 rows/148 non-OK IDs; the149-item expected set differed only by `wt-global-api-C_UIWidgetManager.GetTextWithSubtextWidgetVisualizationInfo-309`, now published. Reconcile that exact row only; post-reconciliation replay remains pending. Publication is not signature/output/security/native parity, and historical outcomes are not rewritten.
+[TextWithSubtext](ui-widget-text-with-subtext.md) owns separate supplied-record and cached Retail/PTR lifecycle proof. Historical pre-reconciliation exact-set FAIL remains:416 rows/268 OK/148 non-OK against149 expected gaps; only getter row309 was already OK. Commit `43158d03c` removes that exact expected-gap row.
+
+### Owning-after checkpoint — 2026-10-14
+
+Independent saved-runtime gate at `0d819ea3ded9904e5a69757b66e67742a78c7635`:416 unique rows,268 OK/148 non-OK exactly equal the current148-ID fixture; row309 published. One primary PASS, exit0; three zero-case auxiliary summaries excluded. All416 observed result objects equal the owning-before results: expected-gap reconciliation alone changes the comparison outcome.
+
+No-run compile20.42s/exit0,741 Cargo records and six existing manifest deprecations retained. Peak4,307,513,344 bytes below8G high. Receipt reuses one producer digest with stable metadata; no independent executable-byte authentication. Complete runtime diagnostics reach FIRST_FRAME_RENDERED; no warning/error lines observed, not native/conformance/font/WTF/render proof. Sound/CASC disabled; caches/dependencies/settings unauthenticated.
+
+Publication is not signature/populated-output/security/native parity. Broader/all-profile/render/full-parent acceptance stays open; broad `4fc115b93` does not cover later type25 changes.
 
 ## Known gaps
 

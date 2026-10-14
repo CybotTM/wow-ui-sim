@@ -2007,4 +2007,4 @@ Updated [manager inventory](systems/ui-widget-manager-state.md#doublestatusbar--
 
 ## [2026-10-14] evidence | TextWithSubtext bounded profile gates
 
-[Manager gate](../specs/ui-widget-manager-state.md#current-bounded-textwithsubtext-verification--2026-10-14) records independent Retail/PTR11 each, complete supplied queries/security and cached two-line lifecycle. Startup/check limits, historical failures and setup discrepancies remain; owning publication and broader acceptance are separate.
+[Manager gate](../specs/ui-widget-manager-state.md#current-bounded-textwithsubtext-verification--2026-10-14) records independent Retail/PTR11 each, complete supplied queries/security and cached two-line lifecycle. Startup/check limits, historical failures and setup discrepancies remain; [owning publication status](../specs/patch-10-0-2-publication-sweep.md#owning-after-checkpoint--2026-10-14) and broader acceptance are separate.

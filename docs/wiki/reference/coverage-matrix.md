@@ -10,7 +10,7 @@ Initial4 PASS was not RED; genuine populated RED4 PASS/8 FAIL and first GREEN15 
 
 ## TextWithSubtext — source and preproduction RED, 2026-10-14
 
-[Manager owner](../../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14): `e37f5426a` complete27-field projection/shared selector policy. Independent Retail `0a3a5ac20` RED1 PASS/7 FAIL; consumer stopped before cached setup. The [current bounded gate](../../specs/ui-widget-manager-state.md#current-bounded-textwithsubtext-verification--2026-10-14) records independent Retail/PTR11 each (8 type25 +3 controls), full cached lifecycle and complete data/security queries, limited normal-startup observations and passing format/default check. Historical failures, warnings and setup discrepancies are retained; owning publication and broader/native/parent acceptance remain open.
+[Manager owner](../../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14): `e37f5426a` complete27-field projection/shared selector policy. Independent Retail `0a3a5ac20` RED1 PASS/7 FAIL; consumer stopped before cached setup. The [current bounded gate](../../specs/ui-widget-manager-state.md#current-bounded-textwithsubtext-verification--2026-10-14) records independent Retail/PTR11 each (8 type25 +3 controls), full cached lifecycle and complete data/security queries, limited normal-startup observations and passing format/default check. Historical failures, warnings and setup discrepancies are retained; [owning publication status](../../specs/patch-10-0-2-publication-sweep.md#owning-after-checkpoint--2026-10-14) is separate; broader/native/parent acceptance remains open.
 
 ## Seven-profile coverage
 

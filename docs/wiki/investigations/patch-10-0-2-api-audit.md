@@ -22,7 +22,7 @@ Repeated lookup passes in bare and unmodified cached Game environments; Mists pr
 
 ## TextWithSubtext follow-up — 2026-10-14
 
-Historical149-gap accounting, negative control and validation below remain revision-scoped and unchanged. The new normal Retail pre-reconciliation sweep observed416 rows:268 OK/148 non-OK, differing from the149-item expected set only at `wt-global-api-C_UIWidgetManager.GetTextWithSubtextWidgetVisualizationInfo-309` (`raw=function; lookup=function`). Current known gaps remove that exact row; post-reconciliation replay remains pending. Separate [TextWithSubtext behavior](../../specs/ui-widget-text-with-subtext.md) includes complete supplied records and actual cached Retail/PTR lifecycle; publication alone does not prove native/signature/output/security parity.
+Historical149-gap accounting, negative control and validation below remain revision-scoped and unchanged. Current owning replay and its limits are recorded in the [owning-after checkpoint](../../specs/patch-10-0-2-publication-sweep.md#owning-after-checkpoint--2026-10-14). Separate [TextWithSubtext behavior](../../specs/ui-widget-text-with-subtext.md) remains distinct from publication proof.
 
 ## Retained gaps
 
