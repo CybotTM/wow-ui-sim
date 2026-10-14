@@ -51,6 +51,8 @@ These revisions do not implement the modeled getter, projection or query registr
 
 Independent preproduction Retail RED at `0a3a5ac20`: one unknown-ID control PASS / seven FAIL, comprising six populated-getter failures and one selector-validation failure. Consumer stopped before cached setup; activation/lifecycle were not reached. Producer GREEN, startup and final checks remain pending. Historical scaffold and adjoining-provider evidence remain separate; broader acceptance stays open.
 
+The cached manager assigns `widgetTag` when acquiring a frame; ordinary setup refreshes order/layout but does not replace its acquisition tag. The getter still projects every supplied replacement field. The type25 fixture must assert retained frame/tag during in-place update and the replacement tag on reacquisition, rather than altering cached Lua or truncating supplied records. Diagnostic-only `e948624b0` localized the earlier update failure to the tag/layout assertion; post-correction runtime remains pending.
+
 ## Implementation inventory
 
 - `src/c_api/ui_widget_manager.rs` — modeled widget identities and existing ButtonHeader records; exports manager input records.

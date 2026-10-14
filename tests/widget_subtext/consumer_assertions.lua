@@ -51,7 +51,7 @@ function AssertSubtextInitial(frame)
     assert(frame.layoutDirection == 1)
 end
 
-function AssertSubtextUpdated(frame)
+function AssertSubtextUpdated(frame, acquiredTag)
     AssertSubtextLine(frame.Text, 'Updated heading 947', 'RIGHT', 4, SystemFont_Shadow_Med3, GREEN_FONT_COLOR)
     AssertSubtextLine(frame.SubText, 'Updated secondary 947', 'CENTER', 3, SystemFont_Large, HIGHLIGHT_FONT_COLOR)
     AssertSubtextGeometry(frame, 206.25, 7.25)
@@ -60,5 +60,7 @@ function AssertSubtextUpdated(frame)
     assert(frame:IsMouseEnabled() and not frame:IsMouseClickEnabled(), 'updated mouse policy')
     assert(frame:GetScale() == 1 and frame.orderIndex == -12.25,
         'updated scale/order: ' .. tostring(frame:GetScale()) .. '/' .. tostring(frame.orderIndex))
-    assert(frame.widgetTag == 'updated-subtext-tag' and frame.layoutDirection == 1, 'updated tag/layout')
+    -- The cached manager initializes widgetTag on acquisition, not ordinary Setup.
+    assert(frame.widgetTag == acquiredTag and frame.layoutDirection == 1,
+        'acquired tag/layout: ' .. tostring(frame.widgetTag) .. '/' .. tostring(frame.layoutDirection))
 end

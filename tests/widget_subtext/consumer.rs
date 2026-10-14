@@ -50,16 +50,26 @@ fn activate_and_update(env: &WowLuaEnv) {
     );
     fixtures::supply(env, fixtures::updated());
     flush_counts(env, 1);
+    assert_updated_frame_and_snapshot(env);
+}
+
+fn assert_updated_frame_and_snapshot(env: &WowLuaEnv) {
     assert_lua(
         env,
         "in-place update of both visible lines",
         r#"
         assert(FixtureContainer.widgetFrames[762501] == FixtureFrame, 'updated frame identity')
-        AssertSubtextUpdated(FixtureFrame)
+        AssertSubtextUpdated(FixtureFrame, 'subtext-contract-731')
         AssertSuppliedSnapshot(SavedSubtextSnapshot)
         local current = FixtureGetter(762501)
         assert(current.text == 'Updated heading 947' and current.subText == 'Updated secondary 947')
         assert(current.spacing == 7.25 and current.widgetWidth == 913.25)
+        assert(current.widgetTag == 'updated-subtext-tag', 'getter projects the replacement tag')
+        local previousTagFrames, replacementTagFrames = {}, {}
+        FixtureContainer:GatherWidgetsByWidgetTag(previousTagFrames, 'subtext-contract-731')
+        FixtureContainer:GatherWidgetsByWidgetTag(replacementTagFrames, 'updated-subtext-tag')
+        assert(#previousTagFrames == 1 and previousTagFrames[1] == FixtureFrame)
+        assert(#replacementTagFrames == 0, 'in-place update retains acquisition tag')
     "#,
     );
 }
@@ -86,7 +96,10 @@ fn hide_and_reacquire(env: &WowLuaEnv) {
         "Shown reacquires actual cached template",
         r#"
         RestoredFrame = assert(FixtureContainer.widgetFrames[762501])
-        AssertSubtextUpdated(RestoredFrame)
+        AssertSubtextUpdated(RestoredFrame, 'updated-subtext-tag')
+        local replacementTagFrames = {}
+        FixtureContainer:GatherWidgetsByWidgetTag(replacementTagFrames, 'updated-subtext-tag')
+        assert(#replacementTagFrames == 1 and replacementTagFrames[1] == RestoredFrame)
         assert(FixtureGetter(762501).shownState == 1)
         AssertSuppliedSnapshot(SavedSubtextSnapshot)
     "#,
@@ -118,7 +131,7 @@ fn unregister_live_container(env: &WowLuaEnv) {
         "unregister cleans live container subscriptions and pool",
         r#"
         CleanupFrame = assert(FixtureContainer.widgetFrames[762501])
-        AssertSubtextUpdated(CleanupFrame)
+        AssertSubtextUpdated(CleanupFrame, 'updated-subtext-tag')
         FixtureContainer:UnregisterForWidgetSet()
         assert(not FixtureContainer:IsRegisteredForWidgetSet(435))
         assert(not UIWidgetManager.registeredWidgetContainers[FixtureContainer])
