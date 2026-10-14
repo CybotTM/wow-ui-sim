@@ -2003,4 +2003,8 @@ Updated [manager inventory](systems/ui-widget-manager-state.md#doublestatusbar--
 
 ## [2026-10-14] source | TextWithSubtext producer after populated RED
 
-[Manager owner](../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14) records `e37f5426a` complete27 projection/shared selector policy after independent Retail1 PASS/7 FAIL. Cached activation was not reached; producer GREEN, startup/checks and broader acceptance remain pending.
+[Manager owner](../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14) records `e37f5426a` complete27 projection/shared selector policy after independent Retail1 PASS/7 FAIL. Cached activation was not reached in that RED.
+
+## [2026-10-14] evidence | TextWithSubtext bounded profile gates
+
+[Manager gate](../specs/ui-widget-manager-state.md#current-bounded-textwithsubtext-verification--2026-10-14) records independent Retail/PTR11 each, complete supplied queries/security and cached two-line lifecycle. Startup/check limits, historical failures and setup discrepancies remain; owning publication and broader acceptance are separate.

@@ -93,11 +93,11 @@ The [manager checkpoint](../../specs/ui-widget-manager-state.md#textwithsubtext-
 
 ### TextWithSubtext producer checkpoint — 2026-10-14
 
-[Manager checkpoint](../../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14) and [owning contract](../../specs/ui-widget-text-with-subtext.md) record source `e37f5426a` and independently accepted preproduction Retail RED: control1 PASS / six populated-getter and one selector FAIL. Consumer stopped before cached setup. Historical scaffold remains unchanged; producer GREEN, startup and final checks are pending, not supplied by adjoining-provider receipts.
+[Manager checkpoint](../../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14) and [owning contract](../../specs/ui-widget-text-with-subtext.md) record source `e37f5426a` and independently accepted preproduction Retail RED: control1 PASS / six populated-getter and one selector FAIL. Consumer stopped before cached setup in that RED. The [current bounded manager gate](../../specs/ui-widget-manager-state.md#current-bounded-textwithsubtext-verification--2026-10-14) now records independent Retail/PTR11 each, complete supplied queries and actual cached two-line lifecycle, normal-startup limits and format/default check. Acquisition tag is retained during ordinary setup and refreshed on reacquisition; no model/vendor patch. Historical scaffold/failures remain, and owning publication/broader acceptance is still separate.
 
 ## Sources
 
-- [TextWithSubtext projection](../../../src/c_api/ui_widget_manager/text_with_subtext.rs) — complete supplied producer; runtime pending.
+- [TextWithSubtext projection](../../../src/c_api/ui_widget_manager/text_with_subtext.rs) — complete supplied producer; bounded profile evidence and remaining limits owned by manager checkpoint.
 
 - [BulletTextList](../../specs/ui-widget-bullet-text-list.md) — supplied-record contract and revision-scoped proof limits.
 

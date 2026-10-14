@@ -49,9 +49,15 @@ These revisions do not implement the modeled getter, projection or query registr
 
 [Owning contract](ui-widget-text-with-subtext.md): `e37f5426a` adds shared registration and a complete27-field projection (20 numbers, six strings, one boolean). The getter clones supplied state, releases its borrow, then roots a fresh Lua table while populating fields. Shared numeric/secret validation runs before lookup; an absent numeric ID returns one nil. No inferred catalog or demo seeds.
 
-Independent preproduction Retail RED at `0a3a5ac20`: one unknown-ID control PASS / seven FAIL, comprising six populated-getter failures and one selector-validation failure. Consumer stopped before cached setup; activation/lifecycle were not reached. Producer GREEN, startup and final checks remain pending. Historical scaffold and adjoining-provider evidence remain separate; broader acceptance stays open.
+Independent preproduction Retail RED at `0a3a5ac20`: one unknown-ID control PASS / seven FAIL, comprising six populated-getter failures and one selector-validation failure. Consumer stopped before cached setup in that RED; activation/lifecycle were not reached then. Historical scaffold and adjoining-provider evidence remain separate.
 
-The cached manager assigns `widgetTag` when acquiring a frame; ordinary setup refreshes order/layout but does not replace its acquisition tag. The getter still projects every supplied replacement field. The type25 fixture must assert retained frame/tag during in-place update and the replacement tag on reacquisition, rather than altering cached Lua or truncating supplied records. Diagnostic-only `e948624b0` localized the earlier update failure to the tag/layout assertion; post-correction runtime remains pending.
+### Current bounded TextWithSubtext verification — 2026-10-14
+
+Independent Retail and PTR gates each passed11 unique cases at `62f115d26` (eight type25 cases including secret wrappers + three unchanged lifecycle controls). Complete27-field fresh/replacement snapshots, environment isolation, required selectors, normal feed ordering/atomicity, actual cached two-line activation/style/geometry/update, acquisition-tag retention/current-tag reacquisition, removal and live unregister are proved at that scope.
+
+Default format/check passed, with six existing manifest deprecations and reported memory-limit crossings retained. Retail normal observation at unchanged producer `e37f5426a` and fresh PTR observation at `62f115d26`: `[]`, exit0; complete informational diagnostics, font fallback, WTF/cache reads and disabled-CASC/sound/third-party-addon/SavedVariables limits retained. No global-clean, native/render/all-profile or full-parent claim. Owning normal Retail10.0.2 publication reconciliation remains pending; earlier broad4fc115b93 does not cover this slice.
+
+The cached manager assigns `widgetTag` when acquiring a frame; ordinary setup refreshes order/layout but does not replace its acquisition tag. The getter still projects every supplied replacement field. The type25 fixture must assert retained frame/tag during in-place update and the replacement tag on reacquisition, rather than altering cached Lua or truncating supplied records. Diagnostic-only `e948624b0` localized the earlier producer10 PASS/1 FAIL update failure to the tag/layout assertion. Corrected source62 fixture passes both profile gates; model/vendor code was unchanged. Preproduction RED, producer/diagnostic failures and original setup-schema discrepancies remain historical, not overwritten.
 
 ## Implementation inventory
 
@@ -61,7 +67,7 @@ The cached manager assigns `widgetTag` when acquiring a frame; ordinary setup re
 - `src/c_api/ui_widget_manager/bars.rs` — full supplied bar snapshot producers, including fresh StatusBar partition arrays; five bar/HUD query cases passed.
 - `src/c_api/ui_widget_manager/hud.rs` — four live `f64` selectors, exactly one numeric return each, with default-zero model policy; bounded query and actual HUD OnLoad proof.
 - `src/c_api/ui_widget_manager/queries.rs` — registration calls both implemented `bars` and `hud` modules.
-- `src/c_api/ui_widget_manager/text_with_subtext_record.rs` / `text_with_subtext.rs` — complete27-field supplied record and fresh projection, shared registration, owned input map and normal type25 feed; post-projection runtime pending.
+- `src/c_api/ui_widget_manager/text_with_subtext_record.rs` / `text_with_subtext.rs` — complete27-field supplied record and fresh projection, shared registration, owned input map and normal type25 feed; bounded Retail/PTR verification described above.
 - `src/c_api/ui_widget_manager/feed.rs` — `WidgetVisualization` integration for StatusBar type2 and CaptureBar type1; actual bar-consumer adaptation uses host feeds instead of direct state changes or manual events.
 - `src/c_api/ui_widget_manager/fixtures.rs` — existing demo initialization. The old PowerBar bootstrap is removed without fallback in the new implementation scope.
 - `src/lua_api/state/sim_state.rs` — environment-owned manager, ButtonHeader, and Prey input state.
