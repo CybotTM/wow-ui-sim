@@ -623,7 +623,6 @@ macro_rules! build_empty_sim_state {
             helpful_spells: ::std::collections::HashSet::new(),
             pet_spells: ::std::collections::HashSet::new(),
             pvp_last_honor_gain: 0,
-            #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
             item_dressability: HashMap::new(),
             equippable_items: ::std::collections::HashSet::new(),
             consumable_items: ::std::collections::HashSet::new(),

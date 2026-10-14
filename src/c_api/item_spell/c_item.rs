@@ -3,6 +3,7 @@ use super::helpers::{
     item_class_name, item_subclass_name, unit_is_reachable,
 };
 use crate::c_api::ensure_namespace;
+use crate::client_profile::{ACTIVE, ClientProfile};
 use crate::items;
 use crate::lua_api::SimState;
 use crate::lua_api::methods::{borrow_state, create_string, table_get, val_to_string};
@@ -10,7 +11,7 @@ use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::{LuaError, LuaResult, RuntimeError, Val};
+use rilua::{LuaError, LuaResult, RuntimeError, Val, runtime_error};
 use std::collections::HashSet;
 
 type CItemMethod = (&'static str, fn(&mut LuaState) -> LuaResult<u32>);
@@ -78,7 +79,23 @@ pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
     register_c_item_existence_queries(state, table_ref)?;
     register_c_item_metadata_queries(state, table_ref)?;
     register_c_item_inventory_queries(state, table_ref)?;
+    register_c_item_dressability_query(state, table_ref)?;
     Ok(())
+}
+
+fn register_c_item_dressability_query(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
+    if !matches!(ACTIVE, ClientProfile::Retail | ClientProfile::Ptr) {
+        return Ok(());
+    }
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsDressableItemByID",
+        c_item_is_dressable_item_by_id,
+    )
 }
 
 fn register_c_item_existence_queries(
@@ -178,6 +195,24 @@ fn register_c_item_methods(
         table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
+}
+
+fn c_item_is_dressable_item_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let value = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
+    if !matches!(value, Val::Num(_) | Val::Str(_)) {
+        return Err(runtime_error(
+            "C_Item.IsDressableItemByID: itemInfo must be a number or item link",
+        ));
+    }
+    let item_id = parse_item_id_from_val(state, value);
+    let dressable = {
+        let sim = borrow_state(state)?;
+        item_id
+            .and_then(|id| sim.item_dressability.get(&id).copied())
+            .unwrap_or(false)
+    };
+    state.push(Val::Bool(dressable));
+    Ok(1)
 }
 
 pub(crate) fn c_item_is_equippable_item(state: &mut LuaState) -> LuaResult<u32> {

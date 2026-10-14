@@ -380,6 +380,10 @@ Historical six-test RED reached missing `SetStartColor`; downstream assertions w
 
 [Owning C API contract](../../specs/item-dressability.md) records approved empty environment-local per-item booleans and missing=false policy. Passive storage and authored direct/security/whole cached PlayerChoice tests are not predicate or consumer acceptance. Catalog, equipment, consumable and mount state do not infer dressability; native classification and rendering remain unproved.
 
+## Supplied item dressability — producer checkpoint
+
+[Owning C API contract](../../specs/item-dressability.md) retains Retail/PTR supplied-input and original PlayerChoice RED. Native registration now publishes the numeric/link predicate only for Retail/PTR, authenticates original secrets before parsing and reads explicit per-environment booleans; misses are false. Uniform empty storage replaces repeated profile cfg lists without publishing an earlier-profile query. GREEN/security/complete state and mount controls remain pending; no native catalog or rendered parity.
+
 ## Sources
 
 - [Item dressability](../../specs/item-dressability.md) — supplied C API model and revision-scoped proof limits.

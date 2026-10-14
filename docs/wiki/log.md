@@ -1,3 +1,7 @@
+## [2026-10-13] source | Supplied dressability predicate after reached RED
+
+[Existing API inventory](systems/lua-api.md#supplied-item-dressability--producer-checkpoint) links the [owning C API contract](../specs/item-dressability.md). Explicit boolean projection and original-secret validation follow actual Retail/PTR supplied-data/whole PlayerChoice RED. GREEN/earlier-profile/native/render/full-parent acceptance pending.
+
 ## [2026-10-13] source | BulletTextList getter after reached RED
 
 [Widget producer checkpoint](systems/ui-widget-manager-state.md#bullettextlist-producer-checkpoint--2026-10-13) links the [owning contract](../specs/ui-widget-bullet-text-list.md). Fresh fifteen-field snapshots follow actual supplied-record/callback/cached-consumer RED; fixture defect preserved separately. GREEN/native/render/full-parent pending.
