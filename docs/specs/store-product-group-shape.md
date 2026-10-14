@@ -90,7 +90,7 @@ Retail/PTR each retain one cleanup `AuraContainerUtil` nil failure reported twic
 
 Local handoff `classic-store-consumer-applicability-current/report.md` records actual WoWForever TOC-selected TBC consumers reading group records; a separate secure helper projects those records to IDs internally. This supports the existing non-Mists public record path, not blanket ID-producer expansion. Wrath/Era/Anniversary cache absence is an evidence limit, not a native API gap; manifest entries alone are not runtime consumer proof. WoWForever cleanup source absence leaves that lifecycle unproved. Store acceptance is only the three named runtime profiles above.
 
-Public Store/macro 170-copy packet is CLOSED and unchanged. The separate [item/display/profile packet](../../data/patch-api/evidence/item-display-profile-preservation-2026-10-14/README.md) retains495 whole texts after independent private-copy integrity and bounded decoded privacy PASS. Public-copy parity is a separate post-commit gate; source authenticity, Mists overall PARTIAL and broader parent limits are not upgraded.
+Public Store/macro 170-copy packet is CLOSED and unchanged. The separate [item/display/profile packet](../../data/patch-api/evidence/item-display-profile-preservation-2026-10-14/README.md) retains495 whole texts after independent private-copy integrity and bounded decoded privacy PASS. Independent public-copy gate at `342b64c3824c13b069fc84c42896086c6b6380ca` passes495/495 whole-byte pairs,497/497 tracked files, new links and bounded decoded privacy. Packet CLOSED; reuse Git/stat metadata without reopening accepted payloads. Source authenticity, Mists overall PARTIAL, universal privacy/unlinkability and broader parent limits are not upgraded.
 
 ## Out of scope
 
