@@ -22,17 +22,17 @@ Historical wording distinguishes player and macro-target predicates; it does not
 - `src/lua_api/game_data.rs`: explicit `TargetInfo.has_vehicle_ui` snapshot input; clones retain it.
 - `src/lua_api/globals/admin_party_target_helpers.rs` and `admin_api/units.rs`: current and legacy admin target constructors initialize the simulator fact.
 - `src/lua_api/globals/targeting_verbs.rs`: player/NPC/party target snapshot initialization.
-- `src/lua_api/globals/security/cmd_option.rs`: existing public parser; vehicle predicates not yet implemented in this passive checkpoint.
+- `src/lua_api/globals/security/cmd_option.rs`: `vehicleui` reads player state; `unithasvehicleui` reads selected player, target or focus facts through the existing selector path. Grammar and separate `UnitHasVehicleUI` API are unchanged.
 
 ## Tests asserting this spec
 
-- `tests/cmd_option_vehicle_ui.rs`: four player/target cases plus one selected-player/focus/implicit-target case. Constant target identity/hostility; Retail 12.0.5 feature gate. Authored, not executed. Initial Retail compilation failed (E0603: private `game_data` import); corrected to the existing public `state::TargetInfo` export. Compile failure is not behavioral RED.
+- `tests/cmd_option_vehicle_ui.rs`: four player/target cases plus one selected-player/focus/implicit-target case. Constant target identity/hostility; Retail 12.0.5 feature gate. Executed Retail RED at52fc18f4e: five unique cases, one false/false control PASS and four predicate FAILs (exit101). Selected-unit case fails on its first supplied row; later three rows were unreached, not sixteen RED outcomes. Initial E0603/private `game_data` import compile failure is retained separately; corrected public `state::TargetInfo` export compiled. Receipt-directory setup failure was zero-launch, corrected by whole-text metadata copies without rehashing.
 - `tests/cmd_option_selected_unit.rs`: existing selected-clause/unit and unchanged cached slash-handler preservation scope; not newly executed here.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile passive state/fixture; execute behavioral RED before adding the condition producer.
-- [ ] Implement predicates only after behavioral RED; execute targeted GREEN and selected-unit preservation with full diagnostics.
+- [x] Compile passive state/fixture and execute five-case behavioral RED before adding the condition producer. Two unchanged selected-clause/cached slash-handler preservation cases passed at the same preproducer revision.
+- [ ] Verify the two-arm producer with targeted GREEN and fresh selected-unit preservation, full diagnostics, formatting/checks and independent gate.
 - [ ] Pet/vehicle/party/raid/self/softinteract/enemy tokens have no newly established vehicle-fact resolution in this bounded source seam; broader selected-token coverage remains open.
 - [ ] Verify affected profiles, formatting/checks, readability and parent acceptance separately.
 

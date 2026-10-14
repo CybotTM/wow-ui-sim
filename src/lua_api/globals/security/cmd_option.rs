@@ -155,6 +155,11 @@ fn condition_matches(condition: &str, unit: &str, sim: &crate::lua_api::SimState
     match name {
         "combat" => sim.player.in_combat,
         "nocombat" => !sim.player.in_combat,
+        "vehicleui" => sim.player.has_vehicle_ui,
+        "unithasvehicleui" => match unit {
+            "player" => sim.player.has_vehicle_ui,
+            _ => unit_target_info(unit, sim).is_some_and(|target| target.has_vehicle_ui),
+        },
         "mod" => modifier_condition_matches(argument, sim, true),
         "nomod" => modifier_condition_matches(argument, sim, false),
         "harm" => unit_is_harmful(unit, sim),
