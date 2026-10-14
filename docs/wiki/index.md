@@ -4,7 +4,7 @@
 
 ## [2026-10-14] source | Featured Store display metadata
 
-[Existing Store investigation](investigations/store-secure-pool-constructors.md#featured-display-metadata--source-checkpoint-2026-10-14) links the [owning source checkpoint](../specs/store-product-group-shape.md#featured-display-metadata--source-checkpoint-2026-10-14): `bf1b61f10` adds only legacy featured-record `displayType=0` after shared `e472` normal Mists447 numeric-display RED, CLI1. Explicit regular-group policy avoids observed nil-equality; no native enum aliases/value claims. Compilation succeeded; recorded public lifecycle reaches one shown entry1003 card; independent runtime gate pending; prior query PASS/UI FAIL and historical Retail Show PASS remain old-source evidence.
+[Existing Store investigation](investigations/store-secure-pool-constructors.md#featured-display-metadata--source-checkpoint-2026-10-14) links the [owning source checkpoint](../specs/store-product-group-shape.md#featured-display-metadata--source-checkpoint-2026-10-14): `bf1b61f10` adds only legacy featured-record `displayType=0` after shared `e472` normal Mists447 numeric-display RED, CLI1. Explicit regular-group policy avoids observed nil-equality; no native enum aliases/value claims. Independent bf1 full-stream runtime gate passes Store2 unique/item4/corrected bag1 and public lifecycle; diagnostics retired at bc5 with current-profile preservation pending; prior query PASS/UI FAIL and historical Retail Show PASS remain old-source evidence.
 
 ## [2026-10-14] source | Item producer and Store selection observation
 

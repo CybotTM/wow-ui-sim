@@ -183,3 +183,7 @@ The connected dump-tree and inspector use `compute_frame_rect()` which resolves 
 4. Derive width/height from opposite edges, or fall back to stored `frame.width`/`frame.height`
 
 The standalone dump-tree uses stored `frame.width`/`frame.height` directly without anchor resolution.
+
+## Temporary Store script selection trace
+
+Retired at `bc5cecffb`: Store-specific selection/query records and their private flag were removed; generic event tracing remains. This anchor preserves historical links, not an available diagnostic. [Store status](specs/store-product-group-shape.md#diagnostic-retirement--source-checkpoint-2026-10-14) separates source retirement from runtime proof.
