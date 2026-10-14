@@ -13,7 +13,7 @@ Audit Warcraft Wiki page 533235 revision 5142162 against current retail. Source:
 
 ## Remaining contracts
 
-- [ ] Fifty-three exact inventory gaps and ten substantive prose contracts remain recorded-problematic; exact producer, lifecycle or permission-policy reasons live in the audit's per-ID review.
+- [ ] Historical ledger records fifty-three exact inventory gaps and ten substantive prose contracts; exact reasons live in the audit's per-ID review. Literal fixture later became 52 after row135 removal; current observed 51 non-OK rows and pending row134-only reconciliation are recorded below, not a new owning PASS.
 - [x] Apply the merged 8.2.5 register; its six removals supersede six 8.2.0 publication gaps with bounded absence coverage.
 - [ ] Inherited 12.0.5, 12.0.7 and 12.1.0 saved-extract reproduction failures remain unchanged, as in the completed 8.3.0 audit.
 
@@ -21,7 +21,15 @@ Audit Warcraft Wiki page 533235 revision 5142162 against current retail. Source:
 
 `8645aaf0a` implements complete DoubleStatusBar26 / TextureAndText19 projections; `a62c81768` registers both and removes only `wt-global-api-C_UIWidgetManager.GetTextureAndTextVisualizationInfo-135` from known gaps. Requested ledger reconciliation is **54→53**; literal committed JSON arrays instead contain **53→52** entries across `a62c81768^`→`a62c81768`. This discrepancy is retained, not silently normalized or represented as a fresh sweep PASS. Historical counts below retain their original proof scope.
 
-Row134 (`GetTextureAndTextRowVisualizationInfo`) is unchanged. DoubleStatusBar has zero evidenced publication rows; none invented. [TextureAndText owner](ui-widget-texture-and-text.md) and [DoubleStatusBar owner](ui-widget-double-status-bar.md) retain observed Retail RED4 PASS /8 FAIL, initial absence-only4 PASS, synthetic-fallback distinction and pending independent classification. Source is implemented but unverified: no behavioral GREEN, native/earlier availability UNKNOWN, no completion claim.
+Row134 (`GetTextureAndTextRowVisualizationInfo`) was unchanged at this historical checkpoint; current observation follows below. DoubleStatusBar has zero evidenced publication rows; none invented. [TextureAndText owner](ui-widget-texture-and-text.md) and [DoubleStatusBar owner](ui-widget-double-status-bar.md) retain observed Retail RED4 PASS /8 FAIL, initial absence-only4 PASS, synthetic-fallback distinction and pending independent classification. Source is implemented but unverified: no behavioral GREEN, native/earlier availability UNKNOWN, no completion claim.
+
+## Row134 owning observation — 2026-10-14
+
+Original owning sweep at `c35ddb7ed`, against the unchanged 52-gap fixture, emitted **193 unique observed rows: 142 OK / 51 non-OK**. Historical outcome remains **FAIL, exit 1**. Raw failure reports no new gaps and exactly one resolved/stale gap: `wt-global-api-C_UIWidgetManager.GetTextureAndTextRowVisualizationInfo-134`; its emitted observation is `raw=function; lookup=function`, OK.
+
+`bb9ea16fe` removes only that one fixture line, yielding the literal **51**-entry expected-gap array. After-reconciliation rerun remains pending; neither observed row presence nor expected 51 establishes owning PASS. Historical row135-only 53→52 reconciliation and earlier ledger discrepancy above remain unchanged.
+
+[Row contract](texture-and-text-row.md) owns behavior proof: independent PTR at `7f44eb773` passes eight unique cases, exit 0, including actual cached consumer and host secrets; earlier Retail eight row cases plus three controls remain separate. Publication presence is not those behavioral gates. Ordinary CLI at `c35ddb7ed` emitted `[]`, exit 0, with addons/SavedVariables disabled and CASC off; independent full diagnostic gate remains pending, not global startup-clean proof. Source compile: 20.48s, 741 records, six warnings, peak 4,762,271,744 bytes below 8G high; no causation inferred. No native/cache-byte/executable-byte authentication or parent closure.
 
 ## Tests
 

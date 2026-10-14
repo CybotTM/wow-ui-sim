@@ -85,7 +85,7 @@ Bounded saved first GREEN at `a62c81768` (`widget-two-retail-first-green-current
 
 Current bounded Retail/PTR runtime, secret-wrapper behavior, normal diagnostics and final format/default-check proof are recorded in the owning contracts above:17 primary PASS per profile (widget14 including security2 + controls3), separate Retail owning sweep1, no PTR owning-sweep credit. Shared registration is not native/earlier-profile availability. Historical first GREEN15 and zero-launch failures remain separate; no all-seven/render/native/full-parent closure.
 
-[8.2.0 owner](../../specs/patch-8-2-0-publication-sweep.md#widget-producer-source-checkpoint--2026-10-14) retains known publication-array reconciliation **53→52, row135 only**. Row134 unchanged; DoubleStatusBar has zero evidenced publication rows, none invented.
+[8.2.0 owner](../../specs/patch-8-2-0-publication-sweep.md#widget-producer-source-checkpoint--2026-10-14) retains known publication-array reconciliation **53→52, row135 only**. Row134 was unchanged at that checkpoint; its later owning observation is linked below. DoubleStatusBar has zero evidenced publication rows, none invented.
 
 ### TextWithSubtext scaffold checkpoint — 2026-10-14
 
@@ -105,11 +105,15 @@ The [manager checkpoint](../../specs/ui-widget-manager-state.md#textwithsubtext-
 
 Genuine pre-projector Retail RED at `89dca152d` remains **1 PASS / 7 FAIL**; ambiguous historical container-flush failure does not prove injection or activation. Independent saved Retail runtime at `46f33b1c8` confirms **8/8 unique PASS, zero FAIL, exit 0**; nested child summaries are nonadditive. Bounded evidence reaches actual cached normal-feed activation/update/hidden release/reacquisition/membership removal/live unregister, fresh nested snapshots and isolation, exact fractional/required-number selectors, and actual host-secret denial/preservation/secure recovery. No substituted vendor handlers; bounded-out texture kits, animations, effects and timers gain no coverage.
 
-Three unchanged Retail sibling controls independently PASS separately from the eight row cases. PTR no-run compilation succeeded, but fresh CPU/memory-pressure admission denied sealing/runtime; no PTR behavior credit. Format/default check, normal diagnostics, owning sweep and whole-TEXT publication remain pending. Six compile manifest warnings remain retained. Native/render parity, historical cache-byte authentication, independent executable-byte authentication and broad-parent acceptance remain unproved; source PASS and saved Retail PASS do not close those gates.
+Three unchanged Retail sibling controls independently PASS separately from the eight row cases. Historical PTR CPU/memory-pressure admission denial and successful no-run compile remain retained. Later independent saved PTR first-runtime gate at `7f44eb773` confirms **8/8 unique PASS, zero FAIL, exit 0**, including actual profile-cached consumer lifecycle/live nested-pool unregister and host-secret behavior. Nested child summaries are nonadditive; earlier Retail8+3 is separate, not added to PTR totals.
+
+[Owning 8.2.0 observation](../../specs/patch-8-2-0-publication-sweep.md#row134-owning-observation--2026-10-14) records original `c35ddb7ed` sweep against unchanged52 fixture: **193 unique rows, 142 OK / 51 non-OK; FAIL, exit 1**. No new gaps; row134 alone resolved with `raw=function; lookup=function`. `bb9ea16fe` removes only that fixture line, yielding the literal expected51 array. Reconciled rerun remains pending, not owning PASS. Publication presence is separate from eight behavioral gates.
+
+Ordinary CLI at `c35ddb7ed` has raw `[]`, exit0, under normal startup without addons/SavedVariables and with CASC off; independent full diagnostic gate remains pending, not global startup-clean proof. The [row ledger](../../specs/texture-and-text-row.md#known-gaps-current-cycle) retains separate compile measurements (current20.48s/741 records/six warnings/peak4,762,271,744 bytes below8G high), without causal inference. Format/default check and whole-TEXT publication remain pending. Native/render parity, cache-byte authentication, independent executable-byte authentication and broad-parent acceptance remain unproved.
 
 ## Sources
 
-- [TextureAndTextRow contract](../../specs/texture-and-text-row.md) — single-source supplied-row contract, historical RED, bounded independent Retail/source gates and pending acceptance.
+- [TextureAndTextRow contract](../../specs/texture-and-text-row.md) — single-source supplied-row contract, historical RED, bounded independent Retail/PTR/source gates and pending owning/diagnostic acceptance.
 
 - [TextWithSubtext projection](../../../src/c_api/ui_widget_manager/text_with_subtext.rs) — complete supplied producer; bounded profile evidence and remaining limits owned by manager checkpoint.
 
