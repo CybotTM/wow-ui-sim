@@ -68,7 +68,7 @@ CLI0, final `[]`, CLEAN and zero observed Lua errors; 291 Blizzard addons and 15
 
 ## Seven-profile saved runtime matrix — 2026-10-14
 
-Source association is report metadata, not authenticated source inputs. Repository HEAD is `18a49459a014d1e212b72d4163f9151b96d71fa1`; the separate compiled revisions below are not interchangeable with HEAD.
+Source association is report metadata, not authenticated source inputs. Source/check checkpoint is `18a49459a014d1e212b72d4163f9151b96d71fa1`; the separate compiled revisions below are not interchangeable with that checkpoint or later documentation commits.
 
 | Profile | Compiled source association | Item / vehicle | Store / bag / selected-unit | Independent saved gate |
 |---|---|---|---|---|
