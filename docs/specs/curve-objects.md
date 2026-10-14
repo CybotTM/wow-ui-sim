@@ -23,7 +23,7 @@
 
 ## Current numeric ordering regression — 2026-10-14
 
-Saved suite `983f02fbf` fails the original EncounterTimeline consumer at `UpdateIconAlpha` → `SetAlpha`. Source adds `(3,0.6),(2,1),(1,1),(0,1),(4,1)`; the insertion-order evaluator's first segment yields1.4 at x=1. `tests/curve_point_order.rs` retains these actual numeric inputs, exact node/interior values and Copy isolation. New targeted RED/GREEN execution remains pending; no vendor or alpha-range policy change is proposed.
+Saved suite `983f02fbf` fails the original EncounterTimeline consumer at `UpdateIconAlpha` → `SetAlpha`. Source adds `(3,0.6),(2,1),(1,1),(0,1),(4,1)`; the insertion-order evaluator's first segment yields1.4 at x=1. `tests/curve_point_order.rs` retains these actual numeric inputs, exact node/interior values and Copy isolation. Targeted default Retail RED at `5c5429756` executes2/2 cases and fails both: node x=1 is1.4 instead of1; Copy fails its initial interpolated-value assertion before later insertion/isolation checks. First resource admission denied with zero launch; fresh retry executesexit101. Numeric `AddPoint` now inserts by ascending x using binary search; color insertion order, evaluator formulas and alpha-range policy are unchanged. Current-source GREEN and original consumer proof remain pending; no vendor changes.
 
 ## Proof boundary
 

@@ -72,10 +72,28 @@ local function install_object_access(prototype, methods, state)
     mt.__metatable = false
 end
 
+local function insert_numeric_point(points, x, y)
+    local point = {x=x or 0, y=y or 0}
+    local low, high = 1, #points + 1
+    while low < high do
+        local middle = math.floor((low + high) / 2)
+        if points[middle].x <= point.x then
+            low = middle + 1
+        else
+            high = middle
+        end
+    end
+    table.insert(points, low, point)
+end
+
 local function install_curve_methods(methods, state, create, isColor)
     function methods:AddPoint(x, y)
         local s = state(self)
-        s.points[#s.points + 1] = {x=x or 0, y=copy_value(y or 0, isColor)}
+        if isColor then
+            s.points[#s.points + 1] = {x=x or 0, y=copy_value(y or 0, true)}
+        else
+            insert_numeric_point(s.points, x, y)
+        end
     end
     function methods:ClearPoints() state(self).points = {} end
     function methods:SetType(value) state(self).curveType = value or 0 end
