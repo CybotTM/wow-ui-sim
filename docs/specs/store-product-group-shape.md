@@ -20,8 +20,8 @@ Concrete fresh demo values above are explicit simulator policy, not claims about
 
 ## Implementation inventory
 
-- `src/lua_api/env_init/runtime_surface_bootstrap.lua`: existing demo Lua table and queries; unchanged by this stage.
-- `src/c_api/`: main implements the small native group query over the existing Lua table using the existing published `__wow_store_state` Lua table; no producer included here and no new module name assumed.
+- `src/lua_api/env_init/runtime_surface_bootstrap.lua`: existing demo Lua table remains published as `__wow_store_state`; replaced Lua GetProductGroups definitions are removed.
+- `src/c_api/c_store_secure.rs`: native group query reads the existing table and projects IDs only on Mists; other profiles retain their record path. No duplicated catalog or initialization bridge.
 
 ## Tests asserting this spec
 
@@ -30,8 +30,8 @@ Concrete fresh demo values above are explicit simulator policy, not claims about
 
 ## Known gaps (current cycle)
 
-- [ ] Run Mists preproducer RED; staged assertion must fail with `Mists GetProductGroups[1] must be numeric`, before any group/product lookup.
-- [ ] Run Retail/PTR record preservation checks and postproducer Mists GREEN.
+- [x] Shared Mists preproducer normal-Lua fixture fails at `Mists GetProductGroups[1] must be numeric` (CLI1), before group/product lookups. Authored Rust case remains unexecuted; independent existing-artifact audit pending.
+- [ ] Postproducer Rust/runtime GREEN and modern record preservation. Preproducer normal-Lua Retail/PTR record/lookup fixture completed with marker and `[]`; no Store UI acceptance follows.
 - [ ] Evaluate separate public UI proposal only after API shape passes; it is not current API-test acceptance.
 
 ## Out of scope

@@ -453,9 +453,6 @@ C_StoreSecure.GetProductList = function()
   end
   return true
 end
-C_StoreSecure.GetProductGroups = function()
-  return __wow_store_state.productGroups
-end
 C_StoreSecure.GetProductGroupInfo = function(groupID)
   return __wow_store_state.productGroupInfo[groupID]
 end
@@ -884,9 +881,6 @@ if rawget(C_StoreSecure, "GetCurrencyInfo") == nil then
       },
     }
   end
-end
-if rawget(C_StoreSecure, "GetProductGroups") == nil then
-  function C_StoreSecure.GetProductGroups() return __wow_store_product_groups end
 end
 if rawget(C_StoreSecure, "GetProductGroupInfo") == nil then
   function C_StoreSecure.GetProductGroupInfo(groupID)

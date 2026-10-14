@@ -188,6 +188,7 @@ pub mod c_spell_classification;
 pub(crate) mod c_spell_counts;
 pub mod c_spell_diminish;
 pub mod c_stable_info;
+mod c_store_secure;
 pub mod c_string_util;
 mod c_string_util_decimal;
 pub mod c_summon_info;
