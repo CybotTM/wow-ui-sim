@@ -38,7 +38,7 @@ Retained full format and default Retail library/six-bin check pass: 733 JSON rec
 
 ## Known gaps (current cycle)
 
-- [ ] Publish and independently verify privacy-safe evidence retention.
+- [ ] Independently verify the [15-text public evidence packet](../../data/patch-api/evidence/texture-draw-layer-validation-2026-10-13/README.md), published with 28 ordered literals and whole-text preservation. Copy/privacy gate pending; prior rejected normalization/regex staging is not this packet.
 - [ ] Fresh earlier-profile coverage and native/render/full-parent acceptance remain open.
 
 ## Out of scope
