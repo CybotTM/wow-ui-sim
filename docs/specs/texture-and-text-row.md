@@ -1,6 +1,6 @@
 # TextureAndTextRow visualization
 
-Contract for supplied type-15 row inputs and `C_UIWidgetManager.GetTextureAndTextRowVisualizationInfo`. Passive DTO, empty map, normal feed and tests are implemented under `src/c_api/ui_widget_manager/`; the modeled getter/projector is not implemented yet. All behavioral requirements below remain unverified, including those with authored tests. See [widget manager state](../wiki/systems/ui-widget-manager-state.md) for surrounding system design.
+Contract for supplied type-15 row inputs and `C_UIWidgetManager.GetTextureAndTextRowVisualizationInfo`. Passive DTO, empty map, normal feed and tests are implemented under `src/c_api/ui_widget_manager/`; the modeled getter now projects complete fresh snapshots through shared namespace registration. GREEN behavioral acceptance remains unverified. See [widget manager state](../wiki/systems/ui-widget-manager-state.md) for surrounding system design.
 
 ## What it must do
 
@@ -23,20 +23,23 @@ Contract for supplied type-15 row inputs and `C_UIWidgetManager.GetTextureAndTex
 
 ## Implementation inventory
 - `src/c_api/ui_widget_manager/texture_and_text_row_record.rs`: complete outer/entry DTOs, no Default record.
-- `src/c_api/ui_widget_manager.rs`: row module and DTO exports only.
+- `src/c_api/ui_widget_manager.rs`: row module declaration and DTO exports.
 - `src/c_api/ui_widget_manager/inputs.rs`: initially empty texture_and_text_row map.
-- `src/c_api/ui_widget_manager/feed.rs`: row variant, type 15 and supply arm only.
+- `src/c_api/ui_widget_manager/feed.rs`: row variant, type 15 and normal supply arm.
+- `src/c_api/ui_widget_manager/texture_and_text_row.rs`: complete fresh outer/array/entry projection; nullable width omitted only when absent.
+- `src/c_api/ui_widget_manager/queries.rs`: shared required-number/secret selector policy and namespace registration.
 
 ## Tests asserting this spec
-- `tests/ui_widget_texture_and_text_row.rs`: six authored, unexecuted API/snapshot/feed/cache cases.
+- `tests/ui_widget_texture_and_text_row.rs`: six authored API/snapshot/feed/cache cases executed in saved pre-projector Retail RED: absent-only control PASS, five FAILs. Current-projector GREEN remains unexecuted.
 - `tests/widget_row_records/fixtures.rs`: complete concrete row fixtures and recursive assertions.
-- `tests/ui_widget_texture_and_text_row_security.rs`: two authored, unexecuted selector/security cases; Retail/PTR file gate, additional retail-12-1-0 gate for host secrets.
+- `tests/ui_widget_texture_and_text_row_security.rs`: two authored selector/security cases executed in saved pre-projector Retail RED, both FAIL; Retail/PTR file gate, additional retail-12-1-0 gate for host secrets. Required-number case failed at the missing argument; host-secret case failed at the initial public populated snapshot before secret wrappers were created. Later selector/security assertions and current-projector GREEN remain unexecuted.
 - `tests/widget_two_records/helpers.rs`: existing unchanged shared numeric/host-secret helpers. Local row observer replaces shallow snapshot observation with deep checks.
 
 ## Known gaps (current cycle)
-- [ ] Freshly admit and observe genuine behavioral RED before modeled getter/projector work. Compile/discovery/cfg errors or omitted cases are not RED; callable nil-returning compatibility behavior is not populated implementation.
-- [ ] Modeled getter/projector/shared registration and behavior/compilation/discovery/RED/GREEN acceptance remain pending. Private source-stage checks are not runtime proof.
+- [x] Saved pre-projector Retail RED at `89dca152d`: eight distinct tests, one absent-only nil-control PASS, seven FAILs, exit 101. Five direct populated cases failed the row-table assertion after the exactly-one-result check; required-number rejection failed at the missing argument. Nested one-case summaries are nonadditive. Independent saved-runtime audit confirms RED only; no new runtime execution.
+- [ ] Cached provider/template checks, actual container/event registration, nonempty membership and absent-row checks were reached in saved RED. The actual-container-count flush failed after ordinary OnUpdate, but identical labels for the pre-injection count=0 and post-injection count=1 flushes leave the failing flush and count/timer predicate ambiguous. Injection and activation are not proved; explicit activation assertions and all later update/hide/reacquire/removal/unregister phases were unreached. Cached vendor bytes/provenance were not independently authenticated.
+- [ ] Current-projector GREEN is unexecuted; cached activation/lifecycle, PTR, format/default check, normal diagnostics and owning publication acceptance remain pending. Saved pre-projector compilation and the absent-only nil control do not prove current populated behavior or runtime acceptance.
 
 ## Out of scope
-- Producer/getter/API-registration implementation before genuine RED; requires later main-owned work.
+- Native and broader profile acceptance are not established by this bounded supplied-record model.
 - Native catalog/default/enum inference, atlas/animation/effect/timer coverage and vendor changes; not part of this bounded scaffold.

@@ -20,6 +20,7 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     super::bars::register(state)?;
     super::double_status_bar::register(state)?;
     super::texture_and_text::register(state)?;
+    super::texture_and_text_row::register(state)?;
     super::discrete::register(state)?;
     super::text_state::register(state)?;
     super::text_with_subtext::register(state)?;

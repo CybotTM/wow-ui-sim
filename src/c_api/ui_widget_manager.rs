@@ -12,6 +12,7 @@ mod double_status_bar;
 mod double_status_bar_record;
 mod texture_and_text;
 mod texture_and_text_record;
+mod texture_and_text_row;
 mod texture_and_text_row_record;
 pub use double_status_bar_record::DoubleStatusBarRecord;
 pub use texture_and_text_record::TextureAndTextRecord;
