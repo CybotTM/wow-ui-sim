@@ -38,6 +38,16 @@ Source `0b365f20e` adds `TargetInfo.has_vehicle_ui`, fifteen existing constructo
 
 `condition_matches` is unchanged and has neither vehicle predicate. Fixture compilation and behavioral RED remain pending; this source checkpoint is not model closure, runtime acceptance or native/default/absent-target/negation evidence. The separate player-only `UnitHasVehicleUI` getter is unchanged. Historical ledgers and receipts remain separate.
 
+## Macro vehicle producer source checkpoint — 2026-10-14
+
+Source `a6b572732` adds five Rust lines in `condition_matches`: `vehicleui` reads the player boolean; `unithasvehicleui` reads the selected player boolean or target/focus snapshot fact through the existing `unit_target_info` resolver. Selector grammar and the separate `UnitHasVehicleUI` API are unchanged. The [owning contract](../../specs/macro-vehicle-ui-conditions.md) is unchanged; behavioral acceptance remains pending. The input-only checkpoint above remains historical.
+
+| Scope | Proof level / remaining boundary |
+|---|---|
+| Preproducer Retail RED at `52fc18f4e` | Five unique cases: 1 PASS, 4 FAIL, exit101. First three positive cases independently FAIL; false/false control PASS. Selected player/focus/implicit-target fixture FAILs on its first supplied row; later three rows unreached. No sixteen-outcome RED or producer acceptance. |
+| Current producer compilation | Observed at source `a6b572732`: 741 JSON records, `build-finished.success=true`, zero `compiler-message` records; stderr contains six manifest deprecations. Duration 3m36s. Independent authentication and runtime proof remain pending; compilation is not runtime acceptance. |
+| Remaining proof | Fresh targeted GREEN and selected-unit preservation pending. Unsupported tokens remain unproved, not out of scope. No native, negation, default or absence semantics established; broader-profile and parent acceptance remain open. |
+
 ## Development proof (historical saved receipts; not rerun in this reconciliation)
 - Source parser RED → GREEN 2/2; current fixture 2/2. Default parser outputs/errors match base on all 77 retained raw inputs; no claim that previously unsupported default parsing now succeeds.
 - Own publication RED exposes two texture gaps → known-gap GREEN 1/1. Impossible-method serialized negative changes two gaps to three and fails exactly as required.

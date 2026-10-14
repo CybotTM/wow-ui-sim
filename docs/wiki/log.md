@@ -1,3 +1,7 @@
+## [2026-10-14] source | Macro vehicle producer checkpoint
+
+[Existing investigation](investigations/patch-3-3-0-api-audit.md#macro-vehicle-producer-source-checkpoint--2026-10-14) records five-line source `a6b572732`, preproducer RED5 (1 PASS/4 FAIL; later three rows unreached), and observed compilation separately from pending independent authentication/runtime proof. Owning contract unchanged; no runtime/native acceptance or new exclusions.
+
 ## [2026-10-14] source | Profile-specific Store group query
 
 [Store checkpoint](investigations/store-secure-pool-constructors.md#store-group-shape--source-checkpoint-2026-10-14) links the [owning contract/status](../specs/store-product-group-shape.md). Modeled getter reads existing Lua backing; only Mists projects IDs. Runtime/Rust/native/UI acceptance remains open.
