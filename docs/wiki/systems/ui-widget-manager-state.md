@@ -87,6 +87,10 @@ Current bounded Retail/PTR runtime, secret-wrapper behavior, normal diagnostics 
 
 [8.2.0 owner](../../specs/patch-8-2-0-publication-sweep.md#widget-producer-source-checkpoint--2026-10-14) retains known publication-array reconciliation **53→52, row135 only**. Row134 unchanged; DoubleStatusBar has zero evidenced publication rows, none invented.
 
+### TextWithSubtext scaffold checkpoint — 2026-10-14
+
+The [manager checkpoint](../../specs/ui-widget-manager-state.md#textwithsubtext-scaffold-checkpoint--2026-10-14) records the complete27-field DTO, empty environment-owned map and normal type25 feed at `66514bf90` / `39a454d09`. Those revisions contain no modeled getter or projection, and have no populated runtime or compile proof. Generic callable/nil fallback is not modeled availability. Completed two-widget evidence above does not cover TextWithSubtext.
+
 ## Sources
 
 - [BulletTextList](../../specs/ui-widget-bullet-text-list.md) — supplied-record contract and revision-scoped proof limits.

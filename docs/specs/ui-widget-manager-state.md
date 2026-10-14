@@ -39,6 +39,12 @@ Production `0745fe84f` supplies full bar producers, HUD selectors and host feeds
 - [Widget architecture](../widget-system.md) — API data is consumed by Lua to create ordinary frames.
 - [Event system](../event-system.md) — event dispatch architecture.
 
+## TextWithSubtext scaffold checkpoint — 2026-10-14
+
+Source `66514bf90` defines the complete passive 27-field `TextWithSubtextRecord`. `39a454d09` exports it and adds an initially empty environment-owned map and normal type25 host-feed storage. No inferred records or demo seeds are added.
+
+These revisions do not implement the modeled getter, projection or query registration. Generic callable/nil fallback is not implementation evidence. Populated query, selector/security and actual cached-consumer behavior remain unproved; no compile or RED/GREEN result is claimed. Completed DoubleStatusBar/TextureAndText evidence remains revision-scoped and separate.
+
 ## Implementation inventory
 
 - `src/c_api/ui_widget_manager.rs` — modeled widget identities and existing ButtonHeader records; exports manager input records.
