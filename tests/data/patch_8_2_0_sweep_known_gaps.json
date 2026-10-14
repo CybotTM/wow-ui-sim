@@ -36,7 +36,6 @@
   "wt-global-api-C_PvP.IsMatchFactional-123",
   "wt-global-api-C_SpellBook.ContainsAnyDisenchantSpell-132",
   "wt-global-api-C_UIWidgetManager.GetTextureAndTextRowVisualizationInfo-134",
-  "wt-global-api-C_UIWidgetManager.GetTextureAndTextVisualizationInfo-135",
   "wt-global-api-C_UIWidgetManager.GetZoneControlVisualizationInfo-136",
   "wt-global-api-C_VoiceChat.IsChannelJoinPending-138",
   "wt-global-api-SetMoveEnabled-142",
