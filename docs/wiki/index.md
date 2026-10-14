@@ -3613,3 +3613,8 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-10] audit | Normal TOC private-table exact bounded PASS
 
 [Proof SSOT](investigations/integrated-source-and-factory-proof-2026-10-09.md#normal-toc-private-table--exact-bounded-pass): saved164122/test9d074f6a8 compile0/source equality, exact reached1/PASS1 exit0, artifact hash/unchanged and fmt0 independently checked; sanitized receipts sealed. Later count-map3c36 separate; no current whole-checkout/bootstrap/native/all-profile acceptance. Docs/evidence only; no builds, operations, delegation or commits.
+
+
+## [2026-10-14] source | Tagged symbolizer protocol
+
+[Performance source checkpoint](investigations/test-suite-performance.md#upstream-tagged-symbolizer-source--2026-10-14) establishes upstream v7.2.10 framing/default5000ms only. Installed-build equivalence and execution cause remain unproved; failed controls retained.

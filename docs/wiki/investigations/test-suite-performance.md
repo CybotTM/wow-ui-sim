@@ -93,3 +93,12 @@ Three additional cases remain integration after failed equivalence probes: cast-
 Independent saved-artifact verification PASS is separate from control FAIL: one immediate-EOF sibling used the prior exact 21-byte comma/address/comma input and GNU addr2line argv. Main exit1, child exit-9, absolute8-second worker deadline; captured27 bytes contain only the zero-address unknown function/location response, no requested-address header. Capture incomplete; no complete-output claim.
 
 Frozen ELF identity reused stored/stat metadata, not new byte authentication. Worker write/flush/close precedes output drain, but no independent milestone proves delivery or child EOF timing. EOF was insufficient within this tested deadline; buffering, OOM, protocol defect, indefinite symbolization failure and perf causality remain unproved. The old first-record warning remains unresolved. Prior persistent timeout and unexecuted-plan checkpoints remain historical; their earlier “no EOF control” statements are not current inventory claims.
+
+
+## Upstream tagged symbolizer source — 2026-10-14
+
+Upstream Linux `v7.2.10` source closes the previously unavailable protocol-source gap, not installed-build equivalence or execution cause. Installed Arch package metadata identifies `7.2.10-1`; its patches/build configuration remain unproved.
+
+[addr2line.c](https://github.com/gregkh/linux/blob/v7.2.10/tools/perf/util/addr2line.c) launches `-e <binary> -a -i -f`, sends a comma/newline handshake, then 16 hex digits/newline/comma/newline requests. Responses contain address/function/location records and a GNU zero-address or LLVM comma sentinel; remaining inline records are drained through that sentinel. [symbol.c](https://github.com/gregkh/linux/blob/v7.2.10/tools/perf/util/symbol.c) sets the default read timeout to 5000 ms; [io.h](https://github.com/gregkh/linux/blob/v7.2.10/tools/lib/api/io.h) applies it to poll before read. Historical effective configuration and whole-request duration are not established.
+
+The independently executed immediate-EOF and persistent controls remain failures with sentinel-only output. Source availability establishes neither child request receipt nor response timing, buffering/OOM/performance causality, a repair, or parent acceptance. No replay follows from this checkpoint.

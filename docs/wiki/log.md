@@ -1974,3 +1974,8 @@ Added [bounded system inventory](systems/ui-widget-manager-state.md) and index l
 ## 2026-10-13 — Separate saved receipts
 
 Linked [Mists](investigations/mists-cast-startup-visibility.md#current-selected-body-receipt--2026-10-13) and [performance](investigations/test-suite-performance.md#separate-current-phase-observation--2026-10-13) owning checkpoints without changing historical payloads.
+
+
+## [2026-10-14] source | Tagged symbolizer protocol
+
+[Performance source checkpoint](investigations/test-suite-performance.md#upstream-tagged-symbolizer-source--2026-10-14) establishes upstream v7.2.10 framing/default5000ms only. Installed-build equivalence and execution cause remain unproved; failed controls retained.

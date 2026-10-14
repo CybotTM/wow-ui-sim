@@ -40,3 +40,6 @@ Test-scoped observations associate existing handler logs with the canonical tale
 No vendor/runtime optimization, production metrics or new runtime configuration. Intervals include helper/error/nested work; summing nested intervals can double-count. Rounded log values and logging overhead are not a CPU profile or exclusive-body measurement. OnUpdate modes/visibility/budget filters still govern actual dispatch. Frozen16-thread full-suite failure and isolated single-case inputs/conditions are not established equivalent; historical/root-cause/full-handoff acceptance remains open.
 
 [Immediate-EOF symbolization control](../wiki/investigations/test-suite-performance.md#separate-immediate-eof-symbolization-control--2026-10-14) also fails its bounded deadline. It supplies no handler-cost attribution or performance-repair proof.
+
+
+[Tagged symbolizer source](../wiki/investigations/test-suite-performance.md#upstream-tagged-symbolizer-source--2026-10-14) closes upstream source availability only, not installed equivalence or performance acceptance.
