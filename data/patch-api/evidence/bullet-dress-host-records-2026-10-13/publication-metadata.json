@@ -1,5 +1,5 @@
 {
-  "selected_text_records": 296,
+  "selected_text_records": 300,
   "transform": "complete UTF-8 TEXT; ordered private literal substitutions then append LF if missing; selected JSON never reserialized",
   "source_scopes": [
     "69f2569cb",
@@ -7,7 +7,7 @@
   ],
   "runtime_gate": "gates-current/runtime/report.md",
   "check_format_gate": "gates-current/check-format/report.md",
-  "public_copy_gate": "pending",
+  "public_copy_gate": "296-record packet additive PASS at dd10be4ff; four retained gate texts awaiting their independent copy gate",
   "entries": [
     {
       "path": "epochs/bullet-dress-owned-retail-red-20261013T234617677640Z/admission.json",
@@ -1488,7 +1488,29 @@
       "path": "gates-current/check-format/proof.json",
       "bytes": 571257,
       "sha256": "f1b6b263abc6da4137e759f2eaa499a57f4172b7942ec913b1c6cfb48e28446c"
+    },
+    {
+      "path": "publication-current/original-privacy-fail/report.md",
+      "bytes": 4087,
+      "sha256": "1347c81f9e1b0cc28d3c37220e057d6ea10fce0f2d6bfcb5be9a58267961870a"
+    },
+    {
+      "path": "publication-current/original-privacy-fail/proof.json",
+      "bytes": 1928952,
+      "sha256": "1e3dce857b3ea9b8e4c8bd24eac16d27278820bdf225b1593f4b7928892cbbd8"
+    },
+    {
+      "path": "publication-current/corrected-overlay-pass/report.md",
+      "bytes": 2393,
+      "sha256": "a78698468da903f8e6967d80fe2209f4813062f0fecc0f97c1dce90fae83709d"
+    },
+    {
+      "path": "publication-current/corrected-overlay-pass/proof.json",
+      "bytes": 1341385,
+      "sha256": "dd1a5650db991b38600c2abc92982ba40dda2cc77289636a21685f85e3d6ac20"
     }
   ],
-  "privacy_correction": "Alternate PTR EditMode account/realm/character values now redacted; original privacy FAIL retained privately; corrected gate pending."
+  "privacy_correction": "Alternate PTR EditMode account/realm/character values now redacted; original privacy FAIL retained privately; corrected gate pending.",
+  "historical_privacy_gate": "publication-current/original-privacy-fail/report.md",
+  "corrected_privacy_gate": "publication-current/corrected-overlay-pass/report.md"
 }
