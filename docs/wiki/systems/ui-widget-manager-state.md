@@ -99,9 +99,17 @@ The [manager checkpoint](../../specs/ui-widget-manager-state.md#textwithsubtext-
 
 [Owning row contract](../../specs/texture-and-text-row.md) records `89dca152d`: complete supplied 18-field DTO with two-field ordered entries, initially empty environment-local map and public type15 typed feed. Only fixedWidth is nullable. Eight authored cases include live row/nested-pool unregister; modeled getter/projector and behavioral RED/GREEN remain unproved; source audit and no-run compilation do not prove behavior. Callable nil compatibility is not populated API or native catalog evidence.
 
+### TextureAndTextRow current bounded checkpoint — 2026-10-14
+
+[Owning row contract](../../specs/texture-and-text-row.md) is the single-source contract and detailed proof ledger; the passive checkpoint above preserves historical input-stage wording. Getter source `398c427fd` projects complete fresh snapshots through shared registration. Independent source/readability gate PASS separately covers that producer and diagnostic-only `46f33b1c8`, which distinguishes lifecycle phases without changing feeds or expected behavior.
+
+Genuine pre-projector Retail RED at `89dca152d` remains **1 PASS / 7 FAIL**; ambiguous historical container-flush failure does not prove injection or activation. Independent saved Retail runtime at `46f33b1c8` confirms **8/8 unique PASS, zero FAIL, exit 0**; nested child summaries are nonadditive. Bounded evidence reaches actual cached normal-feed activation/update/hidden release/reacquisition/membership removal/live unregister, fresh nested snapshots and isolation, exact fractional/required-number selectors, and actual host-secret denial/preservation/secure recovery. No substituted vendor handlers; bounded-out texture kits, animations, effects and timers gain no coverage.
+
+Current reported PTR build is asynchronous/unverified; Retail three controls have raw PASS only, independent gate pending. Format/default check, normal diagnostics, owning sweep and whole-TEXT publication remain pending. Six compile manifest warnings remain retained. Native/render parity, historical cache-byte authentication, independent executable-byte authentication and broad-parent acceptance remain unproved; source PASS and saved Retail PASS do not close those gates.
+
 ## Sources
 
-- [TextureAndTextRow contract](../../specs/texture-and-text-row.md) — passive supplied inputs and authored, unproved cases.
+- [TextureAndTextRow contract](../../specs/texture-and-text-row.md) — single-source supplied-row contract, historical RED, bounded independent Retail/source gates and pending acceptance.
 
 - [TextWithSubtext projection](../../../src/c_api/ui_widget_manager/text_with_subtext.rs) — complete supplied producer; bounded profile evidence and remaining limits owned by manager checkpoint.
 

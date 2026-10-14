@@ -1,3 +1,7 @@
+## [2026-10-14] evidence | TextureAndTextRow bounded Retail checkpoint
+
+[Current manager checkpoint](systems/ui-widget-manager-state.md#textureandtextrow-current-bounded-checkpoint--2026-10-14) adds independent source/saved Retail evidence and pending gates while retaining the historical passive checkpoint.
+
 ## [2026-10-14] evidence | Final983f02 suite FAIL
 
 [Acceptance matrix](investigations/fullsuite-983f02-2026-10-14.md) preserves the terminal three-step failure: integration2, prefork6, library2. Alpha policy/eight resolved rows, numeric curve ordering and sourcedzone372610 repair independently pass49 current Retail cases;5505 older records/all27525 field values preserved. Original fixtures unchanged; startup diagnostics, native/other-profile/currentbroad gaps retained. No historical PASS substitution.

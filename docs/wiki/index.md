@@ -1,3 +1,7 @@
+## [2026-10-14] evidence | TextureAndTextRow bounded Retail checkpoint
+
+[Current manager checkpoint](systems/ui-widget-manager-state.md#textureandtextrow-current-bounded-checkpoint--2026-10-14) links bounded Retail/source evidence, historical RED and remaining acceptance gates.
+
 ## [2026-10-14] source | TextureAndTextRow passive scaffold
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#textureandtextrow-passive-checkpoint--2026-10-14) links owning input-stage contract; runtime acceptance pending.
