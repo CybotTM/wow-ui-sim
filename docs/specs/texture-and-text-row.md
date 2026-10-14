@@ -43,7 +43,9 @@ Contract for supplied type-15 row inputs and `C_UIWidgetManager.GetTextureAndTex
 - [x] Other seven current saved Retail cases complete absent-only nil, complete fresh nested snapshots/mutation isolation, whole replacement/retained snapshots, nullable-width transitions, two-environment isolation, required-number/exact-fractional selectors, and actual host-secret untainted access/tainted denial/wrapper preservation/caller-taint restoration/secure recovery assertions. This is bounded simulator behavior, not native parity.
 - [ ] Compile context supplied for this observation: 741 records, six manifest warnings; peak 8,591,069,184 bytes exceeded the 8G high threshold by 1,134,592 bytes. Compilation is not behavioral acceptance.
 - [x] Independent saved-Retail runtime gate PASS for eight unique cases; nested repeats remain nonadditive. Source/readability gate PASS separately covers projector and diagnostic-only follow-up.
-- [ ] Sibling controls, PTR, format/default checks, normal diagnostic and owning publication remain unexecuted; broader acceptance remains open. Fresh joint admission for PTR compilation plus Retail controls was denied by host memory pressure and projected shared-memory budget; no workload launched.
+- [x] Three unchanged Retail lifecycle sibling controls independently PASS at the same behavior source; separate from the eight row cases. Nested repeats are nonadditive.
+- [ ] PTR no-run compilation at `7f44eb773` succeeded: 741 records, six manifest warnings, exit 0, 5m36s; peak 8,590,278,656 exceeded 8G high by 344,064 bytes, below 9G max. PTR sealing/runtime remains unexecuted after fresh CPU and memory-pressure admission denial. Historical joint denial is retained; later admission allowed this compile and the Retail controls.
+- [ ] Format/default checks, normal diagnostic, owning publication and whole-TEXT publication remain pending; broader acceptance stays open.
 
 ## Out of scope
 - Native and broader profile acceptance are not established by this bounded supplied-record model.
