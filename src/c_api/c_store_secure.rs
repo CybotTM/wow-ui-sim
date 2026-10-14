@@ -11,7 +11,7 @@ use rilua::{LuaResult, Val};
 
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = super::ensure_namespace(state, "C_StoreSecure")?;
-    let trace_inputs = crate::lua_api::env_events::event_dispatch_trace_enabled("OnEvent");
+    let trace_inputs = crate::lua_api::event_dispatch_trace_enabled("OnEvent");
     super::set_global_val(state, "__wow_trace_store_inputs", Val::Bool(trace_inputs));
     table_set_rust_fn_static(state, namespace, "GetProductGroups", get_product_groups)
 }

@@ -76,6 +76,7 @@ pub(crate) mod workarounds_editmode;
 #[cfg(any(feature = "retail-12-1-5", feature = "client-wowforever", test))]
 pub(crate) use env::WowLuaAppData;
 pub use env::WowLuaEnv;
+pub(crate) use env_events::event_dispatch_trace_enabled;
 pub use globals::global_frames::hide_runtime_hidden_frames;
 pub use layout::{
     LayoutRect, anchor_position, compute_frame_rect, frame_position_from_anchor, get_parent_depth,
