@@ -92,21 +92,28 @@ fn assert_dimension_boundaries(env: &WowLuaEnv) {
         (1.0, 0.5, 1.0, 1.0),
         (206.25, 73.75, 206.25, 73.75),
     ] {
-        let mut record = fixtures::updated();
-        record.widget_width = width;
-        record.widget_height = height;
-        fixtures::supply(env, record);
-        assert_phase_counts(
-            env,
-            &format!("dimension boundary width={width}, height={height}"),
-            1,
-            1,
-        );
-        assert_lua(
-            env,
-            "supplied dimensions versus actual consumer bounds",
-            &format!(
-                r#"
+        assert_dimension_boundary(env, (width, height), (expected_width, expected_height));
+    }
+}
+
+fn assert_dimension_boundary(env: &WowLuaEnv, supplied: (f64, f64), expected: (f64, f64)) {
+    let (width, height) = supplied;
+    let (expected_width, expected_height) = expected;
+    let mut record = fixtures::updated();
+    record.widget_width = width;
+    record.widget_height = height;
+    fixtures::supply(env, record);
+    assert_phase_counts(
+        env,
+        &format!("dimension boundary width={width}, height={height}"),
+        1,
+        1,
+    );
+    assert_lua(
+        env,
+        "supplied dimensions versus actual consumer bounds",
+        &format!(
+            r#"
             assert(FixtureContainer.widgetFrames[762201] == FixtureFrame)
             AssertSpacerFrame(FixtureFrame, {expected_width}, {expected_height}, 'spacer-contract-731')
             local current = FixtureGetter(762201)
@@ -114,9 +121,8 @@ fn assert_dimension_boundaries(env: &WowLuaEnv) {
             assert(current.widgetTag == 'updated-spacer-tag')
             AssertSuppliedSnapshot(SavedSpacerSnapshot)
         "#
-            ),
-        );
-    }
+        ),
+    );
 }
 
 fn hide_and_reacquire(env: &WowLuaEnv) {
