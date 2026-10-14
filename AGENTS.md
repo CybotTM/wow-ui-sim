@@ -67,6 +67,7 @@ Follow the workflow in `SCHEMA.md`: check existing pages first (update > create)
 - Use `temporary` workarounds for gaps that should be replaced by a modeled system; name the missing backing system in comments or tests. Use `permanent` workarounds only for intentionally unsupported domains with a documented rationale.
 - Do not add new modules to the base `src/lua_api/globals/` directory as a classification escape hatch. Before moving anything out of `c_api`, decide whether it is real modeled Lua API, temporary workaround, or permanent unsupported-scope workaround.
 - When a `C_*` function is missing or wrong, default to implementing the backing system or state model. Do not reach for shims just to satisfy a failing test.
+- Do not infer C API implementation from callability alone; inspect raw namespace registration and populated behavior ([namespace lookup](docs/wiki/systems/ui-widget-manager-state.md)).
 - Use **temporary shims** only as explicit stopgaps with a clear retirement path. Keep them isolated and named as temporary.
 - Use **permanent shims** only for intentionally unsupported domains with a documented rationale. The existing 3D/model gap is the baseline example, not the default pattern.
 - Do not hide the importance of the C API behind file placement, wrappers, or "just move it under globals" refactors. Preserve the architectural boundary in both module layout and language.
