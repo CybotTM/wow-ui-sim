@@ -7,8 +7,10 @@ fn run_draw_layer_contract(mode: &str) {
     let env = WowLuaEnv::new().expect("fresh texture draw-layer environment");
     env.exec(&format!("drawLayerContractMode = {mode:?}"))
         .expect("select texture draw-layer contract case");
-    env.exec(include_str!("texture_draw_layer_validation/ordinary_names.lua"))
-        .expect("ordinary texture draw-layer contract");
+    env.exec(include_str!(
+        "texture_draw_layer_validation/ordinary_names.lua"
+    ))
+    .expect("ordinary texture draw-layer contract");
 }
 
 #[test]
