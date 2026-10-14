@@ -1,3 +1,7 @@
+## [2026-10-14] source | TextWithSubtext producer after populated RED
+
+[Manager checkpoint](../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14) records `e37f5426a` complete27 projection/shared selector policy after independent Retail1 PASS/7 FAIL. Cached activation was not reached; producer GREEN, startup/checks and broader acceptance remain pending.
+
 ## [2026-10-14] evidence | Terminal broad run independently accounted
 
 [Suite owner](investigations/fullsuite-983f02-2026-10-14.md#terminal-broad-run-4fc115b93--2026-10-14): `4fc115b93` integration11039 PASS/19 unidentified skips, prefork2324 primary+4 supplemental PASS, lib1999 PASS. Warnings and historical983 FAIL preserved; later TextWithSubtext and broader acceptance remain separate.

@@ -8,6 +8,10 @@ Evidence summary: 2026-10-12. Counts denote executed simulator cases at the link
 
 Initial4 PASS was not RED; genuine populated RED4 PASS/8 FAIL and first GREEN15 (not16, omitted sweep) remain historical. [8.2.0 owner](../../specs/patch-8-2-0-publication-sweep.md#widget-producer-source-checkpoint--2026-10-14) removes row135 only,53→52; row134 remains. [Historical983 FAIL and bounded public packet](../investigations/fullsuite-983f02-2026-10-14.md) remain separate from the independently accounted [terminal broad run](../investigations/fullsuite-983f02-2026-10-14.md#terminal-broad-run-4fc115b93--2026-10-14) at `4fc115b93`: integration11039 PASS/19 unidentified skips, prefork2324 primary plus4 supplemental PASS, lib1999 PASS; warnings and historical983 FAIL remain preserved. This run does not cover later TextWithSubtext changes. Existing accepted preview is unchanged; provider-stream/native/credit unknowns and full-parent closure remain separate.
 
+## TextWithSubtext — source and preproduction RED, 2026-10-14
+
+[Manager owner](../../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14): `e37f5426a` complete27-field projection/shared selector policy. Independent Retail `0a3a5ac20` RED1 PASS/7 FAIL; consumer stopped before cached setup. Producer GREEN, startup/checks and broader acceptance remain separate and pending.
+
 ## Seven-profile coverage
 
 | Configuration | Retained simulator runtime proof | Compile/source proof | Remaining boundary |

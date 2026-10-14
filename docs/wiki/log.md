@@ -2000,3 +2000,7 @@ Updated [manager inventory](systems/ui-widget-manager-state.md#doublestatusbar--
 ## [2026-10-14] evidence | Terminal broad run independently accounted
 
 [Suite owner](investigations/fullsuite-983f02-2026-10-14.md#terminal-broad-run-4fc115b93--2026-10-14) records `4fc115b93` integration11039 PASS/19 unidentified skips, prefork2324 primary+4 supplemental PASS, lib1999 PASS, exact argv and sampled resource limits. Warnings, historical983 FAIL and artifact-identity limits preserved; later TextWithSubtext and broader acceptance remain separate.
+
+## [2026-10-14] source | TextWithSubtext producer after populated RED
+
+[Manager owner](../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14) records `e37f5426a` complete27 projection/shared selector policy after independent Retail1 PASS/7 FAIL. Cached activation was not reached; producer GREEN, startup/checks and broader acceptance remain pending.

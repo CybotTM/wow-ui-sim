@@ -91,7 +91,13 @@ Current bounded Retail/PTR runtime, secret-wrapper behavior, normal diagnostics 
 
 The [manager checkpoint](../../specs/ui-widget-manager-state.md#textwithsubtext-scaffold-checkpoint--2026-10-14) records the complete27-field DTO, empty environment-owned map and normal type25 feed at `66514bf90` / `39a454d09`. Those revisions contain no modeled getter or projection, and have no populated runtime or compile proof. Generic callable/nil fallback is not modeled availability. Completed two-widget evidence above does not cover TextWithSubtext.
 
+### TextWithSubtext producer checkpoint — 2026-10-14
+
+[Manager checkpoint](../../specs/ui-widget-manager-state.md#textwithsubtext-producer-checkpoint--2026-10-14) and [owning contract](../../specs/ui-widget-text-with-subtext.md) record source `e37f5426a` and independently accepted preproduction Retail RED: control1 PASS / six populated-getter and one selector FAIL. Consumer stopped before cached setup. Historical scaffold remains unchanged; producer GREEN, startup and final checks are pending, not supplied by adjoining-provider receipts.
+
 ## Sources
+
+- [TextWithSubtext projection](../../../src/c_api/ui_widget_manager/text_with_subtext.rs) — complete supplied producer; runtime pending.
 
 - [BulletTextList](../../specs/ui-widget-bullet-text-list.md) — supplied-record contract and revision-scoped proof limits.
 

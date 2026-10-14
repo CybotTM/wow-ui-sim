@@ -45,6 +45,12 @@ Source `66514bf90` defines the complete passive 27-field `TextWithSubtextRecord`
 
 These revisions do not implement the modeled getter, projection or query registration. Generic callable/nil fallback is not implementation evidence. Populated query, selector/security and actual cached-consumer behavior remain unproved; no compile or RED/GREEN result is claimed. Completed DoubleStatusBar/TextureAndText evidence remains revision-scoped and separate.
 
+## TextWithSubtext producer checkpoint — 2026-10-14
+
+[Owning contract](ui-widget-text-with-subtext.md): `e37f5426a` adds shared registration and a complete27-field projection (20 numbers, six strings, one boolean). The getter clones supplied state, releases its borrow, then roots a fresh Lua table while populating fields. Shared numeric/secret validation runs before lookup; an absent numeric ID returns one nil. No inferred catalog or demo seeds.
+
+Independent preproduction Retail RED at `0a3a5ac20`: one unknown-ID control PASS / seven FAIL, comprising six populated-getter failures and one selector-validation failure. Consumer stopped before cached setup; activation/lifecycle were not reached. Producer GREEN, startup and final checks remain pending. Historical scaffold and adjoining-provider evidence remain separate; broader acceptance stays open.
+
 ## Implementation inventory
 
 - `src/c_api/ui_widget_manager.rs` — modeled widget identities and existing ButtonHeader records; exports manager input records.
@@ -53,6 +59,7 @@ These revisions do not implement the modeled getter, projection or query registr
 - `src/c_api/ui_widget_manager/bars.rs` — full supplied bar snapshot producers, including fresh StatusBar partition arrays; five bar/HUD query cases passed.
 - `src/c_api/ui_widget_manager/hud.rs` — four live `f64` selectors, exactly one numeric return each, with default-zero model policy; bounded query and actual HUD OnLoad proof.
 - `src/c_api/ui_widget_manager/queries.rs` — registration calls both implemented `bars` and `hud` modules.
+- `src/c_api/ui_widget_manager/text_with_subtext_record.rs` / `text_with_subtext.rs` — complete27-field supplied record and fresh projection, shared registration, owned input map and normal type25 feed; post-projection runtime pending.
 - `src/c_api/ui_widget_manager/feed.rs` — `WidgetVisualization` integration for StatusBar type2 and CaptureBar type1; actual bar-consumer adaptation uses host feeds instead of direct state changes or manual events.
 - `src/c_api/ui_widget_manager/fixtures.rs` — existing demo initialization. The old PowerBar bootstrap is removed without fallback in the new implementation scope.
 - `src/lua_api/state/sim_state.rs` — environment-owned manager, ButtonHeader, and Prey input state.
