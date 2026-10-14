@@ -96,7 +96,6 @@
   "wt-global-api-C_TradeSkillUI.SetOnlyShowAvailableForOrders-305",
   "wt-global-api-C_TradeSkillUI.SetSourceTypeFilter-306",
   "wt-global-api-C_Traits.GetTraitSystemWidgetSetID-308",
-  "wt-global-api-C_UIWidgetManager.GetTextWithSubtextWidgetVisualizationInfo-309",
   "wt-global-api-C_WeeklyRewards.ShouldShowFinalRetirementMessage-311",
   "wt-global-api-C_WeeklyRewards.ShouldShowRetirementMessage-312",
   "wt-global-api-GetContainerItemID-353",

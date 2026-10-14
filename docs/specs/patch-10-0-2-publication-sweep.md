@@ -4,7 +4,7 @@ Account for Warcraft Wiki page 303146, revision 2926754 (2023-01-27T02:58:55Z), 
 
 ## What it must do
 
-- [x] Probe all 416 inventory occurrences with all 24 chronological later registers, 10.0.5 through 12.1.0; require exactly 149 reviewed publication gaps.
+- [x] Probe all 416 inventory occurrences with all 24 chronological later registers, 10.0.5 through 12.1.0; require the exact reviewed gap set (currently148 after the TextWithSubtext follow-up below).
 - [x] Keep twenty unused namespace members absent under repeated lookup in bare and unmodified cached Game environments. Preserve modeled crafting-order/item-tooltip successor publication.
 - [x] Preserve Mists legacy namespace lookup. The existing retail epoch module gate excludes Wrath, Mists, Era and Anniversary; no 10.x epoch is introduced.
 - [x] Detect an exact one-row negative control: UnitTokenFromGUID added → removed produces only that new failure, 149 → 150.
@@ -33,9 +33,13 @@ Account for Warcraft Wiki page 303146, revision 2926754 (2023-01-27T02:58:55Z), 
 - `tests/patch_10_0_2_classic_surfaces.rs` — Mists legacy lookup preservation.
 - `tools/test_gen_patch_wikitext_register.py` — unlinked removed CVar identity, line and cardinality.
 
+## TextWithSubtext follow-up — 2026-10-14
+
+[TextWithSubtext](ui-widget-text-with-subtext.md) owns separate complete supplied-record and actual cached Retail/PTR lifecycle evidence. The normal Retail pre-reconciliation sweep observed416 rows/148 non-OK IDs; the149-item expected set differed only by `wt-global-api-C_UIWidgetManager.GetTextWithSubtextWidgetVisualizationInfo-309`, now published. Reconcile that exact row only; post-reconciliation replay remains pending. Publication is not signature/output/security/native parity, and historical outcomes are not rewritten.
+
 ## Known gaps
 
-- [ ] 149 publication gaps; [per-ID review](../../data/patch-api/evidence/10.0.2-session-2026-10-07/p1002-gap-review.json) owns reasons and source/cached references.
+- [ ] 148 current publication gaps; historical149-item review remains preserved;  [per-ID review](../../data/patch-api/evidence/10.0.2-session-2026-10-07/p1002-gap-review.json) owns reasons and source/cached references.
 - [ ] 156 substantive extract occurrences; [literal scout](../../data/patch-api/evidence/10.0.2-session-2026-10-07/p1002-extract-scout.json) records every line and proof boundary.
 
 ## Out of scope

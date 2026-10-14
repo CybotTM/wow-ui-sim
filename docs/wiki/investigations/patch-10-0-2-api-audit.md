@@ -20,6 +20,10 @@ Discovery 247 OK / 169 gaps. Final 267 OK / 149 gaps. Twenty unused members reti
 
 Repeated lookup passes in bare and unmodified cached Game environments; Mists preserves all twenty legacy lookups. `src/c_api/mod.rs:302-303,336-337` gates the module/call on retail-12-0-0, excluding Wrath, Mists, Era and Anniversary. No Blizzard deprecation wrapper, vendor Lua, cache file, existing model or classic registration deleted or monkey-patched.
 
+## TextWithSubtext follow-up — 2026-10-14
+
+Historical149-gap accounting, negative control and validation below remain revision-scoped and unchanged. The new normal Retail pre-reconciliation sweep observed416 rows:268 OK/148 non-OK, differing from the149-item expected set only at `wt-global-api-C_UIWidgetManager.GetTextWithSubtextWidgetVisualizationInfo-309` (`raw=function; lookup=function`). Current known gaps remove that exact row; post-reconciliation replay remains pending. Separate [TextWithSubtext behavior](../../specs/ui-widget-text-with-subtext.md) includes complete supplied records and actual cached Retail/PTR lifecycle; publication alone does not prove native/signature/output/security parity.
+
 ## Retained gaps
 
 Every discovery failure is reviewed once: twenty closed, 149 retained. [Source scans](../../../data/patch-api/evidence/10.0.2-session-2026-10-07/p1002-gap-source-scans.json) and [current declaration excerpts](../../../data/patch-api/evidence/10.0.2-session-2026-10-07/p1002-native-contracts.json) retain file:line context. Name-matched current declaration context found for 117 retained gaps; missing declarations are not evidence that a historical API never existed.
