@@ -36,7 +36,9 @@ Concrete fresh demo values above are explicit simulator policy, not claims about
 
 ## Source checkpoint — 2026-10-14
 
-Producer `85d8d7bd4`, tests `f199e9424`: modeled getter ownership and initialization order are source-inspected, not runtime acceptance. Mists no-run compilation finished successfully with 741 JSON records and no compiler-message records; stderr retains six manifest deprecations and one `UnitRole` dead-code warning. New copied executables await independent authentication; Rust execution and postproducer API/UI acceptance remain open. Preproducer modern preservation does not cover this producer.
+Producer `85d8d7bd4`, tests `f199e9424`: modeled getter ownership and initialization order are source-inspected, not runtime acceptance. Mists no-run compilation finished successfully with 741 JSON records and no compiler-message records; stderr retains six manifest deprecations and one `UnitRole` dead-code warning. Both new copied executables passed independent once-per-copy authentication. Fresh Mists Rust API case passed (1 case); the full normal-session fixture failed at its first data assertion, `GetProductGroups must return a list` (CLI1, two error records for the same assertion). Later length/shape/group/product/entry assertions were unreached; Store UI was not exercised. Preproducer modern preservation does not cover this producer.
+
+Source inspection identifies an original lifecycle gap: cached Mists `Blizzard_EnvironmentCleanup` clears `C_StoreSecure`; simulator restoration reruns the Lua bootstrap without re-registering the modeled getter. That is source-grounded explanation, not proof of the exact dynamically returned value/dispatch. Commit `d9c7c6aa1` adds a real cached-cleanup regression, checking the shared contract after original addon loading and post-load workarounds; compilation/execution remains pending. No getter override, artificial namespace clearing or forced vendor handler.
 
 ## Out of scope
 
