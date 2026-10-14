@@ -1,6 +1,6 @@
 ## [2026-10-14] evidence | Seven-profile runtime revision/gate matrix
 
-[Owning matrix](../specs/store-product-group-shape.md#seven-profile-saved-runtime-matrix--2026-10-14) separates named item/vehicle and Store/bag/selected-unit outcomes, Mists authentication PARTIAL, seven-profile bounded runtime PASS, retained failures and classic consumer limits. New packet pending; historical public 170-copy packet unchanged.
+[Owning matrix](../specs/store-product-group-shape.md#seven-profile-saved-runtime-matrix--2026-10-14) separates named item/vehicle and Store/bag/selected-unit outcomes, Mists authentication PARTIAL, seven-profile bounded runtime PASS, retained failures and classic consumer limits. [Separate495-text packet](../../data/patch-api/evidence/item-display-profile-preservation-2026-10-14/README.md) has private-copy integrity/bounded privacy PASS; public-copy gate remains separate. Historical public170-copy packet unchanged.
 
 ## [2026-10-14] evidence | Public historical Store/macro packet
 
