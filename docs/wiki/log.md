@@ -1,3 +1,7 @@
+## [2026-10-13] source | CreateTexture draw-layer validation
+
+[Widget checkpoint](systems/widget-system.md#createtexture-draw-layer-source-checkpoint--2026-10-13) links the [owning contract/status](../specs/texture-draw-layer-validation.md). Retail/PTR preconstructor validation is source-only; shared preproducer normal-Lua RED and pending Rust/GREEN remain separate. VectorGraphics and earlier profiles are source-preserved, not freshly executed.
+
 ## [2026-10-13] evidence | Region alpha numeric runtime
 
 [Owning contract](../specs/region-alpha-numeric-range.md) records 10 Retail/PTR outcomes, two separate startups and OLD480 legacy observation. Public retention and full-parent acceptance remain open.

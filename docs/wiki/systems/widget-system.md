@@ -18,6 +18,10 @@ Key field groups:
 
 **Widget-specific** — Slider, StatusBar, EditBox, ScrollFrame, Cooldown each have dedicated field groups. Model-family state is grouped in one lazy `Option<Box<ModelWidgetState>>`; absent payloads preserve getter defaults, while mutating methods allocate only when needed and remain globally callable.
 
+### CreateTexture draw-layer source checkpoint — 2026-10-13
+
+`6e085fce9` validates supplied ordinary draw-layer names for Retail/PTR before Texture construction and registration. VectorGraphics bypasses the new validation; earlier profiles retain their existing path. [Owning contract/status](../../specs/texture-draw-layer-validation.md) separates complete preproducer shared-fixture normal-Lua RED from authored, uncompiled Rust cases (`ab0`, formatting `6bdb02b06`). Producer GREEN remains pending; no native/render/full-parent acceptance is established.
+
 ### Actual texture file dimensions — bounded runtime proof
 
 `271793bc6` adds Texture `GetFileWidth`/`GetFileHeight` in [texture adapters](../../../src/lua_api/frame/methods/widgets/texture/atlas.rs). Existing secret-origin readability is checked before resolving actual source metadata through a CPU-only TextureManager with configured addon roots; widget geometry is not the metadata source. No new widget state or GPU dependency. The temporary manager does not retain metadata between getter calls. [Texture-file spec](../../specs/texture-file-dimensions.md) owns source/ID/atlas policies and remaining coverage; [API evidence boundary](lua-api.md#current-pet-hover-and-follower-instance-models--bounded-runtime-proof) records historical six-case RED and sealed Retail `e3978fd48196` six-case GREEN, exit0. Local-file metadata, clearing, geometry independence and existing secret-read policy pass at that old revision; numeric-ID/atlas actual metadata and native parity remain unverified. `b003ec183` later contains both getters to Texture and gives WorldFrame a distinct cached index preserving other entries. [Receiver checkpoint](../investigations/method-dispatch-refactor.md#texture-receiver-containment--2026-10-12) owns default-fixture changes and current bounded receiver proof.

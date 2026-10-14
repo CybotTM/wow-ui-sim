@@ -24,7 +24,7 @@ Ordinary explicit draw-layer names passed to `Frame:CreateTexture` must be valid
 - `create_texture_accepts_all_five_draw_layers`: five explicit creation/getter roundtrips and region count.
 - `create_texture_rejects_invalid_draw_layer_without_adding_region`: five valid baseline creations, then invalid-name rejection and unchanged region count.
 
-These authored Rust tests have not been built or executed. The complete shared Lua fixture ran before the producer on frozen Retail/PTR normal executables: valid mode completed five roundtrips and region-count assertions; invalid mode accepted `INVALID` and changed the region count from 5 to 6. The rejection assertion failed (CLI1); unchanged-count assertion and invalid completion marker were unreached. This is shared normal-Lua RED, not new Rust-case execution or producer GREEN. Initial independent Retail RED audit retains its separate first-failure boundary.
+Source producer `6e085fce9` and test formatting `6bdb02b06` follow tests/spec `ab0`. These authored Rust tests have not been built or executed. The complete shared Lua fixture ran before the producer on frozen Retail/PTR normal executables: valid mode completed five roundtrips and region-count assertions; invalid mode accepted `INVALID` and changed the region count from 5 to 6. The rejection assertion failed (CLI1); unchanged-count assertion and invalid completion marker were unreached. This is shared normal-Lua RED, not new Rust-case execution or producer GREEN. Initial independent Retail RED audit retains its separate first-failure boundary.
 
 ## Known gaps (current cycle)
 
