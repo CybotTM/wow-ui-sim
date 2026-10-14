@@ -1,5 +1,8 @@
 use crate::c_api::ensure_namespace;
-use crate::c_api::item_spell::{helpers::global_table, item_link_for_id};
+use crate::c_api::item_spell::{
+    helpers::{global_table, item_cooldown_pair},
+    item_link_for_id,
+};
 use crate::items;
 use crate::lua_api::methods::{
     borrow_state, create_string, create_table, table_set, table_set_num, table_set_static,
@@ -75,7 +78,10 @@ fn register_container_query_methods(
                 c_container_get_backpack_sell_junk_disabled,
             ),
             ("GetContainerItemInfo", c_container_get_item_info),
-            ("GetContainerItemCooldown", c_container_get_item_cooldown),
+            (
+                "GetContainerItemCooldown",
+                c_container_get_container_item_cooldown,
+            ),
             ("GetItemCooldown", c_container_get_item_cooldown),
             ("GetContainerItemID", c_container_get_item_id),
             ("GetContainerItemLink", c_container_get_item_link),
@@ -229,9 +235,27 @@ fn bag_item_link(bag_item: &BagItem) -> Option<String> {
 }
 
 fn c_container_get_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {
-    let _item_or_bag_id = i32::from_stack(state, 1)?;
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
+    let item_id = u32::from_stack(state, 1)?;
+    let (start, duration) = {
+        let sim = borrow_state(state)?;
+        item_cooldown_pair(&sim, Some(item_id))
+    };
+    state.push(Val::Num(start));
+    state.push(Val::Num(duration));
+    state.push(Val::Num(1.0));
+    Ok(3)
+}
+
+fn c_container_get_container_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {
+    let bag = i32::from_stack(state, 1)?;
+    let slot = i32::from_stack(state, 2)?;
+    let (start, duration) = {
+        let sim = borrow_state(state)?;
+        let item_id = sim.get_bag_item(bag, slot).map(|(item_id, _)| item_id);
+        item_cooldown_pair(&sim, item_id)
+    };
+    state.push(Val::Num(start));
+    state.push(Val::Num(duration));
     state.push(Val::Num(1.0));
     Ok(3)
 }

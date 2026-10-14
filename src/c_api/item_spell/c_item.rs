@@ -1,6 +1,6 @@
 use super::helpers::{
     inv_type_to_class_id, inv_type_to_equip_loc, inv_type_to_subclass, item_class_from_inv_type,
-    item_class_name, item_subclass_name, unit_is_reachable,
+    item_class_name, item_cooldown_pair, item_subclass_name, unit_is_reachable,
 };
 use crate::c_api::ensure_namespace;
 use crate::client_profile::{ACTIVE, ClientProfile};
@@ -744,9 +744,13 @@ fn c_item_get_item_link(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_item_get_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {
-    let _item_info = stack_val(state, 1);
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
+    let item_id = parse_item_id_from_val(state, stack_val(state, 1));
+    let (start, duration) = {
+        let sim = borrow_state(state)?;
+        item_cooldown_pair(&sim, item_id)
+    };
+    state.push(Val::Num(start));
+    state.push(Val::Num(duration));
     state.push(Val::Bool(true));
     Ok(3)
 }
