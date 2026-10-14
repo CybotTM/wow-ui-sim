@@ -48,6 +48,18 @@ Source `a6b572732` adds five Rust lines in `condition_matches`: `vehicleui` read
 | Current producer compilation | Observed at source `a6b572732`: 741 JSON records, `build-finished.success=true`, zero `compiler-message` records; stderr contains six manifest deprecations. Duration 3m36s. Independent authentication and runtime proof remain pending; compilation is not runtime acceptance. |
 | Remaining proof | Fresh targeted GREEN and selected-unit preservation pending. Unsupported tokens remain unproved, not out of scope. No native, negation, default or absence semantics established; broader-profile and parent acceptance remain open. |
 
+## Macro vehicle current Retail runtime follow-up — 2026-10-14
+
+The full Retail macro / Store artifact verification report records bounded runtime at `a6b57273246430131060b64d2b02e6d50baea9a6`. The earlier input-only, producer-source and pending-proof checkpoints above remain historical. The [owning contract](../../specs/macro-vehicle-ui-conditions.md#current-bounded-runtime-follow-up--2026-10-14) now checks five literal requirements; it owns current acceptance limits.
+
+| Scope | Actual runtime / proof boundary |
+|---|---|
+| Retail macro producer | Five unique cases, **5 PASS/0 FAIL**, exit0. Four named player/target combinations pass. The fifth case reaches all four authored rows for explicit player, focus, implicit target and player-only `vehicleui` despite `@focus`; eight completed environment startups corroborate four named plus four loop rows. |
+| Selected-unit preservation | Two unique unchanged selected-clause/cached slash-handler cases, **2 PASS/0 FAIL**, exit0. Macro and selected-unit stderr contain completed initialization sequences and no emitted Lua error records. This is not broader vehicle-token proof. |
+| Historical RED retained | `52fc18f4e`: five unique cases, **1 PASS/4 FAIL**, exit101. Selected-unit fixture reached only its first supplied row; later three rows unreached. GREEN does not rewrite RED into sixteen outcomes. |
+| Association and existing source gate | Selected archived test text and reused receipt/seal STAT metadata associate the saved runtime; no new source-to-binary byte authentication. Source/readability remain the separate source gate. Existing producer compile observation: 741 source JSON records, successful build, zero compiler-message records, six manifest deprecation warnings. |
+| Still pending / unproved | Final producer formatting/checks, affected profiles including PTR, broader selected tokens and parent acceptance. No broad format/check, native, negation, default or absent-target proof supplied by this runtime checkpoint. |
+
 ## Development proof (historical saved receipts; not rerun in this reconciliation)
 - Source parser RED → GREEN 2/2; current fixture 2/2. Default parser outputs/errors match base on all 77 retained raw inputs; no claim that previously unsupported default parsing now succeeds.
 - Own publication RED exposes two texture gaps → known-gap GREEN 1/1. Impossible-method serialized negative changes two gaps to three and fails exactly as required.
