@@ -1,6 +1,6 @@
 # Supplied TextWithSubtext widgets
 
-`C_UIWidgetManager.GetTextWithSubtextWidgetVisualizationInfo(widgetID)` projects explicit host-supplied type25 records from `src/c_api/ui_widget_manager/`. Contract grounded in the profile-scoped Retail/PTR cached `UIWidgetManagerDocumentation.lua` and unchanged `Blizzard_UIWidgetTemplateTextWithSubtext.lua`/`.xml`; records are synthetic inputs, not native catalog observations. See [widget manager state](../wiki/systems/ui-widget-manager-state.md) for architecture.
+The contract requires `C_UIWidgetManager.GetTextWithSubtextWidgetVisualizationInfo(widgetID)` to project explicit host-supplied type25 records from `src/c_api/ui_widget_manager/`. Contract grounded in the profile-scoped Retail/PTR cached `UIWidgetManagerDocumentation.lua` and unchanged `Blizzard_UIWidgetTemplateTextWithSubtext.lua`/`.xml`; records are synthetic inputs, not native catalog observations. See [widget manager state](../wiki/systems/ui-widget-manager-state.md) for architecture.
 
 ## What it must do
 
@@ -32,7 +32,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Populated tests are integrated before getter implementation; execution and RED/GREEN evidence remain pending. Getter intentionally absent at scaffold revision `39a454d09`.
+- [ ] Populated tests are integrated before getter implementation; execution and RED/GREEN evidence remain pending. Getter intentionally absent at scaffold revision `39a454d09` and test checkpoint `0a3a5ac20`.
 
 ## Out of scope
 
