@@ -54,7 +54,7 @@ fn activate_and_update(env: &WowLuaEnv) {
         env,
         "in-place update of both visible lines",
         r#"
-        assert(FixtureContainer.widgetFrames[762501] == FixtureFrame)
+        assert(FixtureContainer.widgetFrames[762501] == FixtureFrame, 'updated frame identity')
         AssertSubtextUpdated(FixtureFrame)
         AssertSuppliedSnapshot(SavedSubtextSnapshot)
         local current = FixtureGetter(762501)
