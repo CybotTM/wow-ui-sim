@@ -7,7 +7,7 @@
   ],
   "runtime_gate": "gates-current/runtime/report.md",
   "check_format_gate": "gates-current/check-format/report.md",
-  "public_copy_gate": "296-record packet additive PASS at dd10be4ff; four retained gate texts awaiting their independent copy gate",
+  "public_copy_gate": "PASS additive corrected296-text gate at dd10be4ff; separate4-text retained-gate copy/privacy PASS at 9cc211226; historicalFAIL retained",
   "entries": [
     {
       "path": "epochs/bullet-dress-owned-retail-red-20261013T234617677640Z/admission.json",
@@ -1512,5 +1512,14 @@
   ],
   "privacy_correction": "Alternate PTR EditMode account/realm/character values now redacted; original privacy FAIL retained privately; corrected gate pending.",
   "historical_privacy_gate": "publication-current/original-privacy-fail/report.md",
-  "corrected_privacy_gate": "publication-current/corrected-overlay-pass/report.md"
+  "corrected_privacy_gate": "publication-current/corrected-overlay-pass/report.md",
+  "gate_copy_acceptance": {
+    "status": "PASS",
+    "covered_revision": "9cc2112267ea139e3e13408a16787edd53c232dd",
+    "selected_gate_texts": 4,
+    "reused_selected_payloads": 296,
+    "report_sha256": "820a468f702625a00bc16d1d9aaf9cb8c2659e740f02b08853875d418fd901ce",
+    "proof_sha256": "6849d2e2821323760ff68d478afd5eefeee4aecb9c59cc9f34d1364314b5b3ff",
+    "scope": "four whole selected gate texts; unchanged296 copy proofs reused without payload reads; native/render/earlierprofile/fullparent unproved"
+  }
 }

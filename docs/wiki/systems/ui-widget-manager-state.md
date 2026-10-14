@@ -71,7 +71,7 @@ At `85b5494d2`, the [SpellDisplay contract](../../specs/ui-widget-spell-display.
 
 ### Bullet / dressability runtime checkpoint
 
-[Whole host records](../../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md) retain the Retail/PTR supplied-model matrix, historical fixture failures, complete compatibility diagnostics and separate startup/check/format gates. Public-copy acceptance is pending; native/render and parent acceptance remain open. Owning contracts: [BulletTextList](../../specs/ui-widget-bullet-text-list.md) and [item dressability](../../specs/item-dressability.md).
+[Whole host records](../../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md) retain the Retail/PTR supplied-model matrix, historical fixture failures, complete compatibility diagnostics and separate startup/check/format gates. Public-copy and retained-gate copy checks pass at their recorded scopes; native/render and parent acceptance remain open. Owning contracts: [BulletTextList](../../specs/ui-widget-bullet-text-list.md) and [item dressability](../../specs/item-dressability.md).
 
 ## Sources
 

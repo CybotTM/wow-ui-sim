@@ -52,7 +52,7 @@ The input-only successor authors three additional direct cases for supplied nume
 
 Retail and PTR each pass five explicit-boolean/input/security/isolation cases and the original PlayerChoice dressability/mount contrast. These prove the supplied model, not native item classification.
 
-The [whole host-record packet](../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md) owns the mixed-revision matrix, preservation, complete diagnostics, startup and check/format evidence. Public-copy acceptance is pending; native/render parity, earlier profiles and the parent handoff remain open.
+The [whole host-record packet](../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md) owns the mixed-revision matrix, preservation, complete diagnostics, startup and check/format evidence. Public-copy and retained-gate copy checks pass at their recorded scopes; native/render parity, earlier profiles and the parent handoff remain open.
 
 ## Known gaps (current cycle)
 

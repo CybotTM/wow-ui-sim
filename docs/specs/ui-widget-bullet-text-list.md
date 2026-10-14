@@ -83,7 +83,7 @@ Retail at `76e8b8309` now executed 0 PASS / 7 FAIL, exit101, after a separate 4G
 
 Retail and PTR each pass seven supplied-record/query/security/cached-consumer cases, plus the two original public-API cases. `bde7ea277` corrects the test helper to execute statement chunks with `exec`; historical fixture failures remain retained.
 
-The [whole host-record packet](../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md) owns the mixed-revision matrix, complete diagnostics, startup and check/format evidence. Public-copy acceptance is pending; native/render parity, earlier profiles and the parent handoff remain open.
+The [whole host-record packet](../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md) owns the mixed-revision matrix, complete diagnostics, startup and check/format evidence. Public-copy and retained-gate copy checks pass at their recorded scopes; native/render parity, earlier profiles and the parent handoff remain open.
 
 ## Known gaps (current cycle)
 

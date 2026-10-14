@@ -1,6 +1,6 @@
 ## [2026-10-13] runtime | Bullet / dressability supplied-model proof
 
-[Host-record matrix](../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md): bounded Retail/PTR runtime, preservation, startup and check/format gates; historical failures retained. Public-copy gate pending; parent/native/render acceptance open.
+[Host-record matrix](../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md): bounded Retail/PTR runtime, preservation, startup and check/format gates; historical failures retained. Public-copy and retained-gate copy checks pass; parent/native/render acceptance open.
 
 ## [2026-10-13] source | Supplied dressability predicate after reached RED
 
