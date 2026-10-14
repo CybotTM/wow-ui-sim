@@ -193,3 +193,11 @@ getter, vendor code or dispatch order changes. Missing diagnostic state emits
 selected bindings, not successful callbacks or populated cards. The synchronous
 public FireEvent path uses this same selector; bootstrap direct handler calls do
 not. Remove this diagnostic once the unresolved Mists boundary is located.
+
+The same `OnEvent` opt-in emits `STORE_QUERY_INPUT` records from the simulator's
+existing Store group/product/entry/currency queries when the original consumer
+naturally calls them. Records contain query names, numeric IDs, value types,
+product-list lengths and currency region; no arguments/payloads beyond these
+fields. Returned values are unchanged; no private handler/getter is forced or
+replaced to fabricate results. This is input observation, not callback, UI or
+native proof. Retire these records and their private flag with the selection trace.
