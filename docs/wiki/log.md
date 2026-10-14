@@ -1,3 +1,7 @@
+## [2026-10-14] evidence | Seven-profile bounded runtime matrix
+
+[Owning matrix](../specs/store-product-group-shape.md#seven-profile-saved-runtime-matrix--2026-10-14) records item4 and vehicle5 PASS on seven profiles at named compiled revisions, plus three-profile Store/bag and two-profile selected-unit preservation. Mists authentication remains PARTIAL; cleanup diagnostics, native/render and full-parent gaps remain open. New retention packet pending; closed historical packet unchanged.
+
 ## [2026-10-14] evidence | Public historical Store/macro packet
 
 [Store owner](../specs/store-product-group-shape.md#current-bounded-retail-receipt--2026-10-14) and [macro owner](../specs/macro-vehicle-ui-conditions.md#current-bounded-runtime-follow-up--2026-10-14) link the [public packet](../../data/patch-api/evidence/store-macro-lifecycle-2026-10-14/README.md). Accepted copy/privacy only; recorded revision scopes and historical failures retained. Current item/display/PTR/UI, native/render and full-parent acceptance excluded.

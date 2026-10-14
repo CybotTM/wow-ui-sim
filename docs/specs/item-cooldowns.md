@@ -47,6 +47,10 @@ Core producer `ee1bc9038` remains unchanged; association with that producer does
 - [x] Existing one-argument bag fixture at source `ffb` genuinely FAILs: argument2 is nil. `baec` fixes the source fixture to a valid bag/slot pair; its first PTR compile failed E0277 because `u32` results lack `FromRiluaResults`. `2d13` changes that result to `i32`. Independent Mists gate at compiled `bf1b61f10` passes corrected bag **1/1** and item **4/4**, all assertions reached. This is not PTR or post-retirement current-HEAD proof.
 - [ ] Native behavior, expiry/elapsed-time rules, enable derivation, secret validation, name selection, profile preservation, and wider consumer/runtime proof remain pending. These are not exclusions from the parent goal.
 
+## Current profile preservation — 2026-10-14
+
+[Seven-profile revision/gate matrix](store-product-group-shape.md#seven-profile-saved-runtime-matrix--2026-10-14) owns current evidence: item4 runtime PASS on all seven profiles at their listed compiled sources. Mists overall/authentication remains PARTIAL. Historical checkpoints above retain their original revision scopes; current runtime does not authenticate source inputs or establish native/full-parent acceptance.
+
 ## Out of scope
 
 No parent exclusions established by this passive-input stage.

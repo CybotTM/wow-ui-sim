@@ -49,7 +49,7 @@ The pending items below preserve the earlier checkpoint, not current runtime sta
 ## Remaining current gates
 
 - [x] Independent PTR gate at compiled `bc5cecffb`: vehicle5/5 and selected-unit2/2, all four fifth-case rows reached; Store2 unique/item4/corrected bag1 also pass. Separate normal public Store lifecycle passes visibility/name/containment and CLEAN0errors. Store cleanup retains one AuraContainerUtil failure reported twice; six manifest warnings remain. This is bounded PTR proof, not all-startup-clean, native/render or full-parent acceptance.
-- [ ] Final producer formatting/checks and current Retail/Mists/older-profile preservation remain pending. The common vehicle5 tests are enabled for Wrath/Era/Anniversary/Wowforever; zero selected tests never count as preservation.
+- [ ] [Current revision/gate matrix](store-product-group-shape.md#seven-profile-saved-runtime-matrix--2026-10-14): vehicle5 runtime PASS on all seven profiles. Selected-unit2 preservation is Retail/PTR only. Mists overall/authentication remains PARTIAL; test eligibility or zero selected tests is not preservation. Final HEAD formatting/default check and synthetic sealer proof are source-only, not runtime/native/full-parent acceptance.
 - [ ] Broader selected-token resolution; native, negation, default and absent-target semantics remain unproved. Existing selected-unit preservation is not new vehicle-fact proof for these boundaries.
 
 ## Out of scope

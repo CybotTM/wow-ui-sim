@@ -66,8 +66,34 @@ Independent existing-artifact gate at source `a6b572732`: **PASS for recorded Re
 
 CLI0, final `[]`, CLEAN and zero observed Lua errors; 291 Blizzard addons and 1569/1569 bytecode cache hits. Startup simulator workarounds ran, including catalog product-card defaults twice. CASC, sound, third-party addons and SavedVariables disabled; read-only WTF EditMode cache loaded. This does not prove pristine/vendor-free behavior, callback source purity, native parity, rendering, PTR/Mists UI or whole-parent acceptance. Mists query PASS and original public Store UI FAIL above remain separate; PTR pending.
 
+## Seven-profile saved runtime matrix — 2026-10-14
+
+Source association is report metadata, not authenticated source inputs. Repository HEAD is `18a49459a014d1e212b72d4163f9151b96d71fa1`; the separate compiled revisions below are not interchangeable with HEAD.
+
+| Profile | Compiled source association | Item / vehicle | Store / bag / selected-unit | Independent saved gate |
+|---|---|---|---|---|
+| Retail | `d288c2701aa880648db73bba473db5dcc35c521b`, production delta `bc5cecffb`; test-only `4d` excluded | 4 / 5 PASS | 2 / 1 / 2 PASS; normal public Store PASS | `store-display-retail-runtime-current/report.md`: bounded runtime PASS |
+| PTR | `bc5cecffbd89d719aa68390f4f12246059f013c5` | 4 / 5 PASS | 2 / 1 / 2 PASS; normal public Store PASS | `store-display-ptr-runtime-current/report.md`: bounded runtime PASS |
+| Mists | `4d5572f241cce3d99a7b486709186a2638566a56`, production delta `bc5cecffb` | 4 / 5 PASS | 2 / 1 / not selected; normal public Store PASS | `store-display-mists-final-runtime-current/report.md`: runtime PASS, copied-byte receipts PASS, authentication/overall PARTIAL |
+| Wrath | `18a49459a014d1e212b72d4163f9151b96d71fa1` | 4 / 5 PASS | not selected | `item-macro-wrath-era-runtime-current/report.md`: 9/9 PASS per profile |
+| Era | `18a49459a014d1e212b72d4163f9151b96d71fa1` | 4 / 5 PASS | not selected | same Wrath/Era report: 9/9 PASS per profile |
+| Anniversary | `18a49459a014d1e212b72d4163f9151b96d71fa1` | 4 / 5 PASS | not selected | `item-macro-anniversary-runtime-current/report.md` now exists: 9/9 PASS |
+| WoWForever | `18a49459a014d1e212b72d4163f9151b96d71fa1` | 4 / 5 PASS | not selected | `item-macro-forever-runtime-current/report.md`: 9/9 PASS |
+
+Report basenames above are local verification evidence, not published packet links. Store Rust scopes are 2×3; corrected ready-bag scope is 1×3; selected-unit preservation is 2×2 (Retail/PTR only). Item scope is 4×7 and vehicle scope 5×7. The named runtime gates record **76 profile/test outcomes at these scopes**, not 76 unique tests. Separate normal Store scenarios are not additive Rust cases; nested cleanup children repeat an outer case. Aggregate acceptance remains PENDING; Mists authentication remains PARTIAL.
+
+Retail/PTR each retain one cleanup `AuraContainerUtil` nil failure reported twice. Separate normal CLEAN results do not erase that failure. Historical RED, compile failures, denial, zero-launch setup failures and earlier Mists query PASS/UI FAIL remain recorded above. Mists retains main strict-control evidence and accepted copied hashes; original-normal numeric pre-copy stat association is not independently established. Runtime PASS does not upgrade its overall PARTIAL or establish source authenticity.
+
+`4d` expands test eligibility only; it adds no production behavior or native/older-profile proof by itself. Caller-accepted `store-item-final-check-source-current/report.md` records formatting/default check PASS with six manifest warnings and three synthetic sealer cases PASS: source-only, not runtime authentication. No reruns were performed for this update. Native behavior, rendered pixels, globally clean startup, all-registry coverage and full-parent acceptance remain unproved.
+
+### Classic Store applicability and publication boundary
+
+Local handoff `classic-store-consumer-applicability-current/report.md` records actual WoWForever TOC-selected TBC consumers reading group records; a separate secure helper projects those records to IDs internally. This supports the existing non-Mists public record path, not blanket ID-producer expansion. Wrath/Era/Anniversary cache absence is an evidence limit, not a native API gap; manifest entries alone are not runtime consumer proof. WoWForever cleanup source absence leaves that lifecycle unproved. Store acceptance is only the three named runtime profiles above.
+
+Public Store/macro 170-copy packet is CLOSED and unchanged. New packet publication remains PENDING; no new public evidence links are asserted.
+
 ## Out of scope
 
-- Other Classic profiles: no newly established consumer evidence; preserve existing behavior.
+- Other Classic profiles: preserve existing record behavior; WoWForever cached TBC consumer evidence and older cache limits are scoped in the matrix above, not Store runtime acceptance.
 - Native parity claims: no official cached StoreSecure declarations or native execution evidence.
 - Whole Store migration, new catalog defaults, transaction/settlement semantics, forced handlers, spies, getter overrides, and nil public category helpers.

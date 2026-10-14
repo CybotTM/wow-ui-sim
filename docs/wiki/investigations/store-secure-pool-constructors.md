@@ -29,6 +29,10 @@ Regression coverage:
 - [[addon-load-order]] — addon load timing can require post-load repairs
 - [[lib-test-failure-sweep-2026-06]] — records why post-load repairs must not rely on `hooksecurefunc(C_AddOns, "LoadAddOn")`
 
+## Current bounded profile evidence — 2026-10-14
+
+[Owning revision/gate matrix](../../specs/store-product-group-shape.md#seven-profile-saved-runtime-matrix--2026-10-14) separates Retail/PTR/Mists Store runtime PASS from Mists overall authentication PARTIAL, retained cleanup failures and native/render/full-parent gaps. It also scopes actual WoWForever TBC record-consumer evidence without expanding public ID projection or claiming older Store runtime acceptance. Historical checkpoints below remain revision-bound.
+
 ## Store group shape — source checkpoint 2026-10-14
 
 `85d8d7bd4` registers the modeled `C_StoreSecure.GetProductGroups` query under `src/c_api/`. Registration precedes runtime bootstrap; the getter reads the already-published `__wow_store_state.productGroups` at call time. Mists receives numeric IDs; other profiles retain the existing record table. Both bootstrap Lua definitions of this getter are removed. Demo backing, other queries and transactions remain legacy bootstrap Lua; no additional state bridge.
