@@ -1,3 +1,7 @@
+## [2026-10-13] runtime | Bullet / dressability supplied-model proof
+
+[Host-record matrix](../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md): bounded Retail/PTR runtime, preservation, startup and check/format gates; historical failures retained. Public-copy gate pending; parent/native/render acceptance open.
+
 ## [2026-10-13] source | Supplied dressability predicate after reached RED
 
 [Existing API inventory](systems/lua-api.md#supplied-item-dressability--producer-checkpoint) links the [owning C API contract](../specs/item-dressability.md). Explicit boolean projection and original-secret validation follow actual Retail/PTR supplied-data/whole PlayerChoice RED. GREEN/earlier-profile/native/render/full-parent acceptance pending.

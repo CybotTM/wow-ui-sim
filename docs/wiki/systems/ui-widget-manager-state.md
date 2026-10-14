@@ -69,6 +69,10 @@ At `85b5494d2`, the [SpellDisplay contract](../../specs/ui-widget-spell-display.
 
 [Owning contract](../../specs/ui-widget-bullet-text-list.md) retains actual Retail/PTR supplied-record/callback RED and the independent Retail/PTR split between six feature failures and one seeded-set fixture defect. The native getter now authenticates numeric selectors and projects complete cloned records into rooted fresh row/line arrays. Corrected rejection tests and GREEN remain pending; no native/render/full-parent acceptance.
 
+### Bullet / dressability runtime checkpoint
+
+[Whole host records](../../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md) retain the Retail/PTR supplied-model matrix, historical fixture failures, complete compatibility diagnostics and separate startup/check/format gates. Public-copy acceptance is pending; native/render and parent acceptance remain open. Owning contracts: [BulletTextList](../../specs/ui-widget-bullet-text-list.md) and [item dressability](../../specs/item-dressability.md).
+
 ## Sources
 
 - [BulletTextList](../../specs/ui-widget-bullet-text-list.md) — supplied-record contract and revision-scoped proof limits.

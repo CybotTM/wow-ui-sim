@@ -48,6 +48,12 @@ The input-only successor authors three additional direct cases for supplied nume
 
 [Initial selected packet](../../data/patch-api/evidence/bullet-dress-initial-api-red-2026-10-13/README.md) retains whole Retail/PTR initial API streams and independent classification; corrected bounded public-copy/privacy/link gate PASS at `a7439281a`, original invocation-ID privacy FAIL retained.
 
+### Verified bounded runtime — 2026-10-13
+
+Retail and PTR each pass five explicit-boolean/input/security/isolation cases and the original PlayerChoice dressability/mount contrast. These prove the supplied model, not native item classification.
+
+The [whole host-record packet](../../data/patch-api/evidence/bullet-dress-host-records-2026-10-13/README.md) owns the mixed-revision matrix, preservation, complete diagnostics, startup and check/format evidence. Public-copy acceptance is pending; native/render parity, earlier profiles and the parent handoff remain open.
+
 ## Known gaps (current cycle)
 
 - [x] Independently classify initial Retail RED; both profiles executed before passive input changes. Classification does not establish passing API, supplied-record, security or consumer coverage.
