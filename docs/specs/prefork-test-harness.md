@@ -96,6 +96,8 @@ The existing-test timestamp trial keeps the root library and six binaries fresh 
 
 #### Current original Retail four-case checkpoint (bounded)
 
+[Current 14-text evidence packet](../../data/test-perf/evidence/current-original-retail-four-2026-10-14/README.md) retains the aggregate/cast reports and complete new chat/spellbook bundles with literal-only privacy transformations. Independent copy/privacy gate pending; historical packets remain separate.
+
 Accepted private saved-artifact reports `current-original4-current/report.md` and `current-original-cast-bar-current/report.md` record **4 distinct PASS / 0 FAIL / 4 total**: chat2/cast-bar1/spellbook1 at compiled `1b707b28b16eb291e36180b2a12ac2f0411264af`, reusing snapshot `6bdb02b06`. Docs-only runtime/test equivalence is accepted source-scope metadata, not renewed byte authentication. Exact-group dispatch uses the original constructors and assertion bodies, not the default completed-Game preload/full registry. No current `85d8` Store proof is supplied.
 
 Chat proves click/focus, keyboard submission of one SAY message, cleared editbox and white/alpha assertions; cast-bar proves Retail lock/anchor/parent transitions; spellbook proves S-key show/hide and an empty interaction-window error list. These are not pixel, real-network, casting-duration or Mists assertion proofs. Supplied full runtime streams have no observed explicit failure diagnostics, but chat/cast constructors continue or discard load/event results and spellbook clears earlier errors. No comprehensive startup-error freedom follows.
