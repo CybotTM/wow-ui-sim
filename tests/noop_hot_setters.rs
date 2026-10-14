@@ -62,7 +62,7 @@ fn set_alpha_same_value_is_a_true_noop() {
 }
 
 #[test]
-fn set_alpha_clamped_same_value_is_a_true_noop() {
+fn set_alpha_out_of_range_preserves_unchanged_render_state() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
         env.exec(
@@ -75,8 +75,17 @@ fn set_alpha_clamped_same_value_is_a_true_noop() {
 
         clear_dirty(&env);
 
-        env.exec(r#"NoopAlphaClampedFrame:SetAlpha(2)"#)
-            .expect("clamped SetAlpha should succeed");
+        let result = env.exec(r#"NoopAlphaClampedFrame:SetAlpha(2)"#);
+        let modern_profile = matches!(
+            wow_ui_sim::client_profile::ACTIVE,
+            wow_ui_sim::client_profile::ClientProfile::Retail
+                | wow_ui_sim::client_profile::ClientProfile::Ptr
+        );
+        if modern_profile {
+            assert!(result.is_err(), "modern SetAlpha should reject invalid range");
+        } else {
+            result.expect("legacy clamped SetAlpha should succeed");
+        }
 
         assert_no_visual_dirty(&env, "SetAlpha(2) on alpha=1");
         assert_no_rect_dirty(&env, "SetAlpha(2) on alpha=1");

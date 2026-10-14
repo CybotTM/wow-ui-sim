@@ -8,6 +8,7 @@ use rilua::{LuaResult, Val};
 
 pub fn set_alpha(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
+    validate_numeric_alpha(state)?;
     let alpha = opt_f32(state, 2);
     let clamped = if (0.0..=1.0).contains(&alpha) {
         alpha
@@ -38,6 +39,22 @@ pub fn set_alpha(state: &mut LuaState) -> LuaResult<u32> {
     }
     sim.widgets.propagate_effective_alpha(id, parent_eff);
     Ok(0)
+}
+
+fn validate_numeric_alpha(state: &LuaState) -> LuaResult<()> {
+    use crate::client_profile::{ACTIVE, ClientProfile};
+
+    if !matches!(ACTIVE, ClientProfile::Retail | ClientProfile::Ptr) {
+        return Ok(());
+    }
+    if let Val::Num(alpha) = crate::lua_bridge::stack_val(state, 2) {
+        if !(0.0..=1.0).contains(&alpha) {
+            return Err(rilua::runtime_error(
+                "SetAlpha alpha must be between 0.0 and 1.0",
+            ));
+        }
+    }
+    Ok(())
 }
 
 pub fn get_alpha(state: &mut LuaState) -> LuaResult<u32> {

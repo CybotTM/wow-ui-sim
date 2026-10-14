@@ -16,13 +16,13 @@ Ordinary numeric `Region:SetAlpha` inputs follow the [10.0.0 change-note summary
 
 ## Implementation inventory
 
-- `src/lua_api/frame/methods/core_state/alpha.rs`: current public alpha setters and effective-alpha propagation; currently clamps out-of-range inputs.
+- `src/lua_api/frame/methods/core_state/alpha.rs`: public alpha setters and effective-alpha propagation; ordinary Retail/PTR numeric range validation precedes narrowing/mutation, while earlier profiles retain clamping.
 - `tests/region_alpha_validation.rs` and `region_alpha_validation/ordinary_range.lua`: concrete ordinary-numeric boundaries and rejection/state-preservation contracts.
 - `tests/noop_hot_setters.rs`: existing valid-value dirty/no-op behavior and historical clamping expectation.
 
 ## Tests asserting this spec
 
-Two new Retail/PTR cases are authored; executed RED/GREEN is pending. The shared complete Lua fixture can also run through normal startup without replacing methods or getters. Historical clamping expectations must remain distinguished from modern range rejection.
+Two new Retail/PTR Rust cases are authored, not yet compiled/executed. Their complete shared Lua fixture executed on existing normal binaries before the producer: valid boundaries completed on both profiles; invalid mode failed at the first Frame `SetAlpha(-0.25)` rejection assertion on both profiles. Later rejection/state-preservation and Texture/FontString assertions were unreached. Independent RED audit and producer GREEN remain pending. The shared complete Lua fixture can also run through normal startup without replacing methods or getters. Historical clamping expectations must remain distinguished from modern range rejection.
 
 ## Known gaps (current cycle)
 
