@@ -10,6 +10,7 @@ Historical wording distinguishes player and macro-target predicates; it does not
 - [ ] Player false, explicit target true: those clauses select `no` and `yes`.
 - [ ] Both explicit facts true: both clauses select `yes`.
 - [ ] Both explicit facts false: both clauses select `no`.
+- [ ] Explicit player/focus and implicit-target clauses use their independently supplied facts; a focus selector does not change the player-only `vehicleui` predicate.
 
 ## How it works
 
@@ -25,13 +26,14 @@ Historical wording distinguishes player and macro-target predicates; it does not
 
 ## Tests asserting this spec
 
-- `tests/cmd_option_vehicle_ui.rs`: four concrete public parser cases with independently supplied player/target facts and constant target identity/hostility. Retail 12.0.5 feature gate; authored, not compiled or executed.
+- `tests/cmd_option_vehicle_ui.rs`: four player/target cases plus one selected-player/focus/implicit-target case. Constant target identity/hostility; Retail 12.0.5 feature gate. Authored, not executed. Initial Retail compilation failed (E0603: private `game_data` import); corrected to the existing public `state::TargetInfo` export. Compile failure is not behavioral RED.
 - `tests/cmd_option_selected_unit.rs`: existing selected-clause/unit and unchanged cached slash-handler preservation scope; not newly executed here.
 
 ## Known gaps (current cycle)
 
 - [ ] Compile passive state/fixture; execute behavioral RED before adding the condition producer.
-- [ ] Implement predicates, execute targeted GREEN and selected-unit preservation with full diagnostics.
+- [ ] Implement predicates only after behavioral RED; execute targeted GREEN and selected-unit preservation with full diagnostics.
+- [ ] Pet/vehicle/party/raid/self/softinteract/enemy tokens have no newly established vehicle-fact resolution in this bounded source seam; broader selected-token coverage remains open.
 - [ ] Verify affected profiles, formatting/checks, readability and parent acceptance separately.
 
 ## Out of scope
