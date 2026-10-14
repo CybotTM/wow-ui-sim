@@ -14,7 +14,7 @@ Source `05665ddad` registers `C_TradeSkillUI.GetItemCraftedQualityInfo` for Reta
 
 Original VM-secret authentication precedes Num/Str validation and the existing item parser. Missing supplied data returns one nil as simulator policy. A present record is cloned before allocation; shared projection pushes the fresh result table onto the VM stack before creating field strings. Recipe queries reuse projection without changing their paired lookup. [Crafted-item contract](../../specs/crafted-item-quality-info.md) owns field requirements and links execution evidence; [recipe-input contract](../../specs/api-contract-probe.md#manual-recipe-quality-input-acceptance) stays separate.
 
-Executed Retail/PTR initial and positive-query/original-consumer RED preceded the getter. GREEN is pending at this source checkpoint. Consumer visibility uses a real host-created Frame, not the original professions panel. Native catalog/name/render/panel parity remains unproved.
+Executed Retail/PTR initial and positive-query/original-consumer RED preceded the getter. At this source checkpoint, GREEN was pending; current retained GREEN evidence records 24 outcomes and two separate startup passes. Consumer visibility uses a real host-created Frame, not the original professions panel. Native catalog/name/render/panel parity remains unproved.
 
 ## Limits
 

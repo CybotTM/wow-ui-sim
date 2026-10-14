@@ -1,6 +1,6 @@
 # Crafted item quality information
 
-`C_TradeSkillUI.GetItemCraftedQualityInfo` queries crafted-item quality on Retail/PTR. Current cached declarations require `itemInfo: ItemInfo`, allow secret arguments only when untainted, and return nullable `CraftingQualityInfo`. See [Lua API architecture](../lua-api.md). An empty environment-owned per-item map supplies the existing thirteen-field record. The native getter projects those inputs after executed positive-query and whole-original-consumer RED on Retail/PTR. Independent runtime verification passes eight feature cases plus four preservation cases per profile; public GREEN retention remains pending.
+`C_TradeSkillUI.GetItemCraftedQualityInfo` queries crafted-item quality on Retail/PTR. Current cached declarations require `itemInfo: ItemInfo`, allow secret arguments only when untainted, and return nullable `CraftingQualityInfo`. See [Lua API architecture](../lua-api.md). An empty environment-owned per-item map supplies the existing thirteen-field record. The native getter projects those inputs after executed positive-query and whole-original-consumer RED on Retail/PTR. Independent runtime verification passes eight feature cases plus four preservation cases per profile; 24 GREEN outcomes and two separate startup passes are retained.
 
 ## What it must do
 
@@ -35,7 +35,7 @@
 
 ## Tests asserting this spec
 
-`tests/crafted_quality_api.rs` authors two cases: omitted/nil contextual rejection and secret-nil ordering/taint recovery. Both executed on Retail and PTR: each profile has two first-call rejection failures (actual exit 101). Explicit-nil/context and later tainted-denial/recovery assertions were unreached; return payloads were not printed. Five supplied-model cases and the whole consumer also executed on both profiles: five first-positive table-check failures plus one original-consumer positive-flag failure per profile. Exact field/alias/lifecycle/security/overlay checks later in those tests were unreached. Fixtures execute statement chunks without query overrides or synthetic secrets.
+`tests/crafted_quality_api.rs` authors two cases: omitted/nil contextual rejection and secret-nil ordering/taint recovery. Both executed on Retail and PTR: each profile has two first-call rejection failures (actual exit 101). Explicit-nil/context and later tainted-denial/recovery assertions were unreached; return payloads were not printed. Five supplied-model cases and the whole consumer also executed on both profiles: five first-positive table-check failures plus one original-consumer positive-flag failure per profile. Exact field/alias/lifecycle/security/overlay checks were unreached in those RED runs; subsequent GREEN outcomes are recorded below. Fixtures execute statement chunks without query overrides or synthetic secrets.
 
 ### Initial crafted API RED checkpoint
 
@@ -43,11 +43,14 @@
 
 ### Supplied-record RED checkpoint
 
-[Whole supplied-record RED](../../data/patch-api/evidence/crafted-item-quality-host-records-2026-10-13/red-current/README.md) retains five query and one original-consumer failure per profile, with successful closure/baseline and unreached downstream assertions distinguished. Public-copy acceptance is pending; later GREEN does not rewrite these failures.
+[Whole supplied-record RED](../../data/patch-api/evidence/crafted-item-quality-host-records-2026-10-13/red-current/README.md) retains five query and one original-consumer failure per profile, with successful closure/baseline and unreached downstream assertions distinguished. Public-copy acceptance passes at its recorded scope; later GREEN does not rewrite these failures.
+
+### Retained GREEN and publication acceptance
+
+[Whole host-record evidence](../../data/patch-api/evidence/crafted-item-quality-host-records-2026-10-13/README.md) retains 24 GREEN outcomes (12 unique cases per profile), two separate startup passes, default check/format and source gates. Closing public-copy verification at `614ed7efb` passes for 211 selected texts across 217 files; prior accepted payload proofs are reused through unchanged Git metadata and current stat, not new runtime execution. Historical SOURCE/readability PASS / SPEC FAIL and additive documentation PASS remain distinct.
 
 ## Known gaps (current cycle)
 
-- [ ] Complete privacy-safe whole GREEN/startup/check/format retention and independent public-copy gates. Preserve the failed historical boundaries separately.
 - [ ] Native ItemInfo name lookup/validation, item catalogs, callback event delivery and original professions-panel/rendered acceptance remain unproved; passing host-model queries do not establish them.
 
 ## Out of scope
