@@ -95,6 +95,12 @@ Independent saved-artifact verification PASS is separate from control FAIL: one 
 Frozen ELF identity reused stored/stat metadata, not new byte authentication. Worker write/flush/close precedes output drain, but no independent milestone proves delivery or child EOF timing. EOF was insufficient within this tested deadline; buffering, OOM, protocol defect, indefinite symbolization failure and perf causality remain unproved. The old first-record warning remains unresolved. Prior persistent timeout and unexecuted-plan checkpoints remain historical; their earlier “no EOF control” statements are not current inventory claims.
 
 
+## Changed 60-second GNU EOF control — 2026-10-14
+
+Independent saved-control verification passes one direct GNU lookup with the same21-byte input, frozen ELF/address and1GiB hard/768MiB soft limits, but a60-second worker deadline. Complete247-byte output contains both zero sentinels and the requested address mapping to rilua `execute.rs:992`; child/worker exit0, elapsed43.60055s. Write/flush and stdin-close milestones are worker-side observations, not child receipt timestamps.
+
+Recorded CPU42.452358s, peak891957248 bytes (above768MiB soft), swap peak1631158272 bytes and zero recorded OOMKills remain context. The invocation followed the shared live-run hold and overlapped a bounded PTR compile. Neither timing nor resource observations establish causation. Earlier8-second persistent/EOF failures remain unchanged. This control does not establish perf's selected helper/configuration, resolve the first-record warning, or prove native/parent acceptance.
+
 ## Upstream tagged symbolizer source — 2026-10-14
 
 Upstream Linux `v7.2.10` source closes the previously unavailable protocol-source gap, not installed-build equivalence or execution cause. Installed Arch package metadata identifies `7.2.10-1`; its patches/build configuration remain unproved.

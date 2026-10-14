@@ -104,6 +104,10 @@ Chat proves click/focus, keyboard submission of one SAY message, cleared editbox
 
 Unchanged observed cache/manifest/marker stat fields and marker text belong only to the accepted cast-bar report, not chat/spellbook or byte/descendant equivalence. Conformance invocation wiring and successful aggregate execution are not case-level conformance diagnostics. Historical original4 evidence remains historical, not additional current cases. Full registry/preload, complete conformance, native/all-profile and general parent acceptance remain open; no requirement boxes close.
 
+### Saved suite983 registry comparison — 2026-10-14 (bounded)
+
+[Repair matrix](../wiki/investigations/fullsuite-983f02-2026-10-14.md#bounded-repair-follow-up) records exact saved copied1b94 list2328 minus four appended original chat2/cast-bar1/spellbook1 fixtures = historical observed primary2324, including set and multiplicity equality. This closes only that comparison, not preload execution, original intended full-source completeness or historical binary authentication; historical suite983 FAIL and19 unknown integration skips remain. The separate unchanged normal-preload marker passes1/1 through the real parent/fork route, establishing UIParent/WorldFrame presence and1024×768 queries. It does not assert complete addon sequence, event order, render/native behavior or all-case acceptance.
+
 ### Retail and Mists target eligibility
 
 - [ ] Admit `prefork_full_ui` for the Retail and Mists client bundles without admitting other profiles through their bundles.

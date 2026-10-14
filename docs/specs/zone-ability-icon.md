@@ -35,7 +35,7 @@ Scoped generation reuses the existing PHF writer with a typed snapshot of the or
 
 - [x] Compile/execute genuine RED and distinguish behavioral failures from fixture barriers.
 - [x] Replace the string placeholder with one C_API-owned producer.
-- [ ] Broader startup/PTR/native acceptance remains open; historical12 SMOOTH setup errors remain history. Current default733-record library/six-bin check and full format pass, with six manifest warnings and the format soft-high crossing retained; no clean-startup implication.
+- [ ] Saved PTR4 zone-policy cases pass within the separate38-case [repair matrix](../wiki/investigations/fullsuite-983f02-2026-10-14.md#bounded-repair-follow-up); broader startup/native acceptance remains open; historical12 SMOOTH setup errors remain history. Current default733-record library/six-bin check and full format pass, with six manifest warnings and the format soft-high crossing retained; no clean-startup implication.
 
 ## Out of scope
 
