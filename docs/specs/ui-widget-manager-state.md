@@ -30,6 +30,7 @@ Production `0745fe84f` supplies full bar producers, HUD selectors and host feeds
 - [ ] Incremental updates activate newly available widgets and update existing consumers using their supplied type and visualization record. **Modeled event adapter:** preserve documented `unitToken` and also publish its supplied string as `unit`, because the current cached container filters that field against `attachedUnit`. Remove this adapter when the cached consumer uses `unitToken`; native event aliases and unit registration/data isolation are not established.
 - [ ] Full reconciliation activates current members and removes consumers whose membership has been removed, preserving supplied ordering.
 - [ ] Hidden visualization state and subsequent activation are handled by actual manager consumers, rather than only by query snapshots.
+- [ ] IconAndText dynamic states 3/2 show the acquired dynamic child through normal supplied-state updates; ordinary state 1 hides it and hidden state 0 releases the frame. Cached-consumer child visibility is distinct from flash timing and native parity.
 - [ ] Unregistering a consumer stops its updates; removal and reactivation leave no stale consumer state.
 - [ ] Behavioral tests exercise activation, removal, hidden-state transitions, and unregister through the actual cached Blizzard manager consumer path.
 

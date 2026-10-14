@@ -401,6 +401,109 @@ fn cached_ui_widget_container_refreshes_removes_and_unregisters_supplied_widgets
 }
 
 #[test]
+fn cached_ui_widget_icon_and_text_dynamic_states_toggle_acquired_child() {
+    common::with_timeout(88, || {
+        wow_ui_sim::xml::register_intrinsic_templates();
+        with_blizzard_addon_closure(
+            &[
+                "Blizzard_SharedXMLGame",
+                "Blizzard_Fonts_Shared",
+                "Blizzard_FrameEffects",
+                "Blizzard_UIWidgets",
+            ],
+            &[],
+            |env, loaded| {
+                assert!(loaded.iter().any(|name| name == "Blizzard_UIWidgets"));
+                assert_lua(
+                    env,
+                    "concrete IconAndText state enum guard",
+                    r#"
+                    assert(Enum.IconAndTextWidgetState.Hidden == 0)
+                    assert(Enum.IconAndTextWidgetState.Shown == 1)
+                    assert(Enum.IconAndTextWidgetState.ShownWithDynamicIconFlashing == 2)
+                    assert(Enum.IconAndTextWidgetState.ShownWithDynamicIconNotFlashing == 3)
+                    "#,
+                );
+                supply_inputs(env);
+                register_container(env);
+                // Reuse the existing fixtures; release the header through the normal
+                // feed so the final zero-active count isolates the IconAndText member.
+                assert!(
+                    env.remove_ui_widget(SET_ID, HEADER_ID)
+                        .expect("remove header membership through host feed")
+                );
+                assert_lua(
+                    env,
+                    "ordinary shown member starts with hidden dynamic child",
+                    r#"
+                    local container = LifecycleContainer
+                    assert(container:IsRegisteredForWidgetSet(417))
+                    assert(container.widgetFrames[760101] == LifecycleIcon)
+                    assert(LifecycleIcon:IsShown())
+                    assert(not LifecycleIcon.DynamicIconButton:IsShown())
+                    assert(container.widgetFrames[760103] == nil)
+                    assert(not LifecycleHeader:IsShown())
+                    assert(container.widgetPools:GetNumActive() == 1)
+                    "#,
+                );
+
+                // Only child visibility is observed; flash animation/timing is not.
+                for (state, phase, dynamic_shown) in [
+                    (3, "dynamic icon not flashing", true),
+                    (2, "dynamic icon flashing", true),
+                    (SHOWN, "ordinary shown after dynamic states", false),
+                ] {
+                    env.update_ui_widget(
+                        SET_ID,
+                        widget_entry(ICON_ID, ICON_AND_TEXT),
+                        WidgetVisualization::IconAndText(icon_record(phase, state)),
+                    )
+                    .expect("supply IconAndText state and notify through host feed");
+                    assert_lua(
+                        env,
+                        phase,
+                        &format!(
+                            r#"
+                            local container = LifecycleContainer
+                            assert(container:IsRegisteredForWidgetSet(417))
+                            local frame = assert(container.widgetFrames[760101])
+                            assert(frame == LifecycleIcon, 'refresh the acquired frame')
+                            assert(frame:IsShown())
+                            assert(frame.Text:GetText() == '{phase}')
+                            assert(C_UIWidgetManager.GetIconAndTextWidgetVisualizationInfo(760101).state == {state})
+                            assert(frame.DynamicIconButton:IsShown() == {dynamic_shown})
+                            assert(container.widgetPools:GetNumActive() == 1)
+                            "#,
+                        ),
+                    );
+                }
+
+                env.update_ui_widget(
+                    SET_ID,
+                    widget_entry(ICON_ID, ICON_AND_TEXT),
+                    WidgetVisualization::IconAndText(icon_record("Hidden dynamic member", HIDDEN)),
+                )
+                .expect("hide IconAndText member through host feed");
+                assert_lua(
+                    env,
+                    "hidden member releases the acquired frame",
+                    r#"
+                    local container = LifecycleContainer
+                    assert(container:IsRegisteredForWidgetSet(417))
+                    assert(C_UIWidgetManager.GetIconAndTextWidgetVisualizationInfo(760101).state == 0)
+                    assert(container.widgetFrames[760101] == nil)
+                    assert(not LifecycleIcon:IsShown(), 'released pool frame is hidden')
+                    assert(container.widgetPools:GetNumActive() == 0)
+                    container:UnregisterForWidgetSet()
+                    assert(not container:IsRegisteredForWidgetSet())
+                    "#,
+                );
+            },
+        );
+    });
+}
+
+#[test]
 fn cached_ui_widget_container_filters_supplied_unit_updates() {
     common::with_timeout(88, || {
         wow_ui_sim::xml::register_intrinsic_templates();
