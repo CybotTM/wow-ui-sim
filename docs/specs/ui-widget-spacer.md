@@ -12,8 +12,8 @@
 ## Current implementation and proof
 
 - `tests/ui_widget_spacer_selector_red.rs` authors only the first required-number case, using the actual runtime query without new production records or fake providers.
-- No new Spacer backing model, getter or registration is implemented. The broader private input/lifecycle stage remains unapplied.
-- This test remains unexecuted: no behavioral RED/GREEN credit. First Retail no-run build at `1ffab60b4` reports success: 741 Cargo records, six manifest warnings, 33.25s, terminal exit 0; peak 6,010,707,968 bytes below 8G high and 9G max. Independent saved compilation audit PASS is limited to that no-run build. Fresh memory-pressure and CPU admissions denied sealing/runtime; no test launched. Resource-admitted behavioral RED precedes production model work; populated RED is required before a modeled getter.
+- Passive `SpacerRecord`, initially empty environment-local `spacers` map and normal typed type-22 feed are now implemented. Every declared field must be supplied; no record defaults or catalog seeding. No modeled getter/projector/query registration exists yet. Full populated/lifecycle cases are being adopted separately.
+- First Retail selector RED at `1ffab60b4` independently confirms one unique FAIL, exit 101: callable getter accepted the missing selector. Seven later invalid forms and error-text assertion were unreached; nested summaries are nonadditive. Prior zero-launch capacity denials remain historical. Its no-run build: 741 records, six manifest warnings, 33.25s, terminal exit 0, peak 6,010,707,968 bytes below 8G high/9G max. This selector RED predates passive production inputs; populated RED remains required before a modeled getter, and no populated/lifecycle/native proof is claimed.
 - Required acceptance remains scoped Retail/PTR behavior, source/readability, format/default check, ordinary startup diagnostics and applicable publication evidence. Source/compilation/callability alone does not establish populated behavior.
 
 ## Limits
