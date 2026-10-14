@@ -11,12 +11,32 @@ const STORE_GROUP_CONTRACT: &str = include_str!("fixtures/store_group_contract.l
 
 #[test]
 fn store_group_shape_resolves_current_demo_entry_for_active_profile() {
+    let env = WowLuaEnv::new().expect("create fresh store API environment");
+    assert_store_group_contract(&env);
+}
+
+#[test]
+fn store_group_shape_survives_original_environment_cleanup() {
+    test_timeout! {
+        crate::common::blizzard_addon_harness::with_blizzard_addon_closure(
+            &["Blizzard_EnvironmentCleanup"],
+            &[],
+            |env, loaded| {
+                assert!(loaded.iter().any(|name| name == "Blizzard_EnvironmentCleanup"));
+                assert_store_group_contract(env);
+                env.apply_post_load_workarounds();
+                assert_store_group_contract(env);
+            },
+        );
+    }
+}
+
+fn assert_store_group_contract(env: &WowLuaEnv) {
     let mode = match ACTIVE {
         ClientProfile::Retail | ClientProfile::Ptr => "records",
         ClientProfile::Mists => "ids",
         profile => panic!("store group contract not audited for {profile:?}"),
     };
-    let env = WowLuaEnv::new().expect("create fresh store API environment");
     let chunk = format!("local store_group_mode = {mode:?}\n{STORE_GROUP_CONTRACT}");
     let passed: bool = env
         .eval(&chunk)
