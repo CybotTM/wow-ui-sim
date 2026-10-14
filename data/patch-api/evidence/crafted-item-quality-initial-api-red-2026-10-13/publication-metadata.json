@@ -1,7 +1,7 @@
 {
   "selected_text_records": 62,
   "transform": "completeUTF8TEXT orderedliteralreplace thenLFifabsent; selectedJSONnotreserialized",
-  "privacy_gate": "Initial60-text public-copy/privacy gate PASS at c652aaa88; retained2gate-text copy pending",
+  "privacy_gate": "PASS initial60wholeTEXT at c652aaa88; retained2gateTEXT at c0e7ca8d3; scope is initial API RED retention only",
   "entries": [
     {
       "path": "widget-discrete-progress-current/crafted-quality-ptr-api-red-20261014T012904034210Z/admission.json",
@@ -313,5 +313,13 @@
       "bytes": 687959,
       "sha256": "ed262fa46bf09ca225dbff04703a5ce92887fe206107b3e82c84f553f97891d3"
     }
-  ]
+  ],
+  "retained_gate_copy": {
+    "status": "PASS",
+    "revision": "c0e7ca8d3aa718e750d7f9d8dcb753c509875714",
+    "new_texts": 2,
+    "reused_texts": 60,
+    "report_sha256": "248169c5a8ca00f8d7e59f31e547f24c9e3a71e8b1f2e08ba61df0401eaad168",
+    "proof_sha256": "da48a8c8e21cb030d1e0be5f6b91ad272d23939ec52706d215f896078d429487"
+  }
 }
