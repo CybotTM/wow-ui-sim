@@ -22,6 +22,8 @@ Ordinary numeric `Region:SetAlpha` inputs follow the [10.0.0 change-note summary
 
 ## Tests asserting this spec
 
+[Retained evidence packet](../../data/patch-api/evidence/region-alpha-numeric-range-2026-10-13/README.md): whole-text publication; independent public-copy verification pending.
+
 Producer `71127a8e1` has bounded Retail/PTR runtime acceptance: five unique Rust cases/profile, **10 passing outcomes**, comprising two numeric contracts and three no-op/dirty-state preservation cases. Frame, Texture and FontString reach all 9 valid and 21 invalid combinations/profile, including near-boundary numbers, infinities and NaN. Rejection preserves stored and effective alpha; getters are not replaced. Nested child summaries are not additional tests.
 
 Two separate normal startups complete both fixture modes with CLEAN diagnostics and `[]`; not additional Rust cases. CASC, sound, third-party addons and SavedVariables are disabled. Normal budgets are 2.5 GiB hard/2 GiB soft; rounded `2G` peaks do not establish below-soft-limit operation. Separate OLD480 Mists observation covers nine clamp/valid combinations, not current-Mists, native history or all-Classic acceptance.
