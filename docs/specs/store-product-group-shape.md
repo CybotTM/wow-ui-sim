@@ -7,7 +7,7 @@ Evidence is inferred from original cached consumers plus explicit simulator poli
 ## What it must do
 
 - [ ] Retail/PTR: return one demo record in a fresh simulator with `groupID=501`, `parentGroupID=0`.
-- [ ] Mists: return one demo numeric ID in a fresh simulator, `501`; no record adapter in the consumer.
+- [x] Mists: return one demo numeric ID in a fresh simulator, `501`; no record adapter in the consumer. Two Rust cases and full normal-session contract passed at compiled3e0cba6d4/restore04d83; this is not Store UI acceptance.
 - [ ] Resolve the returned actual ID through `GetProductGroupInfo` to `groupName="Featured"` and through `GetProducts` to the single entry `1003`.
 - [ ] Resolve returned entry `1003` through `GetEntryInfo` to `entryID=1003`, `productID=2003`, and `sharedData.name="Apprentice Rider Bundle"`.
 
@@ -31,8 +31,8 @@ Concrete fresh demo values above are explicit simulator policy, not claims about
 ## Known gaps (current cycle)
 
 - [x] Shared Mists preproducer normal-Lua fixture fails at `Mists GetProductGroups[1] must be numeric` (CLI1), before group/product lookups. Authored Rust case remains unexecuted. Independent existing-artifact audit read all 18 selected artifacts: Mists first-shape RED and Retail/PTR complete baseline lookups accepted. Source-audit ENOENT was a separate agent visibility limitation; main read the delivered report.
-- [ ] Postproducer Rust/runtime GREEN and modern record preservation. Preproducer normal-Lua Retail/PTR record/lookup fixture completed with marker and `[]`; no Store UI acceptance follows.
-- [ ] Evaluate separate public UI proposal only after API shape passes; it is not current API-test acceptance.
+- [ ] Retail/PTR post-restoration record/lookup preservation remains pending. First Retail compile failed at the macro fixture's private-module import, before runtime; corrected import/extended test compile is asynchronous. Preproducer modern preservation is not fresh producer proof.
+- [ ] Mists Store UI population remains unresolved after API GREEN: original public Show/GetProductList left eight cards hidden with ID0 (146×209, resolved rectangles), then failed the non-vacuity assertion. Conditional positive-ID/size/rect assertions were unreached; CLI1/two records represent one assertion failure. Query GREEN does not establish its dispatch cause.
 
 ## Source checkpoint — 2026-10-14
 
@@ -40,7 +40,9 @@ Producer `85d8d7bd4`, tests `f199e9424`: modeled getter ownership and initializa
 
 Source inspection identifies an original lifecycle gap: cached Mists `Blizzard_EnvironmentCleanup` clears `C_StoreSecure`; simulator restoration reruns the Lua bootstrap without re-registering the modeled getter. That is source-grounded explanation, not proof of the exact dynamically returned value/dispatch. Commit `d9c7c6aa1` adds a real cached-cleanup regression, checking the shared contract after original addon loading and post-load workarounds; Mists execution reached the first post-cleanup contract and failed at `GetProductGroups must return a list` (one unique Rust case, exit101); the second post-load assertion was unreached. Initial admission denial was zero-launch, not RED. No getter override, artificial namespace clearing or forced vendor handler.
 
-`04d83e2a5` re-registers the same Rust `GetProductGroups` implementation immediately after runtime-bootstrap restoration, through the existing namespace registrar. Both immediate cleanup and later post-load restoration call this path. This is a source repair intended to close lost registration, not proof either runtime path passes. Recreating the public namespace does not itself republish it into the secure environment; post-cleanup secure/public identity and vendor dispatch remain unproved. Independent original-cleanup RED gate confirms one unique failure and separate zero-launch denial. Fresh compilation, Mists real-cleanup/full-normal GREEN and Retail/PTR preservation remain pending; two compile admissions were denied without launching. No native or Store UI acceptance.
+`04d83e2a5` re-registers the same Rust `GetProductGroups` implementation immediately after runtime-bootstrap restoration, through the existing namespace registrar. Both immediate cleanup and later post-load restoration call this path. This is a source repair intended to close lost registration, not proof either runtime path passes. Recreating the public namespace does not itself republish it into the secure environment; post-cleanup secure/public identity and vendor dispatch remain unproved. Independent original-cleanup RED gate confirms one unique failure and separate zero-launch denial. Three initial Mists compile admissions were denied without launching; later changed headroom admitted the compiled3e0cba6d4 build (741 JSON records, six manifest deprecations plus UnitRole warning). Both new copied executables passed independent once-per-copy authentication. The initial runtime setup failed before launch because verifier receipts used `authentication-*` names; whole-text `receipt-*` aliases corrected the helper basename without rehashing.
+
+Independent restored-Mists runtime gate: **two unique Rust cases**, fresh query and real cached cleanup with the second post-load assertion reached; one timeout child is not a third case. Full normal session completes all numeric-ID/group/product/entry/name assertions, marker `ids`, `[]` and CLEAN/zero observed errors. Source label3e includes restore04d83 and passive target-input0b; not later macro source acceptance. Retail/PTR fresh preservation remains pending. Original public Mists Store population separately fails as recorded above; no native/render/whole-parent acceptance.
 
 ## Out of scope
 
