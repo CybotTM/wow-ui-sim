@@ -124,8 +124,8 @@ pub fn assert_selector_policy(env: &WowLuaEnv, id: f64) {
     feature = "retail-12-1-0"
 ))]
 pub fn assert_secret_selector_contract(env: &WowLuaEnv, id: f64) {
-    use rilua::table_security::wrap_host_secret_number;
     use rilua::LuaApiMut;
+    use rilua::table_security::wrap_host_secret_number;
 
     {
         let loader = env.loader_env();
