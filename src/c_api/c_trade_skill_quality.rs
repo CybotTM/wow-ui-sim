@@ -1,4 +1,6 @@
 //! Recipe quality snapshots supplied by the host; no DB2 quality catalog inferred.
+use super::item_spell::parse_item_id_from_val;
+use crate::client_profile::{ACTIVE, ClientProfile};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -31,7 +33,11 @@ pub struct RecipeQualityInputs {
 pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
     let ns = super::ensure_namespace(state, "C_TradeSkillUI")?;
     table_set_rust_fn_static(state, ns, "GetRecipeItemQualityInfo", item_quality)?;
-    table_set_rust_fn_static(state, ns, "GetRecipeQualityReagentLink", reagent_link)
+    table_set_rust_fn_static(state, ns, "GetRecipeQualityReagentLink", reagent_link)?;
+    if matches!(ACTIVE, ClientProfile::Retail | ClientProfile::Ptr) {
+        table_set_rust_fn_static(state, ns, "GetItemCraftedQualityInfo", crafted_item_quality)?;
+    }
+    Ok(())
 }
 
 fn read_integer(state: &LuaState, index: i32) -> LuaResult<u32> {
@@ -57,6 +63,31 @@ fn item_quality(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
+    Ok(push_crafting_quality_snapshot(state, &record))
+}
+
+fn crafted_item_quality(state: &mut LuaState) -> LuaResult<u32> {
+    let value = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
+    if !matches!(value, Val::Num(_) | Val::Str(_)) {
+        return Err(rilua::runtime_error(
+            "C_TradeSkillUI.GetItemCraftedQualityInfo: itemInfo must be an item ID or link",
+        ));
+    }
+    let record = match parse_item_id_from_val(state, value) {
+        Some(item_id) => borrow_state(state)?
+            .crafted_item_quality
+            .get(&item_id)
+            .cloned(),
+        None => None,
+    };
+    let Some(record) = record else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    Ok(push_crafting_quality_snapshot(state, &record))
+}
+
+fn push_crafting_quality_snapshot(state: &mut LuaState, record: &CraftingQualityInfo) -> u32 {
     let result = create_table(state);
     state.push(result);
     table_set(
@@ -82,7 +113,7 @@ fn item_quality(state: &mut LuaState) -> LuaResult<u32> {
         let value = create_string(state, text);
         table_set(state, result, key, value);
     }
-    Ok(1)
+    1
 }
 
 fn reagent_link(state: &mut LuaState) -> LuaResult<u32> {

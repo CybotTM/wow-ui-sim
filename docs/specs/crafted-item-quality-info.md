@@ -1,6 +1,6 @@
 # Crafted item quality information
 
-`C_TradeSkillUI.GetItemCraftedQualityInfo` queries crafted-item quality on Retail/PTR. Current cached declarations require `itemInfo: ItemInfo`, allow secret arguments only when untainted, and return nullable `CraftingQualityInfo`. See [Lua API architecture](../lua-api.md). An empty environment-owned per-item map now supplies passive inputs using the existing thirteen-field record. No crafted-item getter exists yet.
+`C_TradeSkillUI.GetItemCraftedQualityInfo` queries crafted-item quality on Retail/PTR. Current cached declarations require `itemInfo: ItemInfo`, allow secret arguments only when untainted, and return nullable `CraftingQualityInfo`. See [Lua API architecture](../lua-api.md). An empty environment-owned per-item map supplies the existing thirteen-field record. The native getter now projects those inputs after executed positive-query and whole-original-consumer RED on Retail/PTR; GREEN remains unverified.
 
 ## What it must do
 
@@ -25,7 +25,7 @@
 
 ## Implementation inventory
 
-- `src/c_api/c_trade_skill_quality.rs`: existing recipe-keyed quality queries; no crafted-item query model.
+- `src/c_api/c_trade_skill_quality.rs`: item-keyed native getter, original-secret validation, Retail/PTR registration and shared fresh snapshot projection; recipe queries retain their distinct input map.
 - `src/lua_api/env_init/runtime_surface_bootstrap.lua`: missing namespace functions may become nil-returning compatibility callables; callability is not modeled behavior.
 - `src/lua_api/state/sim_state.rs` and `state.rs`: separate per-item input map, empty by default.
 - `tests/crafted_quality_api.rs`: public required-input and authentic VM-secret-nil boundary tests.
@@ -39,11 +39,11 @@
 
 ### Initial crafted API RED checkpoint
 
-[Initial whole-text evidence](../../data/patch-api/evidence/crafted-item-quality-initial-api-red-2026-10-13/README.md) owns the Retail/PTR required-input failure matrix and reached/unreached boundaries. Both profiles have executed first-call rejection failures; positive-data and whole-consumer proof remain separate. Public-copy acceptance is pending.
+[Initial whole-text evidence](../../data/patch-api/evidence/crafted-item-quality-initial-api-red-2026-10-13/README.md) owns the Retail/PTR required-input failure matrix and reached/unreached boundaries. Both profiles have executed first-call rejection failures; both profiles subsequently reached five positive-query failures and one genuine original ItemButton consumer failure, after successful closure/empty-input baselines. Downstream field/security/visibility/clear assertions remained unreached. Initial public-copy and retained-gate copy checks pass at their recorded scopes; producer GREEN remains pending.
 
 ## Known gaps (current cycle)
 
-- [ ] Execute positive supplied-record and whole-consumer RED on Retail/PTR before getter implementation; establish fixture baselines first. Initial required-input RED is verified separately, not positive-data or downstream security proof.
+- [ ] Verify producer GREEN on Retail/PTR for the two initial, five owned and one whole-consumer cases. Preserve executed initial/positive RED and its exact reached boundaries; do not infer downstream security or visibility acceptance from earlier failures.
 - [ ] Establish accepted ItemInfo selector representations and valid secret-selector behavior from declarations, existing parsers and real callers.
 - [ ] Establish positive-data RED for complete results before implementing projection. A separate explicit per-item supplied record is a proposed simulator model, not a declared native catalog.
 - [ ] Verify detached results, replacement/removal, retained snapshots, isolation and the whole original ItemButton overlay consumer. These are planned, not passing tests.
