@@ -114,11 +114,17 @@ Three-slice buttons (ThreeSliceButtonTemplate) define their background as child 
 
 **Fix**: replace the child Text FontString's single CENTER anchor with fill-parent anchors (`add_fill_parent_anchors()`), so `resolve_multi_anchor_edges` computes proper width from the parent button bounds.
 
+## Region alpha numeric range
+
+Stored alpha is `f32`; ordinary Retail/PTR numeric validation precedes narrowing and mutation. [Owning contract/status](../../specs/region-alpha-numeric-range.md) records five unique cases/profile, two separate startups, legacy observation and remaining acceptance limits.
+
 ## Visibility
 
 `Show()` fires `OnShow` recursively on visible children. `IsVisible()` walks the parent chain; `IsShown()` checks only the frame's own `visible` flag.
 
 ## Sources
+
+- [Region alpha numeric range](../../specs/region-alpha-numeric-range.md) — ordinary numeric contract and bounded retained status
 
 - [FrameStrataProbe](../../../docs/addons/FrameStrataProbe/README.md) — retail XML `PARENT`, template comparison, and before/after operation observations
 - [widget-system.md](../../widget-system.md) — Frame struct, lazy model payload, WidgetType, WidgetRegistry, default children, strata

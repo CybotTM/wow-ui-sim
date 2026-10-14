@@ -1,3 +1,7 @@
+## [2026-10-13] evidence | Region alpha numeric runtime
+
+[Owning contract](../specs/region-alpha-numeric-range.md) records 10 Retail/PTR outcomes, two separate startups and OLD480 legacy observation. Public retention and full-parent acceptance remain open.
+
 ## [2026-10-13] source | Crafted-item quality producer
 
 [Crafting inventory](systems/crafting-reagents.md#crafted-item-quality-source-checkpoint--2026-10-13) links the owning contract and evidence. Item inputs stay separate from recipe pairs; producer GREEN and native/render/original-panel proof remain unverified at this checkpoint.

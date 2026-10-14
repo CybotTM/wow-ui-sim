@@ -4,10 +4,10 @@ Ordinary numeric `Region:SetAlpha` inputs follow the [10.0.0 change-note summary
 
 ## What it must do
 
-- [ ] Accept numeric zero, one and interior values, returning no values.
-- [ ] Reject ordinary numeric inputs outside the inclusive range, including infinities and NaN, before changing stored or inherited alpha.
-- [ ] Validate the original numeric precision before narrowing to stored `f32`; values just beyond either boundary must not become valid through rounding.
-- [ ] Preserve valid-value dirty/no-op behavior. Earlier profiles retain the existing clamping behavior as simulator compatibility, not independently verified native history.
+- [x] Accept numeric zero, one and interior values, returning no values.
+- [x] Reject ordinary numeric inputs outside the inclusive range, including infinities and NaN, before changing stored or inherited alpha.
+- [x] Validate the original numeric precision before narrowing to stored `f32`; values just beyond either boundary must not become valid through rounding.
+- [x] Preserve valid-value dirty/no-op behavior. Earlier profiles retain the existing clamping behavior as simulator compatibility, not independently verified native history.
 
 ## How it works
 
@@ -22,11 +22,18 @@ Ordinary numeric `Region:SetAlpha` inputs follow the [10.0.0 change-note summary
 
 ## Tests asserting this spec
 
-Two new Retail/PTR Rust cases are authored, not yet compiled/executed. Their complete shared Lua fixture executed on existing normal binaries before the producer: valid boundaries completed on both profiles; invalid mode failed at the first Frame `SetAlpha(-0.25)` rejection assertion on both profiles. Later rejection/state-preservation and Texture/FontString assertions were unreached. Independent normal-Lua RED/valid-baseline audit passes at those scopes; producer GREEN remains pending. The shared complete Lua fixture can also run through normal startup without replacing methods or getters. Historical clamping expectations must remain distinguished from modern range rejection.
+Producer `71127a8e1` has bounded Retail/PTR runtime acceptance: five unique Rust cases/profile, **10 passing outcomes**, comprising two numeric contracts and three no-op/dirty-state preservation cases. Frame, Texture and FontString reach all 9 valid and 21 invalid combinations/profile, including near-boundary numbers, infinities and NaN. Rejection preserves stored and effective alpha; getters are not replaced. Nested child summaries are not additional tests.
+
+Two separate normal startups complete both fixture modes with CLEAN diagnostics and `[]`; not additional Rust cases. CASC, sound, third-party addons and SavedVariables are disabled. Normal budgets are 2.5 GiB hard/2 GiB soft; rounded `2G` peaks do not establish below-soft-limit operation. Separate OLD480 Mists observation covers nine clamp/valid combinations, not current-Mists, native history or all-Classic acceptance.
+
+Retained full format and default Retail library/six-bin check pass: 733 JSON records, zero compiler-message records, six manifest lint-key deprecations. Format peak 566022144 bytes exceeds soft high 536870912 by 29151232 bytes, below the 1 GiB hard maximum.
+
+Pre-producer valid modes passed; invalid modes failed at the first Frame `SetAlpha(-0.25)` rejection assertion, leaving later assertions unreached. Original Retail admission denial and PTR setup failure remain zero-launch. Prior PTR4258 authentication/delivery and global historical hash-read total remain UNKNOWN; fresh4259 copy-integrity evidence does not recover them. Public retention is pending.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile/run the authored Rust tests; verify producer GREEN, preservation, startup diagnostics and check/format. Pre-producer normal-Lua RED is independently verified; it does not establish new Rust execution or producer GREEN.
+- [ ] Publish and independently verify privacy-safe evidence retention.
+- [ ] Current-Mists/all-Classic and native/render/full-parent acceptance remain unproved; dirty-state assertions are not rendered-pixel proof.
 
 ## Out of scope
 
