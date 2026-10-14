@@ -30,12 +30,12 @@
 - `src/lua_api/state/sim_state.rs` and `state.rs`: separate per-item input map, empty by default.
 - `tests/crafted_quality_api.rs`: public required-input and authentic VM-secret-nil boundary tests.
 - `tests/crafted_quality_owned.rs` and `crafted_quality_owned/assertions.lua`: positive projection, selector, lifecycle, isolation and secret-selector tests.
-- `tests/crafted_quality_item_button.rs`: whole original cached consumer candidate with real Button/Texture; fixture validity unproved.
+- `tests/crafted_quality_item_button.rs`: whole original cached consumer with real Button/Texture; Retail/PTR closure and empty-input baselines passed before positive branch RED. Later overlay assertions remain unproved.
 - `Cargo.toml`: pins rilua; `rilua::table_security::unwrap_secret` supplies the existing secret-access guard.
 
 ## Tests asserting this spec
 
-`tests/crafted_quality_api.rs` authors two cases: omitted/nil contextual rejection and secret-nil ordering/taint recovery. Both executed on Retail and PTR: each profile has two first-call rejection failures (actual exit 101). Explicit-nil/context and later tainted-denial/recovery assertions were unreached; return payloads were not printed. Five supplied-model cases and one whole-consumer candidate are authored but unexecuted. Both use statement-chunk execution, without query overrides or synthetic secrets.
+`tests/crafted_quality_api.rs` authors two cases: omitted/nil contextual rejection and secret-nil ordering/taint recovery. Both executed on Retail and PTR: each profile has two first-call rejection failures (actual exit 101). Explicit-nil/context and later tainted-denial/recovery assertions were unreached; return payloads were not printed. Five supplied-model cases and the whole consumer also executed on both profiles: five first-positive table-check failures plus one original-consumer positive-flag failure per profile. Exact field/alias/lifecycle/security/overlay checks later in those tests were unreached. Fixtures execute statement chunks without query overrides or synthetic secrets.
 
 ### Initial crafted API RED checkpoint
 
@@ -45,7 +45,6 @@
 
 - [ ] Verify producer GREEN on Retail/PTR for the two initial, five owned and one whole-consumer cases. Preserve executed initial/positive RED and its exact reached boundaries; do not infer downstream security or visibility acceptance from earlier failures.
 - [ ] Establish accepted ItemInfo selector representations and valid secret-selector behavior from declarations, existing parsers and real callers.
-- [ ] Establish positive-data RED for complete results before implementing projection. A separate explicit per-item supplied record is a proposed simulator model, not a declared native catalog.
 - [ ] Verify detached results, replacement/removal, retained snapshots, isolation and the whole original ItemButton overlay consumer. These are planned, not passing tests.
 
 ## Out of scope
@@ -54,4 +53,4 @@ Native item-catalog/classification and exact-error parity remain unproved. Recip
 
 ## Declaration evidence
 
-Profile-scoped cache sources for both Retail and PTR: `Blizzard_APIDocumentationGenerated/TradeSkillUIDocumentation.lua` and `TradeSkillUITypesDocumentation.lua`. Required signature and thirteen-field result are local declaration observations, not authenticated native captures. Numeric IDs, numeric strings, item strings and hyperlinks remain unestablished in this stage.
+Profile-scoped cache sources for both Retail and PTR: `Blizzard_APIDocumentationGenerated/TradeSkillUIDocumentation.lua` and `TradeSkillUITypesDocumentation.lua`. Required signature and thirteen-field result are local declaration observations, not authenticated native captures. Numeric IDs, decimal strings, item strings and hyperlinks are the selected existing-parser model forms. Their complete runtime alias behavior and native validation remain unproved until appropriate GREEN/native evidence.
