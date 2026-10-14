@@ -1,3 +1,7 @@
+## [2026-10-14] evidence | Public historical Store/macro packet
+
+[Store owner](../specs/store-product-group-shape.md#current-bounded-retail-receipt--2026-10-14) and [macro owner](../specs/macro-vehicle-ui-conditions.md#current-bounded-runtime-follow-up--2026-10-14) link the [public packet](../../data/patch-api/evidence/store-macro-lifecycle-2026-10-14/README.md). Accepted copy/privacy only; recorded revision scopes and historical failures retained. Current item/display/PTR/UI, native/render and full-parent acceptance excluded.
+
 ## [2026-10-14] source | Item producer and Store selection observation
 
 [Item producer checkpoint](systems/lua-api.md#supplied-item-cooldowns--producer-checkpoint-2026-10-14) links owning RED/GREEN limits. [Store selection checkpoint](investigations/store-secure-pool-constructors.md#temporary-store-selection-trace--source-checkpoint-2026-10-14) links opt-in diagnostic limits; no callback/root proof.
