@@ -1,5 +1,3 @@
-#![cfg(feature = "retail-12-0-5")]
-
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::state::TargetInfo;
 

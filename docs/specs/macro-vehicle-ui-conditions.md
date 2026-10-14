@@ -26,7 +26,7 @@ Historical wording distinguishes player and macro-target predicates; it does not
 
 ## Tests asserting this spec
 
-- `tests/cmd_option_vehicle_ui.rs`: four player/target cases plus one selected-player/focus/implicit-target case. Constant target identity/hostility; Retail 12.0.5 feature gate. Executed Retail RED at52fc18f4e: five unique cases, one false/false control PASS and four predicate FAILs (exit101). Selected-unit case fails on its first supplied row; later three rows were unreached, not sixteen RED outcomes. Initial E0603/private `game_data` import compile failure is retained separately; corrected public `state::TargetInfo` export compiled. Receipt-directory setup failure was zero-launch, corrected by whole-text metadata copies without rehashing.
+- `tests/cmd_option_vehicle_ui.rs`: four player/target cases plus one selected-player/focus/implicit-target case. Constant target identity/hostility; five common-producer cases now compile under every supported client profile. This removes a test-only Retail gate; it adds no production behavior or native/older-profile acceptance. Executed Retail RED at52fc18f4e: five unique cases, one false/false control PASS and four predicate FAILs (exit101). Selected-unit case fails on its first supplied row; later three rows were unreached, not sixteen RED outcomes. Initial E0603/private `game_data` import compile failure is retained separately; corrected public `state::TargetInfo` export compiled. Receipt-directory setup failure was zero-launch, corrected by whole-text metadata copies without rehashing.
 - `tests/cmd_option_selected_unit.rs`: existing selected-clause/unit and unchanged cached slash-handler preservation scope; not newly executed here.
 
 ## Current bounded runtime follow-up — 2026-10-14
@@ -48,7 +48,8 @@ The pending items below preserve the earlier checkpoint, not current runtime sta
 
 ## Remaining current gates
 
-- [ ] Final producer formatting/checks and affected profiles, including PTR; broader checks and parent acceptance remain pending.
+- [x] Independent PTR gate at compiled `bc5cecffb`: vehicle5/5 and selected-unit2/2, all four fifth-case rows reached; Store2 unique/item4/corrected bag1 also pass. Separate normal public Store lifecycle passes visibility/name/containment and CLEAN0errors. Store cleanup retains one AuraContainerUtil failure reported twice; six manifest warnings remain. This is bounded PTR proof, not all-startup-clean, native/render or full-parent acceptance.
+- [ ] Final producer formatting/checks and current Retail/Mists/older-profile preservation remain pending. The common vehicle5 tests are enabled for Wrath/Era/Anniversary/Wowforever; zero selected tests never count as preservation.
 - [ ] Broader selected-token resolution; native, negation, default and absent-target semantics remain unproved. Existing selected-unit preservation is not new vehicle-fact proof for these boundaries.
 
 ## Out of scope
