@@ -1,7 +1,7 @@
 {
-  "selected_text_records": 60,
+  "selected_text_records": 62,
   "transform": "completeUTF8TEXT orderedliteralreplace thenLFifabsent; selectedJSONnotreserialized",
-  "privacy_gate": "pending",
+  "privacy_gate": "Initial60-text public-copy/privacy gate PASS at c652aaa88; retained2gate-text copy pending",
   "entries": [
     {
       "path": "widget-discrete-progress-current/crafted-quality-ptr-api-red-20261014T012904034210Z/admission.json",
@@ -302,6 +302,16 @@
       "path": "independent/crafted-quality-ptr-api-red-current/proof.json",
       "bytes": 27257,
       "sha256": "a0091a036aac057ab5c18c828b18cf425eda11979a8a0a1837b362e33c4fabad"
+    },
+    {
+      "path": "publication-current/report.md",
+      "bytes": 10388,
+      "sha256": "3cf1cdf94136ea2a372fb8388bc5b4d022358604b6552b9ff63666f2524aa7c2"
+    },
+    {
+      "path": "publication-current/proof.json",
+      "bytes": 687959,
+      "sha256": "ed262fa46bf09ca225dbff04703a5ce92887fe206107b3e82c84f553f97891d3"
     }
   ]
 }
