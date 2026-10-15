@@ -32,6 +32,10 @@
 - Later ordinary Retail CLI independently exits 0 with exact `[]\n`, 14,709 stderr bytes/219 LF-terminated lines. It uses the cached non-test `d15126365` artifact and completed `d5e3358a3` source mount; later `eba5a1617` TextColumnRow source is excluded. Complete retained stderr contains no observed warning/error diagnostic, but startup fd-2 suppression and inherited read-only WTF/cache access remain. Serial 1-CPU/2G run completed in 6.668s, CPU 5.950s, rounded 1.5G peak/zero swap. Parent high events increased by 12,008 with concurrent lead gates; no new parent OOM increments or workload-causality inference.
 - A third actual owning compile at `eba5a1617` was also safety-aborted: 726 JSON records, six manifest warnings, no `build-finished` or owning artifact, SIGTERM at host full PSI avg10 1.13%. Peak 3,170,910,208 bytes and CPU 8.165s are partial-attempt observations, not build performance or behavior proof. Separate conservative-cache-projection denial launched nothing. Host limits/caches were unchanged; default check, owning publication and public retention remain open.
 
+## Later nonbehavioral follow-up — 2026-10-14
+
+The three owning aborts above remain historical. Four later TextColumn integration compile attempts also ended incomplete; they add no default-check or owning-publication result. Prior Retail/PTR Spacer runtime PASS remains limited to its recorded sources. The [TextColumn follow-up](ui-widget-text-column-row.md#saved-nonbehavioral-follow-up--2026-10-14) separates later format/metadata PASS from interrupted compilation and preserves warning/formatter-failure history. Default check, owning publication and public retention remain open.
+
 ## Limits
 
 Strict selector rejection is the existing simulator sibling policy, not native parity proof. Native catalogs, animation/effect/timer/atlas behavior, nonfinite dimension policy, rendering and broader parent acceptance are not established by this slice. No vendor/cache/Wowless modification is authorized by it.

@@ -1,6 +1,6 @@
 ## [2026-10-14] source | TextColumnRow passive inputs and authored tests
 
-[Manager checkpoint](systems/ui-widget-manager-state.md#textcolumnrow-passive-checkpoint--2026-10-14) links the supplied input/type-21 feed contract. Getter and executed proof remain pending.
+[Manager checkpoint](systems/ui-widget-manager-state.md#textcolumnrow-passive-checkpoint--2026-10-14) links the supplied input/type-21 feed contract. Eight cases remain authored but uncompiled/unexecuted; getter remains absent. [Saved nonbehavioral follow-up](../specs/ui-widget-text-column-row.md#saved-nonbehavioral-follow-up--2026-10-14) separates format/metadata PASS from interrupted compilation.
 
 ## [2026-10-14] evidence | Spacer bounded producer checkpoint
 

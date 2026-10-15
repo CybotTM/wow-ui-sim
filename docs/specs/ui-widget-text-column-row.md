@@ -50,6 +50,14 @@ Passive record structs, empty environment-owned map and normal type-21 storage r
 
 These tests are uncompiled/unexecuted: zero observed RED or GREEN. Consumer tag/style/reset assertions remain authored expectations, not runtime facts. Query-only texture/effect/timer values are synthetic; consumer records neutralize them. Source/readability inspection is separate from compilation and behavior.
 
+## Saved nonbehavioral follow-up — 2026-10-14
+
+Root `cargo fmt --check` at `c66bfa263` passes with empty complete stdout/stderr. The earlier 512M formatter attempt timed out without a formatter result; the corrective 2G attempt passes. This proves formatting only, not compilation or behavior. Later `ed9fdba0e` changes six manifest Clippy-key spellings, preserving values, dependencies and Rust sources; one offline/locked/no-deps metadata invocation passes without those warnings. Historical warning streams remain unchanged; metadata does not prove compiler/linter cleanliness.
+
+Four subsequent Retail integration `--no-run` attempts at `c66bfa263` ended in guard-issued SIGTERM without Cargo `build-finished` or a completed integration artifact. Triggers were host full PSI avg10 (two attempts), host full PSI avg60, then worker full PSI avg10. These are incomplete compilations, not compiler-error failures or behavioral RED. Eight authored cases remain uncompiled/unexecuted; getter/projector/registration remain absent. The earlier owning compile aborts remain separate history in the [Spacer contract](ui-widget-spacer.md).
+
+Saved guard checks establish bounded pure threshold decisions, not unconditional malformed-input fail-closed handling, successful live stopping or machine responsiveness. Resource observations do not establish workload causality.
+
 ## Remaining proof
 
 - [ ] Compile tests and observe genuine populated result-boundary RED before getter implementation. Import/harness failures and absence-only controls do not qualify.
