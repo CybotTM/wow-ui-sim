@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | Watch membership bounded model execution
+
+[Current receipt](../baselines/README.md#current-watch-membership-model-execution--2026-10-15) owns sourcef91 build/seals, 39 bounded model PASS and inventory8427 discovery only. [API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links contract and header-fixture limits. Independent saved model-runtime reconciliation PASS; normal original/header/startup NOT EXECUTED awaiting FIFO. Source27 host-PSI abort, UnitRole warning and source40a/source704 historical results retained; baseline JSON unchanged, broader acceptance open.
+
 ## [2026-10-15] evidence | Watch projection and talent fixture executed
 
 [Receipt owner](../baselines/README.md#current-watchtalent-execution--2026-10-15) records40a's28 targeted passes, proper test-path CVar isolation, positive normal watch/global-count/voice probe and exact startup10/14 FAIL. Previous12/16 retained. Separate real add/remove/type/event RED is not hidden by query-only coverage; Gamepad/native/profile/full-parent gaps remain. Independent saved reconciliation pending.
@@ -2111,4 +2115,4 @@ Updated [existing Windows investigation](investigations/windows-port-build.md#ev
 
 ## [2026-10-15] source | Forever explicit watch membership
 
-[API checkpoint](systems/lua-api.md#forever-supplied-quest-difficulty) links the [owning membership contract](../specs/forever-quest-difficulty.md#ordinary-watch-membership-follow-up--source-only-unexecuted) for `df5bc6537`: bounded source/format audit PASS; current runtime UNEXECUTED and real unchanged whole-vendor Track All/Untrack All, POI toggle and tracker consumer verification pending. Historical source40a28 PASS and startup10/14 FAIL remain separate, including the earlier mutation/event RED. Reconciled only touched quest/watch summaries; no new compile/runtime/native/profile/startup acceptance.
+[API checkpoint](systems/lua-api.md#forever-supplied-quest-difficulty) links the [owning membership contract](../specs/forever-quest-difficulty.md#ordinary-watch-membership-follow-up--bounded-model-execution) for historical `df5bc6537`: bounded source/format audit PASS; runtime then UNEXECUTED and real unchanged whole-vendor Track All/Untrack All, POI toggle and tracker consumer verification pending. Historical source40a28 PASS and startup10/14 FAIL remain separate, including the earlier mutation/event RED. Reconciled only touched quest/watch summaries; no new compile/runtime/native/profile/startup acceptance.

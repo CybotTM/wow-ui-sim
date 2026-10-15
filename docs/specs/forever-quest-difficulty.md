@@ -10,9 +10,9 @@ Forever's `C_QuestLog.GetQuestDifficultyLevel` must expose the supplied rich que
 - [x] Support unchanged whole cached Mainline DifficultyUtil plus Camelot QuestUtilsOverrides with explicit test fixtures for elite status, CVar selection and color dependencies; produce concrete ordinary/elite, colored/plain title prefixes.
 - [ ] Preserve other profiles' existing surface and Retail/PTR `QuestCanHaveWarModeBonus` behavior in runtime verification.
 
-## Ordinary-watch membership follow-up — source only, UNEXECUTED
+## Ordinary-watch membership follow-up — bounded model execution
 
-The Forever membership implementation replaces the all-ordinary-rows watch policy with explicit per-environment `quest_watch_types: HashMap<i32, QuestWatchType>` metadata. The contracts below describe inspected source, not executed acceptance or native parity.
+The Forever membership implementation replaces the all-ordinary-rows watch policy with explicit per-environment `quest_watch_types: HashMap<i32, QuestWatchType>` metadata. The contracts below are bounded simulator policies; current model execution is recorded below, not native parity or normal-startup acceptance.
 
 - **Membership and seed:** seed current non-world rich-row IDs once as `Manual=1`; `Automatic=0` is representable metadata, not selected by `AddQuestWatch`. Later row insertion or identity changes do not auto-enroll IDs. Counts and enumeration intersect metadata keys with current non-world rich rows in rich-row order, not insertion or hash order. Removed/world rows are hidden without deleting their metadata; restoring an eligible row can expose retained membership. Fresh state gets its own seed/map.
 - **Real mutators and type:** `C_QuestLog.AddQuestWatch(questID)` inserts Manual only for a currently represented ordinary ID without existing metadata; duplicate, world-only and absent IDs return one `false`. `RemoveQuestWatch` deletes existing metadata even when the rich row is absent/world, returning one boolean indicating deletion. `GetQuestWatchType` returns exactly one numeric type only for a currently ordinary row with metadata, otherwise one nil. These three endpoints reject nonnumeric, nonfinite, fractional and out-of-i32-range IDs with API context; extra arguments are ignored. Add does not change an existing type.
@@ -23,7 +23,7 @@ The Forever membership implementation replaces the all-ordinary-rows watch polic
 
 Prior runtime source40a has **28 PASS** (difficulty3 + watch-projection4 + finite21), plus the separately recorded normal watch/global-alias/voice checks; [prior receipt](../baselines/README.md#current-watchtalent-execution--2026-10-15) owns attribution. Those results cover the prior read-only projection, not this new explicit-membership implementation or revised tests. Source704's original normal Lua RED included static-only80002; source40a removed that stale producer. A separate source40a normal RED still observed zero-result add/remove, unchanged count2, nil type and zero events. Preserve both historical boundaries; no authored Rust RED is inferred.
 
-**Membership code and new/revised tests: runtime UNEXECUTED.** Source inspected and formatted; no compile, runtime, unchanged Track All/Untrack All/POI/tracker consumer, other-profile, native parity or full-startup acceptance is claimed. The earlier10-record/14-occurrence startup FAIL remains historical and is not repaired by these source changes.
+Current source `f91eb7aab` has **18 quest model PASS**: membership8 + revised projection4 + getter3 + whole cached header-consumer3. The [current central receipt](../baselines/README.md#current-watch-membership-model-execution--2026-10-15) owns build/seals, the separate finite21 controls and independent saved model-runtime PASS. Whole-header tests use explicit fixtures and replace the unrelated refresh tail; they are not normal-process header execution. Original normal membership probe, normal header probe and fresh startup are **NOT EXECUTED**, awaiting FIFO admission. Other-profile, native and full-parent acceptance remain open; the historical10-record/14-occurrence startup FAIL is not repaired or superseded by these model passes.
 
 ## How it works
 
@@ -37,9 +37,9 @@ Prior runtime source40a has **28 PASS** (difficulty3 + watch-projection4 + finit
 - `src/lua_api/globals/quest_surface/{register,handlers}.rs`: omit replaced static watch handlers only on Forever, preserving initial modeled publication.
 - `tests/wowforever_quest_difficulty.rs`: fresh-environment and unchanged whole-consumer behavior assertions.
 - `src/c_api/c_quest_log_watches.rs`: Forever membership mutators, type/count/index queries, legacy global mappings and synchronous notifications; seeded map stored in `SimState`.
-- `tests/wowforever_quest_watch_projection.rs`: revised live-row/explicit-membership projection assertions, UNEXECUTED for current changes.
-- `tests/wowforever_quest_watch_membership.rs` and `.lua`: authored membership, restore-call preservation and reentrant-event coverage, UNEXECUTED; `tests/fixtures/quest_watch_membership_original.lua` retains the original probe.
-- `tests/wowforever_quest_header_consumer.rs` and `.lua`: three authored cases load whole cached QuestUtils and QuestMapFrame unchanged, exercise header-one track/untrack, world interleaving and the real NPE removal gate. An observer replaces only the unrelated UI-refresh tail; actual refresh/menu/frame-event lifecycle is not covered. Rich rows support one synthetic header, so second-header behavior is not fabricated. UNEXECUTED.
+- `tests/wowforever_quest_watch_projection.rs`: revised live-row/explicit-membership projection assertions, four model cases PASS at source `f91eb7aab`.
+- `tests/wowforever_quest_watch_membership.rs` and `.lua`: membership, restore-call preservation and reentrant-event coverage, eight model cases PASS at source `f91eb7aab`; `tests/fixtures/quest_watch_membership_original.lua` retains the original probe.
+- `tests/wowforever_quest_header_consumer.rs` and `.lua`: three model cases PASS at source `f91eb7aab`; load whole cached QuestUtils and QuestMapFrame unchanged, exercise header-one track/untrack, world interleaving and the real NPE removal gate. An observer replaces only the unrelated UI-refresh tail; actual refresh/menu/frame-event lifecycle is not covered. Rich rows support one synthetic header, so second-header behavior is not fabricated. Normal header execution remains pending.
 
 ## Tests asserting this spec
 
@@ -51,9 +51,10 @@ Prior runtime source40a has **28 PASS** (difficulty3 + watch-projection4 + finit
 
 ## Known gaps (current cycle)
 
-- [ ] Execute current membership and revised projection coverage; inspect unchanged Track All/Untrack All, POI toggle and tracker callers. Source implementation is not runtime completion.
+- [x] Independently reconcile all 39 distinct saved model passes at source `f91eb7aab`; discovery and filtered cases are not passes.
+- [ ] Execute normal original/header probes; POI toggle, tracker and actual refresh/menu/frame-event lifecycle remain unverified beyond bounded model cases.
 - [ ] Verify other-profile preservation and default check; world-watch projection and broader query reconciliation remain open.
-- [ ] Native parity and whole-startup acceptance remain open, including earlier Gamepad errors. Prior source40a28 PASS and startup FAIL do not prove current membership behavior.
+- [ ] Native parity and whole-startup acceptance remain open, including earlier Gamepad errors. Prior source40a28 PASS and startup FAIL remain separate from current bounded membership proof.
 
 ## Out of scope
 

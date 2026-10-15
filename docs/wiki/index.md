@@ -1,14 +1,14 @@
 ## [2026-10-15] evidence | Watch/talent bounded execution
 
-[Historical receipt](../baselines/README.md#current-watchtalent-execution--2026-10-15) records source40a's28 targeted passes, positive normal watch/voice probe and startup10records/14occurrences FAIL. Stale80002 emission was removed at that source; its separate mutation/event RED is historical, not a current-source verdict. [Membership checkpoint](systems/lua-api.md#forever-supplied-quest-difficulty) links df5bc6537's owning contract: source/format audit PASS, new runtime UNEXECUTED and real whole-vendor consumer verification pending. Gamepad and broader acceptance remain open.
+[Historical receipt](../baselines/README.md#current-watchtalent-execution--2026-10-15) records source40a's28 targeted passes, positive normal watch/voice probe and startup10records/14occurrences FAIL. Stale80002 emission was removed at that source; its separate mutation/event RED is historical, not a current-source verdict. [Membership checkpoint](systems/lua-api.md#forever-supplied-quest-difficulty) links the current independently reconciled bounded model execution; normal-process probes remain pending. Gamepad and broader acceptance remain open.
 
 ## [2026-10-15] evidence | Provider/quest bounded execution
 
 [Central receipt](../baselines/README.md#current-providerquest-execution--2026-10-15) records source704 build, six new regressions PASS, finite controls19/2, four positive normal probes and startup12records/16occurrences FAIL. Both older control failures reproduce on pre-change code; missing rich quest80002 and Gamepad storage remain open. Independent runtime reconciliation pending.
 
-## [2026-10-15] source | Forever supplied quest difficulty
+## [2026-10-15] evidence | Forever supplied quest difficulty
 
-[API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links the owning live-row contract and separates original query/unchanged-consumer REDs, historical source40a getter/projection passes and the new df5bc6537 membership source-only checkpoint.
+[API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links the owning contract and [current sourcef91 receipt](../baselines/README.md#current-watch-membership-model-execution--2026-10-15): 39 bounded model PASS; independent saved model-runtime reconciliation PASS. Normal original/header/startup NOT EXECUTED awaiting FIFO. Historical source40a/source704 remain separate; no native/default-check/cross-profile/full-parent acceptance.
 
 ## [2026-10-15] research | Screenshot fidelity
 
