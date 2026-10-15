@@ -38,7 +38,7 @@ Static comparison at the [expanded-pass revisions and limits](additional-renderi
 
 **Simulator:** `src/lua_api/frame/methods/text_attribute_event/text.rs:170-191` strips tag spans rather than creating document nodes. `src/lua_api/simple_html.rs:37-55` stores style preferences but no parsed document/link regions. Actual `src/iced_app/quad_builders.rs:352-354` routes SimpleHTML through generic FontString emission using `text_stripped`.
 
-**Counterexample:** `<HTML><BODY><H1>Title</H1><P>See <A href="spell:123">Spell</A><BR>next</P></BODY></HTML>` becomes `TitleSee Spellnext` in simulator's stripped stream; heading/paragraph/break distinctions and clickable link regions are lost. Exact reconstructed pixel positions were not measured.
+**Counterexample:** `<HTML><BODY><H1>Title</H1><P>See <A href="spell:123">Spell</A><BR/>next</P></BODY></HTML>` becomes `TitleSee Spellnext` in simulator's stripped stream; heading/paragraph/break distinctions and clickable link regions are lost. Exact reconstructed pixel positions were not measured.
 
 **Rework/regression:** parse the supported document subset into styled layout and link/image regions, connect per-element settings and hyperlink enablement to it, and preserve text semantics. Test concrete heading/body font differences, line breaks, image geometry and click/hover targets—not just a stripped text getter or a true `GetHyperlinksEnabled` result. Unsupported modern HTML extensions must not be invented from this source.
 
