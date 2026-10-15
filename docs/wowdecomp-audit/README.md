@@ -14,6 +14,8 @@ The initial nine findings below were a bounded first pass, **not the total gap c
 
 [Additional control, text and tooltip findings](additional-controls-text-and-tooltip.md): C4 password rendering, C5 history capacity, C6 fade retiming, H1 HTML structure/links, U1 inline tooltip textures, U2 empty-clear callbacks, U3 double-column wrapping, F1 all-points validation, F2 script-driven movement/resize transactions. Broad tooltip colour and alpha no-op allegations were rejected after tracing shared helpers and registrations.
 
+[Additional widget-state findings](additional-widget-state.md): C7 active button fonts, C8 Slider range script/value lifecycle, C9 deferred scroll-range notification. The StatusBar orientation absence claim was rejected by tracing shared registration and its actual render field.
+
 All remain static historical-source comparisons, not native-confirmed modern defects.
 
 ## Initial rework list

@@ -74,7 +74,7 @@ Static comparison at the [expanded-pass revisions and limits](additional-renderi
 
 ## F1 — `SetAllPoints` bypasses protected mutation and named-target validation
 
-**External:** `Engine/Source/Frame/CScriptRegion_Scripts.cpp:550-594`, offset `0x0049DE40`, checks `ProtectedFunctionsAllowed`, resolves names/tables, and errors on missing/self/cyclic targets before applying anchors.
+**External:** `Engine/Source/Frame/CScriptRegion_Scripts.cpp:550-594`, offset `0x0049DE40`, checks `ProtectedFunctionsAllowed`, resolves names/tables, and errors on missing/self/cyclic targets before applying anchors. `CScriptRegion.cpp:104-109`, offset `0x004884D0`, resolves a name through the actual script-object lookup rather than substituting the parent.
 
 **Simulator:** `src/lua_api/frame/methods/button_anchor_hierarchy/anchors.rs:651-691` checks cycles, but omits the caller-protection guard used by adjacent `SetPoint`; unrecognized string targets fall through to the parent instead of resolving/erroring. This is separate from L1's target-kind eligibility.
 
