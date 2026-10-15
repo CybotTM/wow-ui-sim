@@ -434,6 +434,14 @@ pub(super) fn set_point(state: &mut LuaState) -> LuaResult<u32> {
         point,
         [arguments[1], arguments[2], arguments[3], arguments[4]],
     )?;
+    if let Some(target_id) = request.relative_to {
+        let sim = borrow_state(state)?;
+        if sim.widgets.get(id).is_some_and(|frame| frame.is_protected)
+            && sim.widgets.anchor_chain_reaches_region(target_id as u64)
+        {
+            return Ok(0);
+        }
+    }
     if is_set_point_unchanged(state, id, &request)? {
         update_point_secret_origin(state, id, point, secret)?;
         return Ok(0);

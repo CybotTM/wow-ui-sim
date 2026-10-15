@@ -208,6 +208,30 @@ impl WidgetRegistry {
             .filter_map(|anchor| anchor.relative_to_id.map(|target_id| target_id as u64))
     }
 
+    /// Inspect active anchors only, not historical reverse dirty dependencies.
+    pub(crate) fn anchor_chain_reaches_region(&self, start_id: u64) -> bool {
+        let mut pending = vec![start_id];
+        let mut seen = FxHashSet::default();
+
+        while let Some(id) = pending.pop() {
+            if !seen.insert(id) {
+                continue;
+            }
+            let Some(frame) = self.widgets.get(&id) else {
+                continue;
+            };
+            if matches!(
+                frame.widget_type,
+                crate::widget::WidgetType::Texture | crate::widget::WidgetType::FontString
+            ) {
+                return true;
+            }
+            pending.extend(self.anchor_target_ids(id));
+        }
+
+        false
+    }
+
     /// Record that `frame_id` is anchored to `target_id`.
     pub fn add_anchor_dependent(&mut self, target_id: u64, frame_id: u64) {
         self.anchor_dependents

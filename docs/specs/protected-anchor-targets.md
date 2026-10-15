@@ -11,11 +11,13 @@ Shared clean-room simulator policy for `SetPoint`, including Wrath and Retail. D
 
 ## Tests asserting this spec
 
-`tests/protected_anchor_targets.rs`: five cases compiled in the source `3fa90ab7b` Retail integration artifact; all remain **UNEXECUTED**, with baseline RED pending actual runtime receipts. Trusted, out-of-combat calls create recipients through public `CreateFrame` consuming a real parsed, simulator-owned protected XML template. No host protection toggle or vendor template patch. Rejected calls compare complete points/geometry; equivalent unprotected witnesses prove each input would move a permitted recipient. Direct Texture/FontString, one/two-hop chains, successful controls and active-chain removal/restoration are covered by authored assertions only.
+`tests/protected_anchor_targets.rs`: five unique cases executed in the source `3fa90ab7b6f8cf836e09c19ed34115eba9f245c1` Retail integration artifact: **1 allowed-control PASS, 4 target-rejection FAIL, exit 101**. Saved full streams and result remain private under epoch `cleanroom-controls-retail-baseline-20261015T223734529083Z/protected-targets-first-red`; no published receipt is claimed. Each failure reports `GetPoint: field 2 changed` before later geometry assertions; this does not establish that every authored assertion, chain depth, region variant or removal/restoration phase was reached. Trusted, out-of-combat calls create recipients through public `CreateFrame` consuming a real parsed, simulator-owned protected XML template. No host protection toggle or vendor template patch. Rejected calls compare complete points/geometry; equivalent unprotected witnesses prove each input would move a permitted recipient. Direct Texture/FontString, one/two-hop chains, successful controls and active-chain removal/restoration have authored assertions; the bounded baseline above establishes only the reached failure boundaries and passing control.
 
 ## Implementation status
 
-Current source has separate caller/combat authorization and pre-mutation target resolution, but no modeled target-kind eligibility gate. Behavioral RED and implementation remain pending.
+L1 producer authored: `SetPoint` checks the protected recipient's resolved target before the unchanged-point fast path or any anchor/secret-origin mutation. A read-only visited traversal follows current `anchors[].relative_to_id`, rejecting direct Texture/FontString targets or active chains reaching them. Target protection is ignored; reverse dirty dependencies are not consulted. Existing caller-security, cycle and forbidden-aspect checks remain in place; unresolved-target behavior is unchanged.
+
+Producer compilation and GREEN execution are **pending**, owned by main. Existing five tests are unchanged; no new tests or runtime proof are claimed. Requirement checkboxes remain open until acceptance. Wrath, other profiles, native parity and full-parent completion are not established.
 
 ## Out of scope
 
