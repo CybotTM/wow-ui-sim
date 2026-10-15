@@ -4,7 +4,7 @@
 
 ## [2026-10-15] source | Shared clean-room controls and anchors
 
-[Widget proof matrix](systems/widget-system.md#clean-room-control-and-anchor-follow-ups--2026-10-15) links C1/C2/C3/L1 owning contracts. C1 five, C2 two and L1 five committed tests remain UNCOMPILED/UNEXECUTED without producers/RED. C3 has three valid REDs plus one fixture-oracle error at `5dfa94330`; `186f5db13` fix/corrected test remain uncompiled/unexecuted, not PASS. Wrath/Retail policies are shared simulator requirements, not native parity.
+[Widget proof matrix](systems/widget-system.md#clean-room-control-and-anchor-follow-ups--2026-10-15) links owning contracts and separate pending controls. [C3 owner](../specs/editbox-text-position-selection.md#tests-asserting-this-spec) records saved Retail source `3fa90ab7b`: four unique PASS/exit0, all assertions reached; historical three valid REDs and wrong oracle remain separate. Wrath unexecuted; shared acceptance remains open. No C2/XML-regression, broader startup/check/native or parent-goal credit.
 
 ## [2026-10-15] source | DoubleIconAndText passive scaffold and selector RED
 
