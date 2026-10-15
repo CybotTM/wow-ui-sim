@@ -11,7 +11,7 @@ The [integrated checkpoint](../investigations/integrated-source-and-factory-proo
 
 ## Forever supplied quest difficulty
 
-[Owning contract and proof status](../../specs/forever-quest-difficulty.md) records the Forever-only `C_QuestLog.GetQuestDifficultyLevel` live rich-row lookup. Row-level equality and explicit missing-input errors are simulator policies, not native parity. Original sealed query and unchanged Camelot title-consumer REDs precede producer `70459ec5a`; three current Rust tests and bounded normal probes PASS, while actual startup still requests missing rich quest80002. The [current receipt](../../baselines/README.md#current-providerquest-execution--2026-10-15) owns exact counts and remaining failures. Other-profile/native/whole-startup preservation remains open. No vendor behavior or stored CVars changed.
+[Owning contract and proof status](../../specs/forever-quest-difficulty.md) records the Forever-only `C_QuestLog.GetQuestDifficultyLevel` live rich-row lookup. Row-level equality and explicit missing-input errors are simulator policies, not native parity. Original sealed query and unchanged Camelot title-consumer REDs precede producer `70459ec5a`; getter preservation and four ordinary-watch projection cases PASS at source40a, with normal watch/log/global-alias coherence. The [current receipt](../../baselines/README.md#current-watchtalent-execution--2026-10-15) owns exact counts and remaining failures: missing80002 is absent, but Gamepad startup errors and a separately reproduced missing add/remove/type/event membership path remain. Other-profile/native/whole-startup preservation remains open. No vendor behavior or stored CVars changed.
 
 ## Retail 12.0.5 spell and spellbook loss-of-control outputs
 

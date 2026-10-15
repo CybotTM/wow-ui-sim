@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | Watch projection and talent fixture executed
+
+[Receipt owner](../baselines/README.md#current-watchtalent-execution--2026-10-15) records40a's28 targeted passes, proper test-path CVar isolation, positive normal watch/global-count/voice probe and exact startup10/14 FAIL. Previous12/16 retained. Separate real add/remove/type/event RED is not hidden by query-only coverage; Gamepad/native/profile/full-parent gaps remain. Independent saved reconciliation pending.
+
 ## [2026-10-15] evidence | Provider and quest execution captured
 
 [Receipt owner](../baselines/README.md#current-providerquest-execution--2026-10-15) records source704's six new regression passes, two reproduced older control failures, four normal positive probes and exact startup12/16 FAIL baseline copy. Prior22/26 retained; explicit missing rich quest80002 remains a new state-boundary diagnostic. Independent saved-runtime reconciliation pending; no clean/native/profile/full-parent acceptance.

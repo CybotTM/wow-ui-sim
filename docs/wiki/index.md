@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | Watch/talent bounded execution
+
+[Current receipt](../baselines/README.md#current-watchtalent-execution--2026-10-15) records source40a's28 targeted passes, positive normal watch/voice probe and startup10records/14occurrences FAIL. Stale80002 watch emission is gone; a separate normal RED proves missing stateful watch mutations/events. Gamepad and broader acceptance remain open; independent reconciliation pending.
+
 ## [2026-10-15] evidence | Provider/quest bounded execution
 
 [Central receipt](../baselines/README.md#current-providerquest-execution--2026-10-15) records source704 build, six new regressions PASS, finite controls19/2, four positive normal probes and startup12records/16occurrences FAIL. Both older control failures reproduce on pre-change code; missing rich quest80002 and Gamepad storage remain open. Independent runtime reconciliation pending.

@@ -14,12 +14,12 @@ Forever's `C_QuestLog.GetQuestDifficultyLevel` must expose the supplied rich que
 
 The existing simulator policy watches every ordinary quest. Forever's count and indexed IDs now project that policy from current rich rows, excluding `is_world_quest` rows and preserving row order; this is not native watch-subset parity. Source704's normal Lua RED enumerated80000/80001/80002: the first two resolved to log rows and difficulty80, while80002 had no rich row. New source removes the stale watch producer, not the strict missing-level error.
 
-- [ ] Project `C_QuestLog.GetNumQuestWatches` and `GetQuestIDForQuestWatchIndex` from the same current ordinary-row sequence; global `GetNumQuestWatches` matches the count. Seed IDs are80000/80001, not static-only80002.
-- [ ] Observe identity/level mutation, insertion, removal, reorder and world-flag changes immediately; fresh environments remain independent.
-- [ ] Preserve existing watch-index conversion and arity: nil/missing index means zero, numeric conversion truncates/saturates before bounds checking, valid IDs return one number, misses zero results, nonnumbers error, extra arguments ignored.
-- [ ] Resolve every returned ID through current `GetLogIndexForQuestID`, `GetInfo`, `IsOnQuest` and difficulty metadata without a static fallback or invented rich record.
+- [x] Project `C_QuestLog.GetNumQuestWatches` and `GetQuestIDForQuestWatchIndex` from the same current ordinary-row sequence; global `GetNumQuestWatches` matches the count. Seed IDs are80000/80001, not static-only80002.
+- [x] Observe host-side rich-row identity/level mutation, insertion, removal, reorder and world-flag changes immediately; fresh environments remain independent.
+- [x] Preserve existing watch-index conversion and arity: nil/missing index means zero, numeric conversion truncates/saturates before bounds checking, valid IDs return one number, misses zero results, nonnumbers error, extra arguments ignored.
+- [x] Resolve every returned ID through current `GetLogIndexForQuestID`, `GetInfo`, `IsOnQuest` and difficulty metadata without a static fallback or invented rich record.
 
-Four authored `tests/wowforever_quest_watch_projection.rs` cases cover these requirements; all UNEXECUTED. The later legacy registration omits these three replaced Forever writes, so fresh publication and cleanup restoration use the same C API producers; other profiles retain their old registrations. Watch membership/mutators, legacy index helpers, world-watch projection and broader quest query reconciliation remain parent gaps to investigate where actual callers require them; this correction does not mark them complete or exclude them from the parent.
+Four `tests/wowforever_quest_watch_projection.rs` cases PASS at runtime source40a; [current receipt](../baselines/README.md#current-watchtalent-execution--2026-10-15) owns exact source/build/test/normal-run attribution. Original normal Lua RED precedes the producer; no authored Rust RED is claimed. The later legacy registration omits these three replaced Forever writes, so fresh publication and cleanup restoration use the same C API producers; other profiles retain their old registrations. Actual Track All/Untrack All, POI toggle and tracker callers require watch membership/mutators. A separate source40a normal RED observes zero-result add/remove, unchanged membership count2, nil watch type and zero events. This remains a parent gap alongside legacy index helpers, world-watch projection and broader query reconciliation—not completed or newly excluded.
 
 ## How it works
 
@@ -44,8 +44,8 @@ Four authored `tests/wowforever_quest_watch_projection.rs` cases cover these req
 
 ## Known gaps (current cycle)
 
-- [ ] Source704 startup requests quest80002, present in an older static catalog but absent from rich state; the explicit missing-record error is captured, not suppressed. The ordinary-watch producer correction has original Lua RED but no new Rust/normal-startup GREEN yet.
-- [ ] Other-profile preservation, default check, native parity and whole-startup acceptance remain open. Current no-run compilation, `cargo fmt --check`, three model tests, four-known-row normal coherence and fixture-controlled whole-consumer probe passed; these do not close the missing80002 case.
+- [ ] Implement the observed missing add/remove/type/event watch-membership path; read-only rich-row projection does not satisfy it.
+- [ ] Other-profile preservation, default check, native parity and whole-startup acceptance remain open. Current40a no-run compilation, formatting, getter3/watch4/finite21 tests and normal watch/global-alias/voice checks passed; missing80002 is absent from the10-record/14-occurrence startup FAIL. These do not close remaining Gamepad errors or watch membership.
 
 ## Out of scope
 
