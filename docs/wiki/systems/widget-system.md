@@ -140,10 +140,12 @@ User functional requirements define shared simulator policies for Wrath and Reta
 
 | Scope | Owning contract | Current proof |
 |---|---|---|
-| C1 step assignment | [Slider callbacks](../../specs/slider-value-callback.md#clean-room-step-assignment-follow-up) | Five tests compiled at source `3fa90ab7b`; selection UNEXECUTED, baseline RED pending; no producer |
+| C1 step assignment | [Slider callbacks](../../specs/slider-value-callback.md#clean-room-step-assignment-follow-up) | Actual Retail source `3fa90ab7b`: five unique FAIL, exit101. Producer `c876` and readability follow-up `33` authored; producer GREEN pending. |
 | C2 cursor geometry | [EditBox geometry](../../specs/editbox-text-position-selection.md#cursor-geometry-follow-up) | Two geometry tests compiled at source `3fa90ab7b`; selection UNEXECUTED, baseline RED pending; no geometry producer; actual consumer and Wrath guard-retirement gates open. Separate source `08ffc2838` XML-binding regression remains UNCOMPILED/UNEXECUTED |
 | C3 highlight endpoints | [EditBox selection](../../specs/editbox-text-position-selection.md#tests-asserting-this-spec) | Saved Retail source `3fa90ab7b`: four unique PASS/exit0, all assertions reached; independent saved audit PASS. Historical three valid REDs and wrong fixture oracle remain separate. Wrath unexecuted; shared criterion open. |
-| L1 protected-recipient targets | [Anchor target policy](../../specs/protected-anchor-targets.md) | Five tests compiled at source `3fa90ab7b`; selection UNEXECUTED, baseline RED pending; no eligibility producer |
+| L1 protected-recipient targets | [Anchor target policy](../../specs/protected-anchor-targets.md) | Actual Retail source `3fa90ab7b`: one allowed-control PASS, four target-rejection FAIL, exit101. Failures stop at `GetPoint: field 2 changed`; later geometry assertions and all authored phases are not established as reached. Pre-mutation eligibility gate `0594eb8e5` authored; producer GREEN pending. |
+
+[C8 changed-range candidate](../../specs/slider-value-callback.md#c8-changed-range-callbacklifecycle-candidate): five authored tests (`f2e`, negative-oracle correction `1b5`) remain UNCOMPILED/UNEXECUTED; no C8 producer or behavioral RED/GREEN. C7/C9 policy questions remain pending; neither policy is adopted.
 
 ## Region alpha numeric range
 
