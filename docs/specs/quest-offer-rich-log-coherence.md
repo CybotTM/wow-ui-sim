@@ -4,11 +4,11 @@ Forever public offer acceptance must agree with rich quest-log queries and permi
 
 ## What it must do
 
-- [ ] After the existing public `A_Admin.OpenMultiQuestNpc()` → `SelectAvailableQuest(1)` → `ConfirmAcceptQuest()` path, preserve one lightweight accepted ID, consume the pending offer and expose the matching accepted quest through rich membership/index/info queries.
-- [ ] For newly accepted rich entries, preserve the selected offer's supplied identity, title, level, meta flag and current completion, consistent with Forever difficulty lookup. Already represented rich rows are not duplicated or overwritten. Retain the selected snapshot across gossip closure or replacement rather than reading later gossip rows.
-- [ ] Model newly authored ordinary offers as not-world, not-failed, nonreplayable and not previously completed, with no item/currency rewards in these scenarios. Preserve existing same-quest rich metadata and recorded completion history where supplied. Carry known same-quest map data: Supply Run's existing authored POI blob supplies map37. Custom offers without known map data remain unmapped. Unknown waypoint, tag, theme and criteria metadata remain absent; do not copy another quest's seed defaults, infer an NPC position from a polygon, or claim native values.
-- [ ] After acceptance returns, expose one rich row and one lightweight ID and preserve the existing queued acceptance event. Repeated confirmation without a pending offer is inert; cancellation and separate environments must not gain membership. These assertions do not establish native event timing or internal enqueue ordering.
-- [ ] Allow explicit `C_QuestLog.AddQuestWatch` for the accepted ordinary quest, with coherent membership, count and log-index mapping. No automatic-watch policy is required by this fixture.
+- [x] After the existing public `A_Admin.OpenMultiQuestNpc()` → `SelectAvailableQuest(1)` → `ConfirmAcceptQuest()` path, preserve one lightweight accepted ID, consume the pending offer and expose the matching accepted quest through rich membership/index/info queries.
+- [x] For newly accepted rich entries, preserve the selected offer's supplied identity, title, level, meta flag and current completion, consistent with Forever difficulty lookup. Already represented rich rows are not duplicated or overwritten. Retain the selected snapshot across gossip closure or replacement rather than reading later gossip rows.
+- [x] Model newly authored ordinary offers as not-world, not-failed, nonreplayable and not previously completed, with no item/currency rewards in these scenarios. Preserve existing same-quest rich metadata and recorded completion history where supplied. Carry known same-quest map data: Supply Run's existing authored POI blob supplies map37. Custom offers without known map data remain unmapped. Unknown waypoint, tag, theme and criteria metadata remain absent; do not copy another quest's seed defaults, infer an NPC position from a polygon, or claim native values.
+- [x] After acceptance returns, expose one rich row and one lightweight ID and preserve the existing queued acceptance event. Repeated confirmation without a pending offer is inert; cancellation and separate environments must not gain membership. These assertions do not establish native event timing or internal enqueue ordering.
+- [x] Allow explicit `C_QuestLog.AddQuestWatch` for the accepted ordinary quest, with coherent membership, count and log-index mapping. No automatic-watch policy is required by this fixture.
 
 ## How it works
 
@@ -17,7 +17,7 @@ Forever public offer acceptance must agree with rich quest-log queries and permi
 
 ## Implementation inventory
 
-Producer `ccd9e2d01` is committed; GREEN compilation and execution remain pending. Selection updates supplied fields on a cloned pending snapshot. Acceptance inserts that snapshot only for an absent rich ID; an already represented rich row remains untouched, preserving existing metadata and rewards.
+Producer `ccd9e2d01` is committed; main-observed Forever execution at source `53cf24ab0` passes all43 selected cases, exit0. Independent saved-runtime reconciliation passes in `quest-enrich-next/green-runtime-report.md` under host-private verification state. Selection updates supplied fields on a cloned pending snapshot. Acceptance inserts that snapshot only for an absent rich ID; an already represented rich row remains untouched, preserving existing metadata and rewards.
 
 - `src/lua_api/globals/admin_quests.rs`: public NPC offer seeds; Retail confirmation extracts only the pending ID before dispatch, preserving its existing prompt contract.
 - `src/lua_api/globals/quest_verbs.rs`: consumes the selected snapshot and deduplicates rich/lightweight membership, retaining the existing queued event and already represented rich rows.
@@ -31,11 +31,15 @@ Producer `ccd9e2d01` is committed; GREEN compilation and execution remain pendin
 
 ## Tests asserting this spec
 
-`tests/wowforever_quest_offer_enrichment.rs`: three additional cases cover selected snapshots across `CloseGossip`/replacement, explicit supplied custom title/level/flags, the modeled absent-metadata/no-reward policy, explicit watching, repeat confirmation, cancellation and environment isolation. Final acceptance assertions are Rust-side. At source `d59551d61`, all three executed: **1 control PASS / 2 missing-rich-row FAIL, exit101** after public preconditions; later metadata/watch assertions remained unreached. Current snapshot/publication producer is implemented but GREEN is not yet verified.
+`tests/wowforever_quest_offer_enrichment.rs`: three additional cases cover selected snapshots across `CloseGossip`/replacement, explicit supplied custom title/level/flags, the modeled absent-metadata/no-reward policy, explicit watching, repeat confirmation, cancellation and environment isolation. Final acceptance assertions are Rust-side. At source `d59551d61`, all three executed: **1 control PASS / 2 missing-rich-row FAIL, exit101** after public preconditions; later metadata/watch assertions remained unreached. Current source `53cf24ab0` executes all three enrichment cases PASS; see the bounded current receipt below.
 
-`tests/wowforever_quest_offer_existing.rs`: additional authored **UNEXECUTED** preservation control reopens an already represented quest and verifies its metadata, same-quest reward and watch count are not replaced or duplicated by ordinary-offer initialization.
+`tests/wowforever_quest_offer_existing.rs`: additional **executed PASS at source53cf24ab0** preservation control reopens an already represented quest and verifies its metadata, same-quest reward and watch count are not replaced or duplicated by ordinary-offer initialization.
 
 `tests/wowforever_quest_offer_acceptance.rs` and `.lua`: `seeded_public_offer_acceptance_preserves_rich_and_watch_coherence`, Forever-only fresh environment using actual public seed/selection/acceptance, without injected state, API replacement or event callbacks. Final coherence assertion is in Rust, outside Lua handlers. Actual **0 PASS / 1 FAIL, exit101** at source `f94aea875`; public fixture preconditions completed. [Central receipt](../baselines/README.md#public-offer-rich-log-coherence-red--2026-10-15) owns evidence, observations and separate controls.
+
+### Current bounded execution — 2026-10-15
+
+[Central receipt](../baselines/README.md#public-offer-rich-log-coherence-red--2026-10-15) owns saved evidence at source `53cf24ab0`: **43/43 PASS, exit0** observed by main: enrichment3 + existing-row preservation1 + original acceptance1 + verbs13 + gossip13 + watch membership8 + projection4. These execute selected snapshots across close/replacement, cancellation/isolation/repeat confirmation, represented metadata/reward preservation and explicit watchability. Exact simulator mapping is80002→37; custom map remainsNone. The five requirements above are complete only for these executed boundaries, not broader lifecycle or native behavior. Independent saved-runtime reconciliation confirms all43 unique identities and full streams; build/seal reconciliation is separate. Retail confirmation, default check and startup remain pending; historical Gamepad10 records/14 occurrences is unchanged, not rerun.
 
 ## Known gaps (current cycle)
 
@@ -43,9 +47,10 @@ Producer `ccd9e2d01` is committed; GREEN compilation and execution remain pendin
 - [x] User requested enrichment of the simulator-authored offer data; optional unsupported native metadata remains absent under the documented bounded model.
 - [x] Execute the three-case snapshot/enrichment baseline: source d595 has1 control PASS /2 `MISSING RICH ROW` FAIL. First sourceedf attempt failed at private-module test imports (E0603), not runtime; public state re-exports fix that fixture error.
 - [x] Independently reconcile the new saved baseline through `/home/osso/.local/state/wow-ui-sim/verification/quest-enrich-next/runtime-red-report.md`; failing behavior is not acceptance.
-- [ ] Verify the implemented selected-snapshot/publication producer and updated pending-payload control fixtures; no GREEN, cross-profile or startup claim yet.
+- [x] Independently reconcile Forever source53cf24ab0 selected-snapshot/publication and pending-payload controls:43/43 PASS, exit0, full streams and exact identities verified.
 - [x] Independently reconcile the expected RED and 13 passing existing controls; no commands were rerun.
-- [ ] Prove current rich/watch coherence; historical RED and source implementation are not GREEN acceptance.
+- [x] Prove current rich/watch coherence at the executed Forever boundaries; historical RED remains retained and does not count as a current pass.
+- [ ] Complete Retail confirmation, default check and startup gates.
 
 ## Out of scope
 
