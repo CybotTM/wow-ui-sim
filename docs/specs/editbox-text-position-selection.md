@@ -28,6 +28,17 @@ The new endpoint policy is a shared simulator contract, including Wrath and Reta
 
 Length overflow rejection is the user-selected simulator policy, not a native-client claim. No-edit callback suppression follows the existing numeric-input rejection policy; tests establish simulator consistency, not native callback equivalence.
 
+## Cursor geometry follow-up
+
+Shared clean-room simulator geometry uses frame-local UI units: `x = left inset + shaped caret x`, `y = -(top inset + shaped line top)`, width1.5 and the configured shaped line height. This is an explicit simulator contract, not copied legacy/native coordinate evidence. At font20, existing shaping metrics use line height24; insets `(5,7,3,4)` yield second-line-start geometry `(5,-27,1.5,24)`.
+
+- [ ] Produce `OnCursorChanged(self,x,y,width,height)` through actual font/text layout at a normal update boundary before ordinary `OnUpdate`; cursor setters commit byte/scalar positions without inventing an immediate geometry callback.
+- [ ] Notify initial/changed geometry, suppress unchanged ticks, and expose committed text/cursor state before dispatch without retaining a simulator-state borrow across Lua callbacks.
+- [ ] Cover programmatic and real keyboard movement across multibyte/newline boundaries using actual installed simulator font metrics, not estimated geometry or native-font claims.
+- [ ] Cover the genuine scrolling consumer and its original ordering failure before retiring the existing Wrath nil-field guard. A small test observer is not that consumer.
+
+`tests/editbox_cursor_layout.rs`: two **UNCOMPILED / UNEXECUTED** update-order/geometry cases with explicitly installed font context. No producer exists yet. Actual cached-consumer coverage remains pending; the Wrath guard remains intact. Missing font prerequisites are setup failures, not behavioral RED or permission to fabricate metrics.
+
 ## How it works
 
 - [Widget system](../widget-system.md)
