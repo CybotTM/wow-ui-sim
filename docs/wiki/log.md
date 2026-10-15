@@ -1,6 +1,6 @@
 ## [2026-10-15] evidence | Redacted stderr metadata reconciliation
 
-[Packet correction](../../data/patch-api/evidence/pass2-five-models-2026-10-12/README.md#retained-stderr-metadata-correction--2026-10-15) preserves the source stderr hash/size separately from retained integrity. Three identity substitutions explain the pre-existing mismatch; payload/original bytes and runtime outcomes are unchanged. Independent correction verification pending; the portability audit retains its original 443/444 historical result.
+[Packet correction](../../data/patch-api/evidence/pass2-five-models-2026-10-12/README.md#retained-stderr-metadata-correction--2026-10-15) preserves the source stderr hash/size separately from retained integrity. Three identity substitutions explain the pre-existing mismatch; payload/original bytes and runtime outcomes are unchanged. Independent static correction verification PASS at `ba38287ab`: 132/132 retained entries and the exact source-to-retained transformation; the portability audit retains its original 443/444 historical result.
 
 ## [2026-10-15] research | Screenshot encoding and resolution
 
