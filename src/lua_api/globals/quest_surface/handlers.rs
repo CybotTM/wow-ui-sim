@@ -21,6 +21,7 @@ pub(super) struct StaticQuest {
     pub(super) objectives: &'static [Objective],
 }
 
+#[cfg(not(feature = "client-wowforever"))]
 pub fn quest_count() -> i32 {
     QUEST_LOG
         .iter()
