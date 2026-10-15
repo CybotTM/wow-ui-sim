@@ -17,6 +17,10 @@ Recorded October 12, 2026 local / October 13 UTC. Independent retention audit PA
 - [Check report](check/verification-report.md), [full stderr](check/check.stderr), [JSON stream counts](check/stream-summary.json). Cargo artifact JSON is summarized, not copied.
 - [Retention manifest](retention-manifest.json) identifies 132 complete sanitized text copies. Generated result tables are separate. Originals remain private; executable/library bytes and digests are not published. Text-file hashes authenticate retained text only.
 
+### Retained stderr metadata correction — 2026-10-15
+
+The `startup/stderr` entry now distinguishes the original capture (`source_bytes`, `source_sha256`) from the retained redacted payload (`retained_bytes`, `sha256`). Exactly three account/realm/player substitutions explain the three-byte difference; the private original and retained log are unchanged. The previous retained-byte/hash fields incorrectly described the unredacted source. This is metadata reconciliation, not a rerun or a change to the captured startup outcome. Independent verification of this correction remains pending.
+
 RED's new 37 cases reached 4 PASS / 32 behavioral FAIL / 1 fixture FAIL. CVar RED completed 60 matrix cases, failed one, left 27 unreached—not 88 completed. GREEN's four CVar tests reach all 88 cases. Historical RED is not rewritten by GREEN. VertexColor endpoints stay on VertexColor receivers; Texture getters remain Texture-only. Current method comparison allows exactly two documented Texture getter rows; native captures remain unchanged.
 
 Supplied item stats/set lists, absolute-ms Ping interval, GUID-backed live-party AI membership and existing Retail combat CVar policy are bounded models. Graph/publication success does not establish native parity. No ordinary gameplay data feed, full ping scheduler/lifecycle, GUI/native input, other-profile, performance-causation, provider-stream, credit accounting or whole-handoff acceptance is claimed. Earlier e397 47-test proof remains a separate epoch. Historical full-suite 41cb remains FAIL; new suite submission is not a result.

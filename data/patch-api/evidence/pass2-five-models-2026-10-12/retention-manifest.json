@@ -907,9 +907,10 @@
     {
       "path": "startup/stderr",
       "source_bytes": 17397,
-      "retained_bytes": 17397,
-      "sha256": "2bbc04d7b0e71d68161db4361d7456da106522669c4034c66e890775121b5be8",
-      "transformation": "Complete text; host/path, panic PID and executable-digest redaction only"
+      "source_sha256": "2bbc04d7b0e71d68161db4361d7456da106522669c4034c66e890775121b5be8",
+      "retained_bytes": 17394,
+      "sha256": "4438370bc4d2e2e6c7dd6619ba8e4c756d2b0250aa177dee202c9579417fe754",
+      "transformation": "Complete text; account, realm and player identity substitutions only; source hash preserves pre-redaction provenance"
     },
     {
       "path": "check/check.stderr",

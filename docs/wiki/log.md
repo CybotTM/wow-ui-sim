@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | Redacted stderr metadata reconciliation
+
+[Packet correction](../../data/patch-api/evidence/pass2-five-models-2026-10-12/README.md#retained-stderr-metadata-correction--2026-10-15) preserves the source stderr hash/size separately from retained integrity. Three identity substitutions explain the pre-existing mismatch; payload/original bytes and runtime outcomes are unchanged. Independent correction verification pending; the portability audit retains its original 443/444 historical result.
+
 ## [2026-10-15] research | Screenshot encoding and resolution
 
 [Primary-source guidance](reference/screenshot-fidelity.md) records W3C PNG, Google's separate WebP encoder/transparent-RGB caveat, and OpenAI's model-dependent image preprocessing. Original-resolution evidence and separate defect crops are recommendations, not runtime changes or proof of viewer delivery. Existing screenshot defaults and acceptance scopes remain unchanged.
