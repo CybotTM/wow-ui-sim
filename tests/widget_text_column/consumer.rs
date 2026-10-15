@@ -6,7 +6,7 @@ use crate::common::blizzard_addon_harness::{
 };
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-fn load_and_register_cached_container(env: &WowLuaEnv, cache: &std::path::Path) {
+fn load_cached_widget_addons(env: &WowLuaEnv, cache: &std::path::Path) {
     wow_ui_sim::xml::register_intrinsic_templates();
     let loaded = load_blizzard_addon_closure_into_env(
         env,
@@ -20,6 +20,9 @@ fn load_and_register_cached_container(env: &WowLuaEnv, cache: &std::path::Path) 
         &[],
     );
     assert!(loaded.iter().any(|name| name == "Blizzard_UIWidgets"));
+}
+
+fn register_cached_container(env: &WowLuaEnv) {
     fixtures::assert_lua(
         env,
         "cached observation helpers",
@@ -63,7 +66,7 @@ fn flush_counts(env: &WowLuaEnv, count: usize) {
     );
 }
 
-fn activate_and_update(env: &WowLuaEnv) {
+fn activate_cached_row(env: &WowLuaEnv) {
     fixtures::publish(env, fixtures::supplied());
     flush_counts(env, 1);
     fixtures::assert_lua(
@@ -75,6 +78,9 @@ fn activate_and_update(env: &WowLuaEnv) {
         ColumnOneSnapshot(ColumnExpected, ColumnGet(763621))
     "#,
     );
+}
+
+fn update_cached_row(env: &WowLuaEnv) {
     fixtures::publish(env, fixtures::consumer_update());
     flush_counts(env, 1);
     fixtures::assert_lua(
@@ -130,7 +136,7 @@ fn hide_and_restore(env: &WowLuaEnv) {
     );
 }
 
-fn remove_and_unregister(env: &WowLuaEnv) {
+fn remove_widget_membership(env: &WowLuaEnv) {
     assert!(env.remove_ui_widget(SET_ID, ID).unwrap());
     flush_counts(env, 0);
     fixtures::assert_lua(
@@ -143,6 +149,9 @@ fn remove_and_unregister(env: &WowLuaEnv) {
         ColumnOneSnapshot(ColumnConsumerExpected, ColumnGet(763621))
     "#,
     );
+}
+
+fn unregister_live_container(env: &WowLuaEnv) {
     fixtures::publish(env, fixtures::consumer_update());
     flush_counts(env, 1);
     fixtures::assert_lua(
@@ -182,10 +191,13 @@ fn text_column_cached_type21_normal_activation_update_hidden_restore_removal_unr
         fixtures::seed(&env, ID, fixtures::supplied());
         fixtures::populated_boundary(&env);
         fixtures::supply_empty_set(&env);
-        load_and_register_cached_container(&env, &cache);
+        load_cached_widget_addons(&env, &cache);
+        register_cached_container(&env);
         flush_counts(&env, 0);
-        activate_and_update(&env);
+        activate_cached_row(&env);
+        update_cached_row(&env);
         hide_and_restore(&env);
-        remove_and_unregister(&env);
+        remove_widget_membership(&env);
+        unregister_live_container(&env);
     });
 }
