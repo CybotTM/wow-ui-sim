@@ -42,7 +42,7 @@ Not covered: complete gameplay/C_* API comparison, modern-only APIs, every XML/w
 | Simulator comparison baseline | `739986c9fa011ca4ab8150ed9df073e14896e3a6` |
 | Proof level | Static source comparison, not executed regressions or original-client measurements |
 
-**The simulator's Wrath profile is not the original 3.3.5a client.** `src/client_profile.rs:97-98,164-172` selects interface `38001` for Wrath. Historical behavior below is evidence for investigation, not automatic authority to change Wrath Classic, retail, PTR, Era, Mists, Anniversary or Forever. Each eventual implementation must resolve its target-profile contract against existing specs and available native evidence. No Forever-client probes are assumed available.
+**The simulator's Wrath profile is not the original 3.3.5a client.** `src/client_profile.rs:79-80,143-146` selects interface `38001` for Wrath. Historical behavior below is evidence for investigation, not automatic authority to change Wrath Classic, retail, PTR, Era, Mists, Anniversary or Forever. Each eventual implementation must resolve its target-profile contract against existing specs and available native evidence. No Forever-client probes are assumed available.
 
 The upstream README itself warns that a ported function can differ from the original. `OFFSET` comments identify claimed original addresses; `VERIFY` labels and completion percentages are not independent validation. This audit paraphrases reconstructed behavior rather than importing code. Licensing/provenance rights for code reuse have not been established.
 
