@@ -1,9 +1,10 @@
 //! Host feed operations mutate supplied state before synchronous consumer events.
 use super::{
     BulletTextListRecord, ButtonHeaderRecord, CaptureBarRecord, DiscreteProgressStepsRecord,
-    DoubleStatusBarRecord, IconAndTextRecord, SpacerRecord, SpellDisplayRecord, StatusBarRecord,
-    TextColumnRowVisualizationInfo, TextWithStateRecord, TextWithSubtextRecord,
-    TextureAndTextRecord, TextureAndTextRowRecord, WidgetId, WidgetSetEntry, WidgetSetRecord,
+    DoubleIconAndTextRecord, DoubleStatusBarRecord, IconAndTextRecord, SpacerRecord,
+    SpellDisplayRecord, StatusBarRecord, TextColumnRowVisualizationInfo, TextWithStateRecord,
+    TextWithSubtextRecord, TextureAndTextRecord, TextureAndTextRowRecord, WidgetId, WidgetSetEntry,
+    WidgetSetRecord,
 };
 use crate::lua_api::WowLuaEnv;
 use crate::{Error, Result};
@@ -19,6 +20,7 @@ pub enum WidgetVisualization {
     TextureAndTextRow(TextureAndTextRowRecord),
     TextWithState(TextWithStateRecord),
     TextWithSubtext(TextWithSubtextRecord),
+    DoubleIconAndText(DoubleIconAndTextRecord),
     BulletTextList(BulletTextListRecord),
     TextColumnRow(TextColumnRowVisualizationInfo),
     SpellDisplay(SpellDisplayRecord),
@@ -40,6 +42,7 @@ impl WidgetVisualization {
             Self::TextureAndTextRow(_) => 15,
             Self::TextWithState(_) => 8,
             Self::TextWithSubtext(_) => 25,
+            Self::DoubleIconAndText(_) => 5,
             Self::BulletTextList(_) => 10,
             Self::TextColumnRow(_) => 21,
             Self::SpellDisplay(_) => 13,
@@ -201,6 +204,11 @@ fn supply_visualization(sim: &mut crate::lua_api::SimState, id: f64, record: Wid
         }
         WidgetVisualization::TextWithSubtext(record) => {
             sim.ui_widget_inputs.text_with_subtext.insert(key, record);
+        }
+        WidgetVisualization::DoubleIconAndText(record) => {
+            sim.ui_widget_inputs
+                .double_icon_and_text
+                .insert(key, record);
         }
         WidgetVisualization::DiscreteProgressSteps(record) => {
             sim.ui_widget_inputs

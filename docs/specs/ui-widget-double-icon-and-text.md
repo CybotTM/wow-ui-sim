@@ -1,6 +1,6 @@
 # Supplied DoubleIconAndText widgets
 
-`C_UIWidgetManager.GetDoubleIconAndTextWidgetVisualizationInfo(widgetID)` must expose explicit supplied records and drive the unchanged cached Retail consumer. The [manager-state contract](ui-widget-manager-state.md) owns supplied state and lifecycle; the [manager architecture](../wiki/systems/ui-widget-manager-state.md) describes existing feeds. The getter is not modeled yet. The first public-selector regression is authored, **UNEXECUTED**; no behavioral RED is claimed.
+`C_UIWidgetManager.GetDoubleIconAndTextWidgetVisualizationInfo(widgetID)` must expose explicit supplied records and drive the unchanged cached Retail consumer. The [manager-state contract](ui-widget-manager-state.md) owns supplied state and lifecycle; the [manager architecture](../wiki/systems/ui-widget-manager-state.md) describes existing feeds. The getter is not modeled yet. At source `a56e11267`, the first public-selector regression reaches the required-number rejection failure after its existing-manager control passes: one unique case FAIL, exit101. Nested parent/child summaries are not two independent cases. Passive supplied state is now authored below; it is not getter or populated-result acceptance.
 
 ## What it must do
 
@@ -18,15 +18,19 @@ The active Retail generated `UIWidgetManagerDocumentation.lua` declares the requ
 
 ## Implementation inventory
 
-No new production implementation. Existing `src/c_api/ui_widget_manager/queries.rs` owns shared query policy; DoubleIconAndText has no modeled projection or registration. A generic callable/nil namespace response is not implementation evidence.
+- `src/c_api/ui_widget_manager/double_icon_and_text_record.rs`: complete explicit supplied record, without defaults or demo seeds.
+- `src/c_api/ui_widget_manager/{inputs,feed}.rs`: environment-owned initially empty map and typed type5 host feed through existing membership/event ordering.
+- `src/c_api/ui_widget_manager.rs`: public record export.
+
+This passive scaffold is uncompiled/unexecuted at this checkpoint. Existing `queries.rs` owns shared query policy; DoubleIconAndText still has no modeled projection or registration. A generic callable/nil namespace response is not implementation evidence.
 
 ## Tests asserting this spec
 
-- `tests/ui_widget_double_icon_selector.rs`: first public missing-selector counterexample, with existing required-number behavior as its control. Authored UNEXECUTED; no passive scaffold dependency.
+- `tests/ui_widget_double_icon_selector.rs`: first public missing-selector counterexample, with existing required-number behavior as its control. Executed at sourcea56: one unique FAIL/exit101 at “missing widgetID must reject, not return nil”; the failed assertion establishes successful target call, not independently its returned value. Environment/control setup passed; later target error-message assertions were unreached. Independent saved audit: `/home/osso/.local/state/wow-ui-sim/verification/doubleicon-selector-next/runtime-red-report.md`. No passive scaffold dependency or populated/lifecycle proof.
 
 ## Known gaps (current cycle)
 
-- [ ] Execute the public selector regression and distinguish a reached contract failure from compilation/setup failure.
+- [x] Execute the public selector regression and independently distinguish its reached rejection-contract failure from compilation/setup failure; retained as RED, not acceptance.
 - [ ] Review supplied record/map/feed scaffolding and populated query/secret/isolation/cached-lifecycle fixtures before integration. Private authored candidates are not compiled or executed evidence.
 - [ ] Implement the modeled getter against behavioral counterexamples, then verify focused behavior, profile preservation and normal startup. Full parent acceptance remains separate.
 

@@ -8,6 +8,8 @@ pub use bullet_record::BulletTextListRecord;
 mod discrete;
 mod discrete_record;
 pub use discrete_record::DiscreteProgressStepsRecord;
+mod double_icon_and_text_record;
+pub use double_icon_and_text_record::DoubleIconAndTextRecord;
 mod double_status_bar;
 mod double_status_bar_record;
 mod texture_and_text;
