@@ -47,6 +47,16 @@ Forever additionally accepts `CHAT_MSG_COLLECTED_APPEARANCE` and `UNIT_AURA_BLOC
 
 `forever_finite_events_register_deliver_and_reject_unknown` tests registration, injected callback delivery with payload preservation, unregistration, and unknown-name rejection in the existing grouped integration module. Injection proves simulator dispatch, not native event production or payload secrecy. The frozen pre-patch binary rejects both names (RED, isolated ledger `/tmp/forever-addon-audit/forever-finite-events-red-ww5p10a5/ledger.json`); compiled GREEN and addon replay remain pending.
 
+### 70374 startup event catalog
+
+- [ ] Register, query and unregister exactly these documented Forever additions: `ALERT_AGE_VERIFICATION_RESTRICTED`, `GLOBAL_REGION_MOUSE_DOWN`, `PLAYER_PVP_FLAG_CHANGED`, `VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED`, `VOICE_CHAT_VOICE_PROVIDER_CHANGED`.
+- [ ] Preserve strict rejection of invented/suffixed names and existing other-profile registration policy.
+- [ ] Inject and observe the documented region/button payload and active-provider IDs through the existing event dispatcher; assert observations outside protected callbacks and suppress delivery after unregistering.
+
+Selected 70374 `SystemDocumentation.lua`, `PvpInfoDocumentation.lua`, `SocialRestrictionsDocumentation.lua` and `VoiceChatDocumentation.lua` declare these names; matching vendor consumers and the source136 startup capture reject all five through the stale finite catalog. The 58-record/58-occurrence capture contains twelve rejection records including ScriptErrors wrappers, not twelve independent causes.
+
+Implementation extends only `src/event/valid_events.rs`'s finite Forever list. `tests/startup_api_events.rs::forever_known_startup_*` asserts registration lifecycle, two documented payload shapes and negative/profile controls. Tests are authored, not executed on this source. Native mouse/voice producers are not connected or claimed; no wildcard acceptance, alias, vendor patch or new provider/network model. Other startup failures remain open; the [current baseline](../baselines/README.md#forever-lua-errors) owns measured counts.
+
 ### Aura block-list cleared registration — bounded independently verified GREEN
 
 Source-inspected 2026-10-10: the Forever profile cache's `Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:631–638` declares `UNIT_AURA_BLOCK_LIST_CLEARED`, synchronous, with one required `unitTarget: UnitTokenVariant` payload. This is a source declaration, not native firing or payload-parity proof.

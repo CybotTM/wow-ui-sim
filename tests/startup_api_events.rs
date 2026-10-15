@@ -225,3 +225,183 @@ fn region_helpers_return_us_region_defaults() {
     assert_eq!(region, 1);
     assert_eq!(region_name, "US");
 }
+
+// Registration/dispatch only: these tests do not exercise native mouse or voice producers.
+#[test]
+#[cfg(feature = "client-wowforever")]
+fn forever_known_startup_global_region_mouse_down_dispatches_documented_payload() {
+    let env = env();
+    env.exec(
+        r#"
+        region = CreateFrame("Frame")
+        listener = CreateFrame("Frame")
+        mouseCalls = 0
+        assert(listener:RegisterEvent("GLOBAL_REGION_MOUSE_DOWN"))
+        assert(listener:IsEventRegistered("GLOBAL_REGION_MOUSE_DOWN"))
+        listener:SetScript("OnEvent", function(self, event, ...)
+            mouseCalls = mouseCalls + 1
+            mouseSelf = self == listener
+            mouseEvent = event
+            mouseArgCount = select('#', ...)
+            local receivedRegion, button = ...
+            mouseRegionMatches = rawequal(receivedRegion, region)
+            mouseButton = button
+        end)
+        "#,
+    )
+    .unwrap();
+    let region = env.eval::<rilua::Val>("return region").unwrap();
+    let args = [region, env.lua_string("LeftButton")];
+    env.fire_event_with_args("GLOBAL_REGION_MOUSE_DOWN", &args)
+        .unwrap();
+    // Assert outside protected OnEvent dispatch so callback failures cannot pass silently.
+    env.exec(
+        r#"
+        assert(mouseCalls == 1)
+        assert(mouseSelf and mouseRegionMatches)
+        assert(mouseEvent == "GLOBAL_REGION_MOUSE_DOWN")
+        assert(mouseArgCount == 2 and mouseButton == "LeftButton")
+        listener:UnregisterEvent("GLOBAL_REGION_MOUSE_DOWN")
+        assert(not listener:IsEventRegistered("GLOBAL_REGION_MOUSE_DOWN"))
+        "#,
+    )
+    .unwrap();
+    env.fire_event_with_args("GLOBAL_REGION_MOUSE_DOWN", &args)
+        .unwrap();
+    assert_eq!(env.eval::<i32>("return mouseCalls").unwrap(), 1);
+}
+
+#[test]
+#[cfg(feature = "client-wowforever")]
+fn forever_known_startup_active_voice_provider_dispatches_documented_payload() {
+    let env = env();
+    env.exec(
+        r#"
+        listener = CreateFrame("Frame")
+        providerEvents = {}
+        assert(listener:RegisterEvent("VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED"))
+        assert(listener:IsEventRegistered("VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED"))
+        listener:SetScript("OnEvent", function(self, event, ...)
+            table.insert(providerEvents, {
+                sameSelf = self == listener,
+                event = event,
+                count = select('#', ...),
+                providerID = ...,
+            })
+        end)
+        "#,
+    )
+    .unwrap();
+    // Cached VoiceChatDocumentation defines Legacy=0 and Discord=1.
+    for provider_id in [0.0, 1.0] {
+        env.fire_event_with_args(
+            "VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED",
+            &[rilua::Val::Num(provider_id)],
+        )
+        .unwrap();
+    }
+    env.exec(
+        r#"
+        assert(#providerEvents == 2)
+        for index, received in ipairs(providerEvents) do
+            assert(received.sameSelf)
+            assert(received.event == "VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED")
+            assert(received.count == 1 and received.providerID == index - 1)
+        end
+        listener:UnregisterEvent("VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED")
+        assert(not listener:IsEventRegistered("VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED"))
+        "#,
+    )
+    .unwrap();
+    env.fire_event_with_args(
+        "VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED",
+        &[rilua::Val::Num(0.0)],
+    )
+    .unwrap();
+    assert_eq!(env.eval::<i32>("return #providerEvents").unwrap(), 2);
+}
+
+#[test]
+#[cfg(feature = "client-wowforever")]
+fn forever_known_startup_names_register_query_and_unregister() {
+    let env = env();
+    env.exec(
+        r#"
+        local frame = CreateFrame("Frame")
+        for _, event in ipairs({
+            "ALERT_AGE_VERIFICATION_RESTRICTED",
+            "GLOBAL_REGION_MOUSE_DOWN",
+            "PLAYER_PVP_FLAG_CHANGED",
+            "VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED",
+            "VOICE_CHAT_VOICE_PROVIDER_CHANGED",
+        }) do
+            assert(not frame:IsEventRegistered(event), event)
+            assert(frame:RegisterEvent(event), event)
+            assert(frame:IsEventRegistered(event), event)
+            assert(frame:UnregisterEvent(event), event)
+            assert(not frame:IsEventRegistered(event), event)
+        end
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
+#[cfg(not(feature = "client-wowforever"))]
+fn forever_known_startup_names_preserve_other_profile_registration_policy() {
+    let env = env();
+    let permissive_classic = cfg!(any(
+        feature = "client-wrath",
+        feature = "client-mists",
+        feature = "client-era",
+        feature = "client-anniversary"
+    ));
+    // None of these five names occurs in the current shared or Retail/PTR catalogs.
+    for event in [
+        "ALERT_AGE_VERIFICATION_RESTRICTED",
+        "GLOBAL_REGION_MOUSE_DOWN",
+        "PLAYER_PVP_FLAG_CHANGED",
+        "VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED",
+        "VOICE_CHAT_VOICE_PROVIDER_CHANGED",
+    ] {
+        let (accepted, registered, after_unregister): (bool, bool, bool) = env
+            .eval(&format!(
+                r#"
+                local frame = CreateFrame("Frame")
+                local accepted = pcall(frame.RegisterEvent, frame, "{event}")
+                local registered = frame:IsEventRegistered("{event}")
+                frame:UnregisterEvent("{event}")
+                return accepted, registered, frame:IsEventRegistered("{event}")
+                "#
+            ))
+            .unwrap();
+        assert_eq!(accepted, permissive_classic, "{event}: registration policy");
+        assert_eq!(registered, permissive_classic, "{event}: listener state");
+        assert!(!after_unregister, "{event}: listener state after unregister");
+    }
+}
+
+#[test]
+#[cfg(any(feature = "client-wowforever", feature = "retail-12-0-0"))]
+fn forever_known_startup_catalog_preserves_strict_unknown_name_rejection() {
+    let env = env();
+    env.exec(
+        r#"
+        local frame = CreateFrame("Frame")
+        for _, event in ipairs({
+            "ALERT_AGE_VERIFICATION_RESTRICTED_INVENTED",
+            "GLOBAL_REGION_MOUSE_DOWN_INVENTED",
+            "PLAYER_PVP_FLAG_CHANGED_INVENTED",
+            "VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED_INVENTED",
+            "VOICE_CHAT_VOICE_PROVIDER_CHANGED_INVENTED",
+            "WOWFOREVER_INVENTED_EVENT",
+            "",
+        }) do
+            local ok, err = pcall(frame.RegisterEvent, frame, event)
+            assert(not ok and string.find(err, "Attempt to register unknown event", 1, true))
+            assert(not frame:IsEventRegistered(event))
+        end
+        "#,
+    )
+    .unwrap();
+}
