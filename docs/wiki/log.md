@@ -2116,3 +2116,7 @@ Updated [existing Windows investigation](investigations/windows-port-build.md#ev
 ## [2026-10-15] source | Forever explicit watch membership
 
 [API checkpoint](systems/lua-api.md#forever-supplied-quest-difficulty) links the [owning membership contract](../specs/forever-quest-difficulty.md#ordinary-watch-membership-follow-up--bounded-model-execution) for historical `df5bc6537`: bounded source/format audit PASS; runtime then UNEXECUTED and real unchanged whole-vendor Track All/Untrack All, POI toggle and tracker consumer verification pending. Historical source40a28 PASS and startup10/14 FAIL remain separate, including the earlier mutation/event RED. Reconciled only touched quest/watch summaries; no new compile/runtime/native/profile/startup acceptance.
+
+## [2026-10-15] evidence | Public offer rich-log RED
+
+[Existing quest wiki](systems/lua-api.md#public-offer-rich-log-state-split) links the [owning coherence contract](../specs/quest-offer-rich-log-coherence.md) and [central saved receipt](../baselines/README.md#public-offer-rich-log-coherence-red--2026-10-15): sourcef94 public acceptance0 PASS/1 FAIL at final Rust assertion; separate lightweight controls13 PASS. First source90 compile failure is not RED. Independent saved-runtime reconciliation PASS; user rich-metadata choice pending, with no production/default/baseline changes. Prior sourcef91 watch/normal GREEN and startup10/14 FAIL remain separate.

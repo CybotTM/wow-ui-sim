@@ -1,6 +1,10 @@
+## [2026-10-15] evidence | Public offer rich-log RED
+
+[Existing quest wiki](systems/lua-api.md#public-offer-rich-log-state-split) links the [owning coherence contract](../specs/quest-offer-rich-log-coherence.md) and [central saved receipt](../baselines/README.md#public-offer-rich-log-coherence-red--2026-10-15): sourcef94 public acceptance0 PASS/1 FAIL at final Rust assertion; separate lightweight controls13 PASS. First source90 compile failure is not RED. Independent saved-runtime reconciliation PASS; user rich-metadata choice pending, with no production/default/baseline changes. Prior sourcef91 watch/normal GREEN and startup10/14 FAIL remain separate.
+
 ## [2026-10-15] evidence | Watch/talent bounded execution
 
-[Historical receipt](../baselines/README.md#current-watchtalent-execution--2026-10-15) records source40a's28 targeted passes, positive normal watch/voice probe and startup10records/14occurrences FAIL. Stale80002 emission was removed at that source; its separate mutation/event RED is historical, not a current-source verdict. [Membership checkpoint](systems/lua-api.md#forever-supplied-quest-difficulty) links the current independently reconciled bounded model execution; normal-process probes remain pending. Gamepad and broader acceptance remain open.
+[Historical receipt](../baselines/README.md#current-watchtalent-execution--2026-10-15) records source40a's28 targeted passes, positive normal watch/voice probe and startup10records/14occurrences FAIL. Stale80002 emission was removed at that source; its separate mutation/event RED is historical, not a current-source verdict. [Membership checkpoint](systems/lua-api.md#forever-supplied-quest-difficulty) links current independently reconciled model and bounded normal-process execution; full UI/native/startup acceptance remains open. Gamepad and broader acceptance remain open.
 
 ## [2026-10-15] evidence | Provider/quest bounded execution
 

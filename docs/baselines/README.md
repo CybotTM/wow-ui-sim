@@ -84,6 +84,16 @@ Saved actual normal original membership and actual `QuestMapFrame` header-consum
 
 Fresh actual startup **FAIL:10 records /14 occurrences, exit1**, with Gamepad errors. `membership-startup-baseline-receipt.json` proves capture bytes identical to the committed baseline; no baseline JSON update. Source40a/source704 historical receipts remain separate. Default check, other-profile runtime, native parity, full suites, clean whole startup and full-parent acceptance remain open. This documentation reconciliation performs no build or runtime execution.
 
+### Public offer rich-log coherence RED — 2026-10-15
+
+[Owning contract](../specs/quest-offer-rich-log-coherence.md); evidence root O2: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/forever-offer-coherence-red-retry1-20261015T165133113920Z`. Saved source/runtime basis `f94aea875ca28b89a9678b4aa8e39bf6c678706a`. Full `public-offer-coherence-red/{stdout,stderr,result.json}` records actual **0 PASS / 1 FAIL / 0 ignored, exit101**, not a fixture failure: public preconditions complete and final Rust coherence assertion fails. Public `A_Admin.OpenMultiQuestNpc()` offers80002 “Supply Run”, level80; `SelectAvailableQuest(1)` → `ConfirmAcceptQuest()` leaves lightweightOccurrences1, pendingNone, selected80002 and queuedAccepted1. Rich `IsOnQuest=false`, index/info absent; explicit `AddQuestWatch=false`, count2 unchanged (80000,80001). No state/API/event-handler replacement was used.
+
+Separate `existing-quest-verb-controls/{stdout,stderr,result.json}` records **13 distinct PASS, exit0** for `quest_verbs::`; these establish existing lightweight controls, not rich coherence. `approved-lightweight-results.json` retains both group receipts. Explicit lead approval covered14 lightweight cases without FIFO waiting: MemoryMax2GiB, CPUQuota25%, Nice19, timeout86s, scoped host memory full avg10>5 stop monitor. Both saved `*-host-psi-guard.json` receipts report no aborts, signals or errors. This handoff only reads saved evidence; no new runtime.
+
+First source90 attempt stopped at E0277/u32 fixture compilation, **not behavioral RED**. Typed fixture fix `f94aea875` compiled in3m21s with guard `build_processes_exited`, integration-only `artifacts/deps/` seal; UnitRole dead-code warning retained. `build-summary.json`, `terminal-command.json`, `pressure-watch-result.json` and `seal-integration.json` own compile/seal attribution; compilation does not earn behavior credit.
+
+Independent saved-runtime reconciliation **PASS**: `/home/osso/.local/state/wow-ui-sim/verification/quest-offer-coherence-next/runtime-report.md` confirms expected final-assertion RED, reachable public fixture, separate 13 controls, guard observations and fresh f94 formatting; the coherence behavior remains FAIL. User nonblocking rich-metadata choice remains pending; no production change or default policy is implied. Earlier [sourcef91 watch39 and normal GREEN/startup FAIL10/14](#current-watch-membership-model-execution--2026-10-15) remain separate. No rerun, baseline JSON update, clean-startup, native or full-parent acceptance.
+
 ## Panel And Addon Evidence
 
 - `mists-panels.md` lists the Blizzard panel parity matrix.
