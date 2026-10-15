@@ -20,9 +20,11 @@ Static source comparison at the [expanded-pass revisions and interpretation limi
 
 **Simulator:** `src/lua_api/frame/methods/button_anchor_hierarchy/animations.rs:358-374` aliases `animation_group_get_loop_state` to `animation_group_get_looping`, which returns configured `NONE`, `REPEAT` or `BOUNCE`. Playback direction and configured repetition policy are distinct facts.
 
-**Counterexample:** a playing REPEAT group should report live `FORWARD` under the reconstruction; simulator reports `REPEAT`. A BOUNCE group cannot report its changing direction through this getter.
+**Counterexample:** start a non-looping group containing a timed animation: reconstructed startup selects live `FORWARD` (`CSimpleAnimGroup.cpp:563-574`), while simulator's configured-mode getter reports `NONE`. During reverse BOUNCE playback the source can report `REVERSE`, while simulator still reports `BOUNCE`.
 
-**Rework/regression:** expose live playback direction/state separately from loop mode; assert getter and `OnLoop` arguments while moving forward/reverse and on inactive/paused boundaries. Establish exact boundary ordering against the supported profile; do not infer it solely from an elapsed-time formula.
+**Contract conflict:** [the existing query-lifecycle spec](../specs/animation-query-lifecycle.md) explicitly defines the simulator getter as configured loop mode. This historical discrepancy does not authorize rewriting that tested contract without a supported-profile decision/evidence.
+
+**Rework/regression:** if live state is the intended target contract, expose direction separately from loop mode; assert getter and `OnLoop` arguments while moving forward/reverse and on inactive/paused boundaries. Establish exact boundary ordering rather than inferring it solely from an elapsed-time formula.
 
 ## A3 — Invalid loop mode silently resets configuration
 
@@ -30,7 +32,7 @@ Static source comparison at the [expanded-pass revisions and interpretation limi
 
 **Simulator:** `animations.rs:345-355` feeds any input to `LoopType::from_str`; `src/lua_api/animation.rs:63-71` maps everything except REPEAT/BOUNCE to NONE.
 
-**Counterexample:** after `SetLooping("REPEAT")`, `SetLooping("INVALID")` errors/preserves mode in the reconstruction but silently stops repeating in the simulator.
+**Counterexample:** after `SetLooping("REPEAT")`, `SetLooping("INVALID")` errors/preserves mode in the reconstruction; simulator returns normally and its getter reports `NONE`. Exact downstream playback/callback consequences were not established.
 
 **Rework/regression:** validate the target-profile vocabulary before mutation. Assert `pcall` failure plus unchanged prior mode and successful valid controls. Do not add a fallback-to-NONE policy unless it is actually the intended target contract.
 

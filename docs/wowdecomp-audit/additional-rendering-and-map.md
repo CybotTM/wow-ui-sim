@@ -8,19 +8,21 @@ Expanded pass against simulator `2da20225ba147dda579dd01164917cc16f0618ed`; exte
 
 **Simulator:** `src/lua_api/frame/methods/misc/alpha_gradient.rs:54-70` records `alpha_gradients[0]`, clamps length and always returns true. A source-wide `alpha_gradients` search finds initialization and API storage/getters/clear only, no glyph/render consumer. Existing `src/loader/tests/frame_interaction.rs:266-310` and `tests/patch_11_2_0_publication_fixes.rs` exercise stored surface state, not rendered fading.
 
-**Counterexample:** render a long FontString before and after `SetAlphaGradient(2,4)`. The reconstruction modifies glyph geometry alpha; the simulator emits the same text pixels because rendering never reads the gradient. Exact fade quantization and character/vertex indexing require further target-profile evidence; this audit did not render the fixture.
+**Source-derived fixture:** render a long FontString before and after `SetAlphaGradient(2,4)`. The reconstruction modifies glyph geometry alpha; the inspected simulator glyph path receives no gradient state, predicting unchanged pixels. No pixel comparison was performed. Exact fade quantization and character/vertex indexing require further target-profile evidence.
 
-**Rework:** carry gradient state into actual glyph emission, including retained state after text recreation, and return the target API's meaningful outcome rather than unconditional success. Do not mistake a working `HasAlphaGradient` roundtrip for rendering support.
+**Rework:** carry gradient state into actual glyph emission, including retained state after text recreation. Resolve return behavior separately for profiles retaining the historical contract; current modern gradient APIs are not defined by this old wrapper. Do not mistake a working `HasAlphaGradient` roundtrip for rendering support.
 
 **Regression:** deterministic text render compares pre-span, within-span and post-span pixel alpha; changing text/font after the setter preserves the requested effect. Include empty text/invalid spans only after their native contract is established. Keep modern additional gradient APIs separate from the historical two-argument FontString contract.
 
 ## T5 — Font mutation claims success without validating a usable font
 
-**External:** `Engine/Source/Frame/CSimpleFontString_Scripts.cpp:285-320` validates positive height and reports success only if `SetFont` succeeds. `Engine/Source/Frame/CSimpleRender.cpp:1228-1266`, `CSimpleFontString::SetFont`, offset `0x00483750`, calls `TextBlockGenerateFont` before changing the existing handle/height; failed generation returns 0 with prior font intact. `CSimpleFontString_Scripts.cpp:491-511`, offset `0x0048DDB0`, rejects nonpositive `SetTextHeight`.
+**External:** `Engine/Source/Frame/CSimpleFontString_Scripts.cpp:285-320` validates positive height and reports success only if `SetFont` succeeds. `Engine/Source/Frame/CSimpleRender.cpp:1228-1266`, `CSimpleFontString::SetFont`, offset `0x00483750`, calls `TextBlockGenerateFont` before changing the existing handle/height; failed generation returns 0 with prior font intact. The failure chain is explicit: `Engine/Source/Services/TextBlock.cpp:333-379` → `Engine/Source/Gxu/GxuFontMain.cpp:862-898` → `Engine/Source/Gxu/GxuFontFont.cpp:217-239` → `Engine/Source/Gxu/GxuFontFace.cpp:72-112`; an uncached name whose file cannot be read yields no face/handle, not a default-font success.
+
+The public `SetTextHeight` wrapper at `CSimpleFontString_Scripts.cpp:490-509`, offset `0x0048DDB0`, rejects nonpositive height **before** calling the core setter, and is registered at `:737`. A contrary falsification based only on the unvalidated core `CSimpleRender.cpp:1271-1277` was rejected: core mutation and the Lua API wrapper are different boundaries.
 
 **Simulator:** `src/lua_api/frame/methods/text_attribute_event/text/formatting.rs:330-398` accepts any non-nil font path, stores path/size/outline and returns true without loading/validating the font. `:433-447` permits zero/negative size and aliases `SetTextHeight` to that assignment. The getter can therefore advertise an invalid requested font/height regardless of the renderer's eventual resource resolution.
 
-**Counterexamples:** begin with a known valid font; request an unavailable fixture path with a positive height. Reconstruction reports failure and preserves the old font, simulator reports true and changes the getter state. `SetTextHeight(0)` errors in the reconstructed script contract but stores zero in the simulator.
+**Source-derived counterexamples:** begin with a valid font; request a fresh, uncached fixture path absent from the asset sources with positive height. The traced reconstruction failure path preserves the old font, while simulator setter code reports true and changes getter state. The simulator font system can draw a default family for an unknown requested path (`src/render/font.rs`); this is a return/getter/resource-identity discrepancy, not proof of invisible text. `SetTextHeight(0)` errors in the registered reconstructed Lua wrapper but stores zero in the simulator. No fixture was executed.
 
 **Rework:** make font changes transactional against the actual asset/font loader and the supported profile's height validation. Commit path/height/flags only after successful font creation; align return/error behavior and `GetFont` with the resource actually used. Do not silently substitute a different font while reporting the rejected request as installed.
 
@@ -56,11 +58,11 @@ Expanded pass against simulator `2da20225ba147dda579dd01164917cc16f0618ed`; exte
 
 **External:** `WoW/Source/Ui/MinimapFrame.cpp:3543-3567`, offsets `0x007F3AE0`/`0x007F3B40`/`0x007F3B60`, selects distinct indoor/outdoor zoom, clamps to five, marks view updates and writes `minimapInsideZoom` or `minimapZoom` when changed. Getter reads the active environment's zoom; six levels are exposed.
 
-**Simulator:** `src/lua_api/frame/methods/map_frames.rs:616-639` clamps into six levels but writes a private per-frame `__minimap_zoom` field only. It does not synchronize either CVar or a view-radius/update model. The minimap renderer is the same static image independently of that field.
+**Simulator:** `src/lua_api/frame/methods/map_frames.rs:616-639` clamps into six levels but writes a private per-frame `__minimapZoom` field only. It does not synchronize either CVar or a view-radius/update model. The minimap renderer is the same static image independently of that field.
 
 **Counterexample:** start with a distinct outdoor zoom CVar value, then call `Minimap:SetZoom(3)` with a different current zoom. Reconstruction synchronizes the corresponding CVar/view; simulator's inspected setter changes only its private getter field. Indoor/outdoor switching has no corresponding pair of zoom states in this path.
 
-**Rework:** select a supported-profile view/zoom model as the source of truth, synchronize its relevant CVars and view changes, and derive `GetZoom` from it. Preserve the existing six-level count/clamping where the target contract agrees. Do not implement new terrain generation as a substitute for missing state coupling.
+**Rework:** select a supported-profile view/zoom model as the source of truth and derive `GetZoom` from it. Synchronize the relevant CVars/environment selection only if that historical coupling applies to the selected profile. Preserve the existing six-level count/clamping where the target contract agrees. Do not implement new terrain generation as a substitute for missing state coupling.
 
 **Regression:** supplied indoor/outdoor states with different stored zooms; setter updates active zoom/CVar, environment transition selects the other zoom, and view-dependent consumers use the changed radius. The six-level count itself matches and is not a new gap. Historical CVar/indoor policy requires target-profile confirmation.
 
