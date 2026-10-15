@@ -16,6 +16,8 @@ The initial nine findings below were a bounded first pass, **not the total gap c
 
 [Additional widget-state findings](additional-widget-state.md): C7 active button fonts, C8 Slider range script/value lifecycle, C9 deferred scroll-range notification. The StatusBar orientation absence claim was rejected by tracing shared registration and its actual render field.
 
+[Additional inventory and currency findings](additional-inventory-and-currency.md): B1 pending stack splits, B2 item-instance cursor state, B3 contextual item use, B4 quest-item relationships, B5 mutable currency list/watch state. Old tuple shapes and item-backed currency quantities were not treated as modern defects.
+
 All remain static historical-source comparisons, not native-confirmed modern defects.
 
 ## Initial rework list
