@@ -12,6 +12,16 @@
 
 The cached Forever `SimpleSliderAPIDocumentation.lua` documents `SetValue(value, treatAsMouseEvent=false)`. Dispatch/order/error behavior follows the simulator's existing script model and unchanged addon usage, not a new native-client probe claim.
 
+## Clean-room step assignment follow-up
+
+Wrath and Retail share the following simulator policy; it is not a recovered native algorithm. Current default step remains unchanged. For finite ordered bounds and positive step, choose the nearest minimum-relative lattice value or the maximum endpoint; ties choose the greater value. Step zero is continuous. Thus `[0,10]`, step2, value3 becomes4; step4, value9 becomes10 rather than8.
+
+- [ ] Apply quantization only to Slider programmatic value assignment; preserve StatusBar clamping and callback shape.
+- [ ] Re-evaluate the committed value when `SetValueStep` changes; dispatch synchronously only if the effective value changes, with a false mouse flag for step-triggered callbacks.
+- [ ] Preserve offset/negative minima, exact endpoints, same-effective-value suppression and existing callback observations. Do not infer dragging, native defaults or unsupported argument policy.
+
+`tests/slider_step_assignment.rs` adds five **UNCOMPILED / UNEXECUTED** cases. The fractional scale/CVar consumer explicitly chooses step0.01 to express its existing precision. Current producer remains clamp-only/stores-only; no behavioral RED or fix claimed.
+
 ## How it works
 
 - [Event system](../event-system.md)
@@ -40,4 +50,4 @@ Frozen `3d6017fe` runs unchanged ClassicCastBar `8909724` through scale `1 → 1
 
 ## Out of scope
 
-StatusBar behavior, other slider methods, mouse-drag producers, new secret handling, argument-validation fidelity and native timing conformance remain unchanged or unverified. No addon/vendor changes or manual callback invocation.
+StatusBar behavior, other slider methods outside the step follow-up, mouse-drag producers, new secret handling, argument-validation fidelity and native timing conformance remain unchanged or unverified. No addon/vendor changes or manual callback invocation.

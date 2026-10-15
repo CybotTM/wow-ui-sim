@@ -280,6 +280,7 @@ fn set_value_updates_castbar_style_scale_and_cvar_consumer() {
         local bar = CreateFrame('StatusBar')
         local slider = CreateFrame('Slider')
         slider:SetMinMaxValues(0.7, 1.8)
+        slider:SetValueStep(0.01)
         C_CVar.RegisterCVar('__slider_castbar_scale', '')
         local calls = 0
         slider:SetScript('OnValueChanged', function(_, value)
