@@ -473,7 +473,9 @@ print("FEEDBACK_THUMB_CONTRACT_PASS")
 
 #[test]
 fn slider_thumb_rebinding_preserves_unresolved_and_authored_anchor_controls() {
-    env().exec(r#"
+    env()
+        .exec(
+            r#"
         local slider = CreateFrame("Slider", nil, UIParent)
         slider:SetSize(160, 40)
         slider:SetPoint("CENTER")
@@ -496,13 +498,19 @@ fn slider_thumb_rebinding_preserves_unresolved_and_authored_anchor_controls() {
         local nextLeft, nextBottom = replacement:GetRect()
         assert(left == nextLeft and bottom == nextBottom, "authored anchors remain authoritative")
         replacement:ClearAllPoints()
+        local oldCenter = replacement:GetCenter()
+        assert(oldCenter > slider:GetCenter(), "fixture starts above midpoint")
         local calls = 0
+        local callbackCenter
         slider:SetScript("OnValueChanged", function()
             calls = calls + 1
-            local tx = replacement:GetCenter()
-            assert(tx < slider:GetCenter(), "callback sees newly resolved thumb before SetValue returns")
+            callbackCenter = replacement:GetCenter()
         end)
         slider:SetValue(20)
         assert(calls == 1)
-    "#).unwrap();
+        assert(type(callbackCenter) == "number" and callbackCenter < slider:GetCenter(),
+            "callback must observe the new thumb position before SetValue returns")
+    "#,
+        )
+        .unwrap();
 }
