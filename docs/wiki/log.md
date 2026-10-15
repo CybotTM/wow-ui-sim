@@ -1,3 +1,7 @@
+## [2026-10-15] docs | Public offer producer and baseline reconciled
+
+[Central receipt](../baselines/README.md#public-offer-rich-log-coherence-red--2026-10-15) now separates independently audited d595 baseline3 executed/1 control PASS/2 missing-rich-row FAIL exit101 from original f94 RED/13 controls and E0603 fixture failure. [API inventory](systems/lua-api.md#public-offer-rich-log-state-split) explains producer `ccd9e2d01` selection snapshots/publication, links contract SSOT and records `8802fa400`'s fourth UNEXECUTED preservation control. Index reconciled; current GREEN/default/Retail confirmation/startup unverified. Docs only; no new execution, baseline JSON change or native/full-parent acceptance.
+
 ## [2026-10-15] docs | Public offer enrichment decision reconciled
 
 [API inventory](systems/lua-api.md#public-offer-rich-log-state-split), [central receipt](../baselines/README.md#public-offer-rich-log-coherence-red--2026-10-15) and index now reflect the answered enrichment request and link the [owning policy](../specs/quest-offer-rich-log-coherence.md). Source `edf7dcec6` has three authored UNEXECUTED tests; guarded baseline compilation running, no runtime verdict or production fix. Historical final-coherence RED, 13 passing controls and first compile failure retained; no new execution or broader acceptance.

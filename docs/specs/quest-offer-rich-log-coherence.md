@@ -17,6 +17,8 @@ Forever public offer acceptance must agree with rich quest-log queries and permi
 
 ## Implementation inventory
 
+Producer `ccd9e2d01` is committed; GREEN compilation and execution remain pending. Selection updates supplied fields on a cloned pending snapshot. Acceptance inserts that snapshot only for an absent rich ID; an already represented rich row remains untouched, preserving existing metadata and rewards.
+
 - `src/lua_api/globals/admin_quests.rs`: public NPC offer seeds; Retail confirmation extracts only the pending ID before dispatch, preserving its existing prompt contract.
 - `src/lua_api/globals/quest_verbs.rs`: consumes the selected snapshot and deduplicates rich/lightweight membership, retaining the existing queued event and already represented rich rows.
 - `src/lua_api/globals/quest_surface/legacy_globals.rs`: offer-index selection and public offer metadata.
