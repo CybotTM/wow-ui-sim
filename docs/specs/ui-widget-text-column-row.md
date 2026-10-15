@@ -67,7 +67,7 @@ The separate [frozen historical71 packet](../../data/patch-api/evidence/spacer-t
 ## Remaining proof
 
 - [x] Compile tests and observe populated result-boundary RED before getter implementation: eight unique Retail cases fail querying explicitly supplied records; deeper assertions remain unreached.
-- [ ] Implement/prove projection, shared selector/security behavior and deep snapshot isolation, then exercise each actual Retail/PTR cached consumer and affected diagnostics/checks.
+- [ ] Prove the implemented projection, shared selector/security behavior and deep snapshot isolation, then exercise each actual Retail/PTR cached consumer and affected diagnostics/checks.
 - [ ] Reconcile applicable publication evidence only after ordinary owning observation; preserve historical failures and broader acceptance gaps.
 
 Native catalogs/publishers, native interpolation/security/return parity, rendered output, empty-entry consumer lifecycle and nonneutral texture/effect/timer activation are not established by this slice. Other profiles and full-parent acceptance remain separately scoped.

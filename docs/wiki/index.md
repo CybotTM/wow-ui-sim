@@ -1,6 +1,6 @@
-## [2026-10-14] source | TextColumnRow passive inputs and authored tests
+## [2026-10-14] source | TextColumnRow producer after eight-case RED
 
-[Manager checkpoint](systems/ui-widget-manager-state.md#textcolumnrow-passive-checkpoint--2026-10-14) links the supplied input/type-21 feed contract. Eight cases remain authored with no completed test executable or execution; getter remains absent. [Saved nonbehavioral follow-up](../specs/ui-widget-text-column-row.md#saved-nonbehavioral-follow-up--2026-10-14) separates format/metadata PASS from interrupted compilation.
+[Manager checkpoint](systems/ui-widget-manager-state.md#textcolumnrow-passive-checkpoint--2026-10-14) links the supplied input/type-21 feed contract and `dcd2fbd12` getter/projector/registration after actual eight-case Retail populated-result RED at `9a60ded79`. Producer GREEN and cached lifecycle/security acceptance remain pending. [Saved follow-up](../specs/ui-widget-text-column-row.md#saved-nonbehavioral-follow-up--2026-10-14) preserves compile/copy PASS, dependency warning and earlier incomplete/link-failed attempts.
 
 ## [2026-10-14] evidence | Spacer bounded producer checkpoint
 

@@ -2032,3 +2032,7 @@ Updated [manager inventory](systems/ui-widget-manager-state.md#doublestatusbar--
 ## [2026-10-14] source | TextColumnRow passive inputs and authored tests
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#textcolumnrow-passive-checkpoint--2026-10-14) links supplied records/type-21 feeds and six uncompiled/unexecuted cases. Populated RED precedes getter implementation; native parity remains unproved.
+
+## [2026-10-14] source | TextColumnRow producer after eight-case RED
+
+[Manager checkpoint](systems/ui-widget-manager-state.md#textcolumnrow-passive-checkpoint--2026-10-14) and [owning contract](../specs/ui-widget-text-column-row.md#current-source-checkpoint--2026-10-14) supersede the passive-stage status above: `dcd2fbd12` adds getter/projector/registration after actual eight-case Retail populated-result RED at `9a60ded79`. Producer GREEN, cached lifecycle/security and native parity remain unproved.
