@@ -8,7 +8,7 @@
 
 ## [2026-10-15] evidence | Forever supplied quest difficulty
 
-[API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links the owning contract and [current sourcef91 receipt](../baselines/README.md#current-watch-membership-model-execution--2026-10-15): 39 bounded model PASS; independent saved model-runtime reconciliation PASS. Actual normal original/header bounded GREEN; independent normal verifier pending. Fresh startup FAIL10/14 exit1; baseline bytes unchanged. Central receipt owns stream-only checker correction and consumer limits. Historical source40a/source704 remain separate; no native/default-check/cross-profile/full-parent acceptance.
+[API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links the owning contract and [current sourcef91 receipt](../baselines/README.md#current-watch-membership-model-execution--2026-10-15): 39 bounded model PASS; independent saved model-runtime reconciliation PASS. Actual normal original/header bounded GREEN; independent saved normal-runtime reconciliation PASS. Fresh startup FAIL10/14 exit1; baseline bytes unchanged. Central receipt owns stream-only checker correction and consumer limits. Historical source40a/source704 remain separate; no native/default-check/cross-profile/full-parent acceptance.
 
 ## [2026-10-15] research | Screenshot fidelity
 
