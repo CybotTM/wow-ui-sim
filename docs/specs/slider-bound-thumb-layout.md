@@ -48,13 +48,14 @@ increasing percentage. All paths are within cached `Blizzard_SharedXML`.
 
 ## Tests asserting this spec
 
-Executed bounded integration cases in `tests/widget_slider.rs` cover value/range/orientation/resize geometry and rebinding/unresolved/authored-anchor controls. See [central receipt](../baselines/README.md#verified-scoped-receipts--2026-10-15) for runtime-source attribution and the full Slider group. `slider_thumb_render_rect_tracks_mutations_without_query_side_effects` is not among those selected cases; no new proof claimed for it.
+Executed bounded integration cases in `tests/widget_slider.rs` cover value/range/orientation/resize geometry and rebinding/unresolved/authored-anchor controls. See [central receipt](../baselines/README.md#verified-scoped-receipts--2026-10-15) for runtime-source attribution and the full Slider group. A separate saved exact run of `slider_thumb_render_rect_tracks_mutations_without_query_side_effects` passed 1/1 on source136: CPU render-list inclusion and horizontal/vertical/value/range/size mutation, without Lua geometry queries priming layout. Independent report: `/home/osso/.local/state/wow-ui-sim/verification/slider-query-free-saved-next/report.md`. Scale remains 1; this is not GPU or whole-current-tree proof.
 
 ## Known gaps (current cycle)
 
 - [x] Bounded public-query/mutation and callback geometry tests passed on runtime source136.
 - [x] Separate earlier [GPU receipt](../rendering-pipeline.md#combined-feedback-gpu-receipt--2026-10-15) establishes midpoint thumb visibility at its recorded source.
-- [ ] Query-free render mutation regression, native endpoint parity, full integration and current-source live-render acceptance remain open.
+- [x] Source136 query-free CPU render-list mutation regression passed separately.
+- [ ] Native endpoint parity, full integration and current-source live-render acceptance remain open.
 
 ## Out of scope
 

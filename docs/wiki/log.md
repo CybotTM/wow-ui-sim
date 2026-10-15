@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | Saved Slider render-list proof
+
+[Owning Slider contract](../specs/slider-bound-thumb-layout.md#tests-asserting-this-spec) now records the already-executed source136 query-free CPU render-list regression: 1/1 PASS, separately verified against full saved output and artifact metadata. No rerun; non-unit scale, GPU, native and current-tree acceptance remain open.
+
 ## [2026-10-15] docs | Scoped proof reconciliation
 
 Updated [owning contracts/index](index.md) from independent [central receipts](../baselines/README.md#verified-scoped-receipts--2026-10-15): runtime source136 only; import012/events c2bf compilation in progress, new execution gates NOT GREEN. Post-enum startup remains FAIL; prior module controls are not new-binding acceptance. This checkpoint updates documentation and the captured baseline; unrelated subtext edits remain excluded.
