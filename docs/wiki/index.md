@@ -1,6 +1,6 @@
 ## [2026-10-15] evidence | Watch/talent bounded execution
 
-[Current receipt](../baselines/README.md#current-watchtalent-execution--2026-10-15) records source40a's28 targeted passes, positive normal watch/voice probe and startup10records/14occurrences FAIL. Stale80002 watch emission is gone; a separate normal RED proves missing stateful watch mutations/events. Gamepad and broader acceptance remain open; independent reconciliation pending.
+[Historical receipt](../baselines/README.md#current-watchtalent-execution--2026-10-15) records source40a's28 targeted passes, positive normal watch/voice probe and startup10records/14occurrences FAIL. Stale80002 emission was removed at that source; its separate mutation/event RED is historical, not a current-source verdict. [Membership checkpoint](systems/lua-api.md#forever-supplied-quest-difficulty) links df5bc6537's owning contract: source/format audit PASS, new runtime UNEXECUTED and real whole-vendor consumer verification pending. Gamepad and broader acceptance remain open.
 
 ## [2026-10-15] evidence | Provider/quest bounded execution
 
@@ -8,7 +8,7 @@
 
 ## [2026-10-15] source | Forever supplied quest difficulty
 
-[API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links the owning live-row contract and bounded policy. Original query/unchanged-consumer Lua REDs reproduced; current Rust/runtime GREEN remains pending.
+[API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links the owning live-row contract and separates original query/unchanged-consumer REDs, historical source40a getter/projection passes and the new df5bc6537 membership source-only checkpoint.
 
 ## [2026-10-15] research | Screenshot fidelity
 

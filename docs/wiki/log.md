@@ -8,7 +8,7 @@
 
 ## [2026-10-15] source | Forever quest difficulty lookup
 
-[API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links `70459ec5a`'s supplied-row query and owning contract. Original sealed runtime reproduced four known-row nil mismatches and the unchanged Camelot prefix failure; process0 did not mean behavioral success. Independent source/readability audit passed; current build is in progress and six new enum/query tests remain unexecuted. No native or clean-startup acceptance.
+[API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links `70459ec5a`'s supplied-row query and owning contract. Original sealed runtime reproduced four known-row nil mismatches and the unchanged Camelot prefix failure; process0 did not mean behavioral success. Source/readability audit passed at that checkpoint; later [source40a execution](../baselines/README.md#current-watchtalent-execution--2026-10-15) separately records getter/projection passes and startup FAIL. No native or clean-startup acceptance.
 
 ## [2026-10-15] source | Provider and experience enum follow-up
 
@@ -2108,3 +2108,7 @@ Updated [manager inventory](systems/ui-widget-manager-state.md#doublestatusbar--
 ## [2026-10-15] docs | Windows evidence filename portability
 
 Updated [existing Windows investigation](investigations/windows-port-build.md#evidence-filename-portability--2026-10-15) and [index](index.md): main-supplied 115-name correction, unchanged raw logs, one live `/log` exception with refreshed digest, five candidate metadata/live-reference documents and preserved private originals. Historical scope/snapshot/source paths remain historical. Lexical/static proof only; native Windows checkout open, no general long-path or Docker stderr resolution, release/tag/push change or independent adoption claim. Docs only; no code/tests/evidence edits, commits, builds/runtime/network or delegation.
+
+## [2026-10-15] source | Forever explicit watch membership
+
+[API checkpoint](systems/lua-api.md#forever-supplied-quest-difficulty) links the [owning membership contract](../specs/forever-quest-difficulty.md#ordinary-watch-membership-follow-up--source-only-unexecuted) for `df5bc6537`: bounded source/format audit PASS; current runtime UNEXECUTED and real unchanged whole-vendor Track All/Untrack All, POI toggle and tracker consumer verification pending. Historical source40a28 PASS and startup10/14 FAIL remain separate, including the earlier mutation/event RED. Reconciled only touched quest/watch summaries; no new compile/runtime/native/profile/startup acceptance.

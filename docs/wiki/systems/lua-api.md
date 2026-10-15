@@ -11,7 +11,9 @@ The [integrated checkpoint](../investigations/integrated-source-and-factory-proo
 
 ## Forever supplied quest difficulty
 
-[Owning contract and proof status](../../specs/forever-quest-difficulty.md) records the Forever-only `C_QuestLog.GetQuestDifficultyLevel` live rich-row lookup. Row-level equality and explicit missing-input errors are simulator policies, not native parity. Original sealed query and unchanged Camelot title-consumer REDs precede producer `70459ec5a`; getter preservation and four ordinary-watch projection cases PASS at source40a, with normal watch/log/global-alias coherence. The [current receipt](../../baselines/README.md#current-watchtalent-execution--2026-10-15) owns exact counts and remaining failures: missing80002 is absent, but Gamepad startup errors and a separately reproduced missing add/remove/type/event membership path remain. Other-profile/native/whole-startup preservation remains open. No vendor behavior or stored CVars changed.
+[Owning contract and proof status](../../specs/forever-quest-difficulty.md) owns the Forever-only live rich-row difficulty getter and bounded simulator policies, not native parity. Historical [source40a receipt](../../baselines/README.md#current-watchtalent-execution--2026-10-15) records **28 PASS** (difficulty3 + watch-projection4 + finite21), separate positive normal watch/global-alias/voice checks and startup **10 records / 14 occurrences FAIL**. Its read-only projection passes and separate add/remove/type/event RED do not establish current membership behavior.
+
+[Explicit-membership follow-up](../../specs/forever-quest-difficulty.md#ordinary-watch-membership-follow-up--source-only-unexecuted) owns source `df5bc6537` and its per-environment watch metadata. Bounded source/format audit **PASS**; current membership and revised projection runtime **UNEXECUTED**, not compile or behavioral proof. Real unchanged whole-vendor Track All/Untrack All, POI toggle and tracker consumer verification remains pending. Historical getter/title-consumer proof stays separate; other-profile/native/whole-startup acceptance remains open.
 
 ## Retail 12.0.5 spell and spellbook loss-of-control outputs
 
