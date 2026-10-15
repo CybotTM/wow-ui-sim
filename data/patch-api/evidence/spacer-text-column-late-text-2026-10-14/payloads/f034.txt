@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/usr/bin/git",
+    "-C",
+    "/home/private-account-2/Projects/wow/wow-ui-sim",
+    "rev-parse",
+    "HEAD"
+  ],
+  "exit": 0
+}

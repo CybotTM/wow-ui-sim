@@ -1,0 +1,7 @@
+{
+  "argv": [
+    "/usr/bin/cargo",
+    "--version"
+  ],
+  "exit": 0
+}
