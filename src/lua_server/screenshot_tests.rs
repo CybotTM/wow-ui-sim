@@ -7,6 +7,57 @@ use std::thread;
 use std::time::Duration;
 
 #[test]
+fn screenshot_client_forwards_png_choice() {
+    let directory = tempfile::tempdir().unwrap();
+    let socket_path = directory.path().join("client.sock");
+    let listener = UnixListener::bind(&socket_path).unwrap();
+    let (cmd_tx, cmd_rx) = mpsc::channel();
+    thread::scope(|scope| {
+        let server = scope.spawn(move || {
+            let (stream, _) = listener.accept().unwrap();
+            stream
+                .set_read_timeout(Some(Duration::from_secs(5)))
+                .unwrap();
+            super::handle_connection(stream, &cmd_tx).unwrap();
+        });
+        let client = scope.spawn(|| {
+            super::client::screenshot(
+                &socket_path,
+                "client.png",
+                23,
+                17,
+                Some("Panel".into()),
+                None,
+                true,
+            )
+        });
+        let command = cmd_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+        let LuaCommand::Screenshot {
+            output,
+            width,
+            height,
+            filter,
+            crop,
+            png,
+            respond,
+        } = command
+        else {
+            panic!("expected screenshot command");
+        };
+        assert_eq!(output, "client.png");
+        assert_eq!((width, height), (23, 17));
+        assert_eq!(filter.as_deref(), Some("Panel"));
+        assert_eq!(crop, None);
+        assert!(png);
+        respond
+            .send(Response::Output("saved client.png".into()))
+            .unwrap();
+        assert_eq!(client.join().unwrap().unwrap(), "saved client.png");
+        server.join().unwrap();
+    });
+}
+
+#[test]
 fn screenshot_socket_preserves_png_choice_and_defaults_omitted_to_false() {
     const IO_TIMEOUT: Duration = Duration::from_secs(5);
     let directory = tempfile::tempdir().unwrap();

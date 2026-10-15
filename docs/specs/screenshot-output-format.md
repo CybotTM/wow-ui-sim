@@ -29,6 +29,8 @@ Authored tests; current PNG implementation has not been verified:
 
 - `src/screenshot_output.rs`: `png_preserves_every_rgba_byte_and_forces_extension`, `webp_has_riff_webp_signature_and_forces_extension`, `missing_parent_returns_write_error_for_both_formats`, `directory_destination_returns_write_error_for_both_formats` — encoder fixtures, extensions, and write errors only; not rendered output.
 - `src/bin/wow_sim/main.rs`: `screenshot_png_selection_preserves_defaults` — standalone parsing/defaults only.
+- `src/lua_server/screenshot_tests.rs`: actual Unix socket framing, public client forwarding, mpsc selection, omitted-field default, and response roundtrip.
+- `src/iced_app/update_servers.rs`: `screenshot_commands_save_selected_format_after_crop` — live App command dispatch, GPU capture, crop, output signatures/dimensions, and success paths.
 - `src/bin/wow_cli/main.rs`: `screenshot_png_flag_parses`, `screenshot_png_choice_survives_wire_roundtrip`, `screenshot_defaults_are_unchanged` — live parsing, serialization, and default control only; not a running-server capture.
 
 ## Known gaps (current cycle)

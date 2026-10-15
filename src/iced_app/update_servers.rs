@@ -343,6 +343,50 @@ mod tests {
     }
 
     #[test]
+    fn screenshot_commands_save_selected_format_after_crop() {
+        let (tx, rx) = mpsc::channel();
+        let mut app = build_test_app_with_lua_rx(rx);
+        let directory = tempfile::tempdir().unwrap();
+        for png in [true, false] {
+            let requested =
+                directory
+                    .path()
+                    .join(if png { "lossless.webp" } else { "default.png" });
+            let expected = requested.with_extension(if png { "png" } else { "webp" });
+            let (respond, response_rx) = mpsc::channel();
+            tx.send(LuaCommand::Screenshot {
+                output: requested.to_string_lossy().into_owned(),
+                width: 16,
+                height: 12,
+                filter: None,
+                crop: Some("7x5+2+3".to_string()),
+                png,
+                respond,
+            })
+            .unwrap();
+            app.process_lua_commands();
+            let response = response_rx
+                .recv_timeout(std::time::Duration::from_secs(5))
+                .unwrap();
+            let crate::lua_server::Response::Output(message) = response else {
+                panic!("screenshot failed: {response:?}");
+            };
+            assert!(message.contains("7x5 (cropped from 16x12)"));
+            assert!(message.contains(expected.to_str().unwrap()));
+            assert!(!requested.exists());
+            let bytes = std::fs::read(expected).unwrap();
+            let format = if png {
+                image::ImageFormat::Png
+            } else {
+                image::ImageFormat::WebP
+            };
+            assert_eq!(image::guess_format(&bytes).unwrap(), format);
+            let decoded = image::load_from_memory_with_format(&bytes, format).unwrap();
+            assert_eq!((decoded.width(), decoded.height()), (7, 5));
+        }
+    }
+
+    #[test]
     fn combine_console_and_captured_prefers_newline_when_both_present() {
         assert_eq!(
             combine_console_and_captured("console".to_string(), "captured".to_string()),
