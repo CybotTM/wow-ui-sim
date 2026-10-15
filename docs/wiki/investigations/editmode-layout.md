@@ -112,7 +112,7 @@ Committed `b41b42fc1` corrects the fixtures to the existing combined-index contr
 
 ### Focused repaired-fixture execution — 2026-10-15
 
-[Owning selection spec](../../specs/edit-mode-layout-selection.md#focused-fixture-execution--2026-10-15) records actual sourcefb4b31b8f Retail GUI-feature execution of both repaired fixtures. This closes only their bounded execution gap, not historical source41cb broad FAIL or full-suite/startup/native acceptance. Independent saved-runtime reconciliation by agent5533 remains **pending** until its report exists; no production remap, vendor, user-cache or orientation change is implied.
+[Owning selection spec](../../specs/edit-mode-layout-selection.md#focused-fixture-execution--2026-10-15) records actual sourcefb4b31b8f Retail GUI-feature execution of both repaired fixtures. This closes only their bounded execution gap, not historical source41cb broad FAIL or full-suite/startup/native acceptance. Independent saved-runtime reconciliation **PASS**; the owning spec links the report. No production remap, vendor, user-cache or orientation change is implied.
 
 Follow-up: selecting the saved layout still was not enough for the visible UI.
 The startup fast path for action bars seeded Widescreen `systemInfo` and replayed
