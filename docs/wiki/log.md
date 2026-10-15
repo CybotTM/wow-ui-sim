@@ -1,6 +1,6 @@
 ## [2026-10-15] evidence | Current Forever import/event execution reconciled
 
-[Central receipt](../baselines/README.md#current-importevents-execution--independent-acceptance-pending) owns runtime-code c2bf/build57 attribution, bounded saved execution, inventories and failing startup. Historical source136 model/GPU/backend evidence stays separate. Independent report receipt/acceptance remains pending; enum-provider/experience candidate unintegrated/unexecuted and gamepad root failures open. Documentation only; baseline JSON remains main-owned.
+[Central receipt](../baselines/README.md#current-importevents-execution--2026-10-15) owns runtime-code c2bf/build57 attribution, bounded saved execution, inventories and failing startup. Historical source136 model/GPU/backend evidence stays separate. Independent bounded reconciliation PASS; startup remains FAIL, enum-provider/experience candidate unintegrated/unexecuted and gamepad root failures open. Documentation only; baseline JSON remains main-owned.
 
 ## [2026-10-15] evidence | v0.1.33 outcome refreshed
 

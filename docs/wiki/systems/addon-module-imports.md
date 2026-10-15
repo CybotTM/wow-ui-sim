@@ -14,7 +14,7 @@ Native Forever was not run. Multiple returns, module-name normalization, duplica
 
 ## Forever import binding — 2026-10-15
 
-The completed-module registry and `require` already work. Vendor `Blizzard_GamepadSmartNavigation` orders `Utility.lua` before consumers `SmartNavigation.lua` and `Debug.lua`; Utility returns a table, while both consumers call `import('.Utility')`. Commit `012df1e45` adds a direct Rust `import` registration using the same backend, only under `client-wowforever` at the existing pre-secure-copy seam. Current runtime-code `c2bf42c4f`, built at `57f8e0b10`, has saved bounded compilation/execution; independent acceptance remains pending. No stub, new loader, autoload, host-package fallback or changed `require` contract.
+The completed-module registry and `require` already work. Vendor `Blizzard_GamepadSmartNavigation` orders `Utility.lua` before consumers `SmartNavigation.lua` and `Debug.lua`; Utility returns a table, while both consumers call `import('.Utility')`. Commit `012df1e45` adds a direct Rust `import` registration using the same backend, only under `client-wowforever` at the existing pre-secure-copy seam. Current runtime-code `c2bf42c4f`, built at `57f8e0b10`, has saved bounded compilation/execution; independent bounded reconciliation PASS. No stub, new loader, autoload, host-package fallback or changed `require` contract.
 
 Reused completion, dependency, identity, grammar and error behavior is **simulator compatibility policy** justified by those vendor calls. Native `import=require` semantics, identity, grammar and error parity are UNKNOWN; native new-test authorship alone is not execution proof.
 
@@ -26,7 +26,7 @@ Reused completion, dependency, identity, grammar and error behavior is **simulat
 | Separate models/startup | Earlier source136 model/render/GPU evidence remains separate; current startup is captured but failing. |
 | Binding acceptance | Current execution observed; independent report receipt/acceptance, native parity, cross-profile and broader acceptance remain pending. |
 
-[Central receipt](../../baselines/README.md#current-importevents-execution--independent-acceptance-pending) owns current evidence root, exact counts, binary inventories, probe markers, failing startup and pending independent report. Historical RED is retained under the earlier receipt linked there. Private enum-provider/experience candidate remains unintegrated/unexecuted; actual new gamepad root failures stay open. Baseline JSON copying remains main-owned.
+[Central receipt](../../baselines/README.md#current-importevents-execution--2026-10-15) owns current evidence root, exact counts, binary inventories, probe markers, failing startup and accepted independent bounded report. Historical RED is retained under the earlier receipt linked there. Private enum-provider/experience candidate remains unintegrated/unexecuted; actual new gamepad root failures stay open. Baseline JSON copying remains main-owned.
 
 ## Sources
 

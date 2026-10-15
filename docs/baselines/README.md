@@ -44,7 +44,7 @@ Historical existing require/sandbox/registry/path tests: 12 + 6 + 14 + 16 = 48 d
 
 Compilation and saved fmt passed for the scoped source/profile; UnitRole dead-code warnings remain. Default `cargo check`, full suites, clean startup, native/cross-profile and full parent acceptance remain open. No new build/runtime execution for this documentation update.
 
-### Current import/events execution — independent acceptance pending
+### Current import/events execution — 2026-10-15
 
 Evidence root E: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/feedback-forever-import-events-retry2-20261015T121651105820Z`. Actual runtime-code basis `c2bf42c4f` includes import `012df1e45`; build source `57f8e0b106b6581bb65d0d14eac97944c5c11b57`. Successful no-run compilation followed two guard aborts; four sealed binaries are lib-tests, integration, wow-cli and wow-sim. Actual inventories: **1816 library / 8406 integration** tests, not executed-suite totals. UnitRole dead-code warnings remain.
 
@@ -52,7 +52,7 @@ Evidence root E: `/home/osso/.local/state/wow-ui-sim/verification/widget-discret
 
 Normal probe stderr contains `FOREVER_IMPORT_CURRENT_GREEN completed-table-identity vendor-method-call context-type=nil` and `FOREVER_EVENTS_CURRENT_GREEN count=5`: completed Utility table identity, callable vendor `SmartNavigation:GetCurrentButtonContext` returning nil, and five finite-event registration lifecycles completed; no exec-Lua errors. This does not establish functioning gamepad roots. Actual new gamepad root failures remain open. Normal startup remains FAIL as recorded above; the external full cache was not independently resealed.
 
-Independent report `/home/osso/.local/state/wow-ui-sim/verification/forever-import-events-runtime-next/report.md` is **PENDING main receipt/acceptance**. Saved execution is not independent acceptance, full-suite coverage, native import/event producer or payload parity, cross-profile runtime proof, clean startup or full-parent acceptance. Private enum-provider/experience candidate remains **UNINTEGRATED / UNEXECUTED**, not fixed. No builds or runtime execution were performed by this documentation reconciliation.
+Independent report `/home/osso/.local/state/wow-ui-sim/verification/forever-import-events-runtime-next/report.md` reconciles compilation, seals, inventories, all 57 distinct passes and the positive probe: **bounded PASS; startup FAIL**. This does not establish full-suite coverage, native import/event producer or payload parity, cross-profile runtime proof, clean startup or full-parent acceptance. Private enum-provider/experience candidate remains **UNINTEGRATED / UNEXECUTED**, not fixed. No builds or runtime execution were performed by this documentation reconciliation.
 
 ## Panel And Addon Evidence
 

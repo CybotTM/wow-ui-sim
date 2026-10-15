@@ -68,7 +68,7 @@ Path/dependency requirements have sixteen pure resolver tests; registry/value/pr
 
 ## Binding checkpoint — 2026-10-15
 
-Source integrated at `012df1e45`: the binding adds only `import` registration to the existing backend, not a stub or new loader. Current runtime-code `c2bf42c4f`, built at `57f8e0b10`, has saved bounded import/control execution and a completed-table/vendor-method probe; independent acceptance remains pending. [Central receipt](../baselines/README.md#current-importevents-execution--independent-acceptance-pending) owns counts, artifacts, failing startup and limits. [Owning wiki checkpoint](../wiki/systems/addon-module-imports.md#forever-import-binding--2026-10-15) separates historical RED from current execution; native parity remains unknown.
+Source integrated at `012df1e45`: the binding adds only `import` registration to the existing backend, not a stub or new loader. Current runtime-code `c2bf42c4f`, built at `57f8e0b10`, has saved bounded import/control execution and a completed-table/vendor-method probe; independent bounded reconciliation PASS. [Central receipt](../baselines/README.md#current-importevents-execution--2026-10-15) owns counts, artifacts, failing startup and limits. [Owning wiki checkpoint](../wiki/systems/addon-module-imports.md#forever-import-binding--2026-10-15) separates historical RED from current execution; native parity remains unknown.
 
 ## Known gaps (current cycle)
 
