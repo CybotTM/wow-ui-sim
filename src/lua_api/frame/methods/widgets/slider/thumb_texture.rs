@@ -70,11 +70,13 @@ pub(super) fn set_thumb_texture(state: &mut LuaState) -> LuaResult<u32> {
                 .children_keys
                 .insert("ThumbTexture".to_string(), child_id);
         }
+        sim.widgets.mark_rect_dirty(id);
         return Ok(0);
     }
 
     let child_id = ensure_named_child_texture(state, id, "ThumbTexture")?;
     assign_texture_payload(state, child_id, texture_value)?;
+    borrow_state_mut(state)?.widgets.mark_rect_dirty(id);
     Ok(0)
 }
 

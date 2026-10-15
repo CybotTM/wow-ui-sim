@@ -261,7 +261,8 @@ fn has_own_renderable_rect(
     frame: &crate::widget::Frame,
     id: u64,
 ) -> bool {
-    !frame.anchors.is_empty()
+    crate::layout::resolved_slider_thumb_rect(registry, frame).is_some()
+        || !frame.anchors.is_empty()
         || has_line_endpoint_geometry(frame)
         || frame.name.as_deref() == Some("UIParent")
         || id == 1
@@ -652,6 +653,79 @@ fn clip_hover_highlight(batch: &mut QuadBatch, before: usize, id: u64, registry:
 mod tests {
     use super::{build_render_list, resolve_eff_alpha};
     use crate::widget::{AnchorPoint, Frame, WidgetRegistry, WidgetType};
+
+    #[test]
+    fn slider_thumb_render_rect_tracks_mutations_without_query_side_effects() {
+        let env = crate::lua_api::WowLuaEnv::new().unwrap();
+        env.exec(
+            r#"
+            slider = CreateFrame("Slider", "RenderModelSlider", UIParent)
+            slider:SetSize(160, 40)
+            slider:SetPoint("CENTER")
+            slider:SetMinMaxValues(10, 110)
+            slider:SetValue(60)
+            thumb = slider:GetThumbTexture()
+            thumb:SetSize(18, 24)
+            thumb:SetColorTexture(1, 0, 1, 1)
+            slider:SetThumbTexture(thumb)
+            ordinary = slider:CreateTexture("RenderModelOrdinary")
+            ordinary:SetSize(18, 24)
+        "#,
+        )
+        .unwrap();
+        let render_thumb = || {
+            let state_handle = env.state();
+            let mut state = state_handle.borrow_mut();
+            // Match normal pre-render resolution, without any Lua geometry query.
+            state.ensure_layout_rects();
+            let slider_id = state.widgets.get_id_by_name("RenderModelSlider").unwrap();
+            let slider = state.widgets.get(slider_id).unwrap();
+            let thumb_id = slider.children_keys["ThumbTexture"];
+            let ordinary_id = state.widgets.get_id_by_name("RenderModelOrdinary").unwrap();
+            let list = build_render_list(
+                &[thumb_id, ordinary_id],
+                &state.widgets,
+                (state.screen_width, state.screen_height),
+            );
+            assert_eq!(list.len(), 1, "ordinary unanchored texture stays omitted");
+            assert_eq!(list[0].0, thumb_id);
+            (
+                list[0].1,
+                state.widgets.get(slider_id).unwrap().layout_rect.unwrap(),
+            )
+        };
+        let (mid, track) = render_thumb();
+        assert_eq!((mid.width, mid.height), (18.0, 24.0));
+        assert!((mid.x + mid.width / 2.0 - track.x - track.width / 2.0).abs() < 0.01);
+        assert!((mid.y + mid.height / 2.0 - track.y - track.height / 2.0).abs() < 0.01);
+        env.exec("slider:SetValue(35)").unwrap();
+        let (low, _) = render_thumb();
+        assert!(low.x < mid.x);
+        env.exec("slider:SetMinMaxValues(10, 60)").unwrap();
+        let (range_mid, _) = render_thumb();
+        assert!((range_mid.x - mid.x).abs() < 0.01);
+        env.exec("slider:SetOrientation('VERTICAL'); slider:SetSize(40, 160)")
+            .unwrap();
+        let (vertical_mid, track) = render_thumb();
+        assert!(
+            (vertical_mid.x + vertical_mid.width / 2.0 - track.x - track.width / 2.0).abs() < 0.01
+        );
+        assert!(
+            (vertical_mid.y + vertical_mid.height / 2.0 - track.y - track.height / 2.0).abs()
+                < 0.01
+        );
+        env.exec("slider:SetValue(50)").unwrap();
+        let (down, _) = render_thumb();
+        assert!(
+            down.y > vertical_mid.y,
+            "increasing vertical value moves down in screen space"
+        );
+        env.exec("slider:SetHeight(320); thumb:SetSize(20, 30)")
+            .unwrap();
+        let (resized, _) = render_thumb();
+        assert_eq!((resized.width, resized.height), (20.0, 30.0));
+        assert!(resized.y > down.y);
+    }
 
     #[test]
     fn button_state_texture_alpha_fallback_multiplies_own_alpha() {

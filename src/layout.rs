@@ -6,11 +6,14 @@ use rustc_hash::{FxHashMap, FxHashSet};
 mod layout_line;
 #[path = "layout_render_eligibility.rs"]
 mod layout_render_eligibility;
+#[path = "layout_slider_thumb.rs"]
+mod layout_slider_thumb;
 
 use crate::LayoutRect;
 use crate::widget::{AnchorPoint, WidgetRegistry, WidgetType};
 use layout_line::resolve_line_frame_rect;
 pub use layout_render_eligibility::{frame_has_layout_anchor, frame_has_render_layout};
+pub(crate) use layout_slider_thumb::resolved_slider_thumb_rect;
 
 /// Offset contributed by the designated scroll-child edge, in screen pixels.
 fn scroll_edge_offset(child: &crate::widget::Frame, parent: &crate::widget::Frame) -> (f32, f32) {
@@ -582,6 +585,9 @@ fn anchorless_rect(
     parent_rect: LayoutRect,
     scale: f32,
 ) -> LayoutRect {
+    if let Some(rect) = layout_slider_thumb::slider_thumb_rect(registry, frame, parent_rect) {
+        return rect;
+    }
     let width = registry.round_layout_value(frame, frame.width) * scale;
     let height = registry.round_layout_value(frame, frame.height) * scale;
     if width == 0.0 && height == 0.0 && is_statusbar_bar_child(registry, frame) {

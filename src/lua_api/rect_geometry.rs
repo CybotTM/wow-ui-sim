@@ -48,9 +48,6 @@ fn resolve_queryable_rect(
     crate::lua_api::frame::methods::secret_origin::require_geometry_readable(state, id)?;
     let needs_resolve = {
         let sim = borrow_state(state)?;
-        if !crate::layout::frame_has_render_layout(&sim.widgets, id) {
-            return Ok(None);
-        };
         let Some(frame) = sim.widgets.get(id) else {
             return Ok(None);
         };
@@ -71,6 +68,9 @@ fn resolve_queryable_rect(
     }
 
     let sim = borrow_state(state)?;
+    if !crate::layout::frame_has_render_layout(&sim.widgets, id) {
+        return Ok(None);
+    }
     let Some(frame) = sim.widgets.get(id) else {
         return Ok(None);
     };

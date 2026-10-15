@@ -54,6 +54,13 @@ pub(super) fn set_orientation(state: &mut LuaState) -> LuaResult<u32> {
     if let Some(f) = sim.widgets.get_mut_visual(id) {
         f.slider_orientation = orientation;
     }
+    if sim
+        .widgets
+        .get(id)
+        .is_some_and(|f| f.widget_type == WidgetType::Slider)
+    {
+        sim.widgets.mark_rect_dirty(id);
+    }
     Ok(0)
 }
 
@@ -135,6 +142,7 @@ fn apply_slider_value(sim: &mut crate::lua_api::SimState, id: u64, value: f64) -
         return None;
     }
     sim.widgets.get_mut_visual(id).unwrap().slider_value = clamped;
+    sim.widgets.mark_rect_dirty(id);
     Some(clamped)
 }
 
@@ -266,6 +274,9 @@ pub(super) fn shared_set_min_max_values(state: &mut LuaState) -> LuaResult<u32> 
     let min = checked_range_minimum(widget_type, min, max)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         apply_widget_range(frame, min, max);
+    }
+    if widget_type == WidgetType::Slider {
+        sim.widgets.mark_rect_dirty(id);
     }
     Ok(0)
 }

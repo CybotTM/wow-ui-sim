@@ -396,3 +396,113 @@ fn test_obey_step_on_drag_round_trip() {
         "GetObeyStepOnDrag should round-trip the persisted slider flag"
     );
 }
+
+#[test]
+fn slider_bound_thumb_tracks_value_range_orientation_and_resize() {
+    env()
+        .exec(
+            r#"-- Public Slider contract, without guessing exact endpoint travel/insets.
+-- HybridScrollFrame.xml uses a sized, unanchored ThumbTexture; reproduce that.
+local slider = CreateFrame("Slider", "FeedbackThumbProbe", UIParent)
+slider:SetSize(160, 40)
+slider:SetPoint("CENTER", UIParent, "CENTER")
+slider:SetMinMaxValues(10, 110)
+slider:SetOrientation("HORIZONTAL")
+local thumb = slider:GetThumbTexture()
+thumb:SetSize(18, 24)
+thumb:SetColorTexture(1, 0, 1, 1)
+slider:SetThumbTexture(thumb)
+local function center()
+    local x, y = thumb:GetCenter()
+    assert(type(x) == "number" and type(y) == "number",
+        "THUMB_RED: bound sized thumb without explicit anchors must have a center")
+    return x, y
+end
+local function near(a, b)
+    return math.abs(a - b) < 0.01
+end
+slider:SetValue(35)
+local lowX, lowY = center()
+slider:SetValue(85)
+local highX, highY = center()
+assert(highX > lowX, "THUMB_RED: horizontal value increase must move thumb right")
+local sliderX, sliderY = slider:GetCenter()
+assert(near(lowY, sliderY) and near(highY, sliderY), "horizontal thumb must be vertically centered")
+slider:SetValue(60)
+local midX, midY = center()
+assert(near(midX, sliderX) and near(midY, sliderY), "mid-range horizontal thumb must be centered")
+slider:SetOrientation("VERTICAL")
+slider:SetSize(40, 160)
+slider:SetValue(60)
+midX, midY = center()
+sliderX, sliderY = slider:GetCenter()
+assert(near(midX, sliderX) and near(midY, sliderY), "mid-range vertical thumb must be centered")
+slider:SetValue(35)
+lowX, lowY = center()
+slider:SetValue(85)
+highX, highY = center()
+assert(highY < lowY, "THUMB_RED: vertical value increase must move thumb down")
+assert(near(lowX, sliderX) and near(highX, sliderX), "vertical thumb must be horizontally centered")
+slider:SetOrientation("HORIZONTAL")
+slider:SetSize(160, 40)
+slider:SetValue(60)
+slider:SetMinMaxValues(10, 210)
+local rangeX = center()
+sliderX, sliderY = slider:GetCenter()
+assert(rangeX < sliderX, "THUMB_RED: range change must update thumb geometry")
+slider:SetMinMaxValues(10, 110)
+slider:SetValue(35)
+local beforeX = center()
+slider:SetWidth(320)
+local afterX = center()
+assert(afterX < beforeX, "THUMB_RED: track resize must update off-center thumb")
+thumb:SetSize(30, 20)
+local left, bottom, width, height = thumb:GetRect()
+assert(width == 30 and height == 20, "THUMB_RED: thumb resize must update cached dimensions")
+slider:SetMinMaxValues(7, 7)
+local zeroX, zeroY = center()
+assert(zeroX == zeroX and zeroY == zeroY, "collapsed range must have finite geometry")
+local ordinary = slider:CreateTexture()
+ordinary:SetSize(18, 24)
+assert(ordinary:GetRect() == nil, "ordinary unanchored texture remains unresolved")
+print("FEEDBACK_THUMB_CONTRACT_PASS")
+"#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn slider_thumb_rebinding_preserves_unresolved_and_authored_anchor_controls() {
+    env().exec(r#"
+        local slider = CreateFrame("Slider", nil, UIParent)
+        slider:SetSize(160, 40)
+        slider:SetPoint("CENTER")
+        slider:SetMinMaxValues(0, 100)
+        slider:SetValue(50)
+        local old = slider:GetThumbTexture()
+        old:SetSize(18, 24)
+        assert(old:GetLeft() ~= nil)
+        local replacement = slider:CreateTexture()
+        slider:SetThumbTexture(replacement)
+        assert(old:GetRect() == nil, "unbound unanchored thumb loses implicit geometry")
+        assert(replacement:GetRect() == nil, "unsized bound texture is not resolved geometry")
+        replacement:SetSize(18, 24)
+        local x, y = replacement:GetCenter()
+        local sx, sy = slider:GetCenter()
+        assert(math.abs(x-sx) < 0.01 and math.abs(y-sy) < 0.01)
+        replacement:SetPoint("TOPLEFT", slider, "TOPLEFT", 3, -4)
+        local left, bottom = replacement:GetRect()
+        slider:SetValue(80)
+        local nextLeft, nextBottom = replacement:GetRect()
+        assert(left == nextLeft and bottom == nextBottom, "authored anchors remain authoritative")
+        replacement:ClearAllPoints()
+        local calls = 0
+        slider:SetScript("OnValueChanged", function()
+            calls = calls + 1
+            local tx = replacement:GetCenter()
+            assert(tx < slider:GetCenter(), "callback sees newly resolved thumb before SetValue returns")
+        end)
+        slider:SetValue(20)
+        assert(calls == 1)
+    "#).unwrap();
+}

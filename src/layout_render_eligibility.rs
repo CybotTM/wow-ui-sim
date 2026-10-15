@@ -9,6 +9,7 @@ pub fn frame_has_layout_anchor(
         || !frame.anchors.is_empty()
         || is_statusbar_bar_child(registry, frame)
         || is_scroll_frame_child(registry, frame)
+        || super::resolved_slider_thumb_rect(registry, frame).is_some()
 }
 
 pub fn frame_has_render_layout(registry: &WidgetRegistry, id: u64) -> bool {
