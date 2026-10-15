@@ -15,7 +15,10 @@ pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
     ("GetQuestIDForLogIndex", get_quest_id_for_log_index),
     ("GetLogIndexForQuestID", get_log_index_for_quest_id),
     ("GetTitleForQuestID", get_title_for_quest_id),
+    // Forever's modeled C API publication must survive this later legacy pass.
+    #[cfg(not(feature = "client-wowforever"))]
     ("GetNumQuestWatches", get_num_quest_watches),
+    #[cfg(not(feature = "client-wowforever"))]
     (
         "GetQuestIDForQuestWatchIndex",
         get_quest_id_for_quest_watch_index,
@@ -101,6 +104,7 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
     ("GetQuestIndexForWatch", get_quest_index_for_watch),
     ("GetQuestSortIndex", get_quest_sort_index),
     ("GetQuestWatchIndex", get_quest_watch_index),
+    #[cfg(not(feature = "client-wowforever"))]
     ("GetNumQuestWatches", get_num_quest_watches),
     ("GetNumQuestLogRewards", return_zero),
     ("GetNumQuestLogChoices", return_zero),

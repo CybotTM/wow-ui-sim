@@ -468,11 +468,13 @@ pub fn get_quest_link(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+#[cfg(not(feature = "client-wowforever"))]
 pub fn get_num_quest_watches(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(quest_count() as f64));
     Ok(1)
 }
 
+#[cfg(not(feature = "client-wowforever"))]
 pub fn get_quest_id_for_quest_watch_index(state: &mut LuaState) -> LuaResult<u32> {
     let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
     match watched_quest_id_at_index(index) {

@@ -19,7 +19,7 @@ The existing simulator policy watches every ordinary quest. Forever's count and 
 - [ ] Preserve existing watch-index conversion and arity: nil/missing index means zero, numeric conversion truncates/saturates before bounds checking, valid IDs return one number, misses zero results, nonnumbers error, extra arguments ignored.
 - [ ] Resolve every returned ID through current `GetLogIndexForQuestID`, `GetInfo`, `IsOnQuest` and difficulty metadata without a static fallback or invented rich record.
 
-Four authored `tests/wowforever_quest_watch_projection.rs` cases cover these requirements; all UNEXECUTED. Watch membership/mutators, legacy index helpers, world-watch projection and broader quest query reconciliation remain parent gaps to investigate where actual callers require them; this correction does not mark them complete or exclude them from the parent.
+Four authored `tests/wowforever_quest_watch_projection.rs` cases cover these requirements; all UNEXECUTED. The later legacy registration omits these three replaced Forever writes, so fresh publication and cleanup restoration use the same C API producers; other profiles retain their old registrations. Watch membership/mutators, legacy index helpers, world-watch projection and broader quest query reconciliation remain parent gaps to investigate where actual callers require them; this correction does not mark them complete or exclude them from the parent.
 
 ## How it works
 
@@ -30,6 +30,7 @@ Four authored `tests/wowforever_quest_watch_projection.rs` cases cover these req
 
 - `src/c_api/c_quest_log.rs`: supplied-state lookup and Forever registration; existing Retail/PTR eligibility remains separate.
 - `src/c_api/mod.rs`: narrowly extends the module and utility call gate to Forever.
+- `src/lua_api/globals/quest_surface/{register,handlers}.rs`: omit replaced static watch handlers only on Forever, preserving initial modeled publication.
 - `tests/wowforever_quest_difficulty.rs`: fresh-environment and unchanged whole-consumer behavior assertions.
 - `tests/wowforever_quest_watch_projection.rs`: ordinary-watch/live rich-state coherence, conversion and isolation assertions.
 
