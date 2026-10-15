@@ -61,6 +61,12 @@ WoW uses 8 UV values: `(tlx, tly, blx, bly, trx, try, brx, bry)`. Internally sto
 result_left = atlas_left + user_left * (atlas_right - atlas_left)
 ```
 
+## Rotated tiled edge prefix — 2026-10-15
+
+`5ae7fb14e` changes partial rotated horizontal edge tiles in `src/iced_app/tiling.rs` to show the prefix of a complete rotated tile. Complete tiles keep reversed-V orientation: eight source red texels then eight blue produce blue then red. A 40-pixel row therefore ends with eight blue pixels after two complete 16-pixel tiles, not a red suffix.
+
+The [owning contract](../../specs/rotated-tiled-edge-prefix.md) records exact-source CPU RED/GREEN. Historical pre-fix GPU reproduction showed a red tail against a blue reference. The [combined feedback GPU receipt](../../rendering-pipeline.md#combined-feedback-gpu-receipt--2026-10-15) now records blue tail and blue reference, with complete blue-then-red orientation preserved, at sealed source head `623294944`. Independent saved-capture verification PASS; this does not prove filtering/atlas-bleed correctness, native parity or full-test GREEN. Existing startup errors remain. The linked receipt owns the evidence epoch and separate Slider/colour observations.
+
 ## SetAtlas Lua API
 
 `SetAtlas` resolves names or supported numeric element IDs, applies texture/UV/tiling metadata through `apply_atlas()`, and optionally applies atlas dimensions. Unknown names retain the requested name while clearing texture/UV state.
@@ -82,6 +88,8 @@ Quad batch uses `push_textured_path()` with deferred loading: quads store a path
 The live renderer keeps its GPU atlas in the pipeline across frames. For related headless before/after images, `render_batches_to_images(&[&QuadBatch], ...)` preloads the union of all requests and renders through one persistent atlas context. Separate `render_to_image()` calls repack slots independently; with bilinear filtering, atlas-edge samples can differ even when an unchanged quad's geometry is identical.
 
 ## Sources
+
+- [Rotated tiled edge prefix](../../specs/rotated-tiled-edge-prefix.md) — partial-tail contract and bounded evidence
 
 - [texture-atlas-system.md](../../texture-atlas-system.md) — TextureManager, AtlasInfo, nine-slice kits, tex coord remapping, StatusBar fill
 - [atlas.rs](../../../src/lua_api/frame/methods/widgets/texture/atlas.rs) — `SetAtlas("")` clear semantics and recognized Button/CheckButton slot propagation

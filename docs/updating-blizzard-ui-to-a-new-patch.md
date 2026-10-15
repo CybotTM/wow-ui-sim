@@ -29,11 +29,31 @@ Profile → Gethe branch:
 | mists | `classic` (current Classic = Mists of Pandaria) |
 | era | `classic_era` |
 | anniversary | `classic_anniversary` |
-| wowforever | `forever` (selected 1.60.1.69977; distinct runtime profile, cache, and manifest) |
+| wowforever | `forever` (current selected target 1.60.1.70374; distinct runtime profile, cache, and manifest) |
 
 ## Matching the installed Forever build
 
-On September 24, 2026, the installed `wow_classic_beta` build is `1.60.1.69977`
+### Current selected target — October 15, 2026
+
+The installed-product reader reports
+`product="wow_classic_beta" version="1.60.1.70374"`, exit 0.
+Gethe commit `735496de78ebd30ce816a0637982c556987f258c` has matching build
+`70374`; its manifest has 4,434 paths versus the historical 4,398, with 47
+added and 11 removed. This is the selected target, not a claim about branch
+recency or completed runtime acquisition.
+
+Community-listfile refresh, limited-listfile regeneration, the matching Forever
+build and supported local/CDN sync completed: all 4,434 paths were acquired.
+However, `Blizzard_LoadLocale/LoadLocale.lua` matched the `ptPT` root variant,
+not `enUS`: both pinned local and simulator CDN selection lost locale identity.
+The enUS variant exists in the selected root/encoding metadata. Locale-qualified
+selection, corrected sync and baseline recapture remain open. Complete path
+coverage does not establish correct locale, clean startup or compatibility.
+Preserve historical receipts below; do not relabel old 69977 captures as 70374 proof.
+
+### Historical selected target — September 24, 2026
+
+On September 24, 2026, the installed `wow_classic_beta` build was `1.60.1.69977`
 (`3bd89ce2721f7c75e7525dc83741076f`). Gethe commit
 `c6e89983189e4f626f549204a23c2d2bea93080a` has that exact `version.txt`;
 the branch tip already reports `70009` and must not replace this selected target.
@@ -41,9 +61,9 @@ Prepare the source cache from the matching commit, then use the generator's
 `wowforever --no-refresh` mode. Its 4,398-file manifest is unchanged from `69913`;
 the source diff changes only three Mainline GlueXML files. The runtime cache
 still requires the normal CASC sync and new provenance, not a manual source copy.
-The simulator's temporary `GetBuildInfo()` default and profile regression track
-build `69977`; historical captures and atlas-data provenance retain their original
-build labels.
+At that checkpoint, the simulator's temporary `GetBuildInfo()` default and
+profile regression tracked build `69977`; historical captures and atlas-data
+provenance retain their original build labels.
 
 ## Steps
 

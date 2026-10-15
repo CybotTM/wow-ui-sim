@@ -66,6 +66,16 @@ Commits `08c43a536` and `4c39f4a5a` leave stored anchors and logical layout immu
 
 Ownership when `SetScrollChild` replaces or clears its designation is outside this presentation-only boundary: [ScrollFrame child ownership](../../specs/scrollframe-child-ownership.md) covers the pending detach contract. It makes no native callback or anchor-reset claim.
 
+## Bound Slider thumb layout — 2026-10-15
+
+`2fc87822e` adds engine geometry for sized, unanchored Textures designated as their parent Slider's thumb. `src/layout_slider_thumb.rs` preserves dimensions/scale, centers the cross-axis and positions contained travel by value: right horizontally, down vertically. Contained endpoints, oversized-thumb centering and collapsed/non-finite normalization are simulator policy, not native measurements.
+
+Query and render admission share positive finite resolved-rectangle eligibility; binding identity alone is insufficient. Value/range/orientation/binding/size mutations invalidate layout, including geometry queried synchronously inside `OnValueChanged`. Explicit anchors remain authoritative; ordinary, formerly bound and unsized unanchored textures remain unresolved.
+
+`623294944` strengthens callback proof: capture `GetCenter()` inside `OnValueChanged`, then assert the observed new position after `SetValue` returns, outside protected dispatch. A precondition establishes movement from above to below midpoint; callback failures cannot silently satisfy the outer assertion. This is a test change, not new runtime callback behavior.
+
+Historical pre-fix GPU evidence records zero thumb pixels and `THUMB_NO_ANCHOR_RED` stderr. The [combined feedback GPU receipt](../../rendering-pipeline.md#combined-feedback-gpu-receipt--2026-10-15) now records 432 magenta pixels (18×24), a green final-assertion marker and no exec-Lua errors at sealed source head `623294944`. Independent saved-capture verification PASS; existing startup errors remain. The [owning contract](../../specs/slider-bound-thumb-layout.md) retains broader public Lua/Rust and mutation gates. No native endpoint parity, clean startup or full-test GREEN is claimed.
+
 ## WidgetType Enum (18 types, `src/widget/mod.rs`)
 
 Frame, Button, FontString, Texture, EditBox, ScrollFrame, Slider, CheckButton, StatusBar, Cooldown, Model (stub), ModelScene (stub), PlayerModel, ColorSelect, MessageFrame, SimpleHTML (stub), GameTooltip, Minimap.
@@ -131,6 +141,8 @@ Stored alpha is `f32`; ordinary Retail/PTR numeric validation precedes narrowing
 `Show()` fires `OnShow` recursively on visible children. `IsVisible()` walks the parent chain; `IsShown()` checks only the frame's own `visible` flag.
 
 ## Sources
+
+- [Bound Slider thumb layout](../../specs/slider-bound-thumb-layout.md) — geometry, admission, invalidation and pending proof
 
 - [Region alpha numeric range](../../specs/region-alpha-numeric-range.md) — ordinary numeric contract and bounded retained status
 

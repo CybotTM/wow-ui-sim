@@ -67,6 +67,12 @@ pub struct QuadBatch {
 
 ## GPU Shader Pipeline
 
+### Colour roundtrip checkpoint — 2026-10-15
+
+The [colour contract](specs/shader-colour-roundtrip.md) removes the artificial post-modulation RGB power lift, without changing atlas/attachment formats, linear solid inputs, premultiplied alpha, or additive blending. `e7f303dcd` adds opt-in production-wgpu readback tests; `7c3ce5a24` removes the lift from the shader. Pre-fix GPU observations were opaque RGB128 texture → RGB162 and solid input 0.5 → RGB208. The texture control isolates the lift without assuming that a linear solid input of 0.5 means encoded RGB128. No second-encoding or native colour-space parity claim is established.
+
+The [combined GPU receipt](#combined-feedback-gpu-receipt--2026-10-15) records post-fix opaque texture RGB128 → RGB128 and linear solid input 0.5 → encoded RGB188. Half-alpha and additive readback remain separate pending gates. Separately reported PNG 12-test, default-check and native-capture PASS do not establish overall completion.
+
 ### quad.wgsl
 **File:** `src/render/shader/quad.wgsl`
 
@@ -279,6 +285,26 @@ All RGBA tiers use 4096x4096 backing textures. Optional BC1 and BC3 compressed a
 **Bind Group**: tier_64 (0), tier_128 (1), tier_256 (2), tier_512 (3), tier_2048 (4), sampler (5), glyph_atlas (6), BC1 atlas (7), BC3 atlas (8), glyph sampler (9).
 
 ---
+
+## Geometry repair checkpoint — 2026-10-15
+
+| Boundary | Implemented change | Proof / remaining gate |
+|---|---|---|
+| Rotated horizontal tile tail | `5ae7fb14e` clips the prefix of the complete reversed-V tile, not its suffix; full tiles retain orientation. | Exact-source CPU RED/GREEN is recorded in the [tile contract](specs/rotated-tiled-edge-prefix.md). Historical pre-fix GPU tail was red against a blue reference; the combined receipt below records blue tail and blue reference. Independent saved-capture verification PASS. |
+| Bound Slider thumb | `2fc87822e` supplies real sized unanchored-thumb geometry, shared query/render eligibility and mutation invalidation. | Pre-fix GPU showed zero thumb pixels and `THUMB_NO_ANCHOR_RED` stderr. The combined receipt below records 432 magenta thumb pixels (18×24). `623294944` captures callback-observed geometry and asserts it after protected dispatch so swallowed callback assertions cannot yield false proof. [Slider contract](specs/slider-bound-thumb-layout.md) owns broader Rust/public-Lua and mutation gates; this capture does not establish them. |
+
+These are simulator-side repairs, not vendor changes. [Texture atlas checkpoint](wiki/systems/texture-atlas.md#rotated-tiled-edge-prefix--2026-10-15) and [Slider layout checkpoint](wiki/systems/widget-system.md#bound-slider-thumb-layout--2026-10-15) describe the bounded mechanisms. Pre-fix GPU evidence remains historical in `native-bins-20261015T081338925572Z/feedback-boundary-red/pixel-inspection.json`.
+
+### Combined feedback GPU receipt — 2026-10-15
+
+Local evidence epoch: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/feedback-70374-forever-bins-retry1-20261015T090035328607Z/feedback-combined-green/`. `result.json` records exit0 and a sealed `client-wowforever` 1.60.1.70374 binary at source head `623294944`; `capture.png` and `pixel-inspection.json` record the bounded combined result:
+
+- Partial rotated tail and prefix reference both blue; complete tile remains blue then red.
+- Slider thumb: 432 magenta pixels, 18×24.
+- Opaque texture RGB128 → RGB128; linear solid 0.5 → encoded RGB188.
+- Green final-assertion marker and no exec-Lua errors (`exec_lua_errors: []`).
+
+Independent saved-capture verification PASS: all 256 marker pixels are green, the thumb fills x103–120/y296–319, and every 8×16 tail pixel matches its reference. Source assets and fixture were inspected afterward, not sealed at execution; red and green startup bases differ. Existing startup Lua errors remain in `stderr`; no exec-Lua errors does not mean clean startup. This is bounded simulator GPU evidence, not native parity, full-test GREEN, or broader acceptance.
 
 ## Frame Strata and Draw Layer Sorting
 

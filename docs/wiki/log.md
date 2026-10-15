@@ -1,3 +1,11 @@
+## [2026-10-15] docs | Combined feedback GPU receipt
+
+Updated only rendering, texture-atlas, widget-system, index and this log for `5ae7fb14e`, `2fc87822e`, `7c3ce5a24` and callback-proof `623294944`. [Receipt owner](../rendering-pipeline.md#combined-feedback-gpu-receipt--2026-10-15) records the new `feedback-70374-forever-bins-retry1-20261015T090035328607Z/feedback-combined-green` capture/result/pixel inspection: blue tail/reference, 432 magenta pixels (18×24), texture128 → 128, solid0.5 → 188, green final-assertion marker, no exec-Lua errors. Independent saved-capture verification PASS; existing startup errors, historical RED and broader gates retained. No clean startup, native parity or full-test GREEN claim; profile/acquisition docs and other dirty files untouched by this update.
+
+## [2026-10-15] docs | Bounded rendering repairs and Forever target
+
+Updated [rendering](../rendering-pipeline.md#geometry-repair-checkpoint--2026-10-15), [atlas](systems/texture-atlas.md#rotated-tiled-edge-prefix--2026-10-15) and [widget](systems/widget-system.md#bound-slider-thumb-layout--2026-10-15) checkpoints after `5ae7fb14e`, `2fc87822e` and shader readback tests `e7f303dcd`. Pre-fix GPU RED remains distinct from pending integrated/GPU GREEN and separate reported PNG/default-check/native-capture PASS. [Patch guide](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-15-2026) now separates selected70374/product receipt/Gethe match from historical69977 and pending acquisition/baseline work. Specs and source untouched; no new runtime proof.
+
 ## [2026-10-15] evidence | TextColumnRow bounded Retail proof
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#textcolumnrow-bounded-retail-proof--2026-10-15) links the owning capability matrix: independent Retail eight producer cases plus nine separate controls PASS; guard failed before monitoring, external warning and historical failures retained. PTR/default-check/startup/owning/native/render/full-parent gaps remain open; frozen packets unchanged.
