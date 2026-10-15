@@ -468,3 +468,137 @@ fn forever_finite_constants_publish_source_values() {
         assert(Enum.PingResultMeta.MaxValue == 8)
     "#).unwrap();
 }
+
+#[test]
+fn forever_provider_experience_enums_match_raw_documented_scalars() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        checkedProviderExperienceEnums = 0
+        local wanted = {VoiceProviderID = true, ForeverExperiencePreset = true}
+        APIDocumentation = {AddDocumentationTable = function(_, doc)
+            for _, definition in ipairs(doc.Tables or {}) do
+                if wanted[definition.Name] then
+                    local enums = assert(rawget(_G, "Enum"))
+                    local values = rawget(enums, definition.Name)
+                    local meta = rawget(enums, definition.Name .. "Meta")
+                    assert(type(values) == "table", definition.Name)
+                    assert(type(meta) == "table", definition.Name .. "Meta")
+                    local count = 0
+                    for _, value in pairs(values) do
+                        assert(type(value) == "number")
+                        count = count + 1
+                    end
+                    assert(count == definition.NumValues)
+                    for _, field in ipairs(definition.Fields) do
+                        assert(rawget(values, field.Name) == field.EnumValue, field.Name)
+                    end
+                    for _, key in ipairs({"MinValue", "MaxValue", "NumValues"}) do
+                        assert(type(rawget(meta, key)) == "number", key)
+                        assert(rawget(meta, key) == definition[key], key)
+                    end
+                    checkedProviderExperienceEnums = checkedProviderExperienceEnums + 1
+                end
+            end
+        end}
+        "#,
+    )
+    .unwrap();
+    for file in ["VoiceChatDocumentation.lua", "GameRulesDocumentation.lua"] {
+        load(&env, &format!("Blizzard_APIDocumentationGenerated/{file}"));
+    }
+    assert_eq!(
+        env.eval::<i32>("return checkedProviderExperienceEnums")
+            .unwrap(),
+        2
+    );
+}
+
+#[test]
+fn forever_provider_enum_drives_cached_transcription_visibility() {
+    let env = WowLuaEnv::new().unwrap();
+    // Only dependencies/inputs are fixtures; load and invoke the whole vendor file.
+    env.exec(
+        r#"
+        providerInput = 0
+        dockCalls, updateCalls, dockUpdateCalls = 0, 0, 0
+        ChatFrame3 = CreateFrame("Frame", "ProviderEnumChatFrame")
+        ChatFrame3:SetID(3)
+        ChatFrame3.isTranscribing = true
+        ChatFrame3.editBox = CreateFrame("EditBox")
+        ChatFrame3.editBox.prompt = ChatFrame3:CreateFontString()
+        ProviderEnumChatFrameTab = {}
+        ChatTypeInfo = {PARTY = {r = 1, g = 1, b = 1}}
+        ChatFrameUtil = {DisplaySystemMessage = function() end}
+        SPEECH_TO_TEXT_HEADER = "fixture header"
+        C_VoiceChat.GetActiveVoiceProviderID = function() return providerInput end
+        C_VoiceChat.GetActiveChannelType = function() return -1 end
+        C_VoiceChat.IsSpeakForMeActive = function() return false end
+        C_VoiceChat.IsMuted = function() return false end
+        GetCVarBool = function(name)
+            assert(name == "speechToText")
+            return true
+        end
+        GetChatWindowInfo = function(id)
+            assert(id == 3)
+            return nil, nil, nil, nil, nil, nil, false, nil, false
+        end
+        FCFTab_UpdateColors = function() end
+        FCF_DockFrame = function(frame, id)
+            assert(frame == ChatFrame3 and id == 3)
+            dockCalls = dockCalls + 1
+        end
+        FloatingChatFrame_Update = function(id)
+            assert(id == 3)
+            updateCalls = updateCalls + 1
+        end
+        FCF_DockUpdate = function() dockUpdateCalls = dockUpdateCalls + 1 end
+        "#,
+    )
+    .unwrap();
+    load(
+        &env,
+        "Blizzard_ChatFrame/Shared/VoiceChatTranscriptionFrame.lua",
+    );
+    env.exec(
+        r#"
+        assert(VOICE_WINDOW_ID == 3)
+        assert(dockCalls == 1 and updateCalls == 1 and dockUpdateCalls == 1)
+        providerInput = 1
+        assert(VoiceTranscriptionFrame_CustomEventHandler(
+            ChatFrame3, "VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED") == false)
+        assert(dockCalls == 1 and updateCalls == 1 and dockUpdateCalls == 1)
+        providerInput = 0
+        assert(VoiceTranscriptionFrame_CustomEventHandler(
+            ChatFrame3, "VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED") == false)
+        assert(dockCalls == 2 and updateCalls == 2 and dockUpdateCalls == 2)
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn forever_experience_enum_drives_cached_npc_names_default() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        C_GameRules.GetForeverExperiencePreset = function() return experienceInput end
+        "#,
+    )
+    .unwrap();
+    load(
+        &env,
+        "Blizzard_SettingsDefinitions_Frame/Camelot/NameplatesOverrides.lua",
+    );
+    env.exec(
+        r#"
+        experienceInput = 0
+        assert(NameplatesOverrides.GetNPCNamesOptionDefault() == 5)
+        experienceInput = 1
+        assert(NameplatesOverrides.GetNPCNamesOptionDefault() == 3)
+        experienceInput = nil
+        assert(NameplatesOverrides.GetNPCNamesOptionDefault() == 3)
+        "#,
+    )
+    .unwrap();
+}

@@ -26,7 +26,7 @@ Reused completion, dependency, identity, grammar and error behavior is **simulat
 | Separate models/startup | Earlier source136 model/render/GPU evidence remains separate; current startup is captured but failing. |
 | Binding acceptance | Independent bounded report accepted; native parity, cross-profile and broader acceptance remain open. |
 
-[Central receipt](../../baselines/README.md#current-importevents-execution--2026-10-15) owns current evidence root, exact counts, binary inventories, probe markers, failing startup and accepted independent bounded report. Historical RED is retained under the earlier receipt linked there. Private enum-provider/experience candidate remains unintegrated/unexecuted; actual new gamepad root failures stay open. Baseline JSON copying remains main-owned.
+[Central receipt](../../baselines/README.md#current-importevents-execution--2026-10-15) owns current evidence root, exact counts, binary inventories, probe markers, failing startup and accepted independent bounded report. Historical RED is retained under the earlier receipt linked there. The [separate enum follow-up](../../specs/forever-finite-constants.md#provider-and-experience-enums--source-checkpoint-2026-10-15) owns its pending gates; actual new gamepad root failures stay open. Baseline JSON copying remains main-owned.
 
 ## Sources
 

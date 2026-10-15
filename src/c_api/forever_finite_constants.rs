@@ -1,4 +1,4 @@
-//! Source-published Forever 1.60.1 bag, minimap, ping, transmog and possess-bar data.
+//! Source-published Forever 1.60.1 finite enums and constants.
 
 use crate::lua_api::methods::{create_table, table_get, table_set};
 use rilua::Val;
@@ -27,6 +27,36 @@ fn register_enums(state: &mut LuaState) {
     register_tracking_filters(state, enums);
     register_ping_results(state, enums);
     register_gamepad_overrides(state, enums);
+    register_provider_experience_enums(state, enums);
+}
+
+fn register_provider_experience_enums(state: &mut LuaState, enums: Val) {
+    // Selected Forever 1.60.1.70374 VoiceChatDocumentation.lua.
+    publish(
+        state,
+        enums,
+        "VoiceProviderID",
+        &[("Legacy", 0), ("Discord", 1)],
+    );
+    publish(
+        state,
+        enums,
+        "VoiceProviderIDMeta",
+        &[("MinValue", 0), ("MaxValue", 1), ("NumValues", 2)],
+    );
+    // Selected Forever 1.60.1.70374 GameRulesDocumentation.lua.
+    publish(
+        state,
+        enums,
+        "ForeverExperiencePreset",
+        &[("Classic", 0), ("Modern", 1)],
+    );
+    publish(
+        state,
+        enums,
+        "ForeverExperiencePresetMeta",
+        &[("MinValue", 0), ("MaxValue", 1), ("NumValues", 2)],
+    );
 }
 
 pub(crate) fn register_player_swing_type(state: &mut LuaState) {
