@@ -2028,3 +2028,7 @@ Updated [manager inventory](systems/ui-widget-manager-state.md#doublestatusbar--
 ## [2026-10-14] source | TextureAndTextRow passive scaffold
 
 [TextureAndTextRow checkpoint](systems/ui-widget-manager-state.md#textureandtextrow-passive-checkpoint--2026-10-14) records the input/test scaffold; modeled getter and behavioral RED/GREEN remain pending.
+
+## [2026-10-14] source | TextColumnRow passive inputs and authored tests
+
+[Manager checkpoint](systems/ui-widget-manager-state.md#textcolumnrow-passive-checkpoint--2026-10-14) links supplied records/type-21 feeds and six uncompiled/unexecuted cases. Populated RED precedes getter implementation; native parity remains unproved.

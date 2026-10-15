@@ -119,6 +119,10 @@ The [row ledger](../../specs/texture-and-text-row.md#known-gaps-current-cycle) o
 
 [Owning implementation/proof ledger](../../specs/ui-widget-spacer.md#current-implementation-and-proof) records current modeled projection and independently verified profile-scoped behavior; remaining acceptance and provenance limits live there.
 
+### TextColumnRow passive checkpoint — 2026-10-14
+
+[Owning contract](../../specs/ui-widget-text-column-row.md) records supplied outer/nested records, an empty environment-local map, type-21 normal feeds and six authored tests. Getter/projector/registration are absent; compilation and populated RED/GREEN remain unproved. Actual cached lifecycle and security require separate execution; no native parity claim.
+
 ## Sources
 
 - [TextureAndTextRow contract](../../specs/texture-and-text-row.md) — single-source supplied-row contract, historical RED, bounded independent Retail/PTR/source gates, independent final owning/check/format PASS, separate Retail/PTR diagnostic audits and suppression limits; committed public packet with bounded candidate/canonical integrity/privacy/navigation PASS; broader acceptance remains open.

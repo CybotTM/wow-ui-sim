@@ -1,3 +1,7 @@
+## [2026-10-14] source | TextColumnRow passive inputs and authored tests
+
+[Manager checkpoint](systems/ui-widget-manager-state.md#textcolumnrow-passive-checkpoint--2026-10-14) links the supplied input/type-21 feed contract. Getter and executed proof remain pending.
+
 ## [2026-10-14] evidence | Spacer bounded producer checkpoint
 
 [Current manager checkpoint](systems/ui-widget-manager-state.md#spacer-bounded-producer-checkpoint--2026-10-14) links the owning implementation/proof ledger. Earlier passive checkpoint remains historical; broader acceptance stays open.
