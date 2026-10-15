@@ -20,7 +20,7 @@ Wrath and Retail share the following simulator policy; it is not a recovered nat
 - [ ] Re-evaluate the committed value when `SetValueStep` changes; dispatch synchronously only if the effective value changes, with a false mouse flag for step-triggered callbacks.
 - [ ] Preserve offset/negative minima, exact endpoints, same-effective-value suppression and existing callback observations. Do not infer dragging, native defaults or unsupported argument policy.
 
-`tests/slider_step_assignment.rs` adds five **UNCOMPILED / UNEXECUTED** cases. The fractional scale/CVar consumer explicitly chooses step0.01 to express its existing precision. Current producer remains clamp-only/stores-only; no behavioral RED or fix claimed.
+`tests/slider_step_assignment.rs` adds five cases compiled in the source `3fa90ab7b` Retail integration artifact; all remain **UNEXECUTED**, with baseline RED pending actual runtime receipts. The fractional scale/CVar consumer explicitly chooses step0.01 to express its existing precision. Current producer remains clamp-only/stores-only; no behavioral RED or fix claimed.
 
 ## How it works
 

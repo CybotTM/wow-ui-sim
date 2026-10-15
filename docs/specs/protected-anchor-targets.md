@@ -11,7 +11,7 @@ Shared clean-room simulator policy for `SetPoint`, including Wrath and Retail. D
 
 ## Tests asserting this spec
 
-`tests/protected_anchor_targets.rs`: five **UNCOMPILED / UNEXECUTED** cases. Trusted, out-of-combat calls create recipients through public `CreateFrame` consuming a real parsed, simulator-owned protected XML template. No host protection toggle or vendor template patch. Rejected calls compare complete points/geometry; equivalent unprotected witnesses prove each input would move a permitted recipient. Direct Texture/FontString, one/two-hop chains, successful controls and active-chain removal/restoration are covered by authored assertions only.
+`tests/protected_anchor_targets.rs`: five cases compiled in the source `3fa90ab7b` Retail integration artifact; all remain **UNEXECUTED**, with baseline RED pending actual runtime receipts. Trusted, out-of-combat calls create recipients through public `CreateFrame` consuming a real parsed, simulator-owned protected XML template. No host protection toggle or vendor template patch. Rejected calls compare complete points/geometry; equivalent unprotected witnesses prove each input would move a permitted recipient. Direct Texture/FontString, one/two-hop chains, successful controls and active-chain removal/restoration are covered by authored assertions only.
 
 ## Implementation status
 

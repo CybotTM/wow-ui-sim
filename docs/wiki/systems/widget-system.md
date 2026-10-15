@@ -140,10 +140,10 @@ User functional requirements define shared simulator policies for Wrath and Reta
 
 | Scope | Owning contract | Current proof |
 |---|---|---|
-| C1 step assignment | [Slider callbacks](../../specs/slider-value-callback.md#clean-room-step-assignment-follow-up) | Five committed tests UNCOMPILED/UNEXECUTED; no producer or behavioral RED yet |
-| C2 cursor geometry | [EditBox geometry](../../specs/editbox-text-position-selection.md#cursor-geometry-follow-up) | Two committed tests UNCOMPILED/UNEXECUTED; no producer/RED; actual consumer and Wrath guard-retirement gates open |
-| C3 highlight endpoints | [EditBox selection](../../specs/editbox-text-position-selection.md#tests-asserting-this-spec) | Source `5dfa94330`: three valid REDs plus one fixture-oracle error; empty highlight retains old cursor. Source `186f5db13` byte-endpoint fix and corrected test authored UNCOMPILED/UNEXECUTED; no PASS |
-| L1 protected-recipient targets | [Anchor target policy](../../specs/protected-anchor-targets.md) | Five committed tests UNCOMPILED/UNEXECUTED; no eligibility producer or behavioral RED yet |
+| C1 step assignment | [Slider callbacks](../../specs/slider-value-callback.md#clean-room-step-assignment-follow-up) | Five tests compiled at source `3fa90ab7b`; selection UNEXECUTED, baseline RED pending; no producer |
+| C2 cursor geometry | [EditBox geometry](../../specs/editbox-text-position-selection.md#cursor-geometry-follow-up) | Two geometry tests compiled at source `3fa90ab7b`; selection UNEXECUTED, baseline RED pending; no geometry producer; actual consumer and Wrath guard-retirement gates open. Separate source `08ffc2838` XML-binding regression remains UNCOMPILED/UNEXECUTED |
+| C3 highlight endpoints | [EditBox selection](../../specs/editbox-text-position-selection.md#tests-asserting-this-spec) | Source `5dfa94330`: three valid REDs plus one fixture-oracle error; empty highlight retains old cursor. Source `186f5db13` byte-endpoint fix and corrected test compiled at source `3fa90ab7b`; corrected selection UNEXECUTED, GREEN pending; no PASS |
+| L1 protected-recipient targets | [Anchor target policy](../../specs/protected-anchor-targets.md) | Five tests compiled at source `3fa90ab7b`; selection UNEXECUTED, baseline RED pending; no eligibility producer |
 
 ## Region alpha numeric range
 
