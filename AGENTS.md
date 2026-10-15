@@ -462,7 +462,7 @@ end)
 
 ### Screenshot
 
-Render the UI to an image file without starting the GUI (headless GPU, same shader pipeline as the live renderer). Text is not rendered — this is for debugging frame layout and textures.
+Render the UI to an image file without starting the GUI (headless GPU, same shader pipeline as the live renderer). Use it for debugging frame layout and textures.
 
 ```bash
 wow-sim --no-addons --no-saved-vars screenshot                       # Render to screenshot.webp (1600x1200, lossy q15)

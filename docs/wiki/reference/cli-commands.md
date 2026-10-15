@@ -36,7 +36,7 @@ wow-sim --no-saved-vars self-test --max-ticks 20000
 
 ### `screenshot`
 
-Render the UI without starting the GUI. Text is not rendered (layout/texture debugging only). WebP is the default at standalone quality 15; `wow-cli screenshot` captures from a running simulator at live IPC quality 65. Explicit `--png` writes lossless PNG and forces `.png`. Without it, output is forced to `.webp`, even for `-o frame.png`. Encoding selection leaves source pixels, viewport (default 1600×1200), crop, color handling, and layout unchanged. Windows IPC remains unsupported. PNG source is present; runtime verification is pending. See the [output-format contract](../../specs/screenshot-output-format.md).
+Render the UI without starting the GUI. WebP is the default at standalone quality 15; `wow-cli screenshot` captures from a running simulator at live IPC quality 65. Explicit `--png` writes lossless PNG and forces `.png`. Without it, output is forced to `.webp`, even for `-o frame.png`. Encoding selection leaves source pixels, viewport (default 1600×1200), crop, color handling, and layout unchanged. Windows IPC remains unsupported. PNG source is present; runtime verification is pending. See the [output-format contract](../../specs/screenshot-output-format.md).
 
 ```bash
 wow-sim --no-addons --no-saved-vars screenshot              # → screenshot.webp (1600×1200)
