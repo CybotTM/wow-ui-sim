@@ -20,7 +20,7 @@ error counts and release proof diagnostics.
 
 ## Forever Lua Errors
 
-`wowforever-lua-errors.json` is the actual corrected-enUS `1.60.1.70374` headless startup capture on October 15, 2026: **166 JSON records, 238 occurrences, exit 1**. First error: `Blizzard_EditMode/Mainline/EditModePresetLayouts.lua:1272`, attempt to index field `?` (nil). This is a failing baseline, not accepted clean startup. The [locale proof matrix](../specs/casc-loading.md#locale-checkpoint--october-15-2026) owns binary/source scope, acquisition validation and receipt location; independent runtime verification remains pending.
+`wowforever-lua-errors.json` is the actual corrected-enUS `1.60.1.70374` headless startup capture on October 15, 2026: **166 JSON records, 238 occurrences, exit 1**. First error: `Blizzard_EditMode/Mainline/EditModePresetLayouts.lua:1272`, attempt to index field `?` (nil). This is a failing baseline, not accepted clean startup. The [locale proof matrix](../specs/casc-loading.md#locale-checkpoint--october-15-2026) owns binary/source scope, acquisition validation and receipt location; independent saved locale/runtime receipt verification PASS does not change the startup FAIL.
 
 The previous tracked `[]` is preserved privately as `wowforever-lua-errors.pre-70374.json` beside those receipts; it is not this capture. Historical first capture after `65139f909` synchronized 4,398 files and reported 422 records/514 occurrences, exit 1. That history and the [historical selected69977 checkpoint](../updating-blizzard-ui-to-a-new-patch.md#historical-selected-target--september-24-2026) retain their original identities; neither is relabelled as 70374 proof.
 

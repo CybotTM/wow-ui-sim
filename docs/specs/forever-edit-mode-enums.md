@@ -27,7 +27,7 @@ Forever publishes finite additions from its `EditModeManagerConstantsDocumentati
 
 ## Tests asserting this spec
 
-- `tests/wowforever_edit_mode_enums.rs` — existing exact source values, metadata, actual preset and display consumers. Candidate adds `forever_edit_mode_gamepad_consumers`; AUTHORED, NOT GREEN, not integrated by this docs update.
+- `tests/wowforever_edit_mode_enums.rs` — existing exact source values, metadata, actual preset and display consumers. Includes `forever_edit_mode_gamepad_consumers`; AUTHORED, NOT GREEN. Source integrated at `136748f0b`; independent source/saved-RED verification PASS, compilation/execution pending.
 
 ## Known gaps (current cycle)
 
@@ -41,7 +41,7 @@ Private handoff: `/home/osso/.local/state/wow-ui-sim/handoff/forever-gamepad-enu
 | Candidate patch | Saved `git apply --check` | Applicability PASS only at recorded inputs; no runtime proof. |
 | Candidate regression | Rust test loads actual vendor consumers and asserts the contract above | AUTHORED, NOT GREEN; compilation/execution pending. |
 
-- [ ] Integrate candidate and run owning Forever enum/preset/default-layout/display tests, including the new consumer regression.
+- [ ] Run owning Forever enum/preset/default-layout/display tests on the committed source, including the new consumer regression.
 - [ ] Run normal startup Lua-error gate on the resulting binary before claiming any error reduction. Main commit `d9f051156` records corrected70374 manifest and actual failing 166-record/238-occurrence baseline; neither baseline nor counts are changed here.
 
 Independent locale-acquisition runtime verification reportedly PASS (4,434 files, hashes match); this is acquisition proof only, not a startup fix. See the [locale proof owner](casc-loading.md#locale-checkpoint--october-15-2026); no locale evidence duplicated here.

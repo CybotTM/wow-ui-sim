@@ -33,7 +33,7 @@ Helper functions/constants in `src/client_profile.rs`:
 
 ## Forever gamepad Edit Mode — pending 2026-10-15
 
-[Owning enum contract and proof ledger](../../specs/forever-edit-mode-enums.md#pending-70374-gamepad-candidate--2026-10-15) tracks the private70374 candidate in the existing `client-wowforever` C API module. Actual sealed normal-binary consumer RED is distinct from the authored, unexecuted Rust regression; no integrated GREEN or startup reduction claimed. Corrected manifest/current failing baseline and independent locale-acquisition PASS do not close this enum gap.
+[Owning enum contract and proof ledger](../../specs/forever-edit-mode-enums.md#pending-70374-gamepad-candidate--2026-10-15) tracks the `136748f0b` gamepad extension in the existing `client-wowforever` C API module. Independent source/saved-RED verification PASS is distinct from the authored, unexecuted Rust regression; no integrated GREEN or startup reduction claimed. Corrected manifest/current failing baseline and independent locale-acquisition PASS do not close this enum gap.
 
 ## Forever expansion identity
 
