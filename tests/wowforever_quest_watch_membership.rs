@@ -170,3 +170,127 @@ fn forever_watch_membership_legacy_indices_follow_current_membership() {
     )
     .expect("legacy watch indexes use current rich rows and explicit membership");
 }
+
+#[test]
+fn forever_watch_membership_survives_post_cleanup_restoration() {
+    let env = create_membership_env();
+    register_watch_counter(&env);
+    env.exec(
+        r#"
+        assert(C_QuestLog.RemoveQuestWatch(80000) == true)
+        assert(WatchMembershipEventCount == 1)
+        WatchMembershipTests.assertProjection({80001})
+        WatchMembershipTests.assertUnwatched(80000)
+        "#,
+    )
+    .expect("remove seeded membership before real cleanup restoration");
+
+    env.restore_post_cleanup_globals();
+
+    env.exec(
+        r#"
+        for _, name in ipairs({'AddQuestWatch', 'RemoveQuestWatch', 'GetQuestWatchType',
+            'GetNumQuestWatches', 'GetQuestIDForQuestWatchIndex'}) do
+            assert(type(rawget(C_QuestLog, name)) == 'function', name .. ' after restore')
+        end
+        for _, name in ipairs({'GetNumQuestWatches', 'IsQuestWatched',
+            'GetQuestIndexForWatch', 'GetQuestWatchIndex', 'GetQuestSortIndex'}) do
+            assert(type(rawget(_G, name)) == 'function', name .. ' after restore')
+        end
+        assert(WatchMembershipEventCount == 1, 'restoration must not emit watch events')
+        WatchMembershipTests.assertProjection({80001})
+        WatchMembershipTests.assertUnwatched(80000)
+        assert(C_QuestLog.GetQuestWatchType(80001) == Enum.QuestWatchType.Manual)
+        assert(GetQuestIndexForWatch(1) == 3 and GetQuestIndexForWatch(2) == 0)
+        assert(GetQuestWatchIndex(2) == 0 and GetQuestWatchIndex(3) == 1)
+        assert(GetQuestSortIndex(2) == 0 and GetQuestSortIndex(3) == 1)
+        assert(C_QuestLog.RemoveQuestWatch(80000) == false, 'restore must not reseed')
+        assert(WatchMembershipEventCount == 1)
+        assert(C_QuestLog.AddQuestWatch(80000) == true)
+        assert(WatchMembershipEventCount == 2, 'restored mutator and listener remain live')
+        WatchMembershipTests.assertProjection({80000, 80001})
+        assert(C_QuestLog.GetQuestWatchType(80000) == Enum.QuestWatchType.Manual)
+        assert(GetQuestIndexForWatch(1) == 2 and GetQuestIndexForWatch(2) == 3)
+        assert(GetQuestWatchIndex(2) == 1 and GetQuestSortIndex(3) == 2)
+        assert(C_QuestLog.AddQuestWatch(80000) == false)
+        assert(WatchMembershipEventCount == 2)
+        "#,
+    )
+    .expect("restoration preserves mutated membership without reseeding or notifications");
+}
+
+#[test]
+fn forever_watch_membership_event_can_reenter_mutator_synchronously() {
+    let env = create_membership_env();
+    env.exec(
+        r#"
+        local records, outcomes = {}, {}
+        local reentered = false
+        local nestedResult
+        local listener = CreateFrame('Frame')
+        listener:RegisterEvent('QUEST_WATCH_LIST_CHANGED')
+        local function record(phase, self, event, ...)
+            local ids = {}
+            for index = 1, C_QuestLog.GetNumQuestWatches() do
+                ids[index] = C_QuestLog.GetQuestIDForQuestWatchIndex(index)
+            end
+            records[#records + 1] = {
+                phase = phase, sameFrame = self == listener, event = event,
+                payload = {n = select('#', ...), ...}, ids = ids,
+                count = C_QuestLog.GetNumQuestWatches(), globalCount = GetNumQuestWatches(),
+                watchType = C_QuestLog.GetQuestWatchType(80000),
+                watched = IsQuestWatched(C_QuestLog.GetLogIndexForQuestID(80000)),
+            }
+        end
+        listener:SetScript('OnEvent', function(self, event, ...)
+            local payload = {n = select('#', ...), ...}
+            -- Save callback errors; every assertion runs after protected dispatch returns.
+            local ok, message = pcall(function()
+                record('enter', self, event, unpack(payload, 1, payload.n))
+                if not reentered then
+                    reentered = true
+                    nestedResult = C_QuestLog.AddQuestWatch(80000)
+                end
+                record('exit', self, event, unpack(payload, 1, payload.n))
+            end)
+            outcomes[#outcomes + 1] = {ok = ok, message = message}
+        end)
+
+        assert(C_QuestLog.RemoveQuestWatch(80000) == true)
+        assert(reentered and nestedResult == true, 'nested Add must finish before Remove returns')
+        assert(#outcomes == 2, 'both real event callbacks must finish')
+        for _, outcome in ipairs(outcomes) do
+            assert(outcome.ok, 'callback failed: ' .. tostring(outcome.message))
+        end
+        assert(#records == 4, 'exactly two nested event deliveries, each with enter/exit')
+        local expected = {
+            {phase = 'enter', added = false, ids = {80001}, watched = false},
+            {phase = 'enter', added = true, ids = {80000, 80001}, watched = true},
+            {phase = 'exit', added = true, ids = {80000, 80001}, watched = true},
+            {phase = 'exit', added = false, ids = {80000, 80001}, watched = true},
+        }
+        for index, want in ipairs(expected) do
+            local got = records[index]
+            assert(got.phase == want.phase, 'nested event order at ' .. index)
+            assert(got.sameFrame and got.event == 'QUEST_WATCH_LIST_CHANGED')
+            assert(got.payload.n == 2)
+            assert(got.payload[1] == 80000 and got.payload[2] == want.added)
+            assert(got.count == #want.ids and got.globalCount == #want.ids)
+            assert(#got.ids == #want.ids)
+            for watchIndex, questID in ipairs(want.ids) do
+                assert(got.ids[watchIndex] == questID, 'nested snapshot at ' .. index)
+            end
+            assert(got.watched == want.watched)
+            local wantType
+            if want.watched then wantType = Enum.QuestWatchType.Manual end
+            assert(got.watchType == wantType, 'nested watch type at ' .. index)
+        end
+        WatchMembershipTests.assertProjection({80000, 80001})
+        assert(C_QuestLog.GetQuestWatchType(80000) == Enum.QuestWatchType.Manual)
+        assert(C_QuestLog.AddQuestWatch(80000) == false)
+        assert(#records == 4 and #outcomes == 2, 'duplicate after nested Add emits nothing')
+        listener:UnregisterEvent('QUEST_WATCH_LIST_CHANGED')
+        "#,
+    )
+    .expect("real OnEvent reenters Add without a borrow failure and preserves nested ordering");
+}
