@@ -49,9 +49,10 @@ Forever additionally accepts `CHAT_MSG_COLLECTED_APPEARANCE` and `UNIT_AURA_BLOC
 
 ### 70374 startup event catalog
 
-- [ ] Register, query and unregister exactly these documented Forever additions: `ALERT_AGE_VERIFICATION_RESTRICTED`, `GLOBAL_REGION_MOUSE_DOWN`, `PLAYER_PVP_FLAG_CHANGED`, `VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED`, `VOICE_CHAT_VOICE_PROVIDER_CHANGED`.
-- [ ] Preserve strict rejection of invented/suffixed names and existing other-profile registration policy.
-- [ ] Inject and observe the documented region/button payload and active-provider IDs through the existing event dispatcher; assert observations outside protected callbacks and suppress delivery after unregistering.
+- [x] Register, query and unregister exactly these documented Forever additions: `ALERT_AGE_VERIFICATION_RESTRICTED`, `GLOBAL_REGION_MOUSE_DOWN`, `PLAYER_PVP_FLAG_CHANGED`, `VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED`, `VOICE_CHAT_VOICE_PROVIDER_CHANGED`.
+- [x] Preserve strict rejection of the tested invented/suffixed and empty names on Forever.
+- [ ] Preserve existing other-profile registration policy in runtime verification; source isolation alone is not this gate.
+- [x] Inject and observe the documented region/button payload and active-provider IDs through the existing event dispatcher; assert observations outside protected callbacks and suppress delivery after unregistering.
 
 Selected 70374 `SystemDocumentation.lua`, `PvpInfoDocumentation.lua`, `SocialRestrictionsDocumentation.lua` and `VoiceChatDocumentation.lua` declare these names; matching vendor consumers and the source136 startup capture reject all five through the stale finite catalog. The 58-record/58-occurrence capture contains twelve rejection records including ScriptErrors wrappers, not twelve independent causes.
 

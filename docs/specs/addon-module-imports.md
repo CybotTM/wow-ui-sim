@@ -28,16 +28,16 @@ World of Warcraft: Forever 1.60.1 Beta exposes `require(moduleName)` as an impor
 
 ### Forever import binding (simulator compatibility policy)
 
-- [ ] Expose global `import` only under `client-wowforever`, before secure-environment copying, through the same direct Rust completed-module backend as `require`; preserve the existing `require` contract.
-- [ ] Return the same completed table to insecure and secure addon consumers, preserving callable members and single file execution; reject unfinished/failed/missing/non-TOC modules and undeclared dependencies without autoload or host-package fallback.
+- [x] Expose global `import` on Forever before secure-environment copying, through the same direct Rust completed-module backend as `require`; preserve the existing `require` contract. Other-profile absence remains a separate gate below.
+- [x] Return the same completed table to insecure and secure addon consumers, preserving callable members and single file execution; reject unfinished/failed/missing/non-TOC modules and undeclared dependencies without autoload or host-package fallback.
 
-These unchecked requirements reuse simulator policy justified by vendor `import('.Utility')` after the TOC-loaded `Utility.lua` returns a table. Native import/require semantics, identity, grammar and error parity remain UNKNOWN.
+These executed Forever requirements reuse simulator policy justified by vendor `import('.Utility')` after the TOC-loaded `Utility.lua` returns a table. Native import/require semantics, identity, grammar and error parity remain UNKNOWN.
 
 ### Profile isolation
 
 - [ ] Expose this API only for the `wowforever` profile. Other client profiles must retain their current `require` surface.
 
-Path/dependency requirements have sixteen pure resolver tests; registry/value/provenance requirements have fourteen actual-rilua unit tests. Ten grouped integration tests exercise the real TOC/XML loader, delayed/coroutine imports, dynamic chunks, secure environments, addon varargs and existing peer-file taint behavior. Cross-profile final verification remains pending.
+Path/dependency requirements have sixteen pure resolver tests; registry/value/provenance requirements have fourteen actual-rilua unit tests. Fourteen current grouped integration tests exercise the real TOC/XML loader, delayed/coroutine imports, dynamic chunks, secure environments, addon varargs and existing peer-file taint behavior. Cross-profile final verification remains pending.
 
 ## How it works
 
@@ -61,7 +61,7 @@ Path/dependency requirements have sixteen pure resolver tests; registry/value/pr
 - `src/loader/module_import.rs` — sixteen unit tests for absolute/relative resolution, addon boundary rejection, direct dependency authorization, dynamic absolute exemption, malformed requests, and exact errors.
 - `src/loader/addon_modules.rs` — fourteen actual-rilua tests for completed values/GC identity and stack restoration, load boundaries, delayed/escaped closures, direct dependencies, spoofed dynamic sources, nearest dynamic origins, failed loads/replacement, non-reexecution and VM isolation.
 
-- `tests/addon_require.rs` — ten Forever loader-boundary tests, including TOC dependencies, XML files, values, failed/self/forward imports and caller provenance.
+- `tests/addon_require.rs` — fourteen current Forever loader-boundary tests, including TOC dependencies, XML files, values, failed/self/forward imports and caller provenance.
 - `tests/forever_bug_capture.rs` — absolute local TOC loading followed by real error-capture consumers; requires the local BugGrabber/BugSack sources.
 - `tests/sandbox_dangerous_globals.rs` — profile-specific global/secure-environment exposure and absence of host package loading.
 - `tests/wowforever_profile.rs` — distinct profile identity, client paths, TOC routing and build information.
@@ -72,7 +72,8 @@ Source integrated at `012df1e45`: the binding adds only `import` registration to
 
 ## Known gaps (current cycle)
 
-- [ ] Complete independent verification, cross-profile isolation and startup smoke checks.
+- [x] Independent bounded import/control verification and normal vendor-method probe passed at the recorded source.
+- [ ] Cross-profile isolation and clean startup remain open; the current startup smoke is captured but failing.
 - [ ] Native Forever execution is not part of this task; the Wiki contract and local behavioral fixtures do not establish undocumented native edge cases.
 
 ## Out of scope

@@ -24,7 +24,7 @@ Reused completion, dependency, identity, grammar and error behavior is **simulat
 | Existing backend | Historical pre-binding controls remain historical; current groups are separately executed, not additive. |
 | New import consumers and restrictions | Saved current loader/sandbox/registry/path execution; normal probe confirms completed Utility identity and callable vendor method returning nil. No gamepad-root completion claim. |
 | Separate models/startup | Earlier source136 model/render/GPU evidence remains separate; current startup is captured but failing. |
-| Binding acceptance | Current execution observed; independent report receipt/acceptance, native parity, cross-profile and broader acceptance remain pending. |
+| Binding acceptance | Independent bounded report accepted; native parity, cross-profile and broader acceptance remain open. |
 
 [Central receipt](../../baselines/README.md#current-importevents-execution--2026-10-15) owns current evidence root, exact counts, binary inventories, probe markers, failing startup and accepted independent bounded report. Historical RED is retained under the earlier receipt linked there. Private enum-provider/experience candidate remains unintegrated/unexecuted; actual new gamepad root failures stay open. Baseline JSON copying remains main-owned.
 
