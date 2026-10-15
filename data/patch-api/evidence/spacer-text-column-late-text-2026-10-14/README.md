@@ -13,7 +13,7 @@ These frozen records exclude newer TextColumn compile attempts, later manifest-w
 
 ## Integrity and privacy boundaries
 
-Derivatives preserve complete original bytes except reviewed literal spans: 7,365 base substitutions plus 29 contextual corrections. Payload JSON was never reserialized; no clipping, newline normalization or unlisted gap/tail edits. A separate independent private gate verified all 71 exact replays and bounded complete context/privacy checks before this copy. Canonical copy/catalog/privacy verification remains pending.
+Derivatives preserve complete original bytes except reviewed literal spans: 7,365 base substitutions plus 29 contextual corrections. Payload JSON was never reserialized; no clipping, newline normalization or unlisted gap/tail edits. A separate independent private gate verified all 71 exact replays and bounded complete context/privacy checks before this copy. Independent canonical verification at `055b57afd` passes all 71 byte comparisons, catalog/owner-link and exact commit-scope checks, plus bounded privacy/context review of all 73 packet files. This does not establish universal privacy or new runtime acceptance.
 
 Earlier exactness PASS/privacy FAIL25 and subsequent exactness PASS/privacy FAIL4 remain historical failures; later corrections do not rewrite them. Private originals, mappings, failed candidates and reports remain retained outside this packet. One private correction step created and removed a transient bytecode cache; retained-file preservation is supported, unchanged directory history is not.
 

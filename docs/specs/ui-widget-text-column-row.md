@@ -58,7 +58,7 @@ Four subsequent Retail integration `--no-run` attempts at `c66bfa263` ended in g
 
 Saved guard checks establish bounded pure threshold decisions, not unconditional malformed-input fail-closed handling, successful live stopping or machine responsiveness. Resource observations do not establish workload causality.
 
-The separate [frozen historical71 packet](../../data/patch-api/evidence/spacer-text-column-late-text-2026-10-14/README.md) retains the third Spacer abort, formatter attempts and source-only TextColumn/shared-doc reports. Independent private exactness/privacy review passes after preserving earlier privacy FAIL25/FAIL4; canonical copy/catalog verification remains pending. It excludes newer compile attempts and current-source acceptance.
+The separate [frozen historical71 packet](../../data/patch-api/evidence/spacer-text-column-late-text-2026-10-14/README.md) retains the third Spacer abort, formatter attempts and source-only TextColumn/shared-doc reports. Independent private exactness/privacy review passes after preserving earlier privacy FAIL25/FAIL4; independent canonical verification at `055b57afd` passes 71/71 exact payload comparisons, catalog/owner link, commit scope and bounded 73-file privacy review. It excludes newer compile attempts and current-source acceptance.
 
 ## Remaining proof
 
