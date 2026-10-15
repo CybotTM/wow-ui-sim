@@ -224,9 +224,9 @@ Registration adds registerable names; [state-based removal](specs/frame-event-re
 
 Commit `c2bf42c4f` adds exactly five names to `src/event/valid_events.rs`'s Forever-only finite catalog: `ALERT_AGE_VERIFICATION_RESTRICTED`, `GLOBAL_REGION_MOUSE_DOWN`, `PLAYER_PVP_FLAG_CHANGED`, `VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED`, and `VOICE_CHAT_VOICE_PROVIDER_CHANGED`. It does not make Forever registration permissive or change other-profile policy. The [owning finite-event spec](specs/forever-finite-constants.md#70374-startup-event-catalog) records source declarations and remaining requirements.
 
-The five authored `tests/startup_api_events.rs::forever_known_startup_*` cases (four enabled under Forever) cover registration/query/unregistration, injected region/button and active-provider payloads, other-profile policy, and strict unknown-name rejection. **Compilation is in progress; authored tests remain UNEXECUTED.** Injection is not a native event producer or native payload/parity proof; startup improvement remains unmeasured on this source.
+The five authored `tests/startup_api_events.rs::forever_known_startup_*` cases (four enabled under Forever) cover registration/query/unregistration, injected region/button and active-provider payloads, other-profile policy, and strict unknown-name rejection. **Compilation/execution gates remain pending; authored tests remain UNEXECUTED.** Injection is not a native event producer or native payload/parity proof; startup improvement remains unmeasured on this source.
 
-Separate commit `012df1e45` registers Forever `import` through the existing completed-addon-module backend used by `require`, with authored loader and sandbox controls. Its compilation is in progress and authored tests remain **UNEXECUTED**; it is not an event producer, new loader, or native import/require parity claim. The [module-import spec](specs/addon-module-imports.md) owns that contract.
+Separate commit `012df1e45` registers Forever `import` through the existing completed-addon-module backend used by `require`, with authored loader and sandbox controls. Its compilation/execution gates remain pending and authored tests remain **UNEXECUTED**; it is not an event producer, new loader, or native import/require parity claim. The [module-import spec](specs/addon-module-imports.md) owns that contract.
 
 ### RegisterAllEvents
 

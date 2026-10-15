@@ -28,7 +28,7 @@ Historical pre-70374 `[]` remains private as `wowforever-lua-errors.pre-70374.js
 
 ## Verified scoped receipts — 2026-10-15
 
-All new outcomes below bind runtime source `136748f0b3e122b6c9f897c69db19dcf1b317c5f`, before the import change. Import `012df1e45` and finite-event `c2bf42c4f` compilation is in progress; their new tests and normal startup remain unexecuted/NOT GREEN. Independent saved-evidence reports: `/home/osso/.local/state/wow-ui-sim/verification/feedback-models-current/report.md` and `/home/osso/.local/state/wow-ui-sim/verification/feedback-gpu-startup-current/report.md`. Evidence root E: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/feedback-forever-integrated-tests-20261015T101651047924Z`. Reports reuse saved seals and matching stat metadata, not fresh artifact hashes or enforced immutability.
+All new outcomes below bind runtime source `136748f0b3e122b6c9f897c69db19dcf1b317c5f`, before the import change. Import `012df1e45` and finite-event `c2bf42c4f` compilation/execution remain pending: the first new build stopped at the host-memory safety guard before producing new binaries. Their new tests and normal startup remain unexecuted/NOT GREEN; this was not a compiler error. Independent saved-evidence reports: `/home/osso/.local/state/wow-ui-sim/verification/feedback-models-current/report.md` and `/home/osso/.local/state/wow-ui-sim/verification/feedback-gpu-startup-current/report.md`. Evidence root E: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/feedback-forever-integrated-tests-20261015T101651047924Z`. Reports reuse saved seals and matching stat metadata, not fresh artifact hashes or enforced immutability.
 
 | Component | Actual bounded proof |
 |---|---|
