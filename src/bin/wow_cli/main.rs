@@ -822,6 +822,49 @@ mod tests {
     use super::*;
 
     #[test]
+    fn screenshot_png_flag_parses() {
+        let cli = Cli::try_parse_from(["wow-cli", "screenshot", "--png"])
+            .expect("screenshot should accept the explicit PNG option");
+        assert!(matches!(cli.command, Commands::Screenshot { .. }));
+    }
+
+    #[test]
+    fn screenshot_png_choice_survives_wire_roundtrip() {
+        let payload = serde_json::json!({
+            "Screenshot": {
+                "output": "capture.png",
+                "width": 2,
+                "height": 2,
+                "filter": null,
+                "crop": null,
+                "png": true
+            }
+        });
+        let request: wow_ui_sim::lua_server::Request =
+            serde_json::from_value(payload).expect("valid screenshot request");
+        let encoded = serde_json::to_value(request).expect("serializable screenshot request");
+        assert_eq!(encoded["Screenshot"]["png"], true);
+    }
+
+    #[test]
+    fn screenshot_defaults_are_unchanged() {
+        let cli =
+            Cli::try_parse_from(["wow-cli", "screenshot"]).expect("default screenshot command");
+        match cli.command {
+            Commands::Screenshot {
+                output,
+                width,
+                height,
+                ..
+            } => {
+                assert_eq!(output, PathBuf::from("screenshot.webp"));
+                assert_eq!((width, height), (1600, 1200));
+            }
+            _ => panic!("expected screenshot command"),
+        }
+    }
+
+    #[test]
     fn dump_tree_accepts_filter_key_flag() {
         let cli = Cli::try_parse_from(["wow-cli", "dump-tree", "--filter-key", "PartyFrame"])
             .expect("dump-tree should parse --filter-key");
