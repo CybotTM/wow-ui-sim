@@ -42,7 +42,14 @@ fn create_confirmation_env() -> WowLuaEnv {
 fn select_offer(env: &WowLuaEnv) {
     env.exec("C_GossipInfo.SelectAvailableQuest(80002)")
         .expect("select available quest through modeled API");
-    assert_eq!(env.state().borrow().pending_quest_offer, Some(QUEST_ID));
+    assert_eq!(
+        env.state()
+            .borrow()
+            .pending_quest_offer
+            .as_ref()
+            .map(|offer| offer.quest_id),
+        Some(QUEST_ID as i32)
+    );
 }
 
 fn request_confirmation(env: &WowLuaEnv) {
@@ -86,7 +93,13 @@ fn explicit_input_publishes_three_arguments_synchronously_without_accepting() {
     request_confirmation(&env);
     assert_eq!(env.eval::<i32>("return promptCount").unwrap(), 1);
     let state = env.state().borrow();
-    assert_eq!(state.pending_quest_offer, Some(QUEST_ID));
+    assert_eq!(
+        state
+            .pending_quest_offer
+            .as_ref()
+            .map(|offer| offer.quest_id),
+        Some(QUEST_ID as i32)
+    );
     assert_eq!(state.quest_log, before_log);
     drop(state);
     assert_eq!(queued_event_count(&env, "QUEST_ACCEPTED"), before_accepted);
@@ -106,7 +119,7 @@ fn accept_inside_real_prompt_listener_consumes_offer_without_reprompting() {
     env.exec("acceptDuringPrompt = true").unwrap();
     request_confirmation(&env);
     let state = env.state().borrow();
-    assert_eq!(state.pending_quest_offer, None);
+    assert!(state.pending_quest_offer.is_none());
     assert_eq!(state.quest_log, expected_log);
     drop(state);
     assert_eq!(
@@ -135,7 +148,7 @@ fn closing_quest_frame_clears_offer_without_accepting_or_reprompting() {
     request_confirmation(&env);
     env.exec("CloseQuestFrame()")
         .expect("existing close path clears offer");
-    assert_eq!(env.state().borrow().pending_quest_offer, None);
+    assert!(env.state().borrow().pending_quest_offer.is_none());
     assert_eq!(env.state().borrow().quest_log, before_log);
     assert_eq!(
         queued_event_count(&env, "QUEST_FINISHED"),
@@ -150,12 +163,12 @@ fn closing_quest_frame_clears_offer_without_accepting_or_reprompting() {
 #[test]
 fn confirmation_input_without_pending_offer_is_explicit_simulator_noop() {
     let env = create_confirmation_env();
-    assert_eq!(env.state().borrow().pending_quest_offer, None);
+    assert!(env.state().borrow().pending_quest_offer.is_none());
     let before_log = env.state().borrow().quest_log.clone();
     let before_events = env.state().borrow().events.pending().len();
     request_confirmation(&env);
     assert_eq!(env.eval::<i32>("return promptCount").unwrap(), 0);
-    assert_eq!(env.state().borrow().pending_quest_offer, None);
+    assert!(env.state().borrow().pending_quest_offer.is_none());
     assert_eq!(env.state().borrow().quest_log, before_log);
     assert_eq!(env.state().borrow().events.pending().len(), before_events);
 }

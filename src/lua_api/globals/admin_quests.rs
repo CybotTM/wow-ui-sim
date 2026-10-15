@@ -33,7 +33,10 @@ pub(super) fn register_quests(b: TableBuilder) -> LuaResult<TableBuilder> {
 fn request_quest_accept_confirmation(state: &mut LuaState) -> LuaResult<u32> {
     let name = String::from_stack(state, 1)?;
     let quest_title = String::from_stack(state, 2)?;
-    let pending_offer = crate::lua_api::methods::borrow_state(state)?.pending_quest_offer;
+    let pending_offer = crate::lua_api::methods::borrow_state(state)?
+        .pending_quest_offer
+        .as_ref()
+        .map(|offer| offer.quest_id);
     let Some(quest_id) = pending_offer else {
         return Ok(0);
     };

@@ -553,7 +553,8 @@ pub struct SimState {
     pub quest_watch_types: HashMap<i32, crate::c_api::QuestWatchType>,
     /// Explicit eligible IDs, independent of world-quest classification.
     pub quest_war_mode_eligibility: std::collections::HashSet<i32>,
-    pub pending_quest_offer: Option<u32>,
+    /// Selected rich offer snapshot; survives gossip closure until accepted/cancelled.
+    pub pending_quest_offer: Option<QuestLogEntry>,
     pub quest_choice_id: Option<u32>,
     pub quest_choice_response_id: Option<u32>,
     pub quest_poi_map_id: Option<i32>,

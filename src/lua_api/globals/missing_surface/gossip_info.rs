@@ -105,15 +105,20 @@ fn c_gossip_info_select_available_quest(state: &mut LuaState) -> LuaResult<u32> 
     };
     {
         let mut sim = borrow_state_mut(state)?;
-        let exists = sim
+        let Some(row) = sim
             .gossip
             .available_quests
             .iter()
-            .any(|row| row.quest_id == quest_id);
-        if !exists {
+            .find(|row| row.quest_id == quest_id)
+            .cloned()
+        else {
             return Ok(0);
-        }
-        sim.pending_quest_offer = Some(quest_id);
+        };
+        let offer = sim
+            .quest_log_entries
+            .snapshot_gossip_offer(&row)
+            .map_err(|_| rilua::runtime_error("selected quest ID exceeds the rich-log range"))?;
+        sim.pending_quest_offer = Some(offer);
         sim.selected_quest_log_id = Some(quest_id);
     }
 

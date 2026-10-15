@@ -6,6 +6,13 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("WowLuaEnv init")
 }
 
+fn select_offer(env: &WowLuaEnv, quest_id: u32) {
+    env.exec(&format!(
+        "A_Admin.OpenQuestNpc({quest_id}, 'Fixture quest'); SelectAvailableQuest(1)"
+    ))
+    .expect("select available quest through public legacy API");
+}
+
 fn fired(env: &WowLuaEnv, name: &str) -> bool {
     env.state()
         .borrow()
@@ -20,7 +27,7 @@ fn fired(env: &WowLuaEnv, name: &str) -> bool {
 #[test]
 fn confirm_accept_quest_moves_offer_to_log_and_fires_accepted() {
     let env = env();
-    env.state().borrow_mut().pending_quest_offer = Some(42);
+    select_offer(&env, 42);
     env.exec("ConfirmAcceptQuest()").unwrap();
     let st = env.state().borrow();
     assert!(st.pending_quest_offer.is_none());
@@ -45,8 +52,8 @@ fn confirm_accept_quest_is_idempotent_for_same_id() {
     {
         let mut st = env.state().borrow_mut();
         st.quest_log.push(99);
-        st.pending_quest_offer = Some(99);
     }
+    select_offer(&env, 99);
     env.exec("ConfirmAcceptQuest()").unwrap();
     let st = env.state().borrow();
     let count = st.quest_log.iter().filter(|q| **q == 99).count();
@@ -58,7 +65,7 @@ fn confirm_accept_quest_is_idempotent_for_same_id() {
 #[test]
 fn close_quest_frame_fires_quest_finished_and_clears_offer() {
     let env = env();
-    env.state().borrow_mut().pending_quest_offer = Some(7);
+    select_offer(&env, 7);
     env.exec("CloseQuestFrame()").unwrap();
     assert!(env.state().borrow().pending_quest_offer.is_none());
     assert!(fired(&env, "QUEST_FINISHED"));

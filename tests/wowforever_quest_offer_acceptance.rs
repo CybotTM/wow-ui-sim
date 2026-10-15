@@ -12,7 +12,10 @@ fn seeded_public_offer_acceptance_preserves_rich_and_watch_coherence() {
             !state.quest_log.contains(&80002),
             "BLOCKER: offered quest is already in the lightweight log"
         );
-        assert!(state.pending_quest_offer.is_none(), "BLOCKER: preexisting offer");
+        assert!(
+            state.pending_quest_offer.is_none(),
+            "BLOCKER: preexisting offer"
+        );
     }
     let (quest_id, coherent, observations): (i32, bool, String) = env
         .eval(include_str!("wowforever_quest_offer_acceptance.lua"))
@@ -20,7 +23,10 @@ fn seeded_public_offer_acceptance_preserves_rich_and_watch_coherence() {
     let quest_id = u32::try_from(quest_id).expect("public offered ID must be nonnegative");
     let state = env.state().borrow();
     let accepted_occurrences = state.quest_log.iter().filter(|id| **id == quest_id).count();
-    let pending_offer = state.pending_quest_offer;
+    let pending_offer: Option<i32> = state
+        .pending_quest_offer
+        .as_ref()
+        .map(|offer| offer.quest_id);
     let selected_id = state.selected_quest_log_id;
     let queued_accepted = state
         .events

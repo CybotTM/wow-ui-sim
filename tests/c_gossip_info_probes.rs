@@ -256,5 +256,11 @@ fn select_available_quest_sets_offer_and_fires_quest_detail() {
     let state = env.state().borrow();
     assert!(fired, "SelectAvailableQuest should dispatch QUEST_DETAIL");
     assert_eq!(selected, 80002);
-    assert_eq!(state.pending_quest_offer, Some(80002));
+    assert_eq!(
+        state
+            .pending_quest_offer
+            .as_ref()
+            .map(|offer| offer.quest_id),
+        Some(80002_i32)
+    );
 }

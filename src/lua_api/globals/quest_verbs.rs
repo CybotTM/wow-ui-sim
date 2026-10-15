@@ -1,11 +1,10 @@
-//! Quest verbs that mutate `SimState.quest_log` + related per-session
-//! quest / achievement tracking fields and dispatch the standard WoW
-//! quest events.
+//! Quest verbs that publish accepted IDs and rich quest snapshots, mutate
+//! per-session quest / achievement tracking fields, and queue quest events.
 //!
 //! Migrates 8 entries off `GLOBAL_NIL_STUBS`:
 //!
 //! - `ConfirmAcceptQuest()`               — consumes `pending_quest_offer`,
-//!                                            appends to `quest_log`,
+//!                                            publishes rich/lightweight membership,
 //!                                            fires `QUEST_ACCEPTED`.
 //! - `CloseQuestFrame()`                  — fires `QUEST_FINISHED`.
 //! - `AcknowledgeAutoQuestPopUp(id)`      — silent dismiss. Accepts any arg.
@@ -31,7 +30,6 @@ use crate::lua_api::state::QuestPortraitState;
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
-use std::collections::HashSet;
 
 fn push_event(state: &mut LuaState, name: &str) -> LuaResult<()> {
     borrow_state_mut(state)?.events.push(Event {
@@ -64,26 +62,36 @@ fn stack_bool(state: &mut LuaState, index: i32) -> Option<bool> {
     }
 }
 
-/// `ConfirmAcceptQuest()` — consume `pending_quest_offer`, append to log,
-/// fire QUEST_ACCEPTED. Silent no-op when no offer is pending.
+/// Consume the selected snapshot and publish rich/lightweight membership before
+/// the existing queued QUEST_ACCEPTED. No pending offer remains a silent no-op.
 fn confirm_accept_quest(state: &mut LuaState) -> LuaResult<u32> {
-    let accepted = {
+    {
         let mut st = borrow_state_mut(state)?;
-        let Some(id) = st.pending_quest_offer.take() else {
+        let Some(offer) = st.pending_quest_offer.as_ref() else {
             return Ok(0);
         };
+        let id = u32::try_from(offer.quest_id)
+            .map_err(|_| rilua::runtime_error("pending quest ID must be nonnegative"))?;
+        let offer = st
+            .pending_quest_offer
+            .take()
+            .expect("validated pending offer");
         append_quest_log_entry(&mut st.quest_log, id);
-        true
-    };
-    if accepted {
-        push_event(state, "QUEST_ACCEPTED")?;
+        if !st
+            .quest_log_entries
+            .entries
+            .iter()
+            .any(|entry| entry.quest_id == offer.quest_id)
+        {
+            st.quest_log_entries.entries.push(offer);
+        }
     }
+    push_event(state, "QUEST_ACCEPTED")?;
     Ok(0)
 }
 
 fn append_quest_log_entry(quest_log: &mut Vec<u32>, quest_id: u32) {
-    let mut known_quests = quest_log.iter().copied().collect::<HashSet<_>>();
-    if known_quests.insert(quest_id) {
+    if !quest_log.contains(&quest_id) {
         quest_log.push(quest_id);
     }
 }
@@ -131,7 +139,12 @@ fn set_abandon_quest(state: &mut LuaState) -> LuaResult<u32> {
         st.quest_log.retain(|q| *q != id);
         let removed = st.quest_log.len() != before;
         st.abandon_quest_id = Some(id);
-        if id == st.pending_quest_offer.unwrap_or(0) {
+        if st
+            .pending_quest_offer
+            .as_ref()
+            .map(|offer| offer.quest_id as u32)
+            == Some(id)
+        {
             st.pending_quest_offer = None;
         }
         (removed, id)

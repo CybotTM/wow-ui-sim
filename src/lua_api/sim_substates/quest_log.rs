@@ -4,7 +4,9 @@
 //! accept/abandon list used by `quest_verbs.rs`; `QuestLogState` carries
 //! the rich metadata surfaced to the 17 ported probe methods.
 
+use super::GossipQuestRow;
 use std::collections::HashSet;
+use std::num::TryFromIntError;
 
 /// Rich quest-log entry used by `C_QuestLog.*` probes.
 #[derive(Debug, Clone)]
@@ -75,6 +77,28 @@ pub struct QuestLogState {
 }
 
 impl QuestLogState {
+    /// Snapshot the selected offer, retaining known metadata for this exact quest.
+    /// Unknown ordinary offers use authored simulator policy, not native defaults.
+    pub fn snapshot_gossip_offer(
+        &self,
+        offer: &GossipQuestRow,
+    ) -> Result<QuestLogEntry, TryFromIntError> {
+        let quest_id = i32::try_from(offer.quest_id)?;
+        let mut snapshot = self
+            .entries
+            .iter()
+            .find(|entry| entry.quest_id == quest_id)
+            .cloned()
+            .unwrap_or_else(|| ordinary_offer_entry(quest_id, offer));
+        snapshot.title = offer.title.clone();
+        snapshot.level = offer.quest_level;
+        snapshot.is_complete = offer.is_complete == Some(true);
+        snapshot.is_meta = offer.is_meta;
+        snapshot.is_flagged_completed =
+            snapshot.is_flagged_completed || self.completed_quest_ids.contains(&quest_id);
+        Ok(snapshot)
+    }
+
     pub fn seeded() -> Self {
         Self {
             entries: vec![
@@ -85,6 +109,35 @@ impl QuestLogState {
             ],
             completed_quest_ids: seeded_completed_quest_ids(),
         }
+    }
+}
+
+/// Explicit initial state for simulator-authored ordinary gossip offers.
+/// POI polygons supply a map, never a quest-giver waypoint; other unsupported
+/// metadata stays absent and this scenario has no item/currency rewards.
+fn ordinary_offer_entry(quest_id: i32, offer: &GossipQuestRow) -> QuestLogEntry {
+    QuestLogEntry {
+        quest_id,
+        title: offer.title.clone(),
+        level: offer.quest_level,
+        is_complete: offer.is_complete == Some(true),
+        is_failed: false,
+        is_meta: offer.is_meta,
+        is_world_quest: false,
+        is_replayable: false,
+        is_flagged_completed: false,
+        map_id: crate::quest_poi_blobs::get_quest_blobs(offer.quest_id)
+            .first()
+            .map(|blob| blob.map_id as i32),
+        waypoint: None,
+        tag_id: None,
+        details_theme: None,
+        criteria_spell_id: None,
+        criteria_spell_name: None,
+        criteria_spell_texture: None,
+        criteria_spell_finished: false,
+        reward_items: Vec::new(),
+        currency_rewards: Vec::new(),
     }
 }
 

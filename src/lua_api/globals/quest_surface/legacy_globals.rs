@@ -143,7 +143,11 @@ pub fn select_available_quest(state: &mut LuaState) -> LuaResult<u32> {
     };
     {
         let mut sim = borrow_state_mut(state)?;
-        sim.pending_quest_offer = Some(row.quest_id);
+        let offer = sim
+            .quest_log_entries
+            .snapshot_gossip_offer(&row)
+            .map_err(|_| rilua::runtime_error("selected quest ID exceeds the rich-log range"))?;
+        sim.pending_quest_offer = Some(offer);
         sim.selected_quest_log_id = Some(row.quest_id);
     }
     fire_event_with_args(state, "QUEST_DETAIL", &[]);
