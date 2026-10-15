@@ -113,7 +113,11 @@ The [row ledger](../../specs/texture-and-text-row.md#known-gaps-current-cycle) o
 
 ### Spacer passive-input checkpoint — 2026-10-14
 
-[Spacer contract](../../specs/ui-widget-spacer.md) owns current passive-input, selector-RED and authored-test scope. Populated getter and consumer lifecycle acceptance remain open.
+[Spacer contract](../../specs/ui-widget-spacer.md) preserves the historical passive-input and selector-RED checkpoint.
+
+### Spacer bounded producer checkpoint — 2026-10-14
+
+[Owning implementation/proof ledger](../../specs/ui-widget-spacer.md#current-implementation-and-proof) records current modeled projection and independently verified profile-scoped behavior; remaining acceptance and provenance limits live there.
 
 ## Sources
 

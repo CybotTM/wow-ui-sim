@@ -1,3 +1,7 @@
+## [2026-10-14] evidence | Spacer bounded producer checkpoint
+
+[Current manager checkpoint](systems/ui-widget-manager-state.md#spacer-bounded-producer-checkpoint--2026-10-14) links the owning ledger; historical failures preserved and remaining acceptance kept open.
+
 ## [2026-10-14] source | Spacer passive input and authored tests
 
 [Spacer contract](../specs/ui-widget-spacer.md) now linked from manager documentation and index; no populated behavior or getter acceptance claimed.
