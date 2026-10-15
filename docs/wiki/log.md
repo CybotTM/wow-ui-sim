@@ -1,3 +1,7 @@
+## [2026-10-15] research | Screenshot encoding and resolution
+
+[Primary-source guidance](reference/screenshot-fidelity.md) records W3C PNG, Google's separate WebP encoder/transparent-RGB caveat, and OpenAI's model-dependent image preprocessing. Original-resolution evidence and separate defect crops are recommendations, not runtime changes or proof of viewer delivery. Existing screenshot defaults and acceptance scopes remain unchanged.
+
 ## [2026-10-15] evidence | Portable filename adoption verified
 
 [Windows investigation](investigations/windows-port-build.md#evidence-filename-portability--2026-10-15) records independent static PASS for `87499d15e`: 115 renames, 114 identical payloads, 121 exact edits and 117/117 applicable manifest links. One unchanged historical stderr retention mismatch remains; native Windows checkout and long-path proof stay open.

@@ -1,3 +1,7 @@
+## [2026-10-15] research | Screenshot fidelity
+
+[Encoding and inspection guidance](reference/screenshot-fidelity.md) distinguishes lossless storage, existing WebP defaults, original-resolution evidence and model-specific image resizing. No capture default, quality, viewport or renderer changes.
+
 ## [2026-10-15] evidence | Verified scoped feedback proofs
 
 [Central receipt](../baselines/README.md#verified-scoped-receipts--2026-10-15) owns executed model/GPU/import-baseline attribution to runtime source136. Owning contracts: [locale](../specs/casc-loading.md), [tiling](../specs/rotated-tiled-edge-prefix.md), [Slider](../specs/slider-bound-thumb-layout.md), [colour](../specs/shader-colour-roundtrip.md), [Forever enums](../specs/forever-edit-mode-enums.md), [profiles](../specs/client-profiles.md). [Startup owner](../baselines/README.md#forever-lua-errors) records the reduced but failing post-enum capture. Import012/events c2bf compilation/execution gates remain pending/NOT GREEN; the [receipt owner](../baselines/README.md#verified-scoped-receipts--2026-10-15) records the interrupted build, and old module controls do not cover them. [Earlier combined GPU receipt](../rendering-pipeline.md#combined-feedback-gpu-receipt--2026-10-15) retains its separate source attribution. Default-check, native/cross-profile/full-parent and clean startup remain open.
