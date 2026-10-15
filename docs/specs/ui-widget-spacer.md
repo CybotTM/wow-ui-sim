@@ -34,7 +34,7 @@
 
 ## Later nonbehavioral follow-up — 2026-10-14
 
-The three owning aborts above remain historical. Four later TextColumn integration compile attempts also ended incomplete; they add no default-check or owning-publication result. Prior Retail/PTR Spacer runtime PASS remains limited to its recorded sources. The [TextColumn follow-up](ui-widget-text-column-row.md#saved-nonbehavioral-follow-up--2026-10-14) separates later format/metadata PASS from interrupted compilation and preserves warning/formatter-failure history. Default check, owning publication and public retention remain open.
+The three owning aborts above remain historical. Six later TextColumn integration compile attempts were guard-aborted; a seventh reached linker failure. Subsequent nonincremental Retail integration compile/copy PASS at `9a60ded79` and eight populated-result RED cases add no Spacer default-check or owning-publication result. Prior Retail/PTR Spacer runtime PASS remains limited to its recorded sources. The [TextColumn follow-up](ui-widget-text-column-row.md#saved-nonbehavioral-follow-up--2026-10-14) separates later format/metadata and nonincremental compile/copy PASS from interrupted compilation, linker failure and runtime proof, retaining the external dependency warning and formatter-failure history. Default check, owning publication and public retention remain open.
 
 ## Frozen historical evidence packet
 

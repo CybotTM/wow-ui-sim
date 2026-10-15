@@ -28,6 +28,7 @@ mod spacer_record;
 mod spell_display;
 mod spell_display_record;
 pub use spacer_record::SpacerRecord;
+mod text_column_row;
 mod text_column_row_record;
 mod text_state;
 mod text_state_record;
