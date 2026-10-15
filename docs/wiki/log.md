@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | Portable filename adoption verified
+
+[Windows investigation](investigations/windows-port-build.md#evidence-filename-portability--2026-10-15) records independent static PASS for `87499d15e`: 115 renames, 114 identical payloads, 121 exact edits and 117/117 applicable manifest links. One unchanged historical stderr retention mismatch remains; native Windows checkout and long-path proof stay open.
+
 ## [2026-10-15] evidence | Saved Slider render-list proof
 
 [Owning Slider contract](../specs/slider-bound-thumb-layout.md#tests-asserting-this-spec) now records the already-executed source136 query-free CPU render-list regression: 1/1 PASS, separately verified against full saved output and artifact metadata. No rerun; non-unit scale, GPU, native and current-tree acceptance remain open.

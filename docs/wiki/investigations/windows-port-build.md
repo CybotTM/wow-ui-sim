@@ -54,7 +54,7 @@ Historical `scope`, snapshot keys, source paths and original digests remain hist
 - `/home/osso/.local/state/wow-ui-sim/handoff/portable-path-candidate-next/originals`
 - `/home/osso/.local/state/wow-ui-sim/handoff/portable-receipt-pointer-next0700/originals`
 
-Proof is bounded to lexical namespace and static live-link/digest checks. The original candidate reported the receipt pointer unresolved; the separate amendment supplies its closure, not a rewrite of that historical report. This documentation update records main's supplied integration scope, not independent adoption verification. **Native Windows checkout remains unexecuted/open.** No general long-path fix, Docker stderr resolution, or release/tag/push change is claimed.
+Independent static verification of `87499d15e` passed: 115 renamed paths, 114 identical payloads, 121 exact edits, zero lexical/casefold collisions, and 117/117 applicable live manifest links/digests. The original candidate reported the receipt pointer unresolved; the separate amendment closes it without rewriting that historical report. Report: `/home/osso/.local/state/wow-ui-sim/verification/portable-path-adoption-next/report.md`. Across all inspected manifest entries, 443/444 match: the unchanged `pass2-five-models-2026-10-12/startup/stderr` has a pre-existing size/hash mismatch, so full historical retention closure remains unaccepted. **Native Windows checkout remains unexecuted/open.** No general long-path fix, Docker stderr resolution, or release/tag/push change is claimed.
 
 ## Sources
 
