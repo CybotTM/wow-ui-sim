@@ -54,7 +54,8 @@ Current source `f91eb7aab` has **18 quest model PASS**: membership8 + revised pr
 - [x] Independently reconcile all 39 distinct saved model passes at source `f91eb7aab`; discovery and filtered cases are not passes.
 - [x] Independently reconcile normal original/header probes with bounded GREEN observations; full refresh/UI/native acceptance remains open.
 - [ ] Verify POI toggle, tracker and actual refresh/menu/frame-event lifecycle beyond bounded consumer cases.
-- [ ] Verify other-profile preservation and default check; world-watch projection and broader query reconciliation remain open.
+- [x] Independently accept [default-profile compiler preservation](../baselines/README.md#default-profile-compiler-preservation--2026-10-15) at source `70112e418`; production metadata check only, not `cfg(test)` compilation or runtime.
+- [ ] Verify other-profile preservation; world-watch projection and broader query reconciliation remain open.
 - [ ] Native parity and whole-startup acceptance remain open, including the fresh Gamepad startup FAIL. Prior source40a28 PASS and startup FAIL remain separate from current bounded membership proof.
 
 ## Out of scope
