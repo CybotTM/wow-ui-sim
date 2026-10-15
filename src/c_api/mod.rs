@@ -160,7 +160,11 @@ pub mod c_pvp_crowd_control;
 pub mod c_quest_hub;
 #[cfg(feature = "retail-12-0-5")]
 pub mod c_quest_info_system;
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 mod c_quest_log;
 #[cfg(all(
     feature = "retail-12-0-5",
@@ -375,7 +379,11 @@ pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResu
     c_weather::register(state)?;
     c_achievement_info_relations::register(state)?;
     c_calendar::register(state)?;
-    #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+    #[cfg(any(
+        feature = "client-retail",
+        feature = "client-ptr",
+        feature = "client-wowforever"
+    ))]
     c_quest_log::register(state)?;
     c_garrison_damage_classes::register(state)?;
     #[cfg(feature = "client-retail")]
