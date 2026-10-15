@@ -42,6 +42,10 @@ Root CMake includes local source directories. Scanned CMake files had no `FetchC
 - `Engine/Source/SoundEngine/CMakeLists.txt:77-95`: NASM compiles local assembly inputs.
 - Bundled third-party shell/batch/Python helpers were inventoried but not executed; their upstream identity and modifications were not authenticated.
 
+## Export-name false positive checked during the expanded inventory
+
+`WoW/Source/Ui/ScriptEvents_Scripts.cpp:4364-4371` lists `ReadFile`, `DeleteFile` and `AppendToFile`, but their bodies at `:779-795` explicitly raise `Access Denied`. These names alone are not evidence of arbitrary addon filesystem access or a malicious implant. The broader source/runtime and dependency limits below remain unchanged.
+
 ## Remaining limits
 
 No runtime, sandbox execution, antivirus verdict, dependency authenticity verification, complete manual source review, original executable comparison, or exhaustive endpoint/authentication analysis. Git revision pins bytes, not trustworthiness. Repository `OFFSET`/`VERIFY` comments and README completion claims are author assertions, not independent evidence of original-client equivalence.
