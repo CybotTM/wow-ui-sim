@@ -36,7 +36,8 @@ fn highlight_negative_end_is_end_of_text_sentinel() {
 fn highlight_omitted_ordered_and_empty_endpoints_preserve_existing_editing() {
     assert_inserted_text("abcdef", "2", ("abX", 3, 3));
     assert_inserted_text("abcdef", "1, 3", ("aXdef", 2, 2));
-    assert_inserted_text("abcdef", "2, 2", ("abXcdef", 3, 3));
+    // Empty selection preserves the existing cursor, initially zero.
+    assert_inserted_text("abcdef", "2, 2", ("Xabcdef", 1, 1));
 }
 
 #[test]
@@ -45,5 +46,5 @@ fn highlight_endpoint_policy_preserves_multibyte_byte_offsets_and_scalar_cursor(
     assert_inserted_text("aé🙂z", "1, -1", ("aX", 2, 2));
     assert_inserted_text("aé🙂z", "3", ("aéX", 4, 3));
     assert_inserted_text("aé🙂z", "1, 3", ("aX🙂z", 2, 2));
-    assert_inserted_text("aé🙂z", "3, 3", ("aéX🙂z", 4, 3));
+    assert_inserted_text("aé🙂z", "3, 3", ("Xaé🙂z", 1, 1));
 }

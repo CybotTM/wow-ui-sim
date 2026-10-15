@@ -15,12 +15,11 @@ pub(super) fn highlight_text(state: &mut LuaState) -> LuaResult<u32> {
             Val::Num(n) => n as i32,
             _ => text.len() as i32,
         };
-        let (start, end) = normalize_highlight_range(
+        let (start, end) = normalize_highlight_byte_range(start, end, text.len() as i32);
+        f.editbox_highlight_range = Some((
             char_offset(text, start) as i32,
             char_offset(text, end) as i32,
-            text.chars().count() as i32,
-        );
-        f.editbox_highlight_range = Some((start, end));
+        ));
     }
     Ok(0)
 }
@@ -34,12 +33,9 @@ pub(super) fn clear_highlight_text(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn normalize_highlight_range(start: i32, end: i32, len: i32) -> (i32, i32) {
+/// Negative ends and reversed ranges extend to the text end before UTF-8 conversion.
+fn normalize_highlight_byte_range(start: i32, end: i32, len: i32) -> (i32, i32) {
     let start = start.clamp(0, len);
-    let end = end.clamp(0, len);
-    if start <= end {
-        (start, end)
-    } else {
-        (end, start)
-    }
+    let end = if end < start { len } else { end.min(len) };
+    (start, end)
 }

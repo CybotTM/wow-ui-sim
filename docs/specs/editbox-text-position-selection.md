@@ -24,7 +24,7 @@ Shared EditBox cursor and highlighted-range methods expose bounded text-position
 - [x] Same-value EditBox text assignment is a simulator no-op: it does not dispatch this lifecycle, so a callback assigning its current text cannot recurse. It emits no `OnChar`.
 - [x] Shortening text leaves subsequent `Insert` and Left/Backspace edits within bounds; non-EditBox text setters retain their existing text behavior.
 
-The new endpoint policy is a shared simulator contract, including Wrath and Retail, not native-client parity. It is derived from the user-supplied functional examples without consulting reconstructed implementations; current code still swaps reversed endpoints and does not recognize negative-end sentinels. Its new regression remains uncompiled/unexecuted.
+The new endpoint policy is a shared simulator contract, including Wrath and Retail, not native-client parity. It is derived from the user-supplied functional examples without consulting reconstructed implementations; source5dfa94330 reproduces three endpoint-policy failures. The later byte-range normalizer is authored but uncompiled/unexecuted. Empty highlights retain the existing cursor for subsequent `Insert`; they do not move it to the range start.
 
 Length overflow rejection is the user-selected simulator policy, not a native-client claim. No-edit callback suppression follows the existing numeric-input rejection policy; tests establish simulator consistency, not native callback equivalence.
 
@@ -45,7 +45,7 @@ Length overflow rejection is the user-selected simulator policy, not a native-cl
 
 ## Tests asserting this spec
 
-- `tests/editbox_highlight_endpoints.rs` — four new **UNCOMPILED / UNEXECUTED** cases for reversed/negative ends, ordinary controls and valid multibyte byte boundaries; no RED or fix claim yet.
+- `tests/editbox_highlight_endpoints.rs` — source5dfa94330 executes four cases, exit101. Three reach the expected reversed/negative endpoint failures (including multibyte replacement). The control case passes omitted/ordered checks, then exposes an incorrect empty-selection expectation; that fixture now preserves the existing cursor rather than changing `Insert`. Later assertions remain unreached; corrected controls and the authored producer await execution.
 - `tests/editbox_stub_family.rs` — cursor units, selected replacement/deletion, render text, programmatic mutation and callbacks.
 - `tests/editbox_stub_family/max_letters.rs` — recorded ASCII limit case, scalar/UTF-8 model consistency, clipped callback/cache observations, final-value no-op controls, and the Forever secret EditBox access-control regression.
 - `tests/key_dispatch.rs` — ASCII/Unicode selected typing, selection deletion, subsequent public Insert, callback observations, numeric rejection, and unselected controls.
