@@ -43,7 +43,7 @@ Shared payload change `ccd9e2d01` replaces the pending numeric ID with an existi
 
 [Central Retail receipt](../baselines/README.md#retail-quest-preservation--2026-10-15) owns sourcea56 retry1 evidence, actual default-Retail emitted features/guard, successful12m13s integration no-run build and SHA256 `fcf228806a0203e11a18eea699f7245e88890f2652f5d133f511ffd6ccc5fbdf`. Independent `quest-enrich-next/retail-green-build-report.md` and `retail-green-runtime-report.md` under host-private verification state both PASS. Runtime executes **31 unique PASS / 0 FAIL, exit0**: these confirmation5 + Retail verbs13 + gossip13, harness16.50s; stdout2596/stderr19858 bytes. All five current prompt fixtures pass through actual modeled selection and real synchronous frame listeners. Exact payload/type assertions, immediate callback sentinels and Rust state/event postconditions establish bounded current preservation; exec success alone would not, because callback errors can be routed to an error handler. Complete saved stderr has no such diagnostic.
 
-First204301Z host-PSI guard SIGTERM abort remains separate, with no compiler/test verdict. Original Forever43 at source53cf is not pooled with Retail31. Current a56 format PASS/exit0/empty output does not satisfy pending default `cargo check` or startup. Loaded-popup/native/full-parent acceptance remains open; DoubleIcon selector is unrun and no C_UIWidgetManager closure follows.
+First204301Z host-PSI guard SIGTERM abort remains separate, with no compiler/test verdict. Original Forever43 at source53cf is not pooled with Retail31. Existing a56 fmt PASS and bounded quest-source default check/startup gates are accepted via the [central gate receipt](../baselines/README.md#quest-source-check-and-startup-gates--2026-10-15). Later4cb/52b DoubleIcon passive/test code is not covered by those check/startup/fmt proofs and awaits a new RED build. Loaded-popup/native/full-parent acceptance remains open; no whole-current-HEAD startup pass or C_UIWidgetManager closure follows.
 
 ### Historical proof — 2026-10-01
 
@@ -62,7 +62,8 @@ First204301Z host-PSI guard SIGTERM abort remains separate, with no compiler/tes
 - [x] Implement bounded producer after valid RED.
 - [x] Saved targeted GREEN and independent bounded acceptance/default snapshot gates recorded.
 - [x] Independently reconcile current a56 Retail pending-snapshot preservation: confirmation5 plus verbs13/gossip13 PASS, separate from historical proof and Forever execution.
-- [ ] Current default check/startup remain pending; native, loaded-popup integration and all-profile acceptance remain outside this bounded proof.
+- [x] Close bounded quest-source default check/startup gates from [independent saved receipts](../baselines/README.md#quest-source-check-and-startup-gates--2026-10-15), without extending proof to later4cb/52b code.
+- [ ] Native, loaded-popup integration, all-profile and full-parent acceptance remain open.
 
 ## Out of scope
 
