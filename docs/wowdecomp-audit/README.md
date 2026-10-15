@@ -12,6 +12,8 @@ The initial nine findings below were a bounded first pass, **not the total gap c
 
 [Additional action-state findings](additional-action-state.md): G1 attack classification, G2 active auto-repeat, G3 usability/resource results, G4 cursor/non-spell action dispatch. Missing backing state is distinguished from an already-runnable counterexample.
 
+[Additional control, text and tooltip findings](additional-controls-text-and-tooltip.md): C4 password rendering, C5 history capacity, C6 fade retiming, H1 HTML structure/links, U1 inline tooltip textures, U2 empty-clear callbacks, U3 double-column wrapping, F1 all-points validation, F2 script-driven movement/resize transactions. Broad tooltip colour and alpha no-op allegations were rejected after tracing shared helpers and registrations.
+
 All remain static historical-source comparisons, not native-confirmed modern defects.
 
 ## Initial rework list
