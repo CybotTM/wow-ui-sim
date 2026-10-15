@@ -43,6 +43,12 @@ Known remaining observations from the smoke runs:
 - Vulkan validation/Galaxy overlay layer warnings can appear during screenshot creation, but rendering still completes.
 - `target\debug\wow-sim.exe --no-addons lua-errors` now logs `WTF import source (read-only): <ACCOUNT> @ <REALM>/<PLAYER>`, confirming the Windows WTF path is found without making it a write target.
 
+## Release v0.1.33 outcome — verified 2026-10-15
+
+At 12:19–12:20 UTC, public GitHub metadata reports [release run 38689124268](https://github.com/Osso/wow-ui-sim/actions/runs/38689124268) completed with failure: both Linux builds succeeded; both Windows jobs failed Checkout; macOS failed building binaries and Mists macOS failed packaging. Release publication was skipped. Two Linux Actions artifacts are not published Release assets. The tag ref exists, but the public Release-by-tag API returned 404. [Docker run 38689124309](https://github.com/Osso/wow-ui-sim/actions/runs/38689124309) also completed with failure; original Cargo stderr remains unavailable, not explained by the checkout fix.
+
+Saved public API receipts: `/home/osso/.local/state/wow-ui-sim/handoff/release33-state-refresh-20261015/`. This supersedes the earlier in-progress status, not the historical job outcomes. Local portability commits are not proof of a rerun, published replacement, native checkout or current-source release. No tag, release or workflow was mutated.
+
 ## Evidence filename portability — 2026-10-15
 
 Tracked evidence filenames contained literal `::`, incompatible with Windows checkout paths. This is separate from the historical Windows build/startup proof above; that proof does not establish checkout of the current evidence namespace.

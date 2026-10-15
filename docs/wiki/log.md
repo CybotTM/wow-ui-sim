@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | v0.1.33 outcome refreshed
+
+[Release checkpoint](investigations/windows-port-build.md#release-v0133-outcome--verified-2026-10-15) records completed failure, two successful Linux jobs, four failed Windows/macOS jobs and skipped publication. Public Release-by-tag API remains 404; tag exists. Docker failed separately. This is observed historical-tag status, not current-source release acceptance; nothing published or rewritten.
+
 ## [2026-10-15] evidence | Redacted stderr metadata reconciliation
 
 [Packet correction](../../data/patch-api/evidence/pass2-five-models-2026-10-12/README.md#retained-stderr-metadata-correction--2026-10-15) preserves the source stderr hash/size separately from retained integrity. Three identity substitutions explain the pre-existing mismatch; payload/original bytes and runtime outcomes are unchanged. Independent static correction verification PASS at `ba38287ab`: 132/132 retained entries and the exact source-to-retained transformation; the portability audit retains its original 443/444 historical result.
