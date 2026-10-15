@@ -667,6 +667,7 @@ fn input_handlers_with_options(
             ("OnTabPressed", scripts.on_tab_pressed.last()),
             ("OnSpacePressed", scripts.on_space_pressed.last()),
             ("OnArrowPressed", scripts.on_arrow_pressed.last()),
+            ("OnCursorChanged", scripts.on_cursor_changed.last()),
             ("OnTextChanged", scripts.on_text_changed.last()),
             ("OnTextSet", scripts.on_text_set.last()),
             ("OnChar", scripts.on_char.last()),
