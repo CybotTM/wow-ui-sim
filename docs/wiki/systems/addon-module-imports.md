@@ -14,19 +14,19 @@ Native Forever was not run. Multiple returns, module-name normalization, duplica
 
 ## Forever import binding — 2026-10-15
 
-The completed-module registry and `require` already work. Vendor `Blizzard_GamepadSmartNavigation` orders `Utility.lua` before consumers `SmartNavigation.lua` and `Debug.lua`; Utility returns a table, while both consumers call `import('.Utility')`. Commit `012df1e45` adds a direct Rust `import` registration using the same backend, only under `client-wowforever` at the existing pre-secure-copy seam. New-import compilation/execution remains pending. No stub, new loader, autoload, host-package fallback or changed `require` contract.
+The completed-module registry and `require` already work. Vendor `Blizzard_GamepadSmartNavigation` orders `Utility.lua` before consumers `SmartNavigation.lua` and `Debug.lua`; Utility returns a table, while both consumers call `import('.Utility')`. Commit `012df1e45` adds a direct Rust `import` registration using the same backend, only under `client-wowforever` at the existing pre-secure-copy seam. Current runtime-code `c2bf42c4f`, built at `57f8e0b10`, has saved bounded compilation/execution; independent acceptance remains pending. No stub, new loader, autoload, host-package fallback or changed `require` contract.
 
 Reused completion, dependency, identity, grammar and error behavior is **simulator compatibility policy** justified by those vendor calls. Native `import=require` semantics, identity, grammar and error parity are UNKNOWN; native new-test authorship alone is not execution proof.
 
 | Capability | Evidence / remaining gate |
 | --- | --- |
 | Completed Utility versus absent binding | Actual source `136748f0b` probe first obtains a table through `require('Blizzard_GamepadSmartNavigation.Utility')`, then fails `type(import) == 'function'`: `IMPORT_BINDING_RED: completed Utility table; import=nil`. Process exit0 is not assertion PASS. |
-| Existing backend | Supplied current receipt: 48 backend controls actual PASS before binding; not new-import GREEN. |
-| New import consumers and restrictions | Two authored loader tests cover secure/insecure identity, callable members, single execution, completion/dependencies; failed-file extension and sandbox/profile test also authored, NOT GREEN. |
-| Separate models/startup | Supplied receipt: 39 other-model cases plus one explicitly invoked ignored GPU case PASS; startup58/58 versus166/238 after Enum, before import. Not binding acceptance. |
-| Binding acceptance | Integration, new importer GREEN, existing require/sandbox regression and post-binding startup remain pending. |
+| Existing backend | Historical pre-binding controls remain historical; current groups are separately executed, not additive. |
+| New import consumers and restrictions | Saved current loader/sandbox/registry/path execution; normal probe confirms completed Utility identity and callable vendor method returning nil. No gamepad-root completion claim. |
+| Separate models/startup | Earlier source136 model/render/GPU evidence remains separate; current startup is captured but failing. |
+| Binding acceptance | Current execution observed; independent report receipt/acceptance, native parity, cross-profile and broader acceptance remain pending. |
 
-Saved evidence root: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/feedback-forever-integrated-tests-20261015T101651047924Z`; `import-current-binding-red/result.json` and `stderr` inspected for the actual RED above. Implemented source and authored tests: `/home/osso/.local/state/wow-ui-sim/handoff/forever-import-fix-next0700/{source.patch,tests-first.patch,REPORT.md}`. The older report's unrun-current-probe status is superseded only by this saved probe; it grants no new-test GREEN. Main integrates/formats/commits before future gates. Current baseline JSON unchanged.
+[Central receipt](../../baselines/README.md#current-importevents-execution--independent-acceptance-pending) owns current evidence root, exact counts, binary inventories, probe markers, failing startup and pending independent report. Historical RED is retained under the earlier receipt linked there. Private enum-provider/experience candidate remains unintegrated/unexecuted; actual new gamepad root failures stay open. Baseline JSON copying remains main-owned.
 
 ## Sources
 

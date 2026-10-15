@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | Current Forever import/event execution reconciled
+
+[Central receipt](../baselines/README.md#current-importevents-execution--independent-acceptance-pending) owns runtime-code c2bf/build57 attribution, bounded saved execution, inventories and failing startup. Historical source136 model/GPU/backend evidence stays separate. Independent report receipt/acceptance remains pending; enum-provider/experience candidate unintegrated/unexecuted and gamepad root failures open. Documentation only; baseline JSON remains main-owned.
+
 ## [2026-10-15] evidence | v0.1.33 outcome refreshed
 
 [Release checkpoint](investigations/windows-port-build.md#release-v0133-outcome--verified-2026-10-15) records completed failure, two successful Linux jobs, four failed Windows/macOS jobs and skipped publication. Public Release-by-tag API remains 404; tag exists. Docker failed separately. This is observed historical-tag status, not current-source release acceptance; nothing published or rewritten.
