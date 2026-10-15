@@ -1,5 +1,5 @@
 //! Ordinary-watch projection regressions.
-//! Simulator policy: every rich non-world row is watched, in row order.
+//! Simulator policy: ordinary metadata filters rich non-world rows, in row order.
 //! This is not a claim about the native client's watch subset.
 #![cfg(feature = "client-wowforever")]
 
@@ -99,6 +99,17 @@ fn forever_quest_watch_observes_live_rows_order_removal_and_world_classification
         entry.title = "Live ordinary quest".into();
         entry.level = 23;
     }
+    assert_watch_projection(&env, &[80001]);
+    env.exec(
+        r##"
+        local logIndex = C_QuestLog.GetLogIndexForQuestID(456789)
+        assert(IsQuestWatched(logIndex) == false, "changed ID is not auto-watched")
+        assert(select('#', C_QuestLog.GetQuestWatchType(456789)) == 1)
+        assert(C_QuestLog.GetQuestWatchType(456789) == nil)
+        assert(C_QuestLog.AddQuestWatch(456789) == true)
+        "##,
+    )
+    .unwrap();
     assert_watch_projection(&env, &[456789, 80001]);
     env.exec(
         r##"
@@ -118,6 +129,17 @@ fn forever_quest_watch_observes_live_rows_order_removal_and_world_classification
         inserted.level = 37;
         state.quest_log_entries.entries.insert(1, inserted);
     }
+    assert_watch_projection(&env, &[456789, 80001]);
+    env.exec(
+        r##"
+        local logIndex = C_QuestLog.GetLogIndexForQuestID(456790)
+        assert(IsQuestWatched(logIndex) == false, "inserted row is not auto-watched")
+        assert(select('#', C_QuestLog.GetQuestWatchType(456790)) == 1)
+        assert(C_QuestLog.GetQuestWatchType(456790) == nil)
+        assert(C_QuestLog.AddQuestWatch(456790) == true)
+        "##,
+    )
+    .unwrap();
     assert_watch_projection(&env, &[456789, 456790, 80001]);
     env.state().borrow_mut().quest_log_entries.entries.reverse();
     assert_watch_projection(&env, &[80001, 456790, 456789]);
@@ -132,6 +154,17 @@ fn forever_quest_watch_observes_live_rows_order_removal_and_world_classification
             }
         }
     }
+    assert_watch_projection(&env, &[456790, 456789]);
+    env.exec(
+        r##"
+        local logIndex = C_QuestLog.GetLogIndexForQuestID(90001)
+        assert(IsQuestWatched(logIndex) == false, "newly ordinary row needs membership")
+        assert(select('#', C_QuestLog.GetQuestWatchType(90001)) == 1)
+        assert(C_QuestLog.GetQuestWatchType(90001) == nil)
+        assert(C_QuestLog.AddQuestWatch(90001) == true)
+        "##,
+    )
+    .unwrap();
     assert_watch_projection(&env, &[90001, 456790, 456789]);
     env.state()
         .borrow_mut()
@@ -169,6 +202,18 @@ fn forever_quest_watch_fresh_environments_do_not_share_projection_state() {
         only.level = 19;
         state.quest_log_entries.entries = vec![only];
     }
+    assert_watch_projection(&mutated, &[]);
+    mutated
+        .exec(
+            r##"
+            local logIndex = C_QuestLog.GetLogIndexForQuestID(456791)
+            assert(IsQuestWatched(logIndex) == false, "replacement ID needs membership")
+            assert(select('#', C_QuestLog.GetQuestWatchType(456791)) == 1)
+            assert(C_QuestLog.GetQuestWatchType(456791) == nil)
+            assert(C_QuestLog.AddQuestWatch(456791) == true)
+            "##,
+        )
+        .unwrap();
     assert_watch_projection(&mutated, &[456791]);
     let fresh = WowLuaEnv::new().unwrap();
     assert_watch_projection(&fresh, &[80000, 80001]);

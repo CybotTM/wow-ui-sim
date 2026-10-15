@@ -166,6 +166,12 @@ pub mod c_quest_info_system;
     feature = "client-wowforever"
 ))]
 mod c_quest_log;
+#[cfg(feature = "client-wowforever")]
+mod c_quest_log_watches;
+#[cfg(feature = "client-wowforever")]
+pub use c_quest_log_watches::QuestWatchType;
+#[cfg(feature = "client-wowforever")]
+pub(crate) use c_quest_log_watches::seed_quest_watch_types;
 #[cfg(all(
     feature = "retail-12-0-5",
     any(feature = "profile-retail", feature = "client-ptr")

@@ -13,7 +13,8 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 macro_rules! build_empty_sim_state {
-    ($collections:ident, $runtime:ident) => {
+    ($collections:ident, $runtime:ident) => {{
+        let quest_log_entries = QuestLogState::seeded();
         Self {
             widgets: WidgetRegistry::with_screen_size(
                 $runtime.screen_width,
@@ -456,7 +457,9 @@ macro_rules! build_empty_sim_state {
             relic_forge_at_forge: false,
             artifact_relic_items: HashSet::new(),
             quest_log: Vec::new(),
-            quest_log_entries: QuestLogState::seeded(),
+            #[cfg(feature = "client-wowforever")]
+            quest_watch_types: crate::c_api::seed_quest_watch_types(&quest_log_entries.entries),
+            quest_log_entries,
             quest_war_mode_eligibility: HashSet::new(),
             pending_quest_offer: None,
             quest_choice_id: None,
@@ -646,7 +649,7 @@ macro_rules! build_empty_sim_state {
             debug_anchors: false,
             simulator_exit_requested: false,
         }
-    };
+    }};
 }
 
 #[cfg(feature = "retail-12-0-5")]

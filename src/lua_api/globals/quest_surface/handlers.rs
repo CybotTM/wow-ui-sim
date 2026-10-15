@@ -70,6 +70,7 @@ fn watched_quest_id_at_index(index: i32) -> Option<i32> {
         .nth((index - 1) as usize)
 }
 
+#[cfg(not(feature = "client-wowforever"))]
 fn watch_index_for_quest_id(quest_id: i32) -> Option<i32> {
     QUEST_LOG
         .iter()
@@ -487,6 +488,7 @@ pub fn get_quest_id_for_quest_watch_index(state: &mut LuaState) -> LuaResult<u32
     }
 }
 
+#[cfg(not(feature = "client-wowforever"))]
 pub fn get_quest_index_for_watch(state: &mut LuaState) -> LuaResult<u32> {
     let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
     let log_index = watched_quest_id_at_index(index)
@@ -517,6 +519,7 @@ fn visible_quest_at_index(visible_index: i32) -> Option<(i32, i32)> {
         .and_then(|quest_id| find_quest_by_id(quest_id).map(|(log_index, _)| (quest_id, log_index)))
 }
 
+#[cfg(not(feature = "client-wowforever"))]
 pub fn get_quest_watch_index(state: &mut LuaState) -> LuaResult<u32> {
     let log_index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
     let watch_index = entry_at(log_index)
@@ -529,10 +532,12 @@ pub fn get_quest_watch_index(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+#[cfg(not(feature = "client-wowforever"))]
 pub fn get_quest_sort_index(state: &mut LuaState) -> LuaResult<u32> {
     get_quest_watch_index(state)
 }
 
+#[cfg(not(feature = "client-wowforever"))]
 pub fn is_quest_watched(state: &mut LuaState) -> LuaResult<u32> {
     let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
     let watched = matches!(entry_at(index), Some(QuestLogEntry::Quest { .. }));

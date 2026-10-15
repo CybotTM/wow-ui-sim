@@ -28,7 +28,9 @@ pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
         "GetQuestIDForWorldQuestWatchIndex",
         get_quest_id_for_world_quest_watch_index,
     ),
+    #[cfg(not(feature = "client-wowforever"))]
     ("AddQuestWatch", noop),
+    #[cfg(not(feature = "client-wowforever"))]
     ("RemoveQuestWatch", noop),
     ("SortQuestWatches", noop),
     ("IsQuestFlaggedCompleted", return_false),
@@ -101,8 +103,11 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
     ("GetQuestLogLeaderBoard", get_quest_log_leaderboard),
     ("GetQuestLogQuestText", get_quest_log_quest_text),
     ("GetQuestLogTimeLeft", get_quest_log_time_left),
+    #[cfg(not(feature = "client-wowforever"))]
     ("GetQuestIndexForWatch", get_quest_index_for_watch),
+    #[cfg(not(feature = "client-wowforever"))]
     ("GetQuestSortIndex", get_quest_sort_index),
+    #[cfg(not(feature = "client-wowforever"))]
     ("GetQuestWatchIndex", get_quest_watch_index),
     #[cfg(not(feature = "client-wowforever"))]
     ("GetNumQuestWatches", get_num_quest_watches),
@@ -150,6 +155,7 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
     ("HaveQuestRewardData", have_quest_data),
     ("IsCurrentQuestFailed", is_current_quest_failed),
     ("IsQuestComplete", is_quest_complete),
+    #[cfg(not(feature = "client-wowforever"))]
     ("IsQuestWatched", is_quest_watched),
     ("IsQuestSequenced", is_quest_sequenced),
     ("IsUnitOnQuest", is_unit_on_quest),

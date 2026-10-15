@@ -10,16 +10,20 @@ Forever's `C_QuestLog.GetQuestDifficultyLevel` must expose the supplied rich que
 - [x] Support unchanged whole cached Mainline DifficultyUtil plus Camelot QuestUtilsOverrides with explicit test fixtures for elite status, CVar selection and color dependencies; produce concrete ordinary/elite, colored/plain title prefixes.
 - [ ] Preserve other profiles' existing surface and Retail/PTR `QuestCanHaveWarModeBonus` behavior in runtime verification.
 
-## Ordinary-watch coherence follow-up
+## Ordinary-watch membership follow-up — source only, UNEXECUTED
 
-The existing simulator policy watches every ordinary quest. Forever's count and indexed IDs now project that policy from current rich rows, excluding `is_world_quest` rows and preserving row order; this is not native watch-subset parity. Source704's normal Lua RED enumerated80000/80001/80002: the first two resolved to log rows and difficulty80, while80002 had no rich row. New source removes the stale watch producer, not the strict missing-level error.
+The Forever membership implementation replaces the all-ordinary-rows watch policy with explicit per-environment `quest_watch_types: HashMap<i32, QuestWatchType>` metadata. The contracts below describe inspected source, not executed acceptance or native parity.
 
-- [x] Project `C_QuestLog.GetNumQuestWatches` and `GetQuestIDForQuestWatchIndex` from the same current ordinary-row sequence; global `GetNumQuestWatches` matches the count. Seed IDs are80000/80001, not static-only80002.
-- [x] Observe host-side rich-row identity/level mutation, insertion, removal, reorder and world-flag changes immediately; fresh environments remain independent.
-- [x] Preserve existing watch-index conversion and arity: nil/missing index means zero, numeric conversion truncates/saturates before bounds checking, valid IDs return one number, misses zero results, nonnumbers error, extra arguments ignored.
-- [x] Resolve every returned ID through current `GetLogIndexForQuestID`, `GetInfo`, `IsOnQuest` and difficulty metadata without a static fallback or invented rich record.
+- **Membership and seed:** seed current non-world rich-row IDs once as `Manual=1`; `Automatic=0` is representable metadata, not selected by `AddQuestWatch`. Later row insertion or identity changes do not auto-enroll IDs. Counts and enumeration intersect metadata keys with current non-world rich rows in rich-row order, not insertion or hash order. Removed/world rows are hidden without deleting their metadata; restoring an eligible row can expose retained membership. Fresh state gets its own seed/map.
+- **Real mutators and type:** `C_QuestLog.AddQuestWatch(questID)` inserts Manual only for a currently represented ordinary ID without existing metadata; duplicate, world-only and absent IDs return one `false`. `RemoveQuestWatch` deletes existing metadata even when the rich row is absent/world, returning one boolean indicating deletion. `GetQuestWatchType` returns exactly one numeric type only for a currently ordinary row with metadata, otherwise one nil. These three endpoints reject nonnumeric, nonfinite, fractional and out-of-i32-range IDs with API context; extra arguments are ignored. Add does not change an existing type.
+- **Count and index:** `C_QuestLog.GetNumQuestWatches` and global `GetNumQuestWatches` return the same intersection count. `GetQuestIDForQuestWatchIndex` returns one ID for a valid one-based watch position, otherwise zero results. Global `IsQuestWatched` accepts a log index and returns one boolean. `GetQuestIndexForWatch` maps watch position to rich-row offset + 2; `GetQuestWatchIndex` and `GetQuestSortIndex` map that log index back to one-based watch position. These numeric mapping globals return one zero on misses. Legacy index conversion remains missing/nil → zero, numeric truncation/saturation then bounds checking, nonnumber error, extra arguments ignored. Row removal, reorder and world flags immediately change the visible intersection and mappings; no static catalog fallback or fabricated rich row.
+- **Synchronous event policy:** a successful metadata insertion/deletion commits state, releases its mutable borrow, then dispatches `QUEST_WATCH_LIST_CHANGED(questID, added)` immediately, before the mutator returns. No-op mutations emit no event. Handlers can observe changed state and reenter mutators; nested changes dispatch synchronously. Dispatch errors propagate after mutation, without rollback. Direct host row/map edits do not use this notification path. This is bounded simulator policy, not established native event timing or payload parity.
 
-Four `tests/wowforever_quest_watch_projection.rs` cases PASS at runtime source40a; [current receipt](../baselines/README.md#current-watchtalent-execution--2026-10-15) owns exact source/build/test/normal-run attribution. Original normal Lua RED precedes the producer; no authored Rust RED is claimed. The later legacy registration omits these three replaced Forever writes, so fresh publication and cleanup restoration use the same C API producers; other profiles retain their old registrations. Actual Track All/Untrack All, POI toggle and tracker callers require watch membership/mutators. A separate source40a normal RED observes zero-result add/remove, unchanged membership count2, nil watch type and zero events. This remains a parent gap alongside legacy index helpers, world-watch projection and broader query reconciliation—not completed or newly excluded.
+### Evidence boundary
+
+Prior runtime source40a has **28 PASS** (difficulty3 + watch-projection4 + finite21), plus the separately recorded normal watch/global-alias/voice checks; [prior receipt](../baselines/README.md#current-watchtalent-execution--2026-10-15) owns attribution. Those results cover the prior read-only projection, not this new explicit-membership implementation or revised tests. Source704's original normal Lua RED included static-only80002; source40a removed that stale producer. A separate source40a normal RED still observed zero-result add/remove, unchanged count2, nil type and zero events. Preserve both historical boundaries; no authored Rust RED is inferred.
+
+**Membership code and new/revised tests: runtime UNEXECUTED.** Source inspected and formatted; no compile, runtime, unchanged Track All/Untrack All/POI/tracker consumer, other-profile, native parity or full-startup acceptance is claimed. The earlier10-record/14-occurrence startup FAIL remains historical and is not repaired by these source changes.
 
 ## How it works
 
@@ -32,7 +36,9 @@ Four `tests/wowforever_quest_watch_projection.rs` cases PASS at runtime source40
 - `src/c_api/mod.rs`: narrowly extends the module and utility call gate to Forever.
 - `src/lua_api/globals/quest_surface/{register,handlers}.rs`: omit replaced static watch handlers only on Forever, preserving initial modeled publication.
 - `tests/wowforever_quest_difficulty.rs`: fresh-environment and unchanged whole-consumer behavior assertions.
-- `tests/wowforever_quest_watch_projection.rs`: ordinary-watch/live rich-state coherence, conversion and isolation assertions.
+- `src/c_api/c_quest_log_watches.rs`: Forever membership mutators, type/count/index queries, legacy global mappings and synchronous notifications; seeded map stored in `SimState`.
+- `tests/wowforever_quest_watch_projection.rs`: revised live-row/explicit-membership projection assertions, UNEXECUTED for current changes.
+- `tests/wowforever_quest_watch_membership.rs` and `.lua`: authored membership coverage, UNEXECUTED; `tests/fixtures/quest_watch_membership_original.lua` retains the original probe.
 
 ## Tests asserting this spec
 
@@ -44,8 +50,9 @@ Four `tests/wowforever_quest_watch_projection.rs` cases PASS at runtime source40
 
 ## Known gaps (current cycle)
 
-- [ ] Implement the observed missing add/remove/type/event watch-membership path; read-only rich-row projection does not satisfy it.
-- [ ] Other-profile preservation, default check, native parity and whole-startup acceptance remain open. Current40a no-run compilation, formatting, getter3/watch4/finite21 tests and normal watch/global-alias/voice checks passed; missing80002 is absent from the10-record/14-occurrence startup FAIL. These do not close remaining Gamepad errors or watch membership.
+- [ ] Execute current membership and revised projection coverage; inspect unchanged Track All/Untrack All, POI toggle and tracker callers. Source implementation is not runtime completion.
+- [ ] Verify other-profile preservation and default check; world-watch projection and broader query reconciliation remain open.
+- [ ] Native parity and whole-startup acceptance remain open, including earlier Gamepad errors. Prior source40a28 PASS and startup FAIL do not prove current membership behavior.
 
 ## Out of scope
 

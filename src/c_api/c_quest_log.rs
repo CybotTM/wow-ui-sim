@@ -6,9 +6,6 @@ use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
-#[cfg(feature = "client-wowforever")]
-use crate::{lua_api::sim_substates::QuestLogEntry, lua_bridge::FromStack};
-
 pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
     #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
     {
@@ -28,16 +25,13 @@ pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
 #[cfg(feature = "client-wowforever")]
 fn register_forever_queries(state: &mut LuaState) -> LuaResult<()> {
     let namespace = ensure_namespace(state, "C_QuestLog")?;
-    let methods: &[(&str, rilua::vm::closure::RustFn)] = &[
-        ("GetQuestDifficultyLevel", get_quest_difficulty_level),
-        ("GetNumQuestWatches", get_num_quest_watches),
-        ("GetQuestIDForQuestWatchIndex", get_quest_id_for_watch_index),
-    ];
-    for &(name, function) in methods {
-        table_set_rust_fn_static(state, namespace, name, function)?;
-    }
-    let globals = state.global;
-    table_set_rust_fn_static(state, globals, "GetNumQuestWatches", get_num_quest_watches)
+    table_set_rust_fn_static(
+        state,
+        namespace,
+        "GetQuestDifficultyLevel",
+        get_quest_difficulty_level,
+    )?;
+    super::c_quest_log_watches::register(state)
 }
 
 #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
@@ -84,44 +78,5 @@ fn get_quest_difficulty_level(state: &mut LuaState) -> LuaResult<u32> {
         ))
     })?;
     state.push(Val::Num(f64::from(level)));
-    Ok(1)
-}
-
-/// Existing simulator policy: all ordinary quests are watched in log order.
-/// Watch-subset membership and its mutators are not modeled by this projection.
-#[cfg(feature = "client-wowforever")]
-fn ordinary_quest_ids(entries: &[QuestLogEntry]) -> impl Iterator<Item = i32> + '_ {
-    entries
-        .iter()
-        .filter(|entry| !entry.is_world_quest)
-        .map(|entry| entry.quest_id)
-}
-
-#[cfg(feature = "client-wowforever")]
-fn get_num_quest_watches(state: &mut LuaState) -> LuaResult<u32> {
-    let count = {
-        let sim = borrow_state(state)?;
-        ordinary_quest_ids(&sim.quest_log_entries.entries).count()
-    };
-    state.push(Val::Num(count as f64));
-    Ok(1)
-}
-
-#[cfg(feature = "client-wowforever")]
-fn get_quest_id_for_watch_index(state: &mut LuaState) -> LuaResult<u32> {
-    // Preserve the existing watch index conversion, including numeric truncation.
-    let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
-    if index < 1 {
-        return Ok(0);
-    }
-    let quest_id = {
-        let sim = borrow_state(state)?;
-        let mut ids = ordinary_quest_ids(&sim.quest_log_entries.entries);
-        ids.nth((index - 1) as usize)
-    };
-    let Some(quest_id) = quest_id else {
-        return Ok(0);
-    };
-    state.push(Val::Num(f64::from(quest_id)));
     Ok(1)
 }
