@@ -38,7 +38,8 @@ Prior runtime source40a has **28 PASS** (difficulty3 + watch-projection4 + finit
 - `tests/wowforever_quest_difficulty.rs`: fresh-environment and unchanged whole-consumer behavior assertions.
 - `src/c_api/c_quest_log_watches.rs`: Forever membership mutators, type/count/index queries, legacy global mappings and synchronous notifications; seeded map stored in `SimState`.
 - `tests/wowforever_quest_watch_projection.rs`: revised live-row/explicit-membership projection assertions, UNEXECUTED for current changes.
-- `tests/wowforever_quest_watch_membership.rs` and `.lua`: authored membership coverage, UNEXECUTED; `tests/fixtures/quest_watch_membership_original.lua` retains the original probe.
+- `tests/wowforever_quest_watch_membership.rs` and `.lua`: authored membership, restore-call preservation and reentrant-event coverage, UNEXECUTED; `tests/fixtures/quest_watch_membership_original.lua` retains the original probe.
+- `tests/wowforever_quest_header_consumer.rs` and `.lua`: three authored cases load whole cached QuestUtils and QuestMapFrame unchanged, exercise header-one track/untrack, world interleaving and the real NPE removal gate. An observer replaces only the unrelated UI-refresh tail; actual refresh/menu/frame-event lifecycle is not covered. Rich rows support one synthetic header, so second-header behavior is not fabricated. UNEXECUTED.
 
 ## Tests asserting this spec
 
