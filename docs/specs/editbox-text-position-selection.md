@@ -7,6 +7,7 @@ Shared EditBox cursor and highlighted-range methods expose bounded text-position
 - [x] `SetCursorPosition` accepts valid UTF-8 byte offsets; `GetCursorPosition` returns the byte offset and `GetUTF8CursorPosition` returns the Unicode scalar count before the cursor.
 - [x] Cursor positions past the end clamp to the end; `Insert` at the cursor preserves UTF-8 and advances both public getters consistently.
 - [x] `HighlightText` with valid byte endpoints selects a range; `Insert` replaces that range (including empty-string deletion), collapses the cursor after inserted text, and clears selection for the next insertion.
+- [ ] Shared clean-room policy: a negative or omitted `HighlightText` end selects through the text end; an end before the clamped start also selects from that start through the text end, without exchanging endpoints. Normalize byte endpoints before converting to scalar storage. Preserve ordered and empty ranges, UTF-8-safe `Insert`, and byte/scalar cursor getters.
 - [x] ASCII cursor and selected-range editing retain their original units; renderer-facing stripped text remains synchronized with inserted text.
 - [x] `Insert` derives its resulting cursor from the actual clamped edit range, including when earlier text replacement left cursor or selection indices beyond the new text.
 - [x] Keyboard printable input replaces a highlighted range; Backspace and Delete remove it. Each consumes selection and commits text/caret/render caches before existing callbacks. Rejected numeric input preserves the pending selection.
@@ -22,6 +23,8 @@ Shared EditBox cursor and highlighted-range methods expose bounded text-position
 - [x] Changed programmatic text dispatches `OnTextSet(self)` before `OnTextChanged(self, false)` through normal scripts and hooks. Callbacks see committed text and coherent byte/scalar cursor getters; handler errors reach the error handler and do not prevent later handlers or `OnTextChanged`.
 - [x] Same-value EditBox text assignment is a simulator no-op: it does not dispatch this lifecycle, so a callback assigning its current text cannot recurse. It emits no `OnChar`.
 - [x] Shortening text leaves subsequent `Insert` and Left/Backspace edits within bounds; non-EditBox text setters retain their existing text behavior.
+
+The new endpoint policy is a shared simulator contract, including Wrath and Retail, not native-client parity. It is derived from the user-supplied functional examples without consulting reconstructed implementations; current code still swaps reversed endpoints and does not recognize negative-end sentinels. Its new regression remains uncompiled/unexecuted.
 
 Length overflow rejection is the user-selected simulator policy, not a native-client claim. No-edit callback suppression follows the existing numeric-input rejection policy; tests establish simulator consistency, not native callback equivalence.
 
@@ -42,6 +45,7 @@ Length overflow rejection is the user-selected simulator policy, not a native-cl
 
 ## Tests asserting this spec
 
+- `tests/editbox_highlight_endpoints.rs` — four new **UNCOMPILED / UNEXECUTED** cases for reversed/negative ends, ordinary controls and valid multibyte byte boundaries; no RED or fix claim yet.
 - `tests/editbox_stub_family.rs` — cursor units, selected replacement/deletion, render text, programmatic mutation and callbacks.
 - `tests/editbox_stub_family/max_letters.rs` — recorded ASCII limit case, scalar/UTF-8 model consistency, clipped callback/cache observations, final-value no-op controls, and the Forever secret EditBox access-control regression.
 - `tests/key_dispatch.rs` — ASCII/Unicode selected typing, selection deletion, subsequent public Insert, callback observations, numeric rejection, and unselected controls.
