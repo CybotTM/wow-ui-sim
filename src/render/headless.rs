@@ -484,3 +484,7 @@ mod tests {
         assert_eq!(primitive.glyph_atlas_size, 64);
     }
 }
+
+#[cfg(test)]
+#[path = "headless_colour_tests.rs"]
+mod colour_tests;
