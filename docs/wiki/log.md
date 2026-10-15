@@ -1,3 +1,7 @@
+## [2026-10-15] docs | Pending Forever70374 gamepad enums
+
+Updated [existing owning spec](../specs/forever-edit-mode-enums.md#pending-70374-gamepad-candidate--2026-10-15) and [profile link](systems/client-profiles.md#forever-gamepad-edit-mode--pending-2026-10-15) from private `candidate.patch`/`REPORT.md`: native-vendor values, actual sealed-binary RED and authored consumer regression remain distinct. Candidate integration, focused GREEN and new-binary startup gate pending; corrected failing baseline/counts unchanged. Docs only; no source/tests/data/subtext-spec edits, builds/runs, commits or delegation.
+
 ## [2026-10-15] docs | Corrected Forever70374 acquisition and failing baseline
 
 [Selected-build checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-15-2026) links corrected-enUS sync, exact-root validation and the [actual failing baseline](../baselines/README.md#forever-lua-errors). [Proof matrix](../specs/casc-loading.md#locale-checkpoint--october-15-2026) separates implemented source/compiled binaries from pending full Rust tests and independent runtime verification. Historical identities retained; no clean-startup/native/all-profile/encrypted-content acceptance. Docs-only receipt update; no runtime commands.

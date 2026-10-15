@@ -48,6 +48,21 @@ const ADDITIONS: &[EnumFields] = &[
         "EditModeAccountSettingMeta",
         &[("NumValues", 38), ("MinValue", 0), ("MaxValue", 37)],
     ),
+    // Forever 1.60.1.70374 EditModeManagerConstantsDocumentation.lua:485–497.
+    (
+        "EditModeGamepadMainActionBarSetting",
+        &[
+            ("Compact", 0),
+            ("ShowEmptyBars", 1),
+            ("ShowButtonPrompts", 2),
+            ("ShowHighlight", 3),
+            ("ShouldExpand", 4),
+        ],
+    ),
+    (
+        "EditModeGamepadMainActionBarSettingMeta",
+        &[("NumValues", 5), ("MinValue", 0), ("MaxValue", 4)],
+    ),
     ("EditModeGroupFinderSetting", &[("Size", 0)]),
     (
         "EditModeGroupFinderSettingMeta",
@@ -132,11 +147,12 @@ const ADDITIONS: &[EnumFields] = &[
             ("GroupFinder", 27),
             ("LossOfControl", 28),
             ("SwingTimer", 29),
+            ("GamepadMainActionBar", 30),
         ],
     ),
     (
         "EditModeSystemMeta",
-        &[("NumValues", 30), ("MinValue", 0), ("MaxValue", 29)],
+        &[("NumValues", 31), ("MinValue", 0), ("MaxValue", 30)],
     ),
     (
         "EditModeUnitFrameSetting",

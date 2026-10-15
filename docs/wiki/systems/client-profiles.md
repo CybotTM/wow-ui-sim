@@ -31,6 +31,10 @@ Helper functions/constants in `src/client_profile.rs`:
 - `blizzard_ui_addons_dir_under(root)` — test fallback path anchored at `root`
 - `blizzard_ui_framexml_toc()` → wrath-only `<cache>/FrameXML/FrameXML.toc`; retail/PTR/mists/era/anniversary collapsed FrameXML into `Blizzard_*` addons
 
+## Forever gamepad Edit Mode — pending 2026-10-15
+
+[Owning enum contract and proof ledger](../../specs/forever-edit-mode-enums.md#pending-70374-gamepad-candidate--2026-10-15) tracks the private70374 candidate in the existing `client-wowforever` C API module. Actual sealed normal-binary consumer RED is distinct from the authored, unexecuted Rust regression; no integrated GREEN or startup reduction claimed. Corrected manifest/current failing baseline and independent locale-acquisition PASS do not close this enum gap.
+
 ## Forever expansion identity
 
 `374c2c6c7` gives `WowForever` one profile policy for both `LE_EXPANSION_LEVEL_CURRENT` and legacy `GetExpansionLevel()`: `0` / Classic. This is an explicitly **inferred compatibility policy**, not native Forever evidence. Cached Angleur `8932166` runs under `WOW_PROJECT_MAINLINE`, but its Camelot TOC omits retail producer files and its authored predicate chooses the Camelot branch only when the current expansion equals `LE_EXPANSION_CLASSIC`. The prior inherited retail values (`current=11`, legacy API=10) selected the retail branch and reached those absent producers.
