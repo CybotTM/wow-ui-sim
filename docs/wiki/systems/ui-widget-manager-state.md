@@ -135,9 +135,15 @@ The first selector regression actually executed at `a56e11267`: **one unique cas
 
 Selector RED is not populated-result, isolation or cached-lifecycle acceptance. Broader C_UIWidgetManager lifecycle, popup, performance and full-parent acceptance remain OPEN; no native/render/profile parity follows. Later authored or integrated tests gain no execution credit from this checkpoint.
 
+### DoubleIconAndText producer source after populated RED — 2026-10-15
+
+[Owning contract](../../specs/ui-widget-double-icon-and-text.md) inventories getter/registration source `c3096cd6b`: all 19 explicit supplied fields, shared `read_numeric_id`, record clone before allocation, rooted fresh Lua result and one nil for absent IDs. No defaults or vendor changes. Producer is **UNCOMPILED / UNEXECUTED**; source inspection is not behavior proof.
+
+The separate source1571253e9 Retail baseline executed nine unique cases: **one unknown-ID control PASS / eight FAIL, exit101** (seven supplied-table failures, one invalid-selector failure). Cached lifecycle was unreached before consumer loading. The owning contract links the exact private epoch; independent saved-runtime reconciliation confirms all nine identities, full streams and build/seal receipts. Authored assertions target projection, isolation, feeds and cached lifecycle; none gains producer acceptance from this RED. Behavior checkboxes and whole-parent acceptance remain OPEN.
+
 ## Sources
 
-- [DoubleIconAndText contract](../../specs/ui-widget-double-icon-and-text.md) — supplied-record and consumer requirements, passive scaffold inventory and selector RED boundary.
+- [DoubleIconAndText contract](../../specs/ui-widget-double-icon-and-text.md) — supplied-record/consumer requirements, producer source inventory and separate selector/populated RED boundaries.
 
 - [TextureAndTextRow contract](../../specs/texture-and-text-row.md) — single-source supplied-row contract, historical RED, bounded independent Retail/PTR/source gates, independent final owning/check/format PASS, separate Retail/PTR diagnostic audits and suppression limits; committed public packet with bounded candidate/canonical integrity/privacy/navigation PASS; broader acceptance remains open.
 

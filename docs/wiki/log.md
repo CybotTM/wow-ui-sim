@@ -1,3 +1,7 @@
+## [2026-10-15] source | DoubleIconAndText producer remains unexecuted
+
+[Manager checkpoint](systems/ui-widget-manager-state.md#doubleiconandtext-producer-source-after-populated-red--2026-10-15) separates `c3096cd6b` getter/registration source inventory from source1571253e9 Retail RED: nine unique cases, one unknown-ID control PASS/eight FAIL, exit101; cached consumer loading unreached. Producer UNCOMPILED/UNEXECUTED; independent saved-runtime reconciliation confirms exact identities, full streams and build/seal receipts. Behavior and full-parent acceptance remain open.
+
 ## [2026-10-15] docs | Bounded QUEST-SOURCE gates accepted
 
 [Central gate receipt](../baselines/README.md#quest-source-check-and-startup-gates--2026-10-15) links independent saved default-check/source87 and sealed normal-startup/sourcea56 audits; source87 is docs-only relative to a56 Rust. Bounded quest-source check/startup gates close alongside existing a56 fmt PASS. Later4cb/52b DoubleIcon passive/test code is not covered by these check/startup/fmt proofs and awaits a new RED build. No whole-current-HEAD startup, native/full-addon/render/full-parent claim. Forever43/source53cf and Retail31/sourcea56 remain separately accepted; historical aborts/REDs and Gamepad10/14 unchanged, not rerun. Six allowed docs only; no code/build/tests/delegation/commit or baseline JSON change. Earlier log entries retain their historical pending status.
