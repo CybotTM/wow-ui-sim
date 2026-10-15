@@ -38,7 +38,7 @@ Forever `LegacyConstantsDocumentation.lua` publishes `Constants.LegacyConsts`: `
 
 Forever `LevelConstantsDocumentation.lua` publishes `Constants.LevelConstsExposed.MIN_RES_SICKNESS_LEVEL`, `MIN_ACHIEVEMENT_LEVEL`, and `MIN_TALENT_LEVEL`, each `10`.
 
-The actual Camelot `PlayerSpellsMicroButtonMixin:GetTalentUnlockLevel()` returns `10` when adventure tree `1188` has no config. An unknown tree returning nil remains valid; this publication does not change the trait model or claim configured-tree behavior. Grouped tests assert all nine values and execute the unchanged Camelot override file against the real `C_Traits` API.
+The actual Camelot `PlayerSpellsMicroButtonMixin:GetTalentUnlockLevel()` returns `10` when adventure tree `1188` has no config. An unknown tree returning nil remains valid; this publication does not change the trait model or claim configured-tree behavior. Grouped tests assert all nine values and execute the unchanged Camelot override file against the real `C_Traits` API. The70374 whole-file fixture now supplies all four extended mixin tables, adding `ProfessionMicroButtonMixin` and `LFDMicroButtonMixin` after captured pre-change/current load failure at the first missing table. Only fixture inputs changed; post-correction execution is pending.
 
 ## Quest log limit
 

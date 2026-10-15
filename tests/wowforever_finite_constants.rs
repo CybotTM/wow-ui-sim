@@ -369,8 +369,15 @@ fn forever_finite_constants_publish_legacy_and_level_values() {
 fn forever_finite_constants_camelot_talent_unlock_without_config() {
     let env = WowLuaEnv::new().unwrap();
     // The override file extends these mixin tables; no API or consumer is mocked.
-    env.exec("PlayerSpellsMicroButtonMixin = {}; CharacterMicroButtonMixin = {}")
-        .unwrap();
+    env.exec(
+        r#"
+        PlayerSpellsMicroButtonMixin = {}
+        CharacterMicroButtonMixin = {}
+        ProfessionMicroButtonMixin = {}
+        LFDMicroButtonMixin = {}
+        "#,
+    )
+    .unwrap();
     load(
         &env,
         "Blizzard_MicroMenu/Camelot/MainMenuBarMicroButtonsOverrides.lua",
