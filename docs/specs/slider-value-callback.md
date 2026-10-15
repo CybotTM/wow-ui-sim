@@ -26,6 +26,20 @@ Actual Retail baseline: source `3fa90ab7b6f8cf836e09c19ed34115eba9f245c1`, epoch
 
 **GREEN pending main integration and verification.** No tests, builds or checks run for this authored producer. Existing five cases cover nearest lattice/max and upward ties, offset/negative minima, endpoints/duplicate suppression, step reapplication, and continuous Slider versus unsnapped StatusBar. No duplicate tests added. The fractional scale/CVar consumer explicitly chooses step0.01 to express its existing precision.
 
+## C8 changed-range callback/lifecycle candidate
+
+Explicit shared simulator candidate only, not a native-client claim. This tests/spec-only integration adds no C8 production behavior and establishes no RED/GREEN proof. Existing validation remains owned by [widget range validation](widget-range-validation.md); C8 does not change it or StatusBar behavior.
+
+- [ ] Make Slider `OnMinMaxChanged` publicly discoverable through `HasScript`, bindable/readable through `SetScript`/`GetScript`, and clearable without removing type capability or dispatching on binding alone.
+- [ ] After successful validation of changed bounds, commit both bounds, synchronously notify `OnMinMaxChanged(self,min,max)` while the old stored value remains readable, then reapply that value through ordinary Slider assignment. Hidden sliders follow the same lifecycle; equal bounds are included.
+- [ ] Reapply the value even without a range binding. Deliver `OnValueChanged(self,effectiveValue,false)` synchronously only when the effective value changes, with committed bounds/value readable in that callback.
+- [ ] Notify range once when changed bounds retain the effective value, without a value notification; identical bounds are silent.
+- [ ] Reuse the pending C1 minimum-relative step/max-endpoint policy for range-triggered assignment, not a second quantizer. The step-interaction test depends on C1 and cannot independently establish C8.
+
+Exactly five existing candidate bodies are integrated in `tests/slider_range_lifecycle.rs`: **5 UNCOMPILED / UNEXECUTED**. Public Lua traces assert new-bounds/old-value range observation followed by effective-value observation; these are candidate policy assertions, not independent native evidence. No admission, behavioral RED/GREEN, or production completion is claimed. Existing callback and C1 proof statements above remain unchanged.
+
+Defaults, range initialization, pre-initialization and first-value policy remain untouched and **UNRESOLVED**, outside C8. StatusBar, duplicate validation/quantizer tests, and speculative callback mutations of range/value are excluded. Existing dispatch/error/reentry guarantees are not weakened; this bounded set adds no separate proof for them.
+
 ## How it works
 
 - [Event system](../event-system.md)
@@ -54,4 +68,4 @@ Frozen `3d6017fe` runs unchanged ClassicCastBar `8909724` through scale `1 → 1
 
 ## Out of scope
 
-StatusBar behavior, other slider methods outside the step follow-up, mouse-drag producers, new secret handling, argument-validation fidelity and native timing conformance remain unchanged or unverified. No addon/vendor changes or manual callback invocation.
+StatusBar behavior, other slider methods outside the step follow-up and bounded C8 candidate, mouse-drag producers, new secret handling, argument-validation fidelity and native timing conformance remain unchanged or unverified. No addon/vendor changes or manual callback invocation.
