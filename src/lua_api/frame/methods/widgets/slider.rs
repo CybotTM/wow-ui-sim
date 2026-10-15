@@ -146,17 +146,10 @@ pub(super) fn is_dragging_thumb(state: &mut LuaState) -> LuaResult<u32> {
 /// Choose the nearest minimum-relative step or maximum endpoint, tying upward.
 fn quantize_slider_value(value: f64, min: f64, max: f64, step: f64) -> f64 {
     let clamped = value.clamp(min, max);
-    // Keep existing clamp semantics outside the modeled finite, positive-step domain.
-    // Guard an unrepresentable span before performing lattice arithmetic.
-    if !value.is_finite()
-        || !min.is_finite()
-        || !max.is_finite()
-        || !step.is_finite()
-        || step <= 0.0
-        || (min < 0.0 && max > f64::MAX + min)
-        || clamped == min
-        || clamped == max
-    {
+    if !supports_slider_lattice(value, min, max, step) {
+        return clamped;
+    }
+    if clamped == min || clamped == max {
         return clamped;
     }
     let remainder = (clamped - min) % step;
@@ -171,6 +164,16 @@ fn quantize_slider_value(value: f64, min: f64, max: f64, step: f64) -> f64 {
     } else {
         upper
     }
+}
+
+/// Limit lattice arithmetic to finite inputs and representable range spans.
+fn supports_slider_lattice(value: f64, min: f64, max: f64, step: f64) -> bool {
+    let finite_inputs = [value, min, max, step].into_iter().all(f64::is_finite);
+    if !finite_inputs || step <= 0.0 {
+        return false;
+    }
+    let span_overflows = min < 0.0 && max > f64::MAX + min;
+    !span_overflows
 }
 
 /// Apply a Slider assignment, returning its effective value only when changed.
