@@ -21,6 +21,12 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 - [ ] Missing, malformed, duplicate, or invalid selected-product metadata fails explicitly. A missing `.product.db` is not rescued with `.build.info`.
 - [ ] PTR's pinned UI-source provenance remains independent of installed-product metadata.
 
+### Blizzard UI locale selection
+
+- [ ] Local FDID, CDN FDID, and path-based Blizzard UI reads explicitly select `enUS` root variants with unconstrained content flags (`ContentFlags::NONE`); no cross-locale fallback.
+- [ ] Preserve root version and full-width content flags, including high bits, when parsing/selecting variants; do not flatten root records to a last-variant map.
+- [ ] Record `locale=enUS` and `content_filter=none` in UI-cache provenance. Sync invalidates locale-blind caches even when build identity and manifest match, before reusing files.
+
 ### Source sync transport
 
 - [ ] A sync operation reuses one CDN session and archive index set across file downloads instead of re-querying product metadata per file, then releases them before GUI startup.
@@ -62,12 +68,18 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 
 ## How it works
 
+- [Blizzard UI patch/sync workflow](../updating-blizzard-ui-to-a-new-patch.md) — selected-build acquisition and baseline gates.
+
 - → `docs/wiki/systems/casc-asset-cache.md` — three cache layers, lookup flow, measured per-layer costs
 - → `docs/wiki/systems/texture-atlas.md` — TextureManager structure, path resolution, format support
 - → `docs/rendering-pipeline.md` — Font System section
 - → `docs/texture-atlas-system.md` — full texture/atlas walkthrough
 
 ## Implementation inventory
+
+- `src/blizzard_ui_sync.rs` — UI extraction routes and locale/content cache provenance.
+- `src/blizzard_ui_sync/locale.rs` — explicit enUS root selection for CDN FDID and path reads; local FDID extraction retains asset-resolver's TACT-aware decoder.
+- Asset-resolver is pinned to published `a626003dd4d3dbd1f157181f017694c648c84ce8` for its enUS root-block filter and resolution-schema migration. Its transitive cascette revision is `027a1ac34c81b4ec23a0bfa36ea298f6642abe19`; direct simulator cascette pins remain unchanged. That dependency also carries keyring loading and missing-key chunk zero-fill behavior; no full encrypted-content acceptance is claimed. Unrelated lockfile package identities and dependency edges are preserved.
 
 - `src/asset_resolver_config.rs` — GUI resolution-cache and community-catalog preparation using the active install and product.
 - `src/bin/wow_sim/gui_commands.rs` — GUI startup preparation before `run_iced_ui`
@@ -78,6 +90,9 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 - `Cargo.lock` — pins transitive `binrw`/`binrw_derive` 0.15.2 for the CASC dependency graph; the update fixes Rust E0365 private macro re-export warnings without changing the pinned CASC source revisions
 
 ## Tests asserting this spec
+
+- `src/blizzard_ui_sync/locale/tests.rs` — five selector cases: enUS before last ptPT, absent-enUS rejection, path/FDID agreement, explicit content filtering, V4/high-bit preservation.
+- `src/blizzard_ui_sync/tests.rs::locale_blind_provenance_invalidates_cached_ptpt_before_sync` — same-build stale-locale cache invalidation; full simulator gate pending.
 
 - `src/blizzard_ui_sync/tests.rs::build_identity_reads_forever_when_build_info_omits_the_product` — file-backed missing-row regression without metadata writes.
 - `src/blizzard_ui_sync/tests.rs::build_identity_uses_selected_product_not_stale_build_info` — selected-product identity, optional install key, and absent-product failure.
@@ -92,6 +107,18 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 - `/tmp/wow-character-bug/product-db-error-dialog/{result.json,observer.json,stderr,error-dialog.png,metadata-bracket.json}` — actual Linux Zenity missing-`.product.db` dialog; inspected literal `<profile>` rendering, expected timeout cleanup, and metadata unchanged from before the default GUI through the dialog/parser checks
 
 ## Known gaps (current cycle)
+
+### Locale checkpoint — October 15, 2026
+
+Reported handoff evidence, not rerun for this docs task:
+
+| Scope | Proof | Remaining boundary |
+|---|---|---|
+| Actual selected-root metadata, FDID `5612369` | 12 variants; last is ptPT | Locale-blind selection chose the wrong variant |
+| Matched native local enUS probe | PASS: indexed, 138 bytes, enUS content-hash match, `hasenUS=true`, `hasptPT=false` | Earlier missing result used the wrong variant; not evidence of absent local enUS content |
+| Candidate selector / actual pinned resolver | 5/5 GREEN / 0/5 RED | Candidate proof does not establish integrated simulator behavior |
+
+- [ ] Verify integrated locale-qualified source, sync the corrected cache, and recapture the selected-build baseline. Local enUS residency is established; sync correctness and startup acceptance are not.
 
 - [ ] No assertion that the texture `out_path.exists()` short-circuit in `try_casc_resolve` is faster than a cold extract; this is distinct from verified resolution-cache warm reuse.
 - [ ] `asset_resolver::lookup_path` is not backslash-tolerant; the loader normalises but consumers calling the resolver directly hit `None` on `Fonts\\FRIZQT__.TTF`. Consider lifting normalisation into `asset-resolver` upstream.

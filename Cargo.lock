@@ -285,12 +285,12 @@ dependencies = [
 [[package]]
 name = "asset-resolver"
 version = "0.1.0"
-source = "git+https://github.com/world-of-osso/asset-resolver?rev=462097bba2aa72d1afed8e0ca5b7c7315096427d#462097bba2aa72d1afed8e0ca5b7c7315096427d"
+source = "git+https://github.com/world-of-osso/asset-resolver?rev=a626003dd4d3dbd1f157181f017694c648c84ce8#a626003dd4d3dbd1f157181f017694c648c84ce8"
 dependencies = [
  "binrw",
- "cascette-client-storage",
- "cascette-crypto",
- "cascette-formats",
+ "cascette-client-storage 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=027a1ac34c81b4ec23a0bfa36ea298f6642abe19)",
+ "cascette-crypto 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=027a1ac34c81b4ec23a0bfa36ea298f6642abe19)",
+ "cascette-formats 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=027a1ac34c81b4ec23a0bfa36ea298f6642abe19)",
  "rusqlite",
  "tokio",
 ]
@@ -745,9 +745,9 @@ version = "0.1.0"
 source = "git+https://github.com/Osso/casc-extract?rev=bbfb184066531b6eb674b50b63a6052eb871ab2f#bbfb184066531b6eb674b50b63a6052eb871ab2f"
 dependencies = [
  "anyhow",
- "cascette-client-storage",
- "cascette-crypto",
- "cascette-formats",
+ "cascette-client-storage 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
+ "cascette-crypto 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
+ "cascette-formats 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
  "cascette-protocol",
  "clap",
  "hex",
@@ -763,8 +763,8 @@ dependencies = [
  "async-trait",
  "base64",
  "bytes",
- "cascette-crypto",
- "cascette-formats",
+ "cascette-crypto 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
+ "cascette-formats 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
  "dashmap",
  "futures",
  "getrandom 0.4.3",
@@ -785,11 +785,36 @@ dependencies = [
 [[package]]
 name = "cascette-client-storage"
 version = "0.2.0"
+source = "git+https://github.com/Osso/cascette-rs?rev=027a1ac34c81b4ec23a0bfa36ea298f6642abe19#027a1ac34c81b4ec23a0bfa36ea298f6642abe19"
+dependencies = [
+ "binrw",
+ "cascette-crypto 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=027a1ac34c81b4ec23a0bfa36ea298f6642abe19)",
+ "cascette-formats 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=027a1ac34c81b4ec23a0bfa36ea298f6642abe19)",
+ "dashmap",
+ "flate2",
+ "futures",
+ "hex",
+ "libc",
+ "md5",
+ "memmap2",
+ "parking_lot",
+ "prost",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.17",
+ "tokio",
+ "tracing",
+ "winapi",
+]
+
+[[package]]
+name = "cascette-client-storage"
+version = "0.2.0"
 source = "git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48#758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48"
 dependencies = [
  "binrw",
- "cascette-crypto",
- "cascette-formats",
+ "cascette-crypto 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
+ "cascette-formats 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
  "dashmap",
  "flate2",
  "futures",
@@ -810,6 +835,19 @@ dependencies = [
 [[package]]
 name = "cascette-crypto"
 version = "0.2.0"
+source = "git+https://github.com/Osso/cascette-rs?rev=027a1ac34c81b4ec23a0bfa36ea298f6642abe19#027a1ac34c81b4ec23a0bfa36ea298f6642abe19"
+dependencies = [
+ "binrw",
+ "cipher",
+ "hex",
+ "md-5",
+ "salsa20",
+ "thiserror 2.0.17",
+]
+
+[[package]]
+name = "cascette-crypto"
+version = "0.2.0"
 source = "git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48#758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48"
 dependencies = [
  "binrw",
@@ -823,10 +861,26 @@ dependencies = [
 [[package]]
 name = "cascette-formats"
 version = "0.2.0"
+source = "git+https://github.com/Osso/cascette-rs?rev=027a1ac34c81b4ec23a0bfa36ea298f6642abe19#027a1ac34c81b4ec23a0bfa36ea298f6642abe19"
+dependencies = [
+ "binrw",
+ "cascette-crypto 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=027a1ac34c81b4ec23a0bfa36ea298f6642abe19)",
+ "flate2",
+ "hex",
+ "lz4_flex",
+ "md5",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.17",
+]
+
+[[package]]
+name = "cascette-formats"
+version = "0.2.0"
 source = "git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48#758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48"
 dependencies = [
  "binrw",
- "cascette-crypto",
+ "cascette-crypto 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
  "flate2",
  "hex",
  "lz4_flex",
@@ -846,8 +900,8 @@ dependencies = [
  "base64",
  "bytes",
  "cascette-cache",
- "cascette-crypto",
- "cascette-formats",
+ "cascette-crypto 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
+ "cascette-formats 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
  "cms",
  "dashmap",
  "der",
@@ -1099,9 +1153,9 @@ checksum = "c2459377285ad874054d797f3ccebf984978aa39129f6eafde5cdc8315b612f8"
 
 [[package]]
 name = "core-foundation"
-version = "0.9.4"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91e195e091a93c46f7102ec7818a2aa394e1e1771c3ab4825963fa03e45afb8f"
+checksum = "b2a6cd9ae233e7f62ba4e9353e81a88df7fc8a5987b8d445b4d90c879bd156f6"
 dependencies = [
  "core-foundation-sys",
  "libc",
@@ -1109,9 +1163,9 @@ dependencies = [
 
 [[package]]
 name = "core-foundation"
-version = "0.10.1"
+version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2a6cd9ae233e7f62ba4e9353e81a88df7fc8a5987b8d445b4d90c879bd156f6"
+checksum = "91e195e091a93c46f7102ec7818a2aa394e1e1771c3ab4825963fa03e45afb8f"
 dependencies = [
  "core-foundation-sys",
  "libc",
@@ -3135,15 +3189,15 @@ checksum = "d4a5ff6bcca6c4867b1c4fd4ef63e4db7436ef363e0ad7531d1558856bae64f4"
 
 [[package]]
 name = "linux-raw-sys"
-version = "0.4.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d26c52dbd32dccf2d10cac7725f8eae5296885fb5703b261f7d0a0739ec807ab"
-
-[[package]]
-name = "linux-raw-sys"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df1d3c3b53da64cf5760482273a98e575c651a67eec7f77df96b5b642de8f039"
+
+[[package]]
+name = "linux-raw-sys"
+version = "0.4.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d26c52dbd32dccf2d10cac7725f8eae5296885fb5703b261f7d0a0739ec807ab"
 
 [[package]]
 name = "litemap"
@@ -4631,6 +4685,17 @@ checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
 
 [[package]]
 name = "rand"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2e8e8bcc7961af1fdac401278c6a831614941f6164ee3bf4ce61b7edb162207"
+dependencies = [
+ "chacha20",
+ "getrandom 0.4.3",
+ "rand_core 0.10.1",
+]
+
+[[package]]
+name = "rand"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "34af8d1a0e25924bc5b7c43c079c942339d8f0a8b57c39049bef581b46327404"
@@ -4647,17 +4712,6 @@ checksum = "6db2770f06117d490610c7488547d543617b21bfa07796d7a12f6f1bd53850d1"
 dependencies = [
  "rand_chacha 0.9.0",
  "rand_core 0.9.3",
-]
-
-[[package]]
-name = "rand"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2e8e8bcc7961af1fdac401278c6a831614941f6164ee3bf4ce61b7edb162207"
-dependencies = [
- "chacha20",
- "getrandom 0.4.3",
- "rand_core 0.10.1",
 ]
 
 [[package]]
@@ -4682,6 +4736,12 @@ dependencies = [
 
 [[package]]
 name = "rand_core"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "63b8176103e19a2643978565ca18b50549f6101881c443590420e4dc998a3c69"
+
+[[package]]
+name = "rand_core"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
@@ -4697,12 +4757,6 @@ checksum = "99d9a13982dcf210057a8a78572b2217b667c3beacbf3a0d8b454f6f82837d38"
 dependencies = [
  "getrandom 0.3.4",
 ]
-
-[[package]]
-name = "rand_core"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63b8176103e19a2643978565ca18b50549f6101881c443590420e4dc998a3c69"
 
 [[package]]
 name = "range-alloc"
@@ -5996,17 +6050,6 @@ dependencies = [
 
 [[package]]
 name = "tiff"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba1310fcea54c6a9a4fd1aad794ecc02c31682f6bfbecdf460bf19533eed1e3e"
-dependencies = [
- "flate2",
- "jpeg-decoder",
- "weezl",
-]
-
-[[package]]
-name = "tiff"
 version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af9605de7fee8d9551863fd692cce7637f548dbd9db9180fcc07ccc6d26c336f"
@@ -6017,6 +6060,17 @@ dependencies = [
  "quick-error",
  "weezl",
  "zune-jpeg 0.4.21",
+]
+
+[[package]]
+name = "tiff"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ba1310fcea54c6a9a4fd1aad794ecc02c31682f6bfbecdf460bf19533eed1e3e"
+dependencies = [
+ "flate2",
+ "jpeg-decoder",
+ "weezl",
 ]
 
 [[package]]
@@ -7645,9 +7699,9 @@ dependencies = [
  "asset-resolver",
  "bytemuck",
  "casc-extract",
- "cascette-client-storage",
- "cascette-crypto",
- "cascette-formats",
+ "cascette-client-storage 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
+ "cascette-crypto 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
+ "cascette-formats 0.2.0 (git+https://github.com/Osso/cascette-rs?rev=758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48)",
  "cc",
  "clap",
  "cosmic-text",

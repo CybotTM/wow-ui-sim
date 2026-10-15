@@ -510,3 +510,24 @@ fn mists_cache_rejects_mainline_nameplates_toc_without_game_type_gates() {
 
 #[cfg(feature = "client-mists")]
 include!("../blizzard_ui_sync_mists_test_fixture.rs");
+
+#[test]
+fn locale_blind_provenance_invalidates_cached_ptpt_before_sync() {
+    let root = unique_temp_dir("locale-blind-provenance");
+    let stale_file = root.join("Blizzard_LoadLocale/LoadLocale.lua");
+    std::fs::create_dir_all(stale_file.parent().expect("locale parent")).expect("create cache");
+    std::fs::write(&stale_file, "LOCALE_ptPT = true; UI_LOCALE = \"ptPT\";")
+        .expect("write stale locale");
+    let expected = test_provenance("same-build");
+    let old = expected
+        .contents()
+        .replace("locale=enUS\ncontent_filter=none\n", "");
+    std::fs::write(root.join(super::PROVENANCE_FILE), old).expect("write old provenance");
+    std::fs::write(root.join(super::COMPLETE_MARKER), "complete").expect("write old marker");
+
+    assert!(
+        invalidate_cache_if_provenance_mismatched(&root, &expected).expect("invalidate old cache")
+    );
+    assert!(!stale_file.exists());
+    assert!(!root.join(super::COMPLETE_MARKER).exists());
+}

@@ -46,9 +46,16 @@ Community-listfile refresh, limited-listfile regeneration, the matching Forever
 build and supported local/CDN sync completed: all 4,434 paths were acquired.
 However, `Blizzard_LoadLocale/LoadLocale.lua` matched the `ptPT` root variant,
 not `enUS`: both pinned local and simulator CDN selection lost locale identity.
-The enUS variant exists in the selected root/encoding metadata. Locale-qualified
-selection, corrected sync and baseline recapture remain open. Complete path
-coverage does not establish correct locale, clean startup or compatibility.
+The matched native local probe now establishes enUS residency: FDID `5612369`
+is indexed, decodes to 138 bytes, matches the enUS content hash, and reports
+`hasenUS=true`, `hasptPT=false`. The earlier missing result selected the wrong
+variant, not missing local enUS content. See the owning
+[locale contract and proof matrix](specs/casc-loading.md#locale-checkpoint--october-15-2026):
+candidate selector 5/5 GREEN versus actual pinned resolver 0/5 RED.
+The integrated source pins asset-resolver's published enUS fix while retaining
+its TACT-aware local decoder, and qualifies simulator CDN/path selection.
+Full simulator gates, corrected sync and baseline recapture remain pending. Complete path coverage does not establish correct locale,
+clean startup or compatibility.
 Preserve historical receipts below; do not relabel old 69977 captures as 70374 proof.
 
 ### Historical selected target — September 24, 2026

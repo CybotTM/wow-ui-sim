@@ -1,13 +1,19 @@
 //! CASC-backed Blizzard UI source synchronization.
 
+#[cfg(feature = "casc")]
+mod locale;
 mod pinned;
 #[cfg(feature = "casc")]
 mod pinned_download;
 mod profile_cache;
 
+#[cfg(feature = "casc")]
+use self::locale::LocalizedCascRoot;
 use self::profile_cache::{cache_entry_is_usable, required_profile_cache_entries};
 #[cfg(feature = "casc")]
 use cascette_client_storage::InstalledProduct;
+#[cfg(feature = "casc")]
+use cascette_formats::root::{ContentFlags, LocaleFlags};
 #[cfg(feature = "casc")]
 use sha2::{Digest, Sha256};
 use std::path::{Path, PathBuf};
@@ -186,7 +192,7 @@ impl CacheProvenance {
         manifest_sha256: &str,
     ) -> Self {
         let contents = format!(
-            "schema={PROVENANCE_SCHEMA}\nprofile={profile}\nproduct={product}\nversion={version}\nbuild_key={build_key}\ninstall_key={install_key}\nmanifest_sha256={manifest_sha256}\nsource=casc-local-or-cdn\nfallback=none\n"
+            "schema={PROVENANCE_SCHEMA}\nprofile={profile}\nproduct={product}\nversion={version}\nbuild_key={build_key}\ninstall_key={install_key}\nmanifest_sha256={manifest_sha256}\nlocale=enUS\ncontent_filter=none\nsource=casc-local-or-cdn\nfallback=none\n"
         );
         Self { contents }
     }
@@ -544,6 +550,7 @@ fn write_extracted_casc_path(out_path: &Path, data: &[u8]) -> crate::Result<()> 
 #[cfg(feature = "casc")]
 struct CascPathReader {
     install: cascette_client_storage::Installation,
+    root: LocalizedCascRoot,
 }
 
 #[cfg(feature = "casc")]
@@ -559,10 +566,10 @@ impl CascPathReader {
 
         let install = cascette_client_storage::Installation::open(install_root.join("Data"))
             .map_err(|e| crate::Error::Other(format!("open CASC install: {e}")))?;
-        load_casc_resolver_files(&install, &casc_dir)?;
+        let root = load_casc_resolver_files(&install, &casc_dir)?;
         run_casc_async(install.initialize())
             .map_err(|e| crate::Error::Other(format!("initialize CASC install: {e}")))?;
-        Ok(Self { install })
+        Ok(Self { install, root })
     }
 
     fn read_first_path(&self, paths: &[String]) -> crate::Result<Vec<u8>> {
@@ -579,7 +586,10 @@ impl CascPathReader {
     }
 
     fn try_read_path(&self, path: &str) -> crate::Result<Option<Vec<u8>>> {
-        let Some(encoding_key) = self.install.resolver().resolve_path_to_encoding(path) else {
+        let Some(content_key) = self.root.resolve_path(path) else {
+            return Ok(None);
+        };
+        let Some(encoding_key) = self.install.resolver().resolve_content_key(&content_key) else {
             return Ok(None);
         };
         let data = run_casc_async(self.install.read_file_by_encoding_key(&encoding_key))
@@ -588,7 +598,8 @@ impl CascPathReader {
     }
 
     fn resolve_fdid_to_encoding(&self, fdid: u32) -> Option<cascette_crypto::EncodingKey> {
-        self.install.resolver().resolve_fdid_to_encoding(fdid)
+        let content_key = self.root.resolve_fdid(fdid)?;
+        self.install.resolver().resolve_content_key(&content_key)
     }
 }
 
@@ -596,17 +607,23 @@ impl CascPathReader {
 fn load_casc_resolver_files(
     install: &cascette_client_storage::Installation,
     casc_dir: &Path,
-) -> crate::Result<()> {
+) -> crate::Result<LocalizedCascRoot> {
     let root_data = std::fs::read(casc_dir.join("root.bin"))
         .map_err(|e| crate::Error::Other(format!("read CASC root.bin: {e}")))?;
     let encoding_data = std::fs::read(casc_dir.join("encoding.bin"))
         .map_err(|e| crate::Error::Other(format!("read CASC encoding.bin: {e}")))?;
-    install
-        .load_root_file(&root_data)
-        .map_err(|e| crate::Error::Other(format!("load CASC root.bin: {e}")))?;
+    // Simulator GetLocale is enUS. Retain the existing unrestricted content policy;
+    // do not rewrite the root's flags, version, or the selected build's records.
+    let root = LocalizedCascRoot::parse(
+        &root_data,
+        LocaleFlags::new(LocaleFlags::ENUS),
+        ContentFlags::new(ContentFlags::NONE),
+    )
+    .map_err(crate::Error::Other)?;
     install
         .load_encoding_file(&encoding_data)
-        .map_err(|e| crate::Error::Other(format!("load CASC encoding.bin: {e}")))
+        .map_err(|e| crate::Error::Other(format!("load CASC encoding.bin: {e}")))?;
+    Ok(root)
 }
 
 #[cfg(feature = "casc")]
