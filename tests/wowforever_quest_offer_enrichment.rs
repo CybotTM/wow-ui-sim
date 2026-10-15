@@ -127,21 +127,22 @@ fn assert_rich_offer(env: &WowLuaEnv, offer: &GossipQuestRow) {
     assert_eq!(row.is_meta, offer.is_meta);
     assert_eq!(row.is_complete, offer.is_complete.unwrap_or(false));
     assert_modeled_offer_policy(row);
+    drop(state);
+    assert_accepted_membership(env, offer.quest_id);
+    assert_public_rich_offer(env, offer);
+}
+
+fn assert_accepted_membership(env: &WowLuaEnv, quest_id: u32) {
+    let state = env.state().borrow();
     assert!(
         !state
             .quest_log_entries
             .completed_quest_ids
-            .contains(&row.quest_id)
+            .contains(&(quest_id as i32))
     );
-    let occurrences = state
-        .quest_log
-        .iter()
-        .filter(|id| **id == offer.quest_id)
-        .count();
+    let occurrences = state.quest_log.iter().filter(|id| **id == quest_id).count();
     assert_eq!(occurrences, 1, "exactly one lightweight membership");
     assert!(state.pending_quest_offer.is_none());
-    drop(state);
-    assert_public_rich_offer(env, offer);
 }
 
 fn assert_public_rich_offer(env: &WowLuaEnv, offer: &GossipQuestRow) {
@@ -161,6 +162,10 @@ fn assert_public_rich_offer(env: &WowLuaEnv, offer: &GossipQuestRow) {
         Some(offer.quest_level),
     );
     assert_eq!(public, expected);
+    let difficulty: i32 = env
+        .eval(&format!("return C_QuestLog.GetQuestDifficultyLevel({id})"))
+        .expect("read accepted Forever difficulty endpoint");
+    assert_eq!(difficulty, offer.quest_level);
     assert_public_offer_flags(env, offer);
 }
 
@@ -191,18 +196,22 @@ fn assert_explicit_watch_coherent(env: &WowLuaEnv, quest_id: u32) {
             "return C_QuestLog.GetQuestWatchType({quest_id}), C_QuestLog.GetNumQuestWatches()"
         ))
         .expect("read watch state before explicit AddQuestWatch");
-    assert_eq!(before.0, None, "acceptance must not auto-watch");
+    let needs_watch = before.0.is_none();
     let added: bool = env
         .eval(&format!("return C_QuestLog.AddQuestWatch({quest_id})"))
         .expect("explicitly watch the accepted offer");
-    assert!(
-        added,
-        "accepted ordinary offer must be explicitly watchable"
-    );
-    assert_watch_projection(env, quest_id, before.1 + 1);
+    assert_eq!(added, needs_watch, "add only when membership is absent");
+    let expected_count = before.1 + i32::from(needs_watch);
+    let expected_type = before.0.unwrap_or(1); // Explicit Add creates Manual membership.
+    assert_watch_projection(env, quest_id, expected_count, expected_type);
 }
 
-fn assert_watch_projection(env: &WowLuaEnv, quest_id: u32, expected_count: i32) {
+fn assert_watch_projection(
+    env: &WowLuaEnv,
+    quest_id: u32,
+    expected_count: i32,
+    expected_type: i32,
+) {
     let observed: (i32, i32, bool) = env
         .eval(&format!(
             "local occurrences, matching = 0, false; \
@@ -213,9 +222,9 @@ fn assert_watch_projection(env: &WowLuaEnv, quest_id: u32, expected_count: i32) 
                  end; \
              end; \
              return C_QuestLog.GetNumQuestWatches(), occurrences, \
-                 matching and C_QuestLog.GetQuestWatchType({quest_id}) == 1"
+                 matching and C_QuestLog.GetQuestWatchType({quest_id}) == {expected_type}"
         ))
-        .expect("read explicit Manual watch ID/index projection");
+        .expect("read coherent watch type/ID/index projection");
     assert_eq!(observed, (expected_count, 1, true));
 }
 

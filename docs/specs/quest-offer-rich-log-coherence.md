@@ -7,7 +7,7 @@ Forever public offer acceptance must agree with rich quest-log queries and permi
 - [ ] After the existing public `A_Admin.OpenMultiQuestNpc()` → `SelectAvailableQuest(1)` → `ConfirmAcceptQuest()` path, preserve one lightweight accepted ID, consume the pending offer and expose the matching accepted quest through rich membership/index/info queries.
 - [ ] Preserve the selected offer's supplied identity, title, level, meta flag and current completion in the accepted rich view, consistent with Forever difficulty lookup. Retain the selected snapshot across gossip closure or replacement rather than reading later gossip rows.
 - [ ] Model authored ordinary offers as not-world, not-failed, nonreplayable and not previously completed, with no item/currency rewards in this scenario. Unknown map, waypoint, tag, theme and criteria metadata remain absent; do not copy another quest's seed defaults or claim native values.
-- [ ] Publish one rich row and one lightweight ID before the existing queued acceptance event. Repeated confirmation without a pending offer is inert; cancellation and separate environments must not gain membership.
+- [ ] After acceptance returns, expose one rich row and one lightweight ID and preserve the existing queued acceptance event. Repeated confirmation without a pending offer is inert; cancellation and separate environments must not gain membership. These assertions do not establish native event timing or internal enqueue ordering.
 - [ ] Allow explicit `C_QuestLog.AddQuestWatch` for the accepted ordinary quest, with coherent membership, count and log-index mapping. No automatic-watch policy is required by this fixture.
 
 ## How it works
