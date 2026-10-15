@@ -9,3 +9,7 @@ mod feed;
 mod fixtures;
 #[path = "widget_text_column/queries.rs"]
 mod queries;
+#[path = "widget_text_column/selector_security.rs"]
+mod selector_security;
+#[path = "widget_two_records/helpers.rs"]
+mod selector_shared;

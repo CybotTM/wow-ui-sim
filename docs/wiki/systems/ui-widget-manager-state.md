@@ -121,7 +121,7 @@ The [row ledger](../../specs/texture-and-text-row.md#known-gaps-current-cycle) o
 
 ### TextColumnRow passive checkpoint — 2026-10-14
 
-[Owning contract](../../specs/ui-widget-text-column-row.md) records supplied outer/nested records, an empty environment-local map, type-21 normal feeds and six authored tests. Getter/projector/registration are absent; compilation and populated RED/GREEN remain unproved. Actual cached lifecycle and security require separate execution; no native parity claim.
+[Owning contract](../../specs/ui-widget-text-column-row.md) records supplied outer/nested records, an empty environment-local map, type-21 normal feeds and authored query/feed/security/consumer tests. Getter/projector/registration are absent; compilation and populated RED/GREEN remain unproved. Actual cached lifecycle and security require separate execution; no native parity claim.
 
 ## Sources
 
