@@ -6,7 +6,7 @@ Source-only research dated 2026-10-15. No simulator implementation changes and n
 
 The initial nine findings below were a bounded first pass, **not the total gap count**. The expanded pass inventories literal script registrations and tracks checked, mismatched, unresolved and unchecked behavior rather than treating a small shortlist as coverage.
 
-[Additional rendering and minimap findings](additional-rendering-and-map.md): T4 glyph alpha-gradient rendering, T5 transactional font validation, M1 2D minimap overlays, M2 position-derived ping state/events, M3 zoom/view/CVar coupling.
+[Additional rendering and minimap findings](additional-rendering-and-map.md): T4 glyph alpha-gradient rendering, T5 transactional font validation, T6 shared FontObject live propagation, M1 2D minimap overlays, M2 position-derived ping state/events, M3 zoom/view/CVar coupling.
 
 [Additional animation findings](additional-animation.md): A1 ignored transform configuration, A2 live loop state, A3 loop-mode validation, A4 order bounds, A5 group initial offsets. The alpha `SetChange` no-op claim was rejected after tracing its real registration.
 

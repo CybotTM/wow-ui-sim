@@ -18,7 +18,7 @@ Expanded pass against simulator `2da20225ba147dda579dd01164917cc16f0618ed`; exte
 
 **External:** `Engine/Source/Frame/CSimpleFontString_Scripts.cpp:285-320` validates positive height and reports success only if `SetFont` succeeds. `Engine/Source/Frame/CSimpleRender.cpp:1228-1266`, `CSimpleFontString::SetFont`, offset `0x00483750`, calls `TextBlockGenerateFont` before changing the existing handle/height; failed generation returns 0 with prior font intact. The failure chain is explicit: `Engine/Source/Services/TextBlock.cpp:333-379` → `Engine/Source/Gxu/GxuFontMain.cpp:862-898` → `Engine/Source/Gxu/GxuFontFont.cpp:217-239` → `Engine/Source/Gxu/GxuFontFace.cpp:72-112`; an uncached name whose file cannot be read yields no face/handle, not a default-font success.
 
-The public `SetTextHeight` wrapper at `CSimpleFontString_Scripts.cpp:490-509`, offset `0x0048DDB0`, rejects nonpositive height **before** calling the core setter, and is registered at `:737`. A contrary falsification based only on the unvalidated core `CSimpleRender.cpp:1271-1277` was rejected: core mutation and the Lua API wrapper are different boundaries.
+The public `SetTextHeight` wrapper at `CSimpleFontString_Scripts.cpp:490-509`, offset `0x0048DDB0`, rejects nonpositive height **before** calling the core setter, and is registered at `:737`. The unvalidated internal setter at `CSimpleRender.cpp:1271-1277` does not bypass that public Lua boundary.
 
 **Simulator:** `src/lua_api/frame/methods/text_attribute_event/text/formatting.rs:330-398` accepts any non-nil font path, stores path/size/outline and returns true without loading/validating the font. `:433-447` permits zero/negative size and aliases `SetTextHeight` to that assignment. The getter can therefore advertise an invalid requested font/height regardless of the renderer's eventual resource resolution.
 
@@ -29,6 +29,16 @@ The public `SetTextHeight` wrapper at `CSimpleFontString_Scripts.cpp:490-509`, o
 **Regression:** valid font→missing/corrupt asset leaves prior getter and rendered text intact; valid asset updates both. Check invalid heights and repeated valid assignment without losing existing text. Tests must observe return/state/render coherence, not assert which internal loader was called.
 
 **Applicability:** reconstructed 3.3.5a failure/height contract; modern flags and font APIs may differ. Resource existence must use the simulator's supported asset sources, not require the original client's MPQ layout.
+
+## T6 — Shared FontObject mutations do not update existing FontStrings
+
+**External:** `Engine/Source/Frame/CSimpleFontable.cpp:20-37`, offset `0x00485160`, links an attached fontable to its Font object and applies initial attributes. `Engine/Source/Frame/CSimpleFont.cpp:145-155`, `UpdateObjects`, offset `0x004963F0`, walks those attachments on later mutations. Font `SetFont`, `SetTextColor` and `SetSpacing` invoke it (`Engine/Source/Frame/CSimpleFont_Scripts.cpp:143-166,182-194,273-289`). `Engine/Source/Frame/CSimpleFontStringAttributes.cpp:68-99,103-135` projects changed categories; local FontString setters clear inheritance bits for their overridden font/colour/spacing categories.
+
+**Simulator:** Font is a Lua table. `src/lua_api/globals/font_strings_collection/fonts.rs:102-116,181-195,234-244` mutates table fields without notifying attached strings. `src/lua_api/frame/methods/button_anchor_hierarchy/font_strings.rs:283-318,414-485` reads and applies snapshots to widget fields and stores the object reference. Rendering/measurement uses those widget fields, not a live dereference of the Font table. Returning the original object from `GetFontObject` therefore does not establish a live dependency.
+
+**Counterexample:** attach existing FontStrings A/B to shared Font F. Change F's font/height, colour or spacing: the reconstructed attachment updates eligible A/B fields, while simulator snapshots stay unchanged. Give only A a local colour override, then change F's colour again: A should retain its override while B follows F under the historical contract. This is a source-derived fixture, not executed output.
+
+**Rework/regression:** preserve a live association and per-category local-versus-inherited provenance, then project actual Font changes to eligible existing strings and invalidate their measurement/rendering. Reassignment must detach from the old Font; local overrides must survive updates in other categories. Test two strings, three mutation categories, one local override, reassignment and exact `GetFontObject` identity in a single grouped fixture. Existing creation-time inheritance and [spacing snapshot/independence tests](../specs/fontstring-spacing.md) are not proof of later shared mutation. That owning contract explicitly leaves live propagation unverified; resolve target-profile behavior before extending it. Font-to-Font, EditBox and button consumers need their own traces; do not extrapolate this bounded FontString result to every fontable.
 
 ## M1 — Minimap texture methods do not drive its 2D overlays
 
