@@ -28,10 +28,13 @@ This passive scaffold is uncompiled/unexecuted at this checkpoint. Existing `que
 
 - `tests/ui_widget_double_icon_selector.rs`: first public missing-selector counterexample, with existing required-number behavior as its control. Executed at sourcea56: one unique FAIL/exit101 at “missing widgetID must reject, not return nil”; the failed assertion establishes successful target call, not independently its returned value. Environment/control setup passed; later target error-message assertions were unreached. Independent saved audit: `/home/osso/.local/state/wow-ui-sim/verification/doubleicon-selector-next/runtime-red-report.md`. No passive scaffold dependency or populated/lifecycle proof.
 
+- `tests/ui_widget_double_icon_and_text.rs` and `tests/widget_double_icon/`: nine authored **UNCOMPILED / UNEXECUTED** supplied-result cases. Cover complete fields/freshness/replacement (including distinct in/out animation values), numeric selectors and actual secret wrappers, distinct IDs/removal/restoration, environments, normal-feed state-before-event/rejection atomicity, and unchanged cached activation/update/Hidden/reacquisition/membership removal/live unregister. Feed callback failures are retained and asserted outside handlers. Passive input scaffold only; populated-result RED must execute before getter implementation.
+
 ## Known gaps (current cycle)
 
 - [x] Execute the public selector regression and independently distinguish its reached rejection-contract failure from compilation/setup failure; retained as RED, not acceptance.
-- [ ] Review supplied record/map/feed scaffolding and populated query/secret/isolation/cached-lifecycle fixtures before integration. Private authored candidates are not compiled or executed evidence.
+- [x] Integrate explicit record/map/feed scaffold and source-audited populated query/secret/isolation/cached-lifecycle fixtures, correcting swallowed callback failures and ambiguous animation-field values. Source review is not compilation or behavior proof.
+- [ ] Compile and execute the nine supplied-result cases; distinguish reached populated failures from setup/compilation failures before implementing the getter.
 - [ ] Implement the modeled getter against behavioral counterexamples, then verify focused behavior, profile preservation and normal startup. Full parent acceptance remains separate.
 
 ## Out of scope

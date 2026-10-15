@@ -127,7 +127,17 @@ The [row ledger](../../specs/texture-and-text-row.md#known-gaps-current-cycle) o
 
 [Capability/proof matrix](../../specs/ui-widget-text-column-row.md#bounded-retail-producer-proof--2026-10-15) owns independent `dcd2fbd12` Retail eight-case PASS and separate nine-control PASS, nonadditive nested output, actual cached nested-pool lifecycle and exact exclusions. Compile/copy PASS retains one external dependency warning; pressure guard FAILED unit-prefix validation before monitoring. Scoped source/root-format PASS is separate. No new Spacer owning proof, PTR/default-check/ordinary-startup/owning/native/render/full-parent acceptance or frozen-packet update.
 
+### DoubleIconAndText passive scaffold and selector RED — 2026-10-15
+
+[Owning contract](../../specs/ui-widget-double-icon-and-text.md) is the field/type and behavior SSOT. Source `4cb2b5e98` adds an explicit supplied record, initially empty environment-local map and type5 normal typed-feed storage. This passive scaffold is **UNCOMPILED / UNEXECUTED** at this checkpoint: no modeled projection or getter registration, demo seeds or native defaults. Callable/nil compatibility is not modeled getter evidence.
+
+The first selector regression actually executed at `a56e11267`: **one unique case FAIL, exit101**, after environment setup and the existing manager required-number control passed. The missing-selector target call succeeded instead of rejecting; the failing assertion does not independently establish its returned value. Later target error-message assertions were unreached. Duplicated nested libtest summaries are parent/child propagation of the same case, not two cases. Independent saved audit: `/home/osso/.local/state/wow-ui-sim/verification/doubleicon-selector-next/runtime-red-report.md`. Main's private erratum `/home/osso/.local/state/wow-ui-sim/handoff/doubleicon-selector-red-main-disposition.md` corrects the report's permission annotation: decimal33216 is a regular file with mode0700, not0440; no execution-permission failure occurred. Frozen report and RED streams remain unchanged.
+
+Selector RED is not populated-result, isolation or cached-lifecycle acceptance. Broader C_UIWidgetManager lifecycle, popup, performance and full-parent acceptance remain OPEN; no native/render/profile parity follows. Later authored or integrated tests gain no execution credit from this checkpoint.
+
 ## Sources
+
+- [DoubleIconAndText contract](../../specs/ui-widget-double-icon-and-text.md) — supplied-record and consumer requirements, passive scaffold inventory and selector RED boundary.
 
 - [TextureAndTextRow contract](../../specs/texture-and-text-row.md) — single-source supplied-row contract, historical RED, bounded independent Retail/PTR/source gates, independent final owning/check/format PASS, separate Retail/PTR diagnostic audits and suppression limits; committed public packet with bounded candidate/canonical integrity/privacy/navigation PASS; broader acceptance remains open.
 
