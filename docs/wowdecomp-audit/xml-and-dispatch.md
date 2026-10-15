@@ -39,6 +39,14 @@ Trust is stored metadata controlling replacement, **not part of the registry key
 
 **Applicability:** reconstructed 3.3.5a file-status/continuation evidence. Current profile-specific diagnostic policy remains to be resolved; no loader fixture was run here.
 
+## Include depth — unmeasured boundary, not a demonstrated mismatch
+
+Cross-file XML `<Include>` depth is separate from XML element nesting and Lua call-stack depth. `Engine/Source/FrameXML/FrameXML.cpp:427-498` recursively invokes `FrameXML_ProcessFile` for an included XML file, with no explicit include-depth/path-cycle guard in the inspected path. `Engine/Source/FrameXML/XMLTree.cpp:160-199,290-310` handles per-file element trees through Expat; it does not establish the Include recursion limit.
+
+Simulator `src/loader/xml_file.rs:21-53,433-454` similarly recurses into `load_xml_file` without a depth/cycle check there. `src/loader/load_addon_trace.rs:54-69` increments/decrements `xml_load_addon_depth` for load-scope reporting, not a maximum-depth limit. Both traced paths are recursive; that does **not** mean unlimited depth succeeds or that the original client lacks every possible outer guard.
+
+No numeric maximum, safe depth, cycle failure mode or native parity was measured. Future behavioral coverage should distinguish a finite `A→B→…` Include chain, `A→A`/`A→B→A` cycles, repeated noncyclic includes and deep elements within one file, recording the actual client's diagnostic/termination boundary. Do not add a simulator cap solely because a counter exists, or infer native limits from the reconstruction's compiler/platform stack size. No depth probe or repository code was run here.
+
 ## Leads not accepted as simulator defects
 
 | Lead | Why not promoted |
