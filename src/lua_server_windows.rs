@@ -35,6 +35,8 @@ pub enum Request {
         height: u32,
         filter: Option<String>,
         crop: Option<String>,
+        #[serde(default)]
+        png: bool,
     },
 }
 
@@ -70,6 +72,7 @@ pub enum LuaCommand {
         height: u32,
         filter: Option<String>,
         crop: Option<String>,
+        png: bool,
         respond: mpsc::Sender<Response>,
     },
     MouseMove {
@@ -124,6 +127,7 @@ pub mod client {
         _height: u32,
         _filter: Option<String>,
         _crop: Option<String>,
+        _png: bool,
     ) -> Result<String, String> {
         Err(UNSUPPORTED.into())
     }

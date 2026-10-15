@@ -98,9 +98,13 @@ enum Commands {
 
     /// Render UI to an image file (requires running server)
     Screenshot {
-        /// Output file path (always lossy WebP at quality 50, extension forced to .webp)
+        /// Output file path (extension forced to .webp, or .png with --png)
         #[arg(short, long, default_value = "screenshot.webp")]
         output: PathBuf,
+
+        /// Save lossless PNG instead of lossy WebP
+        #[arg(long)]
+        png: bool,
 
         /// Image width in pixels
         #[arg(long, default_value_t = 1600)]
@@ -321,7 +325,8 @@ fn handle_command(command: Commands) {
             height,
             filter,
             crop,
-        } => take_screenshot(&output, width, height, filter, crop),
+            png,
+        } => take_screenshot(&output, width, height, filter, crop, png),
         Commands::MouseMove { x, y } => mouse_move(x, y),
         Commands::MouseClick { x, y } => mouse_click(x, y),
         Commands::ExtractTextures {
@@ -696,6 +701,7 @@ fn take_screenshot(
     height: u32,
     filter: Option<String>,
     crop: Option<String>,
+    png: bool,
 ) {
     let socket = resolve_socket();
     // Canonicalize output path so the server can write to the right location
@@ -709,6 +715,7 @@ fn take_screenshot(
         height,
         filter,
         crop,
+        png,
     ) {
         Ok(msg) => println!("{}", msg),
         Err(e) => {
@@ -825,7 +832,10 @@ mod tests {
     fn screenshot_png_flag_parses() {
         let cli = Cli::try_parse_from(["wow-cli", "screenshot", "--png"])
             .expect("screenshot should accept the explicit PNG option");
-        assert!(matches!(cli.command, Commands::Screenshot { .. }));
+        assert!(matches!(
+            cli.command,
+            Commands::Screenshot { png: true, .. }
+        ));
     }
 
     #[test]
@@ -855,8 +865,10 @@ mod tests {
                 output,
                 width,
                 height,
+                png,
                 ..
             } => {
+                assert!(!png);
                 assert_eq!(output, PathBuf::from("screenshot.webp"));
                 assert_eq!((width, height), (1600, 1200));
             }

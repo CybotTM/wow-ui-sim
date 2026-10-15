@@ -49,6 +49,9 @@ pub enum Request {
         filter: Option<String>,
         /// Crop the output image to WxH+X+Y (e.g., 700x150+400+650)
         crop: Option<String>,
+        /// Save lossless PNG instead of the default WebP.
+        #[serde(default)]
+        png: bool,
     },
     /// Move the in-app mouse cursor and dispatch hover scripts.
     MouseMove {
@@ -105,6 +108,7 @@ pub enum LuaCommand {
         height: u32,
         filter: Option<String>,
         crop: Option<String>,
+        png: bool,
         respond: mpsc::Sender<Response>,
     },
     MouseMove {
@@ -322,7 +326,8 @@ fn send_app_command_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>)
             height,
             filter,
             crop,
-        } => send_screenshot_command(cmd_tx, output, width, height, filter, crop),
+            png,
+        } => send_screenshot_command(cmd_tx, output, width, height, filter, crop, png),
         Request::MouseMove { x, y } => send_mouse_move_command(cmd_tx, x, y),
         Request::MouseClick { x, y } => send_mouse_click_command(cmd_tx, x, y),
     }
@@ -367,6 +372,7 @@ fn send_screenshot_command(
     height: u32,
     filter: Option<String>,
     crop: Option<String>,
+    png: bool,
 ) -> Response {
     send_command(cmd_tx, |respond| LuaCommand::Screenshot {
         output,
@@ -374,6 +380,7 @@ fn send_screenshot_command(
         height,
         filter,
         crop,
+        png,
         respond,
     })
 }
@@ -480,6 +487,7 @@ pub mod client {
         height: u32,
         filter: Option<String>,
         crop: Option<String>,
+        png: bool,
     ) -> Result<String, String> {
         let response = send_request(
             socket,
@@ -489,6 +497,7 @@ pub mod client {
                 height,
                 filter,
                 crop,
+                png,
             },
         )?;
         match response {
@@ -535,6 +544,9 @@ pub mod client {
         })
     }
 }
+
+#[cfg(test)]
+mod screenshot_tests;
 
 #[cfg(test)]
 mod tests {

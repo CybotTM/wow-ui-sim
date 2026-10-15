@@ -68,6 +68,7 @@ pub(super) fn dispatch_screenshot(dispatch: CommandDispatch) {
         height,
         filter,
         crop,
+        png,
         dump_tree,
     }) = dispatch.command
     else {
@@ -82,6 +83,7 @@ pub(super) fn dispatch_screenshot(dispatch: CommandDispatch) {
             height,
             filter,
             crop,
+            png,
             delay: dispatch.delay,
             exec_lua: dispatch.exec_lua.as_deref(),
             exec_lua_secure: dispatch.exec_lua_secure,
@@ -244,6 +246,7 @@ pub(super) struct ScreenshotCommand<'a> {
     pub(super) height: u32,
     pub(super) filter: Option<String>,
     pub(super) crop: Option<String>,
+    pub(super) png: bool,
     pub(super) delay: Option<u64>,
     pub(super) exec_lua: Option<&'a str>,
     pub(super) exec_lua_secure: bool,
@@ -270,8 +273,7 @@ pub(super) fn run_screenshot(
 
     let img = render_screenshot_image(&batch, &glyph_atlas, command.width, command.height);
     let img = apply_optional_crop(img, command.crop.as_deref());
-    let output = command.output.with_extension("webp");
-    save_screenshot(&img, &output);
+    let output = save_screenshot(&img, &command.output, command.png);
     eprintln!(
         "Saved {}x{} screenshot to {}",
         img.width(),
@@ -426,14 +428,11 @@ fn apply_crop(img: image::RgbaImage, crop_str: &str) -> image::RgbaImage {
     img.view(crop_x, crop_y, crop_width, crop_height).to_image()
 }
 
-fn save_screenshot(img: &image::RgbaImage, output: &Path) {
-    let output = output.with_extension("webp");
-    let encoder = webp::Encoder::from_rgba(img.as_raw(), img.width(), img.height());
-    let mem = encoder.encode(15.0);
-    if let Err(e) = std::fs::write(&output, &*mem) {
-        eprintln!("Failed to save WebP: {}", e);
+fn save_screenshot(img: &image::RgbaImage, output: &Path, png: bool) -> PathBuf {
+    wow_ui_sim::screenshot_output::save_screenshot(img, output, png, 15.0).unwrap_or_else(|e| {
+        eprintln!("Failed to save screenshot: {e}");
         std::process::exit(1);
-    }
+    })
 }
 
 fn create_texture_manager() -> wow_ui_sim::texture::TextureManager {

@@ -18,8 +18,8 @@ impl App {
         height: u32,
         filter: Option<&str>,
         crop: Option<&str>,
+        png: bool,
     ) -> LuaResponse {
-        let output_path = Path::new(output).with_extension("webp");
         let (batch, mut glyph_atlas) = self.build_screenshot_batch(width, height, filter);
         let glyph_data = glyph_atlas_data(&mut glyph_atlas);
         let mut tex_mgr = self.texture_manager.borrow_mut();
@@ -29,9 +29,11 @@ impl App {
             Err(e) => return LuaResponse::Error(e),
         };
 
-        if let Err(e) = save_screenshot(&img, &output_path) {
-            return LuaResponse::Error(format!("Failed to save screenshot: {}", e));
-        }
+        let output_path =
+            match crate::screenshot_output::save_screenshot(&img, Path::new(output), png, 65.0) {
+                Ok(path) => path,
+                Err(e) => return LuaResponse::Error(format!("Failed to save screenshot: {e}")),
+            };
 
         LuaResponse::Output(format_screenshot_saved_message(
             &img,
@@ -153,12 +155,4 @@ fn apply_crop(img: image::RgbaImage, crop_str: &str) -> Result<image::RgbaImage,
         ));
     }
     Ok(img.view(cx, cy, cw, ch).to_image())
-}
-
-/// Save screenshot image as lossy WebP (quality 65). Extension is forced to .webp.
-fn save_screenshot(img: &image::RgbaImage, output: &Path) -> Result<(), String> {
-    let output = output.with_extension("webp");
-    let encoder = webp::Encoder::from_rgba(img.as_raw(), img.width(), img.height());
-    let mem = encoder.encode(65.0);
-    std::fs::write(&output, &*mem).map_err(|e| e.to_string())
 }

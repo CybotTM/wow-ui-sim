@@ -86,6 +86,8 @@ pub mod quest_ui_map;
 pub mod render;
 pub mod saved_variables;
 pub mod screen;
+#[cfg(feature = "gui")]
+pub mod screenshot_output;
 pub mod self_test;
 pub mod server_snapshot_import;
 pub mod sound;

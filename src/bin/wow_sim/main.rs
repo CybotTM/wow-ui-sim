@@ -93,6 +93,9 @@ enum Commands {
     Screenshot {
         #[arg(short, long, default_value = "screenshot.webp")]
         output: PathBuf,
+        /// Save lossless PNG instead of lossy WebP
+        #[arg(long)]
+        png: bool,
         #[arg(long, default_value_t = 1600)]
         width: u32,
         #[arg(long, default_value_t = 1200)]
@@ -636,6 +639,31 @@ fn update_dump_layout_rects(env: &WowLuaEnv) {
 mod tests {
     use super::*;
     use clap::Parser;
+
+    #[cfg(feature = "gui")]
+    #[test]
+    fn screenshot_png_selection_preserves_defaults() {
+        for png in [false, true] {
+            let mut argv = vec!["wow-sim", "screenshot"];
+            if png {
+                argv.push("--png");
+            }
+            let args = Args::try_parse_from(argv).unwrap();
+            let Some(Commands::Screenshot {
+                output,
+                width,
+                height,
+                png: selected,
+                ..
+            }) = args.command
+            else {
+                panic!("expected screenshot command");
+            };
+            assert_eq!(selected, png);
+            assert_eq!(output, PathBuf::from("screenshot.webp"));
+            assert_eq!((width, height), (1600, 1200));
+        }
+    }
 
     #[test]
     fn legacy_character_select_flag_maps_to_character_select_screen() {
