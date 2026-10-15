@@ -1,3 +1,7 @@
+## [2026-10-15] docs | Public offer enrichment decision reconciled
+
+[API inventory](systems/lua-api.md#public-offer-rich-log-state-split), [central receipt](../baselines/README.md#public-offer-rich-log-coherence-red--2026-10-15) and index now reflect the answered enrichment request and link the [owning policy](../specs/quest-offer-rich-log-coherence.md). Source `edf7dcec6` has three authored UNEXECUTED tests; guarded baseline compilation running, no runtime verdict or production fix. Historical final-coherence RED, 13 passing controls and first compile failure retained; no new execution or broader acceptance.
+
 ## [2026-10-15] evidence | Slider and repaired EditMode focused execution
 
 [Slider owner](../specs/slider-bound-thumb-layout.md#tests-asserting-this-spec) and [EditMode follow-up](investigations/editmode-layout.md#focused-repaired-fixture-execution--2026-10-15) record saved sourcefb4b31b8f bounded Retail library execution. Independent saved-runtime reconciliation PASS; historical failures, admission/rejection coverage and broader acceptance remain open.
