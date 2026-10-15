@@ -462,11 +462,13 @@ fn emit_rotated_horiz_tiles(batch: &mut QuadBatch, strip: RotatedHorizTileStrip<
             v_range
         };
         // Rotated: U maps to screen Y (top→bottom), V maps to screen X (left→right)
+        let v_right = v_start + v_range;
+        let v_left = v_right - v_extent;
         let uvs = [
-            [u_min, v_start + v_extent], // TL: top of strip, right side of V tile
-            [u_min, v_start],            // TR: top of strip, left side of V tile
-            [u_max, v_start],            // BR: bottom of strip, left side of V tile
-            [u_max, v_start + v_extent], // BL: bottom of strip, right side of V tile
+            [u_min, v_right], // TL: start of the reversed V tile
+            [u_min, v_left],  // TR: clip the tile prefix at the right edge
+            [u_max, v_left],  // BR
+            [u_max, v_right], // BL
         ];
         batch.push_textured_path_uv4(tile_bounds, uvs, &cropped_path, strip.tint, strip.blend);
         x += strip.tile_w;
@@ -745,5 +747,84 @@ mod tests {
         assert_eq!(batch.vertices[1].position, [64.0, 0.0]);
         assert_eq!(batch.vertices[4].position, [64.0, 0.0]);
         assert_eq!(batch.vertices[5].position, [128.0, 0.0]);
+    }
+}
+
+#[cfg(test)]
+mod rotated_tail_tests {
+    use super::*;
+
+    const RED: [u8; 3] = [255, 0, 0];
+    const BLUE: [u8; 3] = [0, 0, 255];
+    // Cropped source artwork, top to bottom. Reversed V displays blue then red.
+    const SOURCE_COLUMN: [[u8; 3]; 16] = [
+        RED, RED, RED, RED, RED, RED, RED, RED, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE,
+    ];
+
+    fn emit_rotated_row(width: usize) -> QuadBatch {
+        let info = UvRepeatInfo {
+            u_min: 0.25,
+            u_max: 0.75,
+            v_min: 0.0,
+            v_max: 1.0,
+            repeat_x: 1.0,
+            repeat_y: width as f32 / 16.0,
+            dir: TileDir::Horizontal,
+            rotated: true,
+        };
+        let mut batch = QuadBatch::new();
+        emit_rotated_horiz_tiles(
+            &mut batch,
+            RotatedHorizTileStrip {
+                bounds: Rectangle::new(Point::ORIGIN, Size::new(width as f32, 16.0)),
+                info: &info,
+                tex_path: "Interface/Test/RotatedTileTail",
+                tile_w: 16.0,
+                tint: [1.0; 4],
+                blend: BlendMode::Alpha,
+            },
+        );
+        batch
+    }
+
+    fn sample_pixel_row(batch: &QuadBatch, width: usize) -> Vec<[u8; 3]> {
+        (0..width)
+            .map(|pixel| {
+                let center_x = pixel as f32 + 0.5;
+                let quad = batch
+                    .vertices
+                    .chunks_exact(4)
+                    .find(|quad| center_x >= quad[0].position[0] && center_x < quad[1].position[0])
+                    .expect("each row pixel must be covered");
+                let left_x = quad[0].position[0];
+                let right_x = quad[1].position[0];
+                let fraction = (center_x - left_x) / (right_x - left_x);
+                let left_v = quad[0].tex_coords[1];
+                let right_v = quad[1].tex_coords[1];
+                let v = left_v + fraction * (right_v - left_v);
+                SOURCE_COLUMN[(v * SOURCE_COLUMN.len() as f32).floor() as usize]
+            })
+            .collect()
+    }
+
+    #[test]
+    fn rotated_partial_tile_preserves_full_tile_prefix() {
+        let batch = emit_rotated_row(40);
+        let expected = [
+            BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, RED, RED, RED, RED, RED, RED, RED, RED,
+            BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, RED, RED, RED, RED, RED, RED, RED, RED,
+            BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE,
+        ];
+        assert_eq!(sample_pixel_row(&batch, 40), expected);
+    }
+
+    #[test]
+    fn rotated_complete_tile_keeps_reversed_v_orientation() {
+        let batch = emit_rotated_row(32);
+        let expected = [
+            BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, RED, RED, RED, RED, RED, RED, RED, RED,
+            BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, RED, RED, RED, RED, RED, RED, RED, RED,
+        ];
+        assert_eq!(sample_pixel_row(&batch, 32), expected);
     }
 }
