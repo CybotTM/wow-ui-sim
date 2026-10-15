@@ -4,7 +4,7 @@ Navigation to the [source-only research audit](../../wowdecomp-audit/README.md).
 
 ## Sources
 
-- [Audit index](../../wowdecomp-audit/README.md) — coverage, discrepancy matrix and interpretation limits.
+- [Audit index](../../wowdecomp-audit/README.md) — [finding catalogue](../../wowdecomp-audit/findings.md) and [coverage ledger](../../wowdecomp-audit/coverage.md).
 - [Security assessment](../../wowdecomp-audit/security.md) — read before using the external checkout; execution is not authorized.
 - [Textures and text](../../wowdecomp-audit/textures-and-text.md) — detailed source comparisons.
 - [Controls and layout](../../wowdecomp-audit/controls-and-layout.md) — detailed source comparisons.

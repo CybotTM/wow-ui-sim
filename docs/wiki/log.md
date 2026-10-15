@@ -2599,3 +2599,7 @@ Public-API tests reproduce a whole-link secrecy failure on Retail and PTR before
 ## [2026-10-15] research | wowdecomp audit navigation
 
 Added [[wowdecomp-audit]] ([reference page](reference/wowdecomp-audit.md)) and index navigation to the [owning audit directory](../wowdecomp-audit/README.md); findings, provenance, security assessment and proof limits remain there. Documentation only; no external code execution.
+
+## [2026-10-15] research | Expanded wowdecomp source navigation
+
+Added direct finding-catalogue and coverage-ledger links to the [existing reference page](reference/wowdecomp-audit.md); the [audit directory](../wowdecomp-audit/README.md) remains the owner.
