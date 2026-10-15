@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | Slider and repaired EditMode focused execution
+
+[Slider owner](../specs/slider-bound-thumb-layout.md#tests-asserting-this-spec) and [EditMode follow-up](investigations/editmode-layout.md#focused-repaired-fixture-execution--2026-10-15) record saved sourcefb4b31b8f bounded Retail library execution. Independent agent5533 reconciliation pending; historical failures, admission/rejection coverage and broader acceptance remain open.
+
 ## [2026-10-15] evidence | Watch membership bounded model execution
 
 [Current receipt](../baselines/README.md#current-watch-membership-model-execution--2026-10-15) owns sourcef91 build/seals, 39 bounded model PASS and inventory8427 discovery only. [API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links contract and header-fixture limits. Independent saved model-runtime reconciliation PASS; actual normal original/header bounded GREEN; independent saved normal-runtime reconciliation PASS. Fresh startup FAIL10/14 exit1; baseline bytes unchanged. Central receipt owns stream-only checker correction and consumer limits. Source27 host-PSI abort, UnitRole warning and source40a/source704 historical results retained; baseline JSON unchanged, broader acceptance open.

@@ -9,8 +9,9 @@ of native endpoint parity.
 
 - [x] Preserve thumb dimensions; center on the track cross-axis and at the
   value midpoint. Increasing values move right horizontally and down vertically.
-- [ ] Preserve non-default thumb/ancestor scale across query/render geometry;
-  selected executed cases use scale 1.
+- [x] Preserve non-default thumb/ancestor scale in the bounded executed CPU
+  render-list fixtures below, with query agreement/stability at final/max only;
+  not universal scale or scale-only invalidation acceptance.
 - [x] At scale 1, value, range, orientation, binding and track/thumb resize changes
   update query geometry, including synchronous queries inside `OnValueChanged`.
 - [ ] Query and render admission require the same real positive finite resolved
@@ -51,14 +52,17 @@ increasing percentage. All paths are within cached `Blizzard_SharedXML`.
 
 Executed bounded integration cases in `tests/widget_slider.rs` cover value/range/orientation/resize geometry and rebinding/unresolved/authored-anchor controls. See [central receipt](../baselines/README.md#verified-scoped-receipts--2026-10-15) for runtime-source attribution and the full Slider group. A separate saved exact run of `slider_thumb_render_rect_tracks_mutations_without_query_side_effects` passed 1/1 on source136: CPU render-list inclusion and horizontal/vertical/value/range/size mutation, without Lua geometry queries priming layout. Independent report: `/home/osso/.local/state/wow-ui-sim/verification/slider-query-free-saved-next/report.md`. Scale remains 1; this is not GPU or whole-current-tree proof.
 
-Two new library cases in `src/iced_app/slider_scale_tests.rs` remain **UNEXECUTED**: ancestor scales0.5/2 and thumb-local scales0.5/1.5 at ancestor2, both orientations, each min/mid/max. They warm layout before scale changes. Within each of eight fixtures, min/mid/max CPU render-list assertions precede that fixture's first Lua geometry query: 24 endpoint observations containing 48 track/thumb rectangles in total. Query agreement and unchanged rendered rectangles are checked only at final/max. The first post-scale value change also dirties layout, so these cases do not isolate scale-only invalidation. This is authored simulator-policy coverage, not a production counterexample, GPU proof or native endpoint claim.
+Library cases `slider_scale_inherited_thumb_endpoints_without_query_priming` and `slider_scale_thumb_local_endpoints_without_query_priming` in `src/iced_app/slider_scale_tests.rs` passed **2/2, 0 FAIL, exit0** at source `fb4b31b8f7b97bc460f15c0554fb39b91e8c6e2a` on 2026-10-15: ancestor scales0.5/2 and thumb-local scales0.5/1.5 at ancestor2, both orientations, each min/mid/max. They warm layout before scale changes. Within each of eight fixtures, min/mid/max CPU render-list assertions precede that fixture's first Lua geometry query: 24 endpoint observations containing 48 track/thumb rectangles in total. Query agreement and unchanged rendered rectangles are checked only at final/max. The first post-scale value change also dirties layout, so these cases do not isolate scale-only invalidation. This is executed bounded simulator-policy coverage, not a production counterexample, GPU proof, all-scale acceptance or native endpoint claim.
+
+Saved private epoch: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/slider-editmode-retail-library-20261015T183908014044Z`. `focused-runtime-results.json` and full `slider-scale-two/stdout`/`stderr` record execution; `seal-lib-tests.json` identifies `artifacts/deps/wow_ui_sim-85a9bc14e8805300` (SHA256 `f528c5a7f958e3c468fb1fbc53456550c27e9e6f259a335de5fed5a89e3abaae`). Retail GUI-feature library no-run compilation completed in 6m52s, exit0, zero compiler diagnostics; guard exited without abort. Compilation alone is not runtime proof; the build summary's UNEXECUTED label predates the focused results. Independent saved-runtime reconciliation by agent5533 is **pending** until its report exists. Existing source701 default-check evidence remains separate, not rerun or current focused-runtime proof.
 
 ## Known gaps (current cycle)
 
 - [x] Bounded public-query/mutation and callback geometry tests passed on runtime source136.
 - [x] Separate earlier [GPU receipt](../rendering-pipeline.md#combined-feedback-gpu-receipt--2026-10-15) establishes midpoint thumb visibility at its recorded source.
 - [x] Source136 query-free CPU render-list mutation regression passed separately.
-- [ ] Execute the two new non-unit-scale CPU render-list cases; source-oracle inspection is not runtime acceptance.
+- [x] Execute the two non-unit-scale CPU render-list cases: sourcefb4b31b8f bounded 2/2 PASS above; independent reconciliation pending.
+- [ ] Shared positive-finite query/render admission and rejection coverage remain open; positive-sized scale fixtures do not establish rejection behavior.
 - [ ] Native endpoint parity, full integration and current-source live-render acceptance remain open.
 
 ## Out of scope

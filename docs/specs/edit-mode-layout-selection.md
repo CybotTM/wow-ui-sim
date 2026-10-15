@@ -28,7 +28,13 @@ Current Retail/PTR startup must preserve the active-layout index supplied by the
 
 [Source-suite terminal state and fixture repair](../wiki/investigations/editmode-layout.md#test-only-fixture-repair--pending-verification-2026-10-12): main independently read source `41cbf5005` terminal JSON, integration exit0/prefork exit0/lib exit100. Broad suite FAIL: `setup_layout_info_remaps_active_saved_layout_after_prepending_presets` and `setup_layout_info_preserves_distinct_saved_action_bar_profile_settings`; [retained terminal packet](../../data/test-perf/evidence/fullsuite-41cb-2026-10-12/README.md) records 15,123 PASS / 2 FAIL / 19 reported skips, independently reconciled without replay.
 
-Test-only `b41b42fc1` sets active4 for the second custom layout, active3 for the first custom layout (not layoutID9), and retains native active2/Classic control. Production combined-index behavior is unchanged. Gate3095 found cached manager state invalidated the new preset control; follow-up `ac170ecbf` resets it. Runtime remained resource-BLOCKED, zero tests invoked; repaired tests are not credited PASS. Earlier bounded Retail/PTR and native-user evidence below retains its scope, not broad-suite acceptance.
+Test-only `b41b42fc1` sets active4 for the second custom layout, active3 for the first custom layout (not layoutID9), and retains native active2/Classic control. Production combined-index behavior is unchanged. Gate3095 found cached manager state invalidated the new preset control; follow-up `ac170ecbf` resets it. At that historical checkpoint runtime remained resource-BLOCKED, zero tests invoked; no repaired-test PASS was credited then. Earlier bounded Retail/PTR and native-user evidence below retains its scope, not broad-suite acceptance.
+
+## Focused fixture execution — 2026-10-15
+
+At source `fb4b31b8f7b97bc460f15c0554fb39b91e8c6e2a`, Retail GUI-feature library cases `setup_layout_info_preserves_active_combined_index_after_prepending_presets` and `setup_layout_info_preserves_distinct_saved_action_bar_profile_settings` each passed 1/1, 0 FAIL, exit0 (focused total2 PASS). Repairs `b41b42fc1`/`ac170ecbf` now have bounded fixture execution: active4 selects Saved Wide; active2 selects Classic after manager-cache reset; active3 selects Ultrawide despite saved layoutID9, preserving distinct action-bar settings.
+
+Private evidence uses the [shared library epoch/seal](slider-bound-thumb-layout.md#tests-asserting-this-spec): `focused-runtime-results.json` and full `editmode-combined-index/stdout`/`stderr`, `editmode-distinct-settings/stdout`/`stderr` were read. Independent saved-runtime reconciliation by agent5533 remains **pending** until its report exists. Historical source41cb broad FAIL remains historical FAIL; these two passes are not a full-suite rerun, fresh whole-startup, PTR or native/pixel acceptance. Existing source701 default check remains separate and was not rerun.
 
 ## Known gaps (current cycle)
 

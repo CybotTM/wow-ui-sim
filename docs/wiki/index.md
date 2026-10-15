@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | Slider and repaired EditMode focused execution
+
+[Slider owner](../specs/slider-bound-thumb-layout.md#tests-asserting-this-spec) and [EditMode follow-up](investigations/editmode-layout.md#focused-repaired-fixture-execution--2026-10-15) record saved sourcefb4b31b8f bounded Retail library execution. Independent agent5533 reconciliation pending; historical failures, admission/rejection coverage and broader acceptance remain open.
+
 ## [2026-10-15] evidence | Public offer rich-log RED
 
 [Existing quest wiki](systems/lua-api.md#public-offer-rich-log-state-split) links the [owning coherence contract](../specs/quest-offer-rich-log-coherence.md) and [central saved receipt](../baselines/README.md#public-offer-rich-log-coherence-red--2026-10-15): sourcef94 public acceptance0 PASS/1 FAIL at final Rust assertion; separate lightweight controls13 PASS. First source90 compile failure is not RED. Independent saved-runtime reconciliation PASS; user rich-metadata choice pending, with no production/default/baseline changes. Prior sourcef91 watch/normal GREEN and startup10/14 FAIL remain separate.

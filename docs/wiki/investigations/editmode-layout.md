@@ -108,7 +108,11 @@ The private stage-qualified submission receipt records asynchronous `full-suite 
 
 ### Test-only fixture repair — pending verification, 2026-10-12
 
-Committed `b41b42fc1` corrects the fixtures to the existing combined-index contract: active4 selects the second custom layout; active3 selects the first custom layout, not layoutID9; native active2 remains the Classic control. Production native combined-index behavior is unchanged. Gate3095 found the new preset control reused cached manager layoutInfo; follow-up `ac170ecbf` resets that fixture before selecting Classic. Runtime was resource-BLOCKED, zero tests invoked; neither repaired test is credited PASS. The terminal failure above belongs to source `41cbf5005`, not a post-repair run. Earlier Retail `7d9d9f621` and PTR `f3145424c` startup2/cache10/Enter3 proof and native user acceptance retain their bounded scopes; they do not make the current broad suite passing.
+Committed `b41b42fc1` corrects the fixtures to the existing combined-index contract: active4 selects the second custom layout; active3 selects the first custom layout, not layoutID9; native active2 remains the Classic control. Production native combined-index behavior is unchanged. Gate3095 found the new preset control reused cached manager layoutInfo; follow-up `ac170ecbf` resets that fixture before selecting Classic. At that historical checkpoint runtime was resource-BLOCKED, zero tests invoked; neither repaired test was credited PASS then. The terminal failure above belongs to source `41cbf5005`, not a post-repair run. Earlier Retail `7d9d9f621` and PTR `f3145424c` startup2/cache10/Enter3 proof and native user acceptance retain their bounded scopes; they do not make the current broad suite passing.
+
+### Focused repaired-fixture execution — 2026-10-15
+
+[Owning selection spec](../../specs/edit-mode-layout-selection.md#focused-fixture-execution--2026-10-15) records actual sourcefb4b31b8f Retail GUI-feature execution of both repaired fixtures. This closes only their bounded execution gap, not historical source41cb broad FAIL or full-suite/startup/native acceptance. Independent saved-runtime reconciliation by agent5533 remains **pending** until its report exists; no production remap, vendor, user-cache or orientation change is implied.
 
 Follow-up: selecting the saved layout still was not enough for the visible UI.
 The startup fast path for action bars seeded Widescreen `systemInfo` and replayed
