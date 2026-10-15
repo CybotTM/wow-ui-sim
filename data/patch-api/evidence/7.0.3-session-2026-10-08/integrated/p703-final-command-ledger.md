@@ -33,7 +33,7 @@ Runtime/source scope: `771a7d7cc` (same src/tests/tools/source bytes as final in
 | `cargo test --no-default-features --features sound,gui,casc,client-mists --test integration -- patch_7_0_3_recipe_name_filter_changes_catalog_results --nocapture` | 0 | 1 passed | [mists-patch-7-0-3-recipe-name-filter-changes-catalog-results](mists-patch-7-0-3-recipe-name-filter-changes-catalog-results.proof.json) |
 | `cargo test --no-default-features --features sound,gui,casc,client-mists --test integration -- mists_trade_skill_api:: --nocapture` | 0 | 1 passed | [mists-mists-trade-skill-api](mists-mists-trade-skill-api.proof.json) |
 | `cargo test --no-default-features --features sound,gui,casc,client-mists --test integration -- professions_api:: --nocapture` | 0 | 1 passed, 35 passed | [mists-professions-api](mists-professions-api.proof.json) |
-| `cargo test --no-default-features --features sound,gui,casc,client-mists --test integration -- c_collection_api::test_mount_journal --nocapture` | 0 | 12 passed | [mists-c-collection-api::test-mount-journal](mists-c-collection-api::test-mount-journal.proof.json) |
+| `cargo test --no-default-features --features sound,gui,casc,client-mists --test integration -- c_collection_api::test_mount_journal --nocapture` | 0 | 12 passed | [mists-c-collection-api::test-mount-journal](mists-c-collection-api--test-mount-journal.proof.json) |
 
 Register reproduction: 47/47 byte-identical, including recorded flags. Extracts: 44/47 identical; the exact three inherited 12.0.5/12.0.7 mismatches and 12.1.0 unknown-template failure match the integrated master evidence.
 

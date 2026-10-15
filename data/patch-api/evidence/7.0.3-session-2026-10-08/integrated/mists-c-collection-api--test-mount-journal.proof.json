@@ -4069,6 +4069,6 @@
     "tools/tests/test_server_snapshot_deploy.py": "8f4683ed6e757812abf09b84ea807f2d3acd2987720bdcb2204a2dabede8ff72"
   },
   "exit": 0,
-  "log": "mists-c-collection-api::test-mount-journal.txt",
+  "log": "mists-c-collection-api--test-mount-journal.txt",
   "log_sha256": "7c5e96c3c8faffc4c13d6dd976170cd25bc99235e2e6f33ea94b38aed9ed639f"
 }

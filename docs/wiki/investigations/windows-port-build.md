@@ -43,7 +43,24 @@ Known remaining observations from the smoke runs:
 - Vulkan validation/Galaxy overlay layer warnings can appear during screenshot creation, but rendering still completes.
 - `target\debug\wow-sim.exe --no-addons lua-errors` now logs `WTF import source (read-only): <ACCOUNT> @ <REALM>/<PLAYER>`, confirming the Windows WTF path is found without making it a write target.
 
+## Evidence filename portability — 2026-10-15
+
+Tracked evidence filenames contained literal `::`, incompatible with Windows checkout paths. This is separate from the historical Windows build/startup proof above; that proof does not establish checkout of the current evidence namespace.
+
+Main's integration scope replaces literal `::` with `--` in 115 tracked evidence filenames. Raw log bytes remain unchanged. One renamed live receipt, `data/patch-api/evidence/7.0.3-session-2026-10-08/integrated/mists-c-collection-api--test-mount-journal.proof.json`, changes only its `/log` field to the renamed sibling. Its live `artifact-hashes.json` digest is refreshed; five original candidate metadata/live-reference documents receive bounded reference/checksum updates. The receipt exception means not all 115 renamed files remain byte-identical.
+
+Historical `scope`, snapshot keys, source paths and original digests remain historical, not rewritten. Private original bytes are preserved at:
+
+- `/home/osso/.local/state/wow-ui-sim/handoff/portable-path-candidate-next/originals`
+- `/home/osso/.local/state/wow-ui-sim/handoff/portable-receipt-pointer-next0700/originals`
+
+Proof is bounded to lexical namespace and static live-link/digest checks. The original candidate reported the receipt pointer unresolved; the separate amendment supplies its closure, not a rewrite of that historical report. This documentation update records main's supplied integration scope, not independent adoption verification. **Native Windows checkout remains unexecuted/open.** No general long-path fix, Docker stderr resolution, or release/tag/push change is claimed.
+
 ## Sources
+
+- Private `portable-path-candidate-next/report.md` — original 115-name candidate, five metadata documents, preservation and static-check limits.
+- Private `portable-receipt-pointer-next0700/report.md` — separate one-field receipt amendment and live digest refresh; prepared-only status preserved.
+- Main's 2026-10-15 integration handoff — bounded integration scope recorded above; no new runtime proof.
 
 - [Cargo manifest](../../Cargo.toml) - root feature selection for `iced`, `fast-build`, and CASC examples
 - [iced-dynamic manifest](../../iced-dynamic/Cargo.toml) - dynamic re-export crate that triggered the Windows DLL link
@@ -52,5 +69,6 @@ Known remaining observations from the smoke runs:
 
 ## See Also
 
+- [Wiki index](../index.md) — investigation catalog and portability checkpoint
 - [[cli-commands]] - smoke-test commands used for build and screenshot verification
 - [[rendering-pipeline]] - screenshot path and GPU renderer context

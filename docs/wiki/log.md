@@ -2068,3 +2068,7 @@ Updated [manager inventory](systems/ui-widget-manager-state.md#doublestatusbar--
 ## [2026-10-14] source | TextColumnRow producer after eight-case RED
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#textcolumnrow-passive-checkpoint--2026-10-14) and [owning contract](../specs/ui-widget-text-column-row.md#current-source-checkpoint--2026-10-14) supersede the passive-stage status above: `dcd2fbd12` adds getter/projector/registration after actual eight-case Retail populated-result RED at `9a60ded79`. Producer GREEN, cached lifecycle/security and native parity remain unproved.
+
+## [2026-10-15] docs | Windows evidence filename portability
+
+Updated [existing Windows investigation](investigations/windows-port-build.md#evidence-filename-portability--2026-10-15) and [index](index.md): main-supplied 115-name correction, unchanged raw logs, one live `/log` exception with refreshed digest, five candidate metadata/live-reference documents and preserved private originals. Historical scope/snapshot/source paths remain historical. Lexical/static proof only; native Windows checkout open, no general long-path or Docker stderr resolution, release/tag/push change or independent adoption claim. Docs only; no code/tests/evidence edits, commits, builds/runtime/network or delegation.

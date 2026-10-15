@@ -741,7 +741,7 @@
       "payload_sha256": "156d0854fc9255bf5c9023eeb2985e400a919941611c29532bc23a49949b35bc"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.admission.json",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_unknown.admission.json",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.admission.json",
       "original_bytes": 2108,
       "original_text_sha256": "4496f56a7f0292acda4ee76e60f47dc299af7ceb8c03b214bb68c254095384a2",
@@ -749,7 +749,7 @@
       "payload_sha256": "27515a7a69a48122b229b5dedd170f0fc01068b8d42aa362ae9d3d49bbea1a89"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.launcher.txt",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_known.launcher.txt",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.launcher.txt",
       "original_bytes": 320,
       "original_text_sha256": "99e62db91bacbcf2b3719187423ec2b7c32312351fcbe52e148d0f7844cd0b0f",
@@ -757,7 +757,7 @@
       "payload_sha256": "99e62db91bacbcf2b3719187423ec2b7c32312351fcbe52e148d0f7844cd0b0f"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.argv.json",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_unknown.argv.json",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.argv.json",
       "original_bytes": 1659,
       "original_text_sha256": "50b4fd23acc82a5f599910dc61fbe54c5258d3fbba69bd1eef1c4049ed1e064f",
@@ -765,7 +765,7 @@
       "payload_sha256": "ee3ab35be1deec2b792fd0d8a9b598f369eff2da46e764f24274ac49429fdff5"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.stderr",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_known.stderr",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.stderr",
       "original_bytes": 641,
       "original_text_sha256": "0b5c9841cb6f41fb5f22a454f5a2bff8cb3ade3cf125e7506389350babc8b3a6",
@@ -773,7 +773,7 @@
       "payload_sha256": "0b5c9841cb6f41fb5f22a454f5a2bff8cb3ade3cf125e7506389350babc8b3a6"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.launcher.txt",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_unknown.launcher.txt",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.launcher.txt",
       "original_bytes": 324,
       "original_text_sha256": "82745224e48c83c4e2847e0afbff922300d0a7b3fbfddc3e3afe7524c7cde361",
@@ -781,7 +781,7 @@
       "payload_sha256": "82745224e48c83c4e2847e0afbff922300d0a7b3fbfddc3e3afe7524c7cde361"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.admission.json",
+      "path": "20261013T102206703519Z/runtime-controls/hero_talents--test_set_atlas_numeric_element_id.admission.json",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.admission.json",
       "original_bytes": 2110,
       "original_text_sha256": "24a5426c5d816aeab8f983ca9859e4b0204b9b4f890c90000a2dc09d9c51a8dc",
@@ -789,7 +789,7 @@
       "payload_sha256": "f778736808c9cd637d1f57ec0ecebbd63f73955804dc5d850ec42a109aa83e91"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.terminal.txt",
+      "path": "20261013T102206703519Z/runtime-controls/hero_talents--test_set_atlas_numeric_element_id.terminal.txt",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.terminal.txt",
       "original_bytes": 149,
       "original_text_sha256": "5ec2a526925c8b7cbf1b000f8b1934048c3836627c78bc22091a8c1fe302cbad",
@@ -797,7 +797,7 @@
       "payload_sha256": "5ec2a526925c8b7cbf1b000f8b1934048c3836627c78bc22091a8c1fe302cbad"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.terminal.txt",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_unknown.terminal.txt",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.terminal.txt",
       "original_bytes": 149,
       "original_text_sha256": "5ec2a526925c8b7cbf1b000f8b1934048c3836627c78bc22091a8c1fe302cbad",
@@ -805,7 +805,7 @@
       "payload_sha256": "5ec2a526925c8b7cbf1b000f8b1934048c3836627c78bc22091a8c1fe302cbad"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.result.json",
+      "path": "20261013T102206703519Z/runtime-controls/hero_talents--test_set_atlas_numeric_element_id.result.json",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.result.json",
       "original_bytes": 460,
       "original_text_sha256": "76f90ba692c76ed202da7cd9787b67f76ab819104a41542214426b23806edb0e",
@@ -813,7 +813,7 @@
       "payload_sha256": "2a21e4a68f61ce946cb6e10a8db60d227e75d4aba387b0b666dfd59212caebe3"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.terminal.txt",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_known.terminal.txt",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.terminal.txt",
       "original_bytes": 149,
       "original_text_sha256": "5ec2a526925c8b7cbf1b000f8b1934048c3836627c78bc22091a8c1fe302cbad",
@@ -821,7 +821,7 @@
       "payload_sha256": "5ec2a526925c8b7cbf1b000f8b1934048c3836627c78bc22091a8c1fe302cbad"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.stdout",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_unknown.stdout",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.stdout",
       "original_bytes": 168,
       "original_text_sha256": "0d5749ce4746368a4c7e92c63a5afbbfd23bacd0c8ece27677fb991335fa4fd0",
@@ -829,7 +829,7 @@
       "payload_sha256": "e7130d6b66883466de36556117164d6cbd11469ff35001464d5d6990aefc1b4b"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.argv.json",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_known.argv.json",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.argv.json",
       "original_bytes": 1651,
       "original_text_sha256": "de36be0e97b20664cd32604e49ddb6240dc22db426138622358a480ac9d7365b",
@@ -837,7 +837,7 @@
       "payload_sha256": "5ac68214e0f58b91553bc998dfc26cd6cbd586bcda5cd3de4b6bde6d907a3eb6"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.stdout",
+      "path": "20261013T102206703519Z/runtime-controls/hero_talents--test_set_atlas_numeric_element_id.stdout",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.stdout",
       "original_bytes": 176,
       "original_text_sha256": "ae988afabea5acc44967b37c028487a6ec84919283a7a5484dcaba07bbc459f6",
@@ -845,7 +845,7 @@
       "payload_sha256": "5445792e1bcffe5d4ee52d08ea6c4b3382a31ff76416b36d0dcdbeae9be3c029"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.admission.json",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_known.admission.json",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.admission.json",
       "original_bytes": 2110,
       "original_text_sha256": "548f47bba0cbcac3f1fdc1890e3bee3d119889803dd92e01b1020cb59b5b76f9",
@@ -853,7 +853,7 @@
       "payload_sha256": "8bf5c2858fbbd59c7a26d7b7113266b4e9313f26721830ce082b841e85d15f5e"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.stderr",
+      "path": "20261013T102206703519Z/runtime-controls/hero_talents--test_set_atlas_numeric_element_id.stderr",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.stderr",
       "original_bytes": 641,
       "original_text_sha256": "ff8f13b14af020bc47e3d4021df723580fda8fa46fb766f3af8a3557795fd634",
@@ -861,7 +861,7 @@
       "payload_sha256": "ff8f13b14af020bc47e3d4021df723580fda8fa46fb766f3af8a3557795fd634"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.stdout",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_known.stdout",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.stdout",
       "original_bytes": 166,
       "original_text_sha256": "aee875bed78ab7222173d9f745202ce4bc8d433455eb285cd10a42bdaeae23b2",
@@ -869,7 +869,7 @@
       "payload_sha256": "44127ccda8566e6e6cbb0fde7110eef250f31b0c5b99984e39672863328daf7b"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.launcher.txt",
+      "path": "20261013T102206703519Z/runtime-controls/hero_talents--test_set_atlas_numeric_element_id.launcher.txt",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.launcher.txt",
       "original_bytes": 330,
       "original_text_sha256": "8877c5e490cd5d39a99fdc94ffd5928a4f39f79ca4067c64929ff877475eedfd",
@@ -885,7 +885,7 @@
       "payload_sha256": "ca970383ad8cf83ca98575ed5cea629735f287070cde398c06b3dbb406c7a116"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.result.json",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_unknown.result.json",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.result.json",
       "original_bytes": 452,
       "original_text_sha256": "29b4d960b564637cc4118a9f0d5efcd8da2d01cd8b911ad60d1cc851c828c603",
@@ -893,7 +893,7 @@
       "payload_sha256": "65f217683d65bcdae746aa2908270e29a7756f20cd63f94f2ba2be74f76cb39d"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.stderr",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_unknown.stderr",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_unknown.stderr",
       "original_bytes": 643,
       "original_text_sha256": "49ebfd179d4955124b8075c794bfc836ca4145009408d020c52855e84c6c0486",
@@ -901,7 +901,7 @@
       "payload_sha256": "49ebfd179d4955124b8075c794bfc836ca4145009408d020c52855e84c6c0486"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.result.json",
+      "path": "20261013T102206703519Z/runtime-controls/methods_texture--test_set_atlas_known.result.json",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/methods_texture::test_set_atlas_known.result.json",
       "original_bytes": 450,
       "original_text_sha256": "d611c04a3644af996838e81aa73061da772ccb955b84c5e1f443dc2b80e6af41",
@@ -909,7 +909,7 @@
       "payload_sha256": "4478cc3167949ebe44c7dea1ac11b06926e13d8580ed0d92d7c14156a6980526"
     },
     {
-      "path": "20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.argv.json",
+      "path": "20261013T102206703519Z/runtime-controls/hero_talents--test_set_atlas_numeric_element_id.argv.json",
       "source": "<PRIVATE_VERIFICATION_ROOT>/ui-widget-bars-hud-green-current/20261013T102206703519Z/runtime-controls/hero_talents::test_set_atlas_numeric_element_id.argv.json",
       "original_bytes": 1691,
       "original_text_sha256": "d595e852047681aacc389f5c791338a71fff3c344e6d9860d63da1cf840b52c8",
