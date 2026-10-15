@@ -25,7 +25,7 @@
 
 ## Tests asserting this spec
 
-Authored tests; current PNG implementation has not been verified:
+At Rust revision `8feefbdbd`, the targeted screenshot selection passed 12 tests (8 library, 3 wow-cli, 1 wow-sim). This proves the encoder/socket/App fixtures below, not standalone full-startup capture or native render parity:
 
 - `src/screenshot_output.rs`: `png_preserves_every_rgba_byte_and_forces_extension`, `webp_has_riff_webp_signature_and_forces_extension`, `missing_parent_returns_write_error_for_both_formats`, `directory_destination_returns_write_error_for_both_formats` — encoder fixtures, extensions, and write errors only; not rendered output.
 - `src/bin/wow_sim/main.rs`: `screenshot_png_selection_preserves_defaults` — standalone parsing/defaults only.
@@ -35,7 +35,7 @@ Authored tests; current PNG implementation has not been verified:
 
 ## Known gaps (current cycle)
 
-- [ ] Establish current-source GREEN. Supplied corrected-argv RED at `76cb61c40779226bf1d8a224db7abd65a3e793d9` records two failures (PNG parsing and wire roundtrip) and one passing default control; it does not verify the added PNG implementation.
+- [x] Targeted screenshot tests GREEN at `8feefbdbd`: 12 passed, zero failed. Pre-implementation corrected-argv RED at `76cb61c40`: two PNG failures and one passing default control. Source/focused formatting and workspace formatting checks passed; the final default compile check remains pending.
 - [ ] Verify standalone and live capture end to end, including decoded PNG pixels, output paths/messages, and crop/viewport/color/layout preservation. Encoder and parser tests alone cannot establish these boundaries.
 
 ## Out of scope
