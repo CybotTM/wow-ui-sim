@@ -30,9 +30,19 @@ pub(super) use colorselect::register_colorselect;
 pub(super) fn set_value_step(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let step = val_to_f64(stack_val(state, 2));
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(f) = sim.widgets.get_mut_visual(id) {
-        f.slider_step = step;
+    let changed = {
+        let mut sim = borrow_state_mut(state)?;
+        let value = sim.widgets.get_mut_visual(id).map(|f| {
+            f.slider_step = step;
+            (f.widget_type, f.slider_value)
+        });
+        match value {
+            Some((WidgetType::Slider, value)) => apply_slider_value(&mut sim, id, value),
+            _ => None,
+        }
+    };
+    if let Some(value) = changed {
+        fire_value_changed(state, id, value, Some(false))?;
     }
     Ok(0)
 }
@@ -133,11 +143,40 @@ pub(super) fn is_dragging_thumb(state: &mut LuaState) -> LuaResult<u32> {
 // Shared value (Slider + StatusBar)
 // ---------------------------------------------------------------------------
 
-/// Clamp and apply `value` to a Slider, returning the clamped value.
-/// Returns `None` if the value was unchanged (no update needed).
+/// Choose the nearest minimum-relative step or maximum endpoint, tying upward.
+fn quantize_slider_value(value: f64, min: f64, max: f64, step: f64) -> f64 {
+    let clamped = value.clamp(min, max);
+    // Keep existing clamp semantics outside the modeled finite, positive-step domain.
+    // Guard an unrepresentable span before performing lattice arithmetic.
+    if !value.is_finite()
+        || !min.is_finite()
+        || !max.is_finite()
+        || !step.is_finite()
+        || step <= 0.0
+        || (min < 0.0 && max > f64::MAX + min)
+        || clamped == min
+        || clamped == max
+    {
+        return clamped;
+    }
+    let remainder = (clamped - min) % step;
+    let lower = (clamped - remainder).max(min);
+    let upper = if step >= max - lower {
+        max
+    } else {
+        lower + step
+    };
+    if clamped - lower < upper - clamped {
+        lower
+    } else {
+        upper
+    }
+}
+
+/// Apply a Slider assignment, returning its effective value only when changed.
 fn apply_slider_value(sim: &mut crate::lua_api::SimState, id: u64, value: f64) -> Option<f64> {
     let f = sim.widgets.get(id)?;
-    let clamped = value.clamp(f.slider_min, f.slider_max);
+    let clamped = quantize_slider_value(value, f.slider_min, f.slider_max, f.slider_step);
     if clamped == f.slider_value {
         return None;
     }

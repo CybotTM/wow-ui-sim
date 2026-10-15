@@ -4,8 +4,8 @@
 
 ## What it must do
 
-- [x] Deliver `(self, clampedValue, treatAsMouseEvent)` before returning, with the updated value readable inside the callback; omitted mouse flag is `false`, explicit `true` is forwarded.
-- [x] Retain existing clamping and suppress calls whose clamped value is unchanged, including same-value reentry from a callback.
+- [ ] Deliver `(self, effectiveValue, treatAsMouseEvent)` before returning, with the updated value readable inside the callback; omitted mouse flag is `false`, explicit `true` is forwarded.
+- [ ] Clamp and quantize Slider assignments as described below; suppress calls whose effective value is unchanged, including same-value reentry from a callback.
 - [x] Dispatch pre/normal/post bindings in order, including intrinsic bindings when no normal script exists.
 - [x] Report each handler error through the existing error handler and continue later bindings.
 - [x] Permit callbacks to update other widgets and CVars without a held simulator-state borrow; hidden sliders still dispatch.
@@ -14,13 +14,17 @@ The cached Forever `SimpleSliderAPIDocumentation.lua` documents `SetValue(value,
 
 ## Clean-room step assignment follow-up
 
-Wrath and Retail share the following simulator policy; it is not a recovered native algorithm. Current default step remains unchanged. For finite ordered bounds and positive step, choose the nearest minimum-relative lattice value or the maximum endpoint; ties choose the greater value. Step zero is continuous. Thus `[0,10]`, step2, value3 becomes4; step4, value9 becomes10 rather than8.
+C1 defines a shared clean-room simulator policy, not a recovered native algorithm or verified all-profile completion. Current positive default step remains unchanged. For finite ordered bounds and positive finite step, choose the nearest minimum-relative lattice value or the maximum endpoint; ties choose the greater numeric value. Step zero is continuous. Thus `[0,10]`, step2, value3 becomes4; step4, value9 becomes10 rather than8.
 
-- [ ] Apply quantization only to Slider programmatic value assignment; preserve StatusBar clamping and callback shape.
-- [ ] Re-evaluate the committed value when `SetValueStep` changes; dispatch synchronously only if the effective value changes, with a false mouse flag for step-triggered callbacks.
-- [ ] Preserve offset/negative minima, exact endpoints, same-effective-value suppression and existing callback observations. Do not infer dragging, native defaults or unsupported argument policy.
+- [ ] Quantize only Slider programmatic value assignment; preserve StatusBar clamping and callback shape.
+- [ ] Reapply the current stored Slider value through the same assignment when `SetValueStep` is called. Dispatch synchronously only if the effective value changes, with a false mouse flag after releasing the simulator-state borrow.
+- [ ] Preserve offset/negative minima, exact endpoints, same-effective-value suppression and existing dispatch/reentry/error behavior. Keep existing clamp semantics for unsupported nonfinite values/bounds, invalid steps and unrepresentable spans without attempting lattice arithmetic. This does not establish their native argument policy.
 
-`tests/slider_step_assignment.rs` adds five cases compiled in the source `3fa90ab7b` Retail integration artifact; all remain **UNEXECUTED**, with baseline RED pending actual runtime receipts. The fractional scale/CVar consumer explicitly chooses step0.01 to express its existing precision. Current producer remains clamp-only/stores-only; no behavioral RED or fix claimed.
+Producer authored in `src/lua_api/frame/methods/widgets/slider.rs`: pure quantization used by `apply_slider_value`, plus step-triggered reapplication using the existing dispatcher. No default initialization, C8 range-callback/lifecycle, mouse-drag producer or StatusBar changes.
+
+Actual Retail baseline: source `3fa90ab7b6f8cf836e09c19ed34115eba9f245c1`, epoch `cleanroom-controls-retail-baseline-20261015T223734529083Z/slider-step-first-red`, executed the five existing `tests/slider_step_assignment.rs` cases: **0 passed, 5 unique failures, exit 101**. Full stdout/stderr and `result.json` remain in the private verification archive under that epoch; no published receipt is claimed. Four failures report incorrect stored effective values; the duplicate-suppression case reports unwanted dispatch. These receipts establish reached RED against the clamp-only/stores-only producer, not GREEN for this edit.
+
+**GREEN pending main integration and verification.** No tests, builds or checks run for this authored producer. Existing five cases cover nearest lattice/max and upward ties, offset/negative minima, endpoints/duplicate suppression, step reapplication, and continuous Slider versus unsnapped StatusBar. No duplicate tests added. The fractional scale/CVar consumer explicitly chooses step0.01 to express its existing precision.
 
 ## How it works
 
