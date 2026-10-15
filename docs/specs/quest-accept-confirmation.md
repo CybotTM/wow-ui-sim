@@ -30,8 +30,10 @@ The new admin name/signature and absent-offer policy are explicit simulator desi
 
 - `tests/quest_accept_confirmation.rs`: five grouped fixtures, gated by Retail profile and 12.0.5 epoch; no separate Cargo target.
 - `src/lua_api/globals/admin_quests.rs`: gated explicit confirmation input; decodes two strings through `FromStack`, reads only the pending offer ID, releases the state borrow, and roots event strings across synchronous listeners. No offer is a no-op; no new storage or transition.
-- `src/lua_api/globals/missing_surface/gossip_info.rs`: existing available-quest selection producer; unchanged.
-- `src/lua_api/globals/quest_verbs.rs`: existing acceptance/close transitions; unchanged.
+- `src/lua_api/globals/missing_surface/gossip_info.rs`: available-quest selection now retains a full selected snapshot under the [rich-log coherence contract](quest-offer-rich-log-coherence.md).
+- `src/lua_api/globals/quest_verbs.rs`: acceptance now publishes absent rich membership in addition to the existing lightweight ID/event; confirmation and close semantics remain as specified here.
+
+Shared payload change `ccd9e2d01` replaces the pending numeric ID with an existing `QuestLogEntry`; the prompt extracts its ID before synchronous dispatch. Historical proof below predates this change. Current Retail preservation execution is pending; separate Forever43/43 evidence does not validate the Retail prompt.
 
 ## Tests asserting this spec
 
@@ -55,4 +57,4 @@ The new admin name/signature and absent-offer policy are explicit simulator desi
 
 ## Out of scope
 
-Native payload validation/defaults, popup cancellation/decline behavior, quest-sharing transport, full-log rejection policy, rich quest-log projection, generic event injection, source-row completion/accounting and changes to other supported profiles. Producer must be gated to the Retail profile/12.0.5 epoch; existing historical/non-Retail selection and acceptance behavior must remain unchanged. Fixtures assert simulator model transitions, not loaded Blizzard popup integration or native parity.
+Native payload validation/defaults, popup cancellation/decline behavior, quest-sharing transport, full-log rejection policy, rich quest-log projection, generic event injection, source-row completion/accounting and changes to other supported profiles. Producer must be gated to the Retail profile/12.0.5 epoch; existing historical/non-Retail prompt behavior must remain unchanged. The separately specified [shared rich-log enrichment](quest-offer-rich-log-coherence.md) adds accepted membership without redefining this prompt contract. Fixtures assert simulator model transitions, not loaded Blizzard popup integration or native parity.
