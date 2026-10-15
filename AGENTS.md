@@ -474,7 +474,7 @@ wow-sim --no-addons --no-saved-vars screenshot -o fast.webp           # Fast: sk
 
 WebP is the default: standalone quality 15, live IPC quality 65. Without `--png`, the extension is forced to `.webp`, even for `-o frame.png`. Explicit `--png` writes lossless PNG and forces `.png`. Encoding selection leaves source pixels, viewport (default 1600x1200), crop, color handling, and layout unchanged.
 
-`wow-cli screenshot --png -o live.webp` captures `live.png` from a running simulator; Windows IPC remains unsupported. PNG source is present; runtime verification is pending. See the [output-format contract](docs/specs/screenshot-output-format.md).
+`wow-cli screenshot --png -o live.webp` captures `live.png` from a running simulator; Windows IPC remains unsupported. See the [output-format contract](docs/specs/screenshot-output-format.md).
 
 ### Dump Frame Tree
 
