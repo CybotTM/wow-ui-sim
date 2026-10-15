@@ -1,6 +1,6 @@
 ## [2026-10-15] evidence | Watch membership bounded model execution
 
-[Current receipt](../baselines/README.md#current-watch-membership-model-execution--2026-10-15) owns sourcef91 build/seals, 39 bounded model PASS and inventory8427 discovery only. [API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links contract and header-fixture limits. Independent saved model-runtime reconciliation PASS; normal original/header/startup NOT EXECUTED awaiting FIFO. Source27 host-PSI abort, UnitRole warning and source40a/source704 historical results retained; baseline JSON unchanged, broader acceptance open.
+[Current receipt](../baselines/README.md#current-watch-membership-model-execution--2026-10-15) owns sourcef91 build/seals, 39 bounded model PASS and inventory8427 discovery only. [API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links contract and header-fixture limits. Independent saved model-runtime reconciliation PASS; Actual normal original/header bounded GREEN; independent normal verifier pending. Fresh startup FAIL10/14 exit1; baseline bytes unchanged. Central receipt owns stream-only checker correction and consumer limits. Source27 host-PSI abort, UnitRole warning and source40a/source704 historical results retained; baseline JSON unchanged, broader acceptance open.
 
 ## [2026-10-15] evidence | Watch projection and talent fixture executed
 

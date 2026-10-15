@@ -23,7 +23,7 @@ The Forever membership implementation replaces the all-ordinary-rows watch polic
 
 Prior runtime source40a has **28 PASS** (difficulty3 + watch-projection4 + finite21), plus the separately recorded normal watch/global-alias/voice checks; [prior receipt](../baselines/README.md#current-watchtalent-execution--2026-10-15) owns attribution. Those results cover the prior read-only projection, not this new explicit-membership implementation or revised tests. Source704's original normal Lua RED included static-only80002; source40a removed that stale producer. A separate source40a normal RED still observed zero-result add/remove, unchanged count2, nil type and zero events. Preserve both historical boundaries; no authored Rust RED is inferred.
 
-Current source `f91eb7aab` has **18 quest model PASS**: membership8 + revised projection4 + getter3 + whole cached header-consumer3. The [current central receipt](../baselines/README.md#current-watch-membership-model-execution--2026-10-15) owns build/seals, the separate finite21 controls and independent saved model-runtime PASS. Whole-header tests use explicit fixtures and replace the unrelated refresh tail; they are not normal-process header execution. Original normal membership probe, normal header probe and fresh startup are **NOT EXECUTED**, awaiting FIFO admission. Other-profile, native and full-parent acceptance remain open; the historical10-record/14-occurrence startup FAIL is not repaired or superseded by these model passes.
+Current source `f91eb7aab` has **18 quest model PASS**: membership8 + revised projection4 + getter3 + whole cached header-consumer3. The [current central receipt](../baselines/README.md#current-watch-membership-model-execution--2026-10-15) owns build/seals, the separate finite21 controls and independent saved model-runtime PASS. Whole-header tests use explicit fixtures and replace the unrelated refresh tail; they are not normal-process header execution. Actual normal original membership and actual `QuestMapFrame` header probes now show bounded GREEN markers, exit0 and no execLua error; the central receipt owns observations and retained stream-only checker correction. Independent normal-runtime verification remains pending. Fresh startup **FAIL:10 records /14 occurrences, exit1** is byte-identical to the committed baseline; no baseline JSON update. Other-profile, native, full UI lifecycle and full-parent acceptance remain open.
 
 ## How it works
 
@@ -39,7 +39,7 @@ Current source `f91eb7aab` has **18 quest model PASS**: membership8 + revised pr
 - `src/c_api/c_quest_log_watches.rs`: Forever membership mutators, type/count/index queries, legacy global mappings and synchronous notifications; seeded map stored in `SimState`.
 - `tests/wowforever_quest_watch_projection.rs`: revised live-row/explicit-membership projection assertions, four model cases PASS at source `f91eb7aab`.
 - `tests/wowforever_quest_watch_membership.rs` and `.lua`: membership, restore-call preservation and reentrant-event coverage, eight model cases PASS at source `f91eb7aab`; `tests/fixtures/quest_watch_membership_original.lua` retains the original probe.
-- `tests/wowforever_quest_header_consumer.rs` and `.lua`: three model cases PASS at source `f91eb7aab`; load whole cached QuestUtils and QuestMapFrame unchanged, exercise header-one track/untrack, world interleaving and the real NPE removal gate. An observer replaces only the unrelated UI-refresh tail; actual refresh/menu/frame-event lifecycle is not covered. Rich rows support one synthetic header, so second-header behavior is not fabricated. Normal header execution remains pending.
+- `tests/wowforever_quest_header_consumer.rs` and `.lua`: three model cases PASS at source `f91eb7aab`; load whole cached QuestUtils and QuestMapFrame unchanged, exercise header-one track/untrack, world interleaving and the real NPE removal gate. An observer replaces only the unrelated UI-refresh tail; actual refresh/menu/frame-event lifecycle is not covered. Rich rows support one synthetic header, so second-header behavior is not fabricated. Actual normal header execution now has bounded GREEN evidence in the central receipt; full refresh/UI parity remains unverified.
 
 ## Tests asserting this spec
 
@@ -52,9 +52,10 @@ Current source `f91eb7aab` has **18 quest model PASS**: membership8 + revised pr
 ## Known gaps (current cycle)
 
 - [x] Independently reconcile all 39 distinct saved model passes at source `f91eb7aab`; discovery and filtered cases are not passes.
-- [ ] Execute normal original/header probes; POI toggle, tracker and actual refresh/menu/frame-event lifecycle remain unverified beyond bounded model cases.
+- [x] Execute normal original/header probes with bounded GREEN observations; independent normal-runtime verification remains pending.
+- [ ] Verify POI toggle, tracker and actual refresh/menu/frame-event lifecycle beyond bounded consumer cases.
 - [ ] Verify other-profile preservation and default check; world-watch projection and broader query reconciliation remain open.
-- [ ] Native parity and whole-startup acceptance remain open, including earlier Gamepad errors. Prior source40a28 PASS and startup FAIL remain separate from current bounded membership proof.
+- [ ] Native parity and whole-startup acceptance remain open, including the fresh Gamepad startup FAIL. Prior source40a28 PASS and startup FAIL remain separate from current bounded membership proof.
 
 ## Out of scope
 
