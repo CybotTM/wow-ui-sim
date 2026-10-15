@@ -78,13 +78,22 @@ Independent saved-stream review passes the `dcd2fbd12` Retail eight-case produce
 
 The producer's separate nonincremental compile/copy gate passes, with one preserved external `iced_widget@0.14.2` deprecated `std::f32::INFINITY` warning. The pressure watcher **FAILED before monitoring**: unit-prefix validation rejected the producer unit. No successful continuous reserve/PSI/max/OOM guard operation is established; compile/runtime success does not repair that gap or prove default incremental/linker repair. Existing copied-executable receipt is reused, not new source/archive/external cache authentication. Scoped source/readability and root-format gates PASS separately; neither expands runtime coverage.
 
-Consumer texture/frame kits, timer, animations, scripted effect and model layer are neutralized; nonneutral fields are query-tested only. Widget-state assertions are not rendered/native comparison. PTR execution, default check, ordinary startup diagnostics, ordinary owning observation/publication reconciliation and full-parent acceptance remain pending. Earlier eight-case RED, six compile aborts, seventh linker failure and frozen packets remain historical evidence, not overwritten by this GREEN.
+Consumer texture/frame kits, timer, animations, scripted effect and model layer are neutralized; nonneutral fields are query-tested only. Widget-state assertions are not rendered/native comparison. PTR execution, ordinary owning observation/publication reconciliation and full-parent acceptance remain pending. Earlier eight-case RED, six compile aborts, seventh linker failure and frozen packets remain historical evidence, not overwritten by this GREEN.
+
+### Default-feature check and ordinary startup
+
+Independent review passes the later default-feature Retail `cargo check --offline --locked --message-format=json -j 1` at `576555c67` (tracked code unchanged from `dcd2fbd12`): exit 0, 733 JSON records, zero compiler diagnostics. `CARGO_INCREMENTAL=0` was explicit; this is not default incremental linker-repair evidence. Its first attempt remains incomplete after guard SIGTERM15 at the provisional host-reserve boundary. Corrected-prefix guards actually sampled both check attempts; retry completion does not establish unconditional guard safety or erase the producer build's earlier monitoring failure.
+
+The ordinary Retail `lua-errors` run independently exits 0 with `[]` plus LF and zero collected Lua errors; all 219 stderr lines were inspected. Loader warning/nil/requirement totals remain unknown in that invocation because diagnostics are gated and event-stage stderr is suppressed. It does not replace the separate 17-case behavior proof.
+
+A separate verbose ordinary `dump-tree` invocation retains event-stage diagnostics: 291 selected addon success summaries report zero loader warnings, **185 nil observations and 88 strict missing-requirement records**, plus one intentional `EDIT_MODE_LAYOUTS_UPDATED` skip. Those are per-load deduplicated records, not necessarily globally unique symbols or 88 demonstrated call failures. Exact full/bootstrap and omitted-addon/file counts remain unknown. The raw TextColumn member reports function/C and an absent one-nil result; no populated state was supplied in this probe. Normal startup has no complete requirements-clean PASS. Font logs report `casc=true` despite the explicit `WOW_SIM_CASC=0` environment; actual extraction is not established. Inherited read-only WTF/cache and finite update windows remain limits. This dump uses different settling/layout/probe work from `lua-errors`, so their timings are not a performance comparison.
 
 ## Remaining proof
 
 - [x] Compile tests and observe populated result-boundary RED before getter implementation: eight unique Retail cases fail querying explicitly supplied records; deeper assertions remain unreached.
 - [x] Independently verify bounded Retail projection, selector/security, deep snapshots, feeds and actual cached lifecycle: eight producer cases plus nine separate controls.
-- [ ] Exercise PTR cached consumer and affected default check/ordinary startup diagnostics; retain native/render and full-parent gaps.
+- [x] Complete the scoped default-feature check and capture both limited collector and verbose ordinary Retail diagnostics; preserve the observed nil/requirement gaps and skip.
+- [ ] Exercise PTR cached consumer and reconcile applicable ordinary-startup requirements; retain native/render and full-parent gaps.
 - [ ] Reconcile applicable publication evidence only after ordinary owning observation; preserve historical failures and broader acceptance gaps.
 
 Native catalogs/publishers, native interpolation/security/return parity, rendered output, empty-entry consumer lifecycle and nonneutral texture/effect/timer activation are not established by this slice. Other profiles and full-parent acceptance remain separately scoped.
