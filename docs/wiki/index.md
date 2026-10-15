@@ -1,3 +1,7 @@
+## [2026-10-15] source | Forever supplied quest difficulty
+
+[API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links the owning live-row contract and bounded policy. Original query/unchanged-consumer Lua REDs reproduced; current Rust/runtime GREEN remains pending.
+
 ## [2026-10-15] research | Screenshot fidelity
 
 [Encoding and inspection guidance](reference/screenshot-fidelity.md) distinguishes lossless storage, existing WebP defaults, original-resolution evidence and model-specific image resizing. No capture default, quality, viewport or renderer changes.

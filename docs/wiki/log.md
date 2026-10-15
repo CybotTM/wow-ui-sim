@@ -1,3 +1,7 @@
+## [2026-10-15] source | Forever quest difficulty lookup
+
+[API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links `70459ec5a`'s supplied-row query and owning contract. Original sealed runtime reproduced four known-row nil mismatches and the unchanged Camelot prefix failure; process0 did not mean behavioral success. Independent source/readability audit passed; current build and six new enum/query tests remain unexecuted. No native or clean-startup acceptance.
+
 ## [2026-10-15] source | Provider and experience enum follow-up
 
 [Owning finite contract](../specs/forever-finite-constants.md#provider-and-experience-enums--source-checkpoint-2026-10-15) records the source-published enum fix after fresh raw-namespace Lua RED. Three Rust regressions authored; new compilation/execution pending. Existing import/event PASS and failing startup retain their earlier source scope; no getter/provider/preset model or vendor changes.

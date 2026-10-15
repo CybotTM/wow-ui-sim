@@ -9,6 +9,10 @@ The [integrated checkpoint](../investigations/integrated-source-and-factory-proo
 
 [Path/ControlPoint](../../specs/path-control-point.md) belongs to the animation/XML subsystem, using existing target offsets and layout axes. The [owning Path proof ledger](../../specs/path-control-point.md#tests-asserting-this-spec) records recovered historical per-test GREEN; fresh startup/profile acceptance remains separately pending. Neither source inventory nor historical controls establish native or whole-handoff acceptance.
 
+## Forever supplied quest difficulty
+
+[Owning contract and proof status](../../specs/forever-quest-difficulty.md) records the Forever-only `C_QuestLog.GetQuestDifficultyLevel` live rich-row lookup. Row-level equality and explicit missing-input errors are simulator policies, not native parity. Original sealed query and unchanged Camelot title-consumer REDs precede producer `70459ec5a`; authored Rust tests, current build/runtime and other-profile preservation remain pending. No vendor behavior or stored CVars changed.
+
 ## Retail 12.0.5 spell and spellbook loss-of-control outputs
 
 Producer `cc69ac3c4` covers **EXACT313/326 only**: `C_Spell.GetSpellLossOfControlCooldownInfo` and `C_SpellBook.GetSpellBookItemLossOfControlCooldownInfo`. [Contract, inventory and proof SSOT](../../specs/spell-book-loss-of-control-outputs.md) records authored requirements and inferred policies. Both read the existing typed LoC map; book lookup resolves actual player-book bank0 entries, authenticating both original selectors before parsing/model access. Shared rooted DTO writer copies explicit records into a fresh ordinary five-field table: restricted `startTime`, `duration`, `modRate` are private NUMs under `cooldowns_restricted`; `isActive` and `shouldReplaceNormalCooldown` remain public NeverSecret BOOLs. Existing Action serialization shares the writer without changing its inactive-default policy; spell/book absence remains nil. No new acquisition/state/catalog/time model.
