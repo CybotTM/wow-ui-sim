@@ -1,6 +1,6 @@
 # Addon module imports
 
-World of Warcraft: Forever 1.60.1 Beta exposes `require(moduleName)` as an import of an already-finished addon Lua file, not a filesystem or package loader. The source contract is Warcraft Wiki revision 6879760; implementation notes live in [addon module imports](../wiki/systems/addon-module-imports.md).
+World of Warcraft: Forever 1.60.1 Beta exposes `require(moduleName)` as an import of an already-finished addon Lua file, not a filesystem or package loader. The `require` source contract is Warcraft Wiki revision 6879760. The added Forever `import` callable reuses simulator compatibility policy, not an established native `import=require` contract; implementation notes live in [addon module imports](../wiki/systems/addon-module-imports.md).
 
 ## What it must do
 
@@ -26,6 +26,13 @@ World of Warcraft: Forever 1.60.1 Beta exposes `require(moduleName)` as an impor
 - [x] Preserve registered file provenance for delayed nested closures; dynamically compiled chunks remain dynamic even with a spoofed addon filename.
 - [x] Reject a dynamic relative request because it has no file origin. This is an explicit simulator policy; the source contract does not specify it.
 
+### Forever import binding (simulator compatibility policy)
+
+- [ ] Expose global `import` only under `client-wowforever`, before secure-environment copying, through the same direct Rust completed-module backend as `require`; preserve the existing `require` contract.
+- [ ] Return the same completed table to insecure and secure addon consumers, preserving callable members and single file execution; reject unfinished/failed/missing/non-TOC modules and undeclared dependencies without autoload or host-package fallback.
+
+These unchecked requirements reuse simulator policy justified by vendor `import('.Utility')` after the TOC-loaded `Utility.lua` returns a table. Native import/require semantics, identity, grammar and error parity remain UNKNOWN.
+
 ### Profile isolation
 
 - [ ] Expose this API only for the `wowforever` profile. Other client profiles must retain their current `require` surface.
@@ -41,7 +48,7 @@ Path/dependency requirements have sixteen pure resolver tests; registry/value/pr
 ## Implementation inventory
 
 - `src/loader/module_import.rs` — pure logical path and direct-dependency resolver.
-- `src/loader/addon_modules.rs` — completed-value registry, prototype-identity caller provenance, and native `require` installation hook.
+- `src/loader/addon_modules.rs` — completed-value registry, prototype-identity caller provenance, and direct Rust `require`/Forever `import` installation seam.
 - `src/lua_api/env.rs` — per-VM module metadata; module values and source closures are rooted in the Lua registry.
 - `src/loader/mod.rs` — declares the profile/test-gated resolver and runtime modules.
 - `src/loader/lua_file.rs` — registers compiled-file provenance and publishes the existing execution helper's first return only after success.
@@ -58,6 +65,10 @@ Path/dependency requirements have sixteen pure resolver tests; registry/value/pr
 - `tests/forever_bug_capture.rs` — absolute local TOC loading followed by real error-capture consumers; requires the local BugGrabber/BugSack sources.
 - `tests/sandbox_dangerous_globals.rs` — profile-specific global/secure-environment exposure and absence of host package loading.
 - `tests/wowforever_profile.rs` — distinct profile identity, client paths, TOC routing and build information.
+
+## Binding checkpoint — 2026-10-15
+
+Implemented-source handoff pending integration/run: the binding adds only `import` registration to the existing backend, not a stub or new loader. Local source inspection at this docs update still shows `require` alone; no integrated binding or GREEN is claimed. [Owning wiki checkpoint](../wiki/systems/addon-module-imports.md#forever-import-binding--2026-10-15) records exact evidence and authored-test limits.
 
 ## Known gaps (current cycle)
 

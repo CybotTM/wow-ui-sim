@@ -1,3 +1,7 @@
+## [2026-10-15] docs | Forever import binding checkpoint
+
+Updated [owning module spec](../specs/addon-module-imports.md#binding-checkpoint--2026-10-15) and [wiki SSOT](systems/addon-module-imports.md#forever-import-binding--2026-10-15): actual136 completed Utility/missing-import RED, existing backend PASS, implemented-source integration/run pending and authored tests NOT GREEN. Reused policy is simulator compatibility, not native parity. Separate model/startup evidence retained without binding credit. Docs only; no source/tests/data/baseline JSON, runtime, commits or delegation.
+
 ## [2026-10-15] docs | Pending Forever70374 gamepad enums
 
 Updated [existing owning spec](../specs/forever-edit-mode-enums.md#pending-70374-gamepad-candidate--2026-10-15) and [profile link](systems/client-profiles.md#forever-gamepad-edit-mode--pending-2026-10-15) from private `candidate.patch`/`REPORT.md`: native-vendor values, actual sealed-binary RED and authored consumer regression remain distinct. Candidate integration, focused GREEN and new-binary startup gate pending; corrected failing baseline/counts unchanged. Docs only; no source/tests/data/subtext-spec edits, builds/runs, commits or delegation.

@@ -48,7 +48,10 @@ pub(crate) fn initialize(state: &mut LuaState) -> LuaResult<()> {
             registry_set(state, key, table);
         }
     }
-    state.register_function("require", require_module)
+    state.register_function("require", require_module)?;
+    // Reuse completed-module policy for the observed Forever import calls.
+    // This does not establish native import/require semantic or identity parity.
+    state.register_function("import", require_module)
 }
 
 /// Register file provenance before execution and hide its previous completed value.

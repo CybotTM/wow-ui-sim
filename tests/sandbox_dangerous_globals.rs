@@ -87,6 +87,27 @@ fn require_is_module_lookup_on_both_forever_environments() {
 }
 
 #[test]
+fn import_is_only_available_on_forever_in_both_environments() {
+    let env = env();
+    let (g, secure) = probe(&env, "import");
+    let expected = if cfg!(feature = "client-wowforever") {
+        "function"
+    } else {
+        "nil"
+    };
+    assert_eq!(g, expected);
+    assert_eq!(secure, expected);
+    #[cfg(feature = "client-wowforever")]
+    {
+        let (public_ok, secure_ok): (bool, bool) = env
+            .eval("local public = pcall(import, 'os'); local secure = pcall(__secureenv.import, 'os'); return public, secure")
+            .unwrap();
+        assert!(!public_ok, "Forever import must not load host packages");
+        assert!(!secure_ok, "secure import must not load host packages");
+    }
+}
+
+#[test]
 fn string_dump_nil_on_g_retained_on_secureenv() {
     let env = env();
     let (g, secure): (String, String) = env

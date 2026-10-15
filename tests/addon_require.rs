@@ -47,6 +47,113 @@ mod forever {
     }
 
     #[test]
+    fn import_reads_completed_utility_once_in_insecure_and_secure_addons() {
+        let addons = Addons::new();
+        for (name, metadata) in [
+            ("ImportNavigation", ""),
+            ("Blizzard_ImportNavigation", "## UseSecureEnvironment: 1"),
+        ] {
+            addons.load(
+                name,
+                metadata,
+                &[
+                    (
+                        "Utility.lua",
+                        r#"
+                        local _, private = ...
+                        private.utilityRuns = (private.utilityRuns or 0) + 1
+                        local Utility = { calls = 0, secure = issecure() }
+                        function Utility.Add(left, right)
+                            Utility.calls = Utility.calls + 1
+                            return left + right
+                        end
+                        return Utility
+                        "#,
+                    ),
+                    (
+                        "SmartNavigation.lua",
+                        r#"
+                        local Utility = import('.Utility')
+                        local _, private = ...
+                        private.utility = Utility
+                        assert(Utility.Add(7, 11) == 18)
+                        assert(Utility.secure == issecure())
+                        assert(rawequal(Utility, require('.Utility')))
+                        "#,
+                    ),
+                    (
+                        "Debug.lua",
+                        r#"
+                        local Utility = import('.Utility')
+                        local _, private = ...
+                        assert(rawequal(Utility, private.utility))
+                        assert(Utility.Add(19, 23) == 42)
+                        assert(Utility.calls == 2 and private.utilityRuns == 1)
+                        assert(Utility.secure == issecure())
+                        "#,
+                    ),
+                ],
+            );
+            addons.check(&format!(
+                "local value = import('{name}.Utility'); \
+                 assert(value.calls == 2); \
+                 assert(rawequal(value, require('{name}.Utility')))"
+            ));
+        }
+    }
+
+    #[test]
+    fn import_reuses_completion_and_direct_dependency_restrictions() {
+        let addons = Addons::new();
+        addons.load("ImportLibrary", "", &[("Value.lua", "return 61")]);
+        let toc = addons.write(
+            "ImportOrdering",
+            "",
+            &[
+                (
+                    "First.lua",
+                    r#"
+                    for _, name in ipairs({'.First', '.Later', '.Absent', '.OnDisk'}) do
+                        local ok, err = pcall(import, name)
+                        assert(not ok and string.find(err,
+                            'Invalid import: No module with that name exists', 1, true))
+                    end
+                    local ok, err = pcall(import, 'ImportLibrary.Value')
+                    assert(not ok and string.find(err,
+                        'Invalid import: Modules from other addons may only be imported if the calling addon has a direct dependency on the addon being imported',
+                        1, true))
+                    local _, private = ...
+                    assert(private.laterRuns == nil and private.diskRuns == nil)
+                    "#,
+                ),
+                (
+                    "Later.lua",
+                    r#"
+                    local _, private = ...
+                    private.laterRuns = (private.laterRuns or 0) + 1
+                    return 67
+                    "#,
+                ),
+                (
+                    "Check.lua",
+                    r#"
+                    local _, private = ...
+                    assert(import('.Later') == 67)
+                    assert(private.laterRuns == 1 and private.diskRuns == nil)
+                    "#,
+                ),
+            ],
+        );
+        std::fs::write(
+            toc.parent().unwrap().join("OnDisk.lua"),
+            "local _, private = ...; private.diskRuns = 1; return 71",
+        )
+        .unwrap();
+        let result = load_addon(&addons.env.loader_env(), &toc).unwrap();
+        assert!(result.warnings.is_empty(), "{:?}", result.warnings);
+    }
+
+    #[test]
     fn family_definitions_load_before_camelot_overrides_and_bare_dependents() {
         let addons = Addons::new();
         let toc = addons.write("FamilyOrdering", "", &[
@@ -324,8 +431,10 @@ mod forever {
         let toc = addons.write("Broken", "", &[("Bad.lua", "error('module failure')")]);
         let _ = load_addon(&addons.env.loader_env(), &toc);
         addons.check(r#"
-            local ok, err = pcall(require, 'Broken.Bad')
-            assert(not ok and string.find(err, 'Invalid import: No module with that name exists', 1, true))
+            for _, lookup in ipairs({require, import}) do
+                local ok, err = pcall(lookup, 'Broken.Bad')
+                assert(not ok and string.find(err, 'Invalid import: No module with that name exists', 1, true))
+            end
         "#);
     }
 }

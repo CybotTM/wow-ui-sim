@@ -8,9 +8,25 @@
 
 `src/loader/module_import.rs` resolves logical `Addon.Module` and leading-dot relative paths without file lookup. Disk-file cross-addon imports need a direct `## Dep:` or `## OptionalDeps:` target, compared ASCII-case-insensitively. Same-addon imports need no dependency. Dynamic callers may use absolute imports without that dependency check, but cannot make relative imports because they have no disk-file origin. The registry returns the documented errors for no completed module, cross-addon escape, and a missing direct dependency.
 
-`src/lua_api/env_init/mod.rs` installs the native import before secure-environment copying only under `client-wowforever`; both Forever environments receive the same loader-bound global. Other profiles still remove `require` from the insecure sandbox. This does not add Lua `package`, `dofile`, `loadfile`, or host filesystem behavior.
+`src/lua_api/env_init/mod.rs` installs the Rust `require` binding before secure-environment copying only under `client-wowforever`; both Forever environments receive the same loader-bound global. Other profiles still remove `require` from the insecure sandbox. This does not add Lua `package`, `dofile`, `loadfile`, or host filesystem behavior.
 
 Native Forever was not run. Multiple returns, module-name normalization, duplicate modules, failed-load replacement, and registration annotations remain source-unspecified and are not native-conformance claims.
+
+## Forever import binding — 2026-10-15
+
+The completed-module registry and `require` already work. Vendor `Blizzard_GamepadSmartNavigation` orders `Utility.lua` before consumers `SmartNavigation.lua` and `Debug.lua`; Utility returns a table, while both consumers call `import('.Utility')`. The implemented-source handoff adds a direct Rust `import` registration using the same backend, only under `client-wowforever` at the existing pre-secure-copy seam. Integration/run remain pending; inspected canonical source still registers only `require`. No stub, new loader, autoload, host-package fallback or changed `require` contract.
+
+Reused completion, dependency, identity, grammar and error behavior is **simulator compatibility policy** justified by those vendor calls. Native `import=require` semantics, identity, grammar and error parity are UNKNOWN; native new-test authorship alone is not execution proof.
+
+| Capability | Evidence / remaining gate |
+| --- | --- |
+| Completed Utility versus absent binding | Actual source `136748f0b` probe first obtains a table through `require('Blizzard_GamepadSmartNavigation.Utility')`, then fails `type(import) == 'function'`: `IMPORT_BINDING_RED: completed Utility table; import=nil`. Process exit0 is not assertion PASS. |
+| Existing backend | Supplied current receipt: 48 backend controls actual PASS before binding; not new-import GREEN. |
+| New import consumers and restrictions | Two authored loader tests cover secure/insecure identity, callable members, single execution, completion/dependencies; failed-file extension and sandbox/profile test also authored, NOT GREEN. |
+| Separate models/startup | Supplied receipt: 39 other-model cases plus one explicitly invoked ignored GPU case PASS; startup58/58 versus166/238 after Enum, before import. Not binding acceptance. |
+| Binding acceptance | Integration, new importer GREEN, existing require/sandbox regression and post-binding startup remain pending. |
+
+Saved evidence root: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/feedback-forever-integrated-tests-20261015T101651047924Z`; `import-current-binding-red/result.json` and `stderr` inspected for the actual RED above. Implemented source and authored tests: `/home/osso/.local/state/wow-ui-sim/handoff/forever-import-fix-next0700/{source.patch,tests-first.patch,REPORT.md}`. The older report's unrun-current-probe status is superseded only by this saved probe; it grants no new-test GREEN. Main integrates/formats/commits before future gates. Current baseline JSON unchanged.
 
 ## Sources
 
