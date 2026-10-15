@@ -1,6 +1,36 @@
 # wowdecomp behavioral audit
 
-Source-only research begun 2026-10-15. No simulator implementation changes and no execution of the reconstructed client. Read the [security assessment](security.md) before using the external checkout.
+Source-only research dated 2026-10-15. No simulator implementation changes and no execution of the reconstructed client. Read the [security assessment](security.md) before using the external checkout.
+
+## Rework list
+
+**Nine static discrepancies; zero runtime/native reproductions performed in this audit.** IDs refer to detailed entries with exact source locations, required changes and proposed behavioral regressions.
+
+| ID | Behavior needing rework | Detail / proof |
+|---|---|---|
+| T1 | Texture coordinates: wrong arity silently ignored/accepted; bounds unchecked | [Texture validation](textures-and-text.md#t1--reject-invalid-texture-coordinate-arity-and-range-before-mutation); static setter comparison |
+| T2 | Blend names accepted without validation; distinct modes collapse to alpha | [Blend modes](textures-and-text.md#t2--blend-mode-validation-and-rendering-must-agree); static API/enum comparison, GPU equations unverified |
+| T3 | Indented wrapping stored but not consumed by layout/rendering | [Text wrapping](textures-and-text.md#t3--indented-wrapping-must-reach-layoutrendering-not-private-getter-storage); static Font→flag→renderer trace |
+| C1 | Programmatic Slider values ignore step; step changes do not re-snap | [Slider quantization](controls-and-layout.md#c1--slider-value-assignment-ignores-its-step); static assignment comparison |
+| C2 | EditBox cursor geometry callback has registration but no producer | [Cursor notification](controls-and-layout.md#c2--editbox-accepts-oncursorchanged-but-does-not-produce-it); static producer search and downstream Wrath guard |
+| C3 | Negative/reversed selection endpoints select different text | [Highlight ranges](controls-and-layout.md#c3--reversednegative-highlighttext-endpoints-select-the-wrong-range); static range/output derivation |
+| L1 | Protected-recipient region-anchor eligibility absent | [Anchor targets](controls-and-layout.md#l1--protected-frames-can-use-region-targets-that-the-reconstruction-rejects); static guard/mutation comparison |
+| X1 | Non-frame virtual templates ignore trust-sensitive replacement precedence | [Template collisions](xml-and-dispatch.md#x1--non-frame-virtual-templates-overwrite-definitions-without-trust-precedence); static registry comparison |
+| X2 | Include failures inconsistently abort siblings or disappear from returned diagnostics | [Include failures](xml-and-dispatch.md#x2--failed-includes-have-inconsistent-continuation-and-diagnostic-behavior); static file/status/error-path trace |
+
+These are rework leads grounded in differing implementations. Adoption of historical behavior requires resolving the supported profile's contract; the matrix does **not** claim nine native-confirmed bugs.
+
+## Coverage and gaps
+
+| Compared domain | Outcome | Missing or excluded proof |
+|---|---|---|
+| Layout/parenting/visibility/scale/alpha/strata | L1 retained; missing reparent propagation rejected because implemented | No exhaustive layout/native/profile parity |
+| Buttons/CheckButtons/Sliders/StatusBars/ScrollFrames/input | C1 retained; disabled checked-texture issue rejected; other examined controls yielded no isolated finding | No runtime interaction/GPU tests |
+| Texture UVs/blending/tiling/gradients/rotation and font wrapping | T1–T3 retained; rotation/gradient/coercion leads remain unresolved | No pixel comparisons, full blend-equation audit or font-metric/native proof |
+| EditBox/animation lifecycle | C2–C3 retained; UTF-8/focus/pause/explicit-stop omissions rejected; animation edge cases remain leads | No callback timing/native/large-tick loop proof |
+| XML/addon loading/script identity/taint | X1–X2 retained; owner-taint and object-representation claims not established | No full taint/loader/registration-surface audit |
+
+Not covered: complete gameplay/C_* API comparison, modern-only APIs, every XML/widget method, platform-specific behavior, full event/input engine, dependency correctness or full repository security. Full 3D/client networking/update functionality is outside simulator rework scope. Existing tests were inspected selectively, not executed; no build or full suite was needed for this documentation-only audit.
 
 ## Provenance and interpretation
 
