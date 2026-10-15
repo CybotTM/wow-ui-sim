@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | TextColumnRow bounded Retail proof
+
+[Manager checkpoint](systems/ui-widget-manager-state.md#textcolumnrow-bounded-retail-proof--2026-10-15) links the owning capability matrix: independent Retail eight producer cases plus nine separate controls PASS; guard failed before monitoring, external warning and historical failures retained. PTR/default-check/startup/owning/native/render/full-parent gaps remain open; frozen packets unchanged.
+
 ## [2026-10-14] evidence | Spacer bounded producer checkpoint
 
 [Current manager checkpoint](systems/ui-widget-manager-state.md#spacer-bounded-producer-checkpoint--2026-10-14) links the owning ledger; historical failures preserved and remaining acceptance kept open.

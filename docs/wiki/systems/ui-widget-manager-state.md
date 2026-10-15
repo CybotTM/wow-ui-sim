@@ -121,7 +121,11 @@ The [row ledger](../../specs/texture-and-text-row.md#known-gaps-current-cycle) o
 
 ### TextColumnRow passive checkpoint — 2026-10-14
 
-[Owning contract](../../specs/ui-widget-text-column-row.md) records supplied outer/nested records, an empty environment-local map, type-21 normal feeds and authored query/feed/security/consumer tests. Getter/projector/registration now project complete supplied records as fresh nested snapshots. At `9a60ded79`, nonincremental Retail compilation/copy verification passes with one external dependency warning, followed by eight unique populated-result RED failures before implementation. Producer GREEN and actual consumer lifecycle/security acceptance remain pending; six guard aborts and the seventh linker failure remain history. See the [TextColumnRow contract](../../specs/ui-widget-text-column-row.md) for scope. Actual cached lifecycle and security require separate execution; no native parity claim.
+[Owning contract](../../specs/ui-widget-text-column-row.md) retains supplied records/type-21 feeds and historical eight-case populated-result RED at `9a60ded79`, six guard aborts and seventh linker failure. Getter/projector/registration implement fresh complete nested snapshots.
+
+### TextColumnRow bounded Retail proof — 2026-10-15
+
+[Capability/proof matrix](../../specs/ui-widget-text-column-row.md#bounded-retail-producer-proof--2026-10-15) owns independent `dcd2fbd12` Retail eight-case PASS and separate nine-control PASS, nonadditive nested output, actual cached nested-pool lifecycle and exact exclusions. Compile/copy PASS retains one external dependency warning; pressure guard FAILED unit-prefix validation before monitoring. Scoped source/root-format PASS is separate. No new Spacer owning proof, PTR/default-check/ordinary-startup/owning/native/render/full-parent acceptance or frozen-packet update.
 
 ## Sources
 
