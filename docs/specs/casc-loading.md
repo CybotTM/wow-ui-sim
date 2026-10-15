@@ -116,9 +116,16 @@ Reported handoff evidence, not rerun for this docs task:
 |---|---|---|
 | Actual selected-root metadata, FDID `5612369` | 12 variants; last is ptPT | Locale-blind selection chose the wrong variant |
 | Matched native local enUS probe | PASS: indexed, 138 bytes, enUS content-hash match, `hasenUS=true`, `hasptPT=false` | Earlier missing result used the wrong variant; not evidence of absent local enUS content |
-| Candidate selector / actual pinned resolver | 5/5 GREEN / 0/5 RED | Candidate proof does not establish integrated simulator behavior |
+| Candidate selector / historical pinned resolver | 5/5 GREEN / 0/5 RED | Historical RED retained; not a result for the updated dependency |
+| Integrated source | enUS selection/provenance implemented; separate source audit PASS | Full simulator Rust tests, including stale-locale invalidation, remain pending |
+| Normal binaries | Compiled `9a6ea924e` plus dirty 70374 manifest/listfile/BuildInfo metadata | Compilation is not full Rust-test proof |
+| Supported corrected-enUS sync | 4,434 extracted, 0 already present | Selected Forever build only |
+| Exact selected-root content-key validation | 4,434/4,434 matched; no missing/mismatched files | Old cache: 4,433 matched, one wrong-ptPT LoadLocale file; not all encrypted content/all profiles |
+| Corrected-cache headless startup | [Actual failing baseline](../baselines/README.md#forever-lua-errors) captured | Not clean startup; independent runtime verifier `5331` pending |
 
-- [ ] Verify integrated locale-qualified source, sync the corrected cache, and recapture the selected-build baseline. Local enUS residency is established; sync correctness and startup acceptance are not.
+Saved receipt root: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/feedback-enus-forever-bins-retry1-20261015T100055523974Z`; `source-basis.json` binds the dirty source, `corrected-enus-sync/` and `corrected-enus-content-green/` record acquisition/validation, and `corrected-70374-lua-errors/baseline-summary.json` records startup failure.
+
+- [ ] Run the full simulator Rust-test gates for integrated locale selection and cache invalidation. Acquisition and baseline capture are complete; independent runtime verification and clean startup acceptance are not.
 
 - [ ] No assertion that the texture `out_path.exists()` short-circuit in `try_casc_resolve` is faster than a cold extract; this is distinct from verified resolution-cache warm reuse.
 - [ ] `asset_resolver::lookup_path` is not backslash-tolerant; the loader normalises but consumers calling the resolver directly hit `None` on `Fonts\\FRIZQT__.TTF`. Consider lifting normalisation into `asset-resolver` upstream.

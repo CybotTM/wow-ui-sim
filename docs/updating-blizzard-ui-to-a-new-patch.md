@@ -54,8 +54,9 @@ variant, not missing local enUS content. See the owning
 candidate selector 5/5 GREEN versus actual pinned resolver 0/5 RED.
 The integrated source pins asset-resolver's published enUS fix while retaining
 its TACT-aware local decoder, and qualifies simulator CDN/path selection.
-Full simulator gates, corrected sync and baseline recapture remain pending. Complete path coverage does not establish correct locale,
-clean startup or compatibility.
+Normal binaries compiled at `9a6ea924e` plus dirty 70374 manifest/listfile/BuildInfo metadata completed the supported corrected-enUS sync: 4,434 extracted. Exact selected-root content-key validation matched all 4,434 files, with no missing or mismatched entries; the old cache matched 4,433 with one wrong-ptPT LoadLocale file. See the linked proof matrix for implementation versus pending Rust-test coverage.
+
+The actual corrected-cache headless capture is the [current failing baseline](baselines/README.md#forever-lua-errors), not clean startup. Independent runtime verifier `5331` remains pending; separate source audit PASS does not close runtime acceptance. No native, all-profile or complete encrypted-content acceptance is established.
 Preserve historical receipts below; do not relabel old 69977 captures as 70374 proof.
 
 ### Historical selected target — September 24, 2026

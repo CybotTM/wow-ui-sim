@@ -187,7 +187,7 @@ fn wowforever_profile_identity_and_manifest_are_distinct() {
     assert!(!cfg!(feature = "retail-12-0-0"));
     assert!(!cfg!(feature = "client-anniversary"));
     let entries: Vec<_> = wow_ui_sim::blizzard_ui_sync::manifest_entries().collect();
-    assert_eq!(entries.len(), 4398);
+    assert_eq!(entries.len(), 4434);
     assert!(entries.contains(&"Blizzard_FrameXML/Camelot/StackSplitFrame.xml"));
     assert!(entries.contains(&"Blizzard_FrameXMLBase/Blizzard_FrameXMLBase.toc"));
     assert!(
@@ -201,12 +201,20 @@ fn wowforever_profile_identity_and_manifest_are_distinct() {
 #[cfg(feature = "client-wowforever")]
 fn wowforever_profile_reports_build_identity_and_finite_event_validation() {
     let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
-    let identity: (String, String, i32) = env
+    let identity: (String, String, String, i32) = env
         .eval(
-            "local version, build, _, interface = GetBuildInfo(); return version, build, interface",
+            "local version, build, date, interface = GetBuildInfo(); return version, build, date, interface",
         )
         .unwrap();
-    assert_eq!(identity, ("1.60.1".to_owned(), "69977".to_owned(), 16001));
+    assert_eq!(
+        identity,
+        (
+            "1.60.1".to_owned(),
+            "70374".to_owned(),
+            "Jun 17 2026".to_owned(), // Temporary default, not a sourced native build date.
+            16001,
+        )
+    );
     assert!(wow_ui_sim::event::is_registerable_event("PLAYER_LOGIN"));
     for event in [
         "CONFIRM_BATTLE_NET_FRIEND_INVITE_SHOW",

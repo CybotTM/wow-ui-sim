@@ -1,3 +1,7 @@
+## [2026-10-15] docs | Corrected Forever70374 acquisition and failing baseline
+
+[Selected-build checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-15-2026) links corrected-enUS sync, exact-root validation and the [actual failing baseline](../baselines/README.md#forever-lua-errors). [Proof matrix](../specs/casc-loading.md#locale-checkpoint--october-15-2026) separates implemented source/compiled binaries from pending full Rust tests and independent runtime verification. Historical identities retained; no clean-startup/native/all-profile/encrypted-content acceptance. Docs-only receipt update; no runtime commands.
+
 ## [2026-10-15] docs | Combined feedback GPU receipt
 
 Updated only rendering, texture-atlas, widget-system, index and this log for `5ae7fb14e`, `2fc87822e`, `7c3ce5a24` and callback-proof `623294944`. [Receipt owner](../rendering-pipeline.md#combined-feedback-gpu-receipt--2026-10-15) records the new `feedback-70374-forever-bins-retry1-20261015T090035328607Z/feedback-combined-green` capture/result/pixel inspection: blue tail/reference, 432 magenta pixels (18×24), texture128 → 128, solid0.5 → 188, green final-assertion marker, no exec-Lua errors. Independent saved-capture verification PASS; existing startup errors, historical RED and broader gates retained. No clean startup, native parity or full-test GREEN claim; profile/acquisition docs and other dirty files untouched by this update.

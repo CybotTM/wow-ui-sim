@@ -186,6 +186,7 @@ Blizzard_APIDocumentationGenerated/ExpansionLandingPageConstantsDocumentation.lu
 Blizzard_APIDocumentationGenerated/ExpansionLevelConstantsDocumentation.lua
 Blizzard_APIDocumentationGenerated/ExpansionTrialDocumentation.lua
 Blizzard_APIDocumentationGenerated/ExternalEventURLDocumentation.lua
+Blizzard_APIDocumentationGenerated/FlyoutDocumentation.lua
 Blizzard_APIDocumentationGenerated/FogOfWarDocumentation.lua
 Blizzard_APIDocumentationGenerated/FontDocumentation.lua
 Blizzard_APIDocumentationGenerated/ForbiddenAspectConstantsDocumentation.lua
@@ -352,6 +353,7 @@ Blizzard_APIDocumentationGenerated/NameGenConstantsDocumentation.lua
 Blizzard_APIDocumentationGenerated/NamePlateConstantsDocumentation.lua
 Blizzard_APIDocumentationGenerated/NamePlateDocumentation.lua
 Blizzard_APIDocumentationGenerated/NamePlateManagerDocumentation.lua
+Blizzard_APIDocumentationGenerated/NameUtilDocumentation.lua
 Blizzard_APIDocumentationGenerated/NeighborhoodInitiativeDocumentation.lua
 Blizzard_APIDocumentationGenerated/NeighborhoodInitiativesConstantsDocumentation.lua
 Blizzard_APIDocumentationGenerated/NewItemsDocumentation.lua
@@ -674,6 +676,7 @@ Blizzard_AccountStore/Blizzard_AccountStoreItemRack.xml
 Blizzard_AccountStore/Blizzard_AccountStoreUtil.lua
 Blizzard_AchievementUI/Blizzard_AchievementUI.toc
 Blizzard_AchievementUI/Blizzard_AchievementUI_Bootstrap.lua
+Blizzard_AchievementUI/Camelot/Blizzard_AchievementUI.lua
 Blizzard_AchievementUI/Cata/Blizzard_AchievementUI.lua
 Blizzard_AchievementUI/Cata/Blizzard_AchievementUI.xml
 Blizzard_AchievementUI/Mainline/Blizzard_AchievementUI.lua
@@ -970,6 +973,7 @@ Blizzard_CatalogShop/Blizzard_CatalogShop_Details.lua
 Blizzard_CatalogShop/Blizzard_CatalogShop_Elements.lua
 Blizzard_CatalogShop/Blizzard_CatalogShop_Elements.xml
 Blizzard_CatalogShop/Blizzard_CatalogShop_ErrorLookup.lua
+Blizzard_CatalogShop/Blizzard_CatalogShop_Gamepad.lua
 Blizzard_CatalogShop/Blizzard_CatalogShop_Header.lua
 Blizzard_CatalogShop/Blizzard_CatalogShop_Header.xml
 Blizzard_CatalogShop/Blizzard_CatalogShop_Inbound.lua
@@ -1528,6 +1532,7 @@ Blizzard_DurabilityFrame/DurabilityFrame.xml
 Blizzard_EditMode/Blizzard_EditMode.toc
 Blizzard_EditMode/Camelot/EditModeManagerOverrides.lua
 Blizzard_EditMode/Camelot/EditModePresetLayoutConstants.lua
+Blizzard_EditMode/Camelot/EditModeSystemTemplates.lua
 Blizzard_EditMode/Camelot/EditModeUtil.lua
 Blizzard_EditMode/Cata/EditModeManagerOverrides.lua
 Blizzard_EditMode/Mainline/EditModeManagerOverrides.lua
@@ -1818,6 +1823,7 @@ Blizzard_FrameXMLUtil/Blizzard_FrameXMLUtil.toc
 Blizzard_FrameXMLUtil/CalendarUtil.lua
 Blizzard_FrameXMLUtil/Camelot/CollectionsUtilOverrides.lua
 Blizzard_FrameXMLUtil/Camelot/DifficultyUtilOverrides.lua
+Blizzard_FrameXMLUtil/Camelot/ItemUtil.lua
 Blizzard_FrameXMLUtil/Camelot/NameUtil.lua
 Blizzard_FrameXMLUtil/Camelot/QuestUtilsOverrides.lua
 Blizzard_FrameXMLUtil/CampaignUtil.lua
@@ -1937,7 +1943,6 @@ Blizzard_GameTooltip/Shared/GameTooltipConstants.lua
 Blizzard_Gamepad/Bindings.xml
 Blizzard_Gamepad/Blizzard_Gamepad.toc
 Blizzard_Gamepad/Core.lua
-Blizzard_Gamepad/Gameplay/SpecialInputStates.lua
 Blizzard_Gamepad/SmartNavigationInGame/FrameBoltOns/GamepadItemPickupCursor.lua
 Blizzard_Gamepad/SmartNavigationInGame/FrameBoltOns/GamepadItemPickupCursor.xml
 Blizzard_Gamepad/UI/CinematicMovie.lua
@@ -1953,7 +1958,6 @@ Blizzard_Gamepad/UI/Radials/GamepadRadial.xml
 Blizzard_Gamepad/UI/Reticle/GamepadReticle.lua
 Blizzard_Gamepad/UI/Reticle/GamepadReticle.xml
 Blizzard_Gamepad/Utility/Bindings/HoldBindings.lua
-Blizzard_Gamepad/Utility/Utility.lua
 Blizzard_GamepadActionBars/ActionBar.lua
 Blizzard_GamepadActionBars/ActionBarButton.lua
 Blizzard_GamepadActionBars/ActionBarButton.xml
@@ -1965,6 +1969,13 @@ Blizzard_GamepadActionBars/ActionBarTemplates.xml
 Blizzard_GamepadActionBars/ActionBindingUtil.lua
 Blizzard_GamepadActionBars/Bindings.xml
 Blizzard_GamepadActionBars/Blizzard_GamepadActionBars.toc
+Blizzard_GamepadActionBars/Camelot/ClassSpellFlyout.lua
+Blizzard_GamepadActionBars/Camelot/PetActionFlyout.lua
+Blizzard_GamepadActionBars/Camelot/PetActionFlyoutButton.lua
+Blizzard_GamepadActionBars/Camelot/PetClassFlyouts.xml
+Blizzard_GamepadActionBars/Camelot/PetSpellFlyout.lua
+Blizzard_GamepadActionBars/ClassActionFlyout.lua
+Blizzard_GamepadActionBars/ClassActionFlyout.xml
 Blizzard_GamepadActionBars/FlyoutRadial.lua
 Blizzard_GamepadActionBars/FlyoutRadial.xml
 Blizzard_GamepadActionBars/GamepadOverrideBarMixin.lua
@@ -1974,6 +1985,8 @@ Blizzard_GamepadActionBars/MainActionBarFrame.lua
 Blizzard_GamepadActionBars/MainActionBarFrame.xml
 Blizzard_GamepadActionBars/PageUnit.lua
 Blizzard_GamepadActionBars/PossessBar.lua
+Blizzard_GamepadActionBars/SpellFlyoutRadial.lua
+Blizzard_GamepadActionBars/SpellFlyoutRadial.xml
 Blizzard_GamepadActionBars/StanceBar.lua
 Blizzard_GamepadActionBars/TargetActionBars/FriendlyTargetingActionBar.lua
 Blizzard_GamepadActionBars/TargetActionBars/HostileTargetingActionBar.lua
@@ -2103,6 +2116,8 @@ Blizzard_GlueStubs/GlueStubs.xml
 Blizzard_GlueXML/Bindings.xml
 Blizzard_GlueXML/Blizzard_GlueXML.toc
 Blizzard_GlueXML/Camelot/AccountLoginOverrides.lua
+Blizzard_GlueXML/Camelot/CharacterCopy.lua
+Blizzard_GlueXML/Camelot/CharacterCopy.xml
 Blizzard_GlueXML/Camelot/CharacterSelect/CharacterSelectList.lua
 Blizzard_GlueXML/Camelot/CharacterSelect/CharacterSelectListBackground.xml
 Blizzard_GlueXML/Camelot/CharacterSelect/CharacterSelectTemplates.lua
@@ -2113,6 +2128,8 @@ Blizzard_GlueXML/ForceRenameFullNameDialog.lua
 Blizzard_GlueXML/ForceRenameFullNameDialog.xml
 Blizzard_GlueXML/Mainline/AccountLogin.lua
 Blizzard_GlueXML/Mainline/AccountLogin.xml
+Blizzard_GlueXML/Mainline/CharacterCopy.lua
+Blizzard_GlueXML/Mainline/CharacterCopy.xml
 Blizzard_GlueXML/Mainline/CharacterLoginUtil.lua
 Blizzard_GlueXML/Mainline/CharacterSelect.lua
 Blizzard_GlueXML/Mainline/CharacterSelect.xml
@@ -2227,6 +2244,7 @@ Blizzard_GroupFinder_VanillaStyle/Blizzard_LFGVanilla_Browse.lua
 Blizzard_GroupFinder_VanillaStyle/Blizzard_LFGVanilla_Listing.lua
 Blizzard_GroupFinder_VanillaStyle/Blizzard_LFGVanilla_Minimap.lua
 Blizzard_GroupFinder_VanillaStyle/Blizzard_LFGVanilla_ParentFrame.lua
+Blizzard_GroupFinder_VanillaStyle/Blizzard_LFGVanilla_VoiceChat.lua
 Blizzard_GroupFinder_VanillaStyle/Classic/Blizzard_LFGVanilla_Browse.xml
 Blizzard_GroupFinder_VanillaStyle/Classic/Blizzard_LFGVanilla_Listing.xml
 Blizzard_GroupFinder_VanillaStyle/Classic/Blizzard_LFGVanilla_ParentFrame.xml
@@ -2430,7 +2448,10 @@ Blizzard_IME/IME.xml
 Blizzard_InspectUI/Blizzard_InspectUI.toc
 Blizzard_InspectUI/Camelot/Blizzard_InspectUI.lua
 Blizzard_InspectUI/Camelot/Blizzard_InspectUI.xml
-Blizzard_InspectUI/Camelot/Blizzard_InspectUI_Overrides.lua
+Blizzard_InspectUI/Camelot/InspectGuildFrame.lua
+Blizzard_InspectUI/Camelot/InspectGuildFrame.xml
+Blizzard_InspectUI/Camelot/InspectPVPFrame.lua
+Blizzard_InspectUI/Camelot/InspectPVPFrame.xml
 Blizzard_InspectUI/Camelot/InspectPaperDollFrame.xml
 Blizzard_InspectUI/Mainline/Blizzard_InspectUI.lua
 Blizzard_InspectUI/Mainline/Blizzard_InspectUI.xml
@@ -2492,14 +2513,14 @@ Blizzard_Kiosk/Unused/Unused.lua
 Blizzard_Kiosk/Unused/Unused.xml
 Blizzard_LFGUtil/Blizzard_LFGUtil.toc
 Blizzard_LFGUtil/Camelot/LFGUtil.lua
+Blizzard_LFGUtil/Mainline/LFGEye.lua
+Blizzard_LFGUtil/Mainline/LFGEye.xml
 Blizzard_LFGUtil/Mainline/LFGUtil.lua
 Blizzard_LFGUtil/Mainline/PVPHelper.lua
 Blizzard_LFGUtil/Mainline/PVPHelper.xml
 Blizzard_LFGUtil/Mainline/PvpPopup.lua
 Blizzard_LFGUtil/Mainline/PvpPopup.xml
 Blizzard_LFGUtil/Shared/Constants.lua
-Blizzard_LFGUtil/Shared/LFGEye.lua
-Blizzard_LFGUtil/Shared/LFGEye.xml
 Blizzard_LFGUtil/Shared/LFGInvitePopup.lua
 Blizzard_LFGUtil/Shared/LFGInvitePopup.xml
 Blizzard_LFGUtil/Shared/LFGRole.lua
@@ -2515,6 +2536,7 @@ Blizzard_LandingSoulbinds/Blizzard_LandingSoulbinds.toc
 Blizzard_LandingSoulbinds/Blizzard_LandingSoulbinds_Bootstrap.lua
 Blizzard_LegacyChallengeTracker/Blizzard_LegacyChallengeTracker.lua
 Blizzard_LegacyChallengeTracker/Blizzard_LegacyChallengeTracker.toc
+Blizzard_LegacySystem/Blizzard_LegacyAchievementOverrides.lua
 Blizzard_LegacySystem/Blizzard_LegacyChallengeButton.lua
 Blizzard_LegacySystem/Blizzard_LegacyChallengeCategoryList.lua
 Blizzard_LegacySystem/Blizzard_LegacyChallengeCategoryList.xml
@@ -2810,6 +2832,7 @@ Blizzard_PTRFeedback/Blizzard_PTRFeedback.toc
 Blizzard_PTRFeedback/Blizzard_PTRFeedback_Events.lua
 Blizzard_PTRFeedback/Blizzard_PTRFeedback_FrameTemplates.xml
 Blizzard_PTRFeedback/Blizzard_PTRFeedback_Frames.lua
+Blizzard_PTRFeedback/Blizzard_PTRFeedback_Gamepad.lua
 Blizzard_PTRFeedback/Blizzard_PTRFeedback_Tooltips.lua
 Blizzard_PTRFeedback/Blizzard_Reports.lua
 Blizzard_PTRFeedbackGlue/Blizzard_PTRFeedbackGlue.toc
@@ -3063,9 +3086,9 @@ Blizzard_ProfessionsTemplates/Blizzard_ProfessionsTransaction.lua
 Blizzard_ProfessionsTemplates/Camelot/Blizzard_Professions.lua
 Blizzard_ProfessionsTemplates/Camelot/Blizzard_ProfessionsRecipeSchematicForm.xml
 Blizzard_ProfessionsTemplates/Camelot/Blizzard_ProfessionsRecipeSchematicFormOverride.lua
-Blizzard_ProfessionsTemplates/Camelot/Blizzard_ProfessionsTemplates.lua
 Blizzard_ProfessionsTemplates/Mainline/Blizzard_ProfessionsRecipeSchematicForm.xml
 Blizzard_ProjectConstants/Blizzard_ProjectConstants.toc
+Blizzard_ProjectConstants/Camelot/ProjectConstants.lua
 Blizzard_ProjectConstants/ProjectConstants.lua
 Blizzard_ProjectConstants/WoWLabs/ProjectConstants.lua
 Blizzard_QuestNavigation/Blizzard_QuestNavigation.toc
@@ -3192,6 +3215,7 @@ Blizzard_SettingsDefinitions_Frame/AdvancedOptions.lua
 Blizzard_SettingsDefinitions_Frame/Blizzard_SettingsDefinitions_Frame.toc
 Blizzard_SettingsDefinitions_Frame/Camelot/AccessibilityOverrides.lua
 Blizzard_SettingsDefinitions_Frame/Camelot/AudioOverrides.lua
+Blizzard_SettingsDefinitions_Frame/Camelot/ColorblindOverrides.lua
 Blizzard_SettingsDefinitions_Frame/Camelot/ControlsOverrides.lua
 Blizzard_SettingsDefinitions_Frame/Camelot/InterfaceOverrides.lua
 Blizzard_SettingsDefinitions_Frame/Camelot/KeybindingsOverrides.lua
@@ -3266,7 +3290,9 @@ Blizzard_Settings_Shared/Blizzard_SettingsPanel.xml
 Blizzard_Settings_Shared/Blizzard_SettingsRegistrar.lua
 Blizzard_Settings_Shared/Blizzard_Settings_PreferredPlaySettings.lua
 Blizzard_Settings_Shared/Blizzard_Settings_Shared.toc
+Blizzard_Settings_Shared/Camelot/AudioOverrides.lua
 Blizzard_Settings_Shared/Camelot/LanguagesOverrides.lua
+Blizzard_Settings_Shared/Camelot/NewDefinitions.lua
 Blizzard_Settings_Shared/Mainline/AudioOverrides.lua
 Blizzard_Settings_Shared/Mainline/Blizzard_SettingsPanelTemplates.xml
 Blizzard_Settings_Shared/Mainline/GraphicsOverrides.lua
@@ -3791,6 +3817,7 @@ Blizzard_StaticPopup_Game/Mainline/StaticPopupSpecial.xml
 Blizzard_StaticPopup_Game/Mists/StaticPopupGlyphs.lua
 Blizzard_StaticPopup_Game/Wrath/StaticPopupGlyphs.lua
 Blizzard_StaticPopup_Glue/Blizzard_StaticPopup_Glue.toc
+Blizzard_StaticPopup_Glue/Camelot/GlueDialogDefs.lua
 Blizzard_StaticPopup_Glue/GlueDialog.lua
 Blizzard_StaticPopup_Glue/GlueDialog.xml
 Blizzard_StaticPopup_Glue/GlueDialogDefs.lua
@@ -3961,10 +3988,12 @@ Blizzard_UIModes/Blizzard_UIModeManager.lua
 Blizzard_UIModes/Blizzard_UIModeUtil.lua
 Blizzard_UIModes/Blizzard_UIModes.toc
 Blizzard_UIPanelTemplates/Blizzard_UIPanelTemplates.toc
+Blizzard_UIPanelTemplates/Camelot/UIPanelTemplatesOverrides.xml
 Blizzard_UIPanelTemplates/Mainline/AutoCastTemplates.lua
 Blizzard_UIPanelTemplates/Mainline/AutoCastTemplates.xml
 Blizzard_UIPanelTemplates/Mainline/UIPanelTemplates.lua
 Blizzard_UIPanelTemplates/Mainline/UIPanelTemplates.xml
+Blizzard_UIPanelTemplates/Mainline/UIPanelTemplatesOverrides.xml
 Blizzard_UIPanelTemplates/Shared/UIPanelSpellButtonFrame.lua
 Blizzard_UIPanelTemplates/Shared/UIPanelSpellButtonFrame.xml
 Blizzard_UIPanelTemplates/Shared/UIPanelTemplatesShared.lua
@@ -4218,12 +4247,17 @@ Blizzard_UIWidgets/Blizzard_UIWidgetTopCenterFrame.xml
 Blizzard_UIWidgets/Blizzard_UIWidgets.toc
 Blizzard_UIWidgets/Blizzard_WidgetsUtil.lua
 Blizzard_UnitFrame/Blizzard_UnitFrame.toc
-Blizzard_UnitFrame/Camelot/ComboFrameOverrides.lua
+Blizzard_UnitFrame/Camelot/ComboFrame.lua
+Blizzard_UnitFrame/Camelot/ComboFrame.xml
+Blizzard_UnitFrame/Camelot/DruidComboPointBar.xml
 Blizzard_UnitFrame/Camelot/PlayerFrame.lua
 Blizzard_UnitFrame/Camelot/PlayerFrameTemplates.xml
+Blizzard_UnitFrame/Camelot/RogueComboPointBar.xml
+Blizzard_UnitFrame/Camelot/TargetBoundComboPointBar.lua
 Blizzard_UnitFrame/Camelot/TargetFrame.lua
 Blizzard_UnitFrame/Camelot/TargetFrameTemplates.xml
 Blizzard_UnitFrame/Camelot/TargetFrameUtils.lua
+Blizzard_UnitFrame/Camelot/UnitFramePvPIndicatorStyle.lua
 Blizzard_UnitFrame/DemonHunterSoulFragmentsBar.lua
 Blizzard_UnitFrame/DemonHunterSoulFragmentsBar.xml
 Blizzard_UnitFrame/DevourerFuryBar.lua
@@ -4238,12 +4272,11 @@ Blizzard_UnitFrame/Mainline/ClassPowerBar.lua
 Blizzard_UnitFrame/Mainline/ClassPowerBar.xml
 Blizzard_UnitFrame/Mainline/ClassResourceBarTemplate.lua
 Blizzard_UnitFrame/Mainline/ClassResourceBarTemplate.xml
-Blizzard_UnitFrame/Mainline/ComboFrame.lua
-Blizzard_UnitFrame/Mainline/ComboFrame.xml
-Blizzard_UnitFrame/Mainline/ComboFrameOverrides.lua
 Blizzard_UnitFrame/Mainline/CompactArenaFrame.lua
 Blizzard_UnitFrame/Mainline/CompactArenaFrame.xml
 Blizzard_UnitFrame/Mainline/CompactUnitFrameOptions.lua
+Blizzard_UnitFrame/Mainline/DruidComboPoint.lua
+Blizzard_UnitFrame/Mainline/DruidComboPoint.xml
 Blizzard_UnitFrame/Mainline/DruidComboPointBar.lua
 Blizzard_UnitFrame/Mainline/DruidComboPointBar.xml
 Blizzard_UnitFrame/Mainline/EssenceFramePlayer.lua
@@ -4269,6 +4302,8 @@ Blizzard_UnitFrame/Mainline/PlayerFrame.lua
 Blizzard_UnitFrame/Mainline/PlayerFrame.xml
 Blizzard_UnitFrame/Mainline/PlayerFrameTemplates.xml
 Blizzard_UnitFrame/Mainline/PowerBarColorUtil.lua
+Blizzard_UnitFrame/Mainline/RogueComboPoint.lua
+Blizzard_UnitFrame/Mainline/RogueComboPoint.xml
 Blizzard_UnitFrame/Mainline/RogueComboPointBar.lua
 Blizzard_UnitFrame/Mainline/RogueComboPointBar.xml
 Blizzard_UnitFrame/Mainline/RuneFrame.lua
@@ -4282,7 +4317,7 @@ Blizzard_UnitFrame/Mainline/TargetFrameUtils.lua
 Blizzard_UnitFrame/Mainline/TotemFrame.lua
 Blizzard_UnitFrame/Mainline/TotemFrame.xml
 Blizzard_UnitFrame/Mainline/UnitFrame.lua
-Blizzard_UnitFrame/Mainline/UnitFrameUtil.lua
+Blizzard_UnitFrame/Mainline/UnitFramePvPIndicatorStyle.lua
 Blizzard_UnitFrame/Mainline/UnitPowerBarAlt.lua
 Blizzard_UnitFrame/Mainline/UnitPowerBarAlt.xml
 Blizzard_UnitFrame/Shared/CompactPartyFrame.lua
@@ -4312,6 +4347,7 @@ Blizzard_UnitFrame/Shared/TargetFrameAuraContainer.xml
 Blizzard_UnitFrame/Shared/TargetFrameAuraShared.lua
 Blizzard_UnitFrame/Shared/UnitFrame.lua
 Blizzard_UnitFrame/Shared/UnitFrame.xml
+Blizzard_UnitFrame/Shared/UnitFrameUtil.lua
 Blizzard_UnitPopup/Blizzard_UnitPopup.toc
 Blizzard_UnitPopup/Camelot/UnitPopupMenus.lua
 Blizzard_UnitPopup/Mainline/UnitPopup.lua
