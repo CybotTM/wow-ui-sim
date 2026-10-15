@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | Provider and quest execution captured
+
+[Receipt owner](../baselines/README.md#current-providerquest-execution--2026-10-15) records source704's six new regression passes, two reproduced older control failures, four normal positive probes and exact startup12/16 FAIL baseline copy. Prior22/26 retained; explicit missing rich quest80002 remains a new state-boundary diagnostic. Independent saved-runtime reconciliation pending; no clean/native/profile/full-parent acceptance.
+
 ## [2026-10-15] source | Forever quest difficulty lookup
 
 [API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links `70459ec5a`'s supplied-row query and owning contract. Original sealed runtime reproduced four known-row nil mismatches and the unchanged Camelot prefix failure; process0 did not mean behavioral success. Independent source/readability audit passed; current build is in progress and six new enum/query tests remain unexecuted. No native or clean-startup acceptance.

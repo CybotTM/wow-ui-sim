@@ -4,10 +4,11 @@ Forever's `C_QuestLog.GetQuestDifficultyLevel` must expose the supplied rich que
 
 ## What it must do
 
-- [ ] Publish a raw callable `GetQuestDifficultyLevel` only through the Forever modeled registration, preserving other profiles' existing surface and Retail/PTR `QuestCanHaveWarModeBonus` behavior.
-- [ ] Return exactly one number from the exact current environment's `quest_log_entries.entries` row matching `quest_id`; observe non-80 live mutations and never consult a static catalog or fabricate a level.
-- [ ] Fail explicitly with API/questID context for nonnumeric, nonfinite, fractional, out-of-i32-range or unrepresented identities and for removed rows. Missing valid integer identities include that ID in the error.
-- [ ] Support unchanged whole cached Mainline DifficultyUtil plus Camelot QuestUtilsOverrides with explicit test fixtures for elite status, CVar selection and color dependencies; produce concrete ordinary/elite, colored/plain title prefixes.
+- [x] Publish a raw callable `GetQuestDifficultyLevel` through the Forever modeled registration.
+- [x] Return exactly one number from the exact current environment's `quest_log_entries.entries` row matching `quest_id`; observe non-80 live mutations and never consult a static catalog or fabricate a level.
+- [x] Fail explicitly with API/questID context for nonnumeric, nonfinite, fractional, out-of-i32-range or unrepresented identities and for removed rows. Missing valid integer identities include that ID in the error.
+- [x] Support unchanged whole cached Mainline DifficultyUtil plus Camelot QuestUtilsOverrides with explicit test fixtures for elite status, CVar selection and color dependencies; produce concrete ordinary/elite, colored/plain title prefixes.
+- [ ] Preserve other profiles' existing surface and Retail/PTR `QuestCanHaveWarModeBonus` behavior in runtime verification.
 
 ## How it works
 
@@ -22,7 +23,7 @@ Forever's `C_QuestLog.GetQuestDifficultyLevel` must expose the supplied rich que
 
 ## Tests asserting this spec
 
-`tests/wowforever_quest_difficulty.rs` (all UNEXECUTED):
+`tests/wowforever_quest_difficulty.rs`: all three PASS at runtime source `70459ec5a`; [central receipt](../baselines/README.md#current-providerquest-execution--2026-10-15) owns build/seals, normal probes and failing startup. Original sealed Lua REDs precede this producer; no authored Rust RED is claimed.
 
 - `forever_quest_difficulty_raw_publication_reads_seed_and_live_state`: all four seed IDs, exact one-result raw endpoint, level37 mutation, new identity456789/level23 and independent fresh seed.
 - `forever_quest_difficulty_rejects_invalid_and_unrepresented_ids_explicitly`: invalid input shapes, absent IDs, removed row, useful errors; 80002 is deliberately absent from rich state despite the older static quest catalog.
@@ -30,8 +31,8 @@ Forever's `C_QuestLog.GetQuestDifficultyLevel` must expose the supplied rich que
 
 ## Known gaps (current cycle)
 
-- [ ] Execute authored Rust tests and producer/consumer GREEN. The original sealed runtime reproduced both the four-row nil mismatch and unchanged Camelot prefix failure before integration; these Lua RED observations are not authored Rust RED.
-- [ ] Formatting, compilation, other-profile preservation and normal-startup behavior remain unverified.
+- [ ] Actual startup still requests quest80002, present in an older static catalog but absent from rich state; the explicit missing-record error is captured, not suppressed. Resolve this state/query boundary before claiming quest startup acceptance.
+- [ ] Other-profile preservation, default check, native parity and whole-startup acceptance remain open. Current no-run compilation, `cargo fmt --check`, three model tests, four-known-row normal coherence and fixture-controlled whole-consumer probe passed; these do not close the missing80002 case.
 
 ## Out of scope
 

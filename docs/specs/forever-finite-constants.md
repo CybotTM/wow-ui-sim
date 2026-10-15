@@ -23,14 +23,14 @@ The grouped regression executes unchanged `StanceBar.lua` and `GamepadOverrideBa
 
 Selected `VoiceChatDocumentation.lua:1476–1485` and `GameRulesDocumentation.lua:390–399` declare these two-member enums and metadata. Publication uses the existing Forever-only C API module; no getter behavior, provider model, preset model or retail epoch changes.
 
-- [ ] Publish raw numeric `Enum.VoiceProviderID`: `Legacy=0`, `Discord=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`.
-- [ ] Publish raw numeric `Enum.ForeverExperiencePreset`: `Classic=0`, `Modern=1`; identical metadata bounds/count.
-- [ ] Execute unchanged cached transcription initialization/provider-change branches and Camelot NPC-name defaults using explicit test inputs.
+- [x] Publish raw numeric `Enum.VoiceProviderID`: `Legacy=0`, `Discord=1`; metadata `MinValue=0`, `MaxValue=1`, `NumValues=2`.
+- [x] Publish raw numeric `Enum.ForeverExperiencePreset`: `Classic=0`, `Modern=1`; identical metadata bounds/count.
+- [x] Execute unchanged cached transcription initialization/provider-change branches and Camelot NPC-name defaults using explicit test inputs.
 - [ ] Preserve other-profile runtime publication; current source gating alone is not runtime proof.
 
 `src/c_api/forever_finite_constants.rs` now publishes the values. Three authored cases in `tests/wowforever_finite_constants.rs` compare raw values/scalar metadata with selected generated documentation, exercise the whole cached transcription file with Legacy/Discord/Legacy inputs, and execute the whole Camelot nameplate file with Classic/Modern/nil inputs. Fixtures supply getter/dependency inputs, not production shims; these do not establish real provider/preset state or native events.
 
-Before the canonical producer change, a sealed normal binary failed the raw-namespace Lua regression with both `VoiceProviderID raw namespace absent` and `ForeverExperiencePreset raw namespace absent`; process exit0 did not make the failed exec-Lua assertion PASS. Evidence: `provider-experience-raw-red/` under the [current receipt](../baselines/README.md#current-importevents-execution--2026-10-15). This is executed Lua RED plus actual failing vendor startup, not execution of the three new Rust tests. **New producer compilation and Rust/normal-runtime GREEN remain pending.** Other gamepad/quest startup failures remain open.
+Before the canonical producer change, a sealed normal binary failed the raw-namespace Lua regression with both `VoiceProviderID raw namespace absent` and `ForeverExperiencePreset raw namespace absent`; process exit0 did not make the failed exec-Lua assertion PASS. Evidence: `provider-experience-raw-red/` under the [current receipt](../baselines/README.md#current-importevents-execution--2026-10-15). This is executed Lua RED plus actual failing vendor startup, not execution of the three new Rust tests. At runtime source `70459ec5a`, all three new Rust tests and the unchanged raw-enum normal regression PASS; actual normal startup also initializes `VOICE_WINDOW_ID=ChatFrame3:GetID()=3`. Actual provider/preset getters still return nil, so no state-model credit is claimed. The complete21-case finite group is **19 PASS / 2 FAIL**, not GREEN: older talent-fixture and stance-fixture failures reproduce identically on the original c2bf sealed binary. [Current receipt](../baselines/README.md#current-providerquest-execution--2026-10-15) owns exact attribution and remaining12-record/16-occurrence startup FAIL.
 
 ## Legacy and level constants
 

@@ -1,3 +1,7 @@
+## [2026-10-15] evidence | Provider/quest bounded execution
+
+[Central receipt](../baselines/README.md#current-providerquest-execution--2026-10-15) records source704 build, six new regressions PASS, finite controls19/2, four positive normal probes and startup12records/16occurrences FAIL. Both older control failures reproduce on pre-change code; missing rich quest80002 and Gamepad storage remain open. Independent runtime reconciliation pending.
+
 ## [2026-10-15] source | Forever supplied quest difficulty
 
 [API inventory](systems/lua-api.md#forever-supplied-quest-difficulty) links the owning live-row contract and bounded policy. Original query/unchanged-consumer Lua REDs reproduced; current Rust/runtime GREEN remains pending.
