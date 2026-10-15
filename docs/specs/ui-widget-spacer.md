@@ -36,6 +36,10 @@
 
 The three owning aborts above remain historical. Four later TextColumn integration compile attempts also ended incomplete; they add no default-check or owning-publication result. Prior Retail/PTR Spacer runtime PASS remains limited to its recorded sources. The [TextColumn follow-up](ui-widget-text-column-row.md#saved-nonbehavioral-follow-up--2026-10-14) separates later format/metadata PASS from interrupted compilation and preserves warning/formatter-failure history. Default check, owning publication and public retention remain open.
 
+## Frozen historical evidence packet
+
+The [224-text packet](../../data/patch-api/evidence/ui-widget-spacer-2026-10-14/README.md) retains bounded historical Retail/PTR/CLI evidence, earlier failures and incomplete owning builds. Private originals/controls remain separate. It excludes the third owning abort and later TextColumn/current evidence; publication does not establish current-source equivalence, native parity, universal privacy or parent completion. Canonical copy/privacy/navigation verification is pending independently of the earlier candidate checks.
+
 ## Limits
 
 Strict selector rejection is the existing simulator sibling policy, not native parity proof. Native catalogs, animation/effect/timer/atlas behavior, nonfinite dimension policy, rendering and broader parent acceptance are not established by this slice. No vendor/cache/Wowless modification is authorized by it.
