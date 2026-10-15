@@ -134,6 +134,17 @@ Three-slice buttons (ThreeSliceButtonTemplate) define their background as child 
 
 **Fix**: replace the child Text FontString's single CENTER anchor with fill-parent anchors (`add_fill_parent_anchors()`), so `resolve_multi_anchor_edges` computes proper width from the parent button bounds.
 
+## Clean-room control and anchor follow-ups — 2026-10-15
+
+User functional requirements define shared simulator policies for Wrath and Retail, not native parity; no reconstructed implementation is a source. Owning specs retain algorithm/behavior details:
+
+| Scope | Owning contract | Current proof |
+|---|---|---|
+| C1 step assignment | [Slider callbacks](../../specs/slider-value-callback.md#clean-room-step-assignment-follow-up) | Five committed tests UNCOMPILED/UNEXECUTED; no producer or behavioral RED yet |
+| C2 cursor geometry | [EditBox geometry](../../specs/editbox-text-position-selection.md#cursor-geometry-follow-up) | Two committed tests UNCOMPILED/UNEXECUTED; no producer/RED; actual consumer and Wrath guard-retirement gates open |
+| C3 highlight endpoints | [EditBox selection](../../specs/editbox-text-position-selection.md#tests-asserting-this-spec) | Source `5dfa94330`: three valid REDs plus one fixture-oracle error; empty highlight retains old cursor. Source `186f5db13` byte-endpoint fix and corrected test authored UNCOMPILED/UNEXECUTED; no PASS |
+| L1 protected-recipient targets | [Anchor target policy](../../specs/protected-anchor-targets.md) | Five committed tests UNCOMPILED/UNEXECUTED; no eligibility producer or behavioral RED yet |
+
 ## Region alpha numeric range
 
 Stored alpha is `f32`; ordinary Retail/PTR numeric validation precedes narrowing and mutation. [Owning contract/status](../../specs/region-alpha-numeric-range.md) records five unique cases/profile, two separate startups, legacy observation and remaining acceptance limits.
@@ -143,6 +154,9 @@ Stored alpha is `f32`; ordinary Retail/PTR numeric validation precedes narrowing
 `Show()` fires `OnShow` recursively on visible children. `IsVisible()` walks the parent chain; `IsShown()` checks only the frame's own `visible` flag.
 
 ## Sources
+
+- [Slider value callbacks](../../specs/slider-value-callback.md) — shared step follow-up and pending proof
+- [Protected-recipient anchor targets](../../specs/protected-anchor-targets.md) — shared eligibility policy and pending proof
 
 - [Bound Slider thumb layout](../../specs/slider-bound-thumb-layout.md) — geometry, admission, invalidation and pending proof
 

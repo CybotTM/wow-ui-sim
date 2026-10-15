@@ -137,13 +137,17 @@ Selector RED is not populated-result, isolation or cached-lifecycle acceptance. 
 
 ### DoubleIconAndText producer source after populated RED — 2026-10-15
 
-[Owning contract](../../specs/ui-widget-double-icon-and-text.md) inventories getter/registration source `c3096cd6b`: all 19 explicit supplied fields, shared `read_numeric_id`, record clone before allocation, rooted fresh Lua result and one nil for absent IDs. No defaults or vendor changes. Producer is **UNCOMPILED / UNEXECUTED**; source inspection is not behavior proof.
+[Owning contract](../../specs/ui-widget-double-icon-and-text.md) inventories getter/registration source `c3096cd6b`: all 19 explicit supplied fields, shared `read_numeric_id`, record clone before allocation, rooted fresh Lua result and one nil for absent IDs. No defaults or vendor changes. At that source-only checkpoint producer execution was pending; later bounded Retail acceptance is recorded below, not inferred from inspection.
 
-The separate source1571253e9 Retail baseline executed nine unique cases: **one unknown-ID control PASS / eight FAIL, exit101** (seven supplied-table failures, one invalid-selector failure). Cached lifecycle was unreached before consumer loading. The owning contract links the exact private epoch; independent saved-runtime reconciliation confirms all nine identities, full streams and build/seal receipts. Authored assertions target projection, isolation, feeds and cached lifecycle; none gains producer acceptance from this RED. Behavior checkboxes and whole-parent acceptance remain OPEN.
+The separate source1571253e9 Retail baseline executed nine unique cases: **one unknown-ID control PASS / eight FAIL, exit101** (seven supplied-table failures, one invalid-selector failure). Cached lifecycle was unreached before consumer loading. The owning contract links the exact private epoch; independent saved-runtime reconciliation confirms all nine identities, full streams and build/seal receipts. Authored assertions target projection, isolation, feeds and cached lifecycle; none gains producer acceptance from this RED. This RED alone closes no behavior checkbox. Later bounded acceptance follows; whole-parent acceptance remains OPEN.
+
+### DoubleIconAndText bounded Retail producer proof — 2026-10-15
+
+[Owning acceptance matrix](../../specs/ui-widget-double-icon-and-text.md#bounded-retail-producer-acceptance--2026-10-15) records getter `c3096cd6b` executed at saved source `5dfa94330`: **nine unique PASS, exit0**, with independent build/seal/full-stream runtime reconciliation PASS. Complete supplied snapshots, selector/actual-secret policy, feed ordering/atomic rejection and the unchanged cached type5 lifecycle all executed, including live unregister and later inactive feed. Nested parent/child appearances are not additional cases. Historical selector/populated REDs remain separate. Remaining profile preservation, format/check, ordinary startup and full-parent gates stay OPEN; no native/render parity or unrelated current-HEAD/C3 proof.
 
 ## Sources
 
-- [DoubleIconAndText contract](../../specs/ui-widget-double-icon-and-text.md) — supplied-record/consumer requirements, producer source inventory and separate selector/populated RED boundaries.
+- [DoubleIconAndText contract](../../specs/ui-widget-double-icon-and-text.md) — supplied-record/consumer requirements, bounded Retail acceptance matrix and separate historical selector/populated RED boundaries.
 
 - [TextureAndTextRow contract](../../specs/texture-and-text-row.md) — single-source supplied-row contract, historical RED, bounded independent Retail/PTR/source gates, independent final owning/check/format PASS, separate Retail/PTR diagnostic audits and suppression limits; committed public packet with bounded candidate/canonical integrity/privacy/navigation PASS; broader acceptance remains open.
 

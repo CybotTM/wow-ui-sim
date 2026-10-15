@@ -1,10 +1,14 @@
-## [2026-10-15] source | DoubleIconAndText producer remains unexecuted
+## [2026-10-15] evidence | DoubleIconAndText bounded Retail producer PASS
 
-[Manager checkpoint](systems/ui-widget-manager-state.md#doubleiconandtext-producer-source-after-populated-red--2026-10-15) separates `c3096cd6b` getter/registration source inventory from source1571253e9 Retail RED: nine unique cases, one unknown-ID control PASS/eight FAIL, exit101; cached consumer loading unreached. Producer UNCOMPILED/UNEXECUTED; independent saved-runtime reconciliation confirms exact identities, full streams and build/seal receipts. Behavior and full-parent acceptance remain open.
+[Manager checkpoint](systems/ui-widget-manager-state.md#doubleiconandtext-bounded-retail-producer-proof--2026-10-15) links the owning acceptance matrix: getter `c3096cd6b` at saved source `5dfa94330`, nine unique PASS/exit0, independent build/seal/full-stream runtime reconciliation PASS. Actual cached lifecycle and secret selectors executed. Historical REDs remain separate; profile preservation, format/check, ordinary startup and full-parent gates stay open. No nine-case rerun or unrelated current-HEAD/native proof.
+
+## [2026-10-15] source | Shared clean-room controls and anchors
+
+[Widget proof matrix](systems/widget-system.md#clean-room-control-and-anchor-follow-ups--2026-10-15) links C1/C2/C3/L1 owning contracts. C1 five, C2 two and L1 five committed tests remain UNCOMPILED/UNEXECUTED without producers/RED. C3 has three valid REDs plus one fixture-oracle error at `5dfa94330`; `186f5db13` fix/corrected test remain uncompiled/unexecuted, not PASS. Wrath/Retail policies are shared simulator requirements, not native parity.
 
 ## [2026-10-15] source | DoubleIconAndText passive scaffold and selector RED
 
-[Manager checkpoint](systems/ui-widget-manager-state.md#doubleiconandtext-passive-scaffold-and-selector-red--2026-10-15) links the [owning contract](../specs/ui-widget-double-icon-and-text.md), independent saved audit and private permission erratum. Source `a56e11267` reached one unique selector FAIL/exit101 after the existing-manager control passed; nested summaries are nonadditive. `4cb2b5e98` record/empty map/type5 feed remains UNCOMPILED/UNEXECUTED, without modeled projection/getter registration or demo/native defaults. Populated/cached lifecycle, broader C_UIWidgetManager lifecycle/popup/performance and full-parent acceptance remain open.
+[Manager checkpoint](systems/ui-widget-manager-state.md#doubleiconandtext-passive-scaffold-and-selector-red--2026-10-15) links the [owning contract](../specs/ui-widget-double-icon-and-text.md), independent saved audit and private permission erratum. Source `a56e11267` reached one unique selector FAIL/exit101 after the existing-manager control passed; nested summaries are nonadditive. At that historical checkpoint `4cb2b5e98` record/empty map/type5 feed was UNCOMPILED/UNEXECUTED without modeled getter registration. Later bounded producer acceptance is linked above; broader C_UIWidgetManager lifecycle/popup/performance and full-parent acceptance remain open.
 
 ## [2026-10-15] evidence | Slider and repaired EditMode focused execution
 

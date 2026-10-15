@@ -1,3 +1,7 @@
+## [2026-10-15] docs | Clean-room controls and bounded DoubleIcon acceptance
+
+[Owning DoubleIcon matrix](../specs/ui-widget-double-icon-and-text.md#bounded-retail-producer-acceptance--2026-10-15) and manager/index now record saved `5dfa94330` Retail nine unique PASS/exit0 with independent build/seal/runtime reconciliation, actual cached lifecycle and secret selectors. Historical REDs remain intact; remaining profile preservation, format/check, ordinary startup and full-parent gates stay open. [Widget matrix](systems/widget-system.md#clean-room-control-and-anchor-follow-ups--2026-10-15) links shared simulator C1/C2/C3/L1 policies: C1 five/C2 two/L1 five tests uncompiled/unexecuted without producers/RED; C3 three valid REDs plus one empty-highlight fixture error, later `186f5db13` fix/correction uncompiled/unexecuted, not PASS. Docs only; no tests/builds/checks, code/vendor/PLAN edits, commits or delegated work. No reconstructed sources consulted.
+
 ## [2026-10-15] source | DoubleIconAndText producer remains unexecuted
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#doubleiconandtext-producer-source-after-populated-red--2026-10-15) separates `c3096cd6b` getter/registration source inventory from source1571253e9 Retail RED: nine unique cases, one unknown-ID control PASS/eight FAIL, exit101; cached consumer loading unreached. Producer UNCOMPILED/UNEXECUTED; independent saved-runtime reconciliation confirms exact identities, full streams and build/seal receipts. Behavior and full-parent acceptance remain open.
