@@ -39,7 +39,7 @@ Producer `ccd9e2d01` is committed; main-observed Forever execution at source `53
 
 ### Current bounded execution — 2026-10-15
 
-[Central receipt](../baselines/README.md#public-offer-rich-log-coherence-red--2026-10-15) owns saved evidence at source `53cf24ab0`: **43/43 PASS, exit0** observed by main: enrichment3 + existing-row preservation1 + original acceptance1 + verbs13 + gossip13 + watch membership8 + projection4. These execute selected snapshots across close/replacement, cancellation/isolation/repeat confirmation, represented metadata/reward preservation and explicit watchability. Exact simulator mapping is80002→37; custom map remainsNone. The five requirements above are complete only for these executed boundaries, not broader lifecycle or native behavior. Independent saved-runtime reconciliation confirms all43 unique identities and full streams; build/seal reconciliation is separate. Retail confirmation, default check and startup remain pending; historical Gamepad10 records/14 occurrences is unchanged, not rerun.
+[Central receipt](../baselines/README.md#public-offer-rich-log-coherence-red--2026-10-15) owns saved evidence at source `53cf24ab0`: **43/43 PASS, exit0** observed by main: enrichment3 + existing-row preservation1 + original acceptance1 + verbs13 + gossip13 + watch membership8 + projection4. These execute selected snapshots across close/replacement, cancellation/isolation/repeat confirmation, represented metadata/reward preservation and explicit watchability. Exact simulator mapping is80002→37; custom map remainsNone. The five requirements above are complete only for these executed boundaries, not broader lifecycle or native behavior. Independent saved-runtime reconciliation confirms all43 unique identities and full streams; build/seal reconciliation is separate. Separate current source `a56e11267` default-Retail preservation is independently accepted: **31 unique PASS, exit0** (confirmation5 + verbs13 + gossip13), harness16.50s. The [Retail receipt](../baselines/README.md#retail-quest-preservation--2026-10-15) owns retry1 evidence, actual emitted profile, successful guarded12m13s no-run build, seal digest and independent build/runtime reports. This accepts current pending-snapshot prompt preservation at real synchronous listeners, not Retail rich/watch coverage or native behavior. Current a56 formatting PASS/exit0/empty output; default check and startup remain pending. First204301Z host-PSI guard SIGTERM abort has no compiler/test verdict; historical Gamepad10 records/14 occurrences is unchanged, not rerun.
 
 ## Known gaps (current cycle)
 
@@ -50,7 +50,8 @@ Producer `ccd9e2d01` is committed; main-observed Forever execution at source `53
 - [x] Independently reconcile Forever source53cf24ab0 selected-snapshot/publication and pending-payload controls:43/43 PASS, exit0, full streams and exact identities verified.
 - [x] Independently reconcile the expected RED and 13 passing existing controls; no commands were rerun.
 - [x] Prove current rich/watch coherence at the executed Forever boundaries; historical RED remains retained and does not count as a current pass.
-- [ ] Complete Retail confirmation, default check and startup gates.
+- [x] Independently reconcile current a56 Retail confirmation/pending-payload preservation:31 unique PASS, exit0; separate from Forever43 at source53cf.
+- [ ] Complete current default check and startup gates; DoubleIcon selector remains unrun, with no C_UIWidgetManager, broad/native/full-parent closure.
 
 ## Out of scope
 

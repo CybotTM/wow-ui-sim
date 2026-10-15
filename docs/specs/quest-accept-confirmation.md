@@ -33,11 +33,19 @@ The new admin name/signature and absent-offer policy are explicit simulator desi
 - `src/lua_api/globals/missing_surface/gossip_info.rs`: available-quest selection now retains a full selected snapshot under the [rich-log coherence contract](quest-offer-rich-log-coherence.md).
 - `src/lua_api/globals/quest_verbs.rs`: acceptance now publishes absent rich membership in addition to the existing lightweight ID/event; confirmation and close semantics remain as specified here.
 
-Shared payload change `ccd9e2d01` replaces the pending numeric ID with an existing `QuestLogEntry`; the prompt extracts its ID before synchronous dispatch. Historical proof below predates this change. Current Retail preservation execution is pending; separate Forever43/43 evidence does not validate the Retail prompt.
+Shared payload change `ccd9e2d01` replaces the pending numeric ID with an existing `QuestLogEntry`; the prompt extracts its ID before synchronous dispatch. Historical October1 proof below predates this change. Current source `a56e11267` Retail pending-payload preservation is independently accepted at the bounded fixtures below; separate Forever43/43 evidence at source53cf is not Retail prompt proof.
 
 ## Tests asserting this spec
 
 `tests/quest_accept_confirmation.rs` exercises actual `A_Admin.OpenQuestNpc` → `C_GossipInfo.SelectAvailableQuest` ordering, then the explicit admin input. Listeners assert exactly three arguments, concrete values/types and selected-quest visibility. Explicit confirmation title differs from seeded gossip title. Rust observes actual `pending_quest_offer`, `quest_log` and queued lifecycle events; no query globals, handlers or event dispatchers are replaced. Acceptance inside the prompt callback checks pending-state availability at the real dispatch boundary.
+
+### Current Retail preservation — 2026-10-15
+
+[Central Retail receipt](../baselines/README.md#retail-quest-preservation--2026-10-15) owns sourcea56 retry1 evidence, actual default-Retail emitted features/guard, successful12m13s integration no-run build and SHA256 `fcf228806a0203e11a18eea699f7245e88890f2652f5d133f511ffd6ccc5fbdf`. Independent `quest-enrich-next/retail-green-build-report.md` and `retail-green-runtime-report.md` under host-private verification state both PASS. Runtime executes **31 unique PASS / 0 FAIL, exit0**: these confirmation5 + Retail verbs13 + gossip13, harness16.50s; stdout2596/stderr19858 bytes. All five current prompt fixtures pass through actual modeled selection and real synchronous frame listeners. Exact payload/type assertions, immediate callback sentinels and Rust state/event postconditions establish bounded current preservation; exec success alone would not, because callback errors can be routed to an error handler. Complete saved stderr has no such diagnostic.
+
+First204301Z host-PSI guard SIGTERM abort remains separate, with no compiler/test verdict. Original Forever43 at source53cf is not pooled with Retail31. Current a56 format PASS/exit0/empty output does not satisfy pending default `cargo check` or startup. Loaded-popup/native/full-parent acceptance remains open; DoubleIcon selector is unrun and no C_UIWidgetManager closure follows.
+
+### Historical proof — 2026-10-01
 
 **Proof ledger (2026-10-01):** independent `/tmp/patch-12.0.5-quest-confirmation-independent-proof.md` inspected saved RED/GREEN and executed existing lifecycle controls. Producer `e5ab15302` follows actual RED at `81421d0574b6af3c3fc289216a6e910e4ee3806e`: 1 PASS (selection), 4 FAIL at missing `A_Admin.RequestQuestAcceptConfirmation`. Saved `/tmp/patch-12.0.5-batch16-red-run.{log,json}` identifies the artifact. Unrelated RED bin-test compilation failure at `enable_state.rs:225` (missing `AddonMetadata.addon_dir`) remains historical evidence; this producer is not claimed to fix it.
 
@@ -53,7 +61,8 @@ Shared payload change `ccd9e2d01` replaces the pending numeric ID with an existi
 - [x] Parent compiled integration artifact and ran actual targeted RED: selection passed; four confirmation fixtures stopped at missing producer.
 - [x] Implement bounded producer after valid RED.
 - [x] Saved targeted GREEN and independent bounded acceptance/default snapshot gates recorded.
-- [ ] Native, loaded-popup integration and all-profile acceptance remain outside this bounded proof.
+- [x] Independently reconcile current a56 Retail pending-snapshot preservation: confirmation5 plus verbs13/gossip13 PASS, separate from historical proof and Forever execution.
+- [ ] Current default check/startup remain pending; native, loaded-popup integration and all-profile acceptance remain outside this bounded proof.
 
 ## Out of scope
 
