@@ -45,16 +45,20 @@ increasing percentage. All paths are within cached `Blizzard_SharedXML`.
 - `src/lua_api/rect_geometry.rs`: resolve layout before query admission.
 - `src/lua_api/frame/methods/widgets/slider.rs` and `slider/thumb_texture.rs`:
   mark Slider layout dirty after modeled mutations.
+- `src/iced_app/slider_scale_tests.rs`: authored inherited/local-scale CPU render-list cases, registered through the existing test-only `strata_emit` module.
 
 ## Tests asserting this spec
 
 Executed bounded integration cases in `tests/widget_slider.rs` cover value/range/orientation/resize geometry and rebinding/unresolved/authored-anchor controls. See [central receipt](../baselines/README.md#verified-scoped-receipts--2026-10-15) for runtime-source attribution and the full Slider group. A separate saved exact run of `slider_thumb_render_rect_tracks_mutations_without_query_side_effects` passed 1/1 on source136: CPU render-list inclusion and horizontal/vertical/value/range/size mutation, without Lua geometry queries priming layout. Independent report: `/home/osso/.local/state/wow-ui-sim/verification/slider-query-free-saved-next/report.md`. Scale remains 1; this is not GPU or whole-current-tree proof.
+
+Two new library cases in `src/iced_app/slider_scale_tests.rs` remain **UNEXECUTED**: ancestor scales0.5/2 and thumb-local scales0.5/1.5 at ancestor2, both orientations, each min/mid/max. They warm layout before scale changes and observe all24 endpoint rectangles through the CPU render list before querying Lua geometry; later queries must agree without changing rendered rectangles. This is authored simulator-policy coverage, not a production counterexample, GPU proof or native endpoint claim.
 
 ## Known gaps (current cycle)
 
 - [x] Bounded public-query/mutation and callback geometry tests passed on runtime source136.
 - [x] Separate earlier [GPU receipt](../rendering-pipeline.md#combined-feedback-gpu-receipt--2026-10-15) establishes midpoint thumb visibility at its recorded source.
 - [x] Source136 query-free CPU render-list mutation regression passed separately.
+- [ ] Execute the two new non-unit-scale CPU render-list cases; source-oracle inspection is not runtime acceptance.
 - [ ] Native endpoint parity, full integration and current-source live-render acceptance remain open.
 
 ## Out of scope

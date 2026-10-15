@@ -868,3 +868,7 @@ mod tests {
 #[cfg(test)]
 #[path = "strata_emit_endpoint_tests.rs"]
 mod endpoint_tests;
+
+#[cfg(test)]
+#[path = "slider_scale_tests.rs"]
+mod slider_scale_tests;
