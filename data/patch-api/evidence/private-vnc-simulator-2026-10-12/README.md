@@ -16,6 +16,14 @@ The earlier loopback viewer/SSH-forwarding instructions belong to the historical
 
 Stop only these units when finished: `systemctl --user stop wow-ui-vnc-app.service wow-ui-vnc.service wow-ui-vnc-display.service`. Full handoff/frozenBA3FAIL remain OPEN. User clarified there was no403issue; do not carry an invented403blocker.
 
+## Resumed bounded viewing observation — 2026-10-14
+
+Existing app started after fresh resource admission; independent read-only observation confirms active/running, CPU200%, memory4GiB and unlimited runtime. Existing private-LAN/no-password policy, display, user settings and historical `7d9d9f621` GUI artifact are unchanged. This makes the preview available without a 90-second expiry; it is not a current-source GUI acceptance claim.
+
+Native title/focus receipt and complete PNG decoding establish a named 1920×1080 capture with nonuniform pixels. Detailed visual identification remains PARTIAL because image-tool attachments were omitted. Missing ImageMagick command/executable attempts remain failed; native XGetImage capture subsequently succeeded. No remote-viewer/authentication or new native-input acceptance was inferred.
+
+All 283 current-invocation journal entries are retained privately. No explicit warning/error diagnostic was observed in that snapshot; its 927.6ms draw-stall diagnostic remains recorded, not performance-health proof. Historical expiry, focus, size and authentication limitations below remain unchanged. The app stays running for authorized practical viewing; no other session or host limits were changed.
+
 ## Later native input checkpoint — 2026-10-13
 
 [Bounded LFDMicroButton packet](../native-lfd-click-2026-10-13/README.md) retains actual XTest press/release and PVE activation on Retail5bd. Ctrl-held limitation remains; the later user-owned viewing-size answer below supersedes only the size-acceptance UNKNOWN. Saved metadata is not current liveness proof. Retention does not stop or alter the protected app/display/VNC. Earlier runs and cleanup observations below remain historical, not current app ownership/source evidence.
