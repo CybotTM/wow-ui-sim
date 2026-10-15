@@ -6,7 +6,7 @@ Forever public offer acceptance must agree with rich quest-log queries and permi
 
 - [ ] After the existing public `A_Admin.OpenMultiQuestNpc()` → `SelectAvailableQuest(1)` → `ConfirmAcceptQuest()` path, preserve one lightweight accepted ID, consume the pending offer and expose the matching accepted quest through rich membership/index/info queries.
 - [ ] Preserve the selected offer's supplied identity, title, level, meta flag and current completion in the accepted rich view, consistent with Forever difficulty lookup. Retain the selected snapshot across gossip closure or replacement rather than reading later gossip rows.
-- [ ] Model authored ordinary offers as not-world, not-failed, nonreplayable and not previously completed, with no item/currency rewards in this scenario. Unknown map, waypoint, tag, theme and criteria metadata remain absent; do not copy another quest's seed defaults or claim native values.
+- [ ] Model authored ordinary offers as not-world, not-failed, nonreplayable and not previously completed, with no item/currency rewards in this scenario. Carry known same-quest map data: Supply Run's existing authored POI blob supplies map37. Custom offers without known map data remain unmapped. Unknown waypoint, tag, theme and criteria metadata remain absent; do not copy another quest's seed defaults, infer an NPC position from a polygon, or claim native values.
 - [ ] After acceptance returns, expose one rich row and one lightweight ID and preserve the existing queued acceptance event. Repeated confirmation without a pending offer is inert; cancellation and separate environments must not gain membership. These assertions do not establish native event timing or internal enqueue ordering.
 - [ ] Allow explicit `C_QuestLog.AddQuestWatch` for the accepted ordinary quest, with coherent membership, count and log-index mapping. No automatic-watch policy is required by this fixture.
 
@@ -22,6 +22,7 @@ Forever public offer acceptance must agree with rich quest-log queries and permi
 - `src/lua_api/globals/quest_surface/legacy_globals.rs`: offer-index selection and public offer metadata.
 - `src/lua_api/globals/missing_surface/{gossip_info,quest_log}.rs`: public offer and rich-log queries.
 - `src/lua_api/sim_substates/quest_log.rs`: rich state representation.
+- `data/quest_poi_blobs.rs`: existing exact-ID authored map/area metadata; Supply Run maps to37. Generated `data/quest_ui_map.rs` is a separate projection and is not hand-edited.
 - `src/c_api/c_quest_log.rs`: Forever rich-level difficulty lookup.
 - `src/c_api/c_quest_log_watches.rs`: explicit membership intersected with represented ordinary rich rows.
 
@@ -35,7 +36,7 @@ Forever public offer acceptance must agree with rich quest-log queries and permi
 
 - [x] Reproduce the public acceptance/rich-query split at the final Rust coherence assertion.
 - [x] User requested enrichment of the simulator-authored offer data; optional unsupported native metadata remains absent under the documented bounded model.
-- [ ] Execute the new three-case snapshot/enrichment regressions before implementing their producer; compilation/setup failure is not behavioral RED.
+- [ ] Execute the new three-case snapshot/enrichment regressions before implementing their producer; compilation/setup failure is not behavioral RED. First sourceedf attempt failed at private-module test imports (E0603), not runtime; the test now uses existing public state re-exports.
 - [x] Independently reconcile the expected RED and 13 passing existing controls; no commands were rerun.
 - [ ] Implement and prove rich/watch coherence; current RED is not acceptance.
 

@@ -3,9 +3,10 @@
 #![cfg(feature = "client-wowforever")]
 
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::sim_substates::{GossipQuestRow, QuestLogEntry};
+use wow_ui_sim::lua_api::state::{GossipQuestRow, QuestLogEntry};
 
 const SUPPLY_RUN_ID: u32 = 80002;
+const SUPPLY_RUN_MAP_ID: i32 = 37;
 const CUSTOM_OFFER_ID: u32 = 456793;
 const CUSTOM_TITLE: &str = "Authored custom supply offer";
 const CUSTOM_LEVEL: i32 = 27;
@@ -75,6 +76,10 @@ fn read_selected_quest_id(env: &WowLuaEnv) -> u32 {
     u32::try_from(id).expect("selected offer ID is nonnegative")
 }
 
+fn expected_offer_map(quest_id: i32) -> Option<i32> {
+    (quest_id == SUPPLY_RUN_ID as i32).then_some(SUPPLY_RUN_MAP_ID)
+}
+
 fn assert_modeled_offer_policy(row: &QuestLogEntry) {
     assert!(
         !row.is_world_quest,
@@ -84,8 +89,9 @@ fn assert_modeled_offer_policy(row: &QuestLogEntry) {
     assert!(!row.is_replayable);
     assert!(!row.is_flagged_completed, "not previously completed");
     assert_eq!(
-        row.map_id, None,
-        "unknown map must not borrow seeded defaults"
+        row.map_id,
+        expected_offer_map(row.quest_id),
+        "use same-quest map data only"
     );
     assert_eq!(row.waypoint, None);
     assert_eq!(
@@ -167,6 +173,25 @@ fn assert_public_rich_offer(env: &WowLuaEnv, offer: &GossipQuestRow) {
         .expect("read accepted Forever difficulty endpoint");
     assert_eq!(difficulty, offer.quest_level);
     assert_public_offer_flags(env, offer);
+    assert_public_offer_map(env, offer);
+}
+
+fn assert_public_offer_map(env: &WowLuaEnv, offer: &GossipQuestRow) {
+    let id = offer.quest_id;
+    let expected_map = expected_offer_map(id as i32);
+    let present: (bool, bool) = env
+        .eval(&format!(
+            "local index = C_QuestLog.GetLogIndexForQuestID({id}); \
+             return C_QuestLog.IsOnMap({id}), C_QuestLog.GetInfo(index).isOnMap"
+        ))
+        .expect("read accepted map-presence projections");
+    assert_eq!(present, (expected_map.is_some(), expected_map.is_some()));
+    if let Some(map_id) = expected_map {
+        let observed: i32 = env
+            .eval(&format!("return GetQuestUiMapID({id})"))
+            .expect("read the known authored quest map");
+        assert_eq!(observed, map_id);
+    }
 }
 
 fn assert_public_offer_flags(env: &WowLuaEnv, offer: &GossipQuestRow) {
