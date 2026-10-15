@@ -1,5 +1,7 @@
 # CASC asset cache
 
+Updated bounded source136 model proof: [owning contract](../../specs/casc-loading.md), [central receipt](../../baselines/README.md#verified-scoped-receipts--2026-10-15). This does not cover the pending import/event changes or native/cross-profile/full-parent acceptance.
+
 The simulator reads textures and fonts from a live WoW install via three stacked caches. Each layer has a distinct purpose, lifetime, and on-disk location; this page explains what they cache, how they're wired together, and the measured cost of hits and misses.
 
 ## Cache layers

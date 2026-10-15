@@ -63,6 +63,8 @@ result_left = atlas_left + user_left * (atlas_right - atlas_left)
 
 ## Rotated tiled edge prefix — 2026-10-15
 
+Updated bounded source136 model proof: [owning contract](../../specs/rotated-tiled-edge-prefix.md), [central receipt](../../baselines/README.md#verified-scoped-receipts--2026-10-15). This does not cover the unbuilt current import change or native/cross-profile/full-parent acceptance.
+
 `5ae7fb14e` changes partial rotated horizontal edge tiles in `src/iced_app/tiling.rs` to show the prefix of a complete rotated tile. Complete tiles keep reversed-V orientation: eight source red texels then eight blue produce blue then red. A 40-pixel row therefore ends with eight blue pixels after two complete 16-pixel tiles, not a red suffix.
 
 The [owning contract](../../specs/rotated-tiled-edge-prefix.md) records exact-source CPU RED/GREEN. Historical pre-fix GPU reproduction showed a red tail against a blue reference. The [combined feedback GPU receipt](../../rendering-pipeline.md#combined-feedback-gpu-receipt--2026-10-15) now records blue tail and blue reference, with complete blue-then-red orientation preserved, at sealed source head `623294944`. Independent saved-capture verification PASS; this does not prove filtering/atlas-bleed correctness, native parity or full-test GREEN. Existing startup errors remain. The linked receipt owns the evidence epoch and separate Slider/colour observations.

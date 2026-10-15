@@ -71,7 +71,7 @@ pub struct QuadBatch {
 
 The [colour contract](specs/shader-colour-roundtrip.md) removes the artificial post-modulation RGB power lift, without changing atlas/attachment formats, linear solid inputs, premultiplied alpha, or additive blending. `e7f303dcd` adds opt-in production-wgpu readback tests; `7c3ce5a24` removes the lift from the shader. Pre-fix GPU observations were opaque RGB128 texture → RGB162 and solid input 0.5 → RGB208. The texture control isolates the lift without assuming that a linear solid input of 0.5 means encoded RGB128. No second-encoding or native colour-space parity claim is established.
 
-The [combined GPU receipt](#combined-feedback-gpu-receipt--2026-10-15) records post-fix opaque texture RGB128 → RGB128 and linear solid input 0.5 → encoded RGB188. Half-alpha and additive readback remain separate pending gates. Separately reported PNG 12-test, default-check and native-capture PASS do not establish overall completion.
+The [combined GPU receipt](#combined-feedback-gpu-receipt--2026-10-15) records post-fix opaque texture RGB128 → RGB128 and linear solid input 0.5 → encoded RGB188. The later source136 [production readback receipt](baselines/README.md#verified-scoped-receipts--2026-10-15) closes all four bounded colour controls, including half-alpha and additive; it does not widen the earlier geometry GPU source attribution. Separately reported PNG 12-test, default-check and native-capture PASS do not establish overall completion.
 
 ### quad.wgsl
 **File:** `src/render/shader/quad.wgsl`

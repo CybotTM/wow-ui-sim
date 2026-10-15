@@ -70,7 +70,7 @@ The `events` module defines constants for common WoW events:
 | `BAG_UPDATE` | Inventory changed |
 | `UPDATE_MOUSEOVER_UNIT` | Mouseover target changed |
 
-These are string constants only -- the system accepts any arbitrary event name string, not just those listed here.
+These are string constants only, not the registration catalog. Registration policy is profile-specific; see [event registration](#event-registration-on-frames).
 
 ## Script Handler Types
 
@@ -219,6 +219,14 @@ Frames must explicitly register for game events to receive them via OnEvent.
 ### RegisterEvent / UnregisterEvent
 
 Registration adds registerable names; [state-based removal](specs/frame-event-removal.md#current-source-checkpoint--2026-10-13) removes existing membership without catalog validation (selected model policy; post-fix execution pending). Registration uses `frame.registered_events` (`HashSet<String>` on the Rust `Frame` struct, line 126 of `src/widget/frame.rs`). Retail/PTR validate names against generated and epoch-specific strict tables; `EXTERNAL_EVENT_LAUNCH_URL_FAILED` is registerable at retail 12.1 for current `Blizzard_GameMenu` loading. Classic profiles accept any non-empty name. Registration does not model an event producer, payload, or `C_ExternalEventURL` behavior.
+
+### Forever finite startup additions — source checkpoint 2026-10-15
+
+Commit `c2bf42c4f` adds exactly five names to `src/event/valid_events.rs`'s Forever-only finite catalog: `ALERT_AGE_VERIFICATION_RESTRICTED`, `GLOBAL_REGION_MOUSE_DOWN`, `PLAYER_PVP_FLAG_CHANGED`, `VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED`, and `VOICE_CHAT_VOICE_PROVIDER_CHANGED`. It does not make Forever registration permissive or change other-profile policy. The [owning finite-event spec](specs/forever-finite-constants.md#70374-startup-event-catalog) records source declarations and remaining requirements.
+
+The five authored `tests/startup_api_events.rs::forever_known_startup_*` cases (four enabled under Forever) cover registration/query/unregistration, injected region/button and active-provider payloads, other-profile policy, and strict unknown-name rejection. **Compilation is in progress; authored tests remain UNEXECUTED.** Injection is not a native event producer or native payload/parity proof; startup improvement remains unmeasured on this source.
+
+Separate commit `012df1e45` registers Forever `import` through the existing completed-addon-module backend used by `require`, with authored loader and sandbox controls. Its compilation is in progress and authored tests remain **UNEXECUTED**; it is not an event producer, new loader, or native import/require parity claim. The [module-import spec](specs/addon-module-imports.md) owns that contract.
 
 ### RegisterAllEvents
 

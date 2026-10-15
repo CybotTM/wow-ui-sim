@@ -7,13 +7,15 @@ of native endpoint parity.
 
 ## What it must do
 
-- [ ] Preserve thumb dimensions/scale; center on the track cross-axis and at the
+- [x] Preserve thumb dimensions; center on the track cross-axis and at the
   value midpoint. Increasing values move right horizontally and down vertically.
-- [ ] Value, range, orientation, binding and track/thumb resize changes update
-  geometry, including synchronous queries inside `OnValueChanged`.
+- [ ] Preserve non-default thumb/ancestor scale across query/render geometry;
+  selected executed cases use scale 1.
+- [x] At scale 1, value, range, orientation, binding and track/thumb resize changes
+  update query geometry, including synchronous queries inside `OnValueChanged`.
 - [ ] Query and render admission require the same real positive finite resolved
   thumb rectangle, not binding identity alone.
-- [ ] Ordinary and formerly bound unanchored textures remain unresolved; unsized
+- [x] Ordinary and formerly bound unanchored textures remain unresolved; unsized
   bound textures remain unresolved. Explicit thumb anchors stay authoritative.
 
 ### Limited simulator policy — not native endpoint parity
@@ -46,18 +48,13 @@ increasing percentage. All paths are within cached `Blizzard_SharedXML`.
 
 ## Tests asserting this spec
 
-Authored, not executed:
-- `tests/widget_slider.rs`: `slider_bound_thumb_tracks_value_range_orientation_and_resize`;
-  `slider_thumb_rebinding_preserves_unresolved_and_authored_anchor_controls`.
-- `src/iced_app/strata_emit.rs`:
-  `slider_thumb_render_rect_tracks_mutations_without_query_side_effects`.
+Executed bounded integration cases in `tests/widget_slider.rs` cover value/range/orientation/resize geometry and rebinding/unresolved/authored-anchor controls. See [central receipt](../baselines/README.md#verified-scoped-receipts--2026-10-15) for runtime-source attribution and the full Slider group. `slider_thumb_render_rect_tracks_mutations_without_query_side_effects` is not among those selected cases; no new proof claimed for it.
 
 ## Known gaps (current cycle)
 
-- [ ] Main-owned compilation, Rust/public Lua RED/GREEN and midpoint GPU GREEN.
-  Missing-thumb GPU RED records zero magenta pixels for the bound 18×24 thumb.
-  Public Lua query RED capture is main-owned; no result is claimed here.
-- [ ] Integration and actual rendering after live mutations remain unverified.
+- [x] Bounded public-query/mutation and callback geometry tests passed on runtime source136.
+- [x] Separate earlier [GPU receipt](../rendering-pipeline.md#combined-feedback-gpu-receipt--2026-10-15) establishes midpoint thumb visibility at its recorded source.
+- [ ] Query-free render mutation regression, native endpoint parity, full integration and current-source live-render acceptance remain open.
 
 ## Out of scope
 

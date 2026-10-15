@@ -31,9 +31,9 @@ Helper functions/constants in `src/client_profile.rs`:
 - `blizzard_ui_addons_dir_under(root)` — test fallback path anchored at `root`
 - `blizzard_ui_framexml_toc()` → wrath-only `<cache>/FrameXML/FrameXML.toc`; retail/PTR/mists/era/anniversary collapsed FrameXML into `Blizzard_*` addons
 
-## Forever gamepad Edit Mode — pending 2026-10-15
+## Forever gamepad Edit Mode — 2026-10-15
 
-[Owning enum contract and proof ledger](../../specs/forever-edit-mode-enums.md#pending-70374-gamepad-candidate--2026-10-15) tracks the `136748f0b` gamepad extension in the existing `client-wowforever` C API module. Independent source/saved-RED verification PASS is distinct from the authored, unexecuted Rust regression; no integrated GREEN or startup reduction claimed. Corrected manifest/current failing baseline and independent locale-acquisition PASS do not close this enum gap.
+[Owning enum contract](../../specs/forever-edit-mode-enums.md#verified-70374-gamepad-scope--2026-10-15) records bounded executed consumer GREEN; [central receipts](../../baselines/README.md#verified-scoped-receipts--2026-10-15) bind it to runtime source136, before the unbuilt import change. Startup remains FAIL; native/cross-profile/full-parent acceptance remains open.
 
 ## Forever expansion identity
 

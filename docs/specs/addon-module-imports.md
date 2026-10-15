@@ -68,7 +68,7 @@ Path/dependency requirements have sixteen pure resolver tests; registry/value/pr
 
 ## Binding checkpoint — 2026-10-15
 
-Implemented-source handoff pending integration/run: the binding adds only `import` registration to the existing backend, not a stub or new loader. Local source inspection at this docs update still shows `require` alone; no integrated binding or GREEN is claimed. [Owning wiki checkpoint](../wiki/systems/addon-module-imports.md#forever-import-binding--2026-10-15) records exact evidence and authored-test limits.
+Source integrated at `012df1e45`: the binding adds only `import` registration to the existing backend, not a stub or new loader. New-import compilation/execution remains pending; pre-binding controls are not new-import GREEN. [Owning wiki checkpoint](../wiki/systems/addon-module-imports.md#forever-import-binding--2026-10-15) records exact evidence and authored-test limits.
 
 ## Known gaps (current cycle)
 

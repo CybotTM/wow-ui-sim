@@ -1,3 +1,7 @@
+## [2026-10-15] docs | Scoped proof reconciliation
+
+Updated [owning contracts/index](index.md) from independent [central receipts](../baselines/README.md#verified-scoped-receipts--2026-10-15): runtime source136 only; import012/events c2bf compilation in progress, new execution gates NOT GREEN. Post-enum startup remains FAIL; prior module controls are not new-binding acceptance. This checkpoint updates documentation and the captured baseline; unrelated subtext edits remain excluded.
+
 ## [2026-10-15] docs | Forever import binding checkpoint
 
 Updated [owning module spec](../specs/addon-module-imports.md#binding-checkpoint--2026-10-15) and [wiki SSOT](systems/addon-module-imports.md#forever-import-binding--2026-10-15): actual136 completed Utility/missing-import RED, existing backend PASS, implemented-source integration/run pending and authored tests NOT GREEN. Reused policy is simulator compatibility, not native parity. Separate model/startup evidence retained without binding credit. Docs only; no source/tests/data/baseline JSON, runtime, commits or delegation.

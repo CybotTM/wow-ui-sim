@@ -68,6 +68,8 @@ Ownership when `SetScrollChild` replaces or clears its designation is outside th
 
 ## Bound Slider thumb layout — 2026-10-15
 
+Updated bounded source136 model proof: [owning contract](../../specs/slider-bound-thumb-layout.md), [central receipt](../../baselines/README.md#verified-scoped-receipts--2026-10-15). This does not cover the unbuilt current import change or native/cross-profile/full-parent acceptance.
+
 `2fc87822e` adds engine geometry for sized, unanchored Textures designated as their parent Slider's thumb. `src/layout_slider_thumb.rs` preserves dimensions/scale, centers the cross-axis and positions contained travel by value: right horizontally, down vertically. Contained endpoints, oversized-thumb centering and collapsed/non-finite normalization are simulator policy, not native measurements.
 
 Query and render admission share positive finite resolved-rectangle eligibility; binding identity alone is insufficient. Value/range/orientation/binding/size mutations invalidate layout, including geometry queried synchronously inside `OnValueChanged`. Explicit anchors remain authoritative; ordinary, formerly bound and unsized unanchored textures remain unresolved.

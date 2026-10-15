@@ -14,7 +14,7 @@ Native Forever was not run. Multiple returns, module-name normalization, duplica
 
 ## Forever import binding — 2026-10-15
 
-The completed-module registry and `require` already work. Vendor `Blizzard_GamepadSmartNavigation` orders `Utility.lua` before consumers `SmartNavigation.lua` and `Debug.lua`; Utility returns a table, while both consumers call `import('.Utility')`. The implemented-source handoff adds a direct Rust `import` registration using the same backend, only under `client-wowforever` at the existing pre-secure-copy seam. Integration/run remain pending; inspected canonical source still registers only `require`. No stub, new loader, autoload, host-package fallback or changed `require` contract.
+The completed-module registry and `require` already work. Vendor `Blizzard_GamepadSmartNavigation` orders `Utility.lua` before consumers `SmartNavigation.lua` and `Debug.lua`; Utility returns a table, while both consumers call `import('.Utility')`. Commit `012df1e45` adds a direct Rust `import` registration using the same backend, only under `client-wowforever` at the existing pre-secure-copy seam. New-import compilation/execution remains pending. No stub, new loader, autoload, host-package fallback or changed `require` contract.
 
 Reused completion, dependency, identity, grammar and error behavior is **simulator compatibility policy** justified by those vendor calls. Native `import=require` semantics, identity, grammar and error parity are UNKNOWN; native new-test authorship alone is not execution proof.
 

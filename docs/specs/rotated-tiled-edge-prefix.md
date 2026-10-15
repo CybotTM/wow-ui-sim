@@ -26,7 +26,9 @@ Exact-source standalone harness evidence: the partial-row test fails against the
 
 ## Known gaps (current cycle)
 
-- [ ] Integrated library tests and post-fix GPU confirmation remain pending. Existing GPU reproduction shows a red partial tail against a blue prefix reference, with complete-tile blue/red controls.
+- [x] Integrated tiling-model tests passed at runtime source136; see [central receipt](../baselines/README.md#verified-scoped-receipts--2026-10-15).
+- [x] Separate earlier [combined GPU receipt](../rendering-pipeline.md#combined-feedback-gpu-receipt--2026-10-15) confirms blue tail/reference and complete-tile controls at its recorded source, not current-source GPU acceptance.
+- [ ] Filtering/atlas-bleed, native and full-parent acceptance remain open.
 
 ## Out of scope
 
