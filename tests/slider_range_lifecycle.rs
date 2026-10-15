@@ -17,6 +17,7 @@ const HELPERS: &str = r#"
     end
     local function observe_value(slider, trace)
         slider:SetScript('OnValueChanged', function(...)
+            trace[#trace + 1] = 'value-enter'
             local self, value, mouse = ...
             assert(self == slider and select('#', ...) == 3 and mouse == false,
                 'range-triggered Slider assignment must keep the ordinary false mouse payload')
@@ -26,6 +27,7 @@ const HELPERS: &str = r#"
     end
     local function observe_range(slider, trace)
         slider:SetScript('OnMinMaxChanged', function(...)
+            trace[#trace + 1] = 'range-enter'
             local self, lo, hi = ...
             assert(self == slider and select('#', ...) == 3, 'range callback payload changed')
             local committedLo, committedHi = self:GetMinMaxValues()
@@ -53,11 +55,14 @@ fn c8_range_handler_is_publicly_bindable_and_clearable() {
         local slider = slider_at_seven()
         assert(slider:HasScript('OnMinMaxChanged'), 'Slider must support OnMinMaxChanged')
         assert(slider:GetScript('OnMinMaxChanged') == nil)
-        local handler = function() error('binding alone must not dispatch') end
+        local calls = 0
+        local handler = function() calls = calls + 1 end
         slider:SetScript('OnMinMaxChanged', handler)
         assert(slider:GetScript('OnMinMaxChanged') == handler)
+        assert(calls == 0, 'binding alone must not dispatch')
         slider:SetScript('OnMinMaxChanged', nil)
         assert(slider:GetScript('OnMinMaxChanged') == nil)
+        assert(calls == 0, 'clearing alone must not dispatch')
         assert(slider:HasScript('OnMinMaxChanged'), 'clearing must not remove type capability')
     "#,
     );
@@ -74,14 +79,14 @@ fn c8_changed_range_notifies_before_reapplying_value_synchronously() {
         snapshot(trace, 'before', slider)
         slider:SetMinMaxValues(2, 5)
         snapshot(trace, 'after', slider)
-        expect(trace, 'before:0:10:7|range:2:5:7|value=5:2:5:5|after:2:5:5')
+        expect(trace, 'before:0:10:7|range-enter|range:2:5:7|value-enter|value=5:2:5:5|after:2:5:5')
         trace = {}
         observe_value(slider, trace)
         observe_range(slider, trace)
         snapshot(trace, 'before', slider)
         slider:SetMinMaxValues(3, 3)
         snapshot(trace, 'after', slider)
-        expect(trace, 'before:2:5:5|range:3:3:5|value=3:3:3:3|after:3:3:3')
+        expect(trace, 'before:2:5:5|range-enter|range:3:3:5|value-enter|value=3:3:3:3|after:3:3:3')
     "#,
     );
 }
@@ -95,7 +100,7 @@ fn c8_range_reapplication_dispatches_value_even_without_range_binding() {
         snapshot(trace, 'before', slider)
         slider:SetMinMaxValues(2, 5)
         snapshot(trace, 'after', slider)
-        expect(trace, 'before:0:10:7|value=5:2:5:5|after:2:5:5')
+        expect(trace, 'before:0:10:7|value-enter|value=5:2:5:5|after:2:5:5')
     "#,
     );
 }
@@ -112,7 +117,7 @@ fn c8_retained_value_notifies_range_once_and_identical_range_is_silent() {
         snapshot(trace, 'changed', slider)
         slider:SetMinMaxValues(2, 9)
         snapshot(trace, 'same', slider)
-        expect(trace, 'before:0:10:7|range:2:9:7|changed:2:9:7|same:2:9:7')
+        expect(trace, 'before:0:10:7|range-enter|range:2:9:7|changed:2:9:7|same:2:9:7')
     "#,
     );
 }
@@ -129,10 +134,10 @@ fn c8_range_reapplication_uses_pending_c1_policy_with_explicit_step() {
         snapshot(trace, 'before', slider)
         slider:SetMinMaxValues(1, 10)
         snapshot(trace, 'after', slider)
-        expect(trace, 'before:0:10:8|value=9:1:10:9|after:1:10:9')
+        expect(trace, 'before:0:10:8|value-enter|value=9:1:10:9|after:1:10:9')
         slider:SetMinMaxValues(1, 8)
         snapshot(trace, 'endpoint', slider)
-        expect(trace, 'before:0:10:8|value=9:1:10:9|after:1:10:9|value=8:1:8:8|endpoint:1:8:8')
+        expect(trace, 'before:0:10:8|value-enter|value=9:1:10:9|after:1:10:9|value-enter|value=8:1:8:8|endpoint:1:8:8')
     "#,
     );
 }
