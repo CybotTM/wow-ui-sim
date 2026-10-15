@@ -10,6 +10,8 @@ The initial nine findings below were a bounded first pass, **not the total gap c
 
 [Additional animation findings](additional-animation.md): A1 ignored transform configuration, A2 live loop state, A3 loop-mode validation, A4 order bounds, A5 group initial offsets. The alpha `SetChange` no-op claim was rejected after tracing its real registration.
 
+[Additional action-state findings](additional-action-state.md): G1 attack classification, G2 active auto-repeat, G3 usability/resource results, G4 cursor/non-spell action dispatch. Missing backing state is distinguished from an already-runnable counterexample.
+
 All remain static historical-source comparisons, not native-confirmed modern defects.
 
 ## Initial rework list
