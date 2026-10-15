@@ -2,9 +2,15 @@
 
 Source-only research dated 2026-10-15. No simulator implementation changes and no execution of the reconstructed client. Read the [security assessment](security.md) before using the external checkout.
 
-## Rework list
+## Expanded audit
 
-**Nine static discrepancies; zero runtime/native reproductions performed in this audit.** IDs refer to detailed entries with exact source locations, required changes and proposed behavioral regressions.
+The initial nine findings below were a bounded first pass, **not the total gap count**. The expanded pass inventories literal script registrations and tracks checked, mismatched, unresolved and unchecked behavior rather than treating a small shortlist as coverage.
+
+[Additional rendering and minimap findings](additional-rendering-and-map.md): T4 glyph alpha-gradient rendering, T5 transactional font validation, M1 2D minimap overlays, M2 position-derived ping state/events, M3 zoom/view/CVar coupling. All remain static historical-source comparisons, not native-confirmed modern defects.
+
+## Initial rework list
+
+**Nine initial static discrepancies; zero runtime/native reproductions performed in this audit.** IDs refer to detailed entries with exact source locations, required changes and proposed behavioral regressions.
 
 | ID | Behavior needing rework | Detail / proof |
 |---|---|---|
