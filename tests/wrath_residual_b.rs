@@ -38,12 +38,20 @@ fn env(files: &[&str]) -> WowLuaEnv {
             let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc().unwrap();
             let temp = tempfile::tempdir().unwrap();
             let path = temp.path().join("Residual.toc");
+            let original = toc.parent().unwrap().join(file);
+            let common = temp
+                .path()
+                .ancestors()
+                .find(|base| original.starts_with(base))
+                .unwrap();
+            let mut relative = std::path::PathBuf::new();
+            for _ in temp.path().strip_prefix(common).unwrap().components() {
+                relative.push("..");
+            }
+            relative.push(original.strip_prefix(common).unwrap());
             std::fs::write(
                 &path,
-                format!(
-                    "## Interface: 30300\n{}\n",
-                    toc.parent().unwrap().join(file).display()
-                ),
+                format!("## Interface: 30300\n{}\n", relative.display()),
             )
             .unwrap();
             let loaded = wow_ui_sim::loader::load_addon(&env.loader_env(), &path).unwrap();
