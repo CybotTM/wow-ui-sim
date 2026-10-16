@@ -76,7 +76,9 @@ Separate normal PTR startup `iconbackground-ptr-startup` in the build receipt ex
 
 Independent getter source/spec/readability and postgetter `cargo fmt --all -- --check` accepted separately at `/home/osso/.local/state/wow-ui-sim/verification/iconbackground-next/getter-source-report.md`; formatter exit0, empty streams. **Independent build/seal/full-stream runtime/startup reconciliation PASS:** `/home/osso/.local/state/wow-ui-sim/verification/iconbackground-next/ptr-green-runtime-report.md`. Full startup stderr was inspected separately from the empty collector; existing WTF EditMode input remained in use, so CVar-write isolation is not whole-machine hermeticity. Historical selector RED at normal-library `161dad02a` and populated RED at `4adc7cf89` remain retained, not overwritten or credited as current acceptance.
 
-Retail execution, current default check, whole-integration execution, native/catalog/rendered parity, broader profiles and full-parent acceptance remain OPEN. These PTR observations do not satisfy the combined Retail/PTR requirement alone.
+Separate default `cargo check --offline --locked --message-format=json -j1` at `e156442f3` exited0 in43.70s:736 valid JSON records, zero emitted compiler diagnostics, normal guard exit. Actual default/client-retail feature closure checked the library and six binaries; `.rmeta` outputs are not linked executables or Retail runtime proof. Relevant production/Cargo inputs equal getter `2a422cb86`. Independent receipt `/home/osso/.local/state/wow-ui-sim/verification/iconbackground-next/default-check-doc-report.md` accepts this check and the bounded documentation/CPU-scope evidence; no rerun.
+
+Retail execution, whole-integration execution, native/catalog/rendered parity, broader profiles and full-parent acceptance remain OPEN. These PTR observations do not satisfy the combined Retail/PTR requirement alone.
 
 ## Known gaps (current cycle)
 
