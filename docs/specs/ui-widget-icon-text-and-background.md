@@ -1,14 +1,14 @@
 # Supplied IconTextAndBackground widgets
 
-`C_UIWidgetManager.GetIconTextAndBackgroundWidgetVisualizationInfo(widgetID)` must project explicit environment-local supplied records for the unchanged cached Retail/PTR consumer. The source boundary is `src/c_api/ui_widget_manager/`; the [manager-state contract](ui-widget-manager-state.md) owns shared supplied-state behavior and the [manager architecture](../wiki/systems/ui-widget-manager-state.md) describes the existing lifecycle. Selector tests have an independently reconciled two-case PTR RED against normal-library source `161dad02a`; this is failing behavior, not acceptance. Passive record/map/feed plumbing then compiled at `4adc7cf89`; main-observed populated PTR baseline is0PASS/8FAIL, exit101. Getter source `2a422cb86` projects that supplied state. The [bounded PTR receipt](#bounded-ptr-producer-proof--2026-10-16) separates its successful normal build and main-observed ten-case execution from remaining Retail/broader gates.
+`C_UIWidgetManager.GetIconTextAndBackgroundWidgetVisualizationInfo(widgetID)` must project explicit environment-local supplied records for the unchanged cached Retail/PTR consumer. The source boundary is `src/c_api/ui_widget_manager/`; the [manager-state contract](ui-widget-manager-state.md) owns shared supplied-state behavior and the [manager architecture](../wiki/systems/ui-widget-manager-state.md) describes the existing lifecycle. Selector tests have an independently reconciled two-case PTR RED against normal-library source `161dad02a`; this is failing behavior, not acceptance. Passive record/map/feed plumbing then compiled at `4adc7cf89`; main-observed populated PTR baseline is0PASS/8FAIL, exit101. Getter source `2a422cb86` projects that supplied state. The [bounded PTR receipt](#bounded-ptr-producer-proof--2026-10-16) and [bounded Retail receipt](#bounded-retail-producer-proof--2026-10-16) independently accept the combined supplied-record requirements at their saved execution boundaries; broader gates remain open.
 
 ## What it must do
 
 ### Source eligibility and query
 
-- [ ] Support this record on Retail/PTR, where both cached `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumentation.lua` declarations and the registered `Blizzard_UIWidgets/Blizzard_UIWidgetTemplateIconTextAndBackground.lua` consumer exist. Eligibility rests on those actual sources, not a callable namespace entry or an inferred native catalog. No other-profile acceptance is claimed.
-- [ ] Require numeric `widgetID` using the existing manager required-number/secret policy. Missing, nil and non-number arguments (including numeric strings) reject at that boundary. Preserve documented `SecretArguments = "AllowedWhenUntainted"` through the shared policy; do not introduce a new secret policy. An absent numeric ID returns exactly one nil.
-- [ ] Project all 14 non-nil fields below with their supplied values and documented types; do not invent defaults or truncate the record to fields read by Setup. Enum values are supplied numeric scalars; texture kits are supplied strings.
+- [x] Support this record on Retail/PTR, where both cached `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumentation.lua` declarations and the registered `Blizzard_UIWidgets/Blizzard_UIWidgetTemplateIconTextAndBackground.lua` consumer exist. Eligibility rests on those actual sources, not a callable namespace entry or an inferred native catalog. No other-profile acceptance is claimed.
+- [x] Require numeric `widgetID` using the existing manager required-number/secret policy. Missing, nil and non-number arguments (including numeric strings) reject at that boundary. Preserve documented `SecretArguments = "AllowedWhenUntainted"` through the shared policy; do not introduce a new secret policy. An absent numeric ID returns exactly one nil.
+- [x] Project all 14 non-nil fields below with their supplied values and documented types; do not invent defaults or truncate the record to fields read by Setup. Enum values are supplied numeric scalars; texture kits are supplied strings.
 
 | Exact field | Cached documented type |
 | --- | --- |
@@ -27,13 +27,13 @@
 | `modelSceneLayer` | `UIWidgetModelSceneLayer` |
 | `scriptedAnimationEffectID` | `number` |
 
-- [ ] Each query returns a fresh snapshot. Caller mutation, retained snapshots, supplied replacements, distinct IDs and separate `WowLuaEnv` instances stay isolated. Record absence/removal and restoration affect subsequent queries only. Use the existing manager numeric identity policy; do not add integer, positivity or inferred-range restrictions.
+- [x] Each query returns a fresh snapshot. Caller mutation, retained snapshots, supplied replacements, distinct IDs and separate `WowLuaEnv` instances stay isolated. Record absence/removal and restoration affect subsequent queries only. Use the existing manager numeric identity policy; do not add integer, positivity or inferred-range restrictions.
 
 ### Normal feed and cached lifecycle
 
-- [ ] Existing normal host feeds accept the supplied visualization with the documented `Enum.UIWidgetVisualizationType.IconTextAndBackground` membership type. Store state before synchronous `UPDATE_UI_WIDGET`; wrong-type and absent-set updates reject without state mutation or notification. Membership removal/full set replacement uses existing `UPDATE_ALL_UI_WIDGETS` reconciliation and preserves independently queryable visualization records.
-- [ ] Actual cached Retail/PTR manager/template execution acquires this consumer from supplied membership, projects through the real getter, sets `Text` from `text`, and applies `textureKit` to `Icon`/`Glow` using the cached `%s-icon`/`%s-glow` region policy. Exercise supplied updates and base ordering/layout through normal feeds; do not replace providers, getter, Setup, pools or vendor behavior. Texture-region application is not proof of asset availability or rendered pixels.
-- [ ] Actual cached consumers release hidden widgets and reacquire shown widgets, remove consumers after membership removal, and stop updates/clean pools and subscriptions on live unregister. Let cached deferred layout/removal finish before assertions. Ordinary updates retain the acquisition `widgetTag`; reacquisition uses the current supplied tag. Snapshot replacement still exposes every updated field. These are supplied-state lifecycle requirements, not native timing/animation parity.
+- [x] Existing normal host feeds accept the supplied visualization with the documented `Enum.UIWidgetVisualizationType.IconTextAndBackground` membership type. Store state before synchronous `UPDATE_UI_WIDGET`; wrong-type and absent-set updates reject without state mutation or notification. Membership removal/full set replacement uses existing `UPDATE_ALL_UI_WIDGETS` reconciliation and preserves independently queryable visualization records.
+- [x] Actual cached Retail/PTR manager/template execution acquires this consumer from supplied membership, projects through the real getter, sets `Text` from `text`, and applies `textureKit` to `Icon`/`Glow` using the cached `%s-icon`/`%s-glow` region policy. Exercise supplied updates and base ordering/layout through normal feeds; do not replace providers, getter, Setup, pools or vendor behavior. Texture-region application is not proof of asset availability or rendered pixels.
+- [x] Actual cached consumers release hidden widgets and reacquire shown widgets, remove consumers after membership removal, and stop updates/clean pools and subscriptions on live unregister. Let cached deferred layout/removal finish before assertions. Ordinary updates retain the acquisition `widgetTag`; reacquisition uses the current supplied tag. Snapshot replacement still exposes every updated field. These are supplied-state lifecycle requirements, not native timing/animation parity.
 
 ## How it works
 
@@ -42,7 +42,7 @@
 
 ## Implementation inventory
 
-Passive supplied-input plumbing and query projection compiled in the sealed normal PTR build at `2a422cb86`. Bounded executed behavior and remaining limits are recorded below:
+Passive supplied-input plumbing and query projection compiled in the sealed normal PTR and Retail builds below. Combined supplied-record requirements are independently accepted at those saved execution boundaries; remaining limits are retained below:
 
 - `src/c_api/ui_widget_manager/icon_text_and_background.rs` — shared numeric/secret selector boundary, cloned supplied record and complete fresh rooted Lua result.
 
@@ -78,13 +78,23 @@ Independent getter source/spec/readability and postgetter `cargo fmt --all -- --
 
 Separate default `cargo check --offline --locked --message-format=json -j1` at `e156442f3` exited0 in43.70s:736 valid JSON records, zero emitted compiler diagnostics, normal guard exit. Actual default/client-retail feature closure checked the library and six binaries; `.rmeta` outputs are not linked executables or Retail runtime proof. Relevant production/Cargo inputs equal getter `2a422cb86`. Independent receipt `/home/osso/.local/state/wow-ui-sim/verification/iconbackground-next/default-check-doc-report.md` accepts this check and the bounded documentation/CPU-scope evidence; no rerun.
 
-Retail execution, whole-integration execution, native/catalog/rendered parity, broader profiles and full-parent acceptance remain OPEN. These PTR observations do not satisfy the combined Retail/PTR requirement alone.
+## Bounded Retail producer proof — 2026-10-16
+
+Normal-library/runtime source `84da38a3bb0efd09b6f6e23a775eea8844f971db`; getter source remains `2a422cb8639110f2668d8b7af51365086e73d9fb`. Build/seal receipt `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/iconbackground-retail-green-20261016T111625602178Z`: normal default build exit0, 731 JSON records, zero compiler diagnostics, normal guard exit; library and normal wow-sim separately sealed. This is actual Retail compilation, not the earlier default `.rmeta` check or a PTR artifact.
+
+Component receipt `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconbackground-retail-green-20261016T112735462796Z/iconbackground-retail-ten-first`; test checkout `13423aae452b0523fe5c3d726e904358e3d3ba58` differs from normal-library source `84da38a3b` and getter `2a422cb86` only outside the relevant production/fixture scope. Unchanged fixtures and actual common helpers used all21 emitted default Retail features and matching normal-profile externs. Initial wgpu package-ID spelling failed before compiler launch; corrected selection compiled0 with35 inherited helper warnings, not a compiler retry. Actual runtime: **10 cases PASS on Retail, exit0**. The PTR matrix above applies separately to each profile:3 snapshot/identity/environment,2 selectors/security,2 feed/atomicity,1 cached lifecycle,2 original selectors. These are the same ten logical cases on each profile, not20 distinct logical cases or additive parent/child summaries. Standalone common-helper execution is not whole-integration execution.
+
+Separate sealed normal Retail `iconbackground-retail-startup` in the build receipt exited0: stdout `[]`; entire stderr inspected, final `Status: CLEAN`, zero unique/total collector errors and no other observed error diagnostics. It used actual cached Retail Lua/XML, `--no-addons --no-saved-vars`, CASC disabled for assets and a fresh private `XDG_DATA_HOME` containing a byte-exact current original CVar copy at a distinct inode. Original recorded stat/hash remained unchanged. No reset/restore or profile substitution; existing read-only WTF input means this is not whole-machine hermeticity.
+
+Independent Retail build/seal/full-stream runtime/startup reconciliation PASS: `/home/osso/.local/state/wow-ui-sim/verification/iconbackground-next/retail-green-runtime-report.md`. Together with the separate accepted PTR receipt, this completes only the supplied-record Retail/PTR requirements above. Existing formatter/default-check proofs and historical selector/populated REDs retain their own attribution. Different CPU allocations and profiles prevent a performance comparison; no speedup/regression inference.
+
+Whole-integration execution, broader profiles and full-parent acceptance remain OPEN. No assets/pixels, native catalog/population/transport or parity, or activation of projected timer/model/animation effects is established.
 
 ## Known gaps (current cycle)
 
 - [x] Independently reconcile the newly compiled two-case selector RED against normal PTR library `161dad02a`; retain later inputs as unreached, not tested. This closes baseline attribution only.
 - [x] Independently reconcile compiled passive plumbing and the eight populated missing-getter failures; retain their reached boundaries and source attribution. This closes RED provenance only, not supplied-state behavior.
-- [ ] Implement this complete supplied-record query/feed slice with behavioral coverage of snapshots, selectors/security and cached lifecycle on Retail/PTR; retain exact source/build/runtime attribution separately.
+- [x] Implement this complete supplied-record query/feed slice with behavioral coverage of snapshots, selectors/security and cached lifecycle on Retail/PTR; retain exact source/build/runtime attribution separately.
 
 ## Out of scope
 

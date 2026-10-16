@@ -147,7 +147,7 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 ## IconTextAndBackground producer source — 2026-10-16
 
-[Owning contract and bounded PTR receipt](../../specs/ui-widget-icon-text-and-background.md#bounded-ptr-producer-proof--2026-10-16) own getter `2a422cb86`, the sealed normal build and ten distinct fixture/selector PASS cases, including actual cached type4 lifecycle and secret access. Independent full-stream build/runtime/startup reconciliation PASS; isolated normal PTR lua-errors `[]` preserved original CVars. Historical REDs remain separate. The owner also records independently accepted default type checking, not Retail runtime. Retail execution and broader acceptance remain OPEN; no native/catalog/asset/render parity follows.
+[Owning contract](../../specs/ui-widget-icon-text-and-background.md#bounded-retail-producer-proof--2026-10-16) records independently accepted combined Retail/PTR supplied-record requirements: ten cases per profile (the same ten logical cases), actual cached type4 lifecycle and secret access, plus separate clean normal startups with original CVars unchanged. Retail normal source `84da38a3b`, test checkout `13423aae4` and getter `2a422cb86` remain distinct; the [PTR receipt](../../specs/ui-widget-icon-text-and-background.md#bounded-ptr-producer-proof--2026-10-16) retains its own attribution. Historical REDs and separate fmt/default-check proofs are preserved. Standalone common-helper execution is not whole-integration proof; broader/full-parent acceptance remains OPEN. No native/catalog/assets/render parity or activation of projected effects follows; different CPU allocations preclude performance comparison.
 
 ## Sources
 

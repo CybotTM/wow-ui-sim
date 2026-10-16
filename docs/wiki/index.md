@@ -1,6 +1,6 @@
 ## [2026-10-16] evidence | Supplied IconTextAndBackground
 
-[Manager checkpoint](systems/ui-widget-manager-state.md#icontextandbackground-producer-source--2026-10-16) links the independently accepted normal PTR build, ten distinct fixture/selector PASS cases and isolated clean startup. Default type checking is independently accepted separately. Historical REDs remain separate; Retail execution and native/broader acceptance remain open.
+[Manager checkpoint](systems/ui-widget-manager-state.md#icontextandbackground-producer-source--2026-10-16) links independently accepted normal Retail/PTR supplied-record execution: ten cases per profile, the same ten logical cases, and separate isolated clean startups. Formatter/default type checking and historical REDs retain their own attribution. Only this supplied-record slice is complete; whole-integration, native/catalog/assets/projected-effect activation and full-parent acceptance remain open.
 
 ## [2026-10-16] evidence | Additional bounded profile controls
 
