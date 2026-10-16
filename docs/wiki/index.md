@@ -1,3 +1,7 @@
+## [2026-10-16] evidence | Quest turn-in and charge selector bounded GREEN
+
+[Quest owner](../specs/quest-turn-in-model.md#bounded-retailforever-acceptance--2026-10-16) and [charge owner](../specs/cooldown-restriction.md#bounded-retailptr-selector-acceptance--2026-10-16) accept saved source `70ebaee0e`: 57/57 profile cases (Retail 28, PTR 25, Forever 4), 29 logical tests, exact recipe names/seals/features and original-CVar guards. Separate Retail/PTR startups exit 0 `[]`; Forever exit 1, 10 unique/14 baseline-matched GamepadActionBars errors. Overall startup remains failed; no native/full-integration/current-HEAD or parent closure.
+
 ## [2026-10-16] evidence | Bounded Anniversary shared controls accepted
 
 [Owning matrix and Anniversary receipt](../baselines/README.md#anniversary-shared-controls--2026-10-16) record39 exact recipe-name PASS, seven exits0, matching Anniversary library/component seals and unchanged original-CVar guards. Same39 logical behaviors as separately accepted Era/Mists; no startup/native/cache/current-HEAD/all-profile or parent closure.
@@ -8,7 +12,7 @@
 
 ## [2026-10-16] source | Simulator selected quest turn-in producer
 
-[Quest implementation notes](systems/lua-api.md#simulator-selected-quest-turn-in) link the separately approved contract and integrated producer after shared Retail behavioral RED. GREEN and broader verification remain pending; existing accepted offer/watch/abandon receipts do not prove turn-in or native behavior.
+[Quest implementation notes](systems/lua-api.md#simulator-selected-quest-turn-in) link the separately approved contract and integrated producer after shared Retail behavioral RED. Historical producer checkpoint: GREEN was pending; [saved bounded acceptance](../specs/quest-turn-in-model.md#bounded-retailforever-acceptance--2026-10-16) now supersedes that gate. Broader/native acceptance remains open; earlier offer/watch/abandon receipts remain separate.
 
 ## [2026-10-16] evidence | ItemDisplay combined bounded acceptance
 
