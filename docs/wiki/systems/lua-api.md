@@ -17,7 +17,7 @@ The [integrated checkpoint](../investigations/integrated-source-and-factory-proo
 
 ### Public offer rich-log state split
 
-Bounded abandonment now has an executed behavioral RED and committed producer; GREEN acceptance remains open. The [owning contract](../../specs/quest-offer-rich-log-coherence.md#tests-asserting-this-spec) owns its receipt and status.
+Bounded abandonment now has independently accepted Forever removal/watch/history preservation and existing event/no-selection controls. The [owning contract](../../specs/quest-offer-rich-log-coherence.md#later-scoped-abandonment-execution--2026-10-16) owns source/profile receipts, remaining default-check gate and broader exclusions.
 
 Historical sourcef94 public acceptance of offer80002 completed lightweight state changes but left rich membership absent: `confirm_accept_quest` appended only to `quest_log`, while Forever queries/watch eligibility read `quest_log_entries.entries`. The [central receipt](../../baselines/README.md#public-offer-rich-log-coherence-red--2026-10-15) retains that final Rust assertion RED and13 separate passing controls, plus the new source `d59551d61` baseline: **3 executed, 1 negative control PASS / 2 `MISSING RICH ROW` FAIL, exit101**, independently reconciled in private `quest-enrich-next/runtime-red-report.md` and `build-seal-report.md`. Metadata/watch assertions after the missing-row boundary were unreached; the earlier E0603 fixture compile failure is not behavioral RED.
 
