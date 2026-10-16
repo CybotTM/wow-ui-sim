@@ -290,3 +290,314 @@ fn keyboard_cursor_layout_crosses_multibyte_and_newline_boundaries_on_real_ticks
     }
     env.exec("assert(#CursorUpdateObservations == 9)").unwrap();
 }
+
+// Append after the existing cursor-layout tests. This is a public lifecycle
+// observer, not a real ScrollingEdit consumer or a native WoW geometry oracle.
+const DIRTY_FLUSH_OBSERVERS: &str = r#"
+    CursorRecords, CursorUpdateObservations = {}, {}
+    DirtyTrace, DirtyErrors = {}, {}
+    seterrorhandler(function(message)
+        DirtyErrors[#DirtyErrors + 1] = tostring(message)
+    end)
+
+    function RecordDirtyEntry(kind, self, value, arity)
+        local entry = { kind = kind, value = value, arity = arity,
+            text = self:GetText(), byte = self:GetCursorPosition(),
+            scalar = self:GetUTF8CursorPosition(), cursorCount = #CursorRecords }
+        DirtyTrace[#DirtyTrace + 1] = entry
+        return entry
+    end
+
+    CursorBox:SetScript('OnTextSet', function(self, ...)
+        RecordDirtyEntry('set', self, nil, select('#', ...))
+    end)
+    CursorBox:SetScript('OnChar', function(self, ...)
+        local entry = RecordDirtyEntry('char', self, ..., select('#', ...))
+        assert(entry.arity == 1, 'existing keyboard payload: one scalar string')
+        assert(type(entry.value) == 'string' and entry.value ~= '', 'nonempty OnChar')
+    end)
+    CursorBox:SetScript('OnKeyDown', function(self, key, ...)
+        RecordDirtyEntry('key', self, key, 1 + select('#', ...))
+    end)
+    -- Preserve the fixture's actual geometry observer; never manufacture records.
+    CursorBox:HookScript('OnCursorChanged', function(self, ...)
+        local entry = RecordDirtyEntry('cursor', self, nil, select('#', ...))
+        assert(entry.arity == 4, 'actual four-argument presentation callback')
+    end)
+    CursorBox:SetScript('OnTextChanged', function(self, ...)
+        local entry = RecordDirtyEntry('changed', self, ..., select('#', ...))
+        assert(entry.arity == 1 and type(entry.value) == 'boolean')
+        local cursor = CursorRecords[entry.cursorCount]
+        assert(cursor ~= nil, 'changed follows an actual cursor presentation')
+        assert(cursor.text == entry.text, 'presentation contains current text')
+        assert(cursor.byte == entry.byte and cursor.scalar == entry.scalar,
+            'presentation contains current public UTF-8 cursor')
+    end)
+
+    function AssertDirtyTrace(expected)
+        local labels = {}
+        for _, entry in ipairs(DirtyTrace) do
+            if entry.kind == 'set' then
+                labels[#labels + 1] = 'set:' .. entry.text
+            elseif entry.kind == 'char' or entry.kind == 'key'
+                or entry.kind == 'changed' then
+                labels[#labels + 1] = entry.kind .. ':' .. tostring(entry.value)
+                    .. ':' .. entry.text
+            end
+        end
+        local actual = table.concat(labels, '|')
+        assert(actual == expected, 'trace: ' .. actual .. ' expected: ' .. expected)
+    end
+
+    function AssertDirtyText(text, byte, scalar)
+        assert(CursorBox:GetText() == text, 'public current text')
+        assert(CursorBox:GetCursorPosition() == byte, 'public byte cursor')
+        assert(CursorBox:GetUTF8CursorPosition() == scalar, 'public scalar cursor')
+    end
+"#;
+
+fn assert_dirty_flush_errors_empty(env: &WowLuaEnv) {
+    env.exec("assert(#DirtyErrors == 0, table.concat(DirtyErrors, '\\n'))")
+        .unwrap();
+    assert!(
+        env.state().borrow().lua_errors.is_empty(),
+        "dirty-flush callbacks recorded simulator errors: {:?}",
+        env.state().borrow().lua_errors
+    );
+}
+
+fn exec_dirty_flush_lua(env: &WowLuaEnv, script: &str) {
+    let result = env.exec(script);
+    assert_dirty_flush_errors_empty(env);
+    result.unwrap();
+}
+
+fn tick_dirty_flush(env: &WowLuaEnv) {
+    let result = env.fire_on_update(TICK_SECONDS);
+    assert_dirty_flush_errors_empty(env);
+    result.unwrap();
+}
+
+fn create_dirty_flush_env() -> WowLuaEnv {
+    let env = create_env_with_installed_fonts();
+    env.exec("CursorBox:SetFocus(); AssertCursorPending(0, 0, 0)")
+        .unwrap();
+    env.fire_on_update(TICK_SECONDS).unwrap();
+    assert!(
+        env.state().borrow().lua_errors.is_empty(),
+        "setup tick recorded Lua errors: {:?}",
+        env.state().borrow().lua_errors
+    );
+    // Reset only after the fixture's real initial tick. Preserve its Unicode
+    // text, cursor, fonts, geometry and both original observers.
+    env.exec(DIRTY_FLUSH_OBSERVERS).unwrap();
+    assert_dirty_flush_errors_empty(&env);
+    env
+}
+
+fn assert_dirty_flush_stable(env: &WowLuaEnv, expected: &str) {
+    exec_dirty_flush_lua(env, &format!("AssertDirtyTrace('{expected}')"));
+    tick_dirty_flush(env);
+    exec_dirty_flush_lua(env, &format!("AssertDirtyTrace('{expected}')"));
+}
+
+#[test]
+fn dirty_flush_insert_then_changed_settext_is_one_programmatic_change() {
+    let env = create_dirty_flush_env();
+    exec_dirty_flush_lua(
+        &env,
+        r#"
+        CursorBox:HighlightText(0)
+        CursorBox:Insert('a')
+        AssertDirtyTrace('char:a:a')
+        CursorBox:SetText('b')
+        AssertDirtyTrace('char:a:a|set:b')
+        AssertDirtyText('b', 1, 1)
+        "#,
+    );
+    tick_dirty_flush(&env);
+    assert_dirty_flush_stable(&env, "char:a:a|set:b|changed:false:b");
+}
+
+#[test]
+fn dirty_flush_changed_settext_then_insert_is_one_user_change() {
+    let env = create_dirty_flush_env();
+    exec_dirty_flush_lua(
+        &env,
+        r#"
+        CursorBox:SetText('a')
+        AssertDirtyTrace('set:a')
+        CursorBox:SetCursorPosition(1)
+        CursorBox:Insert('b')
+        AssertDirtyTrace('set:a|char:b:ab')
+        AssertDirtyText('ab', 2, 2)
+        "#,
+    );
+    tick_dirty_flush(&env);
+    assert_dirty_flush_stable(&env, "set:a|char:b:ab|changed:true:ab");
+}
+
+#[test]
+fn dirty_flush_same_value_settext_preserves_insert_origin_without_callbacks() {
+    let env = create_dirty_flush_env();
+    exec_dirty_flush_lua(
+        &env,
+        r#"
+        CursorBox:HighlightText(0)
+        CursorBox:Insert('a')
+        AssertDirtyTrace('char:a:a')
+        CursorBox:SetText('a')
+        AssertDirtyTrace('char:a:a')
+        AssertDirtyText('a', 1, 1)
+        "#,
+    );
+    tick_dirty_flush(&env);
+    assert_dirty_flush_stable(&env, "char:a:a|changed:true:a");
+    // Once clean, a same-value assignment must not schedule a new dirty flush.
+    exec_dirty_flush_lua(&env, "CursorBox:SetText('a')");
+    assert_dirty_flush_stable(&env, "char:a:a|changed:true:a");
+}
+
+#[test]
+fn dirty_flush_two_unicode_inserts_emit_synchronous_scalars_and_one_change() {
+    let env = create_dirty_flush_env();
+    exec_dirty_flush_lua(
+        &env,
+        r#"
+        CursorBox:HighlightText(0)
+        CursorBox:Insert('é')
+        AssertDirtyTrace('char:é:é')
+        AssertDirtyText('é', 2, 1)
+        CursorBox:Insert('猫')
+        AssertDirtyTrace('char:é:é|char:猫:é猫')
+        AssertDirtyText('é猫', 5, 2)
+        "#,
+    );
+    tick_dirty_flush(&env);
+    assert_dirty_flush_stable(&env, "char:é:é|char:猫:é猫|changed:true:é猫");
+}
+
+#[test]
+fn dirty_flush_scripted_full_deletion_preserves_true_and_emits_no_empty_char() {
+    let env = create_dirty_flush_env();
+    exec_dirty_flush_lua(
+        &env,
+        r#"
+        CursorBox:HighlightText(0)
+        CursorBox:Insert('a')
+        AssertDirtyTrace('char:a:a')
+        CursorBox:HighlightText(0)
+        CursorBox:Insert('')
+        AssertDirtyTrace('char:a:a')
+        AssertDirtyText('', 0, 0)
+        "#,
+    );
+    tick_dirty_flush(&env);
+    assert_dirty_flush_stable(&env, "char:a:a|changed:true:");
+}
+
+#[test]
+fn dirty_flush_scripted_partial_deletion_preserves_false() {
+    let env = create_dirty_flush_env();
+    exec_dirty_flush_lua(
+        &env,
+        r#"
+        CursorBox:SetText('ab')
+        AssertDirtyTrace('set:ab')
+        CursorBox:HighlightText(0, 1)
+        CursorBox:Insert('')
+        AssertDirtyTrace('set:ab')
+        AssertDirtyText('b', 0, 0)
+        "#,
+    );
+    tick_dirty_flush(&env);
+    assert_dirty_flush_stable(&env, "set:ab|changed:false:b");
+}
+
+#[test]
+fn dirty_flush_keydown_presents_pending_text_before_keydown_and_char() {
+    let env = create_dirty_flush_env();
+    exec_dirty_flush_lua(
+        &env,
+        r#"
+        CursorBox:SetText('ab')
+        CursorBox:SetCursorPosition(2)
+        AssertDirtyTrace('set:ab')
+        AssertDirtyText('ab', 2, 2)
+        "#,
+    );
+    // No intervening tick: the key-down boundary itself must present and flush ab.
+    let result = env.send_key_down("X", Some("x"));
+    assert_dirty_flush_errors_empty(&env);
+    result.unwrap();
+    env.send_key_up("X");
+    exec_dirty_flush_lua(
+        &env,
+        r#"
+        AssertDirtyTrace('set:ab|changed:false:ab|key:X:ab|char:x:abx')
+        AssertDirtyText('abx', 3, 3)
+        "#,
+    );
+    tick_dirty_flush(&env);
+    assert_dirty_flush_stable(
+        &env,
+        "set:ab|changed:false:ab|key:X:ab|char:x:abx|changed:true:abx",
+    );
+}
+
+#[test]
+fn dirty_flush_settext_inside_single_keyboard_onchar_sets_programmatic_origin() {
+    let env = create_dirty_flush_env();
+    exec_dirty_flush_lua(
+        &env,
+        r#"
+        CursorBox:HighlightText(0)
+        CursorBox:HookScript('OnChar', function(self, char)
+            -- Base observer records callback entry before any protected assertion.
+            assert(char == 'x')
+            self:SetText('b')
+        end)
+        "#,
+    );
+    // Exactly one key; a second key could hide the bug with a pre-key flush.
+    let result = env.send_key_press("X", Some("x"));
+    assert_dirty_flush_errors_empty(&env);
+    result.unwrap();
+    exec_dirty_flush_lua(
+        &env,
+        r#"
+        AssertDirtyTrace('key:X:é\n猫z|char:x:x|set:b')
+        AssertDirtyText('b', 1, 1)
+        "#,
+    );
+    tick_dirty_flush(&env);
+    assert_dirty_flush_stable(&env, "key:X:é\\n猫z|char:x:x|set:b|changed:false:b");
+}
+
+#[test]
+fn dirty_flush_settext_inside_keydown_then_keyboard_insert_sets_user_origin() {
+    let env = create_dirty_flush_env();
+    exec_dirty_flush_lua(
+        &env,
+        r#"
+        CursorBox:HookScript('OnKeyDown', function(self, key)
+            -- Base observer records callback entry before any protected assertion.
+            assert(key == 'X')
+            self:SetText('ab')
+            self:SetCursorPosition(2)
+        end)
+        "#,
+    );
+    let result = env.send_key_press("X", Some("x"));
+    assert_dirty_flush_errors_empty(&env);
+    result.unwrap();
+    exec_dirty_flush_lua(
+        &env,
+        r#"
+        AssertDirtyTrace('key:X:é\n猫z|set:ab|char:x:abx')
+        AssertDirtyText('abx', 3, 3)
+        "#,
+    );
+    tick_dirty_flush(&env);
+    assert_dirty_flush_stable(&env, "key:X:é\\n猫z|set:ab|char:x:abx|changed:true:abx");
+}
