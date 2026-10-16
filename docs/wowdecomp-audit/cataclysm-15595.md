@@ -92,6 +92,17 @@ Insertion sets `0x8` for `script=0` and clears it for `script=1` (`15595 :2014�
 | Message scroll offset / `GetCurrentScroll` | 15595 `CSimpleMessageScrollFrame.cpp:82–88,729–751` derives ring-relative state; simulator `message_frame/scroll.rs:83–110` stores a direct offset. `message_frame/mod.rs:54–68` registers `GetScrollOffset`, not the legacy name. Units, exposure and out-of-range policy remain unresolved rather than equating differently named getters. |
 | Message retention | Ring versus Vec is not itself a defect. Full-capacity top insertion and off-bottom append still need observable retained-message/viewport comparison; no accepted retention mismatch here. |
 
+## Frame lifecycle and resize follow-up
+
+| Aspect | Paired reconstruction / simulator evidence | Disposition and regression boundary |
+|---|---|---|
+| `SetMinResize` / `SetMaxResize` preserve the opposite bound pair | 15595 `CSimpleFrame_Scripts.cpp:1055–1072,1086–1103`; 12340 `:1215–1231,1248–1265`. Simulator `misc/bounds.rs:126–145` stores separate min/max fields; `src/iced_app/mouse_drag.rs:104–145` consumes both when resizing. | **CHECKED_MATCH only for independent bound composition.** Configure min then max and reverse the order; getter must retain all four values. Error/coercion, historical getter names, source unit conversion and actual resize/native geometry remain outside this match. Existing simulator tests: `src/loader/tests/frame_state.rs:225–255`, inspected not run. |
+| `SetDontSavePosition` / `GetDontSavePosition` | 15595 `CSimpleFrame_Scripts.cpp:1127–1145`, flag `0x80000`, and `CSimpleFrame.cpp:411–417`; 12340 scripts `:1292–1311`. Simulator `misc/render_layers.rs:68–79` stores/reads `dont_save_position`; no persistence consumer was closed on either side. | **UNRESOLVED** semantic save/load effect and historical `1/nil` versus boolean return policy. A roundtrip does not prove layout omission after serialize/reload. Do not invent a persistence defect without tracing the reconstruction consumer and supported simulator persistence contract. |
+| `StopMovingOrSizing` shared transaction | 15595 `CSimpleFrame_Scripts.cpp:1225–1234` stops only the active top-level frame; `CSimpleTop.cpp:148–155,318–336` clears/starts shared transaction. Older top `:57–64,194–212`. Simulator `misc/drag_input.rs:141–177` changes local flags; real motion additionally consumes `active_drag_frame` in `src/iced_app/mouse.rs:84–108`. | **UNRESOLVED**, extending existing F2 rather than new finding. Test real drag A, stop unrelated B, ensure A continues; then stop A and ensure motion ends. Reconstructed script-start fixture remains blocked on missing producer parity; private flag mutation is not acceptable end-to-end proof. |
+| Clamp inset geometry | 15595 `CSimpleFrame_Scripts.cpp:1003–1041`, core `:476–488`; 12340 scripts `:1179–1199`, core `:492–506`; simulator `misc/bounds.rs:57–82`. | Storage exists; geometry consumer not closed on either side. No new mismatch or whole-method match. Nonzero asymmetric insets and real edge dragging require a source-backed expected rectangle first. |
+
+Simulator `misc/*` paths in this table are under `src/lua_api/frame/methods/`. The five resize/dont-save/stop registrations now have bounded coverage notes; clamp rows remain unchecked for behavioral effect.
+
 ## Cross-version checks on existing questions
 
 | Existing aspect | 15595 evidence | Disposition |

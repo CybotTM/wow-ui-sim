@@ -11,7 +11,7 @@ Engine/Source/Frame/CSimpleControlPoint_Scripts.cpp	5	0	0	0	5
 Engine/Source/Frame/CSimpleEditBox_Scripts.cpp	58	1	6	4	47
 Engine/Source/Frame/CSimpleFontString_Scripts.cpp	41	4	6	3	28
 Engine/Source/Frame/CSimpleFont_Scripts.cpp	24	0	4	0	20
-Engine/Source/Frame/CSimpleFrame_Scripts.cpp	85	3	2	5	75
+Engine/Source/Frame/CSimpleFrame_Scripts.cpp	85	5	2	8	70
 Engine/Source/Frame/CSimpleHTML_Scripts.cpp	23	0	1	1	21
 Engine/Source/Frame/CSimpleMessageFrame_Scripts.cpp	28	0	1	1	26
 Engine/Source/Frame/CSimpleMessageScrollFrame_Scripts.cpp	48	0	2	4	42

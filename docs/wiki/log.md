@@ -2603,3 +2603,7 @@ Added [[wowdecomp-audit]] ([reference page](reference/wowdecomp-audit.md)) and i
 ## [2026-10-15] research | Expanded wowdecomp source navigation
 
 Added direct finding-catalogue and coverage-ledger links to the [existing reference page](reference/wowdecomp-audit.md); the [audit directory](../wowdecomp-audit/README.md) remains the owner.
+
+## [2026-10-15] research | Cataclysm 15595 supplement navigation
+
+Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [reference page](reference/wowdecomp-audit.md) and index. Findings and proof limits remain in the audit. Read-only source research, not native verification; external code execution remains prohibited.

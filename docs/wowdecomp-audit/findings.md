@@ -52,7 +52,6 @@
 | B5 | Currency list expansion/watch state is a static catalogue, not a mutable display list | Capability | [Evidence / rework / regression](additional-inventory-and-currency.md#b5--currency-list-expansionwatch-state-is-a-static-catalogue-not-a-mutable-display-list) |
 | X1 | Non-frame virtual templates overwrite definitions without trust precedence | Boundary | [Evidence / rework / regression](xml-and-dispatch.md#x1--non-frame-virtual-templates-overwrite-definitions-without-trust-precedence) |
 | X2 | Failed includes have inconsistent continuation and diagnostic behavior | Boundary | [Evidence / rework / regression](xml-and-dispatch.md#x2--failed-includes-have-inconsistent-continuation-and-diagnostic-behavior) |
-
 | C10 | EditBox changed notifications are synchronous or absent rather than coalesced at dirty processing | Existing contract conflict / capability | [Evidence / rework / regression](cataclysm-15595.md#c10--editbox-text-notifications-cross-different-mutationupdate-boundaries) |
 | C11 | ScrollingMessageFrame ignores access-ID filtered counts and loses their metadata | Capability | [Evidence / rework / regression](cataclysm-15595.md#c11--scrollingmessageframe-loses-access-id-filtered-counts) |
 | C12 | Disabled checked button hides its only checked texture | Capability | [Evidence / rework / regression](cataclysm-15595.md#c12--disabled-checked-button-hides-its-only-checked-texture) |

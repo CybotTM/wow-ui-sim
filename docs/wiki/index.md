@@ -3487,7 +3487,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 
 | Page | Summary |
 |------|---------|
-| [[wowdecomp-audit]] | Navigation to source-only external research; audit directory owns findings, security assessment and proof limits |
+| [[wowdecomp-audit]] | Read-only source research, including [Cataclysm 15595 supplement](../wowdecomp-audit/cataclysm-15595.md); audit owns findings and proof limits. No native verification; external code execution prohibited |
 | [[toc-game-type-tokens]] | Twelve observed `AllowLoadGameType` literals with local TOC line captures and cache provenance; native recognition, grammar, and BCC acceptance unproven |
 | [[api-coverage]] | ~97% C_* coverage, missing APIs by category, three-layer stub methodology |
 | [[cli-commands]] | wow-sim and wow-cli subcommands: lua-errors, run-tests, screenshot, dump-tree, audit-api |

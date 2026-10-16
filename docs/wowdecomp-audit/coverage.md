@@ -6,11 +6,11 @@ Snapshot: 2026-10-15. External reconstruction `0e4e9fe0a4a9fa08027c5eed4b2c5e873
 
 | Registration-row status | Count | Meaning |
 |---|---:|---|
-| CHECKED_MATCH | 25 | The **named aspect** was compared and agrees; not a whole-method/profile/native parity claim. |
+| CHECKED_MATCH | 27 | The **named aspect** was compared and agrees; not a whole-method/profile/native parity claim. |
 | MISMATCH | 74 | An accepted static source difference, linked to an owning finding; supported-profile adoption remains conditional. |
-| UNRESOLVED | 67 | Partial comparison, historical/current-contract conflict, unclosed producer/dispatch trace or an unaccepted candidate. |
-| UNCHECKED | 2,734 | Literal registration inventoried; simulator behavior not compared. |
-| **Total** | **2,900** | **105 source files; 166 rows have bounded or partial comparison notes.** |
+| UNRESOLVED | 70 | Partial comparison, historical/current-contract conflict, unclosed producer/dispatch trace or an unaccepted candidate. |
+| UNCHECKED | 2,729 | Literal registration inventoried; simulator behavior not compared. |
+| **Total** | **2,900** | **105 source files; 171 rows have bounded or partial comparison notes.** |
 
 There are **46 finding entries**, not 74 separate bugs: one finding can span several methods. Forty-four findings map to method rows; X1/X2 are XML-loader/template behavior outside this literal-method denominator. Include stack depth is an unmeasured shared boundary, not a counted discrepancy.
 
@@ -22,7 +22,7 @@ Counts are contextual registration rows, not unique API names. `Match` always me
 
 | Subsystem | Rows | Match | Difference | Unresolved | Unchecked |
 |---|---:|---:|---:|---:|---:|
-| Frame/object/layout | 114 | 3 | 4 | 5 | 102 |
+| Frame/object/layout | 114 | 5 | 4 | 8 | 97 |
 | Button/CheckButton/Slider/StatusBar/ScrollFrame/ColorSelect | 86 | 7 | 9 | 15 | 55 |
 | Texture/Font/FontString | 94 | 4 | 12 | 3 | 75 |
 | EditBox/MessageFrame/ScrollingMessageFrame/SimpleHTML | 157 | 1 | 10 | 10 | 136 |
@@ -32,7 +32,7 @@ Counts are contextual registration rows, not unique API names. `Match` always me
 | Action bar/spellbook | 73 | 0 | 4 | 11 | 58 |
 | Containers/currency | 28 | 2 | 10 | 16 | 0 |
 | Other WoW APIs/glue | 2,114 | 0 | 0 | 0 | 2,114 |
-| **Total** | **2,900** | **25** | **74** | **67** | **2,734** |
+| **Total** | **2,900** | **27** | **74** | **70** | **2,729** |
 
 Specific unchecked surfaces remain in the ledger, including 42 ScrollingMessageFrame-specific exports. The six CheckButton-specific rows now have bounded aspect notes, not whole-method parity: two identity/nil queries match, the missing-disabled-slot selection differs, and three return-policy/replacement aspects remain unresolved. Examining base classes did not silently mark descendants covered. The largest untouched files include GameUI (310 rows), unit/system exports in ScriptEvents (176), glue exports (113), Calendar (95) and ChatFrame (89). They remain future comparison work, not exclusions or passes.
 

@@ -14,10 +14,10 @@ Source-only research, 2026-10-15. **46 documented source-comparison entries—no
 
 | Status | Registration rows |
 |---|---:|
-| Checked matching **aspect** | 25 |
+| Checked matching **aspect** | 27 |
 | Accepted static difference | 74 |
-| Unresolved/partial comparison | 67 |
-| Unchecked behavior | 2,734 |
+| Unresolved/partial comparison | 70 |
+| Unchecked behavior | 2,729 |
 | **Bounded inventory total** | **2,900** |
 
 One finding can span multiple methods; X1/X2 describe XML loader/template behavior rather than literal exported methods. The [coverage matrix and extraction limits](coverage.md) are authoritative for these counts. Registration entries are not a complete API universe or proof of callable/implemented behavior. Most inventory rows remain unchecked; they are not passes or exclusions.
