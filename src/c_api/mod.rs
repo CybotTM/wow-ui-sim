@@ -12,6 +12,7 @@ pub mod action_count_info;
 #[cfg(feature = "retail-12-0-5")]
 pub use action_count_info::ActionUseCountInfo;
 pub mod action_macros;
+pub mod action_usability;
 #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
 mod addon_messages;
 #[cfg(feature = "retail-12-0-5")]

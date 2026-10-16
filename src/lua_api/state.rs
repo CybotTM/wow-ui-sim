@@ -159,6 +159,7 @@ macro_rules! build_empty_sim_state {
             special_bar_spells: HashSet::new(),
             #[cfg(feature = "retail-12-0-5")]
             action_use_counts: HashMap::new(),
+            spell_action_usability: HashMap::new(),
             action_outfits: $collections.action_outfits,
             action_macros: $collections.action_macros,
             equipped_gear_outfit_action_slots: $collections.equipped_gear_outfit_action_slots,

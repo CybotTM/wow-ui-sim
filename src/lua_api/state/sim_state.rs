@@ -185,6 +185,8 @@ pub struct SimState {
     /// Explicit slot-keyed use counts; stored spell identity must match the current binding.
     #[cfg(feature = "retail-12-0-5")]
     pub action_use_counts: HashMap<u32, crate::c_api::ActionUseCountInfo>,
+    /// Explicit spell-ID usability inputs; missing entries classify as usable.
+    pub spell_action_usability: HashMap<u32, crate::c_api::action_usability::ActionUsability>,
     pub action_outfits: HashMap<u32, i64>,
     pub action_macros: HashMap<u32, u32>,
     pub equipped_gear_outfit_action_slots: HashSet<u32>,
