@@ -1,7 +1,7 @@
 //! Temporary C_Container no-state defaults.
 //!
-//! Purchase/refund, quest-item flags, bag filtering, battle-pay markers, and
-//! direct container item actions depend on systems that are not modeled yet.
+//! Purchase/refund, bag filtering, battle-pay markers, and
+//! related metadata depend on systems that are not modeled yet.
 //! Real bag contents and item metadata stay in the state-backed C_Container
 //! surface.
 
@@ -11,16 +11,6 @@ C_Container = C_Container or __wow_namespace()
 if rawget(C_Container, "GetContainerItemPurchaseInfo") == nil then
     function C_Container.GetContainerItemPurchaseInfo(_bag, _slot)
         return nil
-    end
-end
-
-if rawget(C_Container, "GetContainerItemQuestInfo") == nil then
-    function C_Container.GetContainerItemQuestInfo(_bag, _slot)
-        return {
-            isQuestItem = false,
-            questID = nil,
-            isActive = false,
-        }
     end
 end
 
@@ -36,15 +26,6 @@ if rawget(C_Container, "IsBattlePayItem") == nil then
     end
 end
 
-if rawget(C_Container, "UseContainerItem") == nil then
-    function C_Container.UseContainerItem(_bag, _slot)
-    end
-end
-
-if rawget(C_Container, "SplitContainerItem") == nil then
-    function C_Container.SplitContainerItem(_bag, _slot, _amount)
-    end
-end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {

@@ -38,15 +38,6 @@ pub(crate) fn register_legacy_container_globals(state: &mut LuaState) -> LuaResu
     Ok(())
 }
 
-// Passive legacy projection of HEAD's fixed namespaced quest-info default.
-#[cfg(feature = "client-wrath")]
-fn get_container_item_quest_info(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(rilua::Val::Bool(false));
-    state.push(rilua::Val::Nil);
-    state.push(rilua::Val::Bool(false));
-    Ok(3)
-}
-
 #[cfg(feature = "client-wowforever")]
 fn has_key(state: &mut LuaState) -> LuaResult<u32> {
     // Forever BagIndex.Keyring is -1. Membership, not item-name guessing,
@@ -60,4 +51,17 @@ fn has_key(state: &mut LuaState) -> LuaResult<u32> {
         });
     state.push(rilua::Val::Bool(has_key));
     Ok(1)
+}
+
+#[cfg(feature = "client-wrath")]
+fn get_container_item_quest_info(state: &mut LuaState) -> LuaResult<u32> {
+    let (metadata, is_active) = crate::c_api::container_quest::read_item_quest_info(state)?;
+    state.push(rilua::Val::Bool(metadata.is_quest_item));
+    state.push(
+        metadata
+            .quest_id
+            .map_or(rilua::Val::Nil, |id| rilua::Val::Num(f64::from(id))),
+    );
+    state.push(rilua::Val::Bool(is_active));
+    Ok(3)
 }

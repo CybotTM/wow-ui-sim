@@ -11,6 +11,10 @@ pub struct Message {
     pub b: f32,
     pub a: f32,
     pub message_id: Option<i64>,
+    /// Wrath chat-history grouping, distinct from the line identifier.
+    pub access_id: Option<i64>,
+    /// HistoryKeeper type token used to recover the transfer color.
+    pub extra_data: Option<i64>,
     /// GetTime() value when the message was added (for fading calculations).
     pub timestamp: f64,
 }

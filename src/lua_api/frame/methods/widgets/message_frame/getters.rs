@@ -48,11 +48,17 @@ pub(super) fn clear_text(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn get_num_messages(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    let access_id = super::add::read_optional_id(state, 2);
     let sim = borrow_state(state)?;
     let count = sim
         .message_frames
         .get(&id)
-        .map(|d| d.messages.len())
+        .map(|d| {
+            d.messages
+                .iter()
+                .filter(|message| access_id.is_none() || message.access_id == access_id)
+                .count()
+        })
         .unwrap_or(0) as f64;
     drop(sim);
     count.into_stack(state)
@@ -223,6 +229,9 @@ pub(super) fn has_message_by_id(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn get_message_info(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let index = val_to_f64(stack_val(state, 2)) as i32;
+    if let Some(access_id) = super::add::read_optional_id(state, 3) {
+        return push_filtered_message_info(state, id, index, access_id);
+    }
     let sim = borrow_state(state)?;
     let (text, r, g, b, a, ts) = sim
         .message_frames
@@ -248,6 +257,32 @@ pub(super) fn get_message_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(a));
     state.push(Val::Num(ts));
     Ok(6)
+}
+
+fn push_filtered_message_info(
+    state: &mut LuaState,
+    id: u64,
+    index: i32,
+    access_id: i64,
+) -> LuaResult<u32> {
+    let sim = borrow_state(state)?;
+    let message = sim.message_frames.get(&id).and_then(|data| {
+        data.messages
+            .iter()
+            .filter(|message| message.access_id == Some(access_id))
+            .nth(index.checked_sub(1).unwrap_or(-1) as usize)
+            .cloned()
+    });
+    drop(sim);
+    let Some(message) = message else {
+        return Ok(0);
+    };
+    let text = create_string(state, &message.text);
+    text.into_stack(state)?;
+    message.access_id.into_stack(state)?;
+    message.message_id.into_stack(state)?;
+    message.extra_data.into_stack(state)?;
+    Ok(4)
 }
 
 pub(super) fn set_indented_word_wrap(state: &mut LuaState) -> LuaResult<u32> {

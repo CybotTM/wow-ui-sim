@@ -34,7 +34,7 @@ pub(crate) fn advance_animation_groups(
         };
         apply_animation_group_outcome(&mut sim, &result);
         super::apply_group_vertex_color_state(&mut sim, group_id);
-        super::apply_group_path_state(&mut sim, group_id);
+        super::apply_group_motion_state(&mut sim, group_id);
         sync_action_bar_busy_for_group(&mut sim, group_id);
         super::refresh_active_animation_group(&mut sim, group_id);
         for _ in 0..result.loop_count {
@@ -69,7 +69,7 @@ pub(crate) fn stop_animation_groups_for_hidden_subtree(
         }
         apply_group_flipbook_state(sim, group_id);
         super::apply_group_vertex_color_state(sim, group_id);
-        super::apply_group_path_state(sim, group_id);
+        super::apply_group_motion_state(sim, group_id);
         sync_action_bar_busy_for_group(sim, group_id);
         super::refresh_active_animation_group(sim, group_id);
     }

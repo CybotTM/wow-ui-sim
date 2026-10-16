@@ -50,6 +50,8 @@ pub(super) fn backfill_message(state: &mut LuaState) -> LuaResult<u32> {
             b,
             a,
             message_id: None,
+            access_id: None,
+            extra_data: None,
             timestamp,
         },
     );
@@ -60,64 +62,62 @@ pub(super) fn backfill_message(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-/// Read args from the Lua stack (positions 2+) and insert a message.
-///
-/// This borrows `sim` mutably via `borrow_state_mut` before calling, so the
-/// caller must NOT hold any borrow of `SimState` when calling this.
-///
-/// Stack layout expected: arg1=self(idx1), arg2=text(idx2), arg3=r, arg4=g,
-/// arg5=b, arg6=a, arg7=message_id.
+/// Add the existing simulator message shape or the Wrath history shape.
 pub(super) fn add_message_core_from_stack(state: &mut LuaState, id: u64, log: bool) {
-    let text = match opt_string(state, 2) {
-        Some(t) => t,
-        None => return,
+    let Some(text) = opt_string(state, 2) else {
+        return;
     };
-    let r = opt_f32(state, 3).unwrap_or(1.0);
-    let g = opt_f32(state, 4).unwrap_or(1.0);
-    let b = opt_f32(state, 5).unwrap_or(1.0);
-    let a = opt_f32(state, 6).unwrap_or(1.0);
-    let message_id = match stack_val(state, 7) {
-        Val::Num(n) => Some(n as i64),
-        _ => None,
-    };
-
+    let mut message = read_message_from_stack(state, text);
     let mut sim = match borrow_state_mut(state) {
         Ok(s) => s,
         Err(_) => return,
     };
     if log {
-        log_message_sim(&sim, id, &text);
+        log_message_sim(&sim, id, &message.text);
     }
-    let timestamp = sim.start_time.elapsed().as_secs_f64();
+    message.timestamp = sim.start_time.elapsed().as_secs_f64();
     let data = sim.message_frames.entry(id).or_default();
-    insert_message(data, text, r, g, b, a, message_id, timestamp);
+    insert_message(data, message);
     truncate_messages(data);
     data.display_dirty = true;
 }
 
-pub(super) fn insert_message(
-    data: &mut MessageFrameData,
-    text: String,
-    r: f32,
-    g: f32,
-    b: f32,
-    a: f32,
-    message_id: Option<i64>,
-    timestamp: f64,
-) {
-    let msg = Message {
+fn read_message_from_stack(state: &LuaState, text: String) -> Message {
+    let mut message = Message {
         text,
-        r,
-        g,
-        b,
-        a,
-        message_id,
-        timestamp,
+        r: opt_f32(state, 3).unwrap_or(1.0),
+        g: opt_f32(state, 4).unwrap_or(1.0),
+        b: opt_f32(state, 5).unwrap_or(1.0),
+        a: opt_f32(state, 6).unwrap_or(1.0),
+        message_id: read_optional_id(state, 7),
+        access_id: None,
+        extra_data: None,
+        timestamp: 0.0,
     };
+    // Public Wrath consumer: text, r, g, b, lineID, false, accessID, extraData.
+    let wrath_history =
+        cfg!(feature = "client-wrath") && matches!(stack_val(state, 7), Val::Bool(false));
+    if wrath_history {
+        message.a = 1.0;
+        message.message_id = read_optional_id(state, 6);
+        message.access_id = read_optional_id(state, 8);
+        message.extra_data = read_optional_id(state, 9);
+    }
+    message
+}
+
+pub(super) fn read_optional_id(state: &LuaState, index: i32) -> Option<i64> {
+    match stack_val(state, index) {
+        Val::Num(n) => Some(n as i64),
+        _ => None,
+    }
+}
+
+fn insert_message(data: &mut MessageFrameData, message: Message) {
     if data.insert_mode == "TOP" {
-        data.messages.insert(0, msg);
+        data.messages.insert(0, message);
     } else {
-        data.messages.push(msg);
+        data.messages.push(message);
     }
 }
 

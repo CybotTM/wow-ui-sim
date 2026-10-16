@@ -143,7 +143,7 @@ fn write_vertex_color(sim: &mut crate::lua_api::SimState, target_id: u64, color:
     }
 }
 
-fn elapsed_within_order(group: &AnimGroupState, order: u32) -> f64 {
+pub(super) fn elapsed_within_order(group: &AnimGroupState, order: u32) -> f64 {
     let mut durations = std::collections::BTreeMap::<u32, f64>::new();
     for animation in &group.animations {
         durations
@@ -156,14 +156,7 @@ fn elapsed_within_order(group: &AnimGroupState, order: u32) -> f64 {
 }
 
 fn interpolate_rgba(animation: &AnimState, elapsed: f64) -> Color {
-    let progress = if elapsed <= animation.start_delay {
-        0.0
-    } else if animation.duration <= 0.0 {
-        1.0
-    } else {
-        ((elapsed - animation.start_delay) / animation.duration).clamp(0.0, 1.0)
-    };
-    let progress = smooth_progress(progress, &animation.smoothing);
+    let progress = animation_progress(animation, elapsed);
     let channels: [f32; 4] = std::array::from_fn(|index| {
         let start = animation.start_color[index];
         let end = animation.end_color[index];
@@ -171,6 +164,17 @@ fn interpolate_rgba(animation: &AnimState, elapsed: f64) -> Color {
     });
     let [r, g, b, a] = channels;
     Color::new(r, g, b, a)
+}
+
+pub(super) fn animation_progress(animation: &AnimState, elapsed: f64) -> f64 {
+    let progress = if elapsed <= animation.start_delay {
+        0.0
+    } else if animation.duration <= 0.0 {
+        1.0
+    } else {
+        ((elapsed - animation.start_delay) / animation.duration).clamp(0.0, 1.0)
+    };
+    smooth_progress(progress, &animation.smoothing)
 }
 
 fn smooth_progress(progress: f64, smoothing: &str) -> f64 {

@@ -19,7 +19,8 @@
 //! Rust impls supersede any `stub_nil` entries that slipped through.
 
 use crate::c_api::container_inventory::{
-    equip_cursor_item, pickup_container_item, pickup_inventory_item,
+    equip_cursor_item, pickup_container_item, pickup_inventory_item, split_container_item,
+    use_container_item,
 };
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_ref, table_get,
@@ -307,7 +308,16 @@ fn push_cursor_info(state: &mut LuaState, cursor: CursorInfo) -> LuaResult<u32> 
         | CursorInfo::PetAction { spell_id, .. } => push_cursor_kind_id(state, "spell", spell_id),
         CursorInfo::Talent { talent_id, .. } => push_cursor_kind_id(state, "talent", talent_id),
         CursorInfo::Macro { macro_index } => push_cursor_kind_id(state, "macro", macro_index),
-        CursorInfo::Item { item_id, .. } => push_cursor_kind_id(state, "item", item_id),
+        CursorInfo::Item {
+            item_id,
+            stack_count,
+            ..
+        } => {
+            push_cursor_kind_id(state, "item", item_id)?;
+            // Simulator-authored third result: supplied stack count.
+            state.push(Val::Num(stack_count as f64));
+            Ok(3)
+        }
         CursorInfo::Money { copper } => push_cursor_kind_number(state, "money", copper as f64),
         // INFERRED cursor kind; native documentation does not specify outfit payloads.
         CursorInfo::TransmogOutfit { outfit_id } => {
@@ -428,18 +438,12 @@ fn get_cursor_money(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-// Passive legacy endpoints: preserve HEAD's no-op action behavior.
-fn container_action_noop(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
-}
-
 /// Install in the global table. Exposed for tests that want to bypass the
 /// full `register_globals` chain.
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
-    #[cfg(feature = "client-wrath")]
-    LuaApiMut::register_function(lua, "SplitContainerItem", container_action_noop)?;
-    LuaApiMut::register_function(lua, "UseContainerItem", container_action_noop)?;
     LuaApiMut::register_function(lua, "PickupContainerItem", pickup_container_item)?;
+    LuaApiMut::register_function(lua, "SplitContainerItem", split_container_item)?;
+    LuaApiMut::register_function(lua, "UseContainerItem", use_container_item)?;
     LuaApiMut::register_function(lua, "PickupInventoryItem", pickup_inventory_item)?;
     LuaApiMut::register_function(lua, "PickupBagFromSlot", pickup_bag_from_slot)?;
     LuaApiMut::register_function(lua, "PickupAction", pickup_action)?;

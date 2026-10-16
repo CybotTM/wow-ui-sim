@@ -14,8 +14,18 @@ use rilua::{LuaResult, Val};
 
 use super::scroll::message_frame_scroll_limit;
 
-// Passive publication: HEAD retains every message; producer replaces this body.
-pub(super) fn remove_messages_by_access_id(_state: &mut LuaState) -> LuaResult<u32> {
+pub(super) fn remove_messages_by_access_id(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(access_id) = super::add::read_optional_id(state, 2) else {
+        return Ok(0);
+    };
+    let mut messages = get_message_snapshot(state, id);
+    let previous_count = messages.len();
+    messages.retain(|message| message.access_id != Some(access_id));
+    if messages.len() != previous_count {
+        replace_messages(state, id, messages);
+        set_display_dirty_and_fire_callbacks(state, id)?;
+    }
     Ok(0)
 }
 
@@ -221,6 +231,8 @@ pub(super) fn message_from_transform_results(
         b,
         a,
         message_id,
+        access_id: original.access_id,
+        extra_data: original.extra_data,
         timestamp,
     }
 }

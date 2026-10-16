@@ -3,6 +3,7 @@
 //! Retains the existing cursor representation: item ID, count, and origin only.
 //! Hyperlinks, enchants, and gems do not survive cursor transfer in this model.
 
+use crate::c_api::container_actions::ContainerUseRequest;
 use crate::lua_api::methods::borrow_state_mut;
 use crate::lua_api::state::{BagItem, CursorInfo, CursorItemOrigin, EquippedItem, SimState};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
@@ -16,7 +17,70 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         container,
         "PickupContainerItem",
         pickup_container_item,
-    )
+    )?;
+    table_set_rust_fn_static(state, container, "SplitContainerItem", split_container_item)?;
+    table_set_rust_fn_static(state, container, "UseContainerItem", use_container_item)
+}
+
+// Simulator-authored validation: finite integer arguments only; no coercion.
+fn read_integer_argument(state: &LuaState, index: i32) -> Option<i32> {
+    match stack_val(state, index) {
+        Val::Num(value) => {
+            let in_range = value >= i32::MIN as f64 && value <= i32::MAX as f64;
+            (in_range && value.fract() == 0.0).then_some(value as i32)
+        }
+        _ => None,
+    }
+}
+
+pub(crate) fn split_container_item(state: &mut LuaState) -> LuaResult<u32> {
+    let (Some(bag), Some(slot), Some(amount)) = (
+        read_integer_argument(state, 1),
+        read_integer_argument(state, 2),
+        read_integer_argument(state, 3),
+    ) else {
+        return Ok(0);
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if sim.cursor_item.is_some() {
+        return Ok(0);
+    }
+    let Some(item) = sim.bag_items.get_mut(&(bag, slot)) else {
+        return Ok(0);
+    };
+    if amount <= 0 || amount >= item.stack_count {
+        return Ok(0);
+    }
+    item.stack_count -= amount;
+    let item_id = item.item_id;
+    sim.cursor_item = Some(CursorInfo::Item {
+        item_id,
+        stack_count: amount,
+        origin: CursorItemOrigin::Bag { bag, slot },
+    });
+    Ok(0)
+}
+
+// Accepted request is the only modeled use effect. No native eligibility,
+// consumption, cast, cooldown, bank transfer, or event lifecycle is inferred.
+pub(crate) fn use_container_item(state: &mut LuaState) -> LuaResult<u32> {
+    let (Some(bag), Some(slot)) = (
+        read_integer_argument(state, 1),
+        read_integer_argument(state, 2),
+    ) else {
+        return Ok(0);
+    };
+    let mut sim = borrow_state_mut(state)?;
+    let Some((item_id, count)) = sim.get_bag_item(bag, slot) else {
+        return Ok(0);
+    };
+    if count <= 0 || !sim.container_actions.usable_items.contains(&item_id) {
+        return Ok(0);
+    }
+    sim.container_actions
+        .use_requests
+        .push(ContainerUseRequest { bag, slot, item_id });
+    Ok(0)
 }
 
 fn read_slot_argument(state: &LuaState, index: i32) -> Option<i32> {

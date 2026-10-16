@@ -52,7 +52,7 @@ fn start_group(state: &LuaState, caller_id: u64, reverse: Option<bool>) -> LuaRe
     refresh_active_animation_group(&mut sim, group_id);
     apply_group_flipbook_state(&mut sim, group_id);
     apply_group_vertex_color_state(&mut sim, group_id);
-    super::apply_group_path_state(&mut sim, group_id);
+    super::apply_group_motion_state(&mut sim, group_id);
     sync_action_bar_busy_for_group(&mut sim, group_id);
     Ok(notification)
 }

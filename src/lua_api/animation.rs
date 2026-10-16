@@ -95,6 +95,14 @@ pub struct AnimState {
     /// INFERRED opaque-white defaults; endpoint aliasing/default parity is unknown.
     pub start_color: [f64; 4],
     pub end_color: [f64; 4],
+    /// Supplied transform state; neutral defaults are simulator policy.
+    pub translation_offset: [f64; 2],
+    pub scale: [f64; 2],
+    pub scale_from: [f64; 2],
+    pub scale_to: [f64; 2],
+    pub rotation_degrees: f64,
+    pub origin_point: String,
+    pub origin_offset: [f64; 2],
     pub smoothing: String,
     pub curve: String,
     pub control_points: Vec<ControlPointState>,
@@ -123,6 +131,13 @@ impl AnimState {
             to_percent: 1.0,
             start_color: [1.0; 4],
             end_color: [1.0; 4],
+            translation_offset: [0.0; 2],
+            scale: [1.0; 2],
+            scale_from: [1.0; 2],
+            scale_to: [1.0; 2],
+            rotation_degrees: 0.0,
+            origin_point: "CENTER".to_string(),
+            origin_offset: [0.0; 2],
             smoothing: "NONE".to_string(),
             curve: "NONE".to_string(),
             control_points: Vec::new(),
@@ -165,8 +180,8 @@ pub struct AnimGroupState {
     pub saved_alphas: HashMap<u64, f32>,
     /// INFERRED restoration policy, preserving absence of an explicit tint.
     pub saved_vertex_colors: HashMap<u64, Option<crate::widget::Color>>,
-    /// Simulator policy: each Path playback restores its pre-play presentation offset.
-    pub saved_path_offsets: HashMap<u64, [f32; 2]>,
+    /// Simulator policy: Path/Translation restore pre-play presentation offsets.
+    pub saved_motion_offsets: HashMap<u64, [f32; 2]>,
 }
 
 impl AnimGroupState {
@@ -188,7 +203,7 @@ impl AnimGroupState {
             scripts: HashMap::new(),
             saved_alphas: HashMap::new(),
             saved_vertex_colors: HashMap::new(),
-            saved_path_offsets: HashMap::new(),
+            saved_motion_offsets: HashMap::new(),
         }
     }
 

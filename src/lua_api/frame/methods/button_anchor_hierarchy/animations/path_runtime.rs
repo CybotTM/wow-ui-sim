@@ -1,10 +1,11 @@
-//! Path motion uses the existing target resolver and presentation offsets.
+//! Path and Translation share target resolution and presentation offsets.
 //! SMOOTH is simulator policy: uniform Catmull–Rom, not established native parity.
 use super::resolve_anim_target_id;
+use super::vertex_color::{animation_progress, elapsed_within_order};
 use crate::lua_api::SimState;
-use crate::lua_api::animation::{AnimState, AnimationType, LoopType};
+use crate::lua_api::animation::{AnimGroupState, AnimState, AnimationType, LoopType};
 
-pub(super) fn apply_group_path_state(sim: &mut SimState, group_id: u64) {
+pub(super) fn apply_group_motion_state(sim: &mut SimState, group_id: u64) {
     let Some(group) = sim.animation_groups.get(&group_id) else {
         return;
     };
@@ -12,7 +13,7 @@ pub(super) fn apply_group_path_state(sim: &mut SimState, group_id: u64) {
         return;
     }
     if !group.playing && group.done {
-        restore_group_path_offsets(sim, group_id);
+        restore_group_motion_offsets(sim, group_id);
         return;
     }
     if !group.playing || group.looping != LoopType::None {
@@ -22,7 +23,10 @@ pub(super) fn apply_group_path_state(sim: &mut SimState, group_id: u64) {
         .animations
         .iter()
         .filter_map(|animation| {
-            let displacement = interpolate_path(animation)?;
+            let displacement = match animation.anim_type {
+                AnimationType::Translation => interpolate_translation(animation, group)?,
+                _ => interpolate_path(animation)?,
+            };
             let target_id =
                 resolve_anim_target_id(sim, group.owner_frame_id, animation.child_key.as_deref())?;
             let frame = sim.widgets.get(target_id)?;
@@ -30,35 +34,39 @@ pub(super) fn apply_group_path_state(sim: &mut SimState, group_id: u64) {
             Some((target_id, baseline, displacement))
         })
         .collect();
-    apply_path_offsets(sim, group_id, updates);
+    apply_motion_offsets(sim, group_id, updates);
 }
 
-fn apply_path_offsets(sim: &mut SimState, group_id: u64, updates: Vec<(u64, [f32; 2], [f32; 2])>) {
+fn apply_motion_offsets(
+    sim: &mut SimState,
+    group_id: u64,
+    updates: Vec<(u64, [f32; 2], [f32; 2])>,
+) {
     for (target_id, baseline, displacement) in updates {
         let Some(group) = sim.animation_groups.get_mut(&group_id) else {
             return;
         };
         let saved = *group
-            .saved_path_offsets
+            .saved_motion_offsets
             .entry(target_id)
             .or_insert(baseline);
         let offset = [saved[0] + displacement[0], saved[1] + displacement[1]];
-        write_path_offset(sim, target_id, offset);
+        write_motion_offset(sim, target_id, offset);
     }
 }
 
-fn restore_group_path_offsets(sim: &mut SimState, group_id: u64) {
+fn restore_group_motion_offsets(sim: &mut SimState, group_id: u64) {
     let saved = sim
         .animation_groups
         .get_mut(&group_id)
-        .map(|group| std::mem::take(&mut group.saved_path_offsets))
+        .map(|group| std::mem::take(&mut group.saved_motion_offsets))
         .unwrap_or_default();
     for (target_id, offset) in saved {
-        write_path_offset(sim, target_id, offset);
+        write_motion_offset(sim, target_id, offset);
     }
 }
 
-fn write_path_offset(sim: &mut SimState, target_id: u64, offset: [f32; 2]) {
+fn write_motion_offset(sim: &mut SimState, target_id: u64, offset: [f32; 2]) {
     let changed = sim
         .widgets
         .get(target_id)
@@ -66,6 +74,20 @@ fn write_path_offset(sim: &mut SimState, target_id: u64, offset: [f32; 2]) {
     if changed && let Some(frame) = sim.widgets.get_mut_visual(target_id) {
         [frame.anim_offset_x, frame.anim_offset_y] = offset;
     }
+}
+
+// Model policy: use the existing eased time and layout axes, not native geometry.
+fn interpolate_translation(animation: &AnimState, group: &AnimGroupState) -> Option<[f32; 2]> {
+    if animation.duration <= 0.0 {
+        return None;
+    }
+    let elapsed = elapsed_within_order(group, animation.order);
+    let progress = animation_progress(animation, elapsed);
+    Some(
+        animation
+            .translation_offset
+            .map(|offset| (offset * progress) as f32),
+    )
 }
 
 fn interpolate_path(animation: &AnimState) -> Option<[f32; 2]> {
