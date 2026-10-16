@@ -77,7 +77,7 @@ fn classic_a_r3_original_quality_bank_and_difficulty_cascades() {
         end
         local ok, err = xpcall(function() BankSlotsFrame_OnLoad(slots) end, debug.traceback)
         assert(ok, err)
-        assert(slots:GetID() == BANK_CONTAINER and BANK_CONTAINER == Enum.BagIndex.Bank)
+        assert(slots:GetID() == -1 and BANK_CONTAINER == Enum.BagIndex.Bank)
         assert(slots['Item'..NUM_BANKGENERIC_SLOTS]:GetID() == NUM_BANKGENERIC_SLOTS)
         local bank = CreateFrame('Frame')
         bank:SetWidth(400)
