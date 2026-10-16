@@ -15,7 +15,7 @@ fn currency_watched_mutations_use_displayed_indices_and_survive_collapse() {
         assert(TokenFrame:SetTokenWatched(3, false))
         C_CurrencyInfo.SetCurrencyBackpackByID(2245, false)
         C_CurrencyInfo.SetCurrencyBackpackByID(3089, false)
-        assert(C_CurrencyInfo.GetBackpackCurrencyInfo(1) == nil)
+        assert(C_CurrencyInfo.GetBackpackCurrencyInfo(1) == nil, "B5 watched: supplied removals must empty backpack")
         assert(TokenFrame:SetTokenWatched(4, true))
         assert(C_CurrencyInfo.GetCurrencyListInfo(4).currencyTypesID == 1901)
         assert(C_CurrencyInfo.GetCurrencyListInfo(4).isShowInBackpack == true)
