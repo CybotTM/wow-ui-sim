@@ -46,11 +46,9 @@ Saved source `5dfa94330e411efda0d23ad4fcb946b3759f602f` executes **nine unique c
 
 These checkboxes accept only this supplied-state Retail matrix. Selected streams contain startup timings but no emitted warnings/errors; they are not a complete ordinary startup baseline. No profile-preservation, format/check, native/render/asset/timer/model/animation-execution or full-parent acceptance follows. Historical REDs retain their original source boundaries; this proof does not cover C3 or unrelated current-HEAD changes.
 
-## Pending PTR preservation — 2026-10-16
+## Bounded PTR preservation — 2026-10-16
 
-| Profile | Execution status |
-|---|---|
-| PTR (`client-ptr`) | Pending: nine cases, including security (`client-ptr` → `retail-12-1-5` → `retail-12-1-0`). Test selector now admits PTR; cached PTR type5 Lua/XML consumer is present. No execution or native-parity claim; profile/full-parent acceptance remains open. Existing accepted Retail nine-case receipt is unchanged; no replay. |
+Saved source `161dad02ad868ecce067b4b0c1d87108ec5b2dcb`: **nine unique PASS, exit0**, including actual secret selectors and cached PTR type5 activation/update/removal/unregister. The standalone component imports unchanged real common helpers over the sealed normal PTR library; nested timeout-child output is nonadditive. Independent report: `/home/osso/.local/state/wow-ui-sim/verification/ptr-doubleicon-next/report.md`. Library build7m50s/730 JSON records/zero compiler diagnostics; component compile retains35 unused common-helper warnings. Formatter passes separately at `e1a2ce806`; default library check is reused only through proven production/Cargo equality with `dc2530c3c`. Existing Retail9 is unchanged, not replayed. No whole-integration, ordinary-startup, shared-control, native/rendered, all-profile or full-parent acceptance.
 
 ## Known gaps (current cycle)
 
