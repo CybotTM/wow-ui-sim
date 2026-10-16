@@ -4,7 +4,7 @@
 
 ## [2026-10-16] evidence | IconTextAndCurrencies bounded Retail execution
 
-[Owner receipt](../specs/ui-widget-icon-text-and-currencies.md#bounded-retail-execution--2026-10-16) records normal Retail build/seals, query/feed/cached lifecycle execution and separate startup/CVar preservation. Independent runtime reconciliation, PTR and default check remain pending; broader parent OPEN.
+[Owner receipt](../specs/ui-widget-icon-text-and-currencies.md#bounded-retail-execution--2026-10-16) records normal Retail build/seals, query/feed/cached lifecycle execution and separate startup/CVar preservation. PTR and default check remain pending; broader parent OPEN.
 
 ## [2026-10-16] evidence | Supplied IconTextAndBackground
 

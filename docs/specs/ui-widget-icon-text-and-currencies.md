@@ -1,6 +1,6 @@
 # Supplied IconTextAndCurrencies widgets
 
-`C_UIWidgetManager.GetIconTextAndCurrenciesWidgetVisualizationInfo` exposes explicit environment-owned supplied records to the unchanged cached type-7 consumer. Bounded Retail GREEN is recorded below; independent6068 and PTR/check gates remain pending. See [manager state and feeds](../wiki/systems/ui-widget-manager-state.md).
+`C_UIWidgetManager.GetIconTextAndCurrenciesWidgetVisualizationInfo` exposes explicit environment-owned supplied records to the unchanged cached type-7 consumer. Bounded Retail GREEN is independently accepted below; PTR/check gates remain pending. See [manager state and feeds](../wiki/systems/ui-widget-manager-state.md).
 
 ## What it must do
 
@@ -89,7 +89,7 @@ Independent passive source/spec/readability PASS at source `7e3586e97`: `/home/o
 
 ## Bounded Retail execution — 2026-10-16
 
-Normal Retail source `7273875b2`: `--lib --bin` build9m45s/terminal0, guard exited, artifacts sealed. Unchanged nine populated plus two original selectors: **11 unique PASS / 0 FAIL / exit0**, component compile0/38 inherited unused-helper warnings; nested summaries are nonadditive. Actual unchanged cached type-7 lifecycle assertions reached. Separate startup `[]`/full stderr CLEAN; current CVar copy and original unchanged. Independent6068 pending; PTR normal build running and default check pending. Combined Retail/PTR requirements remain unchecked; no native/catalog/assets/pixels/effect-activation/whole-integration/full-parent acceptance.
+Normal Retail source `7273875b2`: `--lib --bin` build9m45s/terminal0, guard exited, artifacts sealed. Unchanged nine populated plus two original selectors: **11 unique PASS / 0 FAIL / exit0**, component compile0/38 inherited unused-helper warnings; nested summaries are nonadditive. Actual unchanged cached type-7 lifecycle assertions reached. Separate startup `[]`/full stderr CLEAN; current CVar copy and original unchanged. Independent full-stream/source/seal/runtime acceptance: `/home/osso/.local/state/wow-ui-sim/verification/iconcurrencies-next/retail-green-report.md`. PTR normal build running and default check pending. Combined Retail/PTR requirements remain unchecked; no native/catalog/assets/pixels/effect-activation/whole-integration/full-parent acceptance.
 
 Component receipt: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconcurrencies-retail-green-component-20261016T123446079197Z`; test source `0eba46a74`, sealed normal Retail library basis `7273875b2`, not whole-integration compilation. Separate startup receipt: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/iconcurrencies-retail-green-20261016T122137194568Z`.
 
@@ -97,7 +97,7 @@ Component receipt: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source
 
 - [x] Establish and independently reconcile the selector baseline, preserving missing/nil failures and later inputs as unreached. This closes RED provenance only.
 - [x] Compile passive20+10-field records/map/feed and reproduce populated missing-query RED before projection. Independent RED reconciliation passed; later bounded Retail snapshot/isolation/shared secret-policy GREEN is recorded above; PTR remains pending.
-- [x] Execute unchanged normal-feed and cached type-7 lifecycle fixtures in bounded Retail: included in11 unique PASS above; independent6068 pending.
+- [x] Execute unchanged normal-feed and cached type-7 lifecycle fixtures in bounded Retail: included in11 unique PASS and independent Retail acceptance above.
 - [ ] Complete separate PTR execution and default check; combined Retail/PTR requirements remain open.
 
 ## Out of scope
