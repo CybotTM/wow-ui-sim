@@ -67,6 +67,8 @@ Rules:
 
 ## Runtime Cache
 
+Wrath instead uses `data/blizzard-ui-builds/wrath.json` and a separate validated local snapshot; only snapshot absence permits downloading the exact pinned Gethe archive. Invalid existing snapshots fail unchanged. Its 382-entry manifest includes `FrameXML/…`, copied to the profile’s sibling `FrameXML` tree; other entries remain AddOns-relative. Provenance and completion publish only after successful copying. No CASC UI-source fallback or asset-product retargeting is allowed. See the [owning Wrath source contract](../../specs/client-profiles.md#separate-pinned-wrath-source-restoration) for component versus full-startup/native proof limits; the guard remains.
+
 Runtime Blizzard UI files live under the user cache:
 
 ```

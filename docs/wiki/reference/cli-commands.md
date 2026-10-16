@@ -90,7 +90,7 @@ wow-cli audit-api --gaps --format plan      # Markdown checkboxes for PLAN.md
 
 ### `casc sync-blizzard-ui`
 
-Extract Blizzard UI source files from the local WoW CASC install into `~/.cache/wow-ui-sim/blizzard-ui`. GUI startup runs this automatically when the repo symlink/vendor checkout is missing.
+Populate `~/.cache/wow-ui-sim/blizzard-ui/<profile>` from the selected source: ordinary CASC, pinned PTR CDN ranges, or [separate pinned Wrath source](../../specs/client-profiles.md#separate-pinned-wrath-source-restoration). GUI startup syncs missing or stale runtime caches; repo symlinks/vendor checkouts are not runtime sources.
 
 ```bash
 wow-cli casc sync-blizzard-ui

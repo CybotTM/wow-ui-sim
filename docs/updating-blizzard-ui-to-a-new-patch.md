@@ -15,8 +15,8 @@ resolution.
 
 | Data | Source | Where it lives |
 |------|--------|----------------|
-| Per-profile file **list** (`retail.txt`, …) | Gethe branch tree | `data/blizzard-ui-files/<profile>.txt` |
-| File **content** | local WoW CASC for retail/Classic; pinned Blizzard CDN ranges for PTR 12.1.5 | extracted to `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns` |
+| Per-profile file **list** (`retail.txt`, …) | Gethe branch tree; exact pinned revision for Wrath | `data/blizzard-ui-files/<profile>.txt` |
+| File **content** | local WoW CASC except Wrath; pinned Blizzard CDN ranges for PTR 12.1.5; separate pinned Gethe snapshot for Wrath | `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns`, plus sibling `FrameXML` for Wrath |
 | `path → FDID` map | community listfile + authoritative overrides | `data/wow-ui-sim-listfile.csv` (generated) |
 | Extra or canonicalized paths | hand-maintained overrides | `data/listfile-overrides.csv` |
 
@@ -72,6 +72,14 @@ still requires the normal CASC sync and new provenance, not a manual source copy
 At that checkpoint, the simulator's temporary `GetBuildInfo()` default and
 profile regression tracked build `69977`; historical captures and atlas-data
 provenance retain their original build labels.
+
+## Wrath: separate pinned source route
+
+With `client-wrath` selected, run the same `wow-cli casc sync-blizzard-ui` command. Its [pinned source route](wiki/systems/client-profiles.md#runtime-cache) is separate from Mists and Forever; do not replace either snapshot to prepare Wrath.
+
+The [owning Wrath source contract](specs/client-profiles.md#separate-pinned-wrath-source-restoration) records component proof and remaining full-profile, consumer and native acceptance gates. Component tests do not establish full FrameXML startup; retain the scrolling workaround.
+
+The CASC/listfile procedure below applies to CASC-backed profiles, not Wrath source acquisition.
 
 ## Steps
 
@@ -203,8 +211,7 @@ regenerated `data/blizzard-ui-builds/ptr.json`; see [PTR CDN content index](ptr-
 
 ## Notes
 
-- The `~/.cache/wow-ui-sim/wow-ui-source/<branch>` tree is a plain checkout, not
-  wired into the runtime; only the generator reads it.
+- Branch-based `~/.cache/wow-ui-sim/wow-ui-source/<branch>` checkouts feed the generator, not runtime loading. Wrath’s separate validated snapshot also feeds its runtime-cache sync; the loader still reads the profile runtime cache.
 - Gethe's `live` tree is a **superset** of retail CASC (it ships cross-flavor
   source like `_Classic.toc`). Those extra files still resolve from retail CASC
   once the listfile has their FDIDs, so the manifest stays a full, unfiltered

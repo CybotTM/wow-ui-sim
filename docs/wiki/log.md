@@ -1,3 +1,7 @@
+## [2026-10-16] documentation | Separate pinned Wrath acquisition route
+
+[Wrath acquisition](../updating-blizzard-ui-to-a-new-patch.md#wrath-separate-pinned-source-route) now uses its separate pinned source. [Owning contract](../specs/client-profiles.md#separate-pinned-wrath-source-restoration) records current component proof and open runtime/consumer gates; guard retained.
+
 ## Evidence | Fullsuite39 bounded saved-runtime acceptance
 
 [ScrollFrame fixture](../specs/scrollframe-script-bindings.md#library-fixture-reconciliation), [9.1.0 reconciliation](../specs/patch-9-1-0-publication-sweep.md#current-widget-query-reconciliation--2026-10-15) and [shared receipt](investigations/test-suite-performance.md#saved-fullsuite39-bounded-runtime) record independently accepted saved source `655f0698b`: three unique logical cases PASS/exit0; seven scroll assertions and exact remaining 48-gap equality reached; unchanged-budget phase diagnostic counts once despite parent/child duplicate prints. Saved Retail build 18m54s, zero compiler-message records, five seals. Fullsuite39 remains historical FAIL; no original-cause/fix/improvement, matched-conditions, all-profile/native/current-HEAD proof. Earlier source-only log facts remain historical.
