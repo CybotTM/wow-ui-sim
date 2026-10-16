@@ -6,6 +6,10 @@ use crate::currency_displayed_indices::with_token_ui;
 fn currency_watched_mutations_use_displayed_indices_and_survive_collapse() {
     with_token_ui(
         r#"
+        -- TokenUI declares the virtual watcher, but normal container startup
+        -- instantiates it. Use its original template and supply a bounded width.
+        BackpackTokenFrame = CreateFrame("Frame", "BackpackTokenFrame", UIParent, "BackpackTokenFrameTemplate")
+        BackpackTokenFrame:SetWidth(300)
         B5Header(1):ToggleCollapsed()
         -- Original TokenFrame:SetTokenWatched removes the displayed Honor row.
         assert(TokenFrame:SetTokenWatched(3, false))
