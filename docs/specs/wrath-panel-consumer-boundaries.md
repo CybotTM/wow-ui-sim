@@ -45,7 +45,12 @@ Tests read unchanged profile-cache bytes and require their pinned SHA-256 values
 
 - `tests/wrath_panel_boundaries.rs`: Wrath-only original-consumer regressions,
   deterministic external inputs, callback observations and cache requirements.
-- Producer changes are intentionally absent from the tests-first patch.
+- `src/wrath/compat_bootstrap.lua`: guarded Wrath PI alias, installed before vendor chunks.
+- `src/xml/types_elements.rs`: narrow LayerElement deserialize alias, with no case folding.
+- `src/loader/xml_frame/setup.rs`: XML-owned creation flags scoped/restored on both paths.
+- `src/lua_api/globals/create_frame/mod.rs`: consumes those flags before template
+  callbacks; passes the root lifecycle decision explicitly to template application.
+- Producer patch is staged, not compiled or executed; all acceptance boxes stay open.
 
 ## Tests asserting this spec
 

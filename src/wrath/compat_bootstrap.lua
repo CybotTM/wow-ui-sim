@@ -16,6 +16,7 @@ if strbyte == nil and string ~= nil then strbyte = string.byte end
 if strrep == nil and string ~= nil then strrep = string.rep end
 if strrev == nil and string ~= nil then strrev = string.reverse end
 if mod == nil and math ~= nil then mod = math.fmod end
+if rawget(_G, "PI") == nil then PI = math.pi end
 
 -- strjoin and strsplit are registered from Rust (utility_system_spell).
 -- strconcat is registered from Rust (missing_surface.rs).

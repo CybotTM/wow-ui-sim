@@ -51,6 +51,7 @@ impl LayerXml {
 #[serde(rename_all = "PascalCase")]
 pub enum LayerElement {
     Texture(TextureXml),
+    #[serde(alias = "Fontstring")]
     FontString(FontStringXml),
     Line(TextureXml),
     MaskTexture(TextureXml),

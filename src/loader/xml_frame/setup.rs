@@ -127,14 +127,22 @@ fn parent_array_contains_child(
         .unwrap_or(false))
 }
 
-/// Execute CreateFrame Lua with OnLoad suppression (depth-counted for recursion).
+/// Scope creation flags to the XML-owned instance, not its callbacks.
 fn exec_create_frame_code(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), LoadError> {
-    {
+    let fast = can_fast_create_frame(setup);
+    let previous = {
         let mut state = env.state().borrow_mut();
+        let previous = (
+            state.create_frame_initial_hidden,
+            state.suppress_runtime_on_load_depth,
+        );
         state.create_frame_initial_hidden = Some(setup.initial_hidden);
-        state.suppress_runtime_on_load_depth += 1;
-    }
-    let exec_result = if can_fast_create_frame(setup) {
+        // Direct construction already passes fire_on_load=false explicitly.
+        // Generated Lua consumes this marker when registering its root frame.
+        state.suppress_runtime_on_load_depth = if fast { 0 } else { 1 };
+        previous
+    };
+    let exec_result = if fast {
         fast_create_frame(env, setup)
     } else {
         env.exec(setup.lua_code)
@@ -142,9 +150,8 @@ fn exec_create_frame_code(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result
     };
     {
         let mut state = env.state().borrow_mut();
-        state.create_frame_initial_hidden = None;
-        state.suppress_runtime_on_load_depth =
-            state.suppress_runtime_on_load_depth.saturating_sub(1);
+        state.create_frame_initial_hidden = previous.0;
+        state.suppress_runtime_on_load_depth = previous.1;
     }
     exec_result
 }
@@ -224,6 +231,7 @@ fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), 
         let widget_type = fast_create_widget_type(setup.widget_type)?;
         let parent_id = fast_create_parent_id(state, setup.parent)?;
         let frame_id = create_fast_frame_instance(state, setup, widget_type, parent_id)?;
+        crate::lua_api::globals::create_frame::clear_xml_creation_context(state)?;
 
         apply_fast_frame_templates(state, setup, frame_id)?;
         attach_fast_frame_to_parent(state, setup, parent_id, frame_id)?;

@@ -21,7 +21,9 @@ pub(crate) use helpers_shared::{
     apply_parent_sub, create_frame_instance, mark_frame_uses_forbidden_object_table,
 };
 
-use crate::lua_api::methods::{borrow_state, extract_frame_id, frame_ref, val_to_string};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, extract_frame_id, frame_ref, val_to_string,
+};
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::stack_val;
 use crate::widget::WidgetType;
@@ -46,7 +48,9 @@ fn create_frame_from_args(state: &mut LuaState, mut args: CreateFrameArgs) -> Lu
     let template_initializer = args.template_initializer;
     let initial_flags = args.initial_flags;
     args.name = resolve_frame_name(state, args.name.take(), parent_id, parent_explicit)?;
+    let fire_on_load = borrow_state(state)?.suppress_runtime_on_load_depth == 0;
     let frame_id = register_runtime_frame(state, args, parent_id, parent_explicit)?;
+    clear_xml_creation_context(state)?;
     if let Some(flags) = initial_flags {
         flags.apply(state, frame_id)?;
     }
@@ -54,6 +58,7 @@ fn create_frame_from_args(state: &mut LuaState, mut args: CreateFrameArgs) -> Lu
         state,
         frame_id,
         runtime_inherits.as_deref(),
+        fire_on_load,
         template_initializer,
         initial_flags,
     )?;
@@ -122,6 +127,15 @@ impl InitialFrameFlags {
     }
 }
 
+/// Consume loader-owned creation flags before templates can execute user Lua.
+/// A public CreateFrame from a child OnLoad owns its own initialization.
+pub(crate) fn clear_xml_creation_context(state: &mut LuaState) -> LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    sim.suppress_runtime_on_load_depth = 0;
+    sim.create_frame_initial_hidden = None;
+    Ok(())
+}
+
 fn fire_options_initial_on_show(state: &mut LuaState, frame_id: u64) -> LuaResult<()> {
     let visible = {
         let sim = borrow_state(state)?;
@@ -162,11 +176,11 @@ fn apply_runtime_frame_templates(
     state: &mut LuaState,
     frame_id: u64,
     runtime_inherits: Option<&str>,
+    fire_on_load: bool,
     template_initializer: Val,
     initial_flags: Option<InitialFrameFlags>,
 ) -> LuaResult<()> {
     template_chain::ensure_runtime_slider_children(state, frame_id)?;
-    let fire_on_load = borrow_state(state)?.suppress_runtime_on_load_depth == 0;
     template_chain::apply_runtime_template_chain_with_initializer(
         state,
         frame_id,
