@@ -1527,9 +1527,6 @@ __global_mt.__index = function(t, key)
     value = CreateColor(1, 0.1, 0.1, 1)
   elseif key == "PLAYER_FACTION_COLOR_ALLIANCE" then
     value = CreateColor(0.2, 0.4, 1, 1)
-  elseif type(key) == "string" and key:match("^C_[A-Za-z0-9_]+$") then
-    __wow_log_nil_symbol_access("_G", key)
-    value = __wow_attach_namespace_name(__wow_namespace(), key)
   elseif type(key) == "string" and key:match("^ERR_") then
     value = key
   end

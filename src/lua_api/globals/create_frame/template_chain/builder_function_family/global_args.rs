@@ -325,23 +325,11 @@ fn build_function_handler_with_global_arg(
     function_name: &str,
     arg_path: &str,
 ) -> LuaResult<Val> {
-    let builder = load_template(
-        state,
-        r#"
-            local fn, resolved_arg = ...
-            return function(self, ...)
-                return fn(resolved_arg)
-            end
-        "#,
-        TEMPLATE_INLINE_FUNCTION_GLOBAL_ARG,
-    )?;
-    let target = resolve_global_path(state, function_name);
-    let arg = resolve_global_path(state, arg_path);
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[target, arg],
-    )
+    // Parser-validated Lua paths must be read when the script runs, not while
+    // installing it: XML children do not exist yet at installation time.
+    let source = format!("return function(self, ...) return {function_name}({arg_path}) end");
+    let builder = load_template(state, &source, TEMPLATE_INLINE_FUNCTION_GLOBAL_ARG)?;
+    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[])
 }
 
 fn build_function_handler_with_two_global_args(

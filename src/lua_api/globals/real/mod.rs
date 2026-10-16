@@ -69,6 +69,8 @@ pub(crate) mod quest_dialog;
 pub(crate) mod raid_targets;
 #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
 pub mod recent_allies_location;
+#[cfg(feature = "client-wrath")]
+pub mod recruit_a_friend;
 pub mod session_exit;
 pub mod shapeshift;
 #[cfg(feature = "retail-12-0-7")]
