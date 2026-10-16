@@ -4,9 +4,9 @@ The original Forever gamepad consumers require a non-nil player-action storage b
 
 ## What it must do
 
-- [ ] Original cached `ActionBindingUtil.lua` maps standard pages relative to a positive integral player base: `(1,1)` to base, `(1,9)` to base+4, `(1,32)` to base+27, `(2,1)` to base+28, `(3,32)` to base+83; reserved slots5–8 and special page4 return nil.
-- [ ] Normal XML-created main and edit PageUnits complete initial OnLoad without replay or preseeded maps; real possess/stance bars resolve default4/default3 to bottom/right anchors and page1.
-- [ ] Under no-bonus-action state, original registered stance handlers for `UPDATE_BONUS_ACTIONBAR` and `PLAYER_ENTERING_WORLD` preserve linked parents and inactive hidden stance bars without the recorded storage/map errors.
+- [x] Original cached `ActionBindingUtil.lua` maps standard pages relative to a positive integral player base: `(1,1)` to base, `(1,9)` to base+4, `(1,32)` to base+27, `(2,1)` to base+28, `(3,32)` to base+83; reserved slots5–8 and special page4 return nil.
+- [x] Normal XML-created main and edit PageUnits complete initial OnLoad without replay or preseeded maps; real possess/stance bars resolve default4/default3 to bottom/right anchors and page1.
+- [x] Under no-bonus-action state, original registered stance handlers for `UPDATE_BONUS_ACTIONBAR` and `PLAYER_ENTERING_WORLD` preserve linked parents and inactive hidden stance bars without the recorded storage/map errors.
 
 ## Simulator allocation contract
 
@@ -14,7 +14,7 @@ Player gamepad storage occupies **4096–4179 inclusive**, 84 slots in the exist
 
 `GetActionInfo`, `PlaceAction` and `PickupAction` use the same existing player action maps at these IDs, with no copied state or alias translation. Original main/edit buttons reference the same gamepad slots. Pet storage is neither moved nor mirrored.
 
-- [ ] Prove all 84 mapped slots support known-spell placement, lookup and pickup/replacement, original main/edit buttons see the spell, and every lower player slot plus a distinct pet action remain unchanged.
+- [x] Prove all 84 mapped slots support known-spell placement, lookup and pickup/replacement, original main/edit buttons see the spell, and every lower player slot plus a distinct pet action remain unchanged.
 
 ## How it works
 
@@ -35,8 +35,17 @@ Player gamepad storage occupies **4096–4179 inclusive**, 84 slots in the exist
 ## Known gaps (current cycle)
 
 - [x] Behavioral RED at test revision `7cdd8e705`: original consumer nil arithmetic, normal XML mapping errors and selected-base assertion fail; existing pet control passes. Normal Forever library/binary build succeeded. Private proof: `forever-gamepad-producer/red-component-20261016T211328411373Z` under the handoff directory.
-- [x] Select simulator-owned disjoint allocation; behavioral acceptance remains pending.
-- [ ] Re-capture full startup and compare all10 records/14 occurrences; preserve the historical JSON until executed evidence exists.
+- [x] Select simulator-owned disjoint allocation and execute the action/pet acceptance fixture.
+- [x] Re-capture normal startup and compare all10 historical records/14 occurrences. Historical JSON remains intact; this receipt supersedes its counts for the bounded configuration below.
+- [ ] Parent integration verification, whole integration target, native/hardware and GUI evidence remain separate.
+
+## Bounded execution — 2026-10-16
+
+Normal `sound,gui,casc,client-wowforever` library/binary at producer `0177adc75443fa2b6506c0e2ac32c44395dc384c`: **three player tests and one existing pet control PASS** using copied real test modules and the unchanged dependency-closure loader. Tests/library revisions and seals live in private handoff `forever-gamepad-producer/`; `proof-ledger.json` owns exact commands/revisions. No full integration-target claim.
+
+Separate sealed normal startup (`--no-addons --no-saved-vars lua-errors`, CASC/sound disabled) returns **exit0, `[]`, 0 records/0 occurrences**. Own sealed preproducer revision `7cdd8e705` returns exit1,10 records/14 occurrences. It matches the historical baseline apart from the generated handler hash in four event rows; counts, consumers and failure sites match. `startup-comparison.json` records that qualification. All six runtime invocations copied current persisted CVars into fresh child-only data homes and preserved original stat/hash.
+
+The normal build retains the pre-existing unused `UnitRole` variants warning. The component compiler reports one unused closure-helper warning. The narrow lifecycle fixture records an unrelated `MainActionBar.lua:45` missing `BagsBar` diagnostic after events; target-family assertions and state assertions pass. The separate normal startup has no Lua errors. These are not zero-warning, whole-fixture-clean or native-parity claims.
 
 ## Out of scope
 
