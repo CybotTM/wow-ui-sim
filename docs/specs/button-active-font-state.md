@@ -18,7 +18,7 @@ Button text selects a configured FontObject and projects its supplied fields int
 
 ## Implementation inventory
 
-- `src/lua_api/frame/methods/button_anchor_hierarchy/buttons.rs`: font slots and button font projection; C7 producer committed in `3b4dc7c99`, with no GREEN evidence here. The saved baseline predates that producer.
+- `src/lua_api/frame/methods/button_anchor_hierarchy/buttons.rs`: font slots and button font projection; C7 producer committed in `3b4dc7c99`. Current saved execution and historical failures are separated below.
 - `src/lua_api/frame/methods/button_anchor_hierarchy/font_strings.rs`: existing FontString reference and snapshot helpers.
 - `src/lua_api/frame/methods/text_attribute_event/text/formatting.rs`: public FontString FontObject reference/snapshot behavior.
 - `src/iced_app/mouse.rs`: actual GUI hover transition; `A_Admin.SetMouseOverFrame` supplies separate simulated hover.
@@ -27,11 +27,15 @@ Button text selects a configured FontObject and projects its supplied fields int
 
 Saved Retail-epoch baseline `d16876fcc9ec0e49851436a6af7a1e308d0a344c` executed all three C7 cases in `tests/button_state_textures.rs`: **0 passed, 3 failed, exit 101**. The private saved epoch is `c8-producer-c7-c9-retail-baseline-20261016T003140348455Z`, selection `button-font-first-red`. The first two cases stop at unlabelled `C7Check` assertions; active-slot replacement stops at the explicit `selected FontObject reference` assertion. The fixture also incorrectly assumes mapped `GetTexture()` sources return path strings rather than numeric file IDs, so the first two failures do not establish a font-style defect. Later assertions do not independently establish RED or acceptance.
 
-Two style cases omit initial reference assertions so a reference-storage failure cannot mask the style boundary. The authored tests compare emitted glyph quads with a separately rendered FontString and observe the selected path through public `GetFont`; the failing baseline does not prove those assertions pass. Saved producer source `792d62003` executes the full twelve-case module: nine controls pass and all three C7 cases still stop at unlabelled `C7Check` assertions. The reference-first case now reaches that helper, but no full C7 GREEN follows. The corrected oracle captures each assigned texture source before font changes and checks unchanged source/path with labelled assertions; font fields and glyph checks remain unchanged. Corrected-oracle execution, modern native, all-profile, GPU/pixel behavior and loaded-face identity remain unproven.
+Two style cases omit initial reference assertions so a reference-storage failure cannot mask the style boundary. The authored tests compare emitted glyph quads with a separately rendered FontString and observe the selected path through public `GetFont`; the failing baseline does not prove those assertions pass. Saved producer source `792d62003` executes the full twelve-case module: nine controls pass and all three C7 cases still stop at unlabelled `C7Check` assertions. The reference-first case now reaches that helper, but no full C7 GREEN follows. The corrected oracle captures each assigned texture source before font changes and checks unchanged source/path with labelled assertions; font fields and glyph checks remain unchanged. Those earlier helper/oracle failures remain historical; current corrected-oracle execution follows. Modern native, all-profile, GPU/pixel behavior and loaded-face identity remain unproven.
+
+## Saved Retail execution — 2026-10-15
+
+Saved `3a530` corrected `button_state_textures`: 12 PASS/0 FAIL, comprising three C7 cases and nine controls. Execution pending independent acceptance: runtime audit 5768 pending. [EditBox receipt](editbox-text-position-selection.md#saved-retail-execution--2026-10-15) owns shared terminal compile/build-seal evidence, stderr caveats and remaining gates; no clean-startup or all-profile claim.
 
 ## Known gaps (current cycle)
 
-- [ ] Verify the committed bounded projection against the saved three-case RED and affected rendering/state controls; no producer GREEN or independent verification is established here.
+- [ ] Verify the committed bounded projection against the saved three-case RED and affected rendering/state controls; corrected saved execution is recorded above, but independent runtime acceptance remains pending.
 - [ ] Cover actual GUI pointer/hit-test/dispatch; authored tests use public simulated hover, not manual OnEnter callbacks.
 
 ## Out of scope

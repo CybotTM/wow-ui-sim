@@ -2,9 +2,9 @@
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#doubleiconandtext-bounded-retail-producer-proof--2026-10-15) links the owning acceptance matrix: getter `c3096cd6b` at saved source `5dfa94330`, nine unique PASS/exit0, independent build/seal/full-stream runtime reconciliation PASS. Actual cached lifecycle and secret selectors executed. Historical REDs remain separate; profile preservation, format/check, ordinary startup and full-parent gates stay open. No nine-case rerun or unrelated current-HEAD/native proof.
 
-## [2026-10-15] source | C2 retained Buffer follow-up
+## [2026-10-15] evidence | C2/C7 saved Retail execution pending acceptance
 
-[EditBox owner](../specs/editbox-text-position-selection.md#cursor-geometry-follow-up) reconciles the prior raw/stripped snapshot description: opaque public Default cache retains one prepared full-content Buffer shared by Editor and glyph emission. Integration failed with seven E0451 errors before tests; visibility fix `000629293` and follow-up through `91813b0e3` remain uncompiled. CENTER/BOTTOM overflow oracle authored/unexecuted; no new GREEN or native callback-count claim.
+[EditBox receipt](../specs/editbox-text-position-selection.md#saved-retail-execution--2026-10-15) owns saved `3a530` build/seal and C2/preservation/key execution; [C7 owner](../specs/button-active-font-state.md#saved-retail-execution--2026-10-15) owns corrected button execution. Runtime audit5768 pending: execution pending independent acceptance. Owners retain historical failures, stderr caveats, broader scroll-fixture failure and open consumer/profile/startup/check/full-suite/parent gates.
 
 ## [2026-10-15] source | Shared clean-room controls and anchors
 
