@@ -1,15 +1,15 @@
 # Supplied IconTextAndCurrencies widgets
 
-`C_UIWidgetManager.GetIconTextAndCurrenciesWidgetVisualizationInfo` exposes explicit environment-owned supplied records to the unchanged cached type-7 consumer. Bounded Retail GREEN is independently accepted below; PTR/check gates remain pending. See [manager state and feeds](../wiki/systems/ui-widget-manager-state.md).
+`C_UIWidgetManager.GetIconTextAndCurrenciesWidgetVisualizationInfo` exposes explicit environment-owned supplied records to the unchanged cached type-7 consumer. Bounded combined Retail/PTR behavior is independently accepted below; default-check reconciliation remains pending. See [manager state and feeds](../wiki/systems/ui-widget-manager-state.md).
 
 ## What it must do
 
 ### Eligibility and public query
 
-- [ ] Support Retail OR PTR builds, grounded in each profile's actual cached `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumentation.lua` declaration and `Blizzard_UIWidgets/Blizzard_UIWidgetTemplateIconTextAndCurrencies.lua` registration/consumer. Both cached shared enum declarations give `Enum.UIWidgetVisualizationType.IconTextAndCurrencies = 7`. No other-profile acceptance is claimed.
-- [ ] Require numeric `widgetID` using the existing manager required-number and secret policy, including contextual rejection of missing, explicit nil, string (including numeric string), boolean, table and function arguments. Preserve declared `SecretArguments = "AllowedWhenUntainted"` through that shared policy, with actual permitted/denied secret-wrapper coverage; do not introduce a new policy or integer/positive/range restrictions.
-- [ ] An absent numeric ID returns exactly one nil. Numeric IDs never imply records or catalog membership.
-- [ ] Project every supplied field below, all non-nil, preserving values and declared Lua types: exactly 20 outer fields and all 10 fields of every ordered `UIWidgetCurrencyInfo` row. Enum/fileID values are numeric scalars, texture kits are strings; do not clamp, synthesize defaults, or omit fields unused by Setup.
+- [x] Support Retail OR PTR builds, grounded in each profile's actual cached `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumentation.lua` declaration and `Blizzard_UIWidgets/Blizzard_UIWidgetTemplateIconTextAndCurrencies.lua` registration/consumer. Both cached shared enum declarations give `Enum.UIWidgetVisualizationType.IconTextAndCurrencies = 7`. No other-profile acceptance is claimed.
+- [x] Require numeric `widgetID` using the existing manager required-number and secret policy, including contextual rejection of missing, explicit nil, string (including numeric string), boolean, table and function arguments. Preserve declared `SecretArguments = "AllowedWhenUntainted"` through that shared policy, with actual permitted/denied secret-wrapper coverage; do not introduce a new policy or integer/positive/range restrictions.
+- [x] An absent numeric ID returns exactly one nil. Numeric IDs never imply records or catalog membership.
+- [x] Project every supplied field below, all non-nil, preserving values and declared Lua types: exactly 20 outer fields and all 10 fields of every ordered `UIWidgetCurrencyInfo` row. Enum/fileID values are numeric scalars, texture kits are strings; do not clamp, synthesize defaults, or omit fields unused by Setup.
 
 ### Outer IconTextAndCurrenciesWidgetVisualizationInfo (20 fields)
 
@@ -53,14 +53,14 @@
 
 ### Snapshots and isolation
 
-- [ ] Each query returns a fresh outer table, fresh `currencies` array and fresh row tables, preserving supplied order and empty arrays. Concrete complete multi-row records demonstrate all 20+10 fields, not merely fields read by Setup. Caller edits, row/array insertion/removal and retained snapshots cannot mutate supplied state or subsequent results.
-- [ ] Replacements affect later queries only. Distinct numeric IDs, record absence/removal/restoration, and separate fresh `WowLuaEnv` instances remain isolated, using existing manager numeric identity rules without new selector restrictions.
+- [x] Each query returns a fresh outer table, fresh `currencies` array and fresh row tables, preserving supplied order and empty arrays. Concrete complete multi-row records demonstrate all 20+10 fields, not merely fields read by Setup. Caller edits, row/array insertion/removal and retained snapshots cannot mutate supplied state or subsequent results.
+- [x] Replacements affect later queries only. Distinct numeric IDs, record absence/removal/restoration, and separate fresh `WowLuaEnv` instances remain isolated, using existing manager numeric identity rules without new selector restrictions.
 
 ### Normal feed and unchanged cached type-7 lifecycle
 
-- [ ] Use existing normal `WowLuaEnv::replace_ui_widget_set`, `update_ui_widget` and `remove_ui_widget` feeds with explicit complete records and type-7 membership. State is observable before synchronous `UPDATE_UI_WIDGET`; wrong-type/absent-set updates reject atomically without mutation or notification. Membership removal/full-set replacement reconciles through `UPDATE_ALL_UI_WIDGETS` while independent visualization records remain queryable.
-- [ ] Execute actual cached Retail/PTR manager and template activation through the real getter and supplied membership, without replacing provider, getter, Setup, pools or vendor code. Assert actual text, enabled/desaturated state (including cached Yellow-to-White text handling), conditional description visibility/content/enabled state, currency acquisition count/order and concrete observable supplied row content. Assert requested `Icon` texture-kit region name via cached `%s` policy only, not asset availability or pixels.
-- [ ] Exercise ordinary supplied updates, two-widget supplied ordering/layout, full-set replacement, hidden release/shown reacquisition, membership removal and live unregister cleanup (pools, subscriptions and stopped updates). Allow normal cached deferred layout/removal before assertions; no vendor timing shortcuts. Ordinary updates retain acquisition `widgetTag`; reacquisition uses current supplied tag, while queries expose every replacement field. This is supplied-state lifecycle, not native animation/timing parity.
+- [x] Use existing normal `WowLuaEnv::replace_ui_widget_set`, `update_ui_widget` and `remove_ui_widget` feeds with explicit complete records and type-7 membership. State is observable before synchronous `UPDATE_UI_WIDGET`; wrong-type/absent-set updates reject atomically without mutation or notification. Membership removal/full-set replacement reconciles through `UPDATE_ALL_UI_WIDGETS` while independent visualization records remain queryable.
+- [x] Execute actual cached Retail/PTR manager and template activation through the real getter and supplied membership, without replacing provider, getter, Setup, pools or vendor code. Assert actual text, enabled/desaturated state (including cached Yellow-to-White text handling), conditional description visibility/content/enabled state, currency acquisition count/order and concrete observable supplied row content. Assert requested `Icon` texture-kit region name via cached `%s` policy only, not asset availability or pixels.
+- [x] Exercise ordinary supplied updates, two-widget supplied ordering/layout, full-set replacement, hidden release/shown reacquisition, membership removal and live unregister cleanup (pools, subscriptions and stopped updates). Allow normal cached deferred layout/removal before assertions; no vendor timing shortcuts. Ordinary updates retain acquisition `widgetTag`; reacquisition uses current supplied tag, while queries expose every replacement field. This is supplied-state lifecycle, not native animation/timing parity.
 
 ## How it works
 
@@ -69,7 +69,7 @@
 
 ## Implementation inventory
 
-Records/map/feed/getter and fresh projection compile in normal Retail source `7273875b2`; bounded Retail GREEN below does not close combined Retail/PTR acceptance:
+Records/map/feed/getter and fresh projection compile in normal Retail source `7273875b2`; combined bounded Retail/PTR behavior is accepted below, separately from the pending default-check reconciliation:
 
 - `src/c_api/ui_widget_manager/icon_text_and_currencies_record.rs` — explicit20-field `IconTextAndCurrenciesRecord` with ordered10-field `UiWidgetCurrencyRecord` rows, no defaults/seeds; fileID and enum fields follow existing `u32` host-input conventions, plain numbers use `f64`.
 
@@ -89,16 +89,27 @@ Independent passive source/spec/readability PASS at source `7e3586e97`: `/home/o
 
 ## Bounded Retail execution — 2026-10-16
 
-Normal Retail source `7273875b2`: `--lib --bin` build9m45s/terminal0, guard exited, artifacts sealed. Unchanged nine populated plus two original selectors: **11 unique PASS / 0 FAIL / exit0**, component compile0/38 inherited unused-helper warnings; nested summaries are nonadditive. Actual unchanged cached type-7 lifecycle assertions reached. Separate startup `[]`/full stderr CLEAN; current CVar copy and original unchanged. Independent full-stream/source/seal/runtime acceptance: `/home/osso/.local/state/wow-ui-sim/verification/iconcurrencies-next/retail-green-report.md`. PTR normal build running and default check pending. Combined Retail/PTR requirements remain unchecked; no native/catalog/assets/pixels/effect-activation/whole-integration/full-parent acceptance.
+Normal Retail source `7273875b2`: `--lib --bin` build9m45s/terminal0, guard exited, artifacts sealed. Unchanged nine populated plus two original selectors: **11 unique PASS / 0 FAIL / exit0**, component compile0/38 inherited unused-helper warnings; nested summaries are nonadditive. Actual unchanged cached type-7 lifecycle assertions reached. Separate startup `[]`/full stderr CLEAN; current CVar copy and original unchanged. Independent full-stream/source/seal/runtime acceptance: `/home/osso/.local/state/wow-ui-sim/verification/iconcurrencies-next/retail-green-report.md`. Combined Retail/PTR behavior is accepted in the following section; default-check reconciliation remains pending. Retail component execution predates the private CVar-copy fix: no original-CVar preservation claim applies to that component run. Retail normal-startup copy/preservation is accepted separately. No native/catalog/assets/pixels/effect-activation/whole-integration/full-parent acceptance.
 
 Component receipt: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconcurrencies-retail-green-component-20261016T123446079197Z`; test source `0eba46a74`, sealed normal Retail library basis `7273875b2`, not whole-integration compilation. Separate startup receipt: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/iconcurrencies-retail-green-20261016T122137194568Z`.
+
+## Bounded combined Retail/PTR acceptance — 2026-10-16
+
+Independent accepted reports: `/home/osso/.local/state/wow-ui-sim/verification/iconcurrencies-next/retail-green-report.md` and `/home/osso/.local/state/wow-ui-sim/verification/iconcurrencies-next/ptr-green-report.md`. Retail and actual PTR each execute **11 unique PASS / 0 FAIL / exit0**, the same 11 logical cases, not 22 distinct behaviors. This closes the combined behavior checkboxes above: complete nested projection/snapshots, selector and actual secret-wrapper policy, normal-feed publication/atomicity and unchanged actual cached type-7 lifecycle. Nested child summaries are nonadditive.
+
+Actual normal PTR build source `0eba46a74` retains getter/production basis `7273875b2`: build terminal0, 7m25s, 731 JSON records, zero compiler-message diagnostics, sealed normal library/binary. Component source `9792c06d2` uses currency fixtures/helpers unchanged from `a2d2d2792`, links that sealed normal PTR library, and compiles exit0 with 38 inherited unused-helper warnings; this is not a whole979 runtime or whole-integration build. PTR component receipt: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconcurrencies-ptr-green-component-20261016T125002615768Z`.
+
+Separate normal PTR startup exits0 with stdout `[]` and full stderr CLEAN. PTR build/startup receipt: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/iconcurrencies-ptr-green-20261016T123737537344Z`. The new private harness uses fresh byte-exact CURRENT CVar copies for both PTR component and startup, recording unchanged original stat/hash before/after, including launcher exceptions. This does not retroactively establish Retail component preservation. Both profile startups remain nonhermetic: existing WTF EditMode cache is read despite disabled SavedVariables. Asset access is disabled, not cached Blizzard Lua/XML loading.
+
+Default check at source `c732ea38f` reached terminal exit0 in46.49s:736 JSON records, zero compiler-message diagnostics and guard exited. Receipt: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/iconcurrencies-default-check-20261016T130658617553Z`. Independent check/format reconciliation remains pending. Later charge-selector test RED is separate; this check does not establish its behavior or whole-parent acceptance.
 
 ## Known gaps (current cycle)
 
 - [x] Establish and independently reconcile the selector baseline, preserving missing/nil failures and later inputs as unreached. This closes RED provenance only.
-- [x] Compile passive20+10-field records/map/feed and reproduce populated missing-query RED before projection. Independent RED reconciliation passed; later bounded Retail snapshot/isolation/shared secret-policy GREEN is recorded above; PTR remains pending.
-- [x] Execute unchanged normal-feed and cached type-7 lifecycle fixtures in bounded Retail: included in11 unique PASS and independent Retail acceptance above.
-- [ ] Complete separate PTR execution and default check; combined Retail/PTR requirements remain open.
+- [x] Compile passive20+10-field records/map/feed and reproduce populated missing-query RED before projection. Independent RED reconciliation passed; later bounded combined Retail/PTR snapshot/isolation/shared secret-policy GREEN is recorded above.
+- [x] Execute unchanged normal-feed and cached type-7 lifecycle fixtures in bounded Retail and actual PTR: independent combined acceptance above.
+- [x] Complete separate actual PTR execution and independent bounded combined behavior reconciliation above.
+- [ ] Independently reconcile the successful default check and current formatter gate; no whole-parent completion follows.
 
 ## Out of scope
 

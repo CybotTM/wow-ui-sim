@@ -151,11 +151,11 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 ## IconTextAndCurrencies passive source and selector RED — 2026-10-16
 
-[Owning contract](../../specs/ui-widget-icon-text-and-currencies.md#bounded-retail-execution--2026-10-16) records historical RED, the complete fresh nested supplied-record projection and bounded Retail execution. Separate PTR/check and broader parent gates remain open. No native/catalog/assets/render/effect-activation proof.
+[Owning contract](../../specs/ui-widget-icon-text-and-currencies.md#bounded-combined-retailptr-acceptance--2026-10-16) owns historical RED, combined bounded behavior acceptance, startup/CVar qualifications and the remaining default-check reconciliation; broader acceptance stays separate.
 
 ## Sources
 
-- [IconTextAndCurrencies contract](../../specs/ui-widget-icon-text-and-currencies.md) —20+10-field inventory, historical RED, bounded Retail GREEN and open PTR/check gates.
+- [IconTextAndCurrencies contract](../../specs/ui-widget-icon-text-and-currencies.md) — supplied-record contract and owning evidence/gate reconciliation.
 
 - [DoubleIconAndText contract](../../specs/ui-widget-double-icon-and-text.md) — supplied-record/consumer requirements, bounded Retail acceptance matrix and separate historical selector/populated RED boundaries.
 

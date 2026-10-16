@@ -2,9 +2,9 @@
 
 [Path owner](../specs/path-control-point.md#known-gaps-current-cycle) records independent hidden-subtree restoration proof; [access owner](../specs/script-object-access-restrictions.md#bounded-retail-execution--2026-10-16) records existing Retail mask and cached-consumer execution. Forever, startup and broader profile acceptance remain separate.
 
-## [2026-10-16] evidence | IconTextAndCurrencies bounded Retail execution
+## [2026-10-16] evidence | IconTextAndCurrencies combined bounded acceptance
 
-[Owner receipt](../specs/ui-widget-icon-text-and-currencies.md#bounded-retail-execution--2026-10-16) records normal Retail build/seals, query/feed/cached lifecycle execution and separate startup/CVar preservation. PTR and default check remain pending; broader parent OPEN.
+[Owner receipt](../specs/ui-widget-icon-text-and-currencies.md#bounded-combined-retailptr-acceptance--2026-10-16) owns combined behavior acceptance, separate startup evidence, CVar-preservation limits and the remaining default-check reconciliation; broader acceptance stays separate.
 
 ## [2026-10-16] evidence | Supplied IconTextAndBackground
 
