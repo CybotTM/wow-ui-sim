@@ -85,7 +85,9 @@ fn editbox_set_formatted_text_dispatches_hooks_and_routes_errors_without_reentry
     let loaded = wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
     assert!(loaded.warnings.is_empty(), "{:?}", loaded.warnings);
     env.exec(r#"
-        function FormattedCallbackPrecall() end
+        function FormattedCallbackPrecall(self)
+            if self.failTextSet then error("text set failure") end
+        end
         local eb = CreateFrame("EditBox", "FormattedCallbackEB", UIParent, "FormattedCallbackPre")
         _G.formatted_events, _G.formatted_errors = {}, {}
         local events, errors = _G.formatted_events, _G.formatted_errors
@@ -113,7 +115,7 @@ fn editbox_set_formatted_text_dispatches_hooks_and_routes_errors_without_reentry
         local precall = eb:GetScript("OnTextSet", 0)
         assert(type(precall) == "function")
         assert(precall ~= eb:GetScript("OnTextSet"))
-        function FormattedCallbackPrecall() error("text set failure") end
+        eb.failTextSet = true
         eb:SetText("next")
         assert(eb:GetText() == "next")
         assert(#events == 6 and events[5] == "set:next" and events[6] == "set hook:next")
