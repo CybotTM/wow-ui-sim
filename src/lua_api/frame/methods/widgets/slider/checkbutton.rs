@@ -1,16 +1,20 @@
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn_static};
 use crate::widget::AttributeValue;
-use rilua::LuaResult;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-
-use super::super::shared::val_to_bool;
+use rilua::{LuaResult, Val};
 
 fn checkbutton_set_checked(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let checked = val_to_bool(stack_val(state, 2));
+    // Original Wrath FrameXML/ActionButton.lua:302-310 uses SetChecked(1/0).
+    // Numeric flags are a bounded simulator contract, not generic Lua truthiness.
+    let checked = match stack_val(state, 2) {
+        Val::Bool(value) => value,
+        Val::Num(value) => value != 0.0,
+        _ => false,
+    };
     let mut sim = borrow_state_mut(state)?;
     apply_checkbutton_checked(&mut sim, id, checked);
     Ok(0)
