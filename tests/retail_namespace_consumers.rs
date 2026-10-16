@@ -4,9 +4,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 #[cfg(feature = "client-retail")]
 fn load_original(env: &WowLuaEnv, name: &str) {
     use sha2::{Digest, Sha256};
-    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
-        .expect("SETUP: Retail profile cache required");
-    let path = toc.parent().unwrap().parent().unwrap().join(name);
+    let path = wow_ui_sim::client_profile::blizzard_ui_addons_dir().join(name);
     let source = std::fs::read_to_string(&path).expect("SETUP: original cached consumer");
     let pins: serde_json::Value =
         serde_json::from_str(include_str!("retail_namespace_consumers.json")).unwrap();
