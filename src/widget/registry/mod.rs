@@ -60,6 +60,8 @@ pub struct WidgetRegistry {
     pending_layout_ids: FxHashSet<u64>,
     /// Cooldown widget IDs, so per-tick cooldown checks skip the full registry.
     cooldown_ids: FxHashSet<u64>,
+    /// EditBox widget IDs, so presentation updates skip the full registry.
+    editbox_ids: FxHashSet<u64>,
     /// Pre-edit anchor state for frames anchor-edited since the last dirty read.
     anchor_edit_baselines: RefCell<FxHashMap<u64, anchor_edits::AnchorEditBaseline>>,
     /// Layout canvas size, for resolving rects when settling anchor edits.
@@ -107,6 +109,7 @@ impl WidgetRegistry {
             hit_grid_dirty_ids: Self::initial_id_set(),
             pending_layout_ids: Self::initial_id_set(),
             cooldown_ids: FxHashSet::default(),
+            editbox_ids: FxHashSet::default(),
             anchor_edit_baselines: RefCell::new(FxHashMap::default()),
             layout_canvas_size: None,
             size_changed_ids: FxHashSet::default(),
@@ -154,6 +157,7 @@ impl WidgetRegistry {
             self.child_links.insert((id, child_id));
         }
         self.sync_cooldown_index(id, widget.widget_type);
+        self.sync_editbox_index(id, widget.widget_type);
         self.widgets.insert(id, widget);
         if is_new {
             self.ordered_ids.push(id);
@@ -166,6 +170,14 @@ impl WidgetRegistry {
             self.cooldown_ids.insert(id);
         } else {
             self.cooldown_ids.remove(&id);
+        }
+    }
+
+    fn sync_editbox_index(&mut self, id: u64, widget_type: super::WidgetType) {
+        if matches!(widget_type, super::WidgetType::EditBox) {
+            self.editbox_ids.insert(id);
+        } else {
+            self.editbox_ids.remove(&id);
         }
     }
 
@@ -417,6 +429,25 @@ impl WidgetRegistry {
     /// IDs of all registered `Cooldown` widgets.
     pub fn cooldown_ids(&self) -> impl Iterator<Item = u64> + '_ {
         self.cooldown_ids.iter().copied()
+    }
+
+    /// IDs of all registered `EditBox` widgets.
+    pub(crate) fn iter_editbox_ids(&self) -> impl Iterator<Item = u64> + '_ {
+        self.editbox_ids.iter().copied()
+    }
+
+    /// Invalidate font-dependent presentation caches without losing pending input events.
+    pub(crate) fn invalidate_editbox_presentations(&mut self) {
+        for id in &self.editbox_ids {
+            if let Some(presentation) = self
+                .widgets
+                .get_mut(id)
+                .and_then(|frame| frame.editbox_presentation.as_mut())
+            {
+                presentation.input = None;
+                presentation.cursor_geometry = None;
+            }
+        }
     }
 
     pub fn storage_estimate_bytes(&self) -> usize {

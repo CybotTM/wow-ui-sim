@@ -2,22 +2,20 @@
 
 use iced::{Point, Rectangle, Size};
 
+use crate::render::glyph::emit_text_quads;
+use crate::render::shader::GLYPH_ATLAS_TEX_INDEX;
 use crate::render::{BlendMode, QuadBatch, ThreeSlicePathParams};
 use crate::widget::{TextJustify, WidgetType};
 
 use super::textures::remap_atlas_crop;
-use super::{FrameQuadEmit, WidgetTextLayout, WidgetTextRenderer, emit_widget_text_quads};
+use super::{
+    FrameQuadEmit, WidgetTextLayout, WidgetTextRenderer, clip_recent_quads, color_with_alpha,
+    emit_widget_text_quads,
+};
 
 const BUTTON_TEXT_CHILD_KEYS: [&str; 3] = ["Text", "text", "ButtonText"];
 
 type ButtonTextureState<'a> = (Option<&'a String>, Option<(f32, f32, f32, f32)>, bool);
-
-struct EditBoxTextMetrics {
-    bounds: Rectangle,
-    left_pad: f32,
-    top_inset: f32,
-    bottom_inset: f32,
-}
 
 /// UI-Panel-Button-Up is 128×32; button-up strip occupies rows 0-21 (V = 0 .. 22/32 = 0.6875).
 const PANEL_BUTTON_UP_CROP_V: f32 = 22.0 / 32.0;
@@ -471,106 +469,107 @@ pub(super) fn emit_editbox_with_text(
     alpha: f32,
 ) {
     build_editbox_quads(batch, bounds, f, alpha);
-    let text_metrics = editbox_text_metrics(bounds, f.editbox_text_insets);
-    let text_width = emit_editbox_text(batch, f, text_ctx, text_metrics.bounds, alpha);
+    emit_editbox_presentation(batch, bounds, f, text_ctx, alpha);
     if f.editbox_focused {
-        emit_editbox_caret(batch, bounds, text_metrics, text_width, alpha);
+        batch.push_border(bounds, 1.0, [1.0, 0.85, 0.30, 0.85 * alpha]);
     }
 }
 
-fn editbox_text_metrics(
+fn emit_editbox_presentation(
+    batch: &mut QuadBatch,
     bounds: Rectangle,
-    text_insets: (f32, f32, f32, f32),
-) -> EditBoxTextMetrics {
-    let (left_inset, right_inset, top_inset, bottom_inset) = text_insets;
-    let left_pad = if left_inset > 0.0 { left_inset } else { 4.0 };
-    let right_pad = if right_inset > 0.0 { right_inset } else { 4.0 };
-    let bounds = Rectangle::new(
-        Point::new(bounds.x + left_pad, bounds.y + top_inset),
-        Size::new(
-            (bounds.width - left_pad - right_pad).max(0.0),
-            (bounds.height - top_inset - bottom_inset).max(0.0),
-        ),
+    f: &crate::widget::Frame,
+    text_ctx: &mut Option<(
+        &mut crate::render::font::WowFontSystem,
+        &mut crate::render::glyph::GlyphAtlas,
+    )>,
+    alpha: f32,
+) {
+    let Some(presentation) = f.editbox_presentation.as_deref() else {
+        return;
+    };
+    let Some(input) = presentation.input.as_ref() else {
+        return;
+    };
+    let (left, top, width, height) = input.settings.content_bounds();
+    let text_bounds = Rectangle::new(
+        Point::new(bounds.x + left, bounds.y + top),
+        Size::new(width, height),
     );
-
-    EditBoxTextMetrics {
-        bounds,
-        left_pad,
-        top_inset,
-        bottom_inset,
+    emit_editbox_text(batch, f, input, text_ctx, text_bounds, alpha);
+    if f.editbox_focused
+        && let Some(geometry) = presentation.cursor_geometry
+    {
+        emit_editbox_caret(
+            batch,
+            bounds,
+            text_bounds,
+            geometry,
+            input.settings.scale,
+            alpha,
+        );
     }
 }
 
 fn emit_editbox_caret(
     batch: &mut QuadBatch,
     bounds: Rectangle,
-    text_metrics: EditBoxTextMetrics,
-    text_width: f32,
+    text_bounds: Rectangle,
+    geometry: (f32, f32, f32, f32),
+    scale: f32,
     alpha: f32,
 ) {
-    let caret_x =
-        (bounds.x + text_metrics.left_pad + text_width).min(bounds.x + bounds.width - 1.0);
-    let caret_top = bounds.y + text_metrics.top_inset + 1.0;
-    let caret_height =
-        (bounds.height - text_metrics.top_inset - text_metrics.bottom_inset - 2.0).max(2.0);
-    batch.push_solid(
-        Rectangle::new(Point::new(caret_x, caret_top), Size::new(1.5, caret_height)),
-        [1.0, 0.95, 0.55, 0.95 * alpha],
+    let (x, y, width, height) = geometry;
+    let caret_bounds = Rectangle::new(
+        Point::new(bounds.x + x * scale, bounds.y - y * scale),
+        Size::new(width * scale, height * scale),
     );
-    batch.push_border(bounds, 1.0, [1.0, 0.85, 0.30, 0.85 * alpha]);
+    let vert_before = batch.vertices.len();
+    batch.push_solid(caret_bounds, [1.0, 0.95, 0.55, 0.95 * alpha]);
+    clip_recent_quads(batch, vert_before, text_bounds);
 }
 
 fn emit_editbox_text(
     batch: &mut QuadBatch,
     f: &crate::widget::Frame,
+    input: &crate::widget::editbox::EditBoxLayoutInput,
     text_ctx: &mut Option<(
         &mut crate::render::font::WowFontSystem,
         &mut crate::render::glyph::GlyphAtlas,
     )>,
     text_bounds: Rectangle,
     alpha: f32,
-) -> f32 {
+) {
     let Some((fs, ga)) = text_ctx else {
-        return 0.0;
+        return;
     };
-    let Some(txt) = f.text.as_ref() else {
-        return 0.0;
+    let Some(text) = input.text.as_deref() else {
+        return;
     };
-
-    let mut text_renderer = WidgetTextRenderer {
+    let settings = input.settings;
+    let color = color_with_alpha(&f.text_color, alpha);
+    let shadow = (f.shadow_color.a > 0.0).then(|| color_with_alpha(&f.shadow_color, alpha));
+    let vert_before = batch.vertices.len();
+    emit_text_quads(
         batch,
-        font_sys: fs,
-        glyph_atlas: ga,
-    };
-    emit_widget_text_quads(
-        &mut text_renderer,
-        f,
-        WidgetTextLayout {
-            text: txt,
-            bounds: text_bounds,
-            justify_h: TextJustify::Left,
-            justify_v: TextJustify::Center,
-            word_wrap: false,
-            max_lines: 0,
-            alpha,
-        },
+        fs,
+        ga,
+        text,
+        text_bounds,
+        input.font.as_deref(),
+        settings.font_size,
+        color,
+        settings.justify_h,
+        settings.justify_v,
+        GLYPH_ATLAS_TEX_INDEX,
+        shadow,
+        f.shadow_offset,
+        f.font_outline,
+        settings.word_wrap,
+        0,
+        settings.spacing,
+        settings.smooth_scaling,
+        Some(input.stripped_text.as_str()),
     );
-
-    if f.editbox_focused {
-        measure_editbox_text_before_cursor(f, fs, txt)
-    } else {
-        0.0
-    }
-}
-
-fn measure_editbox_text_before_cursor(
-    f: &crate::widget::Frame,
-    font_sys: &mut crate::render::font::WowFontSystem,
-    text: &str,
-) -> f32 {
-    let cursor_chars = f.editbox_cursor_pos.max(0) as usize;
-    let measured: String = text.chars().take(cursor_chars).collect();
-    let font_path = f.font.as_deref();
-    let font_size = if f.font_size > 0.0 { f.font_size } else { 12.0 };
-    font_sys.measure_text_width(&measured, font_path, font_size)
+    clip_recent_quads(batch, vert_before, text_bounds);
 }

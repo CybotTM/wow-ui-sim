@@ -11,7 +11,8 @@ fn editbox_set_text_clamps_internal_positions_before_callbacks_and_keyboard_edit
         eb:SetText("aé猫z")
         eb:SetCursorPosition(7)
         eb:HighlightText(3, 7)
-        local observations = {}
+        _G.set_text_observations = {}
+        local observations = _G.set_text_observations
         eb:SetScript("OnTextSet", function(self)
             observations[#observations + 1] = {"set", self:GetText(), self:GetCursorPosition(), self:GetUTF8CursorPosition()}
         end)
@@ -19,8 +20,14 @@ fn editbox_set_text_clamps_internal_positions_before_callbacks_and_keyboard_edit
             observations[#observations + 1] = {"changed", self:GetText(), self:GetCursorPosition(), self:GetUTF8CursorPosition(), userInput}
         end)
         eb:SetText("éX")
-        assert(#observations == 2)
+        assert(#observations == 1)
         assert(observations[1][1] == "set" and observations[1][2] == "éX" and observations[1][3] == 3 and observations[1][4] == 2)
+    "#).unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(r#"
+        local eb = SetTextBoundsEB
+        local observations = _G.set_text_observations
+        assert(#observations == 2)
         assert(observations[2][1] == "changed" and observations[2][2] == "éX" and observations[2][3] == 3 and observations[2][4] == 2 and observations[2][5] == false)
         eb:Insert("Y")
         assert(eb:GetText() == "éXY", "shortened selection must not delete new text")
@@ -58,9 +65,11 @@ fn editbox_set_text_preserves_in_bounds_caret_and_clips_selection() {
 
 #[test]
 fn editbox_set_formatted_text_dispatches_hooks_and_routes_errors_without_reentry_loop() {
-    env().exec(r#"
-        local eb = CreateFrame("EditBox", nil, UIParent)
-        local events, errors = {}, {}
+    let env = env();
+    env.exec(r#"
+        local eb = CreateFrame("EditBox", "FormattedCallbackEB", UIParent)
+        _G.formatted_events, _G.formatted_errors = {}, {}
+        local events, errors = _G.formatted_events, _G.formatted_errors
         seterrorhandler(function(message) errors[#errors + 1] = tostring(message) end)
         eb:SetScript("OnChar", function() error("unexpected char") end)
         eb:SetScript("OnTextSet", function(self)
@@ -74,13 +83,29 @@ fn editbox_set_formatted_text_dispatches_hooks_and_routes_errors_without_reentry
         eb:HookScript("OnTextChanged", function() events[#events + 1] = "changed hook" end)
         eb:SetFormattedText("%s%d", "é", 2)
         assert(eb:GetText() == "é2")
+        assert(table.concat(events, ",") == "set:é2,set hook:é2", table.concat(events, ","))
+    "#).unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(r#"
+        local eb = FormattedCallbackEB
+        local events, errors = _G.formatted_events, _G.formatted_errors
         assert(table.concat(events, ",") == "set:é2,set hook:é2,changed:é2:false,changed hook", table.concat(events, ","))
         eb:SetScript("OnTextSet", function() error("text set failure") end)
         eb:SetText("next")
         assert(eb:GetText() == "next")
-        assert(events[#events - 1] == "changed:next:false" and events[#events] == "changed hook")
+        assert(#events == 5 and events[5] == "set hook:next")
         assert(#errors == 1 and string.find(errors[1], "text set failure", 1, true))
     "#).unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        local events, errors = _G.formatted_events, _G.formatted_errors
+        assert(#events == 7)
+        assert(events[6] == "changed:next:false" and events[7] == "changed hook")
+        assert(#errors == 1 and string.find(errors[1], "text set failure", 1, true))
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]

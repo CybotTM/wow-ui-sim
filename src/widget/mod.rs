@@ -1,6 +1,7 @@
 //! Widget system implementing WoW's UI object hierarchy.
 
 mod anchor;
+pub(crate) mod editbox;
 mod frame;
 mod frame_enums;
 mod frame_size;

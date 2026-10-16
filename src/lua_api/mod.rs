@@ -10,6 +10,7 @@ mod cast_success;
 pub(crate) mod channeling;
 pub mod chat_init;
 mod diagnostics;
+mod editbox_update;
 mod env;
 mod env_convert;
 mod env_events;

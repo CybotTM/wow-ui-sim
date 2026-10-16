@@ -413,6 +413,8 @@ pub struct Frame {
     pub statusbar_orientation: String,
 
     // --- EditBox fields ---
+    /// Lazily retained presentation and pending text-notification bits.
+    pub(crate) editbox_presentation: Option<Box<super::editbox::EditBoxPresentation>>,
     /// Cursor position in editbox.
     pub editbox_cursor_pos: i32,
     /// Maximum letters allowed (0 = unlimited).

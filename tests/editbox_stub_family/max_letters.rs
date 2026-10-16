@@ -54,7 +54,8 @@ fn editbox_set_text_max_letters_clips_unicode_before_callbacks_and_render_cache(
         eb:SetText('abcdef')
         eb:SetCursorPosition(6)
         eb:SetMaxLetters(3)
-        local seen = {}
+        _G.clipped_seen = {}
+        local seen = _G.clipped_seen
         eb:SetScript('OnTextSet', function(self)
             seen[#seen + 1] = 'set:' .. self:GetText() .. ':' .. self:GetCursorPosition() .. ':' .. self:GetNumLetters()
         end)
@@ -62,8 +63,13 @@ fn editbox_set_text_max_letters_clips_unicode_before_callbacks_and_render_cache(
             seen[#seen + 1] = 'changed:' .. self:GetText() .. ':' .. self:GetCursorPosition() .. ':' .. tostring(userInput)
         end)
         eb:SetText('é猫ABC')
-        assert(table.concat(seen, ',') == 'set:é猫A:6:3,changed:é猫A:6:false', table.concat(seen, ','))
+        assert(table.concat(seen, ',') == 'set:é猫A:6:3', table.concat(seen, ','))
         assert(eb:GetUTF8CursorPosition() == 3)
+    "#).unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(r#"
+        local seen = _G.clipped_seen
+        assert(table.concat(seen, ',') == 'set:é猫A:6:3,changed:é猫A:6:false', table.concat(seen, ','))
     "#).unwrap();
     let state = env.state();
     let state = state.borrow();
@@ -77,12 +83,13 @@ fn editbox_set_text_max_letters_clips_unicode_before_callbacks_and_render_cache(
 
 #[test]
 fn editbox_set_text_max_letters_repeated_clipping_is_noop_including_formatted_text() {
-    env()
-        .exec(
-            r#"
+    let env = env();
+    env.exec(
+        r#"
         local eb = CreateFrame('EditBox', nil, UIParent)
         eb:SetMaxLetters(5)
-        local seen = {}
+        _G.repeated_clip_seen = {}
+        local seen = _G.repeated_clip_seen
         eb:SetScript('OnTextSet', function(self) seen[#seen + 1] = 'set:' .. self:GetText() end)
         eb:SetScript('OnTextChanged', function(self, userInput)
             seen[#seen + 1] = 'changed:' .. self:GetText() .. ':' .. tostring(userInput)
@@ -91,10 +98,20 @@ fn editbox_set_text_max_letters_repeated_clipping_is_noop_including_formatted_te
         eb:SetText('hello again')
         eb:SetFormattedText('%s %s', 'hello', 'friend')
         assert(eb:GetText() == 'hello')
+        assert(table.concat(seen, ',') == 'set:hello', table.concat(seen, ','))
+    "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        local seen = _G.repeated_clip_seen
         assert(table.concat(seen, ',') == 'set:hello,changed:hello:false', table.concat(seen, ','))
     "#,
-        )
-        .unwrap();
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    assert_eq!(env.eval::<i64>("return #_G.repeated_clip_seen").unwrap(), 2);
 }
 
 #[test]

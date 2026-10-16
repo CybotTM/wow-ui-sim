@@ -2,6 +2,8 @@
 //!
 //! Provides both canvas-based (CPU) and shader-based (GPU) rendering.
 
+pub(crate) mod editbox_layout;
+
 pub mod font {
     pub use crate::font::*;
 }

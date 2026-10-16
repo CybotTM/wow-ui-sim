@@ -22,6 +22,10 @@ impl Frame {
             + vec_bytes(&self.mask_textures)
             + model_state_bytes(&self.model_state)
             + vec_string_bytes(&self.editbox_history)
+            + self
+                .editbox_presentation
+                .as_deref()
+                .map_or(0, |presentation| presentation.storage_estimate_bytes())
     }
 
     fn dynamic_string_bytes(&self) -> usize {

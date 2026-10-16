@@ -97,6 +97,11 @@ impl WowLuaEnv {
             .app_data_mut::<WowLuaAppData>()
             .expect("WowLuaEnv rilua app_data should always exist");
         app_data.font_system = Some(font_system);
+        drop(rilua);
+        self.state()
+            .borrow_mut()
+            .widgets
+            .invalidate_editbox_presentations();
     }
 
     pub(crate) fn install_initial_screen_size_globals(&self) {

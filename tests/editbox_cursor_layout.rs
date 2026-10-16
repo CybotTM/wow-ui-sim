@@ -33,6 +33,8 @@ const CREATE_FIXTURE: &str = r#"
     CursorBox:SetSize(400, 120)
     CursorBox:SetPoint('TOPLEFT', UIParent, 'TOPLEFT', 113, -79)
     assert(CursorBox:SetFont('Fonts\\FRIZQT__.TTF', 20))
+    CursorBox:SetJustifyH('LEFT')
+    CursorBox:SetJustifyV('TOP')
     CursorBox:SetTextInsets(5, 7, 3, 4)
     CursorBox:SetText('é\n猫z')
     CursorBox:SetCursorPosition(0)
@@ -600,4 +602,135 @@ fn dirty_flush_settext_inside_keydown_then_keyboard_insert_sets_user_origin() {
     );
     tick_dirty_flush(&env);
     assert_dirty_flush_stable(&env, "key:X:é\\n猫z|set:ab|char:x:abx|changed:true:abx");
+}
+
+#[cfg(feature = "gui")]
+mod visible_text_publication {
+    use super::*;
+    use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};
+    use wow_ui_sim::render::glyph::GlyphAtlas;
+
+    fn render_glyph_positions(
+        env: &WowLuaEnv,
+        fonts: &Rc<RefCell<WowFontSystem>>,
+        atlas: &mut GlyphAtlas,
+        root: &str,
+    ) -> Vec<[f32; 2]> {
+        let buckets = {
+            let mut state = env.state().borrow_mut();
+            state.ensure_layout_rects();
+            let _ = state.get_strata_buckets();
+            state.strata_buckets.as_ref().unwrap().clone()
+        };
+        let state = env.state().borrow();
+        let mut fonts = fonts.borrow_mut();
+        let batch = build_quad_batch_for_registry(
+            RegistryQuadBatchParams::new(&state.widgets, (1024.0, 768.0), &buckets)
+                .root_name(Some(root))
+                .text_ctx(Some((&mut fonts, atlas))),
+        );
+        batch
+            .vertices
+            .iter()
+            .filter(|vertex| vertex.tex_index == wow_ui_sim::render::shader::GLYPH_ATLAS_TEX_INDEX)
+            .map(|vertex| vertex.position)
+            .collect()
+    }
+
+    fn normalize_glyph_positions(positions: &[[f32; 2]]) -> Vec<[f32; 2]> {
+        assert!(
+            !positions.is_empty(),
+            "expected actual emitted glyph vertices"
+        );
+        assert!(
+            positions
+                .iter()
+                .flatten()
+                .all(|coordinate| coordinate.is_finite())
+        );
+        let min_x = positions.iter().map(|p| p[0]).fold(f32::INFINITY, f32::min);
+        let min_y = positions.iter().map(|p| p[1]).fold(f32::INFINITY, f32::min);
+        positions
+            .iter()
+            .map(|p| [p[0] - min_x, p[1] - min_y])
+            .collect()
+    }
+
+    #[test]
+    fn changed_settext_keeps_emitted_glyphs_until_tick_then_matches_fontstring() {
+        let env = create_env_with_installed_fonts();
+        // Replace the fixture's font handle before any tick or batch; retain and
+        // use this exact shared system for both environment layout and rendering.
+        let fonts = Rc::new(RefCell::new(WowFontSystem::new_without_casc()));
+        assert!(fonts.borrow().font_system.db().faces().next().is_some());
+        assert!(fonts.borrow().family_name(Some(DEFAULT_WOW_FONT)).is_some());
+        env.set_font_system(Rc::clone(&fonts));
+        env.set_screen_size(1024.0, 768.0);
+        env.exec(
+            r#"
+            CursorGlyphReferenceParent = CreateFrame('Frame', 'C2GlyphReference', UIParent)
+            CursorGlyphReferenceParent:SetSize(400, 120)
+            CursorGlyphReferenceParent:SetPoint('TOPLEFT', UIParent, 'TOPLEFT', 113, -79)
+            CursorGlyphReferenceParent:Show()
+            local reference = CursorGlyphReferenceParent:CreateFontString(nil, 'ARTWORK')
+            reference:SetPoint('TOPLEFT', CursorGlyphReferenceParent, 'TOPLEFT', 5, -3)
+            reference:SetSize(388, 113)
+            assert(reference:SetFont('Fonts\\FRIZQT__.TTF', 20))
+            reference:SetJustifyH('LEFT')
+            reference:SetJustifyV('TOP')
+            reference:SetText('WWWWWW')
+            reference:Show()
+            assert(CursorBox:GetText() == 'é\n猫z')
+            "#,
+        )
+        .unwrap();
+        let mut atlas = GlyphAtlas::new();
+        env.fire_on_update(TICK_SECONDS).unwrap();
+        assert!(
+            env.state().borrow().lua_errors.is_empty(),
+            "setup tick Lua errors"
+        );
+        let before = render_glyph_positions(&env, &fonts, &mut atlas, "C2CursorLayoutBox");
+        let expected = render_glyph_positions(&env, &fonts, &mut atlas, "C2GlyphReference");
+        let expected_normalized = normalize_glyph_positions(&expected);
+        assert_ne!(
+            normalize_glyph_positions(&before),
+            expected_normalized,
+            "initial multiline Unicode glyphs must distinguish the replacement"
+        );
+
+        env.exec("CursorBox:SetText('WWWWWW'); assert(CursorBox:GetText() == 'WWWWWW')")
+            .unwrap();
+        // Building a real batch must not publish the newly committed logical text.
+        let pending = render_glyph_positions(&env, &fonts, &mut atlas, "C2CursorLayoutBox");
+        assert_eq!(
+            pending, before,
+            "pre-tick emitted glyph positions must remain old"
+        );
+
+        env.fire_on_update(TICK_SECONDS).unwrap();
+        assert!(
+            env.state().borrow().lua_errors.is_empty(),
+            "flush tick Lua errors"
+        );
+        let flushed = render_glyph_positions(&env, &fonts, &mut atlas, "C2CursorLayoutBox");
+        assert_ne!(
+            flushed, before,
+            "actual tick must publish changed visible glyphs"
+        );
+        let flushed_normalized = normalize_glyph_positions(&flushed);
+        assert_eq!(
+            flushed_normalized.len(),
+            expected_normalized.len(),
+            "flushed glyph vertex count must match ordinary FontString output"
+        );
+        for (actual, expected) in flushed_normalized.iter().zip(&expected_normalized) {
+            for axis in 0..2 {
+                assert!(
+                    (actual[axis] - expected[axis]).abs() < 0.001,
+                    "flushed glyph position {actual:?} != FontString {expected:?}"
+                );
+            }
+        }
+    }
 }

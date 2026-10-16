@@ -151,6 +151,7 @@ impl WowLuaEnv {
 
     /// Dispatch a physical key-down while retaining its held state until key-up.
     pub fn send_key_down(&self, key: &str, text: Option<&str>) -> Result<()> {
+        super::editbox_update::flush(self)?;
         let normalized = normalized_key_name(key);
         let key = normalized.as_str();
         self.state
@@ -334,7 +335,7 @@ impl WowLuaEnv {
 
     // ── EditBox text editing ──────────────────────────────────────────────────
 
-    /// Insert `text` at the cursor position, fire OnChar and OnTextChanged.
+    /// Insert accepted text, fire OnChar, and defer the changed notification.
     fn editbox_insert_text(&self, fid: u64, text: &str) -> Result<()> {
         let numeric = self
             .state
@@ -353,7 +354,6 @@ impl WowLuaEnv {
             return Ok(());
         }
         self.fire_char_events(fid, text)?;
-        self.fire_script_handler(fid, "OnTextChanged", vec![Val::Bool(true)])?;
         Ok(())
     }
 
@@ -373,6 +373,7 @@ impl WowLuaEnv {
         };
         let _ = frame.take_editbox_selection();
         replace_editbox_byte_range(frame, range, text);
+        frame.mark_editbox_text_changed(Some(true));
         true
     }
 
@@ -401,8 +402,8 @@ impl WowLuaEnv {
             };
             let range = editbox_byte_range(frame.text.as_deref().unwrap_or(""), range);
             replace_editbox_byte_range(frame, range, "");
+            frame.mark_editbox_text_changed(Some(true));
         }
-        self.fire_script_handler(fid, "OnTextChanged", vec![Val::Bool(true)])?;
         Ok(())
     }
 

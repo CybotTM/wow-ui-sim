@@ -336,10 +336,14 @@ fn editbox_on_text_changed_fires_on_input() {
     }
 
     env.send_key_press("x", Some("x")).unwrap();
+    assert_eq!(env.eval::<i64>("return _G.change_count").unwrap(), 0);
     env.send_key_press("y", Some("y")).unwrap();
+    assert_eq!(env.eval::<i64>("return _G.change_count").unwrap(), 1);
 
-    let count: i64 = env.eval("return _G.change_count").unwrap_or(0);
-    assert_eq!(count, 2, "OnTextChanged should fire once per character");
+    env.fire_on_update(0.016).unwrap();
+    assert_eq!(env.eval::<i64>("return _G.change_count").unwrap(), 2);
+    env.fire_on_update(0.016).unwrap();
+    assert_eq!(env.eval::<i64>("return _G.change_count").unwrap(), 2);
 }
 
 #[test]
@@ -461,6 +465,13 @@ fn selected_keyboard_edits_dispatch_callbacks_after_committing_text_and_caret() 
         r#"
         local eb = CreateFrame("EditBox", "SelectedCallbackEB", UIParent)
         eb:SetText("AB")
+        "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        local eb = SelectedCallbackEB
         eb:HighlightText(0, 1)
         eb:SetCursorPosition(1)
         _G.selected_edit_events = {}
@@ -476,9 +487,20 @@ fn selected_keyboard_edits_dispatch_callbacks_after_committing_text_and_caret() 
     .unwrap();
 
     env.send_key_press("X", Some("X")).unwrap();
+    assert_eq!(
+        env.eval::<String>("return table.concat(_G.selected_edit_events, ';')")
+            .unwrap(),
+        "char:X:XB:1:1"
+    );
     env.exec("SelectedCallbackEB:HighlightText(0, 1); SelectedCallbackEB:SetCursorPosition(1)")
         .unwrap();
     env.send_key_press("BACKSPACE", None).unwrap();
+    assert_eq!(
+        env.eval::<String>("return table.concat(_G.selected_edit_events, ';')")
+            .unwrap(),
+        "char:X:XB:1:1;changed:true:XB:1:1"
+    );
+    env.fire_on_update(0.016).unwrap();
     let events: String = env
         .eval("return table.concat(_G.selected_edit_events, ';')")
         .unwrap();
@@ -557,6 +579,13 @@ fn editbox_limit_rejection_preserves_selection_and_emits_no_edit_callbacks() {
         r#"
         local eb = CreateFrame("EditBox", "LimitedSelectionEB", UIParent)
         eb:SetText("abcde")
+        "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        local eb = LimitedSelectionEB
         eb:SetMaxLetters(4)
         eb:HighlightText(1, 4)
         eb:SetCursorPosition(4)
@@ -577,8 +606,16 @@ fn editbox_limit_rejection_preserves_selection_and_emits_no_edit_callbacks() {
         .eval("return LimitedSelectionEB:GetText(), LimitedSelectionEB:GetCursorPosition(), table.concat(_G.limit_events, ';')")
         .unwrap();
     assert_eq!(rejected, ("abcde".into(), 4, "".into()));
+    env.fire_on_update(0.016).unwrap();
+    assert_eq!(env.eval::<i64>("return #_G.limit_events").unwrap(), 0);
 
     env.send_key_press("B", Some("BC")).unwrap();
+    assert_eq!(
+        env.eval::<String>("return table.concat(_G.limit_events, ';')")
+            .unwrap(),
+        "char:B:aBCe;char:C:aBCe"
+    );
+    env.fire_on_update(0.016).unwrap();
     let accepted: (String, i64, i64, String) = env
         .eval("return LimitedSelectionEB:GetText(), LimitedSelectionEB:GetCursorPosition(), LimitedSelectionEB:GetUTF8CursorPosition(), table.concat(_G.limit_events, ';')")
         .unwrap();

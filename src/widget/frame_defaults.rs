@@ -214,6 +214,7 @@ macro_rules! frame_defaults {
             statusbar_orientation: "HORIZONTAL".to_string(),
 
             // EditBox
+            editbox_presentation: None,
             editbox_cursor_pos: 0,
             editbox_max_letters: 0,
             editbox_max_bytes: 0,

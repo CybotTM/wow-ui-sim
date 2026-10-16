@@ -36,7 +36,7 @@ Length overflow rejection is the user-selected simulator policy, not a native-cl
 
 The user's clarified lifecycle keeps logical edits, `OnTextSet`, and insertion `OnChar` synchronous as specified above, but defers `OnTextChanged` for all accepted text-edit paths until a dirty flush has refreshed actual presentation and cursor. `SetCursorPosition` commits its existing logical byte/scalar position and marks presentation dirty; it does not notify immediately. The genuine scrolling consumer requires cursor refresh/notification before its deferred text-change callback. The clarified flush, key-down ordering, and pending-origin rules supersede historical synchronous notification assumptions, not limits, clipping, no-op or error-handling requirements. These are user-supplied functional requirements, not completed implementation or modern-client parity proof; historical functional evidence remains bounded to the saved revisions and reached assertions below. Public Lua `Insert` limit enforcement is not expanded.
 
-Shared clean-room simulator geometry uses frame-local UI units: `x = left inset + shaped caret x`, `y = -(top inset + shaped line top)`, width1.5 and the configured shaped line height. This is an explicit simulator contract, not copied legacy/native coordinate evidence. At font20, existing shaping metrics use line height24; insets `(5,7,3,4)` yield second-line-start geometry `(5,-27,1.5,24)`.
+Shared clean-room simulator geometry uses frame-local UI units: `x = left inset + shaped caret x`, `y = -(top inset + shaped line top)`, width1.5 and the configured shaped line height. This is an explicit simulator contract, not copied legacy/native coordinate evidence. With explicit LEFT/TOP alignment, font20 uses existing shaped line height24; insets `(5,7,3,4)` yield second-line-start geometry `(5,-27,1.5,24)`. The fixture now declares that alignment rather than assuming a default; other configured alignment offsets come from actual layout.
 
 - [ ] Produce `OnCursorChanged(self,x,y,width,height)` through actual font/text layout at a normal update boundary before ordinary `OnUpdate`; cursor setters commit byte/scalar positions without inventing an immediate geometry callback.
 - [ ] Notify initial/changed geometry, suppress unchanged ticks, and expose committed text/cursor state before dispatch without retaining a simulator-state borrow across Lua callbacks.
@@ -56,13 +56,19 @@ The later programmatic lifecycle regression at saved Retail source `792d62003` e
 
 ## Implementation inventory
 
-- `src/lua_api/frame/methods/widgets/editbox.rs` — public cursor conversions and `Insert`.
+- `src/lua_api/editbox_update.rs` — early update/pre-key dirty flush, actual layout preparation, cursor notification followed by coalesced text notification; pending bits are consumed before callbacks so handler edits remain pending.
+- `src/widget/editbox.rs` — lazily retained presentation inputs, cursor geometry and pending-origin state; registry EditBox IDs avoid a full widget scan, and unchanged inputs avoid reshaping. Font-system replacement invalidates presentation inputs.
+- `src/render/editbox_layout.rs` — full-content configured-font shaping, line-local UTF-8 cursor mapping and library caret coordinates/run height. Unavailable font/layout yields no invented geometry.
+- `src/iced_app/quad_builders_button.rs` — EditBox glyphs/caret consume flushed presentation, not newly assigned logical text; configured alignment and wrapping feed both shaping and rendering.
+- `src/lua_api/frame/methods/widgets/editbox.rs` — public cursor conversions, synchronous insertion `OnChar`, and deferred `Insert` notification.
 - `src/lua_api/frame/methods/text_attribute_event/text.rs` — shared text mutation and changed EditBox callback lifecycle.
 - `src/lua_api/frame/methods/widgets/editbox/selection.rs` — highlighted byte endpoints and character-range storage.
 - `src/lua_api/key_dispatch.rs` — selected-range keyboard replacement/deletion, pre-mutation length validation, and input callbacks.
 - `src/widget/frame.rs` — selection consumption shared by public `Insert` and keyboard edits.
 - `src/xml/types.rs` — optional EditBox `letters` and `bytes` declarations.
 - `src/lua_api/globals/template/direct.rs` — shared independent `bytes`/`letters` resolution, invoked from ordinary XML setup and runtime-template property application before `OnLoad`.
+
+Producer work for the clarified dirty-flush boundary is authored but uncompiled/unexecuted; no requirement above is newly checked complete. `tests/editbox_cursor_layout.rs` additionally covers nine independent origin/coalescing/key-boundary cases and one GUI-gated glyph-presentation regression. The latter observes unchanged emitted glyph positions before a flush and compares post-flush output with an ordinary configured FontString; it is not GPU or native proof. Existing limits/selection/error tests were reconciled only where callback timing was superseded.
 
 ## Tests asserting this spec
 

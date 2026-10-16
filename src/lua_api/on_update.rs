@@ -48,6 +48,7 @@ pub(crate) fn fire(
     #[cfg(feature = "retail-12-1-0")]
     crate::c_api::c_encounter_timeline::begin_tick(env.rilua_mut().state_mut(), elapsed)?;
 
+    super::editbox_update::flush(env)?;
     reconcile_runtime_cache(env);
     let frame_ids = on_update_frame_ids(env);
 

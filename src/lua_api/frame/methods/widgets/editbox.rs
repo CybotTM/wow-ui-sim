@@ -777,22 +777,44 @@ pub(super) fn get_display_text(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn insert(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let text = opt_string(state, 2).unwrap_or_default();
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(f) = sim.widgets.get_mut_visual(id) {
-        let range = f.take_editbox_selection().unwrap_or_else(|| {
-            let pos = f.editbox_cursor_pos.max(0) as usize;
-            pos..pos
-        });
-        let current = f.text.get_or_insert_with(String::new);
-        let start = byte_offset(current, range.start);
-        let end = byte_offset(current, range.end);
-        let cursor = current[..start].chars().count() + text.chars().count();
-        current.replace_range(start..end, &text);
-        f.text_stripped = Some(crate::render::strip_wow_markup(current));
-        f.text_segments.clear();
-        f.editbox_cursor_pos = cursor as i32;
+    let inserted = {
+        let mut sim = borrow_state_mut(state)?;
+        sim.widgets
+            .get_mut_visual(id)
+            .is_some_and(|frame| insert_editbox_text(frame, &text))
+    };
+    if inserted {
+        for character in text.chars() {
+            let value = create_string(state, &character.to_string());
+            super::super::text_attribute_event::fire_editbox_text_script(
+                state,
+                id,
+                "OnChar",
+                &[value],
+            )?;
+        }
     }
     Ok(0)
+}
+
+fn insert_editbox_text(frame: &mut crate::widget::Frame, text: &str) -> bool {
+    let range = frame.take_editbox_selection().unwrap_or_else(|| {
+        let pos = frame.editbox_cursor_pos.max(0) as usize;
+        pos..pos
+    });
+    let current = frame.text.get_or_insert_with(String::new);
+    let start = byte_offset(current, range.start);
+    let end = byte_offset(current, range.end);
+    let cursor = current[..start].chars().count() + text.chars().count();
+    current.replace_range(start..end, text);
+    frame.text_stripped = Some(crate::render::strip_wow_markup(current));
+    frame.text_segments.clear();
+    frame.editbox_cursor_pos = cursor as i32;
+    let inserted = !text.is_empty();
+    if inserted || start != end {
+        frame.mark_editbox_text_changed(inserted.then_some(true));
+    }
+    inserted
 }
 
 pub(super) fn set_blink_speed(state: &mut LuaState) -> LuaResult<u32> {

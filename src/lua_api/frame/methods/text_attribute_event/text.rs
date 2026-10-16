@@ -92,7 +92,6 @@ pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
     }
     if editbox_text_changed {
         fire_editbox_text_script(state, id, "OnTextSet", &[])?;
-        fire_editbox_text_script(state, id, "OnTextChanged", &[Val::Bool(false)])?;
     }
     Ok(0)
 }
@@ -118,7 +117,7 @@ fn truncate_editbox_text(
     Ok(Some(text))
 }
 
-fn fire_editbox_text_script(
+pub(crate) fn fire_editbox_text_script(
     state: &mut LuaState,
     id: u64,
     handler_name: &str,
@@ -254,6 +253,7 @@ fn update_text_frame(
         frame.text_stripped = stripped_text.clone();
         frame.text_segments.clear();
         if editbox_text_changed {
+            frame.mark_editbox_text_changed(Some(false));
             let len = text.as_deref().unwrap_or("").chars().count() as i32;
             frame.editbox_cursor_pos = frame.editbox_cursor_pos.clamp(0, len);
             if let Some((start, end)) = &mut frame.editbox_highlight_range {

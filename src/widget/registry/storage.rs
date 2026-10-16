@@ -15,6 +15,7 @@ pub(super) fn registry_storage_estimate_bytes(registry: &WidgetRegistry) -> usiz
         + hash_set_u64_bytes(&registry.rect_dirty_ids)
         + hash_set_u64_bytes(&registry.hit_grid_dirty_ids)
         + hash_set_u64_bytes(&registry.pending_layout_ids)
+        + hash_set_u64_bytes(&registry.editbox_ids)
 }
 
 fn widgets_bytes(registry: &WidgetRegistry) -> usize {
