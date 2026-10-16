@@ -3,7 +3,7 @@
 use crate::lua_api::globals::strings::string_data::game_enums::ITEM_QUALITY_COLORS_DATA;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
-use rilua::{LuaResult, Val};
+use rilua::{LuaApiMut, LuaResult, Val};
 
 pub(crate) fn register(lua: &mut rilua::Lua) -> crate::Result<()> {
     // ItemQualitiesDocumentation.lua:6-21 (0..8, nine values);
