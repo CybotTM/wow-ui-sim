@@ -109,7 +109,7 @@ fn install_original_mip_getter(env: &WowLuaEnv) {
     let tail = &xml[start..];
     let getter = tail.find("self.GetCurrentValue = function (self)").unwrap();
     let body_start = getter + "self.GetCurrentValue = function (self)".len();
-    let body_end = tail[body_start..].find("end;").unwrap() + body_start;
+    let body_end = tail[body_start..].find("end\n").unwrap() + body_start;
     run(
         env,
         "ResidualMip = CreateFrame('Slider'); ResidualMip.cvar = 'BaseMip'; ResidualMip:SetMinMaxValues(0, 1)",
