@@ -25,11 +25,18 @@ Retail-family 12.1+ and Forever script objects store conditional access-restrict
 
 ## Tests asserting this spec
 
-- `tests/forbidden_frames.rs` — shared-capability mask accumulation/filtering, object isolation, combination with forbidden state, and actual native AuraContainer pre-login/world-entry/post-login application.
+- `tests/forbidden_frames.rs` — shared-capability mask accumulation/filtering, object isolation, combination with forbidden state, and actual cached Blizzard AuraContainer pre-login/world-entry/post-login application.
+- `tests/patch_12_1_0_aura_access_restrictions.rs` — Retail aura-secret method access, initialization before restriction, and pre-login accessibility through `PLAYER_LOGIN`.
+
+### Bounded Retail execution — 2026-10-16
+
+Six distinct existing cases PASS: mask/cached-application 3/3 and live aura-secret consumer 3/3, each exit0. Test checkout `4b0ebcde3` links separately sealed normal Retail library `a2d2d2792`; component compilation exits0 with 29 inherited common-fixture warnings. Receipt: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/access-restrictions-retail-existing-20261016T122607582483Z`; independent full-stream/source/library/seal acceptance: `/home/osso/.local/state/wow-ui-sim/verification/access-restrictions-next/retail-report.md`.
+
+This executes cached Blizzard Lua in the simulator, not native-client conformance. It is bounded Retail proof, not whole-integration, Forever or universal shared-profile acceptance. Requirements above remain unchecked pending remaining profile proof.
 
 ## Known gaps (current cycle)
 
-- [ ] Shared-capability tests await parent compilation/GREEN. Existing Forever GUI RED: `/tmp/ellesmere-forever/secure-chain-gui.stderr`, native `Blizzard_AuraContainerUtil.lua:421` reports missing `AddAccessRestrictions` after login. No new enforcement or mask semantics are introduced.
+- [ ] Forever and remaining shared-profile behavior proof remain open; bounded Retail execution does not close them. Historical Forever GUI RED: `/tmp/ellesmere-forever/secure-chain-gui.stderr`, cached `Blizzard_AuraContainerUtil.lua:421` reports missing `AddAccessRestrictions` after login. Retail cases do not establish resolution of that Forever GUI failure. No new enforcement or mask semantics are introduced.
 - The separate [Forever context-access query](script-object-context-access.md) uses an explicit per-environment aura-secret scenario to evaluate this mask on that query only. It does not derive live aura secrecy or enforce restrictions on other frame methods. No claim of complete security enforcement is made.
 
 ## Out of scope

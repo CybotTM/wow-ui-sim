@@ -1,3 +1,7 @@
+## [2026-10-16] evidence | Path Hide and Retail access restrictions
+
+[Path owner](../specs/path-control-point.md#known-gaps-current-cycle) records independent hidden-subtree restoration proof; [access owner](../specs/script-object-access-restrictions.md#bounded-retail-execution--2026-10-16) records existing Retail mask and cached-consumer execution. Forever, startup and broader profile acceptance remain separate.
+
 ## [2026-10-16] source | IconTextAndCurrencies passive checkpoint
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#icontextandcurrencies-passive-source-and-selector-red--2026-10-16) links passive `7e3586e97`, source/readability acceptance and separate source825 selector RED. Nine populated fixtures now authored, uncompiled/unexecuted; no getter/projection or accepted passive build/runtime. Background proof unchanged; broader parent OPEN, no native/assets/effect-activation claim.
