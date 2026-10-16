@@ -133,6 +133,123 @@ fn programmatic_cursor_layout_delivers_before_onupdate_and_suppresses_unchanged_
 }
 
 #[test]
+fn programmatic_text_lifecycle_defers_changed_until_cursor_layout_before_onupdate() {
+    for assignment in [
+        "CursorBox:SetText('x\\né猫')",
+        "CursorBox:SetFormattedText('%s\\n%s', 'x', 'é猫')",
+    ] {
+        let env = create_env_with_installed_fonts();
+        env.exec("CursorBox:SetCursorPosition(3)").unwrap();
+        env.fire_on_update(TICK_SECONDS).unwrap();
+        assert!(
+            env.state().borrow().lua_errors.is_empty(),
+            "setup tick recorded Lua errors: {:?}",
+            env.state().borrow().lua_errors
+        );
+        env.exec(
+            r#"
+            CursorRecords, CursorUpdateObservations, LifecycleTrace = {}, {}, {}
+            LifecycleErrors = {}
+            seterrorhandler(function(message)
+                LifecycleErrors[#LifecycleErrors + 1] = tostring(message)
+            end)
+
+            local function assert_current_cursor(self)
+                assert(self:GetText() == 'x\né猫', 'callback sees current text')
+                assert(self:GetCursorPosition() == 2, 'callback sees byte cursor')
+                assert(self:GetUTF8CursorPosition() == 2, 'callback sees scalar cursor')
+                assert(#CursorRecords == 1, 'one actual cursor delivery')
+                local record = CursorRecords[1]
+                assert(record.arity == 4, 'four geometry arguments')
+                assert(record.text == self:GetText())
+                assert(record.byte == 2 and record.scalar == 2)
+                local function near(actual, expected)
+                    assert(type(actual) == 'number', 'numeric geometry required')
+                    assert(math.abs(actual - expected) < 0.001,
+                        tostring(actual) .. ' != ' .. tostring(expected))
+                end
+                near(record.x, 5)
+                near(record.y, -27)
+                near(record.width, 1.5)
+                near(record.height, 24)
+            end
+
+            CursorBox:SetScript('OnTextSet', function(self)
+                LifecycleTrace[#LifecycleTrace + 1] = 'set'
+                assert(self:GetText() == 'x\né猫', 'OnTextSet sees committed text')
+                assert(#LifecycleTrace == 1, 'OnTextSet is synchronous and nonreentrant')
+                assert(#CursorRecords == 0, 'OnTextSet does not force layout')
+            end)
+            CursorBox:HookScript('OnCursorChanged', function(self)
+                LifecycleTrace[#LifecycleTrace + 1] = 'cursor'
+                assert_current_cursor(self)
+                assert(table.concat(LifecycleTrace, ',') == 'set,returned,cursor')
+            end)
+            -- Public lifecycle observer, NOT a genuine cached ScrollingEdit consumer.
+            CursorBox:SetScript('OnTextChanged', function(self, userInput)
+                LifecycleTrace[#LifecycleTrace + 1] = 'changed'
+                assert_current_cursor(self)
+                assert(userInput == false, 'programmatic assignment is not user input')
+                assert(table.concat(LifecycleTrace, ',') == 'set,returned,cursor,changed')
+            end)
+            CursorBox:HookScript('OnUpdate', function(self)
+                LifecycleTrace[#LifecycleTrace + 1] = 'update'
+                assert_current_cursor(self)
+                assert(table.concat(LifecycleTrace, ',') == 'set,returned,cursor,changed,update')
+                assert(#CursorUpdateObservations == 1, 'existing OnUpdate observer preserved')
+                local observation = CursorUpdateObservations[1]
+                assert(observation.record == CursorRecords[1] and observation.count == 1)
+                assert(observation.text == self:GetText())
+                assert(observation.byte == 2 and observation.scalar == 2)
+            end)
+            "#,
+        )
+        .unwrap();
+        let assignment_result = env.exec(&format!(
+            r#"
+            {assignment}
+            assert(CursorBox:GetText() == 'x\né猫', 'text commits before method returns')
+            assert(table.concat(LifecycleTrace, ',') == 'set', 'only OnTextSet before return')
+            LifecycleTrace[#LifecycleTrace + 1] = 'returned'
+            assert(CursorBox:GetCursorPosition() == 2, 'logical byte cursor commits immediately')
+            assert(CursorBox:GetUTF8CursorPosition() == 2, 'logical scalar cursor commits immediately')
+            assert(#CursorRecords == 0, 'text assignment must not force cursor delivery')
+            assert(#CursorUpdateObservations == 0, 'no update before actual tick')
+            assert(table.concat(LifecycleTrace, ',') == 'set,returned', 'no immediate notification')
+            "#
+        ));
+        env.exec("assert(#LifecycleErrors == 0, table.concat(LifecycleErrors, '\\n'))")
+            .unwrap();
+        assert!(
+            env.state().borrow().lua_errors.is_empty(),
+            "{assignment}: assignment recorded Lua errors: {:?}",
+            env.state().borrow().lua_errors
+        );
+        assignment_result.unwrap();
+
+        let tick_result = env.fire_on_update(TICK_SECONDS);
+        env.exec("assert(#LifecycleErrors == 0, table.concat(LifecycleErrors, '\\n'))")
+            .unwrap();
+        assert!(
+            env.state().borrow().lua_errors.is_empty(),
+            "{assignment}: lifecycle tick recorded Lua errors: {:?}",
+            env.state().borrow().lua_errors
+        );
+        tick_result.unwrap();
+        env.exec(
+            r#"
+            assert(table.concat(LifecycleTrace, ',') == 'set,returned,cursor,changed,update',
+                table.concat(LifecycleTrace, ','))
+            assert(#CursorRecords == 1 and #CursorUpdateObservations == 1)
+            assert(CursorBox:GetText() == 'x\né猫')
+            assert(CursorBox:GetCursorPosition() == 2 and CursorBox:GetUTF8CursorPosition() == 2)
+            "#,
+        )
+        .unwrap();
+    }
+}
+
+#[test]
 fn keyboard_cursor_layout_crosses_multibyte_and_newline_boundaries_on_real_ticks() {
     let env = create_env_with_installed_fonts();
     env.exec("CursorBox:SetFocus(); AssertCursorPending(0, 0, 0)")
