@@ -209,3 +209,7 @@ No native/font-identity, cached Blizzard startup/consumer, cache publication, GU
 - `mists-release-proof.md` records the full local release proof command.
 - `classic-addon-test-targets.md` lists the installed Mists addon matrix.
 - `mists-lod-audit.md` records LoD addon coverage.
+
+## Forever player-storage root: staged, not executed — 2026-10-16
+
+[Player-storage contract and tests](../specs/forever-gamepad-player-storage.md) target the missing non-nil base consumed before PageUnit override-map initialization. Existing10 records/14 occurrences comprise4 direct arithmetic occurrences,2 parent page-lookup occurrences and8 stance-anchor occurrences. The latter two groups are predicted fallout, not separate map/anchor fixes. No baseline JSON entries are removed: RED, producer allocation policy, coherent action reads/writes and startup re-capture remain pending. Patch application alone is not runtime proof or a resolved-error count.
