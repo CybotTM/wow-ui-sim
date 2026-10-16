@@ -29,6 +29,8 @@ Wrath retains the historical Gethe 3.3.5 source pin in `data/blizzard-ui-builds/
 
 Pinned archive acquisition and all 382 copied source files have independent byte-level verification. This is source-only evidence, not runtime-cache population, automated acquisition, genuine consumer execution or native-client parity. Generator regression baseline reaches two valid-snapshot CLI rejection assertions because Wrath was unsupported; three negative controls pass. Current generator changes await execution. Runtime synchronization, manifest regeneration/baseline pairing and genuine Wrath scrolling-consumer proof remain open; the workaround stays.
 
+`src/blizzard_ui_sync/wrath_snapshot.rs` implements fresh-destination extraction of the two pinned roots, archive-path/link validation, required FrameXML TOC and provenance publication last. Its current registration is unit-test-only, not a wired runtime downloader. A standalone helper baseline reached one Unsupported rejection with three negative controls; the real extractor awaits execution. This component proof does not replace profile synchronization or genuine consumer coverage.
+
 ## How it works
 
 - [Observed TOC game-type tokens](../wiki/reference/toc-game-type-tokens.md) — bounded source inventory, not a native acceptance contract; filename suffixes and filter strings remain separate.
