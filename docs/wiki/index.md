@@ -1,6 +1,6 @@
-## Source | Fullsuite39 bounded follow-ups — runtime pending
+## Evidence | Fullsuite39 bounded follow-ups
 
-[ScrollFrame fixture](../specs/scrollframe-script-bindings.md#library-fixture-reconciliation--pending-runtime), [9.1.0 exact-gap reconciliation](../specs/patch-9-1-0-publication-sweep.md#current-widget-query-reconciliation--2026-10-15) and [tests-only phase diagnostics](investigations/test-suite-performance.md#per-addon-budget-diagnostics) cover `f00f230fe`, `593e543f5` and `655f0698b`. Targeted runtime pending; fullsuite39 remains FAIL. No budget or runtime implementation change.
+[ScrollFrame fixture](../specs/scrollframe-script-bindings.md#library-fixture-reconciliation), [9.1.0 reconciliation](../specs/patch-9-1-0-publication-sweep.md#current-widget-query-reconciliation--2026-10-15) and [shared receipt](investigations/test-suite-performance.md#saved-fullsuite39-bounded-runtime) record independently accepted saved source `655f0698b`: three unique logical cases PASS/exit0; seven scroll assertions and exact remaining 48-gap equality reached; unchanged-budget phase diagnostic counts once despite parent/child duplicate prints. Saved Retail build 18m54s, zero compiler-message records, five seals. Fullsuite39 remains historical FAIL; no original-cause/fix/improvement, matched-conditions, all-profile/native/current-HEAD proof.
 
 ## [2026-10-15] evidence | DoubleIconAndText bounded Retail producer PASS
 

@@ -16,7 +16,7 @@ The saved `983f02fbf` default prefork sweep failed only on resolved/stale entrie
 
 ## Current widget-query reconciliation — 2026-10-15
 
-Saved `39d38` prefork execution reports no new gap and only two resolved/stale expectations: `C_UIWidgetManager.GetSpacerVisualizationInfo` and `GetTextColumnRowVisualizationInfo`. `593e543f5` removes only those two missing-endpoint IDs (50 → 48), matching the implemented [Spacer](ui-widget-spacer.md) and [text-column row](ui-widget-text-column-row.md) queries. Preserve exact remaining set equality and historical captures. This is publication reconciliation, not new payload/native proof; targeted runtime of the corrected sweep is pending and fullsuite39 remains FAIL.
+Saved `39d38` prefork execution reports no new gap and only two resolved/stale expectations: `C_UIWidgetManager.GetSpacerVisualizationInfo` and `GetTextColumnRowVisualizationInfo`. `593e543f5` removes only those two missing-endpoint IDs (50 → 48), matching the implemented [Spacer](ui-widget-spacer.md) and [text-column row](ui-widget-text-column-row.md) queries. Preserve exact remaining set equality and historical captures. Independently accepted saved source `655f0698b` corrected prefork execution passes one case, exit0, reaching unchanged exact remaining 48-gap equality. Raw custom-harness output proves one pass despite empty parsed summaries; three empty harness groups add no cases. Two non-fatal CVar default mismatches remain: graphicsComputeEffects 4 versus 1 and RAIDVolumeFog 1 versus 0. This does not resolve the 48 gaps or prove payload/native behavior. See [saved bounded receipt](../wiki/investigations/test-suite-performance.md#saved-fullsuite39-bounded-runtime). Fullsuite39 remains historical FAIL.
 
 ## Proof boundary
 

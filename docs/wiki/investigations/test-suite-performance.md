@@ -4,7 +4,15 @@ Measured default-retail test cost on 2026-10-07, then reuse the identical full-g
 
 ## Per-addon budget diagnostics
 
-`heaviest_blizzard_addons_stay_within_per_addon_load_budgets` reports the existing top-eight selection's loader phase durations and cache counters before checking its unchanged budgets. Durations are elapsed nanoseconds, not exclusive CPU time; Lua compilation includes cache lookup/replay, and nested components must not be added to the total. `loaded_addon_count` is the harness's discovered addon count, not a transitive registry count. Tests-only `655f0698b` adds this reporting without changing selection or budgets. Targeted runtime is pending; this instrumentation does not establish a cause or improvement for the full-suite `39d38` ProjectConstants budget failure. Fullsuite39 remains FAIL.
+`heaviest_blizzard_addons_stay_within_per_addon_load_budgets` reports the existing top-eight selection's loader phase durations and cache counters before checking its unchanged budgets. Durations are elapsed nanoseconds, not exclusive CPU time; Lua compilation includes cache lookup/replay, and nested components must not be added to the total. `loaded_addon_count` is the harness's discovered addon count, not a transitive registry count. Tests-only `655f0698b` adds this reporting without changing selection or budgets. Independently accepted saved source `655f0698b` execution passes one logical case, exit0; duplicate parent/timeout-child printouts are not independent cases or measurements. It reports 220 loaded addons: ProjectConstants total 515.210301ms, compile/cache lookup-replay 514.930960ms, Lua call 0.184681ms, one cache hit and zero misses. This is not uncached compilation or handler-body time. See [shared receipt](#saved-fullsuite39-bounded-runtime). Fullsuite39 remains historical FAIL.
+
+## Saved fullsuite39 bounded runtime
+
+Independent saved `runtime-report.md` and `build-seal-report.md` audits accept source `655f0698baad8183d68c88f4be9a2b26d32c2371` only: three unique logical cases PASS, each exit0 — [corrected library scroll fixture](../../specs/scrollframe-script-bindings.md#library-fixture-reconciliation), [corrected 9.1.0 prefork sweep](../../specs/patch-9-1-0-publication-sweep.md#current-widget-query-reconciliation--2026-10-15), and [unchanged-budget phase diagnostic](#per-addon-budget-diagnostics). Parent/child duplicate prints count once. Reports remain private.
+
+Saved no-run build finished in 18m54s, zero compiler-message records, five `client-retail` seals: library tests, integration, prefork_full_ui, wow-cli and wow-sim. Build success is separate from runtime success and does not imply warning-free runtime. Saved seal/stat consistency is not newly rehashed binaries or cryptographic source/external-cache provenance.
+
+Fullsuite39 remains historical FAIL. No original-cause, production-fix, improvement, matched original worker/cache/host conditions, all-profile, native or current-HEAD acceptance follows. Invocations set `WOW_SIM_CASC=0` and `WOW_SIM_NO_SOUND=1`; flags alone do not prove total asset non-use. External UI/cache and SavedVariables inputs are not cryptographically bound. Owning specs retain assertion and known-gap limits.
 
 ## Baseline
 

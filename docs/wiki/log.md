@@ -1,3 +1,7 @@
+## Evidence | Fullsuite39 bounded saved-runtime acceptance
+
+[ScrollFrame fixture](../specs/scrollframe-script-bindings.md#library-fixture-reconciliation), [9.1.0 reconciliation](../specs/patch-9-1-0-publication-sweep.md#current-widget-query-reconciliation--2026-10-15) and [shared receipt](investigations/test-suite-performance.md#saved-fullsuite39-bounded-runtime) record independently accepted saved source `655f0698b`: three unique logical cases PASS/exit0; seven scroll assertions and exact remaining 48-gap equality reached; unchanged-budget phase diagnostic counts once despite parent/child duplicate prints. Saved Retail build 18m54s, zero compiler-message records, five seals. Fullsuite39 remains historical FAIL; no original-cause/fix/improvement, matched-conditions, all-profile/native/current-HEAD proof. Earlier source-only log facts remain historical.
+
 ## [2026-10-15] docs | Inline cursor argument binding checkpoint
 
 Updated [XML binding inventory](../xml-template-system.md#scriptbodyxml-three-handler-forms), [widget presentation](../widget-system.md#editbox-logical-and-presented-state), existing widget matrix and index after `03769bb00`. Simulator helper binds local `x, y, w, h` while preserving varargs; no vendor patch. [EditBox owner](../specs/editbox-text-position-selection.md#saved-retail-execution--2026-10-15) retains exact cached observer/process evidence and prior bounded saved proof. Binding fix/regressions and `d374c9520` scroll-fixture repair remain UNCOMPILED/UNEXECUTED; clean-consumer acceptance open. Docs only; no code/tests/build/check/runtime/commit/delegation.
@@ -2187,7 +2191,7 @@ Updated [shared owner](../specs/editbox-text-position-selection.md#saved-xmlscro
 
 ## Source audit | Fullsuite39 bounded follow-ups
 
-Reconciled source-only attribution for `f00f230fe`, `593e543f5` and `655f0698b`: deferred ScrollFrame fixture observation, exactly two resolved 9.1.0 widget gap removals, and top-eight phase diagnostics with unchanged budgets. See [fixture owner](../specs/scrollframe-script-bindings.md#library-fixture-reconciliation--pending-runtime), [publication owner](../specs/patch-9-1-0-publication-sweep.md#current-widget-query-reconciliation--2026-10-15) and [diagnostics owner](investigations/test-suite-performance.md#per-addon-budget-diagnostics). Targeted runtime pending; fullsuite39 remains FAIL.
+Reconciled source-only attribution for `f00f230fe`, `593e543f5` and `655f0698b`: deferred ScrollFrame fixture observation, exactly two resolved 9.1.0 widget gap removals, and top-eight phase diagnostics with unchanged budgets. See [fixture owner](../specs/scrollframe-script-bindings.md#library-fixture-reconciliation), [publication owner](../specs/patch-9-1-0-publication-sweep.md#current-widget-query-reconciliation--2026-10-15) and [diagnostics owner](investigations/test-suite-performance.md#per-addon-budget-diagnostics). Targeted runtime pending; fullsuite39 remains FAIL.
 
 ## [2026-10-15] evidence | Bounded saved Wrath018 proof
 
