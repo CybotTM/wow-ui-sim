@@ -202,6 +202,22 @@ pub fn get_objective_text(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// Legacy API: unsupplied material is nil; the original QuestFrame chooses Parchment.
+pub fn get_quest_background_material(state: &mut LuaState) -> LuaResult<u32> {
+    let material = {
+        let sim = borrow_state(state)?;
+        sim.selected_quest_log_id
+            .and_then(|id| i32::try_from(id).ok())
+            .and_then(|id| sim.quest_log_entries.background_materials.get(&id))
+            .cloned()
+    };
+    let value = material
+        .map(|material| create_string(state, &material))
+        .unwrap_or(Val::Nil);
+    state.push(value);
+    Ok(1)
+}
+
 pub fn get_reward_text(state: &mut LuaState) -> LuaResult<u32> {
     let reward_text = create_string_static(state, QUEST_REWARD_TEXT);
     state.push(reward_text);

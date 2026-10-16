@@ -2305,3 +2305,7 @@ Reconciled source-only attribution for `f00f230fe`, `593e543f5` and `655f0698b`:
 ## [2026-10-16] source | XML StatusBar/Slider values
 
 [Owning contract](../specs/xml-widget-values.md) records original tracker range RED and shared-parser/default initialization RED; generic application source committed before GREEN.
+
+## [2026-10-16] source | Supplied quest material
+
+[Owning contract](../specs/quest-background-material.md) records nilable signature, original Parchment consumer, passive ingress and two actual Retail REDs before the separately committed getter/cleanup.

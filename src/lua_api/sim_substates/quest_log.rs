@@ -95,6 +95,7 @@ impl QuestLogState {
         }
         self.entries.retain(|entry| entry.quest_id != quest_id);
         self.objective_progress.remove(&quest_id);
+        self.background_materials.remove(&quest_id);
         self.readiness.remove_quest(quest_id);
         self.completed_quest_ids.insert(quest_id);
         true

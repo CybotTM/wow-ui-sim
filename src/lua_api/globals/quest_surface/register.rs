@@ -91,7 +91,8 @@ pub const TASK_QUEST_METHODS: &[(&str, SurfaceFn)] = &[
     ("GetQuestTimeLeftSeconds", task_quest_time_left_seconds),
 ];
 
-const READINESS_GLOBALS: &[(&str, SurfaceFn)] = &[
+const LIVE_QUEST_GLOBALS: &[(&str, SurfaceFn)] = &[
+    ("GetQuestBackgroundMaterial", get_quest_background_material),
     ("IsQuestCompletable", is_quest_completable),
     ("CompleteQuest", complete_quest),
     ("AddAutoQuestPopUp", add_auto_quest_popup),
@@ -244,7 +245,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         LuaApiMut::register_function(lua, name, *func)?;
     }
     if crate::c_api::quest_objectives::ENABLED {
-        for (name, func) in READINESS_GLOBALS {
+        for (name, func) in LIVE_QUEST_GLOBALS {
             LuaApiMut::register_function(lua, name, *func)?;
         }
     }

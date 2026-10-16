@@ -45,6 +45,10 @@ Producer `ccd9e2d01` changes `pending_quest_offer` to own a full existing `Quest
 
 [QL-2 contract](../../specs/quest-readiness-dialog.md) owns separately supplied completion, final-objective readiness, live gossip and once-per-active-lifetime opt-in popup notification. `c_api::quest_readiness` records progress/rewards phase separately from selected quest ID; advancing an eligible progress interaction emits completion without granting or turning in. Its source publication/live behavior is Retail/Forever-only, preserving other profiles' pre-existing stubs/cached flags. Both-profile behavioral RED precedes this producer; GREEN remains pending.
 
+### Quest dialog material
+
+[Owning contract](../../specs/quest-background-material.md) records the nilable legacy getter, explicit environment-owned quest material map and original QuestFrame nil-to-Parchment behavior. Passive ingress and its initializer precede two actual Retail behavioral REDs; the getter/cleanup producer is committed separately, GREEN pending. Other missing dialog APIs are not silently defaulted.
+
 ### Simulator selected quest turn-in
 
 The separately approved [simulator-only contract](../../specs/quest-turn-in-model.md) owns selected-completed turn-in and proof status; [admin usage](../../admin-api/quests.md) does not imply native API publication. Producer integrated after three shared Retail behavioral failures on 2026-10-16; GREEN remains unverified: `QuestLogState::turn_in` removes an eligible existing rich row and inserts the same ID into its existing completion set. `A_Admin.TurnInSelectedQuest` also removes lightweight/Forever watch membership, clears consumed selection/matching pending and gossip rows, then uses original synchronous dispatch after releasing the borrow. No new parallel quest domain or reward grants.
