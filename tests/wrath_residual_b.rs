@@ -363,7 +363,7 @@ fn wrath_resid_b_lfd_original_random_renderer() {
             .first_mut()
             .expect("existing dungeon fixture");
         row.difficulty = 1;
-        row.texture_filename = "DistinctTexture".into();
+        row.texture_filename = "brew".into();
         row.description = "Distinct description".into();
         row.is_holiday = false;
         row.dungeon_id
@@ -371,7 +371,7 @@ fn wrath_resid_b_lfd_original_random_renderer() {
     run(
         &env,
         &format!(
-            "LFDQueueFrame.type={id}; LFDQueueFrameRandom_UpdateFrame(); assert(LFDQueueFrameBackground:GetTexture()=='Interface\\\\LFGFrame\\\\UI-LFG-BACKGROUND-HEROIC', 'heroic background: '..tostring(LFDQueueFrameBackground:GetTexture()))"
+            "LFDQueueFrame.type={id}; LFDQueueFrameRandom_UpdateFrame(); assert(LFDQueueFrameBackground:GetTexture()==340816, 'heroic background: '..tostring(LFDQueueFrameBackground:GetTexture()))"
         ),
     );
     {
@@ -382,6 +382,6 @@ fn wrath_resid_b_lfd_original_random_renderer() {
     }
     run(
         &env,
-        "LFDQueueFrameRandom_UpdateFrame(); assert(LFDQueueFrameBackground:GetTexture()=='Interface\\\\LFGFrame\\\\UI-LFG-HOLIDAY-BACKGROUND-DistinctTexture'); assert(LFDQueueFrameRandomScrollFrameChildFrame.description:GetText()=='Distinct description'); assert(not LFDQueueFrameRandomScrollFrameChildFrame.rewardsLabel:IsShown()); LFDQueueFrame.type=nil; LFDQueueFrameRandom_UpdateFrame(); assert(LFDQueueFrameRandomScrollFrameChildFrame.description:GetText()=='Distinct description')",
+        "LFDQueueFrameRandom_UpdateFrame(); assert(LFDQueueFrameBackground:GetTexture()==368570, 'holiday background: '..tostring(LFDQueueFrameBackground:GetTexture())); assert(LFDQueueFrameRandomScrollFrameChildFrame.description:GetText()=='Distinct description'); assert(not LFDQueueFrameRandomScrollFrameChildFrame.rewardsLabel:IsShown()); LFDQueueFrame.type=nil; LFDQueueFrameRandom_UpdateFrame(); assert(LFDQueueFrameRandomScrollFrameChildFrame.description:GetText()=='Distinct description')",
     );
 }
