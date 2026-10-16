@@ -110,5 +110,7 @@ pub mod unit_spell_target_name;
 pub mod vehicle_possession;
 pub mod voice_chat_probes;
 #[cfg(feature = "client-wrath")]
+pub mod wrath_legacy_state;
+#[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_startup_queries;
 pub mod xp_honor_rest;

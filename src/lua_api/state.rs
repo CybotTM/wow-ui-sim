@@ -43,6 +43,10 @@ macro_rules! build_empty_sim_state {
             scripts: ScriptRegistry::default(),
             cvars: CVarStorage::new(),
             guild_roster_selection: 0,
+            #[cfg(feature = "client-wrath")]
+            wrath_legacy: Default::default(),
+            #[cfg(feature = "client-wrath")]
+            who_routing: Default::default(),
             console_output: $collections.console_output,
             timers: $collections.timers,
             rilua_timers: ::std::collections::VecDeque::new(),
