@@ -6,6 +6,10 @@ mod test_support;
 #[path = "mouse_tests.rs"]
 mod tests;
 
+#[cfg(any(feature = "client-retail", feature = "client-wrath"))]
+#[path = "simple_html_tests.rs"]
+mod simple_html_tests;
+
 #[cfg(feature = "client-mists")]
 #[path = "mouse_game_menu_tests.rs"]
 mod game_menu_tests;

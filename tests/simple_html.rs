@@ -52,7 +52,9 @@ fn test_settext_stores_plain_text() {
 }
 
 #[test]
-fn test_settext_strips_html_tags() {
+fn test_settext_keeps_existing_plain_projection_not_document_geometry() {
+    // GetText's existing projection is preserved. This is not rendering proof;
+    // H1's original-consumer tests assert distinct presented block rectangles.
     let env = WowLuaEnv::new().unwrap();
 
     env.exec(
