@@ -2,9 +2,9 @@
 use super::{
     BulletTextListRecord, ButtonHeaderRecord, CaptureBarRecord, DiscreteProgressStepsRecord,
     DoubleIconAndTextRecord, DoubleStatusBarRecord, IconAndTextRecord, IconTextAndBackgroundRecord,
-    SpacerRecord, SpellDisplayRecord, StatusBarRecord, TextColumnRowVisualizationInfo,
-    TextWithStateRecord, TextWithSubtextRecord, TextureAndTextRecord, TextureAndTextRowRecord,
-    WidgetId, WidgetSetEntry, WidgetSetRecord,
+    IconTextAndCurrenciesRecord, SpacerRecord, SpellDisplayRecord, StatusBarRecord,
+    TextColumnRowVisualizationInfo, TextWithStateRecord, TextWithSubtextRecord,
+    TextureAndTextRecord, TextureAndTextRowRecord, WidgetId, WidgetSetEntry, WidgetSetRecord,
 };
 use crate::lua_api::WowLuaEnv;
 use crate::{Error, Result};
@@ -14,6 +14,7 @@ use rilua::LuaApiMut;
 pub enum WidgetVisualization {
     IconAndText(IconAndTextRecord),
     IconTextAndBackground(IconTextAndBackgroundRecord),
+    IconTextAndCurrencies(IconTextAndCurrenciesRecord),
     CaptureBar(CaptureBarRecord),
     StatusBar(StatusBarRecord),
     DoubleStatusBar(DoubleStatusBarRecord),
@@ -37,6 +38,7 @@ impl WidgetVisualization {
         match self {
             Self::IconAndText(_) => 0,
             Self::IconTextAndBackground(_) => 4,
+            Self::IconTextAndCurrencies(_) => 7,
             Self::CaptureBar(_) => 1,
             Self::StatusBar(_) => 2,
             Self::DoubleStatusBar(_) => 3,
@@ -181,6 +183,11 @@ fn supply_visualization(sim: &mut crate::lua_api::SimState, id: f64, record: Wid
         WidgetVisualization::IconTextAndBackground(record) => {
             sim.ui_widget_inputs
                 .icon_text_and_background
+                .insert(key, record);
+        }
+        WidgetVisualization::IconTextAndCurrencies(record) => {
+            sim.ui_widget_inputs
+                .icon_text_and_currencies
                 .insert(key, record);
         }
         WidgetVisualization::CaptureBar(record) => {

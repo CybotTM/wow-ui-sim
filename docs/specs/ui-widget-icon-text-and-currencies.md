@@ -1,6 +1,6 @@
 # Supplied IconTextAndCurrencies widgets
 
-`C_UIWidgetManager.GetIconTextAndCurrenciesWidgetVisualizationInfo` must expose explicit environment-owned supplied records to the unchanged cached Retail/PTR type-7 consumer. The existing subsystem lives in `src/c_api/ui_widget_manager/`; this slice has authored selector tests only, currently **UNEXECUTED**. No supplied-record implementation or behavioral acceptance is claimed. See [manager state and feeds](../wiki/systems/ui-widget-manager-state.md) for subsystem mechanics.
+`C_UIWidgetManager.GetIconTextAndCurrenciesWidgetVisualizationInfo` must expose explicit environment-owned supplied records to the unchanged cached Retail/PTR type-7 consumer. The existing subsystem lives in `src/c_api/ui_widget_manager/`; the public selector baseline is independently reconciled RED. Complete passive records, an empty environment map and type-7 host-feed wiring are now authored but **UNCOMPILED / UNEXECUTED**. No getter or populated-query/cached-consumer acceptance is claimed. See [manager state and feeds](../wiki/systems/ui-widget-manager-state.md) for subsystem mechanics.
 
 ## What it must do
 
@@ -69,21 +69,23 @@
 
 ## Implementation inventory
 
-No IconTextAndCurrencies supplied-record/map/feed/getter is implemented. Existing seams, not completed feature implementations:
+Passive supplied-input plumbing only; no getter/projection registration yet. These authored sources remain uncompiled/unexecuted, not feature acceptance:
+
+- `src/c_api/ui_widget_manager/icon_text_and_currencies_record.rs` — explicit20-field `IconTextAndCurrenciesRecord` with ordered10-field `UiWidgetCurrencyRecord` rows, no defaults/seeds; fileID and enum fields follow existing `u32` host-input conventions, plain numbers use `f64`.
 
 - `src/c_api/ui_widget_manager/queries.rs` — shared required-number/secret selector and namespace registration.
-- `src/c_api/ui_widget_manager/feed.rs` — existing normal host feeds and state-before-event lifecycle.
-- `src/c_api/ui_widget_manager/inputs.rs` — existing environment-owned supplied-input subsystem.
-- `src/c_api/ui_widget_manager.rs` — existing public manager records and numeric identity.
+- `src/c_api/ui_widget_manager/feed.rs` — typed `IconTextAndCurrencies` variant/type7 and supply arm; existing validation/state-before-event behavior unchanged.
+- `src/c_api/ui_widget_manager/inputs.rs` — empty environment-owned `icon_text_and_currencies` map using existing numeric identity.
+- `src/c_api/ui_widget_manager.rs` — public record exports; no default/demo catalog or new identity policy.
 
 ## Tests asserting this spec
 
-- `tests/ui_widget_icon_text_and_currencies_selector.rs` — Retail/PTR-eligible two-case public-selector regression, **UNEXECUTED**. Fresh environment per argument, existing `GetWidgetSetInfo` required-number control, public getter presence, absent numeric ID exactly-one-nil control and contextual required-number rejection. No supplied data, mocks, source-shape assertions or cached load. Early failure leaves later loop inputs unreached; no RED is claimed.
+- `tests/ui_widget_icon_text_and_currencies_selector.rs` — newly compiled test source `825d7bf84` against sealed normal Retail library `84da38a3b`, not a whole825 library. Compile exit0/no Rust diagnostics; actual **0 PASS / 2 FAIL / exit101**. Existing `GetWidgetSetInfo` missing/nil required-number controls, public getter presence and absent numeric ID934207.5 exactly-one-nil controls pass before each target failure. Target missing/nil calls succeed instead of rejecting; target diagnostic checks and later numeric-string/boolean/table/function iterations are unreached. No supplied data, mocks, source-shape assertions or cached load. Receipt `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconcurrencies-selector-retail-red-20261016T113344496157Z`; independent source/spec/readability/seal/full-stream RED attribution PASS: `/home/osso/.local/state/wow-ui-sim/verification/iconcurrencies-next/selector-red-report.md`. This is failing behavior, not feature acceptance or actual PTR execution.
 
 ## Known gaps (current cycle)
 
-- [ ] Establish the actual selector baseline and preserve its exact reached boundary before supplied-state implementation.
-- [ ] Complete supplied 20+10-field records, projection, snapshots/isolation and shared secret-policy behavior remain UNIMPLEMENTED / UNEXECUTED for this slice.
+- [x] Establish and independently reconcile the selector baseline, preserving missing/nil failures and later inputs as unreached. This closes RED provenance only.
+- [ ] Compile passive20+10-field records/map/feed and add populated missing-query RED before projection. Snapshots/isolation/shared secret-policy behavior remain unproved; no getter implementation yet.
 - [ ] Normal-feed and unchanged cached type-7 lifecycle tests/acceptance remain unauthored and UNEXECUTED; selector-only coverage does not prove them.
 
 ## Out of scope
