@@ -71,6 +71,7 @@ fn load_consumer(app: &App, retail: bool) {
         .unwrap();
     env.exec(
         r#"
+        H1FixtureRoot:SetAllPoints(UIParent)
         H1HTML:ClearAllPoints(); H1HTML:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 20, -20)
         H1HTML:SetSize(270, 304); H1HTML:Show(); H1HTML:EnableMouse(true)
         H1HTML:SetTextColor("h1", 1, 0, 0)
@@ -245,6 +246,20 @@ fn h1_retail_original_glue_callback_from_wrapped_link_glyphs() {
     assert!(
         quads.iter().any(|p| p.y > quads[0].y + 24.0),
         "link must wrap"
+    );
+    let html_name: String = app.env.borrow().eval("return H1HTML:GetName()").unwrap();
+    let html_id = app
+        .env
+        .borrow()
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name(&html_name)
+        .unwrap();
+    assert_eq!(
+        app.hit_test_mouse_button(quads[0], "LeftButton", true),
+        Some(html_id),
+        "original region must participate in actual mouse routing"
     );
     // Every emitted link glyph must be clickable, including continuation lines.
     for point in &quads {
