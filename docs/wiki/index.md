@@ -1,6 +1,6 @@
-## [2026-10-16] source | ItemDisplay getter after populated RED
+## [2026-10-16] evidence | ItemDisplay bounded Retail accepted; PTR pending
 
-[Manager checkpoint](systems/ui-widget-manager-state.md#itemdisplay-getter-source-after-populated-red--2026-10-16) links committed getter source `64a5576b1`, **UNCOMPILED / UNEXECUTED**, and the separate owning pre-getter Retail RED receipt. No GREEN, PTR, native or cached-lifecycle acceptance.
+[Owning receipt](../specs/ui-widget-item-display.md#bounded-retail-acceptance--2026-10-16) and [manager checkpoint](systems/ui-widget-manager-state.md#itemdisplay-bounded-retail-acceptance--2026-10-16) record ten unique PASS, completed synchronous cached lifecycle and actual secret wrappers; startup/CVar and source-audit proof stay separate. Historical source/RED checkpoints retained. PTR queued; current check/whole formatter, native/assets/pixels/async/effect activation, full integration and parent acceptance remain open.
 
 ## [2026-10-16] evidence | Bounded Mists shared controls accepted
 

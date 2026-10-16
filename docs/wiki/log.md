@@ -2240,3 +2240,8 @@ Reconciled source-only attribution for `f00f230fe`, `593e543f5` and `655f0698b`:
 ## [2026-10-16] docs | ItemDisplay getter source and pre-getter RED
 
 [Owner inventory](../specs/ui-widget-item-display.md#implementation-inventory) identifies source `64a5576b1` as UNCOMPILED/UNEXECUTED; implementation-only checkbox updated without behavior checkoffs. [Manager checkpoint](systems/ui-widget-manager-state.md#itemdisplay-getter-source-after-populated-red--2026-10-16) and index distinguish the separate populated Retail compile0/eight-unique-FAIL receipt from pending getter execution. No GREEN, native, PTR or lifecycle acceptance; the owner separately links independent pre-getter RED reconciliation.
+
+
+## [2026-10-16] evidence | ItemDisplay bounded Retail accepted; PTR pending
+
+[Owning receipt](../specs/ui-widget-item-display.md#bounded-retail-acceptance--2026-10-16) supersedes current uncompiled Retail claims with saved normal build/seal and ten-unique-PASS evidence, completed synchronous cached consumer and actual secret wrappers. [Manager checkpoint](systems/ui-widget-manager-state.md#itemdisplay-bounded-retail-acceptance--2026-10-16) and index link that scope. Separate clean startup/CVar and source/schema/readability proof; historical REDs retained, generic dual-profile checkboxes unchanged. PTR queued only; no current-check/whole-formatter or broader acceptance.

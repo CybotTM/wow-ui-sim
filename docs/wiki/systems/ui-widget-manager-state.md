@@ -155,7 +155,7 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 ## ItemDisplay historical selector RED — 2026-10-16
 
-[Owning selector receipt](../../specs/ui-widget-item-display.md#historical-retail-selector-red--2026-10-16) owns the independently reconciled bounded Retail RED, separate test/library attribution and reached/unreached assertions. Producer, consumer and broader acceptance remain open.
+[Owning selector receipt](../../specs/ui-widget-item-display.md#historical-retail-selector-red--2026-10-16) owns the independently reconciled bounded Retail RED, separate test/library attribution and reached/unreached assertions. At that historical checkpoint producer, consumer and broader acceptance remained open; [bounded Retail acceptance](../../specs/ui-widget-item-display.md#bounded-retail-acceptance--2026-10-16) now supersedes Retail status only.
 
 ### ItemDisplay passive supplied-state checkpoint — 2026-10-16
 
@@ -165,9 +165,13 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 ### ItemDisplay getter source after populated RED — 2026-10-16
 
-[Owning inventory](../../specs/ui-widget-item-display.md#implementation-inventory) records getter source `64a5576b1`: complete fresh rooted 15-outer/16-nested projection, four `Option` omissions, exactly one nil for absent IDs, shared `read_numeric_id` policy and unconditional namespace registration matching neighbors. Getter is **UNCOMPILED / UNEXECUTED**; this supersedes the passive-only source status above, not its historical evidence.
+[Owning inventory](../../specs/ui-widget-item-display.md#implementation-inventory) records getter source `64a5576b1`: complete fresh rooted 15-outer/16-nested projection, four `Option` omissions, exactly one nil for absent IDs, shared `read_numeric_id` policy and unconditional namespace registration matching neighbors. Getter was **UNCOMPILED / UNEXECUTED** at this historical source checkpoint, superseding the passive-only source status above, not its historical evidence. [Bounded Retail acceptance](../../specs/ui-widget-item-display.md#bounded-retail-acceptance--2026-10-16) now supersedes that pending Retail status; PTR remains pending.
 
-[Populated Retail receipt](../../specs/ui-widget-item-display.md#populated-retail-red-before-getter--2026-10-16) owns the separate pre-getter compile0 and eight unique FAIL at the populated-result boundary. Later projection, feed, secret and cached-lifecycle assertions were unreached; the owner now links independent saved-evidence reconciliation of the exact pre-getter RED boundary. No GREEN, PTR, native or lifecycle acceptance follows.
+[Populated Retail receipt](../../specs/ui-widget-item-display.md#populated-retail-red-before-getter--2026-10-16) owns the separate pre-getter compile0 and eight unique FAIL at the populated-result boundary. Later projection, feed, secret and cached-lifecycle assertions were unreached; the owner now links independent saved-evidence reconciliation of the exact pre-getter RED boundary. No GREEN, PTR, native or lifecycle acceptance follows from that pre-getter RED; the later bounded Retail receipt is separate.
+
+## ItemDisplay bounded Retail acceptance — 2026-10-16
+
+[Owning receipt](../../specs/ui-widget-item-display.md#bounded-retail-acceptance--2026-10-16) records accepted saved normal Retail build/seals, ten unique PASS (eight populated plus two selectors), actual cached completed synchronous type27/BaseItem lifecycle and actual secret wrappers. Separate clean startup/CVar preservation and source/schema/readability audit retain their own scope. Historical REDs remain; PTR queued, current check/whole formatter and broader acceptance pending.
 
 ## Sources
 

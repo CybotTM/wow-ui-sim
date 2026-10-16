@@ -1,6 +1,6 @@
 # Supplied ItemDisplay widgets
 
-`C_UIWidgetManager.GetItemDisplayVisualizationInfo` exposes explicit supplied ItemDisplay records through the existing manager subsystem. Complete records, empty environment-owned storage, typed feeds and a fresh nested getter projection are present in `src/c_api/ui_widget_manager/`. The passive library's populated fixtures reached behavioral RED before getter implementation; the new getter remains uncompiled/unexecuted. See [manager state and feeds](../wiki/systems/ui-widget-manager-state.md) for the existing model.
+`C_UIWidgetManager.GetItemDisplayVisualizationInfo` exposes explicit supplied ItemDisplay records through the existing manager subsystem. Complete records, empty environment-owned storage, typed feeds and a fresh nested getter projection are present in `src/c_api/ui_widget_manager/`. The passive library's populated fixtures reached behavioral RED before getter implementation; [bounded Retail acceptance](#bounded-retail-acceptance--2026-10-16) now covers the getter and completed synchronous cached consumer. PTR remains pending. See [manager state and feeds](../wiki/systems/ui-widget-manager-state.md) for the existing model.
 
 ## What it must do
 
@@ -8,7 +8,7 @@
 - [ ] Reject missing, explicit nil, string (including numeric string), boolean, table and function selectors at the shared required-number boundary. Diagnostics contain `must be a number` and identify `GetItemDisplayVisualizationInfo`; the existing `GetWidgetSetInfo` rejection is the control.
 - [ ] Return exactly one nil for absent numeric `widgetID` `934207.5`. Do not infer catalog membership or introduce integer, positivity or range restrictions.
 
-### Populated supplied-state scope — getter acceptance unverified
+### Populated supplied-state scope — bounded Retail accepted; PTR pending
 
 - [ ] Project exactly the 15 outer and 16 nested declaration rows below; represent the four optional fields as Some/value or None/nil. Preserve Some empty strings and numeric zero; never synthesize item metadata into the manager record.
 - [ ] Return fresh public outer/nested snapshots; isolate caller mutations, retained snapshots, all-field replacements, fractional IDs, environments, removal and restoration.
@@ -65,19 +65,19 @@ Cached Retail and PTR `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumen
 
 ## Implementation inventory
 
-Source inspection on 2026-10-16: getter source `64a5576b1` is **UNCOMPILED / UNEXECUTED**, not runtime evidence. Namespace registration is unconditional, matching neighboring getters; selector handling reuses `read_numeric_id` without a new policy.
+Getter production source `64a5576b1` has [accepted bounded Retail execution](#bounded-retail-acceptance--2026-10-16) at saved normal source `bbeac6213`; PTR remains pending. Namespace registration is unconditional, matching neighboring getters; selector handling reuses `read_numeric_id` without a new policy.
 
 - `src/c_api/ui_widget_manager/queries.rs` — shared required-number/secret selector and modeled ItemDisplay getter registration.
-- `src/c_api/ui_widget_manager/item_display.rs` — fresh rooted outer/nested snapshots, complete15+16 projection, omitted None fields and one-nil absence; no defaults or new selector policy. Getter execution remains unverified.
+- `src/c_api/ui_widget_manager/item_display.rs` — fresh rooted outer/nested snapshots, complete15+16 projection, omitted None fields and one-nil absence; no defaults or new selector policy. Bounded Retail getter execution is accepted; PTR remains pending.
 - `src/c_api/ui_widget_manager/inputs.rs` — empty per-environment `item_display` map; no seeded records.
 - `src/c_api/ui_widget_manager/feed.rs` — `WidgetVisualization::ItemDisplay`, type27 and supplied storage arm; existing feed validation and notification ordering unchanged.
 
 - `src/c_api/ui_widget_manager/item_display_record.rs` — complete15-field `ItemDisplayRecord` and16-field `UiWidgetItemRecord`; four nullable fields use `Option`, no defaults.
-- `src/c_api/ui_widget_manager.rs` — getter/record modules and public exports. Passive normal library source `3eab91eeb` compiled before populated RED; getter source is a later, separately unverified change.
+- `src/c_api/ui_widget_manager.rs` — getter/record modules and public exports. Passive normal library source `3eab91eeb` compiled before populated RED; getter source is a later change with separately accepted bounded Retail execution.
 
 ## Tests asserting this spec
 
-- `tests/ui_widget_item_display.rs` plus `tests/widget_item_display/{queries,feed,security,consumer}.rs` — eight logical cases reached the populated nil/non-table RED boundary against passive normal Retail source `3eab91eeb`. Later assertions and getter acceptance remain unverified; this does not extend the historical selector receipt below.
+- `tests/ui_widget_item_display.rs` plus `tests/widget_item_display/{queries,feed,security,consumer}.rs` — eight logical cases reached the populated nil/non-table RED boundary against passive normal Retail source `3eab91eeb`. The unchanged eight populated cases and two original selector cases later PASS under the bounded Retail receipt below; historical RED boundaries remain unchanged.
 
 - `tests/ui_widget_item_display_selector.rs` — two public-selector regressions at test source `f67005a12a07661592c6a4f5615015102db5b9f3`; fresh `WowLuaEnv` instances, no mock registration, supplied records or cached UI load.
 
@@ -97,12 +97,22 @@ Component epoch `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-cu
 
 Fresh child-only current-CVar copy and paired original stat/hash remain unchanged. No reset/restore, native/catalog/assets/pixels, PTR or whole-integration claim. Independent saved-evidence reconciliation: `/home/osso/.local/state/wow-ui-sim/verification/item-widget-next/populated-red-report.md` accepts eight unique behavioral failures at the one-return non-table boundary, source snapshots, seals, emitted cfg/externs and paired CVar guards. The diagnostic does not distinguish nil from another non-table scalar. New getter execution remains separate.
 
+## Bounded Retail acceptance — 2026-10-16
+
+**ACCEPTED: bounded Retail only; PTR pending.** Independent saved-evidence receipt: `/home/osso/.local/state/wow-ui-sim/verification/item-widget-next/retail-green-report.md`. Normal Retail library/binary source `bbeac62133cfbf678faf3eca07eab27f6b9bcec8` includes production getter `64a5576b1fa7b8f21bcbade605a0058ba8366d88`; production inputs between those revisions are unchanged. Build exit0, 7m32s, 731 Cargo JSON records, zero compiler-message diagnostics; terminal pressure guard exited and library/binary seals reconciled. Separate component compile exit0 retains 38 inherited helper warnings. All 33 immutable fixture/common snapshots match committed `bbeac6213` test bytes, unchanged from `3eab91eeb`.
+
+Ten unique tests PASS/exit0: eight unchanged populated cases plus two original selector regressions; timeout-child replays are nonadditive. Reached complete 15+16 projection, fresh/deep retained snapshots, four nullable fields including Some(0)/empty strings, replacement/fractional/environment/removal isolation, synchronous publication and rejection atomicity, and actual permitted/denied secret wrappers with taint/state preservation. Actual cached type27/XML BaseItem completes synchronous item loading: supplied counts17/23, nil optional text/count hiding, live identity/update, hide/reacquire, membership/full-set removal, live unregister, color-callback cleanup and later-feed inactivity. Text/texture identity and completed sizing are accepted, not assets or pixels. Historical selector RED and eight-populated RED above remain retained, not reclassified.
+
+Separate sealed normal Retail startup PASS/exit0: stdout `[]\n`, final `Status: CLEAN`, zero Lua errors. Both runs use distinct fresh child-only `XDG_DATA_HOME` byte-exact copies of the then-current persisted CVar file; paired original stat/hash unchanged, no reset/restore. Startup child later differs only in serialization, not parsed values. Both runs disable CASC/sound; startup disables third-party addons/SavedVariables. This is not full integration or all-assets/all-addons proof.
+
+Source/schema/readability audit separately PASS; it does not establish current type-check or whole-project formatter acceptance. PTR is only queued via `/home/osso/.local/state/wow-ui-sim/handoff/item-widget-getter-ptr-green-admission-current.txt`; no PTR acceptance follows. No native/catalog, assets/pixels, alternate text-style, asynchronous pending-load/cancellation, projected animation/effect/timer activation, whole-integration or parent-goal acceptance. All generic dual-profile acceptance checkboxes remain open pending PTR.
+
 ## Known gaps (current cycle)
 
-- [ ] Establish selector acceptance under Retail/PTR, retaining reached/unreached boundaries; the historical Retail run remains RED and does not establish PTR behavior.
-- [x] Implement the modeled ItemDisplay getter/projection after populated behavioral RED: source `64a5576b1` only, **UNCOMPILED / UNEXECUTED**; no behavior acceptance.
+- [ ] Establish selector acceptance under Retail/PTR: bounded Retail accepted above; PTR pending. Historical Retail RED remains retained.
+- [x] Implement the modeled ItemDisplay getter/projection after populated behavioral RED: source `64a5576b1`; bounded Retail execution accepted separately above, PTR pending.
 - [x] Compile and execute the populated fixtures separately against the passive normal Retail library: eight unique behavioral failures before getter implementation.
-- [ ] Execute the getter and all later assertions. All 15+16 projection, nullable, feed, secret and cached-consumer acceptance requirements above remain unchecked; reaching the RED boundary does not prove them.
+- [ ] Complete dual-profile getter and later-assertion acceptance: bounded Retail 15+16 projection, nullable, feed, actual secret wrappers and completed synchronous cached-consumer assertions accepted above; PTR pending. Generic dual-profile checkboxes remain unchecked.
 
 ## Out of scope
 
