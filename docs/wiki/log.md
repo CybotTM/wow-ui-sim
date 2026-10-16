@@ -1,3 +1,7 @@
+## [2026-10-16] verification | Wrath post-removal preservation and ordering
+
+[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--acceptance-pending) records independently accepted saved preservation/control and non-replacing original-startup ordering evidence. The all-green retirement gate remains unmet; test-only XML fixture reconciliation is in progress. No native parity or broader acceptance follows.
+
 ## [2026-10-16] verification | Wrath guard-retired module GREEN
 
 [Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--acceptance-pending) records an independently accepted post-removal 5/5 `wrath_scrolling_cursor` result at `e7a3f2109` with zero `cursorOffset` errors. Cursor-layout/XML-binding preservation and the separate ordering observation remain pending.

@@ -1,6 +1,6 @@
 ## [2026-10-16] source | Wrath nil-field guard retirement; acceptance pending
 
-[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--acceptance-pending) records wrapper/module removal, independently verified guard-retained GREEN (5/5 tests), and pending post-removal proof plus the separate ordering observation. Earlier guard-retained entries remain historical; no broader acceptance follows.
+[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--acceptance-pending) records accepted post-removal preservation and original-startup ordering evidence, the pre-existing XML-binding fixture failure, and pending test-only reconciliation. The all-green retirement gate remains unmet; no native parity or broader acceptance follows.
 
 ## [2026-10-16] source | Simulator selected quest turn-in producer
 
