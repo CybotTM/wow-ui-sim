@@ -14,6 +14,16 @@ WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 timeout 90 ./target/debug/wow-sim lu
 Do not refresh this file to bless new startup errors. Refresh only after a
 verified clean Mists capture.
 
+Verified scoped capture on 2026-10-16: **0 records / 0 occurrences, exit0**;
+142 Blizzard addons loaded. Sealed Mists source `4d5572f241cce3d99a7b486709186a2638566a56`
+includes loader fix `480b9f934`; both historical self-anchor records (2 occurrences)
+are absent. Evidence epoch: `/home/osso/.local/state/wow-ui-sim/handoff/mists-startup-confirm/capture-20261016T203207134694Z`.
+Capture used `--no-addons --no-saved-vars lua-errors`, `WOW_SIM_CASC=0`,
+`WOW_SIM_NO_SOUND=1`, and a byte-exact child-only copy of current CVars;
+original CVar stat/hash remained unchanged. Runtime limits: 4GiB, CPU100%, 86s.
+This replaces the stale two-record JSON, not a native-parity, current-HEAD,
+GUI, full-suite, or all-profile acceptance. External cache inputs were not fully sealed.
+
 Use `scripts/diff-lua-errors.sh BASELINE NEW` to compare message sets and
 report regressed/fixed errors. The Mists CI guard uses this for addon-induced
 error counts and release proof diagnostics.
