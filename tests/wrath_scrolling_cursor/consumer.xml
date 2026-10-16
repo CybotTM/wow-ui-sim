@@ -1,0 +1,17 @@
+<Ui>
+    <EditBox name="C2WrathScrollingConsumerTemplate" virtual="true">
+        <Scripts>
+            <OnCursorChanged function="ScrollingEdit_OnCursorChanged"/>
+            <OnTextChanged>
+                C2BeforeChanged(self, userInput);
+                ScrollingEdit_OnTextChanged(self, self:GetParent());
+                C2AfterChanged(self);
+            </OnTextChanged>
+            <OnUpdate>
+                C2BeforeUpdate(self);
+                ScrollingEdit_OnUpdate(self, elapsed, self:GetParent());
+                C2AfterUpdate(self);
+            </OnUpdate>
+        </Scripts>
+    </EditBox>
+</Ui>

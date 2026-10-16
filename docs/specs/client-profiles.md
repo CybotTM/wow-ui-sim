@@ -33,6 +33,8 @@ Pinned archive acquisition and all 382 copied source files have independent byte
 
 The isolated runtime-copy helper maps manifest `FrameXML/…` entries to the profile's sibling FrameXML tree; other entries remain AddOns-relative. It preflights selected source files and conflicting destination bytes before copying, preserves identical and unrelated files, and never publishes completion markers itself. The wrapper publishes the ordinary runtime text provenance and completion marker only after copying succeeds. Cache acceptance checks the pin/manifest identity and selected files, including sibling FrameXML, without requiring the source snapshot or a WoW install. Conflicting existing metadata errors without deletion. Wrath dispatches to this route before generic CASC synchronization; non-Wrath routes stay unchanged. Main observed nine standalone copy/publication fixture passes at `5d795cd47`; independent acceptance, full-profile compilation, downloader HTTP execution and actual runtime publication remain pending.
 
+`tests/wrath_scrolling_cursor.rs` exercises the complete unmodified pinned `UIPanelTemplates.lua` consumer through XML-wired callbacks, real layout ticks and real scroll widgets for cold SetText, Insert and keyboard movement. It requires the runtime cache; no private-source fallback is allowed. These unexecuted fixtures do not establish full FrameXML startup or native parity, and do not authorize guard removal.
+
 ## How it works
 
 - [Observed TOC game-type tokens](../wiki/reference/toc-game-type-tokens.md) — bounded source inventory, not a native acceptance contract; filename suffixes and filter strings remain separate.
