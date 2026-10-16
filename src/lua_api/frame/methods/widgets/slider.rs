@@ -309,18 +309,55 @@ pub(super) fn shared_set_min_max_values(state: &mut LuaState) -> LuaResult<u32> 
     let id = frame_id_from_stack(state, 1)?;
     let min = val_to_f64(stack_val(state, 2));
     let max = val_to_f64(stack_val(state, 3));
-    let mut sim = borrow_state_mut(state)?;
-    let Some(widget_type) = sim.widgets.get(id).map(|f| f.widget_type) else {
-        return Ok(0);
+    let old_slider_value = {
+        let mut sim = borrow_state_mut(state)?;
+        let Some(frame) = sim.widgets.get(id) else {
+            return Ok(0);
+        };
+        let widget_type = frame.widget_type;
+        let min = checked_range_minimum(widget_type, min, max)?;
+        let old_slider_value = if widget_type == WidgetType::Slider {
+            if frame.slider_min == min && frame.slider_max == max {
+                return Ok(0);
+            }
+            Some(frame.slider_value)
+        } else {
+            None
+        };
+        if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            apply_widget_range(frame, min, max);
+        }
+        if widget_type == WidgetType::Slider {
+            sim.widgets.mark_rect_dirty(id);
+        }
+        old_slider_value
     };
-    let min = checked_range_minimum(widget_type, min, max)?;
-    if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        apply_widget_range(frame, min, max);
-    }
-    if widget_type == WidgetType::Slider {
-        sim.widgets.mark_rect_dirty(id);
+    if let Some(value) = old_slider_value {
+        fire_slider_range_changed(state, id, min, max)?;
+        let changed = {
+            let mut sim = borrow_state_mut(state)?;
+            apply_slider_value(&mut sim, id, value)
+        };
+        if let Some(value) = changed {
+            fire_value_changed(state, id, value, Some(false))?;
+        }
     }
     Ok(0)
+}
+
+fn fire_slider_range_changed(state: &mut LuaState, id: u64, min: f64, max: f64) -> LuaResult<()> {
+    let handlers = get_scripts_for_dispatch(state, id, "OnMinMaxChanged");
+    if handlers.is_empty() {
+        return Ok(());
+    }
+    let frame = frame_ref(state, id)?;
+    let args = [frame, Val::Num(min), Val::Num(max)];
+    for handler in handlers {
+        if let Err(error_msg) = protected_lua_pcall_state(state, handler, &args) {
+            call_error_handler_state(state, &error_msg);
+        }
+    }
+    Ok(())
 }
 
 fn checked_range_minimum(widget_type: WidgetType, min: f64, max: f64) -> LuaResult<f64> {
@@ -345,7 +382,6 @@ fn apply_widget_range(frame: &mut crate::widget::Frame, min: f64, max: f64) {
         WidgetType::Slider => {
             frame.slider_min = min;
             frame.slider_max = max;
-            frame.slider_value = frame.slider_value.clamp(min, max);
         }
         WidgetType::StatusBar => {
             frame.statusbar_min = min;

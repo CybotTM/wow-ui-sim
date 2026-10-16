@@ -409,6 +409,7 @@ fn is_widget_specific_script_handler(
         | "OnCursorChanged" => widget_type == WidgetType::EditBox,
         "OnCooldownDone" => matches!(widget_type, WidgetType::Cooldown),
         "OnValueChanged" => matches!(widget_type, WidgetType::Slider | WidgetType::StatusBar),
+        "OnMinMaxChanged" => widget_type == WidgetType::Slider,
         "OnVerticalScroll" | "OnHorizontalScroll" | "OnScrollRangeChanged" => {
             matches!(widget_type, WidgetType::ScrollFrame | WidgetType::EditBox)
         }

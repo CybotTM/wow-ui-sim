@@ -28,15 +28,19 @@ Actual Retail baseline: source `3fa90ab7b6f8cf836e09c19ed34115eba9f245c1`, epoch
 
 ## C8 changed-range callback/lifecycle candidate
 
-Explicit shared simulator candidate only, not a native-client claim. This tests/spec-only integration adds no C8 production behavior and establishes no RED/GREEN proof. Existing validation remains owned by [widget range validation](widget-range-validation.md); C8 does not change it or StatusBar behavior.
+Explicit shared simulator policy only, not a native-client claim. C8 producer is authored; GREEN remains pending main integration and verification. Existing validation remains owned by [widget range validation](widget-range-validation.md); C8 does not change it or StatusBar behavior.
 
-- [ ] Make Slider `OnMinMaxChanged` publicly discoverable through `HasScript`, bindable/readable through `SetScript`/`GetScript`, and clearable without removing type capability or dispatching on binding alone.
+- [ ] Make Slider-only `OnMinMaxChanged` publicly discoverable through `HasScript`, bindable/readable through `SetScript`/`GetScript`, and clearable without removing type capability or dispatching on binding alone; StatusBar does not support it.
 - [ ] After successful validation of changed bounds, commit both bounds, synchronously notify `OnMinMaxChanged(self,min,max)` while the old stored value remains readable, then reapply that value through ordinary Slider assignment. Hidden sliders follow the same lifecycle; equal bounds are included.
 - [ ] Reapply the value even without a range binding. Deliver `OnValueChanged(self,effectiveValue,false)` synchronously only when the effective value changes, with committed bounds/value readable in that callback.
 - [ ] Notify range once when changed bounds retain the effective value, without a value notification; identical bounds are silent.
-- [ ] Reuse the pending C1 minimum-relative step/max-endpoint policy for range-triggered assignment, not a second quantizer. The step-interaction test depends on C1 and cannot independently establish C8.
+- [ ] Reuse C1's minimum-relative step/max-endpoint policy through the same `apply_slider_value` for range-triggered assignment, not a second quantizer. The step-interaction test depends on C1 and cannot independently establish C8.
 
-Exactly five existing candidate bodies are integrated in `tests/slider_range_lifecycle.rs`: **5 UNCOMPILED / UNEXECUTED**. Public Lua traces assert new-bounds/old-value range observation followed by effective-value observation; these are candidate policy assertions, not independent native evidence. No admission, behavioral RED/GREEN, or production completion is claimed. Existing callback and C1 proof statements above remain unchanged.
+Actual sealed Retail baseline source `05f1b4a62`, epoch `controls-producers-retail-green-20261015T235844431000Z/slider-range-first-red`: the five unchanged `tests/slider_range_lifecycle.rs` cases executed, **0 passed, 5 unique failures, exit 101**. Two cases reject `OnMinMaxChanged` as invalid, one reports `HasScript` false, the unbound-range case silently clamps to5 without a value callback, and the explicit-step case retains8 instead of9 after changing the minimum to1. Main read the full saved stdout/stderr streams. Existing C1 five and L1 five passed in the same binary; they were not rerun for this edit.
+
+Authored producer adds Slider-only script capability in `events.rs`, commits changed validated bounds without clamping the stored value, dispatches range bindings through the existing protected pre/normal/post dispatcher, then reapplies the captured stored value through `apply_slider_value`. Both range and value delivery occur outside simulator-state borrows, including hidden sliders. Identical bounds return silently after validation; StatusBar range application is unchanged. Existing error reporting and effective-value reentry suppression are reused.
+
+**GREEN pending main integration and verification.** No tests, builds or checks run for this authored C8 producer; five existing tests remain unchanged. Public Lua traces assert new-bounds/old-value range observation followed by effective-value observation. They establish the reached simulator RED, not native parity or authored-producer GREEN. Existing callback and C1 proof statements above remain unchanged.
 
 Defaults, range initialization, pre-initialization and first-value policy remain untouched and **UNRESOLVED**, outside C8. StatusBar, duplicate validation/quantizer tests, and speculative callback mutations of range/value are excluded. Existing dispatch/error/reentry guarantees are not weakened; this bounded set adds no separate proof for them.
 
