@@ -82,6 +82,8 @@ Frozen `3d6017fe` runs unchanged ClassicCastBar `8909724` through scale `1 → 1
 
 [Bounded Era execution](../baselines/README.md#era-shared-controls--2026-10-16) separately accepts the corresponding matrix cases from saved artifacts only; current source and broader criteria remain unaccepted.
 
+[Bounded Anniversary execution](../baselines/README.md#anniversary-shared-controls--2026-10-16) separately accepts the same corresponding matrix cases from saved Anniversary artifacts only; current source and broader criteria remain unaccepted.
+
 ## Out of scope
 
 StatusBar behavior, other slider methods outside the step follow-up and bounded C8 candidate, mouse-drag producers, new secret handling, argument-validation fidelity and native timing conformance remain unchanged or unverified. No addon/vendor changes or manual callback invocation.

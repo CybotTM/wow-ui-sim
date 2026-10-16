@@ -59,6 +59,8 @@ Blizzard's cached `Blizzard_SharedXML/Shared/Frame/EventScrollFrame.xml` explici
 
 [Bounded Era execution](../baselines/README.md#era-shared-controls--2026-10-16) separately accepts the corresponding matrix cases from saved artifacts only; current source and broader criteria remain unaccepted.
 
+[Bounded Anniversary execution](../baselines/README.md#anniversary-shared-controls--2026-10-16) separately accepts the same corresponding matrix cases from saved Anniversary artifacts only; current source and broader criteria remain unaccepted.
+
 ## Out of scope
 
 Mouse-wheel/size/lifecycle dispatch, new XML implicit argument names, offset clamping, layout or ownership changes, opposite-state recursive callback policy, and native/GPU/all-profile parity.

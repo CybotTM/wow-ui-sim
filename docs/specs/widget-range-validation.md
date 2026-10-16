@@ -36,6 +36,8 @@ RED at `0e3c8157c`: four Rust panic failures and one passing control. Independen
 
 [Bounded Era execution](../baselines/README.md#era-shared-controls--2026-10-16) separately accepts the corresponding matrix cases from saved artifacts only; current source and broader criteria remain unaccepted.
 
+[Bounded Anniversary execution](../baselines/README.md#anniversary-shared-controls--2026-10-16) separately accepts the same corresponding matrix cases from saved Anniversary artifacts only; current source and broader criteria remain unaccepted.
+
 ## Out of scope
 
 Native validation/error fidelity, infinity policies, argument coercion, range-change callback semantics, and other value setters. No vendor changes or new per-profile behavior.

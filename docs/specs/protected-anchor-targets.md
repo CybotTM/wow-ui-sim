@@ -29,6 +29,8 @@ Saved Wrath `39d38`: L1 protected targets **5 PASS**. [Shared Wrath receipt](edi
 
 [Bounded Era execution](../baselines/README.md#era-shared-controls--2026-10-16) separately accepts the corresponding matrix cases from saved artifacts only; current source and broader criteria remain unaccepted.
 
+[Bounded Anniversary execution](../baselines/README.md#anniversary-shared-controls--2026-10-16) separately accepts the same corresponding matrix cases from saved Anniversary artifacts only; current source and broader criteria remain unaccepted.
+
 ## Out of scope
 
 `SetAllPoints`, unresolved/deferred target-name policy, retroactive mutation of existing anchors, new combat/security rules, protection propagation, arbitrary native graph/profile parity and rendered pixels.

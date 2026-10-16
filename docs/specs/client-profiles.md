@@ -46,7 +46,7 @@ The [historical failing Wrath startup inventory](../baselines/README.md#wrath-lu
 
 ## Bounded shared-controls profile execution — 2026-10-16
 
-[Existing Mists/Era owner matrix](../baselines/README.md#mists-shared-controls--2026-10-16) records the same39 logical behaviors separately executed per profile. [Era saved-artifact acceptance](../baselines/README.md#era-shared-controls--2026-10-16) is bounded to its normal library and separate test snapshot, not current HEAD/source; Anniversary remains pending. No startup/native/cache/all-profile or full-parent closure.
+[Existing Mists/Era/Anniversary owner matrix](../baselines/README.md#mists-shared-controls--2026-10-16) records the same39 logical behaviors separately executed per profile. [Era saved-artifact acceptance](../baselines/README.md#era-shared-controls--2026-10-16) and [Anniversary saved-artifact acceptance](../baselines/README.md#anniversary-shared-controls--2026-10-16) each cover their own normal library and separate test snapshot, not current HEAD/source. No startup/native/cache/all-profile or full-parent closure.
 
 ## How it works
 

@@ -203,6 +203,8 @@ Acceptance is limited to saved component runs against sealed libraries: Wrath `e
 
 [Bounded Era execution](../baselines/README.md#era-shared-controls--2026-10-16) separately accepts the corresponding matrix cases from saved artifacts only; current source and broader criteria remain unaccepted.
 
+[Bounded Anniversary execution](../baselines/README.md#anniversary-shared-controls--2026-10-16) separately accepts the same corresponding matrix cases from saved Anniversary artifacts only; current source and broader criteria remain unaccepted.
+
 ## Out of scope
 
 - Full input-system behavior, public `Insert` limit enforcement, `SetText` MaxBytes enforcement, native markup/grapheme counting, IME, clipboard, keyboard selection creation/navigation, and rendering selection highlight.

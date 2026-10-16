@@ -52,6 +52,8 @@ The three C7 fixtures construct their own fonts, Button, FontStrings and texture
 
 [Bounded Era execution](../baselines/README.md#era-shared-controls--2026-10-16) separately accepts the corresponding matrix cases from saved artifacts only; current source and broader criteria remain unaccepted.
 
+[Bounded Anniversary execution](../baselines/README.md#anniversary-shared-controls--2026-10-16) separately accepts the same corresponding matrix cases from saved Anniversary artifacts only; current source and broader criteria remain unaccepted.
+
 ## Out of scope
 
 Later shared FontObject mutation propagation is separate T6 work; snapshot projection is not complete native FontObject inheritance. Missing-slot policy and unspecified/local-field restoration are not inferred here. No texture ownership redesign, vendor edits or reactive FontObject graph.

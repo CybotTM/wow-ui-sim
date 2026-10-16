@@ -1,3 +1,7 @@
+## [2026-10-16] evidence | Bounded Anniversary shared controls accepted
+
+[Owning matrix and Anniversary receipt](../baselines/README.md#anniversary-shared-controls--2026-10-16) record39 exact recipe-name PASS, seven exits0, matching Anniversary library/component seals and unchanged original-CVar guards. Same39 logical behaviors as separately accepted Era/Mists; no startup/native/cache/current-HEAD/all-profile or parent closure.
+
 ## [2026-10-16] evidence | Wrath nil-field guard retirement accepted (bounded)
 
 [Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--accepted-bounded) accepts independently verified saved retirement proofs, including test-only XML reconciliation; profile and widget summaries now link that owner. Earlier pending entries below are historical. No native parity, clean full startup or whole-profile acceptance; unrelated Wrath startup Lua errors remain.
@@ -24,7 +28,7 @@
 
 ## [2026-10-16] evidence | Bounded Mists shared controls accepted
 
-[Widget checkpoint](systems/widget-system.md#clean-room-control-and-anchor-follow-ups--2026-10-15) links the owning Mists proof matrix, retained diagnostics and separate source scopes. Era/Anniversary and broader acceptance remain open.
+[Widget checkpoint](systems/widget-system.md#clean-room-control-and-anchor-follow-ups--2026-10-15) links the owning Mists proof matrix, retained diagnostics and separate source scopes. [Era](../baselines/README.md#era-shared-controls--2026-10-16) and [Anniversary](../baselines/README.md#anniversary-shared-controls--2026-10-16) now have separate bounded receipts; broader acceptance remains open.
 
 ## [2026-10-16] documentation | ItemDisplay passive supplied-state checkpoint
 
