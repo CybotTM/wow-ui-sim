@@ -14,6 +14,10 @@ Account for page 17181 revision 167980 against current retail 12.1.0, not histor
 
 The saved `983f02fbf` default prefork sweep failed only on resolved/stale entries for `C_Item.IsDressableItemByID`; no new gap was reported. Reconcile the current known-gap fixture (51 → 50) with the already-modeled [dressability contract](item-dressability.md). Source rows, IDs, later-register ordering and exact set equality remain unchanged. Historical reviewed captures/counts remain historical, not rewritten. This closes only obsolete missing-endpoint expectations; native/signature/payload parity is not inferred. The original default Retail prefork body passes at compiled`1b94ffff3`; [bounded repair matrix](../wiki/investigations/fullsuite-983f02-2026-10-14.md#bounded-repair-follow-up) owns the independent proof and retained diagnostics. Historical broad FAIL is unchanged.
 
+## Current widget-query reconciliation — 2026-10-15
+
+Saved `39d38` prefork execution reports no new gap and only two resolved/stale expectations: `C_UIWidgetManager.GetSpacerVisualizationInfo` and `GetTextColumnRowVisualizationInfo`. Remove those two missing-endpoint IDs (50 → 48), matching the implemented [Spacer](ui-widget-spacer.md) and [text-column row](ui-widget-text-column-row.md) queries. Preserve exact remaining set equality and historical captures. This is publication reconciliation, not new payload/native proof; the corrected sweep is unexecuted and the full-suite failure remains recorded.
+
 ## Proof boundary
 
 192 IDs: 61 current absences, 65 publication/registration-only rows, 56 pending rows (51 exact gaps after 9.1.5 integration plus three summary contracts; two former gaps are now bounded 9.1.5 supersessions), ten metadata rows. Twenty-one unused namespace retirements closed; post-load tooltip placeholder remains classic-only. Two historical CVar defaults differ without current-state rewrites. Thirty sweeps have combined current-scope proof; first aggregate run's own 9.1.0 failure was resolved by the subsequent focused run, not hidden as an aggregate pass. See [audit](../wiki/investigations/patch-9-1-0-api-audit.md).

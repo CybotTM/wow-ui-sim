@@ -35,8 +35,6 @@
   "wt-global-api-C_TransmogCollection.GetIllusionStrings-79",
   "wt-global-api-C_TransmogCollection.GetInspectItemTransmogInfoList-80",
   "wt-global-api-C_TransmogCollection.GetPairedArtifactAppearance-83",
-  "wt-global-api-C_UIWidgetManager.GetSpacerVisualizationInfo-88",
-  "wt-global-api-C_UIWidgetManager.GetTextColumnRowVisualizationInfo-89",
   "wt-global-api-C_VoiceChat.ActivateChannelTranscription-90",
   "wt-global-api-C_VoiceChat.DeactivateChannelTranscription-91",
   "wt-global-api-C_VoiceChat.GetRemoteTtsVoices-92",
