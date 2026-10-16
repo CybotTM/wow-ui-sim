@@ -114,12 +114,23 @@ fn honor_system_enabled(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_pvp_yesterday_stats(state: &mut LuaState) -> LuaResult<u32> {
-    push_pvp_pair(state, |xp| {
+    let (kills, dishonorable, contribution) = {
+        let sim = borrow_state(state)?;
+        let honor = &sim.pvp_honor;
         (
-            xp.yesterday_honorable_kills,
-            xp.yesterday_dishonorable_kills,
+            honor.yesterday_honorable_kills,
+            honor.yesterday_dishonorable_kills,
+            honor.yesterday_contribution,
         )
-    })
+    };
+    state.push(Val::Num(kills as f64));
+    state.push(Val::Num(dishonorable as f64));
+    use crate::client_profile::{ACTIVE, ClientProfile};
+    if matches!(ACTIVE, ClientProfile::Era | ClientProfile::Anniversary) {
+        state.push(Val::Num(contribution as f64));
+        return Ok(3);
+    }
+    Ok(2)
 }
 
 fn get_pvp_this_week_stats(state: &mut LuaState) -> LuaResult<u32> {
@@ -509,7 +520,11 @@ fn locklist_map_name(map_id: u32) -> Option<&'static str> {
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     register_world_pvp_globals(lua)?;
     register_battleground_globals(lua)?;
-    if cfg!(feature = "client-mists") {
+    use crate::client_profile::{ACTIVE, ClientProfile};
+    if matches!(
+        ACTIVE,
+        ClientProfile::Mists | ClientProfile::Era | ClientProfile::Anniversary
+    ) {
         register_honor_stat_globals(lua)?;
     }
     Ok(())

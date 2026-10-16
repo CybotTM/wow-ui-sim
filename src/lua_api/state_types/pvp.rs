@@ -8,6 +8,8 @@ pub struct PvpHonorState {
     /// `GetPVPYesterdayStats()` — honorable and dishonorable kills.
     pub yesterday_honorable_kills: i32,
     pub yesterday_dishonorable_kills: i32,
+    /// Vanilla third return; supplied contribution snapshot, zero when absent.
+    pub yesterday_contribution: i32,
     /// `GetPVPThisWeekStats()` — honorable kills and contribution.
     pub this_week_honorable_kills: i32,
     pub this_week_contribution: i32,

@@ -1,7 +1,7 @@
 //! `C_CreatureInfo` helpers backed by static game data.
 
 use super::ensure_namespace;
-use crate::lua_api::game_data::{RACE_DATA, class_info_by_index};
+use crate::lua_api::game_data::RACE_DATA;
 use crate::lua_api::methods::{
     create_string, create_table, create_table_with_capacity, table_set_static,
 };
@@ -71,7 +71,11 @@ pub(super) fn register_creature_info_surface(state: &mut LuaState) -> LuaResult<
 
 fn c_creature_info_get_class_info(state: &mut LuaState) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1).unwrap_or(1);
-    let (class_label, class_file, class_id) = class_info_by_index(index);
+    let Some((class_label, class_file, class_id)) = crate::c_api::class_catalog::by_id(index)
+    else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
     let info = create_table_with_capacity(state, CREATURE_CLASS_INFO_HASH_FIELDS);
     let class_name = create_string(state, class_label);
     let class_file = create_string(state, class_file);

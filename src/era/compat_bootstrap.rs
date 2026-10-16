@@ -9,6 +9,7 @@
 const ERA_COMPAT_BOOTSTRAP_LUA: &str = include_str!("compat_bootstrap.lua");
 
 pub fn init(lua: &mut rilua::Lua) -> crate::Result<()> {
+    crate::c_api::classic_startup_data::register(lua)?;
     lua.exec(ERA_COMPAT_BOOTSTRAP_LUA)?;
     Ok(())
 }

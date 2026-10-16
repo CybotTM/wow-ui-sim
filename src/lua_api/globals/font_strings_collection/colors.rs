@@ -86,19 +86,28 @@ pub(super) const NAMED_COLOR_GLOBALS: &[(&'static str, (f64, f64, f64, f64))] = 
     ("DEBUFF_TYPE_POISON_COLOR", (0.0, 0.6, 0.0, 1.0)),
     ("DEBUFF_TYPE_BLEED_COLOR", (1.0, 0.0, 0.0, 1.0)),
     ("DEBUFF_TYPE_NONE_COLOR", (1.0, 1.0, 1.0, 0.0)),
+];
+
+fn classic_castbar_colors() -> &'static [(&'static str, (f64, f64, f64, f64))] {
+    use crate::client_profile::{ACTIVE, ClientProfile};
+    match ACTIVE {
+        ClientProfile::Mists | ClientProfile::Era | ClientProfile::Anniversary => {
+            CLASSIC_CASTBAR_COLORS
+        }
+        _ => &[],
+    }
+}
+
+const CLASSIC_CASTBAR_COLORS: &[(&str, (f64, f64, f64, f64))] = &[
     // Mists 5.5.4.70268 GlobalColor rows 395–398, literal AARRGGBB.
     // Preserve encoded alpha 0; native GetRGBA parity remains unproven.
-    #[cfg(feature = "client-mists")]
     ("CASTBAR_CLASSIC_YELLOW", (1.0, 179.0 / 255.0, 0.0, 0.0)), // 0x00ffb300
-    #[cfg(feature = "client-mists")]
-    ("CASTBAR_CLASSIC_GREEN", (0.0, 1.0, 0.0, 0.0)), // 0x0000ff00
-    #[cfg(feature = "client-mists")]
+    ("CASTBAR_CLASSIC_GREEN", (0.0, 1.0, 0.0, 0.0)),            // 0x0000ff00
     (
         "CASTBAR_CLASSIC_GRAY",
         (179.0 / 255.0, 179.0 / 255.0, 179.0 / 255.0, 0.0),
     ), // 0x00b3b3b3
-    #[cfg(feature = "client-mists")]
-    ("CASTBAR_CLASSIC_RED", (1.0, 0.0, 0.0, 0.0)), // 0x00ff0000
+    ("CASTBAR_CLASSIC_RED", (1.0, 0.0, 0.0, 0.0)),              // 0x00ff0000
 ];
 
 pub(super) const RAID_CLASS_COLORS_DATA: &[(&'static str, (f64, f64, f64, f64))] = &[
@@ -375,7 +384,7 @@ fn build_debuff_type_colors(lua: &mut rilua::Lua) -> LuaResult<Val> {
 
 pub fn register_rilua_color_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     let state = lua.state_mut();
-    for &(name, (r, g, b, a)) in NAMED_COLOR_GLOBALS {
+    for &(name, (r, g, b, a)) in NAMED_COLOR_GLOBALS.iter().chain(classic_castbar_colors()) {
         let color = make_rilua_color_table(state, r, g, b, a)?;
         set_global_val(state, name, color);
     }

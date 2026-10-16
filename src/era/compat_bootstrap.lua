@@ -62,12 +62,6 @@ end
 
 -- ─── PvP / honor stats ─────────────────────────────────────────────────────
 
-if rawget(_G, "GetPVPYesterdayStats") == nil then
-  function GetPVPYesterdayStats()
-    return 0, 0, 0
-  end
-end
-
 if rawget(_G, "GetTabardCreationCost") == nil then
   function GetTabardCreationCost() return 0 end
 end

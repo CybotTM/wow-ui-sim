@@ -328,7 +328,13 @@ fn register_progression_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> 
 }
 
 fn register_world_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
+    use crate::client_profile::{ACTIVE, ClientProfile};
     super::real::mouse_probes::register_all(lua)?;
+    if cfg!(feature = "retail-12-0-0")
+        || matches!(ACTIVE, ClientProfile::Era | ClientProfile::Anniversary)
+    {
+        super::real::publication_12_0_0::register_raid_marker_capability(lua)?;
+    }
     #[cfg(feature = "retail-12-0-0")]
     super::real::publication_12_0_0::register_all(lua)?;
     #[cfg(feature = "retail-12-0-0")]

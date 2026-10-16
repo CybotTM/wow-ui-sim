@@ -60,7 +60,6 @@ pub mod player_facing;
 pub mod player_identity;
 pub mod player_probes;
 pub mod preferred_interact;
-#[cfg(feature = "retail-12-0-0")]
 pub mod publication_12_0_0;
 #[cfg(feature = "retail-12-0-0")]
 pub(crate) mod publication_unit_12_0_0;

@@ -184,6 +184,8 @@ fn classic_a_r6_original_honor_load_and_event_project_state() {
     "#,
     )
     .expect("HonorFrame_Shared.lua:27-94 consumes modeled honor globals");
+    env.state().borrow_mut().pvp_honor.yesterday_contribution = 987;
+    env.exec("HonorFrame_OnEvent(HonorFrame, 'PLAYER_PVP_KILLS_CHANGED'); assert(HonorFrameYesterdayContributionValue:GetText() == '987')").unwrap();
     env.state()
         .borrow_mut()
         .pvp_honor
@@ -199,8 +201,13 @@ fn classic_a_r12_original_marker_menu_uses_enabled_capability() {
         &env,
         "Blizzard_CompactRaidFrames/Classic/Blizzard_CompactRaidFrameManager.lua",
     );
-    env.exec(
-        r#"
+    for enabled in [true, false] {
+        env.state()
+            .borrow_mut()
+            .plain_global_inputs
+            .raid_marker_system_enabled = enabled;
+        env.exec(
+            r#"
         local entries = {}
         local dropdown = CreateFrame('Frame')
         dropdown.SetupMenu = function(self, initialize)
@@ -217,12 +224,19 @@ fn classic_a_r12_original_marker_menu_uses_enabled_capability() {
         CompactRaidFrameManager_SetupRaidMarkerDropdown({displayFrame={leaderOptions={
             raidMarkerDropdown=dropdown, readyCheckButton=ready,
         }}})
-        assert(IsRaidMarkerSystemEnabled()) -- retained simulator enabled default
-        assert(#entries == NUM_WORLD_RAID_MARKERS and #entries > 0)
-        assert(ready:GetWidth() == 80 and dropdown:IsShown())
+        if IsRaidMarkerSystemEnabled() then
+            assert(#entries == NUM_WORLD_RAID_MARKERS and #entries > 0)
+            assert(ready:GetWidth() == 80 and dropdown:IsShown())
+        else
+            assert(#entries == 0 and not dropdown:IsShown())
+            assert(ready:GetWidth() == 104)
+        end
     "#,
-    )
-    .expect("CompactRaidFrameManager.lua:73-111 creates the real marker menu");
+        )
+        .expect(
+            "CompactRaidFrameManager.lua:73-111 creates the real marker menu or widens Ready Check",
+        );
+    }
 }
 
 #[test]
