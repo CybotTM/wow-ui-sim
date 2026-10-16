@@ -567,3 +567,226 @@ fn clearing_button_texture_hides_rendered_child_texture() {
         "Normal texture should not render after ClearNormalTexture"
     );
 }
+
+fn c7_font_env() -> wow_ui_sim::lua_api::WowLuaEnv {
+    let env = env_with_shared_xml();
+    env.exec(
+        r#"
+        local function font(name, path, size, r, g, b)
+            local object = CreateFont(name)
+            object:SetFont(path, size, "")
+            object:SetTextColor(r, g, b, 1)
+            return { object = object, path = path, size = size, color = {r, g, b, 1} }
+        end
+        C7Normal = font("C7NormalFont", "Fonts\\FRIZQT__.TTF", 12, 1, 0, 0)
+        C7Highlight = font("C7HighlightFont", "Fonts\\ARIALN.TTF", 20, 0, 1, 0)
+        C7Disabled = font("C7DisabledFont", "Fonts\\FRIZQT__.TTF", 16, 0, 0, 1)
+        C7Seed = font("C7SeedFont", "Fonts\\FRIZQT__.TTF", 9, 1, 1, 1)
+
+        C7Button = CreateFrame("Button", "C7Button", UIParent)
+        C7Button:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+        C7Button:SetSize(260, 70)
+        C7Label = C7Button:CreateFontString("C7OwnedLabel", "ARTWORK")
+        C7Label:SetFontObject(C7Seed.object)
+        C7Button:SetFontString(C7Label)
+        C7Label:ClearAllPoints()
+        C7Label:SetPoint("CENTER", C7Button, "CENTER", 2, -1)
+        C7Label:SetSize(240, 60)
+        C7Label:SetText("Wm8")
+        C7Anchor = {C7Label:GetPoint(1)}
+
+        C7NormalTexture = C7Button:CreateTexture(nil, "BACKGROUND")
+        C7NormalTexture:SetAllPoints(C7Button)
+        C7NormalTexture:SetTexture("Interface/Buttons/UI-Panel-Button-Up")
+        C7Button:SetNormalTexture(C7NormalTexture)
+        C7HighlightTexture = C7Button:CreateTexture(nil, "HIGHLIGHT")
+        C7HighlightTexture:SetAllPoints(C7Button)
+        C7HighlightTexture:SetTexture("Interface/Buttons/UI-Panel-Button-Highlight")
+        C7Button:SetHighlightTexture(C7HighlightTexture)
+        C7Button:SetPushedTextOffset(4, 3)
+        C7Button:SetNormalFontObject(C7Normal.object)
+        C7Button:SetHighlightFontObject(C7Highlight.object)
+        C7Button:SetDisabledFontObject(C7Disabled.object)
+        C7Button:Show()
+
+        -- Independent ordinary FontString: expected glyph geometry is rendered,
+        -- never guessed from a nominal font height or hardcoded pixel bounds.
+        C7Reference = CreateFrame("Frame", "C7Reference", UIParent)
+        C7Reference:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+        C7Reference:SetSize(260, 70)
+        C7ReferenceLabel = C7Reference:CreateFontString(nil, "ARTWORK")
+        C7ReferenceLabel:SetPoint("CENTER", C7Reference, "CENTER", 2, -1)
+        C7ReferenceLabel:SetSize(240, 60)
+        C7ReferenceLabel:SetText("Wm8")
+        C7Reference:Show()
+
+        function C7Check(expected)
+            assert(C7Button:GetFontString() == C7Label, "owned FontString identity")
+            assert(C7Label:GetParent() == C7Button, "owned FontString parent")
+            assert(C7Label:GetText() == "Wm8", "owned text unchanged")
+            assert(C7Label:GetDrawLayer() == "ARTWORK", "owned draw layer unchanged")
+            assert(C7Label:GetNumPoints() == 1, "owned anchor count unchanged")
+            local anchor = {C7Label:GetPoint(1)}
+            for i = 1, 5 do assert(anchor[i] == C7Anchor[i], "owned anchor " .. i) end
+            assert(C7Button:GetNormalTexture() == C7NormalTexture, "normal texture identity")
+            assert(C7Button:GetHighlightTexture() == C7HighlightTexture, "highlight texture identity")
+            assert(C7NormalTexture:GetTexture() == "Interface/Buttons/UI-Panel-Button-Up")
+            assert(C7HighlightTexture:GetTexture() == "Interface/Buttons/UI-Panel-Button-Highlight")
+            local path, size, flags = C7Label:GetFont()
+            assert(path == expected.path, "selected font path")
+            assert(size == expected.size and flags == "", "selected font size/flags")
+            local color = {C7Label:GetTextColor()}
+            for i = 1, 4 do assert(color[i] == expected.color[i], "selected color " .. i) end
+            C7ReferenceLabel:SetFontObject(expected.object)
+        end
+        "#,
+    )
+    .unwrap();
+    env
+}
+
+fn c7_assert_projection(
+    env: &wow_ui_sim::lua_api::WowLuaEnv,
+    expected: &str,
+    color: [f32; 4],
+) -> wow_ui_sim::render::QuadBatch {
+    // Observe the public child before rendering: a render-only tint is not enough.
+    env.exec(&format!("C7Check({expected})")).unwrap();
+    let actual = build_text_batch_for_button(env, "C7Button");
+    let reference = build_text_batch_for_button(env, "C7Reference");
+    let actual_bounds = glyph_vertex_bounds(&actual);
+    let reference_bounds = glyph_vertex_bounds(&reference);
+    let glyph_index = wow_ui_sim::render::shader::GLYPH_ATLAS_TEX_INDEX;
+    let actual_glyphs: Vec<_> = actual
+        .vertices
+        .iter()
+        .filter(|vertex| vertex.tex_index == glyph_index)
+        .collect();
+    let reference_glyphs: Vec<_> = reference
+        .vertices
+        .iter()
+        .filter(|vertex| vertex.tex_index == glyph_index)
+        .collect();
+    assert!(!actual_glyphs.is_empty(), "selected label must emit glyphs");
+    assert_eq!(actual_glyphs.len(), reference_glyphs.len());
+    for (actual_vertex, reference_vertex) in actual_glyphs.iter().zip(&reference_glyphs) {
+        for channel in 0..4 {
+            assert!(
+                (actual_vertex.color[channel] - color[channel]).abs() < 0.001,
+                "{expected}: glyph color {:?}",
+                actual_vertex.color
+            );
+        }
+        // Normalize translation only: width, height and each glyph's placement
+        // must match real shaping of the expected font path and size.
+        for (axis, actual_origin, reference_origin) in [
+            (0, actual_bounds.0, reference_bounds.0),
+            (1, actual_bounds.1, reference_bounds.1),
+        ] {
+            assert!(
+                ((actual_vertex.position[axis] - actual_origin)
+                    - (reference_vertex.position[axis] - reference_origin))
+                    .abs()
+                    < 0.01,
+                "{expected}: rendered glyph geometry differs on axis {axis}"
+            );
+        }
+    }
+    actual
+}
+
+fn c7_assert_reference_projection(
+    env: &wow_ui_sim::lua_api::WowLuaEnv,
+    expected: &str,
+    color: [f32; 4],
+) {
+    env.exec(&format!(
+        "assert(C7Label:GetFontObject() == {expected}.object, 'selected FontObject reference')"
+    ))
+    .unwrap();
+    c7_assert_projection(env, expected, color);
+}
+
+#[test]
+fn c7_locked_highlight_font_survives_pushed_with_independent_text_offset() {
+    let env = c7_font_env();
+    c7_assert_projection(&env, "C7Normal", [1.0, 0.0, 0.0, 1.0]);
+    env.exec("A_Admin.SetMouseOverFrame(C7Button)").unwrap();
+    c7_assert_projection(&env, "C7Highlight", [0.0, 1.0, 0.0, 1.0]);
+    env.exec("A_Admin.SetMouseOverFrame(nil)").unwrap();
+    c7_assert_projection(&env, "C7Normal", [1.0, 0.0, 0.0, 1.0]);
+    env.exec("C7Button:LockHighlight()").unwrap();
+    let highlighted = c7_assert_projection(&env, "C7Highlight", [0.0, 1.0, 0.0, 1.0]);
+    env.exec("C7Button:SetButtonState('PUSHED')").unwrap();
+    let pushed = c7_assert_projection(&env, "C7Highlight", [0.0, 1.0, 0.0, 1.0]);
+    let before = glyph_vertex_bounds(&highlighted);
+    let after = glyph_vertex_bounds(&pushed);
+    for (observed, expected) in [
+        (after.0, before.0 + 4.0),
+        (after.1, before.1 + 3.0),
+        (after.2, before.2 + 4.0),
+        (after.3, before.3 + 3.0),
+    ] {
+        assert!((observed - expected).abs() < 0.01, "pushed offset");
+    }
+    env.exec("C7Button:UnlockHighlight()").unwrap();
+    c7_assert_projection(&env, "C7Normal", [1.0, 0.0, 0.0, 1.0]);
+    env.exec("C7Button:SetButtonState('NORMAL'); C7Button:SetHighlightLocked(true)")
+        .unwrap();
+    c7_assert_projection(&env, "C7Highlight", [0.0, 1.0, 0.0, 1.0]);
+    env.exec("C7Button:SetHighlightLocked(false)").unwrap();
+    c7_assert_projection(&env, "C7Normal", [1.0, 0.0, 0.0, 1.0]);
+}
+
+#[test]
+fn c7_disabled_font_precedes_highlight_and_normal_returns_after_enable() {
+    let env = c7_font_env();
+    c7_assert_projection(&env, "C7Normal", [1.0, 0.0, 0.0, 1.0]);
+    env.exec("C7Button:Disable()").unwrap();
+    c7_assert_projection(&env, "C7Disabled", [0.0, 0.0, 1.0, 1.0]);
+    env.exec("C7Button:LockHighlight()").unwrap();
+    c7_assert_projection(&env, "C7Disabled", [0.0, 0.0, 1.0, 1.0]);
+    env.exec("C7Button:Enable()").unwrap();
+    c7_assert_projection(&env, "C7Highlight", [0.0, 1.0, 0.0, 1.0]);
+    env.exec("C7Button:Disable(); C7Button:UnlockHighlight()")
+        .unwrap();
+    c7_assert_projection(&env, "C7Disabled", [0.0, 0.0, 1.0, 1.0]);
+    env.exec("C7Button:Enable()").unwrap();
+    c7_assert_projection(&env, "C7Normal", [1.0, 0.0, 0.0, 1.0]);
+}
+
+#[test]
+fn c7_replacing_each_active_font_slot_preserves_owned_children() {
+    let env = c7_font_env();
+    env.exec(
+        r#"
+        local object = CreateFont("C7ReplacementFont")
+        object:SetFont("Fonts\\ARIALN.TTF", 18, "")
+        object:SetTextColor(1, 0, 1, 1)
+        C7Replacement = {object = object, path = "Fonts\\ARIALN.TTF", size = 18,
+                         color = {1, 0, 1, 1}}
+        "#,
+    )
+    .unwrap();
+    c7_assert_reference_projection(&env, "C7Normal", [1.0, 0.0, 0.0, 1.0]);
+    env.exec("C7Button:SetNormalFontObject(C7Replacement.object)")
+        .unwrap();
+    c7_assert_reference_projection(&env, "C7Replacement", [1.0, 0.0, 1.0, 1.0]);
+    env.exec("C7Button:LockHighlight()").unwrap();
+    c7_assert_reference_projection(&env, "C7Highlight", [0.0, 1.0, 0.0, 1.0]);
+    env.exec("C7Button:SetHighlightFontObject(C7Replacement.object)")
+        .unwrap();
+    c7_assert_reference_projection(&env, "C7Replacement", [1.0, 0.0, 1.0, 1.0]);
+    // An inactive normal-slot setter must not overwrite active highlight style.
+    env.exec("C7Button:SetNormalFontObject(C7Normal.object)")
+        .unwrap();
+    c7_assert_reference_projection(&env, "C7Replacement", [1.0, 0.0, 1.0, 1.0]);
+    env.exec("C7Button:Disable()").unwrap();
+    c7_assert_reference_projection(&env, "C7Disabled", [0.0, 0.0, 1.0, 1.0]);
+    env.exec("C7Button:SetDisabledFontObject(C7Replacement.object)")
+        .unwrap();
+    c7_assert_reference_projection(&env, "C7Replacement", [1.0, 0.0, 1.0, 1.0]);
+    env.exec("C7Button:Enable(); C7Button:UnlockHighlight()")
+        .unwrap();
+    c7_assert_reference_projection(&env, "C7Normal", [1.0, 0.0, 0.0, 1.0]);
+}
