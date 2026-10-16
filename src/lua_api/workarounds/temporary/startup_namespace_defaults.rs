@@ -1,7 +1,8 @@
 //! Explicit empty-state queries exposed after removal of C_* synthesis.
 //!
 //! Missing systems: quest-session coordination, client scenes, frame-manager
-//! visibility policy, lobby matchmaking, and covenant calling service snapshots.
+//! visibility policy, lobby matchmaking, covenant calling service snapshots,
+//! and character boost/services popup state.
 //! Retire each namespace's defaults when that backing system supplies queries
 //! (and calling request completion) through c_api. Ordinary quest/LFG/widget
 //! state does not model these separate service contracts.
@@ -60,6 +61,12 @@ install(C_CovenantCallings, "RequestCallings", function()
     -- uses the existing synchronous dispatcher; this is not a discarded request.
     FireEvent("COVENANT_CALLINGS_UPDATED", {})
 end)
+
+-- Consumer-inferred signature in BoostTutorial.lua:224, not API-doc-declared.
+-- Missing system: character boost/services popup state. User-approved false
+-- policy; retire when that state is modeled. Same consumer in Retail/PTR/Forever.
+if rawget(_G, "C_CharacterServicesPublic") == nil then C_CharacterServicesPublic = {} end
+install(C_CharacterServicesPublic, "ShouldSeeControlPopup", function() return false end)
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {

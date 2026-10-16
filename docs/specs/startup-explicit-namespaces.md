@@ -21,15 +21,16 @@ members; do not install metatable catchalls. Unsupported queue/session mutation
 commands remain absent rather than accepting and discarding inputs. Queued-only
 playlist/state/time queries remain outside this empty startup slice.
 
-## Blocked public namespace
+## Consumer-inferred public namespace
 
-Cached Retail BoostTutorial.lua:224 calls
-C_CharacterServicesPublic.ShouldSeeControlPopup(). No cached profile's
-Blizzard_APIDocumentationGenerated files declare that namespace/member.
-Do not manufacture a return type, registration profile, or popup policy.
-The existing character-services active boost fields do not establish this
-public popup policy. The staged original BoostTutorial regression remains RED
-until a documented contract and producer can be supplied.
+Cached BoostTutorial.lua:224 in Retail/PTR/Forever calls
+`C_CharacterServicesPublic.ShouldSeeControlPopup()`. No cached profile's API
+documentation declares the signature. User-approved temporary policy returns
+false on those observed profiles; original BoostTutorial initialization leaves
+its control popup hidden. This is consumer-inferred compatibility, not an
+API-doc-declared signature or native default. Existing active boost fields are
+not used to invent a popup rule. Retire this default when character boost/services
+popup state is modeled.
 
 ## Retirement
 
@@ -46,4 +47,5 @@ Tests assert dialog/mode/frame visibility, LFD button label and role-warning
 state, and calling completion payload/count/throttle. Profile surface tests
 assert declared presence, empty query outputs, and unsupported member absence.
 No build, test execution, clean startup, all-profile runtime, or native-parity
-claim. Public-namespace consumer deliberately remains blocked, not ignored.
+claim. Public popup policy was subsequently authorized from its cached consumer;
+its original-consumer regression remains required, not ignored.
