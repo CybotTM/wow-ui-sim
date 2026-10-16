@@ -47,7 +47,7 @@ The added `path_unknown_curve_token_is_rejected_without_changing_curve` establis
 - [x] Implement NONE movement/restoration after genuine API-boundary RED.
 - [x] Recover individual SMOOTH API/XML/layout-output PASS from the saved `4fc115b93` run; no duplicate execution.
 - [ ] Complete applicable fresh startup/profile checks; historical per-test proof is not full-parent acceptance.
-- [ ] Execute `path_hiding_owner_subtree_stops_playback_and_restores_existing_offset`: authored coverage starts from a nonzero pre-play offset, advances playback, hides the owning subtree, then checks stopped lifecycle and restored computed geometry before any explicit Stop. A subsequent Stop must preserve hidden state and restored geometry. This tests normal Hide's stop/restoration hook, not playback surviving Hide or exclusive explicit-Stop causality. No execution acceptance yet.
+- [x] Bounded Retail execution of `path_hiding_owner_subtree_stops_playback_and_restores_existing_offset`: test source `4b0ebcde3` against separately sealed normal Retail library `a2d2d2792`, **1 PASS / 7 filtered, exit0**. From a nonzero pre-play offset, playback advances, then normal Hide stops playback and restores computed geometry **before explicit Stop**. Subsequent Stop preserves hidden state and restored geometry. Receipt: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/path-hidden-subtree-first-20261016T122350615968Z`; independent seals/source/runtime/readability PASS: `/home/osso/.local/state/wow-ui-sim/verification/path-hidden-subtree-next/report.md`. This covers the natural Hide hook, not playback surviving Hide, exclusive explicit-Stop causality, native parity, startup, all-profile or whole-integration acceptance.
 
 ## Out of scope
 
