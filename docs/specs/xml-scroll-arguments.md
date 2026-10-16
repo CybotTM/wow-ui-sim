@@ -30,6 +30,10 @@ Producer `0c913d2ed` implements the aliases. [Saved three-case proof](../../data
 
 Cached Blizzard `SecureScrollTemplates.xml` directly uses `offset` and `delta`; the Mists `CharacterCreate.xml` range handler uses `yrange`. Vendor files remain unchanged. This is source/consumer corroboration, not a fresh native-client probe.
 
+## Current bounded saved execution
+
+Saved `03769bb00` independently accepts the two `d374c9520` ordinary/runtime timing-reconciled fixtures and cached FauxScrollFrame control within the broader scroll selection. Actual update tick restores range delivery without weakening exact payload/vararg/global-shadow assertions; the earlier missing-range failures remain historical REDs. [Shared receipt](editbox-text-position-selection.md#saved-xmlscroll-and-genuine-consumer-acceptance) owns totals, expected sentinel, private audit paths and remaining profile/native/parent limits. Direct wheel-handler invocation is not physical input proof.
+
 ## Out of scope
 
 Physical wheel input/scaling, other implicit argument names, native all-profile/GPU parity, layout changes, and vendor/UI modifications.
