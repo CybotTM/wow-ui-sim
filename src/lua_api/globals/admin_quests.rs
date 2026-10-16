@@ -6,8 +6,8 @@ use crate::lua_api::methods::borrow_state_mut;
 use crate::lua_api::sim_substates::{GossipQuestRow, GossipState, QuestRewardItem};
 use crate::lua_api::state::QuestLogEntry as RichQuestLogEntry;
 use crate::lua_bridge::{FromStack, TableBuilder};
-use rilua::LuaResult;
 use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
 
 const DEFAULT_QUEST_ID: u32 = 80000;
 const DEFAULT_QUEST_TITLE: &str = "The Lost Expedition";
@@ -26,6 +26,7 @@ pub(super) fn register_quests(b: TableBuilder) -> LuaResult<TableBuilder> {
     )?;
     b.set_function("OpenQuestNpc", open_quest_npc)?
         .set_function("OpenMultiQuestNpc", open_multi_quest_npc)?
+        .set_function("TurnInSelectedQuest", turn_in_selected_quest)?
         .set_function("CloseQuestNpc", close_quest_npc)
 }
 
@@ -121,6 +122,56 @@ pub(super) fn close_quest_npc(state: &mut LuaState) -> LuaResult<u32> {
 
     dispatch_event_now(state, "GOSSIP_CLOSED", &[])?;
     Ok(0)
+}
+
+/// Simulator-only selected-completed turn-in. No inventory/currency/XP grants.
+/// Cached QuestLogDocumentation declares questID, xpReward, moneyReward;
+/// zero rewards are authored policy, not inferred native reward amounts.
+fn turn_in_selected_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let turned_in = {
+        let mut sim = borrow_state_mut(state)?;
+        commit_selected_quest_turn_in(&mut sim)
+    };
+    if let Some(quest_id) = turned_in {
+        dispatch_event_now(
+            state,
+            "QUEST_TURNED_IN",
+            &[Val::Num(f64::from(quest_id)), Val::Num(0.0), Val::Num(0.0)],
+        )?;
+    }
+    state.push(Val::Bool(turned_in.is_some()));
+    Ok(1)
+}
+
+fn commit_selected_quest_turn_in(sim: &mut crate::lua_api::SimState) -> Option<i32> {
+    let selected = sim.selected_quest_log_id?;
+    let quest_id = i32::try_from(selected).ok()?;
+    if !sim.quest_log_entries.turn_in(quest_id) {
+        return None;
+    }
+    sim.quest_log.retain(|id| *id != selected);
+    #[cfg(feature = "client-wowforever")]
+    sim.quest_watch_types.remove(&quest_id);
+    clear_turned_in_quest_dialog(sim, quest_id);
+    Some(quest_id)
+}
+
+fn clear_turned_in_quest_dialog(sim: &mut crate::lua_api::SimState, quest_id: i32) {
+    let matches_pending = sim
+        .pending_quest_offer
+        .as_ref()
+        .is_some_and(|offer| offer.quest_id == quest_id);
+    if matches_pending {
+        sim.pending_quest_offer = None;
+    }
+    sim.selected_quest_log_id = None;
+    sim.gossip
+        .active_quests
+        .retain(|row| row.quest_id != quest_id as u32);
+    sim.gossip
+        .available_quests
+        .retain(|row| row.quest_id != quest_id as u32);
+    refresh_gossip_counts(&mut sim.gossip);
 }
 
 fn quest_row(quest_id: u32, is_complete: bool) -> GossipQuestRow {

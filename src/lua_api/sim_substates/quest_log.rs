@@ -77,6 +77,22 @@ pub struct QuestLogState {
 }
 
 impl QuestLogState {
+    /// Authored simulator transition, not native validation/reward behavior.
+    /// History alone does not block a represented completed row (including seeds).
+    pub fn turn_in(&mut self, quest_id: i32) -> bool {
+        let eligible = quest_id > 0
+            && self
+                .entries
+                .iter()
+                .any(|entry| entry.quest_id == quest_id && entry.is_complete && !entry.is_failed);
+        if !eligible {
+            return false;
+        }
+        self.entries.retain(|entry| entry.quest_id != quest_id);
+        self.completed_quest_ids.insert(quest_id);
+        true
+    }
+
     /// Snapshot the selected offer, retaining known metadata for this exact quest.
     /// Unknown ordinary offers use authored simulator policy, not native defaults.
     pub fn snapshot_gossip_offer(

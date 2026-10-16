@@ -21,5 +21,6 @@ The `A_Admin` namespace provides administrative functions for controlling simula
 - [Guild](guild.md) — SetGuildInfo, ClearGuild, JoinGuild, LeaveGuild
 - [Mail](mail.md) — AddMail, ClearInbox, SetInboxCount
 - [Premade Groups](premade-groups.md) — AddPremadeListing, ClearPremadeListings, UpdatePremadeListing
+- [Quests](quests.md) — simulator-only selected completed quest turn-in
 - [Events](events.md) — FireEvent
 - [Examples](examples.md) — Usage examples (raid healing, combat testing, transmog)

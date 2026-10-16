@@ -6,7 +6,20 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 use super::data::{SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES, WORLD_QUESTS};
-use super::handlers::{find_world_quest, is_world_quest, set_array_value};
+use super::handlers::{find_world_quest, set_array_value};
+
+/// Seed catalog availability minus this environment's recorded completions.
+/// Metadata lookup stays catalog-backed; active/map/time projections use this set.
+fn read_available_world_quests(
+    state: &LuaState,
+) -> LuaResult<Vec<&'static super::data::WorldQuest>> {
+    let sim = borrow_state(state)?;
+    let completed = &sim.quest_log_entries.completed_quest_ids;
+    Ok(WORLD_QUESTS
+        .iter()
+        .filter(|quest| !completed.contains(&quest.quest_id))
+        .collect())
+}
 
 pub fn quest_map_frame_get_focused_quest_id(state: &mut LuaState) -> LuaResult<u32> {
     let selected_quest_log_id = borrow_state(state)?.selected_quest_log_id;
@@ -37,7 +50,11 @@ pub fn quest_map_update_all_quests(state: &mut LuaState) -> LuaResult<u32> {
 pub fn get_quest_log_time_left(state: &mut LuaState) -> LuaResult<u32> {
     let selected = borrow_state(state)?.selected_quest_log_id;
     match selected {
-        Some(quest_id) if is_world_quest(quest_id as i32) => {
+        Some(quest_id)
+            if read_available_world_quests(state)?
+                .iter()
+                .any(|quest| quest.quest_id == quest_id as i32) =>
+        {
             state.push(Val::Num(SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES as f64 * 60.0));
             Ok(1)
         }
@@ -63,7 +80,8 @@ pub fn build_task_quest_info(state: &mut LuaState) -> LuaResult<u32> {
         unreachable!("create_table must return a table");
     };
 
-    let matching_world_quests = WORLD_QUESTS.iter().filter(|q| q.map_id == map_id);
+    let available = read_available_world_quests(state)?;
+    let matching_world_quests = available.into_iter().filter(|quest| quest.map_id == map_id);
     for (out_index, quest) in (1..).zip(matching_world_quests) {
         let info = create_table(state);
         table_set(state, info, "questID", Val::Num(quest.quest_id as f64));
@@ -86,13 +104,18 @@ pub fn build_task_quest_info(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn task_quest_is_active(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
-    state.push(Val::Bool(is_world_quest(quest_id)));
+    let active = read_available_world_quests(state)?
+        .iter()
+        .any(|quest| quest.quest_id == quest_id);
+    state.push(Val::Bool(active));
     Ok(1)
 }
 
 pub fn does_map_show_task_quest_objectives(state: &mut LuaState) -> LuaResult<u32> {
     let map_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
-    let shows_objectives = WORLD_QUESTS.iter().any(|quest| quest.map_id == map_id);
+    let shows_objectives = read_available_world_quests(state)?
+        .iter()
+        .any(|quest| quest.map_id == map_id);
     state.push(Val::Bool(shows_objectives));
     Ok(1)
 }
@@ -122,7 +145,10 @@ pub fn task_quest_get_quest_location(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn task_quest_time_left_minutes(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
-    if is_world_quest(quest_id) {
+    if read_available_world_quests(state)?
+        .iter()
+        .any(|quest| quest.quest_id == quest_id)
+    {
         state.push(Val::Num(SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES as f64));
         return Ok(1);
     }
@@ -131,7 +157,10 @@ pub fn task_quest_time_left_minutes(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn task_quest_time_left_seconds(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
-    if is_world_quest(quest_id) {
+    if read_available_world_quests(state)?
+        .iter()
+        .any(|quest| quest.quest_id == quest_id)
+    {
         state.push(Val::Num((SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES * 60) as f64));
         return Ok(1);
     }

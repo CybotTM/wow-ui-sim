@@ -1,3 +1,7 @@
+## [2026-10-16] source | Simulator selected quest turn-in producer
+
+[Quest implementation notes](systems/lua-api.md#simulator-selected-quest-turn-in) link the separately approved contract and integrated producer after shared Retail behavioral RED. GREEN and broader verification remain pending; existing accepted offer/watch/abandon receipts do not prove turn-in or native behavior.
+
 ## [2026-10-16] evidence | ItemDisplay combined bounded acceptance
 
 [Owner SSOT](../specs/ui-widget-item-display.md#bounded-combined-retailptr-acceptance--2026-10-16) owns separately attributed bounded Retail/PTR behavior acceptance, separate startup/CVar evidence and accepted saved default Retail check/whole-workspace formatting. Historical checkpoints and broader exclusions remain; no PTR/all-profile type-check, full-integration or parent completion.
