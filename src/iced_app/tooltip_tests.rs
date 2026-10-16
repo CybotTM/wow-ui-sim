@@ -140,6 +140,7 @@ fn single_header_tooltip_line() -> TooltipLineRender {
         font_size: TOOLTIP_HEADER_FONT_SIZE,
         wrap: false,
         measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
+        path_attachment: None,
     }
 }
 
@@ -297,6 +298,7 @@ fn tooltip_renderer_emits_inline_color_segments() {
             font_size: TOOLTIP_HEADER_FONT_SIZE,
             wrap: false,
             measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
+            path_attachment: None,
         }],
         line_spacing: TOOLTIP_LINE_SPACING,
     };
@@ -346,6 +348,7 @@ fn tooltip_renderer_wraps_inline_color_segments() {
             font_size: TOOLTIP_BODY_FONT_SIZE,
             wrap: true,
             measured_height: (TOOLTIP_BODY_FONT_SIZE * 3.0).ceil(),
+            path_attachment: None,
         }],
         line_spacing: TOOLTIP_LINE_SPACING,
     };
@@ -488,6 +491,7 @@ fn tooltip_renderer_skips_fallback_background_when_lua_nineslice_exists() {
             font_size: TOOLTIP_HEADER_FONT_SIZE,
             wrap: false,
             measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
+            path_attachment: None,
         }],
         line_spacing: TOOLTIP_LINE_SPACING,
     };
@@ -534,6 +538,7 @@ fn tooltip_renderer_keeps_opaque_center_when_lua_nineslice_exists() {
             font_size: TOOLTIP_HEADER_FONT_SIZE,
             wrap: false,
             measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
+            path_attachment: None,
         }],
         line_spacing: TOOLTIP_LINE_SPACING,
     };

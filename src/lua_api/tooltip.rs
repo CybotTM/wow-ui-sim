@@ -7,6 +7,27 @@ use crate::widget::{Anchor, AnchorPoint};
 pub enum TooltipTexture {
     FileDataId(u32),
     Atlas(String),
+    PathAttachment(TooltipPathAttachment),
+}
+
+/// Path image attached to an existing wrapped blank tooltip row (Retail U1).
+#[derive(Clone)]
+pub struct TooltipPathAttachment {
+    pub path: String,
+    pub height: f32,
+    /// Left, right, top, bottom margins in unscaled UI units.
+    pub margins: [f32; 4],
+}
+
+impl TooltipPathAttachment {
+    /// Selected U1 policy: retain the blank text row and center its image.
+    /// Vertical margins do not change reservation or centering.
+    /// Returns unscaled (row height, image offset from row top).
+    pub fn geometry(&self, font_size: f32) -> (f32, f32) {
+        let row_height = (font_size * 1.2).ceil();
+        let image_offset = (row_height - self.height) / 2.0;
+        (row_height, image_offset)
+    }
 }
 
 /// A text segment with its own color inside a tooltip line.

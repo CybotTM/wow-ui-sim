@@ -75,7 +75,12 @@ fn estimated_line_width(line: &TooltipLine, font_size: f32) -> f32 {
     } else {
         left
     };
-    if line.texture.is_some() {
+    if matches!(
+        line.texture,
+        Some(crate::lua_api::tooltip::TooltipTexture::PathAttachment(_))
+    ) {
+        text_width
+    } else if line.texture.is_some() {
         text_width.max(TEXTURE_LINE_SIZE)
     } else {
         text_width
@@ -87,7 +92,10 @@ fn estimated_text_width(text: &str, font_size: f32) -> f32 {
 }
 
 fn estimated_line_height(line: &TooltipLine, font_size: f32) -> f32 {
-    if line.texture.is_some() {
+    if let Some(crate::lua_api::tooltip::TooltipTexture::PathAttachment(attachment)) = &line.texture
+    {
+        attachment.geometry(font_size).0
+    } else if line.texture.is_some() {
         TEXTURE_LINE_SIZE
     } else {
         (font_size * 1.2).ceil()

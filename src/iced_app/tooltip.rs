@@ -7,6 +7,7 @@ use iced::{Point, Rectangle, Size};
 
 use crate::atlas::{NineSliceAtlasInfo, get_nine_slice_atlas_info};
 use crate::lua_api::SimState;
+use crate::lua_api::tooltip::{TooltipPathAttachment, TooltipTexture};
 use crate::render::QuadBatch;
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::{GlyphAtlas, emit_text_quads};
@@ -47,6 +48,7 @@ pub struct TooltipLineRender {
     pub wrap: bool,
     /// Measured height for this line (accounts for word-wrap).
     pub measured_height: f32,
+    pub path_attachment: Option<TooltipPathAttachment>,
 }
 
 pub struct TooltipTextSegmentRender {
@@ -113,7 +115,9 @@ fn measure_tooltip(state: &SimState, id: u64, font_system: &mut WowFontSystem) -
     let mut total_height: f32 = 0.0;
     for (i, line) in td.lines.iter().enumerate() {
         let font_size = tooltip_line_font_size(i);
-        let line_height = if line.wrap && !line.left_text.is_empty() {
+        let line_height = if let Some(TooltipTexture::PathAttachment(attachment)) = &line.texture {
+            attachment.geometry(font_size).0
+        } else if line.wrap && !line.left_text.is_empty() {
             measure_tooltip_text_height(
                 font_system,
                 &line.left_text,
@@ -298,6 +302,10 @@ fn tooltip_line_render(
         font_size: tooltip_line_font_size(index),
         wrap: line.wrap,
         measured_height: (tooltip_line_font_size(index) * 1.2).ceil(),
+        path_attachment: match &line.texture {
+            Some(TooltipTexture::PathAttachment(attachment)) => Some(attachment.clone()),
+            _ => None,
+        },
     }
 }
 
@@ -391,7 +399,9 @@ fn emit_tooltip_lines(
 
     for line in &data.lines {
         let font_size = scaled_tooltip_font_size(line.font_size, eff_scale);
-        let line_height = if line.wrap && !line.left_text.is_empty() {
+        let line_height = if let Some(attachment) = &line.path_attachment {
+            attachment.geometry(line.font_size).0 * eff_scale
+        } else if line.wrap && !line.left_text.is_empty() {
             text_renderer.font_sys.measure_text_height(
                 &line.left_text,
                 None,
@@ -500,6 +510,21 @@ fn emit_tooltip_line(
     placement: TooltipLinePlacement,
     eff_scale: f32,
 ) {
+    if let Some(attachment) = &line.path_attachment {
+        let (_, image_offset) = attachment.geometry(line.font_size);
+        let image_placement = TooltipLinePlacement {
+            y: placement.y + image_offset * eff_scale,
+            ..placement
+        };
+        emit_tooltip_path_attachment(
+            tr.batch,
+            attachment,
+            image_placement,
+            eff_scale,
+            line.left_color[3],
+        );
+        return;
+    }
     let font_size = scaled_tooltip_font_size(line.font_size, eff_scale);
     let right_width = line
         .right_text
@@ -515,6 +540,29 @@ fn emit_tooltip_line(
     if let Some(ref right_text) = line.right_text {
         emit_right_tooltip_text(tr, line, placement, left_width, right_text, font_size);
     }
+}
+
+fn emit_tooltip_path_attachment(
+    batch: &mut QuadBatch,
+    attachment: &TooltipPathAttachment,
+    placement: TooltipLinePlacement,
+    scale: f32,
+    alpha: f32,
+) {
+    let [left, right, _, _] = attachment.margins;
+    let bounds = Rectangle::new(
+        Point::new(placement.x + left * scale, placement.y),
+        Size::new(
+            (placement.width - (left + right) * scale).max(0.0),
+            attachment.height * scale,
+        ),
+    );
+    batch.push_textured_path(
+        bounds,
+        &attachment.path,
+        [1.0, 1.0, 1.0, alpha],
+        crate::BlendMode::Alpha,
+    );
 }
 
 fn emit_left_tooltip_text(

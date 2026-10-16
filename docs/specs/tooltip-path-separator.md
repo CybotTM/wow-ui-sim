@@ -1,5 +1,7 @@
 # Retail tooltip path separator (U1)
 
+Integration checkpoint (2026-10-16): U1 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+
 Bounded simulator contract for the original cached Retail `SocialUIUtil.AddSeparatorToTooltip` consumer. Source: `src/lua_api/frame/methods/widgets/tooltip/line_frames.rs` and `src/iced_app/tooltip.rs`. Staged proposal only; numeric behavior is preserved. Geometry below is an explicit simulator policy, not established native semantics.
 
 ## What it must do
