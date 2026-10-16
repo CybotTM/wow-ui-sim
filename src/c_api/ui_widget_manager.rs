@@ -30,6 +30,7 @@ mod icon_text_and_background_record;
 mod icon_text_and_currencies;
 mod icon_text_and_currencies_record;
 mod inputs;
+mod item_display;
 mod item_display_record;
 pub use icon_text_and_background_record::IconTextAndBackgroundRecord;
 pub use icon_text_and_currencies_record::{IconTextAndCurrenciesRecord, UiWidgetCurrencyRecord};
