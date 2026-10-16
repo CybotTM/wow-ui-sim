@@ -1,6 +1,10 @@
+## [2026-10-16] documentation | Access-restriction profile proof
+
+[Owning proof matrix](../specs/script-object-access-restrictions.md#bounded-profile-proof--2026-10-16) separates accepted saved mask/application evidence, separate capability proof, source-only bundle scope and live/GUI limits; [existing Forever investigation](investigations/ellesmereui-forever.md#aura-container-dependency-audit) links the historical boundary.
+
 ## [2026-10-16] evidence | Path Hide and Retail access restrictions
 
-[Path owner](../specs/path-control-point.md#known-gaps-current-cycle) records independent hidden-subtree restoration proof; [access owner](../specs/script-object-access-restrictions.md#bounded-retail-execution--2026-10-16) records existing Retail mask and cached-consumer execution. Forever, startup and broader profile acceptance remain separate.
+[Path owner](../specs/path-control-point.md#known-gaps-current-cycle) records independent hidden-subtree restoration proof; [access owner](../specs/script-object-access-restrictions.md#bounded-profile-proof--2026-10-16) records existing Retail mask and cached-consumer execution. Forever, startup and broader profile acceptance remain separate.
 
 ## [2026-10-16] evidence | IconTextAndCurrencies combined bounded acceptance
 
