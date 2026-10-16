@@ -129,7 +129,7 @@ Separate sealed normal PTR startup exit0: stdout `[]\n`, final `Status: CLEAN`, 
 
 Historical selector RED, populated-result RED and uncompiled source checkpoints remain historical, not current failures or acceptance. Live cache sources were inspected but not among the 33 immutable fixture inputs; no immutable historical vendor-byte authentication follows.
 
-Whole-project formatter at source `70f4c465a` observed exit0 via `/home/osso/.local/state/wow-ui-sim/handoff/item-widget-default-format-epoch.txt`; **independent formatter gate pending**. Default Cargo check **only queued** via `/home/osso/.local/state/wow-ui-sim/handoff/item-widget-default-check-admission-current.txt`; no current type-check or final-gate acceptance. No native/catalog/assets/fonts/pixels, alternate text-style activation, uncached async/pending load/cancellation race, projected animation/effect/timer activation, other-profile, whole-integration or parent-completion claim.
+Independent saved sourcegate accepted: `/home/osso/.local/state/wow-ui-sim/verification/item-widget-next/default-check-format-report.md`. Default Retail Cargo check at recorded source `70f4c465a` completed successfully (736 JSON records, zero compiler-message records); separate whole-workspace `cargo fmt --all -- --check` exited0 with empty streams. Independent source/config comparisons and all 4,279 format-manifest entries (4,278 Rust files plus root Cargo.toml) match the audited filesystem at HEAD `3faaab8a9`, covering getter `64a5576b1`. This is saved source check/format acceptance, not a PTR type-check, all-profile or broader final-gate claim. No native/catalog/assets/fonts/pixels, alternate text-style activation, uncached async/pending load/cancellation race, projected animation/effect/timer activation, other-profile, whole-integration or parent-completion claim.
 
 ## Known gaps (current cycle)
 
@@ -137,7 +137,7 @@ Whole-project formatter at source `70f4c465a` observed exit0 via `/home/osso/.lo
 - [x] Implement the modeled ItemDisplay getter/projection after populated behavioral RED: source `64a5576b1`; bounded Retail/PTR execution accepted separately above.
 - [x] Compile and execute the populated fixtures separately against the passive normal Retail library: eight unique behavioral failures before getter implementation.
 - [x] Complete bounded dual-profile getter and later-assertion acceptance: 31 fields, nullable/freshness/isolation/feed/rejection/actual secrets and completed synchronous cached-consumer assertions accepted above.
-- [ ] Independently accept whole-project formatter and complete queued default check; no current type-check/final-gate or broader parent closure.
+- [x] Independently accept saved whole-workspace formatting and default Retail Cargo check covering getter `64a5576b1`, with source/config and format-manifest equality to audited HEAD `3faaab8a9`; no PTR/all-profile type-check, broader final-gate or parent closure.
 
 ## Out of scope
 
