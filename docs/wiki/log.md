@@ -1,3 +1,7 @@
+## [2026-10-16] source | Supplied IconTextAndBackground
+
+[Manager checkpoint](systems/ui-widget-manager-state.md#icontextandbackground-producer-source--2026-10-16) links the complete supplied-record contract and retained RED. Getter compilation/GREEN remains pending; no cached-consumer or native acceptance.
+
 ## [2026-10-16] evidence | Additional bounded profile controls
 
 [Widget-system checkpoint](systems/widget-system.md#clean-room-control-and-anchor-follow-ups--2026-10-15) links separate saved PTR/Forever control receipts; [DoubleIcon owner](../specs/ui-widget-double-icon-and-text.md#bounded-ptr-preservation--2026-10-16) records additional PTR coverage. Reconciled stale Wrath cache/consumer wording against its existing owner; startup, native and all-profile gates remain separate.

@@ -145,6 +145,10 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 [Owning acceptance matrix](../../specs/ui-widget-double-icon-and-text.md#bounded-retail-producer-acceptance--2026-10-15) records getter `c3096cd6b` executed at saved source `5dfa94330`: **nine unique PASS, exit0**, with independent build/seal/full-stream runtime reconciliation PASS. Complete supplied snapshots, selector/actual-secret policy, feed ordering/atomic rejection and the unchanged cached type5 lifecycle all executed, including live unregister and later inactive feed. Nested parent/child appearances are not additional cases. Historical selector/populated REDs remain separate. Remaining profile preservation, format/check, ordinary startup and full-parent gates stay OPEN; no native/render parity or unrelated current-HEAD/C3 proof.
 
+## IconTextAndBackground producer source — 2026-10-16
+
+[Owning contract](../../specs/ui-widget-icon-text-and-background.md) owns the cached record shape, source inventory and proof ledger. Getter `2a422cb86` adds complete supplied snapshots through the shared numeric/secret selector policy; passive type4 inputs/feed and the independently reconciled missing-query RED remain separate. **Getter source only: compilation/GREEN pending.** No cached-consumer, native/catalog/render or broad completion claim follows.
+
 ## Sources
 
 - [DoubleIconAndText contract](../../specs/ui-widget-double-icon-and-text.md) — supplied-record/consumer requirements, bounded Retail acceptance matrix and separate historical selector/populated RED boundaries.
