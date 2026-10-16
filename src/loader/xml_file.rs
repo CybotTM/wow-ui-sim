@@ -65,12 +65,34 @@ fn process_element_with_exclusive_timing(
 ) -> Result<usize, LoadError> {
     let counted_before = timing.independently_counted_time();
     let process_start = Instant::now();
-    let result = process_element(env, element, xml_dir, ctx, timing);
+    let result = process_completed_top_level_element(env, element, xml_dir, ctx, timing);
     let counted_child_time = timing
         .independently_counted_time()
         .saturating_sub(counted_before);
     timing.xml_process_time += process_start.elapsed().saturating_sub(counted_child_time);
     result
+}
+
+/// Only the document-level loop owns this presentation boundary. ScopedModifier
+/// recursion and nested frame construction continue through process_element.
+fn process_completed_top_level_element(
+    env: &LoaderEnv<'_>,
+    element: &XmlElement,
+    xml_dir: &Path,
+    ctx: &AddonContext,
+    timing: &mut LoadTiming,
+) -> Result<usize, LoadError> {
+    if resolve_frame_element(element).is_none() {
+        return process_element(env, element, xml_dir, ctx, timing);
+    }
+    let constructed = process_timed_frame(env, element, ctx, timing)?;
+    if constructed && crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        // Children, bindings, lifecycle and the loading-addon-table guard have
+        // completed. Lua may still be active above a nested LoadAddOn call.
+        env.with_state(crate::lua_api::editbox_update::flush_state)
+            .map_err(|error| LoadError::Lua(error.to_string()))?;
+    }
+    Ok(0)
 }
 
 /// Process a single top-level XML element.
@@ -117,7 +139,7 @@ fn process_element(
             Ok(0)
         }
         XmlElement::Binding(_) | XmlElement::ModifiedClick(_) => Ok(0),
-        _ => process_timed_frame(env, element, ctx, timing),
+        _ => process_timed_frame(env, element, ctx, timing).map(|_| 0),
     }
 }
 
@@ -126,11 +148,11 @@ fn process_timed_frame(
     element: &XmlElement,
     ctx: &AddonContext,
     timing: &mut LoadTiming,
-) -> Result<usize, LoadError> {
+) -> Result<bool, LoadError> {
     let frame_start = Instant::now();
-    process_frame_element(env, element, ctx, timing)?;
+    let constructed = process_frame_element(env, element, ctx, timing)?;
     timing.xml_frame_create_time += frame_start.elapsed();
-    Ok(0)
+    Ok(constructed)
 }
 
 fn top_level_animation(element: &XmlElement) -> Option<&crate::xml::AnimationXml> {
@@ -512,14 +534,15 @@ fn process_frame_element(
     element: &XmlElement,
     ctx: &AddonContext,
     timing: &mut LoadTiming,
-) -> Result<(), LoadError> {
+) -> Result<bool, LoadError> {
     let Some((frame_xml, widget_type, intrinsic)) = resolve_frame_element(element) else {
-        return Ok(());
+        return Ok(false);
     };
 
     let _addon_table_guard = LoadingAddonTableGuard::install(env, ctx.table);
-    create_frame_from_xml(env, frame_xml, widget_type, None, None, intrinsic, timing)?;
-    Ok(())
+    let created =
+        create_frame_from_xml(env, frame_xml, widget_type, None, None, intrinsic, timing)?;
+    Ok(created.is_some())
 }
 
 struct LoadingAddonTableGuard<'env, 'lua> {

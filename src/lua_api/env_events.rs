@@ -7,7 +7,7 @@ use crate::lua_api::methods::{
     call_function as call_rilua_function, create_string, frame_ref, val_to_string,
 };
 use crate::lua_api::script_helpers::{
-    call_error_handler, event_matches_unit_filter, get_event_listeners, get_script,
+    call_error_handler_state, event_matches_unit_filter, get_event_listeners, get_script,
     get_scripts_for_dispatch,
 };
 use rilua::{LuaApi, LuaApiMut, Val};
@@ -126,11 +126,11 @@ fn log_widget_handler_timing(
     );
 }
 
-fn widget_handler_source_label(lua: &rilua::Lua, handler: Val) -> Option<String> {
+fn widget_handler_source_label(state: &rilua::vm::state::LuaState, handler: Val) -> Option<String> {
     let Val::Function(func_ref) = handler else {
         return None;
     };
-    handler_timing::lua_closure_source_label(lua.state(), func_ref)
+    handler_timing::lua_closure_source_label(state, func_ref)
 }
 
 fn widget_handler_error_message(
@@ -339,38 +339,14 @@ impl WowLuaEnv {
         handler: Val,
         call_args: &[Val],
     ) {
-        let start = Instant::now();
-        self.state.borrow_mut().executing_addon_index = addon_idx;
-        let call_result = call_budgeted_widget_handler(
+        call_widget_handler_state(
             lua.state_mut(),
-            widget_id,
-            handler_name,
-            handler,
-            call_args,
-        );
-        if let Err(error) = call_result {
-            let source = widget_handler_source_label(lua, handler);
-            let error = widget_handler_error_message(
-                &self.state,
-                widget_id,
-                addon_idx,
-                handler_name,
-                source.as_deref(),
-                &error,
-            );
-            call_error_handler(lua, &error);
-        }
-        self.state.borrow_mut().executing_addon_index = None;
-        let elapsed = start.elapsed();
-        record_addon_time(&self.state, addon_idx, &start);
-        let source = widget_handler_source_label(lua, handler);
-        log_widget_handler_timing(
             &self.state,
             widget_id,
             addon_idx,
             handler_name,
-            elapsed,
-            source.as_deref(),
+            handler,
+            call_args,
         );
     }
 
@@ -565,6 +541,88 @@ impl WowLuaEnv {
 
         Ok(false)
     }
+}
+
+/// Same binding/filter, budget, error and timing policy as fire_script_handler.
+/// Active loader callers must not acquire the Lua RefCell again.
+pub(crate) fn fire_script_handler_state(
+    state: &mut rilua::vm::state::LuaState,
+    widget_id: u64,
+    handler_name: &str,
+    extra_args: Vec<Val>,
+) -> Result<()> {
+    let sim = state
+        .app_data::<super::env::WowLuaAppData>()
+        .map(|data| Rc::clone(&data.sim_state))
+        .ok_or_else(|| crate::Error::Other("missing WowLuaAppData".to_string()))?;
+    let addon_idx = sim
+        .borrow()
+        .widgets
+        .get(widget_id)
+        .and_then(|frame| frame.owner_addon);
+    let handlers = get_scripts_for_dispatch(state, widget_id, handler_name);
+    if handlers.is_empty() {
+        return Ok(());
+    }
+    let frame = frame_ref(state, widget_id)?;
+    let mut call_args = Vec::with_capacity(extra_args.len() + 1);
+    call_args.push(frame);
+    call_args.extend(extra_args);
+    // The shared host policy clears its owner at return, as before. This active
+    // entry point additionally restores the caller's owner after nested loading.
+    let previous_addon = sim.borrow().executing_addon_index;
+    for handler in handlers {
+        call_widget_handler_state(
+            state,
+            &sim,
+            widget_id,
+            addon_idx,
+            handler_name,
+            handler,
+            &call_args,
+        );
+    }
+    sim.borrow_mut().executing_addon_index = previous_addon;
+    Ok(())
+}
+
+fn call_widget_handler_state(
+    state: &mut rilua::vm::state::LuaState,
+    sim: &Rc<RefCell<SimState>>,
+    widget_id: u64,
+    addon_idx: Option<u16>,
+    handler_name: &str,
+    handler: Val,
+    call_args: &[Val],
+) {
+    let start = Instant::now();
+    sim.borrow_mut().executing_addon_index = addon_idx;
+    let call_result =
+        call_budgeted_widget_handler(state, widget_id, handler_name, handler, call_args);
+    if let Err(error) = call_result {
+        let source = widget_handler_source_label(state, handler);
+        let error = widget_handler_error_message(
+            sim,
+            widget_id,
+            addon_idx,
+            handler_name,
+            source.as_deref(),
+            &error,
+        );
+        call_error_handler_state(state, &error);
+    }
+    sim.borrow_mut().executing_addon_index = None;
+    let elapsed = start.elapsed();
+    record_addon_time(sim, addon_idx, &start);
+    let source = widget_handler_source_label(state, handler);
+    log_widget_handler_timing(
+        sim,
+        widget_id,
+        addon_idx,
+        handler_name,
+        elapsed,
+        source.as_deref(),
+    );
 }
 
 fn call_budgeted_widget_handler(

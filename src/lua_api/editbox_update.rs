@@ -3,9 +3,11 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, Val};
 
 use super::env::{WowLuaAppData, WowLuaEnv};
+use super::state::SimState;
 use crate::render::editbox_layout::{
     EditBoxLayoutRequest, PreparedEditBoxLayout, prepare_editbox_layout,
 };
@@ -27,13 +29,42 @@ struct EditBoxUpdate {
 }
 
 pub(crate) fn flush(env: &WowLuaEnv) -> crate::Result<()> {
-    let fonts = font_system(env);
-    for id in editbox_ids(env) {
-        let Some(update) = refresh_editbox(env, id, fonts.as_ref()) else {
+    let fonts = {
+        let mut lua = env.rilua_mut();
+        lua.state_mut()
+            .app_data::<WowLuaAppData>()
+            .and_then(|data| data.font_system.clone())
+    };
+    flush_updates(env.state(), fonts.as_ref(), |id, name, args| {
+        env.fire_script_handler(id, name, args)
+    })
+}
+
+/// The loader may already be executing inside Lua. Never borrow its owning cell.
+pub(crate) fn flush_state(state: &mut LuaState) -> crate::Result<()> {
+    let (sim, fonts) = {
+        let data = state
+            .app_data::<WowLuaAppData>()
+            .ok_or_else(|| crate::Error::Other("missing WowLuaAppData".to_string()))?;
+        (Rc::clone(&data.sim_state), data.font_system.clone())
+    };
+    flush_updates(&sim, fonts.as_ref(), |id, name, args| {
+        super::env_events::fire_script_handler_state(state, id, name, args)
+    })
+}
+
+fn flush_updates(
+    sim: &Rc<RefCell<SimState>>,
+    fonts: Option<&FontSystem>,
+    mut dispatch: impl FnMut(u64, &str, Vec<Val>) -> crate::Result<()>,
+) -> crate::Result<()> {
+    for id in editbox_ids(sim) {
+        let Some(update) = refresh_editbox(sim, id, fonts) else {
             continue;
         };
+        // Preparation and commit have released every state/font borrow here.
         if let Some((x, y, width, height)) = update.cursor {
-            env.fire_script_handler(
+            dispatch(
                 id,
                 "OnCursorChanged",
                 vec![
@@ -45,29 +76,22 @@ pub(crate) fn flush(env: &WowLuaEnv) -> crate::Result<()> {
             )?;
         }
         if let Some(user_input) = update.text_changed {
-            env.fire_script_handler(id, "OnTextChanged", vec![Val::Bool(user_input)])?;
+            dispatch(id, "OnTextChanged", vec![Val::Bool(user_input)])?;
         }
     }
     Ok(())
 }
 
-fn font_system(env: &WowLuaEnv) -> Option<FontSystem> {
-    let mut lua = env.rilua_mut();
-    lua.state_mut()
-        .app_data::<WowLuaAppData>()
-        .and_then(|data| data.font_system.clone())
-}
-
-fn editbox_ids(env: &WowLuaEnv) -> Vec<u64> {
-    let mut sim = env.state().borrow_mut();
+fn editbox_ids(sim: &Rc<RefCell<SimState>>) -> Vec<u64> {
+    let mut sim = sim.borrow_mut();
     sim.ensure_layout_rects();
     let mut ids = sim.widgets.iter_editbox_ids().collect::<Vec<_>>();
     ids.sort_unstable();
     ids
 }
 
-fn read_layout_refresh(env: &WowLuaEnv, id: u64) -> LayoutRefresh {
-    let sim = env.state().borrow();
+fn read_layout_refresh(sim: &Rc<RefCell<SimState>>, id: u64) -> LayoutRefresh {
+    let sim = sim.borrow();
     let Some(frame) = sim.widgets.get(id) else {
         return LayoutRefresh::Unavailable;
     };
@@ -87,13 +111,17 @@ fn read_layout_refresh(env: &WowLuaEnv, id: u64) -> LayoutRefresh {
     }
 }
 
-fn refresh_editbox(env: &WowLuaEnv, id: u64, fonts: Option<&FontSystem>) -> Option<EditBoxUpdate> {
-    match read_layout_refresh(env, id) {
+fn refresh_editbox(
+    sim: &Rc<RefCell<SimState>>,
+    id: u64,
+    fonts: Option<&FontSystem>,
+) -> Option<EditBoxUpdate> {
+    match read_layout_refresh(sim, id) {
         LayoutRefresh::Unavailable => None,
-        LayoutRefresh::Unchanged => take_text_change(env, id),
+        LayoutRefresh::Unchanged => take_text_change(sim, id),
         LayoutRefresh::Changed(input) => {
             let layout = prepare_layout(fonts, &input);
-            commit_presentation(env, id, input, layout)
+            commit_presentation(sim, id, input, layout)
         }
     }
 }
@@ -142,7 +170,7 @@ fn frame_cursor_geometry(
 }
 
 fn commit_presentation(
-    env: &WowLuaEnv,
+    sim: &Rc<RefCell<SimState>>,
     id: u64,
     input: EditBoxLayoutInput,
     layout: Option<PreparedEditBoxLayout>,
@@ -151,7 +179,7 @@ fn commit_presentation(
         .as_ref()
         .and_then(|layout| layout.cursor)
         .map(|cursor| frame_cursor_geometry(&input, cursor));
-    let mut sim = env.state().borrow_mut();
+    let mut sim = sim.borrow_mut();
     let frame = sim.widgets.get_mut(id)?;
     let presentation = frame.editbox_presentation_mut();
     presentation.input = Some(input);
@@ -165,8 +193,8 @@ fn commit_presentation(
     })
 }
 
-fn take_text_change(env: &WowLuaEnv, id: u64) -> Option<EditBoxUpdate> {
-    let mut sim = env.state().borrow_mut();
+fn take_text_change(sim: &Rc<RefCell<SimState>>, id: u64) -> Option<EditBoxUpdate> {
+    let mut sim = sim.borrow_mut();
     let frame = sim.widgets.get_mut(id)?;
     let text_changed = frame.editbox_presentation.as_mut()?.take_text_change();
     Some(EditBoxUpdate {

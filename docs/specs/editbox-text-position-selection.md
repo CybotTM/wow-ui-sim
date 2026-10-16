@@ -169,6 +169,12 @@ Inspected genuine cache originals under `/home/osso/.cache/wow-ui-sim/blizzard-u
 
 `a17f544af` adds `tests/wrath_scrolling_cursor.rs::original_wrath_startup_error_panel_has_cursor_before_direct_scrolling_update`. Focused direct-rustc execution against the sealed c06 Wrath library reaches the actual FrameXML load and fails its cursor-error assertion: 1 FAIL / 3 filtered, exit101, with 28 original nil-cursor records. Private receipt: `verification/wrath-source-current/wrath-startup-cursor-regression-red-20261016T083549660554Z` under the same state root. This is the bare FrameXML boundary, not the complete startup's 34-occurrence count or proof that existing deferred timing violates a native contract. Nil-field guard stays; no setter timing change follows from this attribution. [Failing startup inventory](../baselines/README.md#wrath-lua-errors) is retained without blessing it as clean; check and broader profile gates remain open.
 
+### Wrath active-state presentation boundary — unverified
+
+The original startup RED above grounds this simulator-side change: successful nonvirtual top-level XML frame construction in Wrath flushes actual font-backed EditBox presentation before the next element. Nested `LoadAddOn` uses its active LuaState rather than reborrowing the owning Lua cell. Ordinary updates and loader presentation share layout/commit code; both retain existing script filtering, bindings, protected calls, owner budgets, diagnostics and timing. Cursor notification precedes pending text notification, with state/font borrows released before callbacks.
+
+`active_nested_load_addon_xml_cursor_precedes_original_synchronous_consumer` adds an actual nested-loading/XML-binding fixture using the unchanged pinned scrolling consumer. That new fixture and the implemented boundary remain unexecuted; compilation, original startup GREEN, explicit ordering proof and normal-update preservation are pending. The Wrath post-load guard remains unchanged. No native timing or whole-profile acceptance follows.
+
 ## Bounded Mists execution — 2026-10-16
 
 [Shared Mists owner matrix](../baselines/README.md#mists-shared-controls--2026-10-16) owns independently accepted saved results, provenance, diagnostics and remaining profile limits. This supplements historical evidence; the Wrath guard and original pre-tick regression remain separate.
