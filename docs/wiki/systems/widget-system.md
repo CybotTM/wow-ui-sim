@@ -86,7 +86,9 @@ Historical pre-fix GPU evidence records zero thumb pixels and `THUMB_NO_ANCHOR_R
 
 ## WidgetType Enum (18 types, `src/widget/mod.rs`)
 
-Frame, Button, FontString, Texture, EditBox, ScrollFrame, Slider, CheckButton, StatusBar, Cooldown, Model (stub), ModelScene (stub), PlayerModel, ColorSelect, MessageFrame, SimpleHTML (stub), GameTooltip, Minimap.
+Frame, Button, FontString, Texture, EditBox, ScrollFrame, Slider, CheckButton, StatusBar, Cooldown, Model (stub), ModelScene (stub), PlayerModel, ColorSelect, MessageFrame, SimpleHTML, GameTooltip, Minimap.
+
+[[simple-html]] describes the bounded structured block/font-role/anchor implementation; plain GetText projection remains separate. [Owning contract](../../specs/simple-html-structured-content.md) and [proof limits](../../baselines/approved-batch-2026-10-16.md) exclude full HTML/native acceptance.
 
 `from_str()` maps WoW aliases: "ItemButton" → Button, "ScrollingMessageFrame" → MessageFrame.
 

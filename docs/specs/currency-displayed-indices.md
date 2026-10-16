@@ -1,8 +1,8 @@
-# Retail displayed currency indices — B5 proposal
+# Retail displayed currency indices — B5
 
-Integration checkpoint (2026-10-16): B5 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+Integration checkpoint (2026-10-16): original Retail consumer behavioral RED → GREEN, preservation and startup observation recorded in [bounded proof](../baselines/approved-batch-2026-10-16.md).
 
-Status: staged, uncompiled/unexecuted. Simulator policy proposal, not native parity.
+Status: implemented simulator policy with bounded Retail proof, not native parity.
 Authority: 2026-10-16 B5 receipt; collapse/expand first. Watched and unused are independently selectable follow-ups, not part of base acceptance.
 
 ## What it must do
@@ -31,11 +31,11 @@ Cases: 19 baseline rows; first collapse ->14; shifted second-header collapse ->8
 
 Cached source: `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_TokenUI/Blizzard_TokenUI.lua:23-31,363-404,459-475`; XML `:4-8` binds original header mixin/template. Cache content is mutable; handoff README records inspected hashes.
 
-Predicted RED only: absent modeled ExpandCurrencyList may return through namespace default handling without changing rows, causing `B5: children must disappear` (19 versus14). A missing-method exception is an earlier registration failure, not the intended behavioral RED. Loader, template or provider setup failure is NOT accepted RED. No execution occurred; producer must not land until the owner records reached behavioral RED at this boundary.
+Observed tests-only RED: original collapse left 19 rows instead of 14 (`B5: children must disappear`). Loader/template/provider setup completed first. Producer then made the original-consumer cases GREEN.
 
 ## Known gaps (current cycle)
 
-- [ ] Reached behavioral RED, compilation/GREEN, stock startup lua-errors and profile-preservation proof are not executed.
+- [x] Retail behavioral RED/GREEN, existing currency preservation and startup observation executed; see the bounded proof limits.
 - [ ] Index-selected siblings without an existing modeled reader (for example GetCurrencyListLink) remain outside this producer; no blanket list API coverage.
 
 ## Out of scope

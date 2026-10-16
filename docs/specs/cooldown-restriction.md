@@ -1,6 +1,6 @@
 # Cooldown restriction input and charge-table secrecy
 
-Integration checkpoint (2026-10-16): SS-P1 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+Integration checkpoint (2026-10-16): SS-P1 Retail seven-case RED → GREEN, existing charge/cooldown preservation and separate startup observation recorded in [bounded proof](../baselines/approved-batch-2026-10-16.md). No native-parity claim.
 
 An explicit `SimState.cooldowns_restricted` input controls the zero-argument `C_Secrets.ShouldCooldownsBeSecret()` predicate and numeric secrecy on three charge tables: `C_Spell.GetSpellCharges`, `C_ActionBar.GetActionCharges`, and `C_SpellBook.GetSpellBookItemCharges`. Policy and new book-table registration require both `retail-12-0-5` and mainline (`profile-retail` or `client-ptr`). Older queries/profile defaults remain unchanged. Existing five-field charge input stays unchanged. See [charge model](../wiki/systems/spell-charge-state.md).
 
@@ -45,9 +45,9 @@ Wrapping all four unannotated numbers whenever the explicit restriction input is
 
 This is an explicitly approved simulator operation, not native identifier-domain acceptance or the full `AllowedWhenTainted` argument matrix. Consumer integration pins published rilua `ddf18d7bf13aa50f873a5792e0873c6c8a0db5a3`. Its five new tests reached actual scaffold RED: two rejection controls passed and three host-consumption cases failed. The implemented API's first GREEN build was safety-aborted for sustained host memory pressure; no test ran in that attempt. That abort remains historical. Saved source `70ebaee0e` subsequently compiled normal Retail/PTR libraries and reached [bounded consumer GREEN](#bounded-retailptr-selector-acceptance--2026-10-16). Dependency own five-test GREEN remains unproven. First/third checklist items retain open broader selector/alias/kind/profile matrices; source inspection is not exhaustive runtime or native trust-boundary proof.
 
-### SS-P1 numeric-secret cooldown/LoC selectors (approved; proof pending)
+### SS-P1 numeric-secret cooldown/LoC selectors (bounded Retail proof)
 
-Approved bounded slice; staged tests and producer only. No execution, GREEN, deployment, or native-parity proof.
+Approved bounded slice with observed Retail RED before producer and seven-case GREEN afterward. No deployment/native-parity claim; PTR-specific consumer execution is not established.
 
 - [ ] Under the existing mainline `retail-12-0-5` gate, accept authentic numeric-secret selectors in `C_Spell.GetSpellCooldown`, `GetSpellChargeDuration`, `GetSpellCooldownDuration`, `GetSpellLossOfControlCooldownInfo`, and `GetSpellLossOfControlCooldownDuration`, for secure and tainted callers. Consume the selector only inside the host lookup; leave the wrapper secret, caller taint intact, and existing action/book guards unchanged.
 - [ ] Preserve current producer policies, independent of selector secrecy. With `cooldowns_restricted` false/true/false, cooldown and LoC tables remain public; their timing/rate numbers follow that restriction input and retain configured payloads. Existing flags remain public. Charge/cooldown/active-LoC duration objects and their timing remain nonsecret with unchanged rate semantics. The already-integrated `GetSpellCharges` precedent is not expanded into new output exposure.
@@ -55,7 +55,7 @@ Approved bounded slice; staged tests and producer only. No execution, GREEN, dep
 - [ ] Preserve exact empty-result policies with no GCD for unknown numeric IDs and known spells lacking rows: cooldown returns one inactive enabled table (0/0/1 timing/rate, restriction still applies); cooldown duration returns one public zero-span object; charge duration and LoC info return one nil; absent LoC duration returns zero values. Secret selectors do not fabricate records.
 - [ ] Execute the original cached Retail `Blizzard_ActionBar/Shared/ActionButton.lua` defaults/update/apply block unchanged against actual APIs and Cooldown widgets. Its `ActionButton_UpdateCooldown` calls cooldown before charges before LoC. Assert all three configured widget timings/rates, then LoC replacement clears normal/charge timing while retaining LoC timing. Cover unrestricted secure/tainted callers and restricted secure callers; preserve the separate restricted-tainted widget setter boundary rather than authorizing it here.
 
-Proposed behavioral coverage: `tests/cooldown_restriction.rs::ssp1` (seven tests; five endpoint cases, empty-result controls, ordered original consumer). Tests inject authentic host-secret numeric wrappers into a minimal fixture; they do not establish that the live consumer normally receives secret spell IDs, native identifier acceptance, native output policies, or rendered pixels. Runtime consumer fixture requires the original Retail cache and fails explicitly if unavailable; no reconstructed fallback is supplied. Predicted RED reasons and exact cache provenance accompany the staging patch, not execution evidence.
+Observed bounded behavioral coverage: `tests/cooldown_restriction.rs::ssp1` (seven tests; five endpoint cases, empty-result controls, ordered original consumer). Tests inject authentic host-secret numeric wrappers into a minimal fixture; they do not establish that the live consumer normally receives secret spell IDs, native identifier acceptance, native output policies, or rendered pixels. Runtime consumer fixture requires the original Retail cache and fails explicitly if unavailable; no reconstructed fallback is supplied. Actual RED/GREEN scope and retained execution provenance are linked in the bounded proof checkpoint above.
 
 ## How it works
 

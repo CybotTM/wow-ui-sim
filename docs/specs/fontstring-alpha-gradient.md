@@ -1,8 +1,8 @@
-# FontString alpha gradient (T4, proposed simulator policy)
+# FontString alpha gradient (T4, approved simulator policy)
 
-Integration checkpoint (2026-10-16): T4 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+Integration checkpoint (2026-10-16): user approved the scalar/taper/completion policy; Retail/Wrath API and renderer RED → GREEN recorded in [bounded proof](../baselines/approved-batch-2026-10-16.md). No native-parity claim.
 
-FontString text reveal and its completion boolean. Producer: `src/lua_api/frame/methods/misc/alpha_gradient.rs`; rendering: `src/render/glyph.rs`. This staged contract requires policy approval and executed behavioral RED before producer integration; it does not establish native parity. See [rendering](../rendering-pipeline.md).
+FontString text reveal and its completion boolean. Producer: `src/lua_api/frame/methods/misc/alpha_gradient.rs`; rendering: `src/render/glyph.rs`. The contract was approved and its tested API/render boundaries reached behavioral RED before producer integration; it does not establish native parity. See [rendering](../rendering-pipeline.md).
 
 ## What it must do
 
@@ -19,7 +19,7 @@ FontString text reveal and its completion boolean. Producer: `src/lua_api/frame/
 
 ## Implementation inventory
 
-- `src/widget/frame_types.rs`: stored gradient and proposed scalar alpha calculation.
+- `src/widget/frame_types.rs`: stored gradient and scalar alpha calculation.
 - `src/lua_api/frame/methods/misc/alpha_gradient.rs`: setter state and completion result.
 - `src/render/glyph.rs`, `src/render/glyph/text_emit.rs`: shaped cluster positions and alpha paint.
 - `src/iced_app/quad_builders.rs`: FontString paint and colored-segment offsets.
@@ -27,15 +27,15 @@ FontString text reveal and its completion boolean. Producer: `src/lua_api/frame/
 ## Tests asserting this spec
 
 - `tests/fontstring_alpha_gradient.rs`: scalar/markup completion, replacement, clearing and empty text.
-- `src/iced_app/quad_builders_alpha_gradient_tests.rs`: concrete emitted glyph alpha and unchanged geometry; original cached consumer callbacks. Predicted behavioral RED only; no builds/runs authorized during staging.
+- `src/iced_app/quad_builders_alpha_gradient_tests.rs`: concrete emitted glyph alpha and unchanged geometry; original cached consumer callbacks are separate, currently blocked proof.
 
 Public consumer citations (cache root `~/.cache/wow-ui-sim/blizzard-ui`): Wrath `FrameXML/QuestInfo.lua:3-16,479-492`, constants `FrameXML/QuestFrame.lua:4-6`; Mists `AddOns/Blizzard_UIPanels_Game/Classic/QuestFrame.lua:4-6,799-814`, dependent helpers `AddOns/Blizzard_UIPanels_Game/Wrath/QuestInfo.lua:919-945`. Wrath's cache places the consumer beside AddOns, not inside it; tests use that literal location, without an alternate-source fallback.
 
 ## Known gaps (current cycle)
 
-- [ ] Threshold/units are a proposed simulator choice, not separately approved by the shortlist receipt.
-- [ ] Execute behavioral RED on tests-only patch, then approve policy before integrating producer.
-- [ ] Compile and run both W/M fixtures, rendering preservation, colored/Unicode cluster paint, shadow/outline and ordinary startup checks; staged source review is not execution evidence.
+- [x] User separately approved units/taper/completion; API and three renderer cases per Retail/Wrath profile reached RED then GREEN.
+- [ ] Original Wrath quest callbacks remain blocked by legacy PlaySound string input. Main requires rerun only after `wrath-fixes` and this branch merge.
+- [ ] Mists fixture, automatic profile selection, native and broader acceptance remain unexecuted. Startup observations are separate and Wrath remains a failing compatibility inventory.
 
 ## Out of scope
 

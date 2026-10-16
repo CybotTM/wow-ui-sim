@@ -1,6 +1,6 @@
 # SimpleHTML structured content (H1)
 
-Integration checkpoint (2026-10-16): H1 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+Integration checkpoint (2026-10-16): Retail/Wrath original-consumer RED → GREEN, existing SimpleHTML preservation and separate startup observations recorded in [bounded proof](../baselines/approved-batch-2026-10-16.md). No native-parity claim.
 
 Bounded simulator contract for paragraph/header geometry and HTML anchor callbacks. Sources live in `src/lua_api/simple_html/`, text API methods and GUI emission/input. Approval: H1, 2026-10-16. This is not native-parity evidence.
 
@@ -30,8 +30,8 @@ Bounded simulator contract for paragraph/header geometry and HTML anchor callbac
 
 ## Known gaps (current cycle)
 
-- [ ] All new tests are staged and unexecuted. Behavioral RED is predicted, not observed. Producers must not land before an observed in-scope RED.
-- [ ] Build/type-check, runtime, profile/startup and native verification remain open.
+- [x] Both profile fixtures reached missing-heading-color RED before producer; Retail callback/geometry and Wrath content geometry became GREEN. XML font roles resolve the actual created frame name, not an invented `__frame_ID` global; pointer fixtures use an anchored ancestor.
+- [ ] Full glue/game startup and routing, other-profile/native/asset acceptance remain unproved. Final verifier gates remain separate from these bounded builds/tests.
 
 ## Out of scope
 

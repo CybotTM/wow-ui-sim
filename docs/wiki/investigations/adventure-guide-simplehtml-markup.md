@@ -30,3 +30,17 @@ Coverage:
 - `render::tests::strips_spell_link_before_wow_newline_escape`
 - `render::text::tests::converts_wow_newline_escape`
 - `render::text::tests::strips_spell_link_before_wow_newline_escape`
+
+## Current boundary
+
+This history concerns the flattened `text_stripped`/GetText projection, not structured document geometry. [[simple-html]] owns the later shared block/height/glyph-region presentation model; it retains this projection separately.
+
+## Sources
+
+- [Text API](../../../src/lua_api/frame/methods/text_attribute_event/text.rs)
+- [Structured contract](../../specs/simple-html-structured-content.md)
+
+## See Also
+
+- [[simple-html]] — structured rendering and link input
+- [[widget-system]] — frame representation

@@ -1,6 +1,6 @@
 # Supplied spell-action usability
 
-Integration checkpoint (2026-10-16): G3 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+Integration checkpoint (2026-10-16): spell kind explicitly approved; Retail/Wrath behavioral RED → GREEN and preservation observed. See [bounded proof](../baselines/approved-batch-2026-10-16.md); no native-parity claim.
 
 G3 supplies usability for existing spell actions to the namespace query and public button consumer. State belongs to `src/c_api/action_usability.rs`; see [Lua API architecture](../lua-api.md). This is a simulator contract, not a native resource-rule claim.
 
@@ -29,7 +29,7 @@ G3 supplies usability for existing spell actions to the namespace query and publ
 
 ## Known gaps (current cycle)
 
-- [ ] Staged only: compile, observed behavioral RED before producer, GREEN and profile preservation remain unexecuted. Patch applicability is not behavior proof.
+- [x] Both profile cases compiled and reached original color assertions before producer; both became GREEN after producer. Full Retail ActionButtonMixin, native and broader profile acceptance remain unproved.
 - [ ] Macro/outfit checks preserve occupancy-query/color behavior only, not action execution or broader action-kind acceptance.
 
 ## Out of scope

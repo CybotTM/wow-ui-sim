@@ -1,8 +1,8 @@
 # Retail watched currency mutation — optional B5 sub-slice
 
-Integration checkpoint (2026-10-16): B5-watch producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+Integration checkpoint (2026-10-16): independently selected watched slice reached original-consumer RED → GREEN; [bounded proof](../baselines/approved-batch-2026-10-16.md). No native-parity claim.
 
-Status: staged, not selected by base B5 acceptance; uncompiled/unexecuted. Proposed simulator contract only.
+Status: implemented by explicit follow-up selection; unused grouping remains deferred. Simulator contract only.
 
 ## What it must do
 
@@ -26,9 +26,10 @@ Status: staged, not selected by base B5 acceptance; uncompiled/unexecuted. Propo
 
 ## Known gaps (current cycle)
 
-- [ ] Compilation, reached RED/GREEN, startup and profile-preservation gates remain unexecuted.
+- [x] Retail original watch mutation RED/GREEN, currency preservation and startup observation executed.
+- [ ] Modified-click branch, removed-record mutation and other-profile/native acceptance are not established by the selected watch case.
 
-Predicted RED on base-only producer: missing watch mutation leaves Honor watched and/or other removals unchanged, so backpack-empty assertion fails; an earlier missing-function error is registration evidence only. Run the test addition without this patch's producer first; setup errors do not qualify. No RED/GREEN execution here.
+Observed RED after instantiating the original BackpackTokenFrameTemplate: supplied removals did not empty backpack membership. Earlier missing watcher setup was not counted as RED. The same original TokenFrame mutation path became GREEN after producer.
 
 ## Out of scope
 

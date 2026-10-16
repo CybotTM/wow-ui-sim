@@ -26,5 +26,5 @@ Original cached `~/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/ActionButton.lua
 ## Known gaps
 
 - [x] Tests-only Wrath behavioral RED: direct nonzero numeric flag and original SetChecked(1) branch both stayed unchecked before the producer.
-- [ ] Producer GREEN, original G2 consumer and Retail existing CheckButton preservation pending.
+- [x] Wrath direct/original UpdateState GREEN, original G2 event consumer GREEN; Retail direct contract plus 19 existing CheckButton cases GREEN. See [bounded proof](../baselines/approved-batch-2026-10-16.md).
 - [ ] Native parity and string normalization are not established.

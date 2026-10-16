@@ -1,10 +1,10 @@
 # Currency list field projection
 
-Expose existing currency-list backing fields through `C_CurrencyInfo.GetCurrencyListInfo` and the Mists legacy tuple. Existing listed currencies project supplied `SimState.currency_info` display values; list structure remains static outside the separately proposed [Retail displayed-index slice](currency-displayed-indices.md). Source lives in `src/c_api/item_spell/c_currency.rs` and `src/mists/compat_bootstrap.lua`.
+Expose existing currency-list backing fields through `C_CurrencyInfo.GetCurrencyListInfo` and the Mists legacy tuple. Existing listed currencies project supplied `SimState.currency_info` display values; list structure remains static outside the separate [Retail displayed-index contract](currency-displayed-indices.md). Source lives in `src/c_api/item_spell/c_currency.rs` and `src/mists/compat_bootstrap.lua`.
 
 ## What it must do
 
-- [x] Return non-nil boolean `isShowInBackpack` from `CurrencyEntry.is_show_in_backpack`, preserving true and false.
+- [x] Return non-nil boolean `isShowInBackpack`, initially from `CurrencyEntry.is_show_in_backpack`, preserving true and false. Explicit [Retail watched mutations](currency-watched-mutations.md) own subsequent overrides.
 - [x] Return non-nil number `maxQuantity`, preserving zero and positive caps. Static header values come from `CurrencyEntry`; ordinary rows use supplied-state values.
 - [x] Forward those fields directly through Mists `GetCurrencyListInfo` tuple positions 5 and 8.
 - [ ] Preserve all other fields, unsupported tuple slots, catalog data, defaults, and registrations.
@@ -24,7 +24,7 @@ Expose existing currency-list backing fields through `C_CurrencyInfo.GetCurrency
 ## Implementation inventory
 
 - `src/lua_api/globals/currency_data.rs` — existing `CurrencyEntry` fields and static list; unchanged.
-- `src/c_api/item_spell/c_currency.rs` — namespaced list-info projection with capacity for nine fields.
+- `src/c_api/item_spell/c_currency.rs` — namespaced list-info projection. Retail additionally publishes `currencyListDepth` through the displayed-index contract; non-Retail retains its existing field set.
 - `src/mists/compat_bootstrap.lua` — existing Mists legacy tuple adapter.
 - `tests/mists_currency_list.rs` — existing Mists namespace and legacy-tuple controls.
 - `tests/currency_info_probes.rs` — shared supplied-state display and missing-row regressions.

@@ -1,9 +1,9 @@
 # Supplied action repeat-active state (G2)
 
-Integration checkpoint (2026-10-16): G2 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+Integration checkpoint (2026-10-16): Retail/Wrath behavioral RED → GREEN and preservation observed; see [bounded proof](../baselines/approved-batch-2026-10-16.md). No native-parity claim.
 
 Explicit repeat-active slot input drives the existing `C_ActionBar.IsAutoRepeatAction`
-query, and the Wrath/Mists legacy projection. This is a proposed simulator contract,
+query, and the Wrath/Mists legacy projection. This is a simulator contract,
 not native parity. Source: `src/c_api/action_repeat.rs`; consumer mechanics remain
 in unchanged cached Blizzard Lua. See [event system](../event-system.md).
 
@@ -16,7 +16,7 @@ in unchanged cached Blizzard Lua. See [event system](../event-system.md).
 - [ ] After explicit START_AUTOREPEAT_SPELL, original StartFlash sets flashing; deterministic original OnUpdate calls toggle the real Flash texture. After clearing input and explicit STOP_AUTOREPEAT_SPELL, checked/flashing/texture return to inactive.
 - [ ] Explicit ACTIONBAR_UPDATE_STATE refreshes checked state without inventing start/stop transitions. The setter never changes checked state directly.
 
-All bullets remain unverified: staging forbids builds/runtime execution.
+Bounded execution covers Retail and Wrath, not every profile named in the contract. Wrath's original numeric checked-state calls require the [local CheckButton input contract](checkbutton-checked-input.md).
 
 ## How it works
 
@@ -44,8 +44,8 @@ not a claim of full ActionBar startup/template/router coverage.
 
 ## Known gaps (current cycle)
 
-- [ ] Reproduce a behavioral RED after passive ingress admission but before query wiring; tests-only baseline lacks the new admin API and cannot count as semantic RED.
-- [ ] Execute the targeted test module under each R/P/W/M/F profile; compile/format/check proof is not yet available.
+- [x] Behavioral RED obtained with passive ingress before query wiring, then Retail/Wrath GREEN. Retail legacy-only early return carries no behavior credit.
+- [ ] PTR/Mists/Forever targeted execution and full-profile/native acceptance remain open.
 
 ## Out of scope
 
