@@ -64,6 +64,10 @@ pub(super) fn set_button_enabled_value(
         }
         sync_button_slot_visibility(&mut sim, id);
     }
+    drop(sim);
+    if changed {
+        refresh_button_font(state, id)?;
+    }
     Ok(())
 }
 
@@ -202,6 +206,7 @@ pub(super) fn set_button_state(state: &mut LuaState) -> LuaResult<u32> {
         }
         sync_button_slot_visibility(&mut sim, id);
     }
+    refresh_button_font(state, id)?;
     Ok(0)
 }
 
@@ -377,19 +382,52 @@ pub(super) fn has_normal_font_object(state: &mut LuaState, id: u64) -> bool {
 }
 
 pub(super) fn set_normal_font_object(state: &mut LuaState) -> LuaResult<u32> {
+    set_button_font_object(state, "normal")
+}
+
+fn active_button_font_slot(state: &LuaState, id: u64) -> LuaResult<Option<&'static str>> {
+    let sim = borrow_state(state)?;
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(None);
+    };
+    if !matches!(
+        frame.widget_type,
+        crate::widget::WidgetType::Button | crate::widget::WidgetType::CheckButton
+    ) {
+        return Ok(None);
+    }
+    // Text highlight remains active while pushed, unlike highlight textures.
+    Ok(Some(if !button_enabled(frame) {
+        "disabled"
+    } else if frame.highlight_locked || sim.hovered_frame == Some(id) {
+        "highlight"
+    } else {
+        "normal"
+    }))
+}
+
+pub(crate) fn refresh_button_font(state: &mut LuaState, id: u64) -> LuaResult<()> {
+    let Some(slot) = active_button_font_slot(state, id)? else {
+        return Ok(());
+    };
+    let store = get_or_create_button_font_store(state);
+    let font_object = table_get(state, store, &format!("{id}:{slot}"));
+    if !matches!(font_object, Val::Table(_)) {
+        return Ok(());
+    }
+    if let Some(child_id) = super::font_strings::ensure_button_text_child(state, id)? {
+        super::font_strings::project_font_object_for_frame(state, child_id, font_object)?;
+    }
+    Ok(())
+}
+
+fn set_button_font_object(state: &mut LuaState, slot: &str) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let font_object = resolve_font_object_arg(state, 2);
     let store = get_or_create_button_font_store(state);
-    table_set(state, store, &format!("{id}:normal"), font_object);
-    let Some(text_child_id) = super::font_strings::ensure_button_text_child(state, id)? else {
-        return Ok(0);
-    };
-    if matches!(font_object, Val::Table(_)) {
-        let fields = super::font_strings::read_font_object_fields(state, font_object);
-        let mut sim = borrow_state_mut(state)?;
-        if let Some(text_child) = sim.widgets.get_mut_visual(text_child_id) {
-            super::font_strings::apply_font_object_snapshot(text_child, &fields);
-        }
+    table_set(state, store, &format!("{id}:{slot}"), font_object);
+    if active_button_font_slot(state, id)? == Some(slot) {
+        refresh_button_font(state, id)?;
     }
     Ok(0)
 }
@@ -416,11 +454,7 @@ pub(super) fn get_normal_font_object(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn set_highlight_font_object(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let font_object = resolve_font_object_arg(state, 2);
-    let store = get_or_create_button_font_store(state);
-    table_set(state, store, &format!("{id}:highlight"), font_object);
-    Ok(0)
+    set_button_font_object(state, "highlight")
 }
 
 pub(super) fn get_highlight_font_object(state: &mut LuaState) -> LuaResult<u32> {
@@ -432,11 +466,7 @@ pub(super) fn get_highlight_font_object(state: &mut LuaState) -> LuaResult<u32> 
 }
 
 pub(super) fn set_disabled_font_object(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let font_object = resolve_font_object_arg(state, 2);
-    let store = get_or_create_button_font_store(state);
-    table_set(state, store, &format!("{id}:disabled"), font_object);
-    Ok(0)
+    set_button_font_object(state, "disabled")
 }
 
 pub(super) fn get_disabled_font_object(state: &mut LuaState) -> LuaResult<u32> {

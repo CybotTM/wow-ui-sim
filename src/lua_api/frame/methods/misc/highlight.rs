@@ -99,6 +99,8 @@ fn set_highlight_with_texture(state: &mut LuaState, id: u64, locked: bool) -> Lu
     {
         sim.widgets.set_visible(highlight_id, locked);
     }
+    drop(sim);
+    super::super::button_anchor_hierarchy::refresh_button_font(state, id)?;
     Ok(0)
 }
 
@@ -113,6 +115,8 @@ pub fn set_highlight_locked(state: &mut LuaState) -> LuaResult<u32> {
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.highlight_locked = locked;
     }
+    drop(sim);
+    super::super::button_anchor_hierarchy::refresh_button_font(state, id)?;
     Ok(0)
 }
 

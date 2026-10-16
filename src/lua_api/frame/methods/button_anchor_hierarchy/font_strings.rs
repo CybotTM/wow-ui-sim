@@ -312,6 +312,32 @@ fn apply_font_string_template(
     inherited_font_object
 }
 
+pub(super) fn project_font_object_for_frame(
+    state: &mut LuaState,
+    frame_id: u64,
+    font_object: Val,
+) -> LuaResult<()> {
+    let fields = read_font_object_fields(state, font_object);
+    store_font_object_for_frame(state, frame_id, font_object);
+    let mut sim = borrow_state_mut(state)?;
+    let changed = sim
+        .widgets
+        .get(frame_id)
+        .is_some_and(|frame| font_object_snapshot_changes_frame(frame, &fields));
+    if changed {
+        if let Some(frame) = sim.widgets.get_mut_visual(frame_id) {
+            apply_font_object_snapshot(frame, &fields);
+        }
+    }
+    drop(sim);
+    if changed {
+        super::super::text_attribute_event::refresh_auto_text_height_after_width_change(
+            state, frame_id,
+        );
+    }
+    Ok(())
+}
+
 fn store_font_object_for_frame(state: &mut LuaState, frame_id: u64, font_object: Val) {
     let store = registry_table_or_create(state, FONT_OBJECTS_REGISTRY_KEY);
     table_set(state, store, &frame_id.to_string(), font_object);

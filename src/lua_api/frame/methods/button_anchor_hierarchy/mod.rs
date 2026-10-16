@@ -17,6 +17,7 @@ mod hierarchy;
 mod shared;
 mod textures;
 
+pub(crate) use buttons::refresh_button_font;
 pub(crate) use hierarchy::apply_parent_change;
 
 pub(crate) use animations::{advance_animation_groups, stop_animation_groups_for_hidden_subtree};

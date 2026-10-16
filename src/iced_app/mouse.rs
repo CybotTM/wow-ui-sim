@@ -137,6 +137,22 @@ impl App {
                 mark_button_state_visuals_dirty(&mut state, old_hovered);
                 mark_button_state_visuals_dirty(&mut state, new_hovered);
             }
+            {
+                let mut lua = env.rilua_mut();
+                for id in [old_hovered, new_hovered].into_iter().flatten() {
+                    if let Err(error) =
+                        crate::lua_api::frame::methods::button_anchor_hierarchy::refresh_button_font(
+                            lua.state_mut(),
+                            id,
+                        )
+                    {
+                        crate::lua_api::script_helpers::call_error_handler_state(
+                            lua.state_mut(),
+                            &error.to_string(),
+                        );
+                    }
+                }
+            }
             if let Some(old_id) = old_hovered.filter(|id| self.motion_scripts_allowed(*id)) {
                 let _ = env.fire_script_handler(old_id, "OnLeave", vec![]);
             }

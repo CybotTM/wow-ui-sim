@@ -86,23 +86,33 @@ pub(super) fn set_mouse_position(state: &mut LuaState) -> LuaResult<u32> {
 /// frame's resolved screen-space center and marks that frame as hovered.
 /// Passing nil clears both mouse-over fields.
 pub(super) fn set_mouse_over_frame(state: &mut LuaState) -> LuaResult<u32> {
-    if matches!(stack_val(state, 1), Val::Nil) {
+    let target = if matches!(stack_val(state, 1), Val::Nil) {
+        None
+    } else {
+        Some(frame_id_from_stack(state, 1)?)
+    };
+    let (old_hovered, new_hovered) = {
         let mut st = borrow_state_mut(state)?;
-        st.hovered_frame = None;
-        st.set_mouse_position(None);
-        return Ok(0);
+        let old_hovered = st.hovered_frame;
+        let position = target.and_then(|id| {
+            st.resolve_rect_if_dirty(id);
+            st.widgets.get(id).and_then(|frame| {
+                frame
+                    .layout_rect
+                    .map(|rect| (rect.x + rect.width / 2.0, rect.y + rect.height / 2.0))
+            })
+        });
+        st.hovered_frame = target.filter(|_| position.is_some());
+        st.set_mouse_position(position);
+        (old_hovered, st.hovered_frame)
+    };
+    if old_hovered != new_hovered {
+        for id in [old_hovered, new_hovered].into_iter().flatten() {
+            crate::lua_api::frame::methods::button_anchor_hierarchy::refresh_button_font(
+                state, id,
+            )?;
+        }
     }
-
-    let id = frame_id_from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    st.resolve_rect_if_dirty(id);
-    let position = st.widgets.get(id).and_then(|frame| {
-        frame
-            .layout_rect
-            .map(|rect| (rect.x + rect.width / 2.0, rect.y + rect.height / 2.0))
-    });
-    st.hovered_frame = position.map(|_| id);
-    st.set_mouse_position(position);
     Ok(0)
 }
 
