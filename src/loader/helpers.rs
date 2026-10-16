@@ -535,9 +535,10 @@ fn handler_params(handler_name: &str) -> &'static str {
     }
 }
 
-/// Bind scroll argument names without consuming the existing vararg payload.
-fn inline_scroll_argument_locals(handler_name: &str) -> &'static str {
+/// Bind XML argument names without consuming the existing vararg payload.
+fn inline_argument_locals(handler_name: &str) -> &'static str {
     match handler_name {
+        "OnCursorChanged" => "local x, y, w, h = ...;",
         "OnHorizontalScroll" | "OnVerticalScroll" => "local offset = ...;",
         "OnScrollRangeChanged" => "local xrange, yrange = ...;",
         "OnMouseWheel" => "local delta = ...;",
@@ -567,7 +568,7 @@ fn build_handler_expr(
             return None;
         }
         let params = handler_params(handler_name);
-        let locals = inline_scroll_argument_locals(handler_name);
+        let locals = inline_argument_locals(handler_name);
         Some(format!(
             "function({params})\n            {locals}\n            {body}\n        end"
         ))
