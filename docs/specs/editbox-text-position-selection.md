@@ -57,7 +57,7 @@ The later programmatic lifecycle regression at saved Retail source `792d62003` e
 ## Implementation inventory
 
 - `src/lua_api/editbox_update.rs` — early update/pre-key dirty flush, actual layout preparation, cursor notification followed by coalesced text notification; pending bits are consumed before callbacks so handler edits remain pending.
-- `src/widget/editbox.rs` — lazily retained presentation inputs, cursor geometry and pending-origin state; registry EditBox IDs avoid a full widget scan, and unchanged inputs avoid reshaping. Font-system replacement invalidates presentation inputs.
+- `src/widget/editbox.rs` — lazily retained presentation inputs, cursor geometry and pending-origin state; registry EditBox IDs avoid a full widget scan, and unchanged inputs avoid reshaping. Font-system replacement invalidates presentation inputs. The opaque defaultable cache type and `Frame` field remain public for existing Rust struct-update construction; no Lua presentation API is added.
 - `src/render/editbox_layout.rs` — full-content configured-font shaping, line-local UTF-8 cursor mapping and library caret coordinates/run height. Unavailable font/layout yields no invented geometry.
 - `src/iced_app/quad_builders_button.rs` — EditBox glyphs/caret consume flushed presentation, not newly assigned logical text; configured alignment and wrapping feed both shaping and rendering.
 - `src/lua_api/frame/methods/widgets/editbox.rs` — public cursor conversions, synchronous insertion `OnChar`, and deferred `Insert` notification.

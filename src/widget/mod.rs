@@ -10,6 +10,7 @@ mod registry;
 
 pub use crate::atlas::NineSliceAtlasInfo;
 pub use anchor::{Anchor, AnchorPoint};
+pub use editbox::EditBoxPresentation;
 pub use frame::{
     AlphaGradient, AttributeValue, Backdrop, Color, Frame, Gradient, LineAnchor,
     MinimapBlobLayerStyle, MinimapBlobRingStyle, TextJustify, TextOutline,

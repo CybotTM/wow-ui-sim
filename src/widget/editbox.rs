@@ -84,23 +84,23 @@ impl EditBoxLayoutInput {
 }
 
 #[derive(Debug, Default)]
-pub(crate) struct EditBoxPresentation {
-    pub input: Option<EditBoxLayoutInput>,
+pub struct EditBoxPresentation {
+    pub(crate) input: Option<EditBoxLayoutInput>,
     /// Frame-local x/y/width/height; y is negative below the frame's top edge.
-    pub cursor_geometry: Option<(f32, f32, f32, f32)>,
+    pub(crate) cursor_geometry: Option<(f32, f32, f32, f32)>,
     text_changed: bool,
     user_input: bool,
 }
 
 impl EditBoxPresentation {
-    pub fn mark_text_changed(&mut self, user_input: Option<bool>) {
+    pub(crate) fn mark_text_changed(&mut self, user_input: Option<bool>) {
         self.text_changed = true;
         if let Some(user_input) = user_input {
             self.user_input = user_input;
         }
     }
 
-    pub fn take_text_change(&mut self) -> Option<bool> {
+    pub(crate) fn take_text_change(&mut self) -> Option<bool> {
         if !self.text_changed {
             return None;
         }

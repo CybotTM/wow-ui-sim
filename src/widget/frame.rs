@@ -414,7 +414,7 @@ pub struct Frame {
 
     // --- EditBox fields ---
     /// Lazily retained presentation and pending text-notification bits.
-    pub(crate) editbox_presentation: Option<Box<super::editbox::EditBoxPresentation>>,
+    pub editbox_presentation: Option<Box<super::EditBoxPresentation>>,
     /// Cursor position in editbox.
     pub editbox_cursor_pos: i32,
     /// Maximum letters allowed (0 = unlimited).
