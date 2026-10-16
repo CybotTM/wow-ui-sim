@@ -28,7 +28,6 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
         set_player_texture_height,
     )?;
     table_set_rust_fn_static(state, mt, "SetPlayerTextureWidth", set_player_texture_width)?;
-    table_set_rust_fn_static(state, mt, "SetMaxBytes", set_max_bytes)?;
     table_set_rust_fn_static(state, mt, "GetTextHeight", get_text_height)?;
     table_set_rust_fn_static(state, mt, "OpenTicket", browser_navigate)?;
     Ok(())
@@ -59,12 +58,6 @@ fn set_player_texture_height(_state: &mut LuaState) -> LuaResult<u32> {
 /// Companion to `SetPlayerTextureHeight` — wrath Minimap calls
 /// `Minimap:SetPlayerTextureWidth(40)` during init.
 fn set_player_texture_width(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
-}
-
-/// Wrath EditBox method. Real implementation would clamp input length to
-/// `bytes`; no-op suffices for unblocking load.
-fn set_max_bytes(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 

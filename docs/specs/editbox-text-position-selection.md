@@ -115,6 +115,10 @@ Scope: `--no-addons --no-saved-vars`, `WOW_SIM_CASC=0`, actual installed-font fa
 - The historical bounded SetText lifecycle tests covered the then-synchronous notification contract, now superseded by the clarified all-edit dirty-flush boundary; preserve their other assertions when reconciling timing. They were RED 2 failed / 2 passed before the fix and GREEN 11/11 in the EditBox family after implementation. Independent verification also passes 19 keyboard, four focus and three non-EditBox text controls, plus format/check without warnings; `/tmp/cross-version-editbox-settext-proof.md` records exact commands and source scope. Warcraft Wiki's `UIHANDLER_OnTextChanged` and `API:EditBox_GetText` are API-reference sources for this audit, not native execution; native callback, caret, selection, and IME lifecycle remains unverified.
 - Cached Blizzard consumers corroborate byte-facing use: `Blizzard_AutoComplete/AutoComplete.lua:405` and `Blizzard_ChatFrameBase/Shared/ChatFrameEditBox.lua:510` pass Lua `strlen` results to `HighlightText`; Classic `ChatFrameUtilOverrides` passes `GetCursorPosition()` to byte-indexed Lua `string.sub`. This is source-consumer corroboration, not a native probe.
 
+## Classic byte-limit preservation follow-up
+
+Saved Wrath `39d38` keyboard preservation reaches 27 PASS/1 FAIL: the independent scalar/UTF-8 limit test accepts `é猫` despite a four-byte limit. The Classic shared method registration overwrites modeled EditBox `SetMaxBytes` with a no-op. Removing that obsolete override restores the existing modeled setter; the existing behavioral test is the regression. Source fix is not yet compiled or executed. Other Classic profiles sharing this registration need preservation proof; no new limit policy is inferred.
+
 ## Out of scope
 
 - Full input-system behavior, public `Insert` limit enforcement, `SetText` MaxBytes enforcement, native markup/grapheme counting, IME, clipboard, keyboard selection creation/navigation, and rendering selection highlight.
