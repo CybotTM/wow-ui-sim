@@ -1,3 +1,7 @@
+## [2026-10-16] evidence | ItemDisplay historical Retail selector RED
+
+[Manager checkpoint](systems/ui-widget-manager-state.md#itemdisplay-historical-selector-red--2026-10-16) links independently reconciled historical RED and reached/unreached boundaries. Test/library revisions stay separate; broader acceptance remains open.
+
 ## [2026-10-16] documentation | Access-restriction profile proof
 
 [Owning proof matrix](../specs/script-object-access-restrictions.md#bounded-profile-proof--2026-10-16) separates accepted saved mask/application evidence, separate capability proof, source-only bundle scope and live/GUI limits; [existing Forever investigation](investigations/ellesmereui-forever.md#aura-container-dependency-audit) links the historical boundary.

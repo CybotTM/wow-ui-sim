@@ -22,13 +22,19 @@ Source inspection on 2026-10-16, not runtime evidence:
 
 ## Tests asserting this spec
 
-- `tests/ui_widget_item_display_selector.rs` — two uncompiled, unexecuted RED candidates mirroring the existing currencies selector pattern. Fresh `WowLuaEnv` instances call the actual public getter, first checking shared rejection, getter presence and exactly-one-nil absence, then target rejection/diagnostics. One test covers missing input; one iterates explicit nil, nonnumeric string, numeric string, boolean, table and function inputs. Earlier failure prevents credit for later assertions/iterations. No mock registration, supplied-record scaffold or cached UI load.
+- `tests/ui_widget_item_display_selector.rs` — two public-selector regressions at test source `f67005a12a07661592c6a4f5615015102db5b9f3`; fresh `WowLuaEnv` instances, no mock registration, supplied records or cached UI load.
 
-These are planned assertions, not observed runtime RED or PASS. Compilation and execution belong to the parent workload; no acceptance is claimed.
+### Historical Retail selector RED — 2026-10-16
+
+Saved runtime epoch: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/item-display-selector-retail-red-20261016T135057967011Z`. Component compile exits0 with no Rust diagnostics; tests link separately sealed normal Retail library `7273875b2d35ae305428661b2650116e802733e5`, not a whole-f670 build.
+
+Exactly two tests run: **0 PASS / 2 FAIL / exit101**. Missing-input and explicit-nil cases each pass the shared `GetWidgetSetInfo` required-number control, public getter function check and absent numeric `934207.5` exactly-one-nil assertions. Each fails `ItemDisplay invalid widgetID must reject`: the invalid target call succeeds. Target diagnostics and later string, numeric-string, boolean, table and function iterations are **UNREACHED**.
+
+Independent full-stream/source/feature/seal/CVar/readability RED reconciliation: `/home/osso/.local/state/wow-ui-sim/verification/item-widget-next/selector-red-report.md`. Child-only current-CVar copy and paired original stat/hash are unchanged at their observed boundaries. No reset/restore or historical preservation claim. This confirms bounded RED, not selector acceptance; PTR, secret wrappers, populated projection, cached consumers, native parity and parent acceptance remain unproved.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile and execute both selector candidates under Retail/PTR and record reached assertions and actual failure boundaries separately.
+- [ ] Establish selector acceptance under Retail/PTR, retaining reached/unreached boundaries; the historical Retail run remains RED and does not establish PTR behavior.
 - [ ] Supply the modeled ItemDisplay producer; it remains missing from the inspected source inventory above.
 - [ ] Add a separately scoped complete projection and populated fixture contract. Cached Retail/PTR declarations have 15 outer fields and 16 nested `UIWidgetItemInfo` fields, including four nullable fields; this selector test does not assert that projection.
 

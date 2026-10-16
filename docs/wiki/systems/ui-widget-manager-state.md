@@ -153,6 +153,10 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 [Owning contract](../../specs/ui-widget-icon-text-and-currencies.md#bounded-combined-retailptr-acceptance--2026-10-16) owns historical RED, combined bounded behavior acceptance, startup/CVar qualifications and separate source-check proof; broader acceptance stays separate.
 
+## ItemDisplay historical selector RED — 2026-10-16
+
+[Owning selector receipt](../../specs/ui-widget-item-display.md#historical-retail-selector-red--2026-10-16) owns the independently reconciled bounded Retail RED, separate test/library attribution and reached/unreached assertions. Producer, consumer and broader acceptance remain open.
+
 ## Sources
 
 - [IconTextAndCurrencies contract](../../specs/ui-widget-icon-text-and-currencies.md) — supplied-record contract and owning evidence/gate reconciliation.
