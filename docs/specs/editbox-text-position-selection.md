@@ -44,6 +44,8 @@ Shared clean-room simulator geometry uses frame-local UI units: `x = left inset 
 
 At saved `05f1b4a62`, the normal cached `InputScrollFrameTemplate` probe passes setup with genuine handlers and scroll-child identity, then reaches nil `cursorOffset` arithmetic inside `SetText` and three subsequent `OnUpdate` calls. Text commits and handlers remain unchanged; outer `pcall` returns true because protected dispatch records the handler failure. Final result: **exit1, four unique serialized records / eight occurrences**; raw/wrapped records are nonadditive, not eight independent failures. Saved original CVar hashes remain stable. Independent saved build/seal and full-stream runtime verification confirms this consumer RED, not geometry GREEN, guard-retirement proof, native parity or current-HEAD startup acceptance.
 
+The later programmatic lifecycle regression at saved Retail source `792d62003` executes **0 passed / 1 failed, exit101** after installed-font and environment setup. It reaches synchronous `SetText` → `OnTextChanged` before any cursor delivery (`one actual cursor delivery`); the custom error sink observes that protected failure. Deferred update geometry/order assertions and the second `SetFormattedText` iteration remain unreached. Independent saved-artifact verification confirms this bounded counterexample; no C2 producer or Wrath guard-retirement acceptance follows.
+
 ## How it works
 
 - [Widget system](../widget-system.md)
