@@ -1,10 +1,11 @@
 //! Host feed operations mutate supplied state before synchronous consumer events.
 use super::{
     BulletTextListRecord, ButtonHeaderRecord, CaptureBarRecord, DiscreteProgressStepsRecord,
-    DoubleIconAndTextRecord, DoubleStatusBarRecord, IconAndTextRecord, IconTextAndBackgroundRecord,
-    IconTextAndCurrenciesRecord, ItemDisplayRecord, SpacerRecord, SpellDisplayRecord,
-    StatusBarRecord, TextColumnRowVisualizationInfo, TextWithStateRecord, TextWithSubtextRecord,
-    TextureAndTextRecord, TextureAndTextRowRecord, WidgetId, WidgetSetEntry, WidgetSetRecord,
+    DoubleIconAndTextRecord, DoubleStatusBarRecord, HorizontalCurrenciesRecord, IconAndTextRecord,
+    IconTextAndBackgroundRecord, IconTextAndCurrenciesRecord, ItemDisplayRecord, SpacerRecord,
+    SpellDisplayRecord, StatusBarRecord, TextColumnRowVisualizationInfo, TextWithStateRecord,
+    TextWithSubtextRecord, TextureAndTextRecord, TextureAndTextRowRecord, WidgetId, WidgetSetEntry,
+    WidgetSetRecord,
 };
 use crate::lua_api::WowLuaEnv;
 use crate::{Error, Result};
@@ -15,6 +16,7 @@ pub enum WidgetVisualization {
     IconAndText(IconAndTextRecord),
     IconTextAndBackground(IconTextAndBackgroundRecord),
     IconTextAndCurrencies(IconTextAndCurrenciesRecord),
+    HorizontalCurrencies(HorizontalCurrenciesRecord),
     ItemDisplay(ItemDisplayRecord),
     CaptureBar(CaptureBarRecord),
     StatusBar(StatusBarRecord),
@@ -40,6 +42,7 @@ impl WidgetVisualization {
             Self::IconAndText(_) => 0,
             Self::IconTextAndBackground(_) => 4,
             Self::IconTextAndCurrencies(_) => 7,
+            Self::HorizontalCurrencies(_) => 9,
             Self::ItemDisplay(_) => 27,
             Self::CaptureBar(_) => 1,
             Self::StatusBar(_) => 2,
@@ -190,6 +193,11 @@ fn supply_visualization(sim: &mut crate::lua_api::SimState, id: f64, record: Wid
         WidgetVisualization::IconTextAndCurrencies(record) => {
             sim.ui_widget_inputs
                 .icon_text_and_currencies
+                .insert(key, record);
+        }
+        WidgetVisualization::HorizontalCurrencies(record) => {
+            sim.ui_widget_inputs
+                .horizontal_currencies
                 .insert(key, record);
         }
         WidgetVisualization::ItemDisplay(record) => {
