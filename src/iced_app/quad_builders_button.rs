@@ -2,7 +2,7 @@
 
 use iced::{Point, Rectangle, Size};
 
-use crate::render::glyph::emit_text_quads;
+use crate::render::glyph::{PreparedBufferTextRequest, emit_prepared_buffer_text_quads};
 use crate::render::shader::GLYPH_ATLAS_TEX_INDEX;
 use crate::render::{BlendMode, QuadBatch, ThreeSlicePathParams};
 use crate::widget::{TextJustify, WidgetType};
@@ -496,7 +496,7 @@ fn emit_editbox_presentation(
         Point::new(bounds.x + left, bounds.y + top),
         Size::new(width, height),
     );
-    emit_editbox_text(batch, f, input, text_ctx, text_bounds, alpha);
+    emit_editbox_text(batch, f, presentation, text_ctx, text_bounds, alpha);
     if f.editbox_focused
         && let Some(geometry) = presentation.cursor_geometry
     {
@@ -532,7 +532,7 @@ fn emit_editbox_caret(
 fn emit_editbox_text(
     batch: &mut QuadBatch,
     f: &crate::widget::Frame,
-    input: &crate::widget::editbox::EditBoxLayoutInput,
+    presentation: &crate::widget::editbox::EditBoxPresentation,
     text_ctx: &mut Option<(
         &mut crate::render::font::WowFontSystem,
         &mut crate::render::glyph::GlyphAtlas,
@@ -543,33 +543,34 @@ fn emit_editbox_text(
     let Some((fs, ga)) = text_ctx else {
         return;
     };
-    let Some(text) = input.text.as_deref() else {
+    let Some(request) = editbox_text_request(f, presentation, text_bounds, alpha) else {
         return;
     };
-    let settings = input.settings;
-    let color = color_with_alpha(&f.text_color, alpha);
-    let shadow = (f.shadow_color.a > 0.0).then(|| color_with_alpha(&f.shadow_color, alpha));
     let vert_before = batch.vertices.len();
-    emit_text_quads(
-        batch,
-        fs,
-        ga,
-        text,
-        text_bounds,
-        input.font.as_deref(),
-        settings.font_size,
-        color,
-        settings.justify_h,
-        settings.justify_v,
-        GLYPH_ATLAS_TEX_INDEX,
-        shadow,
-        f.shadow_offset,
-        f.font_outline,
-        settings.word_wrap,
-        0,
-        settings.spacing,
-        settings.smooth_scaling,
-        Some(input.stripped_text.as_str()),
-    );
+    emit_prepared_buffer_text_quads(batch, fs, ga, request);
     clip_recent_quads(batch, vert_before, text_bounds);
+}
+
+fn editbox_text_request<'a>(
+    f: &crate::widget::Frame,
+    presentation: &'a crate::widget::editbox::EditBoxPresentation,
+    text_bounds: Rectangle,
+    alpha: f32,
+) -> Option<PreparedBufferTextRequest<'a>> {
+    let input = presentation.input.as_ref()?;
+    let buffer = presentation.shaped_text.as_ref()?;
+    let settings = input.settings;
+    let shadow_color = (f.shadow_color.a > 0.0).then(|| color_with_alpha(&f.shadow_color, alpha));
+    Some(PreparedBufferTextRequest {
+        buffer,
+        bounds: text_bounds,
+        spacing: settings.spacing,
+        justify_h: settings.justify_h,
+        justify_v: settings.justify_v,
+        color: color_with_alpha(&f.text_color, alpha),
+        glyph_tex_index: GLYPH_ATLAS_TEX_INDEX,
+        shadow_color,
+        shadow_offset: f.shadow_offset,
+        outline: f.font_outline,
+    })
 }

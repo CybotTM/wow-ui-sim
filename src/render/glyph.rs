@@ -17,6 +17,7 @@ use crate::widget::TextJustify;
 
 mod text_emit;
 pub use text_emit::emit_text_quads;
+pub(crate) use text_emit::{PreparedBufferTextRequest, emit_prepared_buffer_text_quads};
 
 /// Size of the glyph atlas texture in pixels.
 const GLYPH_ATLAS_SIZE: u32 = 2048;

@@ -734,3 +734,166 @@ mod visible_text_publication {
         }
     }
 }
+
+// Public full-content alignment oracle using actual ScrollFrame clipping.
+#[cfg(feature = "gui")]
+mod overflow_vertical_alignment {
+    use super::*;
+    use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};
+    use wow_ui_sim::render::glyph::GlyphAtlas;
+
+    fn render_visible_absolute_glyph_positions(
+        env: &WowLuaEnv,
+        fonts: &Rc<RefCell<WowFontSystem>>,
+        atlas: &mut GlyphAtlas,
+        root: &str,
+    ) -> Vec<[f32; 2]> {
+        let buckets = {
+            let mut state = env.state().borrow_mut();
+            state.ensure_layout_rects();
+            let _ = state.get_strata_buckets();
+            state.strata_buckets.as_ref().unwrap().clone()
+        };
+        let state = env.state().borrow();
+        let mut fonts = fonts.borrow_mut();
+        let batch = build_quad_batch_for_registry(
+            RegistryQuadBatchParams::new(&state.widgets, (1024.0, 768.0), &buckets)
+                .root_name(Some(root))
+                .text_ctx(Some((&mut fonts, atlas))),
+        );
+        // Clipping retains fully excluded vertices with alpha zero. Exclude
+        // those, but retain partially clipped glyph edges at absolute positions.
+        batch
+            .vertices
+            .iter()
+            .filter(|vertex| {
+                vertex.tex_index == wow_ui_sim::render::shader::GLYPH_ATLAS_TEX_INDEX
+                    && vertex.color[3] > 0.0
+            })
+            .map(|vertex| vertex.position)
+            .collect()
+    }
+
+    #[test]
+    fn multiline_overflow_center_and_bottom_match_full_content_scroll_viewport() {
+        let outcomes = ["CENTER", "BOTTOM"].map(|alignment| {
+            let env = create_env_with_installed_fonts();
+            let fonts = Rc::new(RefCell::new(WowFontSystem::new_without_casc()));
+            assert!(fonts.borrow().font_system.db().faces().next().is_some());
+            assert!(fonts.borrow().family_name(Some(DEFAULT_WOW_FONT)).is_some());
+            env.set_font_system(Rc::clone(&fonts));
+            env.set_screen_size(1024.0, 768.0);
+            env.exec(&format!(
+                r#"
+                local alignment = '{alignment}'
+                local text = table.concat({{
+                    'A', 'BB', 'CCC', 'DDDD', 'EEEEE',
+                    'FFFFFF', 'GGGGGGG', 'HHHHHHHH', 'IIIIIIIII', 'JJJJJJJJJJ',
+                }}, '\n')
+                CursorBox:SetSize(400, 72)
+                CursorBox:SetJustifyH('LEFT')
+                CursorBox:SetJustifyV(alignment)
+                CursorBox:SetText(text)
+                CursorBox:SetCursorPosition(0)
+                CursorBox:ClearFocus()
+                CursorBox:SetScript('OnCursorChanged', nil)
+                CursorBox:SetScript('OnUpdate', nil)
+
+                OverflowViewport = CreateFrame('ScrollFrame', 'C2OverflowViewport', UIParent)
+                OverflowViewport:SetPoint('TOPLEFT', CursorBox, 'TOPLEFT', 5, -3)
+                OverflowViewport:SetSize(388, 65)
+                OverflowViewport:Show()
+                OverflowContent = CreateFrame('Frame', nil, OverflowViewport)
+                -- Simulator-configured font20 line height is ceil(20 * 1.2) = 24.
+                OverflowContent:SetSize(388, 10 * 24)
+                OverflowContent:SetPoint(alignment, OverflowViewport, alignment, 0, 0)
+                OverflowViewport:SetScrollChild(OverflowContent)
+                assert(OverflowContent:GetPoint(1) == alignment,
+                    'SETUP FAILURE: SetScrollChild changed explicit alignment anchor')
+                OverflowViewport:SetHorizontalScroll(0)
+                OverflowViewport:SetVerticalScroll(0)
+                OverflowContent:Show()
+                local reference = OverflowContent:CreateFontString(nil, 'ARTWORK')
+                reference:SetAllPoints(OverflowContent)
+                assert(reference:SetFont('Fonts\\FRIZQT__.TTF', 20))
+                reference:SetJustifyH('LEFT')
+                reference:SetJustifyV('TOP')
+                reference:SetText(text)
+                reference:Show()
+                assert(CursorBox:GetText() == reference:GetText())
+                "#,
+            ))
+            .expect("SETUP FAILURE: create public overflow fixtures");
+            env.fire_on_update(TICK_SECONDS).unwrap();
+            assert!(
+                env.state().borrow().lua_errors.is_empty(),
+                "SETUP FAILURE: {alignment} layout tick Lua errors: {:?}",
+                env.state().borrow().lua_errors
+            );
+            env.exec(&format!(
+                r#"
+                local function near(a, b)
+                    assert(math.abs(a - b) < 0.001, 'SETUP FAILURE: public fixture bounds')
+                end
+                near(OverflowViewport:GetLeft(), CursorBox:GetLeft() + 5)
+                near(OverflowViewport:GetTop(), CursorBox:GetTop() - 3)
+                near(OverflowViewport:GetWidth(), CursorBox:GetWidth() - 5 - 7)
+                near(OverflowViewport:GetHeight(), CursorBox:GetHeight() - 3 - 4)
+                near(OverflowContent:GetHeight(), 240)
+                near(OverflowContent:GetLeft(), OverflowViewport:GetLeft())
+                local offset = '{alignment}' == 'CENTER' and (240 - 65) / 2 or 240 - 65
+                near(OverflowContent:GetTop(), OverflowViewport:GetTop() + offset)
+                near(OverflowViewport:GetHorizontalScroll(), 0)
+                near(OverflowViewport:GetVerticalScroll(), 0)
+                "#,
+            ))
+            .expect("SETUP FAILURE: independent public viewport geometry");
+
+            let mut atlas = GlyphAtlas::new();
+            let actual = render_visible_absolute_glyph_positions(
+                &env,
+                &fonts,
+                &mut atlas,
+                "C2CursorLayoutBox",
+            );
+            let expected = render_visible_absolute_glyph_positions(
+                &env,
+                &fonts,
+                &mut atlas,
+                "C2OverflowViewport",
+            );
+            assert!(
+                !actual.is_empty() && !expected.is_empty(),
+                "SETUP FAILURE: {alignment} missing visible glyph output"
+            );
+            assert!(
+                actual
+                    .iter()
+                    .chain(&expected)
+                    .flatten()
+                    .all(|value| value.is_finite()),
+                "SETUP FAILURE: {alignment} nonfinite emitted position"
+            );
+            let first_difference = actual.iter().zip(&expected).position(|(actual, expected)| {
+                (actual[0] - expected[0]).abs() >= 0.001 || (actual[1] - expected[1]).abs() >= 0.001
+            });
+            let matching = actual.len() == expected.len() && first_difference.is_none();
+            let differing_positions =
+                first_difference.map(|index| (actual[index], expected[index]));
+            (
+                alignment,
+                matching,
+                actual.len(),
+                expected.len(),
+                differing_positions,
+            )
+        });
+        // Collect both cases before failing, without normalizing either origin.
+        assert!(
+            outcomes.iter().all(|outcome| outcome.1),
+            "overflow glyph alignment != full-content viewport: \
+             (alignment, matches, actual vertices, expected vertices, first differing positions) \
+             {outcomes:?}"
+        );
+    }
+}

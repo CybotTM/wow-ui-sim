@@ -21,21 +21,36 @@ pub(crate) struct EditBoxLayoutRequest<'a> {
     pub(crate) cursor_scalar: usize,
 }
 
-/// Return content-relative (x, top, height) pixels, without viewport clipping.
-/// Only the temporary buffer/editor is mutated, apart from font shaping caches.
-pub(crate) fn shape_editbox_cursor(
+pub(crate) struct PreparedEditBoxLayout {
+    pub buffer: Buffer,
+    /// Content-relative x/top/height pixels, before viewport clipping.
+    pub cursor: Option<(f32, f32, f32)>,
+}
+
+/// Prepare one authoritative full-content layout for caret and glyph consumers.
+pub(crate) fn prepare_editbox_layout(
     fonts: &mut WowFontSystem,
     request: &EditBoxLayoutRequest<'_>,
-) -> Option<(f32, f32, f32)> {
+) -> Option<PreparedEditBoxLayout> {
     let line_height = valid_line_height(fonts, request)?;
     let visible = super::strip_wow_markup(request.text);
-    let prefix_bytes = visible_cursor_prefix_bytes(request, &visible)?;
-    let buffer = shape_content(fonts, request, &visible, line_height);
-    let cursor = cursor_at_visible_byte(&buffer, prefix_bytes)?;
+    let mut buffer = shape_content(fonts, request, &visible, line_height);
+    let cursor = read_cursor_geometry(&mut buffer, request, &visible, line_height);
+    Some(PreparedEditBoxLayout { buffer, cursor })
+}
+
+fn read_cursor_geometry(
+    buffer: &mut Buffer,
+    request: &EditBoxLayoutRequest<'_>,
+    visible: &str,
+    line_height: f32,
+) -> Option<(f32, f32, f32)> {
+    let prefix_bytes = visible_cursor_prefix_bytes(request, visible)?;
+    let cursor = cursor_at_visible_byte(buffer, prefix_bytes)?;
     let mut editor = Editor::new(buffer);
     editor.set_cursor(cursor);
-    let (x, top) = editor.cursor_position()?;
-    editor.with_buffer(|buffer| positioned_caret(buffer, request, cursor, (x, top), line_height))
+    let position = editor.cursor_position()?;
+    editor.with_buffer(|buffer| positioned_caret(buffer, request, cursor, position, line_height))
 }
 
 fn valid_line_height(fonts: &WowFontSystem, request: &EditBoxLayoutRequest<'_>) -> Option<f32> {

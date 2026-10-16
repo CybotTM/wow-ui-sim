@@ -49,7 +49,6 @@ impl EditBoxLayoutSettings {
 #[derive(Debug)]
 pub(crate) struct EditBoxLayoutInput {
     pub text: Option<String>,
-    pub stripped_text: String,
     pub font: Option<String>,
     pub cursor: usize,
     pub settings: EditBoxLayoutSettings,
@@ -57,11 +56,8 @@ pub(crate) struct EditBoxLayoutInput {
 
 impl EditBoxLayoutInput {
     pub fn from_frame(frame: &Frame, size: (f32, f32)) -> Self {
-        let text = frame.text.clone();
-        let stripped_text = crate::render::strip_wow_markup(text.as_deref().unwrap_or_default());
         Self {
-            text,
-            stripped_text,
+            text: frame.text.clone(),
             font: frame.font.clone(),
             cursor: frame.editbox_cursor_pos.max(0) as usize,
             settings: EditBoxLayoutSettings::from_frame(frame, size),
@@ -78,7 +74,6 @@ impl EditBoxLayoutInput {
 
     pub fn storage_estimate_bytes(&self) -> usize {
         self.text.as_ref().map_or(0, String::capacity)
-            + self.stripped_text.capacity()
             + self.font.as_ref().map_or(0, String::capacity)
     }
 }
@@ -86,6 +81,7 @@ impl EditBoxLayoutInput {
 #[derive(Debug, Default)]
 pub struct EditBoxPresentation {
     pub(crate) input: Option<EditBoxLayoutInput>,
+    pub(crate) shaped_text: Option<cosmic_text::Buffer>,
     /// Frame-local x/y/width/height; y is negative below the frame's top edge.
     pub(crate) cursor_geometry: Option<(f32, f32, f32, f32)>,
     text_changed: bool,
@@ -114,6 +110,14 @@ impl EditBoxPresentation {
                 .input
                 .as_ref()
                 .map_or(0, EditBoxLayoutInput::storage_estimate_bytes)
+            + self.shaped_text.as_ref().map_or(0, |buffer| {
+                buffer.lines.capacity() * std::mem::size_of::<cosmic_text::BufferLine>()
+                    + buffer
+                        .lines
+                        .iter()
+                        .map(|line| line.text().len())
+                        .sum::<usize>()
+            })
     }
 }
 

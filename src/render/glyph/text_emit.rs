@@ -6,6 +6,7 @@ use iced::Rectangle;
 use super::{
     CachedLayoutRun, GlyphAtlas, GlyphCacheEmitRequest, ShapeCacheEntry, TextShapeRequest,
     emit_glyphs_from_cache, extract_layout_runs, shape_cache_hash, shape_text_to_runs,
+    shaped_text_total_height,
 };
 use crate::render::font::{WowFontSystem, line_height_for_font_size};
 use crate::render::shader::QuadBatch;
@@ -78,6 +79,78 @@ pub fn emit_text_quads(
         shadow_offset,
     );
     emit_text_pass(batch, glyph_atlas, font_system, &pass, color, (0.0, 0.0));
+}
+
+/// Geometry settings and current paint for an already prepared full-content buffer.
+pub(crate) struct PreparedBufferTextRequest<'a> {
+    pub(crate) buffer: &'a cosmic_text::Buffer,
+    pub(crate) bounds: Rectangle,
+    pub(crate) spacing: f32,
+    pub(crate) justify_h: TextJustify,
+    pub(crate) justify_v: TextJustify,
+    pub(crate) color: [f32; 4],
+    pub(crate) glyph_tex_index: i32,
+    pub(crate) shadow_color: Option<[f32; 4]>,
+    pub(crate) shadow_offset: (f32, f32),
+    pub(crate) outline: crate::widget::TextOutline,
+}
+
+/// Emit every prepared run without reshaping or limiting it to the viewport.
+/// The caller clips the emitted quads after full-content alignment.
+pub(crate) fn emit_prepared_buffer_text_quads(
+    batch: &mut QuadBatch,
+    font_system: &mut WowFontSystem,
+    glyph_atlas: &mut GlyphAtlas,
+    request: PreparedBufferTextRequest<'_>,
+) {
+    let runs = extract_layout_runs(request.buffer, 0, request.spacing);
+    let total_height = shaped_text_total_height(
+        request.buffer,
+        0,
+        request.buffer.metrics().line_height,
+        request.spacing,
+    );
+    let pass = TextPassContext {
+        runs: &runs,
+        bounds: request.bounds,
+        y_offset: vertical_text_offset(request.justify_v, request.bounds.height, total_height),
+        justify_h: request.justify_h,
+        glyph_tex_index: request.glyph_tex_index,
+    };
+    paint_prepared_text(batch, glyph_atlas, font_system, &pass, &request);
+}
+
+fn paint_prepared_text(
+    batch: &mut QuadBatch,
+    glyph_atlas: &mut GlyphAtlas,
+    font_system: &mut WowFontSystem,
+    pass: &TextPassContext<'_>,
+    request: &PreparedBufferTextRequest<'_>,
+) {
+    emit_outline_text_pass(
+        batch,
+        glyph_atlas,
+        font_system,
+        pass,
+        request.outline,
+        request.color[3],
+    );
+    emit_shadow_text_pass(
+        batch,
+        glyph_atlas,
+        font_system,
+        pass,
+        request.shadow_color,
+        request.shadow_offset,
+    );
+    emit_text_pass(
+        batch,
+        glyph_atlas,
+        font_system,
+        pass,
+        request.color,
+        (0.0, 0.0),
+    );
 }
 
 fn can_emit_text(text: &str, bounds: Rectangle, font_size: f32) -> bool {

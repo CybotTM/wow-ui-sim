@@ -6,7 +6,9 @@ use std::rc::Rc;
 use rilua::{LuaApiMut, Val};
 
 use super::env::{WowLuaAppData, WowLuaEnv};
-use crate::render::editbox_layout::{EditBoxLayoutRequest, shape_editbox_cursor};
+use crate::render::editbox_layout::{
+    EditBoxLayoutRequest, PreparedEditBoxLayout, prepare_editbox_layout,
+};
 use crate::render::font::WowFontSystem;
 use crate::widget::editbox::EditBoxLayoutInput;
 
@@ -90,19 +92,27 @@ fn refresh_editbox(env: &WowLuaEnv, id: u64, fonts: Option<&FontSystem>) -> Opti
         LayoutRefresh::Unavailable => None,
         LayoutRefresh::Unchanged => take_text_change(env, id),
         LayoutRefresh::Changed(input) => {
-            let cursor = shape_cursor(fonts, &input);
-            commit_presentation(env, id, input, cursor)
+            let layout = prepare_layout(fonts, &input);
+            commit_presentation(env, id, input, layout)
         }
     }
 }
 
-fn shape_cursor(fonts: Option<&FontSystem>, input: &EditBoxLayoutInput) -> Option<CursorGeometry> {
-    let settings = input.settings;
-    if !settings.scale.is_finite() || settings.scale <= 0.0 {
+fn prepare_layout(
+    fonts: Option<&FontSystem>,
+    input: &EditBoxLayoutInput,
+) -> Option<PreparedEditBoxLayout> {
+    let scale = input.settings.scale;
+    if !scale.is_finite() || scale <= 0.0 {
         return None;
     }
-    let (left, top, width, height) = settings.content_bounds();
-    let request = EditBoxLayoutRequest {
+    prepare_editbox_layout(&mut fonts?.borrow_mut(), &layout_request(input))
+}
+
+fn layout_request(input: &EditBoxLayoutInput) -> EditBoxLayoutRequest<'_> {
+    let settings = input.settings;
+    let (_, _, width, height) = settings.content_bounds();
+    EditBoxLayoutRequest {
         text: input.text.as_deref().unwrap_or_default(),
         font_path: input.font.as_deref(),
         font_size: settings.font_size,
@@ -114,26 +124,38 @@ fn shape_cursor(fonts: Option<&FontSystem>, input: &EditBoxLayoutInput) -> Optio
         justify_h: settings.justify_h,
         justify_v: settings.justify_v,
         cursor_scalar: input.cursor,
-    };
-    let (x, y, height) = shape_editbox_cursor(&mut fonts?.borrow_mut(), &request)?;
-    Some((
+    }
+}
+
+fn frame_cursor_geometry(
+    input: &EditBoxLayoutInput,
+    (x, y, height): (f32, f32, f32),
+) -> CursorGeometry {
+    let settings = input.settings;
+    let (left, top, _, _) = settings.content_bounds();
+    (
         (left + x) / settings.scale,
         -(top + y) / settings.scale,
         1.5,
         height / settings.scale,
-    ))
+    )
 }
 
 fn commit_presentation(
     env: &WowLuaEnv,
     id: u64,
     input: EditBoxLayoutInput,
-    cursor: Option<CursorGeometry>,
+    layout: Option<PreparedEditBoxLayout>,
 ) -> Option<EditBoxUpdate> {
+    let cursor = layout
+        .as_ref()
+        .and_then(|layout| layout.cursor)
+        .map(|cursor| frame_cursor_geometry(&input, cursor));
     let mut sim = env.state().borrow_mut();
     let frame = sim.widgets.get_mut(id)?;
     let presentation = frame.editbox_presentation_mut();
     presentation.input = Some(input);
+    presentation.shaped_text = layout.map(|layout| layout.buffer);
     presentation.cursor_geometry = cursor;
     let text_changed = presentation.take_text_change();
     sim.widgets.mark_visual_dirty(id);

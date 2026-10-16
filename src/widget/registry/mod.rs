@@ -445,6 +445,7 @@ impl WidgetRegistry {
                 .and_then(|frame| frame.editbox_presentation.as_mut())
             {
                 presentation.input = None;
+                presentation.shaped_text = None;
                 presentation.cursor_geometry = None;
             }
         }
