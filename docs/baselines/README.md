@@ -126,6 +126,10 @@ Independent [normal startup audit](/home/osso/.local/state/wow-ui-sim/verificati
 
 These receipts and existing a56 fmt PASS close only bounded **QUEST-SOURCE** gates. Later `4cb2b5e98` / `52b73d664` DoubleIcon passive/test code is **not covered by check/startup/fmt** and awaits a new RED build; historical selector RED remains separate. No whole-current-HEAD startup pass, native parity, broad/full-parent acceptance or fresh rerun follows. Earlier aborts/REDs and Forever Gamepad10 records/14 occurrences remain unchanged, not rerun.
 
+#### Abandonment profile correction — 2026-10-16
+
+Matching cfg correction `dc2530c3c6440c0762efd8fd3e4fd2a914a8f3e8` has independently reconciled default and Forever library checks: both terminal exit0, exactly one successful `build-finished` each; default730 JSON records/zero compiler diagnostics, Forever731/one existing `UnitRole` dead-code warning. Full streams, unchanged pressure guards, source predicates, formatting exit0 and changed-line readability are recorded in `/home/osso/.local/state/wow-ui-sim/verification/quest-abandon-next/profile-correction-report.md`. The first default E0609 failure remains historical. Earlier abandonment3PASS at normal-library source `58bccba22` is retained separately, without replay: the Forever producer body is unchanged by the matching feature attribute. These are library compile checks, not Retail runtime, startup, native, all-profile or full-parent acceptance. [Owning contract](../specs/quest-offer-rich-log-coherence.md).
+
 ## Panel And Addon Evidence
 
 - `mists-panels.md` lists the Blizzard panel parity matrix.
