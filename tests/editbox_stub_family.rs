@@ -66,8 +66,27 @@ fn editbox_set_text_preserves_in_bounds_caret_and_clips_selection() {
 #[test]
 fn editbox_set_formatted_text_dispatches_hooks_and_routes_errors_without_reentry_loop() {
     let env = env();
+    let root = tempfile::tempdir().unwrap();
+    let toc = root.path().join("EditBoxBindings.toc");
+    std::fs::write(&toc, "## Title: EditBox bindings probe\nBindings.xml\n").unwrap();
+    std::fs::write(
+        root.path().join("Bindings.xml"),
+        r#"
+<Ui>
+    <EditBox name="FormattedCallbackPre" virtual="true" intrinsic="true">
+        <Scripts>
+            <OnTextSet intrinsicOrder="precall">FormattedCallbackPrecall(self)</OnTextSet>
+        </Scripts>
+    </EditBox>
+</Ui>
+"#,
+    )
+    .unwrap();
+    let loaded = wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
+    assert!(loaded.warnings.is_empty(), "{:?}", loaded.warnings);
     env.exec(r#"
-        local eb = CreateFrame("EditBox", "FormattedCallbackEB", UIParent)
+        function FormattedCallbackPrecall() end
+        local eb = CreateFrame("EditBox", "FormattedCallbackEB", UIParent, "FormattedCallbackPre")
         _G.formatted_events, _G.formatted_errors = {}, {}
         local events, errors = _G.formatted_events, _G.formatted_errors
         seterrorhandler(function(message) errors[#errors + 1] = tostring(message) end)
@@ -90,8 +109,11 @@ fn editbox_set_formatted_text_dispatches_hooks_and_routes_errors_without_reentry
         local eb = FormattedCallbackEB
         local events, errors = _G.formatted_events, _G.formatted_errors
         assert(table.concat(events, ",") == "set:é2,set hook:é2,changed:é2:false,changed hook", table.concat(events, ","))
-        -- A separate precall can fail without replacing the normal binding/hooks.
-        eb:SetScript("OnTextSet", function() error("text set failure") end, 0)
+        -- The XML precall is distinct from the retained normal binding/hooks.
+        local precall = eb:GetScript("OnTextSet", 0)
+        assert(type(precall) == "function")
+        assert(precall ~= eb:GetScript("OnTextSet"))
+        function FormattedCallbackPrecall() error("text set failure") end
         eb:SetText("next")
         assert(eb:GetText() == "next")
         assert(#events == 6 and events[5] == "set:next" and events[6] == "set hook:next")

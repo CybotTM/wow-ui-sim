@@ -2,6 +2,10 @@
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#doubleiconandtext-bounded-retail-producer-proof--2026-10-15) links the owning acceptance matrix: getter `c3096cd6b` at saved source `5dfa94330`, nine unique PASS/exit0, independent build/seal/full-stream runtime reconciliation PASS. Actual cached lifecycle and secret selectors executed. Historical REDs remain separate; profile preservation, format/check, ordinary startup and full-parent gates stay open. No nine-case rerun or unrelated current-HEAD/native proof.
 
+## [2026-10-15] source | C2 retained Buffer follow-up
+
+[EditBox owner](../specs/editbox-text-position-selection.md#cursor-geometry-follow-up) reconciles the prior raw/stripped snapshot description: opaque public Default cache retains one prepared full-content Buffer shared by Editor and glyph emission. Integration failed with seven E0451 errors before tests; visibility fix `000629293` and follow-up through `91813b0e3` remain uncompiled. CENTER/BOTTOM overflow oracle authored/unexecuted; no new GREEN or native callback-count claim.
+
 ## [2026-10-15] source | Shared clean-room controls and anchors
 
 [Widget proof matrix](systems/widget-system.md#clean-room-control-and-anchor-follow-ups--2026-10-15) links owning contracts and separate pending controls. [C3 owner](../specs/editbox-text-position-selection.md#tests-asserting-this-spec) records saved Retail source `3fa90ab7b`: four unique PASS/exit0, all assertions reached; historical three valid REDs and wrong oracle remain separate. Wrath unexecuted; shared acceptance remains open. No C2/XML-regression, broader startup/check/native or parent-goal credit.

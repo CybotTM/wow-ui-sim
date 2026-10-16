@@ -48,7 +48,7 @@ Source-inspected 2026-10-12: `globals/real/unit_roles_assignment.rs` commits cha
 
 `fire_on_update()` sequence each render tick (C2 flush source-only at `c8d79f3bf`):
 
-Before ordinary OnUpdate dispatch, flush EditBox presentation/cursor and pending text notifications; the same flush precedes key-down handling. See the [owning lifecycle](../../specs/editbox-text-position-selection.md).
+Before ordinary OnUpdate dispatch, flush EditBox presentation/cursor and pending text notifications; the same flush precedes key-down handling. Source emits changed presentation inputs and suppresses idle inputs/ticks, not an explicitly required geometry-tuple-only policy or native callback-count claim. Integration failed before tests with seven E0451 errors in existing Frame FRU callers; visibility fix `000629293` and follow-up through `91813b0e3` remain uncompiled, with no new GREEN. See the [owning lifecycle](../../specs/editbox-text-position-selection.md#cursor-geometry-follow-up).
 
 1. Filter `on_update_frames` to visible-only
 2. Call `__scripts["{id}_OnUpdate"](frame, elapsed)` for each
