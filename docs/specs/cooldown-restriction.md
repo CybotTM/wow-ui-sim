@@ -1,5 +1,7 @@
 # Cooldown restriction input and charge-table secrecy
 
+Integration checkpoint (2026-10-16): SS-P1 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+
 An explicit `SimState.cooldowns_restricted` input controls the zero-argument `C_Secrets.ShouldCooldownsBeSecret()` predicate and numeric secrecy on three charge tables: `C_Spell.GetSpellCharges`, `C_ActionBar.GetActionCharges`, and `C_SpellBook.GetSpellBookItemCharges`. Policy and new book-table registration require both `retail-12-0-5` and mainline (`profile-retail` or `client-ptr`). Older queries/profile defaults remain unchanged. Existing five-field charge input stays unchanged. See [charge model](../wiki/systems/spell-charge-state.md).
 
 ## What it must do
