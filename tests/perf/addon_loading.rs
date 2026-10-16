@@ -13,6 +13,7 @@ use crate::perf_base_game::{blizzard_ui_dir, new_game_env};
 pub struct PerAddonLoadTiming {
     pub name: String,
     pub total_time: Duration,
+    pub timing: LoadTiming,
 }
 
 pub struct LoadedAddonPhases {
@@ -56,6 +57,7 @@ fn load_timed_game_addons(with_saved_vars: bool) -> LoadedAddonPhases {
         per_addon_timings.push(PerAddonLoadTiming {
             name: name.clone(),
             total_time: result.timing.total(),
+            timing: result.timing,
         });
     }
 

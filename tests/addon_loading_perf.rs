@@ -160,6 +160,7 @@ fn heaviest_blizzard_addons_stay_within_per_addon_load_budgets() {
 
             let heaviest_report = format_heaviest_addon_report(&heaviest);
             eprintln!("heaviest Blizzard addon loads: {heaviest_report}");
+            print_heaviest_addon_phase_report(&heaviest, loaded.addon_count);
 
             let timing_by_name = per_addon_timing_map(&loaded.per_addon_timings);
             let regressions = collect_heavy_addon_regressions(&heaviest, &timing_by_name);
@@ -170,6 +171,38 @@ fn heaviest_blizzard_addons_stay_within_per_addon_load_budgets() {
                 regressions.join("\n"),
                 heaviest_report
             );
+    }
+}
+
+fn print_heaviest_addon_phase_report(heaviest: &[PerAddonLoadTiming], loaded_addon_count: usize) {
+    eprintln!(
+        "heaviest Blizzard addon phases: loaded_addon_count={loaded_addon_count}; durations in ns; compile includes cache lookup/replay, not exclusive CPU; components include subsets and are not additive to total"
+    );
+    for addon in heaviest {
+        let timing = &addon.timing;
+        eprintln!(
+            concat!(
+                "addon={} total_ns={} io_ns={} xml_parse_ns={} xml_process_ns={} ",
+                "lua_exec_ns={} lua_compile_ns={} lua_call_ns={} saved_vars_ns={} ",
+                "cache_hits={} cache_misses={} cache_lookup_misses={} ",
+                "cache_replay_failures={} cache_store_successes={} cache_store_failures={}"
+            ),
+            addon.name,
+            addon.total_time.as_nanos(),
+            timing.io_time.as_nanos(),
+            timing.xml_parse_time.as_nanos(),
+            timing.xml_process_time.as_nanos(),
+            timing.lua_exec_time.as_nanos(),
+            timing.lua_compile_time.as_nanos(),
+            timing.lua_call_time.as_nanos(),
+            timing.saved_vars_time.as_nanos(),
+            timing.cache_hits,
+            timing.cache_misses,
+            timing.cache_lookup_misses,
+            timing.cache_replay_failures,
+            timing.cache_store_successes,
+            timing.cache_store_failures,
+        );
     }
 }
 

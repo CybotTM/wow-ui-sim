@@ -2,6 +2,10 @@
 
 Measured default-retail test cost on 2026-10-07, then reuse the identical full-game preload for publication sweeps without deleting cases or weakening assertions. CI integration coverage remains an unapproved branch-only proposal.
 
+## Per-addon budget diagnostics
+
+`heaviest_blizzard_addons_stay_within_per_addon_load_budgets` reports the existing top-eight selection's loader phase durations and cache counters before checking its unchanged budgets. Durations are elapsed nanoseconds, not exclusive CPU time; Lua compilation includes cache lookup/replay, and nested components must not be added to the total. `loaded_addon_count` is the harness's discovered addon count, not a transitive registry count. This instrumentation does not establish a cause or improvement for the full-suite `39d38` ProjectConstants budget failure.
+
 ## Baseline
 
 At `44e91b8fccb5a6ad1f206a9fccf1b8d9c4ccea34`, four-worker nextest integration ran 10,808 cases in 2717.323s: 10,784 passed, 24 failed, 19 ignored/skipped. Lib ran in 51.959s (1973 passed, six failed); prefork ran in 92.575s (2031 passed). Own default-feature target build took 12m59s; compile time is excluded from test comparisons.
