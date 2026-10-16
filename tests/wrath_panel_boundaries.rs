@@ -112,14 +112,24 @@ fn exec_and_audit(env: &WowLuaEnv, code: &str) {
     result.unwrap();
 }
 
-// The temporary TOC references cache files directly; XML <Script>/<Include> paths
-// still resolve beside the unchanged original document, not beside a copied fixture.
+// TOC entries are relative; XML <Script>/<Include> paths still resolve beside
+// the unchanged original cache document, not beside a copied fixture.
 fn load_original_files(env: &WowLuaEnv, names: &[&str]) {
     let root = tempfile::tempdir().unwrap();
     let mut toc = String::from("## Interface: 30300\n## Title: WrathPanelBoundary\n");
     for name in names {
         let (path, _) = read_original(name);
-        toc.push_str(path.to_str().expect("SETUP FAILURE: cache path UTF-8"));
+        let common = root
+            .path()
+            .ancestors()
+            .find(|base| path.starts_with(base))
+            .unwrap();
+        let mut relative = PathBuf::new();
+        for _ in root.path().strip_prefix(common).unwrap().components() {
+            relative.push("..");
+        }
+        relative.push(path.strip_prefix(common).unwrap());
+        toc.push_str(relative.to_str().expect("SETUP FAILURE: cache path UTF-8"));
         toc.push('\n');
     }
     let path = root.path().join("WrathPanelBoundary.toc");
