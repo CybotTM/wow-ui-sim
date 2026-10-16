@@ -1,6 +1,6 @@
 # Supplied IconTextAndBackground widgets
 
-`C_UIWidgetManager.GetIconTextAndBackgroundWidgetVisualizationInfo(widgetID)` must project explicit environment-local supplied records for the unchanged cached Retail/PTR consumer. The source boundary is `src/c_api/ui_widget_manager/`; the [manager-state contract](ui-widget-manager-state.md) owns shared supplied-state behavior and the [manager architecture](../wiki/systems/ui-widget-manager-state.md) describes the existing lifecycle. This is a staged, unimplemented and unexecuted contract, not acceptance.
+`C_UIWidgetManager.GetIconTextAndBackgroundWidgetVisualizationInfo(widgetID)` must project explicit environment-local supplied records for the unchanged cached Retail/PTR consumer. The source boundary is `src/c_api/ui_widget_manager/`; the [manager-state contract](ui-widget-manager-state.md) owns shared supplied-state behavior and the [manager architecture](../wiki/systems/ui-widget-manager-state.md) describes the existing lifecycle. Selector tests have a main-observed two-case PTR RED against normal-library source `161dad02a`; independent reconciliation is pending. Passive record/map/feed plumbing follows that baseline without a modeled getter. This is not populated-query, feed, consumer or native acceptance.
 
 ## What it must do
 
@@ -42,7 +42,9 @@
 
 ## Implementation inventory
 
-No IconTextAndBackground record/map/feed/getter is present in the inspected model. Existing integration boundaries, not claimed new implementations:
+Passive supplied-input plumbing is present but uncompiled/unexecuted; the modeled getter is still absent. No populated-query or lifecycle acceptance follows:
+
+- `src/c_api/ui_widget_manager/icon_text_and_background_record.rs` — complete explicit 14-field input record, without defaults or seeds.
 
 - `src/c_api/ui_widget_manager.rs` — public supplied records and shared numeric widget identity.
 - `src/c_api/ui_widget_manager/inputs.rs` — environment-owned supplied inputs.
@@ -51,12 +53,12 @@ No IconTextAndBackground record/map/feed/getter is present in the inspected mode
 
 ## Tests asserting this spec
 
-- Candidate `tests/ui_widget_icon_text_and_background_selector.rs` — two standalone public-selector cases (missing; explicit nil/numeric string/boolean/table/function), fresh `WowLuaEnv` and existing `GetWidgetSetInfo` required-number control for each invocation. No record scaffold, mocks or provider replacement. Authored only: compilation and baseline RED not run. A successful target call fails rejection; an unrelated missing-function error fails the required-number diagnostic assertion. The test does not assert what a successful call returned.
+- Candidate `tests/ui_widget_icon_text_and_background_selector.rs` — two standalone public-selector cases (missing; explicit nil/numeric string/boolean/table/function), fresh `WowLuaEnv` and existing `GetWidgetSetInfo` required-number control for each invocation. No record scaffold, mocks or provider replacement. Main-observed PTR baseline: compile exit0; two unique FAIL, exit101, after shared controls. Missing-selector and explicit-nil target calls succeed instead of rejecting; later non-number loop inputs are unreached. Receipt: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconbackground-selector-ptr-first-red-20261016T095402891303Z`. The newly compiled test source is `e1a2ce806`; actual normal-library basis is `161dad02a`, not a whole-e1 library. Independent reconciliation pending. A successful target call fails rejection; an unrelated missing-function error fails the required-number diagnostic assertion. The test does not assert what a successful call returned.
 - Populated query, real secret-wrapper access, normal-feed atomicity, environment isolation and actual cached Retail/PTR lifecycle tests remain to be authored/integrated by the owning implementation; no proof for those requirements is supplied by selector tests.
 
 ## Known gaps (current cycle)
 
-- [ ] Integrate the standalone selector candidate and demonstrate attributable baseline RED against the existing normal library before record scaffolding/producer changes.
+- [ ] Independently reconcile the newly compiled two-case selector RED against normal PTR library `161dad02a`; retain later inputs as unreached, not tested.
 - [ ] Implement this complete supplied-record query/feed slice with behavioral coverage of snapshots, selectors/security and cached lifecycle on Retail/PTR; retain exact source/build/runtime attribution separately.
 
 ## Out of scope

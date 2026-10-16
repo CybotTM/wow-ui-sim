@@ -1,10 +1,10 @@
 //! Host feed operations mutate supplied state before synchronous consumer events.
 use super::{
     BulletTextListRecord, ButtonHeaderRecord, CaptureBarRecord, DiscreteProgressStepsRecord,
-    DoubleIconAndTextRecord, DoubleStatusBarRecord, IconAndTextRecord, SpacerRecord,
-    SpellDisplayRecord, StatusBarRecord, TextColumnRowVisualizationInfo, TextWithStateRecord,
-    TextWithSubtextRecord, TextureAndTextRecord, TextureAndTextRowRecord, WidgetId, WidgetSetEntry,
-    WidgetSetRecord,
+    DoubleIconAndTextRecord, DoubleStatusBarRecord, IconAndTextRecord, IconTextAndBackgroundRecord,
+    SpacerRecord, SpellDisplayRecord, StatusBarRecord, TextColumnRowVisualizationInfo,
+    TextWithStateRecord, TextWithSubtextRecord, TextureAndTextRecord, TextureAndTextRowRecord,
+    WidgetId, WidgetSetEntry, WidgetSetRecord,
 };
 use crate::lua_api::WowLuaEnv;
 use crate::{Error, Result};
@@ -13,6 +13,7 @@ use rilua::LuaApiMut;
 #[derive(Debug, Clone)]
 pub enum WidgetVisualization {
     IconAndText(IconAndTextRecord),
+    IconTextAndBackground(IconTextAndBackgroundRecord),
     CaptureBar(CaptureBarRecord),
     StatusBar(StatusBarRecord),
     DoubleStatusBar(DoubleStatusBarRecord),
@@ -35,6 +36,7 @@ impl WidgetVisualization {
     fn widget_type(&self) -> u32 {
         match self {
             Self::IconAndText(_) => 0,
+            Self::IconTextAndBackground(_) => 4,
             Self::CaptureBar(_) => 1,
             Self::StatusBar(_) => 2,
             Self::DoubleStatusBar(_) => 3,
@@ -175,6 +177,11 @@ fn supply_visualization(sim: &mut crate::lua_api::SimState, id: f64, record: Wid
     match record {
         WidgetVisualization::IconAndText(record) => {
             sim.ui_widget_inputs.icon_and_text.insert(key, record);
+        }
+        WidgetVisualization::IconTextAndBackground(record) => {
+            sim.ui_widget_inputs
+                .icon_text_and_background
+                .insert(key, record);
         }
         WidgetVisualization::CaptureBar(record) => {
             sim.ui_widget_inputs.capture_bars.insert(key, record);
