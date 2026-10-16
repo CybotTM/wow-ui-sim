@@ -640,10 +640,6 @@ if rawget(_G, "GetMultiCastBarIndex") == nil then
   function GetMultiCastBarIndex() return 1 end
 end
 
-if rawget(_G, "IsAutoRepeatAction") == nil then
-  function IsAutoRepeatAction(slot) return false end
-end
-
 if rawget(_G, "IsUsableAction") == nil then
   function IsUsableAction(slot) return true, false end
 end

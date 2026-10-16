@@ -379,12 +379,6 @@ if InitWorldMapPing == nil then
   end
 end
 
-if IsAutoRepeatAction == nil then
-  function IsAutoRepeatAction()
-    return false
-  end
-end
-
 if IsEquippedAction == nil then
   function IsEquippedAction()
     return false

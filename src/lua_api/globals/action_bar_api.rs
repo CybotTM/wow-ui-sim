@@ -252,8 +252,12 @@ fn is_attack_action(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn is_auto_repeat_action(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = stack_val(state, 1);
-    push_bool(state, false)
+    let slot = stack_slot(state);
+    let active = {
+        let sim = borrow_state(state)?;
+        slot.is_some_and(|slot| crate::c_api::action_repeat::is_active(&sim, slot))
+    };
+    push_bool(state, active)
 }
 
 fn is_equipped_action(state: &mut LuaState) -> LuaResult<u32> {

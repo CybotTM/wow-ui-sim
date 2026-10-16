@@ -83,6 +83,13 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     register_pet_slot_methods(state, table_ref)?;
     register_stateful_methods(state, table_ref)?;
     register_slot_mutation_methods(state, table_ref)?;
+    // These approved legacy consumers share the namespaced state-backed query.
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Wrath | crate::client_profile::ClientProfile::Mists
+    ) {
+        LuaApiMut::register_function(state, "IsAutoRepeatAction", is_auto_repeat_action)?;
+    }
     #[cfg(feature = "retail-12-0-0")]
     table_set_rust_fn_static(
         state,

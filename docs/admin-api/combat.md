@@ -1,5 +1,15 @@
 # Combat State
 
+### A_Admin.SetActionRepeatActive(slot, active)
+
+Supplies positive action-slot repeat membership independently of casting/current
+state, attack classification and assigned spell. `active` must be a literal boolean.
+Returns no values; emits no events. Supply state before explicitly firing
+`START_AUTOREPEAT_SPELL`, `STOP_AUTOREPEAT_SPELL` or `ACTIONBAR_UPDATE_STATE` through
+`A_Admin.FireEvent`. Membership lasts until explicitly cleared; this input does not
+infer action replacement, spell auto-fire or multiple-repeat event arbitration.
+See the [G2 contract](../specs/action-repeat-active.md). Staged; runtime unverified.
+
 ### A_Admin.SetInCombat(inCombat)
 
 Toggles the player's combat state.

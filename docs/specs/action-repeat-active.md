@@ -1,5 +1,7 @@
 # Supplied action repeat-active state (G2)
 
+Integration checkpoint (2026-10-16): G2 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+
 Explicit repeat-active slot input drives the existing `C_ActionBar.IsAutoRepeatAction`
 query, and the Wrath/Mists legacy projection. This is a proposed simulator contract,
 not native parity. Source: `src/c_api/action_repeat.rs`; consumer mechanics remain
