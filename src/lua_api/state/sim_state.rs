@@ -580,6 +580,9 @@ pub struct SimState {
     pub quest_short_expiration_warnings: HashSet<u32>,
     pub abandon_quest_id: Option<u32>,
     pub tracked_achievements: HashSet<i32>,
+    /// Supplied legacy trainer visibility: available, unavailable, used.
+    #[cfg(feature = "client-wrath")]
+    pub wrath_trainer_filters: [bool; 3],
     pub bank_frame_open: bool,
     pub guild_bank_frame_open: bool,
     pub bank_purchased_slots: i32,

@@ -1,0 +1,17 @@
+{
+  "FrameXML/UIParent.lua": "a48687367d05ba9965bdd7a43bdecb92666c8ba74873bd7d9da08b205b34e177",
+  "FrameXML/BuffFrame.lua": "c95749ebe1dbac513d3523e98c56231390486e48ae80e0e51072aa24368393bf",
+  "FrameXML/BuffFrame.xml": "c4a1a1e6449c7ed866712f28c60e57080b69a8ade2b00e766bc58d3c0aa068ff",
+  "FrameXML/DurabilityFrame.lua": "67c7bf8fcca1f57b2e3053b9e0f31a0cf5e310e8f2c3c0405d7cc8e0ba2d8ccd",
+  "FrameXML/WatchFrame.lua": "ad67e96468a14734212aa53cb62c43619f4006dc15173affb43a0be29476751b",
+  "FrameXML/UIDropDownMenu.lua": "d83c1d450884a8319045f671b3b81da442250ca9402dc94e85a542e7f1068a6a",
+  "FrameXML/UIDropDownMenu.xml": "efe001430531c977c9d50c88d6e05419787f0a11c204f7b13981b9e44d7eaa61",
+  "FrameXML/UIDropDownMenuTemplates.xml": "5be5e90b8636c26df3af7976daf3094062c02164394b896588be048daf040619",
+  "FrameXML/Fonts.xml": "cf08457a8fd1e1d1788532bb10c2de7e05280291c11f6a00294709f104d26757",
+  "FrameXML/FontStyles.xml": "618ec8ba7234c5725576c31b6d97f30588e8653474292d3783edf602d0d31d8a",
+  "FrameXML/LFGFrame.lua": "c9e729e67a8616266c0f13e19ba5dd32defa1a54d1e83a8b694d91c33a795c3d",
+  "FrameXML/LFDFrame.lua": "b9f07abbc58fee85e955328971dd090c40ca3bfab99343885bcdf5e7e7ccae2d",
+  "FrameXML/LFRFrame.lua": "0e79ebe68dd88c20d0bfca83da4b479aaabf945d2e2b8542d19b4897abde6e10",
+  "AddOns/Blizzard_AchievementUI/Blizzard_AchievementUI.lua": "807185c7d40a6ab9432ab4f62342384773f063d6321657547918e76a8772548a",
+  "AddOns/Blizzard_TrainerUI/Blizzard_TrainerUI.lua": "00773f93e06515e2c2060fa4da5cd923921705786c71765e120787d160758085"
+}

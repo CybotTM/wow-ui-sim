@@ -475,6 +475,9 @@ macro_rules! build_empty_sim_state {
             quest_short_expiration_warnings: ::std::collections::HashSet::new(),
             abandon_quest_id: None,
             tracked_achievements: ::std::collections::HashSet::new(),
+            // Simulator initial policy matches the cached trainer panel constants.
+            #[cfg(feature = "client-wrath")]
+            wrath_trainer_filters: [true, true, false],
             bank_frame_open: false,
             guild_bank_frame_open: false,
             bank_purchased_slots: 0,
