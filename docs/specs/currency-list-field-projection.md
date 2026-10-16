@@ -1,6 +1,6 @@
 # Currency list field projection
 
-Expose existing currency-list backing fields through `C_CurrencyInfo.GetCurrencyListInfo` and the Mists legacy tuple. Existing listed currencies project supplied `SimState.currency_info` display values; list structure remains static. Source lives in `src/c_api/item_spell/c_currency.rs` and `src/mists/compat_bootstrap.lua`.
+Expose existing currency-list backing fields through `C_CurrencyInfo.GetCurrencyListInfo` and the Mists legacy tuple. Existing listed currencies project supplied `SimState.currency_info` display values; list structure remains static outside the separately proposed [Retail displayed-index slice](currency-displayed-indices.md). Source lives in `src/c_api/item_spell/c_currency.rs` and `src/mists/compat_bootstrap.lua`.
 
 ## What it must do
 
