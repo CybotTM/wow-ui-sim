@@ -569,7 +569,7 @@ fn clearing_button_texture_hides_rendered_child_texture() {
 }
 
 fn c7_font_env() -> wow_ui_sim::lua_api::WowLuaEnv {
-    let env = env_with_shared_xml();
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
     env.exec(
         r#"
         local function font(name, path, size, flags, r, g, b)

@@ -42,6 +42,8 @@ Saved `39d38` button module: **1 PASS, 11 SETUP FAIL**, including all three C7 c
 - [x] Independently validate the corrected saved bounded projection and affected rendering/state controls. Historical three-case oracle RED remains separate; this is not native, GPU or all-profile acceptance.
 - [ ] Cover actual GUI pointer/hit-test/dispatch; authored tests use public simulated hover, not manual OnEnter callbacks.
 
+The three C7 fixtures construct their own fonts, Button, FontStrings and textures through public APIs; they do not consume a Blizzard template. Their bootstrap now uses a bare environment, removing the irrelevant modern SharedXML-cache prerequisite without changing assertions. This fixture change is uncompiled/unexecuted; the other texture controls retain their cache requirements. It does not establish genuine Wrath consumer acceptance.
+
 ## Out of scope
 
 Later shared FontObject mutation propagation is separate T6 work; snapshot projection is not complete native FontObject inheritance. Missing-slot policy and unspecified/local-field restoration are not inferred here. No texture ownership redesign, vendor edits or reactive FontObject graph.
