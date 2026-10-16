@@ -33,8 +33,10 @@ unsupplied Parchment, one nil return, supplied Stone, selection changes, environ
 isolation and abandonment cleanup. Passive map ingress was included in test commit
 `4e5e1efd0`; `fe529b241` adds its empty seeded initializer. The first build's E0063
 compile error is not RED. Repaired saved `fe529b241` produced two real Retail
-assertion failures: None versus Parchment and None versus supplied Stone. GREEN and
-full progress/reward dialog acceptance remain pending; unrelated missing consumer
-APIs are separate blockers, not evidence for new defaults.
+assertion failures: None versus Parchment and None versus supplied Stone. Saved
+`9d1430bf3` then passed both cases (4.72s), reaching nil arity, actual Parchment/Stone,
+selection/isolation and removal assertions. Separate same-source Retail startup
+returned `[]`, exit0. Full progress/reward dialog acceptance remained blocked on
+[separately authorized temporary inputs](quest-progress-requirements-empty.md).
 
 See [QL-2 dialog contract](quest-readiness-dialog.md).

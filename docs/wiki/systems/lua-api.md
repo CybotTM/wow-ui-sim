@@ -47,7 +47,11 @@ Producer `ccd9e2d01` changes `pending_quest_offer` to own a full existing `Quest
 
 ### Quest dialog material
 
-[Owning contract](../../specs/quest-background-material.md) records the nilable legacy getter, explicit environment-owned quest material map and original QuestFrame nil-to-Parchment behavior. Passive ingress and its initializer precede two actual Retail behavioral REDs; the getter/cleanup producer is committed separately, GREEN pending. Other missing dialog APIs are not silently defaulted.
+[Owning contract](../../specs/quest-background-material.md) records the nilable legacy getter, explicit environment-owned quest material map and original QuestFrame nil-to-Parchment behavior. Passive ingress and its initializer precede two actual Retail behavioral REDs; the separately committed getter/cleanup passed both focused cases and clean Retail startup at saved `9d1430bf3`. [Explicit temporary progress inputs](../../specs/quest-progress-requirements-empty.md) name the missing systems and retirement condition; they do not pretend to model requirements or portraits.
+
+### Original reward currency rows
+
+[Owning contract](../../specs/quest-reward-currency-panel.md) records the new Retail/Forever `C_QuestInfoSystem.GetQuestRewardCurrencies` wrapper and shared C_QuestLog serializer over existing `currency_rewards`. Original empty-panel control PASS and absent populated-row RED precede the bridge; GREEN pending. Nullable input/selection policy and incomplete metadata scope are explicit; no new reward store or acquisition model.
 
 ### Simulator selected quest turn-in
 

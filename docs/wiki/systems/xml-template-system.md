@@ -16,7 +16,7 @@ Every WoW XML file has a `<Ui>` root deserializing into `UiXml { elements: Vec<X
 
 ## XML widget ranges and default values
 
-[Owning contract](../../specs/xml-widget-values.md) covers shared StatusBar/Slider `minValue`, `maxValue`, `defaultValue` parsing and inherited application before scripts. Ignored attributes left the original tracker bar at0..1, clamping a correctly supplied50 to1 while its label displayed50%. Generic direct/runtime template initialization now consumes those attributes; two Retail REDs precede the fix, GREEN pending.
+[Owning contract](../../specs/xml-widget-values.md) covers shared StatusBar/Slider `minValue`, `maxValue`, `defaultValue` parsing and inherited application before scripts. Ignored attributes left the original tracker bar at0..1, clamping a correctly supplied50 to1 while its label displayed50%. Generic direct/runtime template initialization now consumes those attributes; owning contract records two Retail RED→GREEN cases, XML170/Slider18/original-StatusBar-UI6 preservation, one existing ignored tooltip TODO, and separate clean Retail startup at their saved scopes.
 
 ## Declarative click registration
 

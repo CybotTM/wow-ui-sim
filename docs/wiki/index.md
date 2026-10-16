@@ -3799,3 +3799,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-16] source | Supplied quest material
 
 [Owning contract](../specs/quest-background-material.md) records nilable signature, original Parchment consumer, passive ingress and two actual Retail REDs before the separately committed getter/cleanup.
+
+## [2026-10-16] source | Bounded quest dialog prerequisites and currency rows
+
+[Temporary inputs](../specs/quest-progress-requirements-empty.md) name five missing domains/retirement and three reached original nil-call REDs; money/currency-count boundaries remained behind earlier calls. [Currency projection](../specs/quest-reward-currency-panel.md) shares existing state/serializer after original populated-row RED, with empty control PASS. Earlier material and XML-value root GREEN/preservation/startup receipts now live in their owning specs.

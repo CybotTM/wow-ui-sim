@@ -30,6 +30,12 @@ StatusBar independent overrides, Slider inheritance, pre-OnLoad visibility and
 runtime CreateFrame inheritance for both widget types. Test commit `2ea2da694`
 produced two actual Retail behavioral failures at saved `b8e9da11b`: cached range
 0..1 instead of0..100; supplied initial values0/0 instead of50/15. GREEN,
-StatusBar/Slider XML preservation and current Retail startup remain pending.
+StatusBar/Slider XML preservation and current Retail startup were pending at that
+RED checkpoint. Saved `fe529b241` then passed both focused cases, including original
+value50/label50%, independent overrides and pre-OnLoad/runtime inheritance. Saved
+`9d1430bf3` preservation passed170 XML-template cases (one existing ignored tooltip
+TODO),18 Slider cases and six original StatusBar UI cases (unique names; nested
+child summaries do not add cases). Separate same-source Retail startup returned
+`[]`, exit0. No whole-suite/native/all-profile claim.
 
 See [XML template system](../wiki/systems/xml-template-system.md).
