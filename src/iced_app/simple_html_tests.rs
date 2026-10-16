@@ -43,25 +43,32 @@ fn load_consumer(app: &App, retail: bool) {
         .expect("original SimpleHTML region");
     let end = start + source[start..].find("</SimpleHTML>").unwrap() + "</SimpleHTML>".len();
     let fragment = &source[start..end];
-    let xml =
-        format!("<Ui><Frame name=\"UserScaledFrameTemplate\" virtual=\"true\"/>{fragment}</Ui>");
+    let xml = format!(
+        "<Ui><Frame name=\"UserScaledFrameTemplate\" virtual=\"true\"/><Frame name=\"H1FixtureRoot\"><Frames>{fragment}</Frames></Frame></Ui>"
+    );
     let temp = tempfile::tempdir().unwrap();
     let xml_path = temp.path().join("consumer.xml");
     std::fs::write(&xml_path, xml).unwrap();
     let toc_path = temp.path().join("H1Fixture.toc");
     std::fs::write(&toc_path, "## AllowLoad: Both\nconsumer.xml\n").unwrap();
-    crate::loader::load_addon(&env.loader_env(), &toc_path).unwrap();
-    let id = env
-        .state()
-        .borrow()
-        .widgets
-        .iter_ids()
-        .find(|id| {
-            env.state().borrow().widgets.get(*id).unwrap().widget_type
-                == crate::widget::WidgetType::SimpleHTML
+    let loaded = crate::loader::load_addon(&env.loader_env(), &toc_path).unwrap();
+    assert!(
+        loaded.warnings.is_empty(),
+        "fixture XML: {:?}",
+        loaded.warnings
+    );
+    let name = {
+        let state = env.state().borrow();
+        state.widgets.iter_ids().find_map(|id| {
+            let frame = state.widgets.get(id).unwrap();
+            (frame.widget_type == crate::widget::WidgetType::SimpleHTML)
+                .then(|| frame.name.clone())
+                .flatten()
         })
+    }
+    .expect("original SimpleHTML child must be instantiated");
+    env.exec(&format!("H1HTML = _G[{name:?}]; assert(H1HTML ~= nil)"))
         .unwrap();
-    env.exec(&format!("H1HTML = __frame_{id}")).unwrap();
     env.exec(
         r#"
         H1HTML:ClearAllPoints(); H1HTML:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 20, -20)
