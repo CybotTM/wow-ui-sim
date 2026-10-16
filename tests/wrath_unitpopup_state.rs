@@ -32,6 +32,10 @@ const ORIGINALS: &[(&str, &str)] = &[
         "VehicleMenuBar.lua",
         "2e04588f023d50a528c7b3fef4897adc37e8678b84d33b7478a6fd320e3e99a0",
     ),
+    (
+        "ActionButtonTemplate.xml",
+        "f1d376a849fca3867c2e1b3cb6dfeb4cd21db7838914482a16e48d5ce95c3ffa",
+    ),
 ];
 
 fn read_original(name: &str) -> String {
@@ -221,7 +225,9 @@ fn original_wrath_mainmenu_onload_resolves_late_child_and_rebound_global() {
 #[test]
 fn original_wrath_vehicle_onload_raises_child_and_initializes_action_buttons() {
     let env = consumer_env(&["UIParent.lua", "VehicleMenuBar.lua"]);
+    // NormalTexture geometry from the inherited ActionButtonTemplate.xml:74-85.
     // Ordinary widgets only; no replacement VehicleMenuBar functions or methods.
+    read_original("ActionButtonTemplate.xml");
     exec_and_audit(
         &env,
         r#"
@@ -229,6 +235,10 @@ fn original_wrath_vehicle_onload_raises_child_and_initializes_action_buttons() {
             local name = 'VehicleMenuBarActionButton'..index
             local button = CreateFrame('Button', name, UIParent)
             button:SetNormalTexture('Interface\\Buttons\\UI-Panel-Button-Up')
+            local texture = button:GetNormalTexture()
+            texture:ClearAllPoints()
+            texture:SetPoint('CENTER', button, 'CENTER', 0, -1)
+            texture:SetSize(66, 66)
             button:CreateFontString(name..'HotKey', 'OVERLAY')
         end
     "#,
