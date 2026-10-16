@@ -1,6 +1,6 @@
 ## [2026-10-16] evidence | ItemDisplay combined bounded acceptance
 
-[Owner SSOT](../specs/ui-widget-item-display.md#bounded-combined-retailptr-acceptance--2026-10-16) records accepted full Retail/PTR reports, separately attributed actual normal sources, same ten logical cases per profile, 31 checked fields and synchronous completed cached lifecycle. Separate CLEAN startups and fresh CURRENT child-CVar/original guards retained. Historical RED/uncompiled entries remain historical. Formatter observed exit0 awaits independent gate; default check only queued. No current type-check/final-gate/full-integration/parent completion.
+[Owner SSOT](../specs/ui-widget-item-display.md#bounded-combined-retailptr-acceptance--2026-10-16) owns separately attributed bounded Retail/PTR behavior acceptance, separate startup/CVar evidence and accepted saved default Retail check/whole-workspace formatting. Historical checkpoints and broader exclusions remain; no PTR/all-profile type-check, full-integration or parent completion.
 
 ## [2026-10-16] evidence | Bounded Mists shared controls accepted
 

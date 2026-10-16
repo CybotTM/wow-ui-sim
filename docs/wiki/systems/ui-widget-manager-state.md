@@ -175,7 +175,7 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 ## ItemDisplay combined bounded acceptance — 2026-10-16
 
-[Owning SSOT](../../specs/ui-widget-item-display.md#bounded-combined-retailptr-acceptance--2026-10-16) records independently accepted normal Retail/actual PTR evidence, the same ten logical cases per profile, 31-field supplied projection and completed synchronous cached lifecycle, separate CLEAN startups and fresh CURRENT child-CVar/original guards. Historical RED/uncompiled checkpoints stay historical. Formatter exit0 observed, independent gate pending; default check only queued. Native/assets/fonts/pixels, alternate styles/effect activation, async/pending/cancellation races, whole integration and parent completion remain excluded.
+[Owning SSOT](../../specs/ui-widget-item-display.md#bounded-combined-retailptr-acceptance--2026-10-16) owns separately attributed bounded Retail/PTR behavior acceptance, separate startup/CVar evidence and accepted saved default Retail check/whole-workspace formatting. Historical checkpoints stay historical. PTR/all-profile type-check, native/assets/fonts/pixels, alternate styles/effect/timer activation, async/pending/cancellation races, whole integration and parent completion remain excluded.
 
 ## Sources
 
