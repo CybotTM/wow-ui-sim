@@ -147,7 +147,7 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 ## IconTextAndBackground producer source — 2026-10-16
 
-[Owning contract](../../specs/ui-widget-icon-text-and-background.md) owns the cached record shape, source inventory and proof ledger. Getter `2a422cb86` adds complete supplied snapshots through the shared numeric/secret selector policy; passive type4 inputs/feed and the independently reconciled missing-query RED remain separate. **Getter source only: compilation/GREEN pending.** No cached-consumer, native/catalog/render or broad completion claim follows.
+[Owning contract and bounded PTR receipt](../../specs/ui-widget-icon-text-and-background.md#bounded-ptr-producer-proof--2026-10-16) own getter `2a422cb86`, the sealed normal build and ten distinct fixture/selector PASS cases, including actual cached type4 lifecycle and secret access. Independent full-stream build/runtime/startup reconciliation PASS; isolated normal PTR lua-errors `[]` preserved original CVars. Historical REDs remain separate. Retail execution, current default check and broader acceptance remain OPEN; no native/catalog/asset/render parity follows.
 
 ## Sources
 

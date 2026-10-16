@@ -1,6 +1,6 @@
 # Supplied IconTextAndBackground widgets
 
-`C_UIWidgetManager.GetIconTextAndBackgroundWidgetVisualizationInfo(widgetID)` must project explicit environment-local supplied records for the unchanged cached Retail/PTR consumer. The source boundary is `src/c_api/ui_widget_manager/`; the [manager-state contract](ui-widget-manager-state.md) owns shared supplied-state behavior and the [manager architecture](../wiki/systems/ui-widget-manager-state.md) describes the existing lifecycle. Selector tests have an independently reconciled two-case PTR RED against normal-library source `161dad02a`; this is failing behavior, not acceptance. Passive record/map/feed plumbing then compiled at `4adc7cf89`; main-observed populated PTR baseline is0PASS/8FAIL, exit101. Getter source `2a422cb86` projects that supplied state; compilation/GREEN remains pending. This is not populated-query, feed, consumer or native acceptance.
+`C_UIWidgetManager.GetIconTextAndBackgroundWidgetVisualizationInfo(widgetID)` must project explicit environment-local supplied records for the unchanged cached Retail/PTR consumer. The source boundary is `src/c_api/ui_widget_manager/`; the [manager-state contract](ui-widget-manager-state.md) owns shared supplied-state behavior and the [manager architecture](../wiki/systems/ui-widget-manager-state.md) describes the existing lifecycle. Selector tests have an independently reconciled two-case PTR RED against normal-library source `161dad02a`; this is failing behavior, not acceptance. Passive record/map/feed plumbing then compiled at `4adc7cf89`; main-observed populated PTR baseline is0PASS/8FAIL, exit101. Getter source `2a422cb86` projects that supplied state. The [bounded PTR receipt](#bounded-ptr-producer-proof--2026-10-16) separates its successful normal build and main-observed ten-case execution from remaining Retail/broader gates.
 
 ## What it must do
 
@@ -42,7 +42,7 @@
 
 ## Implementation inventory
 
-Passive supplied-input plumbing compiled in the recorded baseline; query projection is implemented but uncompiled/unexecuted. No populated-query or lifecycle acceptance follows:
+Passive supplied-input plumbing and query projection compiled in the sealed normal PTR build at `2a422cb86`. Bounded executed behavior and remaining limits are recorded below:
 
 - `src/c_api/ui_widget_manager/icon_text_and_background.rs` — shared numeric/secret selector boundary, cloned supplied record and complete fresh rooted Lua result.
 
@@ -57,6 +57,26 @@ Passive supplied-input plumbing compiled in the recorded baseline; query project
 
 - `tests/ui_widget_icon_text_and_background_selector.rs` — auto-discovered by the internal integration test harness on Retail/PTR; two public-selector cases (missing; explicit nil/numeric string/boolean/table/function), fresh `WowLuaEnv` and existing `GetWidgetSetInfo` required-number control for each invocation. No record scaffold, mocks or provider replacement. Main-observed PTR baseline: compile exit0; two unique FAIL, exit101, after shared controls. Missing-selector and explicit-nil target calls succeed instead of rejecting; later non-number loop inputs are unreached. Receipt: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconbackground-selector-ptr-first-red-20261016T095402891303Z`. The newly compiled test source is `e1a2ce806`; actual normal-library basis is `161dad02a`, not a whole-e1 library. Independent report: `/home/osso/.local/state/wow-ui-sim/verification/iconbackground-next/selector-red-report.md`. Its inferred missing-source-wiring finding is rejected: the internal harness generates module references for top-level test files; whole-integration execution remains unproved. A successful target call fails rejection; an unrelated missing-function error fails the required-number diagnostic assertion. The test does not assert what a successful call returned.
 - `tests/ui_widget_icon_text_and_background.rs` and `tests/widget_icon_background/` — eight authored cases: complete14-field fresh/replacement snapshots, distinct fractional IDs/removal/restoration, required selectors, independent environments, normal-feed ordering/atomicity, actual secret-wrapper access and unchanged cached type4 lifecycle. The consumer includes two-widget ordering and full-set replacement. Existing `widget_two_records/helpers.rs` is reused, not replaced. Main-observed normal PTR library `4adc7cf89`: build8m15s/730 JSON records/zero compiler diagnostics, guard exited normally. The new standalone component compiles at test checkout `15e53e813` against that library and executes0PASS/8FAIL, exit101: seven supplied-table failures and one required-selector failure. Consumer fails before cached setup; later snapshot/security/feed/lifecycle assertions remain unreached. Receipt: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconbackground-populated-ptr-red-20261016T102150270256Z/iconbackground-populated-eight-first-red`. Independent populated-RED reconciliation PASS: `/home/osso/.local/state/wow-ui-sim/verification/iconbackground-next/populated-red-report.md`; the suite remains FAIL, not acceptance. Source/spec/format/readability independently accepted separately at `/home/osso/.local/state/wow-ui-sim/verification/iconbackground-next/passive-tests-source-report.md`; not runtime acceptance.
+
+## Bounded PTR producer proof — 2026-10-16
+
+Normal-library source `2a422cb8639110f2668d8b7af51365086e73d9fb`; build/seal receipt `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/iconbackground-green-ptr-20261016T103120943248Z`. Main observed successful terminal exit0, build-finished success, 731 JSON records, zero compiler diagnostics and normal pressure-guard exit. Library and normal wow-sim artifacts are separately sealed with emitted normal-profile association.
+
+Test checkout `e156442f3` has no relevant production/test/Cargo change from that source. Component receipt `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconbackground-ptr-green-20261016T105921359928Z/iconbackground-ten-first-green` uses unchanged committed fixtures, actual common helpers, all21 emitted PTR features and exact normal-target-profile dependency artifacts. Compile exit0 retains35 inherited unused-helper warnings; no warning suppression. Runtime exit0: **10 distinct cases PASS**, not the sum of nested parent/child summaries.
+
+| Executed boundary | Unique result | Proof / limits |
+| --- | --- | --- |
+| Complete14-field fresh/replacement snapshots; distinct fractional IDs/removal/restoration; separate environments | 3 PASS | All concrete assertions reached |
+| Required selectors; actual secret-wrapper secure/tainted access | 2 PASS | Real secret-wrapper case executed, not cfg inference |
+| Normal-feed state-before-event; wrong-type/absent-set atomic rejection | 2 PASS | Synchronous event-time state and no-mutation controls |
+| Unchanged cached type4 lifecycle, two-widget ordering/full-set replacement, hide/reacquire, membership removal/live unregister | 1 PASS | Requested atlas names, not asset availability or pixels |
+| Separate original missing/non-number selectors | 2 PASS | Shared required-number controls and every loop input reached |
+
+Separate normal PTR startup `iconbackground-ptr-startup` in the build receipt exited0, stdout `[]`, stderr final `Status: CLEAN`, zero unique/total collector errors. It used `--no-addons --no-saved-vars`, CASC disabled for assets and the actual PTR cached Lua/XML. A fresh private `XDG_DATA_HOME` held a byte-exact copy of the current original CVar input, distinct inode; original full stat/hash remained unchanged afterward. No CVar reset, original restore, cache sync or profile substitution.
+
+Independent getter source/spec/readability and postgetter `cargo fmt --all -- --check` accepted separately at `/home/osso/.local/state/wow-ui-sim/verification/iconbackground-next/getter-source-report.md`; formatter exit0, empty streams. **Independent build/seal/full-stream runtime/startup reconciliation PASS:** `/home/osso/.local/state/wow-ui-sim/verification/iconbackground-next/ptr-green-runtime-report.md`. Full startup stderr was inspected separately from the empty collector; existing WTF EditMode input remained in use, so CVar-write isolation is not whole-machine hermeticity. Historical selector RED at normal-library `161dad02a` and populated RED at `4adc7cf89` remain retained, not overwritten or credited as current acceptance.
+
+Retail execution, current default check, whole-integration execution, native/catalog/rendered parity, broader profiles and full-parent acceptance remain OPEN. These PTR observations do not satisfy the combined Retail/PTR requirement alone.
 
 ## Known gaps (current cycle)
 
