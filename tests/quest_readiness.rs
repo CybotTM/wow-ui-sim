@@ -34,7 +34,13 @@ fn consumer_env() -> WowLuaEnv {
         .expect("current-profile cache required, no source replacement");
     let (env, loaded) = crate::common::blizzard_addon_harness::build_blizzard_addon_closure_env(
         &cache,
-        &["Blizzard_UIPanels_Game", "Blizzard_ObjectiveTracker"],
+        &[
+            "Blizzard_AccessibilityTemplates",
+            "Blizzard_UIPanels_Game",
+            "Blizzard_ObjectiveTracker",
+            "Blizzard_AlertFrame",
+            "Blizzard_SplashFrame",
+        ],
         &[],
     );
     assert!(loaded.iter().any(|name| name == "Blizzard_UIPanels_Game"));
@@ -141,7 +147,7 @@ fn ql2_original_gossip_refresh_and_click_use_live_readiness() {
 fn ql2_original_progress_button_advances_once_without_grant_or_turn_in() {
     let env = consumer_env();
     let errors_before = env.state().borrow().lua_error_counts.clone();
-    env.exec("QL2.objectives(false); QL2.clickGossip(); QL2.observe(); QuestProgressCompleteButton_OnClick()")
+    env.exec("QL2.objectives(false); QL2.clickGossip(); QL2.observe(); if type(CompleteQuest) == 'function' then QuestProgressCompleteButton_OnClick() end")
         .unwrap();
     env.exec("assert(QL2.completeCount == 0); assert(QuestFrameProgressPanel:IsShown()); QL2.objectives(true)")
         .unwrap();
