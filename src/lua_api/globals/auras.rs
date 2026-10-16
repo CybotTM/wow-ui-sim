@@ -836,7 +836,7 @@ fn push_legacy_aura_tuple(state: &mut LuaState, aura: Val) -> u32 {
 
     state.push(name);
     #[cfg(feature = "client-wrath")]
-    crate::lua_api::workarounds::temporary::wrath_startup_defaults::push_unmodeled_aura_rank(state);
+    crate::lua_api::workarounds::wrath_startup_defaults::push_unmodeled_aura_rank(state);
     state.push(icon);
     state.push(applications);
     state.push(dispel_name);
@@ -845,7 +845,7 @@ fn push_legacy_aura_tuple(state: &mut LuaState, aura: Val) -> u32 {
     state.push(source_unit);
     state.push(is_stealable);
     #[cfg(feature = "client-wrath")]
-    crate::lua_api::workarounds::temporary::wrath_startup_defaults::push_unmodeled_aura_consolidation(state);
+    crate::lua_api::workarounds::wrath_startup_defaults::push_unmodeled_aura_consolidation(state);
     #[cfg(not(feature = "client-wrath"))]
     state.push(Val::Nil);
     state.push(spell_id);

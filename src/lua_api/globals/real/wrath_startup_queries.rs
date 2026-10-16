@@ -18,7 +18,7 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     // The Wrath consumer combines this with IsRaidLeader. Do not read the
     // unrelated WoWLabs matchmaking party used by the earlier registration.
     LuaApiMut::register_function(lua, "IsPartyLeader", is_party_leader)?;
-    crate::lua_api::workarounds::temporary::wrath_startup_defaults::register_all(lua)?;
+    crate::lua_api::workarounds::wrath_startup_defaults::register_all(lua)?;
     Ok(())
 }
 
@@ -50,7 +50,7 @@ fn offhand_has_weapon(state: &mut LuaState) -> LuaResult<u32> {
 
 fn catalogued_item_is_weapon(item_id: u32) -> bool {
     let Some(item) = crate::items::get_item(item_id) else {
-        return crate::lua_api::workarounds::temporary::wrath_startup_defaults::unknown_offhand_is_weapon();
+        return crate::lua_api::workarounds::wrath_startup_defaults::unknown_offhand_is_weapon();
     };
     // Weapon, two-hand weapon, main-hand weapon and off-hand weapon. Shields
     // (14) and holdables (23) are not weapons; identity comes from equipped slot 17.
