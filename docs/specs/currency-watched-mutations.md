@@ -1,5 +1,7 @@
 # Retail watched currency mutation — optional B5 sub-slice
 
+Integration checkpoint (2026-10-16): B5-watch producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+
 Status: staged, not selected by base B5 acceptance; uncompiled/unexecuted. Proposed simulator contract only.
 
 ## What it must do

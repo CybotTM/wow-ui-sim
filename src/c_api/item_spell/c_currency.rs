@@ -16,6 +16,10 @@ const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
     ("IsCurrencyTransferInProgress", query_transfer_activity),
     #[cfg(feature = "client-retail")]
     ("ExpandCurrencyList", expand_currency_list),
+    #[cfg(feature = "client-retail")]
+    ("SetCurrencyBackpack", set_currency_backpack),
+    #[cfg(feature = "client-retail")]
+    ("SetCurrencyBackpackByID", set_currency_backpack_by_id),
     ("GetCurrencyListSize", c_currency_get_list_size),
     ("GetCurrencyListInfo", c_currency_get_list_info),
     (
@@ -185,6 +189,11 @@ fn c_currency_get_list_info(state: &mut LuaState) -> LuaResult<u32> {
     write_currency_row_display_fields(state, info, &display);
     write_currency_list_status_fields(state, info, entry);
     #[cfg(feature = "client-retail")]
+    {
+        let watched = borrow_state(state)?.currency_list.is_watched(entry);
+        table_set_static(state, info, "isShowInBackpack", Val::Bool(watched));
+    }
+    #[cfg(feature = "client-retail")]
     if entry.is_header {
         let expanded = borrow_state(state)?.currency_list.header_expanded(index);
         table_set_static(state, info, "isHeaderExpanded", Val::Bool(expanded));
@@ -306,10 +315,64 @@ fn coin_text(amount: i64, separator: &str) -> String {
     parts.join(separator)
 }
 
+#[cfg(feature = "client-retail")]
+fn set_currency_backpack(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let watched = bool::from_stack(state, 2)?;
+    if let Some(entry) = read_currency_list_entry(state, index)? {
+        update_currency_watch(state, entry.currency_id, watched)?;
+    }
+    Ok(0)
+}
+
+#[cfg(feature = "client-retail")]
+fn set_currency_backpack_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let currency_id = i32::from_stack(state, 1)?;
+    let watched = bool::from_stack(state, 2)?;
+    update_currency_watch(state, currency_id, watched)?;
+    Ok(0)
+}
+
+#[cfg(feature = "client-retail")]
+fn update_currency_watch(state: &LuaState, currency_id: i32, watched: bool) -> LuaResult<()> {
+    if currency_data::get_currency_by_id(currency_id).is_none() {
+        return Ok(());
+    }
+    let mut sim = borrow_state_mut(state)?;
+    let Some(info) = sim.currency_info.get_mut(&currency_id) else {
+        return Ok(());
+    };
+    info.is_show_in_backpack = watched;
+    sim.currency_list.set_watched(currency_id, watched);
+    Ok(())
+}
+
+fn read_backpack_currency_entry(
+    state: &LuaState,
+    index: i32,
+) -> LuaResult<Option<&'static currency_data::CurrencyEntry>> {
+    #[cfg(feature = "client-retail")]
+    {
+        let sim = borrow_state(state)?;
+        let offset = match usize::try_from(index.saturating_sub(1)) {
+            Ok(offset) if index > 0 => offset,
+            _ => return Ok(None),
+        };
+        Ok((1..=currency_data::currency_list_size())
+            .filter_map(currency_data::get_currency_list_entry)
+            .filter(|entry| !entry.is_header && sim.currency_list.is_watched(entry))
+            .nth(offset))
+    }
+    #[cfg(not(feature = "client-retail"))]
+    {
+        let _ = state;
+        Ok(currency_data::backpack_currencies().nth(index.saturating_sub(1) as usize))
+    }
+}
+
 fn c_currency_get_backpack_currency_info(state: &mut LuaState) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1)?;
-    let Some(entry) = currency_data::backpack_currencies().nth(index.saturating_sub(1) as usize)
-    else {
+    let Some(entry) = read_backpack_currency_entry(state, index)? else {
         return Ok(0);
     };
     let display = borrow_state(state)?

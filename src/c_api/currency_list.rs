@@ -1,5 +1,5 @@
 //! Retail currency display projection. Catalog positions identify headers; Lua indices do not.
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use crate::lua_api::globals::currency_data::{self, CurrencyEntry};
 
@@ -8,9 +8,21 @@ pub(crate) type CurrencyListRow = (i32, &'static CurrencyEntry);
 #[derive(Default)]
 pub(crate) struct CurrencyListState {
     collapsed_headers: HashSet<i32>,
+    watched_overrides: HashMap<i32, bool>,
 }
 
 impl CurrencyListState {
+    pub(crate) fn is_watched(&self, entry: &CurrencyEntry) -> bool {
+        self.watched_overrides
+            .get(&entry.currency_id)
+            .copied()
+            .unwrap_or(entry.is_show_in_backpack)
+    }
+
+    pub(crate) fn set_watched(&mut self, currency_id: i32, watched: bool) {
+        self.watched_overrides.insert(currency_id, watched);
+    }
+
     pub(crate) fn displayed_entries(&self) -> Vec<CurrencyListRow> {
         let mut hidden_below_depth = None;
         self.ordered_entries()
