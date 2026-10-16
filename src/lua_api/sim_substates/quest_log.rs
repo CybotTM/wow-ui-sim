@@ -131,6 +131,7 @@ impl QuestLogState {
                 earthen_relic_recovery_entry(),
             ],
             objective_progress: crate::c_api::quest_objectives::seeded_progress(),
+            background_materials: HashMap::new(),
             readiness: Default::default(),
             completed_quest_ids: seeded_completed_quest_ids(),
         }
