@@ -46,9 +46,9 @@ Source-inspected 2026-10-12: `globals/real/unit_roles_assignment.rs` commits cha
 
 ## OnUpdate Tick
 
-`fire_on_update()` sequence each render tick (saved execution pending independent acceptance):
+`fire_on_update()` sequence each render tick (independently validated bounded saved runtime; not broader acceptance):
 
-Before ordinary OnUpdate dispatch, flush EditBox presentation/cursor and pending text notifications; the same flush precedes key-down handling. Changed inputs notify; idle inputs/ticks are suppressed. The [EditBox owner](../../specs/editbox-text-position-selection.md#saved-retail-execution--2026-10-15) owns saved execution, stderr caveats, historical failures and capacity-HOLD genuine-consumer gate. No native callback-count claim.
+Before ordinary OnUpdate dispatch, flush EditBox presentation/cursor and pending text notifications; the same flush precedes key-down handling. Changed inputs notify; idle inputs/ticks are suppressed. The [EditBox owner](../../specs/editbox-text-position-selection.md#saved-retail-execution--2026-10-15) owns saved execution, stderr caveats, historical failures and unresolved genuine-consumer acceptance. No native callback-count claim.
 
 1. Filter `on_update_frames` to visible-only
 2. Call `__scripts["{id}_OnUpdate"](frame, elapsed)` for each

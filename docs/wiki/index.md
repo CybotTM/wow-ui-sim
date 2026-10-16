@@ -2,9 +2,9 @@
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#doubleiconandtext-bounded-retail-producer-proof--2026-10-15) links the owning acceptance matrix: getter `c3096cd6b` at saved source `5dfa94330`, nine unique PASS/exit0, independent build/seal/full-stream runtime reconciliation PASS. Actual cached lifecycle and secret selectors executed. Historical REDs remain separate; profile preservation, format/check, ordinary startup and full-parent gates stay open. No nine-case rerun or unrelated current-HEAD/native proof.
 
-## [2026-10-15] evidence | C2/C7 saved Retail execution pending acceptance
+## [2026-10-15] evidence | C2/C7 independent bounded saved-runtime validation
 
-[EditBox receipt](../specs/editbox-text-position-selection.md#saved-retail-execution--2026-10-15) owns saved `3a530` build/seal and C2/preservation/key execution; [C7 owner](../specs/button-active-font-state.md#saved-retail-execution--2026-10-15) owns corrected button execution. Runtime audit5768 pending: execution pending independent acceptance. Owners retain historical failures, stderr caveats, broader scroll-fixture failure and open consumer/profile/startup/check/full-suite/parent gates.
+[EditBox receipt](../specs/editbox-text-position-selection.md#saved-retail-execution--2026-10-15) owns saved `3a530` build/seal and C2/preservation/key execution; [C7 owner](../specs/button-active-font-state.md#saved-retail-execution--2026-10-15) owns corrected button execution. Independent bounded saved-runtime validation COMPLETE; receipt owns exact reached counts and audit path. Unexpected ESC nil-call remains despite source-fixture assertion PASS; historical baseline acknowledgement is not a fix. Scroll XML fixture repair `d374c9520` is committed but UNCOMPILED/UNEXECUTED; saved failures remain. Genuine scrolling probe reaches PASS but MailFrame XML argument failure keeps consumer acceptance open; Wrath guard intact; all-profile/startup/check/full-suite/parent gates OPEN. No broad C2 GREEN.
 
 ## [2026-10-15] source | Shared clean-room controls and anchors
 
