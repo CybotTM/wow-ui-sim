@@ -88,6 +88,33 @@ fn create_original_wrath_consumer_env() -> WowLuaEnv {
 }
 
 #[test]
+fn original_wrath_startup_error_panel_has_cursor_before_direct_scrolling_update() {
+    let env = WowLuaEnv::new().expect("SETUP FAILURE: Wrath environment");
+    env.set_screen_size(1600.0, 1200.0);
+    env.set_font_system(Rc::new(RefCell::new(WowFontSystem::new_without_casc())));
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("SETUP FAILURE: populate the pinned Wrath runtime cache first");
+
+    // Actual FrameXML loading also loads the original DebugTools error consumer.
+    // No tick, replacement consumer, post-load guard or seeded cursor fields.
+    wow_ui_sim::loader::load_addon(&env.loader_env(), &toc)
+        .expect("SETUP FAILURE: load pinned Wrath FrameXML");
+
+    let cursor_errors = env
+        .state()
+        .borrow()
+        .lua_errors
+        .iter()
+        .filter(|message| message.contains("cursorOffset"))
+        .cloned()
+        .collect::<Vec<_>>();
+    assert!(
+        cursor_errors.is_empty(),
+        "original startup error panel reached scrolling before cursor presentation: {cursor_errors:?}"
+    );
+}
+
+#[test]
 fn original_wrath_settext_delivers_cursor_before_synchronous_changed_consumer() {
     let env = create_original_wrath_consumer_env();
     exec_and_audit(
