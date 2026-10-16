@@ -73,6 +73,8 @@ pub struct QuestRewardCurrency {
 pub struct QuestLogState {
     pub entries: Vec<QuestLogEntry>,
     pub objective_progress: HashMap<i32, QuestObjectiveProgress>,
+    /// Explicit quest-dialog materials; absence leaves the original UI default.
+    pub background_materials: HashMap<i32, String>,
     pub readiness: crate::c_api::quest_readiness::QuestReadinessState,
     /// Quest IDs already turned in / permanently completed.
     /// Drives `GetAllCompletedQuestIDs` and `IsQuestFlaggedCompleted`.
