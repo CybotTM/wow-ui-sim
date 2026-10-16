@@ -242,12 +242,13 @@ fn original_wrath_vehicle_onload_raises_child_and_initializes_action_buttons() {
     exec_and_audit(
         &env,
         r#"
-        assert(VehicleMenuBarArtFrame:GetFrameLevel() == 21)
-        assert(C3BindingScope:IsEventRegistered('UNIT_ENTERED_VEHICLE'))
-        assert(C3BindingScope:IsEventRegistered('UNIT_DISPLAYPOWER'))
+        assert(VehicleMenuBarArtFrame:GetFrameLevel() == 21, 'vehicle child level: '..VehicleMenuBarArtFrame:GetFrameLevel())
+        assert(C3BindingScope:IsEventRegistered('UNIT_ENTERED_VEHICLE'), 'vehicle OnLoad must register UNIT_ENTERED_VEHICLE')
+        assert(C3BindingScope:IsEventRegistered('UNIT_DISPLAYPOWER'), 'vehicle OnLoad must register UNIT_DISPLAYPOWER')
         for index = 1, 6 do
             local texture = _G['VehicleMenuBarActionButton'..index]:GetNormalTexture()
-            assert(texture:GetHeight() == 105 and texture:GetWidth() == 105)
+            assert(texture:GetHeight() == 105 and texture:GetWidth() == 105,
+                'vehicle texture '..index..': '..texture:GetWidth()..'x'..texture:GetHeight())
         end
     "#,
     );
