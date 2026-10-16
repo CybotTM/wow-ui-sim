@@ -1,4 +1,4 @@
-//! CASC-backed Blizzard UI source synchronization.
+//! Profile-scoped Blizzard UI source synchronization.
 
 #[cfg(feature = "casc")]
 mod locale;
@@ -6,12 +6,11 @@ mod pinned;
 #[cfg(feature = "casc")]
 mod pinned_download;
 mod profile_cache;
-#[cfg(test)]
 mod wrath_download;
-#[cfg(test)]
 mod wrath_runtime;
-#[cfg(test)]
 mod wrath_runtime_copy;
+#[cfg(feature = "casc")]
+mod wrath_snapshot;
 
 #[cfg(test)]
 #[path = "blizzard_ui_sync/wrath_snapshot_tests.rs"]
@@ -71,6 +70,15 @@ pub(crate) fn ptr_client_identity() -> crate::Result<pinned::ClientIdentity> {
 
 pub fn cached_blizzard_ui_addons_path() -> Option<PathBuf> {
     let path = default_cache_addons_path().ok()?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        return match wrath_runtime::read_cached_addons_path(&path, WRATH_BLIZZARD_UI_MANIFEST) {
+            Ok(path) => path,
+            Err(cause) => {
+                eprintln!("Read Wrath runtime cache: {cause}");
+                None
+            }
+        };
+    }
     let is_complete = path.join(COMPLETE_MARKER).is_file();
     let identity_matches = crate::client_profile::ACTIVE
         != crate::client_profile::ClientProfile::Ptr
@@ -91,12 +99,31 @@ pub fn sync_blizzard_ui() -> crate::Result<SyncSummary> {
 }
 
 pub fn sync_blizzard_ui_to(root: &Path) -> crate::Result<SyncSummary> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        return sync_wrath_ui_to(root);
+    }
     if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr {
         return pinned::sync_to(root);
     }
     let expected_provenance = expected_cache_provenance()?;
     invalidate_cache_if_provenance_mismatched(root, &expected_provenance)?;
     sync_blizzard_ui_entries(root, sync_manifest_entries(), &expected_provenance)
+}
+
+fn sync_wrath_ui_to(root: &Path) -> crate::Result<SyncSummary> {
+    let source = wrath_download::acquire_wrath_source()
+        .map_err(|cause| crate::Error::Other(cause.to_string()))?;
+    let counts = wrath_runtime::sync_from_snapshot(&source, root, WRATH_BLIZZARD_UI_MANIFEST)
+        .map_err(|cause| {
+            crate::Error::Other(format!("sync Wrath UI to {}: {cause}", root.display()))
+        })?;
+    Ok(SyncSummary {
+        root: root.to_owned(),
+        total: counts.total,
+        extracted: counts.copied,
+        present: counts.present,
+        missing: 0,
+    })
 }
 
 pub fn manifest_entries() -> impl Iterator<Item = &'static str> {

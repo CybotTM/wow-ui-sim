@@ -374,7 +374,7 @@ fn startup_blizzard_ui_help(error: wow_ui_sim::Error) -> Box<dyn std::error::Err
              4. Re-launch wow-ui-sim after the repair completes."
         ),
         _ => format!(
-            "{error}\n\nThe simulator stores Blizzard UI source in ~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns and tries to sync it from local WoW CASC automatically. Make sure WoW is installed or set WOW_INSTALL_PATH/WOW_DATA_PATH, or run `wow-cli casc sync-blizzard-ui` after configuring CASC."
+            "{error}\n\nThe simulator stores Blizzard UI source in ~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns and syncs the profile's configured source automatically. Wrath uses its pinned Gethe source; CASC-backed profiles require a WoW install or WOW_INSTALL_PATH/WOW_DATA_PATH. Run `wow-cli casc sync-blizzard-ui` to populate the active profile cache."
         ),
     };
     Box::<dyn std::error::Error>::from(message)

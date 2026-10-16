@@ -288,7 +288,7 @@ enum GenerateTarget {
 
 #[derive(Subcommand)]
 enum CascTarget {
-    /// Extract Blizzard UI source files from local CASC into the profile-scoped cache
+    /// Populate the profile-scoped Blizzard UI cache from its configured source
     SyncBlizzardUi,
 }
 

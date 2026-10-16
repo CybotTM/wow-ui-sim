@@ -292,7 +292,7 @@ compile_error!("retail API epoch features require profile-retail or client-ptr")
 ///
 /// Prefer a completed cache-managed Blizzard UI source tree for every client
 /// profile, otherwise return the profile-scoped default cache path so startup
-/// can sync it from CASC.
+/// can sync it from the profile's configured source.
 pub fn blizzard_ui_addons_dir() -> PathBuf {
     blizzard_ui_addons_dir_under_with_cache(
         &PathBuf::from(env!("CARGO_MANIFEST_DIR")),
