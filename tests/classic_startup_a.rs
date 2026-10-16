@@ -75,12 +75,14 @@ fn classic_a_r3_original_quality_bank_and_difficulty_cascades() {
         for i = 1, NUM_BANKBAGSLOTS do
             slots['Bag'..i] = CreateFrame('Button', nil, slots)
         end
-        BankSlotsFrame_OnLoad(slots)
+        local ok, err = xpcall(function() BankSlotsFrame_OnLoad(slots) end, debug.traceback)
+        assert(ok, err)
         assert(slots:GetID() == BANK_CONTAINER and BANK_CONTAINER == Enum.BagIndex.Bank)
         assert(slots['Item'..NUM_BANKGENERIC_SLOTS]:GetID() == NUM_BANKGENERIC_SLOTS)
         local bank = CreateFrame('Frame')
         bank:SetWidth(400)
-        BankFrame_OnLoad(bank)
+        local ok, err = xpcall(function() BankFrame_OnLoad(bank) end, debug.traceback)
+        assert(ok, err)
         assert(bank:GetID() == BANK_CONTAINER and bank.size == NUM_BANKGENERIC_SLOTS)
     "#,
     )
