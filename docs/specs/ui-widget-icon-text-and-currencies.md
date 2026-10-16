@@ -1,6 +1,6 @@
 # Supplied IconTextAndCurrencies widgets
 
-`C_UIWidgetManager.GetIconTextAndCurrenciesWidgetVisualizationInfo` exposes explicit environment-owned supplied records to the unchanged cached type-7 consumer. Bounded combined Retail/PTR behavior is independently accepted below; default-check reconciliation remains pending. See [manager state and feeds](../wiki/systems/ui-widget-manager-state.md).
+`C_UIWidgetManager.GetIconTextAndCurrenciesWidgetVisualizationInfo` exposes explicit environment-owned supplied records to the unchanged cached type-7 consumer. Bounded combined Retail/PTR behavior and the separate default-check/format gates are independently accepted below; broader parent work remains open. See [manager state and feeds](../wiki/systems/ui-widget-manager-state.md).
 
 ## What it must do
 
@@ -69,7 +69,7 @@
 
 ## Implementation inventory
 
-Records/map/feed/getter and fresh projection compile in normal Retail source `7273875b2`; combined bounded Retail/PTR behavior is accepted below, separately from the pending default-check reconciliation:
+Records/map/feed/getter and fresh projection compile in normal Retail source `7273875b2`; combined bounded Retail/PTR behavior and separate source-check proof are accepted below:
 
 - `src/c_api/ui_widget_manager/icon_text_and_currencies_record.rs` — explicit20-field `IconTextAndCurrenciesRecord` with ordered10-field `UiWidgetCurrencyRecord` rows, no defaults/seeds; fileID and enum fields follow existing `u32` host-input conventions, plain numbers use `f64`.
 
@@ -89,7 +89,7 @@ Independent passive source/spec/readability PASS at source `7e3586e97`: `/home/o
 
 ## Bounded Retail execution — 2026-10-16
 
-Normal Retail source `7273875b2`: `--lib --bin` build9m45s/terminal0, guard exited, artifacts sealed. Unchanged nine populated plus two original selectors: **11 unique PASS / 0 FAIL / exit0**, component compile0/38 inherited unused-helper warnings; nested summaries are nonadditive. Actual unchanged cached type-7 lifecycle assertions reached. Separate startup `[]`/full stderr CLEAN; current CVar copy and original unchanged. Independent full-stream/source/seal/runtime acceptance: `/home/osso/.local/state/wow-ui-sim/verification/iconcurrencies-next/retail-green-report.md`. Combined Retail/PTR behavior is accepted in the following section; default-check reconciliation remains pending. Retail component execution predates the private CVar-copy fix: no original-CVar preservation claim applies to that component run. Retail normal-startup copy/preservation is accepted separately. No native/catalog/assets/pixels/effect-activation/whole-integration/full-parent acceptance.
+Normal Retail source `7273875b2`: `--lib --bin` build9m45s/terminal0, guard exited, artifacts sealed. Unchanged nine populated plus two original selectors: **11 unique PASS / 0 FAIL / exit0**, component compile0/38 inherited unused-helper warnings; nested summaries are nonadditive. Actual unchanged cached type-7 lifecycle assertions reached. Separate startup `[]`/full stderr CLEAN; current CVar copy and original unchanged. Independent full-stream/source/seal/runtime acceptance: `/home/osso/.local/state/wow-ui-sim/verification/iconcurrencies-next/retail-green-report.md`. Combined Retail/PTR behavior and the separate check/format gate are accepted in the following section. Retail component execution predates the private CVar-copy fix: no original-CVar preservation claim applies to that component run. Retail normal-startup copy/preservation is accepted separately. No native/catalog/assets/pixels/effect-activation/whole-integration/full-parent acceptance.
 
 Component receipt: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconcurrencies-retail-green-component-20261016T123446079197Z`; test source `0eba46a74`, sealed normal Retail library basis `7273875b2`, not whole-integration compilation. Separate startup receipt: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/iconcurrencies-retail-green-20261016T122137194568Z`.
 
@@ -101,7 +101,7 @@ Actual normal PTR build source `0eba46a74` retains getter/production basis `7273
 
 Separate normal PTR startup exits0 with stdout `[]` and full stderr CLEAN. PTR build/startup receipt: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/iconcurrencies-ptr-green-20261016T123737537344Z`. The new private harness uses fresh byte-exact CURRENT CVar copies for both PTR component and startup, recording unchanged original stat/hash before/after, including launcher exceptions. This does not retroactively establish Retail component preservation. Both profile startups remain nonhermetic: existing WTF EditMode cache is read despite disabled SavedVariables. Asset access is disabled, not cached Blizzard Lua/XML loading.
 
-Default check at source `c732ea38f` reached terminal exit0 in46.49s:736 JSON records, zero compiler-message diagnostics and guard exited. Receipt: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/iconcurrencies-default-check-20261016T130658617553Z`. Independent check/format reconciliation remains pending. Later charge-selector test RED is separate; this check does not establish its behavior or whole-parent acceptance.
+Default check at source `c732ea38f` reached terminal exit0 in46.49s:736 JSON records, zero compiler-message diagnostics and guard exited. Receipt: `/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/iconcurrencies-default-check-20261016T130658617553Z`. Independent check/format acceptance, including one current `cargo fmt --all -- --check` exit0 with empty streams: `/home/osso/.local/state/wow-ui-sim/verification/iconcurrencies-next/default-check-format-report.md`. Later charge-selector test RED is separate; this check does not establish its behavior or whole-parent acceptance.
 
 ## Known gaps (current cycle)
 
@@ -109,7 +109,7 @@ Default check at source `c732ea38f` reached terminal exit0 in46.49s:736 JSON rec
 - [x] Compile passive20+10-field records/map/feed and reproduce populated missing-query RED before projection. Independent RED reconciliation passed; later bounded combined Retail/PTR snapshot/isolation/shared secret-policy GREEN is recorded above.
 - [x] Execute unchanged normal-feed and cached type-7 lifecycle fixtures in bounded Retail and actual PTR: independent combined acceptance above.
 - [x] Complete separate actual PTR execution and independent bounded combined behavior reconciliation above.
-- [ ] Independently reconcile the successful default check and current formatter gate; no whole-parent completion follows.
+- [x] Independently accept the successful default check and current formatter gate at their recorded source scopes; no whole-parent completion follows.
 
 ## Out of scope
 

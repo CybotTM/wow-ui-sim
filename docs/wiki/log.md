@@ -4,7 +4,7 @@
 
 ## [2026-10-16] evidence | IconTextAndCurrencies combined bounded acceptance
 
-[Owner receipt](../specs/ui-widget-icon-text-and-currencies.md#bounded-combined-retailptr-acceptance--2026-10-16) owns combined behavior acceptance, separate startup evidence, CVar-preservation limits and the remaining default-check reconciliation; broader acceptance stays separate.
+[Owner receipt](../specs/ui-widget-icon-text-and-currencies.md#bounded-combined-retailptr-acceptance--2026-10-16) owns combined behavior acceptance, separate startup evidence, CVar-preservation limits and separate source-check proof; broader acceptance stays separate.
 
 ## [2026-10-16] evidence | Supplied IconTextAndBackground
 

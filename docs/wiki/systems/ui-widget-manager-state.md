@@ -151,7 +151,7 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 ## IconTextAndCurrencies passive source and selector RED — 2026-10-16
 
-[Owning contract](../../specs/ui-widget-icon-text-and-currencies.md#bounded-combined-retailptr-acceptance--2026-10-16) owns historical RED, combined bounded behavior acceptance, startup/CVar qualifications and the remaining default-check reconciliation; broader acceptance stays separate.
+[Owning contract](../../specs/ui-widget-icon-text-and-currencies.md#bounded-combined-retailptr-acceptance--2026-10-16) owns historical RED, combined bounded behavior acceptance, startup/CVar qualifications and separate source-check proof; broader acceptance stays separate.
 
 ## Sources
 
