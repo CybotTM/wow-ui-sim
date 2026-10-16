@@ -1,12 +1,13 @@
 {
   "status": "FAILING compatibility inventory, not accepted clean baseline",
-  "captured_utc": "2026-10-16",
+  "captured_utc": "2026-10-16T20:37:29.147237+00:00",
   "profile": "client-wrath",
-  "source_revision": "c06c84362d58543c32573656819b7b47d6d16463",
-  "ui_source": "Gethe/wow-ui-source",
-  "ui_revision": "c4e0255fc574598428ee1c25f160ab949798bc98",
+  "source_revision": "4e58e23a1b0971f2ad7dbc3a5fac330f2a0535c0",
+  "epoch": "/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/wrath-startup-baseline-20261016T203305235709Z",
   "manifest_sha256": "1633fb0434fb8dc4c2ed8d08d4c0d055d67a02b303281b78071c31ffb8be0a69",
-  "runtime_files": 382,
+  "previous_manifest_sha256": "1633fb0434fb8dc4c2ed8d08d4c0d055d67a02b303281b78071c31ffb8be0a69",
+  "manifest_matches_previous": true,
+  "external_input_scope": "Current installed Wrath UI cache consumed; not independently sealed or authenticated. Prior capture reports Gethe pin c4e0255fc574598428ee1c25f160ab949798bc98; not re-established by this observation.",
   "command": [
     "wow-sim",
     "--no-addons",
@@ -15,13 +16,23 @@
   ],
   "environment": {
     "WOW_SIM_CASC": "0",
-    "WOW_SIM_NO_SOUND": "1"
+    "WOW_SIM_NO_SOUND": "1",
+    "XDG_DATA_HOME": "fresh private byte-exact copy of current original CVars"
   },
   "exit_code": 1,
-  "records": 45,
-  "occurrences": 89,
-  "normalization": "Replace absolute Wrath cache prefix with <wrath-ui>/; no messages removed or counts changed",
-  "raw_capture": "Retained privately with sealed source/profile artifact attribution",
-  "known_original_cursor_failure_occurrences": 34,
+  "records": 44,
+  "occurrences": 55,
+  "normalization": "Replace absolute /home/osso/.cache/wow-ui-sim/blizzard-ui/wrath/ with <wrath-ui>/; messages/counts otherwise retained, including generated chunk hashes",
+  "raw_capture": "/home/osso/.local/state/wow-ui-sim/verification/widget-discrete-progress-current/wrath-startup-baseline-20261016T203305235709Z/wrath-startup-lua-errors",
+  "sealed_binary_sha256": "150421ad212e7268a2fcc0a7ede45643b12f380523b9c4b0181707819881b277",
+  "emitted_features": [
+    "casc",
+    "client-wrath",
+    "gui",
+    "rodio",
+    "sound"
+  ],
+  "original_cvars_unchanged": true,
+  "known_original_cursor_failure_occurrences": 0,
   "native_parity": false
 }

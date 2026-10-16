@@ -8,10 +8,6 @@
     "count": 1
   },
   {
-    "message": "...w-ui-sim/blizzard-ui/wrath/FrameXML/UIPanelTemplates.lua:365: attempt to perform arithmetic on field 'cursorOffset' (a nil value)",
-    "count": 34
-  },
-  {
     "message": "[OnLoad] AudioOptionsSoundPanel: ...sim/blizzard-ui/wrath/FrameXML/OptionsFrameTemplates.lua:78: attempt to index field 'text' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
     "count": 1
   },
@@ -40,7 +36,7 @@
     "count": 1
   },
   {
-    "message": "expected number, got string at argument 1\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t[C]: in function 'PlaySound'\n\t...he/wow-ui-sim/blizzard-ui/wrath/FrameXML/TargetFrame.lua:232: in function <...he/wow-ui-sim/blizzard-ui/wrath/FrameXML/TargetFrame.lua:231>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n\t[C]: in function 'Hide'\n\t...he/wow-ui-sim/blizzard-ui/wrath/FrameXML/TargetFrame.lua:98: in function 'TargetFrame_Update'\n\t...he/wow-ui-sim/blizzard-ui/wrath/FrameXML/TargetFrame.lua:62: in function 'TargetFrame_OnLoad'\n\tgenerated/loader-exec-no-global-slots/e57ea03c79883f89:15: in function <generated/loader-exec-no-global-slots/e57ea03c79883f89:4>\n\t[C]: in function 'pcall'\n\t(string):16: in main chunk",
+    "message": "expected number, got string at argument 1\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t[C]: in function 'PlaySound'\n\t...he/wow-ui-sim/blizzard-ui/wrath/FrameXML/TargetFrame.lua:232: in function <...he/wow-ui-sim/blizzard-ui/wrath/FrameXML/TargetFrame.lua:231>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n\t[C]: in function 'Hide'\n\t...he/wow-ui-sim/blizzard-ui/wrath/FrameXML/TargetFrame.lua:98: in function 'TargetFrame_Update'\n\t...he/wow-ui-sim/blizzard-ui/wrath/FrameXML/TargetFrame.lua:62: in function 'TargetFrame_OnLoad'\n\tgenerated/loader-exec-no-global-slots/c72638c107db191c:15: in function <generated/loader-exec-no-global-slots/c72638c107db191c:4>\n\t[C]: in function 'pcall'\n\t(string):16: in main chunk",
     "count": 6
   },
   {
@@ -80,7 +76,7 @@
     "count": 1
   },
   {
-    "message": "[OnLoad] WhoFrame: ...ine-function-number-arg-no-global-slots/2324ab1eb9ee4893:4: attempt to call upvalue 'fn' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
+    "message": "[OnLoad] WhoFrame: ...ine-function-number-arg-no-global-slots/c8461d0ff109a44e:4: attempt to call upvalue 'fn' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
     "count": 1
   },
   {
@@ -96,7 +92,7 @@
     "count": 1
   },
   {
-    "message": "...cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/UIParent.lua:2217: attempt to index local 'frame' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__wow_original_securecall'\n\t(string):13: in function 'securecall'\n\t...emplate-chained-handler-no-global-slots/56907f16ed7a08e3:6: in function <...emplate-chained-handler-no-global-slots/56907f16ed7a08e3:4>\n\t[C]: in function 'pcall'\n\t(string):16: in main chunk",
+    "message": "...cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/UIParent.lua:2217: attempt to index local 'frame' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__wow_original_securecall'\n\t(string):13: in function 'securecall'\n\t...emplate-chained-handler-no-global-slots/c4948f4060c87fb4:6: in function <...emplate-chained-handler-no-global-slots/c4948f4060c87fb4:4>\n\t[C]: in function 'pcall'\n\t(string):16: in main chunk",
     "count": 1
   },
   {
@@ -124,19 +120,19 @@
     "count": 2
   },
   {
-    "message": "generated/loader-exec-no-global-slots/e471bf8a91f8eb12:17: attempt to perform arithmetic on local 'value' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__wow_original_securecall'\n\t(string):13: in function 'securecall'\n\t...sim/blizzard-ui/wrath/FrameXML/OptionsPanelTemplates.lua:353: in function <...sim/blizzard-ui/wrath/FrameXML/OptionsPanelTemplates.lua:311>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
+    "message": "generated/loader-exec-no-global-slots/10bb0bdf07f80e4d:17: attempt to perform arithmetic on local 'value' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__wow_original_securecall'\n\t(string):13: in function 'securecall'\n\t...sim/blizzard-ui/wrath/FrameXML/OptionsPanelTemplates.lua:353: in function <...sim/blizzard-ui/wrath/FrameXML/OptionsPanelTemplates.lua:311>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
     "count": 1
   },
   {
-    "message": "[OnEvent] frame=InterfaceOptionsCombatPanelTOTDropDown addon=FrameXML source=@generated/loader-exec-no-global-slots/d214bf4db2367e1b:14: ...im/blizzard-ui/wrath/FrameXML/InterfaceOptionsPanels.lua:260: attempt to concatenate local 'value' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...im/blizzard-ui/wrath/FrameXML/InterfaceOptionsPanels.lua:260: in function 'InterfaceOptionsCombatPanelTOTDropDown_OnEvent'\n\tgenerated/loader-exec-no-global-slots/d214bf4db2367e1b:17: in function <generated/loader-exec-no-global-slots/d214bf4db2367e1b:14>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
+    "message": "[OnEvent] frame=InterfaceOptionsCombatPanelTOTDropDown addon=FrameXML source=@generated/loader-exec-no-global-slots/bd7709cc5771cb79:14: ...im/blizzard-ui/wrath/FrameXML/InterfaceOptionsPanels.lua:260: attempt to concatenate local 'value' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...im/blizzard-ui/wrath/FrameXML/InterfaceOptionsPanels.lua:260: in function 'InterfaceOptionsCombatPanelTOTDropDown_OnEvent'\n\tgenerated/loader-exec-no-global-slots/bd7709cc5771cb79:17: in function <generated/loader-exec-no-global-slots/bd7709cc5771cb79:14>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
     "count": 1
   },
   {
-    "message": "[OnEvent] frame=InterfaceOptionsSocialPanel addon=FrameXML source=@<wrath-ui>/FrameXML/InterfaceOptionsPanels.lua:841: generated/loader-exec-no-global-slots/b6e531feb71accb5:9: attempt to call a nil value\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function 'SetChatMouseOverDelay'\n\tgenerated/loader-exec-no-global-slots/b6e531feb71accb5:9: in function 'setFunc'\n\t...im/blizzard-ui/wrath/FrameXML/InterfaceOptionsPanels.lua:848: in function <...im/blizzard-ui/wrath/FrameXML/InterfaceOptionsPanels.lua:841>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
+    "message": "[OnEvent] frame=InterfaceOptionsSocialPanel addon=FrameXML source=@<wrath-ui>/FrameXML/InterfaceOptionsPanels.lua:841: generated/loader-exec-no-global-slots/35d402f9c5a92537:9: attempt to call a nil value\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function 'SetChatMouseOverDelay'\n\tgenerated/loader-exec-no-global-slots/35d402f9c5a92537:9: in function 'setFunc'\n\t...im/blizzard-ui/wrath/FrameXML/InterfaceOptionsPanels.lua:848: in function <...im/blizzard-ui/wrath/FrameXML/InterfaceOptionsPanels.lua:841>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
     "count": 1
   },
   {
-    "message": "[OnEvent] frame=InterfaceOptionsBuffsPanel addon=FrameXML source=@<wrath-ui>/FrameXML/InterfaceOptionsPanels.lua:1587: ...ache/wow-ui-sim/blizzard-ui/wrath/FrameXML/BuffFrame.lua:190: attempt to perform arithmetic on local 'expirationTime' (a string value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...ache/wow-ui-sim/blizzard-ui/wrath/FrameXML/BuffFrame.lua:190: in function '(for index)'\n\t...ache/wow-ui-sim/blizzard-ui/wrath/FrameXML/BuffFrame.lua:86: in function 'BuffFrame_Update'\n\t...ache/wow-ui-sim/blizzard-ui/wrath/FrameXML/BuffFrame.lua:120: in function 'BuffFrame_UpdatePositions'\n\tgenerated/loader-exec-no-global-slots/30e7320b810f01b9:9: in function 'setFunc'\n\t...im/blizzard-ui/wrath/FrameXML/InterfaceOptionsPanels.lua:1593: in function <...im/blizzard-ui/wrath/FrameXML/InterfaceOptionsPanels.lua:1587>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
+    "message": "[OnEvent] frame=InterfaceOptionsBuffsPanel addon=FrameXML source=@<wrath-ui>/FrameXML/InterfaceOptionsPanels.lua:1587: ...ache/wow-ui-sim/blizzard-ui/wrath/FrameXML/BuffFrame.lua:190: attempt to perform arithmetic on local 'expirationTime' (a string value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...ache/wow-ui-sim/blizzard-ui/wrath/FrameXML/BuffFrame.lua:190: in function '(for index)'\n\t...ache/wow-ui-sim/blizzard-ui/wrath/FrameXML/BuffFrame.lua:86: in function 'BuffFrame_Update'\n\t...ache/wow-ui-sim/blizzard-ui/wrath/FrameXML/BuffFrame.lua:120: in function 'BuffFrame_UpdatePositions'\n\tgenerated/loader-exec-no-global-slots/9e2304849262c3a5:9: in function 'setFunc'\n\t...im/blizzard-ui/wrath/FrameXML/InterfaceOptionsPanels.lua:1593: in function <...im/blizzard-ui/wrath/FrameXML/InterfaceOptionsPanels.lua:1587>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
     "count": 1
   },
   {
@@ -144,7 +140,7 @@
     "count": 1
   },
   {
-    "message": "[OnEvent] frame=DurabilityFrame addon=FrameXML source=@generated/loader-exec-no-global-slots/94fcf7eeccbad63b:11: ...ow-ui-sim/blizzard-ui/wrath/FrameXML/DurabilityFrame.lua:24: attempt to call local '(for generator)' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function '(for generator)'\n\t...ow-ui-sim/blizzard-ui/wrath/FrameXML/DurabilityFrame.lua:24: in function 'DurabilityFrame_SetAlerts'\n\tgenerated/loader-exec-no-global-slots/94fcf7eeccbad63b:13: in function <generated/loader-exec-no-global-slots/94fcf7eeccbad63b:11>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
+    "message": "[OnEvent] frame=DurabilityFrame addon=FrameXML source=@generated/loader-exec-no-global-slots/b7f18b3cafd01f22:11: ...ow-ui-sim/blizzard-ui/wrath/FrameXML/DurabilityFrame.lua:24: attempt to call local '(for generator)' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function '(for generator)'\n\t...ow-ui-sim/blizzard-ui/wrath/FrameXML/DurabilityFrame.lua:24: in function 'DurabilityFrame_SetAlerts'\n\tgenerated/loader-exec-no-global-slots/b7f18b3cafd01f22:13: in function <generated/loader-exec-no-global-slots/b7f18b3cafd01f22:11>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
     "count": 1
   },
   {
