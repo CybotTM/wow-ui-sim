@@ -2236,3 +2236,7 @@ Reconciled source-only attribution for `f00f230fe`, `593e543f5` and `655f0698b`:
 ## [2026-10-15] evidence | Bounded saved Wrath018 proof
 
 [Owning receipt](../specs/editbox-text-position-selection.md#saved-wrath-byte-limit-and-bare-font-execution--source0184775) records independent saved build/seal/runtime audits for source0184775 only; button owner, matrix and index link that scope. Historical39d38 RED/setup failures retained; ESC diagnostic, text-error audit limits and UnitRole warning preserved. No native/all-profile/current-HEAD/genuine Wrath consumer proof, guard retirement or broader parent checkoff.
+
+## [2026-10-16] docs | ItemDisplay getter source and pre-getter RED
+
+[Owner inventory](../specs/ui-widget-item-display.md#implementation-inventory) identifies source `64a5576b1` as UNCOMPILED/UNEXECUTED; implementation-only checkbox updated without behavior checkoffs. [Manager checkpoint](systems/ui-widget-manager-state.md#itemdisplay-getter-source-after-populated-red--2026-10-16) and index distinguish the separate populated Retail compile0/eight-unique-FAIL receipt from pending getter execution. No GREEN, native, PTR or lifecycle acceptance; the owner separately links independent pre-getter RED reconciliation.

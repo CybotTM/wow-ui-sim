@@ -163,6 +163,12 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 [Populated fixtures](../../specs/ui-widget-item-display.md#tests-asserting-this-spec) are uncompiled/unexecuted at this checkpoint. Historical selector RED remains separate; no populated, cached-consumer, native, asynchronous, asset/pixel or broader acceptance follows.
 
+### ItemDisplay getter source after populated RED — 2026-10-16
+
+[Owning inventory](../../specs/ui-widget-item-display.md#implementation-inventory) records getter source `64a5576b1`: complete fresh rooted 15-outer/16-nested projection, four `Option` omissions, exactly one nil for absent IDs, shared `read_numeric_id` policy and unconditional namespace registration matching neighbors. Getter is **UNCOMPILED / UNEXECUTED**; this supersedes the passive-only source status above, not its historical evidence.
+
+[Populated Retail receipt](../../specs/ui-widget-item-display.md#populated-retail-red-before-getter--2026-10-16) owns the separate pre-getter compile0 and eight unique FAIL at the populated-result boundary. Later projection, feed, secret and cached-lifecycle assertions were unreached; the owner now links independent saved-evidence reconciliation of the exact pre-getter RED boundary. No GREEN, PTR, native or lifecycle acceptance follows.
+
 ## Sources
 
 - [IconTextAndCurrencies contract](../../specs/ui-widget-icon-text-and-currencies.md) — supplied-record contract and owning evidence/gate reconciliation.

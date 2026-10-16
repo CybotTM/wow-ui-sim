@@ -1,3 +1,7 @@
+## [2026-10-16] source | ItemDisplay getter after populated RED
+
+[Manager checkpoint](systems/ui-widget-manager-state.md#itemdisplay-getter-source-after-populated-red--2026-10-16) links committed getter source `64a5576b1`, **UNCOMPILED / UNEXECUTED**, and the separate owning pre-getter Retail RED receipt. No GREEN, PTR, native or cached-lifecycle acceptance.
+
 ## [2026-10-16] evidence | Bounded Mists shared controls accepted
 
 [Widget checkpoint](systems/widget-system.md#clean-room-control-and-anchor-follow-ups--2026-10-15) links the owning Mists proof matrix, retained diagnostics and separate source scopes. Era/Anniversary and broader acceptance remain open.

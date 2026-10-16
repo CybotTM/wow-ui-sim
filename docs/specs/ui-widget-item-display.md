@@ -65,7 +65,7 @@ Cached Retail and PTR `Blizzard_APIDocumentationGenerated/UIWidgetManagerDocumen
 
 ## Implementation inventory
 
-Source inspection on 2026-10-16, not runtime evidence:
+Source inspection on 2026-10-16: getter source `64a5576b1` is **UNCOMPILED / UNEXECUTED**, not runtime evidence. Namespace registration is unconditional, matching neighboring getters; selector handling reuses `read_numeric_id` without a new policy.
 
 - `src/c_api/ui_widget_manager/queries.rs` — shared required-number/secret selector and modeled ItemDisplay getter registration.
 - `src/c_api/ui_widget_manager/item_display.rs` — fresh rooted outer/nested snapshots, complete15+16 projection, omitted None fields and one-nil absence; no defaults or new selector policy. Getter execution remains unverified.
@@ -95,12 +95,12 @@ Normal Retail `--lib` build source `3eab91eebdbe588f579f45d7bfe64ad950459526` (p
 
 Component epoch `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/item-display-populated-retail-red-20261016T152638018148Z` snapshots the committed test/common inputs separately. Matching emitted Retail cfg and normal-profile externs compile successfully with38 inherited helper warnings. Runtime reaches **0 PASS / 8 unique FAIL / exit101** at `populated ItemDisplay getter returned nil/non-table`; parent/timeout-child prints are nonadditive. Cached consumer fails its populated precondition before vendor loading. Complete field values, nullable transitions, feed rejection/state preservation, later secret-policy controls and cached lifecycle assertions remain **UNREACHED**, not accepted.
 
-Fresh child-only current-CVar copy and paired original stat/hash remain unchanged. No reset/restore, native/catalog/assets/pixels, PTR or whole-integration claim. Independent saved-evidence reconciliation is pending; new getter execution is separate.
+Fresh child-only current-CVar copy and paired original stat/hash remain unchanged. No reset/restore, native/catalog/assets/pixels, PTR or whole-integration claim. Independent saved-evidence reconciliation: `/home/osso/.local/state/wow-ui-sim/verification/item-widget-next/populated-red-report.md` accepts eight unique behavioral failures at the one-return non-table boundary, source snapshots, seals, emitted cfg/externs and paired CVar guards. The diagnostic does not distinguish nil from another non-table scalar. New getter execution remains separate.
 
 ## Known gaps (current cycle)
 
 - [ ] Establish selector acceptance under Retail/PTR, retaining reached/unreached boundaries; the historical Retail run remains RED and does not establish PTR behavior.
-- [ ] Implement the modeled ItemDisplay getter/projection only after populated behavioral RED; passive input types/feed are not a getter.
+- [x] Implement the modeled ItemDisplay getter/projection after populated behavioral RED: source `64a5576b1` only, **UNCOMPILED / UNEXECUTED**; no behavior acceptance.
 - [x] Compile and execute the populated fixtures separately against the passive normal Retail library: eight unique behavioral failures before getter implementation.
 - [ ] Execute the getter and all later assertions. All 15+16 projection, nullable, feed, secret and cached-consumer acceptance requirements above remain unchecked; reaching the RED boundary does not prove them.
 
