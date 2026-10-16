@@ -23,7 +23,7 @@ Player gamepad storage occupies **4096–4179 inclusive**, 84 slots in the exist
 
 ## Implementation inventory
 
-- `src/c_api/c_gamepad_ui.rs`: existing modeled C API namespace; player getter absent at staging time.
+- `src/c_api/c_gamepad_ui.rs`: Forever-only namespace publishes the reserved player base and unchanged pet base. Existing player action maps supply storage; no legacy API changes.
 - `tests/wowforever_batch5_surface.rs`: original cache binding consumer and dependency-closure XML lifecycle regressions; no vendor changes.
 
 ## Tests asserting this spec
@@ -34,7 +34,7 @@ Player gamepad storage occupies **4096–4179 inclusive**, 84 slots in the exist
 
 ## Known gaps (current cycle)
 
-- [ ] Run behavioral RED; staging checks patch applicability only, not compilation or runtime.
+- [x] Behavioral RED at test revision `7cdd8e705`: original consumer nil arithmetic, normal XML mapping errors and selected-base assertion fail; existing pet control passes. Normal Forever library/binary build succeeded. Private proof: `forever-gamepad-producer/red-component-20261016T211328411373Z` under the handoff directory.
 - [x] Select simulator-owned disjoint allocation; behavioral acceptance remains pending.
 - [ ] Re-capture full startup and compare all10 records/14 occurrences; preserve the historical JSON until executed evidence exists.
 
