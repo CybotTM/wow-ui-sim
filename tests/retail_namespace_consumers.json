@@ -1,4 +1,5 @@
 {
+  "Blizzard_SharedXMLBase/SecureTypes.lua": "57e3a04f3bf4d81da91b84bea72a1b5b8e0b895ce085e388a3cb3e52ace25db0",
   "Blizzard_FrameXML/QuestSession.lua": "05f80eca641277b99e7a994535e9c89118df4bcf1fe49461d4ff8aecb89c3c9f",
   "Blizzard_UIModes/Blizzard_UIModeManager.lua": "32debd3a470032bab955e0e1ad695b27a13e4035f53391b68ec9b7737869a036",
   "Blizzard_UIModes/Blizzard_UIModeUtil.lua": "84c272b3e0a9d52d58c246b3194f9b453909ecdc6f55dc51dd5b2d4466ab6288",

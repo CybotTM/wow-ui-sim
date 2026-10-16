@@ -91,6 +91,7 @@ fn namespace_documented_profile_surface() {
 #[test]
 fn original_retail_boost_tutorial_initialization_keeps_public_popup_hidden() {
     let env = consumer_env();
+    load_original(&env, "Blizzard_SharedXMLBase/SecureTypes.lua");
     load_original(
         &env,
         "Blizzard_MicroMenu/Mainline/MainMenuBarMicroButtons.lua",
