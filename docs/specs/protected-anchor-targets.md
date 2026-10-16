@@ -17,7 +17,7 @@ Shared clean-room simulator policy for `SetPoint`, including Wrath and Retail. D
 
 L1 producer authored: `SetPoint` checks the protected recipient's resolved target before the unchanged-point fast path or any anchor/secret-origin mutation. A read-only visited traversal follows current `anchors[].relative_to_id`, rejecting direct Texture/FontString targets or active chains reaching them. Target protection is ignored; reverse dirty dependencies are not consulted. Existing caller-security, cycle and forbidden-aspect checks remain in place; unresolved-target behavior is unchanged.
 
-Producer compilation and GREEN execution are **pending**, owned by main. Existing five tests are unchanged; no new tests or runtime proof are claimed. Requirement checkboxes remain open until acceptance. Wrath, other profiles, native parity and full-parent completion are not established.
+Saved Retail source `05f1b4a62`: **five unique PASS, exit0**, independently reconciled against saved build/seal and full runtime streams; all test assertions reached. Direct regions, one/two-hop chains, allowed controls, and active-chain removal/restoration preserve or replace complete point tuples and nondegenerate geometry as asserted; moving unprotected witnesses establish rejection sensitivity. Rejection uses `pcall` without distinguishing error from silent decline. This is minimal-environment saved-source proof, not current-HEAD GREEN. Shared requirement checkboxes remain open: Wrath, other profiles, native parity and full-parent completion are not established.
 
 ## Out of scope
 
