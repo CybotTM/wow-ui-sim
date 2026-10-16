@@ -506,6 +506,8 @@ Handler resolution in `build_handler_expr()` (`src/loader/helpers.rs:440-451`):
 - `method="OnLoad"` -- Wraps as: `function(self, ...) self:OnLoad(...) end`
 - Inline body `<OnLoad>code</OnLoad>` -- Wraps as: `function(self, ...) code end`
 
+For inline `OnCursorChanged`, simulator helper `inline_argument_locals` in `src/loader/helpers.rs` adds `local x, y, w, h = ...` inside that vararg wrapper (`03769bb00`). Named geometry arguments are locals, not global assignments; all four varargs remain available. This applies to ordinary XML and runtime-template construction without modifying vendor Lua. The [EditBox owner](specs/editbox-text-position-selection.md#saved-retail-execution--2026-10-15) records the cached MailFrame unbound-`y` failure and bounded observer PASS separately. The fix and two ordinary/runtime actual-font-tick regressions are UNCOMPILED/UNEXECUTED; clean-consumer acceptance remains open.
+
 ### Script Inheritance (prepend/append)
 **File:** `src/loader/helpers.rs:393-437`
 

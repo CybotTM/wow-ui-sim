@@ -1,3 +1,7 @@
+## [2026-10-15] docs | Inline cursor argument binding checkpoint
+
+Updated [XML binding inventory](../xml-template-system.md#scriptbodyxml-three-handler-forms), [widget presentation](../widget-system.md#editbox-logical-and-presented-state), existing widget matrix and index after `03769bb00`. Simulator helper binds local `x, y, w, h` while preserving varargs; no vendor patch. [EditBox owner](../specs/editbox-text-position-selection.md#saved-retail-execution--2026-10-15) retains exact cached observer/process evidence and prior bounded saved proof. Binding fix/regressions and `d374c9520` scroll-fixture repair remain UNCOMPILED/UNEXECUTED; clean-consumer acceptance open. Docs only; no code/tests/build/check/runtime/commit/delegation.
+
 ## [2026-10-15] docs | Saved C2/C7 execution pending independent acceptance
 
 Updated [EditBox owner](../specs/editbox-text-position-selection.md#saved-retail-execution--2026-10-15), [C7 owner](../specs/button-active-font-state.md#saved-retail-execution--2026-10-15), linked widget/event/render inventories and index from supplied `3a530` results. Build/seals independently verified; runtime audit5768 pending. Historical failures retained; stderr errors, scroll-fixture failure, consumer capacity HOLD and remaining gates prevent broader acceptance. Docs only; no code/tests/build/check/commit/delegation.
