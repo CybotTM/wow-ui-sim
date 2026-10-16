@@ -1,52 +1,50 @@
 # Registered XML intrinsic tags
 
-## Contract
+Parsed same-name cached `intrinsic="true"` declarations supply implicit inheritance
+at XML tag sites. Source: `src/loader/xml_frame.rs`, `xml_file.rs` and
+`xml_frame/finalize.rs`. [XML architecture](../wiki/systems/xml-template-system.md#registered-intrinsic-tag-declarations)
+owns implementation details.
 
-A parsed frame tag whose same-name registered template declares `intrinsic="true"`
-implicitly inherits that template before explicit instance `inherits`, for both
-top-level and nested frames. Original mixins, properties and script ordering must
-apply through the existing template pipeline, as for `CreateFrame` inheritance.
-Ordinary native tags and virtual templates do not gain implicit inheritance merely
-because a same-name non-intrinsic template exists. No arbitrary-tag parsing or
-vendor behavior replacement is added.
+## What it must do
 
-## Grounding and implementation
+- [x] Apply the original cached intrinsic mixin and preload for top-level and nested
+  `UIThemeContainerFrame` tags, preserving actual method identity and initialized fields.
+- [x] Run intrinsic precall OnLoad before instance OnLoad; preserve explicit
+  inheritance and nested parent binding.
+- [x] Preserve runtime CreateFrame inheritance of the same original definition.
 
-Cached Retail `Blizzard_AccessibilityTemplates/AccessibilityIntrinsics.xml:3-9`
-defines `UIThemeContainerFrame` with `UIThemeContainerMixin` and a precall OnLoad.
-`Mainline/AccessibilityTemplates.lua:3-7` initializes `cvar`, `fontStrings`, `frames`.
-Original `Blizzard_UIPanels_Game/Mainline/GossipFrame.xml:34` uses that tag and its
-shared Update calls `self:UpdateTheme()`.
+The existing supported-tag parser is unchanged; this is not arbitrary-tag support.
 
-`src/loader/xml_frame.rs::registered_intrinsic_tag` reads the registered declaration;
-top-level `xml_file.rs` and nested `xml_frame/finalize.rs` append it to their existing
-resolved tag mapping. Existing inheritance, mixin and lifecycle code performs the work.
+## How it works
 
-## Tests and evidence
+- [XML system](../wiki/systems/xml-template-system.md#registered-intrinsic-tag-declarations)
 
-`tests/xml_intrinsic_tags.rs` loads the unchanged active-profile AccessibilityTemplates
-addon closure, then uses that original intrinsic definition in a minimal test addon.
-It asserts method identity, actual preload-created fields, precall-before-instance
-ordering, explicit-template size preservation, nested parent binding and a runtime
-CreateFrame control. Test commit `eeb2b3bfa` produced behavioral RED against the saved
-Retail normal library: missing original cached mixin. Saved source `f963b6b18`
-then passed the focused case, including every preload/nested/CreateFrame assertion.
-All `tests/xml_templates/*` cases ran: 170 PASS, one pre-existing ignored tooltip
-fast-path TODO, zero failures (38.95s); this includes intrinsic script ordering and
-runtime CreateFrame inheritance cases. The separately compiled same-source headless
-`wow-sim --no-addons --no-saved-vars lua-errors` returned `[]`, exit0. Original CVar
-stat/hash remained unchanged for every runtime. Private receipts live in
-`~/.local/state/wow-ui-sim/handoff/quest-lifecycle-build/` under
-`intrinsic-green-retail-*` and `intrinsic-startup-retail-*`; no full-suite/native claim.
+## Implementation inventory
 
-Retail declaration inventory also exposes previously omitted `EventFrame` and
-`EventEditBox` intrinsic behavior, and `DropDownToggleButton`/`EventButton` top-level
-intrinsic behavior. Other cached declared intrinsic tags already have explicit
-mapping: AuraButton, AuraContainer, DropdownButton, ScrollingMessageFrame,
-ContainedAlertFrame, ItemButton, EventScrollFrame. Runtime loading/consumer reachability
-is not implied by source inventory.
+- `src/loader/xml_frame.rs`: shared lookup of registered intrinsic declarations.
+- `src/loader/xml_file.rs`: top-level tag inheritance.
+- `src/loader/xml_frame/finalize.rs`: nested tag inheritance.
 
-## Exclusions
+## Tests asserting this spec
 
-Native parity, arbitrary unknown XML tags, new widget domains and vendor patches.
-See [XML system](../wiki/systems/xml-template-system.md).
+`tests/xml_intrinsic_tags.rs` loads unchanged active-profile AccessibilityTemplates.
+Retail cache `AccessibilityIntrinsics.xml:3-9` declares the original mixin/precall;
+`Mainline/AccessibilityTemplates.lua:3-7` initializes cvar/fontStrings/frames.
+
+Test `eeb2b3bfa` reached genuine missing-mixin RED. Saved `f963b6b18` passed the
+focused case, all170 XML-template preservation cases (one existing ignored tooltip
+TODO), and separate headless Retail startup `[]`. Original CVar stat/hash guards
+passed. Receipts: private `quest-lifecycle-build/intrinsic-{green,startup}-retail-*`.
+
+Retail source inventory additionally activates EventFrame/EventEditBox and top-level
+DropDownToggleButton/EventButton declarations. AuraButton, AuraContainer,
+DropdownButton, ScrollingMessageFrame, ContainedAlertFrame, ItemButton and
+EventScrollFrame already had explicit mappings. Inventory is not consumer reachability.
+
+## Known gaps (current cycle)
+
+No open gate for this bounded saved Retail proof. Broader profile acceptance is separate.
+
+## Out of scope
+
+Arbitrary unknown tags, new widgets, native/schema parity, vendor edits and full suites.

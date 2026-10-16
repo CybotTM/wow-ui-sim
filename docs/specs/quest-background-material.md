@@ -1,42 +1,52 @@
 # Supplied quest background material
 
-## Contract
+Retail/Forever legacy `GetQuestBackgroundMaterial()` projects explicitly supplied
+materials from existing quest state. Source: `quest_surface/legacy_globals.rs` and
+`sim_substates/quest_log.rs`. [Quest architecture](../wiki/systems/lua-api.md#quest-dialog-material)
+owns implementation details.
 
-Retail/Forever `GetQuestBackgroundMaterial()` takes no arguments and returns one
-nilable string. Explicit per-environment quest-ID materials in
-`QuestLogState.background_materials` project through the current selected quest ID.
-No selected/supplied material returns nil, not an invented material name. Existing
-abandon/turn-in transitions remove the consumed quest's supplied material.
+[API documentation](https://warcraft.wiki.gg/wiki/API:GetQuestBackgroundMaterial)
+(inspected 2026-10-16) declares no arguments and one `string?` result. The inspected
+cached generated Retail docs have no entry for this legacy global.
 
-The original cached `QuestFrame_GetMaterial` retains responsibility for selecting
-Parchment when nil or when contrast mode requests it. No Blizzard function is
-replaced and no texture/material catalog is invented.
+## What it must do
 
-## Grounding
+- [x] Return one nil when selected/supplied material is absent; let original
+  `QuestFrame_GetMaterial` choose Parchment, without inventing a material name.
+- [x] Return supplied Stone verbatim and preserve live selection/environment isolation.
+- [x] Remove supplied material on existing abandonment.
+- [ ] Preserve the same cleanup through existing completed turn-in (new test assertion pending).
 
-[Warcraft Wiki API documentation](https://warcraft.wiki.gg/wiki/API:GetQuestBackgroundMaterial)
-(inspected 2026-10-16; page edited 2026-08-10) specifies `material =
-GetQuestBackgroundMaterial()` and `string?`, with nil selecting the default Parchment.
-This legacy global has no entry in the inspected cached generated Retail API docs.
-Cached Retail `Blizzard_UIPanels_Game/Mainline/QuestFrame.lua:602-610` independently
-shows the original nil-to-Parchment consumer branch. The corresponding Forever
-consumer uses the same query.
+The rich-state-owned `background_materials` map is explicit ingress, not a second
+quest-membership store. No admin mutation endpoint is added.
 
-## Implementation and proof
+## How it works
 
-`quest_surface/legacy_globals.rs` reads the existing rich-state-owned supplied map;
-`quest_surface/register.rs` publishes only in the same Retail/Forever scope as QL-2.
-No simulator admin mutation endpoint is added.
+- [Quest architecture](../wiki/systems/lua-api.md#quest-dialog-material)
 
-`tests/quest_background_material.rs` loads the original cached consumer and verifies
-unsupplied Parchment, one nil return, supplied Stone, selection changes, environment
-isolation and abandonment cleanup. Passive map ingress was included in test commit
-`4e5e1efd0`; `fe529b241` adds its empty seeded initializer. The first build's E0063
-compile error is not RED. Repaired saved `fe529b241` produced two real Retail
-assertion failures: None versus Parchment and None versus supplied Stone. Saved
-`9d1430bf3` then passed both cases (4.72s), reaching nil arity, actual Parchment/Stone,
-selection/isolation and removal assertions. Separate same-source Retail startup
-returned `[]`, exit0. Full progress/reward dialog acceptance remained blocked on
-[separately authorized temporary inputs](quest-progress-requirements-empty.md).
+## Implementation inventory
 
-See [QL-2 dialog contract](quest-readiness-dialog.md).
+- `src/lua_api/sim_substates/quest_log.rs`: passive supplied map and turn-in cleanup.
+- `src/lua_api/globals/quest_surface/legacy_globals.rs`: selected material getter.
+- `src/lua_api/globals/quest_surface/register.rs`: Retail/Forever-only publication.
+- `src/lua_api/globals/quest_verbs.rs`: abandonment cleanup.
+
+## Tests asserting this spec
+
+`tests/quest_background_material.rs` loads original cached QuestFrame;
+`Mainline/QuestFrame.lua:602-610` contains the nil-to-Parchment branch.
+Passive ingress `4e5e1efd0` needed seeded initializer `fe529b241`; the initial E0063
+build failure is not RED. Repaired source then produced two real assertion REDs:
+None versus Parchment and None versus Stone. Saved `9d1430bf3` passed both cases
+(4.72s), including selection/isolation/abandonment and nil arity; separate Retail
+startup returned `[]`. Test `1a7bea08d` additionally asserts completed turn-in cleanup.
+Receipts: private `quest-lifecycle-build/material-red-repaired-retail-*` and
+`root-green-retail-*`. Full dialog progress is a [separate contract](quest-readiness-dialog.md).
+
+## Known gaps (current cycle)
+
+- [ ] Execute the added turn-in assertion in the final Retail/Forever quest matrix.
+
+## Out of scope
+
+Material acquisition/catalogs, native context parity, full reward metadata and vendor edits.
