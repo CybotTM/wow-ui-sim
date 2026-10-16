@@ -267,6 +267,7 @@ fn original_wrath_character_binding_uses_nil_key_label_fallback_on_load_and_even
         assert(C_KEY_TEXT == nil and rawget(_G, 'C_KEY_TEXT') == nil)
         assert(GetBindingText('C', 'KEY_') == 'C')
         CharacterMicroButton:SetScript('OnEvent', CharacterMicroButton_OnEvent)
+        CharacterMicroButton.tooltipText = 'before UPDATE_BINDINGS'
         assert(type(C_CVar.GetCVar('Sound_EnableAllSound')) == 'string')
     "#,
     );
