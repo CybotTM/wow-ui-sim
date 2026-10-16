@@ -1,14 +1,18 @@
-## [2026-10-16] verification | Wrath post-removal preservation and ordering
+## [2026-10-16] evidence | Wrath nil-field guard retirement accepted (bounded)
 
-[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--acceptance-pending) records independently accepted saved preservation/control and non-replacing original-startup ordering evidence. The all-green retirement gate remains unmet; test-only XML fixture reconciliation is in progress. No native parity or broader acceptance follows.
+[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--accepted-bounded) accepts independently verified saved retirement proofs, including test-only XML reconciliation; profile and widget summaries now link that owner. Earlier pending entries below are historical. No native parity, clean full startup or whole-profile acceptance; unrelated Wrath startup Lua errors remain.
+
+## [2026-10-16] verification | Wrath post-removal preservation and ordering (historical)
+
+[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--accepted-bounded) records independently accepted saved preservation/control and non-replacing original-startup ordering evidence. At this checkpoint the all-green retirement gate remained unmet; test-only XML fixture reconciliation was in progress. No native parity or broader acceptance follows.
 
 ## [2026-10-16] verification | Wrath guard-retired module GREEN
 
-[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--acceptance-pending) records an independently accepted post-removal 5/5 `wrath_scrolling_cursor` result at `e7a3f2109` with zero `cursorOffset` errors. Cursor-layout/XML-binding preservation and the separate ordering observation remain pending.
+[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--accepted-bounded) records an independently accepted post-removal 5/5 `wrath_scrolling_cursor` result at `e7a3f2109` with zero `cursorOffset` errors. Cursor-layout/XML-binding preservation and the separate ordering observation were pending at this checkpoint.
 
-## [2026-10-16] source | Wrath nil-field guard retirement; acceptance pending
+## [2026-10-16] source | Wrath nil-field guard retirement; acceptance pending (historical)
 
-[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--acceptance-pending) records wrapper/module removal, independently verified guard-retained GREEN (5/5 tests), and pending post-removal proof plus the separate ordering observation. Earlier guard-retained entries remain historical; no broader acceptance follows.
+[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--accepted-bounded) records wrapper/module removal, independently verified guard-retained GREEN (5/5 tests), and pending post-removal proof plus the separate ordering observation. Earlier guard-retained entries remain historical; no broader acceptance follows.
 
 ## [2026-10-16] source | Simulator selected quest turn-in producer
 

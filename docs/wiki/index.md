@@ -1,6 +1,6 @@
-## [2026-10-16] source | Wrath nil-field guard retirement; acceptance pending
+## [2026-10-16] evidence | Wrath nil-field guard retirement accepted (bounded)
 
-[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--acceptance-pending) records accepted post-removal preservation and original-startup ordering evidence, the pre-existing XML-binding fixture failure, and pending test-only reconciliation. The all-green retirement gate remains unmet; no native parity or broader acceptance follows.
+[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--accepted-bounded) accepts bounded retirement from independently verified saved consumer, preservation, original-startup ordering and reconciled XML-binding proofs. Sealed-library component scope only; no native parity, clean full startup or whole-profile acceptance. Unrelated Wrath startup Lua errors remain.
 
 ## [2026-10-16] source | Simulator selected quest turn-in producer
 
@@ -40,11 +40,11 @@
 
 ## [2026-10-16] evidence | Wrath publication; original startup cursor gap
 
-[Profile owner](../specs/client-profiles.md#actual-wrath-publication--2026-10-16) records accepted full-build/runtime publication and preservation. [Consumer owner](../specs/editbox-text-position-selection.md#wrath-original-scrolling-consumer--2026-10-16) records three isolated PASS cases and the original startup nil-cursor gap; guard and check gates remain open.
+[Profile owner](../specs/client-profiles.md#actual-wrath-publication--2026-10-16) records accepted full-build/runtime publication and preservation. [Consumer owner](../specs/editbox-text-position-selection.md#wrath-original-scrolling-consumer--2026-10-16) records the historical three isolated PASS cases and original startup nil-cursor gap; [bounded retirement acceptance](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--accepted-bounded) supersedes that cursor blocker. Check remains open.
 
 ## [2026-10-16] documentation | Separate pinned Wrath acquisition route
 
-[Wrath acquisition](../updating-blizzard-ui-to-a-new-patch.md#wrath-separate-pinned-source-route) uses its separate pinned source. [Actual publication](../specs/client-profiles.md#actual-wrath-publication--2026-10-16) supersedes the earlier pending runtime gate; [consumer acceptance](../specs/editbox-text-position-selection.md#wrath-original-scrolling-consumer--2026-10-16) remains open, guard retained.
+[Wrath acquisition](../updating-blizzard-ui-to-a-new-patch.md#wrath-separate-pinned-source-route) uses its separate pinned source. [Actual publication](../specs/client-profiles.md#actual-wrath-publication--2026-10-16) supersedes the earlier pending runtime gate; [consumer history](../specs/editbox-text-position-selection.md#wrath-original-scrolling-consumer--2026-10-16) retains the earlier guard-retained checkpoint; [bounded retirement acceptance](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--accepted-bounded) owns its superseding proof.
 
 ## Evidence | Fullsuite39 bounded follow-ups
 
