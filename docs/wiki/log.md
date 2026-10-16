@@ -1,3 +1,7 @@
+## [2026-10-16] evidence | ItemDisplay combined bounded acceptance
+
+[Owner SSOT](../specs/ui-widget-item-display.md#bounded-combined-retailptr-acceptance--2026-10-16) records accepted full Retail/PTR reports, separately attributed actual normal sources, same ten logical cases per profile, 31 checked fields and synchronous completed cached lifecycle. Separate CLEAN startups and fresh CURRENT child-CVar/original guards retained. Historical RED/uncompiled entries remain historical. Formatter observed exit0 awaits independent gate; default check only queued. No current type-check/final-gate/full-integration/parent completion.
+
 ## [2026-10-16] evidence | Bounded Mists shared controls accepted
 
 [Widget checkpoint](systems/widget-system.md#clean-room-control-and-anchor-follow-ups--2026-10-15) links the owning Mists proof matrix, retained diagnostics and separate source scopes. Era/Anniversary and broader acceptance remain open.

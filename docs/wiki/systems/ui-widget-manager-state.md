@@ -155,25 +155,31 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 ## ItemDisplay historical selector RED — 2026-10-16
 
-[Owning selector receipt](../../specs/ui-widget-item-display.md#historical-retail-selector-red--2026-10-16) owns the independently reconciled bounded Retail RED, separate test/library attribution and reached/unreached assertions. At that historical checkpoint producer, consumer and broader acceptance remained open; [bounded Retail acceptance](../../specs/ui-widget-item-display.md#bounded-retail-acceptance--2026-10-16) now supersedes Retail status only.
+[Owning selector receipt](../../specs/ui-widget-item-display.md#historical-retail-selector-red--2026-10-16) owns the independently reconciled bounded Retail RED, separate test/library attribution and reached/unreached assertions. At that historical checkpoint producer, consumer and broader acceptance remained open; [bounded Retail acceptance](../../specs/ui-widget-item-display.md#bounded-retail-acceptance--2026-10-16) now records Retail status; [combined acceptance](../../specs/ui-widget-item-display.md#bounded-combined-retailptr-acceptance--2026-10-16) separately records actual PTR.
 
 ### ItemDisplay passive supplied-state checkpoint — 2026-10-16
 
-[Owning contract](../../specs/ui-widget-item-display.md#implementation-inventory) inventories source `417f1badd`: complete supplied records, initially empty environment-owned storage, type27 typed-feed storage and public Rust exports. No getter or Lua projection was added. The owner maintains the field schema and unchecked requirements.
+[Owning contract](../../specs/ui-widget-item-display.md#implementation-inventory) inventories source `417f1badd`: complete supplied records, initially empty environment-owned storage, type27 typed-feed storage and public Rust exports. No getter or Lua projection was added. The owner maintains the field schema; unchecked requirements described this historical passive checkpoint, not current combined acceptance.
 
 [Populated fixtures](../../specs/ui-widget-item-display.md#tests-asserting-this-spec) are uncompiled/unexecuted at this checkpoint. Historical selector RED remains separate; no populated, cached-consumer, native, asynchronous, asset/pixel or broader acceptance follows.
 
 ### ItemDisplay getter source after populated RED — 2026-10-16
 
-[Owning inventory](../../specs/ui-widget-item-display.md#implementation-inventory) records getter source `64a5576b1`: complete fresh rooted 15-outer/16-nested projection, four `Option` omissions, exactly one nil for absent IDs, shared `read_numeric_id` policy and unconditional namespace registration matching neighbors. Getter was **UNCOMPILED / UNEXECUTED** at this historical source checkpoint, superseding the passive-only source status above, not its historical evidence. [Bounded Retail acceptance](../../specs/ui-widget-item-display.md#bounded-retail-acceptance--2026-10-16) now supersedes that pending Retail status; PTR remains pending.
+[Owning inventory](../../specs/ui-widget-item-display.md#implementation-inventory) records getter source `64a5576b1`: complete fresh rooted 15-outer/16-nested projection, four `Option` omissions, exactly one nil for absent IDs, shared `read_numeric_id` policy and unconditional namespace registration matching neighbors. Getter was **UNCOMPILED / UNEXECUTED** at this historical source checkpoint, superseding the passive-only source status above, not its historical evidence. [Bounded Retail acceptance](../../specs/ui-widget-item-display.md#bounded-retail-acceptance--2026-10-16) and [combined acceptance](../../specs/ui-widget-item-display.md#bounded-combined-retailptr-acceptance--2026-10-16) now supersede those pending profile statuses.
 
 [Populated Retail receipt](../../specs/ui-widget-item-display.md#populated-retail-red-before-getter--2026-10-16) owns the separate pre-getter compile0 and eight unique FAIL at the populated-result boundary. Later projection, feed, secret and cached-lifecycle assertions were unreached; the owner now links independent saved-evidence reconciliation of the exact pre-getter RED boundary. No GREEN, PTR, native or lifecycle acceptance follows from that pre-getter RED; the later bounded Retail receipt is separate.
 
 ## ItemDisplay bounded Retail acceptance — 2026-10-16
 
-[Owning receipt](../../specs/ui-widget-item-display.md#bounded-retail-acceptance--2026-10-16) records accepted saved normal Retail build/seals, ten unique PASS (eight populated plus two selectors), actual cached completed synchronous type27/BaseItem lifecycle and actual secret wrappers. Separate clean startup/CVar preservation and source/schema/readability audit retain their own scope. Historical REDs remain; PTR queued, current check/whole formatter and broader acceptance pending.
+[Owning receipt](../../specs/ui-widget-item-display.md#bounded-retail-acceptance--2026-10-16) records accepted saved normal Retail build/seals, ten unique PASS (eight populated plus two selectors), actual cached completed synchronous type27/BaseItem lifecycle and actual secret wrappers. Separate clean startup/CVar preservation and source/schema/readability audit retain their own scope. Historical REDs remain; [combined receipt](../../specs/ui-widget-item-display.md#bounded-combined-retailptr-acceptance--2026-10-16) now owns separate actual PTR acceptance and remaining gates.
+
+## ItemDisplay combined bounded acceptance — 2026-10-16
+
+[Owning SSOT](../../specs/ui-widget-item-display.md#bounded-combined-retailptr-acceptance--2026-10-16) records independently accepted normal Retail/actual PTR evidence, the same ten logical cases per profile, 31-field supplied projection and completed synchronous cached lifecycle, separate CLEAN startups and fresh CURRENT child-CVar/original guards. Historical RED/uncompiled checkpoints stay historical. Formatter exit0 observed, independent gate pending; default check only queued. Native/assets/fonts/pixels, alternate styles/effect activation, async/pending/cancellation races, whole integration and parent completion remain excluded.
 
 ## Sources
+
+- [ItemDisplay contract](../../specs/ui-widget-item-display.md) — schema and combined bounded acceptance SSOT.
 
 - [IconTextAndCurrencies contract](../../specs/ui-widget-icon-text-and-currencies.md) — supplied-record contract and owning evidence/gate reconciliation.
 

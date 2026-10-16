@@ -1,6 +1,6 @@
-## [2026-10-16] evidence | ItemDisplay bounded Retail accepted; PTR pending
+## [2026-10-16] evidence | ItemDisplay combined bounded acceptance
 
-[Owning receipt](../specs/ui-widget-item-display.md#bounded-retail-acceptance--2026-10-16) and [manager checkpoint](systems/ui-widget-manager-state.md#itemdisplay-bounded-retail-acceptance--2026-10-16) record ten unique PASS, completed synchronous cached lifecycle and actual secret wrappers; startup/CVar and source-audit proof stay separate. Historical source/RED checkpoints retained. PTR queued; current check/whole formatter, native/assets/pixels/async/effect activation, full integration and parent acceptance remain open.
+[Owning SSOT](../specs/ui-widget-item-display.md#bounded-combined-retailptr-acceptance--2026-10-16) and [manager link](systems/ui-widget-manager-state.md#itemdisplay-combined-bounded-acceptance--2026-10-16) record accepted actual normal Retail/PTR: same ten logical cases per profile, 31 fields and completed synchronous cached lifecycle; separate CLEAN startups/CVar guards. Historical RED/source checkpoints retained. Formatter observed exit0, independent gate pending; default check only queued. No current type-check/final-gate, native/render/async/effect/full-integration or parent closure.
 
 ## [2026-10-16] evidence | Bounded Mists shared controls accepted
 
