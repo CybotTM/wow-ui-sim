@@ -4,7 +4,7 @@ use crate::lua_api::SimState;
 use crate::lua_api::methods::borrow_state;
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
-use rilua::{LuaApiMut, LuaResult, Val};
+use rilua::{LuaResult, Val};
 
 /// Host-supplied classification used by action-button presentation.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
