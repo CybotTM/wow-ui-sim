@@ -603,6 +603,9 @@ fn c7_font_env() -> wow_ui_sim::lua_api::WowLuaEnv {
         C7HighlightTexture:SetAllPoints(C7Button)
         C7HighlightTexture:SetTexture("Interface/Buttons/UI-Panel-Button-Highlight")
         C7Button:SetHighlightTexture(C7HighlightTexture)
+        C7NormalSource = C7NormalTexture:GetTexture()
+        C7HighlightSource = C7HighlightTexture:GetTexture()
+        assert(C7NormalSource ~= nil and C7HighlightSource ~= nil, 'texture sources assigned')
         C7Button:SetPushedTextOffset(4, 3)
         C7Button:SetNormalFontObject(C7Normal.object)
         C7Button:SetHighlightFontObject(C7Highlight.object)
@@ -630,8 +633,12 @@ fn c7_font_env() -> wow_ui_sim::lua_api::WowLuaEnv {
             for i = 1, 5 do assert(anchor[i] == C7Anchor[i], "owned anchor " .. i) end
             assert(C7Button:GetNormalTexture() == C7NormalTexture, "normal texture identity")
             assert(C7Button:GetHighlightTexture() == C7HighlightTexture, "highlight texture identity")
-            assert(C7NormalTexture:GetTexture() == "Interface/Buttons/UI-Panel-Button-Up")
-            assert(C7HighlightTexture:GetTexture() == "Interface/Buttons/UI-Panel-Button-Highlight")
+            assert(C7NormalTexture:GetTexture() == C7NormalSource, 'normal texture source unchanged')
+            assert(C7HighlightTexture:GetTexture() == C7HighlightSource, 'highlight texture source unchanged')
+            assert(C7NormalTexture:GetTextureFilePath() == "Interface/Buttons/UI-Panel-Button-Up",
+                'normal texture path unchanged')
+            assert(C7HighlightTexture:GetTextureFilePath() == "Interface/Buttons/UI-Panel-Button-Highlight",
+                'highlight texture path unchanged')
             local path, size, flags = C7Label:GetFont()
             assert(path == expected.path, "selected font path")
             assert(size == expected.size and flags == expected.flags, "selected font size/flags")
