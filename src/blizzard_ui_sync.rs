@@ -6,6 +6,8 @@ mod pinned;
 #[cfg(feature = "casc")]
 mod pinned_download;
 mod profile_cache;
+#[cfg(test)]
+mod wrath_runtime_copy;
 
 #[cfg(test)]
 #[path = "blizzard_ui_sync/wrath_snapshot_tests.rs"]
