@@ -75,7 +75,7 @@ fn create_original_wrath_consumer_env() -> WowLuaEnv {
         .expect("SETUP FAILURE: complete original UIPanelTemplates.lua");
     assert_callback_errors_empty(&env);
     let ui = parse_xml(include_str!("wrath_scrolling_cursor/consumer.xml")).unwrap();
-    let XmlElement::Frame(template) = &ui.elements[0] else {
+    let XmlElement::EditBox(template) = &ui.elements[0] else {
         panic!("SETUP FAILURE: EditBox template");
     };
     register_template(
