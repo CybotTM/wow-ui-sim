@@ -1,3 +1,7 @@
+## [2026-10-16] evidence | Bounded Mists shared controls accepted
+
+[Widget checkpoint](systems/widget-system.md#clean-room-control-and-anchor-follow-ups--2026-10-15) links the owning Mists proof matrix, retained diagnostics and separate source scopes. Era/Anniversary and broader acceptance remain open.
+
 ## [2026-10-16] documentation | ItemDisplay passive supplied-state checkpoint
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#itemdisplay-passive-supplied-state-checkpoint--2026-10-16) links passive records/storage/feed/exports and the owning unverified contract. Historical selector RED and unexecuted populated fixtures remain separate.

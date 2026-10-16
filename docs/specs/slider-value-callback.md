@@ -76,6 +76,10 @@ Frozen `3d6017fe` runs unchanged ClassicCastBar `8909724` through scale `1 → 1
 
 - [ ] Mouse dragging, settings navigation, casting behavior, rendered pixels and restart persistence remain unverified.
 
+## Bounded Mists execution — 2026-10-16
+
+[Shared Mists owner matrix](../baselines/README.md#mists-shared-controls--2026-10-16) owns independently accepted saved results, provenance, diagnostics and remaining profile limits. This supplements historical evidence, not native or broader contract acceptance.
+
 ## Out of scope
 
 StatusBar behavior, other slider methods outside the step follow-up and bounded C8 candidate, mouse-drag producers, new secret handling, argument-validation fidelity and native timing conformance remain unchanged or unverified. No addon/vendor changes or manual callback invocation.

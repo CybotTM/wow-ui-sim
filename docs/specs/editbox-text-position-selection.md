@@ -169,6 +169,10 @@ Inspected genuine cache originals under `/home/osso/.cache/wow-ui-sim/blizzard-u
 
 `a17f544af` adds `tests/wrath_scrolling_cursor.rs::original_wrath_startup_error_panel_has_cursor_before_direct_scrolling_update`. Focused direct-rustc execution against the sealed c06 Wrath library reaches the actual FrameXML load and fails its cursor-error assertion: 1 FAIL / 3 filtered, exit101, with 28 original nil-cursor records. Private receipt: `verification/wrath-source-current/wrath-startup-cursor-regression-red-20261016T083549660554Z` under the same state root. This is the bare FrameXML boundary, not the complete startup's 34-occurrence count or proof that existing deferred timing violates a native contract. Nil-field guard stays; no setter timing change follows from this attribution. [Failing startup inventory](../baselines/README.md#wrath-lua-errors) is retained without blessing it as clean; check and broader profile gates remain open.
 
+## Bounded Mists execution — 2026-10-16
+
+[Shared Mists owner matrix](../baselines/README.md#mists-shared-controls--2026-10-16) owns independently accepted saved results, provenance, diagnostics and remaining profile limits. This supplements historical evidence; the Wrath guard and original pre-tick regression remain separate.
+
 ## Out of scope
 
 - Full input-system behavior, public `Insert` limit enforcement, `SetText` MaxBytes enforcement, native markup/grapheme counting, IME, clipboard, keyboard selection creation/navigation, and rendering selection highlight.

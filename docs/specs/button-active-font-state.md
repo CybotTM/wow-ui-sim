@@ -46,6 +46,10 @@ Saved `39d38` button module: **1 PASS, 11 SETUP FAIL**, including all three C7 c
 
 The three C7 fixtures construct their own fonts, Button, FontStrings and textures through public APIs; they do not consume a Blizzard template. Their bootstrap now uses a bare environment, removing the irrelevant modern SharedXML-cache prerequisite without changing assertions. Saved source `0184775b5db228e4136f1c29ffaba3b90f84725d` now executes exactly these three bare C7 cases: **3 PASS, exit0**, no Lua errors in C7 stderr. [Shared saved receipt](editbox-text-position-selection.md#saved-wrath-byte-limit-and-bare-font-execution--source0184775) owns all 46 distinct tests, independent build/seal/runtime reports, retained UnitRole warning and diagnostic/provenance limits. Earlier `39d38` missing-cache setup failures remain historical; the other texture controls retain their cache requirements and are not rerun here. No genuine Wrath consumer, native/all-profile/current-HEAD proof or guard retirement.
 
+## Bounded Mists execution — 2026-10-16
+
+[Shared Mists owner matrix](../baselines/README.md#mists-shared-controls--2026-10-16) owns independently accepted saved results, provenance, diagnostics and remaining profile limits. Bare font comparisons use system fallback, not native font/pixel proof.
+
 ## Out of scope
 
 Later shared FontObject mutation propagation is separate T6 work; snapshot projection is not complete native FontObject inheritance. Missing-slot policy and unspecified/local-field restoration are not inferred here. No texture ownership redesign, vendor edits or reactive FontObject graph.

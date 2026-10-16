@@ -23,6 +23,10 @@ Saved Retail source `05f1b4a62`: **five unique PASS, exit0**, independently reco
 
 Saved Wrath `39d38`: L1 protected targets **5 PASS**. [Shared Wrath receipt](editbox-text-position-selection.md#saved-bounded-wrath-checkpoint) owns build/hash qualifications, pending runtime audit5795 and uncompiled current fix. This bounded saved result does not close current relevant-fix/profile criteria.
 
+## Bounded Mists execution — 2026-10-16
+
+[Shared Mists owner matrix](../baselines/README.md#mists-shared-controls--2026-10-16) owns independently accepted saved results, provenance, diagnostics and remaining profile limits. This supplements historical evidence, not native or broader contract acceptance.
+
 ## Out of scope
 
 `SetAllPoints`, unresolved/deferred target-name policy, retroactive mutation of existing anchors, new combat/security rules, protection propagation, arbitrary native graph/profile parity and rendered pixels.

@@ -136,6 +136,8 @@ Three-slice buttons (ThreeSliceButtonTemplate) define their background as child 
 
 ## Clean-room control and anchor follow-ups — 2026-10-15
 
+[Bounded Mists owner matrix](../../baselines/README.md#mists-shared-controls--2026-10-16) owns independently accepted saved execution, provenance and diagnostics; Era/Anniversary and broader gates remain open. Accepted PTR/Forever evidence is unchanged.
+
 User functional requirements define shared simulator policies for Wrath and Retail, not native parity; no reconstructed implementation is a source. Later bounded [PTR](../../baselines/README.md#ptr-shared-controls--2026-10-16) and [Forever](../../baselines/README.md#forever-shared-controls--2026-10-16) receipts supplement the historical matrix below without current-whole-source, startup or native acceptance. Owning specs retain algorithm/behavior details:
 
 | Scope | Owning contract | Current proof |

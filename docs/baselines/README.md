@@ -150,6 +150,26 @@ Six modules36PASS/12filtered; separate bare C7 run3PASS/45filtered. Nine other b
 
 Independent report `/home/osso/.local/state/wow-ui-sim/verification/forever-controls-next/report.md` accepts **39 distinct Forever PASS, exit0** at saved normal-library basis `58bccba22f785250c78ab4153fd64e49aa477a5e`: six-module36PASS/12filtered plus separate bare-C7 3PASS/45filtered. These separately execute the same [seven control boundaries](#ptr-shared-controls--2026-10-16), not PTR results credited as Forever proof. Current unchanged tests compiled at `756a59006`, with exact16 Forever feature flags and normal dependency records; component26 unused-common warnings retained. The earlier library/abandonment proofs were reused without another Cargo build or abandonment replay. Complete streams, seals, source equality and installed-font assertions are independently reconciled. No newer IconTextAndBackground plumbing, genuine cached C2 startup, nine other button cases, native font/pixel/pointer, ordinary startup, whole-current-HEAD, all-profile or full-parent acceptance.
 
+#### Mists shared controls — 2026-10-16
+
+**Independently accepted bounded saved execution.** Normal Mists library `d62a9af2626075ddc99c2467f02e940faab83229`; separate component checkout `85fb070bc75da72bbe8cfc0dfe142c5832da45a0` links that library. Library production basis727, build exit0 in5m34s,731 JSON records, one existing UnitRole warning and preserved normal-library seal. Component compile exit0 retains26 inherited common-helper warnings; neither is a zero-warning claim.
+
+| Control | Mists cases PASS | Owning contract |
+|---|---:|---|
+| C1 | 5 | [Slider callbacks](../specs/slider-value-callback.md#clean-room-step-assignment-follow-up), [range validation](../specs/widget-range-validation.md) |
+| C2 | 14 | [EditBox geometry](../specs/editbox-text-position-selection.md#cursor-geometry-follow-up) |
+| C3 | 4 | [EditBox selection](../specs/editbox-text-position-selection.md#tests-asserting-this-spec) |
+| L1 | 5 | [Protected-recipient targets](../specs/protected-anchor-targets.md) |
+| C7 | 3 | [Active button font](../specs/button-active-font-state.md), bare cases only |
+| C8 | 5 | [Callback lifecycle](../specs/slider-value-callback.md#c8-changed-range-callbacklifecycle-candidate) |
+| C9 | 3 | [ScrollFrame update boundary](../specs/scrollframe-script-bindings.md#c9-range-update-boundary) |
+
+Seven disjoint groups total **39 unique PASS, all exit0**. Independent full-stream/source/feature/extern/seal/CVar reconciliation: `/home/osso/.local/state/wow-ui-sim/verification/mists-controls-next/report.md`. Epochs resolve through `/home/osso/.local/state/wow-ui-sim/handoff/classic-controls-mists-library-epoch.txt` and `classic-controls-mists-component-epoch.txt` beside it. All seven original-CVar stat/hash pairs match; fresh child copies are per invocation, not a historical guarantee. Retain the earlier host-PSI safety abort and precompiler admission holds as non-acceptance, not compiler/test failures.
+
+C2 uses the no-CASC installed-font backend; C7's normal constructor requests CASC but `WOW_SIM_CASC=0` and full streams establish system-font fallback. Neither proves WoW font identity or native pixels. Source417 ItemDisplay is absent from runtime libraryd62; it gains no acceptance. All runtime stderr lines were inspected as bare simulator setup timings, not cached Blizzard application startup.
+
+Accepted PTR/Forever receipts remain separate and were not rerun. Era/Anniversary remain outstanding. Wrath guard and original pre-tick startup failure remain unresolved. No cached Blizzard startup/consumer, native, GUI/pointer/pixel, optional XML3, whole integration, all-profile or parent closure follows.
+
 ## Panel And Addon Evidence
 
 - `mists-panels.md` lists the Blizzard panel parity matrix.
