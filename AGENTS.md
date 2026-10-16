@@ -18,7 +18,7 @@
 - PTR: `python3 scripts/build-host.py --no-default-features --features sound,gui,casc,client-ptr --test --test integration FILTER -- --nocapture`; replace the test tail with `--check` to check that profile.
 - `--save-build-host desktop|local` changes the shared default at `~/.config/game-engine/build-host`. Host failures never select another host. Native tool selection: desktop pinned Rust 1.98.1 via rustup; local installed Arch Cargo/rustc, no rustup (observed 2026-10-10: `/usr/bin/cargo` and `/usr/bin/rustc` 1.99.0; state, not a pin). Record actual `cargo -V` and `rustc -Vv` for build evidence.
 - Full suite runs async only: `full-suite submit [ref]`, then continue other work; check `full-suite status [ref]` later. Never wait or poll synchronously on it or on long builds.
-- Admission CPU measurements must use the same scope: `nproc` inside a quota-limited polling service can report one CPU while `agents.slice` counters cover the host. Keep measurement-only admission wrappers outside smaller CPU quotas; bound actual builds separately. See [CPU scope](docs/remote-builds.md#local-admission-cpu-scope).
+- Match admission CPU usage and capacity to the measured cgroup; caller-local `nproc` can reflect only a polling service's quota. The shared helper uses `getconf _NPROCESSORS_ONLN` for an unlimited host-wide slice. See [CPU scope](docs/remote-builds.md#local-admission-cpu-scope).
 - Shared runner: `/syncthing/Sync/Projects/world-of-osso/game-engine/scripts/`; `BUILD_HOST_SCRIPTS` overrides its location. Runtime caches/assets belong to the selected host; see [native workflow](docs/remote-builds.md).
 
 ## Debugging Priorities
