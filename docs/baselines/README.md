@@ -154,21 +154,31 @@ Independent report `/home/osso/.local/state/wow-ui-sim/verification/forever-cont
 
 **Independently accepted bounded saved execution.** Normal Mists library `d62a9af2626075ddc99c2467f02e940faab83229`; separate component checkout `85fb070bc75da72bbe8cfc0dfe142c5832da45a0` links that library. Library production basis727, build exit0 in5m34s,731 JSON records, one existing UnitRole warning and preserved normal-library seal. Component compile exit0 retains26 inherited common-helper warnings; neither is a zero-warning claim.
 
-| Control | Mists cases PASS | Owning contract |
-|---|---:|---|
-| C1 | 5 | [Slider callbacks](../specs/slider-value-callback.md#clean-room-step-assignment-follow-up), [range validation](../specs/widget-range-validation.md) |
-| C2 | 14 | [EditBox geometry](../specs/editbox-text-position-selection.md#cursor-geometry-follow-up) |
-| C3 | 4 | [EditBox selection](../specs/editbox-text-position-selection.md#tests-asserting-this-spec) |
-| L1 | 5 | [Protected-recipient targets](../specs/protected-anchor-targets.md) |
-| C7 | 3 | [Active button font](../specs/button-active-font-state.md), bare cases only |
-| C8 | 5 | [Callback lifecycle](../specs/slider-value-callback.md#c8-changed-range-callbacklifecycle-candidate) |
-| C9 | 3 | [ScrollFrame update boundary](../specs/scrollframe-script-bindings.md#c9-range-update-boundary) |
+| Control | Mists cases PASS | Era cases PASS | Owning contract |
+|---|---:|---:|---|
+| C1 | 5 | 5 | [Slider callbacks](../specs/slider-value-callback.md#clean-room-step-assignment-follow-up), [range validation](../specs/widget-range-validation.md) |
+| C2 | 14 | 14 | [EditBox geometry](../specs/editbox-text-position-selection.md#cursor-geometry-follow-up) |
+| C3 | 4 | 4 | [EditBox selection](../specs/editbox-text-position-selection.md#tests-asserting-this-spec) |
+| L1 | 5 | 5 | [Protected-recipient targets](../specs/protected-anchor-targets.md) |
+| C7 | 3 | 3 | [Active button font](../specs/button-active-font-state.md), bare cases only |
+| C8 | 5 | 5 | [Callback lifecycle](../specs/slider-value-callback.md#c8-changed-range-callbacklifecycle-candidate) |
+| C9 | 3 | 3 | [ScrollFrame update boundary](../specs/scrollframe-script-bindings.md#c9-range-update-boundary) |
 
 Seven disjoint groups total **39 unique PASS, all exit0**. Independent full-stream/source/feature/extern/seal/CVar reconciliation: `/home/osso/.local/state/wow-ui-sim/verification/mists-controls-next/report.md`. Epochs resolve through `/home/osso/.local/state/wow-ui-sim/handoff/classic-controls-mists-library-epoch.txt` and `classic-controls-mists-component-epoch.txt` beside it. All seven original-CVar stat/hash pairs match; fresh child copies are per invocation, not a historical guarantee. Retain the earlier host-PSI safety abort and precompiler admission holds as non-acceptance, not compiler/test failures.
 
 C2 uses the no-CASC installed-font backend; C7's normal constructor requests CASC but `WOW_SIM_CASC=0` and full streams establish system-font fallback. Neither proves WoW font identity or native pixels. Source417 ItemDisplay is absent from runtime libraryd62; it gains no acceptance. All runtime stderr lines were inspected as bare simulator setup timings, not cached Blizzard application startup.
 
-Accepted PTR/Forever receipts remain separate and were not rerun. Era/Anniversary remain outstanding. Wrath guard and original pre-tick startup failure remain unresolved. No cached Blizzard startup/consumer, native, GUI/pointer/pixel, optional XML3, whole integration, all-profile or parent closure follows.
+Accepted PTR/Forever receipts remain separate and were not rerun. Era bounded saved execution is recorded below; Anniversary remains pending. Wrath guard and original pre-tick startup failure remain unresolved. No cached Blizzard startup/consumer, native, GUI/pointer/pixel, optional XML3, whole integration, all-profile or parent closure follows.
+
+#### Era shared controls — 2026-10-16
+
+Independent [saved-artifact report](/home/osso/.local/state/wow-ui-sim/verification/era-controls-next/report.md) accepts **39 unique Era PASS**, seven runtime exits0, 0 failed/ignored/measured. The [existing owner matrix](#mists-shared-controls--2026-10-16) records the same39 logical behaviors with separate profile-specific execution, not 78 distinct behaviors or Mists results credited to Era.
+
+Normal Era library basis `3faaab8a92b5f998a76dfd63f73c7033db4ed3c4` and separate test-source snapshot revision `3faaab8a92b5f998a76dfd63f73c7033db4ed3c4` are artifact provenance, **not current HEAD/source acceptance**. The normal library build and direct seven-module component compilation are separate successful invocations; all seven groups use the same sealed component. Saved library excludes the unexpected uncommitted `src/lua_api/editbox_update.rs` draft; that draft gains no compile/runtime acceptance.
+
+Exact diagnostics: **normal library1 warning, component26 warnings** (27 across separate compilations), 0 compiler errors; **runtime0 warning/error/panic lines**. Runtime stderr is setup telemetry, not full startup proof. C1 ran before the foreign-window hold; denied C2 admission was not execution or failure; remaining34 passed after removal on the same seal. The report owns exact roots, seals, names, admissions and unchanged original-CVar guards; no evidence replay is implied.
+
+Anniversary remains pending. No native/font-identity, cached Blizzard startup/consumer, cache, GUI/pointer/pixel, optional XML3, nine other button cases, whole integration/crate, all-profile or full-parent closure. Wrath guard and original pre-tick startup failure remain unresolved; prior profile receipts remain separate.
 
 ## Panel And Addon Evidence
 

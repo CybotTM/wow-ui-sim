@@ -44,6 +44,10 @@ The sealed CLI actually published 382 files, exit0. All 382 current runtime file
 
 The [failing Wrath startup inventory](../baselines/README.md#wrath-lua-errors) records 45 unique errors / 89 occurrences, exit1, including 34 original nil-cursor failures. Check remains pending. [Original consumer status](editbox-text-position-selection.md#wrath-original-scrolling-consumer--2026-10-16) owns three isolated PASS results and the remaining startup-boundary investigation; guard retained.
 
+## Bounded shared-controls profile execution — 2026-10-16
+
+[Existing Mists/Era owner matrix](../baselines/README.md#mists-shared-controls--2026-10-16) records the same39 logical behaviors separately executed per profile. [Era saved-artifact acceptance](../baselines/README.md#era-shared-controls--2026-10-16) is bounded to its normal library and separate test snapshot, not current HEAD/source; Anniversary remains pending. No startup/native/cache/all-profile or full-parent closure.
+
 ## How it works
 
 - [Observed TOC game-type tokens](../wiki/reference/toc-game-type-tokens.md) — bounded source inventory, not a native acceptance contract; filename suffixes and filter strings remain separate.

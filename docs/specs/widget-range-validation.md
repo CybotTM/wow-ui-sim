@@ -34,6 +34,8 @@ RED at `0e3c8157c`: four Rust panic failures and one passing control. Independen
 
 [Shared Mists owner matrix](../baselines/README.md#mists-shared-controls--2026-10-16) owns independently accepted saved results, provenance, diagnostics and remaining profile limits. This supplements historical evidence, not native or broader contract acceptance.
 
+[Bounded Era execution](../baselines/README.md#era-shared-controls--2026-10-16) separately accepts the corresponding matrix cases from saved artifacts only; current source and broader criteria remain unaccepted.
+
 ## Out of scope
 
 Native validation/error fidelity, infinity policies, argument coercion, range-change callback semantics, and other value setters. No vendor changes or new per-profile behavior.
