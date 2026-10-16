@@ -572,16 +572,16 @@ fn c7_font_env() -> wow_ui_sim::lua_api::WowLuaEnv {
     let env = env_with_shared_xml();
     env.exec(
         r#"
-        local function font(name, path, size, r, g, b)
+        local function font(name, path, size, flags, r, g, b)
             local object = CreateFont(name)
-            object:SetFont(path, size, "")
+            object:SetFont(path, size, flags)
             object:SetTextColor(r, g, b, 1)
-            return { object = object, path = path, size = size, color = {r, g, b, 1} }
+            return { object = object, path = path, size = size, flags = flags, color = {r, g, b, 1} }
         end
-        C7Normal = font("C7NormalFont", "Fonts\\FRIZQT__.TTF", 12, 1, 0, 0)
-        C7Highlight = font("C7HighlightFont", "Fonts\\ARIALN.TTF", 20, 0, 1, 0)
-        C7Disabled = font("C7DisabledFont", "Fonts\\FRIZQT__.TTF", 16, 0, 0, 1)
-        C7Seed = font("C7SeedFont", "Fonts\\FRIZQT__.TTF", 9, 1, 1, 1)
+        C7Normal = font("C7NormalFont", "Fonts\\FRIZQT__.TTF", 12, "", 1, 0, 0)
+        C7Highlight = font("C7HighlightFont", "Fonts\\ARIALN.TTF", 20, "OUTLINE", 0, 1, 0)
+        C7Disabled = font("C7DisabledFont", "Fonts\\FRIZQT__.TTF", 16, "", 0, 0, 1)
+        C7Seed = font("C7SeedFont", "Fonts\\FRIZQT__.TTF", 9, "", 1, 1, 1)
 
         C7Button = CreateFrame("Button", "C7Button", UIParent)
         C7Button:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
@@ -634,7 +634,7 @@ fn c7_font_env() -> wow_ui_sim::lua_api::WowLuaEnv {
             assert(C7HighlightTexture:GetTexture() == "Interface/Buttons/UI-Panel-Button-Highlight")
             local path, size, flags = C7Label:GetFont()
             assert(path == expected.path, "selected font path")
-            assert(size == expected.size and flags == "", "selected font size/flags")
+            assert(size == expected.size and flags == expected.flags, "selected font size/flags")
             local color = {C7Label:GetTextColor()}
             for i = 1, 4 do assert(color[i] == expected.color[i], "selected color " .. i) end
             C7ReferenceLabel:SetFontObject(expected.object)
@@ -669,10 +669,14 @@ fn c7_assert_projection(
         .collect();
     assert!(!actual_glyphs.is_empty(), "selected label must emit glyphs");
     assert_eq!(actual_glyphs.len(), reference_glyphs.len());
+    assert!(
+        actual_glyphs.iter().any(|vertex| vertex.color == color),
+        "{expected}: selected foreground color must render"
+    );
     for (actual_vertex, reference_vertex) in actual_glyphs.iter().zip(&reference_glyphs) {
         for channel in 0..4 {
             assert!(
-                (actual_vertex.color[channel] - color[channel]).abs() < 0.001,
+                (actual_vertex.color[channel] - reference_vertex.color[channel]).abs() < 0.001,
                 "{expected}: glyph color {:?}",
                 actual_vertex.color
             );
@@ -764,7 +768,7 @@ fn c7_replacing_each_active_font_slot_preserves_owned_children() {
         object:SetFont("Fonts\\ARIALN.TTF", 18, "")
         object:SetTextColor(1, 0, 1, 1)
         C7Replacement = {object = object, path = "Fonts\\ARIALN.TTF", size = 18,
-                         color = {1, 0, 1, 1}}
+                         flags = "", color = {1, 0, 1, 1}}
         "#,
     )
     .unwrap();
