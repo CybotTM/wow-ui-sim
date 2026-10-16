@@ -28,6 +28,23 @@ Use `scripts/diff-lua-errors.sh BASELINE NEW` to compare message sets and
 report regressed/fixed errors. The Mists CI guard uses this for addon-induced
 error counts and release proof diagnostics.
 
+## Era / Anniversary — actual acquisition and startup, 2026-10-16
+
+| Profile | Own cache | Startup lua-errors |
+|---|---:|---|
+| Anniversary (existing Vanilla profile) | 2,971/2,971 PASS | exit1, 92 records / 98 occurrences, FAIL |
+| Era | 2,971/2,971 PASS | exit1, 92 records / 98 occurrences, FAIL |
+
+Build/runtime source `b1e749ee3758c0e576b5cc1bf00e09211dc3c852` is base `70ebaee0e` plus authorized cherry-picks of manifest commit `0d244c899` and listfile commit `b036938ae`. Both profiles have distinct CASC-derived enUS caches and provenance for installed `wow_classic_era` build `1.15.9.70003`; manifest SHA-256 `6647aded693f013c7ed4e1e1e613450558a781da1bf8a0494d8887e1f7810978`. Cache file hashes remained stable across captures. Baseline JSON files are byte-exact stdout, independently executed and byte-identical; they are not profile substitutions.
+
+Observed prerequisite failures include nil table keys in Classic Constants/UnitPopup/CombatLogColors, missing `NUM_LE_ITEM_QUALITYS` in Vanilla UIParent.lua:25, nil casting-bar `classicFillColor`/`classicFullColor`, and missing mixin globals. Other nil API/data callbacks remain unisolated. Records include reporter-wrapped forms of the same errors; 92 records do not mean 92 root causes. No fixes made. Original persisted CVars remained unchanged in every recorded run. Compiler warnings remain; not warning-free or clean-startup acceptance.
+
+Anniversary bare controls separately passed 39/39 at `70ebaee0e`; no claim that they were rerun at this data-only revision. Existing Anniversary profile targets Vanilla, not Gethe current `classic_anniversary` TBC 2.5.6. Native parity, GUI and full-suite acceptance remain unproven. Metadata files bind seals, argv, source, provenance and capture hashes. These are failing compatibility inventories, not clean baselines or startup acceptance at current master.
+
+Files: [Era JSON](era-lua-errors.json), [Era metadata](era-lua-errors.meta.json), [Anniversary JSON](anniversary-lua-errors.json), [Anniversary metadata](anniversary-lua-errors.meta.json). The clean-capture-only refresh rule above applies to Mists; these initial inventories record actual failures without blessing them.
+
+Only Era/Anniversary source manifests changed. No existing mapped path/FDID was lost from any remaining profile. Wrath mapping coverage improves from 57/382 to 103/382 (325 to 279 unmapped); it is not unchanged. Wrath UI acquisition uses its separate pinned source snapshot (`src/blizzard_ui_sync.rs::sync_wrath_ui_to`), not those added CASC UI mappings. The other five source manifests are unchanged. This audit proves mapping preservation, not fresh runtime acceptance for those profiles.
+
 ## Wrath Lua Errors
 
 `wrath-lua-errors.json` refreshes startup after bounded guard retirement at `4e58e23a1`: **44 unique errors / 55 occurrences, exit1**, versus historical `c06c84362` **45 / 89**. This remains a failing compatibility inventory, not a clean baseline. The original `UIPanelTemplates.lua:365` nil-`cursorOffset` failure is absent: **0 cursorOffset/ScrollingEdit records or occurrences**, previously 34 occurrences. Exact message comparison finds 8 added / 9 removed records; 8 pairs differ only in generated chunk hashes (including backtraces). Ignoring those identities for comparison only leaves **0 substantive new errors / 1 resolved error (34 occurrences)**; retained error counts are unchanged.
