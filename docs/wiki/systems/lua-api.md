@@ -3,6 +3,18 @@
 The Lua API layer bridges Lua addon code with the Rust simulation engine. It provides WoW-compatible globals, 300+ frame methods, C_* namespaces, and a timer system — all backed by `WowLuaEnv` and `SimState`.
 
 
+## Container, message history and transform producers — 2026-10-16
+
+Producer `269ed6f17` replaces passive label scaffolds. The C API models remain first-class under `src/c_api/`: `container_inventory.rs` shares split/use transitions with legacy globals, `container_actions.rs` owns environment-local eligibility/request records, and `container_quest.rs` queries current slot item identity plus supplied item metadata and rich quest-log membership. Wrath legacy quest publication projects the same result as three positional values. [Split/use](../../specs/container-split-use.md) and [quest metadata](../../specs/container-item-quest-metadata.md) own policies, historical RED and bounded GREEN receipts; these are not native gameplay/catalog claims.
+
+Message history stores access ID, line ID and extraData separately; widget methods select/count/remove an access-ID subsequence while retaining unfiltered behavior. [Message-frame access history](../../specs/message-frame-access-history.md) owns Wrath argument shape and actual cached transfer-fixture scope. Retail excludes those five tests; source publication is not Retail runtime proof. See [[widget-system]] for storage context.
+
+Animation transform attachment before template application stores independent Translation/Scale/origin configuration and one degree/radian Rotation angle. Shared motion application/restoration resolves the target and applies Translation through existing presentation offsets, alongside existing Path handling. [Animation transforms](../../specs/animation-transforms.md) owns XML, lifecycle, interpolation/restoration policy and proof limits; Scale/Rotation visual effects remain unmodeled. Existing Path/VertexColor proof is not new transform credit. See [[layout-system]] and [[xml-template-system]].
+
+### Remaining container default shapes
+
+At `269ed6f17`, `src/lua_api/workarounds/temporary/container_default_shapes.rs` retains only absent-member defaults for `GetContainerItemPurchaseInfo` (nil), `IsContainerFiltered` (false), and `IsBattlePayItem` (false). Purchase/refund, bag filtering and battle-pay systems are still missing; retire each default when its owning model supplies that query. Pickup, split, use and quest metadata no longer belong to this workaround. Its default-shape/callability tests are preservation controls, not proof of supplied-state behavior. The owning [split/use](../../specs/container-split-use.md), [quest metadata](../../specs/container-item-quest-metadata.md), and [cursor transfer](../../specs/cursor-item-transfer.md) contracts own their separate evidence.
+
 ## Supplied query models and NONE Path — source only
 
 The [integrated checkpoint](../investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers) owns executed baseline and current verification status. C API contracts: [availability/reason](../../specs/cooldown-viewer-availability.md), [transfer activity](../../specs/currency-transfer-activity.md), [catalog icon](../../specs/zone-ability-icon.md), [complete ButtonHeader snapshots](../../specs/ui-widget-button-header.md), [independent assisted identity/slots](../../specs/assisted-action-input.md), [modeled frequency](../../specs/profiler-clock-frequency.md), [global transcription](../../specs/voice-transcribing-input.md), and [supplied ping kits](../../specs/ping-texture-kit-input.md). Their implementations live under `src/c_api/`; specs distinguish explicit inputs, catalog lookup and simulator policies from native evidence.
@@ -415,6 +427,12 @@ Historical `e4caa4899` adds empty-default `SimState.item_cooldowns: HashMap<u32,
 `ee1bc9038` projects supplied pairs unchanged through distinct ItemInfo, item-ID and bag/slot selectors; namespace enable types differ. Missing pairs are an explicit simulator policy, not native parity. Legacy equipment-slot state is unchanged. The [owning contract and bounded proof SSOT](../../specs/item-cooldowns.md#bounded-archived-green--2026-10-14) records independent archived `ffb` Retail/Mists execution, preserving genuine historical RED and later fixture/compile failures. Producer association is not current-HEAD coverage. [Current revision/gate matrix](../../specs/store-product-group-shape.md#seven-profile-saved-runtime-matrix--2026-10-14) owns corrected-fixture/profile runtime status and pending gates; native/full-parent acceptance remains unproved. Historical Store query diagnostics are not a root fix. Trace-environment and intentional visibility-error limits remain with the owning proof.
 
 ## Sources
+
+- [Container split/use](../../specs/container-split-use.md) — supplied actions and bounded receipts
+- [Container quest metadata](../../specs/container-item-quest-metadata.md) — membership authority and bounded receipts
+- [Message-frame access history](../../specs/message-frame-access-history.md) — Wrath history/transfer boundary and receipts
+- [Animation transforms](../../specs/animation-transforms.md) — supplied Lua/XML configuration, Translation motion and receipts
+- [container_default_shapes.rs](../../../src/lua_api/workarounds/temporary/container_default_shapes.rs) — residual no-state defaults
 
 - [Supplied item cooldowns](../../specs/item-cooldowns.md) — supplied-pair producer, bounded archived Retail/Mists GREEN, historical RED and pending corrected-fixture/current-HEAD/PTR acceptance.
 

@@ -1,6 +1,6 @@
 # Supplied container split and use requests
 
-Status: corrected tests/passive scaffold staged; RED/GREEN unexecuted. Wrath legacy dispatch is cfg-gated and required, never runtime-skipped; its baseline is inert.
+Status: producer `269ed6f17` replaces the passive scaffold; historical behavioral RED accepted. Bounded producer GREEN accepted from the sealed component receipts below. No native, full-profile, startup, format or type-check acceptance is implied.
 
 Container splitting and accepted item-use requests share state across `C_Container` and legacy entry points. Backing behavior belongs in `src/c_api/container_inventory.rs`; passive eligibility and request records belong in `src/c_api/container_actions.rs`. See [inventory context](../wiki/systems/lua-api.md).
 
@@ -33,8 +33,8 @@ This is a **simulator-authored supplied-state policy**, not native parity. Publi
 - `src/c_api/mod.rs` — public fixture/model module.
 - `src/c_api/container_inventory.rs` — shared split/use producers and namespaced publication.
 - `src/lua_api/globals/inventory_verbs.rs` — shared legacy publication and item cursor-count projection.
-- `src/lua_api/globals/stubs/global_stubs.rs` — move legacy UseContainerItem no-op into the explicit passive scaffold registration; producer replaces that passive body.
-- `src/lua_api/workarounds/temporary/container_default_shapes.rs` — remove only split/use no-op entries; retain unrelated defaults.
+- `src/lua_api/globals/stubs/global_stubs.rs` — generic legacy UseContainerItem no-op removed in the scaffold; producer registers the shared state-backed action in `inventory_verbs.rs`.
+- `src/lua_api/workarounds/temporary/container_default_shapes.rs` — split/use no-op entries retired; [remaining workaround boundary](../wiki/systems/lua-api.md#remaining-container-default-shapes) owns the residual scope.
 
 ## Tests asserting this spec
 
@@ -46,11 +46,24 @@ This is a **simulator-authored supplied-state policy**, not native parity. Publi
 - `b3_namespaced_and_legacy_use_record_the_same_supplied_request_model`
 - `b3_unsupplied_and_empty_use_are_inert_then_eligible_use_records`
 
+## Bounded RED and post-GREEN receipts — 2026-10-16
+
+Historical tests/passive scaffold: `680a35a1e`; producer: `269ed6f17`. The independent RED report authenticates production-input hashes despite the libraries' older recorded HEAD and documents the cfg-excluded Retail helper conversion difference; do not attribute producer behavior to the RED libraries.
+
+- Retail RED component: `/home/osso/.local/state/wow-ui-sim/verification/green-batch/label-retail-red-20261016T194438112412Z`.
+- Wrath RED component: `/home/osso/.local/state/wow-ui-sim/verification/green-batch/label-wrath-red-20261016T195708968486Z`.
+- Independent RED acceptance: `/home/osso/.local/state/wow-ui-sim/verification/green-batch/label-red-report.md` (saved artifact/source reconciliation, not a fresh run).
+
+**B1/B3 observed RED:** Retail 5 FAIL / 0 PASS; Wrath 5 FAIL / 0 PASS. Source stack stays `(6948,5)` instead of `(6948,3)`; use requests stay empty instead of recording the supplied request. Wrath loops fail at legacy first, so later namespaced calls are not independently reached by RED.
+
+**Accepted bounded GREEN receipt:** Retail `/home/osso/.local/state/wow-ui-sim/handoff/label-producers-green-private/components/label-prod-retail-labels-20261016T210501464288Z`; Wrath `/home/osso/.local/state/wow-ui-sim/handoff/label-producers-green-private/components/label-prod-wrath-labels-20261016T211404318442Z`; independent reports `/home/osso/.local/state/wow-ui-sim/verification/label-producers-green/retail-report.md` and `/home/osso/.local/state/wow-ui-sim/verification/label-producers-green/wrath-report.md`. Those reports own executed identities/counts, assertion reachability, source/artifact identity and preservation scope. Retail cannot earn Wrath-only C11/legacy quest credit. Other profiles, ordinary startup, format/check and native parity remain separate gates.
+
 ## Known gaps (current cycle)
 
-Wrath public legacy calls: `~/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/BankFrame.lua:15` (`SplitContainerItem`) and `ChatFrame.lua:1005` (`UseContainerItem`). Retail/PTR/Mists/Forever cached consumers use `C_Container`; Era/Anniversary caches are absent, so no legacy-consumer conclusion is claimed for them. Wrath tests try legacy first so its inert baseline fails on state values; other profiles compile only namespaced cases. `UseContainerItem` moves from HEAD's generic no-op list to an explicit passive publication with identical no-return/no-op behavior; the old list entry is removed, not duplicated. Missing Wrath legacy split receives the same passive body.
+Wrath public legacy calls: `~/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/BankFrame.lua:15` (`SplitContainerItem`) and `ChatFrame.lua:1005` (`UseContainerItem`). Retail/PTR/Mists/Forever cached consumers use `C_Container`; Era/Anniversary caches are absent, so no legacy-consumer conclusion is claimed for them. Wrath tests try legacy first so its inert baseline fails on state values; other profiles compile only namespaced cases. Historically, the scaffold moved `UseContainerItem` out of the generic no-op list and added passive Wrath split publication. Producer `269ed6f17` replaces both passive actions with the shared model; no duplicate publication is retained.
 
-- [ ] Staged only: execute behavioral RED with passive scaffold before applying producer; then execute focused GREEN/profile preservation. No test/build/type/format acceptance is claimed here.
+- [x] Behavioral RED accepted for the passive scaffold; exact reached boundaries are recorded above.
+- [ ] Bounded GREEN/profile preservation is limited to the resolved receipts above; format/check/startup and other profiles require separate evidence.
 - [ ] Use dispatch is observable only through supplied model state. No gameplay effect or public event is established by the inspected call sites; B3 gameplay compatibility remains unproven.
 
 ## Out of scope

@@ -1,3 +1,7 @@
+## [2026-10-16] documentation | Container, message history and transform label producers
+
+[Producer notes](systems/lua-api.md#container-message-history-and-transform-producers--2026-10-16) and [widget storage](systems/widget-system.md#message-history-and-translation-target-state--2026-10-16) link the owning [split/use](../specs/container-split-use.md), [quest metadata](../specs/container-item-quest-metadata.md), [Wrath history](../specs/message-frame-access-history.md) and [transform](../specs/animation-transforms.md) receipts. Historical accepted RED remains separate from post-GREEN receipts; Retail and Wrath acceptance reports linked from the owning specs bound the GREEN scope. [Residual container workaround](systems/lua-api.md#remaining-container-default-shapes) owns retained defaults and retirement conditions. No native/full-profile/startup/check acceptance.
+
 ## [2026-10-16] evidence | Quest turn-in and charge selector bounded GREEN
 
 [Quest owner](../specs/quest-turn-in-model.md#bounded-retailforever-acceptance--2026-10-16) and [charge owner](../specs/cooldown-restriction.md#bounded-retailptr-selector-acceptance--2026-10-16) accept saved source `70ebaee0e`: 57/57 profile cases (Retail 28, PTR 25, Forever 4), 29 logical tests, exact recipe names/seals/features and original-CVar guards. Separate Retail/PTR startups exit 0 `[]`; Forever exit 1, 10 unique/14 baseline-matched GamepadActionBars errors. Overall startup remains failed; no native/full-integration/current-HEAD or parent closure.

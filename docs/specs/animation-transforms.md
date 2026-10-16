@@ -1,8 +1,8 @@
 # Supplied animation transforms and Translation layout motion
 
-Status: A1 folded after B1/B3, B4 and C11 against HEAD e7a3f2109; tests/passive scaffold only in first patch, producer separate. RED/GREEN unexecuted. Missing queries have neutral passive returns, never runtime skips.
+Status: producer `269ed6f17` replaces the passive scaffold; historical behavioral RED accepted. Bounded producer GREEN accepted from the sealed component receipts below. No native, full-profile, startup, format or type-check acceptance is implied.
 
-Translation, Scale and Rotation preserve supplied Lua/XML configuration. Translation uses the simulator's existing presentation-offset layout model. This staged contract is **simulator policy, not native parity**; no tests have run. Public sources establish signatures and consumption, not interpolation/restoration semantics. See [Path](path-control-point.md), [VertexColor](vertex-color-animation.md) and [query lifecycle](animation-query-lifecycle.md) for existing model boundaries.
+Translation, Scale and Rotation preserve supplied Lua/XML configuration. Translation uses the simulator's existing presentation-offset layout model. This contract is **simulator policy, not native parity**; historical behavioral RED and post-GREEN receipts are recorded below. Public sources establish signatures and consumption, not interpolation/restoration semantics. See [Path](path-control-point.md), [VertexColor](vertex-color-animation.md) and [query lifecycle](animation-query-lifecycle.md) for existing model boundaries.
 
 ## What it must do
 
@@ -21,7 +21,7 @@ Translation, Scale and Rotation preserve supplied Lua/XML configuration. Transla
 
 ## Implementation inventory
 
-Proposed producer only, not installed. Tests-stage `transforms.rs` attaches passive query methods before template application: zero offset/angles, identity scale pairs, CENTER/zero origin. These are scaffold policy, not native defaults; existing HEAD setters and absent Translation motion remain unchanged. Producer replaces the passive module, without a second attachment/publication path:
+Producer `269ed6f17` replaces the tests-stage neutral queries with per-animation supplied configuration and shared Translation motion application/restoration, without a second attachment/publication path. Historical passive zero offset/angles, identity scale pairs and CENTER/zero origin were scaffold policy, not native defaults:
 
 | Path | Role |
 |---|---|
@@ -34,7 +34,7 @@ Proposed producer only, not installed. Tests-stage `transforms.rs` attaches pass
 
 ## Tests asserting this spec
 
-`tests/animation_transforms.rs`, discovered into `--test integration`, seven staged cases:
+`tests/animation_transforms.rs`, discovered into `--test integration`, seven cases:
 
 | Test | Observable assertions |
 |---|---|
@@ -48,10 +48,22 @@ Proposed producer only, not installed. Tests-stage `transforms.rs` attaches pass
 
 All cases are shared-source and ungated. Retail first; other profiles require separate execution. Reduced public-tag fixture is not whole-vendor lifecycle proof.
 
+## Bounded RED and post-GREEN receipts — 2026-10-16
+
+Historical tests/passive scaffold: `680a35a1e`; producer: `269ed6f17`. The independent RED report authenticates production-input hashes despite the libraries' older recorded HEAD and documents the cfg-excluded Retail helper conversion difference; do not attribute producer behavior to the RED libraries.
+
+- Retail RED component: `/home/osso/.local/state/wow-ui-sim/verification/green-batch/label-retail-red-20261016T194438112412Z`.
+- Wrath RED component: `/home/osso/.local/state/wow-ui-sim/verification/green-batch/label-wrath-red-20261016T195708968486Z`.
+- Independent RED acceptance: `/home/osso/.local/state/wow-ui-sim/verification/green-batch/label-red-report.md` (saved artifact/source reconciliation, not a fresh run).
+
+**A1 observed RED:** Retail 7 FAIL / 0 PASS; Wrath 7 FAIL / 0 PASS. Four numeric/XML cases reach wrong neutral values; three motion cases reach computed-layout x mismatches. Methods and setup succeed. Later replay/restoration assertions are not established by RED; existing setter/Path controls are separate preservation evidence.
+
+**Accepted bounded GREEN receipt:** Retail `/home/osso/.local/state/wow-ui-sim/handoff/label-producers-green-private/components/label-prod-retail-labels-20261016T210501464288Z`; Wrath `/home/osso/.local/state/wow-ui-sim/handoff/label-producers-green-private/components/label-prod-wrath-labels-20261016T211404318442Z`; independent reports `/home/osso/.local/state/wow-ui-sim/verification/label-producers-green/retail-report.md` and `/home/osso/.local/state/wow-ui-sim/verification/label-producers-green/wrath-report.md`. Those reports own executed identities/counts, assertion reachability, source/artifact identity and preservation scope. Retail cannot earn Wrath-only C11/legacy quest credit. Preservation: Retail 181 active passes; Wrath 173 active passes. Wrath executes zero Path cases: all eight declarations in `tests/path_control_point.rs` are excluded by the pre-existing line-3 `#![cfg(feature = "retail-12-0-0")]`, absent from the emitted `client-wrath` feature set. No Wrath Path behavioral pass is claimed. Other profiles, ordinary startup, format/check and native parity remain separate gates.
+
 ## Known gaps (current cycle)
 
-- [ ] Execute tests-only against recorded HEAD and retain genuine RED before applying producer; current failures are source-predicted value/layout assertions only. Existing setter-callability tests in `animation_anim.rs` remain unchanged and earn no new feature credit.
-- [ ] Compile and execute producer plus preservation filters; no build, format, type-check, runtime or startup proof is claimed by staging.
+- [x] Saved passive-scaffold value/layout RED accepted; exact reached boundaries are above. Existing setter-callability tests in `animation_anim.rs` earn no new A1 credit.
+- [ ] Producer and preservation acceptance is bounded by the resolved receipts above; format/check/startup and other profiles remain separate.
 - [ ] Scale/Rotation visual effects remain unmodeled. Frame scalar scaling and static texture rotation exist but are not per-axis region animation/pivot hooks; this stage does not repurpose them or claim effective-size/pixel motion.
 
 ## Out of scope

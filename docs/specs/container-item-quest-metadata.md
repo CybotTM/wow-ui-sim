@@ -1,6 +1,6 @@
 # Container item quest metadata
 
-Status: corrected tests/passive scaffold staged; RED/GREEN unexecuted. Wrath legacy calls assert arity and values directly; positive cases predict value RED, negative legacy cases are preservation PASS.
+Status: producer `269ed6f17` replaces the passive scaffold; historical behavioral RED accepted. Bounded producer GREEN accepted from the sealed component receipts below. No native, full-profile, startup, format or type-check acceptance is implied.
 
 Simulator-authored supplied-state policy for `C_Container.GetContainerItemQuestInfo`
 and Wrath's legacy `GetContainerItemQuestInfo`. Public Blizzard UI consumers
@@ -40,7 +40,7 @@ Backing model: `src/c_api/container_quest.rs`.
 - `src/lua_api/state/sim_state.rs`, `src/lua_api/state.rs` — host-facing map/default.
 - `src/lua_api/globals/real/container_legacy.rs` — Wrath positional projection.
 - `src/lua_api/workarounds/temporary/container_default_shapes.rs` — quest entry retired;
-  remaining no-state helpers unchanged.
+  [remaining workaround boundary](../wiki/systems/lua-api.md#remaining-container-default-shapes) owns residual no-state helpers.
 - `src/lua_api/sim_substates/quest_log.rs`, `src/lua_api/globals/quest_verbs.rs` —
   existing membership authority and transitions; unchanged by this feature.
 
@@ -52,10 +52,22 @@ slot identity, Wrath legacy lifecycle and legacy negative shapes.
 `tests/bags.rs::test_bag_ui_c_container_helpers_have_safe_default_shapes`
 remains unchanged as a no-supplied-metadata preservation test.
 
+## Bounded RED and post-GREEN receipts — 2026-10-16
+
+Historical tests/passive scaffold: `680a35a1e`; producer: `269ed6f17`. The independent RED report authenticates production-input hashes despite the libraries' older recorded HEAD and documents the cfg-excluded Retail helper conversion difference; do not attribute producer behavior to the RED libraries.
+
+- Retail RED component: `/home/osso/.local/state/wow-ui-sim/verification/green-batch/label-retail-red-20261016T194438112412Z`.
+- Wrath RED component: `/home/osso/.local/state/wow-ui-sim/verification/green-batch/label-wrath-red-20261016T195708968486Z`.
+- Independent RED acceptance: `/home/osso/.local/state/wow-ui-sim/verification/green-batch/label-red-report.md` (saved artifact/source reconciliation, not a fresh run).
+
+**B4 observed RED:** Retail 4 FAIL / 1 preservation PASS; Wrath 5 FAIL / 2 preservation PASS. Shared positive queries return `(false,nil,false)` instead of supplied metadata; Wrath positive legacy call has the required arity three but wrong values. Negative-shape passes are controls, not feature RED. Accept/abandon assertions after the first failure await GREEN.
+
+**Accepted bounded GREEN receipt:** Retail `/home/osso/.local/state/wow-ui-sim/handoff/label-producers-green-private/components/label-prod-retail-labels-20261016T210501464288Z`; Wrath `/home/osso/.local/state/wow-ui-sim/handoff/label-producers-green-private/components/label-prod-wrath-labels-20261016T211404318442Z`; independent reports `/home/osso/.local/state/wow-ui-sim/verification/label-producers-green/retail-report.md` and `/home/osso/.local/state/wow-ui-sim/verification/label-producers-green/wrath-report.md`. Those reports own executed identities/counts, assertion reachability, source/artifact identity and preservation scope. Retail cannot earn Wrath-only C11/legacy quest credit. Other profiles, ordinary startup, format/check and native parity remain separate gates.
+
 ## Known gaps (current cycle)
 
-- [ ] Execute behavioral RED on HEAD plus passive scaffold, before producer. Passive legacy `GetContainerItemQuestInfo` returns exactly `(false, nil, false)`; no pcall masks call/setup failures.
-- [ ] Execute focused GREEN and default-shape preservation on required profiles.
+- [x] Behavioral RED accepted on the passive scaffold; passive legacy arity/value and negative controls are distinguished above.
+- [ ] Focused GREEN and default-shape preservation are bounded by the resolved receipts above; broader profile acceptance remains open.
 - [ ] Run format/check and startup gates through the integrating session.
 
 ## Out of scope

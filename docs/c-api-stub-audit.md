@@ -77,7 +77,7 @@ glue-screen (login/character creation) or legacy/removed APIs.
 | GetContainerItemLink | Implemented |
 | GetContainerItemInfo | Implemented |
 | HasContainerItem | Implemented |
-| GetContainerItemQuestInfo | Stubbed |
+| GetContainerItemQuestInfo | Supplied-state producer `269ed6f17`; [contract and bounded proof](specs/container-item-quest-metadata.md) |
 | GetContainerItemCooldown | Stubbed |
 | IsContainerFiltered | Stubbed |
 | GetBagName | Stubbed |
@@ -89,9 +89,9 @@ glue-screen (login/character creation) or legacy/removed APIs.
 | GetBackpackSellJunkDisabled | Implemented |
 | SetBackpackSellJunkDisabled | Stubbed |
 | GetContainerItemPurchaseInfo | Stubbed |
-| UseContainerItem | Stubbed |
+| UseContainerItem | Supplied-state producer `269ed6f17`; [contract and bounded proof](specs/container-split-use.md) |
 | PickupContainerItem | Stubbed |
-| SplitContainerItem | Stubbed |
+| SplitContainerItem | Supplied-state producer `269ed6f17`; [contract and bounded proof](specs/container-split-use.md) |
 | IsBattlePayItem | Stubbed |
 | SetBagPortraitTexture | Stubbed |
 

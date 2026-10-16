@@ -172,7 +172,7 @@ At `d6d7a9078`, `SetSpacing` writes per-frame `text_line_spacing`; `GetSpacing` 
 
 **Tooltip:** `SetOwner()`, `AnchorTo()`, `SetText()`, `AddLine()`, `AddDoubleLine()`, `Hide()`, `Show()`
 
-**MessageFrame:** `AddMessage()`, `Clear()`
+**MessageFrame:** `AddMessage()`, `Clear()`, access-filtered `GetNumMessages(id)`, `GetMessageInfo(i,id)` and `RemoveMessagesByAccessID(id)`. [History contract](specs/message-frame-access-history.md) owns bounded Wrath metadata/consumer proof; unfiltered behavior is retained, not a full chat API parity claim.
 
 **ScrollBox:** `ScrollToBegin()`, `ScrollToEnd()`, `SetHorizontalScroll()`, `SetVerticalScroll()`
 
@@ -322,6 +322,8 @@ POIButtonMixin, TaggableObjectMixin, MapCanvasPinMixin, Menu (GetOpenMenu, Popup
 
 ## Animation System
 
+Producer `269ed6f17` stores supplied Translation/Scale/Rotation Lua/XML configuration and applies bounded Translation presentation motion through the existing lifecycle. [Transform contract](specs/animation-transforms.md) owns historical RED, post-GREEN receipts and simulator-only policies; [implementation notes](wiki/systems/lua-api.md#container-message-history-and-transform-producers--2026-10-16) describe the shared motion path. No Scale/Rotation visual or native parity claim.
+
 **State:** [animation.rs](../src/lua_api/animation.rs); **methods/lifecycle:** [animations.rs](../src/lua_api/frame/methods/button_anchor_hierarchy/animations.rs).
 
 ### Types
@@ -356,7 +358,7 @@ anim:SetFromAlpha() / SetToAlpha() / SetDuration()
 | C_Timer | `timer_api.rs` | After, NewTimer, NewTicker |
 | C_Map | `c_map_api.rs` | GetMapInfo (stub) |
 | C_Item | `c_item.rs` | GetItemInfo, GetItemCooldown; state-backed IsConsumableItem, IsEquippableItem, IsItemInRange |
-| C_Container | `item_spell/c_container.rs` | GetContainerItemID/Link/Info, GetBagSlotFlag/SetBagSlotFlag, and backpack flag queries backed by shared bag-slot state |
+| C_Container | `item_spell/c_container.rs`, `container_inventory.rs`, `container_quest.rs` | Existing inventory/flags plus [supplied split/use](specs/container-split-use.md) and [quest metadata](specs/container-item-quest-metadata.md); contracts own bounded proof and gameplay/catalog exclusions |
 | C_GuildInfo | `guild_info.rs` / `guild_verbs.rs` | Invite, Uninvite, Promote, and Leave share state-backed guild management handlers with deprecated globals |
 | C_ProfSpecs | `workarounds/temporary/profession_specs_defaults.rs` | Seeded profession fixture reports specialization only for Blacksmithing skill line 164; authoritative path/tree behavior is unsupported |
 | C_Spell | `c_spell.rs` | GetSpellQueueWindow reads the current SpellQueueWindow CVar |
@@ -440,7 +442,7 @@ Applied after addon loading via `env.apply_post_load_workarounds()`:
 | Script Handlers | Complete | SetScript, HookScript, OnClick, OnEvent, OnUpdate |
 | Text Rendering | Partial | SetText, SetFont; width/height via cosmic-text |
 | Textures | Partial | SetTexture, SetAtlas, SetTexCoord; atlas resolution |
-| Animations | Partial | AnimationGroup creation; ticking implemented |
+| Animations | Partial | AnimationGroup creation/ticking; [supplied transform configuration and bounded Translation motion](specs/animation-transforms.md); Scale/Rotation visuals remain unmodeled |
 | Buttons | Complete | State-dependent texture switching |
 | Sliders | Complete | Min/max, value, step |
 | EditBox | Partial | Text state, focus, byte-facing cursor/selection APIs, and bounded `Insert` replacement/deletion; broader input behavior remains outside this inventory |
