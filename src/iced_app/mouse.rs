@@ -13,6 +13,23 @@ use super::mouse_drag::{
 /// Minimum distance (in pixels) the mouse must move while held to start a drag.
 const DRAG_THRESHOLD: f32 = 5.0;
 
+fn refresh_hovered_button_fonts(env: &crate::lua_api::WowLuaEnv, hovered: [Option<u64>; 2]) {
+    let mut lua = env.rilua_mut();
+    for id in hovered.into_iter().flatten() {
+        if let Err(error) =
+            crate::lua_api::frame::methods::button_anchor_hierarchy::refresh_button_font(
+                lua.state_mut(),
+                id,
+            )
+        {
+            crate::lua_api::script_helpers::call_error_handler_state(
+                lua.state_mut(),
+                &error.to_string(),
+            );
+        }
+    }
+}
+
 impl App {
     pub(super) fn handle_mouse_move(&mut self, pos: Point) {
         let previous_pos = self.mouse_position;
@@ -137,22 +154,7 @@ impl App {
                 mark_button_state_visuals_dirty(&mut state, old_hovered);
                 mark_button_state_visuals_dirty(&mut state, new_hovered);
             }
-            {
-                let mut lua = env.rilua_mut();
-                for id in [old_hovered, new_hovered].into_iter().flatten() {
-                    if let Err(error) =
-                        crate::lua_api::frame::methods::button_anchor_hierarchy::refresh_button_font(
-                            lua.state_mut(),
-                            id,
-                        )
-                    {
-                        crate::lua_api::script_helpers::call_error_handler_state(
-                            lua.state_mut(),
-                            &error.to_string(),
-                        );
-                    }
-                }
-            }
+            refresh_hovered_button_fonts(&env, [old_hovered, new_hovered]);
             if let Some(old_id) = old_hovered.filter(|id| self.motion_scripts_allowed(*id)) {
                 let _ = env.fire_script_handler(old_id, "OnLeave", vec![]);
             }
