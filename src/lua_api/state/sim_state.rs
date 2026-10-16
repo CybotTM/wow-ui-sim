@@ -108,6 +108,8 @@ pub struct SimState {
     pub simple_htmls: HashMap<u64, SimpleHtmlData>,
     pub message_frames: HashMap<u64, MessageFrameData>,
     pub on_update_frames: HashSet<u64>,
+    /// Explicit ScrollFrame range requests, drained after OnUpdate and animations.
+    pub(crate) pending_scroll_range_updates: HashSet<u64>,
     pub visible_on_update_cache: Option<Vec<u64>>,
     pub strata_buckets: Option<Vec<Vec<u64>>>,
     pub(crate) active_toplevel_show_orders: HashMap<u64, u64>,

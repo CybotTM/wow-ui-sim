@@ -432,6 +432,7 @@ fn test_scrollframe_update_scroll_child_rect_uses_resolved_subtree_bounds() {
 
     env.exec("TestScrollFrameRectRefresh:UpdateScrollChildRect()")
         .unwrap();
+    env.fire_on_update(0.016).unwrap();
 
     let after: (f64, f64) = env
         .eval(
@@ -467,6 +468,8 @@ fn test_scrollframe_offsets_round_trip_outside_explicit_ranges_and_notify_after_
     "#,
     )
     .unwrap();
+
+    env.fire_on_update(0.016).unwrap();
 
     let ranges: (f64, f64) = env
         .eval(

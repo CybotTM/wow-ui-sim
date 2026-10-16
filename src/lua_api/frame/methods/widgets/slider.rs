@@ -717,8 +717,22 @@ pub(super) fn set_scroll_child(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn update_scroll_child_rect(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    refresh_scroll_child_rect(state, id)?;
+    borrow_state_mut(state)?
+        .pending_scroll_range_updates
+        .insert(id);
     Ok(0)
+}
+
+pub(crate) fn tick_scroll_range_updates(state: &mut LuaState) -> LuaResult<()> {
+    let mut pending = {
+        let mut sim = borrow_state_mut(state)?;
+        sim.pending_scroll_range_updates.drain().collect::<Vec<_>>()
+    };
+    pending.sort_unstable();
+    for id in pending {
+        refresh_scroll_child_rect(state, id)?;
+    }
+    Ok(())
 }
 
 fn refresh_scroll_child_rect(state: &mut LuaState, id: u64) -> LuaResult<()> {

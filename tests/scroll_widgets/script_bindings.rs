@@ -80,22 +80,36 @@ fn xml_scroll_bindings_order_payload_commit_and_unchanged_suppression() {
                 (event == 'OnHorizontalScroll' and 'h' or 'v'), 'hook', ...) end)
         end
         sf:UpdateScrollChildRect()
+    "#
+    ))
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        local sf = ScrollBindingTarget
         assert(sf:GetHorizontalScrollRange() == 80 and sf:GetVerticalScrollRange() == 120)
         sf:UpdateScrollChildRect()
+    "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        local sf = ScrollBindingTarget
         sf:SetHorizontalScroll(35)
         sf:SetHorizontalScroll(35)
         sf:SetVerticalScroll(-7)
         sf:SetVerticalScroll(-7)
-        local expected = {{}}
-        for _, pair in ipairs({{'range:80:120', 'h:35', 'v:-7'}}) do
-            for _, phase in ipairs({{'pre', 'normal', 'hook', 'post'}}) do
+        local expected = {}
+        for _, pair in ipairs({'range:80:120', 'h:35', 'v:-7'}) do
+            for _, phase in ipairs({'pre', 'normal', 'hook', 'post'}) do
                 expected[#expected + 1] = pair:gsub(':', ':' .. phase .. ':', 1)
             end
         end
         assert(table.concat(ScrollBindingCalls, ',') == table.concat(expected, ','),
             'bindings: ' .. table.concat(ScrollBindingCalls, ','))
-    "#
-    ))
+    "#,
+    )
     .unwrap();
 }
 
@@ -145,7 +159,8 @@ fn ordinary_xml_scrollframe_registers_and_dispatches_all_scroll_scripts() {
     env.exec(
         r#"
         local sf = OrdinaryXmlScrollBindingTarget
-        local calls = {}
+        OrdinaryScrollBindingCalls = {}
+        local calls = OrdinaryScrollBindingCalls
         function OrdinaryScrollProbe(self, event, ...)
             assert(self == sf)
             local x, y = self:GetHorizontalScrollRange(), self:GetVerticalScrollRange()
@@ -177,6 +192,14 @@ fn ordinary_xml_scrollframe_registers_and_dispatches_all_scroll_scripts() {
         content:SetSize(180, 220)
         content:SetPoint('TOPLEFT', child, 'TOPLEFT')
         sf:UpdateScrollChildRect()
+    "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        local sf = OrdinaryXmlScrollBindingTarget
+        local calls = OrdinaryScrollBindingCalls
         assert(sf:GetHorizontalScrollRange() == 80 and sf:GetVerticalScrollRange() == 120)
         sf:SetHorizontalScroll(35)
         sf:SetVerticalScroll(-7)
@@ -191,12 +214,12 @@ fn ordinary_xml_scrollframe_registers_and_dispatches_all_scroll_scripts() {
 
 #[test]
 fn bare_scrollframe_property_named_intrinsic_is_not_a_registered_binding() {
-    WowLuaEnv::new()
-        .unwrap()
-        .exec(
-            r#"
-        local sf = CreateFrame('ScrollFrame', nil, UIParent)
-        local calls = {}
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        local sf = CreateFrame('ScrollFrame', 'BareScrollBindingTarget', UIParent)
+        BareScrollBindingCalls = {}
+        local calls = BareScrollBindingCalls
         sf.OnHorizontalScroll_Intrinsic = function() calls[#calls + 1] = 'h' end
         sf.OnVerticalScroll_Intrinsic = function() calls[#calls + 1] = 'v' end
         sf.OnScrollRangeChanged_Intrinsic = function() calls[#calls + 1] = 'range' end
@@ -217,13 +240,21 @@ fn bare_scrollframe_property_named_intrinsic_is_not_a_registered_binding() {
         child:SetPoint('TOPLEFT', sf, 'TOPLEFT')
         sf:SetScrollChild(child)
         sf:UpdateScrollChildRect()
+    "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        local sf = BareScrollBindingTarget
+        local calls = BareScrollBindingCalls
         sf:SetHorizontalScroll(8)
         sf:SetVerticalScroll(9)
         assert(table.concat(calls, ',') == 'normal,hook',
             'normal script and hook run, but unregistered intrinsic property does not: ' .. table.concat(calls, ','))
     "#,
-        )
-        .unwrap();
+    )
+    .unwrap();
 }
 
 #[test]
@@ -240,7 +271,8 @@ fn cached_event_scrollframe_callbacks_precede_normal_scripts_once() {
         local content = CreateFrame('Frame', nil, child)
         content:SetSize(180, 220)
         content:SetPoint('TOPLEFT', child, 'TOPLEFT')
-        local calls = {}
+        CachedScrollBindingCalls = {}
+        local calls = CachedScrollBindingCalls
         for _, event in ipairs({'OnHorizontalScroll', 'OnVerticalScroll', 'OnScrollRangeChanged'}) do
             assert(type(sf:GetScript(event, 0)) == 'function', event .. ' precall missing')
             sf:RegisterCallback(event, function(owner, ...)
@@ -263,8 +295,23 @@ fn cached_event_scrollframe_callbacks_precede_normal_scripts_once() {
             end)
         end
         sf:UpdateScrollChildRect()
+    "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        local sf = RealEventScrollBindingTarget
         assert(sf:GetHorizontalScrollRange() == 80 and sf:GetVerticalScrollRange() == 120)
         sf:UpdateScrollChildRect()
+    "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        local sf = RealEventScrollBindingTarget
+        local calls = CachedScrollBindingCalls
         sf:SetHorizontalScroll(35)
         sf:SetHorizontalScroll(35)
         sf:SetVerticalScroll(-7)

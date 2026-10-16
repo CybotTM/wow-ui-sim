@@ -105,6 +105,7 @@ macro_rules! build_empty_sim_state {
             simple_htmls: $collections.simple_htmls,
             message_frames: $collections.message_frames,
             on_update_frames: $collections.on_update_frames,
+            pending_scroll_range_updates: HashSet::new(),
             visible_on_update_cache: $runtime.visible_on_update_cache,
             strata_buckets: $runtime.strata_buckets,
             active_toplevel_show_orders: HashMap::new(),

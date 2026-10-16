@@ -65,6 +65,7 @@ pub(crate) fn fire(
     advance_animation_groups(env, elapsed)?;
     timings.animation_groups = started.elapsed();
 
+    super::frame::methods::widgets::tick_scroll_range_updates(env.rilua_mut().state_mut())?;
     fire_layout_size_changes(env)?;
 
     let started = Instant::now();

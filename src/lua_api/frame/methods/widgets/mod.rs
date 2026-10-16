@@ -20,6 +20,7 @@ mod model;
 mod movie;
 pub(super) mod shared;
 mod slider;
+pub(crate) use slider::tick_scroll_range_updates;
 mod statusbar;
 mod texture;
 mod tooltip;
