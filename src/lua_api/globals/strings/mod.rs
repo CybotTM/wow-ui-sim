@@ -42,14 +42,19 @@ fn register_global_strings(
     existing_policy: ExistingGlobalPolicy,
 ) {
     for (name, value) in crate::global_strings::GLOBAL_STRINGS.entries() {
-        let existing = table_get(state, global, name);
-        let preserve_function =
-            cfg!(feature = "client-wowforever") && matches!(existing, Val::Function(_));
-        if !preserve_function && should_set_global(state, global, name, existing_policy) {
-            let resolved = resolve_lua_escapes(value);
-            let lua_value = create_string(state, &resolved);
-            table_set(state, global, name, lua_value);
+        let preserve_existing = match existing_policy {
+            ExistingGlobalPolicy::Preserve => table_get(state, global, name) != Val::Nil,
+            ExistingGlobalPolicy::Replace => {
+                cfg!(feature = "client-wowforever")
+                    && matches!(table_get(state, global, name), Val::Function(_))
+            }
+        };
+        if preserve_existing {
+            continue;
         }
+        let resolved = resolve_lua_escapes(value);
+        let lua_value = create_string(state, &resolved);
+        table_set(state, global, name, lua_value);
     }
 }
 
