@@ -66,4 +66,18 @@ fn selected_supplied_quest_material_is_live_environment_local_and_not_invented()
         None,
         "removed quest must not retain stale supplied material"
     );
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.selected_quest_log_id = Some(80001);
+        sim.quest_log_entries
+            .background_materials
+            .insert(80001, "Stone".into());
+    }
+    env.exec("assert(A_Admin.TurnInSelectedQuest())").unwrap();
+    env.state().borrow_mut().selected_quest_log_id = Some(80001);
+    assert_eq!(
+        supplied_material(&env),
+        None,
+        "turn-in clears the consumed material snapshot"
+    );
 }
