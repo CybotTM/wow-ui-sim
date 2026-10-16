@@ -332,3 +332,22 @@ fn path_stop_and_natural_finish_restore_each_playbacks_existing_offset() {
         .unwrap();
     assert_shift(&env, "PathStageIcon", anchored, -7.0, 11.0);
 }
+
+#[test]
+fn path_unknown_curve_token_is_rejected_without_changing_curve() {
+    let env = new_env();
+    create_path_scene(&env);
+    env.exec(
+        r#"
+        path:SetCurveType('SMOOTH')
+        local prior = path:GetCurveType()
+        assert(prior == 'SMOOTH')
+        local ok = pcall(function()
+            path:SetCurveType('UNSUPPORTED_CURVE')
+        end)
+        assert(ok == false)
+        assert(path:GetCurveType() == prior)
+        "#,
+    )
+    .unwrap();
+}
