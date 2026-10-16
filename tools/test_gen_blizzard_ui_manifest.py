@@ -74,7 +74,11 @@ class WrathManifestTests(unittest.TestCase):
         finally:
             self.assertEqual(self.protected_bytes(), self.protected_before)
 
-    def assert_manifest_entries(self):
+    def generate_and_assert_manifest_entries(self):
+        try:
+            self.invoke_main()
+        except SystemExit as error:
+            self.fail(f'Wrath manifest generation rejected the valid snapshot: {error}')
         self.assertEqual(self.manifest.read_text(encoding='utf-8').splitlines(),
                          EXPECTED_ENTRIES)
 
@@ -85,16 +89,14 @@ class WrathManifestTests(unittest.TestCase):
         self.assertEqual(self.manifest.read_bytes(), self.original_manifest)
 
     def test_wrath_no_refresh_writes_addons_and_framexml_root_relative_entries(self):
-        self.invoke_main()
-        self.assert_manifest_entries()
+        self.generate_and_assert_manifest_entries()
 
     def test_archive_digest_receipt_is_optional_metadata(self):
         self.write_json(self.receipt, {
             'gethe_revision': WRATH_REVISION,
             'archive_sha256': 'a' * 64,
         })
-        self.invoke_main()
-        self.assert_manifest_entries()
+        self.generate_and_assert_manifest_entries()
 
     def test_missing_framexml_preserves_existing_wrath_manifest(self):
         shutil.rmtree(self.snapshot / 'FrameXML')
