@@ -301,15 +301,20 @@ pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
             "secret texture must contain a file ID, path, or nil",
         ));
     }
+    let Some((path, file_data_id)) = resolved else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let success = {
+        let sim = borrow_state(state)?;
+        texture_source_resolves(path.as_deref(), file_data_id, &sim.addon_base_paths)
+    };
     let horiz_tile = opt_bool(state, 3);
     let vert_tile = opt_bool(state, 4);
     let mut sim = borrow_state_mut(state)?;
     let mut order_changed = false;
     let mut changed = false;
     if let Some(frame) = sim.widgets.get_mut(id) {
-        let Some((path, file_data_id)) = resolved else {
-            return Ok(0);
-        };
         let had_render_source = texture_has_render_source(frame);
         let has_render_source = path.is_some() || file_data_id.is_some();
         changed = texture_assignment_changed(frame, &path, file_data_id, horiz_tile, vert_tile)
@@ -334,7 +339,33 @@ pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
     if order_changed {
         sim.invalidate_strata_buckets();
     }
-    Ok(0)
+    drop(sim);
+    state.push(Val::Bool(success));
+    Ok(1)
+}
+
+fn texture_source_resolves(
+    path: Option<&str>,
+    file_data_id: Option<i64>,
+    addon_paths: &[std::path::PathBuf],
+) -> bool {
+    if file_data_id
+        .and_then(|id| u32::try_from(id).ok())
+        .and_then(crate::manifest_interface_data::get_texture_path)
+        .is_some()
+    {
+        return true;
+    }
+    let Some(path) = path else {
+        return false;
+    };
+    if crate::limited_listfile::lookup_texture_path(path).is_some() {
+        return true;
+    }
+    let textures = crate::texture::TextureManager::new().with_addons_paths(addon_paths.to_vec());
+    textures
+        .resolve_path(&crate::texture::normalize_wow_path(path))
+        .is_some()
 }
 
 fn texture_has_render_source(frame: &crate::widget::Frame) -> bool {
