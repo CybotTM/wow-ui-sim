@@ -835,6 +835,8 @@ fn push_legacy_aura_tuple(state: &mut LuaState, aura: Val) -> u32 {
     let spell_id = table_get(state, aura, "spellId");
 
     state.push(name);
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::workarounds::temporary::wrath_startup_defaults::push_unmodeled_aura_rank(state);
     state.push(icon);
     state.push(applications);
     state.push(dispel_name);
@@ -842,9 +844,16 @@ fn push_legacy_aura_tuple(state: &mut LuaState, aura: Val) -> u32 {
     state.push(expiration_time);
     state.push(source_unit);
     state.push(is_stealable);
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::workarounds::temporary::wrath_startup_defaults::push_unmodeled_aura_consolidation(state);
+    #[cfg(not(feature = "client-wrath"))]
     state.push(Val::Nil);
     state.push(spell_id);
-    10
+    if cfg!(feature = "client-wrath") {
+        11
+    } else {
+        10
+    }
 }
 
 fn is_truthy(value: Val) -> bool {

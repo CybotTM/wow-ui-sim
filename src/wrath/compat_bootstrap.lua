@@ -148,11 +148,8 @@ if GetPVPYesterdayStats == nil then
   end
 end
 
-if GetQuestTimers == nil then
-  function GetQuestTimers()
-    return nil
-  end
-end
+-- GetQuestTimers is registered by workarounds/temporary/wrath_startup_defaults:
+-- timed quests remain unmodeled; the empty domain returns zero values.
 
 if GetRefreshRates == nil then
   -- Vararg of available refresh rate ints. Return one (60Hz).

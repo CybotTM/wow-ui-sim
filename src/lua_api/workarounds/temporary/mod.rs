@@ -3,6 +3,8 @@
 pub(crate) mod classic_startup_defaults;
 
 pub(crate) mod session_exit_defaults;
+#[cfg(feature = "client-wrath")]
+pub(crate) mod wrath_startup_defaults;
 
 pub(crate) mod account_store_set_storefront;
 pub(crate) mod achievement_search_preview;

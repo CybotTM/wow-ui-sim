@@ -381,6 +381,8 @@ fn register_compat_and_admin(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::bank_storage_verbs::register_all(lua)?;
     super::debug_api::register_all(lua)?;
     super::admin::register_all(lua)?;
+    #[cfg(feature = "client-wrath")]
+    super::real::wrath_startup_queries::register_all(lua)?;
     Ok(())
 }
 
