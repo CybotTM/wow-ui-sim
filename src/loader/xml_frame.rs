@@ -29,6 +29,13 @@ mod setup;
 #[path = "xml_frame/tests.rs"]
 mod tests;
 
+/// Resolve a cached intrinsic declaration for tags not already mapped as intrinsics.
+pub(super) fn registered_intrinsic_tag(tag: &'static str) -> Option<&'static str> {
+    crate::xml::get_template(tag)
+        .filter(|template| template.frame.intrinsic == Some(true))
+        .map(|_| tag)
+}
+
 /// Create a frame from XML definition.
 /// Returns the name of the created frame (or None if skipped).
 ///

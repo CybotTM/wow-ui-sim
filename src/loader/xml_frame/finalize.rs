@@ -219,6 +219,7 @@ pub(crate) fn frame_element_to_type<'a>(
         "EventButton" => ("Button", Some("EventButton")),
         _ => crate::xml::widget_type_for_tag(child_tag)?,
     };
+    let intrinsic = intrinsic.or_else(|| super::registered_intrinsic_tag(child_tag));
     Some((child_frame, wt, intrinsic))
 }
 

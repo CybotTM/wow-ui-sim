@@ -3775,3 +3775,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-14] source | Tagged symbolizer protocol
 
 [Performance source checkpoint](investigations/test-suite-performance.md#upstream-tagged-symbolizer-source--2026-10-14) establishes upstream v7.2.10 framing/default5000ms only. Installed-build equivalence and execution cause remain unproved; failed controls retained.
+
+## [2026-10-16] source | Cached XML intrinsic-tag application
+
+[XML system](systems/xml-template-system.md#registered-intrinsic-tag-declarations) links [owning contract](../specs/xml-intrinsic-tags.md): original-cache RED, generic tag resolution change, pending GREEN/preservation/startup.

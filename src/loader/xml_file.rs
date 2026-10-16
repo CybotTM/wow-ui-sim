@@ -488,6 +488,7 @@ fn resolve_frame_element(
         "DropDownToggleButton" | "EventButton" => ("Button", None),
         _ => crate::xml::widget_type_for_tag(tag)?,
     };
+    let intrinsic = intrinsic.or_else(|| super::xml_frame::registered_intrinsic_tag(tag));
     Some((f, wt, intrinsic))
 }
 
