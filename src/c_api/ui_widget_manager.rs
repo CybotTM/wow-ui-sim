@@ -25,6 +25,7 @@ mod hud;
 pub use bar_records::{CaptureBarRecord, StatusBarRecord};
 mod feed;
 mod fixtures;
+mod icon_text_and_background;
 mod icon_text_and_background_record;
 mod inputs;
 pub use icon_text_and_background_record::IconTextAndBackgroundRecord;

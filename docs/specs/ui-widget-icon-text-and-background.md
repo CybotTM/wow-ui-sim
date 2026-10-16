@@ -1,6 +1,6 @@
 # Supplied IconTextAndBackground widgets
 
-`C_UIWidgetManager.GetIconTextAndBackgroundWidgetVisualizationInfo(widgetID)` must project explicit environment-local supplied records for the unchanged cached Retail/PTR consumer. The source boundary is `src/c_api/ui_widget_manager/`; the [manager-state contract](ui-widget-manager-state.md) owns shared supplied-state behavior and the [manager architecture](../wiki/systems/ui-widget-manager-state.md) describes the existing lifecycle. Selector tests have an independently reconciled two-case PTR RED against normal-library source `161dad02a`; this is failing behavior, not acceptance. Passive record/map/feed plumbing follows that baseline without a modeled getter. This is not populated-query, feed, consumer or native acceptance.
+`C_UIWidgetManager.GetIconTextAndBackgroundWidgetVisualizationInfo(widgetID)` must project explicit environment-local supplied records for the unchanged cached Retail/PTR consumer. The source boundary is `src/c_api/ui_widget_manager/`; the [manager-state contract](ui-widget-manager-state.md) owns shared supplied-state behavior and the [manager architecture](../wiki/systems/ui-widget-manager-state.md) describes the existing lifecycle. Selector tests have an independently reconciled two-case PTR RED against normal-library source `161dad02a`; this is failing behavior, not acceptance. Passive record/map/feed plumbing then compiled at `4adc7cf89`; main-observed populated PTR baseline is0PASS/8FAIL, exit101. The getter now projects that supplied state, but its compilation/GREEN remains pending. This is not populated-query, feed, consumer or native acceptance.
 
 ## What it must do
 
@@ -42,24 +42,26 @@
 
 ## Implementation inventory
 
-Passive supplied-input plumbing is present but uncompiled/unexecuted; the modeled getter is still absent. No populated-query or lifecycle acceptance follows:
+Passive supplied-input plumbing compiled in the recorded baseline; query projection is implemented but uncompiled/unexecuted. No populated-query or lifecycle acceptance follows:
+
+- `src/c_api/ui_widget_manager/icon_text_and_background.rs` — shared numeric/secret selector boundary, cloned supplied record and complete fresh rooted Lua result.
 
 - `src/c_api/ui_widget_manager/icon_text_and_background_record.rs` — complete explicit 14-field input record, without defaults or seeds.
 
 - `src/c_api/ui_widget_manager.rs` — public supplied records and shared numeric widget identity.
 - `src/c_api/ui_widget_manager/inputs.rs` — environment-owned supplied inputs.
-- `src/c_api/ui_widget_manager/queries.rs` — existing modeled-query registration and shared required-number/secret boundary; no modeled `IconTextAndBackground` getter registration yet.
+- `src/c_api/ui_widget_manager/queries.rs` — registers the modeled getter using the existing required-number/secret boundary.
 - `src/c_api/ui_widget_manager/feed.rs` — typed visualization feeds and synchronous state-before-event lifecycle.
 
 ## Tests asserting this spec
 
 - `tests/ui_widget_icon_text_and_background_selector.rs` — auto-discovered by the internal integration test harness on Retail/PTR; two public-selector cases (missing; explicit nil/numeric string/boolean/table/function), fresh `WowLuaEnv` and existing `GetWidgetSetInfo` required-number control for each invocation. No record scaffold, mocks or provider replacement. Main-observed PTR baseline: compile exit0; two unique FAIL, exit101, after shared controls. Missing-selector and explicit-nil target calls succeed instead of rejecting; later non-number loop inputs are unreached. Receipt: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconbackground-selector-ptr-first-red-20261016T095402891303Z`. The newly compiled test source is `e1a2ce806`; actual normal-library basis is `161dad02a`, not a whole-e1 library. Independent report: `/home/osso/.local/state/wow-ui-sim/verification/iconbackground-next/selector-red-report.md`. Its inferred missing-source-wiring finding is rejected: the internal harness generates module references for top-level test files; whole-integration execution remains unproved. A successful target call fails rejection; an unrelated missing-function error fails the required-number diagnostic assertion. The test does not assert what a successful call returned.
-- `tests/ui_widget_icon_text_and_background.rs` and `tests/widget_icon_background/` — eight authored cases: complete14-field fresh/replacement snapshots, distinct fractional IDs/removal/restoration, required selectors, independent environments, normal-feed ordering/atomicity, actual secret-wrapper access and unchanged cached type4 lifecycle. The consumer includes two-widget ordering and full-set replacement. Existing `widget_two_records/helpers.rs` is reused, not replaced. Compilation/populated RED is pending; later assertions are not reached evidence.
+- `tests/ui_widget_icon_text_and_background.rs` and `tests/widget_icon_background/` — eight authored cases: complete14-field fresh/replacement snapshots, distinct fractional IDs/removal/restoration, required selectors, independent environments, normal-feed ordering/atomicity, actual secret-wrapper access and unchanged cached type4 lifecycle. The consumer includes two-widget ordering and full-set replacement. Existing `widget_two_records/helpers.rs` is reused, not replaced. Main-observed normal PTR library `4adc7cf89`: build8m15s/730 JSON records/zero compiler diagnostics, guard exited normally. The new standalone component compiles at test checkout `15e53e813` against that library and executes0PASS/8FAIL, exit101: seven supplied-table failures and one required-selector failure. Consumer fails before cached setup; later snapshot/security/feed/lifecycle assertions remain unreached. Receipt: `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconbackground-populated-ptr-red-20261016T102150270256Z/iconbackground-populated-eight-first-red`. Independent populated-RED reconciliation pending. Source/spec/format/readability independently accepted separately at `/home/osso/.local/state/wow-ui-sim/verification/iconbackground-next/passive-tests-source-report.md`; not runtime acceptance.
 
 ## Known gaps (current cycle)
 
 - [x] Independently reconcile the newly compiled two-case selector RED against normal PTR library `161dad02a`; retain later inputs as unreached, not tested. This closes baseline attribution only.
-- [ ] Compile passive plumbing and execute the eight populated missing-getter cases before adding query projection.
+- [ ] Independently reconcile compiled passive plumbing and the eight populated missing-getter failures; retain their reached boundaries and source attribution.
 - [ ] Implement this complete supplied-record query/feed slice with behavioral coverage of snapshots, selectors/security and cached lifecycle on Retail/PTR; retain exact source/build/runtime attribution separately.
 
 ## Out of scope
