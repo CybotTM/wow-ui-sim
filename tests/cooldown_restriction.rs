@@ -350,3 +350,387 @@ fn tainted_secret_spell_selector_resolves_configured_opaque_charge_table() {
         original
     );
 }
+
+// SS-P1 staging only: proposed behavior, not executed or native-verified.
+mod ssp1 {
+    use super::*;
+    use wow_ui_sim::lua_api::LossOfControlInfo;
+    use wow_ui_sim::lua_api::state::SpellCooldownState;
+
+    fn install_selector(env: &WowLuaEnv, name: &str, number: f64) {
+        let loader = env.loader_env();
+        let mut lua = loader.rilua_mut();
+        let value = rilua::table_security::wrap_host_secret_number(lua.state_mut(), number);
+        lua.state_mut().push(value);
+        let inserted = lua.set_global_val(name, value);
+        lua.state_mut().pop();
+        inserted.expect("root authentic numeric-secret selector");
+    }
+
+    fn fixture(restricted: bool) -> WowLuaEnv {
+        let env = seed_charge_fixture(restricted);
+        {
+            let mut state = env.state().borrow_mut();
+            state.gcd = None;
+            state.spell_cooldowns.clear();
+            state.spell_cooldowns.insert(
+                19750,
+                SpellCooldownState {
+                    start: 12.0,
+                    duration: 80.0,
+                },
+            );
+            state.spell_loss_of_control.clear();
+            state.spell_loss_of_control.insert(
+                19750,
+                LossOfControlInfo {
+                    start_time: 14.0,
+                    duration: 24.0,
+                    mod_rate: 2.0,
+                    is_active: true,
+                    should_replace_normal_cooldown: false,
+                },
+            );
+            state.spell_id_aliases.insert("900001".into(), 19750);
+        }
+        install_selector(&env, "Ssp1Selector", 19750.0);
+        install_selector(&env, "Ssp1Alias", 900001.0);
+        install_selector(&env, "Ssp1Missing", 900002.0);
+        env
+    }
+
+    fn capture(env: &WowLuaEnv, query: &str, tainted: bool) {
+        env.exec(&format!(
+            r#"
+            local function capture(...) Ssp1Count = select('#', ...); Ssp1Result = ... end
+            local function invoke()
+                local before = debug.getstacktaint()
+                assert(before == {}, 'fixture caller security')
+                assert(issecretvalue(Ssp1Selector))
+                capture({query})
+                for _, selector in ipairs({{Ssp1Selector, Ssp1Alias, Ssp1Missing}}) do
+                    assert(issecretvalue(selector), 'selector remains secret')
+                    if {tainted} then
+                        assert(not canaccessvalue(selector))
+                        assert(not pcall(secretunwrap, selector))
+                        assert(not pcall(function() return selector + 1 end))
+                    end
+                end
+                assert(debug.getstacktaint() == before, 'caller taint preserved')
+            end
+            if {tainted} then debug.setobjecttaint(invoke, 'Ssp1Probe') end
+            invoke()
+        "#,
+            if tainted { "'Ssp1Probe'" } else { "nil" }
+        ))
+        .expect(query);
+    }
+
+    fn assert_numbers(env: &WowLuaEnv, fields: &[(&str, f64)], restricted: bool) {
+        for (field, expected) in fields {
+            let value: Val = env.eval(&format!("return Ssp1Result.{field}")).unwrap();
+            let lua = env.lua();
+            assert!(rilua::api::state_is_secure(lua.state()));
+            assert_eq!(
+                rilua::table_security::is_secret_value(lua.state(), value),
+                restricted
+            );
+            let payload = rilua::table_security::unwrap_secret(lua.state(), value).unwrap();
+            assert_eq!(payload, Val::Num(*expected), "{field}");
+            drop(lua); // Release the VM borrow before re-entering Lua.
+            env.exec(&format!(
+                r#"
+                local function addon()
+                    local value = Ssp1Result.{field}
+                    assert(issecretvalue(value) == {restricted})
+                    assert(canaccessvalue(value) ~= {restricted})
+                    if {restricted} then
+                        assert(not pcall(secretunwrap, value))
+                        assert(not pcall(function() return value + 1 end))
+                    else
+                        assert(value == {expected})
+                    end
+                    assert(debug.getstacktaint() == 'Ssp1OutputProbe')
+                end
+                debug.setobjecttaint(addon, 'Ssp1OutputProbe'); addon()
+            "#
+            ))
+            .unwrap();
+        }
+    }
+
+    fn assert_public_table(env: &WowLuaEnv, flags: &str) {
+        env.exec(&format!(
+            r#"
+            assert(Ssp1Count == 1 and type(Ssp1Result) == 'table')
+            assert(not issecretvalue(Ssp1Result) and canaccessvalue(Ssp1Result))
+            {flags}
+        "#
+        ))
+        .expect("public container and flags");
+    }
+
+    #[test]
+    fn cooldown_secret_numeric_selector_preserves_table_policy() {
+        let env = fixture(false);
+        for restricted in [false, true, false] {
+            env.state().borrow_mut().cooldowns_restricted = restricted;
+            for tainted in [false, true] {
+                for selector in ["19750", "Ssp1Selector"] {
+                    capture(
+                        &env,
+                        &format!("C_Spell.GetSpellCooldown({selector})"),
+                        tainted,
+                    );
+                    assert_public_table(
+                        &env,
+                        "assert(Ssp1Result.isEnabled == true and Ssp1Result.isActive == true); assert(not issecretvalue(Ssp1Result.isEnabled) and not issecretvalue(Ssp1Result.isActive)); assert(Ssp1Result.isOnGCD == nil and Ssp1Result.timeUntilEndOfStartRecovery == nil)",
+                    );
+                    assert_numbers(
+                        &env,
+                        &[("startTime", 12.0), ("duration", 80.0), ("modRate", 1.0)],
+                        restricted,
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn loc_secret_numeric_selector_preserves_table_policy() {
+        let env = fixture(false);
+        for restricted in [false, true, false] {
+            env.state().borrow_mut().cooldowns_restricted = restricted;
+            for tainted in [false, true] {
+                for selector in ["19750", "Ssp1Selector"] {
+                    capture(
+                        &env,
+                        &format!("C_Spell.GetSpellLossOfControlCooldownInfo({selector})"),
+                        tainted,
+                    );
+                    assert_public_table(
+                        &env,
+                        "assert(Ssp1Result.isActive == true and Ssp1Result.shouldReplaceNormalCooldown == false); assert(not issecretvalue(Ssp1Result.isActive) and not issecretvalue(Ssp1Result.shouldReplaceNormalCooldown))",
+                    );
+                    assert_numbers(
+                        &env,
+                        &[("startTime", 14.0), ("duration", 24.0), ("modRate", 2.0)],
+                        restricted,
+                    );
+                }
+            }
+        }
+    }
+
+    fn assert_duration(env: &WowLuaEnv, expected: [f64; 5]) {
+        env.exec(
+            r#"
+            assert(Ssp1Count == 1 and Ssp1Result ~= nil)
+            assert(not issecretvalue(Ssp1Result) and not Ssp1Result:HasSecretValues())
+        "#,
+        )
+        .expect("existing ordinary duration object policy");
+        for (method, expected) in [
+            "GetStartTime()",
+            "GetTotalDuration()",
+            "GetTotalDuration(1)",
+            "GetModRate()",
+            "GetEndTime()",
+        ]
+        .into_iter()
+        .zip(expected)
+        {
+            env.exec(&format!(
+                r#"
+                local function addon()
+                    local value = Ssp1Result:{method}
+                    assert(not issecretvalue(value) and canaccessvalue(value))
+                    assert(value == {expected})
+                    assert(debug.getstacktaint() == 'Ssp1DurationProbe')
+                end
+                debug.setobjecttaint(addon, 'Ssp1DurationProbe'); addon()
+            "#
+            ))
+            .expect(method);
+        }
+    }
+
+    fn exercise_duration(api: &str, expected: [f64; 5], alias_aware: bool) {
+        let env = fixture(false);
+        for restricted in [false, true, false] {
+            env.state().borrow_mut().cooldowns_restricted = restricted;
+            for tainted in [false, true] {
+                for selector in ["19750", "Ssp1Selector"] {
+                    capture(&env, &format!("C_Spell.{api}({selector})"), tainted);
+                    assert_duration(&env, expected);
+                }
+                if alias_aware {
+                    for selector in ["900001", "Ssp1Alias"] {
+                        capture(&env, &format!("C_Spell.{api}({selector})"), tainted);
+                        assert_duration(&env, expected);
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn charge_duration_secret_numeric_selector_keeps_public_rate_snapshot() {
+        exercise_duration(
+            "GetSpellChargeDuration",
+            [12.0, 20.0, 40.0, 2.0, 32.0],
+            true,
+        );
+    }
+
+    #[test]
+    fn cooldown_duration_secret_numeric_selector_keeps_public_snapshot() {
+        exercise_duration(
+            "GetSpellCooldownDuration",
+            [12.0, 80.0, 80.0, 1.0, 92.0],
+            true,
+        );
+    }
+
+    #[test]
+    fn loc_duration_secret_numeric_selector_keeps_public_rate_snapshot() {
+        exercise_duration(
+            "GetSpellLossOfControlCooldownDuration",
+            [14.0, 12.0, 24.0, 2.0, 26.0],
+            false,
+        );
+    }
+
+    #[test]
+    fn missing_and_no_state_secret_selectors_preserve_existing_empty_results() {
+        let env = fixture(false);
+        {
+            let mut state = env.state().borrow_mut();
+            state.spell_cooldowns.clear();
+            state.spell_charges.clear();
+            state.spell_loss_of_control.clear();
+        }
+        for restricted in [false, true] {
+            env.state().borrow_mut().cooldowns_restricted = restricted;
+            for tainted in [false, true] {
+                for selector in ["900002", "Ssp1Missing", "19750", "Ssp1Selector"] {
+                    capture(
+                        &env,
+                        &format!("C_Spell.GetSpellCooldown({selector})"),
+                        tainted,
+                    );
+                    assert_public_table(
+                        &env,
+                        "assert(Ssp1Result.isActive == false and Ssp1Result.isEnabled == true)",
+                    );
+                    assert_numbers(
+                        &env,
+                        &[("startTime", 0.0), ("duration", 0.0), ("modRate", 1.0)],
+                        restricted,
+                    );
+                    capture(
+                        &env,
+                        &format!("C_Spell.GetSpellCooldownDuration({selector})"),
+                        tainted,
+                    );
+                    assert_duration(&env, [0.0, 0.0, 0.0, 1.0, 0.0]);
+                    for api in [
+                        "GetSpellChargeDuration",
+                        "GetSpellLossOfControlCooldownInfo",
+                    ] {
+                        capture(&env, &format!("C_Spell.{api}({selector})"), tainted);
+                        env.exec("assert(Ssp1Count == 1 and Ssp1Result == nil)")
+                            .unwrap();
+                    }
+                    capture(
+                        &env,
+                        &format!("C_Spell.GetSpellLossOfControlCooldownDuration({selector})"),
+                        tainted,
+                    );
+                    env.exec("assert(Ssp1Count == 0 and Ssp1Result == nil)")
+                        .unwrap();
+                }
+            }
+        }
+    }
+
+    fn load_original_action_button_consumer(env: &WowLuaEnv) {
+        let home = std::env::var_os("HOME").expect("HOME for original Retail cache");
+        let path = std::path::PathBuf::from(home).join(
+            ".cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua",
+        );
+        let source =
+            std::fs::read_to_string(path).expect("original cached Retail consumer required");
+        let start = source
+            .find("local defaultCooldownInfo =")
+            .expect("original consumer defaults");
+        let end = source[start..]
+            .find("function ClearActionButtonCooldowns(")
+            .expect("consumer block end")
+            + start;
+        // Execute the contiguous original defaults/update/apply block, unmodified.
+        // This is fixture isolation, not a reimplementation or mocked API trace.
+        env.exec(&source[start..end])
+            .expect("original Retail consumer block");
+    }
+
+    fn assert_widget_timing(env: &WowLuaEnv, name: &str, expected: (f64, f64, f64)) {
+        let state = env.state().borrow();
+        let id = state
+            .widgets
+            .get_id_by_name(name)
+            .expect("real Cooldown widget");
+        let frame = state.widgets.get(id).unwrap();
+        assert_eq!(
+            (
+                frame.cooldown_start,
+                frame.cooldown_duration,
+                frame.cooldown_mod_rate
+            ),
+            expected,
+            "{name}"
+        );
+    }
+
+    #[test]
+    fn original_action_button_consumes_cooldown_before_charges_and_loc() {
+        // Restricted tainted widget setters remain outside SS-P1 acceptance.
+        for (restricted, tainted) in [(false, false), (false, true), (true, false)] {
+            let env = fixture(restricted);
+            load_original_action_button_consumer(&env);
+            env.exec(
+                r#"
+                Ssp1Button = CreateFrame('Button')
+                Ssp1Button.cooldown = CreateFrame('Cooldown', 'Ssp1Normal', Ssp1Button)
+                Ssp1Button.chargeCooldown = CreateFrame('Cooldown', 'Ssp1Charge', Ssp1Button)
+                Ssp1Button.lossOfControlCooldown = CreateFrame('Cooldown', 'Ssp1Loc', Ssp1Button)
+                Ssp1Button.enableLOCCooldown = true
+            "#,
+            )
+            .unwrap();
+            for selector in ["19750", "Ssp1Selector"] {
+                env.exec("Ssp1Button.cooldown:Clear(); Ssp1Button.chargeCooldown:Clear(); Ssp1Button.lossOfControlCooldown:Clear()").unwrap();
+                capture(
+                    &env,
+                    &format!(
+                        "(function() Ssp1Button.spellID = {selector}; ActionButton_UpdateCooldown(Ssp1Button) end)()"
+                    ),
+                    tainted,
+                );
+                assert_widget_timing(&env, "Ssp1Normal", (12.0, 80.0, 1.0));
+                assert_widget_timing(&env, "Ssp1Charge", (12.0, 40.0, 2.0));
+                assert_widget_timing(&env, "Ssp1Loc", (14.0, 24.0, 2.0));
+            }
+            env.state()
+                .borrow_mut()
+                .spell_loss_of_control
+                .get_mut(&19750)
+                .unwrap()
+                .should_replace_normal_cooldown = true;
+            capture(&env, "ActionButton_UpdateCooldown(Ssp1Button)", tainted);
+            assert_widget_timing(&env, "Ssp1Normal", (0.0, 0.0, 1.0));
+            assert_widget_timing(&env, "Ssp1Charge", (0.0, 0.0, 1.0));
+            assert_widget_timing(&env, "Ssp1Loc", (14.0, 24.0, 2.0));
+        }
+    }
+}
