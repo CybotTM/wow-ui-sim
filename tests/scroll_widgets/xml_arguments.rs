@@ -43,7 +43,8 @@ fn assert_inline_arguments(env: &WowLuaEnv, frame: &str) {
         r#"
         ArgCalls = {{}}
         offset, xrange, yrange, delta = 901, 902, 903, 904
-        local sf = {frame}
+        ArgScrollFrame = {frame}
+        local sf = ArgScrollFrame
         sf:SetSize(100, 100)
         local child = CreateFrame('Frame', nil, sf)
         child:SetSize(100, 100)
@@ -53,6 +54,16 @@ fn assert_inline_arguments(env: &WowLuaEnv, frame: &str) {
         content:SetSize(180, 220)
         content:SetPoint('TOPLEFT', child, 'TOPLEFT')
         sf:UpdateScrollChildRect()
+    "#
+    ));
+    assert_no_lua_errors(env);
+    result.unwrap();
+
+    env.fire_on_update(0.016).unwrap();
+
+    let result = env.exec(
+        r#"
+        local sf = ArgScrollFrame
         sf:SetHorizontalScroll(35)
         sf:SetVerticalScroll(37)
         -- Direct script invocation proves XML parameter binding, not physical wheel input.
@@ -60,8 +71,8 @@ fn assert_inline_arguments(env: &WowLuaEnv, frame: &str) {
         assert(table.concat(ArgCalls, ',') ==
             'range:80:120:2,h:35:1,v:37:1,wheel:-1:1', table.concat(ArgCalls, ','))
         assert(offset == 901 and xrange == 902 and yrange == 903 and delta == 904)
-    "#
-    ));
+    "#,
+    );
     assert_no_lua_errors(env);
     result.unwrap();
 }
