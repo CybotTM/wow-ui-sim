@@ -12,7 +12,7 @@ Every WoW XML file has a `<Ui>` root deserializing into `UiXml { elements: Vec<X
 
 ## Registered intrinsic-tag declarations
 
-[Owning contract](../../specs/xml-intrinsic-tags.md) covers same-name cached intrinsic declarations at top-level and nested XML tag sites. Previously, `UIThemeContainerFrame` was mapped to plain Frame without inheriting its cached mixin/preload; original GossipFrame consequently lacked `UpdateTheme`. Tag resolution now consults the declaration and uses the existing inheritance pipeline. Focused original-cache RED is recorded; GREEN, template preservation and startup remain pending. No vendor behavior was patched.
+[Owning contract](../../specs/xml-intrinsic-tags.md) covers same-name cached intrinsic declarations at top-level and nested XML tag sites. Previously, `UIThemeContainerFrame` was mapped to plain Frame without inheriting its cached mixin/preload; original GossipFrame consequently lacked `UpdateTheme`. Tag resolution now consults the declaration and uses the existing inheritance pipeline. Owning contract records focused original-cache RED→GREEN, 170 template preservation PASS with one pre-existing ignored TODO, and separate clean Retail startup at saved `f963b6b18`. No vendor behavior was patched.
 
 ## Declarative click registration
 

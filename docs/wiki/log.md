@@ -2289,3 +2289,7 @@ Reconciled source-only attribution for `f00f230fe`, `593e543f5` and `655f0698b`:
 ## [2026-10-16] source | Cached XML intrinsic-tag application
 
 [XML system](systems/xml-template-system.md#registered-intrinsic-tag-declarations) links [owning contract](../specs/xml-intrinsic-tags.md): original-cache RED, generic tag resolution change, pending GREEN/preservation/startup.
+
+## [2026-10-16] evidence | Cached intrinsic-tag Retail proof
+
+[Owning contract](../specs/xml-intrinsic-tags.md) records focused original-cache GREEN, 170 template preservation PASS/one existing ignored TODO, and separate clean Retail startup at f963b6b18. No native/all-profile claim.

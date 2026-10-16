@@ -3779,3 +3779,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-16] source | Cached XML intrinsic-tag application
 
 [XML system](systems/xml-template-system.md#registered-intrinsic-tag-declarations) links [owning contract](../specs/xml-intrinsic-tags.md): original-cache RED, generic tag resolution change, pending GREEN/preservation/startup.
+
+## [2026-10-16] evidence | Cached intrinsic-tag Retail proof
+
+[Owning contract](../specs/xml-intrinsic-tags.md) records focused original-cache GREEN, 170 template preservation PASS/one existing ignored TODO, and separate clean Retail startup at f963b6b18. No native/all-profile claim.
