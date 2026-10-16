@@ -1,6 +1,6 @@
 # Finding catalogue
 
-**41 source-comparison entries, not an exhaustive gap count or 41 native-confirmed bugs.** Initial nine plus 32 additional entries. Each linked detail gives reconstructed/source and simulator evidence, a discriminating fixture, proposed behavior changes, regression scope and profile limits.
+**46 source-comparison entries, not an exhaustive gap count or 46 native-confirmed bugs.** Initial nine plus 32 expanded entries and five [15595 follow-ups](cataclysm-15595.md). Each linked detail gives reconstructed/source and simulator evidence, a discriminating fixture, proposed behavior changes, regression scope and profile limits.
 
 | Kind | Interpretation |
 |---|---|
@@ -52,6 +52,12 @@
 | B5 | Currency list expansion/watch state is a static catalogue, not a mutable display list | Capability | [Evidence / rework / regression](additional-inventory-and-currency.md#b5--currency-list-expansionwatch-state-is-a-static-catalogue-not-a-mutable-display-list) |
 | X1 | Non-frame virtual templates overwrite definitions without trust precedence | Boundary | [Evidence / rework / regression](xml-and-dispatch.md#x1--non-frame-virtual-templates-overwrite-definitions-without-trust-precedence) |
 | X2 | Failed includes have inconsistent continuation and diagnostic behavior | Boundary | [Evidence / rework / regression](xml-and-dispatch.md#x2--failed-includes-have-inconsistent-continuation-and-diagnostic-behavior) |
+
+| C10 | EditBox changed notifications are synchronous or absent rather than coalesced at dirty processing | Existing contract conflict / capability | [Evidence / rework / regression](cataclysm-15595.md#c10--editbox-text-notifications-cross-different-mutationupdate-boundaries) |
+| C11 | ScrollingMessageFrame ignores access-ID filtered counts and loses their metadata | Capability | [Evidence / rework / regression](cataclysm-15595.md#c11--scrollingmessageframe-loses-access-id-filtered-counts) |
+| C12 | Disabled checked button hides its only checked texture | Capability | [Evidence / rework / regression](cataclysm-15595.md#c12--disabled-checked-button-hides-its-only-checked-texture) |
+| T7 | FontString justification accepts invalid input instead of rejecting it | Boundary | [Evidence / rework / regression](cataclysm-15595.md#t7--fontstring-justification-accepts-invalid-input-instead-of-rejecting-it) |
+| T8 | FontString text-color defaults and clamping differ | Boundary | [Evidence / rework / regression](cataclysm-15595.md#t8--fontstring-text-color-defaults-and-clamping-differ) |
 
 ## Coverage, exclusions and unanswered questions
 

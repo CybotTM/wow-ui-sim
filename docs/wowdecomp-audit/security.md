@@ -52,6 +52,17 @@ No runtime, sandbox execution, antivirus verdict, dependency authenticity verifi
 
 Continue using this checkout as inert research material. Any decision to run it requires a separate execution/security assessment; this audit does not authorize it.
 
+## 15595 checkout supplement
+
+Additional bounded static inspection: `~/Repos/wowdecomp15595` at `959b0b85c5f55c565328d7c3ca33027a65e41327`, declaring 4.3.4/build 15595. Read-only authorization remains unchanged; no configure/build/import/run occurred. The earlier inspection does not automatically clear this different checkout.
+
+- Git inventory: 4,121 tracked entries, all mode `100644`; no tracked symlinks or gitlinks. `.gitattributes:1` is `* text=auto`. These are inventory facts, not security assurance.
+- Unlike the earlier checkout, **`ThirdParty/DivxDecoder/DivxDecoder.dll` is tracked**, 413,696 bytes (Git blob `9fcbb0fde44c04dfdfc41572beb1d9b51a7f598f`). NVAPI libraries and the linked xvidcore archive are also opaque compiled dependencies; their authenticity and payload were not audited. Mode `100644` does not make a DLL inert if loaded.
+- `ThirdParty/CMakeLists.txt:140–177` invokes the import-library tool during Win32 configuration and copies the decoder DLL through a custom target. `Tools/XvidDecoder/CMakeLists.txt` links a precompiled xvidcore library into a local DLL. Inspected root/nested CMake definitions showed no URL/Git dependency fetch; toolchain and indirect behavior remain unproved.
+- Runtime launch/load boundaries remain consequential: `WoW/Source/Glue/Win64/PatchDownloadGlue.cpp:24–33` can request `runas`; `SurveyDownloadGlue.cpp:146–180` authenticates `Survey.mpq`, requires `authResult >= 5`, extracts a DLL and loads it to resolve `ExtraWork`. `WoW/Source/Battlenet/Win64/Battlenet.cpp:22–57` loads a supplied DLL path and resolves exports. Caller/path control, archive authentication semantics and DLL search security were not closed.
+
+No confirmed implant was established by this bounded inspection; that is not a safe-to-run verdict. No binary malware analysis, signature/reputation checks, full endpoint/credential review, complete source review or original-binary verification occurred. [15595 behavioral comparisons](cataclysm-15595.md) use this repository only as inert text evidence.
+
 ## Related
 
 - [Audit index and behavioral coverage](README.md)

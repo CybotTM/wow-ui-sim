@@ -64,7 +64,7 @@ These outputs are derived from source, not observed executions.
 | Candidate | Disposition |
 |---|---|
 | Stale inherited alpha/scale/strata after `SetParent` | Rejected: `src/lua_api/frame/methods/methods_hierarchy.rs:22-43` propagates these properties. No missing-propagation claim. |
-| Disabled CheckButton checked texture | Rejected: specialized checked-texture selection plus generic enable/disable refresh exist. |
+| Generic disabled CheckButton checked texture absence | Rejected for configured disabled slots: selection and enable/disable refresh exist. [C12](cataclysm-15595.md#c12--disabled-checked-button-hides-its-only-checked-texture) isolates the distinct missing-disabled-slot case. |
 | Generic UTF-8 cursor handling, ordinary focus transfer, animation pause/explicit stop | Already modeled with existing tests/contracts; no new omission established. |
 | Animation zero-duration progress and multi-loop callback cadence | Lead only. Source raw division versus simulator guarded progress does not establish a target-client defect; keep existing contract pending stronger evidence. |
 | General hit testing, StatusBar, ScrollFrame, anchor math | Bounded inspection did not isolate a concrete discrepancy; not a parity verdict. |
