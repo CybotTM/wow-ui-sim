@@ -9,30 +9,30 @@ Tests read unchanged profile-cache bytes and require their pinned SHA-256 values
 
 ### GameTime
 
-- [ ] Publish `PI == math.pi` before the original `GameTime.lua` captures it.
-- [ ] Complete that chunk and format explicit 13:07 and midnight inputs using
+- [x] Publish `PI == math.pi` before the original `GameTime.lua` captures it.
+- [x] Complete that chunk and format explicit 13:07 and midnight inputs using
   deterministic localized strings and both military-time CVar settings.
 
 ### Floating chat XML
 
-- [ ] Parse the entire original `FloatingChatFrame.xml`, including its observed
+- [x] Parse the entire original `FloatingChatFrame.xml`, including its observed
   `Fontstring` spelling, while preserving canonical `FontString` support.
-- [ ] Construct the original `FriendsMicroButton` subtree unchanged: its count
+- [x] Construct the original `FriendsMicroButton` subtree unchanged: its count
   region starts at `0`, then its own OnLoad displays `5` for two BNet and three
   WoW online friends. The named region remains a child FontString.
 
 ### Options frame construction
 
-- [ ] Load original `OptionsFrameTemplates.xml`, then `AudioOptionsFrame.xml`
+- [x] Load original `OptionsFrameTemplates.xml`, then `AudioOptionsFrame.xml`
   through normal XML/addon loading; initialize dynamically created category
   buttons even while inherited static child OnLoads are executing. The hidden
   XML root must not force these public dynamic buttons to be initially hidden.
-- [ ] Each original parent/category/button initializer executes once, with named
+- [x] Each original parent/category/button initializer executes once, with named
   ButtonText and toggle regions wired before use. The outer XML lifecycle must
   not suppress unrelated synchronous public CreateFrame calls.
-- [ ] The same original AudioOptionsFrame subtree works with a loader-supplied
+- [x] The same original AudioOptionsFrame subtree works with a loader-supplied
   explicit UIParent, covering direct construction as well as generated Lua.
-- [ ] Original category addition displays `Sound` at left offset 8 and its expanded
+- [x] Original category addition displays `Sound` at left offset 8 and its expanded
   child `Effects` at offset 16 without captured callback or loader errors.
 
 ## How it works
@@ -50,7 +50,8 @@ Tests read unchanged profile-cache bytes and require their pinned SHA-256 values
 - `src/loader/xml_frame/setup.rs`: XML-owned creation flags scoped/restored on both paths.
 - `src/lua_api/globals/create_frame/mod.rs`: consumes those flags before template
   callbacks; passes the root lifecycle decision explicitly to template application.
-- Producer patch is staged, not compiled or executed; all acceptance boxes stay open.
+- Wrath-profile execution on 2026-10-16: four behavioral RED failures, then four
+  passing original-consumer tests; shared-profile execution remains unverified.
 
 ## Tests asserting this spec
 
@@ -60,9 +61,11 @@ All are gated by `client-wrath`; no new value conversion implementation is neede
 
 ## Known gaps (current cycle)
 
-- [ ] Compile and execute tests-only RED, then producer GREEN on the pinned Wrath
-  profile. Current handoff is source-only and explicitly prohibits builds.
-- [ ] Capture startup errors separately before claiming any downstream reduction.
+- [x] Compile and execute tests-only RED, then producer GREEN on the pinned Wrath
+  profile. All four panel tests pass; five Wrath cursor and three XML cursor
+  preservation tests also pass.
+- [x] Capture startup separately: combined panel/unitpopup fixes change 44 unique /
+  55 occurrences to 37 / 51. Startup still fails; this is not isolated causal proof.
 
 ## Out of scope
 
