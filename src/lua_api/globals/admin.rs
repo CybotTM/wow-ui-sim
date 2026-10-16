@@ -323,6 +323,10 @@ fn register_inventory_and_mail(b: TableBuilder) -> LuaResult<TableBuilder> {
     let b = b
         .set_function("SetActionSlot", set_action_slot)?
         .set_function(
+            "SetActionRepeatActive",
+            crate::c_api::action_repeat::set_active_admin,
+        )?
+        .set_function(
             "SetMacroActionSlot",
             crate::c_api::action_macros::set_macro_action_slot,
         )?

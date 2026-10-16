@@ -178,6 +178,8 @@ pub struct SimState {
     pub weekly_reward_progress:
         HashMap<i32, Vec<crate::c_api::c_weekly_rewards::ActivityTierProgress>>,
     pub action_bars: HashMap<u32, u32>,
+    /// Explicit slot-owned input; no cast/attack/spell-lifetime inference.
+    pub(crate) action_repeat_active_slots: HashSet<u32>,
     /// INFERRED host-declared resolved spell IDs on special bars; empty by default.
     /// Independent of direct assignments and bar visibility.
     #[cfg(feature = "retail-12-0-5")]
