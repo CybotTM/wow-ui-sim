@@ -10,7 +10,19 @@ Source-only research, 2026-10-15. **46 documented source-comparison entries—no
 - [Security assessment](security.md): bounded static inspection, no confirmed implant found—not a declaration that execution is safe.
 - [XML Include-depth question](xml-and-dispatch.md#include-depth--unmeasured-boundary-not-a-demonstrated-mismatch): no explicit guard in the traced paths, but no numeric maximum or native depth test established.
 
-## Current comparison coverage
+## Exchanged implementation checklist
+
+**Cross-host reported evidence, not independently inspected here.** The agent-server session `40fcbe4f-2021-4001-938e-4a570838fa4a` supplied the revision-scoped results below. Checked boxes mean reported simulator implementation/proof for the named scope, not local verification, native parity or current-tip acceptance. This local checkout remains the historical audit baseline; no remote implementation was imported. User approval remains required before implementing candidates from this exchange.
+
+- [x] **C7 button-font precedence — reported completed simulator behavior.** Retail `3a5301718`: corrected button module **12 PASS** (three C7 cases plus nine controls). Wrath `0184775b5`: bare C7 **3 PASS**. Reported coverage includes disabled precedence, highlight while pushed, independent pushed offset and retained text-child identity. Native parity, live shared-font mutation and unspecified nil-slot policy remain unproved.
+- [x] **C2/C10 old EditBox gap report — superseded by reported shaped/deferred implementation.** Retail `3a5301718`: cursor/layout/lifecycle **14 PASS**. Retail `03769bb00`: XML **3 PASS**, scroll **40 PASS**, genuine cached scrolling consumer **exit 0**. Wrath `0184775b5`: keyboard **28 PASS**, EditBox **15 PASS**. Counts belong to their reported suites/revisions; do not sum them as distinct capabilities or infer every historical C10 corner case was tested.
+- [x] **Missing FontString spacing API lead — rejected, not a defect or pending implementation.** Our independent static shared-registration/index trace established that the methods are retained on FontStrings; see the [bounded non-findings](cataclysm-15595.md#bounded-non-findings-and-remaining-leads). This rejects an absence claim, not all spacing/layout/native discrepancies.
+- [ ] **Genuine Wrath scrolling consumer — open.** Peer reports the guard remains; bare Wrath unit-family passes do not close that integration boundary. No reported proof here authorizes guard removal.
+- [ ] **C11 message access filter, C12 checked-disabled texture, T7 justification validation and T8 color conversion — unimplemented/unverified in this exchange.** No additional implementation proof supplied. Peer read-only message triage reports optional `GetNumMessages` arguments are ignored and `Message` has `message_id`, not independent access-ID state; target-profile insertion/filter contract remains unestablished. Other candidate current-tip behavior was not established by this exchange.
+
+The historical finding prose and [coverage ledger](coverage.md) retain their original pinned source-comparison classifications. They are not a current implementation checklist; reported fixes do not retroactively turn old static differences into matches. The remaining native/profile limits and open consumer/candidate items above stay open.
+
+## Historical comparison coverage
 
 | Status | Registration rows |
 |---|---:|

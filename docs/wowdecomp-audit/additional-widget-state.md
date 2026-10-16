@@ -4,6 +4,8 @@ Static source comparison at the [expanded-pass revisions](additional-rendering-a
 
 ## C7 — Button highlight/disabled fonts do not project into active text
 
+**Historical baseline finding; reported implementation completed.** See the [exchange checklist](README.md#exchanged-implementation-checklist) for bounded Retail/Wrath results and unresolved native/live-font/nil-slot limits. The simulator trace below describes the audit baseline, not those later revisions.
+
 **External:** `Engine/Source/Frame/CSimpleButton_Scripts.cpp:175-198,251-274` updates state after assigning font objects. `CSimpleButton.cpp:522-549`, `UpdateTextState`, offset `0x0096F4A0`, chooses disabled/highlight/normal FontObject based on actual state and highlight layer, including pushed text offset. `LockHighlight` at `:64-69` also invokes text-state refresh.
 
 **Simulator:** `src/lua_api/frame/methods/button_anchor_hierarchy/buttons.rs:379-394` applies a normal-font snapshot, but `:418-440` stores highlight/disabled references only in `__button_font_objects`. Source-wide searches find those slots only in their setter/getter paths. `src/lua_api/frame/methods/misc/highlight.rs:90-102` changes highlight lock/texture visibility without selecting the corresponding text FontObject. Correct highlight texture visibility does not establish correct text style.

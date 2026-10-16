@@ -2,6 +2,8 @@
 
 **46 source-comparison entries, not an exhaustive gap count or 46 native-confirmed bugs.** Initial nine plus 32 expanded entries and five [15595 follow-ups](cataclysm-15595.md). Each linked detail gives reconstructed/source and simulator evidence, a discriminating fixture, proposed behavior changes, regression scope and profile limits.
 
+Current disposition of exchanged items: [implementation checklist and revision-scoped cross-host reports](README.md#exchanged-implementation-checklist). C7 is reported completed; old C2/C10 gap reports are superseded within the reported scope; missing spacing API is rejected. Genuine Wrath consumer and C11/C12/T7/T8 remain open. Catalogue entries below preserve historical comparisons, not current-tip defect claims.
+
 | Kind | Interpretation |
 |---|---|
 | Capability | A compared state/dispatch/render consumer is absent or incomplete. Does not establish required availability on every modern profile. |

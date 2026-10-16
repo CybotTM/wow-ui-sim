@@ -18,6 +18,8 @@
 
 ## C2 — EditBox accepts `OnCursorChanged` but does not produce it
 
+**Historical baseline gap report superseded within the reported implementation scope.** See the [exchange checklist](README.md#exchanged-implementation-checklist) for cross-host Retail/Wrath results. Genuine Wrath scrolling-consumer proof remains open and its guard retained; the baseline trace below is not a current-tip missing-producer claim.
+
 **External evidence:** `Engine/Source/Frame/CSimpleEditBox.cpp:288-299`, `RunOnCursorChangedScript`, offset `0x009627E0`, passes four geometry numbers; `:1630-1700`, `UpdateVisibleCursor`, offset `0x00964A90`, calculates cursor geometry and calls that producer. `SetCursorPosition` at `:818-826`, offset `0x00963350`, dirties cursor layout rather than synthesizing an immediate geometry callback.
 
 **Simulator difference:** `src/lua_api/frame/methods/widgets/editbox.rs:151-160` changes cursor position without producing this event. A source-wide search found `OnCursorChanged` in script registration/validation (`src/event/mod.rs:142,238`; `src/lua_api/frame/methods/text_attribute_event/events.rs:409`) but no actual EditBox dispatch producer. `src/wrath/post_load.lua:6-27` already guards `ScrollingEdit_OnUpdate` when cursor geometry fields are absent; that workaround is downstream evidence, not a substitute for the missing producer.

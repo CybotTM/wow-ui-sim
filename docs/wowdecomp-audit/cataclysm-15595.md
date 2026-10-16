@@ -14,6 +14,8 @@ Static comparison only; no reconstruction code was executed, configured, built o
 
 ## C10 — EditBox text notifications cross different mutation/update boundaries
 
+**Historical baseline gap report superseded within the reported shaped/deferred implementation scope.** The [exchange checklist](README.md#exchanged-implementation-checklist) owns cross-host Retail/Wrath results and the still-open genuine Wrath consumer. Later implementation and exact mixed-origin/reentrant corner-case coverage were not independently inspected here; the trace/fixtures below retain their original baseline attribution.
+
 **Kind:** existing contract conflict for changed setters/keyboard edits; missing notification capability for public `Insert`. The difference is concrete in source, but historical evidence alone does not authorize replacing the [current EditBox contract](../specs/editbox-text-position-selection.md).
 
 **Reconstructed producer:** 15595 `Engine/Source/Frame/CSimpleEditBox_Scripts.cpp:273–297` routes Lua `Insert` to `Insert(...,1,0,0)` and `SetText` to the setter. `CSimpleEditBox.cpp:1963–2081`, offset `0x005198A0/0x140165140`, mutates text/cursor metadata, marks text/cursor dirty, and invokes `OnChar` synchronously when `runScripts` is enabled. `:2371–2387`, offset `0x0051A370/0x140166090`, makes changed `SetText` call `Insert(...,0,0,1)`, then synchronous `OnTextSet`; same-value text returns early. Accepted characters use insertion (`:2223–2235`); deletion also marks text dirty (`DeleteSubstring`, `:593–684`).
@@ -43,6 +45,8 @@ Insertion sets `0x8` for `script=0` and clears it for `script=1` (`15595 :2014�
 **Required rework if adopted:** unify accepted edit paths around actual pending text/cursor state and source-matched flush boundaries; keep character and setter callbacks distinct. Do not synthesize cursor geometry inside setters merely to preserve current changed-callback timing. Existing user-selected length-limit policy and modern-profile contracts remain separate decisions. Neither reconstruction's EditBox table registers `SetFormattedText`; simulator exposes its shared setter path, so its native availability/timing is not established by this comparison.
 
 ## C11 — ScrollingMessageFrame loses access-ID filtered counts
+
+**Open in the [exchange checklist](README.md#exchanged-implementation-checklist):** peer read-only triage corroborates the argument/model gap, not implementation or a supported-profile contract. C12/T7/T8 below likewise have no implementation proof from this exchange. Their simulator traces remain baseline-scoped.
 
 **Kind:** capability. 15595 `Engine/Source/Frame/CSimpleMessageScrollFrame_Scripts.cpp:381–386` forwards the optional access ID to `GetNumMessages`; core `CSimpleMessageScrollFrame.cpp:131–149`, offset `0x0051D470/0x140169D80`, returns total count for zero, otherwise scans retained entries for matching `m_accessID`. Older wrappers/core are `CSimpleMessageScrollFrame_Scripts.cpp:397–403` and `CSimpleMessageScrollFrame.cpp:148–166`. These are counts of retained messages, not just visible lines.
 
