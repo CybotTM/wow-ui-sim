@@ -64,7 +64,7 @@ Batch11 at `d8a93bec37dc09980e41dd37b63d0dd26be88668` records **24 PASS / 0 FAIL
 ## Known gaps (current cycle)
 
 - [x] Independently confirmed bounded batch11 policy 8/8 and charge/ignoreGCD controls 16/16, with artifact binding; startup `[]` remains historical/hash-bound only.
-- [ ] Secret spell identifier `AllowedWhenTainted` remains unresolved and untested here; guarded generic unwrap does not solve it.
+- [ ] Secret spell identifier `AllowedWhenTainted` remains unresolved. Authored `tainted_secret_spell_selector_resolves_configured_opaque_charge_table` uses the existing simulator row19750 (current1/max3/start12/duration40/rate2), explicit alias `fixture heal` and an actual host-secret numeric wrapper. A tainted call must return one configured table with public max and four opaque restricted fields, preserving caller taint/input secrecy; a later unrestricted public-alias query and stored-state control remain unchanged. This is an explicit simulator mapping, not native identifier-domain validation or parity. Fixture uncompiled/unexecuted; no producer change. Guarded generic unwrap is not a solution, and the pinned VM's numeric opaque-host operation remains under investigation.
 - [x] Bounded independent audit and revision-scoped default fmt/check gates above; not PTR/older-profile, native or whole-page acceptance.
 
 ## 12.0.1 extract follow-up

@@ -254,3 +254,99 @@ fn secret_action_and_book_selectors_require_untainted_callers_separately_from_ou
     )
     .expect("AllowedWhenUntainted selector matrix, not secret-output policy");
 }
+
+#[test]
+fn tainted_secret_spell_selector_resolves_configured_opaque_charge_table() {
+    let env = seed_charge_fixture(true);
+    env.state()
+        .borrow_mut()
+        .spell_id_aliases
+        .insert("fixture heal".into(), 19750);
+    let original = env.state().borrow().spell_charges.get(&19750).copied();
+    assert_eq!(
+        original,
+        Some(SpellChargeState {
+            current_charges: 1,
+            max_charges: 3,
+            recharge_start: 12.0,
+            recharge_duration: 40.0,
+            charge_mod_rate: 2.0,
+        })
+    );
+    {
+        let loader = env.loader_env();
+        let mut lua = loader.rilua_mut();
+        let secret = rilua::table_security::wrap_host_secret_number(lua.state_mut(), 19750.0);
+        lua.state_mut().push(secret);
+        let inserted = lua.set_global_val("SecretChargeSpell", secret);
+        lua.state_mut().pop();
+        inserted.expect("install rooted host-secret charge spell identifier");
+    }
+    env.exec(
+        r#"
+        local function capture(...)
+            return select('#', ...), ...
+        end
+        local function addon()
+            local before = debug.getstacktaint()
+            assert(before == 'SecretChargeSelectorProbe')
+            local public = C_Spell.GetSpellCharges('fixture heal')
+            assert(type(public) == 'table' and public.maxCharges == 3,
+                'public alias resolves configured charge row before secret call')
+            assert(debug.getstacktaint() == before)
+            assert(issecretvalue(SecretChargeSpell) and not canaccessvalue(SecretChargeSpell))
+            local count, info = capture(C_Spell.GetSpellCharges(SecretChargeSpell))
+            assert(count == 1, 'secret spell selector returns exactly one value')
+            assert(type(info) == 'table', 'secret spell selector resolves configured charge table')
+            assert(not issecretvalue(info) and canaccessvalue(info))
+            assert(not issecretvalue(info.maxCharges) and canaccessvalue(info.maxCharges))
+            assert(info.maxCharges == 3)
+            for _, field in ipairs({'currentCharges', 'cooldownStartTime',
+                'cooldownDuration', 'chargeModRate'}) do
+                local value = info[field]
+                assert(issecretvalue(value) and not canaccessvalue(value), field)
+                assert(not pcall(secretunwrap, value), field .. ' unwrap')
+                assert(not pcall(function() return value + 1 end), field .. ' arithmetic')
+            end
+            assert(debug.getstacktaint() == before)
+            assert(issecretvalue(SecretChargeSpell) and not canaccessvalue(SecretChargeSpell))
+            assert(not pcall(secretunwrap, SecretChargeSpell), 'input unwrap')
+            assert(not pcall(function() return SecretChargeSpell + 1 end), 'input arithmetic')
+            assert(debug.getstacktaint() == before)
+        end
+        debug.setobjecttaint(addon, 'SecretChargeSelectorProbe')
+        addon()
+        "#,
+    )
+    .expect("AllowedWhenTainted secret spell selector resolves without declassification");
+    assert_eq!(
+        env.state().borrow().spell_charges.get(&19750).copied(),
+        original
+    );
+    env.state().borrow_mut().cooldowns_restricted = false;
+    env.exec(
+        r#"
+        local function addon()
+            local before = debug.getstacktaint()
+            assert(before == 'SecretChargeSelectorProbe')
+            local info = C_Spell.GetSpellCharges('fixture heal')
+            assert(type(info) == 'table' and not issecretvalue(info))
+            assert(not issecretvalue(info.maxCharges) and info.maxCharges == 3)
+            for field, expected in pairs({currentCharges = 1, cooldownStartTime = 12,
+                cooldownDuration = 40, chargeModRate = 2}) do
+                assert(not issecretvalue(info[field]) and canaccessvalue(info[field]), field)
+                assert(info[field] == expected, field)
+            end
+            assert(issecretvalue(SecretChargeSpell) and not canaccessvalue(SecretChargeSpell))
+            assert(debug.getstacktaint() == before)
+        end
+        debug.setobjecttaint(addon, 'SecretChargeSelectorProbe')
+        addon()
+        "#,
+    )
+    .expect("unrestricted public alias preserves configured ordinary charge fields");
+    assert_eq!(
+        env.state().borrow().spell_charges.get(&19750).copied(),
+        original
+    );
+}
