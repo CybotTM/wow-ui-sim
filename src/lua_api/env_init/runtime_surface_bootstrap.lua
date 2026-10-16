@@ -125,7 +125,8 @@ local function __wow_attach_namespace_name(namespace, name)
   return namespace
 end
 
-local function __wow_namespace(defaults)
+-- Shared by explicit namespace initializers in the later workaround bootstrap.
+function __wow_namespace(defaults)
   return __wow_attach_namespace_name(defaults or {})
 end
 

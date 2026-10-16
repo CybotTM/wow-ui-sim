@@ -33,7 +33,8 @@ initial loot method. See [XML templates](../xml-template-system.md) and
 - `src/lua_api/globals/create_frame/template_chain/builder_function_family/global_args.rs`:
   invocation-time single-global-argument handler.
 - `src/lua_api/env_init/runtime_surface_bootstrap.lua`: removes prefix-only synthesis;
-  no new compatibility path or namespace inventory is invented.
+  shares the existing internal factory with explicit later namespace initializers.
+  No new compatibility path or namespace inventory is invented.
 
 ## Tests asserting this spec
 
