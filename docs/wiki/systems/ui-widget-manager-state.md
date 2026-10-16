@@ -157,6 +157,12 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 [Owning selector receipt](../../specs/ui-widget-item-display.md#historical-retail-selector-red--2026-10-16) owns the independently reconciled bounded Retail RED, separate test/library attribution and reached/unreached assertions. Producer, consumer and broader acceptance remain open.
 
+### ItemDisplay passive supplied-state checkpoint — 2026-10-16
+
+[Owning contract](../../specs/ui-widget-item-display.md#implementation-inventory) inventories source `417f1badd`: complete supplied records, initially empty environment-owned storage, type27 typed-feed storage and public Rust exports. No getter or Lua projection was added. The owner maintains the field schema and unchecked requirements.
+
+[Populated fixtures](../../specs/ui-widget-item-display.md#tests-asserting-this-spec) are uncompiled/unexecuted at this checkpoint. Historical selector RED remains separate; no populated, cached-consumer, native, asynchronous, asset/pixel or broader acceptance follows.
+
 ## Sources
 
 - [IconTextAndCurrencies contract](../../specs/ui-widget-icon-text-and-currencies.md) — supplied-record contract and owning evidence/gate reconciliation.

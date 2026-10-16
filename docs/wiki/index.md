@@ -1,3 +1,7 @@
+## [2026-10-16] documentation | ItemDisplay passive supplied-state checkpoint
+
+[Manager checkpoint](systems/ui-widget-manager-state.md#itemdisplay-passive-supplied-state-checkpoint--2026-10-16) links passive records/storage/feed/exports and the owning unverified contract. Historical selector RED and unexecuted populated fixtures remain separate.
+
 ## [2026-10-16] evidence | ItemDisplay historical Retail selector RED
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#itemdisplay-historical-selector-red--2026-10-16) links independently reconciled historical RED and reached/unreached boundaries. Test/library revisions stay separate; broader acceptance remains open.
