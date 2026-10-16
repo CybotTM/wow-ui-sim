@@ -109,7 +109,6 @@ pub struct CachedFrameLayout {
 #[derive(Default)]
 pub struct LayoutCache {
     resolved: FxHashMap<u64, CachedFrameLayout>,
-    visiting: FxHashSet<u64>,
     /// Frames whose stored rect was already rewritten during this pass.
     recomputed: FxHashSet<u64>,
 }
@@ -125,7 +124,6 @@ impl LayoutCache {
 
     pub fn remove(&mut self, id: &u64) {
         self.resolved.remove(id);
-        self.visiting.remove(id);
     }
 
     /// Claim `id` for a stored-rect rewrite in this pass. Rects depend only on
@@ -133,14 +131,6 @@ impl LayoutCache {
     /// the same pass would produce the same result.
     pub(crate) fn claim_recompute(&mut self, id: u64) -> bool {
         self.recomputed.insert(id)
-    }
-
-    fn begin_resolve(&mut self, id: u64) -> bool {
-        self.visiting.insert(id)
-    }
-
-    fn finish_resolve(&mut self, id: u64) {
-        self.visiting.remove(&id);
     }
 }
 
@@ -426,10 +416,8 @@ pub fn compute_frame_rect_cached(
     if let Some(cached) = cache.get(id) {
         return cached;
     }
-    if !cache.begin_resolve(id) {
-        return cyclic_frame_layout();
-    }
-
+    // The cached sentinel also marks in-progress frames: recursive lookups
+    // return it above, so no separate visiting set is needed.
     // Break parent/anchor cycles. Real WoW tolerates invalid layout graphs
     // without recursing forever; the unresolved edge falls back to zero rect
     // for the recursive leg, then the outer frame result overwrites it.
@@ -442,7 +430,6 @@ pub fn compute_frame_rect_cached(
         })
         .unwrap_or_else(missing_frame_layout);
 
-    cache.finish_resolve(id);
     cache_layout_result(cache, id, result)
 }
 
@@ -491,10 +478,6 @@ fn missing_frame_layout() -> CachedFrameLayout {
         rect: LayoutRect::default(),
         eff_scale: 1.0,
     }
-}
-
-fn cyclic_frame_layout() -> CachedFrameLayout {
-    missing_frame_layout()
 }
 
 fn root_frame_layout(
