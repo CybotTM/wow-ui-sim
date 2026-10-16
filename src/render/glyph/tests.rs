@@ -91,6 +91,7 @@ fn zero_font_size_emits_no_text_quads() {
         0.0,
         false,
         None,
+        None,
     );
 
     assert_eq!(batch.quad_count(), 0);

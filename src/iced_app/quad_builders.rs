@@ -171,6 +171,13 @@ fn effective_word_wrap(f: &crate::widget::Frame, requested_word_wrap: bool) -> b
     requested_word_wrap && !f.width_is_text_auto
 }
 
+fn fontstring_alpha_gradient(f: &crate::widget::Frame) -> Option<crate::widget::AlphaGradient> {
+    if f.widget_type != WidgetType::FontString {
+        return None;
+    }
+    f.alpha_gradients.get(&0).copied()
+}
+
 /// Emit text quads for a widget, extracting color/shadow from the frame.
 pub(super) fn emit_widget_text_quads(
     text_renderer: &mut WidgetTextRenderer<'_>,
@@ -207,6 +214,7 @@ pub(super) fn emit_widget_text_quads(
         f.text_line_spacing * f.effective_scale,
         f.font_string_smooth_scaling,
         f.text_stripped.as_deref(),
+        fontstring_alpha_gradient(f),
     );
     clip_recent_quads(text_renderer.batch, vert_before, clip_bounds);
 }
@@ -226,6 +234,7 @@ fn emit_widget_text_segment_quads(
     let mut x = layout.bounds.x;
     let mut y = layout.bounds.y;
     let right = layout.bounds.x + layout.bounds.width;
+    let mut gradient = fontstring_alpha_gradient(f);
 
     for segment in &f.text_segments {
         let color = color_with_alpha(&segment.color, layout.alpha);
@@ -239,7 +248,19 @@ fn emit_widget_text_segment_quads(
                 y += line_height + f.text_line_spacing * f.effective_scale;
             }
             let bounds = Rectangle::new(Point::new(x, y), Size::new(width.max(1.0), line_height));
-            emit_text_segment_chunk(text_renderer, f, chunk, bounds, font_size, color, shadow);
+            emit_text_segment_chunk(
+                text_renderer,
+                f,
+                chunk,
+                bounds,
+                font_size,
+                color,
+                shadow,
+                gradient,
+            );
+            if let Some(gradient) = gradient.as_mut() {
+                gradient.start -= crate::render::strip_wow_markup(chunk).chars().count() as f32;
+            }
             x += width;
         }
     }
@@ -263,6 +284,7 @@ fn emit_text_segment_chunk(
     font_size: f32,
     color: [f32; 4],
     shadow: Option<[f32; 4]>,
+    alpha_gradient: Option<crate::widget::AlphaGradient>,
 ) {
     emit_text_quads(
         text_renderer.batch,
@@ -284,6 +306,7 @@ fn emit_text_segment_chunk(
         0.0,
         f.font_string_smooth_scaling,
         None,
+        alpha_gradient,
     );
 }
 

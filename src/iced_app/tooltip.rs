@@ -817,6 +817,7 @@ fn emit_tooltip_text_run(
         0.0,
         false,
         None,
+        None,
     );
 }
 

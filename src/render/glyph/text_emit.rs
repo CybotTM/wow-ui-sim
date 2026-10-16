@@ -37,6 +37,7 @@ pub fn emit_text_quads(
     spacing: f32,
     smooth_scaling: bool,
     pre_stripped: Option<&str>,
+    alpha_gradient: Option<crate::widget::AlphaGradient>,
 ) {
     if !can_emit_text(text, bounds, font_size) {
         return;
@@ -67,6 +68,7 @@ pub fn emit_text_quads(
         y_offset: vertical_text_offset(justify_v, bounds.height, layout.total_height),
         justify_h,
         glyph_tex_index,
+        alpha_gradient,
     };
 
     emit_outline_text_pass(batch, glyph_atlas, font_system, &pass, outline, color[3]);
@@ -116,6 +118,7 @@ pub(crate) fn emit_prepared_buffer_text_quads(
         y_offset: vertical_text_offset(request.justify_v, request.bounds.height, total_height),
         justify_h: request.justify_h,
         glyph_tex_index: request.glyph_tex_index,
+        alpha_gradient: None,
     };
     paint_prepared_text(batch, glyph_atlas, font_system, &pass, &request);
 }
@@ -259,6 +262,7 @@ struct TextPassContext<'a> {
     y_offset: f32,
     justify_h: TextJustify,
     glyph_tex_index: i32,
+    alpha_gradient: Option<crate::widget::AlphaGradient>,
 }
 
 fn emit_outline_text_pass(
@@ -352,6 +356,7 @@ fn emit_text_pass(
             glyph_color: color,
             offset,
             glyph_tex_index: pass.glyph_tex_index,
+            alpha_gradient: pass.alpha_gradient,
         },
     );
 }

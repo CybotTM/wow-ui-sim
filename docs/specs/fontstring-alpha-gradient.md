@@ -1,5 +1,7 @@
 # FontString alpha gradient (T4, proposed simulator policy)
 
+Integration checkpoint (2026-10-16): T4 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+
 FontString text reveal and its completion boolean. Producer: `src/lua_api/frame/methods/misc/alpha_gradient.rs`; rendering: `src/render/glyph.rs`. This staged contract requires policy approval and executed behavioral RED before producer integration; it does not establish native parity. See [rendering](../rendering-pipeline.md).
 
 ## What it must do

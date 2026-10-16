@@ -69,6 +69,7 @@ struct CachedGlyph {
     cache_key: CacheKey,
     x: i32,
     y: i32,
+    scalar_position: usize,
 }
 
 /// Extracted layout run data for cache replay.
@@ -485,8 +486,27 @@ struct TextShapeRequest<'a> {
     smooth_scaling: bool,
 }
 
+/// Map cluster byte starts to scalar progress once per hard line, before wrapping.
+fn scalar_positions_by_line(buffer: &Buffer) -> Vec<Vec<usize>> {
+    buffer
+        .lines
+        .iter()
+        .scan(0, |position, line| {
+            let mut positions = vec![0; line.text().len() + 1];
+            for (byte, _) in line.text().char_indices() {
+                positions[byte] = *position;
+                *position += 1;
+            }
+            positions[line.text().len()] = *position;
+            *position += line.ending().as_str().chars().count();
+            Some(positions)
+        })
+        .collect()
+}
+
 /// Extract glyph positions from layout runs into cacheable data.
 fn extract_layout_runs(buffer: &Buffer, max_lines: u32, spacing: f32) -> Vec<CachedLayoutRun> {
+    let scalar_positions = scalar_positions_by_line(buffer);
     let runs: Vec<_> = buffer.layout_runs().collect();
     let runs_slice = if max_lines > 0 {
         &runs[..runs.len().min(max_lines as usize)]
@@ -506,6 +526,7 @@ fn extract_layout_runs(buffer: &Buffer, max_lines: u32, spacing: f32) -> Vec<Cac
                         cache_key: pg.cache_key,
                         x: pg.x,
                         y: pg.y,
+                        scalar_position: scalar_positions[run.line_i][g.start],
                     }
                 })
                 .collect();
@@ -526,6 +547,7 @@ pub(super) struct GlyphCacheEmitRequest<'a> {
     glyph_color: [f32; 4],
     offset: (f32, f32),
     glyph_tex_index: i32,
+    alpha_gradient: Option<crate::widget::AlphaGradient>,
 }
 
 /// Emit glyph quads from cached layout runs with a given color and offset.
@@ -576,10 +598,14 @@ fn emit_cached_glyph(
         return;
     };
 
+    let mut color = request.glyph_color;
+    if let Some(gradient) = request.alpha_gradient {
+        color[3] *= gradient.alpha_at(glyph.scalar_position);
+    }
     batch.push_quad(
         cached_glyph_bounds(request, run, x_offset, glyph, entry),
         cached_glyph_uv(entry),
-        request.glyph_color,
+        color,
         request.glyph_tex_index,
         BlendMode::Alpha,
     );

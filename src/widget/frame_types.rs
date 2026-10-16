@@ -61,6 +61,17 @@ pub struct AlphaGradient {
     pub length: f32,
 }
 
+impl AlphaGradient {
+    /// Simulator reveal policy: scalar positions in markup-stripped text.
+    pub fn alpha_at(self, position: usize) -> f32 {
+        let position = position as f32;
+        if self.length <= 0.0 {
+            return if position < self.start { 1.0 } else { 0.0 };
+        }
+        ((self.start + self.length - position) / self.length).clamp(0.0, 1.0)
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct MinimapBlobLayerStyle {
     pub texture: Option<String>,

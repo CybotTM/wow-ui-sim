@@ -172,6 +172,7 @@ fn render_message(
         0.0,
         false,
         None, // message frames don't pre-strip
+        None, // FontString-only alpha gradient
     );
 }
 

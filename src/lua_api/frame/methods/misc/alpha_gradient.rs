@@ -56,7 +56,12 @@ pub fn set_alpha_gradient(state: &mut LuaState) -> LuaResult<u32> {
     let start = read_gradient_start(state);
     let length = read_gradient_length(state);
     let mut sim = borrow_state_mut(state)?;
+    let mut continuing = true;
     if let Some(frame) = sim.widgets.get_mut(id) {
+        if frame.widget_type == crate::widget::WidgetType::FontString {
+            let text = crate::render::strip_wow_markup(frame.text.as_deref().unwrap_or(""));
+            continuing = start < text.chars().count() as f32;
+        }
         frame.alpha_gradients.insert(
             0,
             crate::widget::AlphaGradient {
@@ -66,7 +71,7 @@ pub fn set_alpha_gradient(state: &mut LuaState) -> LuaResult<u32> {
         );
     }
     drop(sim);
-    state.push(Val::Bool(true));
+    state.push(Val::Bool(continuing));
     Ok(1)
 }
 
