@@ -51,7 +51,7 @@ Producer `ccd9e2d01` changes `pending_quest_offer` to own a full existing `Quest
 
 ### Original reward currency rows
 
-[Owning contract](../../specs/quest-reward-currency-panel.md) records the new Retail/Forever `C_QuestInfoSystem.GetQuestRewardCurrencies` wrapper and shared C_QuestLog serializer over existing `currency_rewards`. Original empty-panel control PASS and absent populated-row RED precede the bridge; GREEN pending. Nullable input/selection policy and incomplete metadata scope are explicit; no new reward store or acquisition model.
+[Owning contract](../../specs/quest-reward-currency-panel.md) records the new Retail/Forever `C_QuestInfoSystem.GetQuestRewardCurrencies` wrapper and shared C_QuestLog serializer over existing `currency_rewards`. Original empty-panel control PASS and absent populated-row RED precede the bridge. Saved `24a076873` plus corrected exact-display oracle `4f601b63e` passes the populated row/count/context assertions and separate clean Retail startup; owning contract retains the initial oracle correction. Nullable input/selection policy and incomplete metadata scope are explicit; no new reward store or acquisition model.
 
 ### Simulator selected quest turn-in
 

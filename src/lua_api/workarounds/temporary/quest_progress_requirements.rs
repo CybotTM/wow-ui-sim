@@ -33,6 +33,13 @@ fn empty_requirement_count(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn absent_turn_in_portrait(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
+fn absent_turn_in_portrait(state: &mut LuaState) -> LuaResult<u32> {
+    // Cached Retail Mainline/QuestFrame.lua:129-136 tests displayID ~= 0;
+    // :523 compares it numerically. Text/name are strings (:459, :499-504).
+    // Zero takes the original hide/detach branch (:535-540), not a fake portrait.
+    state.push(Val::Num(0.0));
+    let empty = create_string_static(state, "");
+    state.push(empty);
+    state.push(empty);
+    Ok(3)
 }

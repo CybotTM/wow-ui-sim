@@ -28,12 +28,20 @@ uses QL-1's Retail/Forever gate.
 `tests/quest_reward_currency_panel.rs` invokes original `QuestInfo_ShowRewards` with
 explicit existing reward-frame context. Empty-state control checks a hidden rewards
 frame. A supplied1166/5 record must produce the original Name/Count and currencyInfo,
-then both namespace outputs and nullable selection behavior are checked.
+then both namespace outputs and nullable selection behavior are checked. Currency1166
+is displayed as the modeled `Timewarped Badge` by original CurrencyContainerUtil
+(`Blizzard_FrameXMLUtil/CurrencyContainer.lua:3-9`), while row.currencyInfo retains
+the explicitly supplied name; both are asserted, not merely a nonempty label.
 
 Test `6d8417000` at saved `9d1430bf3` produced genuine Retail RED: original panel
 had no supplied currency row (None versus supplied name), while the empty-panel
-control passed. Later row/count/context assertions were unreached. GREEN and separate
-Retail startup remain pending. Automatic panel scheduling, native/schema-complete
+control passed. Later row/count/context assertions were unreached. At saved
+`24a076873` the row appeared; the first oracle incorrectly expected its raw name
+instead of the native container display. Revised test `4f601b63e` passed the exact
+`Timewarped Badge` label, count5, retained supplied metadata, both namespace
+projections and nullable-context/no-context assertions (3.07s). Empty-panel control
+and separate same-source Retail startup `[]` also passed. This is bounded supplied-
+record GREEN, not native/schema-complete reward parity. Automatic panel scheduling, native/schema-complete
 reward metadata, reward spells and grants are excluded.
 
 See [QL-2](quest-readiness-dialog.md) and [temporary requirements inputs](quest-progress-requirements-empty.md).

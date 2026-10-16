@@ -4,8 +4,8 @@
 
 Retail/Forever original Mainline QuestFrame calls five unmodeled native globals:
 `GetProgressText` returns `""`; `GetQuestMoneyToGet`, `GetNumQuestItems`,
-`GetNumQuestCurrencies` each return numeric0; `GetQuestPortraitTurnIn` returns no
-values. No required rows, costs, dialogue or portrait IDs are invented. These are
+`GetNumQuestCurrencies` each return numeric0; `GetQuestPortraitTurnIn` returns
+`0, "", ""` (no display ID, empty portrait text/name). No required rows, costs, dialogue or portrait IDs are invented. These are
 explicit temporary compatibility gaps, not supplied-state implementations.
 
 No NPC progress-dialogue, required-item/currency/cost, or turn-in portrait-input
@@ -22,15 +22,21 @@ requirements/dialogue/portrait-input model replaces these typed empties.
 Cached Retail `Blizzard_UIPanels_Game/Mainline/QuestFrame.lua:205,218-225,129`
 calls progress text, requirement counts/cost and turn-in portrait respectively.
 `tests/quest_dialog_requirements.rs` invokes those original handlers and asserts
-empty text, hidden requirement rows/cost, an empty reward panel and zero portrait
-return arity, with no new swallowed Lua errors. Explicit fixture mapView=false
+empty text, hidden requirement rows/cost, an empty reward panel and a hidden,
+detached portrait frame with the exact empty portrait tuple, with no new swallowed Lua errors. Explicit fixture mapView=false
 establishes the first-dialog presentation state; automatic startup is not claimed.
 
 Test commit `7c7d9d8ff` at saved producer `9d1430bf3` reached three actual nil-call
 REDs: progress text line205, required-item count line218, portrait line129. Required-
 currency and money calls occur later in the blocked same original refresh; their
 individual nil-call boundaries were not reached and are not claimed as distinct
-REDs. GREEN remains pending.
+REDs. At saved `24a076873`, text and requirement-refresh cases passed; the first
+no-values portrait draft instead reached original `QuestFrame.lua:523`'s nil-number
+comparison. The original `:129-136` tests displayID against0 and calls its hide branch
+at`:535-540`; text/name are consumed at`:459,499-504`. The approved correction uses
+numeric0 plus empty strings, never a portrait ID. Revised test `4f601b63e` reproduced
+the same original nil-comparison RED before the temporary-producer fix. Final
+no-portrait branch GREEN remains pending.
 
 ## Inventory exclusions
 

@@ -3803,3 +3803,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-16] source | Bounded quest dialog prerequisites and currency rows
 
 [Temporary inputs](../specs/quest-progress-requirements-empty.md) name five missing domains/retirement and three reached original nil-call REDs; money/currency-count boundaries remained behind earlier calls. [Currency projection](../specs/quest-reward-currency-panel.md) shares existing state/serializer after original populated-row RED, with empty control PASS. Earlier material and XML-value root GREEN/preservation/startup receipts now live in their owning specs.
+
+## [2026-10-16] correction | Typed no-portrait sentinel
+
+[Temporary-input contract](../specs/quest-progress-requirements-empty.md) replaces the rejected no-values draft with original-consumer-typed `0, "", ""`, after direct nil-comparison RED and a hidden/detached-frame assertion. [Currency owner](../specs/quest-reward-currency-panel.md) records exact native container-label/supplied-metadata GREEN at saved24a076873.
