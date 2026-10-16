@@ -14,8 +14,9 @@ pub(crate) fn with_token_ui(probe: &str) {
             .join("Blizzard_TokenUI/Blizzard_TokenUI.lua")
             .is_file()
     );
+    let probe = probe.to_owned();
     common::with_perf_lock(|| {
-        common::with_timeout(90, || {
+        common::with_timeout(90, move || {
             with_blizzard_addon_smoke_shape_in_dir(
                 &cache,
                 &["Blizzard_TokenUI"],
@@ -24,7 +25,7 @@ pub(crate) fn with_token_ui(probe: &str) {
                     assert!(loaded.iter().any(|name| name == "Blizzard_TokenUI"));
                     env.exec(include_str!("fixtures/currency_displayed_indices.lua"))
                         .expect("original TokenUI fixture setup");
-                    env.exec(probe).expect("currency consumer assertions");
+                    env.exec(&probe).expect("currency consumer assertions");
                 },
             );
         });
