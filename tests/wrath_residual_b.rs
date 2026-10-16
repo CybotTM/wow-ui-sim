@@ -371,7 +371,7 @@ fn wrath_resid_b_lfd_original_random_renderer() {
     run(
         &env,
         &format!(
-            "LFDQueueFrame.type={id}; LFDQueueFrameRandom_UpdateFrame(); assert(LFDQueueFrameBackground:GetTexture()=='Interface\\\\LFGFrame\\\\UI-LFG-BACKGROUND-HEROIC')"
+            "LFDQueueFrame.type={id}; LFDQueueFrameRandom_UpdateFrame(); assert(LFDQueueFrameBackground:GetTexture()=='Interface\\\\LFGFrame\\\\UI-LFG-BACKGROUND-HEROIC', 'heroic background: '..tostring(LFDQueueFrameBackground:GetTexture()))"
         ),
     );
     {
