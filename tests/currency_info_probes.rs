@@ -289,7 +289,7 @@ fn get_currency_list_info_reflects_successive_existing_currency_updates() {
             info.quality = quality;
         }
         let actual: (String, i32, i32, i64, i32) = env
-            .eval(
+            .eval(&format!(
                 r#"
                 local listed = C_CurrencyInfo.GetCurrencyListInfo(2)
                 assert(listed.currencyTypesID == 2245)
@@ -298,7 +298,7 @@ fn get_currency_list_info_reflects_successive_existing_currency_updates() {
                 assert(listed.isShowInBackpack == true)
                 local fieldCount = 0
                 for _ in pairs(listed) do fieldCount = fieldCount + 1 end
-                assert(fieldCount == 9)
+                assert(fieldCount == {})
                 local detail = C_CurrencyInfo.GetCurrencyInfo(2245)
                 assert(detail.currencyID == 2245)
                 assert(listed.name == detail.name)
@@ -309,7 +309,12 @@ fn get_currency_list_info_reflects_successive_existing_currency_updates() {
                 return listed.name, listed.quantity, listed.maxQuantity,
                        listed.iconFileID, listed.quality
                 "#,
-            )
+                if cfg!(feature = "client-retail") {
+                    10
+                } else {
+                    9
+                }
+            ))
             .unwrap();
         assert_eq!(
             actual,
