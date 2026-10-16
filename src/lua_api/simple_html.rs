@@ -2,8 +2,11 @@
 
 use std::collections::HashMap;
 
+pub mod document;
+pub mod layout;
+
 /// Per-textType style (h1, h2, h3, p, etc.)
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct TextStyle {
     pub font: Option<String>,
     pub font_size: f32,
@@ -35,6 +38,7 @@ impl Default for TextStyle {
 }
 
 /// State for a SimpleHTML frame.
+#[derive(Debug)]
 pub struct SimpleHtmlData {
     pub hyperlink_format: String,
     pub hyperlinks_enabled: bool,

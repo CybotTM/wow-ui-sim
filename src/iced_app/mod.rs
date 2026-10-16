@@ -47,6 +47,10 @@ mod render;
 #[cfg(feature = "gui")]
 mod screenshot;
 #[cfg(feature = "gui")]
+mod simple_html_input;
+#[cfg(feature = "gui")]
+mod simple_html_render;
+#[cfg(feature = "gui")]
 mod slice_render;
 #[cfg(feature = "gui")]
 mod state;

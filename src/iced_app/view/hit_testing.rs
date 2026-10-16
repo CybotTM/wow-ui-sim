@@ -281,6 +281,11 @@ fn frame_has_mouse_button_action(
     if down {
         return true;
     }
+    if frame.widget_type == crate::widget::WidgetType::SimpleHTML
+        && env.has_script_handler(frame_id, "OnHyperlinkClick")
+    {
+        return true;
+    }
 
     let script = if down { "OnMouseDown" } else { "OnMouseUp" };
     crate::iced_app::frame_collect::frame_mouse_registration_matches(frame, button_name, down)

@@ -791,6 +791,11 @@ pub(super) fn get_text_height(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn get_content_height(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    if is_simple_html_frame(state, id) {
+        let height = simple_html::measure_document_height(state, id);
+        state.push(Val::Num(height as f64));
+        return Ok(1);
+    }
     let has_text = {
         let sim = borrow_state(state)?;
         sim.widgets

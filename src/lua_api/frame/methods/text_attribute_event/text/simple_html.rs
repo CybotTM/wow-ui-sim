@@ -34,7 +34,33 @@ pub(super) fn with_simple_html_data_mut<R>(
         return None;
     }
     let mut sim = borrow_state_mut(state).ok()?;
-    Some(f(sim.simple_htmls.entry(id).or_default()))
+    let frame = sim.widgets.get_mut_visual(id)?;
+    let data = frame.simple_html.get_or_insert_with(Default::default);
+    Some(f(data))
+}
+
+pub(super) fn measure_document_height(state: &LuaState, id: u64) -> f32 {
+    let fonts = state
+        .app_data::<crate::lua_api::env::WowLuaAppData>()
+        .and_then(|app| app.font_system.clone());
+    let sim = borrow_state(state).expect("SimpleHTML measurement requires simulator state");
+    let Some(frame) = sim.widgets.get(id) else {
+        return 0.0;
+    };
+    let scale = frame.effective_scale.max(f32::EPSILON);
+    let width = super::resolved_frame_width(state, id) / scale;
+    if let Some(fonts) = fonts {
+        return crate::lua_api::simple_html::layout::layout_document(
+            frame,
+            width,
+            &mut fonts.borrow_mut(),
+        )
+        .height;
+    }
+    // Headless API environments have no installed GUI font context; shape with
+    // the same font engine using its system font database, without CASC I/O.
+    let mut fonts = crate::render::font::WowFontSystem::new_without_casc();
+    crate::lua_api::simple_html::layout::layout_document(frame, width, &mut fonts).height
 }
 
 fn simple_html_style<'a>(data: &'a mut SimpleHtmlData, text_type: &str) -> &'a mut TextStyle {

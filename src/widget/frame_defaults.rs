@@ -10,6 +10,7 @@ macro_rules! frame_defaults {
         Frame {
             id: $id,
             widget_type: WidgetType::Frame,
+            simple_html: None,
             object_type_name: None,
             name: None,
             is_simulator_placeholder: false,

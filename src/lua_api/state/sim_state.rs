@@ -105,7 +105,6 @@ pub struct SimState {
     pub fog_of_war_frames: HashMap<u64, FogOfWarFrameState>,
     pub unit_position_frames: HashMap<u64, UnitPositionFrameState>,
     pub pending_player_reports: HashMap<i64, PendingPlayerReport>,
-    pub simple_htmls: HashMap<u64, SimpleHtmlData>,
     pub message_frames: HashMap<u64, MessageFrameData>,
     pub on_update_frames: HashSet<u64>,
     /// Explicit ScrollFrame range requests, drained after OnUpdate and animations.

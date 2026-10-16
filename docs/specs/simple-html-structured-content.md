@@ -1,5 +1,7 @@
 # SimpleHTML structured content (H1)
 
+Integration checkpoint (2026-10-16): H1 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+
 Bounded simulator contract for paragraph/header geometry and HTML anchor callbacks. Sources live in `src/lua_api/simple_html/`, text API methods and GUI emission/input. Approval: H1, 2026-10-16. This is not native-parity evidence.
 
 ## What it must do

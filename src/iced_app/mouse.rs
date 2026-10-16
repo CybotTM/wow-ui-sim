@@ -256,6 +256,7 @@ impl App {
             self.dispatch_left_mouse_release(released_on);
         }
         self.mouse_down_frame = None;
+        self.mouse_down_pos = None;
         self.clear_pressed_frame();
         self.flush_post_script_updates();
         self.update_hovered_frame(pos);
@@ -274,7 +275,6 @@ impl App {
     fn take_left_drag_state(&mut self) -> (bool, Option<u64>) {
         let was_dragging = self.dragging;
         let drag_source = self.env.borrow().state().borrow().active_drag_frame;
-        self.mouse_down_pos = None;
         self.dragging = false;
         {
             let env = self.env.borrow();
@@ -304,8 +304,11 @@ impl App {
             let _ = env.fire_script_handler(frame_id, "OnMouseUp", vec![button_val.clone()]);
         }
 
-        if self.mouse_down_frame == Some(frame_id) && clicks_on_up {
-            self.fire_left_click_sequence(frame_id, &env, &button_val, false);
+        if self.mouse_down_frame == Some(frame_id) {
+            self.dispatch_simple_html_link(frame_id, &env);
+            if clicks_on_up {
+                self.fire_left_click_sequence(frame_id, &env, &button_val, false);
+            }
         }
 
         self.fire_propagated_mouse_script(
@@ -316,6 +319,34 @@ impl App {
             &button_val,
             false,
         );
+    }
+
+    fn dispatch_simple_html_link(&self, id: u64, env: &crate::lua_api::WowLuaEnv) {
+        let Some(pos) = self.mouse_position else {
+            return;
+        };
+        let Some(down) = self.mouse_down_pos else {
+            return;
+        };
+        let link = super::simple_html_input::find_clicked_link(
+            &env.state().borrow(),
+            id,
+            &mut self.font_system.borrow_mut(),
+            (down, pos),
+        );
+        if let Some(link) = link {
+            if let Err(error) = env.fire_script_handler(
+                id,
+                "OnHyperlinkClick",
+                vec![
+                    env.lua_string(&link.target),
+                    env.lua_string(&link.label),
+                    env.lua_string("LeftButton"),
+                ],
+            ) {
+                eprintln!("SimpleHTML {id} hyperlink dispatch failed: {error}");
+            }
+        }
     }
 
     fn cursor_holds_item(&self) -> bool {

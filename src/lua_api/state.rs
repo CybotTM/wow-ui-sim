@@ -3,7 +3,6 @@ use crate::cvars::CVarStorage;
 use crate::event::{EventQueue, ScriptRegistry};
 use crate::lua_api::animation::AnimGroupState;
 use crate::lua_api::message_frame::MessageFrameData;
-use crate::lua_api::simple_html::SimpleHtmlData;
 use crate::lua_api::tooltip::TooltipData;
 use crate::screen::ScreenKind;
 use crate::sound::SoundManager;
@@ -102,7 +101,6 @@ macro_rules! build_empty_sim_state {
             fog_of_war_frames: $collections.fog_of_war_frames,
             unit_position_frames: $collections.unit_position_frames,
             pending_player_reports: $collections.pending_player_reports,
-            simple_htmls: $collections.simple_htmls,
             message_frames: $collections.message_frames,
             on_update_frames: $collections.on_update_frames,
             pending_scroll_range_updates: HashSet::new(),
@@ -760,7 +758,6 @@ struct EmptyStateCollections {
     account_store_storefront_state: HashMap<i64, i64>,
     account_store_categories: HashMap<i64, AccountStoreCategoryInfo>,
     account_store_items: HashMap<i64, AccountStoreItemInfo>,
-    simple_htmls: HashMap<u64, SimpleHtmlData>,
     message_frames: HashMap<u64, MessageFrameData>,
     animation_groups: HashMap<u64, AnimGroupState>,
     active_animation_groups: HashSet<u64>,

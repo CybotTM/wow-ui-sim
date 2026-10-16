@@ -155,9 +155,6 @@ fn set_text_noop_rejects_simple_html_frames() {
     frame.text = Some("Hello".to_string());
     let id = frame.id;
     state.widgets.register(frame);
-    state
-        .simple_htmls
-        .insert(id, crate::lua_api::simple_html::SimpleHtmlData::default());
     assert!(!is_set_text_noop(&state, id, &Some("Hello".to_string())));
 }
 

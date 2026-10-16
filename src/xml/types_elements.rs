@@ -232,6 +232,8 @@ pub struct MaskedTextureEntryXml {
 
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct FontStringXml {
+    #[serde(rename = "@spacing")]
+    pub spacing: Option<f32>,
     #[serde(rename = "@name")]
     pub name: Option<String>,
     #[serde(rename = "@parentKey", alias = "@parentkey")]

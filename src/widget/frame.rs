@@ -14,6 +14,8 @@ pub struct Frame {
     pub id: u64,
     /// Widget type.
     pub widget_type: WidgetType,
+    /// SimpleHTML styles shared by measurement, rendering and pointer dispatch.
+    pub simple_html: Option<Box<crate::lua_api::simple_html::SimpleHtmlData>>,
     /// Original type name for GetObjectType() when mapped to a generic WidgetType.
     /// E.g., "ArchaeologyDigSiteFrame" maps to WidgetType::Frame but GetObjectType
     /// should still return "ArchaeologyDigSiteFrame".
@@ -668,7 +670,10 @@ impl Frame {
     pub fn new(widget_type: WidgetType, name: Option<String>, parent_id: Option<u64>) -> Self {
         let mouse_enabled = matches!(
             widget_type,
-            WidgetType::Button | WidgetType::CheckButton | WidgetType::EditBox
+            WidgetType::Button
+                | WidgetType::CheckButton
+                | WidgetType::EditBox
+                | WidgetType::SimpleHTML
         );
         let mut frame = Self {
             widget_type,

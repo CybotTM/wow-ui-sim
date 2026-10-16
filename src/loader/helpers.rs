@@ -538,6 +538,7 @@ fn handler_params(handler_name: &str) -> &'static str {
 /// Bind XML argument names without consuming the existing vararg payload.
 fn inline_argument_locals(handler_name: &str) -> &'static str {
     match handler_name {
+        "OnHyperlinkClick" => "local link, text, button = ...;",
         "OnCursorChanged" => "local x, y, w, h = ...;",
         "OnHorizontalScroll" | "OnVerticalScroll" => "local offset = ...;",
         "OnScrollRangeChanged" => "local xrange, yrange = ...;",
