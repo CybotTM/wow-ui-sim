@@ -10,6 +10,9 @@ function AssertCompletedItem(frame, expected)
     assert(child.itemID == 6948 and child.quality == 1)
     assert(child.Icon:GetParent() == child)
     assert(child.Icon:GetTexture() == 134414, 'existing Hearthstone metadata texture identity')
+    local count = item.stackCount or 1
+    assert(child.Count:IsShown() == (count > 1))
+    if count > 1 then assert(child.Count:GetText() == tostring(count)) end
     assert(child.ItemName:IsShown())
     assert(child.ItemName:GetText() == (item.overrideItemName or 'Hearthstone'))
     assert(child.InfoText:IsShown() == (item.infoText ~= nil))
