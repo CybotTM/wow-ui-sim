@@ -6,7 +6,7 @@ Bounded simulator contract for the original cached Retail `SocialUIUtil.AddSepar
 
 - [ ] Execute the unchanged cached `retail/AddOns/Blizzard_SocialUIShared/SocialUIUtil.lua:138-152` and attach its path/options divider to the wrapped blank row it just added, without increasing NumLines again.
 - [ ] Emit one deferred texture request for that path between Header and Footer, spanning the content width with zero horizontal margins.
-- [ ] Proposed geometry policy: supplied height=10 is image height; row height is height + top + bottom margins (6 here). Top=-2 places the image 2 units above the row origin; bottom=-2 extends it 2 units below the row. Existing inter-row spacing remains unchanged. Apply effective scale and tooltip alpha.
+- [ ] Accepted simulator geometry policy (2026-10-16): keep the normal blank text-line height (15 body units here); center the supplied 10-unit image vertically in that row (2.5-unit offset). Supplied top/bottom margins do not shrink the row or shift the centered image. Existing inter-row spacing remains unchanged. Apply effective scale and tooltip alpha. The rejected alternative reserves 6 units (10 - 2 - 2) and starts the image at -2; it is not this contract.
 - [ ] ClearLines removes the attachment; rebuilding text-only content emits no stale divider.
 - [ ] Numeric and numeric-string AddTexture inputs still append their own rows, including when an options table is supplied; keep FileDataId storage unchanged.
 
@@ -17,7 +17,7 @@ Bounded simulator contract for the original cached Retail `SocialUIUtil.AddSepar
 
 ## Implementation inventory
 
-- `src/lua_api/tooltip.rs`: attached path and height/margin data.
+- `src/lua_api/tooltip.rs`: attached path and height/margin data; one geometry function governs both row reservation and image offset.
 - `src/lua_api/frame/methods/widgets/tooltip/line_frames.rs`: bounded path/options decoding and existing-row attachment.
 - `src/lua_api/frame/methods/widgets/tooltip/sizing.rs`: immediate Lua-visible row sizing.
 - `src/iced_app/tooltip.rs`: measured sizing, render collection and deferred path quad emission.
@@ -29,7 +29,7 @@ Bounded simulator contract for the original cached Retail `SocialUIUtil.AddSepar
 
 ## Known gaps (current cycle)
 
-- [ ] Obtain explicit acceptance of proposed geometry policy before landing producer.
+- [x] User selected unchanged blank-row height and centered image on 2026-10-16; simulator policy only.
 - [ ] Execute test-only patch and establish behavioral RED before producer lands. Predicted RED: no divider texture request, not a compile failure.
 - [ ] Execute combined patches and preserve exact revision/output; no build or runtime evidence accompanies staging.
 

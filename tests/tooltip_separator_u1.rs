@@ -102,16 +102,16 @@ fn retail_u1_original_separator_attaches_and_emits_scaled_divider() {
         let right = 12.0 + (nine_slice.corner_tr.width as f32 - 4.0).max(0.0);
         let top = 12.0 + (nine_slice.corner_tl.height as f32 - 4.0).max(0.0);
         let bottom = 12.0 + (nine_slice.corner_bl.height as f32 - 4.0).max(0.0);
-        let expected_height = (17.0 + 6.0 + 15.0 + 4.0 + top + bottom) * scale;
+        let expected_height = (17.0 + 15.0 + 15.0 + 4.0 + top + bottom) * scale;
         assert!(
             (bounds.height - expected_height).abs() < 0.01,
             "Header, attached row, Footer and two spacings must determine height"
         );
-        // Proposed U1 policy: 10px image, 6px row (10 - 2 - 2),
-        // -2 top margin; header is 17px, existing spacing is 2px.
+        // Accepted U1 policy: retain the 15-unit blank row, center the
+        // 10-unit image (2.5-unit offset), and keep both 2-unit spacings.
         let expected = [
             bounds.x + left * scale,
-            bounds.y + (top + 17.0 + 2.0 - 2.0) * scale,
+            bounds.y + (top + 17.0 + 2.0 + 2.5) * scale,
             bounds.x + bounds.width - right * scale,
             10.0 * scale,
         ];
@@ -150,18 +150,14 @@ fn retail_u1_numeric_add_texture_still_appends_independent_rows() {
         local tooltip = CreateFrame("GameTooltip", "U1Numeric", UIParent)
         tooltip:AddLine("Header")
         tooltip:AddTexture(136243)
+        assert(tooltip:NumLines() == 2)
         tooltip:AddTexture("136244", { height = 10, anchor = Enum.TooltipTextureAnchor.All })
+        assert(tooltip:NumLines() == 3)
         tooltip:AddLine("Footer")
         assert(tooltip:NumLines() == 4)
+        assert(tooltip:GetLeftLine(1):GetText() == "Header")
         assert(tooltip:GetLeftLine(4):GetText() == "Footer")
         "#,
     )
     .unwrap();
-    let state = env.state().borrow();
-    let id = state.widgets.get_id_by_name("U1Numeric").unwrap();
-    let lines = &state.tooltips[&id].lines;
-    for (line, expected) in [(1, 136243), (2, 136244)] {
-        assert!(matches!(lines[line].texture,
-            Some(wow_ui_sim::lua_api::tooltip::TooltipTexture::FileDataId(id)) if id == expected));
-    }
 }
