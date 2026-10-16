@@ -23,6 +23,8 @@ Button text selects a configured FontObject and projects its supplied fields int
 - `src/lua_api/frame/methods/text_attribute_event/text/formatting.rs`: public FontString FontObject reference/snapshot behavior.
 - `src/iced_app/mouse.rs`: actual GUI hover transition; `A_Admin.SetMouseOverFrame` supplies separate simulated hover.
 
+[Bounded PTR C7 execution](../baselines/README.md#ptr-shared-controls--2026-10-16) covers bare font-slot/state/ownership fixtures, not physical pointer input or all button controls.
+
 ## Tests asserting this spec
 
 Saved Retail-epoch baseline `d16876fcc9ec0e49851436a6af7a1e308d0a344c` executed all three C7 cases in `tests/button_state_textures.rs`: **0 passed, 3 failed, exit 101**. The private saved epoch is `c8-producer-c7-c9-retail-baseline-20261016T003140348455Z`, selection `button-font-first-red`. The first two cases stop at unlabelled `C7Check` assertions; active-slot replacement stops at the explicit `selected FontObject reference` assertion. The fixture also incorrectly assumes mapped `GetTexture()` sources return path strings rather than numeric file IDs, so the first two failures do not establish a font-style defect. Later assertions do not independently establish RED or acceptance.

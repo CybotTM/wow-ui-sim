@@ -57,6 +57,8 @@ Defaults, range initialization, pre-initialization and first-value policy remain
 
 - `src/lua_api/frame/methods/widgets/slider.rs`: changed-value application and synchronous slider script delivery.
 
+[Bounded PTR C1/C8 execution](../baselines/README.md#ptr-shared-controls--2026-10-16) supplements saved Retail/Wrath evidence; its receipt owns source and acceptance limits.
+
 ## Tests asserting this spec
 
 `tests/widget_slider.rs` in the grouped integration target:

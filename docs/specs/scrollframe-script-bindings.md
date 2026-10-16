@@ -39,6 +39,8 @@ Tests-only `f00f230fe` changes `test_scrollframe_scroll_scripts_fire_from_native
 - `src/loader/helpers.rs`, `src/lua_api/globals/create_frame/template_chain.rs`: ordinary/runtime script enumeration and registration.
 - `src/lua_api/frame/methods/widgets/slider.rs`: offset/range mutation and registered binding dispatch.
 
+[Bounded PTR C9 execution](../baselines/README.md#ptr-shared-controls--2026-10-16) covers real update/animation boundaries under the shared simulator policy, not native timing parity.
+
 ## Tests asserting this spec
 
 `tests/scroll_widgets/script_bindings.rs`, inside the existing grouped integration target, proves registration and dispatch through an ordinary XML `<ScrollFrame>` and through cached EventScrollFrame XML/Lua. Both paths verify public `GetScript` bindings, committed payloads, callback order, and zero recorded Lua errors. Existing `tests/scroll_widgets.rs` retains offset/range/presentation controls.

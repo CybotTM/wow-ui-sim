@@ -130,6 +130,22 @@ These receipts and existing a56 fmt PASS close only bounded **QUEST-SOURCE** gat
 
 Matching cfg correction `dc2530c3c6440c0762efd8fd3e4fd2a914a8f3e8` has independently reconciled default and Forever library checks: both terminal exit0, exactly one successful `build-finished` each; default730 JSON records/zero compiler diagnostics, Forever731/one existing `UnitRole` dead-code warning. Full streams, unchanged pressure guards, source predicates, formatting exit0 and changed-line readability are recorded in `/home/osso/.local/state/wow-ui-sim/verification/quest-abandon-next/profile-correction-report.md`. The first default E0609 failure remains historical. Earlier abandonment3PASS at normal-library source `58bccba22` is retained separately, without replay: the Forever producer body is unchanged by the matching feature attribute. These are library compile checks, not Retail runtime, startup, native, all-profile or full-parent acceptance. [Owning contract](../specs/quest-offer-rich-log-coherence.md).
 
+#### PTR shared controls — 2026-10-16
+
+Normal-library basis `161dad02ad868ecce067b4b0c1d87108ec5b2dcb`; actual unchanged control tests compiled at `ecebf3dbf`. Independent saved-artifact report `/home/osso/.local/state/wow-ui-sim/verification/ptr-controls-next/report.md` accepts **39 distinct PASS, exit0** across two disjoint runs:
+
+| Control | PTR cases | Executed boundary |
+|---|---:|---|
+| C1 | 5 | Slider quantization/effective callbacks; unsnapped StatusBar control |
+| C2 | 14 | Real installed-font geometry/glyphs, UTF-8 editing and dirty/update ordering |
+| C3 | 4 | Negative/reversed/empty/multibyte public selection endpoints |
+| L1 | 5 | Protected-recipient direct/active-chain eligibility, unchanged geometry and moving controls |
+| C7 | 3 | Bare button font-slot/state/render projection and child ownership |
+| C8 | 5 | Public range callbacks and synchronous coherent value reapplication |
+| C9 | 3 | Deferred range notifications at real OnUpdate/animation boundaries |
+
+Six modules36PASS/12filtered; separate bare C7 run3PASS/45filtered. Nine other button cases were not run. Full streams, exact features/normal-dependency association, component seal and control/layout-source equality are independently reconciled; the newer IconTextAndBackground plumbing is excluded. Component compilation retains35 unused common-helper warnings, distinct from the accepted normal library's zero diagnostics. This is not genuine cached C2 consumer, ordinary startup, physical pointer, native/CASC-font/pixel, whole-current-HEAD, all-profile or full-parent proof. Wrath startup RED and guard remain unchanged; accepted Retail cases were not replayed.
+
 ## Panel And Addon Evidence
 
 - `mists-panels.md` lists the Blizzard panel parity matrix.
