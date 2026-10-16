@@ -3,7 +3,8 @@
 Bounded simulator contracts for six source-established Wrath startup failures.
 Modeled legacy globals live in `src/lua_api/globals/real/wrath_startup_queries.rs`;
 unmodeled values remain in `src/lua_api/workarounds/temporary/wrath_startup_defaults.rs`.
-This is a source-only staged delta: tests have not been compiled or executed.
+Wrath-profile execution on 2026-10-16: six behavioral RED failures, then six
+passing consumer regressions plus seventeen preserved panel/unitpopup/cursor tests.
 
 ## What it must do
 
@@ -46,7 +47,10 @@ This is a source-only staged delta: tests have not been compiled or executed.
 
 ## Known gaps (current cycle)
 
-- [ ] All behavioral RED/GREEN, compilation and cross-profile preservation runs remain unexecuted under the staging-only/no-build instruction.
+- [x] Wrath-profile compile and behavioral RED/GREEN: 0/6 before producers,
+  6/6 after; combined preservation set 23/23. Cross-profile execution remains open.
+- [x] Separate combined startup observation changes 37 unique / 51 occurrences
+  to 29 / 37. Startup still fails; no clean-startup or isolated causal claim.
 - [ ] Full original startup ordering and all residual errors remain parent-goal acceptance work.
 - [ ] Trainer service catalog filtering is not modeled by this endpoint-only delta; menu state roundtrips do not prove filtered service rows.
 - [ ] Positive durability alert severity is unmodeled; staged original-consumer tests use the existing zero-alert producer and assert selected texture/color reset, not positive damage alerts.
@@ -56,4 +60,4 @@ This is a source-only staged delta: tests have not been compiled or executed.
 
 Native-client parity, complete historical tuples beyond the bounded projection,
 server behavior, timed quest population/expiry, trainer service catalogs, raid model
-redesign, other residual clusters, vendor Lua changes, builds and deployment.
+redesign, other residual clusters, vendor Lua changes and deployment.
