@@ -577,3 +577,7 @@ fn emit_blob_polygon(
 #[cfg(test)]
 #[path = "quad_builders_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "quad_builders_alpha_gradient_tests.rs"]
+mod alpha_gradient_tests;
