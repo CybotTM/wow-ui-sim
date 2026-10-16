@@ -4,6 +4,7 @@ mod registration;
 pub use registration::register_all;
 
 use crate::Result;
+use crate::c_api::action_usability::is_usable_action;
 use crate::c_api::c_action_bar::{
     action_texture_path, get_action_cooldown, get_action_cooldown_duration,
 };
@@ -413,21 +414,6 @@ fn get_action_texture(state: &mut LuaState) -> LuaResult<u32> {
         None => state.push(Val::Nil),
     }
     Ok(1)
-}
-
-fn is_usable_action(state: &mut LuaState) -> LuaResult<u32> {
-    let slot = stack_slot(state);
-    let usable = {
-        let sim = borrow_state(state)?;
-        slot.is_some_and(|slot| {
-            sim.action_bars.contains_key(&slot)
-                || sim.action_outfits.contains_key(&slot)
-                || sim.action_macros.contains_key(&slot)
-        })
-    };
-    state.push(Val::Bool(usable));
-    state.push(Val::Bool(false));
-    Ok(2)
 }
 
 fn is_current_action(state: &mut LuaState) -> LuaResult<u32> {

@@ -1,5 +1,7 @@
 # Supplied spell-action usability
 
+Integration checkpoint (2026-10-16): G3 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+
 G3 supplies usability for existing spell actions to the namespace query and public button consumer. State belongs to `src/c_api/action_usability.rs`; see [Lua API architecture](../lua-api.md). This is a simulator contract, not a native resource-rule claim.
 
 ## What it must do

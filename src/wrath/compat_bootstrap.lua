@@ -391,10 +391,8 @@ if IsRaidOfficer == nil then
   end
 end
 
-if IsUsableAction == nil then
-  function IsUsableAction()
-    return true, false
-  end
+function IsUsableAction(action)
+  return C_ActionBar.IsUsableAction(action)
 end
 
 if IsVoiceChatEnabled == nil then
