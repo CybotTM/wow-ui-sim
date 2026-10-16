@@ -3,7 +3,11 @@
 ## Contract
 
 Authored simulator policy, conditional Retail/Forever consumers; not native parity.
-Depends on [QL-1 live objectives](quest-objective-progress.md).
+Depends on [QL-1 live objectives](quest-objective-progress.md). Modeled publication
+and live gossip/history behavior use QL-1's Retail/Forever gate; other profiles
+retain their prior readiness stub, cached gossip flags and popup defaults.
+`tests/quest_readiness_scope.rs` supplies an unsupported-profile negative control
+(not executed in the current Retail/Forever builds).
 
 - A nonempty supplied objective snapshot sets active completion when every row is
   finished. An empty snapshot does not infer readiness. Failed/unknown rows are
@@ -54,6 +58,16 @@ Forever cache source counterparts (reachability still unproved):
 `Mainline/QuestFrame.lua:66-74,170-172,215-219`; original tracker
 `Blizzard_QuestObjectiveTracker.lua:28-31`, popup helper
 `Blizzard_AutoQuestPopUpTracker.lua:34-39`.
+
+## Implementation
+
+`src/c_api/quest_readiness.rs` owns opt-in/notification markers, progress/reward
+interaction and readiness decisions on existing rich rows. QL-1 commits objective-
+derived readiness inside its mutation scope before notifying. Modeled Lua globals
+live in `globals/real/quest_dialog.rs`; original cached consumers remain unchanged.
+The separate [generic XML intrinsic-tag fix](xml-intrinsic-tags.md) supplies the
+missing original theme mixin/preload prerequisite; fixture closure also loads the
+original AccessibilityTemplates, FrameXML and SplashFrame addons.
 
 ## Tests and proof boundary
 

@@ -99,7 +99,11 @@ fn append_quest_log_entry(quest_log: &mut Vec<u32>, quest_id: u32) {
 /// `CloseQuestFrame()` — fires `QUEST_FINISHED`. WoW also nils the pending
 /// offer; mirror that here.
 fn close_quest_frame(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.pending_quest_offer = None;
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.pending_quest_offer = None;
+        sim.quest_log_entries.readiness.dialog = None;
+    }
     push_event(state, "QUEST_FINISHED")?;
     Ok(0)
 }
@@ -121,7 +125,11 @@ fn quest_choice_set_active(state: &mut LuaState) -> LuaResult<u32> {
 /// `QuestMapLogTitleButton_OnClick(questId)` — write `selected_quest_log_id`.
 fn quest_map_log_title_button_on_click(state: &mut LuaState) -> LuaResult<u32> {
     let id = stack_u32(state, 1);
-    borrow_state_mut(state)?.selected_quest_log_id = id;
+    let mut sim = borrow_state_mut(state)?;
+    if sim.selected_quest_log_id != id {
+        sim.quest_log_entries.readiness.dialog = None;
+    }
+    sim.selected_quest_log_id = id;
     Ok(0)
 }
 
@@ -144,6 +152,7 @@ fn set_abandon_quest(state: &mut LuaState) -> LuaResult<u32> {
         st.quest_log_entries.objective_progress.remove(&(id as i32));
         #[cfg(feature = "client-wowforever")]
         st.quest_watch_types.remove(&(id as i32));
+        st.quest_log_entries.readiness.remove_quest(id as i32);
         st.abandon_quest_id = Some(id);
         if st
             .pending_quest_offer
@@ -265,6 +274,9 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
 fn register_quest_state_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "ConfirmAcceptQuest", confirm_accept_quest)?;
     LuaApiMut::register_function(lua, "CloseQuestFrame", close_quest_frame)?;
+    if crate::c_api::quest_objectives::ENABLED {
+        LuaApiMut::register_function(lua, "CloseQuest", close_quest_frame)?;
+    }
     LuaApiMut::register_function(
         lua,
         "AcknowledgeAutoQuestPopUp",

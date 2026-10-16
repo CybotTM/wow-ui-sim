@@ -83,7 +83,19 @@ fn c_gossip_info_get_options(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_gossip_info_get_active_quests(state: &mut LuaState) -> LuaResult<u32> {
-    let rows = borrow_state(state)?.gossip.active_quests.clone();
+    let rows = {
+        let sim = borrow_state(state)?;
+        let mut rows = sim.gossip.active_quests.clone();
+        if crate::c_api::quest_objectives::ENABLED {
+            for row in &mut rows {
+                row.is_complete = Some(crate::c_api::quest_readiness::is_ready(
+                    &sim,
+                    row.quest_id as i32,
+                ));
+            }
+        }
+        rows
+    };
     push_quest_array(state, &rows)
 }
 
@@ -118,6 +130,7 @@ fn c_gossip_info_select_available_quest(state: &mut LuaState) -> LuaResult<u32> 
             .quest_log_entries
             .snapshot_gossip_offer(&row)
             .map_err(|_| rilua::runtime_error("selected quest ID exceeds the rich-log range"))?;
+        sim.quest_log_entries.readiness.dialog = None;
         sim.pending_quest_offer = Some(offer);
         sim.selected_quest_log_id = Some(quest_id);
     }
@@ -130,22 +143,24 @@ fn c_gossip_info_select_active_quest(state: &mut LuaState) -> LuaResult<u32> {
     let Some(quest_id) = quest_id_arg(state)? else {
         return Ok(0);
     };
+    if crate::c_api::quest_objectives::ENABLED {
+        return crate::c_api::quest_readiness::select_active_dialog(state, quest_id);
+    }
     let Some(is_complete) = ({
         let mut sim = borrow_state_mut(state)?;
-        let is_complete = sim
+        let complete = sim
             .gossip
             .active_quests
             .iter()
             .find(|row| row.quest_id == quest_id)
             .map(|row| row.is_complete.unwrap_or(false));
-        if is_complete.is_some() {
+        if complete.is_some() {
             sim.selected_quest_log_id = Some(quest_id);
         }
-        is_complete
+        complete
     }) else {
         return Ok(0);
     };
-
     let event = if is_complete {
         "QUEST_COMPLETE"
     } else {
@@ -159,6 +174,7 @@ fn c_gossip_info_close_gossip(state: &mut LuaState) -> LuaResult<u32> {
     {
         let mut sim = borrow_state_mut(state)?;
         sim.gossip.active = false;
+        sim.quest_log_entries.readiness.dialog = None;
         sim.gossip.options.clear();
         sim.gossip.active_quests.clear();
         sim.gossip.available_quests.clear();

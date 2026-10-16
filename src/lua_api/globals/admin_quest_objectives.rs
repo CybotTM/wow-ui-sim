@@ -14,7 +14,7 @@ pub(super) fn set_quest_objectives(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = i32::from_stack(state, 1)?;
     let progress = decode_progress(state)?;
     let criteria = commit_supplied_progress(state, quest_id, progress)?;
-    let Some(criteria) = criteria else {
+    let Some((criteria, autocomplete)) = criteria else {
         state.push(Val::Bool(false));
         return Ok(1);
     };
@@ -27,6 +27,7 @@ pub(super) fn set_quest_objectives(state: &mut LuaState) -> LuaResult<u32> {
         &[Val::Num(f64::from(quest_id))],
     )?;
     dispatch_event_now(state, "QUEST_LOG_UPDATE", &[])?;
+    crate::c_api::quest_readiness::notify_readiness(state, quest_id, autocomplete)?;
     state.push(Val::Bool(true));
     Ok(1)
 }
@@ -35,7 +36,7 @@ fn commit_supplied_progress(
     state: &mut LuaState,
     quest_id: i32,
     progress: QuestObjectiveProgress,
-) -> LuaResult<Option<Vec<QuestObjective>>> {
+) -> LuaResult<Option<(Vec<QuestObjective>, bool)>> {
     let mut sim = borrow_state_mut(state)?;
     let previous = sim
         .quest_log_entries
@@ -45,8 +46,12 @@ fn commit_supplied_progress(
     if !commit_objective_progress(&mut sim.quest_log_entries, quest_id, progress.clone()) {
         return Ok(None);
     }
-    // QL-2 seam: commit derived readiness/gossip here, before any dispatch.
-    Ok(Some(changed_criteria(previous.as_ref(), &progress)))
+    let autocomplete =
+        crate::c_api::quest_readiness::commit_objective_readiness(&mut sim, quest_id);
+    Ok(Some((
+        changed_criteria(previous.as_ref(), &progress),
+        autocomplete,
+    )))
 }
 
 fn decode_progress(state: &mut LuaState) -> LuaResult<QuestObjectiveProgress> {

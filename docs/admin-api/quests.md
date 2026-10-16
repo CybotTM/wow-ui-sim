@@ -14,6 +14,16 @@ not infer progress, grant rewards or create membership. Identical input is inert
 cardinality and committed-before-notify behavior. Both-profile behavioral RED is
 recorded; producer GREEN remains pending.
 
+## SetQuestReadiness
+
+Retail/Forever only: `A_Admin.SetQuestReadiness(questID, ready, autoComplete)`
+supplies active completion for non-objective conditions and configures opt-in
+completion notification. Unknown/failed rows are rejected; permanent history is
+independent. Nonempty later objective snapshots replace supplied completion.
+A first ready opted-in state notifies once per active lifetime; it never turns in
+or grants rewards. [QL-2 contract](../specs/quest-readiness-dialog.md) owns dialog
+eligibility, committed-before-notify projections and proof boundaries.
+
 ## TurnInSelectedQuest
 
 ```lua

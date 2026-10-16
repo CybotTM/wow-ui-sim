@@ -105,7 +105,12 @@ pub(super) fn selected_log_index(state: &LuaState) -> LuaResult<i32> {
 }
 
 pub(super) fn set_selected_quest_id(state: &mut LuaState, quest_id: i32) -> LuaResult<()> {
-    borrow_state_mut(state)?.selected_quest_log_id = (quest_id > 0).then_some(quest_id as u32);
+    let selected = (quest_id > 0).then_some(quest_id as u32);
+    let mut sim = borrow_state_mut(state)?;
+    if sim.selected_quest_log_id != selected {
+        sim.quest_log_entries.readiness.dialog = None;
+    }
+    sim.selected_quest_log_id = selected;
     Ok(())
 }
 
@@ -341,7 +346,10 @@ fn is_completed_quest(state: &LuaState, quest_id: i32) -> LuaResult<bool> {
         .entries
         .iter()
         .find(|entry| entry.quest_id == quest_id)
-        .map(|entry| entry.is_complete || entry.is_flagged_completed)
+        .map(|entry| {
+            entry.is_complete
+                || (!crate::c_api::quest_objectives::ENABLED && entry.is_flagged_completed)
+        })
         .unwrap_or(false);
     Ok(completed)
 }
@@ -394,7 +402,7 @@ pub fn select_quest_log_entry(state: &mut LuaState) -> LuaResult<u32> {
         Some(QuestLogEntry::Quest { quest_id, .. }) => Some(*quest_id as u32),
         _ => None,
     };
-    borrow_state_mut(state)?.selected_quest_log_id = selected_quest_id;
+    set_selected_quest_id(state, selected_quest_id.map(|id| id as i32).unwrap_or(0))?;
     Ok(0)
 }
 

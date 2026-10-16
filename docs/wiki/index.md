@@ -3787,3 +3787,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-16] source | Supplied quest objectives
 
 [Lua state checkpoint](systems/lua-api.md#supplied-objective-snapshots) links the QL-1 contract and admin boundary; both-profile behavioral RED precedes the producer, GREEN pending.
+
+## [2026-10-16] source | Supplied quest readiness and dialog phase
+
+[Lua state checkpoint](systems/lua-api.md#supplied-readiness-and-reward-dialog-phase) links the Retail/Forever-only QL-2 model, source gate and original consumer requirements. Both-profile RED recorded; GREEN pending.

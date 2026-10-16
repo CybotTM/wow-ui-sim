@@ -30,15 +30,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
   end
 end
 
--- Auto quest popups (tutorial toasts). Not simulated; `for i = 1, N do`
--- loops in AutoQuestPopUpTracker iterate zero times.
-if GetNumAutoQuestPopUps == nil then
-  function GetNumAutoQuestPopUps() return 0 end
-end
-if GetAutoQuestPopUp == nil then
-  function GetAutoQuestPopUp(_index) return nil, nil end
-end
-
 -- Retail-backed ObjectiveTracker code asks ObjectAPI's QuestCache for quest
 -- objects. Classic/Mists profile source does not always load ObjectAPI's
 -- retail Quest.lua, so provide a thin cache backed by the modeled C_QuestLog
@@ -109,12 +100,28 @@ if QuestUtil.QuestShowsItemByIndex == nil then
 end
 "#;
 
+// Existing non-Retail/Forever empty popup domain remains outside QL-2.
+const UNMODELED_POPUPS_LUA: &str = r#"
+if GetNumAutoQuestPopUps == nil then
+  function GetNumAutoQuestPopUps() return 0 end
+end
+if GetAutoQuestPopUp == nil then
+  function GetAutoQuestPopUp(_index) return nil, nil end
+end
+"#;
+
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    if !crate::c_api::quest_objectives::ENABLED {
+        lua.exec(UNMODELED_POPUPS_LUA)?;
+    }
     lua.exec(QUEST_OBJECTIVE_DEFAULTS_LUA)?;
     Ok(())
 }
 
 pub(crate) fn patch_loader(env: &LoaderEnv<'_>) {
+    if !crate::c_api::quest_objectives::ENABLED {
+        let _ = env.exec(UNMODELED_POPUPS_LUA);
+    }
     let _ = env.exec(QUEST_OBJECTIVE_DEFAULTS_LUA);
 }
 

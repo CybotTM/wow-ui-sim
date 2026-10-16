@@ -51,7 +51,13 @@ pub fn get_active_title(state: &mut LuaState) -> LuaResult<u32> {
     };
     let title = create_string(state, &row.title);
     state.push(title);
-    state.push(Val::Bool(row.is_complete.unwrap_or(false)));
+    let ready = if quest_objectives::ENABLED {
+        let sim = borrow_state(state)?;
+        crate::c_api::quest_readiness::is_ready(&sim, row.quest_id as i32)
+    } else {
+        row.is_complete.unwrap_or(false)
+    };
+    state.push(Val::Bool(ready));
     Ok(2)
 }
 
@@ -122,6 +128,9 @@ pub fn select_active_quest(state: &mut LuaState) -> LuaResult<u32> {
     let Some(row) = row else {
         return Ok(0);
     };
+    if quest_objectives::ENABLED {
+        return crate::c_api::quest_readiness::select_active_dialog(state, row.quest_id);
+    }
     set_selected_quest_id(state, row.quest_id as i32)?;
     let event = if row.is_complete.unwrap_or(false) {
         "QUEST_COMPLETE"
@@ -148,6 +157,7 @@ pub fn select_available_quest(state: &mut LuaState) -> LuaResult<u32> {
             .quest_log_entries
             .snapshot_gossip_offer(&row)
             .map_err(|_| rilua::runtime_error("selected quest ID exceeds the rich-log range"))?;
+        sim.quest_log_entries.readiness.dialog = None;
         sim.pending_quest_offer = Some(offer);
         sim.selected_quest_log_id = Some(row.quest_id);
     }

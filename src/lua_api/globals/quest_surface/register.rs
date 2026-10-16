@@ -8,6 +8,7 @@ use super::SurfaceFn;
 use super::handlers::*;
 use super::legacy_globals::*;
 use super::task_quest::*;
+use crate::lua_api::globals::real::quest_dialog::*;
 
 pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
     ("GetNumQuestLogEntries", get_num_quest_log_entries),
@@ -35,7 +36,14 @@ pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
     ("SortQuestWatches", noop),
     ("IsQuestFlaggedCompleted", return_false),
     ("IsComplete", return_false),
-    ("ReadyForTurnIn", return_false),
+    (
+        "ReadyForTurnIn",
+        if crate::c_api::quest_objectives::ENABLED {
+            crate::c_api::quest_readiness::ready_for_turn_in
+        } else {
+            return_false
+        },
+    ),
     ("IsFailed", return_false),
     ("IsQuestDisabledForSession", return_false),
     ("IsPushableQuest", return_false),
@@ -81,6 +89,15 @@ pub const TASK_QUEST_METHODS: &[(&str, SurfaceFn)] = &[
     ("GetQuestLocation", task_quest_get_quest_location),
     ("GetQuestTimeLeftMinutes", task_quest_time_left_minutes),
     ("GetQuestTimeLeftSeconds", task_quest_time_left_seconds),
+];
+
+const READINESS_GLOBALS: &[(&str, SurfaceFn)] = &[
+    ("IsQuestCompletable", is_quest_completable),
+    ("CompleteQuest", complete_quest),
+    ("AddAutoQuestPopUp", add_auto_quest_popup),
+    ("GetAutoQuestPopUp", get_auto_quest_popup),
+    ("GetNumAutoQuestPopUps", get_num_auto_quest_popups),
+    ("RemoveAutoQuestPopUp", remove_auto_quest_popup),
 ];
 
 pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
@@ -225,6 +242,11 @@ pub fn register_quest_classification_handler(state: &mut LuaState) -> LuaResult<
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     for (name, func) in GLOBAL_QUEST_FUNCTIONS {
         LuaApiMut::register_function(lua, name, *func)?;
+    }
+    if crate::c_api::quest_objectives::ENABLED {
+        for (name, func) in READINESS_GLOBALS {
+            LuaApiMut::register_function(lua, name, *func)?;
+        }
     }
     let state = lua.state_mut();
     register_quest_info_handlers(state)?;

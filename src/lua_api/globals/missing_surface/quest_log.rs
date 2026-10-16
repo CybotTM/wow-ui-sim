@@ -111,6 +111,13 @@ fn get_info(state: &mut LuaState) -> LuaResult<u32> {
             write_quest_identity_fields(state, t, &entry, log_index);
             write_quest_classification_flags(state, t, &entry);
             write_quest_constant_stub_fields(state, t, false);
+            let auto_complete = crate::c_api::quest_objectives::ENABLED
+                && borrow_state(state)?
+                    .quest_log_entries
+                    .readiness
+                    .auto_complete
+                    .contains(&entry.quest_id);
+            table_set(state, t, "isAutoComplete", Val::Bool(auto_complete));
         }
     }
 
@@ -179,7 +186,6 @@ fn write_quest_constant_stub_fields(state: &mut LuaState, t: Val, is_header: boo
     table_set(state, t, "isStory", Val::Bool(false));
     table_set(state, t, "hasLocalPOI", Val::Bool(false));
     table_set(state, t, "isHidden", Val::Bool(false));
-    table_set(state, t, "isAutoComplete", Val::Bool(false));
     table_set(state, t, "overridesSortOrder", Val::Bool(false));
     table_set(state, t, "startEvent", Val::Bool(false));
     table_set(state, t, "isScaling", Val::Bool(false));
@@ -191,6 +197,7 @@ fn write_quest_constant_stub_fields(state: &mut LuaState, t: Val, is_header: boo
 }
 
 fn write_header_constant_fields(state: &mut LuaState, t: Val) {
+    table_set(state, t, "isAutoComplete", Val::Bool(false));
     table_set(state, t, "isMeta", Val::Bool(false));
     table_set(state, t, "isWorldQuest", Val::Bool(false));
     table_set(state, t, "isTask", Val::Bool(false));

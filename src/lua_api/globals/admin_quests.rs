@@ -29,6 +29,10 @@ pub(super) fn register_quests(b: TableBuilder) -> LuaResult<TableBuilder> {
             "SetQuestObjectives",
             super::admin_quest_objectives::set_quest_objectives,
         )?
+        .set_function(
+            "SetQuestReadiness",
+            super::real::quest_dialog::set_quest_readiness,
+        )?
     } else {
         b
     };
@@ -81,6 +85,7 @@ pub(super) fn open_quest_npc(state: &mut LuaState) -> LuaResult<u32> {
         sim.gossip.text = QUEST_GREETING_TEXT.to_string();
         sim.gossip.options.clear();
         sim.gossip.active_quests.clear();
+        sim.quest_log_entries.readiness.dialog = None;
         sim.gossip.available_quests = vec![GossipQuestRow {
             quest_id,
             quest_info_id: quest_id,
@@ -108,6 +113,12 @@ pub(super) fn open_multi_quest_npc(state: &mut LuaState) -> LuaResult<u32> {
         ];
         sim.gossip.available_quests = vec![quest_row(AVAILABLE_MULTI_QUEST_ID, false)];
         seed_completed_quest_reward(&mut sim.quest_log_entries.entries);
+        if crate::c_api::quest_objectives::ENABLED {
+            for id in [COMPLETED_REWARD_QUEST_ID, INCOMPLETE_ACTIVE_QUEST_ID] {
+                crate::c_api::quest_readiness::sync_gossip_readiness(&mut sim, id as i32);
+            }
+        }
+        sim.quest_log_entries.readiness.dialog = None;
         refresh_gossip_counts(&mut sim.gossip);
     }
 
@@ -119,6 +130,7 @@ pub(super) fn close_quest_npc(state: &mut LuaState) -> LuaResult<u32> {
     {
         let mut sim = borrow_state_mut(state)?;
         sim.gossip.active = false;
+        sim.quest_log_entries.readiness.dialog = None;
         sim.gossip.text.clear();
         sim.gossip.options.clear();
         sim.gossip.active_quests.clear();
