@@ -72,6 +72,8 @@ fn horizontal_currencies_passive_host_storage_feed_replacement_and_membership_re
             .horizontal_currencies
             .is_empty()
     );
+    let default_sets = env.state().borrow().ui_widget_inputs.sets.clone();
+    assert!(!default_sets.contains_key(&WidgetId::from_number(SET)));
     supply_empty_set(&env);
     let supplied = record();
     env.update_ui_widget(
@@ -122,8 +124,22 @@ fn horizontal_currencies_passive_host_storage_feed_replacement_and_membership_re
         env.state().borrow().ui_widget_inputs.horizontal_currencies[&WidgetId::from_number(ID)],
         replacement
     );
+    assert!(
+        env.state()
+            .borrow()
+            .ui_widget_inputs
+            .sets
+            .contains_key(&WidgetId::from_number(SET))
+    );
     env.replace_ui_widget_set(SET, None).unwrap();
-    assert!(env.state().borrow().ui_widget_inputs.sets.is_empty());
+    assert!(
+        !env.state()
+            .borrow()
+            .ui_widget_inputs
+            .sets
+            .contains_key(&WidgetId::from_number(SET))
+    );
+    assert_eq!(env.state().borrow().ui_widget_inputs.sets, default_sets);
     assert_eq!(
         env.state().borrow().ui_widget_inputs.horizontal_currencies[&WidgetId::from_number(ID)],
         replacement
