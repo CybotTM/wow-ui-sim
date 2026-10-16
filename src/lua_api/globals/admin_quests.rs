@@ -24,6 +24,14 @@ pub(super) fn register_quests(b: TableBuilder) -> LuaResult<TableBuilder> {
         "RequestQuestAcceptConfirmation",
         request_quest_accept_confirmation,
     )?;
+    let b = if crate::c_api::quest_objectives::ENABLED {
+        b.set_function(
+            "SetQuestObjectives",
+            super::admin_quest_objectives::set_quest_objectives,
+        )?
+    } else {
+        b
+    };
     b.set_function("OpenQuestNpc", open_quest_npc)?
         .set_function("OpenMultiQuestNpc", open_multi_quest_npc)?
         .set_function("TurnInSelectedQuest", turn_in_selected_quest)?

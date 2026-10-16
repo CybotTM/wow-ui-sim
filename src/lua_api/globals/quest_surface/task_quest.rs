@@ -1,5 +1,6 @@
 //! Quest map and C_TaskQuest handlers.
 
+use crate::c_api::quest_objectives;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
@@ -88,12 +89,15 @@ pub fn build_task_quest_info(state: &mut LuaState) -> LuaResult<u32> {
         table_set(state, info, "x", Val::Num(quest.x));
         table_set(state, info, "y", Val::Num(quest.y));
         table_set(state, info, "mapID", Val::Num(quest.map_id as f64));
-        table_set(
-            state,
-            info,
-            "numObjectives",
-            Val::Num(quest.num_objectives as f64),
-        );
+        let count = if quest_objectives::ENABLED {
+            quest_objectives::objective_count(
+                &borrow_state(state)?.quest_log_entries,
+                quest.quest_id,
+            )
+        } else {
+            quest.num_objectives
+        };
+        table_set(state, info, "numObjectives", Val::Num(f64::from(count)));
         table_set(state, info, "isMapIndicatorQuest", Val::Bool(false));
         set_array_value(state, result_ref, out_index, info);
     }

@@ -5,6 +5,7 @@
 
 #[cfg(feature = "client-retail")]
 pub(crate) mod currency_list;
+pub mod quest_objectives;
 pub mod ui_widget_manager;
 
 #[cfg(feature = "retail-12-0-5")]

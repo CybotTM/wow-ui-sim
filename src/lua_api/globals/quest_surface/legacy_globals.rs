@@ -1,5 +1,6 @@
 //! Legacy global quest handlers shared by classic profile quest panels.
 
+use crate::c_api::quest_objectives;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_string_static,
 };
@@ -179,9 +180,13 @@ pub fn get_quest_text(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn get_objective_text(state: &mut LuaState) -> LuaResult<u32> {
-    let objective_text = selected_static_quest(state)?
-        .map(join_objective_text)
-        .unwrap_or_default();
+    let objective_text = if quest_objectives::ENABLED {
+        quest_objectives::read_selected_objective_text(state)?
+    } else {
+        selected_static_quest(state)?
+            .map(join_objective_text)
+            .unwrap_or_default()
+    };
     let objective_text = create_string(state, &objective_text);
     state.push(objective_text);
     Ok(1)
@@ -230,6 +235,9 @@ pub fn get_quest_item_info_loot_type(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn get_num_quest_leaderboards(state: &mut LuaState) -> LuaResult<u32> {
+    if quest_objectives::ENABLED {
+        return quest_objectives::get_legacy_objective_count(state);
+    }
     let log_index = Option::<f64>::from_stack(state, 1)?
         .map(|index| index as i32)
         .unwrap_or(selected_log_index(state)?);
@@ -242,6 +250,9 @@ pub fn get_num_quest_leaderboards(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn get_quest_log_leaderboard(state: &mut LuaState) -> LuaResult<u32> {
+    if quest_objectives::ENABLED {
+        return quest_objectives::get_legacy_leaderboard(state);
+    }
     let objective_index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
     let log_index = Option::<f64>::from_stack(state, 2)?
         .map(|index| index as i32)
@@ -258,6 +269,9 @@ pub fn get_quest_log_leaderboard(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn get_quest_log_quest_text(state: &mut LuaState) -> LuaResult<u32> {
+    if quest_objectives::ENABLED {
+        return quest_objectives::get_legacy_quest_text(state);
+    }
     let quest_id = selected_quest_id(state)?;
     let Some((
         _,
@@ -355,6 +369,9 @@ fn push_selected_criteria_spell(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn get_quest_progress_bar_percent(state: &mut LuaState) -> LuaResult<u32> {
+    if quest_objectives::ENABLED {
+        return quest_objectives::get_percentage(state);
+    }
     state.push(Val::Num(0.0));
     Ok(1)
 }

@@ -3783,3 +3783,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-16] evidence | Cached intrinsic-tag Retail proof
 
 [Owning contract](../specs/xml-intrinsic-tags.md) records focused original-cache GREEN, 170 template preservation PASS/one existing ignored TODO, and separate clean Retail startup at f963b6b18. No native/all-profile claim.
+
+## [2026-10-16] source | Supplied quest objectives
+
+[Lua state checkpoint](systems/lua-api.md#supplied-objective-snapshots) links the QL-1 contract and admin boundary; both-profile behavioral RED precedes the producer, GREEN pending.

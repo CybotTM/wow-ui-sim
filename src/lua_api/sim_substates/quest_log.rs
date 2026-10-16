@@ -5,7 +5,8 @@
 //! the rich metadata surfaced to the 17 ported probe methods.
 
 use super::GossipQuestRow;
-use std::collections::HashSet;
+use crate::c_api::quest_objectives::QuestObjectiveProgress;
+use std::collections::{HashMap, HashSet};
 use std::num::TryFromIntError;
 
 /// Rich quest-log entry used by `C_QuestLog.*` probes.
@@ -71,6 +72,7 @@ pub struct QuestRewardCurrency {
 #[derive(Debug, Clone, Default)]
 pub struct QuestLogState {
     pub entries: Vec<QuestLogEntry>,
+    pub objective_progress: HashMap<i32, QuestObjectiveProgress>,
     /// Quest IDs already turned in / permanently completed.
     /// Drives `GetAllCompletedQuestIDs` and `IsQuestFlaggedCompleted`.
     pub completed_quest_ids: HashSet<i32>,
@@ -89,6 +91,7 @@ impl QuestLogState {
             return false;
         }
         self.entries.retain(|entry| entry.quest_id != quest_id);
+        self.objective_progress.remove(&quest_id);
         self.completed_quest_ids.insert(quest_id);
         true
     }
@@ -123,6 +126,7 @@ impl QuestLogState {
                 glittering_geodes_entry(),
                 earthen_relic_recovery_entry(),
             ],
+            objective_progress: crate::c_api::quest_objectives::seeded_progress(),
             completed_quest_ids: seeded_completed_quest_ids(),
         }
     }

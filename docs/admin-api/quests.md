@@ -2,6 +2,18 @@
 
 `A_Admin` functions are simulator-only, not native WoW APIs.
 
+## SetQuestObjectives
+
+Retail/Forever only: `A_Admin.SetQuestObjectives(questID, rows, percentage?)` replaces
+an existing active rich quest's ordered objective snapshot. Rows supply `text`,
+`type`, boolean `finished`, nonnegative integer `numFulfilled`/`numRequired` and
+optional positive integer `criteriaID`; percentage is optional finite 0–100.
+Returns changed-state boolean; invalid typed data errors before mutation. It does
+not infer progress, grant rewards or create membership. Identical input is inert.
+[Contract](../specs/quest-objective-progress.md) owns projections, declared bootstrap
+cardinality and committed-before-notify behavior. Both-profile behavioral RED is
+recorded; producer GREEN remains pending.
+
 ## TurnInSelectedQuest
 
 ```lua

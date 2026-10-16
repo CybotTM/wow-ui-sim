@@ -22,6 +22,7 @@
 //! - `IsWorldQuest(questID)` — returns bool.
 
 use super::{ensure_namespace, set_table_array};
+use crate::c_api::quest_objectives;
 use crate::lua_api::globals::quest_surface::data::{
     QUEST_LOG, QuestLogEntry as SeededQuestLogEntry, WORLD_QUESTS,
 };
@@ -40,6 +41,7 @@ pub(super) fn register_quest_log_surface(state: &mut LuaState) -> LuaResult<()> 
     for (name, func) in C_QUEST_LOG_METHODS {
         table_set_rust_fn_static(state, ns, name, *func)?;
     }
+    quest_objectives::register(state)?;
     let globals = state.global;
     table_set_rust_fn_static(state, globals, "GetQuestPOIs", get_quest_pois)?;
     Ok(())
@@ -241,7 +243,8 @@ fn get_next_waypoint_for_map(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_num_quest_objectives(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = i32::from_stack(state, 1)?;
-    let count = objective_count_for_quest(quest_id).unwrap_or(0);
+    let count =
+        objective_count_for_quest(&borrow_state(state)?.quest_log_entries, quest_id).unwrap_or(0);
     state.push(Val::Num(count as f64));
     Ok(1)
 }
@@ -316,7 +319,12 @@ fn get_world_quest_info(state: &mut LuaState) -> LuaResult<u32> {
         table_set(state, t, "x", Val::Num(x));
         table_set(state, t, "y", Val::Num(y));
     }
-    table_set(state, t, "numObjectives", Val::Num(1.0));
+    let count = if quest_objectives::ENABLED {
+        quest_objectives::objective_count(&borrow_state(state)?.quest_log_entries, quest_id)
+    } else {
+        1
+    };
+    table_set(state, t, "numObjectives", Val::Num(f64::from(count)));
     table_set(state, t, "isElite", Val::Bool(false));
     table_set(state, t, "tradeskillLineIndex", Val::Num(0.0));
     state.push(t);
@@ -325,13 +333,15 @@ fn get_world_quest_info(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_quests_on_map(state: &mut LuaState) -> LuaResult<u32> {
     let map_id = i32::from_stack(state, 1)?;
-    let quests = borrow_state(state)?
-        .quest_log_entries
-        .entries
-        .iter()
-        .filter(|entry| entry.map_id == Some(map_id))
-        .filter_map(quest_poi_map_info_for_entry)
-        .collect::<Vec<_>>();
+    let quests = {
+        let sim = borrow_state(state)?;
+        let log = &sim.quest_log_entries;
+        log.entries
+            .iter()
+            .filter(|entry| entry.map_id == Some(map_id))
+            .filter_map(|entry| quest_poi_map_info_for_entry(log, entry))
+            .collect::<Vec<_>>()
+    };
 
     let array = create_table(state);
     for (index, quest) in quests.into_iter().enumerate() {
@@ -543,10 +553,13 @@ struct QuestPoiMapInfo {
     in_progress: bool,
 }
 
-fn quest_poi_map_info_for_entry(entry: &QuestLogEntry) -> Option<QuestPoiMapInfo> {
+fn quest_poi_map_info_for_entry(
+    log: &QuestLogState,
+    entry: &QuestLogEntry,
+) -> Option<QuestPoiMapInfo> {
     let map_id = entry.map_id?;
     let (x, y) = entry.waypoint?;
-    let num_objectives = objective_count_for_quest(entry.quest_id).unwrap_or(0);
+    let num_objectives = objective_count_for_quest(log, entry.quest_id).unwrap_or(0);
     Some(QuestPoiMapInfo {
         quest_id: entry.quest_id,
         map_id,
@@ -558,7 +571,10 @@ fn quest_poi_map_info_for_entry(entry: &QuestLogEntry) -> Option<QuestPoiMapInfo
     })
 }
 
-fn objective_count_for_quest(quest_id: i32) -> Option<i32> {
+fn objective_count_for_quest(log: &QuestLogState, quest_id: i32) -> Option<i32> {
+    if quest_objectives::ENABLED {
+        return Some(quest_objectives::objective_count(log, quest_id));
+    }
     if let Some(quest) = WORLD_QUESTS.iter().find(|quest| quest.quest_id == quest_id) {
         return Some(quest.num_objectives);
     }

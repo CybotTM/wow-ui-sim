@@ -2293,3 +2293,7 @@ Reconciled source-only attribution for `f00f230fe`, `593e543f5` and `655f0698b`:
 ## [2026-10-16] evidence | Cached intrinsic-tag Retail proof
 
 [Owning contract](../specs/xml-intrinsic-tags.md) records focused original-cache GREEN, 170 template preservation PASS/one existing ignored TODO, and separate clean Retail startup at f963b6b18. No native/all-profile claim.
+
+## [2026-10-16] source | Supplied quest objectives
+
+[Lua state checkpoint](systems/lua-api.md#supplied-objective-snapshots) links the QL-1 contract and admin boundary; both-profile behavioral RED precedes the producer, GREEN pending.

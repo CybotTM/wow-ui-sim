@@ -17,6 +17,7 @@ pub mod admin_movement;
 pub mod admin_party_target_helpers;
 pub mod admin_premade;
 pub mod admin_pvp_guild;
+pub mod admin_quest_objectives;
 pub mod admin_quests;
 pub mod admin_spec;
 pub mod admin_vault;

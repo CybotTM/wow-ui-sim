@@ -4,6 +4,8 @@ pub struct Objective {
     pub text: &'static str,
     pub obj_type: &'static str,
     pub finished: bool,
+    pub num_fulfilled: i32,
+    pub num_required: i32,
 }
 
 pub enum QuestLogEntry {
@@ -40,11 +42,15 @@ pub static QUEST_LOG: &[QuestLogEntry] = &[
                 text: "Ironforge Relics collected: 3/5",
                 obj_type: "item",
                 finished: false,
+                num_fulfilled: 3,
+                num_required: 5,
             },
             Objective {
                 text: "Explore the Old Quarry",
                 obj_type: "event",
                 finished: false,
+                num_fulfilled: 0,
+                num_required: 1,
             },
         ],
     },
@@ -56,6 +62,8 @@ pub static QUEST_LOG: &[QuestLogEntry] = &[
             text: "Stormwind Guards defended: 7/10",
             obj_type: "monster",
             finished: false,
+            num_fulfilled: 7,
+            num_required: 10,
         }],
     },
     QuestLogEntry::Quest {
@@ -67,11 +75,15 @@ pub static QUEST_LOG: &[QuestLogEntry] = &[
                 text: "Supplies gathered: 5/5",
                 obj_type: "item",
                 finished: true,
+                num_fulfilled: 5,
+                num_required: 5,
             },
             Objective {
                 text: "Deliver to Quartermaster",
                 obj_type: "event",
                 finished: false,
+                num_fulfilled: 0,
+                num_required: 1,
             },
         ],
     },

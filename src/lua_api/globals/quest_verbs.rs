@@ -141,6 +141,7 @@ fn set_abandon_quest(state: &mut LuaState) -> LuaResult<u32> {
         st.quest_log_entries
             .entries
             .retain(|entry| entry.quest_id != id as i32);
+        st.quest_log_entries.objective_progress.remove(&(id as i32));
         #[cfg(feature = "client-wowforever")]
         st.quest_watch_types.remove(&(id as i32));
         st.abandon_quest_id = Some(id);
