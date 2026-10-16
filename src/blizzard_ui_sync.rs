@@ -7,6 +7,8 @@ mod pinned;
 mod pinned_download;
 mod profile_cache;
 #[cfg(test)]
+mod wrath_runtime;
+#[cfg(test)]
 mod wrath_runtime_copy;
 
 #[cfg(test)]
