@@ -36,6 +36,12 @@ Desktop source and Cargo targets persist under `/home/osso-test/.cache/native-bu
 
 Runtime Blizzard caches remain host-local and profile-scoped under `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns`; desktop resolves that home as `osso-test`. Host selection does not populate or migrate those caches. SSH leases control remote cleanup. Source SCP has a 60-second attempt limit and at most three transient attempts; permanent failures fail immediately.
 
+### Local admission CPU scope
+
+Measure CPU usage and capacity over the same cgroup scope. On October16,2026, local `agents.slice/cpu.max` was `max 100000` and main `nproc` reported32 CPUs; a measurement service with `CPUQuota=20%` reported1 from `nproc`, while `nproc --all` reported32. The local capacity helper pairs slice-wide CPU counters with a `nproc` denominator when the slice quota is unlimited, so adding a smaller polling-service quota can produce a misleading `agents 9.9/1 CPU` verdict. This is not evidence that the slice has a one-core limit.
+
+Keep these sleeping measurement-only wrappers outside smaller CPU quotas, preserving low priority, bounded memory and normal queue/memory/pressure admission. Actual builds retain their separate resource limits and guards. Main corrected only its existing polling unit's runtime quota, without restarting it, bypassing FIFO, changing host-slice policy or modifying the shared helper. Raw bounded reproduction and correction receipts: `/home/osso/.local/state/wow-ui-sim/handoff/iconbackground-capacity-scope-main-disposition.md`. This diagnoses measurement scope, not a Cargo bottleneck or jobs12 speedup.
+
 ## Evidence and pending runtime proof
 
 Main-observed evidence on October 3, 2026: actual native desktop GUI binary build passed (4m9s); headless CLI startup `--no-addons --no-saved-vars lua-errors` returned `[]`, exit 0 (`target/native-desktop-lua-errors.log`). These are bounded build/CLI observations, not full parity or warning-free acceptance.
