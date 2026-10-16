@@ -59,7 +59,18 @@ fn load_xml_files(env: &WowLuaEnv, names: &[&str]) {
     let dir = tempfile::tempdir().unwrap();
     let mut toc = String::from("## Interface: 30300\n## Title: WrathResidualA\n");
     for name in names {
-        toc.push_str(read_original(name).to_str().unwrap());
+        let original = read_original(name);
+        let common = dir
+            .path()
+            .ancestors()
+            .find(|base| original.starts_with(base))
+            .unwrap();
+        let mut relative = PathBuf::new();
+        for _ in dir.path().strip_prefix(common).unwrap().components() {
+            relative.push("..");
+        }
+        relative.push(original.strip_prefix(common).unwrap());
+        toc.push_str(relative.to_str().unwrap());
         toc.push('\n');
     }
     let path = dir.path().join("WrathResidualA.toc");
