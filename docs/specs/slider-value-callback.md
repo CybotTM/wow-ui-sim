@@ -28,7 +28,7 @@ Saved Retail source `05f1b4a62`: **five unique PASS, exit0**, independently reco
 
 ## C8 changed-range callback/lifecycle candidate
 
-Explicit shared simulator policy only, not a native-client claim. C8 producer is authored; GREEN remains pending main integration and verification. Existing validation remains owned by [widget range validation](widget-range-validation.md); C8 does not change it or StatusBar behavior.
+Explicit shared simulator policy only, not a native-client claim. Saved Retail producer execution passes five cases; current-source/all-profile acceptance remains open. Existing validation remains owned by [widget range validation](widget-range-validation.md); C8 does not change it or StatusBar behavior.
 
 - [ ] Make Slider-only `OnMinMaxChanged` publicly discoverable through `HasScript`, bindable/readable through `SetScript`/`GetScript`, and clearable without removing type capability or dispatching on binding alone; StatusBar does not support it.
 - [ ] After successful validation of changed bounds, commit both bounds, synchronously notify `OnMinMaxChanged(self,min,max)` while the old stored value remains readable, then reapply that value through ordinary Slider assignment. Hidden sliders follow the same lifecycle; equal bounds are included.
@@ -40,7 +40,7 @@ Actual sealed Retail baseline source `05f1b4a62`, epoch `controls-producers-reta
 
 Authored producer adds Slider-only script capability in `events.rs`, commits changed validated bounds without clamping the stored value, dispatches range bindings through the existing protected pre/normal/post dispatcher, then reapplies the captured stored value through `apply_slider_value`. Both range and value delivery occur outside simulator-state borrows, including hidden sliders. Identical bounds return silently after validation; StatusBar range application is unchanged. Existing error reporting and effective-value reentry suppression are reused.
 
-Producer `bddb5eb11` plus `b4d806ec7` follow-up is authored; **GREEN pending main integration and verification**. Saved `05f1b4a62` execution does not cover this later producer; five existing tests remain unchanged. Public Lua traces assert new-bounds/old-value range observation followed by effective-value observation. They establish the reached simulator RED, not native parity or authored-producer GREEN. Existing callback and C1 proof statements above remain unchanged.
+Producer `bddb5eb11` plus `b4d806ec7` executes at saved Retail source `d16876fcc`: **five unique PASS, exit0**, with all assertions reached and independent full-stream/build/seal verification. The retained selection is `c8-producer-c7-c9-retail-baseline-20261016T003140348455Z/slider-range-producer-first-green`. Public Lua traces cover new-bounds/old-value range observation followed by effective-value observation, public binding capability, retained-value silence and C1 quantizer reuse. This is bounded saved-Retail proof, not current-HEAD, other-profile or native acceptance. Historical `05f1b4a62` RED and existing callback/C1 scopes above remain separate.
 
 Defaults, range initialization, pre-initialization and first-value policy remain untouched and **UNRESOLVED**, outside C8. StatusBar, duplicate validation/quantizer tests, and speculative callback mutations of range/value are excluded. Existing dispatch/error/reentry guarantees are not weakened; this bounded set adds no separate proof for them.
 

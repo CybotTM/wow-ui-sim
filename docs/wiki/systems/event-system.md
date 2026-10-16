@@ -36,7 +36,7 @@ Handlers stored in the `__scripts` global table keyed as `"{widget_id}_{handler_
 2. For each listener: look up `__scripts["{id}_OnEvent"]` and `__frame_{id}`, call `handler(frame, event_name, ...args)`
 3. Errors logged per-frame; dispatch continues to remaining frames
 
-`fire_script_handler(id, handler_type, args)` fires any non-OnEvent handler on a specific frame. Changed EditBox `SetText`/`SetFormattedText` first commits text and clamps scalar cursor/selection state, then directly dispatches normal scripts and hooks as `OnTextSet(self)` followed by `OnTextChanged(self, false)`. Same-value assignment dispatches neither; errors route to the error handler while later handlers and the second phase continue. `EditBox:SetFocus` and `ClearFocus` use the normal ordered binding dispatcher directly: after committing focus state, a transfer calls former owner `OnEditFocusLost`, then current requested owner `OnEditFocusGained`; clearing calls loss only. Repeated focus/clear and clearing a non-owner are no-ops. Loss-handler reentry can replace the requested owner, suppressing its stale gained callback; handler errors are reported and later focus callbacks continue. This closes simulator omissions, not native-WoW skips. Mouse input focus behavior is unchanged.
+`fire_script_handler(id, handler_type, args)` fires any non-OnEvent handler on a specific frame. Changed EditBox `SetText`/`SetFormattedText` first commits text and clamps scalar cursor/selection state, then dispatches synchronous `OnTextSet(self)`. Source-only `c8d79f3bf` defers `OnTextChanged` until an early shared tick or pre-key-down dirty flush refreshes presentation and dispatches cursor notification first. Insertion `OnChar` stays synchronous; pending change/origin bits coalesce notification and are consumed before callbacks. Same-value assignment does not enqueue a change. [Owning EditBox contract](../../specs/editbox-text-position-selection.md#cursor-geometry-follow-up) retains historical RED, origin rules and uncompiled/unexecuted producer status. `EditBox:SetFocus` and `ClearFocus` use the normal ordered binding dispatcher directly: after committing focus state, a transfer calls former owner `OnEditFocusLost`, then current requested owner `OnEditFocusGained`; clearing calls loss only. Repeated focus/clear and clearing a non-owner are no-ops. Loss-handler reentry can replace the requested owner, suppressing its stale gained callback; handler errors are reported and later focus callbacks continue. This closes simulator omissions, not native-WoW skips. Mouse input focus behavior is unchanged.
 
 `FireEvent(event, ...)` — Lua-callable global that performs the same dispatch, useful for tests.
 
@@ -46,7 +46,10 @@ Source-inspected 2026-10-12: `globals/real/unit_roles_assignment.rs` commits cha
 
 ## OnUpdate Tick
 
-`fire_on_update()` sequence each render tick:
+`fire_on_update()` sequence each render tick (C2 flush source-only at `c8d79f3bf`):
+
+Before ordinary OnUpdate dispatch, flush EditBox presentation/cursor and pending text notifications; the same flush precedes key-down handling. See the [owning lifecycle](../../specs/editbox-text-position-selection.md).
+
 1. Filter `on_update_frames` to visible-only
 2. Call `__scripts["{id}_OnUpdate"](frame, elapsed)` for each
 3. Fire OnPostUpdate handlers for the same set

@@ -1,5 +1,11 @@
 # Rendering Pipeline
 
+## EditBox presented cache
+
+Source-only `c8d79f3bf`: EditBox glyph/caret emission consumes retained `EditBoxPresentation.input` and cursor geometry, not immediate logical `Frame.text`/`text_stripped`. Those immediate fields remain API state. The flushed snapshot supplies raw/stripped text, font and layout settings, including configured alignment/wrap; color, shadow and outline still come from the frame. Without a presentation input, no text/caret is emitted.
+
+`src/render/editbox_layout.rs` shapes full content using cosmic-text `Buffer`/`Editor`, maps the visible UTF-8 cursor, and applies actual run metrics, alignment and spacing. Geometry is computed before viewport clipping; glyphs/caret are clipped during emission. This is not an estimated prefix-width caret. The [owning contract](specs/editbox-text-position-selection.md#cursor-geometry-follow-up) records flush ordering and proof limits: uncompiled/unexecuted C2, no GPU/native acceptance. Explicit LEFT/TOP geometry fixtures do not establish default alignment or native policy.
+
 ## Overview
 
 Two-tier rendering architecture:
@@ -177,7 +183,7 @@ pub fn build_quad_batch_for_registry(registry, screen_size, ...) -> QuadBatch {
 | Texture | `build_texture_quads()` | Image, atlas, tiling, nine-slice |
 | FontString | `emit_widget_text_quads()` | Text with justify/wrap/max_lines/line spacing |
 | CheckButton | `build_button_quads()` | + left-aligned text offset 20px |
-| EditBox | `build_editbox_quads()` | + padded text |
+| EditBox | `build_editbox_quads()` | + flushed presentation text/caret |
 
 **Button texture fallback** (lines 169-188): If tex_coords specified, use custom UVs. Otherwise 3-slice default (4px caps).
 

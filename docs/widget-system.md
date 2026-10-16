@@ -1,5 +1,9 @@
 # Widget System
 
+## EditBox logical and presented state
+
+Source-only `c8d79f3bf` adds lazy `EditBoxPresentation`: retained typed layout input, cursor geometry and pending text-change/origin bits. `WidgetRegistry` maintains EditBox IDs rather than scanning all widgets; flush compares inputs before reshaping. Logical text/stripped cache and cursor remain immediate API state, distinct from the flushed raw/stripped/font/settings snapshot consumed by rendering. Font-system replacement invalidates presentation inputs without clearing pending notifications. See [owning lifecycle and proof limits](specs/editbox-text-position-selection.md#cursor-geometry-follow-up) and [renderer consumption](rendering-pipeline.md#editbox-presented-cache). C2 remains uncompiled/unexecuted; historical RED and the Wrath guard remain.
+
 ## Frame Struct: Core Widget Representation
 
 **File:** `src/widget/frame.rs:104-340`

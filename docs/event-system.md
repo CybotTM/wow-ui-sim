@@ -111,9 +111,9 @@ The `ScriptHandler` enum defines all recognized handler types. Each frame can ha
 | `OnSpacePressed` | Space key in EditBox | none |
 | `OnEditFocusGained` | EditBox gains focus | none |
 | `OnEditFocusLost` | EditBox loses focus | none |
-| `OnTextChanged` | EditBox text changes | none |
+| `OnTextChanged` | EditBox pending change delivered after presentation flush | `userInput` |
 | `OnValueChanged` | Slider value changes | `value` |
-| `OnMinMaxChanged` | Slider min/max changes | none |
+| `OnMinMaxChanged` | Slider min/max changes | `min`, `max` |
 | `OnTooltipCleared` | Tooltip content cleared | none |
 | `OnTooltipSetItem` | Tooltip set to item | none |
 | `OnTooltipSetUnit` | Tooltip set to unit | none |
@@ -411,6 +411,10 @@ Both are wrapped in `pcall()` to match WoW behavior.
 Visibility dispatch is reentrant and child-first for currently visible children. `Show()` or `Hide()` changes the frame state immediately, so a handler observes its own mutation. A `Hide()` called from `OnShow` defers `OnHide` until `OnShow` returns, then dispatches `OnHide` and leaves the frame hidden; cleanup only resets dispatch-depth bookkeeping and does not restore the outer request.
 
 Mutual `OnShow`/`OnHide` changes are drained iteratively for at most 12 handler invocations. Nested cross-frame dispatch is capped at depth 40. These limits prevent recursion overflow while preserving the final state selected by the handlers.
+
+## EditBox dirty-flush boundary
+
+Source-only producer `c8d79f3bf` flushes EditBoxes early in the shared environment tick, before ordinary OnUpdate, and before key-down handling. Logical edits remain immediate; changed `SetText`/`SetFormattedText` runs `OnTextSet` synchronously, and keyboard/nonempty Lua insertion runs synchronous `OnChar`. A flush refreshes actual presentation/caret before `OnCursorChanged`, then delivers one pending `OnTextChanged` per EditBox absent handler edits. Pending change/origin bits are consumed before callbacks so reentrant edits remain pending. The [owning contract](specs/editbox-text-position-selection.md#cursor-geometry-follow-up) defines origin semantics and retains historical RED/native limits. No C2 compilation/runtime GREEN; original scrolling-consumer proof is still required before removing the Wrath guard.
 
 ## OnUpdate Tick Mechanism
 
