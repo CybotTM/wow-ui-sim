@@ -504,6 +504,8 @@ macro_rules! build_empty_sim_state {
             loot_slots: Vec::new(),
             last_loot_roll_choice: None,
             auction_browse_items: Vec::new(),
+            #[cfg(feature = "client-wrath")]
+            refer_a_friend_linked_guids: HashSet::new(),
             loot_method: LootMethodState::default(),
             loot_history: LootHistoryState::default(),
             gossip: GossipState::default(),

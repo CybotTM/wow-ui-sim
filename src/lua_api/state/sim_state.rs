@@ -22,6 +22,9 @@ pub struct SimState {
     /// Independent free-look-hover policy; false default is a simulator guess.
     #[cfg(feature = "client-wowforever")]
     pub(crate) gamepad_allow_hover_events_with_free_look: bool,
+    /// Explicit Wrath RAF link snapshot, keyed by represented unit GUID.
+    #[cfg(feature = "client-wrath")]
+    pub refer_a_friend_linked_guids: HashSet<String>,
     pub widgets: WidgetRegistry,
     #[cfg(feature = "retail-12-1-5")]
     pub(crate) weather: crate::c_api::c_weather::WeatherState,
