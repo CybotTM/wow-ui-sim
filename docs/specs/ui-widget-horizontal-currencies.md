@@ -2,31 +2,32 @@
 
 Private supplied-state contract for `src/c_api/ui_widget_manager/`; architecture
 owner: [manager state](../wiki/systems/ui-widget-manager-state.md).
-2026-10-16. Staged contract; no compiler, test, RED/GREEN or startup proof.
+2026-10-16. Supplied-state behavior verified on Retail and PTR against sealed
+normal libraries; no startup, native or pixel acceptance.
 This expands the selector-only preparation without rewriting historical evidence.
 
 ## What it must do
 
-- [ ] Accept explicit complete supplied records only; fresh environments start
+- [x] Accept explicit complete supplied records only; fresh environments start
   with an empty map. Reuse existing `UiWidgetCurrencyRecord`, not a second row type.
-- [ ] Public `GetHorizontalCurrenciesWidgetVisualizationInfo(widgetID)` requires
+- [x] Public `GetHorizontalCurrenciesWidgetVisualizationInfo(widgetID)` requires
   a number and returns exactly one nullable record. A populated record returns a
   table containing all 15 outer fields and every ordered 10-field currency row.
   Missing required input and invalid types are separate controls. Diagnostic
   wording follows existing simulator required-number behavior, not native proof.
-- [ ] Each query returns fresh outer/array/row tables. Caller edits, row insertion,
+- [x] Each query returns fresh outer/array/row tables. Caller edits, row insertion,
   deletion, whole replacement, later host updates and record removal do not mutate
   retained snapshots. Fractional keys remain distinct; environments stay isolated.
-- [ ] Empty currencies are a fresh empty table, not omitted/nil. Restore ordered
+- [x] Empty currencies are a fresh empty table, not omitted/nil. Restore ordered
   rows without filling an older empty snapshot. No invented widget-ID range policy.
-- [ ] `SecretArguments = "AllowedWhenUntainted"`: test actual wrapped present/absent
+- [x] `SecretArguments = "AllowedWhenUntainted"`: test actual wrapped present/absent
   numbers securely, deny both under tainted callers before lookup, preserve wrappers,
   caller taint and host state, then recover securely. Security case is compiled only
   when the repository's `retail-12-1-0` feature exposes the existing test helpers.
-- [ ] Type9 feed publishes complete membership and record before synchronous
+- [x] Type9 feed publishes complete membership and record before synchronous
   `UPDATE_UI_WIDGET`; invalid visualization type or missing set changes neither
   records/membership nor events. Removing membership retains independent records.
-- [ ] Actual cached Retail/PTR HorizontalCurrencies Lua/XML, loaded through the
+- [x] Actual cached Retail/PTR HorizontalCurrencies Lua/XML, loaded through the
   existing addon closure and unmodified manager provider, consumes normal feeds.
   Cover activation, in-place reordered row update, empty rows, both cached width
   branches, sorting, full-set replacement, Hidden release, Shown reacquisition,
@@ -38,36 +39,36 @@ This expands the selector-only preparation without rewriting historical evidence
 
 | Requirement | Field | Declared type | Nilable |
 | --- | --- | --- | --- |
-| [ ] | `shownState` | `WidgetShownState` | false |
-| [ ] | `currencies` | `table`, InnerType `UIWidgetCurrencyInfo` | false |
-| [ ] | `tooltipLoc` | `UIWidgetTooltipLocation` | false |
-| [ ] | `widgetSizeSetting` | `number` | false |
-| [ ] | `textureKit` | `textureKit` | false |
-| [ ] | `frameTextureKit` | `textureKit` | false |
-| [ ] | `hasTimer` | `bool` | false |
-| [ ] | `orderIndex` | `number` | false |
-| [ ] | `widgetTag` | `string` | false |
-| [ ] | `inAnimType` | `WidgetAnimationType` | false |
-| [ ] | `outAnimType` | `WidgetAnimationType` | false |
-| [ ] | `widgetScale` | `UIWidgetScale` | false |
-| [ ] | `layoutDirection` | `UIWidgetLayoutDirection` | false |
-| [ ] | `modelSceneLayer` | `UIWidgetModelSceneLayer` | false |
-| [ ] | `scriptedAnimationEffectID` | `number` | false |
+| [x] | `shownState` | `WidgetShownState` | false |
+| [x] | `currencies` | `table`, InnerType `UIWidgetCurrencyInfo` | false |
+| [x] | `tooltipLoc` | `UIWidgetTooltipLocation` | false |
+| [x] | `widgetSizeSetting` | `number` | false |
+| [x] | `textureKit` | `textureKit` | false |
+| [x] | `frameTextureKit` | `textureKit` | false |
+| [x] | `hasTimer` | `bool` | false |
+| [x] | `orderIndex` | `number` | false |
+| [x] | `widgetTag` | `string` | false |
+| [x] | `inAnimType` | `WidgetAnimationType` | false |
+| [x] | `outAnimType` | `WidgetAnimationType` | false |
+| [x] | `widgetScale` | `UIWidgetScale` | false |
+| [x] | `layoutDirection` | `UIWidgetLayoutDirection` | false |
+| [x] | `modelSceneLayer` | `UIWidgetModelSceneLayer` | false |
+| [x] | `scriptedAnimationEffectID` | `number` | false |
 
 Ordered `UIWidgetCurrencyInfo` rows:
 
 | Requirement | Field | Declared type | Nilable |
 | --- | --- | --- | --- |
-| [ ] | `iconFileID` | `fileID` | false |
-| [ ] | `leadingText` | `string` | false |
-| [ ] | `text` | `string` | false |
-| [ ] | `tooltip` | `string` | false |
-| [ ] | `isCurrencyMaxed` | `bool` | false |
-| [ ] | `textFontType` | `UIWidgetFontType` | false |
-| [ ] | `textSizeType` | `UIWidgetTextSizeType` | false |
-| [ ] | `textEnabledState` | `WidgetEnabledState` | false |
-| [ ] | `iconSizeType` | `WidgetIconSizeType` | false |
-| [ ] | `updateAnimType` | `UIWidgetUpdateAnimType` | false |
+| [x] | `iconFileID` | `fileID` | false |
+| [x] | `leadingText` | `string` | false |
+| [x] | `text` | `string` | false |
+| [x] | `tooltip` | `string` | false |
+| [x] | `isCurrencyMaxed` | `bool` | false |
+| [x] | `textFontType` | `UIWidgetFontType` | false |
+| [x] | `textSizeType` | `UIWidgetTextSizeType` | false |
+| [x] | `textEnabledState` | `WidgetEnabledState` | false |
+| [x] | `iconSizeType` | `WidgetIconSizeType` | false |
+| [x] | `updateAnimType` | `UIWidgetUpdateAnimType` | false |
 
 ## How it works
 
@@ -91,7 +92,7 @@ Ordered `UIWidgetCurrencyInfo` rows:
 
 ## Implementation inventory
 
-Private passive proposals, not canonical implementation:
+Implemented on branch `horizcurr` (not merged into canonical):
 
 - `src/c_api/ui_widget_manager/horizontal_currencies_record.rs`: complete 15-field
   input, reusing existing `UiWidgetCurrencyRecord`.
@@ -102,7 +103,7 @@ Private passive proposals, not canonical implementation:
 Patch `00-tests.patch` contains only this passive wiring and tests. Existing
 missing-member namespace behavior returns nil, so populated tests must fail at
 the table boundary. Patch `10-producer.patch` replaces that missing behavior with
-explicit getter registration and complete fresh projection; adopt it only after
+explicit getter registration and complete fresh projection; adopted after
 recording the populated behavioral RED.
 
 ## Tests asserting this spec
@@ -112,15 +113,41 @@ recording the populated behavioral RED.
 `tests/ui_widget_horizontal_currencies.rs` and `tests/widget_horizontal_currencies/`:
 full query, feed, gated security and cached lifecycle assertions.
 
-13 intended Rust test functions with security feature enabled (12 without). Two passive, two selector, five query, two feed,
-one feature-gated security, one composite cached lifecycle. Helpers/loops/profiles
-are not extra independent cases. Every execution boundary is currently UNREACHED.
+13 Rust test functions with security feature enabled (12 without). Two passive,
+two selector, five query, two feed, one feature-gated security, one composite cached
+lifecycle. Helpers/loops/profiles are not extra independent cases.
+
+| Scope | Retail | PTR |
+| --- | --- | --- |
+| HorizontalCurrencies query/feed/security/cached lifecycle | 9/9 pass | 9/9 pass |
+| Passive host controls | 2/2 pass | 2/2 pass |
+| Required-number selectors | 2/2 pass | 2/2 pass |
+| IconTextAndCurrencies preservation | 11/11 pass | 11/11 pass |
+| ItemDisplay preservation | 10/10 pass | 10/10 pass |
+
+Retail tests-first execution observed nine populated-table assertion failures and
+two invalid-selector rejection assertion failures. One passive control passed;
+the other incorrectly required removal of unrelated default sets. The approved
+test-only correction preserves the exact original set map and explicitly checks
+that supplied set 449 disappears. A deliberate copied-test no-op-removal
+counterexample failed that absence assertion. No setup/nil-call/compile failure
+was counted as populated RED.
+
+Production revisions: passive `b7c4d1e11`, producer `b6bd754b8`.
+Corrected test revision: `3978e49af`. Retail GREEN used the producer library;
+PTR used the corrected-test revision with identical production inputs.
+Private build/component manifests, seals, source snapshots, per-group results and
+CVar stat/hash checks live under
+`~/.local/state/wow-ui-sim/handoff/horizcurr-execution/`.
+The reused runner's generic scope label mentions quest/charge; actual module
+manifests and executed names establish this widget-only coverage.
 
 ## Known gaps (current cycle)
 
-- [ ] Main adoption, formatting, compiler checks and populated behavioral RED.
-- [ ] Producer patch adoption after RED, subsequent bounded Retail/PTR behavior,
-  startup and other required gates. Producer is staged separately, not executed.
+- [x] Branch adoption, changed-file formatting, normal-library builds and populated
+  assertion RED followed by Retail/PTR GREEN and widget preservation.
+- [ ] Canonical integration and broader parent acceptance, including startup;
+  not part of this isolated slice.
 
 ## Out of scope
 
