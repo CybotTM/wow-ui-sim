@@ -58,6 +58,10 @@ Updated [classic startup cascades](investigations/classic-startup-producer-casca
 
 [Proof owner](../baselines/approved-batch-2026-10-16.md) records separately attributed Retail/Wrath RED/GREEN/preservation, clean Retail startup and unchanged failing Wrath inventory. [[simple-html]] documents shared structured layout and XML/pointer fixture boundaries. CheckButton numeric input is local; strings and shared boolean extraction remain unchanged. T4 original Wrath sound consumers and final verifier gates remain open.
 
+## [2026-10-16] performance | Startup primitive redundancy
+
+[Investigation](investigations/startup-primitive-redundancy.md) records tests-first Retail 42/42 before/after preservation for separate layout and registration optimizations. SetText optimization remains deferred; matched measurement pending, no gain claimed.
+
 ## [2026-10-16] evidence | Quest turn-in and charge selector bounded GREEN
 
 [Quest owner](../specs/quest-turn-in-model.md#bounded-retailforever-acceptance--2026-10-16) and [charge owner](../specs/cooldown-restriction.md#bounded-retailptr-selector-acceptance--2026-10-16) accept saved source `70ebaee0e`: 57/57 profile cases (Retail 28, PTR 25, Forever 4), 29 logical tests, exact recipe names/seals/features and original-CVar guards. Separate Retail/PTR startups exit 0 `[]`; Forever exit 1, 10 unique/14 baseline-matched GamepadActionBars errors. Overall startup remains failed; no native/full-integration/current-HEAD or parent closure.

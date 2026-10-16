@@ -58,6 +58,10 @@
 
 [Client profile checkpoint](systems/client-profiles.md#retail-70448-source-and-producer-update--october-16-2026) links exact source identity, private-cache acquisition, public API epoch and producer regressions. Bounded runtime/preservation acceptance: startup `[]`, 265/265 preservation, 139 newly enabled epoch cases and 23 atlas/aura controls; native/all-profile/full-suite acceptance remains separate.
 
+## [2026-10-16] performance | Startup primitive redundancy
+
+[Investigation](investigations/startup-primitive-redundancy.md) records separate layout-cycle bookkeeping and UI-string lookup removals, tests-first Retail 42/42 before/after preservation, deferred SetText optimization and pending matched measurement. No gain or all-profile claim.
+
 ## [2026-10-16] documentation | Container, message history and transform label producers
 
 [Producer notes](systems/lua-api.md#container-message-history-and-transform-producers--2026-10-16) and [widget storage](systems/widget-system.md#message-history-and-translation-target-state--2026-10-16) link the owning [split/use](../specs/container-split-use.md), [quest metadata](../specs/container-item-quest-metadata.md), [Wrath history](../specs/message-frame-access-history.md) and [transform](../specs/animation-transforms.md) receipts. Historical accepted RED remains separate from post-GREEN receipts; Retail and Wrath acceptance reports linked from the owning specs bound the GREEN scope. [Residual container workaround](systems/lua-api.md#remaining-container-default-shapes) owns retained defaults and retirement conditions. No native/full-profile/startup/check acceptance.
