@@ -55,17 +55,8 @@ fn test_text_runtime_helpers_exist() {
 #[test]
 fn test_scrollframe_scroll_scripts_fire_from_native_methods() {
     let env = WowLuaEnv::new().unwrap();
-    let (range_count, h_range, v_range, scroll_count, scroll_offset, current_scroll, current_range): (
-        i32,
-        f64,
-        f64,
-        i32,
-        f64,
-        f64,
-        f64,
-    ) = env
-        .eval(
-            r#"
+    env.exec(
+        r#"
             local scrollFrame = CreateFrame("ScrollFrame")
             scrollFrame:SetSize(100, 100)
 
@@ -89,10 +80,25 @@ fn test_scrollframe_scroll_scripts_fire_from_native_methods() {
             scrollFrame:UpdateScrollChildRect()
             scrollFrame:SetVerticalScroll(40)
 
-            return rangeCount, hRange, vRange, scrollCount, scrollOffset,
-                scrollFrame:GetVerticalScroll(), scrollFrame:GetVerticalScrollRange()
-            "#,
-        )
+            function ScrollScriptSnapshot()
+                return rangeCount, hRange, vRange, scrollCount, scrollOffset,
+                    scrollFrame:GetVerticalScroll(), scrollFrame:GetVerticalScrollRange()
+            end
+        "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+
+    let (range_count, h_range, v_range, scroll_count, scroll_offset, current_scroll, current_range): (
+        i32,
+        f64,
+        f64,
+        i32,
+        f64,
+        f64,
+        f64,
+    ) = env
+        .eval("return ScrollScriptSnapshot()")
         .unwrap();
 
     assert_eq!(range_count, 1);
