@@ -164,7 +164,13 @@ fn get_num_who_results(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn set_who_to_ui(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = bool::from_stack(state, 1)?;
+    let enabled = bool::from_stack(state, 1)?;
+    #[cfg(feature = "client-wrath")]
+    {
+        borrow_state_mut(state)?.who_routing.to_ui = enabled;
+    }
+    #[cfg(not(feature = "client-wrath"))]
+    let _ = enabled;
     Ok(0)
 }
 

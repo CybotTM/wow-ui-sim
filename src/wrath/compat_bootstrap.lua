@@ -285,11 +285,6 @@ if SetPlayerTextureWidth == nil then
   end
 end
 
-if SetSelectedSkill == nil then
-  function SetSelectedSkill()
-  end
-end
-
 if debuginfo == nil then
   function debuginfo()
     return ""
@@ -492,12 +487,6 @@ end
 if rawget(_G, "GetChannelDisplayInfo") == nil then
   function GetChannelDisplayInfo(idx)
     return nil
-  end
-end
-
-if rawget(_G, "GetCurrentMapContinent") == nil then
-  function GetCurrentMapContinent()
-    return 0, 0
   end
 end
 

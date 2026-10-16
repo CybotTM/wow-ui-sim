@@ -15,6 +15,10 @@ const WRATH_COMPAT_FRAME_PROXIES_LUA: &str = include_str!("compat_frame_proxies.
 /// is `if rawget(_G, "X") == nil then ... end` so existing definitions from a
 /// real `Blizzard_SharedXML` addon take precedence.
 pub fn init(lua: &mut rilua::Lua) -> crate::Result<()> {
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::globals::real::wrath_legacy::register_all(lua)?;
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::globals::real::wrath_legacy_lfg::register_all(lua)?;
     lua.exec(WRATH_COMPAT_BOOTSTRAP_LUA)?;
     Ok(())
 }

@@ -215,6 +215,13 @@ fn parse_default_cvars() -> (HashMap<String, String>, HashMap<String, String>) {
         defaults.insert(key.clone(), "0".to_owned());
         original_names.insert(key, name.to_owned());
     }
+    #[cfg(feature = "client-wrath")]
+    {
+        // Blizzard Wrath FrameXML/InterfaceOptionsFrame.lua:319 UI default.
+        defaults.insert("targetoftargetmode".into(), "5".into());
+        original_names.insert("targetoftargetmode".into(), "targetOfTargetMode".into());
+        // BaseMip's shipped range does not establish a default; do not guess.
+    }
     insert_profile_cvars(&mut defaults, &mut original_names);
     remove_profile_cvars(&mut defaults, &mut original_names);
     (defaults, original_names)

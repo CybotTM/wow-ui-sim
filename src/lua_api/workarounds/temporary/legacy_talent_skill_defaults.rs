@@ -57,6 +57,10 @@ if rawget(_G, "GetArenaOpponentSpec") == nil then
     end
 end
 
+"#;
+
+#[cfg(not(feature = "client-wrath"))]
+const LEGACY_SKILL_DEFAULTS_LUA: &str = r#"
 if rawget(_G, "GetNumSkillLines") == nil then
     function GetNumSkillLines()
         return 0
@@ -78,6 +82,8 @@ end
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(LEGACY_TALENT_SKILL_DEFAULTS_LUA)?;
+    #[cfg(not(feature = "client-wrath"))]
+    lua.exec(LEGACY_SKILL_DEFAULTS_LUA)?;
     Ok(())
 }
 
