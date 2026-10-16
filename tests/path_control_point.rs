@@ -334,6 +334,49 @@ fn path_stop_and_natural_finish_restore_each_playbacks_existing_offset() {
 }
 
 #[test]
+fn path_hiding_owner_subtree_stops_playback_and_restores_existing_offset() {
+    let env = new_env();
+    create_path_scene(&env);
+    env.exec(
+        r#"
+        path:SetCurveType('NONE')
+        path:SetSmoothing('NONE')
+        local first = path:CreateControlPoint(nil, nil, 1)
+        first:SetOffset(10, -4)
+        local last = path:CreateControlPoint(nil, nil, 2)
+        last:SetOffset(30, 8)
+        assert(owner:IsVisible() and owner.Icon:IsVisible())
+        "#,
+    )
+    .unwrap();
+    let anchored = frame_rect(&env, "PathStageIcon");
+    seed_icon_offset(&env, 3.0, -5.0);
+    env.exec("group:Play()").unwrap();
+    env.fire_on_update(1.0).unwrap();
+    env.exec("assert(group:IsPlaying())").unwrap();
+    assert_shift(&env, "PathStageIcon", anchored, 23.0, -3.0);
+    env.exec(
+        r#"
+        owner:Hide()
+        assert(not owner:IsShown())
+        assert(not owner:IsVisible() and not owner.Icon:IsVisible())
+        assert(group:IsDone() and not group:IsPlaying())
+        "#,
+    )
+    .unwrap();
+    assert_shift(&env, "PathStageIcon", anchored, 3.0, -5.0);
+    env.exec(
+        r#"
+        group:Stop()
+        assert(not owner:IsVisible() and not owner.Icon:IsVisible())
+        assert(group:IsDone() and not group:IsPlaying())
+        "#,
+    )
+    .unwrap();
+    assert_shift(&env, "PathStageIcon", anchored, 3.0, -5.0);
+}
+
+#[test]
 fn path_unknown_curve_token_is_rejected_without_changing_curve() {
     let env = new_env();
     create_path_scene(&env);
