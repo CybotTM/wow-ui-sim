@@ -90,6 +90,10 @@ const METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetFontStringByID", font_string::get_font_string_by_id),
     // Transforms
     (
+        "RemoveMessagesByAccessID",
+        transform::remove_messages_by_access_id,
+    ),
+    (
         "RemoveMessagesByPredicate",
         transform::remove_messages_by_predicate,
     ),

@@ -17,6 +17,7 @@ mod path_runtime;
 mod play;
 mod runtime;
 mod templates;
+mod transforms;
 mod vertex_color;
 
 pub(super) use vertex_color::{

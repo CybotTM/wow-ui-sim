@@ -455,6 +455,7 @@ pub struct SimState {
     pub item_cooldowns: HashMap<u32, SpellCooldownState>,
     pub action_ui_buttons: Vec<(u64, u32)>,
     pub cursor_item: Option<CursorInfo>,
+    pub container_actions: crate::c_api::container_actions::ContainerActions,
     pub loading_addon_index: Option<u16>,
     pub loading_addon_stack: Vec<u16>,
     pub executing_addon_index: Option<u16>,
@@ -494,6 +495,9 @@ pub struct SimState {
     pub pvp_honor: PvpHonorState,
     pub world: WorldState,
     pub bag_items: HashMap<(i32, i32), BagItem>,
+    /// Host-supplied metadata keyed by item ID, not bag coordinates.
+    pub container_item_quests:
+        HashMap<u32, crate::c_api::container_quest::ContainerItemQuestMetadata>,
     pub bag_info: HashMap<i32, crate::c_api::bag_info::BagInfo>,
     pub tracked_recipes: TrackedRecipes,
     pub crafting: CraftingState,

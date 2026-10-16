@@ -26,9 +26,25 @@ pub(crate) fn register_legacy_container_globals(state: &mut LuaState) -> LuaResu
     for &(name, rust_fn) in LEGACY_CONTAINER_GLOBALS {
         table_set_rust_fn_static(state, state.global, name, rust_fn)?;
     }
+    #[cfg(feature = "client-wrath")]
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "GetContainerItemQuestInfo",
+        get_container_item_quest_info,
+    )?;
     #[cfg(feature = "client-wowforever")]
     table_set_rust_fn_static(state, state.global, "HasKey", has_key)?;
     Ok(())
+}
+
+// Passive legacy projection of HEAD's fixed namespaced quest-info default.
+#[cfg(feature = "client-wrath")]
+fn get_container_item_quest_info(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(rilua::Val::Bool(false));
+    state.push(rilua::Val::Nil);
+    state.push(rilua::Val::Bool(false));
+    Ok(3)
 }
 
 #[cfg(feature = "client-wowforever")]

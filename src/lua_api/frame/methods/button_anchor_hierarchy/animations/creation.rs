@@ -103,7 +103,7 @@ fn attach_animation_specific_methods(
             super::super::register_animation_vertex_color(state, table)
         }
         AnimationType::Path => super::path::attach_path_methods(state, val),
-        _ => Ok(()),
+        _ => super::transforms::attach_transform_methods(state, val, anim_type),
     }
 }
 

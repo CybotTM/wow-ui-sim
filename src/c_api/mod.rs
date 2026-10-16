@@ -168,6 +168,7 @@ pub mod c_quest_info_system;
 mod c_quest_log;
 #[cfg(feature = "client-wowforever")]
 mod c_quest_log_watches;
+pub mod container_quest;
 #[cfg(feature = "client-wowforever")]
 pub use c_quest_log_watches::QuestWatchType;
 #[cfg(feature = "client-wowforever")]
@@ -291,6 +292,7 @@ pub mod c_wowtoken_secure;
 pub mod c_xml_util;
 pub(crate) mod c_zone_ability_icon;
 pub mod charge_state;
+pub mod container_actions;
 pub(crate) mod container_inventory;
 pub(crate) mod cooldown_duration;
 pub(crate) mod duration_clock;

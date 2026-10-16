@@ -428,9 +428,17 @@ fn get_cursor_money(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+// Passive legacy endpoints: preserve HEAD's no-op action behavior.
+fn container_action_noop(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 /// Install in the global table. Exposed for tests that want to bypass the
 /// full `register_globals` chain.
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    #[cfg(feature = "client-wrath")]
+    LuaApiMut::register_function(lua, "SplitContainerItem", container_action_noop)?;
+    LuaApiMut::register_function(lua, "UseContainerItem", container_action_noop)?;
     LuaApiMut::register_function(lua, "PickupContainerItem", pickup_container_item)?;
     LuaApiMut::register_function(lua, "PickupInventoryItem", pickup_inventory_item)?;
     LuaApiMut::register_function(lua, "PickupBagFromSlot", pickup_bag_from_slot)?;

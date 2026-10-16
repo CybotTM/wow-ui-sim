@@ -14,6 +14,11 @@ use rilua::{LuaResult, Val};
 
 use super::scroll::message_frame_scroll_limit;
 
+// Passive publication: HEAD retains every message; producer replaces this body.
+pub(super) fn remove_messages_by_access_id(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 pub(super) fn remove_messages_by_predicate(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let predicate = match stack_val(state, 2) {

@@ -90,7 +90,6 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "UntrackAchievement",
     "UpdateTransmogrifyOutfit",
     "UseAction",
-    "UseContainerItem",
     "UseInventoryItem",
     "UseItemByName",
     "WardrobeFrame_OpenTransmogToItem",
