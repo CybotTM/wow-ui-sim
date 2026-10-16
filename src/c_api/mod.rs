@@ -3,6 +3,8 @@
 //! Real/state-backed surfaces live at the root of this module. Intentionally
 //! unsupported compatibility gaps stay isolated under `permanent_shims`.
 
+#[cfg(feature = "client-retail")]
+pub(crate) mod currency_list;
 pub mod ui_widget_manager;
 
 #[cfg(feature = "retail-12-0-5")]

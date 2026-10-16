@@ -1,5 +1,7 @@
 # Retail displayed currency indices — B5 proposal
 
+Integration checkpoint (2026-10-16): B5 producer admitted after observed behavioral RED in the approved profile scope. GREEN, preservation and startup observations remain pending. No native-parity claim.
+
 Status: staged, uncompiled/unexecuted. Simulator policy proposal, not native parity.
 Authority: 2026-10-16 B5 receipt; collapse/expand first. Watched and unused are independently selectable follow-ups, not part of base acceptance.
 

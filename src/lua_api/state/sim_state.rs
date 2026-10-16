@@ -615,6 +615,8 @@ pub struct SimState {
     pub pet_actions: Vec<PetActionSlot>,
     pub glyph: GlyphState,
     pub currency_info: HashMap<i32, CurrencyInfo>,
+    #[cfg(feature = "client-retail")]
+    pub(crate) currency_list: crate::c_api::currency_list::CurrencyListState,
     /// Explicit (War Mode applies, limit once per tooltip) flags; no inferred catalog.
     pub currency_war_mode_bonus: HashMap<i32, (Option<bool>, Option<bool>)>,
     /// Explicit immediate reputation grants; no inferred currency/faction catalog.

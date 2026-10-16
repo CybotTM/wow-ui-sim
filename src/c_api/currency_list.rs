@@ -1,0 +1,63 @@
+//! Retail currency display projection. Catalog positions identify headers; Lua indices do not.
+use std::collections::HashSet;
+
+use crate::lua_api::globals::currency_data::{self, CurrencyEntry};
+
+pub(crate) type CurrencyListRow = (i32, &'static CurrencyEntry);
+
+#[derive(Default)]
+pub(crate) struct CurrencyListState {
+    collapsed_headers: HashSet<i32>,
+}
+
+impl CurrencyListState {
+    pub(crate) fn displayed_entries(&self) -> Vec<CurrencyListRow> {
+        let mut hidden_below_depth = None;
+        self.ordered_entries()
+            .into_iter()
+            .filter(|(key, entry)| {
+                if hidden_below_depth.is_some_and(|depth| entry.depth > depth) {
+                    return false;
+                }
+                hidden_below_depth = if entry.is_header && self.collapsed_headers.contains(key) {
+                    Some(entry.depth)
+                } else {
+                    None
+                };
+                true
+            })
+            .collect()
+    }
+
+    fn ordered_entries(&self) -> Vec<CurrencyListRow> {
+        (1..=currency_data::currency_list_size())
+            .filter_map(|index| {
+                currency_data::get_currency_list_entry(index).map(|entry| (index, entry))
+            })
+            .collect()
+    }
+
+    pub(crate) fn displayed_entry(&self, index: i32) -> Option<CurrencyListRow> {
+        let offset = usize::try_from(index.checked_sub(1)?).ok()?;
+        self.displayed_entries().get(offset).copied()
+    }
+
+    pub(crate) fn header_expanded(&self, index: i32) -> bool {
+        self.displayed_entry(index)
+            .is_some_and(|(key, entry)| entry.is_header && !self.collapsed_headers.contains(&key))
+    }
+
+    pub(crate) fn set_header_expanded(&mut self, index: i32, expanded: bool) {
+        let Some((key, entry)) = self.displayed_entry(index) else {
+            return;
+        };
+        if !entry.is_header {
+            return;
+        }
+        if expanded {
+            self.collapsed_headers.remove(&key);
+        } else {
+            self.collapsed_headers.insert(key);
+        }
+    }
+}

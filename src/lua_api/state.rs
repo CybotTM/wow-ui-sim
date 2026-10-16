@@ -517,6 +517,8 @@ macro_rules! build_empty_sim_state {
             pet_actions: vec![PetActionSlot::default(); 10],
             glyph: GlyphState::default(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
+            #[cfg(feature = "client-retail")]
+            currency_list: crate::c_api::currency_list::CurrencyListState::default(),
             currency_war_mode_bonus: HashMap::new(),
             currency_faction_grants: HashMap::new(),
             #[cfg(feature = "retail-12-0-0")]

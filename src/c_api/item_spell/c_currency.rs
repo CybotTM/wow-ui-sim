@@ -1,5 +1,7 @@
 use crate::c_api::ensure_namespace;
 use crate::lua_api::globals::currency_data;
+#[cfg(feature = "client-retail")]
+use crate::lua_api::methods::borrow_state_mut;
 use crate::lua_api::methods::{
     borrow_state, create_string, create_table, create_table_with_capacity, table_set,
     table_set_static, val_to_string,
@@ -12,6 +14,8 @@ use rilua::{LuaResult, Val};
 const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
     #[cfg(feature = "retail-12-0-0")]
     ("IsCurrencyTransferInProgress", query_transfer_activity),
+    #[cfg(feature = "client-retail")]
+    ("ExpandCurrencyList", expand_currency_list),
     ("GetCurrencyListSize", c_currency_get_list_size),
     ("GetCurrencyListInfo", c_currency_get_list_info),
     (
@@ -117,14 +121,46 @@ fn query_currency_faction_grant(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+#[cfg(feature = "client-retail")]
+fn expand_currency_list(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let expanded = bool::from_stack(state, 2)?;
+    borrow_state_mut(state)?
+        .currency_list
+        .set_header_expanded(index, expanded);
+    Ok(0)
+}
+
 fn c_currency_get_list_size(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(currency_data::currency_list_size() as f64));
+    #[cfg(feature = "client-retail")]
+    let size = borrow_state(state)?.currency_list.displayed_entries().len() as f64;
+    #[cfg(not(feature = "client-retail"))]
+    let size = currency_data::currency_list_size() as f64;
+    state.push(Val::Num(size));
     Ok(1)
+}
+
+fn read_currency_list_entry(
+    state: &LuaState,
+    index: i32,
+) -> LuaResult<Option<&'static currency_data::CurrencyEntry>> {
+    #[cfg(feature = "client-retail")]
+    {
+        Ok(borrow_state(state)?
+            .currency_list
+            .displayed_entry(index)
+            .map(|(_, entry)| entry))
+    }
+    #[cfg(not(feature = "client-retail"))]
+    {
+        let _ = state;
+        Ok(currency_data::get_currency_list_entry(index))
+    }
 }
 
 fn c_currency_get_list_info(state: &mut LuaState) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1)?;
-    let Some(entry) = currency_data::get_currency_list_entry(index) else {
+    let Some(entry) = read_currency_list_entry(state, index)? else {
         state.push(Val::Nil);
         return Ok(1);
     };
@@ -139,8 +175,20 @@ fn c_currency_get_list_info(state: &mut LuaState) -> LuaResult<u32> {
         "currencyTypesID",
         Val::Num(entry.currency_id as f64),
     );
+    #[cfg(feature = "client-retail")]
+    table_set_static(
+        state,
+        info,
+        "currencyListDepth",
+        Val::Num(entry.depth as f64),
+    );
     write_currency_row_display_fields(state, info, &display);
     write_currency_list_status_fields(state, info, entry);
+    #[cfg(feature = "client-retail")]
+    if entry.is_header {
+        let expanded = borrow_state(state)?.currency_list.header_expanded(index);
+        table_set_static(state, info, "isHeaderExpanded", Val::Bool(expanded));
+    }
     table_set_static(
         state,
         info,
