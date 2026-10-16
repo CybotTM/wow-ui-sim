@@ -131,7 +131,23 @@ These are saved runtime results, not independently accepted runtime or current-H
 
 ## Classic byte-limit preservation follow-up
 
-Saved Wrath `39d38` keyboard preservation reaches the actual limit RED above: the independent scalar/UTF-8 limit test accepts `é猫` despite a four-byte limit. Classic shared registration overwrites modeled EditBox `SetMaxBytes` with a no-op. `c4020794b` retires only that obsolete override, preserving the existing modeled setter shared by Wrath/Mists/Era/Anniversary; the existing behavioral test is the regression. Fix remains UNCOMPILED, unchecked and without GREEN. Other Classic profile preservation remains pending; no new limit policy is inferred.
+Saved Wrath `39d38` keyboard preservation reaches the actual limit RED above: the independent scalar/UTF-8 limit test accepts `é猫` despite a four-byte limit. Classic shared registration overwrites modeled EditBox `SetMaxBytes` with a no-op. `c4020794b` retires only that obsolete override, preserving the existing modeled setter shared by Wrath/Mists/Era/Anniversary; the existing behavioral test is the regression. Saved pinned Wrath execution below now supplies bounded GREEN; no fresh check or other Classic profile preservation follows. No new limit policy is inferred.
+
+## Saved Wrath byte-limit and bare-font execution — source0184775
+
+Private independent reports `Wrath-byte-limit-build-report.md` and `Wrath-byte-limit-runtime-report.md` (retained off-repo) accept only saved source `0184775b5db228e4136f1c29ffaba3b90f84725d`. Records are October 16, 2026 UTC (October 15 evening CDT), not fresh execution by this documentation audit.
+
+| Exact saved selection | Result |
+|---|---|
+| `key_dispatch::` | 28 PASS, exit0; four `editbox_limit_*` cases included |
+| `editbox_stub_family::` | 15 PASS, exit0; four `max_letters::*` cases included |
+| `button_state_textures::c7_` | 3 PASS, exit0; bare public-API font fixtures only |
+
+All 46 executed names are distinct; no failed/ignored/measured tests. Independent build/seal audit accepts recorded no-run compilation and sealed integration SHA-256 `30734f98475cd826a0873e6c6c90b33f3b2d5336b219f25a4febef5e69b0b3b4`. Runtime records link the same sealed executable through matching argv/source and stable before/after stats; they do not hash each execution. Build features are `casc, client-wrath, gui, rodio, sound`. Existing `UnitRole` variants Tank/Healer/Damage `dead_code` warning remains: not warning-free.
+
+Keyboard stderr retains one ESCAPE → `ToggleGameMenu` nil-call Lua error despite 28 Rust PASS; no intentional-injection or zero-error claim. Source-only follow-up attributes this path to the bare `esc_does_not_error_with_no_focus` fixture: it lacks the Blizzard function and asserts only dispatch-result success, while binding execution routes Lua failures to the error handler. This is not evidence of a loaded Blizzard consumer failure; the saved stream alone did not establish fixture ownership. EditBox stderr retains one `text set failure` block with explicit `error`/`SetText` frames, consistent with the passing error-routing fixture, but saved fixture source/assertions were not independently audited for intent/error counts. Bare C7 stderr has no Lua errors; font fallback telemetry is not asset-parity proof. `casc=true` telemetry despite `WOW_SIM_CASC=0` prevents a total-CASC-non-use claim.
+
+Historical `39d38` byte-limit RED and C7 missing-cache setup failures above remain separate, as do its pending runtime/hash qualifications. New proof does not retroactively repair those records or prove RED-to-GREEN causality. No native/all-profile, genuine Wrath consumer, full-suite, current-HEAD or later-source acceptance; no external dependency/asset cryptographic provenance. Genuine Wrath consumer remains unexecuted and nil-field guard STAYS; broader shared/parent gates and unchecked requirements remain OPEN.
 
 ## Out of scope
 

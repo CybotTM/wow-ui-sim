@@ -2188,3 +2188,7 @@ Updated [shared owner](../specs/editbox-text-position-selection.md#saved-xmlscro
 ## Source audit | Fullsuite39 bounded follow-ups
 
 Reconciled source-only attribution for `f00f230fe`, `593e543f5` and `655f0698b`: deferred ScrollFrame fixture observation, exactly two resolved 9.1.0 widget gap removals, and top-eight phase diagnostics with unchanged budgets. See [fixture owner](../specs/scrollframe-script-bindings.md#library-fixture-reconciliation--pending-runtime), [publication owner](../specs/patch-9-1-0-publication-sweep.md#current-widget-query-reconciliation--2026-10-15) and [diagnostics owner](investigations/test-suite-performance.md#per-addon-budget-diagnostics). Targeted runtime pending; fullsuite39 remains FAIL.
+
+## [2026-10-15] evidence | Bounded saved Wrath018 proof
+
+[Owning receipt](../specs/editbox-text-position-selection.md#saved-wrath-byte-limit-and-bare-font-execution--source0184775) records independent saved build/seal/runtime audits for source0184775 only; button owner, matrix and index link that scope. Historical39d38 RED/setup failures retained; ESC diagnostic, text-error audit limits and UnitRole warning preserved. No native/all-profile/current-HEAD/genuine Wrath consumer proof, guard retirement or broader parent checkoff.
