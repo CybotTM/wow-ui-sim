@@ -71,7 +71,7 @@ fn invalid_json(cause: serde_json::Error) -> io::Error {
     invalid(format!("invalid Wrath source identity: {cause}"))
 }
 
-fn inspect_runtime_parent(addons: &Path) -> io::Result<&Path> {
+pub(super) fn inspect_runtime_parent(addons: &Path) -> io::Result<&Path> {
     let parent = addons
         .parent()
         .ok_or_else(|| invalid("missing profile parent"))?;
