@@ -1,5 +1,5 @@
 //! Supplied type5 query, isolation, security and cached-consumer contracts.
-#![cfg(feature = "client-retail")]
+#![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 
 #[path = "widget_double_icon/consumer.rs"]
 mod consumer;

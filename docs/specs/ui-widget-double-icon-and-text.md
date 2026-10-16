@@ -46,6 +46,12 @@ Saved source `5dfa94330e411efda0d23ad4fcb946b3759f602f` executes **nine unique c
 
 These checkboxes accept only this supplied-state Retail matrix. Selected streams contain startup timings but no emitted warnings/errors; they are not a complete ordinary startup baseline. No profile-preservation, format/check, native/render/asset/timer/model/animation-execution or full-parent acceptance follows. Historical REDs retain their original source boundaries; this proof does not cover C3 or unrelated current-HEAD changes.
 
+## Pending PTR preservation — 2026-10-16
+
+| Profile | Execution status |
+|---|---|
+| PTR (`client-ptr`) | Pending: nine cases, including security (`client-ptr` → `retail-12-1-5` → `retail-12-1-0`). Test selector now admits PTR; cached PTR type5 Lua/XML consumer is present. No execution or native-parity claim; profile/full-parent acceptance remains open. Existing accepted Retail nine-case receipt is unchanged; no replay. |
+
 ## Known gaps (current cycle)
 
 - [x] Execute the public selector regression and independently distinguish its reached rejection-contract failure from compilation/setup failure; retained as RED, not acceptance.
