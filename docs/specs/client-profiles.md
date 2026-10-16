@@ -31,6 +31,8 @@ Pinned archive acquisition and all 382 copied source files have independent byte
 
 `src/blizzard_ui_sync/wrath_snapshot.rs` implements fresh-destination extraction of the two pinned roots, archive-path/link validation, required FrameXML TOC and provenance publication last. Its current registration is unit-test-only, not a wired runtime downloader. Standalone helper execution at `94b8593bc` passes four tests after the positive fixture failed at the Unsupported baseline; a separate real-archive test matches all 382 selected files against the verified local snapshot. Independent review accepts these component receipts, not remote-origin authentication. Full-crate/profile compilation, runtime synchronization and genuine consumer coverage remain open.
 
+The isolated runtime-copy helper maps manifest `FrameXML/…` entries to the profile's sibling FrameXML tree; other entries remain AddOns-relative. It preflights selected source files and conflicting destination bytes before copying, preserves identical and unrelated files, and never publishes completion markers itself. Runtime wrapper/routing and execution proof remain pending.
+
 ## How it works
 
 - [Observed TOC game-type tokens](../wiki/reference/toc-game-type-tokens.md) — bounded source inventory, not a native acceptance contract; filename suffixes and filter strings remain separate.
