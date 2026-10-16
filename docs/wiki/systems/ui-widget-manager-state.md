@@ -149,7 +149,15 @@ The separate source1571253e9 Retail baseline executed nine unique cases: **one u
 
 [Owning contract](../../specs/ui-widget-icon-text-and-background.md#bounded-retail-producer-proof--2026-10-16) records independently accepted combined Retail/PTR supplied-record requirements: ten cases per profile (the same ten logical cases), actual cached type4 lifecycle and secret access, plus separate clean normal startups with original CVars unchanged. Retail normal source `84da38a3b`, test checkout `13423aae4` and getter `2a422cb86` remain distinct; the [PTR receipt](../../specs/ui-widget-icon-text-and-background.md#bounded-ptr-producer-proof--2026-10-16) retains its own attribution. Historical REDs and separate fmt/default-check proofs are preserved. Standalone common-helper execution is not whole-integration proof; broader/full-parent acceptance remains OPEN. No native/catalog/assets/render parity or activation of projected effects follows; different CPU allocations preclude performance comparison.
 
+## IconTextAndCurrencies passive source and selector RED — 2026-10-16
+
+[Owning contract](../../specs/ui-widget-icon-text-and-currencies.md) inventories passive `7e3586e97`: explicit20-field records with ordered10-field currency rows, empty environment map, type7 host-feed storage and exports only. Independent source/spec/readability PASS; no modeled supplied-record getter/projection, defaults or seeds. Nine populated fixtures are authored but uncompiled/unexecuted; normal Retail library work is pending, not accepted.
+
+The owner retains independent selector RED at test source `825d7bf84` against older normal Retail library `84da38a3b`:0PASS/2FAIL/exit101 after shared missing/nil and callable/absent-numeric one-nil controls. Target missing/nil calls wrongly succeed; target diagnostics and later argument iterations are unreached. This predates passive source, not a passive-library or PTR execution. [Background acceptance](../../specs/ui-widget-icon-text-and-background.md#bounded-retail-producer-proof--2026-10-16) stays separate; currencies producer/consumer and broader/full-parent gates remain OPEN. No native/catalog/assets/render/effect-activation proof.
+
 ## Sources
+
+- [IconTextAndCurrencies contract](../../specs/ui-widget-icon-text-and-currencies.md) — passive20+10-field inventory, selector RED and open populated-query/lifecycle gates.
 
 - [DoubleIconAndText contract](../../specs/ui-widget-double-icon-and-text.md) — supplied-record/consumer requirements, bounded Retail acceptance matrix and separate historical selector/populated RED boundaries.
 

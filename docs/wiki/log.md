@@ -1,3 +1,7 @@
+## [2026-10-16] source | IconTextAndCurrencies passive checkpoint
+
+[Manager checkpoint](systems/ui-widget-manager-state.md#icontextandcurrencies-passive-source-and-selector-red--2026-10-16) links passive `7e3586e97`, source/readability acceptance and separate source825 selector RED. Nine populated fixtures now authored, uncompiled/unexecuted; no getter/projection or accepted passive build/runtime. Background proof unchanged; broader parent OPEN, no native/assets/effect-activation claim.
+
 ## [2026-10-16] evidence | Supplied IconTextAndBackground
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#icontextandbackground-producer-source--2026-10-16) links independently accepted normal Retail/PTR supplied-record execution: ten cases per profile, the same ten logical cases, and separate isolated clean startups. Formatter/default type checking and historical REDs retain their own attribution. Only this supplied-record slice is complete; whole-integration, native/catalog/assets/projected-effect activation and full-parent acceptance remain open.

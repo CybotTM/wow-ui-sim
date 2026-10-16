@@ -73,7 +73,7 @@ Passive supplied-input plumbing only; no getter/projection registration yet. The
 
 - `src/c_api/ui_widget_manager/icon_text_and_currencies_record.rs` — explicit20-field `IconTextAndCurrenciesRecord` with ordered10-field `UiWidgetCurrencyRecord` rows, no defaults/seeds; fileID and enum fields follow existing `u32` host-input conventions, plain numbers use `f64`.
 
-- `src/c_api/ui_widget_manager/queries.rs` — shared required-number/secret selector and namespace registration.
+- `src/c_api/ui_widget_manager/queries.rs` — existing shared required-number/secret helper and namespace registration; no modeled IconTextAndCurrencies getter/projection registration yet. The callable baseline endpoint is not a supplied-record producer.
 - `src/c_api/ui_widget_manager/feed.rs` — typed `IconTextAndCurrencies` variant/type7 and supply arm; existing validation/state-before-event behavior unchanged.
 - `src/c_api/ui_widget_manager/inputs.rs` — empty environment-owned `icon_text_and_currencies` map using existing numeric identity.
 - `src/c_api/ui_widget_manager.rs` — public record exports; no default/demo catalog or new identity policy.
@@ -82,11 +82,15 @@ Passive supplied-input plumbing only; no getter/projection registration yet. The
 
 - `tests/ui_widget_icon_text_and_currencies_selector.rs` — newly compiled test source `825d7bf84` against sealed normal Retail library `84da38a3b`, not a whole825 library. Compile exit0/no Rust diagnostics; actual **0 PASS / 2 FAIL / exit101**. Existing `GetWidgetSetInfo` missing/nil required-number controls, public getter presence and absent numeric ID934207.5 exactly-one-nil controls pass before each target failure. Target missing/nil calls succeed instead of rejecting; target diagnostic checks and later numeric-string/boolean/table/function iterations are unreached. No supplied data, mocks, source-shape assertions or cached load. Receipt `/home/osso/.local/state/wow-ui-sim/verification/wrath-source-current/iconcurrencies-selector-retail-red-20261016T113344496157Z`; independent source/spec/readability/seal/full-stream RED attribution PASS: `/home/osso/.local/state/wow-ui-sim/verification/iconcurrencies-next/selector-red-report.md`. This is failing behavior, not feature acceptance or actual PTR execution.
 
+- `tests/ui_widget_icon_text_and_currencies.rs` and `tests/widget_icon_currencies/` — nine authored populated cases (eight without the security epoch): complete20+10-field deep snapshots/all-field replacement, environment/fractional-ID/removal isolation, fresh empty arrays/restoration, normal-feed publication/atomicity, actual secret wrappers and one combined unchanged cached type7 lifecycle. Concrete multirow data and recursive public-result assertions; existing common/snapshot helpers reused, not replaced. Consumer covers row anchor order/content, Yellow-to-White/disabled presentation, description branches, empty rows/restoration, two-widget sorting/full-set replacement, hidden/reacquire/tag behavior and live unregister/inactive feed. All new populated fixtures remain **UNCOMPILED / UNEXECUTED**; consumer checks the populated query before cached setup, and no later assertion is credited yet. Requested icon/atlas identity is not asset/pixel proof.
+
+Independent passive source/spec/readability PASS at source `7e3586e97`: `/home/osso/.local/state/wow-ui-sim/verification/iconcurrencies-next/passive-source-report.md`. Exact schemas, empty map, exports and typed feed storage are source-level evidence only; no getter, compilation or runtime acceptance follows.
+
 ## Known gaps (current cycle)
 
 - [x] Establish and independently reconcile the selector baseline, preserving missing/nil failures and later inputs as unreached. This closes RED provenance only.
 - [ ] Compile passive20+10-field records/map/feed and add populated missing-query RED before projection. Snapshots/isolation/shared secret-policy behavior remain unproved; no getter implementation yet.
-- [ ] Normal-feed and unchanged cached type-7 lifecycle tests/acceptance remain unauthored and UNEXECUTED; selector-only coverage does not prove them.
+- [ ] Execute the newly authored normal-feed and unchanged cached type-7 lifecycle fixtures. Selector-only RED does not prove populated records, query behavior or these later assertions.
 
 ## Out of scope
 
