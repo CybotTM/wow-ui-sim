@@ -26,6 +26,8 @@ Actual Retail baseline: source `3fa90ab7b6f8cf836e09c19ed34115eba9f245c1`, epoch
 
 Saved Retail source `05f1b4a62`: **five unique PASS, exit0**, independently reconciled against saved build/seal and full runtime streams; all test assertions reached. Coverage includes nearest lattice/max and upward ties, offset/negative minima, endpoints/duplicate suppression, step reapplication, and continuous Slider versus unsnapped StatusBar. The C1 quantizer/assignment path remains unchanged at `670e3d255`, but this is saved-source proof, not current-HEAD GREEN. Wrath/all-profile acceptance remains open; requirement checkboxes stay open. The fractional scale/CVar consumer explicitly chooses step0.01.
 
+Saved Wrath `39d38`: C1 step assignment **5 PASS**; [shared Wrath receipt](editbox-text-position-selection.md#saved-bounded-wrath-checkpoint) owns build/hash qualifications and pending runtime audit5795. Current relevant-fix/profile proof remains open; no checkbox closure.
+
 ## C8 changed-range callback/lifecycle candidate
 
 Explicit shared simulator policy only, not a native-client claim. Saved Retail producer execution passes five cases; current-source/all-profile acceptance remains open. Existing validation remains owned by [widget range validation](widget-range-validation.md); C8 does not change it or StatusBar behavior.
@@ -41,6 +43,8 @@ Actual sealed Retail baseline source `05f1b4a62`, epoch `controls-producers-reta
 Authored producer adds Slider-only script capability in `events.rs`, commits changed validated bounds without clamping the stored value, dispatches range bindings through the existing protected pre/normal/post dispatcher, then reapplies the captured stored value through `apply_slider_value`. Both range and value delivery occur outside simulator-state borrows, including hidden sliders. Identical bounds return silently after validation; StatusBar range application is unchanged. Existing error reporting and effective-value reentry suppression are reused.
 
 Producer `bddb5eb11` plus `b4d806ec7` executes at saved Retail source `d16876fcc`: **five unique PASS, exit0**, with all assertions reached and independent full-stream/build/seal verification. The retained selection is `c8-producer-c7-c9-retail-baseline-20261016T003140348455Z/slider-range-producer-first-green`. Public Lua traces cover new-bounds/old-value range observation followed by effective-value observation, public binding capability, retained-value silence and C1 quantizer reuse. This is bounded saved-Retail proof, not current-HEAD, other-profile or native acceptance. Historical `05f1b4a62` RED and existing callback/C1 scopes above remain separate.
+
+Saved Wrath `39d38`: C8 range lifecycle **5 PASS**; [shared Wrath receipt](editbox-text-position-selection.md#saved-bounded-wrath-checkpoint) owns pending independent-runtime and current-source qualifications. Shared criteria remain unchecked.
 
 Defaults, range initialization, pre-initialization and first-value policy remain untouched and **UNRESOLVED**, outside C8. StatusBar, duplicate validation/quantizer tests, and speculative callback mutations of range/value are excluded. Existing dispatch/error/reentry guarantees are not weakened; this bounded set adds no separate proof for them.
 

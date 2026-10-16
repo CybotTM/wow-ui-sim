@@ -33,6 +33,10 @@ Two style cases omit initial reference assertions so a reference-storage failure
 
 Saved `3a530` corrected `button_state_textures`: 12 PASS/0 FAIL, comprising three C7 cases and nine controls. Independent bounded saved-runtime validation COMPLETE; all selected assertions reached, streams and sealed-artifact association reconciled. [EditBox receipt](editbox-text-position-selection.md#saved-retail-execution--2026-10-15) owns shared terminal compile/build-seal evidence, stderr caveats and remaining gates; no clean-startup or all-profile claim.
 
+## Saved Wrath setup boundary
+
+Saved `39d38` button module: **1 PASS, 11 SETUP FAIL**, including all three C7 cases, from missing Wrath `Blizzard_SharedXMLBase` TOC. Not font-behavior RED and not C7 acceptance. [Shared Wrath receipt](editbox-text-position-selection.md#saved-bounded-wrath-checkpoint) owns pending runtime audit5795 and build/hash qualifications; earlier Retail proof remains separate.
+
 ## Known gaps (current cycle)
 
 - [x] Independently validate the corrected saved bounded projection and affected rendering/state controls. Historical three-case oracle RED remains separate; this is not native, GPU or all-profile acceptance.
