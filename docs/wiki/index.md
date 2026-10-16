@@ -1,3 +1,7 @@
+## Source | Fullsuite39 bounded follow-ups — runtime pending
+
+[ScrollFrame fixture](../specs/scrollframe-script-bindings.md#library-fixture-reconciliation--pending-runtime), [9.1.0 exact-gap reconciliation](../specs/patch-9-1-0-publication-sweep.md#current-widget-query-reconciliation--2026-10-15) and [tests-only phase diagnostics](investigations/test-suite-performance.md#per-addon-budget-diagnostics) cover `f00f230fe`, `593e543f5` and `655f0698b`. Targeted runtime pending; fullsuite39 remains FAIL. No budget or runtime implementation change.
+
 ## [2026-10-15] evidence | DoubleIconAndText bounded Retail producer PASS
 
 [Manager checkpoint](systems/ui-widget-manager-state.md#doubleiconandtext-bounded-retail-producer-proof--2026-10-15) links the owning acceptance matrix: getter `c3096cd6b` at saved source `5dfa94330`, nine unique PASS/exit0, independent build/seal/full-stream runtime reconciliation PASS. Actual cached lifecycle and secret selectors executed. Historical REDs remain separate; profile preservation, format/check, ordinary startup and full-parent gates stay open. No nine-case rerun or unrelated current-HEAD/native proof.

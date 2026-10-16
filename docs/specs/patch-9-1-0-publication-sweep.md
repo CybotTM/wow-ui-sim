@@ -16,7 +16,7 @@ The saved `983f02fbf` default prefork sweep failed only on resolved/stale entrie
 
 ## Current widget-query reconciliation — 2026-10-15
 
-Saved `39d38` prefork execution reports no new gap and only two resolved/stale expectations: `C_UIWidgetManager.GetSpacerVisualizationInfo` and `GetTextColumnRowVisualizationInfo`. Remove those two missing-endpoint IDs (50 → 48), matching the implemented [Spacer](ui-widget-spacer.md) and [text-column row](ui-widget-text-column-row.md) queries. Preserve exact remaining set equality and historical captures. This is publication reconciliation, not new payload/native proof; the corrected sweep is unexecuted and the full-suite failure remains recorded.
+Saved `39d38` prefork execution reports no new gap and only two resolved/stale expectations: `C_UIWidgetManager.GetSpacerVisualizationInfo` and `GetTextColumnRowVisualizationInfo`. `593e543f5` removes only those two missing-endpoint IDs (50 → 48), matching the implemented [Spacer](ui-widget-spacer.md) and [text-column row](ui-widget-text-column-row.md) queries. Preserve exact remaining set equality and historical captures. This is publication reconciliation, not new payload/native proof; targeted runtime of the corrected sweep is pending and fullsuite39 remains FAIL.
 
 ## Proof boundary
 

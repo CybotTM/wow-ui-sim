@@ -4,7 +4,7 @@ Measured default-retail test cost on 2026-10-07, then reuse the identical full-g
 
 ## Per-addon budget diagnostics
 
-`heaviest_blizzard_addons_stay_within_per_addon_load_budgets` reports the existing top-eight selection's loader phase durations and cache counters before checking its unchanged budgets. Durations are elapsed nanoseconds, not exclusive CPU time; Lua compilation includes cache lookup/replay, and nested components must not be added to the total. `loaded_addon_count` is the harness's discovered addon count, not a transitive registry count. This instrumentation does not establish a cause or improvement for the full-suite `39d38` ProjectConstants budget failure.
+`heaviest_blizzard_addons_stay_within_per_addon_load_budgets` reports the existing top-eight selection's loader phase durations and cache counters before checking its unchanged budgets. Durations are elapsed nanoseconds, not exclusive CPU time; Lua compilation includes cache lookup/replay, and nested components must not be added to the total. `loaded_addon_count` is the harness's discovered addon count, not a transitive registry count. Tests-only `655f0698b` adds this reporting without changing selection or budgets. Targeted runtime is pending; this instrumentation does not establish a cause or improvement for the full-suite `39d38` ProjectConstants budget failure. Fullsuite39 remains FAIL.
 
 ## Baseline
 

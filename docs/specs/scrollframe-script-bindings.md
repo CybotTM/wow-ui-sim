@@ -23,6 +23,10 @@ Saved Retail-epoch baseline `d16876fcc9ec0e49851436a6af7a1e308d0a344c` executed 
 
 C9 producer `d7cd9040c`, separate from that saved baseline, queues explicit requests in a pending set, drains a snapshot after OnUpdate and animation processing but before existing late layout size callbacks, and uses the existing range refresh. Automatic resize refresh is unchanged. Saved Retail source `792d62003` passes all three C9 cases, exit0, including the actual Alpha OnFinished request and same-frame notification after animation processing; independent full-stream/seal verification confirms this bounded result. Existing explicit synchronous-refresh test assumptions were reconciled to real ticks in the producer commit, preserving arithmetic/binding assertions and automatic resize policy; saved `03769bb00` now independently passes the broader scroll selection, including the two `d374c9520` timing-reconciled XML fixtures with payload/global assertions intact. The [shared receipt](editbox-text-position-selection.md#saved-xmlscroll-and-genuine-consumer-acceptance) owns exact totals, expected sentinel, historical REDs and scope limits; this is not a new C9 rerun or shared-Wrath acceptance. Modern native timing and all-profile behavior remain unproven.
 
+## Library fixture reconciliation — pending runtime
+
+Tests-only `f00f230fe` changes `test_scrollframe_scroll_scripts_fire_from_native_methods` to tick `env.fire_on_update(0.016)` before reading its Lua snapshot, so it observes deferred explicit range-refresh callback work. Existing range, offset and callback assertions remain; no runtime implementation or automatic resize policy changes. Targeted runtime is pending; this fixture edit is not a passing-test receipt. Fullsuite39 remains FAIL.
+
 ## How it works
 
 - [Event dispatch](../event-system.md)

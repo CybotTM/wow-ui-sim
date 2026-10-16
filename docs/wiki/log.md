@@ -2184,3 +2184,7 @@ Updated [existing Windows investigation](investigations/windows-port-build.md#ev
 ## [2026-10-15] docs | Saved03769 XML/scroll and genuine Retail consumer acceptance
 
 Updated [shared owner](../specs/editbox-text-position-selection.md#saved-xmlscroll-and-genuine-consumer-acceptance), XML/scroll owners, widget inventories/matrix and index from independent saved build/seal/runtime reports. Actual font ticks and original cached consumer accepted within bounded Retail scope; stdout marker order is libc/Rust buffering, not pre-tick error collection. Historical REDs and earlier proof totals retained; ESC diagnostic unfixed, Wrath guard/shared gate intact. Wrath build ACTIVE; full suite submitted without verdict, not polled. Broader gates OPEN. Docs only; no code/tests/build/check/runtime/commit/delegation.
+
+## Source audit | Fullsuite39 bounded follow-ups
+
+Reconciled source-only attribution for `f00f230fe`, `593e543f5` and `655f0698b`: deferred ScrollFrame fixture observation, exactly two resolved 9.1.0 widget gap removals, and top-eight phase diagnostics with unchanged budgets. See [fixture owner](../specs/scrollframe-script-bindings.md#library-fixture-reconciliation--pending-runtime), [publication owner](../specs/patch-9-1-0-publication-sweep.md#current-widget-query-reconciliation--2026-10-15) and [diagnostics owner](investigations/test-suite-performance.md#per-addon-budget-diagnostics). Targeted runtime pending; fullsuite39 remains FAIL.
