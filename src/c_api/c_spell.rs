@@ -547,6 +547,23 @@ pub(crate) fn push_spell_cooldown_info(state: &mut LuaState, spell_id: u32) -> L
 }
 
 fn get_spell_charges(state: &mut LuaState) -> LuaResult<u32> {
+    #[cfg(all(
+        feature = "retail-12-0-5",
+        any(feature = "profile-retail", feature = "client-ptr")
+    ))]
+    {
+        let value = stack_val(state, 1);
+        if rilua::table_security::secret_payload_kind(state, value)
+            == Some(rilua::table_security::SecretPayloadKind::Number)
+        {
+            // Trusted host-only lookup; never publish the inspected selector to Lua.
+            let spell_id =
+                rilua::table_security::inspect_host_secret_number(state, value, |number| {
+                    read_spell_identifier_value(state, Val::Num(number))
+                })?;
+            return super::charge_state::push_charge_info(state, spell_id);
+        }
+    }
     let spell_id = read_spell_identifier(state)?;
     super::charge_state::push_charge_info(state, spell_id)
 }
