@@ -1,6 +1,10 @@
+## [2026-10-16] evidence | Wrath publication; original startup cursor gap
+
+[Profile owner](../specs/client-profiles.md#actual-wrath-publication--2026-10-16) records accepted full-build/runtime publication and preservation. [Consumer owner](../specs/editbox-text-position-selection.md#wrath-original-scrolling-consumer--2026-10-16) records three isolated PASS cases and the original startup nil-cursor gap; guard and check gates remain open.
+
 ## [2026-10-16] documentation | Separate pinned Wrath acquisition route
 
-[Wrath acquisition](../updating-blizzard-ui-to-a-new-patch.md#wrath-separate-pinned-source-route) now uses its separate pinned source. [Owning contract](../specs/client-profiles.md#separate-pinned-wrath-source-restoration) records current component proof and open runtime/consumer gates; guard retained.
+[Wrath acquisition](../updating-blizzard-ui-to-a-new-patch.md#wrath-separate-pinned-source-route) uses its separate pinned source. [Actual publication](../specs/client-profiles.md#actual-wrath-publication--2026-10-16) supersedes the earlier pending runtime gate; [consumer acceptance](../specs/editbox-text-position-selection.md#wrath-original-scrolling-consumer--2026-10-16) remains open, guard retained.
 
 ## Evidence | Fullsuite39 bounded saved-runtime acceptance
 

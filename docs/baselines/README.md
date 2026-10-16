@@ -18,6 +18,12 @@ Use `scripts/diff-lua-errors.sh BASELINE NEW` to compare message sets and
 report regressed/fixed errors. The Mists CI guard uses this for addon-induced
 error counts and release proof diagnostics.
 
+## Wrath Lua Errors
+
+`wrath-lua-errors.json` records the first restored pinned-source startup at `c06c84362`: **45 unique errors / 89 occurrences, exit1**. This is a failing compatibility inventory, not a clean baseline to bless. The original `UIPanelTemplates.lua:365` nil-cursor failure accounts for 34 occurrences; isolated font-installed consumer tests do not cover that startup boundary. Keep the guard while investigating its actual callback path.
+
+`wrath-lua-errors.meta.json` binds the capture to Gethe pin, manifest hash, profile and command/environment. Absolute user-cache prefixes are replaced with `<wrath-ui>/`; messages and counts are otherwise retained. Raw streams and sealed-artifact proof remain private. See the [profile owner](../specs/client-profiles.md#actual-wrath-publication--2026-10-16) and [consumer owner](../specs/editbox-text-position-selection.md#wrath-original-scrolling-consumer--2026-10-16). No native parity or full-startup acceptance.
+
 ## Forever Lua Errors
 
 Current saved corrected-enUS `1.60.1.70374` capture at runtime/build source `40a010b5a`: **10 records / 14 occurrences, exit1**, still FAIL; all remaining records are Gamepad storage/empty-map errors, first nil player-storage arithmetic. The missing rich quest80002 error is absent after watch/log reconciliation. Historical source704's12/16 JSON remains privately retained as `baseline-before-watch.json` beside the current watch receipt; query coherence is not whole-startup acceptance. Historical c2bf/build57 capture **22 records / 26 occurrences, exit1**, first nil `Enum.VoiceProviderID`, remains privately retained beside current receipts. Source136 post-enum capture **58 records / 58 occurrences, exit1**, first failure missing `import`, remains privately retained. Baseline JSON copying belongs to main; this documentation update does not rewrite or authenticate the tracked JSON. Historical source `9a6ea924e` capture was **166 records / 238 occurrences, exit1**. Preset line1272 and setting-display-map cascade no longer appear; other preset errors remain. Counts are unique records/occurrences, not root-cause counts.

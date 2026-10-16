@@ -1,0 +1,27 @@
+{
+  "status": "FAILING compatibility inventory, not accepted clean baseline",
+  "captured_utc": "2026-10-16",
+  "profile": "client-wrath",
+  "source_revision": "c06c84362d58543c32573656819b7b47d6d16463",
+  "ui_source": "Gethe/wow-ui-source",
+  "ui_revision": "c4e0255fc574598428ee1c25f160ab949798bc98",
+  "manifest_sha256": "1633fb0434fb8dc4c2ed8d08d4c0d055d67a02b303281b78071c31ffb8be0a69",
+  "runtime_files": 382,
+  "command": [
+    "wow-sim",
+    "--no-addons",
+    "--no-saved-vars",
+    "lua-errors"
+  ],
+  "environment": {
+    "WOW_SIM_CASC": "0",
+    "WOW_SIM_NO_SOUND": "1"
+  },
+  "exit_code": 1,
+  "records": 45,
+  "occurrences": 89,
+  "normalization": "Replace absolute Wrath cache prefix with <wrath-ui>/; no messages removed or counts changed",
+  "raw_capture": "Retained privately with sealed source/profile artifact attribution",
+  "known_original_cursor_failure_occurrences": 34,
+  "native_parity": false
+}

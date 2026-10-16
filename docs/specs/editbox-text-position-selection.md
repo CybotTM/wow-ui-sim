@@ -149,6 +149,20 @@ Keyboard stderr retains one ESCAPE → `ToggleGameMenu` nil-call Lua error despi
 
 Historical `39d38` byte-limit RED and C7 missing-cache setup failures above remain separate, as do its pending runtime/hash qualifications. New proof does not retroactively repair those records or prove RED-to-GREEN causality. No native/all-profile, genuine Wrath consumer, full-suite, current-HEAD or later-source acceptance; no external dependency/asset cryptographic provenance. Genuine Wrath consumer remains unexecuted and nil-field guard STAYS; broader shared/parent gates and unchecked requirements remain OPEN.
 
+
+## Wrath original scrolling consumer — 2026-10-16
+
+[Profile owner](client-profiles.md#actual-wrath-publication--2026-10-16) owns accepted full-build/runtime-publication evidence. Acquisition is no longer the current consumer blocker; earlier empty-cache/unexecuted statements above describe their saved checkpoints.
+
+| Consumer fixture revision / boundary | Observed result / proof |
+|---|---|
+| Initial saved c06 selection | 0 PASS / 3 setup failures, exit101: `XmlElement::Frame` instead of `XmlElement::EditBox`; no producer assertion reached. |
+| `dfd751935` fixture correction | Next three executions fail at scroll 0, expected 48. Read-only root-cause confirmation: sizing before `SetScrollChild` leaves the cached range cleared; not established as cursor-producer RED. |
+| `ca9470ce4` corrected fixture | Independently accepted 3 PASS/exit0, compiled against the sealed c06 Wrath library. Positive range192 established without a cursor warm-up; original unmodified helper consumes actual geometry for SetText, Insert and keyboard movement. Isolated consumer proof, not full startup. |
+| Actual c06 pinned startup | 45 unique errors / 89 occurrences, exit1; original nil `cursorOffset` record occurs 34 times during addon loading. This same startup failure remains outside isolated three-case coverage. |
+
+Nil-field guard retained because the original nil-cursor failure still occurs during real startup, not because native/all-startup parity became a new prerequisite. Original startup callback provenance and ordering remain under investigation. [Failing startup inventory](../baselines/README.md#wrath-lua-errors) is retained without blessing it as clean; check and broader profile gates remain open.
+
 ## Out of scope
 
 - Full input-system behavior, public `Insert` limit enforcement, `SetText` MaxBytes enforcement, native markup/grapheme counting, IME, clipboard, keyboard selection creation/navigation, and rendering selection highlight.
