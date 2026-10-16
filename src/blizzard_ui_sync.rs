@@ -7,6 +7,10 @@ mod pinned;
 mod pinned_download;
 mod profile_cache;
 
+#[cfg(test)]
+#[path = "blizzard_ui_sync/wrath_snapshot_tests.rs"]
+mod wrath_snapshot_tests;
+
 #[cfg(feature = "casc")]
 use self::locale::LocalizedCascRoot;
 use self::profile_cache::{cache_entry_is_usable, required_profile_cache_entries};
