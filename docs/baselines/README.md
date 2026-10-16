@@ -146,6 +146,10 @@ Normal-library basis `161dad02ad868ecce067b4b0c1d87108ec5b2dcb`; actual unchange
 
 Six modules36PASS/12filtered; separate bare C7 run3PASS/45filtered. Nine other button cases were not run. Full streams, exact features/normal-dependency association, component seal and control/layout-source equality are independently reconciled; the newer IconTextAndBackground plumbing is excluded. Component compilation retains35 unused common-helper warnings, distinct from the accepted normal library's zero diagnostics. This is not genuine cached C2 consumer, ordinary startup, physical pointer, native/CASC-font/pixel, whole-current-HEAD, all-profile or full-parent proof. Wrath startup RED and guard remain unchanged; accepted Retail cases were not replayed.
 
+#### Forever shared controls — 2026-10-16
+
+Independent report `/home/osso/.local/state/wow-ui-sim/verification/forever-controls-next/report.md` accepts **39 distinct Forever PASS, exit0** at saved normal-library basis `58bccba22f785250c78ab4153fd64e49aa477a5e`: six-module36PASS/12filtered plus separate bare-C7 3PASS/45filtered. These separately execute the same [seven control boundaries](#ptr-shared-controls--2026-10-16), not PTR results credited as Forever proof. Current unchanged tests compiled at `756a59006`, with exact16 Forever feature flags and normal dependency records; component26 unused-common warnings retained. The earlier library/abandonment proofs were reused without another Cargo build or abandonment replay. Complete streams, seals, source equality and installed-font assertions are independently reconciled. No newer IconTextAndBackground plumbing, genuine cached C2 startup, nine other button cases, native font/pixel/pointer, ordinary startup, whole-current-HEAD, all-profile or full-parent acceptance.
+
 ## Panel And Addon Evidence
 
 - `mists-panels.md` lists the Blizzard panel parity matrix.

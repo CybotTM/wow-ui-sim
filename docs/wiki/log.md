@@ -1,3 +1,7 @@
+## [2026-10-16] evidence | Additional bounded profile controls
+
+[Widget-system checkpoint](systems/widget-system.md#clean-room-control-and-anchor-follow-ups--2026-10-15) links separate saved PTR/Forever control receipts; [DoubleIcon owner](../specs/ui-widget-double-icon-and-text.md#bounded-ptr-preservation--2026-10-16) records additional PTR coverage. Reconciled stale Wrath cache/consumer wording against its existing owner; startup, native and all-profile gates remain separate.
+
 ## [2026-10-16] evidence | Wrath publication; original startup cursor gap
 
 [Profile owner](../specs/client-profiles.md#actual-wrath-publication--2026-10-16) records accepted full-build/runtime publication and preservation. [Consumer owner](../specs/editbox-text-position-selection.md#wrath-original-scrolling-consumer--2026-10-16) records three isolated PASS cases and the original startup nil-cursor gap; guard and check gates remain open.
