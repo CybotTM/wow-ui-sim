@@ -283,6 +283,8 @@ Uses **Lua 5.1 semantics** on the `rilua` runtime.
 
 ### Running the Simulator
 
+- Sealed/standalone test executables outside `deps` do not receive automatic CVar isolation (`src/cvars.rs::default_storage_path`). Use a fresh child-only `XDG_DATA_HOME` containing a byte-exact copy of the **current** persisted `wow-sim/cvars.json`. Record the original's stat/hash before and after, including launcher exceptions; never reset or restore it.
+
 **CRITICAL: Always compile separately from running.** Never use `cargo run` directly with a timeout — compilation alone can take 30s+ and the timeout kills the build mid-compile, wasting all progress. Always build first, then run:
 ```bash
 # Step 1: Build (no timeout — let it finish)
