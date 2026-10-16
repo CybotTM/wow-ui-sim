@@ -151,7 +151,9 @@ fn ql2_original_progress_button_advances_once_without_grant_or_turn_in() {
         .unwrap();
     env.exec("assert(QL2.completeCount == 0); assert(QuestFrameProgressPanel:IsShown()); QL2.objectives(true)")
         .unwrap();
-    let ready: bool = env.eval("return IsQuestCompletable()").unwrap();
+    let ready: bool = env
+        .eval("return type(IsQuestCompletable) == 'function' and IsQuestCompletable()")
+        .unwrap();
     assert!(
         ready,
         "selected live progress interaction must become completable"
