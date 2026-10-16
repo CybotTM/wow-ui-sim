@@ -309,30 +309,7 @@ pub(super) fn shared_set_min_max_values(state: &mut LuaState) -> LuaResult<u32> 
     let id = frame_id_from_stack(state, 1)?;
     let min = val_to_f64(stack_val(state, 2));
     let max = val_to_f64(stack_val(state, 3));
-    let old_slider_value = {
-        let mut sim = borrow_state_mut(state)?;
-        let Some(frame) = sim.widgets.get(id) else {
-            return Ok(0);
-        };
-        let widget_type = frame.widget_type;
-        let min = checked_range_minimum(widget_type, min, max)?;
-        let old_slider_value = if widget_type == WidgetType::Slider {
-            if frame.slider_min == min && frame.slider_max == max {
-                return Ok(0);
-            }
-            Some(frame.slider_value)
-        } else {
-            None
-        };
-        if let Some(frame) = sim.widgets.get_mut_visual(id) {
-            apply_widget_range(frame, min, max);
-        }
-        if widget_type == WidgetType::Slider {
-            sim.widgets.mark_rect_dirty(id);
-        }
-        old_slider_value
-    };
-    if let Some(value) = old_slider_value {
+    if let Some(value) = commit_widget_range(state, id, min, max)? {
         fire_slider_range_changed(state, id, min, max)?;
         let changed = {
             let mut sim = borrow_state_mut(state)?;
@@ -343,6 +320,35 @@ pub(super) fn shared_set_min_max_values(state: &mut LuaState) -> LuaResult<u32> 
         }
     }
     Ok(0)
+}
+
+fn commit_widget_range(
+    state: &mut LuaState,
+    id: u64,
+    min: f64,
+    max: f64,
+) -> LuaResult<Option<f64>> {
+    let mut sim = borrow_state_mut(state)?;
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(None);
+    };
+    let widget_type = frame.widget_type;
+    let min = checked_range_minimum(widget_type, min, max)?;
+    let old_slider_value = if widget_type == WidgetType::Slider {
+        if frame.slider_min == min && frame.slider_max == max {
+            return Ok(None);
+        }
+        Some(frame.slider_value)
+    } else {
+        None
+    };
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        apply_widget_range(frame, min, max);
+    }
+    if widget_type == WidgetType::Slider {
+        sim.widgets.mark_rect_dirty(id);
+    }
+    Ok(old_slider_value)
 }
 
 fn fire_slider_range_changed(state: &mut LuaState, id: u64, min: f64, max: f64) -> LuaResult<()> {
