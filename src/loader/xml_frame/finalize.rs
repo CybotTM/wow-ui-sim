@@ -43,7 +43,7 @@ fn create_children_and_finalize(
     inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
-    super::super::simple_html::apply_simple_html_fonts(env, frame, frame_id)?;
+    super::super::simple_html::apply_simple_html_fonts(env, frame, frame_id, name)?;
     seed_child_parent_arrays(env, frame, frame_id)?;
     let layer_start = Instant::now();
     create_layer_children(env, frame, frame_id, name, subst_parent, inherits, timing)?;

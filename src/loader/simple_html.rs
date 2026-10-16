@@ -7,6 +7,7 @@ pub(super) fn apply_simple_html_fonts(
     env: &LoaderEnv<'_>,
     xml: &FrameXml,
     id: u64,
+    name: &str,
 ) -> Result<(), LoadError> {
     let is_html = env
         .state()
@@ -25,7 +26,7 @@ pub(super) fn apply_simple_html_fonts(
             FrameChildElement::FontStringHeader3(font) => ("h3", font),
             _ => continue,
         };
-        apply_font_role(env, id, role, font)?;
+        apply_font_role(env, id, name, role, font)?;
     }
     Ok(())
 }
@@ -33,13 +34,15 @@ pub(super) fn apply_simple_html_fonts(
 fn apply_font_role(
     env: &LoaderEnv<'_>,
     id: u64,
+    name: &str,
     role: &str,
     font: &crate::xml::FontStringXml,
 ) -> Result<(), LoadError> {
     use crate::loader::helpers::escape_lua_string;
     if let Some(inherits) = &font.inherits {
         env.exec(&format!(
-            "__frame_{id}:SetFontObject('{role}', \"{}\")",
+            "_G[\"{}\"]:SetFontObject('{role}', \"{}\")",
+            escape_lua_string(name),
             escape_lua_string(inherits)
         ))
         .map_err(|error| LoadError::Lua(error.to_string()))?;
