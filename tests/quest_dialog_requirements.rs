@@ -50,15 +50,15 @@ fn original_progress_items_refresh_has_zero_unsupplied_cost_and_rows() {
 fn original_reward_panel_has_no_invented_rewards_or_turnin_portrait() {
     let env = dialog_env();
     let before = env.state().borrow().lua_error_counts.clone();
-    env.exec("QuestFrameRewardPanel_OnShow()")
-        .expect("original reward panel must not call absent portrait getter");
+    env.exec("QuestModelScene:SetParent(QuestFrame); QuestFrameRewardPanel_OnShow()")
+        .expect("original reward panel must take its no-portrait branch");
     let empty: bool = env
         .eval("return not QuestInfoFrame.rewardsFrame:IsShown()")
         .unwrap();
     assert!(empty, "unsupplied reward panel must remain empty");
-    let arity: i32 = env
-        .eval("return select('#', GetQuestPortraitTurnIn())")
-        .unwrap();
-    assert_eq!(arity, 0);
+    let portrait: (i32, String, String) = env.eval("return GetQuestPortraitTurnIn()").unwrap();
+    assert_eq!(portrait, (0, String::new(), String::new()));
+    env.exec("assert(not QuestModelScene:IsShown()); assert(QuestModelScene:GetParent() == nil)")
+        .expect("original no-portrait branch hides and detaches the portrait frame");
     assert_eq!(env.state().borrow().lua_error_counts, before);
 }

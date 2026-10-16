@@ -57,8 +57,8 @@ fn supplied_currency_reaches_original_reward_panel_name_count_and_context() {
     let name: Option<String> = env.eval("for _, row in ipairs(QuestInfoRewardsFrame.RewardButtons) do if row:IsShown() and row.objectType == 'currency' then return row.Name:GetText() end end").unwrap();
     assert_eq!(
         name.as_deref(),
-        Some("Supplied quest tokens"),
-        "supplied currency must reach original reward row, not just a callable namespace"
+        Some("Timewarped Badge"),
+        "supplied currency must reach the original row and its native container display override"
     );
     env.exec(
         r#"
@@ -66,6 +66,7 @@ fn supplied_currency_reaches_original_reward_panel_name_count_and_context() {
         assert(QuestInfoRewardsFrame:IsShown() and row.objectType == 'currency')
         assert(row.Count:GetText() == '5')
         assert(row.currencyInfo.currencyID == 1166 and row.currencyInfo.totalRewardAmount == 5)
+        assert(row.currencyInfo.name == 'Supplied quest tokens', 'projection preserves supplied metadata before original container display override')
         local modern = C_QuestInfoSystem.GetQuestRewardCurrencies(80000)
         local legacy = C_QuestLog.GetQuestRewardCurrencies(80000)
         assert(#modern == 1 and #legacy == 1 and modern[1].name == legacy[1].name)
