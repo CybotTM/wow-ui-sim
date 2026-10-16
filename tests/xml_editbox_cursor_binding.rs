@@ -2,6 +2,7 @@
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::font::{DEFAULT_WOW_FONT, WowFontSystem};
 use wow_ui_sim::xml::{XmlElement, parse_xml, register_template};
@@ -137,6 +138,10 @@ fn assert_named_cursor_record(env: &WowLuaEnv, count: i32, y: i32, byte: i32, sc
 #[test]
 fn ordinary_xml_cursor_names_shadow_globals_during_real_layout() {
     let env = named_cursor_env(false);
+    if ACTIVE == ClientProfile::Wrath {
+        env.exec("assert(#CursorArgs == 1, 'Wrath XML completion presents once'); CursorArgs = {}")
+            .unwrap();
+    }
     assert_named_cursor_layout(&env, "NamedCursorFixture");
 }
 
