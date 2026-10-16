@@ -202,6 +202,12 @@ pub struct FrameXml {
     pub orientation: Option<String>,
     #[serde(rename = "@rotatesTexture")]
     pub rotates_texture: Option<bool>,
+    #[serde(rename = "@minValue")]
+    pub min_value: Option<f64>,
+    #[serde(rename = "@maxValue")]
+    pub max_value: Option<f64>,
+    #[serde(rename = "@defaultValue")]
+    pub default_value: Option<f64>,
     #[serde(rename = "@fixedFrameLevel")]
     pub fixed_frame_level: Option<bool>,
     #[serde(rename = "@useParentLevel")]

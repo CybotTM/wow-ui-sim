@@ -3791,3 +3791,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-16] source | Supplied quest readiness and dialog phase
 
 [Lua state checkpoint](systems/lua-api.md#supplied-readiness-and-reward-dialog-phase) links the Retail/Forever-only QL-2 model, source gate and original consumer requirements. Both-profile RED recorded; GREEN pending.
+
+## [2026-10-16] source | XML StatusBar/Slider values
+
+[Owning contract](../specs/xml-widget-values.md) records original tracker range RED and shared-parser/default initialization RED; generic application source committed before GREEN.

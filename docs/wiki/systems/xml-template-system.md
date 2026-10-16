@@ -14,6 +14,10 @@ Every WoW XML file has a `<Ui>` root deserializing into `UiXml { elements: Vec<X
 
 [Owning contract](../../specs/xml-intrinsic-tags.md) covers same-name cached intrinsic declarations at top-level and nested XML tag sites. Previously, `UIThemeContainerFrame` was mapped to plain Frame without inheriting its cached mixin/preload; original GossipFrame consequently lacked `UpdateTheme`. Tag resolution now consults the declaration and uses the existing inheritance pipeline. Owning contract records focused original-cache RED→GREEN, 170 template preservation PASS with one pre-existing ignored TODO, and separate clean Retail startup at saved `f963b6b18`. No vendor behavior was patched.
 
+## XML widget ranges and default values
+
+[Owning contract](../../specs/xml-widget-values.md) covers shared StatusBar/Slider `minValue`, `maxValue`, `defaultValue` parsing and inherited application before scripts. Ignored attributes left the original tracker bar at0..1, clamping a correctly supplied50 to1 while its label displayed50%. Generic direct/runtime template initialization now consumes those attributes; two Retail REDs precede the fix, GREEN pending.
+
 ## Declarative click registration
 
 `FrameXml.register_for_clicks: Option<String>` feeds the shared inherited/instance setter before scripts in direct XML and Lua-created template paths (`33d62d705`). Comma-separated tokens are trimmed; later declarations replace inherited registration, omission preserves it, and later Lua mutation remains authoritative. Existing mouse dispatch policy is unchanged. [Contract](../../specs/xml-button-click-registration.md), [implementation details](../../xml-template-system.md#declarative-click-registration) and [bounded default-Retail GREEN SSOT](../investigations/integrated-source-and-factory-proof-2026-10-09.md#xml-click-registration--bounded-default-retail-green) separate current simulator proof from native grammar/parity and all-profile acceptance. Earlier RED/zero-test history remains in the [3.3.0 audit](../investigations/patch-3-3-0-api-audit.md#current-bounded-reconciliation).

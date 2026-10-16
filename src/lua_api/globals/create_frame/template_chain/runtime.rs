@@ -594,6 +594,9 @@ fn apply_runtime_child_direct_properties_with_inherits(
     crate::lua_api::globals::template::direct::apply_xml_slider_orientation(
         state, frame_id, frame, inherits,
     );
+    crate::lua_api::globals::template::direct::apply_xml_widget_values(
+        state, frame_id, frame, inherits,
+    );
     crate::lua_api::globals::template::direct::apply_xml_statusbar_rotation(
         state, frame_id, frame, inherits,
     );

@@ -811,6 +811,58 @@ pub fn apply_xml_editbox_limits(
     }
 }
 
+/// Initialize StatusBar/Slider XML values before lifecycle scripts run.
+/// Each explicit attribute overrides only that attribute in the inherited chain.
+pub fn apply_xml_widget_values(
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    frame: &FrameXml,
+    inherits: &str,
+) {
+    let chain = crate::xml::get_template_chain(inherits);
+    let minimum = frame
+        .min_value
+        .or_else(|| chain.iter().rev().find_map(|entry| entry.frame.min_value));
+    let maximum = frame
+        .max_value
+        .or_else(|| chain.iter().rev().find_map(|entry| entry.frame.max_value));
+    let default = frame.default_value.or_else(|| {
+        chain
+            .iter()
+            .rev()
+            .find_map(|entry| entry.frame.default_value)
+    });
+    if minimum.is_none() && maximum.is_none() && default.is_none() {
+        return;
+    }
+    let mut sim = state.borrow_mut();
+    let Some(widget) = sim.widgets.get_mut_visual(frame_id) else {
+        return;
+    };
+    match widget.widget_type {
+        crate::widget::WidgetType::StatusBar => {
+            widget.statusbar_max = maximum.unwrap_or(widget.statusbar_max);
+            widget.statusbar_min = minimum
+                .unwrap_or(widget.statusbar_min)
+                .min(widget.statusbar_max);
+            widget.statusbar_value = default
+                .unwrap_or(widget.statusbar_value)
+                .clamp(widget.statusbar_min, widget.statusbar_max);
+            widget.statusbar_interpolated_value = widget.statusbar_value;
+            widget.statusbar_interpolation_target = None;
+        }
+        crate::widget::WidgetType::Slider => {
+            widget.slider_max = maximum.unwrap_or(widget.slider_max);
+            widget.slider_min = minimum.unwrap_or(widget.slider_min).min(widget.slider_max);
+            widget.slider_value = default
+                .unwrap_or(widget.slider_value)
+                .clamp(widget.slider_min, widget.slider_max);
+            sim.widgets.mark_rect_dirty(frame_id);
+        }
+        _ => {}
+    }
+}
+
 /// Resolve and apply StatusBar texture rotation from template chain + instance XML.
 pub fn apply_xml_statusbar_rotation(
     state: &Rc<RefCell<SimState>>,
