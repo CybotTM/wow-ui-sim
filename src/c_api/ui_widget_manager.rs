@@ -27,6 +27,7 @@ mod feed;
 mod fixtures;
 mod icon_text_and_background;
 mod icon_text_and_background_record;
+mod icon_text_and_currencies;
 mod icon_text_and_currencies_record;
 mod inputs;
 pub use icon_text_and_background_record::IconTextAndBackgroundRecord;
