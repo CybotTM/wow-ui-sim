@@ -21,6 +21,14 @@ Client profile bundles select the runtime cache and API epoch exposed by wow-ui-
 - [x] A Carbonite-shaped package with incompatible Retail `Carbonite.toc` and compatible `Carbonite-Camelot.toc` admits the provider through discovery and the startup interface gate before its Info/Notes/Warehouse dependents load.
 - [x] Forever reports version `1.60.1`, build `70374`, and interface `16001` without enabling a retail API epoch or legacy compatibility bootstrap. Implemented metadata matches Gethe `forever` commit `735496de78ebd30ce816a0637982c556987f258c`'s `version.txt` (`1.60.1.70374`) and selected installed product `wow_classic_beta`. Neither establishes a native build date; `Jun 17 2026` and trailing fields remain temporary defaults. Focused manifest and BuildInfo identity tests PASS at runtime source136; [central receipt](../baselines/README.md#verified-scoped-receipts--2026-10-15) owns counts and attribution. Cross-profile/native/full-parent gates remain open. See the [current acquisition checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-15-2026) for bounded runtime evidence.
 
+## Separate pinned Wrath source restoration
+
+Wrath retains the historical Gethe 3.3.5 source pin in `data/blizzard-ui-builds/wrath.json`, not the installed Mists product. Its separate source snapshot is `~/.cache/wow-ui-sim/wow-ui-source/wrath`, containing `AddOns` and `FrameXML`; Mists/classic and Forever snapshots must not be overwritten.
+
+`tools/gen_blizzard_ui_manifest.py wrath --no-refresh` validates that snapshot's `.wow-ui-sim-wrath-source.json` revision against the committed pin, then enumerates AddOns-relative paths plus `FrameXML/…` paths. Missing FrameXML or a mismatched pin rejects before replacing the manifest. Wrath has no moving branch refresh; other profiles retain their existing branch workflow.
+
+Pinned archive acquisition and all 382 copied source files have independent byte-level verification. This is source-only evidence, not runtime-cache population, automated acquisition, genuine consumer execution or native-client parity. Generator regression baseline reaches two valid-snapshot CLI rejection assertions because Wrath was unsupported; three negative controls pass. Current generator changes await execution. Runtime synchronization, manifest regeneration/baseline pairing and genuine Wrath scrolling-consumer proof remain open; the workaround stays.
+
 ## How it works
 
 - [Observed TOC game-type tokens](../wiki/reference/toc-game-type-tokens.md) — bounded source inventory, not a native acceptance contract; filename suffixes and filter strings remain separate.
