@@ -2,8 +2,8 @@
 use super::{
     BulletTextListRecord, ButtonHeaderRecord, CaptureBarRecord, DiscreteProgressStepsRecord,
     DoubleIconAndTextRecord, DoubleStatusBarRecord, IconAndTextRecord, IconTextAndBackgroundRecord,
-    IconTextAndCurrenciesRecord, SpacerRecord, SpellDisplayRecord, StatusBarRecord,
-    TextColumnRowVisualizationInfo, TextWithStateRecord, TextWithSubtextRecord,
+    IconTextAndCurrenciesRecord, ItemDisplayRecord, SpacerRecord, SpellDisplayRecord,
+    StatusBarRecord, TextColumnRowVisualizationInfo, TextWithStateRecord, TextWithSubtextRecord,
     TextureAndTextRecord, TextureAndTextRowRecord, WidgetId, WidgetSetEntry, WidgetSetRecord,
 };
 use crate::lua_api::WowLuaEnv;
@@ -15,6 +15,7 @@ pub enum WidgetVisualization {
     IconAndText(IconAndTextRecord),
     IconTextAndBackground(IconTextAndBackgroundRecord),
     IconTextAndCurrencies(IconTextAndCurrenciesRecord),
+    ItemDisplay(ItemDisplayRecord),
     CaptureBar(CaptureBarRecord),
     StatusBar(StatusBarRecord),
     DoubleStatusBar(DoubleStatusBarRecord),
@@ -39,6 +40,7 @@ impl WidgetVisualization {
             Self::IconAndText(_) => 0,
             Self::IconTextAndBackground(_) => 4,
             Self::IconTextAndCurrencies(_) => 7,
+            Self::ItemDisplay(_) => 27,
             Self::CaptureBar(_) => 1,
             Self::StatusBar(_) => 2,
             Self::DoubleStatusBar(_) => 3,
@@ -189,6 +191,9 @@ fn supply_visualization(sim: &mut crate::lua_api::SimState, id: f64, record: Wid
             sim.ui_widget_inputs
                 .icon_text_and_currencies
                 .insert(key, record);
+        }
+        WidgetVisualization::ItemDisplay(record) => {
+            sim.ui_widget_inputs.item_display.insert(key, record);
         }
         WidgetVisualization::CaptureBar(record) => {
             sim.ui_widget_inputs.capture_bars.insert(key, record);
