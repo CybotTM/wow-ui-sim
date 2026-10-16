@@ -153,11 +153,6 @@ const POST_LOAD_WORKAROUNDS: &[WorkaroundStep] = &[
         label: "patch_settings_canvas_layout_visibility",
         apply: patch_settings_canvas_layout_visibility,
     },
-    #[cfg(feature = "client-wrath")]
-    WorkaroundStep {
-        label: "wrath::post_load",
-        apply: apply_wrath_post_load,
-    },
     #[cfg(feature = "client-mists")]
     WorkaroundStep {
         label: "mists::post_load",
@@ -527,11 +522,6 @@ fn patch_settings_canvas_layout_visibility(env: &crate::lua_api::WowLuaEnv) {
 
 fn patch_housing_dashboard_preload_from_env(env: &crate::lua_api::WowLuaEnv) {
     patch_housing_dashboard_preload(&env.loader_env());
-}
-
-#[cfg(feature = "client-wrath")]
-fn apply_wrath_post_load(env: &crate::lua_api::WowLuaEnv) {
-    crate::wrath::post_load::apply(env);
 }
 
 #[cfg(feature = "client-mists")]

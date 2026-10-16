@@ -1,3 +1,7 @@
+## [2026-10-16] source | Wrath nil-field guard retirement; acceptance pending
+
+[Owning checkpoint](../specs/editbox-text-position-selection.md#wrath-nil-field-guard-retirement--acceptance-pending) records wrapper/module removal, independently verified guard-retained GREEN (5/5 tests), and pending post-removal proof plus the separate ordering observation. Earlier guard-retained entries remain historical; no broader acceptance follows.
+
 ## [2026-10-16] source | Simulator selected quest turn-in producer
 
 [Quest implementation notes](systems/lua-api.md#simulator-selected-quest-turn-in) link the separately approved contract and integrated producer after shared Retail behavioral RED. GREEN and broader verification remain pending; existing accepted offer/watch/abandon receipts do not prove turn-in or native behavior.
