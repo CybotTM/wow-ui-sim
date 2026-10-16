@@ -48,20 +48,9 @@ fn load_consumer(app: &App, retail: bool) {
     let temp = tempfile::tempdir().unwrap();
     let xml_path = temp.path().join("consumer.xml");
     std::fs::write(&xml_path, xml).unwrap();
-    let context = crate::loader::AddonContext {
-        name: "H1Fixture",
-        table: env.create_addon_table().unwrap(),
-        addon_root: temp.path(),
-        use_secure_env: false,
-        taint: false,
-    };
-    crate::loader::load_xml_file(
-        &env.loader_env(),
-        &xml_path,
-        &context,
-        &mut crate::loader::LoadTiming::default(),
-    )
-    .unwrap();
+    let toc_path = temp.path().join("H1Fixture.toc");
+    std::fs::write(&toc_path, "## AllowLoad: Both\nconsumer.xml\n").unwrap();
+    crate::loader::load_addon(&env.loader_env(), &toc_path).unwrap();
     let id = env
         .state()
         .borrow()
@@ -254,8 +243,8 @@ fn h1_retail_original_glue_callback_from_wrapped_link_glyphs() {
     for point in &quads {
         click(&mut app, *point);
     }
-    let count: usize = app.env.borrow().eval("return #h1Calls").unwrap();
-    assert_eq!(count, quads.len());
+    let count: i64 = app.env.borrow().eval("return #h1Calls").unwrap();
+    assert_eq!(count, i64::try_from(quads.len()).unwrap());
     let payload: (bool, String, String, String) = app
         .env
         .borrow()
@@ -283,7 +272,7 @@ fn h1_retail_original_glue_callback_from_wrapped_link_glyphs() {
         .unwrap();
     click(&mut app, quads[0]);
     assert_eq!(
-        app.env.borrow().eval::<usize>("return #h1Calls").unwrap(),
+        app.env.borrow().eval::<i64>("return #h1Calls").unwrap(),
         count
     );
 }
