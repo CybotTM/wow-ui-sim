@@ -1,0 +1,11 @@
+<Ui>
+    <Frame name="C2NestedOuterFrame" parent="UIParent">
+        <Scripts>
+            <OnLoad>
+                table.insert(C2NestedTrace, 'outer-enter');
+                assert(C_AddOns.LoadAddOn('C2NestedInner'));
+                table.insert(C2NestedTrace, 'outer-return');
+            </OnLoad>
+        </Scripts>
+    </Frame>
+</Ui>

@@ -12,6 +12,75 @@ use wow_ui_sim::xml::{XmlElement, parse_xml, register_template};
 const PINNED_SHA256: &str = "d975f94a6d7deb8895a8ab47a2b6975cca4fd9e45f67cc15c54c8e100b37427e";
 const TICK_SECONDS: f64 = 0.016;
 
+/// Append to tests/wrath_scrolling_cursor.rs; producer is intentionally separate.
+#[test]
+fn active_nested_load_addon_xml_cursor_precedes_original_synchronous_consumer() {
+    let fonts = WowFontSystem::new_without_casc();
+    assert!(
+        fonts.font_system.db().faces().next().is_some(),
+        "SETUP FAILURE: font face"
+    );
+    assert!(
+        fonts.family_name(Some(DEFAULT_WOW_FONT)).is_some(),
+        "SETUP FAILURE: font alias"
+    );
+    let env = WowLuaEnv::new().expect("SETUP FAILURE: Wrath environment");
+    env.set_screen_size(1600.0, 1200.0);
+    env.set_font_system(Rc::new(RefCell::new(fonts)));
+    env.exec("C2Errors = {}; seterrorhandler(function(message) C2Errors[#C2Errors + 1] = tostring(message) end); C2NestedTrace = {}")
+        .unwrap();
+    env.loader_env()
+        .exec(&read_original_wrath_consumer())
+        .expect("SETUP FAILURE: full unchanged pinned UIPanelTemplates.lua");
+    assert_callback_errors_empty(&env);
+
+    let root = tempfile::tempdir().unwrap();
+    for (name, file, contents) in [
+        (
+            "C2NestedOuter",
+            "Outer.xml",
+            include_str!("wrath_scrolling_cursor/nested-outer.xml"),
+        ),
+        (
+            "C2NestedInner",
+            "Inner.xml",
+            include_str!("wrath_scrolling_cursor/nested-scroll.xml"),
+        ),
+        (
+            "C2NestedProbe",
+            "Probe.lua",
+            include_str!("wrath_scrolling_cursor/nested-probe.lua"),
+        ),
+    ] {
+        let directory = root.path().join(name);
+        std::fs::create_dir(&directory).unwrap();
+        std::fs::write(
+            directory.join(format!("{name}.toc")),
+            format!("## Interface: 30403\n## Title: {name}\n## LoadOnDemand: 1\n{file}\n"),
+        )
+        .unwrap();
+        std::fs::write(directory.join(file), contents).unwrap();
+    }
+    env.state().borrow_mut().addon_base_paths = vec![root.path().to_path_buf()];
+    // Real Lua -> runtime LoadAddOn -> XML OnLoad -> nested LoadAddOn. No tick.
+    exec_and_audit(&env, "assert(C_AddOns.LoadAddOn('C2NestedOuter'))");
+    exec_and_audit(
+        &env,
+        r#"
+        assert(table.concat(C2NestedTrace, ',') ==
+            'outer-enter,box-load,parent-load,cursor,probe,changed-enter,changed-return,sibling-enter,sibling-return,outer-return',
+            table.concat(C2NestedTrace, ','))
+        assert(C2NestedCursorCount == 1 and C2NestedChangedCount == 1)
+        assert(C2NestedBox:GetCursorPosition() == 7)
+        assert(C2NestedBox:GetUTF8CursorPosition() == 4)
+        assert(C2NestedScroll:GetVerticalScroll() > 0)
+        assert(C2NestedScroll:GetVerticalScroll() <= C2NestedScroll:GetVerticalScrollRange())
+        assert(C2NestedBox.handleCursorChange == false)
+        assert(__wow_sim_wrath_scrolling_edit_wrapped ~= true, 'guard must not mask boundary')
+    "#,
+    );
+}
+
 fn read_original_wrath_consumer() -> String {
     let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
         .expect("SETUP FAILURE: populate the pinned Wrath runtime cache first");

@@ -1,0 +1,63 @@
+<Ui>
+    <ScrollFrame name="C2NestedScroll" parent="UIParent">
+        <Size x="400" y="48"/>
+        <Anchors><Anchor point="TOPLEFT" x="113" y="-79"/></Anchors>
+        <Frames>
+            <EditBox name="C2NestedBox" autoFocus="false" multiLine="true">
+                <Scripts>
+                    <OnCursorChanged function="ScrollingEdit_OnCursorChanged"/>
+                    <OnLoad>
+                        table.insert(C2NestedTrace, 'box-load');
+                        assert(__wow_sim_wrath_scrolling_edit_wrapped ~= true);
+                        assert(self:GetScript('OnCursorChanged') == ScrollingEdit_OnCursorChanged);
+                        assert(self.cursorOffset == nil and self.cursorHeight == nil);
+                        local scroll = self:GetParent();
+                        self:SetPoint('TOPLEFT', scroll, 'TOPLEFT', 0, 0);
+                        assert(self:SetFont('Fonts/FRIZQT__.TTF', 20));
+                        self:SetJustifyH('LEFT');
+                        self:SetJustifyV('TOP');
+                        self:SetTextInsets(5, 7, 3, 4);
+                        scroll:SetScrollChild(self);
+                        self:SetSize(400, 240);
+                        scroll:SetVerticalScroll(0);
+                        C2NestedCursorCount, C2NestedChangedCount = 0, 0;
+                        self:HookScript('OnCursorChanged', function(box, x, y, width, height)
+                            assert(box == C2NestedBox);
+                            assert(type(x) == 'number' and type(y) == 'number');
+                            assert(width > 0 and height > 0);
+                            assert(box.cursorOffset == y and box.cursorHeight == height,
+                                'original XML-bound producer must have run');
+                            C2NestedCursorCount = C2NestedCursorCount + 1;
+                            table.insert(C2NestedTrace, 'cursor');
+                            assert(C_AddOns.LoadAddOn('C2NestedProbe'));
+                        end);
+                        self:SetText('é\n猫\nz');
+                        self:SetCursorPosition(7);
+                        assert(self.cursorOffset == nil and self.cursorHeight == nil);
+                    </OnLoad>
+                    <OnTextChanged>
+                        table.insert(C2NestedTrace, 'changed-enter');
+                        ScrollingEdit_OnTextChanged(self, self:GetParent());
+                        C2NestedChangedCount = C2NestedChangedCount + 1;
+                        table.insert(C2NestedTrace, 'changed-return');
+                    </OnTextChanged>
+                </Scripts>
+            </EditBox>
+        </Frames>
+        <Scripts>
+            <OnLoad>
+                table.insert(C2NestedTrace, 'parent-load');
+                assert(C2NestedBox.cursorOffset == nil and C2NestedBox.cursorHeight == nil,
+                    'no flush inside incomplete top-level construction');
+                assert(self:GetVerticalScrollRange() > 0, 'real positive scroll range');
+            </OnLoad>
+        </Scripts>
+    </ScrollFrame>
+    <Script>
+        table.insert(C2NestedTrace, 'sibling-enter');
+        -- Do not preempt the consumer with a geometry assertion: RED must enter
+        -- unchanged original arithmetic on the cold fields.
+        ScrollingEdit_OnTextChanged(C2NestedBox, C2NestedScroll);
+        table.insert(C2NestedTrace, 'sibling-return');
+    </Script>
+</Ui>
