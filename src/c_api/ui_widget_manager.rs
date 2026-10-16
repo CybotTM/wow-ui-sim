@@ -21,6 +21,7 @@ pub use double_status_bar_record::DoubleStatusBarRecord;
 pub use texture_and_text_record::TextureAndTextRecord;
 pub use texture_and_text_row_record::{TextureAndTextEntryRecord, TextureAndTextRowRecord};
 mod bars;
+mod horizontal_currencies;
 mod horizontal_currencies_record;
 mod hud;
 pub use bar_records::{CaptureBarRecord, StatusBarRecord};
