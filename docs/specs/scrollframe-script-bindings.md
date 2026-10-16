@@ -12,14 +12,16 @@ Scroll offset and range changes dispatch declared scripts through the existing b
 
 ## C9 range update boundary
 
-The user-supplied functional requirement moves explicit range refresh to the ScrollFrame update pass. Its historical evidence is 3.3.5a/build12340, not executed native or modern Retail timing proof; no reconstructed implementation was consulted.
+The user-supplied functional requirement moves only explicit `UpdateScrollChildRect()` range refresh to the ScrollFrame update pass. Existing automatic resize refresh remains unchanged; no broader resize policy is authorized. Its historical evidence is 3.3.5a/build12340, not executed native or modern Retail timing proof; no reconstructed implementation was consulted.
 
 - [ ] `UpdateScrollChildRect()` marks the ScrollFrame dirty and returns without recalculating ranges or dispatching `OnScrollRangeChanged` on that API call stack.
 - [ ] Process the dirty ScrollFrame after its OnUpdate and animation processing. A request from OnUpdate or animation processing can complete later in that same frame; an arbitrary timer or extra tick does not satisfy this boundary.
 - [ ] Preserve resolved subtree range arithmetic, commit both ranges before dispatch, and notify only when the resulting pair changed. Repeated unchanged refresh remains silent.
 - [ ] Preserve registered-binding order/error reporting, independent synchronous offset callbacks, scroll-child ownership, anchors and presentation. Timing changes do not authorize vendor patches or a layout redesign.
 
-`tests/scroll_range_update_pass.rs` adds three **UNCOMPILED / UNEXECUTED** cases: outside-call return versus update pass, request inside OnUpdate versus later same-frame delivery, and a real Alpha animation OnFinished request versus delivery after animation processing. Callback entry is recorded before protected assertions; traces and the error sink are checked outside callbacks. No behavioral RED, producer, animation-order acceptance or cross-profile/native proof yet. Existing synchronous refresh assumptions require deliberate timing reconciliation without weakening their arithmetic/binding assertions.
+Saved Retail-epoch baseline `d16876fcc9ec0e49851436a6af7a1e308d0a344c` executed all three cases in `tests/scroll_range_update_pass.rs`: **0 passed, 3 failed, exit 101**. The private saved epoch is `c8-producer-c7-c9-retail-baseline-20261016T003140348455Z`, selection `scroll-range-update-first-red`. Outside-call, OnUpdate, and real Alpha animation OnFinished traces all show range delivery before the explicit call returns, reproducing the timing failure. Callback entry is recorded before protected assertions; traces and the error sink are checked outside callbacks. Assertions after each first failure are not independent acceptance proof.
+
+C9 producer `d7cd9040c`, separate from that saved baseline, queues explicit requests in a pending set, drains a snapshot after OnUpdate and animation processing but before existing late layout size callbacks, and uses the existing range refresh. Automatic resize refresh is unchanged. This implementation has no GREEN evidence here; same-frame animation-order acceptance, modern native timing, and all-profile behavior remain unproven. Existing explicit synchronous-refresh test assumptions were reconciled to real ticks in the same commit, preserving arithmetic/binding assertions and automatic resize policy; those updated tests remain unexecuted.
 
 ## How it works
 
