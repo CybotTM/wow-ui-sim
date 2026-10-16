@@ -136,12 +136,7 @@ fn seed_aura(env: &WowLuaEnv, helpful: bool) {
         aura_instance_id: 901,
     };
     state.player.buffs.clear();
-    state.player.debuffs.clear();
-    if helpful {
-        state.player.buffs.push(aura);
-    } else {
-        state.player.debuffs.push(aura);
-    }
+    state.player.buffs.push(aura);
 }
 
 #[test]
@@ -194,7 +189,6 @@ fn original_wrath_aura_button_consumes_rank_slot_and_numeric_deadline() {
         );
     }
     env.state().borrow_mut().player.buffs.clear();
-    env.state().borrow_mut().player.debuffs.clear();
     exec_and_audit(
         &env,
         r#"
