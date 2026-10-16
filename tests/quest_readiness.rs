@@ -38,7 +38,7 @@ fn consumer_env() -> WowLuaEnv {
             "Blizzard_AccessibilityTemplates",
             "Blizzard_UIPanels_Game",
             "Blizzard_ObjectiveTracker",
-            "Blizzard_AlertFrame",
+            "Blizzard_FrameXML",
             "Blizzard_SplashFrame",
         ],
         &[],
