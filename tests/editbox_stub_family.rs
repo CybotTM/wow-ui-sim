@@ -90,18 +90,19 @@ fn editbox_set_formatted_text_dispatches_hooks_and_routes_errors_without_reentry
         local eb = FormattedCallbackEB
         local events, errors = _G.formatted_events, _G.formatted_errors
         assert(table.concat(events, ",") == "set:é2,set hook:é2,changed:é2:false,changed hook", table.concat(events, ","))
-        eb:SetScript("OnTextSet", function() error("text set failure") end)
+        -- A separate precall can fail without replacing the normal binding/hooks.
+        eb:SetScript("OnTextSet", function() error("text set failure") end, 0)
         eb:SetText("next")
         assert(eb:GetText() == "next")
-        assert(#events == 5 and events[5] == "set hook:next")
+        assert(#events == 6 and events[5] == "set:next" and events[6] == "set hook:next")
         assert(#errors == 1 and string.find(errors[1], "text set failure", 1, true))
     "#).unwrap();
     env.fire_on_update(0.016).unwrap();
     env.exec(
         r#"
         local events, errors = _G.formatted_events, _G.formatted_errors
-        assert(#events == 7)
-        assert(events[6] == "changed:next:false" and events[7] == "changed hook")
+        assert(#events == 8)
+        assert(events[7] == "changed:next:false" and events[8] == "changed hook")
         assert(#errors == 1 and string.find(errors[1], "text set failure", 1, true))
     "#,
     )
