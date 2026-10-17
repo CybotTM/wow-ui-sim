@@ -129,7 +129,31 @@ end
 
 if rawget(C_CombatLog, "GetCurrentEntryInfo") == nil then
     function C_CombatLog.GetCurrentEntryInfo()
-        return CombatLogState().currentEntry
+        local currentState = CombatLogState()
+        if publishClassicEmptyHistory and CountEntries(currentState) == 0 then
+            -- No event exists. A cursor value (including zero) is not a valid
+            -- timestamp/event tuple for the original Classic refilter.
+            return
+        end
+        -- Populated history/cursor policy remains unsupported; do not infer
+        -- event tuple shape or traversal from this temporary scalar fixture.
+        return currentState.currentEntry
+    end
+end
+
+-- Missing system: Classic combat-log records and cursor/traversal policy.
+-- Only empty validity/advance is defined; populated replay is policy-blocked.
+if publishClassicEmptyHistory then
+    local function SeekEmptyHistory()
+        if CountEntries(CombatLogState()) == 0 then
+            return false
+        end
+    end
+    if rawget(C_CombatLog, "SeekToNewestEntry") == nil then
+        C_CombatLog.SeekToNewestEntry = SeekEmptyHistory
+    end
+    if rawget(C_CombatLog, "SeekToPreviousEntry") == nil then
+        C_CombatLog.SeekToPreviousEntry = SeekEmptyHistory
     end
 end
 
@@ -338,8 +362,13 @@ end -- publishLegacyGlobals
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     let publish_legacy = !cfg!(feature = "client-wowforever");
     let publish_globals = !cfg!(feature = "retail-12-0-0");
+    let classic_empty_history = matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Era
+            | crate::client_profile::ClientProfile::Anniversary
+    );
     let source = format!(
-        "local publishLegacyCurrentEvent = {publish_legacy}\nlocal publishLegacyGlobals = {publish_globals}\n{COMBAT_LOG_STATE_LUA}"
+        "local publishLegacyCurrentEvent = {publish_legacy}\nlocal publishLegacyGlobals = {publish_globals}\nlocal publishClassicEmptyHistory = {classic_empty_history}\n{COMBAT_LOG_STATE_LUA}"
     );
     lua.exec(&source)?;
     Ok(())
