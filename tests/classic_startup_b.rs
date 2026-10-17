@@ -67,15 +67,14 @@ fn classic_b_r2_original_quest_count_statements() {
     );
     // Restore-missing must use the same selected dataset, without overwriting vendor writes.
     env.exec("QUEST_LOG_COUNT_TEMPLATE = nil").unwrap();
-    wow_ui_sim::lua_api::globals::strings::restore_missing_ui_strings(&mut env.rilua_mut())
-        .unwrap();
+    // Public post-load lifecycle invokes the real missing-string restoration.
+    env.apply_post_load_workarounds();
     run(&env, &format!("local numQuests = 0; {body}"));
     run(
         &env,
         "assert(QuestLogQuestCount:GetText() == 'Quests: |cffffffff0/20|r'); QUEST_LOG_COUNT_TEMPLATE = 'owned %d/%d'",
     );
-    wow_ui_sim::lua_api::globals::strings::restore_missing_ui_strings(&mut env.rilua_mut())
-        .unwrap();
+    env.apply_post_load_workarounds();
     run(&env, "assert(QUEST_LOG_COUNT_TEMPLATE == 'owned %d/%d')");
 }
 
