@@ -1,7 +1,9 @@
 //! Original cached Classic consumers. Staged source only; no native parity claim.
 #![cfg(any(feature = "client-era", feature = "client-anniversary"))]
 use sha2::{Digest, Sha256};
+use wow_ui_sim::loader::{discover_blizzard_startup_addons_for_screen, load_startup_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::screen::ScreenKind;
 
 fn ui() -> std::path::PathBuf {
     wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("active Classic cache")
@@ -122,4 +124,77 @@ fn classic_b_r2_original_nameplate_setting_label_from_shipped_data() {
         "number",
         "0",
     );
+}
+
+#[test]
+fn classic_b_r5_required_lod_dependency_fixture_remains_loadable() {
+    let root = tempfile::tempdir().unwrap();
+    for (name, metadata, script) in [
+        (
+            "Blizzard_Game",
+            "## Dependencies: Blizzard_ClassicBRequired\n",
+            "assert(classicBRequiredLoaded); classicBRootLoaded = true",
+        ),
+        (
+            "Blizzard_ClassicBRequired",
+            "## LoadOnDemand: 1\n",
+            "classicBRequiredLoaded = true",
+        ),
+    ] {
+        let dir = root.path().join(name);
+        std::fs::create_dir(&dir).unwrap();
+        std::fs::write(
+            dir.join(format!("{name}.toc")),
+            format!("## Interface: 11509\n{metadata}Test.lua\n"),
+        )
+        .unwrap();
+        std::fs::write(dir.join("Test.lua"), script).unwrap();
+    }
+    let addons = discover_blizzard_startup_addons_for_screen(root.path(), ScreenKind::Game);
+    let names: Vec<_> = addons.iter().map(|addon| addon.name.as_str()).collect();
+    assert_eq!(names, ["Blizzard_ClassicBRequired", "Blizzard_Game"]);
+    let env = env(&[]);
+    env.state().borrow_mut().addon_base_paths = vec![root.path().to_owned()];
+    for addon in addons {
+        load_startup_addon(&env.loader_env(), &addon.toc_path, addon.kind, None).unwrap();
+    }
+    run(
+        &env,
+        "assert(classicBRequiredLoaded and classicBRootLoaded)",
+    );
+}
+
+#[test]
+fn classic_b_r5_original_startup_keeps_transmog_lod_and_hard_dependencies() {
+    let addons = discover_blizzard_startup_addons_for_screen(&ui(), ScreenKind::Game);
+    assert!(!addons.iter().any(|addon| addon.name == "Blizzard_Transmog"));
+    let index = |name| {
+        addons
+            .iter()
+            .position(|addon| addon.name == name)
+            .expect(name)
+    };
+    assert!(index("Blizzard_MoneyFrame") < index("Blizzard_UIPanels_Game"));
+    let env = env(&[]);
+    env.set_screen_mode(ScreenKind::Game);
+    env.state().borrow_mut().addon_base_paths = vec![ui()];
+    wow_ui_sim::xml::register_intrinsic_templates();
+    for addon in &addons {
+        load_startup_addon(&env.loader_env(), &addon.toc_path, addon.kind, None).unwrap();
+    }
+    let errors = env.state().borrow().lua_errors.clone();
+    assert!(
+        !errors
+            .iter()
+            .any(|error| error.contains("Blizzard_Transmog")),
+        "{errors:?}"
+    );
+    // Other startup roots remain eligible; their independent errors are not erased.
+    run_targeted(
+        &env,
+        "assert(not C_AddOns.IsAddOnLoaded('Blizzard_Transmog')); assert(C_AddOns.IsAddOnLoaded('Blizzard_UIPanels_Game'))",
+    );
+}
+fn run_targeted(env: &WowLuaEnv, source: &str) {
+    env.exec(source).unwrap();
 }
