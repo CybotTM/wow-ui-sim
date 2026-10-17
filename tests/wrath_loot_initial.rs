@@ -254,6 +254,10 @@ const ORIGINALS: &[(&str, &str)] = &[
         "RaidFrame.lua",
         "1c2231c864f0d6e0c1bf02bd780ed1d12793ba3457323d86ebcf1d33079b6a1e",
     ),
+    (
+        "VoiceChat.lua",
+        "7154de538cf9d0f0cf8bfaad8e113585c68deb145d7331f068601744e1c3d67c",
+    ),
 ];
 
 fn assert_no_errors(env: &WowLuaEnv) {
@@ -326,6 +330,7 @@ fn create_env() -> WowLuaEnv {
             "Localization.xml",
             "BasicControls.xml",
             "UIParent.lua",
+            "VoiceChat.lua",
             "MoneyFrame.lua",
             "MoneyFrame.xml",
             "MoneyInputFrame.lua",
