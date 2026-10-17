@@ -239,3 +239,20 @@ fn classic_b_r8_original_loot_history_empty_recycles_real_frames() {
     "#,
     );
 }
+
+#[test]
+fn classic_b_r9_original_tracking_load_and_update_hide_empty_icon() {
+    let env = env(&["Blizzard_Minimap/Classic/MinimapTracking_Simple.lua"]);
+    run(
+        &env,
+        r#"
+        MiniMapTracking = CreateFrame('Frame')
+        MiniMapTrackingIcon = MiniMapTracking:CreateTexture()
+        Mixin(MiniMapTracking, MinimapTrackingSimpleMixin)
+        MiniMapTracking:Show(); MiniMapTracking:OnLoad()
+        assert(not MiniMapTracking:IsShown())
+        MiniMapTracking:Show(); MiniMapTracking:OnEvent('MINIMAP_UPDATE_TRACKING')
+        assert(not MiniMapTracking:IsShown())
+    "#,
+    );
+}
