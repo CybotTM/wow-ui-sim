@@ -6,10 +6,10 @@ original ColorManager default-color path. See [Lua API architecture](../lua-api.
 
 ## What it must do
 
-- [ ] Return exactly one nil for an override type when no override registry exists.
-- [ ] Original Retail `ColorManager.GetColorDataForBagItemQuality` returns its
+- [x] Return exactly one nil for an override type when no override registry exists.
+- [x] Original Retail `ColorManager.GetColorDataForBagItemQuality` returns its
   default bag color for a quality with an entry in `ITEM_QUALITY_OVERRIDES`.
-- [ ] Original CharacterFrame opening retains equipment icons and player title.
+- [x] Original CharacterFrame opening retains equipment icons and player title.
 
 Cached `Blizzard_APIDocumentationGenerated/ColorOverridesDocumentation.lua`
 declares the required `ColorOverride` argument and nullable `ColorOverrideInfo`
@@ -32,7 +32,15 @@ result. Nil is this simulator's empty-state policy, not native default proof.
 
 ## Known gaps (current cycle)
 
-- [ ] Behavioral RED/GREEN and separate Retail startup observation.
+Original pre-postload consumer RED at test `eab97a0f9` against the sealed
+`8c3f5646d` Retail library reaches ColorManager.lua:95 (missing query).
+Normal Retail library/binary `019ac27ff` passes the new consumer and both
+unchanged CharacterFrame cases (three unique logical cases); separate startup
+returns `[]`, exit 0. Original CVar stat/hash remains unchanged. Exact private
+receipts: `handoff/wrath-fixes-redgreen/color-retail-green-preservation-epoch.txt`
+and `color-retail-green-startup-comparison.json` under the simulator state root.
+The limited fixture still reports unrelated load diagnostics; these are not a
+clean full-fixture or native-parity claim. The rilua unwind bug remains unfixed.
 
 ## Out of scope
 
