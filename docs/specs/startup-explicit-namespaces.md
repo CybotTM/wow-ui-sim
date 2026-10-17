@@ -165,8 +165,41 @@ Rebase onto `85ad9cae6` and the verified shared-cache resync change two of eleve
 Retail consumer pins: `Blizzard_GroupFinder/Shared/LFGFrame.lua` and
 `Blizzard_MicroMenu/Mainline/MainMenuBarMicroButtons.lua`. Only their expected
 hashes are refreshed to the approved 12.1.5.70448 cache; test bodies and production
-behavior are unchanged. New-input gates are pending. The 9c checkpoint below
-remains historical evidence, not proof against the refreshed inputs.
+behavior are unchanged. At `fd46b7a9a` all seven profiles passed fresh focused
+gates and compile checks, including Retail 13/13 and startup []. This checkpoint
+also reran the other profiles because incoming SetAtlas changes were shared.
+Private `wrath-fixes-redgreen/FINAL-85ad9cae6.json` records exact receipts; the
+older 9c checkpoint below is historical.
+
+### Classic B integration checkpoint
+
+Production `5ea0336fd` integrates comparison master `37b6c07b7`. B's guarded
+Rust empty loot/product producers replace the redundant Lua defaults; engraving
+and strict namespace inventory remain. Shared guild/marker constructor fields
+are passive on the other five profiles. Profile-gated publication, string,
+loader and fixture changes were inspected: their prior observable API behavior
+is unchanged, so their accepted 85ad runtime receipts are reused, not relabeled
+as fresh current-source execution.
+
+| Profile | Focused tests | Master startup → branch | Runtime proof |
+|---|---:|---|---|
+| Retail | 13/13 | [] → [] | 85ad checkpoint reused |
+| PTR | 7/7 | [] → [] | 85ad checkpoint reused |
+| Mists | 6/6 | [] → [] | 85ad checkpoint reused |
+| Forever | 12/12 | [] → [] | 85ad checkpoint reused |
+| Era | 33/33 | 24/56 → 24/56 | 5ea0336fd; 32 + separate empty-history case |
+| Anniversary | 33/33 | 24/56 → 24/56 | 5ea0336fd; combined batch |
+| Wrath | 36/36 | 44/55 → 22/30 | 85ad checkpoint reused |
+
+Era/Anniversary combined gates cover namespace/logging, Classic A/B and marker
+behavior. Their startup records and counts exactly match current master, with
+no new, removed or changed records. Equal counts are accepted: B already
+subsumes the earlier empty-query removals. Both startups still exit 1.
+Wrath's ten unmasked classes and 22/30 inventory remain unchanged; sound v2,
+loot and U1–U4/residual work are deferred to a new branch after merge.
+Private `wrath-fixes-redgreen/37b6-profile-projection.md` records source
+projection and its limits. Independent verification remains parent-owned;
+no clean-startup, native-parity or full-suite claim follows.
 
 ### Historical 9c checkpoint
 
