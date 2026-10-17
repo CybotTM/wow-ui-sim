@@ -209,3 +209,16 @@ Acceptance is limited to saved component runs against sealed libraries: Wrath `e
 
 - Full input-system behavior, public `Insert` limit enforcement, `SetText` MaxBytes enforcement, native markup/grapheme counting, IME, clipboard, keyboard selection creation/navigation, and rendering selection highlight.
 - Native same-value callback policy, caret placement/reset (including any always-end behavior), `OnCursorChanged`, IME lifecycle, and full native EditBox lifecycle remain unverified. The changed-value callbacks, no-op policy, and clipping above are bounded simulator behavior, not a native-client execution claim.
+
+## Initial pristine hidden cursor contract
+
+Derived from shipped consumer contracts (inference from original code), not direct native observation: defer an initial cursor notification only while an EditBox is effectively hidden and pristine (no previous presentation or real text edit, empty text, scalar cursor0). Do not commit the deferred presentation. Revealing it allows the next normal dirty flush to emit its first font-backed cursor before ordinary `OnUpdate`; `Show` itself does not synthesize geometry.
+
+Real text/cursor edits retain the existing flush lifecycle regardless of visibility: cursor presentation precedes pending `OnTextChanged`. Changed layout after a first presentation also retains the existing behavior. Visible boxes retain initial notification, including Wrath XML-completion flushes. No callback is forced inside text/cursor setters, and no Blizzard/vendor Lua is changed.
+
+Consumer constraints:
+- Mists `Blizzard_StoreUI/TBC/Blizzard_StoreUISecure.lua:3567–3583,3816–3820`: the shipped VAS cursor handler reads the character selected only when that flow opens. An initial callback for the pristine hidden control would make the shipped code error, implying that this callback is deferred; the realm-list fixture remains nonempty.
+- Wrath `AddOns/Blizzard_DebugTools/Blizzard_DebugTools.lua:439–449` and `FrameXML/UIPanelTemplates.lua:339–365`: the shipped hidden-box real SetText must yield cursorOffset before the later same-text direct scrolling call. `FrameXML/BasicControls.xml:29–31` intentionally keeps that error panel hidden. A blanket hidden-cursor gate breaks this original consumer.
+- Retail `Blizzard_ChatFrameBase/Shared/MacroExecutionManager.lua:13–26` and `Shared/ChatFrameEditBox.lua:458–475` preserve hidden text processing; Retail `Blizzard_ScriptErrorsFrame/Blizzard_ScriptErrorsFrame.xml:38–40` binds the original cursor consumer; visible initial XML notification remains covered by `tests/xml_editbox_cursor_binding.rs::ordinary_xml_cursor_names_shadow_globals_during_real_layout`. Suppressing every pristine initial callback breaks its Wrath XML-completion assertion.
+
+`tests/mists_store_cursor.rs` loads the complete unchanged pinned StoreUISecure source, checks own-hidden and ancestor-hidden pristine controls, first-show cursor-before-update ordering, and hidden first/changed text cursor-before-notification. The contract is inferred from these shipped consumers; tests do not claim direct native callback-count or timing observation. Native probes remain: own-hidden never-shown, ancestor-hidden own-shown, visible, reveal after hidden mutation, hide after first show; record callback count and order relative to `OnLoad`/`OnShow`.
