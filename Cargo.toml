@@ -296,6 +296,11 @@ name = "classic_r10r14"
 path = "tests/classic_r10r14.rs"
 
 [[test]]
+name = "wrath_residual_b"
+path = "tests/wrath_residual_b.rs"
+required-features = ["client-wrath"]
+
+[[test]]
 name = "classic_guild_roster_selection"
 path = "tests/classic_guild_roster_selection.rs"
 
