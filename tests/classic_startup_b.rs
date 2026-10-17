@@ -450,3 +450,35 @@ fn classic_b_r18_original_reputation_bar_has_no_retail_watch_fixture() {
     "#,
     );
 }
+
+#[test]
+fn classic_b_r19_original_vanilla_rewards_skip_tbc_only_children() {
+    let env = env(&[]);
+    original("Blizzard_UIPanels_Game/Classic/QuestFrame.lua");
+    env.set_screen_mode(ScreenKind::Game);
+    env.state().borrow_mut().addon_base_paths = vec![ui()];
+    wow_ui_sim::xml::register_intrinsic_templates();
+    for addon in discover_blizzard_startup_addons_for_screen(&ui(), ScreenKind::Game) {
+        load_startup_addon(&env.loader_env(), &addon.toc_path, addon.kind, None).unwrap();
+    }
+    env.apply_post_load_workarounds();
+    wow_ui_sim::startup::fire_startup_events_for_screen(&env, ScreenKind::Game);
+    run_targeted(
+        &env,
+        r#"
+        QuestLog_Update()
+        assert(GetClassicExpansionLevel() == LE_EXPANSION_CLASSIC)
+        assert(not ClassicExpansionAtLeast(LE_EXPANSION_BURNING_CRUSADE))
+        assert(QuestLogHonorFrame == nil and QuestLogPlayerTitleFrame == nil)
+    "#,
+    );
+    let errors: Vec<_> = env
+        .state()
+        .borrow()
+        .lua_errors
+        .iter()
+        .filter(|error| error.contains("QuestFrame.lua:549"))
+        .cloned()
+        .collect();
+    assert!(errors.is_empty(), "{errors:?}");
+}
