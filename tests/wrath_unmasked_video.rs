@@ -14,7 +14,10 @@ fn wrath_unmasked_original_effects_preserves_player_texture_enabled_state() {
     );
     drop(previous);
     let env = env();
-    run(&env, "RegisterCVar('BaseMip', '0')");
+    run(
+        &env,
+        "RegisterCVar('BaseMip', '0'); SetCVar('BaseMip', '0')",
+    );
     load(
         &env,
         &[
