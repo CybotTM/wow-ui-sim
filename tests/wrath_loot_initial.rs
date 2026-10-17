@@ -508,6 +508,32 @@ fn original_wrath_party_roots_preserve_master_indices_with_supplied_raf_link() {
             format(RAF_SUMMON_WITH_COOLDOWN, SecondsToTime(remaining, true)))
     "#,
     );
+    // A second concrete supplied party member must reach the original shown path.
+    {
+        let mut sim = env.state().borrow_mut();
+        let mut second = sim.party_members[0].clone();
+        second.name = "SecondFriend".into();
+        sim.party_members.push(second);
+    }
+    exec(
+        &env,
+        r#"
+        assert(GetPartyMember(1) == true and GetPartyMember(2) == true)
+        assert(GetPartyMember(3) == false)
+        assert(GetPartyMember(0) == false and GetPartyMember(5) == false)
+        PartyMemberFrame_UpdateMember(PartyMemberFrame2)
+        assert(PartyMemberFrame2:IsShown())
+    "#,
+    );
+    env.state().borrow_mut().party_group_active = false;
+    exec(
+        &env,
+        r#"
+        assert(GetPartyMember(1) == false and GetPartyMember(2) == false)
+        PartyMemberFrame_UpdateMember(PartyMemberFrame2)
+        assert(not PartyMemberFrame2:IsShown())
+    "#,
+    );
     env.state().borrow_mut().refer_a_friend_linked_guids.clear();
     exec(&env, "assert(not IsReferAFriendLinked('party1'))");
 }
