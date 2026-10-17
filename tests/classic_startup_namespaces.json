@@ -1,0 +1,14 @@
+{
+  "era": {
+    "Blizzard_FrameXML/Classic/LootHistory.lua": "9bd5a85e0d10fc7a154acec914ed67209466e6dc975dc97774d9b0a3c3b680dc",
+    "Blizzard_UIPanels_Game/Classic/ProductChoice.lua": "bd8a9614c356fc818c40c34f8a18b6d4c60c645bf54259bd43cb6035dd707ca1",
+    "Blizzard_CharacterFrame/Vanilla/PaperDollFrame.lua": "d2f4d736fb380dee53f57891f9f72bcf173d4f45c8e26b086cd123dcd7c6c23a",
+    "Blizzard_SharedXML/Classic/SharedUIPanelTemplates.lua": "8327c8b752ed3225626bcc370c9e16c626c57cf3ecb98759e9982fc52da148d7"
+  },
+  "anniversary": {
+    "Blizzard_FrameXML/Classic/LootHistory.lua": "9bd5a85e0d10fc7a154acec914ed67209466e6dc975dc97774d9b0a3c3b680dc",
+    "Blizzard_UIPanels_Game/Classic/ProductChoice.lua": "bd8a9614c356fc818c40c34f8a18b6d4c60c645bf54259bd43cb6035dd707ca1",
+    "Blizzard_CharacterFrame/Vanilla/PaperDollFrame.lua": "d2f4d736fb380dee53f57891f9f72bcf173d4f45c8e26b086cd123dcd7c6c23a",
+    "Blizzard_SharedXML/Classic/SharedUIPanelTemplates.lua": "8327c8b752ed3225626bcc370c9e16c626c57cf3ecb98759e9982fc52da148d7"
+  }
+}
