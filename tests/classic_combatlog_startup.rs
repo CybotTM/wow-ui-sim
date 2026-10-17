@@ -42,7 +42,8 @@ fn classic_a_original_login_refilter_has_no_fabricated_history_entry() {
         Blizzard_CombatLog_Refilter()
         assert(CombatLogUpdateFrame.refiltering == false)
         assert(CombatLogUpdateFrame:GetScript('OnUpdate') == nil)
-        assert(not CombatLogQuickButtonFrameProgressBar:IsShown())
+        local progress = assert(getfenv(Blizzard_CombatLog_Refilter).CombatLogQuickButtonFrameProgressBar)
+        assert(not progress:IsShown())
         "#,
     )
     .expect("empty Classic history never fabricates a valid event from a cursor; populated replay is policy-blocked");
