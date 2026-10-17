@@ -1,6 +1,6 @@
 # Wrath temporary startup capability defaults
 
-Wrath-only legacy defaults live in `src/lua_api/workarounds/temporary/wrath_startup_defaults.rs`, naming each missing backing system and retirement condition. The user approved these simulator choices on 2026-10-17; none is native-capability or hardware evidence.
+Wrath-only legacy defaults live in `src/lua_api/workarounds/temporary/wrath_startup_defaults.rs`, naming each missing backing system and retirement condition. The user explicitly approved the three boolean values on 2026-10-17. Empty counts apply the separately approved standing empty/zero/no-selection policy to the observed unsupplied domains. None is native-capability or hardware evidence.
 
 ## What it must do
 
