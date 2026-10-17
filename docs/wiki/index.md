@@ -2,6 +2,10 @@
 
 [Investigation](investigations/classic-startup-producer-cascades.md) links bounded A consumer proof, integrated Era/Anniversary startup reconciliation and the empty-only CombatLog repair. Marker selection remains a separate B root; populated history/native/full startup acceptance is not claimed.
 
+## [2026-10-16] source | Retail 70448 profile update
+
+[Client profile checkpoint](systems/client-profiles.md#retail-70448-source-and-producer-update--october-16-2026) links exact source identity, private-cache acquisition, public API epoch and producer regressions. Runtime/preservation acceptance remains separate.
+
 ## [2026-10-16] documentation | Container, message history and transform label producers
 
 [Producer notes](systems/lua-api.md#container-message-history-and-transform-producers--2026-10-16) and [widget storage](systems/widget-system.md#message-history-and-translation-target-state--2026-10-16) link the owning [split/use](../specs/container-split-use.md), [quest metadata](../specs/container-item-quest-metadata.md), [Wrath history](../specs/message-frame-access-history.md) and [transform](../specs/animation-transforms.md) receipts. Historical accepted RED remains separate from post-GREEN receipts; Retail and Wrath acceptance reports linked from the owning specs bound the GREEN scope. [Residual container workaround](systems/lua-api.md#remaining-container-default-shapes) owns retained defaults and retirement conditions. No native/full-profile/startup/check acceptance.

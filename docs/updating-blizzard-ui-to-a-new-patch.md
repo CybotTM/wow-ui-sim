@@ -31,6 +31,35 @@ Profile → Gethe branch:
 | anniversary | `classic_anniversary` |
 | wowforever | `forever` (current selected target 1.60.1.70374; distinct runtime profile, cache, and manifest) |
 
+## Retail selected target — October 16, 2026
+
+Retail's selected installed product is `wow` **12.1.5.70448**, active build key
+`88d5e8ef05ec5a8446cdec93d142d7c6`. Gethe `live` revision
+`b9be9379719047977fca4dba1bb1d9988e8840b3` reports that exact version;
+its full manifest contains 4,026 paths (+34/-49 from the previous manifest).
+The refreshed limited listfile maps every entry and contains 146,699 rows
+(+0/-17). Keep installed identity, source identity and runtime acceptance separate.
+
+When another gate uses the shared Retail cache, **never sync it in place**.
+`blizzard_ui_sync::default_cache_addons_path()` uses `dirs::cache_dir()`, so set
+an absolute private `XDG_CACHE_HOME` on both the sync and every subsequent test
+or startup process. Runtime files then live beneath
+`$XDG_CACHE_HOME/wow-ui-sim/blizzard-ui/retail/AddOns`. Validate its provenance's
+product, version, full build key and compiled manifest SHA256. Keep the original
+CVar-copy helper and child-only `XDG_DATA_HOME`; cache isolation does not replace
+CVar isolation. No changes to the shared cache or vendor Lua are required.
+
+The root install `.build.info` identifies installed PTR (`wowxptr`) 12.1.5.70340,
+not 70448; `_ptr_/.build.info` is absent. This Retail update does not move PTR's
+manifest, installed target, source pin or feature closure.
+
+Retail 70448 also requires its [separate GlobalStrings table](specs/client-profiles.md).
+The committed CSV/provenance contains 26,069 authenticated unencrypted shipped
+rows; 65 unreadable encrypted-section rows are omitted explicitly, not filled
+with fabricated text. Its WDC5 layout remains `D40F6D96`, with three sections.
+The existing multi-section DB2 reader and multiline-safe repo PHF generator are
+used; the old shared and Forever string tables remain unchanged.
+
 ## Matching the installed Forever build
 
 ### Current selected target — October 15, 2026
@@ -204,9 +233,11 @@ TOC-required file.
 wow-sim --no-addons --no-saved-vars lua-errors 2>/dev/null > docs/baselines/retail-lua-errors.json
 ```
 
-Commit the manifest(s), `data/wow-ui-sim-listfile.csv`, any
-`data/listfile-overrides.csv` additions, guard/list updates, and the refreshed
-baseline together — they are one logical patch bump. PTR 12.1.5 also commits its
+Commit each manifest/listfile data regeneration separately with added/removed
+counts and exact installed/source identity. Commit producer fixes with their
+regressions and owning specs, then document executed startup/preservation proof.
+Refresh an existing profile baseline only from the matching isolated runtime,
+not from source acquisition alone. PTR 12.1.5 also commits its
 regenerated `data/blizzard-ui-builds/ptr.json`; see [PTR CDN content index](ptr-cdn-content-index.md).
 
 ## Notes

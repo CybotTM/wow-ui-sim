@@ -1,3 +1,7 @@
+## [2026-10-16] source | Retail 12.1.5.70448 isolated update
+
+[Client profile update](systems/client-profiles.md#retail-70448-source-and-producer-update--october-16-2026) records exact installed/source identity, 4,026-file private cache, 12.1.5 public epoch, original-consumer RED roots and separately scoped shipped Retail GlobalStrings. Shared Retail cache and other profiles are preserved; source acquisition is not startup/preservation acceptance.
+
 ## [2026-10-17] evidence | Quest lifecycle latest-base implementer gates
 
 [Owning receipt](../baselines/quest-lifecycle.md#latest-base-integration-proof--2026-10-17) records rebuilt Retail82/Forever81, both clean startups and three exact B5 Retail preservation cases after rebase onto `275f9f09b`. Runtime/test trees match across the two documentation-separated build revisions. Independent verification/merge and broader/native acceptance remain separate.
