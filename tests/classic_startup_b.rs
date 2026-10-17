@@ -276,7 +276,7 @@ fn classic_b_r11_original_guild_initialization_and_row_selection_statements() {
     );
     run(&env, &init);
     run(&env, "assert(GetGuildRosterSelection() == 0)");
-    use wow_ui_sim::lua_api::state_types::GuildMember;
+    use wow_ui_sim::lua_api::state::GuildMember;
     env.state().borrow_mut().world.guild_members = vec![
         GuildMember {
             name: "First".into(),
