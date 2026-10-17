@@ -1,6 +1,6 @@
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn test_patch_12_1_5_curio_rarity_preserves_retail() {
     let env = WowLuaEnv::new().unwrap();

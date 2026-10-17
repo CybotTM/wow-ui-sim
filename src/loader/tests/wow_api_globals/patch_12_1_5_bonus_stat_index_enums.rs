@@ -61,7 +61,7 @@ fn assert_metadata_and_member_count(env: &WowLuaEnv, ptr: bool) {
     assert_eq!(actual, (0, count - 1, count, count));
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn patch_12_1_5_bonus_stat_index_enums_ptr() {
     let env = WowLuaEnv::new().unwrap();
@@ -70,7 +70,7 @@ fn patch_12_1_5_bonus_stat_index_enums_ptr() {
     assert_bonus_stat_publication(&env, true);
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn patch_12_1_5_bonus_stat_index_enums_preserves_retail() {
     let env = WowLuaEnv::new().unwrap();

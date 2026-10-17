@@ -16,7 +16,7 @@ fn expected_members() -> Vec<(String, i64)> {
         .unwrap();
     assert_eq!(parent["before"]["Fields"].as_array().unwrap().len(), 50);
     // `before` equals cached retail TooltipInfoSharedDocumentation.lua:27–85.
-    let side = if cfg!(feature = "client-ptr") {
+    let side = if cfg!(feature = "retail-12-1-5") {
         "after"
     } else {
         "before"
@@ -51,7 +51,7 @@ fn assert_publication(env: &WowLuaEnv, expected: &[(String, i64)]) {
     "#,
         )
         .unwrap();
-    let metadata = if cfg!(feature = "client-ptr") {
+    let metadata = if cfg!(feature = "retail-12-1-5") {
         (0, 51, 52)
     } else {
         (0, 49, 50)
@@ -60,7 +60,7 @@ fn assert_publication(env: &WowLuaEnv, expected: &[(String, i64)]) {
         actual,
         (expected.len() as i64, metadata.0, metadata.1, metadata.2)
     );
-    if cfg!(feature = "client-ptr") {
+    if cfg!(feature = "retail-12-1-5") {
         env.exec(r#"
             for _, name in ipairs({"RestrictedRaceClass", "RestrictedFaction", "RestrictedSkill",
                 "RestrictedPvPMedal", "RestrictedReputation", "RestrictedSpellKnown", "RestrictedLevel",

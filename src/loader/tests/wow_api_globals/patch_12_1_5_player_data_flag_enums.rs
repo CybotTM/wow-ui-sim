@@ -29,7 +29,7 @@ fn assert_player_data_flags(env: &WowLuaEnv, ptr: bool) {
     .expect("player-data flag publication");
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn patch_12_1_5_player_data_flag_enums_ptr() {
     let env = WowLuaEnv::new().unwrap();
@@ -38,7 +38,7 @@ fn patch_12_1_5_player_data_flag_enums_ptr() {
     assert_player_data_flags(&env, true);
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn patch_12_1_5_player_data_flag_enums_retail() {
     let env = WowLuaEnv::new().unwrap();

@@ -31,10 +31,10 @@ fn assert_publication(env: &WowLuaEnv, ptr: bool) {
 }
 
 #[test]
-#[cfg(any(feature = "client-ptr", feature = "client-retail"))]
+#[cfg(any(feature = "retail-12-1-5", feature = "client-retail"))]
 fn patch_12_1_5_transmog_illusion_flags_publication() {
     let env = WowLuaEnv::new().unwrap();
-    let ptr = cfg!(feature = "client-ptr");
+    let ptr = cfg!(feature = "retail-12-1-5");
     // Retail publishes 12.0.5 values; PTR retains its additional HiddenIllusion bit.
     assert_publication(&env, ptr);
     crate::ptr::compat_bootstrap::apply_post_load(&env);

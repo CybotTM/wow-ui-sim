@@ -75,14 +75,14 @@ fn assert_publication_survives_post_load(side: &str, count: usize) {
     assert_fragment_metadata(&env, count as i32);
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn patch_12_1_5_fragment_id_enums_ptr() {
     assert_publication_survives_post_load("after", 78);
 }
 
 // Cached retail WowCSConstantsDocumentation.lua:6–91 equals the register's `before`.
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn patch_12_1_5_fragment_id_enums_preserves_retail() {
     assert_publication_survives_post_load("before", 77);

@@ -28,7 +28,7 @@ fn assert_publication(env: &WowLuaEnv, ptr: bool) {
     .expect("exact entrance enum publication");
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn patch_12_1_5_tiered_entrance_enums_ptr() {
     let env = WowLuaEnv::new().unwrap();
@@ -37,7 +37,7 @@ fn patch_12_1_5_tiered_entrance_enums_ptr() {
     assert_publication(&env, true);
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn patch_12_1_5_tiered_entrance_enums_retail() {
     let env = WowLuaEnv::new().unwrap();

@@ -2,7 +2,7 @@
 
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 fn assert_weather_type(env: &WowLuaEnv) {
     env.exec(
         r#"
@@ -25,7 +25,7 @@ fn assert_weather_type(env: &WowLuaEnv) {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn patch_12_1_5_weather_type_enums_ptr() {
     let env = WowLuaEnv::new().unwrap();
@@ -34,7 +34,7 @@ fn patch_12_1_5_weather_type_enums_ptr() {
     assert_weather_type(&env);
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn patch_12_1_5_weather_type_enums_preserves_retail() {
     let env = WowLuaEnv::new().unwrap();

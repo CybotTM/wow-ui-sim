@@ -70,13 +70,13 @@ fn assert_housing_publication(ptr: bool) {
     }
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn patch_12_1_5_housing_result_enums_ptr() {
     assert_housing_publication(true);
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn patch_12_1_5_housing_result_enums_preserves_retail() {
     assert_housing_publication(false);
