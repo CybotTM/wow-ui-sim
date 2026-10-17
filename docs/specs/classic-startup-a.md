@@ -29,15 +29,35 @@ Finite data and existing modeled inputs required by the installed Vanilla startu
 
 ## Tests asserting this spec
 
-- `tests/classic_startup_a.rs`: six original-cache consumer cases, extended with supplied false capability and nonzero yesterday contribution after their Rust storage is available. Existing `tests/mists_class_colors.rs`, `tests/p1200_plain_globals.rs` cover preservation but have not been executed here.
+- `tests/classic_startup_a.rs`: six original-cache consumer cases, extended with supplied false capability and nonzero yesterday contribution after their Rust storage is available. Existing Mists cast/color/class/honor and Retail plain-global/social tests cover preservation; saved execution receipts follow below.
 
 ## Known gaps (current cycle)
 
-- [ ] All tests are staged, unbuilt and unexecuted. Runtime RED/GREEN, startup reduction, type checking and integration acceptance remain required.
+- [x] Bounded runtime proof: Era and Anniversary each fail all six original consumers at test revision `fcd05ae2c`, then pass all six at production/test revision `9a454578d` (normal `sound,gui,casc,client-<profile>` libraries). This does not establish native or complete startup parity.
+- [x] Preservation: existing Mists cast colors (2), cast fade (1), class colors (2), honor (3), Retail plain globals (8) and social probes (17) pass. Retail `cargo check --no-default-features --features sound,gui,casc,client-retail` and `cargo fmt --check` pass on `9a454578d`.
+- [x] Separate sealed startup runs: both profiles report 38 unique / 46 total errors versus committed 92 / 98 baselines, exit 1. Original persisted CVars unchanged; each runtime uses a fresh byte-exact child XDG copy.
+- [ ] Startup still fails. In particular CompactRaidFrameManager:84 reaches a different nil call than the bounded R12 fixture; attribution remains open.
 - [ ] Consumer cases load original Lua chunks and drive handlers on real widgets or presentation fixtures, not the whole startup/XML dependency graph. Full startup-order coverage remains open.
 - [ ] Watch login uses the existing three static legacy watches. Five/six capacity uses supplied UI-owned watch records, not six state-backed legacy quest memberships.
 - [ ] Native Vanilla class-enumeration indexing and native palette RGBA are not established. Compact enumeration is an explicit simulator choice grounded in the shipped nine-class set.
 - [ ] Existing item RGB values are reused, not newly acquired native measurements. Invalid-quality behavior is outside this startup contract.
+
+## Saved proof ledger
+
+Private evidence root: `/home/osso/.local/state/wow-ui-sim/handoff/classic-build/` (0700; report 0600). Builds use the assigned reusable `slot-3`, pressure-guarded launcher, emitted feature/artifact records and captured Cargo/rustc versions. No full test suite was run.
+
+| Proof | Saved epoch / result |
+|---|---|
+| Era RED | `classic-a-era-red-consumers-20261016T225122002761Z/a-red`: 0/6, Rust test exit 101; normal library `fcd05ae2c` |
+| Anniversary RED | `classic-a-anniversary-red-consumers-20261016T225702871989Z/a-red`: 0/6; same source |
+| Era GREEN | `classic-a-era-final-20261016T233603903613Z/a-green`: 6/6; normal library/test source `9a454578d` |
+| Anniversary GREEN | `classic-a-anniversary-final-20261016T232755151867Z/a-green`: 6/6; same source |
+| Mists preservation | `classic-a-mists-preservation-20261016T233630295384Z`: cast-colors, cast-fade, class-colors, honor all exit 0; 8 logical tests (timeout child summaries are not additional tests) |
+| Retail preservation | `classic-a-retail-preservation-20261016T234650693396Z`: plain-globals 8/8, social-probes 17/17 |
+| Retail check / format | `classic-a-retail-check-20261017T000048380432Z`, `a-format.json`: exit 0 |
+| Startup | `{era,anniversary}-a-startup-summary.json` link exact final normal binary epochs, each 38/46, exit 1 |
+
+Initial producer compile failure (missing `LuaApiMut` import) and original-bank-handler failure are retained. The bank traceback reaches `SetID(BANK_CONTAINER)` because the shared Retail enum omitted `Bank`; publishing documented `Enum.BagIndex.Bank=-1` before the original Constants chunk fixes the producer rather than injecting a downstream alias. Admission-denied component epochs are not execution evidence; already compiled components were retained and run only after admission. No proof was rerun solely for a later milestone.
 
 ## Out of scope
 
