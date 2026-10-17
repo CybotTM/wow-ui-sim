@@ -4,7 +4,7 @@ PTR `C_LFGInfo.GetActiveLFGDungeonName()` queries the existing instance ID and L
 
 ## What it must do
 
-- [x] Publish the query only on PTR; earlier retail must retain absence through normal namespace lookup before and after bootstrap.
+- [x] Publish the query with the Retail 12.1.5 epoch on both Retail and PTR; earlier Retail epochs retain absence through normal namespace lookup before and after bootstrap.
 - [x] Resolve only `world.instance_lfg_dungeon_id` against `lfd_dungeons`; return the matching catalog name, not the world instance label or proposal name.
 - [x] Read current state on every call: instance-ID changes and catalog renames must affect subsequent results.
 - [x] Return one empty string when no instance LFG ID is set, including proposal-only state.

@@ -10,7 +10,7 @@ Pinned 12.1.5 declares `C_Intl.Length(text: cstring)` and `LuaLocaleContext.Leng
 - Empty text counts as zero; `é` counts as one, decomposed `e` plus combining accent as two, `😀` as one, and `👩‍💻` as three.
 - Reject malformed UTF-8 and nonstring inputs through the same validation used by [normalization](intl-normalization.md). No replacement characters or new dependencies.
 - Context calls validate the existing userdata receiver without changing its stored locale. Independent contexts produce the same count.
-- PTR only; earlier retail retains namespace absence. Existing [context storage](intl-locale-context.md) and normalization APIs remain unchanged.
+- Retail 12.1.5+ and PTR; earlier Retail epochs retain namespace absence. Existing [context storage](intl-locale-context.md) and normalization APIs remain unchanged.
 
 Scalar counting and explicit errors are simulator assumptions, not confirmed native counting units or failure behavior. No claim of byte, grapheme, UTF-16-unit, or native cstring/NUL semantics. Native no-return conditions and secret/taint enforcement remain unverified.
 

@@ -4,7 +4,7 @@ The PTR `C_ActionBar.IsMacroActionWithShowTooltip(actionID)` query reads the bod
 
 ## What it must do
 
-- [x] PTR returns a boolean for positive action slots; empty, spell, outfit, and macros without a matching directive return false. Earlier retail does not expose the query, including through namespace fallback.
+- [x] Retail 12.1.5+ and PTR return a boolean for positive action slots; empty, spell, outfit, and macros without a matching directive return false. Earlier retail does not expose the query, including through namespace fallback.
 - [x] Query reads current `MacroInfo.body`, so `EditMacro` changes results without reassignment.
 - [x] `A_Admin.SetMacroActionSlot(slot, macroID)` assigns an existing macro; `GetActionInfo` returns `"macro", macroID, nil` and `HasAction` recognizes it. Existing spell assignment positional arguments remain unchanged.
 - [x] Admin clear/replace, cursor macro pickup/place, and `PutActionInSlot` preserve a single action kind per slot and remove obsolete associations.
