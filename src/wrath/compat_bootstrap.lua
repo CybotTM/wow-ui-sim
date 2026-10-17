@@ -148,7 +148,7 @@ if GetPVPYesterdayStats == nil then
   end
 end
 
--- GetQuestTimers is registered by workarounds/temporary/wrath_startup_defaults:
+-- GetQuestTimers is registered by workarounds/temporary/legacy_quest_timers:
 -- timed quests remain unmodeled; the empty domain returns zero values.
 
 if GetRefreshRates == nil then

@@ -23,6 +23,7 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetPartyLeaderIndex", get_party_leader_index)?;
     super::wrath_voice::register_all(lua)?;
     crate::lua_api::workarounds::wrath_startup_defaults::register_all(lua)?;
+    crate::lua_api::workarounds::register_legacy_quest_timers(lua)?;
     Ok(())
 }
 

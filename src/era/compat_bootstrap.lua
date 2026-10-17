@@ -72,10 +72,6 @@ if rawget(_G, "GetNumQuestWatches") == nil then
   function GetNumQuestWatches() return 0 end
 end
 
-if rawget(_G, "GetQuestTimers") == nil then
-  function GetQuestTimers() return nil end
-end
-
 -- ─── Raid frame profiles ───────────────────────────────────────────────────
 
 if rawget(_G, "GetRaidProfileOption") == nil then

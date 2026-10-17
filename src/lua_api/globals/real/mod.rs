@@ -35,6 +35,12 @@ pub mod input_interface;
 pub mod instanced_identity;
 pub mod item_legacy;
 pub(crate) mod legacy_guild_selection;
+#[cfg(any(
+    feature = "client-wrath",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
+pub mod legacy_skills;
 #[cfg(feature = "client-wrath")]
 pub(crate) mod legacy_sound;
 pub mod locale_info;
@@ -114,7 +120,11 @@ pub mod voice_chat_probes;
 pub mod wrath_legacy;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_legacy_lfg;
-#[cfg(feature = "client-wrath")]
+#[cfg(any(
+    feature = "client-wrath",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 pub mod wrath_legacy_state;
 #[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_startup_queries;

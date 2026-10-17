@@ -78,7 +78,11 @@ pub struct SimState {
     pub cvars: CVarStorage,
     /// Zero means none; other values are one-based guild roster indexes.
     pub guild_roster_selection: usize,
-    #[cfg(feature = "client-wrath")]
+    #[cfg(any(
+        feature = "client-wrath",
+        feature = "client-era",
+        feature = "client-anniversary"
+    ))]
     pub wrath_legacy: crate::lua_api::globals::real::wrath_legacy_state::WrathLegacyState,
     #[cfg(feature = "client-wrath")]
     pub who_routing: crate::c_api::who_routing::WhoRouting,

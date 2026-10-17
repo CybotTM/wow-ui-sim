@@ -5,7 +5,6 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
-    LuaApiMut::register_function(lua, "GetQuestTimers", empty_quest_timers)?;
     LuaApiMut::register_function(lua, "GetNumMapOverlays", empty_map_overlay_count)?;
     LuaApiMut::register_function(lua, "GetNumMapDebugObjects", empty_map_debug_object_count)?;
     LuaApiMut::register_function(lua, "GetNumDungeonMapLevels", empty_dungeon_map_level_count)?;
@@ -55,10 +54,6 @@ fn is_player_resolution_available(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-// No timed-quest model exists: empty domain means zero values, never one nil.
-fn empty_quest_timers(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
-}
 
 // AuraInfo has no legacy spell-rank field. Keep the positional slot, without
 // claiming a rank or moving the modeled icon into that slot.

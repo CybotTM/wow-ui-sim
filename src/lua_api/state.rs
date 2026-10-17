@@ -43,7 +43,11 @@ macro_rules! build_empty_sim_state {
             scripts: ScriptRegistry::default(),
             cvars: CVarStorage::new(),
             guild_roster_selection: 0,
-            #[cfg(feature = "client-wrath")]
+            #[cfg(any(
+                feature = "client-wrath",
+                feature = "client-era",
+                feature = "client-anniversary"
+            ))]
             wrath_legacy: Default::default(),
             #[cfg(feature = "client-wrath")]
             who_routing: Default::default(),

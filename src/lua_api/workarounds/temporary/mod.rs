@@ -1,6 +1,12 @@
 //! Temporary Lua workarounds with explicit retirement paths.
 
 pub(crate) mod classic_startup_defaults;
+#[cfg(any(
+    feature = "client-wrath",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
+pub(crate) mod legacy_quest_timers;
 
 pub(crate) mod session_exit_defaults;
 #[cfg(feature = "client-wrath")]

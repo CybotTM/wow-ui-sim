@@ -1,23 +1,8 @@
-//! Explicit Wrath consumer inputs. Empty inputs are simulator policy, not
-//! observations of native startup. No retail table-to-legacy inference.
+//! Explicit legacy consumer inputs. Skill storage is shared with Era/Anniversary;
+//! other projections remain Wrath-only. Empty inputs are simulator policy.
 use std::collections::{HashMap, HashSet};
 
-#[derive(Clone, Debug, Default)]
-pub struct Skill {
-    pub name: String,
-    pub is_header: bool,
-    pub is_expanded: bool,
-    pub rank: i32,
-    pub temporary_points: i32,
-    pub modifier: i32,
-    pub max_rank: i32,
-    pub abandonable: bool,
-    pub step_cost: Option<i32>,
-    pub rank_cost: Option<i32>,
-    pub min_level: i32,
-    pub cost_type: i32,
-    pub description: String,
-}
+pub use super::legacy_skills::Skill;
 #[derive(Clone, Debug)]
 pub struct Landmark {
     pub name: String,

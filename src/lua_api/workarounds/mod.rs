@@ -6,6 +6,12 @@ mod runtime_surfaces;
 mod temporary;
 
 pub(crate) use temporary::classic_startup_defaults::register_all as register_classic_startup_defaults;
+#[cfg(any(
+    feature = "client-wrath",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
+pub(crate) use temporary::legacy_quest_timers::register_all as register_legacy_quest_timers;
 #[cfg(feature = "client-wrath")]
 pub(crate) use temporary::wrath_startup_defaults;
 

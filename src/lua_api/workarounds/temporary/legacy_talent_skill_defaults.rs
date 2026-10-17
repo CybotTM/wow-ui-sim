@@ -59,7 +59,11 @@ end
 
 "#;
 
-#[cfg(not(feature = "client-wrath"))]
+#[cfg(not(any(
+    feature = "client-wrath",
+    feature = "client-era",
+    feature = "client-anniversary"
+)))]
 const LEGACY_SKILL_DEFAULTS_LUA: &str = r#"
 if rawget(_G, "GetNumSkillLines") == nil then
     function GetNumSkillLines()
@@ -82,7 +86,11 @@ end
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(LEGACY_TALENT_SKILL_DEFAULTS_LUA)?;
-    #[cfg(not(feature = "client-wrath"))]
+    #[cfg(not(any(
+        feature = "client-wrath",
+        feature = "client-era",
+        feature = "client-anniversary"
+    )))]
     lua.exec(LEGACY_SKILL_DEFAULTS_LUA)?;
     Ok(())
 }

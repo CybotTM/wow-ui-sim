@@ -55,6 +55,47 @@ fn r10_original_skill_detail_hides_no_selection() {
 }
 
 #[test]
+fn r10_original_skill_detail_renders_supplied_rank() {
+    use wow_ui_sim::lua_api::globals::real::legacy_skills::Skill;
+    let env = load_consumer(&["Blizzard_UIPanels_Game/Classic/SkillFrame.lua"]);
+    // Explicit records, not a default catalog or inferred character profession.
+    env.state().borrow_mut().wrath_legacy.skills.push(Skill {
+        name: "Alchemy".into(),
+        rank: 42,
+        temporary_points: 3,
+        max_rank: 75,
+        description: "Mix potions".into(),
+        ..Default::default()
+    });
+    run_consumer(
+        &env,
+        r#"
+        SkillDetailStatusBar = CreateFrame('StatusBar', 'SkillDetailStatusBar', UIParent)
+        SkillDetailStatusBar:SetWidth(256)
+        SkillDetailDescriptionText = SkillDetailStatusBar:CreateFontString()
+        SkillDetailCostText = SkillDetailStatusBar:CreateFontString('SkillDetailCostText')
+        for _, name in ipairs({'Background','FillBar'}) do SkillDetailStatusBar:CreateTexture('SkillDetailStatusBar'..name) end
+        for _, name in ipairs({'SkillRank','SkillName'}) do SkillDetailStatusBar:CreateFontString('SkillDetailStatusBar'..name) end
+        SkillDetailStatusBarUnlearnButton = CreateFrame('Button', nil, SkillDetailStatusBar)
+        NORMAL_FONT_COLOR = {r=1,g=1,b=1}; HIGHLIGHT_FONT_COLOR = NORMAL_FONT_COLOR
+        -- Surrounding localization/color fixtures, not producer defaults.
+        SKILL_DESCRIPTION = '%s %s'
+        assert(GetNumSkillLines() == 1)
+        SetSelectedSkill(1)
+        SkillDetailFrame_SetStatusBar(GetSelectedSkill())
+        assert(GetSelectedSkill() == 1)
+        assert(SkillDetailStatusBar:IsShown() and SkillDetailDescriptionText:IsShown())
+        assert(SkillDetailStatusBarSkillName:GetText() == 'Alchemy')
+        assert(SkillDetailStatusBarSkillRank:GetText() == '45/75')
+        assert(SkillDetailStatusBar:GetValue() == 42)
+        SetSelectedSkill(0)
+        SkillDetailFrame_SetStatusBar(GetSelectedSkill())
+        assert(not SkillDetailStatusBar:IsShown())
+    "#,
+    );
+}
+
+#[test]
 fn r14_original_quest_timer_events_hide_empty_domain() {
     let env = load_consumer(&[
         "Blizzard_SharedXML/TimeUtil.lua",
