@@ -2,6 +2,20 @@
 
 Validation artifacts for supported client profiles.
 
+## rilua re-pin baseline refresh — 2026-10-17
+
+Fresh seven-profile captures at `83e57fcc4` use rilua `b2629b6329484945cb14e43b0e5590ee308c5df4`. The three re-pin commits were rebased onto `e90d921cc` as `761d3e6da`, `38ed2a969`, and `466088929`; both base and resulting tree differences are confined to `docs/baselines`, so saved build/test/startup evidence remains applicable without rebuilding.
+
+| Profile | e90d921cc records / occurrences | Fresh records / occurrences | Exit | Classification |
+|---|---:|---:|---:|---|
+| Retail / PTR / Mists / Forever | 0 / 0 each | 0 / 0 each | 0 | Unchanged; Retail uses explicit `[]` expectation (no tracked JSON) |
+| Era / Anniversary | 24 / 56 each | 24 / 56 each | 1 | All 24 messages gain host traceback frames; error text/counts unchanged |
+| Wrath | 22 / 30 | 22 / 30 | 1 | 21 traceback-only changes; one corrected function name plus traceback elision-boundary shift |
+
+Only Era, Anniversary and Wrath JSON/metadata are refreshed, byte-identical to their fresh stdout, following the prior Classic B capture format. Additional `?: ?` / `[C]: ?` frames follow rilua's unified host `exec`/`call_function` path. Wrath's `Blizzard_CombatLog.lua:3692` name changes from erroneous `(for generator)` to `Blizzard_CombatLog_QuickButton_OnClick`, consistent with the pending-local lifetime correction and the cached source call site; one tail-call frame moves behind the existing traceback ellipsis. No error class or occurrence is added/removed, and no retained count changes. StoreUI records are already absent from the selected master baselines and all fresh captures; no StoreUI removal is credited to this comparison.
+
+Saved evidence: `/home/osso/.local/state/wow-ui-sim/handoff/rilua-repin-rebase/report.md`, per-profile `*-startup-diff.json`, `acceptance-summary.json`, and `final-rebase-proof.json`. Five targeted tests pass under each profile (35 executions, five logical tests, including two unwind/diagnostic regressions). All original-CVar guards pass; profile cache hashes are unchanged across each capture. Existing `UnitRole` dead-code warnings remain in five non-Retail/PTR builds. These remain failing compatibility inventories for Era/Anniversary/Wrath, not native, GUI, full-suite or clean-startup acceptance. Earlier sections retain historical receipts.
+
 ## Lua Errors
 
 `mists-lua-errors.json` is the committed clean startup baseline for:
