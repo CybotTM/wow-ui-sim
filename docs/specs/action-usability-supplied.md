@@ -26,6 +26,7 @@ G3 supplies usability for existing spell actions to the namespace query and publ
 ## Tests asserting this spec
 
 - `tests/action_usability_supplied.rs` — full cached Wrath file, actual textures, original event consumer; Retail additionally loads its complete deprecated wrapper.
+- `tests/action_usability_modern_supplied.rs` — active Retail/PTR/Mists/Forever shared ActionButton file and SharedXMLBase closure; unchanged modern mixin query refresh and `ACTION_USABLE_CHANGED` watcher, Rust-supplied spell state, passive supply, per-slot routing, rebind and empty-slot colors. Explicit host event delivery, not automatic notifications. Execution evidence pending.
 
 ## Known gaps (current cycle)
 
