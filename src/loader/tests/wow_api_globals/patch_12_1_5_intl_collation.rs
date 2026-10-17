@@ -1,6 +1,6 @@
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_collation_strengths_and_binary_keys() {
     let env = WowLuaEnv::new().unwrap();
@@ -46,7 +46,7 @@ fn intl_collation_strengths_and_binary_keys() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_collation_locales_and_validation() {
     let env = WowLuaEnv::new().unwrap();
@@ -85,7 +85,7 @@ fn intl_collation_locales_and_validation() {
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn intl_collation_preserves_retail_absence() {
     let env = WowLuaEnv::new().unwrap();

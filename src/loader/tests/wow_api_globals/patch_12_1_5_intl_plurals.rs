@@ -1,6 +1,6 @@
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_plurals_use_cldr_cardinal_and_ordinal_rules() {
     let env = WowLuaEnv::new().unwrap();
@@ -35,7 +35,7 @@ fn intl_plurals_use_cldr_cardinal_and_ordinal_rules() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_plurals_reject_invalid_inputs_without_mutating_context() {
     let env = WowLuaEnv::new().unwrap();
@@ -64,7 +64,7 @@ fn intl_plurals_reject_invalid_inputs_without_mutating_context() {
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn intl_plurals_preserve_retail_absence() {
     let env = WowLuaEnv::new().unwrap();

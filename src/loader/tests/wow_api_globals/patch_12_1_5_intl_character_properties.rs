@@ -1,6 +1,6 @@
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_character_properties_return_unicode_data() {
     let env = WowLuaEnv::new().unwrap();
@@ -40,7 +40,7 @@ fn intl_character_properties_return_unicode_data() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_character_properties_validate_and_isolate_results() {
     let env = WowLuaEnv::new().unwrap();
@@ -69,7 +69,7 @@ fn intl_character_properties_validate_and_isolate_results() {
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn intl_character_properties_preserve_retail_absence() {
     let env = WowLuaEnv::new().unwrap();

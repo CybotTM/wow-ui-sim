@@ -1,13 +1,13 @@
 //! Instance-ID lookup policy; native inactive/error behavior remains unverified.
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 fn active_name(env: &WowLuaEnv) -> String {
     env.eval("return C_LFGInfo.GetActiveLFGDungeonName()")
         .unwrap()
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn active_lfg_dungeon_name_tracks_instance_and_catalog_changes() {
     let env = WowLuaEnv::new().unwrap();
@@ -35,7 +35,7 @@ fn active_lfg_dungeon_name_tracks_instance_and_catalog_changes() {
     assert_eq!(active_name(&env), "");
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn active_lfg_dungeon_name_ignores_proposal_without_instance_id() {
     let env = WowLuaEnv::new().unwrap();
@@ -51,7 +51,7 @@ fn active_lfg_dungeon_name_ignores_proposal_without_instance_id() {
     assert_eq!(active_name(&env), "Ara-Kara, City of Echoes");
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn active_lfg_dungeon_name_reports_unknown_instance_id() {
     let env = WowLuaEnv::new().unwrap();
@@ -74,7 +74,7 @@ fn active_lfg_dungeon_name_reports_unknown_instance_id() {
     assert_eq!(active_name(&env), "City of Threads");
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn active_lfg_dungeon_name_remains_absent_on_retail() {
     let env = WowLuaEnv::new().unwrap();

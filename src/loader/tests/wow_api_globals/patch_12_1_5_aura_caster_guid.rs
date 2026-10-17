@@ -1,6 +1,6 @@
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 fn seeded_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
     {
@@ -32,7 +32,7 @@ fn seeded_env() -> WowLuaEnv {
     env
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn aura_caster_guid_resolves_live_sources_and_isolates_units() {
     let env = seeded_env();
@@ -73,7 +73,7 @@ fn aura_caster_guid_resolves_live_sources_and_isolates_units() {
     env.exec("assert(C_UnitAuras.GetAuraCasterGUID('player', 703) == nil); assert(C_UnitAuras.GetAuraCasterGUID('player', 702) == nil)").unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn aura_caster_guid_validates_required_arguments() {
     let env = seeded_env();
@@ -92,7 +92,7 @@ fn aura_caster_guid_validates_required_arguments() {
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn aura_caster_guid_preserves_retail_absence() {
     let env = WowLuaEnv::new().unwrap();

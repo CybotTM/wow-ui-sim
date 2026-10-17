@@ -2,7 +2,7 @@
 
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn patch_12_1_5_string_extensions_matching() {
     let env = WowLuaEnv::new().unwrap();
@@ -40,7 +40,7 @@ fn patch_12_1_5_string_extensions_matching() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn patch_12_1_5_string_extensions_trimming() {
     let env = WowLuaEnv::new().unwrap();
@@ -88,7 +88,7 @@ fn patch_12_1_5_string_extensions_preserves_legacy_trim() {
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn patch_12_1_5_string_extensions_absent_on_retail() {
     let env = WowLuaEnv::new().unwrap();

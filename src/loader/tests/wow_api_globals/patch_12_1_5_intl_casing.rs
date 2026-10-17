@@ -1,6 +1,6 @@
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_casing_uses_current_and_context_locales() {
     let env = WowLuaEnv::new().unwrap();
@@ -38,7 +38,7 @@ fn intl_casing_uses_current_and_context_locales() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_casing_full_fold_is_locale_independent() {
     let env = WowLuaEnv::new().unwrap();
@@ -65,7 +65,7 @@ fn intl_casing_full_fold_is_locale_independent() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_casing_rejects_invalid_text_locales_and_receivers() {
     let env = WowLuaEnv::new().unwrap();
@@ -98,7 +98,7 @@ fn intl_casing_rejects_invalid_text_locales_and_receivers() {
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn intl_casing_preserves_retail_absence() {
     let env = WowLuaEnv::new().unwrap();

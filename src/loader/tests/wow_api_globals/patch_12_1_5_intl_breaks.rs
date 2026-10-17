@@ -1,6 +1,6 @@
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_breaks_returns_utf8_boundaries_for_all_modes() {
     let env = WowLuaEnv::new().unwrap();
@@ -33,7 +33,7 @@ fn intl_breaks_returns_utf8_boundaries_for_all_modes() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_breaks_rejects_invalid_inputs_and_receivers() {
     let env = WowLuaEnv::new().unwrap();
@@ -57,7 +57,7 @@ fn intl_breaks_rejects_invalid_inputs_and_receivers() {
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn intl_breaks_preserves_retail_absence() {
     let env = WowLuaEnv::new().unwrap();

@@ -1,7 +1,7 @@
 //! ICU4C formatting is simulator behavior, not a native WoW output guarantee.
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_numbers_formats_and_parses_all_styles() {
     let env = WowLuaEnv::new().unwrap();
@@ -28,11 +28,12 @@ fn intl_numbers_formats_and_parses_all_styles() {
     "#).unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_numbers_currency_results_and_context_changes_are_independent() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         local en = C_Intl.CreateLocaleContext("enUS")
         local de = C_Intl.CreateLocaleContext("de-DE")
         assert(en:FormatCurrency(1234.5, "EUR") == "€1,234.50")
@@ -50,14 +51,17 @@ fn intl_numbers_currency_results_and_context_changes_are_independent() {
         local result = C_Intl.ParseCurrency(C_Intl.FormatCurrency(12.5, "USD"))
         assert(result.amount == 12.5 and result.currencyCode == "USD")
         assert(CurrencyParseResult == nil)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_numbers_reject_invalid_arguments_and_incomplete_parses() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         local context = C_Intl.CreateLocaleContext("en-US")
         for _, text in ipairs({"", "not a number", "12 trailing", "12\0"}) do
             assert(select('#', context:ParseNumber(text, 0)) == 0)
@@ -76,7 +80,9 @@ fn intl_numbers_reject_invalid_arguments_and_incomplete_parses() {
         assert(not pcall(context.ParseCurrency, context, string.char(255)))
         assert(not pcall(context.FormatNumber, {}, 1, 0))
         assert(context:FormatNumber(42, 0) == "42")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[cfg(feature = "client-retail")]
@@ -84,7 +90,8 @@ fn intl_numbers_reject_invalid_arguments_and_incomplete_parses() {
 fn intl_numbers_preserves_retail_namespace_absence() {
     let env = WowLuaEnv::new().unwrap();
     for _ in 0..2 {
-        env.exec("assert(C_Intl == nil); assert(CurrencyParseResult == nil)").unwrap();
+        env.exec("assert(C_Intl == nil); assert(CurrencyParseResult == nil)")
+            .unwrap();
         wow_ui_sim::ptr::compat_bootstrap::apply_post_load(&env);
     }
 }

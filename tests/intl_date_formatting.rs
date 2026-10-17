@@ -1,11 +1,12 @@
 //! Explicit-zone ICU4C model; native WoW defaults and output versions are unverified.
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_dates_epoch_styles_and_explicit_zones() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         local c = C_Intl.CreateLocaleContext("en-GB")
         assert(c:FormatDate(0, 1, "UTC") == "01/01/1970")
         assert(c:FormatTime(0, 2, "UTC") == "00:00:00")
@@ -28,14 +29,17 @@ fn intl_dates_epoch_styles_and_explicit_zones() {
                 assert(both:find(date, 1, true) and both:find(time, 1, true))
             else assert(date == "" and time == "") end
         end
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_dates_dst_and_locale_selection() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         local c = C_Intl.CreateLocaleContext("en-GB")
         assert(c:FormatTime(1710053999, 2, "America/New_York") == "01:59:59")
         assert(c:FormatTime(1710054000, 2, "America/New_York") == "03:00:00")
@@ -50,10 +54,12 @@ fn intl_dates_dst_and_locale_selection() {
         local arab = C_Intl.CreateLocaleContext("en-GB-u-nu-arab")
         assert(arab:FormatDate(0, 1, "UTC") ~= "01/01/1970")
         assert(arab:GetLocale() == "en-GB-u-nu-arab")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_dates_reject_invalid_arguments_without_zone_fallback() {
     let env = WowLuaEnv::new().unwrap();

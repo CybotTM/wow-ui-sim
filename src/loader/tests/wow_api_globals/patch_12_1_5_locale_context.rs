@@ -1,6 +1,6 @@
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn locale_context_storage_ptr() {
     let env = WowLuaEnv::new().unwrap();
@@ -31,7 +31,7 @@ fn locale_context_storage_ptr() {
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn locale_context_storage_retail_absence() {
     let env = WowLuaEnv::new().unwrap();

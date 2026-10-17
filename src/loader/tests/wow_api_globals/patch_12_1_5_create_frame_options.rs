@@ -1,7 +1,7 @@
 //! Options-constructor behavior; lifecycle/validation choices are simulator assumptions.
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 fn options_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
     env.exec(r#"
@@ -34,7 +34,7 @@ fn options_env() -> WowLuaEnv {
     env
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn create_frame_options_identity_and_types() {
     let env = options_env();
@@ -58,7 +58,7 @@ fn create_frame_options_identity_and_types() {
     "#).unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn create_frame_options_template_order_and_lifecycle() {
     let env = options_env();
@@ -85,7 +85,7 @@ fn create_frame_options_template_order_and_lifecycle() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn create_frame_options_explicit_flags_override_template_visibility() {
     let env = options_env();
@@ -106,7 +106,7 @@ fn create_frame_options_explicit_flags_override_template_visibility() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn create_frame_options_rejects_malformed_fields_before_creation() {
     let env = options_env();
@@ -133,7 +133,7 @@ fn create_frame_options_rejects_malformed_fields_before_creation() {
     "#).unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn create_frame_options_preserves_retail_absence_and_positional_api() {
     let env = WowLuaEnv::new().unwrap();

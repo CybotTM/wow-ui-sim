@@ -1,6 +1,6 @@
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_titlecase_maps_each_word_and_preserves_separators() {
     let env = WowLuaEnv::new().unwrap();
@@ -34,7 +34,7 @@ fn intl_titlecase_maps_each_word_and_preserves_separators() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_titlecase_rejects_invalid_inputs_without_mutating_context() {
     let env = WowLuaEnv::new().unwrap();
@@ -59,7 +59,7 @@ fn intl_titlecase_rejects_invalid_inputs_without_mutating_context() {
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn intl_titlecase_preserves_retail_absence() {
     let env = WowLuaEnv::new().unwrap();

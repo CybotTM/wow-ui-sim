@@ -1,11 +1,12 @@
 //! ICU currency metadata is modeled behavior, not a native WoW data guarantee.
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_currency_metadata_names_cover_styles_and_context_updates() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         local en = C_Intl.CreateLocaleContext("en-US")
         local fr = C_Intl.CreateLocaleContext("fr-FR")
         local de = C_Intl.CreateLocaleContext("de-DE")
@@ -36,14 +37,17 @@ fn intl_currency_metadata_names_cover_styles_and_context_updates() {
         local extended = C_Intl.CreateLocaleContext("en-US-u-nu-arab")
         assert(extended:GetCurrencyName("USD", styles.Long) == "US Dollar")
         assert(extended:GetLocale() == "en-US-u-nu-arab")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_currency_metadata_fraction_digits_distinguish_zero_and_unknown() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         for _, case in ipairs({{"USD", 2}, {"jpy", 0}, {"KWD", 3}}) do
             assert(C_Intl.GetCurrencyFractionDigits(case[1]) == case[2])
             assert(select('#', C_Intl.GetCurrencyFractionDigits(case[1])) == 1)
@@ -57,14 +61,17 @@ fn intl_currency_metadata_fraction_digits_distinguish_zero_and_unknown() {
         assert(en.GetCurrencyFractionDigits == nil)
         assert(C_Intl.GetCurrencyFractionDigits("JPY") == 0)
         assert(en:GetCurrencyName("USD", 0) == "$")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_currency_metadata_rejects_malformed_inputs_without_state_changes() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         local en = C_Intl.CreateLocaleContext("en-US")
         for _, code in ipairs({"", "US", "USDX", "U1D", "US\0", "€UR", string.char(255)}) do
             assert(not pcall(C_Intl.GetCurrencyName, code, 0))
@@ -84,7 +91,9 @@ fn intl_currency_metadata_rejects_malformed_inputs_without_state_changes() {
         assert(not pcall(en.GetCurrencyName, en, "USD", 0))
         assert(en:SetLocale("en-US"))
         assert(en:GetCurrencyName("USD", 0) == "$")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[cfg(feature = "client-retail")]
@@ -92,7 +101,8 @@ fn intl_currency_metadata_rejects_malformed_inputs_without_state_changes() {
 fn intl_currency_metadata_preserves_retail_absence() {
     let env = WowLuaEnv::new().unwrap();
     for _ in 0..2 {
-        env.exec("assert(C_Intl == nil); assert(LuaLocaleContext == nil)").unwrap();
+        env.exec("assert(C_Intl == nil); assert(LuaLocaleContext == nil)")
+            .unwrap();
         wow_ui_sim::ptr::compat_bootstrap::apply_post_load(&env);
     }
 }

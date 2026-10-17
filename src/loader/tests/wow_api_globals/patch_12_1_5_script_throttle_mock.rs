@@ -1,7 +1,7 @@
 //! Explicit zero placeholders only; no native values or throttling semantics.
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn script_throttle_mock_returns_exact_fresh_zero_tables() {
     let env = WowLuaEnv::new().unwrap();
@@ -41,7 +41,7 @@ fn script_throttle_mock_returns_exact_fresh_zero_tables() {
     }
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn script_throttle_mock_preserves_retail_absence() {
     let env = WowLuaEnv::new().unwrap();

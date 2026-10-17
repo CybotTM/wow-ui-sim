@@ -72,7 +72,7 @@ fn assert_metadata(env: &WowLuaEnv, definition: &Value) {
 fn assert_publication(env: &WowLuaEnv) {
     for definition in pinned_enums() {
         let name = definition["Name"].as_str().unwrap();
-        if cfg!(feature = "client-ptr") {
+        if cfg!(feature = "retail-12-1-5") {
             assert_members(env, &definition);
             assert_metadata(env, &definition);
         } else {

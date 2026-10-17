@@ -1,11 +1,12 @@
 //! ICU4C data and error policies are modeled behavior, not native WoW guarantees.
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_display_names_use_argument_as_display_language() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         local target = C_Intl.CreateLocaleContext("fr-FR")
         assert(target:GetDisplayName("en-US") == "French (France)")
         assert(target:GetDisplayName("de-DE") == "Französisch (Frankreich)")
@@ -25,14 +26,17 @@ fn intl_display_names_use_argument_as_display_language() {
         assert(not pcall(target.GetDisplayName, {}, "en-US"))
         assert(target:SetLocale("not a locale"))
         assert(not pcall(target.GetDisplayName, target, "en-US"))
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_transliteration_handles_growth_and_repeated_calls() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         assert(type(rawget(C_Intl, "Transliterate")) == "function")
         for _ = 1, 8 do
             assert(C_Intl.Transliterate("Crème brûlée", "Latin-ASCII") == "Creme brulee")
@@ -46,14 +50,17 @@ fn intl_transliteration_handles_growth_and_repeated_calls() {
         assert(select('#', C_Intl.Transliterate("é", "Latin-ASCII")) == 1)
         local context = C_Intl.CreateLocaleContext("en-US")
         assert(context.Transliterate == nil)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_display_transliteration_rejects_invalid_input_without_poisoning_calls() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         for _, id in ipairs({"", "Missing-Transliterator", "Latin-ASCII\0", string.char(255)}) do
             assert(not pcall(C_Intl.Transliterate, "abc", id))
         end
@@ -64,7 +71,9 @@ fn intl_display_transliteration_rejects_invalid_input_without_poisoning_calls() 
         assert(not pcall(C_Intl.GetDisplayName))
         assert(C_Intl.Transliterate("é", "Latin-ASCII") == "e")
         assert(type(C_Intl.GetDisplayName("en-US")) == "string")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[cfg(feature = "client-retail")]
@@ -72,7 +81,8 @@ fn intl_display_transliteration_rejects_invalid_input_without_poisoning_calls() 
 fn intl_display_transliteration_preserves_retail_absence() {
     let env = WowLuaEnv::new().unwrap();
     for _ in 0..2 {
-        env.exec("assert(C_Intl == nil); assert(LuaLocaleContext == nil)").unwrap();
+        env.exec("assert(C_Intl == nil); assert(LuaLocaleContext == nil)")
+            .unwrap();
         wow_ui_sim::ptr::compat_bootstrap::apply_post_load(&env);
     }
 }

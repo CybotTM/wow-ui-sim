@@ -1,6 +1,6 @@
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_normalization_forms() {
     let env = WowLuaEnv::new().unwrap();
@@ -34,7 +34,7 @@ fn intl_normalization_forms() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_normalization_rejects_invalid_input() {
     let env = WowLuaEnv::new().unwrap();
@@ -57,7 +57,7 @@ fn intl_normalization_rejects_invalid_input() {
     "#).unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn intl_normalization_retail_absence() {
     let env = WowLuaEnv::new().unwrap();

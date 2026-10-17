@@ -1,11 +1,12 @@
 //! ICU4C search results are modeled behavior, not native WoW equivalence.
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_string_matches_strengths_and_canonical_equivalence() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         local en = C_Intl.CreateLocaleContext("en-US")
         local function check(text, pattern, strength, expected)
             local actual = en:FindStringMatches(text, pattern, strength)
@@ -22,14 +23,17 @@ fn intl_string_matches_strengths_and_canonical_equivalence() {
         local de = C_Intl.CreateLocaleContext("de-DE")
         local matches = de:FindStringMatches("Straße STRASSE", "strasse", 0)
         assert(#matches == 2 and matches[1] == 0 and matches[2] == 8)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_string_matches_byte_offsets_nonoverlap_and_locale_state() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         local context = C_Intl.CreateLocaleContext("enUS")
         local matches = context:FindStringMatches("😀é banana banana", "ana", 2)
         assert(#matches == 2 and matches[1] == 8 and matches[2] == 15)
@@ -52,14 +56,17 @@ fn intl_string_matches_byte_offsets_nonoverlap_and_locale_state() {
         local large = context:FindStringMatches(string.rep("😀a", 2048), "a", 2)
         assert(#large == 2048)
         for i, offset in ipairs(large) do assert(offset == (i - 1) * 5 + 4) end
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn intl_string_matches_empty_and_invalid_inputs() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         local context = C_Intl.CreateLocaleContext("en-US")
         assert(type(rawget(C_Intl, "FindStringMatches")) == "function")
         for strength = 0, 4 do
@@ -83,7 +90,9 @@ fn intl_string_matches_empty_and_invalid_inputs() {
         assert(not pcall(context.FindStringMatches, context, "", "", 0))
         assert(context:SetLocale("en-US"))
         assert(context:FindStringMatches("abc", "b", 2)[1] == 1)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[cfg(feature = "client-retail")]
@@ -91,7 +100,8 @@ fn intl_string_matches_empty_and_invalid_inputs() {
 fn intl_string_matches_preserves_retail_absence() {
     let env = WowLuaEnv::new().unwrap();
     for _ in 0..2 {
-        env.exec("assert(C_Intl == nil); assert(LuaLocaleContext == nil)").unwrap();
+        env.exec("assert(C_Intl == nil); assert(LuaLocaleContext == nil)")
+            .unwrap();
         wow_ui_sim::ptr::compat_bootstrap::apply_post_load(&env);
     }
 }

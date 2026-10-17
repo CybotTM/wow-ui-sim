@@ -1,7 +1,7 @@
 //! Simulator weather assumptions, not native weather timing or intensity semantics.
 use crate::lua_api::WowLuaEnv;
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn patch_12_1_5_weather_state_and_snapshots() {
     let env = WowLuaEnv::new().unwrap();
@@ -33,7 +33,7 @@ fn patch_12_1_5_weather_state_and_snapshots() {
     );
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn patch_12_1_5_weather_explicit_event_observes_state() {
     let env = WowLuaEnv::new().unwrap();
@@ -57,7 +57,7 @@ fn patch_12_1_5_weather_explicit_event_observes_state() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn patch_12_1_5_weather_admin_validation_is_atomic() {
     let env = WowLuaEnv::new().unwrap();
@@ -77,7 +77,7 @@ fn patch_12_1_5_weather_admin_validation_is_atomic() {
     "#).unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(not(feature = "retail-12-1-5"))]
 #[test]
 fn patch_12_1_5_weather_namespace_absent_on_retail() {
     let env = WowLuaEnv::new().unwrap();
