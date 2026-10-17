@@ -152,7 +152,7 @@ fn promote_foundational_addons_to_load_first(addons: &mut HashMap<String, (PathB
 }
 
 fn implicit_blizzard_startup_dependencies() -> HashMap<String, Vec<String>> {
-    HashMap::from([
+    let mut dependencies = HashMap::from([
         (
             "Blizzard_UIPanels_Game".to_string(),
             vec!["Blizzard_MoneyFrame".to_string()],
@@ -183,7 +183,15 @@ fn implicit_blizzard_startup_dependencies() -> HashMap<String, Vec<String>> {
         ("Blizzard_AchievementUI".to_string(), vec![]),
         ("Blizzard_Transmog".to_string(), vec![]),
         ("Blizzard_ArdenwealdGardening".to_string(), vec![]),
-    ])
+    ]);
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Era
+            | crate::client_profile::ClientProfile::Anniversary
+    ) {
+        dependencies.remove("Blizzard_Transmog");
+    }
+    dependencies
 }
 
 /// Ordered TOC variants for the active client profile.
