@@ -16,6 +16,10 @@ Wrath `GetOptOutOfLoot()` reads `LootMethodState.opt_out`, settable through the
 same Rust test-state path. Unsupplied state is false (not opted out), per the
 standing approved Wrath empty/zero/no-selection policy applied by the parent on
 2026-10-17. This is a simulator default, not a native observation.
+Wrath's legacy `GetSummonFriendCooldown()` delegates to the existing
+`C_RecruitAFriend.GetSummonFriendCooldown` producer: unsupplied `(0, 0)`, per the
+same approved zero-when-unsupplied policy (parent decision 2026-10-17).
+The temporary alias retires when modeled RAF cooldown state supplies the legacy API.
 No solo-time override, setter change, or group-leave behavior is added.
 This fixture is not a native initial-state or tuple-parity claim.
 
@@ -35,6 +39,7 @@ original Wrath FrameXML/UnitPopup.lua's accepted tokens. No native capture.
 - [ ] All four dropdowns and the original loot-threshold menu resolve to
   `ITEM_QUALITY2_DESC`; an explicit threshold 4 update resolves to `ITEM_QUALITY4_DESC`.
 - [ ] Original opt-out menu text reflects unsupplied false and explicit true state.
+- [ ] Original RAF summon text has no cooldown suffix for unsupplied `(0, 0)`.
 
 Behavioral RED reached PartyMemberFrame1 creation at original UnitPopup.lua:223
 before producer `6dab184f6`. After that approved producer, both original party
@@ -51,6 +56,7 @@ including nine newly unmasked :226 records (2026-10-17).
 
 - `src/lua_api/sim_substates/mod.rs`: approved initial token and threshold fixture.
 - `src/lua_api/globals/real/loot_method.rs`: Wrath-only legacy threshold and opt-out readers.
+- `src/lua_api/workarounds/temporary/wrath_startup_defaults.rs`: temporary legacy RAF cooldown alias.
 
 ## Tests asserting this spec
 

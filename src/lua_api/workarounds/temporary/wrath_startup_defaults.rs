@@ -17,6 +17,9 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         "IsPlayerResolutionAvailable",
         is_player_resolution_available,
     )?;
+    // No RAF summon cooldown state: reuse the existing zero/zero producer.
+    // Retire this alias when a modeled RAF cooldown supplies the legacy API.
+    lua.exec("GetSummonFriendCooldown = C_RecruitAFriend.GetSummonFriendCooldown")?;
     Ok(())
 }
 
