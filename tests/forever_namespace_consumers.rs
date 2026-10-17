@@ -1,4 +1,4 @@
-//! Source-only staged regressions; runtime RED/GREEN remains unexecuted.
+//! Complete hash-pinned original consumers for bounded namespace publication.
 #![cfg(any(
     feature = "client-wowforever",
     feature = "client-mists",

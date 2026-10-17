@@ -121,9 +121,17 @@ functions. A complete-bootstrap test covers only these strict surfaces; a separa
 C_CVar/constructor control asserts unchanged non-strict behavior. Retail/PTR/Wrath
 receive no strict exemptions. Generic member-factory retirement is out of scope.
 
-Predicted RED/GREEN only; no executed tests/builds. Mists store selected-character errors
-and downstream error-reporter behavior remain separate, unresolved startup gates.
-No clean startup, full-profile or native acceptance is asserted.
+Pre-rebase execution at producer `26877f296`: Forever passes all ten original
+consumer cases and both factory controls (12/12); Mists, Era and Anniversary each
+pass three original consumers and two controls (5/5). Their preceding REDs failed
+at the missing named namespace in each original consumer, plus strictness; the
+non-strict factory control passed. Retail/PTR SocialUI preservation and integrated
+startup gates still require separate post-rebase proof.
+
+The Mists error-reporter gap predates this stage and has its own
+[modeled logging repair](mists-script-error-logging.md). The selected-character
+root is owned by the master StoreUI fix. No clean startup, full-profile or native
+acceptance follows from these bounded component results.
 
 
 ## Contract

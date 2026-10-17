@@ -2,6 +2,10 @@
 
 [Client profile update](systems/client-profiles.md#retail-70448-source-and-producer-update--october-16-2026) records exact installed/source identity, 4,026-file private cache, 12.1.5 public epoch, original-consumer RED roots and separately scoped shipped Retail GlobalStrings. Shared Retail cache and other profiles are preserved. Bounded post-rebase acceptance: startup `[]`; requested preservation265/265; epoch unit89/integration50; atlas/aura23; default check and formatting pass. Seven existing unused-helper warnings remain; native/all-profile/full-suite and 65 encrypted string rows remain outside this proof.
 
+## Investigation | Namespace exposure and secondary error reporting
+
+Updated [classic startup cascades](investigations/classic-startup-producer-cascades.md#namespace-exposure-and-secondary-reporter-failures) with SSOT links for bounded namespace proof and modeled Mists logging. Original ScriptErrors source distinguishes missing C_Log from the VM's later-loop diagnostic-name defect. Post-rebase integrated gates remain separate.
+
 ## [2026-10-17] evidence | Quest lifecycle latest-base implementer gates
 
 [Owning receipt](../baselines/quest-lifecycle.md#latest-base-integration-proof--2026-10-17) records rebuilt Retail82/Forever81, both clean startups and three exact B5 Retail preservation cases after rebase onto `275f9f09b`. Runtime/test trees match across the two documentation-separated build revisions. Independent verification/merge and broader/native acceptance remain separate.

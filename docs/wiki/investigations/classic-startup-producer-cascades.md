@@ -10,10 +10,27 @@ The [empty-history investigation](../../specs/classic-empty-combatlog-history.md
 
 R12's menu fixture captured callbacks without evaluating selection. Real dropdown startup evaluates `IsRaidMarkerActive` and exposes a separate missing query. It receives no R12 credit and belongs to a separate B root.
 
+## Namespace exposure and secondary reporter failures
+
+Removing generic namespace synthesis can expose both the original missing API
+and a second failure while Blizzard formats it. The
+[explicit namespace contract](../../specs/startup-explicit-namespaces.md) owns the
+bounded shared models, temporary defaults and publication-scoped strictness;
+other namespace factories retain their existing behavior.
+
+Mists's original `Blizzard_ScriptErrors.lua:83` calls `C_Log.LogErrorMessage`.
+Its missing publication is distinct from the StoreUI error being formatted and
+from the VM diagnostic that mislabeled an earlier nil global access with a later
+generic-for local name. The [logging contract](../../specs/mists-script-error-logging.md)
+owns the original-consumer regression and modeled console sink. Never infer an
+iterator failure from `(for generator)` without checking the actual source line.
+
 ## Sources
 
 - [Classic A](../../specs/classic-startup-a.md) — contract, source attribution and sealed profile receipts.
 - [Empty history](../../specs/classic-empty-combatlog-history.md) — original consumer chain, policy boundary and temporary producer ownership.
+- [Explicit namespaces](../../specs/startup-explicit-namespaces.md) — bounded publication and factory-preservation contract.
+- [Mists logging](../../specs/mists-script-error-logging.md) — secondary reporter root and observable console behavior.
 
 ## See Also
 
