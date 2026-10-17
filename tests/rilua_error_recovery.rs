@@ -37,10 +37,8 @@ fn missing_global_before_loop_reports_global_name() {
     let error = env
         .exec(
             r#"
-            local value = MissingForGeneratorRepro.field
-            for key, item in pairs({}) do
-                value = item
-            end
+            MissingForGeneratorRepro.field()
+            for index, value in ipairs({}) do end
             "#,
         )
         .unwrap_err();
