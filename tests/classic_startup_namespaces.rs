@@ -1,4 +1,4 @@
-//! Staged source-only regressions: runtime RED/GREEN has not been executed.
+//! Original-consumer regressions for bounded Era/Anniversary startup namespaces.
 #![cfg(any(feature = "client-era", feature = "client-anniversary"))]
 
 use sha2::{Digest, Sha256};

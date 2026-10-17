@@ -2,14 +2,14 @@
 
 ## Era / Anniversary startup extension
 
-- [ ] `C_LootHistory.GetNumItems()` returns zero pending a Classic roll-history
+- [x] `C_LootHistory.GetNumItems()` returns zero pending a Classic roll-history
   model; original OnLoad and full-update handlers clear/recycle stale UI rows.
-- [ ] `C_ProductChoice.GetChoices()` returns a fresh empty identifier array pending
+- [x] `C_ProductChoice.GetChoices()` returns a fresh empty identifier array pending
   a product-entitlement catalog; original OnLoad initializes the reward panel,
   and login/update handlers complete without creating reward alerts.
-- [ ] `C_Engraving.IsEngravingEnabled()` returns false pending engraving availability
+- [x] `C_Engraving.IsEngravingEnabled()` returns false pending engraving availability
   state; the original rune control OnLoad hides an initially shown control.
-- [ ] Unknown members remain nil on these three Era/Anniversary namespaces, even
+- [x] Unknown members remain nil on these three Era/Anniversary namespaces, even
   after exported-constructor reuse. Existing non-strict factories remain unchanged.
 
 Only IsEngravingEnabled has a cached generated signature (non-nil bool).
@@ -29,7 +29,14 @@ plus complete-bootstrap strictness/factory preservation. Tests-only Era RED at
 fbf25a24d reproduced missing C_LootHistory at LootHistory.lua:55, C_ProductChoice
 at ProductChoice.lua:63 (OnLoad and dispatched events), C_Engraving at
 PaperDollFrame.lua:951, and the absent raw namespace preservation control.
-Producer GREEN and sealed startup receipts are recorded separately after execution.
+Producer GREEN passed all five tests on both Era and Anniversary. Sealed headless
+startups on this branch each measured 87 unique records / 138 occurrences versus
+the supplied 26877f296 captures' 95/150: eight records disappeared, no new records,
+and the existing ScriptErrors.lua:83 reporter count fell 50→46. Removed records
+are LootHistory OnLoad :55, ProductChoice OnLoad and OnEvent :63, and rune-control
+OnLoad PaperDollFrame :951, each with its Lua Error mirror and count one.
+These are still failing startups, not full-profile acceptance. Build/runtime
+receipts and exact-message deltas live in the private classic-ns-apply handoff.
 Populated loot history, product selection, engraving modes/runes, reporter repair,
 and full startup acceptance are outside this bounded extension.
 
