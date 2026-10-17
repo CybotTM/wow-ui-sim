@@ -277,7 +277,7 @@ fn assert_no_errors(env: &WowLuaEnv) {
 fn exec(env: &WowLuaEnv, code: &str) {
     let result = env.exec(code);
     assert_no_errors(env);
-    result.expect("original consumer and assertions");
+    result.unwrap_or_else(|error| panic!("original consumer and assertions:\n{code}\n{error}"));
 }
 
 fn load(env: &WowLuaEnv, files: &[&str]) {
