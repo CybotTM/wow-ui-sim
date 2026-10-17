@@ -20,6 +20,7 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     // unrelated WoWLabs matchmaking party used by the earlier registration.
     LuaApiMut::register_function(lua, "IsPartyLeader", is_party_leader)?;
     LuaApiMut::register_function(lua, "GetPartyMember", get_party_member)?;
+    LuaApiMut::register_function(lua, "GetPartyLeaderIndex", get_party_leader_index)?;
     super::wrath_voice::register_all(lua)?;
     crate::lua_api::workarounds::wrath_startup_defaults::register_all(lua)?;
     Ok(())
@@ -104,6 +105,18 @@ fn is_raid_leader(state: &mut LuaState) -> LuaResult<u32> {
         raid && is_group_leader(&sim, "player")
     };
     state.push(Val::Bool(leader));
+    Ok(1)
+}
+
+fn get_party_leader_index(state: &mut LuaState) -> LuaResult<u32> {
+    let leader = {
+        let sim = borrow_state(state)?;
+        // Shared leader queries use zero-based member indices; None is player.
+        sim.party_leader_index
+            .filter(|&index| sim.party_group_active && index < 4 && index < sim.party_members.len())
+            .map_or(0, |index| index + 1)
+    };
+    state.push(Val::Num(leader as f64));
     Ok(1)
 }
 

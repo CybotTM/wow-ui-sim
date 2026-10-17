@@ -26,6 +26,9 @@ documentation; it does not claim native cooldown lifecycle parity.
 Wrath `GetPartyMember(index)` reads the existing active-group flag and supplied
 party-member list. Only occupied indices 1–4 in an active group return true;
 other indices/inactive groups return false. No new party state or default is added.
+`GetPartyLeaderIndex()` converts existing zero-based member-leader state to party
+indices 1–4; player leadership (`None`), inactive groups, and unsupplied/invalid
+member indices return 0. It agrees with existing leader queries for supplied members.
 Wrath `GetVoiceStatus(unit, mode)` / `GetMuteStatus(unit, mode)` read explicit
 per-unit/channel-mode presentation entries beside `VoiceChatState`; absent entries
 return false. Modes remain distinct (`party`, `raid`, `Battleground`), as selected
@@ -56,6 +59,8 @@ original Wrath FrameXML/UnitPopup.lua's accepted tokens. No native capture.
 - [ ] Original opt-out menu text reflects unsupplied false and explicit true state.
 - [ ] A second supplied member reaches the original shown-frame path; disabling
   the group makes the same frame hide.
+- [ ] Supplying party2 as leader returns index 2 and shows only that member's
+  original leader icon; player leadership returns 0 and hides member leader icons.
 - [ ] Supplied voice-enabled/muted flags reach the original speaker/mute icons;
   absent flags hide them, and another mode does not inherit the party selection.
 - [ ] An explicitly active speaker named like the supplied party member reaches
