@@ -427,13 +427,15 @@ fn classic_b_r18_original_reputation_bar_has_no_retail_watch_fixture() {
     run_targeted(
         &env,
         r#"
-        ClassicBSuppliedReputation = {
-            selectedFaction=0, watchedFactionID=72, sortType=0, showLegacy=true,
-            factions={{factionID=72, name='Stormwind', reaction=5,
-                standing=1000, bottom=0, top=3000, isHeader=false,
-                isAccountWide=false, isLegacy=true}},
-        }
-        __wow_reputation_state = ClassicBSuppliedReputation
+        -- Existing query closures own this table; supply its fields in place,
+        -- rather than replacing the debug global with an unrelated table.
+        ClassicBSuppliedReputation = __wow_reputation_state
+        local state = ClassicBSuppliedReputation
+        state.selectedFaction=0; state.watchedFactionID=72; state.sortType=0; state.showLegacy=true
+        state.factions={{factionID=72, name='Stormwind', reaction=5,
+            standing=1000, bottom=0, top=3000, isHeader=false,
+            currentStanding=1000, currentReactionThreshold=0, nextReactionThreshold=3000,
+            isAccountWide=false, isLegacy=true}}
     "#,
     );
     env.apply_post_load_workarounds();
