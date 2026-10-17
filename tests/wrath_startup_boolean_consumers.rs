@@ -56,6 +56,30 @@ fn wrath_original_worldmap_skips_unavailable_debug_zone_map() {
 }
 
 #[test]
+fn wrath_original_worldmap_onload_reads_empty_debug_objects() {
+    let env = load_original_wrath_startup();
+    let errors: Vec<_> = env
+        .state()
+        .borrow()
+        .lua_errors
+        .iter()
+        .filter(|message| message.contains("WorldMapFrame.lua:402"))
+        .cloned()
+        .collect();
+    assert!(
+        errors.is_empty(),
+        "original OnLoad debug-object count: {errors:?}"
+    );
+    env.exec(
+        r#"
+        assert(GetNumMapDebugObjects() == 0)
+        assert(NUM_WORLDMAP_DEBUG_OBJECTS == 0)
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn wrath_original_player_world_entry_hides_unsupplied_voice_indicator() {
     let env = load_original_wrath_startup();
     let errors: Vec<_> = env
