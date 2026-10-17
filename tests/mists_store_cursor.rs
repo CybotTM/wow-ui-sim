@@ -1,10 +1,9 @@
 //! Cursor lifecycle derived from shipped consumer contracts (original-code inference).
 //! No direct native observation.
-#![cfg(feature = "client-mists")]
-
 use std::cell::RefCell;
 use std::rc::Rc;
 
+#[cfg(feature = "client-mists")]
 use sha2::{Digest, Sha256};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::font::{DEFAULT_WOW_FONT, WowFontSystem};
@@ -18,6 +17,7 @@ fn create_env() -> WowLuaEnv {
     env
 }
 
+#[cfg(feature = "client-mists")]
 #[test]
 fn original_mists_vas_cursor_does_not_run_before_hidden_character_selection() {
     let env = create_env();
