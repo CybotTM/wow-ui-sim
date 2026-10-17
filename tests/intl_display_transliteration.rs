@@ -76,7 +76,7 @@ fn intl_display_transliteration_rejects_invalid_input_without_poisoning_calls() 
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(all(feature = "profile-retail", not(feature = "retail-12-1-5")))]
 #[test]
 fn intl_display_transliteration_preserves_retail_absence() {
     let env = WowLuaEnv::new().unwrap();

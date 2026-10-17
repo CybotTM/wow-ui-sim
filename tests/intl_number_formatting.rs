@@ -85,7 +85,7 @@ fn intl_numbers_reject_invalid_arguments_and_incomplete_parses() {
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(all(feature = "profile-retail", not(feature = "retail-12-1-5")))]
 #[test]
 fn intl_numbers_preserves_retail_namespace_absence() {
     let env = WowLuaEnv::new().unwrap();

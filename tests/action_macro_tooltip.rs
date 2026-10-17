@@ -153,7 +153,7 @@ fn action_macro_tooltip_slot_mutations_clear_old_associations() {
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(all(feature = "profile-retail", not(feature = "retail-12-1-5")))]
 #[test]
 fn action_macro_tooltip_query_absent_on_retail() {
     let env = WowLuaEnv::new().unwrap();

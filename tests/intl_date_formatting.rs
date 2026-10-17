@@ -83,7 +83,7 @@ fn intl_dates_reject_invalid_arguments_without_zone_fallback() {
     "#).unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(all(feature = "profile-retail", not(feature = "retail-12-1-5")))]
 #[test]
 fn intl_dates_preserve_retail_absence() {
     let env = WowLuaEnv::new().unwrap();

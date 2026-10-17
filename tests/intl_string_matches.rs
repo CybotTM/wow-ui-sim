@@ -95,7 +95,7 @@ fn intl_string_matches_empty_and_invalid_inputs() {
     .unwrap();
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(all(feature = "profile-retail", not(feature = "retail-12-1-5")))]
 #[test]
 fn intl_string_matches_preserves_retail_absence() {
     let env = WowLuaEnv::new().unwrap();
