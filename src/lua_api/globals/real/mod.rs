@@ -13,7 +13,6 @@ pub(crate) mod bnet_friend_index;
 pub(crate) mod break_up_large_numbers;
 pub mod combat_probes;
 pub mod combat_stats;
-#[cfg(any(feature = "client-retail", feature = "client-wowforever"))]
 pub mod combo_points;
 pub mod container_legacy;
 #[cfg(feature = "retail-12-0-0")]

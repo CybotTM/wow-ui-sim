@@ -80,5 +80,11 @@ fn get_combo_points(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(crate) fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
-    LuaApiMut::register_function(lua, "GetComboPoints", get_combo_points)
+    if matches!(
+        ACTIVE,
+        ClientProfile::Retail | ClientProfile::WowForever | ClientProfile::Wrath
+    ) {
+        LuaApiMut::register_function(lua, "GetComboPoints", get_combo_points)?;
+    }
+    Ok(())
 }
