@@ -9,6 +9,7 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetQuestTimers", empty_quest_timers)?;
     LuaApiMut::register_function(lua, "GetNumMapOverlays", empty_map_overlay_count)?;
     LuaApiMut::register_function(lua, "GetNumMapDebugObjects", empty_map_debug_object_count)?;
+    LuaApiMut::register_function(lua, "GetNumDungeonMapLevels", empty_dungeon_map_level_count)?;
     LuaApiMut::register_function(lua, "HasDebugZoneMap", has_debug_zone_map)?;
     LuaApiMut::register_function(lua, "UnitIsTalking", unit_is_talking)?;
     LuaApiMut::register_function(
@@ -29,6 +30,14 @@ fn empty_map_overlay_count(state: &mut LuaState) -> LuaResult<u32> {
 // Missing system: map debug objects. No supplied catalog means zero objects;
 // retire when that model owns the count and corresponding debug-object records.
 fn empty_map_debug_object_count(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+// Missing system: selected-map dungeon-floor catalog. Unsupplied floors mean
+// zero, never a total inferred from the selected-floor scalar. Retire when a
+// supplied floor catalog owns both records and count.
+fn empty_dungeon_map_level_count(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     Ok(1)
 }
