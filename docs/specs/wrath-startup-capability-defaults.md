@@ -1,6 +1,6 @@
 # Wrath temporary startup capability defaults
 
-Wrath-only legacy defaults live in `src/lua_api/workarounds/temporary/wrath_startup_defaults.rs`, naming each missing backing system and retirement condition. The user explicitly approved the three boolean values on 2026-10-17. Empty counts apply the separately approved standing empty/zero/no-selection policy to the observed unsupplied domains. None is native-capability or hardware evidence.
+Wrath-only legacy defaults live in `src/lua_api/workarounds/temporary/wrath_startup_defaults.rs`, naming each missing backing system and retirement condition. The user explicitly approved the three boolean values on 2026-10-17. Empty counts apply the separately approved standing empty/zero/no-selection policy to the observed unsupplied domains. None is native-capability or hardware evidence. The former constant voice probe is now replaced by the state-backed reader in [Wrath loot/party support](wrath-initial-loot.md); only one registration remains.
 
 ## What it must do
 
@@ -12,7 +12,7 @@ Wrath-only legacy defaults live in `src/lua_api/workarounds/temporary/wrath_star
 
 ### Voice and player textures
 
-- [x] `UnitIsTalking(name)` returns false for every Lua string until the voice-chat speaking model exists. Original PlayerFrame.lua:150 passes `UnitName("player")`, not a unit token. Unknown/empty names, Unicode and arbitrary byte strings are accepted without lookup, decoding or network/audio access.
+- [x] `UnitIsTalking(name)` reads existing channel members' speaking flags by exact character-name bytes, through the [state-backed voice reader](wrath-initial-loot.md). Original PlayerFrame.lua:150 passes `UnitName("player")`, not a unit token. Unsupplied/unknown/empty names and the original unknown Unicode/binary controls remain false; supplied matching active speakers return true. No network/audio access.
 - [x] Original world-entry voice handling hides the speaker indicator through unchanged PlayerFrame.lua:366–373 and VoiceChat.lua:197–205.
 - [x] `IsPlayerResolutionAvailable()` returns true until the player-texture-resolution capability model exists. Original Effects event must not force-disable an enabled PlayerTexture control.
 
@@ -23,7 +23,7 @@ Wrath-only legacy defaults live in `src/lua_api/workarounds/temporary/wrath_star
 
 ## Implementation inventory
 
-- `src/lua_api/workarounds/temporary/wrath_startup_defaults.rs`: three explicit capability producers and empty debug-object/floor counts; no namespace/global catch-all.
+- `src/lua_api/workarounds/temporary/wrath_startup_defaults.rs`: two explicit capability producers and empty debug-object/floor counts; no namespace/global catch-all.
 - `src/lua_api/workarounds/temporary/mod.rs` and `workarounds/mod.rs`: existing client-wrath-only module/export gates.
 - `src/lua_api/globals/real/wrath_startup_queries.rs`: existing Wrath initialization route.
 
@@ -42,7 +42,7 @@ Wrath-only legacy defaults live in `src/lua_api/workarounds/temporary/wrath_star
 
 ## Out of scope
 
-Native parity, actual rendering/hardware support, populated debug tiles, real voice transport/speaking state, BaseMip defaults, gamma operations, Blizzard/vendor edits and blanket missing-API handling.
+Native parity, actual rendering/hardware support, populated debug tiles, real voice transport (supplied speaking state belongs to the linked loot/party support), BaseMip defaults, gamma operations, Blizzard/vendor edits and blanket missing-API handling.
 
 ## Original resolution branch
 
@@ -56,7 +56,7 @@ end
 
 False force-disables the control. True only skips this block; it never calls Enable and therefore does not itself establish that the control must be enabled under every other state.
 
-## Final bounded proof — 2026-10-17
+## Historical bounded proof — 2026-10-17 (before combined loot/party support)
 
 Rebased on `e90d921cc`, whose committed Wrath baseline is exactly equal to the independently captured base messages/counts. Normal sealed Wrath source `8f7644b3a` contains the final production inputs from `112241401`; later changes are documentation only.
 

@@ -1,9 +1,8 @@
 //! Wrath-only defaults for unmodeled legacy startup domains.
 //! Retire each default when its named backing system can supply the value.
 
-use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
-use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
+use rilua::{LuaApiMut, LuaResult, Val};
 
 pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetQuestTimers", empty_quest_timers)?;
@@ -11,7 +10,6 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetNumMapDebugObjects", empty_map_debug_object_count)?;
     LuaApiMut::register_function(lua, "GetNumDungeonMapLevels", empty_dungeon_map_level_count)?;
     LuaApiMut::register_function(lua, "HasDebugZoneMap", has_debug_zone_map)?;
-    LuaApiMut::register_function(lua, "UnitIsTalking", unit_is_talking)?;
     LuaApiMut::register_function(
         lua,
         "IsPlayerResolutionAvailable",
@@ -45,20 +43,6 @@ fn empty_dungeon_map_level_count(state: &mut LuaState) -> LuaResult<u32> {
 // Missing system: debug-zone map tiles/capability. Retire when that model owns
 // availability. User-approved temporary policy: false, not native capability.
 fn has_debug_zone_map(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
-// Missing system: voice-chat speaking model. Original PlayerFrame passes UnitName,
-// not a unit token. Accept every Lua string, including non-UTF-8 bytes; no lookup.
-// Retire when supplied voice activity owns this query. Temporary policy: false.
-fn unit_is_talking(state: &mut LuaState) -> LuaResult<u32> {
-    let name = Val::from_stack(state, 1)?;
-    if !matches!(name, Val::Str(_)) {
-        return Err(runtime_error(
-            "UnitIsTalking expects a character name string",
-        ));
-    }
     state.push(Val::Bool(false));
     Ok(1)
 }
