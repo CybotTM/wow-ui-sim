@@ -4,7 +4,7 @@
 
 ## What it must do
 
-- [x] Publish the legacy global on Forever only, requiring both unit-token arguments and returning one number for modeled queries. Leave other profiles and their existing compatibility behavior unchanged.
+- [x] On Forever, publish the legacy global requiring both unit-token arguments and returning one number for modeled queries. [Retail](retail-combo-points.md) retains its separate player-owned contract; [Wrath](wrath-combo-points.md) now reuses target-bound storage under its own bounded policy.
 - [x] Read the existing `PlayerState.secondary_powers[4]` count. `A_Admin.SetPlayerPower(count, max, 4)` also assigns that snapshot to the selected target GUID; unrelated power inputs do not alter the assignment.
 - [x] Return the pool count only for its assigned target. During `PLAYER_TARGET_CHANGED`, a different target must already report zero even when `UnitPower("player", 4)` still reports the earlier snapshot.
 - [x] Resolve owner/target aliases through existing unit snapshots and GUID identity. An absent owner or target has no combo points and returns zero.
@@ -29,9 +29,9 @@ Cached EllesmereUI 9.2.2's changelog reports `UnitPower=3` while `GetComboPoints
 ## Implementation inventory
 
 - `src/lua_api/globals/real/combo_points.rs`: modeled query, registration, and target assignment from power inputs.
-- `src/lua_api/state_types/character_world.rs`: Forever-only optional target GUID; count/max remain in the existing secondary pool.
+- `src/lua_api/state_types/character_world.rs`: passive optional target GUID, used by target-bound profiles; count/max remain in the existing secondary pool.
 - `src/lua_api/globals/admin.rs`: bind accepted combo-point inputs to their target.
-- `src/lua_api/globals/real/mod.rs`, `src/lua_api/globals/register.rs`: Forever-only wiring.
+- `src/lua_api/globals/real/mod.rs`, `src/lua_api/globals/register.rs`: profile-gated publication.
 
 ## Tests asserting this spec
 
