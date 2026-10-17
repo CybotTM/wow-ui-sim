@@ -429,10 +429,12 @@ fn assert_party_flow(env: &WowLuaEnv, label: &str, raf_visible: i32) {
             assert(dropdown.selectedLootMethod == UnitLootMethod['{label}'].text)
             assert(ITEM_QUALITY2_DESC == 'Uncommon')
             assert(dropdown.selectedLootThreshold == ITEM_QUALITY2_DESC)
+            assert(not _G['PartyMemberFrame'..i..'LeaderIcon']:IsShown())
         end
         UIDropDownMenu_Initialize(PartyMemberFrame1DropDown, PartyFrameDropDown_Initialize, 'MENU')
         assert(UnitPopupButtons.LOOT_THRESHOLD.text == ITEM_QUALITY2_DESC)
         assert(GetLootThreshold() == 2)
+        assert(GetPartyLeaderIndex() == 0)
         local start, duration = GetSummonFriendCooldown()
         assert(start == 0 and duration == 0)
         assert(UnitPopupButtons.RAF_SUMMON.text == RAF_SUMMON)
@@ -621,11 +623,36 @@ fn original_wrath_party_roots_preserve_master_indices_with_supplied_raf_link() {
         assert(PartyMemberFrame2:IsShown())
     "#,
     );
+    env.state().borrow_mut().party_leader_index = Some(1); // zero-based party2
+    exec(
+        &env,
+        r#"
+        assert(GetPartyLeaderIndex() == 2)
+        assert(UnitIsGroupLeader('party2') and not UnitIsGroupLeader('player'))
+        assert(not IsPartyLeader())
+        assert(not HasLFGRestrictions())
+        for i = 1, 4 do
+            PartyMemberFrame_UpdateLeader(_G['PartyMemberFrame'..i])
+            assert(_G['PartyMemberFrame'..i..'LeaderIcon']:IsShown() == (i == 2))
+        end
+    "#,
+    );
+    env.state().borrow_mut().party_leader_index = None;
+    exec(
+        &env,
+        r#"
+        assert(GetPartyLeaderIndex() == 0)
+        assert(UnitIsGroupLeader('player') and IsPartyLeader())
+        PartyMemberFrame_UpdateLeader(PartyMemberFrame2)
+        assert(not PartyMemberFrame2LeaderIcon:IsShown())
+    "#,
+    );
     env.state().borrow_mut().party_group_active = false;
     exec(
         &env,
         r#"
         assert(GetPartyMember(1) == false and GetPartyMember(2) == false)
+        assert(GetPartyLeaderIndex() == 0)
         PartyMemberFrame_UpdateMember(PartyMemberFrame2)
         assert(not PartyMemberFrame2:IsShown())
     "#,
