@@ -21,7 +21,6 @@ fn create_env() -> WowLuaEnv {
 fn original_mists_vas_cursor_does_not_run_before_hidden_character_selection() {
     let env = create_env();
     let path = wow_ui_sim::client_profile::blizzard_ui_addons_dir()
-        .expect("populate Mists runtime cache")
         .join("Blizzard_StoreUI/TBC/Blizzard_StoreUISecure.lua");
     let bytes = std::fs::read(&path).unwrap();
     assert_eq!(
