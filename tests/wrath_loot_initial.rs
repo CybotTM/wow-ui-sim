@@ -591,10 +591,12 @@ fn original_wrath_party_roots_preserve_master_indices_with_supplied_raf_link() {
     exec(
         &env,
         r#"
-        assert(UnitIsTalking('RafFriend') == true)
-        assert(UnitIsTalking('AnotherFriend') == false)
+        assert(UnitIsTalking('RafFriend') == true, 'supplied speaker lookup')
+        assert(UnitIsTalking('AnotherFriend') == false, 'unmatched speaker lookup')
         PartyMemberFrame_UpdateVoiceStatus(PartyMemberFrame1)
-        assert(PartyMemberFrame1SpeakerFrame:IsShown())
+        assert(PartyMemberFrame1SpeakerFrame:IsShown(),
+            'speaker frame name='..tostring(UnitName('party1'))..
+            ' talking='..tostring(UnitIsTalking(UnitName('party1'))))
     "#,
     );
     env.state().borrow_mut().voice_chat.channels[0].members[0].is_active_speaker = false;
