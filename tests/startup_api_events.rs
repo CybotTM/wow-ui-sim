@@ -356,7 +356,7 @@ fn forever_known_startup_names_preserve_other_profile_registration_policy() {
         feature = "client-era",
         feature = "client-anniversary"
     ));
-    // None of these five names occurs in the current shared or Retail/PTR catalogs.
+    // Retail 12.1.5 adds the age-verification event; the other four remain Forever-only.
     for event in [
         "ALERT_AGE_VERIFICATION_RESTRICTED",
         "GLOBAL_REGION_MOUSE_DOWN",
@@ -375,9 +375,15 @@ fn forever_known_startup_names_preserve_other_profile_registration_policy() {
                 "#
             ))
             .unwrap();
-        assert_eq!(accepted, permissive_classic, "{event}: registration policy");
-        assert_eq!(registered, permissive_classic, "{event}: listener state");
-        assert!(!after_unregister, "{event}: listener state after unregister");
+        let retail_age_verification =
+            cfg!(feature = "retail-12-1-5") && event == "ALERT_AGE_VERIFICATION_RESTRICTED";
+        let expected = permissive_classic || retail_age_verification;
+        assert_eq!(accepted, expected, "{event}: registration policy");
+        assert_eq!(registered, expected, "{event}: listener state");
+        assert!(
+            !after_unregister,
+            "{event}: listener state after unregister"
+        );
     }
 }
 

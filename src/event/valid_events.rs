@@ -81,7 +81,10 @@ pub fn is_registerable_event(name: &str) -> bool {
         return true;
     }
     #[cfg(feature = "retail-12-1-5")]
-    if name == "WEATHER_CHANGED" {
+    if matches!(
+        name,
+        "WEATHER_CHANGED" | "ALERT_AGE_VERIFICATION_RESTRICTED"
+    ) {
         return true;
     }
     #[cfg(feature = "retail-12-1-0")]
