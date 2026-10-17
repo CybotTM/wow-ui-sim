@@ -7,6 +7,18 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ORIGINALS: &[(&str, &str)] = &[
     (
+        "OptionsPanelTemplates.xml",
+        "6b8213261c8da907ed0f0ca7dd1c1db01d336b8b870268389bc8478be6b8db93",
+    ),
+    (
+        "CharacterFrameTemplates.xml",
+        "6c4fa77614d930fe3300a6a70e5c3f0b640fe5189065ca809f2088a678fa937c",
+    ),
+    (
+        "FriendsFrame.xml",
+        "97a2b0f11858e552636abe30874b62480d1a207ee15cb79f1e0138b4cec17b90",
+    ),
+    (
         "GlobalStrings.lua",
         "1d6662e6e77945a1d82d91dbc2fec70a5dffeb31e123c392e24adf7548d17dec",
     ),
@@ -343,6 +355,8 @@ fn create_env() -> WowLuaEnv {
             "UIDropDownMenu.xml",
             "UIPanelTemplates.lua",
             "UIPanelTemplates.xml",
+            "OptionsPanelTemplates.xml",
+            "CharacterFrameTemplates.xml",
             "SecureTemplates.xml",
             "SecureHandlerTemplates.xml",
             "ItemButtonTemplate.xml",
@@ -359,7 +373,23 @@ fn create_env() -> WowLuaEnv {
             "UnitFrame.xml",
         ],
     );
+    register_original_friends_tab_template();
     env
+}
+
+fn register_original_friends_tab_template() {
+    // Mail consumes this virtual prerequisite, not the unrelated FriendsFrame tree.
+    // Parse the complete pinned original; retain the template without rewriting it.
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc().unwrap();
+    let source = std::fs::read_to_string(toc.parent().unwrap().join("FriendsFrame.xml")).unwrap();
+    let ui = wow_ui_sim::xml::parse_xml(&source).unwrap();
+    let (frame, kind) = ui
+        .elements
+        .iter()
+        .filter_map(|element| element.as_frame_data())
+        .find(|(frame, _)| frame.name.as_deref() == Some("FriendsFrameTabTemplate"))
+        .unwrap();
+    wow_ui_sim::xml::register_template("FriendsFrameTabTemplate", kind, frame.clone());
 }
 
 fn clear_request(env: &WowLuaEnv) {
