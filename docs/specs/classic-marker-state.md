@@ -4,9 +4,9 @@ Era/Anniversary `IsRaidMarkerActive(index)` projects supplied marker indexes. So
 
 ## What it must do
 
-- [ ] Publish the query before original CompactRaidFrameManager startup evaluates dropdown selections.
-- [ ] Return a boolean for the supplied index, matching cached Era/Anniversary `Blizzard_APIDocumentationGenerated/RaidMarkersDocumentation.lua:48-59` (`luaIndex` argument, nonnil boolean result).
-- [ ] Empty supplied set returns false; this is approved simulator empty-state policy, not a documented native default. Explicit active index 3 returns true without changing other markers.
+- [x] Publish the query before original CompactRaidFrameManager startup evaluates dropdown selections.
+- [x] Return a boolean for the supplied index, matching cached Era/Anniversary `Blizzard_APIDocumentationGenerated/RaidMarkersDocumentation.lua:48-59` (`luaIndex` argument, nonnil boolean result).
+- [x] Empty supplied set returns false; this is approved simulator empty-state policy, not a documented native default. Explicit active index 3 returns true without changing other markers.
 
 ## How it works
 
@@ -23,7 +23,7 @@ Era/Anniversary `IsRaidMarkerActive(index)` projects supplied marker indexes. So
 
 ## Known gaps (current cycle)
 
-- [ ] GREEN and preservation pending. Test commit `505550cda` fails in both profiles on production `9a454578d`; original manager line84 calls missing `IsRaidMarkerActive`. The A fixture captured callbacks without evaluating them, unlike the real dropdown.
+- [x] Original startup test GREEN both profiles on normal production `91b739f1e`; each also preserves A6/6 and empty history1/1. [B ledger](classic-startup-b.md#bounded-proof-ledger) owns exact receipts. Historical test commit `505550cda` fails in both profiles on production `9a454578d`; original manager line84 calls missing `IsRaidMarkerActive`. The A fixture captured callbacks without evaluating them, unlike the real dropdown.
 
 ## Out of scope
 

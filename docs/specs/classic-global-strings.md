@@ -4,10 +4,10 @@ Era and Anniversary select one complete shipped enUS Classic dataset through `sr
 
 ## What it must do
 
-- [ ] Select all 19,624 shipped rows for both profiles, independently of Retail/Forever string tables. No fallback to another profile's dataset.
-- [ ] Original quest count formats three and zero out of twenty with the shipped two-placeholder template; missing-string restore uses the same selected table and preserves vendor-owned text.
-- [ ] Original microbutton tooltip and original HD/nameplate setting validators consume the shipped labels.
-- [ ] Do not invent `OPTION_TOOLTIP_HD_TEXTURES`: it is absent from the shipped base DB2. Retain any resulting consumer error as remaining.
+- [x] Select all 19,624 shipped rows for both profiles, independently of Retail/Forever string tables. No fallback to another profile's dataset.
+- [x] Original quest count formats three and zero out of twenty with the shipped two-placeholder template; missing-string restore uses the same selected table and preserves vendor-owned text.
+- [x] Original microbutton tooltip and original HD/nameplate setting validators consume the shipped labels.
+- [x] Do not invent `OPTION_TOOLTIP_HD_TEXTURES`: it is absent from the shipped base DB2. Retain any resulting consumer error as remaining.
 
 ## How it works
 
@@ -25,7 +25,8 @@ Era and Anniversary select one complete shipped enUS Classic dataset through `sr
 
 ## Known gaps (current cycle)
 
-- [ ] GREEN, preservation and startup reconciliation pending.
+- [x] Both profiles pass all four original-consumer tests against normal production `91b739f1e`. Follow-up receipts `classic-b-{era,anniversary}-strings-count-20261017T0310*Z` also assert the selected 19,624-row table and absent tooltip. Generation output is byte-identical to the independently validated extraction artifact (SHA256 in the acquisition guide).
+- [x] Retail existing reputation/plain/social preservation47/47, PTR reputation22/22, and Mists cast/color/class/honor8/8 pass on identical relevant production inputs. Exact source/proof scopes are recorded in the [B ledger](classic-startup-b.md#bounded-proof-ledger); this does not close B's separately blocked roots.
 - [ ] `OPTION_TOOLTIP_HD_TEXTURES` absent; no tooltip substitution authorized.
 - [ ] Native global publication/hotfix application not measured. Installed base DB2 text is provenance, not native runtime parity.
 

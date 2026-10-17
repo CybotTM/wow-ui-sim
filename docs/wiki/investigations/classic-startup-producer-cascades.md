@@ -19,3 +19,11 @@ R12's menu fixture captured callbacks without evaluating selection. Real dropdow
 
 - [[lua-api]] — simulator API boundaries.
 - [[client-profiles]] — selected cache and client features.
+
+## B checkpoint and policy limits
+
+The [B owning matrix](../../specs/classic-startup-b.md#bounded-proof-ledger) distinguishes implemented roots, original-consumer proof, current preservation and blocked cases. [Shipped strings](../../specs/classic-global-strings.md) select an authenticated full Vanilla dataset rather than a foreign overlay; subsequent failures must be attributed before choosing another producer. [Marker state](../../specs/classic-marker-state.md) closes the separate selected-callback query, not marker placement effects.
+
+R17 reuses an existing real getter instead of enabling a broad quest bundle. R18 scopes creation of a Retail faction fixture, retaining pre-existing supplied state. R19's expansion selection is grounded independently for each acquired profile/cache and the actual Vanilla loader route, not Anniversary realm naming. See the B spec for exact provenance and the absent TOC Interface caveat.
+
+R20 is a visible-behavior decision, not merely a missing callable: a false health-knowledge result makes original UI select percentage text even for the player's own health. Tests remain RED and the producer is explicitly held; value secrecy, ownership and historical health knowledge are distinct concepts. R10/R14 still require the shared Wrath producer/model rather than duplicates. No clean-startup or whole-goal acceptance is claimed.

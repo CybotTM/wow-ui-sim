@@ -2333,3 +2333,7 @@ Reconciled source-only attribution for `f00f230fe`, `593e543f5` and `655f0698b`:
 ## 2026-10-17 — Classic startup producer cascades
 
 Linked A integrated receipts and empty-history attribution in [investigation](investigations/classic-startup-producer-cascades.md); kept marker selection and populated replay outside A credit.
+
+## 2026-10-17 — Classic B bounded checkpoint
+
+Linked implemented-root proof and preservation in [B matrix](../specs/classic-startup-b.md#bounded-proof-ledger); retained R10/R14 dependency and R20 visible-policy blockers without clean-startup claims.

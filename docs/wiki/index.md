@@ -1,3 +1,7 @@
+## [2026-10-17] evidence | Classic B implemented roots and held policy
+
+[Owning matrix](../specs/classic-startup-b.md#bounded-proof-ledger) records both-profile bounded B14+marker1+A7, exact Retail/PTR/Mists preservation and failing24/56 startups. [Cascade investigation](investigations/classic-startup-producer-cascades.md#b-checkpoint-and-policy-limits) links authentic string selection, profile leaks and the held health-display decision. R10/R14 dependency and R20 visible policy remain blocked; no whole-goal closure.
+
 ## [2026-10-17] investigation | Classic startup producer cascades
 
 [Investigation](investigations/classic-startup-producer-cascades.md) links bounded A consumer proof, integrated Era/Anniversary startup reconciliation and the empty-only CombatLog repair. Marker selection remains a separate B root; populated history/native/full startup acceptance is not claimed.

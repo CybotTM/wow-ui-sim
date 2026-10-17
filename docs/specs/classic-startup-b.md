@@ -11,7 +11,7 @@ Audited startup roots beyond [A](classic-startup-a.md). [Shared shipped strings]
 
 - [x] R17: Publish only the existing real quest-background getter on Era/Anniversary. Original QuestFrame chooses Parchment for absent material and receives an explicit supplied map value unchanged; do not enable the rest of LIVE_QUEST_GLOBALS.
 
-- [ ] R18: Exclude Retail watched-faction fixture seeding from Era/Anniversary. New state has zero watched ID and empty factions; existing supplied state survives unchanged. Retail/PTR retain all original fixture values. Original ReputationBar receives empty watched data, without inventing REPUTATION_STATUS_BAR_LABEL_ACCOUNT_WIDE.
+- [x] R18: Exclude Retail watched-faction fixture seeding from Era/Anniversary. New state has zero watched ID and empty factions; existing supplied state survives unchanged. Retail/PTR retain all original fixture values. Original ReputationBar receives empty watched data, without inventing REPUTATION_STATUS_BAR_LABEL_ACCOUNT_WIDE.
 
 - [x] R19: Scope Classic expansion level to the selected per-profile cache/runtime, so original Vanilla quest rewards do not enter the TBC-only named-child path. Preserve every other profile's current expansion defaults; no missing XML child is fabricated.
 
@@ -52,6 +52,43 @@ This concerns the selected runtime, not Anniversary realms generally or future T
 | Anniversary | Its separate provenance file independently records the same product/version/key | Its separate manifest and TOC match Era and the current loader maps Anniversary to Vanilla; same selected XML absence. No claim about a 2.5.x/TBC Anniversary client. Same absent TOC Interface, same simulator11507. |
 
 Both manifest hashes are `6647aded693f013c7ed4e1e1e613450558a781da1bf8a0494d8887e1f7810978`. Both caches' generated `ExpansionInfoDocumentation.lua` declares the existing Classic expansion queries; `ExpansionLevelConstantsDocumentation.lua:13-14,23` declares None0/BurningCrusade1/WarWithin10. Before fix the shared constant10 made `QuestFrame.lua:497,545-549` take TBC branches against Vanilla XML. Only TBC/QuestLogFrame.xml:1007,1016 declares those legacy named frames. The original startup/detail test reproduces the nil honorFrame on both profiles before projection changes. Re-evaluate this profile selection when a selected product/manifest/loader route actually changes; do not infer live realm progression from the profile name.
+
+## Bounded proof ledger
+
+Evidence root: `/home/osso/.local/state/wow-ui-sim/handoff/classic-build/` (private). Normal production `91b739f1e` is based on master `9c0251fca`; subsequent commits change tests/docs only. Each root has a separate tests commit before its observed RED and a separate producer commit. Tests execute original cached chunks/TOCs/widgets or explicitly identified statement boundaries; none modifies Blizzard Lua.
+
+| Root / capability | Era + Anniversary proof | Remaining limit |
+|---|---|---|
+| R2 selected strings | Original four cases RED0/4 each before producer, then GREEN4/4; later runtime table cardinality19,624 and absent tooltip pass | Base DB2, not hotfix/native global-publication proof |
+| R5 LoD roots | Original startup stops force-loading Transmog; independent required-LoD side effects/order preserve; two tests GREEN each | Manual Transmog load unsupported |
+| R7/R8/R9 empty domains | Original product alerts, loot frame recycling, tracking load/event hide all GREEN; separate R7 fresh/mutated-table isolation PASS | Temporary empty domains only |
+| R11 selection | Original init/row/detail statements GREEN, invalid reset and later roster-shrink PASS | Not whole FriendsFrame lifecycle/native cursor policy |
+| R15 replay | Original ordered CombatLogBase colors/filter keys and secure/public isolation GREEN | Not populated combat-log history |
+| R17 material | Original function RED at:856, then Parchment/no-input and supplied Bronze map GREEN | Getter-only publication, no broad quest bundle |
+| R18 fixture scope | Original real ReputationStatusBarTemplate Update RED at:148, then empty watch and preserved supplied snapshot GREEN | Retail/PTR preservation bounded to existing reputation tests, not full-profile native parity |
+| R19 selected Vanilla | Original detail/startup RED at nil TBC-only honor child, then original QuestLog_Update GREEN with expansion0 and no fabricated children | Selected cache/runtime only, not live Anniversary progression |
+| Marker active state | Original startup selection RED both, then GREEN both | No Place/Clear effects |
+| R20 held | Separate test executes RED both on the missing UnitFrame:737 query, downstream feedback visible in startup | User-owned visible policy decision; no producer |
+| R10/R14 | No integration/claim | Wrath dependency not landed; no duplicate skill/timer model |
+
+Exact current-production receipts:
+
+| Gate | Saved epoch / result |
+|---|---|
+| Era implemented B / preservation | `classic-b-era-expansion-final-20261017T024932821599Z`: B14/14, marker1/1, A6/6, empty-history1/1 |
+| Anniversary implemented B / preservation | `classic-b-anniv-expansion-final-20261017T025752560605Z`: same22 passing cases; separately selected `r20-open-red`0/1 |
+| Era R20 held | `classic-b-era-health-open-red-20261017T025825544160Z`:0/1; no test ignored or silent pass |
+| R7 freshness / R11 shrink | `classic-b-era-fresh-shrink-20261017T030105399104Z`, `classic-b-anniversary-fresh-shrink-20261017T030113488570Z`:2/2 each, test source `2a9f6a989` |
+| Final R2 table/consumers | `classic-b-era-strings-count-20261017T031040280731Z`, `classic-b-anniversary-strings-count-20261017T031050032015Z`:4/4 each, test source `f8d37d184` |
+| Retail preservation | `classic-b-retail-preserve-tests-20261017T030705747887Z`: reputation22, plain8, social9; `classic-b-retail-social-neighbor-20261017T030752527011Z`: C_social8. All47 pass on normal library `c18dc805f`, production equal to `91b739f1e` |
+| PTR reputation | `classic-b-ptr-reputation-tests-20261017T031818416590Z`:22/22 on normal library `2a9f6a989`, relevant production equal |
+| Mists preservation | `classic-b-mists-preservation-20261017T031828328531Z`: cast-colors2, cast-fade1, class-colors2, honor3; all8 pass on source `f8d37d184`. Timeout subprocess summaries are not additional logical tests |
+| Retail check | `classic-b-retail-check-20261017T030721786425Z`: `cargo check --no-default-features --features sound,gui,casc,client-retail`, exit0 |
+| Startup | `classic-b-era-expansion-green-20261017T024237379149Z/era-startup-expansion`, `classic-b-anniv-expansion-green-20261017T025037584381Z/anniversary-startup-expansion`: each24 unique/56 occurrences, exit1; original CVar guards unchanged |
+
+Startup is **not clean** and the branch is **not a fully passing Era/Anniversary suite**. Refreshed A baseline remains36/38; captured B output is retained separately pending the blocked roots/acceptance. The R17/R18 pairs initially unmasked after authentic string selection were fixed under separate approvals; R19 then unmasked R20 and downstream feedback, which remain disclosed. StoreUI's cursor pair disappeared after the separately merged master fix and gets no B producer credit. Runtime uses fresh byte-exact child XDG CVar copies and existing profile caches with `WOW_SIM_CASC=0`; no install extraction/re-pin occurred. Each Classic cache independently records1.15.9.70003/key2417084b8b041ee120d02d4adf31b0bc.
+
+The staged tests had private `rilua_mut`/`state_types` accesses: tests now use the public post-load restoration lifecycle and existing public GuildMember re-export. No passive production ingress was added. An initial R18 supplied-snapshot test replaced the debug global rather than the captured query table; corrected test-only to supply fields in the actual table, with failure evidence retained. Temporary `tempfile` extern is attributed to a saved emitted Cargo artifact from the same owned target slot; copied component inputs, cfgs, hashes and provenance remain sealed.
 
 ## Known gaps (current cycle)
 
