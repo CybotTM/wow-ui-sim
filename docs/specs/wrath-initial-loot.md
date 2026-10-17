@@ -48,26 +48,26 @@ original Wrath FrameXML/UnitPopup.lua's accepted tokens. No native capture.
 
 ## What it must do
 
-- [ ] Fresh state reaches original UIDropDownMenu/UnitPopup through complete
+- [x] Fresh state reaches original UIDropDownMenu/UnitPopup through complete
   PartyFrame.xml sequential loading; four real party frames/dropdowns and labels.
-- [ ] Empty RAF links and explicitly supplied links are separately exercised.
-- [ ] Explicit master state preserves party index 1 and raid index 3.
-- [ ] Original RaidOptionsFrame_UpdatePartyFrames hides unused real siblings
+- [x] Empty RAF links and explicitly supplied links are separately exercised.
+- [x] Explicit master state preserves party index 1 and raid index 3.
+- [x] Original RaidOptionsFrame_UpdatePartyFrames hides unused real siblings
   and shows the represented party member without captured Lua errors.
-- [ ] All four dropdowns and the original loot-threshold menu resolve to
+- [x] All four dropdowns and the original loot-threshold menu resolve to
   `ITEM_QUALITY2_DESC`; an explicit threshold 4 update resolves to `ITEM_QUALITY4_DESC`.
-- [ ] Original opt-out menu text reflects unsupplied false and explicit true state.
-- [ ] A second supplied member reaches the original shown-frame path; disabling
+- [x] Original opt-out menu text reflects unsupplied false and explicit true state.
+- [x] A second supplied member reaches the original shown-frame path; disabling
   the group makes the same frame hide.
-- [ ] Supplying party2 as leader returns index 2 and shows only that member's
+- [x] Supplying party2 as leader returns index 2 and shows only that member's
   original leader icon; player leadership returns 0 and hides member leader icons.
-- [ ] Supplied voice-enabled/muted flags reach the original speaker/mute icons;
+- [x] Supplied voice-enabled/muted flags reach the original speaker/mute icons;
   absent flags hide them, and another mode does not inherit the party selection.
-- [ ] An explicitly active speaker named like the supplied party member reaches
+- [x] An explicitly active speaker named like the supplied party member reaches
   the original talking-frame path; changing it inactive hides that frame.
-- [ ] Original RAF summon text has no cooldown suffix for unsupplied `(0, 0)`;
+- [x] Original RAF summon text has no cooldown suffix for unsupplied `(0, 0)`;
   supplied start/duration reaches its formatted remaining-time label.
-- [ ] Retail C API returns documented start/duration/enabled fields; original
+- [x] Retail C API returns documented start/duration/enabled fields; original
   FriendsListTemplates RefreshCooldown clears for unsupplied/disabled state and
   applies the supplied cooldown when enabled.
 
@@ -76,15 +76,24 @@ before producer `6dab184f6`, then :226 on absent GetLootThreshold. Subsequent RE
 exposed opt-out, RAF cooldown, membership, voice, and leader readers. Original
 consumers and explicit master/RAF fixtures were preserved.
 
-Bounded 2026-10-17 checkpoint: sealed production `bb79d0d41`, tests `9becf1f82`,
-required Wrath 44/44 plus shared cooldown 2/2 PASS; Retail cooldown 3/3 PASS,
-including complete pinned FriendsListTemplates.lua with real Cooldown.lua/widget.
-Wrath startup improves branch 19/22 to 9/12 (10 removed records, no new or changed
-records), or master `e90d921cc` 22/30 to 9/12 (13 removed). Retail startup remains
-`[]`. Exact names, raw records and revisions live in the private sound/loot
-handoff's `proof-ledger.json` and `wrath-current-startup-vs-*.json`.
-Combined rebase/preservation against the pending Wrath residual branch is still
-required; no clean Wrath startup, native parity, or final combined-gate claim.
+## Combined proof — 2026-10-17
+
+Sealed source `a83be2c64`, rebased onto `241ce290f`, uses rilua `b2629b6`.
+All 58 distinct Wrath names PASS: our 46 plus u-resid's 48 share 36 controls,
+so no duplicate executions are credited. This includes the unchanged original
+unsupplied/binary-name voice consumer and the supplied speaking/party2-leader paths.
+All eight Retail controls PASS: cooldown three, existing combo/speed four, and
+an unchanged 535-byte admin/query trace. Retail startup is `[]`; default/Wrath
+library and full root-bin checks plus formatting PASS. These are bounded proofs,
+not full-suite, native-parity or all-profile acceptance.
+
+The [current failing startup inventory](../baselines/README.md#wrath-lua-errors)
+owns exact deltas and the newly exposed error-display cursor record. Its
+[original-source investigation](../wiki/investigations/wrath-startup-u-residuals.md#error-display-after-lootsound-repair)
+separates exposure from a cursor fix; no cursor/vendor behavior is patched.
+Exact commands, names, seals, CVar guards and raw attribution are retained under
+`~/.local/state/wow-ui-sim/handoff/wrath-sound-loot/` in `proof-ledger.json`,
+`wrath-combined-startup-vs-*.json` and `wrath-combined-classification.json`.
 
 ## How it works
 

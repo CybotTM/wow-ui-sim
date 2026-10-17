@@ -56,14 +56,16 @@ end
 
 False force-disables the control. True only skips this block; it never calls Enable and therefore does not itself establish that the control must be enabled under every other state.
 
-## Historical bounded proof — 2026-10-17 (before combined loot/party support)
+## Final bounded proof — 2026-10-17
+
+Historical u-resid receipt before combined loot/party support; the [combined proof](wrath-initial-loot.md#combined-proof--2026-10-17) supersedes it for current integration. This receipt used the old rilua pin.
 
 Rebased on `e90d921cc`, whose committed Wrath baseline is exactly equal to the independently captured base messages/counts. Normal sealed Wrath source `8f7644b3a` contains the final production inputs from `112241401`; later changes are documentation only.
 
 | Scope | Result |
 |---|---|
 | Wrath named consumers and controls | 48/48 PASS in two bounded groups: 36 existing controls and 12 queue cases. |
-| Wrath startup | 22 records / 30 occurrences → 15 / 21, exit1. Seven original records removed, no new records. The unchanged PlaySound producer's existing TargetFrame.lua:232 record rises6→7 as further original work runs. |
+| Wrath startup | 22 records / 30 occurrences → 15 / 21, exit1. Seven original records removed, no new records. The numeric-only PlaySound aggregate rises6→7 as further original work runs; TargetFrame.lua:232 is its representative stack, not every occurrence. The [combined raw-stack disclosure](../baselines/README.md#wrath-lua-errors) distinguishes TargetFrame and CombatLog callers. |
 | Retail preservation | Both existing combo tests pass; same-file speed controls and identical-source admin/query trace pass. Exact d4/current trace equality:535 bytes, SHA-256 `27356d533851e86f9773b22db33b73efd8e66ff41e5be53791fba2aa17bff983`. Separate startup[]. |
 | Forever preservation | Five unchanged target-bound model cases plus the corrected original-consumer case pass. That stale fixture fails on the old library too; its corrected event-handler form passes on both. Separate startup[]. |
 | Era engraving relocation | Five existing namespace cases plus original empty-history startup/advance control pass; original guarded false policy and strict inventory preserved. |

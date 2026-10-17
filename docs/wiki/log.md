@@ -2349,3 +2349,7 @@ Linked implemented-root proof and preservation in [B matrix](../specs/classic-st
 ## 2026-10-17 — Wrath U/residual source and attribution
 
 Added [[wrath-startup-u-residuals]] and owning contracts: existing-model publishers, shared empty history, original CombatLog2841/745 four-occurrence chain and generated BaseMip/gamma closure identities. Pending runtime/check and approval boundaries explicit.
+
+## 2026-10-17 — Wrath combined loot/party proof and cursor exposure
+
+Updated [[wrath-startup-u-residuals]] with the original unchanged-text error-display path, raw-stack aggregation limits and same-library historical-input replay. [Loot/party contract](../specs/wrath-initial-loot.md#combined-proof--2026-10-17) owns the combined behavior gate; [inventory](../baselines/README.md#wrath-lua-errors) owns exact failing counts and disclosure. Cursor initialization remains unfixed; no vendor, native-parity or full-suite claim.
