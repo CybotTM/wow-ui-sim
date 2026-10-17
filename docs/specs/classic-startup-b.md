@@ -53,6 +53,19 @@ This concerns the selected runtime, not Anniversary realms generally or future T
 
 Both manifest hashes are `6647aded693f013c7ed4e1e1e613450558a781da1bf8a0494d8887e1f7810978`. Both caches' generated `ExpansionInfoDocumentation.lua` declares the existing Classic expansion queries; `ExpansionLevelConstantsDocumentation.lua:13-14,23` declares None0/BurningCrusade1/WarWithin10. Before fix the shared constant10 made `QuestFrame.lua:497,545-549` take TBC branches against Vanilla XML. Only TBC/QuestLogFrame.xml:1007,1016 declares those legacy named frames. The original startup/detail test reproduces the nil honorFrame on both profiles before projection changes. Re-evaluate this profile selection when a selected product/manifest/loader route actually changes; do not infer live realm progression from the profile name.
 
+## Merge candidate excluding held R20 tests
+
+`classic-startup-b-merge` was created from preserved `classic-startup-b` tip `8b510fee9`, dropping only R20 test commits `bb6597550` and `c18dc805f`. Before documentation changes, the exact net tree difference was 56 R20 test lines and three R20-only source-pin rows removed; production inputs have no difference from `91b739f1e`. The original branch remains unchanged for the later user decision.
+
+Fresh complete B component execution at test/document revision `1029f589e`, with no skip/ignore arguments:
+
+| Profile | Private epoch | Result |
+|---|---|---|
+| Era | `classic-b-merge-era-20261017T033720843124Z` | B14/14 + marker1/1; `--list` inventories15 tests, no R20 |
+| Anniversary | `classic-b-merge-anniversary-20261017T033757551756Z` | B14/14 + marker1/1; `--list` inventories15 tests, no R20 |
+
+Both use the previously sealed, profile-matching normal `sound,gui,casc` libraries at production `91b739f1e`, with exact production-equality checks, current committed source snapshots and unchanged original-CVar guards. No Cargo rebuild or startup replay was needed for a tests/docs-only candidate. Existing 24/56 startup receipts remain valid for the unchanged production; main owns verifier/merge/baseline refresh. R20 stays open, with its RED tests held off master—not converted to ignored/passing tests.
+
 ## Bounded proof ledger
 
 Evidence root: `/home/osso/.local/state/wow-ui-sim/handoff/classic-build/` (private). Normal production `91b739f1e` is based on master `9c0251fca`; subsequent commits change tests/docs only. Each root has a separate tests commit before its observed RED and a separate producer commit. Tests execute original cached chunks/TOCs/widgets or explicitly identified statement boundaries; none modifies Blizzard Lua.
