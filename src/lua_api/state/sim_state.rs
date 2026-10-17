@@ -25,6 +25,7 @@ pub struct SimState {
     /// Explicit Wrath RAF link snapshot, keyed by represented unit GUID.
     #[cfg(feature = "client-wrath")]
     pub refer_a_friend_linked_guids: HashSet<String>,
+    pub summon_friend_cooldown: crate::c_api::c_recruit_a_friend::SummonFriendCooldown,
     pub widgets: WidgetRegistry,
     #[cfg(feature = "retail-12-1-5")]
     pub(crate) weather: crate::c_api::c_weather::WeatherState,

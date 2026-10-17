@@ -511,6 +511,7 @@ macro_rules! build_empty_sim_state {
             auction_browse_items: Vec::new(),
             #[cfg(feature = "client-wrath")]
             refer_a_friend_linked_guids: HashSet::new(),
+            summon_friend_cooldown: Default::default(),
             loot_method: LootMethodState::default(),
             loot_history: LootHistoryState::default(),
             gossip: GossipState::default(),

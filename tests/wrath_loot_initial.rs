@@ -487,6 +487,27 @@ fn original_wrath_party_roots_preserve_master_indices_with_supplied_raf_link() {
             format(OPT_OUT_LOOT_TITLE, UnitPopupButtons.OPT_OUT_LOOT_ENABLE.text))
     "#,
     );
+    let now: f64 = env.eval("return GetTime()").unwrap();
+    env.state().borrow_mut().summon_friend_cooldown =
+        wow_ui_sim::c_api::c_recruit_a_friend::SummonFriendCooldown {
+            start_time_seconds: now + 120.0,
+            duration_seconds: 600.0,
+            enable_cooldown_timer: true,
+        };
+    exec(
+        &env,
+        r#"
+        UIDropDownMenu_Initialize(PartyMemberFrame1DropDown, PartyFrameDropDown_Initialize, 'MENU')
+        local start, duration, enabled = GetSummonFriendCooldown()
+        local nsStart, nsDuration, nsEnabled = C_RecruitAFriend.GetSummonFriendCooldown()
+        assert(duration == 600 and enabled == true)
+        assert(start == nsStart and duration == nsDuration and enabled == nsEnabled)
+        local remaining = start + duration - GetTime()
+        assert(remaining > 0)
+        assert(UnitPopupButtons.RAF_SUMMON.text ==
+            format(RAF_SUMMON_WITH_COOLDOWN, SecondsToTime(remaining, true)))
+    "#,
+    );
     env.state().borrow_mut().refer_a_friend_linked_guids.clear();
     exec(&env, "assert(not IsReferAFriendLinked('party1'))");
 }
