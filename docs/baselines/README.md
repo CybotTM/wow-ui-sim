@@ -77,7 +77,15 @@ Only Era/Anniversary source manifests changed. No existing mapped path/FDID was 
 
 ## Wrath Lua Errors
 
-Current combined inventory at sealed source `a83be2c64`, rebased onto `241ce290f`, rilua `b2629b6`: **3 records / 3 occurrences, exit1, FAIL**. The JSON is byte-identical to fresh uninstrumented `lua-errors` stdout, including paths, generated identities and trailing LF. Metadata binds source, manifest, seals, argv and original-CVar guards; comparison normalization is not applied to the committed bytes.
+Current listener-flush inventory at `ddf45b6ee`, rebased onto `483701ae4`: **2 records / 2 occurrences, exit1, FAIL**. JSON is byte-identical to fresh uninstrumented `--no-addons --no-saved-vars lua-errors` stdout; metadata records argv, binary/manifest hashes and unchanged original-CVar stat/hash guards. Against `483701ae4`'s **3/3**, the single `UIPanelTemplates.lua:365` nil-`cursorOffset` record is removed. Gamma (`SetGamma`) and BaseMip (`GetCurrentValue`) each retain count1 and identical full stacks after generated chunk-ID normalization. No new record or count increase appears; normalization is comparison-only and preserves semantic chunk tags, source sites and host frames.
+
+The existing presentation producer now flushes after each completed **Wrath-only** host event listener, before the next listener. Original Blizzard handlers, deferred setters and pristine-hidden cursor policy are unchanged. Sixteen bounded Wrath tests pass (original cold-hidden DebugTools ordering, five scrolling cursor controls, six legacy sound, two initial loot, two RAF cooldown); formatting and Wrath library/root-bin checks pass. Other-profile receipts live separately in the rebase evidence; pending results are not claimed by this capture. Existing UnitRole warnings remain. CASC is disabled, sound suppressed, and each runtime receives a byte-exact child-only copy of current CVars. This remains a failing compatibility inventory, not clean startup, native, GUI, full-suite or whole-input equivalence acceptance.
+
+Evidence: `/home/osso/.local/state/wow-ui-sim/handoff/wrath-cursor-flush/rebase/` (`wrath-startup.stdout`, `wrath-startup.result.json`, `wrath-delta.json`, `report.md`). Era/Anniversary baselines are not refreshed here.
+
+### Historical combined loot/sound inventory
+
+Previous combined inventory at sealed source `a83be2c64`, rebased onto `241ce290f`, rilua `b2629b6`: **3 records / 3 occurrences, exit1, FAIL**. The JSON is byte-identical to fresh uninstrumented `lua-errors` stdout, including paths, generated identities and trailing LF. Metadata binds source, manifest, seals, argv and original-CVar guards; comparison normalization is not applied to the committed bytes.
 
 | Remaining record | Count | Disclosure |
 |---|---:|---|
