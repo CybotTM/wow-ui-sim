@@ -181,6 +181,12 @@ C_ColorUtil = __wow_color_merge_namespace(C_ColorUtil, {
 })
 
 C_ColorOverrides = __wow_color_merge_namespace(C_ColorOverrides, {
+  -- ColorOverridesDocumentation: ColorOverride -> nullable ColorOverrideInfo.
+  -- Missing system: color override registry. Empty-state simulator policy;
+  -- retire this query when c_api owns that registry and its supplied records.
+  GetColorOverrideInfo = function(_overrideType)
+    return nil
+  end,
   GetColorForQuality = function(_quality)
     return CreateColor(1, 1, 1, 1)
   end,
