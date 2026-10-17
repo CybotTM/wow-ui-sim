@@ -98,6 +98,8 @@ pub(crate) fn register_interaction_tables(state: &mut LuaState) -> LuaResult<()>
         super::c_recent_allies::register(state)?;
     }
     register_classic_combat_tables(state)?;
+    #[cfg(feature = "client-mists")]
+    super::c_log::register(state)?;
     #[cfg(feature = "retail-12-0-5")]
     super::c_scenario_info::register(state)?;
     #[cfg(feature = "client-retail")]

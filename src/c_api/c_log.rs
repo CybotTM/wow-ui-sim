@@ -8,6 +8,8 @@ use rilua::vm::state::LuaState;
 
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = ensure_namespace(state, "C_Log")?;
+    #[cfg(feature = "client-mists")]
+    table_set_rust_fn_static(state, namespace, "LogErrorMessage", log_message)?;
     table_set_rust_fn_static(state, namespace, "LogMessage", log_message)
 }
 
