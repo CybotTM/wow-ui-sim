@@ -1,4 +1,5 @@
-//! Earlier-retail method absence; PTR geometry proof lives in pixel_rounding_probe.
+//! Earlier-retail method absence; current geometry proof lives in pixel_rounding_probe.
+#![cfg(not(feature = "retail-12-1-5"))]
 
 use crate::lua_api::WowLuaEnv;
 

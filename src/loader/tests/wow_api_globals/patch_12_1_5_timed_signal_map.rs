@@ -1,6 +1,7 @@
 //! Earlier-retail publication only; no timed-signal access or security claims.
 
 #[test]
+#[cfg(not(feature = "timed-signal-maps"))]
 fn timed_signal_map_factory_remains_absent_on_retail() {
     let env = crate::lua_api::WowLuaEnv::new().unwrap();
     let lookup: (String, String) = env
