@@ -35,6 +35,8 @@ pub mod input_interface;
 pub mod instanced_identity;
 pub mod item_legacy;
 pub(crate) mod legacy_guild_selection;
+#[cfg(feature = "client-wrath")]
+pub(crate) mod legacy_sound;
 pub mod locale_info;
 pub mod loot_method;
 pub mod math_extensions;

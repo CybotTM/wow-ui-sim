@@ -92,6 +92,9 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
 }
 
 fn register_audio_and_utility_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
+    #[cfg(feature = "client-wrath")]
+    LuaApiMut::register_function(lua, "PlaySound", super::real::legacy_sound::play_sound)?;
+    #[cfg(not(feature = "client-wrath"))]
     LuaApiMut::register_function(lua, "PlaySound", c_api::c_sound::play_sound)?;
     LuaApiMut::register_function(lua, "PlaySoundFile", play_sound_file)?;
     LuaApiMut::register_function(lua, "StopSound", stop_sound)?;
