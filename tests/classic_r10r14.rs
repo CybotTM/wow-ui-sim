@@ -33,7 +33,7 @@ fn run_consumer(env: &WowLuaEnv, source: &str) {
         "{:?}",
         env.state().borrow().lua_errors
     );
-    env.exec("assert(#ConsumerErrors == 0, table.concat(ConsumerErrors, '\n'))")
+    env.exec(r"assert(#ConsumerErrors == 0, table.concat(ConsumerErrors, '\n'))")
         .unwrap();
     result.unwrap();
 }
