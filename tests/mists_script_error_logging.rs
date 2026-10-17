@@ -1,11 +1,15 @@
 //! Original ScriptErrors consumer must log errors through the modeled console sink.
-#![cfg(feature = "client-mists")]
+#![cfg(any(
+    feature = "client-mists",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 
 use sha2::{Digest, Sha256};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[test]
-fn mists_original_script_error_handler_logs_and_delivers_message() {
+fn classic_original_script_error_handler_logs_and_delivers_message() {
     let env = WowLuaEnv::new().unwrap();
     let path = wow_ui_sim::client_profile::blizzard_ui_addons_dir()
         .join("Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua");
