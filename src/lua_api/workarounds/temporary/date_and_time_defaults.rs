@@ -124,6 +124,21 @@ end
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(DATE_AND_TIME_DEFAULTS_LUA)?;
+    #[cfg(feature = "client-wrath")]
+    lua.exec(
+        r#"
+        -- Missing system: server calendar clock and pending-invitation model.
+        -- Project the existing temporary namespace sources; do not seed UI fields.
+        -- Retire with those defaults when supplied calendar state is implemented.
+        function CalendarGetDate()
+            local date = C_DateAndTime.GetCurrentCalendarTime()
+            return date.weekday, date.month, date.monthDay, date.year
+        end
+        function CalendarGetNumPendingInvites()
+            return C_Calendar.GetNumPendingInvites()
+        end
+        "#,
+    )?;
     Ok(())
 }
 
