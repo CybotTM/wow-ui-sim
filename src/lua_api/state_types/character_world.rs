@@ -250,8 +250,7 @@ pub struct PlayerState {
     /// None returns no values, a simulator guess for unavailable effective AP.
     #[cfg(feature = "client-retail")]
     pub effective_attack_power: Option<EffectiveAttackPower>,
-    /// Forever simulator policy: target owning the last combo-point power input.
-    #[cfg(feature = "client-wowforever")]
+    /// Wrath/Forever target owning the last combo input; unused on player-pool profiles.
     pub combo_points_target_guid: Option<String>,
     pub in_combat: bool,
     pub is_resting: bool,

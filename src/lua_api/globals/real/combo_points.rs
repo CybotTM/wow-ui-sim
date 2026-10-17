@@ -1,4 +1,6 @@
-//! Player combo points: retail owns the pool, Forever assigns it to a target.
+//! Player combo points: Retail owns the pool; Wrath/Forever assign it to a target.
+
+use crate::client_profile::{ACTIVE, ClientProfile};
 
 use crate::lua_api::globals::targeting_verbs::resolve_unit_snapshot;
 use crate::lua_api::globals::unit_misc::guid_for_unit;
@@ -10,10 +12,16 @@ use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 
 pub(crate) const COMBO_POINTS_POWER_TYPE: i32 = 4;
 
-/// Forever simulator policy: a power input assigns the existing pool to the selected target.
+fn uses_target_bound_pool() -> bool {
+    matches!(ACTIVE, ClientProfile::Wrath | ClientProfile::WowForever)
+}
+
+/// Target-bound simulator policy: power input assigns the pool to the selected target.
 /// Selection changes alone leave UnitPower's snapshot and this assignment untouched.
-#[cfg(feature = "client-wowforever")]
 pub(crate) fn bind_player_combo_points(sim: &mut SimState) {
+    if !uses_target_bound_pool() {
+        return;
+    }
     let has_points = sim
         .player
         .secondary_powers
@@ -28,21 +36,30 @@ pub(crate) fn bind_player_combo_points(sim: &mut SimState) {
     };
 }
 
-fn read_player_combo_points(sim: &SimState, unit: &str, _target: &str) -> LuaResult<i32> {
+fn read_player_combo_points(sim: &SimState, unit: &str, target: &str) -> LuaResult<i32> {
     let Some(owner) = resolve_unit_snapshot(sim, unit) else {
         return Ok(0);
     };
-    #[cfg(feature = "client-wowforever")]
-    let Some(target) = resolve_unit_snapshot(sim, _target) else {
-        return Ok(0);
+    let target = if uses_target_bound_pool() {
+        let Some(target) = resolve_unit_snapshot(sim, target) else {
+            return Ok(0);
+        };
+        Some(target)
+    } else {
+        None
     };
     if owner.guid != guid_for_unit(sim, "player") {
+        if ACTIVE == ClientProfile::Wrath {
+            // No supplied nonplayer combo pool; Wrath's empty-state policy is zero.
+            return Ok(0);
+        }
         return Err(runtime_error(
             "GetComboPoints currently supports the modeled player owner only",
         ));
     }
-    #[cfg(feature = "client-wowforever")]
-    if sim.player.combo_points_target_guid.as_deref() != Some(target.guid.as_str()) {
+    if let Some(target) = target
+        && sim.player.combo_points_target_guid.as_deref() != Some(target.guid.as_str())
+    {
         return Ok(0);
     }
     Ok(sim
