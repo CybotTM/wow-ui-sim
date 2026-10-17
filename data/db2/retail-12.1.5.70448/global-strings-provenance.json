@@ -1,0 +1,165 @@
+{
+  "product": "wow",
+  "version": "12.1.5.70448",
+  "active_build_key": "88d5e8ef05ec5a8446cdec93d142d7c6",
+  "product_db_sha256": "8e0bf4beee0067f13c5516b91814304e78247237ac132b6324d21c41c0add061",
+  "fdid": 1394440,
+  "logical_path": "dbfilesclient/globalstrings.db2",
+  "build_config": {
+    "path": "/syncthing/World of Warcraft/Data/config/88/d5/88d5e8ef05ec5a8446cdec93d142d7c6",
+    "sha256": "f80e4cb45b64a3e00f94db5b6eafc45dfdd03b0734282c1369bcff9443062ba1",
+    "md5": "88d5e8ef05ec5a8446cdec93d142d7c6"
+  },
+  "content_key": "e59b4940a5d6e8da47142f3785de26c4",
+  "encoding_key": "7291db9f9f416ea46509fcb307b25749",
+  "archive": {
+    "archive_path": "/syncthing/World of Warcraft/Data/data/data.004",
+    "locations": [
+      {
+        "index_path": "/syncthing/World of Warcraft/Data/data/0b000006a6.idx",
+        "index_sha256": "5c38c317b78bfd2ca934b1a6b2c95d4513e82383716ffb31724c4b067dcaa016",
+        "archive": 4,
+        "offset": 1057382065,
+        "size": 636439
+      }
+    ]
+  },
+  "root_sha256": "03679e881c9fd37da7da80a6d555166ea840fa3260f56f7a994c0d26f6713c65",
+  "encoding_sha256": "b148cb4a900e6ef4caebc2a0e2e199d93af2fac2c79a55a15de75afcdd0ef9d8",
+  "root_candidates": [
+    {
+      "locale_flags": 4,
+      "content_flags": 270532608,
+      "content_key": "9b1777f8ef4457764dc556477fa653b2"
+    },
+    {
+      "locale_flags": 16,
+      "content_flags": 270532608,
+      "content_key": "7e7ef72c7d35acc3405f70e861d1c076"
+    },
+    {
+      "locale_flags": 32,
+      "content_flags": 270532608,
+      "content_key": "5cd9f8d304b54659a15c75adbae0e05d"
+    },
+    {
+      "locale_flags": 64,
+      "content_flags": 270532608,
+      "content_key": "9686c98ca089482d06f0538b8d40ffd5"
+    },
+    {
+      "locale_flags": 128,
+      "content_flags": 270532608,
+      "content_key": "af745f07916793cfee2fe5627a2ed6d6"
+    },
+    {
+      "locale_flags": 256,
+      "content_flags": 270532608,
+      "content_key": "98271ff1bc86683f5d6ebe76b527bb73"
+    },
+    {
+      "locale_flags": 514,
+      "content_flags": 270532608,
+      "content_key": "e59b4940a5d6e8da47142f3785de26c4"
+    },
+    {
+      "locale_flags": 4096,
+      "content_flags": 270532608,
+      "content_key": "be964e7bdf17502ec1d26ebe38df829f"
+    },
+    {
+      "locale_flags": 8192,
+      "content_flags": 270532608,
+      "content_key": "51c1e6c5e28d6ae074ea03e86a082aeb"
+    },
+    {
+      "locale_flags": 32768,
+      "content_flags": 270532608,
+      "content_key": "3aebdbdb5541149f79424633f573881c"
+    },
+    {
+      "locale_flags": 81920,
+      "content_flags": 270532608,
+      "content_key": "6e85f67962724bf6da3ab415c931475b"
+    }
+  ],
+  "locale": "enUS",
+  "layout_hash": "D40F6D96",
+  "section_count": 3,
+  "exported_rows": 26069,
+  "encrypted_rows_excluded": 65,
+  "verified_chunks": [
+    {
+      "chunk": 0,
+      "offset": 0,
+      "size": 704,
+      "sha256": "fb3925fc4cf636a9793af7aba62bfa808867d0a9bef184c4d3dac46f430f3db4"
+    },
+    {
+      "chunk": 1,
+      "offset": 704,
+      "size": 262144,
+      "sha256": "873514b2a46ba054c46885e7756be14b7b28b6d8955821b876b4d8f5317c712e"
+    },
+    {
+      "chunk": 2,
+      "offset": 262848,
+      "size": 262144,
+      "sha256": "3739c804b13dc3cd81caf911ad8dd4ed3a4f2f054923494226704b0a82848a9b"
+    },
+    {
+      "chunk": 3,
+      "offset": 524992,
+      "size": 262144,
+      "sha256": "98c66b4a737a0b6e383df1719954efbbde36c71d420471ef68ecfeb0cc245d7f"
+    },
+    {
+      "chunk": 4,
+      "offset": 787136,
+      "size": 262144,
+      "sha256": "99e578b1a8b9a9b408624a8b6bca06cadea7d87cf1ed89392526dce1f804a276"
+    },
+    {
+      "chunk": 5,
+      "offset": 1049280,
+      "size": 262144,
+      "sha256": "9e2e663ff9d9a2909d142dd6568034d2343560794bec6db3c5a6371a47755bc6"
+    },
+    {
+      "chunk": 6,
+      "offset": 1311424,
+      "size": 262144,
+      "sha256": "4a0c0179738604748c8009136428a9952062948e1cf5cad6397691b0754ea420"
+    },
+    {
+      "chunk": 7,
+      "offset": 1573568,
+      "size": 262144,
+      "sha256": "dc230b58593d1858a6612c070d6932669b13aac4a27433c16cb2643fa1530ab8"
+    },
+    {
+      "chunk": 8,
+      "offset": 1835712,
+      "size": 132865,
+      "sha256": "1aba6d53dbca3f80c5ef3cb703b5bf141fed7fc152038526e8b4d6aa507bfeca"
+    }
+  ],
+  "unreadable_chunks": [
+    {
+      "chunk": 9,
+      "offset": 1968577,
+      "size": 260
+    },
+    {
+      "chunk": 10,
+      "offset": 1968837,
+      "size": 4466
+    }
+  ],
+  "blte_sha256": "76be4c14814e5d1acaf48b27f903ddd028ca6b35a29bf1fe4833fc7a9c54b74b",
+  "full_content_key_verified": false,
+  "parser": "/home/osso/Projects/world-of-osso/game-engine/scripts/export_db2_csv.py",
+  "parser_sha256": "dcedd738560e2b5a43aaebf9fc2a6bf73ba69ac8cdd51eed3cbef441f6ad40fb",
+  "csv_sha256": "d5ac7f3251e7b96b25c397e9cf94bf7ca8b3906e157ae7e8bca0e555d562285e",
+  "scope": "Authenticated unencrypted shipped base rows only; 65 encrypted rows omitted, no hotfix or native-publication claim."
+}
