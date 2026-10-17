@@ -54,7 +54,6 @@ fn is_player_resolution_available(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-
 // AuraInfo has no legacy spell-rank field. Keep the positional slot, without
 // claiming a rank or moving the modeled icon into that slot.
 pub(crate) fn push_unmodeled_aura_rank(state: &mut LuaState) {
