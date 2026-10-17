@@ -210,6 +210,10 @@ fn classic_b_r7_original_product_choice_empty_alerts() {
         r#"
         local f = CreateFrame('Frame')
         f.TitleText = f:CreateFontString()
+        local first, second = C_ProductChoice.GetChoices(), C_ProductChoice.GetChoices()
+        assert(type(first) == 'table' and type(second) == 'table' and first ~= second)
+        first[1] = 'caller-owned'
+        assert(#second == 0 and #C_ProductChoice.GetChoices() == 0)
         ProductChoiceFrame_OnLoad(f)
         assert(f.selectedPageNum == 1 and f.TitleText:GetText() == RECRUIT_A_FRIEND_REWARDS)
         for _, event in ipairs({'PLAYER_LOGIN', 'PRODUCT_CHOICE_UPDATE'}) do
@@ -321,6 +325,8 @@ fn classic_b_r11_original_guild_initialization_and_row_selection_statements() {
         &env,
         "assert(GuildMemberDetailName:GetText() == 'Second'); local _, rank = GetGuildRosterInfo(2); assert(GuildMemberDetailRankText:GetText() == rank)",
     );
+    env.state().borrow_mut().world.guild_members.truncate(1);
+    run(&env, "assert(GetGuildRosterSelection() == 0)");
     run(&env, &init);
     run(
         &env,
