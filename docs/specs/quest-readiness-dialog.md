@@ -69,6 +69,12 @@ The separate [generic XML intrinsic-tag fix](xml-intrinsic-tags.md) supplies the
 missing original theme mixin/preload prerequisite; fixture closure also loads the
 original AccessibilityTemplates, FrameXML and SplashFrame addons.
 
+## Current execution
+
+[Owning execution receipt](../baselines/quest-lifecycle.md) records both-profile
+behavioral RED, saved five-case GREEN and the current latest-base integration gate.
+Historical staging predictions below are not current unexecuted status.
+
 ## Tests and proof boundary
 
 `tests/quest_readiness.rs` / `.lua` exercise committed query callbacks, original

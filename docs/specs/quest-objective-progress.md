@@ -1,7 +1,8 @@
-# Supplied mutable quest objectives (QL-1; approved staged source)
+# Supplied mutable quest objectives (QL-1)
 
 Approved bounded per-environment objective progress for represented quests in Retail and
-Forever. Producer source is staged only; no landing, build or runtime proof is claimed.
+Forever. [Execution receipt](../baselines/quest-lifecycle.md) owns historical RED,
+saved GREEN and the current integration gate; native/full-parent acceptance is separate.
 Current backing model: `src/lua_api/sim_substates/quest_log.rs`; current projections:
 `src/lua_api/globals/quest_surface/` and `globals/missing_surface/quest_log.rs`.
 See [quest state architecture](../wiki/systems/lua-api.md#public-offer-rich-log-state-split).
@@ -74,13 +75,14 @@ closure loading through the existing addon harness. Tests inspect real FontStrin
 StatusBar and animation state; no fake block methods, query replacements, vendor
 source slicing or synthetic events. Test-owned event receiver explicitly invokes
 original `DoQuestObjectives`; full tracker automatic scheduling is not claimed.
-All cases remain unbuilt/unexecuted; behavioral RED is predicted only.
+Five producer-dependent cases reached behavioral RED in both profiles before the
+producer; the bootstrap control passed. All six passed both saved matrices; [receipt](../baselines/quest-lifecycle.md) distinguishes those
+sources from the current integration gate.
 
 ## Known gaps (current cycle)
 
-- [ ] Execute behavioral RED before landing producer, then GREEN and profile checks.
-- [ ] Cached addon closure/template preconditions need execution in both profiles;
-  any unrelated load failure is a fixture blocker, not QL-1 behavioral RED.
+- [ ] Complete the receipt's latest-base integration gate after the approved-batch merge.
+  Historical closure prerequisites and RED/GREEN checkpoints are already executed.
 - [ ] Full tracker scheduling, map-handler integration and actual rendering remain
   unproven; the tracker body/real widget path is the bounded original-consumer test.
 

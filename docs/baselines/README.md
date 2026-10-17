@@ -232,3 +232,7 @@ No native/font-identity, cached Blizzard startup/consumer, cache publication, GU
 [Player-storage contract and execution](../specs/forever-gamepad-player-storage.md#bounded-execution--2026-10-16) records simulator-owned slots4096–4179, three player acceptance cases and the existing pet control PASS at producer `0177adc75`. Normal sealed startup now reports **exit0,0 records/0 occurrences** with no third-party addons/SavedVariables/CASC/sound. Own preproducer startup reproduces **exit1,10 records/14 occurrences**:4 direct arithmetic,2 parent page-lookup and8 stance-anchor occurrences. Historical message equality differs only in the generated handler hash in four event rows. Fixing the producer resolves downstream initialization without map/anchor or vendor patches.
 
 `wowforever-lua-errors.json` remains the historical preproducer inventory, not the current bounded result. The linked receipt owns precise revisions, scope, diagnostics and private evidence; native/GUI, full integration and parent acceptance are not established.
+
+## Quest lifecycle integration
+
+[Owning QL-1 / QL-2 receipt](quest-lifecycle.md) separates historical REDs, saved profile execution, clean startup checkpoints and the current latest-base preservation gate.

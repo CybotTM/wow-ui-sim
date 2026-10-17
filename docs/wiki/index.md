@@ -3807,3 +3807,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-16] correction | Typed no-portrait sentinel
 
 [Temporary-input contract](../specs/quest-progress-requirements-empty.md) replaces the rejected no-values draft with original-consumer-typed `0, "", ""`, after direct nil-comparison RED and a hidden/detached-frame assertion. [Currency owner](../specs/quest-reward-currency-panel.md) records exact native container-label/supplied-metadata GREEN at saved24a076873.
+
+## [2026-10-16] evidence | QL-1 / QL-2 saved integration checkpoint
+
+[Owning receipt](../baselines/quest-lifecycle.md) records the saved9fc3d15f9 component/startup proof and the later275f9f09b rebase/B5 preservation gate. Earlier REDs and temporary-domain limitations remain distinct.
