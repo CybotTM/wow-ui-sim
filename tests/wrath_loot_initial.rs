@@ -258,6 +258,10 @@ const ORIGINALS: &[(&str, &str)] = &[
         "VoiceChat.lua",
         "7154de538cf9d0f0cf8bfaad8e113585c68deb145d7331f068601744e1c3d67c",
     ),
+    (
+        "VoiceChat.xml",
+        "b3a62a6a670fe2cc28f002ef8fbdd8a6ccee1fbbd896548a2fb24ea09748c8fc",
+    ),
 ];
 
 fn assert_no_errors(env: &WowLuaEnv) {
@@ -356,7 +360,23 @@ fn create_env() -> WowLuaEnv {
             "UnitFrame.xml",
         ],
     );
+    register_original_voice_template();
     env
+}
+
+fn register_original_voice_template() {
+    // Register the unchanged virtual speaker template, without instantiating
+    // unrelated minimap/voice-session roots from the same original XML file.
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc().unwrap();
+    let source = std::fs::read_to_string(toc.parent().unwrap().join("VoiceChat.xml")).unwrap();
+    let ui = wow_ui_sim::xml::parse_xml(&source).unwrap();
+    let (frame, kind) = ui
+        .elements
+        .iter()
+        .filter_map(|element| element.as_frame_data())
+        .find(|(frame, _)| frame.name.as_deref() == Some("VoiceChatSpeakerTemplate"))
+        .unwrap();
+    wow_ui_sim::xml::register_template("VoiceChatSpeakerTemplate", kind, frame.clone());
 }
 
 fn seed_party(env: &WowLuaEnv, linked: bool) {
