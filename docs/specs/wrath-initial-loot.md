@@ -12,6 +12,10 @@ through the existing Rust admin/test state path. Its initial 2 (Uncommon) is an
 approved temporary simulator default, not native parity (2026-10-17 receipt:
 `~/.local/state/wow-ui-sim/handoff/user-decisions-wrath-loot-threshold-20261017.json`).
 Retire this fixture when native group loot threshold state is modeled.
+Wrath `GetOptOutOfLoot()` reads `LootMethodState.opt_out`, settable through the
+same Rust test-state path. Unsupplied state is false (not opted out), per the
+standing approved Wrath empty/zero/no-selection policy applied by the parent on
+2026-10-17. This is a simulator default, not a native observation.
 No solo-time override, setter change, or group-leave behavior is added.
 This fixture is not a native initial-state or tuple-parity claim.
 
@@ -30,6 +34,7 @@ original Wrath FrameXML/UnitPopup.lua's accepted tokens. No native capture.
   and shows the represented party member without captured Lua errors.
 - [ ] All four dropdowns and the original loot-threshold menu resolve to
   `ITEM_QUALITY2_DESC`; an explicit threshold 4 update resolves to `ITEM_QUALITY4_DESC`.
+- [ ] Original opt-out menu text reflects unsupplied false and explicit true state.
 
 Behavioral RED reached PartyMemberFrame1 creation at original UnitPopup.lua:223
 before producer `6dab184f6`. After that approved producer, both original party
@@ -45,7 +50,7 @@ including nine newly unmasked :226 records (2026-10-17).
 ## Implementation inventory
 
 - `src/lua_api/sim_substates/mod.rs`: approved initial token and threshold fixture.
-- `src/lua_api/globals/real/loot_method.rs`: Wrath-only legacy threshold reader.
+- `src/lua_api/globals/real/loot_method.rs`: Wrath-only legacy threshold and opt-out readers.
 
 ## Tests asserting this spec
 

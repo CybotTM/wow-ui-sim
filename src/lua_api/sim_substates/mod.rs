@@ -507,6 +507,9 @@ pub struct LootMethodState {
     pub party_master_index: i32,
     pub raid_master_index: i32,
     pub threshold: i32,
+    /// Wrath's explicit loot opt-out selection; unsupplied means not opted out.
+    #[cfg(feature = "client-wrath")]
+    pub opt_out: bool,
 }
 
 impl Default for LootMethodState {
@@ -524,6 +527,8 @@ impl Default for LootMethodState {
             // Wrath: approved temporary Uncommon fixture, not native parity.
             // Retire this fixture when native group loot threshold state is modeled.
             threshold: 2,
+            #[cfg(feature = "client-wrath")]
+            opt_out: false,
         }
     }
 }

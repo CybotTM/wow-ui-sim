@@ -474,6 +474,16 @@ fn original_wrath_party_roots_preserve_master_indices_with_supplied_raf_link() {
         assert(UnitPopupButtons.LOOT_THRESHOLD.text == ITEM_QUALITY4_DESC)
     "#,
     );
+    env.state().borrow_mut().loot_method.opt_out = true;
+    exec(
+        &env,
+        r#"
+        assert(GetOptOutOfLoot() == true)
+        UIDropDownMenu_Initialize(PartyMemberFrame1DropDown, PartyFrameDropDown_Initialize, 'MENU')
+        assert(UnitPopupButtons.OPT_OUT_LOOT_TITLE.text ==
+            format(OPT_OUT_LOOT_TITLE, UnitPopupButtons.OPT_OUT_LOOT_ENABLE.text))
+    "#,
+    );
     env.state().borrow_mut().refer_a_friend_linked_guids.clear();
     exec(&env, "assert(not IsReferAFriendLinked('party1'))");
 }
