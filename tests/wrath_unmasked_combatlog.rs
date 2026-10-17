@@ -30,7 +30,10 @@ fn wrath_unmasked_original_empty_refilter_clears_and_completes() {
         .borrow()
         .lua_errors
         .iter()
-        .filter(|error| error.contains("Blizzard_CombatLog") && error.contains("Refilter"))
+        .filter(|error| {
+            error.contains("Blizzard_CombatLog")
+                && (error.contains("Refilter") || error.contains("CombatLogUpdateFrame"))
+        })
         .cloned()
         .collect();
     assert!(history_errors.is_empty(), "{history_errors:?}");
