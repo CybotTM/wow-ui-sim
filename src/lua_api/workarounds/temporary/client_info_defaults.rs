@@ -4,9 +4,15 @@
 //! They are compatibility defaults until the simulator has a real client/session
 //! metadata model.
 
-/// Classic expansion compatibility level until per-client Classic metadata exists.
-/// Forever's separately modeled current expansion identity remains 0.
-pub(crate) const CLASSIC_EXPANSION_LEVEL: f64 = 10.0;
+/// Selected Era/Anniversary caches are 1.15.9.70003 and route [Game] to Vanilla.
+/// Their documented ExpansionLevel.None is 0, not the shared War Within value.
+/// Other profiles retain their existing compatibility policy; Forever's separate
+/// modeled current expansion identity remains 0.
+pub(crate) const CLASSIC_EXPANSION_LEVEL: f64 = match crate::client_profile::ACTIVE {
+    crate::client_profile::ClientProfile::Era
+    | crate::client_profile::ClientProfile::Anniversary => 0.0,
+    _ => 10.0,
+};
 
 #[cfg(not(feature = "client-ptr"))]
 const CLIENT_VERSION: &str = if cfg!(feature = "client-wowforever") {

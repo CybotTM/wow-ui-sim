@@ -13,6 +13,8 @@ Audited startup roots beyond [A](classic-startup-a.md). [Shared shipped strings]
 
 - [ ] R18: Exclude Retail watched-faction fixture seeding from Era/Anniversary. New state has zero watched ID and empty factions; existing supplied state survives unchanged. Retail/PTR retain all original fixture values. Original ReputationBar receives empty watched data, without inventing REPUTATION_STATUS_BAR_LABEL_ACCOUNT_WIDE.
 
+- [ ] R19: Scope Classic expansion level to the selected per-profile cache/runtime, so original Vanilla quest rewards do not enter the TBC-only named-child path. Preserve every other profile's current expansion defaults; no missing XML child is fabricated.
+
 ## How it works
 
 - [Addon pipeline](../addon-loading-pipeline.md)
@@ -28,9 +30,22 @@ Audited startup roots beyond [A](classic-startup-a.md). [Shared shipped strings]
 - R18: `src/lua_api/workarounds/temporary/reputation_state.rs` — selected-profile population only for newly created fixture state.
 - R17: `src/lua_api/globals/quest_surface/register.rs` — narrow publication of existing selected-quest map getter.
 
+- R19: `src/lua_api/workarounds/temporary/client_info_defaults.rs` — selected Vanilla expansion0, other profiles unchanged.
+
 ## Tests asserting this spec
 
 `tests/classic_startup_b.rs` contains separate original consumer cases with `classic_startup_b_pins.tsv`. Both-profile RED observed: R5 startup discovers forced Transmog; R7 nil collection length; R8 nil numeric bound; R9 missing global; R11 missing selection API; R15 CombatLogBase replay error. Independent required-LoD preservation passes before producer. Tests/commits remain root-specific; groups share one sealed normal library without repeating logical tests.
+
+## R19 selected-profile evidence
+
+This concerns the selected runtime, not Anniversary realms generally or future TBC progression.
+
+| Profile | Its own cache provenance | Actual QuestLog route / Interface evidence |
+|---|---|---|
+| Era | `AddOns/.wow-ui-sim-blizzard-ui-provenance`: `product=wow_classic_era`, `version=1.15.9.70003`, `build_key=2417084b8b041ee120d02d4adf31b0bc` | Manifest ships Vanilla/TBC/Wrath/Cata variants; selected `Blizzard_UIPanels_Game_Classic.toc:50` uses `[Game]\\QuestLogFrame.xml`; active loader maps Era to Vanilla. That selected XML lacks QuestLogHonorFrame/QuestLogPlayerTitleFrame. TOC declares no Interface; incidental other TOC values0/30001 are not build evidence. Simulator interface11507 is Vanilla-era, not a measured11509 declaration. |
+| Anniversary | Its separate provenance file independently records the same product/version/key | Its separate manifest and TOC match Era and the current loader maps Anniversary to Vanilla; same selected XML absence. No claim about a 2.5.x/TBC Anniversary client. Same absent TOC Interface, same simulator11507. |
+
+Both manifest hashes are `6647aded693f013c7ed4e1e1e613450558a781da1bf8a0494d8887e1f7810978`. Both caches' generated `ExpansionInfoDocumentation.lua` declares the existing Classic expansion queries; `ExpansionLevelConstantsDocumentation.lua:13-14,23` declares None0/BurningCrusade1/WarWithin10. Before fix the shared constant10 made `QuestFrame.lua:497,545-549` take TBC branches against Vanilla XML. Only TBC/QuestLogFrame.xml:1007,1016 declares those legacy named frames. The original startup/detail test reproduces the nil honorFrame on both profiles before projection changes. Re-evaluate this profile selection when a selected product/manifest/loader route actually changes; do not infer live realm progression from the profile name.
 
 ## Known gaps (current cycle)
 
