@@ -8,19 +8,19 @@ See [Lua API architecture](../lua-api.md) for the surrounding system.
 
 ## What it must do
 
-- [ ] Record every requested string byte-exact, including unknown, empty and
+- [x] Record every requested string byte-exact, including unknown, empty and
   non-UTF-8 names. Unknown names are a playback no-op, not an error; recording
   still occurs and clears any previous kit rather than leaving a stale ID.
-- [ ] Resolve only these bounded, exact spellings with unique public dump IDs:
+- [x] Resolve only these bounded, exact spellings with unique public dump IDs:
   `WriteQuest` = 3093, `igAbiliityPageTurn` = 836,
   `igMainMenuOptionCheckBoxOn` = 856. No case folding or aliases.
-- [ ] Original TargetFrame hide records `INTERFACESOUND_LOSTTARGETUNIT` name-only:
+- [x] Original TargetFrame hide records `INTERFACESOUND_LOSTTARGETUNIT` name-only:
   the public dump has duplicate rows 684/900, so neither ID is selected.
-- [ ] Original SpellBook XML initial tab records `igAbiliityPageTurn`/836;
+- [x] Original SpellBook XML initial tab records `igAbiliityPageTurn`/836;
   original Mail XML SendMail OnLoad records `igMainMenuOptionCheckBoxOn`/856;
   original `QuestInfoFadingFrame_OnUpdate` (`W/FrameXML/QuestInfo.lua:5-6`)
   records `WriteQuest`/3093.
-- [ ] Numeric global `PlaySound` and `C_Sound.PlaySound` remain unchanged:
+- [x] Numeric global `PlaySound` and `C_Sound.PlaySound` remain unchanged:
   numeric requests use the existing kit path, namespace strings still reject,
   and numeric calls do not overwrite the last requested legacy name.
 
@@ -54,14 +54,21 @@ The bounded mapping is not a general import of the public sound catalog.
 
 ## Tests asserting this spec
 
-- `tests/wrath_legacy_sound.rs`: six proposed tests; unchanged original consumers
+- `tests/wrath_legacy_sound.rs`: six passing tests; unchanged original consumers
   loaded from hash-pinned cache files. Quest callback uses ordinary widget
-  inputs, not the complete QuestFrame XML tree. No vendor function is replaced.
+  inputs, not the complete QuestFrame XML tree. Mail uses the unchanged virtual
+  FriendsFrameTabTemplate parsed from the complete pinned FriendsFrame.xml,
+  without constructing the unrelated FriendsFrame tree. OptionsPanelTemplates
+  and CharacterFrameTemplates supply original virtual prerequisites. No vendor
+  function is replaced.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile and run behavioral RED/GREEN on the ordered patch stack.
-  Source-staged only; compilation, tests, audio and startup recovery unverified.
+Behavioral RED: six string-request failures against the passive-state library
+`cd4e70018`. GREEN: six passes with the same repaired fixtures against sound
+producer `16bf5b4de` and final production `6dab184f6` (2026-10-17). The final
+44-case Wrath gate passes all six sound and 36 retained cases; two separate
+loot cases remain blocked. Audio output is not tested.
 
 ## Out of scope
 

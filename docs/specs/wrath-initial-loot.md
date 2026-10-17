@@ -24,8 +24,12 @@ original Wrath FrameXML/UnitPopup.lua's accepted tokens. No native capture.
 - [ ] Original RaidOptionsFrame_UpdatePartyFrames hides unused real siblings
   and shows the represented party member without captured Lua errors.
 
-Tests source-staged; builds and RED/GREEN prohibited in staging. Unrelated setup
-failures remain failures, not acceptance; no startup reduction is claimed.
+Behavioral RED reached PartyMemberFrame1 creation at original UnitPopup.lua:223
+before producer `6dab184f6`. After that approved producer, both original party
+fixtures fail at UnitPopup.lua:226 on the absent GetLootThreshold call. Explicit
+master/RAF inputs and original consumers remain unchanged; no green party-flow
+claim. Combined sound/loot startup falls from 22 records/30 occurrences to 19/22,
+including nine newly unmasked :226 records (2026-10-17).
 
 ## How it works
 
@@ -41,7 +45,9 @@ failures remain failures, not acceptance; no startup reduction is claimed.
 
 ## Known gaps (current cycle)
 
-- [ ] Compile and run behavioral RED/GREEN on the ordered patch stack.
+- [ ] Resolve the missing GetLootThreshold surface before completing either
+  party-flow test. Adding an adapter or temporary producer is not covered by
+  the approved initial-token patch; no additional implementation was inferred.
 
 ## Out of scope
 
