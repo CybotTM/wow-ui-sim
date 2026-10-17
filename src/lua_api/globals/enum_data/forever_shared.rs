@@ -44,9 +44,20 @@ const ACTION_BAR_SET_META: EnumDef = (
     &[("MinValue", 0), ("MaxValue", 3), ("NumValues", 4)],
 );
 
-// Forever 1.60.1.69913 CombatAudioAlertSharedDocumentation.lua.
-#[cfg(feature = "client-wowforever")]
-pub(super) const COMBAT_AUDIO_ALERT_PULSE_PERCENT_VALUES: EnumDef = (
+// CombatAudioAlertSharedDocumentation.lua in Retail 12.1.5.70448 and Forever.
+pub const COMBAT_AUDIO_PULSE_ENUMS: &[EnumDef] = if cfg!(any(
+    feature = "retail-12-1-5",
+    feature = "client-wowforever"
+)) {
+    &[
+        COMBAT_AUDIO_ALERT_PULSE_PERCENT_VALUES,
+        COMBAT_AUDIO_ALERT_PULSE_PERCENT_VALUES_META,
+    ]
+} else {
+    &[]
+};
+
+const COMBAT_AUDIO_ALERT_PULSE_PERCENT_VALUES: EnumDef = (
     "CombatAudioAlertPulsePercentValues",
     &[
         ("Off", 0),
@@ -62,8 +73,7 @@ pub(super) const COMBAT_AUDIO_ALERT_PULSE_PERCENT_VALUES: EnumDef = (
     ],
 );
 
-#[cfg(feature = "client-wowforever")]
-pub(super) const COMBAT_AUDIO_ALERT_PULSE_PERCENT_VALUES_META: EnumDef = (
+const COMBAT_AUDIO_ALERT_PULSE_PERCENT_VALUES_META: EnumDef = (
     "CombatAudioAlertPulsePercentValuesMeta",
     &[("MinValue", 0), ("MaxValue", 9), ("NumValues", 10)],
 );

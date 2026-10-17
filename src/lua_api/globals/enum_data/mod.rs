@@ -8,7 +8,7 @@ mod combat_system;
 mod edit_mode;
 mod forever_shared;
 mod game_system;
-pub use forever_shared::ENUMS as FOREVER_SHARED_ENUMS;
+pub use forever_shared::{COMBAT_AUDIO_PULSE_ENUMS, ENUMS as FOREVER_SHARED_ENUMS};
 mod widget;
 
 pub use addon_system::*;
@@ -187,10 +187,6 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
 // All explicit value enums (for batch registration)
 pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     COOLDOWN_VIEWER_CATEGORY_META,
-    #[cfg(feature = "client-wowforever")]
-    forever_shared::COMBAT_AUDIO_ALERT_PULSE_PERCENT_VALUES,
-    #[cfg(feature = "client-wowforever")]
-    forever_shared::COMBAT_AUDIO_ALERT_PULSE_PERCENT_VALUES_META,
     #[cfg(feature = "client-wowforever")]
     forever_shared::RECENT_ALLIES_INTERACTION_CATEGORY_FILTER,
     #[cfg(feature = "client-wowforever")]
