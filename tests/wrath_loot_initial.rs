@@ -408,6 +408,9 @@ fn assert_party_flow(env: &WowLuaEnv, label: &str, raf_visible: i32) {
         UIDropDownMenu_Initialize(PartyMemberFrame1DropDown, PartyFrameDropDown_Initialize, 'MENU')
         assert(UnitPopupButtons.LOOT_THRESHOLD.text == ITEM_QUALITY2_DESC)
         assert(GetLootThreshold() == 2)
+        local start, duration = GetSummonFriendCooldown()
+        assert(start == 0 and duration == 0)
+        assert(UnitPopupButtons.RAF_SUMMON.text == RAF_SUMMON)
         assert(GetOptOutOfLoot() == false)
         assert(UnitPopupButtons.OPT_OUT_LOOT_TITLE.text ==
             format(OPT_OUT_LOOT_TITLE, UnitPopupButtons.OPT_OUT_LOOT_DISABLE.text))
