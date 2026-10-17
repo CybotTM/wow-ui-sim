@@ -28,7 +28,7 @@ fn wowforever_texture_metatable_loads_unit_frame_util() {
 }
 
 #[test]
-#[cfg(not(feature = "client-wowforever"))]
+#[cfg(not(any(feature = "retail-12-1-5", feature = "client-wowforever")))]
 fn wowforever_texture_metatable_is_not_published_elsewhere() {
     let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
     env.exec("assert(GetTextureMetatable == nil)").unwrap();

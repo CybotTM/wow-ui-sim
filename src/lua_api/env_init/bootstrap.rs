@@ -20,7 +20,7 @@ pub(crate) fn init_shared_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
             Val::Bool(cfg!(feature = "retail-12-0-0")),
         ],
     )?;
-    #[cfg(feature = "client-wowforever")]
+    #[cfg(any(feature = "retail-12-1-5", feature = "client-wowforever"))]
     lua.exec(include_str!("texture_metatable.lua"))?;
     Ok(())
 }
