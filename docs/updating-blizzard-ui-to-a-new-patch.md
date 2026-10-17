@@ -251,3 +251,19 @@ regenerated `data/blizzard-ui-builds/ptr.json`; see [PTR CDN content index](ptr-
   source like `_Classic.toc`). Those extra files still resolve from retail CASC
   once the listfile has their FDIDs, so the manifest stays a full, unfiltered
   branch listing.
+
+## Classic Era/Anniversary GlobalStrings
+
+Both Vanilla profiles select `data/global_strings_classic.rs`: all 19,624 enUS rows from installed `wow_classic_era` **1.15.9.70003**, build key `2417084b8b041ee120d02d4adf31b0bc`. This is a shared selected Vanilla dataset, not a new build-string pin or a Retail/Forever fallback. [Owning contract](specs/classic-global-strings.md).
+
+Local archive provenance: GlobalStrings DB2 FDID **1394440**, content key `5426329b56962158a807759e84de041b`, encoding key `fa1e3b831a0e2a3ffa078b2d1c426370`; decoded DB2 SHA256 `fc1f1a3b41a683c5a3b4b2533840689f501bda3dae3b655e45dec7e49881466f`. CSV SHA256 `3de553113c4cb19c50bec10a233d331917078643e819a61830ff03c32672f2aa`; generated Rust SHA256 `e263e5ed7477ab586ac076a9a3f2b9e2a63d61c3a2f6fae56d2f1d3749c0c668`. The extraction receipt validates installed product/config identity, enUS root selection, local journal/archive location and BLTE/content hashes. Schema metadata `WOWSTATIC_1_15_9_68185` is not the installed build version.
+
+Exact generation command from the private extraction handoff (no install read needed to regenerate from its CSV):
+
+```text
+python3 -B /home/osso/.local/state/wow-ui-sim/handoff/era-globalstrings/generate_classic.py --repo /home/osso/Projects/wow/wow-ui-sim --source /home/osso/.local/state/wow-ui-sim/handoff/era-globalstrings/GlobalStrings.csv --output /home/osso/.local/state/wow-ui-sim/handoff/era-globalstrings/generated/data/global_strings_classic.rs
+```
+
+The inspectable wrapper reuses only `tools/gen_forever_global_strings.py`'s CSV/PHF generator algorithm (SHA256 `60987fa51e14b0ddaee1f0d80beee7f13542ec54abcd46b908a1016eb0f20e62`), replacing provenance comments, **not Forever data**. It preserves all three multiline rows; the legacy line-oriented Rust generator is unsuitable. Handoff `era-globalstrings/README.md`, `.provenance.json`, `validation.json` and sealed CSV own the full offline reproduction chain.
+
+`OPTION_TOOLTIP_HD_TEXTURES` is absent from this shipped base DB2. Do not substitute the distinct `HD_TEXTURES_BUTTON_TOOLTIP`, copy a foreign build's row, or relax consumers. Record any resulting error as remaining. Hotfixes and native global-publication behavior are not established by base DB2 extraction.

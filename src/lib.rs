@@ -52,9 +52,15 @@ pub mod global_slot_coverage;
     path = "../data/global_strings_retail.rs"
 )]
 #[cfg_attr(
+    any(feature = "client-era", feature = "client-anniversary"),
+    path = "../data/global_strings_classic.rs"
+)]
+#[cfg_attr(
     not(any(
         feature = "client-wowforever",
-        all(feature = "profile-retail", feature = "retail-12-1-5")
+        all(feature = "profile-retail", feature = "retail-12-1-5"),
+        feature = "client-era",
+        feature = "client-anniversary"
     )),
     path = "../data/global_strings.rs"
 )]
