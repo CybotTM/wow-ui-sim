@@ -157,6 +157,17 @@ requests must retain an observable completion effect, not become no-ops.
 
 ## Proof level
 
+### Retail 70448 input checkpoint
+
+Rebase onto `85ad9cae6` and the verified shared-cache resync change two of eleven
+Retail consumer pins: `Blizzard_GroupFinder/Shared/LFGFrame.lua` and
+`Blizzard_MicroMenu/Mainline/MainMenuBarMicroButtons.lua`. Only their expected
+hashes are refreshed to the approved 12.1.5.70448 cache; test bodies and production
+behavior are unchanged. New-input gates are pending. The 9c checkpoint below
+remains historical evidence, not proof against the refreshed inputs.
+
+### Historical 9c checkpoint
+
 Original complete cached Lua chunks are hash-pinned by the consumer tests.
 Tests assert dialog/mode/frame visibility, LFD button label and role-warning
 state, calling completion payload/count/throttle, supplied rows, and the original
