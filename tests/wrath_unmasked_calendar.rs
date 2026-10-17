@@ -5,6 +5,29 @@ mod support;
 use support::{env, load, run};
 
 #[test]
+fn wrath_unmasked_original_gametime_event_clears_unsupplied_invitations() {
+    let env = env();
+    load(&env, &["GlobalStrings.lua", "GameTime.lua"]);
+    run(
+        &env,
+        r#"
+        GameTimeFrame = CreateFrame('Button', 'CalendarEventFixture', UIParent)
+        GameTimeFrame.pendingCalendarInvites = 17
+        GameTimeFrame.flashInvite = true
+        GameTimeCalendarInvitesTexture = GameTimeFrame:CreateTexture()
+        GameTimeCalendarInvitesGlow = GameTimeFrame:CreateTexture()
+        GameTimeCalendarInvitesTexture:Show()
+        GameTimeCalendarInvitesGlow:Show()
+        GameTimeFrame_OnEvent(GameTimeFrame, 'PLAYER_ENTERING_WORLD')
+        assert(GameTimeFrame.pendingCalendarInvites == 0)
+        assert(GameTimeFrame.flashInvite == false)
+        assert(not GameTimeCalendarInvitesTexture:IsShown())
+        assert(not GameTimeCalendarInvitesGlow:IsShown())
+        "#,
+    );
+}
+
+#[test]
 fn wrath_unmasked_original_gametime_default_calendar_projection() {
     let env = env();
     // Ordinary parent fixture; unrelated Minimap sibling scripts are not loaded.
