@@ -6,7 +6,7 @@ Wrath publishes the existing target-bound simulator combo pool in `src/lua_api/g
 
 - [x] Original `ComboFrame.lua:20` reads `GetComboPoints(PlayerFrame.unit, "target")`; absent/unsupplied targets return zero and hide the frame and its first highlight/shine.
 - [x] `A_Admin.SetPlayerPower(count, max, 4)` binds the existing secondary pool to the selected target GUID, as on [Forever](forever-combo-points.md). Original ComboFrame shows supplied points; swapping targets hides stale points without changing UnitPower.
-- [ ] Resolved nonplayer owners without supplied combo state return zero on Wrath, not an ownership error. Retail's player-owned and Forever's existing query/error policies stay unchanged.
+- [x] Resolved nonplayer owners without supplied combo state return zero on Wrath, not an ownership error. Retail's player-owned and Forever's existing query/error policies stay unchanged.
 
 ## How it works
 
@@ -27,7 +27,8 @@ Wrath publishes the existing target-bound simulator combo pool in `src/lua_api/g
 ## Known gaps (current cycle)
 
 - [x] Original absent-global RED at ComboFrame.lua:20 on empty and supplied paths; both GREEN in the d11a25154 sealed Wrath43 gate. The resolved nonplayer zero control also passes separately after its fixture assertion was added. Startup no longer fails at ComboFrame:20; it next exposes UnitIsTalking at PlayerFrame.lua:150.
-- [ ] Retail/Forever preservation and final checks pending; whole Wrath startup remains failing (18 records / 24 occurrences).
+- [x] Both existing Retail combo tests pass; the identical experiment against exact d4 and current Retail libraries returns byte-identical 535-byte admin/query traces (SHA-256 `27356d533851e86f9773b22db33b73efd8e66ff41e5be53791fba2aa17bff983`). Five unchanged Forever model cases and its corrected original-consumer case pass; Retail/Forever startups both return `[]`. This is bounded observable preservation, not binary/native identity.
+- [ ] Final Wrath/default checks and post-floor-count startup remain pending at this checkpoint.
 
 ## Out of scope
 

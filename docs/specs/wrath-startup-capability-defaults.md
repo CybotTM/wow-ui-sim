@@ -6,15 +6,15 @@ Wrath-only legacy defaults live in `src/lua_api/workarounds/temporary/wrath_star
 
 ### Empty map domains
 
-- [ ] `HasDebugZoneMap()` returns false until a debug-zone tile/capability model exists. Original WorldMapFrame.lua:363 skips debug tiles; no populated debug-map state is invented.
-- [ ] `GetNumMapDebugObjects()` returns numeric zero until a supplied map-debug-objects model owns both count and records. Original WorldMapFrame.lua:402 OnLoad must traverse the empty domain without calling a missing count producer.
+- [x] `HasDebugZoneMap()` returns false until a debug-zone tile/capability model exists. Original WorldMapFrame.lua:363 skips debug tiles; no populated debug-map state is invented.
+- [x] `GetNumMapDebugObjects()` returns numeric zero until a supplied map-debug-objects model owns both count and records. Original WorldMapFrame.lua:402 OnLoad must traverse the empty domain without calling a missing count producer.
 - [ ] `GetNumDungeonMapLevels()` returns zero for an unsupplied selected-map floor catalog, under the same standing empty-count policy. Original OnLoad reaches WorldMapFrame.lua:592; its original dropdown update clears/hides the floor selector and up/down controls. Never derive total floors from the selected-floor scalar.
 
 ### Voice and player textures
 
-- [ ] `UnitIsTalking(name)` returns false for every Lua string until the voice-chat speaking model exists. Original PlayerFrame.lua:150 passes `UnitName("player")`, not a unit token. Unknown/empty names, Unicode and arbitrary byte strings are accepted without lookup, decoding or network/audio access.
-- [ ] Original world-entry voice handling hides the speaker indicator through unchanged PlayerFrame.lua:366–373 and VoiceChat.lua:197–205.
-- [ ] `IsPlayerResolutionAvailable()` returns true until the player-texture-resolution capability model exists. Original Effects event must not force-disable an enabled PlayerTexture control.
+- [x] `UnitIsTalking(name)` returns false for every Lua string until the voice-chat speaking model exists. Original PlayerFrame.lua:150 passes `UnitName("player")`, not a unit token. Unknown/empty names, Unicode and arbitrary byte strings are accepted without lookup, decoding or network/audio access.
+- [x] Original world-entry voice handling hides the speaker indicator through unchanged PlayerFrame.lua:366–373 and VoiceChat.lua:197–205.
+- [x] `IsPlayerResolutionAvailable()` returns true until the player-texture-resolution capability model exists. Original Effects event must not force-disable an enabled PlayerTexture control.
 
 ## How it works
 
@@ -35,7 +35,7 @@ Wrath-only legacy defaults live in `src/lua_api/workarounds/temporary/wrath_star
 ## Known gaps (current cycle)
 
 - [x] Before producers, all three original-consumer tests fail at WorldMapFrame.lua:363, PlayerFrame.lua:150 and VideoOptionsPanels.lua:441 against sealed d11a25154.
-- [ ] GREEN and updated startup delta pending.
+- [ ] The capability/debug checkpoint passes 47 named cases (36 controls + 11 queue cases); startup drops from the exact e90 baseline22/30 to16/22 and exposes the original floor-count call at:592. The final post-floor-count gate and capture remain pending.
 - [x] The new debug-object count reaches original WorldMapFrame.lua:402 in a behavioral RED before its producer, under the approved empty/zero policy.
 - [ ] Populated debug objects and floor catalogs remain unmodeled; count defaults do not invent records. The newly unmasked floor count has an original OnLoad:592 RED before its producer.
 - [ ] BaseMip has no approved default; the explicit video fixture does not establish one. The generated BaseMip/gamma records remain attribution-only.

@@ -1,6 +1,6 @@
 # Wrath calendar, friends and empty-history startup boundaries
 
-The deferred Wrath queue exposes missing legacy publishers and an empty-history validity defect. Original cached Lua is the unchanged consumer; the bounded simulator policies are not native-parity evidence. Runtime/check acceptance remains pending at this source checkpoint.
+The deferred Wrath queue exposes missing legacy publishers and an empty-history validity defect. Original cached Lua is the unchanged consumer; the bounded simulator policies are not native-parity evidence. The bounded capability/debug checkpoint passes 47 named Wrath cases; final post-floor-count gates remain pending at this checkpoint.
 
 ## Producer ownership
 
@@ -21,7 +21,7 @@ Runtime `debug.getinfo` on the original closures establishes source identity, no
 
 ## Approval boundaries
 
-Main explicitly extended the documented empty/zero/no-selection policy to existing-model publication, no-target/unsupplied counts and shared empty history. U3's `IsPlayerResolutionAvailable` boolean policy, BaseMip, gamma capability and populated combat-log replay remain unapproved. The approvals-packet U1 and u1-geometry receipt concern the unrelated Retail tooltip divider.
+Main explicitly extended the documented empty/zero/no-selection policy to existing-model publication, no-target/unsupplied counts and shared empty history. The user separately approved HasDebugZoneMap=false, UnitIsTalking=false for any name string, and IsPlayerResolutionAvailable=true on 2026-10-17; [their owning contract](../../specs/wrath-startup-capability-defaults.md) distinguishes temporary UI policy from native capability. Empty debug-object/floor counts use the standing zero-when-unsupplied policy, never a total inferred from a selected-floor scalar. BaseMip, gamma operations and populated combat-log replay remain blocked. The approvals-packet U1 and u1-geometry receipt concern the unrelated Retail tooltip divider.
 
 ## Sources
 
@@ -29,6 +29,7 @@ Main explicitly extended the documented empty/zero/no-selection policy to existi
 - [Friend count contract](../../specs/wrath-legacy-friend-count.md)
 - [Combo contract](../../specs/wrath-combo-points.md)
 - [Empty overlay contract](../../specs/wrath-empty-map-overlays.md)
+- [Startup capability/default contract](../../specs/wrath-startup-capability-defaults.md)
 - [Shared empty-history contract](../../specs/classic-empty-combatlog-history.md)
 
 ## See Also

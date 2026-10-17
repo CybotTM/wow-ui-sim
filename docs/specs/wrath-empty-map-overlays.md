@@ -23,7 +23,7 @@ Wrath's temporary `GetNumMapOverlays()` count lives in `src/lua_api/workarounds/
 ## Known gaps (current cycle)
 
 - [x] Bounded original-consumer GREEN in the d11a25154 sealed Wrath43 gate: both stale overlay textures hide. Startup replaces the :304 record with the exact newly unmasked :363 missing HasDebugZoneMap record; whole startup falls 22/30 → 18/24, not clean.
-- [ ] The next debug-map capability query `HasDebugZoneMap()` at :363 has no backing model or approved boolean default. The bounded test records that downstream failure explicitly; it is not a complete WorldMap update or clean-startup claim.
+- [x] The user subsequently approved temporary HasDebugZoneMap=false and an empty map-debug-object count; the complete original WorldMapFrame_Update now succeeds in the bounded test. Further OnLoad floor-catalog handling belongs to [startup defaults](wrath-startup-capability-defaults.md), not an invented overlay catalog. Whole-profile startup remains a separate failing gate.
 
 ## Out of scope
 
