@@ -19,6 +19,7 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     // The Wrath consumer combines this with IsRaidLeader. Do not read the
     // unrelated WoWLabs matchmaking party used by the earlier registration.
     LuaApiMut::register_function(lua, "IsPartyLeader", is_party_leader)?;
+    LuaApiMut::register_function(lua, "GetPartyMember", get_party_member)?;
     crate::lua_api::workarounds::wrath_startup_defaults::register_all(lua)?;
     Ok(())
 }
@@ -102,6 +103,17 @@ fn is_raid_leader(state: &mut LuaState) -> LuaResult<u32> {
         raid && is_group_leader(&sim, "player")
     };
     state.push(Val::Bool(leader));
+    Ok(1)
+}
+
+fn get_party_member(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let valid_slot = (1..=4).contains(&index);
+    let present = {
+        let sim = borrow_state(state)?;
+        valid_slot && sim.party_group_active && index as usize <= sim.party_members.len()
+    };
+    state.push(Val::Bool(present));
     Ok(1)
 }
 

@@ -23,6 +23,9 @@ state is `(0, 0, false)`, per the approved zero/no-selection policy (parent
 correction 2026-10-17); supplied values must be preserved by both readers.
 This corrects the C API's previously missing third result to match pinned generated
 documentation; it does not claim native cooldown lifecycle parity.
+Wrath `GetPartyMember(index)` reads the existing active-group flag and supplied
+party-member list. Only occupied indices 1–4 in an active group return true;
+other indices/inactive groups return false. No new party state or default is added.
 No solo-time override, setter change, or group-leave behavior is added.
 This fixture is not a native initial-state or tuple-parity claim.
 
@@ -42,6 +45,8 @@ original Wrath FrameXML/UnitPopup.lua's accepted tokens. No native capture.
 - [ ] All four dropdowns and the original loot-threshold menu resolve to
   `ITEM_QUALITY2_DESC`; an explicit threshold 4 update resolves to `ITEM_QUALITY4_DESC`.
 - [ ] Original opt-out menu text reflects unsupplied false and explicit true state.
+- [ ] A second supplied member reaches the original shown-frame path; disabling
+  the group makes the same frame hide.
 - [ ] Original RAF summon text has no cooldown suffix for unsupplied `(0, 0)`;
   supplied start/duration reaches its formatted remaining-time label.
 - [ ] Retail C API returns documented start/duration/enabled fields; original
@@ -63,7 +68,8 @@ including nine newly unmasked :226 records (2026-10-17).
 
 - `src/lua_api/sim_substates/mod.rs`: approved initial token and threshold fixture.
 - `src/lua_api/globals/real/loot_method.rs`: Wrath-only legacy threshold and opt-out readers.
-- `src/c_api/c_recruit_a_friend.rs`: shared explicit cooldown snapshot.
+- `src/c_api/c_recruit_a_friend.rs`: shared explicit cooldown snapshot and reader.
+- `src/lua_api/globals/real/wrath_startup_queries.rs`: existing-state party membership reader.
 - `src/lua_api/globals/real/recruit_a_friend.rs`: Wrath legacy cooldown registration.
 
 ## Tests asserting this spec
