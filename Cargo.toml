@@ -301,6 +301,20 @@ path = "tests/wrath_residual_b.rs"
 required-features = ["client-wrath"]
 
 [[test]]
+name = "wrath_legacy_sound"
+path = "tests/wrath_legacy_sound.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_loot_initial"
+path = "tests/wrath_loot_initial.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "recruit_a_friend_cooldown"
+path = "tests/recruit_a_friend_cooldown.rs"
+
+[[test]]
 name = "classic_guild_roster_selection"
 path = "tests/classic_guild_roster_selection.rs"
 
