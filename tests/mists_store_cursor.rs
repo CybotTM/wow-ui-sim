@@ -1,4 +1,5 @@
-//! Original StoreUISecure consumer; hidden VAS controls have no presented cursor.
+//! Cursor lifecycle derived from shipped consumer contracts (original-code inference).
+//! No direct native observation.
 #![cfg(feature = "client-mists")]
 
 use std::cell::RefCell;
@@ -62,44 +63,87 @@ fn original_mists_vas_cursor_does_not_run_before_hidden_character_selection() {
     );
 }
 
+// Visible XML retains initial presentation; Wrath hidden edits still need a cursor
+// before DebugTools.lua:449 calls UIPanelTemplates.lua:342/365 directly.
 #[test]
-fn hidden_editbox_keeps_text_notifications_and_presents_latest_cursor_when_shown() {
+fn pristine_hidden_cursor_defers_to_first_show_but_hidden_edits_present_before_text_change() {
     let env = create_env();
-    env.exec(
-        r#"
+    env.exec(r#"
         local panel = CreateFrame('Frame', nil, UIParent)
         panel:Hide()
-        HiddenCursorPanel = panel
+        DeferredPanel = panel
         local box = CreateFrame('EditBox', nil, panel)
-        HiddenCursorBox = box
+        DeferredBox = box
         box:SetAutoFocus(false)
         box:SetSize(120, 20)
         box:SetPoint('CENTER')
         assert(box:SetFont('Fonts\\FRIZQT__.TTF', 14))
-        HiddenCursorTrace = {}
+        DeferredTrace = {}
         box:SetScript('OnCursorChanged', function(self, x, y, w, h)
-            assert(self:IsVisible(), 'cursor requires visible presentation')
-            assert(self:GetText() == 'latest' and self:GetCursorPosition() == 3)
             assert(type(x) == 'number' and type(y) == 'number' and w > 0 and h > 0)
-            HiddenCursorTrace[#HiddenCursorTrace + 1] = 'cursor'
+            DeferredTrace[#DeferredTrace + 1] = 'cursor:' .. self:GetText() .. ':' .. self:GetCursorPosition()
         end)
         box:SetScript('OnTextChanged', function(self, userInput)
-            assert(not self:IsVisible() and not userInput)
-            HiddenCursorTrace[#HiddenCursorTrace + 1] = 'text'
+            assert(not userInput)
+            DeferredTrace[#DeferredTrace + 1] = 'text:' .. self:GetText()
         end)
-        box:SetText('latest')
-        box:SetCursorPosition(3)
+        box:SetScript('OnUpdate', function(self)
+            DeferredTrace[#DeferredTrace + 1] = 'update'
+        end)
+    "#).unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec("assert(#DeferredTrace == 0); DeferredPanel:Show(); assert(#DeferredTrace == 0)")
+        .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        assert(table.concat(DeferredTrace, ',') == 'cursor::0,update')
+        DeferredTrace = {}
+        DeferredPanel:Hide()
+        DeferredBox:SetText('latest')
+        DeferredBox:SetCursorPosition(3)
     "#,
     )
     .unwrap();
     env.fire_on_update(0.016).unwrap();
-    env.exec("assert(table.concat(HiddenCursorTrace, ',') == 'text'); HiddenCursorPanel:Show()")
-        .unwrap();
+    env.exec("assert(table.concat(DeferredTrace, ',') == 'cursor:latest:3,text:latest'); DeferredTrace = {}").unwrap();
     env.fire_on_update(0.016).unwrap();
-    env.exec("assert(table.concat(HiddenCursorTrace, ',') == 'text,cursor')")
-        .unwrap();
+    env.exec("assert(#DeferredTrace == 0)").unwrap();
+    assert!(
+        env.state().borrow().lua_errors.is_empty(),
+        "{:?}",
+        env.state().borrow().lua_errors
+    );
+}
+
+// BasicControls.xml:31 deliberately keeps DebugTools hidden; its real SetText
+// at Blizzard_DebugTools.lua:445 must still produce cursorOffset before :449.
+#[test]
+fn never_shown_box_with_first_real_text_gets_hidden_cursor_before_text_change() {
+    let env = create_env();
+    env.exec(
+        r#"
+        local box = CreateFrame('EditBox', nil, UIParent)
+        box:SetAutoFocus(false)
+        box:Hide()
+        box:SetSize(120, 20)
+        box:SetPoint('CENTER')
+        assert(box:SetFont('Fonts\\FRIZQT__.TTF', 14))
+        HiddenEditTrace = {}
+        box:SetScript('OnCursorChanged', function(self)
+            assert(not self:IsVisible() and self:GetText() == 'first')
+            HiddenEditTrace[#HiddenEditTrace + 1] = 'cursor'
+        end)
+        box:SetScript('OnTextChanged', function(self, userInput)
+            assert(not self:IsVisible() and not userInput)
+            HiddenEditTrace[#HiddenEditTrace + 1] = 'text'
+        end)
+        box:SetText('first')
+    "#,
+    )
+    .unwrap();
     env.fire_on_update(0.016).unwrap();
-    env.exec("assert(table.concat(HiddenCursorTrace, ',') == 'text,cursor')")
+    env.exec("assert(table.concat(HiddenEditTrace, ',') == 'cursor,text')")
         .unwrap();
     assert!(
         env.state().borrow().lua_errors.is_empty(),
