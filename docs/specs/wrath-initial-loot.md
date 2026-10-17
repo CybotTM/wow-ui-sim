@@ -32,6 +32,9 @@ return false. Modes remain distinct (`party`, `raid`, `Battleground`), as select
 by the original party-frame consumer. Both values are booleans, not numeric flags.
 Existing channel snapshots have no unit-to-member mapping carrying both flags;
 this small legacy input does not implement voice transport or native parity.
+`UnitIsTalking(name)` reads existing channel member `is_active_speaker` entries
+by exact character-name bytes; no match returns false. Non-UTF-8 names remain
+valid string inputs and cannot match the modeled UTF-8 names.
 No solo-time override, setter change, or group-leave behavior is added.
 This fixture is not a native initial-state or tuple-parity claim.
 
@@ -55,6 +58,8 @@ original Wrath FrameXML/UnitPopup.lua's accepted tokens. No native capture.
   the group makes the same frame hide.
 - [ ] Supplied voice-enabled/muted flags reach the original speaker/mute icons;
   absent flags hide them, and another mode does not inherit the party selection.
+- [ ] An explicitly active speaker named like the supplied party member reaches
+  the original talking-frame path; changing it inactive hides that frame.
 - [ ] Original RAF summon text has no cooldown suffix for unsupplied `(0, 0)`;
   supplied start/duration reaches its formatted remaining-time label.
 - [ ] Retail C API returns documented start/duration/enabled fields; original
