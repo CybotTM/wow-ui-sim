@@ -1,29 +1,5 @@
 [
   {
-    "message": "@Interface/AddOns/Blizzard_FrameXMLBase/Classic/Constants.lua: table index is nil\nstack traceback:\n\t(string):1: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: @Interface/AddOns/Blizzard_FrameXMLBase/Classic/Constants.lua: table index is nil\nstack traceback:\n\t(string):1: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
-    "message": "@Interface/AddOns/Blizzard_UIParent/Vanilla/UIParent.lua: Interface/AddOns/Blizzard_UIParent/Vanilla/UIParent.lua:25: attempt to perform arithmetic on global 'NUM_LE_ITEM_QUALITYS' (a nil value)\nstack traceback:\n\t(string):1: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: @Interface/AddOns/Blizzard_UIParent/Vanilla/UIParent.lua: Interface/AddOns/Blizzard_UIParent/Vanilla/UIParent.lua:25: attempt to perform arithmetic on global 'NUM_LE_ITEM_QUALITYS' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
-    "message": "@Interface/AddOns/Blizzard_UnitPopup/Vanilla/UnitPopup.lua: table index is nil\nstack traceback:\n\t(string):1: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: @Interface/AddOns/Blizzard_UnitPopup/Vanilla/UnitPopup.lua: table index is nil\nstack traceback:\n\t(string):1: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
     "message": "[OnLoad] LootHistoryFrame: Interface/AddOns/Blizzard_FrameXML/Classic/LootHistory.lua:57: 'for' limit must be a number\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
     "count": 1
   },
@@ -40,35 +16,11 @@
     "count": 1
   },
   {
-    "message": "...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__wow_original_securecall'\n\t(string):13: in function 'securecall'\n\tgenerated/loader-exec-no-global-slots/123b7962e845f02c:21: in function <generated/loader-exec-no-global-slots/123b7962e845f02c:19>\n\t[C]: in function 'pcall'\n\t(string):16: in main chunk",
-    "count": 3
-  },
-  {
-    "message": "Lua Error: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__wow_original_securecall'\n\t(string):13: in function 'securecall'\n\tgenerated/loader-exec-no-global-slots/123b7962e845f02c:21: in function <generated/loader-exec-no-global-slots/123b7962e845f02c:19>\n\t[C]: in function 'pcall'\n\t(string):16: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__wow_original_securecall'\n=(string):13: in function 'securecall'\n[generated/loader-exec-no-global-slots/123b7962e845f02c]:21: in function <[generated/loader-exec-no-global-slots/123b7962e845f02c]:19>\n=[C]:: in function 'pcall'\n=(string):16: in main chunk",
-    "count": 3
-  },
-  {
-    "message": "[OnLoad] OverlayPlayerCastingBarFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnLoad] OverlayPlayerCastingBarFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
-    "count": 1
-  },
-  {
     "message": "[OnLoad] SkillFrame: ...ace/AddOns/Blizzard_UIPanels_Game/Classic/SkillFrame.lua:185: attempt to perform arithmetic on local 'skillRank' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
     "count": 1
   },
   {
     "message": "Lua Error: [OnLoad] SkillFrame: ...ace/AddOns/Blizzard_UIPanels_Game/Classic/SkillFrame.lua:185: attempt to perform arithmetic on local 'skillRank' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "[OnLoad] HonorFrame: ...Ons/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua:29: attempt to call a nil value\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnLoad] HonorFrame: ...Ons/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua:29: attempt to call a nil value\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
     "count": 1
   },
   {
@@ -88,70 +40,6 @@
     "count": 1
   },
   {
-    "message": "[OnLoad] BankSlotsFrame: expected number, got nil at argument 2\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnLoad] BankSlotsFrame: expected number, got nil at argument 2\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "[OnLoad] BankFrame: expected number, got nil at argument 2\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnLoad] BankFrame: expected number, got nil at argument 2\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "[OnLoad] Boss1TargetFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnLoad] Boss1TargetFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "[OnLoad] Boss2TargetFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnLoad] Boss2TargetFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "[OnLoad] Boss3TargetFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnLoad] Boss3TargetFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "[OnLoad] Boss4TargetFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnLoad] Boss4TargetFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "[OnLoad] Boss5TargetFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnLoad] Boss5TargetFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "[OnLoad] PetCastingBarFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnLoad] PetCastingBarFrame: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
-    "count": 1
-  },
-  {
     "message": "@Interface/AddOns/Blizzard_CombatLogBase/Vanilla/CombatLogColors.lua: table index is nil\nstack traceback:\n\t(string):1: in main chunk",
     "count": 1
   },
@@ -160,27 +48,11 @@
     "count": 1
   },
   {
-    "message": "[OnLoad] : Interface/AddOns/Blizzard_Communities/ClubFinder.lua:566: attempt to index local 'classColor' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
+    "message": "[OnLoad] CompactRaidFrameManager: ...tRaidFrames/Classic/Blizzard_CompactRaidFrameManager.lua:84: attempt to call a nil value\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
     "count": 1
   },
   {
-    "message": "Lua Error: [OnLoad] : Interface/AddOns/Blizzard_Communities/ClubFinder.lua:566: attempt to index local 'classColor' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "[OnLoad] ?: Interface/AddOns/Blizzard_Communities/ClubFinder.lua:566: attempt to index local 'classColor' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnLoad] ?: Interface/AddOns/Blizzard_Communities/ClubFinder.lua:566: attempt to index local 'classColor' (a nil value)\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "[OnLoad] CompactRaidFrameManager: ...tRaidFrames/Classic/Blizzard_CompactRaidFrameManager.lua:75: attempt to call a nil value\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnLoad] CompactRaidFrameManager: ...tRaidFrames/Classic/Blizzard_CompactRaidFrameManager.lua:75: attempt to call a nil value\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
+    "message": "Lua Error: [OnLoad] CompactRaidFrameManager: ...tRaidFrames/Classic/Blizzard_CompactRaidFrameManager.lua:84: attempt to call a nil value\n=(string):19: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):20: in main chunk\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function '__report'\n=(string):20: in main chunk",
     "count": 1
   },
   {
@@ -208,14 +80,6 @@
     "count": 1
   },
   {
-    "message": "[OnEvent] frame=QuestLogFrame addon=Blizzard_UIPanels_Game source=@generated/loader-exec-no-global-slots/08242aef882f3377:6: .../AddOns/Blizzard_UIPanels_Game/Vanilla/QuestLogFrame.lua:747: attempt to compare number with nil\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t.../AddOns/Blizzard_UIPanels_Game/Vanilla/QuestLogFrame.lua:747: in function 'AutoQuestWatch_Insert'\n\t.../AddOns/Blizzard_UIPanels_Game/Vanilla/QuestLogFrame.lua:631: in function 'QuestWatch_OnLogin'\n\t.../AddOns/Blizzard_UIPanels_Game/Vanilla/QuestLogFrame.lua:59: in function 'QuestLog_OnEvent'\n\tgenerated/loader-exec-no-global-slots/08242aef882f3377:8: in function <generated/loader-exec-no-global-slots/08242aef882f3377:6>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnEvent] frame=QuestLogFrame addon=Blizzard_UIPanels_Game source=@generated/loader-exec-no-global-slots/08242aef882f3377:6: .../AddOns/Blizzard_UIPanels_Game/Vanilla/QuestLogFrame.lua:747: attempt to compare number with nil\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t.../AddOns/Blizzard_UIPanels_Game/Vanilla/QuestLogFrame.lua:747: in function 'AutoQuestWatch_Insert'\n\t.../AddOns/Blizzard_UIPanels_Game/Vanilla/QuestLogFrame.lua:631: in function 'QuestWatch_OnLogin'\n\t.../AddOns/Blizzard_UIPanels_Game/Vanilla/QuestLogFrame.lua:59: in function 'QuestLog_OnEvent'\n\tgenerated/loader-exec-no-global-slots/08242aef882f3377:8: in function <generated/loader-exec-no-global-slots/08242aef882f3377:6>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
     "message": "[OnEvent] frame=ProductChoiceFrame addon=Blizzard_UIPanels_Game source=@Interface/AddOns/Blizzard_UIPanels_Game/Classic/ProductChoice.lua:17: .../AddOns/Blizzard_UIPanels_Game/Classic/ProductChoice.lua:63: attempt to get length of a nil value\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function 'GetChoices'\n\t.../AddOns/Blizzard_UIPanels_Game/Classic/ProductChoice.lua:63: in function 'ProductChoiceFrame_ShowAlerts'\n\t.../AddOns/Blizzard_UIPanels_Game/Classic/ProductChoice.lua:21: in function <.../AddOns/Blizzard_UIPanels_Game/Classic/ProductChoice.lua:17>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
     "count": 1
   },
@@ -237,94 +101,6 @@
   },
   {
     "message": "Lua Error: ...ace/AddOns/Blizzard_Settings_Shared/Blizzard_Setting.lua:34: 'name' for variable 'UNIT_NAMEPLATES_CLASS_COLOR' requires string type or a function that returns a string.\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t[C]: in function 'error'\n\t...ace/AddOns/Blizzard_Settings_Shared/Blizzard_Setting.lua:34: in function 'ErrorIfInvalidSettingArguments'\n\t...ace/AddOns/Blizzard_Settings_Shared/Blizzard_Setting.lua:340: in function 'Init'\n\tInterface/AddOns/Blizzard_SharedXMLBase/Mixin.lua:10: in function 'CreateAndInitFromMixin'\n\t...ns/Blizzard_Settings_Shared/Blizzard_SettingsInbound.lua:215: in function 'handler'\n\t(string):3: in main chunk\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t...\n\t[C]: in function 'securecallfunction'\n\t...rface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:210: in function <...rface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n\t[C]: in function 'secureexecuterange'\n\t...rface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:213: in function 'TriggerEvent'\n\t...AddOns/Blizzard_SharedXMLBase/GlobalCallbackRegistry.lua:9: in function <...AddOns/Blizzard_SharedXMLBase/GlobalCallbackRegistry.lua:8>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n=[C]:: in function 'SetAttribute'\n[Interface/AddOns/Blizzard_Settings_Shared/Blizzard_SettingsInbound.lua]:121: in function <[Interface/AddOns/Blizzard_Settings_Shared/Blizzard_SettingsInbound.lua]:117>\n=(tail call): ?\n[Interface/AddOns/Blizzard_SettingsDefinitions_Frame/Nameplates.lua]:831: in function 'registrant'\n[Interface/AddOns/Blizzard_Settings_Shared/Blizzard_SettingsRegistrar.lua]:15: in function <[Interface/AddOns/Blizzard_Settings_Shared/Blizzard_SettingsRegistrar.lua]:14>\n=[C]:: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_Settings_Shared/Blizzard_SettingsRegistrar.lua]:17: in function 'callback'\n[Interface/AddOns/Blizzard_SharedXML/EventUtil.lua]:21: in function <[Interface/AddOns/Blizzard_SharedXML/EventUtil.lua]:15>\n=[C]:: in function 'securecallfunction'\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:209>\n=[C]:: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXMLBase/GlobalCallbackRegistry.lua]:9: in function <[Interface/AddOns/Blizzard_SharedXMLBase/GlobalCallbackRegistry.lua]:8>\n=(tail call): ?\n=(tail call): ?\n=[C]:: in function 'native_xpcall'\n=(string):8: in function <=(string):5>\n=(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "[OnEvent] frame=PlayerCastingBarFrame addon=Blizzard_UIPanels_Game source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function <...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:96>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnEvent] frame=PlayerCastingBarFrame addon=Blizzard_UIPanels_Game source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function <...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:96>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
-    "message": "[OnEvent] frame=OverlayPlayerCastingBarFrame addon=Blizzard_UIPanels_Game source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function <...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:96>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnEvent] frame=OverlayPlayerCastingBarFrame addon=Blizzard_UIPanels_Game source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function <...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:96>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
-    "message": "[OnEvent] frame=HonorFrame addon=Blizzard_UIPanels_Game source=@Interface/AddOns/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua:15: ...Ons/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua:45: attempt to call a nil value\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function 'GetPVPThisWeekStats'\n\t...Ons/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua:45: in function 'HonorFrame_Update'\n\t...Ons/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua:19: in function <...Ons/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua:15>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnEvent] frame=HonorFrame addon=Blizzard_UIPanels_Game source=@Interface/AddOns/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua:15: ...Ons/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua:45: attempt to call a nil value\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function 'GetPVPThisWeekStats'\n\t...Ons/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua:45: in function 'HonorFrame_Update'\n\t...Ons/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua:19: in function <...Ons/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua:15>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
-    "message": "[OnEvent] frame=TargetFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnEvent] frame=TargetFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
-    "message": "[OnEvent] frame=FocusFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnEvent] frame=FocusFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
-    "message": "[OnEvent] frame=Boss1TargetFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnEvent] frame=Boss1TargetFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
-    "message": "[OnEvent] frame=Boss2TargetFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnEvent] frame=Boss2TargetFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
-    "message": "[OnEvent] frame=Boss3TargetFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnEvent] frame=Boss3TargetFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
-    "message": "[OnEvent] frame=Boss4TargetFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnEvent] frame=Boss4TargetFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
-    "message": "[OnEvent] frame=Boss5TargetFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnEvent] frame=Boss5TargetFrameSpellBar addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1074: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/TargetFrame.lua:1036>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
-    "count": 1
-  },
-  {
-    "message": "[OnEvent] frame=PetCastingBarFrame addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/PetFrame.lua:222: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/PetFrame.lua:208>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
-    "count": 1
-  },
-  {
-    "message": "Lua Error: [OnEvent] frame=PetCastingBarFrame addon=Blizzard_UnitFrame source=@generated/template-method-handler-no-global-slots/5d63520e71c5ff09:3: ...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: attempt to index local 'colorInfo' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:630: in function 'UpdateBarFillTexture'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:563: in function 'FinishSpell'\n\t...AddOns/Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua:110: in function 'OnEvent'\n\tInterface/AddOns/Blizzard_UnitFrame/Classic/PetFrame.lua:222: in function <Interface/AddOns/Blizzard_UnitFrame/Classic/PetFrame.lua:208>\n\t(tail call): ?\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
     "count": 1
   },
   {
@@ -360,11 +136,11 @@
     "count": 1
   },
   {
-    "message": "[OnCursorChanged] frame=__Blizzard_StoreUI_21796 addon=Blizzard_StoreUI source=@Interface/AddOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3713: ...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3431: attempt to index local 'character' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3431: in function 'VASRealmList_BuildAutoCompleteList'\n\t...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3523: in function 'VASCharacterSelectionTransferRealmEditBox_UpdateAutoComplete'\n\t...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3717: in function <...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3713>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
+    "message": "[OnCursorChanged] frame=__Blizzard_StoreUI_21958 addon=Blizzard_StoreUI source=@Interface/AddOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3713: ...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3431: attempt to index local 'character' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3431: in function 'VASRealmList_BuildAutoCompleteList'\n\t...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3523: in function 'VASCharacterSelectionTransferRealmEditBox_UpdateAutoComplete'\n\t...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3717: in function <...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3713>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?",
     "count": 1
   },
   {
-    "message": "Lua Error: [OnCursorChanged] frame=__Blizzard_StoreUI_21796 addon=Blizzard_StoreUI source=@Interface/AddOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3713: ...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3431: attempt to index local 'character' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3431: in function 'VASRealmList_BuildAutoCompleteList'\n\t...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3523: in function 'VASCharacterSelectionTransferRealmEditBox_UpdateAutoComplete'\n\t...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3717: in function <...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3713>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
+    "message": "Lua Error: [OnCursorChanged] frame=__Blizzard_StoreUI_21958 addon=Blizzard_StoreUI source=@Interface/AddOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3713: ...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3431: attempt to index local 'character' (a nil value)\nstack traceback:\n\t(string):12: in function <(string):12>\n\t[C]: in function 'native_xpcall'\n\t(string):11: in function <(string):10>\n\t...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3431: in function 'VASRealmList_BuildAutoCompleteList'\n\t...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3523: in function 'VASCharacterSelectionTransferRealmEditBox_UpdateAutoComplete'\n\t...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3717: in function <...dOns/Blizzard_StoreUI/Vanilla/Blizzard_StoreUISecure.lua:3713>\n\t(tail call): ?\n\t(tail call): ?\n\t[C]: in function 'native_xpcall'\n\t(string):8: in function <(string):5>\n\t(tail call): ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>",
     "count": 1
   }
 ]
