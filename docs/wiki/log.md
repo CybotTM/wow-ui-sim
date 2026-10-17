@@ -2345,3 +2345,7 @@ Linked A integrated receipts and empty-history attribution in [investigation](in
 ## 2026-10-17 — Classic B bounded checkpoint
 
 Linked implemented-root proof and preservation in [B matrix](../specs/classic-startup-b.md#bounded-proof-ledger); retained R10/R14 dependency and R20 visible-policy blockers without clean-startup claims.
+
+## 2026-10-17 — Wrath U/residual source and attribution
+
+Added [[wrath-startup-u-residuals]] and owning contracts: existing-model publishers, shared empty history, original CombatLog2841/745 four-occurrence chain and generated BaseMip/gamma closure identities. Pending runtime/check and approval boundaries explicit.

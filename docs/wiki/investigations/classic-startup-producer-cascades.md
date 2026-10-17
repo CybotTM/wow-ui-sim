@@ -38,6 +38,7 @@ remaining Wrath roots from independent verification and full-startup acceptance.
 
 ## See Also
 
+- [[wrath-startup-u-residuals]] — Wrath's separate TOC, four refilter occurrences and generated-closure identities.
 - [[lua-api]] — simulator API boundaries.
 - [[client-profiles]] — selected cache and client features.
 

@@ -1,3 +1,7 @@
+## [2026-10-17] investigation | Wrath U/residual startup boundaries
+
+[Wrath investigation](investigations/wrath-startup-u-residuals.md) links existing calendar/friend/target-bound combo publishers, shared empty history and empty overlays. Four nil-string occurrences are attributed to original CombatLog formatting; two generated closure identities map to BaseMip and gamma consumers. Boolean capability/default policies remain staged; runtime acceptance pending.
+
 ## [2026-10-17] evidence | Classic B implemented roots and held policy
 
 [Owning matrix](../specs/classic-startup-b.md#bounded-proof-ledger) records both-profile bounded B14+marker1+A7, exact Retail/PTR/Mists preservation and failing24/56 startups. [Cascade investigation](investigations/classic-startup-producer-cascades.md#b-checkpoint-and-policy-limits) links authentic string selection, profile leaks and the held health-display decision. R10/R14 dependency and R20 visible policy remain blocked; no whole-goal closure.
