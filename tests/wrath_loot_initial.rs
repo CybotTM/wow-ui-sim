@@ -443,7 +443,7 @@ fn assert_party_flow(env: &WowLuaEnv, label: &str, raf_visible: i32) {
         assert(GetMuteStatus('party1', 'party') == false)
         assert(not PartyMemberFrame1Speaker:IsShown())
         assert(not PartyMemberFrame1SpeakerMuted:IsShown())
-        assert(UnitIsTalking('RafFriend') == false)
+        assert(UnitIsTalking('LootFriend') == false)
         assert(not PartyMemberFrame1SpeakerFrame:IsShown())
         for _, name in ipairs({{'', 'Unknown speaker', 'Jöhn', string.char(255, 0, 128)}}) do
             assert(UnitIsTalking(name) == false)
@@ -583,7 +583,7 @@ fn original_wrath_party_roots_preserve_master_indices_with_supplied_raf_link() {
         channel_type: 1,
         members: vec![wow_ui_sim::lua_api::state::VoiceMember {
             member_id: 41,
-            name: "RafFriend".into(),
+            name: "LootFriend".into(),
             is_active_speaker: true,
             volume: 1.0,
         }],
@@ -591,7 +591,7 @@ fn original_wrath_party_roots_preserve_master_indices_with_supplied_raf_link() {
     exec(
         &env,
         r#"
-        assert(UnitIsTalking('RafFriend') == true, 'supplied speaker lookup')
+        assert(UnitIsTalking('LootFriend') == true, 'supplied speaker lookup')
         assert(UnitIsTalking('AnotherFriend') == false, 'unmatched speaker lookup')
         PartyMemberFrame_UpdateVoiceStatus(PartyMemberFrame1)
         assert(PartyMemberFrame1SpeakerFrame:IsShown(),
@@ -603,7 +603,7 @@ fn original_wrath_party_roots_preserve_master_indices_with_supplied_raf_link() {
     exec(
         &env,
         r#"
-        assert(UnitIsTalking('RafFriend') == false)
+        assert(UnitIsTalking('LootFriend') == false)
         PartyMemberFrame_UpdateVoiceStatus(PartyMemberFrame1)
         assert(not PartyMemberFrame1SpeakerFrame:IsShown())
     "#,
