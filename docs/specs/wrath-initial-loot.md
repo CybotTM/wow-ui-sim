@@ -64,11 +64,12 @@ including nine newly unmasked :226 records (2026-10-17).
 - `src/lua_api/sim_substates/mod.rs`: approved initial token and threshold fixture.
 - `src/lua_api/globals/real/loot_method.rs`: Wrath-only legacy threshold and opt-out readers.
 - `src/c_api/c_recruit_a_friend.rs`: shared explicit cooldown snapshot.
-- `src/lua_api/workarounds/temporary/wrath_startup_defaults.rs`: legacy RAF cooldown delegation.
+- `src/lua_api/globals/real/recruit_a_friend.rs`: Wrath legacy cooldown registration.
 
 ## Tests asserting this spec
 
 - `tests/wrath_loot_initial.rs`
+- `tests/recruit_a_friend_cooldown.rs`
 
 ## Known gaps (current cycle)
 

@@ -27,5 +27,10 @@ fn is_refer_a_friend_linked(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsReferAFriendLinked", is_refer_a_friend_linked)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetSummonFriendCooldown",
+        crate::c_api::c_recruit_a_friend::get_summon_friend_cooldown,
+    )?;
     Ok(())
 }

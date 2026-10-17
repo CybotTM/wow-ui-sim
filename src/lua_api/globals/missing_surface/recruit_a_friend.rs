@@ -1,6 +1,7 @@
 //! `C_RecruitAFriend` probe surface with disabled-by-default RAF data.
 
 use super::{ensure_namespace, set_table_array};
+use crate::c_api::c_recruit_a_friend::get_summon_friend_cooldown;
 use crate::lua_api::methods::{create_table, table_set};
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
@@ -92,12 +93,6 @@ fn is_recruiting_enabled(state: &mut LuaState) -> LuaResult<u32> {
 fn get_recruit_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     state.push(Val::Nil);
-    Ok(2)
-}
-
-fn get_summon_friend_cooldown(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
     Ok(2)
 }
 
