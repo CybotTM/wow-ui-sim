@@ -1,97 +1,75 @@
 # Supplied quest readiness and reward-dialog transition (QL-2)
 
-## Contract
+Retail/Forever supplied readiness is distinct from history and reward acquisition.
+Source: `src/c_api/quest_readiness.rs` and existing quest state. [Architecture](../wiki/systems/lua-api.md#supplied-readiness-and-reward-dialog-phase)
+owns implementation details; [execution receipt](../baselines/quest-lifecycle.md)
+owns saved proof and the current integration gate.
 
-Authored simulator policy, conditional Retail/Forever consumers; not native parity.
-Depends on [QL-1 live objectives](quest-objective-progress.md). Modeled publication
-and live gossip/history behavior use QL-1's Retail/Forever gate; other profiles
-retain their prior readiness stub, cached gossip flags and popup defaults.
-`tests/quest_readiness_scope.rs` supplies an unsupported-profile negative control
-(not executed in the current Retail/Forever builds).
+## What it must do
 
-- A nonempty supplied objective snapshot sets active completion when every row is
-  finished. An empty snapshot does not infer readiness. Failed/unknown rows are
-  never ready; history is neither readiness nor active completion.
-- `A_Admin.SetQuestReadiness(questID, ready, autoComplete)` supplies completion
-  for conditions not modeled by objectives and explicitly configures auto-complete
-  (default false). Later nonempty objective snapshots replace supplied completion.
-  Rejected unknown/failed rows return false without mutation. Identical settings
-  are inert. The producer returns true only for a changed accepted state.
-- `C_QuestLog.ReadyForTurnIn` and selected `IsQuestCompletable` read active complete,
-  nonfailed state. Legacy `IsQuestComplete` reads active completion, not history.
-- Current NPC active rows and legacy completion tuples project that live readiness.
-  Objective/readiness/gossip state commits before QL-1 notifications. Explicit
-  readiness emits `QUEST_LOG_UPDATE()` after commit. After log notifications,
-  a still-selected current progress interaction receives `QUEST_PROGRESS()` to
-  refresh original progress-panel button gating before any opt-in auto notification.
-- Public active-quest selection requires a current active NPC row and rich active
-  quest. It opens progress if not ready, rewards if ready. `CompleteQuest` only
-  advances the selected current progress interaction when ready, once. Selection
-  alone via log/map does not authorize a dialog. Closing, abandonment and committed
-  turn-in invalidate its interaction. Changing selection invalidates its eligibility.
-- Reward-dialog entry emits `QUEST_COMPLETE()` but does not remove membership,
-  modify history, watches, money, XP, inventory or grant rewards. Existing
-  [turn-in model](quest-turn-in-model.md) remains separate.
-- Auto-complete is opt-in per active quest. The first ready state reached while
-  opted in publishes `QUEST_AUTOCOMPLETE(questID)` once per active lifetime, after
-  log notifications. The notification is consumed by original tracker popup logic;
-  popup add/read/remove APIs retain that resulting state. Regression/recompletion
-  does not re-notify. No auto-grant/turn-in or universal automatic completion.
+- [x] Final supplied objectives publish active readiness before log callbacks,
+  without marking history; regression and separate environments remain independent.
+- [x] Explicit non-objective readiness rejects unknown/failed targets; historical
+  completion alone does not imply active completion/readiness.
+- [x] Original gossip refresh/template click and legacy selector consume current
+  readiness and open the appropriate progress/reward panel with real button gating.
+- [x] Original progress button advances an eligible ready interaction once, without
+  turn-in, membership/history/money/XP changes; closing invalidates further advancement.
+- [x] Explicit opt-in creates one original COMPLETE popup; identical progress and
+  regression/recompletion do not duplicate it. Default progress does not auto-notify.
 
-## Consumer grounding (cached Retail source, inspected 2026-10-16)
+`A_Admin.SetQuestReadiness(questID, ready, autoComplete)` supplies non-objective
+completion and opt-in. Nonempty objective snapshots replace supplied completion;
+empty/declared-count snapshots do not infer readiness. Active nonfailed completion
+backs ReadyForTurnIn/IsQuestCompletable; legacy IsQuestComplete does not read history.
 
-Cache prefix: `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/`.
+Dialog progress/rewards phase is separate from log selection. Public NPC selection
+requires a current active NPC row and rich membership; selection changes, closing,
+abandonment and turn-in invalidate the old interaction. Notification markers commit
+before callbacks and last for one active lifetime; opting out does not reset them.
+These are authored simulator policies, not native timing/reacceptance claims.
 
-- `Blizzard_UIPanels_Game/Mainline/GossipFrame.lua:50-69`: original
-  `QUEST_LOG_UPDATE` refresh; `Shared/GossipFrameShared.lua:269-273` consumes live
-  active rows; `:62-63` button click invokes `C_GossipInfo.SelectActiveQuest`.
-- `Blizzard_UIPanels_Game/Mainline/QuestFrame.lua:64-72`: progress/reward panel
-  reaction; `:164-166` original progress button calls `CompleteQuest`;
-  `:209-213` progress button gating uses `IsQuestCompletable`.
-- `Blizzard_ObjectiveTracker/Blizzard_QuestObjectiveTracker.lua:27-30`: original
-  `QUEST_AUTOCOMPLETE` handler calls `AddAutoQuestPopUp(..., "COMPLETE")`;
-  `Blizzard_AutoQuestPopUpTracker.lua:34-39` retains popup via public add API.
+## How it works
 
-Forever cache source counterparts (reachability still unproved):
-`Blizzard_UIPanels_Game/Mainline/GossipFrame.lua:51,69-71`,
-`Shared/GossipFrameShared.lua:61-62,268-272`,
-`Mainline/QuestFrame.lua:66-74,170-172,215-219`; original tracker
-`Blizzard_QuestObjectiveTracker.lua:28-31`, popup helper
-`Blizzard_AutoQuestPopUpTracker.lua:34-39`.
+- [Readiness architecture](../wiki/systems/lua-api.md#supplied-readiness-and-reward-dialog-phase)
+- [QL-1 objective contract](quest-objective-progress.md)
+- [Separate turn-in contract](quest-turn-in-model.md)
 
-## Implementation
+## Implementation inventory
 
-`src/c_api/quest_readiness.rs` owns opt-in/notification markers, progress/reward
-interaction and readiness decisions on existing rich rows. QL-1 commits objective-
-derived readiness inside its mutation scope before notifying. Modeled Lua globals
-live in `globals/real/quest_dialog.rs`; original cached consumers remain unchanged.
-The separate [generic XML intrinsic-tag fix](xml-intrinsic-tags.md) supplies the
-missing original theme mixin/preload prerequisite; fixture closure also loads the
-original AccessibilityTemplates, FrameXML and SplashFrame addons.
+- `src/c_api/quest_readiness.rs`: readiness, phase and notification state/decisions.
+- `src/lua_api/sim_substates/quest_log.rs`: environment-owned state and removal cleanup.
+- `src/lua_api/globals/real/quest_dialog.rs`: modeled globals, popup storage and admin ingress.
+- `globals/admin_quest_objectives.rs`, `admin_quests.rs`: pre-notification mutation seam/registration.
+- `globals/quest_surface/`, `missing_surface/gossip_info.rs`, `quest_verbs.rs`: projections/selectors/cleanup.
 
-## Current execution
+Publication/live behavior uses QL-1's Retail/Forever gate; other profiles retain
+prior readiness stubs, cached gossip flags and popup defaults.
 
-[Owning execution receipt](../baselines/quest-lifecycle.md) records both-profile
-behavioral RED, saved five-case GREEN and the current latest-base integration gate.
-Historical staging predictions below are not current unexecuted status.
+## Tests asserting this spec
 
-## Tests and proof boundary
+`tests/quest_readiness.rs` / `.lua`: five shared cases use whole cached closures,
+not rewritten consumer bodies. Callback error-count guards reject swallowed errors.
+Original consumers explicitly subscribed by fixtures do not prove automatic startup
+subscription/scheduling. `quest_readiness_scope.rs` is an unexecuted non-target control.
 
-`tests/quest_readiness.rs` / `.lua` exercise committed query callbacks, original
-cached gossip data-provider refresh/click, original QuestFrame panel/button path,
-and original tracker popup event path. Consumer fixtures explicitly register
-`QUEST_LOG_UPDATE` on original GossipFrame and `QUEST_AUTOCOMPLETE` on original
-QuestObjectiveTracker; this proves consumer reactions, not automatic startup
-subscription/scheduling. Error-count snapshots reject swallowed callback errors.
-No copied function bodies or API replacement.
+Cached Retail sources: Mainline/GossipFrame.lua:50-69 and
+Shared/GossipFrameShared.lua:62-63,269-273; Mainline/QuestFrame.lua:64-72,164-166,209-213;
+QuestObjectiveTracker.lua:27-30 and AutoQuestPopUpTracker.lua:34-39. Forever counterparts
+are loaded independently in the recorded profile executions.
 
-Predicted behavioral RED after QL-1 alone: final objectives leave
-`C_QuestLog.ReadyForTurnIn(990002) == false`; gossip provider retains false;
-progress cannot enter rewards; opt-in completion emits zero notifications. Missing
-admin publication is probed without a missing-function error. Consumer prerequisite
-failures are blockers, not behavioral RED evidence. No tests/builds executed while
-staging; staged producer must not land until a real in-scope RED is recorded.
+Behavioral RED preceded producers. Initial closure/missing-API failures were kept
+separate; [generic intrinsic](xml-intrinsic-tags.md), [widget values](xml-widget-values.md),
+[material](quest-background-material.md), [temporary inputs](quest-progress-requirements-empty.md)
+and [currency projection](quest-reward-currency-panel.md) own those prerequisites.
+Saved profile GREEN and latest-base acceptance are distinguished in the receipt.
 
-Forever runs use only the current-profile cache and must establish actual closure
-reachability separately. Retail source citations do not prove Forever runtime
-loading, startup health, rendering or all-profile/native acceptance.
+## Known gaps (current cycle)
+
+- [ ] Close the latest-base quest/startup/B5 integration gate in the execution receipt.
+- [ ] Non-target profile runtime control remains unexecuted; not part of this two-profile matrix.
+
+## Out of scope
+
+Native parity/timing, full tracker scheduling/pixels, failure/deadline algorithms,
+reward validation/grants, new acquisition/persistence or all-profile acceptance.

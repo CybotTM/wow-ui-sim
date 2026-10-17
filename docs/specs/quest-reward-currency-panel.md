@@ -1,47 +1,57 @@
 # Shared quest reward currency projection into the original panel
 
-## Contract
+Retail/Forever C_QuestInfoSystem.GetQuestRewardCurrencies reads existing
+currency_rewards through the same serializer as C_QuestLog. Source:
+`src/c_api/quest_reward_currencies.rs`. [Architecture](../wiki/systems/lua-api.md#original-reward-currency-rows)
+and [execution receipt](../baselines/quest-lifecycle.md) own implementation/proof.
 
-Retail/Forever `C_QuestInfoSystem.GetQuestRewardCurrencies(questID?)` reads the
-existing selected/rich quest's `currency_rewards`, using the exact same serializer
-as `C_QuestLog.GetQuestRewardCurrencies(questID)`. No parallel store, invented rows,
-or reward acquisition is added. The existing known fields and optional supplied
-base amount remain unchanged; quality/bonus/context metadata not represented by
-that record are not synthesized.
+## What it must do
 
-Cached Retail `Blizzard_APIDocumentationGenerated/QuestInfoSystemDocumentation.lua:58-72`
-declares AllowedWhenUntainted, nullable questID and MayReturnNothing.
-`QuestLogDocumentation.lua:493-506` instead requires questID. The new wrapper
-unwraps/authenticates the original argument before validation, and permits nil.
-Authored context policy: nil uses `selected_quest_log_id`; absent/unrepresentable
-context yields no values. A representable explicit ID uses the existing list
-projection, including its empty-list miss behavior. Native context parity is not
-claimed.
+- [x] A supplied1166/5 record reaches actual original reward currency rows; name/count
+  and currencyInfo, not just function callability, are observable.
+- [x] Original CurrencyContainerUtil displays the exact modeled `Timewarped Badge`
+  label/count5 while currencyInfo retains the explicitly supplied name and amount.
+- [x] Both quest namespaces expose the same supplied record, without another store;
+  nullable selected context works and absent context permits no result.
+- [x] The original rewards frame remains hidden without supplied rewards.
 
-## Original consumer and implementation
+Cached QuestInfoSystemDocumentation.lua:58-72 declares AllowedWhenUntainted,
+nullable questID and MayReturnNothing; QuestLogDocumentation.lua:493-506 requires ID.
+Authenticate/unwrap the original argument before validation. Authored nil-context
+policy uses selected_quest_log_id; an absent/unrepresentable context returns nothing.
+An explicit representable ID retains the existing list projection's empty miss.
+Existing represented fields/optional base amount are unchanged; quality/bonus/context
+metadata absent from the record are not invented. Native context/schema parity is separate.
 
-`Blizzard_UIPanels_Game/Mainline/QuestInfo.lua:608,963-975` reads this namespace and
-creates actual reward currency rows. `c_api/quest_reward_currencies.rs` now owns the
-shared projection (the existing favor module is Retail-epoch-only); the pre-existing C_QuestLog handler delegates to it. Publication
-uses QL-1's Retail/Forever gate.
+## How it works
 
-`tests/quest_reward_currency_panel.rs` invokes original `QuestInfo_ShowRewards` with
-explicit existing reward-frame context. Empty-state control checks a hidden rewards
-frame. A supplied1166/5 record must produce the original Name/Count and currencyInfo,
-then both namespace outputs and nullable selection behavior are checked. Currency1166
-is displayed as the modeled `Timewarped Badge` by original CurrencyContainerUtil
-(`Blizzard_FrameXMLUtil/CurrencyContainer.lua:3-9`), while row.currencyInfo retains
-the explicitly supplied name; both are asserted, not merely a nonempty label.
+- [Reward projection](../wiki/systems/lua-api.md#original-reward-currency-rows)
+- [QL-2](quest-readiness-dialog.md)
 
-Test `6d8417000` at saved `9d1430bf3` produced genuine Retail RED: original panel
-had no supplied currency row (None versus supplied name), while the empty-panel
-control passed. Later row/count/context assertions were unreached. At saved
-`24a076873` the row appeared; the first oracle incorrectly expected its raw name
-instead of the native container display. Revised test `4f601b63e` passed the exact
-`Timewarped Badge` label, count5, retained supplied metadata, both namespace
-projections and nullable-context/no-context assertions (3.07s). Empty-panel control
-and separate same-source Retail startup `[]` also passed. This is bounded supplied-
-record GREEN, not native/schema-complete reward parity. Automatic panel scheduling, native/schema-complete
-reward metadata, reward spells and grants are excluded.
+## Implementation inventory
 
-See [QL-2](quest-readiness-dialog.md) and [temporary requirements inputs](quest-progress-requirements-empty.md).
+- `src/c_api/quest_reward_currencies.rs`: cross-profile wrapper and shared serializer.
+- `src/c_api/mod.rs`, `globals/register.rs`: Retail/Forever registration.
+- `globals/quest_surface/handlers.rs`: C_QuestLog delegates to that same projection.
+
+## Tests asserting this spec
+
+`tests/quest_reward_currency_panel.rs` calls original QuestInfo_ShowRewards with
+explicit existing reward-frame context. Original Mainline/QuestInfo.lua:608,963-975
+reads the namespace and builds currency rows. FrameXMLUtil/CurrencyContainer.lua:3-9
+owns the modeled container display override.
+
+Historical empty control passed while supplied row was absent (actual RED). After
+publication the row appeared; the first oracle incorrectly expected its raw name.
+Corrected tests require the exact modeled container label and preserved raw metadata,
+plus both namespaces and nullable/no-context behavior. Saved GREEN/latest-base status
+are distinct in the execution receipt.
+
+## Known gaps (current cycle)
+
+- [ ] Close the latest-base quest/startup/B5 gate in the execution receipt.
+
+## Out of scope
+
+New reward stores, acquisition/grants, reward-spell modeling, complete native reward
+metadata, automatic panel scheduling, pixels and all-profile acceptance.
