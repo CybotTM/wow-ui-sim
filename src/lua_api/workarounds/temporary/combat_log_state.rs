@@ -2,6 +2,7 @@
 //!
 //! Combat log history is not modeled yet. This keeps the small shared Lua state
 //! fixture explicit rather than presenting it as complete C API behavior.
+//! Retire the empty-only path when the authorized history model owns validity and traversal.
 
 const COMBAT_LOG_STATE_LUA: &str = r#"
 CombatLogInbound = CombatLogInbound or {
@@ -345,6 +346,9 @@ end
 if rawget(_G, "CombatLogAdvanceEntry") == nil then
     function CombatLogAdvanceEntry(step)
         local currentState = CombatLogState()
+        if publishClassicEmptyHistory and CountEntries(currentState) == 0 then
+            return false
+        end
         local amount = tonumber(step) or 0
         currentState.currentEntry = math.max(0, currentState.currentEntry + amount)
         return true
@@ -366,6 +370,7 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
         crate::client_profile::ACTIVE,
         crate::client_profile::ClientProfile::Era
             | crate::client_profile::ClientProfile::Anniversary
+            | crate::client_profile::ClientProfile::Wrath
     );
     let source = format!(
         "local publishLegacyCurrentEvent = {publish_legacy}\nlocal publishLegacyGlobals = {publish_globals}\nlocal publishClassicEmptyHistory = {classic_empty_history}\n{COMBAT_LOG_STATE_LUA}"

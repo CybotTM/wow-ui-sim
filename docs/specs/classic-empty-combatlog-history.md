@@ -1,13 +1,15 @@
 # Classic empty combat-log history
 
-Era/Anniversary public history queries must not turn an empty cursor into a fabricated event. Existing temporary fixture ownership is `src/lua_api/workarounds/temporary/combat_log_state.rs`; no second history model is introduced. See [Lua API](../lua-api.md).
+Era/Anniversary/Wrath public history queries must not turn an empty cursor into a fabricated event. Existing temporary fixture ownership is `src/lua_api/workarounds/temporary/combat_log_state.rs`; no second history model is introduced. See [Lua API](../lua-api.md).
 
 ## What it must do
 
 - [x] Empty `C_CombatLog.GetCurrentEntryInfo()` returns no values (therefore nil in the original validity check), regardless of the stored cursor number.
 - [x] Empty `SeekToNewestEntry` and `SeekToPreviousEntry` return false. Cached `Blizzard_APIDocumentationGenerated/CombatLogDocumentation.lua:109-137` declares boolean validity for both seek methods.
 - [x] Original Vanilla UIParent PLAYER_LOGIN loads the real CombatLog and completes its empty refilter without passing nil event to `strsub`.
-- [ ] Preserve other profiles' existing public scalar contract and secure fixture behavior; no populated replay contract is selected.
+- [ ] Preserve non-admitted profiles' existing public scalar contract and secure fixture behavior; no populated replay contract is selected.
+- [ ] Wrath's original login and three lua-errors update ticks must not format an empty cursor as an event; explicit refilter clears stale messages, completes, and removes its OnUpdate callback.
+- [ ] Admitted Classic legacy CombatLogAdvanceEntry returns false on empty history, including a stale scalar cursor.
 
 ## How it works
 
@@ -20,7 +22,8 @@ Era/Anniversary public history queries must not turn an empty cursor into a fabr
 
 ## Tests asserting this spec
 
-- `tests/classic_combatlog_startup.rs`: original cache/TOC startup and startup events; empty query, stale cursor 37, original refilter completion and OnUpdate removal.
+- `tests/classic_combatlog_startup.rs`: Era/Anniversary original cache/TOC startup and startup events; empty query, stale cursor 37, original refilter completion and OnUpdate removal.
+- `tests/wrath_unmasked_combatlog.rs`: Wrath's separate original FrameXML TOC, addon discovery, login and deferred refilter ticks; same shared empty validity, stale cursor, original refilter output/completion and legacy advance.
 
 ## Known gaps (current cycle)
 
@@ -32,7 +35,7 @@ Era/Anniversary public history queries must not turn an empty cursor into a fabr
 
 R3 quality/count publication permits the original `Blizzard_UIParent/Vanilla/UIParent.lua:24-29` color loop to finish, so `UIParent_OnEvent` is defined and PLAYER_LOGIN at :381 calls `CombatLog_LoadUI`. Original `Blizzard_CombatLog/Classic/Blizzard_CombatLog.lua:602-610` uses `GetCurrentEntryInfo` first as validity, then as the formatter's event tuple. The fixture instead returned cursor zero, truthy in Lua; `event` becomes nil at the formatter's :1705 `strsub(event, 1, 5)`. This is an unmasked producer defect, not a vendor bug.
 
-Cached `CombatLogDocumentation.lua:49-57` declares `GetCurrentEntryInfo` with an empty Returns list, not an explicit event schema or native nil-count measurement. Returning no values for absent history follows the original consumer's falsy-entry boundary; no native populated tuple is inferred. The existing U4 Wrath proposal repairs its legacy-global validity/advance at the same shared fixture and leaves the modern scalar intact. Era/Anniversary need the public namespace route; U4 must retain its distinct legacy route when integrated.
+Cached `CombatLogDocumentation.lua:49-57` declares `GetCurrentEntryInfo` with an empty Returns list, not an explicit event schema or native nil-count measurement. Returning no values for absent history follows the original consumer's falsy-entry boundary; no native populated tuple is inferred. U4 now admits Wrath at the same shared fixture: its legacy getter aliases the admitted namespace getter, so both reject empty cursor values. Non-admitted profiles retain their existing scalar fixture. Wrath original `Blizzard_CombatLog.lua:745` passes `CombatLogGetCurrentEntry()` to `CombatLog_OnEvent`; its formatter at :2841 previously received nil `event` and called `format("ACTION_%s_FULL_TEXT", event)`. Sealed original-consumer RED reproduces the initial login failure and three deferred OnUpdate occurrences. No populated tuple is selected.
 
 ## Out of scope
 
