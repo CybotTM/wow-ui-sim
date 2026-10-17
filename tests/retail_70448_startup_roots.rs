@@ -24,6 +24,37 @@ fn original_shared_unit_frame_util_loads_with_real_texture_metatable() {
 }
 
 #[test]
+fn original_arena_spec_display_accepts_secret_atlas_and_preserves_read_policy() {
+    let env = WowLuaEnv::new().unwrap();
+    let root = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
+    env.exec(
+        &std::fs::read_to_string(root.join("Blizzard_UnitFrame/Shared/UnitFrameUtil.lua")).unwrap(),
+    )
+    .unwrap();
+    env.exec(
+        r#"
+        local texture = CreateFrame("Frame"):CreateTexture()
+        UnitFrameUtil.UpdateArenaOpponentSpecDisplay({roleIcon = texture}, 1)
+        texture:SetAtlas(secretwrap("GM-icon-menu"))
+        assert(texture:GetAtlas() == "GM-icon-menu")
+        local wrapped = secretwrap("GM-icon-settings")
+        local function addon()
+            assert(not pcall(texture.SetAtlas, texture, wrapped))
+            assert(not pcall(texture.GetAtlas, texture))
+        end
+        debug.setobjecttaint(addon, "SecretAtlasProbe")
+        addon()
+        assert(texture:GetAtlas() == "GM-icon-menu")
+        texture:SetAtlas("GM-icon-settings")
+        local function public() return texture:GetAtlas() end
+        debug.setobjecttaint(public, "SecretAtlasProbe")
+        assert(public() == "GM-icon-settings")
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn combat_audio_pulse_range_matches_70448_documented_command_bounds() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(
