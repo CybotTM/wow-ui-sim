@@ -10,6 +10,8 @@
 
 ## Development build/run
 
+- Standing user authorization: delete binary artifacts from merged or superseded epochs under `~/.local/state/wow-ui-sim/{verification,handoff}`. Binary artifacts are ELF executables, rlib/rmeta/so/a files, and copied target/deps/incremental trees. Keep all text evidence and hashes. Record each deleted path, size and sha256 in a manifest. Skip epochs that active agents use and epochs modified in the last 6 hours.
+
 - Reuse the canonical `target/` by default. Alternate `CARGO_TARGET_DIR` caches are limited to four reusable slots: `~/.cache/wow-ui-sim-targets/slot-{0,1,2,3}`. Never create per-task, per-revision, or per-worktree target directories. Check active use before reassigning or pruning a slot; preserve proof logs and sealed artifacts outside build caches.
 
 - `python3 scripts/build-host.py --build-host desktop --run -- <args>` builds and runs in desktop WSL; `--build-host local` does both here. Bare Cargo remains local.
