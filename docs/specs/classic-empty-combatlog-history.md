@@ -25,6 +25,7 @@ Era/Anniversary public history queries must not turn an empty cursor into a fabr
 ## Known gaps (current cycle)
 
 - [ ] GREEN/preservation/startup reconciliation pending.
+- [ ] Progress-bar visibility is not asserted: real secure startup does not expose that frame through the tested public globals or `getfenv` path. Parent approved removing only this lookup assertion; startup error rejection, empty queries, refilter completion and OnUpdate removal remain mandatory.
 - [ ] Populated history remains policy-blocked. Handoff `stage-wrath-unmasked/README.md` U4 and `stage-wrath-unmasked/U4-combatlog/POLICY.md` explicitly leave row order, cursor-zero semantics, tuple schema/arity and populated replay undecided. This fix makes none of those choices. Retire this temporary path when the authorized history model exists.
 
 ## Attribution and grounding
