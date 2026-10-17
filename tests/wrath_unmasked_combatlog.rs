@@ -2,7 +2,7 @@
 #![cfg(feature = "client-wrath")]
 use wow_ui_sim::loader::{discover_blizzard_startup_addons_for_screen, load_startup_addon};
 use wow_ui_sim::screen::ScreenKind;
-use wow_ui_sim::startup::fire_startup_events_for_screen;
+use wow_ui_sim::startup::collect_lua_error_startup;
 
 #[test]
 fn wrath_unmasked_original_empty_refilter_clears_and_completes() {
@@ -22,7 +22,7 @@ fn wrath_unmasked_original_empty_refilter_clears_and_completes() {
             .unwrap_or_else(|error| panic!("load {}: {error}", addon.name));
     }
     env.apply_post_load_workarounds();
-    fire_startup_events_for_screen(&env, ScreenKind::Game);
+    collect_lua_error_startup(&env);
     // Keep unrelated sound/loot startup failures visible but outside this
     // consumer's gate. Do not replace the formatter, history or callbacks.
     let history_errors: Vec<_> = env
