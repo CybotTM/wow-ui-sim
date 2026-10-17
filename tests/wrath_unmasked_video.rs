@@ -6,6 +6,13 @@ use support::{env, load, run};
 
 #[test]
 fn wrath_unmasked_original_effects_preserves_player_texture_enabled_state() {
+    // Reproduce the preceding BaseMip fixture's persisted child-only override.
+    let previous = env();
+    run(
+        &previous,
+        "RegisterCVar('BaseMip', '0'); SetCVar('BaseMip', '1')",
+    );
+    drop(previous);
     let env = env();
     run(&env, "RegisterCVar('BaseMip', '0')");
     load(
@@ -38,14 +45,15 @@ fn wrath_unmasked_original_effects_preserves_player_texture_enabled_state() {
         control:Enable()
         assert(control:IsEnabled())
         panel:GetScript('OnEvent')(panel, 'PLAYER_ENTERING_WORLD')
-        assert(IsPlayerResolutionAvailable() == true)
-        assert(control:IsEnabled())
+        assert(IsPlayerResolutionAvailable() == true, 'approved capability must be true')
+        assert(control:IsEnabled(), 'PlayerTexture was force-disabled')
         local slider = VideoOptionsEffectsPanelViewDistance
         local low, high = slider:GetMinMaxValues()
         assert(high > low)
         assert(slider:GetValueStep() == (high - low) / 10)
         assert(type(panel.controls) == 'table' and #panel.controls > 0)
-        assert(VideoOptionsEffectsPanelTextureResolution:GetCurrentValue() == 1)
+        local mipValue = VideoOptionsEffectsPanelTextureResolution:GetCurrentValue()
+        assert(mipValue == 1, 'explicit BaseMip0 projection expected1; current='..tostring(GetCVar('BaseMip'))..' projected='..tostring(mipValue))
         assert(not panel:IsEventRegistered('PLAYER_ENTERING_WORLD'))
     "#,
     );
