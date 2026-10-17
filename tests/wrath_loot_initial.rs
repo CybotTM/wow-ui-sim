@@ -412,6 +412,10 @@ fn assert_party_flow(env: &WowLuaEnv, label: &str, raf_visible: i32) {
         assert(start == 0 and duration == 0)
         assert(UnitPopupButtons.RAF_SUMMON.text == RAF_SUMMON)
         assert(GetOptOutOfLoot() == false)
+        assert(GetVoiceStatus('party1', 'party') == false)
+        assert(GetMuteStatus('party1', 'party') == false)
+        assert(not PartyMemberFrame1Speaker:IsShown())
+        assert(not PartyMemberFrame1SpeakerMuted:IsShown())
         assert(UnitPopupButtons.OPT_OUT_LOOT_TITLE.text ==
             format(OPT_OUT_LOOT_TITLE, UnitPopupButtons.OPT_OUT_LOOT_DISABLE.text))
         local found = 0
@@ -506,6 +510,39 @@ fn original_wrath_party_roots_preserve_master_indices_with_supplied_raf_link() {
         assert(remaining > 0)
         assert(UnitPopupButtons.RAF_SUMMON.text ==
             format(RAF_SUMMON_WITH_COOLDOWN, SecondsToTime(remaining, true)))
+    "#,
+    );
+    env.state().borrow_mut().legacy_unit_voice.insert(
+        ("party1".into(), "party".into()),
+        wow_ui_sim::lua_api::globals::real::wrath_voice::LegacyUnitVoice {
+            voice_enabled: true,
+            muted: true,
+        },
+    );
+    exec(
+        &env,
+        r#"
+        assert(GetVoiceStatus('party1', 'party') == true)
+        assert(GetMuteStatus('party1', 'party') == true)
+        assert(GetVoiceStatus('party1', 'raid') == false)
+        assert(GetMuteStatus('party1', 'raid') == false)
+        PartyMemberFrame_UpdateVoiceStatus(PartyMemberFrame1)
+        assert(PartyMemberFrame1Speaker:IsShown())
+        assert(PartyMemberFrame1SpeakerMuted:IsShown())
+    "#,
+    );
+    env.state()
+        .borrow_mut()
+        .legacy_unit_voice
+        .get_mut(&("party1".into(), "party".into()))
+        .unwrap()
+        .muted = false;
+    exec(
+        &env,
+        r#"
+        PartyMemberFrame_UpdateVoiceStatus(PartyMemberFrame1)
+        assert(PartyMemberFrame1Speaker:IsShown())
+        assert(not PartyMemberFrame1SpeakerMuted:IsShown())
     "#,
     );
     // A second concrete supplied party member must reach the original shown path.
