@@ -172,27 +172,8 @@ if rawget(_G, "SecureMixin") == nil then
 end
 
 -- ─── Temporary vanilla startup namespace defaults ─────────────────────────
--- Scope: Era + Anniversary, via this shared profile bootstrap. These queries
--- are empty simulator policies, not evidence of real-client defaults.
--- Missing system: Classic roll-history records (including completed rolls and
--- players). Active world.loot_rolls is not history; the Retail encounter/time
--- model exposes a different API. Retire when c_api owns Classic history.
--- No cached Classic generated doc declares GetNumItems; LootHistory.lua:55/57
--- requires GetNumItems() -> number. Do not invent item/player/command results.
-if rawget(_G, "C_LootHistory") == nil then C_LootHistory = {} end
-if rawget(C_LootHistory, "GetNumItems") == nil then
-  function C_LootHistory.GetNumItems() return 0 end
-end
-
--- Missing system: product-entitlement choices. Retire when c_api owns their
--- catalog/lifecycle. No cached generated doc declares GetChoices; the original
--- ProductChoice.lua:63/138 requires GetChoices() -> array of choice identifiers.
--- A fresh empty array avoids inventing products or accepting selection commands.
-if rawget(_G, "C_ProductChoice") == nil then C_ProductChoice = {} end
-if rawget(C_ProductChoice, "GetChoices") == nil then
-  function C_ProductChoice.GetChoices() return {} end
-end
-
+-- Era + Anniversary. Classic product choices and loot history are registered
+-- by workarounds/temporary/classic_startup_defaults.rs, not duplicated here.
 -- Missing system: engraving feature availability. Retire when c_api owns that
 -- availability state. EngravingInfoDocumentation.lua:179-185 declares
 -- IsEngravingEnabled() -> value:bool (non-nil). False is our temporary policy.
