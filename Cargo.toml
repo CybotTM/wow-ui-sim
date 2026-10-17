@@ -372,3 +372,7 @@ required-features = ["client-era"]
 name = "patch_2_4_2_factory"
 path = "tests/patch_2_4_2_factory.rs"
 required-features = ["client-retail"]
+
+[[test]]
+name = "classic_r20_health"
+path = "tests/classic_startup_b.rs"
