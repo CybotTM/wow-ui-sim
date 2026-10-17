@@ -402,8 +402,12 @@ fn assert_party_flow(env: &WowLuaEnv, label: &str, raf_visible: i32) {
             assert(frame and frame:GetID() == i)
             assert(dropdown and dropdown:GetParent() == frame)
             assert(dropdown.selectedLootMethod == UnitLootMethod['{label}'].text)
+            assert(ITEM_QUALITY2_DESC == 'Uncommon')
+            assert(dropdown.selectedLootThreshold == ITEM_QUALITY2_DESC)
         end
         UIDropDownMenu_Initialize(PartyMemberFrame1DropDown, PartyFrameDropDown_Initialize, 'MENU')
+        assert(UnitPopupButtons.LOOT_THRESHOLD.text == ITEM_QUALITY2_DESC)
+        assert(GetLootThreshold() == 2)
         local found = 0
         for index, name in ipairs(UnitPopupMenus.PARTY) do
             if name == 'RAF_SUMMON' or name == 'RAF_GRANT_LEVEL' then
@@ -453,6 +457,19 @@ fn original_wrath_party_roots_preserve_master_indices_with_supplied_raf_link() {
     exec(
         &env,
         "local _, p, r = GetLootMethod(); assert(p == 1 and r == 3)",
+    );
+    // The existing test-state path must drive the legacy reader and original menu.
+    env.state().borrow_mut().loot_method.threshold = 4; // Epic
+    exec(
+        &env,
+        r#"
+        assert(GetLootThreshold() == 4)
+        assert(GetMasterLooterThreshold() == 4)
+        UIDropDownMenu_Initialize(PartyMemberFrame1DropDown, PartyFrameDropDown_Initialize, 'MENU')
+        assert(ITEM_QUALITY4_DESC == 'Epic')
+        assert(PartyMemberFrame1DropDown.selectedLootThreshold == ITEM_QUALITY4_DESC)
+        assert(UnitPopupButtons.LOOT_THRESHOLD.text == ITEM_QUALITY4_DESC)
+    "#,
     );
     env.state().borrow_mut().refer_a_friend_linked_guids.clear();
     exec(&env, "assert(not IsReferAFriendLinked('party1'))");
