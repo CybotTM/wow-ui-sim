@@ -1,5 +1,35 @@
 # Explicit startup namespace empty states (staged)
 
+## Era / Anniversary startup extension (source-only)
+
+- [ ] `C_LootHistory.GetNumItems()` returns zero pending a Classic roll-history
+  model; original OnLoad and full-update handlers clear/recycle stale UI rows.
+- [ ] `C_ProductChoice.GetChoices()` returns a fresh empty identifier array pending
+  a product-entitlement catalog; original OnLoad initializes the reward panel,
+  and login/update handlers complete without creating reward alerts.
+- [ ] `C_Engraving.IsEngravingEnabled()` returns false pending engraving availability
+  state; the original rune control OnLoad hides an initially shown control.
+- [ ] Unknown members remain nil on these three Era/Anniversary namespaces, even
+  after exported-constructor reuse. Existing non-strict factories remain unchanged.
+
+Only IsEngravingEnabled has a cached generated signature (non-nil bool).
+GetNumItems and GetChoices are consumer-inferred number/array queries: Classic
+caches omit their generated documentation. These policies are not client defaults.
+
+Profile-only temporary stubs live in `src/era/compat_bootstrap.lua` per the profile
+placement rule; Era and Anniversary share that file. Retire each when its named
+missing system is represented under c_api. Retail's encounter/time API and active
+loot-roll state are not Classic completed-roll/player history; C_PlayerChoice is
+not C_ProductChoice. Mists's pre-existing empty loot/product defaults are not a
+backing model. This extension changes no Mists/Forever/Wrath/ Retail/PTR surface.
+
+`tests/classic_startup_namespaces.rs` loads complete hash-pinned cached consumers
+using `blizzard_ui_addons_dir()`. Five tests cover the four original-handler cases
+plus complete-bootstrap strictness/factory preservation. No tests/builds executed;
+RED at 26877f296 and subsequent GREEN remain predictions. Populated loot history,
+product selection, engraving modes/runes, reporter repair, and full startup
+acceptance are outside this bounded extension.
+
 ## Forever and classic extension (source-only)
 
 Share existing combat-text active-unit selection and spell-overlay membership with
@@ -37,7 +67,8 @@ social-view trees. Only consumer-required dependencies are loaded.
 Preserve the tip's generic namespace member factory, constructor, merger and final
 C_* seed. Only newly published surfaces are strict: C_CombatText and
 C_SpellActivationOverlay in Mists/Era/Anniversary/Forever, plus C_PlayerChoice,
-C_RecentAllies, C_PlayerMentorship, C_SocialUI and C_Flyout in Forever. Keep the
+C_RecentAllies, C_PlayerMentorship, C_SocialUI and C_Flyout in Forever, plus
+C_LootHistory, C_ProductChoice and C_Engraving in Era/Anniversary. Keep the
 exemption inventory in one bootstrap location. Their missing members return nil
 through ordinary lookup without changing membership, including after reusing the
 exported constructor. Other namespaces retain synthesized cached nil-returning

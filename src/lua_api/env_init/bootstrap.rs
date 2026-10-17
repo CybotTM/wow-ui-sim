@@ -43,6 +43,10 @@ pub(crate) fn init_runtime_surface_bootstrap(lua: &mut rilua::Lua) -> crate::Res
         &[
             Val::Bool(classic_combat),
             Val::Bool(ACTIVE == ClientProfile::WowForever),
+            Val::Bool(matches!(
+                ACTIVE,
+                ClientProfile::Era | ClientProfile::Anniversary
+            )),
         ],
     )?;
     Ok(())

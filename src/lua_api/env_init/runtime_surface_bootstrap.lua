@@ -1,5 +1,5 @@
 -- Single publication-scoped exemption inventory; Retail/PTR/Wrath stay unchanged.
-local classicCombat, forever = ...
+local classicCombat, forever, vanilla = ...
 local strictNamespaces = {}
 if classicCombat then
   strictNamespaces.C_CombatText = true
@@ -11,6 +11,11 @@ if forever then
   strictNamespaces.C_PlayerMentorship = true
   strictNamespaces.C_SocialUI = true
   strictNamespaces.C_Flyout = true
+end
+if vanilla then
+  strictNamespaces.C_LootHistory = true
+  strictNamespaces.C_ProductChoice = true
+  strictNamespaces.C_Engraving = true
 end
 for name in pairs(strictNamespaces) do
   local namespace = rawget(_G, name)
