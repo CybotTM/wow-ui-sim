@@ -39,6 +39,7 @@ fn classic_a_original_login_refilter_has_no_fabricated_history_entry() {
         assert(C_CombatLog.SeekToPreviousEntry() == false, 'empty previous validity')
         C_CombatLog._state.currentEntry = 37
         assert(C_CombatLog.GetCurrentEntryInfo() == nil, 'stale cursor is not an entry')
+        assert(CombatLogAdvanceEntry(-1) == false, 'empty legacy advance has no valid entry')
         Blizzard_CombatLog_Refilter()
         assert(CombatLogUpdateFrame.refiltering == false, 'refilter complete')
         assert(CombatLogUpdateFrame:GetScript('OnUpdate') == nil, 'update callback removed')

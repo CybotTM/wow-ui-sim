@@ -56,6 +56,7 @@ fn wrath_unmasked_original_combo_frame_tracks_supplied_target_pool() {
         assert(COMBO_FRAME_LAST_NUM_POINTS == 3)
         assert(ComboFrame:IsShown())
         assert(GetComboPoints('player', 'target') == 3)
+        assert(GetComboPoints('target', 'player') == 0)
         TargetUnit('enemy2')
         ComboFrame_OnEvent(ComboFrame, 'PLAYER_TARGET_CHANGED')
         assert(GetComboPoints('player', 'target') == 0)
