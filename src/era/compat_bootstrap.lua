@@ -170,4 +170,3 @@ if rawget(_G, "SecureMixin") == nil then
     return target
   end
 end
-
