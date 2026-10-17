@@ -198,3 +198,24 @@ fn classic_b_r5_original_startup_keeps_transmog_lod_and_hard_dependencies() {
 fn run_targeted(env: &WowLuaEnv, source: &str) {
     env.exec(source).unwrap();
 }
+
+#[test]
+fn classic_b_r7_original_product_choice_empty_alerts() {
+    let env = env(&[
+        "Blizzard_SharedXML/Classic/SharedUIPanelTemplates.lua",
+        "Blizzard_UIPanels_Game/Classic/ProductChoice.lua",
+    ]);
+    run(
+        &env,
+        r#"
+        local f = CreateFrame('Frame')
+        f.TitleText = f:CreateFontString()
+        ProductChoiceFrame_OnLoad(f)
+        assert(f.selectedPageNum == 1 and f.TitleText:GetText() == RECRUIT_A_FRIEND_REWARDS)
+        for _, event in ipairs({'PLAYER_LOGIN', 'PRODUCT_CHOICE_UPDATE'}) do
+            ProductChoiceFrame_OnEvent(f, event)
+            assert(f.mainAlertFrame == nil and f.secondAlertFrame == nil)
+        end
+    "#,
+    );
+}
