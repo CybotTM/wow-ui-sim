@@ -185,10 +185,6 @@ macro_rules! build_empty_sim_state {
             major_factions: HashMap::new(),
             major_faction_renown_levels: HashMap::new(),
             major_faction_renown_rewards: HashMap::new(),
-            #[cfg(all(
-                feature = "retail-12-0-5",
-                any(feature = "profile-retail", feature = "client-ptr")
-            ))]
             recent_allies: crate::c_api::c_recent_allies::RecentAlliesInput::default(),
             account_wide_reputation_factions: HashSet::new(),
             faction_paragon: HashMap::new(),
@@ -634,7 +630,6 @@ macro_rules! build_empty_sim_state {
             bnet_presence: Default::default(),
             #[cfg(feature = "retail-12-0-5")]
             voice_chat_speak_requests: Vec::new(),
-            #[cfg(feature = "retail-12-0-0")]
             spell_activation_overlays: ::std::collections::HashSet::new(),
             #[cfg(feature = "retail-12-0-0")]
             challenge_completion: Default::default(),

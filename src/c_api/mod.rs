@@ -185,10 +185,6 @@ pub mod container_quest;
 pub use c_quest_log_watches::QuestWatchType;
 #[cfg(feature = "client-wowforever")]
 pub(crate) use c_quest_log_watches::seed_quest_watch_types;
-#[cfg(all(
-    feature = "retail-12-0-5",
-    any(feature = "profile-retail", feature = "client-ptr")
-))]
 pub mod c_recent_allies;
 pub mod c_report_system;
 pub mod c_reputation;
