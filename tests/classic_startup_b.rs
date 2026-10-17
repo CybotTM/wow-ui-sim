@@ -423,4 +423,28 @@ fn classic_b_r18_original_reputation_bar_has_no_retail_watch_fixture() {
         .cloned()
         .collect();
     assert!(errors.is_empty(), "{errors:?}");
+    // A pre-existing supplied snapshot is not replaced by profile seeding.
+    run_targeted(
+        &env,
+        r#"
+        ClassicBSuppliedReputation = {
+            selectedFaction=0, watchedFactionID=72, sortType=0, showLegacy=true,
+            factions={{factionID=72, name='Stormwind', reaction=5,
+                standing=1000, bottom=0, top=3000, isHeader=false,
+                isAccountWide=false, isLegacy=true}},
+        }
+        __wow_reputation_state = ClassicBSuppliedReputation
+    "#,
+    );
+    env.apply_post_load_workarounds();
+    run_targeted(
+        &env,
+        r#"
+        assert(__wow_reputation_state == ClassicBSuppliedReputation)
+        local data = C_Reputation.GetWatchedFactionData()
+        assert(data.factionID == 72 and data.name == 'Stormwind')
+        assert(data.currentStanding == 1000 and not data.isAccountWide)
+        assert(C_Reputation.GetNumFactions() == 1)
+    "#,
+    );
 }

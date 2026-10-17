@@ -11,6 +11,8 @@ Audited startup roots beyond [A](classic-startup-a.md). [Shared shipped strings]
 
 - [ ] R17: Publish only the existing real quest-background getter on Era/Anniversary. Original QuestFrame chooses Parchment for absent material and receives an explicit supplied map value unchanged; do not enable the rest of LIVE_QUEST_GLOBALS.
 
+- [ ] R18: Exclude Retail watched-faction fixture seeding from Era/Anniversary. New state has zero watched ID and empty factions; existing supplied state survives unchanged. Retail/PTR retain all original fixture values. Original ReputationBar receives empty watched data, without inventing REPUTATION_STATUS_BAR_LABEL_ACCOUNT_WIDE.
+
 ## How it works
 
 - [Addon pipeline](../addon-loading-pipeline.md)
@@ -23,6 +25,7 @@ Audited startup roots beyond [A](classic-startup-a.md). [Shared shipped strings]
 - R7/R8/R9: `src/lua_api/workarounds/temporary/classic_startup_defaults.rs` — R7 fresh empty choices, R8 numeric zero loot, R9 nil tracking texture.
 - R11: `src/lua_api/globals/real/legacy_guild_selection.rs` — existing guild-vector selection, zero/invalid/stale→none policy.
 
+- R18: `src/lua_api/workarounds/temporary/reputation_state.rs` — selected-profile population only for newly created fixture state.
 - R17: `src/lua_api/globals/quest_surface/register.rs` — narrow publication of existing selected-quest map getter.
 
 ## Tests asserting this spec
@@ -34,7 +37,7 @@ Audited startup roots beyond [A](classic-startup-a.md). [Shared shipped strings]
 - [ ] GREEN, preservation and final startup capture pending.
 - [ ] R10 shared skills and R14 shared zero-result timers await wrath-fixes landing; no duplicate model/producer introduced.
 - [ ] Replacing temporary domains with real reward/roll/tracking/timer state is required before populated claims. Retire each endpoint when its backing system exists.
-- [ ] R17 quest-material records were separately attributed and authorized; GREEN pending. R18 reputation-fixture scoping is authorized but producer pending. Historical unmasking disclosure remains; R16 Store cursor attribution stays unstaged.
+- [ ] R17 quest-material records were separately attributed and authorized; GREEN pending. R18 reputation-fixture scoping is implemented, GREEN/preservation pending. Historical unmasking disclosure remains; R16 Store cursor attribution stays unstaged.
 
 ## Out of scope
 

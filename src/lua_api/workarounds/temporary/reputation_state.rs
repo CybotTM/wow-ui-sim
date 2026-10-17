@@ -12,10 +12,10 @@ local state = rawget(_G, "__wow_reputation_state")
 if type(state) ~= "table" then
     state = {
         selectedFaction = 0,
-        watchedFactionID = 2590,
+        watchedFactionID = seedRetailReputationFixture and 2590 or 0,
         sortType = Enum.ReputationSortType and Enum.ReputationSortType.None or 0,
         showLegacy = true,
-        factions = {
+        factions = seedRetailReputationFixture and {
             { factionID = 0, name = "The War Within", description = "", reaction = 0, standing = 0, bottom = 0, top = 0, isHeader = true, isCollapsed = false, isChild = false, isAccountWide = false, isLegacy = false },
             { factionID = 2590, name = "Council of Dornogal", description = "The governing body of Dornogal.", reaction = 6, standing = 8200, bottom = 0, top = 12000, isHeader = false, isCollapsed = false, isChild = true, isAccountWide = true, isLegacy = false },
             { factionID = 2570, name = "Hallowfall Arathi", description = "The Arathi settlers of Hallowfall.", reaction = 7, standing = 4500, bottom = 0, top = 21000, isHeader = false, isCollapsed = false, isChild = true, isAccountWide = true, isLegacy = false },
@@ -27,7 +27,7 @@ if type(state) ~= "table" then
             { factionID = 0, name = "Classic", description = "", reaction = 0, standing = 0, bottom = 0, top = 0, isHeader = true, isCollapsed = false, isChild = false, isAccountWide = false, isLegacy = true },
             { factionID = 72, name = "Stormwind", description = "The Kingdom of Stormwind.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true, isAccountWide = false, isLegacy = true },
             { factionID = 47, name = "Ironforge", description = "The Dwarven capital.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true, isAccountWide = false, isLegacy = true },
-        },
+        } or {},
     }
     rawset(_G, "__wow_reputation_state", state)
 end
@@ -238,7 +238,16 @@ end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
-    lua.exec(REPUTATION_STATE_LUA)?;
+    // Era/Anniversary have no selected Retail faction fixture. Keep existing
+    // supplied Lua state intact; only a new state's population is scoped.
+    let seed_retail_fixture = !matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Era
+            | crate::client_profile::ClientProfile::Anniversary
+    );
+    lua.exec(&format!(
+        "local seedRetailReputationFixture = {seed_retail_fixture}\n{REPUTATION_STATE_LUA}"
+    ))?;
     Ok(())
 }
 
