@@ -90,11 +90,14 @@ pub(crate) fn register_interaction_tables(state: &mut LuaState) -> LuaResult<()>
     super::c_cooldown_viewer::register(state)?;
     super::c_neighborhood_initiative::register(state)?;
     super::c_roleset::register(state)?;
-    #[cfg(all(
+    if cfg!(all(
         feature = "retail-12-0-5",
         any(feature = "profile-retail", feature = "client-ptr")
-    ))]
-    super::c_recent_allies::register(state)?;
+    )) || crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::WowForever
+    {
+        super::c_recent_allies::register(state)?;
+    }
+    register_classic_combat_tables(state)?;
     #[cfg(feature = "retail-12-0-5")]
     super::c_scenario_info::register(state)?;
     #[cfg(feature = "client-retail")]
@@ -109,6 +112,21 @@ pub(crate) fn register_interaction_tables(state: &mut LuaState) -> LuaResult<()>
     c_browser::register_c_browser_surface(state)?;
     super::c_sound::register(state)?;
     c_player_interaction_manager::register_c_player_interaction_manager_surface(state)
+}
+
+fn register_classic_combat_tables(state: &mut LuaState) -> LuaResult<()> {
+    use crate::client_profile::{ACTIVE, ClientProfile};
+    if matches!(
+        ACTIVE,
+        ClientProfile::Mists
+            | ClientProfile::Era
+            | ClientProfile::Anniversary
+            | ClientProfile::WowForever
+    ) {
+        super::c_combat_text::register(state)?;
+        super::c_spell_activation_overlay::register(state)?;
+    }
+    Ok(())
 }
 
 #[cfg(feature = "retail-12-0-0")]

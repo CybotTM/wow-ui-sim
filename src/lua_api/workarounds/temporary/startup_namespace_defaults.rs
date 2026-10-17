@@ -69,9 +69,56 @@ if rawget(_G, "C_CharacterServicesPublic") == nil then C_CharacterServicesPublic
 install(C_CharacterServicesPublic, "ShouldSeeControlPopup", function() return false end)
 "#;
 
+// Forever declares these members, but has no mentor membership/eligibility,
+// flyout artwork metadata, combat-text event payload stream, or Recent Allies
+// game-type support policy. Retire each default when the corresponding c_api
+// producer owns that state. Existing spell_flyouts has no texture field; do not
+// reuse its legacy tuple-shaped GetFlyoutInfo as C_Flyout's structured result.
+const FOREVER_DEFAULTS: &str = r#"
+local function install(namespace, name, fn)
+    if rawget(namespace, name) == nil then
+        namespace[name] = fn
+    end
+end
+
+if rawget(_G, "C_Flyout") == nil then C_Flyout = {} end
+-- MayReturnNothing=true: unknown artwork returns no values, not a fake fileID.
+install(C_Flyout, "GetFlyoutTexture", function(flyoutID) end)
+
+if rawget(_G, "C_PlayerMentorship") == nil then C_PlayerMentorship = {} end
+-- PlayerMentorshipConstantsDocumentation.lua:26 documents None = 0.
+install(C_PlayerMentorship, "GetMentorshipStatus", function(playerLocation) return 0 end)
+install(C_PlayerMentorship, "IsActivePlayerConsideredNewcomer", function() return false end)
+install(C_PlayerMentorship, "IsMentorRestricted", function() return true end)
+install(C_PlayerMentorship, "GetMentorLevelRequirement", function() return nil end)
+install(C_PlayerMentorship, "GetMentorRequirements", function() return {}, {}, 0 end)
+
+-- Namespace, active unit and enabled queries are supplied by shared c_api state.
+install(C_RecentAllies, "IsSystemSupported", function() return false end)
+install(C_RecentAllies, "IsInteractionCategoryFilterSupportedForCurrentGameType", function(filter) return false end)
+-- Do not fabricate request completion, readiness, mutations or populated lookups.
+"#;
+
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     if ACTIVE == ClientProfile::Wrath {
         return Ok(());
+    }
+    if matches!(
+        ACTIVE,
+        ClientProfile::Mists
+            | ClientProfile::Era
+            | ClientProfile::Anniversary
+            | ClientProfile::WowForever
+    ) {
+        // Missing combat-text event payload stream. Retire when c_api owns event
+        // payload routing. These four cached docs declare an empty Returns list.
+        lua.exec(
+            r#"
+            if rawget(C_CombatText, "GetCurrentEventInfo") == nil then
+                function C_CombatText.GetCurrentEventInfo() end
+            end
+        "#,
+        )?;
     }
     lua.exec(SESSION_AND_QUEUE_DEFAULTS)?;
     if matches!(
@@ -79,6 +126,9 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
         ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::WowForever
     ) {
         lua.exec(MODERN_DEFAULTS)?;
+    }
+    if ACTIVE == ClientProfile::WowForever {
+        lua.exec(FOREVER_DEFAULTS)?;
     }
     Ok(())
 }

@@ -26,6 +26,24 @@ pub(crate) fn init_shared_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 pub(crate) fn init_runtime_surface_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
-    lua.exec(RUNTIME_SURFACE_BOOTSTRAP_LUA)?;
+    use crate::client_profile::{ACTIVE, ClientProfile};
+    let classic_combat = matches!(
+        ACTIVE,
+        ClientProfile::Mists
+            | ClientProfile::Era
+            | ClientProfile::Anniversary
+            | ClientProfile::WowForever
+    );
+    let bootstrap = lua.load_bytes(
+        RUNTIME_SURFACE_BOOTSTRAP_LUA.as_bytes(),
+        "@runtime_surface_bootstrap.lua",
+    )?;
+    lua.call_function(
+        &bootstrap,
+        &[
+            Val::Bool(classic_combat),
+            Val::Bool(ACTIVE == ClientProfile::WowForever),
+        ],
+    )?;
     Ok(())
 }

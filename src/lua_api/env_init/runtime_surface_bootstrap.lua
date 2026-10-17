@@ -1,3 +1,26 @@
+-- Single publication-scoped exemption inventory; Retail/PTR/Wrath stay unchanged.
+local classicCombat, forever = ...
+local strictNamespaces = {}
+if classicCombat then
+  strictNamespaces.C_CombatText = true
+  strictNamespaces.C_SpellActivationOverlay = true
+end
+if forever then
+  strictNamespaces.C_PlayerChoice = true
+  strictNamespaces.C_RecentAllies = true
+  strictNamespaces.C_PlayerMentorship = true
+  strictNamespaces.C_SocialUI = true
+  strictNamespaces.C_Flyout = true
+end
+for name in pairs(strictNamespaces) do
+  local namespace = rawget(_G, name)
+  if namespace == nil then
+    namespace = {}
+    rawset(_G, name, namespace)
+  end
+  rawset(namespace, "__wow_strict_namespace", true)
+end
+
 local function __wow_noop()
 end
 
@@ -64,6 +87,9 @@ end
 local __wow_namespace_names = setmetatable({}, { __mode = "k" })
 local __wow_namespace_mt = {
   __index = function(t, key)
+    if rawget(t, "__wow_strict_namespace") then
+      return nil
+    end
     local removed = rawget(t, "__wow_ptr_removed_keys") or rawget(t, "__wow_removed_keys")
     if type(removed) == "table" and removed[key] then
       return nil

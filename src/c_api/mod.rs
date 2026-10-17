@@ -86,7 +86,6 @@ pub mod c_club;
 pub(crate) mod c_combat_audio_alert;
 #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
 mod c_combat_log;
-#[cfg(feature = "retail-12-0-0")]
 mod c_combat_text;
 pub(crate) mod c_console;
 pub mod c_cooldown_viewer;
@@ -160,6 +159,7 @@ pub mod c_pet_battles;
 pub mod c_pet_journal_hover;
 pub mod c_photo_sharing;
 pub mod c_ping_secure;
+#[cfg(any(feature = "retail-12-1-0", feature = "client-wowforever"))]
 pub mod c_player_choice;
 #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 pub(crate) mod c_player_info_guid;
@@ -198,7 +198,6 @@ pub mod c_social;
 pub mod c_sound;
 pub mod c_spec;
 pub mod c_spell;
-#[cfg(feature = "retail-12-0-0")]
 pub(crate) mod c_spell_activation_overlay;
 pub mod c_spell_book;
 #[cfg(feature = "retail-12-0-0")]

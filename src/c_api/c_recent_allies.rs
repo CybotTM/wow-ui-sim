@@ -68,18 +68,77 @@ pub struct RecentAllyInteractionContextData {
 
 pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = ensure_namespace(state, "C_RecentAllies")?;
-    #[cfg(feature = "retail-12-1-0")]
-    table_set_rust_fn_static(state, namespace, "SearchRecentAllies", search_recent_allies)?;
-    table_set_rust_fn_static(state, namespace, "GetRecentAllies", get_recent_allies)
+    if cfg!(feature = "retail-12-1-0")
+        || crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::WowForever
+    {
+        table_set_rust_fn_static(state, namespace, "SearchRecentAllies", search_recent_allies)?;
+    }
+    table_set_rust_fn_static(state, namespace, "GetRecentAllies", get_recent_allies)?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::WowForever {
+        table_set_rust_fn_static(state, namespace, "IsSystemEnabled", is_system_enabled)?;
+        table_set_rust_fn_static(
+            state,
+            namespace,
+            "IsRecentAllyByGUID",
+            is_recent_ally_by_guid,
+        )?;
+        table_set_rust_fn_static(
+            state,
+            namespace,
+            "IsRecentAllyByFullName",
+            is_recent_ally_by_full_name,
+        )?;
+    }
+    Ok(())
+}
+
+fn is_recent_ally_by_guid(state: &mut LuaState) -> LuaResult<u32> {
+    query_recent_ally_identity(state, |character| &character.guid)
+}
+
+fn is_recent_ally_by_full_name(state: &mut LuaState) -> LuaResult<u32> {
+    query_recent_ally_identity(state, |character| &character.full_name)
+}
+
+fn query_recent_ally_identity(
+    state: &mut LuaState,
+    identity: fn(&RecentAllyCharacterData) -> &str,
+) -> LuaResult<u32> {
+    use crate::lua_bridge::FromStack;
+    let value = String::from_stack(state, 1)?;
+    let found = {
+        let sim = borrow_state(state)?;
+        sim.recent_allies.enabled
+            && sim
+                .recent_allies
+                .entries
+                .iter()
+                .any(|ally| identity(&ally.character_data) == value)
+    };
+    state.push(Val::Bool(found));
+    Ok(1)
+}
+
+fn is_system_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let enabled = borrow_state(state)?.recent_allies.enabled;
+    state.push(Val::Bool(enabled));
+    Ok(1)
 }
 
 fn get_recent_allies(state: &mut LuaState) -> LuaResult<u32> {
     let entries = {
         let sim = borrow_state(state)?;
-        if !sim.recent_allies.enabled {
+        if !sim.recent_allies.enabled
+            && crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::WowForever
+        {
             return Ok(0);
         }
-        sim.recent_allies.entries.clone()
+        // Forever declares a non-nil array, even for this simulator disabled state.
+        if sim.recent_allies.enabled {
+            sim.recent_allies.entries.clone()
+        } else {
+            Vec::new()
+        }
     };
     push_ally_sequence(state, &entries);
     Ok(1)
@@ -88,7 +147,6 @@ fn get_recent_allies(state: &mut LuaState) -> LuaResult<u32> {
 /// `RecentAlliesSearchInfo`: checked status flags are alternatives (the social
 /// view ORs its filter options); text, status, and interests must all match.
 /// Disabled Recent Allies yields an empty list for the non-nilable result.
-#[cfg(feature = "retail-12-1-0")]
 fn search_recent_allies(state: &mut LuaState) -> LuaResult<u32> {
     let search = AllySearch::read(state, crate::lua_bridge::stack_val(state, 1));
     let entries: Vec<RecentAllyData> = {
@@ -109,14 +167,12 @@ fn search_recent_allies(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "retail-12-1-0")]
 struct AllySearch {
     text: String,
     statuses: [bool; 4],
     has_interests: bool,
 }
 
-#[cfg(feature = "retail-12-1-0")]
 impl AllySearch {
     fn read(state: &mut LuaState, info: Val) -> Self {
         use crate::lua_api::methods::{table_get, val_to_string};

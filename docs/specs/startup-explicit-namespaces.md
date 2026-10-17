@@ -1,5 +1,55 @@
 # Explicit startup namespace empty states (staged)
 
+## Forever and classic extension (source-only)
+
+Share existing combat-text active-unit selection and spell-overlay membership with
+Mists, Era, Anniversary and Forever, whose cached API docs declare those methods.
+Keep Wrath namespace absence. Share the existing local PlayerChoice model with
+Forever; share RecentAllies storage/query code with Forever without publishing it
+to additional classic profiles. Forever's disabled GetRecentAllies returns an
+empty array as declared, rather than the Retail disabled no-result policy.
+Share the existing SearchRecentAllies producer with Forever without changing its
+Retail epoch gate or adding a second search model. No RecentAllies service,
+request completion, readiness or note/pin mutation behavior is added. Forever's
+IsRecentAllyByGUID and IsRecentAllyByFullName query enabled supplied rows by exact
+GUID/full-name identity; disabled input returns false, including retained rows.
+
+Forever-only temporary defaults: no flyout artwork (GetFlyoutTexture returns no
+values); no mentor membership (None), no newcomer status, restricted mentoring,
+no required level, fresh empty achievement arrays plus zero optional count; no
+RecentAllies game-type support or supported filter categories. Social UI reuses
+the existing temporary disabled-service policy with Forever admitted explicitly.
+Mists/Era/Anniversary/Forever GetCurrentEventInfo has no returns pending modeled
+combat-text event routing. These defaults are simulator choices, not native facts.
+
+Retire defaults when c_api models flyout artwork, mentorship membership/eligibility,
+social-UI availability, recent-allies game-type support, or combat-text event
+payload routing. Do not add missing request/mutation no-ops to fill out namespaces.
+
+Ten original-consumer tests are staged: three shared Mists/Era/Anniversary/Forever
+cases and seven Forever-only cases. Tests load complete hash-pinned cached chunks
+from blizzard_ui_addons_dir and assert alert visibility under supplied membership,
+deprecated alias state effects, vehicle unit transitions, hidden choice toggle,
+empty supported-filter list, false mentor/social predicates, cleared unavailable
+flyout texture, disabled/supplied RecentAllies list rows, and text/status-filtered
+social-view trees. Only consumer-required dependencies are loaded.
+
+Preserve the tip's generic namespace member factory, constructor, merger and final
+C_* seed. Only newly published surfaces are strict: C_CombatText and
+C_SpellActivationOverlay in Mists/Era/Anniversary/Forever, plus C_PlayerChoice,
+C_RecentAllies, C_PlayerMentorship, C_SocialUI and C_Flyout in Forever. Keep the
+exemption inventory in one bootstrap location. Their missing members return nil
+through ordinary lookup without changing membership, including after reusing the
+exported constructor. Other namespaces retain synthesized cached nil-returning
+functions. A complete-bootstrap test covers only these strict surfaces; a separate
+C_CVar/constructor control asserts unchanged non-strict behavior. Retail/PTR/Wrath
+receive no strict exemptions. Generic member-factory retirement is out of scope.
+
+Predicted RED/GREEN only; no executed tests/builds. Mists store selected-character errors
+and downstream error-reporter behavior remain separate, unresolved startup gates.
+No clean startup, full-profile or native acceptance is asserted.
+
+
 ## Contract
 
 Replace reliance on removed generic C_* namespace synthesis with explicit,
