@@ -35,7 +35,9 @@ fn original_retail_social_card_receives_supplied_cooldown_and_enable_flag() {
     ] {
         let source = std::fs::read(cache.join(file)).unwrap();
         assert_eq!(format!("{:x}", Sha256::digest(&source)), digest);
-        env.loader_env().exec(std::str::from_utf8(&source).unwrap()).unwrap();
+        env.loader_env()
+            .exec(std::str::from_utf8(&source).unwrap())
+            .unwrap();
     }
     env.exec(
         r#"
@@ -48,7 +50,8 @@ fn original_retail_social_card_receives_supplied_cooldown_and_enable_flag() {
         local start, duration = RafCooldownCard.Cooldown:GetCooldownTimes()
         assert(start == 0 and duration == 0)
     "#,
-    ).unwrap();
+    )
+    .unwrap();
     env.state().borrow_mut().summon_friend_cooldown = SummonFriendCooldown {
         start_time_seconds: 120.0,
         duration_seconds: 600.0,
@@ -62,15 +65,20 @@ fn original_retail_social_card_receives_supplied_cooldown_and_enable_flag() {
         local start, duration = RafCooldownCard.Cooldown:GetCooldownTimes()
         assert(start == 120000 and duration == 600000)
     "#,
-    ).unwrap();
-    env.state().borrow_mut().summon_friend_cooldown.enable_cooldown_timer = false;
+    )
+    .unwrap();
+    env.state()
+        .borrow_mut()
+        .summon_friend_cooldown
+        .enable_cooldown_timer = false;
     env.exec(
         r#"
         FriendsListSocialCardRAFSummonButtonMixin.RefreshCooldown(RafCooldownCard)
         local start, duration = RafCooldownCard.Cooldown:GetCooldownTimes()
         assert(start == 0 and duration == 0)
     "#,
-    ).unwrap();
+    )
+    .unwrap();
     assert!(env.state().borrow().lua_errors.is_empty());
 }
 
@@ -89,7 +97,10 @@ fn raf_cooldown_reads_supplied_start_duration_and_timer_flag() {
     "#,
     )
     .unwrap();
-    env.state().borrow_mut().summon_friend_cooldown.enable_cooldown_timer = false;
+    env.state()
+        .borrow_mut()
+        .summon_friend_cooldown
+        .enable_cooldown_timer = false;
     env.exec(
         r#"
         local start, duration, enabled = C_RecruitAFriend.GetSummonFriendCooldown()
