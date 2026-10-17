@@ -4,7 +4,7 @@
 
 ## [2026-10-16] source | Retail 70448 profile update
 
-[Client profile checkpoint](systems/client-profiles.md#retail-70448-source-and-producer-update--october-16-2026) links exact source identity, private-cache acquisition, public API epoch and producer regressions. Runtime/preservation acceptance remains separate.
+[Client profile checkpoint](systems/client-profiles.md#retail-70448-source-and-producer-update--october-16-2026) links exact source identity, private-cache acquisition, public API epoch and producer regressions. Bounded runtime/preservation acceptance: startup `[]`, 265/265 preservation, 139 newly enabled epoch cases and 23 atlas/aura controls; native/all-profile/full-suite acceptance remains separate.
 
 ## [2026-10-16] documentation | Container, message history and transform label producers
 

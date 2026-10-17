@@ -22,6 +22,12 @@ Client profile bundles select the runtime cache and API epoch exposed by wow-ui-
 - [x] A Carbonite-shaped package with incompatible Retail `Carbonite.toc` and compatible `Carbonite-Camelot.toc` admits the provider through discovery and the startup interface gate before its Info/Notes/Warehouse dependents load.
 - [x] Forever reports version `1.60.1`, build `70374`, and interface `16001` without enabling a retail API epoch or legacy compatibility bootstrap. Implemented metadata matches Gethe `forever` commit `735496de78ebd30ce816a0637982c556987f258c`'s `version.txt` (`1.60.1.70374`) and selected installed product `wow_classic_beta`. Neither establishes a native build date; `Jun 17 2026` and trailing fields remain temporary defaults. Focused manifest and BuildInfo identity tests PASS at runtime source136; [central receipt](../baselines/README.md#verified-scoped-receipts--2026-10-15) owns counts and attribution. Cross-profile/native/full-parent gates remain open. See the [current acquisition checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-15-2026) for bounded runtime evidence.
 
+## Retail 70448 bounded execution
+
+After rebase onto `9c0251fca`, default Retail startup exits 0 with exact `[]` against the isolated 4,026-file installed-build cache. Preservation passes 265/265 (approved batch132, quest82, label/widget51). Newly enabled epoch behavior passes 89 unit/API and 50 integration cases; atlas/aura controls pass 23/23. Default `cargo check --tests` and workspace formatting pass; seven pre-existing unused publication helper warnings remain. No consumer hashes were re-pinned. Historical absence assertions are retained on pre-12.1.5 Retail epochs, not applied to the new current bundle.
+
+Runtime and preservation source `20398a9eb` is production-equivalent to corrected integration source `115761b56`; only unrelated historical test gates and subsequent docs differ. Other-profile/native/GPU/full-suite and the 65 encrypted GlobalStrings rows are not covered. [Profile implementation and isolation notes](../wiki/systems/client-profiles.md#retail-70448-source-and-producer-update--october-16-2026) own the source/cache details.
+
 ## Separate pinned Wrath source restoration
 
 Wrath retains the historical Gethe 3.3.5 source pin in `data/blizzard-ui-builds/wrath.json`, not the installed Mists product. Its separate source snapshot is `~/.cache/wow-ui-sim/wow-ui-source/wrath`, containing `AddOns` and `FrameXML`; Mists/classic and Forever snapshots must not be overwritten.

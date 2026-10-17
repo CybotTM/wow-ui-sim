@@ -58,7 +58,11 @@ The committed CSV/provenance contains 26,069 authenticated unencrypted shipped
 rows; 65 unreadable encrypted-section rows are omitted explicitly, not filled
 with fabricated text. Its WDC5 layout remains `D40F6D96`, with three sections.
 The existing multi-section DB2 reader and multiline-safe repo PHF generator are
-used; the old shared and Forever string tables remain unchanged.
+used; the old shared and Forever string tables remain unchanged. The
+[bounded Retail acceptance](specs/client-profiles.md#retail-70448-bounded-execution)
+records clean isolated startup, all 265 requested preservation cases and executed
+12.1.5 behavior tests after rebase onto `9c0251fca`. No Retail baseline JSON
+previously existed; no other profile's baseline is rewritten.
 
 ## Matching the installed Forever build
 
