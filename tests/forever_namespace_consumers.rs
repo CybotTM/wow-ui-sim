@@ -97,7 +97,8 @@ fn classic_original_action_button_alert_tracks_supplied_proc_membership() {
         for i = 1, 208 do ActionBarActionButtonMixin.UpdateSpellAlert(button) end
         assert(not Alert:IsShown())
     "#).unwrap();
-    let spell: u32 = env.eval("return FixtureSpell").unwrap();
+    let spell: i32 = env.eval("return FixtureSpell").unwrap();
+    let spell = u32::try_from(spell).expect("SETUP: seeded spell ID fits u32");
     env.state()
         .borrow_mut()
         .spell_activation_overlays
