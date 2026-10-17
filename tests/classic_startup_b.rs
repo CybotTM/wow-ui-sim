@@ -375,3 +375,18 @@ fn classic_b_r15_original_combat_log_toc_and_secure_isolation() {
         "assert(rawget(_G, 'classicBSecureOnly') == nil and __secureenv.classicBSecureOnly == 19)",
     );
 }
+
+#[test]
+fn classic_b_r17_original_quest_material_uses_supplied_map() {
+    let env = env(&["Blizzard_UIPanels_Game/Classic/QuestFrame.lua"]);
+    run(&env, "assert(QuestFrame_GetMaterial() == 'Parchment')");
+    {
+        let mut state = env.state().borrow_mut();
+        state.selected_quest_log_id = Some(80002);
+        state
+            .quest_log_entries
+            .background_materials
+            .insert(80002, "Bronze".into());
+    }
+    run(&env, "assert(QuestFrame_GetMaterial() == 'Bronze')");
+}
