@@ -1,10 +1,10 @@
 # Opaque locale contexts
 
-PTR locale-context storage implements the pinned 12.1.5 declarations in `src/c_api/c_intl.rs`. Contexts store identifiers without interpreting them; see [C API architecture](../lua-api.md).
+Retail 12.1.5+ and PTR locale-context storage implements the pinned 12.1.5 declarations in `src/c_api/c_intl.rs`. Contexts store identifiers without interpreting them; see [C API architecture](../lua-api.md).
 
 ## What it must do
 
-- [x] PTR exposes `C_Intl.CreateLocaleContext(locale)` and `GetCurrentLocale()`.
+- [x] The 12.1.5 epoch exposes `C_Intl.CreateLocaleContext(locale)` and `GetCurrentLocale()` on Retail and PTR, including the documented enum constants consumed by its methods.
 - [x] Each constructor call returns an independent userdata with `GetLocale()` and `SetLocale(locale)`.
 - [x] Identifiers including `enUS`, `fr-FR`, and `zh-Hant-TW` are preserved verbatim.
 - [x] Simulator assumption: identifiers must be nonempty and NUL-free. Invalid constructor identifiers error; invalid setter identifiers return false without mutation. Successful setters return true. Nonstring required arguments error.
