@@ -441,6 +441,11 @@ fn assert_party_flow(env: &WowLuaEnv, label: &str, raf_visible: i32) {
         assert(GetMuteStatus('party1', 'party') == false)
         assert(not PartyMemberFrame1Speaker:IsShown())
         assert(not PartyMemberFrame1SpeakerMuted:IsShown())
+        assert(UnitIsTalking('RafFriend') == false)
+        assert(not PartyMemberFrame1SpeakerFrame:IsShown())
+        for _, name in ipairs({'', 'Unknown speaker', 'Jöhn', string.char(255, 0, 128)}) do
+            assert(UnitIsTalking(name) == false)
+        end
         assert(UnitPopupButtons.OPT_OUT_LOOT_TITLE.text ==
             format(OPT_OUT_LOOT_TITLE, UnitPopupButtons.OPT_OUT_LOOT_DISABLE.text))
         local found = 0
@@ -568,6 +573,35 @@ fn original_wrath_party_roots_preserve_master_indices_with_supplied_raf_link() {
         PartyMemberFrame_UpdateVoiceStatus(PartyMemberFrame1)
         assert(PartyMemberFrame1Speaker:IsShown())
         assert(not PartyMemberFrame1SpeakerMuted:IsShown())
+    "#,
+    );
+    env.state().borrow_mut().voice_chat.channels = vec![wow_ui_sim::lua_api::state::VoiceChannel {
+        channel_id: 7,
+        name: "Supplied party voice".into(),
+        channel_type: 1,
+        members: vec![wow_ui_sim::lua_api::state::VoiceMember {
+            member_id: 41,
+            name: "RafFriend".into(),
+            is_active_speaker: true,
+            volume: 1.0,
+        }],
+    }];
+    exec(
+        &env,
+        r#"
+        assert(UnitIsTalking('RafFriend') == true)
+        assert(UnitIsTalking('AnotherFriend') == false)
+        PartyMemberFrame_UpdateVoiceStatus(PartyMemberFrame1)
+        assert(PartyMemberFrame1SpeakerFrame:IsShown())
+    "#,
+    );
+    env.state().borrow_mut().voice_chat.channels[0].members[0].is_active_speaker = false;
+    exec(
+        &env,
+        r#"
+        assert(UnitIsTalking('RafFriend') == false)
+        PartyMemberFrame_UpdateVoiceStatus(PartyMemberFrame1)
+        assert(not PartyMemberFrame1SpeakerFrame:IsShown())
     "#,
     );
     // A second concrete supplied party member must reach the original shown path.
