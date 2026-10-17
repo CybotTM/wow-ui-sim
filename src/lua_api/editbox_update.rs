@@ -95,6 +95,12 @@ fn read_layout_refresh(sim: &Rc<RefCell<SimState>>, id: u64) -> LayoutRefresh {
     let Some(frame) = sim.widgets.get(id) else {
         return LayoutRefresh::Unavailable;
     };
+    let pristine = frame.editbox_presentation.is_none()
+        && frame.text.as_deref().unwrap_or_default().is_empty()
+        && frame.editbox_cursor_pos == 0;
+    if pristine && !sim.widgets.is_ancestor_visible(id) {
+        return LayoutRefresh::Unavailable;
+    }
     let Some(rect) = frame.layout_rect else {
         return LayoutRefresh::Unavailable;
     };
