@@ -20,7 +20,7 @@ fn original_color_manager_bag_quality_uses_default_without_override() {
         assert(ITEM_QUALITY_OVERRIDES[quality] ~= nil, "fixture must reach the override query")
         assert(ColorManager.GetColorDataForBagItemQuality(quality) == expected)
         assert(rawget(C_ColorOverrides, "GetColorOverrideInfo") ~= nil)
-        assert(select("#", C_ColorOverrides.GetColorOverrideInfo(ITEM_QUALITY_OVERRIDES[quality])) == 1)
+        assert(select('#', C_ColorOverrides.GetColorOverrideInfo(ITEM_QUALITY_OVERRIDES[quality])) == 1)
         assert(C_ColorOverrides.GetColorOverrideInfo(ITEM_QUALITY_OVERRIDES[quality]) == nil)
         "#,
     )
