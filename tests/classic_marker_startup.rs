@@ -35,6 +35,13 @@ fn classic_b_marker_state_original_startup_evaluates_selection() {
         marker_errors.is_empty(),
         "original enabled dropdown must evaluate its selection callback without error: {marker_errors:?}"
     );
-    env.exec("assert(type(IsRaidMarkerActive(1)) == 'boolean')")
-        .expect("marker active-state query exists independently of the capability flag");
+    env.exec("for i=1,8 do assert(IsRaidMarkerActive(i) == false) end")
+        .expect("default marker state is explicitly empty simulator policy");
+    env.state()
+        .borrow_mut()
+        .plain_global_inputs
+        .active_raid_markers
+        .insert(3);
+    env.exec("assert(IsRaidMarkerActive(3)); assert(not IsRaidMarkerActive(1)); CompactRaidFrameManager_SetupRaidMarkerDropdown(CompactRaidFrameManager)")
+        .expect("original dropdown selection uses the supplied active marker without placement calls");
 }

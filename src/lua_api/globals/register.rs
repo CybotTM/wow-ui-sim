@@ -335,6 +335,9 @@ fn register_world_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     {
         super::real::publication_12_0_0::register_raid_marker_capability(lua)?;
     }
+    if matches!(ACTIVE, ClientProfile::Era | ClientProfile::Anniversary) {
+        super::real::publication_12_0_0::register_classic_marker_state(lua)?;
+    }
     #[cfg(feature = "retail-12-0-0")]
     super::real::publication_12_0_0::register_all(lua)?;
     #[cfg(feature = "retail-12-0-0")]

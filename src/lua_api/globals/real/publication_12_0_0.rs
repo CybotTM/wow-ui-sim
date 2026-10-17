@@ -3,6 +3,7 @@
 //! clothing shown, empty role/threat/class inputs. No persistence or 3D rendering.
 
 use crate::lua_api::methods::borrow_state;
+use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 use std::collections::{HashMap, HashSet};
@@ -11,6 +12,8 @@ use std::collections::{HashMap, HashSet};
 pub struct PlainGlobalInputs {
     pub collapsing_star_cost: f64,
     pub raid_marker_system_enabled: bool,
+    /// Supplied marker indexes; empty default is simulator policy, not native state.
+    pub active_raid_markers: HashSet<i32>,
     pub showing_cloak: bool,
     pub showing_helm: bool,
     /// Known-unit GUIDs, not selected-unit token preferences.
@@ -30,6 +33,7 @@ impl Default for PlainGlobalInputs {
         Self {
             collapsing_star_cost: 0.0,
             raid_marker_system_enabled: true,
+            active_raid_markers: HashSet::new(),
             showing_cloak: true,
             showing_helm: true,
             lieutenant_guids: HashSet::new(),
@@ -65,6 +69,21 @@ pub(crate) fn register_raid_marker_capability(lua: &mut rilua::Lua) -> LuaResult
         is_raid_marker_system_enabled,
     )?;
     Ok(())
+}
+
+fn is_raid_marker_active(state: &mut LuaState) -> LuaResult<u32> {
+    // Era/Anniversary RaidMarkersDocumentation.lua:48-59: luaIndex -> bool.
+    let index = i32::from_stack(state, 1)?;
+    let active = borrow_state(state)?
+        .plain_global_inputs
+        .active_raid_markers
+        .contains(&index);
+    state.push(Val::Bool(active));
+    Ok(1)
+}
+
+pub(crate) fn register_classic_marker_state(lua: &mut rilua::Lua) -> LuaResult<()> {
+    LuaApiMut::register_function(lua, "IsRaidMarkerActive", is_raid_marker_active)
 }
 
 #[cfg(feature = "retail-12-0-0")]
