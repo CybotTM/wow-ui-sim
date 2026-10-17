@@ -256,3 +256,74 @@ fn classic_b_r9_original_tracking_load_and_update_hide_empty_icon() {
     "#,
     );
 }
+
+#[test]
+fn classic_b_r11_original_guild_initialization_and_row_selection_statements() {
+    let env = env(&[]);
+    let init = statements(
+        "Blizzard_UIPanels_Game/Classic/FriendsFrame.lua",
+        "GuildFrame.notesToggle = 1;",
+        "local currentGuildMOTD",
+    );
+    let click = statements(
+        "Blizzard_UIPanels_Game/Classic/FriendsFrame.lua",
+        "GuildFrame.previousSelectedGuildMember = GuildFrame.selectedGuildMember;",
+        "-- Toggle guild details frame",
+    );
+    run(
+        &env,
+        "GuildFrame = CreateFrame('Frame'); GuildRowB = CreateFrame('Button', 'GuildRowB'); GuildRowB:CreateFontString('GuildRowBName'):SetText('Second')",
+    );
+    run(&env, &init);
+    run(&env, "assert(GetGuildRosterSelection() == 0)");
+    use wow_ui_sim::lua_api::state_types::GuildMember;
+    env.state().borrow_mut().world.guild_members = vec![
+        GuildMember {
+            name: "First".into(),
+            rank_index: 1,
+            online: true,
+        },
+        GuildMember {
+            name: "Second".into(),
+            rank_index: 2,
+            online: true,
+        },
+    ];
+    run(
+        &env,
+        &format!("local self = GuildRowB; self.guildIndex = 2; {click}"),
+    );
+    run(
+        &env,
+        "assert(GetGuildRosterSelection() == 2 and GetGuildRosterInfo(GetGuildRosterSelection()) == 'Second'); assert(GuildFrame.selectedName == 'Second')",
+    );
+    let selected = statements(
+        "Blizzard_UIPanels_Game/Classic/FriendsFrame.lua",
+        "fullName, rank, rankIndex, level, class, zone, note, officernote, online = GetGuildRosterInfo(GetGuildRosterSelection());",
+        "-- If there's a selected guildmember",
+    );
+    let details = statements(
+        "Blizzard_UIPanels_Game/Classic/FriendsFrame.lua",
+        "local displayedName = Ambiguate(fullName, \"guild\");",
+        "if ( online ) then",
+    );
+    run(
+        &env,
+        "for _, name in ipairs({'Name','Level','ZoneText','RankText'}) do GuildFrame:CreateFontString('GuildMemberDetail'..name) end",
+    );
+    run(
+        &env,
+        &format!(
+            "local fullName, rank, rankIndex, level, class, zone, note, officernote, online; {selected}\n{details}"
+        ),
+    );
+    run(
+        &env,
+        "assert(GuildMemberDetailName:GetText() == 'Second'); local _, rank = GetGuildRosterInfo(2); assert(GuildMemberDetailRankText:GetText() == rank)",
+    );
+    run(&env, &init);
+    run(
+        &env,
+        "assert(GetGuildRosterSelection() == 0); SetGuildRosterSelection(-1); assert(GetGuildRosterSelection() == 0); SetGuildRosterSelection(3); assert(GetGuildRosterSelection() == 0)",
+    );
+}
