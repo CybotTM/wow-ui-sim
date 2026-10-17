@@ -34,6 +34,14 @@ Use `scripts/diff-lua-errors.sh BASELINE NEW` to compare message sets and
 report regressed/fixed errors. The Mists CI guard uses this for addon-induced
 error counts and release proof diagnostics.
 
+## Era / Anniversary — current baseline, 2026-10-17
+
+At `781a26fef` (Classic B merged on top of Classic A and Retail 70448), both profiles report **24 records / 56 occurrences, exit1, FAIL**. The JSON is the byte-exact stdout captured by the rebase gates; each `.meta.json` holds the details. Open items:
+- R20: `ShouldKnowUnitHealth` at `UnitFrame.lua:737` is missing. The producer is held for a user decision, and its tests are off master. The `CombatFeedback` nil record is downstream of R20.
+- The skill and timer pairs are blocked on R10/R14, which depend on wrath-fixes.
+
+Candidate C removed the StoreUI cursor pair. The earlier counts (92/98 below, then 36/38 after Classic A) are historical.
+
 ## Era / Anniversary — actual acquisition and startup, 2026-10-16
 
 | Profile | Own cache | Startup lua-errors |
