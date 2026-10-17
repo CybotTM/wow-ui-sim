@@ -299,6 +299,8 @@ macro_rules! build_empty_sim_state {
             unit_raid_target_icons: HashMap::new(),
             sound_manager: $runtime.sound_manager,
             last_sound_kit_requested: $runtime.last_sound_kit_requested,
+            #[cfg(feature = "client-wrath")]
+            last_sound_name_requested: None,
             cooldown_viewer_cooldowns: Default::default(),
             #[cfg(feature = "retail-12-0-0")]
             cooldown_viewer_availability: Default::default(),

@@ -413,6 +413,9 @@ pub struct SimState {
     pub weapon_enchants: [Vec<crate::c_api::weapon_enchants::WeaponEnchant>; 3],
     pub sound_manager: Option<SoundManager>,
     pub last_sound_kit_requested: Option<u32>,
+    /// Last legacy string bytes, including unknown/ambiguous names; no playback implied.
+    #[cfg(feature = "client-wrath")]
+    pub last_sound_name_requested: Option<Vec<u8>>,
     /// `C_CooldownViewer` entries keyed by cooldownID; empty until populated.
     #[cfg(feature = "retail-12-0-0")]
     pub encounter_policy: crate::c_api::c_instance_encounter::EncounterPolicy,
