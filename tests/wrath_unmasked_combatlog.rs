@@ -14,6 +14,9 @@ fn wrath_unmasked_original_empty_refilter_clears_and_completes() {
     let ui = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
     env.set_screen_mode(ScreenKind::Game);
     env.state().borrow_mut().addon_base_paths = vec![ui.clone()];
+    // Wrath's main UI is a separate FrameXML TOC, not an AddOns node.
+    let framexml = wow_ui_sim::client_profile::blizzard_ui_framexml_toc().unwrap();
+    wow_ui_sim::loader::load_addon(&env.loader_env(), &framexml).unwrap();
     for addon in discover_blizzard_startup_addons_for_screen(&ui, ScreenKind::Game) {
         load_startup_addon(&env.loader_env(), &addon.toc_path, addon.kind, None)
             .unwrap_or_else(|error| panic!("load {}: {error}", addon.name));
