@@ -1,6 +1,6 @@
 # Explicit startup namespace empty states (staged)
 
-## Era / Anniversary startup extension (source-only)
+## Era / Anniversary startup extension
 
 - [ ] `C_LootHistory.GetNumItems()` returns zero pending a Classic roll-history
   model; original OnLoad and full-update handlers clear/recycle stale UI rows.
@@ -25,10 +25,48 @@ backing model. This extension changes no Mists/Forever/Wrath/ Retail/PTR surface
 
 `tests/classic_startup_namespaces.rs` loads complete hash-pinned cached consumers
 using `blizzard_ui_addons_dir()`. Five tests cover the four original-handler cases
-plus complete-bootstrap strictness/factory preservation. No tests/builds executed;
-RED at 26877f296 and subsequent GREEN remain predictions. Populated loot history,
-product selection, engraving modes/runes, reporter repair, and full startup
-acceptance are outside this bounded extension.
+plus complete-bootstrap strictness/factory preservation. Tests-only Era RED at
+fbf25a24d reproduced missing C_LootHistory at LootHistory.lua:55, C_ProductChoice
+at ProductChoice.lua:63 (OnLoad and dispatched events), C_Engraving at
+PaperDollFrame.lua:951, and the absent raw namespace preservation control.
+Producer GREEN and sealed startup receipts are recorded separately after execution.
+Populated loot history, product selection, engraving modes/runes, reporter repair,
+and full startup acceptance are outside this bounded extension.
+
+### Explicit consumer exclusions
+
+`Blizzard_UIPanels_Game/Classic/ContainerFrame_Shared.lua:54,95,315-316,1078,1088-1089,1111`
+bag/rune events and bag-generation paths remain unsupported:
+`C_Engraving.GetEngravingModeEnabled`, `GetCurrentRuneCast`, and `RefreshRunesList`
+remain nil. The first two are called without an availability guard;
+`alwaysShowRuneIcons=1` can reach RefreshRunesList even with availability false.
+Forced engraving UI and PaperDoll engraving interaction paths also remain excluded.
+`Blizzard_SettingsDefinitions_Frame/Classic/InterfaceOverrides.lua:136` uses
+IsEngravingEnabled and skips its setting when false; that is not bag/rune coverage.
+
+### Revision-pinned startup comparisons
+
+Units are unique records / total occurrences, not independent root causes.
+Current comparison master **972eef0bed0dd81c2f2529d64366e35563dd7320** has
+**Era 36/38 and Anniversary 36/38**. Each contains six affected loot/product
+records (three primary, three mirrors), no engraving missing-namespace record,
+and no ScriptErrors.lua:83 record. Removing only those six gives conditional
+**30/32**, not a measured combined master + branch result.
+
+The **historical 92/98** approved baselines (both blob SHA-256
+`2cf8194055fa25eb3aae79882b450671904e9febab0dd5335f12bca0b4db8b1b`)
+would similarly become **86/92** if unrelated records stayed unchanged. These
+historical numbers are not the current master comparison.
+
+The supplied wrath-fixes **26877f29636686760594a95ef9a3c63747fd8984** captures
+are **95/150** for both profiles. Eight affected records (four primary failures
+plus four Lua Error mirrors) predict **87/142** with reporter count held fixed;
+if one reporter occurrence disappears per primary, **87/138** (reporter 50→46).
+Those conditional branch totals versus current master are **+51/+104** and
+**+51/+100**, respectively, not measured stage regressions or combined-branch
+predictions. Historical branch-versus-92/98 arithmetic **-5/+40** applies only
+to that older comparison. Execution must compare sealed branch startups to the
+supplied captures at 26877f296, not substitute master's different baseline.
 
 ## Forever and classic extension (source-only)
 
