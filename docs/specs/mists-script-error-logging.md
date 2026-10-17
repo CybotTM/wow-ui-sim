@@ -19,7 +19,12 @@ logging, not native logging services or priority semantics.
 `tests/mists_script_error_logging.rs` loads the complete hash-pinned original
 ScriptErrors chunk, invokes its installed handler, and asserts exactly one
 formatted console message and delivery of the original error to a listener.
-Behavioral RED/GREEN and the Mists startup comparison remain pending.
+Behavioral RED failed at original line 83 on the missing namespace. GREEN
+passes against producer `c9594ed03`: exactly one console message, callback
+delivery, and exactly the deliberate rendered error, with no secondary error.
+Five namespace controls also pass. Mists startup returns to the merge-base
+capture's exact two StoreUI records/two occurrences; the secondary ScriptErrors
+record disappears. This pre-rebase result does not claim current-master parity.
 
 ## Limits
 
