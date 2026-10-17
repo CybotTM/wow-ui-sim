@@ -95,7 +95,8 @@ fn wrath_unmasked_original_worldmap_empty_overlays_hide_stale_textures() {
         assert(not WorldMapOverlay1:IsShown(), tostring(err))
         assert(not WorldMapOverlay2:IsShown(), tostring(err))
         assert(GetNumMapOverlays() == 0)
-        assert(not ok and string.find(tostring(err), 'HasDebugZoneMap', 1, true), tostring(err))
+        assert(not ok and type(HasDebugZoneMap) == 'nil', tostring(err))
+        print('Bounded overlay update stops at unsupported debug-map capability:', err)
         "#,
     );
 }

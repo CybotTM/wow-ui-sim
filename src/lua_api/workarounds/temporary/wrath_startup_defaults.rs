@@ -7,7 +7,15 @@ use rilua::{LuaApiMut, LuaResult, Val};
 
 pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetQuestTimers", empty_quest_timers)?;
+    LuaApiMut::register_function(lua, "GetNumMapOverlays", empty_map_overlay_count)?;
     Ok(())
+}
+
+// Missing system: legacy discovered-map overlay catalog. No supplied overlays
+// means zero; retire when a map-overlay model owns count and records together.
+fn empty_map_overlay_count(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
 }
 
 // No timed-quest model exists: empty domain means zero values, never one nil.
