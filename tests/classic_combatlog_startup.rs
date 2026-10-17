@@ -33,17 +33,17 @@ fn classic_a_original_login_refilter_has_no_fabricated_history_entry() {
     assert!(history_errors.is_empty(), "{history_errors:?}");
     env.exec(
         r#"
-        assert(C_CombatLog.GetEntryCount() == 0)
-        assert(C_CombatLog.GetCurrentEntryInfo() == nil)
-        assert(C_CombatLog.SeekToNewestEntry() == false)
-        assert(C_CombatLog.SeekToPreviousEntry() == false)
+        assert(C_CombatLog.GetEntryCount() == 0, 'empty count')
+        assert(C_CombatLog.GetCurrentEntryInfo() == nil, 'empty entry')
+        assert(C_CombatLog.SeekToNewestEntry() == false, 'empty newest validity')
+        assert(C_CombatLog.SeekToPreviousEntry() == false, 'empty previous validity')
         C_CombatLog._state.currentEntry = 37
-        assert(C_CombatLog.GetCurrentEntryInfo() == nil)
+        assert(C_CombatLog.GetCurrentEntryInfo() == nil, 'stale cursor is not an entry')
         Blizzard_CombatLog_Refilter()
-        assert(CombatLogUpdateFrame.refiltering == false)
-        assert(CombatLogUpdateFrame:GetScript('OnUpdate') == nil)
-        local progress = assert(getfenv(Blizzard_CombatLog_Refilter).CombatLogQuickButtonFrameProgressBar)
-        assert(not progress:IsShown())
+        assert(CombatLogUpdateFrame.refiltering == false, 'refilter complete')
+        assert(CombatLogUpdateFrame:GetScript('OnUpdate') == nil, 'update callback removed')
+        local progress = assert(getfenv(Blizzard_CombatLog_Refilter).CombatLogQuickButtonFrameProgressBar, 'progress in original function environment')
+        assert(not progress:IsShown(), 'original progress hidden')
         "#,
     )
     .expect("empty Classic history never fabricates a valid event from a cursor; populated replay is policy-blocked");
