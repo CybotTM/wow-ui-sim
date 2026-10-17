@@ -17,7 +17,7 @@ Audited startup roots beyond [A](classic-startup-a.md). [Shared shipped strings]
 ## Implementation inventory
 
 - R5: `src/loader/mod.rs` — selected-profile implicit startup roots.
-- R15: `src/loader/addon.rs` — selected-profile secure replay classification (producer pending).
+- R15: `src/loader/addon.rs` — Mists/Era/Anniversary CombatLogBase remains public-only.
 - R7/R8/R9: `src/lua_api/workarounds/temporary/classic_startup_defaults.rs` — R7 fresh empty choices, R8 numeric zero loot, R9 nil tracking texture.
 - R11: `src/lua_api/globals/real/legacy_guild_selection.rs` — existing guild-vector selection, zero/invalid/stale→none policy.
 
