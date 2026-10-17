@@ -52,6 +52,12 @@ fn statements(file: &str, start: &str, end: &str) -> String {
 
 #[test]
 fn classic_b_r2_original_quest_count_statements() {
+    assert_eq!(wow_ui_sim::global_strings::GLOBAL_STRINGS.len(), 19_624);
+    assert_eq!(
+        wow_ui_sim::global_strings::get_global_string("OPTION_TOOLTIP_HD_TEXTURES"),
+        None,
+        "absent shipped tooltip must not be invented or borrowed"
+    );
     let env = env(&[]);
     run(
         &env,
