@@ -219,3 +219,23 @@ fn classic_b_r7_original_product_choice_empty_alerts() {
     "#,
     );
 }
+
+#[test]
+fn classic_b_r8_original_loot_history_empty_recycles_real_frames() {
+    let env = env(&["Blizzard_FrameXML/Classic/LootHistory.lua"]);
+    run(
+        &env,
+        r#"
+        local f = CreateFrame('Frame')
+        LootHistoryFrame_OnLoad(f)
+        assert(#f.itemFrames == 0 and #f.usedPlayerFrames == 0)
+        local row, player = CreateFrame('Button'), CreateFrame('Button')
+        row:Show(); player:Show(); player.itemIdx = 1; player.playerIdx = 1
+        f.itemFrames[1] = row; f.usedPlayerFrames[1] = player
+        LootHistoryFrame_OnEvent(f, 'LOOT_HISTORY_FULL_UPDATE')
+        assert(not row:IsShown() and not player:IsShown())
+        assert(#f.usedPlayerFrames == 0 and f.unusedPlayerFrames[1] == player)
+        assert(player.itemIdx == nil and player.playerIdx == nil)
+    "#,
+    );
+}
