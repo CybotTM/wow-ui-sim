@@ -62,11 +62,11 @@ Behavioral RED preceded producers. Initial closure/missing-API failures were kep
 separate; [generic intrinsic](xml-intrinsic-tags.md), [widget values](xml-widget-values.md),
 [material](quest-background-material.md), [temporary inputs](quest-progress-requirements-empty.md)
 and [currency projection](quest-reward-currency-panel.md) own those prerequisites.
-Saved profile GREEN and latest-base acceptance are distinguished in the receipt.
+Both latest-base profile matrices pass; the [receipt](../baselines/quest-lifecycle.md#latest-base-integration-proof--2026-10-17)
+binds source revisions and keeps independent verification/merge separate.
 
 ## Known gaps (current cycle)
 
-- [ ] Close the latest-base quest/startup/B5 integration gate in the execution receipt.
 - [ ] Non-target profile runtime control remains unexecuted; not part of this two-profile matrix.
 
 ## Out of scope

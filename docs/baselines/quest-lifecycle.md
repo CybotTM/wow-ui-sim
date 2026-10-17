@@ -76,13 +76,32 @@ The old branch-base Forever10-record/14-occurrence comparison is **historical an
 superseded**. It predates master's gamepad fix `03e1ce7d3`; it is not final acceptance.
 No baseline was rewritten to bless errors. Rebased Forever is clean `[]`.
 
-## Current integration gate
+## Latest-base integration proof — 2026-10-17
 
-Master advanced to `275f9f09b` with the approved batch/B5. The saved checkpoint above
-is not acceptance on that later base. Rebase/rebuild and repeat Retail82/Forever81,
-both exact clean startups, plus the approved ledger's B5 Retail cases
-(`currency_displayed_indices` two; `currency_watched_mutations` one). Main's verifier
-then owns final acceptance.
+Rebased onto `275f9f09b0ca94fa33284fa8cbbdf436b047903d` with the approved batch/B5.
+The only conflict was `src/c_api/mod.rs`: retained Retail `currency_list` and quest
+module declarations. Retail build/test source is
+`d674187447cdedacf47c04bf7a21fac2b9383fb1`; Forever source is
+`142ea9d73111206f0a9ec16743c1e73f91122305`. Their only differences are three quest
+spec documents; runtime and test trees are identical. No preserved checkpoint was
+substituted for these rebuilt executions.
+
+| Required gate | Result | Proof level |
+|---|---|---|
+| Retail quest component | 82/82 PASS, 34.37s | Exact saved case identities, zero failed/ignored/filtered |
+| Forever quest component | 81/81 PASS, 44.64s | Exact saved case identities, zero failed/ignored/filtered |
+| Retail and Forever startup | Both `[]`, exit0 | Separate sealed `wow-sim` executions; Forever matches master baseline |
+| Approved B5 Retail preservation | 3/3 PASS, 18.32s | Two `currency_displayed_indices`, one `currency_watched_mutations`; exact ledger names |
+
+Same bounded build/runtime features and CVar isolation described above. Toolchain:
+Arch Cargo/rustc 1.99.0. Evidence under the private root:
+
+- `batch-rebased-green-retail-20261017t001934543394z/`: `quest-component-20261017t003011678462z/quest/`, `b5-component-20261017t003103034867z/b5-retry-2/`, `startup/`.
+- `batch-rebased-green-wowforever-20261017t004055564241z/`: `quest-component-20261017t005036355527z/quest/`, `startup/`.
+- `integration-275-coverage.json` binds case identities, sealed artifacts, source equality and clean startup receipts; `proof-ledger.json` preserves command attribution.
+
+These satisfy the requested implementer integration gates. Main's independent
+verifier and merge remain pending; this is not whole-parent or native acceptance.
 
 ## Limits
 

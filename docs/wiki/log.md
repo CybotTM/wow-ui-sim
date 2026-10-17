@@ -1,3 +1,7 @@
+## [2026-10-17] evidence | Quest lifecycle latest-base implementer gates
+
+[Owning receipt](../baselines/quest-lifecycle.md#latest-base-integration-proof--2026-10-17) records rebuilt Retail82/Forever81, both clean startups and three exact B5 Retail preservation cases after rebase onto `275f9f09b`. Runtime/test trees match across the two documentation-separated build revisions. Independent verification/merge and broader/native acceptance remain separate.
+
 ## [2026-10-16] evidence | Approved batch bounded builds and original consumers
 
 [Proof owner](../baselines/approved-batch-2026-10-16.md) records separately attributed Retail/Wrath RED/GREEN/preservation, clean Retail startup and unchanged failing Wrath inventory. [[simple-html]] documents shared structured layout and XML/pointer fixture boundaries. CheckButton numeric input is local; strings and shared boolean extraction remain unchanged. T4 original Wrath sound consumers and final verifier gates remain open.
