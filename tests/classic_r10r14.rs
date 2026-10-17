@@ -63,6 +63,8 @@ fn r14_original_quest_timer_events_hide_empty_domain() {
     run_consumer(
         &env,
         r#"
+        -- Blizzard_FrameXMLBase/Vanilla/Constants.lua:86, shipped Classic row.
+        MAX_QUESTS = 20
         local timer = CreateFrame('Frame', 'ResidualQuestTimer', UIParent)
         Mixin(timer, QuestTimerMixin)
         for i = 1, MAX_QUESTS do
