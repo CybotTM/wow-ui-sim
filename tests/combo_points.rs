@@ -145,14 +145,24 @@ fn combo_points_native_frame_updates_with_the_cvar_enabled() {
         assert(ComboFrame and ComboFrame.maxComboPoints)
         assert(ComboFrame:IsEventRegistered('PLAYER_TARGET_CHANGED'))
         TargetUnit('enemy1')
+        -- Current pinned Camelot consumer handles events through its mixin;
+        -- the superseded ComboFrame_Update/COMBO_FRAME_LAST_NUM_POINTS globals
+        -- are not part of this shipped consumer.
+        local function filled_points()
+            local count = 0
+            for _, point in ipairs(ComboFrame.ComboPoints) do
+                if point:IsShown() and point.isFull then count = count + 1 end
+            end
+            return count
+        end
         A_Admin.SetPlayerPower(3, 5, Enum.PowerType.ComboPoints)
-        ComboFrame_Update(ComboFrame)
+        FireEvent('PLAYER_ENTERING_WORLD')
         assert(ComboFrame:IsShown())
-        assert(COMBO_FRAME_LAST_NUM_POINTS == 3)
+        assert(filled_points() == 3)
         A_Admin.SetPlayerPower(0, 5, Enum.PowerType.ComboPoints)
-        ComboFrame_Update(ComboFrame)
+        FireEvent('PLAYER_ENTERING_WORLD')
         assert(not ComboFrame:IsShown())
-        assert(COMBO_FRAME_LAST_NUM_POINTS == 0)
+        assert(filled_points() == 0)
         "#,
     )
     .expect("unchanged native ComboFrame consumes zero and nonzero modeled values");

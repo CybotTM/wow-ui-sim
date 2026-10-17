@@ -41,6 +41,8 @@ Runtime RED exists in `/tmp/forever-addon-audit/batch-combo-error-transition.jso
 
 ## Known gaps (current cycle)
 
+- [ ] Current-cache preservation: the old original-frame fixture calls removed `ComboFrame_Update` and reads obsolete `COMBO_FRAME_LAST_NUM_POINTS`. It fails identically on retained pre-change fd46b7a9a and current 1c3b548a7 libraries. The pinned `Blizzard_UnitFrame/Camelot/ComboFrame.lua` instead handles world-entry through `ComboFrameMixin:OnEvent` and updates pooled point states. The test now dispatches that original event and checks shown/filled points for3 then0; no vendor or producer change. Targeted GREEN pending.
+
 - [ ] Verify affected addon paths under per-process CVar isolation; the shared-CVar baseline is invalidated and cannot provide this proof.
 - [ ] Native PvP/secret-return semantics, nonplayer ownership, and combat generation/consumption remain unmodeled; affected workflows must remain explicit gaps.
 
