@@ -37,21 +37,13 @@ fn classic_a_original_login_refilter_has_no_fabricated_history_entry() {
         assert(C_CombatLog.GetCurrentEntryInfo() == nil)
         assert(C_CombatLog.SeekToNewestEntry() == false)
         assert(C_CombatLog.SeekToPreviousEntry() == false)
-        C_CombatLog._state.entries = {
-            {123, 'UNIT_DIED', false, 'source-guid', 'Source', 0, 0, 'dest-guid', 'Destination', 0, 0},
-            {456, 'PARTY_KILL', false, 'source-guid', 'Source', 0, 0, 'dest-guid', 'Destination', 0, 0},
-        }
-        assert(C_CombatLog.SeekToNewestEntry())
-        local time, event = C_CombatLog.GetCurrentEntryInfo()
-        assert(time == 456 and event == 'PARTY_KILL')
-        assert(C_CombatLog.SeekToPreviousEntry())
-        time, event = C_CombatLog.GetCurrentEntryInfo()
-        assert(time == 123 and event == 'UNIT_DIED')
-        assert(not C_CombatLog.SeekToPreviousEntry())
-        C_CombatLog.ClearEntries()
+        C_CombatLog._state.currentEntry = 37
         assert(C_CombatLog.GetCurrentEntryInfo() == nil)
-        Blizzard_CombatLog_RefilterUpdate()
+        Blizzard_CombatLog_Refilter()
+        assert(CombatLogUpdateFrame.refiltering == false)
+        assert(CombatLogUpdateFrame:GetScript('OnUpdate') == nil)
+        assert(not CombatLogQuickButtonFrameProgressBar:IsShown())
         "#,
     )
-    .expect("public Classic history projects actual supplied tuples and empty history, never cursor zero");
+    .expect("empty Classic history never fabricates a valid event from a cursor; populated replay is policy-blocked");
 }
