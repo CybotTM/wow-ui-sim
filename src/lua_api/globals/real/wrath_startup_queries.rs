@@ -10,6 +10,7 @@ const OFFHAND_SLOT: i32 = 17;
 const SIMULATED_RAID_MIN_COMPANIONS: usize = 6;
 
 pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_legacy_friend_count(lua)?;
     LuaApiMut::register_function(lua, "GetTrackedAchievements", get_tracked_achievements)?;
     LuaApiMut::register_function(lua, "OffhandHasWeapon", offhand_has_weapon)?;
     LuaApiMut::register_function(lua, "GetTrainerServiceTypeFilter", get_trainer_filter)?;
@@ -19,6 +20,18 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     // unrelated WoWLabs matchmaking party used by the earlier registration.
     LuaApiMut::register_function(lua, "IsPartyLeader", is_party_leader)?;
     crate::lua_api::workarounds::wrath_startup_defaults::register_all(lua)?;
+    Ok(())
+}
+
+fn register_legacy_friend_count(lua: &mut rilua::Lua) -> crate::Result<()> {
+    // The namespace owns social_friends reads; Wrath consumes a two-value tuple.
+    lua.exec(
+        r#"
+        function GetNumFriends()
+            return C_FriendList.GetNumFriends(), C_FriendList.GetNumOnlineFriends()
+        end
+        "#,
+    )?;
     Ok(())
 }
 
