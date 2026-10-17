@@ -24,6 +24,12 @@ original CVar stat/hash remained unchanged. Runtime limits: 4GiB, CPU100%, 86s.
 This replaces the stale two-record JSON, not a native-parity, current-HEAD,
 GUI, full-suite, or all-profile acceptance. External cache inputs were not fully sealed.
 
+Re-confirmed on 2026-10-16 at `039026c8c` (master after the EditBox cursor
+policy candidate C merge): **0 records / 0 occurrences, exit0**. Between
+`c8d79f3bf` and that merge, master's Mists startup emitted the StoreUISecure
+`OnCursorChanged` pair (2 records), so the `[]` file was stale for that range.
+Independent verifier evidence: `/home/osso/.local/state/wow-ui-sim/verification/mists-store-final/report.md`.
+
 Use `scripts/diff-lua-errors.sh BASELINE NEW` to compare message sets and
 report regressed/fixed errors. The Mists CI guard uses this for addon-induced
 error counts and release proof diagnostics.
