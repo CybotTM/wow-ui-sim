@@ -37,5 +37,6 @@ fn mists_original_script_error_handler_logs_and_delivers_message() {
         1,
         "original error handler must log exactly once"
     );
-    assert!(state.lua_errors.is_empty(), "{:?}", state.lua_errors);
+    assert_eq!(state.lua_errors.len(), 1, "{:?}", state.lua_errors);
+    assert!(state.lua_errors[0].starts_with("Lua Error: mists-log-fixture\n"));
 }
