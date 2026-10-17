@@ -16,11 +16,12 @@ Only IsEngravingEnabled has a cached generated signature (non-nil bool).
 GetNumItems and GetChoices are consumer-inferred number/array queries: Classic
 caches omit their generated documentation. These policies are not client defaults.
 
-Classic B's `workarounds/temporary/classic_startup_defaults.rs` owns the two
-empty loot/product queries; the Era/Anniversary registration gate is shared.
-Their superseded Lua paths were removed during integration. Engraving availability
-remains in `src/era/compat_bootstrap.lua`; strict namespace policy remains in the
-runtime bootstrap. Retire each default when its named system is modeled under c_api. Retail's encounter/time API and active
+`workarounds/temporary/classic_startup_defaults.rs` owns the empty loot/product
+queries and engraving availability; the Era/Anniversary registration gate is shared.
+Their superseded Lua paths were removed during integration. The engraving block
+was relocated unchanged from `src/era/compat_bootstrap.lua` on 2026-10-17, retaining
+its rawget guards, missing-system/retirement comment and false policy. Strict
+namespace policy remains in the runtime bootstrap. Fresh Era namespace proof is pending. Retire each default when its named system is modeled under c_api. Retail's encounter/time API and active
 loot-roll state are not Classic completed-roll/player history; C_PlayerChoice is
 not C_ProductChoice. Mists's pre-existing empty loot/product defaults are not a
 backing model. This extension changes no Mists/Forever/Wrath/ Retail/PTR surface.

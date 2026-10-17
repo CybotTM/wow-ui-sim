@@ -171,13 +171,3 @@ if rawget(_G, "SecureMixin") == nil then
   end
 end
 
--- ─── Temporary vanilla startup namespace defaults ─────────────────────────
--- Era + Anniversary. Classic product choices and loot history are registered
--- by workarounds/temporary/classic_startup_defaults.rs, not duplicated here.
--- Missing system: engraving feature availability. Retire when c_api owns that
--- availability state. EngravingInfoDocumentation.lua:179-185 declares
--- IsEngravingEnabled() -> value:bool (non-nil). False is our temporary policy.
-if rawget(_G, "C_Engraving") == nil then C_Engraving = {} end
-if rawget(C_Engraving, "IsEngravingEnabled") == nil then
-  function C_Engraving.IsEngravingEnabled() return false end
-end
