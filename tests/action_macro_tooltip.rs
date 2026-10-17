@@ -73,7 +73,7 @@ fn spell_action_texture_queries_remain_nonempty_and_equal() {
     .unwrap();
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn action_macro_tooltip_tracks_edits_and_directive_boundaries() {
     let env = WowLuaEnv::new().unwrap();
@@ -109,7 +109,7 @@ fn action_macro_tooltip_tracks_edits_and_directive_boundaries() {
     assert!(env.state().borrow().running_macro.is_none());
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-5")]
 #[test]
 fn action_macro_tooltip_slot_mutations_clear_old_associations() {
     let env = WowLuaEnv::new().unwrap();

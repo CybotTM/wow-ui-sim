@@ -330,7 +330,7 @@ fn test_patch_12_1_cooldown_viewer_sound_enum() {
     assert_eq!(result, "ok");
 }
 
-#[cfg(feature = "retail-12-1-5")]
+#[cfg(feature = "client-ptr")]
 #[test]
 fn test_patch_12_1_5_get_build_info_uses_pinned_ptr_identity() {
     let env = WowLuaEnv::new().unwrap();
