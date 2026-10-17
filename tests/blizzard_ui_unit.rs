@@ -11,7 +11,7 @@ use tooltip_full_env_helpers::{refresh_aura_frames, setup_full_env};
 
 #[test]
 fn original_color_manager_bag_quality_uses_default_without_override() {
-    let env = setup_full_env();
+    let env = tooltip_full_env_helpers::load_full_env_without_post_load();
     env.exec(
         r#"
         local quality = Enum.ItemQuality.Rare

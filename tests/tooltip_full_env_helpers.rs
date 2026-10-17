@@ -42,16 +42,16 @@ const TOOLTIP_TEST_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
     ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
-    (
-        "Blizzard_StaticPopup_Game",
-        "Blizzard_StaticPopup_Game.toc",
-    ),
+    ("Blizzard_StaticPopup_Game", "Blizzard_StaticPopup_Game.toc"),
     ("Blizzard_TransmogShared", "Blizzard_TransmogShared.toc"),
     ("Blizzard_GameMenuEsc", "Blizzard_GameMenuEsc.toc"),
     ("Blizzard_Communities", "Blizzard_Communities_Mainline.toc"),
     ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
-    ("Blizzard_ManagedFrameSystem", "Blizzard_ManagedFrameSystem_Mainline.toc"),
+    (
+        "Blizzard_ManagedFrameSystem",
+        "Blizzard_ManagedFrameSystem_Mainline.toc",
+    ),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
     ("Blizzard_BuffFrame", "Blizzard_BuffFrame.toc"),
@@ -88,6 +88,15 @@ const TOOLTIP_TEST_ADDONS: &[(&str, &str)] = &[
 ];
 
 pub fn setup_full_env() -> WowLuaEnv {
+    let env = load_full_env_without_post_load();
+    env.apply_post_load_workarounds();
+    fire_startup_events(&env);
+    wow_ui_sim::startup::process_pending_timers(&env);
+    wow_ui_sim::startup::run_extra_update_ticks(&env, 3);
+    env
+}
+
+pub fn load_full_env_without_post_load() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
     env.set_screen_size(1024.0, 768.0);
 
@@ -105,10 +114,6 @@ pub fn setup_full_env() -> WowLuaEnv {
         "#,
     )
     .expect("refresh UIPanelWindows after tooltip fixture load order");
-    env.apply_post_load_workarounds();
-    fire_startup_events(&env);
-    wow_ui_sim::startup::process_pending_timers(&env);
-    wow_ui_sim::startup::run_extra_update_ticks(&env, 3);
     env
 }
 
