@@ -2,6 +2,10 @@
 
 [Client profile update](systems/client-profiles.md#retail-70448-source-and-producer-update--october-16-2026) records exact installed/source identity, 4,026-file private cache, 12.1.5 public epoch, original-consumer RED roots and separately scoped shipped Retail GlobalStrings. Shared Retail cache and other profiles are preserved. Bounded post-rebase acceptance: startup `[]`; requested preservation265/265; epoch unit89/integration50; atlas/aura23; default check and formatting pass. Seven existing unused-helper warnings remain; native/all-profile/full-suite and 65 encrypted string rows remain outside this proof.
 
+## Evidence | Namespace profile-gate handoff
+
+[Owning matrix](../specs/startup-explicit-namespaces.md#proof-level) records measured post-rebase profile gates, the older Forever receipt, and disclosed pre-v4 Wrath roots. [Logging contract](../specs/mists-script-error-logging.md) records original-handler RED/GREEN on Mists/Era/Anniversary. Production edits stopped; independent verification and merge remain parent-owned.
+
 ## Investigation | Namespace exposure and secondary error reporting
 
 Updated [classic startup cascades](investigations/classic-startup-producer-cascades.md#namespace-exposure-and-secondary-reporter-failures) with SSOT links for bounded namespace proof and modeled Mists logging. Original ScriptErrors source distinguishes missing C_Log from the VM's later-loop diagnostic-name defect. Post-rebase integrated gates remain separate.

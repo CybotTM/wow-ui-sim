@@ -25,6 +25,10 @@ generic-for local name. The [logging contract](../../specs/mists-script-error-lo
 owns the original-consumer regression and modeled console sink. Never infer an
 iterator failure from `(for generator)` without checking the actual source line.
 
+The [integrated profile matrix](../../specs/startup-explicit-namespaces.md#proof-level)
+separates measured startup preservation, older source-bounded receipts, and
+remaining Wrath roots from independent verification and full-startup acceptance.
+
 ## Sources
 
 - [Classic A](../../specs/classic-startup-a.md) — contract, source attribution and sealed profile receipts.

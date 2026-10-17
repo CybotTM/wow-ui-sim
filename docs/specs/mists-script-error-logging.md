@@ -21,13 +21,15 @@ logging, not native logging services or priority semantics.
 `tests/mists_script_error_logging.rs` loads the complete hash-pinned original
 ScriptErrors chunk, invokes its installed handler, and asserts exactly one
 formatted console message and delivery of the original error to a listener.
-Behavioral RED failed at original line 83 on the missing namespace. GREEN
-passes against producer `c9594ed03`: exactly one console message, callback
-delivery, and exactly the deliberate rendered error, with no secondary error.
-Five namespace controls also pass. Era/Anniversary extension proof is pending.
-Mists startup returns to the merge-base
-capture's exact two StoreUI records/two occurrences; the secondary ScriptErrors
-record disappears. This pre-rebase result does not claim current-master parity.
+Behavioral RED failed at original line 83 on Mists, Era and Anniversary.
+GREEN against shared producer `b37d2a509` asserts exactly one console message,
+callback delivery, and exactly the deliberate rendered error with no secondary
+error. Original ScriptErrors bytes are identical across these three caches.
+
+[Integrated profile receipts](startup-explicit-namespaces.md#proof-level) own the
+post-rebase test/startup matrix. The real producer eliminates the reporter failure;
+it does not suppress the original error being formatted. Mists's StoreUI root is
+fixed separately on comparison master `9c0251fca`.
 
 ## Limits
 

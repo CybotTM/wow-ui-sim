@@ -4,7 +4,7 @@
 
 ## Investigation | Namespace exposure and secondary error reporting
 
-[Classic startup investigation](investigations/classic-startup-producer-cascades.md#namespace-exposure-and-secondary-reporter-failures) separates bounded namespace publication, the missing Mists logging producer, and misleading VM diagnostic names. Owning specs retain component proof and pending integrated startup gates.
+[Classic startup investigation](investigations/classic-startup-producer-cascades.md#namespace-exposure-and-secondary-reporter-failures) separates bounded namespace publication, the missing Mists logging producer, and misleading VM diagnostic names. Owning specs distinguish measured profile gates from pending independent verification.
 
 ## [2026-10-17] investigation | Classic startup producer cascades
 

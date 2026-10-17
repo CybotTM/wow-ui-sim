@@ -1,4 +1,4 @@
-# Explicit startup namespace empty states (staged)
+# Explicit startup namespace empty states
 
 ## Era / Anniversary startup extension
 
@@ -51,31 +51,13 @@ Forced engraving UI and PaperDoll engraving interaction paths also remain exclud
 `Blizzard_SettingsDefinitions_Frame/Classic/InterfaceOverrides.lua:136` uses
 IsEngravingEnabled and skips its setting when false; that is not bag/rune coverage.
 
-### Revision-pinned startup comparisons
+### Comparison boundaries
 
-Units are unique records / total occurrences, not independent root causes.
-Current comparison master **972eef0bed0dd81c2f2529d64366e35563dd7320** has
-**Era 36/38 and Anniversary 36/38**. Each contains six affected loot/product
-records (three primary, three mirrors), no engraving missing-namespace record,
-and no ScriptErrors.lua:83 record. Removing only those six gives conditional
-**30/32**, not a measured combined master + branch result.
+The pre-rebase receipts above and historical 92/98 baselines are not current
+integration gates. Measured post-rebase comparisons against `9c0251fca` are in
+[Proof level](#proof-level); they supersede earlier conditional arithmetic.
 
-The **historical 92/98** approved baselines (both blob SHA-256
-`2cf8194055fa25eb3aae79882b450671904e9febab0dd5335f12bca0b4db8b1b`)
-would similarly become **86/92** if unrelated records stayed unchanged. These
-historical numbers are not the current master comparison.
-
-The supplied wrath-fixes **26877f29636686760594a95ef9a3c63747fd8984** captures
-are **95/150** for both profiles. Eight affected records (four primary failures
-plus four Lua Error mirrors) predict **87/142** with reporter count held fixed;
-if one reporter occurrence disappears per primary, **87/138** (reporter 50→46).
-Those conditional branch totals versus current master are **+51/+104** and
-**+51/+100**, respectively, not measured stage regressions or combined-branch
-predictions. Historical branch-versus-92/98 arithmetic **-5/+40** applies only
-to that older comparison. Execution must compare sealed branch startups to the
-supplied captures at 26877f296, not substitute master's different baseline.
-
-## Forever and classic extension (source-only)
+## Forever and classic extension
 
 Share existing combat-text active-unit selection and spell-overlay membership with
 Mists, Era, Anniversary and Forever, whose cached API docs declare those methods.
@@ -101,7 +83,7 @@ Retire defaults when c_api models flyout artwork, mentorship membership/eligibil
 social-UI availability, recent-allies game-type support, or combat-text event
 payload routing. Do not add missing request/mutation no-ops to fill out namespaces.
 
-Ten original-consumer tests are staged: three shared Mists/Era/Anniversary/Forever
+Ten original-consumer tests cover three shared Mists/Era/Anniversary/Forever
 cases and seven Forever-only cases. Tests load complete hash-pinned cached chunks
 from blizzard_ui_addons_dir and assert alert visibility under supplied membership,
 deprecated alias state effects, vehicle unit transitions, hidden choice toggle,
@@ -125,8 +107,8 @@ Pre-rebase execution at producer `26877f296`: Forever passes all ten original
 consumer cases and both factory controls (12/12); Mists, Era and Anniversary each
 pass three original consumers and two controls (5/5). Their preceding REDs failed
 at the missing named namespace in each original consumer, plus strictness; the
-non-strict factory control passed. Retail/PTR SocialUI preservation and integrated
-startup gates still require separate post-rebase proof.
+non-strict factory control passed. Post-rebase SocialUI preservation and startup
+receipts are listed in [Proof level](#proof-level).
 
 The Mists error-reporter gap predates this stage and has its own
 [modeled logging repair](mists-script-error-logging.md). The selected-character
@@ -137,8 +119,8 @@ acceptance follows from these bounded component results.
 ## Contract
 
 Replace reliance on removed generic C_* namespace synthesis with explicit,
-profile-scoped members. No arbitrary namespace/member fabrication; no Blizzard
-source changes. These temporary defaults describe simulator empty state, not
+profile-scoped members. No new arbitrary namespace/member fabrication or Blizzard
+source changes; existing non-strict member factories retain the policy above. These temporary defaults describe simulator empty state, not
 native behavior or defaults established by API documentation.
 
 | Namespace | Empty behavior | Profiles with cached declaration |
@@ -175,11 +157,35 @@ requests must retain an observable completion effect, not become no-ops.
 
 ## Proof level
 
-Source-only staging against wrath-fixes 6a86078991b16790755631d268aa861742631bd3.
 Original complete cached Lua chunks are hash-pinned by the consumer tests.
 Tests assert dialog/mode/frame visibility, LFD button label and role-warning
-state, and calling completion payload/count/throttle. Profile surface tests
-assert declared presence, empty query outputs, and unsupported member absence.
-No build, test execution, clean startup, all-profile runtime, or native-parity
-claim. Public popup policy was subsequently authorized from its cached consumer;
-its original-consumer regression remains required, not ignored.
+state, calling completion payload/count/throttle, supplied rows, and the original
+public-popup consumer. Namespace factory controls check observable lookup behavior.
+
+Post-rebase implementer checkpoint: comparison master `9c0251fca`, production
+`b37d2a509` except the explicitly older Forever receipt. Counts are unique error
+records / occurrences, not independent root causes.
+
+| Profile | Focused tests | Master startup → branch | Runtime source |
+|---|---:|---|---|
+| Retail | 13/13 | [] → [] | b37d2a509 |
+| PTR | 7/7 | [] → [] | b37d2a509 |
+| Mists | 6/6 | [] → [] | b37d2a509 |
+| Forever | 12/12 | [] → [] | 50b975eb7 |
+| Era | 11/11 | 36/38 → 28/30 | b37d2a509 |
+| Anniversary | 11/11 | 36/38 → 28/30 | b37d2a509 |
+| Wrath | 36/36 | 44/55 → 22/30 | b37d2a509 |
+
+Retail/PTR include the explicit SocialUI member-factory control. Era/Anniversary
+remove exactly eight records with no new records or changed common counts after
+[modeled logging](mists-script-error-logging.md). Wrath's ten unmasked classes
+predate v4: its normalized inventory/counts exactly equal the retained
+pre-namespace `6a8607899` capture. Remaining Wrath sound/loot/unmasked-root work
+continues separately; Wrath/Era/Anniversary startups remain failing.
+
+Forever was not rerun after the later Mists/Era/Anniversary-only logging
+registration change. Its raw C_Log publication matched an independently sealed
+exact-master `9c0251fca` probe (both absent, both clean startup), so no Forever
+logging change was authorized. This is source-bounded evidence, not a fresh
+all-profile current-HEAD claim. Parent-owned independent verification and merge
+remain pending. No native parity or broad-suite acceptance is asserted.
