@@ -443,7 +443,7 @@ fn assert_party_flow(env: &WowLuaEnv, label: &str, raf_visible: i32) {
         assert(not PartyMemberFrame1SpeakerMuted:IsShown())
         assert(UnitIsTalking('RafFriend') == false)
         assert(not PartyMemberFrame1SpeakerFrame:IsShown())
-        for _, name in ipairs({'', 'Unknown speaker', 'Jöhn', string.char(255, 0, 128)}) do
+        for _, name in ipairs({{'', 'Unknown speaker', 'Jöhn', string.char(255, 0, 128)}}) do
             assert(UnitIsTalking(name) == false)
         end
         assert(UnitPopupButtons.OPT_OUT_LOOT_TITLE.text ==
