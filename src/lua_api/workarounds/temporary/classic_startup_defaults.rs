@@ -1,4 +1,4 @@
-//! Temporary empty Classic product rewards and loot history. No native-default or populated claims.
+//! Temporary empty Classic product rewards, loot history and tracking. No native-default or populated claims.
 //! Retire each endpoint when its corresponding supplied backing system exists.
 use crate::c_api::ensure_namespace;
 use crate::lua_api::methods::create_table;
@@ -12,7 +12,13 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     table_set_rust_fn_static(state, product, "GetChoices", empty_choices)?;
     let loot = ensure_namespace(state, "C_LootHistory")?;
     table_set_rust_fn_static(state, loot, "GetNumItems", empty_loot_count)?;
+    LuaApiMut::register_function(lua, "GetTrackingTexture", no_tracking_texture)?;
     Ok(())
+}
+
+fn no_tracking_texture(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
 }
 
 fn empty_loot_count(state: &mut LuaState) -> LuaResult<u32> {
