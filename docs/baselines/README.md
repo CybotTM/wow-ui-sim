@@ -4,6 +4,8 @@ Validation artifacts for supported client profiles.
 
 ## rilua re-pin baseline refresh — 2026-10-17
 
+This is the historical re-pin-only capture; the [combined Wrath inventory](#wrath-lua-errors) below supersedes its Wrath row.
+
 Fresh seven-profile captures at `83e57fcc4` use rilua `b2629b6329484945cb14e43b0e5590ee308c5df4`. The three re-pin commits were rebased onto `e90d921cc` as `761d3e6da`, `38ed2a969`, and `466088929`; both base and resulting tree differences are confined to `docs/baselines`, so saved build/test/startup evidence remains applicable without rebuilding.
 
 | Profile | e90d921cc records / occurrences | Fresh records / occurrences | Exit | Classification |
@@ -75,7 +77,27 @@ Only Era/Anniversary source manifests changed. No existing mapped path/FDID was 
 
 ## Wrath Lua Errors
 
-Current baseline at `d4d58189b` (wrath-fixes): **22 classes / 30 occurrences, exit1, FAIL**, independently verified on 2026-10-17 by `agent_6773`. The JSON is byte-exact verifier stdout, with no path or generated-chunk normalization, mirroring the Era/Anniversary refresh. Metadata binds source, manifest, sealed binary, command/environment and capture hash. Evidence: `/home/osso/.local/state/wow-ui-sim/verification/wrath-fixes-final/` (`report.md`, `proof-ledger.json`, `wrath-startup/stdout`, `wrath-classification.json`).
+Current combined inventory at sealed source `a83be2c64`, rebased onto `241ce290f`, rilua `b2629b6`: **3 records / 3 occurrences, exit1, FAIL**. The JSON is byte-identical to fresh uninstrumented `lua-errors` stdout, including paths, generated identities and trailing LF. Metadata binds source, manifest, seals, argv and original-CVar guards; comparison normalization is not applied to the committed bytes.
+
+| Remaining record | Count | Disclosure |
+|---|---:|---|
+| GammaSlider `SetGamma`, VideoOptionsPanels.xml:387 | 1 | Retained; gamma operations remain unmodeled. |
+| TextureResolution `GetCurrentValue`, VideoOptionsPanels.xml:688 | 1 | Retained nil BaseMip arithmetic; no default is approved. |
+| UIPanelTemplates.lua:365 `cursorOffset` nil | 1 | Newly exposed error-display cursor initialization gap, not fixed here. |
+
+Against the refreshed committed **22/30**: 20 records/28 occurrences removed, two records/two occurrences retained unchanged, one new record/occurrence. Against u-resid's old-pin **15/21**: 13 underlying records/19 occurrences removed, the same two failures retained, and the cursor record exposed. The literal full-stack old-pin diff reports 15 removed/three new: after generated-ID normalization, Gamma and BaseMip each gain only one trailing unknown `[C]: ?` host frame; their counts remain one. No retained count increases are hidden by first-line matching.
+
+The [cursor investigation](../wiki/investigations/wrath-startup-u-residuals.md#error-display-after-lootsound-repair) captures the original DebugTools unchanged-text path while BaseMip error handling re-displays the selected Gamma message. With fonts installed, the error edit box has nil cursor offset/height. A line-hook diagnostic reproduces the fresh CLI's exact raw messages/counts. An isolated replay using the same sealed simulator library, VM and current CVar bytes restores only the pre-fix `personalloot` token and numeric-only simulator sound binding: it reproduces **15/21**, no cursor record, and initialized fields at all 20 observed cursor reads. This demonstrates joint earlier-abort exposure, not which restoration initializes the fields or a fix for the absent initial notification. No vendor handler or EditBox source is changed; the replay binding change is diagnostic only, not a production fallback.
+
+Raw stacks also resolve the old sound aggregate: the controlled replay's count seven is **six TargetFrame.lua:232 occurrences plus one Blizzard_CombatLog.lua:3695 occurrence**, not seven TargetFrame calls. Fresh sound errors are absent. `lua-errors` groups counts by normalized first line, so its representative stack alone cannot establish a caller distribution.
+
+The combined gate passes **58 distinct Wrath names** (our 46 and u-resid's 48 share 36 controls), **eight Retail controls**, unchanged 535-byte Retail admin/query trace, Retail startup `[]`, default/Wrath library plus all root-bin checks, and formatting. Existing Wrath UnitRole warnings remain. All runtimes use sealed copies, MemoryMax4G/timeout86, CASC0/no-sound1 and fresh byte-exact child-only current CVar copies; originals remain unchanged. This is a failing compatibility inventory and bounded API proof, not clean-startup, full-suite, GUI/hardware or native-parity acceptance.
+
+Exact raw removed/new records, full-stack diffs and per-occurrence attribution: `~/.local/state/wow-ui-sim/handoff/wrath-sound-loot/` (`report.md`, `proof-ledger.json`, `wrath-combined-startup-vs-*.json`, `wrath-combined-classification.json`, `cursor-startup-attribution.json`, `prior-abort-raw.json`).
+
+### Historical wrath-fixes inventory
+
+The prior baseline at `d4d58189b` (wrath-fixes) was **22 classes / 30 occurrences, exit1, FAIL**, independently verified on 2026-10-17 by `agent_6773`. Its archived JSON was byte-exact verifier stdout, with no path or generated-chunk normalization; tracebacks were subsequently refreshed by the re-pin-only capture above. Evidence: `/home/osso/.local/state/wow-ui-sim/verification/wrath-fixes-final/` (`report.md`, `proof-ledger.json`, `wrath-startup/stdout`, `wrath-classification.json`).
 
 Against the prior 44/55 inventory: **12 classes / 17 occurrences retained unchanged; 32 / 38 removed; 10 / 13 unmasked by fixed earlier aborts, not regressions**. The latter includes BaseMip's pre-existing failure recontextualized through the newly installed EffectsPanel callback. The verifier accounts for every differing record through original control-flow exposure; shared counts are unchanged and no undisclosed records remain. Cache hashes and original persisted CVars remained unchanged. This is still a failing compatibility inventory, not clean-startup, native-parity, GUI or full-suite acceptance.
 
