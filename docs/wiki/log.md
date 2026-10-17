@@ -2325,3 +2325,7 @@ Reconciled source-only attribution for `f00f230fe`, `593e543f5` and `655f0698b`:
 ## [2026-10-16] evidence | QL-1 / QL-2 saved integration checkpoint
 
 [Owning receipt](../baselines/quest-lifecycle.md) records the saved9fc3d15f9 component/startup proof and the later275f9f09b rebase/B5 preservation gate. Earlier REDs and temporary-domain limitations remain distinct.
+
+## 2026-10-17 — Classic startup producer cascades
+
+Linked A integrated receipts and empty-history attribution in [investigation](investigations/classic-startup-producer-cascades.md); kept marker selection and populated replay outside A credit.

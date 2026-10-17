@@ -42,6 +42,22 @@ Finite data and existing modeled inputs required by the installed Vanilla startu
 - [ ] Native Vanilla class-enumeration indexing and native palette RGBA are not established. Compact enumeration is an explicit simulator choice grounded in the shipped nine-class set.
 - [ ] Existing item RGB values are reused, not newly acquired native measurements. Invalid-quality behavior is outside this startup contract.
 
+## Final integration onto master d5e1cb4de
+
+Conflict-free rebase still intersects A's `c_api/mod.rs`, `globals/real/mod.rs` and `globals/register.rs`. Therefore both profiles were rebuilt and rerun, rather than using the single-Era non-overlap exception. All module declarations remain.
+
+Normal production/test revision `516908617586714be7983279feea512a4d7d5b6b`:
+
+| Gate | Evidence under private classic-build root |
+|---|---|
+| Era 6+1 | `classic-a-integrated-era-final-20261017T011401022635Z`: six-consumers 6/6, empty-history 1/1 |
+| Anniversary 6+1 | `classic-a-integrated-anniv-final-20261017T011935743324Z`: six-consumers 6/6, empty-history 1/1 |
+| Both startups | `{era,anniversary}-a-integrated-summary.json`: each 36 unique / 38 occurrences, exit 1; original CVar guards unchanged |
+| Exact record reconciliation | Only StoreUI generated frame IDs normalized; exactly two new records per profile, the accepted/disclosed R12 :84 pair. No string.sub record remains. |
+| Formatting | `a-integrated-format.json`: `cargo fmt --check`, exit 0 |
+
+No install/CASC extraction or sync was run; existing cache inputs and `WOW_SIM_CASC=0` remain in force. Existing changed-file Era combat-log unit preservation passed 1/1 on the preceding integrated tree (`classic-a-era-history-preservation-20261017T010100394364Z/history-unit`); it is not populated replay acceptance. Per parent instruction only Era/Anniversary runtime gates were repeated after the final rebase; old Mists/Retail/check receipts retain their stated historical scope.
+
 ## Rebased acceptance after CombatLog rejection
 
 `classic-startup` was rebased onto master `275f9f09b`. The module conflict retains both `currency_list` and the A modules; state merges retain master's added fields and A's shared host storage. Production `0c6636255` repairs only empty history; later commits change tests/docs only. Populated replay remains blocked.
