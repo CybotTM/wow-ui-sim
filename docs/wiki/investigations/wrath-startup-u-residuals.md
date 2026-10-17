@@ -1,6 +1,6 @@
 # Wrath calendar, friends and empty-history startup boundaries
 
-The deferred Wrath queue exposes missing legacy publishers and an empty-history validity defect. Original cached Lua is the unchanged consumer; the bounded simulator policies are not native-parity evidence. The bounded capability/debug checkpoint passes 47 named Wrath cases; final post-floor-count gates remain pending at this checkpoint.
+The deferred Wrath queue exposes missing legacy publishers and an empty-history validity defect. Original cached Lua is the unchanged consumer; the bounded simulator policies are not native-parity evidence. The [final bounded gate](../../specs/wrath-startup-capability-defaults.md#final-bounded-proof--2026-10-17) passes 48 named Wrath cases; startup drops from 22/30 to 15/21 with no new records, but still fails. Retail/Forever startup preservation remains separately bounded.
 
 ## Producer ownership
 

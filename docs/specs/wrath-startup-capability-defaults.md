@@ -8,7 +8,7 @@ Wrath-only legacy defaults live in `src/lua_api/workarounds/temporary/wrath_star
 
 - [x] `HasDebugZoneMap()` returns false until a debug-zone tile/capability model exists. Original WorldMapFrame.lua:363 skips debug tiles; no populated debug-map state is invented.
 - [x] `GetNumMapDebugObjects()` returns numeric zero until a supplied map-debug-objects model owns both count and records. Original WorldMapFrame.lua:402 OnLoad must traverse the empty domain without calling a missing count producer.
-- [ ] `GetNumDungeonMapLevels()` returns zero for an unsupplied selected-map floor catalog, under the same standing empty-count policy. Original OnLoad reaches WorldMapFrame.lua:592; its original dropdown update clears/hides the floor selector and up/down controls. Never derive total floors from the selected-floor scalar.
+- [x] `GetNumDungeonMapLevels()` returns zero for an unsupplied selected-map floor catalog, under the same standing empty-count policy. Original OnLoad reaches WorldMapFrame.lua:592; its original dropdown update clears/hides the floor selector and up/down controls. Never derive total floors from the selected-floor scalar.
 
 ### Voice and player textures
 
@@ -35,7 +35,7 @@ Wrath-only legacy defaults live in `src/lua_api/workarounds/temporary/wrath_star
 ## Known gaps (current cycle)
 
 - [x] Before producers, all three original-consumer tests fail at WorldMapFrame.lua:363, PlayerFrame.lua:150 and VideoOptionsPanels.lua:441 against sealed d11a25154.
-- [ ] The capability/debug checkpoint passes 47 named cases (36 controls + 11 queue cases); startup drops from the exact e90 baseline22/30 to16/22 and exposes the original floor-count call at:592. The final post-floor-count gate and capture remain pending.
+- [x] The final rebased gate passes 48 named cases (36 controls + 12 queue cases). Original OnLoad:592 RED precedes the floor producer; the original empty-floor dropdown transition passes. Startup drops from the exact e90 baseline 22/30 to 15/21, with no new records. See the bounded proof below.
 - [x] The new debug-object count reaches original WorldMapFrame.lua:402 in a behavioral RED before its producer, under the approved empty/zero policy.
 - [ ] Populated debug objects and floor catalogs remain unmodeled; count defaults do not invent records. The newly unmasked floor count has an original OnLoad:592 RED before its producer.
 - [ ] BaseMip has no approved default; the explicit video fixture does not establish one. The generated BaseMip/gamma records remain attribution-only.
@@ -55,3 +55,19 @@ end
 ```
 
 False force-disables the control. True only skips this block; it never calls Enable and therefore does not itself establish that the control must be enabled under every other state.
+
+## Final bounded proof — 2026-10-17
+
+Rebased on `e90d921cc`, whose committed Wrath baseline is exactly equal to the independently captured base messages/counts. Normal sealed Wrath source `8f7644b3a` contains the final production inputs from `112241401`; later changes are documentation only.
+
+| Scope | Result |
+|---|---|
+| Wrath named consumers and controls | 48/48 PASS in two bounded groups: 36 existing controls and 12 queue cases. |
+| Wrath startup | 22 records / 30 occurrences → 15 / 21, exit1. Seven original records removed, no new records. The unchanged PlaySound producer's existing TargetFrame.lua:232 record rises6→7 as further original work runs. |
+| Retail preservation | Both existing combo tests pass; same-file speed controls and identical-source admin/query trace pass. Exact d4/current trace equality:535 bytes, SHA-256 `27356d533851e86f9773b22db33b73efd8e66ff41e5be53791fba2aa17bff983`. Separate startup[]. |
+| Forever preservation | Five unchanged target-bound model cases plus the corrected original-consumer case pass. That stale fixture fails on the old library too; its corrected event-handler form passes on both. Separate startup[]. |
+| Era engraving relocation | Five existing namespace cases plus original empty-history startup/advance control pass; original guarded false policy and strict inventory preserved. |
+
+Whole `cargo fmt --check`, default `cargo check` and Wrath `cargo check` pass. Wrath retains the base's existing Tank/Healer/Damage dead-code warning; no new diagnostic or suppression. Retail/Forever compiler dependency records exclude the later Wrath-only module changes; their receipts are not relabeled as whole-tree or binary identity.
+
+All executions use sealed copies, MemoryMax4G, timeout86, CASC0/no-sound1 and fresh child-only byte-exact current CVar copies, with unchanged-original checks. No vendor/Blizzard/rilua changes or native-parity claim. Sound/loot work remains separate; BaseMip default, gamma policy and populated combat-log replay remain unlanded. Exact commands, source/binary hashes, input pins, intermediate unmasked records and final inventories are retained in the private `wrath-u-resid` handoff.

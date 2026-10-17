@@ -1,6 +1,6 @@
 ## [2026-10-17] investigation | Wrath U/residual startup boundaries
 
-[Wrath investigation](investigations/wrath-startup-u-residuals.md) links existing-model projections, shared empty history and original-source attribution. The [default contract](../specs/wrath-startup-capability-defaults.md) now records the separately approved three boolean policies and empty map counts. Bounded capability/debug Wrath47 passes; final floor-count gates are pending. BaseMip/gamma and populated history remain blocked.
+[Wrath investigation](investigations/wrath-startup-u-residuals.md) links existing-model projections, shared empty history and original-source attribution. The [default contract](../specs/wrath-startup-capability-defaults.md) now records the separately approved three boolean policies and empty map counts. The [final bounded gate](../specs/wrath-startup-capability-defaults.md#final-bounded-proof--2026-10-17) passes Wrath48 with startup22/30→15/21 and no new records; startup remains failing. BaseMip/gamma and populated history remain blocked.
 
 ## [2026-10-17] evidence | Classic B implemented roots and held policy
 

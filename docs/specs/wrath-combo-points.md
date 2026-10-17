@@ -28,7 +28,7 @@ Wrath publishes the existing target-bound simulator combo pool in `src/lua_api/g
 
 - [x] Original absent-global RED at ComboFrame.lua:20 on empty and supplied paths; both GREEN in the d11a25154 sealed Wrath43 gate. The resolved nonplayer zero control also passes separately after its fixture assertion was added. Startup no longer fails at ComboFrame:20; it next exposes UnitIsTalking at PlayerFrame.lua:150.
 - [x] Both existing Retail combo tests pass; the identical experiment against exact d4 and current Retail libraries returns byte-identical 535-byte admin/query traces (SHA-256 `27356d533851e86f9773b22db33b73efd8e66ff41e5be53791fba2aa17bff983`). Five unchanged Forever model cases and its corrected original-consumer case pass; Retail/Forever startups both return `[]`. This is bounded observable preservation, not binary/native identity.
-- [ ] Final Wrath/default checks and post-floor-count startup remain pending at this checkpoint.
+- [x] Final Wrath/default checks pass on the rebased production inputs; the [final bounded gate](wrath-startup-capability-defaults.md#final-bounded-proof--2026-10-17) records Wrath48 and startup15/21. Whole Wrath startup still exits1; no clean-profile/native claim.
 
 ## Out of scope
 
