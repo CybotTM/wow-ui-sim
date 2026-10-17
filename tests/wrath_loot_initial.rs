@@ -425,10 +425,10 @@ fn assert_party_flow(env: &WowLuaEnv, label: &str, raf_visible: i32) {
 fn original_wrath_party_roots_use_fresh_freeforall_with_empty_raf_links() {
     let env = create_env();
     // No loot-state override: this exercises the approved simulator default.
-    exec(&env, "assert(GetLootMethod() == 'freeforall')");
     seed_party(&env, false);
     exec(&env, "assert(not IsReferAFriendLinked('party1'))");
     assert_party_flow(&env, "freeforall", 0);
+    exec(&env, "assert(GetLootMethod() == 'freeforall')");
 }
 
 #[test]
