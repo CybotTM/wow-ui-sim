@@ -11,6 +11,8 @@ pub(crate) const CLASSIC_EXPANSION_LEVEL: f64 = 10.0;
 #[cfg(not(feature = "client-ptr"))]
 const CLIENT_VERSION: &str = if cfg!(feature = "client-wowforever") {
     "1.60.1"
+} else if cfg!(feature = "retail-12-1-5") {
+    "12.1.5"
 } else if cfg!(feature = "retail-12-1-0") {
     "12.1.0"
 } else {
@@ -28,6 +30,8 @@ const CLIENT_BUILD: &str = if cfg!(feature = "client-wowforever") {
 const CLIENT_INTERFACE: u32 = if cfg!(feature = "client-ptr") || cfg!(feature = "client-wowforever")
 {
     crate::client_profile::ACTIVE_INTERFACE_VERSION
+} else if cfg!(feature = "retail-12-1-5") {
+    120105
 } else if cfg!(feature = "retail-12-1-0") {
     120100
 } else {

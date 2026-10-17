@@ -4,12 +4,12 @@ Client profile bundles select the runtime cache and API epoch exposed by wow-ui-
 
 ## What it must do
 
-- [x] The public `client-retail` bundle selects the retail profile and current retail 12.1.0 API epoch (`120100`).
-- [x] Retail API epoch features remain cumulative, so 12.1.0 includes the modeled 12.0.0, 12.0.5, and 12.0.7 surfaces.
+- [x] The public `client-retail` bundle selects the retail profile and current retail 12.1.5 API epoch (`120105`), selected for installed Retail 12.1.5.70448.
+- [x] Retail API epoch features remain cumulative, so 12.1.5 includes the modeled 12.0.0, 12.0.5, 12.0.7, and 12.1.0 surfaces.
 - [x] Historical retail epochs remain selectable through `profile-retail` without enabling the current-retail bundle.
 - [x] `client-ptr` remains a distinct profile/cache while selecting the cumulative 12.1.5 API epoch (`120105`).
 - [x] PTR CASC resolves the official `wowxptr` product; 12.1.5.69594 uses BuildConfig `4a9973f37906f8cfb344f8a9fe6777e0` and Gethe `ptr2` source commit `49b69918fcdc77e109813281e4f537d45ec7dcbf`.
-- [x] PTR `GetBuildInfo()` publishes `12.1.5`, build `69594`, and interface `120105` from the pinned source identity; non-PTR builds retain temporary interface `120100` with `retail-12-1-0`, otherwise `120007`.
+- [x] PTR `GetBuildInfo()` publishes `12.1.5`, build `69594`, and interface `120105` from the pinned source identity; non-PTR builds publish version `12.1.5` and interface `120105` with `retail-12-1-5`, `12.1.0`/`120100` with `retail-12-1-0`, otherwise `12.0.7`/`120007`. Retail build/date/trailing fields remain temporary defaults, not installed-build identity.
 - [x] PTR 12.1.5 publishes `Enum.CurioRarity.EpicTier2 = 5` and metadata through 5; earlier retail epochs retain the four-value contract.
 - [x] Same-epoch profiles may have source-proven post-startup removals: retail 12.1 keeps `C_RecruitAFriend.IsEnabled`, while PTR hides it after startup.
 - [x] Default-retail Lua initialization publishes the probe-backed retail 12.1 global-string contract.
