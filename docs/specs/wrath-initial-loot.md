@@ -71,12 +71,20 @@ original Wrath FrameXML/UnitPopup.lua's accepted tokens. No native capture.
   FriendsListTemplates RefreshCooldown clears for unsupplied/disabled state and
   applies the supplied cooldown when enabled.
 
-Behavioral RED reached PartyMemberFrame1 creation at original UnitPopup.lua:223
-before producer `6dab184f6`. After that approved producer, both original party
-fixtures fail at UnitPopup.lua:226 on the absent GetLootThreshold call. Explicit
-master/RAF inputs and original consumers remain unchanged; no green party-flow
-claim. Combined sound/loot startup falls from 22 records/30 occurrences to 19/22,
-including nine newly unmasked :226 records (2026-10-17).
+Historical RED reached PartyMemberFrame1 creation at original UnitPopup.lua:223
+before producer `6dab184f6`, then :226 on absent GetLootThreshold. Subsequent REDs
+exposed opt-out, RAF cooldown, membership, voice, and leader readers. Original
+consumers and explicit master/RAF fixtures were preserved.
+
+Bounded 2026-10-17 checkpoint: sealed production `bb79d0d41`, tests `9becf1f82`,
+required Wrath 44/44 plus shared cooldown 2/2 PASS; Retail cooldown 3/3 PASS,
+including complete pinned FriendsListTemplates.lua with real Cooldown.lua/widget.
+Wrath startup improves branch 19/22 to 9/12 (10 removed records, no new or changed
+records), or master `e90d921cc` 22/30 to 9/12 (13 removed). Retail startup remains
+`[]`. Exact names, raw records and revisions live in the private sound/loot
+handoff's `proof-ledger.json` and `wrath-current-startup-vs-*.json`.
+Combined rebase/preservation against the pending Wrath residual branch is still
+required; no clean Wrath startup, native parity, or final combined-gate claim.
 
 ## How it works
 
