@@ -5,6 +5,7 @@
 ## What it must do
 
 - [x] A successfully resolved and applied atlas returns exactly one boolean `true`.
+- [x] Like SetTexture, SetAtlas authenticates genuine secret-wrapper inputs before type validation, permits an untainted caller to decode them, and preserves secret-origin read restrictions until a public replacement. Retail 70448 original UnitFrameUtil arena-spec display exercises this path.
 - [x] An accepted input that does not apply an atlas returns exactly one boolean `false`; existing argument errors and mutation behavior remain unchanged.
 - [x] Real cached CaptureBar TextureKit consumers keep available neutral glow/spark textures visible, then consume updates, hidden/restored records, removal and unregister without vendor changes.
 
@@ -35,4 +36,4 @@ Historical genuine RED at `21aabeaf1`: existing argument validation PASS, applic
 ## Out of scope
 
 - Native return parity: cached generated `SimpleTextureBaseAPIDocumentation.lua` has no Returns for SetAtlas; current Wowless `TextureBase.SetAtlas` schema has empty outputs. Cached `TextureUtil.lua::SetupTextureKitOnFrame` nevertheless assigns SetAtlas's result to `success` and uses it for `SetShown`. This conflict is retained, not resolved by invented native evidence.
-- Vendor edits, atlas-catalog fabrication, changing argument validation or unrelated texture behavior.
+- Vendor edits, atlas-catalog fabrication or unrelated texture behavior. Secret-wrapper authentication precedes the existing underlying atlas argument validation.

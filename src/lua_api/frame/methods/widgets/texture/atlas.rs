@@ -14,8 +14,10 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     if arg_count < 2 {
         return set_atlas_usage_error();
     }
-    let atlas_name = match stack_val(state, 2) {
-        Val::Str(_) => super::super::shared::opt_string(state, 2),
+    let (atlas_value, secret) =
+        crate::lua_api::frame::methods::secret_origin::unwrap_input(state, stack_val(state, 2))?;
+    let atlas_name = match atlas_value {
+        Val::Str(_) => val_to_string(state, atlas_value),
         Val::Nil => None,
         Val::Num(element_id) if element_id > 0.0 => {
             crate::atlas::get_atlas_name_by_element_id(element_id as u32).map(str::to_string)
@@ -26,6 +28,9 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let Some(atlas_name) = atlas_name else {
         return push_atlas_application_result(state, false);
     };
+    if let Some(frame) = borrow_state_mut(state)?.widgets.get_mut_visual(id) {
+        frame.secret_texture = secret;
+    }
     if atlas_name.trim().is_empty() {
         let mut sim = borrow_state_mut(state)?;
         clear_atlas_texture(&mut sim.widgets, id);
