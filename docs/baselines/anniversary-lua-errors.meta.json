@@ -77,7 +77,7 @@
   "classification_counts": {
     "expected extra unknown host traceback frames / generated chunk identity": 24
   },
-  "classification": "No new/resolved error classes or occurrence changes. Host exec now routes through call_function, adding unknown host traceback frames. StoreUI records already absent in selected master baseline and fresh capture; no removal credited.",
+  "classification": "No new/resolved error classes or occurrence changes. Host exec now routes through call_function, adding 40 unknown host traceback frame lines. Generated chunk-ID churn changes three frame lines in records 3 and 4 (1-based): c4948f4060c87fb4 becomes 8c74c8a5fcb060aa; headers are unchanged. src/loader/chunk_cache.rs names chunks @generated/<tag>/<hash>, and bytecode_cache.rs::content_hash_for_compiler hashes RILUA_COMPILER_REVISION, so the rilua pin change renames every generated chunk. After generated-ID normalization, every record's tag, source site, error text and count is unchanged. StoreUI records already absent in selected master baseline and fresh capture; no removal credited.",
   "classification_receipt": "/home/osso/.local/state/wow-ui-sim/handoff/rilua-repin-rebase/anniversary-startup-diff.json",
   "cache_input_scope": "Existing profile UI cache consumed with WOW_SIM_CASC=0; all file hashes unchanged across this capture. No fresh acquisition, authenticated-source, native-parity or whole-input equivalence claim.",
   "acceptance": "Saved targeted re-pin tests 5/5 per profile; startup remains FAIL. No native, GUI or full-suite acceptance.",
