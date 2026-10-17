@@ -9,7 +9,7 @@ Era/Anniversary/Wrath public history queries must not turn an empty cursor into 
 - [x] Original Vanilla UIParent PLAYER_LOGIN loads the real CombatLog and completes its empty refilter without passing nil event to `strsub`.
 - [ ] Preserve non-admitted profiles' existing public scalar contract and secure fixture behavior; no populated replay contract is selected.
 - [x] Wrath's original login and three lua-errors update ticks must not format an empty cursor as an event; explicit refilter clears stale messages, completes, and removes its OnUpdate callback.
-- [x] Wrath legacy CombatLogAdvanceEntry returns false on empty history, including a stale scalar cursor. Era/Anniversary share this path; fresh Era coverage is pending.
+- [x] Wrath legacy CombatLogAdvanceEntry returns false on empty history, including a stale scalar cursor. Era/Anniversary share this path. The b6c603498 Era original-startup test also passes its explicit empty legacy-advance assertion; no fresh Anniversary result is claimed.
 
 ## How it works
 
