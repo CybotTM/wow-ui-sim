@@ -41,8 +41,6 @@ fn wrath_unmasked_original_empty_refilter_clears_and_completes() {
         CombatLogClearEntries()
         assert(CombatLogGetNumEntries() == 0)
         C_CombatLog._state.currentEntry = 37
-        -- A stale scalar cursor must not fabricate an event in empty history.
-        assert(C_CombatLog.GetCurrentEntryInfo() == nil)
         ChatFrame2:AddMessage('stale sentinel')
         assert(ChatFrame2:GetNumMessages() == 1)
         Blizzard_CombatLog_Refilter()
@@ -54,7 +52,9 @@ fn wrath_unmasked_original_empty_refilter_clears_and_completes() {
         assert(CombatLogUpdateFrame.refiltering == false)
         assert(CombatLogUpdateFrame:GetScript('OnUpdate') == nil)
         assert(not CombatLogQuickButtonFrameProgressBar:IsShown())
-        assert(C_CombatLog.GetCurrentEntryInfo() == 0)
+        assert(C_CombatLog.GetCurrentEntryInfo() == nil)
+        C_CombatLog._state.currentEntry = 37
+        assert(C_CombatLog.GetCurrentEntryInfo() == nil)
         assert(CombatLogGetCurrentEntry() == nil)
         assert(CombatLogAdvanceEntry(-1) == false)
     "#,

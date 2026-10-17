@@ -40,6 +40,7 @@ fn wrath_unmasked_original_combo_frame_tracks_supplied_target_pool() {
         PlayerFrame = CreateFrame('Frame', 'ResidualPlayerFrame', UIParent)
         PlayerFrame.unit = 'player'
         ComboFrame = CreateFrame('Frame', 'ResidualComboFrame', PlayerFrame)
+        MAX_COMBO_POINTS = 5 -- Original TargetFrame.lua:1 constant input.
         for i=1,MAX_COMBO_POINTS do
             _G['ComboPoint'..i] = CreateFrame('Frame', nil, ComboFrame)
             _G['ComboPoint'..i..'Highlight'] = ComboFrame:CreateTexture()

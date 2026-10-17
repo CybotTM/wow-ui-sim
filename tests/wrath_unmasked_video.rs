@@ -15,6 +15,7 @@ fn wrath_unmasked_original_effects_disables_unsupported_player_texture() {
             "Constants.lua",
             "Fonts.xml",
             "FontStyles.xml",
+            "UIPanelTemplates.lua",
             "UIPanelTemplates.xml",
             "UIDropDownMenu.xml",
             "OptionsFrameTemplates.xml",

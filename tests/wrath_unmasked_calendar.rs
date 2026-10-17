@@ -7,6 +7,8 @@ use support::{env, load, run};
 #[test]
 fn wrath_unmasked_original_gametime_default_calendar_projection() {
     let env = env();
+    // Ordinary parent fixture; unrelated Minimap sibling scripts are not loaded.
+    run(&env, "Minimap = CreateFrame('Frame', 'Minimap', UIParent)");
     load(
         &env,
         &[
@@ -16,7 +18,6 @@ fn wrath_unmasked_original_gametime_default_calendar_projection() {
             "FontStyles.xml",
             "UIPanelTemplates.xml",
             "UIDropDownMenu.xml",
-            "Minimap.xml",
             "GameTime.xml",
         ],
     );
