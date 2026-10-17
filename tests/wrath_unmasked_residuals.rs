@@ -31,6 +31,44 @@ fn wrath_unmasked_original_combo_frame_hides_without_target_points() {
 }
 
 #[test]
+fn wrath_unmasked_original_combo_frame_tracks_supplied_target_pool() {
+    let env = env();
+    load(&env, &["Constants.lua", "UIParent.lua", "ComboFrame.lua"]);
+    run(
+        &env,
+        r#"
+        PlayerFrame = CreateFrame('Frame', 'ResidualPlayerFrame', UIParent)
+        PlayerFrame.unit = 'player'
+        ComboFrame = CreateFrame('Frame', 'ResidualComboFrame', PlayerFrame)
+        for i=1,MAX_COMBO_POINTS do
+            _G['ComboPoint'..i] = CreateFrame('Frame', nil, ComboFrame)
+            _G['ComboPoint'..i..'Highlight'] = ComboFrame:CreateTexture()
+            _G['ComboPoint'..i..'Shine'] = ComboFrame:CreateTexture()
+        end
+        TargetUnit('enemy1')
+        assert(UnitExists('target'))
+        ComboFrame_OnEvent(ComboFrame, 'UNIT_COMBO_POINTS', 'player')
+        assert(COMBO_FRAME_LAST_NUM_POINTS == 0)
+        assert(not ComboFrame:IsShown())
+        A_Admin.SetPlayerPower(3, 5, 4)
+        ComboFrame_OnEvent(ComboFrame, 'UNIT_COMBO_POINTS', 'player')
+        assert(COMBO_FRAME_LAST_NUM_POINTS == 3)
+        assert(ComboFrame:IsShown())
+        assert(GetComboPoints('player', 'target') == 3)
+        TargetUnit('enemy2')
+        ComboFrame_OnEvent(ComboFrame, 'PLAYER_TARGET_CHANGED')
+        assert(GetComboPoints('player', 'target') == 0)
+        assert(UnitPower('player', 4) == 3)
+        assert(not ComboFrame:IsShown())
+        ClearTarget()
+        ComboFrame_OnEvent(ComboFrame, 'PLAYER_TARGET_CHANGED')
+        assert(COMBO_FRAME_LAST_NUM_POINTS == 0)
+        assert(GetComboPoints('target', 'player') == 0)
+        "#,
+    );
+}
+
+#[test]
 fn wrath_unmasked_original_worldmap_empty_overlays_hide_stale_textures() {
     let env = env();
     load(&env, &["Constants.lua", "WorldMapFrame.lua"]);
