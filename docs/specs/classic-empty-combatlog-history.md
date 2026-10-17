@@ -4,9 +4,9 @@ Era/Anniversary public history queries must not turn an empty cursor into a fabr
 
 ## What it must do
 
-- [ ] Empty `C_CombatLog.GetCurrentEntryInfo()` returns no values (therefore nil in the original validity check), regardless of the stored cursor number.
-- [ ] Empty `SeekToNewestEntry` and `SeekToPreviousEntry` return false. Cached `Blizzard_APIDocumentationGenerated/CombatLogDocumentation.lua:109-137` declares boolean validity for both seek methods.
-- [ ] Original Vanilla UIParent PLAYER_LOGIN loads the real CombatLog and completes its empty refilter without passing nil event to `strsub`.
+- [x] Empty `C_CombatLog.GetCurrentEntryInfo()` returns no values (therefore nil in the original validity check), regardless of the stored cursor number.
+- [x] Empty `SeekToNewestEntry` and `SeekToPreviousEntry` return false. Cached `Blizzard_APIDocumentationGenerated/CombatLogDocumentation.lua:109-137` declares boolean validity for both seek methods.
+- [x] Original Vanilla UIParent PLAYER_LOGIN loads the real CombatLog and completes its empty refilter without passing nil event to `strsub`.
 - [ ] Preserve other profiles' existing public scalar contract and secure fixture behavior; no populated replay contract is selected.
 
 ## How it works
@@ -24,7 +24,7 @@ Era/Anniversary public history queries must not turn an empty cursor into a fabr
 
 ## Known gaps (current cycle)
 
-- [ ] GREEN/preservation/startup reconciliation pending.
+- [x] Original-login empty-history test GREEN in both profiles on production `0c6636255`; exact receipts in the [A ledger](classic-startup-a.md#rebased-acceptance-after-combatlog-rejection). Both startups report 36 unique / 38 occurrences, with the string.sub pair removed; only the disclosed marker-active-state pair is new after StoreUI-ID normalization.
 - [ ] Progress-bar visibility is not asserted: real secure startup does not expose that frame through the tested public globals or `getfenv` path. Parent approved removing only this lookup assertion; startup error rejection, empty queries, refilter completion and OnUpdate removal remain mandatory.
 - [ ] Populated history remains policy-blocked. Handoff `stage-wrath-unmasked/README.md` U4 and `stage-wrath-unmasked/U4-combatlog/POLICY.md` explicitly leave row order, cursor-zero semantics, tuple schema/arity and populated replay undecided. This fix makes none of those choices. Retire this temporary path when the authorized history model exists.
 

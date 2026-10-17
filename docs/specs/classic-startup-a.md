@@ -35,14 +35,27 @@ Finite data and existing modeled inputs required by the installed Vanilla startu
 
 - [x] Bounded runtime proof: Era and Anniversary each fail all six original consumers at test revision `fcd05ae2c`, then pass all six at production/test revision `9a454578d` (normal `sound,gui,casc,client-<profile>` libraries). This does not establish native or complete startup parity.
 - [x] Preservation: existing Mists cast colors (2), cast fade (1), class colors (2), honor (3), Retail plain globals (8) and social probes (17) pass. Retail `cargo check --no-default-features --features sound,gui,casc,client-retail` and `cargo fmt --check` pass on `9a454578d`.
-- [x] Separate sealed startup runs: both profiles report 38 unique / 46 total errors versus committed 92 / 98 baselines, exit 1. Original persisted CVars unchanged; each runtime uses a fresh byte-exact child XDG copy.
+- [x] Separate rebased sealed startup runs: both profiles report 36 unique / 38 total errors versus committed 92 / 98 baselines, exit 1. Original persisted CVars unchanged; each runtime uses a fresh byte-exact child XDG copy. The historical 38/46 receipt below was rejected for two new CombatLog records; [empty-history repair](classic-empty-combatlog-history.md) removes them.
 - [ ] Startup still fails. In particular CompactRaidFrameManager:84 reaches a different nil call than the bounded R12 fixture; attribution remains open.
 - [ ] Consumer cases load original Lua chunks and drive handlers on real widgets or presentation fixtures, not the whole startup/XML dependency graph. Full startup-order coverage remains open.
 - [ ] Watch login uses the existing three static legacy watches. Five/six capacity uses supplied UI-owned watch records, not six state-backed legacy quest memberships.
 - [ ] Native Vanilla class-enumeration indexing and native palette RGBA are not established. Compact enumeration is an explicit simulator choice grounded in the shipped nine-class set.
 - [ ] Existing item RGB values are reused, not newly acquired native measurements. Invalid-quality behavior is outside this startup contract.
 
-## Saved proof ledger
+## Rebased acceptance after CombatLog rejection
+
+`classic-startup` was rebased onto master `275f9f09b`. The module conflict retains both `currency_list` and the A modules; state merges retain master's added fields and A's shared host storage. Production `0c6636255` repairs only empty history; later commits change tests/docs only. Populated replay remains blocked.
+
+| Gate | Saved evidence under private classic-build root |
+|---|---|
+| New original-login RED | `classic-a-rebased-era-history-red-20261017T002354710646Z`, `classic-a-rebased-anniv-history-red-20261017T003746365651Z`: exact original :1705 → :610 → :597 → UIParent:381 chain |
+| Anniversary consumers | `classic-a-rebased-anniv-final-20261017T004617362770Z/six-consumers`: 6/6; `classic-a-anniv-history-final-20261017T005410144190Z/empty-history`: 1/1 |
+| Era consumers | `classic-a-rebased-era-final-20261017T010018428476Z`: six-consumers 6/6, empty-history 1/1 |
+| Startup | `{era,anniversary}-a-rebased-startup-summary.json`: each 36/38, no string.sub records; only new records are the explicitly disclosed R12 :84 pair after normalizing StoreUI frame IDs |
+
+Normal Anniversary binary/library revision `0c6636255`; Era revision `3c240bcc8` has identical production inputs. Final history test source `e2dab9508` removes only the parent-approved inaccessible progress-frame lookup; error, query, completion and OnUpdate assertions remain. Existing Mists/Retail class/palette/honor/plain-global preservation below remains attributed to its historical revision, not claimed as a fresh integrated-tree run.
+
+## Historical saved proof ledger (before rejection)
 
 Private evidence root: `/home/osso/.local/state/wow-ui-sim/handoff/classic-build/` (0700; report 0600). Builds use the assigned reusable `slot-3`, pressure-guarded launcher, emitted feature/artifact records and captured Cargo/rustc versions. No full test suite was run.
 
