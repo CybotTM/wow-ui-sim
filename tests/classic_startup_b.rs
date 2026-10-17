@@ -327,3 +327,51 @@ fn classic_b_r11_original_guild_initialization_and_row_selection_statements() {
         "assert(GetGuildRosterSelection() == 0); SetGuildRosterSelection(-1); assert(GetGuildRosterSelection() == 0); SetGuildRosterSelection(3); assert(GetGuildRosterSelection() == 0)",
     );
 }
+
+#[test]
+fn classic_b_r15_original_combat_log_toc_and_secure_isolation() {
+    let env = env(&[]);
+    env.set_screen_mode(ScreenKind::Game);
+    env.state().borrow_mut().addon_base_paths = vec![ui()];
+    wow_ui_sim::xml::register_intrinsic_templates();
+    for file in [
+        "Blizzard_FrameXMLBase/Classic/Constants.lua",
+        "Blizzard_CombatLogBase/Shared/CombatLogFilters.lua",
+        "Blizzard_CombatLogBase/Vanilla/CombatLogColors.lua",
+        "Blizzard_CombatLogBase/Blizzard_CombatLogBase.toc",
+    ] {
+        original(file);
+    }
+    let addons = discover_blizzard_startup_addons_for_screen(&ui(), ScreenKind::Game);
+    let last = addons
+        .iter()
+        .position(|addon| addon.name == "Blizzard_CombatLogBase")
+        .unwrap();
+    for addon in &addons[..=last] {
+        load_startup_addon(&env.loader_env(), &addon.toc_path, addon.kind, None).unwrap();
+    }
+    let errors = env.state().borrow().lua_errors.clone();
+    assert!(
+        !errors
+            .iter()
+            .any(|error| error.contains("Blizzard_CombatLogBase")),
+        "{errors:?}"
+    );
+    run_targeted(
+        &env,
+        r#"
+        local c = COMBATLOG_DEFAULT_COLORS.schoolColoring
+        assert(c[0].a == 1 and c[0].r == 1 and c[0].g == 1 and c[0].b == 1)
+        assert(c[SCHOOL_MASK_FIRE].r == 1 and c[SCHOOL_MASK_FIRE].g == .5 and c[SCHOOL_MASK_FIRE].b == 0)
+        assert(COMBATLOG_DEFAULT_COLORS.unitColoring[COMBATLOG_FILTER_MINE].r == .7)
+        classicBPublicOnly = 71
+        assert(rawget(__secureenv, 'classicBPublicOnly') == nil)
+    "#,
+    );
+    env.exec_rilua_secure("classicBSecureOnly = 19; assert(classicBPublicOnly == nil)")
+        .unwrap();
+    run_targeted(
+        &env,
+        "assert(rawget(_G, 'classicBSecureOnly') == nil and __secureenv.classicBSecureOnly == 19)",
+    );
+}
