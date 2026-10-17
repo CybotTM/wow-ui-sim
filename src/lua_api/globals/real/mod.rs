@@ -35,6 +35,7 @@ pub mod input_interface;
 ))]
 pub mod instanced_identity;
 pub mod item_legacy;
+pub(crate) mod legacy_guild_selection;
 pub mod locale_info;
 pub mod loot_method;
 pub mod math_extensions;

@@ -42,6 +42,7 @@ macro_rules! build_empty_sim_state {
             encounter_timeline: crate::c_api::c_encounter_timeline::Timeline::default(),
             scripts: ScriptRegistry::default(),
             cvars: CVarStorage::new(),
+            guild_roster_selection: 0,
             console_output: $collections.console_output,
             timers: $collections.timers,
             rilua_timers: ::std::collections::VecDeque::new(),

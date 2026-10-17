@@ -72,6 +72,8 @@ pub struct SimState {
         Option<crate::c_api::c_party_info::countdown::CountdownRequest>,
     pub quest_portrait_state: Option<QuestPortraitState>,
     pub cvars: CVarStorage,
+    /// Zero means none; other values are one-based guild roster indexes.
+    pub guild_roster_selection: usize,
     pub tooltips: HashMap<u64, TooltipData>,
     /// Explicit exact-link fixtures only; initially empty, no catalog producer.
     #[cfg(feature = "retail-12-0-0")]

@@ -324,6 +324,7 @@ fn register_progression_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> 
         crate::client_profile::ClientProfile::Era
             | crate::client_profile::ClientProfile::Anniversary
     ) {
+        super::real::legacy_guild_selection::register_all(lua)?;
         crate::lua_api::workarounds::register_classic_startup_defaults(lua)?;
     }
     super::real::xp_honor_rest::register_all(lua)?;
