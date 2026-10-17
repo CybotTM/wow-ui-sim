@@ -9,6 +9,24 @@ mod tooltip_full_env_helpers;
 
 use tooltip_full_env_helpers::{refresh_aura_frames, setup_full_env};
 
+#[test]
+fn original_color_manager_bag_quality_uses_default_without_override() {
+    let env = setup_full_env();
+    env.exec(
+        r#"
+        local quality = Enum.ItemQuality.Rare
+        local expected = BAG_ITEM_QUALITY_COLORS[quality]
+        assert(expected ~= nil, "fixture must provide the original default bag color")
+        assert(ITEM_QUALITY_OVERRIDES[quality] ~= nil, "fixture must reach the override query")
+        assert(ColorManager.GetColorDataForBagItemQuality(quality) == expected)
+        assert(rawget(C_ColorOverrides, "GetColorOverrideInfo") ~= nil)
+        assert(select("#", C_ColorOverrides.GetColorOverrideInfo(ITEM_QUALITY_OVERRIDES[quality])) == 1)
+        assert(C_ColorOverrides.GetColorOverrideInfo(ITEM_QUALITY_OVERRIDES[quality]) == nil)
+        "#,
+    )
+    .expect("original ColorManager must use the default color without an override");
+}
+
 fn open_character_panel(env: &wow_ui_sim::lua_api::WowLuaEnv) {
     click_character_micro_button(env);
     sync_character_panel_title_text(env);
