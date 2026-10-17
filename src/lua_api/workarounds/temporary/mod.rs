@@ -1,5 +1,7 @@
 //! Temporary Lua workarounds with explicit retirement paths.
 
+pub(crate) mod classic_startup_defaults;
+
 pub(crate) mod session_exit_defaults;
 
 pub(crate) mod account_store_set_storefront;

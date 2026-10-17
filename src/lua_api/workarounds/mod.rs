@@ -5,6 +5,7 @@ mod permanent;
 mod runtime_surfaces;
 mod temporary;
 
+pub(crate) use temporary::classic_startup_defaults::register_all as register_classic_startup_defaults;
 pub(crate) use temporary::client_info_defaults::CLASSIC_EXPANSION_LEVEL;
 pub(crate) use temporary::environment_cleanup_restore::restore_post_cleanup_globals;
 #[cfg(not(feature = "retail-12-0-0"))]

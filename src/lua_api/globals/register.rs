@@ -319,6 +319,13 @@ fn register_action_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn register_progression_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Era
+            | crate::client_profile::ClientProfile::Anniversary
+    ) {
+        crate::lua_api::workarounds::register_classic_startup_defaults(lua)?;
+    }
     super::real::xp_honor_rest::register_all(lua)?;
     #[cfg(not(feature = "retail-12-0-0"))]
     super::real::spell_tabs::register_all(lua)?;
