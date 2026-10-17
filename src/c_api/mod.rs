@@ -133,7 +133,6 @@ pub mod c_lfg_list_policy;
 pub mod c_lfg_list_search;
 #[cfg(feature = "retail-12-0-0")]
 mod c_limited_input;
-#[cfg(any(feature = "retail-12-0-0", feature = "client-mists"))]
 pub(crate) mod c_log;
 pub mod c_login;
 pub mod c_loot_history;

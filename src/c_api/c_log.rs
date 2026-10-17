@@ -8,9 +8,20 @@ use rilua::vm::state::LuaState;
 
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = ensure_namespace(state, "C_Log")?;
-    #[cfg(feature = "client-mists")]
-    table_set_rust_fn_static(state, namespace, "LogErrorMessage", log_message)?;
     table_set_rust_fn_static(state, namespace, "LogMessage", log_message)
+}
+
+pub(crate) fn register_classic(state: &mut LuaState) -> LuaResult<()> {
+    use crate::client_profile::{ACTIVE, ClientProfile};
+    if !matches!(
+        ACTIVE,
+        ClientProfile::Mists | ClientProfile::Era | ClientProfile::Anniversary
+    ) {
+        return Ok(());
+    }
+    register(state)?;
+    let namespace = ensure_namespace(state, "C_Log")?;
+    table_set_rust_fn_static(state, namespace, "LogErrorMessage", log_message)
 }
 
 fn log_message(state: &mut LuaState) -> LuaResult<u32> {
