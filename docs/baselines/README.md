@@ -52,11 +52,13 @@ error counts and release proof diagnostics.
 
 ## Era / Anniversary — current baseline, 2026-10-17
 
-At `781a26fef` (Classic B merged on top of Classic A and Retail 70448), both profiles report **24 records / 56 occurrences, exit1, FAIL**. The JSON is the byte-exact stdout captured by the rebase gates; each `.meta.json` holds the details. Open items:
-- R20: `ShouldKnowUnitHealth` at `UnitFrame.lua:737` is missing. The producer is held for a user decision, and its tests are off master. The `CombatFeedback` nil record is downstream of R20.
-- The skill and timer pairs are blocked on R10/R14, which depend on wrath-fixes.
+At source `492bae7b6a59eac1af2a294f37d9954f872b08e6`, based on master `483701ae4`, both profiles report **20 records / 52 occurrences, exit1, FAIL**. Each JSON is byte-identical to its own fresh final startup stdout, including raw stacks, generated identities and trailing LF; metadata binds the capture, sealed binary and command.
 
-Candidate C removed the StoreUI cursor pair. The earlier counts (92/98 below, then 36/38 after Classic A) are historical.
+Against master's 24/56 inventory, each profile removes exactly four single-occurrence records: plain and reporter-wrapped SkillFrame.lua:185 nil-`skillRank` failures (R10), and plain and reporter-wrapped QuestTimerFrame OnEvent → original TimeUtil `floor(number expected)` failures (R14). Comparing whole messages/stacks with only `@generated/<tag>/<hash>` chunk hashes normalized finds **zero added records, zero retained-count changes and zero retained-stack changes**. Remaining R20 `ShouldKnowUnitHealth`/`CombatFeedback` failures are unchanged and out of scope; no R20 fix is credited.
+
+All 19 planned final commands completed: Era/Anniversary consumer GREEN 3/3 each; unchanged Wrath skill 1/1, sound 6/6, loot 2/2 and RAF 2/2; three profile `cargo check --tests`; fmt; three fresh startup captures. Wrath remains 3/3 against master; its baseline and metadata are untouched here, with cursor-flush owned separately. All nine original-CVar stat/hash guards passed. Existing UnitRole dead-code warnings remain; Wrath check also reports the existing unused `rebuild_hittable_cache` import. Not warning-free, clean-startup, native, GUI, full-suite or fresh seven-profile acceptance.
+
+Evidence: `/home/osso/.local/state/wow-ui-sim/handoff/classic-r10r14/final/accepted-final-output-inspection.json` and per-profile `*-full-stack-acceptance.json`, containing raw before/after stacks and every classification. Existing external profile caches were consumed with CASC disabled, not independently resealed or authenticated. Earlier 24/56 (Classic B), 36/38 (Classic A), and 92/98 inventories below are historical; Candidate C's StoreUI removals predate this comparison.
 
 ## Era / Anniversary — actual acquisition and startup, 2026-10-16
 
