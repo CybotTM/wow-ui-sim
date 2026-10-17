@@ -1,12 +1,12 @@
 # Wrath legacy friend count tuple
 
-Source-only proposed Wrath simulator contract (2026-10-16), not native-client evidence.
+Wrath simulator projection of existing friend-list state, not native-client evidence.
 
 ## What it must do
 
-- [ ] Global GetNumFriends returns exactly total, online from existing C_FriendList social state, Wrath only.
-- [ ] Original FriendsMicroButton subtree displays 2, 1 and 0 for supplied three/two-online, three/one-online and empty records respectively.
-- [ ] Namespace and legacy counts agree; no independent friend list and no replacement count getters in tests.
+- [x] Global GetNumFriends returns exactly total, online from existing C_FriendList social state, Wrath only.
+- [x] Original FriendsMicroButton subtree displays 2, 1 and 0 for supplied three/two-online, three/one-online and empty records respectively.
+- [x] Namespace and legacy counts agree; no independent friend list and no replacement count getters in tests.
 
 ## How it works
 
@@ -23,9 +23,9 @@ Source-only proposed Wrath simulator contract (2026-10-16), not native-client ev
 
 ## Known gaps (current cycle)
 
-- [ ] No executed RED/GREEN or whole FloatingChatFrame startup acceptance.
+- [x] Original FriendsMicroButton RED reaches generated bcdd9c3815ef6147:8 (FloatingChatFrame.xml:947). All supplied/empty count fixtures pass in the d11a25154 sealed Wrath43 gate; that startup record disappears. This is not complete FloatingChatFrame/profile acceptance.
 - [ ] Existing BNGetNumFriends temporary zero policy is not a modeled Battle.net count. Combined two-domain populated behavior remains unsupported.
 
 ## Out of scope
 
-Blizzard/vendor edits, native parity, full profile acceptance, builds and runtime execution during staging.
+Blizzard/vendor edits, native parity and full-profile acceptance.

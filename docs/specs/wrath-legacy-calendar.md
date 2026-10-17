@@ -1,12 +1,12 @@
 # Wrath legacy calendar projections
 
-Source-only proposed Wrath simulator contract (2026-10-16), not native-client evidence.
+Wrath simulator projections over existing temporary sources, not native-client evidence.
 
 ## What it must do
 
-- [ ] Publish CalendarGetDate before original GameTime.lua captures it; return weekday, month, monthDay, year from the existing C_DateAndTime producer.
-- [ ] Publish CalendarGetNumPendingInvites from C_Calendar, without independent defaults or UI-field seeding.
-- [ ] Original GameTime.xml OnLoad displays the existing default day; original PLAYER_ENTERING_WORLD clears empty invitations and glow state.
+- [x] Publish CalendarGetDate before original GameTime.lua captures it; return weekday, month, monthDay, year from the existing C_DateAndTime producer.
+- [x] Publish CalendarGetNumPendingInvites from C_Calendar, without independent defaults or UI-field seeding.
+- [x] Original GameTime.xml OnLoad displays the existing default day; original PLAYER_ENTERING_WORLD clears empty invitations and glow state.
 
 ## How it works
 
@@ -23,9 +23,9 @@ Source-only proposed Wrath simulator contract (2026-10-16), not native-client ev
 
 ## Known gaps (current cycle)
 
-- [ ] No executed RED/GREEN or startup acceptance.
+- [x] Original-consumer RED reaches GameTime.lua:247 and independently :157. Both tests pass in the d11a25154 sealed Wrath43 gate; both startup records disappear in the 22/30 → 18/24 delta. This remains a failing whole startup.
 - [ ] Clock and invitation state are unmodeled: fixed 2026-04-14, zero pending invitations inherited from existing producers. Changed-date/populated-invite behavior is not covered; retire these adapters alongside the defaults when server calendar state is modeled.
 
 ## Out of scope
 
-Blizzard/vendor edits, native parity, full profile acceptance, builds and runtime execution during staging.
+Blizzard/vendor edits, native parity and full-profile acceptance.
