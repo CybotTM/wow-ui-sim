@@ -80,6 +80,36 @@ fn wrath_original_worldmap_onload_reads_empty_debug_objects() {
 }
 
 #[test]
+fn wrath_original_worldmap_onload_hides_empty_floor_selector() {
+    let env = load_original_wrath_startup();
+    let errors: Vec<_> = env
+        .state()
+        .borrow()
+        .lua_errors
+        .iter()
+        .filter(|message| message.contains("WorldMapFrame.lua:592"))
+        .cloned()
+        .collect();
+    assert!(
+        errors.is_empty(),
+        "original OnLoad dungeon-floor count: {errors:?}"
+    );
+    env.exec(
+        r#"
+        assert(GetNumDungeonMapLevels() == 0)
+        WorldMapLevelDropDown:Show()
+        WorldMapLevelUpButton:Show()
+        WorldMapLevelDownButton:Show()
+        WorldMapLevelDropDown_Update()
+        assert(not WorldMapLevelDropDown:IsShown())
+        assert(not WorldMapLevelUpButton:IsShown())
+        assert(not WorldMapLevelDownButton:IsShown())
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn wrath_original_player_world_entry_hides_unsupplied_voice_indicator() {
     let env = load_original_wrath_startup();
     let errors: Vec<_> = env
