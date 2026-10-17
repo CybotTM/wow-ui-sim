@@ -521,15 +521,16 @@ fn classic_b_r20_original_unit_load_and_feedback_use_empty_health_knowledge() {
     // Invoke the real XML OnLoad and pooled party UpdateMember independently:
     // a captured earlier startup error must not hide either caller boundary.
     env.exec(r#"
-        local bar = OverrideActionBar.HealthBar
+        local bar = OverrideActionBar.healthBar
         R20OverrideOK, R20OverrideError = pcall(bar:GetScript('OnLoad'), bar)
         R20PartyOK, R20PartyError = pcall(PartyFrame.MemberFrame1.UpdateMember, PartyFrame.MemberFrame1)
     "#).unwrap();
     env.fire_on_update(0.05).unwrap();
     let consumer_result = env.exec(
         r#"
-        assert(R20OverrideOK, 'OverrideActionBar OnLoad: '..tostring(R20OverrideError))
-        assert(R20PartyOK, 'party UpdateMember: '..tostring(R20PartyError))
+        assert(R20OverrideOK and R20PartyOK,
+            'OverrideActionBar OnLoad: '..tostring(R20OverrideError)..
+            '\nparty UpdateMember: '..tostring(R20PartyError))
     "#,
     );
     eprintln!("original consumer result: {consumer_result:?}");
