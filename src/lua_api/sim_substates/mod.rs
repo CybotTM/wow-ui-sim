@@ -511,9 +511,13 @@ pub struct LootMethodState {
 impl Default for LootMethodState {
     fn default() -> Self {
         Self {
-            // Retail's modern default is personal loot; classic-era
-            // addons still probe GetLootMethod, so keep the token there.
-            method: "personalloot".into(),
+            // Approved Wrath simulator default; see wrath-initial-loot spec.
+            // Other profiles retain their existing initial state.
+            method: match crate::client_profile::ACTIVE {
+                crate::client_profile::ClientProfile::Wrath => "freeforall",
+                _ => "personalloot",
+            }
+            .into(),
             party_master_index: 0,
             raid_master_index: 0,
             threshold: 2, // Uncommon — retail's default master-loot threshold.
