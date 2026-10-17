@@ -498,6 +498,11 @@ fn classic_b_r19_original_vanilla_rewards_skip_tbc_only_children() {
 #[test]
 fn classic_b_r20_original_unit_load_and_feedback_use_empty_health_knowledge() {
     let env = env(&[]);
+    {
+        let mut state = env.state().borrow_mut();
+        state.player.health = 250;
+        state.player.health_max = 500;
+    }
     for file in [
         "Blizzard_UnitFrame/Classic/UnitFrame.lua",
         "Blizzard_UnitFrame/Classic/PlayerFrame.lua",
@@ -532,6 +537,14 @@ fn classic_b_r20_original_unit_load_and_feedback_use_empty_health_knowledge() {
             assert(ShouldKnowUnitHealth(unit) == false)
         end
         assert(PlayerFrame.feedbackText and PetFrame.feedbackText)
+        local health = PlayerFrame_GetHealthBar()
+        health.forceShow = true
+        SetCVar('statusTextDisplay', 'NUMERIC')
+        UnitFrameHealthBar_Update(health, 'player')
+        assert(health.showPercentage and not health.forceHideText)
+        local text = assert(health.TextString:GetText())
+        assert(text:find('50%', 1, true), text)
+        assert(not text:find('250', 1, true) and not text:find('500', 1, true), text)
         CombatFeedback_OnUpdate(PlayerFrame, .05)
         CombatFeedback_OnUpdate(PetFrame, .05)
     "#,
