@@ -7,6 +7,40 @@ use std::rc::Rc;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::font::{DEFAULT_WOW_FONT, WowFontSystem};
 
+fn load_original_debugtools(env: &WowLuaEnv) {
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc().unwrap();
+    let framexml = toc.parent().unwrap();
+    let directory = tempfile::tempdir().unwrap();
+    let mut contents = String::from("## Interface: 30300\n## AllowLoad: Game\n");
+    // Only original foundations: unrelated later FrameXML load errors would warm
+    // the hidden box and erase the cold event-listener scheduling boundary.
+    for name in [
+        "GlobalStrings.lua",
+        "Constants.lua",
+        "Fonts.xml",
+        "FontStyles.xml",
+        "BasicControls.xml",
+        "UIPanelTemplates.lua",
+        "UIPanelTemplates.xml",
+    ] {
+        let path = framexml.join(name);
+        let parents = "../".repeat(directory.path().components().count() - 1);
+        contents.push_str(&format!(
+            "{parents}{}\n",
+            path.strip_prefix("/").unwrap().display()
+        ));
+    }
+    let fixture_toc = directory.path().join("CursorFoundations.toc");
+    std::fs::write(&fixture_toc, contents).unwrap();
+    wow_ui_sim::loader::load_addon(&env.loader_env(), &fixture_toc).unwrap();
+    let debugtools = framexml
+        .parent()
+        .unwrap()
+        .join("AddOns/Blizzard_DebugTools/Blizzard_DebugTools.toc");
+    wow_ui_sim::loader::load_addon(&env.loader_env(), &debugtools).unwrap();
+    assert!(env.state().borrow().lua_errors.is_empty());
+}
+
 #[test]
 fn original_hidden_debugtools_cursor_flushes_between_event_listeners() {
     let fonts = WowFontSystem::new_without_casc();
@@ -15,14 +49,13 @@ fn original_hidden_debugtools_cursor_flushes_between_event_listeners() {
     let env = WowLuaEnv::new().unwrap();
     env.set_screen_size(1600.0, 1200.0);
     env.set_font_system(Rc::new(RefCell::new(fonts)));
-    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc().unwrap();
-    wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
+    load_original_debugtools(&env);
     env.exec(include_str!("wrath_event_cursor_flush.lua"))
         .expect("cold hidden original DebugTools fixture");
 
     // No tick, setter flush, seeded fields, or replacement Blizzard handlers.
     env.fire_event("CURSOR_FLUSH_TEST").unwrap();
-    env.exec("debug.sethook() ").unwrap();
+    env.exec("debug.sethook()").unwrap();
     let errors = env.state().borrow().lua_errors.clone();
     eprintln!("event-listener errors: {errors:#?}");
     env.exec(
