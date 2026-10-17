@@ -493,7 +493,8 @@ pub struct FactionEntry {
 }
 
 /// Party loot-method state — drives `GetLootMethod()` and
-/// `GetMasterLooterThreshold()`. `method` is the retail token
+/// `GetMasterLooterThreshold()` (and Wrath's `GetLootThreshold()`).
+/// `method` is the retail token
 /// (`"group"`, `"master"`, `"freeforall"`, `"roundrobin"`,
 /// `"needbeforegreed"`, `"personalloot"`). `party_master_index` /
 /// `raid_master_index` are 1-based loot-candidate indices that matter
@@ -520,7 +521,9 @@ impl Default for LootMethodState {
             .into(),
             party_master_index: 0,
             raid_master_index: 0,
-            threshold: 2, // Uncommon — retail's default master-loot threshold.
+            // Wrath: approved temporary Uncommon fixture, not native parity.
+            // Retire this fixture when native group loot threshold state is modeled.
+            threshold: 2,
         }
     }
 }

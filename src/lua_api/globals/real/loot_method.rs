@@ -56,6 +56,8 @@ fn request_party_loot_method(state: &mut LuaState) -> LuaResult<u32> {
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetLootMethod", get_loot_method)?;
     LuaApiMut::register_function(lua, "GetMasterLooterThreshold", get_master_looter_threshold)?;
+    #[cfg(feature = "client-wrath")]
+    LuaApiMut::register_function(lua, "GetLootThreshold", get_master_looter_threshold)?;
     LuaApiMut::register_function(lua, "RequestPartyLootMethod", request_party_loot_method)?;
     Ok(())
 }

@@ -6,8 +6,13 @@ wowless Wrath Classic data, not a native observation. Decision receipt:
 
 Documented simulator fixture: a fresh client-wrath LootMethodState starts with
 method `freeforall`. Other profiles retain their existing initial token.
-Existing master indices, thresholds, state-backed readers and mutations remain
-unchanged. No solo-time override, setter change, or group-leave behavior is added.
+Existing master indices, state-backed readers and mutations remain unchanged.
+Wrath `GetLootThreshold()` reads the existing `LootMethodState.threshold`, settable
+through the existing Rust admin/test state path. Its initial 2 (Uncommon) is an
+approved temporary simulator default, not native parity (2026-10-17 receipt:
+`~/.local/state/wow-ui-sim/handoff/user-decisions-wrath-loot-threshold-20261017.json`).
+Retire this fixture when native group loot threshold state is modeled.
+No solo-time override, setter change, or group-leave behavior is added.
 This fixture is not a native initial-state or tuple-parity claim.
 
 Evidence: research-loot-sound/report.md in the private staging handoff identifies
@@ -23,6 +28,8 @@ original Wrath FrameXML/UnitPopup.lua's accepted tokens. No native capture.
 - [ ] Explicit master state preserves party index 1 and raid index 3.
 - [ ] Original RaidOptionsFrame_UpdatePartyFrames hides unused real siblings
   and shows the represented party member without captured Lua errors.
+- [ ] All four dropdowns and the original loot-threshold menu resolve to
+  `ITEM_QUALITY2_DESC`; an explicit threshold 4 update resolves to `ITEM_QUALITY4_DESC`.
 
 Behavioral RED reached PartyMemberFrame1 creation at original UnitPopup.lua:223
 before producer `6dab184f6`. After that approved producer, both original party
@@ -37,7 +44,8 @@ including nine newly unmasked :226 records (2026-10-17).
 
 ## Implementation inventory
 
-- `src/lua_api/sim_substates/mod.rs`: approved initial token selected by active profile.
+- `src/lua_api/sim_substates/mod.rs`: approved initial token and threshold fixture.
+- `src/lua_api/globals/real/loot_method.rs`: Wrath-only legacy threshold reader.
 
 ## Tests asserting this spec
 
@@ -45,9 +53,9 @@ including nine newly unmasked :226 records (2026-10-17).
 
 ## Known gaps (current cycle)
 
-- [ ] Resolve the missing GetLootThreshold surface before completing either
-  party-flow test. Adding an adapter or temporary producer is not covered by
-  the approved initial-token patch; no additional implementation was inferred.
+Native initial threshold and group-transition parity remain unverified. The
+2026-10-17 decision authorizes the state-backed reader with temporary default 2,
+not a new group-loot lifecycle model.
 
 ## Out of scope
 
