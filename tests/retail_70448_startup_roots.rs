@@ -75,6 +75,55 @@ fn combat_audio_pulse_range_matches_70448_documented_command_bounds() {
 }
 
 #[test]
+fn original_pulse_health_command_registers_with_shipped_retail_strings() {
+    let env = WowLuaEnv::new().unwrap();
+    let root = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
+    let source =
+        std::fs::read_to_string(root.join("Blizzard_ChatFrame/Shared/TextToSpeechCommands.lua"))
+            .unwrap();
+    let block = source
+        .split_once("-- Pulse Your Health")
+        .unwrap()
+        .1
+        .split_once("-- Pulse Your Health Volume")
+        .unwrap()
+        .0;
+    env.exec(
+        r#"
+        CAACommands = { AddCommand = function(_, name, handler, _, _, narrated, min, max)
+            pulseName = string.lower(name)
+            assert(type(narrated) == 'string')
+            pulseHandler, pulseMin, pulseMax = handler, min, max
+        end }
+        CombatAudioAlertUtil = {
+            EnumeratePulseHealthPercentInfo = function() return ipairs({}) end,
+            GetPulseHealthPercentInfo = function(value) return { str = tostring(value) } end,
+        }
+        function GetInitialSuboptionFailureStrings() return 'invalid', 'invalid' end
+        pulseCommand = { GetCommands = function() return {
+            SpeakConfirmation = function(_, text) pulseConfirmation = text end,
+        } end }
+        "#,
+    )
+    .unwrap();
+    env.exec(block).unwrap();
+    env.exec(
+        r#"
+        assert(pulseName == 'pulseyourhealth' and pulseMin == 0 and pulseMax == 9)
+        for value = 0, 9 do
+            assert(pulseHandler(pulseCommand, tostring(value)))
+            assert(GetCVar('CAAPulsePlayerHealthPercent') == tostring(value))
+        end
+        for _, value in ipairs({'-1', '10', 'invalid'}) do
+            assert(not pulseHandler(pulseCommand, value))
+            assert(GetCVar('CAAPulsePlayerHealthPercent') == '9')
+        end
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn age_verification_event_registers_delivers_and_rejects_invented_suffix() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(
