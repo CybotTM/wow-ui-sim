@@ -155,12 +155,14 @@ fn combo_points_native_frame_updates_with_the_cvar_enabled() {
             end
             return count
         end
+        local onEvent = ComboFrame:GetScript('OnEvent')
+        assert(type(onEvent) == 'function')
         A_Admin.SetPlayerPower(3, 5, Enum.PowerType.ComboPoints)
-        FireEvent('PLAYER_ENTERING_WORLD')
+        onEvent(ComboFrame, 'PLAYER_ENTERING_WORLD')
         assert(ComboFrame:IsShown())
         assert(filled_points() == 3)
         A_Admin.SetPlayerPower(0, 5, Enum.PowerType.ComboPoints)
-        FireEvent('PLAYER_ENTERING_WORLD')
+        onEvent(ComboFrame, 'PLAYER_ENTERING_WORLD')
         assert(not ComboFrame:IsShown())
         assert(filled_points() == 0)
         "#,
