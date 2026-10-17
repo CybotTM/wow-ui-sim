@@ -494,3 +494,46 @@ fn classic_b_r19_original_vanilla_rewards_skip_tbc_only_children() {
         .collect();
     assert!(errors.is_empty(), "{errors:?}");
 }
+
+#[test]
+fn classic_b_r20_original_unit_load_and_feedback_use_empty_health_knowledge() {
+    let env = env(&[]);
+    for file in [
+        "Blizzard_UnitFrame/Classic/UnitFrame.lua",
+        "Blizzard_UnitFrame/Classic/PlayerFrame.lua",
+        "Blizzard_FrameXML/Classic/CombatFeedback.lua",
+    ] {
+        original(file);
+    }
+    env.set_screen_mode(ScreenKind::Game);
+    env.state().borrow_mut().addon_base_paths = vec![ui()];
+    wow_ui_sim::xml::register_intrinsic_templates();
+    for addon in discover_blizzard_startup_addons_for_screen(&ui(), ScreenKind::Game) {
+        load_startup_addon(&env.loader_env(), &addon.toc_path, addon.kind, None).unwrap();
+    }
+    env.apply_post_load_workarounds();
+    wow_ui_sim::startup::fire_startup_events_for_screen(&env, ScreenKind::Game);
+    env.fire_on_update(0.05).unwrap();
+    let errors: Vec<_> = env
+        .state()
+        .borrow()
+        .lua_errors
+        .iter()
+        .filter(|error| {
+            error.contains("UnitFrame.lua:737") || error.contains("CombatFeedback.lua:104")
+        })
+        .cloned()
+        .collect();
+    assert!(errors.is_empty(), "{errors:?}");
+    run_targeted(
+        &env,
+        r#"
+        for _, unit in ipairs({'player', 'pet', 'target', 'party1'}) do
+            assert(ShouldKnowUnitHealth(unit) == false)
+        end
+        assert(PlayerFrame.feedbackText and PetFrame.feedbackText)
+        CombatFeedback_OnUpdate(PlayerFrame, .05)
+        CombatFeedback_OnUpdate(PetFrame, .05)
+    "#,
+    );
+}
