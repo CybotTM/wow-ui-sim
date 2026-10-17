@@ -248,6 +248,16 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         for (name, func) in LIVE_QUEST_GLOBALS {
             LuaApiMut::register_function(lua, name, *func)?;
         }
+    } else if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Era
+            | crate::client_profile::ClientProfile::Anniversary
+    ) {
+        LuaApiMut::register_function(
+            lua,
+            "GetQuestBackgroundMaterial",
+            get_quest_background_material,
+        )?;
     }
     let state = lua.state_mut();
     register_quest_info_handlers(state)?;

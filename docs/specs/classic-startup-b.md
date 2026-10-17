@@ -9,6 +9,8 @@ Audited startup roots beyond [A](classic-startup-a.md). [Shared shipped strings]
 - [ ] R11: project one-based roster selection over the existing guild member vector; zero means none, invalid/stale selection projects zero. This reset policy is approved simulator policy, not native evidence.
 - [ ] R15: Classic CombatLogBase consumes public FrameXML masks without being replayed into the isolated secure environment; original color/filter values exist, public/secure writes remain isolated.
 
+- [ ] R17: Publish only the existing real quest-background getter on Era/Anniversary. Original QuestFrame chooses Parchment for absent material and receives an explicit supplied map value unchanged; do not enable the rest of LIVE_QUEST_GLOBALS.
+
 ## How it works
 
 - [Addon pipeline](../addon-loading-pipeline.md)
@@ -21,6 +23,8 @@ Audited startup roots beyond [A](classic-startup-a.md). [Shared shipped strings]
 - R7/R8/R9: `src/lua_api/workarounds/temporary/classic_startup_defaults.rs` — R7 fresh empty choices, R8 numeric zero loot, R9 nil tracking texture.
 - R11: `src/lua_api/globals/real/legacy_guild_selection.rs` — existing guild-vector selection, zero/invalid/stale→none policy.
 
+- R17: `src/lua_api/globals/quest_surface/register.rs` — narrow publication of existing selected-quest map getter.
+
 ## Tests asserting this spec
 
 `tests/classic_startup_b.rs` contains separate original consumer cases with `classic_startup_b_pins.tsv`. Both-profile RED observed: R5 startup discovers forced Transmog; R7 nil collection length; R8 nil numeric bound; R9 missing global; R11 missing selection API; R15 CombatLogBase replay error. Independent required-LoD preservation passes before producer. Tests/commits remain root-specific; groups share one sealed normal library without repeating logical tests.
@@ -30,7 +34,7 @@ Audited startup roots beyond [A](classic-startup-a.md). [Shared shipped strings]
 - [ ] GREEN, preservation and final startup capture pending.
 - [ ] R10 shared skills and R14 shared zero-result timers await wrath-fixes landing; no duplicate model/producer introduced.
 - [ ] Replacing temporary domains with real reward/roll/tracking/timer state is required before populated claims. Retire each endpoint when its backing system exists.
-- [ ] Main-classified unmasked quest-material and reputation-label records remain disclosed, not fixed by this spec. R16 Store cursor attribution remains unstaged.
+- [ ] R17 quest-material records were separately attributed and authorized; GREEN pending. R18 reputation-fixture scoping is authorized but producer pending. Historical unmasking disclosure remains; R16 Store cursor attribution stays unstaged.
 
 ## Out of scope
 
