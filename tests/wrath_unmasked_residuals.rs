@@ -90,14 +90,15 @@ fn wrath_unmasked_original_worldmap_empty_overlays_hide_stale_textures() {
             _G['WorldMapOverlay'..i] = WorldMapDetailFrame:CreateTexture()
             _G['WorldMapOverlay'..i]:Show()
         end
-        -- Execute the complete unchanged function. The known next unsupported
-        -- debug-map capability is not replaced or credited as repaired here.
+        -- Execute the complete unchanged function. Debug-map availability is
+        -- now approved false; the next debug-object catalog is still unmodeled.
         local ok, err = pcall(WorldMapFrame_Update)
         assert(not WorldMapOverlay1:IsShown(), tostring(err))
         assert(not WorldMapOverlay2:IsShown(), tostring(err))
         assert(GetNumMapOverlays() == 0)
-        assert(not ok and type(HasDebugZoneMap) == 'nil', tostring(err))
-        print('Bounded overlay update stops at unsupported debug-map capability:', err)
+        assert(HasDebugZoneMap() == false)
+        assert(not ok and type(GetNumMapDebugObjects) == 'nil', tostring(err))
+        print('Bounded overlay update stops at unsupported debug-object catalog:', err)
         "#,
     );
 }
