@@ -26,6 +26,12 @@ documentation; it does not claim native cooldown lifecycle parity.
 Wrath `GetPartyMember(index)` reads the existing active-group flag and supplied
 party-member list. Only occupied indices 1–4 in an active group return true;
 other indices/inactive groups return false. No new party state or default is added.
+Wrath `GetVoiceStatus(unit, mode)` / `GetMuteStatus(unit, mode)` read explicit
+per-unit/channel-mode presentation entries beside `VoiceChatState`; absent entries
+return false. Modes remain distinct (`party`, `raid`, `Battleground`), as selected
+by the original party-frame consumer. Both values are booleans, not numeric flags.
+Existing channel snapshots have no unit-to-member mapping carrying both flags;
+this small legacy input does not implement voice transport or native parity.
 No solo-time override, setter change, or group-leave behavior is added.
 This fixture is not a native initial-state or tuple-parity claim.
 
@@ -47,6 +53,8 @@ original Wrath FrameXML/UnitPopup.lua's accepted tokens. No native capture.
 - [ ] Original opt-out menu text reflects unsupplied false and explicit true state.
 - [ ] A second supplied member reaches the original shown-frame path; disabling
   the group makes the same frame hide.
+- [ ] Supplied voice-enabled/muted flags reach the original speaker/mute icons;
+  absent flags hide them, and another mode does not inherit the party selection.
 - [ ] Original RAF summon text has no cooldown suffix for unsupplied `(0, 0)`;
   supplied start/duration reaches its formatted remaining-time label.
 - [ ] Retail C API returns documented start/duration/enabled fields; original
@@ -70,6 +78,7 @@ including nine newly unmasked :226 records (2026-10-17).
 - `src/lua_api/globals/real/loot_method.rs`: Wrath-only legacy threshold and opt-out readers.
 - `src/c_api/c_recruit_a_friend.rs`: shared explicit cooldown snapshot and reader.
 - `src/lua_api/globals/real/wrath_startup_queries.rs`: existing-state party membership reader.
+- `src/lua_api/globals/real/wrath_voice.rs`: explicit legacy voice presentation input/readers.
 - `src/lua_api/globals/real/recruit_a_friend.rs`: Wrath legacy cooldown registration.
 
 ## Tests asserting this spec

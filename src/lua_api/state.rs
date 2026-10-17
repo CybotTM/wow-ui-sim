@@ -621,6 +621,8 @@ macro_rules! build_empty_sim_state {
             party_leader_index: None,
             ready_check: ReadyCheckState::default(),
             voice_chat: VoiceChatState::default(),
+            #[cfg(feature = "client-wrath")]
+            legacy_unit_voice: HashMap::new(),
             #[cfg(feature = "retail-12-0-5")]
             voice_channels: Vec::new(),
             #[cfg(feature = "retail-12-0-5")]

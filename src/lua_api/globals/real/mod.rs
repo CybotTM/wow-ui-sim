@@ -118,4 +118,6 @@ pub mod wrath_legacy_lfg;
 pub mod wrath_legacy_state;
 #[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_startup_queries;
+#[cfg(feature = "client-wrath")]
+pub mod wrath_voice;
 pub mod xp_honor_rest;

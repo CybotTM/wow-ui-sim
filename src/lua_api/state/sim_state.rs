@@ -743,6 +743,10 @@ pub struct SimState {
     pub party_leader_index: Option<usize>,
     pub ready_check: ReadyCheckState,
     pub voice_chat: VoiceChatState,
+    /// Explicit (unit token, channel mode) legacy presentation inputs.
+    #[cfg(feature = "client-wrath")]
+    pub legacy_unit_voice:
+        HashMap<(String, String), crate::lua_api::globals::real::wrath_voice::LegacyUnitVoice>,
     #[cfg(feature = "retail-12-0-5")]
     pub voice_channels: Vec<crate::c_api::c_voice_chat_channels::VoiceChannel>,
     #[cfg(feature = "retail-12-0-5")]
