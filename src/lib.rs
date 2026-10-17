@@ -47,7 +47,17 @@ pub mod global_slot_coverage;
     feature = "client-wowforever",
     path = "../data/global_strings_wowforever.rs"
 )]
-#[cfg_attr(not(feature = "client-wowforever"), path = "../data/global_strings.rs")]
+#[cfg_attr(
+    all(feature = "profile-retail", feature = "retail-12-1-5"),
+    path = "../data/global_strings_retail.rs"
+)]
+#[cfg_attr(
+    not(any(
+        feature = "client-wowforever",
+        all(feature = "profile-retail", feature = "retail-12-1-5")
+    )),
+    path = "../data/global_strings.rs"
+)]
 pub mod global_strings;
 pub mod iced_app;
 #[cfg(not(target_os = "linux"))]
