@@ -276,6 +276,11 @@ impl WowLuaEnv {
         let dispatch_started = Instant::now();
         for widget_id in listeners {
             self.dispatch_event_to_frame(widget_id, event, args)?;
+            // Wrath DebugTools can consume the previous listener's hidden text
+            // synchronously. Present it after dispatch releases its Lua borrow.
+            if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+                super::editbox_update::flush(self)?;
+            }
         }
         trace_event_phase(event, "dispatch-listeners", dispatch_started);
         if event == "PLAYER_ENTERING_WORLD" {
