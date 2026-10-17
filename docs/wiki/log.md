@@ -60,7 +60,7 @@ Updated [classic startup cascades](investigations/classic-startup-producer-casca
 
 ## [2026-10-16] performance | Startup primitive redundancy
 
-[Investigation](investigations/startup-primitive-redundancy.md) records tests-first Retail 42/42 before/after preservation for separate layout and registration optimizations. SetText optimization remains deferred; matched measurement pending, no gain claimed.
+[Investigation](investigations/startup-primitive-redundancy.md) records Retail 42/42 shared before/after preservation, six additional after-only unit cases, passing check/formatting and three captures per seal. All six startups exit 0 `[]` with unchanged original CVars. Syncthing contention, large timing variance, sample loss and attribution limits prevent a speedup claim. SetText optimization stays deferred; no native/all-profile acceptance.
 
 ## [2026-10-16] evidence | Quest turn-in and charge selector bounded GREEN
 

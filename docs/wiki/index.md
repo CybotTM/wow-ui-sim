@@ -60,7 +60,7 @@
 
 ## [2026-10-16] performance | Startup primitive redundancy
 
-[Investigation](investigations/startup-primitive-redundancy.md) records separate layout-cycle bookkeeping and UI-string lookup removals, tests-first Retail 42/42 before/after preservation, deferred SetText optimization and pending matched measurement. No gain or all-profile claim.
+[Investigation](investigations/startup-primitive-redundancy.md) records separate layout-cycle and UI-string lookup removals, Retail 42/42 shared before/after preservation plus six after-only unit cases, and three captures per seal. Syncthing contention, variance, sample loss and attribution limits prevent a speedup claim; SetText optimization stays deferred. No all-profile acceptance.
 
 ## [2026-10-16] documentation | Container, message history and transform label producers
 

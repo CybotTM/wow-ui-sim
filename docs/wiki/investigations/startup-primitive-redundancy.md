@@ -12,11 +12,19 @@ UI-string replacement on Retail discarded an unconditional raw lookup. Restorati
 
 Tests-first `85e8f8eda` precedes layout `f74ecfc64` and registration `ee9b563d8`. Retail/default dev opt1: **42/42 selected tests PASS both before and after**, including seven new cases. Coverage includes cyclic geometry/effective scale/cache removal/missing frames; raw registration values, function/table identity and absence of `__index` callbacks; text nil/empty/Unicode/NUL, repeated public SetText after style changes, and existing layout/cursor/callback tests.
 
+Six additional after-only existing unit cases also pass (five core layout tests and one post-event-layout case), giving 48 after cases versus 42 before. Default Retail `cargo check`, whole-workspace formatting and changed-line readability checks pass. Documentation-only follow-ups do not invalidate the sealed code/test scope.
+
 This does not establish native parity, all-profile acceptance, rendered-cycle equivalence or a performance gain. Forever's branch is source-inspected, not executed in this Retail-only gate.
 
 ## Measurement
 
-Matched sealed before/after startup measurement is pending. Private receipts and exact argv: `/home/osso/.local/state/wow-ui-sim/handoff/perf-build/report.md`. No gain claimed from source deletion or historical profile percentages.
+Three captures per sealed binary completed with unchanged `--no-addons --no-saved-vars lua-errors`, `WOW_SIM_CASC=0`, `WOW_SIM_NO_SOUND=1`, cold/recompiling bytecode-cache access, 4 GiB scopes and private copies of current CVar bytes. All six startups return exit 0 and `[]`; original CVar stat/hash guards pass. Sampling uses `cpu-clock:u`, 199 Hz, DWARF 65528, 512K mmap and the prior explicit-CFI recovery algorithm.
+
+**No gain demonstrated.** Wall-time variance is large and main reported concurrent Syncthing disk/CPU contention during an incomplete Retail 70391→70448 install sync. No install extraction, refresh or re-pin was performed. These observations cannot establish a final speedup or causal regression. Three captures also lose samples; recovered complete-root coverage is about 94–96%, so inclusive percentages are qualified observations.
+
+Neither seal exposes a standalone `table_get_with_key` ELF symbol. Its observed zero standalone-frame count is not zero cost: the report separately measures `table_get`/`table_get_static` carrier frames and the broader UI-string registration envelope. SetText remains an unchanged control, not an optimized path.
+
+Private per-run wall times, inclusive means/standard deviations/variances, seals, argv, recovery limits, admission correction and proof ledger: `/home/osso/.local/state/wow-ui-sim/handoff/perf-build/report.md`. No gain claimed from source deletion or historical profile percentages.
 
 ## Sources
 
