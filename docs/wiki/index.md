@@ -1,6 +1,6 @@
 ## [2026-10-18] investigation | Ellesmere timer125 hook target fanout
 
-[Timer125 diagnosis](investigations/ellesmereui-forever.md#timer125-inherited-secure-hook-fanout--2026-10-18) records captured cross-widget setter hooks and original-seal consumer RED. [Hook contract](../specs/hook-callback-origin.md) owns target/key isolation; compiled GREEN and full-addon replay remain pending.
+[Timer125 diagnosis](investigations/ellesmereui-forever.md#timer125-inherited-secure-hook-fanout--2026-10-18) records captured cross-widget setter hooks and original-seal consumer RED. [Hook contract](../specs/hook-callback-origin.md#bounded-proof--2026-10-18) owns target/key isolation and bounded compiled/control/real-GUI GREEN; full addon compatibility remains separate.
 
 ## [2026-10-18] documentation | Merged-lane texture and startup integration
 

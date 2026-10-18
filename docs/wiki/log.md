@@ -1,6 +1,6 @@
 ## [2026-10-18] investigation | Ellesmere timer125 secure-hook targets
 
-[Diagnosis](investigations/ellesmereui-forever.md#timer125-inherited-secure-hook-fanout--2026-10-18) links captured shared callback growth and real extracted-consumer RED. Target/key binding now separates instance hooks from inherited/copied wrappers without rooting targets; compiled GREEN and real-addon replay pending. No addon, texture-cache or scheduling change.
+[Diagnosis](investigations/ellesmereui-forever.md#timer125-inherited-secure-hook-fanout--2026-10-18) links captured shared callback growth and real extracted-consumer RED. Target/key binding separates instance hooks from inherited/copied wrappers without rooting targets. [Bounded proof](../specs/hook-callback-origin.md#bounded-proof--2026-10-18) records compiled target/control GREEN and real-addon callback/Exec/draw progress. No addon, texture-cache or scheduling change; no full compatibility claim.
 
 ## [2026-10-18] ingest | Merged-lane documentation integration
 
