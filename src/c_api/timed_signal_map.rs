@@ -3,6 +3,7 @@
 use crate::c_api::ensure_namespace;
 use crate::lua_api::WowLuaAppData;
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
+use rilua::table_security::{can_access_secrets, is_secret_value, unwrap_secret};
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::vm::value::{Userdata, Val};
@@ -16,9 +17,15 @@ struct TimedSignalMap {
     id: u64,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct SignalDeadline {
+    pub(crate) time: f64,
+    pub(crate) is_secret: bool,
+}
+
 #[derive(Debug, Default)]
 pub(crate) struct TimedSignalMapState {
-    pub(crate) signals: BTreeMap<i64, f64>,
+    pub(crate) signals: BTreeMap<i64, SignalDeadline>,
     pub(crate) owner_addon: Option<u16>,
 }
 
@@ -124,8 +131,10 @@ fn signal_key(state: &LuaState, index: i32) -> LuaResult<i64> {
     Ok(key as i64)
 }
 
-fn signal_time(state: &LuaState, index: i32) -> LuaResult<f64> {
-    let Val::Num(time) = stack_val(state, index) else {
+fn signal_time(state: &LuaState, index: i32) -> LuaResult<SignalDeadline> {
+    let value = stack_val(state, index);
+    let is_secret = is_secret_value(state, value);
+    let Val::Num(time) = unwrap_secret(state, value)? else {
         return Err(runtime_error(format!(
             "bad argument #{index} (number expected)"
         )));
@@ -135,17 +144,25 @@ fn signal_time(state: &LuaState, index: i32) -> LuaResult<f64> {
             "bad argument #{index} (finite number expected)"
         )));
     }
-    Ok(time)
+    Ok(SignalDeadline { time, is_secret })
 }
 
 fn map_state<'a>(
+    lua: &LuaState,
     state: &'a mut crate::lua_api::SimState,
     id: u64,
 ) -> LuaResult<&'a mut TimedSignalMapState> {
-    state
+    let map = state
         .timed_signal_maps
         .get_mut(&id)
-        .ok_or_else(|| runtime_error("TimedSignalMap state is unavailable"))
+        .ok_or_else(|| runtime_error("TimedSignalMap state is unavailable"))?;
+    let holds_secrets = map.signals.values().any(|deadline| deadline.is_secret);
+    if holds_secrets && !can_access_secrets(lua) {
+        return Err(runtime_error(
+            "TimedSignalMap access requires an untainted caller without revoked access",
+        ));
+    }
+    Ok(map)
 }
 
 fn index(state: &mut LuaState) -> LuaResult<u32> {
@@ -221,7 +238,7 @@ fn finalize(state: &mut LuaState) -> LuaResult<u32> {
 fn cancel_all_signals(state: &mut LuaState) -> LuaResult<u32> {
     let id = map_id(state)?;
     let mut sim = app_state(state)?;
-    map_state(&mut sim, id)?.signals.clear();
+    map_state(state, &mut sim, id)?.signals.clear();
     Ok(0)
 }
 
@@ -229,7 +246,7 @@ fn cancel_signal(state: &mut LuaState) -> LuaResult<u32> {
     let id = map_id(state)?;
     let key = signal_key(state, 2)?;
     let mut sim = app_state(state)?;
-    map_state(&mut sim, id)?.signals.remove(&key);
+    map_state(state, &mut sim, id)?.signals.remove(&key);
     Ok(0)
 }
 
@@ -237,11 +254,16 @@ fn get_next_signal(state: &mut LuaState) -> LuaResult<u32> {
     let id = map_id(state)?;
     let next = {
         let mut sim = app_state(state)?;
-        map_state(&mut sim, id)?
+        map_state(state, &mut sim, id)?
             .signals
             .iter()
-            .min_by(|left, right| left.1.total_cmp(right.1).then_with(|| left.0.cmp(right.0)))
-            .map(|(key, time)| (*key, *time))
+            .min_by(|left, right| {
+                left.1
+                    .time
+                    .total_cmp(&right.1.time)
+                    .then_with(|| left.0.cmp(right.0))
+            })
+            .map(|(key, deadline)| (*key, deadline.time))
     };
     if let Some((key, time)) = next {
         state.push(Val::Num(key as f64));
@@ -257,7 +279,7 @@ fn get_signal_count(state: &mut LuaState) -> LuaResult<u32> {
     let id = map_id(state)?;
     let count = {
         let mut sim = app_state(state)?;
-        map_state(&mut sim, id)?.signals.len()
+        map_state(state, &mut sim, id)?.signals.len()
     };
     state.push(Val::Num(count as f64));
     Ok(1)
@@ -268,7 +290,10 @@ fn get_signal_time(state: &mut LuaState) -> LuaResult<u32> {
     let key = signal_key(state, 2)?;
     let time = {
         let mut sim = app_state(state)?;
-        map_state(&mut sim, id)?.signals.get(&key).copied()
+        map_state(state, &mut sim, id)?
+            .signals
+            .get(&key)
+            .map(|deadline| deadline.time)
     };
     state.push(time.map_or(Val::Nil, Val::Num));
     Ok(1)
@@ -279,26 +304,29 @@ fn has_signal(state: &mut LuaState) -> LuaResult<u32> {
     let key = signal_key(state, 2)?;
     let present = {
         let mut sim = app_state(state)?;
-        map_state(&mut sim, id)?.signals.contains_key(&key)
+        map_state(state, &mut sim, id)?.signals.contains_key(&key)
     };
     state.push(Val::Bool(present));
     Ok(1)
 }
 
 fn signal_after(state: &mut LuaState) -> LuaResult<u32> {
-    let seconds = signal_time(state, 3)?;
+    let mut deadline = signal_time(state, 3)?;
     let now = app_state(state)?.start_time.elapsed().as_secs_f64();
-    signal_at_values(state, signal_key(state, 2)?, now + seconds)
+    deadline.time += now;
+    signal_at_values(state, signal_key(state, 2)?, deadline)
 }
 
 fn signal_at(state: &mut LuaState) -> LuaResult<u32> {
     signal_at_values(state, signal_key(state, 2)?, signal_time(state, 3)?)
 }
 
-fn signal_at_values(state: &mut LuaState, key: i64, time: f64) -> LuaResult<u32> {
+fn signal_at_values(state: &mut LuaState, key: i64, deadline: SignalDeadline) -> LuaResult<u32> {
     let id = map_id(state)?;
     let mut sim = app_state(state)?;
-    map_state(&mut sim, id)?.signals.insert(key, time);
+    map_state(state, &mut sim, id)?
+        .signals
+        .insert(key, deadline);
     Ok(0)
 }
 
@@ -309,7 +337,7 @@ pub(crate) fn take_due_signals(state: &mut crate::lua_api::SimState) -> Vec<DueT
         let keys: Vec<_> = map
             .signals
             .iter()
-            .filter_map(|(key, time)| (*time <= now).then_some(*key))
+            .filter_map(|(key, deadline)| (deadline.time <= now).then_some(*key))
             .collect();
         for key in keys {
             map.signals.remove(&key);
@@ -329,6 +357,6 @@ pub(crate) fn next_signal_delay(state: &crate::lua_api::SimState) -> Option<std:
         .timed_signal_maps
         .values()
         .flat_map(|map| map.signals.values())
-        .map(|time| std::time::Duration::from_secs_f64((*time - now).max(0.0)))
+        .map(|deadline| std::time::Duration::from_secs_f64((deadline.time - now).max(0.0)))
         .min()
 }
