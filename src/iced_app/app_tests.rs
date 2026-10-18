@@ -36,6 +36,28 @@ fn build_test_app(screen_kind: ScreenKind) -> App {
     })
 }
 
+fn draw_test_canvas(app: &App, size: Size) -> crate::render::WowUiPrimitive {
+    iced::widget::shader::Program::draw(
+        &app,
+        &(),
+        iced::mouse::Cursor::Unavailable,
+        iced::Rectangle::with_size(size),
+    )
+}
+
+fn complete_gui_startup(app: &mut App) {
+    app.ensure_gui_startup_for_canvas_size(app.screen_size.get());
+    for _ in 0..200 {
+        if app.gui_startup_complete.get() {
+            return;
+        }
+        let _ = app.update(super::super::Message::ProcessTimers(
+            std::time::Instant::now(),
+        ));
+    }
+    panic!("bounded GUI startup did not complete");
+}
+
 #[test]
 fn glue_screens_tick_on_update_at_interactive_rate() {
     let app = build_test_app(ScreenKind::CharacterSelect);
@@ -242,8 +264,8 @@ fn gui_startup_zero_delay_chain_yields_to_queued_exec() {
         )
         .unwrap();
 
-    // The same first-canvas entry used by draw, followed by a normal app turn.
-    app.ensure_gui_startup_for_canvas_size(Size::new(1266.0, 822.0));
+    // Real shader draw records the first canvas; the update turn runs generation A.
+    let _ = draw_test_canvas(&app, Size::new(1266.0, 822.0));
     let _ = app.update(super::super::Message::ProcessTimers(
         std::time::Instant::now(),
     ));
@@ -285,7 +307,7 @@ fn gui_startup_zero_delay_chain_yields_to_queued_exec() {
 
 #[test]
 fn gui_startup_uses_first_real_canvas_size_for_display_size_changed() {
-    let app = build_test_app(ScreenKind::Game);
+    let mut app = build_test_app(ScreenKind::Game);
     app.env
         .borrow()
         .exec(
@@ -302,7 +324,8 @@ fn gui_startup_uses_first_real_canvas_size_for_display_size_changed() {
         )
         .expect("startup size recorder should install");
 
-    app.ensure_gui_startup_for_canvas_size(Size::new(1266.0, 822.0));
+    let _ = draw_test_canvas(&app, Size::new(1266.0, 822.0));
+    complete_gui_startup(&mut app);
 
     let (width, height): (f64, f64) = app
         .env
@@ -314,6 +337,142 @@ fn gui_startup_uses_first_real_canvas_size_for_display_size_changed() {
 }
 
 #[test]
+fn gui_startup_draw_defers_lua_and_keeps_event_order_once() {
+    let mut app = build_test_app(ScreenKind::Game);
+    app.env
+        .borrow()
+        .exec(
+            r#"
+        startup_events = {}
+        startup_sizes = {}
+        local frame = CreateFrame("Frame")
+        frame:RegisterEvent("DISPLAY_SIZE_CHANGED")
+        frame:RegisterEvent("VARIABLES_LOADED")
+        frame:RegisterEvent("PLAYER_LOGIN")
+        frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+        frame:RegisterEvent("FIRST_FRAME_RENDERED")
+        frame:SetScript("OnEvent", function(_, event)
+            if event == "DISPLAY_SIZE_CHANGED" then
+                table.insert(startup_sizes, GetScreenWidth())
+            else
+                table.insert(startup_events, event)
+            end
+        end)
+    "#,
+        )
+        .unwrap();
+    let size = Size::new(1266.0, 822.0);
+    let primitive = draw_test_canvas(&app, size);
+    assert!(
+        primitive
+            .strata_batches
+            .iter()
+            .flatten()
+            .all(|batch| batch.vertices.is_empty())
+    );
+    let events: String = app
+        .env
+        .borrow()
+        .eval("return table.concat(startup_events, ',')")
+        .unwrap();
+    assert_eq!(events, "", "draw must not dispatch startup Lua");
+    let sizes: usize = app.env.borrow().eval("return #startup_sizes").unwrap();
+    assert_eq!(sizes, 0, "draw must not dispatch resize Lua either");
+
+    complete_gui_startup(&mut app);
+    // Further draws and ordinary ticks cannot replay the startup events.
+    let _ = draw_test_canvas(&app, size);
+    let _ = app.update(super::super::Message::ProcessTimers(
+        std::time::Instant::now(),
+    ));
+    let events: String = app
+        .env
+        .borrow()
+        .eval("return table.concat(startup_events, ',')")
+        .unwrap();
+    assert_eq!(
+        events,
+        "VARIABLES_LOADED,PLAYER_LOGIN,PLAYER_ENTERING_WORLD,FIRST_FRAME_RENDERED"
+    );
+    let widths_match: bool = app
+        .env
+        .borrow()
+        .eval(
+            r#"
+        if #startup_sizes == 0 then return false end
+        for _, width in ipairs(startup_sizes) do
+            if width ~= 1266 then return false end
+        end
+        return true
+    "#,
+        )
+        .unwrap();
+    assert!(widths_match);
+}
+
+#[test]
+fn gui_startup_branching_zero_delay_chain_spans_turns() {
+    let mut app = build_test_app(ScreenKind::Game);
+    app.env
+        .borrow()
+        .exec(
+            r#"
+        branches = {}
+        local function branch(name, depth)
+            C_Timer.After(0, function()
+                table.insert(branches, name)
+                if depth > 0 then
+                    branch(name .. "L", depth - 1)
+                    branch(name .. "R", depth - 1)
+                end
+            end)
+        end
+        branch("root", 2)
+    "#,
+        )
+        .unwrap();
+    let _ = draw_test_canvas(&app, Size::new(800.0, 600.0));
+    for expected in [
+        "root",
+        "root,rootL,rootR",
+        "root,rootL,rootR,rootLL,rootLR,rootRL,rootRR",
+    ] {
+        let _ = app.update(super::super::Message::ProcessTimers(
+            std::time::Instant::now(),
+        ));
+        let trace: String = app
+            .env
+            .borrow()
+            .eval("return table.concat(branches, ',')")
+            .unwrap();
+        assert_eq!(trace, expected);
+    }
+    complete_gui_startup(&mut app);
+    let count: usize = app.env.borrow().eval("return #branches").unwrap();
+    assert_eq!(count, 7);
+}
+
+#[test]
+fn gui_startup_waits_for_canvas_before_running_lua() {
+    let mut app = build_test_app(ScreenKind::Game);
+    app.env
+        .borrow()
+        .exec(
+            "canvas_wait_fired = false; C_Timer.After(0, function() canvas_wait_fired = true end)",
+        )
+        .unwrap();
+    let _ = app.update(super::super::Message::ProcessTimers(
+        std::time::Instant::now(),
+    ));
+    let fired: bool = app.env.borrow().eval("return canvas_wait_fired").unwrap();
+    assert!(!fired);
+    assert!(!app.gui_startup_complete.get());
+    complete_gui_startup(&mut app);
+    let fired: bool = app.env.borrow().eval("return canvas_wait_fired").unwrap();
+    assert!(fired);
+}
+
+#[test]
 fn app_screen_size_starts_from_sim_state_size() {
     let app = build_test_app(ScreenKind::Game);
 
@@ -321,8 +480,9 @@ fn app_screen_size_starts_from_sim_state_size() {
 }
 
 #[test]
-fn gui_startup_drains_ready_timers_before_interactive_ticks() {
-    let env = build_env();
+fn gui_startup_settles_ready_timers_at_completion() {
+    let mut app = build_test_app(ScreenKind::Game);
+    let env = Rc::clone(&app.env);
     env.borrow()
         .exec(
             r#"
@@ -334,7 +494,7 @@ fn gui_startup_drains_ready_timers_before_interactive_ticks() {
         )
         .expect("startup timer setup should succeed");
 
-    App::run_startup_sequence(&env);
+    complete_gui_startup(&mut app);
 
     let fired: f64 = env
         .borrow()
@@ -344,8 +504,9 @@ fn gui_startup_drains_ready_timers_before_interactive_ticks() {
 }
 
 #[test]
-fn gui_startup_settles_bounded_on_update_work_before_interactive_ticks() {
-    let env = build_env();
+fn gui_startup_settles_bounded_on_update_work_at_completion() {
+    let mut app = build_test_app(ScreenKind::Game);
+    let env = Rc::clone(&app.env);
     env.borrow()
         .exec(
             r#"
@@ -361,7 +522,7 @@ fn gui_startup_settles_bounded_on_update_work_before_interactive_ticks() {
         )
         .expect("startup OnUpdate setup should succeed");
 
-    App::run_startup_sequence(&env);
+    complete_gui_startup(&mut app);
 
     let fired: f64 = env
         .borrow()
@@ -375,7 +536,8 @@ fn gui_startup_settles_bounded_on_update_work_before_interactive_ticks() {
 
 #[test]
 fn gui_startup_closes_windows_created_by_startup_timers() {
-    let env = build_env();
+    let mut app = build_test_app(ScreenKind::Game);
+    let env = Rc::clone(&app.env);
     env.borrow()
         .exec(
             r#"
@@ -387,7 +549,12 @@ fn gui_startup_closes_windows_created_by_startup_timers() {
         )
         .expect("startup timer window setup should succeed");
 
-    App::run_startup_sequence(&env);
+    complete_gui_startup(&mut app);
+    let created: bool = env
+        .borrow()
+        .eval("return Baganator_WelcomeFrame ~= nil")
+        .unwrap();
+    assert!(created, "startup timer must actually create the window");
 
     let shown: bool = env
         .borrow()

@@ -42,6 +42,40 @@ struct AppInitialSelections {
 /// One frame at 60 Hz: the fastest tick rate, matching a 60 FPS client frame.
 const FRAME_INTERVAL: std::time::Duration = std::time::Duration::from_micros(16_667);
 const GUI_STARTUP_ON_UPDATE_TICKS: usize = 16;
+const GUI_STARTUP_TIMER_PASSES: usize = 10;
+
+struct GuiStartupProgress {
+    timer_passes_remaining: usize,
+    on_update_ticks_remaining: usize,
+}
+
+impl GuiStartupProgress {
+    fn new() -> Self {
+        Self {
+            timer_passes_remaining: GUI_STARTUP_TIMER_PASSES,
+            on_update_ticks_remaining: GUI_STARTUP_ON_UPDATE_TICKS,
+        }
+    }
+
+    /// Preserve the settling budget, but never consume two timer snapshots in one turn.
+    fn advance(&mut self, env: &WowLuaEnv) -> bool {
+        if self.timer_passes_remaining == 0 {
+            crate::startup::fire_gui_startup_on_update_tick(env);
+            self.on_update_ticks_remaining -= 1;
+            self.timer_passes_remaining = GUI_STARTUP_TIMER_PASSES;
+        }
+        self.timer_passes_remaining -= 1;
+        match env.process_timers() {
+            Ok(0) => self.timer_passes_remaining = 0,
+            Ok(_) => {}
+            Err(error) => {
+                crate::logging::eprintln_elapsed(&format!("[GUI startup timers] error: {error}"));
+                self.timer_passes_remaining = 0;
+            }
+        }
+        self.timer_passes_remaining == 0 && self.on_update_ticks_remaining == 0
+    }
+}
 
 /// Debug visualization options.
 #[derive(Default, Clone)]
@@ -86,8 +120,11 @@ pub struct App {
     pub(crate) scroll_offset: f32,
     /// Current canvas size (updated each frame for layout calculations).
     pub(crate) screen_size: std::cell::Cell<Size>,
-    /// True after WoW startup events have run against real canvas bounds.
+    /// True after startup events, deferred settling and cleanup have completed.
     pub(crate) gui_startup_complete: std::cell::Cell<bool>,
+    /// First real draw bounds; recording them must not execute Lua.
+    first_canvas_size: std::cell::Cell<Option<Size>>,
+    gui_startup_progress: Option<GuiStartupProgress>,
     pub(crate) debug_rx: Option<mpsc::Receiver<debug_server::Command>>,
     pub(crate) pending_screenshot: Option<oneshot::Sender<Result<ScreenshotData, String>>>,
     pub(crate) lua_rx: Option<std::sync::mpsc::Receiver<lua_server::LuaCommand>>,
@@ -242,6 +279,8 @@ macro_rules! app_from_initial_state {
             scroll_offset: 0.0,
             screen_size: std::cell::Cell::new($initial_screen_size),
             gui_startup_complete: std::cell::Cell::new(false),
+            first_canvas_size: std::cell::Cell::new(None),
+            gui_startup_progress: None,
             debug_rx: Some($init.cmd_rx),
             pending_screenshot: None,
             lua_rx: Some($init.lua_rx),
@@ -371,42 +410,53 @@ impl App {
         crate::startup::resize_party_state(&mut state, usize::from(config.party_size.min(4)));
     }
 
-    /// Extract init params from thread-local storage.
-    /// Fire startup events, apply post-event workarounds, and hide default-hidden frames.
-    fn run_startup_sequence(env_rc: &Rc<RefCell<WowLuaEnv>>) {
-        fire_startup_events(env_rc);
-        let env_ref = env_rc.borrow();
-        env_ref.apply_post_event_workarounds();
-        crate::startup::settle_startup_animation_groups(&env_ref);
-        crate::startup::process_pending_timers(&env_ref);
-        Self::settle_gui_startup_on_update(&env_ref);
-        crate::lua_api::workarounds::close_startup_special_windows_before_first_frame(&env_ref);
-        let _ = crate::lua_api::hide_runtime_hidden_frames(env_ref.lua());
-        env_ref.state().borrow_mut().widgets.rebuild_anchor_index();
-    }
-
-    fn settle_gui_startup_on_update(env_ref: &WowLuaEnv) {
-        for _ in 0..GUI_STARTUP_ON_UPDATE_TICKS {
-            crate::startup::fire_gui_startup_on_update_tick(env_ref);
-            crate::startup::process_pending_timers(env_ref);
-        }
-    }
-
+    /// Record draw bounds only. Startup and resize callbacks run on the update path.
     pub(crate) fn ensure_gui_startup_for_canvas_size(&self, size: Size) {
-        if self.gui_startup_complete.get() {
-            return;
-        }
-
         self.screen_size.set(size);
+        if self.first_canvas_size.get().is_none() {
+            self.first_canvas_size.set(Some(size));
+        }
+    }
+
+    pub(super) fn advance_gui_startup(&mut self) {
+        if self.gui_startup_progress.is_none() {
+            let Some(size) = self.first_canvas_size.get() else {
+                return;
+            };
+            self.begin_gui_startup(size);
+            self.gui_startup_progress = Some(GuiStartupProgress::new());
+        }
+        let finished = {
+            let progress = self.gui_startup_progress.as_mut().unwrap();
+            let env = self.env.borrow();
+            progress.advance(&env)
+        };
+        if finished {
+            self.finish_gui_startup();
+            self.gui_startup_progress = None;
+        }
+    }
+
+    fn begin_gui_startup(&self, size: Size) {
         self.env.borrow().set_screen_size(size.width, size.height);
-        Self::run_startup_sequence(&self.env);
+        fire_startup_events(&self.env);
+        let env = self.env.borrow();
+        env.apply_post_event_workarounds();
+        crate::startup::settle_startup_animation_groups(&env);
+    }
+
+    fn finish_gui_startup(&mut self) {
         {
             let env = self.env.borrow();
+            crate::lua_api::workarounds::close_startup_special_windows_before_first_frame(&env);
+            let _ = crate::lua_api::hide_runtime_hidden_frames(env.lua());
             let mut state = env.state().borrow_mut();
+            state.widgets.rebuild_anchor_index();
             state.initialize_render_state();
             state.ensure_layout_rects();
         }
         self.preload_initial_texture_requests();
+        self.last_on_update_time = std::time::Instant::now();
         self.gui_startup_complete.set(true);
     }
 
@@ -551,6 +601,9 @@ impl App {
     /// OnUpdate handlers cause a 1-second tick when any frames have them
     /// registered (e.g., buff duration countdown text).
     pub(crate) fn compute_tick_interval(&self) -> Option<std::time::Duration> {
+        if self.first_canvas_size.get().is_some() && !self.gui_startup_complete.get() {
+            return Some(FRAME_INTERVAL);
+        }
         let env = self.env.borrow();
         // A timer due within the smallest bucket already asks for the
         // fastest tick, and no fast-tick condition can ask for more; skip

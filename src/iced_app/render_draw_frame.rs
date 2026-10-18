@@ -18,6 +18,16 @@ impl App {
     pub(super) fn draw_wow_ui_primitive(&self, bounds: Rectangle) -> WowUiPrimitive {
         let start = self.begin_draw_frame();
         let size = self.sync_draw_bounds(bounds);
+        if !self.gui_startup_complete.get() {
+            // Never paint startup-created windows before the settling cleanup.
+            return self.build_draw_primitive(
+                std::array::from_fn(|_| Some(Arc::new(QuadBatch::new()))),
+                QuadBatch::new(),
+                Vec::new(),
+                Vec::new(),
+                Arc::new(std::sync::Mutex::new(Default::default())),
+            );
+        }
         let mut quads = self.rebuild_draw_quads(size);
         let overlay = self.build_overlay();
         let texture_load = self.load_draw_textures(&mut quads, &overlay);
@@ -42,12 +52,7 @@ impl App {
 
     fn sync_draw_bounds(&self, bounds: Rectangle) -> Size {
         let size = bounds.size();
-        if self.gui_startup_complete.get() {
-            self.screen_size.set(size);
-            self.sync_screen_size_to_state(size);
-        } else {
-            self.ensure_gui_startup_for_canvas_size(size);
-        }
+        self.ensure_gui_startup_for_canvas_size(size);
         size
     }
 

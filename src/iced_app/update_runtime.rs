@@ -367,9 +367,12 @@ impl App {
             return Task::none();
         }
         if !self.gui_startup_complete.get() {
+            self.set_main_thread_phase("gui_startup");
+            self.advance_gui_startup();
             return request_redraw_task();
         }
 
+        self.sync_screen_size_to_state(self.screen_size.get());
         self.set_main_thread_phase("process_timers");
         let tick_started = std::time::Instant::now();
         let mut stage_timings = TickStageTimings::default();

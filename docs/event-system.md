@@ -464,6 +464,21 @@ This avoids scanning all widgets every tick to find OnUpdate handlers.
 
 ## Startup Event Sequence
 
+GUI draw records the first real canvas bounds without executing startup or resize Lua.
+`App::update` services queued IPC before a timer message advances startup. Each
+startup turn processes at most one timer generation and one settling OnUpdate;
+callback-created zero-delay timers wait for another turn. The existing initial
+ten-pass timer budget and sixteen OnUpdates (each with up to ten timer passes)
+are carried between turns, stopping each timer group on an empty pass. Startup
+keeps a frame-rate tick subscription until complete, even when no timers remain.
+
+Startup events still run once against the first canvas size. After settling,
+window cleanup, hidden-frame policy, anchor/render initialization and initial
+texture warmup finish before UI quads are drawn. Until then draw returns empty
+batches. Subsequent resize events run on timer updates, not draw. Headless
+settling and ordinary timer callback/identity semantics are unchanged. A single
+synchronous Lua callback can still block its turn; this is not preemption.
+
 **File:** `src/iced_app/app.rs:53-105` (GUI mode) and `src/main.rs:434-478` (headless mode)
 
 After all addons are loaded, the simulator fires startup events in this order:
