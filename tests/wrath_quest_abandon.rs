@@ -137,6 +137,20 @@ fn seed_env() -> ConsumerEnv {
     env
 }
 
+// Deliver only notifications actually queued by the producer, through registered
+// original listeners. This is not a native event-timing claim.
+fn dispatch_queued_abandon_events(env: &ConsumerEnv) -> usize {
+    let events = env.state().borrow_mut().events.drain();
+    let count = events.len();
+    for event in events {
+        assert_eq!(event.name, "QUEST_LOG_UPDATE");
+        assert!(event.args.is_empty());
+        env.fire_event(&event.name).unwrap();
+        assert_errors(env);
+    }
+    count
+}
+
 fn snapshot(env: &WowLuaEnv) -> String {
     let sim = env.state().borrow();
     format!(
@@ -192,6 +206,7 @@ fn original_button_cancel_then_accept_marked_target() {
         &env,
         "assert(GetAbandonQuestName() == 'Wrath abandon first'); StaticPopup_FindVisible('ABANDON_QUEST').button1:Click()",
     );
+    assert_eq!(dispatch_queued_abandon_events(&env), 1);
     {
         let sim = env.state().borrow();
         assert_eq!(sim.quest_log, vec![990202]);
@@ -257,6 +272,7 @@ fn original_button_cancel_then_accept_marked_target() {
         assert(#AbandonEvents == 1, 'repeat does not notify')
     "#,
     );
+    assert_eq!(dispatch_queued_abandon_events(&env), 0);
     assert_eq!(env.state().borrow().quest_log, vec![990202]);
 }
 
@@ -279,6 +295,7 @@ fn invalid_stale_and_consumed_targets_do_not_remove_other_rows() {
         "SelectQuestLogEntry(2); SetAbandonQuest(); AbandonQuest(); AbandonQuest()",
     );
     assert_eq!(env.state().borrow().quest_log, vec![990101]);
+    assert_eq!(dispatch_queued_abandon_events(&env), 1);
     exec(
         &env,
         "assert(#AbandonEvents == 1 and AbandonEvents[1][1] == 'QUEST_LOG_UPDATE')",
