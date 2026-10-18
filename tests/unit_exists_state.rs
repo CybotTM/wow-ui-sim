@@ -141,6 +141,8 @@ fn missing_unit_aura_paths_preserve_results_errors_and_access_checks() {
         blessing.aura_instance_id = 3;
         blessing.is_helpful = true;
         sim.target_auras.push(blessing.clone());
+        sim.party_members[0].buffs = vec![blessing.clone()];
+        sim.party_members[0].debuffs = vec![sim.target_auras[0].clone()];
         sim.player.buffs.push(blessing.clone());
         sim.spell_aura_durations.insert(53338, SpellAuraDuration {
             base_duration_seconds: 12.0,
@@ -149,7 +151,8 @@ fn missing_unit_aura_paths_preserve_results_errors_and_access_checks() {
         blessing
     };
     {
-        let mut lua = env.rilua_mut();
+        let loader = env.loader_env();
+        let mut lua = loader.rilua_mut();
         rilua::table_security::register_table_security(&mut lua).unwrap();
         let secret = wrap_host_secret_number(lua.state_mut(), 2.0);
         lua.state_mut().push(secret);
@@ -159,6 +162,7 @@ fn missing_unit_aura_paths_preserve_results_errors_and_access_checks() {
     env.exec(include_str!("fixtures/unit_exists_aura_paths.lua")).unwrap();
     for present in [false, true, false, true] {
         env.state().borrow_mut().current_target = present.then(target);
+        env.state().borrow_mut().party_group_active = present;
         env.exec(&format!("CheckStoredTargetAuras({present})")).unwrap();
         env.state().borrow_mut().unit_auras_restricted = true;
         env.exec("CheckRestrictedTargetAccess()").unwrap();

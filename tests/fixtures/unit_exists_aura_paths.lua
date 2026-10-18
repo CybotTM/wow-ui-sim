@@ -26,6 +26,15 @@ function CheckStoredTargetAuras(present)
     for _, fixture in ipairs({{'HELPFUL', 'Fixture Blessing', 3}, {'HARMFUL', 'Expose Weakness', 2}}) do
         local filter, name, id = unpack(fixture)
         local expected = present and name or nil
+        local tooltip_name = filter == 'HELPFUL' and 'GetUnitBuff' or 'GetUnitDebuff'
+        local tooltip_query = rawget(C_TooltipInfo, tooltip_name)
+        assert(type(tooltip_query) == 'function')
+        local tooltip = tooltip_query('party1', 1)
+        if present then
+            assert(tooltip.lines[1].leftText == name)
+        else
+            assert(next(tooltip.lines) == nil)
+        end
         assert(UnitAura('target', 1, filter) == expected)
         local legacy = filter == 'HELPFUL' and UnitBuff or UnitDebuff
         assert(legacy('target', 1) == expected)
@@ -35,6 +44,7 @@ function CheckStoredTargetAuras(present)
             {'GetAuraDataBySlot', {'target', id}},
             {'GetAuraDataByAuraInstanceID', {'target', id}},
             {'GetAuraDataBySpellName', {'target', name}},
+            {'GetUnitAuraBySpellID', {'target', id == 2 and 53338 or 990003}},
         }) do
             aura_matches(registered(query[1])(unpack(query[2])), present, name)
         end
@@ -99,6 +109,8 @@ for _, name in ipairs({'GetAuraBaseDuration', 'GetRefreshExtendedDuration', 'Get
     invalid_queries[#invalid_queries + 1] = {function() callback('target', {}) end, 'aura instance'}
     secret_queries[#secret_queries + 1] = function() callback('target', SecretAuraID) end
 end
+invalid_queries[#invalid_queries + 1] = {function() registered('GetUnitAuraBySpellID')('target', {}) end, 'argument 2'}
+secret_queries[#secret_queries + 1] = function() registered('GetUnitAuraBySpellID')('target', SecretAuraID) end
 invalid_queries[#invalid_queries + 1] = {function() registered('GetAuraSlots')('target', 'HARMFUL', {}) end, 'argument 3'}
 invalid_queries[#invalid_queries + 1] = {function() registered('GetUnitAuraInstanceIDs')('target', 'HARMFUL', -1) end, 'maxCount must be non-negative'}
 secret_queries[#secret_queries + 1] = function() registered('GetAuraSlots')('target', 'HARMFUL', SecretAuraID) end
@@ -109,6 +121,12 @@ for _, name in ipairs({'GetAuraDataByIndex', 'GetBuffDataByIndex', 'GetDebuffDat
     'GetAuraBaseDuration', 'GetRefreshExtendedDuration', 'GetAuraDuration',
     'DoesAuraHaveExpirationTime', 'GetAuraDispelTypeColor'}) do
     access_queries[#access_queries + 1] = registered(name)
+end
+for _, name in ipairs({'GetUnitBuff', 'GetUnitDebuff'}) do
+    local callback = rawget(C_TooltipInfo, name)
+    invalid_queries[#invalid_queries + 1] = {function() callback('party1', {}) end, 'argument 2'}
+    secret_queries[#secret_queries + 1] = function() callback('party1', SecretAuraID) end
+    access_queries[#access_queries + 1] = callback
 end
 function CheckRestrictedTargetAccess()
     local function probe()
