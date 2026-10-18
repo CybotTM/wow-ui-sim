@@ -26,6 +26,14 @@ GUI startup settling yields between app updates without changing timer callback 
 
 `src/iced_app/app_tests.rs`: `gui_startup_zero_delay_chain_yields_to_queued_exec`, `gui_startup_uses_first_real_canvas_size_for_display_size_changed`, `gui_startup_draw_defers_lua_and_keeps_event_order_once`, `gui_startup_branching_zero_delay_chain_spans_turns`, `gui_startup_waits_for_canvas_before_running_lua`, `gui_startup_settles_ready_timers_at_completion`, `gui_startup_settles_bounded_on_update_work_at_completion` and `gui_startup_closes_windows_created_by_startup_timers`. Existing timer/container regressions own ordinary invocation preservation.
 
+`src/iced_app/app_startup_proof_tests.rs` adds App-level budget and completion-order oracles:
+
+- `saturated_startup_carries_ten_pass_groups_and_sixteen_ticks_across_updates`: 170 recursive generations, exact timer/OnUpdate trace per update, completion only after the last ten-pass group.
+- `empty_startup_groups_short_circuit_and_keep_fast_subscription_without_timers`: chat-free fixture, 17 updates, 16 OnUpdates, no pending timers and frame-rate startup subscription throughout.
+- `startup_cleanup_layout_and_texture_warmup_precede_first_nonempty_quad`: timer-created filesystem texture and three hidden windows, decoded pixels before draw, then one correctly positioned textured quad and its upload bytes.
+
+Startup completion now warms visible CPU texture sources before setting the completion flag; the previous request-only preload had no render requests before the first draw. These tests construct the actual App and invoke its shader draw without a GPU adapter; they do not prove GPU upload or presentation. See the [source-cache contract](texture-source-resolution-cache.md) for queued preload and reload coverage.
+
 ## Known gaps (current cycle)
 
 - [ ] Attach final-revision execution receipts before marking requirements verified; this documentation audit inspected source/tests only.

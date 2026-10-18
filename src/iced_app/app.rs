@@ -455,6 +455,7 @@ impl App {
             state.initialize_render_state();
             state.ensure_layout_rects();
         }
+        self.preload_visible_textures();
         self.preload_initial_texture_requests();
         self.last_on_update_time = std::time::Instant::now();
         self.gui_startup_complete.set(true);

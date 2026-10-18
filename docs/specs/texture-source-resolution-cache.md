@@ -29,6 +29,8 @@ Environment-owned source lookup reduces repeated filesystem enumeration in `SetT
 - `tests/texture_set_texture_result.rs`, `src/texture/tests.rs` — existing result and source-selection contracts.
 - `tests/wowforever_texture_metatable.rs`, `tests/aura_secret_display.rs`, `tests/texture_file_dimensions.rs` — profile and secret controls.
 - `tests/methods_texture.rs`, `tests/texture_atlas_regressions.rs`, `tests/methods_button_textures.rs` — atlas, tiling and dirty controls.
+- `src/iced_app/app_startup_proof_tests.rs::filesystem::app_preload_setter_render_reuse_root_change_and_gui_reload_recover_sources` — actual App, valid filesystem BLP pixels, calibrated Linux directory opens for setter/queued-preload/draw reuse, root replacement and unchanged-directory GUI reload invalidation, followed by missing-source recovery. PNG extension probing can legitimately refresh missing higher-priority filenames; the zero-reopen fixture uses BLP, the first extension in the lookup order.
+- `src/iced_app/app_startup_proof_tests.rs::startup_cleanup_layout_and_texture_warmup_precede_first_nonempty_quad` — visible filesystem PNG decoded before the first nonempty App primitive, with cleanup/layout and upload-data assertions. See [startup contract](gui-startup-yield.md). Neither fixture invokes GPU prepare/upload or proves presented pixels.
 
 ## Known gaps (current cycle)
 
