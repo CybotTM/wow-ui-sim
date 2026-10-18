@@ -32,6 +32,22 @@ Environment-owned source lookup reduces repeated filesystem enumeration in `SetT
 - `src/iced_app/app_startup_proof_tests.rs::filesystem::app_preload_setter_render_reuse_root_change_and_gui_reload_recover_sources` — actual App, valid filesystem BLP pixels, calibrated Linux directory opens for setter/queued-preload/draw reuse, root replacement and unchanged-directory GUI reload invalidation, followed by missing-source recovery. PNG extension probing can legitimately refresh missing higher-priority filenames; the zero-reopen fixture uses BLP, the first extension in the lookup order.
 - `src/iced_app/app_startup_proof_tests.rs::startup_cleanup_layout_and_texture_warmup_precede_first_nonempty_quad` — visible filesystem PNG decoded before the first nonempty App primitive, with cleanup/layout and upload-data assertions. See [startup contract](gui-startup-yield.md). Neither fixture invokes GPU prepare/upload or proves presented pixels.
 
+## Bounded App proof — 2026-10-18
+
+The Linux filesystem App fixture passed once under the [Retail App proof revision and artifact](gui-startup-yield.md#bounded-app-proof--2026-10-18), alongside the separate first-quad fixture and eight startup controls. Real uncompressed 2×1 BLP files exercise queued decoding and rendering; kernel directory-open observation is calibrated against two real enumerations.
+
+| Phase | Observed fixture-directory opens |
+|---|---:|
+| First mixed-case setter | 1 |
+| Queued App preload, reusing the setter listing | 0 |
+| 32 warm setter/update/draw cycles | 0 |
+| Root-listing replacement | 1 |
+| Actual GUI reload and root-change draw recovery | 1 |
+| GUI reload with unchanged directory | 1 |
+| Late-file creation after reload | 1 |
+
+The test observes missing draw requests before recovery and checks concrete decoded/upload pixels, not resolver call counts. Root-change recovery deliberately crosses actual GUI ReloadUI; the pre-reload failed-handle boundary below is not made into a new automatic-retry requirement. Filesystem-only runtimes use CASC disabled; GPU prepare/upload/presentation and successful decoded-byte hot reload are not covered.
+
 ## Known gaps (current cycle)
 
 Final acceptance requires the requested gates on the final implementation revision; source-only inspection and zero-selected filters are not passing receipts. Native/live-GPU/real-addon acceptance is not supplied by these bounded fixtures.
