@@ -1,3 +1,7 @@
+## [2026-10-18] investigation | Ellesmere timer125 hook target fanout
+
+[Timer125 diagnosis](investigations/ellesmereui-forever.md#timer125-inherited-secure-hook-fanout--2026-10-18) records captured cross-widget setter hooks and original-seal consumer RED. [Hook contract](../specs/hook-callback-origin.md) owns target/key isolation; compiled GREEN and full-addon replay remain pending.
+
 ## [2026-10-18] documentation | Merged-lane texture and startup integration
 
 [Texture entry points](systems/texture-atlas.md#texturemanager-srctexturers) link their [source-cache owner](systems/texture-source-resolution-cache.md). [Ellesmere follow-up](investigations/ellesmereui-forever.md#texture-lookup-and-startup-yielding-follow-up--2026-10-18) links F1, F2 and timer diagnostics with their separate acceptance limits.

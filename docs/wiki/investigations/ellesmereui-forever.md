@@ -76,8 +76,18 @@ The [texture source-cache system](../systems/texture-source-resolution-cache.md)
 
 This follow-up records source/test inspection, not a new real Ellesmere startup, first-draw, IPC or all-six-interaction acceptance receipt. Historical failure observations above are not superseded by merge alone.
 
+## Timer125 inherited secure-hook fanout — 2026-10-18
+
+Count-hook stacks from the sealed `70a334c0f` GUI isolate the stalled callback to `ApplyColorsToOUF → ActionBars:ApplyBorders → MakeButtonSquare → SetSquareTexture`. Threat synchronization is later in the callback and is not the sampled hot path. The archived engine exports its own `Engine.ForceAll`; assuming an oUF frame walk would misidentify this snapshot.
+
+PixelPerfect intentionally hooks the Texture metatable. The simulator's `hooksecurefunc` then looked up an existing registration solely by resolved wrapper identity. An instance inherited that wrapper, so installing its arrow or action-border hook appended the callback to the shared metatable registration. Every texture setter consequently invoked unrelated per-widget callbacks and nested setter work. Live debug locals show the same SetAtlas callback list growing from 9 to 137. This establishes cross-widget hook fanout, not mathematical nontermination or an exclusive texture-resolution cost.
+
+The [hook contract](../../specs/hook-callback-origin.md) owns target/key isolation. Its regression fixture preserves the archived PixelPerfect, arrow-skin and action-border function bodies with three real action buttons and an unrelated arrow. Original-seal RED: a border repaint repaints that arrow 24 times instead of zero. Compiled GREEN and full-addon post-fix replay are pending; this diagnosis does not establish general Ellesmere compatibility.
+
 ## Sources
 
+- `/home/osso/.local/state/wow-ui-sim/handoff/ellesmere-timer125-root/report.md` — sealed runtime stacks, debug locals, fixture provenance and proof ledger
+- [Hook callback contract](../../specs/hook-callback-origin.md) — exact target/key isolation and regressions
 - [Texture source-cache contract](../../specs/texture-source-resolution-cache.md) — F1 behavior and bounded fixture limits
 - [GUI startup contract](../../specs/gui-startup-yield.md) — F2 update-turn ordering and proof limits
 - [Timer provenance contract](../../specs/timer-callback-provenance.md) — diagnostic format, lifetime and association handling

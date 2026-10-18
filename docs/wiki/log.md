@@ -1,3 +1,7 @@
+## [2026-10-18] investigation | Ellesmere timer125 secure-hook targets
+
+[Diagnosis](investigations/ellesmereui-forever.md#timer125-inherited-secure-hook-fanout--2026-10-18) links captured shared callback growth and real extracted-consumer RED. Target/key binding now separates instance hooks from inherited/copied wrappers without rooting targets; compiled GREEN and real-addon replay pending. No addon, texture-cache or scheduling change.
+
 ## [2026-10-18] ingest | Merged-lane documentation integration
 
 Replaced stale texture structure/priority copies with owner links, linked CASC miss reuse to the [source-cache contract](../specs/texture-source-resolution-cache.md), and added the [Ellesmere follow-up](investigations/ellesmereui-forever.md#texture-lookup-and-startup-yielding-follow-up--2026-10-18) with Sources and See Also coverage. Source inspection only; no new runtime acceptance.

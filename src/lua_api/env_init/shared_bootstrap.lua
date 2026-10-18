@@ -858,13 +858,19 @@ function hooksecurefunc(target, methodName, hook)
   end
 
   local existingId = __wow_hooksecurefunc_wrapper_ids[original]
-  if existingId ~= nil and __wow_hooksecurefunc_registry[existingId] ~= nil then
-    table.insert(__wow_hooksecurefunc_registry[existingId].callbacks, callback)
+  local existingEntry = existingId and __wow_hooksecurefunc_registry[existingId]
+  -- Inherited/copied wrappers are callees, not this target's registration.
+  local sameBinding = existingEntry and rawequal(existingEntry.target[1], object) and existingEntry.key == key
+  if sameBinding then
+    table.insert(existingEntry.callbacks, callback)
     return
   end
 
   local hookId = #__wow_hooksecurefunc_registry + 1
   __wow_hooksecurefunc_registry[hookId] = {
+    -- Registration metadata must not keep an otherwise dead target alive.
+    target = setmetatable({ object }, { __mode = "v" }),
+    key = key,
     original = original,
     callbacks = { callback },
   }

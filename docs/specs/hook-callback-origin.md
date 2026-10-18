@@ -8,6 +8,8 @@ Simulator-owned `HookScript` and `hooksecurefunc` adapters must not acquire the 
 - [ ] A hooked function called from addon code remains subject to that caller's taint; constructing the adapter must not clear the addon caller.
 - [ ] Preserve original-before-hook ordering, original multi-return values including nil gaps, and existing error behavior.
 - [ ] Generate only the fixed engine adapter, not arbitrary caller-supplied source. Do not taint an originally clean global slot merely by installing its secure hook.
+- [ ] Hooks belong to the exact target object and method key. Hooking an inherited or copied wrapper must not append that callback to the source target's hook list. Preserve inherited hooks and repeated-hook ordering on the actual target.
+- [ ] A texture-metatable pixel-snap hook followed by instance-local arrow and action-border hooks must not repaint the arrow when another texture's border is repainted.
 
 ## How it works
 
@@ -23,6 +25,7 @@ Simulator-owned `HookScript` and `hooksecurefunc` adapters must not acquire the 
 
 - `tests/hook_script.rs` — original/hook/caller taint, result preservation and existing chaining behavior.
 - `tests/security_api.rs` — existing global/table hook consumers.
+- `tests/secure_hook_target.rs` and `tests/fixtures/ellesmere_hook_consumers.lua` — inherited/copied target isolation, ordering/nil returns, and real extracted Ellesmere consumers driven by a timer.
 
 ## Known gaps (current cycle)
 
