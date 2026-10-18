@@ -376,7 +376,7 @@ fn gui_startup_draw_defers_lua_and_keeps_event_order_once() {
         .eval("return table.concat(startup_events, ',')")
         .unwrap();
     assert_eq!(events, "", "draw must not dispatch startup Lua");
-    let sizes: usize = app.env.borrow().eval("return #startup_sizes").unwrap();
+    let sizes: i32 = app.env.borrow().eval("return #startup_sizes").unwrap();
     assert_eq!(sizes, 0, "draw must not dispatch resize Lua either");
 
     complete_gui_startup(&mut app);
@@ -461,7 +461,7 @@ fn gui_startup_branching_zero_delay_chain_spans_turns() {
         assert_eq!(trace, expected);
     }
     complete_gui_startup(&mut app);
-    let count: usize = app.env.borrow().eval("return #branches").unwrap();
+    let count: i32 = app.env.borrow().eval("return #branches").unwrap();
     assert_eq!(count, 7);
 }
 
