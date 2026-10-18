@@ -39,7 +39,7 @@ Forever build `cc8c334820279e87a2360e8c606395ae72bf3dee`, features `sound,gui,ca
 | Real archived addons, uninstrumented callback | Timer125 returns `outcome=ok` in 591.188 ms; public AF_UNIX Exec sent after callback entry returns in 2.551545 s. Subsequent populated draws and normal ticks complete. |
 | Static gates | `cargo fmt --all -- --check` and locked single-job Forever `cargo check` exit 0. Build/check each retain the unchanged `unit_roles.rs:17-19` dead-code warning for Tank/Healer/Damage. |
 
-Receipts: `/home/osso/.local/state/wow-ui-sim/handoff/ellesmere-timer125-root/report.md`. Tests and GUI use verified private launch copies, isolated current CVar copies and 4 GiB units; builds/checks use slot3 in admitted 9 GiB async units. No addon/vendor edits, push or merge.
+Proof: `tests/secure_hook_target.rs` with the extracted consumer fixture `tests/fixtures/ellesmere_hook_consumers.lua`; real-addon GUI receipts are retained in the private handoff, not in the repository.
 
 ## Known gaps (current cycle)
 

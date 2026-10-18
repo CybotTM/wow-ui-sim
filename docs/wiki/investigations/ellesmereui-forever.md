@@ -86,7 +86,6 @@ The [hook contract](../../specs/hook-callback-origin.md) owns target/key isolati
 
 ## Sources
 
-- `/home/osso/.local/state/wow-ui-sim/handoff/ellesmere-timer125-root/report.md` — sealed runtime stacks, debug locals, fixture provenance and proof ledger
 - [Hook callback contract](../../specs/hook-callback-origin.md) — exact target/key isolation and regressions
 - [Texture source-cache contract](../../specs/texture-source-resolution-cache.md) — F1 behavior and bounded fixture limits
 - [GUI startup contract](../../specs/gui-startup-yield.md) — F2 update-turn ordering and proof limits
