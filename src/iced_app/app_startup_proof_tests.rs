@@ -90,6 +90,8 @@ fn empty_startup_groups_short_circuit_and_keep_fast_subscription_without_timers(
         .borrow()
         .exec(
             r#"
+        -- No chat fixture: simulator fake-chat startup otherwise schedules tickers.
+        ChatFrame1 = nil
         updates = 0
         local frame = CreateFrame('Frame', nil, UIParent)
         frame:SetScript('OnUpdate', function() updates = updates + 1 end)
@@ -276,6 +278,26 @@ mod filesystem {
         }
     }
 
+    fn write_blp_texture(root: &std::path::Path, name: &str, rgba: [u8; 4]) {
+        // BLP2 Raw3: 148-byte header, 256-entry palette, one 2x1 BGRA mip.
+        const MIP_OFFSET: usize = 148 + 256 * 4;
+        let mut bytes = vec![0u8; MIP_OFFSET + 8];
+        bytes[..4].copy_from_slice(b"BLP2");
+        bytes[4..8].copy_from_slice(&1u32.to_le_bytes());
+        bytes[8] = 3; // Raw3, not compressed BC: exercise the CPU RGBA path.
+        bytes[9] = 8;
+        bytes[12..16].copy_from_slice(&2u32.to_le_bytes());
+        bytes[16..20].copy_from_slice(&1u32.to_le_bytes());
+        bytes[20..24].copy_from_slice(&(MIP_OFFSET as u32).to_le_bytes());
+        bytes[84..88].copy_from_slice(&8u32.to_le_bytes());
+        let bgra = [rgba[2], rgba[1], rgba[0], rgba[3]];
+        bytes[MIP_OFFSET..].copy_from_slice(&[bgra, bgra].concat());
+        image_blp::parser::load_blp_from_buf(&bytes).expect("valid uncompressed BLP fixture");
+        let directory = root.join("Proof/Media");
+        std::fs::create_dir_all(&directory).unwrap();
+        std::fs::write(directory.join(format!("{name}.blp")), bytes).unwrap();
+    }
+
     fn assign_texture(app: &App, name: &str, expected: bool) {
         app.env
             .borrow()
@@ -294,8 +316,8 @@ mod filesystem {
     fn app_preload_setter_render_reuse_root_change_and_gui_reload_recover_sources() {
         let first = tempfile::tempdir().unwrap();
         let second = tempfile::tempdir().unwrap();
-        write_texture(first.path(), "Queued", [1, 2, 3, 255]);
-        write_texture(second.path(), "RootOnly", [4, 5, 6, 255]);
+        write_blp_texture(first.path(), "Queued", [1, 2, 3, 255]);
+        write_blp_texture(second.path(), "RootOnly", [4, 5, 6, 255]);
         let mut observer = DirectoryObserver::watch(&first.path().join("Proof/Media"));
         // Calibrate kernel event delivery against two real enumerations.
         for _ in 0..2 {
@@ -389,7 +411,7 @@ mod filesystem {
             1,
             "GUI reload must discard the shared source listing even without a filesystem change"
         );
-        write_texture(second.path(), "Late", [7, 8, 9, 255]);
+        write_blp_texture(second.path(), "Late", [7, 8, 9, 255]);
         assign_texture(&app, "late", true);
         let primitive = draw_test_canvas(&app, size);
         assert!(
