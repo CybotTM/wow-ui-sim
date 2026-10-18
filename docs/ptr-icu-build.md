@@ -1,20 +1,21 @@
-# Optional PTR ICU4C build
+# PTR ICU4C build
 
-The `retail-12-1-5` feature enables the native ICU4C boundary; `client-ptr`
-selects that epoch. Default `client-retail`, `client-mists`, release aliases,
-and the retail Docker image do **not** require ICU4C. Existing ICU4X Rust
-algorithms remain separate from this native dependency.
+The `native-duration-formatting` feature enables the native ICU4C build;
+current `client-retail` and `client-ptr` both select it. `client-mists` does not.
+Existing ICU4X Rust algorithms remain separate from this native dependency.
 
 The native contract belongs in [ICU native linking](specs/intl-native-linking.md).
 This page covers provisioning and the independent
 [PTR ICU4C workflow](../.github/workflows/ptr-icu.yml), not native WoW equivalence.
+Retail release/Docker provisioning, distribution and non-publishing rehearsal
+belong in [release ICU packaging](release-icu.md).
 
 ## Platforms
 
 | Platform | Build provisioning | Link/runtime contract |
 |---|---|---|
 | Linux | `pkg-config` and ICU4C development package, e.g. Debian/Ubuntu `libicu-dev` | `icu-i18n` and `icu-uc` >=72; shared ICU libraries and matching data must be available at runtime |
-| macOS | Homebrew `icu4c` and `pkg-config`; `PKG_CONFIG_PATH=$(brew --prefix icu4c)/lib/pkgconfig` | Shared Homebrew ICU libraries must remain available at their recorded install names; no portable app bundling is added here |
+| macOS | Homebrew `icu4c` and `pkg-config`; `PKG_CONFIG_PATH=$(brew --prefix icu4c)/lib/pkgconfig` | This test workflow uses Homebrew shared libraries; the separate Retail release workflow bundles their ICU closure |
 | Windows MSVC x64 | Pinned vcpkg manifest below; explicit `VCPKG_ROOT` and `VCPKGRS_TRIPLET=x64-windows-static-md` | Static ICU/data, dynamic MSVC CRT; no ICU DLL copying or bundling |
 
 The CI library-test build uses `sound,gui,client-ptr` to cover the existing
@@ -57,8 +58,7 @@ Official pin sources:
 
 ## CI proof path
 
-The separate workflow leaves the release, retail-test, Mists-test, and Docker
-workflow matrices unchanged. It builds the existing grouped Rust library test
+The separate PTR workflow builds the existing grouped Rust library test
 binary with:
 
 ```text
@@ -77,9 +77,9 @@ Windows rejects any ICU DLL import. Executed wrapper tests provide the native
 link/call smoke rather than merely accepting a successful build with zero tests.
 Cargo artifact records, linkage output, and test output are uploaded per platform.
 
-Docker only gains `COPY build/` and `COPY native/`, so the feature-gated build
-helper and C inputs are present in its context. The build still selects
-`client-retail`; no ICU package, image runtime dependency, or PTR image is added.
+The [Retail Docker image](release-icu.md#docker) separately provisions ICU
+and copies its shared code/data libraries into the runtime image. It does not
+build a PTR image.
 
 ## Runtime notices and evidence limits
 
@@ -90,9 +90,10 @@ vcpkg installs these in
 [ICU 74.2 LICENSE](https://github.com/unicode-org/icu/blob/release-74-2/LICENSE).
 That file includes Unicode License V3 and additional notices; retain the full
 installed file, not only a short license label. No release package is produced
-by this workflow. Existing non-PTR packages are unchanged.
+by this PTR workflow. Retail redistribution is a separate packaging concern;
+see [release limits](release-icu.md#proof-limits).
 
-Local packaging preflight, 2026-09-10:
+Historical local packaging preflight, 2026-09-10 (before Retail ICU packaging):
 
 | Check | Evidence in this slice |
 |---|---|
@@ -102,7 +103,7 @@ Local packaging preflight, 2026-09-10:
 | Existing packaging | Release/test/Docker workflows, xtask, features and runtime image configuration unchanged; only Docker source inputs added |
 | Platform execution | Linux, macOS and Windows native builds/linkage/runtime smoke **not run by this slice**; no local package installation |
 
-Windows static linkage is a CI requirement, not a verified local result.
-Parent integration owns platform jobs and final acceptance; inspect successful
-job output before claiming platform support is proven. PowerShell was not
-available locally, so provisioning commands have only workflow syntax proof.
+That historical preflight did not execute native Windows or macOS builds.
+Current release-platform evidence and remaining acceptance boundaries belong
+in [release ICU packaging](release-icu.md#proof-limits); do not infer them from
+this PTR preflight.

@@ -181,6 +181,13 @@ Captured in `docs/baselines/`:
 - `mists-test-coverage.md`, `mists-release-proof.md`, and `mists-lod-audit.md` — retained Mists proof notes
 - `classic-addon-test-targets.md` — Mists addon harness target set
 
+## Release ICU packaging
+
+[Release packaging](../../release-icu.md) owns Retail ICU provisioning, the macOS
+bundle closure, Docker runtime/source coherence and tag-push-only publication.
+Mists remains outside the native ICU dependency. Helper/static proof does not
+establish native platform execution; macOS is verified only by CI dispatch.
+
 ## Sources
 
 - `Cargo.toml` — mutually-exclusive `client-*` profile features and cumulative `retail-*` API epoch features
@@ -195,6 +202,7 @@ Captured in `docs/baselines/`:
 - `src/event/valid_events.rs` — strict vs permissive event validator dispatch
 - `scripts/setup-blizzard-ui.sh`, `scripts/init-worktree.sh` — vendor pinning
 - `.github/workflows/{test,addon-harness}.yml` — CI matrix
+- [Release ICU packaging](../../release-icu.md) — release/Docker contracts and proof limits
 - `src/blizzard_ui_sync/{pinned,pinned_download}.rs` — immutable PTR CDN sync and validation
 - `data/blizzard-ui-builds/ptr.json` — PTR 12.1.5 build/content identity
 - [PTR source spec](../../specs/ptr-blizzard-ui-source.md) — cache and startup proof boundary

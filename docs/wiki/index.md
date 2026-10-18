@@ -1,3 +1,7 @@
+## [2026-10-18] packaging | Release ICU and Docker publication
+
+[Profile packaging notes](systems/client-profiles.md#release-icu-packaging) link the [release contract](../release-icu.md): explicit native ICU provisioning, relocatable macOS ICU closure, manifest-checked Docker UI/runtime and non-publishing manual rehearsal. Platform proof remains separate from synthetic helper tests.
+
 ## [2026-10-18] investigation | Ellesmere timer125 hook target fanout
 
 [Timer125 diagnosis](investigations/ellesmereui-forever.md#timer125-inherited-secure-hook-fanout--2026-10-18) records captured cross-widget setter hooks and original-seal consumer RED. [Hook contract](../specs/hook-callback-origin.md#bounded-proof--2026-10-18) owns target/key isolation and bounded compiled/control/real-GUI GREEN; full addon compatibility remains separate.

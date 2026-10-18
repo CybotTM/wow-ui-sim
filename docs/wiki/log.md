@@ -2385,3 +2385,7 @@ Added [[wrath-startup-u-residuals]] and owning contracts: existing-model publish
 ## 2026-10-17 — Wrath combined loot/party proof and cursor exposure
 
 Updated [[wrath-startup-u-residuals]] with the original unchanged-text error-display path, raw-stack aggregation limits and same-library historical-input replay. [Loot/party contract](../specs/wrath-initial-loot.md#combined-proof--2026-10-17) owns the combined behavior gate; [inventory](../baselines/README.md#wrath-lua-errors) owns exact failing counts and disclosure. Cursor initialization remains unfixed; no vendor, native-parity or full-suite claim.
+
+## 2026-10-18 — Release ICU packaging
+
+Linked Retail native/Docker packaging and non-publishing rehearsal from client profiles; corrected outdated PTR-only dependency claims. Native platform proof remains separate from helper/static checks.
