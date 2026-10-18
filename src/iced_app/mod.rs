@@ -99,6 +99,8 @@ use crate::saved_variables::SavedVariablesManager;
 
 #[cfg(feature = "gui")]
 pub use app::App;
+#[cfg(all(test, feature = "gui"))]
+pub(crate) use app::AppInit;
 #[cfg(feature = "gui")]
 pub use benchmark::{
     BenchmarkPhase, DurationStats, LfgPanelBenchmarkReport, PhaseStats, SpellbookBenchmarkReport,

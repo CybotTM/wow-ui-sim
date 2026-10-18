@@ -545,6 +545,9 @@ pub mod client {
     }
 }
 
+#[cfg(all(test, feature = "gui"))]
+mod exec_tests;
+
 #[cfg(test)]
 mod screenshot_tests;
 
