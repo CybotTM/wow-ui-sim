@@ -168,7 +168,7 @@ jobs:
 
           # Generate the source PNG for the iconset (also writes the ICO,
           # which is unused on macOS).
-          cargo run --example gen_app_icon
+          cargo run --example gen_app_icon --no-default-features --features "${{ matrix.features }}"
 
           # Build a multi-size iconset from the rendered PNG and convert
           # to .icns. Source is 128x128, so larger sizes are upscaled.
