@@ -2,6 +2,10 @@
 
 [Source cache](systems/texture-source-resolution-cache.md) documents shared setter/renderer ownership, directory freshness and cheap metadata-validated CPU negatives. [Contract](../specs/texture-source-resolution-cache.md) owns behavioral and preservation proof; real Ellesmere startup acceptance remains separate.
 
+## [2026-10-18] correction | Timer diagnostic lifetime
+
+[Timer system](systems/lua-api.md#callback-timing-provenance) now uses weak keys and values: rilua has no ephemeron marking. [Contract and GC regression](../specs/timer-callback-provenance.md#tests-asserting-this-spec) distinguish diagnostic-map ownership from unrelated container backing roots; private fix receipts supplement the historical proof.
+
 ## [2026-10-18] source | Timer callback diagnostic provenance
 
 [Timer system](systems/lua-api.md#callback-timing-provenance) links the [record contract](../specs/timer-callback-provenance.md): opt-in pre-call entries and original-source/ID correlation without changing callback invocation. Behavioral RED→GREEN: 32 bounded cases per Retail/Forever profile; [receipt](../specs/timer-callback-provenance.md#bounded-proof--2026-10-18) separates exact pre-rebase source, clean rebase, checks and remaining proof limits.

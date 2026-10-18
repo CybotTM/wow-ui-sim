@@ -83,9 +83,51 @@ fn field<'a>(record: &'a str, name: &str) -> &'a str {
         .unwrap_or_else(|| panic!("missing {name}: {record}"))
 }
 
+#[test]
+fn completed_callback_handle_cycle_does_not_root_provenance() {
+    run_isolated(Some("0"), exercise_completed_handle_cycle);
+}
+
+fn exercise_completed_handle_cycle() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        local originals = debug.getregistry().__wow_timer_original_callbacks
+        assert(type(originals) == "table", "diagnostics must be enabled")
+        local handle = {}
+        local callback = function() handle.fired = true end
+        TimerLifetimeContainer = C_FunctionContainers.CreateCallback(callback)
+        C_Timer.After(0, TimerLifetimeContainer)
+        -- Model a callback-owned handle reaching its invoker. Registry inspection
+        -- exposes the wrapper, but neither it nor the original is kept globally.
+        handle.invoker = next(originals)
+        assert(originals[handle.invoker] == callback)
+        "#,
+    )
+    .unwrap();
+    env.process_timers().unwrap();
+    env.exec(
+        r#"
+        -- Remove the pre-existing container backing map's independent strong
+        -- callback edge, so this test isolates diagnostic ownership only.
+        TimerLifetimeContainer._callback = nil
+        TimerLifetimeContainer = nil
+        collectgarbage("collect")
+        collectgarbage("collect")
+        assert(next(debug.getregistry().__wow_timer_original_callbacks) == nil,
+            "completed callback/handle cycle retained by provenance association")
+        "#,
+    )
+    .unwrap();
+}
+
 fn run_fixture(threshold: Option<&str>) -> Option<String> {
+    run_isolated(threshold, exercise_addon)
+}
+
+fn run_isolated(threshold: Option<&str>, exercise: fn()) -> Option<String> {
     if std::env::var_os(CHILD).is_some() {
-        exercise_addon();
+        exercise();
         return None;
     }
     let thread = std::thread::current();

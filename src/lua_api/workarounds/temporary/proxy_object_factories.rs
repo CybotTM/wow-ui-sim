@@ -272,7 +272,8 @@ if rawget(C_FunctionContainers, "CreateCallback") == nil then
     -- with a proxy of the container (retail passes a proxy of the ticker that
     -- compares == to the handle), and stops if the container was cancelled. The
     -- proxy is built once per registration to avoid per-tick allocation.
-    -- Weak keys preserve wrapper/callback lifetime when diagnostics are enabled.
+    -- Weak keys and values add no GC roots, even for callback-to-invoker cycles.
+    -- A live invoker keeps its original callback alive through the fn upvalue.
     local originalCallbacks = debug.getregistry().__wow_timer_original_callbacks
     local function makeInvoker(container)
       local fn = container._callback
@@ -349,7 +350,7 @@ end
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     if crate::lua_api::handler_timing::is_enabled() {
         lua.exec(
-            r#"debug.getregistry().__wow_timer_original_callbacks = setmetatable({}, {__mode = "k"})"#,
+            r#"debug.getregistry().__wow_timer_original_callbacks = setmetatable({}, {__mode = "kv"})"#,
         )?;
     }
     lua.exec(PROXY_OBJECT_FACTORIES_LUA)?;

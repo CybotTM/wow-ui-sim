@@ -16,7 +16,7 @@ Opt-in simulator diagnostics identify original timer callbacks rather than only 
 
 ## Implementation inventory
 
-- `src/lua_api/workarounds/temporary/proxy_object_factories.rs`: opt-in weak wrapper-to-original association at invoker creation; callback bodies unchanged.
+- `src/lua_api/workarounds/temporary/proxy_object_factories.rs`: opt-in weak-key/weak-value (`__mode="kv"`) wrapper-to-original association at invoker creation; callback bodies unchanged. The wrapper's `fn` upvalue retains its original while live. Weak keys alone are insufficient: pinned rilua marks strong table values unconditionally, without ephemerons, so an original reaching its wrapper would retain both.
 - `src/lua_api/timer_layout.rs`: capture identities at native registration; retire metadata with the stored callback.
 - `src/lua_api/state{,/sim_state}.rs`: per-environment timer-ID-to-source strings; no callback references.
 - `src/lua_api/handler_timing.rs`: source capture and additive entry/return formatting; existing threshold parser unchanged.
@@ -24,7 +24,7 @@ Opt-in simulator diagnostics identify original timer callbacks rather than only 
 
 ## Tests asserting this spec
 
-- `tests/timer_callback_provenance.rs` and `tests/fixtures/TimerProvenance/`: subprocess-captured stderr for concrete After success/error, entry-before-body ordering, matching return ID/source, disabled gate, high threshold and repeated container-backed ticker. Fixture asserts zero After arguments, ticker/container identity, addon stack taint and unchanged error delivery.
+- `tests/timer_callback_provenance.rs` and `tests/fixtures/TimerProvenance/`: subprocess-captured stderr for concrete After success/error, entry-before-body ordering, matching return ID/source, disabled gate, high threshold and repeated container-backed ticker. Fixture asserts zero After arguments, ticker/container identity, addon stack taint and unchanged error delivery. The subprocess GC regression completes an After callback closing over a handle that reaches its wrapper, drops references, and requires the diagnostic entry to disappear after two collections. It removes the container backing map's independent callback edge to isolate diagnostic ownership; it does not prove unrelated container cycles collect.
 - `tests/timer_callback_container.rs`, `tests/timed_signal_map.rs` and `src/lua_api/handler_timing.rs::tests`: existing invocation/lifecycle/security and timing-format preservation controls.
 - RED at `245f55610`: compile exit0; 1 PASS / 3 FAIL, missing original entry records, existing invoker-only sources `=(string):273/284`. Evidence: private `handoff/timer-provenance/red-retail-20261018T075507Z`.
 
@@ -46,7 +46,7 @@ Final rebase onto `35822d5c7` completed without conflict. All eleven owning diag
 
 ## Known gaps (current cycle)
 
-Callback lifetime preservation and once-per-registration capture are source-audited (weak wrapper keys, string-only metadata and no per-tick closure lookup), not dedicated GC/source-lookup-counter regressions. No full startup, GUI, native parity or full-suite acceptance is claimed.
+Diagnostic-map cycle collection has a dedicated GC regression; once-per-registration capture remains source-audited (string-only metadata and no per-tick closure lookup), without a source-lookup-counter regression. Pre-existing function-container backing-map ownership is outside the diagnostic-map fix. Verifier-fix revisions and command receipts are recorded in private `handoff/timer-provenance/fix-report.md` and appended to `proof-ledger.json`; the historical proof above is unchanged. No full startup, GUI, native parity or full-suite acceptance is claimed.
 
 ## Out of scope
 
