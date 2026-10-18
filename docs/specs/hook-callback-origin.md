@@ -37,13 +37,13 @@ Forever build `cc8c334820279e87a2360e8c606395ae72bf3dee`, features `sound,gui,ca
 | Rebuilt timer consumer and target/key isolation | GREEN: `secure_hook_target::` 3/3. |
 | Existing hook controls | `hook_script::` 16/16, including taint and nil-return preservation; `hooksecurefunc` filter 3/3. |
 | Real archived addons, uninstrumented callback | Timer125 returns `outcome=ok` in 591.188 ms; public AF_UNIX Exec sent after callback entry returns in 2.551545 s. Subsequent populated draws and normal ticks complete. |
-| Static gates | `cargo fmt --all -- --check` and locked single-job Forever `cargo check` exit 0; no compiler warnings. |
+| Static gates | `cargo fmt --all -- --check` and locked single-job Forever `cargo check` exit 0. Build/check each retain the unchanged `unit_roles.rs:17-19` dead-code warning for Tank/Healer/Damage. |
 
 Receipts: `/home/osso/.local/state/wow-ui-sim/handoff/ellesmere-timer125-root/report.md`. Tests and GUI use verified private launch copies, isolated current CVar copies and 4 GiB units; builds/checks use slot3 in admitted 9 GiB async units. No addon/vendor edits, push or merge.
 
 ## Known gaps (current cycle)
 
-- [ ] Native conformance, other-profile execution and full Ellesmere interaction acceptance remain outside this bounded proof. Historical taint RED is superseded only by the selected passing Forever controls above.
+- [ ] Native conformance, other-profile execution and full Ellesmere interaction acceptance remain outside this bounded proof. Other GUI Lua errors and the unchanged UnitRole compiler warning are not repaired by this fix. Historical taint RED is superseded only by the selected passing Forever controls above.
 
 ## Out of scope
 
