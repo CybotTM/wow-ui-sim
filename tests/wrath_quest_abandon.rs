@@ -21,7 +21,7 @@ fn original(file: &str, expected: &str) -> PathBuf {
 
 fn assert_errors(env: &WowLuaEnv) {
     let errors: String = env
-        .eval("return table.concat(AbandonErrors, '\n')")
+        .eval(r"return table.concat(AbandonErrors, '\n')")
         .unwrap();
     let sim = env.state().borrow();
     eprintln!(
