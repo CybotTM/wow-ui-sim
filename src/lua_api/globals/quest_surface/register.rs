@@ -5,13 +5,9 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 use super::SurfaceFn;
-#[cfg(not(feature = "client-wrath"))]
-use super::handlers as legacy_log;
 use super::handlers::*;
 use super::legacy_globals::*;
 use super::task_quest::*;
-#[cfg(feature = "client-wrath")]
-use super::wrath_quest_log as legacy_log;
 use crate::lua_api::globals::real::quest_dialog::*;
 
 pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
@@ -116,9 +112,9 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
     ("GetQuestLogIndexByID", get_quest_log_index_by_id),
     ("GetQuestLogPushable", get_quest_log_pushable),
     ("GetQuestLogRequiredMoney", get_required_money),
-    ("GetQuestLogSelection", legacy_log::get_quest_log_selection),
+    ("GetQuestLogSelection", get_quest_log_selection),
     ("GetQuestLogSelectedID", get_quest_log_selected_id),
-    ("GetQuestLogTitle", legacy_log::get_quest_log_title),
+    ("GetQuestLogTitle", get_quest_log_title),
     ("GetQuestUiMapID", get_quest_ui_map_id),
     ("GetNumQuestLogEntries", get_num_quest_log_entries),
     ("GetQuestLink", get_quest_link),
@@ -186,7 +182,7 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
         quest_poi_get_quest_id_by_visible_index,
     ),
     ("RemoveQuestWatch", noop),
-    ("SelectQuestLogEntry", legacy_log::select_quest_log_entry),
+    ("SelectQuestLogEntry", select_quest_log_entry),
     ("GetQuestLogCompletionText", get_quest_log_completion_text),
     ("GetQuestLogCriteriaSpell", get_quest_log_criteria_spell),
     ("GetQuestProgressBarPercent", get_quest_progress_bar_percent),
@@ -248,7 +244,15 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     #[cfg(feature = "client-wrath")]
     super::wrath_gossip::register_all(lua)?;
     for (name, func) in GLOBAL_QUEST_FUNCTIONS {
-        LuaApiMut::register_function(lua, name, *func)?;
+        let func = *func;
+        #[cfg(feature = "client-wrath")]
+        let func: SurfaceFn = match *name {
+            "GetQuestLogTitle" => super::wrath_quest_log::get_quest_log_title,
+            "SelectQuestLogEntry" => super::wrath_quest_log::select_quest_log_entry,
+            "GetQuestLogSelection" => super::wrath_quest_log::get_quest_log_selection,
+            _ => func,
+        };
+        LuaApiMut::register_function(lua, name, func)?;
     }
     if crate::c_api::quest_objectives::ENABLED {
         for (name, func) in LIVE_QUEST_GLOBALS {
