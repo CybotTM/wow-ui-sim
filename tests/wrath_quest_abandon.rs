@@ -123,6 +123,10 @@ fn seed_env() -> WowLuaEnv {
     );
     for (file, hash) in [
         (
+            "MoneyFrame.lua",
+            "f7392b7c139c8694fc3fe7581231c21342b9b6ed23b19f0b4bb77f3c156a7d90",
+        ),
+        (
             "QuestLogFrame.lua",
             "6ac6ca92b3036417082b88cc2f8b5c9fc8889f51f82aa726fe0bcd44990bc5e2",
         ),
