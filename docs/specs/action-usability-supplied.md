@@ -26,12 +26,27 @@ G3 supplies usability for existing spell actions to the namespace query and publ
 ## Tests asserting this spec
 
 - `tests/action_usability_supplied.rs` — full cached Wrath file, actual textures, original event consumer; Retail additionally loads its complete deprecated wrapper.
-- `tests/action_usability_modern_supplied.rs` — active Retail/PTR/Mists/Forever shared ActionButton file and SharedXMLBase closure; unchanged modern mixin query refresh and `ACTION_USABLE_CHANGED` watcher, Rust-supplied spell state, passive supply, per-slot routing, rebind and empty-slot colors. Explicit host event delivery, not automatic notifications. Execution evidence pending.
+- `tests/action_usability_modern_supplied.rs` — active Retail/PTR/Mists/Forever shared ActionButton file and SharedXMLBase closure; unchanged modern mixin query refresh and `ACTION_USABLE_CHANGED` watcher, Rust-supplied spell state, passive supply, per-slot routing, rebind and empty-slot colors. Explicit host event delivery, not automatic notifications. See bounded proof below.
 
 ## Known gaps (current cycle)
 
-- [x] Both profile cases compiled and reached original color assertions before producer; both became GREEN after producer. Full Retail ActionButtonMixin, native and broader profile acceptance remain unproved.
+- [x] Both original Retail/Wrath cases compiled and reached original color assertions before producer; both became GREEN after producer. Modern shared-mixin proof is recorded below; full ActionBar/template/router startup and native parity remain unproved.
 - [ ] Macro/outfit checks preserve occupancy-query/color behavior only, not action execution or broader action-kind acceptance.
+
+## Modern consumer bounded proof
+
+Test revision `c5f96b724f11cf299e74b87d5327c7bf69ee26e6`, based on master `46afa7fc4`: both modern G3 tests were already GREEN. This is missing-proof coverage only, not a simulator behavior change. No production or Blizzard/vendor source changed.
+
+| Profile | Modern G3 | Preserved existing cases |
+|---|---|---|
+| Retail | 2/2 | 3 G2 + 2 Wrath-consumer/deprecated-wrapper G3 |
+| PTR | 2/2 | 3 G2 |
+| Mists | 2/2 | 4 G2, including applicable legacy projection |
+| Forever | 2/2 | 3 G2 |
+
+All 23 selected profile/test pairs passed through the tracked `integration` target with `--no-default-features --features sound,gui,casc,client-<profile>`, `-j1`, serial execution and a 9 GiB systemd limit. Legacy G2 early returns outside Mists were excluded, not counted. The first Retail warm-cache attempt selected zero tests because its generated harness retained another checkout's absolute paths; it carries no behavioral credit. Regenerating only the dev harness cache produced the passing tracked run. No extracted/reconstructed consumer, external component acceptance, gameplay policy or automatic-event claim.
+
+Private command/output/artifact-feature records, CVar before/after guards and exact pass names: `/home/osso/.local/state/wow-ui-sim/handoff/g3-retail-actionbutton/`. Proof is bounded to unchanged query-refresh and watcher methods on native widgets, not full addon startup, native resource rules or GPU pixels.
 
 ## Out of scope
 
