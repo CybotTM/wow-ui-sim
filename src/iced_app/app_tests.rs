@@ -221,6 +221,69 @@ fn registry_tracks_cooldown_ids_across_reregistration() {
 }
 
 #[test]
+fn gui_startup_zero_delay_chain_yields_to_queued_exec() {
+    let mut app = build_test_app(ScreenKind::Game);
+    let (commands, receiver) = std::sync::mpsc::channel();
+    app.lua_rx = Some(receiver);
+    app.env
+        .borrow()
+        .exec(
+            r#"
+        startup_trace = {}
+        startup_ticker_count = 0
+        C_Timer.After(0, function()
+            table.insert(startup_trace, "A")
+            C_Timer.After(0, function() table.insert(startup_trace, "B") end)
+        end)
+        C_Timer.NewTicker(0, function()
+            startup_ticker_count = startup_ticker_count + 1
+        end, 3)
+    "#,
+        )
+        .unwrap();
+
+    // The same first-canvas entry used by draw, followed by a normal app turn.
+    app.ensure_gui_startup_for_canvas_size(Size::new(1266.0, 822.0));
+    let _ = app.update(super::super::Message::ProcessTimers(
+        std::time::Instant::now(),
+    ));
+    let (trace, ticks): (String, i32) = app
+        .env
+        .borrow()
+        .eval("return table.concat(startup_trace, ','), startup_ticker_count")
+        .unwrap();
+    assert_eq!(trace, "A", "first generation must return before chained B");
+    assert_eq!(ticks, 1, "zero ticker fires once per startup generation");
+
+    // The controller queues real Exec only after the first turn returned.
+    let (respond, response) = std::sync::mpsc::channel();
+    commands
+        .send(crate::lua_server::LuaCommand::Exec {
+            code: "table.insert(startup_trace, 'Exec'); print(table.concat(startup_trace, ','))"
+                .into(),
+            respond,
+        })
+        .unwrap();
+    let _ = app.update(super::super::Message::ProcessTimers(
+        std::time::Instant::now(),
+    ));
+    match response.try_recv().expect("queued Exec must be answered") {
+        crate::lua_server::Response::Output(output) => assert_eq!(output.trim(), "A,Exec"),
+        other => panic!("unexpected Exec response: {other:?}"),
+    }
+    let (trace, ticks): (String, i32) = app
+        .env
+        .borrow()
+        .eval("return table.concat(startup_trace, ','), startup_ticker_count")
+        .unwrap();
+    assert_eq!(
+        trace, "A,Exec,B",
+        "B runs on the later app turn, after Exec"
+    );
+    assert_eq!(ticks, 2);
+}
+
+#[test]
 fn gui_startup_uses_first_real_canvas_size_for_display_size_changed() {
     let app = build_test_app(ScreenKind::Game);
     app.env
