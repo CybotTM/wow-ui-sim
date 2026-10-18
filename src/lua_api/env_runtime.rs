@@ -372,7 +372,13 @@ impl WowLuaEnv {
         callback_arg: Option<Val>,
     ) {
         let start = Instant::now();
-        let addon_name = self.addon_folder_name(owner_addon);
+        let source = self.timer_callback_source(timer_id);
+        let addon_name = source
+            .as_ref()
+            .and_then(|_| self.addon_folder_name(owner_addon));
+        if let Some(source) = source.as_ref() {
+            source.log_entry(addon_name.as_deref(), timer_id);
+        }
         self.state.borrow_mut().executing_addon_index = owner_addon;
         let call_result = {
             let mut lua = self.lua.borrow_mut();
@@ -394,29 +400,30 @@ impl WowLuaEnv {
             };
             call_rilua_function(&mut lua, callback, &args)
         };
+        let failed = call_result.is_err();
         if let Err(error) = call_result {
             let mut lua = self.lua.borrow_mut();
             call_error_handler(&mut lua, &error.to_string());
         }
         self.state.borrow_mut().executing_addon_index = None;
-        let source = self.timer_callback_source_label(callback);
-        crate::lua_api::handler_timing::log_with_source(
-            addon_name.as_deref(),
-            "C_Timer",
-            None,
-            0,
-            start.elapsed(),
-            source.as_deref(),
-        );
+        if let Some(source) = source {
+            source.log_return(addon_name.as_deref(), timer_id, start.elapsed(), failed);
+        }
         record_addon_time(&self.state, owner_addon, &start);
     }
 
-    fn timer_callback_source_label(&self, callback: Val) -> Option<String> {
-        let Val::Function(func_ref) = callback else {
+    fn timer_callback_source(
+        &self,
+        timer_id: u64,
+    ) -> Option<crate::lua_api::handler_timing::TimerCallbackSource> {
+        if !crate::lua_api::handler_timing::is_enabled() {
             return None;
-        };
-        let lua = self.lua.borrow();
-        crate::lua_api::handler_timing::lua_closure_source_label(lua.state(), func_ref)
+        }
+        self.state
+            .borrow()
+            .timer_callback_sources
+            .get(&timer_id)
+            .cloned()
     }
 
     fn addon_folder_name(&self, owner_addon: Option<u16>) -> Option<String> {

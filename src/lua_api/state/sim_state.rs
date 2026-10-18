@@ -36,6 +36,9 @@ pub struct SimState {
     pub console_output: Vec<String>,
     pub timers: VecDeque<PendingTimer>,
     pub rilua_timers: VecDeque<crate::lua_api::timer_layout::RiluaPendingTimer>,
+    /// Diagnostic strings only; remains empty without handler timing opt-in.
+    pub(crate) timer_callback_sources:
+        HashMap<u64, crate::lua_api::handler_timing::TimerCallbackSource>,
     #[cfg(feature = "timed-signal-maps")]
     pub(crate) timed_signal_maps: HashMap<u64, crate::c_api::timed_signal_map::TimedSignalMapState>,
     pub focused_frame_id: Option<u64>,

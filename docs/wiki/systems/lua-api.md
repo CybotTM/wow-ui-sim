@@ -406,7 +406,13 @@ C_Timer (After, NewTimer, NewTicker), C_Map (stub), C_Item (`IsConsumableItem`, 
 
 ## Timer System
 
-`C_Timer.After(seconds, cb)`, `C_Timer.NewTicker(seconds, cb, iterations)` — backed by `WowLuaEnv.schedule_timer()`. `process_timers()` fires due callbacks each tick. `next_timer_delay()` drives the event loop scheduling.
+`C_Timer.After(seconds, cb)`, `C_Timer.NewTimer(seconds, cb)` and `C_Timer.NewTicker(seconds, cb, iterations)` register native timers in `timer_layout.rs`; callbacks are retained in the Lua registry by timer ID. Container support wraps the original callback in `makeAfterInvoker` or `makeInvoker`. `process_timers()` fires due callbacks each tick; `next_timer_delay()` drives event-loop scheduling.
+
+### Callback timing provenance
+
+The [record contract](../../specs/timer-callback-provenance.md) owns the format and proof scope. With `WOW_SIM_LOG_HANDLER_TIMINGS` enabled, simulator bootstrap creates a weak-key invoker-to-original table. Invoker creation records the captured original without changing the invocation body. `store_timer_callback` reads both functions' source metadata once into `SimState.timer_callback_sources`, keyed by timer ID. This storage holds strings only and is removed alongside the registry callback on completion/cancellation/finalization. Tickers and TimedSignalMap invocations reuse their registration metadata.
+
+Native firing clones diagnostic strings before releasing state borrows and calling Lua, so self-cancellation does not erase the in-flight identity. `[handler-entry]` precedes the call even when the duration threshold is high; `[handler]` preserves its invoker `source` and appends the same ID/original `callback_source` plus `outcome`. Existing error handling is unchanged. Without the opt-in, no provenance table or source strings are populated and firing bypasses diagnostic metadata lookup/formatting. No addon/vendor behavior is patched; missing return records do not establish why execution stopped.
 
 ## Five-producer source inventory — 2026-10-12
 

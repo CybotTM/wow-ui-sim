@@ -56,6 +56,7 @@ macro_rules! build_empty_sim_state {
             console_output: $collections.console_output,
             timers: $collections.timers,
             rilua_timers: ::std::collections::VecDeque::new(),
+            timer_callback_sources: ::std::collections::HashMap::new(),
             #[cfg(feature = "timed-signal-maps")]
             timed_signal_maps: ::std::collections::HashMap::new(),
             focused_frame_id: $runtime.focused_frame_id,

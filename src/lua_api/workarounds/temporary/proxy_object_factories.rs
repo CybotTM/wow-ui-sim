@@ -272,26 +272,36 @@ if rawget(C_FunctionContainers, "CreateCallback") == nil then
     -- with a proxy of the container (retail passes a proxy of the ticker that
     -- compares == to the handle), and stops if the container was cancelled. The
     -- proxy is built once per registration to avoid per-tick allocation.
+    -- Weak keys preserve wrapper/callback lifetime when diagnostics are enabled.
+    local originalCallbacks = debug.getregistry().__wow_timer_original_callbacks
     local function makeInvoker(container)
       local fn = container._callback
       local proxy = newProxyOf(container)
-      return function()
+      local invoker = function()
         if container._cancelled then
           return
         end
         return fn(proxy)
       end
+      if originalCallbacks then
+        originalCallbacks[invoker] = fn
+      end
+      return invoker
     end
 
     -- TimerCallback (After) has no arguments; TickerCallback receives a proxy.
     local function makeAfterInvoker(container)
       local fn = container._callback
-      return function()
+      local invoker = function()
         if container._cancelled then
           return
         end
         return fn()
       end
+      if originalCallbacks then
+        originalCallbacks[invoker] = fn
+      end
+      return invoker
     end
 
     function C_Timer.After(seconds, callback)
@@ -337,6 +347,11 @@ end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    if crate::lua_api::handler_timing::is_enabled() {
+        lua.exec(
+            r#"debug.getregistry().__wow_timer_original_callbacks = setmetatable({}, {__mode = "k"})"#,
+        )?;
+    }
     lua.exec(PROXY_OBJECT_FACTORIES_LUA)?;
     Ok(())
 }

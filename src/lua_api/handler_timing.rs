@@ -2,6 +2,7 @@ use std::borrow::Cow;
 use std::sync::OnceLock;
 use std::time::Duration;
 
+use rilua::Val;
 use rilua::vm::closure::Closure;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -9,7 +10,6 @@ use rilua::vm::state::LuaState;
 const BUILTIN_ADDON_NAME: &str = "__BuiltIn";
 const HANDLER_TIMING_ENV: &str = "WOW_SIM_LOG_HANDLER_TIMINGS";
 
-#[cfg(feature = "retail-12-0-5")]
 pub(crate) fn is_enabled() -> bool {
     min_duration_ms().is_some()
 }
@@ -57,6 +57,80 @@ pub(crate) fn lua_closure_source_label(
     }
 
     Some(format!("{}:{}", proto.source, proto.line_defined))
+}
+
+/// Source identities captured once when the native timer stores its callback.
+#[derive(Clone)]
+pub(crate) struct TimerCallbackSource {
+    source: Option<String>,
+    callback_source: Option<String>,
+}
+
+impl TimerCallbackSource {
+    pub(crate) fn capture(state: &mut LuaState, callback: Val) -> Self {
+        let originals = super::methods::registry_get(state, "__wow_timer_original_callbacks");
+        let original = match originals {
+            Val::Table(table) => state
+                .gc
+                .tables
+                .get(table)
+                .map(|table| table.get(callback, &state.gc.string_arena))
+                .filter(|value| matches!(value, Val::Function(_)))
+                .unwrap_or(callback),
+            _ => callback,
+        };
+        Self {
+            source: function_source_label(state, callback),
+            callback_source: function_source_label(state, original),
+        }
+    }
+
+    pub(crate) fn log_entry(&self, addon_name: Option<&str>, timer_id: u64) {
+        let addon = addon_name.unwrap_or(BUILTIN_ADDON_NAME);
+        let mut line = format!("[handler-entry] addon={addon} handler=C_Timer frame=#0");
+        if let Some(source) = self.source.as_deref() {
+            line.push_str(" source=");
+            line.push_str(source);
+        }
+        line.push_str(&self.format_timer_fields(timer_id));
+        eprintln!("{line}");
+    }
+
+    pub(crate) fn log_return(
+        &self,
+        addon_name: Option<&str>,
+        timer_id: u64,
+        duration: Duration,
+        failed: bool,
+    ) {
+        if !should_log(duration) {
+            return;
+        }
+        let mut line = format_log(
+            addon_name,
+            "C_Timer",
+            None,
+            0,
+            duration,
+            self.source.as_deref(),
+        );
+        line.push_str(&self.format_timer_fields(timer_id));
+        let outcome = if failed { "error" } else { "ok" };
+        line.push_str(&format!(" outcome={outcome}"));
+        eprintln!("{line}");
+    }
+
+    fn format_timer_fields(&self, timer_id: u64) -> String {
+        let callback_source = self.callback_source.as_deref().unwrap_or("<unknown>");
+        format!(" timer_id={timer_id} callback_source={callback_source}")
+    }
+}
+
+fn function_source_label(state: &LuaState, callback: Val) -> Option<String> {
+    let Val::Function(func_ref) = callback else {
+        return None;
+    };
+    lua_closure_source_label(state, func_ref)
 }
 
 fn min_duration_ms() -> Option<f64> {

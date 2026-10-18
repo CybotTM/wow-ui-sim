@@ -9,6 +9,8 @@ Simulator diagnostics expose successful tainted Lua-file owner-budget snapshots 
 - [x] Preserve successful return values, private-table effects and cumulative owner-meter continuity between files: the same concrete sequential loader fixture passed with instrumentation opt-in on and off.
 - [x] Preserve tested sequential owner limits, error propagation and opt-in-off behavior. Broader quota initialization/reset/exemption preservation and excluded untainted/compilation/setup/Rust-work boundaries have unchanged-source audit evidence, not comprehensive runtime re-execution.
 
+Timer records under the same opt-in have a separate [callback provenance contract](timer-callback-provenance.md): unthresholded `[handler-entry]` plus additive original-source/ID/outcome fields on thresholded `[handler]` returns. These are not file-budget records or instruction counters.
+
 ## How it works
 
 - [Addon loading pipeline](../addon-loading-pipeline.md#top-level-file-budget-diagnostics)

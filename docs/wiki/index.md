@@ -2,6 +2,10 @@
 
 [Source cache](systems/texture-source-resolution-cache.md) documents shared setter/renderer ownership, directory freshness and cheap metadata-validated CPU negatives. [Contract](../specs/texture-source-resolution-cache.md) owns behavioral and preservation proof; real Ellesmere startup acceptance remains separate.
 
+## [2026-10-18] source | Timer callback diagnostic provenance
+
+[Timer system](systems/lua-api.md#callback-timing-provenance) links the [record contract](../specs/timer-callback-provenance.md): opt-in pre-call entries and original-source/ID correlation without changing callback invocation. Behavioral RED observed; GREEN pending.
+
 ## [2026-10-17] evidence | Classic health knowledge
 
 [R20 producer](investigations/classic-startup-producer-cascades.md#r20-approved-health-knowledge-producer) links original-consumer RED→GREEN, explicit supplied state and the repaired initialization cascade. [Contract](../specs/should-know-unit-health.md) owns proof scope/rebase applicability; [baseline](../baselines/README.md#era--anniversary--current-baseline-2026-10-17) owns exact startup/preservation counts. No native/full-suite claim.

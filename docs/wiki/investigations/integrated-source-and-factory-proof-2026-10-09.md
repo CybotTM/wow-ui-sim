@@ -763,6 +763,10 @@ Warning-report source/docs commit `a2d301531` is separate from this earlier audi
 - [3.0.2 audit](patch-3-0-2-api-audit.md), [3.0.3 audit](patch-3-0-3-api-audit.md).
 - [Forever failure/functions gates](forever-cfg-failure-and-function-gates.md).
 
+## Timer callback provenance — separate diagnostic contract
+
+[Timer system](../systems/lua-api.md#callback-timing-provenance) and [record contract](../../specs/timer-callback-provenance.md) describe the later opt-in entry and original-source/ID fields for native timer callbacks. These extend timer duration diagnostics, not the historical frame-owner/file-budget receipts below; they do not identify any previously unlogged callback retroactively.
+
 ## Owner-budget error metadata — source audit only, goal OPEN
 
 Verified 2026-10-09 local: inspected commit `1f50ffbcbe542fee767784360ea0d85292ceae93` and current `src/lua_api/execution_budget.rs` / `handler_timing.rs`. Failed owner-budgeted frame callbacks emit `[handler-budget-error]` through `eprintln!` (stderr) only when the existing `WOW_SIM_LOG_HANDLER_TIMINGS` flag is enabled. Duration threshold does not gate this error record. Successful callbacks and ownerless callbacks do not emit it; owner resolution errors occur before this logging path.

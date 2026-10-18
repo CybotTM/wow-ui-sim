@@ -81,10 +81,27 @@ pub(crate) fn store_timer_callback(state: &mut LuaState, timer_id: u64, callback
         let _ = t.raw_set(Val::Num(timer_id as f64), callback, &state.gc.string_arena);
     }
     state.gc.barrier_back(table);
+    if super::handler_timing::is_enabled() {
+        let source = super::handler_timing::TimerCallbackSource::capture(state, callback);
+        if let Some(app) = state.app_data::<WowLuaAppData>() {
+            app.sim_state
+                .borrow_mut()
+                .timer_callback_sources
+                .insert(timer_id, source);
+        }
+    }
 }
 
 /// Remove a timer callback from the registry table (called after firing/cancel).
 pub fn remove_timer_callback(state: &mut LuaState, timer_id: u64) {
+    if super::handler_timing::is_enabled() {
+        if let Some(app) = state.app_data::<WowLuaAppData>() {
+            app.sim_state
+                .borrow_mut()
+                .timer_callback_sources
+                .remove(&timer_id);
+        }
+    }
     let key_ref = state
         .gc
         .intern_string_static(TIMER_CALLBACKS_KEY.as_bytes());
