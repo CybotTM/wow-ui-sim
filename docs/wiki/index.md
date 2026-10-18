@@ -4,7 +4,7 @@
 
 ## [2026-10-17] investigation | Wrath startup and error-display boundaries
 
-[Wrath investigation](investigations/wrath-startup-u-residuals.md) links existing-model publishers, shared empty history and the exposed DebugTools cursor path. The [combined loot/party proof](../specs/wrath-initial-loot.md#combined-proof--2026-10-17) owns behavior acceptance; the [failing inventory](../baselines/README.md#wrath-lua-errors) owns exact counts, raw-stack classification and the controlled earlier-abort replay. BaseMip defaults, gamma, populated history and the cursor fix remain outside this work.
+[Wrath investigation](investigations/wrath-startup-u-residuals.md) links existing-model publishers, shared empty history and the exposed DebugTools cursor path. The [combined loot/party proof](../specs/wrath-initial-loot.md#combined-proof--2026-10-17) owns behavior acceptance; the [failing inventory](../baselines/README.md#wrath-lua-errors) owns exact counts, raw-stack classification and the controlled earlier-abort replay. [Approved legacy video state and decimal Slider root](investigations/wrath-startup-u-residuals.md#approved-legacy-video-state-and-decimal-slider-root) tracks the later policy and separate exact-zero regression; populated history and the cursor fix remain separate.
 
 ## [2026-10-17] evidence | Classic B implemented roots and held policy
 

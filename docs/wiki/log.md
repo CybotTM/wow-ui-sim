@@ -1,3 +1,7 @@
+## [2026-10-17] investigation | Wrath video policy and decimal Slider root
+
+[Existing startup investigation](investigations/wrath-startup-u-residuals.md#approved-legacy-video-state-and-decimal-slider-root) now links approved simulated gamma0/BaseMip0, original-consumer RED and the separate remainder-arithmetic exact-zero defect. Linked contracts own pending GREEN and profile/startup evidence; no native/display claim.
+
 ## [2026-10-17] evidence | Classic R20 health knowledge
 
 [Investigation](investigations/classic-startup-producer-cascades.md#r20-approved-health-knowledge-producer) records the state-backed query and unchanged vendor initialization ordering. [Contract](../specs/should-know-unit-health.md) owns original-consumer/state GREEN and retained-versus-fresh rebase receipts; [baseline](../baselines/README.md#era--anniversary--current-baseline-2026-10-17) owns byte-exact startup reconciliation. Broader native/GUI/full-suite acceptance remains unproven.

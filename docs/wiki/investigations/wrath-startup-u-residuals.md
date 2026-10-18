@@ -21,6 +21,12 @@ Original-closure `debug.getinfo` established the following identities on the old
 
 The [re-pin disclosure](../../baselines/README.md#rilua-re-pin-baseline-refresh--2026-10-17) owns the new generated IDs and extra host-frame changes. Normalize generated identities for comparison, not the committed raw stdout.
 
+## Approved legacy video state and decimal Slider root
+
+On 2026-10-17 the user approved [simulated gamma0 and BaseMip0](../../specs/wrath-legacy-video-settings.md). Gamma uses one Wrath-only Rust scalar, not the Gamma CVar or real display gamma. BaseMip belongs to the existing CVar registry. The original Resolution range callback and Effects GetCurrentValue each reached RED before those producers.
+
+The original Gamma round-trip then exposed a separate [Slider lattice defect](../../specs/slider-value-callback.md#exact-signed-decimal-lattice-point--2026-10-17): range[-0.5,0.5], step0.1, SetValue0 stored `2.7755575615628914e-17`, while the original setter's final SetGamma0 and GetGamma remained exactly0. Remainder subtraction plus step addition introduced the leftover; reconstruction from integral minimum-relative step indices gives exact0 without decimal rounding or Gamma-specific handling. Both the strict original consumer and focused Slider stored/payload test are RED; their current GREEN/preservation/startup scopes belong to the linked specs and inventory, not this historical attribution.
+
 ## Error display after loot/sound repair
 
 With the earlier loot/sound aborts fixed, the first selected error is Gamma. While handling the following BaseMip failure, unchanged `Blizzard_DebugTools.lua:449` takes its unchanged-text branch: `ScriptErrorsFrame_Update` → `ScrollingEdit_OnTextChanged` at UIPanelTemplates.lua:342 → `ScrollingEdit_OnUpdate` at :365. The observed `ScriptErrorsFrameScrollFrameText` has `handleCursorChange=true`, but `cursorOffset` and `cursorHeight` are nil. This occurs with the font system installed, not just in the earlier fontless fixture's secondary error path.
@@ -31,7 +37,7 @@ A read-only line hook reproduces the fresh CLI's exact raw error messages/counts
 
 ## Approval boundaries
 
-Main extended the standing empty/zero/no-selection policy to existing-model publication, no-target/unsupplied counts and shared empty history. The user separately approved HasDebugZoneMap=false, the former unsupplied UnitIsTalking=false policy, and IsPlayerResolutionAvailable=true on 2026-10-17. [Loot/party support](../../specs/wrath-initial-loot.md) now replaces the constant speaking probe with existing named-member activity while preserving unsupplied/binary controls. Empty debug-object/floor counts never infer a total from the selected-floor scalar. BaseMip defaults, gamma operations, populated combat-log replay and the cursor fix remain outside this work. The U1/u1-geometry approvals concern the unrelated Retail tooltip divider.
+Main extended the standing empty/zero/no-selection policy to existing-model publication, no-target/unsupplied counts and shared empty history. The user separately approved HasDebugZoneMap=false, the former unsupplied UnitIsTalking=false policy, and IsPlayerResolutionAvailable=true on 2026-10-17. [Loot/party support](../../specs/wrath-initial-loot.md) now replaces the constant speaking probe with existing named-member activity while preserving unsupplied/binary controls. Empty debug-object/floor counts never infer a total from the selected-floor scalar. The historical loot/party work did not cover BaseMip defaults or gamma; their later approval is tracked above. Populated combat-log replay and the cursor fix remain separate. The U1/u1-geometry approvals concern the unrelated Retail tooltip divider.
 
 ## Sources
 
@@ -39,6 +45,7 @@ Main extended the standing empty/zero/no-selection policy to existing-model publ
 - [Combo contract](../../specs/wrath-combo-points.md) and [shared empty history](../../specs/classic-empty-combatlog-history.md)
 - [Empty overlays](../../specs/wrath-empty-map-overlays.md) and [startup defaults](../../specs/wrath-startup-capability-defaults.md)
 - [Loot/party support](../../specs/wrath-initial-loot.md)
+- [Legacy video policies](../../specs/wrath-legacy-video-settings.md) and [exact-zero Slider regression](../../specs/slider-value-callback.md#exact-signed-decimal-lattice-point--2026-10-17)
 - [Current failing inventory](../../baselines/README.md#wrath-lua-errors)
 
 ## See Also
