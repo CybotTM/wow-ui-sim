@@ -34,8 +34,10 @@ COPY xtask/ xtask/
 # Cargo resolves workspace/dev-dependency manifests even for binary-only builds.
 COPY crates/test-harness/ crates/test-harness/
 
-# Fetch all dependencies (cached dependency-input layer).
-RUN cargo fetch --locked
+# Cargo validates explicitly declared targets before fetching dependencies.
+# Derive empty sources from the manifest so adding targets cannot stale a list.
+COPY scripts/docker-stub-cargo-targets.sh /tmp/docker-stub-cargo-targets.sh
+RUN sh /tmp/docker-stub-cargo-targets.sh /build/Cargo.toml && cargo fetch --locked
 
 # Copy the full source tree and build the simulator binary.
 # --no-default-features skips sound, GUI, and CASC dependencies not needed for
@@ -46,6 +48,8 @@ COPY build.rs ./
 COPY build/ build/
 COPY native/ native/
 COPY data/ data/
+# Overwrite every binary stub with real sources. Test/example/bench stubs are
+# manifest-only inputs: the binary-only build below never compiles them.
 COPY src/ src/
 RUN cargo build --release --bin wow-sim --no-default-features --features client-retail --locked \
     && strip /build/target/release/wow-sim
