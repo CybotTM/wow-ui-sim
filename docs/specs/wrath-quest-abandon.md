@@ -26,7 +26,6 @@ Wrath legacy abandonment separates selection from confirmation in `src/lua_api/g
 
 - `tests/wrath_quest_abandon.rs` — hash-pinned original consumers loaded through the real full Wrath startup, original XML button and popup, supplied noncatalog rows and state/notification controls.
 - `tests/common/wrath_full_ui.rs` — shared original FrameXML TOC/startup addon ordering.
-- `tests/fixtures/wrath-abandon-button.xml` — exact contiguous original XML button; checked against the whole pinned source.
 - `tests/quest_verbs.rs`, `tests/quest_abandon_membership.rs` — existing cross-profile preservation contracts.
 
 ## Known gaps (current cycle)
