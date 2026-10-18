@@ -65,16 +65,16 @@ fn wrath_gamma_original_resolution_range_callback_and_round_trip() {
         assert(panel:IsEventRegistered('PLAYER_ENTERING_WORLD'))
         panel:GetScript('OnEvent')(panel, 'PLAYER_ENTERING_WORLD')
         local low, high = slider:GetMinMaxValues()
-        assert(low == -0.5 and high == 0.5)
-        assert(slider:GetValueStep() == 0.1)
+        assert(low == -0.5 and high == 0.5, 'gamma range: '..tostring(low)..','..tostring(high))
+        assert(slider:GetValueStep() == 0.1, 'gamma step: '..tostring(slider:GetValueStep()))
         assert(slider.newValue == 0.5, 'range reconciliation must run OnValueChanged')
-        assert(GetGamma() == 0.5 and slider.value == 0.5)
+        assert(GetGamma() == 0.5 and slider.value == 0.5, 'gamma setup: '..tostring(GetGamma())..','..tostring(slider.value))
         assert(not panel:IsEventRegistered('PLAYER_ENTERING_WORLD'))
         for _, value in ipairs({-0.5, 0, 0.5}) do
             slider:SetValue(value)
-            assert(GetGamma() == value)
-            assert(slider:GetCurrentValue() == value)
-            assert(slider:GetValue() == value)
+            assert(GetGamma() == value, 'gamma round-trip: '..tostring(value)..','..tostring(GetGamma()))
+            assert(slider:GetCurrentValue() == value, 'gamma reader: '..tostring(value)..','..tostring(slider:GetCurrentValue()))
+            assert(slider:GetValue() == value, string.format('gamma display expected %.17g, got %.17g', value, slider:GetValue()))
         end
         "#,
     );
