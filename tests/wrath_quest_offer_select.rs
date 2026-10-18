@@ -130,7 +130,7 @@ fn seed_env() -> WowLuaEnv {
     {
         let mut lua = loader.rilua_mut();
         let handle = lua.create_userdata(Rc::clone(env.state()));
-        lua.set_global_val("OfferObservedState", Val::Userdata(handle.0))
+        lua.set_global_val("OfferObservedState", Val::Userdata(handle.gc_ref()))
             .unwrap();
         lua.register_function("ObserveOfferState", observe_offer)
             .unwrap();
