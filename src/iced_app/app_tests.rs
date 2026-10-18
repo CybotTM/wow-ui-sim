@@ -253,6 +253,7 @@ fn gui_startup_zero_delay_chain_yields_to_queued_exec() {
             r#"
         startup_trace = {}
         startup_ticker_count = 0
+        startup_exec_count = 0
         C_Timer.After(0, function()
             table.insert(startup_trace, "A")
             C_Timer.After(0, function() table.insert(startup_trace, "B") end)
@@ -281,7 +282,7 @@ fn gui_startup_zero_delay_chain_yields_to_queued_exec() {
     let (respond, response) = std::sync::mpsc::channel();
     commands
         .send(crate::lua_server::LuaCommand::Exec {
-            code: "table.insert(startup_trace, 'Exec'); print(table.concat(startup_trace, ','))"
+            code: "startup_exec_count = startup_exec_count + 1; table.insert(startup_trace, 'Exec'); print(table.concat(startup_trace, ','))"
                 .into(),
             respond,
         })
@@ -307,6 +308,8 @@ fn gui_startup_zero_delay_chain_yields_to_queued_exec() {
         "B runs on the later app turn, after Exec"
     );
     assert_eq!(ticks, 2);
+    let exec_count: i32 = app.env.borrow().eval("return startup_exec_count").unwrap();
+    assert_eq!(exec_count, 1, "queued Exec body must execute exactly once");
 }
 
 #[test]
