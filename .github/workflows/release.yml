@@ -48,6 +48,11 @@ jobs:
             features: sound,gui,client-mists
 
     steps:
+      - name: Enable Git long paths
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: git config --system core.longpaths true
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
