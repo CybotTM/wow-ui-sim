@@ -10,7 +10,7 @@ FontString text reveal and its completion boolean. Producer: `src/lua_api/frame/
 - [ ] Multiply ordinary text, shadow and outline alpha by `clamp((start + length - position) / length, 0, 1)`. For zero length use a hard boundary: positions strictly below start visible, others hidden. Preserve geometry, RGB and layout/cache behavior; colored segments continue the same position sequence.
 - [ ] Replace slot-zero gradient on each setter call, retaining current storage/getter/clear behavior. Completion retains the gradient; clearing restores ordinary text rendering.
 - [ ] Return true while start is less than stripped scalar count, false at/after that count (including empty text). Length controls the taper, not the completion threshold. Completion ignores viewport clipping, font size and wrapping.
-- [ ] Drive the original cached Wrath callback through gradual progress and the consumer's 1024 instant-progress convention; clear fading, reveal its dependent frame and enable accept on false. Characterize the cached Mists Classic callback explicitly, without claiming automatic profile selection. Immediate dependent reveal branch only; scheduled dependent-frame fade is separate.
+- [x] Drive the original cached Wrath callback through gradual progress and the consumer's 1024 instant-progress convention; clear fading, reveal its dependent frame and enable accept on false. Characterize the cached Mists Classic callback explicitly, without claiming automatic profile selection. Immediate dependent reveal branch only; scheduled dependent-frame fade is separate.
 
 ## How it works
 
@@ -27,15 +27,23 @@ FontString text reveal and its completion boolean. Producer: `src/lua_api/frame/
 ## Tests asserting this spec
 
 - `tests/fontstring_alpha_gradient.rs`: scalar/markup completion, replacement, clearing and empty text.
-- `src/iced_app/quad_builders_alpha_gradient_tests.rs`: concrete emitted glyph alpha and unchanged geometry; original cached consumer callbacks are separate, currently blocked proof.
+- `src/iced_app/quad_builders_alpha_gradient_tests.rs`: concrete emitted glyph alpha and unchanged geometry.
+- `tests/wrath_quest_alpha_gradient.rs`: two original cached Wrath initializer/callback paths; pending progress, exact scalar completion, dependent alpha, Accept state, retained gradient, idle completed callback and original `WriteQuest` request/kit 3093.
+- `tests/mists_quest_alpha_gradient_characterization.rs`: two explicitly selected cached Mists callback paths with original hide/show helpers and two dependent frames. Loads the complete hash-pinned Wrath `SoundKitConstants.lua` from the Mists cache; no sound stub.
+- `tests/common/quest_alpha_gradient.rs` and `tests/fixtures/quest_alpha_gradient/{wrath,mists}.lua`: shared hash-checked complete-source loader, real widgets and explicit error capture.
 
 Public consumer citations (cache root `~/.cache/wow-ui-sim/blizzard-ui`): Wrath `FrameXML/QuestInfo.lua:3-16,479-492`, constants `FrameXML/QuestFrame.lua:4-6`; Mists `AddOns/Blizzard_UIPanels_Game/Classic/QuestFrame.lua:4-6,799-814`, dependent helpers `AddOns/Blizzard_UIPanels_Game/Wrath/QuestInfo.lua:919-945`. Wrath's cache places the consumer beside AddOns, not inside it; tests use that literal location, without an alternate-source fallback.
 
 ## Known gaps (current cycle)
 
 - [x] User separately approved units/taper/completion; API and three renderer cases per Retail/Wrath profile reached RED then GREEN.
-- [ ] Original Wrath quest callbacks remain blocked by legacy PlaySound string input. Main requires rerun only after `wrath-fixes` and this branch merge.
-- [ ] Mists fixture, automatic profile selection, native and broader acceptance remain unexecuted. Startup observations are separate and Wrath remains a failing compatibility inventory.
+- [x] Original Wrath callbacks: 2/2 passed with `--no-default-features --features sound,gui,casc,client-wrath`, integration selector `wrath_quest_alpha_gradient::`. Legacy `PlaySound("WriteQuest")` no longer blocks this proof.
+- [x] Separate Mists characterization: 2/2 passed with `--no-default-features --features sound,gui,casc,client-mists`, integration selector `mists_quest_alpha_gradient_characterization::`. Initial run failed setup because the harness omitted vendor sound constants; loading that original file fixed setup. Neither run establishes gradient RED → GREEN: the producer was already merged; these are missing-proof coverage.
+- [ ] Fixed-setting gradual scheduled dependent fades, automatic Mists profile selection, native and broader acceptance remain unexecuted. Startup observations are separate and Wrath remains a failing compatibility inventory.
+
+Both gradual cases use 35 markup-stripped scalars, including Unicode, spaces and newlines. They change the fading setting from `"0"` to `"1"` only before the completing tick, selecting immediate dependent reveal without replacing callbacks or scheduling helpers. Wrath executes the original initializer's 1024 branch; Mists supplies post-OnShow progress 1024 and does not execute OnShow. Completion clears `fading`, not the stored gradient, and reveals already-shown alpha-zero dependents without claiming `Show()` behavior.
+
+Proof receipts: `/home/osso/.local/state/wow-ui-sim/handoff/t4-wrath-callback-tests/` (`wrath-tests.log`, `mists-tests-corrected.log`, `proof-ledger.json`). Wrath passed at `5671220c1`; Mists passed at `f7674e2e0` after the harness-only prerequisite correction. No simulator or vendor behavior changes.
 
 ## Out of scope
 

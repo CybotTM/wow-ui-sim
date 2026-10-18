@@ -1,4 +1,4 @@
-//! T4 original Wrath callback coverage; unexecuted candidate, not native parity.
+//! T4 original Wrath callback coverage for approved simulator policy, not native parity.
 #![cfg(feature = "client-wrath")]
 
 #[path = "common/quest_alpha_gradient.rs"]
