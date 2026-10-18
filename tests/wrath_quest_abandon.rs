@@ -1,70 +1,85 @@
-//! Wrath abandonment must commit only through the original confirmation consumer.
+//! Wrath abandonment through the unchanged full-startup selection/button/popup consumers.
 #![cfg(feature = "client-wrath")]
 
+#[path = "common/wrath_full_ui.rs"]
+mod wrath_full_ui;
+
 use sha2::{Digest, Sha256};
-use std::path::{Path, PathBuf};
+use std::ops::Deref;
 use wow_ui_sim::c_api::quest_objectives::QuestObjectiveProgress;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::state::GossipQuestRow;
 
-fn original(file: &str, expected: &str) -> PathBuf {
-    let path = dirs::cache_dir()
-        .unwrap()
-        .join("wow-ui-sim/blizzard-ui/wrath/FrameXML")
-        .join(file);
-    let bytes = std::fs::read(&path).unwrap();
-    let hash = format!("{:x}", Sha256::digest(bytes));
-    assert_eq!(hash, expected, "source drift: {}", path.display());
-    eprintln!("original {} sha256={hash}", path.display());
-    path
+struct ConsumerEnv {
+    env: WowLuaEnv,
+    startup_errors: String,
 }
 
-fn assert_errors(env: &WowLuaEnv) {
+impl Deref for ConsumerEnv {
+    type Target = WowLuaEnv;
+
+    fn deref(&self) -> &Self::Target {
+        &self.env
+    }
+}
+
+fn error_snapshot(env: &WowLuaEnv) -> String {
+    let sim = env.state().borrow();
+    format!("{:?}|{:?}", sim.lua_errors, sim.lua_error_counts)
+}
+
+fn assert_errors(env: &ConsumerEnv) {
     let errors: String = env
         .eval(r"return table.concat(AbandonErrors, '\n')")
         .unwrap();
-    let sim = env.state().borrow();
-    eprintln!(
-        "handler={errors:?}; lua_errors={:?}; counts={:?}",
-        sim.lua_errors, sim.lua_error_counts
-    );
     assert!(errors.is_empty(), "{errors}");
-    assert!(sim.lua_errors.is_empty(), "{:?}", sim.lua_errors);
-    assert!(
-        sim.lua_error_counts.is_empty(),
-        "{:?}",
-        sim.lua_error_counts
+    assert_eq!(
+        error_snapshot(env),
+        env.startup_errors,
+        "new consumer errors"
     );
 }
 
-fn exec(env: &WowLuaEnv, source: &str) {
+fn exec(env: &ConsumerEnv, source: &str) {
     let result = env.exec(source);
     eprintln!("direct eval {source:?}: {result:?}");
     assert_errors(env);
     result.expect("original consumer and behavioral assertions");
 }
 
-fn load_xml(env: &WowLuaEnv, path: &Path) {
-    let dir = tempfile::tempdir().unwrap();
-    let toc = dir.path().join("AbandonFixture.toc");
-    std::os::unix::fs::symlink(path.parent().unwrap(), dir.path().join("source")).unwrap();
-    std::fs::write(
-        &toc,
-        format!(
-            "## Title: AbandonFixture\nsource/{}\n",
-            path.file_name().unwrap().to_str().unwrap()
+fn assert_originals() {
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc().unwrap();
+    for (file, expected) in [
+        (
+            "QuestLogFrame.lua",
+            "6ac6ca92b3036417082b88cc2f8b5c9fc8889f51f82aa726fe0bcd44990bc5e2",
         ),
-    )
-    .unwrap();
-    let result = wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
-    eprintln!("XML result: {result:?}");
-    assert!(result.warnings.is_empty(), "{:?}", result.warnings);
-    assert_eq!(result.xml_files, 1);
-    assert_errors(env);
+        (
+            "StaticPopup.lua",
+            "1134b08e87d8577c0353895207eaec24e74e8f669775a49257a82431a4ac3042",
+        ),
+        (
+            "StaticPopup.xml",
+            "a575f35cc8e9e3a585c6ccd5db40f650dbd4f153e62be6736f1101c3f33dde7b",
+        ),
+        (
+            "QuestLogFrame.xml",
+            "530c396e36af4b23a725086d37b6cb68abaf1966db77ba26c4e3fed3ce76f154",
+        ),
+    ] {
+        let path = toc.parent().unwrap().join(file);
+        let bytes = std::fs::read(&path).unwrap();
+        let hash = format!("{:x}", Sha256::digest(bytes));
+        assert_eq!(hash, expected, "source drift: {}", path.display());
+        eprintln!("original {} sha256={hash}", path.display());
+    }
 }
 
-fn seed_env() -> WowLuaEnv {
-    let env = WowLuaEnv::new().unwrap();
+fn seed_env() -> ConsumerEnv {
+    assert_originals();
+    let env = wrath_full_ui::load_original_wrath_startup();
+    let startup_errors = error_snapshot(&env);
+    eprintln!("retained full-startup errors: {startup_errors}");
     env.exec("AbandonErrors = {}; seterrorhandler(function(e) AbandonErrors[#AbandonErrors+1] = tostring(e) end)").unwrap();
     {
         let mut sim = env.state().borrow_mut();
@@ -103,16 +118,14 @@ fn seed_env() -> WowLuaEnv {
                 .push((id, "OFFER".into()));
         }
     }
+    let env = ConsumerEnv {
+        env,
+        startup_errors,
+    };
     exec(
         &env,
         r#"
-        QuestDifficultyColors = {}
-        for _, key in ipairs({'impossible', 'verydifficult', 'difficult', 'standard', 'trivial', 'header'}) do QuestDifficultyColors[key] = {} end
-        QuestLogFrame = CreateFrame('Frame', 'QuestLogFrame')
-        QuestLogDetailFrame = CreateFrame('Frame', 'QuestLogDetailFrame'); QuestLogDetailFrame:Hide()
-        QuestLogDetailScrollFrame = CreateFrame('ScrollFrame', 'QuestLogDetailScrollFrame'); QuestLogDetailScrollFrame:Hide()
-        QuestLogFrameTrackButton = CreateFrame('Button', 'QuestLogFrameTrackButton')
-        QuestLogFramePushQuestButton = CreateFrame('Button', 'QuestLogFramePushQuestButton')
+        assert(QuestLogFrameAbandonButton and StaticPopup1, 'original startup widgets')
         AbandonEvents = {}
         local observer = CreateFrame('Frame')
         for _, event in ipairs({'QUEST_LOG_UPDATE', 'QUEST_REMOVED', 'QUEST_ACCEPTED', 'QUEST_TURNED_IN'}) do observer:RegisterEvent(event) end
@@ -120,53 +133,6 @@ fn seed_env() -> WowLuaEnv {
             AbandonEvents[#AbandonEvents+1] = {event, GetNumQuestLogEntries(), GetQuestLogTitle(1), select('#', ...)}
         end)
     "#,
-    );
-    for (file, hash) in [
-        (
-            "MoneyFrame.lua",
-            "f7392b7c139c8694fc3fe7581231c21342b9b6ed23b19f0b4bb77f3c156a7d90",
-        ),
-        (
-            "QuestLogFrame.lua",
-            "6ac6ca92b3036417082b88cc2f8b5c9fc8889f51f82aa726fe0bcd44990bc5e2",
-        ),
-        (
-            "StaticPopup.lua",
-            "1134b08e87d8577c0353895207eaec24e74e8f669775a49257a82431a4ac3042",
-        ),
-    ] {
-        let path = original(file, hash);
-        let result = env.exec_named(
-            &std::fs::read_to_string(&path).unwrap(),
-            &format!("@{}", path.display()),
-        );
-        eprintln!("load {file}: {result:?}");
-        assert_errors(&env);
-        result.unwrap();
-    }
-    let popup = original(
-        "StaticPopup.xml",
-        "a575f35cc8e9e3a585c6ccd5db40f650dbd4f153e62be6736f1101c3f33dde7b",
-    );
-    load_xml(&env, &popup);
-    let xml = original(
-        "QuestLogFrame.xml",
-        "530c396e36af4b23a725086d37b6cb68abaf1966db77ba26c4e3fed3ce76f154",
-    );
-    let whole = std::fs::read_to_string(xml).unwrap();
-    let fixture = include_str!("fixtures/wrath-abandon-button.xml");
-    assert!(
-        whole.contains(
-            fixture
-                .strip_prefix("<Ui>\n")
-                .unwrap()
-                .strip_suffix("\n</Ui>\n")
-                .unwrap()
-        )
-    );
-    load_xml(
-        &env,
-        &Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/wrath-abandon-button.xml"),
     );
     env
 }
@@ -189,8 +155,11 @@ fn original_button_cancel_then_accept_marked_target() {
     let env = seed_env();
     exec(&env, "SelectQuestLogEntry(1)");
     let before = snapshot(&env);
-    exec(&env, "QuestLogFrameAbandonButton:Click()");
+    let clicked = env.exec("QuestLogFrameAbandonButton:Click()");
+    eprintln!("original button result: {clicked:?}");
     assert_eq!(snapshot(&env), before, "marking must not delete or notify");
+    assert_errors(&env);
+    clicked.unwrap();
     exec(
         &env,
         r#"
@@ -301,6 +270,9 @@ fn original_selection_zero_is_nondestructive() {
 fn original_nonzero_selection_is_nondestructive() {
     let env = seed_env();
     let before = snapshot(&env);
-    exec(&env, "QuestLog_SetSelection(1)");
-    assert_eq!(snapshot(&env), before);
+    let selected = env.exec("QuestLog_SetSelection(1)");
+    eprintln!("original full selection result: {selected:?}");
+    assert_eq!(snapshot(&env), before, "ordinary selection must not delete");
+    assert_errors(&env);
+    selected.unwrap();
 }
