@@ -45,6 +45,8 @@ class FullSuiteWorkerTests(unittest.TestCase):
         (self.root / "Projects/wow/wow-ui-sim").mkdir()
         self.results = self.root / "Projects/wow/full-suite-results"
         self.results.mkdir()
+        self.target_dir = self.root / ".cache/wow-ui-sim-targets/slot-2"
+        self.target_dir.mkdir(parents=True)
         self.wrapper = self.bin / "build-lock"
         self.lock_path = self.root / "builder.lock"
         write_executable(
@@ -71,7 +73,7 @@ class FullSuiteWorkerTests(unittest.TestCase):
             "prefix = os.environ['WORKER'] + '.' + name\n"
             "(root / (prefix + '.started')).write_text(json.dumps({\n"
             "    'argv': sys.argv[1:], 'jobs': os.environ.get('CARGO_BUILD_JOBS'),\n"
-            "    'cwd': os.getcwd(),\n"
+            "    'cwd': os.getcwd(), 'target_dir': os.environ.get('CARGO_TARGET_DIR'),\n"
             "    'fixture_capacity': os.environ.get('WOW_SIM_TIMEOUT_FIXTURE_CAPACITY')}))\n"
             "deadline = time.monotonic() + 5\n"
             "while not (root / (prefix + '.release')).exists():\n"
@@ -93,7 +95,7 @@ class FullSuiteWorkerTests(unittest.TestCase):
             # Sandbox the obsolete dependency if a regression reintroduces it.
             "worker['run'].__globals__['BUILD_LOCK'] = pathlib.Path(sys.argv[1])\n"
             "(pathlib.Path(os.environ['HOME']) / (os.environ['WORKER'] + '.ready')).touch()\n"
-            "worker['run']('sandbox-ref')\n"
+            f"worker['run']('sandbox-ref', 2, {str(self.target_dir)!r})\n"
         )
         self.env = dict(
             os.environ,
@@ -101,6 +103,7 @@ class FullSuiteWorkerTests(unittest.TestCase):
             PATH=f"{self.bin}{os.pathsep}{os.environ['PATH']}",
             FULL_SUITE_JOBS="3",
             CARGO_BUILD_JOBS="29",
+            CARGO_TARGET_DIR=str(self.root / "unapproved-inherited-target"),
             FAIL_SUITES="0",
         )
 
@@ -132,6 +135,7 @@ class FullSuiteWorkerTests(unittest.TestCase):
             "integration": [
                 "nextest",
                 "run",
+                "-j2",
                 "--test",
                 "integration",
                 "--no-fail-fast",
@@ -142,6 +146,7 @@ class FullSuiteWorkerTests(unittest.TestCase):
             ],
             "prefork_full_ui": [
                 "test",
+                "-j2",
                 "--test",
                 "prefork_full_ui",
                 "--offline",
@@ -150,6 +155,7 @@ class FullSuiteWorkerTests(unittest.TestCase):
             "lib": [
                 "nextest",
                 "run",
+                "-j2",
                 "--lib",
                 "--no-fail-fast",
                 "--test-threads",
@@ -164,7 +170,8 @@ class FullSuiteWorkerTests(unittest.TestCase):
             self.assert_controller_locked()
             record = json.loads(started.read_text())
             self.assertEqual(record["argv"], expected_argv[name])
-            self.assertEqual(record["jobs"], "12")
+            self.assertEqual(record["jobs"], "2")
+            self.assertEqual(record["target_dir"], str(self.target_dir))
             self.assertEqual(record["cwd"], str(self.checkout))
             (self.root / f"{worker}.{name}.release").touch()
         stdout, stderr = process.communicate(timeout=5)
@@ -286,7 +293,10 @@ class FullSuiteWorkerTests(unittest.TestCase):
             "(root / 'submitted.json').write_text(json.dumps(sys.argv[1:]))\n",
         )
         process = subprocess.Popen(
-            [sys.executable, str(RUNNER), "submit", "sandbox-ref"],
+            [
+                sys.executable, str(RUNNER), "submit", "sandbox-ref",
+                "--build-jobs", "2", "--target-dir", str(self.target_dir),
+            ],
             env=self.env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -315,14 +325,96 @@ class FullSuiteWorkerTests(unittest.TestCase):
                 "MemoryHigh=16G",
                 "-p",
                 "MemoryMax=16G",
+                "--setenv=FULL_SUITE_JOBS=3",
                 sys.executable,
                 str(RUNNER),
                 "run",
                 "sandbox-ref",
+                "--build-jobs",
+                "2",
+                "--target-dir",
+                str(self.target_dir),
             ],
         )
         self.assertFalse(list(self.root.glob("*.started")))
         self.assertFalse(list(self.root.glob("*.git")))
+
+    def invoke_controller(self, action, *options):
+        return subprocess.run(
+            [sys.executable, str(RUNNER), action, "sandbox-ref", *options],
+            env=dict(self.env, WORKER="validation"),
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+
+    def test_submit_accepts_all_four_slots_and_defaults_build_jobs_to_one(self):
+        write_executable(
+            self.bin / "systemd-run",
+            "import json, os, pathlib, sys\n"
+            "(pathlib.Path(os.environ['HOME']) / 'submitted.json').write_text(\n"
+            "    json.dumps(sys.argv[1:]))\n",
+        )
+        self.env.pop("FULL_SUITE_JOBS", None)
+        for slot in range(4):
+            target = self.target_dir.with_name(f"slot-{slot}")
+            with self.subTest(slot=slot):
+                result = self.invoke_controller("submit", "--target-dir", str(target))
+                self.assertEqual(result.returncode, 0, result.stderr)
+                argv = json.loads((self.root / "submitted.json").read_text())
+                self.assertEqual(argv[-4:], ["--build-jobs", "1", "--target-dir", str(target)])
+                self.assertIn("--setenv=FULL_SUITE_JOBS=16", argv)
+
+    def test_invalid_options_rejected_before_launch_or_checkout(self):
+        write_executable(
+            self.bin / "systemd-run",
+            "import os, pathlib\n"
+            "(pathlib.Path(os.environ['HOME']) / 'unexpected-service').touch()\n",
+        )
+        targets = [
+            self.root / "Projects/wow/wow-ui-sim/target",
+            self.checkout / "target",
+            Path("/home/osso/Projects/wow/wow-ui-sim/target"),
+            self.target_dir.with_name("slot-4"),
+            self.target_dir / "nested",
+            self.root / "other-target",
+            Path("relative-target"),
+        ]
+        cases = [([], "--target-dir")]
+        cases.extend((["--target-dir", str(target)], "target") for target in targets)
+        cases.extend(
+            (["--target-dir", str(self.target_dir), "--build-jobs", jobs], "--build-jobs")
+            for jobs in ("0", "-1", "invalid")
+        )
+        for action in ("submit", "run"):
+            for options, diagnostic in cases:
+                with self.subTest(action=action, options=options):
+                    result = self.invoke_controller(action, *options)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(diagnostic, result.stderr)
+        self.assertFalse((self.root / "unexpected-service").exists())
+        self.assertFalse((self.root / "validation.git").exists())
+        self.assertFalse((self.results / ".lock").exists())
+
+    def test_slot_symlinks_cannot_redirect_to_checkout_targets_or_outside_slots(self):
+        targets = [
+            self.root / "Projects/wow/wow-ui-sim/target",
+            self.checkout / "target",
+            self.root / "outside-slots",
+        ]
+        link = self.target_dir.with_name("slot-0")
+        for target in targets:
+            link.symlink_to(target, target_is_directory=True)
+            try:
+                for action in ("submit", "run"):
+                    with self.subTest(action=action, target=target):
+                        result = self.invoke_controller(action, "--target-dir", str(link))
+                        self.assertNotEqual(result.returncode, 0)
+                        self.assertIn("target", result.stderr)
+            finally:
+                link.unlink()
+        self.assertFalse((self.root / "validation.git").exists())
+        self.assertFalse((self.results / ".lock").exists())
 
     def test_deploy_installs_only_full_suite_in_home_bin(self):
         result = subprocess.run(
