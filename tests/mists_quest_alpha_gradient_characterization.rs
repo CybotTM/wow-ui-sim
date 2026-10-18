@@ -10,6 +10,11 @@ fn create_env() -> WowLuaEnv {
     let env = support::create_env();
     support::load_cached_lua(
         &env,
+        "mists/AddOns/Blizzard_SharedXML/Wrath/SoundKitConstants.lua",
+        "184a74f6e0b7ae04646ce54db0ba37fb105217adf3a6fc500b1a348a772128bf",
+    );
+    support::load_cached_lua(
+        &env,
         "mists/AddOns/Blizzard_UIPanels_Game/Classic/QuestFrame.lua",
         "0e44a7710ffc15a302a3ae061a2c6c7c534248b2b09399ba53cb1c5f786a69df",
     );
