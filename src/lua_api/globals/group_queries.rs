@@ -491,7 +491,9 @@ fn unit_exists(state: &mut LuaState) -> LuaResult<u32> {
 pub(crate) fn unit_exists_in_state(st: &crate::lua_api::state::SimState, unit: &str) -> bool {
     match unit {
         "" => false,
-        "player" | "vehicle" | "pet" => true,
+        "player" => true,
+        "pet" => st.pet.icon.is_some(),
+        "vehicle" => st.player.in_vehicle,
         "questnpc" => st.gossip.active,
         "softinteract" => super::targeting_verbs::resolve_unit_snapshot(st, unit)
             .is_some_and(|unit| !unit.interaction.is_game_object),

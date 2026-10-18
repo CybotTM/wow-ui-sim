@@ -436,8 +436,9 @@ fn test_unit_exists_target_after_targeting() {
 }
 
 #[test]
-fn test_unit_exists_pet() {
+fn test_unit_exists_pet_after_summoning() {
     let env = env();
+    env.state().borrow_mut().pet.icon = Some("Interface\\Icons\\Ability_Hunter_Pet_Wolf".into());
     let exists: bool = env.eval("return UnitExists('pet')").unwrap();
     assert!(exists);
 }

@@ -299,6 +299,9 @@ fn collect_unit_auras(state: &mut LuaState, unit: &str, filter: AuraFilter) -> V
     let Ok(sim) = borrow_state(state) else {
         return Vec::new();
     };
+    if !super::group_queries::unit_exists_in_state(&sim, unit) {
+        return Vec::new();
+    }
     use crate::lua_api::globals::unit_api::parse_party_index;
     let auras: Vec<&AuraInfo> = if let Some(idx) = parse_party_index(unit) {
         if let Some(member) = sim.party_members.get(idx) {
