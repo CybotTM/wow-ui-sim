@@ -490,6 +490,8 @@ if rawget(_G, "GetChannelDisplayInfo") == nil then
   end
 end
 
+-- Wrath registers its modeled legacy gamma pair before this shared bootstrap.
+-- Retain the existing compatibility value only for other Classic profiles.
 if rawget(_G, "GetGamma") == nil then
   function GetGamma()
     return 1.0

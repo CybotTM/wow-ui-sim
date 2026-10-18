@@ -76,6 +76,9 @@ pub struct SimState {
         Option<crate::c_api::c_party_info::countdown::CountdownRequest>,
     pub quest_portrait_state: Option<QuestPortraitState>,
     pub cvars: CVarStorage,
+    /// User-approved signed legacy gamma; simulator state only, never host gamma.
+    #[cfg(feature = "client-wrath")]
+    pub legacy_gamma: f64,
     /// Zero means none; other values are one-based guild roster indexes.
     pub guild_roster_selection: usize,
     #[cfg(any(

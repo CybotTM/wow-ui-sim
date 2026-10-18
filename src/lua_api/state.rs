@@ -42,6 +42,8 @@ macro_rules! build_empty_sim_state {
             encounter_timeline: crate::c_api::c_encounter_timeline::Timeline::default(),
             scripts: ScriptRegistry::default(),
             cvars: CVarStorage::new(),
+            #[cfg(feature = "client-wrath")]
+            legacy_gamma: 0.0,
             guild_roster_selection: 0,
             #[cfg(any(
                 feature = "client-wrath",

@@ -21,6 +21,7 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsPartyLeader", is_party_leader)?;
     LuaApiMut::register_function(lua, "GetPartyMember", get_party_member)?;
     LuaApiMut::register_function(lua, "GetPartyLeaderIndex", get_party_leader_index)?;
+    super::legacy_gamma::register_all(lua)?;
     super::wrath_voice::register_all(lua)?;
     crate::lua_api::workarounds::wrath_startup_defaults::register_all(lua)?;
     crate::lua_api::workarounds::register_legacy_quest_timers(lua)?;

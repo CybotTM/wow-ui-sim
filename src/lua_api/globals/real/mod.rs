@@ -34,6 +34,8 @@ pub mod input_interface;
 ))]
 pub mod instanced_identity;
 pub mod item_legacy;
+#[cfg(feature = "client-wrath")]
+pub(crate) mod legacy_gamma;
 pub(crate) mod legacy_guild_selection;
 #[cfg(any(
     feature = "client-wrath",
