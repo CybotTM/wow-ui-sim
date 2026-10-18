@@ -9,7 +9,7 @@ use crate::font::WowFontSystem;
 use crate::lua_api::methods::{call_function as call_rilua_function, registry_get};
 use crate::lua_api::script_helpers::call_error_handler;
 use crate::screen::ScreenKind;
-use rilua::{LuaApi, LuaApiMut, Val};
+use rilua::{LuaApiMut, Val};
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
