@@ -37,8 +37,12 @@ fn forever_gamepad_publication_is_absent_from_earlier_profiles() {
     .unwrap();
 }
 
-#[cfg(any(feature = "client-wrath", feature = "client-mists",
-    feature = "client-era", feature = "client-anniversary"))]
+#[cfg(any(
+    feature = "client-wrath",
+    feature = "client-mists",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn classic_profiles_keep_shared_modern_enum_group_absent() {
     let env = WowLuaEnv::new().unwrap();
@@ -136,8 +140,14 @@ fn original_account_consumer_keeps_friend_levels_and_ranks() {
 #[test]
 fn original_sound_data_keeps_numeric_sound_ids_and_kits() {
     let env = WowLuaEnv::new().unwrap();
-    load_original_consumer(&env, "Blizzard_CooldownViewer/CooldownViewerSettingsConstants.lua");
-    load_original_consumer(&env, "Blizzard_CooldownViewer/CooldownViewerSoundAlertData.lua");
+    load_original_consumer(
+        &env,
+        "Blizzard_CooldownViewer/CooldownViewerSettingsConstants.lua",
+    );
+    load_original_consumer(
+        &env,
+        "Blizzard_CooldownViewer/CooldownViewerSoundAlertData.lua",
+    );
     env.exec(
         r#"
         local cat = CooldownViewerSoundData[1][1]
