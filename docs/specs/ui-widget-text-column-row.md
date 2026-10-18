@@ -88,12 +88,27 @@ The ordinary Retail `lua-errors` run independently exits 0 with `[]` plus LF and
 
 A separate verbose ordinary `dump-tree` invocation retains event-stage diagnostics: 291 selected addon success summaries report zero loader warnings, **185 nil observations and 88 strict missing-requirement records**, plus one intentional `EDIT_MODE_LAYOUTS_UPDATED` skip. Those are per-load deduplicated records, not necessarily globally unique symbols or 88 demonstrated call failures. Exact full/bootstrap and omitted-addon/file counts remain unknown. The raw TextColumn member reports function/C and an absent one-nil result; no populated state was supplied in this probe. Normal startup has no complete requirements-clean PASS. Font logs report `casc=true` despite the explicit `WOW_SIM_CASC=0` environment; actual extraction is not established. Inherited read-only WTF/cache and finite update windows remain limits. This dump uses different settling/layout/probe work from `lua-errors`, so their timings are not a performance comparison.
 
+## Bounded PTR execution — 2026-10-18 UTC
+
+Lane `textcolumn-ptr` executed the committed draft without changing assertions, providers, vendor files or simulator behavior. The first producer selection passed 8/8 at `a94dca4d3` on base `78577edc0`. After rebasing onto `f452d5a4b`, code revision `8e1100ad6` passed the same eight producer cases, two new PTR cases and nine separate shared controls. All selections exited 0, with no ignored, extra or cfg-missing selected cases; nested timeout-child executions are nonadditive. No missing-behavior RED or test-defect RED was observed, so no implementation fix was justified.
+
+| Boundary | Bounded PTR proof at `8e1100ad6` |
+| --- | --- |
+| Supplied query, feeds, numeric/security selectors | Eight existing producer cases PASS, including actual host-secret numbers, deep isolated snapshots and the original cached type-21 consumer. |
+| Original PTR lifecycle | New closure-loaded case PASS: registration, activation, three-to-two entry update/style/layout, Hidden release, Shown reacquisition, membership removal and live unregister. Container-hidden/zero-showing assertions pass immediately after unregister and after subsequent feed plus normal OnUpdate, without row/nested-entry reacquisition. |
+| Owning observation | New ordinary Game discovery/bootstrap/startup case PASS, followed by the same populated original consumer and unchanged 179-row 9.1.0 sweep/later-register chain. Sweep has 131 successful rows and exactly the existing 48 known gaps; TextColumn publication row is successful (`raw=function; lookup=function`). `graphicsComputeEffects` (4 versus 1) and `RAIDVolumeFog` (1 versus 0) default mismatches remain recorded. This is expected-gap equality, not 179 implemented behaviors. |
+| Separate preservation | Exact nine shared manager/lifecycle/security/TextureAndText controls PASS; these are not additional TextColumn producer cases. |
+
+Commands used `--no-default-features --features sound,gui,casc,client-ptr`, slot-2 and async 9-GiB systemd units admitted only on capacity ADD. Separately built `wow-sim --no-saved-vars lua-errors` exited 0; stdout is byte-exact `[]` plus LF, matching `docs/baselines/ptr-lua-errors.json` (SHA256 `37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570`). Runtime used a child-only byte-copy of current persisted CVars; original stat/hash remained unchanged. Stderr retains unavailable-audio-device diagnostics. Collector success does not establish loader nil/strict-requirement cleanliness, rendered/native parity or full-parent acceptance.
+
+Private exact argv, revision-scoped outputs, selected names/counts, hashes and receipts remain at `/home/osso/.local/state/wow-ui-sim/handoff/textcolumn-ptr-run/`. Historical Retail failures and evidence packets remain unchanged.
+
 ## Remaining proof
 
 - [x] Compile tests and observe populated result-boundary RED before getter implementation: eight unique Retail cases fail querying explicitly supplied records; deeper assertions remain unreached.
 - [x] Independently verify bounded Retail projection, selector/security, deep snapshots, feeds and actual cached lifecycle: eight producer cases plus nine separate controls.
 - [x] Complete the scoped default-feature check and capture both limited collector and verbose ordinary Retail diagnostics; preserve the observed nil/requirement gaps and skip.
-- [ ] Exercise PTR cached consumer and reconcile applicable ordinary-startup requirements; retain native/render and full-parent gaps.
-- [ ] Reconcile applicable publication evidence only after ordinary owning observation; preserve historical failures and broader acceptance gaps.
+- [ ] Reconcile remaining PTR ordinary-startup nil/strict-requirement diagnostics; original cached lifecycle and the baseline-matched Lua-error collector are proven above, not complete requirements cleanliness.
+- [x] Observe applicable 9.1.0 publication after ordinary PTR owning startup and populated consumer; retain known gaps, historical failures and broader acceptance gaps.
 
 Native catalogs/publishers, native interpolation/security/return parity, rendered output, empty-entry consumer lifecycle and nonneutral texture/effect/timer activation are not established by this slice. Other profiles and full-parent acceptance remain separately scoped.
