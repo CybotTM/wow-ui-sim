@@ -11,7 +11,7 @@ The simulator reads textures and fonts from a live WoW install via three stacked
 | FDID resolution | `fdid → (content_key, encoding_key)` | `~/.cache/asset-resolver/casc/<product>/<build-key>/resolution.sqlite` (~85 MB, ~1.87 M rows) | `asset-resolver` on first miss or stale cache; `casc_refresh` can prewarm it | Persistent across processes; rebuilt when WoW patches |
 | BLP byte cache | Extracted BLP files keyed by listfile path | `~/.cache/wow-ui-sim/casc-extract/<Interface/...>.blp` | `asset_resolver::ensure_cached` on first miss | Persistent across processes; never invalidated automatically |
 | Blizzard UI source cache | Extracted Blizzard Lua/XML/TOC source files | `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns/<Blizzard_...>` | `wow-cli casc sync-blizzard-ui` or GUI startup when the cache is missing | Persistent across processes; guarded by `.wow-ui-sim-blizzard-ui-complete` |
-| In-memory texture cache | `TextureData` (decoded RGBA) keyed by normalised wow path | `TextureManager::cache` | `TextureManager::load` on first hit | Per-process |
+| In-memory texture cache | `TextureData` (decoded RGBA) keyed by normalised wow path | `TextureManager::cache` | `TextureManager::load` on first hit | [Per manager; shared by environment-associated setters/renderers](texture-source-resolution-cache.md) |
 
 The resolution sqlite is generated cache data, not repo data. wow-ui-sim constructs `asset-resolver` with an explicit cache root: `$ASSET_RESOLVER_CACHE_DIR` when set, otherwise `$XDG_CACHE_HOME/asset-resolver` or `~/.cache/asset-resolver`. The path is product/build-key scoped so retail, classic, and future patch builds do not overwrite each other. Runtime loading no longer depends on `GAME_ENGINE_SHARED_ROOT` or a sibling game-engine checkout.
 
@@ -32,6 +32,7 @@ At `4eb32befa`, `gui_resolution_cache_preparation` passed 1/1 in 12.80 seconds: 
 ```
 TextureManager::load(wow_path)
   ├─ in-memory hit?         → return TextureData     [≈ 2 µs]
+  ├─ reusable CPU negative? → return miss          [source-cache system below]
   ├─ resolve_path(normalised)
   │    ├─ addon dir?        → file path
   │    ├─ try_casc_resolve
@@ -47,6 +48,8 @@ TextureManager::load(wow_path)
   │    └─ extracted-Interface fallback under <wow>/_retail_/BlizzardInterfaceArt
   └─ load_texture_file(path) + insert in-memory cache
 ```
+
+The [source-cache system](texture-source-resolution-cache.md#lookup-and-identity) owns CPU-negative metadata validation and invalidation.
 
 `Installation::initialize` does **not** parse `root.bin` or `encoding.bin` on warm starts — that work is delegated to the resolution sqlite. If the sqlite is missing or stale, `asset-resolver` rebuilds it once from the current local CASC build.
 

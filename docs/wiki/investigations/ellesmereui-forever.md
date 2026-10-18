@@ -70,8 +70,17 @@ After enumeration and action-cooldown publication, the real GUI reached five pas
 - Compile and run focused GREEN for the uncompiled TOC/profile, TargetFrame diagnostic, unit-relationship, secret-duration-core, widget, duration-text-binding, and geometry/texture endpoint slices. Secret-origin flags guard only the direct modeled reads named above; they do not establish general secrecy enforcement.
 - Re-run isolated startup and all six reachable Ellesmere interactions after the secret duration/display handoffs are compiled. No full-startup or full-addon compatibility claim is current.
 
+## Texture lookup and startup yielding follow-up — 2026-10-18
+
+The [texture source-cache system](../systems/texture-source-resolution-cache.md) owns F1 lookup freshness and rendered-byte exclusions. The [GUI startup contract](../../specs/gui-startup-yield.md) owns F2 update-turn yielding; [startup mechanics](../../event-system.md#startup-event-sequence) describes its synchronous-callback limit. The [timer diagnostic contract](../../specs/timer-callback-provenance.md) owns future entry/return correlation, not retroactive diagnosis of the earlier unlogged callback.
+
+This follow-up records source/test inspection, not a new real Ellesmere startup, first-draw, IPC or all-six-interaction acceptance receipt. Historical failure observations above are not superseded by merge alone.
+
 ## Sources
 
+- [Texture source-cache contract](../../specs/texture-source-resolution-cache.md) — F1 behavior and bounded fixture limits
+- [GUI startup contract](../../specs/gui-startup-yield.md) — F2 update-turn ordering and proof limits
+- [Timer provenance contract](../../specs/timer-callback-provenance.md) — diagnostic format, lifetime and association handling
 - [EllesmereUI Forever compatibility](../../ellesmereui-forever.md) — cached package identity, startup evidence, and scope
 - [Forever report](../../wowforever-1.60.1.md) — profile-wide runtime evidence and limits
 - [Forever addon comparison](../../forever-addon-comparison.md) — separate cached-addon audit boundary
@@ -100,6 +109,8 @@ After enumeration and action-cooldown publication, the real GUI reached five pas
 - [[forever-clean-startup]] — distinct Blizzard-only sustained runtime proof
 - [[forever-addon-comparison]] — broader cached-addon comparison, not Ellesmere acceptance
 - [[client-profiles]] — Forever/Camelot profile routing
+- [[texture-source-resolution-cache]] — lookup freshness, not rendered-byte freshness
+- [[event-system]] — GUI startup ordering and yielding
 - [[bytecode-cache-growth]] — persisted-pack identity and storage bounds
 - [[on-update-dirty]] — existing update-dispatch behavior and dirty scheduling
 - [[secret-number-ordering]] — guarded wrapped-number comparison required by target-aura layout

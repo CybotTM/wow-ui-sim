@@ -1,3 +1,7 @@
+## [2026-10-18] ingest | Merged-lane documentation integration
+
+Replaced stale texture structure/priority copies with owner links, linked CASC miss reuse to the [source-cache contract](../specs/texture-source-resolution-cache.md), and added the [Ellesmere follow-up](investigations/ellesmereui-forever.md#texture-lookup-and-startup-yielding-follow-up--2026-10-18) with Sources and See Also coverage. Source inspection only; no new runtime acceptance.
+
 ## [2026-10-18] ingest | GUI startup yielding
 
 Added the [GUI startup contract](../specs/gui-startup-yield.md), synchronized [event-system coverage](systems/event-system.md#startup-event-sequence), and corrected the stale startup-order copy by linking its architecture owner. Source/test inspection only; no runtime acceptance claimed.

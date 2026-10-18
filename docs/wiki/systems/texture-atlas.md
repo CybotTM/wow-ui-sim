@@ -4,17 +4,9 @@ Texture handling spans three interconnected layers: file I/O and caching (Textur
 
 ## TextureManager (`src/texture.rs`)
 
-```rust
-pub struct TextureManager {
-    addons_path: Option<PathBuf>,     // Addon directories
-    cache: HashMap<String, TextureData>,
-    sub_cache: HashMap<String, TextureData>,
-}
-```
+See [TextureManager storage](../../texture-atlas-system.md#structure) for decoded data and cache fields; the [source-cache system](texture-source-resolution-cache.md) owns shared resolution, directory indexing and CPU-negative freshness.
 
-All textures decoded to `TextureData { width, height, pixels: Vec<u8> }` in RGBA8.
-
-**Path resolution priority**: addon textures (`Interface/AddOns/...`) → CASC via `asset-resolver` against the live WoW install at `/syncthing/World of Warcraft/Data`. Extracted BLPs are cached under `~/.cache/wow-ui-sim/casc-extract/`.
+**Path resolution priority**: see the [CASC loading contract](../../specs/casc-loading.md#texture-resolution).
 
 **Path normalization**: backslashes to forward slashes, extension stripped. `Interface\Buttons\UI-Panel-Button-Up.blp` → `Interface/Buttons/UI-Panel-Button-Up`. CASC lookup retries with several extensions (`blp`, `tga`, `ttf`, `otf`).
 

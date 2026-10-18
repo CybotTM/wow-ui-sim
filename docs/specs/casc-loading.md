@@ -51,7 +51,7 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 - [ ] Addon-shipped textures under `Interface/AddOns/<Addon>/...` resolve before CASC is consulted.
 - [ ] Listfile lookup is case-insensitive (`UI-Panel-Button-Up.blp` and `ui-panel-button-up.blp` both resolve to the same fileDataID).
 - [ ] The generated bundled subset keeps ordinary community rows normalized lowercase; `data/listfile-overrides.csv` is authoritative for its normalized path and FDID, preserving slash-normalized canonical casing; generated rows sort by normalized path.
-- [ ] When CASC misses (e.g. live archives have been GC'd by a partial patch but the encoding manifest still references the entry), a third-tier fallback resolves the path under `<install-root>/_retail_/BlizzardInterfaceArt/Interface/...` (install root from `asset_resolver::wow_install_path()`) with the same case-insensitive matching as the addon tier. Repeated misses on the same path use the existing `.missing` sentinel to short-circuit CASC fast (~40ms warm path).
+- [ ] When CASC misses (e.g. live archives have been GC'd by a partial patch but the encoding manifest still references the entry), a third-tier fallback resolves the path under `<install-root>/_retail_/BlizzardInterfaceArt/Interface/...` (install root from `asset_resolver::wow_install_path()`) with the same case-insensitive matching as the addon tier. CPU miss reuse, filesystem freshness and root/reload invalidation are owned by the [source-cache contract](texture-source-resolution-cache.md).
 
 ### Font resolution
 
@@ -67,6 +67,8 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 - [x] `Fonts\FRIZQT__.TTF`, `Fonts\ARIALN.TTF`, and `Fonts\FRIZQT___CYR.TTF` resolve through `WowFontSystem` to distinct real WoW faces, including the known encoding-key fallback when raw FDID resolution misses (`tests/casc_loading.rs::casc_resolves_baseline_fonts`).
 
 ## How it works
+
+- [Texture source cache](../wiki/systems/texture-source-resolution-cache.md) — shared setter/renderer resolver and CPU-negative freshness.
 
 - [Blizzard UI patch/sync workflow](../updating-blizzard-ui-to-a-new-patch.md) — selected-build acquisition and baseline gates.
 

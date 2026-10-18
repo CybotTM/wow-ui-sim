@@ -16,24 +16,13 @@ Three interconnected layers:
 
 ### Structure
 
-```rust
-pub struct TextureManager {
-    addons_path: Option<PathBuf>,     // Addon directories
-    cache: HashMap<String, TextureData>,       // Loaded texture pixels
-    sub_cache: HashMap<String, TextureData>,   // Sub-region extractions
-}
-```
+`TextureManager` owns ordered addon roots, decoded RGBA/BC data, dimensions and crop caches. `TextureData.pixels` is `Arc<[u8]>` (RGBA8).
 
-**Key type:** `TextureData { width: u32, height: u32, pixels: Vec<u8> }` -- RGBA8 format
+The [source-cache system](wiki/systems/texture-source-resolution-cache.md) owns the shared resolver, directory index, CPU-negative freshness and invalidation limits.
 
 ### Path Resolution Strategy
 
-Two-tier priority:
-
-1. **Addon textures** -- `Interface/AddOns/{AddonName}/...`
-2. **CASC** -- the live WoW install at `/syncthing/World of Warcraft/Data`, resolved via the `asset-resolver` crate (`src/texture/resolve.rs:try_casc_resolve`). The first hit retries `path`, `path.blp`, `path.BLP`, `path.tga`, `path.TGA`, `path.ttf`, `path.TTF`, `path.otf`, `path.OTF`. Extracted BLPs land in `~/.cache/wow-ui-sim/casc-extract/<listfile/path>`.
-
-CASC is gated behind the `casc` Cargo feature (default-on). Set `WOW_SIM_CASC=0` to disable.
+The [CASC loading contract](specs/casc-loading.md#texture-resolution) owns source priority and extraction behavior, including the extracted-interface-art path. The [source-cache contract](specs/texture-source-resolution-cache.md) owns repeated lookup and miss freshness.
 
 ### Path Normalization
 
