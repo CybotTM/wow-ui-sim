@@ -18,7 +18,10 @@ fn seed_ptr_spell_state(restricted: bool) -> WowLuaEnv {
         state.spell_cooldowns.clear();
         state.spell_cooldowns.insert(
             19750,
-            SpellCooldownState { start: 12.0, duration: 80.0 },
+            SpellCooldownState {
+                start: 12.0,
+                duration: 80.0,
+            },
         );
         state.spell_charges.clear();
         state.spell_charges.insert(
@@ -62,15 +65,20 @@ fn load_original_ptr_consumer(env: &WowLuaEnv) {
     let path = std::path::PathBuf::from(home).join(
         ".cache/wow-ui-sim/blizzard-ui/ptr/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua",
     );
-    let source = std::fs::read_to_string(&path)
-        .unwrap_or_else(|error| panic!("required original PTR consumer {}: {error}", path.display()));
-    let start = source.find("local defaultCooldownInfo =").expect("PTR defaults boundary");
-    let end = start + source[start..]
-        .find("function ClearActionButtonCooldowns(")
-        .expect("PTR consumer end boundary");
+    let source = std::fs::read_to_string(&path).unwrap_or_else(|error| {
+        panic!("required original PTR consumer {}: {error}", path.display())
+    });
+    let start = source
+        .find("local defaultCooldownInfo =")
+        .expect("PTR defaults boundary");
+    let end = start
+        + source[start..]
+            .find("function ClearActionButtonCooldowns(")
+            .expect("PTR consumer end boundary");
     // Delimit fixture isolation only: execute original bytes, not reconstructed Lua.
     // These searches are not assertions about implementation shape or API ordering.
-    env.exec(&source[start..end]).expect("unchanged original PTR consumer block");
+    env.exec(&source[start..end])
+        .expect("unchanged original PTR consumer block");
     env.exec(
         r#"
         Ssp1PtrButton = CreateFrame('Button')
@@ -79,7 +87,8 @@ fn load_original_ptr_consumer(env: &WowLuaEnv) {
         Ssp1PtrButton.lossOfControlCooldown = CreateFrame('Cooldown', 'Ssp1PtrLoc', Ssp1PtrButton)
         Ssp1PtrButton.enableLOCCooldown = true
         "#,
-    ).expect("real PTR consumer Cooldown widgets");
+    )
+    .expect("real PTR consumer Cooldown widgets");
 }
 
 fn invoke_original_ptr_consumer(env: &WowLuaEnv, selector: &str, tainted: bool) {
@@ -108,15 +117,23 @@ fn invoke_original_ptr_consumer(env: &WowLuaEnv, selector: &str, tainted: bool) 
         if {tainted} then debug.setobjecttaint(invoke, 'Ssp1PtrProbe') end
         invoke()
         "#,
-    )).expect("original PTR cooldown-before-charges-before-LoC execution");
+    ))
+    .expect("original PTR cooldown-before-charges-before-LoC execution");
 }
 
 fn assert_widget_timing(env: &WowLuaEnv, name: &str, expected: (f64, f64, f64)) {
     let state = env.state().borrow();
-    let id = state.widgets.get_id_by_name(name).expect("named real Cooldown widget");
+    let id = state
+        .widgets
+        .get_id_by_name(name)
+        .expect("named real Cooldown widget");
     let frame = state.widgets.get(id).expect("Cooldown widget state");
     assert_eq!(
-        (frame.cooldown_start, frame.cooldown_duration, frame.cooldown_mod_rate),
+        (
+            frame.cooldown_start,
+            frame.cooldown_duration,
+            frame.cooldown_mod_rate
+        ),
         expected,
         "{name}",
     );
@@ -129,22 +146,31 @@ fn original_ptr_action_button_preserves_ssp1_secret_spell_selection() {
         let env = seed_ptr_spell_state(restricted);
         load_original_ptr_consumer(&env);
         for selector in ["19750", "Ssp1PtrSelector"] {
-            env.state().borrow_mut().spell_loss_of_control.get_mut(&19750)
-                .expect("supplied LoC row").should_replace_normal_cooldown = false;
+            env.state()
+                .borrow_mut()
+                .spell_loss_of_control
+                .get_mut(&19750)
+                .expect("supplied LoC row")
+                .should_replace_normal_cooldown = false;
             env.exec(
                 r#"
                 Ssp1PtrButton.cooldown:Clear()
                 Ssp1PtrButton.chargeCooldown:Clear()
                 Ssp1PtrButton.lossOfControlCooldown:Clear()
                 "#,
-            ).expect("clear widgets before each selector");
+            )
+            .expect("clear widgets before each selector");
             invoke_original_ptr_consumer(&env, selector, tainted);
             assert_widget_timing(&env, "Ssp1PtrNormal", (12.0, 80.0, 1.0));
             assert_widget_timing(&env, "Ssp1PtrCharge", (12.0, 40.0, 2.0));
             assert_widget_timing(&env, "Ssp1PtrLoc", (14.0, 24.0, 2.0));
 
-            env.state().borrow_mut().spell_loss_of_control.get_mut(&19750)
-                .expect("supplied LoC row").should_replace_normal_cooldown = true;
+            env.state()
+                .borrow_mut()
+                .spell_loss_of_control
+                .get_mut(&19750)
+                .expect("supplied LoC row")
+                .should_replace_normal_cooldown = true;
             invoke_original_ptr_consumer(&env, selector, tainted);
             assert_widget_timing(&env, "Ssp1PtrNormal", (0.0, 0.0, 1.0));
             assert_widget_timing(&env, "Ssp1PtrCharge", (0.0, 0.0, 1.0));
