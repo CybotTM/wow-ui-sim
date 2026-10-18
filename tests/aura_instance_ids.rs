@@ -34,6 +34,7 @@ fn seeded_env() -> WowLuaEnv {
 #[test]
 fn aura_instance_ids_follow_live_filters_and_blocking() {
     let env = seeded_env();
+    env.exec("TargetUnit('player')").unwrap();
     env.exec(
         r#"
         local function ids(unit, filter, ...)

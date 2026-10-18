@@ -31,6 +31,7 @@ fn fixture_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("create display count environment");
     {
         let mut state = env.state().borrow_mut();
+        state.party_group_active = true;
         state.player.buffs = [0, 1, 2, 5, 6]
             .into_iter()
             .enumerate()

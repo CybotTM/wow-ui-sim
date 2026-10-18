@@ -31,6 +31,7 @@ fn fixture_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("enumeration environment");
     {
         let mut state = env.state().borrow_mut();
+        state.party_group_active = true;
         state.player.buffs = vec![
             aura(307, true, true),
             aura(811, true, false),

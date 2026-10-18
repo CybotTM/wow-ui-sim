@@ -32,6 +32,7 @@ fn fixture_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("create dispel color environment");
     {
         let mut state = env.state().borrow_mut();
+        state.party_group_active = true;
         state.player.buffs = vec![
             aura(100, None, true),
             aura(101, Some("Magic"), false),

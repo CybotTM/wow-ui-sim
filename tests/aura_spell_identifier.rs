@@ -52,6 +52,7 @@ fn seeded_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("create aura lookup environment");
     {
         let mut state = env.state().borrow_mut();
+        state.party_group_active = true;
         state.player.buffs = vec![
             fixture_aura(99001, 101, true),
             fixture_aura(99002, 102, false),
@@ -226,6 +227,7 @@ fn inferred_unit_order_prefers_first_helpful_then_first_harmful_duplicate() {
 #[test]
 fn unit_target_query_uses_actual_builtin_harmful_fixture_not_invented_state() {
     let env = seeded_env();
+    env.exec("TargetUnit('player')").unwrap();
     env.exec(
         r#"
         local aura = C_UnitAuras.GetUnitAuraBySpellID('target', 113746)

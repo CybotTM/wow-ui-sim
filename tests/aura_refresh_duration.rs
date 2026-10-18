@@ -53,6 +53,7 @@ fn seeded_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("create duration environment");
     {
         let mut state = env.state().borrow_mut();
+        state.party_group_active = true;
         let expiration = state.start_time.elapsed().as_secs_f64() + 600.0;
         state.player.buffs = vec![
             fixture_aura(99001, 101, true, expiration),

@@ -163,6 +163,7 @@ fn fixture_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("real tooltip namespace");
     {
         let mut state = env.state().borrow_mut();
+        state.party_group_active = true;
         state.player.buffs = vec![
             aura(101, "Player helpful sentinel", true, true),
             aura(102, "Player outside source", false, false),

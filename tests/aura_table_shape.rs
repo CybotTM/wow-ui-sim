@@ -47,6 +47,7 @@ fn buff_slot_table_has_every_documented_field() {
 #[test]
 fn debuff_slot_table_reports_harmful() {
     let env = env();
+    env.exec("TargetUnit('player')").unwrap();
     let (is_helpful, is_harmful, is_raid): (bool, bool, bool) = env
         .eval(
             r#"
@@ -159,6 +160,7 @@ fn harmful_raid_fixture() -> AuraInfo {
 
 fn classification_env() -> WowLuaEnv {
     let env = env();
+    env.exec("TargetUnit('player')").unwrap();
     let helpful = helpful_non_raid_fixture();
     let harmful = harmful_raid_fixture();
     let mut party_helpful = helpful.clone();
@@ -172,6 +174,7 @@ fn classification_env() -> WowLuaEnv {
     {
         let mut state = env.state().borrow_mut();
         state.player.buffs = vec![helpful, harmful];
+        state.party_group_active = true;
         state.party_members = vec![classification_party(party_helpful, party_harmful)];
     }
     env
