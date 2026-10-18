@@ -338,6 +338,24 @@ fn original_selection_zero_is_nondestructive() {
 }
 
 #[test]
+fn original_selection_renders_supplied_suggested_group_size() {
+    let env = seed_env();
+    env.state().borrow_mut().quest_log_entries.entries[0].suggested_group_size = Some(5);
+    exec(&env, "QuestLog_SetSelection(1)");
+    exec(
+        &env,
+        r#"
+        assert(GetQuestLogGroupNum() == 5)
+        assert(QuestInfoGroupSize:IsShown())
+        assert(QuestInfoGroupSize:GetText() == format(QUEST_SUGGESTED_GROUP_NUM, 5))
+        QuestLog_SetSelection(2)
+        assert(GetQuestLogGroupNum() == 0)
+        assert(not QuestInfoGroupSize:IsShown())
+    "#,
+    );
+}
+
+#[test]
 fn original_nonzero_selection_is_nondestructive() {
     let env = seed_env();
     let before = snapshot(&env);

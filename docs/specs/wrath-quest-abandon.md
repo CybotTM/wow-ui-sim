@@ -8,6 +8,7 @@ Wrath legacy abandonment separates selection from confirmation in `src/lua_api/g
 - [ ] `GetAbandonQuestName` reads the marked rich quest title, even if current selection changes. The unchanged original XML abandon button opens the original no-items `ABANDON_QUEST` dialog with that title; its real cancel button preserves quest state.
 - [ ] `AbandonQuest` consumes the marked target once, removes only that quest from rich/light membership and objective/background/readiness stores, clears a matching pending offer and selected identity, and preserves unrelated rows, pending offers, history, money and XP.
 - [ ] Successful Wrath confirmation publishes one argumentless `QUEST_LOG_UPDATE` after commit, not the modern `QUEST_REMOVED` event. Missing/stale/consumed targets do not remove another quest or publish another success notification.
+- [ ] Wrath `GetQuestLogGroupNum` reads the selected rich entry's supplied suggested group size, or zero when absent. Original `QuestInfo_ShowGroupSize` renders supplied group text and hides it for a no-group row.
 - [ ] Original `QuestLog_SetSelection` remains nondestructive. Original `QuestLog_OnEvent` observes the committed log through its `QUEST_LOG_UPDATE` path. Original consumer errors remain visible rather than replaced with test implementations.
 - [ ] Retail, PTR and Forever retain their existing destructive `SetAbandonQuest` contracts.
 
