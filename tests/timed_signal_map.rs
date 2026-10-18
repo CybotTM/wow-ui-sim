@@ -132,6 +132,227 @@ fn timed_signal_map_accepts_secure_secret_deadline_before_enforcing_map_access()
     .expect("trusted replacement and tainted guarded access respect held secrets");
 }
 
+fn secret_deadline_fixture(time: f64) -> WowLuaEnv {
+    use rilua::LuaApiMut;
+
+    let env = WowLuaEnv::new().unwrap();
+    {
+        let loader = env.loader_env();
+        let mut lua = loader.rilua_mut();
+        rilua::table_security::register_table_security(&mut lua).unwrap();
+        for (name, time) in [("secret_deadline", time), ("secret_later_deadline", 111.5)] {
+            let deadline = rilua::table_security::wrap_host_secret_number(lua.state_mut(), time);
+            lua.state_mut().push(deadline);
+            let inserted = lua.set_global_val(name, deadline);
+            lua.state_mut().pop();
+            inserted.unwrap();
+        }
+    }
+    env.exec(
+        r#"
+        map = C_Timer.NewTimedSignalMap(function(key)
+            -- ConditionalSecret callback keys are explicitly outside this lane.
+            assert(type(key) == "number" and not issecretvalue(key))
+            calls = (calls or 0) + 1
+        end)
+        map:SignalAt(2, 2000)
+        "#,
+    )
+    .unwrap();
+    env
+}
+
+fn run_tainted(env: &WowLuaEnv, body: &str) {
+    env.exec(&format!(
+        r#"
+        assert(debug.getstacktaint() == nil)
+        local function addon()
+            assert(debug.getstacktaint() == "TimedSignalSecretTest")
+            {body}
+            assert(debug.getstacktaint() == "TimedSignalSecretTest")
+        end
+        debug.setobjecttaint(addon, "TimedSignalSecretTest")
+        addon()
+        assert(debug.getstacktaint() == nil)
+        "#,
+    ))
+    .expect(body);
+}
+
+fn assert_secret_map_denied(env: &WowLuaEnv) {
+    run_tainted(
+        env,
+        r#"
+        local ok = pcall(function() return map:GetSignalCount() end)
+        assert(not ok, "secret metadata must deny tainted map access")
+        "#,
+    );
+}
+
+#[test]
+fn timed_signal_map_public_replacement_clears_deadline_secrecy() {
+    let env = secret_deadline_fixture(73.125);
+    env.exec("map:SignalAt(1, secret_deadline)").unwrap();
+    assert_secret_map_denied(&env);
+    env.exec("map:SignalAt(1, 37.75)").unwrap();
+    run_tainted(
+        &env,
+        "assert(map:GetSignalCount() == 2); assert(map:GetSignalTime(1) == 37.75)",
+    );
+}
+
+#[test]
+fn timed_signal_map_cancel_clears_only_removed_deadline_secrecy() {
+    let env = secret_deadline_fixture(61.875);
+    env.exec("map:SignalAt(1, secret_deadline); map:SignalAt(3, secret_deadline)")
+        .unwrap();
+    assert_secret_map_denied(&env);
+    env.exec("map:CancelSignal(1)").unwrap();
+    assert_secret_map_denied(&env);
+    env.exec("map:CancelSignal(3)").unwrap();
+    run_tainted(
+        &env,
+        "assert(map:GetSignalCount() == 1); assert(map:GetSignalTime(2) == 2000)",
+    );
+}
+
+#[test]
+fn timed_signal_map_cancel_all_clears_deadline_secrecy() {
+    let env = secret_deadline_fixture(92.625);
+    env.exec("map:SignalAt(1, secret_deadline)").unwrap();
+    assert_secret_map_denied(&env);
+    env.exec("map:CancelAllSignals()").unwrap();
+    run_tainted(
+        &env,
+        "assert(map:GetSignalCount() == 0); map:SignalAt(4, 16.25); assert(map:GetSignalTime(4) == 16.25)",
+    );
+}
+
+#[test]
+fn timed_signal_map_due_removal_clears_only_removed_deadline_secrecy() {
+    let env = secret_deadline_fixture(0.0);
+    env.exec("map:SignalAt(1, secret_deadline); map:SignalAt(3, secret_later_deadline)")
+        .unwrap();
+    assert_secret_map_denied(&env);
+    assert_eq!(env.process_timers().unwrap(), 1);
+    assert_secret_map_denied(&env);
+    env.state().borrow_mut().start_time -= std::time::Duration::from_secs(120);
+    assert_eq!(env.process_timers().unwrap(), 1);
+    run_tainted(
+        &env,
+        "assert(map:GetSignalCount() == 1); assert(map:GetSignalTime(2) == 2000)",
+    );
+    assert_eq!(env.eval::<i64>("return calls").unwrap(), 2);
+}
+
+#[test]
+fn timed_signal_map_secret_after_retains_absolute_deadline_and_access_guard() {
+    let env = secret_deadline_fixture(47.375);
+    env.exec(
+        r#"
+        local before = GetTime()
+        map:SignalAfter(1, secret_deadline)
+        local deadline = map:GetSignalTime(1)
+        assert(deadline >= before + 47.375 and deadline <= GetTime() + 47.375)
+        assert(issecretvalue(secret_deadline) and secretunwrap(secret_deadline) == 47.375)
+        "#,
+    )
+    .unwrap();
+    assert_secret_map_denied(&env);
+}
+
+#[test]
+fn timed_signal_map_rejected_tainted_secret_ingress_preserves_public_state() {
+    for method in ["SignalAt", "SignalAfter"] {
+        let env = secret_deadline_fixture(29.625);
+        run_tainted(
+            &env,
+            &format!(
+                r#"
+                assert(not pcall(function() map:{method}(2, secret_deadline) end))
+                assert(not pcall(function() map:{method}(7, secret_deadline) end))
+                assert(map:GetSignalCount() == 1)
+                assert(map:GetSignalTime(2) == 2000 and not map:HasSignal(7))
+                assert(issecretvalue(secret_deadline))
+                "#,
+            ),
+        );
+        env.exec("assert(secretunwrap(secret_deadline) == 29.625)")
+            .unwrap();
+    }
+}
+
+#[test]
+fn timed_signal_map_secret_holding_guard_covers_all_eight_methods_without_mutation() {
+    for call in [
+        "CancelAllSignals()",
+        "CancelSignal(1)",
+        "GetNextSignal()",
+        "GetSignalCount()",
+        "GetSignalTime(2)",
+        "HasSignal(2)",
+        "SignalAfter(3, 100)",
+        "SignalAt(1, 100)",
+    ] {
+        let env = secret_deadline_fixture(84.375);
+        env.exec(
+            r#"
+            map:SignalAt(1, secret_deadline)
+            public_map = C_Timer.NewTimedSignalMap(function() end)
+            public_map:SignalAt(1, 10)
+            public_map:SignalAt(2, 20)
+            "#,
+        )
+        .unwrap();
+        run_tainted(
+            &env,
+            &format!(
+                r#"
+                assert(not pcall(function() return map:{call} end), "{call} must reject tainted access")
+                assert(pcall(function() return public_map:{call} end), "{call} must allow public-only maps")
+                "#,
+            ),
+        );
+        env.exec(
+            r#"
+            assert(map:GetSignalCount() == 2)
+            assert(map:GetSignalTime(1) == 84.375 and map:GetSignalTime(2) == 2000)
+            assert(not map:HasSignal(3))
+            local key, time = map:GetNextSignal()
+            assert(key == 1 and time == 84.375)
+            "#,
+        )
+        .expect(call);
+    }
+}
+
+#[test]
+fn timed_signal_map_rejects_nonfinite_secret_deadlines_without_mutation() {
+    for time in [f64::INFINITY, f64::NEG_INFINITY, f64::NAN] {
+        let env = secret_deadline_fixture(time);
+        env.exec(
+            r#"
+            for _, method in ipairs({"SignalAt", "SignalAfter"}) do
+                assert(not pcall(function() map[method](map, 2, secret_deadline) end))
+                assert(map:GetSignalCount() == 1 and map:GetSignalTime(2) == 2000)
+                assert(issecretvalue(secret_deadline))
+            end
+            "#,
+        )
+        .unwrap();
+    }
+}
+
+#[test]
+fn timed_signal_map_secret_finalizer_releases_state_from_tainted_collection() {
+    let env = secret_deadline_fixture(0.0);
+    env.exec("map:SignalAt(1, secret_deadline)").unwrap();
+    assert_secret_map_denied(&env);
+    run_tainted(&env, "map = nil; collectgarbage('collect')");
+    assert_eq!(env.process_timers().unwrap(), 0);
+    assert_eq!(env.eval::<Option<i64>>("return calls").unwrap(), None);
+}
+
 #[test]
 fn timed_signal_map_reports_present_key_and_exact_time() {
     let env = WowLuaEnv::new().unwrap();
