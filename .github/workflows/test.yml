@@ -22,7 +22,11 @@ jobs:
           submodules: recursive
 
       - name: Install mold
-        run: sudo apt-get update && sudo apt-get install -y mold libasound2-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mold libasound2-dev pkg-config libicu-dev
+          pkg-config --atleast-version=72 icu-i18n icu-uc
+          pkg-config --modversion icu-i18n icu-uc
 
       - name: Fetch Blizzard UI source (retail)
         if: false

@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+
+# Manual runs build/package artifacts only; publication is tag-push-only.
+env:
+  RELEASE_REF: ${{ github.event_name == 'push' && github.ref_name || 'v0.0.0-ci' }}
 
 permissions:
   contents: write
@@ -74,7 +79,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y pkg-config libasound2-dev libudev-dev
+          sudo apt-get install -y pkg-config libicu-dev libasound2-dev libudev-dev
 
       - name: Install macOS ICU
         if: runner.os == 'macOS' && contains(matrix.features, 'client-retail')
@@ -82,6 +87,44 @@ jobs:
         run: |
           brew install icu4c pkg-config
           echo "PKG_CONFIG_PATH=$(brew --prefix icu4c)/lib/pkgconfig" >> "${GITHUB_ENV}"
+
+      - name: Read pinned vcpkg revision
+        if: runner.os == 'Windows' && contains(matrix.features, 'client-retail')
+        id: vcpkg-pin
+        shell: pwsh
+        run: |
+          $revision = (Get-Content vcpkg.json -Raw | ConvertFrom-Json).'builtin-baseline'
+          if ($revision -notmatch '^[0-9a-f]{40}$') { throw 'Invalid vcpkg baseline' }
+          "revision=$revision" >> $env:GITHUB_OUTPUT
+
+      - name: Checkout pinned vcpkg
+        if: runner.os == 'Windows' && contains(matrix.features, 'client-retail')
+        uses: actions/checkout@v4
+        with:
+          repository: microsoft/vcpkg
+          ref: ${{ steps.vcpkg-pin.outputs.revision }}
+          path: .ci-vcpkg
+          persist-credentials: false
+
+      - name: Install static Windows ICU
+        if: runner.os == 'Windows' && contains(matrix.features, 'client-retail')
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:GITHUB_WORKSPACE '.ci-vcpkg'
+          & "$root/bootstrap-vcpkg.bat" -disableMetrics
+          if ($LASTEXITCODE -ne 0) { throw 'vcpkg bootstrap failed' }
+          & "$root/vcpkg.exe" install --triplet x64-windows-static-md --host-triplet x64-windows-static-md "--x-manifest-root=$env:GITHUB_WORKSPACE" "--x-install-root=$root/installed"
+          if ($LASTEXITCODE -ne 0) { throw 'vcpkg ICU installation failed' }
+          "VCPKG_ROOT=$root" >> $env:GITHUB_ENV
+          'VCPKGRS_TRIPLET=x64-windows-static-md' >> $env:GITHUB_ENV
+
+      - name: Report Unix ICU versions
+        if: runner.os != 'Windows' && contains(matrix.features, 'client-retail')
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg-config --atleast-version=72 icu-i18n icu-uc
+          pkg-config --modversion icu-i18n icu-uc
 
       - name: Install Inno Setup
         if: runner.os == 'Windows'
@@ -92,7 +135,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          version="${RELEASE_REF#v}"
           python3 - "$version" <<'PY'
           import pathlib, re, sys
           v = sys.argv[1]
@@ -123,7 +166,7 @@ jobs:
           fi
           echo "--- ${bin} --version ---"
           "${bin}" --version
-          expected="wow-sim ${GITHUB_REF_NAME#v}"
+          expected="wow-sim ${RELEASE_REF#v}"
           actual="$("${bin}" --version)"
           if [[ "${actual}" != "${expected}" ]]; then
             echo "version mismatch: expected '${expected}', got '${actual}'" >&2
@@ -136,7 +179,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          name="wow-ui-sim-${GITHUB_REF_NAME}-${{ matrix.name }}"
+          name="wow-ui-sim-${RELEASE_REF}-${{ matrix.name }}"
           root="dist/${name}"
 
           mkdir -p "${root}"
@@ -152,7 +195,7 @@ jobs:
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: wow-ui-sim-${{ github.ref_name }}-${{ matrix.name }}
+          name: wow-ui-sim-${{ env.RELEASE_REF }}-${{ matrix.name }}
           path: ${{ steps.package-linux.outputs.asset }}
 
       - name: Package macOS release
@@ -161,8 +204,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          name="wow-ui-sim-${GITHUB_REF_NAME}-${{ matrix.name }}"
-          version="${GITHUB_REF_NAME#v}"
+          name="wow-ui-sim-${RELEASE_REF}-${{ matrix.name }}"
+          version="${RELEASE_REF#v}"
           app="dist/WoW Sim.app"
           contents="${app}/Contents"
 
@@ -196,6 +239,11 @@ jobs:
           cp -R Interface/AddOns/Admin Interface/AddOns/SimCommands Interface/AddOns/TestFramework \
             "${contents}/Resources/Interface/AddOns/"
 
+          if [[ "${{ matrix.features }}" == *client-retail* ]]; then
+            python3 "${GITHUB_WORKSPACE}/scripts/bundle-macos-icu.py" \
+              "${contents}/MacOS/wow-sim" "$(brew --prefix icu4c)/lib"
+          fi
+
           # Ad-hoc codesign so macOS reports "unidentified developer"
           # rather than the misleading "damaged and can't be opened"
           # Gatekeeper error on first launch of a quarantined download.
@@ -222,9 +270,17 @@ jobs:
           PLIST
 
           # Ad-hoc sign the assembled bundle. --deep covers any nested
-          # frameworks (none today, but cheap insurance).
+          # ICU dylibs are signed inside-out before the outer bundle.
+          if [[ -d "${contents}/Frameworks" ]]; then
+            for dylib in "${contents}/Frameworks/"*.dylib; do
+              codesign --force --sign - "${dylib}"
+            done
+          fi
           codesign --force --deep --sign - "${app}"
           codesign --verify --deep --strict --verbose=2 "${app}"
+
+          # Run the packaged executable, not the unbundled build output.
+          "${contents}/MacOS/wow-sim" --version
 
           # Stage a DMG layout: the .app + a symlink to /Applications so
           # users drag-to-install.
@@ -248,7 +304,7 @@ jobs:
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: wow-ui-sim-${{ github.ref_name }}-${{ matrix.name }}
+          name: wow-ui-sim-${{ env.RELEASE_REF }}-${{ matrix.name }}
           path: ${{ steps.package-macos.outputs.asset }}
 
       - name: Package Windows release
@@ -257,7 +313,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $name = "wow-ui-sim-$env:GITHUB_REF_NAME-${{ matrix.name }}"
+          $name = "wow-ui-sim-$env:RELEASE_REF-${{ matrix.name }}"
           $root = "dist\$name"
 
           New-Item -ItemType Directory -Force $root | Out-Null
@@ -269,7 +325,7 @@ jobs:
           Compress-Archive -Path $root -DestinationPath "dist\$name.zip" -Force
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           & $iscc ".\installer\wow-ui-sim.iss" `
-            "/DAppVersion=$env:GITHUB_REF_NAME" `
+            "/DAppVersion=$env:RELEASE_REF" `
             "/DSourceDir=$((Resolve-Path $root).Path)" `
             "/DOutputDir=$((Resolve-Path dist).Path)" `
             "/DOutputBaseFilename=$name-setup"
@@ -280,13 +336,14 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: wow-ui-sim-${{ github.ref_name }}-${{ matrix.name }}
+          name: wow-ui-sim-${{ env.RELEASE_REF }}-${{ matrix.name }}
           path: ${{ steps.package-windows.outputs.asset }}
 
   publish-release:
     name: Publish GitHub release
     runs-on: ubuntu-latest
     needs: build-release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Download release packages
         uses: actions/download-artifact@v4
