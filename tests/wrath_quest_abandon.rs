@@ -153,7 +153,10 @@ fn snapshot(env: &WowLuaEnv) -> String {
 #[test]
 fn original_button_cancel_then_accept_marked_target() {
     let env = seed_env();
-    exec(&env, "SelectQuestLogEntry(1)");
+    exec(
+        &env,
+        "SelectQuestLogEntry(1); SetAbandonQuest(); QuestLogControlPanel_UpdateState()",
+    );
     let before = snapshot(&env);
     let clicked = env.exec("QuestLogFrameAbandonButton:Click()");
     eprintln!("original button result: {clicked:?}");

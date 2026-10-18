@@ -1,0 +1,40 @@
+# Wrath quest abandon confirmation
+
+Wrath legacy abandonment separates selection from confirmation in `src/lua_api/globals/quest_verbs.rs` and `src/lua_api/globals/quest_surface/`. It reuses the existing quest stores and target field. See [quest state architecture](../wiki/systems/lua-api.md) and [Wrath log projection](wrath-quest-log-projection.md).
+
+## What it must do
+
+- [ ] Under `client-wrath`, `SetAbandonQuest` records the selected active rich quest identity without removing membership, auxiliary state, pending offers or completion history, granting rewards or publishing success notifications. Empty/invalid selection clears the target.
+- [ ] `GetAbandonQuestName` reads the marked rich quest title, even if current selection changes. The unchanged original XML abandon button opens the original no-items `ABANDON_QUEST` dialog with that title; its real cancel button preserves quest state.
+- [ ] `AbandonQuest` consumes the marked target once, removes only that quest from rich/light membership and objective/background/readiness stores, clears a matching pending offer and selected identity, and preserves unrelated rows, pending offers, history, money and XP.
+- [ ] Successful Wrath confirmation publishes one argumentless `QUEST_LOG_UPDATE` after commit, not the modern `QUEST_REMOVED` event. Missing/stale/consumed targets do not remove another quest or publish another success notification.
+- [ ] Original `QuestLog_SetSelection` remains nondestructive. Original `QuestLog_OnEvent` observes the committed log through its `QUEST_LOG_UPDATE` path. Original consumer errors remain visible rather than replaced with test implementations.
+- [ ] Retail, PTR and Forever retain their existing destructive `SetAbandonQuest` contracts.
+
+## How it works
+
+- [Lua API and quest state](../wiki/systems/lua-api.md)
+- [Legacy read projection](wrath-quest-log-projection.md)
+
+## Implementation inventory
+
+- `src/lua_api/globals/quest_verbs.rs` — profile-specific marking/confirmation over existing state.
+- `src/lua_api/globals/quest_surface/wrath_quest_log.rs` — marked supplied-title projection, selected at registration.
+- `src/lua_api/sim_substates/quest_log.rs` — existing rich membership and auxiliary stores; no parallel quest store.
+
+## Tests asserting this spec
+
+- `tests/wrath_quest_abandon.rs` — hash-pinned original consumers loaded through the real full Wrath startup, original XML button and popup, supplied noncatalog rows and state/notification controls.
+- `tests/common/wrath_full_ui.rs` — shared original FrameXML TOC/startup addon ordering.
+- `tests/fixtures/wrath-abandon-button.xml` — exact contiguous original XML button; checked against the whole pinned source.
+- `tests/quest_verbs.rs`, `tests/quest_abandon_membership.rs` — existing cross-profile preservation contracts.
+
+## Known gaps (current cycle)
+
+- Consumer RED: original `QuestLog_SetSelection(1)` removes supplied rich/light membership and auxiliary state before confirmation. Original full startup records no Lua errors in this probe.
+- [ ] Original full-selection GREEN remains blocked downstream at `QuestInfo.lua` calling missing `GetQuestLogGroupNum`; details/map callbacks are not replaced.
+- [ ] Confirmation/log-refresh GREEN and cross-profile preservation pending.
+
+## Out of scope
+
+Items-to-destroy, watch-index modeling, acceptance, turn-in, reward acquisition, native event timing and whole W1/profile acceptance. `GetAbandonQuestItems` remains the existing nil no-items branch; that does not establish item destruction support. No Blizzard/vendor code or callback replacement is permitted.

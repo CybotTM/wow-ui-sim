@@ -16,10 +16,9 @@
 //!                                            `tracked_achievements`.
 //! - `UntrackAchievement(id)`             — remove id (no-op when absent).
 //!
-//! `QUEST_REMOVED` is not fired by these verbs directly — the real WoW
-//! flow would emit it from `AbandonQuest()` (not in this port). The sim
-//! emits `QUEST_REMOVED` from `SetAbandonQuest` so tests can observe the
-//! intent without a second confirm step; the admin API can follow up.
+//! Wrath marks with `SetAbandonQuest`, then commits through `AbandonQuest`
+//! and queues `QUEST_LOG_UPDATE`. Other profiles retain the immediate
+//! `SetAbandonQuest` transition and its `QUEST_REMOVED` notification.
 //!
 //! Registered from `register_tail_globals` after `missing_surface`.
 
@@ -137,6 +136,7 @@ fn quest_map_log_title_button_on_click(state: &mut LuaState) -> LuaResult<u32> {
 /// abandon target and fire `QUEST_REMOVED` to signal intent. The sim does
 /// not run a two-step confirm (`AbandonQuest` in retail); the mark is the
 /// full commitment.
+#[cfg(not(feature = "client-wrath"))]
 fn set_abandon_quest(state: &mut LuaState) -> LuaResult<u32> {
     let (removed, marked_id) = {
         let mut st = borrow_state_mut(state)?;
@@ -171,6 +171,47 @@ fn set_abandon_quest(state: &mut LuaState) -> LuaResult<u32> {
         push_event(state, "QUEST_REMOVED")?;
     }
     let _ = marked_id; // kept for future admin hooks
+    Ok(0)
+}
+
+/// Wrath selection marks an active identity; it does not commit abandonment.
+#[cfg(feature = "client-wrath")]
+fn set_abandon_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    sim.abandon_quest_id = sim.selected_quest_log_id.filter(|id| {
+        sim.quest_log_entries
+            .entries
+            .iter()
+            .any(|row| row.quest_id as u32 == *id)
+    });
+    Ok(0)
+}
+
+/// Consume the marked identity once, independently of later selection changes.
+#[cfg(feature = "client-wrath")]
+fn abandon_quest(state: &mut LuaState) -> LuaResult<u32> {
+    {
+        let mut sim = borrow_state_mut(state)?;
+        let Some(id) = sim.abandon_quest_id.take() else {
+            return Ok(0);
+        };
+        if !sim.quest_log_entries.abandon(id as i32) {
+            return Ok(0);
+        }
+        sim.quest_log.retain(|quest| *quest != id);
+        if sim.selected_quest_log_id == Some(id) {
+            sim.selected_quest_log_id = None;
+        }
+        if sim
+            .pending_quest_offer
+            .as_ref()
+            .map(|offer| offer.quest_id as u32)
+            == Some(id)
+        {
+            sim.pending_quest_offer = None;
+        }
+    }
+    push_event(state, "QUEST_LOG_UPDATE")?;
     Ok(0)
 }
 
@@ -296,6 +337,8 @@ fn register_quest_state_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
         quest_map_log_title_button_on_click,
     )?;
     LuaApiMut::register_function(lua, "SetAbandonQuest", set_abandon_quest)?;
+    #[cfg(feature = "client-wrath")]
+    LuaApiMut::register_function(lua, "AbandonQuest", abandon_quest)?;
     LuaApiMut::register_function(lua, "SetTrackedAchievement", set_tracked_achievement)?;
     LuaApiMut::register_function(lua, "UntrackAchievement", untrack_achievement)?;
     Ok(())

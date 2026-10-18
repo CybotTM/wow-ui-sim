@@ -82,6 +82,19 @@ pub struct QuestLogState {
 }
 
 impl QuestLogState {
+    /// Remove active membership and auxiliary state without completing the quest.
+    pub fn abandon(&mut self, quest_id: i32) -> bool {
+        let before = self.entries.len();
+        self.entries.retain(|entry| entry.quest_id != quest_id);
+        if self.entries.len() == before {
+            return false;
+        }
+        self.objective_progress.remove(&quest_id);
+        self.background_materials.remove(&quest_id);
+        self.readiness.remove_quest(quest_id);
+        true
+    }
+
     /// Authored simulator transition, not native validation/reward behavior.
     /// History alone does not block a represented completed row (including seeds).
     pub fn turn_in(&mut self, quest_id: i32) -> bool {

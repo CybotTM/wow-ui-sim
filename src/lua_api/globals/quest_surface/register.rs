@@ -248,6 +248,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         #[cfg(feature = "client-wrath")]
         let func: SurfaceFn = match *name {
             "GetQuestLogTitle" => super::wrath_quest_log::get_quest_log_title,
+            "GetAbandonQuestName" => super::wrath_quest_log::get_abandon_quest_name,
             "SelectQuestLogEntry" => super::wrath_quest_log::select_quest_log_entry,
             "GetQuestLogSelection" => super::wrath_quest_log::get_quest_log_selection,
             _ => func,

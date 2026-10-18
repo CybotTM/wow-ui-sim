@@ -9,6 +9,25 @@ fn supplied_index(state: &LuaState) -> LuaResult<usize> {
     Ok(index.wrapping_sub(1))
 }
 
+pub(super) fn get_abandon_quest_name(state: &mut LuaState) -> LuaResult<u32> {
+    let title = {
+        let sim = borrow_state(state)?;
+        sim.abandon_quest_id.and_then(|id| {
+            sim.quest_log_entries
+                .entries
+                .iter()
+                .find(|row| row.quest_id as u32 == id)
+                .map(|row| row.title.clone())
+        })
+    };
+    let Some(title) = title else {
+        return Ok(0);
+    };
+    let title = create_string(state, &title);
+    state.push(title);
+    Ok(1)
+}
+
 pub(super) fn get_quest_log_title(state: &mut LuaState) -> LuaResult<u32> {
     let index = supplied_index(state)?;
     let row = borrow_state(state)?
