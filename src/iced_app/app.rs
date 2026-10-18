@@ -331,6 +331,12 @@ impl App {
 
     /// Construct the App struct from initialized components.
     pub(crate) fn build_app(init: AppInit) -> Self {
+        {
+            let env = init.env.borrow();
+            let mut state = env.state().borrow_mut();
+            state.addon_base_paths = init.texture_manager.borrow().source_roots().to_vec();
+            state.texture_manager = init.texture_manager.clone();
+        }
         let now = std::time::Instant::now();
         let selections = AppInitialSelections::from_config(&init.config);
         let initial_screen_size = current_env_screen_size(&init.env);
@@ -414,8 +420,11 @@ impl App {
 
     /// Create texture manager, font system, and glyph atlas.
     fn init_rendering(env_rc: &Rc<RefCell<WowLuaEnv>>) -> RenderResources {
-        let mut tex_mgr =
-            TextureManager::new().with_addons_paths(crate::paths::default_addons_paths());
+        let texture_manager = {
+            let env = env_rc.borrow();
+            env.state().borrow().texture_manager()
+        };
+        let mut tex_mgr = texture_manager.borrow_mut();
         if Self::eager_startup_texture_preloads_enabled() {
             let class_name = {
                 let env = env_rc.borrow();
@@ -436,7 +445,7 @@ impl App {
                 Self::preload_non_glue_textures(&mut tex_mgr, &class_name);
             }
         }
-        let texture_manager = Rc::new(RefCell::new(tex_mgr));
+        drop(tex_mgr);
         let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
         env_rc.borrow().set_font_system(Rc::clone(&font_system));
         let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));

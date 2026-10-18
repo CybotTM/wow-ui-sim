@@ -22,7 +22,8 @@ impl App {
     ) -> LuaResponse {
         let (batch, mut glyph_atlas) = self.build_screenshot_batch(width, height, filter);
         let glyph_data = glyph_atlas_data(&mut glyph_atlas);
-        let mut tex_mgr = self.texture_manager.borrow_mut();
+        let texture_manager = self.env.borrow().state().borrow().texture_manager();
+        let mut tex_mgr = texture_manager.borrow_mut();
         let img = render_to_image(&batch, &mut tex_mgr, width, height, glyph_data);
         let img = match maybe_crop_image(img, crop) {
             Ok(img) => img,

@@ -2,6 +2,7 @@
 
 mod preload;
 mod resolve;
+mod source_index;
 
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
@@ -17,17 +18,16 @@ use image_blp::types::BlpContent;
 pub struct TextureManager {
     /// Base paths to addon directories (for addon textures).
     addons_paths: Vec<PathBuf>,
+    source_index: std::cell::RefCell<source_index::SourceIndex>,
     /// Cache of loaded texture data (path -> RGBA pixels).
     cache: HashMap<String, TextureData>,
     /// Cache of texture dimensions keyed by normalized WoW path.
     size_cache: HashMap<String, (u32, u32)>,
     /// Cache of raw BC-compressed texture data keyed by normalized WoW path.
     bc_cache: HashMap<String, BcTextureResult>,
-    /// Cache of normalized paths known to be unavailable on the BC path.
-    bc_unavailable: HashSet<String>,
     /// Cache of sub-region textures (path#region -> RGBA pixels).
     sub_cache: HashMap<String, TextureData>,
-    /// Paths that failed to load (logged once, then silenced).
+    /// Paths already logged as missing; never used to suppress source retries.
     not_found: HashSet<String>,
 }
 
@@ -44,10 +44,10 @@ impl TextureManager {
     pub fn new() -> Self {
         Self {
             addons_paths: Vec::new(),
+            source_index: Default::default(),
             cache: HashMap::new(),
             size_cache: HashMap::new(),
             bc_cache: HashMap::new(),
-            bc_unavailable: HashSet::new(),
             sub_cache: HashMap::new(),
             not_found: HashSet::new(),
         }
@@ -55,14 +55,33 @@ impl TextureManager {
 
     /// Set the addons directory path for addon textures.
     pub fn with_addons_path(mut self, path: impl Into<PathBuf>) -> Self {
-        self.addons_paths = vec![path.into()];
+        self.set_source_roots(&[path.into()]);
         self
     }
 
     /// Set all addon directory paths for addon textures.
     pub fn with_addons_paths(mut self, paths: impl IntoIterator<Item = PathBuf>) -> Self {
-        self.addons_paths = paths.into_iter().collect();
+        self.set_source_roots(&paths.into_iter().collect::<Vec<_>>());
         self
+    }
+
+    pub(crate) fn source_roots(&self) -> &[PathBuf] {
+        &self.addons_paths
+    }
+
+    /// Root order is part of source identity; do not sort or canonicalize it.
+    pub fn set_source_roots(&mut self, roots: &[PathBuf]) {
+        if roots != self.addons_paths {
+            self.addons_paths = roots.to_vec();
+            self.invalidate_source_generation();
+        }
+    }
+
+    /// Call at an explicit asset/root reload, even if root spelling is unchanged.
+    /// This does not evict already rendered pixels or GPU atlas handles.
+    pub fn invalidate_source_generation(&mut self) {
+        self.source_index.get_mut().clear();
+        self.not_found.clear();
     }
 
     /// Load a texture by its WoW path (e.g., "Interface\\DialogFrame\\UI-DialogBox-Background").
@@ -80,9 +99,6 @@ impl TextureManager {
 
         if self.cache.contains_key(&normalized) {
             return self.cached_texture_load_result(&normalized, start);
-        }
-        if self.not_found.contains(&normalized) {
-            return unavailable_texture_load_result(start);
         }
 
         let loaded = self.load_resolved_texture(wow_path, &normalized, &mut telemetry);
@@ -113,8 +129,9 @@ impl TextureManager {
         let resolve_start = Instant::now();
         let Some(file_path) = self.resolve_path(normalized) else {
             telemetry.resolve_elapsed = resolve_start.elapsed();
-            crate::logging::eprintln_elapsed(&format!("[TexMgr] Not found: {}", wow_path));
-            self.not_found.insert(normalized.to_string());
+            if self.not_found.insert(normalized.to_string()) {
+                crate::logging::eprintln_elapsed(&format!("[TexMgr] Not found: {}", wow_path));
+            }
             return false;
         };
 
@@ -182,16 +199,6 @@ impl Default for TextureManager {
     }
 }
 
-fn unavailable_texture_load_result(
-    start: Instant,
-) -> (Option<&'static TextureData>, RgbaLoadTelemetry) {
-    let telemetry = RgbaLoadTelemetry {
-        total_elapsed: start.elapsed(),
-        ..Default::default()
-    };
-    (None, telemetry)
-}
-
 /// Result of a BC-compressed texture load.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BcTextureFormat {
@@ -247,9 +254,6 @@ impl TextureManager {
         if self.bc_cache.contains_key(&normalized) {
             return self.cached_bc_load_result(&normalized, start);
         }
-        if self.bc_unavailable.contains(&normalized) {
-            return unavailable_bc_load_result(start);
-        }
 
         let mut telemetry = BcLoadTelemetry::default();
         let loaded = self.load_resolved_bc_texture(&normalized, &mut telemetry);
@@ -279,19 +283,16 @@ impl TextureManager {
         let resolve_start = Instant::now();
         let Some(file_path) = self.resolve_path(normalized) else {
             telemetry.resolve_elapsed = resolve_start.elapsed();
-            self.mark_bc_unavailable(normalized);
             return false;
         };
         telemetry.resolve_elapsed = resolve_start.elapsed();
 
         if !is_blp_file(&file_path) {
-            self.mark_bc_unavailable(normalized);
             return false;
         }
         telemetry.resolved_blp = true;
 
         let Some(bc_texture) = load_bc_texture_from_blp(&file_path, telemetry) else {
-            self.mark_bc_unavailable(normalized);
             return false;
         };
 
@@ -299,24 +300,9 @@ impl TextureManager {
         true
     }
 
-    fn mark_bc_unavailable(&mut self, normalized: &str) {
-        self.bc_unavailable.insert(normalized.to_string());
-    }
-
     fn cache_bc_texture_data(&mut self, normalized: &str, bc_texture: BcTextureResult) {
-        self.bc_unavailable.remove(normalized);
         self.bc_cache.insert(normalized.to_string(), bc_texture);
     }
-}
-
-fn unavailable_bc_load_result(
-    start: Instant,
-) -> (Option<&'static BcTextureResult>, BcLoadTelemetry) {
-    let telemetry = BcLoadTelemetry {
-        total_elapsed: start.elapsed(),
-        ..Default::default()
-    };
-    (None, telemetry)
 }
 
 fn is_blp_file(file_path: &Path) -> bool {

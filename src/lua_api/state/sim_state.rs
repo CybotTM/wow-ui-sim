@@ -362,6 +362,7 @@ pub struct SimState {
     pub spell_flyouts: HashMap<u32, SpellFlyoutInfo>,
     pub action_profession_quality: HashMap<i32, ProfessionQualityInfo>,
     pub addon_base_paths: Vec<PathBuf>,
+    pub texture_manager: std::rc::Rc<std::cell::RefCell<crate::texture::TextureManager>>,
     pub create_frame_initial_hidden: Option<bool>,
     pub suppress_runtime_on_load_depth: u32,
     pub xml_load_addon_depth: u32,
@@ -793,4 +794,17 @@ pub struct SimState {
     pub debug_borders: bool,
     pub debug_anchors: bool,
     pub simulator_exit_requested: bool,
+}
+
+impl SimState {
+    /// Share source lookup with every environment-associated renderer, synchronizing
+    /// the publicly mutable root vector before any manager borrow.
+    pub fn texture_manager(
+        &self,
+    ) -> std::rc::Rc<std::cell::RefCell<crate::texture::TextureManager>> {
+        self.texture_manager
+            .borrow_mut()
+            .set_source_roots(&self.addon_base_paths);
+        self.texture_manager.clone()
+    }
 }

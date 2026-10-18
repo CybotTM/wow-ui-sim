@@ -105,7 +105,8 @@ impl App {
         deadline: std::time::Instant,
     ) -> usize {
         let mut loaded = 0usize;
-        let mut tex_mgr = self.texture_manager.borrow_mut();
+        let texture_manager = self.env.borrow().state().borrow().texture_manager();
+        let mut tex_mgr = texture_manager.borrow_mut();
         for path in paths {
             if texture_request_is_cached(&tex_mgr, path) {
                 continue;

@@ -307,7 +307,7 @@ pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
     };
     let success = {
         let sim = borrow_state(state)?;
-        texture_source_resolves(path.as_deref(), file_data_id, &sim.addon_base_paths)
+        texture_source_resolves(path.as_deref(), file_data_id, &sim)
     };
     let horiz_tile = opt_bool(state, 3);
     let vert_tile = opt_bool(state, 4);
@@ -347,7 +347,7 @@ pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
 fn texture_source_resolves(
     path: Option<&str>,
     file_data_id: Option<i64>,
-    addon_paths: &[std::path::PathBuf],
+    sim: &crate::lua_api::state::SimState,
 ) -> bool {
     if file_data_id
         .and_then(|id| u32::try_from(id).ok())
@@ -362,7 +362,8 @@ fn texture_source_resolves(
     if crate::limited_listfile::lookup_texture_path(path).is_some() {
         return true;
     }
-    let textures = crate::texture::TextureManager::new().with_addons_paths(addon_paths.to_vec());
+    let texture_manager = sim.texture_manager();
+    let textures = texture_manager.borrow();
     textures
         .resolve_path(&crate::texture::normalize_wow_path(path))
         .is_some()

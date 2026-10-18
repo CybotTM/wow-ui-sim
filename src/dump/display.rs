@@ -241,16 +241,13 @@ pub(crate) fn resolve_button_state_texture<'a>(
 /// Returns e.g. " (webp)", " (BLP)", or " (MISSING)".
 pub(crate) fn resolve_texture_format(wow_path: &str) -> String {
     use crate::texture::{TextureManager, normalize_wow_path};
-    use std::sync::OnceLock;
 
     if !dump_texture_formats_enabled() {
         return String::new();
     }
 
-    static TEX_MGR: OnceLock<TextureManager> = OnceLock::new();
-    let mgr = TEX_MGR.get_or_init(|| {
-        TextureManager::new().with_addons_paths(crate::paths::default_addons_paths())
-    });
+    // Dump diagnostics have no owning environment; never retain source decisions globally.
+    let mgr = TextureManager::new().with_addons_paths(crate::paths::default_addons_paths());
 
     let normalized = normalize_wow_path(wow_path);
     match mgr.resolve_path(&normalized) {

@@ -271,7 +271,7 @@ pub(super) fn run_screenshot(
     }
     log_screenshot_batch(&batch);
 
-    let img = render_screenshot_image(&batch, &glyph_atlas, command.width, command.height);
+    let img = render_screenshot_image(env, &batch, &glyph_atlas, command.width, command.height);
     let img = apply_optional_crop(img, command.crop.as_deref());
     let output = save_screenshot(&img, &command.output, command.png);
     eprintln!(
@@ -309,12 +309,14 @@ fn log_screenshot_batch(batch: &wow_ui_sim::render::QuadBatch) {
 }
 
 fn render_screenshot_image(
+    env: &WowLuaEnv,
     batch: &wow_ui_sim::render::QuadBatch,
     glyph_atlas: &wow_ui_sim::render::GlyphAtlas,
     width: u32,
     height: u32,
 ) -> image::RgbaImage {
-    let mut tex_mgr = create_texture_manager();
+    let texture_manager = create_texture_manager(env);
+    let mut tex_mgr = texture_manager.borrow_mut();
     let glyph_data = glyph_atlas.is_dirty().then(|| {
         let (data, size, _) = glyph_atlas.texture_data();
         (data, size)
@@ -344,7 +346,8 @@ pub(super) fn run_dump_texture(
         batch.quad_count(),
         batch.texture_requests.len()
     );
-    let mut tex_mgr = create_texture_manager();
+    let texture_manager = create_texture_manager(env);
+    let mut tex_mgr = texture_manager.borrow_mut();
     wow_ui_sim::dump_texture::dump_batch_textures(&batch, &mut tex_mgr, &output, filter.as_deref());
 }
 
@@ -435,13 +438,12 @@ fn save_screenshot(img: &image::RgbaImage, output: &Path, png: bool) -> PathBuf 
     })
 }
 
-fn create_texture_manager() -> wow_ui_sim::texture::TextureManager {
-    use wow_ui_sim::texture::TextureManager;
-
+fn create_texture_manager(env: &WowLuaEnv) -> Rc<RefCell<wow_ui_sim::texture::TextureManager>> {
     let config = wow_ui_sim::config::SimConfig::load();
-    let mut mgr =
-        TextureManager::new().with_addons_paths(wow_ui_sim::paths::default_addons_paths());
+    let texture_manager = { env.state().borrow().texture_manager() };
+    let mut mgr = texture_manager.borrow_mut();
     mgr.preload_talent_textures(790);
     mgr.preload_talent_panel_textures(&config.player_class);
-    mgr
+    drop(mgr);
+    texture_manager
 }

@@ -225,7 +225,8 @@ impl App {
         deadline: std::time::Instant,
         texture_requests: &mut TextureRequestTracker,
     ) -> BudgetedTextureLoadResult {
-        let mut tex_mgr = self.texture_manager.borrow_mut();
+        let texture_manager = self.env.borrow().state().borrow().texture_manager();
+        let mut tex_mgr = texture_manager.borrow_mut();
         let scan_start = std::time::Instant::now();
         texture_requests.register_batch(quads);
         let pending_paths = unresolved_texture_request_paths(quads);
@@ -251,7 +252,8 @@ impl App {
         let mut textures = Vec::new();
         let mut bc_textures = Vec::new();
         let mut telemetry = TextureLoadBatchTelemetry::default();
-        let mut tex_mgr = self.texture_manager.borrow_mut();
+        let texture_manager = self.env.borrow().state().borrow().texture_manager();
+        let mut tex_mgr = texture_manager.borrow_mut();
         let mut scan_elapsed = std::time::Duration::ZERO;
         let mut load_elapsed = std::time::Duration::ZERO;
         let mut budget_hit = false;

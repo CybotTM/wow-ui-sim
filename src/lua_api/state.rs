@@ -272,6 +272,7 @@ macro_rules! build_empty_sim_state {
             spell_flyouts: HashMap::new(),
             action_profession_quality: HashMap::new(),
             addon_base_paths: $collections.addon_base_paths,
+            texture_manager: Default::default(),
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
             suppress_runtime_on_load_depth: $runtime.suppress_runtime_on_load_depth,
             mouse_position: $runtime.mouse_position,

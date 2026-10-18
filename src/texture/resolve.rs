@@ -5,7 +5,7 @@ use std::{
     sync::Arc,
 };
 
-use crate::paths::find_case_insensitive;
+use super::source_index::DirectorySearch;
 
 use super::{TextureData, TextureManager, normalize_wow_path};
 
@@ -298,14 +298,16 @@ impl TextureManager {
 
     /// Resolve path with case-insensitive directory matching within a base directory.
     fn resolve_case_insensitive_in(&self, base: &Path, path: &str) -> Option<PathBuf> {
+        let mut index = self.source_index.borrow_mut();
+        let mut search = index.search();
         let components: Vec<&str> = path.split('/').collect();
         let file_name = components.last()?;
         let mut current = base.to_path_buf();
 
         for component in components.iter().take(components.len().saturating_sub(1)) {
-            current = find_case_insensitive_dir(&current, component)?;
+            current = find_case_insensitive_dir(&mut search, &current, component)?;
         }
-        find_case_insensitive_file(&current, file_name)
+        find_case_insensitive_file(&mut search, &current, file_name)
     }
 }
 
@@ -385,18 +387,29 @@ fn texture_extension_priority() -> &'static [&'static str] {
     ]
 }
 
-fn find_case_insensitive_file(dir: &Path, name: &str) -> Option<PathBuf> {
+fn find_case_insensitive_file(
+    search: &mut DirectorySearch<'_>,
+    dir: &Path,
+    name: &str,
+) -> Option<PathBuf> {
     for ext in texture_extension_priority() {
         let with_ext = format!("{name}.{ext}");
-        if let Some(entry) = find_case_insensitive(dir, &with_ext).filter(|entry| entry.is_file()) {
+        if let Some(entry) = search
+            .read_match(dir, &with_ext)
+            .filter(|entry| entry.is_file())
+        {
             return Some(entry);
         }
     }
-    find_case_insensitive(dir, name).filter(|entry| entry.is_file())
+    search.read_match(dir, name).filter(|entry| entry.is_file())
 }
 
-fn find_case_insensitive_dir(dir: &Path, name: &str) -> Option<PathBuf> {
-    let entry = find_case_insensitive(dir, name)?;
+fn find_case_insensitive_dir(
+    search: &mut DirectorySearch<'_>,
+    dir: &Path,
+    name: &str,
+) -> Option<PathBuf> {
+    let entry = search.read_match(dir, name)?;
     entry.is_dir().then_some(entry)
 }
 

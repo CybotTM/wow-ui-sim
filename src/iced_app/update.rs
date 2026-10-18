@@ -373,6 +373,9 @@ impl App {
     }
 
     fn handle_reload_ui(&mut self) {
+        self.texture_manager
+            .borrow_mut()
+            .invalidate_source_generation();
         self.log_messages.push("Reloading UI...".to_string());
         {
             let env = self.env.borrow();
