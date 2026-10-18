@@ -437,6 +437,14 @@ mod filesystem {
         set_roots(&app, second.path());
         let mut second_observer = DirectoryObserver::watch(&second.path().join("Proof/Media"));
         assign_texture(&app, "rootonly", true);
+        assert_eq!(
+            second_observer.drain_opens(),
+            1,
+            "root change replaces the shared source listing"
+        );
+        // Root changes take effect through a GUI reload. A repeated identical
+        // assignment need not replace an already-failed render request handle.
+        let _ = app.update(Message::ReloadUI);
         tick(&mut app);
         let primitive = draw_test_canvas(&app, size);
         assert!(
@@ -449,7 +457,7 @@ mod filesystem {
         assert_eq!(
             second_observer.drain_opens(),
             1,
-            "root change rebuilds one shared listing"
+            "root change plus GUI reload recovers the failed draw through one fresh listing"
         );
         assign_texture(&app, "late", false);
         tick(&mut app);
@@ -505,7 +513,7 @@ mod filesystem {
             "file creation after GUI reload recovers the previous CPU miss"
         );
         eprintln!(
-            "B2 directory_opens setter=1 queued_preload=0 warm_draws32=0 root_change=1 gui_reload=1 late_creation=1"
+            "B2 directory_opens setter=1 queued_preload=0 warm_draws32=0 root_listing=1 root_reload_draw=1 unchanged_reload=1 late_creation=1"
         );
     }
 }

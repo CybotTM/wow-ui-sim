@@ -36,6 +36,8 @@ Environment-owned source lookup reduces repeated filesystem enumeration in `SetT
 
 Final acceptance requires the requested gates on the final implementation revision; source-only inspection and zero-selected filters are not passing receipts. Native/live-GPU/real-addon acceptance is not supplied by these bounded fixtures.
 
+Observed App boundary: after a failed draw request, changing roots and repeating the identical `SetTexture` can return true while retaining that failed draw handle until GUI invalidation/reload. The contract requires source-listing and CPU-negative invalidation, not automatic pre-reload recovery of draw handles. App recovery fixtures therefore use `Message::ReloadUI` after changing roots, with separate root-listing and unchanged-directory reload oracles. This observation is not classified as a contract divergence.
+
 ## Out of scope
 
 - Decoded pixel, dimensions, crop and GPU-handle hot reload: source lookup freshness is not rendered-byte freshness.
