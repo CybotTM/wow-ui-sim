@@ -124,6 +124,72 @@ fn party_aura_queries_require_active_membership_without_deleting_stored_auras() 
 }
 
 #[cfg(feature = "client-retail")]
+#[test]
+fn missing_unit_aura_paths_preserve_results_errors_and_access_checks() {
+    use rilua::LuaApiMut;
+    use rilua::table_security::wrap_host_secret_number;
+    use wow_ui_sim::c_api::aura_duration::SpellAuraDuration;
+
+    let env = env();
+    let blessing = {
+        let mut sim = env.state().borrow_mut();
+        sim.target_auras.retain(|aura| aura.aura_instance_id == 2);
+        assert_eq!(sim.target_auras[0].name, "Expose Weakness");
+        let mut blessing = sim.target_auras[0].clone();
+        blessing.name = "Fixture Blessing".into();
+        blessing.spell_id = 990003;
+        blessing.aura_instance_id = 3;
+        blessing.is_helpful = true;
+        sim.target_auras.push(blessing.clone());
+        sim.player.buffs.push(blessing.clone());
+        sim.spell_aura_durations.insert(53338, SpellAuraDuration {
+            base_duration_seconds: 12.0,
+            max_carryover_seconds: 3.0,
+        });
+        blessing
+    };
+    {
+        let mut lua = env.rilua_mut();
+        rilua::table_security::register_table_security(&mut lua).unwrap();
+        let secret = wrap_host_secret_number(lua.state_mut(), 2.0);
+        lua.state_mut().push(secret);
+        lua.set_global_val("SecretAuraID", secret).unwrap();
+        lua.state_mut().pop();
+    }
+    env.exec(include_str!("fixtures/unit_exists_aura_paths.lua")).unwrap();
+    for present in [false, true, false, true] {
+        env.state().borrow_mut().current_target = present.then(target);
+        env.exec(&format!("CheckStoredTargetAuras({present})")).unwrap();
+        env.state().borrow_mut().unit_auras_restricted = true;
+        env.exec("CheckRestrictedTargetAccess()").unwrap();
+        env.state().borrow_mut().unit_auras_restricted = false;
+        let sim = env.state().borrow();
+        assert_eq!(sim.target_auras.len(), 2);
+        assert_eq!(sim.target_auras[0].name, "Expose Weakness");
+        assert_eq!(sim.target_auras[1].name, blessing.name);
+    }
+}
+
+#[test]
+fn focus_and_party_index_boundaries_follow_state_transitions() {
+    let env = env();
+    env.exec("assert(not UnitExists('focus'))").unwrap();
+    env.state().borrow_mut().current_focus = Some(target());
+    env.exec("assert(UnitExists('focus'))").unwrap();
+    env.state().borrow_mut().current_focus = None;
+    env.exec("assert(not UnitExists('focus'))").unwrap();
+    let members = env.state().borrow().party_members.len();
+    assert!(members > 1, "fixture needs distinct first and last members");
+    for active in [false, true, false] {
+        env.state().borrow_mut().party_group_active = active;
+        for index in [0, 1, members, members + 1] {
+            let exists: bool = env.eval(&format!("return UnitExists('party{index}')")).unwrap();
+            assert_eq!(exists, active && index > 0 && index <= members, "party{index}, active={active}");
+        }
+    }
+}
+
+#[cfg(feature = "client-retail")]
 fn consumer_env(relative: &str) -> WowLuaEnv {
     let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
     let (env, _) = crate::common::blizzard_addon_harness::build_blizzard_addon_closure_env(

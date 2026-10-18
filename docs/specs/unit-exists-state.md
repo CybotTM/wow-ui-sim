@@ -43,6 +43,8 @@ The checked items have regression assertions in the test file below and historic
 - `pet_existence_tracks_summon_and_dismiss_from_rust_state` and `vehicle_existence_tracks_player_occupancy_from_rust_state`: absent/present/absent transitions and player controls.
 - `target_aura_queries_follow_selection_and_clear`: existence, legacy/index/instance/slot absence and populated target controls.
 - `party_aura_queries_require_active_membership_without_deleting_stored_auras`: inactive/active/inactive query visibility and retained stored aura.
+- `focus_and_party_index_boundaries_follow_state_transitions`: focus absent/present/cleared and inactive/active/inactive party indices zero, first, last and one-past-end.
+- Retail-only `missing_unit_aura_paths_preserve_results_errors_and_access_checks`: retained helpful/harmful target fixtures through missing/present/missing/present transitions, raw-registered collector endpoints, exact missing-record boundaries, invalid/secret arguments and restricted tainted access. Player-only queries retain populated controls; private-store endpoints do not use the shared public collector. Execution status lives in the bounded proof report, not this test inventory.
 - Retail-only `compact_unit_frame_pet_visibility_tracks_summon_and_dismiss` and `blizzard_aura_util_visits_only_selected_target_debuffs`: cached Blizzard consumers through simulator state transitions.
 
 The first four have historical Retail and Forever passes; consumer tests have Retail passes only. This does not establish all-profile coverage.
@@ -50,7 +52,7 @@ The first four have historical Retail and Forever passes; consumer tests have Re
 ## Known gaps (current cycle)
 
 - [ ] Pet/vehicle vitals still return player vitals before checking existence in `lookup_unit_vitals`; health/power behavior is unchanged and inconsistent with absent pet/vehicle existence.
-- [ ] The six focused regressions do not directly cover focus transitions or missing-unit display-count/filter/duration/dispel transitions; broader collector effects are source-grounded, not a universal empty-result guarantee.
+- [ ] Dedicated focus and missing-unit aura transition regressions have been added; execution acceptance remains separate. Neither these nor the original six regressions establish native or all-profile parity.
 
 ## Out of scope
 

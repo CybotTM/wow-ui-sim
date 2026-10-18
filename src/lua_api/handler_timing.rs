@@ -188,6 +188,54 @@ mod tests {
     use rilua::LuaApiMut;
 
     #[test]
+    fn missing_source_and_invalid_registry_states_are_explicit() {
+        let env = crate::lua_api::WowLuaEnv::new().unwrap();
+        for (registry, callback, expected) in [
+            ("{}", "collectgarbage", "<unknown>"),
+            ("nil", "function() return 37 end", "<invalid-association>"),
+            ("42", "function() return 37 end", "<invalid-association>"),
+        ] {
+            let callback = env
+                .eval::<Val>(&format!(
+                    "debug.getregistry().__wow_timer_original_callbacks = {registry}; \
+                     CallbackUnderTest = {callback}; return CallbackUnderTest"
+                ))
+                .unwrap();
+            let captured = {
+                let mut lua = env.rilua_mut();
+                TimerCallbackSource::capture(lua.state_mut(), callback)
+            };
+            assert_eq!(
+                captured.format_timer_fields(23),
+                format!(" timer_id=23 callback_source={expected}")
+            );
+            let result: i64 = env
+                .eval(if registry == "{}" {
+                    "return CallbackUnderTest('count') > 0 and 37 or 0"
+                } else {
+                    "return CallbackUnderTest()"
+                })
+                .unwrap();
+            assert_eq!(result, 37, "capture must not change invocation");
+        }
+        let callback = env
+            .eval::<Val>(
+                "debug.getregistry().__wow_timer_original_callbacks = {}; \
+                 CallbackUnderTest = function() return 37 end; return CallbackUnderTest",
+            )
+            .unwrap();
+        let captured = {
+            let mut lua = env.rilua_mut();
+            TimerCallbackSource::capture(lua.state_mut(), callback)
+        };
+        assert_eq!(
+            captured.format_timer_fields(24),
+            " timer_id=24 callback_source==(string):1"
+        );
+        assert_eq!(env.eval::<i64>("return CallbackUnderTest()").unwrap(), 37);
+    }
+
+    #[test]
     fn invalid_callback_association_has_explicit_source_marker() {
         let env = crate::lua_api::WowLuaEnv::new().unwrap();
         let callback = env
