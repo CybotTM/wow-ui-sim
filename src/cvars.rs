@@ -220,7 +220,9 @@ fn parse_default_cvars() -> (HashMap<String, String>, HashMap<String, String>) {
         // Blizzard Wrath FrameXML/InterfaceOptionsFrame.lua:319 UI default.
         defaults.insert("targetoftargetmode".into(), "5".into());
         original_names.insert("targetoftargetmode".into(), "targetOfTargetMode".into());
-        // BaseMip's shipped range does not establish a default; do not guess.
+        // User-approved Wrath simulator policy (2026-10-17), not a native default.
+        defaults.insert("basemip".into(), "0".into());
+        original_names.insert("basemip".into(), "BaseMip".into());
     }
     insert_profile_cvars(&mut defaults, &mut original_names);
     remove_profile_cvars(&mut defaults, &mut original_names);

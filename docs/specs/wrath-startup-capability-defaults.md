@@ -38,11 +38,11 @@ Wrath-only legacy defaults live in `src/lua_api/workarounds/temporary/wrath_star
 - [x] The final rebased gate passes 48 named cases (36 controls + 12 queue cases). Original OnLoad:592 RED precedes the floor producer; the original empty-floor dropdown transition passes. Startup drops from the exact e90 baseline 22/30 to 15/21, with no new records. See the bounded proof below.
 - [x] The new debug-object count reaches original WorldMapFrame.lua:402 in a behavioral RED before its producer, under the approved empty/zero policy.
 - [ ] Populated debug objects and floor catalogs remain unmodeled; count defaults do not invent records. The newly unmasked floor count has an original OnLoad:592 RED before its producer.
-- [ ] BaseMip has no approved default; the explicit video fixture does not establish one. The generated BaseMip/gamma records remain attribution-only.
+- [x] BaseMip0 and simulated gamma0 now have explicit user approval; the modeled policies and original-consumer tests are tracked in [legacy video settings](wrath-legacy-video-settings.md). The earlier explicit video fixture remains capability evidence, not native-default proof.
 
 ## Out of scope
 
-Native parity, actual rendering/hardware support, populated debug tiles, real voice transport (supplied speaking state belongs to the linked loot/party support), BaseMip defaults, gamma operations, Blizzard/vendor edits and blanket missing-API handling.
+Native parity, actual rendering/hardware support, populated debug tiles, real voice transport (supplied speaking state belongs to the linked loot/party support), [modeled legacy video settings](wrath-legacy-video-settings.md), Blizzard/vendor edits and blanket missing-API handling.
 
 ## Original resolution branch
 
