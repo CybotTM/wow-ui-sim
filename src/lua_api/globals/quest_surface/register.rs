@@ -5,9 +5,13 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 use super::SurfaceFn;
+#[cfg(not(feature = "client-wrath"))]
+use super::handlers as legacy_log;
 use super::handlers::*;
 use super::legacy_globals::*;
 use super::task_quest::*;
+#[cfg(feature = "client-wrath")]
+use super::wrath_quest_log as legacy_log;
 use crate::lua_api::globals::real::quest_dialog::*;
 
 pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
@@ -112,9 +116,9 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
     ("GetQuestLogIndexByID", get_quest_log_index_by_id),
     ("GetQuestLogPushable", get_quest_log_pushable),
     ("GetQuestLogRequiredMoney", get_required_money),
-    ("GetQuestLogSelection", get_quest_log_selection),
+    ("GetQuestLogSelection", legacy_log::get_quest_log_selection),
     ("GetQuestLogSelectedID", get_quest_log_selected_id),
-    ("GetQuestLogTitle", get_quest_log_title),
+    ("GetQuestLogTitle", legacy_log::get_quest_log_title),
     ("GetQuestUiMapID", get_quest_ui_map_id),
     ("GetNumQuestLogEntries", get_num_quest_log_entries),
     ("GetQuestLink", get_quest_link),
@@ -182,7 +186,7 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
         quest_poi_get_quest_id_by_visible_index,
     ),
     ("RemoveQuestWatch", noop),
-    ("SelectQuestLogEntry", select_quest_log_entry),
+    ("SelectQuestLogEntry", legacy_log::select_quest_log_entry),
     ("GetQuestLogCompletionText", get_quest_log_completion_text),
     ("GetQuestLogCriteriaSpell", get_quest_log_criteria_spell),
     ("GetQuestProgressBarPercent", get_quest_progress_bar_percent),
