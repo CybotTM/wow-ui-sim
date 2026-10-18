@@ -58,7 +58,7 @@ fn saturated_startup_carries_ten_pass_groups_and_sixteen_ticks_across_updates() 
             expected_trace.push(format!("U{expected_updates}"));
         }
         expected_trace.push(format!("T{turn}"));
-        let (generations, updates, trace): (usize, usize, String) = app
+        let (generations, updates, trace): (i32, i32, String) = app
             .env
             .borrow()
             .eval("return generations, updates, table.concat(trace, ',')")
@@ -108,7 +108,7 @@ fn empty_startup_groups_short_circuit_and_keep_fast_subscription_without_timers(
             Some(Duration::from_micros(16_667))
         );
         tick(&mut app);
-        let updates: usize = app.env.borrow().eval("return updates").unwrap();
+        let updates: i32 = app.env.borrow().eval("return updates").unwrap();
         assert_eq!(updates, turn - 1, "empty timer group at turn {turn}");
         assert_eq!(app.gui_startup_complete.get(), turn == 17);
         if turn < 17 {
@@ -378,9 +378,17 @@ mod filesystem {
         );
         assign_texture(&app, "late", false);
         let _ = draw_test_canvas(&app, size);
-        // Remove the failed source decision without requiring filesystem freshness.
-        // Successful decoded-byte hot reload is intentionally outside F1's contract.
+        assert_eq!(second_observer.drain_opens(), 0);
+        // An unchanged directory must be enumerated again after the GUI reload;
+        // creating a file first would only prove automatic filesystem freshness.
         let _ = app.update(Message::ReloadUI);
+        assign_texture(&app, "rootonly", true);
+        let _ = draw_test_canvas(&app, size);
+        assert_eq!(
+            second_observer.drain_opens(),
+            1,
+            "GUI reload must discard the shared source listing even without a filesystem change"
+        );
         write_texture(second.path(), "Late", [7, 8, 9, 255]);
         assign_texture(&app, "late", true);
         let primitive = draw_test_canvas(&app, size);
@@ -394,10 +402,10 @@ mod filesystem {
         assert_eq!(
             second_observer.drain_opens(),
             1,
-            "GUI reload invalidates actual App source listing"
+            "file creation after GUI reload recovers the previous CPU miss"
         );
         eprintln!(
-            "B2 directory_opens setter=1 queued_preload=0 warm_draws32=0 root_change=1 gui_reload=1"
+            "B2 directory_opens setter=1 queued_preload=0 warm_draws32=0 root_change=1 gui_reload=1 late_creation=1"
         );
     }
 }
