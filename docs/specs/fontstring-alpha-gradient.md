@@ -45,6 +45,14 @@ Both gradual cases use 35 markup-stripped scalars, including Unicode, spaces and
 
 Proof receipts: `/home/osso/.local/state/wow-ui-sim/handoff/t4-wrath-callback-tests/` (`wrath-tests.log`, `mists-tests-corrected.log`, `proof-ledger.json`). Wrath passed at `5671220c1`; Mists passed at `f7674e2e0` after the harness-only prerequisite correction. No simulator or vendor behavior changes.
 
+## Combined-tree callback proof
+
+After rebasing onto master `f452d5a4b`, all five bounded gates passed on revision `8debcce7c375ea24deaf795bbafe4d5506b54b4b`, tree `fadd70738ec003f5ba3b092149101ee6d99b7eb5`. Wrath selected both named callback cases: **2 passed, 0 failed, 8241 filtered**; Mists selected both named characterization cases: **2 passed, 0 failed, 8354 filtered**. No zero-selection run or harness invalidation occurred.
+
+Both `cargo check --locked -j1 --no-default-features --features sound,gui,casc,client-<profile>` gates (Wrath and Mists, default check targets) and workspace `cargo fmt --all -- --check` exited 0. The existing `UnitRole::{Tank,Healer,Damage}` dead-code warning appeared in both tests and checks, without suppression. This proves the rebased callback initialization/compilation boundary, not the excluded native, scheduler, startup or broader acceptance boundaries.
+
+Complete commands, output, toolchain and receipts: `/home/osso/.local/state/wow-ui-sim/handoff/t4-combined-rerun/`; appended records: `/home/osso/.local/state/wow-ui-sim/handoff/t4-wrath-callback-tests/proof-ledger.json`. Each Cargo gate ran asynchronously in a user systemd unit with `MemoryMax=9G`, slot-0 and admission `ADD`. Tests used byte-exact isolated copies of current persisted CVars; original stat/hash stayed unchanged before/after every gate. This documentation-only follow-up does not invalidate that proof.
+
 ## Out of scope
 
 Native thresholds, malformed/nonfinite input redesign, ScrollBox edge fades, vendor edits, quest acceptance effects, automatic Mists branch-selection proof and other-profile acceptance.
