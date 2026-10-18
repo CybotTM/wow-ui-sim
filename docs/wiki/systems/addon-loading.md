@@ -131,8 +131,7 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 2. Load Blizzard non-LoD roots, explicit LoD startup roots, and their dependencies in order; every selected addon loads its full TOC, with no bootstrap-only pass
 3. Load enabled third-party startup addons alphabetically/dependency-sorted, overlaying `ServerSnapshotDB` addon states when present; third-party LoD addons remain unloaded unless explicitly requested
 4. Apply post-load workarounds, including idempotent reconciliation of replacement `_G.SettingsPanel`/`Settings` surfaces before later category registration/opening (plus UpdateMicroButtons and WorldMapFrame scroll initialization)
-5. Fire startup events: `ADDON_LOADED("WoWUISim")`, `VARIABLES_LOADED`, `PLAYER_LOGIN`, `PLAYER_ENTERING_WORLD(true, false)`, `UPDATE_BINDINGS`, `DISPLAY_SIZE_CHANGED`, `UI_SCALE_CHANGED`
-6. Launch GUI, dump frame tree, or render screenshot
+5. Fire startup events; order and GUI-versus-headless timing are owned by [Startup Event Sequence](../../event-system.md#startup-event-sequence). The GUI starts first and advances startup from app updates after canvas observation; headless commands (dump frame tree, screenshot) fire the sequence before running.
 
 ## Error Handling
 
