@@ -21,7 +21,7 @@ Wrath's legacy gamma uses simulator state in `src/lua_api/globals/real/legacy_ga
 - `src/cvars.rs`: Wrath-only BaseMip entry in the existing default registry.
 - `src/lua_api/globals/real/legacy_gamma.rs`: Wrath-only modeled getter/setter registration.
 - `src/lua_api/state/sim_state.rs` and `state.rs`: public scalar and neutral initialization.
-- `src/lua_api/globals/real/wrath_startup_queries.rs`: existing Wrath registration route, preceding shared compatibility bootstrap.
+- `src/lua_api/globals/real/wrath_startup_queries.rs`: existing Wrath registration route; old constant compatibility getter removed.
 
 ## Tests asserting this spec
 

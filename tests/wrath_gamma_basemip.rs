@@ -29,7 +29,12 @@ fn wrath_gamma_initial_state_is_neutral() {
     let env = env();
     run(&env, "assert(GetGamma() == 0, 'approved neutral initial gamma')");
     env.state().borrow_mut().legacy_gamma = -0.25;
-    run(&env, "assert(GetGamma() == -0.25); SetGamma(0.25)");
+    run(
+        &env,
+        "local cvarGamma = GetCVar('Gamma'); \
+         assert(GetGamma() == -0.25); SetGamma(0.25); \
+         assert(GetCVar('Gamma') == cvarGamma)",
+    );
     assert_eq!(env.state().borrow().legacy_gamma, 0.25);
     let other = support::env();
     run(&other, "assert(GetGamma() == 0)");
