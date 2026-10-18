@@ -258,9 +258,8 @@ impl App {
 }
 
 fn install_repl_print_capture(env: &WowLuaEnv) {
-    // Blizzard_PrintHandler overwrites the Rust `print` during addon load,
-    // so console_output is never populated. This wrapper captures print
-    // calls at the Lua level regardless of which print is active.
+    // Capture print calls regardless of which print implementation is active,
+    // while preserving the previous print's normal side effects.
     let _ = env.exec(
         r##"
         __repl_prev_print = print
@@ -286,19 +285,8 @@ fn collect_lua_command_output(env: &WowLuaEnv) -> String {
         .eval(r#"return table.concat(__repl_captured or {}, "\n")"#)
         .unwrap_or_default();
 
-    let mut state = env.state().borrow_mut();
-    let console = state.console_output.join("\n");
-    state.console_output.clear();
-    combine_console_and_captured(console, captured)
-}
-
-fn combine_console_and_captured(console: String, captured: String) -> String {
-    match (console.is_empty(), captured.is_empty()) {
-        (true, true) => String::new(),
-        (false, true) => console,
-        (true, false) => captured,
-        (false, false) => format!("{}\n{}", console, captured),
-    }
+    env.state().borrow_mut().console_output.clear();
+    captured
 }
 
 fn drain_lua_commands(rx: Option<&mpsc::Receiver<LuaCommand>>) -> Vec<LuaCommand> {
@@ -308,7 +296,7 @@ fn drain_lua_commands(rx: Option<&mpsc::Receiver<LuaCommand>>) -> Vec<LuaCommand
 
 #[cfg(test)]
 mod tests {
-    use super::{App, combine_console_and_captured, drain_lua_commands};
+    use super::{App, drain_lua_commands};
     use crate::iced_app::app::AppInit;
     use crate::lua_api::WowLuaEnv;
     use crate::lua_server::LuaCommand;
@@ -384,22 +372,6 @@ mod tests {
             let decoded = image::load_from_memory_with_format(&bytes, format).unwrap();
             assert_eq!((decoded.width(), decoded.height()), (7, 5));
         }
-    }
-
-    #[test]
-    fn combine_console_and_captured_prefers_newline_when_both_present() {
-        assert_eq!(
-            combine_console_and_captured("console".to_string(), "captured".to_string()),
-            "console\ncaptured"
-        );
-        assert_eq!(
-            combine_console_and_captured(String::new(), "captured".to_string()),
-            "captured"
-        );
-        assert_eq!(
-            combine_console_and_captured("console".to_string(), String::new()),
-            "console"
-        );
     }
 
     #[test]
