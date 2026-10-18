@@ -2,9 +2,9 @@
 
 [Source ownership and freshness](systems/texture-source-resolution-cache.md) links the [contract](../specs/texture-source-resolution-cache.md), calibrated directory-open fixture and cheap frame-load negative-cache requirement. Historical unconditional-negative behavior is replaced by stamp validation, not unconditional per-frame rescanning. GREEN/preservation pending; no real-addon readiness claim.
 
-## [2026-10-18] correction | Timer diagnostic lifetime
+## [2026-10-18] correction | Timer diagnostic lifetime and association validity
 
-Corrected [timer ownership](systems/lua-api.md#callback-timing-provenance) and [contract](../specs/timer-callback-provenance.md): `kv` associations avoid diagnostic roots under rilua's non-ephemeron collector. Added subprocess RED-first completed-callback/handle-cycle regression, isolated from the pre-existing container backing map's independent callback edge. Private `handoff/timer-provenance/fix-report.md` owns new revisions and receipts.
+Corrected [timer ownership](systems/lua-api.md#callback-timing-provenance) and [contract](../specs/timer-callback-provenance.md): `kv` associations avoid diagnostic roots under rilua's non-ephemeron collector. Added subprocess RED-first completed-callback/handle-cycle regression, isolated from the pre-existing container backing map's independent callback edge. Resolver regressions distinguish authoritative direct-callback source from explicit `<invalid-association>` diagnostics without changing invocation. Private `handoff/timer-provenance/fix-report.md` owns new revisions and receipts.
 
 ## [2026-10-18] source | Timer callback diagnostic provenance
 

@@ -69,19 +69,25 @@ pub(crate) struct TimerCallbackSource {
 impl TimerCallbackSource {
     pub(crate) fn capture(state: &mut LuaState, callback: Val) -> Self {
         let originals = super::methods::registry_get(state, "__wow_timer_original_callbacks");
-        let original = match originals {
+        let association = match originals {
             Val::Table(table) => state
                 .gc
                 .tables
                 .get(table)
-                .map(|table| table.get(callback, &state.gc.string_arena))
-                .filter(|value| matches!(value, Val::Function(_)))
-                .unwrap_or(callback),
-            _ => callback,
+                .map(|table| table.get(callback, &state.gc.string_arena)),
+            _ => None,
+        };
+        let callback_source = match association {
+            // Wrappers are associated before registration whenever diagnostics
+            // are enabled. An absent key denotes a direct callback (TimedSignalMap).
+            Some(Val::Nil) => function_source_label(state, callback),
+            Some(original @ Val::Function(_)) => function_source_label(state, original),
+            // Corrupt association/table state must not masquerade as direct registration.
+            _ => Some("<invalid-association>".to_owned()),
         };
         Self {
             source: function_source_label(state, callback),
-            callback_source: function_source_label(state, original),
+            callback_source,
         }
     }
 
@@ -179,6 +185,41 @@ fn frame_label<'a>(frame_name: Option<&'a str>, widget_id: u64) -> Cow<'a, str> 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rilua::LuaApiMut;
+
+    #[test]
+    fn invalid_callback_association_has_explicit_source_marker() {
+        let env = crate::lua_api::WowLuaEnv::new().unwrap();
+        let callback = env
+            .eval::<Val>(
+                r#"
+            local callback = function() end
+            debug.getregistry().__wow_timer_original_callbacks = { [callback] = 42 }
+            return callback
+            "#,
+            )
+            .unwrap();
+        let mut lua = env.rilua_mut();
+        let captured = TimerCallbackSource::capture(lua.state_mut(), callback);
+        assert_eq!(
+            captured.format_timer_fields(17),
+            " timer_id=17 callback_source=<invalid-association>"
+        );
+    }
+
+    #[test]
+    fn direct_callback_without_association_uses_its_own_source() {
+        let env = crate::lua_api::WowLuaEnv::new().unwrap();
+        let callback = env
+            .eval::<Val>(
+                "debug.getregistry().__wow_timer_original_callbacks = {}; return function() end",
+            )
+            .unwrap();
+        let mut lua = env.rilua_mut();
+        let captured = TimerCallbackSource::capture(lua.state_mut(), callback);
+        assert!(captured.source.is_some());
+        assert_eq!(captured.callback_source, captured.source);
+    }
 
     #[test]
     fn parse_min_duration_ms_disables_logging_when_unset() {
