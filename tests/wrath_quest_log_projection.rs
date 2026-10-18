@@ -100,6 +100,12 @@ fn seed_env(order: &[usize]) -> WowLuaEnv {
         QuestInfoFrame = CreateFrame("Frame", "QuestInfoFrame")
         QuestInfoFrame.questLog = true
         QuestInfoTitleHeader = QuestInfoFrame:CreateFontString("QuestInfoTitleHeader", "ARTWORK")
+        LogNotifications = 0
+        local observer = CreateFrame("Frame")
+        for _, event in ipairs({"QUEST_ACCEPTED", "QUEST_REMOVED", "QUEST_LOG_UPDATE", "QUEST_WATCH_UPDATE", "QUEST_DETAIL"}) do
+            observer:RegisterEvent(event)
+        end
+        observer:SetScript("OnEvent", function() LogNotifications = LogNotifications + 1 end)
         QuestDifficultyColors = {}
         for _, key in ipairs({"impossible", "verydifficult", "difficult", "standard", "trivial", "header"}) do
             QuestDifficultyColors[key] = {}
@@ -117,6 +123,11 @@ fn seed_env(order: &[usize]) -> WowLuaEnv {
 }
 
 fn preserved(env: &WowLuaEnv) -> String {
+    let notifications: i32 = env.eval("return LogNotifications").unwrap();
+    assert_eq!(
+        notifications, 0,
+        "read seam must not dispatch notifications"
+    );
     let sim = env.state().borrow();
     let mut log = sim.quest_log_entries.clone();
     // Selection may invalidate dialog readiness, but must not mutate membership/data.
