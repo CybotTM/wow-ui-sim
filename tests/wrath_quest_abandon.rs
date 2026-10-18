@@ -261,6 +261,57 @@ fn original_button_cancel_then_accept_marked_target() {
 }
 
 #[test]
+fn invalid_stale_and_consumed_targets_do_not_remove_other_rows() {
+    let env = seed_env();
+    let before = snapshot(&env);
+    exec(
+        &env,
+        "SelectQuestLogEntry(1); SetAbandonQuest(); SelectQuestLogEntry(99); SetAbandonQuest(); AbandonQuest()",
+    );
+    assert!(env.state().borrow().abandon_quest_id.is_none());
+    assert_eq!(snapshot(&env), before);
+    env.state().borrow_mut().abandon_quest_id = Some(999999);
+    exec(&env, "AbandonQuest()");
+    assert!(env.state().borrow().abandon_quest_id.is_none());
+    assert_eq!(snapshot(&env), before);
+    exec(
+        &env,
+        "SelectQuestLogEntry(2); SetAbandonQuest(); AbandonQuest(); AbandonQuest()",
+    );
+    assert_eq!(env.state().borrow().quest_log, vec![990101]);
+    exec(
+        &env,
+        "assert(#AbandonEvents == 1 and AbandonEvents[1][1] == 'QUEST_LOG_UPDATE')",
+    );
+}
+
+#[test]
+fn confirmation_clears_only_matching_pending_offer_and_selection() {
+    let env = seed_env();
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.pending_quest_offer = Some(sim.quest_log_entries.entries[1].clone());
+    }
+    exec(
+        &env,
+        "SelectQuestLogEntry(1); SetAbandonQuest(); AbandonQuest()",
+    );
+    {
+        let sim = env.state().borrow();
+        assert_eq!(sim.pending_quest_offer.as_ref().unwrap().quest_id, 990202);
+        assert!(sim.selected_quest_log_id.is_none());
+    }
+    exec(&env, "SelectQuestLogEntry(1); SetAbandonQuest()");
+    assert!(env.state().borrow().pending_quest_offer.is_some());
+    exec(&env, "AbandonQuest()");
+    let sim = env.state().borrow();
+    assert!(sim.pending_quest_offer.is_none());
+    assert!(sim.quest_log.is_empty());
+    assert!(sim.quest_log_entries.entries.is_empty());
+    assert!(sim.selected_quest_log_id.is_none());
+}
+
+#[test]
 fn original_selection_zero_is_nondestructive() {
     let env = seed_env();
     let before = snapshot(&env);
