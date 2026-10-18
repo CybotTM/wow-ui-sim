@@ -4,7 +4,7 @@
 
 ## [2026-10-18] source | Timer callback diagnostic provenance
 
-[Timer system](systems/lua-api.md#callback-timing-provenance) links the [record contract](../specs/timer-callback-provenance.md): opt-in pre-call entries and original-source/ID correlation without changing callback invocation. Behavioral RED observed; GREEN pending.
+[Timer system](systems/lua-api.md#callback-timing-provenance) links the [record contract](../specs/timer-callback-provenance.md): opt-in pre-call entries and original-source/ID correlation without changing callback invocation. Behavioral RED→GREEN: 32 bounded cases per Retail/Forever profile; [receipt](../specs/timer-callback-provenance.md#bounded-proof--2026-10-18) separates exact pre-rebase source, clean rebase, checks and remaining proof limits.
 
 ## [2026-10-17] evidence | Classic health knowledge
 

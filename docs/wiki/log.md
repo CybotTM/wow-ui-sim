@@ -4,7 +4,7 @@
 
 ## [2026-10-18] source | Timer callback diagnostic provenance
 
-Updated [timer system](systems/lua-api.md#callback-timing-provenance), [diagnostic contract](../specs/timer-callback-provenance.md) and Performance guidance. Original callback source is captured at registration, entries precede calls and returns add correlated IDs; RED observed, bounded Retail/Forever GREEN pending.
+Updated [timer system](systems/lua-api.md#callback-timing-provenance), [diagnostic contract](../specs/timer-callback-provenance.md) and Performance guidance. Original callback source is captured at registration, entries precede calls and returns add correlated IDs. [Bounded receipt](../specs/timer-callback-provenance.md#bounded-proof--2026-10-18) records observed RED→GREEN, 32 PASS per Retail/Forever profile, profile checks, import-warning cleanup and unchanged owning-source hashes after rebase; no full-startup/native/full-suite claim.
 
 ## [2026-10-17] investigation | Wrath video policy and decimal Slider root
 
