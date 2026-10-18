@@ -1,3 +1,7 @@
+## [2026-10-17] implementation | Classic R20 health-knowledge producer
+
+[Investigation](investigations/classic-startup-producer-cascades.md#r20-approved-health-knowledge-producer) records the approved per-unit state query and unchanged vendor initialization ordering; [contract](../specs/should-know-unit-health.md) owns scope and evidence. Both-profile original-consumer RED observed; GREEN/startups pending.
+
 ## [2026-10-16] source | Retail 12.1.5.70448 isolated update
 
 [Client profile update](systems/client-profiles.md#retail-70448-source-and-producer-update--october-16-2026) records exact installed/source identity, 4,026-file private cache, 12.1.5 public epoch, original-consumer RED roots and separately scoped shipped Retail GlobalStrings. Shared Retail cache and other profiles are preserved. Bounded post-rebase acceptance: startup `[]`; requested preservation265/265; epoch unit89/integration50; atlas/aura23; default check and formatting pass. Seven existing unused-helper warnings remain; native/all-profile/full-suite and 65 encrypted string rows remain outside this proof.

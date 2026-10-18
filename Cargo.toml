@@ -376,3 +376,7 @@ required-features = ["client-retail"]
 [[test]]
 name = "classic_r20_health"
 path = "tests/classic_startup_b.rs"
+
+[[test]]
+name = "should_know_unit_health"
+path = "tests/should_know_unit_health.rs"

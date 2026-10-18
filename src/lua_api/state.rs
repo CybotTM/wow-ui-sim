@@ -406,6 +406,7 @@ macro_rules! build_empty_sim_state {
             nearest_party_member_token: None,
             #[cfg(feature = "retail-12-0-5")]
             aura_entry_ids: crate::c_api::aura_entry_ids::AuraEntryIds::default(),
+            unit_health_knowledge: HashMap::new(),
             player: PlayerState::seeded(),
             war_mode: crate::c_api::c_pvp::war_mode::WarModeState::default(),
             player_xp: PlayerXpState::default(),

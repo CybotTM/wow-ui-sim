@@ -11,6 +11,7 @@ const ERA_COMPAT_BOOTSTRAP_LUA: &str = include_str!("compat_bootstrap.lua");
 pub fn init(lua: &mut rilua::Lua) -> crate::Result<()> {
     crate::c_api::classic_startup_data::register(lua)?;
     crate::lua_api::globals::real::legacy_skills::register_all(lua)?;
+    crate::lua_api::globals::real::unit_health_knowledge::register(lua)?;
     crate::lua_api::workarounds::register_legacy_quest_timers(lua)?;
     lua.exec(ERA_COMPAT_BOOTSTRAP_LUA)?;
     Ok(())

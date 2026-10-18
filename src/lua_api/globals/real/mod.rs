@@ -100,6 +100,8 @@ pub mod template_queries;
 pub mod timerunning;
 pub mod totems;
 pub mod ui_widget_container;
+#[cfg(any(feature = "client-era", feature = "client-anniversary"))]
+pub(crate) mod unit_health_knowledge;
 pub mod unit_interaction;
 #[cfg(feature = "aura-containers")]
 pub mod unit_relationships;

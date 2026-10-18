@@ -552,7 +552,8 @@ fn classic_b_r20_original_unit_load_and_feedback_use_empty_health_knowledge() {
         for _, unit in ipairs({'player', 'pet', 'target', 'party1'}) do
             assert(ShouldKnowUnitHealth(unit) == false)
         end
-        assert(PlayerFrame.feedbackText and PetFrame.feedbackText)
+        assert(PlayerFrame.feedbackText == PlayerHitIndicator)
+        assert(PetFrame.feedbackText == PetHitIndicator)
         local health = PlayerFrame_GetHealthBar()
         health.forceShow = true
         SetCVar('statusTextDisplay', 'NUMERIC')
@@ -563,6 +564,21 @@ fn classic_b_r20_original_unit_load_and_feedback_use_empty_health_knowledge() {
         assert(not text:find('250', 1, true) and not text:find('500', 1, true), text)
         CombatFeedback_OnUpdate(PlayerFrame, .05)
         CombatFeedback_OnUpdate(PetFrame, .05)
+    "#,
+    );
+    env.state()
+        .borrow_mut()
+        .unit_health_knowledge
+        .insert("player".into(), true);
+    run_targeted(
+        &env,
+        r#"
+        UnitFrameHealthBar_Update(PlayerFrame_GetHealthBar(), 'player')
+        local health = PlayerFrame_GetHealthBar()
+        assert(not health.showPercentage)
+        local text = assert(health.TextString:GetText())
+        assert(text:find('250', 1, true) and text:find('500', 1, true), text)
+        assert(not text:find('%', 1, true), text)
     "#,
     );
 }

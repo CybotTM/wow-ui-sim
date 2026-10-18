@@ -502,6 +502,8 @@ pub struct SimState {
     /// Host-provided identifiers for the next encounter/M+/PvP entry.
     #[cfg(feature = "retail-12-0-5")]
     pub aura_entry_ids: crate::c_api::aura_entry_ids::AuraEntryIds,
+    /// Explicit exact-health knowledge by unit token; absent entries are unknown.
+    pub unit_health_knowledge: HashMap<String, bool>,
     pub player: PlayerState,
     pub war_mode: crate::c_api::c_pvp::war_mode::WarModeState,
     pub player_xp: PlayerXpState,
