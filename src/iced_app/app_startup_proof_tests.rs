@@ -381,7 +381,19 @@ mod filesystem {
         }
         assign_texture(&app, "rootonly", false);
         // The App's renderer has observed a CPU miss before the roots change.
-        let _ = draw_test_canvas(&app, size);
+        let missing = draw_test_canvas(&app, size);
+        assert!(
+            missing
+                .textures
+                .iter()
+                .all(|texture| !texture.path.ends_with("/rootonly"))
+        );
+        assert!(
+            app.texture_manager
+                .borrow()
+                .get("interface/addons/proof/media/rootonly")
+                .is_none()
+        );
         set_roots(&app, second.path());
         let mut second_observer = DirectoryObserver::watch(&second.path().join("Proof/Media"));
         assign_texture(&app, "rootonly", true);
@@ -399,8 +411,21 @@ mod filesystem {
             "root change rebuilds one shared listing"
         );
         assign_texture(&app, "late", false);
-        let _ = draw_test_canvas(&app, size);
-        assert_eq!(second_observer.drain_opens(), 0);
+        let missing = draw_test_canvas(&app, size);
+        assert!(
+            missing
+                .textures
+                .iter()
+                .all(|texture| !texture.path.ends_with("/late"))
+        );
+        assert!(
+            app.texture_manager
+                .borrow()
+                .get("interface/addons/proof/media/late")
+                .is_none()
+        );
+        // Missing-name freshness can enumerate; drain it before the unchanged reload oracle.
+        let _ = second_observer.drain_opens();
         // An unchanged directory must be enumerated again after the GUI reload;
         // creating a file first would only prove automatic filesystem freshness.
         let _ = app.update(Message::ReloadUI);
