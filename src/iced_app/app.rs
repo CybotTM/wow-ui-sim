@@ -855,3 +855,7 @@ impl Drop for App {
 #[cfg(test)]
 #[path = "app_tests.rs"]
 mod app_tests;
+
+#[cfg(test)]
+#[path = "app_startup_proof_tests.rs"]
+mod app_startup_proof_tests;

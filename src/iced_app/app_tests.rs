@@ -10,7 +10,7 @@ fn build_env() -> Rc<RefCell<WowLuaEnv>> {
     ))
 }
 
-fn build_test_app(screen_kind: ScreenKind) -> App {
+pub(super) fn build_test_app(screen_kind: ScreenKind) -> App {
     let env = build_env();
     env.borrow().set_screen_mode(screen_kind);
     env.borrow().set_screen_size(800.0, 600.0);
@@ -36,7 +36,7 @@ fn build_test_app(screen_kind: ScreenKind) -> App {
     })
 }
 
-fn draw_test_canvas(app: &App, size: Size) -> crate::render::WowUiPrimitive {
+pub(super) fn draw_test_canvas(app: &App, size: Size) -> crate::render::WowUiPrimitive {
     iced::widget::shader::Program::draw(
         &app,
         &(),
