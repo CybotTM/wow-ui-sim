@@ -6,7 +6,7 @@ fn wowforever_texture_metatable_loads_unit_frame_util() {
     let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
     let source = wow_ui_sim::blizzard_ui_sync::default_cache_addons_path()
         .unwrap()
-        .join("Blizzard_UnitFrame/Mainline/UnitFrameUtil.lua");
+        .join("Blizzard_UnitFrame/Shared/UnitFrameUtil.lua");
     env.exec(&std::fs::read_to_string(source).unwrap()).unwrap();
     env.exec(
         r#"
