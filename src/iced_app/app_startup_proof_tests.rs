@@ -420,6 +420,15 @@ mod filesystem {
                 .all(|texture| !texture.path.ends_with("/rootonly"))
         );
         assert!(
+            missing
+                .strata_batches
+                .iter()
+                .flatten()
+                .flat_map(|batch| &batch.texture_requests)
+                .any(|texture| texture.path.ends_with("/rootonly")),
+            "the failed source must have reached the actual App draw request"
+        );
+        assert!(
             app.texture_manager
                 .borrow()
                 .get("interface/addons/proof/media/rootonly")
@@ -450,6 +459,15 @@ mod filesystem {
                 .textures
                 .iter()
                 .all(|texture| !texture.path.ends_with("/late"))
+        );
+        assert!(
+            missing
+                .strata_batches
+                .iter()
+                .flatten()
+                .flat_map(|batch| &batch.texture_requests)
+                .any(|texture| texture.path.ends_with("/late")),
+            "the pre-reload miss must reach the actual App draw request"
         );
         assert!(
             app.texture_manager
