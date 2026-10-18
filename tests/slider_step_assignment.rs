@@ -33,6 +33,25 @@ fn run_lua(body: &str) {
 }
 
 #[test]
+fn slider_step_assignment_preserves_exact_zero_on_signed_decimal_lattice() {
+    run_lua(
+        r#"
+        local slider = CreateFrame('Slider')
+        slider:SetMinMaxValues(-0.5, 0.5)
+        slider:SetValueStep(0.1)
+        slider:SetValue(0.5)
+        local events = observe(slider)
+
+        slider:SetValue(0)
+        expect_event(slider, events, 1, 0, false)
+        slider:SetValue(0)
+        assert(slider:GetValue() == 0 and #events == 1,
+            'exact zero reassignment must remain silent')
+        "#,
+    );
+}
+
+#[test]
 fn slider_step_assignment_chooses_nearest_lattice_or_max_with_upward_ties() {
     run_lua(
         r#"
