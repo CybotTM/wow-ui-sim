@@ -47,7 +47,7 @@ This is an explicitly approved simulator operation, not native identifier-domain
 
 ### SS-P1 numeric-secret cooldown/LoC selectors (bounded Retail proof)
 
-Approved bounded slice with observed Retail RED before producer and seven-case GREEN afterward. No deployment/native-parity claim; PTR-specific consumer execution is not established.
+Approved bounded slice with observed Retail RED before producer and seven-case GREEN afterward. [Bounded PTR preservation](#ss-p1-ptr-preservation--2026-10-18) now supplies separate original-PTR consumer execution. No deployment/native-parity claim.
 
 - [ ] Under the existing mainline `retail-12-0-5` gate, accept authentic numeric-secret selectors in `C_Spell.GetSpellCooldown`, `GetSpellChargeDuration`, `GetSpellCooldownDuration`, `GetSpellLossOfControlCooldownInfo`, and `GetSpellLossOfControlCooldownDuration`, for secure and tainted callers. Consume the selector only inside the host lookup; leave the wrapper secret, caller taint intact, and existing action/book guards unchanged.
 - [ ] Preserve current producer policies, independent of selector secrecy. With `cooldowns_restricted` false/true/false, cooldown and LoC tables remain public; their timing/rate numbers follow that restriction input and retain configured payloads. Existing flags remain public. Charge/cooldown/active-LoC duration objects and their timing remain nonsecret with unchanged rate semantics. The already-integrated `GetSpellCharges` precedent is not expanded into new output exposure.
@@ -56,6 +56,16 @@ Approved bounded slice with observed Retail RED before producer and seven-case G
 - [ ] Execute the original cached Retail `Blizzard_ActionBar/Shared/ActionButton.lua` defaults/update/apply block unchanged against actual APIs and Cooldown widgets. Its `ActionButton_UpdateCooldown` calls cooldown before charges before LoC. Assert all three configured widget timings/rates, then LoC replacement clears normal/charge timing while retaining LoC timing. Cover unrestricted secure/tainted callers and restricted secure callers; preserve the separate restricted-tainted widget setter boundary rather than authorizing it here.
 
 Observed bounded behavioral coverage: `tests/cooldown_restriction.rs::ssp1` (seven tests; five endpoint cases, empty-result controls, ordered original consumer). Tests inject authentic host-secret numeric wrappers into a minimal fixture; they do not establish that the live consumer normally receives secret spell IDs, native identifier acceptance, native output policies, or rendered pixels. Runtime consumer fixture requires the original Retail cache and fails explicitly if unavailable; no reconstructed fallback is supplied. Actual RED/GREEN scope and retained execution provenance are linked in the bounded proof checkpoint above.
+
+## SS-P1 PTR preservation — 2026-10-18
+
+Executed source `b0b2bb5193ce7085c0045e04a5fe5d4f0a3c9201`, based on `10606898e`: **PTR 8/8 GREEN**, **Retail 7/7 GREEN**, both exit0, zero failed/ignored/measured. Filter `ssp1` selects the seven named `cooldown_restriction::ssp1` cases plus PTR-only `ss_p1_ptr_preservation::original_ptr_action_button_preserves_ssp1_secret_spell_selection`; Retail selects only the same seven existing cases. Exact per-name counts and commands: `/home/osso/.local/state/wow-ui-sim/handoff/ss-p1-ptr-run/{proof-ledger.json,ptr-eight.log.names.json,retail-seven.log.names.json}`. Initial stale-harness seven-only output is superseded, not additional coverage. No behavioral RED or producer/test repair was needed.
+
+The new case executes the unchanged cached PTR ActionButton defaults/update/apply block (SHA-256 `1c4f8e4eca223d1b277b0ad4c044b40e2116afdaf708b4ee7dceb3db78b6390e`), real APIs and real Cooldown widgets. Public/authentic numeric-secret spell19750 selects normal `(12,80,1)`, charge `(12,40,2)`, LoC `(14,24,2)`; replacement clears normal/charge while retaining LoC. Unrestricted secure/tainted and restricted secure contexts preserve selector opacity and caller taint. Restricted-tainted widget setters remain excluded.
+
+Separate normal PTR `sound,gui,casc,client-ptr` startup exits0 with stdout byte-exact against `docs/baselines/ptr-lua-errors.json` (`[]` plus newline). `WOW_SIM_CASC`/`WOW_SIM_NO_SOUND` unset; child-only XDG storage starts with a byte-exact current persisted CVar copy; original before/after stat/hash unchanged (`startup-guards.json`). Whole-workspace fmt check and PTR package `cargo check --locked -j1` exit0 without diagnostics. Cargo/rustc1.99.0; async user units capped at9G.
+
+Post-proof rebase onto `032a3e7d8` yields test commits `3a10bce23` + `677247c03`, byte-identical test sources. Parent explicitly waived reruns: branch changes no timed-signal files; added base changes only timed-signal source/test/spec. Evidence remains attributed to the executed revision, not fresh post-rebase execution. No native parity, live secret-ID provenance, rendered/full-suite/all-profile acceptance, secret-string support, action/book/shared-selector widening or Retail behavior change.
 
 ## How it works
 
