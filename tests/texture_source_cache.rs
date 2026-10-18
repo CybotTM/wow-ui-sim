@@ -53,6 +53,66 @@ fn repeated_requests_live_create_delete_and_directory_rejection() {
 }
 
 #[test]
+fn warm_source_checks_preserve_assignment_side_effects() {
+    let root = tempfile::tempdir().unwrap();
+    png(root.path(), "F1/Media/Logo.png", [255, 0, 0, 255]);
+    let env = WowLuaEnv::new().unwrap();
+    roots(&env, &[root.path()]);
+    setter(&env, "interface/addons/f1/media/logo", true);
+    env.exec(
+        r#"
+        local t = CacheProbe
+        local path = 'interface/addons/f1/media/logo'
+        t:SetColorTexture(1, 0, 0, 1)
+        assert(t:SetTexture(path, true, false))
+        assert(t:GetTexture() == path and t:GetHorizTile() and not t:GetVertTile())
+        t:SetAtlas('checkbox-minimal')
+        assert(t:GetAtlas() == 'checkbox-minimal')
+        assert(t:SetTexture(path, false, true))
+        assert(t:GetAtlas() == nil and t:GetTexture() == path)
+        assert(not t:GetHorizTile() and t:GetVertTile())
+        assert(not t:SetTexture(nil) and t:GetTexture() == nil)
+        assert(t:SetTexture(path))
+        assert(not t:SetTexture('') and t:GetTexture() == nil)
+    "#,
+    )
+    .unwrap();
+    let state = env.state().borrow();
+    let id = state.widgets.get_id_by_name("CacheProbe").unwrap();
+    let frame = state.widgets.get(id).unwrap();
+    assert!(frame.color_texture.is_none());
+    assert!(frame.atlas_tex_coords.is_none());
+}
+
+#[cfg(feature = "forbidden-aspects")]
+#[test]
+fn warm_source_checks_preserve_secret_replacement_and_clear() {
+    let root = tempfile::tempdir().unwrap();
+    png(root.path(), "F1/Media/Logo.png", [255, 0, 0, 255]);
+    let env = WowLuaEnv::new().unwrap();
+    roots(&env, &[root.path()]);
+    setter(&env, "interface/addons/f1/media/logo", true);
+    env.exec(
+        r#"
+        local t = CacheProbe
+        local path = 'interface/addons/f1/media/logo'
+        assert(t:SetTexture(secretwrap(path)))
+        local function denied() assert(not pcall(t.GetTexture, t)) end
+        debug.setobjecttaint(denied, 'CacheSecretProbe')
+        denied()
+        assert(t:SetTexture(path))
+        local function public() assert(t:GetTexture() == path) end
+        debug.setobjecttaint(public, 'CacheSecretProbe')
+        public()
+        assert(t:SetTexture(secretwrap(path)))
+        assert(not t:SetTexture(secretwrap(nil)))
+        assert(t:GetTexture() == nil)
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn setter_discovers_root_changes_and_keeps_environments_isolated() {
     let a = tempfile::tempdir().unwrap();
     let b = tempfile::tempdir().unwrap();
