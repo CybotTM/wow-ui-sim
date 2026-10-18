@@ -1,6 +1,6 @@
 # IPC Exec print output
 
-IPC Exec returns the Lua-wrapped `print` capture for that request, not a second copy from the simulator console buffer. This records commit `f96644168`; execution and capture live in `/home/osso/Projects/wow/wow-ui-sim/src/iced_app/update_servers.rs`. See [Lua API architecture](/home/osso/Projects/wow/wow-ui-sim/docs/wiki/systems/lua-api.md) for the execution environment.
+IPC Exec returns the Lua-wrapped `print` capture for that request, not a second copy from the simulator console buffer. This records commit `f96644168`; execution and capture live in `src/iced_app/update_servers.rs`. See [Lua API architecture](../wiki/systems/lua-api.md) for the execution environment.
 
 ## What it must do
 
@@ -14,16 +14,16 @@ Unchecked items are source-grounded contracts, not newly verified test passes. T
 
 ## How it works
 
-- [Lua API architecture](/home/osso/Projects/wow/wow-ui-sim/docs/wiki/systems/lua-api.md).
+- [Lua API architecture](../wiki/systems/lua-api.md).
 
 ## Implementation inventory
 
-- `/home/osso/Projects/wow/wow-ui-sim/src/iced_app/update_servers.rs`: Exec execution, print wrapping/restoration, capture-only output collection and response dispatch.
-- `/home/osso/Projects/wow/wow-ui-sim/src/lua_server.rs`: IPC Exec command, Output/Error response types and socket transport.
+- `src/iced_app/update_servers.rs`: Exec execution, print wrapping/restoration, capture-only output collection and response dispatch.
+- `src/lua_server.rs`: IPC Exec command, Output/Error response types and socket transport.
 
 ## Tests asserting this spec
 
-`/home/osso/Projects/wow/wow-ui-sim/src/lua_server/exec_tests.rs`, `exec_print_output_is_captured_once_per_call_across_connections`: real Unix-socket requests processed by the app; asserts single execution, exact single-print output, empty next-request capture and repeated identical lines.
+`src/lua_server/exec_tests.rs`, `exec_print_output_is_captured_once_per_call_across_connections`: real Unix-socket requests processed by the app; asserts single execution, exact single-print output, empty next-request capture and repeated identical lines.
 
 ## Known gaps (current cycle)
 

@@ -1,6 +1,6 @@
 # Unit existence state and aura visibility
 
-`UnitExists` reads simulator state, and shared aura collection suppresses records for units without modeled existence. This records commits `1a5e8f348`, `1681029d7` and `35822d5c7`; the producers live in `/home/osso/Projects/wow/wow-ui-sim/src/lua_api/globals/group_queries.rs` and `/home/osso/Projects/wow/wow-ui-sim/src/lua_api/globals/auras.rs`. See [Lua API architecture](/home/osso/Projects/wow/wow-ui-sim/docs/wiki/systems/lua-api.md). These are simulator contracts, not native-parity claims.
+`UnitExists` reads simulator state, and shared aura collection suppresses records for units without modeled existence. This records commits `1a5e8f348`, `1681029d7` and `35822d5c7`; the producers live in `src/lua_api/globals/group_queries.rs` and `src/lua_api/globals/auras.rs`. See [Lua API architecture](../wiki/systems/lua-api.md). These are simulator contracts, not native-parity claims.
 
 ## What it must do
 
@@ -19,26 +19,26 @@
 - [ ] Preserve these specific missing-record results for otherwise accepted inputs, where the API is registered: `GetAuraApplicationDisplayCount` returns `""`; `IsAuraFilteredOutByInstanceID` returns **true** (missing means filtered out); `GetAuraBaseDuration` and `GetRefreshExtendedDuration` return nil; `DoesAuraHaveExpirationTime` returns false.
 - [ ] Preserve existing errors rather than describing every aura query as empty: curve-based `GetAuraDispelTypeColor` raises `aura instance not found`; `GetAuraDuration` raises `no such aura instance`.
 
-The checked items have regression assertions in the test file below and historical Retail/Forever GREEN evidence in `/home/osso/.local/state/wow-ui-sim/verification/unit-exists-state-verify/report.md`. Its section 4 records the broader source-level impact. Unchecked items remain source-grounded without claiming dedicated transition-test coverage. No tests are rerun for this docs-only change.
+The checked items have regression assertions in the test file below and historical Retail/Forever GREEN evidence from the lane's independent verification. Broader source-level impact is listed in the implementation inventory below. Unchecked items remain source-grounded without claiming dedicated transition-test coverage. No tests are rerun for this docs-only change.
 
 ## How it works
 
-- [Lua API architecture](/home/osso/Projects/wow/wow-ui-sim/docs/wiki/systems/lua-api.md).
-- [Unit GUID presence](/home/osso/Projects/wow/wow-ui-sim/docs/specs/unit-guid-presence.md) — separate identity-query contract.
+- [Lua API architecture](../wiki/systems/lua-api.md).
+- [Unit GUID presence](unit-guid-presence.md) — separate identity-query contract.
 
 ## Implementation inventory
 
-- `/home/osso/Projects/wow/wow-ui-sim/src/lua_api/globals/group_queries.rs`: `UnitExists` and shared `unit_exists_in_state` predicate.
-- `/home/osso/Projects/wow/wow-ui-sim/src/lua_api/globals/auras.rs`: existence gate before aura-store reads; shared collection and instance lookup.
-- `/home/osso/Projects/wow/wow-ui-sim/src/c_api/c_unit_aura_display_count.rs`: empty missing-record display count.
-- `/home/osso/Projects/wow/wow-ui-sim/src/c_api/c_unit_aura_filter_query.rs`: missing records are filtered out.
-- `/home/osso/Projects/wow/wow-ui-sim/src/c_api/c_unit_aura_dispel_color.rs`: curve query's missing-instance error.
-- `/home/osso/Projects/wow/wow-ui-sim/src/c_api/aura_duration.rs`: base/refresh nil results, expiration false and duration-object error on missing records.
-- `/home/osso/Projects/wow/wow-ui-sim/src/lua_api/globals/utility_system_spell/spell_api.rs`: unchanged pet/vehicle player-vitals shortcut.
+- `src/lua_api/globals/group_queries.rs`: `UnitExists` and shared `unit_exists_in_state` predicate.
+- `src/lua_api/globals/auras.rs`: existence gate before aura-store reads; shared collection and instance lookup.
+- `src/c_api/c_unit_aura_display_count.rs`: empty missing-record display count.
+- `src/c_api/c_unit_aura_filter_query.rs`: missing records are filtered out.
+- `src/c_api/c_unit_aura_dispel_color.rs`: curve query's missing-instance error.
+- `src/c_api/aura_duration.rs`: base/refresh nil results, expiration false and duration-object error on missing records.
+- `src/lua_api/globals/utility_system_spell/spell_api.rs`: unchanged pet/vehicle player-vitals shortcut.
 
 ## Tests asserting this spec
 
-`/home/osso/Projects/wow/wow-ui-sim/tests/unit_exists_state.rs`:
+`tests/unit_exists_state.rs`:
 
 - `pet_existence_tracks_summon_and_dismiss_from_rust_state` and `vehicle_existence_tracks_player_occupancy_from_rust_state`: absent/present/absent transitions and player controls.
 - `target_aura_queries_follow_selection_and_clear`: existence, legacy/index/instance/slot absence and populated target controls.
