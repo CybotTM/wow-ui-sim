@@ -56,6 +56,83 @@ fn timed_signal_map_replaces_cancels_and_dispatches_due_key() {
 }
 
 #[test]
+fn timed_signal_map_accepts_secure_secret_deadline_before_enforcing_map_access() {
+    use rilua::table_security::wrap_host_secret_number;
+    use rilua::LuaApiMut;
+
+    let env = WowLuaEnv::new().unwrap();
+    let addons = wow_ui_sim::blizzard_ui_sync::default_cache_addons_path().unwrap();
+    for filename in ["MathUtil.lua", "TimerUtil.lua"] {
+        let path = addons.join("Blizzard_SharedXMLBase").join(filename);
+        env.exec_named(&std::fs::read_to_string(path).unwrap(), filename)
+            .unwrap();
+    }
+    {
+        let loader = env.loader_env();
+        let mut lua = loader.rilua_mut();
+        rilua::table_security::register_table_security(&mut lua).unwrap();
+        let deadline = wrap_host_secret_number(lua.state_mut(), 25.0);
+        lua.state_mut().push(deadline);
+        let inserted = lua.set_global_val("secret_deadline", deadline);
+        lua.state_mut().pop();
+        inserted.expect("root authentic host-secret deadline");
+    }
+    env.exec(
+        r#"
+        assert(debug.getstacktaint() == nil)
+        secret_map = TimerUtil.CreateTimedSignalCallbackMap()
+        secret_key = secret_map:RegisterCallback(function() end)
+        secret_map:SignalAt(secret_key, 12.5)
+        assert(secret_map:GetSignalCount() == 1)
+        assert(secret_map:GetSignalTime(secret_key) == 12.5)
+        public_map = TimerUtil.CreateTimedSignalCallbackMap()
+        public_key = public_map:RegisterCallback(function() end)
+        public_map:SignalAt(public_key, 12.5)
+        "#,
+    )
+    .expect("unchanged cached wrapper schedules public deadlines");
+    env.exec(
+        r##"
+        local function ingress()
+            assert(debug.getstacktaint() == nil)
+            assert(issecretvalue(secret_deadline))
+            assert(select("#", secret_map:SignalAt(secret_key, secret_deadline)) == 0)
+            assert(issecretvalue(secret_deadline))
+            assert(secretunwrap(secret_deadline) == 25.0)
+            assert(debug.getstacktaint() == nil)
+        end
+        ingress()
+        "##,
+    )
+    .expect("untainted SignalAt accepts an authentic host-secret argument 3");
+    env.exec(
+        r#"
+        assert(debug.getstacktaint() == nil)
+        assert(secret_map:GetSignalCount() == 1)
+        assert(secret_map:HasSignal(secret_key))
+        local deadline = secret_map:GetSignalTime(secret_key)
+        if issecretvalue(deadline) then
+            deadline = secretunwrap(deadline)
+        end
+        assert(deadline == 25.0)
+        local function guarded_probe()
+            assert(debug.getstacktaint() == "TimedSignalMapProbe")
+            local ok = pcall(function() return secret_map:GetSignalCount() end)
+            assert(not ok, "tainted access to a secret-containing map must fail")
+            assert(public_map:GetSignalCount() == 1)
+            assert(public_map:GetSignalTime(public_key) == 12.5)
+            assert(issecretvalue(secret_deadline))
+            assert(debug.getstacktaint() == "TimedSignalMapProbe")
+        end
+        debug.setobjecttaint(guarded_probe, "TimedSignalMapProbe")
+        guarded_probe()
+        assert(debug.getstacktaint() == nil)
+        "#,
+    )
+    .expect("trusted replacement and tainted guarded access respect held secrets");
+}
+
+#[test]
 fn timed_signal_map_reports_present_key_and_exact_time() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(
