@@ -52,6 +52,16 @@ error counts and release proof diagnostics.
 
 ## Era / Anniversary — current baseline, 2026-10-17
 
+R20 health knowledge reduces each profile from **20 records / 52 occurrences to 0 / 0, exit0 (`[]`)**. Each committed JSON is copied byte-for-byte from its own startup stdout, including trailing LF; no filters, stack normalization or formatting transforms are applied. All16 missing-query records/40 occurrences and all4 downstream CombatFeedback records/12 occurrences are removed. No residual or added record remains; R10/R14 and the inherited Wrath cursor fix receive no R20 credit.
+
+Captures, supplied-state controls1/1 and original-consumer controls1/1 per profile ran at `1b38b6d6e`. The original XML vehicle OnLoad, pooled party UpdateMember, Player/Pet feedback initialization/OnUpdate and real numeric-versus-percentage FontString text all pass. Era/Anniversary full-package checks also pass there. Producer rebased onto `b9e4f0a5f` as `0c4727c5a`: R20 sources/tests/Cargo/data/pins are identical; the only runtime integration delta flushes between listeners when `ACTIVE == Wrath`, false for Era/Anniversary. These executed-path proofs are retained, **not fresh post-rebase Era/Anniversary captures or bit-identical binary claims**.
+
+Fresh rebased Wrath remains **2/2, exit1**, byte-identical to `b9e4f0a5f`; its two pre-existing Gamma/BaseMip failures are unchanged. Retail startup is **0/0, exit0**. Both other-profile absence controls1/1, fresh Wrath full-package check and current formatting pass. Original persisted CVar stat/hash guards remain unchanged. Existing Classic UnitRole dead-code warnings remain; no warning-free, native, GUI, full-suite or fresh seven-profile acceptance is claimed.
+
+Evidence: `/home/osso/.local/state/wow-ui-sim/handoff/classic-r20-health/acceptance.json`, `rebase-proof.json`, both `*-classification.json` receipts and startup stdout/result files. Metadata binds actual capture revision, profile features, command/environment and execution-time binary hash; no immutable binary copy was retained. External UI caches were consumed with CASC disabled, not independently resealed or authenticated. Wrath JSON/metadata remain untouched.
+
+### R10/R14 checkpoint
+
 At source `492bae7b6a59eac1af2a294f37d9954f872b08e6`, based on master `483701ae4`, both profiles report **20 records / 52 occurrences, exit1, FAIL**. Each JSON is byte-identical to its own fresh final startup stdout, including raw stacks, generated identities and trailing LF; metadata binds the capture, sealed binary and command.
 
 Against master's 24/56 inventory, each profile removes exactly four single-occurrence records: plain and reporter-wrapped SkillFrame.lua:185 nil-`skillRank` failures (R10), and plain and reporter-wrapped QuestTimerFrame OnEvent → original TimeUtil `floor(number expected)` failures (R14). Comparing whole messages/stacks with only `@generated/<tag>/<hash>` chunk hashes normalized finds **zero added records, zero retained-count changes and zero retained-stack changes**. Remaining R20 `ShouldKnowUnitHealth`/`CombatFeedback` failures are unchanged and out of scope; no R20 fix is credited.

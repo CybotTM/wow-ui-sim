@@ -32,6 +32,7 @@ remaining Wrath roots from independent verification and full-startup acceptance.
 ## Sources
 
 - [Classic A](../../specs/classic-startup-a.md) — contract, source attribution and sealed profile receipts.
+- [R20 health knowledge](../../specs/should-know-unit-health.md) — approved state contract, original consumers, profile scope and bounded proof.
 - [Empty history](../../specs/classic-empty-combatlog-history.md) — original consumer chain, policy boundary and temporary producer ownership.
 - [Explicit namespaces](../../specs/startup-explicit-namespaces.md) — bounded publication and factory-preservation contract.
 - [Mists logging](../../specs/mists-script-error-logging.md) — secondary reporter root and observable console behavior.
@@ -48,10 +49,10 @@ The [B owning matrix](../../specs/classic-startup-b.md#bounded-proof-ledger) dis
 
 R17 reuses an existing real getter instead of enabling a broad quest bundle. R18 scopes creation of a Retail faction fixture, retaining pre-existing supplied state. R19's expansion selection is grounded independently for each acquired profile/cache and the actual Vanilla loader route, not Anniversary realm naming. See the B spec for exact provenance and the absent TOC Interface caveat.
 
-The earlier B checkpoint held R20's visible-behavior policy and R10/R14's shared producers. R10/R14 subsequently landed on the pending baseline branch; its [20/52 inventory](../../baselines/README.md#era--anniversary--current-baseline-2026-10-17) predates the R20 change below. Historical tests/receipts do not establish current clean-startup acceptance.
+The earlier B checkpoint held R20's visible-behavior policy and R10/R14's shared producers. R10/R14 subsequently landed on the pending baseline branch; its [20/52 inventory](../../baselines/README.md#r10r14-checkpoint) predates the R20 change below. Historical tests/receipts do not establish current clean-startup acceptance.
 
 ## R20 approved health-knowledge producer
 
 The [R20 contract](../../specs/should-know-unit-health.md) owns the October17 user decision, profile scope and proof ledger. `SimState.unit_health_knowledge` is one map; the real non-C query reads it on each call. The shared Era bootstrap registers it only for Era/Anniversary. No health, ownership or secrecy inference is added.
 
-Original Classic Player/Pet OnLoad calls UnitFrame initialization before CombatFeedback initialization. The absent query at UnitFrame.lua:737 aborted that ordering, leaving the declared feedback FontString unassigned at CombatFeedback.lua:104. The producer changes neither vendor handlers nor feedback fields. Both-profile original vehicle OnLoad and party UpdateMember reproduce the missing-query RED independently. GREEN and startup reconciliation remain pending.
+Original Classic Player/Pet OnLoad calls UnitFrame initialization before CombatFeedback initialization. The absent query at UnitFrame.lua:737 aborted that ordering, leaving the declared feedback FontString unassigned at CombatFeedback.lua:104. The producer changes neither vendor handlers nor feedback fields. Both-profile original vehicle OnLoad and party UpdateMember reproduce the missing-query RED independently, then complete after publication. Real feedback object identities and numeric/percentage FontString text pass. The [contract](../../specs/should-know-unit-health.md#tests-asserting-this-spec) owns exact source/rebase applicability; the [baseline owner](../../baselines/README.md#era--anniversary--current-baseline-2026-10-17) owns startup counts and preservation. Era/Anniversary receipts predate the rebase and are retained for their unchanged executed path, not presented as fresh post-rebase captures. Native/GUI/full-suite acceptance remains outside this proof.

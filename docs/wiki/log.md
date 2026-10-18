@@ -1,6 +1,6 @@
-## [2026-10-17] implementation | Classic R20 health-knowledge producer
+## [2026-10-17] evidence | Classic R20 health knowledge
 
-[Investigation](investigations/classic-startup-producer-cascades.md#r20-approved-health-knowledge-producer) records the approved per-unit state query and unchanged vendor initialization ordering; [contract](../specs/should-know-unit-health.md) owns scope and evidence. Both-profile original-consumer RED observed; GREEN/startups pending.
+[Investigation](investigations/classic-startup-producer-cascades.md#r20-approved-health-knowledge-producer) records the state-backed query and unchanged vendor initialization ordering. [Contract](../specs/should-know-unit-health.md) owns original-consumer/state GREEN and retained-versus-fresh rebase receipts; [baseline](../baselines/README.md#era--anniversary--current-baseline-2026-10-17) owns byte-exact startup reconciliation. Broader native/GUI/full-suite acceptance remains unproven.
 
 ## [2026-10-16] source | Retail 12.1.5.70448 isolated update
 

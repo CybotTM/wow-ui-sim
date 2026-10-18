@@ -1,6 +1,6 @@
-## [2026-10-17] implementation | Approved Classic health knowledge
+## [2026-10-17] evidence | Classic health knowledge
 
-[R20 producer](investigations/classic-startup-producer-cascades.md#r20-approved-health-knowledge-producer) links the approved per-unit contract, Era/Anniversary publication and original initialization cascade. Both-profile consumer RED observed; GREEN/startup reconciliation pending.
+[R20 producer](investigations/classic-startup-producer-cascades.md#r20-approved-health-knowledge-producer) links original-consumer RED→GREEN, explicit supplied state and the repaired initialization cascade. [Contract](../specs/should-know-unit-health.md) owns proof scope/rebase applicability; [baseline](../baselines/README.md#era--anniversary--current-baseline-2026-10-17) owns exact startup/preservation counts. No native/full-suite claim.
 
 ## [2026-10-17] investigation | Wrath startup and error-display boundaries
 
