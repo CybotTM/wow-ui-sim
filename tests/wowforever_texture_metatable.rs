@@ -4,10 +4,21 @@
 #[cfg(feature = "client-wowforever")]
 fn wowforever_texture_metatable_loads_unit_frame_util() {
     let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
-    let source = wow_ui_sim::blizzard_ui_sync::default_cache_addons_path()
+    let root = wow_ui_sim::blizzard_ui_sync::default_cache_addons_path()
         .unwrap()
-        .join("Blizzard_UnitFrame/Shared/UnitFrameUtil.lua");
-    env.exec(&std::fs::read_to_string(source).unwrap()).unwrap();
+        .join("Blizzard_UnitFrame");
+    let style =
+        std::fs::read_to_string(root.join("Camelot/UnitFramePvPIndicatorStyle.lua")).unwrap();
+    let source = std::fs::read_to_string(root.join("Shared/UnitFrameUtil.lua")).unwrap();
+    // Match the Forever TOC order and pass the same addon-local table to both files.
+    env.exec(&format!(
+        r#"
+        local addonTable = {{}}
+        assert(loadstring([==[{style}]==], '@Blizzard_UnitFrame/Camelot/UnitFramePvPIndicatorStyle.lua'))('Blizzard_UnitFrame', addonTable)
+        assert(loadstring([==[{source}]==], '@Blizzard_UnitFrame/Shared/UnitFrameUtil.lua'))('Blizzard_UnitFrame', addonTable)
+        "#,
+    ))
+    .unwrap();
     env.exec(
         r#"
         local texture = CreateFrame("Frame"):CreateTexture()
