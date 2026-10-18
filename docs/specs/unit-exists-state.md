@@ -9,17 +9,17 @@
 - [x] Keep `player` present. Report `pet` present exactly when `pet.icon` is populated; summon/dismiss state changes must update the result.
 - [x] Report `vehicle` present exactly while `player.in_vehicle` is true; entering/exiting must update the result.
 - [x] Report `target` absent before selection and after clearing, and present while `current_target` is populated.
-- [ ] Report `focus` present exactly when `current_focus` is populated. Party tokens require both `party_group_active` and an in-range member index (`unit_exists_in_state`).
+- [x] Report `focus` present exactly when `current_focus` is populated. Party tokens require both `party_group_active` and an in-range member index (`unit_exists_in_state`).
 
 ### Aura visibility and result boundaries
 
 - [x] Absent targets expose no legacy UnitAura/UnitDebuff record, indexed/instance record or aura slots; selecting a target exposes its stored debuffs, and clearing it hides them again.
 - [x] Inactive party membership hides stored party auras from legacy and indexed queries without deleting them; activating membership exposes the stored records.
-- [ ] All retrieval/enumeration paths using the shared collector must suppress records for missing units. This does not bypass existing argument validation or access checks.
-- [ ] Preserve these specific missing-record results for otherwise accepted inputs, where the API is registered: `GetAuraApplicationDisplayCount` returns `""`; `IsAuraFilteredOutByInstanceID` returns **true** (missing means filtered out); `GetAuraBaseDuration` and `GetRefreshExtendedDuration` return nil; `DoesAuraHaveExpirationTime` returns false.
-- [ ] Preserve existing errors rather than describing every aura query as empty: curve-based `GetAuraDispelTypeColor` raises `aura instance not found`; `GetAuraDuration` raises `no such aura instance`.
+- [x] All retrieval/enumeration paths using the shared collector must suppress records for missing units. This does not bypass existing argument validation or access checks.
+- [x] Preserve these specific missing-record results for otherwise accepted inputs, where the API is registered: `GetAuraApplicationDisplayCount` returns `""`; `IsAuraFilteredOutByInstanceID` returns **true** (missing means filtered out); `GetAuraBaseDuration` and `GetRefreshExtendedDuration` return nil; `DoesAuraHaveExpirationTime` returns false.
+- [x] Preserve existing errors rather than describing every aura query as empty: curve-based `GetAuraDispelTypeColor` raises `aura instance not found`; `GetAuraDuration` raises `no such aura instance`.
 
-The checked items have regression assertions in the test file below and historical Retail/Forever GREEN evidence from the lane's independent verification. Broader source-level impact is listed in the implementation inventory below. Unchecked items remain source-grounded without claiming dedicated transition-test coverage. No tests are rerun for this docs-only change.
+Original existence/visibility regressions retain historical Retail/Forever GREEN evidence. The additional focus/party boundaries and public shared-collector result/error/access matrix have bounded Retail execution below; no Forever or native acceptance is inferred for those additions.
 
 ## How it works
 
@@ -49,10 +49,16 @@ The checked items have regression assertions in the test file below and historic
 
 The first four have historical Retail and Forever passes; consumer tests have Retail passes only. This does not establish all-profile coverage.
 
+## Additional bounded proof — 2026-10-18
+
+Source `f8afe3b3f9e23082aa7c44acef9feafb05ff4f59`, based on `29fac7076965dd53973168c47d972e4090f27b98`: both new `unit_exists_state::` tests above selected **1 PASS / 0 FAIL each**, using the same Retail integration executable. Features: `--no-default-features --features sound,gui,casc,client-retail`. Private-store-relative receipts: `handoff/a1-timer-unit-tests/build-03-B5.json` and `build-03-B6.json`; each binds exact selector, executable SHA-256, features and source revision. `cargo fmt --check` and matching Retail `cargo check --lib` passed.
+
+The aura fixture retains concrete helpful/harmful records through four existence transitions, including reactivation. It covers the registered legacy, `C_UnitAuras` and `AuraUtil` public collector queries, plus party indexed-tooltip reads. Player-only queries remain populated controls because `player` cannot disappear; private-store APIs are not callers of this public collector. No product behavior was changed.
+
 ## Known gaps (current cycle)
 
 - [ ] Pet/vehicle vitals still return player vitals before checking existence in `lookup_unit_vitals`; health/power behavior is unchanged and inconsistent with absent pet/vehicle existence.
-- [ ] Dedicated focus and missing-unit aura transition regressions have been added; execution acceptance remains separate. Neither these nor the original six regressions establish native or all-profile parity.
+- [x] Dedicated focus and missing-unit aura transition regressions have bounded Retail GREEN. Neither these nor the original six regressions establish native or all-profile parity.
 
 ## Out of scope
 

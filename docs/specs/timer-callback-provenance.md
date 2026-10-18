@@ -46,6 +46,17 @@ All compilation uses `--no-default-features --features sound,gui,casc,client-<pr
 
 Final rebase onto `35822d5c7` completed without conflict. All eleven owning diagnostic/fixture/container/TimedSignalMap source hashes match the pre-rebase source (`pre-rebase-source-hashes.json`, `post-rebase-source-hashes.json`). Rebased feature commits are `aca5c8be6`, `705d5051a`, `e8ebcf711`; upstream Exec-capture/UnitExists changes are outside these fixtures' timer paths. Saved runtime receipts are pre-rebase evidence, not a newly executed whole-HEAD gate. No broad suites were repeated.
 
+## Additional bounded proof — 2026-10-18
+
+Source `f8afe3b3f9e23082aa7c44acef9feafb05ff4f59`, based on `29fac7076965dd53973168c47d972e4090f27b98`, uses one Retail lib+integration build with `--no-default-features --features sound,gui,casc,client-retail`:
+
+| Exact selector | Executed result |
+|---|---|
+| `timer_callback_provenance::registration_and_invocation_contracts_hold_in_both_diagnostic_modes` | 1 PASS; same fixture in isolated disabled/enabled processes |
+| `lua_api::handler_timing::tests::missing_source_and_invalid_registry_states_are_explicit` | 1 PASS; native unknown source, nil/non-table registry and direct callback controls |
+
+Private-store-relative receipts `handoff/a1-timer-unit-tests/build-03-B3.json` and `build-03-B4.json` bind exact argv, revision, emitted features and executable SHA-256. Matching `cargo fmt --check` and Retail `cargo check --lib` passed. Earlier fixture failures were private-method access and an incorrect eval-chunk line oracle, not product divergences; only tests changed. Snapshot stability is executed proof, not a measurement of capture frequency or absence of gate-off work. No Forever rerun or broader scheduling guarantee is claimed.
+
 ## Known gaps (current cycle)
 
 Diagnostic-map cycle collection has a dedicated GC regression; once-per-registration capture remains source-audited (string-only metadata and no per-tick closure lookup), without a source-lookup-counter regression. Pre-existing function-container backing-map ownership is outside the diagnostic-map fix. Verifier-fix revisions and command receipts are recorded in private `handoff/timer-provenance/fix-report.md` and appended to `proof-ledger.json`; the historical proof above is unchanged. No full startup, GUI, native parity or full-suite acceptance is claimed.

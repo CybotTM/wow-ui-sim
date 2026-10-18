@@ -20,6 +20,12 @@ Test-only observation in [`tests/startup_perf.rs`](../../tests/startup_perf.rs) 
 - `tests/startup_perf.rs::full_game_startup_stays_under_budget` — one canonical body PASS; parent/child summaries are not separate executions. Ordered paired rows and original readiness/budget assertions have bounded current-run proof.
 - `tests/startup_perf/observation.rs::tests::addon_observation_roundtrip_preserves_values_and_only_diagnostic_counts` — concrete distinct durations, counters and identities; asserts decoded JSON values, integer nanosecond units and diagnostic counts without text. One focused serializer execution PASS; separate from the canonical body.
 
+## Additional bounded proof — 2026-10-18
+
+The unchanged canonical selector `startup_perf::full_game_startup_stays_under_budget` passed at source `f8afe3b3f9e23082aa7c44acef9feafb05ff4f59`, based on `29fac7076965dd53973168c47d972e4090f27b98`, using the same Retail integration build as the timer/unit proof batch (`--no-default-features --features sound,gui,casc,client-retail`). Raw stderr contains **211** discovery-ordered addon rows and **one** summary: readiness true, `startup_elapsed_ns=14848171400 < budget_ns=20000000000`. Parsed rows retain both identities, file counts, eight timings, six cache counters and three diagnostic counts with nonnegative integer values. Discovered identities and returned addon titles are distinct fields, not an equality requirement.
+
+Private-store-relative receipt `handoff/a1-timer-unit-tests/build-03-B7.json` records exact argv, source, emitted features, executable SHA-256, ordered names and parsed summary; adjacent stdout/stderr retain the original assertions and records. Parent/child PASS summaries are **one logical canonical execution**, not two. Clock boundaries remain source-audited. This passing run does not exercise original assertion failure or load-error behavior, and makes no native, historical timing-equivalence or all-profile claim.
+
 ## Known gaps (current cycle)
 
 - [x] Implement observation and focused concrete serialization coverage; saved compilation and formatting PASS. Production check reuse covers unchanged production/library scope only, not new tests.
