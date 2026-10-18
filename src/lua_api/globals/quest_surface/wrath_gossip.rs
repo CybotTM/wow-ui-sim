@@ -19,10 +19,18 @@ fn get_available_quests(state: &mut LuaState) -> LuaResult<u32> {
         let title = create_string(state, &row.title);
         state.push(title);
         state.push(Val::Num(row.quest_level as f64));
-        state.push(Val::Bool(row.is_trivial));
+        state.push(if row.is_trivial {
+            Val::Num(1.0)
+        } else {
+            Val::Nil
+        });
         // No supplied isDaily field: frequency classification is outside this slice.
         state.push(Val::Nil);
-        state.push(row.repeatable.map_or(Val::Nil, Val::Bool));
+        state.push(if row.repeatable == Some(true) {
+            Val::Num(1.0)
+        } else {
+            Val::Nil
+        });
     }
     Ok(result_count as u32)
 }
