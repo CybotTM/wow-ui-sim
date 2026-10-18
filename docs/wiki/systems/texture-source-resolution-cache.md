@@ -8,9 +8,11 @@ The resolver still probes the case-preserving normalized request exactly, in ori
 
 Directory listings retain the first enumerated entry per Unicode-lowercased name, including directories; callers still enforce file/directory types. Unix freshness checks include device, inode, mtime and ctime nanoseconds; other hosts use modification time and length. A missing name forces a fresh enumeration once per synchronous search regardless of matching timestamps. Extension probes share that fresh listing only within the search. Failed/partial listings are not reusable negative evidence.
 
-The old sticky CPU RGBA/BC miss gates are removed; the missing-path set only limits logging. Existing decoded pixel/dimension/crop and GPU-ready/failed handles are not hot-reload invalidated. Concurrent filesystem mutation is not an atomic snapshot guarantee.
+CPU RGBA/BC negative entries are keyed by normalized request within the ordered-root/profile context. They retain the consulted directory/file metadata (including absent paths), not permanent misses. Repeated unchanged loads validate those stamps without reopening directories; creation/deletion/replacement invalidates the entry. Root changes and reload clear both negative maps. Failed/partial enumeration and untracked CASC extraction failures cannot create reusable negatives. The missing-path set only limits logging. Existing decoded pixel/dimension/crop and GPU-ready/failed handles are not hot-reload invalidated. Concurrent filesystem mutation is not an atomic snapshot guarantee.
 
 ## Proof boundaries
+
+A separate 64-frame BC+RGBA missing-source fixture bounds directory opens to two before creation, then verifies newly created PNG pixels. The pre-existing non-BLP telemetry test still requires cheap unchanged negatives; permanence is replaced by metadata-validated freshness.
 
 The Linux behavioral fixture calibrates an inotify directory observer against three real read_dir opens, then exercises 512 setters across 64 existing and 64 missing mixed-case requests in a 525-file leaf. The assertion bounds actual directory-open events, not helper calls; elapsed time is supporting evidence, not a universal deadline. This does not reproduce the 95-second real addon callback or prove first-draw responsiveness.
 

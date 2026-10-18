@@ -1,12 +1,31 @@
 //! Reusable directory listings, scoped to one manager's ordered roots and binary profile.
 //! Requests still run the original case-preserving exact probes before indexed CI probes.
-//! No request-to-missing result is retained between searches.
+//! Directory misses refresh per search; CPU negatives use validated SourceObservations.
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Default)]
 pub(super) struct SourceIndex {
     directories: HashMap<PathBuf, DirectorySnapshot>,
+    observation: SourceObservation,
+}
+
+/// A CPU negative decision is reusable only while all consulted paths are unchanged.
+#[derive(Debug, Default, Clone)]
+pub(super) struct SourceObservation {
+    stamps: HashMap<PathBuf, Option<DirectoryStamp>>,
+    untracked_source: bool,
+}
+
+impl SourceObservation {
+    pub(super) fn is_current(&self) -> bool {
+        if self.untracked_source || self.stamps.is_empty() {
+            return false;
+        }
+        self.stamps
+            .iter()
+            .all(|(path, stamp)| read_source_stamp(path) == *stamp)
+    }
 }
 
 #[derive(Debug)]
@@ -17,7 +36,7 @@ struct DirectorySnapshot {
     entries: HashMap<String, PathBuf>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct DirectoryStamp {
     modified: Option<std::time::SystemTime>,
     length: u64,
@@ -28,6 +47,37 @@ struct DirectoryStamp {
 impl SourceIndex {
     pub(super) fn clear(&mut self) {
         self.directories.clear();
+        self.begin_resolution();
+    }
+
+    pub(super) fn begin_resolution(&mut self) {
+        self.observation = SourceObservation::default();
+    }
+
+    pub(super) fn observation(&self) -> SourceObservation {
+        self.observation.clone()
+    }
+
+    pub(super) fn observe_source(&mut self, base: &Path, relative: &str) {
+        let mut current = base.to_path_buf();
+        self.observe_entry(&current);
+        if let Some(parent) = Path::new(relative).parent() {
+            for component in parent.components() {
+                current.push(component);
+                self.observe_entry(&current);
+            }
+        }
+    }
+
+    pub(super) fn observe_entry(&mut self, path: &Path) {
+        self.observation
+            .stamps
+            .entry(path.to_path_buf())
+            .or_insert_with(|| read_source_stamp(path));
+    }
+
+    pub(super) fn disallow_negative_cache(&mut self) {
+        self.observation.untracked_source = true;
     }
 
     pub(super) fn search(&mut self) -> DirectorySearch<'_> {
@@ -45,7 +95,8 @@ pub(super) struct DirectorySearch<'a> {
 
 impl DirectorySearch<'_> {
     pub(super) fn read_match(&mut self, dir: &Path, name: &str) -> Option<PathBuf> {
-        let stamp = read_directory_stamp(dir)?;
+        self.index.observe_entry(dir);
+        let stamp = read_source_stamp(dir)?;
         let stale = self
             .index
             .directories
@@ -72,9 +123,15 @@ impl DirectorySearch<'_> {
     fn refresh_directory(&mut self, dir: &Path) -> Option<()> {
         self.index.directories.remove(dir);
         self.refreshed.insert(dir.to_path_buf());
-        let stamp = read_directory_stamp(dir)?;
-        let (entries, complete) = read_directory_entries(dir)?;
-        if read_directory_stamp(dir)? != stamp {
+        let stamp = read_source_stamp(dir)?;
+        let Some((entries, complete)) = read_directory_entries(dir) else {
+            self.index.disallow_negative_cache();
+            return None;
+        };
+        if !complete {
+            self.index.disallow_negative_cache();
+        }
+        if read_source_stamp(dir)? != stamp {
             return None;
         }
         self.index.directories.insert(
@@ -103,11 +160,8 @@ fn read_directory_entries(dir: &Path) -> Option<(HashMap<String, PathBuf>, bool)
     Some((entries, complete))
 }
 
-fn read_directory_stamp(dir: &Path) -> Option<DirectoryStamp> {
-    let metadata = std::fs::metadata(dir).ok()?;
-    if !metadata.is_dir() {
-        return None;
-    }
+fn read_source_stamp(path: &Path) -> Option<DirectoryStamp> {
+    let metadata = std::fs::metadata(path).ok()?;
     #[cfg(unix)]
     use std::os::unix::fs::MetadataExt;
     Some(DirectoryStamp {

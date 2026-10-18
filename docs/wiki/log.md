@@ -1,3 +1,7 @@
+## [2026-10-18] system | Texture source resolution cache
+
+[Source ownership and freshness](systems/texture-source-resolution-cache.md) links the [contract](../specs/texture-source-resolution-cache.md), calibrated directory-open fixture and cheap frame-load negative-cache requirement. Historical unconditional-negative behavior is replaced by stamp validation, not unconditional per-frame rescanning. GREEN/preservation pending; no real-addon readiness claim.
+
 ## [2026-10-17] investigation | Wrath video policy and decimal Slider root
 
 [Existing startup investigation](investigations/wrath-startup-u-residuals.md#approved-legacy-video-state-and-decimal-slider-root) now links approved simulated gamma0/BaseMip0, original-consumer RED and the separate remainder-arithmetic exact-zero defect. Linked contracts own pending GREEN and profile/startup evidence; no native/display claim.

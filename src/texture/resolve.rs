@@ -46,7 +46,7 @@ fn casc_extract_dir() -> Option<PathBuf> {
 }
 
 #[cfg(feature = "casc")]
-fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
+fn try_casc_resolve(manager: &TextureManager, normalized_path: &str) -> Option<PathBuf> {
     if !casc_enabled() {
         return None;
     }
@@ -72,6 +72,11 @@ fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
     let extract_dir = casc_extract_dir()?;
     let safe_relative = listfile_path.replace('\\', "/");
     let out_path = extract_dir.join(&safe_relative);
+    {
+        let mut index = manager.source_index.borrow_mut();
+        index.observe_source(&extract_dir, &safe_relative);
+        index.observe_entry(&out_path);
+    }
     if let Some(parent) = out_path.parent() {
         std::fs::create_dir_all(parent).ok()?;
     }
@@ -80,6 +85,9 @@ fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
         return Some(out_path);
     }
 
+    // Native CASC availability is not described by directory listings. Retry a
+    // failed extraction rather than storing an unverifiable negative decision.
+    manager.source_index.borrow_mut().disallow_negative_cache();
     resolver.ensure_cached(fdid, &out_path).or_else(|| {
         crate::casc_asset_fallback::ensure_known_asset_cached(&listfile_path, &out_path)
     })
@@ -100,7 +108,7 @@ fn lookup_casc_path(
 }
 
 #[cfg(not(feature = "casc"))]
-fn try_casc_resolve(_normalized_path: &str) -> Option<PathBuf> {
+fn try_casc_resolve(_manager: &TextureManager, _normalized_path: &str) -> Option<PathBuf> {
     None
 }
 
@@ -219,6 +227,7 @@ impl TextureManager {
 
     /// Resolve a WoW texture path to a file system path.
     pub fn resolve_path(&self, normalized_path: &str) -> Option<PathBuf> {
+        self.source_index.borrow_mut().begin_resolution();
         if let Some(addon_relative) = strip_addons_prefix(normalized_path) {
             for addons_path in &self.addons_paths {
                 if let Some(result) = self.try_resolve_in_dir(addons_path, addon_relative) {
@@ -234,7 +243,7 @@ impl TextureManager {
             return Some(result);
         }
 
-        if let Some(result) = try_casc_resolve(normalized_path) {
+        if let Some(result) = try_casc_resolve(self, normalized_path) {
             return Some(result);
         }
 
@@ -253,6 +262,10 @@ fn try_blizzard_interface_art_resolve(
     normalized_path: &str,
 ) -> Option<PathBuf> {
     let blizzard_art_root = blizzard_interface_art_root()?;
+    texture_manager
+        .source_index
+        .borrow_mut()
+        .observe_entry(&blizzard_art_root);
     if !blizzard_art_root.exists() {
         return None;
     }
@@ -277,19 +290,23 @@ fn is_legacy_paperdoll_slot_path(normalized_path: &str) -> bool {
 impl TextureManager {
     /// Try to resolve a path within a given base directory.
     fn try_resolve_in_dir(&self, base: &Path, path: &str) -> Option<PathBuf> {
+        self.source_index.borrow_mut().observe_source(base, path);
         for ext in texture_extension_priority() {
             let file_path = base.join(format!("{}.{}", path, ext));
             if file_path.is_file() {
+                self.source_index.borrow_mut().observe_entry(&file_path);
                 return Some(file_path);
             }
         }
 
         let file_path = base.join(path);
         if file_path.is_file() {
+            self.source_index.borrow_mut().observe_entry(&file_path);
             return Some(file_path);
         }
 
         if let Some(result) = self.resolve_case_insensitive_in(base, path) {
+            self.source_index.borrow_mut().observe_entry(&result);
             return Some(result);
         }
 

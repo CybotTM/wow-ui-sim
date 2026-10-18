@@ -19,6 +19,9 @@ pub struct TextureManager {
     /// Base paths to addon directories (for addon textures).
     addons_paths: Vec<PathBuf>,
     source_index: std::cell::RefCell<source_index::SourceIndex>,
+    /// Negative CPU loads keyed by normalized request in this root/profile context.
+    rgba_unavailable: HashMap<String, source_index::SourceObservation>,
+    bc_unavailable: HashMap<String, source_index::SourceObservation>,
     /// Cache of loaded texture data (path -> RGBA pixels).
     cache: HashMap<String, TextureData>,
     /// Cache of texture dimensions keyed by normalized WoW path.
@@ -45,6 +48,8 @@ impl TextureManager {
         Self {
             addons_paths: Vec::new(),
             source_index: Default::default(),
+            rgba_unavailable: HashMap::new(),
+            bc_unavailable: HashMap::new(),
             cache: HashMap::new(),
             size_cache: HashMap::new(),
             bc_cache: HashMap::new(),
@@ -81,6 +86,8 @@ impl TextureManager {
     /// This does not evict already rendered pixels or GPU atlas handles.
     pub fn invalidate_source_generation(&mut self) {
         self.source_index.get_mut().clear();
+        self.rgba_unavailable.clear();
+        self.bc_unavailable.clear();
         self.not_found.clear();
     }
 
@@ -100,6 +107,20 @@ impl TextureManager {
         if self.cache.contains_key(&normalized) {
             return self.cached_texture_load_result(&normalized, start);
         }
+        if self
+            .rgba_unavailable
+            .get(&normalized)
+            .is_some_and(|entry| entry.is_current())
+        {
+            return (
+                None,
+                RgbaLoadTelemetry {
+                    total_elapsed: start.elapsed(),
+                    ..Default::default()
+                },
+            );
+        }
+        self.rgba_unavailable.remove(&normalized);
 
         let loaded = self.load_resolved_texture(wow_path, &normalized, &mut telemetry);
         telemetry.total_elapsed = start.elapsed();
@@ -129,6 +150,10 @@ impl TextureManager {
         let resolve_start = Instant::now();
         let Some(file_path) = self.resolve_path(normalized) else {
             telemetry.resolve_elapsed = resolve_start.elapsed();
+            self.rgba_unavailable.insert(
+                normalized.to_string(),
+                self.source_index.borrow().observation(),
+            );
             if self.not_found.insert(normalized.to_string()) {
                 crate::logging::eprintln_elapsed(&format!("[TexMgr] Not found: {}", wow_path));
             }
@@ -254,6 +279,20 @@ impl TextureManager {
         if self.bc_cache.contains_key(&normalized) {
             return self.cached_bc_load_result(&normalized, start);
         }
+        if self
+            .bc_unavailable
+            .get(&normalized)
+            .is_some_and(|entry| entry.is_current())
+        {
+            return (
+                None,
+                BcLoadTelemetry {
+                    total_elapsed: start.elapsed(),
+                    ..Default::default()
+                },
+            );
+        }
+        self.bc_unavailable.remove(&normalized);
 
         let mut telemetry = BcLoadTelemetry::default();
         let loaded = self.load_resolved_bc_texture(&normalized, &mut telemetry);
@@ -283,21 +322,31 @@ impl TextureManager {
         let resolve_start = Instant::now();
         let Some(file_path) = self.resolve_path(normalized) else {
             telemetry.resolve_elapsed = resolve_start.elapsed();
+            self.mark_bc_unavailable(normalized);
             return false;
         };
         telemetry.resolve_elapsed = resolve_start.elapsed();
 
         if !is_blp_file(&file_path) {
+            self.mark_bc_unavailable(normalized);
             return false;
         }
         telemetry.resolved_blp = true;
 
         let Some(bc_texture) = load_bc_texture_from_blp(&file_path, telemetry) else {
+            self.mark_bc_unavailable(normalized);
             return false;
         };
 
         self.cache_bc_texture_data(normalized, bc_texture);
         true
+    }
+
+    fn mark_bc_unavailable(&mut self, normalized: &str) {
+        self.bc_unavailable.insert(
+            normalized.to_string(),
+            self.source_index.borrow().observation(),
+        );
     }
 
     fn cache_bc_texture_data(&mut self, normalized: &str, bc_texture: BcTextureResult) {

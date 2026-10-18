@@ -1,3 +1,7 @@
+## [2026-10-18] system | Environment texture source resolution
+
+[Source cache](systems/texture-source-resolution-cache.md) documents shared setter/renderer ownership, directory freshness and cheap metadata-validated CPU negatives. [Contract](../specs/texture-source-resolution-cache.md) owns behavioral and preservation proof; real Ellesmere startup acceptance remains separate.
+
 ## [2026-10-17] evidence | Classic health knowledge
 
 [R20 producer](investigations/classic-startup-producer-cascades.md#r20-approved-health-knowledge-producer) links original-consumer RED→GREEN, explicit supplied state and the repaired initialization cascade. [Contract](../specs/should-know-unit-health.md) owns proof scope/rebase applicability; [baseline](../baselines/README.md#era--anniversary--current-baseline-2026-10-17) owns exact startup/preservation counts. No native/full-suite claim.

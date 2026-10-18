@@ -152,17 +152,20 @@ fn renderer_retries_bc_after_non_bc_source_is_replaced() {
     let mut manager = TextureManager::new().with_addons_path(root.path());
     let request = "interface/addons/f1/media/logo";
     assert!(manager.load_bc(request).is_none());
-    // Concrete BLP2: direct DXT1, 4x4, one eight-byte mip at offset 148.
-    let mut blp = vec![0u8; 156];
+    // Concrete BLP2: direct DXT1, 4x4, palette padding required by image-blp,
+    // one eight-byte mip following the 148-byte header and 1024-byte palette.
+    const MIP_OFFSET: usize = 148 + 1024;
+    let mut blp = vec![0u8; MIP_OFFSET + 8];
     blp[..4].copy_from_slice(b"BLP2");
     blp[4..8].copy_from_slice(&1u32.to_le_bytes());
     blp[8] = 2;
     blp[11] = 1;
     blp[12..16].copy_from_slice(&4u32.to_le_bytes());
     blp[16..20].copy_from_slice(&4u32.to_le_bytes());
-    blp[20..24].copy_from_slice(&148u32.to_le_bytes());
+    blp[20..24].copy_from_slice(&(MIP_OFFSET as u32).to_le_bytes());
     blp[84..88].copy_from_slice(&8u32.to_le_bytes());
-    blp[148..].fill(0xaa);
+    blp[MIP_OFFSET..].fill(0xaa);
+    image_blp::parser::load_blp_from_buf(&blp).expect("valid BC fixture");
     fs::write(root.path().join("F1/Media/Logo.blp"), blp).unwrap();
     let loaded = manager
         .load_bc(request)

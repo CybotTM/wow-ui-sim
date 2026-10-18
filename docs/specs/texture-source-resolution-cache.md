@@ -6,7 +6,7 @@ Environment-owned source lookup reduces repeated filesystem enumeration in `SetT
 
 - [ ] Share one source resolver between an environment's setters and renderers; isolate environments and binary client profiles.
 - [ ] Preserve normalized request spelling, ordered addon roots, exact-before-case-insensitive extension precedence, file/directory distinctions and existing return values.
-- [ ] Discover file creation/deletion and root changes without retaining negative decisions; invalidate source listings on root changes and UI reload.
+- [ ] Discover file creation/deletion and root changes without retaining stale negative decisions; invalidate source listings and CPU negatives on root changes and UI reload. Unchanged repeated frame loads must not repeatedly enumerate missing-source directories.
 - [ ] Repeated assignments retain field, secret, atlas, color and tiling effects, including nil/empty clears.
 - [ ] Bound directory opens for repeated mixed-case requests, measured against a concrete filesystem fixture rather than internal calls.
 
