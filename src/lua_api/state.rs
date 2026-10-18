@@ -626,6 +626,7 @@ macro_rules! build_empty_sim_state {
             solo_group_guid: None,
             #[cfg(feature = "retail-12-0-7")]
             solo_group_last: None,
+            #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
             unit_roles: HashMap::new(),
             party_leader_index: None,
             ready_check: ReadyCheckState::default(),

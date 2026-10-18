@@ -751,8 +751,9 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-7")]
     pub(crate) solo_group_last: Option<(i32, String)>,
     /// Explicit optional display role by existing player/party GUID; unset by default.
+    #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
     pub(crate) unit_roles:
-        HashMap<String, Option<crate::lua_api::globals::real::unit_roles::UnitRole>>,
+        HashMap<String, Option<crate::lua_api::globals::real::unit_roles_assignment::UnitRole>>,
     pub party_leader_index: Option<usize>,
     pub ready_check: ReadyCheckState,
     pub voice_chat: VoiceChatState,

@@ -1,13 +1,46 @@
 //! Retail/PTR role writes with changed-only synchronous notification.
 
-use super::unit_roles::{UnitRole, represented_identity, require_string, role_name};
+use super::unit_roles::{represented_identity, require_string};
 use crate::lua_api::globals::group_queries::relationships::{is_group_assistant, is_group_leader};
-use crate::lua_api::methods::{borrow_state_mut, create_string};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::stack_val;
 use rilua::table_security::unwrap_secret;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum UnitRole {
+    Tank,
+    Healer,
+    Damage,
+}
+
+impl UnitRole {
+    fn number(self) -> f64 {
+        match self {
+            Self::Tank => 0.0,
+            Self::Healer => 1.0,
+            Self::Damage => 2.0,
+        }
+    }
+}
+
+fn role_name(role: Option<UnitRole>) -> &'static str {
+    match role {
+        Some(UnitRole::Tank) => "TANK",
+        Some(UnitRole::Healer) => "HEALER",
+        Some(UnitRole::Damage) => "DAMAGER",
+        None => "NONE",
+    }
+}
+
+pub(super) fn read_role(state: &LuaState, unit: &str) -> LuaResult<(&'static str, f64)> {
+    let sim = borrow_state(state)?;
+    let role = represented_identity(&sim, unit)
+        .and_then(|(guid, _)| sim.unit_roles.get(&guid).copied().flatten());
+    Ok((role_name(role), role.map_or(-1.0, UnitRole::number)))
+}
 
 fn parse_enum_role(value: Val) -> LuaResult<Option<Option<UnitRole>>> {
     match value {

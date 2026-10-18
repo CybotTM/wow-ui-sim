@@ -416,6 +416,21 @@ fn test_unit_group_roles_assigned_returns_none() {
         .eval(r#"return UnitGroupRolesAssigned("player")"#)
         .unwrap();
     assert_eq!(role, "NONE");
+    env.exec(
+        r#"
+        for _, unit in ipairs({"player", "party1", "nonexistent"}) do
+            assert(select('#', UnitGroupRolesAssigned(unit)) == 1)
+            assert(UnitGroupRolesAssigned(unit) == "NONE")
+            assert(select('#', UnitGroupRolesAssignedEnum(unit)) == 1)
+            assert(UnitGroupRolesAssignedEnum(unit) == -1)
+        end
+        assert(UnitGroupRolesAssigned(nil) == "NONE")
+        assert(UnitGroupRolesAssignedEnum(nil) == -1)
+        assert(not pcall(UnitGroupRolesAssigned, {}))
+        assert(not pcall(UnitGroupRolesAssignedEnum, {}))
+        "#,
+    )
+    .unwrap();
 }
 
 // ============================================================================
