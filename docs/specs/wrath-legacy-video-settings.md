@@ -29,7 +29,8 @@ Wrath's legacy gamma uses simulator state in `src/lua_api/globals/real/legacy_ga
 
 ## Known gaps (current cycle)
 
-- [ ] GREEN and requested profile preservation/startup checks pending; original-consumer RED recorded before producers.
+- [x] Bounded Wrath normal-Cargo GREEN at `89a915a0c`: 34/34 PASS (four Gamma/BaseMip cases, six Slider step-assignment, five range-lifecycle, eighteen widget-slider and one original Effects control). Exact argv, full streams and exit0: private handoff `wrath-gamma-basemip-fix/wrath-slider-green.*`.
+- [ ] This headless Wrath subset does not establish full-feature startup, current-master integration, other-profile preservation, native parity or rendered brightness; those remain separate receipts.
 
 ## Out of scope
 
