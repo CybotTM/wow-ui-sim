@@ -173,7 +173,8 @@ fn unregister_live_container(env: &WowLuaEnv) {
     "#,
     );
     fixtures::publish(env, fixtures::supplied());
-    env.fire_on_update(0.0).expect("post-unregister normal OnUpdate");
+    env.fire_on_update(0.0)
+        .expect("post-unregister normal OnUpdate");
     fixtures::assert_lua(
         env,
         "post-unregister feed cannot reacquire consumer",
@@ -209,9 +210,13 @@ fn ptr_cached_register_update_remove_and_live_unregister() {
             wow_ui_sim::client_profile::ACTIVE,
             wow_ui_sim::client_profile::ClientProfile::Ptr
         );
-        let cache = wow_ui_sim::paths::default_blizzard_ui_addons_path()
-            .expect("resolve active PTR cache");
-        assert!(cache.ends_with("ptr/AddOns"), "wrong cache: {}", cache.display());
+        let cache =
+            wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("resolve active PTR cache");
+        assert!(
+            cache.ends_with("ptr/AddOns"),
+            "wrong cache: {}",
+            cache.display()
+        );
         let env = new_blizzard_addon_env(&cache);
         load_cached_widget_addons(&env, &cache);
         observe_preloaded(&env);
