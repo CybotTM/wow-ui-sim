@@ -1,0 +1,16 @@
+{
+  "GlobalStrings.lua": "1d6662e6e77945a1d82d91dbc2fec70a5dffeb31e123c392e24adf7548d17dec",
+  "Fonts.xml": "cf08457a8fd1e1d1788532bb10c2de7e05280291c11f6a00294709f104d26757",
+  "MoneyFrame.xml": "2d72bc532d440ef7c01db88986be0a0151b9ff644e0b8a5a22def9998c109590",
+  "MoneyInputFrame.xml": "8c178e530b037adce610eed18cc17822656c9eec548962f5bb912fd8d5b71c5f",
+  "ItemButtonTemplate.xml": "a6a8a4971f813a57089a0bd640d98c748367bea3564b86aa1565334b3acdbefd",
+  "UIPanelTemplates.xml": "e3cb10077e9296a5067ec32e33655b01c8930bee4019db37196ac292f602b91c",
+  "QuestInfo.xml": "290ed9e781c98734b69829184b171b99348c8d34ff3972292a01b1db7736bccc",
+  "QuestInfo.lua": "3bfe691acdb2a095a6633c3ce7bef4a13f53f464d20781b2e850e442f9b715cd",
+  "MoneyFrame.lua": "f7392b7c139c8694fc3fe7581231c21342b9b6ed23b19f0b4bb77f3c156a7d90",
+  "MoneyInputFrame.lua": "47b5cb82c6632450348b51b4f3301209eb37a5677190e4e8cd6cefa6410abee2",
+  "StaticPopup.lua": "1134b08e87d8577c0353895207eaec24e74e8f669775a49257a82431a4ac3042",
+  "StaticPopup.xml": "a575f35cc8e9e3a585c6ccd5db40f650dbd4f153e62be6736f1101c3f33dde7b",
+  "QuestLogFrame.lua": "6ac6ca92b3036417082b88cc2f8b5c9fc8889f51f82aa726fe0bcd44990bc5e2",
+  "QuestLogFrame.xml": "530c396e36af4b23a725086d37b6cb68abaf1966db77ba26c4e3fed3ce76f154"
+}
