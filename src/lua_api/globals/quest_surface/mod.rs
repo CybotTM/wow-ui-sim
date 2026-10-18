@@ -10,6 +10,8 @@ mod info_fields;
 mod legacy_globals;
 mod register;
 mod task_quest;
+#[cfg(feature = "client-wrath")]
+mod wrath_gossip;
 
 use crate::lua_api::methods::create_table;
 use rilua::Val;
