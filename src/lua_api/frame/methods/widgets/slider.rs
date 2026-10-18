@@ -152,14 +152,12 @@ fn quantize_slider_value(value: f64, min: f64, max: f64, step: f64) -> f64 {
     if clamped == min || clamped == max {
         return clamped;
     }
-    let remainder = (clamped - min) % step;
-    let lower = (clamped - remainder).max(min);
-    let upper = if step >= max - lower {
-        max
-    } else {
-        lower + step
-    };
-    if clamped - lower < upper - clamped {
+    // Reconstruct both lattice points from their integer step index. Subtracting
+    // a floating remainder then adding step drifts even an exact zero off-grid.
+    let lower_index = ((clamped - min) / step).floor();
+    let lower = (min + lower_index * step).clamp(min, max);
+    let upper = (min + (lower_index + 1.0) * step).clamp(min, max);
+    if (clamped - lower).abs() < (upper - clamped).abs() {
         lower
     } else {
         upper

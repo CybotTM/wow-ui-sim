@@ -28,6 +28,12 @@ Saved Retail source `05f1b4a62`: **five unique PASS, exit0**, independently reco
 
 Saved Wrath `39d38`: C1 step assignment **5 PASS**; [shared Wrath receipt](editbox-text-position-selection.md#saved-bounded-wrath-checkpoint) owns build/hash qualifications and pending runtime audit5795. Current relevant-fix/profile proof remains open; no checkbox closure.
 
+## Exact signed decimal lattice point — 2026-10-17
+
+- [ ] With range `[-0.5,0.5]`, step `0.1`, prior value `0.5`, assigning `0` stores exactly zero and reports exactly zero synchronously; repeating zero remains silent.
+
+The original Wrath Gamma consumer exposed remainder-subtraction drift: `(0-(-0.5)) % 0.1` becomes `0.09999999999999998`; subtracting that remainder then adding step yields `2.7755575615628914e-17`. Reconstruct adjacent candidates from integral step indices relative to the minimum instead: `-0.5 + 5*0.1` is exactly zero. Keep nearest-candidate/max-endpoint/upward-tie policy; no decimal rounding, Gamma special case or display correction. `tests/slider_step_assignment.rs::slider_step_assignment_preserves_exact_zero_on_signed_decimal_lattice` and the unchanged exact-zero assertion in `tests/wrath_gamma_basemip.rs` are RED before the arithmetic correction. Current GREEN and Retail/Wrath preservation pending.
+
 ## C8 changed-range callback/lifecycle candidate
 
 Explicit shared simulator policy only, not a native-client claim. Saved Retail producer execution passes five cases; current-source/all-profile acceptance remains open. Existing validation remains owned by [widget range validation](widget-range-validation.md); C8 does not change it or StatusBar behavior.
