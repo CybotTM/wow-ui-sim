@@ -4,11 +4,11 @@ Under `client-wrath`, the legacy log read surface projects ordered supplied rich
 
 ## What it must do
 
-- [ ] `GetQuestLogTitle`, `SelectQuestLogEntry`, and `GetQuestLogSelection` use the same ordered rich rows counted by `GetNumQuestLogEntries`; no static catalog fallback. Selection retains quest identity and resolves its current one-based position after reorder.
-- [ ] Unchanged Wrath `QuestLog_GetFirstSelectableQuest` and `QuestInfo_ShowTitle` enumerate/read supplied rows; selecting indices 1 and 2 independently displays the corresponding real FontString title, including reversed input.
-- [ ] Empty rows produce count 0/0, first-selectable 0, selection 0, nil title lookup, and an empty original title display.
-- [ ] Represented ordinary rows return the tuple below; active completion/failed flags, not completion history, determine slot 7.
-- [ ] Reads/selection preserve rich/light membership, pending offer, gossip, money, XP, completion history, independent environments and notifications. Only selection and existing dialog-readiness invalidation may change. Direct execution, installed error handler, `lua_errors` and `lua_error_counts` remain clean.
+- [x] `GetQuestLogTitle`, `SelectQuestLogEntry`, and `GetQuestLogSelection` use the same ordered rich rows counted by `GetNumQuestLogEntries`; no static catalog fallback. Selection retains quest identity and resolves its current one-based position after reorder.
+- [x] Unchanged Wrath `QuestLog_GetFirstSelectableQuest` and `QuestInfo_ShowTitle` enumerate/read supplied rows; selecting indices 1 and 2 independently displays the corresponding real FontString title, including reversed input.
+- [x] Empty rows produce count 0/0, first-selectable 0, selection 0, nil title lookup, and an empty original title display.
+- [x] Represented ordinary rows return the tuple below; active completion/failed flags, not completion history, determine slot 7.
+- [x] Reads/selection preserve rich/light membership, pending offer, gossip, money, XP, completion history, independent environments and notifications. Only selection and existing dialog-readiness invalidation may change. Direct execution, installed error handler, `lua_errors` and `lua_error_counts` remain clean.
 
 ### WotLK 3.3.5 return contract
 
@@ -50,8 +50,14 @@ Fixtures load whole cached sources, verify hashes, use real simulator widgets an
 
 ## Known gaps (current cycle)
 
-- [ ] Bounded Wrath runtime and preservation proof pending; no native/full-profile acceptance claim.
+Bounded supplied-row seam verified below; native/full-profile acceptance remains outside scope.
 
 ## Out of scope
 
 Headers, collapse/grouping, daily classification, tag localization, full `QuestLog_Update`, original `QuestLog_SetSelection`, full `QuestInfo_Display`, objectives/progress/readiness, acceptance/events, watches, abandon, rewards, other profiles, C_QuestLog redesign and static fallback catalogs. `GetQuestLogIndexByID`, C namespace indices and static objective/text reads remain separate downstream gaps. `IsCurrentQuestFailed` representation is not certified. Original full selection remains excluded because its `SetAbandonQuest` call currently removes membership; fixing this read seam must not imply that boundary is repaired.
+
+## Bounded proof — 2026-10-18
+
+At source `a206fff605b161d0f1b806af41196b2a336c0c66`, Wrath `--no-default-features --features sound,gui,casc,client-wrath` integration execution passes **6/6 new cases + 6/6 gossip/greeting/flag controls + 32/32 exact shared controls**. All direct/handler/simulator error oracles are clean, and the original persisted CVar stat/hash is unchanged. `cargo fmt --all -- --check` and admitted `cargo check --lib -j1` exit 0. Builds use slot-0 in async MemoryMax=9G units, `-j1`; launch copies use MemoryMax=4G and a 180-second unit bound.
+
+Tests were committed before implementation, but optional pre-fix runtime was **not run** after capacity HOLD. This is bounded GREEN, not an observed RED-to-GREEN result or whole W1 closure. Raw build/runtime/check/CVar receipts are kept in the host-private `wrath-questlog-read` handoff report; no native, full startup, full quest panel or other-profile proof is borrowed.
