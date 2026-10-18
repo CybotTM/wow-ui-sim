@@ -1,3 +1,7 @@
+## [2026-10-18] system | GUI startup yielding
+
+[Event system](systems/event-system.md#startup-event-sequence) links the [GUI startup contract](../specs/gui-startup-yield.md) and the shared startup mechanics. Requirements remain unverified; source/test inspection is not runtime or real-addon acceptance.
+
 ## [2026-10-18] system | Environment texture source resolution
 
 [Source cache](systems/texture-source-resolution-cache.md) documents shared setter/renderer ownership, directory freshness and cheap metadata-validated CPU negatives. [Contract](../specs/texture-source-resolution-cache.md) owns behavioral and preservation proof; real Ellesmere startup acceptance remains separate.

@@ -65,7 +65,7 @@ OnUpdate errors suppress the frame on subsequent ticks (added to `on_update_erro
 
 ## Startup Event Sequence
 
-After all addons load, the simulator fires in order: `ADDON_LOADED("WoWUISim")`, `VARIABLES_LOADED`, `PLAYER_LOGIN`, `EDIT_MODE_LAYOUTS_UPDATED`, `TIME_PLAYED_MSG`, `PLAYER_ENTERING_WORLD(true, false)`, `UPDATE_BINDINGS`, `DISPLAY_SIZE_CHANGED`, `UI_SCALE_CHANGED`.
+The [GUI startup contract](../../specs/gui-startup-yield.md) owns update-turn yielding and acceptance. [Startup mechanics](../../event-system.md#startup-event-sequence) owns the event order, first-canvas capture, IPC ordering, settling and resize dispatch; game login and glue startup have distinct sequences.
 
 ## XML Script Setup
 
@@ -76,6 +76,7 @@ Three handler forms: `function="X"` uses X directly, `method="X"` wraps as `self
 - [Unit role assignment](../../specs/unit-role-assignment.md) — role producer, original callers and proof limits
 
 - [event-system.md](../../event-system.md) — EventQueue, ScriptHandler types, dispatch, OnUpdate, input flow, startup sequence
+- [GUI startup contract](../../specs/gui-startup-yield.md) — update-turn yielding, IPC ordering and proof limits
 - [EditBox focus callbacks](../../specs/editbox-focus-callbacks.md) — Lua focus-transition contract and limits
 - [Forever finite constants](../../specs/forever-finite-constants.md) — source-backed finite event additions and limits
 - `Blizzard_APIDocumentationGenerated/{ChatInfoDocumentation,UnitAuraDocumentation}.lua` in the pinned Forever cache — event literals

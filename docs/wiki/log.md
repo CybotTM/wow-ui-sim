@@ -1,3 +1,7 @@
+## [2026-10-18] ingest | GUI startup yielding
+
+Added the [GUI startup contract](../specs/gui-startup-yield.md), synchronized [event-system coverage](systems/event-system.md#startup-event-sequence), and corrected the stale startup-order copy by linking its architecture owner. Source/test inspection only; no runtime acceptance claimed.
+
 ## [2026-10-18] system | Texture source resolution cache
 
 [Source ownership and freshness](systems/texture-source-resolution-cache.md) links the [contract](../specs/texture-source-resolution-cache.md), calibrated directory-open fixture and cheap frame-load negative-cache requirement. Historical unconditional-negative behavior is replaced by stamp validation, not unconditional per-frame rescanning. GREEN/preservation pending; no real-addon readiness claim.

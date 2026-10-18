@@ -479,17 +479,22 @@ batches. Subsequent resize events run on timer updates, not draw. Headless
 settling and ordinary timer callback/identity semantics are unchanged. A single
 synchronous Lua callback can still block its turn; this is not preemption.
 
-**File:** `src/iced_app/app.rs:53-105` (GUI mode) and `src/main.rs:434-478` (headless mode)
+**Contract:** [GUI startup yielding](specs/gui-startup-yield.md).
 
-After all addons are loaded, the simulator fires startup events in this order:
+**Source:** `src/iced_app/app.rs` (`GuiStartupProgress`, `advance_gui_startup`), `src/iced_app/update_runtime.rs` (`handle_process_timers`) and `src/startup.rs` (shared event sequence and headless settling).
+
+After all addons are loaded, game-screen startup fires events in this order:
 
 1. `ADDON_LOADED` with arg `"WoWUISim"` -- signals all addons are loaded
 2. `VARIABLES_LOADED` -- SavedVariables are available
-3. `PLAYER_LOGIN` -- player data available
-4. `EDIT_MODE_LAYOUTS_UPDATED` -- action bar layout info (if EditMode addon loaded)
-5. `TIME_PLAYED_MSG` -- via `RequestTimePlayed()` global
-6. `PLAYER_ENTERING_WORLD` with args `(true, false)` for initial login
-7. `UPDATE_BINDINGS` -- key bindings ready
+3. `DISPLAY_SIZE_CHANGED`, then `UI_SCALE_CHANGED` -- before login; GUI size-setting can emit an earlier pair
+4. `PLAYER_LOGIN` -- player data available
+5. `EDIT_MODE_LAYOUTS_UPDATED` -- action bar layout info (if EditMode addon loaded)
+6. `TIME_PLAYED_MSG` -- via `RequestTimePlayed()` global
+7. `PLAYER_ENTERING_WORLD` with args `(true, false)` for initial login
+8. `UPDATE_BINDINGS` -- key bindings ready
+
+Glue screens use `src/startup.rs::fire_glue_startup_events`, not this game-login sequence.
 
 Display/scale recalculation emits `DISPLAY_SIZE_CHANGED` then `UI_SCALE_CHANGED`; at those handlers, modeled `uiScale`/`useUiScale` changes expose the new effective scale while `GetCVar()` still returns the old value. The successful CVar write and `CVAR_UPDATE` follow afterward. Startup emits the display/scale pair before `PLAYER_LOGIN` as described in the scale-event investigation.
 
