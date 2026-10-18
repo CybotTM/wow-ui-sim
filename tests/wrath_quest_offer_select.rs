@@ -3,9 +3,10 @@
 
 use rilua::{LuaApiMut, LuaResult, Val, vm::state::LuaState};
 use sha2::{Digest, Sha256};
-use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::methods::{borrow_state, create_string};
-use wow_ui_sim::lua_api::sim_substates::{GossipQuestRow, GossipState};
+use std::{cell::RefCell, rc::Rc};
+use wow_ui_sim::lua_api::state::{GossipQuestRow, GossipState};
+use wow_ui_sim::lua_api::{SimState, WowLuaEnv};
+use wow_ui_sim::lua_bridge::FromStack;
 
 const SOURCES: &[(&str, &str)] = &[
     (
@@ -63,7 +64,14 @@ fn load_originals(env: &WowLuaEnv) {
 // Read-only test instrumentation: the observer samples actual state during dispatch.
 fn observe_offer(state: &mut LuaState) -> LuaResult<u32> {
     let (selected, pending) = {
-        let sim = borrow_state(state)?;
+        let Val::Userdata(handle) = Val::from_stack(state, 1)? else {
+            return Err(rilua::runtime_error("observer state handle required"));
+        };
+        let handle = state.gc.userdata.get(handle).unwrap();
+        let sim = handle
+            .downcast_ref::<Rc<RefCell<SimState>>>()
+            .unwrap()
+            .borrow();
         (sim.selected_quest_log_id, sim.pending_quest_offer.clone())
     };
     state.push(selected.map_or(Val::Nil, |id| Val::Num(id as f64)));
@@ -71,8 +79,8 @@ fn observe_offer(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(1);
     };
     state.push(Val::Num(offer.quest_id as f64));
-    let title = create_string(state, &offer.title);
-    state.push(title);
+    let title = state.gc.intern_string(offer.title.as_bytes());
+    state.push(Val::Str(title));
     state.push(Val::Num(offer.level as f64));
     Ok(4)
 }
@@ -119,8 +127,14 @@ fn seed_env() -> WowLuaEnv {
         assert!(sim.selected_quest_log_id.is_none());
     }
     let loader = env.loader_env();
-    LuaApiMut::register_function(&mut *loader.rilua_mut(), "ObserveOfferState", observe_offer)
-        .unwrap();
+    {
+        let mut lua = loader.rilua_mut();
+        let handle = lua.create_userdata(Rc::clone(env.state())).unwrap();
+        lua.set_global_val("OfferObservedState", Val::Userdata(handle.0))
+            .unwrap();
+        lua.register_function("ObserveOfferState", observe_offer)
+            .unwrap();
+    }
     exec(
         &env,
         r#"
@@ -130,7 +144,7 @@ fn seed_env() -> WowLuaEnv {
         observer:RegisterEvent("QUEST_ACCEPTED")
         observer:SetScript("OnEvent", function(_, event)
             if event == "QUEST_DETAIL" then
-                OfferDetails[#OfferDetails+1] = {ObserveOfferState()}
+                OfferDetails[#OfferDetails+1] = {ObserveOfferState(OfferObservedState)}
             else
                 OfferAccepted = OfferAccepted + 1
             end
