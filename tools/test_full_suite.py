@@ -294,8 +294,14 @@ class FullSuiteWorkerTests(unittest.TestCase):
         )
         process = subprocess.Popen(
             [
-                sys.executable, str(RUNNER), "submit", "sandbox-ref",
-                "--build-jobs", "2", "--target-dir", str(self.target_dir),
+                sys.executable,
+                str(RUNNER),
+                "submit",
+                "sandbox-ref",
+                "--build-jobs",
+                "2",
+                "--target-dir",
+                str(self.target_dir),
             ],
             env=self.env,
             stdout=subprocess.PIPE,
@@ -362,7 +368,9 @@ class FullSuiteWorkerTests(unittest.TestCase):
                 result = self.invoke_controller("submit", "--target-dir", str(target))
                 self.assertEqual(result.returncode, 0, result.stderr)
                 argv = json.loads((self.root / "submitted.json").read_text())
-                self.assertEqual(argv[-4:], ["--build-jobs", "1", "--target-dir", str(target)])
+                self.assertEqual(
+                    argv[-4:], ["--build-jobs", "1", "--target-dir", str(target)]
+                )
                 self.assertIn("--setenv=FULL_SUITE_JOBS=16", argv)
 
     def test_invalid_options_rejected_before_launch_or_checkout(self):

@@ -94,7 +94,8 @@ A separate local temporary-marker discovery/execution/cleanup control passes, an
 
 ## Asynchronous full suite
 
-`python3 tools/full_suite.py submit [REF]` schedules the detached worker;
+`python3 tools/full_suite.py submit [REF] --target-dir SLOT --build-jobs 1`
+schedules the detached worker;
 `python3 tools/full_suite.py status [REF]` reads stored results. The worker keeps
 its existing suite lock and dedicated checkout/results under `~/Projects/wow/`.
 The results `.lock` serializes revision resolution, checkout preparation and all
@@ -102,13 +103,24 @@ three child lifetimes, including unsuccessful exits. Each step invokes native
 Cargo directly; the obsolete external builder-lock wrapper is not a dependency
 and its lock does not block these children.
 
-Cargo steps use `--offline --locked` and `CARGO_BUILD_JOBS=12`; dependencies must
-already be cached and the lockfile current. `FULL_SUITE_JOBS` controls nextest
-test workers only (default 16), independently of compilation jobs. Complete
+Both `submit` and `run` require `--target-dir SLOT`: an absolute path resolving
+to one of the four approved cache slots in [build policy](../AGENTS.md#development-buildrun).
+Canonical and suite checkout `target/` paths, non-slot paths, relative paths, and
+slots redirected outside the approved set by symlinks are rejected before launch
+or checkout. Select an available, coordinated slot; validation does not reserve it.
+
+`--build-jobs N` accepts positive integers and defaults to **1** for both actions;
+there is no caller-environment build-job default. Submit passes build jobs and the
+resolved target as explicit worker arguments. Every Cargo phase receives `-jN`,
+`CARGO_BUILD_JOBS=N`, and `CARGO_TARGET_DIR=SLOT`, overriding inherited values.
+Cargo steps retain `--offline --locked`; dependencies must already be cached and
+the lockfile current. `FULL_SUITE_JOBS` controls nextest test workers only
+(default 16), independently of compilation jobs, and submit forwards its chosen
+value explicitly via `systemd-run --setenv`. Complete
 integration and library scopes use nextest with `--no-fail-fast`; the complete
 `prefork_full_ui` scope uses `cargo test`. Nonzero Cargo exits, parsed failures
 and both stdout/stderr remain in the stored JSON/log; later steps still run.
-Submission/status behavior is unchanged.
+Status behavior and all three workload scopes are unchanged.
 
 Source revision `3eab34fb9` adds two fields to each executed step's JSON:
 `command` is the exact argv passed to the subprocess, including `--offline`
@@ -129,14 +141,16 @@ Bounded worker regression tests (temporary git/Cargo executable fixtures and rea
 flocks, no actual builds or systemd) prove children execute while the old builder
 lock remains held, independent jobs/flags, all-scope failure/stream retention,
 and controller serialization before checkout and through child execution:
-`python3 -m unittest tools.test_full_suite -v`. Fake-systemd coverage checks the
-detached worker argv/resource limits; installation coverage writes only to a
-temporary home.
+`python3 -I -m unittest discover -s tools -p test_full_suite.py -v`.
+Fake-systemd coverage checks detached worker argv/resource limits, explicit
+build-job/target forwarding, default jobs and all four slots; rejection coverage
+checks both submit and worker paths, including symlink redirection. Installation
+coverage writes only to a temporary home.
 
 Main deploys with `./deploy.sh` from the repository root (a Python installer,
 not Bash). It installs only `tools/full_suite.py` as executable
 `~/bin/full-suite`; no simulator build, service restart or suite submission.
-Tracked edits alone do not update `/home/osso/bin/full-suite`.
+Tracked edits alone do not update the installed entrypoint.
 
 ## Related
 

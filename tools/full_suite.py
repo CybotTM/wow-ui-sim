@@ -2,15 +2,20 @@
 """Run the full wow-ui-sim test suite for one commit, in the background, and record results.
 
 Usage:
-  full_suite.py run [REF]      Test REF (default origin/master) now; blocks until done.
-  full_suite.py submit [REF]   Same, detached via systemd-run --user; prints the unit name.
+  full_suite.py run [REF] --target-dir SLOT [--build-jobs N]
+                             Test REF (default origin/master) now; blocks until done.
+  full_suite.py submit [REF] --target-dir SLOT [--build-jobs N]
+                             Same, detached via systemd-run --user; prints the unit name.
   full_suite.py status [REF]   Print the stored result for REF's commit (or the latest run).
 
-Runs serialize on a lock. Each run uses a dedicated checkout and target dir so agents'
-working copies are never touched. Results: RESULTS/<sha>.json plus <sha>.log; master runs
+Build jobs default to 1, independent of FULL_SUITE_JOBS (nextest workers, default 16).
+SLOT must resolve to one of ~/.cache/wow-ui-sim-targets/slot-{0,1,2,3}.
+Runs serialize on a lock. Each run uses a dedicated checkout and an explicitly selected
+approved target slot so agents' working copies are never touched. Results: RESULTS/<sha>.json plus <sha>.log; master runs
 also update RESULTS/master-latest.json, which later runs compare against to list NEW failures.
 """
 
+import argparse
 import fcntl
 import json
 import os
@@ -73,13 +78,40 @@ def summarize(output, pattern):
     return sorted(set(pattern.findall(output)))
 
 
-def run(ref):
+def validate_target_dir(value):
+    target = Path(value)
+    if not target.is_absolute():
+        raise ValueError("target dir must be absolute")
+    target = target.resolve()
+    forbidden = {(REPO / "target").resolve(), (CHECKOUT / "target").resolve()}
+    slots = {Path.home() / f".cache/wow-ui-sim-targets/slot-{i}" for i in range(4)}
+    if target in forbidden or target not in slots:
+        raise ValueError(
+            "target dir must resolve to an approved cache slot (0..3), not a checkout target"
+        )
+    return target
+
+
+def positive_build_jobs(value):
+    jobs = int(value)
+    if jobs < 1:
+        raise argparse.ArgumentTypeError("build jobs must be positive")
+    return jobs
+
+
+def run(ref, build_jobs, target_dir):
+    target_dir = validate_target_dir(target_dir)
     RESULTS.mkdir(parents=True, exist_ok=True)
     with open(LOCK, "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         sha = resolve(ref)
         prepare_checkout(sha)
-        env = dict(os.environ, CARGO_BUILD_JOBS="12", CARGO_TERM_COLOR="never")
+        env = dict(
+            os.environ,
+            CARGO_BUILD_JOBS=str(build_jobs),
+            CARGO_TARGET_DIR=str(target_dir),
+            CARGO_TERM_COLOR="never",
+        )
         result = {
             "ref": ref,
             "sha": sha,
@@ -95,6 +127,7 @@ def run(ref):
                         "cargo",
                         "nextest",
                         "run",
+                        f"-j{build_jobs}",
                         "--test",
                         "integration",
                         "--no-fail-fast",
@@ -105,7 +138,7 @@ def run(ref):
                 ),
                 (
                     "prefork",
-                    ["cargo", "test", "--test", "prefork_full_ui"],
+                    ["cargo", "test", f"-j{build_jobs}", "--test", "prefork_full_ui"],
                     PREFORK_FAILED,
                 ),
                 (
@@ -114,6 +147,7 @@ def run(ref):
                         "cargo",
                         "nextest",
                         "run",
+                        f"-j{build_jobs}",
                         "--lib",
                         "--no-fail-fast",
                         "--test-threads",
@@ -150,7 +184,8 @@ def new_failures(result):
     }
 
 
-def submit(ref):
+def submit(ref, build_jobs, target_dir):
+    target_dir = validate_target_dir(target_dir)
     unit = f"full-suite-{int(time.time())}"
     subprocess.run(
         [
@@ -165,10 +200,15 @@ def submit(ref):
             "MemoryHigh=16G",
             "-p",
             "MemoryMax=16G",
+            f"--setenv=FULL_SUITE_JOBS={JOBS}",
             sys.executable,
             os.path.abspath(__file__),
             "run",
             ref,
+            "--build-jobs",
+            str(build_jobs),
+            "--target-dir",
+            str(target_dir),
         ],
         check=True,
     )
@@ -189,13 +229,23 @@ def status(ref):
 
 
 if __name__ == "__main__":
-    action = sys.argv[1] if len(sys.argv) > 1 else "status"
-    target = sys.argv[2] if len(sys.argv) > 2 else None
-    if action == "run":
-        run(target or "origin/master")
-    elif action == "submit":
-        submit(target or "origin/master")
-    elif action == "status":
-        status(target)
+    parser = argparse.ArgumentParser(description=__doc__)
+    actions = parser.add_subparsers(dest="action", required=True)
+    for action in ("run", "submit"):
+        command = actions.add_parser(action)
+        command.add_argument("ref", nargs="?", default="origin/master")
+        command.add_argument("--build-jobs", type=positive_build_jobs, default=1)
+        command.add_argument("--target-dir", required=True)
+    status_parser = actions.add_parser("status")
+    status_parser.add_argument("ref", nargs="?")
+    args = parser.parse_args(sys.argv[1:] or ["status"])
+    if args.action == "status":
+        status(args.ref)
     else:
-        sys.exit(__doc__)
+        try:
+            if args.action == "run":
+                run(args.ref, args.build_jobs, args.target_dir)
+            else:
+                submit(args.ref, args.build_jobs, args.target_dir)
+        except ValueError as error:
+            parser.error(str(error))
