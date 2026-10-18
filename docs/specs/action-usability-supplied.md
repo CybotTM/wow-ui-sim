@@ -48,6 +48,21 @@ All 23 selected profile/test pairs passed through the tracked `integration` targ
 
 Private command/output/artifact-feature records, CVar before/after guards and exact pass names: `/home/osso/.local/state/wow-ui-sim/handoff/g3-retail-actionbutton/`. Proof is bounded to unchanged query-refresh and watcher methods on native widgets, not full addon startup, native resource rules or GPU pixels.
 
+## Combined-tree acceptance
+
+Combined revision `0636c88ffd4d3f1c77c761d2723ec2270f458596`, tree `415f988e92d274493fc02ee783c44b25b54eee5b`, rebased onto master `f452d5a4b` (including the global Slider quantization fix): the exact tracked `integration` selections passed again, sequentially in reusable slot-1.
+
+| Profile | Named PASS | Selection |
+|---|---|---|
+| Retail | 7 | 2 modern G3 + 3 G2 + 2 legacy/deprecated G3 |
+| PTR | 5 | 2 modern G3 + 3 G2 |
+| Mists | 6 | 2 modern G3 + 4 G2, including legacy projection |
+| Forever | 5 | 2 modern G3 + 3 G2 |
+
+All 23 profile/test pairs ran on that combined revision with `--locked -j1 --no-default-features --features sound,gui,casc,client-<profile>`, serial libtest execution and `MemoryMax=9G`. Non-Mists selections skipped the early-return legacy projection. Every run reported zero failed/ignored/measured tests and emitted the matching profile's integration artifact; the generated harness selected this worktree's sources. No zero-selection run or cache invalidation was needed. Original CVar stat/hash remained unchanged around every isolated byte-exact copy, including the check run. Mists/Forever retain the pre-existing UnitRole dead-code warning; Retail/PTR and default check emitted no compiler warnings.
+
+`cargo fmt --all -- --check` and default-feature `cargo check --locked -j1` both passed on the same combined revision. These gates cover the tracked selections and default compilation, not a full suite or additional profile acceptance. The following documentation-only receipt preserves their source scope. Exact commands, named tests, compiler artifacts, harness snapshots and CVar guards: `/home/osso/.local/state/wow-ui-sim/handoff/g3-combined-rerun/`; owning ledger: `/home/osso/.local/state/wow-ui-sim/handoff/g3-retail-actionbutton/proof-ledger.json`.
+
 ## Out of scope
 
 Resource/range/cooldown calculations, casting eligibility/enforcement, automatic notifications, attack/repeat state (G1/G2), UseAction dispatch (G4), vendor edits, native parity and broader profile acceptance. Host supplies state; the fixture explicitly delivers the public usability event.
