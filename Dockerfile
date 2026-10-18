@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     pkg-config \
     cmake \
+    libicu-dev \
     fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
@@ -43,8 +44,7 @@ RUN sh /tmp/docker-stub-cargo-targets.sh /build/Cargo.toml && cargo fetch --lock
 # --no-default-features skips sound, GUI, and CASC dependencies not needed for
 # headless test runs. client-retail still selects the required runtime profile.
 COPY build.rs ./
-# Keep optional PTR native build inputs available; client-retail below does not
-# enable retail-12-1-5 or require ICU4C build/runtime packages.
+# Retail selects retail-12-1-5, including the native ICU build/runtime dependency.
 COPY build/ build/
 COPY native/ native/
 COPY data/ data/
@@ -52,23 +52,36 @@ COPY data/ data/
 # manifest-only inputs: the binary-only build below never compiles them.
 COPY src/ src/
 RUN cargo build --release --bin wow-sim --no-default-features --features client-retail --locked \
-    && strip /build/target/release/wow-sim
+    && strip /build/target/release/wow-sim \
+    && mkdir /icu-runtime \
+    && cp -L /usr/lib/x86_64-linux-gnu/libicui18n.so.72 \
+             /usr/lib/x86_64-linux-gnu/libicuuc.so.72 \
+             /usr/lib/x86_64-linux-gnu/libicudata.so.72 /icu-runtime/
 
 # =============================================================================
 # BlizzardUI Stage — sparse-checkout from Gethe/wow-ui-source
 # =============================================================================
 FROM alpine/git AS blizzard-ui
 
-ARG BLIZZARD_UI_TAG=12.0.7
-RUN git clone --filter=blob:none --no-checkout --depth=1 --branch ${BLIZZARD_UI_TAG} \
-        https://github.com/Gethe/wow-ui-source.git /wow-ui-source \
+# Selected Retail 12.1.5.70448 source; see docs/updating-blizzard-ui-to-a-new-patch.md.
+# Never publish a cache whose tree differs from the compiled Retail manifest.
+COPY data/blizzard-ui-files/retail.txt /tmp/retail.txt
+RUN git init /wow-ui-source \
     && cd /wow-ui-source \
+    && git remote add origin https://github.com/Gethe/wow-ui-source.git \
+    && git fetch --depth=1 origin b9be9379719047977fca4dba1bb1d9988e8840b3 \
     && git sparse-checkout init --cone \
     && git sparse-checkout set Interface/AddOns \
-    && git checkout ${BLIZZARD_UI_TAG} \
-    && rm -rf /wow-ui-source/.git \
-    && touch /wow-ui-source/Interface/AddOns/.wow-ui-sim-blizzard-ui-complete \
-    && printf 'profile=retail\nsource=gethe-image-build\nfallback=none\n' > /wow-ui-source/Interface/AddOns/.wow-ui-sim-blizzard-ui-provenance
+    && git checkout --detach FETCH_HEAD \
+    && test "$(git rev-parse HEAD)" = b9be9379719047977fca4dba1bb1d9988e8840b3 \
+    && git ls-tree -r --name-only HEAD Interface/AddOns/ | cut -d/ -f3- | LC_ALL=C sort > /tmp/actual.txt \
+    && LC_ALL=C sort /tmp/retail.txt > /tmp/expected.txt \
+    && diff -u /tmp/expected.txt /tmp/actual.txt \
+    && while IFS= read -r entry; do test -f "Interface/AddOns/$entry" || exit 1; done < /tmp/retail.txt \
+    && manifest_sha256="$(sha256sum /tmp/retail.txt | cut -d' ' -f1)" \
+    && printf 'profile=retail\nversion=12.1.5.70448\nsource=gethe-image-build\ngethe_revision=b9be9379719047977fca4dba1bb1d9988e8840b3\nmanifest_sha256=%s\nfallback=none\n' "$manifest_sha256" > Interface/AddOns/.wow-ui-sim-blizzard-ui-provenance \
+    && touch Interface/AddOns/.wow-ui-sim-blizzard-ui-complete \
+    && rm -rf /wow-ui-source/.git
 
 # =============================================================================
 # Runtime Stage
@@ -79,6 +92,9 @@ WORKDIR /app
 
 # Copy stripped binary from build stage.
 COPY --from=builder /build/target/release/wow-sim /app/wow-sim
+
+# Debian 12 ICU code and data libraries, from the same builder package set.
+COPY --from=builder /icu-runtime/ /usr/lib/x86_64-linux-gnu/
 
 # Copy data directories from the build context.
 # These are read at runtime and are NOT compiled into the binary.
