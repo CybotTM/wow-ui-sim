@@ -47,13 +47,19 @@ fn exec(env: &WowLuaEnv, source: &str) {
 fn load_xml(env: &WowLuaEnv, path: &Path) {
     let dir = tempfile::tempdir().unwrap();
     let toc = dir.path().join("AbandonFixture.toc");
+    std::os::unix::fs::symlink(path.parent().unwrap(), dir.path().join("source")).unwrap();
     std::fs::write(
         &toc,
-        format!("## Title: AbandonFixture\n{}\n", path.display()),
+        format!(
+            "## Title: AbandonFixture\nsource/{}\n",
+            path.file_name().unwrap().to_str().unwrap()
+        ),
     )
     .unwrap();
     let result = wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
     eprintln!("XML result: {result:?}");
+    assert!(result.warnings.is_empty(), "{:?}", result.warnings);
+    assert_eq!(result.xml_files, 1);
     assert_errors(env);
 }
 
