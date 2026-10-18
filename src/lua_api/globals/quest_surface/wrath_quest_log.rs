@@ -2,7 +2,7 @@
 
 use crate::lua_api::methods::{borrow_state, create_string};
 use crate::lua_bridge::FromStack;
-use rilua::{LuaApiMut, LuaResult, Val, vm::state::LuaState};
+use rilua::{LuaResult, Val, vm::state::LuaState};
 
 fn supplied_index(state: &LuaState) -> LuaResult<usize> {
     let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as usize;
