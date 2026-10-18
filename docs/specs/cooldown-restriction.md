@@ -65,7 +65,7 @@ The new case executes the unchanged cached PTR ActionButton defaults/update/appl
 
 Separate normal PTR `sound,gui,casc,client-ptr` startup exits0 with stdout byte-exact against `docs/baselines/ptr-lua-errors.json` (`[]` plus newline). `WOW_SIM_CASC`/`WOW_SIM_NO_SOUND` unset; child-only XDG storage starts with a byte-exact current persisted CVar copy; original before/after stat/hash unchanged (`startup-guards.json`). Whole-workspace fmt check and PTR package `cargo check --locked -j1` exit0 without diagnostics. Cargo/rustc1.99.0; async user units capped at9G.
 
-Post-proof rebase onto `032a3e7d8` yields test commits `3a10bce23` + `677247c03`, byte-identical test sources. Parent explicitly waived reruns: branch changes no timed-signal files; added base changes only timed-signal source/test/spec. Evidence remains attributed to the executed revision, not fresh post-rebase execution. No native parity, live secret-ID provenance, rendered/full-suite/all-profile acceptance, secret-string support, action/book/shared-selector widening or Retail behavior change.
+Post-proof rebase onto `032a3e7d8` yields test commits `3a10bce23` + `677247c03`, byte-identical test sources. Parent explicitly waived reruns: branch changes no timed-signal or text-column files; added base changes cover timed-signal source/test/spec and PTR text-column tests/spec. Evidence remains attributed to the executed revision, not fresh post-rebase execution. No native parity, live secret-ID provenance, rendered/full-suite/all-profile acceptance, secret-string support, action/book/shared-selector widening or Retail behavior change.
 
 ## How it works
 
