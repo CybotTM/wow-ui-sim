@@ -194,19 +194,46 @@ fn startup_cleanup_layout_and_texture_warmup_precede_first_nonempty_quad() {
         )
         .unwrap();
     assert_eq!(visibility, (true, false, false, false));
-    // Observe CPU pixels before invoking the first drawable shader call.
+    // Observe settled geometry and CPU pixels before the first drawable call.
+    {
+        let env = app.env.borrow();
+        let state = env.state().borrow();
+        let id = state.widgets.get_id_by_name("VisibleProof").unwrap();
+        let rect = state
+            .widgets
+            .get(id)
+            .unwrap()
+            .layout_rect
+            .expect("startup must settle fixture layout before draw");
+        assert_eq!(
+            (rect.x, rect.y, rect.width, rect.height),
+            (30.0, 50.0, 40.0, 20.0)
+        );
+    }
     assert_cached_pixels(&app, request, [23, 47, 89, 255]);
     let primitive = draw_test_canvas(&app, size);
     let vertices: Vec<_> = primitive
         .strata_batches
         .iter()
         .flatten()
-        .flat_map(|batch| batch.vertices.iter())
+        // The App also emits marble backdrop quads; select the fixture's
+        // serialized draw ranges, not unrelated background geometry.
+        .flat_map(|batch| {
+            batch
+                .texture_requests
+                .iter()
+                .filter(|texture| texture.path == request)
+                .flat_map(|texture| {
+                    let start = texture.vertex_start as usize;
+                    let end = start + texture.vertex_count as usize;
+                    batch.vertices[start..end].iter()
+                })
+        })
         .collect();
     assert_eq!(
         vertices.len(),
         4,
-        "only the visible fixture may emit a quad"
+        "only the visible fixture may emit this texture"
     );
     let mut positions: Vec<_> = vertices.iter().map(|vertex| vertex.position).collect();
     positions.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -365,6 +392,7 @@ mod filesystem {
         assert!(app.gui_startup_complete.get());
         for _ in 0..32 {
             assign_texture(&app, "queued", true);
+            tick(&mut app);
             let primitive = draw_test_canvas(&app, size);
             assert!(
                 primitive
@@ -380,6 +408,9 @@ mod filesystem {
             );
         }
         assign_texture(&app, "rootonly", false);
+        // Normal GUI updates consume widget dirtiness and retry failed requests.
+        // Direct env.exec followed only by draw bypasses that App boundary.
+        tick(&mut app);
         // The App's renderer has observed a CPU miss before the roots change.
         let missing = draw_test_canvas(&app, size);
         assert!(
@@ -397,6 +428,7 @@ mod filesystem {
         set_roots(&app, second.path());
         let mut second_observer = DirectoryObserver::watch(&second.path().join("Proof/Media"));
         assign_texture(&app, "rootonly", true);
+        tick(&mut app);
         let primitive = draw_test_canvas(&app, size);
         assert!(
             primitive
@@ -411,6 +443,7 @@ mod filesystem {
             "root change rebuilds one shared listing"
         );
         assign_texture(&app, "late", false);
+        tick(&mut app);
         let missing = draw_test_canvas(&app, size);
         assert!(
             missing
@@ -430,6 +463,7 @@ mod filesystem {
         // creating a file first would only prove automatic filesystem freshness.
         let _ = app.update(Message::ReloadUI);
         assign_texture(&app, "rootonly", true);
+        tick(&mut app);
         let _ = draw_test_canvas(&app, size);
         assert_eq!(
             second_observer.drain_opens(),
@@ -438,6 +472,7 @@ mod filesystem {
         );
         write_blp_texture(second.path(), "Late", [7, 8, 9, 255]);
         assign_texture(&app, "late", true);
+        tick(&mut app);
         let primitive = draw_test_canvas(&app, size);
         assert!(
             primitive
