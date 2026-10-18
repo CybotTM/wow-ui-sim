@@ -52,7 +52,7 @@ impl App {
 
     fn sync_draw_bounds(&self, bounds: Rectangle) -> Size {
         let size = bounds.size();
-        self.ensure_gui_startup_for_canvas_size(size);
+        self.record_canvas_size(size);
         size
     }
 

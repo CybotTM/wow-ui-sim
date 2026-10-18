@@ -411,7 +411,7 @@ impl App {
     }
 
     /// Record draw bounds only. Startup and resize callbacks run on the update path.
-    pub(crate) fn ensure_gui_startup_for_canvas_size(&self, size: Size) {
+    pub(crate) fn record_canvas_size(&self, size: Size) {
         self.screen_size.set(size);
         if self.first_canvas_size.get().is_none() {
             self.first_canvas_size.set(Some(size));

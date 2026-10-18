@@ -46,7 +46,7 @@ fn draw_test_canvas(app: &App, size: Size) -> crate::render::WowUiPrimitive {
 }
 
 fn complete_gui_startup(app: &mut App) {
-    app.ensure_gui_startup_for_canvas_size(app.screen_size.get());
+    app.record_canvas_size(app.screen_size.get());
     for _ in 0..200 {
         if app.gui_startup_complete.get() {
             return;
@@ -408,6 +408,19 @@ fn gui_startup_draw_defers_lua_and_keeps_event_order_once() {
         )
         .unwrap();
     assert!(widths_match);
+
+    let _ = draw_test_canvas(&app, Size::new(1100.0, 700.0));
+    let width: f64 = app.env.borrow().eval("return GetScreenWidth()").unwrap();
+    assert_eq!(width, 1266.0, "resize draw must not run Lua");
+    let _ = app.update(super::super::Message::ProcessTimers(
+        std::time::Instant::now(),
+    ));
+    let width: f64 = app
+        .env
+        .borrow()
+        .eval("return startup_sizes[#startup_sizes]")
+        .unwrap();
+    assert_eq!(width, 1100.0, "the update path must dispatch the resize");
 }
 
 #[test]
