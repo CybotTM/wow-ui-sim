@@ -145,6 +145,62 @@ fn renderer_retries_missing_source_after_creation() {
 }
 
 #[test]
+fn renderer_retries_bc_after_non_bc_source_is_replaced() {
+    use wow_ui_sim::texture::BcTextureFormat;
+    let root = tempfile::tempdir().unwrap();
+    png(root.path(), "F1/Media/Logo.png", [16, 32, 48, 255]);
+    let mut manager = TextureManager::new().with_addons_path(root.path());
+    let request = "interface/addons/f1/media/logo";
+    assert!(manager.load_bc(request).is_none());
+    // Concrete BLP2: direct DXT1, 4x4, one eight-byte mip at offset 148.
+    let mut blp = vec![0u8; 156];
+    blp[..4].copy_from_slice(b"BLP2");
+    blp[4..8].copy_from_slice(&1u32.to_le_bytes());
+    blp[8] = 2;
+    blp[11] = 1;
+    blp[12..16].copy_from_slice(&4u32.to_le_bytes());
+    blp[16..20].copy_from_slice(&4u32.to_le_bytes());
+    blp[20..24].copy_from_slice(&148u32.to_le_bytes());
+    blp[84..88].copy_from_slice(&8u32.to_le_bytes());
+    blp[148..].fill(0xaa);
+    fs::write(root.path().join("F1/Media/Logo.blp"), blp).unwrap();
+    let loaded = manager
+        .load_bc(request)
+        .expect("new higher-priority BLP must replace non-BC decision");
+    assert_eq!((loaded.width, loaded.height), (4, 4));
+    assert_eq!(loaded.format, BcTextureFormat::Bc1);
+    assert_eq!(&*loaded.bc_data, &[0xaa; 8]);
+}
+
+#[test]
+fn renderer_manager_observes_setter_root_order_and_reload() {
+    let a = tempfile::tempdir().unwrap();
+    let b = tempfile::tempdir().unwrap();
+    png(a.path(), "F1/Media/Logo.png", [255, 0, 0, 255]);
+    png(b.path(), "F1/Media/Logo.png", [0, 0, 255, 255]);
+    let env = WowLuaEnv::new().unwrap();
+    let request = "interface/addons/f1/media/logo";
+    roots(&env, &[a.path(), b.path()]);
+    setter(&env, request, true);
+    let manager = env.state().borrow().texture_manager();
+    assert_eq!(
+        manager.borrow().resolve_path(request),
+        Some(a.path().join("F1/Media/Logo.png"))
+    );
+    roots(&env, &[b.path(), a.path()]);
+    setter(&env, request, true);
+    assert_eq!(
+        manager.borrow().resolve_path(request),
+        Some(b.path().join("F1/Media/Logo.png"))
+    );
+    env.exec("ReloadUI()").unwrap();
+    assert_eq!(
+        manager.borrow().resolve_path(request),
+        Some(b.path().join("F1/Media/Logo.png"))
+    );
+}
+
+#[test]
 fn exact_case_phase_precedes_ci_extension_phase() {
     let root = tempfile::tempdir().unwrap();
     png(root.path(), "F1/Media/Logo.png", [255, 0, 0, 255]);
@@ -260,6 +316,67 @@ mod directory_io {
             }
             count
         }
+    }
+
+    #[test]
+    fn repeated_frame_load_misses_are_cheap_until_file_creation() {
+        let root = tempfile::tempdir().unwrap();
+        let leaf = root.path().join("F1/Media");
+        fs::create_dir_all(&leaf).unwrap();
+        let mut manager = TextureManager::new().with_addons_path(root.path());
+        let mut observer = DirectoryObserver::new(&leaf);
+        let request = "interface/addons/f1/media/late";
+        let mut opens = 0;
+        for _frame in 0..64 {
+            assert!(manager.load_bc(request).is_none());
+            assert!(manager.load(request).is_none());
+            opens += observer.opens();
+        }
+        png(root.path(), "F1/Media/Late.png", [16, 32, 48, 255]);
+        let texture = manager
+            .load(request)
+            .expect("new file must invalidate the cheap negative");
+        assert_eq!((texture.width, texture.height), (2, 1));
+        assert_eq!(&texture.pixels[..4], &[16, 32, 48, 255]);
+        eprintln!("F1_FRAME_MISSES frames=64 leaf_opens={opens}");
+        assert!(
+            opens <= 2,
+            "unchanged BC/RGBA misses opened directory {opens} times, budget 2"
+        );
+    }
+
+    #[test]
+    fn renderer_reuses_setter_directory_observations_until_reload() {
+        let root = tempfile::tempdir().unwrap();
+        let leaf = root.path().join("F1/Media");
+        fs::create_dir_all(&leaf).unwrap();
+        fs::write(leaf.join("Present.blp"), []).unwrap();
+        let env = WowLuaEnv::new().unwrap();
+        roots(&env, &[root.path()]);
+        let mut observer = DirectoryObserver::new(&leaf);
+        let request = "interface/addons/f1/media/present";
+        setter(&env, request, true);
+        assert_eq!(observer.opens(), 1);
+        let manager = env.state().borrow().texture_manager();
+        assert_eq!(
+            manager.borrow().resolve_path(request),
+            Some(leaf.join("Present.blp"))
+        );
+        assert_eq!(
+            observer.opens(),
+            0,
+            "renderer must reuse setter's source listing"
+        );
+        env.exec("ReloadUI()").unwrap();
+        assert_eq!(
+            manager.borrow().resolve_path(request),
+            Some(leaf.join("Present.blp"))
+        );
+        assert_eq!(
+            observer.opens(),
+            1,
+            "reload must discard source observations"
+        );
     }
 
     #[test]

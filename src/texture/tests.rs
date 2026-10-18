@@ -451,12 +451,12 @@ fn test_load_bc_with_telemetry_caches_non_blp_paths() {
     assert_eq!(
         second_telemetry.resolve_elapsed,
         Duration::ZERO,
-        "negative BC cache should skip path resolution on repeat"
+        "unchanged non-BC sources should retain cheap negative decisions"
     );
     assert_eq!(
         second_telemetry.parse_elapsed,
         Duration::ZERO,
-        "negative BC cache should skip BLP parsing on repeat"
+        "unchanged non-BC sources should skip BLP parsing on repeat"
     );
 }
 
