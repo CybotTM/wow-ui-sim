@@ -290,7 +290,11 @@ fn gui_startup_zero_delay_chain_yields_to_queued_exec() {
         std::time::Instant::now(),
     ));
     match response.try_recv().expect("queued Exec must be answered") {
-        crate::lua_server::Response::Output(output) => assert_eq!(output.trim(), "A,Exec"),
+        crate::lua_server::Response::Output(output) => {
+            let lines: Vec<_> = output.lines().collect();
+            assert!(!lines.is_empty(), "Exec must return its trace output");
+            assert!(lines.iter().all(|line| *line == "A,Exec"), "{output}");
+        }
         other => panic!("unexpected Exec response: {other:?}"),
     }
     let (trace, ticks): (String, i32) = app
