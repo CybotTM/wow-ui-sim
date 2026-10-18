@@ -265,6 +265,101 @@ fn reload_and_same_spelling_root_replacement_do_not_retain_misses() {
     setter(&env, "interface/addons/f1/media/logo", true);
 }
 
+#[cfg(feature = "casc")]
+#[test]
+fn failed_casc_extraction_stays_quiet_until_root_or_reload() {
+    const CHILD_FLAG: &str = "F1_CASC_FAILURE_FIXTURE";
+    if let Some(fixture) = std::env::var_os(CHILD_FLAG) {
+        let fixture = std::path::PathBuf::from(fixture);
+        let env = WowLuaEnv::new().unwrap();
+        roots(&env, &[&fixture.join("addons-a")]);
+        let manager = env.state().borrow().texture_manager();
+        let request = "Interface/Icons/INV_Misc_QuestionMark";
+        let load_missing_frame = || {
+            assert!(manager.borrow_mut().load_bc(request).is_none());
+            assert!(manager.borrow_mut().load(request).is_none());
+        };
+        eprintln!("F1_CASC_PHASE first");
+        load_missing_frame();
+        eprintln!("F1_CASC_PHASE warm");
+        for _ in 0..64 {
+            load_missing_frame();
+        }
+        eprintln!("F1_CASC_PHASE root");
+        roots(&env, &[&fixture.join("addons-b")]);
+        drop(env.state().borrow().texture_manager());
+        for _ in 0..64 {
+            load_missing_frame();
+        }
+        eprintln!("F1_CASC_PHASE reload");
+        env.exec("ReloadUI()").unwrap();
+        for _ in 0..64 {
+            load_missing_frame();
+        }
+        eprintln!("F1_CASC_PHASE end");
+        return;
+    }
+
+    // Real resolver/extraction failure in a private incomplete install: no
+    // real game files, network catalog, mocks, or synthetic call counters.
+    let fixture = tempfile::tempdir().unwrap();
+    for relative in [
+        "install/Data/data",
+        "catalog",
+        "cache",
+        "addons-a",
+        "addons-b",
+    ] {
+        fs::create_dir_all(fixture.path().join(relative)).unwrap();
+    }
+    fs::write(
+        fixture.path().join("catalog/community-listfile.csv"),
+        "134400;interface/icons/inv_misc_questionmark.blp\n",
+    )
+    .unwrap();
+    let output = std::process::Command::new(std::env::current_exe().unwrap())
+        .args([
+            "--exact",
+            "texture_source_cache::failed_casc_extraction_stays_quiet_until_root_or_reload",
+            "--nocapture",
+        ])
+        .env(CHILD_FLAG, fixture.path())
+        .env("WOW_INSTALL_PATH", fixture.path().join("install"))
+        .env("WOW_DATA_PATH", fixture.path().join("install/Data"))
+        .env("WOW_SIM_CASC", "1")
+        .env("ASSET_RESOLVER_DATA_DIR", fixture.path().join("catalog"))
+        .env(
+            "ASSET_RESOLVER_CACHE_DIR",
+            fixture.path().join("resolver-cache"),
+        )
+        .env("XDG_CACHE_HOME", fixture.path().join("cache"))
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    assert!(output.status.success(), "child failed: {stderr}");
+    let failure = "asset-cache extraction failed: fdid 134400 ->";
+    for (phase, next, expected) in [
+        ("first", "warm", 2),
+        ("warm", "root", 0),
+        ("root", "reload", 2),
+        ("reload", "end", 2),
+    ] {
+        let section = stderr
+            .split_once(&format!("F1_CASC_PHASE {phase}\n"))
+            .unwrap()
+            .1
+            .split_once(&format!("F1_CASC_PHASE {next}\n"))
+            .unwrap()
+            .0;
+        assert_eq!(
+            section.matches(failure).count(),
+            expected,
+            "phase {phase}: {stderr}"
+        );
+    }
+    eprintln!("F1_CASC_FAILURES first=2 warm64=0 root64=2 reload64=2");
+}
+
 #[cfg(target_os = "linux")]
 mod directory_io {
     use super::*;

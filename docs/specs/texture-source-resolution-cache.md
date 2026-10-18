@@ -25,14 +25,14 @@ Environment-owned source lookup reduces repeated filesystem enumeration in `SetT
 
 ## Tests asserting this spec
 
-- `tests/texture_source_cache.rs` — live fixtures, root/environment isolation, setter effects, CPU miss recovery and calibrated Linux directory-open observation.
+- `tests/texture_source_cache.rs` — live fixtures, root/environment isolation, setter effects, CPU miss recovery, calibrated Linux directory opens and a child-process CASC failure guard (first/warm/root/reload diagnostics).
 - `tests/texture_set_texture_result.rs`, `src/texture/tests.rs` — existing result and source-selection contracts.
 - `tests/wowforever_texture_metatable.rs`, `tests/aura_secret_display.rs`, `tests/texture_file_dimensions.rs` — profile and secret controls.
 - `tests/methods_texture.rs`, `tests/texture_atlas_regressions.rs`, `tests/methods_button_textures.rs` — atlas, tiling and dirty controls.
 
 ## Known gaps (current cycle)
 
-- [ ] GREEN and preservation evidence pending.
+Final acceptance requires the requested gates on the final implementation revision; source-only inspection and zero-selected filters are not passing receipts. Native/live-GPU/real-addon acceptance is not supplied by these bounded fixtures.
 
 ## Out of scope
 

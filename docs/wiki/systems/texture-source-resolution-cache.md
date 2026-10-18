@@ -12,6 +12,8 @@ CPU RGBA/BC negative entries are keyed by normalized request within the ordered-
 
 ## Proof boundaries
 
+A child-process preservation control uses a private incomplete CASC install and a local catalog row for FDID 134400. It counts actual emitted extraction-failure diagnostics across first, unchanged warm, root-change and ReloadUI phases; no synthetic extraction counter or native-CASC hot reload model is added.
+
 A separate 64-frame BC+RGBA missing-source fixture bounds directory opens to two before creation, then verifies newly created PNG pixels. The pre-existing non-BLP telemetry test still requires cheap unchanged negatives; permanence is replaced by metadata-validated freshness.
 
 The Linux behavioral fixture calibrates an inotify directory observer against three real read_dir opens, then exercises 512 setters across 64 existing and 64 missing mixed-case requests in a 525-file leaf. The assertion bounds actual directory-open events, not helper calls; elapsed time is supporting evidence, not a universal deadline. This does not reproduce the 95-second real addon callback or prove first-draw responsiveness.
