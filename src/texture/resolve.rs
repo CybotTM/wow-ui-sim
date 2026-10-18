@@ -72,22 +72,21 @@ fn try_casc_resolve(manager: &TextureManager, normalized_path: &str) -> Option<P
     let extract_dir = casc_extract_dir()?;
     let safe_relative = listfile_path.replace('\\', "/");
     let out_path = extract_dir.join(&safe_relative);
+    if let Some(parent) = out_path.parent() {
+        std::fs::create_dir_all(parent).ok()?;
+    }
+    // Observe after our own directory creation so an unchanged extraction miss
+    // stays cheap. Native CASC availability retains the existing reload boundary.
     {
         let mut index = manager.source_index.borrow_mut();
         index.observe_source(&extract_dir, &safe_relative);
         index.observe_entry(&out_path);
-    }
-    if let Some(parent) = out_path.parent() {
-        std::fs::create_dir_all(parent).ok()?;
     }
 
     if out_path.exists() {
         return Some(out_path);
     }
 
-    // Native CASC availability is not described by directory listings. Retry a
-    // failed extraction rather than storing an unverifiable negative decision.
-    manager.source_index.borrow_mut().disallow_negative_cache();
     resolver.ensure_cached(fdid, &out_path).or_else(|| {
         crate::casc_asset_fallback::ensure_known_asset_cached(&listfile_path, &out_path)
     })

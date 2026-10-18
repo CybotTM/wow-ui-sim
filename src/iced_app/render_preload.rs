@@ -255,7 +255,8 @@ impl App {
         deadline: Option<std::time::Instant>,
         collect_samples: bool,
     ) -> QueuedTexturePreloadProgress {
-        let mut tex_mgr = self.texture_manager.borrow_mut();
+        let texture_manager = self.env.borrow().state().borrow().texture_manager();
+        let mut tex_mgr = texture_manager.borrow_mut();
         self.preload_queued_texture_requests(&mut tex_mgr, deadline, collect_samples)
     }
 
