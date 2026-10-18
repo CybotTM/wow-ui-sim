@@ -13,8 +13,9 @@ Forever public offer acceptance must agree with rich quest-log queries and permi
 
 ### Bounded Wrath ordinary offer/select
 
-- [x] Under `client-wrath`, `GetGossipAvailableQuests` projects supplied available rows in the original five-value stride: title, level, trivial flag, daily classification, repeatable flag. This slice supplies neutral ordinary flags only; daily classification remains absent rather than inferred from numeric frequency.
+- [x] Under `client-wrath`, `GetGossipAvailableQuests` projects supplied available rows in the original five-value stride: title, level, trivial flag, daily classification, repeatable flag. The three flags use WotLK 3.3.5 numeric `1`/`nil`, not booleans: trivial and repeatable are `1` when supplied true, otherwise `nil`. Daily classification remains `nil` rather than inferred from numeric frequency.
 - [x] The unchanged pinned `GossipFrameAvailableQuestsUpdate(GetGossipAvailableQuests())` renders both supplied rows as distinct visible Buttons with indices1/2 and exact formatted text. Original gossip index clicks select the corresponding supplied ID and exact pending title/level before one `QUEST_DETAIL`, using the existing available-selection producer.
+- [x] The unchanged pinned Wrath `FrameXML/GossipFrame.lua` consumer uses truthiness (`if ( isDaily )`, `elseif ( isRepeatable )`, `if ( isTrivial )`), not comparisons to `1`. Raw-return tests in `tests/wrath_quest_offer_select.rs` separately assert `type()` and `select('#', ...)`, including trailing nils; consumer success alone does not establish flag-type fidelity.
 - [x] Original `QuestTitleButton_OnClick` greeting controls reach the same seam for each index. Neither path accepts a quest, mutates active membership/history/money/XP, or changes an independent environment. Direct eval, installed error handler and simulator error collections must all be checked.
 
 ## How it works

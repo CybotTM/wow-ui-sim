@@ -264,6 +264,50 @@ fn exercise_click(index: u32, greeting: bool) {
 }
 
 #[test]
+fn available_quest_true_flags_are_numeric_one() {
+    let env = seed_env();
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.gossip.available_quests.truncate(1);
+        sim.gossip.num_available_quests = 1;
+        sim.gossip.available_quests[0].is_trivial = true;
+        sim.gossip.available_quests[0].repeatable = Some(true);
+    }
+    exec(
+        &env,
+        r#"
+        assert(select('#', GetGossipAvailableQuests()) == 5, "five raw returns per quest")
+        local title, level, isLowLevel, isDaily, isRepeatable = GetGossipAvailableQuests()
+        assert(title == "Wrath supplied first" and level == 17)
+        assert(type(isLowLevel) == "number" and isLowLevel == 1, "trivial flag must be numeric 1")
+        assert(type(isDaily) == "nil", "daily data remains absent")
+        assert(type(isRepeatable) == "number" and isRepeatable == 1, "repeatable flag must be numeric 1")
+    "#,
+    );
+}
+
+#[test]
+fn available_quest_false_flags_are_nil() {
+    let env = seed_env();
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.gossip.available_quests.truncate(1);
+        sim.gossip.num_available_quests = 1;
+    }
+    exec(
+        &env,
+        r#"
+        assert(select('#', GetGossipAvailableQuests()) == 5, "five raw returns including trailing nils")
+        local title, level, isLowLevel, isDaily, isRepeatable = GetGossipAvailableQuests()
+        assert(title == "Wrath supplied first" and level == 17)
+        assert(type(isLowLevel) == "nil", "non-trivial flag must be nil")
+        assert(type(isDaily) == "nil", "daily data remains absent")
+        assert(type(isRepeatable) == "nil", "non-repeatable flag must be nil")
+    "#,
+    );
+}
+
+#[test]
 fn gossip_index_one() {
     exercise_click(1, false);
 }
