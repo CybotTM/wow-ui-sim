@@ -65,6 +65,33 @@ publisher requires a `push` event on `refs/tags/v*`. Docker login/push require a
 a tag to rehearse; if registration blocks dispatch, resolve registration in a
 separately authorized repository/fork rather than bypassing these gates.
 
+## Local acceptance — 2026-10-18
+
+Native build/runtime inputs at `6dcc58e5d`, based on `29fac7076`; later
+proof-documentation edits do not change those inputs. Builds retain the source
+version `0.1.0`; CI rehearsal separately exercises `0.0.0-ci` version/package metadata.
+
+| Target | Executed proof | Result |
+|---|---|---|
+| Linux | CI Cargo config, `cargo release-linux -j1`, system ICU78.3, 9GiB build limit; copied executable in a 4GiB smoke unit with 90-second child timeout; `ldd` | Build exit0 (48m57s), all three ICU78 imports resolved, startup exit0 / `[]`; persisted CVars stat/hash unchanged |
+| Docker amd64 | Actual Dockerfile with committed Cargo config; Rust1.92/Bookworm ICU72; offline version/startup/two-addon-test verifier; exported filesystem and in-image loader inspection | Build/verifier/inspection exit0; two tests passed; all4026 manifest paths, pinned revision/digest and three ICU72 libraries confirmed; test image removed |
+| Native Windows x64 | Rust1.98.1/MSVC2022; pinned vcpkg ICU74.2#5 static-md; `cargo release-windows -j2`; `dumpbin`; 90-second headless startup limit | Build exit0 (23m49s), version launch succeeds, no ICU DLL imports, startup exit0 / `[]` after native CASC cache refresh; persisted CVars stat/hash unchanged |
+| macOS | No local execution | CI dispatch required; not proven |
+
+Windows first rejected an incomplete old profile cache; an error dialog then
+exceeded the smoke timeout. Backing up that profile and using the built
+`wow-cli casc sync-blizzard-ui` against the installed game extracted all4026
+files with matching Retail12.1.5.70448 provenance. The refreshed cache and sibling
+`retail.bak-20261018` were retained; large scratch build outputs were removed.
+A PowerShell5 proof harness initially lost the child exit code; retaining the
+native process handle established the final explicit exit0, not merely `[]` output.
+
+Windows cache isolation is a separate finding: cache selection uses
+`dirs::cache_dir()`, whose Windows implementation calls `SHGetKnownFolderPath`;
+no simulator cache-root override is exposed. No environment workaround or
+new override was implemented. Existing warnings remain: seven in headless Docker,
+three in native Windows; none were suppressed or repaired in unrelated Rust code.
+
 ## Proof limits
 
 Local acceptance must separately record actual Linux release compilation,

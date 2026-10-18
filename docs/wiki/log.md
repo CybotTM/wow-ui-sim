@@ -2389,3 +2389,7 @@ Updated [[wrath-startup-u-residuals]] with the original unchanged-text error-dis
 ## 2026-10-18 — Release ICU packaging
 
 Linked Retail native/Docker packaging and non-publishing rehearsal from client profiles; corrected outdated PTR-only dependency claims. Native platform proof remains separate from helper/static checks.
+
+## 2026-10-18 — Release ICU local acceptance
+
+Linked the release acceptance matrix: actual Linux/Docker/native Windows build, loader and zero-error startup proofs; Windows cache refresh and retained backup; macOS CI remains pending.

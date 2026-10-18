@@ -1,6 +1,6 @@
 ## [2026-10-18] packaging | Release ICU and Docker publication
 
-[Profile packaging notes](systems/client-profiles.md#release-icu-packaging) link the [release contract](../release-icu.md): explicit native ICU provisioning, relocatable macOS ICU closure, manifest-checked Docker UI/runtime and non-publishing manual rehearsal. Platform proof remains separate from synthetic helper tests.
+[Profile packaging notes](systems/client-profiles.md#release-icu-packaging) link the [release contract](../release-icu.md): explicit native ICU provisioning, relocatable macOS ICU closure, manifest-checked Docker UI/runtime and non-publishing manual rehearsal. The [local matrix](../release-icu.md#local-acceptance--2026-10-18) records Linux/Docker/native Windows build/link/startup acceptance and pending macOS CI; synthetic helper tests remain separate.
 
 ## [2026-10-18] investigation | Ellesmere timer125 hook target fanout
 

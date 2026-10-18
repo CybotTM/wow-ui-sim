@@ -185,8 +185,7 @@ Captured in `docs/baselines/`:
 
 [Release packaging](../../release-icu.md) owns Retail ICU provisioning, the macOS
 bundle closure, Docker runtime/source coherence and tag-push-only publication.
-Mists remains outside the native ICU dependency. Helper/static proof does not
-establish native platform execution; macOS is verified only by CI dispatch.
+Mists remains outside the native ICU dependency. The [local acceptance matrix](../../release-icu.md#local-acceptance--2026-10-18) records Linux, Docker and native Windows release/link/startup proof, separate from helper/static checks. macOS is verified only by CI dispatch; that gate remains pending.
 
 ## Sources
 
