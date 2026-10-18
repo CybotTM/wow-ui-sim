@@ -230,7 +230,7 @@ mod tests {
         };
         assert_eq!(
             captured.format_timer_fields(24),
-            " timer_id=24 callback_source==(string):1"
+            " timer_id=24 callback_source==(string):2"
         );
         assert_eq!(env.eval::<i64>("return CallbackUnderTest()").unwrap(), 37);
     }
