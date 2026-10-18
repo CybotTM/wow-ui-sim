@@ -30,7 +30,7 @@ Opt-in simulator diagnostics identify original timer callbacks rather than only 
 
 ## Bounded proof — 2026-10-18
 
-Private evidence root: `/home/osso/.local/state/wow-ui-sim/handoff/timer-provenance/`.
+Private evidence root: `handoff/timer-provenance/` (private handoff store, not tracked).
 
 | Scope | Exact source and receipt | Result |
 |---|---|---|
