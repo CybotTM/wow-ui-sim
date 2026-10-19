@@ -450,6 +450,8 @@ pub struct GossipQuestRow {
 #[derive(Debug, Default, Clone)]
 pub struct GossipState {
     pub active: bool,
+    /// Stored quest-dialog giver identity; zero suppresses local quest closure.
+    pub giver_guid: u64,
     pub text: String,
     pub num_options: i32,
     pub num_available_quests: i32,

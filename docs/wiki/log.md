@@ -1,3 +1,7 @@
+## [2026-10-19] source | Wrath dialog request/response plumbing
+
+[System notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [staged turn-in contract](../specs/wrath-quest-turn-in.md#staged-producer-proof): shared original-progress feature-absence RED, single concrete giver and executed A3 12-control/18-boundary gate, followed by complete bounded B GREEN, Wrath preservation and final zero-warning gates. Exact proof is tracked by the contract; inferred finish ordering is not a native fact.
+
 ## [2026-10-19] evidence | ReloadUI default-retail compilation
 
 [Contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) records full-default retail `cargo check -j1` with zero warnings, including `wow-sim`, `wow-cli`, library and auxiliary binaries. The check and 69 component-scoped behavioral passes cover the same Rust tree; later changes are documentation only. Original CVar hash/stat remain unchanged. Native lifecycle facts and full Ellesmere acceptance remain separate.
