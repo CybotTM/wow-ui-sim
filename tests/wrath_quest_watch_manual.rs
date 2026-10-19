@@ -15,7 +15,8 @@ struct Case {
 
 fn errors(env: &WowLuaEnv) -> String {
     let sim = env.state().borrow();
-    format!("{:?}|{:?}", sim.lua_errors, sim.lua_error_counts)
+    let counts: std::collections::BTreeMap<_, _> = sim.lua_error_counts.iter().collect();
+    serde_json::to_string(&(&sim.lua_errors, counts)).unwrap()
 }
 
 fn exec(case: &Case, source: &str) {
@@ -87,6 +88,12 @@ fn supplied() -> Case {
     assert_original_sources();
     let env = wrath_full_ui::load_original_wrath_startup();
     let errors_before = errors(&env);
+    eprintln!("N3 full-startup snapshot: {errors_before}");
+    assert_eq!(
+        errors_before,
+        include_str!("fixtures/wrath_manual_watch_startup_errors.json").trim(),
+        "full-startup error precondition changed"
+    );
     env.exec("N3Errors = {}; seterrorhandler(function(e) N3Errors[#N3Errors+1] = tostring(e) end)")
         .unwrap();
     supply_active_rows(&env);
