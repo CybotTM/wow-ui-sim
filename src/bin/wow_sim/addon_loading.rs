@@ -790,3 +790,6 @@ fn print_frame_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(all(test, feature = "profile-retail"))]
+mod reload_payload_tests;
