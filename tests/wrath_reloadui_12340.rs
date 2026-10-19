@@ -46,8 +46,8 @@ fn wrath_startup_reload_pew_is_argless_in_fresh_original_ui() {
 }
 
 #[test]
-fn wrath_startup_original_game_menu_show_hide_survives_reload() {
-    entry_payload::assert_original_game_menu_reload_paths();
+fn wrath_startup_original_stopwatch_show_hide_survives_reload() {
+    entry_payload::assert_original_stopwatch_reload_paths();
 }
 
 #[test]

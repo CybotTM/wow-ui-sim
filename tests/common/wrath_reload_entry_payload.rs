@@ -1,4 +1,4 @@
-//! Wrath payload proof, passing-panel preservation and uncounted spellbook diagnostics.
+//! Wrath payload proof, original Stopwatch preservation and uncounted spellbook diagnostics.
 pub fn assert_reload_pew_arity() {
     let mut env = super::original::load_original_wrath_startup();
     env.set_reload_loader(|env, _| {
@@ -24,28 +24,33 @@ pub fn assert_reload_pew_arity() {
     env.exec("assert(Blizzard_CombatLog_Filters ~= nil, 'original UIParent LOGIN consumer ran in fresh UI')").unwrap();
 }
 
-pub fn assert_original_game_menu_reload_paths() {
+pub fn assert_original_stopwatch_reload_paths() {
     let mut env = super::original::load_original_wrath_startup();
-    assert_game_menu_show_hide(&env);
-    env.exec("OldGameMenuFrame = GameMenuFrame; ReloadUI()")
+    assert_stopwatch_show_hide(&env);
+    env.exec("OldStopwatchFrame = StopwatchFrame; ReloadUI()")
         .unwrap();
     env.set_reload_loader(|env, _| {
         super::original::load_original_wrath_ui(env);
         Ok(())
     });
     assert!(env.service_headless_reload(&mut None).unwrap());
-    env.exec("assert(OldGameMenuFrame == nil and GameMenuFrame ~= nil, 'new original panel in fresh VM')").unwrap();
-    assert_game_menu_show_hide(&env);
+    env.exec("assert(OldStopwatchFrame == nil and StopwatchFrame ~= nil, 'new original panel in fresh VM')").unwrap();
+    assert_stopwatch_show_hide(&env);
     observe_original_spellbook_gap();
 }
 
-fn assert_game_menu_show_hide(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+fn assert_stopwatch_show_hide(env: &wow_ui_sim::lua_api::WowLuaEnv) {
     let before = env.state().borrow().lua_errors.len();
-    env.exec("GameMenuFrame:Hide(); GameMenuFrame:Show(); assert(GameMenuFrame:IsShown()); GameMenuFrame:Hide(); assert(not GameMenuFrame:IsShown())").unwrap();
+    env.exec("StopwatchFrame:Hide()").unwrap();
+    wow_ui_sim::startup::run_lua_error_update_ticks(env);
+    env.exec("StopwatchFrame:Show(); assert(StopwatchFrame:IsShown()); assert(TimeManagerStopwatchCheck:GetChecked(), 'original OnShow checks the stopwatch toggle')").unwrap();
+    wow_ui_sim::startup::run_lua_error_update_ticks(env);
+    env.exec("StopwatchFrame:Hide(); assert(not StopwatchFrame:IsShown()); assert(not TimeManagerStopwatchCheck:GetChecked(), 'original OnHide clears the toggle'); assert(StopwatchTabFrame:GetAlpha() == 0)").unwrap();
+    wow_ui_sim::startup::run_lua_error_update_ticks(env);
     assert_eq!(
         env.state().borrow().lua_errors.len(),
         before,
-        "original GameMenu show/hide emits no errors"
+        "original Stopwatch show/hide and ticks emit no errors"
     );
 }
 
