@@ -71,6 +71,30 @@ fn out_of_world_shutdown_omits_leaving_without_rejecting_logout() {
 }
 
 #[test]
+fn original_forbidden_popup_disables_selected_addon_through_modeled_state() {
+    let env = original::load_original_wrath_startup();
+    env.state().borrow_mut().addons.push(AddonInfo {
+        folder_name: "ReloadDisposable".into(),
+        enabled: true,
+        ..Default::default()
+    });
+    env.exec("OldReloadSentinel = {}; StaticPopupDialogs.ADDON_ACTION_FORBIDDEN.OnAccept({}, 'ReloadDisposable'); assert(OldReloadSentinel ~= nil)").unwrap();
+    assert_eq!(
+        env.eval::<i32>("return C_AddOns.GetAddOnEnableState('ReloadDisposable')")
+            .unwrap(),
+        0
+    );
+    assert!(env.state().borrow().ui_reload_requested);
+    assert!(
+        env.state()
+            .borrow()
+            .addons
+            .iter()
+            .any(|addon| addon.enabled)
+    );
+}
+
+#[test]
 fn original_forbidden_popup_defers_reload_through_cinematic() {
     let mut env = original::load_original_wrath_startup();
     env.state().borrow_mut().addons.push(AddonInfo {
@@ -87,6 +111,11 @@ fn original_forbidden_popup_defers_reload_through_cinematic() {
     .unwrap();
     assert!(env.state().borrow().ui_reload_requested);
     assert!(!env.state().borrow().addons.last().unwrap().enabled);
+    assert_eq!(
+        env.eval::<i32>("return C_AddOns.GetAddOnEnableState('ReloadDisposable')")
+            .unwrap(),
+        0
+    );
     assert!(
         env.state()
             .borrow()
