@@ -5,6 +5,8 @@ use rilua::{LuaApiMut, LuaResult, Val, vm::state::LuaState};
 
 pub(super) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.register_function("GetGossipAvailableQuests", get_available_quests)?;
+    lua.register_function("GetGossipText", get_text)?;
+    lua.register_function("GetGossipActiveQuests", get_active_quests)?;
     lua.register_function(
         "GetNumGossipAvailableQuests",
         super::legacy_globals::get_num_available_quests,
@@ -20,6 +22,34 @@ pub(super) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         super::legacy_globals::select_available_quest,
     )?;
     Ok(())
+}
+
+fn get_text(state: &mut LuaState) -> LuaResult<u32> {
+    let text = borrow_state(state)?.gossip.text.clone();
+    let text = create_string(state, &text);
+    state.push(text);
+    Ok(1)
+}
+
+fn get_active_quests(state: &mut LuaState) -> LuaResult<u32> {
+    let rows = borrow_state(state)?.gossip.active_quests.clone();
+    let result_count = rows.len() * 4;
+    for row in rows {
+        let title = create_string(state, &row.title);
+        state.push(title);
+        state.push(Val::Num(row.quest_level as f64));
+        state.push(if row.is_trivial {
+            Val::Num(1.0)
+        } else {
+            Val::Nil
+        });
+        state.push(if row.is_complete == Some(true) {
+            Val::Num(1.0)
+        } else {
+            Val::Nil
+        });
+    }
+    Ok(result_count as u32)
 }
 
 fn get_num_options(state: &mut LuaState) -> LuaResult<u32> {

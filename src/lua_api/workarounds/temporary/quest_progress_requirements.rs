@@ -7,7 +7,7 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
-    if !crate::c_api::quest_objectives::ENABLED {
+    if !crate::c_api::quest_objectives::ENABLED && !cfg!(feature = "client-wrath") {
         return Ok(());
     }
     #[cfg(feature = "client-wrath")]
@@ -15,6 +15,10 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
         // Missing supplied quest PvP/auto-accept flags. Retire when that model lands.
         LuaApiMut::register_function(lua, name, ordinary_quest_flag)?;
     }
+    #[cfg(feature = "client-wrath")]
+    // Missing legacy gossip option icon-type projection. Retire when that model lands.
+    // Only the no-option quest NPC is supported by this temporary surface.
+    LuaApiMut::register_function(lua, "GetGossipOptions", no_gossip_options)?;
     LuaApiMut::register_function(lua, "GetProgressText", empty_progress_text)?;
     for name in [
         "GetQuestMoneyToGet",
@@ -31,6 +35,11 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
 fn ordinary_quest_flag(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)
+}
+
+#[cfg(feature = "client-wrath")]
+fn no_gossip_options(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }
 
 fn empty_progress_text(state: &mut LuaState) -> LuaResult<u32> {

@@ -45,4 +45,6 @@ Party/PvP confirmation, auto-accept, watches, turn-in/rewards, native packet/tic
 
 See [Lua API](../wiki/systems/lua-api.md), [loading](../addon-loading-pipeline.md), [events](../event-system.md).
 
+Continuation RED at `122f26445`: all four full-original tests fail on the legacy `GetGossipText` wrapper before acceptance. Wrath now registers greeting text and active-quest tuples directly from supplied gossip state, independent of the modern namespace. Temporary no-option gossip support remains limited to quest NPC fixtures: legacy option icon-type projection is missing. The temporary progress/ordinary-flag registration must include Wrath even though the modern objective subsystem is disabled there. GREEN remains pending.
+
 Wrath-only temporary ordinary PvP/auto-accept flag defaults live in `src/lua_api/workarounds/temporary/quest_progress_requirements.rs`; retire when supplied quest flag state lands. Acceptance and abandonment share immediate player UNIT / deferred coalesced log notification policy.
