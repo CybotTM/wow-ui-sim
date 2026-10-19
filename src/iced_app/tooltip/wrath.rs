@@ -1,16 +1,15 @@
 //! Wrath's ordered left-string width refinement, using simulator font metrics.
 
 use super::{
-    measure_tooltip_text_height, measure_tooltip_text_width, tooltip_line_font_size,
-    tooltip_text_insets,
+    measure_tooltip_text_height, measure_tooltip_text_width, tooltip_column_gap,
+    tooltip_line_font_size, tooltip_text_insets,
 };
 use crate::lua_api::SimState;
 use crate::lua_api::tooltip::{TooltipData, TooltipLine};
 use crate::render::font::WowFontSystem;
 
 // Local UI values confirmed by clean-room report wow-tooltip-units-12340-facts.md
-// (reconstruction0e4e9fe0). Column contribution and wrap candidate, not padding/cap.
-const DOUBLE_LINE_GAP: f32 = 38.400002;
+// (reconstruction0e4e9fe0). Left-wrap candidate, not a universal final-width cap.
 const WRAP_CANDIDATE_CAP: f32 = 230.39999;
 const MAX_WRAP_STARTS: usize = 30;
 const ROW_GAP: f32 = 2.0;
@@ -52,14 +51,11 @@ fn unwrapped_width(state: &SimState, td: &TooltipData, fonts: &mut WowFontSystem
         .fold(td.min_width, |width, (index, line)| {
             let font_size = tooltip_line_font_size(index);
             let left = measure_tooltip_text_width(fonts, &line.left_text, font_size);
-            let right = line
-                .right_text
-                .as_deref()
-                .filter(|text| !text.is_empty())
-                .map_or(0.0, |text| {
-                    measure_tooltip_text_width(fonts, text, font_size) + DOUBLE_LINE_GAP
-                });
-            width.max(left + right + attachment_width(state, td, index))
+            let right = line.right_text.as_deref().map_or(0.0, |text| {
+                measure_tooltip_text_width(fonts, text, font_size)
+            });
+            let gap = tooltip_column_gap(&line.left_text, line.right_text.as_deref(), 1.0);
+            width.max(left + right + gap + attachment_width(state, td, index))
         })
 }
 
