@@ -7,6 +7,14 @@ mod consumer;
 
 use consumer::*;
 
+thread_local! {
+    static CALLBACK_STATE: std::cell::RefCell<Option<std::rc::Rc<std::cell::RefCell<wow_ui_sim::lua_api::SimState>>>> = const { std::cell::RefCell::new(None) };
+}
+
+fn supply_callback_state(env: &ConsumerEnv) {
+    CALLBACK_STATE.with_borrow_mut(|slot| *slot = Some(std::rc::Rc::clone(env.env.state())));
+}
+
 #[test]
 fn original_buttons_request_then_server_policy_accepts_once() {
     let env = seed_env();
@@ -698,13 +706,17 @@ fn original_unselected_reward_reports_one_message_and_named_sound() {
 fn reward_feedback_ignores_arguments_without_quest_or_player() {
     let env = seed_env();
     observe(&env);
+    supply_callback_state(&env);
     env.env
         .register_rilua_function("FeedbackWasRecorded", |state| {
-            use rilua::LuaApiMut;
-            let recorded = wow_ui_sim::lua_api::methods::borrow_state(state)?
-                .last_ui_error_message
-                .as_deref()
-                == Some("No quest required.");
+            let recorded = CALLBACK_STATE.with_borrow(|slot| {
+                slot.as_ref()
+                    .expect("supplied callback state")
+                    .borrow()
+                    .last_ui_error_message
+                    .as_deref()
+                    == Some("No quest required.")
+            });
             state.push(rilua::Val::Bool(recorded));
             Ok(1)
         })
@@ -762,15 +774,15 @@ fn close_clears_all_identities_before_original_hide_reentry_once() {
         sim.gossip.inform_guid = NPC_GUID + 1;
         sim.gossip.interact_guid = NPC_GUID + 2;
     }
+    supply_callback_state(&env);
     env.env
         .register_rilua_function("DialogIdentitiesCleared", |state| {
-            use rilua::LuaApiMut;
-            let cleared = {
-                let sim = wow_ui_sim::lua_api::methods::borrow_state(state)?;
+            let cleared = CALLBACK_STATE.with_borrow(|slot| {
+                let sim = slot.as_ref().expect("supplied callback state").borrow();
                 sim.gossip.giver_guid == 0
                     && sim.gossip.inform_guid == 0
                     && sim.gossip.interact_guid == 0
-            };
+            });
             state.push(rilua::Val::Bool(cleared));
             Ok(1)
         })
