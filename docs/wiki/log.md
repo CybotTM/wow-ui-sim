@@ -1,3 +1,7 @@
+## [2026-10-19] source | Wrath ReloadUI facts and popup prerequisite
+
+[Reload mechanics](systems/reload-ui.md#request-and-ownership) link the [12340 contract and pending matrix](../specs/reload-ui.md#wrath-12340-requirements). Original StaticPopup acceptance exposed a missing legacy DisableAddOn endpoint; Wrath alone calls it among the seven shipped caches. Registration shares the modeled C_AddOns function. Behavioral GREEN and cinematic eligibility remain pending; Retail chronology remains UNKNOWN, with separate LoD-SV ownership and placement-unit bounds.
+
 ## [2026-10-19] source | Wrath dialog request/response plumbing
 
 [System notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [staged turn-in contract](../specs/wrath-quest-turn-in.md#staged-producer-proof): shared original-progress feature-absence RED, single concrete giver and executed A3 12-control/18-boundary gate, followed by complete bounded B GREEN, Wrath preservation and final zero-warning gates. Exact proof is tracked by the contract; inferred finish ordering is not a native fact.

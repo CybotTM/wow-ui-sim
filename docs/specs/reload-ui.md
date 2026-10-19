@@ -14,7 +14,34 @@
 
 - [x] Restore the file-backed EditMode cache using the initial layout name and config, without re-importing ServerSnapshot. The original EditMode consumer must select the same active layout after ReloadUI. Native reread timing/ordering is INFERRED and unasserted.
 
-Exact native event ordering remains unverified pending native evidence; tests must not invent teardown events. Existing simulator startup order is documented in [event system](../event-system.md#startup-event-sequence). Reload world-entry flags must distinguish reload from initial login.
+Wrath build 12340 chronology is authenticated by clean-room laptop reconstruction `0e4e9fe0`, independently checked at `228` (relayed 2026-10-19); this is static source evidence, not native execution. Retail engine chronology remains UNKNOWN. Existing simulator policy is documented in [event system](../event-system.md#startup-event-sequence); it is not proof of native Retail order.
+
+### Wrath 12340 requirements
+
+Verified 2026-10-19: among all seven active profile caches, only Wrath's shipped Lua calls bare `DisableAddOn` (`FrameXML/StaticPopup.lua:466`); Mists, Era, Anniversary, Forever, Retail and PTR call `C_AddOns.DisableAddOn`. Existing `register_legacy_addon_fns` is shared by every non-Retail/non-PTR profile. The added legacy registration is therefore Wrath-only and uses the exact `c_addons_disable_addon` backing function, not an alias table or workaround.
+
+| Slice | Required boundary | Current proof |
+| --- | --- | --- |
+| A prerequisite | Original StaticPopup acceptance disables its selected addon, then requests reload | RED at `06d7cbcee`: missing legacy DisableAddOn; registration implemented, GREEN pending |
+| A | Deferred request waits outside cinematic playback; zero results, coalescing, no explicit combat rejection | Cinematic RED pending prerequisite repair |
+| B | Temporary protected-action allowance and argless REGEN_ENABLED precede conditional LEAVING, then LOGOUT; handlers finish before addon SV serialization | Pending |
+| C | Per-addon code/bindings, account SV, character SV, then ADDON_LOADED(name), one argument | Pending |
+| D | Both account chunks ready: VARIABLES_LOADED inline before LOGIN/argless PEW; pending chunks may defer it past entry; no synthetic WoWUISim addon event | Pending |
+| E | Restore eligible named user-placed movable/resizable frames on new objects, excluding DontSavePosition; cancel mirror timers on LeaveWorld, retain totems/player context | Pending |
+
+Scope approval limits C to managed startup/direct-load SV ordering. C_AddOns runtime LoD persistence remains UNMODELED: `src/c_api/c_addons_runtime.rs:131,135` calls `load_addon_from_toc`, which passes no manager at `src/loader/mod.rs:492`; a new ownership seam is a separate follow-up. Slice E uses the independently verified 12340 placed-frame and file-format facts relayed 2026-10-19 from reconstruction `0e4e9fe0a4a9fa08027c5eed4b2c5e873739cfd3`. Original anchors and relative targets are NOT serialized. Save selects one corresponding frame/root point pair by minimum squared distance, with strict-first ties in TOPLEFT, TOP, TOPRIGHT, LEFT, CENTER, RIGHT, BOTTOMLEFT, BOTTOM, BOTTOMRIGHT order. Eligibility requires a named, user-placed, movable OR resizable frame, not DontSavePosition, with a queryable rect; visibility and relative-target name do not exclude it.
+
+Load resolves the new frame by name. CURRENT movable frames replace points with the stored point against the SAME root point; CURRENT resizable frames receive stored size. Each applicable operation marks user-placed. Nonnegative levels are assigned subject to the native upward-delta cap of 128, followed by layout resolution. Load does not recheck DontSavePosition. Missing frames are skipped.
+
+Native storage is character-local `layout-local.txt`, not Lua SV. The simulator uses the persistence manager's `storage_dir/<realm>/<character>/layout-local.txt`, creating directories normally only when a manager is present; disabled persistence writes nothing. Tests use temporary roots only. No test or producer may create/modify the real `~/.local/share/wow-sim` tree.
+
+The exact writer grammar is `Version: 1\n`, then per frame `Frame`, `FrameLevel`, `Anchor`, `X`, `Y`, `W`, `H` lines, each `Key: value\n`, one space, signed decimal integers and uppercase point names; no separators and final LF. Ordinary writer-generated records are the scope, not oversized-name/truncation quirks. Reader keys are case-insensitive; CR/LF/CRLF delimit lines. Unknown keys and Version values are ignored. New Frame/EOF applies records; per-frame defaults are TOPLEFT, X/Y/W/H=0, level=-1. Invalid anchors retain the current point; signed numeric prefixes stop at the first non-digit. H deliberately resets with other fields instead of reproducing an unverified reconstruction carry-over quirk.
+
+Documented simulator deviation: store its own unscaled layout units and round to nearest/ties-even, not guessed NDC/aspect constants. Native uses effective scale and width conversion for BOTH axes with lrintf; native rounding-mode parity is unmeasured. This is round-trip equivalence in the simulator's units, NOT native numeric/file byte parity.
+
+The request's unnamed taint gate/default/producer and feedback contract remain evidence-blocked. Do not invent them. SPELLS_CHANGED reload occurrence/order is UNKNOWN. General engine timer policy and full native shutdown persistence are not implemented by this bounded goal. Combat reentry notification is combat-bit conditional; its finer position among startup events is not asserted.
+
+Pinned Retail API docs at `b9be9379719047977fca4dba1bb1d9988e8840b3` declare ADDON_LOADED(name STRING, containsBindings BOOL) and PEW(initialLogin BOOL, reloadingUi BOOL). Reload values and containsBindings value semantics beyond type are INFERRED. These declarations do not authenticate Retail chronology or other-profile payloads. The payload slice covers only real-addon startup and C_AddOns LoD emissions. Synthetic Retail ADDON_LOADED("WoWUISim") is deliberately unchanged and remains a separate non-native simulator-policy gap.
 
 ## How it works
 
@@ -44,7 +71,7 @@ Exact native event ordering remains unverified pending native evidence; tests mu
 
 ## Known gaps (current cycle)
 
-- [ ] Native teardown ordering remains unconfirmed; no native-order or target/focus-preservation assertion is made.
+- [ ] Wrath 12340 requirements above still need behavioral acceptance. Retail/other-profile native teardown ordering and target/focus preservation remain unconfirmed.
 - [ ] Keyboard/mouse model-state preservation is INFERRED and unasserted pending native lifecycle evidence. Keep `mouse_position`, `mouse_buttons` and `pressed_keys`; discard frame-ID input caches, not these model values.
 - [ ] Full Ellesmere acceptance and standalone `wow-cli` executable reruns remain separate from the bounded Unix-socket client proof.
 

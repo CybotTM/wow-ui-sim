@@ -8,6 +8,8 @@ Both `C_UI.Reload` and legacy `ReloadUI` call the same Rust request producer. Bl
 
 Dump-tree, screenshot and lua-errors owners also service requests after startup, script execution and settling callbacks, before observing their output. Headless owners settle rebuilt startup synchronously.
 
+Wrath's original forbidden-action popup first calls legacy `DisableAddOn`. That endpoint now registers the same Rust model function as `C_AddOns.DisableAddOn`; the [contract](../../specs/reload-ui.md#wrath-12340-requirements) records the seven-profile source check and prerequisite RED. No namespace alias table or vendor modification is involved. Cinematic eligibility is a separate pending producer.
+
 The GUI shortcut records the same request. App discards frame-ID input, hit-testing, quad and pending-texture caches, then restarts yielded GUI startup using current canvas dimensions. Texture manager, font system and glyph atlas allocations survive.
 
 ## Environment retirement
@@ -20,7 +22,7 @@ The launch pipeline installs a reload loader on the environment. It reuses Blizz
 
 ## Lifecycle evidence and failure
 
-Existing simulator reload world-entry flags are reused; native teardown order remains unconfirmed. No teardown event ordering is invented. App treats rebuild failure as fatal and prevents a partial VM from overwriting pre-reload SavedVariables.
+The [Wrath 12340 requirements](../../specs/reload-ui.md#wrath-12340-requirements) now distinguish authenticated static native facts from implementation proof. Cinematic eligibility, shutdown-before-save, post-code addon SV restore, readiness-driven VARIABLES_LOADED and selective placed-frame/mirror state need bounded behavioral acceptance. The supplied cinematic state is not a cinematic playback engine. Unnamed taint-gate production and feedback remain evidence-blocked. Retail and other-profile chronology remain UNKNOWN; do not copy Wrath ordering into them. App treats rebuild failure as fatal and prevents a partial VM from overwriting pre-reload SavedVariables.
 
 ## Sources
 

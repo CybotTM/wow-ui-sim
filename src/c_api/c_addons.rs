@@ -65,6 +65,10 @@ pub fn register_legacy_addon_globals(state: &mut LuaState) -> LuaResult<()> {
     if !retail {
         register_legacy_addon_fns(state)?;
     }
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        // Original 12340 StaticPopup acceptance disables the selected addon before ReloadUI.
+        table_set_rust_fn_static(state, state.global, "DisableAddOn", c_addons_disable_addon)?;
+    }
     register_addon_actions_blocked(state);
     Ok(())
 }
