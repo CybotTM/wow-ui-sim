@@ -1,3 +1,7 @@
+## [2026-10-19] source | Wrath legacy currency state
+
+Added [model ownership](systems/lua-api.md#wrath-legacy-currency-display-state) and links to the [legacy currency](../specs/wrath-legacy-currency-tokenui.md) and [minimap/XML](../specs/wrath-minimap-xml-labels.md) contracts. Category display indices and independent watch enumeration do not delegate to modern currency state. Source documentation only; runtime proof remains separate.
+
 ## [2026-10-18] investigation | Ellesmere timer125 secure-hook targets
 
 [Diagnosis](investigations/ellesmereui-forever.md#timer125-inherited-secure-hook-fanout--2026-10-18) links captured shared callback growth and real extracted-consumer RED. Target/key binding separates instance hooks from inherited/copied wrappers without rooting targets. [Bounded proof](../specs/hook-callback-origin.md#bounded-proof--2026-10-18) records compiled target/control GREEN and real-addon callback/Exec/draw progress. No addon, texture-cache or scheduling change; no full compatibility claim.

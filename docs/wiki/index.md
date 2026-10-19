@@ -1,3 +1,7 @@
+## [2026-10-19] source | Wrath legacy currency state
+
+[Lua API ownership](systems/lua-api.md#wrath-legacy-currency-display-state) links the supplied category/watch model to the [TokenUI contract](../specs/wrath-legacy-currency-tokenui.md), separate from modern currency queries. [Minimap/XML contracts](../specs/wrath-minimap-xml-labels.md) retain held zoom/transform/effect-data gaps. Runtime acceptance remains revision-scoped and separate.
+
 ## [2026-10-18] source | Wrath widget state and tooltip size oracle
 
 [Widget state](systems/widget-system.md#wrath-editbox-history-and-presentation) links optional history slots, direct arrows, byte-mask presentation and row timers to the [owning contract](../specs/wrath-widget-labels.md). [Tooltip investigation](investigations/wrath-tooltip-stored-size.md) records the false queried-size oracle, native-correct XML parent fill and separate cached dependency failure. Producer documentation only; current-head/preservation acceptance remains separate.
