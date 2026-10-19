@@ -97,6 +97,13 @@ A separate local temporary-marker discovery/execution/cleanup control passes, an
 `python3 tools/full_suite.py submit [REF] --profile PROFILE --target-dir SLOT --build-jobs 1`
 schedules one detached profile worker. `PROFILE` is `retail` (default), `ptr`,
 `wrath`, `mists`, `wowforever`, `era`, or `anniversary`.
+
+`run` and `submit` default REF to `origin/master`, not the current checkout or
+local HEAD. Resolution fetches origin; submit forwards the ref for resolution by
+the detached worker, so a moving ref may select different code by execution time.
+For revision-bound verification, pass the same explicit full commit SHA to every
+profile submission and to `status SHA`.
+
 `python3 tools/full_suite.py status [REF]` lists all seven profiles for the resolved
 SHA; without REF it lists the latest receipt's SHA. Missing profile receipts are
 JSON `null`, not passes. The worker keeps
