@@ -39,7 +39,7 @@ Retail, PTR and Forever cached `QuestOfferDocumentation.lua` declare
   returning one fresh table of `{ factionID, rewardAmount }` records.
 - [x] Require matching dialog/selected identity and an active NPC quest; log
   selection alone is not a dialog. Closing invalidates the query.
-- [x] Return zero values when no rows are supplied, as **simulator policy**, not
+- [x] Return zero values when no snapshot is supplied, as **simulator policy**, not
   a measured native default. An explicitly supplied empty list returns a table.
 - [x] Keep supplied rows environment-local, live, and scoped to one active quest
   lifetime; abandonment/turn-in clear them without granting reputation.
@@ -59,12 +59,24 @@ close invalidation, lifetime cleanup and isolation. `tests/forever_log_sink.rs`
 covers actual sink output/arity/isolation and Retail/PTR publication preservation.
 Both are discovered automatically by the integration harness. At `7f22c009c`,
 all six query cases and the Forever sink case fail on the missing bindings after
-successful compilation. The modeled query and Forever sink are implemented;
-GREEN profile preservation remains pending. Forever calls the shared error-sink
-registrar explicitly; the existing classic predicate and Retail/PTR registrar
-are unchanged. [Classic logging](mists-script-error-logging.md) owns their prior
-consumer contract.
-Native secret-input parity and additional namespace members remain out of scope.
+successful compilation. Forever calls the shared error-sink registrar explicitly;
+the existing classic predicate and Retail/PTR registrar are unchanged.
+[Classic logging](mists-script-error-logging.md) owns their prior consumer contract.
+
+Bounded GREEN at `7b5fba503`, using `sound,gui,casc` and each client feature:
+
+| Profile | Readiness | Reputation query | Logging |
+|---|---|---|---|
+| Forever | 5/5, including both original consumers | 6/6 | Error sink 1/1 |
+| Retail | 5/5, including both original consumers | 6/6 | Existing message sink / absent raw error binding 1/1 |
+| PTR | Not a QL-2 producer proof | 6/6, supplied dialog context | Same preservation control 1/1 |
+
+All 31 cases pass with zero ignored; all three final builds emit zero warnings.
+`cargo fmt --check` passes. Forever startup reports zero Lua errors before and
+after repair. Initial headless RED builds emitted existing feature-off warnings;
+final proof enables the normal feature bundle without suppressions or unrelated
+source changes. Native secret-input parity, other namespace members and new-offer
+dialog contexts remain outside this bounded proof.
 
 ## How it works
 
@@ -74,7 +86,8 @@ Native secret-input parity and additional namespace members remain out of scope.
 
 ## Implementation inventory
 
-- `src/c_api/quest_readiness.rs`: readiness, phase and notification state/decisions.
+- `src/c_api/quest_readiness.rs`, `src/c_api/c_quest_offer.rs`, `src/c_api/c_log.rs`:
+  readiness/phase, supplied reputation projection, and console-sink publication.
 - `src/lua_api/sim_substates/quest_log.rs`: environment-owned state and removal cleanup.
 - `src/lua_api/globals/real/quest_dialog.rs`: modeled globals, popup storage and admin ingress.
 - `globals/admin_quest_objectives.rs`, `admin_quests.rs`: pre-notification mutation seam/registration.
@@ -107,7 +120,11 @@ ScriptErrors.lua:83. The supplied-input/query and sink repair above owns this ga
 
 ## Known gaps (current cycle)
 
-- [ ] Non-target profile runtime control remains unexecuted; not part of this two-profile matrix.
+- [ ] Non-target readiness runtime control remains unexecuted; outside the
+  bounded Retail/Forever readiness proof.
+- [ ] Native major-faction reward classification/selection remains unmeasured;
+  rows stay distinct supplied input. PTR tests supply dialog context, not a new
+  QL-2 producer.
 
 ## Out of scope
 
