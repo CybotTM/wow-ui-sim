@@ -5,8 +5,13 @@ use crate::lua_api::state::{QuestLogEntry, SimState};
 use crate::lua_bridge::FromStack;
 use rilua::{LuaResult, Val, vm::state::LuaState};
 
+// Client 12340 reconstruction 0e4e9fe0: level/5, capped at the last entry.
+const QUEST_GREEN_RANGE_LEVEL_BAND: usize = 5;
+const QUEST_GREEN_RANGES: [u8; 20] = [4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8];
+
 pub(super) const LEGACY_READS: &[(&str, super::SurfaceFn)] = &[
     ("GetQuestLogGroupNum", get_quest_log_group_num),
+    ("GetQuestGreenRange", get_quest_green_range),
     ("GetDailyQuestsCompleted", get_daily_quests_completed),
     ("GetMaxDailyQuests", get_max_daily_quests),
     ("GetNumQuestLogRewards", get_num_quest_log_rewards),
@@ -112,6 +117,13 @@ pub(super) fn get_quest_log_group_num(state: &mut LuaState) -> LuaResult<u32> {
             .unwrap_or(0)
     };
     state.push(Val::Num(group_size as f64));
+    Ok(1)
+}
+
+pub(super) fn get_quest_green_range(state: &mut LuaState) -> LuaResult<u32> {
+    let level = borrow_state(state)?.player.level as usize;
+    let band = (level / QUEST_GREEN_RANGE_LEVEL_BAND).min(QUEST_GREEN_RANGES.len() - 1);
+    state.push(Val::Num(f64::from(QUEST_GREEN_RANGES[band])));
     Ok(1)
 }
 
