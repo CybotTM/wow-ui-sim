@@ -465,6 +465,26 @@ class FullSuiteWorkerTests(unittest.TestCase):
         self.assertEqual(len(list(self.results.glob("sandbox-sha-*.json"))), 7)
         self.assertEqual(len(list(self.results.glob("sandbox-sha-*.log"))), 7)
 
+    def test_nonretail_failures_are_retained_and_later_scopes_still_run(self):
+        self.env["FAIL_SUITES"] = "1"
+        for profile in ("mists", "wrath"):
+            with self.subTest(profile=profile):
+                process = self.start_worker(profile, profile=profile)
+                self.finish_scopes(process, profile, profile)
+                result = json.loads(
+                    (self.results / f"sandbox-sha-{profile}.json").read_text()
+                )
+                self.assertEqual(result["steps"]["integration"]["exit"], 8)
+                self.assertEqual(result["steps"]["lib"]["exit"], 8)
+                expected = {
+                    "integration": ["sandbox::integration_failure"],
+                    "lib": ["sandbox::lib_failure"],
+                }
+                if profile == "mists":
+                    self.assertEqual(result["steps"]["prefork"]["exit"], 7)
+                    expected["prefork"] = ["sandbox::prefork_failure"]
+                self.assertEqual(result["failures"], expected)
+
     def test_submit_forwards_each_profile_without_changing_resource_policy(self):
         write_executable(
             self.bin / "systemd-run",
@@ -545,6 +565,7 @@ class FullSuiteWorkerTests(unittest.TestCase):
         (self.results / "master-latest.json").write_text(
             json.dumps({"failures": {"lib": ["shared", "old-retail"]}})
         )
+        self.assertIsNone(compare({"profile": "ptr", "failures": {"lib": ["shared"]}}))
         for profile in PROFILES:
             (self.results / f"master-latest-{profile}.json").write_text(
                 json.dumps({"failures": {"lib": [f"old-{profile}"]}})
