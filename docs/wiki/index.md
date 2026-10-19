@@ -1,3 +1,7 @@
+## [2026-10-19] source | Wrath supplied objective reads
+
+[Legacy surface](systems/lua-api.md#wrath-selected-quest-legacy-surface) links identity-keyed snapshot adapters and the unchanged capability gate. [Objective contract](../specs/wrath-quest-objectives.md) separates original-consumer RED, pending GREEN and native category/intermediate gaps.
+
 ## [2026-10-19] source/tooling | Disabled checks and profile-aware suites
 
 [Disabled-check contract](../specs/disabled-check-emission.md) owns original Retail/Wrath LFG emitted-path proof and exclusions. [Runner policy](../remote-builds.md#asynchronous-full-suite) owns seven-profile submission, receipt scope and explicit-SHA binding; historical Retail receipts do not establish another profile's acceptance.

@@ -1,3 +1,7 @@
+## [2026-10-19] source | Wrath supplied objective reads
+
+[System notes](systems/lua-api.md#wrath-selected-quest-legacy-surface) link the Wrath-only snapshot adapter; [contract](../specs/wrath-quest-objectives.md) owns consumer RED, pending producer GREEN and native input-model exclusions. No vendor, lifecycle or shared capability-gate change.
+
 ## [2026-10-18] source | Wrath selected quest legacy surface
 
 [System notes](systems/lua-api.md#wrath-selected-quest-legacy-surface) document selected rich-row adapters, shared prepared faction output and separate player daily fields. [Contract](../specs/wrath-quest-abandon.md) owns original-popup/selection RED→bounded GREEN, source-derived limits, master-classified Forever gaps and provisional server-response sequencing; no native or whole W1 completion claim.
