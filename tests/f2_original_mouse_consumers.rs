@@ -1,4 +1,4 @@
-//! Staged, uncompiled. Requires the staged mouse-sequence adapter export.
+//! Original Retail resize and Wrath chat callbacks driven through real App input.
 #![cfg(all(
     feature = "gui",
     any(feature = "client-retail", feature = "client-wrath")

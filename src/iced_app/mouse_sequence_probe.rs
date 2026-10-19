@@ -1,4 +1,4 @@
-//! Staged input adapter for external integration tests; not a Lua shim.
+//! Input adapter for external integration tests; not a Lua shim.
 //! App boot/cache construction follows the existing named-click probe.
 use iced::{Point, Size};
 

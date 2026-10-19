@@ -1,4 +1,4 @@
-//! Staged, not executed. Include from the integration test registry.
+//! Original LFG consumers select the normal and disabled rendered check slots.
 #![cfg(all(
     feature = "gui",
     any(feature = "client-retail", feature = "client-wrath")
