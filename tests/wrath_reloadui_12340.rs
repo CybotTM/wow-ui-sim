@@ -25,7 +25,15 @@ mod placement_writer;
 #[path = "common/wrath_reload_entry_payload.rs"]
 mod entry_payload;
 
+#[path = "common/wrath_reload_persistence_controls.rs"]
+mod persistence_controls;
+
 use wow_ui_sim::lua_api::state::AddonInfo;
+
+#[test]
+fn saved_reload_preserves_scalar_large_values_and_readonly_wtf() {
+    persistence_controls::assert_reload_readback();
+}
 
 #[test]
 fn wrath_startup_reload_pew_is_argless_in_fresh_original_ui() {
