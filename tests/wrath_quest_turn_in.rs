@@ -652,3 +652,194 @@ fn no_choice_positive_internal_index_does_not_raise() {
     // infer server acceptance or raw wire index from a no-choice receipt map.
     // Exact sent index remains a recorded observability gap.
 }
+
+#[test]
+fn original_unselected_reward_reports_one_message_and_named_sound() {
+    let env = seed_env();
+    supply_choices(&env, false);
+    open_rewards(&env);
+    exec(
+        &env,
+        "UIErrorsFrame:ClearText(); ERR_QUEST_MUST_CHOOSE = 'Choose a northern reward.'",
+    );
+    force_reward_callback(&env);
+    exec(
+        &env,
+        r#"
+        assert(TurnInCount('UI_ERROR_MESSAGE') == 1, 'unselected reward emits feedback inline')
+        for _, seen in ipairs(TurnInEvents) do
+            if seen.name == 'UI_ERROR_MESSAGE' then
+                assert(seen.argc == 1 and seen.args[1] == ERR_QUEST_MUST_CHOOSE, 'Wrath has one message, no numeric type')
+            end
+        end
+        assert(UIErrorsFrame:GetNumMessages() == 1, 'original UIErrorsFrame consumed the error')
+        local text, r, g, b = UIErrorsFrame:GetMessageInfo(1)
+        assert(text == ERR_QUEST_MUST_CHOOSE and r == 1 and g == 0.1 and b == 0.1, 'original red error message')
+        assert(QuestFrameRewardPanel:IsShown(), 'feedback retains rewards')
+        assert(not A_Admin.TurnInSelectedQuest(), 'feedback does not claim a reward')
+    "#,
+    );
+    let sim = env.env.state().borrow();
+    assert_eq!(
+        sim.last_ui_error_message.as_deref(),
+        Some("Choose a northern reward.")
+    );
+    assert_eq!(
+        sim.last_sound_name_requested.as_deref(),
+        Some(b"igQuestFailed".as_slice())
+    );
+    assert_eq!(
+        sim.last_sound_kit_requested, None,
+        "no invented numeric mapping"
+    );
+}
+
+#[test]
+fn reward_feedback_ignores_arguments_without_quest_or_player() {
+    let env = seed_env();
+    observe(&env);
+    env.env
+        .register_rilua_function("FeedbackWasRecorded", |state| {
+            use rilua::LuaApiMut;
+            let recorded = wow_ui_sim::lua_api::methods::borrow_state(state)?
+                .last_ui_error_message
+                .as_deref()
+                == Some("No quest required.");
+            state.push(rilua::Val::Bool(recorded));
+            Ok(1)
+        })
+        .unwrap();
+    {
+        let mut sim = env.env.state().borrow_mut();
+        sim.gossip.giver_guid = 0;
+        sim.quest_log_entries.readiness.active_player_present = false;
+        sim.quest_log_entries.readiness.response_sent = true;
+    }
+    exec(
+        &env,
+        r#"
+        UIErrorsFrame:ClearText(); ERR_QUEST_MUST_CHOOSE = 'No quest required.'
+        UIErrorsFrame:HookScript('OnEvent', function(_, event)
+            if event == 'UI_ERROR_MESSAGE' then
+                assert(FeedbackWasRecorded(), 'last error recorded before synchronous listeners')
+            end
+        end)
+        assert(select('#', QuestChooseRewardError({}, false, 'ignored', 123)) == 0, 'all arguments ignored; zero results')
+        assert(TurnInCount('UI_ERROR_MESSAGE') == 1, 'no state/player gate')
+        assert(UIErrorsFrame:GetMessageInfo(1) == 'No quest required.', 'original consumer receives string')
+    "#,
+    );
+    assert_active(&env);
+}
+
+#[test]
+fn empty_reward_error_records_empty_and_requests_sound_without_event() {
+    let env = seed_env();
+    observe(&env);
+    exec(
+        &env,
+        r#"
+        UIErrorsFrame:ClearText(); ERR_QUEST_MUST_CHOOSE = ''
+        assert(select('#', QuestChooseRewardError()) == 0)
+        assert(TurnInCount('UI_ERROR_MESSAGE') == 0, 'empty text has no event')
+        assert(UIErrorsFrame:GetNumMessages() == 0, 'no empty message displayed')
+    "#,
+    );
+    let sim = env.env.state().borrow();
+    assert_eq!(sim.last_ui_error_message.as_deref(), Some(""));
+    assert_eq!(
+        sim.last_sound_name_requested.as_deref(),
+        Some(b"igQuestFailed".as_slice())
+    );
+}
+
+#[test]
+fn close_clears_all_identities_before_original_hide_reentry_once() {
+    let env = seed_env();
+    open_rewards(&env);
+    {
+        let mut sim = env.env.state().borrow_mut();
+        sim.gossip.inform_guid = NPC_GUID + 1;
+        sim.gossip.interact_guid = NPC_GUID + 2;
+    }
+    env.env
+        .register_rilua_function("DialogIdentitiesCleared", |state| {
+            use rilua::LuaApiMut;
+            let cleared = {
+                let sim = wow_ui_sim::lua_api::methods::borrow_state(state)?;
+                sim.gossip.giver_guid == 0
+                    && sim.gossip.inform_guid == 0
+                    && sim.gossip.interact_guid == 0
+            };
+            state.push(rilua::Val::Bool(cleared));
+            Ok(1)
+        })
+        .unwrap();
+    exec(
+        &env,
+        r#"
+        QuestFrame:HookScript('OnEvent', function(_, event)
+            if event == 'QUEST_FINISHED' then
+                assert(DialogIdentitiesCleared(), 'all identities cleared before FINISHED')
+            end
+        end)
+        assert(QuestFrame:IsShown())
+        assert(select('#', CloseQuest('ignored')) == 0)
+        assert(not QuestFrame:IsShown(), 'original FINISHED hides synchronously')
+        assert(TurnInCount('QUEST_FINISHED') == 1, 'OnHide CloseQuest reentry is a no-op')
+        CloseQuest()
+        assert(TurnInCount('QUEST_FINISHED') == 1, 'zero NPC repeats do not emit')
+    "#,
+    );
+    assert_active(&env);
+}
+
+#[test]
+fn zero_npc_close_is_noop_even_with_pending_offer_and_other_identities() {
+    let env = seed_env();
+    open_progress(&env);
+    {
+        let mut sim = env.env.state().borrow_mut();
+        sim.gossip.giver_guid = 0;
+        sim.gossip.inform_guid = NPC_GUID + 1;
+        sim.gossip.interact_guid = NPC_GUID + 2;
+        sim.pending_quest_offer = Some(sim.quest_log_entries.entries[1].clone());
+    }
+    clear_trace(&env);
+    exec(
+        &env,
+        r#"
+        assert(select('#', CloseQuest()) == 0)
+        assert(QuestFrame:IsShown(), 'zero NPC does not trigger original hide')
+        assert(#TurnInEvents == 0, 'zero NPC close is silent')
+    "#,
+    );
+    let sim = env.env.state().borrow();
+    assert_eq!(
+        sim.pending_quest_offer.as_ref().map(|row| row.quest_id),
+        Some(TARGET)
+    );
+    assert_eq!(sim.gossip.inform_guid, NPC_GUID + 1);
+    assert_eq!(sim.gossip.interact_guid, NPC_GUID + 2);
+}
+
+#[test]
+fn nonzero_close_retains_pending_dialog_snapshot() {
+    let env = seed_env();
+    open_progress(&env);
+    {
+        let mut sim = env.env.state().borrow_mut();
+        sim.pending_quest_offer = Some(sim.quest_log_entries.entries[1].clone());
+    }
+    exec(&env, "CloseQuest(); assert(not QuestFrame:IsShown())");
+    assert_eq!(
+        env.env
+            .state()
+            .borrow()
+            .pending_quest_offer
+            .as_ref()
+            .map(|row| row.quest_id),
+        Some(TARGET),
+        "CloseQuest does not reset current quest snapshot"
+    );
+}
