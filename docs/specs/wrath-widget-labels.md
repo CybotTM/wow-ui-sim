@@ -2,6 +2,8 @@
 
 Wrath 12340 contracts from laptop findings batches 4, 6, 7 and 8 (2026-10-18). Original LFR and UIErrorsFrame consumers supply behavioral integration boundaries; native execution is not claimed. Other profiles retain their existing behavior.
 
+Clean-room unit evidence: `wow-tooltip-units-12340-facts.md`, reconstruction revision 0e4e9fe0, independently source-verified by laptop, not native-run. Raw DDC icon gap .0049999999 converts to local UI gap `.005*768*sqrt(aspect²+1)` (6.4 at 4:3); effective layout scale follows afterwards. U3's 38.400002 two-column contribution and 230.39999 left-wrap candidate maximum are already local UI values, not border padding or a universal final-width cap.
+
 ## What it must do
 
 - [ ] U2: ClearLines clears row text/identity, used child visibility, left widths/wrap and non-forced minimum width; preserves tooltip size/visibility. OnTooltipCleared is synchronous only when previous rows existed.
@@ -37,7 +39,7 @@ Wrath 12340 contracts from laptop findings batches 4, 6, 7 and 8 (2026-10-18). O
 
 ## Known gaps (current cycle)
 
-- [ ] PROVISIONAL U1/U3 unit conversion: batches 6/8 supply native G=.005, gap=38.400002/(aspect*1024), cap=230.39999/(aspect*1024). Current producer uses G=.005*aspect*1024 and UI constants 38.400002/230.39999 pending laptop confirmation; relational tests do not prove absolute conversion.
+- [ ] Zero-sized texture-slot initialization has no fixture in this slice; retained nonzero template dimensions are covered.
 
 - [ ] Forced-width input and item/context cleanup have no authenticated populated fixtures.
 - [ ] Interior-byte cursor positions and XML password values other than 1/0 are unknown. Masked-caret parity is required at UTF-8 boundaries (0, 2, 5 for é猫).

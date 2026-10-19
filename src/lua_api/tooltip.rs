@@ -109,6 +109,15 @@ impl Default for TooltipData {
     }
 }
 
+/// Clean-room report wow-tooltip-units-12340-facts.md, reconstruction0e4e9fe0.
+/// Convert the raw DDC gap to local UI units; layout applies effective scale later.
+pub(crate) fn wrath_texture_gap(width: f32, height: f32) -> f32 {
+    const DDC_GAP: f32 = 0.0049999999;
+    const REFERENCE_HEIGHT: f32 = 768.0;
+    let aspect = width / height;
+    DDC_GAP * REFERENCE_HEIGHT * (aspect * aspect + 1.0).sqrt()
+}
+
 pub(crate) const DEFAULT_CURSOR_Y_OFFSET: f32 = 20.0;
 
 pub(crate) fn build_cursor_anchor(mx: f32, my: f32, x_offset: f32, y_offset: f32) -> Anchor {

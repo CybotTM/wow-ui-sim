@@ -100,9 +100,7 @@ fn anchor_attachment(
     adjacent: bool,
 ) {
     let width = sim.widgets.get(texture).map_or(0.0, |frame| frame.width);
-    // PROVISIONAL: batch6/batch8 give native G=.005; conversion into UI
-    // units awaits laptop confirmation. Tests assert relational geometry only.
-    let gap = 0.005 * (sim.screen_width / sim.screen_height) * 1024.0;
+    let gap = crate::lua_api::tooltip::wrath_texture_gap(sim.screen_width, sim.screen_height);
     let previous = sim
         .tooltips
         .get(&tooltip)

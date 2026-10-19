@@ -8,8 +8,8 @@ use crate::lua_api::SimState;
 use crate::lua_api::tooltip::{TooltipData, TooltipLine};
 use crate::render::font::WowFontSystem;
 
-// PROVISIONAL UI-unit conversion: batch6 gives 38.400002/(aspect*1024)
-// and 230.39999/(aspect*1024). Laptop conversion confirmation is pending.
+// Local UI values confirmed by clean-room report wow-tooltip-units-12340-facts.md
+// (reconstruction0e4e9fe0). Column contribution and wrap candidate, not padding/cap.
 const DOUBLE_LINE_GAP: f32 = 38.400002;
 const WRAP_CANDIDATE_CAP: f32 = 230.39999;
 const MAX_WRAP_STARTS: usize = 30;
@@ -120,8 +120,7 @@ fn wrapped_segment_width(
 }
 
 fn attachment_width(state: &SimState, td: &TooltipData, row: usize) -> f32 {
-    // PROVISIONAL conversion of batch6/batch8's native G=.005; see constants above.
-    let gap = 0.005 * (state.screen_width / state.screen_height) * 1024.0;
+    let gap = crate::lua_api::tooltip::wrath_texture_gap(state.screen_width, state.screen_height);
     td.wrath_texture_rows
         .iter()
         .rev()
