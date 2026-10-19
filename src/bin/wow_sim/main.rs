@@ -681,6 +681,22 @@ mod tests {
         );
     }
 
+    #[test]
+    fn reload_ui_lua_errors_owner_observes_fresh_environment() {
+        let mut env = WowLuaEnv::new().unwrap();
+        wow_ui_sim::lua_errors::run_lua_errors(
+            &mut env,
+            &mut None,
+            None,
+            Some("reload_sentinel = true; ReloadUI()"),
+            false,
+        );
+        assert!(
+            env.eval::<bool>("return reload_sentinel == nil").unwrap(),
+            "lua-errors must service reload before collecting output"
+        );
+    }
+
     #[cfg(feature = "gui")]
     #[test]
     fn screenshot_png_selection_preserves_defaults() {

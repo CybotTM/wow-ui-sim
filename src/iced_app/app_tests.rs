@@ -81,6 +81,10 @@ fn reload_ui_shortcut_discards_lua_globals_and_old_frames() {
             .unwrap(),
         "ReloadUI must not preserve arbitrary globals, frames or timer callbacks"
     );
+    assert!(
+        app.saved_vars.is_none(),
+        "disabled persistence must stay disabled"
+    );
     assert!(Rc::ptr_eq(&textures, &app.texture_manager));
     assert!(Rc::ptr_eq(&fonts, &app.font_system));
     let env = app.env.borrow();
@@ -150,34 +154,69 @@ fn reload_ui_round_trips_scalar_and_locally_written_large_variables() {
     let mut manager = SavedVariablesManager::with_storage_dir(directory.path().to_path_buf());
     manager.set_max_load_bytes(Some(16));
     let variables = ["ReloadScalar".to_string(), "ReloadLarge".to_string()];
+    let per_character = ["ReloadChar".to_string()];
+    let wtf_directory = tempfile::tempdir().unwrap();
+    let config = crate::saved_variables::WtfConfig::new(
+        wtf_directory.path(),
+        "Account",
+        "Realm",
+        "Character",
+    );
+    let sources = [
+        (
+            config.account_saved_vars_file("ReloadPersistence"),
+            "ReloadScalar=3\n",
+        ),
+        (
+            config.character_saved_vars_file("ReloadPersistence"),
+            "ReloadChar=5\n",
+        ),
+    ];
+    for (path, content) in &sources {
+        std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+        std::fs::write(path, content).unwrap();
+    }
+    manager.set_wtf_config(config);
     manager
         .init_for_addon(
             app.env.borrow().rilua_mut().state_mut(),
             "ReloadPersistence",
             &variables,
-            &[],
+            &per_character,
         )
         .unwrap();
     app.saved_vars = Some(manager);
     app.env
         .borrow()
-        .exec("ReloadScalar = 73; ReloadLarge = { message = string.rep('saved', 100) }; ReloadUI()")
+        .exec("ReloadScalar = 73; ReloadChar = 77; ReloadLarge = { message = string.rep('saved', 100) }; ReloadUI()")
         .unwrap();
     let _ = app.update(super::super::Message::ProcessTimers(Instant::now()));
     complete_gui_startup(&mut app);
-    app.saved_vars
-        .as_mut()
-        .unwrap()
+    let manager = app.saved_vars.as_mut().unwrap();
+    manager
+        .load_wtf_for_addon(
+            app.env.borrow().rilua_mut().state_mut(),
+            "ReloadPersistence",
+        )
+        .unwrap();
+    manager
         .init_for_addon(
             app.env.borrow().rilua_mut().state_mut(),
             "ReloadPersistence",
             &variables,
-            &[],
+            &per_character,
         )
         .unwrap();
     assert!(app.env.borrow().eval::<bool>(
-        "return ReloadScalar == 73 and ReloadLarge ~= nil and ReloadLarge.message == string.rep('saved', 100)").unwrap(),
-        "locally written reload data must round-trip scalars and must not use the import size cap");
+        "return ReloadScalar == 73 and ReloadChar == 77 and ReloadLarge ~= nil and ReloadLarge.message == string.rep('saved', 100)").unwrap(),
+        "account/character reload data must beat stale WTF, retain scalars and bypass the import cap");
+    for (path, content) in sources {
+        assert_eq!(
+            std::fs::read_to_string(path).unwrap(),
+            content,
+            "imported WTF must stay unchanged"
+        );
+    }
 }
 
 #[test]
