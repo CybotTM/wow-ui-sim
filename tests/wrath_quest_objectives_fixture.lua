@@ -1,5 +1,5 @@
 -- Authored supplied-state assertions through unchanged original consumers.
--- No native boolean/arity/enum, invalid-index, event-order, or readiness claim.
+-- Native tuple/selectors have separate direct API tests; no event/readiness claim.
 N2 = {}
 
 local function assertColor(font, expected)
@@ -52,6 +52,12 @@ function N2.detailB()
 end
 
 function N2.empty()
+    local function noRow(...)
+        assert(select('#', ...) == 3)
+        local text, kind, finished = ...
+        assert(text == nil and kind == nil and finished == nil)
+    end
+    noRow(GetQuestLogLeaderBoard(1))
     local frame, last = QuestInfo_ShowObjectives()
     assert(frame == nil and last == nil, "empty objectives return no widget")
     assert(not QuestInfoObjectivesFrame:IsShown())
