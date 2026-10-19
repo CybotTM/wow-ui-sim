@@ -25,6 +25,24 @@ fn b6_u1_original_lfr_row_attachment() {
     "#).unwrap();
 }
 #[test]
+fn b6_u1_original_lfr_gap_is_local_6_4_at_four_three() {
+    if !wrath() {
+        return;
+    }
+    let env = lfr_env();
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.screen_width = 1600.0;
+        sim.screen_height = 1200.0;
+        sim.ensure_layout_rects();
+    }
+    let gap: f64 = env
+        .eval("return B6TipTextLeft2:GetLeft()-B6TipTexture1:GetRight()")
+        .unwrap();
+    assert!((gap - 6.4).abs() < 0.01, "local 4:3 DDC gap: {gap}");
+}
+
+#[test]
 fn b6_u1_fresh_empty_path_keeps_layout_without_image() {
     if !wrath() {
         return;
