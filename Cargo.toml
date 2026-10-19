@@ -301,6 +301,11 @@ path = "tests/wrath_residual_b.rs"
 required-features = ["client-wrath"]
 
 [[test]]
+name = "wrath_quest_accept"
+path = "tests/wrath_quest_accept.rs"
+required-features = ["client-wrath"]
+
+[[test]]
 name = "wrath_legacy_sound"
 path = "tests/wrath_legacy_sound.rs"
 required-features = ["client-wrath"]
