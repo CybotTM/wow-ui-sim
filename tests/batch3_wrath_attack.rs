@@ -1,4 +1,4 @@
-//! Only exact negative return shape is unblocked by current spell data.
+//! Exact negative return shape and explicit temporary missing-effect-data policy.
 #![cfg(feature = "client-wrath")]
 
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -19,6 +19,24 @@ fn g1_empty_one_based_action_returns_one_nil_not_boolean_false() {
     "#,
     )
     .unwrap();
+}
+
+#[test]
+fn g1_temporary_occupied_spell_without_effect_types_is_non_attack() {
+    let env = WowLuaEnv::new().unwrap();
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.action_macros.remove(&7);
+        sim.action_outfits.remove(&7);
+        // Synthetic supplied spell, not an authenticated native attack/non-attack ID.
+        sim.action_bars.insert(7, 1_000_001);
+    }
+    env.exec(r#"
+        assert(IsAttackAction(7)==nil, 'temporary: absent effect types treats occupied slots as non-attack')
+        assert(select('#', IsAttackAction(7))==1)
+        -- Simulator namespace preservation, not a 12340 namespace parity claim.
+        assert(C_ActionBar.IsAttackAction(7)==false)
+    "#).unwrap();
 }
 
 #[test]
