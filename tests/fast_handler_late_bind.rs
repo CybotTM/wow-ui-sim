@@ -82,6 +82,7 @@ fn function_family_shapes_read_current_handler_environment() {
         "LateBoundCallback(self:GetParent():GetID())",
         "LateBoundCallback(self:GetParent().value)",
         "LateBoundCallback(self, self:GetParent().value)",
+        "LateBoundCallback(self:GetParent().value, self:GetParent().child.nested:GetValue())",
         "LateBoundCallback(LateBoundArg())",
         "LateBoundCallback(self:GetChecked())",
         "LateBoundCallback(LateBoundObject:GetValue())",
@@ -105,9 +106,15 @@ fn function_family_shapes_read_current_handler_environment() {
             local handler = LateBoundFrame:GetScript('OnClick')
             local parent = CreateFrame('Frame', nil, UIParent)
             parent.value = 42
+            parent.child = {nested = {GetValue = function() return 42 end}}
             LateBoundFrame:SetParent(parent)
             local calls = 0
-            local function callback(...) calls = calls + 1 end
+            local function callback(...)
+                for i = 1, select('#', ...) do
+                    assert(select(i, ...) ~= 'old', 'captured stale global argument')
+                end
+                calls = calls + 1
+            end
             local environment = setmetatable({
                 LateBoundCallback = callback,
                 LateBoundNamespace = {Callback = callback},
@@ -118,6 +125,47 @@ fn function_family_shapes_read_current_handler_environment() {
             setfenv(handler, environment)
             handler(LateBoundFrame, 'LeftButton', 0.25)
             assert(calls == 1, 'handler did not use its environment')
+        "#,
+        );
+        assert!(result.is_ok(), "{body}: {result:?}");
+    }
+}
+
+#[test]
+fn checked_assignment_callbacks_read_current_handler_environment() {
+    let bodies = [
+        "LateBoundSettings.enabled = self:GetChecked(); LateBoundChanged(); LateBoundSound(self:GetChecked());",
+        "LateBoundSettings.a = self:GetChecked(); LateBoundSettings.b = self:GetChecked(); LateBoundSettings.c = self:GetChecked(); LateBoundChanged(); LateBoundSound(self:GetChecked());",
+        "LateBoundSettings.enabled = self:GetChecked(); LateBoundChanged(); LateBoundOther(); LateBoundSound(self:GetChecked());",
+        "LateBoundSettings.enabled = 3; LateBoundChanged(); LateBoundSound(self:GetChecked());",
+    ];
+    for body in bodies {
+        let env = WowLuaEnv::new().unwrap();
+        env.exec(
+            r#"
+            LateBoundSettings = {}
+            function LateBoundChanged() error('old changed callback') end
+            function LateBoundOther() error('old other callback') end
+            function LateBoundSound() error('old sound callback') end
+        "#,
+        )
+        .unwrap();
+        install(&env, body);
+        let result = env.exec(
+            r#"
+            local handler = LateBoundFrame:GetScript('OnClick')
+            local changed, sound = 0, 0
+            local settings = {}
+            setfenv(handler, setmetatable({
+                LateBoundSettings = settings,
+                LateBoundChanged = function() changed = changed + 1 end,
+                LateBoundOther = function() end,
+                LateBoundSound = function(checked) assert(checked); sound = sound + 1 end,
+            }, {__index = _G}))
+            LateBoundFrame:SetChecked(true)
+            handler(LateBoundFrame)
+            assert(changed == 1 and sound == 1, 'callbacks bypassed environment')
+            assert(next(settings), 'assignment bypassed environment')
         "#,
         );
         assert!(result.is_ok(), "{body}: {result:?}");
