@@ -187,32 +187,48 @@ fn set_abandon_quest(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-/// Consume the marked identity once, independently of later selection changes.
+/// Model the server removal response, retaining the client's marked identity.
 #[cfg(feature = "client-wrath")]
 fn abandon_quest(state: &mut LuaState) -> LuaResult<u32> {
-    {
-        let mut sim = borrow_state_mut(state)?;
-        let Some(id) = sim.abandon_quest_id.take() else {
-            return Ok(0);
-        };
-        if !sim.quest_log_entries.abandon(id as i32) {
-            return Ok(0);
-        }
-        sim.quest_log.retain(|quest| *quest != id);
-        if sim.selected_quest_log_id == Some(id) {
-            sim.selected_quest_log_id = None;
-        }
-        if sim
-            .pending_quest_offer
-            .as_ref()
-            .map(|offer| offer.quest_id as u32)
-            == Some(id)
-        {
-            sim.pending_quest_offer = None;
-        }
+    let removed = abandon_marked_quest(&mut *borrow_state_mut(state)?);
+    if !removed {
+        return Ok(0);
     }
-    push_event(state, "QUEST_LOG_UPDATE")?;
+    let player = crate::lua_api::methods::create_string_static(state, "player");
+    super::state_backed_queries::dispatch_event_now(state, "UNIT_QUEST_LOG_CHANGED", &[player])?;
+    let mut sim = borrow_state_mut(state)?;
+    if !sim
+        .events
+        .pending()
+        .iter()
+        .any(|event| event.name == "QUEST_LOG_UPDATE")
+    {
+        sim.events.push_simple("QUEST_LOG_UPDATE");
+    }
     Ok(0)
+}
+
+#[cfg(feature = "client-wrath")]
+fn abandon_marked_quest(sim: &mut crate::lua_api::SimState) -> bool {
+    let Some(id) = sim.abandon_quest_id else {
+        return false;
+    };
+    if !sim.quest_log_entries.abandon(id as i32) {
+        return false;
+    }
+    sim.quest_log.retain(|quest| *quest != id);
+    if sim.selected_quest_log_id == Some(id) {
+        sim.selected_quest_log_id = None;
+    }
+    if sim
+        .pending_quest_offer
+        .as_ref()
+        .map(|offer| offer.quest_id as u32)
+        == Some(id)
+    {
+        sim.pending_quest_offer = None;
+    }
+    true
 }
 
 /// `SetTrackedAchievement(id, tracked)` — add or remove by id.

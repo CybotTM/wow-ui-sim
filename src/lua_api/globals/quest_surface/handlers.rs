@@ -664,6 +664,13 @@ pub fn get_quest_log_reward_info(state: &mut LuaState) -> LuaResult<u32> {
             .find(|entry| entry.quest_id == quest_id)
             .and_then(|entry| entry.reward_items.get((item_index - 1) as usize).cloned())
     };
+    push_quest_reward_item(state, item)
+}
+
+pub(super) fn push_quest_reward_item(
+    state: &mut LuaState,
+    item: Option<crate::lua_api::state::QuestRewardItem>,
+) -> LuaResult<u32> {
     let Some(item) = item else {
         return Ok(0);
     };

@@ -38,6 +38,12 @@ pub struct QuestLogEntry {
     /// Item rewards iterated by `GetNumQuestLogRewards` /
     /// `GetQuestLogRewardInfo`. Empty for quests with no item rewards.
     pub reward_items: Vec<QuestRewardItem>,
+    /// Supplied Wrath rewards; absent spell and zero points mean no reward.
+    pub reward_spell: Option<QuestRewardSpell>,
+    pub reward_arena_points: u32,
+    pub reward_talents: u32,
+    /// Resolved faction ID and amount, in the units consumed by FrameXML.
+    pub reward_factions: Vec<(i32, i32)>,
     /// Currency rewards returned by
     /// `C_QuestLog.GetQuestRewardCurrencies`. Empty for quests with no
     /// currency rewards.
@@ -53,6 +59,15 @@ pub struct QuestRewardItem {
     pub count: i32,
     pub quality: i32,
     pub is_usable: bool,
+}
+
+/// Spell presentation returned to the original Wrath reward consumer.
+#[derive(Debug, Clone)]
+pub struct QuestRewardSpell {
+    pub texture: String,
+    pub name: String,
+    pub is_trade_skill: bool,
+    pub is_learned: bool,
 }
 
 /// One currency-reward entry surfaced by
@@ -78,12 +93,23 @@ pub struct QuestLogState {
     /// Explicit quest-dialog materials; absence leaves the original UI default.
     pub background_materials: HashMap<i32, String>,
     pub readiness: crate::c_api::quest_readiness::QuestReadinessState,
+    /// Shared prepared output: readers do not implicitly refresh on selection.
+    pub processed_reward_factions: Vec<(i32, i32)>,
     /// Quest IDs already turned in / permanently completed.
     /// Drives `GetAllCompletedQuestIDs` and `IsQuestFlaggedCompleted`.
     pub completed_quest_ids: HashSet<i32>,
 }
 
 impl QuestLogState {
+    pub fn process_reward_factions(&mut self, quest_id: Option<u32>) {
+        self.processed_reward_factions = self
+            .entries
+            .iter()
+            .find(|entry| Some(entry.quest_id as u32) == quest_id)
+            .map(|entry| entry.reward_factions.clone())
+            .unwrap_or_default();
+    }
+
     /// Remove active membership and auxiliary state without completing the quest.
     pub fn abandon(&mut self, quest_id: i32) -> bool {
         let before = self.entries.len();
@@ -149,6 +175,7 @@ impl QuestLogState {
             objective_progress: crate::c_api::quest_objectives::seeded_progress(),
             background_materials: HashMap::new(),
             readiness: Default::default(),
+            processed_reward_factions: Vec::new(),
             completed_quest_ids: seeded_completed_quest_ids(),
         }
     }
@@ -180,6 +207,10 @@ fn ordinary_offer_entry(quest_id: i32, offer: &GossipQuestRow) -> QuestLogEntry 
         criteria_spell_texture: None,
         criteria_spell_finished: false,
         reward_items: Vec::new(),
+        reward_spell: None,
+        reward_arena_points: 0,
+        reward_talents: 0,
+        reward_factions: Vec::new(),
         currency_rewards: Vec::new(),
     }
 }
@@ -209,6 +240,10 @@ fn seed_quest_defaults() -> QuestLogEntry {
         criteria_spell_texture: None,
         criteria_spell_finished: false,
         reward_items: Vec::new(),
+        reward_spell: None,
+        reward_arena_points: 0,
+        reward_talents: 0,
+        reward_factions: Vec::new(),
         currency_rewards: Vec::new(),
     }
 }

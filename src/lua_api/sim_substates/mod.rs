@@ -16,7 +16,9 @@ mod wow_labs;
 pub use archaeology::{ArchaeologyArtifact, ArchaeologyRace, ArchaeologyState, SelectedArtifact};
 pub use arrow_callouts::{ArrowCalloutInfo, ArrowCalloutState};
 pub use gardenweald::GardenwealdState;
-pub use quest_log::{QuestLogEntry, QuestLogState, QuestRewardCurrency, QuestRewardItem};
+pub use quest_log::{
+    QuestLogEntry, QuestLogState, QuestRewardCurrency, QuestRewardItem, QuestRewardSpell,
+};
 pub use viewed_artifact::{
     ArtifactAppearanceInfo, ArtifactAppearanceSetInfo, ArtifactArtInfo, ArtifactPowerInfo,
     ColorRgb, MetaPowerEntry, RelicSlotInfo, ViewedArtifactState,
