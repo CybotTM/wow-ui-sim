@@ -27,7 +27,9 @@ impl SimState {
         self.message_frames.clear();
         self.private_aura_anchors = Default::default();
         #[cfg(feature = "retail-12-0-5")]
-        self.private_aura_sound_registrations = Default::default();
+        {
+            self.private_aura_sound_registrations = Default::default();
+        }
         self.quest_portrait_state = None;
         self.visible_on_update_cache = None;
         self.strata_buckets = None;
