@@ -22,6 +22,15 @@ fn read_original(name: &str) -> String {
     String::from_utf8(bytes).expect("SETUP: original UTF-8")
 }
 
+fn assert_no_script_errors(env: &WowLuaEnv) {
+    let sim = env.state().borrow();
+    assert!(
+        sim.lua_errors.is_empty(),
+        "SETUP: original script errors: {:?}",
+        sim.lua_errors
+    );
+}
+
 fn exec_original(env: &WowLuaEnv, name: &str) {
     env.loader_env()
         .exec(&read_original(name))
@@ -49,7 +58,7 @@ fn load_originals(env: &WowLuaEnv, names: &[&str]) {
     assert!(loaded.warnings.is_empty(), "SETUP: {:?}", loaded.warnings);
 }
 
-fn original_frame(name: &str, wanted: &str) -> FrameXml {
+fn read_original_frame(name: &str, wanted: &str) -> FrameXml {
     let ui = parse_xml(&read_original(name)).expect("SETUP: complete original XML");
     ui.elements
         .into_iter()
@@ -76,7 +85,7 @@ fn instantiate(env: &WowLuaEnv, frame: &FrameXml, kind: &str, parent: Option<&st
     .expect("SETUP: instantiate original node");
 }
 
-fn autocomplete_env() -> WowLuaEnv {
+fn create_autocomplete_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
     load_originals(
         &env,
@@ -88,6 +97,7 @@ fn autocomplete_env() -> WowLuaEnv {
         ],
     );
     env.exec("assert(AutoCompleteButton1:GetWidth()==120 and AutoCompleteButton1:GetHeight()==14); assert(AutoCompleteButton1:GetFontString():GetNumPoints()>0)").expect("SETUP: original autocomplete lifecycle");
+    assert_no_script_errors(&env);
     env
 }
 
@@ -97,7 +107,7 @@ fn t1_original_animation_rejects_range_without_mutating_original_uvs() {
     exec_original(&env, "UIParent.lua");
     instantiate(
         &env,
-        &original_frame("ComboFrame.xml", "ComboPointTemplate"),
+        &read_original_frame("ComboFrame.xml", "ComboPointTemplate"),
         "Frame",
         None,
     );
@@ -144,8 +154,8 @@ fn f1_original_restricted_screen_handle_fills_root_not_offset_parent() {
     "#).unwrap();
 }
 
-fn chat_env() -> WowLuaEnv {
-    let env = autocomplete_env();
+fn create_chat_env() -> WowLuaEnv {
+    let env = create_autocomplete_env();
     exec_original(&env, "GlobalStrings.lua");
     exec_original(&env, "UIParent.lua");
     exec_original(&env, "FloatingChatFrame.lua");
@@ -160,8 +170,21 @@ fn chat_env() -> WowLuaEnv {
     "#,
     )
     .unwrap();
-    let floating = original_frame("FloatingChatFrame.xml", "FloatingChatFrameTemplate");
-    let edit = floating
+    let edit = read_chat_editbox();
+    instantiate(&env, &edit, "EditBox", Some("RealPathChat"));
+    env.exec(r#"
+        ChatBox=RealPathChatEditBox
+        assert(ChatBox.chatFrame==ChatWindow and ChatWindow.editBox==ChatBox, 'SETUP: original window links before OnLoad')
+        assert(ChatBox:GetAttribute('chatType')=='SAY' and ChatBox:GetScript('OnTextChanged'), 'SETUP: original chat lifecycle')
+        ChatBox:Show(); ChatBox:SetFocus()
+    "#).unwrap();
+    assert_no_script_errors(&env);
+    env
+}
+
+fn read_chat_editbox() -> FrameXml {
+    let floating = read_original_frame("FloatingChatFrame.xml", "FloatingChatFrameTemplate");
+    floating
         .children
         .iter()
         .find_map(|child| match child {
@@ -177,20 +200,13 @@ fn chat_env() -> WowLuaEnv {
             }
             _ => None,
         })
-        .expect("SETUP: original floating chat editbox");
-    instantiate(&env, edit, "EditBox", Some("RealPathChat"));
-    env.exec(r#"
-        ChatBox=RealPathChatEditBox
-        assert(ChatBox.chatFrame==ChatWindow and ChatWindow.editBox==ChatBox, 'SETUP: original window links before OnLoad')
-        assert(ChatBox:GetAttribute('chatType')=='SAY' and ChatBox:GetScript('OnTextChanged'), 'SETUP: original chat lifecycle')
-        ChatBox:Show(); ChatBox:SetFocus()
-    "#).unwrap();
-    env
+        .expect("SETUP: original floating chat editbox")
+        .clone()
 }
 
 #[test]
 fn c5_original_chat_history_keeps_duplicates_and_cycles_via_alt_dispatch() {
-    let env = chat_env();
+    let env = create_chat_env();
     env.exec(r#"
         for _,text in ipairs({'A','A','B'}) do ChatBox:SetText(text); ChatEdit_AddHistory(ChatBox) end
         ChatBox:SetText('')
@@ -204,7 +220,7 @@ fn c5_original_chat_history_keeps_duplicates_and_cycles_via_alt_dispatch() {
 
 #[test]
 fn arrows_original_chat_ignore_arrows_controls_real_alt_motion() {
-    let env = chat_env();
+    let env = create_chat_env();
     for text in ["a", "b", "c", "d"] {
         env.send_key_press("", Some(text)).unwrap();
     }
@@ -225,7 +241,7 @@ fn arrows_original_chat_ignore_arrows_controls_real_alt_motion() {
 fn c4_original_editbox_input_renders_byte_mask_glyphs_and_end_caret() {
     use std::{cell::RefCell, rc::Rc};
     use wow_ui_sim::render::WowFontSystem;
-    let env = autocomplete_env();
+    let env = create_autocomplete_env();
     let fonts = Rc::new(RefCell::new(WowFontSystem::new_without_casc()));
     assert!(
         fonts.borrow().font_system.db().faces().next().is_some(),
@@ -253,12 +269,13 @@ fn c4_original_editbox_input_renders_byte_mask_glyphs_and_end_caret() {
         env.send_key_press("", Some("*")).unwrap();
     }
     env.fire_on_update(0.016).unwrap();
+    assert_no_script_errors(&env);
     env.exec(r#"
         assert(Stars:GetText()=='*****' and Masked.caret and Stars.caret, 'SETUP: star control and real caret output')
         for i=1,4 do assert(math.abs(Masked.caret[i]-Stars.caret[i])<0.01, 'RED C4: byte-mask end caret') end
     "#).unwrap();
-    let mask = collect_glyphs(&env, &fonts, "RealPathMasked");
-    let stars = collect_glyphs(&env, &fonts, "RealPathStars");
+    let mask = render_glyphs(&env, &fonts, "RealPathMasked");
+    let stars = render_glyphs(&env, &fonts, "RealPathStars");
     assert!(
         !mask.is_empty() && !stars.is_empty(),
         "SETUP: nonempty real glyph output"
@@ -270,7 +287,7 @@ fn c4_original_editbox_input_renders_byte_mask_glyphs_and_end_caret() {
 }
 
 #[cfg(feature = "gui")]
-fn collect_glyphs(
+fn render_glyphs(
     env: &WowLuaEnv,
     fonts: &std::rc::Rc<std::cell::RefCell<wow_ui_sim::render::WowFontSystem>>,
     root: &str,
@@ -301,12 +318,12 @@ fn collect_glyphs(
 
 #[test]
 fn x1_original_clean_template_survives_exact_tainted_replacement_on_replay() {
-    let env = autocomplete_env();
+    let env = create_autocomplete_env();
     let dir = tempfile::tempdir().unwrap();
     let toc = TocFile::parse(dir.path(), "## Interface: 30300\nReplacement.xml\n");
     std::fs::write(dir.path().join("Replacement.xml"),r#"<Ui><Button name="AutoCompleteButtonTemplate" virtual="true"><Size x="222" y="29"/></Button></Ui>"#).unwrap();
     load_addon_from_toc(&env.loader_env(), &toc).unwrap();
-    let original = original_frame("AutoComplete.xml", "AutoCompleteBox");
+    let original = read_original_frame("AutoComplete.xml", "AutoCompleteBox");
     let button = original
         .children
         .iter()
@@ -366,6 +383,48 @@ fn x2_original_xml_continues_after_missing_external_script() {
 }
 
 #[test]
+fn x2_original_pvp_xml_continues_after_missing_template_include() {
+    let env = WowLuaEnv::new().unwrap();
+    exec_original(&env, "GlobalStrings.lua");
+    exec_original(&env, "FriendsFrame.lua");
+    load_originals(
+        &env,
+        &[
+            "Fonts.xml",
+            "FontStyles.xml",
+            "UIPanelTemplates.xml",
+            "PVPFrameTemplates.xml",
+        ],
+    );
+    assert_no_script_errors(&env);
+    let dir = tempfile::tempdir().unwrap();
+    for name in ["PVPFrame.xml", "PVPFrame.lua"] {
+        let source = read_original(name);
+        let path = dir.path().join(name);
+        std::fs::write(&path, source.as_bytes()).unwrap();
+        assert_eq!(
+            std::fs::read(&path).unwrap(),
+            std::fs::read(Path::new(CACHE).join(name)).unwrap()
+        );
+    }
+    assert!(
+        !dir.path().join("PVPFrameTemplates.xml").exists(),
+        "SETUP: only original template include unavailable"
+    );
+    let toc = TocFile::parse(
+        dir.path(),
+        "## Interface: 30300\n## AllowLoad: Both\nPVPFrame.xml\n",
+    );
+    let outcome = load_addon_from_toc(&env.loader_env(), &toc);
+    eprintln!("controlled missing include load result={outcome:?}");
+    env.exec(r#"
+        assert(PVPParentFrame, 'RED X2 include: original parent sibling must survive child I/O failure')
+        assert(PVPParentFrame:GetWidth()==384 and PVPParentFrame:GetHeight()==512, 'RED X2 include: original sibling geometry')
+    "#).unwrap();
+    assert_no_script_errors(&env);
+}
+
+#[test]
 fn g1_original_action_event_observes_real_public_nil_tuple_without_flashing() {
     let env = WowLuaEnv::new().unwrap();
     load_originals(
@@ -406,6 +465,7 @@ fn g1_original_action_event_observes_real_public_nil_tuple_without_flashing() {
             env.fire_event(event).unwrap();
         }
     }
+    assert_no_script_errors(&env);
     env.exec(r#"
         IsAttackAction=SavedAttackBinding
         assert(#AttackResults==4, 'SETUP: original event dispatch reached real public binding')
