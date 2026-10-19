@@ -12,7 +12,7 @@ The GUI shortcut records the same request. App discards frame-ID input, hit-test
 
 ## Environment retirement
 
-`WowLuaEnv::service_reload` writes declared SavedVariables before mutation. The persistence manager forgets old `Val` handles and registrations; each enabled addon re-registers through normal TOC loading. Previously saved addons bypass WTF import and read simulator storage. Disabled persistence stays disabled. Imported WTF files are never written.
+`WowLuaEnv::service_reload` writes declared SavedVariables before mutation. The persistence manager forgets old `Val` handles and registrations; each enabled addon re-registers through normal TOC loading. Previously saved addons bypass WTF import and read simulator storage. Their just-written data bypasses the external import-size cap and retains scalar globals as well as tables; ordinary initial imports keep the existing limit. Disabled persistence stays disabled. Imported WTF files are never written.
 
 The old VM's self-reference and font handle are cleared before it drops. A fresh VM receives fresh app data, registries, API registration, templates and built-in frames. `SimState::discard_ui_environment` discards UI callbacks, animations, frames and addon runtime records without replacing player/world/party/session data. Selected target/focus are retained as model state, not asserted as native behavior.
 

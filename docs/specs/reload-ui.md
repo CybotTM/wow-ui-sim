@@ -5,7 +5,7 @@
 ## What it must do
 
 - [ ] Coalesce Lua reload requests without dispatching reload events or destroying Lua inside the invoking call.
-- [ ] Save declared account and character SavedVariables before retiring the old VM; make those values available during fresh addon loading. Keep `--no-saved-vars` disabled across reload and never write imported WTF files.
+- [ ] Save declared account and character SavedVariables before retiring the old VM; read back table and scalar values during fresh addon loading. Do not apply the external import-size cap to just-written reload data or re-import stale WTF values over it. Keep `--no-saved-vars` disabled across reload and never write imported WTF files.
 - [ ] Discard old globals, frames, scripts, timers, animation state, templates and addon-loading state. Release the old Lua VM; rerun the real startup/addon-loading path with the original launch settings.
 - [ ] Preserve modeled server/session/player/world/party state and process IPC/texture/font resources. Clear GUI frame-ID, input and render caches before drawing the new UI.
 - [ ] Service reloads requested by IPC, GUI shortcut, slash commands, events and timers only after the active Lua call unwinds; subsequent IPC commands use the new environment and retain print-output isolation.

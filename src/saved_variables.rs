@@ -413,6 +413,11 @@ impl SavedVariablesManager {
         if !path.exists() {
             return Ok(Val::Nil);
         }
+        if self.reload_saved_addons.contains(addon_name) {
+            // These values were just serialized by this process, not imported from WTF.
+            self.read_and_execute_lua_file(state, &path, "@SavedVariables")?;
+            return Ok(get_global(state, var_name));
+        }
 
         if let Err(error) = self.load_lua_file(state, &path, "@SavedVariables") {
             tracing::warn!(
@@ -458,6 +463,15 @@ impl SavedVariablesManager {
         if self.should_skip_load(path)? {
             return Ok(());
         }
+        self.read_and_execute_lua_file(state, path, chunk_prefix)
+    }
+
+    fn read_and_execute_lua_file(
+        &self,
+        state: &mut LuaState,
+        path: &Path,
+        chunk_prefix: &str,
+    ) -> crate::Result<()> {
         let content = fs::read_to_string(path).map_err(|e| crate::Error::Other(e.to_string()))?;
         let content = content.strip_prefix('\u{feff}').unwrap_or(&content);
         let mut table_size_cache = load_table_size_cache(&self.storage_dir, path);
