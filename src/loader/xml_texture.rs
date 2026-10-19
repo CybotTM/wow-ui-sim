@@ -328,11 +328,6 @@ pub(super) fn build_texture_lua(
 
 /// Append anchor or SetAllPoints code for a texture.
 fn append_texture_anchors(code: &mut String, texture: &crate::xml::TextureXml, parent_name: &str) {
-    // Wrath's sized tooltip slots stay unanchored until AddTexture; parent fill
-    // would replace their declared dimensions with the empty tooltip's size.
-    let preserve_declared_size = crate::client_profile::ACTIVE
-        == crate::client_profile::ClientProfile::Wrath
-        && texture.size.is_some();
     if let Some(anchors) = &texture.anchors {
         let anchors = normalize_published_texture_self_key(texture, anchors);
         code.push_str(&generate_set_point_code(
@@ -342,7 +337,7 @@ fn append_texture_anchors(code: &mut String, texture: &crate::xml::TextureXml, p
             parent_name,
             "parent",
         ));
-    } else if texture.set_all_points != Some(true) && !preserve_declared_size {
+    } else if texture.set_all_points != Some(true) {
         code.push_str("\n        tex:SetAllPoints(true)\n        ");
     }
 }
