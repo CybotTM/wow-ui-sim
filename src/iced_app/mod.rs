@@ -37,6 +37,10 @@ mod mouse;
 #[cfg(feature = "gui")]
 mod mouse_drag;
 #[cfg(feature = "gui")]
+mod mouse_sequence_probe;
+#[cfg(feature = "gui")]
+pub use mouse_sequence_probe::{MouseSequenceStep, run_headless_mouse_sequence};
+#[cfg(feature = "gui")]
 mod nine_slice;
 #[cfg(feature = "gui")]
 mod quad_builders;
