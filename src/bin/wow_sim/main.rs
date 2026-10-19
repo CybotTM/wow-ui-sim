@@ -17,6 +17,7 @@ use tracing_subscriber::EnvFilter;
 use wow_ui_sim::font::WowFontSystem;
 use wow_ui_sim::logging;
 use wow_ui_sim::lua_api::WowLuaEnv;
+#[cfg(feature = "gui")]
 use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
 
