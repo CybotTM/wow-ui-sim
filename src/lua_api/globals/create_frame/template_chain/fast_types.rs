@@ -250,6 +250,7 @@ pub(crate) enum FastHandlerRef<'a> {
         value: FastLiteralValue<'a>,
     },
     Function(&'a str),
+    FunctionWithSelfArg(&'a str),
     FunctionNoArgs(&'a str),
     FunctionWithSelfIdArg(&'a str),
     FunctionWithStringArg {

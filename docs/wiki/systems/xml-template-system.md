@@ -88,6 +88,12 @@ Intrinsic default scripts use the precall binding; ordinary XML scripts use the 
 
 `inherit="prepend"` or `"append"` chains new/existing handlers, both wrapped in `pcall`. Without `inherit`, new handler replaces old.
 
+## Inline function calls resolve globals at invocation
+
+The function-family builders emit parser-validated Lua call expressions inside the installed handler instead of capturing resolved globals. This covers plain/dotted callbacks, literal/global arguments, ancestor fields, method/function-result arguments and checked-assignment callbacks. The handler's Lua environment owns lookup, so later definitions, replacements and `hooksecurefunc` wrappers remain visible; nil-call diagnostics come from Lua itself. XML `function="X"` remains a direct value binding, distinct from the inline body `X(self)`.
+
+The unchanged-producer fixtures at `6b03106f9` failed all six cases, including original Wrath FrameXML TOC order followed by GameMenu Show→tick→Hide→tick. That run recorded missing `UpdateMicroButtons`, `Disable_BagButtons`, `Enable_BagButtons` and `VoiceChat_Toggle` despite their later definitions being callable, plus a separate `cursorOffset`-nil error. Producer GREEN and preservation/startup evidence are pending; this is not a performance or native-parity claim. Tests: [`fast_handler_late_bind.rs`](../../../tests/fast_handler_late_bind.rs); implementation: [`builder_function_family`](../../../src/lua_api/globals/create_frame/template_chain/builder_function_family/mod.rs).
+
 ## Name Substitution and parentKey
 
 `$parent` in frame names resolves to the actual parent name. `$parent.ScrollBox` in `relativeKey` resolves to `parent["ScrollBox"]`; `$parent.$parent.X` chains via `GetParent()`.

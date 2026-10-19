@@ -2445,3 +2445,7 @@ Linked the [disabled-check contract](../specs/disabled-check-emission.md) for bo
 ## 2026-10-18 — Wrath widget state and stored-size correction
 
 Linked optional EditBox history, direct arrows, byte-mask presentation and MessageFrame row timers from [[widget-system]] to their owning contract. Added [[wrath-tooltip-stored-size]]: the queried-size oracle confused parent-fill geometry with retained dimensions; the unsupported loader change was reverted, and cached dependency repair remains distinct. Source/reconstructed authority and old-library fixture controls are not current-head/native/preservation acceptance.
+
+## 2026-10-19 — Inline XML callback late binding
+
+Updated [[xml-template-system]] with call-time function-family lookup and the distinct direct `function=` binding. All six unchanged-producer fixtures fail behaviorally at `6b03106f9`, including original Wrath GameMenu and unfiltered cursor errors. Producer uses Lua expressions rather than install-time callback/argument captures; GREEN, preservation and startup proof remain pending.
