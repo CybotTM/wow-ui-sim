@@ -135,7 +135,14 @@ impl WowLuaEnv {
         &mut self,
         saved_vars: &mut Option<crate::saved_variables::SavedVariablesManager>,
     ) -> Result<bool> {
-        if !self.state.borrow().ui_reload_requested {
+        let eligible = {
+            let state = self.state.borrow();
+            let cinematic_blocks = crate::client_profile::ACTIVE
+                == crate::client_profile::ClientProfile::Wrath
+                && state.cinematic_active;
+            state.ui_reload_requested && !cinematic_blocks
+        };
+        if !eligible {
             return Ok(false);
         }
         if let Some(manager) = saved_vars {

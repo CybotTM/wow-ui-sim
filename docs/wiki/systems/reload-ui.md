@@ -8,7 +8,7 @@ Both `C_UI.Reload` and legacy `ReloadUI` call the same Rust request producer. Bl
 
 Dump-tree, screenshot and lua-errors owners also service requests after startup, script execution and settling callbacks, before observing their output. Headless owners settle rebuilt startup synchronously.
 
-Wrath's original forbidden-action popup first calls legacy `DisableAddOn`. That endpoint now registers the same Rust model function as `C_AddOns.DisableAddOn`; the [contract](../../specs/reload-ui.md#wrath-12340-requirements) records the seven-profile source check and prerequisite RED. No namespace alias table or vendor modification is involved. Cinematic eligibility is a separate pending producer.
+Wrath's original forbidden-action popup first calls legacy `DisableAddOn`. That endpoint now registers the same Rust model function as `C_AddOns.DisableAddOn`; the [contract](../../specs/reload-ui.md#wrath-12340-requirements) records the seven-profile source check and prerequisite RED. No namespace alias table or vendor modification is involved. Wrath owner service now leaves the request pending during supplied cinematic playback; other profiles retain their prior eligibility policy. The original popup first passed its disable/query control, then reproduced the cinematic failure before this guard. Taint-gate production/feedback remain evidence-blocked.
 
 The GUI shortcut records the same request. App discards frame-ID input, hit-testing, quad and pending-texture caches, then restarts yielded GUI startup using current canvas dimensions. Texture manager, font system and glyph atlas allocations survive.
 

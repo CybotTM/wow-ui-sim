@@ -1,3 +1,7 @@
+## [2026-10-19] source | Wrath cinematic reload eligibility
+
+[Reload ownership](systems/reload-ui.md#request-and-ownership) links the [bounded contract](../specs/reload-ui.md#wrath-12340-requirements): exact prerequisite fixture RED, original popup disable/query GREEN, then a distinct cinematic RED at `2711a473e`. The owner guard is Wrath-only; no combat refusal or unknown taint feedback is invented. Eligibility GREEN remains pending.
+
 ## [2026-10-19] source | Wrath ReloadUI facts and popup prerequisite
 
 [Reload mechanics](systems/reload-ui.md#request-and-ownership) link the [12340 contract and pending matrix](../specs/reload-ui.md#wrath-12340-requirements). Original StaticPopup acceptance exposed a missing legacy DisableAddOn endpoint; Wrath alone calls it among the seven shipped caches. Registration shares the modeled C_AddOns function. Behavioral GREEN and cinematic eligibility remain pending; Retail chronology remains UNKNOWN, with separate LoD-SV ownership and placement-unit bounds.

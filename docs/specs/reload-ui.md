@@ -22,8 +22,8 @@ Verified 2026-10-19: among all seven active profile caches, only Wrath's shipped
 
 | Slice | Required boundary | Current proof |
 | --- | --- | --- |
-| A prerequisite | Original StaticPopup acceptance disables its selected addon, then requests reload | RED at `06d7cbcee`: missing legacy DisableAddOn; registration implemented, GREEN pending |
-| A | Deferred request waits outside cinematic playback; zero results, coalescing, no explicit combat rejection | Cinematic RED pending prerequisite repair |
+| A prerequisite | Original StaticPopup acceptance disables its selected addon, then requests reload | Exact fixture RED `1a20ccf65`; producer `2711a473e` GREEN through original popup and C_AddOns enable-state query |
+| A | Deferred request waits outside cinematic playback; zero results, coalescing, no explicit combat rejection | Original-popup cinematic RED at `2711a473e`; eligibility producer implemented, GREEN pending |
 | B | Temporary protected-action allowance and argless REGEN_ENABLED precede conditional LEAVING, then LOGOUT; handlers finish before addon SV serialization | Pending |
 | C | Per-addon code/bindings, account SV, character SV, then ADDON_LOADED(name), one argument | Pending |
 | D | Both account chunks ready: VARIABLES_LOADED inline before LOGIN/argless PEW; pending chunks may defer it past entry; no synthetic WoWUISim addon event | Pending |
