@@ -14,6 +14,7 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         ),
         ("SelectGossipActiveQuest", select_active_quest),
         ("IsQuestCompletable", is_quest_completable),
+        ("IsQuestFlaggedCompleted", is_quest_flagged_completed),
         ("CompleteQuest", complete_quest),
         ("GetQuestReward", get_quest_reward),
         ("GetTitleText", get_title_text),
@@ -86,6 +87,16 @@ fn open_active_dialog(state: &mut LuaState, id: i32) -> LuaResult<()> {
 fn is_quest_completable(state: &mut LuaState) -> LuaResult<u32> {
     let ready = read_current_entry(state)?.is_some_and(|row| row.is_complete && !row.is_failed);
     state.push(Val::Bool(ready));
+    Ok(1)
+}
+
+fn is_quest_flagged_completed(state: &mut LuaState) -> LuaResult<u32> {
+    let id = i32::from_stack(state, 1)?;
+    let completed = borrow_state(state)?
+        .quest_log_entries
+        .completed_quest_ids
+        .contains(&id);
+    state.push(Val::Bool(completed));
     Ok(1)
 }
 
