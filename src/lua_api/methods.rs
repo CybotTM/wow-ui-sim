@@ -154,6 +154,16 @@ pub fn extract_frame_id(state: &LuaState, val: Val) -> Option<u64> {
     dispatch_frame_id_from_val(state, val)
 }
 
+/// Extract only the slot-zero identity, without native-table backing recovery.
+pub(crate) fn extract_frame_slot_zero_id(state: &LuaState, value: Val) -> Option<u64> {
+    let Val::Table(table_ref) = value else {
+        return None;
+    };
+    let table = state.gc.tables.get(table_ref)?;
+    let (index, generation) = frame_identity_backing(state, table)?;
+    Some(pack_id(index, generation))
+}
+
 /// Extract the native frame table ID, ignoring `frame[0]` dispatch overrides.
 pub fn native_frame_id_from_val(state: &LuaState, val: Val) -> Option<u64> {
     let Val::Table(table_ref) = val else {

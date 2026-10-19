@@ -18,6 +18,14 @@ Key field groups:
 
 **Widget-specific** — Slider, StatusBar, EditBox, ScrollFrame, Cooldown each have dedicated field groups. Model-family state is grouped in one lazy `Option<Box<ModelWidgetState>>`; absent payloads preserve getter defaults, while mutating methods allocate only when needed and remain globally callable.
 
+### Wrath EditBox history and presentation
+
+`Frame.editbox_history` is `Vec<Option<String>>`: `None` is an unused slot and `Some("")` is a stored empty entry. A shared index is maintained by [history methods](../../../src/widget/editbox_history.rs). Wrath bindings use physical slots; other profiles retain their existing push/length/clear behavior. The [owning contract](../../specs/wrath-widget-labels.md) separates required Retail/PTR preservation and len-based storage-accounting evidence from native parity.
+
+Wrath [direct arrows](../../../src/lua_api/key_dispatch/wrath.rs) bypass OnArrowPressed, reuse the common text-assignment path after history lookup, and leave callbacks outside the state borrow. XML attributes are applied base-to-derived before lifecycle scripts. Password rendering retains raw text/scalar cursor state while [presentation input](../../../src/widget/editbox.rs) produces byte-count stars and the corresponding display cursor. Wrapped visual-line/preferred-column behavior and word movement are not modeled in this slice.
+
+[Tooltip stored-size investigation](../investigations/wrath-tooltip-stored-size.md) distinguishes parent-fill query geometry from retained texture dimensions; current Retail XML defaults remain unverified.
+
 ### CreateTexture draw-layer bounded runtime status
 
 [Owning runtime status](../../specs/texture-draw-layer-validation.md#current-bounded-runtime-status) records 10 Retail/PTR outcomes, two separate startups, retained check/format caveats and OLD480 Mists observation. Public retention, fresh earlier-profile and native/render/full-parent acceptance remain open. The source checkpoint below remains historical.
@@ -32,7 +40,7 @@ Key field groups:
 
 ### Message history and Translation target state — 2026-10-16
 
-`269ed6f17` extends existing `MessageFrameData` entries with separate access-ID/extraData metadata alongside line ID; it does not introduce a widget type. Both message widget names use the same stored history and filtered count/index/removal methods. The [C11 contract](../../specs/message-frame-access-history.md) owns the Wrath-only transfer fixture and execution scope.
+`269ed6f17` extends existing `MessageFrameData` entries with separate access-ID/extraData metadata alongside line ID; it does not introduce a widget type. Both message widget names use the same stored history and filtered count/index/removal methods. Wrath MessageFrame additionally queues one insertion per update and stores per-row visible/fade timers; the update stage advances those timers before OnUpdate-handler dispatch, and rendering projects linear alpha. ScrollingMessageFrame retains timestamp fading. The [Wrath widget contract](../../specs/wrath-widget-labels.md) owns scheduling and acceptance limits. The [C11 contract](../../specs/message-frame-access-history.md) owns the Wrath-only transfer fixture and execution scope.
 
 Translation writes existing target `anim_offset_x/y`, consumed by layout, with per-playback baseline restoration shared with Path motion. It does not mutate owner/sibling dimensions or turn Scale/Rotation configuration into visual effects. [Transform contract](../../specs/animation-transforms.md) owns the bounded unit-scale NONE-looping policy and receipts; [[lua-api]] links producer/storage paths. No native/render/full-lifecycle acceptance follows.
 
@@ -170,6 +178,8 @@ Stored alpha is `f32`; ordinary Retail/PTR numeric validation precedes narrowing
 
 ## Sources
 
+- [Wrath widget contracts](../../specs/wrath-widget-labels.md) — profile-gated history, presentation, tooltip and MessageFrame producers
+- [Tooltip stored-size investigation](../investigations/wrath-tooltip-stored-size.md) — false oracle and separate cached-anchor failure
 - [Message-frame access history](../../specs/message-frame-access-history.md) — filtered history contract and receipts
 - [Animation transforms](../../specs/animation-transforms.md) — Translation presentation state and bounded receipts
 
@@ -199,6 +209,7 @@ Stored alpha is `f32`; ordinary Retail/PTR numeric validation precedes narrowing
 
 ## See Also
 
+- [[wrath-tooltip-stored-size]] — XML parent-fill versus stored texture dimensions
 - [[layout-system]] — uses Frame.anchors to compute screen positions
 - [[rendering-pipeline]] — dispatches quad emission per WidgetType
 - [[event-system]] — Frame.registered_events, script handler storage, and focus callback dispatch

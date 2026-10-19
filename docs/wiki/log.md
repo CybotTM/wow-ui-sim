@@ -30,6 +30,10 @@
 
 [Mouse sizing](investigations/mouse-sizing-capture.md) records missing native capture and spurious script-drag routing, reproduced through unchanged DamageMeter callbacks. [AsyncRequest contract](../specs/timer-callback-provenance.md#original-asyncrequest-correlation--bounded-retail-proof) records isolated original TOC loading, both timing modes and negative fixture controls. Native outside-release/scale policy and full startup remain excluded.
 
+## [2026-10-19] source | Wrath legacy currency state
+
+Added [model ownership](systems/lua-api.md#wrath-legacy-currency-display-state) and links to the [legacy currency](../specs/wrath-legacy-currency-tokenui.md) and [minimap/XML](../specs/wrath-minimap-xml-labels.md) contracts. Category display indices and independent watch enumeration do not delegate to modern currency state. Source documentation only; runtime proof remains separate.
+
 ## [2026-10-18] investigation | Ellesmere timer125 secure-hook targets
 
 [Diagnosis](investigations/ellesmereui-forever.md#timer125-inherited-secure-hook-fanout--2026-10-18) links captured shared callback growth and real extracted-consumer RED. Target/key binding separates instance hooks from inherited/copied wrappers without rooting targets. [Bounded proof](../specs/hook-callback-origin.md#bounded-proof--2026-10-18) records compiled target/control GREEN and real-addon callback/Exec/draw progress. No addon, texture-cache or scheduling change; no full compatibility claim.
@@ -2433,3 +2437,7 @@ Linked the [disabled-check contract](../specs/disabled-check-emission.md) for bo
 - 2026-10-19: Added Wrath manual-watch state/binding/refresh ownership to the legacy-surface wiki and owning spec; twelve genuine REDs recorded, GREEN pending.
 
 - 2026-10-19: Closed bounded N3 manual-watch proof: twelve RED→GREEN cases, zero startup errors/warnings,59 passing controls plus one unchanged generic destructive-marking failure reproduced on exact baseb88ef4c9e. Native sort/cache/progress/automatic gaps remain unmodeled; full-profile check/fmt/readability pass.
+
+## 2026-10-18 — Wrath widget state and stored-size correction
+
+Linked optional EditBox history, direct arrows, byte-mask presentation and MessageFrame row timers from [[widget-system]] to their owning contract. Added [[wrath-tooltip-stored-size]]: the queried-size oracle confused parent-fill geometry with retained dimensions; the unsupported loader change was reverted, and cached dependency repair remains distinct. Source/reconstructed authority and old-library fixture controls are not current-head/native/preservation acceptance.

@@ -460,9 +460,17 @@ Historical `e4caa4899` adds empty-default `SimState.item_cooldowns: HashMap<u32,
 
 `ee1bc9038` projects supplied pairs unchanged through distinct ItemInfo, item-ID and bag/slot selectors; namespace enable types differ. Missing pairs are an explicit simulator policy, not native parity. Legacy equipment-slot state is unchanged. The [owning contract and bounded proof SSOT](../../specs/item-cooldowns.md#bounded-archived-green--2026-10-14) records independent archived `ffb` Retail/Mists execution, preserving genuine historical RED and later fixture/compile failures. Producer association is not current-HEAD coverage. [Current revision/gate matrix](../../specs/store-product-group-shape.md#seven-profile-saved-runtime-matrix--2026-10-14) owns corrected-fixture/profile runtime status and pending gates; native/full-parent acceptance remains unproved. Historical Store query diagnostics are not a root fix. Trace-environment and intentional visibility-error limits remain with the owning proof.
 
+## Wrath legacy currency display state
+
+`SimState.wrath_currency` stores supplied `CurrencyCategory` rows and their `CurrencyToken` children. Display indices are recomputed from expansion flags; watch enumeration scans category storage independently of expansion. The [legacy global module](../../../src/lua_api/globals/real/wrath_currency.rs) owns this model, with Wrath-only registration at the currency namespace initialization boundary. `C_CurrencyInfo` continues reading its existing independent state.
+
+The [TokenUI contract](../../specs/wrath-legacy-currency-tokenui.md) owns positional tuples, original-consumer tests and unresolved unused-category ordering. No native currency catalog is inferred. The [minimap/XML contract](../../specs/wrath-minimap-xml-labels.md) separately owns local-ping publication, template trust selection and explicit temporary coordinate/attack policies.
+
 ## Sources
 
 - [Wrath supplied objectives](../../specs/wrath-quest-objectives.md) — legacy snapshot reads, bounded consumer proof and native input-model gaps
+
+- [Wrath legacy currency](../../specs/wrath-legacy-currency-tokenui.md) — supplied model and original-consumer contract
 - [Container split/use](../../specs/container-split-use.md) — supplied actions and bounded receipts
 - [Container quest metadata](../../specs/container-item-quest-metadata.md) — membership authority and bounded receipts
 - [Message-frame access history](../../specs/message-frame-access-history.md) — Wrath history/transfer boundary and receipts

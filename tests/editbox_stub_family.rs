@@ -189,6 +189,10 @@ fn editbox_insert_clamps_cursor_after_text_shortens() {
 #[test]
 fn editbox_stub_family_methods_persist_runtime_state() {
     let env = env();
+    let wrath =
+        wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath;
+    env.exec(&format!("__wrathHistoryContract = {wrath}"))
+        .unwrap();
     let result: String = env
         .eval(
             r#"
@@ -233,13 +237,26 @@ fn editbox_stub_family_methods_persist_runtime_state() {
             eb:SetCountInvisibleLetters(true)
             eb:SetHighlightColor(0.25, 0.5, 0.75, 0.9)
 
+            if __wrathHistoryContract then
+                if eb:GetHistoryLines() ~= 0 then
+                    return "wrath_history_should_start_disabled"
+                end
+                eb:SetHistoryLines(2)
+                if eb:GetHistoryLines() ~= 2 then
+                    return "wrath_history_should_report_capacity"
+                end
+            end
             eb:AddHistoryLine("one")
             eb:AddHistoryLine("two")
             if eb:GetHistoryLines() ~= 2 then
                 return "history_should_have_two_lines"
             end
             eb:ClearHistory()
-            if eb:GetHistoryLines() ~= 0 then
+            if __wrathHistoryContract then
+                if eb:GetHistoryLines() ~= 2 then
+                    return "wrath_clear_history_should_keep_capacity"
+                end
+            elseif eb:GetHistoryLines() ~= 0 then
                 return "clear_history_should_empty_history"
             end
 

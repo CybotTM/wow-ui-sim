@@ -22,6 +22,14 @@
 
 [Mouse sizing diagnosis](investigations/mouse-sizing-capture.md) links original-consumer geometry/release RED→GREEN and the registered-drag boundary. [AsyncRequest correlation](../specs/timer-callback-provenance.md#original-asyncrequest-correlation--bounded-retail-proof) records both-mode original-source/owner/ID proof and negative fixture controls, without a timer producer change.
 
+## [2026-10-19] source | Wrath legacy currency state
+
+[Lua API ownership](systems/lua-api.md#wrath-legacy-currency-display-state) links the supplied category/watch model to the [TokenUI contract](../specs/wrath-legacy-currency-tokenui.md), separate from modern currency queries. [Minimap/XML contracts](../specs/wrath-minimap-xml-labels.md) retain held zoom/transform/effect-data gaps. Runtime acceptance remains revision-scoped and separate.
+
+## [2026-10-18] source | Wrath widget state and tooltip size oracle
+
+[Widget state](systems/widget-system.md#wrath-editbox-history-and-presentation) links optional history slots, direct arrows, byte-mask presentation and row timers to the [owning contract](../specs/wrath-widget-labels.md). [Tooltip investigation](investigations/wrath-tooltip-stored-size.md) records the false queried-size oracle, native-correct XML parent fill and separate cached dependency failure. Producer documentation only; current-head/preservation acceptance remains separate.
+
 ## [2026-10-18] packaging | Release ICU and Docker publication
 
 [Profile packaging notes](systems/client-profiles.md#release-icu-packaging) link the [release contract](../release-icu.md): explicit native ICU provisioning, relocatable macOS ICU closure, manifest-checked Docker UI/runtime and non-publishing manual rehearsal. The [local matrix](../release-icu.md#local-acceptance--2026-10-18) records Linux/Docker/native Windows build/link/startup acceptance and pending macOS CI; synthetic helper tests remain separate.
