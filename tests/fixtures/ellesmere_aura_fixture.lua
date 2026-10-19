@@ -4,7 +4,7 @@ local function create(candidateFilters)
     local host = CreateFrame('Frame', nil, UIParent)
     host:SetSize(64, 64)
     host:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
-    return EllesmereUI.AuraKit.CreateContainer(host, 'player', {
+    return FixtureCreateContainer(host, 'player', {
         point = {'CENTER', host, 'CENTER'},
         groups = {{
             key = 'current-package-helpful', filter = {'HELPFUL'},

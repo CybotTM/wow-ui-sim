@@ -1,26 +1,31 @@
-//! Acceptance-owned filter regression through the unchanged installed AuraKit.
+//! Acceptance-owned filter regression through unchanged Blizzard/AuraKit consumers.
 #![cfg(feature = "client-wowforever")]
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-const AURA_KIT_ENV: &str = "ELLESMERE_AURA_KIT_PATH";
 const FRAME_SECONDS: f64 = 0.016;
 const SETTLE_FRAMES: usize = 8;
 
-fn load_aura_kit_env() -> WowLuaEnv {
+fn load_blizzard_env() -> WowLuaEnv {
     let ui = wow_ui_sim::blizzard_ui_sync::default_cache_addons_path().unwrap();
     let (env, _) = crate::common::blizzard_addon_harness::build_blizzard_addon_closure_env(
         &ui,
         &["Blizzard_AuraContainer"],
         &[],
     );
-    let path = std::env::var(AURA_KIT_ENV)
+    env
+}
+
+#[cfg(feature = "ellesmere-acceptance")]
+fn load_aura_kit_env() -> WowLuaEnv {
+    let env = load_blizzard_env();
+    let path = std::env::var("ELLESMERE_AURA_KIT_PATH")
         .expect("ELLESMERE_AURA_KIT_PATH must name the unchanged installed AuraKit Lua file");
     let source = std::fs::read_to_string(&path).expect("read installed AuraKit");
     // AuraKit owns this namespace. No addon functions or Blizzard APIs are mocked.
     env.exec("EllesmereUI = {}").unwrap();
     env.exec(&source).expect("load unchanged installed AuraKit");
-    env.exec(include_str!("fixtures/ellesmere_aura_fixture.lua"))
+    env.exec("FixtureCreateContainer = EllesmereUI.AuraKit.CreateContainer")
         .unwrap();
     env
 }
@@ -31,10 +36,10 @@ fn settle(env: &WowLuaEnv) {
     }
 }
 
-#[test]
-fn ellesmere_keyed_filter_accepts_admin_aura_and_array_rejects_it() {
-    let env = load_aura_kit_env();
-    settle(&env);
+fn assert_admin_aura_lifecycle(env: &WowLuaEnv) {
+    env.exec(include_str!("fixtures/ellesmere_aura_fixture.lua"))
+        .unwrap();
+    settle(env);
     env.exec("FixtureAssertShown(FixtureArray, 0); FixtureAssertShown(FixtureKeyed, 0)")
         .unwrap();
     env.exec(
@@ -47,11 +52,11 @@ fn ellesmere_keyed_filter_accepts_admin_aura_and_array_rejects_it() {
         "#,
     )
     .unwrap();
-    settle(&env);
+    settle(env);
     env.exec("FixtureAssertShown(FixtureArray, 0); FixtureAssertShown(FixtureKeyed, 1)")
         .unwrap();
     env.exec("A_Admin.RemoveBuff(19750)").unwrap();
-    settle(&env);
+    settle(env);
     env.exec(
         r#"
         FixtureAssertShown(FixtureArray, 0)
@@ -66,4 +71,18 @@ fn ellesmere_keyed_filter_accepts_admin_aura_and_array_rejects_it() {
         "{:?}",
         env.state().borrow().lua_errors
     );
+}
+
+#[test]
+fn blizzard_keyed_filter_accepts_admin_aura_and_array_rejects_it() {
+    let env = load_blizzard_env();
+    env.exec(include_str!("fixtures/ellesmere_blizzard_container.lua"))
+        .unwrap();
+    assert_admin_aura_lifecycle(&env);
+}
+
+#[cfg(feature = "ellesmere-acceptance")]
+#[test]
+fn ellesmere_keyed_filter_accepts_admin_aura_and_array_rejects_it() {
+    assert_admin_aura_lifecycle(&load_aura_kit_env());
 }
