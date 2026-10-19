@@ -18,7 +18,9 @@ Wrath 12340 behavior supplied by laptop batch 3 (2026-10-18); original Minimap L
 
 ## Implementation inventory
 
-- `src/lua_api/frame/methods/map_frames.rs` — zoom and local ping.
+- `src/lua_api/frame/methods/map_frames.rs` — zoom and local-ping entry points.
+- `src/lua_api/frame/methods/map_frames/wrath_ping.rs` — player-present local publication.
+- `src/lua_api/workarounds/temporary/wrath_minimap_ping_coordinates.rs` — explicitly raw nonzero coordinates pending transform modeling.
 - `src/loader/xml_file.rs` — document failure boundaries.
 - `src/xml/template.rs` — template precedence and cache invalidation.
 - `src/lua_api/globals/action_bar_api/` — legacy attack query registration.
