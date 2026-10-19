@@ -76,6 +76,17 @@ pub fn register_template_with_local_source(
 ) {
     with_template_registry_mut(|registry| {
         let lower = name.to_ascii_lowercase();
+        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+            && retain_wrath_declaration(registry, &lower, declaration_taint.as_deref())
+        {
+            tracing::warn!("Duplicate virtual frame template: {}", name);
+            return;
+        }
+        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+            && let Some(previous) = registry.entries_ci.get(&lower)
+        {
+            registry.entries.remove(previous);
+        }
         registry.entries.insert(
             name.to_string(),
             Arc::new(TemplateEntry {
@@ -90,6 +101,21 @@ pub fn register_template_with_local_source(
         registry.chain_cache.clear();
         registry.lifecycle_cache.clear();
     });
+}
+
+fn retain_wrath_declaration(
+    registry: &TemplateRegistry,
+    lowercase_name: &str,
+    incoming_taint: Option<&str>,
+) -> bool {
+    let Some(existing) = registry
+        .entries_ci
+        .get(lowercase_name)
+        .and_then(|name| registry.entries.get(name))
+    else {
+        return false;
+    };
+    existing.declaration_taint.is_none() || incoming_taint.is_some()
 }
 
 /// Get a template by name from the registry (case-insensitive).
