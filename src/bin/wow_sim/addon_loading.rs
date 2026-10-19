@@ -195,7 +195,10 @@ fn print_load_diagnostics(result: &LoadResult) {
 }
 
 fn fire_addon_loaded(env: &WowLuaEnv, name: &str) {
-    if let Err(e) = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(name)]) {
+    let name_value = env.lua_string(name);
+    let arguments =
+        wow_ui_sim::loader::addon_loaded_arguments(&env.state().borrow(), name, name_value);
+    if let Err(e) = env.fire_event_with_args("ADDON_LOADED", &arguments) {
         logging::println_elapsed(&format!("Error firing ADDON_LOADED for {name}: {e}"));
     }
 }

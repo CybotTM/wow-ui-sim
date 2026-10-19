@@ -73,6 +73,24 @@ pub fn release_prefork_parent_bytecode_cache_memory() -> Result<usize, String> {
     bytecode_cache::release_prefork_parent_memory()
 }
 
+/// Real-addon notification payload only; synthetic startup notifications are separate policy.
+pub fn addon_loaded_arguments(
+    state: &crate::lua_api::SimState,
+    addon_name: &str,
+    name_value: rilua::Val,
+) -> Vec<rilua::Val> {
+    let mut arguments = vec![name_value];
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Retail {
+        // Boolean type is authenticated; deriving its value from parsed bindings is INFERRED.
+        let contains_bindings = state
+            .addons
+            .iter()
+            .any(|addon| addon.folder_name == addon_name && addon.contains_bindings);
+        arguments.push(rilua::Val::Bool(contains_bindings));
+    }
+    arguments
+}
+
 const ENV_PROFILE_LUA_FILES: &str = "WOW_SIM_PROFILE_LUA_FILES";
 
 #[derive(Debug, Clone)]

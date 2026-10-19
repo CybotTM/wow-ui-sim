@@ -1,3 +1,7 @@
+## [2026-10-19] source | Managed Wrath saved-scope order and Retail addon payload
+
+[Managed restoration](systems/reload-ui.md#managed-addon-restoration) links the [contract](../specs/reload-ui.md#wrath-12340-requirements): original Stopwatch and Retail Settings consumer REDs precede the producer. Wrath now restores declared scopes once after code; real-addon Retail notifications append parsed-binding metadata. Value semantics remain INFERRED; LoD SV ownership stays UNMODELED. GREEN and two-sided preservation remain pending.
+
 ## [2026-10-19] source | Wrath shutdown-before-save and combat window
 
 [Reload retirement](systems/reload-ui.md#environment-retirement) links the [12340 proof matrix](../specs/reload-ui.md#wrath-12340-requirements): original logout consumers and old-VM trace REDs, combat-entry RED, and passing noncombat control. Wrath shutdown now finishes the lifecycle callbacks before saving without erasing combat; its protected-state predicate covers the temporary window. Reentry's finer event slot remains INFERRED. GREEN is pending; missing minimap-arrow construction remains separate.

@@ -212,8 +212,13 @@ pub fn load_addon_internal(
         return Ok(result);
     }
 
-    let saved_vars_mgr =
-        maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);
+    let wrath_saved_variables =
+        crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath;
+    let saved_vars_mgr = if wrath_saved_variables {
+        saved_vars_mgr
+    } else {
+        maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result)
+    };
     let loading_guard = begin_addon_load(env, folder_name, toc);
     let ctx = build_addon_context(env, toc, folder_name)?;
     let nil_symbol_access_start = env.state().borrow().nil_symbol_accesses.len();
@@ -228,7 +233,12 @@ pub fn load_addon_internal(
         &mut result,
     );
     maybe_replay_blizzard_lua_in_secure_env(env, toc, folder_name, &ctx, &mut result);
-    maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
+    read_conventional_binding_metadata(env, toc, folder_name, &mut result);
+    if wrath_saved_variables {
+        maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);
+    } else {
+        maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
+    }
     apply_blizzard_post_load_patches(env, folder_name, &mut result);
     let addon_index = loading_guard.addon_index();
     append_nil_symbol_diagnostics(
@@ -510,6 +520,38 @@ fn load_addon_files(
             println!("  loading file {}", file_rel.display());
         }
         load_addon_file(env, &file_ctx, result, &file, pass);
+    }
+}
+
+fn read_conventional_binding_metadata(
+    env: &LoaderEnv<'_>,
+    toc: &TocFile,
+    folder_name: &str,
+    result: &mut LoadResult,
+) {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Retail {
+        return;
+    }
+    let path = toc.addon_dir.join("Bindings.xml");
+    if !path.is_file() || toc.file_paths().contains(&path) {
+        return;
+    }
+    match crate::xml::parse_xml_file(&path) {
+        Ok(ui) => {
+            let contains_bindings = ui.elements.iter().any(|element| {
+                matches!(element, crate::xml::XmlElement::Binding(binding) if binding.name.is_some())
+            });
+            if let Some(addon) = env
+                .state()
+                .borrow_mut()
+                .addons
+                .iter_mut()
+                .find(|addon| addon.folder_name == folder_name)
+            {
+                addon.contains_bindings |= contains_bindings;
+            }
+        }
+        Err(error) => result.warnings.push(format!("{}: {error}", path.display())),
     }
 }
 

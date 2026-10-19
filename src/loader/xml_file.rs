@@ -138,7 +138,20 @@ fn process_element(
             register_virtual_anim_group(ag);
             Ok(0)
         }
-        XmlElement::Binding(_) | XmlElement::ModifiedClick(_) => Ok(0),
+        XmlElement::Binding(binding) => {
+            if binding.name.is_some()
+                && let Some(addon) = env
+                    .state()
+                    .borrow_mut()
+                    .addons
+                    .iter_mut()
+                    .find(|addon| addon.folder_name == ctx.name)
+            {
+                addon.contains_bindings = true;
+            }
+            Ok(0)
+        }
+        XmlElement::ModifiedClick(_) => Ok(0),
         _ => process_timed_frame(env, element, ctx, timing).map(|_| 0),
     }
 }

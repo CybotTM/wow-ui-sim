@@ -295,6 +295,54 @@ impl SavedVariablesManager {
         Ok(())
     }
 
+    /// Wrath executes each declared scope once after addon code, overwriting defaults.
+    pub(crate) fn load_after_addon_code(
+        &mut self,
+        state: &mut LuaState,
+        addon_name: &str,
+        saved_vars: &[String],
+        saved_vars_per_char: &[String],
+    ) -> crate::Result<()> {
+        self.remember_registered_vars(addon_name, saved_vars, saved_vars_per_char);
+        for (per_character, names) in [(false, saved_vars), (true, saved_vars_per_char)] {
+            if !names.is_empty() {
+                self.load_post_code_scope(state, addon_name, per_character)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn load_post_code_scope(
+        &self,
+        state: &mut LuaState,
+        addon_name: &str,
+        per_character: bool,
+    ) -> crate::Result<()> {
+        let local_path = self.storage_path(addon_name, per_character);
+        if self.reload_saved_addons.contains(addon_name) {
+            if local_path.exists() {
+                self.read_and_execute_lua_file(state, &local_path, "@SavedVariables")?;
+            }
+            return Ok(());
+        }
+        let import_path = self.wtf_config.as_ref().map(|config| {
+            if per_character {
+                config.character_saved_vars_file(addon_name)
+            } else {
+                config.account_saved_vars_file(addon_name)
+            }
+        });
+        if let Some(path) = import_path.filter(|path| path.exists()) {
+            self.load_lua_file(state, &path, "@WTF")?;
+            crate::lua_api::workarounds::sanitize_imported_wtf_addon_saved_variables(
+                state, addon_name,
+            );
+        } else if local_path.exists() {
+            self.load_lua_file(state, &local_path, "@SavedVariables")?;
+        }
+        Ok(())
+    }
+
     /// Restore saved-variable globals that addon top-level code clobbered with
     /// an empty table after the persisted value had already loaded.
     pub fn restore_clobbered_globals(&mut self, state: &mut LuaState, addon_name: &str) -> usize {

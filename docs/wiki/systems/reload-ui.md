@@ -20,6 +20,12 @@ The old VM's self-reference and font handle are cleared before it drops. A fresh
 
 The launch pipeline installs a reload loader on the environment. It reuses Blizzard/third-party addon loading and post-load bootstrap, preserving original launch options. The initial EditMode layout name and a copied WTF config seed a clean cache reader with no old `Val` handles; the file-backed cache is reread for the fresh VM even when Lua SavedVariables are disabled. Native reread timing/ordering is INFERRED and unasserted. ServerSnapshot character/enable imports and initial party reseeding are still skipped on reload. No addon-specific sentinel cleanup exists.
 
+## Managed addon restoration
+
+Wrath's loader defers [SavedVariables](../../../src/saved_variables.rs) until addon code finishes. It registers declarations, then reads account and character scopes once each, allowing persisted scalars/tables to overwrite code defaults. Initial WTF imports remain capped and read-only; freshly serialized reload storage bypasses that import cap and stale WTF. Other profiles keep their prior loading policy. The C_AddOns runtime route still passes no persistence manager; LoD restore/registration is UNMODELED, not silently bridged by a copied manager.
+
+Parsed named XML bindings set `AddonInfo.contains_bindings`; conventional unlisted `Bindings.xml` is parsed for this metadata under Retail. The two real-addon notification emitters share payload construction: Retail appends a boolean, Wrath keeps one name argument. Boolean type is authenticated; deriving its value from parsed definitions is INFERRED. Synthetic Retail notifications remain unchanged. [Proof status](../../specs/reload-ui.md#wrath-12340-requirements) separates recorded REDs from pending preservation and GREEN.
+
 ## Lifecycle evidence and failure
 
 The [Wrath 12340 requirements](../../specs/reload-ui.md#wrath-12340-requirements) now distinguish authenticated static native facts from implementation proof. Cinematic eligibility has bounded original-popup GREEN. Shutdown-before-save, post-code addon SV restore, readiness-driven VARIABLES_LOADED and selective placed-frame/mirror state retain separate proof rows. The supplied cinematic state is not a cinematic playback engine. Unnamed taint-gate production and feedback remain evidence-blocked. Retail and other-profile chronology remain UNKNOWN; do not copy Wrath ordering into them. App treats rebuild failure as fatal and prevents a partial VM from overwriting pre-reload SavedVariables.

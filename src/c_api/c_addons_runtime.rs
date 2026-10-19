@@ -224,6 +224,11 @@ fn disabled_dep_error(dependency: &str) -> LoadError {
 fn fire_addon_loaded(state: &mut LuaState, loader_env: &LoaderEnv<'_>, addon_name: &str) {
     let saved_top = state.top;
     let addon_name_val = create_string(state, addon_name);
-    let _ = loader_env.fire_event_with_args("ADDON_LOADED", &[addon_name_val]);
+    let arguments = crate::loader::addon_loaded_arguments(
+        &loader_env.state().borrow(),
+        addon_name,
+        addon_name_val,
+    );
+    let _ = loader_env.fire_event_with_args("ADDON_LOADED", &arguments);
     state.top = saved_top;
 }
