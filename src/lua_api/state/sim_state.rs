@@ -801,6 +801,10 @@ pub struct SimState {
     pub ui_reload_requested: bool,
     /// Explicit host-supplied cinematic playback state; no playback engine implied.
     pub cinematic_active: bool,
+    /// World entry is distinct from IsLoggedIn; supplied/transitioned by the owner.
+    pub in_world: bool,
+    /// Wrath reload's temporary protected-action phase, not the player's combat bit.
+    pub reload_allows_protected_actions: bool,
     /// Simulator lifecycle marker, not a native event-order assertion.
     pub ui_reloaded: bool,
 }

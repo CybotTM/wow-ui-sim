@@ -4,7 +4,20 @@
 #[path = "common/wrath_full_ui.rs"]
 mod original;
 
+#[path = "common/wrath_reload_shutdown.rs"]
+mod shutdown;
+
 use wow_ui_sim::lua_api::state::AddonInfo;
+
+#[test]
+fn original_logout_handlers_persist_after_in_world_combat_shutdown() {
+    shutdown::assert_shutdown(true, true);
+}
+
+#[test]
+fn out_of_world_shutdown_omits_leaving_without_rejecting_logout() {
+    shutdown::assert_shutdown(false, false);
+}
 
 #[test]
 fn original_forbidden_popup_defers_reload_through_cinematic() {

@@ -43,6 +43,8 @@ macro_rules! build_empty_sim_state {
             scripts: ScriptRegistry::default(),
             ui_reload_requested: false,
             cinematic_active: false,
+            in_world: false,
+            reload_allows_protected_actions: false,
             ui_reloaded: false,
             cvars: CVarStorage::new(),
             #[cfg(feature = "client-wrath")]
