@@ -11,15 +11,15 @@ Wrath's legacy spellbook globals expose full and compact views of existing `SimS
 - [ ] Compact valid same-name nonzero-rank runs to their highest parsed rank, not their highest spell ID. Rank-zero entries remain separate boundaries.
 - [ ] Parse the first nonzero ASCII decimal run, ignoring nondigits while the accumulator is zero. No prefix, locale or sign interpretation; e.g. Rank 2/4 gives 2, Rank 0/4 gives 4.
 - [ ] Treat missing SpellInfo/subtext as rank zero (approved INFERRED simulator policy).
-- [ ] Expose both views independently of ShowAllSpellRanks; original Lua selects the view.
+- [x] Expose both views independently of ShowAllSpellRanks; original Lua selects the view.
 
 ### Legacy bindings
 
-- [ ] GetSpellTabInfo accepts numbers/numeric strings, truncates ordinary finite fractions before indexing, and ignores extra arguments.
-- [ ] Outside the sole tab, return exactly nil,nil,0,0,0,0. Reject missing/nil/boolean/table/nonnumeric-string arguments with Usage: GetSpellTabInfo(index).
-- [ ] GetKnownSlotFromHighestRankSlot maps a one-based global compact slot to the first matching one-based full known slot, returning exactly one number or zero on failure, never nil.
-- [ ] UpdateSpells ignores arguments, returns zero values and synchronously emits argless SPELLS_CHANGED unconditionally. Derived views require no persistent rebuild.
-- [ ] Original Wrath SpellBookFrame show/select/hide produces numeric selectedSkillLineOffset and zero Lua errors.
+- [x] GetSpellTabInfo accepts numbers/numeric strings, truncates ordinary finite fractions before indexing, and ignores extra arguments.
+- [x] Outside the sole tab, return exactly nil,nil,0,0,0,0. Reject missing/nil/boolean/table/nonnumeric-string arguments with Usage: GetSpellTabInfo(index).
+- [x] GetKnownSlotFromHighestRankSlot maps a one-based global compact slot to the first matching one-based full known slot, returning exactly one number or zero on failure, never nil.
+- [x] UpdateSpells ignores arguments, returns zero values and synchronously emits argless SPELLS_CHANGED unconditionally. Derived views require no persistent rebuild.
+- [x] Original Wrath SpellBookFrame show/select/hide produces numeric selectedSkillLineOffset and zero Lua errors.
 - [ ] Retail and every other profile preserve existing spellbook behavior.
 
 ## How it works
@@ -41,9 +41,13 @@ Wrath's legacy spellbook globals expose full and compact views of existing `SimS
 - `tests/wrath_spellbook_contract.rs` — focused tab binding, compact-slot mapping and synchronous UpdateSpells contracts. Ranked fixture Ebon Crown IDs 1248891/1248890/1248888 have ascending ranks 1/2/4 but descending IDs.
 - `tests/spell_api.rs`, `tests/professions_spellbook.rs` — existing C_SpellBook/profile preservation.
 
+## Bounded producer proof — 2026-10-19
+
+Original lifecycle RED ran at exact f71f7ce1b; API3 RED used fixture18089b84e against identical f71 production sources. After separate producer commits f7a564083/cfd036547, source9a4b109bc passed API3/3 plus unchanged original lifecycle1/1. Original startup and lifecycle both had zero collected Lua errors, without filtering, and no cursor :365 failure. The lifecycle uses the observed default empty known-spell membership; populated original-consumer rendering is not claimed. Build warnings0; original CVar full stat/hash unchanged. Private receipts: handoff/wrath-spellbook-tabinfo/green-{api,original}-receipt.json under the user state root. Later documentation and boundary-test additions do not change producer source.
+
 ## Known gaps (current cycle)
 
-- [ ] Producer GREEN and preservation evidence pending. Original lifecycle RED: f71f7ce1b; focused API RED: 18089b84e against identical f71 production sources.
+- [ ] Boundary coverage b4ff67e19 and seven-profile preservation/stock Wrath CLI execution pending; producer4/4 GREEN does not establish those gates.
 - [ ] Independent cursor follow-up OPEN and excluded from this slice. Final authenticated Q-CUR1 (`cursor-onshow-ordering-12340.md` in laptop handoff answers) supports only conditional deferred dirty flushing, not synchronous SetText/OnShow cursor callbacks. Historical fixture4d20f7625 and observer called DebugTools updates back to back with NO intervening ticks; both reached original :365 nil cursorOffset, but do not prove a native violation. That unsupported synchronous assertion was removed from the shippable suite without an ignore; exact source/trace remain in handoff. Follow-up needs realistic intervening ticks and original-consumer deferred-flush RED before any producer fix.
 - [ ] Stock Wrath startup [] and existing other-profile spellbook preservation after integration.
 

@@ -1,6 +1,6 @@
 ## [2026-10-19] source | Wrath single-class spellbook views
 
-[Projection notes](systems/lua-api.md#wrath-single-class-spellbook-projection) link the [contract](../specs/wrath-spellbook-tabs.md): existing known membership, derived full/compact views, original-consumer/API RED and pending GREEN/preservation. Native skill-line metadata and independent deferred-cursor follow-up remain outside this slice.
+[Projection notes](systems/lua-api.md#wrath-single-class-spellbook-projection) link the [contract](../specs/wrath-spellbook-tabs.md): existing known membership, derived full/compact views, original-consumer/API RED→GREEN4/4 and pending boundary/profile preservation. Native skill-line metadata and independent deferred-cursor follow-up remain outside this slice.
 
 ## [2026-10-19] source | Wrath dialog request/response plumbing
 
