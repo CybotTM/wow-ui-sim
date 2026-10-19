@@ -2,6 +2,50 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::SavedVariablesManager;
 
+pub fn assert_scope_execution_order() {
+    let env = WowLuaEnv::new().unwrap();
+    let storage = tempfile::tempdir().unwrap();
+    let addon = storage.path().join("ReloadScopeFixture");
+    std::fs::create_dir(&addon).unwrap();
+    std::fs::write(
+        addon.join("Code.lua"),
+        r#"
+        table.insert(ScopeOrder, 'code')
+        CodeSawSaved = ReloadScalar ~= nil
+        ReloadScalar = 3
+        ReloadTable = { scope = 'code' }
+    "#,
+    )
+    .unwrap();
+    let toc = wow_ui_sim::toc::TocFile::parse(
+        &addon,
+        "## SavedVariables: ReloadScalar, ReloadTable\n## SavedVariablesPerCharacter: ReloadScalar, ReloadTable\nCode.lua\n",
+    );
+    let character_dir = storage.path().join("SimRealm/SimPlayer");
+    std::fs::create_dir_all(&character_dir).unwrap();
+    for (path, scope, number) in [
+        (storage.path().join("ReloadScopeFixture.lua"), "account", 11),
+        (
+            character_dir.join("ReloadScopeFixture.lua"),
+            "character",
+            22,
+        ),
+    ] {
+        std::fs::write(path, format!("table.insert(ScopeOrder, '{scope}'); ReloadScalar = {number}; ReloadTable = {{ scope = '{scope}' }}")).unwrap();
+    }
+    env.exec("ScopeOrder = {}").unwrap();
+    let mut manager = SavedVariablesManager::with_storage_dir(storage.path().to_path_buf());
+    wow_ui_sim::loader::load_addon_from_toc_with_saved_vars(&env.loader_env(), &toc, &mut manager)
+        .unwrap();
+    assert_eq!(
+        env.eval::<String>("return table.concat(ScopeOrder, ',')")
+            .unwrap(),
+        "code,account,character",
+        "files execute once per scope after code"
+    );
+    env.exec("assert(not CodeSawSaved); assert(ReloadScalar == 22); assert(ReloadTable.scope == 'character')").unwrap();
+}
+
 pub fn assert_original_restore_after_code() {
     let env = WowLuaEnv::new().unwrap();
     env.set_screen_size(1600.0, 1200.0);

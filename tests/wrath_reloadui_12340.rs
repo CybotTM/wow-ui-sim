@@ -41,6 +41,11 @@ fn original_ui_parent_waits_for_each_account_chunk() {
 }
 
 #[test]
+fn saved_scope_files_execute_once_and_override_scalar_and_nonempty_defaults() {
+    saved_variables::assert_scope_execution_order();
+}
+
+#[test]
 fn original_stopwatch_restores_saved_variables_after_code_before_event() {
     saved_variables::assert_original_restore_after_code();
 }
