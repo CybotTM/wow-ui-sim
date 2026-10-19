@@ -16,7 +16,8 @@ const MUTATION: &str = "WOW_SIM_SHARED_INPUT_MUTATION";
 const VENDOR_SHA256: &str = "1648c842902f6657ae1e10de7366cd0650c77a5eb41bc1c9c7e8030256fa8acb";
 const CALLBACK: &str = "@Interface/AddOns/Blizzard_AsyncRequest/Blizzard_AsyncRequest.lua:60";
 const OWNERS: [&str; 2] = ["AsyncRequestOwnerA", "AsyncRequestOwnerB"];
-const COMPLETE: &str = "asyncreq-result requests=4 responses=2 timeouts=2 cancelled_timeouts=0 errors=0";
+const COMPLETE: &str =
+    "asyncreq-result requests=4 responses=2 timeouts=2 cancelled_timeouts=0 errors=0";
 
 #[test]
 fn original_async_request_correlates_timeout_and_cancellation_in_both_modes() {
@@ -26,8 +27,15 @@ fn original_async_request_correlates_timeout_and_cancellation_in_both_modes() {
     }
     for threshold in [None, Some("0")] {
         let stderr = run_isolated(threshold);
-        eprintln!("asyncreq-diagnostic-mode={}\n{stderr}", threshold.unwrap_or("unset"));
-        assert_eq!(stderr.lines().filter(|line| *line == COMPLETE).count(), 1, "{stderr}");
+        eprintln!(
+            "asyncreq-diagnostic-mode={}\n{stderr}",
+            threshold.unwrap_or("unset")
+        );
+        assert_eq!(
+            stderr.lines().filter(|line| *line == COMPLETE).count(),
+            1,
+            "{stderr}"
+        );
         assert!(!stderr.contains("asyncreq-cancelled-timeout"), "{stderr}");
         assert_registration_ids_are_distinct(&stderr);
         if threshold.is_some() {
@@ -46,7 +54,12 @@ fn run_isolated(threshold: Option<&str>) -> String {
     command
         .arg("90")
         .arg(std::env::current_exe().unwrap())
-        .args([thread.name().unwrap(), "--exact", "--test-threads=1", "--nocapture"])
+        .args([
+            thread.name().unwrap(),
+            "--exact",
+            "--test-threads=1",
+            "--nocapture",
+        ])
         .env(CHILD, "1")
         .env_remove(TIMINGS);
     if let Some(threshold) = threshold {
@@ -54,7 +67,11 @@ fn run_isolated(threshold: Option<&str>) -> String {
     }
     let output = command.output().expect("run bounded AsyncRequest child");
     let stderr = String::from_utf8(output.stderr).unwrap();
-    assert!(output.status.success(), "child failed: {stderr}\n{}", String::from_utf8_lossy(&output.stdout));
+    assert!(
+        output.status.success(),
+        "child failed: {stderr}\n{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
     stderr
 }
 
@@ -63,7 +80,12 @@ fn exercise_original_requests() {
     let original = cache.join("Blizzard_AsyncRequest/Blizzard_AsyncRequest.lua");
     let bytes = std::fs::read(&original).expect("read original Retail AsyncRequest Lua");
     let digest = format!("{:x}", Sha256::digest(&bytes));
-    assert_eq!(digest, VENDOR_SHA256, "consumer drift: {}", original.display());
+    assert_eq!(
+        digest,
+        VENDOR_SHA256,
+        "consumer drift: {}",
+        original.display()
+    );
     with_blizzard_addon_smoke_shape_in_dir(
         &cache,
         &["Blizzard_AsyncRequest"],
@@ -73,22 +95,28 @@ fn exercise_original_requests() {
 }
 
 fn exercise_request_transitions(env: &WowLuaEnv) {
-    env.exec(r#"
+    env.exec(
+        r#"
         AsyncRequestProvenance = { errors = 0 }
         seterrorhandler(function()
             AsyncRequestProvenance.errors = AsyncRequestProvenance.errors + 1
         end)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     install_mutation_control(env);
     let temp = tempfile::tempdir().unwrap();
     for owner in OWNERS {
         load_request_addon(env, temp.path(), owner);
     }
     let ids = OWNERS.map(|owner| request_ids(env, owner));
-    env.exec(r#"
+    env.exec(
+        r#"
         FireEvent("PLAYER_LOGIN", AsyncRequestResponseOverride or "AsyncRequestOwnerA-response")
         FireEvent("PLAYER_LOGOUT", "AsyncRequestOwnerB-response")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_request_state(env, 0, 0);
     make_timer_ready(env, ids[0].0);
     env.process_timers().unwrap();
@@ -110,15 +138,21 @@ fn drain_cancelled_deadlines(env: &WowLuaEnv, ids: &[u64]) {
 
 fn install_mutation_control(env: &WowLuaEnv) {
     match std::env::var(MUTATION).as_deref() {
-        Ok("response") => env.exec("AsyncRequestResponseOverride = 'wrong-response'").unwrap(),
-        Ok("source") => env.exec(r#"
+        Ok("response") => env
+            .exec("AsyncRequestResponseOverride = 'wrong-response'")
+            .unwrap(),
+        Ok("source") => env
+            .exec(
+                r#"
             local associations = debug.getregistry().__wow_timer_original_callbacks
             if associations then
                 getmetatable(associations).__newindex = function(store, wrapper)
                     rawset(store, wrapper, wrapper)
                 end
             end
-        "#).unwrap(),
+        "#,
+            )
+            .unwrap(),
         _ => {}
     }
 }
@@ -136,8 +170,12 @@ fn load_request_addon(env: &WowLuaEnv, root: &Path, owner: &str) {
     let directory = root.join("Interface/AddOns").join(owner);
     std::fs::create_dir_all(&directory).unwrap();
     let toc = directory.join(format!("{owner}.toc"));
-    std::fs::write(&toc, format!("## Interface: 120005\n## Title: {owner}\nRequests.lua\n")).unwrap();
-    std::fs::write(directory.join("Requests.lua"), include_str!("fixtures/AsyncRequestProvenance/Requests.lua")).unwrap();
+    std::fs::write(
+        &toc,
+        format!("## Interface: 120005\n## Title: {owner}\nRequests.lua\n"),
+    )
+    .unwrap();
+    std::fs::write(directory.join("Requests.lua"), request_fixture()).unwrap();
     let result = wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
     assert!(result.warnings.is_empty(), "{owner}: {:?}", result.warnings);
 }
@@ -154,7 +192,10 @@ fn request_ids(env: &WowLuaEnv, owner: &str) -> (u64, u64) {
 fn make_timer_ready(env: &WowLuaEnv, id: u64) {
     let state = env.state();
     let mut state = state.borrow_mut();
-    let timer = state.rilua_timers.iter_mut().find(|timer| timer.id == id)
+    let timer = state
+        .rilua_timers
+        .iter_mut()
+        .find(|timer| timer.id == id)
         .expect("positive live timer must still be pending");
     assert!(!timer.cancelled);
     timer.fire_at = Instant::now();
@@ -172,7 +213,8 @@ fn make_retained_timers_ready(env: &WowLuaEnv, ids: &[u64]) {
 }
 
 fn assert_request_state(env: &WowLuaEnv, first: u32, second: u32) {
-    env.exec(&format!(r#"
+    env.exec(&format!(
+        r#"
         assert(AsyncRequestProvenance.errors == 0, 'unexpected callback error')
         local expected = {{ AsyncRequestOwnerA = {first}, AsyncRequestOwnerB = {second} }}
         for owner, timeoutCount in pairs(expected) do
@@ -192,29 +234,43 @@ fn assert_request_state(env: &WowLuaEnv, first: u32, second: u32) {
                 assert(not p.live:IsEventRegistered('PLAYER_ENTERING_WORLD'), owner)
             end
         end
-    "#)).unwrap();
+    "#
+    ))
+    .unwrap();
 }
 
 fn registration<'a>(stderr: &'a str, owner: &str) -> &'a str {
     let prefix = format!("asyncreq-registration owner={owner} ");
-    let matches: Vec<_> = stderr.lines().filter(|line| line.starts_with(&prefix)).collect();
+    let matches: Vec<_> = stderr
+        .lines()
+        .filter(|line| line.starts_with(&prefix))
+        .collect();
     assert_eq!(matches.len(), 1, "{stderr}");
     matches[0]
 }
 
 fn assert_registration_ids_are_distinct(stderr: &str) {
-    let ids: Vec<_> = OWNERS.iter().flat_map(|owner| {
-        let record = registration(stderr, owner);
-        [field(record, "live_id"), field(record, "cancelled_id")]
-    }).collect();
+    let ids: Vec<_> = OWNERS
+        .iter()
+        .flat_map(|owner| {
+            let record = registration(stderr, owner);
+            [field(record, "live_id"), field(record, "cancelled_id")]
+        })
+        .collect();
     let unique: std::collections::HashSet<_> = ids.iter().collect();
     assert_eq!(unique.len(), 4, "{stderr}");
 }
 
 fn assert_correlated_records(stderr: &str) {
     let label = format!("callback_source={CALLBACK}");
-    let entries: Vec<_> = stderr.lines().filter(|line| line.starts_with("[handler-entry]") && line.contains(&label)).collect();
-    let returns: Vec<_> = stderr.lines().filter(|line| line.starts_with("[handler]") && line.contains(&label)).collect();
+    let entries: Vec<_> = stderr
+        .lines()
+        .filter(|line| line.starts_with("[handler-entry]") && line.contains(&label))
+        .collect();
+    let returns: Vec<_> = stderr
+        .lines()
+        .filter(|line| line.starts_with("[handler]") && line.contains(&label))
+        .collect();
     assert_eq!(entries.len(), 2, "{stderr}");
     assert_eq!(returns.len(), 2, "{stderr}");
     for owner in OWNERS {
@@ -226,11 +282,22 @@ fn assert_owner_invocation(stderr: &str, owner: &str) {
     let registered = registration(stderr, owner);
     let live_id = field(registered, "live_id");
     let cancelled_id = field(registered, "cancelled_id");
-    let records: Vec<_> = stderr.lines().filter(|line| {
-        line.starts_with("[handler-entry]") || line.starts_with("[handler]")
-    }).filter(|line| line.contains("handler=C_Timer")).collect();
-    assert!(!records.iter().any(|line| field(line, "timer_id") == cancelled_id), "{stderr}");
-    let live: Vec<_> = records.iter().copied().filter(|line| field(line, "timer_id") == live_id).collect();
+    let records: Vec<_> = stderr
+        .lines()
+        .filter(|line| line.starts_with("[handler-entry]") || line.starts_with("[handler]"))
+        .filter(|line| line.contains("handler=C_Timer"))
+        .collect();
+    assert!(
+        !records
+            .iter()
+            .any(|line| field(line, "timer_id") == cancelled_id),
+        "{stderr}"
+    );
+    let live: Vec<_> = records
+        .iter()
+        .copied()
+        .filter(|line| field(line, "timer_id") == live_id)
+        .collect();
     assert_eq!(live.len(), 2, "{stderr}");
     assert!(live[0].starts_with("[handler-entry]"), "{stderr}");
     assert!(live[1].starts_with("[handler]"), "{stderr}");
@@ -238,17 +305,33 @@ fn assert_owner_invocation(stderr: &str, owner: &str) {
         assert_eq!(field(record, "addon"), owner, "{record}");
         assert_eq!(field(record, "frame"), "#0", "{record}");
         assert_eq!(field(record, "callback_source"), CALLBACK, "{record}");
-        assert_ne!(field(record, "source"), CALLBACK, "invoker and original must remain distinct");
+        assert_ne!(
+            field(record, "source"),
+            CALLBACK,
+            "invoker and original must remain distinct"
+        );
     }
     assert_eq!(field(live[1], "outcome"), "ok");
     let body = format!("asyncreq-timeout owner={owner}");
-    assert_eq!(stderr.lines().filter(|line| *line == body).count(), 1, "{stderr}");
-    assert!(stderr.find(live[0]).unwrap() < stderr.find(&body).unwrap(), "{stderr}");
-    assert!(stderr.find(&body).unwrap() < stderr.find(live[1]).unwrap(), "{stderr}");
+    assert_eq!(
+        stderr.lines().filter(|line| *line == body).count(),
+        1,
+        "{stderr}"
+    );
+    assert!(
+        stderr.find(live[0]).unwrap() < stderr.find(&body).unwrap(),
+        "{stderr}"
+    );
+    assert!(
+        stderr.find(&body).unwrap() < stderr.find(live[1]).unwrap(),
+        "{stderr}"
+    );
 }
 
 fn field<'a>(record: &'a str, name: &str) -> &'a str {
     let prefix = format!("{name}=");
-    record.split_whitespace().find_map(|part| part.strip_prefix(&prefix))
+    record
+        .split_whitespace()
+        .find_map(|part| part.strip_prefix(&prefix))
         .unwrap_or_else(|| panic!("missing {name}: {record}"))
 }

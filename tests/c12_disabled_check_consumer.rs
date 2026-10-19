@@ -1,5 +1,8 @@
 //! Staged, not executed. Include from the integration test registry.
-#![cfg(all(feature = "gui", any(feature = "client-retail", feature = "client-wrath")))]
+#![cfg(all(
+    feature = "gui",
+    any(feature = "client-retail", feature = "client-wrath")
+))]
 
 use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -19,7 +22,8 @@ fn load_consumer() -> WowLuaEnv {
     } else {
         exec_original(&env, "Blizzard_GroupFinder/Shared/LFGFrame.lua");
     }
-    env.exec(r#"
+    env.exec(
+        r#"
         C12Parent = CreateFrame("Frame", "C12Parent", UIParent)
         C12Parent:SetAllPoints(UIParent)
         C12Row = CreateFrame("Frame", "C12Row", C12Parent)
@@ -36,21 +40,29 @@ fn load_consumer() -> WowLuaEnv {
         -- Supplied presentation/data fixture, not a replacement API function.
         QuestDifficulty_Header = CreateFont("C12HeaderFont")
         LFGLockList = {}; LFGCollapseList = {}; LFGEnabledList = {}; LFGQueuedForList = {}
-    "#).expect("SETUP: concrete widget/data fixture");
+    "#,
+    )
+    .expect("SETUP: concrete widget/data fixture");
     if cfg!(feature = "client-wrath") {
-        env.exec(r#"
+        env.exec(
+            r#"
             LFGDungeonInfo = {[-1] = {"C12 header", 1, 1, 80, 40, 1, 80, 0, 0}}
             function C12Refresh(selection)
                 LFGQueuedForList[-1] = selection
                 LFDQueueFrameSpecificListButton_SetDungeon(C12Row, -1, "queued", nil)
             end
-        "#).expect("SETUP: Wrath header data/orchestration");
+        "#,
+        )
+        .expect("SETUP: Wrath header data/orchestration");
     } else {
-        env.exec(r#"
+        env.exec(
+            r#"
             function C12Refresh(selection)
                 LFGDungeonListButton_SetDungeon(C12Row, -1, false, {[-1] = selection})
             end
-        "#).expect("SETUP: Retail orchestration");
+        "#,
+        )
+        .expect("SETUP: Retail orchestration");
     }
     env
 }
@@ -66,10 +78,15 @@ fn assert_emitted(env: &WowLuaEnv, normal: &str, disabled: &str, expected: Optio
     );
     for path in [normal, disabled] {
         let wanted = format!("interface/buttons/{path}").to_lowercase();
-        let present = batch.texture_requests.iter().any(|request| {
-            request.path.replace('\\', "/").to_lowercase() == wanted
-        });
-        assert_eq!(present, expected == Some(path), "C12 emitted selection: {path}");
+        let present = batch
+            .texture_requests
+            .iter()
+            .any(|request| request.path.replace('\\', "/").to_lowercase() == wanted);
+        assert_eq!(
+            present,
+            expected == Some(path),
+            "C12 emitted selection: {path}"
+        );
     }
 }
 
@@ -80,28 +97,36 @@ fn c12_original_lfg_disabled_check_emission_and_reassignment() {
     const DISABLED: &str = "UI-CheckBox-Check-Disabled";
     const MULTI: &str = "UI-MultiCheck-Up";
     const MULTI_DISABLED: &str = "UI-MultiCheck-Disabled";
-    env.exec("C12Refresh(2)").expect("SETUP: original consumer invocation");
+    env.exec("C12Refresh(2)")
+        .expect("SETUP: original consumer invocation");
     if std::env::var("WOW_SIM_SHARED_INPUT_MUTATION").as_deref() == Ok("disabled-check") {
-        env.exec("C12Check:SetDisabledCheckedTexture('Interface/Buttons/UI-CheckBox-Check')").unwrap();
+        env.exec("C12Check:SetDisabledCheckedTexture('Interface/Buttons/UI-CheckBox-Check')")
+            .unwrap();
     }
     assert_emitted(&env, CHECK, DISABLED, Some(DISABLED));
-    env.exec(r#"
+    env.exec(
+        r#"
         C12Checked = C12Check:GetCheckedTexture()
         C12Disabled = C12Check:GetDisabledCheckedTexture()
         C12Check:Enable()
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_emitted(&env, CHECK, DISABLED, Some(CHECK));
     env.exec("C12Check:Disable()").unwrap();
     assert_emitted(&env, CHECK, DISABLED, Some(DISABLED));
     env.exec("C12Refresh(1)").unwrap();
     assert_emitted(&env, MULTI, MULTI_DISABLED, Some(MULTI_DISABLED));
     assert_emitted(&env, CHECK, DISABLED, None);
-    env.exec(r#"
+    env.exec(
+        r#"
         assert(C12Checked == C12Check:GetCheckedTexture(), "checked child identity")
         assert(C12Disabled == C12Check:GetDisabledCheckedTexture(), "disabled child identity")
         assert(C12Checked:GetParent() == C12Check and C12Disabled:GetParent() == C12Check)
         C12Parent:Hide()
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_emitted(&env, MULTI, MULTI_DISABLED, None);
     env.exec("C12Parent:Show(); C12Refresh(0)").unwrap();
     assert_emitted(&env, CHECK, DISABLED, None);
