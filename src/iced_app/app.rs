@@ -382,6 +382,67 @@ impl App {
         app_from_initial_state!(init, selections, now, initial_screen_size)
     }
 
+    pub(super) fn service_pending_reload(&mut self) {
+        let result = self.env.borrow_mut().service_reload(&mut self.saved_vars);
+        match result {
+            Ok(false) => return,
+            Ok(true) => self.reset_reloaded_ui(),
+            Err(error) => {
+                // A partially loaded VM must never overwrite the saved pre-reload values.
+                self.saved_vars = None;
+                panic!("ReloadUI failed: {error}");
+            }
+        }
+        self.log_messages
+            .push("UI environment rebuilt.".to_string());
+    }
+
+    fn reset_reloaded_ui(&mut self) {
+        self.clear_frame_input();
+        self.clear_render_caches();
+        self.clear_pending_textures();
+        self.gui_startup_complete.set(false);
+        self.gui_startup_progress = None;
+        self.first_canvas_size.set(Some(self.screen_size.get()));
+        self.last_on_update_time = std::time::Instant::now();
+        self.mark_all_strata_dirty();
+    }
+
+    fn clear_frame_input(&mut self) {
+        self.hovered_frame = None;
+        self.pressed_frame = None;
+        self.mouse_down_frame = None;
+        self.right_mouse_down_frame = None;
+        self.mouse_down_pos = None;
+        self.dragging = false;
+        self.mouse_position = None;
+        self.inspected_frame = None;
+        self.inspector_visible = false;
+        self.inspector_state = InspectorState::default();
+    }
+
+    fn clear_render_caches(&mut self) {
+        *self.cached_quads.borrow_mut() = None;
+        *self.cached_strata_quads.borrow_mut() = std::array::from_fn(|_| None);
+        *self.cached_frame_snapshots.borrow_mut() = std::array::from_fn(|_| None);
+        *self.pending_dirty_ids.borrow_mut() = None;
+        self.previous_active_cooldown_widget_ids
+            .borrow_mut()
+            .clear();
+        *self.cached_hittable.borrow_mut() = None;
+    }
+
+    fn clear_pending_textures(&mut self) {
+        self.pending_texture_path_queue.borrow_mut().clear();
+        self.pending_texture_path_set.borrow_mut().clear();
+        *self.strata_pending_texture_requests.borrow_mut() =
+            std::array::from_fn(|_| FxHashMap::default());
+        self.pending_texture_requests_by_path.borrow_mut().clear();
+        self.ready_texture_path_cache.borrow_mut().clear();
+        self.texture_warmup_unsettled_strata.set(ALL_STRATA_MASK);
+        self.textures_pending.set(false);
+    }
+
     /// Apply saved config to SimState before startup events fire.
     fn apply_config_to_state(env_rc: &Rc<RefCell<WowLuaEnv>>, config: &crate::config::SimConfig) {
         use crate::lua_api::state::{CLASS_LABELS, RACE_DATA, ROT_DAMAGE_LEVELS};

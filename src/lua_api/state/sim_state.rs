@@ -798,6 +798,9 @@ pub struct SimState {
     pub debug_borders: bool,
     pub debug_anchors: bool,
     pub simulator_exit_requested: bool,
+    pub ui_reload_requested: bool,
+    /// Simulator lifecycle marker, not a native event-order assertion.
+    pub ui_reloaded: bool,
 }
 
 impl SimState {

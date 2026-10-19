@@ -475,9 +475,10 @@ fn fire_world_enter_sequence(env: &WowLuaEnv) {
     }
 
     log_with_timestamp(env, "[Startup] Firing PLAYER_ENTERING_WORLD");
+    let reloaded = env.state().borrow().ui_reloaded;
     if let Err(e) = env.fire_event_with_args(
         "PLAYER_ENTERING_WORLD",
-        &[Val::Bool(true), Val::Bool(false)],
+        &[Val::Bool(!reloaded), Val::Bool(reloaded)],
     ) {
         log_with_timestamp(env, &format!("Error firing PLAYER_ENTERING_WORLD: {e}"));
     }
@@ -493,7 +494,9 @@ fn fire_post_login_events(env: &WowLuaEnv) {
     fire("PET_UI_UPDATE");
     fire("BAG_UPDATE_DELAYED");
     fire("QUEST_LOG_UPDATE");
-    resize_party_state(&mut env.state().borrow_mut(), 4);
+    if !env.state().borrow().ui_reloaded {
+        resize_party_state(&mut env.state().borrow_mut(), 4);
+    }
     refresh_party_frames(env);
     fire("ACTIONBAR_UPDATE_STATE");
     fire("ACTIONBAR_UPDATE_COOLDOWN");

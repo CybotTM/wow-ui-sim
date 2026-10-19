@@ -28,7 +28,7 @@ pub(super) fn init_and_load(args: &Args, screen: ScreenKind) -> InitResult {
     initialize_and_load_env(args, screen, env)
 }
 
-fn initialize_and_load_env(args: &Args, screen: ScreenKind, env: WowLuaEnv) -> InitResult {
+fn initialize_and_load_env(args: &Args, screen: ScreenKind, mut env: WowLuaEnv) -> InitResult {
     configure_screen_size(&env, args);
     let font_system = create_font_system(args);
     init_environment(args, &env, &font_system)?;
@@ -46,13 +46,144 @@ fn initialize_and_load_env(args: &Args, screen: ScreenKind, env: WowLuaEnv) -> I
     );
 
     restart_gc_after_bootstrap(&env);
+    install_reload_loader(
+        &mut env,
+        args,
+        screen,
+        saved_vars.as_ref().or(edit_mode_cache_vars.as_ref()),
+        snapshot_edit_mode_layout,
+    );
     Ok((env, font_system, saved_vars))
+}
+
+fn install_reload_loader(
+    env: &mut WowLuaEnv,
+    args: &Args,
+    screen: ScreenKind,
+    cache_source: Option<&SavedVariablesManager>,
+    initial_layout_name: Option<String>,
+) {
+    let cache_config = cache_source
+        .and_then(SavedVariablesManager::wtf_config)
+        .cloned();
+    let edit_mode_cache = cache_config.map(|config| {
+        let mut cache = SavedVariablesManager::new();
+        cache.set_wtf_config(config);
+        cache
+    });
+    let reload_args = args.clone();
+    env.set_reload_loader(move |env, saved_vars| {
+        env.gc_stop();
+        load_startup_addons(
+            &reload_args,
+            screen,
+            env,
+            saved_vars,
+            edit_mode_cache.as_ref(),
+            initial_layout_name.as_deref(),
+        );
+        restart_gc_after_bootstrap(env);
+        Ok(())
+    });
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use clap::Parser;
+
+    #[cfg(feature = "gui")]
+    #[test]
+    fn reload_ui_rebuilds_the_real_no_addons_startup() {
+        let args =
+            Args::try_parse_from(["wow-sim", "--no-addons"]).expect("reload startup arguments");
+        let (env, _font_system, saved_vars) =
+            init_and_load(&args, ScreenKind::Game).expect("real no-addons startup must load");
+        assert!(saved_vars.is_some());
+        assert!(
+            env.eval::<bool>("return UIParent ~= nil and PlayerFrame ~= nil")
+                .unwrap()
+        );
+        wow_ui_sim::iced_app::run_headless_named_click_probe(
+            env,
+            saved_vars,
+            iced::Size::new(1024.0, 768.0),
+            "reload_sentinel = true; CreateFrame('Frame', 'ReloadOldFrame'); \
+             Blizzard_Console_SavedVars.__reload_test = 73; ReloadUI()", 
+            &[],
+            Some(
+                "assert(reload_sentinel == nil, 'no fresh Lua environment after ReloadUI'); \
+                 assert(ReloadOldFrame == nil); assert(UIParent ~= nil and PlayerFrame ~= nil); \
+                 assert(Blizzard_Console_SavedVars.__reload_test == 73, 'SavedVariables lost during reload')",
+            ),
+        )
+        .expect("ReloadUI must reuse real startup without third-party addons");
+    }
+
+    #[cfg(feature = "gui")]
+    #[test]
+    fn reload_ui_preserves_file_backed_edit_mode_layout() {
+        const CHILD_ENV: &str = "WOW_SIM_RELOAD_EDIT_MODE_CHILD";
+        if std::env::var_os(CHILD_ENV).is_some() {
+            run_edit_mode_reload_consumer();
+            return;
+        }
+        let fixture = tempfile::tempdir().unwrap();
+        let wtf = fixture.path().join("WTF");
+        let account = wtf.join("Account/ReloadAccount");
+        let character = account.join("Test Realm/ReloadChar");
+        std::fs::create_dir_all(&character).unwrap();
+        std::fs::write(
+            account.join("edit-mode-cache-account.txt"),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/tests/fixtures/frame_position_replay/edit-mode-cache-account.txt"
+            )),
+        )
+        .unwrap();
+        std::fs::write(
+            character.join("edit-mode-cache-character.txt"),
+            b"2 2 2 2 0 0\0",
+        )
+        .unwrap();
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "startup::tests::reload_ui_preserves_file_backed_edit_mode_layout",
+                "--nocapture",
+                "--test-threads=1",
+            ])
+            .env(CHILD_ENV, "1")
+            .env("WOW_SIM_WTF_PATH", &wtf)
+            .env("WOW_SIM_WTF_ACCOUNT", "ReloadAccount")
+            .env("WOW_SIM_WTF_REALM", "Test Realm")
+            .env("WOW_SIM_WTF_CHARACTER", "ReloadChar")
+            .env("WOW_SIM_EDIT_MODE_LAYOUT", "Widescreen")
+            .status()
+            .unwrap();
+        assert!(
+            status.success(),
+            "original EditMode consumer must retain its active cached layout across ReloadUI"
+        );
+    }
+
+    #[cfg(feature = "gui")]
+    fn run_edit_mode_reload_consumer() {
+        let args = Args::try_parse_from(["wow-sim", "--no-addons"]).unwrap();
+        let (env, _font_system, saved_vars) = init_and_load(&args, ScreenKind::Game).unwrap();
+        wow_ui_sim::startup::fire_startup_events(&env);
+        let before: String = env
+            .eval("return EditModeManagerFrame:GetActiveLayoutInfo().layoutName")
+            .unwrap();
+        assert_eq!(
+            before, "Widescreen",
+            "non-default file-backed layout readiness"
+        );
+        wow_ui_sim::iced_app::run_headless_named_click_probe(
+            env, saved_vars, iced::Size::new(1024.0, 768.0), "ReloadUI()", &[],
+            Some(&format!("assert(EditModeManagerFrame:GetActiveLayoutInfo().layoutName == {before:?}, 'ReloadUI changed the active file-backed EditMode layout')")),
+        ).expect("original EditMode layout consumer after ReloadUI");
+    }
 
     #[test]
     #[ignore = "private host-budget probe; external no-sound setting and 90s process bound required"]
@@ -277,14 +408,12 @@ fn load_startup_addons(
     edit_mode_cache_vars: Option<&SavedVariablesManager>,
     snapshot_edit_mode_layout: Option<&str>,
 ) {
-    startup_trace::time_load_step("load edit mode cache", || {
-        addon_loading::load_edit_mode_cache(
-            env,
-            saved_vars.as_ref().or(edit_mode_cache_vars),
-            snapshot_edit_mode_layout,
-        )
-    });
-    load_server_snapshot_state(env, saved_vars);
+    load_edit_mode_cache_and_initial_snapshot(
+        env,
+        saved_vars,
+        edit_mode_cache_vars,
+        snapshot_edit_mode_layout,
+    );
     startup_trace::time_load_step("load Blizzard addons", || {
         addon_loading::load_blizzard_addons(env, saved_vars, screen)
     });
@@ -306,6 +435,24 @@ fn load_startup_addons(
     });
     startup_trace::time_load_step("sync addon names to Lua", || env.sync_addon_names_to_lua());
     apply_post_load_workarounds(env);
+}
+
+fn load_edit_mode_cache_and_initial_snapshot(
+    env: &WowLuaEnv,
+    saved_vars: &mut Option<SavedVariablesManager>,
+    edit_mode_cache_vars: Option<&SavedVariablesManager>,
+    snapshot_edit_mode_layout: Option<&str>,
+) {
+    startup_trace::time_load_step("load edit mode cache", || {
+        addon_loading::load_edit_mode_cache(
+            env,
+            edit_mode_cache_vars.or(saved_vars.as_ref()),
+            snapshot_edit_mode_layout,
+        )
+    });
+    if !env.state().borrow().ui_reloaded {
+        load_server_snapshot_state(env, saved_vars);
+    }
 }
 
 fn load_server_snapshot_state(env: &WowLuaEnv, saved_vars: &mut Option<SavedVariablesManager>) {
