@@ -1,9 +1,25 @@
 use super::*;
+use wow_ui_sim::client_profile::{self, ClientProfile};
+
+fn load_profile_framexml() -> (WowLuaEnv, Vec<String>) {
+    if client_profile::ACTIVE != ClientProfile::Wrath {
+        return load_single_blizzard_addon("Blizzard_FrameXML");
+    }
+
+    // Wrath's game foundations live in the flat FrameXML TOC, not a split addon.
+    let toc_path = client_profile::blizzard_ui_framexml_toc()
+        .expect("Wrath's manifest-backed FrameXML.toc should exist");
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.set_screen_mode(ScreenKind::Login);
+    let warnings = load_blizzard_addon_warnings(&env, "FrameXML", &toc_path);
+    (env, warnings)
+}
 
 #[test]
 fn test_secure_action_button_template_is_protected_tuple_after_blizzard_framexml_load() {
     test_timeout! {
-        let (env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+        let (env, warnings) = load_profile_framexml();
         let (is_protected, is_protected_explicitly): (bool, bool) = env
             .eval(
                 r#"
@@ -331,7 +347,7 @@ fn test_blizzard_framexml_loads_role_poll_without_role_icon_warning() {
 #[test]
 fn test_blizzard_framexml_loads_zone_text_without_fading_frame_warning() {
     test_timeout! {
-        let (env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+        let (env, warnings) = load_profile_framexml();
 
         let fading_warnings: Vec<String> = warnings
             .iter()
@@ -346,7 +362,7 @@ fn test_blizzard_framexml_loads_zone_text_without_fading_frame_warning() {
 
         assert!(
             fading_warnings.is_empty(),
-            "Blizzard_FrameXML should not warn on fading-frame helpers:\n  {}",
+            "Profile FrameXML should not warn on fading-frame helpers:\n  {}",
             fading_warnings.join("\n  ")
         );
 
