@@ -98,6 +98,8 @@ Verified 2026-10-19 against the actual Wrath cache: 382 source files plus two ca
 
 Therefore `test_restricted_addon_environment_exposes_execution_surface`, `test_secure_env_annotated_files_load_cleanly`, and `test_secure_env_toc_annotations_are_exhaustive` exclude only `client-wrath`. Historical `FrameXML/SecureTemplates.xml` and `SecureHandlerTemplates.xml` do not establish the modern addon or annotated five-file contract. Other-profile eligibility and all assertions remain unchanged.
 
+`test_no_warnings_on_startup` remains enabled: Wrath ships `AddOns/Blizzard_AchievementUI/Blizzard_AchievementUI.xml`. Its achievement/stats containers inherit `HybridScrollBarTemplate`, whose `$parentBG` texture is declared by `FrameXML/HybridScrollFrame.xml`. The broad fixture must load the required authentic `FrameXML/FrameXML.toc` before discovering/loading addons, matching product startup order in `src/bin/wow_sim/addon_loading.rs`. Previously it enumerated only AddOns, omitting these templates and failing at `Blizzard_AchievementUI.lua:628` and `:1634`. FrameXML failures, handler errors and runtime diagnostics use the same strict collector as addons; none are cleared or baselined. This repairs the fixture, not Blizzard Lua or an API default.
+
 Private file listings, pre-change classification and inherited RED stacks on both `d29abccad` and `5a508d443` are retained under `/home/osso/.local/state/wow-ui-sim/handoff/wrath-startup-parent4/`; runtime acceptance is pending.
 
 ## Forever event coverage

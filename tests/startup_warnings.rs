@@ -68,6 +68,11 @@ fn load_and_startup() -> StartupDiagnostics {
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons(&ui);
     let mut diagnostics = StartupDiagnostics::default();
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        let toc_path = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+            .expect("Wrath's manifest-backed FrameXML.toc should exist");
+        diagnostics.extend(collect_addon_load_diagnostics(&env, "FrameXML", &toc_path));
+    }
     for (name, toc_path) in &addons {
         diagnostics.extend(collect_addon_load_diagnostics(&env, name, toc_path));
     }
