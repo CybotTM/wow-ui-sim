@@ -805,6 +805,8 @@ pub struct SimState {
     pub in_world: bool,
     /// Wrath reload's temporary protected-action phase, not the player's combat bit.
     pub reload_allows_protected_actions: bool,
+    /// Supplied readiness of the two account CVar chunks; not a network client.
+    pub account_cvar_chunks_ready: [bool; 2],
     /// Simulator lifecycle marker, not a native event-order assertion.
     pub ui_reloaded: bool,
 }

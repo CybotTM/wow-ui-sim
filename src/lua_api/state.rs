@@ -45,6 +45,7 @@ macro_rules! build_empty_sim_state {
             cinematic_active: false,
             in_world: false,
             reload_allows_protected_actions: false,
+            account_cvar_chunks_ready: [true; 2],
             ui_reloaded: false,
             cvars: CVarStorage::new(),
             #[cfg(feature = "client-wrath")]

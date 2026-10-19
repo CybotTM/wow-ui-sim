@@ -124,6 +124,12 @@ impl WowLuaEnv {
         self.reload_loader = Some(Rc::new(loader));
     }
 
+    /// Supply completion/readiness without implementing account-data networking.
+    pub fn set_account_cvar_chunk_ready(&self, chunk: usize, ready: bool) -> Result<()> {
+        self.state.borrow_mut().account_cvar_chunks_ready[chunk] = ready;
+        Ok(())
+    }
+
     /// Service a deferred request only after the caller has released all Lua borrows.
     pub fn service_reload(
         &mut self,

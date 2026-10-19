@@ -10,7 +10,22 @@ mod shutdown;
 #[path = "common/wrath_reload_saved_variables.rs"]
 mod saved_variables;
 
+#[path = "common/wrath_reload_startup.rs"]
+mod startup;
+
 use wow_ui_sim::lua_api::state::AddonInfo;
+
+#[test]
+fn original_ui_parent_cached_readiness_and_argless_wrath_entry() {
+    startup::assert_startup_readiness([true, true]);
+}
+
+#[test]
+fn original_ui_parent_waits_for_each_account_chunk() {
+    for ready in [[false, true], [true, false], [false, false]] {
+        startup::assert_startup_readiness(ready);
+    }
+}
 
 #[test]
 fn original_stopwatch_restores_saved_variables_after_code_before_event() {
