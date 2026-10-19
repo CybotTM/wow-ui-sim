@@ -1,3 +1,7 @@
+## [2026-10-19] source | Wrath shutdown-before-save and combat window
+
+[Reload retirement](systems/reload-ui.md#environment-retirement) links the [12340 proof matrix](../specs/reload-ui.md#wrath-12340-requirements): original logout consumers and old-VM trace REDs, combat-entry RED, and passing noncombat control. Wrath shutdown now finishes the lifecycle callbacks before saving without erasing combat; its protected-state predicate covers the temporary window. Reentry's finer event slot remains INFERRED. GREEN is pending; missing minimap-arrow construction remains separate.
+
 ## [2026-10-19] source | Wrath cinematic reload eligibility
 
 [Reload ownership](systems/reload-ui.md#request-and-ownership) links the [bounded contract](../specs/reload-ui.md#wrath-12340-requirements): exact prerequisite fixture RED, original popup disable/query GREEN, then a distinct cinematic RED at `2711a473e`. The owner guard is Wrath-only; no combat refusal or unknown taint feedback is invented. Eligibility GREEN remains pending.

@@ -482,6 +482,23 @@ fn fire_world_enter_sequence(env: &WowLuaEnv) {
     ) {
         log_with_timestamp(env, &format!("Error firing PLAYER_ENTERING_WORLD: {e}"));
     }
+    finish_wrath_world_entry(env);
+}
+
+fn finish_wrath_world_entry(env: &WowLuaEnv) {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+        return;
+    }
+    let in_combat = {
+        let mut state = env.state().borrow_mut();
+        state.in_world = true;
+        state.reload_allows_protected_actions = false;
+        state.player.in_combat
+    };
+    // The finer slot within EnterWorld is simulator policy, not 12340 ordering proof.
+    if in_combat {
+        fire_simple_event(env, "PLAYER_REGEN_DISABLED");
+    }
 }
 
 /// Fire post-login events: unit frames, auras, bags, UI updates.

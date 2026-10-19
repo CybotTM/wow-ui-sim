@@ -3,6 +3,13 @@
 use super::SimState;
 
 impl SimState {
+    pub(crate) fn in_combat_lockdown(&self) -> bool {
+        let reload_window = crate::client_profile::ACTIVE
+            == crate::client_profile::ClientProfile::Wrath
+            && self.reload_allows_protected_actions;
+        self.player.in_combat && !reload_window
+    }
+
     pub(crate) fn discard_ui_environment(&mut self) {
         self.discard_ui_registries();
         self.discard_ui_callbacks();

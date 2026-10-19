@@ -145,6 +145,7 @@ impl WowLuaEnv {
         if !eligible {
             return Ok(false);
         }
+        self.fire_wrath_reload_shutdown()?;
         if let Some(manager) = saved_vars {
             manager.save_all(self.rilua_mut().state_mut())?;
             manager.retire_lua_environment();
@@ -154,6 +155,20 @@ impl WowLuaEnv {
             loader(self, saved_vars)?;
         }
         Ok(true)
+    }
+
+    fn fire_wrath_reload_shutdown(&self) -> Result<()> {
+        if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+            return Ok(());
+        }
+        self.state.borrow_mut().reload_allows_protected_actions = true;
+        self.fire_event("PLAYER_REGEN_ENABLED")?;
+        let leaving_world = self.state.borrow().in_world;
+        if leaving_world {
+            self.state.borrow_mut().in_world = false;
+            self.fire_event("PLAYER_LEAVING_WORLD")?;
+        }
+        self.fire_event("PLAYER_LOGOUT")
     }
 
     /// One-shot command owners settle a rebuilt UI before observing output.

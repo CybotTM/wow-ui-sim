@@ -2,7 +2,7 @@
 //!
 //! Migrates 6 entries off `GLOBAL_FALSE_STUBS` onto real Rust impls:
 //!
-//! - `InCombatLockdown()`    — `player.in_combat`
+//! - `InCombatLockdown()`    — combat bit, except Wrath's reload permission window
 //! - `IsEncounterInProgress()` — `world.encounter_in_progress`
 //! - `IsResting()`           — `player.is_resting`
 //! - `IsFlyableArea()`       — `world.flyable_area`
@@ -16,7 +16,7 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 fn in_combat_lockdown(state: &mut LuaState) -> LuaResult<u32> {
-    let in_combat = borrow_state_mut(state)?.player.in_combat;
+    let in_combat = borrow_state_mut(state)?.in_combat_lockdown();
     state.push(Val::Bool(in_combat));
     Ok(1)
 }

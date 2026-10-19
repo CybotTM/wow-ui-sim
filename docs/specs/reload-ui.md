@@ -23,8 +23,8 @@ Verified 2026-10-19: among all seven active profile caches, only Wrath's shipped
 | Slice | Required boundary | Current proof |
 | --- | --- | --- |
 | A prerequisite | Original StaticPopup acceptance disables its selected addon, then requests reload | Exact fixture RED `1a20ccf65`; producer `2711a473e` GREEN through original popup and C_AddOns enable-state query |
-| A | Deferred request waits outside cinematic playback; zero results, coalescing, no explicit combat rejection | Original-popup cinematic RED at `2711a473e`; eligibility producer implemented, GREEN pending |
-| B | Temporary protected-action allowance and argless REGEN_ENABLED precede conditional LEAVING, then LOGOUT; handlers finish before addon SV serialization | Pending |
+| A | Deferred request waits outside cinematic playback; zero results, coalescing, no explicit combat rejection | Original-popup cinematic RED at `2711a473e`; GREEN 2/2 at `121e4fe47` |
+| B | Temporary protected-action allowance and argless REGEN_ENABLED precede conditional LEAVING, then LOGOUT; handlers finish before addon SV serialization | Exact fixture `fa73666b1`: three feature-absence REDs, noncombat control passes; producer implemented, GREEN pending |
 | C | Per-addon code/bindings, account SV, character SV, then ADDON_LOADED(name), one argument | Pending |
 | D | Both account chunks ready: VARIABLES_LOADED inline before LOGIN/argless PEW; pending chunks may defer it past entry; no synthetic WoWUISim addon event | Pending |
 | E | Restore eligible named user-placed movable/resizable frames on new objects, excluding DontSavePosition; cancel mirror timers on LeaveWorld, retain totems/player context | Pending |
@@ -39,7 +39,7 @@ The exact writer grammar is `Version: 1\n`, then per frame `Frame`, `FrameLevel`
 
 Documented simulator deviation: store its own unscaled layout units and round to nearest/ties-even, not guessed NDC/aspect constants. Native uses effective scale and width conversion for BOTH axes with lrintf; native rounding-mode parity is unmeasured. This is round-trip equivalence in the simulator's units, NOT native numeric/file byte parity.
 
-The request's unnamed taint gate/default/producer and feedback contract remain evidence-blocked. Do not invent them. SPELLS_CHANGED reload occurrence/order is UNKNOWN. General engine timer policy and full native shutdown persistence are not implemented by this bounded goal. Combat reentry notification is combat-bit conditional; its finer position among startup events is not asserted.
+The request's unnamed taint gate/default/producer and feedback contract remain evidence-blocked. Do not invent them. SPELLS_CHANGED reload occurrence/order is UNKNOWN. General engine timer policy and full native shutdown persistence are not implemented by this bounded goal. Combat reentry notification is combat-bit conditional; its finer position among startup events is not asserted. The simulator ends the Wrath permission window in its world-entry helper after PEW; this placement is INFERRED simulator policy, not a new authenticated partial order. Combat state is never cleared to simulate this window. `InCombatLockdown` and the existing protected-frame state-change probe share the same permission predicate.
 
 Pinned Retail API docs at `b9be9379719047977fca4dba1bb1d9988e8840b3` declare ADDON_LOADED(name STRING, containsBindings BOOL) and PEW(initialLogin BOOL, reloadingUi BOOL). Reload values and containsBindings value semantics beyond type are INFERRED. These declarations do not authenticate Retail chronology or other-profile payloads. The payload slice covers only real-addon startup and C_AddOns LoD emissions. Synthetic Retail ADDON_LOADED("WoWUISim") is deliberately unchanged and remains a separate non-native simulator-policy gap.
 
