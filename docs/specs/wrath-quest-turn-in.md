@@ -48,7 +48,7 @@ Main approved using the existing `GossipState.giver_guid` as the single concrete
 - `src/lua_api/globals/admin_quests.rs`: existing selected-quest admin behavior; proposed Wrath offer/completion response policy still required. Preserve existing Retail/Forever policy.
 - `tests/common/wrath_turn_in_consumer.rs`: original full-startup fixture, concrete inputs and producer-only notification drain; no callback/API replacement.
 
-`Cargo.toml` explicitly registers `wrath_quest_turn_in` because automatic integration-test discovery is disabled. The v4 packet omitted this fixture prerequisite; the initial attempted RED build therefore did not execute a test.
+`Cargo.toml` explicitly registers `wrath_quest_turn_in` because automatic integration-test discovery is disabled. The v4 packet omitted this fixture prerequisite; the initial attempted RED build therefore did not execute a test. Standalone targets also expose unchanged Wrath abandon/log-read tests for bounded preservation. Fixture compilation uses the public `lua_api::state::QuestRewardItem` re-export and supported `i64` Lua counter conversion; v4's private-module import and unsupported `usize` conversion were compile errors, not behavioral RED.
 
 ## Tests asserting this spec
 

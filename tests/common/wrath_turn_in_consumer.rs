@@ -5,8 +5,8 @@ mod wrath_full_ui;
 use sha2::{Digest, Sha256};
 use wow_ui_sim::event::EventArg;
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::sim_substates::QuestRewardItem;
 use wow_ui_sim::lua_api::state::GossipQuestRow;
+use wow_ui_sim::lua_api::state::QuestRewardItem;
 
 pub const NPC_GUID: u64 = 0xF130_0030_0000_0001;
 pub const TARGET: i32 = 990301;
@@ -29,7 +29,7 @@ pub fn assert_errors(env: &ConsumerEnv) {
         .eval(r"return table.concat(TurnInErrors, '\n')")
         .unwrap();
     assert!(errors.is_empty(), "original consumer errors: {errors}");
-    let forbidden: usize = env.env.eval("return TurnInForbiddenEvents or 0").unwrap();
+    let forbidden: i64 = env.env.eval("return TurnInForbiddenEvents or 0").unwrap();
     assert_eq!(forbidden, 0, "QUEST_TURNED_IN observed during this cycle");
     assert_eq!(
         error_snapshot(&env.env),
