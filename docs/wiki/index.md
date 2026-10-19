@@ -1,6 +1,6 @@
 ## [2026-10-19] source | Wrath supplied objective reads
 
-[Legacy surface](systems/lua-api.md#wrath-selected-quest-legacy-surface) links identity-keyed snapshot adapters and the unchanged capability gate. [Objective contract](../specs/wrath-quest-objectives.md) separates original-consumer RED, pending GREEN and native category/intermediate gaps.
+[Legacy surface](systems/lua-api.md#wrath-selected-quest-legacy-surface) links identity-keyed snapshot adapters and the unchanged capability gate. [Objective contract](../specs/wrath-quest-objectives.md#bounded-proof--2026-10-19) records original-consumer RED→GREEN, Wrath preservation, startup/fmt/full-feature check scope and native category/intermediate gaps.
 
 ## [2026-10-19] source/tooling | Disabled checks and profile-aware suites
 

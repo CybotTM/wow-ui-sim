@@ -1,3 +1,7 @@
+## [2026-10-19] proof | Wrath objective consumers
+
+[Owning proof](../specs/wrath-quest-objectives.md#bounded-proof--2026-10-19) records original-body RED→GREEN, Wrath preservation, startup/fmt and zero-warning full-feature checking. It separately binds the reviewer-requested cache-resolver test rerun and excludes native input-model gaps and parent integration.
+
 ## [2026-10-19] source | Wrath supplied objective reads
 
 [System notes](systems/lua-api.md#wrath-selected-quest-legacy-surface) link the Wrath-only snapshot adapter; [contract](../specs/wrath-quest-objectives.md) owns consumer RED, pending producer GREEN and native input-model exclusions. No vendor, lifecycle or shared capability-gate change.
