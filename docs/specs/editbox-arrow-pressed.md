@@ -4,11 +4,11 @@ EditBox accepts `OnArrowPressed(self, key)` and dispatches it through the focuse
 
 ## What it must do
 
-- [ ] EditBox supports `SetScript`, deferred `HookScript`, `GetScript`, `HasScript` and clearing `OnArrowPressed`; ordinary Frame does not acquire this handler.
-- [ ] Focused EditBox dispatches exactly `self` and an uppercase `LEFT`, `RIGHT`, `UP` or `DOWN` direction. Home/End do not emit arrow callbacks. Left/Right retain cursor movement and arrow input does not change text.
-- [ ] Generic EditBox alt-arrow mode defaults to false. False accepts plain arrows. True requires Alt for EditBox arrow handling; plain arrows neither invoke the handler nor move its cursor and remain available to bindings.
-- [ ] Alt is recognized from modifier state or an `ALT-` key prefix. Script arguments exclude modifier prefixes. An unfocused EditBox receives no arrow callback.
-- [ ] The original Blizzard `AutoCompleteEditBoxTemplate` XML binds its original `AutoCompleteEditBox_OnArrowPressed` function, and keyboard Up/Down changes the original autocomplete selection, including wraparound.
+- [x] EditBox supports `SetScript`, deferred `HookScript`, `GetScript`, `HasScript` and clearing `OnArrowPressed`; ordinary Frame does not acquire this handler.
+- [x] Focused EditBox dispatches exactly `self` and an uppercase `LEFT`, `RIGHT`, `UP` or `DOWN` direction. Home/End do not emit arrow callbacks. Left/Right retain cursor movement and arrow input does not change text.
+- [x] Generic EditBox alt-arrow mode defaults to false. False accepts plain arrows. True requires Alt for EditBox arrow handling; plain arrows neither invoke the handler nor move its cursor and remain available to bindings.
+- [x] Alt is recognized from modifier state or an `ALT-` key prefix. Script arguments exclude modifier prefixes. An unfocused EditBox receives no arrow callback.
+- [x] The original Blizzard `AutoCompleteEditBoxTemplate` XML binds its original `AutoCompleteEditBox_OnArrowPressed` function, and keyboard Up/Down changes the original autocomplete selection, including wraparound.
 
 The false default is supported by wowless's EditBox `altArrowKeyMode.init` and Blizzard's `UI.xsd` `ignoreArrows` default. Blizzard's chat EditBox template explicitly requests `ignoreArrows="true"`; that is not the generic EditBox default. Blizzard AutoComplete temporarily calls `SetAltArrowKeyMode(false)` when showing suggestions and restores the previous mode when hiding them.
 
@@ -28,6 +28,10 @@ The false default is supported by wowless's EditBox `altArrowKeyMode.init` and B
 ## Tests asserting this spec
 
 `tests/editbox_arrow_pressed.rs` covers script APIs and the deferred timer hook pattern, four directions, cursor/text preservation, alt mode and binding routing, focus exclusion, and original cached Blizzard XML/Lua consumer behavior. `tests/key_dispatch.rs` provides existing keyboard-dispatch preservation coverage.
+
+### Bounded Retail proof — 2026-10-18
+
+Four regressions passed at `8943614e0`, linked against the unchanged default-feature Retail library built at `855267dc2`. The original consumer fixture loads Blizzard's unchanged `Blizzard_SharedXMLBase/Compat.lua` prerequisite before `AutoComplete.lua`. All 28 existing `tests/key_dispatch.rs` cases passed against that same production revision in the preceding bounded run; they were not rerun for the fixture-only correction. The initial committed RED at `2bfe5b55b` had four failures, including explicit invalid-handler rejection and unchanged original autocomplete selection. This is bounded headless API/input proof, not native or full-addon acceptance.
 
 ## Known gaps (current cycle)
 
