@@ -312,16 +312,12 @@ fn load_startup_addons(
     edit_mode_cache_vars: Option<&SavedVariablesManager>,
     snapshot_edit_mode_layout: Option<&str>,
 ) {
-    if !env.state().borrow().ui_reloaded {
-        startup_trace::time_load_step("load edit mode cache", || {
-            addon_loading::load_edit_mode_cache(
-                env,
-                saved_vars.as_ref().or(edit_mode_cache_vars),
-                snapshot_edit_mode_layout,
-            )
-        });
-        load_server_snapshot_state(env, saved_vars);
-    }
+    load_initial_snapshot_and_edit_mode(
+        env,
+        saved_vars,
+        edit_mode_cache_vars,
+        snapshot_edit_mode_layout,
+    );
     startup_trace::time_load_step("load Blizzard addons", || {
         addon_loading::load_blizzard_addons(env, saved_vars, screen)
     });
@@ -343,6 +339,25 @@ fn load_startup_addons(
     });
     startup_trace::time_load_step("sync addon names to Lua", || env.sync_addon_names_to_lua());
     apply_post_load_workarounds(env);
+}
+
+fn load_initial_snapshot_and_edit_mode(
+    env: &WowLuaEnv,
+    saved_vars: &mut Option<SavedVariablesManager>,
+    edit_mode_cache_vars: Option<&SavedVariablesManager>,
+    snapshot_edit_mode_layout: Option<&str>,
+) {
+    if env.state().borrow().ui_reloaded {
+        return;
+    }
+    startup_trace::time_load_step("load edit mode cache", || {
+        addon_loading::load_edit_mode_cache(
+            env,
+            saved_vars.as_ref().or(edit_mode_cache_vars),
+            snapshot_edit_mode_layout,
+        )
+    });
+    load_server_snapshot_state(env, saved_vars);
 }
 
 fn load_server_snapshot_state(env: &WowLuaEnv, saved_vars: &mut Option<SavedVariablesManager>) {

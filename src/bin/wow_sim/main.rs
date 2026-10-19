@@ -618,6 +618,10 @@ fn run_dump_tree(
         .expect("dump-tree timer ReloadUI failed");
     apply_delay(command.delay);
     update_dump_layout_rects(env);
+    print_dump_tree(env, &command);
+}
+
+fn print_dump_tree(env: &WowLuaEnv, command: &DumpTreeCommand<'_>) {
     let state = env.state().borrow();
     let addon_names: Vec<String> = state.addons.iter().map(|a| a.folder_name.clone()).collect();
     wow_ui_sim::dump::print_frame_tree(
