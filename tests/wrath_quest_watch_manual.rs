@@ -161,7 +161,6 @@ fn n3_reordered_supplied_snapshot_uses_current_log_indices() {
         &case,
         "N3.request_membership({1}); QuestLog_Update(); WatchFrame_Update(); N3.expect_membership({[1]='N3 supplied B'})",
     );
-    // PENDING: with no resupply, does B remain watched, and in what watch order?
 }
 
 #[test]
@@ -197,5 +196,59 @@ fn n3_original_abandon_of_watched_row_has_no_stale_visible_identity() {
         }
     }
     exec(&case, "N3.expect_no_removed_identity(991302)");
-    // PENDING: exact post-removal watch count/order, survivor remapping, native trace.
+}
+
+#[test]
+fn n3_original_views_retain_watched_ids_without_resupply_after_reorder() {
+    let case = supplied();
+    exec(
+        &case,
+        "N3.request_membership({4,2,1}); QuestLog_Update(); WatchFrame_Update()",
+    );
+    {
+        let mut sim = case.env.state().borrow_mut();
+        sim.quest_log_entries.entries.swap(0, 3);
+        sim.quest_log.swap(0, 3);
+    }
+    exec(
+        &case,
+        r#"
+        QuestLog_Update(); WatchFrame_Update()
+        N3.expect_membership({[1]='N3 supplied D',[2]='N3 supplied B',[4]='N3 supplied A'})
+        assert(GetQuestIndexForWatch(1) == 1 and GetQuestIndexForWatch(2) == 2 and GetQuestIndexForWatch(3) == 4)
+        "#,
+    );
+}
+
+#[test]
+fn n3_original_abandon_refresh_compacts_surviving_watch_order() {
+    let case = supplied();
+    exec(
+        &case,
+        r#"
+        N3.request_membership({4,2,1}); QuestLog_Update(); WatchFrame_Update()
+        N3.expect_membership({[4]='N3 supplied D',[2]='N3 supplied B',[1]='N3 supplied A'})
+        QuestLog_SetSelection(2)
+        QuestLogFrameAbandonButton:Click()
+        StaticPopup_FindVisible('ABANDON_QUEST').button1:Click()
+        assert(GetNumQuestWatches() == 3, 'no immediate watch cleanup')
+        "#,
+    );
+    let queued = case.env.state().borrow_mut().events.drain();
+    let mut refreshes = 0;
+    for event in queued {
+        if event.name == "QUEST_LOG_UPDATE" {
+            case.env.fire_event(&event.name).unwrap();
+            refreshes += 1;
+        }
+    }
+    assert_eq!(refreshes, 1);
+    exec(
+        &case,
+        r#"
+        N3.expect_membership({[3]='N3 supplied D',[1]='N3 supplied A'})
+        assert(GetQuestIndexForWatch(1) == 3 and GetQuestIndexForWatch(2) == 1)
+        N3.expect_no_removed_identity(991302)
+        "#,
+    );
 }
