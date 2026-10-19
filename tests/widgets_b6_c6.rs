@@ -98,6 +98,24 @@ fn b6_c6_defaults_and_original_xml_duration() {
         .exec("assert(UIErrorsFrame:GetTimeVisible()==5 and UIErrorsFrame:GetFadeDuration()==3)")
         .unwrap();
 }
+#[test]
+fn b6_c6_original_consumer_queues_one_row_per_update() {
+    if ACTIVE != ClientProfile::Wrath {
+        return;
+    }
+    let env = errors_env();
+    env.exec(r#"
+        local handler = UIErrorsFrame:GetScript('OnEvent')
+        handler(UIErrorsFrame, 'UI_ERROR_MESSAGE', 'first')
+        handler(UIErrorsFrame, 'UI_ERROR_MESSAGE', 'second')
+        assert(UIErrorsFrame:GetNumMessages() == 0, 'AddMessage must queue')
+    "#).unwrap();
+    env.fire_on_update(0.0).unwrap();
+    env.exec("assert(UIErrorsFrame:GetNumMessages() == 1, 'one insertion per update')").unwrap();
+    env.fire_on_update(0.0).unwrap();
+    env.exec("assert(UIErrorsFrame:GetNumMessages() == 2)").unwrap();
+}
+
 #[cfg(feature = "gui")]
 #[test]
 fn b6_c6_set_time_visible_restarts_nonzero_active_timer() {
