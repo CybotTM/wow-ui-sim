@@ -549,6 +549,7 @@ impl WowFontSystem {
     }
 
     /// Byte starts of wrapped runs, for consumers that measure the resulting ranges.
+    #[cfg(feature = "gui")]
     pub(crate) fn measure_wrap_starts(
         &mut self,
         text: &str,
