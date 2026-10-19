@@ -8,8 +8,6 @@ use std::time::Instant;
 use sha2::{Digest, Sha256};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape_in_dir;
-
 const CHILD: &str = "WOW_SIM_ASYNC_REQUEST_PROVENANCE_CHILD";
 const TIMINGS: &str = "WOW_SIM_LOG_HANDLER_TIMINGS";
 const MUTATION: &str = "WOW_SIM_SHARED_INPUT_MUTATION";
@@ -86,12 +84,11 @@ fn exercise_original_requests() {
         "consumer drift: {}",
         original.display()
     );
-    with_blizzard_addon_smoke_shape_in_dir(
-        &cache,
-        &["Blizzard_AsyncRequest"],
-        &[],
-        |env, _loaded| exercise_request_transitions(env),
-    );
+    let env = WowLuaEnv::new().expect("isolated original AsyncRequest environment");
+    let toc = cache.join("Blizzard_AsyncRequest/Blizzard_AsyncRequest.toc");
+    let loaded = wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
+    assert!(loaded.warnings.is_empty(), "{:?}", loaded.warnings);
+    exercise_request_transitions(&env);
 }
 
 fn exercise_request_transitions(env: &WowLuaEnv) {
