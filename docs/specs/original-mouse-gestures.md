@@ -12,8 +12,8 @@ Bounded input contract for original Retail DamageMeter sizing and Wrath floating
 
 ### Wrath floating chat
 
-- [ ] Original XML tab OnDragStart moves the owning chat frame by the cursor delta without resizing it.
-- [ ] After release, original FCFTab_OnUpdate reaches FCF_StopDragging and clears native motion, MOVING_CHATFRAME and tab dragButton.
+- [x] Original XML tab OnDragStart moves the owning chat frame by the cursor delta without resizing it.
+- [x] After release, original FCFTab_OnUpdate reaches FCF_StopDragging and clears native motion, MOVING_CHATFRAME and tab dragButton.
 
 ## Implementation inventory
 
@@ -28,7 +28,7 @@ Bounded input contract for original Retail DamageMeter sizing and Wrath floating
 
 The original callbacks were unchanged. Root cause: StartSizing set flags without motion capture, while threshold crossing marked a script drag even without a registered handler, diverting mouse-up cleanup. The simulator now captures sizing and distinguishes registered script drags.
 
-Wrath full original FrameXML loading reached original OnDragStart but reproduced no horizontal movement. Original ChatFrame1Tab is a sibling of ChatFrame1, not its child: ancestor-only motion selection cannot find the frame started by the tab callback. StartMoving now captures its actual frame, like StartSizing. Wrath GREEN and non-vacuity proof remain pending. Cache/loader failures are setup failures, not behavioral RED; no shims may hide them.
+Wrath full original FrameXML loading reached original OnDragStart but reproduced no horizontal movement. Original ChatFrame1Tab is a sibling of ChatFrame1, not its child: ancestor-only motion selection cannot find the frame started by the tab callback. StartMoving now captures its actual frame, like StartSizing. At `a23d6741d`, the original loaded XML gesture and original OnUpdate cleanup pass. Setting only the supplied frame's movable flag false preserves original OnDragStart dispatch but fails the horizontal-delta assertion, establishing non-vacuity. Cache/loader failures are setup failures, not behavioral RED; no shims may hide them.
 
 ## Exclusions and fact gaps
 
