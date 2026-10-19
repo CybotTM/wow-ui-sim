@@ -20,6 +20,7 @@ Wrath 12340 behavior supplied by laptop batch 3 (2026-10-18); original Minimap L
 
 - `src/lua_api/frame/methods/map_frames.rs` — zoom and local-ping entry points.
 - `src/lua_api/frame/methods/map_frames/wrath_ping.rs` — player-present local publication.
+- `src/lua_api/globals/real/wrath_legacy.rs` — native global sqrt alias required by the original Minimap_SetPing consumer; no vendor handler replacement.
 - `src/lua_api/workarounds/temporary/wrath_minimap_ping_coordinates.rs` — explicitly raw nonzero coordinates pending transform modeling.
 - `src/loader/xml_file.rs` — document failure boundaries.
 - `src/xml/template.rs` — template precedence and cache invalidation.
