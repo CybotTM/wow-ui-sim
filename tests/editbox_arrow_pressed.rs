@@ -136,8 +136,13 @@ fn editbox_arrow_pressed_alt_mode_requires_alt_and_releases_plain_arrows_to_bind
 fn editbox_arrow_pressed_original_blizzard_xml_and_autocomplete_consumer() {
     let env = WowLuaEnv::new().unwrap();
     let root = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
-    let lua = std::fs::read_to_string(root.join("Blizzard_AutoComplete/AutoComplete.lua")).unwrap();
-    env.exec(&lua).unwrap();
+    for path in [
+        "Blizzard_SharedXMLBase/Compat.lua",
+        "Blizzard_AutoComplete/AutoComplete.lua",
+    ] {
+        let lua = std::fs::read_to_string(root.join(path)).unwrap();
+        env.exec(&lua).unwrap();
+    }
     let ui = parse_xml_file(&root.join("Blizzard_AutoComplete/AutoComplete.xml")).unwrap();
     let template = ui
         .elements
