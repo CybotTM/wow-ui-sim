@@ -1,3 +1,7 @@
+## [2026-10-18] investigation | Original sizing and AsyncRequest proof
+
+[Mouse sizing](investigations/mouse-sizing-capture.md) records missing native capture and spurious script-drag routing, reproduced through unchanged DamageMeter callbacks. [AsyncRequest contract](../specs/timer-callback-provenance.md#original-asyncrequest-correlation--bounded-retail-proof) records isolated original TOC loading, both timing modes and negative fixture controls. Native outside-release/scale policy and full startup remain excluded.
+
 ## [2026-10-18] investigation | Ellesmere timer125 secure-hook targets
 
 [Diagnosis](investigations/ellesmereui-forever.md#timer125-inherited-secure-hook-fanout--2026-10-18) links captured shared callback growth and real extracted-consumer RED. Target/key binding separates instance hooks from inherited/copied wrappers without rooting targets. [Bounded proof](../specs/hook-callback-origin.md#bounded-proof--2026-10-18) records compiled target/control GREEN and real-addon callback/Exec/draw progress. No addon, texture-cache or scheduling change; no full compatibility claim.

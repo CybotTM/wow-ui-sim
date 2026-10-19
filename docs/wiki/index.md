@@ -1,3 +1,7 @@
+## [2026-10-18] investigation | Original sizing capture and release
+
+[Mouse sizing diagnosis](investigations/mouse-sizing-capture.md) links original-consumer geometry/release RED→GREEN and the registered-drag boundary. [AsyncRequest correlation](../specs/timer-callback-provenance.md#original-asyncrequest-correlation--bounded-retail-proof) records both-mode original-source/owner/ID proof and negative fixture controls, without a timer producer change.
+
 ## [2026-10-18] packaging | Release ICU and Docker publication
 
 [Profile packaging notes](systems/client-profiles.md#release-icu-packaging) link the [release contract](../release-icu.md): explicit native ICU provisioning, relocatable macOS ICU closure, manifest-checked Docker UI/runtime and non-publishing manual rehearsal. The [local matrix](../release-icu.md#local-acceptance--2026-10-18) records Linux/Docker/native Windows build/link/startup acceptance and pending macOS CI; synthetic helper tests remain separate.
