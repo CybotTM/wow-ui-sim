@@ -36,14 +36,14 @@ Wrath's legacy spellbook globals expose full and compact views of existing `SimS
 
 ## Tests asserting this spec
 
-- `tests/wrath_spellbook_tabinfo.rs` — unchanged original startup and SpellBook lifecycle; separate original DebugTools cursor case.
+- `tests/wrath_spellbook_tabinfo.rs` — unchanged original startup and SpellBook lifecycle.
 - `tests/wrath_spellbook_contract.rs` — focused tab binding, compact-slot mapping and synchronous UpdateSpells contracts. Ranked fixture Ebon Crown IDs 1248891/1248890/1248888 have ascending ranks 1/2/4 but descending IDs.
 - `tests/spell_api.rs`, `tests/professions_spellbook.rs` — existing C_SpellBook/profile preservation.
 
 ## Known gaps (current cycle)
 
 - [ ] Producer GREEN and preservation evidence pending. Original lifecycle RED: f71f7ce1b; focused API RED: 18089b84e against identical f71 production sources.
-- [ ] Independent cursor gap OPEN, waiting on authoritative Q-CUR1 native ordering facts (`cursor-onshow-ordering-12340.md` in laptop handoff answers). Corrected fixture4d20f7625 and read-only hook observer both reached original UIPanelTemplates.lua:365 nil cursorOffset against the frozen f71 library. No prior cursor callback occurred before original DebugTools.lua:449 direct changed/update calls. Initial nil ScriptErrorsFrame failure was setup, not behavioral RED. Cursor producer is excluded from this slice.
+- [ ] Independent cursor follow-up OPEN and excluded from this slice. Final authenticated Q-CUR1 (`cursor-onshow-ordering-12340.md` in laptop handoff answers) supports only conditional deferred dirty flushing, not synchronous SetText/OnShow cursor callbacks. Historical fixture4d20f7625 and observer called DebugTools updates back to back with NO intervening ticks; both reached original :365 nil cursorOffset, but do not prove a native violation. That unsupported synchronous assertion was removed from the shippable suite without an ignore; exact source/trace remain in handoff. Follow-up needs realistic intervening ticks and original-consumer deferred-flush RED before any producer fix.
 - [ ] Stock Wrath startup [] and existing other-profile spellbook preservation after integration.
 
 ## Out of scope

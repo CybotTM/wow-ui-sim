@@ -95,32 +95,3 @@ fn original_wrath_spellbook_show_select_skill_lines_hide_without_errors() {
     assert_no_errors(&env, "original SpellBook show/select/hide");
     result.expect("original spellbook lifecycle and numeric offset");
 }
-
-fn load_original_debugtools(env: &WowLuaEnv) {
-    env.exec("assert(C_AddOns.LoadAddOn('Blizzard_DebugTools'))")
-        .expect("SETUP: load original demand-loaded DebugTools");
-    assert_no_errors(env, "original DebugTools setup");
-}
-
-#[test]
-fn original_wrath_debugtools_same_text_synchronous_scrolling_has_cursor() {
-    let env = load_original_startup();
-    load_original_debugtools(&env);
-    let result = env.exec(
-        r#"
-        assert(not ScriptErrorsFrame:IsShown(), 'cold error panel')
-        ScriptErrorsFrame_OnError('Wrath spellbook lane cursor fixture')
-        local box = ScriptErrorsFrameScrollFrameText
-        local text = box:GetText()
-        assert(type(text) == 'string' and #text > 0)
-        box:SetText(text)
-        box:SetText(text)
-        ScriptErrorsFrame_Update()
-        assert(type(box.cursorOffset) == 'number', 'cursorOffset='..tostring(box.cursorOffset))
-        assert(type(box.cursorHeight) == 'number', 'cursorHeight='..tostring(box.cursorHeight))
-        ScriptErrorsFrame:Hide()
-        "#,
-    );
-    assert_no_errors(&env, "original DebugTools repeated-text scrolling");
-    result.expect("original synchronous scrolling must see cursor presentation");
-}
