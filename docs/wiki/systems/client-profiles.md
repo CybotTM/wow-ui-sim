@@ -109,6 +109,10 @@ The [independent stored-error CLI audit](../../../data/patch-api/evidence/narrow
 
 Later saved `192210Z` at `ef55bf873` closes only [bounded normal completion and distinct CLI zero](../investigations/integrated-source-and-factory-proof-2026-10-09.md#forever-post-event-repair-stock--bounded-normal-completion-and-distinct-cli-zero): normal stock dump marker/exit0 (`casc=true`); separate CLI exact `[]`, exit0, 0 unique/0 occurrences (`casc=false`), not the same in-memory pool. Cached normal artifact reused from GREEN integration compilation, six manifest warnings retained. Historical19/36 and422/514 remain unchanged; attribute/pool disappearance is not causally attributed. Native/GUI/all-profile/cold-state/third-party/key readiness remains unproven.
 
+## Startup test applicability
+
+The [startup warning applicability inventory](../../specs/client-profiles.md#startup-warning-test-applicability) owns consumer-specific eligibility and the retained FrameXML fixture boundary; profile selection alone is not runtime acceptance.
+
 ## Profile-aware loader paths
 
 ### TOC discovery (`src/loader/mod.rs`)

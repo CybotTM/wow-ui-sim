@@ -100,7 +100,31 @@ Therefore `test_restricted_addon_environment_exposes_execution_surface`, `test_s
 
 `test_no_warnings_on_startup` remains enabled: Wrath ships `AddOns/Blizzard_AchievementUI/Blizzard_AchievementUI.xml`. Its achievement/stats containers inherit `HybridScrollBarTemplate`, whose `$parentBG` texture is declared by `FrameXML/HybridScrollFrame.xml`. The broad fixture must load the required authentic `FrameXML/FrameXML.toc` before loading addons, matching product startup order in `src/bin/wow_sim/addon_loading.rs`. Previously it enumerated only AddOns, omitting these templates and failing at `Blizzard_AchievementUI.lua:628` and `:1634`. FrameXML failures, handler errors and runtime diagnostics use the same strict collector as addons; none are cleared or baselined. This repairs the fixture, not Blizzard Lua or an API default.
 
-Private file listings, pre-change classification and inherited RED stacks on both `d29abccad` and `5a508d443` are retained under `/home/osso/.local/state/wow-ui-sim/handoff/wrath-startup-parent4/`; runtime acceptance is pending. Expected eligibility after these three exclusions: Wrath 4 compiled tests (the other three of its former seven are gated), Retail 26 unchanged. This is static inventory, not a passing-runtime claim; all four reusable build slots were still owned at handoff.
+Static inventory at `fddc3bc0b`: [startup warning tests](../../tests/startup_warnings.rs) and [late fixtures](../../tests/startup_warnings/late.rs). After the three Wrath-only secure-environment exclusions, Wrath has 4 eligible tests (three of its former seven are gated), Retail 26 unchanged. These counts describe source eligibility, not passing runtime execution.
+
+The late fixtures have consumer-scoped compile-time eligibility:
+
+| Required consumer | Eligible public client profiles | Late tests |
+|---|---|---:|
+| Retained secure-action and zone-text consumers | All seven | 2 |
+| Split-addon consumers absent from the flat Wrath tree | Retail, PTR, Forever, Mists, Era, Anniversary | 8 |
+| AccountStore, BossBanner, EventUtil, FrameUtil, HousingTutorials or NewPlayerExperience consumers | Retail, PTR, Forever | 7 |
+
+The two all-profile late tests use `load_profile_framexml()`: Wrath loads its manifest-backed `FrameXML/FrameXML.toc`; other profiles load `Blizzard_FrameXML`. This helper is limited to the secure-action protection tuple and zone-text fading-helper fixtures. It does not change production startup. The broad `test_no_warnings_on_startup` fixture has the separate Wrath FrameXML-before-addons ordering described above.
+
+The parent module also restricts its widget-container test and three AccountStore tests to Retail, PTR and Forever. Its three secure-environment tests exclude only `client-wrath`, as detailed above. Static eligibility across both modules is:
+
+| Public client profile | Parent-module tests | Late tests | Total eligible tests |
+|---|---:|---:|---:|
+| Retail (`client-retail`) | 9 | 17 | 26 |
+| PTR (`client-ptr`) | 9 | 17 | 26 |
+| Forever (`client-wowforever`) | 9 | 17 | 26 |
+| Mists (`client-mists`) | 5 | 10 | 15 |
+| Era (`client-era`) | 5 | 10 | 15 |
+| Anniversary (`client-anniversary`) | 5 | 10 | 15 |
+| Wrath (`client-wrath`) | 2 | 2 | 4 |
+
+Counts assume exactly one named public `client-*` profile feature. The gates name `client-retail`, not the standalone historical `profile-retail` marker. Eligibility is not compiled discovery, runtime acceptance or a clean-startup claim.
 
 ## Forever event coverage
 
