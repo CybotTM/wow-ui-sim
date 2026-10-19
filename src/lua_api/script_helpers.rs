@@ -36,7 +36,7 @@ pub(crate) fn load_constant_factory(
     use crate::lua_api::methods::{table_get_static, table_set_static};
     use rilua::vm::closure::{Closure, LuaClosure, Upvalue};
 
-    let sources = constant_factory_sources(state, chunk_name);
+    let sources = find_or_create_factory_sources(state, chunk_name);
     let anchor = match table_get_static(state, sources, source) {
         Val::Function(function) => function,
         _ => {
@@ -62,7 +62,7 @@ pub(crate) fn load_constant_factory(
     Ok(rilua::Function::from_gc_ref(function))
 }
 
-fn constant_factory_sources(state: &mut LuaState, chunk_name: &str) -> Val {
+fn find_or_create_factory_sources(state: &mut LuaState, chunk_name: &str) -> Val {
     use crate::lua_api::methods::{create_table, registry_table_or_create, table_get, table_set};
 
     let cache = registry_table_or_create(state, "__wow_constant_factory_prototypes");

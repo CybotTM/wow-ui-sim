@@ -10,8 +10,8 @@ pub fn load_chunk<L: LuaApiMut>(
     code: &str,
     tag: &str,
 ) -> Result<rilua::Function, LoadError> {
-    let (hash, chunk_name) = generated_chunk_identity(code, tag);
-    let profile_start = generated_chunk_profile_start();
+    let (hash, chunk_name) = build_generated_chunk_identity(code, tag);
+    let profile_start = start_generated_chunk_profile();
 
     if !bytecode_cache::is_disabled() {
         if let Some(result) = bytecode_cache::with_cached_bytecode(hash, |bytecode| {
@@ -39,8 +39,8 @@ pub(crate) fn load_constant_chunk<L: LuaApiMut>(
     code: &'static str,
     tag: &str,
 ) -> Result<rilua::Function, LoadError> {
-    let (hash, chunk_name) = generated_chunk_identity(code, tag);
-    let profile_start = generated_chunk_profile_start();
+    let (hash, chunk_name) = build_generated_chunk_identity(code, tag);
+    let profile_start = start_generated_chunk_profile();
     let function =
         crate::lua_api::script_helpers::load_constant_factory(lua.state_mut(), code, &chunk_name)
             .map_err(|error| LoadError::Lua(error.to_string()))?;
@@ -48,7 +48,7 @@ pub(crate) fn load_constant_chunk<L: LuaApiMut>(
     Ok(function)
 }
 
-fn generated_chunk_identity(code: &str, tag: &str) -> (u64, String) {
+fn build_generated_chunk_identity(code: &str, tag: &str) -> (u64, String) {
     let hash = bytecode_cache::content_hash(code.as_bytes(), tag);
     (hash, format!("@generated/{tag}/{hash:016x}"))
 }
@@ -61,7 +61,7 @@ pub(crate) struct GeneratedChunkScope(&'static str);
 
 impl GeneratedChunkScope {
     pub(crate) fn enter(phase: &'static str) -> Option<Self> {
-        generated_chunk_profile_start()
+        start_generated_chunk_profile()
             .map(|_| Self(PROFILE_PHASE.with(|current| current.replace(phase))))
     }
 }
@@ -72,7 +72,7 @@ impl Drop for GeneratedChunkScope {
     }
 }
 
-pub(crate) fn generated_chunk_profile_start() -> Option<std::time::Instant> {
+pub(crate) fn start_generated_chunk_profile() -> Option<std::time::Instant> {
     static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     ENABLED
         .get_or_init(|| std::env::var_os("WOW_SIM_PROFILE_GENERATED_CHUNKS").is_some())
