@@ -43,7 +43,7 @@ Wrath's legacy spellbook globals expose full and compact views of existing `SimS
 ## Known gaps (current cycle)
 
 - [ ] Producer GREEN and preservation evidence pending. Original lifecycle RED: f71f7ce1b; focused API RED: 18089b84e against identical f71 production sources.
-- [ ] Independent DebugTools cursor fixture setup corrected at 4d20f7625; cursor RED pending. Initial nil ScriptErrorsFrame failure was setup, not behavioral RED.
+- [ ] Independent cursor gap OPEN, waiting on authoritative Q-CUR1 native ordering facts (`cursor-onshow-ordering-12340.md` in laptop handoff answers). Corrected fixture4d20f7625 and read-only hook observer both reached original UIPanelTemplates.lua:365 nil cursorOffset against the frozen f71 library. No prior cursor callback occurred before original DebugTools.lua:449 direct changed/update calls. Initial nil ScriptErrorsFrame failure was setup, not behavioral RED. Cursor producer is excluded from this slice.
 - [ ] Stock Wrath startup [] and existing other-profile spellbook preservation after integration.
 
 ## Out of scope
