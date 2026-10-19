@@ -114,6 +114,36 @@ fn b6_u3_wrath_refinement_is_monotone_without_back_propagation() {
 }
 #[cfg(feature = "gui")]
 #[test]
+fn b6_u3_local_double_column_gap_only_when_both_strings_shown() {
+    if !wrath() {
+        return;
+    }
+    let env = lfr_env();
+    let mut fonts = wow_ui_sim::render::WowFontSystem::new_without_casc();
+    assert!(
+        fonts.font_system.db().faces().next().is_some(),
+        "SETUP: fonts required"
+    );
+    let measure = |left: &str, right: &str, fonts: &mut wow_ui_sim::render::WowFontSystem| {
+        env.exec(&format!("B6Tip:ClearLines(); B6Tip:AddLine('h'); B6Tip:AddDoubleLine({left},{right}); B6Tip:Show()")).unwrap();
+        wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut env.state().borrow_mut(), fonts);
+        env.eval::<f64>("return B6Tip:GetWidth()").unwrap()
+    };
+    let right_text = "RRRRRRRRRRRR";
+    let right_width = fonts.measure_text_width(right_text, None, 12.0) as f64;
+    let left_only = measure("'LLLLLLLLLLLL'", "nil", &mut fonts);
+    let both = measure("'LLLLLLLLLLLL'", "'RRRRRRRRRRRR'", &mut fonts);
+    assert!((both - left_only - right_width - 38.400002).abs() < 0.01);
+    let right_only = measure("''", "'RRRRRRRRRRRR'", &mut fonts);
+    let same_as_left = measure("'RRRRRRRRRRRR'", "nil", &mut fonts);
+    assert!(
+        (right_only - same_as_left).abs() < 0.01,
+        "hidden left string must not add column gap"
+    );
+}
+
+#[cfg(feature = "gui")]
+#[test]
 fn b6_u3_already_wide_shared_width_bypasses_refinement() {
     if !wrath() {
         return;
