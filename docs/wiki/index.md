@@ -1,3 +1,7 @@
+## [2026-10-19] source/tooling | Disabled checks and profile-aware suites
+
+[Disabled-check contract](../specs/disabled-check-emission.md) owns original Retail/Wrath LFG emitted-path proof and exclusions. [Runner policy](../remote-builds.md#asynchronous-full-suite) owns seven-profile submission, receipt scope and explicit-SHA binding; historical Retail receipts do not establish another profile's acceptance.
+
 ## [2026-10-18] source | Wrath selected quest reads and abandon response
 
 [Legacy surface](systems/lua-api.md#wrath-selected-quest-legacy-surface) links selected rich reward reads, prepared faction output, player daily fields and profile-specific abandonment. [Owning contract](../specs/wrath-quest-abandon.md) records original-consumer RED→bounded GREEN, master-classified Forever gaps and provisional native timing separately.

@@ -2401,3 +2401,7 @@ Linked Retail native/Docker packaging and non-publishing rehearsal from client p
 ## 2026-10-18 — Release ICU local acceptance
 
 Linked the release acceptance matrix: actual Linux/Docker/native Windows build, loader and zero-error startup proofs; Windows cache refresh and retained backup; macOS CI remains pending.
+
+## [2026-10-19] ingest | Disabled checks and profile-aware suites
+
+Linked the [disabled-check contract](../specs/disabled-check-emission.md) for bounded original Retail/Wrath LFG emitted-path proof and the [runner policy](../remote-builds.md#asynchronous-full-suite) for seven-profile selection, receipt boundaries and explicit-SHA binding. Documentation/source inspection only; no new runtime or installed-controller acceptance.
