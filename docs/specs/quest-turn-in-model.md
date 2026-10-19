@@ -2,6 +2,8 @@
 
 Explicitly simulator-authored `A_Admin.TurnInSelectedQuest()` commits a selected completed quest using the existing rich quest-log/history model in `src/lua_api/sim_substates/quest_log.rs` and administrative producer in `src/lua_api/globals/admin_quests.rs`. This is not a native API or native-parity claim. [Implementation notes](../wiki/systems/lua-api.md#simulator-selected-quest-turn-in) describe projections.
 
+Wrath 3.3.5a build 12340 native/dialog behavior is governed separately by [Wrath turn-in](wrath-quest-turn-in.md). The selected-log admin validation and modern `QUEST_TURNED_IN` rules below record the existing Retail/Forever simulator policy, not Wrath native semantics; a future Wrath pending-claim response adapter must not inherit them.
+
 ## What it must do
 
 - [x] Consume only the selected positive, i32-representable quest ID whose existing rich row is complete and not failed. Return `true` only for a committed turn-in; no selection, invalid/out-of-range ID, missing row, incomplete or failed row returns `false` without mutation/event. Selection, not a supplied argument or another completed quest, determines the target.
