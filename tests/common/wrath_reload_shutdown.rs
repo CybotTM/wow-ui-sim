@@ -11,22 +11,21 @@ fn register_originals(env: &WowLuaEnv, manager: &mut SavedVariablesManager) {
     ] {
         let toc = wow_ui_sim::toc::TocFile::from_file(&root.join(name).join(format!("{name}.toc")))
             .unwrap();
-        manager
-            .init_for_addon(
-                env.rilua_mut().state_mut(),
-                name,
-                &toc.saved_variables(),
-                &toc.saved_variables_per_character(),
-            )
+        env.loader_env()
+            .with_state(|state| {
+                manager.init_for_addon(
+                    state,
+                    name,
+                    &toc.saved_variables(),
+                    &toc.saved_variables_per_character(),
+                )
+            })
             .unwrap();
     }
-    manager
-        .init_for_addon(
-            env.rilua_mut().state_mut(),
-            "ReloadObserver",
-            &["ReloadTrace".into()],
-            &[],
-        )
+    env.loader_env()
+        .with_state(|state| {
+            manager.init_for_addon(state, "ReloadObserver", &["ReloadTrace".into()], &[])
+        })
         .unwrap();
 }
 
