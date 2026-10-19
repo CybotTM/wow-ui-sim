@@ -27,6 +27,8 @@ The [integrated checkpoint](../investigations/integrated-source-and-factory-proo
 
 Wrath `quest_verbs.rs` separates marking from its server-response simulation and reuses `QuestLogState::abandon`; other profiles keep their existing branch. [Contract limits](../../specs/wrath-quest-abandon.md#consumer-grounding-and-source-limits) distinguish original UI compatibility from native request/event sequencing. No whole W1 acceptance is implied.
 
+`quest_surface/wrath_objectives.rs` projects the existing `c_api::quest_objectives` snapshots through Wrath-only registrations. It resolves displayed rich-row positions separately from identity-keyed storage; the shared Retail/Forever capability gate is unchanged. Numeric strings use C number parsing, and objective values are rooted before subsequent Lua allocations. [Objective contract](../../specs/wrath-quest-objectives.md) owns the `1`/nil tuple, asymmetric selector rules, authored summary policy and native metadata gaps. Its bounded proof records original-consumer RED→GREEN, existing Wrath controls, startup and warning-free full-feature checking; combined parent integration remains separate.
+
 ## Forever supplied quest difficulty
 
 [Owning contract and proof status](../../specs/forever-quest-difficulty.md) owns the Forever-only live rich-row difficulty getter and bounded simulator policies, not native parity. Historical [source40a receipt](../../baselines/README.md#current-watchtalent-execution--2026-10-15) records **28 PASS** (difficulty3 + watch-projection4 + finite21), separate positive normal watch/global-alias/voice checks and startup **10 records / 14 occurrences FAIL**. Its read-only projection passes and separate add/remove/type/event RED do not establish current membership behavior.
@@ -456,6 +458,7 @@ Historical `e4caa4899` adds empty-default `SimState.item_cooldowns: HashMap<u32,
 
 ## Sources
 
+- [Wrath supplied objectives](../../specs/wrath-quest-objectives.md) — legacy snapshot reads, bounded consumer proof and native input-model gaps
 - [Container split/use](../../specs/container-split-use.md) — supplied actions and bounded receipts
 - [Container quest metadata](../../specs/container-item-quest-metadata.md) — membership authority and bounded receipts
 - [Message-frame access history](../../specs/message-frame-access-history.md) — Wrath history/transfer boundary and receipts

@@ -10,6 +10,18 @@ const QUEST_GREEN_RANGE_LEVEL_BAND: usize = 5;
 const QUEST_GREEN_RANGES: [u8; 20] = [4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8];
 
 pub(super) const LEGACY_READS: &[(&str, super::SurfaceFn)] = &[
+    (
+        "GetNumQuestLeaderBoards",
+        super::wrath_objectives::get_num_quest_leaderboards,
+    ),
+    (
+        "GetQuestLogLeaderBoard",
+        super::wrath_objectives::get_quest_log_leaderboard,
+    ),
+    (
+        "GetQuestLogQuestText",
+        super::wrath_objectives::get_quest_log_quest_text,
+    ),
     ("GetQuestLogGroupNum", get_quest_log_group_num),
     ("GetQuestGreenRange", get_quest_green_range),
     ("GetDailyQuestsCompleted", get_daily_quests_completed),
