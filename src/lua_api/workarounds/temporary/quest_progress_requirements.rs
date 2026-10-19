@@ -7,7 +7,8 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
-    if !crate::c_api::quest_objectives::ENABLED && !cfg!(feature = "client-wrath") {
+    let supports_dialog = crate::c_api::quest_objectives::ENABLED || cfg!(feature = "client-wrath");
+    if !supports_dialog {
         return Ok(());
     }
     #[cfg(feature = "client-wrath")]
