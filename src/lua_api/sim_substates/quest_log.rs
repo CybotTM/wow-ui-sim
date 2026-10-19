@@ -9,6 +9,9 @@ use crate::c_api::quest_objectives::QuestObjectiveProgress;
 use std::collections::{HashMap, HashSet};
 use std::num::TryFromIntError;
 
+#[cfg(feature = "client-wrath")]
+const WRATH_DAILY_QUEST_LIMIT: usize = 25;
+
 /// Rich quest-log entry used by `C_QuestLog.*` probes.
 #[derive(Debug, Clone)]
 pub struct QuestLogEntry {
@@ -95,6 +98,9 @@ pub struct QuestLogState {
     pub readiness: crate::c_api::quest_readiness::QuestReadinessState,
     /// Shared prepared output: readers do not implicitly refresh on selection.
     pub processed_reward_factions: Vec<(i32, i32)>,
+    /// Player daily fields, separate from active rows and completion history.
+    #[cfg(feature = "client-wrath")]
+    pub daily_quest_ids: [u32; WRATH_DAILY_QUEST_LIMIT],
     /// Quest IDs already turned in / permanently completed.
     /// Drives `GetAllCompletedQuestIDs` and `IsQuestFlaggedCompleted`.
     pub completed_quest_ids: HashSet<i32>,
@@ -176,6 +182,8 @@ impl QuestLogState {
             background_materials: HashMap::new(),
             readiness: Default::default(),
             processed_reward_factions: Vec::new(),
+            #[cfg(feature = "client-wrath")]
+            daily_quest_ids: [0; WRATH_DAILY_QUEST_LIMIT],
             completed_quest_ids: seeded_completed_quest_ids(),
         }
     }

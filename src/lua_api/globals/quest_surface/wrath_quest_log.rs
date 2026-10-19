@@ -7,6 +7,8 @@ use rilua::{LuaResult, Val, vm::state::LuaState};
 
 pub(super) const LEGACY_REWARD_READS: &[(&str, super::SurfaceFn)] = &[
     ("GetQuestLogGroupNum", get_quest_log_group_num),
+    ("GetDailyQuestsCompleted", get_daily_quests_completed),
+    ("GetMaxDailyQuests", get_max_daily_quests),
     ("GetNumQuestLogRewards", get_num_quest_log_rewards),
     ("GetQuestLogRewardInfo", get_quest_log_reward_info),
     ("GetQuestLogRewardSpell", get_quest_log_reward_spell),
@@ -110,6 +112,23 @@ pub(super) fn get_quest_log_group_num(state: &mut LuaState) -> LuaResult<u32> {
             .unwrap_or(0)
     };
     state.push(Val::Num(group_size as f64));
+    Ok(1)
+}
+
+pub(super) fn get_daily_quests_completed(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?
+        .quest_log_entries
+        .daily_quest_ids
+        .iter()
+        .filter(|id| **id != 0)
+        .count();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+pub(super) fn get_max_daily_quests(state: &mut LuaState) -> LuaResult<u32> {
+    let limit = borrow_state(state)?.quest_log_entries.daily_quest_ids.len();
+    state.push(Val::Num(limit as f64));
     Ok(1)
 }
 
