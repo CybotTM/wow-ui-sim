@@ -18,8 +18,8 @@ fn b6_u1_original_lfr_row_attachment() {
         assert(B6Tip:GetLeftLine(2):GetText()=='Leader')
         assert(B6Tip:GetLeftLine(3):GetText()=='2 members')
         assert(B6TipTexture10:GetWidth()>0 and B6TipTexture10:GetHeight()>0)
-        assert(B6TipTexture1:GetWidth()==B6TipTexture10:GetWidth())
-        assert(B6TipTexture1:GetHeight()==B6TipTexture10:GetHeight())
+        assert(B6TipTexture1:GetWidth()==B6TipTexture10:GetWidth(), 'retained slot widths '..B6TipTexture1:GetWidth()..'/'..B6TipTexture10:GetWidth())
+        assert(B6TipTexture1:GetHeight()==B6TipTexture10:GetHeight(), 'retained slot heights '..B6TipTexture1:GetHeight()..'/'..B6TipTexture10:GetHeight())
         local tlx,tly,blx,bly,trx,try,brx,bry=B6TipTexture1:GetTexCoord()
         assert(tlx==0 and tly==0 and blx==0 and bly==1 and trx==0.25 and try==0 and brx==0.25 and bry==1,'UV crop retained')
     "#).unwrap();
@@ -40,6 +40,32 @@ fn b6_u1_original_lfr_gap_is_local_6_4_at_four_three() {
         .eval("return B6TipTextLeft2:GetLeft()-B6TipTexture1:GetRight()")
         .unwrap();
     assert!((gap - 6.4).abs() < 0.01, "local 4:3 DDC gap: {gap}");
+}
+
+#[test]
+fn b6_u1_attached_icon_follows_caption_after_cached_layout() {
+    if !wrath() {
+        return;
+    }
+    let env = lfr_env();
+    env.state().borrow_mut().ensure_layout_rects();
+    let before: (f64, f64) = env
+        .eval("return B6TipTextLeft2:GetLeft(),B6TipTexture1:GetRight()")
+        .unwrap();
+    env.exec("B6TipTextLeft2:SetPoint('TOPLEFT',B6TipTextLeft1,'BOTTOMLEFT',100,-2)")
+        .unwrap();
+    env.state().borrow_mut().ensure_layout_rects();
+    let after: (f64, f64) = env
+        .eval("return B6TipTextLeft2:GetLeft(),B6TipTexture1:GetRight()")
+        .unwrap();
+    assert!(
+        (after.0 - before.0).abs() > 0.1,
+        "fixture must actually move caption"
+    );
+    assert!(
+        ((after.0 - before.0) - (after.1 - before.1)).abs() < 0.01,
+        "icon must follow its anchored sibling after cached layout"
+    );
 }
 
 #[test]
@@ -130,7 +156,7 @@ fn b6_u1_slot_size_blank_spacing_and_ten_slot_cap() {
         (after.1 - before.1).abs() < 0.01,
         "slot height must not replace left height"
     );
-    env.exec("assert(B6TipTexture1:GetWidth()==B6SlotWidth and B6TipTexture1:GetHeight()==B6SlotHeight); assert(B6TipTexture1:GetTexture()==nil)").unwrap();
+    env.exec("assert(B6TipTexture1:GetWidth()==B6SlotWidth, 'retained width '..B6TipTexture1:GetWidth()..'/'..B6SlotWidth); assert(B6TipTexture1:GetHeight()==B6SlotHeight, 'retained height '..B6TipTexture1:GetHeight()..'/'..B6SlotHeight); assert(B6TipTexture1:GetTexture()==nil)").unwrap();
     for index in 2..=10 {
         env.exec(&format!(
             "B6Tip:AddLine(string.rep('W',{})); B6Tip:AddTexture('')",
