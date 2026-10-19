@@ -1,3 +1,7 @@
+## [2026-10-19] evidence | ReloadUI bounded retail GREEN
+
+[Contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) records 64 library/App/socket/persistence and four startup/output-owner passes on `bbc3f5d7c`, historical assertion RED and unchanged original-CVar guards. [Lifecycle](systems/reload-ui.md) includes Blizzard’s `C_UI.Reload` route. Native teardown ordering and full Ellesmere acceptance remain separate.
+
 ## [2026-10-19] system | Deferred fresh-environment ReloadUI
 
 [Reload lifecycle](systems/reload-ui.md) documents owner-serviced VM retirement, retained session state, SavedVariables readback and IPC boundaries. [Contract](../specs/reload-ui.md) separates behavioral RED from pending GREEN and unconfirmed native event order.
