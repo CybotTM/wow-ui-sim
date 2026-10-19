@@ -162,8 +162,8 @@ fn create_chat_env() -> WowLuaEnv {
     exec_original(&env, "GlobalStrings.lua");
     exec_original(&env, "Constants.lua");
     exec_original(&env, "UIParent.lua");
-    exec_original(&env, "FloatingChatFrame.lua");
     load_originals(&env, &["UIDropDownMenu.xml", "ChatFrame.xml"]);
+    exec_original(&env, "FloatingChatFrame.lua");
     env.exec(
         r#"
         ChatWindow=CreateFrame('ScrollingMessageFrame','RealPathChat',UIParent)
