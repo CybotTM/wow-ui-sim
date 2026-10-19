@@ -192,6 +192,8 @@ impl QuestLogState {
                 glittering_geodes_entry(),
                 earthen_relic_recovery_entry(),
             ],
+            #[cfg(feature = "client-wrath")]
+            manual_watch_ids: Vec::new(),
             objective_progress: crate::c_api::quest_objectives::seeded_progress(),
             background_materials: HashMap::new(),
             readiness: Default::default(),
