@@ -401,7 +401,8 @@ fn is_widget_specific_script_handler(
         }
         "OnDoubleClick" => true,
         "OnEnable" | "OnDisable" => supports_enable_disable_script(widget_type),
-        "OnTextChanged"
+        "OnArrowPressed"
+        | "OnTextChanged"
         | "OnTextSet"
         | "OnEditFocusGained"
         | "OnEditFocusLost"

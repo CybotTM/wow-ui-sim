@@ -124,6 +124,10 @@ pub(crate) fn normalized_key_name(key: &str) -> String {
     key.to_ascii_uppercase()
 }
 
+fn is_arrow_key(key: &str) -> bool {
+    matches!(key, "LEFT" | "RIGHT" | "UP" | "DOWN")
+}
+
 fn unmodified_key_name(key: &str) -> &str {
     let mut key = key;
     while let Some(rest) = key
@@ -213,8 +217,8 @@ impl WowLuaEnv {
             }
         }
 
-        let is_editbox = self.focused_is_editbox(focused);
-        if !is_editbox {
+        let editbox_input = self.focused_editbox_accepts_key(focused, key);
+        if !editbox_input {
             let mut lua = self.lua.borrow_mut();
             if super::globals::keybindings::dispatch_key_binding(&mut lua, key)? {
                 return Ok(());
@@ -223,34 +227,42 @@ impl WowLuaEnv {
 
         self.dispatch_on_key_down(key)?;
 
-        if let Some(fid) = focused {
-            if is_editbox {
-                self.dispatch_editbox_key(fid, key, text)?;
-            }
+        if let Some(fid) = focused.filter(|_| editbox_input) {
+            self.dispatch_editbox_key(fid, key, text)?;
         }
 
         Ok(())
     }
 
-    /// `true` if `focused` refers to an EditBox widget.
-    fn focused_is_editbox(&self, focused: Option<u64>) -> bool {
-        focused.is_some_and(|fid| {
-            self.state
-                .borrow()
-                .widgets
-                .get(fid)
-                .map(|f| f.widget_type == crate::widget::WidgetType::EditBox)
-                .unwrap_or(false)
-        })
+    /// Alt-arrow mode leaves unmodified arrows available to keybindings.
+    fn focused_editbox_accepts_key(&self, focused: Option<u64>, key: &str) -> bool {
+        let Some(fid) = focused else {
+            return false;
+        };
+        let state = self.state.borrow();
+        let Some(frame) = state.widgets.get(fid) else {
+            return false;
+        };
+        if frame.widget_type != crate::widget::WidgetType::EditBox {
+            return false;
+        }
+        let requires_alt =
+            is_arrow_key(unmodified_key_name(key)) && frame.editbox_alt_arrow_key_mode;
+        if !requires_alt {
+            return true;
+        }
+        state.modifier_keys.alt || key.split('-').any(|modifier| modifier == "ALT")
     }
 
     /// Dispatch a key event to a focused EditBox.
     fn dispatch_editbox_key(&self, fid: u64, key: &str, text: Option<&str>) -> Result<()> {
+        let arrow = unmodified_key_name(key);
+        if is_arrow_key(arrow) {
+            return self.dispatch_editbox_arrow(fid, arrow);
+        }
         match key {
             "BACKSPACE" => self.editbox_delete_text(fid, true)?,
             "DELETE" => self.editbox_delete_text(fid, false)?,
-            "LEFT" => self.editbox_move_cursor(fid, -1)?,
-            "RIGHT" => self.editbox_move_cursor(fid, 1)?,
             "HOME" => self.editbox_cursor_home(fid)?,
             "END" => self.editbox_cursor_end(fid)?,
             _ => {
@@ -260,6 +272,20 @@ impl WowLuaEnv {
             }
         }
         Ok(())
+    }
+
+    /// Arrow scripts receive the direction, not the modifier-prefixed binding key.
+    fn dispatch_editbox_arrow(&self, fid: u64, arrow: &str) -> Result<()> {
+        let key_val = {
+            let mut lua = self.lua.borrow_mut();
+            create_string(lua.state_mut(), arrow)
+        };
+        self.fire_script_handler(fid, "OnArrowPressed", vec![key_val])?;
+        match arrow {
+            "LEFT" => self.editbox_move_cursor(fid, -1),
+            "RIGHT" => self.editbox_move_cursor(fid, 1),
+            _ => Ok(()),
+        }
     }
 
     // ── OnKeyDown propagation ─────────────────────────────────────────────────
