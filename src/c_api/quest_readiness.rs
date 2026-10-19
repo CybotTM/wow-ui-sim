@@ -179,7 +179,7 @@ pub(crate) fn select_active_dialog(state: &mut LuaState, quest_id: u32) -> LuaRe
     Ok(0)
 }
 
-fn has_active_npc_quest(sim: &SimState, quest_id: i32) -> bool {
+pub(crate) fn has_active_npc_quest(sim: &SimState, quest_id: i32) -> bool {
     sim.gossip.active
         && sim
             .gossip

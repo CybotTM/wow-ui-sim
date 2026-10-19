@@ -96,6 +96,7 @@ pub struct QuestLogState {
     /// Explicit quest-dialog materials; absence leaves the original UI default.
     pub background_materials: HashMap<i32, String>,
     pub readiness: crate::c_api::quest_readiness::QuestReadinessState,
+    pub offer: crate::c_api::c_quest_offer::QuestOfferState,
     /// Shared prepared output: readers do not implicitly refresh on selection.
     pub processed_reward_factions: Vec<(i32, i32)>,
     /// Player daily fields, separate from active rows and completion history.
@@ -126,6 +127,7 @@ impl QuestLogState {
         self.objective_progress.remove(&quest_id);
         self.background_materials.remove(&quest_id);
         self.readiness.remove_quest(quest_id);
+        self.offer.major_faction_rewards.remove(&quest_id);
         true
     }
 
@@ -144,6 +146,7 @@ impl QuestLogState {
         self.objective_progress.remove(&quest_id);
         self.background_materials.remove(&quest_id);
         self.readiness.remove_quest(quest_id);
+        self.offer.major_faction_rewards.remove(&quest_id);
         self.completed_quest_ids.insert(quest_id);
         true
     }
@@ -181,6 +184,7 @@ impl QuestLogState {
             objective_progress: crate::c_api::quest_objectives::seeded_progress(),
             background_materials: HashMap::new(),
             readiness: Default::default(),
+            offer: Default::default(),
             processed_reward_factions: Vec::new(),
             #[cfg(feature = "client-wrath")]
             daily_quest_ids: [0; WRATH_DAILY_QUEST_LIMIT],

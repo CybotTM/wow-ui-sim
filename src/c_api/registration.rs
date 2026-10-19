@@ -53,6 +53,7 @@ pub(crate) fn register_character_progression_tables(state: &mut LuaState) -> Lua
 }
 
 pub(crate) fn register_interaction_tables(state: &mut LuaState) -> LuaResult<()> {
+    super::c_quest_offer::register(state)?;
     super::c_store_secure::register(state)?;
     super::c_voice_chat_activity::register(state)?;
     #[cfg(feature = "retail-12-0-0")]
@@ -99,6 +100,8 @@ pub(crate) fn register_interaction_tables(state: &mut LuaState) -> LuaResult<()>
     }
     register_classic_combat_tables(state)?;
     super::c_log::register_classic(state)?;
+    #[cfg(feature = "client-wowforever")]
+    super::c_log::register_error_sink(state)?;
     #[cfg(feature = "retail-12-0-5")]
     super::c_scenario_info::register(state)?;
     #[cfg(feature = "client-retail")]

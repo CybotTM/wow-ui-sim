@@ -6,8 +6,10 @@ Under `client-mists`, `client-era` and `client-anniversary`, publish
 `C_Log.LogMessage(message)` and
 `C_Log.LogErrorMessage(message)` through the existing Rust console sink.
 Each accepts a string, appends it once to `SimState.console_output`, and returns
-no values. Other profiles retain their existing publication behavior. Do not
-add namespace strictness or synthesize missing namespaces.
+no values. Retail/PTR and Wrath retain their existing publication behavior.
+[Forever quest-dialog logging](quest-readiness-dialog.md#supplied-major-faction-reputation-and-error-logging)
+adds an explicit caller of this same sink without changing the classic predicate.
+Do not add namespace strictness or synthesize missing namespaces.
 
 Cached Mists, Era and Anniversary
 `Blizzard_APIDocumentationGenerated/LogDocumentation.lua:5,11-25` declare this
