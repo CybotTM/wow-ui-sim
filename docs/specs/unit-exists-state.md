@@ -8,6 +8,7 @@
 
 - [x] Keep `player` present. Report `pet` present exactly when `pet.icon` is populated; summon/dismiss state changes must update the result.
 - [x] Report `vehicle` present exactly while `player.in_vehicle` is true; entering/exiting must update the result.
+- [ ] Original Retail `CompactUnitFrame_UpdateVisible` must hide/show/hide a frame whose `unit` and `displayedUnit` are `vehicle` across absent/entered/exited occupancy, publishing `unitExists` false/true/false. Keep both tokens, the player control's visibility/tokens and stored pet fixture unchanged. This does not exercise vehicle/pet token substitution.
 - [x] Report `target` absent before selection and after clearing, and present while `current_target` is populated.
 - [x] Report `focus` present exactly when `current_focus` is populated. Party tokens require both `party_group_active` and an in-range member index (`unit_exists_in_state`).
 
@@ -46,6 +47,8 @@ Original existence/visibility regressions retain historical Retail/Forever GREEN
 - `focus_and_party_index_boundaries_follow_state_transitions`: focus absent/present/cleared and inactive/active/inactive party indices zero, first, last and one-past-end.
 - Retail-only `missing_unit_aura_paths_preserve_results_errors_and_access_checks`: retained helpful/harmful target fixtures through missing/present/missing/present transitions, raw-registered collector endpoints, exact missing-record boundaries, invalid/secret arguments and restricted tainted access. Player-only queries retain populated controls; private-store endpoints do not use the shared public collector. Execution status lives in the bounded proof report, not this test inventory.
 - Retail-only `compact_unit_frame_pet_visibility_tracks_summon_and_dismiss` and `blizzard_aura_util_visits_only_selected_target_debuffs`: cached Blizzard consumers through simulator state transitions.
+
+`tests/unit_exists_vehicle_consumer.rs` adds Retail-only `compact_unit_frame_vehicle_visibility_tracks_enter_and_exit`. It loads the complete original profile-cache `Blizzard_UnitFrame/Shared/CompactUnitFrame.lua` (SHA-256 `1f7064c5d54466c26c53fded64684612d76891cb10d514fe3a806839079848fb`), calls its unchanged visibility function and delegates existence through its original `CompactUnitFrame_UnitExists`. No consumer function or unit query is replaced. `tests/integration.rs` discovers this module through `crates/test-harness/build.rs`; no manual registration is needed. Execution evidence is pending.
 
 The first four have historical Retail and Forever passes; consumer tests have Retail passes only. This does not establish all-profile coverage.
 
