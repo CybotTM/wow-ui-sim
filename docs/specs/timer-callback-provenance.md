@@ -64,3 +64,11 @@ Diagnostic-map cycle collection has a dedicated GC regression; once-per-registra
 ## Out of scope
 
 Registration caller stacks, callback arguments/payloads/SavedVariables, per-line cost, vendor/addon edits, timer policy changes and diagnosis of the earlier 95-second callback. Source identities can contain private paths. No additional protected call, retry or error suppression is introduced.
+
+## Original AsyncRequest correlation — bounded Retail proof
+
+- [x] Two ordinary fixture addons register four original AsyncRequest timers. Timing-off/on children both report four requests, two responses, two once-only timeouts, no cancelled timeouts and zero callback errors. Cancelled deadlines are advanced before two extra drains.
+- [x] Enabled records bind live public handle IDs to registering owners and original `@Interface/AddOns/Blizzard_AsyncRequest/Blizzard_AsyncRequest.lua:60`, with entry/body/return ordering. Cancelled IDs emit no invocation records; timing-off emits no provenance fields.
+- [x] Wrong response payload and doubled fixture timeout increments are rejected in each timing mode. A disposable simulator diagnostic-table mutation associates each wrapper with itself: ordinary callbacks still pass, but enabled original-source correlation rejects wrapper provenance.
+
+`tests/timer_async_request_provenance.rs` loads the original TOC directly in an isolated environment and rejects consumer drift using SHA-256 `1648c842902f6657ae1e10de7366cd0650c77a5eb41bc1c9c7e8030256fa8acb`. `tests/fixtures/AsyncRequestProvenance/Requests.lua` is supplied test data, not a replacement consumer. The panel smoke harness was rejected for this zero-error proof because its unrelated TimeManager listener fails during PLAYER_LOGIN; no error was suppressed and no timer producer changed. Three unchanged ordinary timeout/response/concurrent controls also pass. Proof covers source `5f5aa4563`, not native parity, full startup, other profiles or capture frequency.

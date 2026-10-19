@@ -1,14 +1,14 @@
 # Original consumer mouse move and resize gestures
 
-Draft input contract for original DamageMeter sizing and Wrath floating-chat moving consumers. Input/motion code lives in `src/iced_app/`; native method state lives in `src/lua_api/frame/methods/misc/drag_input.rs`. See [layout system](../layout-system.md). Staged assertions have not been compiled or executed; no checkbox below denotes an accepted pass.
+Draft input contract for original DamageMeter sizing and Wrath floating-chat moving consumers. Input/motion code lives in `src/iced_app/`; native method state lives in `src/lua_api/frame/methods/misc/drag_input.rs`. See [layout system](../layout-system.md). Retail proof is recorded below; Wrath remains pending.
 
 ## What it must do
 
 ### DamageMeter sizing
 
-- [ ] Original DamageMeter InitializeResizeButton mouse-down starts sizing; actual subsequent mouse motion changes geometry without adding synthetic drag registration or replacement Lua callbacks.
-- [ ] Bottom-right sizing preserves top-left; bottom-left sizing preserves top-right. Positive outward movement increases dimensions; bounds constrain logical width and height.
-- [ ] Stationary release and release after motion clear native sizing/moving flags, active drag state, original isResizing and original userPlaced as set by the original mouse-up closure.
+- [x] Original DamageMeter InitializeResizeButton mouse-down starts sizing; actual subsequent mouse motion changes geometry without adding synthetic drag registration or replacement Lua callbacks.
+- [x] Bottom-right sizing preserves top-left; bottom-left sizing preserves top-right. Positive outward movement increases dimensions; bounds constrain logical width and height.
+- [x] Stationary release and release after motion clear native sizing/moving flags, active drag state, original isResizing and original userPlaced as set by the original mouse-up closure.
 
 ### Wrath floating-chat moving
 
@@ -48,4 +48,4 @@ Draft input contract for original DamageMeter sizing and Wrath floating-chat mov
 
 ## Reproduced Retail boundary
 
-Original DamageMeter callbacks start sizing, but the simulator previously set no motion capture. Threshold crossing also marked a drag without a registered drag handler, routing release away from original OnMouseUp. Five original-consumer assertions reproduced these failures; stationary release passed. StartSizing now captures the resized frame, StopMovingOrSizing releases that capture, and threshold dispatch records a script drag only when a registered handler actually starts. GREEN remains pending. Outside-release order and scaled native sizing remain excluded.
+Original DamageMeter callbacks start sizing, but the simulator previously set no motion capture. Threshold crossing also marked a drag without a registered drag handler, routing release away from original OnMouseUp. Five original-consumer assertions reproduced these failures; stationary release passed. StartSizing now captures the resized frame, StopMovingOrSizing releases that capture, and threshold dispatch records a script drag only when a registered handler actually starts. All six Retail original-consumer cases now pass at `5f5aa4563`: right/left geometry, min/max, stationary release and in-handle moved release. An omitted-Up control fails the stationary stop assertion; five existing sizing-state controls pass. Geometry cases deliberately end before release, so clamped motion does not assert outside-release policy. Outside-release order and scaled native sizing remain excluded.
