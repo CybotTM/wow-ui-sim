@@ -1,4 +1,4 @@
-use super::super::{FastHandlerRef, load_template};
+use super::super::{FastHandlerRef, load_constant_template, load_template};
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -233,7 +233,7 @@ fn build_method_with_two_number_args_handler(
 }
 
 fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Val> {
-    let builder = load_template(
+    let builder = load_constant_template(
         state,
         r#"
             local method_name = ...

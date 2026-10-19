@@ -10,9 +10,8 @@ pub fn load_chunk<L: LuaApiMut>(
     code: &str,
     tag: &str,
 ) -> Result<rilua::Function, LoadError> {
-    let hash = bytecode_cache::content_hash(code.as_bytes(), tag);
+    let (hash, chunk_name) = generated_chunk_identity(code, tag);
     let profile_start = generated_chunk_profile_start();
-    let chunk_name = format!("@generated/{tag}/{hash:016x}");
 
     if !bytecode_cache::is_disabled() {
         if let Some(result) = bytecode_cache::with_cached_bytecode(hash, |bytecode| {
@@ -32,6 +31,26 @@ pub fn load_chunk<L: LuaApiMut>(
     }
     profile_generated_chunk(profile_start, tag, hash, code.len(), "compile");
     Ok(func)
+}
+
+/// Instantiate a fresh constant factory without replaying its bytecode per use.
+pub(crate) fn load_constant_chunk<L: LuaApiMut>(
+    lua: &mut L,
+    code: &'static str,
+    tag: &str,
+) -> Result<rilua::Function, LoadError> {
+    let (hash, chunk_name) = generated_chunk_identity(code, tag);
+    let profile_start = generated_chunk_profile_start();
+    let function =
+        crate::lua_api::script_helpers::load_constant_factory(lua.state_mut(), code, &chunk_name)
+            .map_err(|error| LoadError::Lua(error.to_string()))?;
+    profile_generated_chunk(profile_start, tag, hash, code.len(), "prototype");
+    Ok(function)
+}
+
+fn generated_chunk_identity(code: &str, tag: &str) -> (u64, String) {
+    let hash = bytecode_cache::content_hash(code.as_bytes(), tag);
+    (hash, format!("@generated/{tag}/{hash:016x}"))
 }
 
 std::thread_local! {

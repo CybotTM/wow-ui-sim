@@ -14,6 +14,7 @@
 
 - [ ] Reuse constant simulator factories only for identical source and chunk names within the active VM. Each use must receive a fresh closure, current-global environment binding and independent top-level upvalues; no old-VM prototype or object may survive reload through this cache.
 - [ ] Preserve HookScript order, self/arguments, solo-hook result passthrough, chained-result discard and error boundaries; preserve direct/indirect attribute callbacks, per-frame state and observable taint before and after reload.
+- [ ] Preserve real XML method-handler inheritance/chaining order, result passthrough, per-frame method/upvalue isolation and fresh frame/script state after ReloadUI when reusing its constant factory prototype.
 
 ### File-backed client state
 
@@ -33,6 +34,7 @@ Exact native event ordering remains unverified pending native evidence; tests mu
 - `src/lua_api/globals/state_backed_queries.rs` — legacy Lua `ReloadUI` registration sharing the request producer.
 - `src/lua_api/env.rs` — Lua VM construction and handle retirement.
 - `src/lua_api/script_helpers.rs` — VM-local factory prototype anchors and fresh closure construction for HookScript and attribute dispatch.
+- `src/loader/chunk_cache.rs` and `src/lua_api/globals/create_frame/template_chain/` — exact-name constant XML method factory loading with dynamic global slots disabled, as before.
 - `src/bin/wow_sim/startup.rs` — real startup/addon-loading pipeline.
 - `src/startup.rs` — startup event dispatch.
 - `src/saved_variables.rs` — declared-variable persistence.
@@ -44,6 +46,7 @@ Exact native event ordering remains unverified pending native evidence; tests mu
 ## Tests asserting this spec
 
 - `src/lua_api/reload_factory_tests.rs` — callback arguments/results/errors, hook/frame/upvalue isolation, environment rebinding, closure taint and real deferred VM retirement. Pre-change characterization passes; post-change proof pending.
+- `src/loader/tests/reload_factory_xml.rs` — real XML templates and method handlers, inherited/chained order, independent frame state/method replacement, returns and fresh VM retirement. Pre-change characterization passes; post-change proof pending.
 - `src/iced_app/app_tests.rs` — shortcut sentinel/frame/VM retirement and Lua-requested SavedVariables persistence.
 - `src/lua_server/exec_tests.rs` — public Unix Exec request, reload, subsequent fresh environment and print output.
 - `src/bin/wow_sim/main.rs`, `src/bin/wow_sim/gui_commands.rs` — dump/screenshot reload observation boundaries.

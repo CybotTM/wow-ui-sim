@@ -24,6 +24,8 @@ The launch pipeline installs a reload loader on the environment. It reuses Blizz
 
 Each use allocates a new Lua closure from the prototype, binds it to the current global table and initializes independent nil top-level upvalues, matching `load_bytes`. The global table is shared within a VM; each closure's environment binding is independent. Returning/executing the anchor would let callback `setfenv` changes contaminate later calls, so the anchor is never exposed to dispatch. Nested hook closures and their captured arguments are still created by normal Lua execution.
 
+The single constant `template-method-handler` factory also uses this path through [`load_constant_chunk`](../../../src/loader/chunk_cache.rs). Its exact source-derived generated chunk name is unchanged, and the builder still disables dynamic global slots while loading. Factory execution still creates a new method-name capture for each XML handler; inherited/chained handlers retain their existing execution policy. Other generated chunks keep the existing bytecode path: frame-ID key churn is not normalized or cached as a mutable closure.
+
 Reload replaces the VM registry, so the prototype cache begins empty without a model-state reset or extra cleanup path. The [contract](../../specs/reload-ui.md#dispatch-factory-isolation) separates pre-change characterization from pending post-change and wall-time proof; native lifecycle ordering remains unconfirmed.
 
 ## Lifecycle evidence and failure

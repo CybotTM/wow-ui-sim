@@ -1,3 +1,7 @@
+## [2026-10-19] system | Constant XML method factory reuse
+
+[Prototype mechanics](systems/reload-ui.md#constant-dispatch-factories) includes the one measured XML method factory, preserving exact source/chunk identity, fresh captures and slot-disable policy. [Contract](../specs/reload-ui.md#dispatch-factory-isolation) links real-XML pre-change characterization; post-change and quiet-window proof remain pending. Generated frame-ID churn stays unchanged.
+
 ## [2026-10-19] system | Reload dispatch factory prototypes
 
 [Lifecycle mechanics](systems/reload-ui.md#constant-dispatch-factories) documents VM-registry prototype anchors and fresh closure/environment bindings without changing authored Lua bodies. [Contract](../specs/reload-ui.md#dispatch-factory-isolation) tracks characterization and pending post-change proof separately; no quiet-window wall gain or full acceptance claim yet.
