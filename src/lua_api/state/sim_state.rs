@@ -807,6 +807,7 @@ pub struct SimState {
     pub reload_allows_protected_actions: bool,
     /// Supplied readiness of the two account CVar chunks; not a network client.
     pub account_cvar_chunks_ready: [bool; 2],
+    pub(crate) account_cvar_callback_pending: bool,
     /// Simulator lifecycle marker, not a native event-order assertion.
     pub ui_reloaded: bool,
 }

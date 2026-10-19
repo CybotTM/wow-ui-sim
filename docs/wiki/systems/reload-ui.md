@@ -26,6 +26,10 @@ Wrath's loader defers [SavedVariables](../../../src/saved_variables.rs) until ad
 
 Parsed named XML bindings set `AddonInfo.contains_bindings`; conventional unlisted `Bindings.xml` is parsed for this metadata under Retail. The two real-addon notification emitters share payload construction: Retail appends a boolean, Wrath keeps one name argument. Boolean type is authenticated; deriving its value from parsed definitions is INFERRED. Synthetic Retail notifications remain unchanged. [Proof status](../../specs/reload-ui.md#wrath-12340-requirements) separates recorded REDs from pending preservation and GREEN.
 
+## Wrath startup readiness
+
+Startup registers an environment-local pending account-variables callback. The two supplied CVar chunk flags invoke it immediately when already ready, or from the completion setter once both become ready. The callback clears its pending bit before synchronous VARIABLES_LOADED dispatch, preventing duplicate completion. Reload retires this callback while retaining account readiness. Wrath emits argless PEW and omits the synthetic WoWUISim addon notification. Other profiles keep their prior policy; this is not account-data networking. The [contract](../../specs/reload-ui.md#wrath-12340-requirements) owns current proof and separately blocked original-consumer controls.
+
 ## Lifecycle evidence and failure
 
 The [Wrath 12340 requirements](../../specs/reload-ui.md#wrath-12340-requirements) now distinguish authenticated static native facts from implementation proof. Cinematic eligibility has bounded original-popup GREEN. Shutdown-before-save, post-code addon SV restore, readiness-driven VARIABLES_LOADED and selective placed-frame/mirror state retain separate proof rows. The supplied cinematic state is not a cinematic playback engine. Unnamed taint-gate production and feedback remain evidence-blocked. Retail and other-profile chronology remain UNKNOWN; do not copy Wrath ordering into them. App treats rebuild failure as fatal and prevents a partial VM from overwriting pre-reload SavedVariables.

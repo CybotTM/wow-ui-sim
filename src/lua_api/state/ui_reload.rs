@@ -18,6 +18,7 @@ impl SimState {
         self.ui_reload_requested = false;
         self.ui_reloaded = true;
         self.is_logged_in = false;
+        self.account_cvar_callback_pending = false;
         self.post_event_workarounds_applied = false;
         self.screen_first_displayed = false;
         self.texture_manager

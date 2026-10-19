@@ -126,7 +126,38 @@ impl WowLuaEnv {
 
     /// Supply completion/readiness without implementing account-data networking.
     pub fn set_account_cvar_chunk_ready(&self, chunk: usize, ready: bool) -> Result<()> {
-        self.state.borrow_mut().account_cvar_chunks_ready[chunk] = ready;
+        let mut state = self.state.borrow_mut();
+        let Some(value) = state.account_cvar_chunks_ready.get_mut(chunk) else {
+            return Err(crate::Error::Other(format!(
+                "unknown account CVar chunk {chunk}"
+            )));
+        };
+        *value = ready;
+        drop(state);
+        self.dispatch_ready_account_variables()
+    }
+
+    pub(crate) fn register_account_variables_callback(&self) -> Result<()> {
+        self.state.borrow_mut().account_cvar_callback_pending = true;
+        self.dispatch_ready_account_variables()
+    }
+
+    fn dispatch_ready_account_variables(&self) -> Result<()> {
+        let dispatch = {
+            let mut state = self.state.borrow_mut();
+            let ready = state.account_cvar_chunks_ready.iter().all(|ready| *ready);
+            let dispatch = crate::client_profile::ACTIVE
+                == crate::client_profile::ClientProfile::Wrath
+                && state.account_cvar_callback_pending
+                && ready;
+            if dispatch {
+                state.account_cvar_callback_pending = false;
+            }
+            dispatch
+        };
+        if dispatch {
+            self.fire_event("VARIABLES_LOADED")?;
+        }
         Ok(())
     }
 
