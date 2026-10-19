@@ -134,10 +134,10 @@ fn function_family_shapes_read_current_handler_environment() {
 #[test]
 fn checked_assignment_callbacks_read_current_handler_environment() {
     let bodies = [
-        "LateBoundSettings.enabled = self:GetChecked(); LateBoundChanged(); LateBoundSound(self:GetChecked());",
-        "LateBoundSettings.a = self:GetChecked(); LateBoundSettings.b = self:GetChecked(); LateBoundSettings.c = self:GetChecked(); LateBoundChanged(); LateBoundSound(self:GetChecked());",
-        "LateBoundSettings.enabled = self:GetChecked(); LateBoundChanged(); LateBoundOther(); LateBoundSound(self:GetChecked());",
-        "LateBoundSettings.enabled = 3; LateBoundChanged(); LateBoundSound(self:GetChecked());",
+        "local checked = self:GetChecked() if (checked) then LateBoundSettings.enabled = true; else LateBoundSettings.enabled = false; end LateBoundChanged(); LateBoundSound(checked)",
+        "local checked = self:GetChecked() if (checked) then LateBoundSettings.a = true; LateBoundSettings.b = true; LateBoundSettings.c = true; else LateBoundSettings.a = false; LateBoundSettings.b = false; LateBoundSettings.c = false; end LateBoundChanged(); LateBoundSound(checked)",
+        "local checked = self:GetChecked() if (checked) then LateBoundSettings.enabled = true; else LateBoundSettings.enabled = false; end LateBoundChanged(); LateBoundOther(); LateBoundSound(checked)",
+        "local checked = self:GetChecked(); LateBoundSettings.enabled = 3; LateBoundChanged(); LateBoundSound(checked)",
     ];
     for body in bodies {
         let env = WowLuaEnv::new().unwrap();
