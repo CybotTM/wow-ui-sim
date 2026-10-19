@@ -19,6 +19,16 @@ mod preservation;
 use wow_ui_sim::lua_api::state::AddonInfo;
 
 #[test]
+fn placed_frame_anchor_selection_uses_first_corresponding_point_on_ties() {
+    preservation::assert_anchor_tie();
+}
+
+#[test]
+fn placed_frame_reader_accepts_tolerant_records_and_resets_missing_fields() {
+    preservation::assert_tolerant_reader();
+}
+
+#[test]
 fn original_world_map_restores_only_eligible_named_placements() {
     preservation::assert_placed_frames();
 }
