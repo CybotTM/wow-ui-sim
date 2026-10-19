@@ -53,6 +53,8 @@ const SILVER_COIN_ICON_FILE_ID: i32 = 133785;
 const COPPER_COIN_ICON_FILE_ID: i32 = 133786;
 
 pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::globals::real::wrath_currency::register(state)?;
     let table_ref = ensure_namespace(state, "C_CurrencyInfo")?;
     for &(name, func) in CURRENCY_INFO_METHODS {
         table_set_rust_fn_static(state, table_ref, name, func)?;
