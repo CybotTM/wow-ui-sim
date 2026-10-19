@@ -26,7 +26,7 @@ Each use allocates a new Lua closure from the prototype, binds it to the current
 
 The single constant `template-method-handler` factory also uses this path through [`load_constant_chunk`](../../../src/loader/chunk_cache.rs). Its exact source-derived generated chunk name is unchanged, and the builder still disables dynamic global slots while loading. Factory execution still creates a new method-name capture for each XML handler; inherited/chained handlers retain their existing execution policy. Other generated chunks keep the existing bytecode path: frame-ID key churn is not normalized or cached as a mutable closure.
 
-Reload replaces the VM registry, so the prototype cache begins empty without a model-state reset or extra cleanup path. The [contract](../../specs/reload-ui.md#dispatch-factory-isolation) separates pre-change characterization from pending post-change and wall-time proof; native lifecycle ordering remains unconfirmed.
+Reload replaces the VM registry, so the prototype cache begins empty without a model-state reset or extra cleanup path. The [contract](../../specs/reload-ui.md#dispatch-factory-isolation) records matched before/after characterization and profile compilation; paired wall-time and full acceptance remain separate. Native lifecycle ordering remains unconfirmed.
 
 ## Lifecycle evidence and failure
 

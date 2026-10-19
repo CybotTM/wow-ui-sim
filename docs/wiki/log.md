@@ -1,3 +1,7 @@
+## [2026-10-19] evidence | Factory preservation and profile compilation
+
+[Factory contract](../specs/reload-ui.md#bounded-forever-factory-proof--2026-10-19) records matching pre/post characterization, unchanged Lua bodies, fresh VM retirement and warning-free Forever/default Retail compilation. Quiet-window wall-time and unchanged Ellesmere acceptance remain pending; startup sampling excludes the initial Blizzard/XML load.
+
 ## [2026-10-19] system | Constant XML method factory reuse
 
 [Prototype mechanics](systems/reload-ui.md#constant-dispatch-factories) includes the one measured XML method factory, preserving exact source/chunk identity, fresh captures and slot-disable policy. [Contract](../specs/reload-ui.md#dispatch-factory-isolation) links real-XML pre-change characterization; post-change and quiet-window proof remain pending. Generated frame-ID churn stays unchanged.
