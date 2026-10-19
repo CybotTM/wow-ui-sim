@@ -26,6 +26,10 @@ Wrath's loader defers [SavedVariables](../../../src/saved_variables.rs) until ad
 
 Parsed named XML bindings set `AddonInfo.contains_bindings`; conventional unlisted `Bindings.xml` is parsed for this metadata under Retail. The two real-addon notification emitters share payload construction: Retail appends a boolean, Wrath keeps one name argument. Boolean type is authenticated; deriving its value from parsed definitions is INFERRED. Synthetic Retail notifications remain unchanged. [Proof status](../../specs/reload-ui.md#wrath-12340-requirements) separates recorded REDs from pending preservation and GREEN.
 
+## Wrath placed-frame storage and timer retention
+
+After logout handlers and before registry retirement, a present SavedVariablesManager writes eligible geometry into its character-local `layout-local.txt`. The fresh addon loader runs before this file is read and applied to new named frames. Capture derives one corresponding root anchor from resolved geometry; offsets and size divide by effective scale and round nearest/ties-even. Current movable/resizable flags independently gate anchor/size restoration; scale is not restored. The [contract](../../specs/reload-ui.md#wrath-12340-requirements) owns grammar, exclusions, numeric deviation and proof. No manager means no file reads/writes. Wrath LeaveWorld clears mirror-timer state, not totems/player/session state, and invents no mirror-stop notification.
+
 ## Wrath startup readiness
 
 Startup registers an environment-local pending account-variables callback. The two supplied CVar chunk flags invoke it immediately when already ready, or from the completion setter once both become ready. The callback clears its pending bit before synchronous VARIABLES_LOADED dispatch, preventing duplicate completion. Reload retires this callback while retaining account readiness. Wrath emits argless PEW and omits the synthetic WoWUISim addon notification. Other profiles keep their prior policy; this is not account-data networking. The [contract](../../specs/reload-ui.md#wrath-12340-requirements) owns current proof and separately blocked original-consumer controls.

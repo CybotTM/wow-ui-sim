@@ -169,6 +169,13 @@ impl SavedVariablesManager {
         self.wtf_loaded.clear();
     }
 
+    #[cfg(feature = "client-wrath")]
+    pub(crate) fn character_storage_dir(&self) -> PathBuf {
+        self.storage_dir
+            .join(&self.realm_name)
+            .join(&self.character_name)
+    }
+
     pub fn set_character(&mut self, name: &str, realm: &str) {
         self.character_name = name.to_string();
         self.realm_name = realm.to_string();

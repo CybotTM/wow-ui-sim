@@ -179,11 +179,17 @@ impl WowLuaEnv {
         self.fire_wrath_reload_shutdown()?;
         if let Some(manager) = saved_vars {
             manager.save_all(self.rilua_mut().state_mut())?;
+            #[cfg(feature = "client-wrath")]
+            super::placed_frames::save(self, manager)?;
             manager.retire_lua_environment();
         }
         self.rebuild_lua_environment()?;
         if let Some(loader) = self.reload_loader.clone() {
             loader(self, saved_vars)?;
+        }
+        #[cfg(feature = "client-wrath")]
+        if let Some(manager) = saved_vars {
+            super::placed_frames::load(self, manager)?;
         }
         Ok(true)
     }
@@ -196,7 +202,11 @@ impl WowLuaEnv {
         self.fire_event("PLAYER_REGEN_ENABLED")?;
         let leaving_world = self.state.borrow().in_world;
         if leaving_world {
-            self.state.borrow_mut().in_world = false;
+            {
+                let mut state = self.state.borrow_mut();
+                state.in_world = false;
+                state.world.mirror_timers.clear();
+            }
             self.fire_event("PLAYER_LEAVING_WORLD")?;
         }
         self.fire_event("PLAYER_LOGOUT")

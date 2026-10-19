@@ -44,6 +44,8 @@ pub(crate) mod methods;
 pub(crate) mod on_update;
 #[cfg(feature = "retail-12-0-7")]
 pub mod performance_inputs;
+#[cfg(feature = "client-wrath")]
+mod placed_frames;
 pub(crate) mod rect_geometry;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod script_helpers;
