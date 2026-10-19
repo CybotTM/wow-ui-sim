@@ -251,7 +251,8 @@ fn supplied_objective_12340_return_and_selector_contract() {
         for _, index in ipairs({"not a number", false, {}}) do
             assert(GetNumQuestLeaderBoards(index) == 2)
         end
-        assert(GetNumQuestLeaderBoards() == 2)
+        local count = pack(GetNumQuestLeaderBoards())
+        assert(count.n == 1 and type(count[1]) == "number" and count[1] == 2)
         assert(GetNumQuestLeaderBoards("2") == 1)
         assert(GetNumQuestLeaderBoards(" 0x2 ") == 1)
         assert(GetNumQuestLeaderBoards(1.9) == 2)
