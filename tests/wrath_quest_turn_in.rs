@@ -6,13 +6,42 @@
 mod consumer;
 
 use consumer::*;
+use std::cell::RefCell;
+use std::rc::Rc;
+use wow_ui_sim::lua_api::SimState;
 
 thread_local! {
-    static CALLBACK_STATE: std::cell::RefCell<Option<std::rc::Rc<std::cell::RefCell<wow_ui_sim::lua_api::SimState>>>> = const { std::cell::RefCell::new(None) };
+    static CALLBACK_STATE: RefCell<Option<Rc<RefCell<SimState>>>> = const { RefCell::new(None) };
 }
 
 fn supply_callback_state(env: &ConsumerEnv) {
-    CALLBACK_STATE.with_borrow_mut(|slot| *slot = Some(std::rc::Rc::clone(env.env.state())));
+    CALLBACK_STATE.with_borrow_mut(|slot| *slot = Some(Rc::clone(env.env.state())));
+}
+
+fn observe_finish_cleanup(env: &ConsumerEnv) {
+    supply_callback_state(env);
+    env.env
+        .register_rilua_function("DialogIdentitiesCleared", |state| {
+            let cleared = CALLBACK_STATE.with_borrow(|slot| {
+                let sim = slot.as_ref().expect("supplied callback state").borrow();
+                sim.gossip.giver_guid == 0
+                    && sim.gossip.inform_guid == 0
+                    && sim.gossip.interact_guid == 0
+            });
+            state.push(rilua::Val::Bool(cleared));
+            Ok(1)
+        })
+        .unwrap();
+    exec(
+        env,
+        r#"
+        QuestFrame:HookScript('OnEvent', function(_, event)
+            if event == 'QUEST_FINISHED' then
+                assert(DialogIdentitiesCleared(), 'all identities cleared before FINISHED')
+            end
+        end)
+    "#,
+    );
 }
 
 #[test]
@@ -774,27 +803,10 @@ fn close_clears_all_identities_before_original_hide_reentry_once() {
         sim.gossip.inform_guid = NPC_GUID + 1;
         sim.gossip.interact_guid = NPC_GUID + 2;
     }
-    supply_callback_state(&env);
-    env.env
-        .register_rilua_function("DialogIdentitiesCleared", |state| {
-            let cleared = CALLBACK_STATE.with_borrow(|slot| {
-                let sim = slot.as_ref().expect("supplied callback state").borrow();
-                sim.gossip.giver_guid == 0
-                    && sim.gossip.inform_guid == 0
-                    && sim.gossip.interact_guid == 0
-            });
-            state.push(rilua::Val::Bool(cleared));
-            Ok(1)
-        })
-        .unwrap();
+    observe_finish_cleanup(&env);
     exec(
         &env,
         r#"
-        QuestFrame:HookScript('OnEvent', function(_, event)
-            if event == 'QUEST_FINISHED' then
-                assert(DialogIdentitiesCleared(), 'all identities cleared before FINISHED')
-            end
-        end)
         assert(QuestFrame:IsShown())
         assert(select('#', CloseQuest('ignored')) == 0)
         assert(not QuestFrame:IsShown(), 'original FINISHED hides synchronously')
@@ -803,7 +815,33 @@ fn close_clears_all_identities_before_original_hide_reentry_once() {
         assert(TurnInCount('QUEST_FINISHED') == 1, 'zero NPC repeats do not emit')
     "#,
     );
+    dispatch_queued(&env);
+    assert_finish_count(&env, 1);
     assert_active(&env);
+}
+
+#[test]
+fn completion_clears_all_identities_before_original_hide_reentry_once() {
+    let env = seed_env();
+    open_rewards(&env);
+    {
+        let mut sim = env.env.state().borrow_mut();
+        sim.gossip.inform_guid = NPC_GUID + 1;
+        sim.gossip.interact_guid = NPC_GUID + 2;
+    }
+    observe_finish_cleanup(&env);
+    claim(&env);
+    accept_response(&env);
+    exec(
+        &env,
+        r#"
+        assert(not QuestFrame:IsShown(), 'supplied cache-hit completion hides inline')
+        assert(TurnInCount('QUEST_FINISHED') == 1, 'completion reentry emits exactly one FINISHED')
+    "#,
+    );
+    dispatch_queued(&env);
+    assert_finish_count(&env, 1);
+    assert_target_accepted(&env);
 }
 
 #[test]
