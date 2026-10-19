@@ -208,14 +208,31 @@ fn read_chat_editbox() -> FrameXml {
 fn c5_original_chat_history_keeps_duplicates_and_cycles_via_alt_dispatch() {
     let env = create_chat_env();
     env.exec(r#"
+        HistoryBeforeParse={}
+        SavedChatTextSet=ChatBox:GetScript('OnTextSet')
+        assert(SavedChatTextSet, 'SETUP: original chat OnTextSet')
+        -- Observe recalled text before the ORIGINAL callback strips its slash prefix.
+        ChatBox:SetScript('OnTextSet',function(self,...)
+            local text=self:GetText()
+            if string.sub(text,1,#SLASH_SAY1+1)==SLASH_SAY1..' ' then
+                HistoryBeforeParse[#HistoryBeforeParse+1]=text
+            end
+            return SavedChatTextSet(self,...)
+        end)
         for _,text in ipairs({'A','A','B'}) do ChatBox:SetText(text); ChatEdit_AddHistory(ChatBox) end
         ChatBox:SetText('')
-        ExpectedHistory={SLASH_SAY1..' B',SLASH_SAY1..' A',SLASH_SAY1..' A',SLASH_SAY1..' B'}
+        ExpectedHistory={'B','A','A','B'}
     "#).unwrap();
     for index in 1..=4 {
         env.send_key_press("ALT-UP", None).unwrap();
-        env.exec(&format!("assert(ChatBox:GetText()==ExpectedHistory[{index}], 'RED C5: original chat recall {index}: '..ChatBox:GetText())")).unwrap();
+        assert_no_script_errors(&env);
+        env.exec(&format!(r#"
+            assert(HistoryBeforeParse[{index}]==SLASH_SAY1..' '..ExpectedHistory[{index}], 'RED C5: original prefixed history recall {index}')
+            assert(ChatBox:GetText()==ExpectedHistory[{index}], 'RED C5: original parsed chat recall {index}: '..ChatBox:GetText())
+        "#)).unwrap();
     }
+    env.exec("ChatBox:SetScript('OnTextSet',SavedChatTextSet)")
+        .unwrap();
 }
 
 #[test]
@@ -224,6 +241,7 @@ fn arrows_original_chat_ignore_arrows_controls_real_alt_motion() {
     for text in ["a", "b", "c", "d"] {
         env.send_key_press("", Some(text)).unwrap();
     }
+    assert_no_script_errors(&env);
     env.exec("assert(ChatBox:GetText()=='abcd' and ChatBox:GetCursorPosition()==4, 'SETUP: real chat text dispatch')").unwrap();
     env.send_key_press("LEFT", None).unwrap();
     env.exec("assert(ChatBox:GetCursorPosition()==4, 'RED arrows: original ignoreArrows blocks plain LEFT')").unwrap();
@@ -272,17 +290,28 @@ fn c4_original_editbox_input_renders_byte_mask_glyphs_and_end_caret() {
     assert_no_script_errors(&env);
     env.exec(r#"
         assert(Stars:GetText()=='*****' and Masked.caret and Stars.caret, 'SETUP: star control and real caret output')
-        for i=1,4 do assert(math.abs(Masked.caret[i]-Stars.caret[i])<0.01, 'RED C4: byte-mask end caret') end
     "#).unwrap();
+    let caret_matches = env
+        .eval::<bool>(
+            r#"
+        for i=1,4 do
+            if math.abs(Masked.caret[i]-Stars.caret[i])>=0.01 then return false end
+        end
+        return true
+    "#,
+        )
+        .unwrap();
     let mask = render_glyphs(&env, &fonts, "RealPathMasked");
     let stars = render_glyphs(&env, &fonts, "RealPathStars");
     assert!(
         !mask.is_empty() && !stars.is_empty(),
         "SETUP: nonempty real glyph output"
     );
-    assert_eq!(
-        mask, stars,
-        "RED C4: UTF-8 input must render five byte-mask stars"
+    assert!(
+        mask == stars && caret_matches,
+        "RED C4: five byte-mask glyphs and end caret; mask_vertices={} star_vertices={} caret_matches={caret_matches}",
+        mask.len(),
+        stars.len()
     );
 }
 
