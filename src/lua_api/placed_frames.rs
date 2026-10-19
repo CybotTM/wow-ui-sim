@@ -63,7 +63,9 @@ fn capture_frame(frame: &Frame, root: LayoutRect) -> Option<Placement> {
     let name = frame.name.as_ref().filter(|name| !name.is_empty())?;
     let can_move_or_resize = frame.movable || frame.resizable;
     let queryable = crate::widget::has_queryable_rect(frame, frame.id);
-    if !frame.user_placed || frame.dont_save_position || !can_move_or_resize || !queryable {
+    let requested_persistence = frame.user_placed && !frame.dont_save_position;
+    let eligible = requested_persistence && can_move_or_resize && queryable;
+    if !eligible {
         return None;
     }
     let rect = frame.layout_rect?;
