@@ -20,7 +20,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
 
-#[derive(Parser)]
+#[derive(Parser, Clone)]
 #[command(name = "wow-sim", about = "WoW UI Simulator", version)]
 struct Args {
     /// Skip loading WTF Lua SavedVariables (EditMode cache still loads)
@@ -70,7 +70,7 @@ struct Args {
     command: Option<Commands>,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Clone)]
 enum Commands {
     /// Load UI and dump frame tree (no GUI needed)
     DumpTree {

@@ -65,6 +65,7 @@ impl App {
 
         for cmd in commands {
             self.handle_lua_command(cmd);
+            self.service_pending_reload();
         }
     }
 

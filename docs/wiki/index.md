@@ -1,3 +1,7 @@
+## [2026-10-19] system | Deferred fresh-environment ReloadUI
+
+[Reload lifecycle](systems/reload-ui.md) documents owner-serviced VM retirement, retained session state, SavedVariables readback and IPC boundaries. [Contract](../specs/reload-ui.md) separates behavioral RED from pending GREEN and unconfirmed native event order.
+
 ## [2026-10-19] source/tooling | Disabled checks and profile-aware suites
 
 [Disabled-check contract](../specs/disabled-check-emission.md) owns original Retail/Wrath LFG emitted-path proof and exclusions. [Runner policy](../remote-builds.md#asynchronous-full-suite) owns seven-profile submission, receipt scope and explicit-SHA binding; historical Retail receipts do not establish another profile's acceptance.

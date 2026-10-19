@@ -129,6 +129,7 @@ pub struct SavedVariablesManager {
     wtf_config: Option<WtfConfig>,
     wtf_loaded: HashMap<String, bool>,
     loaded_values: HashMap<String, Vec<(String, Val)>>,
+    reload_saved_addons: std::collections::HashSet<String>,
     max_load_bytes: Option<u64>,
 }
 
@@ -151,8 +152,21 @@ impl SavedVariablesManager {
             wtf_config: None,
             wtf_loaded: HashMap::new(),
             loaded_values: HashMap::new(),
+            reload_saved_addons: std::collections::HashSet::new(),
             max_load_bytes: max_load_bytes_from_env(),
         }
+    }
+
+    /// Forget VM handles and declarations; the fresh addon graph registers them again.
+    pub(crate) fn retire_lua_environment(&mut self) {
+        self.reload_saved_addons
+            .extend(self.registered.keys().cloned());
+        self.reload_saved_addons
+            .extend(self.registered_per_char.keys().cloned());
+        self.registered.clear();
+        self.registered_per_char.clear();
+        self.loaded_values.clear();
+        self.wtf_loaded.clear();
     }
 
     pub fn set_character(&mut self, name: &str, realm: &str) {
@@ -182,6 +196,9 @@ impl SavedVariablesManager {
         state: &mut LuaState,
         addon_name: &str,
     ) -> crate::Result<usize> {
+        if self.reload_saved_addons.contains(addon_name) {
+            return Ok(0);
+        }
         let Some(config) = self.wtf_config.clone() else {
             return Ok(0);
         };

@@ -108,15 +108,7 @@ fn fire_event(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn reload_ui(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state(state)?
-        .texture_manager
-        .borrow_mut()
-        .invalidate_source_generation();
-    dispatch_event_now(
-        state,
-        "PLAYER_ENTERING_WORLD",
-        &[Val::Bool(false), Val::Bool(true)],
-    )?;
+    borrow_state_mut(state)?.ui_reload_requested = true;
     Ok(0)
 }
 

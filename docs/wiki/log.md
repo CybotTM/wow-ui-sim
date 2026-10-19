@@ -1,3 +1,7 @@
+## [2026-10-19] system | Deferred fresh-environment ReloadUI
+
+[Reload lifecycle](systems/reload-ui.md) documents owner-serviced VM retirement, retained session state, SavedVariables readback and IPC boundaries. [Contract](../specs/reload-ui.md) separates behavioral RED from pending GREEN and unconfirmed native event order.
+
 ## [2026-10-18] source | Wrath selected quest legacy surface
 
 [System notes](systems/lua-api.md#wrath-selected-quest-legacy-surface) document selected rich-row adapters, shared prepared faction output and separate player daily fields. [Contract](../specs/wrath-quest-abandon.md) owns original-popup/selection RED→bounded GREEN, source-derived limits, master-classified Forever gaps and provisional server-response sequencing; no native or whole W1 completion claim.

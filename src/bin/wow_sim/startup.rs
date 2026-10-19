@@ -28,7 +28,7 @@ pub(super) fn init_and_load(args: &Args, screen: ScreenKind) -> InitResult {
     initialize_and_load_env(args, screen, env)
 }
 
-fn initialize_and_load_env(args: &Args, screen: ScreenKind, env: WowLuaEnv) -> InitResult {
+fn initialize_and_load_env(args: &Args, screen: ScreenKind, mut env: WowLuaEnv) -> InitResult {
     configure_screen_size(&env, args);
     let font_system = create_font_system(args);
     init_environment(args, &env, &font_system)?;
@@ -46,6 +46,13 @@ fn initialize_and_load_env(args: &Args, screen: ScreenKind, env: WowLuaEnv) -> I
     );
 
     restart_gc_after_bootstrap(&env);
+    let reload_args = args.clone();
+    env.set_reload_loader(move |env, saved_vars| {
+        env.gc_stop();
+        load_startup_addons(&reload_args, screen, env, saved_vars, None, None);
+        restart_gc_after_bootstrap(env);
+        Ok(())
+    });
     Ok((env, font_system, saved_vars))
 }
 
@@ -305,14 +312,16 @@ fn load_startup_addons(
     edit_mode_cache_vars: Option<&SavedVariablesManager>,
     snapshot_edit_mode_layout: Option<&str>,
 ) {
-    startup_trace::time_load_step("load edit mode cache", || {
-        addon_loading::load_edit_mode_cache(
-            env,
-            saved_vars.as_ref().or(edit_mode_cache_vars),
-            snapshot_edit_mode_layout,
-        )
-    });
-    load_server_snapshot_state(env, saved_vars);
+    if !env.state().borrow().ui_reloaded {
+        startup_trace::time_load_step("load edit mode cache", || {
+            addon_loading::load_edit_mode_cache(
+                env,
+                saved_vars.as_ref().or(edit_mode_cache_vars),
+                snapshot_edit_mode_layout,
+            )
+        });
+        load_server_snapshot_state(env, saved_vars);
+    }
     startup_trace::time_load_step("load Blizzard addons", || {
         addon_loading::load_blizzard_addons(env, saved_vars, screen)
     });
