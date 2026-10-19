@@ -240,6 +240,9 @@ pub fn open_progress(env: &ConsumerEnv) {
         assert(GetNumQuestItems() == 0 and GetQuestMoneyToGet() == 0, 'supplied no-items no-cost fixture')
     "#,
     );
+    // Original QuestLog_Update returns while hidden. Keep the observed renderer
+    // visible before later response notifications; never repair its output.
+    exec(env, "QuestLogFrame:Show()");
 }
 
 pub fn supply_status(env: &ConsumerEnv, complete: bool, failed: bool) {
