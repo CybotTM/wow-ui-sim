@@ -377,8 +377,13 @@ fn x1_original_clean_template_survives_exact_tainted_replacement_on_replay() {
     instantiate(&env, button, "Button", Some("AutoCompleteBox"));
     env.exec(r#"
         assert(AutoCompleteButton1:GetWidth()==120 and AutoCompleteButton1:GetHeight()==14, 'RED X1: original clean template must win exact tainted replacement')
-        local p,r,rp,x,y=AutoCompleteButton1:GetFontString():GetPoint(1)
-        assert(p=='LEFT' and r==AutoCompleteButton1 and rp=='LEFT' and x==15 and y==0, 'RED X1: original inherited font anchor')
+        local text=AutoCompleteButton1:GetFontString()
+        local originalAnchor=false
+        for i=1,text:GetNumPoints() do
+            local p,r,rp,x,y=text:GetPoint(i)
+            if p=='LEFT' and r==AutoCompleteButton1 and rp=='LEFT' and x==15 and y==0 then originalAnchor=true end
+        end
+        assert(originalAnchor, 'RED X1: original inherited font anchor')
     "#).unwrap();
 }
 
