@@ -16,7 +16,20 @@ mod startup;
 #[path = "common/wrath_reload_preservation.rs"]
 mod preservation;
 
+#[path = "common/wrath_reload_reentry.rs"]
+mod reentry;
+
 use wow_ui_sim::lua_api::state::AddonInfo;
+
+#[test]
+fn wrath_shutdown_combat_reentry_receives_argless_regen_disabled() {
+    reentry::assert_reentry(true);
+}
+
+#[test]
+fn wrath_shutdown_noncombat_reentry_omits_regen_disabled() {
+    reentry::assert_reentry(false);
+}
 
 #[test]
 fn placed_frame_anchor_selection_uses_first_corresponding_point_on_ties() {
@@ -61,12 +74,12 @@ fn original_stopwatch_restores_saved_variables_after_code_before_event() {
 }
 
 #[test]
-fn original_logout_handlers_persist_after_in_world_combat_shutdown() {
+fn wrath_shutdown_original_logout_handlers_persist_after_combat_shutdown() {
     shutdown::assert_shutdown(true, true);
 }
 
 #[test]
-fn out_of_world_shutdown_omits_leaving_without_rejecting_logout() {
+fn wrath_shutdown_out_of_world_omits_leaving_without_rejecting_logout() {
     shutdown::assert_shutdown(false, false);
 }
 

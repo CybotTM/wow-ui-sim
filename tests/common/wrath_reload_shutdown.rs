@@ -49,19 +49,22 @@ pub fn assert_shutdown(in_world: bool, combat: bool) {
         BattlefieldMinimapTab:SetUserPlaced(true)
         Blizzard_CombatLog_Filters.ReloadControl = 7321
         PlayerFrame.onHateList = 1
+        ReloadProtected = CreateFrame('Button', 'ReloadProtected', UIParent, 'SecureActionButtonTemplate')
         ReloadTrace = { events = {}, payloads = {}, permissions = {} }
         local observer = CreateFrame('Frame')
         for _, name in ipairs({'PLAYER_REGEN_ENABLED', 'PLAYER_LEAVING_WORLD', 'PLAYER_LOGOUT', 'ADDONS_UNLOADING'}) do
             observer:RegisterEvent(name)
         end
-        observer:SetScript('OnEvent', function(self, event, ...)
+        local callback = function(self, event, ...)
             table.insert(ReloadTrace.events, event)
             table.insert(ReloadTrace.payloads, select('#', ...))
-            table.insert(ReloadTrace.permissions, not InCombatLockdown())
+            table.insert(ReloadTrace.permissions, not InCombatLockdown() and ReloadProtected:CanChangeProtectedState())
             if event == 'PLAYER_LOGOUT' then
                 ReloadTrace.hateCleared = PlayerFrame.onHateList == nil
             end
-        end)
+        end
+        debug.setobjecttaint(callback, 'ReloadObserver')
+        observer:SetScript('OnEvent', callback)
         ReloadUI()
     "#).unwrap();
     let mut manager = Some(manager);
