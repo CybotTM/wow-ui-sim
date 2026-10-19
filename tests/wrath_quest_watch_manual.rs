@@ -35,26 +35,35 @@ fn exec(case: &Case, source: &str) {
 }
 
 fn assert_original_sources() {
-    for (path, expected) in [
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("active profile's original FrameXML TOC");
+    let frame_xml = toc.parent().expect("FrameXML source directory");
+    for (file, expected) in [
         (
-            "/home/osso/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/QuestLogFrame.lua",
+            "QuestLogFrame.lua",
             "6ac6ca92b3036417082b88cc2f8b5c9fc8889f51f82aa726fe0bcd44990bc5e2",
         ),
         (
-            "/home/osso/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/WatchFrame.lua",
+            "WatchFrame.lua",
             "ad67e96468a14734212aa53cb62c43619f4006dc15173affb43a0be29476751b",
         ),
         (
-            "/home/osso/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/QuestLogFrame.xml",
+            "QuestLogFrame.xml",
             "530c396e36af4b23a725086d37b6cb68abaf1966db77ba26c4e3fed3ce76f154",
         ),
         (
-            "/home/osso/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/WatchFrame.xml",
+            "WatchFrame.xml",
             "d957db59c5a827f06d586333701de58a1585172f7c3d07625604fb42c5aebf58",
         ),
     ] {
-        let bytes = std::fs::read(path).unwrap();
-        assert_eq!(format!("{:x}", Sha256::digest(bytes)), expected, "{path}");
+        let path = frame_xml.join(file);
+        let bytes = std::fs::read(&path).unwrap();
+        assert_eq!(
+            format!("{:x}", Sha256::digest(bytes)),
+            expected,
+            "{}",
+            path.display()
+        );
     }
 }
 
