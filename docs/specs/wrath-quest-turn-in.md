@@ -62,6 +62,8 @@ Main approved using the existing `GossipState.giver_guid` as the single concrete
 
 ## Known gaps (current cycle)
 
+- [ ] Native `QuestChooseRewardError` feedback is unmodeled. Main explicitly authorized a Wrath-only, rawget-guarded temporary global with zero results, no side effects and no events under `workarounds/temporary/wrath_quest_choice_feedback.rs`. Retire when the native UI-error feedback model is supplied. Tests assert only original guard prevents a claim/send and no Lua error escapes; no UI_ERROR_MESSAGE or UIErrorsFrame feedback oracle is introduced.
+
 - [ ] Step-A per-test boundaries, step-B GREEN and preservation remain pending. Shared RED is executed at `84f7067d6`, with startup `[]|{}` and unchanged original CVar stat/hash. Earlier target-registration and fixture compilation failures are not behavioral RED. Acceptance is 4/4 GREEN at `7ea9065be`, conditional on the documented finish-order inference.
 - [ ] NaN, infinity, out-of-int32 values and subtraction overflow remain unverified; add no expected-result oracle. Successful-call result arity also remains unspecified. Extra-argument and non-numeric-string cases are source-grounded above but not separately tested in this packet.
 - [ ] No-choice input 3 has a no-error test, but exact sent index 2 is not publicly observable through the current receipt/acceptance seam. Do not assert private request fields or infer a wire index from receipt absence. Wire/send-index observability remains a gap; zero-index input cases use the existing simulator-policy acceptance seam.
