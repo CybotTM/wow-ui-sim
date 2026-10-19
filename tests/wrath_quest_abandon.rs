@@ -55,6 +55,10 @@ fn assert_originals() {
             "6ac6ca92b3036417082b88cc2f8b5c9fc8889f51f82aa726fe0bcd44990bc5e2",
         ),
         (
+            "QuestInfo.lua",
+            "3bfe691acdb2a095a6633c3ce7bef4a13f53f464d20781b2e850e442f9b715cd",
+        ),
+        (
             "StaticPopup.lua",
             "1134b08e87d8577c0353895207eaec24e74e8f669775a49257a82431a4ac3042",
         ),
@@ -169,7 +173,13 @@ fn original_button_cancel_then_accept_marked_target() {
     let env = seed_env();
     exec(
         &env,
-        "SelectQuestLogEntry(1); SetAbandonQuest(); QuestLogControlPanel_UpdateState()",
+        r#"
+        SelectQuestLogEntry(1)
+        ShowUIPanel(QuestLogFrame)
+        assert(QuestLogFrame:IsShown(), 'original log refresh must not return early')
+        assert(QuestLogScrollFrame.buttons[1]:GetText() == '  Wrath abandon first')
+        assert(QuestLogScrollFrame.buttons[2]:GetText() == '  Wrath abandon second')
+        "#,
     );
     let before = snapshot(&env);
     let clicked = env.exec("QuestLogFrameAbandonButton:Click()");
@@ -267,6 +277,9 @@ fn original_button_cancel_then_accept_marked_target() {
         assert(#AbandonEvents == 1 and AbandonEvents[1][1] == 'QUEST_LOG_UPDATE', 'Wrath log notification, no modern removal event')
         assert(AbandonEvents[1][2] == 1 and AbandonEvents[1][3] == 'Wrath abandon second', 'listener sees committed log')
         assert(AbandonEvents[1][4] == 0, 'argumentless log update')
+        assert(QuestLogFrame:IsShown(), 'original log remains visible after confirmation')
+        assert(QuestLogScrollFrame.buttons[1]:GetText() == '  Wrath abandon second', 'original log listener renders surviving row')
+        assert(not QuestLogScrollFrame.buttons[2]:IsShown(), 'original log listener hides removed row')
         StaticPopup1Button1:Click()
         AbandonQuest()
         assert(#AbandonEvents == 1, 'repeat does not notify')
@@ -351,8 +364,12 @@ fn original_selection_renders_supplied_suggested_group_size() {
         QuestLog_SetSelection(2)
         assert(GetQuestLogGroupNum() == 0)
         assert(not QuestInfoGroupSize:IsShown())
+        SelectQuestLogEntry(0)
+        assert(GetQuestLogGroupNum() == 0, 'absent selection')
     "#,
     );
+    env.state().borrow_mut().selected_quest_log_id = Some(999999);
+    exec(&env, "assert(GetQuestLogGroupNum() == 0, 'absent rich row')");
 }
 
 #[test]
