@@ -4,7 +4,7 @@
 
 ## [2026-10-19] source | Wrath manual watch seam
 
-[Legacy state](systems/lua-api.md#wrath-manual-watch-seam) links ordered ID-backed watches and deferred-refresh pruning. [Contract](../specs/wrath-manual-watch.md) separates original-consumer RED, pending GREEN and unmodeled sorting/cache/progress/automatic watches.
+[Legacy state](systems/lua-api.md#wrath-manual-watch-seam) links ordered ID-backed watches and deferred-refresh pruning. [Contract](../specs/wrath-manual-watch.md#bounded-proof--2026-10-19) records twelve original-consumer/native-contract RED→GREEN cases, unchanged startup, warning-free Wrath checks, and one generic control failing identically on exact base; native sorting/cache/progress/automatic gaps remain separate.
 
 ## [2026-10-19] source/tooling | Disabled checks and profile-aware suites
 
