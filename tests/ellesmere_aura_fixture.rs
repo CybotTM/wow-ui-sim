@@ -38,16 +38,16 @@ fn settle(env: &WowLuaEnv) {
 
 fn native_widget_ids(env: &WowLuaEnv, container: &str) -> Vec<[u64; 3]> {
     let rows = env
-        .eval::<Vec<Vec<rilua::Val>>>(&format!("return FixtureWidgets({container})"))
+        .eval::<Vec<Vec<String>>>(&format!("return FixtureWidgets({container})"))
         .expect("collect actual initializer widget identities without reading secret state");
-    let lua = env.rilua();
     rows.into_iter()
         .map(|row| {
-            let widgets: [rilua::Val; 3] =
-                row.try_into().expect("button, icon and stack identities");
-            widgets.map(|value| {
-                wow_ui_sim::lua_api::methods::native_frame_id_from_val(lua.state(), value)
-                    .expect("real native widget backing")
+            let widgets: [String; 3] = row.try_into().expect("button, icon and stack identities");
+            widgets.map(|name| {
+                name.rsplit(':')
+                    .next()
+                    .and_then(|id| id.parse().ok())
+                    .unwrap_or_else(|| panic!("{name} has no unnamed native widget id"))
             })
         })
         .collect()

@@ -27,7 +27,9 @@ function FixtureWidgets(container)
     for index = 1, container:GetAuraGroupFrameCount('current-package-helpful') do
         local button = container:GetAuraGroupFrame('current-package-helpful', index)
         local data = assert(regions[button], 'real initializer regions missing')
-        widgets[index] = {button, data.icon, data.stack}
+        widgets[index] = {
+            button:GetDebugName(), data.icon:GetDebugName(), data.stack:GetDebugName(),
+        }
     end
     return widgets
 end
