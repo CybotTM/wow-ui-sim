@@ -64,10 +64,10 @@ fn read_original_frame(name: &str, wanted: &str) -> FrameXml {
         .into_iter()
         .find_map(|element| {
             let frame = match element {
-                XmlElement::Frame(f)
-                | XmlElement::Button(f)
-                | XmlElement::EditBox(f)
-                | XmlElement::ScrollingMessageFrame(f) => f,
+                XmlElement::Frame(frame)
+                | XmlElement::Button(frame)
+                | XmlElement::EditBox(frame)
+                | XmlElement::ScrollingMessageFrame(frame) => frame,
                 _ => return None,
             };
             (frame.name.as_deref() == Some(wanted)).then_some(frame)
