@@ -1,7 +1,7 @@
 //! Real cached vendor consumers, supplied adversarial state, production dispatch/output.
 #![cfg(feature = "client-wrath")]
 
-use std::path::Path;
+use std::path::PathBuf;
 
 use sha2::{Digest, Sha256};
 use wow_ui_sim::loader::{LoadTiming, create_frame_from_xml, load_addon_from_toc};
@@ -9,10 +9,16 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::toc::TocFile;
 use wow_ui_sim::xml::{FrameChildElement, FrameElement, FrameXml, XmlElement, parse_xml};
 
-const CACHE: &str = "/home/osso/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML";
+fn frame_xml_dir() -> PathBuf {
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("active profile's original FrameXML TOC");
+    toc.parent()
+        .expect("FrameXML source directory")
+        .to_path_buf()
+}
 
 fn read_original(name: &str) -> String {
-    let path = Path::new(CACHE).join(name);
+    let path = frame_xml_dir().join(name);
     let bytes = std::fs::read(&path).expect("SETUP: cached vendor source");
     eprintln!(
         "original={} sha256={:x}",
@@ -43,7 +49,7 @@ fn load_originals(env: &WowLuaEnv, names: &[&str]) {
     }
     // Distinct TOC roots avoid addon-directory deduplication between prerequisite loads.
     let fixture = tempfile::tempdir().unwrap();
-    for entry in std::fs::read_dir(CACHE).unwrap() {
+    for entry in std::fs::read_dir(frame_xml_dir()).unwrap() {
         let entry = entry.unwrap();
         std::os::unix::fs::symlink(entry.path(), fixture.path().join(entry.file_name())).unwrap();
     }
@@ -401,7 +407,7 @@ fn x2_original_xml_continues_after_missing_external_script() {
     std::fs::write(&fixture, xml.as_bytes()).unwrap();
     assert_eq!(
         std::fs::read(&fixture).unwrap(),
-        std::fs::read(Path::new(CACHE).join("AutoComplete.xml")).unwrap()
+        std::fs::read(frame_xml_dir().join("AutoComplete.xml")).unwrap()
     );
     assert!(
         !dir.path().join("AutoComplete.lua").exists(),
@@ -445,7 +451,7 @@ fn x2_original_pvp_xml_continues_after_missing_template_include() {
         std::fs::write(&path, source.as_bytes()).unwrap();
         assert_eq!(
             std::fs::read(&path).unwrap(),
-            std::fs::read(Path::new(CACHE).join(name)).unwrap()
+            std::fs::read(frame_xml_dir().join(name)).unwrap()
         );
     }
     assert!(
