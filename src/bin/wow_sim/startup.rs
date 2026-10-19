@@ -57,11 +57,11 @@ mod tests {
     #[cfg(feature = "gui")]
     #[test]
     fn reload_ui_rebuilds_the_real_no_addons_startup() {
-        let args = Args::try_parse_from(["wow-sim", "--no-addons", "--no-saved-vars"])
-            .expect("reload startup arguments");
+        let args =
+            Args::try_parse_from(["wow-sim", "--no-addons"]).expect("reload startup arguments");
         let (env, _font_system, saved_vars) =
             init_and_load(&args, ScreenKind::Game).expect("real no-addons startup must load");
-        assert!(saved_vars.is_none());
+        assert!(saved_vars.is_some());
         assert!(
             env.eval::<bool>("return UIParent ~= nil and PlayerFrame ~= nil")
                 .unwrap()
@@ -70,11 +70,13 @@ mod tests {
             env,
             saved_vars,
             iced::Size::new(1024.0, 768.0),
-            "reload_sentinel = true; CreateFrame('Frame', 'ReloadOldFrame'); ReloadUI()",
+            "reload_sentinel = true; CreateFrame('Frame', 'ReloadOldFrame'); \
+             Blizzard_Console_SavedVars.__reload_test = 73; ReloadUI()", 
             &[],
             Some(
                 "assert(reload_sentinel == nil, 'no fresh Lua environment after ReloadUI'); \
-                 assert(ReloadOldFrame == nil); assert(UIParent ~= nil and PlayerFrame ~= nil)",
+                 assert(ReloadOldFrame == nil); assert(UIParent ~= nil and PlayerFrame ~= nil); \
+                 assert(Blizzard_Console_SavedVars.__reload_test == 73, 'SavedVariables lost during reload')",
             ),
         )
         .expect("ReloadUI must reuse real startup without third-party addons");
