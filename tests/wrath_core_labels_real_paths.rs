@@ -462,7 +462,15 @@ fn x2_original_pvp_xml_continues_after_missing_template_include() {
         assert(PVPParentFrame, 'RED X2 include: original parent sibling must survive child I/O failure')
         assert(PVPParentFrame:GetWidth()==384 and PVPParentFrame:GetHeight()==512, 'RED X2 include: original sibling geometry')
     "#).unwrap();
-    assert_no_script_errors(&env);
+    let expected_error = format!(
+        "IO error loading {}: No such file or directory (os error 2)\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: ?",
+        dir.path().join("PVPFrameTemplates.xml").display()
+    );
+    assert_eq!(
+        env.state().borrow().lua_errors,
+        vec![expected_error],
+        "SETUP: exactly the controlled include diagnostic, no other script errors"
+    );
 }
 
 #[test]
