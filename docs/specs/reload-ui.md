@@ -10,6 +10,11 @@
 - [x] Preserve modeled server/session/player/world/party state and process IPC/texture/font resources. Clear GUI frame-ID, input and render caches before drawing the new UI.
 - [x] Service reloads requested by Lua IPC, GUI shortcut, slash commands, events and timers only after the active Lua call unwinds; subsequent IPC commands use the new environment and retain print-output isolation.
 
+### Dispatch factory isolation
+
+- [ ] Reuse constant simulator factories only for identical source and chunk names within the active VM. Each use must receive a fresh closure, current-global environment binding and independent top-level upvalues; no old-VM prototype or object may survive reload through this cache.
+- [ ] Preserve HookScript order, self/arguments, solo-hook result passthrough, chained-result discard and error boundaries; preserve direct/indirect attribute callbacks, per-frame state and observable taint before and after reload.
+
 ### File-backed client state
 
 - [x] Restore the file-backed EditMode cache using the initial layout name and config, without re-importing ServerSnapshot. The original EditMode consumer must select the same active layout after ReloadUI. Native reread timing/ordering is INFERRED and unasserted.
@@ -27,6 +32,7 @@ Exact native event ordering remains unverified pending native evidence; tests mu
 - `src/c_api/c_ui.rs` — modeled `C_UI.Reload`, also called by Blizzard’s public `ReloadUI` wrapper.
 - `src/lua_api/globals/state_backed_queries.rs` — legacy Lua `ReloadUI` registration sharing the request producer.
 - `src/lua_api/env.rs` — Lua VM construction and handle retirement.
+- `src/lua_api/script_helpers.rs` — VM-local factory prototype anchors and fresh closure construction for HookScript and attribute dispatch.
 - `src/bin/wow_sim/startup.rs` — real startup/addon-loading pipeline.
 - `src/startup.rs` — startup event dispatch.
 - `src/saved_variables.rs` — declared-variable persistence.
@@ -37,6 +43,7 @@ Exact native event ordering remains unverified pending native evidence; tests mu
 
 ## Tests asserting this spec
 
+- `src/lua_api/reload_factory_tests.rs` — callback arguments/results/errors, hook/frame/upvalue isolation, environment rebinding, closure taint and real deferred VM retirement. Pre-change characterization passes; post-change proof pending.
 - `src/iced_app/app_tests.rs` — shortcut sentinel/frame/VM retirement and Lua-requested SavedVariables persistence.
 - `src/lua_server/exec_tests.rs` — public Unix Exec request, reload, subsequent fresh environment and print output.
 - `src/bin/wow_sim/main.rs`, `src/bin/wow_sim/gui_commands.rs` — dump/screenshot reload observation boundaries.

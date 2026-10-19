@@ -24,6 +24,57 @@ pub use on_update_cache::{frames_with_on_post_update, reconcile_on_update_runtim
 pub use source_metadata::get_script_source_binding;
 use source_metadata::{remove_script_source_binding, set_script_source_binding};
 
+/// Reuse only a constant factory's prepared prototype within this VM.
+/// The rooted anchor is never executed or returned: each use gets a fresh
+/// closure bound to the current global table and fresh nil top-level upvalues,
+/// as with `load_bytes`.
+pub(crate) fn load_constant_factory(
+    state: &mut LuaState,
+    source: &'static str,
+    chunk_name: &str,
+) -> rilua::LuaResult<rilua::Function> {
+    use crate::lua_api::methods::{table_get_static, table_set_static};
+    use rilua::vm::closure::{Closure, LuaClosure, Upvalue};
+
+    let sources = constant_factory_sources(state, chunk_name);
+    let anchor = match table_get_static(state, sources, source) {
+        Val::Function(function) => function,
+        _ => {
+            let function = state.load_bytes(source.as_bytes(), chunk_name)?;
+            table_set_static(state, sources, source, Val::Function(function.gc_ref()));
+            function.gc_ref()
+        }
+    };
+    let proto = match state.gc.closures.get(anchor) {
+        Some(Closure::Lua(closure)) => closure.proto.clone(),
+        _ => {
+            return Err(rilua::runtime_error(
+                "constant factory prototype anchor is invalid",
+            ));
+        }
+    };
+    let mut closure = LuaClosure::new(proto, state.global);
+    for _ in 0..closure.proto.num_upvalues {
+        let upvalue = state.gc.alloc_upvalue(Upvalue::new_closed(Val::Nil));
+        closure.upvalues.push(upvalue);
+    }
+    let function = state.gc.alloc_closure(Closure::Lua(closure));
+    Ok(rilua::Function::from_gc_ref(function))
+}
+
+fn constant_factory_sources(state: &mut LuaState, chunk_name: &str) -> Val {
+    use crate::lua_api::methods::{create_table, registry_table_or_create, table_get, table_set};
+
+    let cache = registry_table_or_create(state, "__wow_constant_factory_prototypes");
+    let sources = table_get(state, cache, chunk_name);
+    if matches!(sources, Val::Table(_)) {
+        return sources;
+    }
+    let sources = create_table(state);
+    table_set(state, cache, chunk_name, sources);
+    sources
+}
+
 // ── Registry helpers ────────────────────────────────────────────────
 
 const SCRIPTS_PRECALL_KEY: &str = "__scripts_pre";

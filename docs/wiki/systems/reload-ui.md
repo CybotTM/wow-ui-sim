@@ -18,6 +18,14 @@ The old VM's self-reference and font handle are cleared before it drops. A fresh
 
 The launch pipeline installs a reload loader on the environment. It reuses Blizzard/third-party addon loading and post-load bootstrap, preserving original launch options. The initial EditMode layout name and a copied WTF config seed a clean cache reader with no old `Val` handles; the file-backed cache is reread for the fresh VM even when Lua SavedVariables are disabled. Native reread timing/ordering is INFERRED and unasserted. ServerSnapshot character/enable imports and initial party reseeding are still skipped on reload. No addon-specific sentinel cleanup exists.
 
+## Constant dispatch factories
+
+[`load_constant_factory`](../../../src/lua_api/script_helpers.rs) stores an unexecuted Lua-function anchor in the active VM registry, indexed by exact chunk name and source. The anchor roots the prepared prototype and its interned constants in that VM; no prototype or Lua handle lives in a process-global cache. HookScript and direct/indirect attribute dispatch retain their original Lua source, chunk names and invocation/error policies.
+
+Each use allocates a new Lua closure from the prototype, binds it to the current global table and initializes independent nil top-level upvalues, matching `load_bytes`. The global table is shared within a VM; each closure's environment binding is independent. Returning/executing the anchor would let callback `setfenv` changes contaminate later calls, so the anchor is never exposed to dispatch. Nested hook closures and their captured arguments are still created by normal Lua execution.
+
+Reload replaces the VM registry, so the prototype cache begins empty without a model-state reset or extra cleanup path. The [contract](../../specs/reload-ui.md#dispatch-factory-isolation) separates pre-change characterization from pending post-change and wall-time proof; native lifecycle ordering remains unconfirmed.
+
 ## Lifecycle evidence and failure
 
 Existing simulator reload world-entry flags are reused; native teardown order remains unconfirmed. No teardown event ordering is invented. App treats rebuild failure as fatal and prevents a partial VM from overwriting pre-reload SavedVariables.
@@ -25,6 +33,7 @@ Existing simulator reload world-entry flags are reused; native teardown order re
 ## Sources
 
 - [Request producer](../../../src/c_api/c_ui.rs) and [environment](../../../src/lua_api/env.rs) — deferred request and VM retirement.
+- [Dispatch helpers](../../../src/lua_api/script_helpers.rs) — per-VM prototype rooting and per-use closure construction.
 - [UI-owned state](../../../src/lua_api/state/ui_reload.rs) — reset boundary.
 - [Launch bootstrap](../../../src/bin/wow_sim/startup.rs) — real addon reload loader.
 - [App](../../../src/iced_app/app.rs) and [IPC boundary](../../../src/iced_app/update_servers.rs) — cache/startup reset and response-before-rebuild sequencing.

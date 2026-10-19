@@ -46,7 +46,7 @@ pub(super) fn build_hooked_script(
     old: Val,
     hook: Val,
 ) -> LuaResult<Val> {
-    let func = crate::loader::chunk_cache::load_profiled_chunk(
+    let func = crate::lua_api::script_helpers::load_constant_factory(
         state,
         r#"
         local old, hook, frameId, layout, allowed = ...
@@ -58,7 +58,7 @@ pub(super) fn build_hooked_script(
             if allowed(frameId, layout, hook) then hook(...) end
         end
     "#,
-        "hook-script-factory",
+        "=(string)",
     )?;
     let gate = hook_gate(state);
     let args = [

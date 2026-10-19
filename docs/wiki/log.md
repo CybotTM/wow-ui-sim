@@ -1,3 +1,7 @@
+## [2026-10-19] system | Reload dispatch factory prototypes
+
+[Lifecycle mechanics](systems/reload-ui.md#constant-dispatch-factories) documents VM-registry prototype anchors and fresh closure/environment bindings without changing authored Lua bodies. [Contract](../specs/reload-ui.md#dispatch-factory-isolation) tracks characterization and pending post-change proof separately; no quiet-window wall gain or full acceptance claim yet.
+
 ## [2026-10-19] evidence | ReloadUI default-retail compilation
 
 [Contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) records full-default retail `cargo check -j1` with zero warnings, including `wow-sim`, `wow-cli`, library and auxiliary binaries. The check and 69 component-scoped behavioral passes cover the same Rust tree; later changes are documentation only. Original CVar hash/stat remain unchanged. Native lifecycle facts and full Ellesmere acceptance remain separate.

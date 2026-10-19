@@ -34,20 +34,6 @@ pub fn load_chunk<L: LuaApiMut>(
     Ok(func)
 }
 
-pub(crate) fn load_profiled_chunk<L: LuaApiMut>(
-    lua: &mut L,
-    code: &str,
-    tag: &str,
-) -> rilua::LuaResult<rilua::Function> {
-    let started = generated_chunk_profile_start();
-    let result = LuaApiMut::load_bytes(lua, code.as_bytes(), "=(string)");
-    if started.is_some() {
-        let hash = bytecode_cache::content_hash(code.as_bytes(), tag);
-        profile_generated_chunk(started, tag, hash, code.len(), "compile");
-    }
-    result
-}
-
 std::thread_local! {
     static PROFILE_PHASE: std::cell::Cell<&'static str> = const { std::cell::Cell::new("other") };
 }
