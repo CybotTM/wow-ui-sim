@@ -180,6 +180,11 @@ name = "integration"
 path = "tests/integration.rs"
 
 [[test]]
+name = "wrath_core_labels_real_paths"
+path = "tests/wrath_core_labels_real_paths.rs"
+required-features = ["client-wrath"]
+
+[[test]]
 name = "prefork_full_ui"
 path = "tests/prefork_full_ui.rs"
 harness = false
