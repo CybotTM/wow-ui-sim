@@ -153,6 +153,13 @@ fn wrath_tokenui_original_modified_click_caps_three_and_watches_shifted_row() {
         assert(GetBackpackCurrencyInfo(2) == 'Emblem of Triumph')
         assert(GetBackpackCurrencyInfo(3) == 'Emblem of Conquest')
         TokenButton_OnClick(TokenFrameContainer.buttons[6])
+    "#,
+    );
+    // Native Wrath UIErrorsFrame inserts its queued MessageFrame row on update.
+    env.fire_on_update(0.0).unwrap();
+    assert_consumer(
+        &env,
+        r#"
         assert(UIErrorsFrame:GetNumMessages() == 1, 'original UI rejects fourth watch')
         assert(UIErrorsFrame:GetMessageInfo(1) == 'Only 3 currencies may be watched')
         assert(select(5, GetCurrencyListInfo(6)) == false)

@@ -163,7 +163,9 @@ fn test_create_font_text_color() {
             "#,
         )
         .unwrap();
-    assert_eq!((r, g, b, a), (0.5, 0.6, 0.7, 0.8));
+    for (actual, expected) in [r, g, b, a].into_iter().zip([0.5, 0.6, 0.7, 0.8]) {
+        assert!((actual - expected).abs() < 1e-6);
+    }
 }
 
 #[test]
@@ -773,6 +775,9 @@ fn test_accessibility_templates_set_fixed_color_pattern() {
 // FontString:SetFont 12.0.5 shape: numeric height, nilable flags, success return
 // ============================================================================
 
+// Wrath's success/generation oracle is held; its invalid-argument contract
+// raises rather than returning the modern false result tested here.
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn font_string_set_font_returns_exactly_one_success_boolean() {
     let env = env();

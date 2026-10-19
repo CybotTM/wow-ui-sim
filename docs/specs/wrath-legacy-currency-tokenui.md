@@ -26,7 +26,7 @@ Wrath 12340 legacy globals expose explicitly supplied one-level categories throu
 ## Tests asserting this spec
 
 - `tests/wrath_currency_tokenui.rs` — original complete Lua consumers with byte hashes and concrete supplied categories.
-- `tests/fixtures/wrath_currency_tokenui.lua` — widget/localization fixture; no currency API replacements.
+- `tests/fixtures/wrath_currency_tokenui.lua` — widget/localization fixture; no currency API replacements. UIErrorsFrame is a MessageFrame; the fourth-watch error assertion follows its next-update insertion boundary, as specified by [Wrath message lifetimes](wrath-widget-labels.md).
 
 ## Known gaps (current cycle)
 
