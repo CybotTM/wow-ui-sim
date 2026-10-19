@@ -1,11 +1,16 @@
 //! Original Wrath available-gossip projection and shared index selection.
 
-use crate::lua_api::methods::{borrow_state, create_string};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use rilua::{LuaApiMut, LuaResult, Val, vm::state::LuaState};
 
 pub(super) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.register_function("GetGossipAvailableQuests", get_available_quests)?;
     lua.register_function("GetGossipText", get_text)?;
+    lua.register_function("CloseGossip", close_gossip)?;
+    lua.register_function(
+        "GetQuestBackgroundMaterial",
+        super::legacy_globals::get_quest_background_material,
+    )?;
     lua.register_function("GetGossipActiveQuests", get_active_quests)?;
     lua.register_function(
         "GetNumGossipAvailableQuests",
@@ -22,6 +27,21 @@ pub(super) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         super::legacy_globals::select_available_quest,
     )?;
     Ok(())
+}
+
+fn close_gossip(state: &mut LuaState) -> LuaResult<u32> {
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.gossip.active = false;
+        sim.gossip.options.clear();
+        sim.gossip.active_quests.clear();
+        sim.gossip.available_quests.clear();
+        sim.gossip.num_options = 0;
+        sim.gossip.num_active_quests = 0;
+        sim.gossip.num_available_quests = 0;
+    }
+    crate::lua_api::globals::state_backed_queries::dispatch_event_now(state, "GOSSIP_CLOSED", &[])?;
+    Ok(0)
 }
 
 fn get_text(state: &mut LuaState) -> LuaResult<u32> {
