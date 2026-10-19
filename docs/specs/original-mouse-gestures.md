@@ -1,51 +1,35 @@
-# Original consumer mouse move and resize gestures
+# Original consumer mouse gestures
 
-Draft input contract for original DamageMeter sizing and Wrath floating-chat moving consumers. Input/motion code lives in `src/iced_app/`; native method state lives in `src/lua_api/frame/methods/misc/drag_input.rs`. See [layout system](../layout-system.md). Retail proof is recorded below; Wrath remains pending.
+Bounded input contract for original Retail DamageMeter sizing and Wrath floating-chat movement. See [layout](../layout-system.md) and [events](../event-system.md).
 
 ## What it must do
 
-### DamageMeter sizing
+### Retail DamageMeter
 
-- [x] Original DamageMeter InitializeResizeButton mouse-down starts sizing; actual subsequent mouse motion changes geometry without adding synthetic drag registration or replacement Lua callbacks.
-- [x] Bottom-right sizing preserves top-left; bottom-left sizing preserves top-right. Positive outward movement increases dimensions; bounds constrain logical width and height.
-- [x] Stationary release and release after motion clear native sizing/moving flags, active drag state, original isResizing and original userPlaced as set by the original mouse-up closure.
+- [x] Original InitializeResizeButton mouse-down starts sizing; subsequent physical motion changes geometry without synthetic drag registration or replacement callbacks.
+- [x] Bottom-right sizing preserves top-left; bottom-left preserves top-right. Outward movement increases dimensions; minimum/maximum bounds constrain them.
+- [x] Stationary release and moved release while still on the handle clear native motion flags, capture, original isResizing and original userPlaced.
 
-### Wrath floating-chat moving
+### Wrath floating chat
 
-- [ ] Original chat tab OnDragStart moves the owning chat frame by the mouse delta, without resizing it or replacing the XML handler.
-- [ ] After release, original FCFTab_OnUpdate reaches FCFTab_OnDragStop/FCF_StopDragging and clears motion state, MOVING_CHATFRAME and tab dragButton.
-
-## How it works
-
-- [Layout system](../layout-system.md).
-- [Event system](../event-system.md).
+- [ ] Original XML tab OnDragStart moves the owning chat frame by the cursor delta without resizing it.
+- [ ] After release, original FCFTab_OnUpdate reaches FCF_StopDragging and clears native motion, MOVING_CHATFRAME and tab dragButton.
 
 ## Implementation inventory
 
-- `src/iced_app/mouse.rs` — real GUI down/move/up dispatch, drag threshold/capture and release routing.
-- `src/iced_app/mouse_drag.rs` — movement, sizing/bounds, fixed-corner reanchoring.
-- `src/lua_api/frame/methods/misc/drag_input.rs` — StartMoving/StartSizing/StopMovingOrSizing state.
-- Proposed `src/iced_app/mouse_sequence_probe.rs` — Rust-only integration adapter to existing App mouse dispatch. No producer fix and no Lua behavior substitution.
+- `src/iced_app/mouse.rs`: physical down/move/up, registered script-drag threshold and release routing.
+- `src/iced_app/mouse_drag.rs`: geometry and opposite-corner anchoring.
+- `src/lua_api/frame/methods/misc/drag_input.rs`: StartSizing capture and StopMovingOrSizing cleanup.
+- `src/iced_app/mouse_sequence_probe.rs`: shared Rust adapter that drives real App handlers and hit-grid construction; no Lua shim.
 
-## Tests asserting this spec
+## Tests and proof
 
-- Proposed `tests/f2_original_mouse_consumers.rs` — separate right/left sizing, min/max, scale, stationary release, moved release, outside release and original Wrath XML chat gesture.
-- Existing `src/iced_app/mouse_drag_scaled_tests.rs` — synthetic moving-scale preservation control; not original resize acceptance.
+`tests/f2_original_mouse_consumers.rs` is shared between profiles. At source `5f5aa4563`, all six Retail cases pass: right/left geometry, maximum/minimum, stationary release and moved in-handle release. Five cases first reproduced geometry or cleanup RED; stationary release was already GREEN. Omitting physical mouse-up rejects the stationary stop assertion. Five unchanged native sizing-state tests pass. Geometry cases deliberately stop before release, so clamped motion does not assert outside-handle behavior.
 
-## Known gaps (current cycle)
+The original callbacks were unchanged. Root cause: StartSizing set flags without motion capture, while threshold crossing marked a script drag even without a registered handler, diverting mouse-up cleanup. The simulator now captures sizing and distinguishes registered script drags.
 
-- [ ] Expose the staged Rust adapter before compiling integration tests; missing exports are setup work, not behavioral RED.
-- [ ] First observe RED at original DamageMeter geometry after mouse-down, not missing cache, script-loading or compiler failures.
-- [ ] After the first demonstrated motion defect is addressed, evaluate release and scale tests independently; current source suggests further capture/release and scale problems.
-- [ ] Confirm outside-release ordering and scaled native resize behavior with laptop observations.
-- [ ] Wrath full original FrameXML loading may expose unrelated startup failures; classify them instead of adding shims. Other-profile DamageMeter applicability is unproved.
+Wrath original full FrameXML loading, gesture and non-vacuity proof remain pending. Cache/loader failures are setup failures, not behavioral RED; no shims may hide them.
 
-## Out of scope
+## Exclusions and fact gaps
 
-- Keyboard dispatch, quest paths, EditBox paths, CompactUnitFrame vehicle behavior and vendor edits.
-- Automatic docking policy redesign, persistence policy redesign, full GUI startup and all-profile acceptance.
-- Rewriting Blizzard callbacks or registering synthetic OnDragStart to make the resize tests pass.
-
-## Reproduced Retail boundary
-
-Original DamageMeter callbacks start sizing, but the simulator previously set no motion capture. Threshold crossing also marked a drag without a registered drag handler, routing release away from original OnMouseUp. Five original-consumer assertions reproduced these failures; stationary release passed. StartSizing now captures the resized frame, StopMovingOrSizing releases that capture, and threshold dispatch records a script drag only when a registered handler actually starts. All six Retail original-consumer cases now pass at `5f5aa4563`: right/left geometry, min/max, stationary release and in-handle moved release. An omitted-Up control fails the stationary stop assertion; five existing sizing-state controls pass. Geometry cases deliberately end before release, so clamped motion does not assert outside-release policy. Outside-release order and scaled native sizing remain excluded.
+Native outside-handle release ordering and scaled native resize policy remain fact gaps; neither is asserted. No vendor edits, callback replacement, synthetic resize OnDragStart, docking/persistence redesign, complete startup or other-profile acceptance. Retail fixtures call the original initializer but not full DamageMeter OnLoad/OnShow.
