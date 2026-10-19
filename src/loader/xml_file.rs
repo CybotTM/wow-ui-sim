@@ -389,9 +389,17 @@ fn compile_inline_script(
     timing: &mut LoadTiming,
 ) -> Result<Function, LoadError> {
     let compile_start = Instant::now();
+    let profile_start = crate::loader::chunk_cache::generated_chunk_profile_start();
     let func_result =
         env.with_state(|state| LuaApiMut::load_bytes(state, inline.as_bytes(), "@inline"));
     let compile_elapsed = compile_start.elapsed();
+    crate::loader::chunk_cache::profile_generated_chunk(
+        profile_start,
+        "@inline",
+        crate::loader::bytecode_cache::content_hash(inline.as_bytes(), "@inline"),
+        inline.len(),
+        "compile",
+    );
     timing.lua_compile_time += compile_elapsed;
     timing.lua_exec_time += compile_elapsed;
 

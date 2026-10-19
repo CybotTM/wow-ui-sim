@@ -11,6 +11,7 @@ pub fn load_chunk<L: LuaApiMut>(
     tag: &str,
 ) -> Result<rilua::Function, LoadError> {
     let hash = bytecode_cache::content_hash(code.as_bytes(), tag);
+    let profile_start = generated_chunk_profile_start();
     let chunk_name = format!("@generated/{tag}/{hash:016x}");
 
     if !bytecode_cache::is_disabled() {
@@ -18,6 +19,7 @@ pub fn load_chunk<L: LuaApiMut>(
             LuaApiMut::load_bytes(lua, bytecode, &chunk_name)
         }) && let Ok(func) = result
         {
+            profile_generated_chunk(profile_start, tag, hash, code.len(), "replay");
             return Ok(func);
         }
     }
@@ -28,7 +30,30 @@ pub fn load_chunk<L: LuaApiMut>(
         let bytecode = crate::loader::bytecode::dump_function(lua.state_mut(), &func)?;
         bytecode_cache::put(hash, &bytecode);
     }
+    profile_generated_chunk(profile_start, tag, hash, code.len(), "compile");
     Ok(func)
+}
+
+pub(crate) fn generated_chunk_profile_start() -> Option<std::time::Instant> {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    ENABLED
+        .get_or_init(|| std::env::var_os("WOW_SIM_PROFILE_GENERATED_CHUNKS").is_some())
+        .then(std::time::Instant::now)
+}
+
+pub(crate) fn profile_generated_chunk(
+    started: Option<std::time::Instant>,
+    tag: &str,
+    hash: u64,
+    bytes: usize,
+    mode: &str,
+) {
+    if let Some(started) = started {
+        crate::logging::eprintln_elapsed(&format!(
+            "[generated-chunk] tag={tag} key={hash:016x} bytes={bytes} mode={mode} us={}",
+            started.elapsed().as_micros()
+        ));
+    }
 }
 
 #[cfg(test)]
