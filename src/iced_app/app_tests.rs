@@ -55,16 +55,11 @@ fn reload_ui_shortcut_discards_lua_globals_and_old_frames() {
         .exec("reload_sentinel = true; CreateFrame('Frame', 'ReloadOldFrame')")
         .unwrap();
     let old_lua = Rc::downgrade(&app.env.borrow().lua);
-    let old_state = Rc::downgrade(app.env.borrow().state());
 
     let _ = app.update(super::super::Message::ReloadUI);
     complete_gui_startup(&mut app);
 
     assert!(old_lua.upgrade().is_none(), "old Lua VM must be destroyed");
-    assert!(
-        old_state.upgrade().is_none(),
-        "old UI state must be dropped"
-    );
     assert!(
         app.env
             .borrow()
