@@ -6,6 +6,9 @@
 
 use crate::lua_api::SimState;
 mod frame_level;
+mod message_frame;
+
+pub use message_frame::apply_xml_message_frame_attributes;
 
 pub use frame_level::{apply_xml_frame_level, apply_xml_frame_strata};
 

@@ -2,7 +2,7 @@
 
 use super::super::shared::{opt_f32, opt_string};
 use super::scroll::truncate_messages;
-use crate::lua_api::message_frame::{Message, MessageFrameData};
+use crate::lua_api::message_frame::Message;
 use crate::lua_api::methods::{borrow_state_mut, frame_id_from_stack};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -53,6 +53,7 @@ pub(super) fn backfill_message(state: &mut LuaState) -> LuaResult<u32> {
             access_id: None,
             extra_data: None,
             timestamp,
+            wrath_timers: None,
         },
     );
     if data.messages.len() > data.max_lines {
@@ -76,8 +77,17 @@ pub(super) fn add_message_core_from_stack(state: &mut LuaState, id: u64, log: bo
         log_message_sim(&sim, id, &message.text);
     }
     message.timestamp = sim.start_time.elapsed().as_secs_f64();
+    let wrath_row = crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+        && sim
+            .widgets
+            .get(id)
+            .is_some_and(|frame| frame.widget_type == crate::widget::WidgetType::MessageFrame);
     let data = sim.message_frames.entry(id).or_default();
-    insert_message(data, message);
+    if wrath_row {
+        data.pending_wrath_messages.push_back(message);
+        return;
+    }
+    data.insert_message(message);
     truncate_messages(data);
     data.display_dirty = true;
 }
@@ -93,6 +103,7 @@ fn read_message_from_stack(state: &LuaState, text: String) -> Message {
         access_id: None,
         extra_data: None,
         timestamp: 0.0,
+        wrath_timers: None,
     };
     // Public Wrath consumer: text, r, g, b, lineID, false, accessID, extraData.
     let wrath_history =
@@ -110,14 +121,6 @@ pub(super) fn read_optional_id(state: &LuaState, index: i32) -> Option<i64> {
     match stack_val(state, index) {
         Val::Num(n) => Some(n as i64),
         _ => None,
-    }
-}
-
-fn insert_message(data: &mut MessageFrameData, message: Message) {
-    if data.insert_mode == "TOP" {
-        data.messages.insert(0, message);
-    } else {
-        data.messages.push(message);
     }
 }
 
