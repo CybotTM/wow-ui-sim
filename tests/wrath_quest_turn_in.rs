@@ -709,9 +709,7 @@ fn original_unselected_reward_reports_one_message_and_named_sound() {
                 assert(seen.argc == 1 and seen.args[1] == ERR_QUEST_MUST_CHOOSE, 'Wrath has one message, no numeric type')
             end
         end
-        assert(UIErrorsFrame:GetNumMessages() == 1, 'original UIErrorsFrame consumed the error')
-        local text, r, g, b = UIErrorsFrame:GetMessageInfo(1)
-        assert(text == ERR_QUEST_MUST_CHOOSE and r == 1 and math.abs(g - 0.1) < 0.000001 and math.abs(b - 0.1) < 0.000001, 'original red error message')
+        assert(UIErrorsFrame:GetNumMessages() == 0, 'error row waits for the next update')
         assert(QuestFrameRewardPanel:IsShown(), 'feedback retains rewards')
         assert(not A_Admin.TurnInSelectedQuest(), 'feedback does not claim a reward')
     "#,
@@ -728,6 +726,17 @@ fn original_unselected_reward_reports_one_message_and_named_sound() {
     assert_eq!(
         sim.last_sound_kit_requested, None,
         "no invented numeric mapping"
+    );
+    drop(sim);
+    env.env.fire_on_update(0.0).unwrap();
+    exec(
+        &env,
+        r#"
+        assert(TurnInCount('UI_ERROR_MESSAGE') == 1, 'update does not repeat feedback')
+        assert(UIErrorsFrame:GetNumMessages() == 1, 'original UIErrorsFrame consumed the error')
+        local text, r, g, b = UIErrorsFrame:GetMessageInfo(1)
+        assert(text == ERR_QUEST_MUST_CHOOSE and r == 1 and math.abs(g - 0.1) < 0.000001 and math.abs(b - 0.1) < 0.000001, 'original red error message')
+    "#,
     );
 }
 
@@ -767,6 +776,16 @@ fn reward_feedback_ignores_arguments_without_quest_or_player() {
         end)
         assert(select('#', QuestChooseRewardError({}, false, 'ignored', 123)) == 0, 'all arguments ignored; zero results')
         assert(TurnInCount('UI_ERROR_MESSAGE') == 1, 'no state/player gate')
+        assert(UIErrorsFrame:GetNumMessages() == 0, 'error row waits for the next update')
+    "#,
+    );
+    assert_active(&env);
+    env.env.fire_on_update(0.0).unwrap();
+    exec(
+        &env,
+        r#"
+        assert(TurnInCount('UI_ERROR_MESSAGE') == 1, 'update does not repeat feedback')
+        assert(UIErrorsFrame:GetNumMessages() == 1, 'original consumer inserts one row')
         assert(UIErrorsFrame:GetMessageInfo(1) == 'No quest required.', 'original consumer receives string')
     "#,
     );
