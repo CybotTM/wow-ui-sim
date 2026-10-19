@@ -588,7 +588,7 @@ fn apply_runtime_child_direct_properties_with_inherits(
     crate::lua_api::globals::template::direct::apply_xml_hidden(state, frame_id, frame, inherits);
     crate::lua_api::globals::template::direct::apply_xml_alpha(state, frame_id, frame, inherits);
     crate::lua_api::globals::template::direct::apply_xml_scale(state, frame_id, frame, inherits);
-    crate::lua_api::globals::template::direct::apply_xml_editbox_limits(
+    crate::lua_api::globals::template::direct::apply_xml_editbox_attributes(
         state, frame_id, frame, inherits,
     );
     crate::lua_api::globals::template::direct::apply_xml_slider_orientation(

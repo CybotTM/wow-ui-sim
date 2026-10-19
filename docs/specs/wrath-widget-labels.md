@@ -38,7 +38,7 @@ Wrath 12340 contracts from laptop findings batches 4, 6, 7 and 8 (2026-10-18). O
 ## Known gaps (current cycle)
 
 - [ ] Forced-width input and item/context cleanup have no authenticated populated fixtures.
-- [ ] Interior-byte cursor positions and XML password values other than 1/0 are unknown.
+- [ ] Interior-byte cursor positions and XML password values other than 1/0 are unknown. Masked-caret parity is required at UTF-8 boundaries (0, 2, 5 for é猫).
 - [ ] Exact native scheduling, image pixels and complete startup compatibility are not established by bounded consumer tests.
 - [ ] C5 first-Down step convention, ClearHistory cursor reset and GetHistoryLines capacity-versus-occupancy meaning are not authenticated.
 

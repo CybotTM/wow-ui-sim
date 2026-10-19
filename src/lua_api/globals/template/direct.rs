@@ -781,9 +781,9 @@ pub fn apply_xml_id(state: &Rc<RefCell<SimState>>, frame_id: u64, frame: &FrameX
     }
 }
 
-/// Apply declared EditBox limits, resolving each field independently.
+/// Apply declared EditBox attributes, resolving each field independently.
 /// Explicit values (including zero) override the most-derived template value.
-pub fn apply_xml_editbox_limits(
+pub fn apply_xml_editbox_attributes(
     state: &Rc<RefCell<SimState>>,
     frame_id: u64,
     frame: &FrameXml,
@@ -796,7 +796,17 @@ pub fn apply_xml_editbox_limits(
     let bytes = frame
         .bytes
         .or_else(|| chain.iter().rev().find_map(|entry| entry.frame.bytes));
-    if letters.is_none() && bytes.is_none() {
+    let password = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        frame.password.as_deref().or_else(|| {
+            chain
+                .iter()
+                .rev()
+                .find_map(|entry| entry.frame.password.as_deref())
+        })
+    } else {
+        None
+    };
+    if letters.is_none() && bytes.is_none() && password.is_none() {
         return;
     }
     let mut sim = state.borrow_mut();
@@ -808,6 +818,9 @@ pub fn apply_xml_editbox_limits(
     }
     if let Some(value) = bytes {
         widget.editbox_max_bytes = value;
+    }
+    if let Some(value) = password {
+        widget.editbox_password = value == "1";
     }
 }
 

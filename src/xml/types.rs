@@ -227,6 +227,9 @@ pub struct FrameXml {
     /// Initial EditBox MaxBytes value from XML.
     #[serde(rename = "@bytes")]
     pub bytes: Option<i32>,
+    /// Preserve the Wrath string-helper input rather than parsing as an XML bool.
+    #[serde(rename = "@password")]
+    pub password: Option<String>,
 
     #[serde(skip)]
     pub use_forbidden_object_table: bool,
