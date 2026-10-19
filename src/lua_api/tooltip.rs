@@ -79,6 +79,8 @@ pub struct TooltipData {
     pub left_line_ids: Vec<u64>,
     /// Widget IDs for right-side FontString children (`{Name}TextRight{N}`).
     pub right_line_ids: Vec<u64>,
+    /// Wrath template texture slots in attachment order: zero-based row, widget ID.
+    pub wrath_texture_rows: Vec<(usize, u64)>,
 }
 
 impl Default for TooltipData {
@@ -102,6 +104,7 @@ impl Default for TooltipData {
             line_spacing: None,
             left_line_ids: Vec::new(),
             right_line_ids: Vec::new(),
+            wrath_texture_rows: Vec::new(),
         }
     }
 }

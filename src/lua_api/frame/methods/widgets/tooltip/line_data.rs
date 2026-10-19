@@ -26,6 +26,7 @@ pub(super) fn clear_lines(state: &mut LuaState) -> LuaResult<u32> {
         td.lines.clear();
         if wrath {
             td.min_width = 0.0;
+            td.wrath_texture_rows.clear();
         }
         td.spell_id = None;
         td.unit_token = None;
@@ -166,7 +167,11 @@ fn double_line_args(state: &mut LuaState) -> DoubleLineArgs {
         opt_f32(state, 8).unwrap_or(left_color.1),
         opt_f32(state, 9).unwrap_or(left_color.2),
     );
-    let wrap = val_to_bool(stack_val(state, 10));
+    let requested_wrap = val_to_bool(stack_val(state, 10));
+    let right_prevents_wrap = crate::client_profile::ACTIVE
+        == crate::client_profile::ClientProfile::Wrath
+        && right_text.as_deref().is_some_and(|text| !text.is_empty());
+    let wrap = requested_wrap && !right_prevents_wrap;
     DoubleLineArgs {
         left_text,
         right_text,
