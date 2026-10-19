@@ -145,6 +145,7 @@ pub fn start_moving(state: &mut LuaState) -> LuaResult<u32> {
         && frame.movable
     {
         frame.is_moving = true;
+        sim.set_active_drag_frame(Some(id));
     }
     Ok(0)
 }

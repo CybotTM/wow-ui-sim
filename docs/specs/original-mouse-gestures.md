@@ -28,7 +28,7 @@ Bounded input contract for original Retail DamageMeter sizing and Wrath floating
 
 The original callbacks were unchanged. Root cause: StartSizing set flags without motion capture, while threshold crossing marked a script drag even without a registered handler, diverting mouse-up cleanup. The simulator now captures sizing and distinguishes registered script drags.
 
-Wrath original full FrameXML loading, gesture and non-vacuity proof remain pending. Cache/loader failures are setup failures, not behavioral RED; no shims may hide them.
+Wrath full original FrameXML loading reached original OnDragStart but reproduced no horizontal movement. Original ChatFrame1Tab is a sibling of ChatFrame1, not its child: ancestor-only motion selection cannot find the frame started by the tab callback. StartMoving now captures its actual frame, like StartSizing. Wrath GREEN and non-vacuity proof remain pending. Cache/loader failures are setup failures, not behavioral RED; no shims may hide them.
 
 ## Exclusions and fact gaps
 
