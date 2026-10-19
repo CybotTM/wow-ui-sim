@@ -1,6 +1,6 @@
 # Original consumer mouse move and resize gestures
 
-Draft input contract for original DamageMeter sizing and Wrath floating-chat moving consumers. Input/motion code lives in `src/iced_app/`; native method state lives in `src/lua_api/frame/methods/misc/drag_input.rs`. See [layout system](docs/layout-system.md). Staged assertions have not been compiled or executed; no checkbox below denotes an accepted pass.
+Draft input contract for original DamageMeter sizing and Wrath floating-chat moving consumers. Input/motion code lives in `src/iced_app/`; native method state lives in `src/lua_api/frame/methods/misc/drag_input.rs`. See [layout system](../layout-system.md). Staged assertions have not been compiled or executed; no checkbox below denotes an accepted pass.
 
 ## What it must do
 
@@ -17,8 +17,8 @@ Draft input contract for original DamageMeter sizing and Wrath floating-chat mov
 
 ## How it works
 
-- [Layout system](docs/layout-system.md).
-- [Event system](docs/event-system.md).
+- [Layout system](../layout-system.md).
+- [Event system](../event-system.md).
 
 ## Implementation inventory
 

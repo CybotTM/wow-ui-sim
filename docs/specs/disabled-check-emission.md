@@ -1,6 +1,6 @@
 # Disabled checked texture emission
 
-Draft contract for CheckButton texture selection exercised through original Blizzard LFG consumers. State selection lives in `src/lua_api/frame/methods/button_anchor_hierarchy/`; rendered requests come from `src/iced_app/`. Architectural context: [rendering pipeline](docs/rendering-pipeline.md). All requirements remain unverified: this handoff stages tests without executing them.
+Draft contract for CheckButton texture selection exercised through original Blizzard LFG consumers. State selection lives in `src/lua_api/frame/methods/button_anchor_hierarchy/`; rendered requests come from `src/iced_app/`. Architectural context: [rendering pipeline](../rendering-pipeline.md). All requirements remain unverified: this handoff stages tests without executing them.
 
 ## What it must do
 
@@ -12,8 +12,8 @@ Draft contract for CheckButton texture selection exercised through original Bliz
 
 ## How it works
 
-- [Widget system](docs/widget-system.md).
-- [Rendering pipeline](docs/rendering-pipeline.md).
+- [Widget system](../widget-system.md).
+- [Rendering pipeline](../rendering-pipeline.md).
 
 ## Implementation inventory
 
