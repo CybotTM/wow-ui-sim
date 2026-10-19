@@ -31,22 +31,31 @@ fn exec(env: &WowLuaEnv, source: &str) {
 }
 
 fn assert_source_seals() {
-    for (path, expected) in [
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("active profile's original FrameXML TOC");
+    let frame_xml = toc.parent().expect("FrameXML source directory");
+    for (file, expected) in [
         (
-            "/home/osso/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/QuestInfo.lua",
+            "QuestInfo.lua",
             "3bfe691acdb2a095a6633c3ce7bef4a13f53f464d20781b2e850e442f9b715cd",
         ),
         (
-            "/home/osso/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/QuestLogFrame.lua",
+            "QuestLogFrame.lua",
             "6ac6ca92b3036417082b88cc2f8b5c9fc8889f51f82aa726fe0bcd44990bc5e2",
         ),
         (
-            "/home/osso/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/QuestInfo.xml",
+            "QuestInfo.xml",
             "290ed9e781c98734b69829184b171b99348c8d34ff3972292a01b1db7736bccc",
         ),
     ] {
-        let bytes = std::fs::read(path).expect("original source, no alternate source");
-        assert_eq!(format!("{:x}", Sha256::digest(bytes)), expected, "{path}");
+        let path = frame_xml.join(file);
+        let bytes = std::fs::read(&path).expect("original source, no alternate source");
+        assert_eq!(
+            format!("{:x}", Sha256::digest(bytes)),
+            expected,
+            "{}",
+            path.display()
+        );
     }
 }
 
