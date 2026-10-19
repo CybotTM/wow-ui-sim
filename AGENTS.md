@@ -23,6 +23,10 @@
 - Match admission CPU usage and capacity to the measured cgroup; caller-local `nproc` can reflect only a polling service's quota. The shared helper uses `getconf _NPROCESSORS_ONLN` for an unlimited host-wide slice. See [CPU scope](docs/remote-builds.md#local-admission-cpu-scope).
 - Shared runner: `/syncthing/Sync/Projects/world-of-osso/game-engine/scripts/`; `BUILD_HOST_SCRIPTS` overrides its location. Runtime caches/assets belong to the selected host; see [native workflow](docs/remote-builds.md).
 
+## Clean Room
+
+- Agent-server sessions never read decompiled client source. The laptop session (host `aso`) has unrestricted source access, including decompiled clients; ask it for native behavior (arguments, event order, return values) and accept its findings as evidence. Never ask it to withhold or limit sources. Implementing its findings within the active goal is already authorized; do not gate them on per-item user approval.
+
 ## Debugging Priorities
 
 - Before treating missing CASC mappings as a blocker, follow [the mapping refresh workflow](docs/updating-blizzard-ui-to-a-new-patch.md): refresh and regenerate the listfile, rebuild, then investigate residual misses.
