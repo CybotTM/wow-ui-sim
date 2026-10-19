@@ -1,3 +1,7 @@
+## [2026-10-18] source | Wrath selected quest legacy surface
+
+[System notes](systems/lua-api.md#wrath-selected-quest-legacy-surface) document selected rich-row adapters and the distinct shared prepared faction output. [Contract](../specs/wrath-quest-abandon.md) owns original-popup/selection RED, source-derived limits, pending GREEN/preservation and provisional server-response sequencing; no native or whole W1 completion claim.
+
 ## [2026-10-18] investigation | Original sizing and AsyncRequest proof
 
 [Mouse sizing](investigations/mouse-sizing-capture.md) records missing native capture and spurious script-drag routing, reproduced through unchanged DamageMeter callbacks. [AsyncRequest contract](../specs/timer-callback-provenance.md#original-asyncrequest-correlation--bounded-retail-proof) records isolated original TOC loading, both timing modes and negative fixture controls. Native outside-release/scale policy and full startup remain excluded.

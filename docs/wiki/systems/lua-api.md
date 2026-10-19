@@ -21,6 +21,12 @@ The [integrated checkpoint](../investigations/integrated-source-and-factory-proo
 
 [Path/ControlPoint](../../specs/path-control-point.md) belongs to the animation/XML subsystem, using existing target offsets and layout axes. The [owning Path proof ledger](../../specs/path-control-point.md#tests-asserting-this-spec) records recovered historical per-test GREEN; fresh startup/profile acceptance remains separately pending. Neither source inventory nor historical controls establish native or whole-handoff acceptance.
 
+## Wrath selected quest legacy surface
+
+`quest_surface/wrath_quest_log.rs` adapts selected rich rows through a Wrath-only legacy registration table; shared reward-item serialization remains in `handlers.rs`. Supplied spell/point/faction fields live on `QuestLogEntry`. `QuestLogState::process_reward_factions` copies the selected row's faction pairs into `processed_reward_factions`, the separate shared prepared output read by faction getters; selection/dialog clearing does not implicitly rebuild that output. The [owning contract](../../specs/wrath-quest-abandon.md) records source-derived cache lifetime, empty values, pending dialog-producer coverage and exact proof status.
+
+Wrath `quest_verbs.rs` separates marking from its server-response simulation and reuses `QuestLogState::abandon`; other profiles keep their existing branch. [Contract limits](../../specs/wrath-quest-abandon.md#consumer-grounding-and-source-limits) distinguish original UI compatibility from native request/event sequencing. No whole W1 acceptance is implied.
+
 ## Forever supplied quest difficulty
 
 [Owning contract and proof status](../../specs/forever-quest-difficulty.md) owns the Forever-only live rich-row difficulty getter and bounded simulator policies, not native parity. Historical [source40a receipt](../../baselines/README.md#current-watchtalent-execution--2026-10-15) records **28 PASS** (difficulty3 + watch-projection4 + finite21), separate positive normal watch/global-alias/voice checks and startup **10 records / 14 occurrences FAIL**. Its read-only projection passes and separate add/remove/type/event RED do not establish current membership behavior.

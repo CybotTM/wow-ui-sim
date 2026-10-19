@@ -1,3 +1,7 @@
+## [2026-10-18] source | Wrath selected quest reads and abandon response
+
+[Legacy surface](systems/lua-api.md#wrath-selected-quest-legacy-surface) links selected rich reward reads, shared prepared faction output and profile-specific abandonment. [Owning contract](../specs/wrath-quest-abandon.md) keeps original-consumer RED, pending GREEN/preservation and provisional native timing separate.
+
 ## [2026-10-18] investigation | Original sizing capture and release
 
 [Mouse sizing diagnosis](investigations/mouse-sizing-capture.md) links original-consumer geometry/release RED→GREEN and the registered-drag boundary. [AsyncRequest correlation](../specs/timer-callback-provenance.md#original-asyncrequest-correlation--bounded-retail-proof) records both-mode original-source/owner/ID proof and negative fixture controls, without a timer producer change.
