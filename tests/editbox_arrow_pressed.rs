@@ -98,9 +98,8 @@ fn editbox_arrow_pressed_alt_mode_requires_alt_and_releases_plain_arrows_to_bind
             table.insert(arrowCalls, key)
         end)
         bindingCalls = 0
-        SetBinding("LEFT", "CLICK ArrowBindingButton:LeftButton")
-        local button = CreateFrame("Button", "ArrowBindingButton", UIParent)
-        button:SetScript("OnClick", function() bindingCalls = bindingCalls + 1 end)
+        SetBinding("LEFT", "TOGGLEBACKPACK")
+        function ToggleBackpack() bindingCalls = bindingCalls + 1 end
         "#,
     )
     .unwrap();
