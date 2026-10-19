@@ -1,3 +1,7 @@
+## [2026-10-19] evidence | ReloadUI default-retail compilation
+
+[Contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) records full-default retail `cargo check -j1` with zero warnings, including `wow-sim`, `wow-cli`, library and auxiliary binaries. The check and 69 component-scoped behavioral passes cover the same Rust tree; later changes are documentation only. Original CVar hash/stat remain unchanged. Native lifecycle facts and full Ellesmere acceptance remain separate.
+
 ## [2026-10-19] evidence | ReloadUI client-cache continuity
 
 [Contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) combines 64 unchanged library cases at `e23196863` with five binary cases at `79f52bb3f`. The original EditMode consumer fails before the cache-reread producer and retains its non-default file-backed layout afterward. Native reread timing/order and keyboard/mouse model persistence remain INFERRED and unasserted.

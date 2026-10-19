@@ -62,7 +62,7 @@ Historical RED: four original freshness assertions on `f254e22ee`; dump/screensh
 | Startup/output owners | Real cached Blizzard startup loads twice; original EditMode consumer retains the non-default file-backed layout; dump, screenshot preparation and lua-errors observe fresh environment | Native cache-reread timing/order inferred; no full-addon acceptance claim |
 | Preservation | Existing yielded startup/texture tests pass; modeled level, zone, party count and font/texture allocations survive | No native session-parity claim |
 
-Both GREEN runtimes use child-only XDG directories with copied current CVars; original CVar hash/stat remain unchanged. `cargo fmt --check` passes. Full-default retail `cargo check` is pending capacity.
+Both GREEN runtimes use child-only XDG directories with copied current CVars; original CVar hash/stat remain unchanged. `cargo fmt --check` passes. Full-default retail `cargo check -j1` passes with zero warnings at `f5f124f93` (same Rust as `79f52bb3f`), including `wow-sim`, `wow-cli`, library and auxiliary binaries. Default features: `sound`, `gui`, `casc`, `client-retail`. Private proof: `final-check-proof.json`.
 
 ## Out of scope
 
