@@ -87,6 +87,35 @@ fn exchange(
 }
 
 #[test]
+fn exec_reload_ui_replaces_environment_before_the_next_connection() {
+    let directory = tempfile::tempdir().unwrap();
+    let socket_path = directory.path().join("reload.sock");
+    let listener = UnixListener::bind(&socket_path).unwrap();
+    listener.set_nonblocking(true).unwrap();
+    let (cmd_tx, cmd_rx) = mpsc::channel();
+    let mut app = build_app(cmd_rx);
+    let old_lua = Rc::downgrade(&app.env.borrow().lua);
+
+    let response = exchange(
+        &mut app,
+        &listener,
+        &socket_path,
+        &cmd_tx,
+        "reload_sentinel = true; print('RELOAD_REQUEST'); ReloadUI(); print('CALL_RETURNED')",
+    );
+    assert_eq!(response, "RELOAD_REQUEST\nCALL_RETURNED");
+    let response = exchange(
+        &mut app,
+        &listener,
+        &socket_path,
+        &cmd_tx,
+        "assert(reload_sentinel == nil, 'no fresh Lua environment after ReloadUI'); print('FRESH_ENV')",
+    );
+    assert_eq!(response, "FRESH_ENV");
+    assert!(old_lua.upgrade().is_none(), "IPC must release the old VM");
+}
+
+#[test]
 fn exec_print_output_is_captured_once_per_call_across_connections() {
     let directory = tempfile::tempdir().unwrap();
     let socket_path = directory.path().join("exec.sock");
