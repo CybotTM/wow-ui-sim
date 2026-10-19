@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use wow_ui_sim::font::WowFontSystem;
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::startup::{apply_delay, run_extra_update_ticks, settle_headless_startup};
 
 pub(super) fn run_gui(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
@@ -256,7 +257,7 @@ pub(super) struct ScreenshotCommand<'a> {
 
 pub(super) fn run_screenshot(
     env: &mut WowLuaEnv,
-    saved_vars: &mut Option<crate::saved_variables::SavedVariablesManager>,
+    saved_vars: &mut Option<SavedVariablesManager>,
     font_system: &Rc<RefCell<WowFontSystem>>,
     command: ScreenshotCommand<'_>,
 ) {
@@ -286,7 +287,7 @@ pub(super) fn run_screenshot(
 
 fn prepare_screenshot_env(
     env: &mut WowLuaEnv,
-    saved_vars: &mut Option<crate::saved_variables::SavedVariablesManager>,
+    saved_vars: &mut Option<SavedVariablesManager>,
     command: &ScreenshotCommand<'_>,
 ) {
     settle_headless_startup(env);
