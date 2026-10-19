@@ -134,6 +134,23 @@ fn editbox_arrow_pressed_alt_mode_requires_alt_and_releases_plain_arrows_to_bind
 
 #[test]
 fn editbox_arrow_pressed_original_blizzard_xml_and_autocomplete_consumer() {
+    use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
+    // Audited all seven shipped caches on 2026-10-18. These six define and
+    // bind AutoCompleteEditBox_OnArrowPressed in Blizzard_AutoComplete.
+    // Wrath FrameXML/AutoComplete.lua and .xml have neither the function nor
+    // an OnArrowPressed binding; this consumer is not its engine oracle.
+    let shipped_arrow_consumer = matches!(
+        ACTIVE,
+        ClientProfile::Retail
+            | ClientProfile::Ptr
+            | ClientProfile::Mists
+            | ClientProfile::Era
+            | ClientProfile::Anniversary
+            | ClientProfile::WowForever
+    );
+    if !shipped_arrow_consumer {
+        return;
+    }
     let env = WowLuaEnv::new().unwrap();
     let root = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
     for path in [
