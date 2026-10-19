@@ -1,3 +1,7 @@
+## [2026-10-19] source | Wrath readiness and placed-frame reconstruction
+
+[Reload mechanics](systems/reload-ui.md) link the [proof owner](../specs/reload-ui.md#wrath-12340-requirements): A–D bounded GREEN, two-sided C preservation and ticked original Stopwatch control. Wrath now uses readiness-driven VARIABLES_LOADED and argless PEW without synthetic WoWUISim completion. E stores character-local placed geometry in simulator units and cancels mirrors only; runtime proof pending. GameMenu early-binding and cursor/spellbook gaps remain separate.
+
 ## [2026-10-19] source | Managed Wrath saved-scope order and Retail addon payload
 
 [Managed restoration](systems/reload-ui.md#managed-addon-restoration) links the [contract](../specs/reload-ui.md#wrath-12340-requirements): original Stopwatch and Retail Settings consumer REDs precede the producer. Wrath now restores declared scopes once after code; real-addon Retail notifications append parsed-binding metadata. Value semantics remain INFERRED; LoD SV ownership stays UNMODELED. GREEN and two-sided preservation remain pending.

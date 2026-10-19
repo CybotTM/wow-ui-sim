@@ -1,3 +1,7 @@
+## [2026-10-19] system | Wrath reload lifecycle and character layout
+
+[Reload mechanics](systems/reload-ui.md) link the [profile contract](../specs/reload-ui.md#wrath-12340-requirements): A–D bounded GREEN, two-sided saved-value and ticked original Stopwatch preservation, readiness-driven variables delivery and argless Wrath entry. Character-local placed-frame restoration and selective mirror cancellation are implemented with E proof pending; unauthenticated conversion constants and separate GameMenu/cursor/spellbook gaps remain excluded.
+
 ## [2026-10-19] source | Wrath dialog request/response plumbing
 
 [Lua API notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [Wrath turn-in contract](../specs/wrath-quest-turn-in.md): shared feature-absence RED, executed A boundaries, complete bounded turn-in GREEN and Wrath preservation/zero-warning gates. The owning contract records exact receipts and remaining gaps; clear-before-emit ordering remains explicitly inferred.

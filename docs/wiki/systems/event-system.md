@@ -67,6 +67,8 @@ OnUpdate errors suppress the frame on subsequent ticks (added to `on_update_erro
 
 The [GUI startup contract](../../specs/gui-startup-yield.md) owns update-turn yielding and acceptance. [Startup mechanics](../../event-system.md#startup-event-sequence) owns the event order, first-canvas capture, IPC ordering, settling and resize dispatch; game login and glue startup have distinct sequences.
 
+Wrath uses a two-chunk readiness callback for VARIABLES_LOADED, omits the synthetic WoWUISim addon completion, and delivers argless PLAYER_ENTERING_WORLD. A pending callback may complete after login/entry; other profiles keep their prior simulator-policy order. The [ReloadUI contract](../../specs/reload-ui.md#wrath-12340-requirements) separates profile-native facts, supplied readiness and bounded proof.
+
 ## XML Script Setup
 
 Three handler forms: `function="X"` uses X directly, `method="X"` wraps as `self:X(...)`, inline body wraps as `function(self, ...) body end`. `inherit="prepend"` or `"append"` chains handlers with pcall wrapping.
