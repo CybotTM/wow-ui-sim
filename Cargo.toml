@@ -102,6 +102,8 @@ pollster = "0.4"
 tempfile = "3"
 
 [features]
+# Opt-in installed Ellesmere AuraKit acceptance test; requires ELLESMERE_AURA_KIT_PATH.
+ellesmere-acceptance = ["client-wowforever"]
 # fast-build is opt-in because the iced dylib hits MSVC's LNK1189 object limit
 # on Windows. Local Linux dev/debug builds can use `--features fast-build` for
 # faster incremental rebuilds. Release builds should use:
