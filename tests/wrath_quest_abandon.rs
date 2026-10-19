@@ -290,6 +290,29 @@ fn original_button_cancel_then_accept_marked_target() {
 }
 
 #[test]
+fn original_popup_confirmation_retains_marked_identity() {
+    let env = seed_env();
+    exec(
+        &env,
+        "SelectQuestLogEntry(1); SetAbandonQuest(); QuestLogControlPanel_UpdateState(); QuestLogFrameAbandonButton:Click(); SelectQuestLogEntry(2)",
+    );
+    exec(
+        &env,
+        "StaticPopup_FindVisible('ABANDON_QUEST').button1:Click()",
+    );
+    assert_eq!(env.state().borrow().quest_log, vec![990202]);
+    assert_eq!(
+        env.state().borrow().abandon_quest_id,
+        Some(990101),
+        "confirmation retains the marked quest ID, not the current selection"
+    );
+    let before = snapshot(&env);
+    exec(&env, "AbandonQuest()");
+    assert_eq!(snapshot(&env), before, "missing marked row is a no-op");
+    assert_eq!(env.state().borrow().abandon_quest_id, Some(990101));
+}
+
+#[test]
 fn invalid_stale_and_consumed_targets_do_not_remove_other_rows() {
     let env = seed_env();
     let before = snapshot(&env);
