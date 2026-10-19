@@ -42,6 +42,18 @@ pub fn assert_startup_readiness(ready: [bool; 2]) {
         for (chunk, was_ready) in ready.iter().enumerate() {
             if !was_ready {
                 env.set_account_cvar_chunk_ready(chunk, true).unwrap();
+                let complete = env
+                    .state()
+                    .borrow()
+                    .account_cvar_chunks_ready
+                    .iter()
+                    .all(|ready| *ready);
+                let expected_count = if complete { 3 } else { 2 };
+                assert_eq!(
+                    env.eval::<i32>("return #ReloadStartupEvents").unwrap(),
+                    expected_count,
+                    "both chunks must complete before inline variables delivery"
+                );
             }
         }
         env.exec("assert(#ReloadStartupEvents == 3 and ReloadStartupEvents[3].name == 'VARIABLES_LOADED', 'completion dispatches inline after entry')").unwrap();

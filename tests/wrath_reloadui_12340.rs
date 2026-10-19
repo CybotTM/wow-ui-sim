@@ -22,7 +22,20 @@ mod reentry;
 #[path = "common/wrath_reload_writer.rs"]
 mod placement_writer;
 
+#[path = "common/wrath_reload_entry_payload.rs"]
+mod entry_payload;
+
 use wow_ui_sim::lua_api::state::AddonInfo;
+
+#[test]
+fn wrath_startup_reload_pew_is_argless_in_fresh_original_ui() {
+    entry_payload::assert_reload_pew_arity();
+}
+
+#[test]
+fn wrath_startup_original_spellbook_hidden_show_control() {
+    entry_payload::assert_original_spellbook_paths();
+}
 
 #[test]
 fn placed_frame_writer_uses_authenticated_grammar_and_nearest_rounding() {
@@ -65,12 +78,12 @@ fn original_mirror_bars_cancel_but_totems_and_player_survive() {
 }
 
 #[test]
-fn original_ui_parent_cached_readiness_and_argless_wrath_entry() {
+fn wrath_startup_original_ui_parent_cached_readiness_and_argless_entry() {
     startup::assert_startup_readiness([true, true]);
 }
 
 #[test]
-fn original_ui_parent_waits_for_each_account_chunk() {
+fn wrath_startup_original_ui_parent_waits_for_each_account_chunk() {
     for ready in [[false, true], [true, false], [false, false]] {
         startup::assert_startup_readiness(ready);
     }
