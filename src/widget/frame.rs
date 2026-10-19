@@ -603,6 +603,7 @@ impl Default for Frame {
     }
 }
 
+#[cfg(any(feature = "gui", feature = "retail-12-0-5"))]
 impl Frame {
     pub(crate) fn cooldown_elapsed_since_start(&self, elapsed_secs: f64) -> f64 {
         let mod_rate = if self.cooldown_mod_rate > 0.0 {
@@ -626,7 +627,9 @@ impl Frame {
         }
         Some(remaining)
     }
+}
 
+impl Frame {
     pub(crate) fn editbox_selection(&self) -> Option<std::ops::Range<usize>> {
         self.editbox_highlight_range
             .and_then(|(start, end)| (start != end).then(|| start as usize..end as usize))
