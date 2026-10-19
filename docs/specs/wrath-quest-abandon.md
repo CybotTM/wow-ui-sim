@@ -20,7 +20,7 @@ Wrath legacy abandonment separates selection from confirmation in `src/lua_api/g
 ## Implementation inventory
 
 - `src/lua_api/globals/quest_verbs.rs` — profile-specific marking/confirmation over existing state.
-- `src/lua_api/globals/quest_surface/wrath_quest_log.rs` — marked supplied-title projection, selected at registration.
+- `src/lua_api/globals/quest_surface/wrath_quest_log.rs` — marked supplied-title projection and selected rich-row group recommendation, registered only for Wrath.
 - `src/lua_api/sim_substates/quest_log.rs` — existing rich membership and auxiliary stores; no parallel quest store.
 
 ## Tests asserting this spec
@@ -32,7 +32,7 @@ Wrath legacy abandonment separates selection from confirmation in `src/lua_api/g
 ## Known gaps (current cycle)
 
 - Consumer RED: original `QuestLog_SetSelection(1)` removes supplied rich/light membership and auxiliary state before confirmation. Original full startup records no Lua errors in this probe.
-- [ ] Original full-selection GREEN remains blocked downstream at `QuestInfo.lua` calling missing `GetQuestLogGroupNum`; details/map callbacks are not replaced.
+- Group-size RED: original `QuestLog_SetSelection(1)` reaches `QuestInfo_ShowGroupSize` and fails at its missing `GetQuestLogGroupNum` call. The selected-row read is implemented; original full-selection GREEN remains pending.
 - [ ] Confirmation/log-refresh GREEN and cross-profile preservation pending.
 
 ## Out of scope

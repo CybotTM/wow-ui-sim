@@ -77,6 +77,23 @@ pub(super) fn select_quest_log_entry(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn get_quest_log_group_num(state: &mut LuaState) -> LuaResult<u32> {
+    let group_size = {
+        let sim = borrow_state(state)?;
+        sim.selected_quest_log_id
+            .and_then(|id| {
+                sim.quest_log_entries
+                    .entries
+                    .iter()
+                    .find(|row| row.quest_id as u32 == id)
+            })
+            .and_then(|row| row.suggested_group_size)
+            .unwrap_or(0)
+    };
+    state.push(Val::Num(group_size as f64));
+    Ok(1)
+}
+
 pub(super) fn get_quest_log_selection(state: &mut LuaState) -> LuaResult<u32> {
     let index = {
         let sim = borrow_state(state)?;

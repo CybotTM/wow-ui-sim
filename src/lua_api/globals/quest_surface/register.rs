@@ -113,6 +113,11 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
     ("GetQuestLogPushable", get_quest_log_pushable),
     ("GetQuestLogRequiredMoney", get_required_money),
     ("GetQuestLogSelection", get_quest_log_selection),
+    #[cfg(feature = "client-wrath")]
+    (
+        "GetQuestLogGroupNum",
+        super::wrath_quest_log::get_quest_log_group_num,
+    ),
     ("GetQuestLogSelectedID", get_quest_log_selected_id),
     ("GetQuestLogTitle", get_quest_log_title),
     ("GetQuestUiMapID", get_quest_ui_map_id),
