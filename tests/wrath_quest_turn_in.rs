@@ -10,6 +10,12 @@ use consumer::*;
 #[test]
 fn original_buttons_request_then_server_policy_accepts_once() {
     let env = seed_env();
+    env.env
+        .state()
+        .borrow_mut()
+        .quest_log_entries
+        .turn_in_choices
+        .insert(998888, 1);
     open_rewards(&env);
     claim(&env);
     accept_response(&env);
