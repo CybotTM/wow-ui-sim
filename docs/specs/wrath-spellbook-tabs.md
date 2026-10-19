@@ -37,6 +37,7 @@ Wrath's legacy spellbook globals expose full and compact views of existing `SimS
 ## Tests asserting this spec
 
 - `tests/wrath_spellbook_tabinfo.rs` — unchanged original startup and SpellBook lifecycle.
+- `tests/wrath_spellbook_boundaries.rs` — approved rank-zero/missing-record policy, one-tab consistency and on-demand membership changes; execution pending.
 - `tests/wrath_spellbook_contract.rs` — focused tab binding, compact-slot mapping and synchronous UpdateSpells contracts. Ranked fixture Ebon Crown IDs 1248891/1248890/1248888 have ascending ranks 1/2/4 but descending IDs.
 - `tests/spell_api.rs`, `tests/professions_spellbook.rs` — existing C_SpellBook/profile preservation.
 
