@@ -219,8 +219,55 @@ fn supplied_objectives_original_detail_reorder_and_finished_transition() {
         sim.quest_log_entries.objective_progress.get(&990202),
         other.as_ref()
     );
-    // Native exact return arity/types, kinds, finished representation and invalid
-    // indices remain PENDING authority; no event scheduling claim.
+    // Objective completion does not schedule a native notification.
+}
+
+#[test]
+fn supplied_objective_12340_return_and_selector_contract() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec("N2Errors = {}; seterrorhandler(function(e) N2Errors[#N2Errors+1] = tostring(e) end)")
+        .unwrap();
+    seed(&env);
+    exec(
+        &env,
+        r#"
+        SelectQuestLogEntry(1)
+        local function pack(...) return {n = select('#', ...), ...} end
+        local first = pack(GetQuestLogLeaderBoard(1))
+        assert(first.n == 3 and first[1] == "Wolves slain: 1/2")
+        assert(first[2] == "monster" and first[3] == nil)
+        local finished = pack(GetQuestLogLeaderBoard(2))
+        assert(finished.n == 3 and finished[2] == "item" and finished[3] == 1)
+        for _, index in ipairs({"1", " 1.9 ", "0x1"}) do
+            assert(GetQuestLogLeaderBoard(index) == first[1])
+        end
+        assert(GetQuestLogLeaderBoard(1, "2") == "Crates gathered: 0/3")
+        for _, index in ipairs({0, -1, 99, "not a number", false, {}}) do
+            assert(GetQuestLogLeaderBoard(1, index) == first[1])
+        end
+        for _, index in ipairs({0, -1, 99}) do
+            assert(GetNumQuestLeaderBoards(index) == 0)
+        end
+        for _, index in ipairs({"not a number", false, {}}) do
+            assert(GetNumQuestLeaderBoards(index) == 2)
+        end
+        assert(GetNumQuestLeaderBoards() == 2)
+        assert(GetNumQuestLeaderBoards("2") == 1)
+        assert(GetNumQuestLeaderBoards(" 0x2 ") == 1)
+        assert(GetNumQuestLeaderBoards(1.9) == 2)
+        local function usage(...)
+            local ok, err = pcall(GetQuestLogLeaderBoard, ...)
+            assert(not ok and tostring(err):find("Usage: GetQuestLogLeaderBoard(index)", 1, true))
+        end
+        usage(); usage(nil); usage(false); usage({}); usage("not a number")
+        SelectQuestLogEntry(99)
+        local missing = pack(GetQuestLogLeaderBoard(1))
+        assert(missing.n == 3 and missing[1] == nil and missing[2] == nil and missing[3] == nil)
+        assert(GetNumQuestLeaderBoards() == 0)
+        assert(GetQuestLogLeaderBoard(1, 2) == "Crates gathered: 0/3")
+        assert(GetNumQuestLeaderBoards(2) == 1)
+    "#,
+    );
 }
 
 #[test]
@@ -256,6 +303,25 @@ fn supplied_objectives_empty_unknown_and_independent_environments() {
         .quest_log_entries
         .objective_progress
         .remove(&990101);
+    exec(&env, "N2.empty()");
+    // A catalog identity must not resurrect static objective rows either.
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.quest_log_entries.entries[0].quest_id = 80000;
+        sim.quest_log[0] = 80000;
+        sim.selected_quest_log_id = Some(80000);
+        assert!(commit_objective_progress(
+            &mut sim.quest_log_entries,
+            80000,
+            QuestObjectiveProgress::default(),
+        ));
+    }
+    exec(&env, "N2.empty()");
+    env.state()
+        .borrow_mut()
+        .quest_log_entries
+        .objective_progress
+        .remove(&80000);
     exec(&env, "N2.empty()");
 }
 
