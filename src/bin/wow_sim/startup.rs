@@ -109,7 +109,7 @@ mod tests {
             saved_vars,
             iced::Size::new(1024.0, 768.0),
             "reload_sentinel = true; CreateFrame('Frame', 'ReloadOldFrame'); \
-             Blizzard_Console_SavedVars.__reload_test = 73; ReloadUI()", 
+             Blizzard_Console_SavedVars.__reload_test = 73; ReloadUI()",
             &[],
             Some(
                 "assert(reload_sentinel == nil, 'no fresh Lua environment after ReloadUI'); \
