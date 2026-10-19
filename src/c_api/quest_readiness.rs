@@ -19,6 +19,21 @@ pub struct QuestReadinessState {
     pub auto_complete: HashSet<i32>,
     pub notified: HashSet<i32>,
     pub dialog: Option<(i32, QuestDialogPhase)>,
+    /// Supplied Wrath active-player context; fixtures explicitly set presence.
+    pub active_player_present: bool,
+    /// Wrath response latch; SetState resets it, CloseQuest preserves it.
+    pub response_sent: bool,
+    /// Concrete supplied NPC GUID; zero means no giver, never an NPC fallback.
+    pub giver_guid: u64,
+    /// Concrete supplied next quest ID; zero means no continuation.
+    pub next_quest_id: i32,
+    /// Supplied simulator response policy: acceptance completes a cache-hit callback inline.
+    /// False does not specify when a native cache-miss callback will complete.
+    pub completion_callback_cache_hit: bool,
+    /// CompleteQuest request awaiting simulator-supplied offer data.
+    pub reward_requested: Option<i32>,
+    /// GetQuestReward request awaiting simulator acceptance, not a receipt.
+    pub pending_reward_choice: Option<(i32, usize)>,
     pub popups: Vec<(i32, String)>,
 }
 

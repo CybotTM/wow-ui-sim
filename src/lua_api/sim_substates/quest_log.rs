@@ -41,6 +41,8 @@ pub struct QuestLogEntry {
     /// Item rewards iterated by `GetNumQuestLogRewards` /
     /// `GetQuestLogRewardInfo`. Empty for quests with no item rewards.
     pub reward_items: Vec<QuestRewardItem>,
+    /// Supplied dialog reward choices; empty means no choices.
+    pub reward_choices: Vec<QuestRewardItem>,
     /// Supplied Wrath rewards; absent spell and zero points mean no reward.
     pub reward_spell: Option<QuestRewardSpell>,
     pub reward_arena_points: u32,
@@ -104,6 +106,8 @@ pub struct QuestLogState {
     /// Quest IDs already turned in / permanently completed.
     /// Drives `GetAllCompletedQuestIDs` and `IsQuestFlaggedCompleted`.
     pub completed_quest_ids: HashSet<i32>,
+    /// Simulator acceptance receipt, not native inventory acquisition.
+    pub turn_in_choices: HashMap<i32, usize>,
 }
 
 impl QuestLogState {
@@ -185,6 +189,7 @@ impl QuestLogState {
             #[cfg(feature = "client-wrath")]
             daily_quest_ids: [0; WRATH_DAILY_QUEST_LIMIT],
             completed_quest_ids: seeded_completed_quest_ids(),
+            turn_in_choices: HashMap::new(),
         }
     }
 }
@@ -215,6 +220,7 @@ fn ordinary_offer_entry(quest_id: i32, offer: &GossipQuestRow) -> QuestLogEntry 
         criteria_spell_texture: None,
         criteria_spell_finished: false,
         reward_items: Vec::new(),
+        reward_choices: Vec::new(),
         reward_spell: None,
         reward_arena_points: 0,
         reward_talents: 0,
@@ -248,6 +254,7 @@ fn seed_quest_defaults() -> QuestLogEntry {
         criteria_spell_texture: None,
         criteria_spell_finished: false,
         reward_items: Vec::new(),
+        reward_choices: Vec::new(),
         reward_spell: None,
         reward_arena_points: 0,
         reward_talents: 0,
