@@ -25,7 +25,7 @@ pub(super) fn attach_texture(state: &mut LuaState, tooltip_id: u64) -> LuaResult
     let uv = read_texture_coords(state)?;
     let mut sim = borrow_state_mut(state)?;
     assign_slot_texture(&mut sim, texture_id, path, value, uv);
-    anchor_attachment(&mut sim, tooltip_id, row, texture_id, left_id, adjacent);
+    anchor_attachment(&mut sim, tooltip_id, left_id, (row, texture_id, adjacent));
     sim.tooltips
         .entry(tooltip_id)
         .or_default()
@@ -91,14 +91,8 @@ fn assign_slot_texture(
     }
 }
 
-fn anchor_attachment(
-    sim: &mut SimState,
-    tooltip: u64,
-    row: usize,
-    texture: u64,
-    left: u64,
-    adjacent: bool,
-) {
+fn anchor_attachment(sim: &mut SimState, tooltip: u64, left: u64, slot: (usize, u64, bool)) {
+    let (row, texture, adjacent) = slot;
     let width = sim.widgets.get(texture).map_or(0.0, |frame| frame.width);
     let gap = crate::lua_api::tooltip::wrath_texture_gap(sim.screen_width, sim.screen_height);
     let previous = sim
@@ -113,11 +107,9 @@ fn anchor_attachment(
     replace_anchor(
         sim,
         texture,
-        AnchorPoint::TopRight,
         left,
-        AnchorPoint::TopLeft,
-        -gap,
-        0.0,
+        (AnchorPoint::TopRight, AnchorPoint::TopLeft),
+        (-gap, 0.0),
     );
     let next = sim
         .widgets
@@ -136,32 +128,28 @@ fn anchor_below(sim: &mut SimState, id: u64, previous: u64, x: f32) {
     replace_anchor(
         sim,
         id,
-        AnchorPoint::TopLeft,
         previous,
-        AnchorPoint::BottomLeft,
-        x,
-        -ROW_GAP,
+        (AnchorPoint::TopLeft, AnchorPoint::BottomLeft),
+        (x, -ROW_GAP),
     );
 }
 
 fn replace_anchor(
     sim: &mut SimState,
     id: u64,
-    point: AnchorPoint,
     relative: u64,
-    relative_point: AnchorPoint,
-    x: f32,
-    y: f32,
+    points: (AnchorPoint, AnchorPoint),
+    offset: (f32, f32),
 ) {
     sim.widgets.remove_all_anchor_dependents_for(id);
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.anchors = vec![Anchor {
-            point,
+            point: points.0,
             relative_to: None,
             relative_to_id: Some(relative as usize),
-            relative_point,
-            x_offset: x,
-            y_offset: y,
+            relative_point: points.1,
+            x_offset: offset.0,
+            y_offset: offset.1,
         }];
     }
     sim.widgets.add_anchor_dependent(relative, id);
