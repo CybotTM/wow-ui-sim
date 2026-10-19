@@ -19,7 +19,20 @@ mod preservation;
 #[path = "common/wrath_reload_reentry.rs"]
 mod reentry;
 
+#[path = "common/wrath_reload_writer.rs"]
+mod placement_writer;
+
 use wow_ui_sim::lua_api::state::AddonInfo;
+
+#[test]
+fn placed_frame_writer_uses_authenticated_grammar_and_nearest_rounding() {
+    placement_writer::assert_writer_grammar_and_rounding();
+}
+
+#[test]
+fn placed_frame_writer_rewrites_an_empty_snapshot_header() {
+    placement_writer::assert_empty_writer();
+}
 
 #[test]
 fn wrath_shutdown_combat_reentry_receives_argless_regen_disabled() {
