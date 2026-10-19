@@ -7,7 +7,15 @@ mod original;
 #[path = "common/wrath_reload_shutdown.rs"]
 mod shutdown;
 
+#[path = "common/wrath_reload_saved_variables.rs"]
+mod saved_variables;
+
 use wow_ui_sim::lua_api::state::AddonInfo;
+
+#[test]
+fn original_stopwatch_restores_saved_variables_after_code_before_event() {
+    saved_variables::assert_original_restore_after_code();
+}
 
 #[test]
 fn original_logout_handlers_persist_after_in_world_combat_shutdown() {
