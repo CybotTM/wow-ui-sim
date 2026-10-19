@@ -220,5 +220,76 @@ fn supplied_objectives_original_detail_reorder_and_finished_transition() {
         other.as_ref()
     );
     // Native exact return arity/types, kinds, finished representation and invalid
-    // indices remain PENDING Q1-Q5 in REPORT.md; no event scheduling claim.
+    // indices remain PENDING authority; no event scheduling claim.
+}
+
+#[test]
+fn supplied_objectives_empty_unknown_and_independent_environments() {
+    let env = load_supplied_objective_env();
+    let independent = load_supplied_objective_env();
+    exec(&env, "N2.directA(false)");
+    {
+        let mut sim = env.state().borrow_mut();
+        assert!(commit_objective_progress(
+            &mut sim.quest_log_entries,
+            990101,
+            QuestObjectiveProgress::default(),
+        ));
+    }
+    exec(&env, "N2.empty()");
+    exec(&independent, "N2.directA(false); N2.detailA(false)");
+    {
+        let sim = env.state().borrow();
+        assert!(
+            sim.quest_log_entries
+                .objective_progress
+                .contains_key(&990101)
+        );
+        assert!(
+            sim.quest_log_entries.objective_progress[&990101]
+                .objectives
+                .is_empty()
+        );
+    }
+    env.state()
+        .borrow_mut()
+        .quest_log_entries
+        .objective_progress
+        .remove(&990101);
+    exec(&env, "N2.empty()");
+}
+
+#[test]
+fn supplied_objective_type_substitution_and_queries_are_read_only() {
+    let env = load_supplied_objective_env();
+    let before = {
+        let mut sim = env.state().borrow_mut();
+        let progress = QuestObjectiveProgress {
+            objectives: vec![objective("", "authored fallback text", false, (0, 1))],
+            ..Default::default()
+        };
+        assert!(commit_objective_progress(
+            &mut sim.quest_log_entries,
+            990101,
+            progress
+        ));
+        format!("{:?}", sim.quest_log_entries)
+    };
+    exec(
+        &env,
+        r#"
+        local frame, last = QuestInfo_ShowObjectives()
+        assert(frame == QuestInfoObjectivesFrame and last == QuestInfoObjective1)
+        assert(QuestInfoObjective1:GetText() == "authored fallback text")
+        assert(QuestInfoObjective1:IsShown() and not QuestInfoObjective2:IsShown())
+        for i = 1, 3 do
+            assert(GetNumQuestLeaderBoards() == 1)
+            assert(GetQuestLogLeaderBoard(1) == "")
+            GetQuestLogQuestText()
+        end
+    "#,
+    );
+    let sim = env.state().borrow();
+    assert_eq!(format!("{:?}", sim.quest_log_entries), before);
+    assert_eq!(sim.selected_quest_log_id, Some(990101));
 }
