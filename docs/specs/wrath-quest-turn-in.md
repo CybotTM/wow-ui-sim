@@ -48,6 +48,8 @@ Main approved using the existing `GossipState.giver_guid` as the single concrete
 - `src/lua_api/globals/admin_quests.rs`: existing selected-quest admin behavior; proposed Wrath offer/completion response policy still required. Preserve existing Retail/Forever policy.
 - `tests/common/wrath_turn_in_consumer.rs`: original full-startup fixture, concrete inputs and producer-only notification drain; no callback/API replacement.
 
+`Cargo.toml` explicitly registers `wrath_quest_turn_in` because automatic integration-test discovery is disabled. The v4 packet omitted this fixture prerequisite; the initial attempted RED build therefore did not execute a test.
+
 ## Tests asserting this spec
 
 `tests/wrath_quest_turn_in.rs`: 30 authored cases, not 30 reached REDs. Restaging evidence artifact identifier: `w1-turnin-restage-12340-v4` (external, not a tracked report). Its report classifies 12 cases as step-A controls and 18 as step-B named assertion boundaries under Main's staged producer disposition; no step-A receipts have executed. `accepted_response_remains_answered_after_close` is an A post-completion negative acceptance control, not response-sent guard RED: the target row is already consumed. Pending-claim cases `answered_dialog_ignores_both_verbs_and_close_does_not_reset_latch` and `answered_guard_precedes_invalid_choice_after_successful_send` retain the related guard-boundary expectations. `tests/common/wrath_full_ui.rs` is reused unchanged from base 122f26445. Cached original QuestFrame/QuestInfo/QuestLogFrame Lua/XML hashes are provenance preconditions, not substitutes for behavioral assertions.
