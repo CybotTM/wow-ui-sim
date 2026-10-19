@@ -51,6 +51,14 @@ fn assert_originals() {
     let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc().unwrap();
     for (file, expected) in [
         (
+            "UIParent.lua",
+            "a48687367d05ba9965bdd7a43bdecb92666c8ba74873bd7d9da08b205b34e177",
+        ),
+        (
+            "Constants.lua",
+            "367f5024098edda7d8dbcc9f57cf2616c85da4a3a9eb9851d2d4fc0bea8b72fd",
+        ),
+        (
             "QuestLogFrame.lua",
             "6ac6ca92b3036417082b88cc2f8b5c9fc8889f51f82aa726fe0bcd44990bc5e2",
         ),
@@ -166,6 +174,120 @@ fn snapshot(env: &WowLuaEnv) -> String {
         sim.player.money,
         sim.player.xp
     )
+}
+
+#[test]
+fn original_difficulty_color_uses_player_level_green_bands() {
+    let env = seed_env();
+    for (level, range) in [
+        (9, 4),
+        (10, 5),
+        (19, 5),
+        (20, 6),
+        (29, 6),
+        (30, 7),
+        (39, 7),
+        (40, 8),
+        (45, 8),
+        (55, 8),
+        (60, 8),
+        (80, 8),
+        (95, 8),
+        (1000, 8),
+    ] {
+        env.state().borrow_mut().player.level = level;
+        exec(
+            &env,
+            &format!(
+                r#"
+            local function assertColor(color, r, g, b)
+                assert(color.r == r and color.g == g and color.b == b, 'original difficulty color at player level {level}')
+            end
+            assertColor(GetQuestDifficultyColor({green}), 0.25, 0.75, 0.25)
+            assertColor(GetQuestDifficultyColor({gray}), 0.50, 0.50, 0.50)
+            assertColor(GetQuestDifficultyColor({red}), 1.00, 0.10, 0.10)
+            assertColor(GetQuestDifficultyColor({orange}), 1.00, 0.50, 0.25)
+            assertColor(GetQuestDifficultyColor({yellow}), 1.00, 1.00, 0.00)
+            assert(select('#', GetQuestGreenRange()) == 1)
+            assert(GetQuestGreenRange() == {range}, 'live player-derived range')
+            assert(GetQuestGreenRange('player') == {range})
+            assert(GetQuestGreenRange('target', false, {{}}) == {range}, 'arguments ignored')
+        "#,
+                green = level - range,
+                gray = level - range - 1,
+                red = level + 5,
+                orange = level + 3,
+                yellow = level - 2
+            ),
+        );
+    }
+}
+
+#[test]
+fn original_standalone_detail_button_cancel_accepts_marked_target() {
+    let env = seed_env();
+    exec(
+        &env,
+        r#"
+        QuestLog_SetSelection(1)
+        assert(not QuestLogFrame:IsShown(), 'standalone original detail route')
+        assert(QuestLogDetailFrame:IsShown())
+        assert(QuestLogControlPanel:GetParent() == QuestLogDetailFrame)
+        assert(QuestLogFrameAbandonButton:IsVisible(), 'real original control is visible')
+    "#,
+    );
+    let before = snapshot(&env);
+    exec(
+        &env,
+        r#"
+        QuestLogFrameAbandonButton:Click()
+        local popup = StaticPopup_FindVisible('ABANDON_QUEST')
+        assert(popup and popup:IsVisible())
+        assert(string.find(popup.text:GetText(), 'Wrath abandon first', 1, true))
+        popup.button2:Click()
+        assert(not popup:IsShown())
+    "#,
+    );
+    assert_eq!(
+        snapshot(&env),
+        before,
+        "visible original cancel preserves state"
+    );
+    let history = env
+        .state()
+        .borrow()
+        .quest_log_entries
+        .completed_quest_ids
+        .clone();
+    let economy = {
+        let sim = env.state().borrow();
+        (sim.player.money, sim.player.xp)
+    };
+    exec(
+        &env,
+        r#"
+        QuestLogFrameAbandonButton:Click()
+        SelectQuestLogEntry(2)
+        StaticPopup_FindVisible('ABANDON_QUEST').button1:Click()
+        assert(not QuestLogDetailFrame:IsShown(), 'original confirmation hides detail')
+    "#,
+    );
+    assert_eq!(dispatch_queued_abandon_events(&env), 1);
+    {
+        let sim = env.state().borrow();
+        assert_eq!(sim.quest_log, vec![990202]);
+        assert_eq!(sim.quest_log_entries.entries.len(), 1);
+        assert_eq!(sim.quest_log_entries.entries[0].quest_id, 990202);
+        assert_eq!(sim.quest_log_entries.completed_quest_ids, history);
+        assert_eq!((sim.player.money, sim.player.xp), economy);
+        assert_eq!(sim.abandon_quest_id, Some(990101));
+    }
+    exec(
+        &env,
+        "assert(#AbandonEvents == 1 and AbandonEvents[1][3] == 'Wrath abandon second'); AbandonQuest()",
+    );
+    assert_eq!(dispatch_queued_abandon_events(&env), 0);
+    assert_eq!(env.state().borrow().quest_log, vec![990202]);
 }
 
 #[test]
