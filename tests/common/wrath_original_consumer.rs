@@ -2,18 +2,21 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-pub fn load_original(env: &WowLuaEnv, name: &str) {
+pub fn load_original_files(env: &WowLuaEnv, names: &[&str]) {
     let cache = dirs::cache_dir()
         .expect("cache directory")
         .join("wow-ui-sim/blizzard-ui/wrath/FrameXML");
-    assert!(
-        cache.join(name).is_file(),
-        "SETUP: original consumer {name} absent"
-    );
-    let mut toc =
-        wow_ui_sim::toc::TocFile::parse(&cache, &format!("## Interface: 30300\n{name}\n"));
-    toc.name = format!("Blizzard_LabelFixture_{name}");
+    for name in names {
+        assert!(
+            cache.join(name).is_file(),
+            "SETUP: original consumer {name} absent"
+        );
+    }
+    // Loading deduplicates by directory, so the entire original file sequence
+    // must share one TOC rather than repeatedly loading the same directory.
+    let files = names.join("\n");
+    let toc = wow_ui_sim::toc::TocFile::parse(&cache, &format!("## Interface: 30300\n{files}\n"));
     let loaded = wow_ui_sim::loader::load_addon_from_toc(&env.loader_env(), &toc)
-        .expect("SETUP: load unchanged original consumer");
+        .expect("SETUP: load unchanged original consumers");
     assert!(loaded.warnings.is_empty(), "SETUP: {:?}", loaded.warnings);
 }

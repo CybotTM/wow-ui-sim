@@ -4,18 +4,20 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[path = "wrath_original_consumer.rs"]
 mod originals;
-pub use originals::load_original;
+use originals::load_original_files;
 
 pub fn tooltip_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
-    for name in [
-        "Fonts.xml",
-        "FontStyles.xml",
-        "GameTooltip.lua",
-        "GameTooltipTemplate.xml",
-    ] {
-        load_original(&env, name);
-    }
+    load_original_files(
+        &env,
+        &[
+            "Fonts.xml",
+            "FontStyles.xml",
+            "GameTooltip.lua",
+            "GameTooltipTemplate.xml",
+            "LFRFrame.lua",
+        ],
+    );
     env.exec(
         r#"
         B6Tip=CreateFrame('GameTooltip','B6Tip',UIParent,'GameTooltipTemplate')
@@ -29,7 +31,6 @@ pub fn tooltip_env() -> WowLuaEnv {
 
 pub fn lfr_env() -> WowLuaEnv {
     let env = tooltip_env();
-    load_original(&env, "LFRFrame.lua");
     env.exec(LFR_INPUTS).unwrap();
     env
 }
