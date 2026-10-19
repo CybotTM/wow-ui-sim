@@ -1,4 +1,4 @@
-//! Staged only: no compile/runtime proof. Original Wrath source is required, not copied.
+//! Original Wrath minimap consumer; no copied or substituted handlers.
 #![cfg(feature = "client-wrath")]
 
 use wow_ui_sim::lua_api::WowLuaEnv;

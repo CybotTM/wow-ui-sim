@@ -51,7 +51,6 @@ fn b6_c4_utf8_password_matches_byte_count_stars_and_caret() {
     env.fire_on_update(0.016).unwrap();
     env.exec("assert(Masked:GetText()=='é猫' and not Masked:IsPassword())")
         .unwrap();
-    // cases.md requires emitted glyph comparison too; caret alone is not full render proof.
 }
 #[test]
 fn b6_c4_xml_password_one_precedes_onload() {

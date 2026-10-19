@@ -1,4 +1,4 @@
-//! Staged, unexecuted behavioural contracts: Wrath 12340 only; Cataclysm 15595 corroborates, Mists/Retail unknown.
+//! Wrath 12340 region contracts; Cataclysm 15595 corroborates only.
 #![cfg(feature = "client-wrath")]
 
 use wow_ui_sim::lua_api::WowLuaEnv;
