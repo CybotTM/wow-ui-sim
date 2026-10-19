@@ -9,7 +9,7 @@ const CURRENT_FRAMES: &str = r#"
     WorldMapFrame:ClearAllPoints()
     WorldMapFrame:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', 10, 20)
     WorldMapFrame:SetSize(90, 70)
-    for _, name in ipairs({'ReloadResizable', 'ReloadMovableOnly', 'ReloadNotPlaced', 'ReloadImmovable', 'ReloadDontSave', 'ReloadLoadDontSave'}) do
+    for _, name in ipairs({'ReloadResizable', 'ReloadMovableOnly', 'ReloadNotPlaced', 'ReloadImmovable', 'ReloadDontSave', 'ReloadLoadDontSave', 'ReloadUnresolved'}) do
         local f = CreateFrame('Frame', name, UIParent)
         f:SetSize(120, 80)
         f:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', 10, 20)
@@ -39,15 +39,17 @@ pub fn assert_placed_frames() {
         WorldMapFrame:SetFrameLevel(42)
         ReloadDontSave:SetDontSavePosition(true)
         ReloadLoadDontSave:SetDontSavePosition(false)
-        for _, f in ipairs({ReloadResizable, ReloadMovableOnly, ReloadDontSave, ReloadImmovable, ReloadLoadDontSave}) do
+        for _, f in ipairs({ReloadResizable, ReloadMovableOnly, ReloadDontSave, ReloadImmovable, ReloadLoadDontSave, ReloadUnresolved}) do
             f:SetUserPlaced(true)
         end
-        for _, f in ipairs({ReloadResizable, ReloadMovableOnly, ReloadNotPlaced, ReloadDontSave, ReloadImmovable, ReloadLoadDontSave}) do
+        for _, f in ipairs({ReloadResizable, ReloadMovableOnly, ReloadNotPlaced, ReloadDontSave, ReloadImmovable, ReloadLoadDontSave, ReloadUnresolved}) do
             f:ClearAllPoints()
             f:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', 177, 188)
             f:SetSize(321, 219)
             f:SetFrameLevel(31)
         end
+        ReloadUnresolved:ClearAllPoints()
+        assert(select('#', ReloadUnresolved:GetRect()) == 0, 'fixture has no queryable rect')
         ReloadUnnamed = CreateFrame('Frame', nil, UIParent)
         ReloadUnnamed:SetMovable(true)
         ReloadUnnamed:SetUserPlaced(true)
@@ -81,7 +83,7 @@ pub fn assert_placed_frames() {
         placement(ReloadMovableOnly, 120, 80, 31, 177, 188)
         placement(ReloadLoadDontSave, 120, 80, 31, 177, 188)
         assert(ReloadLoadDontSave:IsUserPlaced(), 'load does not recheck DontSavePosition')
-        for _, f in ipairs({ReloadNotPlaced, ReloadDontSave, ReloadImmovable}) do placement(f, 120, 80, 7, 10, 20) end
+        for _, f in ipairs({ReloadNotPlaced, ReloadDontSave, ReloadImmovable, ReloadUnresolved}) do placement(f, 120, 80, 7, 10, 20) end
     "#).unwrap();
     assert!(
         storage
@@ -120,7 +122,7 @@ pub fn assert_tolerant_reader() {
     env.set_reload_loader(move |env, _| {
         env.exec(FRAMES)?;
         std::fs::create_dir_all(path.parent().unwrap()).unwrap();
-        std::fs::write(&path, "vErSiOn: 999\r\nUnknown: ignored\r\nfRaMe: ReloadReader\r\nx: 12junk\r\ny: -7rest\r\nw: 41\r\nh: 52\r\nAnchor: BOTTOMRIGHT\r\nAnchor: invalid\rFrame: ReloadMissingField\rX: 5").unwrap();
+        std::fs::write(&path, "vErSiOn: 999\r\nUnknown: ignored\r\nfRaMe: ReloadReader\r\nx: 12junk\r\ny: -7rest\r\nw: 41\r\nh: 52\r\nFrameLevel: 777\r\nAnchor: BOTTOMRIGHT\r\nAnchor: invalid\rFrame: ReloadMissingField\rX: 5").unwrap();
         Ok(())
     });
     let mut manager = Some(SavedVariablesManager::with_storage_dir(
@@ -131,7 +133,7 @@ pub fn assert_tolerant_reader() {
     env.exec(r#"
         local point, root, relativePoint, x, y = ReloadReader:GetPoint()
         assert(point == 'BOTTOMRIGHT' and relativePoint == point and root == UIParent and x == 12 and y == -7)
-        assert(ReloadReader:GetWidth() == 41 and ReloadReader:GetHeight() == 52 and ReloadReader:GetFrameLevel() == 7)
+        assert(ReloadReader:GetWidth() == 41 and ReloadReader:GetHeight() == 52 and ReloadReader:GetFrameLevel() == 135, 'level increases cap at 128')
         local p, _, rp, dx, dy = ReloadMissingField:GetPoint()
         assert(p == 'TOPLEFT' and rp == p and dx == 5 and dy == 0, 'per-frame defaults')
         assert(ReloadMissingField:GetWidth() == 0 and ReloadMissingField:GetHeight() == 0, 'reset H rather than reconstruction carry-over')
@@ -173,7 +175,8 @@ pub fn assert_selective_timers() {
         Ok(())
     });
     env.exec("ReloadUI()").unwrap();
-    assert!(env.service_headless_reload(&mut None).unwrap());
+    assert!(env.service_reload(&mut None).unwrap());
+    wow_ui_sim::startup::fire_startup_events(&env);
     assert_eq!(
         env.eval::<String>("return GetMirrorTimerInfo(1)").unwrap(),
         "UNKNOWN",
@@ -184,7 +187,7 @@ pub fn assert_selective_timers() {
         guid
     );
     env.exec(r#"
-        assert(GetTotemInfo(1) == true and TotemFrame.activeTotems == 1, 'totem survives and original fresh consumer renders it')
+        assert(GetTotemInfo(1) == true and TotemFrame.activeTotems == 1 and TotemFrame:IsShown(), 'totem survives and original fresh PEW consumer renders it')
         for i = 1, MIRRORTIMER_NUMTIMERS do assert(_G['MirrorTimer'..i].timer == nil, 'fresh original mirror bars do not restart') end
     "#).unwrap();
 }

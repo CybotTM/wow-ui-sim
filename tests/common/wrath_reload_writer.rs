@@ -59,3 +59,24 @@ pub fn assert_empty_writer() {
     );
     assert_eq!(std::fs::read_to_string(path).unwrap(), "Version: 1\n");
 }
+
+pub fn assert_disabled_persistence_writes_no_layout() {
+    let data = std::path::PathBuf::from(std::env::var_os("XDG_DATA_HOME").unwrap());
+    let storage = data.join("wow-sim/SavedVariables");
+    let existed = storage.try_exists().unwrap();
+    let mut env = WowLuaEnv::new().unwrap();
+    env.exec("local f = CreateFrame('Frame', 'ReloadDisabledWriter', UIParent); f:SetMovable(true); f:SetUserPlaced(true); f:SetSize(200, 100); f:SetPoint('CENTER', UIParent, 'CENTER'); ReloadUI()").unwrap();
+    env.service_reload(&mut None).unwrap();
+    assert_eq!(
+        storage.try_exists().unwrap(),
+        existed,
+        "manager None must not create a persistence root"
+    );
+    assert!(
+        !storage
+            .join("SimRealm/SimPlayer/layout-local.txt")
+            .try_exists()
+            .unwrap(),
+        "manager None must not write layout-local.txt"
+    );
+}

@@ -38,12 +38,17 @@ fn wrath_startup_original_spellbook_hidden_show_control() {
 }
 
 #[test]
-fn placed_frame_writer_uses_authenticated_grammar_and_nearest_rounding() {
+fn wrath_preservation_writer_uses_authenticated_grammar_and_nearest_rounding() {
     placement_writer::assert_writer_grammar_and_rounding();
 }
 
 #[test]
-fn placed_frame_writer_rewrites_an_empty_snapshot_header() {
+fn wrath_preservation_disabled_persistence_writes_no_layout() {
+    placement_writer::assert_disabled_persistence_writes_no_layout();
+}
+
+#[test]
+fn wrath_preservation_writer_rewrites_an_empty_snapshot_header() {
     placement_writer::assert_empty_writer();
 }
 
@@ -58,22 +63,22 @@ fn wrath_shutdown_noncombat_reentry_omits_regen_disabled() {
 }
 
 #[test]
-fn placed_frame_anchor_selection_uses_first_corresponding_point_on_ties() {
+fn wrath_preservation_anchor_selection_uses_first_corresponding_point_on_ties() {
     preservation::assert_anchor_tie();
 }
 
 #[test]
-fn placed_frame_reader_accepts_tolerant_records_and_resets_missing_fields() {
+fn wrath_preservation_reader_accepts_tolerant_records_and_resets_missing_fields() {
     preservation::assert_tolerant_reader();
 }
 
 #[test]
-fn original_world_map_restores_only_eligible_named_placements() {
+fn wrath_preservation_original_world_map_restores_only_eligible_named_placements() {
     preservation::assert_placed_frames();
 }
 
 #[test]
-fn original_mirror_bars_cancel_but_totems_and_player_survive() {
+fn wrath_preservation_original_mirror_bars_cancel_but_totems_and_player_survive() {
     preservation::assert_selective_timers();
 }
 
