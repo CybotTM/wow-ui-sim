@@ -1,4 +1,4 @@
-# Wrath ordinary quest acceptance — draft, unexecuted
+# Wrath ordinary quest acceptance
 
 Original GossipFrame/greeting selection and QuestFrame accept callback must commit the pending supplied offer to existing light and rich membership, once. No separate quest store or vendor changes.
 
@@ -29,7 +29,8 @@ Original consumer citations use paths relative to the Wrath runtime source root:
 - [ ] Preceding abandon/read lane and `tests/common/wrath_full_ui.rs` must land first.
 - [x] Explicit `GossipState.giver_guid` supplies stored dialog identity, default zero, with nonzero fixtures set through the existing Rust state input. Authority: laptop `packet-20261018.md`, Q1 (accept closure), Q2 (full-log closure), Q4 (turn-in closure). No inference from `gossip.active` and no fallback giver.
 - [ ] Missing-player lifecycle remains unmodeled: `group_queries::unit_exists_in_state("player")` always returns true; `UnitGUID` uses the same resolver and a seeded identity. Reuse that resolver; no parallel presence flag. Header generation, giver acquisition/reset and native identity encoding remain gaps.
-- [ ] Genuine reached RED, targeted Wrath GREEN, confirmation preservation, formatting/check/readability and stock startup Lua-error proof remain unexecuted integration gates.
+- [x] Original-consumer RED on fixture revision `2a284f45f`: missing native AcceptQuest and legacy gossip count producers.
+- [ ] Targeted GREEN and Retail/Forever preservation remain gates.
 
 ## Out of scope
 
@@ -43,3 +44,5 @@ Party/PvP confirmation, auto-accept, watches, turn-in/rewards, native packet/tic
 - `src/lua_api/sim_substates/quest_log.rs`: ordered rich membership and snapshots.
 
 See [Lua API](../wiki/systems/lua-api.md), [loading](../addon-loading-pipeline.md), [events](../event-system.md).
+
+Wrath-only temporary ordinary PvP/auto-accept flag defaults live in `src/lua_api/workarounds/temporary/quest_progress_requirements.rs`; retire when supplied quest flag state lands. Acceptance and abandonment share immediate player UNIT / deferred coalesced log notification policy.

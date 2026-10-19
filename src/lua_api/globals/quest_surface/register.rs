@@ -241,8 +241,6 @@ pub fn register_quest_classification_handler(state: &mut LuaState) -> LuaResult<
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
-    #[cfg(feature = "client-wrath")]
-    super::wrath_gossip::register_all(lua)?;
     for (name, func) in GLOBAL_QUEST_FUNCTIONS {
         let func = *func;
         #[cfg(feature = "client-wrath")]
@@ -255,6 +253,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         };
         LuaApiMut::register_function(lua, name, func)?;
     }
+    #[cfg(feature = "client-wrath")]
+    super::wrath_gossip::register_all(lua)?;
     #[cfg(feature = "client-wrath")]
     for (name, func) in super::wrath_quest_log::LEGACY_READS {
         LuaApiMut::register_function(lua, name, *func)?;

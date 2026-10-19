@@ -10,6 +10,11 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     if !crate::c_api::quest_objectives::ENABLED {
         return Ok(());
     }
+    #[cfg(feature = "client-wrath")]
+    for name in ["QuestFlagsPVP", "QuestGetAutoAccept"] {
+        // Missing supplied quest PvP/auto-accept flags. Retire when that model lands.
+        LuaApiMut::register_function(lua, name, ordinary_quest_flag)?;
+    }
     LuaApiMut::register_function(lua, "GetProgressText", empty_progress_text)?;
     for name in [
         "GetQuestMoneyToGet",
@@ -20,6 +25,12 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     }
     LuaApiMut::register_function(lua, "GetQuestPortraitTurnIn", absent_turn_in_portrait)?;
     Ok(())
+}
+
+#[cfg(feature = "client-wrath")]
+fn ordinary_quest_flag(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
 }
 
 fn empty_progress_text(state: &mut LuaState) -> LuaResult<u32> {

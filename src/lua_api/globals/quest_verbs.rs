@@ -95,6 +95,65 @@ fn append_quest_log_entry(quest_log: &mut Vec<u32>, quest_id: u32) {
     }
 }
 
+#[cfg(feature = "client-wrath")]
+fn accept_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let (index, finish) = {
+        let mut sim = borrow_state_mut(state)?;
+        if !super::group_queries::unit_exists_in_state(&sim, "player") {
+            return Ok(0);
+        }
+        let Some(offer) = sim.pending_quest_offer.take() else {
+            return Ok(0);
+        };
+        let finish = sim.gossip.giver_guid != 0;
+        let id = offer.quest_id as u32;
+        let index = if sim.quest_log_entries.entries.len() >= 25 {
+            None
+        } else {
+            append_quest_log_entry(&mut sim.quest_log, id);
+            sim.quest_log_entries.entries.push(offer);
+            Some(sim.quest_log_entries.entries.len())
+        };
+        (index, finish)
+    };
+    publish_accept_response(state, index)?;
+    if finish {
+        super::state_backed_queries::dispatch_event_now(state, "QUEST_FINISHED", &[])?;
+    }
+    Ok(0)
+}
+
+#[cfg(feature = "client-wrath")]
+fn publish_accept_response(state: &mut LuaState, index: Option<usize>) -> LuaResult<()> {
+    let Some(index) = index else {
+        let text = crate::lua_api::methods::create_string_static(state, "Your quest log is full.");
+        return super::state_backed_queries::dispatch_event_now(state, "UI_ERROR_MESSAGE", &[text]);
+    };
+    // Simulator server-response policy; not a claim that AcceptQuest inserts locally.
+    super::state_backed_queries::dispatch_event_now(
+        state,
+        "QUEST_ACCEPTED",
+        &[Val::Num(index as f64)],
+    )?;
+    notify_wrath_log_changed(state)
+}
+
+#[cfg(feature = "client-wrath")]
+pub(super) fn notify_wrath_log_changed(state: &mut LuaState) -> LuaResult<()> {
+    let player = crate::lua_api::methods::create_string_static(state, "player");
+    super::state_backed_queries::dispatch_event_now(state, "UNIT_QUEST_LOG_CHANGED", &[player])?;
+    let mut sim = borrow_state_mut(state)?;
+    if !sim
+        .events
+        .pending()
+        .iter()
+        .any(|event| event.name == "QUEST_LOG_UPDATE")
+    {
+        sim.events.push_simple("QUEST_LOG_UPDATE");
+    }
+    Ok(())
+}
+
 /// `CloseQuestFrame()` — fires `QUEST_FINISHED`. WoW also nils the pending
 /// offer; mirror that here.
 fn close_quest_frame(state: &mut LuaState) -> LuaResult<u32> {
@@ -194,17 +253,7 @@ fn abandon_quest(state: &mut LuaState) -> LuaResult<u32> {
     if !removed {
         return Ok(0);
     }
-    let player = crate::lua_api::methods::create_string_static(state, "player");
-    super::state_backed_queries::dispatch_event_now(state, "UNIT_QUEST_LOG_CHANGED", &[player])?;
-    let mut sim = borrow_state_mut(state)?;
-    if !sim
-        .events
-        .pending()
-        .iter()
-        .any(|event| event.name == "QUEST_LOG_UPDATE")
-    {
-        sim.events.push_simple("QUEST_LOG_UPDATE");
-    }
+    notify_wrath_log_changed(state)?;
     Ok(0)
 }
 
@@ -332,6 +381,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn register_quest_state_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
+    #[cfg(feature = "client-wrath")]
+    LuaApiMut::register_function(lua, "AcceptQuest", accept_quest)?;
     LuaApiMut::register_function(lua, "ConfirmAcceptQuest", confirm_accept_quest)?;
     LuaApiMut::register_function(lua, "CloseQuestFrame", close_quest_frame)?;
     if crate::c_api::quest_objectives::ENABLED {
