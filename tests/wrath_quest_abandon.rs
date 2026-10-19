@@ -488,6 +488,7 @@ fn original_selection_renders_supplied_suggested_group_size() {
     exec(
         &env,
         r#"
+        assert(select('#', GetQuestLogGroupNum()) == 1, 'one numeric return')
         assert(GetQuestLogGroupNum() == 5)
         assert(QuestInfoGroupSize:IsShown())
         assert(QuestInfoGroupSize:GetText() == format(QUEST_SUGGESTED_GROUP_NUM, 5))
