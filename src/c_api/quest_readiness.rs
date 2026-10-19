@@ -23,8 +23,6 @@ pub struct QuestReadinessState {
     pub active_player_present: bool,
     /// Wrath response latch; SetState resets it, CloseQuest preserves it.
     pub response_sent: bool,
-    /// Concrete supplied NPC GUID; zero means no giver, never an NPC fallback.
-    pub giver_guid: u64,
     /// Concrete supplied next quest ID; zero means no continuation.
     pub next_quest_id: i32,
     /// Supplied simulator response policy: acceptance completes a cache-hit callback inline.

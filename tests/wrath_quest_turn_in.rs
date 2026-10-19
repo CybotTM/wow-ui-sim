@@ -275,7 +275,7 @@ fn absent_npc_does_not_guard_native_requests() {
     {
         let mut sim = env.env.state().borrow_mut();
         sim.gossip.active = false;
-        sim.quest_log_entries.readiness.giver_guid = 0;
+        sim.gossip.giver_guid = 0;
     }
     clear_trace(&env);
     force_complete_callback(&env);
@@ -546,7 +546,7 @@ fn completion_finish_depends_only_on_next_quest_and_concrete_giver() {
         {
             let mut sim = env.env.state().borrow_mut();
             sim.quest_log_entries.readiness.next_quest_id = next;
-            sim.quest_log_entries.readiness.giver_guid = giver;
+            sim.gossip.giver_guid = giver;
             sim.gossip.active = gossip_active;
         }
         // Test both active-gossip GUID-zero and absent-NPC completion contexts.

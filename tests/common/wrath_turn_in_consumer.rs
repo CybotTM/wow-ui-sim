@@ -111,7 +111,7 @@ fn seed_existing_quests(env: &WowLuaEnv) {
         .insert(TARGET, "Parchment".into());
     sim.quest_log_entries.readiness = Default::default();
     sim.quest_log_entries.readiness.active_player_present = true;
-    sim.quest_log_entries.readiness.giver_guid = NPC_GUID;
+    sim.gossip.giver_guid = NPC_GUID;
     sim.quest_log_entries.readiness.next_quest_id = 0;
     // Supplied simulator response: acceptance completes a cache-hit callback inline.
     // This is not a guarantee about the native server/cache schedule.

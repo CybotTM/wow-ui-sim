@@ -35,9 +35,13 @@ Binding evidence artifact identifiers: `laptop-labels-answers-20261018:turnin-gu
 - [Event delivery](../event-system.md)
 - [Existing authored admin scope](quest-turn-in-model.md)
 
+## Fixture integration amendment
+
+Main approved using the existing `GossipState.giver_guid` as the single concrete giver input instead of v4's additional `QuestReadinessState.giver_guid`. All supplied GUID values and behavioral oracles are unchanged; there is no inferred/fallback giver. This representation-only departure is committed separately from the v4 fixture/test/spec patches.
+
 ## Implementation inventory
 
-- `src/c_api/quest_readiness.rs`: existing dialog phase/id plus staged supplied player/response/giver/next/request fields. Fields alone implement no behavior; Progress/Rewards represent native states 2/3, not numeric enum discriminants.
+- `src/c_api/quest_readiness.rs`: existing dialog phase/id plus staged supplied player/response/next/request fields; concrete giver remains in `GossipState`. Fields alone implement no behavior; Progress/Rewards represent native states 2/3, not numeric enum discriminants.
 - `src/lua_api/sim_substates/quest_log.rs`: supplied choice records and simulator acceptance receipts; existing rich/light/history model remains authoritative.
 - `src/lua_api/globals/quest_surface/legacy_globals.rs`: existing active selection and dialog reader entry points; native Wrath adaptation still required.
 - `src/lua_api/globals/quest_surface/register.rs`: existing registration; Wrath verbs/readers still require adaptation.
