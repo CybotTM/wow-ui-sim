@@ -640,6 +640,32 @@ mod tests {
     use super::*;
     use clap::Parser;
 
+    #[test]
+    fn reload_ui_dump_owner_observes_fresh_environment() {
+        let mut env = WowLuaEnv::new().unwrap();
+        run_dump_tree(
+            &mut env,
+            DumpTreeCommand {
+                filter: Some("ReloadOldFrame".to_string()),
+                filter_key: None,
+                visible_only: false,
+                verbose: false,
+                width: 800,
+                height: 600,
+                delay: None,
+                exec_lua: Some(
+                    "reload_sentinel = true; CreateFrame('Frame', 'ReloadOldFrame'); ReloadUI()",
+                ),
+                exec_lua_secure: false,
+            },
+        );
+        assert!(
+            env.eval::<bool>("return reload_sentinel == nil and ReloadOldFrame == nil")
+                .unwrap(),
+            "dump-tree must service reload before observing the frame tree"
+        );
+    }
+
     #[cfg(feature = "gui")]
     #[test]
     fn screenshot_png_selection_preserves_defaults() {

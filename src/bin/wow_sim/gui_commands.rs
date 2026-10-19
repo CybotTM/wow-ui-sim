@@ -447,3 +447,30 @@ fn create_texture_manager(env: &WowLuaEnv) -> Rc<RefCell<wow_ui_sim::texture::Te
     drop(mgr);
     texture_manager
 }
+
+#[cfg(test)]
+mod reload_tests {
+    use super::*;
+
+    #[test]
+    fn reload_ui_screenshot_owner_observes_fresh_environment() {
+        let mut env = WowLuaEnv::new().unwrap();
+        let command = ScreenshotCommand {
+            output: PathBuf::from("unused.webp"),
+            width: 800,
+            height: 600,
+            filter: None,
+            crop: None,
+            png: false,
+            delay: None,
+            exec_lua: Some("reload_sentinel = true; ReloadUI()"),
+            exec_lua_secure: false,
+            dump_tree: None,
+        };
+        prepare_screenshot_env(&mut env, &command);
+        assert!(
+            env.eval::<bool>("return reload_sentinel == nil").unwrap(),
+            "screenshot must service reload before building render output"
+        );
+    }
+}
