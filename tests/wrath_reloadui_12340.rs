@@ -36,13 +36,18 @@ fn saved_reload_preserves_scalar_large_values_and_readonly_wtf() {
 }
 
 #[test]
+fn saved_guarded_defaults_preserve_nested_large_values_and_readonly_wtf() {
+    persistence_controls::assert_guarded_reload_readback();
+}
+
+#[test]
 fn wrath_startup_reload_pew_is_argless_in_fresh_original_ui() {
     entry_payload::assert_reload_pew_arity();
 }
 
 #[test]
-fn wrath_startup_original_spellbook_hidden_show_control() {
-    entry_payload::assert_original_spellbook_paths();
+fn wrath_startup_original_game_menu_show_hide_survives_reload() {
+    entry_payload::assert_original_game_menu_reload_paths();
 }
 
 #[test]

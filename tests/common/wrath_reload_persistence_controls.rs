@@ -3,16 +3,24 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::{SavedVariablesManager, WtfConfig};
 
 pub fn assert_reload_readback() {
+    assert_reload_readback_with_defaults(
+        "ReloadScalar = 3; ReloadCharacterScalar = 4; ReloadLarge = { codeDefault = true }",
+    );
+}
+
+pub fn assert_guarded_reload_readback() {
+    assert_reload_readback_with_defaults(
+        "ReloadScalar = ReloadScalar or 3; ReloadCharacterScalar = ReloadCharacterScalar or 4; ReloadLarge = ReloadLarge or { codeDefault = true }",
+    );
+}
+
+fn assert_reload_readback_with_defaults(defaults: &str) {
     let fixture = tempfile::tempdir().unwrap();
     let addon = fixture.path().join("WrathPersistenceFixture");
     std::fs::create_dir(&addon).unwrap();
     let toc = addon.join("WrathPersistenceFixture.toc");
     std::fs::write(&toc, "## SavedVariables: ReloadScalar, ReloadLarge\n## SavedVariablesPerCharacter: ReloadCharacterScalar\nCode.lua\n").unwrap();
-    std::fs::write(
-        addon.join("Code.lua"),
-        "ReloadScalar = 3; ReloadCharacterScalar = 4; ReloadLarge = { codeDefault = true }",
-    )
-    .unwrap();
+    std::fs::write(addon.join("Code.lua"), defaults).unwrap();
     let config = WtfConfig::new(
         fixture.path().join("WTF"),
         "ReloadAccount",
@@ -49,7 +57,7 @@ pub fn assert_reload_readback() {
         .map_err(|error| wow_ui_sim::Error::Other(error.to_string()))?;
         Ok(())
     });
-    env.exec("ReloadScalar = 73; ReloadCharacterScalar = 92; ReloadLarge = {}; for i=1,256 do ReloadLarge[i] = i*2 end; OldPersistenceGlobal = {}; CreateFrame('Frame', 'OldPersistenceFrame'); C_Timer.After(0, function() OldPersistenceTimer = true end); ReloadUI()").unwrap();
+    env.exec("ReloadScalar = 73; ReloadCharacterScalar = 92; ReloadLarge = {}; for i=1,256 do ReloadLarge[i] = i*2 end; ReloadLarge.child = { nested = { retained = 'same-session' } }; OldPersistenceGlobal = {}; CreateFrame('Frame', 'OldPersistenceFrame'); C_Timer.After(0, function() OldPersistenceTimer = true end); ReloadUI()").unwrap();
     let mut manager = Some(manager);
     assert!(env.service_reload(&mut manager).unwrap());
     let local = fixture.path().join("storage/WrathPersistenceFixture.lua");
@@ -57,7 +65,13 @@ pub fn assert_reload_readback() {
         std::fs::metadata(local).unwrap().len() > 128,
         "local readback exceeds the external import cap"
     );
-    env.exec("assert(ReloadScalar == 73 and ReloadCharacterScalar == 92, 'scalar readback beats defaults and stale WTF'); assert(#ReloadLarge == 256 and ReloadLarge[256] == 512 and ReloadLarge.stale == nil, 'uncapped trusted local table readback'); assert(OldPersistenceGlobal == nil and OldPersistenceFrame == nil, 'fresh VM globals and frames')").unwrap();
+    eprintln!(
+        "Reload persistence readback: account={} character={} array_count={}",
+        env.eval::<i32>("return ReloadScalar").unwrap(),
+        env.eval::<i32>("return ReloadCharacterScalar").unwrap(),
+        env.eval::<i32>("return #ReloadLarge").unwrap(),
+    );
+    env.exec("assert(ReloadScalar == 73 and ReloadCharacterScalar == 92, 'scalar readback beats defaults and stale WTF'); assert(#ReloadLarge == 256 and ReloadLarge[256] == 512 and ReloadLarge.stale == nil and ReloadLarge.child.nested.retained == 'same-session', 'uncapped trusted local table readback'); assert(OldPersistenceGlobal == nil and OldPersistenceFrame == nil, 'fresh VM globals and frames')").unwrap();
     wow_ui_sim::startup::run_lua_error_update_ticks(&env);
     assert!(
         env.eval::<bool>("return OldPersistenceTimer == nil")
