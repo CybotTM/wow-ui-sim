@@ -192,4 +192,3 @@ fn f1_protected_denial_precedes_unknown_name_validation() {
         "#,
     );
 }
-

@@ -3,13 +3,15 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 pub fn load_original(env: &WowLuaEnv, name: &str) {
-    let cache = dirs::cache_dir().expect("cache directory")
+    let cache = dirs::cache_dir()
+        .expect("cache directory")
         .join("wow-ui-sim/blizzard-ui/wrath/FrameXML");
-    assert!(cache.join(name).is_file(), "SETUP: original consumer {name} absent");
-    let mut toc = wow_ui_sim::toc::TocFile::parse(
-        &cache,
-        &format!("## Interface: 30300\n{name}\n"),
+    assert!(
+        cache.join(name).is_file(),
+        "SETUP: original consumer {name} absent"
     );
+    let mut toc =
+        wow_ui_sim::toc::TocFile::parse(&cache, &format!("## Interface: 30300\n{name}\n"));
     toc.name = format!("Blizzard_LabelFixture_{name}");
     let loaded = wow_ui_sim::loader::load_addon_from_toc(&env.loader_env(), &toc)
         .expect("SETUP: load unchanged original consumer");
@@ -18,14 +20,22 @@ pub fn load_original(env: &WowLuaEnv, name: &str) {
 
 pub fn tooltip_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
-    for name in ["Fonts.xml", "FontStyles.xml", "GameTooltip.lua", "GameTooltipTemplate.xml"] {
+    for name in [
+        "Fonts.xml",
+        "FontStyles.xml",
+        "GameTooltip.lua",
+        "GameTooltipTemplate.xml",
+    ] {
         load_original(&env, name);
     }
-    env.exec(r#"
+    env.exec(
+        r#"
         B6Tip=CreateFrame('GameTooltip','B6Tip',UIParent,'GameTooltipTemplate')
         B6Owner=CreateFrame('Button','B6Owner',UIParent)
         B6Tip:SetOwner(B6Owner,'ANCHOR_NONE')
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     env
 }
 
