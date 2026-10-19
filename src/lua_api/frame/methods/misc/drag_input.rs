@@ -160,6 +160,7 @@ pub fn start_sizing(state: &mut LuaState) -> LuaResult<u32> {
     {
         frame.is_sizing = true;
         frame.sizing_point = sizing_point;
+        sim.set_active_drag_frame(Some(id));
     }
     Ok(0)
 }
@@ -173,6 +174,9 @@ pub fn stop_moving_or_sizing(state: &mut LuaState) -> LuaResult<u32> {
         }
         frame.is_moving = false;
         frame.is_sizing = false;
+    }
+    if sim.active_drag_frame == Some(id) {
+        sim.set_active_drag_frame(None);
     }
     Ok(0)
 }

@@ -45,3 +45,7 @@ Draft input contract for original DamageMeter sizing and Wrath floating-chat mov
 - Keyboard dispatch, quest paths, EditBox paths, CompactUnitFrame vehicle behavior and vendor edits.
 - Automatic docking policy redesign, persistence policy redesign, full GUI startup and all-profile acceptance.
 - Rewriting Blizzard callbacks or registering synthetic OnDragStart to make the resize tests pass.
+
+## Reproduced Retail boundary
+
+Original DamageMeter callbacks start sizing, but the simulator previously set no motion capture. Threshold crossing also marked a drag without a registered drag handler, routing release away from original OnMouseUp. Five original-consumer assertions reproduced these failures; stationary release passed. StartSizing now captures the resized frame, StopMovingOrSizing releases that capture, and threshold dispatch records a script drag only when a registered handler actually starts. GREEN remains pending. Outside-release order and scaled native sizing remain excluded.

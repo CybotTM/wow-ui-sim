@@ -75,8 +75,7 @@ impl App {
             let dx = pos.x - down_pos.x;
             let dy = pos.y - down_pos.y;
             if (dx * dx + dy * dy).sqrt() >= DRAG_THRESHOLD {
-                self.dragging = true;
-                self.fire_drag_start(down_frame, "LeftButton");
+                self.dragging = self.fire_drag_start(down_frame, "LeftButton");
                 self.flush_post_script_updates();
             }
         }
@@ -609,13 +608,13 @@ impl App {
     }
 
     /// Fire OnDragStart on the source frame (walks up parent chain).
-    fn fire_drag_start(&mut self, frame_id: u64, button_name: &str) {
+    fn fire_drag_start(&mut self, frame_id: u64, button_name: &str) -> bool {
         let drag_target = {
             let env = self.env.borrow();
             find_drag_script_target(&env, frame_id, "OnDragStart")
         };
         let Some(drag_target) = drag_target else {
-            return;
+            return false;
         };
 
         let drag_button_registered = {
@@ -628,7 +627,7 @@ impl App {
                 .unwrap_or(false)
         };
         if !drag_button_registered {
-            return;
+            return false;
         }
 
         {
@@ -642,6 +641,7 @@ impl App {
         let button_val = env.lua_string(button_name);
         eprintln!("[drag] OnDragStart fired on frame {}", drag_target);
         let _ = env.fire_script_handler(drag_target, "OnDragStart", vec![button_val]);
+        true
     }
 
     /// Fire OnDragStop on source and OnReceiveDrag on target.
