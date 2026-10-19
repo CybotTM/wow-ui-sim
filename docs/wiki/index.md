@@ -1,6 +1,6 @@
 ## [2026-10-18] source | Wrath selected quest reads and abandon response
 
-[Legacy surface](systems/lua-api.md#wrath-selected-quest-legacy-surface) links selected rich reward reads, shared prepared faction output and profile-specific abandonment. [Owning contract](../specs/wrath-quest-abandon.md) keeps original-consumer RED, pending GREEN/preservation and provisional native timing separate.
+[Legacy surface](systems/lua-api.md#wrath-selected-quest-legacy-surface) links selected rich reward reads, prepared faction output, player daily fields and profile-specific abandonment. [Owning contract](../specs/wrath-quest-abandon.md) keeps original-consumer RED, pending GREEN/preservation and provisional native timing separate.
 
 ## [2026-10-18] investigation | Original sizing capture and release
 

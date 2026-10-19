@@ -256,7 +256,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         LuaApiMut::register_function(lua, name, func)?;
     }
     #[cfg(feature = "client-wrath")]
-    for (name, func) in super::wrath_quest_log::LEGACY_REWARD_READS {
+    for (name, func) in super::wrath_quest_log::LEGACY_READS {
         LuaApiMut::register_function(lua, name, *func)?;
     }
     if crate::c_api::quest_objectives::ENABLED {

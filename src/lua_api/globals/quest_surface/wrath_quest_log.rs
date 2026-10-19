@@ -5,7 +5,7 @@ use crate::lua_api::state::{QuestLogEntry, SimState};
 use crate::lua_bridge::FromStack;
 use rilua::{LuaResult, Val, vm::state::LuaState};
 
-pub(super) const LEGACY_REWARD_READS: &[(&str, super::SurfaceFn)] = &[
+pub(super) const LEGACY_READS: &[(&str, super::SurfaceFn)] = &[
     ("GetQuestLogGroupNum", get_quest_log_group_num),
     ("GetDailyQuestsCompleted", get_daily_quests_completed),
     ("GetMaxDailyQuests", get_max_daily_quests),
