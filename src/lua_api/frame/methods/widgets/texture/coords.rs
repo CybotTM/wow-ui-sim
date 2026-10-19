@@ -8,26 +8,9 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn set_blend_mode(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let wrath = crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath;
-    let mode_name = if wrath {
-        crate::lua_api::wrath_arguments::string(state, stack_val(state, 2))?
-    } else {
-        opt_string(state, 2)
-    };
-    let Some(mode_name) = mode_name else {
-        if wrath {
-            return Err(rilua::runtime_error("SetBlendMode: expected a blend token"));
-        }
+    let Some(normalized) = read_blend_mode(state)? else {
         return Ok(0);
     };
-    let normalized = mode_name.to_ascii_uppercase();
-    let recognized = matches!(
-        normalized.as_str(),
-        "DISABLE" | "BLEND" | "ALPHAKEY" | "ADD" | "MOD"
-    );
-    if wrath && !recognized {
-        return Err(rilua::runtime_error("SetBlendMode: invalid blend token"));
-    }
     let blend_mode = match normalized.as_str() {
         "ADD" => crate::BlendMode::Additive,
         _ => crate::BlendMode::Alpha,
@@ -38,6 +21,30 @@ pub(super) fn set_blend_mode(state: &mut LuaState) -> LuaResult<u32> {
         frame.blend_mode = blend_mode;
     }
     Ok(0)
+}
+
+fn read_blend_mode(state: &mut LuaState) -> LuaResult<Option<String>> {
+    let wrath = crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath;
+    let mode_name = if wrath {
+        crate::lua_api::wrath_arguments::convert_string(state, stack_val(state, 2))?
+    } else {
+        opt_string(state, 2)
+    };
+    let Some(mode_name) = mode_name else {
+        if wrath {
+            return Err(rilua::runtime_error("SetBlendMode: expected a blend token"));
+        }
+        return Ok(None);
+    };
+    let normalized = mode_name.to_ascii_uppercase();
+    let recognized = matches!(
+        normalized.as_str(),
+        "DISABLE" | "BLEND" | "ALPHAKEY" | "ADD" | "MOD"
+    );
+    if wrath && !recognized {
+        return Err(rilua::runtime_error("SetBlendMode: invalid blend token"));
+    }
+    Ok(Some(normalized))
 }
 
 pub(super) fn get_blend_mode(state: &mut LuaState) -> LuaResult<u32> {
@@ -88,7 +95,8 @@ fn read_wrath_tex_coords(state: &mut LuaState) -> LuaResult<Vec<f32>> {
     (2..=count + 1)
         .map(|index| {
             let value = crate::lua_bridge::stack_val(state, index as i32);
-            let number = crate::lua_api::wrath_arguments::number(state, value)?.unwrap_or(0.0);
+            let number =
+                crate::lua_api::wrath_arguments::convert_number(state, value)?.unwrap_or(0.0);
             // Ordered comparisons deliberately retain NaN while rejecting infinity.
             if number < -MAX_COORDINATE || number > MAX_COORDINATE {
                 return Err(rilua::runtime_error(

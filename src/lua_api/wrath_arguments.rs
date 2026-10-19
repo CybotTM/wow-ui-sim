@@ -5,7 +5,7 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
 
 /// Use the VM's numeric grammar without consulting a replaceable Lua global.
-pub(crate) fn number(state: &mut LuaState, value: Val) -> LuaResult<Option<f64>> {
+pub(crate) fn convert_number(state: &mut LuaState, value: Val) -> LuaResult<Option<f64>> {
     let saved_base = state.base;
     let saved_top = state.top;
     state.base = saved_top;
@@ -21,7 +21,7 @@ pub(crate) fn number(state: &mut LuaState, value: Val) -> LuaResult<Option<f64>>
     Ok(converted)
 }
 
-pub(crate) fn string(state: &mut LuaState, value: Val) -> LuaResult<Option<String>> {
+pub(crate) fn convert_string(state: &mut LuaState, value: Val) -> LuaResult<Option<String>> {
     if !matches!(value, Val::Str(_) | Val::Num(_)) {
         return Ok(None);
     }
@@ -37,18 +37,18 @@ pub(crate) fn string(state: &mut LuaState, value: Val) -> LuaResult<Option<Strin
     Ok(converted)
 }
 
-pub(crate) fn text_color(state: &mut LuaState) -> LuaResult<[f32; 4]> {
+pub(crate) fn read_text_color(state: &mut LuaState) -> LuaResult<[f32; 4]> {
     let mut color = [0.0, 0.0, 0.0, 1.0];
     for (offset, component) in color.iter_mut().enumerate() {
         let value = crate::lua_bridge::stack_val(state, offset as i32 + 2);
-        *component = number(state, value)?
+        *component = convert_number(state, value)?
             .unwrap_or(*component as f64)
             .clamp(0.0, 1.0) as f32;
     }
     Ok(color)
 }
 
-pub(crate) fn justification(token: &str, horizontal: bool) -> LuaResult<&'static str> {
+pub(crate) fn parse_justification(token: &str, horizontal: bool) -> LuaResult<&'static str> {
     let canonical = match token.to_ascii_uppercase().as_str() {
         "LEFT" => "LEFT",
         "CENTER" => "CENTER",

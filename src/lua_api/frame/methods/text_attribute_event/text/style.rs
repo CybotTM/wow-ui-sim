@@ -127,7 +127,7 @@ pub(crate) fn set_text_color(state: &mut LuaState) -> LuaResult<u32> {
     }
     let [r, g, b, a] =
         if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
-            crate::lua_api::wrath_arguments::text_color(state)?
+            crate::lua_api::wrath_arguments::read_text_color(state)?
         } else {
             [
                 val_to_f32(stack_val(state, 2), 1.0),
@@ -311,7 +311,7 @@ fn set_justify_value(
     let wrath = crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
         && !is_simple_html_frame(state, id);
     let justification = if wrath {
-        crate::lua_api::wrath_arguments::justification(
+        crate::lua_api::wrath_arguments::parse_justification(
             justification,
             matches!(axis, JustifyAxis::Horizontal),
         )?
@@ -321,14 +321,7 @@ fn set_justify_value(
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         if wrath {
-            let key = justify_unknown_key(axis);
-            if justification == "UNKNOWN" {
-                frame
-                    .attributes
-                    .insert(key.to_owned(), crate::widget::AttributeValue::Boolean(true));
-            } else {
-                frame.attributes.remove(key);
-            }
+            update_justify_unknown_marker(frame, axis, justification == "UNKNOWN");
         }
         let justify = crate::widget::TextJustify::from_wow_str(justification);
         match axis {
@@ -337,6 +330,21 @@ fn set_justify_value(
         }
     }
     Ok(0)
+}
+
+fn update_justify_unknown_marker(
+    frame: &mut crate::widget::Frame,
+    axis: JustifyAxis,
+    unknown: bool,
+) {
+    let key = justify_unknown_key(axis);
+    if unknown {
+        frame
+            .attributes
+            .insert(key.to_owned(), crate::widget::AttributeValue::Boolean(true));
+    } else {
+        frame.attributes.remove(key);
+    }
 }
 
 pub(crate) fn get_justify_v(state: &mut LuaState) -> LuaResult<u32> {

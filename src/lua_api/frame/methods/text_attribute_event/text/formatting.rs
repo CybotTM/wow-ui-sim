@@ -376,7 +376,7 @@ fn reject_wrath_font_arguments(state: &mut LuaState, id: u64) -> LuaResult<Optio
         .widgets
         .get(id)
         .is_some_and(|frame| frame.widget_type == crate::widget::WidgetType::FontString);
-    let path = crate::lua_api::wrath_arguments::string(state, stack_val(state, 2))?;
+    let path = crate::lua_api::wrath_arguments::convert_string(state, stack_val(state, 2))?;
     let height = match stack_val(state, 3) {
         Val::Num(value) => Some(value),
         _ => None,

@@ -148,7 +148,7 @@ fn font_set_text_color(state: &mut LuaState) -> LuaResult<u32> {
     if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
         return set_rgba_component_fields(state, "__textColor");
     }
-    let color = crate::lua_api::wrath_arguments::text_color(state)?;
+    let color = crate::lua_api::wrath_arguments::read_text_color(state)?;
     let font = stack_val(state, 1);
     for (suffix, value) in ["R", "G", "B", "A"].into_iter().zip(color) {
         table_set(
@@ -226,7 +226,7 @@ fn font_set_justify_h(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
     let j = String::from_stack(state, 2)?;
     let j = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
-        crate::lua_api::wrath_arguments::justification(&j, true)?
+        crate::lua_api::wrath_arguments::parse_justification(&j, true)?
     } else {
         &j
     };
@@ -245,7 +245,7 @@ fn font_set_justify_v(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
     let j = String::from_stack(state, 2)?;
     let j = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
-        crate::lua_api::wrath_arguments::justification(&j, false)?
+        crate::lua_api::wrath_arguments::parse_justification(&j, false)?
     } else {
         &j
     };

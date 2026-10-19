@@ -694,15 +694,8 @@ fn resolve_wrath_all_points_target(
 ) -> LuaResult<Option<usize>> {
     let target = match arg {
         Val::Nil if supplied => Some("UIParent".to_owned()),
-        Val::Str(_) | Val::Num(_) => crate::lua_api::wrath_arguments::string(state, arg)?,
-        Val::Table(_) => {
-            let identity = crate::lua_api::methods::extract_frame_slot_zero_id(state, arg);
-            let sim = borrow_state(state)?;
-            return identity
-                .filter(|target| sim.widgets.get(*target).is_some())
-                .map(|target| Some(target as usize))
-                .ok_or_else(|| runtime_error("SetAllPoints: invalid region identity"));
-        }
+        Val::Str(_) | Val::Num(_) => crate::lua_api::wrath_arguments::convert_string(state, arg)?,
+        Val::Table(_) => return resolve_wrath_all_points_identity(state, arg).map(Some),
         _ => None,
     };
     let sim = borrow_state(state)?;
@@ -718,6 +711,15 @@ fn resolve_wrath_all_points_target(
         .get(id)
         .and_then(|frame| frame.parent_id)
         .map(|parent| parent as usize))
+}
+
+fn resolve_wrath_all_points_identity(state: &LuaState, arg: Val) -> LuaResult<usize> {
+    let identity = crate::lua_api::methods::extract_frame_slot_zero_id(state, arg);
+    let sim = borrow_state(state)?;
+    identity
+        .filter(|target| sim.widgets.get(*target).is_some())
+        .map(|target| target as usize)
+        .ok_or_else(|| runtime_error("SetAllPoints: invalid region identity"))
 }
 
 fn resolve_set_all_points_target(
