@@ -82,3 +82,48 @@ fn b6_c5_binding_number_is_converted_to_string() {
         .unwrap();
     recall(&env, "UP", "42");
 }
+
+fn history_storage(env: &WowLuaEnv) -> (usize, usize, usize) {
+    let sim = env.state().borrow();
+    let id = sim.widgets.get_id_by_name("B6History").unwrap();
+    let frame = sim.widgets.get(id).unwrap();
+    (
+        frame.editbox_history.len(),
+        frame.editbox_history.capacity(),
+        frame.storage_estimate_bytes(),
+    )
+}
+
+#[test]
+fn b6_c5_history_storage_matches_string_vector_numbers() {
+    let env = history_env(7);
+    let (empty_slots, empty_capacity, empty_bytes) = history_storage(&env);
+    let string_bytes = std::mem::size_of::<String>();
+    // Existing estimator counts live vector slots, not retained spare capacity.
+    let non_history_bytes = empty_bytes - empty_slots * string_bytes;
+    env.exec("H:AddHistoryLine('alpha'); H:AddHistoryLine(''); H:AddHistoryLine('beta')")
+        .unwrap();
+    let (populated_slots, populated_capacity, populated_bytes) = history_storage(&env);
+    let old_vector_bytes = populated_slots * string_bytes + "alpha".len() + "beta".len();
+    assert_eq!(populated_bytes - non_history_bytes, old_vector_bytes);
+    env.exec("H:ClearHistory()").unwrap();
+    let (cleared_slots, cleared_capacity, cleared_bytes) = history_storage(&env);
+    assert_eq!(
+        cleared_bytes - non_history_bytes,
+        cleared_slots * string_bytes
+    );
+    println!(
+        "history-memory frame={} string={} optional_string={} empty_slots={} empty_capacity={} populated_slots={} populated_capacity={} cleared_slots={} cleared_capacity={} populated_dynamic={} cleared_dynamic={}",
+        std::mem::size_of::<wow_ui_sim::widget::Frame>(),
+        string_bytes,
+        std::mem::size_of::<Option<String>>(),
+        empty_slots,
+        empty_capacity,
+        populated_slots,
+        populated_capacity,
+        cleared_slots,
+        cleared_capacity,
+        populated_bytes - non_history_bytes,
+        cleared_bytes - non_history_bytes
+    );
+}
