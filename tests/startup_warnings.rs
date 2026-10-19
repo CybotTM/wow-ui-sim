@@ -615,6 +615,11 @@ fn test_restricted_addon_environment_exposes_execution_surface() {
 /// ObjectiveTrackerUIWidgetContainer inherits UIWidgetContainerTemplate,
 /// which inherits UIWidgetContainerNoResizeTemplate (mixin UIWidgetContainerMixin).
 /// GetNumWidgetsShowing must be available on the frame.
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_widget_container_mixin_applied() {
     test_timeout! {
@@ -641,6 +646,11 @@ fn test_widget_container_mixin_applied() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_load_addon_with_error_handling_loads_account_store_and_preserves_surface() {
     test_timeout! {
@@ -695,6 +705,11 @@ fn test_load_addon_with_error_handling_loads_account_store_and_preserves_surface
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_account_store_frame_exposes_mixin_methods_after_load() {
     test_timeout! {
@@ -727,6 +742,11 @@ fn test_account_store_frame_exposes_mixin_methods_after_load() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_account_store_set_storefront_id_is_safe_after_load() {
     test_timeout! {
