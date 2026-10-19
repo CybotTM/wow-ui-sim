@@ -1,6 +1,6 @@
 # Wrath supplied quest objectives
 
-Wrath ordinary active quests project supplied identity-keyed objective snapshots through legacy reads and unchanged `QuestInfo.lua` / `QuestLogFrame.lua` consumers. Reuse the [quest-log state and selected identity](wrath-quest-log-projection.md); individual objective completion is not [quest acceptance](wrath-quest-accept.md), readiness or turn-in. See [legacy surface architecture](../wiki/systems/lua-api.md#wrath-selected-quest-legacy-surface).
+Wrath ordinary active quests project supplied identity-keyed objective snapshots through legacy reads and unchanged `QuestInfo.lua` / `QuestLogFrame.lua` consumers. Reuse the [quest-log state and selected identity](wrath-quest-log-projection.md); individual objective completion is not quest acceptance, readiness or turn-in. See [legacy surface architecture](../wiki/systems/lua-api.md#wrath-selected-quest-legacy-surface).
 
 ## What it must do
 
