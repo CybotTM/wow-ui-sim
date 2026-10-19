@@ -44,6 +44,26 @@ pub fn assert_writer_grammar_and_rounding() {
     );
 }
 
+pub fn assert_inherited_scale_roundtrip() {
+    let mut env = WowLuaEnv::new().unwrap();
+    env.set_screen_size(1000.0, 800.0);
+    env.exec("local p = CreateFrame('Frame', 'ReloadScaledParent', UIParent); p:SetScale(2); p:SetSize(100,100); p:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT',40,20); local f = CreateFrame('Frame', 'ReloadInheritedScale', p); f:SetScale(0.75); f:SetSize(200,100); f:SetPoint('BOTTOMLEFT',p,'BOTTOMLEFT',17,23); f:SetMovable(true); f:SetResizable(true); f:SetUserPlaced(true); ReloadUI()").unwrap();
+    env.set_reload_loader(|env, _| env.exec("local p = CreateFrame('Frame', 'ReloadScaledParent', UIParent); p:SetScale(0.5); p:SetSize(100,100); p:SetPoint('CENTER',UIParent,'CENTER'); local f = CreateFrame('Frame', 'ReloadInheritedScale',p); f:SetSize(9,8); f:SetMovable(true); f:SetResizable(true)"));
+    let storage = tempfile::tempdir().unwrap();
+    let mut manager = Some(SavedVariablesManager::with_storage_dir(
+        storage.path().to_path_buf(),
+    ));
+    env.service_reload(&mut manager).unwrap();
+    let written =
+        std::fs::read_to_string(storage.path().join("SimRealm/SimPlayer/layout-local.txt"))
+            .unwrap();
+    assert!(
+        written.contains("Anchor: BOTTOMLEFT\nX: 70\nY: 50\nW: 200\nH: 100\n"),
+        "inherited scale divides both axes and size: {written}"
+    );
+    env.exec("assert(ReloadInheritedScale:GetEffectiveScale() == 0.5, 'scale is not restored'); assert(ReloadInheritedScale:GetWidth() == 200 and ReloadInheritedScale:GetHeight() == 100); local p,r,rp,x,y = ReloadInheritedScale:GetPoint(); assert(p == 'BOTTOMLEFT' and rp == p and r == UIParent and x == 70 and y == 50)").unwrap();
+}
+
 pub fn assert_empty_writer() {
     let mut env = WowLuaEnv::new().unwrap();
     let storage = tempfile::tempdir().unwrap();

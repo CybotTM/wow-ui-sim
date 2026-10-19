@@ -56,6 +56,11 @@ fn wrath_preservation_writer_uses_authenticated_grammar_and_nearest_rounding() {
 }
 
 #[test]
+fn wrath_preservation_inherited_scale_roundtrip_does_not_restore_scale() {
+    placement_writer::assert_inherited_scale_roundtrip();
+}
+
+#[test]
 fn wrath_preservation_disabled_persistence_writes_no_layout() {
     placement_writer::assert_disabled_persistence_writes_no_layout();
 }
