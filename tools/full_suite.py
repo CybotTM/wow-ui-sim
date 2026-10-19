@@ -2,17 +2,20 @@
 """Run the full wow-ui-sim test suite for one commit, in the background, and record results.
 
 Usage:
-  full_suite.py run [REF] --target-dir SLOT [--build-jobs N]
+  full_suite.py run [REF] --target-dir SLOT [--build-jobs N] [--profile PROFILE]
                              Test REF (default origin/master) now; blocks until done.
-  full_suite.py submit [REF] --target-dir SLOT [--build-jobs N]
+  full_suite.py submit [REF] --target-dir SLOT [--build-jobs N] [--profile PROFILE]
                              Same, detached via systemd-run --user; prints the unit name.
-  full_suite.py status [REF]   Print the stored result for REF's commit (or the latest run).
+  full_suite.py status [REF]   Print per-profile results for REF (or the latest run's SHA).
 
 Build jobs default to 1, independent of FULL_SUITE_JOBS (nextest workers, default 16).
 SLOT must resolve to one of ~/.cache/wow-ui-sim-targets/slot-{0,1,2,3}.
 Runs serialize on a lock. Each run uses a dedicated checkout and an explicitly selected
-approved target slot so agents' working copies are never touched. Results: RESULTS/<sha>.json plus <sha>.log; master runs
-also update RESULTS/master-latest.json, which later runs compare against to list NEW failures.
+approved target slot so agents' working copies are never touched. Results:
+RESULTS/<sha>-<profile>.json plus <sha>-<profile>.log; master runs also update
+RESULTS/master-latest-<profile>.json for same-profile NEW failure comparisons.
+Retail (default) retains Cargo default features; other profiles select explicit features.
+Integration/lib run for every profile; prefork runs only for Retail/Mists.
 """
 
 import argparse
@@ -31,6 +34,7 @@ CHECKOUT = ROOT / "full-suite-checkout"
 RESULTS = ROOT / "full-suite-results"
 LOCK = RESULTS / ".lock"
 JOBS = os.environ.get("FULL_SUITE_JOBS", "16")
+PROFILES = ("retail", "ptr", "wrath", "mists", "wowforever", "era", "anniversary")
 FAILED = re.compile(
     r"^\s*(?:FAIL|SIGSEGV|SIGABRT|TIMEOUT) \[.*?\] (?:\(\s*\d+/\d+\) )?\S+ (\S+)", re.M
 )
@@ -99,7 +103,55 @@ def positive_build_jobs(value):
     return jobs
 
 
-def run(ref, build_jobs, target_dir):
+def suite_steps(build_jobs, profile):
+    features = (
+        []
+        if profile == "retail"
+        else ["--no-default-features", "--features", f"sound,gui,casc,client-{profile}"]
+    )
+    return [
+        (
+            "integration",
+            [
+                "cargo",
+                "nextest",
+                "run",
+                f"-j{build_jobs}",
+                "--test",
+                "integration",
+                "--no-fail-fast",
+                "--test-threads",
+                JOBS,
+                *features,
+            ],
+            FAILED,
+        ),
+        (
+            "prefork",
+            ["cargo", "test", f"-j{build_jobs}", "--test", "prefork_full_ui", *features]
+            if profile in ("retail", "mists")
+            else None,
+            PREFORK_FAILED,
+        ),
+        (
+            "lib",
+            [
+                "cargo",
+                "nextest",
+                "run",
+                f"-j{build_jobs}",
+                "--lib",
+                "--no-fail-fast",
+                "--test-threads",
+                JOBS,
+                *features,
+            ],
+            FAILED,
+        ),
+    ]
+
+
+def run(ref, build_jobs, target_dir, profile="retail"):
     target_dir = validate_target_dir(target_dir)
     RESULTS.mkdir(parents=True, exist_ok=True)
     with open(LOCK, "w") as lock:
@@ -115,66 +167,39 @@ def run(ref, build_jobs, target_dir):
         result = {
             "ref": ref,
             "sha": sha,
+            "profile": profile,
             "started": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
             "steps": {},
             "failures": {},
         }
-        with open(RESULTS / f"{sha}.log", "w") as log:
-            steps = [
-                (
-                    "integration",
-                    [
-                        "cargo",
-                        "nextest",
-                        "run",
-                        f"-j{build_jobs}",
-                        "--test",
-                        "integration",
-                        "--no-fail-fast",
-                        "--test-threads",
-                        JOBS,
-                    ],
-                    FAILED,
-                ),
-                (
-                    "prefork",
-                    ["cargo", "test", f"-j{build_jobs}", "--test", "prefork_full_ui"],
-                    PREFORK_FAILED,
-                ),
-                (
-                    "lib",
-                    [
-                        "cargo",
-                        "nextest",
-                        "run",
-                        f"-j{build_jobs}",
-                        "--lib",
-                        "--no-fail-fast",
-                        "--test-threads",
-                        JOBS,
-                    ],
-                    FAILED,
-                ),
-            ]
-            for name, cmd, pattern in steps:
+        with open(RESULTS / f"{sha}-{profile}.log", "w") as log:
+            for name, cmd, pattern in suite_steps(build_jobs, profile):
+                if cmd is None:
+                    reason = "prefork_full_ui supports only Retail/Mists"
+                    result["steps"][name] = {
+                        "status": "not_applicable",
+                        "reason": reason,
+                    }
+                    log.write(f"===== {name}: N/A ({reason})\n")
+                    continue
                 result["steps"][name], output = run_step(name, cmd, log, env)
                 result["failures"][name] = summarize(output, pattern)
         result["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
         result["new_failures"] = new_failures(result)
-        (RESULTS / f"{sha}.json").write_text(json.dumps(result, indent=2) + "\n")
+        (RESULTS / f"{sha}-{profile}.json").write_text(json.dumps(result, indent=2) + "\n")
         if ref in ("origin/master", "master"):
-            (RESULTS / "master-latest.json").write_text(
+            (RESULTS / f"master-latest-{profile}.json").write_text(
                 json.dumps(result, indent=2) + "\n"
             )
         print(
             json.dumps(
-                {k: result[k] for k in ("sha", "steps", "new_failures")}, indent=2
+                {k: result[k] for k in ("sha", "profile", "steps", "new_failures")}, indent=2
             )
         )
 
 
 def new_failures(result):
-    base_path = RESULTS / "master-latest.json"
+    base_path = RESULTS / f"master-latest-{result['profile']}.json"
     if not base_path.exists():
         return None
     base = json.loads(base_path.read_text())
@@ -184,9 +209,9 @@ def new_failures(result):
     }
 
 
-def submit(ref, build_jobs, target_dir):
+def submit(ref, build_jobs, target_dir, profile="retail"):
     target_dir = validate_target_dir(target_dir)
-    unit = f"full-suite-{int(time.time())}"
+    unit = f"full-suite-{profile}-{int(time.time())}"
     subprocess.run(
         [
             "systemd-run",
@@ -205,6 +230,8 @@ def submit(ref, build_jobs, target_dir):
             os.path.abspath(__file__),
             "run",
             ref,
+            "--profile",
+            profile,
             "--build-jobs",
             str(build_jobs),
             "--target-dir",
@@ -217,15 +244,30 @@ def submit(ref, build_jobs, target_dir):
 
 def status(ref):
     if ref:
-        path = RESULTS / f"{resolve(ref)}.json"
+        sha = resolve(ref)
     else:
-        runs = sorted(RESULTS.glob("*.json"), key=lambda p: p.stat().st_mtime)
-        runs = [p for p in runs if p.name != "master-latest.json"]
-        path = runs[-1] if runs else None
-    if not path or not path.exists():
+        runs = [
+            p
+            for p in RESULTS.glob("*.json")
+            if not p.name.startswith("master-latest")
+        ]
+        if not runs:
+            print("no result yet")
+            return
+        latest = max(runs, key=lambda p: p.stat().st_mtime)
+        sha = json.loads(latest.read_text())["sha"]
+    profiles = {}
+    for profile in PROFILES:
+        path = RESULTS / f"{sha}-{profile}.json"
+        profiles[profile] = json.loads(path.read_text()) if path.exists() else None
+    result = {"sha": sha, "profiles": profiles}
+    legacy = RESULTS / f"{sha}.json"
+    if legacy.exists():
+        result["legacy_retail"] = json.loads(legacy.read_text())
+    if not any(profiles.values()) and not legacy.exists():
         print("no result yet")
         return
-    print(path.read_text())
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":
@@ -234,6 +276,7 @@ if __name__ == "__main__":
     for action in ("run", "submit"):
         command = actions.add_parser(action)
         command.add_argument("ref", nargs="?", default="origin/master")
+        command.add_argument("--profile", choices=PROFILES, default="retail")
         command.add_argument("--build-jobs", type=positive_build_jobs, default=1)
         command.add_argument("--target-dir", required=True)
     status_parser = actions.add_parser("status")
@@ -244,8 +287,8 @@ if __name__ == "__main__":
     else:
         try:
             if args.action == "run":
-                run(args.ref, args.build_jobs, args.target_dir)
+                run(args.ref, args.build_jobs, args.target_dir, args.profile)
             else:
-                submit(args.ref, args.build_jobs, args.target_dir)
+                submit(args.ref, args.build_jobs, args.target_dir, args.profile)
         except ValueError as error:
             parser.error(str(error))

@@ -14,6 +14,7 @@ import unittest
 
 RUNNER = Path(__file__).with_name("full_suite.py")
 SCOPES = ("integration", "prefork_full_ui", "lib")
+PROFILES = ("retail", "ptr", "wrath", "mists", "wowforever", "era", "anniversary")
 
 
 def write_executable(path, body):
@@ -107,7 +108,13 @@ class FullSuiteWorkerTests(unittest.TestCase):
             FAIL_SUITES="0",
         )
 
-    def start_worker(self, name="first"):
+    def start_worker(self, name="first", profile=None):
+        if profile is not None:
+            self.harness.write_text(
+                "import runpy\n"
+                f"worker = runpy.run_path({str(RUNNER)!r})\n"
+                f"worker['run']('sandbox-ref', 2, {str(self.target_dir)!r}, profile={profile!r})\n"
+            )
         process = subprocess.Popen(
             [sys.executable, str(self.harness), str(self.wrapper)],
             env=dict(self.env, WORKER=name),
@@ -130,7 +137,7 @@ class FullSuiteWorkerTests(unittest.TestCase):
             with self.assertRaises(BlockingIOError):
                 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
-    def finish_scopes(self, process, worker="first"):
+    def finish_scopes(self, process, worker="first", profile="retail"):
         expected_argv = {
             "integration": [
                 "nextest",
@@ -164,7 +171,12 @@ class FullSuiteWorkerTests(unittest.TestCase):
                 "--locked",
             ],
         }
-        for name in SCOPES:
+        scopes = SCOPES if profile in ("retail", "mists") else ("integration", "lib")
+        for name in scopes:
+            if profile != "retail":
+                expected_argv[name][-2:-2] = [
+                    "--no-default-features", "--features", f"sound,gui,casc,client-{profile}"
+                ]
             started = self.root / f"{worker}.{name}.started"
             wait_for(started, process)
             self.assert_controller_locked()
@@ -190,7 +202,7 @@ class FullSuiteWorkerTests(unittest.TestCase):
                     fcntl.flock(contender, fcntl.LOCK_EX | fcntl.LOCK_NB)
         with (self.results / ".lock").open("w") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        result = json.loads((self.results / "sandbox-sha.json").read_text())
+        result = json.loads((self.results / "sandbox-sha-retail.json").read_text())
         expected_exits = {"integration": 8, "prefork": 7, "lib": 8}
         self.assertEqual(set(result["steps"]), set(expected_exits))
         for step, failure_exit in expected_exits.items():
@@ -202,7 +214,7 @@ class FullSuiteWorkerTests(unittest.TestCase):
                 [f"sandbox::{step}_failure"] if fail_suites else [],
             )
         self.assertEqual(json.loads(stdout)["steps"], result["steps"])
-        log = (self.results / "sandbox-sha.log").read_text()
+        log = (self.results / "sandbox-sha-retail.log").read_text()
         for name in SCOPES:
             self.assertIn(f"{name} stdout retained", log)
             self.assertIn(f"{name} stderr retained", log)
@@ -217,7 +229,7 @@ class FullSuiteWorkerTests(unittest.TestCase):
             self.env["WOW_SIM_TIMEOUT_FIXTURE_CAPACITY"] = fixture_capacity
         process = self.start_worker()
         stdout = self.finish_scopes(process)
-        result = json.loads((self.results / "sandbox-sha.json").read_text())
+        result = json.loads((self.results / "sandbox-sha-retail.json").read_text())
         steps = (
             ("integration", "integration"),
             ("prefork", "prefork_full_ui"),
@@ -336,6 +348,8 @@ class FullSuiteWorkerTests(unittest.TestCase):
                 str(RUNNER),
                 "run",
                 "sandbox-ref",
+                "--profile",
+                "retail",
                 "--build-jobs",
                 "2",
                 "--target-dir",
@@ -423,6 +437,137 @@ class FullSuiteWorkerTests(unittest.TestCase):
                 link.unlink()
         self.assertFalse((self.root / "validation.git").exists())
         self.assertFalse((self.results / ".lock").exists())
+
+    def test_profiles_select_features_scopes_and_distinct_receipts(self):
+        for profile in PROFILES:
+            with self.subTest(profile=profile):
+                process = self.start_worker(profile, profile=profile)
+                stdout = self.finish_scopes(process, profile, profile)
+                path = self.results / f"sandbox-sha-{profile}.json"
+                result = json.loads(path.read_text())
+                self.assertEqual(result["profile"], profile)
+                self.assertEqual(json.loads(stdout)["profile"], profile)
+                self.assertEqual(result["steps"]["integration"]["exit"], 0)
+                self.assertEqual(result["steps"]["lib"]["exit"], 0)
+                log = (self.results / f"sandbox-sha-{profile}.log").read_text()
+                self.assertIn("integration stdout retained", log)
+                self.assertIn("lib stdout retained", log)
+                if profile in ("retail", "mists"):
+                    self.assertEqual(result["steps"]["prefork"]["exit"], 0)
+                    self.assertIn("prefork_full_ui stdout retained", log)
+                else:
+                    self.assertEqual(result["steps"]["prefork"]["status"], "not_applicable")
+                    self.assertIn("Retail/Mists", result["steps"]["prefork"]["reason"])
+                    self.assertNotIn("exit", result["steps"]["prefork"])
+                    self.assertNotIn("prefork", result["failures"])
+                    self.assertIn("prefork: N/A", log)
+                    self.assertFalse((self.root / f"{profile}.prefork_full_ui.started").exists())
+        self.assertEqual(len(list(self.results.glob("sandbox-sha-*.json"))), 7)
+        self.assertEqual(len(list(self.results.glob("sandbox-sha-*.log"))), 7)
+
+    def test_submit_forwards_each_profile_without_changing_resource_policy(self):
+        write_executable(
+            self.bin / "systemd-run",
+            "import json, os, pathlib, sys\n"
+            "(pathlib.Path(os.environ['HOME']) / 'submitted.json').write_text(\n"
+            "    json.dumps(sys.argv[1:]))\n",
+        )
+        for profile in PROFILES:
+            with self.subTest(profile=profile):
+                result = self.invoke_controller(
+                    "submit", "--target-dir", str(self.target_dir), "--profile", profile
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                argv = json.loads((self.root / "submitted.json").read_text())
+                self.assertIn(f"--unit=full-suite-{profile}-", " ".join(argv))
+                self.assertEqual(argv[argv.index("--profile") + 1], profile)
+                for option in ("CPUQuota=1200%", "MemoryHigh=16G", "MemoryMax=16G"):
+                    self.assertIn(option, argv)
+        self.assertFalse(list(self.root.glob("*.started")))
+        self.assertFalse(list(self.root.glob("*.git")))
+
+    def test_invalid_profile_rejected_before_launch(self):
+        for action in ("run", "submit"):
+            result = self.invoke_controller(
+                action, "--target-dir", str(self.target_dir), "--profile", "unknown"
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("invalid choice", result.stderr)
+        self.assertFalse(list(self.root.glob("*.git")))
+        self.assertFalse((self.results / ".lock").exists())
+
+    def test_status_lists_all_profiles_and_preserves_legacy_retail_receipt(self):
+        legacy = {"sha": "sandbox-sha", "steps": {"lib": {"exit": 9}}}
+        (self.results / "sandbox-sha.json").write_text(json.dumps(legacy))
+        receipts = {}
+        for profile in PROFILES:
+            receipt = {"sha": "sandbox-sha", "profile": profile, "steps": {"lib": {"exit": 0}}}
+            receipts[profile] = receipt
+            (self.results / f"sandbox-sha-{profile}.json").write_text(json.dumps(receipt))
+        result = self.invoke_controller("status")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        listing = json.loads(result.stdout)
+        self.assertEqual(listing["sha"], "sandbox-sha")
+        self.assertEqual(listing["profiles"], receipts)
+        self.assertEqual(listing["legacy_retail"], legacy)
+
+    def test_status_without_ref_groups_latest_sha_and_excludes_baselines(self):
+        receipt = {"sha": "latest-sha", "profile": "ptr", "steps": {}}
+        (self.results / "latest-sha-ptr.json").write_text(json.dumps(receipt))
+        baseline = self.results / "master-latest-mists.json"
+        baseline.write_text(json.dumps({"sha": "other-sha", "profile": "mists"}))
+        os.utime(baseline, (time.time() + 60, time.time() + 60))
+        result = subprocess.run(
+            [sys.executable, str(RUNNER), "status"], env=self.env,
+            capture_output=True, text=True, timeout=5,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        listing = json.loads(result.stdout)
+        self.assertEqual(listing["sha"], "latest-sha")
+        self.assertEqual(listing["profiles"]["ptr"], receipt)
+        self.assertIsNone(listing["profiles"]["retail"])
+        self.assertIsNone(listing["profiles"]["mists"])
+
+    def test_status_reads_legacy_only_results_without_claiming_other_profiles(self):
+        legacy = {"sha": "sandbox-sha", "steps": {"lib": {"exit": 0}}}
+        (self.results / "sandbox-sha.json").write_text(json.dumps(legacy))
+        result = self.invoke_controller("status")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        listing = json.loads(result.stdout)
+        self.assertEqual(listing["legacy_retail"], legacy)
+        self.assertEqual(listing["profiles"], dict.fromkeys(PROFILES))
+
+    def test_failure_comparisons_use_only_same_profile_baseline(self):
+        import runpy
+        worker = runpy.run_path(str(RUNNER))
+        compare = worker["new_failures"]
+        compare.__globals__["RESULTS"] = self.results
+        (self.results / "master-latest.json").write_text(
+            json.dumps({"failures": {"lib": ["shared", "old-retail"]}})
+        )
+        for profile in PROFILES:
+            (self.results / f"master-latest-{profile}.json").write_text(
+                json.dumps({"failures": {"lib": [f"old-{profile}"]}})
+            )
+            result = {"profile": profile, "failures": {"lib": [f"old-{profile}", "shared"]}}
+            self.assertEqual(compare(result), {"lib": ["shared"]})
+
+    def test_master_updates_only_selected_profile_baseline(self):
+        legacy = self.results / "master-latest.json"
+        legacy.write_text('{"historical": true}\n')
+        self.harness.write_text(
+            "import runpy\n"
+            f"worker = runpy.run_path({str(RUNNER)!r})\n"
+            f"worker['run']('master', 2, {str(self.target_dir)!r}, profile='mists')\n"
+        )
+        process = self.start_worker()
+        self.finish_scopes(process, profile="mists")
+        receipt = json.loads((self.results / "sandbox-sha-mists.json").read_text())
+        self.assertEqual(
+            json.loads((self.results / "master-latest-mists.json").read_text()), receipt
+        )
+        self.assertEqual(legacy.read_text(), '{"historical": true}\n')
+        self.assertFalse((self.results / "master-latest-retail.json").exists())
 
     def test_deploy_installs_only_full_suite_in_home_bin(self):
         result = subprocess.run(

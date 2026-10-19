@@ -94,12 +94,15 @@ A separate local temporary-marker discovery/execution/cleanup control passes, an
 
 ## Asynchronous full suite
 
-`python3 tools/full_suite.py submit [REF] --target-dir SLOT --build-jobs 1`
-schedules the detached worker;
-`python3 tools/full_suite.py status [REF]` reads stored results. The worker keeps
+`python3 tools/full_suite.py submit [REF] --profile PROFILE --target-dir SLOT --build-jobs 1`
+schedules one detached profile worker. `PROFILE` is `retail` (default), `ptr`,
+`wrath`, `mists`, `wowforever`, `era`, or `anniversary`.
+`python3 tools/full_suite.py status [REF]` lists all seven profiles for the resolved
+SHA; without REF it lists the latest receipt's SHA. Missing profile receipts are
+JSON `null`, not passes. The worker keeps
 its existing suite lock and dedicated checkout/results under `~/Projects/wow/`.
 The results `.lock` serializes revision resolution, checkout preparation and all
-three child lifetimes, including unsuccessful exits. Each step invokes native
+applicable child lifetimes, including unsuccessful exits. Each step invokes native
 Cargo directly; the obsolete external builder-lock wrapper is not a dependency
 and its lock does not block these children.
 
@@ -117,10 +120,32 @@ Cargo steps retain `--offline --locked`; dependencies must already be cached and
 the lockfile current. `FULL_SUITE_JOBS` controls nextest test workers only
 (default 16), independently of compilation jobs, and submit forwards its chosen
 value explicitly via `systemd-run --setenv`. Complete
-integration and library scopes use nextest with `--no-fail-fast`; the complete
-`prefork_full_ui` scope uses `cargo test`. Nonzero Cargo exits, parsed failures
-and both stdout/stderr remain in the stored JSON/log; later steps still run.
-Status behavior and all three workload scopes are unchanged.
+integration and library scopes use nextest with `--no-fail-fast` for every profile.
+The complete `prefork_full_ui` scope uses `cargo test` only for Retail/Mists,
+matching `prefork-full-ui` admission in Cargo.toml and the target's compile guards.
+Other profiles record `steps.prefork.status = "not_applicable"` with a reason and
+an N/A log entry, without an exit code or fabricated failure/pass record.
+Nonzero Cargo exits, parsed failures and both stdout/stderr remain in the stored
+JSON/log; later applicable steps still run.
+
+Retail deliberately retains Cargo default features (`sound,gui,casc,client-retail`)
+with unchanged child argv so historical Retail receipts remain comparable.
+Every other profile passes `--no-default-features --features sound,gui,casc,client-<profile>`
+to every applicable Cargo command. No extra prefork feature is forced.
+
+Receipts and logs are `<sha>-<profile>.json` and `<sha>-<profile>.log`; each receipt
+and worker summary identifies `profile`. Master runs update only
+`master-latest-<profile>.json`; NEW failures compare only to that profile's baseline
+(or JSON `null` when absent). Historical `<sha>.json` Retail receipts remain
+readable in status under `legacy_retail`, separate from new profile receipts;
+historical `master-latest.json` is neither overwritten nor used across profiles.
+Submit forwards the profile explicitly; systemd unit names include it.
+
+Submit each desired profile separately against the same final SHA and a coordinated
+approved slot; the existing suite lock serializes them. No `--profile all` matrix
+mode: retain the single-profile worker/receipt contract rather than add aggregate
+orchestration. Seven receipts establish seven-profile coverage, not one aggregate
+acceptance receipt; review each profile's applicable scopes and failures.
 
 Source revision `3eab34fb9` adds two fields to each executed step's JSON:
 `command` is the exact argv passed to the subprocess, including `--offline`
