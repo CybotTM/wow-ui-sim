@@ -238,6 +238,14 @@ fn test_blizzard_framexml_load_registers_boss_banner_cvar_without_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_blizzard_framexml_loads_role_poll_without_role_icon_warning() {
     test_timeout! {
