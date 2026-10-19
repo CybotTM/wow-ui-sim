@@ -89,6 +89,71 @@ mod tests {
         .expect("ReloadUI must reuse real startup without third-party addons");
     }
 
+    #[cfg(feature = "gui")]
+    #[test]
+    fn reload_ui_preserves_file_backed_edit_mode_layout() {
+        const CHILD_ENV: &str = "WOW_SIM_RELOAD_EDIT_MODE_CHILD";
+        if std::env::var_os(CHILD_ENV).is_some() {
+            run_edit_mode_reload_consumer();
+            return;
+        }
+        let fixture = tempfile::tempdir().unwrap();
+        let wtf = fixture.path().join("WTF");
+        let account = wtf.join("Account/ReloadAccount");
+        let character = account.join("Test Realm/ReloadChar");
+        std::fs::create_dir_all(&character).unwrap();
+        std::fs::write(
+            account.join("edit-mode-cache-account.txt"),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/tests/fixtures/frame_position_replay/edit-mode-cache-account.txt"
+            )),
+        )
+        .unwrap();
+        std::fs::write(
+            character.join("edit-mode-cache-character.txt"),
+            b"2 2 2 2 0 0\0",
+        )
+        .unwrap();
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "startup::tests::reload_ui_preserves_file_backed_edit_mode_layout",
+                "--nocapture",
+                "--test-threads=1",
+            ])
+            .env(CHILD_ENV, "1")
+            .env("WOW_SIM_WTF_PATH", &wtf)
+            .env("WOW_SIM_WTF_ACCOUNT", "ReloadAccount")
+            .env("WOW_SIM_WTF_REALM", "Test Realm")
+            .env("WOW_SIM_WTF_CHARACTER", "ReloadChar")
+            .env("WOW_SIM_EDIT_MODE_LAYOUT", "Widescreen")
+            .status()
+            .unwrap();
+        assert!(
+            status.success(),
+            "original EditMode consumer must retain its active cached layout across ReloadUI"
+        );
+    }
+
+    #[cfg(feature = "gui")]
+    fn run_edit_mode_reload_consumer() {
+        let args = Args::try_parse_from(["wow-sim", "--no-addons"]).unwrap();
+        let (env, _font_system, saved_vars) = init_and_load(&args, ScreenKind::Game).unwrap();
+        wow_ui_sim::startup::fire_startup_events(&env);
+        let before: String = env
+            .eval("return EditModeManagerFrame:GetActiveLayoutInfo().layoutName")
+            .unwrap();
+        assert_eq!(
+            before, "Widescreen",
+            "non-default file-backed layout readiness"
+        );
+        wow_ui_sim::iced_app::run_headless_named_click_probe(
+            env, saved_vars, iced::Size::new(1024.0, 768.0), "ReloadUI()", &[],
+            Some(&format!("assert(EditModeManagerFrame:GetActiveLayoutInfo().layoutName == {before:?}, 'ReloadUI changed the active file-backed EditMode layout')")),
+        ).expect("original EditMode layout consumer after ReloadUI");
+    }
+
     #[test]
     #[ignore = "private host-budget probe; external no-sound setting and 90s process bound required"]
     fn trusted_finite_budget_for_selected_addons() {
