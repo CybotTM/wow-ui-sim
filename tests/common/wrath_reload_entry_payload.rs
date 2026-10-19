@@ -26,6 +26,7 @@ pub fn assert_reload_pew_arity() {
 
 pub fn assert_original_stopwatch_reload_paths() {
     let mut env = super::original::load_original_wrath_startup();
+    env.exec("TimeManager_LoadUI()").unwrap();
     assert_stopwatch_show_hide(&env);
     env.exec("OldStopwatchFrame = StopwatchFrame; ReloadUI()")
         .unwrap();
@@ -34,6 +35,7 @@ pub fn assert_original_stopwatch_reload_paths() {
         Ok(())
     });
     assert!(env.service_headless_reload(&mut None).unwrap());
+    env.exec("TimeManager_LoadUI()").unwrap();
     env.exec("assert(OldStopwatchFrame == nil and StopwatchFrame ~= nil, 'new original panel in fresh VM')").unwrap();
     assert_stopwatch_show_hide(&env);
     observe_original_spellbook_gap();
