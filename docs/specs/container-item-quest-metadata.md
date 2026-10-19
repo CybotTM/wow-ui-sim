@@ -18,8 +18,7 @@ Backing model: `src/c_api/container_quest.rs`.
 - [ ] `isActive` reflects membership of that quest ID in
   `SimState.quest_log_entries.entries`, including seeded active entries; completion
   history alone does not make an item active. Do not OR in the lightweight list.
-- [ ] Existing `ConfirmAcceptQuest` / `SetAbandonQuest` transitions change the next
-  query false → true → false without changing supplied item metadata.
+- [ ] `ConfirmAcceptQuest` makes the next query active without changing supplied item metadata. Non-Wrath `SetAbandonQuest` removes active membership immediately; Wrath marking preserves it until `AbandonQuest` confirmation. The [Wrath abandon contract](wrath-quest-abandon.md) owns that confirmation boundary.
 - [ ] Ordinary items without supplied metadata, empty slots, unknown bags, nonpositive
   slots and slots beyond supplied bag capacity return `(false, nil, false)` fields.
   The documentation specifies the table/field types but does **not** specify these
