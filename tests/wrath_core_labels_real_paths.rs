@@ -160,9 +160,10 @@ fn f1_original_restricted_screen_handle_fills_root_not_offset_parent() {
 fn create_chat_env() -> WowLuaEnv {
     let env = create_autocomplete_env();
     exec_original(&env, "GlobalStrings.lua");
+    exec_original(&env, "Constants.lua");
     exec_original(&env, "UIParent.lua");
     exec_original(&env, "FloatingChatFrame.lua");
-    load_originals(&env, &["ChatFrame.xml"]);
+    load_originals(&env, &["UIDropDownMenu.xml", "ChatFrame.xml"]);
     env.exec(
         r#"
         ChatWindow=CreateFrame('ScrollingMessageFrame','RealPathChat',UIParent)
@@ -418,6 +419,7 @@ fn x2_original_xml_continues_after_missing_external_script() {
 fn x2_original_pvp_xml_continues_after_missing_template_include() {
     let env = WowLuaEnv::new().unwrap();
     exec_original(&env, "GlobalStrings.lua");
+    exec_original(&env, "Constants.lua");
     exec_original(&env, "FriendsFrame.lua");
     load_originals(
         &env,
@@ -425,6 +427,7 @@ fn x2_original_pvp_xml_continues_after_missing_template_include() {
             "Fonts.xml",
             "FontStyles.xml",
             "UIPanelTemplates.xml",
+            "UIDropDownMenu.xml",
             "PVPFrameTemplates.xml",
         ],
     );
