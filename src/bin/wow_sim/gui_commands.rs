@@ -479,7 +479,7 @@ mod reload_tests {
             exec_lua_secure: false,
             dump_tree: None,
         };
-        prepare_screenshot_env(&mut env, &command);
+        prepare_screenshot_env(&mut env, &mut None, &command);
         assert!(
             env.eval::<bool>("return reload_sentinel == nil").unwrap(),
             "screenshot must service reload before building render output"

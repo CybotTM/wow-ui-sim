@@ -142,7 +142,68 @@ fn reload_ui_saves_declared_variables_before_discarding_the_vm() {
     );
 }
 
-fn complete_gui_startup(app: &mut App) {
+#[test]
+fn reload_ui_round_trips_scalar_and_locally_written_large_variables() {
+    let directory = tempfile::tempdir().unwrap();
+    let mut app = build_test_app(ScreenKind::Game);
+    complete_gui_startup(&mut app);
+    let mut manager = SavedVariablesManager::with_storage_dir(directory.path().to_path_buf());
+    manager.set_max_load_bytes(Some(16));
+    let variables = ["ReloadScalar".to_string(), "ReloadLarge".to_string()];
+    manager
+        .init_for_addon(
+            app.env.borrow().rilua_mut().state_mut(),
+            "ReloadPersistence",
+            &variables,
+            &[],
+        )
+        .unwrap();
+    app.saved_vars = Some(manager);
+    app.env
+        .borrow()
+        .exec("ReloadScalar = 73; ReloadLarge = { message = string.rep('saved', 100) }; ReloadUI()")
+        .unwrap();
+    let _ = app.update(super::super::Message::ProcessTimers(Instant::now()));
+    complete_gui_startup(&mut app);
+    app.saved_vars
+        .as_mut()
+        .unwrap()
+        .init_for_addon(
+            app.env.borrow().rilua_mut().state_mut(),
+            "ReloadPersistence",
+            &variables,
+            &[],
+        )
+        .unwrap();
+    assert!(app.env.borrow().eval::<bool>(
+        "return ReloadScalar == 73 and ReloadLarge ~= nil and ReloadLarge.message == string.rep('saved', 100)").unwrap(),
+        "locally written reload data must round-trip scalars and must not use the import size cap");
+}
+
+#[test]
+fn reload_ui_requested_from_timer_retires_the_callback_environment() {
+    let mut app = build_test_app(ScreenKind::Game);
+    complete_gui_startup(&mut app);
+    app.env
+        .borrow()
+        .exec("reload_sentinel = true; C_Timer.After(0, function() ReloadUI() end)")
+        .unwrap();
+    let old_lua = Rc::downgrade(&app.env.borrow().lua);
+    let _ = app.update(super::super::Message::ProcessTimers(Instant::now()));
+    complete_gui_startup(&mut app);
+    assert!(
+        old_lua.upgrade().is_none(),
+        "timer-originated reload must retire its VM"
+    );
+    assert!(
+        app.env
+            .borrow()
+            .eval::<bool>("return reload_sentinel == nil")
+            .unwrap()
+    );
+}
+
+pub(super) fn complete_gui_startup(app: &mut App) {
     app.record_canvas_size(app.screen_size.get());
     for _ in 0..200 {
         if app.gui_startup_complete.get() {

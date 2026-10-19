@@ -655,6 +655,7 @@ mod tests {
         let mut env = WowLuaEnv::new().unwrap();
         run_dump_tree(
             &mut env,
+            &mut None,
             DumpTreeCommand {
                 filter: Some("ReloadOldFrame".to_string()),
                 filter_key: None,
