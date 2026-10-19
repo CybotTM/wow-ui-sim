@@ -44,6 +44,7 @@ fn original_forbidden_popup_defers_reload_through_cinematic() {
 #[test]
 fn request_returns_zero_values_coalesces_and_does_not_reject_combat() {
     let mut env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().player.in_combat = true;
     env.exec("assert(select('#', ReloadUI()) == 0); ReloadUI(); OldReloadSentinel = true")
         .unwrap();
     assert!(env.state().borrow().ui_reload_requested);
