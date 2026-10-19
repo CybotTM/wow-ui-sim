@@ -445,6 +445,8 @@ mod filesystem {
         // Root changes take effect through a GUI reload. A repeated identical
         // assignment need not replace an already-failed render request handle.
         let _ = app.update(Message::ReloadUI);
+        // A real reload discards frame tables; addon bootstrap recreates textures.
+        assign_texture(&app, "rootonly", true);
         tick(&mut app);
         let primitive = draw_test_canvas(&app, size);
         assert!(

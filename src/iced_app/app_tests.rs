@@ -52,9 +52,21 @@ fn reload_ui_shortcut_discards_lua_globals_and_old_frames() {
     complete_gui_startup(&mut app);
     app.env
         .borrow()
-        .exec("reload_sentinel = true; CreateFrame('Frame', 'ReloadOldFrame')")
+        .exec(
+            "reload_sentinel = true; CreateFrame('Frame', 'ReloadOldFrame'); \
+               C_Timer.After(0, function() old_timer_fired = true end)",
+        )
         .unwrap();
     let old_lua = Rc::downgrade(&app.env.borrow().lua);
+    let textures = Rc::clone(&app.texture_manager);
+    let fonts = Rc::clone(&app.font_system);
+    {
+        let env = app.env.borrow();
+        let mut state = env.state().borrow_mut();
+        state.player.level = 73;
+        state.party_members.pop();
+        state.world.zone_name = "Reload preservation zone".to_string();
+    }
 
     let _ = app.update(super::super::Message::ReloadUI);
     complete_gui_startup(&mut app);
@@ -63,10 +75,19 @@ fn reload_ui_shortcut_discards_lua_globals_and_old_frames() {
     assert!(
         app.env
             .borrow()
-            .eval::<bool>("return reload_sentinel == nil and ReloadOldFrame == nil")
+            .eval::<bool>(
+                "return reload_sentinel == nil and ReloadOldFrame == nil and old_timer_fired == nil"
+            )
             .unwrap(),
-        "ReloadUI must not preserve arbitrary globals or old frame tables"
+        "ReloadUI must not preserve arbitrary globals, frames or timer callbacks"
     );
+    assert!(Rc::ptr_eq(&textures, &app.texture_manager));
+    assert!(Rc::ptr_eq(&fonts, &app.font_system));
+    let env = app.env.borrow();
+    let state = env.state().borrow();
+    assert_eq!(state.player.level, 73);
+    assert_eq!(state.party_members.len(), 3);
+    assert_eq!(state.world.zone_name, "Reload preservation zone");
 }
 
 #[test]
