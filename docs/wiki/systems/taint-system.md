@@ -103,6 +103,8 @@ Driver limitations:
 
 These are the real Blizzard Lua paths the simulator executes today that branch on `issecure()` or pass its value into secure APIs. They are the practical end-to-end checks for Elune taint integration. The important runtime question is whether existing tests exercise the secure branch, the insecure branch, or only load-time registration.
 
+The secure-file and restricted-environment startup-test citations below have [profile-specific applicability](../../specs/client-profiles.md#startup-warning-test-applicability); they do not establish all-profile runtime acceptance.
+
 | Area | Blizzard paths | Branch behavior | Simulator coverage |
 |------|----------------|-----------------|--------------------|
 | Secure mixin creation | `Blizzard_SharedXMLBase/Mixin.lua` | `SecureMixin` and `CreateFromSecureMixins` return only for secure callers. | Loaded by nearly every Blizzard integration lane; TOC coverage in `tests/toc_parsing.rs`, global/mixin coverage in `tests/utility_api.rs`, startup/panel/keybinding lanes. |

@@ -90,6 +90,42 @@ The [historical failing Wrath startup inventory](../baselines/README.md#wrath-lu
 
 Loader source `31ac46b3a`: RED 4/9 TOC tests and 0/1 Carbonite provider/consumer test; targeted offline GREEN 10/10 Forever TOC, 8/8 Forever profile, 12/12 Mists TOC, 3/3 existing Mists screen-selection, and 11/11 Retail TOC tests. These 44 tests cover the selected profiles, not a fresh runtime test of every client or the entire Carbonite addon. Eight pre-existing unrelated lib-test warnings occur under Forever/Mists, also present in RED. Commands, revision scopes, and complete logs are recorded in `/tmp/forever-carbonite-toc-development-ledger.json`; final checks and actual-package startup remain integration-owned.
 
+## Startup warning test applicability
+
+The Wrath cache is the flat historical FrameXML snapshot, not the modern split-addon UI. `tests/startup_warnings.rs` must retain applicable Wrath consumers and compile-exclude only tests whose required consumer is absent.
+
+Verified 2026-10-19 against the actual Wrath cache: 382 source files plus two cache metadata files. `Blizzard_RestrictedAddOnEnvironment` is absent, as are all five files required by `test_secure_env_toc_annotations_are_exhaustive`: `Blizzard_ChatFrameBase/Shared/ChatFrameFiltersSecure.lua`, `Blizzard_CooldownViewer/CooldownViewerSecure.lua`, `Blizzard_RestrictedAddOnEnvironment/RestrictedEnvironment.lua`, and `Blizzard_UnitFrame/Shared/{TargetFrameAuraButton,TargetFrameAuraContainer}.lua`. No Wrath Lua/XML/TOC contains `EssentialCooldownViewer`, `LoadIntoEnvironment`, `GetFrameMetatable`, or `PropagateForbiddenToReferencedFrames`.
+
+Therefore `test_restricted_addon_environment_exposes_execution_surface`, `test_secure_env_annotated_files_load_cleanly`, and `test_secure_env_toc_annotations_are_exhaustive` exclude only `client-wrath`. Historical `FrameXML/SecureTemplates.xml` and `SecureHandlerTemplates.xml` do not establish the modern addon or annotated five-file contract. Other-profile eligibility and all assertions remain unchanged.
+
+`test_no_warnings_on_startup` remains enabled: Wrath ships `AddOns/Blizzard_AchievementUI/Blizzard_AchievementUI.xml`. Its achievement/stats containers inherit `HybridScrollBarTemplate`, whose `$parentBG` texture is declared by `FrameXML/HybridScrollFrame.xml`. The broad fixture must load the required authentic `FrameXML/FrameXML.toc` before loading addons, matching product startup order in `src/bin/wow_sim/addon_loading.rs`. Previously it enumerated only AddOns, omitting these templates and failing at `Blizzard_AchievementUI.lua:628` and `:1634`. FrameXML failures, handler errors and runtime diagnostics use the same strict collector as addons; none are cleared or baselined. This repairs the fixture, not Blizzard Lua or an API default.
+
+Static inventory at `fddc3bc0b`: [startup warning tests](../../tests/startup_warnings.rs) and [late fixtures](../../tests/startup_warnings/late.rs). After the three Wrath-only secure-environment exclusions, Wrath has 4 eligible tests (three of its former seven are gated), Retail 26 unchanged. These counts describe source eligibility, not passing runtime execution.
+
+The late fixtures have consumer-scoped compile-time eligibility:
+
+| Required consumer | Eligible public client profiles | Late tests |
+|---|---|---:|
+| Retained secure-action and zone-text consumers | All seven | 2 |
+| Split-addon consumers absent from the flat Wrath tree | Retail, PTR, Forever, Mists, Era, Anniversary | 8 |
+| AccountStore, BossBanner, EventUtil, FrameUtil, HousingTutorials or NewPlayerExperience consumers | Retail, PTR, Forever | 7 |
+
+The two all-profile late tests use `load_profile_framexml()`: Wrath loads its manifest-backed `FrameXML/FrameXML.toc`; other profiles load `Blizzard_FrameXML`. This helper is limited to the secure-action protection tuple and zone-text fading-helper fixtures. It does not change production startup. The broad `test_no_warnings_on_startup` fixture has the separate Wrath FrameXML-before-addons ordering described above.
+
+The parent module also restricts its widget-container test and three AccountStore tests to Retail, PTR and Forever. Its three secure-environment tests exclude only `client-wrath`, as detailed above. Static eligibility across both modules is:
+
+| Public client profile | Parent-module tests | Late tests | Total eligible tests |
+|---|---:|---:|---:|
+| Retail (`client-retail`) | 9 | 17 | 26 |
+| PTR (`client-ptr`) | 9 | 17 | 26 |
+| Forever (`client-wowforever`) | 9 | 17 | 26 |
+| Mists (`client-mists`) | 5 | 10 | 15 |
+| Era (`client-era`) | 5 | 10 | 15 |
+| Anniversary (`client-anniversary`) | 5 | 10 | 15 |
+| Wrath (`client-wrath`) | 2 | 2 | 4 |
+
+Counts assume exactly one named public `client-*` profile feature. The gates name `client-retail`, not the standalone historical `profile-retail` marker. Eligibility is not compiled discovery, runtime acceptance or a clean-startup claim.
+
 ## Forever event coverage
 
 - Forever accepts and dispatches `PET_STATS_UPDATE`, `SHARD_TRANSFER`, `SHARD_TRANSFER_IMMINENT`, `GUILD_PREFERRED_PLAY_SETTINGS_UPDATED`, and `HIDDEN_GROUP_BUFFS_CHANGED` through ordinary frame event handlers. Empty and invented event names remain rejected.
