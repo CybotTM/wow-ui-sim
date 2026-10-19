@@ -674,7 +674,7 @@ fn original_unselected_reward_reports_one_message_and_named_sound() {
         end
         assert(UIErrorsFrame:GetNumMessages() == 1, 'original UIErrorsFrame consumed the error')
         local text, r, g, b = UIErrorsFrame:GetMessageInfo(1)
-        assert(text == ERR_QUEST_MUST_CHOOSE and r == 1 and g == 0.1 and b == 0.1, 'original red error message')
+        assert(text == ERR_QUEST_MUST_CHOOSE and r == 1 and math.abs(g - 0.1) < 0.000001 and math.abs(b - 0.1) < 0.000001, 'original red error message')
         assert(QuestFrameRewardPanel:IsShown(), 'feedback retains rewards')
         assert(not A_Admin.TurnInSelectedQuest(), 'feedback does not claim a reward')
     "#,
