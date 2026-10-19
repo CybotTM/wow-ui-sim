@@ -29,7 +29,7 @@ Wrath's legacy spellbook globals expose full and compact views of existing `SimS
 
 ## Implementation inventory
 
-- `src/lua_api/globals/real/wrath_spellbook.rs` — Wrath-only ordered/compact projection and tab binding; reuses existing libc numeric conversion for Lua-style numeric strings.
+- `src/lua_api/globals/real/wrath_spellbook.rs` — Wrath-only ordered/compact projection, tab/mapping bindings and synchronous UpdateSpells; reuses existing libc numeric conversion for Lua-style numeric strings.
 - `src/lua_api/globals/real/spell_tabs.rs` — Wrath registration selects its own producer; other-profile function bodies remain unchanged.
 - `src/lua_api/globals/real/mod.rs` — Wrath-only module gate.
 - `src/lua_api/state/sim_state.rs` — existing known_spells membership, unchanged.

@@ -91,5 +91,7 @@ fn get_retail_spell_tab_info(
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetNumSpellTabs", get_num_spell_tabs)?;
     LuaApiMut::register_function(lua, "GetSpellTabInfo", get_spell_tab_info)?;
+    #[cfg(feature = "client-wrath")]
+    super::wrath_spellbook::register_actions(lua)?;
     Ok(())
 }

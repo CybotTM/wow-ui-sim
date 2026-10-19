@@ -9,7 +9,38 @@ use crate::lua_api::state::SimState;
 use crate::lua_bridge::stack_val;
 use crate::spells;
 use rilua::vm::state::LuaState;
-use rilua::{LuaError, LuaResult, RuntimeError, Val};
+use rilua::{LuaApiMut, LuaError, LuaResult, RuntimeError, Val};
+
+pub(super) fn register_actions(lua: &mut rilua::Lua) -> crate::Result<()> {
+    LuaApiMut::register_function(lua, "GetKnownSlotFromHighestRankSlot", get_known_slot)?;
+    LuaApiMut::register_function(lua, "UpdateSpells", update_spells)?;
+    Ok(())
+}
+
+fn get_known_slot(state: &mut LuaState) -> LuaResult<u32> {
+    // No fractional rounding is modeled: only authenticated integer slots map.
+    let compact_index = numeric_argument(state)
+        .filter(|number| number.fract() == 0.0)
+        .map(|number| number as usize)
+        .and_then(|slot| slot.checked_sub(1));
+    let known_slot = {
+        let sim = borrow_state(state)?;
+        let full = ordered_known_spells(&sim);
+        let compact = compact_slots(&full);
+        // HashSet membership has unique IDs, so this is the first full match.
+        compact_index
+            .and_then(|index| compact.get(index))
+            .map_or(0, |full_index| full_index + 1)
+    };
+    state.push(Val::Num(known_slot as f64));
+    Ok(1)
+}
+
+fn update_spells(state: &mut LuaState) -> LuaResult<u32> {
+    // Views are derived, but native notification is unconditional and synchronous.
+    crate::lua_api::script_helpers::fire_named_event_state(state, "SPELLS_CHANGED", &[]);
+    Ok(0)
+}
 
 pub(super) fn get_spell_tab_info(state: &mut LuaState) -> LuaResult<u32> {
     let index = numeric_argument(state).ok_or_else(tab_usage_error)? as i32;
