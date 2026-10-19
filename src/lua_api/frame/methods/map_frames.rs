@@ -616,7 +616,11 @@ where
 fn set_zoom(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let requested = stack_i32(state, 2).unwrap_or(0);
-    let clamped = requested.clamp(0, MINIMAP_ZOOM_LEVELS - 1);
+    let clamped = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        (requested as u32).min((MINIMAP_ZOOM_LEVELS - 1) as u32) as i32
+    } else {
+        requested.clamp(0, MINIMAP_ZOOM_LEVELS - 1)
+    };
     let fields = get_or_create_frame_fields(state, id);
     table_set(state, fields, MINIMAP_ZOOM_KEY, Val::Num(clamped as f64));
     Ok(0)
