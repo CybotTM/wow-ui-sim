@@ -22,7 +22,10 @@ pub fn tooltip_env() -> WowLuaEnv {
         r#"
         B6Tip=CreateFrame('GameTooltip','B6Tip',UIParent,'GameTooltipTemplate')
         B6Owner=CreateFrame('Button','B6Owner',UIParent)
+        B6Owner:SetSize(40,20)
+        B6Owner:SetPoint('TOPLEFT',UIParent,'TOPLEFT',40,-40)
         B6Tip:SetOwner(B6Owner,'ANCHOR_NONE')
+        B6Tip:SetPoint('TOPLEFT',UIParent,'TOPLEFT',60,-60)
     "#,
     )
     .unwrap();
