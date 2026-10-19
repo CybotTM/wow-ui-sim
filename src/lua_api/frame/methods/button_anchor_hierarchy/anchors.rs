@@ -658,12 +658,21 @@ fn apply_set_point(
 /// SetAllPoints([relativeTo])
 pub(super) fn set_all_points(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    let wrath = crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath;
+    if wrath && !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "SetAllPoints");
+        return Ok(0);
+    }
     let arg = stack_val(state, 2);
-    if arg == Val::Bool(false) {
+    if !wrath && arg == Val::Bool(false) {
         return Ok(0);
     }
     let has_target_arg = state.top.saturating_sub(state.base) >= 2;
-    let relative_to_id = resolve_set_all_points_target(state, id, arg, has_target_arg)?;
+    let relative_to_id = if wrath {
+        resolve_wrath_all_points_target(state, id, arg, has_target_arg)?
+    } else {
+        resolve_set_all_points_target(state, id, arg, has_target_arg)?
+    };
     ensure_no_anchor_cycle(state, id, relative_to_id, "SetAllPoints")?;
     let mut sim = borrow_state_mut(state)?;
     sim.widgets.remove_all_anchor_dependents_for(id);
@@ -675,6 +684,40 @@ pub(super) fn set_all_points(state: &mut LuaState) -> LuaResult<u32> {
     }
     sim.widgets.mark_anchor_rect_dirty(id);
     Ok(0)
+}
+
+fn resolve_wrath_all_points_target(
+    state: &mut LuaState,
+    id: u64,
+    arg: Val,
+    supplied: bool,
+) -> LuaResult<Option<usize>> {
+    let target = match arg {
+        Val::Nil if supplied => Some("UIParent".to_owned()),
+        Val::Str(_) | Val::Num(_) => crate::lua_api::wrath_arguments::string(state, arg)?,
+        Val::Table(_) => {
+            let identity = crate::lua_api::methods::extract_frame_slot_zero_id(state, arg);
+            let sim = borrow_state(state)?;
+            return identity
+                .filter(|target| sim.widgets.get(*target).is_some())
+                .map(|target| Some(target as usize))
+                .ok_or_else(|| runtime_error("SetAllPoints: invalid region identity"));
+        }
+        _ => None,
+    };
+    let sim = borrow_state(state)?;
+    if let Some(name) = target {
+        return sim
+            .widgets
+            .get_id_by_name(&name)
+            .map(|target| Some(target as usize))
+            .ok_or_else(|| runtime_error(format!("SetAllPoints: unknown region {name}")));
+    }
+    Ok(sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.parent_id)
+        .map(|parent| parent as usize))
 }
 
 fn resolve_set_all_points_target(

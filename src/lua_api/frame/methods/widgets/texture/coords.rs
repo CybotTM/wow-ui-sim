@@ -8,10 +8,26 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn set_blend_mode(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let Some(mode_name) = opt_string(state, 2) else {
+    let wrath = crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath;
+    let mode_name = if wrath {
+        crate::lua_api::wrath_arguments::string(state, stack_val(state, 2))?
+    } else {
+        opt_string(state, 2)
+    };
+    let Some(mode_name) = mode_name else {
+        if wrath {
+            return Err(rilua::runtime_error("SetBlendMode: expected a blend token"));
+        }
         return Ok(0);
     };
     let normalized = mode_name.to_ascii_uppercase();
+    let recognized = matches!(
+        normalized.as_str(),
+        "DISABLE" | "BLEND" | "ALPHAKEY" | "ADD" | "MOD"
+    );
+    if wrath && !recognized {
+        return Err(rilua::runtime_error("SetBlendMode: invalid blend token"));
+    }
     let blend_mode = match normalized.as_str() {
         "ADD" => crate::BlendMode::Additive,
         _ => crate::BlendMode::Alpha,
@@ -38,7 +54,11 @@ pub(super) fn get_blend_mode(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn set_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let coords: Vec<f32> = (2..=9).filter_map(|index| opt_f32(state, index)).collect();
+    let coords = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        read_wrath_tex_coords(state)?
+    } else {
+        (2..=9).filter_map(|index| opt_f32(state, index)).collect()
+    };
     let mut sim = borrow_state_mut(state)?;
     let Some(frame) = sim.widgets.get_mut_visual(id) else {
         return Ok(0);
@@ -55,6 +75,29 @@ pub(super) fn set_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
         _ => {}
     }
     Ok(0)
+}
+
+fn read_wrath_tex_coords(state: &mut LuaState) -> LuaResult<Vec<f32>> {
+    const MAX_COORDINATE: f64 = 10000.0;
+    let count = state.top.saturating_sub(state.base).saturating_sub(1);
+    if count != 4 && count != 8 {
+        return Err(rilua::runtime_error(
+            "SetTexCoord: expected four or eight coordinates",
+        ));
+    }
+    (2..=count + 1)
+        .map(|index| {
+            let value = crate::lua_bridge::stack_val(state, index as i32);
+            let number = crate::lua_api::wrath_arguments::number(state, value)?.unwrap_or(0.0);
+            // Ordered comparisons deliberately retain NaN while rejecting infinity.
+            if number < -MAX_COORDINATE || number > MAX_COORDINATE {
+                return Err(rilua::runtime_error(
+                    "SetTexCoord: coordinate outside allowed range",
+                ));
+            }
+            Ok(number as f32)
+        })
+        .collect()
 }
 
 /// Rect form `(ULx, LRx, ULy, LRy)`. Atlas remapping is applied when the

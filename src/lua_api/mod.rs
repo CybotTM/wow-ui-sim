@@ -72,6 +72,7 @@ pub mod tooltip;
 pub(crate) mod tracked_recipes;
 pub mod workarounds;
 pub(crate) mod workarounds_editmode;
+pub(crate) mod wrath_arguments;
 
 // Re-export public types
 #[cfg(any(feature = "retail-12-1-5", feature = "client-wowforever", test))]

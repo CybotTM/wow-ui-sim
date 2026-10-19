@@ -106,6 +106,12 @@ fn font_set_font(state: &mut LuaState) -> LuaResult<u32> {
     let height = Option::<f64>::from_stack(state, 3)?;
     let flags = Option::<String>::from_stack(state, 4)?;
     let Some(path) = path else { return Ok(0) };
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+        && height.is_some_and(|height| height <= 0.0)
+    {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
     let path_val = create_string(state, &path);
     table_set_static(state, font, "__fontPath", path_val);
     if let Some(h) = height {
@@ -139,7 +145,20 @@ fn add_font_text_color_methods(state: &mut LuaState, font_ref: FontTableRef) -> 
 }
 
 fn font_set_text_color(state: &mut LuaState) -> LuaResult<u32> {
-    set_rgba_component_fields(state, "__textColor")
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+        return set_rgba_component_fields(state, "__textColor");
+    }
+    let color = crate::lua_api::wrath_arguments::text_color(state)?;
+    let font = stack_val(state, 1);
+    for (suffix, value) in ["R", "G", "B", "A"].into_iter().zip(color) {
+        table_set(
+            state,
+            font,
+            &format!("__textColor{suffix}"),
+            Val::Num(value as f64),
+        );
+    }
+    Ok(0)
 }
 
 fn font_get_text_color(state: &mut LuaState) -> LuaResult<u32> {
@@ -206,7 +225,12 @@ fn get_rgba_component_fields(state: &mut LuaState, prefix: &str) -> LuaResult<u3
 fn font_set_justify_h(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
     let j = String::from_stack(state, 2)?;
-    let jv = create_string(state, &j);
+    let j = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        crate::lua_api::wrath_arguments::justification(&j, true)?
+    } else {
+        &j
+    };
+    let jv = create_string(state, j);
     table_set_static(state, font, "__justifyH", jv);
     Ok(0)
 }
@@ -220,7 +244,12 @@ fn font_get_justify_h(state: &mut LuaState) -> LuaResult<u32> {
 fn font_set_justify_v(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
     let j = String::from_stack(state, 2)?;
-    let jv = create_string(state, &j);
+    let j = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        crate::lua_api::wrath_arguments::justification(&j, false)?
+    } else {
+        &j
+    };
+    let jv = create_string(state, j);
     table_set_static(state, font, "__justifyV", jv);
     Ok(0)
 }
