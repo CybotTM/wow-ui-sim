@@ -12,7 +12,7 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape_in_di
 
 const CHILD: &str = "WOW_SIM_ASYNC_REQUEST_PROVENANCE_CHILD";
 const TIMINGS: &str = "WOW_SIM_LOG_HANDLER_TIMINGS";
-const CACHE: &str = "/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns";
+const MUTATION: &str = "WOW_SIM_SHARED_INPUT_MUTATION";
 const VENDOR_SHA256: &str = "1648c842902f6657ae1e10de7366cd0650c77a5eb41bc1c9c7e8030256fa8acb";
 const CALLBACK: &str = "@Interface/AddOns/Blizzard_AsyncRequest/Blizzard_AsyncRequest.lua:60";
 const OWNERS: [&str; 2] = ["AsyncRequestOwnerA", "AsyncRequestOwnerB"];
@@ -59,12 +59,13 @@ fn run_isolated(threshold: Option<&str>) -> String {
 }
 
 fn exercise_original_requests() {
-    let original = Path::new(CACHE).join("Blizzard_AsyncRequest/Blizzard_AsyncRequest.lua");
+    let cache = wow_ui_sim::client_profile::blizzard_ui_addons_dir();
+    let original = cache.join("Blizzard_AsyncRequest/Blizzard_AsyncRequest.lua");
     let bytes = std::fs::read(&original).expect("read original Retail AsyncRequest Lua");
     let digest = format!("{:x}", Sha256::digest(&bytes));
     assert_eq!(digest, VENDOR_SHA256, "consumer drift: {}", original.display());
     with_blizzard_addon_smoke_shape_in_dir(
-        Path::new(CACHE),
+        &cache,
         &["Blizzard_AsyncRequest"],
         &[],
         |env, _loaded| exercise_request_transitions(env),
@@ -78,13 +79,14 @@ fn exercise_request_transitions(env: &WowLuaEnv) {
             AsyncRequestProvenance.errors = AsyncRequestProvenance.errors + 1
         end)
     "#).unwrap();
+    install_mutation_control(env);
     let temp = tempfile::tempdir().unwrap();
     for owner in OWNERS {
         load_request_addon(env, temp.path(), owner);
     }
     let ids = OWNERS.map(|owner| request_ids(env, owner));
     env.exec(r#"
-        FireEvent("PLAYER_LOGIN", "AsyncRequestOwnerA-response")
+        FireEvent("PLAYER_LOGIN", AsyncRequestResponseOverride or "AsyncRequestOwnerA-response")
         FireEvent("PLAYER_LOGOUT", "AsyncRequestOwnerB-response")
     "#).unwrap();
     assert_request_state(env, 0, 0);
@@ -104,6 +106,30 @@ fn drain_cancelled_deadlines(env: &WowLuaEnv, ids: &[u64]) {
     make_retained_timers_ready(env, ids);
     env.process_timers().unwrap();
     env.process_timers().unwrap();
+}
+
+fn install_mutation_control(env: &WowLuaEnv) {
+    match std::env::var(MUTATION).as_deref() {
+        Ok("response") => env.exec("AsyncRequestResponseOverride = 'wrong-response'").unwrap(),
+        Ok("source") => env.exec(r#"
+            local associations = debug.getregistry().__wow_timer_original_callbacks
+            if associations then
+                getmetatable(associations).__newindex = function(store, wrapper)
+                    rawset(store, wrapper, wrapper)
+                end
+            end
+        "#).unwrap(),
+        _ => {}
+    }
+}
+
+fn request_fixture() -> String {
+    let source = include_str!("fixtures/AsyncRequestProvenance/Requests.lua");
+    if std::env::var(MUTATION).as_deref() == Ok("timeout") {
+        source.replace("probe.timeouts + 1", "probe.timeouts + 2")
+    } else {
+        source.to_owned()
+    }
 }
 
 fn load_request_addon(env: &WowLuaEnv, root: &Path, owner: &str) {

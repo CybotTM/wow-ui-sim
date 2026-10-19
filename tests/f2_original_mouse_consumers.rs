@@ -8,9 +8,9 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 #[cfg(feature = "client-retail")]
 fn load_damage_meter_consumer() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("SETUP: env");
-    let path = "/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_DamageMeter/DamageMeterSourceWindow.lua";
-    let source = std::fs::read_to_string(path).expect("SETUP: original DamageMeter source");
-    env.exec_named(&source, &format!("@{path}")).expect("SETUP: whole original source");
+    let path = wow_ui_sim::client_profile::blizzard_ui_addons_dir().join("Blizzard_DamageMeter/DamageMeterSourceWindow.lua");
+    let source = std::fs::read_to_string(&path).expect("SETUP: original DamageMeter source");
+    env.exec_named(&source, &format!("@{}", path.display())).expect("SETUP: whole original source");
     env
 }
 

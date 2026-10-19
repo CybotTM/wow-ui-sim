@@ -4,19 +4,20 @@
 use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-fn exec_original(env: &WowLuaEnv, path: &str) {
-    let source = std::fs::read_to_string(path).expect("SETUP: read original cache");
-    env.exec_named(&source, &format!("@{path}"))
+fn exec_original(env: &WowLuaEnv, relative: &str) {
+    let path = wow_ui_sim::client_profile::blizzard_ui_addons_dir().join(relative);
+    let source = std::fs::read_to_string(&path).expect("SETUP: read original cache");
+    env.exec_named(&source, &format!("@{}", path.display()))
         .expect("SETUP: execute whole unchanged original consumer");
 }
 
 fn load_consumer() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("SETUP: env");
     if cfg!(feature = "client-wrath") {
-        exec_original(&env, "/home/osso/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/LFGFrame.lua");
-        exec_original(&env, "/home/osso/.cache/wow-ui-sim/blizzard-ui/wrath/FrameXML/LFDFrame.lua");
+        exec_original(&env, "../FrameXML/LFGFrame.lua");
+        exec_original(&env, "../FrameXML/LFDFrame.lua");
     } else {
-        exec_original(&env, "/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_GroupFinder/Shared/LFGFrame.lua");
+        exec_original(&env, "Blizzard_GroupFinder/Shared/LFGFrame.lua");
     }
     env.exec(r#"
         C12Parent = CreateFrame("Frame", "C12Parent", UIParent)
@@ -80,6 +81,9 @@ fn c12_original_lfg_disabled_check_emission_and_reassignment() {
     const MULTI: &str = "UI-MultiCheck-Up";
     const MULTI_DISABLED: &str = "UI-MultiCheck-Disabled";
     env.exec("C12Refresh(2)").expect("SETUP: original consumer invocation");
+    if std::env::var("WOW_SIM_SHARED_INPUT_MUTATION").as_deref() == Ok("disabled-check") {
+        env.exec("C12Check:SetDisabledCheckedTexture('Interface/Buttons/UI-CheckBox-Check')").unwrap();
+    }
     assert_emitted(&env, CHECK, DISABLED, Some(DISABLED));
     env.exec(r#"
         C12Checked = C12Check:GetCheckedTexture()
