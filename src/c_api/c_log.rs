@@ -19,6 +19,10 @@ pub(crate) fn register_classic(state: &mut LuaState) -> LuaResult<()> {
     ) {
         return Ok(());
     }
+    register_error_sink(state)
+}
+
+pub(crate) fn register_error_sink(state: &mut LuaState) -> LuaResult<()> {
     register(state)?;
     let namespace = ensure_namespace(state, "C_Log")?;
     table_set_rust_fn_static(state, namespace, "LogErrorMessage", log_message)

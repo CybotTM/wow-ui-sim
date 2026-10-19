@@ -43,7 +43,7 @@ Retail, PTR and Forever cached `QuestOfferDocumentation.lua` declare
   a measured native default. An explicitly supplied empty list returns a table.
 - [x] Keep supplied rows environment-local, live, and scoped to one active quest
   lifetime; abandonment/turn-in clear them without granting reputation.
-- [ ] Publish Forever's real `C_Log.LogErrorMessage` sink: append the exact
+- [x] Publish Forever's real `C_Log.LogErrorMessage` sink: append the exact
   ordinary string once to environment-local console output, with zero returns.
   Preserve classic and Retail/PTR publication and string-handling behavior.
 
@@ -59,8 +59,11 @@ close invalidation, lifetime cleanup and isolation. `tests/forever_log_sink.rs`
 covers actual sink output/arity/isolation and Retail/PTR publication preservation.
 Both are discovered automatically by the integration harness. At `7f22c009c`,
 all six query cases and the Forever sink case fail on the missing bindings after
-successful compilation. The modeled query is implemented; sink repair and GREEN
-profile preservation remain pending.
+successful compilation. The modeled query and Forever sink are implemented;
+GREEN profile preservation remains pending. Forever calls the shared error-sink
+registrar explicitly; the existing classic predicate and Retail/PTR registrar
+are unchanged. [Classic logging](mists-script-error-logging.md) owns their prior
+consumer contract.
 Native secret-input parity and additional namespace members remain out of scope.
 
 ## How it works
