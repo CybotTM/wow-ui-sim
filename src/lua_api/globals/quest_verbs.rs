@@ -95,6 +95,86 @@ fn append_quest_log_entry(quest_log: &mut Vec<u32>, quest_id: u32) {
     }
 }
 
+#[cfg(feature = "client-wrath")]
+fn accept_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let (index, giver) = {
+        let mut sim = borrow_state_mut(state)?;
+        if !super::group_queries::unit_exists_in_state(&sim, "player") {
+            return Ok(0);
+        }
+        let Some(offer) = sim.pending_quest_offer.take() else {
+            return Ok(0);
+        };
+        // INFERRED ordering pending native confirmation: clear before dispatch so
+        // the original OnHide -> CloseQuest re-entry cannot emit a second finish.
+        let giver = std::mem::take(&mut sim.gossip.giver_guid);
+        let id = offer.quest_id as u32;
+        let index = if sim.quest_log_entries.entries.len() >= 25 {
+            None
+        } else {
+            append_quest_log_entry(&mut sim.quest_log, id);
+            sim.quest_log_entries.entries.push(offer);
+            Some(sim.quest_log_entries.entries.len())
+        };
+        (index, giver)
+    };
+    publish_accept_response(state, index)?;
+    finish_wrath_quest_dialog(state, giver)?;
+    Ok(0)
+}
+
+#[cfg(feature = "client-wrath")]
+pub(super) fn finish_wrath_quest_dialog(state: &mut LuaState, cleared_giver: u64) -> LuaResult<()> {
+    if cleared_giver == 0 {
+        return Ok(());
+    }
+    super::state_backed_queries::dispatch_event_now(state, "QUEST_FINISHED", &[])
+}
+
+#[cfg(feature = "client-wrath")]
+fn close_wrath_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let giver = {
+        let mut sim = borrow_state_mut(state)?;
+        sim.pending_quest_offer = None;
+        // CloseQuest retains current quest/phase, sent latch and pending claim.
+        // INFERRED clear-before-emit ordering; native confirmation is pending.
+        std::mem::take(&mut sim.gossip.giver_guid)
+    };
+    finish_wrath_quest_dialog(state, giver)?;
+    Ok(0)
+}
+
+#[cfg(feature = "client-wrath")]
+fn publish_accept_response(state: &mut LuaState, index: Option<usize>) -> LuaResult<()> {
+    let Some(index) = index else {
+        let text = crate::lua_api::methods::create_string_static(state, "Your quest log is full.");
+        return super::state_backed_queries::dispatch_event_now(state, "UI_ERROR_MESSAGE", &[text]);
+    };
+    // Simulator server-response policy; not a claim that AcceptQuest inserts locally.
+    super::state_backed_queries::dispatch_event_now(
+        state,
+        "QUEST_ACCEPTED",
+        &[Val::Num(index as f64)],
+    )?;
+    notify_wrath_log_changed(state)
+}
+
+#[cfg(feature = "client-wrath")]
+pub(super) fn notify_wrath_log_changed(state: &mut LuaState) -> LuaResult<()> {
+    let player = crate::lua_api::methods::create_string_static(state, "player");
+    super::state_backed_queries::dispatch_event_now(state, "UNIT_QUEST_LOG_CHANGED", &[player])?;
+    let mut sim = borrow_state_mut(state)?;
+    if !sim
+        .events
+        .pending()
+        .iter()
+        .any(|event| event.name == "QUEST_LOG_UPDATE")
+    {
+        sim.events.push_simple("QUEST_LOG_UPDATE");
+    }
+    Ok(())
+}
+
 /// `CloseQuestFrame()` — fires `QUEST_FINISHED`. WoW also nils the pending
 /// offer; mirror that here.
 fn close_quest_frame(state: &mut LuaState) -> LuaResult<u32> {
@@ -125,6 +205,7 @@ fn quest_choice_set_active(state: &mut LuaState) -> LuaResult<u32> {
 fn quest_map_log_title_button_on_click(state: &mut LuaState) -> LuaResult<u32> {
     let id = stack_u32(state, 1);
     let mut sim = borrow_state_mut(state)?;
+    #[cfg(not(feature = "client-wrath"))]
     if sim.selected_quest_log_id != id {
         sim.quest_log_entries.readiness.dialog = None;
     }
@@ -194,17 +275,7 @@ fn abandon_quest(state: &mut LuaState) -> LuaResult<u32> {
     if !removed {
         return Ok(0);
     }
-    let player = crate::lua_api::methods::create_string_static(state, "player");
-    super::state_backed_queries::dispatch_event_now(state, "UNIT_QUEST_LOG_CHANGED", &[player])?;
-    let mut sim = borrow_state_mut(state)?;
-    if !sim
-        .events
-        .pending()
-        .iter()
-        .any(|event| event.name == "QUEST_LOG_UPDATE")
-    {
-        sim.events.push_simple("QUEST_LOG_UPDATE");
-    }
+    notify_wrath_log_changed(state)?;
     Ok(0)
 }
 
@@ -332,8 +403,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn register_quest_state_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
+    #[cfg(feature = "client-wrath")]
+    LuaApiMut::register_function(lua, "AcceptQuest", accept_quest)?;
     LuaApiMut::register_function(lua, "ConfirmAcceptQuest", confirm_accept_quest)?;
     LuaApiMut::register_function(lua, "CloseQuestFrame", close_quest_frame)?;
+    #[cfg(feature = "client-wrath")]
+    LuaApiMut::register_function(lua, "CloseQuest", close_wrath_quest)?;
     if crate::c_api::quest_objectives::ENABLED {
         LuaApiMut::register_function(lua, "CloseQuest", close_quest_frame)?;
     }

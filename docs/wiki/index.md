@@ -1,3 +1,7 @@
+## [2026-10-19] source | Wrath dialog request/response plumbing
+
+[Lua API notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [Wrath turn-in contract](../specs/wrath-quest-turn-in.md): shared feature-absence RED, executed A boundaries, complete bounded turn-in GREEN and Wrath preservation/zero-warning gates. The owning contract records exact receipts and remaining gaps; clear-before-emit ordering remains explicitly inferred.
+
 ## [2026-10-19] system | Deferred fresh-environment ReloadUI
 
 [Reload lifecycle](systems/reload-ui.md) documents owner-serviced VM retirement, retained session state, SavedVariables readback and IPC boundaries. [Contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) records 69 targeted retail passes, original EditMode consumer continuity, historical behavioral RED and unconfirmed native event order.

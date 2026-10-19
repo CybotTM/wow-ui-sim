@@ -306,6 +306,26 @@ path = "tests/wrath_residual_b.rs"
 required-features = ["client-wrath"]
 
 [[test]]
+name = "wrath_quest_accept"
+path = "tests/wrath_quest_accept.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_quest_turn_in"
+path = "tests/wrath_quest_turn_in.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_quest_abandon"
+path = "tests/wrath_quest_abandon.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_quest_log_projection"
+path = "tests/wrath_quest_log_projection.rs"
+required-features = ["client-wrath"]
+
+[[test]]
 name = "wrath_legacy_sound"
 path = "tests/wrath_legacy_sound.rs"
 required-features = ["client-wrath"]
