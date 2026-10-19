@@ -294,7 +294,9 @@ fn original_button_cancel_then_accept_marked_target() {
 #[test]
 fn original_popup_removals_deliver_unit_changes_and_coalesce_log_refresh() {
     let env = seed_env();
-    exec(&env, r#"
+    exec(
+        &env,
+        r#"
         ResponseEvents = {}
         local observer = CreateFrame('Frame')
         observer:RegisterEvent('UNIT_QUEST_LOG_CHANGED')
@@ -311,25 +313,31 @@ fn original_popup_removals_deliver_unit_changes_and_coalesce_log_refresh() {
         QuestLogFrameAbandonButton:Click()
         StaticPopup_FindVisible('ABANDON_QUEST').button1:Click()
         assert(#ResponseEvents == 2 and ResponseEvents[2][4] == 0, 'second direct unit signal precedes queued refresh')
-    "#);
+    "#,
+    );
     assert_eq!(dispatch_queued_abandon_events(&env), 1, "coalesced refresh");
-    exec(&env, "assert(#ResponseEvents == 3 and ResponseEvents[3][1] == 'QUEST_LOG_UPDATE' and ResponseEvents[3][2] == 0)");
+    exec(
+        &env,
+        "assert(#ResponseEvents == 3 and ResponseEvents[3][1] == 'QUEST_LOG_UPDATE' and ResponseEvents[3][2] == 0)",
+    );
 }
 
 #[test]
 fn original_selection_renders_supplied_item_reward() {
     let env = seed_env();
-    env.state().borrow_mut().quest_log_entries.entries[0].reward_items.push(
-        wow_ui_sim::lua_api::state::QuestRewardItem {
+    env.state().borrow_mut().quest_log_entries.entries[0]
+        .reward_items
+        .push(wow_ui_sim::lua_api::state::QuestRewardItem {
             name: "Wrath supplied reward".into(),
             texture: "Interface/Icons/INV_Box_01".into(),
             count: 3,
             quality: 2,
             is_usable: true,
-        },
-    );
+        });
     exec(&env, "QuestLog_SetSelection(1)");
-    exec(&env, r#"
+    exec(
+        &env,
+        r#"
         assert(GetQuestLogRewardSpell() == nil, 'absent spell is nil, never numeric zero')
         assert(GetQuestLogRewardArenaPoints() == 0 and GetQuestLogRewardTalents() == 0, 'numeric empty rewards')
         assert(GetNumQuestLogRewardFactions() == 0, 'absent faction rewards')
@@ -339,7 +347,8 @@ fn original_selection_renders_supplied_item_reward() {
         QuestLog_SetSelection(2)
         assert(GetNumQuestLogRewards() == 0)
         assert(not QuestInfoRewardsFrame:IsShown(), 'empty row hides rewards')
-    "#);
+    "#,
+    );
 }
 
 #[test]
@@ -350,22 +359,40 @@ fn original_daily_quest_counter_counts_slots_not_history() {
         sim.quest_log_entries.daily_quest_ids[0] = 710101;
         sim.quest_log_entries.daily_quest_ids[7] = 710101;
         sim.quest_log_entries.daily_quest_ids[24] = 710103;
-        sim.quest_log_entries.completed_quest_ids = [710001, 710002, 710003, 710004].into_iter().collect();
+        sim.quest_log_entries.completed_quest_ids =
+            [710001, 710002, 710003, 710004].into_iter().collect();
     }
-    exec(&env, r#"
+    exec(
+        &env,
+        r#"
         QuestLog_UpdateQuestCount(2)
         assert(select('#', GetDailyQuestsCompleted()) == 1 and select('#', GetMaxDailyQuests()) == 1)
         assert(GetDailyQuestsCompleted() == 3 and GetMaxDailyQuests() == 25)
         assert(QuestLogDailyQuestCount:IsShown())
         assert(QuestLogDailyQuestCount:GetText() == format(QUEST_LOG_DAILY_COUNT_TEMPLATE, 3, 25))
-    "#);
-    env.state().borrow_mut().quest_log_entries.daily_quest_ids.fill(0);
-    exec(&env, r#"
+    "#,
+    );
+    env.state()
+        .borrow_mut()
+        .quest_log_entries
+        .daily_quest_ids
+        .fill(0);
+    exec(
+        &env,
+        r#"
         QuestLog_UpdateQuestCount(2)
         assert(GetDailyQuestsCompleted() == 0 and GetMaxDailyQuests() == 25)
         assert(not QuestLogDailyQuestCount:IsShown())
-    "#);
-    assert_eq!(env.state().borrow().quest_log_entries.completed_quest_ids.len(), 4);
+    "#,
+    );
+    assert_eq!(
+        env.state()
+            .borrow()
+            .quest_log_entries
+            .completed_quest_ids
+            .len(),
+        4
+    );
 }
 
 #[test]
@@ -384,7 +411,9 @@ fn original_selection_renders_supplied_spell_and_points() {
         row.reward_talents = 2;
     }
     exec(&env, "QuestLog_SetSelection(1)");
-    exec(&env, r#"
+    exec(
+        &env,
+        r#"
         assert(QuestInfoItem1Name:GetText() == 'Wrath supplied spell')
         assert(QuestInfoArenaPointsFramePoints:GetText() == '17')
         assert(QuestInfoTalentFramePoints:GetText() == '2')
@@ -395,16 +424,23 @@ fn original_selection_renders_supplied_spell_and_points() {
         assert(GetQuestLogRewardSpell() == nil)
         assert(GetQuestLogRewardArenaPoints() == 0 and GetQuestLogRewardTalents() == 0)
         assert(not QuestInfoRewardsFrame:IsShown())
-    "#);
+    "#,
+    );
 }
 
 #[test]
 fn original_reward_processing_prepares_shared_faction_output() {
     let env = seed_env();
-    exec(&env, "assert(select('#', GetNumQuestLogRewardFactions()) == 1); assert(GetNumQuestLogRewardFactions() == 0)");
-    env.state().borrow_mut().quest_log_entries.entries[0].reward_factions = vec![(72, 500), (47, -100)];
+    exec(
+        &env,
+        "assert(select('#', GetNumQuestLogRewardFactions()) == 1); assert(GetNumQuestLogRewardFactions() == 0)",
+    );
+    env.state().borrow_mut().quest_log_entries.entries[0].reward_factions =
+        vec![(72, 500), (47, -100)];
     exec(&env, "QuestLog_SetSelection(1)");
-    exec(&env, r#"
+    exec(
+        &env,
+        r#"
         assert(GetNumQuestLogRewardFactions() == 2, 'original QuestInfo_ShowRewards prepares the shared output')
         local id, amount = GetQuestLogRewardFactionInfo(1)
         assert(id == 72 and amount == 500)
@@ -418,10 +454,18 @@ fn original_reward_processing_prepares_shared_faction_output() {
         assert(id == 0 and amount == 0)
         id, amount = GetQuestLogRewardFactionInfo(99)
         assert(id == 0 and amount == 0)
-    "#);
+    "#,
+    );
     let events = env.state().borrow().events.pending().len();
-    exec(&env, "ProcessQuestLogRewardFactions(); assert(GetNumQuestLogRewardFactions() == 0)");
-    assert_eq!(env.state().borrow().events.pending().len(), events, "processing emits no event");
+    exec(
+        &env,
+        "ProcessQuestLogRewardFactions(); assert(GetNumQuestLogRewardFactions() == 0)",
+    );
+    assert_eq!(
+        env.state().borrow().events.pending().len(),
+        events,
+        "processing emits no event"
+    );
 }
 
 #[test]
@@ -436,10 +480,13 @@ fn original_popup_confirmation_retains_marked_identity() {
         sim.quest_log_entries.entries.reverse();
         sim.quest_log.reverse();
     }
-    exec(&env, "assert(GetQuestLogSelection() == 1, 'selection resolves the reordered current log')");
     exec(
         &env,
-        "StaticPopup_FindVisible('ABANDON_QUEST').button1:Click()", 
+        "assert(GetQuestLogSelection() == 1, 'selection resolves the reordered current log')",
+    );
+    exec(
+        &env,
+        "StaticPopup_FindVisible('ABANDON_QUEST').button1:Click()",
     );
     assert_eq!(env.state().borrow().quest_log, vec![990202]);
     assert_eq!(
@@ -534,7 +581,10 @@ fn original_selection_renders_supplied_suggested_group_size() {
     "#,
     );
     env.state().borrow_mut().selected_quest_log_id = Some(999999);
-    exec(&env, "assert(GetQuestLogGroupNum() == 0, 'absent rich row')");
+    exec(
+        &env,
+        "assert(GetQuestLogGroupNum() == 0, 'absent rich row')",
+    );
 }
 
 #[test]
