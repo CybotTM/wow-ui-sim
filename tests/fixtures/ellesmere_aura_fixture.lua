@@ -20,24 +20,14 @@ debug.setobjecttaint(create, 'EllesmereFixture')
 FixtureArray = create({includeSpellIDs = {19750}})
 FixtureKeyed = create({includeSpellIDs = {[19750] = true}})
 
-local function readWidget(label, widget, method)
-    local taint = debug.getstacktaint()
-    local ok, value = pcall(widget[method], widget)
-    assert(ok, label .. ':' .. method .. ' caller=' .. tostring(taint) .. ': ' .. tostring(value))
-    return value
-end
-
-function FixtureAssertShown(container, expected, label)
-    local shown = 0
+-- Return identity only. Reading addon-written regions taints this call; widget
+-- readouts belong to the Rust observer, like native tree/render inspection.
+function FixtureWidgets(container)
+    local widgets = {}
     for index = 1, container:GetAuraGroupFrameCount('current-package-helpful') do
         local button = container:GetAuraGroupFrame('current-package-helpful', index)
-        local context = label .. ':button[' .. index .. ']'
-        if readWidget(context, button, 'IsShown') then
-            shown = shown + 1
-            local data = assert(regions[button], 'real initializer regions missing')
-            assert(readWidget(context .. ':icon', data.icon, 'GetTexture') == 135907, 'wrong icon')
-            assert(readWidget(context .. ':stack', data.stack, 'GetText') == '3', 'wrong stack text')
-        end
+        local data = assert(regions[button], 'real initializer regions missing')
+        widgets[index] = {button, data.icon, data.stack}
     end
-    assert(shown == expected, 'expected ' .. expected .. ' shown buttons, got ' .. shown)
+    return widgets
 end

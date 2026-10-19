@@ -36,15 +36,52 @@ fn settle(env: &WowLuaEnv) {
     }
 }
 
+fn native_widget_ids(env: &WowLuaEnv, container: &str) -> Vec<[u64; 3]> {
+    let rows = env
+        .eval::<Vec<Vec<rilua::Val>>>(&format!("return FixtureWidgets({container})"))
+        .expect("collect actual initializer widget identities without reading secret state");
+    let lua = env.rilua();
+    rows.into_iter()
+        .map(|row| {
+            let widgets: [rilua::Val; 3] =
+                row.try_into().expect("button, icon and stack identities");
+            widgets.map(|value| {
+                wow_ui_sim::lua_api::methods::native_frame_id_from_val(lua.state(), value)
+                    .expect("real native widget backing")
+            })
+        })
+        .collect()
+}
+
+fn assert_native_container(env: &WowLuaEnv, container: &str, expected: usize) {
+    let identities = native_widget_ids(env, container);
+    assert!(!identities.is_empty(), "{container}: owned pool must exist");
+    let state = env.state().borrow();
+    let mut shown = 0;
+    for [button_id, icon_id, stack_id] in identities {
+        let button = state.widgets.get(button_id).expect("owned aura button");
+        if !button.visible {
+            continue;
+        }
+        shown += 1;
+        let icon = state.widgets.get(icon_id).expect("actual initializer icon");
+        let stack = state
+            .widgets
+            .get(stack_id)
+            .expect("actual initializer stack");
+        assert_eq!(icon.texture_file_data_id, Some(135907), "{container}: icon");
+        assert_eq!(stack.text.as_deref(), Some("3"), "{container}: stack text");
+        println!("{container}: button={button_id} shown icon=135907 stack=3");
+    }
+    assert_eq!(shown, expected, "{container}: shown native buttons");
+    println!("{container}: shown={shown}, expected={expected}");
+}
+
 fn assert_containers(env: &WowLuaEnv, keyed_shown: usize) {
-    let array = env.exec("FixtureAssertShown(FixtureArray, 0, 'array')");
-    let keyed = env.exec(&format!(
-        "FixtureAssertShown(FixtureKeyed, {keyed_shown}, 'keyed')"
-    ));
-    assert!(
-        array.is_ok() && keyed.is_ok(),
-        "array: {array:?}; keyed: {keyed:?}"
-    );
+    // Native tree/render state stays observable without granting addon Lua access
+    // to secret-origin widget getters or clearing any caller/widget taint.
+    assert_native_container(env, "FixtureArray", 0);
+    assert_native_container(env, "FixtureKeyed", keyed_shown);
 }
 
 fn assert_admin_aura_lifecycle(env: &WowLuaEnv) {
