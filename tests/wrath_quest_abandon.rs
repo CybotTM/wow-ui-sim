@@ -341,6 +341,62 @@ fn original_selection_renders_supplied_item_reward() {
 }
 
 #[test]
+fn original_selection_renders_supplied_spell_and_points() {
+    let env = seed_env();
+    {
+        let mut sim = env.state().borrow_mut();
+        let row = &mut sim.quest_log_entries.entries[0];
+        row.reward_spell = Some(wow_ui_sim::lua_api::state::QuestRewardSpell {
+            texture: "Interface/Icons/Spell_Holy_MagicalSentry".into(),
+            name: "Wrath supplied spell".into(),
+            is_trade_skill: false,
+            is_learned: true,
+        });
+        row.reward_arena_points = 17;
+        row.reward_talents = 2;
+    }
+    exec(&env, "QuestLog_SetSelection(1)");
+    exec(&env, r#"
+        assert(QuestInfoItem1Name:GetText() == 'Wrath supplied spell')
+        assert(QuestInfoArenaPointsFramePoints:GetText() == '17')
+        assert(QuestInfoTalentFramePoints:GetText() == '2')
+        local texture, name, tradeSkill, learned = GetQuestLogRewardSpell()
+        assert(texture == 'Interface/Icons/Spell_Holy_MagicalSentry' and name == 'Wrath supplied spell')
+        assert(tradeSkill == false and learned == true)
+        QuestLog_SetSelection(2)
+        assert(GetQuestLogRewardSpell() == nil)
+        assert(GetQuestLogRewardArenaPoints() == 0 and GetQuestLogRewardTalents() == 0)
+        assert(not QuestInfoRewardsFrame:IsShown())
+    "#);
+}
+
+#[test]
+fn original_reward_processing_prepares_shared_faction_output() {
+    let env = seed_env();
+    exec(&env, "assert(select('#', GetNumQuestLogRewardFactions()) == 1); assert(GetNumQuestLogRewardFactions() == 0)");
+    env.state().borrow_mut().quest_log_entries.entries[0].reward_factions = vec![(72, 500), (47, -100)];
+    exec(&env, "QuestLog_SetSelection(1)");
+    exec(&env, r#"
+        assert(GetNumQuestLogRewardFactions() == 2, 'original QuestInfo_ShowRewards prepares the shared output')
+        local id, amount = GetQuestLogRewardFactionInfo(1)
+        assert(id == 72 and amount == 500)
+        id, amount = GetQuestLogRewardFactionInfo(2)
+        assert(id == 47 and amount == -100)
+        SelectQuestLogEntry(2)
+        assert(GetNumQuestLogRewardFactions() == 2, 'reader does not auto-refresh selection')
+        CloseQuestFrame()
+        assert(GetNumQuestLogRewardFactions() == 2, 'dialog clear preserves prepared output')
+        local id, amount = GetQuestLogRewardFactionInfo(0)
+        assert(id == 0 and amount == 0)
+        id, amount = GetQuestLogRewardFactionInfo(99)
+        assert(id == 0 and amount == 0)
+    "#);
+    let events = env.state().borrow().events.pending().len();
+    exec(&env, "ProcessQuestLogRewardFactions(); assert(GetNumQuestLogRewardFactions() == 0)");
+    assert_eq!(env.state().borrow().events.pending().len(), events, "processing emits no event");
+}
+
+#[test]
 fn original_popup_confirmation_retains_marked_identity() {
     let env = seed_env();
     exec(
@@ -364,7 +420,7 @@ fn original_popup_confirmation_retains_marked_identity() {
 }
 
 #[test]
-fn invalid_stale_and_consumed_targets_do_not_remove_other_rows() {
+fn invalid_and_stale_targets_do_not_remove_other_rows() {
     let env = seed_env();
     let before = snapshot(&env);
     exec(
@@ -375,7 +431,7 @@ fn invalid_stale_and_consumed_targets_do_not_remove_other_rows() {
     assert_eq!(snapshot(&env), before);
     env.state().borrow_mut().abandon_quest_id = Some(999999);
     exec(&env, "AbandonQuest()");
-    assert!(env.state().borrow().abandon_quest_id.is_none());
+    assert_eq!(env.state().borrow().abandon_quest_id, Some(999999));
     assert_eq!(snapshot(&env), before);
     exec(
         &env,

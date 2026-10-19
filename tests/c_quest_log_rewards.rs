@@ -4,7 +4,11 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::state::{QuestLogEntry, QuestRewardCurrency, QuestRewardItem};
 
 fn env() -> WowLuaEnv {
-    WowLuaEnv::new().expect("WowLuaEnv init")
+    let env = WowLuaEnv::new().expect("WowLuaEnv init");
+    // Wrath's legacy reward read addresses the selected quest, not argument two.
+    #[cfg(feature = "client-wrath")]
+    env.exec("C_QuestLog.SetSelectedQuest(80000)").unwrap();
+    env
 }
 
 fn update_seeded_quest(env: &WowLuaEnv, quest_id: i32, update: impl FnOnce(&mut QuestLogEntry)) {
