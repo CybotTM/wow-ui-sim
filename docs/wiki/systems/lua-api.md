@@ -29,7 +29,7 @@ Wrath `quest_verbs.rs` separates marking from its server-response simulation and
 
 ### Wrath dialog request/response plumbing
 
-`globals/real/wrath_quest_dialog.rs` separates pending detail offers from the active dialog's `(quest ID, Progress/Rewards)` tuple. Native dialog readers use that identity, not unrelated log selection. Offer and acceptance adapters consume pending requests; accepted choices are simulator receipts, not inventory grants. `GossipState.giver_guid` is the sole concrete giver input. [Owning contract](../../specs/wrath-quest-turn-in.md#staged-producer-proof) records shared RED, the required A/B boundary run, and the provisional clear-before-emit ordering; happy-path source does not prove native guards or event behavior.
+`globals/real/wrath_quest_dialog.rs` separates pending detail offers from the active dialog's `(quest ID, Progress/Rewards)` tuple. Native dialog readers use that identity, not unrelated log selection. Offer and acceptance adapters consume pending requests; accepted choices are simulator receipts, not inventory grants. `GossipState.giver_guid` is the sole concrete giver input. Native request eligibility uses supplied player presence, dialog phase and response latch before choice handling. CloseQuest preserves the dialog/latch while clearing the concrete giver; accepted responses use the abandon notifier and a separate supplied-cache-hit completion path. [Owning contract](../../specs/wrath-quest-turn-in.md#staged-producer-proof) owns executed A/B boundaries, pending/final GREEN status and provisional clear-before-emit ordering.
 
 ## Forever supplied quest difficulty
 

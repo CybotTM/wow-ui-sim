@@ -136,7 +136,7 @@ fn close_wrath_quest(state: &mut LuaState) -> LuaResult<u32> {
     let giver = {
         let mut sim = borrow_state_mut(state)?;
         sim.pending_quest_offer = None;
-        sim.quest_log_entries.readiness.dialog = None;
+        // CloseQuest retains current quest/phase, sent latch and pending claim.
         // INFERRED clear-before-emit ordering; native confirmation is pending.
         std::mem::take(&mut sim.gossip.giver_guid)
     };

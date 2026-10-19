@@ -1,6 +1,6 @@
 ## [2026-10-19] source | Wrath dialog request/response plumbing
 
-[System notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [staged turn-in contract](../specs/wrath-quest-turn-in.md#staged-producer-proof): shared original-progress feature-absence RED, single concrete giver input and A-only happy path. Per-test A/B and final GREEN remain pending; inferred finish ordering is not a native fact.
+[System notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [staged turn-in contract](../specs/wrath-quest-turn-in.md#staged-producer-proof): shared original-progress feature-absence RED, single concrete giver and executed A3 12-control/18-boundary gate, followed by B source. Final GREEN is tracked by the contract; inferred finish ordering is not a native fact.
 
 ## [2026-10-18] source | Wrath selected quest legacy surface
 

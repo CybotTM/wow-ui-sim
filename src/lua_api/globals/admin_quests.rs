@@ -38,19 +38,27 @@ pub(super) fn register_quests(b: TableBuilder) -> LuaResult<TableBuilder> {
     } else {
         b
     };
-    #[cfg(feature = "client-wrath")]
-    let b = b.set_function(
-        "OfferQuestReward",
-        super::real::wrath_quest_dialog::offer_response,
-    )?;
-    #[cfg(feature = "client-wrath")]
-    let turn_in = super::real::wrath_quest_dialog::accept_response;
-    #[cfg(not(feature = "client-wrath"))]
-    let turn_in = turn_in_selected_quest;
+    let b = register_turn_in_responses(b)?;
     b.set_function("OpenQuestNpc", open_quest_npc)?
         .set_function("OpenMultiQuestNpc", open_multi_quest_npc)?
-        .set_function("TurnInSelectedQuest", turn_in)?
         .set_function("CloseQuestNpc", close_quest_npc)
+}
+
+#[cfg(feature = "client-wrath")]
+fn register_turn_in_responses(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function(
+        "OfferQuestReward",
+        super::real::wrath_quest_dialog::offer_response,
+    )?
+    .set_function(
+        "TurnInSelectedQuest",
+        super::real::wrath_quest_dialog::accept_response,
+    )
+}
+
+#[cfg(not(feature = "client-wrath"))]
+fn register_turn_in_responses(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("TurnInSelectedQuest", turn_in_selected_quest)
 }
 
 #[cfg(all(feature = "profile-retail", feature = "retail-12-0-5"))]

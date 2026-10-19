@@ -3,7 +3,7 @@ use crate::c_api::quest_readiness::QuestDialogPhase;
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_api::state::{QuestLogEntry, SimState};
-use crate::lua_bridge::FromStack;
+use crate::lua_bridge::{FromStack, stack_val};
 use rilua::{LuaApiMut, LuaResult, Val, vm::state::LuaState};
 
 pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -15,8 +15,8 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         ("SelectGossipActiveQuest", select_active_quest),
         ("IsQuestCompletable", is_quest_completable),
         ("IsQuestFlaggedCompleted", is_quest_flagged_completed),
-        ("CompleteQuest", complete_quest),
-        ("GetQuestReward", get_quest_reward),
+        ("CompleteQuest", request_reward_offer),
+        ("GetQuestReward", send_reward_claim),
         ("GetTitleText", get_title_text),
         ("GetQuestBackgroundMaterial", get_background_material),
         ("GetNumQuestChoices", get_num_choices),
@@ -100,27 +100,70 @@ fn is_quest_flagged_completed(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn complete_quest(state: &mut LuaState) -> LuaResult<u32> {
+fn eligible_dialog_id(sim: &SimState, phase: QuestDialogPhase) -> Option<i32> {
+    let dialog = &sim.quest_log_entries.readiness;
+    if !dialog.active_player_present || dialog.response_sent {
+        return None;
+    }
+    let (id, current_phase) = dialog.dialog?;
+    (current_phase == phase).then_some(id)
+}
+
+fn request_reward_offer(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
+    let Some(id) = eligible_dialog_id(&sim, QuestDialogPhase::Progress) else {
+        return Ok(0);
+    };
     let dialog = &mut sim.quest_log_entries.readiness;
-    dialog.reward_requested = dialog.dialog.map(|(id, _)| id);
+    dialog.reward_requested = Some(id);
     dialog.response_sent = true;
     Ok(0)
 }
 
-fn get_quest_reward(state: &mut LuaState) -> LuaResult<u32> {
-    let count = read_current_entry(state)?.map_or(0, |row| row.reward_choices.len());
-    // Step A handles ordinary integer labels only; native conversion/validation is step B.
-    let choice = if count == 0 {
-        0
-    } else {
-        Option::<i32>::from_stack(state, 1)?.unwrap_or(0) as usize
+fn send_reward_claim(state: &mut LuaState) -> LuaResult<u32> {
+    let (id, count) = {
+        let sim = borrow_state(state)?;
+        let Some(id) = eligible_dialog_id(&sim, QuestDialogPhase::Rewards) else {
+            return Ok(0);
+        };
+        let count = current_entry(&sim).map_or(0, |row| row.reward_choices.len());
+        (id, count)
     };
+    // Eligibility must precede even invalid argument conversion/validation.
+    let choice = convert_reward_choice(state, count)?;
     let mut sim = borrow_state_mut(state)?;
     let dialog = &mut sim.quest_log_entries.readiness;
-    dialog.pending_reward_choice = dialog.dialog.map(|(id, _)| (id, choice));
+    dialog.pending_reward_choice = Some((id, choice));
     dialog.response_sent = true;
     Ok(0)
+}
+
+fn reward_argument(state: &LuaState) -> LuaResult<f64> {
+    match stack_val(state, 1) {
+        Val::Num(value) => Ok(value),
+        Val::Str(_) => {
+            let text = String::from_stack(state, 1)?;
+            Ok(text.trim().parse().unwrap_or(0.0))
+        }
+        _ => Ok(0.0),
+    }
+}
+
+fn convert_reward_choice(state: &LuaState, count: usize) -> LuaResult<usize> {
+    // Ordinary finite int32-domain inputs only: exceptional numbers/overflow
+    // remain unverified, with no compatibility oracle for Rust cast behavior.
+    let converted = reward_argument(state)? as i32;
+    let internal = i64::from(converted) - 1;
+    if count == 0 {
+        return Ok(internal.max(0) as usize);
+    }
+    if internal < 0 || internal >= count as i64 {
+        return Err(rilua::runtime_error(
+            "Invalid reward choice in GetQuestReward([choice])",
+        ));
+    }
+    // Acceptance receipts use supplied one-based choice labels, not wire indices.
+    Ok(converted as usize)
 }
 
 pub(crate) fn offer_response(state: &mut LuaState) -> LuaResult<u32> {
@@ -180,8 +223,27 @@ fn commit_pending_claim(sim: &mut SimState) -> bool {
 
 pub(crate) fn accept_response(state: &mut LuaState) -> LuaResult<u32> {
     let accepted = commit_pending_claim(&mut *borrow_state_mut(state)?);
+    if accepted {
+        crate::lua_api::globals::quest_verbs::notify_wrath_log_changed(state)?;
+        finish_completed_dialog(state)?;
+    }
     state.push(Val::Bool(accepted));
     Ok(1)
+}
+
+fn finish_completed_dialog(state: &mut LuaState) -> LuaResult<()> {
+    let giver = {
+        let mut sim = borrow_state_mut(state)?;
+        let dialog = &sim.quest_log_entries.readiness;
+        if !dialog.completion_callback_cache_hit || dialog.next_quest_id != 0 {
+            return Ok(());
+        }
+        // INFERRED clear-before-emit ordering, pending native confirmation.
+        std::mem::take(&mut sim.gossip.giver_guid)
+    };
+    // The supplied inline callback and mirror notification are separate paths.
+    // Their invocation here is simulator scheduling, not a native total order.
+    crate::lua_api::globals::quest_verbs::finish_wrath_quest_dialog(state, giver)
 }
 
 fn get_title_text(state: &mut LuaState) -> LuaResult<u32> {
