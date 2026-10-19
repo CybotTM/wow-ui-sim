@@ -153,6 +153,7 @@ fn replace_anchor(
     x: f32,
     y: f32,
 ) {
+    sim.widgets.remove_all_anchor_dependents_for(id);
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.anchors = vec![Anchor {
             point,
@@ -163,5 +164,6 @@ fn replace_anchor(
             y_offset: y,
         }];
     }
+    sim.widgets.add_anchor_dependent(relative, id);
     sim.widgets.mark_rect_dirty(id);
 }
