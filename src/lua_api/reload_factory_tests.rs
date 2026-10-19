@@ -175,6 +175,36 @@ fn reload_factory_attribute_errors_are_reported_without_escaping_set_attribute()
     .unwrap();
 }
 
+#[test]
+fn reload_factory_attribute_caller_environments_are_fresh_for_every_dispatch() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        for _, direct in ipairs({false, true}) do
+            local calls = 0
+            local function changed(self, key, value)
+                assert(key == 'probe' and value == 5)
+                -- A callback may inspect/change its Lua caller's environment.
+                -- That must not poison a subsequent dispatch on either frame.
+                assert(getfenv(2) == _G)
+                setfenv(2, { poisoned = true })
+                calls = calls + 1
+            end
+            local first, second = CreateFrame('Frame'), CreateFrame('Frame')
+            for _, frame in ipairs({first, second}) do
+                if direct then frame.OnAttributeChanged = changed
+                else frame:SetScript('OnAttributeChanged', changed) end
+            end
+            first:SetAttribute('probe', 5)
+            second:SetAttribute('probe', 5)
+            first:SetAttribute('probe', 5)
+            assert(calls == 3)
+        end
+        "#,
+    )
+    .unwrap();
+}
+
 const RELOAD_FACTORIES: &str = r#"
     FactoryReloadFrames = {}
     local function record(expected, label)
