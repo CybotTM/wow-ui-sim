@@ -4,9 +4,14 @@
 //! compatibility probes. The simulator answers these from the spellbook state
 //! instead of treating them as generic nil/zero shims.
 
+#[cfg(feature = "client-wrath")]
+use super::wrath_spellbook::get_spell_tab_info;
+#[cfg(not(feature = "client-wrath"))]
 use crate::lua_api::game_data::CLASS_LABELS;
 use crate::lua_api::globals::spellbook_data;
+#[cfg(not(feature = "client-wrath"))]
 use crate::lua_api::methods::{borrow_state, create_string};
+#[cfg(not(feature = "client-wrath"))]
 use crate::lua_bridge::stack_val;
 use rilua::{LuaApiMut, LuaResult, Val};
 
@@ -23,6 +28,7 @@ fn get_num_spell_tabs(state: &mut rilua::vm::state::LuaState) -> LuaResult<u32> 
 
 /// `GetSpellTabInfo(tabIndex)` — legacy clients expect:
 /// `(name, icon, offset, numSpells, isGuild, offSpecID, shouldHide, specID)`.
+#[cfg(not(feature = "client-wrath"))]
 fn get_spell_tab_info(state: &mut rilua::vm::state::LuaState) -> LuaResult<u32> {
     let tab_index = match stack_val(state, 1) {
         Val::Num(index) => index as i32,
@@ -54,6 +60,7 @@ fn get_spell_tab_info(state: &mut rilua::vm::state::LuaState) -> LuaResult<u32> 
     Ok(8)
 }
 
+#[cfg(not(feature = "client-wrath"))]
 fn get_retail_spell_tab_info(
     state: &mut rilua::vm::state::LuaState,
     tab_index: i32,
