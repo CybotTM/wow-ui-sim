@@ -29,6 +29,10 @@ Wrath `quest_verbs.rs` separates marking from its server-response simulation and
 
 `quest_surface/wrath_objectives.rs` projects the existing `c_api::quest_objectives` snapshots through Wrath-only registrations. It resolves displayed rich-row positions separately from identity-keyed storage; the shared Retail/Forever capability gate is unchanged. Numeric strings use C number parsing, and objective values are rooted before subsequent Lua allocations. [Objective contract](../../specs/wrath-quest-objectives.md) owns the `1`/nil tuple, asymmetric selector rules, authored summary policy and native metadata gaps. Its bounded proof records original-consumer RED→GREEN, existing Wrath controls, startup and warning-free full-feature checking; combined parent integration remains separate.
 
+### Wrath manual watch seam
+
+`QuestLogState.manual_watch_ids` is an initially empty ordered vector, separate from rich rows and Forever metadata. `quest_surface/wrath_quest_watch.rs` binds five legacy calls; each row lookup scans current rich entries by identity without visibility filtering. Mutation is bounded to 25 IDs, so a single ordered vector preserves append/removal order without a second membership index. `env_events.rs` prunes missing IDs before `QUEST_LOG_UPDATE` listeners, not during immediate abandonment; the existing unit-change/deferred-log notifier is unchanged. [Contract and proof status](../../specs/wrath-manual-watch.md) owns the input/return/event rules, original-consumer tests and explicit gaps.
+
 ## Forever supplied quest difficulty
 
 [Owning contract and proof status](../../specs/forever-quest-difficulty.md) owns the Forever-only live rich-row difficulty getter and bounded simulator policies, not native parity. Historical [source40a receipt](../../baselines/README.md#current-watchtalent-execution--2026-10-15) records **28 PASS** (difficulty3 + watch-projection4 + finite21), separate positive normal watch/global-alias/voice checks and startup **10 records / 14 occurrences FAIL**. Its read-only projection passes and separate add/remove/type/event RED do not establish current membership behavior.
