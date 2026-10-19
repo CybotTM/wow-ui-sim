@@ -1,4 +1,4 @@
-//! Authored RED candidates, NOT executed. Native contract: Wrath build 12340.
+//! Original-consumer runtime regressions. Native contract: Wrath build 12340.
 //! Server offer/acceptance and choice receipts are explicit simulator policy.
 #![cfg(feature = "client-wrath")]
 

@@ -1,6 +1,6 @@
 ## [2026-10-19] source | Wrath dialog request/response plumbing
 
-[Lua API notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [Wrath turn-in contract](../specs/wrath-quest-turn-in.md): shared feature-absence RED, executed A boundaries and B guarded request/response source. The owning contract records final proof status; clear-before-emit ordering remains explicitly inferred.
+[Lua API notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [Wrath turn-in contract](../specs/wrath-quest-turn-in.md): shared feature-absence RED, executed A boundaries, complete bounded turn-in GREEN and Wrath preservation/zero-warning gates. The owning contract records exact receipts and remaining gaps; clear-before-emit ordering remains explicitly inferred.
 
 ## [2026-10-18] source | Wrath selected quest reads and abandon response
 

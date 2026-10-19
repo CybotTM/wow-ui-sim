@@ -26,11 +26,12 @@ Original consumer citations use paths relative to the Wrath runtime source root:
 
 `tests/wrath_quest_accept.rs` stages two original offer paths at indices 2/3, no-offer/repeat silence, 24→25 success, 25-slot server-full error and original refresh/closure. These fixtures are flat; header-inclusive indexing is required but not exercised.
 
-- [ ] Preceding abandon/read lane and `tests/common/wrath_full_ui.rs` must land first.
+- [x] Preceding abandon/read consumers and `tests/common/wrath_full_ui.rs` are present; preservation passes 14 abandon / 6 log-read cases.
 - [x] Explicit `GossipState.giver_guid` supplies stored dialog identity, default zero, with nonzero fixtures set through the existing Rust state input. Authority: laptop `packet-20261018.md`, Q1 (accept closure), Q2 (full-log closure), Q4 (turn-in closure). No inference from `gossip.active` and no fallback giver.
 - [ ] Missing-player lifecycle remains unmodeled: `group_queries::unit_exists_in_state("player")` always returns true; `UnitGUID` uses the same resolver and a seeded identity. Reuse that resolver; no parallel presence flag. Header generation, giver acquisition/reset and native identity encoding remain gaps.
 - [x] Original-consumer RED on fixture revision `2a284f45f`: missing native AcceptQuest and legacy gossip count producers.
-- [ ] Targeted GREEN and Retail/Forever preservation remain gates.
+- [x] Wrath targeted GREEN 4/4 at `7ea9065be9fef4db6ae124d4724262e89edc0514`, startup `[]`, re-proved as 4/4 preservation at `b01a3725f`; [composed proof](wrath-quest-turn-in.md#bounded-proof--2026-10-19) owns final receipts and scope.
+- [ ] Retail/Forever preservation is outside this Wrath-only continuation; no all-profile acceptance is claimed.
 
 ## Out of scope
 
@@ -39,12 +40,13 @@ Party/PvP confirmation, auto-accept, watches, turn-in/rewards, native packet/tic
 ## Implementation inventory
 
 - `src/lua_api/globals/quest_verbs.rs`: ordinary Wrath producer and existing close/confirm verbs.
-- `src/lua_api/globals/quest_surface/legacy_globals.rs`: original offer selection/detail readers.
+- `src/lua_api/globals/quest_surface/legacy_globals.rs`: original offer selection.
+- `src/lua_api/globals/real/wrath_quest_dialog.rs`: current pending/active dialog readers, without selected-log fallback.
 - `src/lua_api/globals/quest_surface/wrath_quest_log.rs`: supplied-row legacy projection dependency.
 - `src/lua_api/sim_substates/quest_log.rs`: ordered rich membership and snapshots.
 
 See [Lua API](../wiki/systems/lua-api.md), [loading](../addon-loading-pipeline.md), [events](../event-system.md).
 
-Continuation RED at `122f26445`: all four full-original tests fail on the legacy `GetGossipText` wrapper before acceptance. Wrath now registers greeting text and active-quest tuples directly from supplied gossip state, independent of the modern namespace. Temporary no-option gossip support remains limited to quest NPC fixtures: legacy option icon-type projection is missing. The temporary progress/ordinary-flag registration must include Wrath even though the modern objective subsystem is disabled there. At `085d2c042`, the no-offer control passes; two original gossip paths next reach missing `CloseGossip`, and greeting reaches missing `GetQuestBackgroundMaterial`. Register modeled legacy closure and the existing supplied-material reader for Wrath. A full-startup diagnostic also reaches nil `GetSuggestedGroupNum`, `GetRewardSpell`, `GetRewardArenaPoints` and `GetRewardTalents`; their legacy detail readers now project the pending rich snapshot (absent rewards remain absent). At `8589e7a21`, 1/4 passes and all accepting paths reach original OnHide → missing `CloseQuest`. Main authorized bringing its basic registration/shared finish path forward: suppress zero-giver finish and clear the stored GUID before emission. **Clear-before-emit is INFERRED ordering, pending native confirmation**, not a supplied native fact. Exactly one FINISHED in this re-entrant acceptance flow depends on that inference. Turn-in dialog-retention rules remain for step B. GREEN remains pending.
+Continuation RED at `122f26445`: all four full-original tests fail on the legacy `GetGossipText` wrapper before acceptance. Wrath now registers greeting text and active-quest tuples directly from supplied gossip state, independent of the modern namespace. Temporary no-option gossip support remains limited to quest NPC fixtures: legacy option icon-type projection is missing. The temporary progress/ordinary-flag registration must include Wrath even though the modern objective subsystem is disabled there. At `085d2c042`, the no-offer control passes; two original gossip paths next reach missing `CloseGossip`, and greeting reaches missing `GetQuestBackgroundMaterial`. Register modeled legacy closure and the existing supplied-material reader for Wrath. A full-startup diagnostic also reaches nil `GetSuggestedGroupNum`, `GetRewardSpell`, `GetRewardArenaPoints` and `GetRewardTalents`; their legacy detail readers now project the pending rich snapshot (absent rewards remain absent). At `8589e7a21`, 1/4 passes and all accepting paths reach original OnHide → missing `CloseQuest`. Main authorized bringing its basic registration/shared finish path forward: suppress zero-giver finish and clear the stored GUID before emission. **Clear-before-emit is INFERRED ordering, pending native confirmation**, not a supplied native fact. Exactly one FINISHED in this re-entrant acceptance flow depends on that inference. Turn-in dialog-retention rules landed only in the separately gated step B. Wrath acceptance GREEN is executed as recorded above.
 
 Wrath-only temporary ordinary PvP/auto-accept flag defaults live in `src/lua_api/workarounds/temporary/quest_progress_requirements.rs`; retire when supplied quest flag state lands. Acceptance and abandonment share immediate player UNIT / deferred coalesced log notification policy.
