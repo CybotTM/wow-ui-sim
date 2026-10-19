@@ -637,6 +637,8 @@ pub struct SimState {
     pub pet_actions: Vec<PetActionSlot>,
     pub glyph: GlyphState,
     pub currency_info: HashMap<i32, CurrencyInfo>,
+    /// Explicit Wrath-only legacy categories; modern currency queries do not read this.
+    pub wrath_currency: super::super::globals::real::wrath_currency::CurrencyListState,
     #[cfg(feature = "client-retail")]
     pub(crate) currency_list: crate::c_api::currency_list::CurrencyListState,
     /// Explicit (War Mode applies, limit once per tooltip) flags; no inferred catalog.
