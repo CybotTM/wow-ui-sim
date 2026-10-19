@@ -37,6 +37,8 @@ Wrath 12340 contracts from laptop findings batches 4, 6, 7 and 8 (2026-10-18). O
 
 ## Known gaps (current cycle)
 
+- [ ] PROVISIONAL U1/U3 unit conversion: batches 6/8 supply native G=.005, gap=38.400002/(aspect*1024), cap=230.39999/(aspect*1024). Current producer uses G=.005*aspect*1024 and UI constants 38.400002/230.39999 pending laptop confirmation; relational tests do not prove absolute conversion.
+
 - [ ] Forced-width input and item/context cleanup have no authenticated populated fixtures.
 - [ ] Interior-byte cursor positions and XML password values other than 1/0 are unknown. Masked-caret parity is required at UTF-8 boundaries (0, 2, 5 for é猫).
 - [ ] Exact native scheduling, image pixels and complete startup compatibility are not established by bounded consumer tests.
