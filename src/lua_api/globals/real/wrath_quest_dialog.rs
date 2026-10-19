@@ -47,9 +47,8 @@ fn read_current_entry(state: &LuaState) -> LuaResult<Option<QuestLogEntry>> {
 }
 
 fn select_active_quest(state: &mut LuaState) -> LuaResult<u32> {
-    let index = Option::<usize>::from_stack(state, 1)?
-        .unwrap_or(0)
-        .wrapping_sub(1);
+    let supplied_index = Option::<i32>::from_stack(state, 1)?.unwrap_or(0);
+    let index = (supplied_index as usize).wrapping_sub(1);
     let id = borrow_state(state)?
         .gossip
         .active_quests
@@ -214,7 +213,8 @@ fn get_num_rewards(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_item_info(state: &mut LuaState) -> LuaResult<u32> {
     let kind = String::from_stack(state, 1)?;
-    let index = usize::from_stack(state, 2)?.wrapping_sub(1);
+    let supplied_index = i32::from_stack(state, 2)?;
+    let index = (supplied_index as usize).wrapping_sub(1);
     let item = read_current_entry(state)?.and_then(|row| match kind.as_str() {
         "choice" => row.reward_choices.get(index).cloned(),
         "reward" => row.reward_items.get(index).cloned(),
