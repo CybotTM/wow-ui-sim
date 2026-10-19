@@ -54,6 +54,32 @@ mod tests {
     use super::*;
     use clap::Parser;
 
+    #[cfg(feature = "gui")]
+    #[test]
+    fn reload_ui_rebuilds_the_real_no_addons_startup() {
+        let args = Args::try_parse_from(["wow-sim", "--no-addons", "--no-saved-vars"])
+            .expect("reload startup arguments");
+        let (env, _font_system, saved_vars) =
+            init_and_load(&args, ScreenKind::Game).expect("real no-addons startup must load");
+        assert!(saved_vars.is_none());
+        assert!(
+            env.eval::<bool>("return UIParent ~= nil and PlayerFrame ~= nil")
+                .unwrap()
+        );
+        wow_ui_sim::iced_app::run_headless_named_click_probe(
+            env,
+            saved_vars,
+            iced::Size::new(1024.0, 768.0),
+            "reload_sentinel = true; CreateFrame('Frame', 'ReloadOldFrame'); ReloadUI()",
+            &[],
+            Some(
+                "assert(reload_sentinel == nil, 'no fresh Lua environment after ReloadUI'); \
+                 assert(ReloadOldFrame == nil); assert(UIParent ~= nil and PlayerFrame ~= nil)",
+            ),
+        )
+        .expect("ReloadUI must reuse real startup without third-party addons");
+    }
+
     #[test]
     #[ignore = "private host-budget probe; external no-sound setting and 90s process bound required"]
     fn trusted_finite_budget_for_selected_addons() {
