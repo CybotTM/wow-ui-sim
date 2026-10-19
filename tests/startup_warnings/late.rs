@@ -23,6 +23,11 @@ fn test_secure_action_button_template_is_protected_tuple_after_blizzard_framexml
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_c_addons_load_addon_preserves_account_store_mixin_methods() {
     test_timeout! {
@@ -96,6 +101,11 @@ fn test_c_addons_load_addon_preserves_account_store_mixin_methods() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_rust_load_addon_after_base_load_preserves_account_store_mixin_methods() {
     test_timeout! {
@@ -154,6 +164,14 @@ fn test_rust_load_addon_after_base_load_preserves_account_store_mixin_methods() 
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_low_health_frame_animation_bound_after_load() {
     test_timeout! {
@@ -178,6 +196,14 @@ fn test_low_health_frame_animation_bound_after_load() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_low_health_frame_animation_bound_after_blizzard_framexml_load() {
     test_timeout! {
@@ -206,6 +232,11 @@ fn test_low_health_frame_animation_bound_after_blizzard_framexml_load() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_blizzard_framexml_load_registers_boss_banner_cvar_without_warning() {
     test_timeout! {
@@ -338,6 +369,11 @@ fn test_blizzard_framexml_loads_zone_text_without_fading_frame_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_blizzard_framexml_loads_without_eventutil_warning() {
     test_timeout! {
@@ -361,6 +397,14 @@ fn test_blizzard_framexml_loads_without_eventutil_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_blizzard_framexml_loads_without_setup_localization_warning() {
     test_timeout! {
@@ -384,6 +428,11 @@ fn test_blizzard_framexml_loads_without_setup_localization_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_blizzard_framexml_loads_without_frameutil_warning() {
     test_timeout! {
@@ -408,6 +457,14 @@ fn test_blizzard_framexml_loads_without_frameutil_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_blizzard_commentator_loads_without_cooldown_frame_warning() {
     test_timeout! {
@@ -434,6 +491,14 @@ fn test_blizzard_commentator_loads_without_cooldown_frame_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_ui_parent_panel_manager_loads_with_minimap_cluster_stub() {
     test_timeout! {
@@ -470,6 +535,11 @@ fn test_ui_parent_panel_manager_loads_with_minimap_cluster_stub() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_housing_tutorials_load_without_cvar_bitfield_warning() {
     test_timeout! {
@@ -504,6 +574,11 @@ fn test_housing_tutorials_load_without_cvar_bitfield_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_new_player_experience_loads_without_minimap_cluster_warning() {
     test_timeout! {
@@ -538,6 +613,14 @@ fn test_new_player_experience_loads_without_minimap_cluster_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_battlefield_map_startup_uses_maputil_displayable_map_helper() {
     test_timeout! {
@@ -611,6 +694,14 @@ fn test_battlefield_map_startup_uses_maputil_displayable_map_helper() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_world_map_loads_without_maputil_warning() {
     test_timeout! {
