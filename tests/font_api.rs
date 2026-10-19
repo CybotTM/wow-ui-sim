@@ -112,14 +112,19 @@ fn test_set_font_object_prefers_canonical_fields_over_legacy_aliases() {
 #[test]
 fn test_set_font_nil_path_does_not_clear_existing_font() {
     let env = env();
+    let call = if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        "pcall(f.SetFont, f, nil, 0)"
+    } else {
+        "f:SetFont(nil, 0)"
+    };
     let (result, path, height): (bool, String, f64) = env
         .eval(
-            r#"
+            &format!(r#"
             local f = UIParent:CreateFontString("SetFontNilPathProbe", "ARTWORK", "ChatFontNormal")
-            local result = f:SetFont(nil, 0)
+            local result = {call}
             local path, height = f:GetFont()
             return result, path, height
-            "#,
+            "#),
         )
         .unwrap();
 
