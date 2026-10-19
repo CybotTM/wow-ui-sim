@@ -1,8 +1,8 @@
 # Wrath 12340 quest turn-in
 
-Wrath 3.3.5a (build 12340) dialog requests consumed by the unchanged cached `FrameXML/QuestFrame.lua` and XML. Backing state lives in `src/c_api/quest_readiness.rs` and `src/lua_api/sim_substates/quest_log.rs`; native registration and the simulator response adapters remain unimplemented by this staging packet. See [quest implementation notes](../wiki/systems/lua-api.md#simulator-selected-quest-turn-in).
+Wrath 3.3.5a (build 12340) dialog requests consumed by the unchanged cached `FrameXML/QuestFrame.lua` and XML. Backing state lives in `src/c_api/quest_readiness.rs` and `src/lua_api/sim_substates/quest_log.rs`; native readers/request registration and simulator response adapters are being implemented through the staged A/B proof below. See [quest implementation notes](../wiki/systems/lua-api.md#simulator-selected-quest-turn-in).
 
-Binding evidence artifact identifiers: `laptop-labels-answers-20261018:turnin-guards-12340` (Q-T1–Q-T3) and `laptop-labels-answers-20261018:getquestreward-choice-12340` (choice conversion/error details), laptop answers dated 2026-10-19. These identifiers are not repository files or filesystem paths. This packet uses that answer, not decompiled source or a native capture. Every checkbox remains open: candidates have not compiled or run.
+Binding evidence artifact identifiers: `laptop-labels-answers-20261018:turnin-guards-12340` (Q-T1–Q-T3) and `laptop-labels-answers-20261018:getquestreward-choice-12340` (choice conversion/error details), laptop answers dated 2026-10-19. These identifiers are not repository files or filesystem paths. This packet uses that answer, not decompiled source or a native capture. Requirement checkboxes remain open until final GREEN. The integrated fixture compiled and reached shared feature-absence RED at `84f7067d6`: original progress UI calls missing `IsQuestCompletable`; no distinct guard/conversion/event RED is credited from that setup failure.
 
 ## What it must do
 
@@ -28,6 +28,10 @@ Binding evidence artifact identifiers: `laptop-labels-answers-20261018:turnin-gu
 - [ ] Accepted target 990301 leaves active log/history coherent while complete control 991300 and historical ID 998888 survive. Supplied choice receipts are recorded only at acceptance and preserve unrelated receipt `(998888, 1)`; no-choice index zero adds no choice receipt. These receipts are not inventory grants.
 - [ ] Two accepted pending claims in one notification pass each increase the observed player-token emission count before any drain and produce one later argumentless log update. Open the second dialog through original active-title selection, never by resetting the latch in the fixture. Original QuestLogFrame renders the final count. Callback repetition cannot create a second accepted claim without a new dialog.
 - [ ] The original UI's no-choice button path accepts without a choice receipt under supplied simulator policy. This does not establish native omitted/nil/zero normalization or successful-call result arity.
+
+## Staged producer proof
+
+Step A implements current-dialog selection/readers, response-latch reset on new dialog, ordinary-integer claims and pending-request-consuming simulator offer/acceptance. Wrath log selection no longer erases the dialog target. It deliberately does not implement native state/player/sent guards, reward conversion/validation, CloseQuest retention, completion FINISHED, or turn-in notifications. Basic shared CloseQuest/acceptance finish plumbing was brought forward to unblock acceptance under Main's explicit disposition. Its clear-before-emit order is **INFERRED pending native confirmation**; zero-giver suppression prevents original OnHide re-entry from publishing a second finish. Step-A runtime receipts are required before B.
 
 ## How it works
 
@@ -56,7 +60,7 @@ Main approved using the existing `GossipState.giver_guid` as the single concrete
 
 ## Known gaps (current cycle)
 
-- [ ] Genuine reached behavioral RED, compilation, targeted GREEN, preservation, startup/error baseline and composed W1 acceptance: not performed; builds and execution are forbidden for this packet. At base 122f26445 the original title reader fails before most feature stimuli; missing verbs/readers/response adapters also block them. No test-specific RED is claimed from a common prerequisite failure.
+- [ ] Step-A per-test boundaries, step-B GREEN and preservation remain pending. Shared RED is executed at `84f7067d6`, with startup `[]|{}` and unchanged original CVar stat/hash. Earlier target-registration and fixture compilation failures are not behavioral RED. Acceptance is 4/4 GREEN at `7ea9065be`, conditional on the documented finish-order inference.
 - [ ] NaN, infinity, out-of-int32 values and subtraction overflow remain unverified; add no expected-result oracle. Successful-call result arity also remains unspecified. Extra-argument and non-numeric-string cases are source-grounded above but not separately tested in this packet.
 - [ ] No-choice input 3 has a no-error test, but exact sent index 2 is not publicly observable through the current receipt/acceptance seam. Do not assert private request fields or infer a wire index from receipt absence. Wire/send-index observability remains a gap; zero-index input cases use the existing simulator-policy acceptance seam.
 - [ ] Both response adapters and Wrath native verb/reader/event implementations are absent or incompatible at the base; staged fixture additions alone do not make tests runnable/GREEN.

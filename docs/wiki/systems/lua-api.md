@@ -27,6 +27,10 @@ The [integrated checkpoint](../investigations/integrated-source-and-factory-proo
 
 Wrath `quest_verbs.rs` separates marking from its server-response simulation and reuses `QuestLogState::abandon`; other profiles keep their existing branch. [Contract limits](../../specs/wrath-quest-abandon.md#consumer-grounding-and-source-limits) distinguish original UI compatibility from native request/event sequencing. No whole W1 acceptance is implied.
 
+### Wrath dialog request/response plumbing
+
+`globals/real/wrath_quest_dialog.rs` separates pending detail offers from the active dialog's `(quest ID, Progress/Rewards)` tuple. Native dialog readers use that identity, not unrelated log selection. Offer and acceptance adapters consume pending requests; accepted choices are simulator receipts, not inventory grants. `GossipState.giver_guid` is the sole concrete giver input. [Owning contract](../../specs/wrath-quest-turn-in.md#staged-producer-proof) records shared RED, the required A/B boundary run, and the provisional clear-before-emit ordering; happy-path source does not prove native guards or event behavior.
+
 ## Forever supplied quest difficulty
 
 [Owning contract and proof status](../../specs/forever-quest-difficulty.md) owns the Forever-only live rich-row difficulty getter and bounded simulator policies, not native parity. Historical [source40a receipt](../../baselines/README.md#current-watchtalent-execution--2026-10-15) records **28 PASS** (difficulty3 + watch-projection4 + finite21), separate positive normal watch/global-alias/voice checks and startup **10 records / 14 occurrences FAIL**. Its read-only projection passes and separate add/remove/type/event RED do not establish current membership behavior.

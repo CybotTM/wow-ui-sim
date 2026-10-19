@@ -7,10 +7,6 @@ pub(super) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.register_function("GetGossipAvailableQuests", get_available_quests)?;
     lua.register_function("GetGossipText", get_text)?;
     lua.register_function("CloseGossip", close_gossip)?;
-    lua.register_function(
-        "GetQuestBackgroundMaterial",
-        super::legacy_globals::get_quest_background_material,
-    )?;
     lua.register_function("GetGossipActiveQuests", get_active_quests)?;
     lua.register_function(
         "GetNumGossipAvailableQuests",
@@ -21,11 +17,6 @@ pub(super) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         super::legacy_globals::get_num_active_quests,
     )?;
     lua.register_function("GetNumGossipOptions", get_num_options)?;
-    lua.register_function("GetTitleText", get_title_text)?;
-    lua.register_function("GetSuggestedGroupNum", get_suggested_group_num)?;
-    lua.register_function("GetRewardSpell", get_reward_spell)?;
-    lua.register_function("GetRewardArenaPoints", get_reward_arena_points)?;
-    lua.register_function("GetRewardTalents", get_reward_talents)?;
     lua.register_function(
         "SelectGossipAvailableQuest",
         super::legacy_globals::select_available_quest,
@@ -79,67 +70,6 @@ fn get_active_quests(state: &mut LuaState) -> LuaResult<u32> {
 fn get_num_options(state: &mut LuaState) -> LuaResult<u32> {
     let count = borrow_state(state)?.gossip.options.len();
     state.push(Val::Num(count as f64));
-    Ok(1)
-}
-
-fn get_title_text(state: &mut LuaState) -> LuaResult<u32> {
-    let title = {
-        let sim = borrow_state(state)?;
-        sim.pending_quest_offer
-            .as_ref()
-            .map(|row| row.title.clone())
-    };
-    let Some(title) = title else {
-        return super::legacy_globals::get_title_text(state);
-    };
-    let title = create_string(state, &title);
-    state.push(title);
-    Ok(1)
-}
-
-fn get_suggested_group_num(state: &mut LuaState) -> LuaResult<u32> {
-    let count = borrow_state(state)?
-        .pending_quest_offer
-        .as_ref()
-        .and_then(|row| row.suggested_group_size)
-        .unwrap_or(0);
-    state.push(Val::Num(count as f64));
-    Ok(1)
-}
-
-fn get_reward_spell(state: &mut LuaState) -> LuaResult<u32> {
-    let spell = borrow_state(state)?
-        .pending_quest_offer
-        .as_ref()
-        .and_then(|row| row.reward_spell.clone());
-    let Some(spell) = spell else {
-        state.push(Val::Nil);
-        return Ok(1);
-    };
-    let texture = create_string(state, &spell.texture);
-    state.push(texture);
-    let name = create_string(state, &spell.name);
-    state.push(name);
-    state.push(Val::Bool(spell.is_trade_skill));
-    state.push(Val::Bool(spell.is_learned));
-    Ok(4)
-}
-
-fn get_reward_arena_points(state: &mut LuaState) -> LuaResult<u32> {
-    let points = borrow_state(state)?
-        .pending_quest_offer
-        .as_ref()
-        .map_or(0, |row| row.reward_arena_points);
-    state.push(Val::Num(points as f64));
-    Ok(1)
-}
-
-fn get_reward_talents(state: &mut LuaState) -> LuaResult<u32> {
-    let talents = borrow_state(state)?
-        .pending_quest_offer
-        .as_ref()
-        .map_or(0, |row| row.reward_talents);
-    state.push(Val::Num(talents as f64));
     Ok(1)
 }
 

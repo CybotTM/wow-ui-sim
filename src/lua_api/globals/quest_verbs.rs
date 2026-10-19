@@ -205,6 +205,7 @@ fn quest_choice_set_active(state: &mut LuaState) -> LuaResult<u32> {
 fn quest_map_log_title_button_on_click(state: &mut LuaState) -> LuaResult<u32> {
     let id = stack_u32(state, 1);
     let mut sim = borrow_state_mut(state)?;
+    #[cfg(not(feature = "client-wrath"))]
     if sim.selected_quest_log_id != id {
         sim.quest_log_entries.readiness.dialog = None;
     }

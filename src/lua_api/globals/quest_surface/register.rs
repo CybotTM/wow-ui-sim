@@ -256,6 +256,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     #[cfg(feature = "client-wrath")]
     super::wrath_gossip::register_all(lua)?;
     #[cfg(feature = "client-wrath")]
+    crate::lua_api::globals::real::wrath_quest_dialog::register_all(lua)?;
+    #[cfg(feature = "client-wrath")]
     for (name, func) in super::wrath_quest_log::LEGACY_READS {
         LuaApiMut::register_function(lua, name, *func)?;
     }
