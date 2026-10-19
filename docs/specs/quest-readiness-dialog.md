@@ -35,13 +35,13 @@ Retail, PTR and Forever cached `QuestOfferDocumentation.lua` declare
 `C_QuestOffer.GetQuestOfferMajorFactionReputationRewards()` with `MayReturnNothing`.
 `QuestRewardsDocumentation.lua` declares numeric `factionID` and `rewardAmount`.
 
-- [ ] Read ordered, separately supplied reputation rows for the active dialog,
+- [x] Read ordered, separately supplied reputation rows for the active dialog,
   returning one fresh table of `{ factionID, rewardAmount }` records.
-- [ ] Require matching dialog/selected identity and an active NPC quest; log
+- [x] Require matching dialog/selected identity and an active NPC quest; log
   selection alone is not a dialog. Closing invalidates the query.
-- [ ] Return zero values when no rows are supplied, as **simulator policy**, not
+- [x] Return zero values when no rows are supplied, as **simulator policy**, not
   a measured native default. An explicitly supplied empty list returns a table.
-- [ ] Keep supplied rows environment-local, live, and scoped to one active quest
+- [x] Keep supplied rows environment-local, live, and scoped to one active quest
   lifetime; abandonment/turn-in clear them without granting reputation.
 - [ ] Publish Forever's real `C_Log.LogErrorMessage` sink: append the exact
   ordinary string once to environment-local console output, with zero returns.
@@ -57,8 +57,10 @@ context directly; this does not add a PTR QL-2 producer or widen a Retail epoch.
 `tests/c_quest_offer.rs` covers absent/supplied output, identity, live snapshots,
 close invalidation, lifetime cleanup and isolation. `tests/forever_log_sink.rs`
 covers actual sink output/arity/isolation and Retail/PTR publication preservation.
-Both are discovered automatically by the integration harness. Focused RED/GREEN
-and implementation are pending; this section defines the bounded repair contract.
+Both are discovered automatically by the integration harness. At `7f22c009c`,
+all six query cases and the Forever sink case fail on the missing bindings after
+successful compilation. The modeled query is implemented; sink repair and GREEN
+profile preservation remain pending.
 Native secret-input parity and additional namespace members remain out of scope.
 
 ## How it works
