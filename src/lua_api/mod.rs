@@ -45,6 +45,8 @@ pub(crate) mod on_update;
 #[cfg(feature = "retail-12-0-7")]
 pub mod performance_inputs;
 pub(crate) mod rect_geometry;
+#[cfg(test)]
+mod reload_factory_tests;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod script_helpers;
 #[cfg(feature = "forbidden-aspects")]
