@@ -177,8 +177,10 @@ fn original_button_cancel_then_accept_marked_target() {
         SelectQuestLogEntry(1)
         ShowUIPanel(QuestLogFrame)
         assert(QuestLogFrame:IsShown(), 'original log refresh must not return early')
-        assert(QuestLogScrollFrame.buttons[1]:GetText() == '  Wrath abandon first')
-        assert(QuestLogScrollFrame.buttons[2]:GetText() == '  Wrath abandon second')
+        local firstTitle = QuestLogScrollFrame.buttons[1]:GetText()
+        local secondTitle = QuestLogScrollFrame.buttons[2]:GetText()
+        assert(firstTitle == '  Wrath abandon first', firstTitle or '<nil first title>')
+        assert(secondTitle == '  Wrath abandon second', secondTitle or '<nil second title>')
         "#,
     );
     let before = snapshot(&env);
@@ -338,6 +340,32 @@ fn original_selection_renders_supplied_item_reward() {
         assert(GetNumQuestLogRewards() == 0)
         assert(not QuestInfoRewardsFrame:IsShown(), 'empty row hides rewards')
     "#);
+}
+
+#[test]
+fn original_daily_quest_counter_counts_slots_not_history() {
+    let env = seed_env();
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.quest_log_entries.daily_quest_ids[0] = 710101;
+        sim.quest_log_entries.daily_quest_ids[7] = 710101;
+        sim.quest_log_entries.daily_quest_ids[24] = 710103;
+        sim.quest_log_entries.completed_quest_ids = [710001, 710002, 710003, 710004].into_iter().collect();
+    }
+    exec(&env, r#"
+        QuestLog_UpdateQuestCount(2)
+        assert(select('#', GetDailyQuestsCompleted()) == 1 and select('#', GetMaxDailyQuests()) == 1)
+        assert(GetDailyQuestsCompleted() == 3 and GetMaxDailyQuests() == 25)
+        assert(QuestLogDailyQuestCount:IsShown())
+        assert(QuestLogDailyQuestCount:GetText() == format(QUEST_LOG_DAILY_COUNT_TEMPLATE, 3, 25))
+    "#);
+    env.state().borrow_mut().quest_log_entries.daily_quest_ids.fill(0);
+    exec(&env, r#"
+        QuestLog_UpdateQuestCount(2)
+        assert(GetDailyQuestsCompleted() == 0 and GetMaxDailyQuests() == 25)
+        assert(not QuestLogDailyQuestCount:IsShown())
+    "#);
+    assert_eq!(env.state().borrow().quest_log_entries.completed_quest_ids.len(), 4);
 }
 
 #[test]
