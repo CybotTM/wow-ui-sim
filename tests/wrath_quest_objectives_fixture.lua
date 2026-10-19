@@ -1,4 +1,4 @@
--- STAGED ONLY: existing authored supplied-state + original consumer assertions.
+-- Authored supplied-state assertions through unchanged original consumers.
 -- No native boolean/arity/enum, invalid-index, event-order, or readiness claim.
 N2 = {}
 
@@ -35,9 +35,9 @@ function N2.detailA(done)
     assert(QuestLogDetailScrollFrame:IsShown(), "original detail entry must show scroll")
     assert(QuestInfoTitleHeader:GetText() == "Wrath supplied wolves")
     N2.assertA(done)
-    -- PENDING owning-spec authored summary policy, NOT an established native fact:
-    -- assert(QuestInfoObjectivesText:GetText() ==
-    --     (done and "Wolves slain: 2/2" or "Wolves slain: 1/2") .. "\nSealed relic recovered: 1/1")
+    -- Authored summary projection, not native narrative-summary equivalence.
+    assert(QuestInfoObjectivesText:GetText() ==
+        (done and "Wolves slain: 2/2" or "Wolves slain: 1/2") .. "\nSealed relic recovered: 1/1")
 end
 
 function N2.detailB()
@@ -49,6 +49,18 @@ function N2.detailB()
     for i = 2, MAX_OBJECTIVES do
         assert(not _G["QuestInfoObjective" .. i]:IsShown(), "shorter quest must hide stale rows")
     end
+end
+
+function N2.empty()
+    local frame, last = QuestInfo_ShowObjectives()
+    assert(frame == nil and last == nil, "empty objectives return no widget")
+    assert(not QuestInfoObjectivesFrame:IsShown())
+    for i = 1, MAX_OBJECTIVES do
+        assert(not _G["QuestInfoObjective" .. i]:IsShown(), "empty snapshot hides stale rows")
+    end
+    QuestLog_UpdateQuestDetails(false)
+    assert(not QuestInfoObjectivesFrame:IsShown())
+    assert(QuestInfoObjectivesText:GetText() == nil or QuestInfoObjectivesText:GetText() == "")
 end
 
 function N2.assertExplicitRows()
