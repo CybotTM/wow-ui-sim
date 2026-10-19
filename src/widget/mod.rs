@@ -2,6 +2,7 @@
 
 mod anchor;
 pub(crate) mod editbox;
+mod editbox_history;
 mod frame;
 mod frame_enums;
 mod frame_size;

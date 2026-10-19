@@ -230,6 +230,10 @@ pub struct FrameXml {
     /// Preserve the Wrath string-helper input rather than parsing as an XML bool.
     #[serde(rename = "@password")]
     pub password: Option<String>,
+    #[serde(rename = "@historyLines")]
+    pub history_lines: Option<i32>,
+    #[serde(rename = "@ignoreArrows")]
+    pub ignore_arrows: Option<bool>,
     #[serde(rename = "@displayDuration")]
     pub display_duration: Option<f64>,
     #[serde(rename = "@insertMode")]

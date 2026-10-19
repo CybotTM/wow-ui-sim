@@ -16,8 +16,11 @@ XML anchoring evidence: `wow-xml-texture-default-anchors-12340-facts.md`, revisi
 - [ ] C4: Password presentation has one star per UTF-8 byte and masked caret geometry, without modifying stored text. XML password="1" applies before OnLoad, including virtual inheritance.
 - [ ] C6: MessageFrame defaults are fading=true, visible=10, fade=3; original UIErrorsFrame XML sets visible=5. MessageFrame insertion is queued and processes one row per update, resetting only that row. Fade is linear. ScrollingMessageFrame chat history retains its existing insertion and timestamp-based behavior.
 - [ ] C6: SetTimeVisible resets only nonzero active visible timers; SetFadeDuration resets only nonzero fade timers. Expired rows must not revive.
-- [ ] C5: History capacity zero disables insertion/navigation. Preserve duplicate physical ring slots; insertion overwrites then advances. Shrink keeps physical prefix and clamps cursor to new capacity minus one. Single-line arrow navigation skips empty slots and wraps, without bypassing arrow admission. Wrath has no OnArrowPressed script; engine-side motion/history is direct. Other profiles retain their callback behavior.
-- [ ] C5: Capacity three with A,B,C,D, then shrink to two, recalls D,B,D on successive Up presses.
+- [ ] C5: History capacity zero disables insertion/navigation. None represents an unused slot; a stored empty string is recallable. Preserve duplicate physical ring slots; insertion overwrites then advances. Grow adds unused slots; shrink keeps physical prefix and clamps the shared index to new capacity minus one. Navigation advances before reading, skips unused slots, wraps, and changes the shared index only on a stored match. Other profiles retain their existing push/length/clear behavior.
+- [ ] C5: Capacity three with A,B,C,D, then shrink to two, recalls D,B,D on successive Up presses. Capacity four with A,B,C gives first Down A or first Up C. ClearHistory retains capacity/displayed text, clears stored entries and sets the shared index to zero. GetHistoryLines returns capacity.
+- [ ] C5: Lua SetHistoryLines converts numeric strings/numbers, truncates toward zero and requires a positive result. Rejection leaves all history state unchanged and raises `Usage: NAME:SetHistoryLines(numLines)`. XML historyLines accepts nonpositive values as zero. NAME is the frame name or `<unnamed>`.
+- [ ] C5: AddHistoryLine requires exactly one argument after self, otherwise raises `Usage: NAME:AddHistoryLine("text")`. Strings including empty entries are stored; numbers convert to strings. Capacity zero returns without writing or advancing.
+- [ ] Wrath arrows: HasScript("OnArrowPressed") returns exactly one nil; GetScript and SetScript reject it (including a nil handler). No arrow callback dispatch. Left/Right move the caret; single-line Up/Down recall history; bounded multiline Up/Down moves across equal-glyph newline-separated lines. XML ignoreArrows and SetAltArrowKeyMode share the mode flag: true requires Alt, false admits plain arrows.
 
 ## How it works
 
@@ -30,6 +33,8 @@ XML anchoring evidence: `wow-xml-texture-default-anchors-12340-facts.md`, revisi
 - `src/lua_api/tooltip.rs` — tooltip state.
 - `src/iced_app/tooltip.rs` — measured tooltip layout.
 - `src/widget/editbox.rs` — password presentation.
+- `src/widget/editbox_history.rs` — optional physical history slots and shared index.
+- `src/lua_api/key_dispatch/wrath.rs` — direct Wrath cursor/history arrows.
 - `src/xml/types.rs` and `src/lua_api/globals/template/direct.rs` — XML attributes.
 - `src/lua_api/message_frame.rs` — message lifecycle.
 - `src/lua_api/frame/methods/widgets/message_frame/` — message producers.
@@ -37,7 +42,7 @@ XML anchoring evidence: `wow-xml-texture-default-anchors-12340-facts.md`, revisi
 
 ## Tests asserting this spec
 
-`tests/widgets_b6_u2.rs`, `tests/widgets_b6_u1.rs`, `tests/widgets_b6_u3.rs`, `tests/widgets_b6_c4.rs`, `tests/widgets_b6_c6.rs`, `tests/widgets_b6_c5.rs`. Geometry assertions are relational, never absolute font-metric native oracles. Preserve existing `tests/key_dispatch.rs` and `tests/editbox_arrow_pressed.rs`.
+`tests/widgets_b6_u2.rs`, `tests/widgets_b6_u1.rs`, `tests/widgets_b6_u3.rs`, `tests/widgets_b6_c4.rs`, `tests/widgets_b6_c6.rs`, `tests/widgets_b6_c5.rs`, `tests/widgets_b6_c5_binding.rs`. Geometry assertions are relational, never absolute font-metric native oracles. Preserve existing `tests/key_dispatch.rs` and `tests/editbox_arrow_pressed.rs`.
 
 ## Known gaps (current cycle)
 
@@ -48,7 +53,11 @@ XML anchoring evidence: `wow-xml-texture-default-anchors-12340-facts.md`, revisi
 - [ ] Forced-width input and item/context cleanup have no authenticated populated fixtures.
 - [ ] Interior-byte cursor positions and XML password values other than 1/0 are unknown. Masked-caret parity is required at UTF-8 boundaries (0, 2, 5 for é猫).
 - [ ] Exact native scheduling, image pixels and complete startup compatibility are not established by bounded consumer tests.
-- [ ] C5 first-Down step convention, ClearHistory cursor reset and GetHistoryLines capacity-versus-occupancy meaning are not authenticated.
+- [ ] C5 AddHistoryLine with a single nil/boolean/table converts to a native null string: native behaviour undefined; not modeled. No rejection, blank-entry or crash parity is asserted.
+- [ ] multiline Up/Down across wrapped visual lines and preferred-column (sticky-x) behaviour: unverified, not modeled.
+- [ ] Word-motion trigger is unverified and excluded; no Ctrl/other word-navigation assumption.
+
+C5 clean-room authority: `wow-editbox-history-api-12340-facts.md`, `wow-editbox-history-setter-12340-facts.md`, `wow-editbox-empty-history-12340-facts.md`, revision 0e4e9fe0; independently source-verified by laptop, not native-run. Shared optional-slot representation requires Retail/PTR push/length/clear regression and memory-estimator comparisons before preservation claims.
 
 ## Out of scope
 

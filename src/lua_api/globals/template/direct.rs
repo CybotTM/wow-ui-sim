@@ -5,7 +5,10 @@
 //! call. Used during template application and XML frame loading.
 
 use crate::lua_api::SimState;
+mod editbox;
 mod frame_level;
+
+pub use editbox::apply_xml_editbox_attributes;
 mod message_frame;
 
 pub use message_frame::apply_xml_message_frame_attributes;
@@ -781,49 +784,6 @@ pub fn apply_xml_protected(
 pub fn apply_xml_id(state: &Rc<RefCell<SimState>>, frame_id: u64, frame: &FrameXml) {
     if let Some(id) = frame.xml_id {
         set_id(state, frame_id, id);
-    }
-}
-
-/// Apply declared EditBox attributes, resolving each field independently.
-/// Explicit values (including zero) override the most-derived template value.
-pub fn apply_xml_editbox_attributes(
-    state: &Rc<RefCell<SimState>>,
-    frame_id: u64,
-    frame: &FrameXml,
-    inherits: &str,
-) {
-    let chain = crate::xml::get_template_chain(inherits);
-    let letters = frame
-        .letters
-        .or_else(|| chain.iter().rev().find_map(|entry| entry.frame.letters));
-    let bytes = frame
-        .bytes
-        .or_else(|| chain.iter().rev().find_map(|entry| entry.frame.bytes));
-    let password = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
-        frame.password.as_deref().or_else(|| {
-            chain
-                .iter()
-                .rev()
-                .find_map(|entry| entry.frame.password.as_deref())
-        })
-    } else {
-        None
-    };
-    if letters.is_none() && bytes.is_none() && password.is_none() {
-        return;
-    }
-    let mut sim = state.borrow_mut();
-    let Some(widget) = sim.widgets.get_mut_visual(frame_id) else {
-        return;
-    };
-    if let Some(value) = letters {
-        widget.editbox_max_letters = value;
-    }
-    if let Some(value) = bytes {
-        widget.editbox_max_bytes = value;
-    }
-    if let Some(value) = password {
-        widget.editbox_password = value == "1";
     }
 }
 
