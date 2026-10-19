@@ -1,4 +1,4 @@
-use super::{LuaCommand, client, handle_connection};
+use super::{LuaCommand, Response, client, handle_connection};
 use crate::iced_app::{App, AppInit, Message};
 use crate::lua_api::WowLuaEnv;
 use crate::render::{GlyphAtlas, WowFontSystem};
@@ -84,6 +84,60 @@ fn exchange(
         server.join().unwrap().unwrap();
         output
     })
+}
+
+#[test]
+fn exec_reload_ui_replaces_environment_before_the_next_connection() {
+    let directory = tempfile::tempdir().unwrap();
+    let socket_path = directory.path().join("reload.sock");
+    let listener = UnixListener::bind(&socket_path).unwrap();
+    listener.set_nonblocking(true).unwrap();
+    let (cmd_tx, cmd_rx) = mpsc::channel();
+    let mut app = build_app(cmd_rx);
+    let old_lua = Rc::downgrade(&app.env.borrow().lua);
+
+    let response = exchange(
+        &mut app,
+        &listener,
+        &socket_path,
+        &cmd_tx,
+        "reload_sentinel = true; print('RELOAD_REQUEST'); ReloadUI(); print('CALL_RETURNED')",
+    );
+    assert_eq!(response, "RELOAD_REQUEST\nCALL_RETURNED");
+    let response = exchange(
+        &mut app,
+        &listener,
+        &socket_path,
+        &cmd_tx,
+        "assert(reload_sentinel == nil, 'no fresh Lua environment after ReloadUI'); print('FRESH_ENV')",
+    );
+    assert_eq!(response, "FRESH_ENV");
+    assert!(old_lua.upgrade().is_none(), "IPC must release the old VM");
+}
+
+#[test]
+fn exec_reload_ui_retires_environment_between_already_queued_commands() {
+    let (commands, receiver) = mpsc::channel();
+    let mut app = build_app(receiver);
+    let (first_reply, first_response) = mpsc::channel();
+    let (second_reply, second_response) = mpsc::channel();
+    commands.send(LuaCommand::Exec {
+        code: "reload_sentinel = true; ReloadUI(); C_UI.Reload(); assert(reload_sentinel); print('RETURNED')".to_string(),
+        respond: first_reply,
+    }).unwrap();
+    commands
+        .send(LuaCommand::Exec {
+            code: "assert(reload_sentinel == nil); print('FRESH')".to_string(),
+            respond: second_reply,
+        })
+        .unwrap();
+    let _ = app.update(Message::ProcessTimers(Instant::now()));
+    assert!(
+        matches!(first_response.try_recv().unwrap(), Response::Output(text) if text == "RETURNED")
+    );
+    assert!(
+        matches!(second_response.try_recv().unwrap(), Response::Output(text) if text == "FRESH")
+    );
 }
 
 #[test]

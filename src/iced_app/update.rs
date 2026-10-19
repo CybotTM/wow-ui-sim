@@ -29,12 +29,14 @@ fn request_runtime_exit_task() -> Task<Message> {
 
 impl App {
     pub fn update(&mut self, message: Message) -> Task<Message> {
+        self.service_pending_reload();
         let ipc_task = self.process_ipc();
         let task = match message {
             Message::CanvasEvent(cm) => self.handle_canvas_event(cm),
             Message::ProcessTimers(captured_at) => self.handle_process_timers(captured_at),
             msg => self.dispatch_simple_message(msg),
         };
+        self.service_pending_reload();
         let exit_task = self.take_simulator_exit_task();
         Task::batch([exit_task, task, ipc_task])
     }
@@ -373,25 +375,7 @@ impl App {
     }
 
     fn handle_reload_ui(&mut self) {
-        self.texture_manager
-            .borrow_mut()
-            .invalidate_source_generation();
-        self.log_messages.push("Reloading UI...".to_string());
-        {
-            let env = self.env.borrow();
-            let _ = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string("WoWUISim")]);
-            let _ = env.fire_event("VARIABLES_LOADED");
-            let _ = env.fire_event_with_args(
-                "PLAYER_ENTERING_WORLD",
-                &[Val::Bool(false), Val::Bool(true)],
-            );
-            let _ = env.fire_event("UPDATE_BINDINGS");
-            let _ = env.fire_event("DISPLAY_SIZE_CHANGED");
-            let _ = env.fire_event("UI_SCALE_CHANGED");
-        }
-        self.drain_console();
-        self.log_messages.push("UI reloaded.".to_string());
-        self.mark_all_strata_dirty();
+        self.env.borrow().state().borrow_mut().ui_reload_requested = true;
     }
 
     fn handle_execute_command(&mut self) {

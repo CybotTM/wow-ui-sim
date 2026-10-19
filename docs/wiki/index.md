@@ -1,3 +1,7 @@
+## [2026-10-19] system | Deferred fresh-environment ReloadUI
+
+[Reload lifecycle](systems/reload-ui.md) documents owner-serviced VM retirement, retained session state, SavedVariables readback and IPC boundaries. [Contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) records 69 targeted retail passes, original EditMode consumer continuity, historical behavioral RED and unconfirmed native event order.
+
 ## [2026-10-19] source | Wrath supplied objective reads
 
 [Legacy surface](systems/lua-api.md#wrath-selected-quest-legacy-surface) links identity-keyed snapshot adapters and the unchanged capability gate. [Objective contract](../specs/wrath-quest-objectives.md#bounded-proof--2026-10-19) records original-consumer RED→GREEN, Wrath preservation, startup/fmt/full-feature check scope and native category/intermediate gaps.

@@ -41,6 +41,8 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-1-0")]
             encounter_timeline: crate::c_api::c_encounter_timeline::Timeline::default(),
             scripts: ScriptRegistry::default(),
+            ui_reload_requested: false,
+            ui_reloaded: false,
             cvars: CVarStorage::new(),
             #[cfg(feature = "client-wrath")]
             legacy_gamma: 0.0,
@@ -734,6 +736,7 @@ mod cursor_tooltips;
 mod defaults;
 mod sim_state;
 mod support_types;
+mod ui_reload;
 
 use defaults::*;
 pub use sim_state::SimState;

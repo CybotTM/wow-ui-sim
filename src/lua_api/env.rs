@@ -59,7 +59,11 @@ impl WowLuaAppData {
 pub struct WowLuaEnv {
     pub(crate) lua: Rc<RefCell<rilua::Lua>>,
     pub(crate) state: Rc<RefCell<SimState>>,
+    reload_loader: Option<Rc<ReloadLoader>>,
 }
+
+type ReloadLoader =
+    dyn Fn(&WowLuaEnv, &mut Option<crate::saved_variables::SavedVariablesManager>) -> Result<()>;
 
 impl Drop for WowLuaEnv {
     fn drop(&mut self) {
@@ -98,10 +102,81 @@ impl WowLuaEnv {
             init_lua_state(&mut lua_ref, Rc::clone(&state))
         })?;
 
-        let env = Self { lua, state };
+        let env = Self {
+            lua,
+            state,
+            reload_loader: None,
+        };
         env.install_final_runtime_globals();
         crate::logging::eprintln_elapsed("[Startup] WowLuaEnv::new complete");
         Ok(env)
+    }
+
+    /// Register the launch-specific addon bootstrap used by every UI reload.
+    pub fn set_reload_loader(
+        &mut self,
+        loader: impl Fn(
+            &WowLuaEnv,
+            &mut Option<crate::saved_variables::SavedVariablesManager>,
+        ) -> Result<()>
+        + 'static,
+    ) {
+        self.reload_loader = Some(Rc::new(loader));
+    }
+
+    /// Service a deferred request only after the caller has released all Lua borrows.
+    pub fn service_reload(
+        &mut self,
+        saved_vars: &mut Option<crate::saved_variables::SavedVariablesManager>,
+    ) -> Result<bool> {
+        if !self.state.borrow().ui_reload_requested {
+            return Ok(false);
+        }
+        if let Some(manager) = saved_vars {
+            manager.save_all(self.rilua_mut().state_mut())?;
+            manager.retire_lua_environment();
+        }
+        self.rebuild_lua_environment()?;
+        if let Some(loader) = self.reload_loader.clone() {
+            loader(self, saved_vars)?;
+        }
+        Ok(true)
+    }
+
+    /// One-shot command owners settle a rebuilt UI before observing output.
+    pub fn service_headless_reload(
+        &mut self,
+        saved_vars: &mut Option<crate::saved_variables::SavedVariablesManager>,
+    ) -> Result<bool> {
+        let reloaded = self.service_reload(saved_vars)?;
+        if reloaded {
+            crate::startup::settle_headless_startup(self);
+        }
+        Ok(reloaded)
+    }
+
+    fn rebuild_lua_environment(&mut self) -> Result<()> {
+        let font_system = self
+            .lua
+            .borrow()
+            .state()
+            .app_data::<WowLuaAppData>()
+            .and_then(|data| data.font_system.clone());
+        let fresh_lua = Rc::new(RefCell::new(Self::new_rilua(Rc::clone(&self.state))));
+        clear_app_data_handles(&self.lua);
+        self.state.borrow_mut().discard_ui_environment();
+        let old_lua = std::mem::replace(&mut self.lua, fresh_lua);
+        drop(old_lua);
+        clear_templates();
+        register_intrinsic_templates();
+        init_builtin_frames(&self.state);
+        install_app_data_lua_handle(&self.lua, &self.lua);
+        init_lua_state(&mut self.lua.borrow_mut(), Rc::clone(&self.state))?;
+        self.install_final_runtime_globals();
+        if let Some(font_system) = font_system {
+            self.set_font_system(font_system);
+        }
+        Ok(())
     }
 
     fn install_final_runtime_globals(&self) {

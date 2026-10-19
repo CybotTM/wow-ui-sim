@@ -290,7 +290,9 @@ fn merged_addon_enable_overrides(
 ) -> Option<HashMap<String, bool>> {
     let mut overrides = addon_enable_overrides(saved_vars.as_ref()).unwrap_or_default();
 
-    if let Some(saved_vars) = saved_vars.as_mut() {
+    if !env.state().borrow().ui_reloaded
+        && let Some(saved_vars) = saved_vars.as_mut()
+    {
         match wow_ui_sim::server_snapshot_import::load_addon_enable_overrides(env, saved_vars) {
             Ok(snapshot_overrides) => overrides.extend(snapshot_overrides),
             Err(error) => logging::println_elapsed(&format!(
