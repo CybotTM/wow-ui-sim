@@ -10,7 +10,7 @@ Original Retail DamageMeter resize callbacks exposed simulator motion-capture an
 
 ## Proof boundary
 
-Tests were committed before the producer repair. Five original DamageMeter cases reproduced geometry/moved-release failures; stationary release passed. All six cases pass after repair, alongside five existing native sizing-state controls. Omitting physical mouse-up fails the stationary stop assertion. Geometry cases stop before release so bounds do not accidentally assert outside-handle ordering. Wrath then reproduced the same capture gap through original tab OnDragStart: ChatFrame1Tab and ChatFrame1 are siblings, so ancestor-only lookup cannot find the moved frame. StartMoving now captures its actual target. Original full-FrameXML drag and original OnUpdate stop pass; a supplied SetMovable(false) control still dispatches original OnDragStart but fails movement. The contract tracks exact proof scope.
+The [owning proof ledger](../../specs/original-mouse-gestures.md#tests-and-proof) records Retail geometry/release cases, sizing controls, Wrath original XML/OnUpdate coverage and mutation controls. Wrath exposed the same missing capture through a sibling tab/frame pair: ancestor-only lookup could not find the `StartMoving` target. `StartMoving` now captures its actual target.
 
 ## Sources
 
