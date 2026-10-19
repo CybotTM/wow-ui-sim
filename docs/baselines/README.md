@@ -20,6 +20,31 @@ Saved evidence: `/home/osso/.local/state/wow-ui-sim/handoff/rilua-repin-rebase/r
 
 ## Lua Errors
 
+### Retail
+
+`retail-lua-errors.json` records stock startup with default Retail features,
+no third-party addons and no SavedVariables. Capture stdout byte-for-byte,
+including its trailing LF, using the approved build cache and an isolated
+`XDG_DATA_HOME` containing a byte-exact copy of current persisted CVars
+(see [runtime isolation](../../AGENTS.md#running-the-simulator)):
+
+```bash
+cargo build -j1 --bin wow-sim
+WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 timeout 90 "${CARGO_TARGET_DIR}/debug/wow-sim" lua-errors > docs/baselines/retail-lua-errors.json
+```
+
+Set `CARGO_TARGET_DIR` to the approved shared cache before building. Keep CASC
+and sound at their stock settings. Refresh only after a verified clean capture;
+do not bless new startup errors. This baseline is not full-suite, GUI or native
+parity acceptance.
+
+Verified on 2026-10-19 at runtime source `a150e228591da3c97179b606b23082d9cff9b07a`:
+**0 records / 0 occurrences, exit0 (`[]` plus LF)**; 282 Blizzard addons loaded.
+Original persisted CVar hash/stat remained unchanged. The host had no audio
+device; this is not audio-device acceptance.
+
+### Mists
+
 `mists-lua-errors.json` is the committed clean startup baseline for:
 
 ```bash

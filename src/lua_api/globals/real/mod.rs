@@ -137,3 +137,5 @@ pub(crate) mod wrath_startup_queries;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_voice;
 pub mod xp_honor_rest;
+
+pub mod wrath_currency;

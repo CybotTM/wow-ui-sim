@@ -70,6 +70,7 @@ impl TextureManager {
         self
     }
 
+    #[cfg(feature = "gui")]
     pub(crate) fn source_roots(&self) -> &[PathBuf] {
         &self.addons_paths
     }

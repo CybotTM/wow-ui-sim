@@ -5,6 +5,7 @@ mod line_data;
 mod line_frames;
 mod owner;
 mod sizing;
+mod wrath;
 
 use self::content::*;
 use self::line_data::*;

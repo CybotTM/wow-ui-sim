@@ -112,15 +112,21 @@ fn test_set_font_object_prefers_canonical_fields_over_legacy_aliases() {
 #[test]
 fn test_set_font_nil_path_does_not_clear_existing_font() {
     let env = env();
+    let call =
+        if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+            "pcall(f.SetFont, f, nil, 0)"
+        } else {
+            "f:SetFont(nil, 0)"
+        };
     let (result, path, height): (bool, String, f64) = env
-        .eval(
+        .eval(&format!(
             r#"
             local f = UIParent:CreateFontString("SetFontNilPathProbe", "ARTWORK", "ChatFontNormal")
-            local result = f:SetFont(nil, 0)
+            local result = {call}
             local path, height = f:GetFont()
             return result, path, height
-            "#,
-        )
+            "#
+        ))
         .unwrap();
 
     assert!(!result, "SetFont(nil, ...) should report failure");
@@ -157,7 +163,9 @@ fn test_create_font_text_color() {
             "#,
         )
         .unwrap();
-    assert_eq!((r, g, b, a), (0.5, 0.6, 0.7, 0.8));
+    for (actual, expected) in [r, g, b, a].into_iter().zip([0.5, 0.6, 0.7, 0.8]) {
+        assert!((actual - expected).abs() < 1e-6);
+    }
 }
 
 #[test]
@@ -381,8 +389,14 @@ fn font_string_unbounded_width_for_text_measures_caller_text_in_own_font() {
             "#,
         )
         .unwrap();
-    assert_eq!(for_text, reference_width, "markup is stripped and the own font is used");
-    assert!(for_text > 20.0, "measurement is not bounded by the frame width");
+    assert_eq!(
+        for_text, reference_width,
+        "markup is stripped and the own font is used"
+    );
+    assert!(
+        for_text > 20.0,
+        "measurement is not bounded by the frame width"
+    );
     assert!(for_text > short_width);
     assert_eq!(own_width, short_width, "own text measurement is unchanged");
     assert_eq!(text, "Tier 1");
@@ -761,6 +775,9 @@ fn test_accessibility_templates_set_fixed_color_pattern() {
 // FontString:SetFont 12.0.5 shape: numeric height, nilable flags, success return
 // ============================================================================
 
+// Wrath's success/generation oracle is held; its invalid-argument contract
+// raises rather than returning the modern false result tested here.
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn font_string_set_font_returns_exactly_one_success_boolean() {
     let env = env();

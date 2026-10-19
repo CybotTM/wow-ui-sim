@@ -5,6 +5,7 @@
 //! miss those rows on fresh caches, so path-based extraction fails. Keep the
 //! same kind of explicit encoding-key fallback used for core fonts.
 
+#[cfg(feature = "casc")]
 use std::path::{Path, PathBuf};
 
 #[cfg(feature = "casc")]
@@ -87,11 +88,6 @@ pub(crate) fn ensure_known_asset_cached(path: &str, out_path: &Path) -> Option<P
         out_path.display()
     );
     Some(out_path.to_path_buf())
-}
-
-#[cfg(not(feature = "casc"))]
-pub(crate) fn ensure_known_asset_cached(_path: &str, _out_path: &Path) -> Option<PathBuf> {
-    None
 }
 
 fn normalize_path(path: &str) -> String {

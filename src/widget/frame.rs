@@ -433,10 +433,12 @@ pub struct Frame {
     pub editbox_password: bool,
     /// Cursor blink speed in seconds.
     pub editbox_blink_speed: f64,
-    /// History lines.
-    pub editbox_history: Vec<String>,
-    /// Maximum history lines (0 = unlimited).
+    /// History slots: None is unused; Some("") is a stored empty entry.
+    pub editbox_history: Vec<Option<String>>,
+    /// Wrath capacity (zero disables); other profiles retain their existing limit semantics.
     pub editbox_history_max: i32,
+    /// Wrath's shared insertion/navigation index.
+    pub editbox_history_cursor: usize,
     /// Text insets (left, right, top, bottom).
     pub editbox_text_insets: (f32, f32, f32, f32),
     /// Additional distance between rendered text lines, set by `SetSpacing`.
@@ -601,6 +603,7 @@ impl Default for Frame {
     }
 }
 
+#[cfg(any(feature = "gui", feature = "retail-12-0-5"))]
 impl Frame {
     pub(crate) fn cooldown_elapsed_since_start(&self, elapsed_secs: f64) -> f64 {
         let mod_rate = if self.cooldown_mod_rate > 0.0 {
@@ -624,7 +627,9 @@ impl Frame {
         }
         Some(remaining)
     }
+}
 
+impl Frame {
     pub(crate) fn editbox_selection(&self) -> Option<std::ops::Range<usize>> {
         self.editbox_highlight_range
             .and_then(|(start, end)| (start != end).then(|| start as usize..end as usize))

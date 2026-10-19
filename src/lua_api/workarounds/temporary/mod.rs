@@ -8,6 +8,10 @@ pub(crate) mod classic_startup_defaults;
 ))]
 pub(crate) mod legacy_quest_timers;
 
+#[cfg(feature = "client-wrath")]
+pub(crate) mod wrath_attack_action;
+pub(crate) mod wrath_minimap_ping_coordinates;
+
 pub(crate) mod session_exit_defaults;
 #[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_startup_defaults;

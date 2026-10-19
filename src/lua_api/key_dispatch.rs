@@ -12,6 +12,8 @@
 //! - Keybinding dispatch is backed by `SimState.keybindings` (not registry
 //!   tables), via `dispatch_key_binding` in the keybindings module.
 
+mod wrath;
+
 use std::ops::Range;
 
 use crate::Result;
@@ -276,6 +278,9 @@ impl WowLuaEnv {
 
     /// Arrow scripts receive the direction, not the modifier-prefixed binding key.
     fn dispatch_editbox_arrow(&self, fid: u64, arrow: &str) -> Result<()> {
+        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+            return self.dispatch_wrath_editbox_arrow(fid, arrow);
+        }
         let key_val = {
             let mut lua = self.lua.borrow_mut();
             create_string(lua.state_mut(), arrow)
