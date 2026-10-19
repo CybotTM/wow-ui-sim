@@ -92,9 +92,6 @@ impl SimState {
         self.hovered_frame = None;
         self.active_drag_frame = None;
         self.active_slider_thumb_drag_frame = None;
-        self.mouse_position = None;
-        self.mouse_buttons = Default::default();
-        self.pressed_keys.clear();
         self.chat_edit_open_state = None;
         #[cfg(feature = "retail-12-0-7")]
         self.simulated_mouse_inputs.clear();

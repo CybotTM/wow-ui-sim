@@ -41,6 +41,7 @@ Exact native event ordering remains unverified pending native evidence; tests mu
 ## Known gaps (current cycle)
 
 - [ ] Native teardown ordering remains unconfirmed; no native-order or target/focus-preservation assertion is made.
+- [ ] Keyboard/mouse model-state preservation is INFERRED and unasserted pending native lifecycle evidence. Keep `mouse_position`, `mouse_buttons` and `pressed_keys`; discard frame-ID input caches, not these model values.
 - [ ] Full Ellesmere acceptance and standalone `wow-cli` executable reruns remain separate from the bounded Unix-socket client proof.
 
 ### Bounded retail proof — 2026-10-19
