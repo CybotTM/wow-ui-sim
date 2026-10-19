@@ -6,6 +6,8 @@
 
 Both `C_UI.Reload` and legacy `ReloadUI` call the same Rust request producer. Blizzard SharedXML replaces the public global with a wrapper that calls `C_UI.Reload`; wiring only the legacy global does not cover real startup. Lua calls only set `SimState::ui_reload_requested`; repeated calls coalesce. App services requests outside Lua borrows, at update boundaries and between IPC commands. An Exec response captures its output and acknowledges the completed invoking chunk before expensive rebootstrap. IPC transport and queued commands remain process-owned.
 
+Dump-tree, screenshot and lua-errors owners also service requests after startup, script execution and settling callbacks, before observing their output. Headless owners settle rebuilt startup synchronously.
+
 The GUI shortcut records the same request. App discards frame-ID input, hit-testing, quad and pending-texture caches, then restarts yielded GUI startup using current canvas dimensions. Texture manager, font system and glyph atlas allocations survive.
 
 ## Environment retirement

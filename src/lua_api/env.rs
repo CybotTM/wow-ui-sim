@@ -143,6 +143,18 @@ impl WowLuaEnv {
         Ok(true)
     }
 
+    /// One-shot command owners settle a rebuilt UI before observing output.
+    pub fn service_headless_reload(
+        &mut self,
+        saved_vars: &mut Option<crate::saved_variables::SavedVariablesManager>,
+    ) -> Result<bool> {
+        let reloaded = self.service_reload(saved_vars)?;
+        if reloaded {
+            crate::startup::settle_headless_startup(self);
+        }
+        Ok(reloaded)
+    }
+
     fn rebuild_lua_environment(&mut self) -> Result<()> {
         let font_system = self
             .lua

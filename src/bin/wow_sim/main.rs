@@ -214,7 +214,7 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(feature = "gui")]
     let (env, font_system, saved_vars) = init;
     #[cfg(not(feature = "gui"))]
-    let (env, _font_system, _saved_vars) = init;
+    let (env, _font_system, saved_vars) = init;
 
     let dispatch = CommandDispatch {
         command: args.command,
@@ -225,7 +225,6 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
         exec_lua: resolve_exec_lua(&args.exec_lua),
         exec_lua_secure: args.exec_lua_secure,
         saved_stdout,
-        #[cfg(feature = "gui")]
         saved_vars,
         #[cfg(feature = "gui")]
         debug_borders: args.debug_borders,
@@ -468,7 +467,6 @@ struct CommandDispatch {
     exec_lua: Option<String>,
     exec_lua_secure: bool,
     saved_stdout: Option<i32>,
-    #[cfg(feature = "gui")]
     saved_vars: Option<SavedVariablesManager>,
     #[cfg(feature = "gui")]
     debug_borders: bool,
@@ -488,12 +486,12 @@ impl CommandDispatch {
     }
 }
 
-fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
+fn dispatch_command(mut dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
     match dispatch.command {
         Some(Commands::DumpTree { .. }) => dispatch_dump_tree(dispatch),
         #[cfg(feature = "gui")]
         Some(Commands::Screenshot { .. }) => gui_commands::dispatch_screenshot(dispatch),
-        Some(Commands::LuaErrors) => run_lua_errors(&dispatch),
+        Some(Commands::LuaErrors) => run_lua_errors(&mut dispatch),
         Some(Commands::SelfTest {
             max_ticks,
             ref categories,
@@ -521,7 +519,7 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
     Ok(())
 }
 
-fn dispatch_dump_tree(dispatch: CommandDispatch) {
+fn dispatch_dump_tree(mut dispatch: CommandDispatch) {
     let Some(Commands::DumpTree {
         filter,
         filter_key,
@@ -534,7 +532,8 @@ fn dispatch_dump_tree(dispatch: CommandDispatch) {
         unreachable!("dispatch_dump_tree only fires for Commands::DumpTree");
     };
     run_dump_tree(
-        &dispatch.env,
+        &mut dispatch.env,
+        &mut dispatch.saved_vars,
         DumpTreeCommand {
             filter,
             filter_key,
@@ -549,9 +548,10 @@ fn dispatch_dump_tree(dispatch: CommandDispatch) {
     );
 }
 
-fn run_lua_errors(dispatch: &CommandDispatch) {
+fn run_lua_errors(dispatch: &mut CommandDispatch) {
     let clean = wow_ui_sim::lua_errors::run_lua_errors(
-        &dispatch.env,
+        &mut dispatch.env,
+        &mut dispatch.saved_vars,
         dispatch.saved_stdout,
         dispatch.exec_lua.as_deref(),
         dispatch.exec_lua_secure,
@@ -597,15 +597,25 @@ struct DumpTreeCommand<'a> {
     exec_lua_secure: bool,
 }
 
-fn run_dump_tree(env: &WowLuaEnv, command: DumpTreeCommand<'_>) {
+fn run_dump_tree(
+    env: &mut WowLuaEnv,
+    saved_vars: &mut Option<SavedVariablesManager>,
+    command: DumpTreeCommand<'_>,
+) {
     settle_headless_startup(env);
+    env.service_headless_reload(saved_vars)
+        .expect("dump-tree startup ReloadUI failed");
     if let Some(code) = command.exec_lua {
         let code = exec_lua::wrap_headless_exec_lua(code);
         if let Err(e) = env.exec_maybe_secure(&code, command.exec_lua_secure) {
             eprintln!("[exec-lua] error: {e}");
         }
     }
+    env.service_headless_reload(saved_vars)
+        .expect("dump-tree script ReloadUI failed");
     run_extra_update_ticks(env, 3);
+    env.service_headless_reload(saved_vars)
+        .expect("dump-tree timer ReloadUI failed");
     apply_delay(command.delay);
     update_dump_layout_rects(env);
     let state = env.state().borrow();

@@ -23,17 +23,20 @@ Exact native event ordering remains unverified pending native evidence; tests mu
 - `src/c_api/c_ui.rs` — modeled `C_UI.Reload`, also called by Blizzard’s public `ReloadUI` wrapper.
 - `src/lua_api/globals/state_backed_queries.rs` — legacy Lua `ReloadUI` registration sharing the request producer.
 - `src/lua_api/env.rs` — Lua VM construction and handle retirement.
+- `src/bin/wow_sim/main.rs`, `src/bin/wow_sim/gui_commands.rs` — dump/screenshot reload observation boundaries.
 - `src/bin/wow_sim/startup.rs` — real startup/addon-loading pipeline.
 - `src/startup.rs` — startup event dispatch.
 - `src/saved_variables.rs` — declared-variable persistence.
 - `src/iced_app/update.rs` — GUI lifecycle owner and shortcut.
 - `src/iced_app/update_servers.rs` — IPC execution boundary.
 - `src/lua_server.rs` — persistent socket transport.
+- `src/bin/wow_sim/main.rs`, `src/bin/wow_sim/gui_commands.rs`, `src/lua_errors.rs` — one-shot owner service before output.
 
 ## Tests asserting this spec
 
 - `src/iced_app/app_tests.rs` — shortcut sentinel/frame/VM retirement and Lua-requested SavedVariables persistence.
 - `src/lua_server/exec_tests.rs` — public Unix Exec request, reload, subsequent fresh environment and print output.
+- `src/bin/wow_sim/main.rs`, `src/bin/wow_sim/gui_commands.rs` — dump/screenshot reload observation boundaries.
 - `src/bin/wow_sim/startup.rs` — real `--no-addons` startup with declared Blizzard SavedVariables rebuilt through App.
 
 ## Known gaps (current cycle)
