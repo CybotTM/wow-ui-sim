@@ -290,6 +290,57 @@ fn original_button_cancel_then_accept_marked_target() {
 }
 
 #[test]
+fn original_popup_removals_deliver_unit_changes_and_coalesce_log_refresh() {
+    let env = seed_env();
+    exec(&env, r#"
+        ResponseEvents = {}
+        local observer = CreateFrame('Frame')
+        observer:RegisterEvent('UNIT_QUEST_LOG_CHANGED')
+        observer:RegisterEvent('QUEST_LOG_UPDATE')
+        observer:SetScript('OnEvent', function(_, event, ...)
+            ResponseEvents[#ResponseEvents+1] = {event, select('#', ...), ..., GetNumQuestLogEntries()}
+        end)
+        SelectQuestLogEntry(1); SetAbandonQuest(); QuestLogControlPanel_UpdateState()
+        QuestLogFrameAbandonButton:Click()
+        StaticPopup_FindVisible('ABANDON_QUEST').button1:Click()
+        assert(#ResponseEvents == 1 and ResponseEvents[1][1] == 'UNIT_QUEST_LOG_CHANGED', 'unit signal delivered before confirmation returns')
+        assert(ResponseEvents[1][2] == 1 and ResponseEvents[1][3] == 'player' and ResponseEvents[1][4] == 1, 'unit listener sees player and committed membership')
+        SelectQuestLogEntry(1); SetAbandonQuest(); QuestLogControlPanel_UpdateState()
+        QuestLogFrameAbandonButton:Click()
+        StaticPopup_FindVisible('ABANDON_QUEST').button1:Click()
+        assert(#ResponseEvents == 2 and ResponseEvents[2][4] == 0, 'second direct unit signal precedes queued refresh')
+    "#);
+    assert_eq!(dispatch_queued_abandon_events(&env), 1, "coalesced refresh");
+    exec(&env, "assert(#ResponseEvents == 3 and ResponseEvents[3][1] == 'QUEST_LOG_UPDATE' and ResponseEvents[3][2] == 0)");
+}
+
+#[test]
+fn original_selection_renders_supplied_item_reward() {
+    let env = seed_env();
+    env.state().borrow_mut().quest_log_entries.entries[0].reward_items.push(
+        wow_ui_sim::lua_api::state::QuestRewardItem {
+            name: "Wrath supplied reward".into(),
+            texture: "Interface/Icons/INV_Box_01".into(),
+            count: 3,
+            quality: 2,
+            is_usable: true,
+        },
+    );
+    exec(&env, "QuestLog_SetSelection(1)");
+    exec(&env, r#"
+        assert(GetQuestLogRewardSpell() == nil, 'absent spell is nil, never numeric zero')
+        assert(GetQuestLogRewardArenaPoints() == 0 and GetQuestLogRewardTalents() == 0, 'numeric empty rewards')
+        assert(GetNumQuestLogRewardFactions() == 0, 'absent faction rewards')
+        assert(QuestInfoRewardsFrame:IsShown() and QuestInfoItem1:IsShown())
+        assert(QuestInfoItem1Name:GetText() == 'Wrath supplied reward')
+        assert(GetNumQuestLogRewards() == 1)
+        QuestLog_SetSelection(2)
+        assert(GetNumQuestLogRewards() == 0)
+        assert(not QuestInfoRewardsFrame:IsShown(), 'empty row hides rewards')
+    "#);
+}
+
+#[test]
 fn original_popup_confirmation_retains_marked_identity() {
     let env = seed_env();
     exec(
