@@ -431,6 +431,7 @@ fn x2_original_pvp_xml_continues_after_missing_template_include() {
         &[
             "Fonts.xml",
             "FontStyles.xml",
+            "UIPanelTemplates.lua",
             "UIPanelTemplates.xml",
             "UIDropDownMenu.xml",
             "PVPFrameTemplates.xml",
