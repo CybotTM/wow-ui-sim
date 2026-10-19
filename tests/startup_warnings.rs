@@ -386,6 +386,7 @@ fn fire_events_and_timers(env: &WowLuaEnv) {
 /// Fails if a new annotation is introduced (we want to know about it
 /// deliberately, not silently), or if an existing annotation disappears
 /// (so we can track Blizzard's secure-env footprint across patches).
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn test_secure_env_toc_annotations_are_exhaustive() {
     let ui = blizzard_ui_dir();
@@ -429,6 +430,7 @@ fn test_secure_env_toc_annotations_are_exhaustive() {
 /// Every annotated secure file should load without warnings and its
 /// downstream surface should be reachable — a smoke test that our per-file
 /// TOC secureenv dispatch is wired end-to-end.
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn test_secure_env_annotated_files_load_cleanly() {
     test_timeout! {
@@ -557,6 +559,7 @@ fn test_secure_env_annotated_files_load_cleanly() {
     }
 }
 
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn test_restricted_addon_environment_exposes_execution_surface() {
     test_timeout! {

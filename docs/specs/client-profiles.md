@@ -90,6 +90,16 @@ The [historical failing Wrath startup inventory](../baselines/README.md#wrath-lu
 
 Loader source `31ac46b3a`: RED 4/9 TOC tests and 0/1 Carbonite provider/consumer test; targeted offline GREEN 10/10 Forever TOC, 8/8 Forever profile, 12/12 Mists TOC, 3/3 existing Mists screen-selection, and 11/11 Retail TOC tests. These 44 tests cover the selected profiles, not a fresh runtime test of every client or the entire Carbonite addon. Eight pre-existing unrelated lib-test warnings occur under Forever/Mists, also present in RED. Commands, revision scopes, and complete logs are recorded in `/tmp/forever-carbonite-toc-development-ledger.json`; final checks and actual-package startup remain integration-owned.
 
+## Startup warning test applicability
+
+The Wrath cache is the flat historical FrameXML snapshot, not the modern split-addon UI. `tests/startup_warnings.rs` must retain applicable Wrath consumers and compile-exclude only tests whose required consumer is absent.
+
+Verified 2026-10-19 against the actual Wrath cache: 382 source files plus two cache metadata files. `Blizzard_RestrictedAddOnEnvironment` is absent, as are all five files required by `test_secure_env_toc_annotations_are_exhaustive`: `Blizzard_ChatFrameBase/Shared/ChatFrameFiltersSecure.lua`, `Blizzard_CooldownViewer/CooldownViewerSecure.lua`, `Blizzard_RestrictedAddOnEnvironment/RestrictedEnvironment.lua`, and `Blizzard_UnitFrame/Shared/{TargetFrameAuraButton,TargetFrameAuraContainer}.lua`. No Wrath Lua/XML/TOC contains `EssentialCooldownViewer`, `LoadIntoEnvironment`, `GetFrameMetatable`, or `PropagateForbiddenToReferencedFrames`.
+
+Therefore `test_restricted_addon_environment_exposes_execution_surface`, `test_secure_env_annotated_files_load_cleanly`, and `test_secure_env_toc_annotations_are_exhaustive` exclude only `client-wrath`. Historical `FrameXML/SecureTemplates.xml` and `SecureHandlerTemplates.xml` do not establish the modern addon or annotated five-file contract. Other-profile eligibility and all assertions remain unchanged.
+
+Private file listings, pre-change classification and inherited RED stacks on both `d29abccad` and `5a508d443` are retained under `/home/osso/.local/state/wow-ui-sim/handoff/wrath-startup-parent4/`; runtime acceptance is pending.
+
 ## Forever event coverage
 
 - Forever accepts and dispatches `PET_STATS_UPDATE`, `SHARD_TRANSFER`, `SHARD_TRANSFER_IMMINENT`, `GUILD_PREFERRED_PLAY_SETTINGS_UPDATED`, and `HIDDEN_GROUP_BUFFS_CHANGED` through ordinary frame event handlers. Empty and invented event names remain rejected.
