@@ -431,9 +431,15 @@ fn original_popup_confirmation_retains_marked_identity() {
         &env,
         "SelectQuestLogEntry(1); SetAbandonQuest(); QuestLogControlPanel_UpdateState(); QuestLogFrameAbandonButton:Click(); SelectQuestLogEntry(2)",
     );
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.quest_log_entries.entries.reverse();
+        sim.quest_log.reverse();
+    }
+    exec(&env, "assert(GetQuestLogSelection() == 1, 'selection resolves the reordered current log')");
     exec(
         &env,
-        "StaticPopup_FindVisible('ABANDON_QUEST').button1:Click()",
+        "StaticPopup_FindVisible('ABANDON_QUEST').button1:Click()", 
     );
     assert_eq!(env.state().borrow().quest_log, vec![990202]);
     assert_eq!(
