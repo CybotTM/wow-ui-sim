@@ -2413,3 +2413,5 @@ Linked the release acceptance matrix: actual Linux/Docker/native Windows build, 
 ## [2026-10-19] ingest | Disabled checks and profile-aware suites
 
 Linked the [disabled-check contract](../specs/disabled-check-emission.md) for bounded original Retail/Wrath LFG emitted-path proof and the [runner policy](../remote-builds.md#asynchronous-full-suite) for seven-profile selection, receipt boundaries and explicit-SHA binding. Documentation/source inspection only; no new runtime or installed-controller acceptance.
+
+- 2026-10-19: Added Wrath manual-watch state/binding/refresh ownership to the legacy-surface wiki and owning spec; twelve genuine REDs recorded, GREEN pending.

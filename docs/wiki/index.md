@@ -2,6 +2,10 @@
 
 [Legacy surface](systems/lua-api.md#wrath-selected-quest-legacy-surface) links identity-keyed snapshot adapters and the unchanged capability gate. [Objective contract](../specs/wrath-quest-objectives.md#bounded-proof--2026-10-19) records original-consumer RED→GREEN, Wrath preservation, startup/fmt/full-feature check scope and native category/intermediate gaps.
 
+## [2026-10-19] source | Wrath manual watch seam
+
+[Legacy state](systems/lua-api.md#wrath-manual-watch-seam) links ordered ID-backed watches and deferred-refresh pruning. [Contract](../specs/wrath-manual-watch.md) separates original-consumer RED, pending GREEN and unmodeled sorting/cache/progress/automatic watches.
+
 ## [2026-10-19] source/tooling | Disabled checks and profile-aware suites
 
 [Disabled-check contract](../specs/disabled-check-emission.md) owns original Retail/Wrath LFG emitted-path proof and exclusions. [Runner policy](../remote-builds.md#asynchronous-full-suite) owns seven-profile submission, receipt scope and explicit-SHA binding; historical Retail receipts do not establish another profile's acceptance.

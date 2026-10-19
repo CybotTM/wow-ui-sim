@@ -92,6 +92,9 @@ pub struct QuestRewardCurrency {
 #[derive(Debug, Clone, Default)]
 pub struct QuestLogState {
     pub entries: Vec<QuestLogEntry>,
+    /// Build-12340 manual append order; IDs survive row reorder until log refresh.
+    #[cfg(feature = "client-wrath")]
+    pub manual_watch_ids: Vec<i32>,
     pub objective_progress: HashMap<i32, QuestObjectiveProgress>,
     /// Explicit quest-dialog materials; absence leaves the original UI default.
     pub background_materials: HashMap<i32, String>,
@@ -108,6 +111,14 @@ pub struct QuestLogState {
 }
 
 impl QuestLogState {
+    /// Refresh-time cleanup, deliberately not part of the abandon response.
+    #[cfg(feature = "client-wrath")]
+    pub fn prune_manual_watches(&mut self) {
+        let entries = &self.entries;
+        self.manual_watch_ids
+            .retain(|id| entries.iter().any(|entry| entry.quest_id == *id));
+    }
+
     pub fn process_reward_factions(&mut self, quest_id: Option<u32>) {
         self.processed_reward_factions = self
             .entries

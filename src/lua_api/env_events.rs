@@ -259,6 +259,13 @@ impl WowLuaEnv {
     }
 
     fn fire_rooted_event(&self, event: &str, args: &[Val]) -> Result<()> {
+        #[cfg(feature = "client-wrath")]
+        if event == "QUEST_LOG_UPDATE" {
+            self.state
+                .borrow_mut()
+                .quest_log_entries
+                .prune_manual_watches();
+        }
         #[cfg(feature = "retail-12-0-5")]
         crate::c_api::aura_entry::apply_entry_event(self.lua.borrow_mut().state_mut(), event)?;
         #[cfg(feature = "retail-12-0-0")]
