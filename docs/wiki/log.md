@@ -1,3 +1,7 @@
+## [2026-10-19] source | Wrath single-class spellbook views
+
+[System notes](systems/lua-api.md#wrath-single-class-spellbook-projection) link the [owning contract](../specs/wrath-spellbook-tabs.md). Two Wrath-only producers derive tab views and compact-slot mappings from existing membership and publish synchronous updates. Original-consumer/API RED is retained; GREEN and preservation remain pending. Tickless cursor evidence is not native timing proof.
+
 ## [2026-10-19] source | Wrath dialog request/response plumbing
 
 [System notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [staged turn-in contract](../specs/wrath-quest-turn-in.md#staged-producer-proof): shared original-progress feature-absence RED, single concrete giver and executed A3 12-control/18-boundary gate, followed by complete bounded B GREEN, Wrath preservation and final zero-warning gates. Exact proof is tracked by the contract; inferred finish ordering is not a native fact.
