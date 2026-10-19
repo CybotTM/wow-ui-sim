@@ -48,6 +48,25 @@ pub(crate) fn load_profiled_chunk<L: LuaApiMut>(
     result
 }
 
+std::thread_local! {
+    static PROFILE_PHASE: std::cell::Cell<&'static str> = const { std::cell::Cell::new("other") };
+}
+
+pub(crate) struct GeneratedChunkScope(&'static str);
+
+impl GeneratedChunkScope {
+    pub(crate) fn enter(phase: &'static str) -> Option<Self> {
+        generated_chunk_profile_start()
+            .map(|_| Self(PROFILE_PHASE.with(|current| current.replace(phase))))
+    }
+}
+
+impl Drop for GeneratedChunkScope {
+    fn drop(&mut self) {
+        PROFILE_PHASE.with(|current| current.set(self.0));
+    }
+}
+
 pub(crate) fn generated_chunk_profile_start() -> Option<std::time::Instant> {
     static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     ENABLED
@@ -64,8 +83,9 @@ pub(crate) fn profile_generated_chunk(
 ) {
     if let Some(started) = started {
         crate::logging::eprintln_elapsed(&format!(
-            "[generated-chunk] tag={tag} key={hash:016x} bytes={bytes} mode={mode} us={}",
-            started.elapsed().as_micros()
+            "[generated-chunk] tag={tag} key={hash:016x} bytes={bytes} mode={mode} us={} phase={}",
+            started.elapsed().as_micros(),
+            PROFILE_PHASE.with(|current| current.get())
         ));
     }
 }

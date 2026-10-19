@@ -476,6 +476,7 @@ fn fire_world_enter_sequence(env: &WowLuaEnv) {
 
     log_with_timestamp(env, "[Startup] Firing PLAYER_ENTERING_WORLD");
     let reloaded = env.state().borrow().ui_reloaded;
+    let _profile = crate::loader::chunk_cache::GeneratedChunkScope::enter("PLAYER_ENTERING_WORLD");
     if let Err(e) = env.fire_event_with_args(
         "PLAYER_ENTERING_WORLD",
         &[Val::Bool(!reloaded), Val::Bool(reloaded)],
