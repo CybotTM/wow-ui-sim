@@ -13,7 +13,20 @@ mod saved_variables;
 #[path = "common/wrath_reload_startup.rs"]
 mod startup;
 
+#[path = "common/wrath_reload_preservation.rs"]
+mod preservation;
+
 use wow_ui_sim::lua_api::state::AddonInfo;
+
+#[test]
+fn original_world_map_restores_only_eligible_named_placements() {
+    preservation::assert_placed_frames();
+}
+
+#[test]
+fn original_mirror_bars_cancel_but_totems_and_player_survive() {
+    preservation::assert_selective_timers();
+}
 
 #[test]
 fn original_ui_parent_cached_readiness_and_argless_wrath_entry() {
