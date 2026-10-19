@@ -12,7 +12,7 @@
 
 ### File-backed client state
 
-- [ ] Restore the file-backed EditMode cache using the initial layout name and config, without re-importing ServerSnapshot. The original EditMode consumer must select the same active layout after ReloadUI. Native reread timing/ordering is INFERRED and unasserted.
+- [x] Restore the file-backed EditMode cache using the initial layout name and config, without re-importing ServerSnapshot. The original EditMode consumer must select the same active layout after ReloadUI. Native reread timing/ordering is INFERRED and unasserted.
 
 Exact native event ordering remains unverified pending native evidence; tests must not invent teardown events. Existing simulator startup order is documented in [event system](../event-system.md#startup-event-sequence). Reload world-entry flags must distinguish reload from initial login.
 
@@ -50,14 +50,16 @@ Exact native event ordering remains unverified pending native evidence; tests mu
 
 ### Bounded retail proof — 2026-10-19
 
-Source `bbc3f5d7c`: 64 library/App/socket/persistence tests and four binary owner/startup tests pass, zero ignored. Historical RED: four original freshness assertions on `f254e22ee`; dump/screenshot owner assertions on `6987f6145`; scalar/import-cap assertion on `5703ecc56`. Private receipts are named `red-{lib,startup}-receipt.json`, `owner-red-{lib,startup}-receipt.json`, `persistence-red2-lib-receipt.json`, and `green-final-{lib,startup}-receipt.json`.
+69 logical cases pass, zero ignored: 64 library/App/socket/persistence cases at `e23196863` and five binary owner/startup cases at `79f52bb3f`. Only binary startup code and docs changed between these source points; the library proof remains valid. The EditMode case's isolated child is the same logical case, not an additional one.
+
+Historical RED: four original freshness assertions on `f254e22ee`; dump/screenshot owner assertions on `6987f6145`; scalar/import-cap assertion on `5703ecc56`; original EditMode consumer assertion on `00f8dc298`. Private RED receipts: `red-{lib,startup}-receipt.json`, `owner-red-{lib,startup}-receipt.json`, `persistence-red2-lib-receipt.json`, `editmode-red-startup-receipt.json`. Current GREEN receipts: `input-green-lib-receipt.json` and `editmode-green-startup-receipt.json`.
 
 | Capability | Behavioral evidence | Limit |
 | --- | --- | --- |
 | Deferred request and IPC isolation | Invoking chunk returns; already-queued Exec and real subsequent socket connection see fresh globals; print capture stays isolated | Acknowledgement is not startup-completion notification |
 | VM/UI retirement | Old VM weak handle expires; old globals/frames/timer callbacks disappear; timer-originated request rebuilds | Native teardown sequence unconfirmed |
 | Persistence | Declared Blizzard table survives real addon re-registration; account/character scalars and larger local tables survive; stale WTF does not win or change | External import cap remains intact |
-| Startup/output owners | Real cached Blizzard startup loads twice; dump, screenshot preparation and lua-errors observe fresh environment | No full-addon acceptance claim |
+| Startup/output owners | Real cached Blizzard startup loads twice; original EditMode consumer retains the non-default file-backed layout; dump, screenshot preparation and lua-errors observe fresh environment | Native cache-reread timing/order inferred; no full-addon acceptance claim |
 | Preservation | Existing yielded startup/texture tests pass; modeled level, zone, party count and font/texture allocations survive | No native session-parity claim |
 
 Both GREEN runtimes use child-only XDG directories with copied current CVars; original CVar hash/stat remain unchanged. `cargo fmt --check` passes. Full-default retail `cargo check` is pending capacity.

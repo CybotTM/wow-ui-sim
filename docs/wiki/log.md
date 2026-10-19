@@ -1,3 +1,7 @@
+## [2026-10-19] evidence | ReloadUI client-cache continuity
+
+[Contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) combines 64 unchanged library cases at `e23196863` with five binary cases at `79f52bb3f`. The original EditMode consumer fails before the cache-reread producer and retains its non-default file-backed layout afterward. Native reread timing/order and keyboard/mouse model persistence remain INFERRED and unasserted.
+
 ## [2026-10-19] evidence | ReloadUI bounded retail GREEN
 
 [Contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) records 64 library/App/socket/persistence and four startup/output-owner passes on `bbc3f5d7c`, historical assertion RED and unchanged original-CVar guards. [Lifecycle](systems/reload-ui.md) includes Blizzard’s `C_UI.Reload` route. Native teardown ordering and full Ellesmere acceptance remain separate.

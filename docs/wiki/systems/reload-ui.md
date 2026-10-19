@@ -24,15 +24,14 @@ Existing simulator reload world-entry flags are reused; native teardown order re
 
 ## Sources
 
-- [Environment](../../../src/lua_api/env.rs) — request service and VM retirement.
+- [Request producer](../../../src/c_api/c_ui.rs) and [environment](../../../src/lua_api/env.rs) — deferred request and VM retirement.
 - [UI-owned state](../../../src/lua_api/state/ui_reload.rs) — reset boundary.
 - [Launch bootstrap](../../../src/bin/wow_sim/startup.rs) — real addon reload loader.
-- [App](../../../src/iced_app/app.rs) — cache reset and startup restart.
-- [IPC boundary](../../../src/iced_app/update_servers.rs) — response-before-rebuild sequencing.
+- [App](../../../src/iced_app/app.rs) and [IPC boundary](../../../src/iced_app/update_servers.rs) — cache/startup reset and response-before-rebuild sequencing.
 - [Persistence](../../../src/saved_variables.rs) — SavedVariables registration and storage.
 
 ## See Also
 
 - [[event-system]] — existing startup dispatch.
-- [[addon-loading-pipeline]] — addon graph reconstruction.
+- [[addon-loading]] — addon graph reconstruction.
 - [[texture-source-resolution-cache]] — generation invalidation without resource replacement.

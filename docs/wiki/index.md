@@ -1,6 +1,6 @@
 ## [2026-10-19] system | Deferred fresh-environment ReloadUI
 
-[Reload lifecycle](systems/reload-ui.md) documents owner-serviced VM retirement, retained session state, SavedVariables readback and IPC boundaries. [Contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) records 68 targeted retail passes, historical behavioral RED and unconfirmed native event order.
+[Reload lifecycle](systems/reload-ui.md) documents owner-serviced VM retirement, retained session state, SavedVariables readback and IPC boundaries. [Contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) records 69 targeted retail passes, original EditMode consumer continuity, historical behavioral RED and unconfirmed native event order.
 
 ## [2026-10-19] source/tooling | Disabled checks and profile-aware suites
 
