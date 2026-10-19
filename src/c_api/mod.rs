@@ -266,6 +266,7 @@ pub mod c_toy_box_info;
 pub mod c_transmog_outfit_info;
 #[cfg(feature = "retail-12-0-0")]
 pub mod c_transmog_sets;
+pub(crate) mod c_ui;
 pub mod c_ui_file_asset;
 #[cfg(feature = "retail-12-0-5")]
 pub(crate) mod c_unit_aura_altered_form;
@@ -428,6 +429,7 @@ fn register_specialization_and_model_tables(state: &mut LuaState) -> LuaResult<(
 fn register_glue_and_display_tables(state: &mut LuaState) -> LuaResult<()> {
     c_glue::register_c_glue(state)?;
     c_login::register_c_login(state)?;
+    c_ui::register(state)?;
     permanent_shims::c_ui::register_c_ui(state)
 }
 

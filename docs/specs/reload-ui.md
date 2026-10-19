@@ -20,7 +20,8 @@ Exact native event ordering remains unverified pending native evidence; tests mu
 
 ## Implementation inventory
 
-- `src/lua_api/globals/state_backed_queries.rs` — public Lua `ReloadUI` registration.
+- `src/c_api/c_ui.rs` — modeled `C_UI.Reload`, also called by Blizzard’s public `ReloadUI` wrapper.
+- `src/lua_api/globals/state_backed_queries.rs` — legacy Lua `ReloadUI` registration sharing the request producer.
 - `src/lua_api/env.rs` — Lua VM construction and handle retirement.
 - `src/bin/wow_sim/startup.rs` — real startup/addon-loading pipeline.
 - `src/startup.rs` — startup event dispatch.
