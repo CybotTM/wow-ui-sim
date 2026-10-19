@@ -2,12 +2,21 @@
 use super::*;
 use clap::Parser;
 
+#[derive(Debug, PartialEq)]
+struct PayloadObservation {
+    name: String,
+    argument_count: i32,
+    value_type: String,
+    contains_bindings: bool,
+    displayed_label: bool,
+}
+
 fn observe(env: &WowLuaEnv, target: &str, label: &str) {
     env.exec(&format!(
         r#"
         ReloadPayloadTarget = {target:?}
-        ReloadPayloadCount = nil
-        ReloadPayloadType = nil
+        ReloadPayloadCount = -1
+        ReloadPayloadType = '<not-seen>'
         ReloadPayloadBindings = nil
         BINDING_HEADER_OTHER = {label:?}
         if not ReloadPayloadObserver then
@@ -27,29 +36,26 @@ fn observe(env: &WowLuaEnv, target: &str, label: &str) {
     .unwrap();
 }
 
-fn assert_payload_and_original_label(env: &WowLuaEnv, label: &str, contains_bindings: bool) {
-    assert_eq!(env.eval::<i32>("return ReloadPayloadCount").unwrap(), 2);
-    assert_eq!(
-        env.eval::<String>("return ReloadPayloadType").unwrap(),
-        "boolean"
-    );
-    assert_eq!(
-        env.eval::<bool>("return ReloadPayloadBindings").unwrap(),
-        contains_bindings
-    );
+fn read_payload_and_original_label(env: &WowLuaEnv, name: &str, label: &str) -> PayloadObservation {
     env.exec("SettingsPanel:Hide(); Settings.OpenToCategory(Settings.KEYBINDINGS_CATEGORY_ID)")
         .unwrap();
-    let state = env.state().borrow();
-    let has_label = state.widgets.iter_ids().any(|id| {
-        state
-            .widgets
-            .get(id)
-            .is_some_and(|frame| frame.text.as_deref() == Some(label))
-    });
-    assert_eq!(
-        has_label, contains_bindings,
-        "unchanged Settings consumer regenerates the displayed binding section only for binding-bearing addons"
-    );
+    let displayed_label = {
+        let state = env.state().borrow();
+        let found = state.widgets.iter_ids().any(|id| {
+            state
+                .widgets
+                .get(id)
+                .is_some_and(|frame| frame.text.as_deref() == Some(label))
+        });
+        found
+    };
+    PayloadObservation {
+        name: name.into(),
+        argument_count: env.eval("return ReloadPayloadCount").unwrap(),
+        value_type: env.eval("return ReloadPayloadType").unwrap(),
+        contains_bindings: env.eval("return ReloadPayloadBindings == true").unwrap(),
+        displayed_label,
+    }
 }
 
 #[test]
@@ -60,20 +66,25 @@ fn reload_real_addon_payload_retains_original_settings_consumer() {
     wow_ui_sim::startup::fire_startup_events(&env);
     env.exec("Settings.OpenToCategory(Settings.KEYBINDINGS_CATEGORY_ID)")
         .unwrap();
-
-    observe(&env, "Blizzard_PingUI", "Reload startup binding section");
-    fire_addon_loaded(&env, "Blizzard_PingUI");
-    assert_payload_and_original_label(&env, "Reload startup binding section", true);
-
-    observe(&env, "Blizzard_Colors", "Reload startup no-binding section");
-    fire_addon_loaded(&env, "Blizzard_Colors");
-    assert_payload_and_original_label(&env, "Reload startup no-binding section", false);
+    let mut actual = Vec::new();
+    for (name, label) in [
+        ("Blizzard_PingUI", "Reload startup binding section"),
+        ("Blizzard_Colors", "Reload startup no-binding section"),
+    ] {
+        observe(&env, name, label);
+        fire_addon_loaded(&env, name);
+        actual.push(read_payload_and_original_label(&env, name, label));
+    }
 
     let fixture = tempfile::tempdir().unwrap();
     for (name, with_bindings) in [("ReloadBindingsLoD", true), ("ReloadNoBindingsLoD", false)] {
         let dir = fixture.path().join(name);
         std::fs::create_dir(&dir).unwrap();
-        std::fs::write(dir.join(format!("{name}.toc")), "## LoadOnDemand: 1\n").unwrap();
+        let toc = format!(
+            "## Interface: {}\n## LoadOnDemand: 1\n",
+            wow_ui_sim::toc::ACTIVE_INTERFACE_VERSION
+        );
+        std::fs::write(dir.join(format!("{name}.toc")), toc).unwrap();
         if with_bindings {
             let root = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
             std::fs::copy(
@@ -87,17 +98,32 @@ fn reload_real_addon_payload_retains_original_settings_consumer() {
         .borrow_mut()
         .addon_base_paths
         .push(fixture.path().to_path_buf());
-    for (name, label, expected) in [
-        ("ReloadBindingsLoD", "Reload LoD binding section", true),
-        (
-            "ReloadNoBindingsLoD",
-            "Reload LoD no-binding section",
-            false,
-        ),
+    for (name, label) in [
+        ("ReloadBindingsLoD", "Reload LoD binding section"),
+        ("ReloadNoBindingsLoD", "Reload LoD no-binding section"),
     ] {
         observe(&env, name, label);
         env.exec(&format!("assert(C_AddOns.LoadAddOn({name:?}))"))
             .unwrap();
-        assert_payload_and_original_label(&env, label, expected);
+        actual.push(read_payload_and_original_label(&env, name, label));
     }
+    let expected: Vec<_> = [
+        ("Blizzard_PingUI", true),
+        ("Blizzard_Colors", false),
+        ("ReloadBindingsLoD", true),
+        ("ReloadNoBindingsLoD", false),
+    ]
+    .into_iter()
+    .map(|(name, contains_bindings)| PayloadObservation {
+        name: name.into(),
+        argument_count: 2,
+        value_type: "boolean".into(),
+        contains_bindings,
+        displayed_label: contains_bindings,
+    })
+    .collect();
+    assert_eq!(
+        actual, expected,
+        "both real-addon emitters and the original Settings consumer"
+    );
 }
