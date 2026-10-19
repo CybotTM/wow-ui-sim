@@ -2393,3 +2393,7 @@ Linked Retail native/Docker packaging and non-publishing rehearsal from client p
 ## 2026-10-18 — Release ICU local acceptance
 
 Linked the release acceptance matrix: actual Linux/Docker/native Windows build, loader and zero-error startup proofs; Windows cache refresh and retained backup; macOS CI remains pending.
+
+## 2026-10-18 — Wrath widget state and stored-size correction
+
+Linked optional EditBox history, direct arrows, byte-mask presentation and MessageFrame row timers from [[widget-system]] to their owning contract. Added [[wrath-tooltip-stored-size]]: the queried-size oracle confused parent-fill geometry with retained dimensions; the unsupported loader change was reverted, and cached dependency repair remains distinct. Source/reconstructed authority and old-library fixture controls are not current-head/native/preservation acceptance.

@@ -1,3 +1,7 @@
+## [2026-10-18] source | Wrath widget state and tooltip size oracle
+
+[Widget state](systems/widget-system.md#wrath-editbox-history-and-presentation) links optional history slots, direct arrows, byte-mask presentation and row timers to the [owning contract](../specs/wrath-widget-labels.md). [Tooltip investigation](investigations/wrath-tooltip-stored-size.md) records the false queried-size oracle, native-correct XML parent fill and separate cached dependency failure. Producer documentation only; current-head/preservation acceptance remains separate.
+
 ## [2026-10-18] packaging | Release ICU and Docker publication
 
 [Profile packaging notes](systems/client-profiles.md#release-icu-packaging) link the [release contract](../release-icu.md): explicit native ICU provisioning, relocatable macOS ICU closure, manifest-checked Docker UI/runtime and non-publishing manual rehearsal. The [local matrix](../release-icu.md#local-acceptance--2026-10-18) records Linux/Docker/native Windows build/link/startup acceptance and pending macOS CI; synthetic helper tests remain separate.
