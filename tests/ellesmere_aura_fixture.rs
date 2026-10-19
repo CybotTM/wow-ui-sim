@@ -36,12 +36,22 @@ fn settle(env: &WowLuaEnv) {
     }
 }
 
+fn assert_containers(env: &WowLuaEnv, keyed_shown: usize) {
+    let array = env.exec("FixtureAssertShown(FixtureArray, 0, 'array')");
+    let keyed = env.exec(&format!(
+        "FixtureAssertShown(FixtureKeyed, {keyed_shown}, 'keyed')"
+    ));
+    assert!(
+        array.is_ok() && keyed.is_ok(),
+        "array: {array:?}; keyed: {keyed:?}"
+    );
+}
+
 fn assert_admin_aura_lifecycle(env: &WowLuaEnv) {
     env.exec(include_str!("fixtures/ellesmere_aura_fixture.lua"))
         .unwrap();
     settle(env);
-    env.exec("FixtureAssertShown(FixtureArray, 0); FixtureAssertShown(FixtureKeyed, 0)")
-        .unwrap();
+    assert_containers(env, 0);
     env.exec(
         r#"
         A_Admin.AddBuff(19750, 'CURRENT-PACKAGE helpful aura', 135907, 30, 3)
@@ -53,14 +63,12 @@ fn assert_admin_aura_lifecycle(env: &WowLuaEnv) {
     )
     .unwrap();
     settle(env);
-    env.exec("FixtureAssertShown(FixtureArray, 0); FixtureAssertShown(FixtureKeyed, 1)")
-        .unwrap();
+    assert_containers(env, 1);
     env.exec("A_Admin.RemoveBuff(19750)").unwrap();
     settle(env);
+    assert_containers(env, 0);
     env.exec(
         r#"
-        FixtureAssertShown(FixtureArray, 0)
-        FixtureAssertShown(FixtureKeyed, 0)
         assert(C_UnitAuras.GetPlayerAuraBySpellID(19750) == nil)
         assert(C_UnitAuras.GetPlayerAuraBySpellID(19751) ~= nil)
         "#,
