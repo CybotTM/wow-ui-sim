@@ -46,14 +46,45 @@ fn initialize_and_load_env(args: &Args, screen: ScreenKind, mut env: WowLuaEnv) 
     );
 
     restart_gc_after_bootstrap(&env);
+    install_reload_loader(
+        &mut env,
+        args,
+        screen,
+        saved_vars.as_ref().or(edit_mode_cache_vars.as_ref()),
+        snapshot_edit_mode_layout,
+    );
+    Ok((env, font_system, saved_vars))
+}
+
+fn install_reload_loader(
+    env: &mut WowLuaEnv,
+    args: &Args,
+    screen: ScreenKind,
+    cache_source: Option<&SavedVariablesManager>,
+    initial_layout_name: Option<String>,
+) {
+    let cache_config = cache_source
+        .and_then(SavedVariablesManager::wtf_config)
+        .cloned();
+    let edit_mode_cache = cache_config.map(|config| {
+        let mut cache = SavedVariablesManager::new();
+        cache.set_wtf_config(config);
+        cache
+    });
     let reload_args = args.clone();
     env.set_reload_loader(move |env, saved_vars| {
         env.gc_stop();
-        load_startup_addons(&reload_args, screen, env, saved_vars, None, None);
+        load_startup_addons(
+            &reload_args,
+            screen,
+            env,
+            saved_vars,
+            edit_mode_cache.as_ref(),
+            initial_layout_name.as_deref(),
+        );
         restart_gc_after_bootstrap(env);
         Ok(())
     });
-    Ok((env, font_system, saved_vars))
 }
 
 #[cfg(test)]
@@ -377,7 +408,7 @@ fn load_startup_addons(
     edit_mode_cache_vars: Option<&SavedVariablesManager>,
     snapshot_edit_mode_layout: Option<&str>,
 ) {
-    load_initial_snapshot_and_edit_mode(
+    load_edit_mode_cache_and_initial_snapshot(
         env,
         saved_vars,
         edit_mode_cache_vars,
@@ -406,23 +437,22 @@ fn load_startup_addons(
     apply_post_load_workarounds(env);
 }
 
-fn load_initial_snapshot_and_edit_mode(
+fn load_edit_mode_cache_and_initial_snapshot(
     env: &WowLuaEnv,
     saved_vars: &mut Option<SavedVariablesManager>,
     edit_mode_cache_vars: Option<&SavedVariablesManager>,
     snapshot_edit_mode_layout: Option<&str>,
 ) {
-    if env.state().borrow().ui_reloaded {
-        return;
-    }
     startup_trace::time_load_step("load edit mode cache", || {
         addon_loading::load_edit_mode_cache(
             env,
-            saved_vars.as_ref().or(edit_mode_cache_vars),
+            edit_mode_cache_vars.or(saved_vars.as_ref()),
             snapshot_edit_mode_layout,
         )
     });
-    load_server_snapshot_state(env, saved_vars);
+    if !env.state().borrow().ui_reloaded {
+        load_server_snapshot_state(env, saved_vars);
+    }
 }
 
 fn load_server_snapshot_state(env: &WowLuaEnv, saved_vars: &mut Option<SavedVariablesManager>) {

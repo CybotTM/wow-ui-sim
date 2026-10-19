@@ -16,7 +16,7 @@ The GUI shortcut records the same request. App discards frame-ID input, hit-test
 
 The old VM's self-reference and font handle are cleared before it drops. A fresh VM receives fresh app data, registries, API registration, templates and built-in frames. `SimState::discard_ui_environment` discards UI callbacks, animations, frames and addon runtime records without replacing player/world/party/session data. Selected target/focus and physical-input model fields (`mouse_position`, `mouse_buttons`, `pressed_keys`) are retained. Native keyboard/mouse persistence is INFERRED and unasserted pending lifecycle evidence; old frame-ID input caches are still discarded.
 
-The launch pipeline installs a reload loader on the environment. It reuses Blizzard/third-party addon loading and post-load bootstrap, preserving original launch options. ServerSnapshot character/enable imports and initial party reseeding are skipped on reload. No addon-specific sentinel cleanup exists.
+The launch pipeline installs a reload loader on the environment. It reuses Blizzard/third-party addon loading and post-load bootstrap, preserving original launch options. The initial EditMode layout name and a copied WTF config seed a clean cache reader with no old `Val` handles; the file-backed cache is reread for the fresh VM even when Lua SavedVariables are disabled. Native reread timing/ordering is INFERRED and unasserted. ServerSnapshot character/enable imports and initial party reseeding are still skipped on reload. No addon-specific sentinel cleanup exists.
 
 ## Lifecycle evidence and failure
 
