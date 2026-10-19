@@ -452,12 +452,6 @@ if rawget(_G, "GetQuestLogSelection") == nil then
   end
 end
 
-if rawget(_G, "IsAttackAction") == nil then
-  function IsAttackAction(slot)
-    return false
-  end
-end
-
 if rawget(_G, "IsConsumableAction") == nil then
   function IsConsumableAction(slot)
     return false

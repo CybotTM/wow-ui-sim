@@ -83,6 +83,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     register_pet_slot_methods(state, table_ref)?;
     register_stateful_methods(state, table_ref)?;
     register_slot_mutation_methods(state, table_ref)?;
+    #[cfg(feature = "client-wrath")]
+    LuaApiMut::register_function(
+        state,
+        "IsAttackAction",
+        crate::lua_api::workarounds::temporary::wrath_attack_action::query_non_attack,
+    )?;
     // These approved legacy consumers share the namespaced state-backed query.
     if matches!(
         crate::client_profile::ACTIVE,
