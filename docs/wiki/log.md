@@ -1,6 +1,6 @@
 ## [2026-10-18] source | Wrath selected quest legacy surface
 
-[System notes](systems/lua-api.md#wrath-selected-quest-legacy-surface) document selected rich-row adapters, shared prepared faction output and separate player daily fields. [Contract](../specs/wrath-quest-abandon.md) owns original-popup/selection RED, source-derived limits, pending GREEN/preservation and provisional server-response sequencing; no native or whole W1 completion claim.
+[System notes](systems/lua-api.md#wrath-selected-quest-legacy-surface) document selected rich-row adapters, shared prepared faction output and separate player daily fields. [Contract](../specs/wrath-quest-abandon.md) owns original-popup/selection RED→bounded GREEN, source-derived limits, master-classified Forever gaps and provisional server-response sequencing; no native or whole W1 completion claim.
 
 ## [2026-10-18] investigation | Original sizing and AsyncRequest proof
 
