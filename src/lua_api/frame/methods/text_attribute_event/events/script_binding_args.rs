@@ -7,7 +7,7 @@ use crate::lua_api::taint::{clear_active_stack_taint, restore_active_stack_taint
 use crate::lua_bridge::stack_val;
 use rilua::vm::closure::{Closure, RustClosure};
 use rilua::vm::state::LuaState;
-use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
+use rilua::{LuaResult, Val, runtime_error};
 
 pub(super) fn optional_script_binding_from_stack(
     state: &mut LuaState,
@@ -46,7 +46,8 @@ pub(super) fn build_hooked_script(
     old: Val,
     hook: Val,
 ) -> LuaResult<Val> {
-    let func = state.load(
+    let func = crate::loader::chunk_cache::load_profiled_chunk(
+        state,
         r#"
         local old, hook, frameId, layout, allowed = ...
         if old == nil then
@@ -57,6 +58,7 @@ pub(super) fn build_hooked_script(
             if allowed(frameId, layout, hook) then hook(...) end
         end
     "#,
+        "hook-script-factory",
     )?;
     let gate = hook_gate(state);
     let args = [
