@@ -36,6 +36,7 @@ Wrath's legacy spellbook globals expose full and compact views of existing `SimS
 
 ## Tests asserting this spec
 
+- `wrath_spellbook.rs::tests` — actual ordered/compact spell IDs and authenticated ASCII rank examples (execution pending); complements public slot-number tests, which do not expose selected IDs.
 - `tests/wrath_spellbook_tabinfo.rs` — unchanged original startup and SpellBook lifecycle.
 - `tests/wrath_spellbook_boundaries.rs` — approved rank-zero/missing-record policy, one-tab consistency and on-demand membership changes; execution pending.
 - `tests/wrath_spellbook_contract.rs` — focused tab binding, compact-slot mapping and synchronous UpdateSpells contracts. Ranked fixture Ebon Crown IDs 1248891/1248890/1248888 have ascending ranks 1/2/4 but descending IDs.
@@ -47,7 +48,7 @@ Original lifecycle RED ran at exact f71f7ce1b; API3 RED used fixture18089b84e ag
 
 ## Known gaps (current cycle)
 
-- [ ] Boundary coverage b4ff67e19 and seven-profile preservation/stock Wrath CLI execution pending; producer4/4 GREEN does not establish those gates.
+- [ ] Focused model unit execution and remaining six-profile preservation pending. Wrath existing API17+profession8+boundary1 controls passed, and stock CLI output is literal[].
 - [ ] Independent cursor follow-up OPEN and excluded from this slice. Final authenticated Q-CUR1 (`cursor-onshow-ordering-12340.md` in laptop handoff answers) supports only conditional deferred dirty flushing, not synchronous SetText/OnShow cursor callbacks. Historical fixture4d20f7625 and observer called DebugTools updates back to back with NO intervening ticks; both reached original :365 nil cursorOffset, but do not prove a native violation. That unsupported synchronous assertion was removed from the shippable suite without an ignore; exact source/trace remain in handoff. Follow-up needs realistic intervening ticks and original-consumer deferred-flush RED before any producer fix.
 - [ ] Stock Wrath startup [] and existing other-profile spellbook preservation after integration.
 

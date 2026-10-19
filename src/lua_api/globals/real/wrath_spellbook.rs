@@ -165,3 +165,43 @@ fn parse_rank(subtext: &str) -> i32 {
     }
     rank
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{compact_slots, ordered_known_spells, parse_rank};
+    use crate::lua_api::state::SimState;
+
+    #[test]
+    fn ordered_and_compact_views_choose_rank_not_spell_id() {
+        let mut state = SimState::default();
+        state.known_spells = [1248891, 1248890, 1248888, 6603].into();
+        let full = ordered_known_spells(&state);
+        assert_eq!(full, [6603, 1248891, 1248890, 1248888]);
+        let compact: Vec<_> = compact_slots(&full)
+            .into_iter()
+            .map(|slot| full[slot])
+            .collect();
+        assert_eq!(compact, [6603, 1248888]);
+    }
+
+    #[test]
+    fn rank_parser_matches_authenticated_ascii_runs() {
+        for (subtext, expected) in [
+            ("Rank 2/4", 2),
+            ("Rank 0/4", 4),
+            ("abc00def02/4", 2),
+            ("Rank 24", 24),
+            ("2 Rank 4", 2),
+            ("Rank -2", 2),
+            ("+2", 2),
+            ("2-4", 2),
+            ("0002", 2),
+            ("000", 0),
+            ("no digits", 0),
+            ("", 0),
+            ("２", 0),
+        ] {
+            assert_eq!(parse_rank(subtext), expected, "{subtext:?}");
+        }
+    }
+}
