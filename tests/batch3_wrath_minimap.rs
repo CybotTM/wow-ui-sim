@@ -135,6 +135,23 @@ fn m2_local_center_ping_reaches_original_consumer_twice_without_group() {
 }
 
 #[test]
+fn m2_nonzero_view_input_still_publishes_local_unit_event() {
+    let env = original_minimap();
+    env.exec("assert(UnitExists('player')); Minimap:PingLocation(17,-23)")
+        .unwrap();
+    env.fire_on_update(0.0).unwrap();
+    env.exec(
+        r#"
+        assert(#Batch3Pings==1,'every player-present ping publishes locally')
+        assert(Batch3Pings[1][1]=='player')
+        -- Nonzero x/y are intentionally unasserted: transform/normalization missing.
+    "#,
+    )
+    .unwrap();
+    assert!(env.state().borrow().lua_errors.is_empty());
+}
+
+#[test]
 fn m2_missing_pair_uses_player_center_not_one_supplied_coordinate() {
     let env = original_minimap();
     env.exec(
