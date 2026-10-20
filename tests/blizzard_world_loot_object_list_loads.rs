@@ -206,6 +206,7 @@ fn toc_raw_bytes_pin_directives() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn directory_holds_three_entries() {
     let entries = std::fs::read_dir(world_loot_dir())
@@ -217,6 +218,7 @@ fn directory_holds_three_entries() {
          no Localization.lua — the addon emits zero strings of its own, every label comes from \
          the live spell info via C_Spell.GetSpellInfo or the widget visualization info)"
     );
+}
 }
 
 #[test]
