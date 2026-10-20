@@ -1,3 +1,4 @@
+#[cfg(feature = "casc")]
 use self::preload::should_preload_talent_atlas_key;
 use super::*;
 use image_blp::types::direct::dxtn::{BlpDxtn, DxtnFormat, DxtnImage};
@@ -637,6 +638,7 @@ fn test_preloaded_talent_textures_cover_active_class_atlas_entries() {
 }
 
 /// Collect talent icon paths that should be cached but aren't.
+#[cfg(feature = "casc")]
 fn find_uncached_talent_icons(mgr: &TextureManager, tree_id: u32) -> Vec<String> {
     use crate::traits::{TRAIT_DEFINITION_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB, TRAIT_TREE_DB};
     let tree = TRAIT_TREE_DB.get(&tree_id).expect("tree exists");
@@ -669,6 +671,7 @@ fn find_uncached_talent_icons(mgr: &TextureManager, tree_id: u32) -> Vec<String>
     missing
 }
 
+#[cfg(feature = "casc")]
 fn check_icon_cached(mgr: &TextureManager, missing: &mut Vec<String>, node_id: u32, icon_id: u32) {
     let Some(path) = crate::manifest_interface_data::get_texture_path(icon_id) else {
         missing.push(format!(

@@ -27,31 +27,44 @@ pub fn load_xml_file(
     let _xml_load_addon_guard = super::enter_xml_load_addon_context(env);
     let xml_start = Instant::now();
     let ui = parse_xml_file(path).map_err(|e| {
-        let _ = env.with_state(|state| {
-            call_error_handler_state(state, &e.to_string());
-            Ok::<(), crate::Error>(())
-        });
+        report_xml_error(env, &e.to_string());
         LoadError::Xml(e)
     })?;
     timing.xml_parse_time += xml_start.elapsed();
 
     let xml_dir = path.parent().unwrap_or(Path::new("."));
+    load_xml_elements(env, &ui.elements, xml_dir, ctx, timing)
+}
+
+fn load_xml_elements(
+    env: &LoaderEnv<'_>,
+    elements: &[XmlElement],
+    xml_dir: &Path,
+    ctx: &AddonContext,
+    timing: &mut LoadTiming,
+) -> Result<usize, LoadError> {
     let mut lua_count = 0;
-
-    for element in &ui.elements {
-        lua_count += process_element_with_exclusive_timing(env, element, xml_dir, ctx, timing)
-            .map_err(|e| {
-                if !matches!(e, LoadError::Lua(_)) {
-                    let _ = env.with_state(|state| {
-                        call_error_handler_state(state, &e.to_string());
-                        Ok::<(), crate::Error>(())
-                    });
+    let mut first_include_error = None;
+    for element in elements {
+        match process_element_with_exclusive_timing(env, element, xml_dir, ctx, timing) {
+            Ok(count) => lua_count += count,
+            Err(error)
+                if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+                    && matches!(element, XmlElement::Include(_)) =>
+            {
+                // The child already reported its failure. Finish Wrath's parent
+                // siblings without turning that failure into a successful load.
+                first_include_error.get_or_insert(error);
+            }
+            Err(error) => {
+                if !matches!(error, LoadError::Lua(_)) {
+                    report_xml_error(env, &error.to_string());
                 }
-                e
-            })?;
+                return Err(error);
+            }
+        }
     }
-
-    Ok(lua_count)
+    first_include_error.map_or(Ok(lua_count), Err)
 }
 
 /// Attribute only time not already counted in another timing bucket (Lua
@@ -409,7 +422,7 @@ fn compile_inline_script(
     timing.lua_exec_time += compile_elapsed;
 
     func_result.map_err(|e| {
-        report_inline_script_error(env, &e.to_string());
+        report_xml_error(env, &e.to_string());
         LoadError::Lua(e.to_string())
     })
 }
@@ -458,7 +471,7 @@ fn record_inline_script_call_timing(timing: &mut LoadTiming, call_start: Instant
     timing.lua_exec_time += call_elapsed;
 }
 
-fn report_inline_script_error(env: &LoaderEnv<'_>, error: &str) {
+fn report_xml_error(env: &LoaderEnv<'_>, error: &str) {
     let _ = env.with_state(|state| {
         call_error_handler_state(state, error);
         Ok::<(), crate::Error>(())
@@ -485,8 +498,7 @@ fn process_include(
         }
         Ok(1)
     } else {
-        let result = load_xml_file(env, &include_path, ctx, timing);
-        continue_wrath_parent_after_child(file, result)
+        load_xml_file(env, &include_path, ctx, timing)
     }
 }
 

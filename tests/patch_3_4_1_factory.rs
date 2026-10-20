@@ -3,9 +3,7 @@
 #[path = "common/publication_sweep.rs"]
 mod publication_sweep;
 
-use publication_sweep::{
-    Entry, SweepSpec, probe_entry, run_factory_publication_sweep, run_publication_sweep,
-};
+use publication_sweep::{Entry, SweepSpec, probe_entry, run_publication_sweep, run_sweep};
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -28,7 +26,7 @@ const SPEC: SweepSpec = SweepSpec {
 fn patch_3_4_1_exact_factory_publication_gaps() {
     let env = WowLuaEnv::new().expect("bare Wrath Lua environment");
     assert_eq!(wow_ui_sim::client_profile::ACTIVE_INTERFACE_VERSION, 38001);
-    run_factory_publication_sweep(&env, &SPEC);
+    run_sweep(&env, &SPEC, BTreeMap::new);
 }
 
 #[test]

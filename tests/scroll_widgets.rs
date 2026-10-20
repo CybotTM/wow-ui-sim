@@ -612,7 +612,10 @@ fn test_scrollframe_template_creates_scrollbar() {
     .unwrap();
 
     let has_scrollbar: bool = env
-        .eval("return TestScrollFrameTemplate.ScrollBar ~= nil")
+        .eval(&format!(
+            "return _G[{:?}] ~= nil",
+            common::template_child_name("TestScrollFrameTemplate", "ScrollBar")
+        ))
         .unwrap();
     assert!(
         has_scrollbar,
@@ -633,10 +636,16 @@ fn test_scrollbar_has_buttons() {
     .unwrap();
 
     let has_up: bool = env
-        .eval("return TestScrollBarButtons.ScrollBar.ScrollUpButton ~= nil")
+        .eval(&format!(
+            "return _G[{:?}] ~= nil",
+            common::template_child_name("TestScrollBarButtons", "ScrollBarScrollUpButton")
+        ))
         .unwrap();
     let has_down: bool = env
-        .eval("return TestScrollBarButtons.ScrollBar.ScrollDownButton ~= nil")
+        .eval(&format!(
+            "return _G[{:?}] ~= nil",
+            common::template_child_name("TestScrollBarButtons", "ScrollBarScrollDownButton")
+        ))
         .unwrap();
 
     assert!(has_up, "ScrollBar should have ScrollUpButton");
@@ -656,7 +665,10 @@ fn test_scrollbar_has_thumb_texture() {
     .unwrap();
 
     let has_thumb: bool = env
-        .eval("return TestScrollBarThumb.ScrollBar.ThumbTexture ~= nil")
+        .eval(&format!(
+            "return _G[{:?}]:GetThumbTexture() ~= nil",
+            common::template_child_name("TestScrollBarThumb", "ScrollBar")
+        ))
         .unwrap();
     assert!(has_thumb, "ScrollBar should have ThumbTexture");
 }
@@ -792,18 +804,19 @@ fn test_scroll_button_has_textures() {
     )
     .unwrap();
 
-    // Check that ScrollUpButton has its textures from UIPanelScrollUpButtonTemplate
+    // Check that ScrollUpButton has its textures from UIPanelScrollUpButtonTemplate.
+    let up_button = common::template_child_name("TestScrollBtnTex", "ScrollBarScrollUpButton");
     let has_normal: bool = env
-        .eval("return TestScrollBtnTex.ScrollBar.ScrollUpButton.Normal ~= nil")
+        .eval(&format!("return _G[{up_button:?}]:GetNormalTexture() ~= nil"))
         .unwrap();
     let has_pushed: bool = env
-        .eval("return TestScrollBtnTex.ScrollBar.ScrollUpButton.Pushed ~= nil")
+        .eval(&format!("return _G[{up_button:?}]:GetPushedTexture() ~= nil"))
         .unwrap();
     let has_disabled: bool = env
-        .eval("return TestScrollBtnTex.ScrollBar.ScrollUpButton.Disabled ~= nil")
+        .eval(&format!("return _G[{up_button:?}]:GetDisabledTexture() ~= nil"))
         .unwrap();
     let has_highlight: bool = env
-        .eval("return TestScrollBtnTex.ScrollBar.ScrollUpButton.Highlight ~= nil")
+        .eval(&format!("return _G[{up_button:?}]:GetHighlightTexture() ~= nil"))
         .unwrap();
 
     assert!(has_normal, "ScrollUpButton should have Normal texture");
