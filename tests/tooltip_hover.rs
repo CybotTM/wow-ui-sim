@@ -503,6 +503,7 @@ fn test_tooltip_data_handler_set_minimap_mouseover_uses_minimap_getter() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_tooltip_data_handler_set_upgrade_item_uses_upgrade_getter() {
     let env = setup_full_env();
@@ -536,4 +537,5 @@ fn test_tooltip_data_handler_set_upgrade_item_uses_upgrade_getter() {
         has_real_tooltip,
         "TooltipDataHandler should populate GameTooltip:SetUpgradeItem through C_TooltipInfo.GetUpgradeItem",
     );
+}
 }
