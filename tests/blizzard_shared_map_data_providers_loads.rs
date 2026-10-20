@@ -320,6 +320,7 @@ fn toc_body_count_breakdown_matches_filesystem_layout() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn lod_addon_dragged_into_game_eager_discovery_via_worldmap_required_dep() {
     let ui = blizzard_ui_dir();
@@ -359,6 +360,7 @@ fn lod_addon_dragged_into_game_eager_discovery_via_worldmap_required_dep() {
              out of the eager pool"
         );
     }
+}
 }
 
 #[test]
