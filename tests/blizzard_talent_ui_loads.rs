@@ -71,6 +71,7 @@ fn flavor_subdirs_present_classic_subdir_absent() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn mists_toc_parses_with_load_on_demand_and_help_plate_dep() {
     let toc = TocFile::from_file(&talent_ui_mists_toc()).expect("Mists TOC parses");
@@ -97,7 +98,9 @@ fn mists_toc_parses_with_load_on_demand_and_help_plate_dep() {
     assert!(!toc.is_game_type_restricted());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn mists_toc_raw_bytes_pin_three_metadata_directives() {
     let raw = std::fs::read_to_string(talent_ui_mists_toc()).expect("TOC reads utf-8");
@@ -131,7 +134,9 @@ fn mists_toc_raw_bytes_pin_three_metadata_directives() {
     assert!(!raw.contains("## OptionalDep"));
     assert!(!raw.contains("## RequiredDep"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_resolves_two_bootstraps_and_five_entries_with_normalized_slashes() {
     let toc = TocFile::from_file(&talent_ui_mists_toc()).expect("TOC parses");
@@ -158,7 +163,9 @@ fn body_resolves_two_bootstraps_and_five_entries_with_normalized_slashes() {
          order. Got: {body:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_absent_restricts_to_game_screen_only() {
     let toc = TocFile::from_file(&talent_ui_mists_toc()).expect("TOC parses");
@@ -180,6 +187,7 @@ fn allow_load_absent_restricts_to_game_screen_only() {
              in-world"
         );
     }
+}
 }
 
 #[test]
