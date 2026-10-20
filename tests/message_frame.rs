@@ -220,7 +220,6 @@ fn test_insert_mode_set_get() {
 }
 
 #[test]
-#[cfg(not(feature = "client-wrath"))]
 fn test_get_message_info() {
     let env = WowLuaEnv::new().unwrap();
 
@@ -232,13 +231,18 @@ fn test_get_message_info() {
     )
     .unwrap();
 
-    let (text, r, g, b): (String, f64, f64, f64) = env
-        .eval("local t, r, g, b = TestMFInfo:GetMessageInfo(1); return t, r, g, b")
+    let (text, first, second, third): (String, f64, f64, f64) = env
+        .eval("return TestMFInfo:GetMessageInfo(1)")
         .unwrap();
     assert_eq!(text, "Hello");
-    assert!((r - 0.5).abs() < 0.01);
-    assert!((g - 0.6).abs() < 0.01);
-    assert!((b - 0.7).abs() < 0.01);
+    let expected = if cfg!(feature = "client-wrath") {
+        [0.0, 0.0, 0.0] // accessID, typeID, extraData
+    } else {
+        [0.5, 0.6, 0.7] // r, g, b
+    };
+    for (actual, expected) in [first, second, third].into_iter().zip(expected) {
+        assert!((actual - expected).abs() < 0.01);
+    }
 }
 
 #[test]
@@ -615,7 +619,7 @@ fn test_message_frame_callbacks_fire_for_scroll_and_display_refresh() {
 fn test_message_frame_transform_and_filter_apis_update_history() {
     let env = WowLuaEnv::new().unwrap();
 
-    let result: (i32, String, f64, f64, f64, String, f64, f64, f64) = env
+    let result: (i32, String, String) = env
         .eval(
             r#"
             local f = CreateFrame("ScrollingMessageFrame", "TestMFTransform", UIParent)
@@ -648,9 +652,7 @@ fn test_message_frame_transform_and_filter_apis_update_history() {
                 end
             )
 
-            local keepText, keepR, keepG, keepB = f:GetMessageInfo(1)
-            local swapText, swapR, swapG, swapB = f:GetMessageInfo(2)
-            return refreshCalls, keepText, keepR, keepG, keepB, swapText, swapR, swapG, swapB
+            return refreshCalls, f:GetMessageInfo(1), (f:GetMessageInfo(2))
         "#,
         )
         .unwrap();
@@ -660,23 +662,30 @@ fn test_message_frame_transform_and_filter_apis_update_history() {
         "each mutating API should mark the display dirty once"
     );
     assert_eq!(result.1, "Keep");
-    assert!((result.2 - 0.25).abs() < 0.01);
-    assert!((result.3 - 0.5).abs() < 0.01);
-    assert!((result.4 - 0.75).abs() < 0.01);
-    assert_eq!(result.5, "Swapped");
-    assert!((result.6 - 0.9).abs() < 0.01);
-    assert!((result.7 - 0.8).abs() < 0.01);
-    assert!((result.8 - 0.7).abs() < 0.01);
+    assert_eq!(result.2, "Swapped");
+    let sim = env.state().borrow();
+    let id = sim.widgets.get_id_by_name("TestMFTransform").unwrap();
+    let rows = &sim.message_frames[&id].messages;
+    for (row, expected) in rows.iter().zip([[0.25, 0.5, 0.75], [0.9, 0.8, 0.7]]) {
+        for (actual, expected) in [row.r, row.g, row.b].into_iter().zip(expected) {
+            assert!((actual - expected).abs() < 0.01);
+        }
+    }
 }
 
 #[test]
 fn test_message_frame_fontstring_lookup_and_fade_reset_update_runtime_state() {
     let env = WowLuaEnv::new().unwrap();
-
+    env.exec(&format!("__SMF_WRATH_NATIVE = {}", cfg!(feature = "client-wrath")))
+        .unwrap();
     env.exec(
         r#"
         local f = CreateFrame("ScrollingMessageFrame", "TestMFFadeReset", UIParent)
-        f:AddMessage("Repeated", 0.8, 0.4, 0.2, 1.0, 77)
+        if __SMF_WRATH_NATIVE then
+            f:AddMessage("Repeated", 0.8, 0.4, 0.2, 77, false)
+        else
+            f:AddMessage("Repeated", 0.8, 0.4, 0.2, 1.0, 77)
+        end
     "#,
     )
     .unwrap();

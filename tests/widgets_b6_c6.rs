@@ -129,6 +129,23 @@ fn b6_c6_original_consumer_queues_one_row_per_update() {
 }
 
 #[test]
+#[cfg(feature = "client-retail")]
+fn b6_c6_retail_scrolling_history_remains_immediate_across_update() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"
+        B6Retail = CreateFrame('ScrollingMessageFrame')
+        B6Retail:AddMessage('retained', 0.25, 0.5, 0.75)
+        assert(B6Retail:GetNumMessages() == 1)
+    "#).unwrap();
+    env.fire_on_update(0.0).unwrap();
+    env.exec(r#"
+        assert(B6Retail:GetNumMessages() == 1)
+        local text, r, g, b = B6Retail:GetMessageInfo(1)
+        assert(text == 'retained' and r == 0.25 and g == 0.5 and b == 0.75)
+    "#).unwrap();
+}
+
+#[test]
 #[cfg(feature = "client-wrath")]
 fn b6_c6_scrolling_history_is_immediate_and_does_not_acquire_row_timers() {
     let env = WowLuaEnv::new().unwrap();
