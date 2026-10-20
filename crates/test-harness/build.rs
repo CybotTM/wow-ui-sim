@@ -8,8 +8,6 @@ use syn::{
 };
 
 fn main() {
-    // Generated module paths are absolute; shared targets can move between worktrees.
-    println!("cargo:rerun-if-env-changed=CARGO_MANIFEST_DIR");
     println!("cargo:rerun-if-changed=build.rs");
     println!(
         "cargo:rerun-if-changed={}",
@@ -20,7 +18,8 @@ fn main() {
 }
 
 fn project_root() -> PathBuf {
-    let manifest_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").expect("manifest dir"));
+    // Compile-time binding invalidates absolute generated paths after relocation.
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     manifest_dir
         .parent()
         .and_then(Path::parent)
