@@ -6,7 +6,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn report_frame_glue_dir() -> PathBuf {
@@ -65,6 +66,8 @@ fn load_character_select_screen() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&report_frame_glue_dir())
@@ -81,7 +84,9 @@ fn find_toc_file_resolves_bare_toc() {
          suffices"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_glue_only_with_one_hard_dep() {
     let toc = TocFile::from_file(&report_frame_glue_toc())
@@ -130,7 +135,9 @@ fn toc_declares_eager_glue_only_with_one_hard_dep() {
          after a character is selected and the realm enters the Game screen"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_only_xml_with_lua_loaded_via_script_include() {
     let toc = TocFile::from_file(&report_frame_glue_toc())
@@ -152,7 +159,9 @@ fn toc_lists_only_xml_with_lua_loaded_via_script_include() {
          frame's `mixin=\"ReportFrameMixin\"` attribute resolves it"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_embeds_script_file_directive_for_lua() {
     let xml_text = std::fs::read_to_string(report_frame_glue_dir().join("ReportFrame.xml"))
@@ -165,7 +174,9 @@ fn xml_embeds_script_file_directive_for_lua() {
          CreateFromMixins chain at frame instantiation"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allows_screen_returns_true_only_for_glue_screens() {
     let toc = TocFile::from_file(&report_frame_glue_toc())
@@ -190,6 +201,7 @@ fn allows_screen_returns_true_only_for_glue_screens() {
          to load on the Game screen would cause a double-instantiation of `ReportFrame` at \
          _G with conflicting parents (UIParent vs GlueParent)"
     );
+}
 }
 
 #[test]
@@ -454,6 +466,7 @@ fn registers_for_report_lifecycle_events() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_uses_pure_inheritance_with_script_include_only() {
     let xml_text = std::fs::read_to_string(report_frame_glue_dir().join("ReportFrame.xml"))
@@ -485,4 +498,5 @@ fn xml_uses_pure_inheritance_with_script_include_only() {
          structure is inherited from SharedReportFrameTemplate. The glue variant matches the \
          Game variant in this respect: pure inheritance, zero inline children"
     );
+}
 }
