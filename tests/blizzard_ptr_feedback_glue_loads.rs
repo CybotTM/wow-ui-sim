@@ -296,6 +296,7 @@ fn blizzard_ptr_feedback_glue_does_not_appear_in_eager_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_glue_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -311,7 +312,9 @@ fn blizzard_ptr_feedback_glue_appears_in_full_addon_inventory() {
          for coverage"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_glue_loads_explicitly_on_glue_screen() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -369,4 +372,5 @@ fn blizzard_ptr_feedback_glue_loads_explicitly_on_glue_screen() {
          frame at file scope, so loading just the Glue TOC is sufficient to \
          publish the entire PTR_IssueReporter namespace on a fresh env"
     );
+}
 }
