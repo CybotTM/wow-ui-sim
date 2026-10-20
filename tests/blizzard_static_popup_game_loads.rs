@@ -148,6 +148,7 @@ fn fresh_env(screen: ScreenKind) -> WowLuaEnv {
 
 fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     let env = fresh_env(screen);
+    crate::common::load_profile_framexml(&env);
 
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), screen);
     for (name, toc_path) in &addons {
@@ -442,6 +443,22 @@ fn is_addon_loaded_reports_true_after_eager_sweep() {
 prefork_full_ui_case! {
 fn equipment_set_confirmation_popup_resizes_to_compact_dialog(env: &WowLuaEnv) {
 
+    if cfg!(feature = "client-wrath") {
+        // 12340 saves immediately; only overwrite/delete have confirmation definitions.
+        let (width, height): (f64, f64) = env.eval(r#"
+            assert(StaticPopupDialogs.CONFIRM_SAVE_EQUIPMENT_SET == nil)
+            local dialog = StaticPopup_Show("CONFIRM_OVERWRITE_EQUIPMENT_SET", "fixture")
+            assert(dialog and dialog:IsShown())
+            assert(_G[dialog:GetName().."Text"]:GetText() ~= "")
+            local width, height = dialog:GetWidth(), dialog:GetHeight()
+            StaticPopup_OnClick(dialog, 2)
+            assert(not dialog:IsShown())
+            return width, height
+        "#).expect("native equipment overwrite confirmation lifecycle");
+        assert_eq!(width, 320.0, "12340 StaticPopup_Resize default width");
+        assert!(height > 0.0 && height <= 180.0, "height={height}");
+        return;
+    }
     let (width, height, text_width): (f64, f64, f64) = env
         .eval(
             r#"
@@ -792,6 +809,8 @@ prefork_full_ui_case! {
 fn four_named_dialog_slots_materialize_as_hidden_dialogs(env: &WowLuaEnv) {
 
     for name in NAMED_DIALOG_SLOTS {
+        let hidden: bool = env.eval(&format!("return {name} ~= nil and not {name}:IsShown()")).expect("popup visibility");
+        assert!(hidden, "{name} should start hidden");
         let kind: String = env
             .eval(&format!("return type({name})"))
             .unwrap_or_else(|err| panic!("{name} probe failed: {err}"));
@@ -814,7 +833,12 @@ fn four_named_dialog_slots_materialize_as_hidden_dialogs() {
 prefork_full_ui_case! {
 fn shared_dialog_definitions_seed_into_dispatcher(env: &WowLuaEnv) {
 
-    for key in SHARED_DIALOG_KEYS {
+    let keys = if cfg!(feature = "client-wrath") {
+        &["XP_LOSS_NO_SICKNESS_NO_DURABILITY", "CONFIRM_OVERWRITE_EQUIPMENT_SET", "CONFIRM_DELETE_EQUIPMENT_SET", "USE_GUILDBANK_REPAIR"][..]
+    } else {
+        SHARED_DIALOG_KEYS
+    };
+    for key in keys {
         let kind: String = env
             .eval(&format!("return type(StaticPopupDialogs['{key}'])"))
             .unwrap_or_else(|err| panic!("StaticPopupDialogs[{key}] probe failed: {err}"));
