@@ -189,6 +189,7 @@ fn blizzard_recent_allies_allows_all_screens_via_allow_load_both() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recent_allies_appears_in_eager_game_discovery() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -203,6 +204,7 @@ fn blizzard_recent_allies_appears_in_eager_game_discovery() {
          Game-screen inventory. This is what wires the load-order edge to \
          Blizzard_FriendsFrame's OptionalDeps"
     );
+}
 }
 
 prefork_full_ui_case! {
