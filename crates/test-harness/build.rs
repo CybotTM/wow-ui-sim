@@ -8,6 +8,8 @@ use syn::{
 };
 
 fn main() {
+    // Generated module paths are absolute; shared targets can move between worktrees.
+    println!("cargo:rerun-if-env-changed=CARGO_MANIFEST_DIR");
     println!("cargo:rerun-if-changed=build.rs");
     println!(
         "cargo:rerun-if-changed={}",
