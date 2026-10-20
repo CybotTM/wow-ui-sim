@@ -275,12 +275,6 @@ fn try_sequence_conditional_handler(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Option<Val>>> {
-    if let Some(result) = try_conditional_global_noargs_variant(state, handler_ref)? {
-        return Ok(Some(result));
-    }
-    if let Some(result) = try_conditional_global_function_result_then_variant(state, handler_ref)? {
-        return Ok(Some(result));
-    }
     if let Some(result) = try_conditional_global_field_equals_variant(state, handler_ref)? {
         return Ok(Some(result));
     }
@@ -288,42 +282,6 @@ fn try_sequence_conditional_handler(
         return Ok(Some(result));
     }
     try_conditional_self_field_variant(state, handler_ref)
-}
-
-fn try_conditional_global_noargs_variant(
-    state: &mut LuaState,
-    handler_ref: &FastHandlerRef<'_>,
-) -> LuaResult<Option<Option<Val>>> {
-    let FastHandlerRef::ConditionalGlobalNoArgs {
-        function_name,
-        then_ref,
-        else_ref,
-    } = handler_ref
-    else {
-        return Ok(None);
-    };
-    build_conditional_global_noargs_handler(state, function_name, then_ref, else_ref).map(Some)
-}
-
-fn try_conditional_global_function_result_then_variant(
-    state: &mut LuaState,
-    handler_ref: &FastHandlerRef<'_>,
-) -> LuaResult<Option<Option<Val>>> {
-    let FastHandlerRef::ConditionalGlobalFunctionWithNoArgFunctionResultThen {
-        function_name,
-        arg_function_name,
-        then_ref,
-    } = handler_ref
-    else {
-        return Ok(None);
-    };
-    build_conditional_global_function_result_then_handler(
-        state,
-        function_name,
-        arg_function_name,
-        then_ref,
-    )
-    .map(Some)
 }
 
 fn try_conditional_global_field_equals_variant(
@@ -371,84 +329,6 @@ fn try_conditional_self_field_variant(
         return Ok(None);
     };
     build_conditional_self_field_handler(state, field, then_ref, else_ref).map(Some)
-}
-
-fn build_conditional_global_noargs_handler(
-    state: &mut LuaState,
-    function_name: &str,
-    then_ref: &FastHandlerRef<'_>,
-    else_ref: &FastHandlerRef<'_>,
-) -> LuaResult<Option<Val>> {
-    let then_handler = build_fast_handler(state, then_ref.clone())?;
-    let else_handler = build_fast_handler(state, else_ref.clone())?;
-    let condition =
-        crate::lua_api::globals::create_frame::helpers::resolve_global_path(state, function_name);
-    let builder = load_template(
-        state,
-        TEMPLATE_CONDITIONAL_GLOBAL_NOARGS,
-        "template-inline-conditional-global-noargs",
-    )?;
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[
-            condition,
-            then_handler.unwrap_or(Val::Nil),
-            else_handler.unwrap_or(Val::Nil),
-        ],
-    )
-    .map(Some)
-}
-
-const TEMPLATE_CONDITIONAL_GLOBAL_NOARGS: &str = r#"
-    local condition, then_handler, else_handler = ...
-    return function(self, ...)
-        if condition() then
-            if then_handler then
-                return then_handler(self, ...)
-            end
-            return
-        end
-        if else_handler then
-            return else_handler(self, ...)
-        end
-    end
-"#;
-
-fn build_conditional_global_function_result_then_handler(
-    state: &mut LuaState,
-    function_name: &str,
-    arg_function_name: &str,
-    then_ref: &FastHandlerRef<'_>,
-) -> LuaResult<Option<Val>> {
-    let then_handler = build_fast_handler(state, then_ref.clone())?;
-    let condition =
-        crate::lua_api::globals::create_frame::helpers::resolve_global_path(state, function_name);
-    let arg_function = crate::lua_api::globals::create_frame::helpers::resolve_global_path(
-        state,
-        arg_function_name,
-    );
-    let builder = load_template(
-        state,
-        r#"
-            local condition, arg_function, then_handler = ...
-            return function(self, ...)
-                if not condition(arg_function()) then
-                    return
-                end
-                if then_handler then
-                    return then_handler(self, ...)
-                end
-            end
-        "#,
-        "template-inline-conditional-global-function-noarg-result-then",
-    )?;
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[condition, arg_function, then_handler.unwrap_or(Val::Nil)],
-    )
-    .map(Some)
 }
 
 fn build_conditional_global_field_equals_handler(

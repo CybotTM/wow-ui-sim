@@ -12,8 +12,6 @@ pub(crate) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
 fn parse_mode_or_conditional_global<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     lfg_mode_branch(stmt)
         .or_else(|| local_path_conditional_method(stmt))
-        .or_else(|| conditional_global_noarg(stmt))
-        .or_else(|| conditional_global_function_result(stmt))
         .or_else(|| conditional_global_field_equals_string(stmt))
 }
 
@@ -34,28 +32,6 @@ fn local_path_conditional_method<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>
         target_path,
         method_name,
     })
-}
-
-fn conditional_global_noarg<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
-    let (function_name, then_ref, else_ref) =
-        super::parse_conditional_global_noarg_then_else(stmt)?;
-    Some(FastHandlerRef::ConditionalGlobalNoArgs {
-        function_name,
-        then_ref: Box::new(then_ref),
-        else_ref: Box::new(else_ref),
-    })
-}
-
-fn conditional_global_function_result<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
-    let (function_name, arg_function_name, then_ref) =
-        super::parse_conditional_global_function_with_noarg_function_result_then(stmt)?;
-    Some(
-        FastHandlerRef::ConditionalGlobalFunctionWithNoArgFunctionResultThen {
-            function_name,
-            arg_function_name,
-            then_ref: Box::new(then_ref),
-        },
-    )
 }
 
 fn conditional_global_field_equals_string<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {

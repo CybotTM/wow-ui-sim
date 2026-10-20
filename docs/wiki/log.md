@@ -2449,3 +2449,7 @@ Linked optional EditBox history, direct arrows, byte-mask presentation and Messa
 ## 2026-10-19 — Inline XML callback late binding
 
 Updated [[xml-template-system]] with call-time function-family lookup and the distinct direct `function=` binding. All six unchanged-producer fixtures fail behaviorally at `6b03106f9`, including original Wrath GameMenu and unfiltered cursor errors. Producer `c1e98b4cc` uses Lua expressions rather than install-time callback/argument captures. Bounded GREEN: Wrath6/6, Retail5/5; both startups byte-identical `[]`. Original Wrath GameMenu warnings/errors, including cursorOffset-nil, disappear without an EditBox change. Preservation and separately committed conditional/LFG callback follow-ups remain pending; no native/full-suite claim.
+
+## 2026-10-19 — Conditional XML predicate capture removal
+
+Four original-body Wrath KeyRing/Retail ChatConfig regressions are RED. Removed conditional global predicate/getter fast-path captures so the unchanged ordinary Lua compiler owns these bodies and surrounding sequences. Removed the obsolete optimization-selection assertion, not a behavior test. Follow-up GREEN/preservation pending; see [[xml-template-system]].

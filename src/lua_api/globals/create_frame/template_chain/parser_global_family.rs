@@ -85,62 +85,6 @@ fn parse_global_function_call(stmt: &str) -> Option<(&str, &str)> {
     is_fast_handler_path(function_name).then_some((function_name, args))
 }
 
-fn parse_conditional_global_noarg_then_else<'a>(
-    stmt: &'a str,
-) -> Option<(&'a str, FastHandlerRef<'a>, FastHandlerRef<'a>)> {
-    let remainder = stmt.trim().strip_prefix("if")?.trim_start();
-    let (condition, remainder) = if let Some(remainder) = remainder.strip_prefix('(') {
-        let (condition, remainder) = remainder.split_once("then")?;
-        (condition.trim_end().strip_suffix(')')?.trim(), remainder)
-    } else {
-        let (condition, remainder) = remainder.split_once("then")?;
-        (condition.trim(), remainder)
-    };
-    let function_name = condition.strip_suffix("()")?.trim();
-    if !is_fast_handler_path(function_name) {
-        return None;
-    }
-
-    let (then_stmt, else_tail) = remainder.split_once("else")?;
-    let else_stmt = else_tail.trim().strip_suffix("end")?.trim();
-    let then_stmt = then_stmt
-        .trim()
-        .strip_suffix(';')
-        .map(str::trim)
-        .unwrap_or(then_stmt.trim());
-    let else_stmt = else_stmt
-        .strip_suffix(';')
-        .map(str::trim)
-        .unwrap_or(else_stmt);
-
-    let then_ref = super::parse_inline_fast_handler("OnClick", then_stmt)?;
-    let else_ref = super::parse_inline_fast_handler("OnClick", else_stmt)?;
-    Some((function_name, then_ref, else_ref))
-}
-
-fn parse_conditional_global_function_with_noarg_function_result_then<'a>(
-    stmt: &'a str,
-) -> Option<(&'a str, &'a str, FastHandlerRef<'a>)> {
-    let remainder = stmt.trim().strip_prefix("if")?.trim_start();
-    let remainder = remainder.strip_prefix('(')?.trim_start();
-    let (condition, remainder) = remainder.split_once("then")?;
-    let condition = condition.trim_end().strip_suffix(')')?.trim();
-    let (function_name, args) = parse_global_function_call(condition)?;
-    let args = args.trim();
-    let arg_function_name = args.strip_suffix("()")?.trim();
-    if !(is_fast_handler_path(function_name) && is_fast_handler_path(arg_function_name)) {
-        return None;
-    }
-
-    let then_stmt = remainder.trim().strip_suffix("end")?.trim();
-    let then_stmt = then_stmt
-        .strip_suffix(';')
-        .map(str::trim)
-        .unwrap_or(then_stmt);
-    let then_ref = super::parse_inline_fast_handler("OnClick", then_stmt)?;
-    Some((function_name, arg_function_name, then_ref))
-}
-
 fn parse_conditional_global_field_equals_string_then<'a>(
     stmt: &'a str,
 ) -> Option<(&'a str, &'a str, &'a str, FastHandlerRef<'a>)> {

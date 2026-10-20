@@ -805,35 +805,6 @@ mod tests {
             first_fast_install_miss(&scripts)
         );
     }
-
-    #[test]
-    fn parser_supports_chat_config_prefix_conditional_suffix_sequence() {
-        let body = r#"
-                        HideUIPanel(ChatConfigFrame);
-                        if ( IsCombatLog(FCF_GetCurrentChatFrame()) ) then
-                            Blizzard_CombatLog_RefreshGlobalLinks();
-                            C_CombatLog.ApplyFilterSettings(Blizzard_CombatLog_CurrentSettings);
-                            C_CombatLog.RefilterEntries();
-                        end
-                        PlaySound(SOUNDKIT.GS_TITLE_OPTION_OK);
-                    "#;
-        assert!(
-            parser::parse_inline_fast_handler("OnClick", body).is_some(),
-            "parser miss"
-        );
-        let scripts = ScriptsXml {
-            on_click: vec![ScriptBodyXml {
-                body: Some(body.to_string()),
-                ..Default::default()
-            }],
-            ..Default::default()
-        };
-        assert!(
-            scripts_support_fast_install(&scripts),
-            "miss={:?}",
-            first_fast_install_miss(&scripts)
-        );
-    }
 }
 
 // ---------------------------------------------------------------------------

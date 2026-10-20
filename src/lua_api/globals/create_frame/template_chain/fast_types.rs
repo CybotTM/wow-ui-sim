@@ -11,16 +11,6 @@ pub(crate) enum FastHandlerRef<'a> {
             FastHandlerRef<'a>,
         )>,
     ),
-    ConditionalGlobalNoArgs {
-        function_name: &'a str,
-        then_ref: Box<FastHandlerRef<'a>>,
-        else_ref: Box<FastHandlerRef<'a>>,
-    },
-    ConditionalGlobalFunctionWithNoArgFunctionResultThen {
-        function_name: &'a str,
-        arg_function_name: &'a str,
-        then_ref: Box<FastHandlerRef<'a>>,
-    },
     ConditionalGlobalFieldEqualsStringThen {
         target_path: &'a str,
         field: &'a str,
