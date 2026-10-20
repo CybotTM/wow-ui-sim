@@ -17,12 +17,12 @@ fn currency_unused_mutations_original_checkbox_updates_selected_currency_and_pro
         local checkbox = TokenFramePopup.InactiveCheckbox
         checkbox:SetChecked(true)
         checkbox:OnClick()
-        local moved = assert(C_CurrencyInfo.GetCurrencyListInfo(TokenFrame.selectedID))
-        assert(moved.currencyTypesID == 1792, "original checkbox must reselect its currency")
-        assert(moved.isTypeUnused == true, "B5 unused: original checkbox must mark selected currency unused")
+        local selectedAfterUpdate = assert(C_CurrencyInfo.GetCurrencyListInfo(TokenFrame.selectedID))
+        assert(selectedAfterUpdate.currencyTypesID == 1792, "original checkbox must reselect its currency")
+        assert(selectedAfterUpdate.isTypeUnused == true, "B5 unused: original checkbox must mark selected currency unused")
         assert(C_CurrencyInfo.GetCurrencyInfo(1792).isTypeUnused == true)
         assert(C_CurrencyInfo.GetCurrencyInfo(1792).quantity == 4350)
-        assert(moved.isShowInBackpack == true)
+        assert(selectedAfterUpdate.isShowInBackpack == true)
         assert(C_CurrencyInfo.GetCurrencyInfo(1792).isShowInBackpack == true)
         assert(C_CurrencyInfo.GetBackpackCurrencyInfo(3).currencyTypesID == 1792)
         local provider = TokenFrame.ScrollBox:GetDataProvider()
@@ -53,6 +53,11 @@ fn currency_unused_mutations_original_popup_shows_discovered_currency_checkbox()
         assert(TokenFramePopup.InactiveCheckbox:IsShown(),
             "B5 unused: original popup must expose a discovered currency checkbox")
         assert(TokenFramePopup.InactiveCheckbox:GetChecked() == false)
+        C_CurrencyInfo.SetCurrencyUnused(3, true)
+        entry:Initialize(C_CurrencyInfo.GetCurrencyListInfo(3))
+        TokenFrame:UpdatePopup(entry)
+        assert(TokenFramePopup.InactiveCheckbox:IsShown())
+        assert(TokenFramePopup.InactiveCheckbox:GetChecked() == true)
         "#,
     );
 }
@@ -82,6 +87,25 @@ fn currency_unused_mutations_ignore_non_currency_indices_and_missing_supplied_ro
         "#,
     )
     .unwrap();
+}
+
+#[test]
+fn currency_unused_mutations_project_supplied_unused_and_discovery_flags() {
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
+    for (unused, discovered) in [(true, false), (false, true)] {
+        {
+            let mut state = env.state().borrow_mut();
+            let info = state.currency_info.get_mut(&2806).unwrap();
+            info.is_type_unused = unused;
+            info.discovered = discovered;
+        }
+        let actual: (bool, bool) = env
+            .eval(
+                "local row = C_CurrencyInfo.GetCurrencyListInfo(3); return row.isTypeUnused, row.discovered",
+            )
+            .unwrap();
+        assert_eq!(actual, (unused, discovered));
+    }
 }
 
 #[test]
