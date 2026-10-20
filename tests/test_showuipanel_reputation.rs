@@ -321,6 +321,7 @@ fn show_ui_panel_locks_reputation_frame_layout() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn reputation_filter_dropdown_mouse_down_materializes_menu_rows() {
     test_timeout! {
@@ -404,4 +405,5 @@ fn reputation_filter_dropdown_mouse_down_materializes_menu_rows() {
             .unwrap();
         assert_eq!(result, "ok");
     }
+}
 }
