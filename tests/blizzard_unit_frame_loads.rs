@@ -420,6 +420,7 @@ fn family_placeholder_resolves_to_mainline_directory() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -430,6 +431,7 @@ fn appears_in_game_eager_discovery() {
          PlayerFrame, TargetFrame, PartyFrame, RuneFrame, etc. are \
          the canonical visible-on-PLAYER_ENTERING_WORLD frames"
     );
+}
 }
 
 #[test]
