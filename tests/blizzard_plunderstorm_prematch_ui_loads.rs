@@ -271,6 +271,7 @@ fn blizzard_plunderstorm_prematch_ui_does_not_appear_in_eager_discovery_for_any_
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_prematch_ui_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -284,6 +285,7 @@ fn blizzard_plunderstorm_prematch_ui_appears_in_full_addon_inventory() {
          LoadOnDemand filters and lists every parseable Blizzard_* TOC, so \
          flavor-restricted addons are still visible to inventory tools"
     );
+}
 }
 
 prefork_full_ui_case! {
