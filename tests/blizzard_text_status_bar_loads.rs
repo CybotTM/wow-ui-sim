@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn text_status_bar_dir() -> PathBuf {
@@ -86,6 +87,10 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal split-addon TOC/discovery snapshots: Wrath manifest1-382 has
+// only FrameXML/TextStatusBar.lua/xml (338-339), not Blizzard_TextStatusBar.
+// Native-equivalent behavior markers below remain top-level and enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&text_status_bar_dir()).expect("TextStatusBar TOC resolves");
@@ -205,6 +210,8 @@ fn present_in_every_screen_eager_discovery() {
              discovery — AllowLoad: Both + no LoadOnDemand"
         );
     }
+}
+
 }
 
 prefork_full_ui_case! {
@@ -390,6 +397,7 @@ fn is_addon_loaded_reports_true_after_eager_sweep(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn three_mainline_addons_declare_text_status_bar_as_dependency() {
     for declarer in MAINLINE_DEPENDENTS {
@@ -418,4 +426,5 @@ fn three_mainline_addons_declare_text_status_bar_as_dependency() {
             toc.dependencies()
         );
     }
+}
 }
