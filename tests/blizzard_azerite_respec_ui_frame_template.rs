@@ -56,6 +56,8 @@ end
 return table.concat(failures, "\n")
 "#;
 
+// AzeriteRespecUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_respec_ui_frame_inherits_ethereal_template_shape() {
     common::with_perf_lock(|| {
@@ -85,4 +87,5 @@ fn blizzard_azerite_respec_ui_frame_inherits_ethereal_template_shape() {
             });
         });
     });
+}
 }
