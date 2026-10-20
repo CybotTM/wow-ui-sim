@@ -119,6 +119,7 @@ fn load_addon_or_panic(env: &WowLuaEnv, addon: &str) {
 /// `inherits="ButtonFrameTemplate"` calls `self.TopTileStreaks:Hide()` in its
 /// OnLoad mixin. Confirms the static XML loader installs inherited
 /// parentKey textures before OnLoad fires.
+post_wrath_ui_fixture! {
 #[test]
 fn allied_races_addon_loads_without_top_tile_streaks_error() {
     let env = env_with_shared_xml();
@@ -142,6 +143,7 @@ fn allied_races_addon_loads_without_top_tile_streaks_error() {
         .eval("return AlliedRacesFrame.TopTileStreaks:GetObjectType()")
         .unwrap();
     assert_eq!(object_type, "Texture");
+}
 }
 
 /// Reproduce the full-Blizzard-load failure path: `discover_all_blizzard_addons`
