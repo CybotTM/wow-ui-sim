@@ -271,6 +271,7 @@ fn classic_override_file_remains_on_disk_for_other_flavors() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn implicit_startup_dependency_promotes_transmog_only_for_game() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -292,6 +293,7 @@ fn implicit_startup_dependency_promotes_transmog_only_for_game() {
             "AllowLoad: Game excludes Transmog from {screen:?} discovery"
         );
     }
+}
 }
 
 #[test]
@@ -337,6 +339,7 @@ fn no_addon_declares_transmog_as_dependency() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn transmog_shared_dep_directory_exists_on_disk() {
     let shared_dir = blizzard_ui_dir().join("Blizzard_TransmogShared");
@@ -351,6 +354,7 @@ fn transmog_shared_dep_directory_exists_on_disk() {
         toc.is_some(),
         "Blizzard_TransmogShared must have a discoverable TOC"
     );
+}
 }
 
 prefork_full_ui_case! {
