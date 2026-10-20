@@ -261,6 +261,7 @@ fn included_in_eager_discovery_for_every_screen() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_two_files_next_to_toc() {
     let mut entries: Vec<String> = std::fs::read_dir(report_shared_dir())
@@ -279,6 +280,7 @@ fn root_directory_holds_two_files_next_to_toc() {
         "Blizzard_ReportFrameShared/ root must hold exactly the lua/xml pair next to the TOC — \
          no per-flavor subdirectory and no localization stub"
     );
+}
 }
 
 prefork_full_ui_case! {
