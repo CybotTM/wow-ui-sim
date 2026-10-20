@@ -309,6 +309,7 @@ fn blizzard_recent_allies_virtual_templates_not_in_global_env(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recent_allies_has_no_named_non_virtual_frames() {
     let xml_path =
@@ -343,6 +344,7 @@ fn blizzard_recent_allies_has_no_named_non_virtual_frames() {
          become per-instance child names, not template-level globals"
     );
 }
+}
 
 prefork_full_ui_case! {
 fn blizzard_recent_allies_list_mixin_event_registration_is_lazy(env: &WowLuaEnv) {
@@ -370,6 +372,7 @@ fn blizzard_recent_allies_list_mixin_event_registration_is_lazy(env: &WowLuaEnv)
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recent_allies_xml_loaded_via_explicit_toc_listing_not_script_directive() {
     let xml_path =
@@ -384,6 +387,7 @@ fn blizzard_recent_allies_xml_loaded_via_explicit_toc_listing_not_script_directi
          Blizzard addons like Blizzard_RaidUI use the inverse pattern: TOC lists only \
          the .xml, and the XML pulls its .lua via <Script file=\"…\"/>.)"
     );
+}
 }
 
 prefork_full_ui_case! {
