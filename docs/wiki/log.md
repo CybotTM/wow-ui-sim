@@ -2465,3 +2465,7 @@ Classified source-bound fixture receipts (8/13 pass), traced AuctionUI nil calls
 ## 2026-10-20 — Wrath addon-load bounded acceptance
 
 [Fixture diagnosis](investigations/wrath-addon-load-fixture.md) records all13 nonzero original consumers (8pass/5retained), unchanged-model auction publication (5→1 errors; missing class catalog retained), Retail17/17 before and after, both stock `lua-errors []`, zero-warning builds/check, fmt and unchanged CVars. Module-cfg compile repair and excluded zero-test launcher receipts remain explicit. No native-client/full-suite acceptance, baseline increases, or other legacy implementation is claimed.
+
+## 2026-10-20 — Wrath legacy LoD native-evidence producer slice
+
+Updated [consumer follow-up](investigations/wrath-addon-load-fixture.md#native-evidence-legacy-api-follow-up) with state ownership, isolated unmodeled branches, code-equivalent original-consumer RED and [held/inferred contracts](../specs/wrath-legacy-lod-apis.md). Current-head runtime proof remains pending.

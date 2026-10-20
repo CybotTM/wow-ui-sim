@@ -40,9 +40,15 @@ Local evidence: `/home/osso/.local/state/wow-ui-sim/handoff/wrath-addon-load/tak
 
 The original AuctionUI consumer (shard 10 and prior-runtime) fails at `Blizzard_AuctionUI.lua:482` (`SortAuctionClearSort`), `:281` (`GetBidderAuctionItems`) and `:187` (`CalculateAuctionDeposit`): each calls nil. These functions already exist in the simulator's legacy auction model, but both its registration and module compilation were Mists-only. Commits `ecc7db346` and `dec4eda85` publish and compile that unchanged model on Wrath; no auction semantics change. The original shard is the RED. Post-correction AuctionUI errors decrease from 5 to 1: the consumer now reaches `Blizzard_AuctionUI.lua:380`, where `GetAuctionItemClasses` is missing. The shard remains RED for that separate catalog gap; no full AuctionUI GREEN is claimed. An intermediate build caught the initially omitted module cfg (E0433); its zero-test launcher failures are explicitly excluded from behavioral proof.
 
+## Native-evidence legacy API follow-up
+
+The [Wrath legacy LoD contract](../../specs/wrath-legacy-lod-apis.md) owns the subsequent producer slice. Talent groups use separate cached indices, not class specialization. Calendar projects supplied account/player context and existing guild ranks; labels come from loaded FrameXML GlobalStrings. Mini-map arrows own two lazy child Models; mesh rendering remains unsupported. Arena no-team and profession empty-catalog/reset branches stay isolated temporary paths, with no invented catalog or roster. Wrath publishes the native math alias before Calendar captures it.
+
+Original-consumer RED was re-executed using the sealed `dec4eda85` ELF (SHA256 `d211483ef8b3a7373033490d73bb2ce5e52e4bbf80b6f1297dde40efc3b6fc58`), whose code is unchanged at `046dcc2a6`: force-load, shards 10/11/13 and prior-runtime each execute one case and fail at the retained boundaries below. Current producer GREEN remains pending; this is not an all-addon completion claim. Auction data is held, not approximated: cache provenance is pinned Gethe UI-only source, not a 12340 MPQ/DBC installation. The contract records the exact missing DB fields and all INFERRED initialization/lifetime choices.
+
 ## Retained legacy gaps
 
-These are separate from fixture ordering and auction publication. They remain unchanged, with no budget relaxation:
+This historical pre-producer inventory is separate from fixture ordering and auction publication. They remain unchanged, with no budget relaxation:
 
 | Original cached consumer boundary | Failure | Missing modeled contract |
 |---|---|---|
@@ -80,6 +86,7 @@ Residual failures must be traced after the corrected fixture executes; missing-c
 
 ## Sources
 
+- [Legacy LoD contract](../../specs/wrath-legacy-lod-apis.md) — native-evidence follow-up, held catalogs, INFERRED inputs and producer proof scope.
 - [Production startup](../../../src/bin/wow_sim/addon_loading.rs) — optional profile FrameXML precedes Blizzard addon iteration.
 - [Profile TOC lookup](../../../src/client_profile.rs) — profile-cache top-level TOC discovery.
 - [LoD coverage](../../../tests/addon_coverage_lod.rs) — original runtime consumers and concrete TimeManager assertion.

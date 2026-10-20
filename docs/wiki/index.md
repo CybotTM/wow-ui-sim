@@ -1,3 +1,7 @@
+## [2026-10-20] source | Wrath legacy LoD native-evidence adapters
+
+[Consumer follow-up](investigations/wrath-addon-load-fixture.md#native-evidence-legacy-api-follow-up) links the [contract](../specs/wrath-legacy-lod-apis.md): cached groups, lazy arrow models, Calendar context, no-team arena and empty-catalog filter reset paths; native alias publication precedes Calendar capture. Auction DB export absent; original-consumer RED recorded, current GREEN pending.
+
 ## [2026-10-20] investigation | Wrath addon-load fixture ordering
 
 [Fixture diagnosis](investigations/wrath-addon-load-fixture.md) traces missing core prerequisites to omitted profile FrameXML loading. The corrected fixture passes 8/13 original Wrath consumers; five retained failures name separate legacy gaps. Existing auction-model publication reduces AuctionUI errors5→1. Retail17 before/after and stock Wrath/Retail `lua-errors []` pass; cached Interface30300 remains distinct from native acceptance.
