@@ -119,6 +119,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_variant() {
     let resolved =
@@ -129,7 +131,9 @@ fn find_toc_file_resolves_bare_variant() {
         "Retail 12.1.0.69497 ships the bare Blizzard_Settings_Shared.toc variant"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_both_with_four_dep_entries() {
     let toc = TocFile::from_file(&settings_shared_toc()).expect("TOC parses");
@@ -165,7 +169,9 @@ fn toc_declares_eager_both_with_four_dep_entries() {
     );
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_uses_dep_entries_without_optional_dependencies() {
     let toc = TocFile::from_file(&settings_shared_toc()).expect("TOC parses");
@@ -175,7 +181,9 @@ fn toc_uses_dep_entries_without_optional_dependencies() {
         "Retail 12.1.0.69497 uses Dep entries, not OptionalDep metadata"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_allows_load_on_every_screen_via_allow_load_both() {
     let toc = TocFile::from_file(&settings_shared_toc()).expect("TOC parses");
@@ -196,7 +204,9 @@ fn toc_allows_load_on_every_screen_via_allow_load_both() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_current_dep_entries_and_allow_load_both() {
     let raw =
@@ -227,7 +237,9 @@ fn toc_raw_bytes_pin_current_dep_entries_and_allow_load_both() {
     assert!(!raw.contains("## RequiredDep"));
     assert!(!raw.contains("## OptionalDep"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_body_load_order_runs_definitions_framework_before_namespace_seed() {
     let raw = std::fs::read_to_string(settings_shared_toc()).expect("TOC reads utf-8");
@@ -268,7 +280,9 @@ fn toc_body_load_order_runs_definitions_framework_before_namespace_seed() {
         "Retail 12.1.0.69497 lists 21 current Settings_Shared body entries in this exact order"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_entry_count_breakdown_matches_filesystem_layout() {
     let toc = TocFile::from_file(&settings_shared_toc()).expect("TOC parses");
@@ -292,7 +306,9 @@ fn toc_entry_count_breakdown_matches_filesystem_layout() {
         "Retail 12.1.0.69497 lists seven XML entries, including NewDefinitionsFramework.xml. Got: {xml_count}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn family_placeholder_resolves_to_mainline_subdir_in_three_entries() {
     let toc = TocFile::from_file(&settings_shared_toc()).expect("TOC parses");
@@ -332,6 +348,7 @@ fn family_placeholder_resolves_to_mainline_subdir_in_three_entries() {
             "Mainline body entry {expected} must be present after normalization"
         );
     }
+}
 }
 
 #[test]
