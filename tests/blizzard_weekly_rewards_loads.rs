@@ -46,6 +46,8 @@ fn load_weekly_rewards(env: &WowLuaEnv) {
         .expect("Blizzard_WeeklyRewards should load via explicit Rust loader call");
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_variant() {
     let resolved =
@@ -59,7 +61,9 @@ fn find_toc_file_resolves_bare_variant() {
          `_Classic.toc` / `_Mists.toc` companion exists"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_lod_with_zero_dependencies() {
     let toc =
@@ -96,7 +100,9 @@ fn toc_declares_lod_with_zero_dependencies() {
          persistence"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_omits_allow_load_directives() {
     let toc =
@@ -126,7 +132,9 @@ fn toc_omits_allow_load_directives() {
          (the Great Vault ships on every retail flavor since Shadowlands)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_bootstrap_then_xml_body_file() {
     let toc =
@@ -148,7 +156,9 @@ fn toc_lists_bootstrap_then_xml_body_file() {
          instantiation, since `<Script file>` runs synchronously at the start of XML parsing"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_minimal_directives() {
     let raw = std::fs::read_to_string(weekly_rewards_toc())
@@ -194,6 +204,7 @@ fn toc_raw_bytes_pin_minimal_directives() {
              minimal addon analyzed in this campaign: Title + LoadOnDemand:1 + bootstrap/XML body lines"
         );
     }
+}
 }
 
 #[test]
