@@ -627,15 +627,15 @@ fn ordinary_tainted_public_calls_preserve_stack_taint_and_payload() {
 }
 
 #[test]
-fn secret_identifiers_conservatively_reject_all_actual_vm_representations() {
+fn secret_nonnumeric_identifiers_reject_actual_vm_representations() {
     let env = secret_env();
     exec_secret_probe(
         &env,
         r#"
         TMContexts(function()
             for _, query in ipairs({C_TooltipInfo.GetSpellByID, C_TooltipInfo.GetMountBySpellID}) do
-                for _, value in ipairs(TMSecrets) do
-                    TMReject(query, value)
+                for index, value in ipairs(TMSecrets) do
+                    if index ~= 3 then TMReject(query, value) end
                     assert(issecretvalue(value))
                 end
             end
@@ -763,7 +763,7 @@ fn original_frame_identifier_routes_match_direct_dto_and_actual_rendered_lines()
 }
 
 #[test]
-fn frame_secret_inputs_fail_without_mutating_prior_actual_tooltip_payload() {
+fn frame_nonnumeric_secret_inputs_fail_without_mutating_prior_actual_tooltip_payload() {
     let env = secret_env();
     env.exec("GameTooltip:SetSpellByID(19750)").unwrap();
     let prior = rendered_lines(&env);
@@ -772,11 +772,13 @@ fn frame_secret_inputs_fail_without_mutating_prior_actual_tooltip_payload() {
         r#"
         local original = GameTooltip.processingInfo.tooltipData
         TMContexts(function()
-            for _, value in ipairs(TMSecrets) do
-                for _, method in ipairs({'SetSpellByID', 'SetMountBySpellID'}) do
-                    local ok, err = pcall(GameTooltip[method], GameTooltip, value)
-                    assert(not ok and type(err) == 'string' and #err > 0)
-                    assert(rawequal(GameTooltip.processingInfo.tooltipData, original))
+            for index, value in ipairs(TMSecrets) do
+                if index ~= 3 then
+                    for _, method in ipairs({'SetSpellByID', 'SetMountBySpellID'}) do
+                        local ok, err = pcall(GameTooltip[method], GameTooltip, value)
+                        assert(not ok and type(err) == 'string' and #err > 0)
+                        assert(rawequal(GameTooltip.processingInfo.tooltipData, original))
+                    end
                 end
                 local ok, err = pcall(GameTooltip.SetMountBySpellID, GameTooltip, 'swift palomino', value)
                 assert(not ok and type(err) == 'string' and #err > 0)
@@ -813,10 +815,20 @@ fn forced_gc_preserves_stack_global_list_roots_and_caller_properties() {
             local frame, inputs = TMFrame, TMInputs
             collectgarbage('collect')
             local roots = {a,b,c,d,e,f}
-            for _, value in ipairs(roots) do
+            for index, value in ipairs(roots) do
                 assert(issecretvalue(value))
-                TMReject(C_TooltipInfo.GetSpellByID, value)
-                TMReject(C_TooltipInfo.GetMountBySpellID, value)
+                if index == 3 then
+                    for _, query in ipairs({C_TooltipInfo.GetSpellByID, C_TooltipInfo.GetMountBySpellID}) do
+                        local data = query(value)
+                        assert(not issecretvalue(data) and issecretvalue(data.id))
+                        assert(data.lines[1].leftText == 'Flash of Light')
+                        if canaccessvalue(data.id) then assert(secretunwrap(data.id) == 19750)
+                        else assert(not pcall(secretunwrap, data.id)) end
+                    end
+                else
+                    TMReject(C_TooltipInfo.GetSpellByID, value)
+                    TMReject(C_TooltipInfo.GetMountBySpellID, value)
+                end
                 TMRejectOptional(C_TooltipInfo.GetMountBySpellID, 'swift palomino', 2, value)
                 for position = 2, 6 do
                     TMRejectOptional(C_TooltipInfo.GetSpellByID, 'flash of light', position, value)
