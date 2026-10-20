@@ -377,7 +377,7 @@ fn minimal_checkbox_mouse_enabled_by_default() {
 
 #[test]
 fn button_mouse_enabled_by_default() {
-    let env = env_with_shared_xml();
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"

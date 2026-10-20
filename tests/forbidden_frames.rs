@@ -7,6 +7,7 @@
 use crate::common;
 
 use common::env_with_shared_xml;
+use wow_ui_sim::lua_api::WowLuaEnv;
 
 /// Forbidden proxy __newindex must delegate to the underlying LightUserData.
 /// Without this, assignments on the proxy table are invisible when the same frame
@@ -19,7 +20,7 @@ use common::env_with_shared_xml;
 /// 4. `parent.Track.Thumb` → children_keys returns lud → lud.Thumb = nil
 #[test]
 fn test_forbidden_frame_newindex_syncs_children_keys() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     // Step 1: Create a normal (non-forbidden) parent frame
     env.exec("TestParent = CreateFrame('Frame', 'TestParent', UIParent)")
@@ -90,7 +91,7 @@ fn test_forbidden_scrollbar_track_has_thumb() {
 
 #[test]
 fn has_access_constraints_reports_forbidden_frames_without_restrictions() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
     env.exec("local normal = CreateFrame('Frame', 'AccessConstraintNormal', UIParent)")
         .unwrap();
 
@@ -226,7 +227,7 @@ fn access_restrictions_native_aura_consumer_defers_until_world_entry_then_applie
 
 #[test]
 fn test_forbidden_proxy_method_lookup_does_not_exhaust_aux_stack() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
     env.state().borrow_mut().loading_forbidden = true;
     env.exec("CreateFrame('Frame', 'ForbiddenLoopFrame', UIParent)")
         .unwrap();
@@ -247,7 +248,7 @@ fn test_forbidden_proxy_method_lookup_does_not_exhaust_aux_stack() {
 
 #[test]
 fn test_set_point_accepts_forbidden_proxy_relative_to() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
     env.state().borrow_mut().loading_forbidden = true;
 
     let result: String = env
