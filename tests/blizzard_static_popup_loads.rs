@@ -346,6 +346,7 @@ fn body_orders_dispatcher_before_templates_before_definitions() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_eager_discovery_on_all_four_screens() {
     let ui = blizzard_ui_dir();
@@ -368,6 +369,7 @@ fn appears_in_eager_discovery_on_all_four_screens() {
              consumer attempts StaticPopup_Show"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
