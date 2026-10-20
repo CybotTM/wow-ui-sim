@@ -312,6 +312,7 @@ fn toc_raw_bytes_pin_directives_and_representative_body_files() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -323,6 +324,7 @@ fn appears_in_game_eager_discovery() {
          scenario timers, status bars, zone control widgets, delve \
          tier frames) routes through this addon's container frames"
     );
+}
 }
 
 #[test]
