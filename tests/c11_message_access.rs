@@ -2,26 +2,26 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[cfg(feature = "client-wrath")]
-fn create_tagged_env(kind: &str) -> WowLuaEnv {
+fn create_tagged_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(&format!(
+    env.exec(
         r#"
-        C11Frame = CreateFrame('{kind}')
+        C11Frame = CreateFrame('ScrollingMessageFrame')
         assert(C11Frame:GetNumMessages() == 0, 'new history is empty')
         C11Frame:AddMessage('other-first', 1, 0, 0, 901, false, 22, 202)
         C11Frame:AddMessage('chosen-first', 0, 1, 0, 902, false, 11, 101)
         C11Frame:AddMessage('untagged')
         C11Frame:AddMessage('other-second', 1, 0, 0, 903, false, 22, 202)
         C11Frame:AddMessage('chosen-second', 0, 0, 1, 904, false, 11, 103)
-    "#
-    ))
+    "#,
+    )
     .unwrap();
     env
 }
 
 #[cfg(feature = "client-wrath")]
-fn assert_access_counts(kind: &str) {
-    let env = create_tagged_env(kind);
+fn assert_access_counts() {
+    let env = create_tagged_env();
     env.exec(
         r#"
         assert(C11Frame:GetNumMessages() == 5, 'unfiltered count before')
@@ -40,23 +40,53 @@ fn assert_access_counts(kind: &str) {
 
 #[test]
 #[cfg(feature = "client-wrath")]
-fn c11_message_frame_counts_only_selected_access_id() {
-    assert_access_counts("MessageFrame");
+fn c11_plain_message_frame_queues_and_clear_cancels_before_drain_inferred() {
+    // Both laptop 12340 answers exclude history queries on plain MessageFrame.
+    // Queue timing remains INFERRED: message-frame-access-12340.md disagrees on it.
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        C11Plain = CreateFrame('MessageFrame', 'C11Plain', UIParent)
+        C11Plain:SetSize(300, 100)
+        C11Plain:SetPoint('CENTER')
+        assert(select('#', C11Plain:AddMessage('cancelled')) == 0)
+        "#,
+    )
+    .unwrap();
+    let displayed_rows = || {
+        let sim = env.state().borrow();
+        let id = sim.widgets.get_id_by_name("C11Plain").unwrap();
+        sim.message_frames[&id]
+            .messages
+            .iter()
+            .map(|row| row.text.clone())
+            .collect::<Vec<_>>()
+    };
+    assert!(displayed_rows().is_empty(), "AddMessage must queue");
+    env.exec("C11Plain:Clear()").unwrap();
+    env.fire_on_update(0.0).unwrap();
+    assert!(
+        displayed_rows().is_empty(),
+        "Clear must cancel pending rows"
+    );
+    env.exec("C11Plain:AddMessage('retained')").unwrap();
+    assert!(displayed_rows().is_empty(), "display waits for update");
+    env.fire_on_update(0.0).unwrap();
+    assert_eq!(displayed_rows(), ["retained"]);
 }
 
 #[test]
 #[cfg(feature = "client-wrath")]
 fn c11_scrolling_message_frame_counts_only_selected_access_id() {
-    assert_access_counts("ScrollingMessageFrame");
+    assert_access_counts();
 }
 
 #[test]
 #[cfg(feature = "client-wrath")]
 fn c11_filtered_info_indexes_selected_history_and_returns_transfer_metadata() {
-    for kind in ["MessageFrame", "ScrollingMessageFrame"] {
-        let env = create_tagged_env(kind);
-        env.exec(
-            r#"
+    let env = create_tagged_env();
+    env.exec(
+        r#"
             local text, access, line, extra = C11Frame:GetMessageInfo(1, 11)
             assert(text == 'chosen-first', 'filtered index 1')
             assert(access == 11 and line == 902 and extra == 101, 'first metadata')
@@ -68,18 +98,16 @@ fn c11_filtered_info_indexes_selected_history_and_returns_transfer_metadata() {
             assert(C11Frame:GetMessageInfo(1) == 'other-first', 'unfiltered order')
             assert(C11Frame:GetNumMessages() == 5)
         "#,
-        )
-        .unwrap();
-    }
+    )
+    .unwrap();
 }
 
 #[test]
 #[cfg(feature = "client-wrath")]
 fn c11_remove_selected_access_id_preserves_other_and_untagged_messages() {
-    for kind in ["MessageFrame", "ScrollingMessageFrame"] {
-        let env = create_tagged_env(kind);
-        env.exec(
-            r#"
+    let env = create_tagged_env();
+    env.exec(
+        r#"
             C11Frame:RemoveMessagesByAccessID(11)
             assert(C11Frame:GetNumMessages() == 3)
             assert(C11Frame:GetNumMessages(11) == 0)
@@ -88,9 +116,8 @@ fn c11_remove_selected_access_id_preserves_other_and_untagged_messages() {
             assert(C11Frame:GetMessageInfo(2) == 'untagged')
             assert(C11Frame:GetMessageInfo(3) == 'other-second')
         "#,
-        )
-        .unwrap();
-    }
+    )
+    .unwrap();
 }
 
 #[cfg(feature = "client-wrath")]
