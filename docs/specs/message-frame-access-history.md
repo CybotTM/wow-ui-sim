@@ -62,7 +62,7 @@ Fixture `1e468a530`: C11 0/5, C6 5/7. Both C6 failures report `scrolling history
 
 After test-only `8fb92fc43`, explicit ADD-admitted Wrath rebuild followed by **C11-only rerun passes 5/5**, including the unchanged public transfer and new inferred plain-frame Clear-before-drain case. C6/combatlog/existing insert were not redundantly rerun: production and their test files are unchanged. Default Retail history remains 30/30 before/after the producer; C11 is cfg-excluded (zero tests), not five Retail passes. Post-correction format and default full-feature cargo check exit0. No whole-profile, rendering-pixel or native-run acceptance follows.
 
-Exact commands, stdout/stderr, artifact hashes, revision scope and source/proof applicability: `/home/osso/.local/state/wow-ui-sim/handoff/wrath-msg-access/report.md` and `proof-ledger.json`. Runtime receipts record unchanged original CVars stat/hash; each child uses a byte-exact private copy. Plain-frame timing remains INFERRED, not upgraded by simulator test success.
+Exact commands, stdout/stderr, artifact hashes, revision scope and source/proof applicability are kept in the private `wrath-msg-access` handoff (`report.md`, `proof-ledger.json`). Runtime receipts record unchanged original CVars stat/hash; each child uses a byte-exact private copy. Plain-frame timing remains INFERRED, not upgraded by simulator test success.
 
 ## Known gaps (current cycle)
 
