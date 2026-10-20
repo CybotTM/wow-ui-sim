@@ -242,6 +242,7 @@ fn toc_raw_bytes_pin_six_directives_and_six_body_files() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -257,6 +258,7 @@ fn appears_in_game_eager_discovery() {
          Blizzard_ChatFrame (Mists). Without this addon the entire UI \
          dependency graph collapses"
     );
+}
 }
 
 #[test]
