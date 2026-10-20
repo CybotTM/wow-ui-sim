@@ -289,6 +289,7 @@ fn is_addon_loaded_transitions_false_to_true_after_explicit_load() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn settings_addon_loaded_consumer_lives_in_settings_shared_addon() {
     let consumer = blizzard_ui_dir().join("Blizzard_Settings_Shared/Blizzard_SettingsPanel.lua");
@@ -309,4 +310,5 @@ fn settings_addon_loaded_consumer_lives_in_settings_shared_addon() {
          comment `-- Loaded for tracking` documents intent: this is a one-shot \
          load-time event that downstream code can key off"
     );
+}
 }
