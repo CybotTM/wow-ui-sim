@@ -472,8 +472,15 @@ Historical `e4caa4899` adds empty-default `SimState.item_cooldowns: HashMap<u32,
 
 The [TokenUI contract](../../specs/wrath-legacy-currency-tokenui.md) owns positional tuples, original-consumer tests and unresolved unused-category ordering. No native currency catalog is inferred. The [minimap/XML contract](../../specs/wrath-minimap-xml-labels.md) separately owns local-ping publication, template trust selection and explicit temporary coordinate/attack policies.
 
+## Wrath single-class spellbook projection
+
+`src/lua_api/globals/real/wrath_spellbook.rs` derives ordered known IDs and compact full-slot indices from the existing `SimState.known_spells` HashSet on demand. No parallel membership or persistent compact store is added. `spell_tabs.rs` selects this producer only for Wrath; other-profile function bodies remain unchanged.
+
+The [owning contract](../../specs/wrath-spellbook-tabs.md) tracks original-consumer/API proof, inferred missing-metadata policy and unmodeled skill-line/level inputs. Cursor ordering is a separate follow-up: the historical back-to-back DebugTools diagnostic does not authenticate synchronous cursor callbacks, and no cursor producer is included.
+
 ## Sources
 
+- [Wrath spellbook views](../../specs/wrath-spellbook-tabs.md) — bounded one-tab model, native contract and proof limits
 - [Wrath supplied objectives](../../specs/wrath-quest-objectives.md) — legacy snapshot reads, bounded consumer proof and native input-model gaps
 
 - [Wrath legacy currency](../../specs/wrath-legacy-currency-tokenui.md) — supplied model and original-consumer contract
