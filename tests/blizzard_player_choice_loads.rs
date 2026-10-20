@@ -375,11 +375,13 @@ fn blizzard_player_choice_loads_without_addon_specific_lua_errors(env: &WowLuaEn
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_loads_without_addon_specific_lua_errors() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_loads_without_addon_specific_lua_errors::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -434,11 +436,13 @@ fn blizzard_player_choice_publishes_twenty_six_mixin_tables(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_publishes_twenty_six_mixin_tables() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_publishes_twenty_six_mixin_tables::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -480,11 +484,13 @@ fn blizzard_player_choice_creates_named_non_virtual_frames(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_creates_named_non_virtual_frames() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_creates_named_non_virtual_frames::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -527,11 +533,13 @@ fn blizzard_player_choice_does_not_leak_virtual_templates_to_globals(env: &WowLu
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_does_not_leak_virtual_templates_to_globals() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_does_not_leak_virtual_templates_to_globals::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -563,11 +571,13 @@ fn blizzard_player_choice_frame_renders_as_hidden_after_load(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_frame_renders_as_hidden_after_load() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_frame_renders_as_hidden_after_load::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -607,9 +617,11 @@ fn blizzard_player_choice_uiwidgets_dep_loaded_via_eager_discovery(env: &WowLuaE
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_uiwidgets_dep_loaded_via_eager_discovery() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_uiwidgets_dep_loaded_via_eager_discovery::run(&env);
+}
 }
