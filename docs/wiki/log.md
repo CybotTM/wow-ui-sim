@@ -2453,3 +2453,7 @@ Updated [[xml-template-system]] with call-time function-family lookup and the di
 ## 2026-10-19 — Conditional XML predicate capture removal
 
 Four original-body Wrath KeyRing/Retail ChatConfig regressions are RED. Removed conditional global predicate/getter fast-path captures so the unchanged ordinary Lua compiler owns these bodies and surrounding sequences. Removed the obsolete optimization-selection assertion, not a behavior test. Follow-up GREEN/preservation pending; see [[xml-template-system]].
+
+## 2026-10-19 — LFG XML callback capture removal
+
+Four original LFD/RaidFinder OnClick-body cases are RED: join and leave replacements/hooks are bypassed for category-only and category+slot calls. Removed the specialized capture builder/parser and its optimization-selection assertion; ordinary Lua now owns the unchanged bodies. GREEN/preservation pending; see [[xml-template-system]].

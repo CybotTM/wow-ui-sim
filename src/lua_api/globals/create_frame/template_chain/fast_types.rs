@@ -394,12 +394,6 @@ pub(crate) enum FastHandlerRef<'a> {
         target_path: &'a str,
         method_name: &'a str,
     },
-    GetLfgModeBranch {
-        category_path: &'a str,
-        slot_path: Option<&'a str>,
-        leave_function: &'a str,
-        join_function: &'a str,
-    },
     GrandparentMethodWithNotSelfCheckedArg {
         method_name: &'a str,
     },

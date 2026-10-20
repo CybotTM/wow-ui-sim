@@ -39,52 +39,6 @@ fn parse_local_global_path_conditional_method(stmt: &str) -> Option<(&str, &str)
         .then_some((target_path, method_name))
 }
 
-fn parse_get_lfg_mode_branch(stmt: &str) -> Option<(&str, Option<&str>, &str, &str)> {
-    let stmt = stmt.trim();
-    let prefix = "local mode, subMode = GetLFGMode(";
-    let remainder = stmt.strip_prefix(prefix)?;
-    let (args, remainder) = remainder.split_once(");")?;
-    let mut parts = args.split(',').map(str::trim);
-    let category_path = parts.next()?;
-    let slot_path = parts.next();
-    if parts.next().is_some() || !is_fast_handler_path(category_path) {
-        return None;
-    }
-    if let Some(slot_path) = slot_path
-        && !is_fast_handler_path(slot_path)
-    {
-        return None;
-    }
-
-    let remainder = remainder.trim_start();
-    let condition_prefix = "if ( mode == \"queued\" or mode == \"listed\" or mode == \"rolecheck\" or mode == \"suspended\" ) then";
-    let remainder = remainder.strip_prefix(condition_prefix)?.trim_start();
-    let (then_stmt, else_tail) = remainder.split_once("else")?;
-    let else_stmt = else_tail.trim().strip_suffix("end")?.trim();
-    let (leave_function, leave_args) =
-        parse_global_function_call(then_stmt.trim().trim_end_matches(';'))?;
-    let (join_function, join_args) =
-        parse_global_function_call(else_stmt.trim().trim_end_matches(';'))?;
-    if !join_args.trim().is_empty() {
-        return None;
-    }
-    let expected_leave_args = match slot_path {
-        Some(slot) => format!("{category_path}, {slot}"),
-        None => category_path.to_string(),
-    };
-    (leave_args.trim() == expected_leave_args
-        && is_fast_handler_path(leave_function)
-        && is_fast_handler_path(join_function))
-    .then_some((category_path, slot_path, leave_function, join_function))
-}
-
-fn parse_global_function_call(stmt: &str) -> Option<(&str, &str)> {
-    let (function_name, args) = stmt.split_once('(')?;
-    let args = args.strip_suffix(')')?;
-    let function_name = function_name.trim();
-    is_fast_handler_path(function_name).then_some((function_name, args))
-}
-
 fn parse_conditional_global_field_equals_string_then<'a>(
     stmt: &'a str,
 ) -> Option<(&'a str, &'a str, &'a str, FastHandlerRef<'a>)> {

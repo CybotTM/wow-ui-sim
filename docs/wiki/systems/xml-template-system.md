@@ -98,6 +98,10 @@ The unchanged-producer fixtures at `6b03106f9` failed all six cases, including o
 
 Global no-argument predicates and predicates receiving a global getter result now use the ordinary Lua handler compiler, including surrounding sequences. Their capture templates, enum variants and parser dispatch were removed. Original Wrath KeyRing and Retail ChatConfig OnClick bodies provide four behavioral REDs: later predicate/getter definitions and secure hooks were bypassed. The former ChatConfig optimization-selection assertion is replaced by those original-body behavior tests; no behavior test is ignored. Follow-up GREEN/preservation remains pending.
 
+### LFG branch callbacks
+
+The `GetLFGMode` branch special case also uses the ordinary Lua compiler; its capture template, parser and enum variant were removed. Four original LFD/RaidFinder OnClick-body regressions independently show frozen join/leave callbacks bypassing replacements and secure hooks, with both category-only and category+slot argument checks. These behavior tests replace the old parser-selection assertion. Follow-up GREEN/preservation remains pending.
+
 ## Name Substitution and parentKey
 
 `$parent` in frame names resolves to the actual parent name. `$parent.ScrollBox` in `relativeKey` resolves to `parent["ScrollBox"]`; `$parent.$parent.X` chains via `GetParent()`.
