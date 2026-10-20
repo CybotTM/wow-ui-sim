@@ -132,6 +132,7 @@ fn toc_raw_bytes_pin_three_metadata_lines_with_single_lua_body() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn lua_body_is_a_single_global_flag_assignment() {
     let raw = std::fs::read_to_string(settings_lua()).expect("Blizzard_Settings.lua reads utf-8");
@@ -146,6 +147,7 @@ fn lua_body_is_a_single_global_flag_assignment() {
          other code here would defeat the tracking semantics: the addon must be \
          a thin lazy-load sentinel, NOT a code container"
     );
+}
 }
 
 #[test]
@@ -170,6 +172,7 @@ fn lod_addon_excluded_from_eager_discovery_on_every_screen() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_only_the_toc_and_one_lua_file() {
     let dir = settings_dir();
@@ -187,6 +190,7 @@ fn root_directory_holds_only_the_toc_and_one_lua_file() {
         "Blizzard_Settings directory must contain exactly 2 entries (1 toc + 1 \
          lua) — no XML, no helpers, no nested directories. Got: {entries:?}"
     );
+}
 }
 
 #[test]
