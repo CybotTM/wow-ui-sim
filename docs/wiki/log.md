@@ -1,3 +1,7 @@
+## [2026-10-20] source | Numeric-secret tooltip selectors
+
+[Tooltip bridge notes](systems/lua-api.md#retail-1205-tooltip-spell-and-mount-identifiers) link the [owning contract](../specs/tooltip-spell-mount-identifiers.md#numeric-secret-original-consumer-contract): original meter OnEnter and dynamic mount arg1 RED, explicit identity/presentation policy and independent NeverSecret optionals. P3 presentation is not used to initialize the meter row; producer GREEN remains pending.
+
 ## [2026-10-20] source | Numeric-secret presentation selectors
 
 [Lua API notes](systems/lua-api.md#numeric-secret-spell-presentation-selectors) link the [owning contract](../specs/spell-secret-presentation.md): authentic-wrapper original meter/reward RED precedes opt-in host inspection and secret resolved Info identity. Public parsing, shared strict guards and action/book boundaries remain unchanged. Core GREEN precedes distinct original-tooltip description RED and its producer; the contract now retains final five-case GREEN, two-sided preservation, clean startup and formatting. Link sink and casting-producer gaps remain explicit.

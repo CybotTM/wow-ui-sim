@@ -173,6 +173,8 @@ Commit `da2ec8cb8` adds only an epoch125 (`retail-12-0-5`) authentic VM-secret c
 
 ## Retail 12.0.5 tooltip spell and mount identifiers
 
+The [numeric-secret extension](../../specs/tooltip-spell-mount-identifiers.md#numeric-secret-original-consumer-contract) keeps argument admission local to `c_api::c_tooltip_info_spell_mount`: authenticated host numbers feed the existing strict alias resolver; the rooted DTO receives secret identity fields after payload construction. Presentation and public-selector payloads remain unchanged. Original meter OnEnter is installed without its presentation Init, then uses actual TooltipDataHandler; native field secrecy is not inferred from argument permissions. Producer GREEN remains pending.
+
 [Batch56 saved proof SSOT](../../specs/tooltip-spell-mount-identifiers.md#reconciled-batch56-saved-parent-green--2026-10-02) owns22 new +133 actual substring-selected controls =155 uniquePASS, startup0 `[]`, dirty provenance and inferred policies. Sole epoch125 C API handlers reuse existing payloads; public flags ignored, GetSpell alias/mount-title gaps retained. Independent acceptance and four source rows pending; no native/profile/whole-page credit.
 
 ## Retail 12.0.5 tertiary stat inputs

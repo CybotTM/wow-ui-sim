@@ -1,3 +1,7 @@
+## [2026-10-20] source | Numeric-secret tooltip selectors
+
+[Tooltip bridge notes](systems/lua-api.md#retail-1205-tooltip-spell-and-mount-identifiers) link the [owning contract](../specs/tooltip-spell-mount-identifiers.md#numeric-secret-original-consumer-contract): original meter OnEnter and dynamic mount arg1 RED, explicit identity/presentation policy and independent NeverSecret optionals. P3 presentation is not used to initialize the meter row; producer GREEN remains pending.
+
 ## [2026-10-20] source | Numeric-secret spell presentation
 
 [Host-only lookup notes](systems/lua-api.md#numeric-secret-spell-presentation-selectors) link the [presentation contract](../specs/spell-secret-presentation.md): original meter/reward selector RED, endpoint-specific conversions and explicit secret-identity/public-presentation policy. Core and description RED→GREEN, two-sided preservation and clean stock startup are bounded Retail proof; link/casting-producer holds remain separate.

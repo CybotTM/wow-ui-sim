@@ -1,6 +1,6 @@
 # Tooltip spell and mount identifiers
 
-Retail 12.0.5 `C_TooltipInfo.GetMountBySpellID` and `GetSpellByID` must accept the chosen shared public spell-identifier model and enforce their documented NeverSecret optional arguments. Batch56 independently accepted within the chosen bounded contract; global formatting remains failed on preserved unowned source. No native-verified capability is claimed. See [Lua API architecture](../lua-api.md) and [frame data flow](../frame-data-flow.md).
+Retail 12.0.5 `C_TooltipInfo.GetMountBySpellID` and `GetSpellByID` must accept the chosen shared public spell-identifier model and enforce their documented NeverSecret optional arguments. Original Batch56 acceptance is retained below as historical public-boundary proof; the numeric-secret extension has separate current receipts. No native-verified capability is claimed. See [Lua API architecture](../lua-api.md) and [frame data flow](../frame-data-flow.md).
 
 ## What it must do
 
@@ -13,13 +13,14 @@ Retail 12.0.5 `C_TooltipInfo.GetMountBySpellID` and `GetSpellByID` must accept t
 - [x] Read alias changes/removal live. Queries do not mutate aliases or declared mounts; independent environments remain isolated. Mutating a returned DTO cannot change later results or another returned DTO.
 - [x] Preserve current unknown numeric policy: exactly one identified, line-empty, Spell-typed tooltip, including valid u32 endpoints.
 - [x] **INFERRED new unresolved-public-STRING miss policy:** exactly one fresh, unidentified, empty Spell-typed TooltipData with a fresh lines table. Never invent an ID. Unseeded numeric strings, catalog names, short links and full colored links remain misses; no general parsing/catalog-name lookup/acquisition/override graph.
-- [x] Results and nested DTO fields remain public under the chosen simulator contract. Native output secrecy remains unknown.
+- [x] Public-selector results and nested DTO fields retain their existing public contract.
+- [ ] Explicit user policy (2026-10-20): numeric-secret selection keeps presentation and containers public, while returned `id`/`spellID` fields remain authentic secrets, including retained unknown numeric identities. Native output secrecy remains INFERRED.
 
 ### Secret boundary and caller context
 
 - [x] Reject authentic VM-secret optional arguments in all documented positions, whether caller is secure or ordinarily tainted, before alias/catalog/payload acquisition. Mount arg2 `checkIndoors`; spell args2–6 `isPet`, `showSubtext`, `dontOverride`, `difficultyID`, `isLink`.
-- [x] **INFERRED conservative arg1 policy:** reject secret identifiers through the same public identifier helper without unwrapping or inspecting payloads. Native `AllowedWhenTainted` permissions are unknown; rejection does not establish them.
-- [x] Reject actual host-secret BOOL true and false, NUMBER, STRING, wrapped real Frame table and ordinary table across every optional position and both arg1 boundaries. Known numeric/name inputs and numeric/string misses cannot bypass NeverSecret checks.
+- [ ] Admit authentic numeric-secret arg1 in secure and ordinarily tainted mainline callers through host-only inspection and the existing alias-first resolver. Preserve the strict public finite-integral-u32 domain; do not widen the shared public reader. Secret strings and other secret payload kinds remain rejected. Native full identifier grammar and exact errors remain INFERRED.
+- [x] Reject actual host-secret BOOL true/false, NUMBER, STRING, wrapped real Frame and ordinary table across every optional position. Keep nonnumeric secret arg1 rejection; numeric arg1 has separate success coverage. Known numeric/name inputs and numeric/string misses cannot bypass NeverSecret checks.
 - [x] Failed queries preserve authentic wrapper secrecy, global/list/stack roots, live wrapper allocation identity, ordinary caller properties and owned state maps; valid public recovery still works after forced GC and failures.
 - [x] Preserve stack taint for rejection and ordinary public calls. Restore secure context after returning from an explicitly tainted closure.
 - [x] **INFERRED error policy:** provide nonempty public API context, without private string payload disclosure. Exact native errors and precedence are unknown; tests do not assert source text or a native error message.
@@ -28,7 +29,13 @@ Retail 12.0.5 `C_TooltipInfo.GetMountBySpellID` and `GetSpellByID` must accept t
 
 - [x] Preserve **current ignored-provider behavior**, not new flag semantics: documented nil/BOOL combinations for mount arg2 and spell args2/3/4/6, plus nil or public number17 at spell arg5, leave actual payload unchanged. No new public optional type/domain/finite validation is required for unused flags.
 - [x] Actual `GameTooltip:SetSpellByID` and `SetMountBySpellID` pass the original identifier to the same real namespace query. Numeric/name/full-link aliases preserve every direct-query TooltipData field/value, including public RGBA components, and equivalent actual rendered lines. Processing may add per-line `lineIndex` only: when present it must be public numeric and equal the actual line position. Other extra fields or lines fail equivalence. No query replacement, method-call spy, VM-shape assertion or duplicate builder counts as frame proof.
-- [x] Secret frame identifiers and mount arg2 fail without replacing prior exposed TooltipData or rendered lines; valid public frame recovery remains meaningful.
+- [x] Nonnumeric secret frame identifiers and all secret mount arg2 values fail without replacing prior exposed TooltipData or rendered lines; valid public frame recovery remains meaningful.
+
+### Numeric-secret original-consumer contract
+
+- [ ] Original meter OnEnter reaches real `TooltipDataHandler` from a row initialized without P3 name/icon/Info presentation methods; original dynamic mount handler resolves actual default mount23338 Swift Palomino.
+- [ ] Four selector/caller controls retain exact arity and meaningful title/lines, wrapper opacity, caller taint and source model rows. Unknown numeric900002 remains one identified empty Spell DTO with secret identity for secret input.
+- [ ] Forced GC retains authentic input roots and secret numeric success; NeverSecret optional negatives and nonnumeric rejections remain independent.
 
 ## How it works
 
@@ -63,7 +70,7 @@ Both declare `SecretArguments = "AllowedWhenTainted"`, `MayReturnNothing = true`
 
 ### Existing meaningful producers and state
 
-- `src/c_api/c_tooltip_info_spell_mount.rs`: owns both handlers and their sole `retail-12-0-5` publication. Rejects actual VM-secret arg1 and all declared optional positions before shared identifier resolution; public errors include method, argument index and policy without payload inspection or taint changes. Ordinary public optionals remain ignored.
+- `src/c_api/c_tooltip_info_spell_mount.rs`: owns both handlers and their sole `retail-12-0-5` publication. Authenticates numeric-secret arg1 with host-only strict-u32 inspection; nonnumeric secrets retain the strict public reader rejection. All declared optional positions remain NeverSecret before alias/model lookup. Roots the returned DTO before wrapping resolved identity fields, without altering caller taint. Ordinary public optionals remain ignored.
 - `src/c_api/mod.rs`: feature-gates the focused module under `retail-12-0-5`.
 - `src/lua_api/globals/missing_surface/tooltip_info/mod.rs`: invokes the C API registrar after the namespace exists in globals. A single crate-visible `tooltip_for_spell_identifier` bridge dispatches resolved numeric IDs to unchanged shared producers, or unresolved strings to the existing fresh empty Spell DTO builder. Only the tooltip module visibility is widened; child producers/builders remain private.
 - `src/lua_api/globals/missing_surface/tooltip_info/probes.rs`: both old numeric handlers and registrations compile only without `retail-12-0-5`; earlier profile behavior remains unchanged.
@@ -73,7 +80,7 @@ Both declare `SecretArguments = "AllowedWhenTainted"`, `MayReturnNothing = true`
 - `src/spell_lookup.rs`: existing spell catalog facade; 23338 has no spell row in inspected generated catalog and reaches host mount state.
 - `src/lua_api/state_defaults.rs`: actual default mount18 Swift Palomino, spell23338, icon132261, collected/usable true, mount_type230. A later default mount69 shares23338; current first match wins. Tests assert the existing fixture precondition rather than fabricate catalog data.
 - `src/lua_api/state_types/collections.rs`: declared `MountData` fields; no new state/producer fixtures or modified model.
-- `src/c_api/c_spell.rs`: already crate-visible strict public identifier helper and shared alias-first resolver over existing `spell_id_aliases`; unchanged.
+- `src/c_api/c_spell.rs`: already crate-visible strict public identifier helper and shared alias-first value resolver over existing `spell_id_aliases`; unchanged by this extension.
 - `src/lua_api/frame/methods/widgets/tooltip/content.rs`: actual setters forward original argument values to the real namespace query, store exposed `processingInfo.tooltipData`, and apply rendered lines. Mount forwards arg2; spell setter currently forwards only arg1.
 - `src/lua_api/frame/methods/widgets/tooltip/line_data.rs`: **frame precondition limit**: `GetSpell()` uses `TooltipData.spell_id`, which setters populate only from original numeric inputs. String aliases currently have no GetSpell name/ID; numeric mount23338 names fall back to `Spell 23338`, not the mount title. Thus these fixtures compare actual rendered lines and exposed query DTO, not an invented GetSpell equivalence. No frame patch is authorized here.
 - `src/lua_api/methods.rs`: original frames are backed `Val::Table` objects, not presumed Userdata. Tests require actual `GetObjectType()` and existing table backing metadata before wrapping the real frame.
