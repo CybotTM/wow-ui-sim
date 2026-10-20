@@ -70,6 +70,9 @@ const POOL_FACTORIES: &[&str] = &[
     "CreateMaskTexturePool",
 ];
 
+// Literal split-addon TOC/discovery snapshots only: absent from Wrath's
+// complete manifest1-382/cache. This does not gate native FrameXML helpers.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&shared_xml_base_dir()).expect("SharedXMLBase TOC resolves");
@@ -369,6 +372,8 @@ fn eager_discovery_includes_addon_on_all_four_screens() {
              FrameUtil / Pools at parse time"
         );
     }
+}
+
 }
 
 prefork_full_ui_case! {
