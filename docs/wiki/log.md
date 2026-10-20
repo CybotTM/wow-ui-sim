@@ -2461,3 +2461,7 @@ Linked optional EditBox history, direct arrows, byte-mask presentation and Messa
 ## 2026-10-20 — Wrath addon-load takeover
 
 Classified source-bound fixture receipts (8/13 pass), traced AuctionUI nil calls to Mists-only model registration, and recorded retained legacy boundaries in [fixture diagnosis](investigations/wrath-addon-load-fixture.md). Auction publication is now enabled for Wrath without model changes; original-consumer GREEN and preservation remain pending.
+
+## 2026-10-20 — Wrath addon-load bounded acceptance
+
+[Fixture diagnosis](investigations/wrath-addon-load-fixture.md) records all13 nonzero original consumers (8pass/5retained), unchanged-model auction publication (5→1 errors; missing class catalog retained), Retail17/17 before and after, both stock `lua-errors []`, zero-warning builds/check, fmt and unchanged CVars. Module-cfg compile repair and excluded zero-test launcher receipts remain explicit. No native-client/full-suite acceptance, baseline increases, or other legacy implementation is claimed.
