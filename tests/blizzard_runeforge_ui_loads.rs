@@ -273,6 +273,7 @@ fn excluded_from_eager_discovery_due_to_load_on_demand() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_seven_lua_xml_pairs_next_to_toc() {
     let dir = runeforge_dir();
@@ -292,6 +293,7 @@ fn root_directory_holds_seven_lua_xml_pairs_next_to_toc() {
         let path = dir.join(xml);
         assert!(path.is_file(), "{} missing", path.display());
     }
+}
 }
 
 post_wrath_ui_fixture! {
