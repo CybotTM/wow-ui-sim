@@ -169,6 +169,7 @@ fn allows_screen_returns_true_only_for_game_when_allowload_absent() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn included_in_eager_discovery_for_game_screen_only() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -196,6 +197,7 @@ fn included_in_eager_discovery_for_game_screen_only() {
              Game-only semantics"
         );
     }
+}
 }
 
 #[test]
