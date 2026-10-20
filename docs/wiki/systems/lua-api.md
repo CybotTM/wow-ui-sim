@@ -478,8 +478,13 @@ The [TokenUI contract](../../specs/wrath-legacy-currency-tokenui.md) owns positi
 
 The [owning contract](../../specs/wrath-spellbook-tabs.md) tracks original-consumer/API proof, inferred missing-metadata policy and unmodeled skill-line/level inputs. Cursor ordering is a separate follow-up: the historical back-to-back DebugTools diagnostic does not authenticate synchronous cursor callbacks, and no cursor producer is included.
 
+## Retail unused currency flags
+
+`src/c_api/item_spell/c_currency.rs` resolves `SetCurrencyUnused` through the existing Retail displayed-index projection and changes `CurrencyInfo.is_type_unused`. List and ID queries read the same supplied row; list `discovered` feeds original popup visibility. No second membership store, grouping, sorting or persistence layer was added. The [owning contract](../../specs/currency-unused-mutations.md#bounded-proof) records original checkbox/popup proof and current-Retail native grouping UNKNOWN; existing [displayed-index](../../specs/currency-displayed-indices.md) and [watched](../../specs/currency-watched-mutations.md) models remain separate.
+
 ## Sources
 
+- [Retail unused currency contract](../../specs/currency-unused-mutations.md) — flag scope, original consumers and held grouping.
 - [Wrath spellbook views](../../specs/wrath-spellbook-tabs.md) — bounded one-tab model, native contract and proof limits
 - [Wrath supplied objectives](../../specs/wrath-quest-objectives.md) — legacy snapshot reads, bounded consumer proof and native input-model gaps
 
