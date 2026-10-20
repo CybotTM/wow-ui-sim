@@ -8,6 +8,7 @@ const ROOT: &str = "Blizzard_ActionBar";
 const ACTION_ID: u32 = 1;
 const SPELL_ID: u32 = 1234;
 
+post_wrath_ui_fixture! {
 #[test]
 fn locked_action_shows_level_link_overlay_until_unlocked() {
     test_timeout! {
@@ -23,6 +24,7 @@ fn locked_action_shows_level_link_overlay_until_unlocked() {
         assert_level_link_overlay_hidden(env);
     });
     }
+}
 }
 
 fn seed_action_button_spell(env: &WowLuaEnv) {
