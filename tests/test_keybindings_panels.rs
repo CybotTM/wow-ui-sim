@@ -358,6 +358,7 @@ fn keybind_l_opens_group_finder() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn raid_finder_group_button_path_handles_empty_rf_dungeon_list() {
     test_timeout! {
@@ -371,7 +372,9 @@ fn raid_finder_group_button_path_handles_empty_rf_dungeon_list() {
         ).expect("Raid Finder group button path should not raise Lua errors");
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn premade_group_category_buttons_can_be_clicked() {
     test_timeout! {
@@ -400,7 +403,9 @@ fn premade_group_category_buttons_can_be_clicked() {
         ).expect("Premade Group category buttons should click without Lua errors");
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn premade_group_categories_can_start_search() {
     test_timeout! {
@@ -425,7 +430,9 @@ fn premade_group_categories_can_start_search() {
         ).expect("Premade Group categories should start search without Lua errors");
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn premade_group_search_result_tooltips_do_not_error() {
     test_timeout! {
@@ -442,6 +449,7 @@ fn premade_group_search_result_tooltips_do_not_error() {
             "#
         ).expect("Premade Group search result tooltips should not raise Lua errors");
     }
+}
 }
 
 // ── O → ToggleFriendsFrame() ────────────────────────────────────────────
