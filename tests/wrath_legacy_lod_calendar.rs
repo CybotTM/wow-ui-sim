@@ -39,6 +39,22 @@ fn calendar_original_3771_types_and_4521_defaults() {
             .unwrap();
         assert_eq!(actual, (cap, cap, ranks as i32));
     }
+    // Native wrapper reads m_numRanks directly; do not repair guild-model state here.
+    env.state().borrow_mut().world.guild_name = None;
+    let actual: (i32, i32, i32) = env.eval("return CalendarDefaultGuildFilter()").unwrap();
+    assert_eq!(actual, (80, 80, ranks as i32));
+    env.state()
+        .borrow_mut()
+        .wrath_legacy
+        .calendar
+        .player_present = false;
+    let actual: (i32, i32, i32) = env.eval("return CalendarDefaultGuildFilter()").unwrap();
+    assert_eq!(actual, (0, 0, 0));
+    env.state()
+        .borrow_mut()
+        .wrath_legacy
+        .calendar
+        .player_present = true;
     env.state().borrow_mut().world.guild_ranks.clear();
     let actual: (i32, i32, i32) = env.eval("return CalendarDefaultGuildFilter()").unwrap();
     assert_eq!(actual, (80, 80, 0));
