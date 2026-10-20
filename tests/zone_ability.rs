@@ -128,6 +128,7 @@ fn fire_startup_events(env: &WowLuaEnv) {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn zone_ability_frame_displays_seeded_active_ability() {
     test_timeout! {
@@ -183,4 +184,5 @@ fn zone_ability_frame_displays_seeded_active_ability() {
             "zone ability button should resolve a visible icon texture"
         );
     }
+}
 }

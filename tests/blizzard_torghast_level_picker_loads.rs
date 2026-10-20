@@ -258,6 +258,7 @@ fn no_addon_declares_torghast_level_picker_as_dependency() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_colors_dep_directory_exists_on_disk() {
     let colors_dir = blizzard_ui_dir().join("Blizzard_Colors");
@@ -273,6 +274,7 @@ fn blizzard_colors_dep_directory_exists_on_disk() {
         "Blizzard_Colors must have a discoverable TOC \
          (mainline-flavor or bare). Got: {toc:?}"
     );
+}
 }
 
 prefork_full_ui_case! {
@@ -356,6 +358,7 @@ fn ui_panel_windows_entry_registered_at_boot(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn six_torghast_gossip_texture_kits_route_to_load_addon() {
     let raw = std::fs::read_to_string(
@@ -376,6 +379,7 @@ fn six_torghast_gossip_texture_kits_route_to_load_addon() {
              C_AddOns.LoadAddOn at line 16 then TryShow at line 17"
         );
     }
+}
 }
 
 prefork_full_ui_case! {

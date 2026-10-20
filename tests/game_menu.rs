@@ -398,6 +398,7 @@ fn test_game_menu_hide() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_game_menu_shop_button_opens_store_and_menu_can_reopen_after_store_closes() {
     test_timeout! {
@@ -454,4 +455,5 @@ fn test_game_menu_shop_button_opens_store_and_menu_can_reopen_after_store_closes
 
         assert_eq!(result, "ok");
     }
+}
 }

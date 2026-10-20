@@ -67,6 +67,7 @@ fn spellbook_corner_flipbook_frame_index(env: &wow_ui_sim::lua_api::WowLuaEnv) -
         .expect("SpellBook corner flipbook frame probe should return")
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn spellbook_corner_flipbook_plays_and_rewinds() {
     test_timeout! {
@@ -129,4 +130,5 @@ fn spellbook_corner_flipbook_plays_and_rewinds() {
             handler_errors.join("\n")
         );
     }
+}
 }

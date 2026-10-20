@@ -274,6 +274,7 @@ fn no_mainline_addon_declares_timerunning_as_dependency() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_six_mixins_with_expected_method_counts() {
     let env = load_character_select_screen();
@@ -307,7 +308,9 @@ fn explicit_load_publishes_six_mixins_with_expected_method_counts() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_creates_four_named_toplevel_frames() {
     let env = load_character_select_screen();
@@ -332,7 +335,9 @@ fn explicit_load_creates_four_named_toplevel_frames() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_registers_two_static_popups() {
     let env = load_character_select_screen();
@@ -357,7 +362,9 @@ fn explicit_load_registers_two_static_popups() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_has_no_addon_specific_lua_errors() {
     let env = load_character_select_screen();
@@ -378,7 +385,9 @@ fn explicit_load_has_no_addon_specific_lua_errors() {
         "Timerunning legacy globals should let the addon load without Lua errors. Found: {errors:#?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn three_required_dep_directories_exist_on_disk() {
     for dep in REQUIRED_DEPS {
@@ -396,4 +405,5 @@ fn three_required_dep_directories_exist_on_disk() {
              find_toc_file (mainline-flavor or bare). Got: {toc:?}"
         );
     }
+}
 }

@@ -222,6 +222,7 @@ fn test_button_frame_level_change_relevels_connected_edges_on_update() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_hero_spec_content_spec_image_anchors_to_spec_name() {
     // Regression test for xml_layer_batch two-pass ordering bug.
@@ -292,4 +293,5 @@ fn test_hero_spec_content_spec_image_anchors_to_spec_name() {
         )
         .unwrap();
     assert_eq!(result, "ok");
+}
 }

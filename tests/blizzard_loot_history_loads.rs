@@ -5,6 +5,7 @@ use common::panel_fixtures::clear_recorded_lua_errors;
 
 const ROOT: &str = "Blizzard_FrameXML";
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_loot_history_loads_and_shows_empty_state_without_lua_errors() {
     common::with_perf_lock(|| {
@@ -70,4 +71,5 @@ fn blizzard_loot_history_loads_and_shows_empty_state_without_lua_errors() {
             });
         });
     });
+}
 }

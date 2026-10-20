@@ -250,6 +250,7 @@ fn test_main_action_bar_size() {
     );
 }
 
+post_wrath_ui_fixture! {
 /// Verify the core EditMode enter/exit flow works without pcall.
 ///
 /// AccountSettings:OnEditModeEnter/Exit are excluded — they call
@@ -284,6 +285,7 @@ fn test_enter_exit_edit_mode_core_steps() {
         "EditMode core steps should not crash:\n{}",
         failures
     );
+}
 }
 
 #[test]

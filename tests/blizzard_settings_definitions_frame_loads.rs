@@ -76,6 +76,7 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn retail_12_1_housing_settings_global_strings_match_pinned_export() {
     const EXPECTED: &[(&str, &str)] = &[
@@ -138,6 +139,7 @@ fn retail_12_1_housing_settings_global_strings_match_pinned_export() {
             "global {name}: expected {expected:?}, actual {actual_value:?}"
         );
     }
+}
 }
 
 // Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.

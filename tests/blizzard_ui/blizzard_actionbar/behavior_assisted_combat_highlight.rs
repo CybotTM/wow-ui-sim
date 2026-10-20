@@ -8,6 +8,7 @@ const ROOT: &str = "Blizzard_ActionBar";
 const SLOT: u32 = 1;
 const SPELL_ID: u32 = 1234;
 
+post_wrath_ui_fixture! {
 #[test]
 fn assisted_combat_next_cast_shows_matching_button_highlight() {
     test_timeout! {
@@ -20,6 +21,7 @@ fn assisted_combat_next_cast_shows_matching_button_highlight() {
         assert_action_button_highlight_shown(env);
     });
     }
+}
 }
 
 fn seed_next_cast_button(env: &WowLuaEnv) {

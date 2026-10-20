@@ -69,6 +69,7 @@ const EXPECTED_ITERATION: &str = "addline_count=2 first_line=GUILD_EARNED_BY_TOK
 type GatingProbe = (String, String, String, String);
 type IterationProbe = (String, String, String, String);
 
+post_wrath_ui_fixture! {
 #[test]
 fn check_guild_members_tooltip_no_ops_outside_guild_view_and_when_num_members_is_zero() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -208,7 +209,9 @@ fn check_guild_members_tooltip_no_ops_outside_guild_view_and_when_num_members_is
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn check_guild_members_tooltip_pairs_odd_index_left_with_even_index_right_via_add_double_line() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -356,4 +359,5 @@ fn check_guild_members_tooltip_pairs_odd_index_left_with_even_index_right_via_ad
              the loop should fetch each member exactly once."
         );
     });
+}
 }

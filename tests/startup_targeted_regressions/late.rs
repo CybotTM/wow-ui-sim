@@ -204,6 +204,7 @@ fn blizzard_console_saved_variables_machine_seed_without_saved_vars_manager() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn damage_meter_saved_variables_default_without_partial_empty_seed() {
     test_timeout! {
@@ -225,7 +226,9 @@ fn damage_meter_saved_variables_default_without_partial_empty_seed() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn damage_meter_saved_variables_default_with_empty_saved_vars_storage() {
     test_timeout! {
@@ -249,6 +252,7 @@ fn damage_meter_saved_variables_default_with_empty_saved_vars_storage() {
             "DamageMeter saved vars should stay nil or expose windowDataList, not a partially-seeded table"
         );
     }
+}
 }
 
 prefork_full_ui_case! {

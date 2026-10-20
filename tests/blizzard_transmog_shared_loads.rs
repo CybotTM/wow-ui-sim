@@ -355,6 +355,7 @@ fn runtime_load_keeps_removed_inventory_slot_global_private() {
     assert_eq!(result, "ok");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn direct_load_keeps_removed_inventory_slot_global_private() {
     let env = fresh_game_env();
@@ -380,7 +381,9 @@ fn direct_load_keeps_removed_inventory_slot_global_private() {
 
     assert_eq!(result, "ok");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_transmog_util_table() {
     let env = fresh_game_env();
@@ -411,7 +414,9 @@ fn explicit_load_publishes_transmog_util_table() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_transmog_location_mixin() {
     let env = fresh_game_env();
@@ -440,7 +445,9 @@ fn explicit_load_publishes_transmog_location_mixin() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_item_model_base_mixin() {
     let env = fresh_game_env();
@@ -473,7 +480,9 @@ fn explicit_load_publishes_item_model_base_mixin() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_wardrobe_sets_data_provider_mixin() {
     let env = fresh_game_env();
@@ -507,7 +516,9 @@ fn explicit_load_publishes_wardrobe_sets_data_provider_mixin() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_transmog_slot_order() {
     let env = fresh_game_env();
@@ -537,7 +548,9 @@ fn explicit_load_publishes_transmog_slot_order() {
          Legs, Feet, MainHand, OffHand"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_initializes_empty_transmog_slots_table() {
     let env = fresh_game_env();
@@ -558,7 +571,9 @@ fn explicit_load_initializes_empty_transmog_slots_table() {
          empty after load — that's expected"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_initialize_slot_location_info_global() {
     let env = fresh_game_env();
@@ -578,7 +593,9 @@ fn explicit_load_publishes_initialize_slot_location_info_global() {
          indirectly populate SLOT_ID_TO_NAME"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_registers_static_popup_dialog() {
     let env = fresh_game_env();
@@ -598,7 +615,9 @@ fn explicit_load_registers_static_popup_dialog() {
          button1=OKAY, button2=CANCEL, hideOnEscape=1, timeout=0"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_emits_no_addon_specific_errors() {
     let env = fresh_game_env();
@@ -629,4 +648,5 @@ fn explicit_load_emits_no_addon_specific_errors() {
          tolerate an empty/nil return without raising. Found: \
          {addon_specific:?}"
     );
+}
 }

@@ -15,6 +15,7 @@ struct GlyphStateProbe {
     glyph_translation: bool,
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn spell_flyout_pending_glyph_marks_valid_spell_buttons() {
     test_timeout! {
@@ -27,6 +28,7 @@ fn spell_flyout_pending_glyph_marks_valid_spell_buttons() {
         assert_pending_glyph_highlights_popup_button(env);
     });
     }
+}
 }
 
 fn seed_pending_glyph(env: &WowLuaEnv) {

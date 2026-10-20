@@ -404,11 +404,13 @@ fn publishes_two_mixin_tables_in_secure_env_only(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn publishes_two_mixin_tables_in_secure_env_only() {
     let env = load_full_ui_for(ScreenKind::Game);
     publishes_two_mixin_tables_in_secure_env_only::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -475,11 +477,13 @@ fn publishes_outbound_table_via_simulator_stub_back_reference(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn publishes_outbound_table_via_simulator_stub_back_reference() {
     let env = load_full_ui_for(ScreenKind::Game);
     publishes_outbound_table_via_simulator_stub_back_reference::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -528,11 +532,13 @@ fn xml_publishes_three_virtual_line_templates_via_create_frame(env: &WowLuaEnv) 
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn xml_publishes_three_virtual_line_templates_via_create_frame() {
     let env = load_full_ui_for(ScreenKind::Game);
     xml_publishes_three_virtual_line_templates_via_create_frame::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -559,11 +565,13 @@ fn xml_publishes_simple_checkout_frame_with_close_button_and_background(env: &Wo
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn xml_publishes_simple_checkout_frame_with_close_button_and_background() {
     let env = load_full_ui_for(ScreenKind::Game);
     xml_publishes_simple_checkout_frame_with_close_button_and_background::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -589,11 +597,13 @@ fn check_cancel_open_checkout_method_present_on_simple_checkout_frame(env: &WowL
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn check_cancel_open_checkout_method_present_on_simple_checkout_frame() {
     let env = load_full_ui_for(ScreenKind::Game);
     check_cancel_open_checkout_method_present_on_simple_checkout_frame::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -616,9 +626,11 @@ fn close_button_is_named_global_via_parent_key_synthesis(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn close_button_is_named_global_via_parent_key_synthesis() {
     let env = load_full_ui_for(ScreenKind::Game);
     close_button_is_named_global_via_parent_key_synthesis::run(&env);
+}
 }

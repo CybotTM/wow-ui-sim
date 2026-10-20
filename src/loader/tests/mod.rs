@@ -93,10 +93,12 @@ fn val_to_rust_string(env: &WowLuaEnv, value: Val) -> String {
         .unwrap_or_else(|| panic!("expected string value, got {}", value.type_name()))
 }
 
+post_wrath_ui_fixture! {
 fn blizzard_ui_dir() -> PathBuf {
     crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
         "CARGO_MANIFEST_DIR"
     )))
+}
 }
 
 /// Create a test environment, write XML content, load it, return context.

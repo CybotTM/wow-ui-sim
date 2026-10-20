@@ -807,16 +807,24 @@ fn test_scroll_button_has_textures() {
     // Check that ScrollUpButton has its textures from UIPanelScrollUpButtonTemplate.
     let up_button = common::template_child_name("TestScrollBtnTex", "ScrollBarScrollUpButton");
     let has_normal: bool = env
-        .eval(&format!("return _G[{up_button:?}]:GetNormalTexture() ~= nil"))
+        .eval(&format!(
+            "return _G[{up_button:?}]:GetNormalTexture() ~= nil"
+        ))
         .unwrap();
     let has_pushed: bool = env
-        .eval(&format!("return _G[{up_button:?}]:GetPushedTexture() ~= nil"))
+        .eval(&format!(
+            "return _G[{up_button:?}]:GetPushedTexture() ~= nil"
+        ))
         .unwrap();
     let has_disabled: bool = env
-        .eval(&format!("return _G[{up_button:?}]:GetDisabledTexture() ~= nil"))
+        .eval(&format!(
+            "return _G[{up_button:?}]:GetDisabledTexture() ~= nil"
+        ))
         .unwrap();
     let has_highlight: bool = env
-        .eval(&format!("return _G[{up_button:?}]:GetHighlightTexture() ~= nil"))
+        .eval(&format!(
+            "return _G[{up_button:?}]:GetHighlightTexture() ~= nil"
+        ))
         .unwrap();
 
     assert!(has_normal, "ScrollUpButton should have Normal texture");
@@ -929,6 +937,7 @@ fn test_hybrid_scroll_template_applies_declared_thumb_texture() {
 // TextureKitConstants Tests (requires SharedXML)
 // ============================================================================
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_texture_kit_constants_defined() {
     let env = env_with_shared_xml();
@@ -950,6 +959,7 @@ fn test_texture_kit_constants_defined() {
         use_atlas_size,
         "TextureKitConstants.UseAtlasSize should be true"
     );
+}
 }
 
 // ============================================================================

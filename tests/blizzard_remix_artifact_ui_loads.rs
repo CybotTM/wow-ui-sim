@@ -183,6 +183,7 @@ fn excluded_from_eager_discovery_via_load_on_demand() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_bootstrap_and_two_files() {
     let mut entries: Vec<String> = std::fs::read_dir(remix_artifact_dir())
@@ -201,6 +202,7 @@ fn root_directory_holds_bootstrap_and_two_files() {
         ],
         "Retail 12.1.0.69497 ships the RemixArtifact bootstrap beside its Lua and XML files"
     );
+}
 }
 
 prefork_full_ui_case! {

@@ -262,9 +262,11 @@ fn compact_raid_manager_emits_background_and_forward_toggle_quad_bounds(env: &Wo
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn compact_raid_manager_emits_background_and_forward_toggle_quad_bounds() {
     let env = load_settled_game_ui();
     compact_raid_manager_emits_background_and_forward_toggle_quad_bounds::run(&env);
+}
 }

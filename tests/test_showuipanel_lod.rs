@@ -270,6 +270,7 @@ fn encounter_timeline_loads_and_populates_track_view_event_frames() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn damage_meter_loads_and_populates_primary_session_window() {
     test_timeout! {
@@ -350,6 +351,7 @@ fn damage_meter_loads_and_populates_primary_session_window() {
         assert_eq!(result, "ok", "DamageMeter should load and populate the primary session and source windows: {result}");
     }
 }
+}
 
 fn build_panel_damage_meter_input() -> DamageMeterInput {
     const SESSION_ID: i64 = 1;
@@ -370,8 +372,16 @@ fn build_panel_damage_meter_input() -> DamageMeterInput {
             duration_seconds: Some(40.0),
         }],
         session_ids_by_type: [(OVERALL, SESSION_ID), (CURRENT, SESSION_ID)].into(),
-        sessions: [((SESSION_ID, DAMAGE_DONE), build_panel_damage_meter_session(source))].into(),
-        source_details: [((SESSION_ID, DAMAGE_DONE, source_key), build_panel_damage_meter_details())].into(),
+        sessions: [(
+            (SESSION_ID, DAMAGE_DONE),
+            build_panel_damage_meter_session(source),
+        )]
+        .into(),
+        source_details: [(
+            (SESSION_ID, DAMAGE_DONE, source_key),
+            build_panel_damage_meter_details(),
+        )]
+        .into(),
     }
 }
 
@@ -565,6 +575,7 @@ fn professions_frame_loads_and_populates_specialization_tab() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn professions_frame_xml_pages_are_parent_keyed() {
     test_timeout! {
@@ -601,7 +612,9 @@ fn professions_frame_xml_pages_are_parent_keyed() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
     test_timeout! {
@@ -648,4 +661,5 @@ fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
             "LossOfControlFrame should show the seeded loss-of-control overlay: {result}"
         );
     }
+}
 }

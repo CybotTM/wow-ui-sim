@@ -152,6 +152,7 @@ const LEVEL_3_THRESHOLD: i64 = 2_500;
 const PAYLOAD_HOUSE_FAVOR: i64 = 1_800;
 const PAYLOAD_HOUSE_LEVEL: i64 = 2;
 
+post_wrath_ui_fixture! {
 #[test]
 fn house_favor_bar_round_trips_through_house_level_favor_updated_event() {
     test_timeout! {
@@ -165,6 +166,7 @@ fn house_favor_bar_round_trips_through_house_level_favor_updated_event() {
         assert_post_event_status_bar_values(env);
     });
     }
+}
 }
 
 fn assert_cold_globals_resolve(env: &WowLuaEnv) {

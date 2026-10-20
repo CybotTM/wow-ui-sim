@@ -688,6 +688,7 @@ fn spell_flyout_publishes_dialog_strata_hidden_by_default() {
     });
 }
 
+post_wrath_ui_fixture! {
 /// Pin `StatusTrackingBarManager` identity together with its two
 /// `parentKey` child containers. Declared at
 /// `Mainline/StatusTrackingBar.xml:35-62` as a `parent="UIParent"`
@@ -747,4 +748,5 @@ fn status_tracking_bar_manager_publishes_main_and_secondary_parent_key_children(
             );
         }
     });
+}
 }

@@ -115,6 +115,7 @@ fn load_addon_or_panic(env: &WowLuaEnv, addon: &str) {
     load_addon(&env.loader_env(), &toc).unwrap_or_else(|err| panic!("{addon} load failed: {err}"));
 }
 
+post_wrath_ui_fixture! {
 /// Reproduce the AlliedRacesUI load path: a top-level XML frame defined via
 /// `inherits="ButtonFrameTemplate"` calls `self.TopTileStreaks:Hide()` in its
 /// OnLoad mixin. Confirms the static XML loader installs inherited
@@ -142,6 +143,7 @@ fn allied_races_addon_loads_without_top_tile_streaks_error() {
         .eval("return AlliedRacesFrame.TopTileStreaks:GetObjectType()")
         .unwrap();
     assert_eq!(object_type, "Texture");
+}
 }
 
 /// Reproduce the full-Blizzard-load failure path: `discover_all_blizzard_addons`

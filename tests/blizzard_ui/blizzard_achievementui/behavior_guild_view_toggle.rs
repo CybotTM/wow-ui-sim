@@ -74,6 +74,7 @@ const EXPECTED_NUM_COMPLETED: &str =
 type TabDispatchProbe = (String, String, String);
 type ForwardingProbe = (String, String, String, String);
 
+post_wrath_ui_fixture! {
 #[test]
 fn toggle_dispatches_base_tab_onclick_with_index_2_for_guild_and_index_1_for_player() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -161,7 +162,9 @@ fn toggle_dispatches_base_tab_onclick_with_index_2_for_guild_and_index_1_for_pla
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn refresh_view_and_summary_status_bar_propagate_in_guild_view_to_total_points_and_num_completed_globals()
  {
@@ -310,4 +313,5 @@ fn refresh_view_and_summary_status_bar_propagate_in_guild_view_to_total_points_a
              lua:2473 before the count is read."
         );
     });
+}
 }

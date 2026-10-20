@@ -227,6 +227,7 @@ fn absent_from_every_screen_eager_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn azerite_ui_declares_transform_tree_as_hard_dependency() {
     let azerite_toc = blizzard_ui_dir()
@@ -252,7 +253,9 @@ fn azerite_ui_declares_transform_tree_as_hard_dependency() {
     );
     assert!(toc.is_load_on_demand());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn no_other_addon_declares_transform_tree_as_dependency() {
     let entries = std::fs::read_dir(blizzard_ui_dir()).expect("BlizzardUI dir reads");
@@ -291,6 +294,7 @@ fn no_other_addon_declares_transform_tree_as_dependency() {
          a forward-declared utility for future consumers. Got \
          declarers: {declarers:?}"
     );
+}
 }
 
 prefork_full_ui_case! {

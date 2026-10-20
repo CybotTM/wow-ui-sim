@@ -5,9 +5,9 @@
 use crate::common;
 mod render_order_support;
 
-use wow_ui_sim::lua_api::WowLuaEnv;
 use render_order_support::*;
 use wow_ui_sim::iced_app::compute_frame_rect;
+use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::headless::render_to_image;
 
 // ============================================================================
@@ -459,6 +459,7 @@ fn late_set_frame_level_invalidates_cached_strata_buckets() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn isolated_world_map_stack_opens_and_populates_world_quest_pins() {
     common::with_timeout(120, move || {
@@ -499,6 +500,7 @@ fn isolated_world_map_stack_opens_and_populates_world_quest_pins() {
             "isolated world map stack should still populate visible world quest pins"
         );
     });
+}
 }
 
 #[test]
@@ -643,6 +645,7 @@ fn pixel_delta(lhs: [u8; 4], rhs: [u8; 4]) -> u32 {
         + u32::from(lhs[2].abs_diff(rhs[2]))
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn isolated_world_map_seeded_world_quests_do_not_show_expiration_clock() {
     common::with_timeout(120, move || {
@@ -687,7 +690,9 @@ fn isolated_world_map_seeded_world_quests_do_not_show_expiration_clock() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn isolated_world_map_world_quest_circle_keeps_atlas_size() {
     common::with_timeout(120, move || {
@@ -709,4 +714,5 @@ fn isolated_world_map_world_quest_circle_keeps_atlas_size() {
             "world quest NormalTexture should keep its 32x32 atlas-sized rect, got {circle_rect:?}"
         );
     });
+}
 }
