@@ -7,7 +7,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn weekly_rewards_util_dir() -> PathBuf {
@@ -58,6 +59,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_variant() {
     let resolved = find_toc_file(&weekly_rewards_util_dir())
@@ -71,7 +74,9 @@ fn find_toc_file_resolves_bare_variant() {
          the Great Vault feature"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_explicit_lod_zero() {
     let toc = TocFile::from_file(&weekly_rewards_util_toc())
@@ -102,7 +107,9 @@ fn toc_declares_explicit_lod_zero() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.saved_variables().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_omits_allow_load_directives() {
     let toc = TocFile::from_file(&weekly_rewards_util_toc())
@@ -131,7 +138,9 @@ fn toc_omits_allow_load_directives() {
          gametype)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_only_lua_body_file() {
     let toc = TocFile::from_file(&weekly_rewards_util_toc())
@@ -149,7 +158,9 @@ fn toc_lists_only_lua_body_file() {
          `<Script file>`); this addon lists ONLY lua and has no XML at all"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_minimal_directives() {
     let raw = std::fs::read_to_string(weekly_rewards_util_toc())
@@ -192,6 +203,7 @@ fn toc_raw_bytes_pin_minimal_directives() {
              just Title + LoadOnDemand:0 + 1 lua body line"
         );
     }
+}
 }
 
 #[test]
