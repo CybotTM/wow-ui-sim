@@ -11,6 +11,8 @@ fn fixture() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
     {
         let mut sim = env.state().borrow_mut();
+        sim.spell_classifications.clear();
+        sim.aura_filter_facts.important_spell_ids.clear();
         sim.spell_classifications.insert(
             19750,
             SpellClassification {
@@ -40,6 +42,22 @@ fn fixture() -> WowLuaEnv {
     lua.state_mut().pop();
     drop(lua);
     env
+}
+
+fn assert_classification_facts(env: &WowLuaEnv) {
+    let sim = env.state().borrow();
+    assert_eq!(sim.spell_classifications.len(), 1);
+    let flags = sim.spell_classifications.get(&19750).unwrap();
+    assert_eq!(
+        (
+            flags.consumable,
+            flags.crowd_control,
+            flags.external_defensive
+        ),
+        (true, true, true)
+    );
+    assert_eq!(sim.aura_filter_facts.important_spell_ids.len(), 1);
+    assert!(sim.aura_filter_facts.important_spell_ids.contains(&19750));
 }
 
 fn load_original(env: &WowLuaEnv, file: &str, start: &str, end: &str) {
@@ -86,7 +104,7 @@ fn original_nameplate_classifies_tainted_secret_spell() {
     "#,
     )
     .expect("original nameplate resolves configured true classification");
-    assert!(env.state().borrow().spell_classifications[&19750].crowd_control);
+    assert_classification_facts(&env);
 }
 
 #[test]
@@ -130,6 +148,7 @@ fn original_castbar_highlights_tainted_secret_spell() {
     "#,
     )
     .expect("original cast bar resolves important fact");
+    assert_classification_facts(&env);
 }
 
 #[test]
@@ -170,4 +189,5 @@ fn classification_selector_controls_and_external_permission() {
         debug.setobjecttaint(probe, 'P2Probe')
         probe('P2Probe')
     "#).expect("P2 controls and unchanged AllowedWhenUntainted endpoint");
+    assert_classification_facts(&env);
 }
