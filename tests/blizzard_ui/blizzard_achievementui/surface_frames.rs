@@ -54,13 +54,41 @@ const XML_SITE: &str = "Mainline/Blizzard_AchievementUI.xml:1505";
 /// Filter controls moved below `HeaderDetails.Filters` and are covered by a
 /// separate nested-path test.
 const PLAN_NAMED_CHILDREN: &[(&str, &str, &str)] = &[
-    ("Header", "Mainline/Blizzard_AchievementUI.xml:1505", "parentKey"),
-    ("HeaderDetails", "Mainline/Blizzard_AchievementUI.xml:1675", "parentKey"),
-    ("Categories", "Mainline/Blizzard_AchievementUI.xml:1578", "parentKey"),
-    ("Achievements", "Mainline/Blizzard_AchievementUI.xml:1518", "name-prefix"),
-    ("Stats", "Mainline/Blizzard_AchievementUI.xml:1572", "name-prefix"),
-    ("Summary", "Mainline/Blizzard_AchievementUI.xml:1625", "name-prefix"),
-    ("Comparison", "Mainline/Blizzard_AchievementUI.xml:2080", "name-prefix"),
+    (
+        "Header",
+        "Mainline/Blizzard_AchievementUI.xml:1505",
+        "parentKey",
+    ),
+    (
+        "HeaderDetails",
+        "Mainline/Blizzard_AchievementUI.xml:1675",
+        "parentKey",
+    ),
+    (
+        "Categories",
+        "Mainline/Blizzard_AchievementUI.xml:1578",
+        "parentKey",
+    ),
+    (
+        "Achievements",
+        "Mainline/Blizzard_AchievementUI.xml:1518",
+        "name-prefix",
+    ),
+    (
+        "Stats",
+        "Mainline/Blizzard_AchievementUI.xml:1572",
+        "name-prefix",
+    ),
+    (
+        "Summary",
+        "Mainline/Blizzard_AchievementUI.xml:1625",
+        "name-prefix",
+    ),
+    (
+        "Comparison",
+        "Mainline/Blizzard_AchievementUI.xml:2080",
+        "name-prefix",
+    ),
 ];
 
 #[test]
@@ -340,6 +368,7 @@ fn achievement_frame_comparison_subtree_publishes_plan_named_paths() {
 const SEARCH_PROGRESS_BAR_PATH: &str =
     "AchievementFrame.HeaderDetails.Filters.SearchBox.SearchProgressBar";
 
+post_wrath_ui_fixture! {
 #[test]
 fn achievement_frame_search_progress_bar_uses_nested_search_box_path() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -362,4 +391,5 @@ fn achievement_frame_search_progress_bar_uses_nested_search_box_path() {
         assert_eq!(observations.3, "function", "{SEARCH_PROGRESS_BAR_HANDLER} must be global.");
         assert_eq!(observations.4, "nil", "OnUpdate is installed only while search runs.");
     });
+}
 }

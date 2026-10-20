@@ -40,6 +40,7 @@ const FAKE_FRAME_BUILDER: &str = r#"
     end
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn set_restricted_mode_uses_nested_search_box_and_forwards_category() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -81,4 +82,5 @@ fn set_restricted_mode_uses_nested_search_box_and_forwards_category() {
              forwards the category."
         );
     });
+}
 }
