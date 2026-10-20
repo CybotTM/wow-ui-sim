@@ -22,6 +22,8 @@ const TOC_FILES: &[&str] = &["Blizzard_QuestTimer.lua", "Blizzard_QuestTimer.xml
 
 const REQUIRED_DEPS: &[&str] = &["Blizzard_GameTooltip", "Blizzard_ManagedFrameSystem"];
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quest_timer_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&quest_timer_dir()).expect("Blizzard_QuestTimer TOC resolves");
@@ -45,7 +47,9 @@ fn blizzard_quest_timer_find_toc_resolves_bare_variant() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quest_timer_toc_pins_classic_only_with_default_state_enabled() {
     let toc = TocFile::from_file(&quest_timer_toc()).expect("Blizzard_QuestTimer TOC parses");
@@ -90,7 +94,9 @@ fn blizzard_quest_timer_toc_pins_classic_only_with_default_state_enabled() {
     );
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quest_timer_toc_declares_game_tooltip_and_managed_frame_dependencies() {
     let toc = TocFile::from_file(&quest_timer_toc()).expect("TOC parses");
@@ -102,7 +108,9 @@ fn blizzard_quest_timer_toc_declares_game_tooltip_and_managed_frame_dependencies
          Blizzard_ManagedFrameSystem in published order"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quest_timer_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(quest_timer_toc()).expect("TOC reads utf-8");
@@ -136,7 +144,9 @@ fn blizzard_quest_timer_toc_declares_metadata_in_raw_bytes() {
          addons missing the canonical version line"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quest_timer_toc_lists_two_files_lua_then_xml() {
     let toc = TocFile::from_file(&quest_timer_toc()).expect("TOC parses");
@@ -159,6 +169,7 @@ fn blizzard_quest_timer_toc_lists_two_files_lua_then_xml() {
          Blizzard_QuestNavigation, this addon DOES list its companion Lua \
          explicitly in the TOC body — the older eager-load pattern"
     );
+}
 }
 
 #[test]
@@ -202,6 +213,7 @@ fn blizzard_quest_timer_appears_in_full_addon_inventory() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quest_timer_xml_declares_twenty_five_named_buttons() {
     let xml_path = quest_timer_dir().join("Blizzard_QuestTimer.xml");
@@ -232,4 +244,5 @@ fn blizzard_quest_timer_xml_declares_twenty_five_named_buttons() {
         raw.contains("QuestTimerMixin") && raw.contains("QuestTimerButtonMixin"),
         "XML must reference both Lua-defined mixins via `mixin=...` attributes"
     );
+}
 }
