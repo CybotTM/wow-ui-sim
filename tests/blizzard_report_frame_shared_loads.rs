@@ -113,6 +113,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved =
@@ -127,7 +129,9 @@ fn find_toc_file_resolves_bare_toc() {
          Glue (Blizzard_ReportFrameGlue) consumers depend on the same template/mixin surface"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_both_screens_with_no_hard_deps() {
     let toc = TocFile::from_file(&report_shared_toc())
@@ -163,7 +167,9 @@ fn toc_declares_eager_both_screens_with_no_hard_deps() {
          straight to C_ReportSystem.SendReport, never persisted client-side"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_optional_dep_singular_advisory_only() {
     let toc = TocFile::from_file(&report_shared_toc())
@@ -183,7 +189,9 @@ fn toc_declares_optional_dep_singular_advisory_only() {
         "the singular `## OptionalDep:` directive exposes the current GlueParent advisory dependency"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_two_files_in_root_directory() {
     let toc = TocFile::from_file(&report_shared_toc())
@@ -203,7 +211,9 @@ fn toc_lists_two_files_in_root_directory() {
          publish before ReportFrameShared.xml's `mixin=\"...Mixin\"` attributes resolve them"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allows_screen_returns_true_for_every_screen() {
     let toc = TocFile::from_file(&report_shared_toc())
@@ -222,6 +232,7 @@ fn allows_screen_returns_true_for_every_screen() {
              always true. (Screen tested: {screen:?})"
         );
     }
+}
 }
 
 #[test]
@@ -514,6 +525,7 @@ fn module_locals_stay_file_scoped(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_declares_two_virtual_templates_and_one_named_frame() {
     let xml_text = std::fs::read_to_string(report_shared_dir().join("ReportFrameShared.xml"))
@@ -546,4 +558,5 @@ fn xml_declares_two_virtual_templates_and_one_named_frame() {
          OnAttributeChanged with the cleaned data payload, decoupling the protected/insecure \
          caller from the frame's secure environment"
     );
+}
 }
