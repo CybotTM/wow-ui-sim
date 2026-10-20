@@ -318,6 +318,7 @@ fn game_screen_eager_discovery_includes_static_popup_core_game_and_eager_tutoria
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_screens_eager_discovery_includes_static_popup_core_and_glue_variants() {
     let ui = blizzard_ui_dir();
@@ -344,6 +345,7 @@ fn glue_screens_eager_discovery_includes_static_popup_core_and_glue_variants() {
             );
         }
     }
+}
 }
 
 #[test]
