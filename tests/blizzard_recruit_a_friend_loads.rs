@@ -206,6 +206,7 @@ fn blizzard_recruit_a_friend_toc_carries_rare_suppress_local_table_ref_directive
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recruit_a_friend_toc_lists_frame_and_social_view_sources() {
     let toc = TocFile::from_file(&raf_toc()).expect("RAF TOC parse");
@@ -234,6 +235,7 @@ fn blizzard_recruit_a_friend_toc_lists_frame_and_social_view_sources() {
          — this is what pulls in the .lua companion when XML parsing reaches the directive"
     );
 }
+}
 
 post_wrath_ui_fixture! {
 #[test]
@@ -259,6 +261,7 @@ fn blizzard_recruit_a_friend_only_allows_game_screen_via_allow_load_game() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recruit_a_friend_appears_in_eager_game_discovery() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -272,6 +275,7 @@ fn blizzard_recruit_a_friend_appears_in_eager_game_discovery() {
          Game-screen inventory — every loader-filter gate (load_on_demand=false / \
          ptr_only=false / game_type_restricted=false / allows_screen(Game)=true) admits it"
     );
+}
 }
 
 #[test]
