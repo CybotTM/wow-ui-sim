@@ -246,6 +246,7 @@ fn toc_raw_bytes_pin_directives_and_body_files() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_files_exist_on_disk() {
     for path in BODY_FILES {
@@ -259,7 +260,9 @@ fn body_files_exist_on_disk() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -273,6 +276,7 @@ fn appears_in_game_eager_discovery() {
          roster voice indicators consume the templates, so the addon \
          must be alive at PLAYER_ENTERING_WORLD"
     );
+}
 }
 
 #[test]
