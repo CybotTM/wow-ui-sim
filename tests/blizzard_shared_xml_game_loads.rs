@@ -270,6 +270,7 @@ fn tooltip_lua_precedes_dressup_and_loot_specialization() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn eager_discovery_includes_addon_only_on_game_screen() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -298,6 +299,7 @@ fn eager_discovery_includes_addon_only_on_game_screen() {
              for the dress-up + tooltip layer to operate against"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
