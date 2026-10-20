@@ -1,6 +1,6 @@
 ## [2026-10-20] investigation | Shared-target test source binding
 
-[Harness notes](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) record another worktree's absolute generated module paths and TimeManager zero-selection; manifest-directory invalidation is committed, runtime confirmation pending. Exact private RED receipts are retained, not accepted as this lane's source-bound proof.
+[Harness notes](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) record another worktree's absolute generated module paths and TimeManager zero-selection; the initial runtime environment watch is insufficient under Cargo's documented semantics. A real two-root relocation regression is committed; compile-time binding and runtime confirmation remain pending. Exact private RED receipts are retained, not accepted as this lane's source-bound proof.
 
 ## [2026-10-20] source | Wrath message-frame method and metadata boundary
 
