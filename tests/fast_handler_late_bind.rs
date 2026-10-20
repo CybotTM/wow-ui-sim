@@ -1,4 +1,5 @@
 //! XML handlers must observe globals when invoked, not when installed.
+use std::path::Path;
 use wow_ui_sim::loader::{LoadTiming, create_frame_from_xml};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::xml::{XmlElement, parse_xml};
@@ -248,4 +249,173 @@ fn original_wrath_game_menu_resolves_later_framexml_globals() {
         missing.is_empty(),
         "late-bound GameMenu globals: {missing:#?}"
     );
+}
+
+fn find_original_frame<'a>(
+    frame: &'a wow_ui_sim::xml::FrameXml,
+    name: &str,
+) -> Option<&'a wow_ui_sim::xml::FrameXml> {
+    if frame.name.as_deref() == Some(name) {
+        return Some(frame);
+    }
+    frame
+        .all_frame_elements()
+        .into_iter()
+        .find_map(|(child, _)| find_original_frame(child, name))
+}
+
+fn original_on_click(path: &Path, name: &str) -> String {
+    let source = std::fs::read_to_string(path).unwrap();
+    let ui = parse_xml(&source).unwrap();
+    let frame = ui
+        .elements
+        .iter()
+        .filter_map(|element| element.as_frame_data())
+        .find_map(|(frame, _)| find_original_frame(frame, name))
+        .unwrap_or_else(|| panic!("missing original frame {name} in {}", path.display()));
+    frame
+        .scripts()
+        .flat_map(|scripts| &scripts.on_click)
+        .last()
+        .and_then(|script| script.body.clone())
+        .expect("original inline OnClick")
+}
+
+#[cfg(feature = "client-wrath")]
+fn keyring_body() -> String {
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc().unwrap();
+    original_on_click(
+        &toc.parent().unwrap().join("MainMenuBarBagButtons.xml"),
+        "KeyRingButton",
+    )
+}
+
+#[cfg(feature = "client-wrath")]
+#[test]
+fn followup_original_keyring_observes_predicate_redefinition_and_hook() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        function CursorHasItem() return false end
+        function PutKeyInKeyRing() lateBoundKeyring = 'put' end
+        function ToggleKeyRing() lateBoundKeyring = 'toggle' end
+    "#,
+    )
+    .unwrap();
+    install(&env, &keyring_body());
+    env.exec(
+        r#"
+        function CursorHasItem() return true end
+        hooksecurefunc('CursorHasItem', function() lateBoundPredicateHook = true end)
+        LateBoundFrame:GetScript('OnClick')(LateBoundFrame)
+        assert(lateBoundKeyring == 'put', 'stale KeyRing predicate')
+        assert(lateBoundPredicateHook, 'predicate secure hook bypassed')
+    "#,
+    )
+    .unwrap();
+}
+
+#[cfg(feature = "client-wrath")]
+#[test]
+fn followup_original_keyring_resolves_predicate_defined_after_install() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        CursorHasItem = nil
+        function PutKeyInKeyRing() lateBoundKeyring = 'put' end
+        function ToggleKeyRing() lateBoundKeyring = 'toggle' end
+    "#,
+    )
+    .unwrap();
+    install(&env, &keyring_body());
+    env.exec(
+        r#"
+        function CursorHasItem() return true end
+        LateBoundFrame:GetScript('OnClick')(LateBoundFrame)
+        assert(lateBoundKeyring == 'put', 'late KeyRing predicate not called')
+    "#,
+    )
+    .unwrap();
+}
+
+#[cfg(feature = "client-retail")]
+fn chat_config_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        ChatConfigFrame = CreateFrame('Frame')
+        LateBoundChatFrame = CreateFrame('Frame')
+        function HideUIPanel(frame) assert(frame == ChatConfigFrame) end
+        function PlaySound() end
+        function FCF_GetCurrentChatFrame() return LateBoundChatFrame end
+        function IsCombatLog() return false end
+        function Blizzard_CombatLog_RefreshGlobalLinks() lateBoundRefresh = true end
+        Blizzard_CombatLog_CurrentSettings = {}
+        C_CombatLog = {
+            ApplyFilterSettings = function(settings)
+                assert(settings == Blizzard_CombatLog_CurrentSettings)
+            end,
+            RefilterEntries = function() lateBoundRefilter = true end,
+        }
+    "#,
+    )
+    .unwrap();
+    env
+}
+
+#[cfg(feature = "client-retail")]
+fn chat_config_body() -> String {
+    let ui = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
+    original_on_click(
+        &ui.join("Blizzard_ChatFrame/Mainline/ChatConfigFrame.xml"),
+        "$parentOkayButton",
+    )
+}
+
+#[cfg(feature = "client-retail")]
+#[test]
+fn followup_original_chat_config_observes_predicate_redefinition_and_hook() {
+    let env = chat_config_env();
+    install(&env, &chat_config_body());
+    env.exec(
+        r#"
+        function IsCombatLog(frame)
+            assert(frame == LateBoundChatFrame)
+            return true
+        end
+        hooksecurefunc('IsCombatLog', function() lateBoundPredicateHook = true end)
+        LateBoundFrame:GetScript('OnClick')(LateBoundFrame)
+        assert(lateBoundRefresh and lateBoundRefilter, 'stale ChatConfig predicate')
+        assert(lateBoundPredicateHook, 'predicate secure hook bypassed')
+    "#,
+    )
+    .unwrap();
+}
+
+#[cfg(feature = "client-retail")]
+#[test]
+fn followup_original_chat_config_observes_getter_redefinition_and_hook() {
+    let env = chat_config_env();
+    env.exec(
+        r#"
+        local old = CreateFrame('Frame')
+        function FCF_GetCurrentChatFrame() return old end
+        function IsCombatLog(frame)
+            assert(frame == LateBoundChatFrame, 'stale predicate input')
+            return true
+        end
+    "#,
+    )
+    .unwrap();
+    install(&env, &chat_config_body());
+    env.exec(
+        r#"
+        function FCF_GetCurrentChatFrame() return LateBoundChatFrame end
+        hooksecurefunc('FCF_GetCurrentChatFrame', function() lateBoundGetterHook = true end)
+        LateBoundFrame:GetScript('OnClick')(LateBoundFrame)
+        assert(lateBoundRefresh and lateBoundRefilter)
+        assert(lateBoundGetterHook, 'predicate getter secure hook bypassed')
+    "#,
+    )
+    .unwrap();
 }
