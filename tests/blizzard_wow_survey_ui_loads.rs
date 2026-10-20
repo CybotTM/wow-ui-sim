@@ -192,6 +192,7 @@ fn toc_raw_bytes_pin_directives() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn directory_holds_four_entries_with_bootstrap() {
     let entries: Vec<String> = std::fs::read_dir(wow_survey_dir())
@@ -205,7 +206,9 @@ fn directory_holds_four_entries_with_bootstrap() {
          Got: {entries:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dep_directory_exists_on_disk() {
     assert!(
@@ -218,6 +221,7 @@ fn dep_directory_exists_on_disk() {
         status_ui_toc().is_file(),
         "Blizzard_StatusUI ships a bare TOC (no flavor variants)"
     );
+}
 }
 
 #[test]
