@@ -193,27 +193,17 @@ fn find_scrollbar_children(
     registry: &wow_ui_sim::widget::WidgetRegistry,
     sf_name: &str,
 ) -> (u64, u64, u64) {
-    let sf_id = registry
-        .get_id_by_name(sf_name)
-        .expect("ScrollFrame should exist");
-    let sf = registry.get(sf_id).unwrap();
-
-    let scrollbar_id = *sf
-        .children_keys
-        .get("ScrollBar")
-        .expect("Should have ScrollBar child key");
-    let scrollbar = registry.get(scrollbar_id).unwrap();
-
-    let up_id = *scrollbar
-        .children_keys
-        .get("ScrollUpButton")
-        .expect("ScrollBar should have ScrollUpButton child key");
-    let down_id = *scrollbar
-        .children_keys
-        .get("ScrollDownButton")
-        .expect("ScrollBar should have ScrollDownButton child key");
-
-    (scrollbar_id, up_id, down_id)
+    let child_id = |suffix| {
+        let name = common::template_child_name(sf_name, suffix);
+        registry
+            .get_id_by_name(&name)
+            .unwrap_or_else(|| panic!("native Faux template should create {name}"))
+    };
+    (
+        child_id("ScrollBar"),
+        child_id("ScrollBarScrollUpButton"),
+        child_id("ScrollBarScrollDownButton"),
+    )
 }
 
 #[test]

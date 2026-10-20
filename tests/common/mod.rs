@@ -263,6 +263,12 @@ fn load_wrath_panel_templates(env: &WowLuaEnv) {
     );
 }
 
+/// Both native Faux template layouts publish `$parent` children as named globals.
+/// Wrath does not additionally publish the modern parentKey fields.
+pub fn template_child_name(parent_name: &str, suffix: &str) -> String {
+    format!("{parent_name}{suffix}")
+}
+
 pub fn fire_addon_loaded(env: &WowLuaEnv, addon_name: &str) {
     let _ = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(addon_name)]);
 }
@@ -333,6 +339,7 @@ const _: () = {
     let _ = std::mem::size_of::<LockedEnv>();
     let _ = lock_env as fn(EnvBuilder) -> LockedEnv;
     let _ = env_with_shared_xml as fn() -> WowLuaEnv;
+    let _ = template_child_name as fn(&str, &str) -> String;
     let _ = fire_addon_loaded as fn(&WowLuaEnv, &str);
     let _ = fire_player_entering_world as fn(&WowLuaEnv, bool, bool);
     let _ = call_global_if_present as fn(&WowLuaEnv, &str);
