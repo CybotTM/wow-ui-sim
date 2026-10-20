@@ -78,6 +78,8 @@ fn load_full_game_ui_with_prematch_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_prematch_ui_find_toc_resolves_bare_variant() {
     let resolved =
@@ -99,6 +101,7 @@ fn blizzard_plunderstorm_prematch_ui_find_toc_resolves_bare_variant() {
         "There must be NO `_Mainline.toc` at {} — the bare TOC is the canonical entry point",
         mainline.display()
     );
+}
 }
 
 #[test]
@@ -159,6 +162,7 @@ fn blizzard_plunderstorm_prematch_ui_toc_declares_eager_plunderstorm_only() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_prematch_ui_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(prematch_ui_toc())
@@ -218,7 +222,9 @@ fn blizzard_plunderstorm_prematch_ui_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## Version:` — unversioned"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_prematch_ui_toc_lists_two_files_in_canonical_order() {
     let toc =
@@ -236,6 +242,7 @@ fn blizzard_plunderstorm_prematch_ui_toc_lists_two_files_in_canonical_order() {
          Blizzard_PlunderstormPrematchUI.xml SECOND (materializes 2 virtual templates + \
          the named PrematchHeaderFrame)"
     );
+}
 }
 
 #[test]
