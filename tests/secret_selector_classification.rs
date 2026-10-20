@@ -1,5 +1,8 @@
 //! P2: original consumers with authentic numeric-secret selectors.
-#![cfg(all(feature = "retail-12-0-5", any(feature = "profile-retail", feature = "client-ptr")))]
+#![cfg(all(
+    feature = "retail-12-0-5",
+    any(feature = "profile-retail", feature = "client-ptr")
+))]
 use rilua::LuaApiMut;
 use wow_ui_sim::c_api::c_spell_classification::SpellClassification;
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -8,14 +11,24 @@ fn fixture() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
     {
         let mut sim = env.state().borrow_mut();
-        sim.spell_classifications.insert(19750, SpellClassification {
-            consumable: true, crowd_control: true, external_defensive: true,
-        });
+        sim.spell_classifications.insert(
+            19750,
+            SpellClassification {
+                consumable: true,
+                crowd_control: true,
+                external_defensive: true,
+            },
+        );
         sim.aura_filter_facts.important_spell_ids.insert(19750);
     }
     let loader = env.loader_env();
     let mut lua = loader.rilua_mut();
-    for (name, number) in [("Selector", 19750.0), ("Missing", 900002.0), ("Invalid", -1.0), ("Fraction", 19750.5)] {
+    for (name, number) in [
+        ("Selector", 19750.0),
+        ("Missing", 900002.0),
+        ("Invalid", -1.0),
+        ("Fraction", 19750.5),
+    ] {
         let value = rilua::table_security::wrap_host_secret_number(lua.state_mut(), number);
         lua.state_mut().push(value);
         lua.set_global_val(name, value).unwrap();
@@ -30,33 +43,49 @@ fn fixture() -> WowLuaEnv {
 }
 
 fn load_original(env: &WowLuaEnv, file: &str, start: &str, end: &str) {
-    let profile = if cfg!(feature = "client-ptr") { "ptr" } else { "retail" };
+    let profile = if cfg!(feature = "client-ptr") {
+        "ptr"
+    } else {
+        "retail"
+    };
     let root = std::path::PathBuf::from(std::env::var_os("HOME").unwrap());
-    let path = root.join(format!(".cache/wow-ui-sim/blizzard-ui/{profile}/AddOns/{file}"));
+    let path = root.join(format!(
+        ".cache/wow-ui-sim/blizzard-ui/{profile}/AddOns/{file}"
+    ));
     let source = std::fs::read_to_string(path).unwrap();
     let begin = source.find(start).unwrap();
     let finish = begin + source[begin..].find(end).unwrap();
-    env.exec(&source[begin..finish]).expect("unchanged original consumer block");
+    env.exec(&source[begin..finish])
+        .expect("unchanged original consumer block");
 }
 
 #[test]
 fn original_nameplate_classifies_tainted_secret_spell() {
     let env = fixture();
     env.exec("NamePlateAurasMixin = {}").unwrap();
-    load_original(&env, "Blizzard_NamePlates/Blizzard_NamePlateAuras.lua", "function NamePlateAurasMixin:IsAuraCrowdControl(", "function NamePlateAurasMixin:AddAura(");
-    env.exec(r#"
-        local function probe()
+    load_original(
+        &env,
+        "Blizzard_NamePlates/Blizzard_NamePlateAuras.lua",
+        "function NamePlateAurasMixin:IsAuraCrowdControl(",
+        "function NamePlateAurasMixin:AddAura(",
+    );
+    env.exec(
+        r#"
+        local function probe(expectedTaint)
             local before = debug.getstacktaint()
+            assert(before == expectedTaint, 'explicit caller context')
             for _, id in ipairs({19750, Selector}) do
                 assert(NamePlateAurasMixin:IsAuraCrowdControl({spellId=id}) == true)
             end
             assert(issecretvalue(Selector))
             assert(debug.getstacktaint() == before)
         end
-        probe()
+        probe(nil)
         debug.setobjecttaint(probe, 'P2Probe')
-        probe()
-    "#).expect("original nameplate resolves configured true classification");
+        probe('P2Probe')
+    "#,
+    )
+    .expect("original nameplate resolves configured true classification");
     assert!(env.state().borrow().spell_classifications[&19750].crowd_control);
 }
 
@@ -64,11 +93,23 @@ fn original_nameplate_classifies_tainted_secret_spell() {
 fn original_castbar_highlights_tainted_secret_spell() {
     let env = fixture();
     env.exec("CastingBarMixin = {}").unwrap();
-    load_original(&env, "Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua", "function CastingBarMixin:GetHighlightImportantCasts(", "function CastingBarMixin:SetIsHighlightedImportantCast(");
-    load_original(&env, "Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua", "function CastingBarMixin:SetIsHighlightedImportantCast(", "function CastingBarMixin:GetIsHighlightedImportantCast(");
-    env.exec(r#"
-        local function probe()
+    load_original(
+        &env,
+        "Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua",
+        "function CastingBarMixin:GetHighlightImportantCasts(",
+        "function CastingBarMixin:SetIsHighlightedImportantCast(",
+    );
+    load_original(
+        &env,
+        "Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua",
+        "function CastingBarMixin:SetIsHighlightedImportantCast(",
+        "function CastingBarMixin:GetIsHighlightedImportantCast(",
+    );
+    env.exec(
+        r#"
+        local function probe(expectedTaint)
             local before = debug.getstacktaint()
+            assert(before == expectedTaint, 'explicit caller context')
             for _, id in ipairs({19750, Selector}) do
                 local frame = CreateFrame('Frame')
                 Mixin(frame, CastingBarMixin)
@@ -83,18 +124,21 @@ fn original_castbar_highlights_tainted_secret_spell() {
             assert(issecretvalue(Selector))
             assert(debug.getstacktaint() == before)
         end
-        probe()
+        probe(nil)
         debug.setobjecttaint(probe, 'P2Probe')
-        probe()
-    "#).expect("original cast bar resolves important fact");
+        probe('P2Probe')
+    "#,
+    )
+    .expect("original cast bar resolves important fact");
 }
 
 #[test]
 fn classification_selector_controls_and_external_permission() {
     let env = fixture();
     env.exec(r#"
-        local function probe()
+        local function probe(expectedTaint)
             local before = debug.getstacktaint()
+            assert(before == expectedTaint, 'explicit caller context')
             for _, query in ipairs({C_Spell.IsSpellImportant, C_Spell.IsSpellCrowdControl, C_Spell.IsConsumableSpell}) do
                 for _, id in ipairs({19750, Selector}) do
                     assert(select('#', query(id)) == 1)
@@ -122,8 +166,8 @@ fn classification_selector_controls_and_external_permission() {
             assert(C_Spell.IsExternalDefensive(19750) == true)
             assert(debug.getstacktaint() == before)
         end
-        probe()
+        probe(nil)
         debug.setobjecttaint(probe, 'P2Probe')
-        probe()
+        probe('P2Probe')
     "#).expect("P2 controls and unchanged AllowedWhenUntainted endpoint");
 }

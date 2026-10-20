@@ -3,6 +3,10 @@
 The Lua API layer bridges Lua addon code with the Rust simulation engine. It provides WoW-compatible globals, 300+ frame methods, C_* namespaces, and a timer system — all backed by `WowLuaEnv` and `SimState`.
 
 
+## C API numeric-secret selector boundaries
+
+Classification endpoints in `src/c_api/c_spell_classification.rs` inspect authentic numeric-secret selectors only inside their modeled host lookup. The shared public spell reader and VM unwrap permissions remain unchanged; ExternalDefensive keeps VM authentication. [Classification contract](../../specs/secret-selector-classification.md) owns endpoint scope, inferred output policy and revision-scoped proof. Original-consumer wrapper injection is not evidence of natural secret-ID production at startup.
+
 ## Container, message history and transform producers — 2026-10-16
 
 Producer `269ed6f17` replaces passive label scaffolds. The C API models remain first-class under `src/c_api/`: `container_inventory.rs` shares split/use transitions with legacy globals, `container_actions.rs` owns environment-local eligibility/request records, and `container_quest.rs` queries current slot item identity plus supplied item metadata and rich quest-log membership. Wrath legacy quest publication projects the same result as three positional values. [Split/use](../../specs/container-split-use.md) and [quest metadata](../../specs/container-item-quest-metadata.md) own policies, historical RED and bounded GREEN receipts; these are not native gameplay/catalog claims.
