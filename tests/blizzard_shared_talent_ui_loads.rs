@@ -6,7 +6,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn talent_ui_dir() -> PathBuf {
@@ -68,6 +69,9 @@ const PUBLIC_UTIL_TABLES: &[&str] = &[
     "TalentButtonAnimUtil",
 ];
 
+// Literal cached-tree facts only: Wrath manifest1-382/cache has no
+// Blizzard_SharedTalentUI input tree. Prefork behavior below remains enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&talent_ui_dir()).expect("Blizzard_SharedTalentUI TOC resolves");
@@ -337,6 +341,8 @@ fn eager_discovery_includes_addon_on_game_screen_only() {
              addon depends on it"
         );
     }
+}
+
 }
 
 prefork_full_ui_case! {
@@ -615,6 +621,7 @@ prefork_full_ui_case! {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn raw_pngs_in_addon_dir_are_not_listed_in_toc_body() {
     let raw = std::fs::read_to_string(talent_ui_toc()).expect("TOC reads utf-8");
@@ -640,4 +647,5 @@ fn raw_pngs_in_addon_dir_are_not_listed_in_toc_body() {
              silhouettes)"
         );
     }
+}
 }
