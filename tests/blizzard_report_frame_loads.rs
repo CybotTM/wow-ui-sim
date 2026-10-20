@@ -68,6 +68,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved =
@@ -82,7 +84,9 @@ fn find_toc_file_resolves_bare_toc() {
          src/loader/mod.rs:65 tries `_Mainline.toc` first (miss), then bare (hit) and returns it"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_game_only_with_two_hard_deps() {
     let toc =
@@ -124,7 +128,9 @@ fn toc_declares_eager_game_only_with_two_hard_deps() {
          C_ReportSystem.SendReport, never persisted client-side"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_two_files_in_root_directory() {
     let toc =
@@ -142,7 +148,9 @@ fn toc_lists_two_files_in_root_directory() {
          attribute resolves them at frame instantiation"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allows_screen_returns_true_only_for_game() {
     let toc =
@@ -164,6 +172,7 @@ fn allows_screen_returns_true_only_for_game() {
              the Game branch only at src/toc.rs:308. (Screen tested: {screen:?})"
         );
     }
+}
 }
 
 #[test]
@@ -400,6 +409,7 @@ fn xml_declares_no_virtual_templates_at_global_scope(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_uses_pure_inheritance_with_no_inline_children() {
     let xml_text = std::fs::read_to_string(report_frame_dir().join("ReportFrame.xml"))
@@ -425,4 +435,5 @@ fn xml_uses_pure_inheritance_with_no_inline_children() {
          would diverge from the glue twin (Blizzard_ReportFrameGlue's GlueReportFrame) which \
          shares the same template; both rely on the shared XML being the single source of truth"
     );
+}
 }
