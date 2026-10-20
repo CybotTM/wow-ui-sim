@@ -14,12 +14,12 @@ Retail 12.0.5 `C_TooltipInfo.GetMountBySpellID` and `GetSpellByID` must accept t
 - [x] Preserve current unknown numeric policy: exactly one identified, line-empty, Spell-typed tooltip, including valid u32 endpoints.
 - [x] **INFERRED new unresolved-public-STRING miss policy:** exactly one fresh, unidentified, empty Spell-typed TooltipData with a fresh lines table. Never invent an ID. Unseeded numeric strings, catalog names, short links and full colored links remain misses; no general parsing/catalog-name lookup/acquisition/override graph.
 - [x] Public-selector results and nested DTO fields retain their existing public contract.
-- [ ] Explicit user policy (2026-10-20): numeric-secret selection keeps presentation and containers public, while returned `id`/`spellID` fields remain authentic secrets, including retained unknown numeric identities. Native output secrecy remains INFERRED.
+- [x] Explicit user policy (2026-10-20): numeric-secret selection keeps presentation and containers public, while returned `id`/`spellID` fields remain authentic secrets, including retained unknown numeric identities. Native output secrecy remains INFERRED.
 
 ### Secret boundary and caller context
 
 - [x] Reject authentic VM-secret optional arguments in all documented positions, whether caller is secure or ordinarily tainted, before alias/catalog/payload acquisition. Mount arg2 `checkIndoors`; spell args2–6 `isPet`, `showSubtext`, `dontOverride`, `difficultyID`, `isLink`.
-- [ ] Admit authentic numeric-secret arg1 in secure and ordinarily tainted mainline callers through host-only inspection and the existing alias-first resolver. Preserve the strict public finite-integral-u32 domain; do not widen the shared public reader. Secret strings and other secret payload kinds remain rejected. Native full identifier grammar and exact errors remain INFERRED.
+- [x] Admit authentic numeric-secret arg1 in secure and ordinarily tainted mainline callers through host-only inspection and the existing alias-first resolver. Preserve the strict public finite-integral-u32 domain; do not widen the shared public reader. Secret strings and other secret payload kinds remain rejected. Native full identifier grammar and exact errors remain INFERRED.
 - [x] Reject actual host-secret BOOL true/false, NUMBER, STRING, wrapped real Frame and ordinary table across every optional position. Keep nonnumeric secret arg1 rejection; numeric arg1 has separate success coverage. Known numeric/name inputs and numeric/string misses cannot bypass NeverSecret checks.
 - [x] Failed queries preserve authentic wrapper secrecy, global/list/stack roots, live wrapper allocation identity, ordinary caller properties and owned state maps; valid public recovery still works after forced GC and failures.
 - [x] Preserve stack taint for rejection and ordinary public calls. Restore secure context after returning from an explicitly tainted closure.
@@ -33,9 +33,9 @@ Retail 12.0.5 `C_TooltipInfo.GetMountBySpellID` and `GetSpellByID` must accept t
 
 ### Numeric-secret original-consumer contract
 
-- [ ] Original meter OnEnter reaches real `TooltipDataHandler` from a row initialized without P3 name/icon/Info presentation methods; original dynamic mount handler resolves actual default mount23338 Swift Palomino.
-- [ ] Four selector/caller controls retain exact arity and meaningful title/lines, wrapper opacity, caller taint and source model rows. Unknown numeric900002 remains one identified empty Spell DTO with secret identity for secret input.
-- [ ] Forced GC retains authentic input roots and secret numeric success; NeverSecret optional negatives and nonnumeric rejections remain independent.
+- [x] Original meter OnEnter reaches real `TooltipDataHandler` from a row initialized without P3 name/icon/Info presentation methods; original dynamic mount handler resolves actual default mount23338 Swift Palomino.
+- [x] Four selector/caller controls retain exact arity and meaningful title/lines, wrapper opacity, caller taint and source model rows. Unknown numeric900002 remains one identified empty Spell DTO with secret identity for secret input.
+- [x] Forced GC retains authentic input roots and secret numeric success; NeverSecret optional negatives and nonnumeric rejections remain independent.
 
 ## How it works
 
@@ -89,6 +89,17 @@ Namespace registration uses the constructor's `GcRef<Table>`, already globally r
 
 ## Tests asserting this spec
 
+### Numeric-secret extension — bounded Retail proof 2026-10-20
+
+`tests/secret_spell_tooltip.rs` adds four cases: unchanged meter OnEnter through real TooltipDataHandler without presentation Init, original dynamic mount handling, exact identity/arity/model preservation, and invalid/NeverSecret controls. Existing `tests/tooltip_spell_mount_identifiers.rs` replaces only numeric arg1 rejection with protected-identity success after GC; all optional and nonnumeric rejection/root checks remain.
+
+Before P6, existing tooltip22 and original public hover1 pass on P3 code `fb3a8a74d`. Tests `3be4331bd` precede producers `ec4ffece9` / import correction `904b22afa`: four new cases fail at the explicit arg1 selector rejection, plus the new numeric-GC success expectation; the other21 legacy cases and public hover pass. Neither fixture loading nor a preceding P3 presentation call is credited as RED.
+
+Final tests `038c53e43` pass **4 new +22 existing +1 public hover =27**, zero warnings, focused/global formatting0, and only owning-worktree test paths in ELF `9722a07e5b9f00968b837fbb87519ed7939c85dce4dbaeafac72681854b02be6`. Final builds use `CARGO_INCREMENTAL=0`, one Cargo job and the 9G/no-swap unit limit. Stock Retail startup on unchanged production code `904b22afa` returns `[]` with byte-exact child-only current CVar input and unchanged original stat/hash; the later commit changes only a test.
+
+The GC test correction distinguishes the simulator's `canaccessvalue` secrecy classification (`!secret`) from VM unwrap permission: `issecure()` selects the secure payload control, while tainted unwrap remains denied. This is observed simulator behavior, not a new native permission claim. Native outputs, errors and identifier vocabulary beyond literal annotations remain **INFERRED**. No other-profile, full-suite or native acceptance is claimed.
+
+
 `tests/tooltip_spell_mount_identifiers.rs`: **22 focused tests**, `#[cfg(feature = "retail-12-0-5")]`. Existing `build.rs` discovers top-level test modules into the grouped `integration` target (`tests/integration.rs`); no new Cargo target or harness edit.
 
 | Capability | Fixture cases | Proof level |
@@ -118,7 +129,7 @@ Existing meaningful controls remain in `tests/tooltip_mount.rs`, `tests/tooltip_
 Corrected parent compiled RED is recorded above; the two focused C API boundaries are implemented. Fixture preconditions remain explicit and unchanged; no monkey-patching or weakened query assertions.
 - [x] Independent457 source/security/readability audit accepted; only four exact source rows credited below.
 - [ ] Ordinary optional flags are currently ignored: indoor eligibility, pet/subtext/override selection, difficulty and link meanings remain **gaps**, not semantic support.
-- [ ] Native alias vocabulary, arg types, permissions for secret arg1, error precedence, miss behavior and result secrecy remain unknown. Native probes are unavailable and not a completion gate for this chosen simulator policy.
+- [ ] Native alias vocabulary, full identifier/secret-payload grammar, exact errors/precedence, miss behavior and result secrecy remain INFERRED. Native probes are unavailable and not a completion gate for this chosen simulator policy.
 
 ## Out of scope
 
