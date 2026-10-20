@@ -9,6 +9,7 @@ const LEFT_SLOT: u32 = 6;
 const RIGHT_SLOT: u32 = 7;
 const SPELL_ID: u32 = 853;
 
+post_wrath_ui_fixture! {
 #[test]
 fn main_bar_divider_between_six_and_seven_requires_both_buttons() {
     test_timeout! {
@@ -32,6 +33,7 @@ fn main_bar_divider_between_six_and_seven_requires_both_buttons() {
         assert_center_divider_count(env, 0, "right half alone hides center divider");
     });
     }
+}
 }
 
 fn clear_main_bar_actions_and_grid(env: &wow_ui_sim::lua_api::WowLuaEnv) {
