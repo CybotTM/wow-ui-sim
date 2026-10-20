@@ -318,6 +318,7 @@ fn toc_body_lists_nine_mainline_overrides_then_current_main_files() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_only_on_game_screen_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -350,7 +351,9 @@ fn appears_only_on_game_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_nine_mainline_overrides_in_subdir() {
     let dir = definitions_frame_dir();
@@ -379,6 +382,7 @@ fn root_directory_holds_nine_mainline_overrides_in_subdir() {
              for mainline category-registration overrides"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
