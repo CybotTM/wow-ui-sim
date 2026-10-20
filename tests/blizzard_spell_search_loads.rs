@@ -258,6 +258,7 @@ fn templates_xml_is_last_for_mixin_resolution() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn spell_search_pulls_into_game_screen_via_shared_talent_ui_dep() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -277,6 +278,7 @@ fn spell_search_pulls_into_game_screen_via_shared_talent_ui_dep() {
          as deps of non-LoD addons — auto-discovery must not silently \
          drop a declared dependency just because the dep is itself LoD"
     );
+}
 }
 
 #[test]
