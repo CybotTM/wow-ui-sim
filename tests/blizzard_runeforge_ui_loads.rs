@@ -101,6 +101,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&runeforge_dir()).expect("Blizzard_RuneforgeUI TOC resolves");
@@ -112,7 +114,9 @@ fn find_toc_file_resolves_bare_toc() {
          legacy retail-only and a sibling Classic flavor would never load it"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_load_on_demand_with_blizzard_colors_dependency() {
     let toc = TocFile::from_file(&runeforge_toc()).expect("Blizzard_RuneforgeUI TOC parses");
@@ -150,7 +154,9 @@ fn toc_declares_load_on_demand_with_blizzard_colors_dependency() {
          re-fetches available powers/modifiers/currencies on every UI open"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_metadata_in_raw_bytes() {
     let raw =
@@ -189,7 +195,9 @@ fn toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare any `## OptionalDep` keys"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_bootstrap_and_seven_xml_files() {
     let toc = TocFile::from_file(&runeforge_toc()).expect("Blizzard_RuneforgeUI TOC parses");
@@ -203,7 +211,9 @@ fn toc_lists_bootstrap_and_seven_xml_files() {
         "Retail 12.1.0.69497 lists the Runeforge bootstrap before its seven XML files"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allows_screen_returns_true_only_for_game_when_allowload_absent() {
     let toc = TocFile::from_file(&runeforge_toc()).expect("Blizzard_RuneforgeUI TOC parses");
@@ -226,6 +236,7 @@ fn allows_screen_returns_true_only_for_game_when_allowload_absent() {
              interaction or C_LegendaryCrafting backend on glue screens"
         );
     }
+}
 }
 
 #[test]
@@ -283,6 +294,7 @@ fn root_directory_holds_seven_lua_xml_pairs_next_to_toc() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_files_embed_lua_via_script_directive_at_top_of_ui_root() {
     let dir = runeforge_dir();
@@ -300,6 +312,7 @@ fn xml_files_embed_lua_via_script_directive_at_top_of_ui_root() {
              addon table exclusively through this embedded-script mechanism"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
