@@ -32,6 +32,10 @@ def write_fixture(root, repo, build_script):
     helper = root / 'crates/test-harness'
     shutil.copytree(repo / 'crates/test-harness', helper)
     shutil.copy2(build_script, helper / 'build.rs')
+    (root / '.cargo').mkdir()
+    (root / '.cargo/config.toml').write_text('''[env]
+WOW_UI_SIM_TEST_SOURCE_ROOT = { value = "", relative = true, force = true }
+''')
     (root / 'Cargo.toml').write_text('''[package]
 name = "wow-ui-sim-harness-relocation-fixture"
 version = "0.1.0"
