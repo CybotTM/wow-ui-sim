@@ -311,6 +311,7 @@ fn status_ui_frame_template_materializes_via_create_frame(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn declared_dependents_pin_to_load_on_demand_addons() {
     let gm_chat_toc = blizzard_ui_dir().join("Blizzard_GMChatUI/Blizzard_GMChatUI.toc");
@@ -342,4 +343,5 @@ fn declared_dependents_pin_to_load_on_demand_addons() {
         survey.is_load_on_demand(),
         "Blizzard_WowSurveyUI is LoadOnDemand — same exclusion rule"
     );
+}
 }
