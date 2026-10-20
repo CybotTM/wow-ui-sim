@@ -505,11 +505,13 @@ fn blizzard_player_spells_dependencies_loaded_via_eager_discovery(env: &WowLuaEn
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_spells_dependencies_loaded_via_eager_discovery() {
     let env = load_full_game_ui_with_player_spells();
     blizzard_player_spells_dependencies_loaded_via_eager_discovery::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -548,11 +550,13 @@ fn blizzard_player_spells_creates_named_non_virtual_frames(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_spells_creates_named_non_virtual_frames() {
     let env = load_full_game_ui_with_player_spells();
     blizzard_player_spells_creates_named_non_virtual_frames::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -696,11 +700,13 @@ fn blizzard_player_spells_publishes_hero_talent_mixins(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_spells_publishes_hero_talent_mixins() {
     let env = load_full_game_ui_with_player_spells();
     blizzard_player_spells_publishes_hero_talent_mixins::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -758,11 +764,13 @@ fn blizzard_player_spells_publishes_loadout_dialog_mixins(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_spells_publishes_loadout_dialog_mixins() {
     let env = load_full_game_ui_with_player_spells();
     blizzard_player_spells_publishes_loadout_dialog_mixins::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -787,11 +795,13 @@ fn blizzard_player_spells_publishes_pvp_and_warmode_mixins(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_spells_publishes_pvp_and_warmode_mixins() {
     let env = load_full_game_ui_with_player_spells();
     blizzard_player_spells_publishes_pvp_and_warmode_mixins::run(&env);
+}
 }
 
 prefork_full_ui_case! {

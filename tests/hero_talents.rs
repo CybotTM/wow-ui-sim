@@ -412,6 +412,7 @@ fn test_active_hero_subtree_exposes_multiple_visible_nodes_and_edges() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_non_selectable_hero_nodes_do_not_show_selectable_glow() {
     let env = env_with_protection_ui();
@@ -481,4 +482,5 @@ fn test_non_selectable_hero_nodes_do_not_show_selectable_glow() {
         parts[2], 0,
         "non-selectable hero nodes unexpectedly showed selectable glow: {result}"
     );
+}
 }
