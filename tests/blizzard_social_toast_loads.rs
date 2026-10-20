@@ -7,7 +7,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn social_toast_dir() -> PathBuf {
@@ -57,6 +58,8 @@ fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&social_toast_dir()).expect("SocialToast TOC resolves");
@@ -72,7 +75,9 @@ fn find_toc_file_resolves_bare_toc() {
          surface that drives the social toast queue"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dependencies_accessor_returns_shared_xml_via_dependencies_key() {
     let toc = TocFile::from_file(&social_toast_toc()).expect("TOC parses");
@@ -92,7 +97,9 @@ fn dependencies_accessor_returns_shared_xml_via_dependencies_key() {
          BackdropTemplate that SocialToastTemplate inherits. Got: {deps:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_both_lowercase_resolves_correctly() {
     let toc = TocFile::from_file(&social_toast_toc()).expect("TOC parses");
@@ -112,7 +119,9 @@ fn allow_load_both_lowercase_resolves_correctly() {
     assert!(toc.allows_screen(ScreenKind::CharacterSelect));
     assert!(toc.allows_screen(ScreenKind::CharacterCreate));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_type_mainline_is_not_restricted() {
     let toc = TocFile::from_file(&social_toast_toc()).expect("TOC parses");
@@ -129,7 +138,9 @@ fn allow_load_game_type_mainline_is_not_restricted() {
          simulator flavor is mainline so the addon eager-loads"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     let toc = TocFile::from_file(&social_toast_toc()).expect("TOC parses");
@@ -147,7 +158,9 @@ fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_six_metadata_directives() {
     let raw = std::fs::read_to_string(social_toast_toc()).expect("TOC reads utf-8");
@@ -178,7 +191,9 @@ fn toc_raw_bytes_pin_six_metadata_directives() {
     assert!(!raw.contains("## UseSecureEnvironment"));
     assert!(!raw.contains("## Version"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_lists_lua_before_xml() {
     let toc = TocFile::from_file(&social_toast_toc()).expect("TOC parses");
@@ -216,6 +231,7 @@ fn body_lists_lua_before_xml() {
          template-registration time, so they MUST already be tables in \
          _G when the .xml chunk is processed"
     );
+}
 }
 
 #[test]
