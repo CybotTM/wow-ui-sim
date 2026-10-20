@@ -175,6 +175,7 @@ fn toc_lists_single_lua_file_with_no_xml() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_on_every_screen_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -197,7 +198,9 @@ fn appears_on_every_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_single_lua_next_to_toc() {
     let dir = script_errors_dir();
@@ -215,6 +218,7 @@ fn root_directory_holds_single_lua_next_to_toc() {
         "Blizzard_ScriptErrors directory must contain exactly 2 entries (1 lua + 1 toc), \
          got {entries:?}. No XML, no nested directories, no extra Lua files"
     );
+}
 }
 
 prefork_full_ui_case! {
