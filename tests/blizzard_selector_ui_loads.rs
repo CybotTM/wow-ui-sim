@@ -217,6 +217,7 @@ fn actual_selector_code_lives_in_shared_xml_body_not_this_folder() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn shared_xml_toc_lists_selector_files_in_its_body() {
     let shared_xml_toc = blizzard_ui_dir().join("Blizzard_SharedXML/Blizzard_SharedXML.toc");
@@ -237,6 +238,7 @@ fn shared_xml_toc_lists_selector_files_in_its_body() {
              bypassing the empty Blizzard_SelectorUI shell entirely"
         );
     }
+}
 }
 
 #[test]
