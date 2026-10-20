@@ -277,6 +277,7 @@ fn toc_lists_one_lua_and_one_xml() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_on_every_screen_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -299,7 +300,9 @@ fn appears_on_every_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_lua_xml_and_toc() {
     let dir = script_errors_frame_dir();
@@ -318,6 +321,7 @@ fn root_directory_holds_lua_xml_and_toc() {
         "Blizzard_ScriptErrorsFrame directory must contain exactly 3 entries \
          (1 lua + 1 xml + 1 toc), got {entries:?}"
     );
+}
 }
 
 post_wrath_ui_fixture! {
