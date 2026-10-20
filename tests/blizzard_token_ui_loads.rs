@@ -249,9 +249,9 @@ fn token_frame_load_ui_is_absent_and_wow_token_ui_owns_secure_token_flow() {
             TokenFrame_LoadUI()
             assert(IsAddOnLoaded("Blizzard_TokenUI"))
             ToggleCharacter("TokenFrame")
-            assert(TokenFrame:IsShown())
+            assert(TokenFrame:IsVisible())
             ToggleCharacter("TokenFrame")
-            assert(not TokenFrame:IsShown())
+            assert(not TokenFrame:IsVisible())
         "#,
         )
         .expect("12340 currency-token panel lifecycle");
