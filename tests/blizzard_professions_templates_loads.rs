@@ -148,6 +148,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_find_toc_resolves_bare_variant() {
     let resolved =
@@ -166,7 +168,9 @@ fn blizzard_professions_templates_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_toc_declares_lod_with_load_with_triggers() {
     let toc =
@@ -205,7 +209,9 @@ fn blizzard_professions_templates_toc_declares_lod_with_load_with_triggers() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_toc_declares_load_with_triggers() {
     let toc =
@@ -227,7 +233,9 @@ fn blizzard_professions_templates_toc_declares_load_with_triggers() {
          Y loads, ensure X is loaded first)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_toc_declares_one_dependency() {
     let toc =
@@ -251,7 +259,9 @@ fn blizzard_professions_templates_toc_declares_one_dependency() {
         "Zero `## OptionalDeps:` declared"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_toc_declares_no_saved_variables() {
     let toc =
@@ -268,7 +278,9 @@ fn blizzard_professions_templates_toc_declares_no_saved_variables() {
         "TOC must declare zero `## SavedVariablesPerCharacter:`"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(templates_toc())
@@ -319,7 +331,9 @@ fn blizzard_professions_templates_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## DefaultState:`"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_toc_lists_sixteen_files_in_canonical_order() {
     let toc =
@@ -348,6 +362,7 @@ fn blizzard_professions_templates_toc_lists_sixteen_files_in_canonical_order() {
          file's `mixin=...` attributes resolve at parse time against globals \
          declared by the preceding Lua files"
     );
+}
 }
 
 #[test]
