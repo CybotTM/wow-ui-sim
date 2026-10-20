@@ -1,3 +1,7 @@
+## [2026-10-20] investigation | Shared-target test source binding
+
+[Harness notes](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) record another worktree's absolute generated module paths and TimeManager zero-selection; manifest-directory invalidation is committed, runtime confirmation pending. Exact private RED receipts are retained, not accepted as this lane's source-bound proof.
+
 ## [2026-10-20] source | Wrath message-frame method and metadata boundary
 
 [Widget state](systems/widget-system.md#message-history-and-translation-target-state--2026-10-16) and [Lua API](systems/lua-api.md#container-message-history-and-transform-producers--2026-10-16) link the [access-ID contract/proof](../specs/message-frame-access-history.md#access-id-correction-proof--2026-10-20): authenticated plain-method table, distinct cached indices, native Wrath metadata/zero-ID rules and preserved Retail surface/tuple. Six-case RED→GREEN, both-profile bounded preservation, empty stock startups, zero-warning checks and formatter pass are recorded with worktree-only ELF binding and unchanged original CVars. Four Wrath chat failures reproduce on master. Native execution, universal method leaks and backFill-ordering/queue-timing changes remain excluded.

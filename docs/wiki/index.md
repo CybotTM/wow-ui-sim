@@ -1,3 +1,7 @@
+## [2026-10-20] investigation | Shared-target test source binding
+
+[Harness source binding](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) records stale absolute module paths after worktree relocation, a zero-test false success, and manifest-directory invalidation. Regeneration/runtime confirmation remains pending.
+
 ## [2026-10-19] system | Wrath reload lifecycle and character layout
 
 [Reload mechanics](systems/reload-ui.md) link the [profile contract](../specs/reload-ui.md#wrath-12340-requirements): A–D bounded GREEN, two-sided saved-value and ticked original Stopwatch preservation, readiness-driven variables delivery and argless Wrath entry. Character-local placed-frame restoration and selective mirror cancellation pass E's eight bounded cases. [Final implementer gates](../specs/reload-ui.md#final-implementer-gate--2026-10-19) record 23 Wrath cases, profile preservation, four warning-free checks and both clean startups; independent integrated verification remains pending; unauthenticated conversion constants and separate GameMenu/cursor/spellbook gaps remain excluded.
