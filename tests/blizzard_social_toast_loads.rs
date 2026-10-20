@@ -312,11 +312,13 @@ fn is_addon_loaded_reports_true_after_eager_sweep(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn is_addon_loaded_reports_true_after_eager_sweep() {
     let env = load_full_ui_for(ScreenKind::Game);
     is_addon_loaded_reports_true_after_eager_sweep::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -358,11 +360,13 @@ fn publishes_three_mixin_tables_with_canonical_methods(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn publishes_three_mixin_tables_with_canonical_methods() {
     let env = load_full_ui_for(ScreenKind::Game);
     publishes_three_mixin_tables_with_canonical_methods::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -385,11 +389,13 @@ fn social_toast_mixin_calls_alert_frame_helpers_on_hover(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn social_toast_mixin_calls_alert_frame_helpers_on_hover() {
     let env = load_full_ui_for(ScreenKind::Game);
     social_toast_mixin_calls_alert_frame_helpers_on_hover::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -428,11 +434,13 @@ fn social_toast_template_materializes_with_close_button_child_and_low_strata(env
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn social_toast_template_materializes_with_close_button_child_and_low_strata() {
     let env = load_full_ui_for(ScreenKind::Game);
     social_toast_template_materializes_with_close_button_child_and_low_strata::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -463,11 +471,13 @@ fn social_toast_close_button_template_materializes_with_three_state_textures(env
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn social_toast_close_button_template_materializes_with_three_state_textures() {
     let env = load_full_ui_for(ScreenKind::Game);
     social_toast_close_button_template_materializes_with_three_state_textures::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -534,11 +544,13 @@ fn social_toast_template_inherits_backdrop_template(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn social_toast_template_inherits_backdrop_template() {
     let env = load_full_ui_for(ScreenKind::Game);
     social_toast_template_inherits_backdrop_template::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -561,9 +573,11 @@ fn published_animation_group_template_with_default_anim_out_mixin_resolves(env: 
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn published_animation_group_template_with_default_anim_out_mixin_resolves() {
     let env = load_full_ui_for(ScreenKind::Game);
     published_animation_group_template_with_default_anim_out_mixin_resolves::run(&env);
+}
 }
