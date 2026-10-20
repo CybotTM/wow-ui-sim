@@ -255,6 +255,7 @@ fn test_main_action_bar_size() {
 /// AccountSettings:OnEditModeEnter/Exit are excluded — they call
 /// Setup/Refresh on ~30 optional frames (DurabilityFrame, TargetFrame, etc.)
 /// that may not be loaded in partial test environments.
+post_wrath_ui_fixture! {
 #[test]
 fn test_enter_exit_edit_mode_core_steps() {
     let env = env_with_action_bar();
@@ -284,6 +285,7 @@ fn test_enter_exit_edit_mode_core_steps() {
         "EditMode core steps should not crash:\n{}",
         failures
     );
+}
 }
 
 #[test]

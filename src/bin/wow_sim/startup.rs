@@ -120,6 +120,7 @@ mod tests {
         .expect("ReloadUI must reuse real startup without third-party addons");
     }
 
+    wow_ui_sim::post_wrath_ui_fixture! {
     #[cfg(feature = "gui")]
     #[test]
     fn reload_ui_preserves_file_backed_edit_mode_layout() {
@@ -183,6 +184,7 @@ mod tests {
             env, saved_vars, iced::Size::new(1024.0, 768.0), "ReloadUI()", &[],
             Some(&format!("assert(EditModeManagerFrame:GetActiveLayoutInfo().layoutName == {before:?}, 'ReloadUI changed the active file-backed EditMode layout')")),
         ).expect("original EditMode layout consumer after ReloadUI");
+    }
     }
 
     #[test]
