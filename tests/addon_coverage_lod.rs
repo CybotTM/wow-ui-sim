@@ -440,6 +440,39 @@ fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usiz
     })
 }
 
+#[cfg(feature = "client-wrath")]
+#[test]
+fn time_manager_renders_numeric_hour_through_original_dropdown() {
+    common::with_timeout(180, || {
+        with_isolated_addon_coverage_state(|| {
+            let env = WowLuaEnv::new().expect("Lua environment");
+            env.set_screen_size(1024.0, 768.0);
+            env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+            env.exec(
+                r#"
+                SetCVar("timeMgrUseMilitaryTime", "0")
+                SetCVar("timeMgrAlarmTime", "780")
+                SetCVar("timeMgrAlarmEnabled", "0")
+                "#,
+            )
+            .expect("concrete 1 PM alarm input");
+            load_startup_blizzard_ui(&env);
+            clear_lua_error_tracking(&env);
+
+            let (loaded, reason): (bool, Option<String>) = env
+                .eval("return C_AddOns.LoadAddOn('Blizzard_TimeManager')")
+                .expect("original TimeManager runtime load returns");
+            assert!(loaded, "TimeManager load: {reason:?}");
+            let errors = grouped_errors_by_addon(&env.state().borrow());
+            assert!(errors.is_empty(), "original TimeManager load: {errors:#?}");
+            let hour: String = env
+                .eval("return TimeManagerAlarmHourDropDownText:GetText()")
+                .expect("original dropdown's rendered hour");
+            assert_eq!(hour, "1", "native numeric hour reaches its FontString");
+        });
+    });
+}
+
 #[test]
 fn load_on_demand_runtime_baseline_overrides_force_load_counts() {
     let known_runtime_counts = known_load_on_demand_runtime_error_counts();
