@@ -275,8 +275,7 @@ fn original_on_click(path: &Path, name: &str) -> String {
         .unwrap_or_else(|| panic!("missing original frame {name} in {}", path.display()));
     frame
         .scripts()
-        .flat_map(|scripts| &scripts.on_click)
-        .last()
+        .and_then(|scripts| scripts.on_click.last())
         .and_then(|script| script.body.clone())
         .expect("original inline OnClick")
 }
