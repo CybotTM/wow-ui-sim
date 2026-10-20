@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn unit_popup_shared_dir() -> PathBuf {
@@ -133,6 +134,9 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal packaged TOC/dependency-directory/discovery snapshots only:
+// Wrath manifest1-382/cache lacks these inputs; native popup behavior stays.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_mainline_variant() {
     let resolved = find_toc_file(&unit_popup_shared_dir()).expect("UnitPopupShared TOC resolves");
@@ -352,6 +356,8 @@ fn optional_dep_directories_exist_on_disk() {
              may-be-absent guard"
         );
     }
+}
+
 }
 
 prefork_full_ui_case! {
