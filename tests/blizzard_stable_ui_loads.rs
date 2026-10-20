@@ -295,6 +295,7 @@ fn body_lists_lua_before_xml_for_mixin_resolution() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn auto_discovers_on_game_screen_with_help_plate_dep() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -317,6 +318,7 @@ fn auto_discovers_on_game_screen_with_help_plate_dep() {
          load-time because both addons appear in the same eager-discovery \
          pass; the loader orders deps before dependents internally"
     );
+}
 }
 
 #[test]
