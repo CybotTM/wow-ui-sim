@@ -1,6 +1,9 @@
 //! P3 numeric selectors: original meter consumers, not replacement providers.
 #![cfg(all(feature = "retail-12-0-5", feature = "profile-retail"))]
 
+#[path = "tooltip_full_env_helpers.rs"]
+mod tooltip_full_env_helpers;
+
 use rilua::{LuaApi, LuaApiMut};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -207,6 +210,69 @@ fn presentation_miss_and_invalid_numeric_secret_controls() {
             end
             assert(select('#', C_Spell.GetSpellTexture({})) == 0)
             assert(not pcall(C_Spell.GetSpellName, {}))
+        "#,
+            tainted,
+        );
+    }
+}
+
+#[test]
+fn original_contribution_tooltip_numeric_secret_description() {
+    let env = tooltip_full_env_helpers::setup_full_env();
+    let original = std::fs::read_to_string("/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_Contribution/Blizzard_Contribution.lua").unwrap();
+    env.exec(&original)
+        .expect("unchanged original Contribution source");
+    install_secrets(&env);
+    env.exec(
+        r#"
+        RewardRow = CreateFrame('Frame', nil, UIParent)
+        RewardRow:SetSize(32,32); RewardRow:SetPoint('CENTER')
+        RewardRow.Icon = RewardRow:CreateTexture(); RewardRow.Icon:SetSize(24,24)
+        RewardRow.Icon:SetPoint('CENTER')
+        RewardRow.RewardName = RewardRow:CreateFontString(nil, nil, 'GameFontNormal')
+        RewardRow.PadLock = CreateFrame('Frame', nil, RewardRow)
+        ContributionBuffTooltip = CreateFrame('Frame', nil, UIParent)
+        ContributionBuffTooltip:SetSize(200,100)
+        ContributionBuffTooltip.Icon = ContributionBuffTooltip:CreateTexture()
+        ContributionBuffTooltip.Icon:SetSize(24,24)
+        ContributionBuffTooltip.Icon:SetPoint('TOPLEFT')
+        for _, key in ipairs({'Name','Description','Footer'}) do
+            local text = ContributionBuffTooltip:CreateFontString(nil, nil, 'GameFontNormal')
+            text:SetSize(180,20); text:SetPoint('TOPLEFT')
+            ContributionBuffTooltip[key] = text
+        end
+        ExpectedDescription = C_Spell.GetSpellDescription(19750)
+        assert(string.find(ExpectedDescription, 'Quickly heal a friendly target', 1, true) == 1)
+    "#,
+    )
+    .unwrap();
+    for tainted in [false, true] {
+        for selector in ["19750", "Selector"] {
+            invoke(
+                &env,
+                &format!(
+                    r#"
+                ContributionRewardMixin.Setup(RewardRow, {selector}, true)
+                ContributionRewardMixin.OnEnter(RewardRow)
+                assert(ContributionBuffTooltip:IsShown())
+                assert(ContributionBuffTooltip.Name:GetText() == 'Flash of Light')
+                local description = ContributionBuffTooltip.Description:GetText()
+                assert(description == ExpectedDescription and not issecretvalue(description))
+                assert(select('#', C_Spell.GetSpellDescription({selector})) == 1)
+                assert(not issecretvalue(C_Spell.GetSpellDescription({selector})))
+            "#
+                ),
+                tainted,
+            );
+        }
+        invoke(
+            &env,
+            r#"
+            assert(select('#', C_Spell.GetSpellDescription(Missing)) == 1)
+            assert(C_Spell.GetSpellDescription(Missing) == '')
+            for _, invalid in ipairs({Fraction,Negative,Overflow,Nan,Infinite,SecretString,SecretBool}) do
+                assert(not pcall(C_Spell.GetSpellDescription, invalid))
+            end
         "#,
             tainted,
         );
