@@ -250,6 +250,7 @@ fn encounter_journal_addon_load_creates_frame() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn compact_unit_frame_runtime_template_keeps_over_heal_absorb_glow_child() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -277,6 +278,7 @@ fn compact_unit_frame_runtime_template_keeps_over_heal_absorb_glow_child() {
         has_glow,
         "CompactUnitFrameTemplate should attach overHealAbsorbGlow as a parentKey child"
     );
+}
 }
 
 post_wrath_ui_fixture! {
