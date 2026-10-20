@@ -317,6 +317,7 @@ fn allows_screen_returns_true_only_for_game() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn included_in_eager_discovery_for_game_screen() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -331,6 +332,7 @@ fn included_in_eager_discovery_for_game_screen() {
          secure-handler globals are referenced by countless Blizzard XML templates' OnLoad \
          attributes that resolve at load time"
     );
+}
 }
 
 #[test]
