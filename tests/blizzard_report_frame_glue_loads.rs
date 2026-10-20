@@ -204,6 +204,7 @@ fn allows_screen_returns_true_only_for_glue_screens() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn included_in_eager_glue_screen_discovery() {
     for screen in [
@@ -223,6 +224,7 @@ fn included_in_eager_glue_screen_discovery() {
              reference `ReportFrame:InitiateReport(...)` directly with no LoadAddOn guard"
         );
     }
+}
 }
 
 #[test]
