@@ -146,6 +146,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved =
@@ -157,7 +159,9 @@ fn find_toc_file_resolves_bare_toc() {
          frame is engine-flavor-agnostic — same Lua + XML on every flavor"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_both_with_two_hard_dependencies() {
     let toc = TocFile::from_file(&script_errors_frame_toc())
@@ -206,7 +210,9 @@ fn toc_declares_eager_both_with_two_hard_dependencies() {
     assert!(toc.saved_variables().is_empty());
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_default_state_enabled_with_escalate_during_load() {
     let toc = TocFile::from_file(&script_errors_frame_toc())
@@ -229,7 +235,9 @@ fn toc_declares_default_state_enabled_with_escalate_during_load() {
          display them)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_metadata_in_raw_bytes_with_singular_error_in_title() {
     let raw = std::fs::read_to_string(script_errors_frame_toc())
@@ -246,7 +254,9 @@ fn toc_declares_metadata_in_raw_bytes_with_singular_error_in_title() {
     assert!(raw.contains("## AllowLoad: Both"));
     assert!(raw.contains("## Dependencies: Blizzard_ScriptErrors, Blizzard_SharedXML"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_one_lua_and_one_xml() {
     let toc = TocFile::from_file(&script_errors_frame_toc())
@@ -264,6 +274,7 @@ fn toc_lists_one_lua_and_one_xml() {
          binding resolve the Lua-defined mixin global at parse time — the .lua \
          must load first so ScriptErrorsFrameMixin exists when the .xml is parsed"
     );
+}
 }
 
 #[test]
@@ -309,6 +320,7 @@ fn root_directory_holds_lua_xml_and_toc() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_wraps_frame_in_scoped_modifier_with_secure_env_addition() {
     let xml_path = script_errors_frame_dir().join("Blizzard_ScriptErrorsFrame.xml");
@@ -325,6 +337,7 @@ fn xml_wraps_frame_in_scoped_modifier_with_secure_env_addition() {
          even when invoked from tainted code paths, otherwise tainted-callstack \
          errors couldn't surface their UI"
     );
+}
 }
 
 prefork_full_ui_case! {
