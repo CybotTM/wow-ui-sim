@@ -1,6 +1,6 @@
 ## [2026-10-20] investigation | Shared-target test source binding
 
-[Harness source binding](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) records stale absolute module paths, corrected runtime-root regression RED, rejected manifest bindings and the config-relative source-root input. Relocation GREEN remains pending; before-fixture Retail17 passes and Wrath13 failures are source-bound.
+[Harness source binding](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) records stale absolute module paths, corrected runtime-root regression RED, rejected manifest bindings and the config-relative source-root input. Config-root relocation GREEN1+1 and a real integration build's1,791 current-worktree paths are verified; before-fixture Retail17 passes and Wrath13 failures remain separate.
 
 ## [2026-10-19] source | Wrath single-class spellbook views
 
