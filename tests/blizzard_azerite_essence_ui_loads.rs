@@ -8,6 +8,8 @@ const ROOT: &str = "Blizzard_AzeriteEssenceUI";
 const DEPENDENCY: &str = "Blizzard_Colors";
 const MAIN_SLOT: i32 = 0;
 
+// AzeriteEssenceUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_essence_ui_lod_loads_after_colors() {
     common::with_perf_lock(|| {
@@ -46,6 +48,7 @@ fn blizzard_azerite_essence_ui_lod_loads_after_colors() {
             });
         });
     });
+}
 }
 
 fn seed_minimal_azerite_essence_state(state: &mut SimState) {

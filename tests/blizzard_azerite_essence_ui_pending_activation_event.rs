@@ -12,6 +12,8 @@ const ROOT: &str = "Blizzard_AzeriteEssenceUI";
 const MAIN_SLOT: i32 = 0;
 const PENDING_ESSENCE_ID: i32 = 123;
 
+// AzeriteEssenceUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_essence_ui_pending_activation_event_refreshes_list() {
     common::with_perf_lock(|| {
@@ -123,6 +125,7 @@ fn blizzard_azerite_essence_ui_pending_activation_event_refreshes_list() {
             });
         });
     });
+}
 }
 
 fn seed_pending_activation_state(state: &mut SimState) {

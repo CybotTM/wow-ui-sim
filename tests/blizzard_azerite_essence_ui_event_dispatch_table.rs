@@ -12,6 +12,8 @@ const MAIN_SLOT: i32 = 0;
 const ESSENCE_ID: i32 = 200;
 const MILESTONE_ID: i32 = 100;
 
+// AzeriteEssenceUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_essence_ui_dispatches_registered_events_to_expected_refresh_paths() {
     common::with_perf_lock(|| {
@@ -70,6 +72,7 @@ fn blizzard_azerite_essence_ui_dispatches_registered_events_to_expected_refresh_
             });
         });
     });
+}
 }
 
 struct EventCase<'a> {
