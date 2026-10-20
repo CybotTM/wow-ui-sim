@@ -51,6 +51,7 @@ path = "tests/integration.rs"
     tests = root / 'tests'
     (tests / 'common').mkdir(parents=True)
     (tests / 'c_item_api').mkdir()
+    (tests / 'perf').mkdir()
     for path in ['common/mod.rs', 'common/token_ui_fixtures.rs', 'c_item_api/support.rs']:
         (tests / path).touch()
     (tests / 'integration.rs').write_text('wow_ui_sim_test_harness::integration_tests!();\n')
