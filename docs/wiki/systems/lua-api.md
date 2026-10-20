@@ -169,7 +169,7 @@ Commit `da2ec8cb8` adds only an epoch125 (`retail-12-0-5`) authentic VM-secret c
 
 ## Numeric-secret spell presentation selectors
 
-`c_api::c_spell` opts presentation lookups into the existing host-only numeric inspector without widening the shared public reader or action/book selectors. Endpoint-specific numeric conversion stays intact; a rooted Info DTO receives a newly wrapped resolved identity, not the original potentially fractional selector. The [presentation contract](../../specs/spell-secret-presentation.md) owns the user-approved output policy, original meter/reward fixtures, description/link sub-batch limits and native-evidence gaps. Core selector GREEN precedes a distinct original-tooltip description RED; final preservation acceptance remains pending.
+`c_api::c_spell` opts presentation lookups into the existing host-only numeric inspector without widening the shared public reader or action/book selectors. Endpoint-specific numeric conversion stays intact; a rooted Info DTO receives a newly wrapped resolved identity, not the original potentially fractional selector. The [presentation contract](../../specs/spell-secret-presentation.md) owns the user-approved output policy, original meter/reward fixtures, description/link sub-batch limits and native-evidence gaps. Core selector GREEN precedes a distinct original-tooltip description RED. The contract retains final five-case GREEN, two-sided preservation, startup and formatting receipts; link/casting-producer holds remain separate.
 
 ## Retail 12.0.5 tooltip spell and mount identifiers
 

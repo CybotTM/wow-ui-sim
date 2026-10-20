@@ -1,6 +1,6 @@
 ## [2026-10-20] source | Numeric-secret spell presentation
 
-[Host-only lookup notes](systems/lua-api.md#numeric-secret-spell-presentation-selectors) link the [presentation contract](../specs/spell-secret-presentation.md): original meter/reward selector RED, endpoint-specific conversions and explicit secret-identity/public-presentation policy. Core GREEN, distinct original-tooltip description RED and held link/casting-producer boundaries remain separate; final preservation is pending.
+[Host-only lookup notes](systems/lua-api.md#numeric-secret-spell-presentation-selectors) link the [presentation contract](../specs/spell-secret-presentation.md): original meter/reward selector RED, endpoint-specific conversions and explicit secret-identity/public-presentation policy. Core and description RED→GREEN, two-sided preservation and clean stock startup are bounded Retail proof; link/casting-producer holds remain separate.
 
 ## [2026-10-19] system | Wrath reload lifecycle and character layout
 
