@@ -331,6 +331,7 @@ fn managed_frame_template_registered(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn dependent_addons_exist_on_disk() {
     for dependent in &["Blizzard_MawBuffs"] {
@@ -350,6 +351,7 @@ fn dependent_addons_exist_on_disk() {
              RequiredDeps / Dependencies as interchangeable"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
