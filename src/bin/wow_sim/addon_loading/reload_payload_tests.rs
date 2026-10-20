@@ -2,6 +2,23 @@
 use super::*;
 use clap::Parser;
 
+const PAYLOAD_CHILD_ENV: &str = "WOW_SIM_RELOAD_PAYLOAD_CHILD";
+const PAYLOAD_TEST_NAME: &str = "addon_loading::reload_payload_tests::reload_real_addon_payload_retains_original_settings_consumer";
+
+fn assert_payload_child_process() {
+    let status = std::process::Command::new(std::env::current_exe().unwrap())
+        .args([
+            "--exact",
+            PAYLOAD_TEST_NAME,
+            "--nocapture",
+            "--test-threads=1",
+        ])
+        .env(PAYLOAD_CHILD_ENV, "1")
+        .status()
+        .unwrap();
+    assert!(status.success(), "original Settings payload child failed");
+}
+
 #[derive(Debug, PartialEq)]
 struct PayloadObservation {
     name: String,
@@ -60,6 +77,11 @@ fn read_payload_and_original_label(env: &WowLuaEnv, name: &str, label: &str) -> 
 
 #[test]
 fn reload_real_addon_payload_retains_original_settings_consumer() {
+    // Real startup installs a process-global tracing subscriber exactly once.
+    if std::env::var_os(PAYLOAD_CHILD_ENV).is_none() {
+        assert_payload_child_process();
+        return;
+    }
     let args = crate::Args::try_parse_from(["wow-sim", "--no-addons", "--no-saved-vars"]).unwrap();
     let (env, _fonts, manager) = crate::startup::init_and_load(&args, ScreenKind::Game).unwrap();
     assert!(manager.is_none());
