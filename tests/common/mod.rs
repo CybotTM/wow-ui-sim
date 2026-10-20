@@ -232,16 +232,35 @@ pub fn load_click_binding_bootstrap(env: &WowLuaEnv, ui: &Path) {
     );
 }
 
-/// Helper to load Blizzard_SharedXML templates for tests that need them.
-/// Returns the environment with templates loaded.
+/// Load the active profile's native panel templates, not a synthetic replacement.
 pub fn env_with_shared_xml() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    let ui = blizzard_ui_dir();
-
-    load_required_blizzard_addon(&env, &ui, "Blizzard_SharedXMLBase");
-    load_required_blizzard_addon(&env, &ui, "Blizzard_SharedXML");
-
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        load_wrath_panel_templates(&env);
+    } else {
+        let ui = blizzard_ui_dir();
+        load_required_blizzard_addon(&env, &ui, "Blizzard_SharedXMLBase");
+        load_required_blizzard_addon(&env, &ui, "Blizzard_SharedXML");
+    }
     env
+}
+
+fn load_wrath_panel_templates(env: &WowLuaEnv) {
+    let toc_path = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("Wrath FrameXML cache should be synced");
+    let root = toc_path.parent().expect("FrameXML TOC should have a parent");
+    let toc = wow_ui_sim::toc::TocFile::parse(
+        root,
+        "UIPanelTemplates.lua\nUIPanelTemplates.xml\n",
+    );
+    let result = wow_ui_sim::loader::load_addon_from_toc(&env.loader_env(), &toc)
+        .expect("Failed to load native Wrath panel templates");
+    assert!(result.warnings.is_empty(), "{:?}", result.warnings);
+    assert!(
+        result.missing_requirements.is_empty(),
+        "{:?}",
+        result.missing_requirements
+    );
 }
 
 pub fn fire_addon_loaded(env: &WowLuaEnv, addon_name: &str) {
