@@ -1,3 +1,7 @@
+## [2026-10-20] source | Numeric-secret presentation selectors
+
+[Lua API notes](systems/lua-api.md#numeric-secret-spell-presentation-selectors) link the [owning contract](../specs/spell-secret-presentation.md): authentic-wrapper original meter/reward RED precedes opt-in host inspection and secret resolved Info identity. Public parsing, shared strict guards and action/book boundaries remain unchanged. GREEN and description follow-up are pending; link sink and casting-producer gaps are explicit.
+
 ## [2026-10-19] source | Wrath readiness and placed-frame reconstruction
 
 [Reload mechanics](systems/reload-ui.md) link the [proof owner](../specs/reload-ui.md#wrath-12340-requirements): A–D bounded GREEN, two-sided C preservation and ticked original Stopwatch control. Wrath now uses readiness-driven VARIABLES_LOADED and argless PEW without synthetic WoWUISim completion. E stores character-local placed geometry in simulator units and cancels mirrors only; eight bounded runtime cases pass, with inherited-scale roundtrip and two-sided disabled-persistence control. [Final implementer gates](../specs/reload-ui.md#final-implementer-gate--2026-10-19) record full-profile Wrath23/23, both library21/21 subsets, Retail bin6/6 after test-process isolation, four warning-free checks and both startup arrays empty. Two unchanged wrong-profile Wrath binary fixtures remain explicitly non-blocking; independent integrated verification is pending. GameMenu early-binding and cursor/spellbook gaps remain separate.

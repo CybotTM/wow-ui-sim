@@ -236,7 +236,7 @@ fn get_spell_queue_window(state: &mut LuaState) -> LuaResult<u32> {
 ///
 /// Retail fields: `name, iconID, originalIconID, castTime, minRange, maxRange, spellID`.
 fn get_spell_info(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(spell_id) = numeric_spell_id(state, 1) else {
+    let Some(spell_id) = read_modeled_numeric_spell_id(state)? else {
         state.push(Val::Nil);
         return Ok(1);
     };
@@ -244,31 +244,33 @@ fn get_spell_info(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
-    let info = create_table_with_capacity(state, SPELL_INFO_HASH_FIELDS);
-    let name = create_string(state, spell.name);
-    table_set_static(state, info, "name", name);
-    table_set_static(
-        state,
-        info,
-        "iconID",
-        Val::Num(spell.icon_file_data_id as f64),
-    );
-    table_set_static(
-        state,
-        info,
-        "originalIconID",
-        Val::Num(spell.icon_file_data_id as f64),
-    );
-    table_set_static(state, info, "castTime", Val::Num(0.0));
-    table_set_static(state, info, "minRange", Val::Num(0.0));
-    table_set_static(state, info, "maxRange", Val::Num(0.0));
-    table_set_static(state, info, "spellID", Val::Num(spell_id as f64));
-    state.push(info);
+    push_spell_info(state, spell.name, spell.icon_file_data_id, spell_id);
     Ok(1)
 }
 
+fn push_spell_info(state: &mut LuaState, name: &str, icon_id: u32, spell_id: u32) {
+    let info = create_table_with_capacity(state, SPELL_INFO_HASH_FIELDS);
+    // Keep the DTO reachable while the identity wrapper allocates.
+    state.push(info);
+    let name = create_string(state, name);
+    table_set_static(state, info, "name", name);
+    for field in ["iconID", "originalIconID"] {
+        table_set_static(state, info, field, Val::Num(f64::from(icon_id)));
+    }
+    for field in ["castTime", "minRange", "maxRange"] {
+        table_set_static(state, info, field, Val::Num(0.0));
+    }
+    // Explicit simulator policy: presentation is public; resolved identity is not.
+    let identity = if rilua::table_security::is_secret_value(state, stack_val(state, 1)) {
+        rilua::table_security::wrap_host_secret_number(state, f64::from(spell_id))
+    } else {
+        Val::Num(f64::from(spell_id))
+    };
+    table_set_static(state, info, "spellID", identity);
+}
+
 fn get_spell_texture(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(spell_id) = numeric_spell_id(state, 1) else {
+    let Some(spell_id) = read_modeled_numeric_spell_id(state)? else {
         return Ok(0);
     };
     let Some(spell) = spells::get_spell(spell_id) else {
@@ -481,7 +483,7 @@ fn get_spell_link(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_spell_name(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = u32::from_stack(state, 1)?;
+    let spell_id = read_modeled_u32_spell_id(state)?;
     let name = spells::get_spell(spell_id)
         .map(|spell| spell.name)
         .unwrap_or("Unknown");
@@ -494,7 +496,7 @@ fn get_spell_name(state: &mut LuaState) -> LuaResult<u32> {
 ///
 /// Retail fields: `startTime, duration, isEnabled, isActive, modRate`.
 fn get_spell_cooldown(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = match inspect_modeled_cooldown_selector(state, |number| {
+    let spell_id = match inspect_modeled_spell_selector(state, |number| {
         // Match the existing typed u32 reader without interpolating private input.
         let integer = number as i64;
         if integer as f64 != number {
@@ -581,9 +583,9 @@ fn get_spell_charges(state: &mut LuaState) -> LuaResult<u32> {
     super::charge_state::push_charge_info(state, spell_id)
 }
 
-/// Only these modeled cooldown/LoC endpoints may inspect numeric-secret selectors.
+/// Only explicitly opted-in endpoints inspect numeric-secret selectors.
 /// The closure returns host-only identity, never a Lua selector or callback result.
-fn inspect_modeled_cooldown_selector<T>(
+fn inspect_modeled_spell_selector<T>(
     state: &LuaState,
     resolve: impl FnOnce(f64) -> LuaResult<T>,
 ) -> LuaResult<Option<T>> {
@@ -603,7 +605,7 @@ fn inspect_modeled_cooldown_selector<T>(
 
 #[cfg(feature = "retail-12-0-0")]
 fn read_modeled_cooldown_identifier(state: &LuaState) -> LuaResult<Option<u32>> {
-    if let Some(spell_id) = inspect_modeled_cooldown_selector(state, |number| {
+    if let Some(spell_id) = inspect_modeled_spell_selector(state, |number| {
         read_spell_identifier_value(state, Val::Num(number))
     })? {
         return Ok(spell_id);
@@ -611,13 +613,28 @@ fn read_modeled_cooldown_identifier(state: &LuaState) -> LuaResult<Option<u32>> 
     read_spell_identifier(state)
 }
 
-fn read_modeled_loc_identifier(state: &LuaState) -> LuaResult<Option<u32>> {
-    if let Some(spell_id) = inspect_modeled_cooldown_selector(state, |number| {
+fn read_modeled_numeric_spell_id(state: &LuaState) -> LuaResult<Option<u32>> {
+    if let Some(spell_id) = inspect_modeled_spell_selector(state, |number| {
         Ok(numeric_spell_id_value(state, Val::Num(number)))
     })? {
         return Ok(spell_id);
     }
     Ok(numeric_spell_id(state, 1))
+}
+
+fn read_modeled_u32_spell_id(state: &LuaState) -> LuaResult<u32> {
+    if let Some(spell_id) = inspect_modeled_spell_selector(state, |number| {
+        let id = number as u32;
+        if f64::from(id) != number {
+            return Err(rilua::runtime_error(
+                "C_Spell: expected u32 spell identifier",
+            ));
+        }
+        Ok(id)
+    })? {
+        return Ok(spell_id);
+    }
+    u32::from_stack(state, 1)
 }
 
 #[cfg(feature = "retail-12-0-5")]
@@ -879,7 +896,7 @@ fn is_current_spell(state: &mut LuaState) -> LuaResult<u32> {
 /// `defaultLossOfControlInfo` baseline. Returning nil here mirrors that path
 /// for spells with no registered loss-of-control entry.
 fn get_spell_loss_of_control_cooldown_info(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(spell_id) = read_modeled_loc_identifier(state)? else {
+    let Some(spell_id) = read_modeled_numeric_spell_id(state)? else {
         state.push(Val::Nil);
         return Ok(1);
     };
@@ -888,7 +905,7 @@ fn get_spell_loss_of_control_cooldown_info(state: &mut LuaState) -> LuaResult<u3
 
 #[cfg(feature = "retail-12-0-0")]
 fn get_spell_loss_of_control_duration(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(spell_id) = read_modeled_loc_identifier(state)? else {
+    let Some(spell_id) = read_modeled_numeric_spell_id(state)? else {
         return Ok(0);
     };
     push_spell_loss_of_control_duration(state, spell_id)

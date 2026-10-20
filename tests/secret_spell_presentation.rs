@@ -98,6 +98,11 @@ fn invoke(env: &WowLuaEnv, code: &str, tainted: bool) {
 #[test]
 fn original_meter_icon_numeric_secret_selector() {
     let env = fixture();
+    let texture_arity = if cfg!(feature = "retail-12-1-0") {
+        3
+    } else {
+        2
+    };
     for tainted in [false, true] {
         for selector in ["19750", "Selector"] {
             invoke(
@@ -107,7 +112,7 @@ fn original_meter_icon_numeric_secret_selector() {
                 local row = {{spellID = {selector}}}
                 local icon, original, override = DamageMeterSpellEntryMixin.GetIconTexture(row)
                 assert(icon == 135907 and original == 135907 and override == nil, 'selected Flash of Light icon')
-                assert(select('#', DamageMeterSpellEntryMixin.GetIconTexture(row)) == 3)
+                assert(select('#', DamageMeterSpellEntryMixin.GetIconTexture(row)) == {texture_arity})
                 assert(issecretvalue(row.spellID) == issecretvalue({selector}), 'row secrecy unchanged')
             "#
                 ),

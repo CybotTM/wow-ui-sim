@@ -167,6 +167,10 @@ Commit `da2ec8cb8` adds only an epoch125 (`retail-12-0-5`) authentic VM-secret c
 
 [Row311 contract and saved RED SSOT](../../specs/spell-link-glyph-security.md) records genuine pre-producer **3 PASS / 5 FAIL**, compile **149.032s** and execution **1.0117s**, under `/tmp/patch-12.0.5-batch57-red-*`. Three public controls passed; five secret-boundary tests failed. Dirty-combined RED is not clean-revision proof or evidence that this commit passes. GREEN, independent acceptance and checks remain pending; no arg1, glyph-catalog or native permission credit. Current accounting remains **210 pending / 138 bounded / 14 partial; 64 capabilities**, with row311 pending. See [[patch-12-0-5-api-audit]] for broader coverage.
 
+## Numeric-secret spell presentation selectors
+
+`c_api::c_spell` opts presentation lookups into the existing host-only numeric inspector without widening the shared public reader or action/book selectors. Endpoint-specific numeric conversion stays intact; a rooted Info DTO receives a newly wrapped resolved identity, not the original potentially fractional selector. The [presentation contract](../../specs/spell-secret-presentation.md) owns the user-approved output policy, original meter/reward fixtures, description/link sub-batch limits and native-evidence gaps. Runtime acceptance remains pending.
+
 ## Retail 12.0.5 tooltip spell and mount identifiers
 
 [Batch56 saved proof SSOT](../../specs/tooltip-spell-mount-identifiers.md#reconciled-batch56-saved-parent-green--2026-10-02) owns22 new +133 actual substring-selected controls =155 uniquePASS, startup0 `[]`, dirty provenance and inferred policies. Sole epoch125 C API handlers reuse existing payloads; public flags ignored, GetSpell alias/mount-title gaps retained. Independent acceptance and four source rows pending; no native/profile/whole-page credit.
