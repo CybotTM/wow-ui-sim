@@ -256,6 +256,7 @@ fn blizzard_plunderstorm_basics_does_not_appear_in_eager_discovery_for_any_scree
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_basics_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -268,6 +269,7 @@ fn blizzard_plunderstorm_basics_appears_in_full_addon_inventory() {
          full inventory is a structural listing of every parseable TOC including LoD \
          addons"
     );
+}
 }
 
 prefork_full_ui_case! {
