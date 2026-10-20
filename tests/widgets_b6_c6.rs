@@ -125,7 +125,7 @@ fn b6_c6_original_consumer_queues_one_row_per_update() {
     env.fire_on_update(0.0).unwrap();
     assert_eq!(rows(), ["first"]);
     env.fire_on_update(0.0).unwrap();
-    assert_eq!(rows(), ["first", "second"]);
+    assert_eq!(rows(), ["second", "first"]); // Original XML uses TOP insertion.
 }
 
 #[test]

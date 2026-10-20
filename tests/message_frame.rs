@@ -264,7 +264,7 @@ fn test_builtin_chat_frame_accepts_messages() {
 
     env.fire_on_update(0.0).unwrap();
     let sim = env.state().borrow();
-    let id = sim.widgets.get_id_by_name("ChatFrame1").unwrap();
+    let id = sim.widgets.get_id_by_name("DEFAULT_CHAT_FRAME").unwrap();
     assert_eq!(sim.message_frames[&id].messages[0].text, "Test");
 }
 
@@ -400,11 +400,17 @@ fn test_text_copyable_set_get() {
 #[test]
 fn test_has_message_by_id() {
     let env = WowLuaEnv::new().unwrap();
+    env.exec(&format!("__SMF_WRATH_NATIVE = {}", cfg!(feature = "client-wrath")))
+        .unwrap();
 
     env.exec(
         r#"
         local f = CreateFrame("ScrollingMessageFrame", "TestMFByID", UIParent)
-        f:AddMessage("Tagged", 1, 1, 1, 1, 42)
+        if __SMF_WRATH_NATIVE then
+            f:AddMessage("Tagged", 1, 1, 1, 42, false)
+        else
+            f:AddMessage("Tagged", 1, 1, 1, 1, 42)
+        end
         f:AddMessage("Untagged")
     "#,
     )

@@ -249,3 +249,19 @@ fn c11_original_wrath_temporary_window_moves_only_selected_access_history() {
         .unwrap();
     assert!(env.state().borrow().lua_errors.is_empty());
 }
+
+
+#[test]
+#[cfg(feature = "client-retail")]
+fn c11_retail_scrolling_history_retains_color_tuple() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"
+        local f = CreateFrame('ScrollingMessageFrame')
+        f:AddMessage('retail', 0.25, 0.5, 0.75, 0.8, 42)
+        assert(select('#', f:GetMessageInfo(1)) == 6)
+        local text, r, g, b, alpha, timestamp = f:GetMessageInfo(1)
+        assert(text == 'retail' and r == 0.25 and g == 0.5 and b == 0.75)
+        assert(math.abs(alpha - 0.8) < 0.00001 and type(timestamp) == 'number')
+        assert(f:HasMessageByID(42) and f:GetNumMessages() == 1)
+    "#).unwrap();
+}
