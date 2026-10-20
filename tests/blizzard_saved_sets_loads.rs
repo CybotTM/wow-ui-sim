@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn saved_sets_dir() -> PathBuf {
@@ -64,6 +65,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&saved_sets_dir()).expect("Blizzard_SavedSets TOC resolves");
@@ -75,7 +78,9 @@ fn find_toc_file_resolves_bare_toc() {
          engine-flavor-agnostic by construction"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_on_both_screens_with_account_wide_saved_variable() {
     let toc = TocFile::from_file(&saved_sets_toc()).expect("Blizzard_SavedSets TOC parses");
@@ -131,7 +136,9 @@ fn toc_declares_eager_on_both_screens_with_account_wide_saved_variable() {
     );
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_metadata_in_raw_bytes_with_descriptive_comment() {
     let raw =
@@ -166,7 +173,9 @@ fn toc_declares_metadata_in_raw_bytes_with_descriptive_comment() {
         "TOC must NOT declare `## Author:` — relies on implicit Blizzard ownership"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_single_lua_file_with_no_xml() {
     let toc = TocFile::from_file(&saved_sets_toc()).expect("Blizzard_SavedSets TOC parses");
@@ -182,6 +191,7 @@ fn toc_lists_single_lua_file_with_no_xml() {
          handlers wired through XML; just a global-scope `SavedSetsUtil` table and a \
          single `EventUtil.ContinueOnVariablesLoaded` callback registration"
     );
+}
 }
 
 #[test]
