@@ -32,6 +32,10 @@ fn install_secrets(env: &WowLuaEnv) {
         lua.set_global_val(name, value).unwrap();
         lua.state_mut().pop();
     }
+    let flag = rilua::table_security::wrap_host_secret_bool(lua.state_mut(), true);
+    lua.state_mut().push(flag);
+    lua.set_global_val("SecretBool", flag).unwrap();
+    lua.state_mut().pop();
     let value = rilua::table_security::wrap_host_secret_string(lua.state_mut(), "19750");
     lua.state_mut().push(value);
     lua.set_global_val("SecretString", value).unwrap();
@@ -63,6 +67,13 @@ fn invoke(env: &WowLuaEnv, code: &str, tainted: bool) {
         }
     ))
     .expect(code);
+    let value: rilua::Val = env.eval("return Selector").unwrap();
+    let lua = env.lua();
+    assert_eq!(
+        rilua::table_security::unwrap_secret(lua.state(), value).unwrap(),
+        rilua::Val::Num(19750.0),
+        "query preserves original wrapper payload"
+    );
 }
 
 #[test]
@@ -120,7 +131,7 @@ fn presentation_miss_and_invalid_numeric_secret_controls() {
             assert(C_Spell.GetSpellName(Missing) == 'Unknown')
             assert(select('#', C_Spell.GetSpellTexture(900002)) == 0)
             assert(C_Spell.GetSpellName(900002) == 'Unknown')
-            for _, value in ipairs({Fraction, Negative, Infinite, Nan, Overflow, SecretString}) do
+            for _, value in ipairs({Fraction, Negative, Infinite, Nan, Overflow, SecretString, SecretBool}) do
                 assert(select('#', C_Spell.GetSpellTexture(value)) == 0)
                 assert(not pcall(C_Spell.GetSpellName, value), 'invalid typed name selector')
                 assert(issecretvalue(value), 'invalid wrapper unchanged')
