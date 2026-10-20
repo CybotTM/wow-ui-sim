@@ -7,7 +7,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn static_popup_dir() -> PathBuf {
@@ -131,6 +132,8 @@ fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&static_popup_dir()).expect("StaticPopup TOC resolves");
@@ -144,7 +147,9 @@ fn find_toc_file_resolves_bare_toc() {
          Blizzard_StaticPopup_Game / Blizzard_StaticPopup_Glue siblings"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dependencies_are_empty() {
     let toc = TocFile::from_file(&static_popup_toc()).expect("TOC parses");
@@ -162,7 +167,9 @@ fn dependencies_are_empty() {
         toc.dependencies()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_both_resolves_to_all_four_screens() {
     let toc = TocFile::from_file(&static_popup_toc()).expect("TOC parses");
@@ -182,7 +189,9 @@ fn allow_load_both_resolves_to_all_four_screens() {
     assert!(toc.allows_screen(ScreenKind::CharacterSelect));
     assert!(toc.allows_screen(ScreenKind::CharacterCreate));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn no_game_type_restriction() {
     let toc = TocFile::from_file(&static_popup_toc()).expect("TOC parses");
@@ -198,7 +207,9 @@ fn no_game_type_restriction() {
          addons, not here"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     let toc = TocFile::from_file(&static_popup_toc()).expect("TOC parses");
@@ -217,7 +228,9 @@ fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_three_metadata_directives() {
     let raw = std::fs::read_to_string(static_popup_toc()).expect("TOC reads utf-8");
@@ -248,7 +261,9 @@ fn toc_raw_bytes_pin_three_metadata_directives() {
     assert!(!raw.contains("## AllowLoadGameType"));
     assert!(!raw.contains("## UseSecureEnvironment"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_lists_three_lua_files_in_dependency_order() {
     let toc = TocFile::from_file(&static_popup_toc()).expect("TOC parses");
@@ -291,7 +306,9 @@ fn body_lists_three_lua_files_in_dependency_order() {
          dialog into StaticPopupDialogs"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_orders_dispatcher_before_templates_before_definitions() {
     let toc = TocFile::from_file(&static_popup_toc()).expect("TOC parses");
@@ -326,6 +343,7 @@ fn body_orders_dispatcher_before_templates_before_definitions() {
          OnAccept / OnCancel handlers, requiring StaticPopupDialogs \
          from StaticPopup.lua to already be declared"
     );
+}
 }
 
 #[test]
