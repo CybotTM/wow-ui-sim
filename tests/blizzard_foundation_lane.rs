@@ -290,6 +290,7 @@ fn lane_appears_in_eager_discovery_in_dep_first_order() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn shared_xml_base_loads_on_glue_screens_others_do_not() {
     let ui = blizzard_ui_dir();
@@ -347,6 +348,7 @@ fn shared_xml_base_loads_on_glue_screens_others_do_not() {
             "UIPanelTemplates MUST be ABSENT from {screen:?} eager discovery"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
