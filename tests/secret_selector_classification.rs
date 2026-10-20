@@ -72,10 +72,13 @@ fn original_castbar_highlights_tainted_secret_spell() {
             for _, id in ipairs({19750, Selector}) do
                 local frame = CreateFrame('Frame')
                 Mixin(frame, CastingBarMixin)
+                frame.ImportantCastIndicator = frame:CreateTexture()
+                frame.ImportantCastIndicator:Hide()
                 frame.highlightImportantCasts = true
                 frame.spellID = id
                 frame:UpdateHighlightImportantCast()
                 assert(frame.isHighlightedImportantCast == true)
+                assert(frame.ImportantCastIndicator:IsShown())
             end
             assert(issecretvalue(Selector))
             assert(debug.getstacktaint() == before)
