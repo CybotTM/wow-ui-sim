@@ -235,6 +235,7 @@ fn excluded_from_eager_discovery_due_to_load_on_demand() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_bootstrap_lua_and_xml_next_to_toc() {
     let dir = scrapping_dir();
@@ -256,6 +257,7 @@ fn root_directory_holds_bootstrap_lua_and_xml_next_to_toc() {
         4,
         "Retail 12.1.0.69497 adds a bootstrap Lua beside the TOC, XML, and embedded-script Lua: {entries:?}"
     );
+}
 }
 
 post_wrath_ui_fixture! {
