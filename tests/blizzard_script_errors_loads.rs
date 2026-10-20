@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn script_errors_dir() -> PathBuf {
@@ -49,6 +50,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&script_errors_dir()).expect("Blizzard_ScriptErrors TOC resolves");
@@ -61,7 +64,9 @@ fn find_toc_file_resolves_bare_toc() {
          flavor-specific TOC variants"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_on_both_screens_with_no_dependencies() {
     let toc = TocFile::from_file(&script_errors_toc()).expect("Blizzard_ScriptErrors TOC parses");
@@ -103,7 +108,9 @@ fn toc_declares_eager_on_both_screens_with_no_dependencies() {
     assert!(toc.saved_variables().is_empty());
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_default_state_enabled() {
     let toc = TocFile::from_file(&script_errors_toc()).expect("Blizzard_ScriptErrors TOC parses");
@@ -114,7 +121,9 @@ fn toc_declares_default_state_enabled() {
          downstream Lua error would fall through to the C++ engine handler"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_metadata_in_raw_bytes_with_escalate_and_global_env() {
     let raw = std::fs::read_to_string(script_errors_toc())
@@ -145,7 +154,9 @@ fn toc_declares_metadata_in_raw_bytes_with_escalate_and_global_env() {
          the bare filename"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_single_lua_file_with_no_xml() {
     let toc = TocFile::from_file(&script_errors_toc()).expect("Blizzard_ScriptErrors TOC parses");
@@ -162,7 +173,9 @@ fn toc_lists_single_lua_file_with_no_xml() {
          addon which registers as a downstream handler via `AddLuaErrorHandler`"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_on_every_screen_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -185,7 +198,9 @@ fn appears_on_every_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_single_lua_next_to_toc() {
     let dir = script_errors_dir();
@@ -203,6 +218,7 @@ fn root_directory_holds_single_lua_next_to_toc() {
         "Blizzard_ScriptErrors directory must contain exactly 2 entries (1 lua + 1 toc), \
          got {entries:?}. No XML, no nested directories, no extra Lua files"
     );
+}
 }
 
 prefork_full_ui_case! {

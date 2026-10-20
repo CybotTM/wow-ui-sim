@@ -14,12 +14,12 @@ fn env_with_object_api() -> WowLuaEnv {
     let env = common::env_with_shared_xml();
     let ui = blizzard_ui_dir();
 
-    let colors_toc = find_toc_file(&ui.join("Blizzard_Colors"))
-        .expect("Blizzard_Colors TOC should exist");
+    let colors_toc =
+        find_toc_file(&ui.join("Blizzard_Colors")).expect("Blizzard_Colors TOC should exist");
     load_addon(&env.loader_env(), &colors_toc).expect("Failed to load Blizzard_Colors");
 
-    let object_api_toc = find_toc_file(&ui.join("Blizzard_ObjectAPI"))
-        .expect("Blizzard_ObjectAPI TOC should exist");
+    let object_api_toc =
+        find_toc_file(&ui.join("Blizzard_ObjectAPI")).expect("Blizzard_ObjectAPI TOC should exist");
     load_addon(&env.loader_env(), &object_api_toc).expect("Failed to load Blizzard_ObjectAPI");
 
     env
@@ -54,6 +54,7 @@ fn request_load_quest_by_id_fires_result_event() {
     assert!(success, "known quest IDs should report success");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn quest_event_listener_callback_runs_from_request_load() {
     let env = env_with_object_api();
@@ -76,6 +77,7 @@ fn quest_event_listener_callback_runs_from_request_load() {
         callback_fired,
         "QuestEventListener callbacks should run via QUEST_DATA_LOAD_RESULT"
     );
+}
 }
 
 #[test]
@@ -117,6 +119,7 @@ fn request_load_unknown_quest_reports_failure() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn spell_event_listener_callback_runs_from_request_load() {
     let env = env_with_object_api();
@@ -141,7 +144,9 @@ fn spell_event_listener_callback_runs_from_request_load() {
         "SpellEventListener callbacks should run via SPELL_DATA_LOAD_RESULT"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn item_event_listener_callback_runs_from_request_load() {
     let env = env_with_object_api();
@@ -166,7 +171,9 @@ fn item_event_listener_callback_runs_from_request_load() {
         "ItemEventListener callbacks should run via ITEM_DATA_LOAD_RESULT"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn spell_cancel_callback_is_spent_after_sync_load() {
     let env = env_with_object_api();
@@ -194,7 +201,9 @@ fn spell_cancel_callback_is_spent_after_sync_load() {
         "cancel should report false once the synchronous load already consumed the callback"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn continuable_container_satisfies_mixed_item_and_spell_loads() {
     let env = env_with_object_api();
@@ -223,4 +232,5 @@ fn continuable_container_satisfies_mixed_item_and_spell_loads() {
         outstanding_after, 0,
         "ContinuableContainer should not leave outstanding loads after completion"
     );
+}
 }

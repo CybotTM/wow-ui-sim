@@ -79,6 +79,7 @@ const EXPECTED_BUTTON_INIT: &str = "id_called=1 id_index=5 achievement_id=9001";
 type TextChangedProbe = (String, String, String, String);
 type FullResultsProbe = (String, String, String, String);
 
+post_wrath_ui_fixture! {
 #[test]
 fn search_box_text_changed_calls_set_achievement_search_string_when_query_meets_min_length() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -204,7 +205,9 @@ fn search_box_text_changed_calls_set_achievement_search_string_when_query_meets_
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn full_search_results_chain_uses_filtered_globals_for_data_provider_and_per_row_init() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -360,4 +363,5 @@ fn full_search_results_chain_uses_filtered_globals_for_data_provider_and_per_row
              `if self.achievementID then ...` and would silently no-op for every click."
         );
     });
+}
 }

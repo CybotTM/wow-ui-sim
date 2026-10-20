@@ -1,5 +1,10 @@
 //! Shared test helpers.
 
+include!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/tests/common/profile_fixtures.rs"
+));
+
 pub mod addon_coverage_baseline;
 #[cfg(feature = "retail-12-1-0")]
 pub mod aura_container_harness;
@@ -232,6 +237,20 @@ pub fn load_click_binding_bootstrap(env: &WowLuaEnv, ui: &Path) {
     );
 }
 
+/// Parse the native core inventory for profiles predating modular Blizzard addons.
+pub fn native_framexml_toc() -> wow_ui_sim::toc::TocFile {
+    let path = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("native FrameXML cache should be synced");
+    wow_ui_sim::toc::TocFile::from_file(&path).expect("native FrameXML TOC should parse")
+}
+
+/// Match production's top-level FrameXML load before discovering split addons.
+pub fn load_profile_framexml(env: &WowLuaEnv) {
+    if let Some(toc) = wow_ui_sim::client_profile::blizzard_ui_framexml_toc() {
+        load_addon(&env.loader_env(), &toc).expect("native FrameXML should load");
+    }
+}
+
 /// Load the active profile's native panel templates, not a synthetic replacement.
 pub fn env_with_shared_xml() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -248,11 +267,10 @@ pub fn env_with_shared_xml() -> WowLuaEnv {
 fn load_wrath_panel_templates(env: &WowLuaEnv) {
     let toc_path = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
         .expect("Wrath FrameXML cache should be synced");
-    let root = toc_path.parent().expect("FrameXML TOC should have a parent");
-    let toc = wow_ui_sim::toc::TocFile::parse(
-        root,
-        "UIPanelTemplates.lua\nUIPanelTemplates.xml\n",
-    );
+    let root = toc_path
+        .parent()
+        .expect("FrameXML TOC should have a parent");
+    let toc = wow_ui_sim::toc::TocFile::parse(root, "UIPanelTemplates.lua\nUIPanelTemplates.xml\n");
     let result = wow_ui_sim::loader::load_addon_from_toc(&env.loader_env(), &toc)
         .expect("Failed to load native Wrath panel templates");
     assert!(result.warnings.is_empty(), "{:?}", result.warnings);

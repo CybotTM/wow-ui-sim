@@ -49,6 +49,7 @@ end
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn auth_challenge_ui_input_frame_has_four_template_edit_boxes() {
     common::with_perf_lock(|| {
@@ -78,4 +79,5 @@ fn auth_challenge_ui_input_frame_has_four_template_edit_boxes() {
             });
         });
     });
+}
 }

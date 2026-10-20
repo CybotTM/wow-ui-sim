@@ -102,6 +102,8 @@ return pin.panAndZoomToCount,
        trigger and trigger.pin == pin
 "#;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn quest_offer_pin_click_anchors_dialog_and_trigger() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -119,6 +121,7 @@ fn quest_offer_pin_click_anchors_dialog_and_trigger() {
             "FXAM-QuestBang",
         );
     });
+}
 }
 
 #[derive(Clone, Copy)]

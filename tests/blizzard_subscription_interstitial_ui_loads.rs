@@ -70,6 +70,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved =
@@ -80,7 +82,9 @@ fn find_toc_file_resolves_bare_toc() {
         "Bare TOC — no flavor suffix; addon ships only the mainline body"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_load_on_demand_with_no_dependencies() {
     let toc = TocFile::from_file(&subscription_interstitial_toc()).expect("TOC parses");
@@ -99,7 +103,9 @@ fn toc_is_load_on_demand_with_no_dependencies() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.saved_variables().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_has_no_allow_load_or_game_type_restriction_or_secure_env() {
     let toc = TocFile::from_file(&subscription_interstitial_toc()).expect("TOC parses");
@@ -112,7 +118,9 @@ fn toc_has_no_allow_load_or_game_type_restriction_or_secure_env() {
     assert!(!toc.is_load_first());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_absent_restricts_to_game_screen_only() {
     let toc = TocFile::from_file(&subscription_interstitial_toc()).expect("TOC parses");
@@ -128,7 +136,9 @@ fn allow_load_absent_restricts_to_game_screen_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_metadata_and_bootstrap_xml_body() {
     let raw = std::fs::read_to_string(subscription_interstitial_toc()).expect("TOC reads utf-8");
@@ -155,7 +165,9 @@ fn toc_raw_bytes_pin_metadata_and_bootstrap_xml_body() {
     assert!(!raw.contains("## UseSecureEnvironment"));
     assert!(!raw.contains("## LoadFirst"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_resolves_bootstrap_then_xml_entry() {
     let toc = TocFile::from_file(&subscription_interstitial_toc()).expect("TOC parses");
@@ -176,7 +188,9 @@ fn body_resolves_bootstrap_then_xml_entry() {
          Got: {body:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_chains_lua_via_script_file_directive() {
     let xml_path = subscription_interstitial_dir().join("Blizzard_SubscriptionInterstitialUI.xml");
@@ -188,6 +202,7 @@ fn xml_chains_lua_via_script_file_directive() {
          — drives the 5-mixin publication chain since the .lua is NOT \
          listed in the TOC body directly"
     );
+}
 }
 
 #[test]

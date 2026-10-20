@@ -10,6 +10,8 @@ const VALID_B_QUEST_ID: i64 = 40521;
 const NIL_COORDS_QUEST_ID: i64 = 40522;
 const EXPECTED_VALID_CHOICE_COUNT: i64 = 2;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn quest_choice_refresh_acquires_choice_and_fog_pin_per_valid_choice() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -113,6 +115,7 @@ fn quest_choice_refresh_acquires_choice_and_fog_pin_per_valid_choice() {
 
         assert_quest_choice_refresh_surface(surface);
     });
+}
 }
 
 type QuestChoiceRefreshSurface = (i64, i64, bool, bool, bool, bool, f64, f64, i64, i64, bool);

@@ -6,6 +6,8 @@ use wow_ui_sim::lua_api::AddonInfo;
 const ROOT: &str = "Blizzard_AddOnList";
 const PROBE_ADDON: &str = "AddonListClearCharacterProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn clear_character_dropdown_resets_selected_character_to_all() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -43,6 +45,7 @@ fn clear_character_dropdown_resets_selected_character_to_all() {
 
         assert_clear_character_probe(probe);
     });
+}
 }
 
 type ClearCharacterProbe = (String, String, bool);

@@ -7,6 +7,8 @@ const ROOT: &str = "Blizzard_AddOnList";
 const CHILD_ADDON: &str = "AddonListPendingChildProbe";
 const PARENT_ADDON: &str = "AddonListPendingParentProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn addon_list_update_attaches_pending_children_when_parent_loads_later() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -59,6 +61,7 @@ fn addon_list_update_attaches_pending_children_when_parent_loads_later() {
 
         assert_pending_child_probe(probe);
     });
+}
 }
 
 type PendingChildProbe = (bool, bool, bool, i64, i64, i64);

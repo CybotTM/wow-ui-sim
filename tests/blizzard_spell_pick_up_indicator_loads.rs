@@ -6,7 +6,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn pickup_dir() -> PathBuf {
@@ -48,6 +49,8 @@ fn load_spell_pick_up_indicator(env: &WowLuaEnv) {
         .expect("Blizzard_SpellPickUpIndicator should load via explicit Rust loader call");
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_resolves_bare_variant() {
     let resolved =
@@ -61,7 +64,9 @@ fn find_toc_resolves_bare_variant() {
          standard retail"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_three_directives_with_no_dependencies() {
     let toc =
@@ -98,7 +103,9 @@ fn toc_declares_three_directives_with_no_dependencies() {
     );
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_plunderstorm_only_without_allow_load_directive() {
     let toc =
@@ -125,7 +132,9 @@ fn toc_is_plunderstorm_only_without_allow_load_directive() {
     assert!(!toc.allows_screen(ScreenKind::CharacterSelect));
     assert!(!toc.allows_screen(ScreenKind::CharacterCreate));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn raw_bytes_pin_three_metadata_directives() {
     let raw = std::fs::read_to_string(pickup_toc()).expect("TOC reads utf-8");
@@ -162,7 +171,9 @@ fn raw_bytes_pin_three_metadata_directives() {
     assert!(!raw.contains("## UseSecureEnvironment"));
     assert!(!raw.contains("## AllowLoad:"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_lists_lua_before_xml() {
     let toc = TocFile::from_file(&pickup_toc()).expect("TOC parses");
@@ -198,6 +209,7 @@ fn body_lists_lua_before_xml() {
          template-registration time, so they MUST already be tables in \
          _G when the .xml chunk is processed"
     );
+}
 }
 
 #[test]

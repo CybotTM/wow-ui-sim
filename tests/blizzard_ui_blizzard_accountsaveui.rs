@@ -7,6 +7,9 @@
 
 use crate::common;
 
+// Wrath manifest1-382/cache has no AccountSaveFrame or AccountSaveFrameMixin;
+// six other manifests ship Blizzard_AccountSaveUI's Glue UI publishers.
+post_wrath_ui_fixture! {
 #[path = "blizzard_ui/blizzard_accountsaveui/load.rs"]
 mod load;
 
@@ -57,3 +60,4 @@ mod behavior_on_size_changed;
 
 #[path = "blizzard_ui/blizzard_accountsaveui/behavior_editbox_keys.rs"]
 mod behavior_editbox_keys;
+}

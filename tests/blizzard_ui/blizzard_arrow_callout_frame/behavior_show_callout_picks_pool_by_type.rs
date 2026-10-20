@@ -64,6 +64,8 @@ expect(tutorial.CloseButton:GetParent() == tutorial, "tutorial CloseButton shoul
 return table.concat(failures, "\n")
 "#;
 
+// Wrath has no ArrowCallout vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn show_callout_selects_container_pool_from_callout_type() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -77,6 +79,7 @@ fn show_callout_selects_container_pool_from_callout_type() {
             "ArrowCalloutFrame pool-by-type behavior mismatches:\n{failures}"
         );
     });
+}
 }
 
 fn load_arrow_callout_frame(env: &wow_ui_sim::lua_api::WowLuaEnv) {

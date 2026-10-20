@@ -5,6 +5,8 @@ use common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};
 
 const ROOT: &str = "Blizzard_AzeriteRespecUI";
 
+// AzeriteRespecUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_respec_ui_selection_event_clears_only_matching_slot() {
     common::with_perf_lock(|| {
@@ -95,4 +97,5 @@ fn blizzard_azerite_respec_ui_selection_event_clears_only_matching_slot() {
             });
         });
     });
+}
 }

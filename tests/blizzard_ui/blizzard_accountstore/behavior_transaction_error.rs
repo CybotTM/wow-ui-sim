@@ -112,6 +112,7 @@ const ROOT: &str = "Blizzard_AccountStore";
 const POPUP_KEY: &str = "ACCOUNT_STORE_TRANSACTION_ERROR";
 const LOCALIZED_TEXT_SUBSTRING: &str = "The transaction could not be completed.";
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_account_store_load_preserves_popup_after_static_popup_load() {
     let ui_dir = blizzard_ui_dir();
@@ -150,7 +151,9 @@ fn explicit_account_store_load_preserves_popup_after_static_popup_load() {
         "The AccountStore transaction-error popup must survive the later explicit Blizzard_StaticPopup load"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn transaction_error_popup_table_has_expected_six_fields() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -189,6 +192,7 @@ fn transaction_error_popup_table_has_expected_six_fields() {
         assert_popup_field_equals_zero(env, "timeout");
         assert_popup_field_equals_one(env, "whileDead");
     });
+}
 }
 
 fn assert_popup_field_equals_okay(env: &WowLuaEnv) {
@@ -260,6 +264,7 @@ fn assert_popup_field_equals_zero(env: &WowLuaEnv, field_name: &str) {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn transaction_error_popup_text_contains_localized_string() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -281,7 +286,9 @@ fn transaction_error_popup_text_contains_localized_string() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn event_registry_trigger_does_not_invoke_static_popup_show() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -315,7 +322,9 @@ fn event_registry_trigger_does_not_invoke_static_popup_show() {
         teardown_static_popup_show_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_item_display_on_event_dispatches_constant_popup_name() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -374,7 +383,9 @@ fn account_store_item_display_on_event_dispatches_constant_popup_name() {
         teardown_static_popup_show_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_item_display_on_event_does_not_propagate_result_code() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -418,6 +429,7 @@ fn account_store_item_display_on_event_does_not_propagate_result_code() {
 
         teardown_static_popup_show_tracker(env);
     });
+}
 }
 
 fn seed_static_popup_show_tracker(env: &WowLuaEnv) {

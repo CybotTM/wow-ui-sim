@@ -303,7 +303,7 @@ fn frame_mt_registry_key(state: &mut LuaState) -> GcRef<rilua::vm::string::LuaSt
 ///
 /// Methods are accessed via `__index` in the metatable, not copied directly.
 /// This avoids ~636 raw_set calls per frame and reduces memory/GC pressure.
-fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>, id: u64) {
+pub(crate) fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>, id: u64) {
     let mt_key = frame_mt_registry_key(state);
     let mt_val = state
         .gc
@@ -312,11 +312,19 @@ fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>, id: u64
         .map(|reg| reg.get_str(mt_key, &state.gc.string_arena))
         .unwrap_or(Val::Nil);
     if let Val::Table(mt_ref) = mt_val {
-        let widget_type = borrow_state(state)
+        let (widget_type, plain_wrath_message_frame) = borrow_state(state)
             .ok()
-            .and_then(|sim| sim.widgets.get(id).map(|frame| frame.widget_type))
-            .unwrap_or(WidgetType::Frame);
-        let type_mt = frame_metatable_for_widget_type(state, mt_ref, widget_type);
+            .and_then(|sim| {
+                sim.widgets.get(id).map(|frame| {
+                    (
+                        frame.widget_type,
+                        super::message_frame::uses_wrath_row_lifecycle(frame),
+                    )
+                })
+            })
+            .unwrap_or((WidgetType::Frame, false));
+        let type_mt =
+            frame_metatable_for_widget_type(state, mt_ref, widget_type, plain_wrath_message_frame);
         if let Some(t) = state.gc.tables.get_mut(table_ref) {
             if let Val::Table(type_mt_ref) = type_mt {
                 t.set_metatable(Some(type_mt_ref));

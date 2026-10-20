@@ -10,6 +10,8 @@ const READY_LOD_ADDON: &str = "AddonListReadyLod";
 const BLOCKED_LOD_ADDON: &str = "AddonListBlockedLod";
 const NON_LOD_ADDON: &str = "AddonListNotLod";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn is_addon_load_on_demand_requires_lod_flag_and_loaded_dependencies() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -46,6 +48,7 @@ fn is_addon_load_on_demand_requires_lod_flag_and_loaded_dependencies() {
             "`AddonList_IsAddOnLoadOnDemand` must return false when any declared dep is unloaded"
         );
     });
+}
 }
 
 fn seed_dependency_probe_addons(env: &wow_ui_sim::lua_api::WowLuaEnv) {

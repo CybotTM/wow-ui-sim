@@ -8,6 +8,8 @@ use wow_ui_sim::lua_api::state::{
 const ROOT: &str = "Blizzard_ArtifactUI";
 const ARTIFACT_ICON: &str = "Interface/Icons/inv_sword_2h_artifactashbringer_d_01";
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn appearance_tutorial_helptip_shows_until_closed_info_frame_bit_is_set() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -24,6 +26,7 @@ fn appearance_tutorial_helptip_shows_until_closed_info_frame_bit_is_set() {
              mismatches: {mismatches:?}"
         );
     });
+}
 }
 
 fn seed_viewed_artifact_with_unlocked_appearances(env: &wow_ui_sim::lua_api::WowLuaEnv) {

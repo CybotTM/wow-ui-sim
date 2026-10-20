@@ -48,13 +48,17 @@ const ADVENTURE_MAP_QUEST_CHOICE_DIALOG_MIXIN_METHODS: &[&str] = &[
     "DeclineQuest",
 ];
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_mixin_exposes_plan_methods() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         assert_mixin_methods(env, "AdventureMapMixin", ADVENTURE_MAP_MIXIN_METHODS);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_inset_mixin_exposes_plan_methods() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -65,7 +69,9 @@ fn adventure_map_inset_mixin_exposes_plan_methods() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_quest_choice_dialog_mixin_exposes_plan_methods() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -75,6 +81,7 @@ fn adventure_map_quest_choice_dialog_mixin_exposes_plan_methods() {
             ADVENTURE_MAP_QUEST_CHOICE_DIALOG_MIXIN_METHODS,
         );
     });
+}
 }
 
 fn assert_mixin_methods(

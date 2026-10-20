@@ -119,7 +119,12 @@ fn init_addon_list(env: &WowLuaEnv) {
 
 #[test]
 fn test_addon_list_update_defaults_group_metadata_to_addon_name() {
-    let env = env_with_addon_list();
+    // Group defaulting belongs to the addon registry, not the modern ScrollBox.
+    let env = if cfg!(feature = "client-wrath") {
+        WowLuaEnv::new().expect("addon metadata environment")
+    } else {
+        env_with_addon_list()
+    };
     env.exec(r#"A_Admin.RegisterTestAddon("FakeTestAddon")"#)
         .unwrap();
 
@@ -131,8 +136,15 @@ fn test_addon_list_update_defaults_group_metadata_to_addon_name() {
         "AddOnList expects every addon to have a Group string, even when no TOC metadata sets one"
     );
 
-    env.exec("AddonList:Show()").unwrap();
-    env.exec("AddonList_Update()").unwrap();
+    if cfg!(feature = "client-wrath") {
+        let legacy_group: String = env
+            .eval(r#"return GetAddOnMetadata("FakeTestAddon", "Group")"#)
+            .unwrap();
+        assert_eq!(legacy_group, group);
+    } else {
+        env.exec("AddonList:Show()").unwrap();
+        env.exec("AddonList_Update()").unwrap();
+    }
 }
 
 #[test]

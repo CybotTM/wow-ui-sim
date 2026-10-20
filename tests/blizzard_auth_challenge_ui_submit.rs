@@ -20,6 +20,7 @@ C_AuthChallenge.Submit = originalSubmit
 return callCount, argCount
 "##;
 
+post_wrath_ui_fixture! {
 #[test]
 fn auth_challenge_ui_submit_calls_auth_challenge_submit_without_args() {
     common::with_perf_lock(|| {
@@ -53,4 +54,5 @@ fn auth_challenge_ui_submit_calls_auth_challenge_submit_without_args() {
             });
         });
     });
+}
 }

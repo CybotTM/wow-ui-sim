@@ -22,7 +22,10 @@ const PANEL_COVERAGE_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame_Mainline.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
     (
         "Blizzard_UIPanelTemplates",
         "Blizzard_UIPanelTemplates_Mainline.toc",
@@ -287,6 +290,7 @@ fn fire_panel_harness_startup_events(env: &WowLuaEnv) {
 
 fn load_panel_harness_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
     reset_template_state();
+    common::load_profile_framexml(env);
     let ui = blizzard_ui_dir();
     let roots = panel_coverage_roots();
     let closure = discover_blizzard_addon_closure_for_screen(&ui, ScreenKind::Game, &roots);

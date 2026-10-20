@@ -97,6 +97,7 @@ const THIRD_CATEGORY_ID: i64 = 30;
 const REPLACED_FIRST_CATEGORY_ID: i64 = 99;
 const REPLACED_SECOND_CATEGORY_ID: i64 = 88;
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_category_list_mixin_does_not_define_refresh() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -117,7 +118,9 @@ fn account_store_category_list_mixin_does_not_define_refresh() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_category_list_mixin_on_store_front_set_and_set_categories_are_functions() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -149,7 +152,9 @@ fn account_store_category_list_mixin_on_store_front_set_and_set_categories_are_f
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_category_mixin_set_category_is_the_per_button_get_category_info_caller() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -170,7 +175,9 @@ fn account_store_category_mixin_set_category_is_the_per_button_get_category_info
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_store_front_set_calls_get_categories_with_store_front_id_param() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -235,7 +242,9 @@ fn on_store_front_set_calls_get_categories_with_store_front_id_param() {
         teardown_get_categories_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn set_categories_does_not_directly_call_get_category_info() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -279,7 +288,9 @@ fn set_categories_does_not_directly_call_get_category_info() {
         teardown_get_category_info_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn set_categories_resets_selection_to_first_category_not_preserves_selection() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -379,6 +390,7 @@ fn set_categories_resets_selection_to_first_category_not_preserves_selection() {
         teardown_stub_category_list(env);
         teardown_event_registry_trigger_capture(env);
     });
+}
 }
 
 fn seed_get_categories_tracker(env: &WowLuaEnv) {

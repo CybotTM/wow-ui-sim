@@ -75,6 +75,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved =
@@ -87,7 +89,9 @@ fn find_toc_file_resolves_bare_toc() {
          server API, mainline-only by virtue of that backend's absence on classic"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_minimal_load_on_demand_with_zero_dependencies() {
     let toc = TocFile::from_file(&scrapping_toc()).expect("Blizzard_ScrappingMachineUI TOC parses");
@@ -121,7 +125,9 @@ fn toc_declares_minimal_load_on_demand_with_zero_dependencies() {
          scrap list re-fetches from C_ScrappingMachineUI on every UI open"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_metadata_in_raw_bytes_with_carried_over_blizzard_typo() {
     let raw = std::fs::read_to_string(scrapping_toc())
@@ -161,7 +167,9 @@ fn toc_declares_metadata_in_raw_bytes_with_carried_over_blizzard_typo() {
         "TOC must NOT declare `## Author:` — relies on implicit Blizzard ownership"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_bootstrap_then_xml_with_lua_loaded_via_script_directive() {
     let toc = TocFile::from_file(&scrapping_toc()).expect("Blizzard_ScrappingMachineUI TOC parses");
@@ -175,7 +183,9 @@ fn toc_lists_bootstrap_then_xml_with_lua_loaded_via_script_directive() {
         "Retail 12.1.0.69497 lists the ScrappingMachine bootstrap before the XML file"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allows_screen_returns_true_only_for_game_when_allowload_absent() {
     let toc = TocFile::from_file(&scrapping_toc()).expect("Blizzard_ScrappingMachineUI TOC parses");
@@ -197,6 +207,7 @@ fn allows_screen_returns_true_only_for_game_when_allowload_absent() {
              interaction or C_ScrappingMachineUI backend on glue screens"
         );
     }
+}
 }
 
 #[test]
@@ -224,15 +235,17 @@ fn excluded_from_eager_discovery_due_to_load_on_demand() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_bootstrap_lua_and_xml_next_to_toc() {
     let dir = scrapping_dir();
     assert!(dir.join("Blizzard_ScrappingMachineUI.lua").is_file());
     assert!(dir.join("Blizzard_ScrappingMachineUI.xml").is_file());
     assert!(dir.join("Blizzard_ScrappingMachineUI.toc").is_file());
-    assert!(dir
-        .join("Blizzard_ScrappingMachineUI_Bootstrap.lua")
-        .is_file());
+    assert!(
+        dir.join("Blizzard_ScrappingMachineUI_Bootstrap.lua")
+            .is_file()
+    );
 
     let entries: Vec<String> = std::fs::read_dir(&dir)
         .expect("read addon dir")
@@ -245,7 +258,9 @@ fn root_directory_holds_bootstrap_lua_and_xml_next_to_toc() {
         "Retail 12.1.0.69497 adds a bootstrap Lua beside the TOC, XML, and embedded-script Lua: {entries:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_embeds_lua_via_script_directive_at_top_of_ui_root() {
     let body = std::fs::read_to_string(scrapping_dir().join("Blizzard_ScrappingMachineUI.xml"))
@@ -257,6 +272,7 @@ fn xml_embeds_lua_via_script_directive_at_top_of_ui_root() {
          only the XML file; Lua reaches the addon table exclusively through this \
          embedded-script mechanism"
     );
+}
 }
 
 prefork_full_ui_case! {

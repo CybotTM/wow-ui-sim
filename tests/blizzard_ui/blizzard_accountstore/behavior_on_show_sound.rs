@@ -72,6 +72,7 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_show_calls_play_sound_with_account_store_open_sound_kit_constant_value() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -163,7 +164,9 @@ fn on_show_calls_play_sound_with_account_store_open_sound_kit_constant_value() {
         .expect("PlaySound restore + tracker tear-down must run cleanly");
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_show_fires_account_store_shown_state_event_registry_with_true_payload() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -260,6 +263,7 @@ fn on_show_fires_account_store_shown_state_event_registry_with_true_payload() {
         .expect("ShownState observer tear-down must run cleanly");
     });
 }
+}
 
 const PLAN_NAMED_SHOW_EVENT_ALIASES: &[(&str, &str)] = &[
     (
@@ -284,6 +288,7 @@ const PLAN_NAMED_SHOW_EVENT_ALIASES: &[(&str, &str)] = &[
     ),
 ];
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_show_does_not_fire_event_registry_callbacks_for_plan_named_show_event_aliases() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -358,6 +363,7 @@ fn on_show_does_not_fire_event_registry_callbacks_for_plan_named_show_event_alia
             });
         }
     });
+}
 }
 
 fn sanitize_tag(alias: &str) -> String {

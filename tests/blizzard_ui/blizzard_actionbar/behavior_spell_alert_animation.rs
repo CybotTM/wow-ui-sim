@@ -6,6 +6,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_ActionBar";
 
+post_wrath_ui_fixture! {
 #[test]
 fn spell_alert_show_starts_birth_then_loop_and_hide_stops_both() {
     test_timeout! {
@@ -22,6 +23,7 @@ fn spell_alert_show_starts_birth_then_loop_and_hide_stops_both() {
         assert_alert_animations_stopped(env);
     });
     }
+}
 }
 
 fn create_spell_alert_button(env: &WowLuaEnv) {

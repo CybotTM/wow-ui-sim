@@ -8,6 +8,7 @@ const ROOT: &str = "Blizzard_ActionBar";
 const ACTION_ID: u32 = 1;
 const EQUIPPED_GEAR_OUTFIT_ID: i64 = 0;
 
+post_wrath_ui_fixture! {
 #[test]
 fn equipped_gear_outfit_lock_shows_autocast_overlay_until_unlocked() {
     test_timeout! {
@@ -23,6 +24,7 @@ fn equipped_gear_outfit_lock_shows_autocast_overlay_until_unlocked() {
         assert_outfit_overlay_hidden(env);
     });
     }
+}
 }
 
 fn seed_equipped_gear_outfit_action(env: &WowLuaEnv) {

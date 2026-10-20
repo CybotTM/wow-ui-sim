@@ -65,6 +65,7 @@ fn assert_no_child_cycle(
     path.pop();
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn store_frame_tree_contains_expected_panels_and_controls() {
     let env = load_store_ui_tree();
@@ -148,7 +149,9 @@ fn store_frame_tree_contains_expected_panels_and_controls() {
         "StoreFrame Lua subtree should expose the expected store controls"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn store_frame_can_be_shown_after_minimal_store_load() {
     let env = load_store_ui_tree();
@@ -165,7 +168,9 @@ fn store_frame_can_be_shown_after_minimal_store_load() {
         "StoreFrame should show after minimal store-only load"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn store_frame_action_attribute_shows_frame_after_minimal_store_load() {
     let env = load_store_ui_tree();
@@ -197,7 +202,9 @@ fn store_frame_action_attribute_shows_frame_after_minimal_store_load() {
         "OnShow should set isshown=true in minimal load"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn store_catalog_exposes_fake_products_after_product_refresh() {
     let env = load_store_ui_tree();
@@ -232,6 +239,7 @@ fn store_catalog_exposes_fake_products_after_product_refresh() {
     );
     assert_eq!(first_name, "Apprentice Rider Bundle");
 }
+}
 
 prefork_full_ui_case! {
 fn store_open_does_not_record_store_state_errors_or_connecting_notice(env: &WowLuaEnv) {
@@ -260,6 +268,7 @@ fn store_open_does_not_record_store_state_errors_or_connecting_notice(env: &WowL
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn store_catalog_uses_blizzard_card_pool_instead_of_debug_card() {
     let env = load_store_ui_tree();
@@ -282,7 +291,9 @@ fn store_catalog_uses_blizzard_card_pool_instead_of_debug_card() {
         "store catalog should use Blizzard card pool output, not the simulator debug card"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn store_catalog_card_geometry_stays_bounded() {
     let env = load_store_ui_tree();
@@ -378,7 +389,9 @@ fn store_catalog_card_geometry_stays_bounded() {
         "card texture rect height too large: {tex_rect_h} for {name}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn store_catalog_button_slice_geometry_stays_bounded() {
     let env = load_store_ui_tree();
@@ -441,6 +454,7 @@ fn store_catalog_button_slice_geometry_stays_bounded() {
         assert!(w <= 250.0, "{name} width too large: {w} ({label})");
         assert!(h <= 80.0, "{name} height too large: {h} ({label})");
     }
+}
 }
 
 prefork_full_ui_case! {

@@ -113,7 +113,11 @@ fn load_full_game_ui() -> WowLuaEnv {
 fn blizzard_raid_ui_find_toc_resolves_active_mainline_variant() {
     assert_eq!(
         raid_ui_toc(),
-        raid_ui_dir().join("Blizzard_RaidUI_Mainline.toc"),
+        raid_ui_dir().join(if cfg!(feature = "client-wrath") {
+            "Blizzard_RaidUI.toc"
+        } else {
+            "Blizzard_RaidUI_Mainline.toc"
+        }),
         "Retail must select Blizzard_RaidUI_Mainline.toc through find_toc_file."
     );
 }
@@ -222,8 +226,11 @@ fn blizzard_raid_ui_toc_declares_metadata_in_raw_bytes() {
          still Blizzard_RaidUI"
     );
     assert!(raw.contains("## LoadOnDemand: 1"));
-    assert!(raw
-        .contains("## SavedVariablesPerCharacter: RAID_PULLOUT_POSITIONS, RAID_SINGLE_POSITIONS"));
+    assert!(
+        raw.contains(
+            "## SavedVariablesPerCharacter: RAID_PULLOUT_POSITIONS, RAID_SINGLE_POSITIONS"
+        )
+    );
 
     assert!(!raw.contains("## Author"));
     assert!(!raw.contains("## DefaultState"));
@@ -232,14 +239,21 @@ fn blizzard_raid_ui_toc_declares_metadata_in_raw_bytes() {
         !raw.contains("## OptionalDeps"),
         "TOC must NOT carry OptionalDeps"
     );
-    assert!(
-        raw.contains("## AllowLoad: game"),
-        "Retail 12.1.0.69497 explicitly gates Blizzard_RaidUI to game screens"
-    );
-    assert!(
-        raw.contains("## AllowLoadGameType: mainline"),
-        "Retail 12.1.0.69497 restricts this TOC to mainline"
-    );
+    if cfg!(feature = "client-wrath") {
+        assert!(raw.contains("## Interface: 30300"));
+        assert!(raw.contains("## Secure: 1"));
+        assert!(!raw.contains("## AllowLoad:"));
+        assert!(!raw.contains("## AllowLoadGameType:"));
+    } else {
+        assert!(
+            raw.contains("## AllowLoad: game"),
+            "Retail 12.1.0.69497 explicitly gates Blizzard_RaidUI to game screens"
+        );
+        assert!(
+            raw.contains("## AllowLoadGameType: mainline"),
+            "Retail 12.1.0.69497 restricts this TOC to mainline"
+        );
+    }
     assert!(!raw.contains("## LoadFirst"));
     assert!(!raw.contains("## Version"));
     assert!(!raw.contains("## OnlyBetaAndPTR"));
@@ -260,7 +274,12 @@ fn blizzard_raid_ui_toc_lists_bootstrap_xml_then_localization() {
         .map(|p| p.to_string_lossy().into_owned())
         .collect();
     assert_eq!(
-        listed, TOC_FILES,
+        listed,
+        if cfg!(feature = "client-wrath") {
+            &["Blizzard_RaidUI.xml", "Localization.lua"][..]
+        } else {
+            TOC_FILES
+        },
         "TOC body lists EXACTLY 2 files in this order: \
          Blizzard_RaidUI.xml FIRST (publishes 8 virtual templates + the 64 \
          numbered named frames RaidClassButton1..16 + RaidGroup1..8 + \
@@ -588,7 +607,11 @@ fn blizzard_raid_ui_registers_extra_events_on_raid_frame(env: &WowLuaEnv) {
 
 #[test]
 fn blizzard_raid_ui_xml_pulls_lua_via_script_directive() {
-    let xml_path = raid_ui_dir().join("Mainline/Blizzard_RaidUI.xml");
+    let xml_path = raid_ui_dir().join(if cfg!(feature = "client-wrath") {
+        "Blizzard_RaidUI.xml"
+    } else {
+        "Mainline/Blizzard_RaidUI.xml"
+    });
     let xml = std::fs::read_to_string(&xml_path).expect("XML reads utf-8");
     assert!(
         xml.contains(r#"<Script file="Blizzard_RaidUI.lua"/>"#),

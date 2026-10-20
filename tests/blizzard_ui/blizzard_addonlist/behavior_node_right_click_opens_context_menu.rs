@@ -7,6 +7,8 @@ const ROOT: &str = "Blizzard_AddOnList";
 const PARENT_ADDON: &str = "AddonListRightClickParentProbe";
 const CHILD_ADDON: &str = "AddonListRightClickChildProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn right_clicking_addon_row_builds_context_menu() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -88,6 +90,7 @@ fn right_clicking_addon_row_builds_context_menu() {
             "right-click menu must include the reset-to-default action"
         );
     });
+}
 }
 
 type MenuProbe = (String, bool, bool, bool, bool);

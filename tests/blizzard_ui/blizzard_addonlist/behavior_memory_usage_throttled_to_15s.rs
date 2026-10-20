@@ -4,6 +4,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
 const ROOT: &str = "Blizzard_AddOnList";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn update_addon_memory_usage_is_throttled_to_more_than_fifteen_seconds() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -44,6 +46,7 @@ fn update_addon_memory_usage_is_throttled_to_more_than_fifteen_seconds() {
 
         assert_memory_throttle_probe((calls_after_first, calls_after_early, calls_after_late));
     });
+}
 }
 
 type MemoryThrottleProbe = (i64, i64, i64);

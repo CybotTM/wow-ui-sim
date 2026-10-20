@@ -8,6 +8,9 @@ use crate::common;
 #[path = "blizzard_ui/blizzard_async_request/load.rs"]
 mod load;
 
+// No CreateAsyncRequest/AsyncRequestMixin in Wrath manifest1-382/cache.
+// Keep load.rs visible: its mixed TOC/runtime cases are not snapshot gates.
+post_wrath_ui_fixture! {
 #[path = "blizzard_ui/blizzard_async_request/surface_globals.rs"]
 mod surface_globals;
 
@@ -52,3 +55,4 @@ mod behavior_two_concurrent_requests_isolated;
 
 #[path = "blizzard_ui/blizzard_async_request/behavior_response_callback_can_restart.rs"]
 mod behavior_response_callback_can_restart;
+}

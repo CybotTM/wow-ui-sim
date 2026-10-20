@@ -81,6 +81,20 @@ fn fresh_lane_env() -> WowLuaEnv {
 
 #[test]
 fn each_lane_addon_directory_resolves_with_a_toc() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        assert_eq!(
+            toc.metadata.get("Interface").map(String::as_str),
+            Some("30300")
+        );
+        for file in &toc.files {
+            assert!(
+                toc.addon_dir.join(file).is_file(),
+                "missing native core file: {file:?}"
+            );
+        }
+        return;
+    }
     for name in LANE_ADDONS_BASE_TO_CONSUMER {
         let dir = blizzard_ui_dir().join(name);
         assert!(
@@ -100,6 +114,26 @@ fn each_lane_addon_directory_resolves_with_a_toc() {
 
 #[test]
 fn lane_dep_edges_pin_canonical_chain() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        assert!(toc.dependencies().is_empty());
+        let files: Vec<_> = toc
+            .files
+            .iter()
+            .map(|p| p.to_string_lossy().into_owned())
+            .collect();
+        let order = [
+            "BasicControls.xml",
+            "UIParent.xml",
+            "UIPanelTemplates.lua",
+            "GameMenuFrame.xml",
+            "StaticPopup.xml",
+        ];
+        for pair in order.windows(2) {
+            assert!(position_in(&files, pair[0]).unwrap() < position_in(&files, pair[1]).unwrap());
+        }
+        return;
+    }
     let base = parse_lane_toc("Blizzard_FrameXMLBase");
     let _util = parse_lane_toc("Blizzard_FrameXMLUtil");
     let uiparent = parse_lane_toc("Blizzard_UIParent");
@@ -169,6 +203,14 @@ fn lane_dep_edges_pin_canonical_chain() {
 
 #[test]
 fn frame_xml_util_repeated_singular_deps_are_accumulated() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        assert!(toc.dependencies().is_empty());
+        assert!(toc.files.contains(&PathBuf::from("Constants.lua")));
+        assert!(toc.files.contains(&PathBuf::from("StaticPopup.xml")));
+        assert!(!blizzard_ui_dir().join("Blizzard_FrameXMLUtil").exists());
+        return;
+    }
     let util = parse_lane_toc("Blizzard_FrameXMLUtil");
 
     assert_eq!(
@@ -194,6 +236,17 @@ fn frame_xml_util_repeated_singular_deps_are_accumulated() {
 
 #[test]
 fn frame_xml_uses_load_first_to_run_before_other_eager_addons() {
+    if cfg!(feature = "client-wrath") {
+        let env = fresh_lane_env();
+        crate::common::load_profile_framexml(&env);
+        assert!(!crate::common::native_framexml_toc().is_load_first());
+        assert!(env.eval::<bool>("return IsAddOnLoaded('FrameXML') and type(ShowUIPanel) == 'function' and GameMenuFrame ~= nil").unwrap());
+        assert!(
+            !env.eval::<bool>("return IsAddOnLoaded('Blizzard_AchievementUI')")
+                .unwrap()
+        );
+        return;
+    }
     let frame_xml = parse_lane_toc("Blizzard_FrameXML");
     assert!(
         frame_xml.is_load_first(),
@@ -225,6 +278,13 @@ fn frame_xml_uses_load_first_to_run_before_other_eager_addons() {
 
 #[test]
 fn ui_parent_panel_manager_declares_current_dependencies_without_load_with() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        assert!(toc.load_with().is_empty());
+        assert!(toc.dependencies().is_empty());
+        assert!(toc.files.contains(&PathBuf::from("UIParent.xml")));
+        return;
+    }
     let panel_manager = parse_lane_toc("Blizzard_UIParentPanelManager");
 
     let load_with = panel_manager.load_with();
@@ -252,6 +312,19 @@ fn ui_parent_panel_manager_declares_current_dependencies_without_load_with() {
 
 #[test]
 fn ui_parent_panel_manager_diagnostic_files_carry_allow_load_environment_global_in_raw_form() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        let parent = toc
+            .files
+            .iter()
+            .position(|file| file == std::path::Path::new("UIParent.xml"))
+            .unwrap();
+        assert_eq!(toc.file_allow_load_environment(parent), None);
+        assert_eq!(toc.file_use_secure_env(parent), None);
+        let xml = std::fs::read_to_string(toc.addon_dir.join("UIParent.xml")).unwrap();
+        assert!(xml.contains(r#"<Script file="UIParent.lua"/>"#));
+        return;
+    }
     let panel_manager = parse_lane_toc("Blizzard_UIParentPanelManager");
 
     let raw = std::fs::read_to_string(lane_toc("Blizzard_UIParentPanelManager"))
@@ -292,6 +365,18 @@ fn ui_parent_panel_manager_diagnostic_files_carry_allow_load_environment_global_
 
 #[test]
 fn ui_parent_lane_addons_restrict_to_game_screen_only() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        assert!(toc.allows_screen(ScreenKind::Game));
+        for screen in [
+            ScreenKind::Login,
+            ScreenKind::CharacterSelect,
+            ScreenKind::CharacterCreate,
+        ] {
+            assert!(!toc.allows_screen(screen));
+        }
+        return;
+    }
     let glue_screens = [
         ScreenKind::Login,
         ScreenKind::CharacterSelect,
@@ -321,6 +406,12 @@ fn ui_parent_lane_addons_restrict_to_game_screen_only() {
 
 #[test]
 fn ui_parent_panel_manager_is_mainline_only_via_allow_load_game_type() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        assert!(!toc.is_game_type_restricted());
+        assert!(toc.files.contains(&PathBuf::from("UIParent.xml")));
+        return;
+    }
     let panel_manager = parse_lane_toc("Blizzard_UIParentPanelManager");
 
     let raw_panel = std::fs::read_to_string(lane_toc("Blizzard_UIParentPanelManager"))
@@ -400,6 +491,20 @@ fn engine_frames_pre_create_uiparent_with_panel_attributes_before_xml() {
 
 #[test]
 fn lane_appears_in_eager_discovery_with_load_first_promoted_for_frame_xml() {
+    if cfg!(feature = "client-wrath") {
+        // Native core is loaded explicitly, not returned as a modular addon.
+        let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
+        assert!(!addons.iter().any(|(name, _)| name == "FrameXML"));
+        let env = fresh_lane_env();
+        crate::common::load_profile_framexml(&env);
+        assert!(
+            env.eval::<bool>(
+                "return IsAddOnLoaded('FrameXML') and UIParent ~= nil and WorldFrame ~= nil"
+            )
+            .unwrap()
+        );
+        return;
+    }
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
     let names: Vec<String> = addons.iter().map(|(name, _)| name.clone()).collect();

@@ -148,6 +148,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_find_toc_resolves_bare_variant() {
     let resolved =
@@ -166,7 +168,9 @@ fn blizzard_professions_templates_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_toc_declares_lod_with_load_with_triggers() {
     let toc =
@@ -205,7 +209,9 @@ fn blizzard_professions_templates_toc_declares_lod_with_load_with_triggers() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_toc_declares_load_with_triggers() {
     let toc =
@@ -227,7 +233,9 @@ fn blizzard_professions_templates_toc_declares_load_with_triggers() {
          Y loads, ensure X is loaded first)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_toc_declares_one_dependency() {
     let toc =
@@ -251,7 +259,9 @@ fn blizzard_professions_templates_toc_declares_one_dependency() {
         "Zero `## OptionalDeps:` declared"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_toc_declares_no_saved_variables() {
     let toc =
@@ -268,7 +278,9 @@ fn blizzard_professions_templates_toc_declares_no_saved_variables() {
         "TOC must declare zero `## SavedVariablesPerCharacter:`"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(templates_toc())
@@ -319,7 +331,9 @@ fn blizzard_professions_templates_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## DefaultState:`"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_toc_lists_sixteen_files_in_canonical_order() {
     let toc =
@@ -349,6 +363,7 @@ fn blizzard_professions_templates_toc_lists_sixteen_files_in_canonical_order() {
          declared by the preceding Lua files"
     );
 }
+}
 
 #[test]
 fn blizzard_professions_templates_does_not_appear_in_eager_discovery() {
@@ -374,6 +389,7 @@ fn blizzard_professions_templates_does_not_appear_in_eager_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -384,6 +400,7 @@ fn blizzard_professions_templates_appears_in_full_addon_inventory() {
         found,
         "Blizzard_ProfessionsTemplates must appear in `discover_all_blizzard_addons`"
     );
+}
 }
 
 prefork_full_ui_case! {

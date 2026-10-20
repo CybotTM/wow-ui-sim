@@ -6,6 +6,8 @@ use wow_ui_sim::lua_api::AddonInfo;
 const ROOT: &str = "Blizzard_AddOnList";
 const BLOCKED_ADDON: &str = "AddonListBlockedActionProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn addon_actions_blocked_appends_alert_icon_to_initialized_row_title() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -47,6 +49,7 @@ fn addon_actions_blocked_appends_alert_icon_to_initialized_row_title() {
             "`AddonList_InitAddon` must preserve the addon title before the alert icon; got {title_text:?}"
         );
     });
+}
 }
 
 fn seed_blocked_action_probe_addon(env: &wow_ui_sim::lua_api::WowLuaEnv) {

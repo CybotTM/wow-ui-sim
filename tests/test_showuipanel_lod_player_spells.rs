@@ -359,6 +359,7 @@ fn keybind_n_loads_blizzard_player_spells_and_shows_talents() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn starter_build_highlight_uses_player_spells_talent_ui_call_path() {
     test_timeout! {
@@ -434,7 +435,9 @@ fn starter_build_highlight_uses_player_spells_talent_ui_call_path() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn player_spells_export_disabled_callback_tracks_unspent_hero_points() {
     test_timeout! {
@@ -549,7 +552,9 @@ fn player_spells_export_disabled_callback_tracks_unspent_hero_points() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn player_spells_tiered_button_costs_aggregate_real_trait_data() {
     test_timeout! {
@@ -633,7 +638,9 @@ fn player_spells_tiered_button_costs_aggregate_real_trait_data() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn player_spells_view_loadout_uses_trait_tree_for_imported_spec() {
     test_timeout! {
@@ -693,4 +700,5 @@ fn player_spells_view_loadout_uses_trait_tree_for_imported_spec() {
             "Protection export should round-trip through ViewLoadout using spec 66: {result}"
         );
     }
+}
 }

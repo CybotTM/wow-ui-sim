@@ -202,6 +202,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&ui_widgets_dir()).expect("UIWidgets TOC resolves");
@@ -211,7 +213,9 @@ fn find_toc_file_resolves_bare_toc() {
         "Blizzard_UIWidgets ships the active retail contract in one bare TOC"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_four_dependencies() {
     let toc = TocFile::from_file(&ui_widgets_toc()).expect("TOC parses");
@@ -238,7 +242,9 @@ fn toc_is_eager_with_four_dependencies() {
     assert!(!toc.is_load_first());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_restricts_to_in_world() {
     let toc = TocFile::from_file(&ui_widgets_toc()).expect("TOC parses");
@@ -256,7 +262,9 @@ fn allow_load_game_restricts_to_in_world() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_omits_game_type_restriction() {
     let toc = TocFile::from_file(&ui_widgets_toc()).expect("TOC parses");
@@ -266,7 +274,9 @@ fn toc_omits_game_type_restriction() {
         "The current bare TOC has no `## AllowLoadGameType` directive, so it must remain unrestricted"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_directives_and_representative_body_files() {
     let raw = std::fs::read_to_string(ui_widgets_toc()).expect("TOC reads utf-8");
@@ -300,7 +310,9 @@ fn toc_raw_bytes_pin_directives_and_representative_body_files() {
     assert!(!raw.contains("## SavedVariables"));
     assert!(!raw.contains("## RequiredDep"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -312,6 +324,7 @@ fn appears_in_game_eager_discovery() {
          scenario timers, status bars, zone control widgets, delve \
          tier frames) routes through this addon's container frames"
     );
+}
 }
 
 #[test]

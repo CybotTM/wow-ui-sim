@@ -4,6 +4,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
 const ROOT: &str = "Blizzard_AddOnList";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn force_load_click_toggles_addon_version_check() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -33,4 +35,5 @@ fn force_load_click_toggles_addon_version_check() {
             "Clicking `AddonList.ForceLoad` to unchecked must enable addon version checking"
         );
     });
+}
 }

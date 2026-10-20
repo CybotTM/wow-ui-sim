@@ -73,6 +73,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved =
@@ -85,7 +87,9 @@ fn find_toc_file_resolves_bare_toc() {
          marker so find_toc_file resolves it via the bare path try"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_two_required_deps_and_mainline_gametype() {
     let toc = TocFile::from_file(&tiered_entrance_traits_toc()).expect("TOC parses");
@@ -125,7 +129,9 @@ fn toc_is_eager_with_two_required_deps_and_mainline_gametype() {
     );
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_absent_restricts_to_game_screen_only() {
     let toc = TocFile::from_file(&tiered_entrance_traits_toc()).expect("TOC parses");
@@ -146,7 +152,9 @@ fn allow_load_absent_restricts_to_game_screen_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_four_metadata_directives() {
     let raw = std::fs::read_to_string(tiered_entrance_traits_toc()).expect("TOC reads utf-8");
@@ -177,7 +185,9 @@ fn toc_raw_bytes_pin_four_metadata_directives() {
     assert!(!raw.contains("## LoadFirst"));
     assert!(!raw.contains("## DefaultState"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_orders_lua_before_xml() {
     let toc = TocFile::from_file(&tiered_entrance_traits_toc()).expect("TOC parses");
@@ -199,7 +209,9 @@ fn body_orders_lua_before_xml() {
          consume them. Got: {body:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn present_only_in_game_screen_eager_discovery() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -226,7 +238,9 @@ fn present_only_in_game_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn objective_tracker_declares_tiered_entrance_traits_as_required_dep() {
     let toc_path = blizzard_ui_dir()
@@ -246,6 +260,7 @@ fn objective_tracker_declares_tiered_entrance_traits_as_required_dep() {
          loads. Got deps: {:?}",
         toc.dependencies()
     );
+}
 }
 
 prefork_full_ui_case! {

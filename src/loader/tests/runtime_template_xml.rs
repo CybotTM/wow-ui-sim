@@ -580,6 +580,7 @@ fn test_xml_instance_keeps_inherited_checkbutton_parent_key() {
         .unwrap();
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_catalog_shop_file_prefix_numeric_error_probe() {
     let env = WowLuaEnv::new().expect("lua env");
@@ -667,7 +668,9 @@ fn test_catalog_shop_file_prefix_numeric_error_probe() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_catalog_shop_xml_numeric_error_without_main_onload() {
     let env = WowLuaEnv::new().expect("lua env");
@@ -753,6 +756,7 @@ fn test_catalog_shop_xml_numeric_error_without_main_onload() {
         targeted.is_empty(),
         "CatalogShop xml still introduced numeric load error with product card layout disabled: {targeted:?}"
     );
+}
 }
 
 #[test]

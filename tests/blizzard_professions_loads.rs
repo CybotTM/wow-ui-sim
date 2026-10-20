@@ -90,6 +90,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&professions_dir()).expect("Blizzard_Professions TOC resolves");
@@ -109,7 +111,9 @@ fn blizzard_professions_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_toc_declares_lod_mainline_game_only_addon() {
     let toc = TocFile::from_file(&professions_toc()).expect("Blizzard_Professions TOC parses");
@@ -155,7 +159,9 @@ fn blizzard_professions_toc_declares_lod_mainline_game_only_addon() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_toc_declares_five_dependencies() {
     let toc = TocFile::from_file(&professions_toc()).expect("Blizzard_Professions TOC parses");
@@ -173,7 +179,9 @@ fn blizzard_professions_toc_declares_five_dependencies() {
         "Zero `## OptionalDeps:` — every dependency is hard-required"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_toc_declares_two_per_character_saved_vars() {
     let toc = TocFile::from_file(&professions_toc()).expect("Blizzard_Professions TOC parses");
@@ -201,7 +209,9 @@ fn blizzard_professions_toc_declares_two_per_character_saved_vars() {
          (separate accessor from `saved_variables()`)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_toc_declares_metadata_in_raw_bytes() {
     let raw =
@@ -273,7 +283,9 @@ fn blizzard_professions_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## Version:` — unversioned"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_toc_lists_bootstrap_then_thirteen_files_in_canonical_load_order() {
     let toc = TocFile::from_file(&professions_toc()).expect("Blizzard_Professions TOC parses");
@@ -288,6 +300,7 @@ fn blizzard_professions_toc_lists_bootstrap_then_thirteen_files_in_canonical_loa
          registration Lua, and Localization. The XML entries continue to load paired Lua \
          files through Script directives"
     );
+}
 }
 
 #[test]
@@ -314,6 +327,7 @@ fn blizzard_professions_does_not_appear_in_eager_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -326,6 +340,7 @@ fn blizzard_professions_appears_in_full_addon_inventory() {
          unfiltered inventory at src/loader/mod.rs lists every parseable Blizzard_* TOC \
          regardless of LoadOnDemand gating"
     );
+}
 }
 
 prefork_full_ui_case! {

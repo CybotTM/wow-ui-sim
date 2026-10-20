@@ -7,6 +7,8 @@ use wow_ui_sim::lua_api::state::{AzeriteEssenceMilestoneInfo, AzeriteEssenceStat
 const ROOT: &str = "Blizzard_AzeriteEssenceUI";
 const MAIN_SLOT: i32 = 0;
 
+// AzeriteEssenceUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_essence_ui_should_open_bags_tracks_unlocked_essence_count() {
     common::with_perf_lock(|| {
@@ -41,6 +43,7 @@ fn blizzard_azerite_essence_ui_should_open_bags_tracks_unlocked_essence_count() 
             });
         });
     });
+}
 }
 
 fn seed_azerite_essence_state(state: &mut SimState, num_unlocked: i32) {

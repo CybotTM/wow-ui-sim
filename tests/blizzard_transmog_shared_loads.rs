@@ -7,7 +7,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn transmog_shared_dir() -> PathBuf {
@@ -133,6 +134,8 @@ fn fresh_game_env() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&transmog_shared_dir()).expect("TransmogShared TOC resolves");
@@ -143,7 +146,9 @@ fn find_toc_file_resolves_bare_toc() {
          in find_toc_file at src/loader/mod.rs:65-95"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_load_on_demand_with_two_dependencies() {
     let toc = TocFile::from_file(&transmog_shared_toc()).expect("TOC parses");
@@ -188,7 +193,9 @@ fn toc_is_load_on_demand_with_two_dependencies() {
     );
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_restricts_to_in_world_only() {
     let toc = TocFile::from_file(&transmog_shared_toc()).expect("TOC parses");
@@ -208,7 +215,9 @@ fn allow_load_game_restricts_to_in_world_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_four_directives_and_single_body_file() {
     let raw = std::fs::read_to_string(transmog_shared_toc()).expect("TOC reads utf-8");
@@ -255,7 +264,9 @@ fn toc_raw_bytes_pin_four_directives_and_single_body_file() {
     assert!(!raw.contains("[Family]"));
     assert!(!raw.contains(".xml"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn promoted_into_game_eager_discovery_via_dependents() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -272,6 +283,7 @@ fn promoted_into_game_eager_discovery_via_dependents() {
          (loader/mod.rs:553-) promotes it from the lod_pool into the \
          eager addons map"
     );
+}
 }
 
 #[test]
@@ -343,6 +355,7 @@ fn runtime_load_keeps_removed_inventory_slot_global_private() {
     assert_eq!(result, "ok");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn direct_load_keeps_removed_inventory_slot_global_private() {
     let env = fresh_game_env();
@@ -368,7 +381,9 @@ fn direct_load_keeps_removed_inventory_slot_global_private() {
 
     assert_eq!(result, "ok");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_transmog_util_table() {
     let env = fresh_game_env();
@@ -399,7 +414,9 @@ fn explicit_load_publishes_transmog_util_table() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_transmog_location_mixin() {
     let env = fresh_game_env();
@@ -428,7 +445,9 @@ fn explicit_load_publishes_transmog_location_mixin() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_item_model_base_mixin() {
     let env = fresh_game_env();
@@ -461,7 +480,9 @@ fn explicit_load_publishes_item_model_base_mixin() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_wardrobe_sets_data_provider_mixin() {
     let env = fresh_game_env();
@@ -495,7 +516,9 @@ fn explicit_load_publishes_wardrobe_sets_data_provider_mixin() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_transmog_slot_order() {
     let env = fresh_game_env();
@@ -525,7 +548,9 @@ fn explicit_load_publishes_transmog_slot_order() {
          Legs, Feet, MainHand, OffHand"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_initializes_empty_transmog_slots_table() {
     let env = fresh_game_env();
@@ -546,7 +571,9 @@ fn explicit_load_initializes_empty_transmog_slots_table() {
          empty after load — that's expected"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_publishes_initialize_slot_location_info_global() {
     let env = fresh_game_env();
@@ -566,7 +593,9 @@ fn explicit_load_publishes_initialize_slot_location_info_global() {
          indirectly populate SLOT_ID_TO_NAME"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_registers_static_popup_dialog() {
     let env = fresh_game_env();
@@ -586,7 +615,9 @@ fn explicit_load_registers_static_popup_dialog() {
          button1=OKAY, button2=CANCEL, hideOnEscape=1, timeout=0"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_emits_no_addon_specific_errors() {
     let env = fresh_game_env();
@@ -617,4 +648,5 @@ fn explicit_load_emits_no_addon_specific_errors() {
          tolerate an empty/nil return without raising. Found: \
          {addon_specific:?}"
     );
+}
 }

@@ -84,12 +84,15 @@ return expandedZoomingOutCollapsed,
        collapsedZoomingOutSizeChangeCount
 "#;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_inset_canvas_scale_change_collapses_only_when_zooming_out() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let surface = inset_scale_surface(env);
         assert_inset_scale_surface(surface);
     });
+}
 }
 
 type InsetScaleSurface = (bool, f64, i64, bool, bool, f64, i64, bool, f64, i64);

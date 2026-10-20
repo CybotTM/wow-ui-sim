@@ -78,6 +78,8 @@ expect(#registerCalls == 1, "nil uiWidgetSetID callout should not call RegisterF
 return table.concat(failures, "\n")
 "#;
 
+// Wrath has no ArrowCallout vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn widget_container_callout_registers_widget_set_only_when_id_is_present() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -91,6 +93,7 @@ fn widget_container_callout_registers_widget_set_only_when_id_is_present() {
             "ArrowCalloutFrame widget-set registration behavior mismatches:\n{failures}"
         );
     });
+}
 }
 
 fn load_arrow_callout_frame(env: &wow_ui_sim::lua_api::WowLuaEnv) {

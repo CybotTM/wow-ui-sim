@@ -9,6 +9,8 @@ use crate::common::panel_fixtures::{
 
 const ROOT: &str = "Blizzard_APIDocumentation";
 
+// APIDocumentation vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn system_list_slash_command_writes_all_system_names() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -59,6 +61,7 @@ fn system_list_slash_command_writes_all_system_names() {
             "third system line must contain the third seeded system; got {third_line:?}"
         );
     });
+}
 }
 
 fn load_api_documentation(env: &wow_ui_sim::lua_api::WowLuaEnv) {

@@ -60,6 +60,8 @@ fn retail_toc_selection_excludes_classic_only_reforging() {
     );
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_load_on_demand_secure_classic_only_and_no_deps() {
     let toc =
@@ -100,7 +102,9 @@ fn toc_declares_load_on_demand_secure_classic_only_and_no_deps() {
          per-item state, no client persistence"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_bootstrap_and_three_files_in_classic_subdirectory() {
     let toc =
@@ -115,7 +119,9 @@ fn toc_lists_bootstrap_and_three_files_in_classic_subdirectory() {
         "Retail 12.1.0.69497 lists the bootstrap before the classic Lua, XML, and localization files"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn is_game_type_restricted_returns_true_for_classic_only_addon() {
     let toc =
@@ -127,6 +133,7 @@ fn is_game_type_restricted_returns_true_for_classic_only_addon() {
          Reforging system was removed in Mists of Pandaria pre-patch (5.0.4) so the addon ships \
          only as a Classic-flavor panel"
     );
+}
 }
 
 #[test]
@@ -153,6 +160,7 @@ fn excluded_from_every_screen_auto_discovery_under_retail() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn classic_subdirectory_holds_bootstrap_lua_xml_and_localization() {
     let classic_dir = reforging_ui_dir().join("Classic");
@@ -172,6 +180,7 @@ fn classic_subdirectory_holds_bootstrap_lua_xml_and_localization() {
         ],
         "Retail 12.1.0.69497 ships the classic bootstrap beside the Lua, XML, and localization files"
     );
+}
 }
 
 prefork_full_ui_case! {
@@ -360,6 +369,7 @@ fn defines_no_mixin_tables_pre_mixin_pattern(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_loads_via_script_directive_and_inline_lua_listed_in_toc() {
     let xml_text =
@@ -383,4 +393,5 @@ fn xml_loads_via_script_directive_and_inline_lua_listed_in_toc() {
          re-load of the already-cached chunk (idempotent — re-defining the same globals is a \
          no-op)"
     );
+}
 }

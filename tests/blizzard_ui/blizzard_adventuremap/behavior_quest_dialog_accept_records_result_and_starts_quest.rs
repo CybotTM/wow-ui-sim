@@ -36,6 +36,8 @@ return shownBeforeAccept,
        AdventureMapQuestChoiceDialog.onClosedCallback == nil
 "#;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn quest_dialog_accept_records_result_and_starts_quest() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -46,6 +48,7 @@ fn quest_dialog_accept_records_result_and_starts_quest() {
             "`AcceptQuest` must start the selected adventure-map quest"
         );
     });
+}
 }
 
 type AcceptSurface = (bool, i64, i64, bool, bool, bool, bool);

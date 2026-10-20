@@ -148,6 +148,7 @@ fn fresh_env(screen: ScreenKind) -> WowLuaEnv {
 
 fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     let env = fresh_env(screen);
+    crate::common::load_profile_framexml(&env);
 
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), screen);
     for (name, toc_path) in &addons {
@@ -159,6 +160,8 @@ fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&static_popup_game_dir()).expect("StaticPopup_Game TOC resolves");
@@ -169,7 +172,9 @@ fn find_toc_file_resolves_bare_toc() {
          placeholders + [AllowLoadGameType] annotations (toc.rs:144-146)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dependencies_chain_pulls_six_blizzard_addons_via_plural_dependencies_key() {
     let toc = TocFile::from_file(&static_popup_game_toc()).expect("TOC parses");
@@ -194,7 +199,9 @@ fn dependencies_chain_pulls_six_blizzard_addons_via_plural_dependencies_key() {
         toc.dependencies()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_resolves_to_game_screen_only() {
     let toc = TocFile::from_file(&static_popup_game_toc()).expect("TOC parses");
@@ -211,7 +218,9 @@ fn allow_load_game_resolves_to_game_screen_only() {
     assert!(!toc.allows_screen(ScreenKind::CharacterSelect));
     assert!(!toc.allows_screen(ScreenKind::CharacterCreate));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn no_game_type_restriction_at_addon_level() {
     let toc = TocFile::from_file(&static_popup_game_toc()).expect("TOC parses");
@@ -222,7 +231,9 @@ fn no_game_type_restriction_at_addon_level() {
          inline annotations. None-branch returns false (toc.rs:294-302)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     let toc = TocFile::from_file(&static_popup_game_toc()).expect("TOC parses");
@@ -238,7 +249,9 @@ fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_three_metadata_directives() {
     let raw = std::fs::read_to_string(static_popup_game_toc()).expect("TOC reads utf-8");
@@ -268,7 +281,9 @@ fn toc_raw_bytes_pin_three_metadata_directives() {
     assert!(!raw.contains("## AllowLoadGameType"));
     assert!(!raw.contains("## UseSecureEnvironment"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_substitutes_family_and_filters_classic_only_entries() {
     let toc = TocFile::from_file(&static_popup_game_toc()).expect("TOC parses");
@@ -305,7 +320,9 @@ fn body_substitutes_family_and_filters_classic_only_entries() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_orders_definitions_before_logic_before_layout() {
     let toc = TocFile::from_file(&static_popup_game_toc()).expect("TOC parses");
@@ -334,7 +351,9 @@ fn body_orders_definitions_before_logic_before_layout() {
          time, so mixin tables must already exist in _G"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_eager_discovery_on_game_screen_only() {
     let ui = blizzard_ui_dir();
@@ -359,6 +378,7 @@ fn appears_in_eager_discovery_on_game_screen_only() {
             .any(|(name, _)| name == "Blizzard_StaticPopup_Game");
         assert!(!found, "{screen:?} sweep must exclude StaticPopup_Game");
     }
+}
 }
 
 prefork_full_ui_case! {
@@ -423,6 +443,22 @@ fn is_addon_loaded_reports_true_after_eager_sweep() {
 prefork_full_ui_case! {
 fn equipment_set_confirmation_popup_resizes_to_compact_dialog(env: &WowLuaEnv) {
 
+    if cfg!(feature = "client-wrath") {
+        // 12340 saves immediately; only overwrite/delete have confirmation definitions.
+        let (width, height): (f64, f64) = env.eval(r#"
+            assert(StaticPopupDialogs.CONFIRM_SAVE_EQUIPMENT_SET == nil)
+            local dialog = StaticPopup_Show("CONFIRM_OVERWRITE_EQUIPMENT_SET", "fixture")
+            assert(dialog and dialog:IsShown())
+            assert(_G[dialog:GetName().."Text"]:GetText() ~= "")
+            local width, height = dialog:GetWidth(), dialog:GetHeight()
+            StaticPopup_OnClick(dialog, 2)
+            assert(not dialog:IsShown())
+            return width, height
+        "#).expect("native equipment overwrite confirmation lifecycle");
+        assert_eq!(width, 320.0, "12340 StaticPopup_Resize default width");
+        assert!(height > 0.0 && height <= 180.0, "height={height}");
+        return;
+    }
     let (width, height, text_width): (f64, f64, f64) = env
         .eval(
             r#"
@@ -470,11 +506,13 @@ fn publishes_four_mixin_tables_at_global_scope(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn publishes_four_mixin_tables_at_global_scope() {
     let env = load_full_ui_for(ScreenKind::Game);
     publishes_four_mixin_tables_at_global_scope::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -493,11 +531,13 @@ fn base_mixin_carries_three_close_button_methods(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn base_mixin_carries_three_close_button_methods() {
     let env = load_full_ui_for(ScreenKind::Game);
     base_mixin_carries_three_close_button_methods::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -516,11 +556,13 @@ fn game_dialog_mixin_inherits_from_base_via_create_from_mixins(env: &WowLuaEnv) 
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn game_dialog_mixin_inherits_from_base_via_create_from_mixins() {
     let env = load_full_ui_for(ScreenKind::Game);
     game_dialog_mixin_inherits_from_base_via_create_from_mixins::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -539,11 +581,13 @@ fn game_dialog_mixin_carries_seventeen_setup_methods(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn game_dialog_mixin_carries_seventeen_setup_methods() {
     let env = load_full_ui_for(ScreenKind::Game);
     game_dialog_mixin_carries_seventeen_setup_methods::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -562,11 +606,13 @@ fn game_dialog_mixin_carries_twelve_accessor_methods(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn game_dialog_mixin_carries_twelve_accessor_methods() {
     let env = load_full_ui_for(ScreenKind::Game);
     game_dialog_mixin_carries_twelve_accessor_methods::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -585,11 +631,13 @@ fn game_dialog_mixin_carries_fourteen_lifecycle_and_text_methods(env: &WowLuaEnv
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn game_dialog_mixin_carries_fourteen_lifecycle_and_text_methods() {
     let env = load_full_ui_for(ScreenKind::Game);
     game_dialog_mixin_carries_fourteen_lifecycle_and_text_methods::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -610,11 +658,13 @@ fn item_frame_mixin_carries_eight_methods(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn item_frame_mixin_carries_eight_methods() {
     let env = load_full_ui_for(ScreenKind::Game);
     item_frame_mixin_carries_eight_methods::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -635,11 +685,13 @@ fn cover_frame_mixin_carries_init_and_keydown(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn cover_frame_mixin_carries_init_and_keydown() {
     let env = load_full_ui_for(ScreenKind::Game);
     cover_frame_mixin_carries_init_and_keydown::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -667,11 +719,13 @@ fn defs_util_table_carries_three_helper_functions(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn defs_util_table_carries_three_helper_functions() {
     let env = load_full_ui_for(ScreenKind::Game);
     defs_util_table_carries_three_helper_functions::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -690,11 +744,13 @@ fn close_button_atlas_globals_publish_as_strings(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn close_button_atlas_globals_publish_as_strings() {
     let env = load_full_ui_for(ScreenKind::Game);
     close_button_atlas_globals_publish_as_strings::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -711,11 +767,13 @@ fn money_frame_on_load_global_publishes_as_function(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn money_frame_on_load_global_publishes_as_function() {
     let env = load_full_ui_for(ScreenKind::Game);
     money_frame_on_load_global_publishes_as_function::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -751,6 +809,8 @@ prefork_full_ui_case! {
 fn four_named_dialog_slots_materialize_as_hidden_dialogs(env: &WowLuaEnv) {
 
     for name in NAMED_DIALOG_SLOTS {
+        let hidden: bool = env.eval(&format!("return {name} ~= nil and not {name}:IsShown()")).expect("popup visibility");
+        assert!(hidden, "{name} should start hidden");
         let kind: String = env
             .eval(&format!("return type({name})"))
             .unwrap_or_else(|err| panic!("{name} probe failed: {err}"));
@@ -773,7 +833,12 @@ fn four_named_dialog_slots_materialize_as_hidden_dialogs() {
 prefork_full_ui_case! {
 fn shared_dialog_definitions_seed_into_dispatcher(env: &WowLuaEnv) {
 
-    for key in SHARED_DIALOG_KEYS {
+    let keys = if cfg!(feature = "client-wrath") {
+        &["XP_LOSS_NO_SICKNESS_NO_DURABILITY", "CONFIRM_OVERWRITE_EQUIPMENT_SET", "CONFIRM_DELETE_EQUIPMENT_SET", "USE_GUILDBANK_REPAIR"][..]
+    } else {
+        SHARED_DIALOG_KEYS
+    };
+    for key in keys {
         let kind: String = env
             .eval(&format!("return type(StaticPopupDialogs['{key}'])"))
             .unwrap_or_else(|err| panic!("StaticPopupDialogs[{key}] probe failed: {err}"));
@@ -807,9 +872,11 @@ fn pet_battle_queue_ready_frame_materializes_from_mainline_special_xml(env: &Wow
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn pet_battle_queue_ready_frame_materializes_from_mainline_special_xml() {
     let env = load_full_ui_for(ScreenKind::Game);
     pet_battle_queue_ready_frame_materializes_from_mainline_special_xml::run(&env);
+}
 }

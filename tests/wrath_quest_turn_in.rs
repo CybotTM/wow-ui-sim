@@ -690,6 +690,18 @@ fn no_choice_positive_internal_index_does_not_raise() {
     // Exact sent index remains a recorded observability gap.
 }
 
+// Wrath's plain MessageFrame has no Lua history readers; inspect active rows.
+fn assert_error_messages(env: &ConsumerEnv, expected: &[&str]) {
+    let sim = env.env.state().borrow();
+    let id = sim.widgets.get_id_by_name("UIErrorsFrame").unwrap();
+    let messages = &sim.message_frames[&id].messages;
+    let texts: Vec<&str> = messages
+        .iter()
+        .map(|message| message.text.as_str())
+        .collect();
+    assert_eq!(texts, expected, "displayed UIErrorsFrame rows");
+}
+
 #[test]
 fn original_unselected_reward_reports_one_message_and_named_sound() {
     let env = seed_env();
@@ -697,7 +709,7 @@ fn original_unselected_reward_reports_one_message_and_named_sound() {
     open_rewards(&env);
     exec(
         &env,
-        "UIErrorsFrame:ClearText(); ERR_QUEST_MUST_CHOOSE = 'Choose a northern reward.'",
+        "UIErrorsFrame:Clear(); ERR_QUEST_MUST_CHOOSE = 'Choose a northern reward.'",
     );
     force_reward_callback(&env);
     exec(
@@ -709,11 +721,11 @@ fn original_unselected_reward_reports_one_message_and_named_sound() {
                 assert(seen.argc == 1 and seen.args[1] == ERR_QUEST_MUST_CHOOSE, 'Wrath has one message, no numeric type')
             end
         end
-        assert(UIErrorsFrame:GetNumMessages() == 0, 'error row waits for the next update')
         assert(QuestFrameRewardPanel:IsShown(), 'feedback retains rewards')
         assert(not A_Admin.TurnInSelectedQuest(), 'feedback does not claim a reward')
     "#,
     );
+    assert_error_messages(&env, &[]);
     let sim = env.env.state().borrow();
     assert_eq!(
         sim.last_ui_error_message.as_deref(),
@@ -733,11 +745,15 @@ fn original_unselected_reward_reports_one_message_and_named_sound() {
         &env,
         r#"
         assert(TurnInCount('UI_ERROR_MESSAGE') == 1, 'update does not repeat feedback')
-        assert(UIErrorsFrame:GetNumMessages() == 1, 'original UIErrorsFrame consumed the error')
-        local text, r, g, b = UIErrorsFrame:GetMessageInfo(1)
-        assert(text == ERR_QUEST_MUST_CHOOSE and r == 1 and math.abs(g - 0.1) < 0.000001 and math.abs(b - 0.1) < 0.000001, 'original red error message')
     "#,
     );
+    assert_error_messages(&env, &["Choose a northern reward."]);
+    let sim = env.env.state().borrow();
+    let id = sim.widgets.get_id_by_name("UIErrorsFrame").unwrap();
+    let message = &sim.message_frames[&id].messages[0];
+    assert_eq!(message.r, 1.0, "original red error message");
+    assert!((message.g - 0.1).abs() < 0.000001);
+    assert!((message.b - 0.1).abs() < 0.000001);
 }
 
 #[test]
@@ -768,7 +784,7 @@ fn reward_feedback_ignores_arguments_without_quest_or_player() {
     exec(
         &env,
         r#"
-        UIErrorsFrame:ClearText(); ERR_QUEST_MUST_CHOOSE = 'No quest required.'
+        UIErrorsFrame:Clear(); ERR_QUEST_MUST_CHOOSE = 'No quest required.'
         UIErrorsFrame:HookScript('OnEvent', function(_, event)
             if event == 'UI_ERROR_MESSAGE' then
                 assert(FeedbackWasRecorded(), 'last error recorded before synchronous listeners')
@@ -776,19 +792,18 @@ fn reward_feedback_ignores_arguments_without_quest_or_player() {
         end)
         assert(select('#', QuestChooseRewardError({}, false, 'ignored', 123)) == 0, 'all arguments ignored; zero results')
         assert(TurnInCount('UI_ERROR_MESSAGE') == 1, 'no state/player gate')
-        assert(UIErrorsFrame:GetNumMessages() == 0, 'error row waits for the next update')
     "#,
     );
+    assert_error_messages(&env, &[]);
     assert_active(&env);
     env.env.fire_on_update(0.0).unwrap();
     exec(
         &env,
         r#"
         assert(TurnInCount('UI_ERROR_MESSAGE') == 1, 'update does not repeat feedback')
-        assert(UIErrorsFrame:GetNumMessages() == 1, 'original consumer inserts one row')
-        assert(UIErrorsFrame:GetMessageInfo(1) == 'No quest required.', 'original consumer receives string')
     "#,
     );
+    assert_error_messages(&env, &["No quest required."]);
     assert_active(&env);
 }
 
@@ -799,12 +814,12 @@ fn empty_reward_error_records_empty_and_requests_sound_without_event() {
     exec(
         &env,
         r#"
-        UIErrorsFrame:ClearText(); ERR_QUEST_MUST_CHOOSE = ''
+        UIErrorsFrame:Clear(); ERR_QUEST_MUST_CHOOSE = ''
         assert(select('#', QuestChooseRewardError()) == 0)
         assert(TurnInCount('UI_ERROR_MESSAGE') == 0, 'empty text has no event')
-        assert(UIErrorsFrame:GetNumMessages() == 0, 'no empty message displayed')
     "#,
     );
+    assert_error_messages(&env, &[]);
     let sim = env.env.state().borrow();
     assert_eq!(sim.last_ui_error_message.as_deref(), Some(""));
     assert_eq!(

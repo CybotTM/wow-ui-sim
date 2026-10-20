@@ -225,10 +225,11 @@ fn c11_original_wrath_temporary_window_moves_only_selected_access_history() {
         text, access, line, extra = destination:GetMessageInfo(2, C11Alice)
         assert(text == 'alice-out' and access == C11Alice and line == 503 and extra == C11Inform)
         assert(destination:GetNumMessages(C11Bob) == 0)
-        local _, r, g, b = destination:GetMessageInfo(1)
-        assert(r == 0 and g == 1 and b == 0, 'incoming type color')
-        _, r, g, b = destination:GetMessageInfo(2)
-        assert(r == 0 and g == 0 and b == 1, 'outgoing type color')
+        text, access, line, extra = destination:GetMessageInfo(1)
+        assert(text == 'alice-in' and access == C11Alice and line == 502 and extra == C11Alice,
+            'unfiltered native metadata')
+        text, access, line, extra = destination:GetMessageInfo(2)
+        assert(text == 'alice-out' and access == C11Alice and line == 503 and extra == C11Inform)
         assert(C11Source:GetNumMessages() == 3)
         assert(C11Source:GetNumMessages(C11Alice) == 0)
         assert(C11Source:GetNumMessages(C11Bob) == 2)
@@ -238,7 +239,29 @@ fn c11_original_wrath_temporary_window_moves_only_selected_access_history() {
     "#,
     )
     .expect("ASSERTION FAILURE: original Wrath transfer must preserve access, line, extraData");
+    let sim = env.state().borrow();
+    let destination = sim.widgets.get_id_by_name("C11Destination").unwrap();
+    let rows = &sim.message_frames[&destination].messages;
+    assert_eq!((rows[0].r, rows[0].g, rows[0].b), (0.0, 1.0, 0.0));
+    assert_eq!((rows[1].r, rows[1].g, rows[1].b), (0.0, 0.0, 1.0));
+    drop(sim);
     env.exec(r#"assert(#C11Errors == 0, table.concat(C11Errors, '\n'))"#)
         .unwrap();
     assert!(env.state().borrow().lua_errors.is_empty());
+}
+
+
+#[test]
+#[cfg(feature = "client-retail")]
+fn c11_retail_scrolling_history_retains_color_tuple() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"
+        local f = CreateFrame('ScrollingMessageFrame')
+        f:AddMessage('retail', 0.25, 0.5, 0.75, 0.8, 42)
+        assert(select('#', f:GetMessageInfo(1)) == 6)
+        local text, r, g, b, alpha, timestamp = f:GetMessageInfo(1)
+        assert(text == 'retail' and r == 0.25 and g == 0.5 and b == 0.75)
+        assert(math.abs(alpha - 0.8) < 0.00001 and type(timestamp) == 'number')
+        assert(f:HasMessageByID(42) and f:GetNumMessages() == 1)
+    "#).unwrap();
 }

@@ -258,6 +258,8 @@ fn mainline_spellbook_keybind_opens_and_closes_without_runtime_errors() {
     mainline_spellbook_keybind_opens_and_closes_without_runtime_errors::run(&env);
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_spells_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&player_spells_dir()).expect("Blizzard_PlayerSpells TOC resolves");
@@ -278,7 +280,9 @@ fn blizzard_player_spells_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_spells_toc_declares_load_on_demand_with_three_dependencies() {
     let toc = TocFile::from_file(&player_spells_toc()).expect("Blizzard_PlayerSpells TOC parses");
@@ -339,7 +343,9 @@ fn blizzard_player_spells_toc_declares_load_on_demand_with_three_dependencies() 
          authoritative via C_SpecializationInfo"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_spells_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(player_spells_toc())
@@ -394,7 +400,9 @@ fn blizzard_player_spells_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## Version:` — unversioned"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_spells_toc_lists_bootstrap_then_twenty_six_files_in_canonical_order() {
     let toc = TocFile::from_file(&player_spells_toc()).expect("Blizzard_PlayerSpells TOC parses");
@@ -409,6 +417,7 @@ fn blizzard_player_spells_toc_lists_bootstrap_then_twenty_six_files_in_canonical
          files across ClassSpecializations, ClassTalents, PvPTalents, SpellBook, and the \
          root-level frame, registration, and localization entries"
     );
+}
 }
 
 #[test]
@@ -435,6 +444,7 @@ fn blizzard_player_spells_does_not_appear_in_eager_discovery_for_any_screen() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_spells_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -446,6 +456,7 @@ fn blizzard_player_spells_appears_in_full_addon_inventory() {
         "Blizzard_PlayerSpells must appear in `discover_all_blizzard_addons` — the full \
          inventory is a structural listing of every parseable TOC including LoD addons"
     );
+}
 }
 
 prefork_full_ui_case! {
@@ -494,11 +505,13 @@ fn blizzard_player_spells_dependencies_loaded_via_eager_discovery(env: &WowLuaEn
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_spells_dependencies_loaded_via_eager_discovery() {
     let env = load_full_game_ui_with_player_spells();
     blizzard_player_spells_dependencies_loaded_via_eager_discovery::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -537,11 +550,13 @@ fn blizzard_player_spells_creates_named_non_virtual_frames(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_spells_creates_named_non_virtual_frames() {
     let env = load_full_game_ui_with_player_spells();
     blizzard_player_spells_creates_named_non_virtual_frames::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -685,11 +700,13 @@ fn blizzard_player_spells_publishes_hero_talent_mixins(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_spells_publishes_hero_talent_mixins() {
     let env = load_full_game_ui_with_player_spells();
     blizzard_player_spells_publishes_hero_talent_mixins::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -747,11 +764,13 @@ fn blizzard_player_spells_publishes_loadout_dialog_mixins(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_spells_publishes_loadout_dialog_mixins() {
     let env = load_full_game_ui_with_player_spells();
     blizzard_player_spells_publishes_loadout_dialog_mixins::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -776,11 +795,13 @@ fn blizzard_player_spells_publishes_pvp_and_warmode_mixins(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_spells_publishes_pvp_and_warmode_mixins() {
     let env = load_full_game_ui_with_player_spells();
     blizzard_player_spells_publishes_pvp_and_warmode_mixins::run(&env);
+}
 }
 
 prefork_full_ui_case! {

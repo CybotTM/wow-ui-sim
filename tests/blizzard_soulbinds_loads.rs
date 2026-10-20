@@ -76,6 +76,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_load_on_demand_with_current_dependencies() {
     let toc = TocFile::from_file(&soulbinds_toc()).expect("Soulbinds TOC parses");
@@ -100,7 +102,9 @@ fn toc_declares_load_on_demand_with_current_dependencies() {
         "Current retail Soulbinds depends on Blizzard_Colors and Blizzard_GameMenuEsc"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_omits_optional_metadata_directives() {
     let toc = TocFile::from_file(&soulbinds_toc()).expect("Soulbinds TOC parses");
@@ -115,7 +119,9 @@ fn toc_omits_optional_metadata_directives() {
          absence implies enabled)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_four_metadata_directives() {
     let raw = std::fs::read_to_string(soulbinds_toc()).expect("TOC reads utf-8");
@@ -148,7 +154,9 @@ fn toc_raw_bytes_pin_four_metadata_directives() {
     assert!(!raw.contains("## UseSecureEnvironment"));
     assert!(!raw.contains("## Version"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_resolves_to_twelve_entries_in_canonical_order() {
     let toc = TocFile::from_file(&soulbinds_toc()).expect("TOC parses");
@@ -189,7 +197,9 @@ fn body_resolves_to_twelve_entries_in_canonical_order() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn bootstrap_loads_before_util_to_publish_soulbinds_namespace_before_consumers() {
     let toc = TocFile::from_file(&soulbinds_toc()).expect("TOC parses");
@@ -214,7 +224,9 @@ fn bootstrap_loads_before_util_to_publish_soulbinds_namespace_before_consumers()
         "Blizzard_SoulbindsUtil.lua follows the bootstrap and publishes the Soulbinds namespace"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn templates_xml_loads_before_node_xml_for_select_button_template_inheritance() {
     let toc = TocFile::from_file(&soulbinds_toc()).expect("TOC parses");
@@ -267,7 +279,9 @@ fn templates_xml_loads_before_node_xml_for_select_button_template_inheritance() 
          <Frames> block resolves"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn soulbinds_xml_is_last_so_register_ui_panel_runs_after_viewer_exists() {
     let toc = TocFile::from_file(&soulbinds_toc()).expect("TOC parses");
@@ -290,6 +304,7 @@ fn soulbinds_xml_is_last_so_register_ui_panel_runs_after_viewer_exists() {
          already run to publish the SoulbindViewer global before the \
          RegisterUIPanel call dereferences it"
     );
+}
 }
 
 #[test]

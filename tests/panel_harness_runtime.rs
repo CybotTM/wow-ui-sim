@@ -45,10 +45,7 @@ const PANEL_HARNESS_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIParentPanelManager",
         "Blizzard_UIParentPanelManager_Mainline.toc",
     ),
-    (
-        "Blizzard_Settings_Shared",
-        "Blizzard_Settings_Shared.toc",
-    ),
+    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared.toc"),
     (
         "Blizzard_SettingsDefinitions_Shared",
         "Blizzard_SettingsDefinitions_Shared.toc",
@@ -75,7 +72,6 @@ const PANEL_HARNESS_ADDONS: &[(&str, &str)] = &[
 fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::paths::default_blizzard_ui_addons_path()
         .expect("Blizzard UI cache should be synced")
-
 }
 
 fn load_blizzard_addon(env: &WowLuaEnv, addon_name: &str, toc_name: &str) {
@@ -198,6 +194,7 @@ fn achievement_error_handling_load_matches_raw_load_addon() {
     assert!(raw_is_loaded, "raw load should mark the addon loaded");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn collections_addon_load_creates_collections_journal() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -224,7 +221,9 @@ fn collections_addon_load_creates_collections_journal() {
         "Blizzard_Collections should create CollectionsJournal when loaded"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn encounter_journal_addon_load_creates_frame() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -251,7 +250,9 @@ fn encounter_journal_addon_load_creates_frame() {
         "Blizzard_EncounterJournal should create EncounterJournal when loaded"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn compact_unit_frame_runtime_template_keeps_over_heal_absorb_glow_child() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -280,7 +281,9 @@ fn compact_unit_frame_runtime_template_keeps_over_heal_absorb_glow_child() {
         "CompactUnitFrameTemplate should attach overHealAbsorbGlow as a parentKey child"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn deprecated_arena_match_frame_keeps_over_heal_absorb_glow_named_from_ancestor() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -316,6 +319,7 @@ fn deprecated_arena_match_frame_keeps_over_heal_absorb_glow_named_from_ancestor(
         has_glow,
         "ArenaEnemyMatchFrame1 should keep its named overHealAbsorbGlow through anonymous XML wrapper frames"
     );
+}
 }
 
 #[test]
@@ -501,6 +505,7 @@ fn achievement_toggle_loads_and_shows_frame() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn collections_toggle_loads_and_shows_frame() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -528,7 +533,9 @@ fn collections_toggle_loads_and_shows_frame() {
     assert!(loaded, "collections toggle should load the addon");
     assert!(shown, "collections toggle should show the frame");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn encounter_toggle_loads_and_shows_frame() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -547,6 +554,7 @@ fn encounter_toggle_loads_and_shows_frame() {
 
     assert!(loaded, "encounter journal toggle should load the addon");
     assert!(shown, "encounter journal toggle should show the frame");
+}
 }
 
 #[test]
@@ -584,6 +592,7 @@ fn adventure_journal_dungeon_action_opens_lfd_without_recursing() {
     assert_eq!(dungeon_type, 1201, "linked dungeon should become LFD type");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn encounter_journal_display_dungeon_instance_does_not_recurse() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -611,7 +620,9 @@ fn encounter_journal_display_dungeon_instance_does_not_recurse() {
         "dungeon display should show the encounter panel"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn encounter_journal_journeys_frame_seeds_current_major_factions_without_tww_leak() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -659,4 +670,5 @@ fn encounter_journal_journeys_frame_seeds_current_major_factions_without_tww_lea
         false,
         "current Midnight Journeys must not show War Within rows; count={count}, names={names}"
     );
+}
 }

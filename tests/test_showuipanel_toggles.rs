@@ -268,6 +268,7 @@ fn toggle_player_spells_frame_opens_and_closes_talent_panel() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs_and_accepts_search_text() {
     test_timeout! {
@@ -322,6 +323,7 @@ fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs_and_accepts_search
             "ToggleCollectionsJournal(tab) should open, switch tabs, accept search text, and close for mounts, pets, and toys: {result}"
         );
     }
+}
 }
 
 #[test]
@@ -401,6 +403,7 @@ fn toggle_achievement_frame_opens_and_closes_achievement_panel() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn toggle_encounter_journal_opens_and_closes_panel() {
     test_timeout! {
@@ -429,6 +432,7 @@ fn toggle_encounter_journal_opens_and_closes_panel() {
             "ToggleEncounterJournal() should open and close the encounter journal panel: {result}"
         );
     }
+}
 }
 
 #[test]
@@ -681,6 +685,7 @@ fn open_all_bags_opens_a_bag_frame() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
@@ -734,4 +739,5 @@ fn housing_dashboard_loads_and_opens_panel() {
             "Housing dashboard should show its empty state after the owned-house response: {result}"
         );
     }
+}
 }
