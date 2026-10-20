@@ -45,6 +45,8 @@ fn load_wow_survey_ui_with_dependency(env: &WowLuaEnv) {
         .expect("Blizzard_WowSurveyUI should load via explicit Rust loader call");
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_variant() {
     let resolved =
@@ -57,7 +59,9 @@ fn find_toc_file_resolves_bare_variant() {
          The user-survey UI is a thin universal addon shared across every retail flavor"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_lod_with_status_ui_dep() {
     let toc = TocFile::from_file(&wow_survey_toc()).expect("Blizzard_WowSurveyUI TOC should parse");
@@ -92,7 +96,9 @@ fn toc_declares_lod_with_status_ui_dep() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.saved_variables().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_omits_allow_load_directives() {
     let toc = TocFile::from_file(&wow_survey_toc()).expect("Blizzard_WowSurveyUI TOC should parse");
@@ -118,7 +124,9 @@ fn toc_omits_allow_load_directives() {
          UI is gametype-unrestricted — surveys can be triggered on any retail flavor"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_bootstrap_lua_and_xml_body_files() {
     let toc = TocFile::from_file(&wow_survey_toc()).expect("Blizzard_WowSurveyUI TOC should parse");
@@ -140,7 +148,9 @@ fn toc_lists_bootstrap_lua_and_xml_body_files() {
          to `nil` and the Button would inherit nothing"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_directives() {
     let raw =
@@ -179,6 +189,7 @@ fn toc_raw_bytes_pin_directives() {
             "TOC raw bytes must NOT contain `{absent_directive}`"
         );
     }
+}
 }
 
 #[test]
