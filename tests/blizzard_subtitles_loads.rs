@@ -182,6 +182,7 @@ fn body_orders_lua_before_xml() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn present_in_every_screen_eager_discovery() {
     for screen in ALL_FOUR_SCREENS {
@@ -194,6 +195,7 @@ fn present_in_every_screen_eager_discovery() {
              loads on every screen at startup"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
@@ -346,6 +348,7 @@ fn is_addon_loaded_reports_true_after_eager_sweep(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_screen_eager_discovery_includes_subtitles() {
     for screen in GLUE_SCREENS {
@@ -360,4 +363,5 @@ fn glue_screen_eager_discovery_includes_subtitles() {
              flow"
         );
     }
+}
 }
