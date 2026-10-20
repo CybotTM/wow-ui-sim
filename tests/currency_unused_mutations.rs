@@ -8,6 +8,8 @@ fn currency_unused_mutations_original_checkbox_updates_selected_currency_and_pro
         r#"
         -- Resolve from current displayed indices after a preceding category collapses.
         B5Header(1):ToggleCollapsed()
+        local watched = C_CurrencyInfo.GetBackpackCurrencyInfo(3)
+        assert(watched.currencyTypesID == 1792)
         local selected = assert(C_CurrencyInfo.GetCurrencyListInfo(3))
         assert(selected.currencyTypesID == 1792)
         TokenFrame.selectedID = 3
@@ -20,6 +22,9 @@ fn currency_unused_mutations_original_checkbox_updates_selected_currency_and_pro
         assert(moved.isTypeUnused == true, "B5 unused: original checkbox must mark selected currency unused")
         assert(C_CurrencyInfo.GetCurrencyInfo(1792).isTypeUnused == true)
         assert(C_CurrencyInfo.GetCurrencyInfo(1792).quantity == 4350)
+        assert(moved.isShowInBackpack == true)
+        assert(C_CurrencyInfo.GetCurrencyInfo(1792).isShowInBackpack == true)
+        assert(C_CurrencyInfo.GetBackpackCurrencyInfo(3).currencyTypesID == 1792)
         local provider = TokenFrame.ScrollBox:GetDataProvider()
         assert(provider:Find(TokenFrame.selectedID).isTypeUnused == true,
             "original TokenFrame must display the unused flag")
@@ -30,7 +35,59 @@ fn currency_unused_mutations_original_checkbox_updates_selected_currency_and_pro
         assert(C_CurrencyInfo.GetCurrencyListInfo(TokenFrame.selectedID).isTypeUnused == false)
         assert(C_CurrencyInfo.GetCurrencyInfo(1792).isTypeUnused == false)
         assert(TokenFrame.ScrollBox:GetDataProvider():Find(TokenFrame.selectedID).isTypeUnused == false)
+        assert(C_CurrencyInfo.GetBackpackCurrencyInfo(3).currencyTypesID == 1792)
         B5AssertProvider()
         "#,
     );
+}
+
+#[test]
+fn currency_unused_mutations_ignore_non_currency_indices_and_missing_supplied_rows() {
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        for _, index in ipairs({0, -1, 20, 2245, 1, 7, 14}) do
+            C_CurrencyInfo.SetCurrencyUnused(index, true)
+        end
+        assert(C_CurrencyInfo.GetCurrencyListSize() == 19)
+        for _, id in ipairs({2245, 2806, 1792, 1901, 1191}) do
+            assert(C_CurrencyInfo.GetCurrencyInfo(id).isTypeUnused == false)
+        end
+        "#,
+    )
+    .unwrap();
+    env.state().borrow_mut().currency_info.remove(&2245);
+    env.exec(
+        r#"
+        C_CurrencyInfo.SetCurrencyUnused(2, true)
+        assert(C_CurrencyInfo.GetCurrencyListInfo(2) == nil)
+        assert(C_CurrencyInfo.GetCurrencyInfo(2245) == nil)
+        assert(C_CurrencyInfo.GetCurrencyListSize() == 19)
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn currency_unused_mutations_repeated_requests_and_fresh_environments() {
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        for _ = 1, 2 do
+            C_CurrencyInfo.SetCurrencyUnused(3, true)
+            assert(C_CurrencyInfo.GetCurrencyInfo(2806).isTypeUnused == true,
+                "B5 unused: repeated request must keep the supplied flag")
+        end
+        "#,
+    )
+    .unwrap();
+    let fresh = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
+    fresh
+        .exec(
+            r#"
+            assert(C_CurrencyInfo.GetCurrencyInfo(2806).isTypeUnused == false)
+            assert(C_CurrencyInfo.GetCurrencyListSize() == 19)
+            "#,
+        )
+        .unwrap();
 }
