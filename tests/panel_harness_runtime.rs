@@ -194,6 +194,7 @@ fn achievement_error_handling_load_matches_raw_load_addon() {
     assert!(raw_is_loaded, "raw load should mark the addon loaded");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn collections_addon_load_creates_collections_journal() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -219,6 +220,7 @@ fn collections_addon_load_creates_collections_journal() {
         frame_exists,
         "Blizzard_Collections should create CollectionsJournal when loaded"
     );
+}
 }
 
 #[test]
@@ -499,6 +501,7 @@ fn achievement_toggle_loads_and_shows_frame() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn collections_toggle_loads_and_shows_frame() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -525,6 +528,7 @@ fn collections_toggle_loads_and_shows_frame() {
 
     assert!(loaded, "collections toggle should load the addon");
     assert!(shown, "collections toggle should show the frame");
+}
 }
 
 #[test]

@@ -268,6 +268,7 @@ fn toggle_player_spells_frame_opens_and_closes_talent_panel() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs_and_accepts_search_text() {
     test_timeout! {
@@ -322,6 +323,7 @@ fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs_and_accepts_search
             "ToggleCollectionsJournal(tab) should open, switch tabs, accept search text, and close for mounts, pets, and toys: {result}"
         );
     }
+}
 }
 
 #[test]

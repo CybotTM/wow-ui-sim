@@ -587,6 +587,7 @@ fn micro_menu_player_spells_button_loads_and_opens_panel() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn micro_menu_collections_button_loads_and_opens_panel() {
     let env = setup_env();
@@ -599,6 +600,7 @@ fn micro_menu_collections_button_loads_and_opens_panel() {
         frame_is_shown(&env, "CollectionsJournal"),
         "CollectionsJournal should be shown after clicking CollectionsMicroButton"
     );
+}
 }
 
 #[test]
