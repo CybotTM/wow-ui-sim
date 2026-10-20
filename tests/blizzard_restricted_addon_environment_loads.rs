@@ -356,6 +356,7 @@ fn excluded_from_eager_discovery_on_glue_screens() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_ten_lua_and_two_xml_files() {
     let mut entries: Vec<String> = std::fs::read_dir(restricted_dir())
@@ -373,6 +374,7 @@ fn root_directory_holds_ten_lua_and_two_xml_files() {
         entries, expected,
         "Retail 12.1 root must contain exactly its ten Lua and two XML TOC body files"
     );
+}
 }
 
 prefork_full_ui_case! {
