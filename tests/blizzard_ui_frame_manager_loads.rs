@@ -58,6 +58,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&ui_frame_manager_dir()).expect("UIFrameManager TOC resolves");
@@ -68,7 +70,9 @@ fn find_toc_file_resolves_bare_toc() {
          in find_toc_file at src/loader/mod.rs:65-95"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_no_dependencies() {
     let toc = TocFile::from_file(&ui_frame_manager_toc()).expect("TOC parses");
@@ -101,7 +105,9 @@ fn toc_is_eager_with_no_dependencies() {
     );
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_absent_implies_game_only() {
     let toc = TocFile::from_file(&ui_frame_manager_toc()).expect("TOC parses");
@@ -120,7 +126,9 @@ fn allow_load_absent_implies_game_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_two_directives_and_two_body_files() {
     let raw = std::fs::read_to_string(ui_frame_manager_toc()).expect("TOC reads utf-8");
@@ -155,6 +163,7 @@ fn toc_raw_bytes_pin_two_directives_and_two_body_files() {
     assert!(!raw.contains("## UseSecureEnvironment"));
     assert!(!raw.contains("## LoadFirst"));
     assert!(!raw.contains("[Family]"));
+}
 }
 
 #[test]
