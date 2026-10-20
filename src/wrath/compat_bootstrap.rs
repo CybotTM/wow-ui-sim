@@ -27,6 +27,8 @@ pub fn init(lua: &mut rilua::Lua) -> crate::Result<()> {
     crate::lua_api::globals::real::wrath_calendar::register(lua)?;
     #[cfg(feature = "client-wrath")]
     crate::lua_api::workarounds::temporary::wrath_arena_roster::register(lua)?;
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::workarounds::temporary::wrath_trade_skill_filters::register(lua)?;
     lua.exec(WRATH_COMPAT_BOOTSTRAP_LUA)?;
     Ok(())
 }

@@ -52,6 +52,11 @@ pub struct WrathLegacyState {
     pub mini_map_arrows: Option<(u64, u64)>,
     #[cfg(feature = "client-wrath")]
     pub calendar: CalendarContext,
+    /// None means no supplied/reset filter yet; never invent initial native state.
+    #[cfg(feature = "client-wrath")]
+    pub trade_skill_subclass_filter: Option<(u32, u32)>,
+    #[cfg(feature = "client-wrath")]
+    pub trade_skill_inventory_filter: Option<u32>,
     pub skills: Vec<Skill>,
     /// Zero denotes no selection; otherwise one-based into skills.
     pub selected_skill: usize,
