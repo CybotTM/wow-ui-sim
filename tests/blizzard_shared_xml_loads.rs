@@ -289,6 +289,7 @@ fn mainline_toc_body_count_breakdown_matches_filesystem_layout() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn shared_subdir_holds_localization_and_widget_subdirs() {
     let shared_dir = shared_xml_dir().join("Shared");
@@ -321,7 +322,9 @@ fn shared_subdir_holds_localization_and_widget_subdirs() {
     assert!(shared_dir.join("LocalizationMachinery.lua").is_file());
     assert!(shared_dir.join("VASErrorLookup.lua").is_file());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn mainline_subdir_holds_retail_only_overrides() {
     let mainline_dir = shared_xml_dir().join("Mainline");
@@ -349,7 +352,9 @@ fn mainline_subdir_holds_retail_only_overrides() {
     assert!(mainline_dir.join("Sound.lua").is_file());
     assert!(mainline_dir.join("ScrollDefine.lua").is_file());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn eager_discovery_includes_addon_on_all_four_screens() {
     let ui = blizzard_ui_dir();
@@ -369,6 +374,7 @@ fn eager_discovery_includes_addon_on_all_four_screens() {
              screen, and 54+ downstream addons hard-dep on it"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
