@@ -50,6 +50,7 @@ fn test_object_api_loads_before_frame_xml() {
 
 /// ItemMixin (from Blizzard_ObjectAPI) must be defined when Blizzard_FrameXML loads.
 /// EventToastManager.lua:669 does `CreateFromMixins(..., ItemMixin)` at file scope.
+post_wrath_ui_fixture! {
 #[test]
 fn test_item_mixin_available_for_event_toast_manager() {
     test_timeout! {
@@ -72,6 +73,7 @@ fn test_item_mixin_available_for_event_toast_manager() {
             "ItemMixin should be defined before Blizzard_FrameXML finishes loading"
         );
     }
+}
 }
 
 /// Blizzard_UIPanels_Game (which defines PaperDollItemSlotButton_OnLoad) must
