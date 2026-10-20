@@ -266,6 +266,7 @@ fn toc_raw_bytes_pin_four_directives_and_single_body_file() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn promoted_into_game_eager_discovery_via_dependents() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -282,6 +283,7 @@ fn promoted_into_game_eager_discovery_via_dependents() {
          (loader/mod.rs:553-) promotes it from the lod_pool into the \
          eager addons map"
     );
+}
 }
 
 #[test]
