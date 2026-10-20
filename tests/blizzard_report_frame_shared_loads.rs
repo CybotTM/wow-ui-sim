@@ -235,6 +235,7 @@ fn allows_screen_returns_true_for_every_screen() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn included_in_eager_discovery_for_every_screen() {
     for screen in [
@@ -257,6 +258,7 @@ fn included_in_eager_discovery_for_every_screen() {
              {screen:?})"
         );
     }
+}
 }
 
 #[test]
