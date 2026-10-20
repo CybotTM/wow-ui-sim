@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn quick_keybind_dir() -> PathBuf {
@@ -55,6 +56,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quick_keybind_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&quick_keybind_dir()).expect("Blizzard_QuickKeybind TOC resolves");
@@ -80,7 +83,9 @@ fn blizzard_quick_keybind_find_toc_resolves_bare_variant() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quick_keybind_toc_pins_eager_cross_flavor_with_default_state_enabled() {
     let toc = TocFile::from_file(&quick_keybind_toc()).expect("Blizzard_QuickKeybind TOC parses");
@@ -141,7 +146,9 @@ fn blizzard_quick_keybind_toc_pins_eager_cross_flavor_with_default_state_enabled
     );
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quick_keybind_toc_declares_one_dependency() {
     let toc = TocFile::from_file(&quick_keybind_toc()).expect("TOC parses");
@@ -161,7 +168,9 @@ fn blizzard_quick_keybind_toc_declares_one_dependency() {
          load every script handler would fail with a nil global"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quick_keybind_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(quick_keybind_toc()).expect("TOC reads utf-8");
@@ -210,7 +219,9 @@ fn blizzard_quick_keybind_toc_declares_metadata_in_raw_bytes() {
          Blizzard_QuestTimer / Blizzard_QueueStatusFrame / Blizzard_QuickJoin)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quick_keybind_toc_lists_one_xml_file_with_companion_lua_pulled_in() {
     let toc = TocFile::from_file(&quick_keybind_toc()).expect("TOC parses");
@@ -230,6 +241,7 @@ fn blizzard_quick_keybind_toc_lists_one_xml_file_with_companion_lua_pulled_in() 
          the older eager-load form used by Blizzard_QuestTimer where both \
          .lua and .xml are listed explicitly in the TOC body"
     );
+}
 }
 
 #[test]
