@@ -378,11 +378,13 @@ fn publishes_two_mixin_tables_at_global_scope(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn publishes_two_mixin_tables_at_global_scope() {
     let env = load_full_ui_for(ScreenKind::Game);
     publishes_two_mixin_tables_at_global_scope::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -412,11 +414,13 @@ fn tray_item_mixin_carries_seven_canonical_methods(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn tray_item_mixin_carries_seven_canonical_methods() {
     let env = load_full_ui_for(ScreenKind::Game);
     tray_item_mixin_carries_seven_canonical_methods::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -453,11 +457,13 @@ fn tray_mixin_carries_twenty_five_lifecycle_and_pool_methods(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn tray_mixin_carries_twenty_five_lifecycle_and_pool_methods() {
     let env = load_full_ui_for(ScreenKind::Game);
     tray_mixin_carries_twenty_five_lifecycle_and_pool_methods::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -489,11 +495,13 @@ fn tray_item_template_materializes_with_cooldown_and_immunity_children(env: &Wow
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn tray_item_template_materializes_with_cooldown_and_immunity_children() {
     let env = load_full_ui_for(ScreenKind::Game);
     tray_item_template_materializes_with_cooldown_and_immunity_children::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -522,11 +530,13 @@ fn tray_template_materializes_with_resize_layout_keyvalues(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn tray_template_materializes_with_resize_layout_keyvalues() {
     let env = load_full_ui_for(ScreenKind::Game);
     tray_template_materializes_with_resize_layout_keyvalues::run(&env);
+}
 }
 
 prefork_full_ui_case! {
