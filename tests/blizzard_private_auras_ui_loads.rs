@@ -259,6 +259,7 @@ fn blizzard_private_auras_ui_toc_lists_files_in_order() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_appears_only_in_game_screen_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -290,7 +291,9 @@ fn blizzard_private_auras_ui_appears_only_in_game_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -303,6 +306,7 @@ fn blizzard_private_auras_ui_appears_in_full_addon_inventory() {
          unfiltered inventory at src/loader/mod.rs lists every parseable Blizzard_* TOC \
          regardless of AllowLoad gating"
     );
+}
 }
 
 prefork_full_ui_case! {
