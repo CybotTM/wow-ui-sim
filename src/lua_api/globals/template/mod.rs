@@ -12,6 +12,18 @@ pub fn set_intrinsic(state: &mut LuaState, frame_id: u64, base: &str) {
     };
     let value = crate::lua_api::methods::create_string(state, base);
     table_set(state, frame, "intrinsic", value);
+    // Only Wrath's queued-row lifecycle needs the XML alias distinguished in Rust.
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath
+        || base != "ScrollingMessageFrame"
+    {
+        return;
+    }
+    let Ok(mut sim) = crate::lua_api::methods::borrow_state_mut(state) else {
+        return;
+    };
+    if let Some(frame) = sim.widgets.get_mut_visual(frame_id) {
+        frame.object_type_name = Some(base.to_string());
+    }
 }
 
 pub fn assign_parent_key(
