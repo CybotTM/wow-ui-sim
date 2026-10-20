@@ -358,6 +358,8 @@ fn startup_lane_addons_appear_in_eager_game_discovery() {
     }
 }
 
+// Only cached-tree/named-addon inputs absent in Wrath; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn map_canvas_secure_util_emerges_before_other_lane_addons_in_eager_order() {
     let ui = blizzard_ui_dir();
@@ -396,6 +398,7 @@ fn map_canvas_secure_util_emerges_before_other_lane_addons_in_eager_order() {
          inherits=\"MapCanvasFrameTemplate\">` parses. \
          Got order: MapCanvas@{canvas_idx}, WorldMap@{world_map_idx}"
     );
+}
 }
 
 #[test]
