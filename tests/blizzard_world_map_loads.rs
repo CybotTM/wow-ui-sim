@@ -285,6 +285,7 @@ fn dep_directories_exist_on_disk() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -294,6 +295,7 @@ fn appears_in_game_eager_discovery() {
         "Blizzard_WorldMap must appear in Game eager discovery — eager (no LoadOnDemand), \
          not game-type-restricted at the top level, AllowLoad defaults to Game"
     );
+}
 }
 
 #[test]
