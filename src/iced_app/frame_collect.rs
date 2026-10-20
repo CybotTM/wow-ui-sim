@@ -239,7 +239,9 @@ fn registration_set_matches(
 
 #[cfg(test)]
 mod tests {
-    use super::{collect_subtree_ids, intra_strata_sort_key};
+    #[cfg(feature = "gui")]
+    use super::collect_subtree_ids;
+    use super::intra_strata_sort_key;
     use crate::widget::{AnchorPoint, Frame, WidgetRegistry, WidgetType};
 
     #[cfg(feature = "gui")]
