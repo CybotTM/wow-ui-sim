@@ -2,6 +2,7 @@ use super::{
     CacheProvenance, invalidate_cache_if_provenance_mismatched, manifest_entries,
     manifest_entry_fdid, manifest_entry_is_allowed_unmapped,
 };
+#[cfg(feature = "casc")]
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
