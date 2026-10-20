@@ -92,6 +92,11 @@ mod tests {
     use super::*;
     use clap::Parser;
 
+    include!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/common/profile_fixtures.rs"
+    ));
+
     #[cfg(feature = "gui")]
     #[test]
     fn reload_ui_rebuilds_the_real_no_addons_startup() {
@@ -120,7 +125,7 @@ mod tests {
         .expect("ReloadUI must reuse real startup without third-party addons");
     }
 
-    wow_ui_sim::post_wrath_ui_fixture! {
+    post_wrath_ui_fixture! {
     #[cfg(feature = "gui")]
     #[test]
     fn reload_ui_preserves_file_backed_edit_mode_layout() {
