@@ -73,9 +73,25 @@ Pinned Retail API docs at `b9be9379719047977fca4dba1bb1d9988e8840b3` declare ADD
 - `src/bin/wow_sim/main.rs`, `src/bin/wow_sim/gui_commands.rs` — dump/screenshot reload observation boundaries.
 - `src/bin/wow_sim/startup.rs` — real `--no-addons` startup with declared Blizzard SavedVariables rebuilt through App.
 
+## Final implementer gate — 2026-10-19
+
+Production Rust is `10023c3d9`; final normal-code receipts compile `ce2a122ba` (docs-only delta). Test-only `3446189b6` isolates the Retail Settings payload fixture in a child process: real startup installs a process-global tracing subscriber once. The combined six-case batch reproduced a second-initialization panic before reload, then passed unchanged consumer assertions after isolation. Production logging was not altered. This module is gated by `test` and `profile-retail`, so the other proof scopes remain valid.
+
+| Gate | Executed result |
+| --- | --- |
+| Wrath 12340 lifecycle | 23/23, no exclusions, full sound/gui/casc profile; C/D/E controls pass on both sides of their producers |
+| Wrath shared owners/startup | Library 21/21; binary 3/5, with two unchanged, out-of-profile Console/EditMode fixtures failing before ReloadUI and explicitly classified non-blocking by the integrator |
+| Retail preservation and payload | Library 21/21; binary 6/6 at `3446189b6`, including original Settings and non-default EditMode consumers |
+| Compilation and format | Wrath/Retail GUI and headless checks: 4/4, zero warnings. Full format check passes at `3446189b6` |
+| Stock startup | Wrath and Retail `--no-addons --no-saved-vars lua-errors` each emit exactly `[]` |
+
+Receipts: `final-wrath-{check,headless-check,lib,runtime-abc2,runtime-de,bin-tests,startup}-receipt.json`, `final-retail-{check,headless-check,lib-reload,lib-startup,bin-tests2,startup}-receipt.json`, `final-fmt2-receipt.json`. Original persisted CVar hash/stat and directory listing remain unchanged; each runtime uses a copied current CVar file under child-only XDG storage. All builds/runs used capacity admission, the retained shared slot, 9-GiB single-job builds and 4-GiB/90-second runtimes.
+
+The Wrath test build has one pre-existing `simple_html_tests.rs:2` unused import, byte-identical to the lane base and fixed separately by `65afa9064`; normal checks have none. No warning suppression or ignored tests were added. Full suites and native execution were not run. Independent integrated verification remains the next owner gate.
+
 ## Known gaps (current cycle)
 
-- [ ] Wrath 12340 requirements above still need behavioral acceptance. Retail/other-profile native teardown ordering and target/focus preservation remain unconfirmed.
+- [ ] Independent integrated verification of these bounded Wrath/retail gates remains pending. Retail/other-profile native teardown ordering and target/focus preservation remain unconfirmed.
 - [ ] Keyboard/mouse model-state preservation is INFERRED and unasserted pending native lifecycle evidence. Keep `mouse_position`, `mouse_buttons` and `pressed_keys`; discard frame-ID input caches, not these model values.
 - [ ] Full Ellesmere acceptance and standalone `wow-cli` executable reruns remain separate from the bounded Unix-socket client proof.
 
