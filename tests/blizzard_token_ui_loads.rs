@@ -241,6 +241,22 @@ fn present_in_game_screen_eager_discovery_only() {
 #[test]
 fn token_frame_load_ui_is_absent_and_wow_token_ui_owns_secure_token_flow() {
     let env = fresh_game_env();
+    if cfg!(feature = "client-wrath") {
+        crate::common::load_profile_framexml(&env);
+        env.exec(
+            r#"
+            assert(type(TokenFrame_LoadUI) == "function")
+            TokenFrame_LoadUI()
+            assert(IsAddOnLoaded("Blizzard_TokenUI"))
+            ToggleCharacter("TokenFrame")
+            assert(TokenFrame:IsShown())
+            ToggleCharacter("TokenFrame")
+            assert(not TokenFrame:IsShown())
+        "#,
+        )
+        .expect("12340 currency-token panel lifecycle");
+        return;
+    }
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
     for (name, toc_path) in &addons {
         if name == "Blizzard_TokenUI" {
