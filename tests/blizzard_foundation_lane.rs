@@ -63,6 +63,19 @@ fn fresh_lane_env() -> WowLuaEnv {
 
 #[test]
 fn each_lane_addon_directory_resolves_with_a_toc() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        for file in [
+            "Fonts.xml",
+            "BasicControls.xml",
+            "UIPanelTemplates.lua",
+            "UIPanelTemplates.xml",
+        ] {
+            assert!(toc.files.contains(&PathBuf::from(file)));
+            assert!(toc.addon_dir.join(file).is_file());
+        }
+        return;
+    }
     for name in LANE_ADDONS_BASE_TO_CONSUMER {
         let dir = blizzard_ui_dir().join(name);
         assert!(
@@ -82,6 +95,26 @@ fn each_lane_addon_directory_resolves_with_a_toc() {
 
 #[test]
 fn lane_dep_edges_pin_canonical_chain() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        assert!(toc.dependencies().is_empty());
+        let files: Vec<_> = toc
+            .files
+            .iter()
+            .map(|p| p.to_string_lossy().into_owned())
+            .collect();
+        for pair in [
+            "Fonts.xml",
+            "BasicControls.xml",
+            "UIPanelTemplates.lua",
+            "UIPanelTemplates.xml",
+        ]
+        .windows(2)
+        {
+            assert!(position_in(&files, pair[0]).unwrap() < position_in(&files, pair[1]).unwrap());
+        }
+        return;
+    }
     let base = parse_lane_toc("Blizzard_SharedXMLBase");
     let shared = parse_lane_toc("Blizzard_SharedXML");
     let _game = parse_lane_toc("Blizzard_SharedXMLGame");
@@ -149,6 +182,23 @@ fn shared_xml_game_repeated_singular_deps_are_accumulated() {
 
 #[test]
 fn shared_xml_base_publishes_global_env_overrides_for_diagnostic_files() {
+    if cfg!(feature = "client-wrath") {
+        let env = fresh_lane_env();
+        crate::common::load_profile_framexml(&env);
+        env.exec(
+            r#"
+            assert(type(_ERRORMESSAGE) == "function")
+            assert(TEXT("native text") == "native text")
+            message("native diagnostic")
+            assert(BasicScriptErrors:IsShown())
+            assert(BasicScriptErrorsText:GetText() == "native diagnostic")
+            BasicScriptErrorsButton:Click()
+            assert(not BasicScriptErrors:IsShown())
+        "#,
+        )
+        .expect("12340 BasicControls diagnostic lifecycle");
+        return;
+    }
     let base = parse_lane_toc("Blizzard_SharedXMLBase");
 
     let body: Vec<String> = base
@@ -221,6 +271,20 @@ fn shared_xml_diagnostic_files_carry_allow_load_environment_global_in_raw_form()
 
 #[test]
 fn shared_xml_game_body_substitutes_family_placeholder_to_mainline() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        assert!(toc.files.contains(&PathBuf::from("Localization.xml")));
+        assert_eq!(
+            toc.files.last(),
+            Some(&PathBuf::from("LocalizationPost.xml"))
+        );
+        assert!(
+            toc.files
+                .iter()
+                .all(|file| toc.addon_dir.join(file).is_file())
+        );
+        return;
+    }
     let game = parse_lane_toc("Blizzard_SharedXMLGame");
 
     let body: Vec<String> = game
@@ -259,6 +323,23 @@ fn shared_xml_game_body_substitutes_family_placeholder_to_mainline() {
 
 #[test]
 fn lane_appears_in_eager_discovery_in_dep_first_order() {
+    if cfg!(feature = "client-wrath") {
+        let env = fresh_lane_env();
+        crate::common::load_profile_framexml(&env);
+        assert!(
+            env.eval::<bool>(
+                "return IsAddOnLoaded('FrameXML') and type(PanelTemplates_SetNumTabs) == 'function'"
+            )
+            .unwrap()
+        );
+        let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
+        assert!(
+            !addons
+                .iter()
+                .any(|(name, _)| name == "Blizzard_SharedXMLBase")
+        );
+        return;
+    }
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
     let names: Vec<String> = addons.iter().map(|(name, _)| name.clone()).collect();
@@ -292,6 +373,18 @@ fn lane_appears_in_eager_discovery_in_dep_first_order() {
 
 #[test]
 fn shared_xml_base_loads_on_glue_screens_others_do_not() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        assert!(toc.allows_screen(ScreenKind::Game));
+        for screen in [
+            ScreenKind::Login,
+            ScreenKind::CharacterSelect,
+            ScreenKind::CharacterCreate,
+        ] {
+            assert!(!toc.allows_screen(screen));
+        }
+        return;
+    }
     let ui = blizzard_ui_dir();
     let glue_screens = [
         ScreenKind::Login,
