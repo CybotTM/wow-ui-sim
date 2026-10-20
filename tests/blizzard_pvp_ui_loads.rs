@@ -369,6 +369,7 @@ fn blizzard_pvp_ui_does_not_appear_in_eager_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_ui_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -377,6 +378,7 @@ fn blizzard_pvp_ui_appears_in_full_addon_inventory() {
         found,
         "Blizzard_PVPUI MUST appear in `discover_all_blizzard_addons`"
     );
+}
 }
 
 prefork_full_ui_case! {
