@@ -72,6 +72,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_photo_sharing_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&photo_sharing_dir()).expect("Blizzard_PhotoSharing TOC resolves");
@@ -91,7 +93,9 @@ fn blizzard_photo_sharing_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_photo_sharing_toc_declares_eager_mainline_only_with_game_menu_dependency() {
     let toc = TocFile::from_file(&photo_sharing_toc()).expect("Blizzard_PhotoSharing TOC parses");
@@ -153,7 +157,9 @@ fn blizzard_photo_sharing_toc_declares_eager_mainline_only_with_game_menu_depend
          service's server, not on the client"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_photo_sharing_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(photo_sharing_toc())
@@ -203,7 +209,9 @@ fn blizzard_photo_sharing_toc_declares_metadata_in_raw_bytes() {
          and matches a few small Mainline-only social/utility addons"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_photo_sharing_toc_lists_four_files_in_canonical_order() {
     let toc = TocFile::from_file(&photo_sharing_toc()).expect("Blizzard_PhotoSharing TOC parses");
@@ -222,6 +230,7 @@ fn blizzard_photo_sharing_toc_lists_four_files_in_canonical_order() {
          mixins (PhotoSharingMixin / PhotoSharingBrowserMixin / etc.) so the XML's \
          `mixin=\"...\"` attribute can resolve at parse time"
     );
+}
 }
 
 #[test]
