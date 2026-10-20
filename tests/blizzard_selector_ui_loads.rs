@@ -23,6 +23,8 @@ fn shared_xml_selector_dir() -> PathBuf {
     blizzard_ui_dir().join("Blizzard_SharedXML/Shared/Selector")
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&selector_ui_dir()).expect("Blizzard_SelectorUI TOC resolves");
@@ -36,7 +38,9 @@ fn find_toc_file_resolves_bare_toc() {
          code can `IsAddOnLoaded('Blizzard_SelectorUI')` against a registered name"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_only_title_and_load_on_demand() {
     let toc = TocFile::from_file(&selector_ui_toc()).expect("Blizzard_SelectorUI TOC parses");
@@ -71,7 +75,9 @@ fn toc_declares_only_title_and_load_on_demand() {
         toc.files
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lacks_allow_load_so_falls_through_to_game_only() {
     let toc = TocFile::from_file(&selector_ui_toc()).expect("Blizzard_SelectorUI TOC parses");
@@ -95,7 +101,9 @@ fn toc_lacks_allow_load_so_falls_through_to_game_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_contain_only_title_and_load_on_demand_lines() {
     let raw =
@@ -125,6 +133,7 @@ fn toc_raw_bytes_contain_only_title_and_load_on_demand_lines() {
         "TOC must have zero non-comment body lines — empty stub has no body files. \
          Got: {body_lines:?}"
     );
+}
 }
 
 #[test]
