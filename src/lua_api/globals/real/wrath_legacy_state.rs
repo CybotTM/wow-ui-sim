@@ -21,6 +21,12 @@ pub struct Battlefield {
 }
 #[derive(Debug, Default)]
 pub struct WrathLegacyState {
+    /// Cached zero-based dual-spec groups, not class specialization indices.
+    /// INFERRED simulator default: one talent group; native initialization unproved.
+    #[cfg(feature = "client-wrath")]
+    pub player_talent_group: u32,
+    #[cfg(feature = "client-wrath")]
+    pub inspected_talent_group: u32,
     pub skills: Vec<Skill>,
     /// Zero denotes no selection; otherwise one-based into skills.
     pub selected_skill: usize,

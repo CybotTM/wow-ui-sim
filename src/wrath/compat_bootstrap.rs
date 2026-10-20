@@ -19,6 +19,8 @@ pub fn init(lua: &mut rilua::Lua) -> crate::Result<()> {
     crate::lua_api::globals::real::wrath_legacy::register_all(lua)?;
     #[cfg(feature = "client-wrath")]
     crate::lua_api::globals::real::wrath_legacy_lfg::register_all(lua)?;
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::globals::real::wrath_talent_groups::register(lua)?;
     lua.exec(WRATH_COMPAT_BOOTSTRAP_LUA)?;
     Ok(())
 }
