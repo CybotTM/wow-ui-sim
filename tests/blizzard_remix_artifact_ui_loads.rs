@@ -55,6 +55,8 @@ fn load_remix_artifact_ui_with_dependency(env: &WowLuaEnv) {
         .expect("Blizzard_RemixArtifactUI should load via explicit Rust loader call");
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved =
@@ -68,7 +70,9 @@ fn find_toc_file_resolves_bare_toc() {
          src/loader/mod.rs:65 tries `_Mainline.toc` first (miss), then bare (hit) and returns it"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_load_on_demand_standard_game_only_with_two_hard_deps() {
     let toc = TocFile::from_file(&remix_artifact_toc())
@@ -118,7 +122,9 @@ fn toc_declares_load_on_demand_standard_game_only_with_two_hard_deps() {
          the C_Traits server-backed configID/treeID state, not per-addon SavedVariables"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_bootstrap_and_two_files_in_root_directory() {
     let toc = TocFile::from_file(&remix_artifact_toc())
@@ -133,7 +139,9 @@ fn toc_lists_bootstrap_and_two_files_in_root_directory() {
         "Retail 12.1.0.69497 lists the RemixArtifact bootstrap before its Lua and XML files"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allows_screen_returns_true_only_for_game() {
     let toc = TocFile::from_file(&remix_artifact_toc())
@@ -155,6 +163,7 @@ fn allows_screen_returns_true_only_for_game() {
              matches the Game branch only at src/toc.rs:308. (Screen tested: {screen:?})"
         );
     }
+}
 }
 
 #[test]
@@ -459,6 +468,7 @@ fn util_dispatch_helpers_resolve_template_names(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_uses_method_attribute_dispatch() {
     let xml_text =
@@ -484,4 +494,5 @@ fn xml_uses_method_attribute_dispatch() {
          method= form, this resolves through `_G` instead of the mixin table because \
          GameTooltip_Hide is a free FrameXML helper, not a mixin method"
     );
+}
 }
