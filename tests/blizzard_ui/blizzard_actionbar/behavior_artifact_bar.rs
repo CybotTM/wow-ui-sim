@@ -189,6 +189,7 @@ const EXPECTED_NUM_POINTS: i32 = 3;
 const EXPECTED_REMAINING_XP: i64 = 50;
 const EXPECTED_NEXT_COST: i64 = 200;
 
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_bar_round_trips_through_artifact_xp_update_event() {
     test_timeout! {
@@ -206,6 +207,7 @@ fn artifact_bar_round_trips_through_artifact_xp_update_event() {
         assert_post_event_tick_shown(env);
     });
     }
+}
 }
 
 fn assert_cold_globals_resolve(env: &WowLuaEnv) {
