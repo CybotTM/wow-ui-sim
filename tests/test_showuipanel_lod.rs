@@ -575,6 +575,7 @@ fn professions_frame_loads_and_populates_specialization_tab() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn professions_frame_xml_pages_are_parent_keyed() {
     test_timeout! {
@@ -610,6 +611,7 @@ fn professions_frame_xml_pages_are_parent_keyed() {
             "ProfessionsFrame XML page children should be available through parentKey: {result}"
         );
     }
+}
 }
 
 post_wrath_ui_fixture! {
