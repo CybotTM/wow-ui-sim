@@ -1,3 +1,7 @@
+## [2026-10-20] investigation | Shared-target test source binding
+
+[Harness source binding](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) records stale absolute module paths after worktree relocation, a zero-test false success, and manifest-directory invalidation. Regeneration/runtime confirmation remains pending.
+
 ## [2026-10-19] source | Wrath single-class spellbook views
 
 [Projection notes](systems/lua-api.md#wrath-single-class-spellbook-projection) link the [contract](../specs/wrath-spellbook-tabs.md): existing known membership, derived full/compact views, original-consumer/API RED→GREEN4/4 and pending boundary/profile preservation. Native skill-line metadata and independent deferred-cursor follow-up remain outside this slice.

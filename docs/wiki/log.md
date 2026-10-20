@@ -1,3 +1,7 @@
+## [2026-10-20] investigation | Shared-target test source binding
+
+[Harness notes](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) record another worktree's absolute generated module paths and TimeManager zero-selection; manifest-directory invalidation is committed, runtime confirmation pending. Exact private RED receipts are retained, not accepted as this lane's source-bound proof.
+
 ## [2026-10-19] source | Wrath single-class spellbook views
 
 [System notes](systems/lua-api.md#wrath-single-class-spellbook-projection) link the [owning contract](../specs/wrath-spellbook-tabs.md). Two Wrath-only producers derive tab views and compact-slot mappings from existing membership and publish synchronous updates. Original-consumer/API RED→GREEN4/4 is retained with unchanged original CVar stat/hash; boundary/profile preservation remains pending. Tickless cursor evidence is not native timing proof.
