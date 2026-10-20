@@ -159,6 +159,7 @@ fn lod_addon_excluded_from_eager_discovery_on_every_screen() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_only_the_toc_with_no_body_files() {
     let dir = selector_ui_dir();
@@ -177,7 +178,9 @@ fn root_directory_holds_only_the_toc_with_no_body_files() {
          Blizzard_SharedXML/Shared/Selector/. Got: {entries:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn actual_selector_code_lives_in_shared_xml_body_not_this_folder() {
     let shared_dir = shared_xml_selector_dir();
@@ -211,6 +214,7 @@ fn actual_selector_code_lives_in_shared_xml_body_not_this_folder() {
             .is_file(),
         "The Mainline selector XML companion must exist outside Shared/Selector"
     );
+}
 }
 
 #[test]
