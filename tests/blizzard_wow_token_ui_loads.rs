@@ -75,6 +75,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_variant() {
     let resolved = find_toc_file(&token_ui_dir()).expect("Blizzard_WowTokenUI TOC should resolve");
@@ -88,7 +90,9 @@ fn find_toc_file_resolves_bare_variant() {
          `_Mists.toc` variant exists"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_secure_environment_with_two_required_deps() {
     let toc = TocFile::from_file(&token_ui_toc()).expect("Blizzard_WowTokenUI TOC should parse");
@@ -131,7 +135,9 @@ fn toc_declares_secure_environment_with_two_required_deps() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.saved_variables().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_omits_allow_load_directives() {
     let toc = TocFile::from_file(&token_ui_toc()).expect("Blizzard_WowTokenUI TOC should parse");
@@ -157,7 +163,9 @@ fn toc_omits_allow_load_directives() {
          UI ships on every retail flavor"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_body_lists_two_xml_files_only() {
     let toc = TocFile::from_file(&token_ui_toc()).expect("Blizzard_WowTokenUI TOC should parse");
@@ -184,7 +192,9 @@ fn toc_body_lists_two_xml_files_only() {
          each lua file establish the correct env BEFORE any function in that file is defined"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_directives() {
     let raw = std::fs::read_to_string(token_ui_toc()).expect("Blizzard_WowTokenUI TOC should read");
@@ -222,6 +232,7 @@ fn toc_raw_bytes_pin_directives() {
             "TOC raw bytes must NOT contain `{absent_directive}`"
         );
     }
+}
 }
 
 #[test]
