@@ -141,6 +141,7 @@ const SEEDED_POWER_LEVEL: i32 = 25;
 const SEEDED_UNLIMITED_LEVEL: i32 = 29;
 const EXPECTED_XP_TO_NEXT_LEVEL: i64 = SEEDED_MAX_XP - SEEDED_CURRENT_XP;
 
+post_wrath_ui_fixture! {
 #[test]
 fn azerite_bar_round_trips_through_azerite_item_experience_changed_event() {
     test_timeout! {
@@ -156,6 +157,7 @@ fn azerite_bar_round_trips_through_azerite_item_experience_changed_event() {
         assert_post_event_status_bar_values(env);
     });
     }
+}
 }
 
 fn assert_cold_globals_resolve(env: &WowLuaEnv) {
