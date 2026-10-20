@@ -93,6 +93,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_book_find_toc_resolves_bare_variant() {
     let resolved =
@@ -113,7 +115,9 @@ fn blizzard_professions_book_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_book_toc_declares_lod_game_only_addon() {
     let toc =
@@ -155,7 +159,9 @@ fn blizzard_professions_book_toc_declares_lod_game_only_addon() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_book_toc_declares_one_dependency() {
     let toc =
@@ -176,7 +182,9 @@ fn blizzard_professions_book_toc_declares_one_dependency() {
         "Zero `## OptionalDeps:` declared"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_book_toc_declares_no_saved_variables() {
     let toc =
@@ -194,7 +202,9 @@ fn blizzard_professions_book_toc_declares_no_saved_variables() {
          from server-authoritative skill-line / spellbook state"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_book_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(professions_book_toc())
@@ -247,7 +257,9 @@ fn blizzard_professions_book_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## DefaultState:` — defaults to enabled when omitted"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_book_toc_lists_bootstrap_then_two_files_in_canonical_order() {
     let toc =
@@ -263,6 +275,7 @@ fn blizzard_professions_book_toc_lists_bootstrap_then_two_files_in_canonical_ord
          before Blizzard_ProfessionsBook.xml so mixins and script-bound functions exist \
          before XML parsing"
     );
+}
 }
 
 #[test]
