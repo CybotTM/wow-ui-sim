@@ -1,6 +1,6 @@
 ## [2026-10-20] source | Wrath legacy LoD native-evidence adapters
 
-[Consumer follow-up](investigations/wrath-addon-load-fixture.md#native-evidence-legacy-api-follow-up) links the [contract](../specs/wrath-legacy-lod-apis.md): cached groups, lazy arrow models, Calendar context, no-team arena and empty-catalog filter reset paths; native alias publication precedes Calendar capture. Auction DB export absent; original-consumer RED recorded, current GREEN pending.
+[Consumer follow-up](investigations/wrath-addon-load-fixture.md#native-evidence-legacy-api-follow-up) links the [contract](../specs/wrath-legacy-lod-apis.md): cached groups, lazy arrow models, Calendar context, no-team arena and empty-catalog filter reset paths; native alias publication precedes Calendar capture. Auction DB export absent; six bounded producer cases GREEN, whole-addon residual counts recorded, stock/profile proof pending.
 
 ## [2026-10-20] investigation | Wrath addon-load fixture ordering
 

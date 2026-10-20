@@ -4,14 +4,14 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 
 ## What it must do
 
-- [ ] `GetActiveTalentGroup` returns one cached group plus one; inspect precedes pet, pet returns one. Arguments follow native StringToBOOL, not Lua truthiness. No usage error.
-- [ ] `CreateMiniWorldMapArrowFrame(parent)` validates table/slot-zero/frame type, emits exact native errors, returns zero values and lazily creates two named child Models. Subsequent calls retain their original parents. Model mesh rendering is unsupported.
-- [ ] `CalendarEventGetTypes` returns five loaded localized Calendar labels in native order; ignores arguments.
-- [ ] `CalendarDefaultGuildFilter` returns level cap twice (60/70/80 by account expansion) and the cached guild-rank count directly (`CGGuildInfo::m_numRanks`, laptop clarification); no guild-name membership gate. Absent player returns three zeros. Ignores arguments.
-- [ ] `ArenaTeamRoster` accepts Lua-numeric values/strings, otherwise errors `Usage: ArenaTeamRoster(team)`; no modeled team => zero returns, no roster, query or immediate event.
-- [ ] Trade-skill subclass/inventory setters accept number/string arg1; zero/negative/nonnumeric-string ordinals reset, return zero values and emit `TRADE_SKILL_UPDATE`. Subclass reset stores both subclass values as `0xFFFFFFFF` and inventory mask 1; inventory reset stores `0xFFFFFFFF`.
-- [ ] With no profession filter catalog, positive ordinals fail native `Bad sub class ...` / `Bad inv slot ...` validation before inspecting on/off. Invalid arg1 types use exact native usage messages.
-- [ ] Wrath publishes `random = math.random` before Calendar captures its local; no `randomseed` alias is introduced.
+- [x] `GetActiveTalentGroup` returns one cached group plus one; inspect precedes pet, pet returns one. Arguments follow native StringToBOOL, not Lua truthiness. No usage error.
+- [x] `CreateMiniWorldMapArrowFrame(parent)` validates table/slot-zero/frame type, emits exact native errors, returns zero values and lazily creates two named child Models. Subsequent calls retain their original parents. Model mesh rendering is unsupported.
+- [x] `CalendarEventGetTypes` returns five loaded localized Calendar labels in native order; ignores arguments.
+- [x] `CalendarDefaultGuildFilter` returns level cap twice (60/70/80 by account expansion) and the cached guild-rank count directly (`CGGuildInfo::m_numRanks`, laptop clarification); no guild-name membership gate. Absent player returns three zeros. Ignores arguments.
+- [x] `ArenaTeamRoster` accepts Lua-numeric values/strings, otherwise errors `Usage: ArenaTeamRoster(team)`; no modeled team => zero returns, no roster, query or immediate event.
+- [x] Trade-skill subclass/inventory setters accept number/string arg1; zero/negative/nonnumeric-string ordinals reset, return zero values and emit `TRADE_SKILL_UPDATE`. Subclass reset stores both subclass values as `0xFFFFFFFF` and inventory mask 1; inventory reset stores `0xFFFFFFFF`.
+- [x] With no profession filter catalog, positive ordinals fail native `Bad sub class ...` / `Bad inv slot ...` validation before inspecting on/off. Invalid arg1 types use exact native usage messages.
+- [x] Wrath publishes `random = math.random` before Calendar captures its local; no `randomseed` alias is introduced.
 - [ ] Preserve Retail publication and other profiles.
 
 ## How it works
@@ -34,6 +34,22 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - `tests/wrath_legacy_lod_apis.rs`: original TalentUI line 266, inspect/pet precedence, argument conversion and environment-local cache.
 - Original retained LoD shards and force-load in `tests/addon_coverage{,_lod}.rs`.
 
+### Bounded Wrath proof — 2026-10-20
+
+At `4270e9876`, six exact integration cases cover eight published functions/aliases: all pass, one executed test each. Full-feature Wrath build uses `CARGO_INCREMENTAL=0`, emits zero compiler warnings and embeds 1,423 own-worktree test paths with no alien paths. Stock/profile-preservation gates remain pending. Hand-off `wrath-legacy-apis/proof-ledger.json` owns commands, revisions, hashes, private CVar snapshots and raw outputs.
+
+Five original consumer cases were re-run against the unchanged error budgets; each executes one test and remains RED for held or newly reached gaps:
+
+| Consumer | Before → after unique errors (affected addons) | Retained boundary |
+|---|---|---|
+| Force-load all | BattlefieldMinimap 2→0; Calendar 8→4; TalentUI 8→8; TradeSkillUI 4→4; AuctionUI 1→1 | Same held catalog plus downstream functions below; unrelated errors unchanged. |
+| Shard 10 | AuctionUI 1→1 | Held auction catalog at line 380. |
+| Shard 11 | BattlefieldMinimap 1→0; TalentUI 4→4 | `GetNumTalentGroups` at lines 267/971, after active-group call succeeds. |
+| Shard 13 | Calendar 4→2; TradeSkillUI 2→2 | `CalendarEventGetRepeatOptions` at 3811, `CalendarCanSendInvite` at 4644; trade catalog getters at 470/515. |
+| Prior-runtime | AuctionUI 1→1 | Stops at held shard-10 catalog before later shards. |
+
+No consumer failure is hidden, ignored or re-budgeted. These newly reached APIs are outside this slice; no values are fabricated to bypass them.
+
 ## Known gaps (current cycle)
 
 - [ ] INFERRED default: player/inspect group zero (single-group character); native cache initialization unestablished. Approved by parent.
@@ -42,7 +58,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - [ ] INFERRED Calendar default: active player and expansion 2; native initialization unproved. Reuses existing `world.guild_ranks`, not fabricated rank content. Loaded FrameXML GlobalStrings supplies labels; missing labels/invalid supplied expansion are explicit model errors, not claimed native malformed-state behavior.
 - [ ] Profession subclass/inventory catalog absent. Existing Mists subclass/inventory getters return zero values; modern blacksmithing recipes lack native subclass flags/inventory masks. Positive selection, missing-on/off validation after valid selection, bit toggles/exclusivity, and recipe recomputation remain held, not approximated.
 - [ ] INFERRED native guild cache lifecycle: presumably cleared on leaving a guild; unestablished. This wrapper does not repair inconsistent guild membership/rank state.
-- [ ] Current-head GREEN and preservation proof pending.
+- [ ] Stock Wrath/Retail startup and Retail preservation gates pending.
 
 ## Out of scope
 

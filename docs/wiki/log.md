@@ -2469,3 +2469,7 @@ Classified source-bound fixture receipts (8/13 pass), traced AuctionUI nil calls
 ## 2026-10-20 — Wrath legacy LoD native-evidence producer slice
 
 Updated [consumer follow-up](investigations/wrath-addon-load-fixture.md#native-evidence-legacy-api-follow-up) with state ownership, isolated unmodeled branches, code-equivalent original-consumer RED and [held/inferred contracts](../specs/wrath-legacy-lod-apis.md). Current-head runtime proof remains pending.
+
+## 2026-10-20 — Wrath legacy LoD bounded producer GREEN
+
+[Contract](../specs/wrath-legacy-lod-apis.md#bounded-wrath-proof--2026-10-20) records six exact producer/native cases passing at `4270e9876`, source-bound warning-free Wrath ELF and all five original consumers re-run without budget changes. BattlefieldMinimap clears errors; Calendar halves counts; held auction and new getter boundaries retain whole-addon RED. Stock/profile gates pending.
