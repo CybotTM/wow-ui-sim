@@ -387,6 +387,7 @@ fn is_addon_loaded_reports_false_on_game_screen() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_dialog_mixin_publishes_with_full_method_surface() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -411,7 +412,9 @@ fn glue_dialog_mixin_publishes_with_full_method_surface() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_dialog_button_mixin_publishes_on_text_scale_updated() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -433,7 +436,9 @@ fn glue_dialog_button_mixin_publishes_on_text_scale_updated() {
          scale callback consumed by TextSizeManager"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_announcement_dialog_mixin_publishes_with_two_methods() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -460,7 +465,9 @@ fn glue_announcement_dialog_mixin_publishes_with_two_methods() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_dialog_background_top_atlas_global_publishes() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -482,6 +489,7 @@ fn glue_dialog_background_top_atlas_global_publishes() {
         "Mainline atlas name pinned"
     );
 }
+}
 
 #[test]
 fn shared_glue_dialog_definitions_seed_into_dispatcher() {
@@ -500,6 +508,7 @@ fn shared_glue_dialog_definitions_seed_into_dispatcher() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn mainline_glue_dialog_definitions_seed_into_dispatcher() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -517,7 +526,9 @@ fn mainline_glue_dialog_definitions_seed_into_dispatcher() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn mainline_realm_is_full_on_cancel_overrides_in_place() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -534,7 +545,9 @@ fn mainline_realm_is_full_on_cancel_overrides_in_place() {
          CharacterSelectUtil.ChangeRealm callback"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_dialog_named_frame_materializes() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -547,6 +560,7 @@ fn glue_dialog_named_frame_materializes() {
         "GlueDialog = frame — GlueDialog.xml line 15 declares the named \
          frame mixin=GlueDialogMixin toplevel=true hidden=true"
     );
+}
 }
 
 #[test]
@@ -566,6 +580,7 @@ fn glue_dialog_button_template_materializes_via_create_frame() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_announcement_dialog_named_frame_materializes_on_glue() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -580,4 +595,5 @@ fn glue_announcement_dialog_named_frame_materializes_on_glue() {
          GlueAnnouncementDialogMixin OnShow handler. Mainline-gated via \
          inline `[AllowLoadGameType mainline]` annotation"
     );
+}
 }
