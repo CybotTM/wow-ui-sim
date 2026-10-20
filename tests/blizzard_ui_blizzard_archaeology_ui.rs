@@ -8,6 +8,9 @@ use crate::common;
 #[path = "blizzard_ui/blizzard_archaeology_ui/load.rs"]
 mod load;
 
+// Wrath manifest1-382/cache has no ArchaeologyFrame or its Lua UI handlers.
+// Keep load.rs's mixed TOC/dependency/runtime assertion on every profile.
+post_wrath_ui_fixture! {
 #[path = "blizzard_ui/blizzard_archaeology_ui/surface_globals.rs"]
 mod surface_globals;
 
@@ -58,3 +61,4 @@ mod behavior_summary_page_mouse_wheel_paginates;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/behavior_faction_icon_uses_alliance_or_horde_texcoords.rs"]
 mod behavior_faction_icon_uses_alliance_or_horde_texcoords;
+}
