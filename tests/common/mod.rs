@@ -237,6 +237,13 @@ pub fn load_click_binding_bootstrap(env: &WowLuaEnv, ui: &Path) {
     );
 }
 
+/// Parse the native core inventory for profiles predating modular Blizzard addons.
+pub fn native_framexml_toc() -> wow_ui_sim::toc::TocFile {
+    let path = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("native FrameXML cache should be synced");
+    wow_ui_sim::toc::TocFile::from_file(&path).expect("native FrameXML TOC should parse")
+}
+
 /// Match production's top-level FrameXML load before discovering split addons.
 pub fn load_profile_framexml(env: &WowLuaEnv) {
     if let Some(toc) = wow_ui_sim::client_profile::blizzard_ui_framexml_toc() {
