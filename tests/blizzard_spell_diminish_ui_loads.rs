@@ -266,6 +266,7 @@ fn body_lists_lua_before_xml() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_eager_discovery_on_game_screen_only() {
     let ui = blizzard_ui_dir();
@@ -297,6 +298,7 @@ fn appears_in_eager_discovery_on_game_screen_only() {
              combat-only PvP feature, no glue-screen reachability"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
