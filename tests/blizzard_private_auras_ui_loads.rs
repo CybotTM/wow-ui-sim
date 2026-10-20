@@ -72,6 +72,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_find_toc_resolves_bare_variant() {
     let resolved =
@@ -92,7 +94,9 @@ fn blizzard_private_auras_ui_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_toc_declares_secure_game_only_addon() {
     let toc = TocFile::from_file(&private_auras_toc()).expect("Blizzard_PrivateAurasUI TOC parses");
@@ -134,7 +138,9 @@ fn blizzard_private_auras_ui_toc_declares_secure_game_only_addon() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_toc_uses_singular_dep_form() {
     let toc = TocFile::from_file(&private_auras_toc()).expect("Blizzard_PrivateAurasUI TOC parses");
@@ -163,7 +169,9 @@ fn blizzard_private_auras_ui_toc_uses_singular_dep_form() {
          side, the Lua side is a stateless view"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(private_auras_toc())
@@ -227,7 +235,9 @@ fn blizzard_private_auras_ui_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## Version:` — unversioned"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_toc_lists_files_in_order() {
     let toc = TocFile::from_file(&private_auras_toc()).expect("Blizzard_PrivateAurasUI TOC parses");
@@ -246,6 +256,7 @@ fn blizzard_private_auras_ui_toc_lists_files_in_order() {
          Order matters: PrivateAuraInit.lua must run last because it asserts \
          `PrivateAuras.unitWatchers ~= nil` which the .lua chunk creates"
     );
+}
 }
 
 #[test]
@@ -403,6 +414,7 @@ fn blizzard_private_auras_ui_scoped_named_frames_stay_out_of_global_env(env: &Wo
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_xml_uses_scoped_modifier_wrapper() {
     let raw = std::fs::read_to_string(private_auras_dir().join("Blizzard_PrivateAurasUI.xml"))
@@ -445,6 +457,7 @@ fn blizzard_private_auras_ui_xml_uses_scoped_modifier_wrapper() {
         "PrivateAurasTooltip must inherit SharedTooltipArtTemplate — the standard tooltip \
          art surface (border, NineSlice background) reused by every Blizzard tooltip"
     );
+}
 }
 
 prefork_full_ui_case! {
