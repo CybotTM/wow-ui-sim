@@ -5,8 +5,12 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::xml::{XmlElement, parse_xml};
 
 fn install(env: &WowLuaEnv, body: &str) {
+    install_script(env, body, "OnClick");
+}
+
+fn install_script(env: &WowLuaEnv, body: &str, handler: &str) {
     let xml = format!(
-        r#"<Ui><CheckButton name="LateBoundFrame" parent="UIParent" id="7"><Scripts><OnClick>{body}</OnClick></Scripts></CheckButton></Ui>"#
+        r#"<Ui><CheckButton name="LateBoundFrame" parent="UIParent" id="7"><Scripts><{handler}>{body}</{handler}></Scripts></CheckButton></Ui>"#
     );
     let ui = parse_xml(&xml).unwrap();
     let XmlElement::CheckButton(frame) = &ui.elements[0] else {
@@ -265,6 +269,10 @@ fn find_original_frame<'a>(
 }
 
 fn original_on_click(path: &Path, name: &str) -> String {
+    original_script(path, name, "OnClick")
+}
+
+fn original_script(path: &Path, name: &str, handler: &str) -> String {
     let source = std::fs::read_to_string(path).unwrap();
     let ui = parse_xml(&source).unwrap();
     let frame = ui
@@ -273,11 +281,16 @@ fn original_on_click(path: &Path, name: &str) -> String {
         .filter_map(|element| element.as_frame_data())
         .find_map(|(frame, _)| find_original_frame(frame, name))
         .unwrap_or_else(|| panic!("missing original frame {name} in {}", path.display()));
-    frame
-        .scripts()
-        .and_then(|scripts| scripts.on_click.last())
+    let scripts = frame.scripts().expect("original scripts");
+    let handlers = match handler {
+        "OnClick" => &scripts.on_click,
+        "OnEnter" => &scripts.on_enter,
+        _ => panic!("unsupported original script {handler}"),
+    };
+    handlers
+        .last()
         .and_then(|script| script.body.clone())
-        .expect("original inline OnClick")
+        .expect("original inline body")
 }
 
 #[cfg(feature = "client-wrath")]
@@ -517,4 +530,89 @@ fn followup_original_raid_leave_callback_observes_redefinition_and_hook() {
 #[test]
 fn followup_original_raid_join_callback_observes_redefinition_and_hook() {
     assert_lfg_branch(&raidfinder_body(), "none", "join-raid");
+}
+
+#[cfg(feature = "client-retail")]
+#[test]
+fn followup_original_character_tooltip_observes_formatter_redefinition_and_hook() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        CHARACTER_INFO = 'old title'
+        function MicroButtonTooltipText() error('old tooltip formatter') end
+        GameTooltip = {
+            SetOwner = function(_, owner, anchor)
+                assert(owner == LateBoundFrame and anchor == 'ANCHOR_RIGHT')
+            end,
+            SetText = function(_, text, r, g, b)
+                assert(text == 'current tooltip' and r == 1 and g == 1 and b == 1)
+                lateBoundTooltipSeen = true
+            end,
+        }
+    "#,
+    )
+    .unwrap();
+    let ui = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
+    let body = original_script(
+        &ui.join("Blizzard_UIPanels_Game/Mainline/CharacterFrame.xml"),
+        "CharacterFrameTab1",
+        "OnEnter",
+    );
+    install_script(&env, &body, "OnEnter");
+    env.exec(
+        r#"
+        CHARACTER_INFO = 'current title'
+        function MicroButtonTooltipText(title, binding)
+            assert(title == 'current title' and binding == 'TOGGLECHARACTER0',
+                'stale tooltip formatter input')
+            return 'current tooltip'
+        end
+        hooksecurefunc('MicroButtonTooltipText', function() lateBoundTooltipHook = true end)
+        LateBoundFrame:GetScript('OnEnter')(LateBoundFrame)
+        assert(lateBoundTooltipSeen, 'tooltip formatter replacement not observed')
+        assert(lateBoundTooltipHook, 'tooltip formatter hook bypassed')
+    "#,
+    )
+    .unwrap();
+}
+
+#[cfg(feature = "client-retail")]
+#[test]
+fn followup_literal_tooltip_reads_current_handler_environment() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        function LateBoundTooltip() error('old literal tooltip formatter') end
+        GameTooltip = {SetText = function() error('old literal tooltip target') end}
+    "#,
+    )
+    .unwrap();
+    install_script(
+        &env,
+        "GameTooltip:SetText(LateBoundTooltip('literal', 'binding'), 1, 2, 3)",
+        "OnEnter",
+    );
+    env.exec(
+        r#"
+        local handler = LateBoundFrame:GetScript('OnEnter')
+        local calls = 0
+        local target = {}
+        target.SetText = function(self, text, r, g, b)
+            assert(self == target and text == 'environment tooltip')
+            assert(r == 1 and g == 2 and b == 3)
+            calls = calls + 1
+        end
+        local environment = setmetatable({
+            GameTooltip = target,
+            LateBoundTooltip = function(first, second)
+                assert(first == 'literal' and second == 'binding')
+                return 'environment tooltip'
+            end,
+        }, {__index = _G})
+        setfenv(handler, environment)
+        handler(LateBoundFrame)
+        assert(calls == 1, 'tooltip bypassed handler environment')
+    "#,
+    )
+    .unwrap();
 }
