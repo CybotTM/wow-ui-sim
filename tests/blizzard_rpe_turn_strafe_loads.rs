@@ -7,7 +7,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn rpe_dir() -> PathBuf {
@@ -58,6 +59,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&rpe_dir()).expect("Blizzard_RPE_TurnStrafe TOC should resolve");
@@ -71,7 +74,9 @@ fn find_toc_file_resolves_bare_toc() {
          already, so a separate `_Mainline.toc` would be redundant"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_standard_only_with_zero_dependencies() {
     let toc = TocFile::from_file(&rpe_toc()).expect("Blizzard_RPE_TurnStrafe TOC should parse");
@@ -112,7 +117,9 @@ fn toc_declares_eager_standard_only_with_zero_dependencies() {
          load-bearing for the turn/strafe migration flow on every login"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_two_files_in_root_directory() {
     let toc = TocFile::from_file(&rpe_toc()).expect("Blizzard_RPE_TurnStrafe TOC should parse");
@@ -130,7 +137,9 @@ fn toc_lists_two_files_in_root_directory() {
          RPETurnStrafeStyleFrameTemplate resolves the mixin lookup"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allows_screen_returns_true_only_for_game_when_allowload_absent() {
     let toc = TocFile::from_file(&rpe_toc()).expect("Blizzard_RPE_TurnStrafe TOC should parse");
@@ -157,6 +166,7 @@ fn allows_screen_returns_true_only_for_game_when_allowload_absent() {
              screen. Turn/strafe binding migration only happens in-game"
         );
     }
+}
 }
 
 #[test]
@@ -336,6 +346,7 @@ fn virtual_templates_stay_off_global_scope(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_declares_two_virtual_templates_and_zero_named_frames() {
     let xml_text = std::fs::read_to_string(rpe_dir().join("Blizzard_RPE_TurnStrafe.xml"))
@@ -368,4 +379,5 @@ fn xml_declares_two_virtual_templates_and_zero_named_frames() {
          dispatch — these are the bindings that register/unregister UPDATE_BINDINGS so the \
          popup refreshes when keybinds change while it is visible"
     );
+}
 }
