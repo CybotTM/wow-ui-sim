@@ -303,6 +303,7 @@ fn body_orders_defs_before_logic_before_xml() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_eager_discovery_on_glue_screens_only() {
     let ui = blizzard_ui_dir();
@@ -328,6 +329,7 @@ fn appears_in_eager_discovery_on_glue_screens_only() {
              {screen:?} eager discovery"
         );
     }
+}
 }
 
 #[test]
