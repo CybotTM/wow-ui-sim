@@ -1567,7 +1567,8 @@ __global_mt.__index = function(t, key)
     rawset(t, key, value)
     return value
   end
-  if debug.isglobalindex() then
+  local isNamespace = type(key) == "string" and key:sub(1, 2) == "C_"
+  if isNamespace or debug.isglobalindex() then
     __wow_log_nil_symbol_access("_G", key)
   end
   return nil
