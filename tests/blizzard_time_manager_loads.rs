@@ -251,6 +251,22 @@ fn body_resolves_bootstrap_and_three_entries_with_normalized_slashes() {
 
 #[test]
 fn appears_in_game_discovery_via_blizzard_game_implicit_dependency() {
+    if cfg!(feature = "client-wrath") {
+        let env = WowLuaEnv::new().expect("native TimeManager environment");
+        env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+        crate::common::load_profile_framexml(&env);
+        env.exec(
+            r#"
+            assert(not IsAddOnLoaded("Blizzard_TimeManager"))
+            ToggleTimeManager()
+            assert(IsAddOnLoaded("Blizzard_TimeManager"))
+            assert(TimeManagerFrame:IsShown())
+            ToggleTimeManager()
+            assert(not TimeManagerFrame:IsShown())
+        "#,
+        )
+        .expect("12340 TimeManager lazy toggle lifecycle");
+    }
     for screen in ALL_FOUR_SCREENS {
         let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), *screen);
         let found = addons
@@ -258,7 +274,7 @@ fn appears_in_game_discovery_via_blizzard_game_implicit_dependency() {
             .any(|(name, _)| name == "Blizzard_TimeManager");
         assert_eq!(
             found,
-            *screen == ScreenKind::Game,
+            !cfg!(feature = "client-wrath") && *screen == ScreenKind::Game,
             "TimeManager should appear only for {screen:?}: Blizzard_Game pulls this LoD addon \
              through the current implicit startup dependency while AllowLoad: game excludes \
              glue screens"

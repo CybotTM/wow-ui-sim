@@ -121,6 +121,7 @@ fn fresh_env(screen: ScreenKind) -> WowLuaEnv {
 
 fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     let env = fresh_env(screen);
+    crate::common::load_profile_framexml(&env);
 
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), screen);
     for (name, toc_path) in &addons {
@@ -412,8 +413,9 @@ fn full_game_load_emits_no_addon_specific_lua_errors() {
 prefork_full_ui_case! {
 fn is_addon_loaded_reports_true_after_eager_sweep(env: &WowLuaEnv) {
 
+    let addon = if cfg!(feature = "client-wrath") { "FrameXML" } else { "Blizzard_StaticPopup" };
     let loaded: bool = env
-        .eval("return C_AddOns.IsAddOnLoaded('Blizzard_StaticPopup')")
+        .eval(&format!("return C_AddOns.IsAddOnLoaded({addon:?})"))
         .expect("IsAddOnLoaded query");
     assert!(
         loaded,
@@ -655,7 +657,12 @@ fn generic_confirmation_dialog_is_seeded_with_handlers() {
 prefork_full_ui_case! {
 fn show_hide_globals_are_functions(env: &WowLuaEnv) {
 
-    for name in SHOW_HIDE_GLOBALS {
+    let names = if cfg!(feature = "client-wrath") {
+        &["StaticPopup_Show", "StaticPopup_Hide", "StaticPopup_FindVisible", "StaticPopup_Visible", "StaticPopup_HideExclusive", "StaticPopup_IsLastDisplayedFrame"][..]
+    } else {
+        SHOW_HIDE_GLOBALS
+    };
+    for name in names {
         let kind: String = env
             .eval(&format!("return type({name})"))
             .unwrap_or_else(|err| panic!("{name} probe failed: {err}"));
@@ -679,6 +686,17 @@ fn show_hide_globals_are_functions() {
 prefork_full_ui_case! {
 fn queue_management_globals_are_functions(env: &WowLuaEnv) {
 
+    if cfg!(feature = "client-wrath") {
+        // Exercise 12340's direct dispatch, not unrelated compatibility defaults.
+        env.exec(r#"
+            local popup = StaticPopup_Show("CONFIRM_DELETE_EQUIPMENT_SET", "fixture")
+            assert(popup and popup:IsShown())
+            assert(StaticPopup_FindVisible("CONFIRM_DELETE_EQUIPMENT_SET") == popup)
+            StaticPopup_Hide("CONFIRM_DELETE_EQUIPMENT_SET")
+            assert(not popup:IsShown())
+        "#).expect("native direct popup dispatch");
+        return;
+    }
     for name in QUEUE_GLOBALS {
         let kind: String = env
             .eval(&format!("return type({name})"))
@@ -704,7 +722,12 @@ fn queue_management_globals_are_functions() {
 prefork_full_ui_case! {
 fn script_handler_globals_are_functions(env: &WowLuaEnv) {
 
-    for name in HANDLER_GLOBALS {
+    let names = if cfg!(feature = "client-wrath") {
+        &["StaticPopup_OnUpdate", "StaticPopup_OnShow", "StaticPopup_OnHide", "StaticPopup_OnClick", "StaticPopup_OnKeyDown", "StaticPopup_OnEvent"][..]
+    } else {
+        HANDLER_GLOBALS
+    };
+    for name in names {
         let kind: String = env
             .eval(&format!("return type({name})"))
             .unwrap_or_else(|err| panic!("{name} probe failed: {err}"));
@@ -729,7 +752,12 @@ fn script_handler_globals_are_functions() {
 prefork_full_ui_case! {
 fn layout_and_position_globals_are_functions(env: &WowLuaEnv) {
 
-    for name in LAYOUT_GLOBALS {
+    let names = if cfg!(feature = "client-wrath") {
+        &["StaticPopup_SetUpPosition", "StaticPopup_Resize", "StaticPopup_CollapseTable", "StaticPopup_EscapePressed"][..]
+    } else {
+        LAYOUT_GLOBALS
+    };
+    for name in names {
         let kind: String = env
             .eval(&format!("return type({name})"))
             .unwrap_or_else(|err| panic!("{name} probe failed: {err}"));
@@ -755,7 +783,12 @@ fn layout_and_position_globals_are_functions() {
 prefork_full_ui_case! {
 fn special_dialog_globals_are_functions(env: &WowLuaEnv) {
 
-    for name in SPECIAL_GLOBALS {
+    let names = if cfg!(feature = "client-wrath") {
+        &["StaticPopupSpecial_Show", "StaticPopupSpecial_Hide"][..]
+    } else {
+        SPECIAL_GLOBALS
+    };
+    for name in names {
         let kind: String = env
             .eval(&format!("return type({name})"))
             .unwrap_or_else(|err| panic!("{name} probe failed: {err}"));
@@ -781,7 +814,12 @@ fn special_dialog_globals_are_functions() {
 prefork_full_ui_case! {
 fn show_helper_globals_are_functions(env: &WowLuaEnv) {
 
-    for name in SHOW_HELPER_GLOBALS {
+    let names = if cfg!(feature = "client-wrath") {
+        &["StaticPopup_EditBoxOnEnterPressed", "StaticPopup_EditBoxOnEscapePressed", "StaticPopup_EditBoxOnTextChanged"][..]
+    } else {
+        SHOW_HELPER_GLOBALS
+    };
+    for name in names {
         let kind: String = env
             .eval(&format!("return type({name})"))
             .unwrap_or_else(|err| panic!("{name} probe failed: {err}"));

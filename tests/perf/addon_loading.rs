@@ -35,7 +35,10 @@ pub fn load_timed_game_addons_with_saved_vars() -> LoadedAddonPhases {
 fn load_timed_game_addons(with_saved_vars: bool) -> LoadedAddonPhases {
     let started = Instant::now();
     let env = new_game_env();
-    let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
+    let mut addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
+    if let Some(toc) = wow_ui_sim::client_profile::blizzard_ui_framexml_toc() {
+        addons.insert(0, ("FrameXML".to_string(), toc));
+    }
     let mut saved_vars = with_saved_vars.then(SavedVariablesManager::new);
     let mut addon_timing = LoadTiming::default();
     let mut per_addon_timings = Vec::with_capacity(addons.len());
