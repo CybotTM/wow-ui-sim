@@ -57,7 +57,8 @@ path = "tests/integration.rs"
     (tests / 'integration.rs').write_text('wow_ui_sim_test_harness::integration_tests!();\n')
     (tests / 'relocation.rs').write_text('''#[test]
 fn harness_uses_current_worktree() {
-    assert_eq!(file!(), concat!(env!("CARGO_MANIFEST_DIR"), "/tests/relocation.rs"));
+    let root = std::env::var("HARNESS_EXPECTED_ROOT").expect("runtime fixture root");
+    assert_eq!(file!(), format!("{root}/tests/relocation.rs"));
 }
 ''')
 
@@ -82,6 +83,7 @@ def build_and_run(root, evidence):
                   and record.get('executable'))
     selected = 'relocation::harness_uses_current_worktree'
     test = subprocess.run([binary, selected, '--exact', '--nocapture'],
+                          env={**os.environ, 'HARNESS_EXPECTED_ROOT': str(root)},
                           capture_output=True, text=True, timeout=90)
     (evidence / (root.name + '-runtime.stdout')).write_text(test.stdout)
     (evidence / (root.name + '-runtime.stderr')).write_text(test.stderr)
