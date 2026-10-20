@@ -268,6 +268,7 @@ fn allow_load_environment_annotations_set_global_pass_filters() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -280,6 +281,7 @@ fn appears_in_game_eager_discovery() {
          discovery — it's a hard dep of every panel that calls \
          ShowUIPanel/HideUIPanel"
     );
+}
 }
 
 #[test]
