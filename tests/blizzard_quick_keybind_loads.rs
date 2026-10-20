@@ -244,6 +244,7 @@ fn blizzard_quick_keybind_toc_lists_one_xml_file_with_companion_lua_pulled_in() 
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quick_keybind_appears_in_eager_game_discovery() {
     let ui = blizzard_ui_dir();
@@ -278,7 +279,9 @@ fn blizzard_quick_keybind_appears_in_eager_game_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quick_keybind_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -289,6 +292,7 @@ fn blizzard_quick_keybind_appears_in_full_addon_inventory() {
         found,
         "Blizzard_QuickKeybind MUST appear in `discover_all_blizzard_addons`"
     );
+}
 }
 
 prefork_full_ui_case! {
