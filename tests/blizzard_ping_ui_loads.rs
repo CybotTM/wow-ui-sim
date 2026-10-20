@@ -281,6 +281,7 @@ fn blizzard_ping_ui_toc_lists_four_files_in_canonical_order() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ping_ui_appears_in_game_screen_eager_discovery_only() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -309,7 +310,9 @@ fn blizzard_ping_ui_appears_in_game_screen_eager_discovery_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ping_ui_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -320,6 +323,7 @@ fn blizzard_ping_ui_appears_in_full_addon_inventory() {
          inventory is a structural listing of every parseable TOC and includes \
          glue-restricted addons too"
     );
+}
 }
 
 prefork_full_ui_case! {
