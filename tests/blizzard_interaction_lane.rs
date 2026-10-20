@@ -139,6 +139,18 @@ fn load_full_game_ui() -> WowLuaEnv {
 
 #[test]
 fn each_lane_addon_directory_resolves_with_a_toc() {
+    if cfg!(feature = "client-wrath") {
+        let core = crate::common::native_framexml_toc();
+        for file in [
+            "StaticPopup.xml",
+            "StaticPopup.lua",
+            "TutorialFrame.xml",
+            "TutorialFrame.lua",
+        ] {
+            assert!(core.addon_dir.join(file).is_file());
+        }
+        return;
+    }
     let mut all: Vec<&str> = Vec::new();
     all.extend(POPUP_CLUSTER.iter().copied());
     all.extend(GLUE_DIALOG_CLUSTER.iter().copied());
@@ -164,6 +176,22 @@ fn each_lane_addon_directory_resolves_with_a_toc() {
 
 #[test]
 fn popup_cluster_dep_edges_pin_load_floor_for_popup_flow() {
+    if cfg!(feature = "client-wrath") {
+        let core = crate::common::native_framexml_toc();
+        assert!(core.dependencies().is_empty());
+        let autocomplete = core
+            .files
+            .iter()
+            .position(|file| file == std::path::Path::new("AutoComplete.xml"))
+            .unwrap();
+        let popup = core
+            .files
+            .iter()
+            .position(|file| file == std::path::Path::new("StaticPopup.xml"))
+            .unwrap();
+        assert!(autocomplete < popup);
+        return;
+    }
     let core = parse_lane_toc("Blizzard_StaticPopup");
     let game = parse_lane_toc("Blizzard_StaticPopup_Game");
     let glue = parse_lane_toc("Blizzard_StaticPopup_Glue");
@@ -217,6 +245,13 @@ fn popup_cluster_dep_edges_pin_load_floor_for_popup_flow() {
 
 #[test]
 fn static_popup_core_targets_both_screens_via_allow_load_both() {
+    if cfg!(feature = "client-wrath") {
+        let core = crate::common::native_framexml_toc();
+        assert!(core.allows_screen(ScreenKind::Game));
+        assert!(!core.allows_screen(ScreenKind::Login));
+        assert!(core.files.contains(&PathBuf::from("StaticPopup.xml")));
+        return;
+    }
     let core = parse_lane_toc("Blizzard_StaticPopup");
     for screen in [
         ScreenKind::Game,
@@ -298,6 +333,12 @@ fn game_variants_do_not_appear_in_glue_discovery() {
 
 #[test]
 fn game_screen_eager_discovery_includes_static_popup_core_game_and_eager_tutorials() {
+    if cfg!(feature = "client-wrath") {
+        let env = fresh_lane_env();
+        crate::common::load_profile_framexml(&env);
+        assert!(env.eval::<bool>("return StaticPopup1 ~= nil and TutorialFrame ~= nil and type(StaticPopup_Show) == 'function'").unwrap());
+        return;
+    }
     let ui = blizzard_ui_dir();
     let game_names: Vec<String> = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game)
         .into_iter()
@@ -348,6 +389,15 @@ fn glue_screens_eager_discovery_includes_static_popup_core_and_glue_variants() {
 
 #[test]
 fn smoke_tutorials_are_load_on_demand_with_current_game_discovery_exceptions() {
+    if cfg!(feature = "client-wrath") {
+        let core = crate::common::native_framexml_toc();
+        assert!(!core.is_load_on_demand());
+        assert!(core.files.contains(&PathBuf::from("TutorialFrame.xml")));
+        let env = fresh_lane_env();
+        crate::common::load_profile_framexml(&env);
+        assert!(env.eval::<bool>("return TutorialFrame:IsEventRegistered('TUTORIAL_TRIGGER') and not TutorialFrame:IsShown()").unwrap());
+        return;
+    }
     let ui = blizzard_ui_dir();
     let game_names: Vec<String> = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game)
         .into_iter()
@@ -416,6 +466,14 @@ fn eager_tutorial_chain_appears_in_game_discovery_in_dep_first_order() {
 
 #[test]
 fn tutorial_addons_use_inverse_game_type_restriction_semantics_for_standard() {
+    if cfg!(feature = "client-wrath") {
+        let core = crate::common::native_framexml_toc();
+        assert!(!core.is_game_type_restricted());
+        let env = fresh_lane_env();
+        crate::common::load_profile_framexml(&env);
+        assert!(env.eval::<bool>("return type(TutorialFrame_OnLoad) == 'function' and type(TutorialFrame_Update) == 'function'").unwrap());
+        return;
+    }
     let tutorials = parse_lane_toc("Blizzard_Tutorials");
     let housing = parse_lane_toc("Blizzard_HousingTutorials");
 
