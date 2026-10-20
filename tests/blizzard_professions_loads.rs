@@ -327,6 +327,7 @@ fn blizzard_professions_does_not_appear_in_eager_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -339,6 +340,7 @@ fn blizzard_professions_appears_in_full_addon_inventory() {
          unfiltered inventory at src/loader/mod.rs lists every parseable Blizzard_* TOC \
          regardless of LoadOnDemand gating"
     );
+}
 }
 
 prefork_full_ui_case! {
