@@ -109,6 +109,8 @@ end
 return table.concat(failures, "\n")
 "#;
 
+// Wrath has no ArrowCallout vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn anchor_directions_use_documented_anchor_points_and_arrow_templates() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -122,6 +124,7 @@ fn anchor_directions_use_documented_anchor_points_and_arrow_templates() {
             "ArrowCalloutFrame direction-anchor behavior mismatches:\n{failures}"
         );
     });
+}
 }
 
 fn load_arrow_callout_frame(env: &wow_ui_sim::lua_api::WowLuaEnv) {

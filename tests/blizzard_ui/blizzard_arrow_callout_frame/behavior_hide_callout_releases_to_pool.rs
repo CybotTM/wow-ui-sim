@@ -54,6 +54,8 @@ expect(pool:IsActive(secondCallout), "second show should mark the reused contain
 return table.concat(failures, "\n")
 "#;
 
+// Wrath has no ArrowCallout vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn hide_callout_releases_and_reuses_container_frame() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -67,6 +69,7 @@ fn hide_callout_releases_and_reuses_container_frame() {
             "ArrowCalloutFrame hide-callout behavior mismatches:\n{failures}"
         );
     });
+}
 }
 
 fn load_arrow_callout_frame(env: &wow_ui_sim::lua_api::WowLuaEnv) {
