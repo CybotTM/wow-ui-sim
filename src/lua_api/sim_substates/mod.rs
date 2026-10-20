@@ -452,6 +452,12 @@ pub struct GossipState {
     pub active: bool,
     /// Stored quest-dialog giver identity; zero suppresses local quest closure.
     pub giver_guid: u64,
+    /// Supplied Wrath quest notification identity, independent of the NPC GUID.
+    #[cfg(feature = "client-wrath")]
+    pub inform_guid: u64,
+    /// Supplied Wrath quest interaction identity; not the soft-target selection.
+    #[cfg(feature = "client-wrath")]
+    pub interact_guid: u64,
     pub text: String,
     pub num_options: i32,
     pub num_available_quests: i32,

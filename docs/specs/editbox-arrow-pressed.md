@@ -1,8 +1,12 @@
 # EditBox arrow scripts
 
-EditBox accepts `OnArrowPressed(self, key)` and dispatches it through the focused keyboard input path in `src/lua_api/key_dispatch.rs`. Script support lives in `src/lua_api/frame/methods/text_attribute_event/events.rs`; existing XML parsing and template binding already represent this handler. See [keyboard dispatch](../event-system.md).
+Retail, PTR, Mists, Era, Anniversary and WowForever retain simulator support for `OnArrowPressed(self, key)` through the focused keyboard input path in `src/lua_api/key_dispatch.rs`. Wrath instead uses direct engine-side arrows without that script; see the [Wrath widget contracts](wrath-widget-labels.md). Script support lives in `src/lua_api/frame/methods/text_attribute_event/events.rs`; existing XML parsing and template binding already represent this handler. See [keyboard dispatch](../event-system.md).
 
-## What it must do
+## Wrath exception
+
+`ACTIVE == ClientProfile::Wrath` selects direct caret/history handling. HasScript("OnArrowPressed") returns one nil; GetScript and SetScript reject it, including nil clearing. XML ignoreArrows and SetAltArrowKeyMode share a flag; true requires Alt, false accepts plain arrows. This is reconstructed 12340 behavior, not native-run proof. Multiline coverage is bounded to equal-glyph newline-separated lines; wrapped visual-line/preferred-column behavior and word movement remain unmodeled.
+
+## What it must do (script-capable profiles)
 
 - [x] EditBox supports `SetScript`, deferred `HookScript`, `GetScript`, `HasScript` and clearing `OnArrowPressed`; ordinary Frame does not acquire this handler.
 - [x] Focused EditBox dispatches exactly `self` and an uppercase `LEFT`, `RIGHT`, `UP` or `DOWN` direction. Home/End do not emit arrow callbacks. Left/Right retain cursor movement and arrow input does not change text.
@@ -24,6 +28,8 @@ The false default is supported by wowless's EditBox `altArrowKeyMode.init` and B
 - `src/lua_api/frame/methods/widgets/editbox.rs` — existing alt-arrow mode setter/getter, unchanged.
 - `src/widget/frame_defaults.rs` — existing false default, unchanged.
 - `src/xml/types_support.rs`, `src/loader/helpers.rs`, `src/lua_api/globals/create_frame/template_chain.rs` — existing XML script parsing/binding, unchanged.
+- `src/xml/types.rs`, `src/lua_api/globals/template/direct/editbox.rs` — Wrath ignoreArrows/historyLines attributes.
+- `src/lua_api/key_dispatch/wrath.rs` — direct Wrath caret/history handling.
 
 ## Tests asserting this spec
 
@@ -39,4 +45,4 @@ Four regressions passed at `8943614e0`, linked against the unchanged default-fea
 
 ## Out of scope
 
-IME composition handlers, XML `ignoreArrows` attribute modeling, Ctrl word navigation, Shift selection, multiline vertical cursor layout and chat-history navigation are separate compatibility work. No Blizzard or third-party addon behavior is modified.
+IME composition handlers, non-Wrath XML `ignoreArrows` attribute modeling, Ctrl word navigation, Shift selection and wrapped visual-line/preferred-column cursor layout are separate compatibility work. Wrath physical history and bounded newline motion are covered by the linked widget contract; other-profile history navigation is unchanged. No Blizzard or third-party addon behavior is modified.

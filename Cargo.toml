@@ -102,6 +102,8 @@ pollster = "0.4"
 tempfile = "3"
 
 [features]
+# Opt-in installed Ellesmere AuraKit acceptance test; requires ELLESMERE_AURA_KIT_PATH.
+ellesmere-acceptance = ["client-wowforever"]
 # fast-build is opt-in because the iced dylib hits MSVC's LNK1189 object limit
 # on Windows. Local Linux dev/debug builds can use `--features fast-build` for
 # faster incremental rebuilds. Release builds should use:
@@ -178,6 +180,11 @@ harness = false
 [[test]]
 name = "integration"
 path = "tests/integration.rs"
+
+[[test]]
+name = "wrath_core_labels_real_paths"
+path = "tests/wrath_core_labels_real_paths.rs"
+required-features = ["client-wrath"]
 
 [[test]]
 name = "prefork_full_ui"

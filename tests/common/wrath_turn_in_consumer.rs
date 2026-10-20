@@ -52,6 +52,10 @@ fn assert_originals() {
     assert_eq!(toc.parent().unwrap(), expected_root);
     for (file, expected) in [
         (
+            "UIErrorsFrame.lua",
+            "d4d1865b12b06b2abeab1b1e3ec588dbfa8930185801ecc6e7cc9f7336ab0e5b",
+        ),
+        (
             "QuestFrame.lua",
             "4b2221da7f962535796ed500fbd1fc2adf95020e4564217ef457c1be7f9935f9",
         ),

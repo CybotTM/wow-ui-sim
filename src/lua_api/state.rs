@@ -315,6 +315,8 @@ macro_rules! build_empty_sim_state {
             sound_manager: $runtime.sound_manager,
             last_sound_kit_requested: $runtime.last_sound_kit_requested,
             #[cfg(feature = "client-wrath")]
+            last_ui_error_message: None,
+            #[cfg(feature = "client-wrath")]
             last_sound_name_requested: None,
             cooldown_viewer_cooldowns: Default::default(),
             #[cfg(feature = "retail-12-0-0")]
@@ -539,6 +541,7 @@ macro_rules! build_empty_sim_state {
             pet_actions: vec![PetActionSlot::default(); 10],
             glyph: GlyphState::default(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
+            wrath_currency: super::globals::real::wrath_currency::CurrencyListState::default(),
             #[cfg(feature = "client-retail")]
             currency_list: crate::c_api::currency_list::CurrencyListState::default(),
             currency_war_mode_bonus: HashMap::new(),

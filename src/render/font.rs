@@ -548,6 +548,46 @@ impl WowFontSystem {
         .0
     }
 
+    /// Byte starts of wrapped runs, for consumers that measure the resulting ranges.
+    #[cfg(feature = "gui")]
+    pub(crate) fn measure_wrap_starts(
+        &mut self,
+        text: &str,
+        font_size: f32,
+        width: f32,
+    ) -> Vec<usize> {
+        let Some(line_height) = line_height_for_font_size(font_size, false) else {
+            return Vec::new();
+        };
+        let attrs = self.attrs_owned(None);
+        let metrics = cosmic_text::Metrics::new(font_size, line_height);
+        let mut buffer = cosmic_text::Buffer::new(&mut self.font_system, metrics);
+        buffer.set_size(&mut self.font_system, Some(width), Some(10000.0));
+        buffer.set_text(
+            &mut self.font_system,
+            text,
+            &attrs.as_attrs(),
+            cosmic_text::Shaping::Advanced,
+            None,
+        );
+        buffer.shape_until_scroll(&mut self.font_system, true);
+        let paragraph_starts: Vec<usize> = std::iter::once(0)
+            .chain(text.match_indices('\n').map(|(offset, _)| offset + 1))
+            .collect();
+        buffer
+            .layout_runs()
+            .map(|run| {
+                let start = run
+                    .glyphs
+                    .iter()
+                    .map(|glyph| glyph.start)
+                    .min()
+                    .unwrap_or(0);
+                paragraph_starts[run.line_i] + start
+            })
+            .collect()
+    }
+
     pub(crate) fn measure_text_layout(
         &mut self,
         text: &str,

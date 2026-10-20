@@ -234,6 +234,7 @@ pub(super) fn message_from_transform_results(
         access_id: original.access_id,
         extra_data: original.extra_data,
         timestamp,
+        wrath_timers: original.wrath_timers.clone(),
     }
 }
 

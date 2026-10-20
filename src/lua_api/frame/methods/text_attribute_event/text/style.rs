@@ -125,10 +125,17 @@ pub(crate) fn set_text_color(state: &mut LuaState) -> LuaResult<u32> {
         );
         return Ok(0);
     }
-    let r = val_to_f32(stack_val(state, 2), 1.0);
-    let g = val_to_f32(stack_val(state, 3), 1.0);
-    let b = val_to_f32(stack_val(state, 4), 1.0);
-    let a = val_to_f32(stack_val(state, 5), 1.0);
+    let [r, g, b, a] =
+        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+            crate::lua_api::wrath_arguments::read_text_color(state)?
+        } else {
+            [
+                val_to_f32(stack_val(state, 2), 1.0),
+                val_to_f32(stack_val(state, 3), 1.0),
+                val_to_f32(stack_val(state, 4), 1.0),
+                val_to_f32(stack_val(state, 5), 1.0),
+            ]
+        };
     let new_color = crate::widget::Color::new(r, g, b, a);
     let mut sim = borrow_state_mut(state)?;
     let changed = sim
@@ -258,11 +265,7 @@ pub(crate) fn get_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(crate) fn set_justify_h(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let Some(justification) = val_to_string(state, stack_val(state, 2)) else {
-        return Ok(0);
-    };
-    set_justify_value(state, id, &justification, JustifyAxis::Horizontal)
+    set_justify_from_stack(state, JustifyAxis::Horizontal)
 }
 
 pub(crate) fn get_justify_h(state: &mut LuaState) -> LuaResult<u32> {
@@ -274,11 +277,29 @@ pub(crate) fn get_justify_h(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(crate) fn set_justify_v(state: &mut LuaState) -> LuaResult<u32> {
+    set_justify_from_stack(state, JustifyAxis::Vertical)
+}
+
+fn set_justify_from_stack(state: &mut LuaState, axis: JustifyAxis) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let Some(justification) = val_to_string(state, stack_val(state, 2)) else {
+    let justification = val_to_string(state, stack_val(state, 2));
+    let wrath = crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath;
+    if justification.is_none() && wrath && !is_simple_html_frame(state, id) {
+        return Err(rilua::runtime_error(
+            "SetJustify: expected a justification token",
+        ));
+    }
+    let Some(justification) = justification else {
         return Ok(0);
     };
-    set_justify_value(state, id, &justification, JustifyAxis::Vertical)
+    set_justify_value(state, id, &justification, axis)
+}
+
+fn justify_unknown_key(axis: JustifyAxis) -> &'static str {
+    match axis {
+        JustifyAxis::Horizontal => "__wrath_justify_h_unknown",
+        JustifyAxis::Vertical => "__wrath_justify_v_unknown",
+    }
 }
 
 fn set_justify_value(
@@ -287,8 +308,21 @@ fn set_justify_value(
     justification: &str,
     axis: JustifyAxis,
 ) -> LuaResult<u32> {
+    let wrath = crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+        && !is_simple_html_frame(state, id);
+    let justification = if wrath {
+        crate::lua_api::wrath_arguments::parse_justification(
+            justification,
+            matches!(axis, JustifyAxis::Horizontal),
+        )?
+    } else {
+        justification
+    };
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        if wrath {
+            update_justify_unknown_marker(frame, axis, justification == "UNKNOWN");
+        }
         let justify = crate::widget::TextJustify::from_wow_str(justification);
         match axis {
             JustifyAxis::Horizontal => frame.justify_h = justify,
@@ -296,6 +330,21 @@ fn set_justify_value(
         }
     }
     Ok(0)
+}
+
+fn update_justify_unknown_marker(
+    frame: &mut crate::widget::Frame,
+    axis: JustifyAxis,
+    unknown: bool,
+) {
+    let key = justify_unknown_key(axis);
+    if unknown {
+        frame
+            .attributes
+            .insert(key.to_owned(), crate::widget::AttributeValue::Boolean(true));
+    } else {
+        frame.attributes.remove(key);
+    }
 }
 
 pub(crate) fn get_justify_v(state: &mut LuaState) -> LuaResult<u32> {
@@ -308,6 +357,16 @@ pub(crate) fn get_justify_v(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_justify_value(state: &LuaState, id: u64, axis: JustifyAxis) -> LuaResult<&'static str> {
     let sim = borrow_state(state)?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+        && sim.widgets.get(id).is_some_and(|frame| {
+            frame
+                .attributes
+                .get(justify_unknown_key(axis))
+                .is_some_and(|value| matches!(value, crate::widget::AttributeValue::Boolean(true)))
+        })
+    {
+        return Ok("UNKNOWN");
+    }
     Ok(sim
         .widgets
         .get(id)

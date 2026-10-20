@@ -18,9 +18,13 @@
 
 [Reload mechanics](systems/reload-ui.md#request-and-ownership) link the [12340 contract and pending matrix](../specs/reload-ui.md#wrath-12340-requirements). Original StaticPopup acceptance exposed a missing legacy DisableAddOn endpoint; Wrath alone calls it among the seven shipped caches. Registration shares the modeled C_AddOns function. Behavioral GREEN and cinematic eligibility remain pending; Retail chronology remains UNKNOWN, with separate LoD-SV ownership and placement-unit bounds.
 
+## [2026-10-19] source | Wrath single-class spellbook views
+
+[System notes](systems/lua-api.md#wrath-single-class-spellbook-projection) link the [owning contract](../specs/wrath-spellbook-tabs.md). Two Wrath-only producers derive tab views and compact-slot mappings from existing membership and publish synchronous updates. Original-consumer/API RED→GREEN4/4 is retained with unchanged original CVar stat/hash; boundary/profile preservation remains pending. Tickless cursor evidence is not native timing proof.
+
 ## [2026-10-19] source | Wrath dialog request/response plumbing
 
-[System notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [staged turn-in contract](../specs/wrath-quest-turn-in.md#staged-producer-proof): shared original-progress feature-absence RED, single concrete giver and executed A3 12-control/18-boundary gate, followed by complete bounded B GREEN, Wrath preservation and final zero-warning gates. Exact proof is tracked by the contract; inferred finish ordering is not a native fact.
+[System notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [staged turn-in contract](../specs/wrath-quest-turn-in.md#staged-producer-proof): shared original-progress feature-absence RED, single concrete giver and executed A3 12-control/18-boundary gate, followed by complete bounded B GREEN, Wrath preservation and final zero-warning gates. Exact proof is tracked by the contract. W1b's authenticated laptop 12340 source-reading answers supersede W1's inference: clear NPC/inform, then interact target, then synchronous FINISHED; zero-NPC CloseQuest is a no-op. Native QuestChooseRewardError feedback supersedes the no-op contract. W1b's seven original-consumer cases reached named behavioral RED before producer edits. Real feedback and centralized finish cleanup now replace the no-op and pre-cleared-token paths; turn-in37/37 and Wrath-specific preservation41/41 pass at5a27bb24f; generic controls, startup, fmt and final Wrath check remain pending. No native capture claimed.
 
 ## [2026-10-19] evidence | ReloadUI default-retail compilation
 
@@ -53,6 +57,10 @@
 ## [2026-10-18] investigation | Original sizing and AsyncRequest proof
 
 [Mouse sizing](investigations/mouse-sizing-capture.md) records missing native capture and spurious script-drag routing, reproduced through unchanged DamageMeter callbacks. [AsyncRequest contract](../specs/timer-callback-provenance.md#original-asyncrequest-correlation--bounded-retail-proof) records isolated original TOC loading, both timing modes and negative fixture controls. Native outside-release/scale policy and full startup remain excluded.
+
+## [2026-10-19] source | Wrath legacy currency state
+
+Added [model ownership](systems/lua-api.md#wrath-legacy-currency-display-state) and links to the [legacy currency](../specs/wrath-legacy-currency-tokenui.md) and [minimap/XML](../specs/wrath-minimap-xml-labels.md) contracts. Category display indices and independent watch enumeration do not delegate to modern currency state. Source documentation only; runtime proof remains separate.
 
 ## [2026-10-18] investigation | Ellesmere timer125 secure-hook targets
 
@@ -2457,3 +2465,7 @@ Linked the [disabled-check contract](../specs/disabled-check-emission.md) for bo
 - 2026-10-19: Added Wrath manual-watch state/binding/refresh ownership to the legacy-surface wiki and owning spec; twelve genuine REDs recorded, GREEN pending.
 
 - 2026-10-19: Closed bounded N3 manual-watch proof: twelve RED→GREEN cases, zero startup errors/warnings,59 passing controls plus one unchanged generic destructive-marking failure reproduced on exact baseb88ef4c9e. Native sort/cache/progress/automatic gaps remain unmodeled; full-profile check/fmt/readability pass.
+
+## 2026-10-18 — Wrath widget state and stored-size correction
+
+Linked optional EditBox history, direct arrows, byte-mask presentation and MessageFrame row timers from [[widget-system]] to their owning contract. Added [[wrath-tooltip-stored-size]]: the queried-size oracle confused parent-fill geometry with retained dimensions; the unsupported loader change was reverted, and cached dependency repair remains distinct. Source/reconstructed authority and old-library fixture controls are not current-head/native/preservation acceptance.

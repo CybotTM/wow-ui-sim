@@ -17,8 +17,105 @@ fn focused_editbox() -> WowLuaEnv {
     env
 }
 
+// 12340 reconstructed source authority, independently checked by laptop;
+// these are simulator assertions, not a native-run receipt.
+fn wrath_arrow_script_is_unknown() {
+    let env = focused_editbox();
+    env.exec(
+        r#"
+        assert(select('#', arrowBox:HasScript('OnArrowPressed')) == 1)
+        assert(arrowBox:HasScript('OnArrowPressed') == nil)
+        assert(not pcall(arrowBox.GetScript, arrowBox, 'OnArrowPressed'))
+        assert(not pcall(arrowBox.SetScript, arrowBox, 'OnArrowPressed', function() end))
+        assert(not pcall(arrowBox.SetScript, arrowBox, 'OnArrowPressed', nil))
+    "#,
+    )
+    .unwrap();
+}
+
+fn wrath_arrows_move_caret_and_lines() {
+    let env = focused_editbox();
+    for (key, cursor) in [("LEFT", 1), ("RIGHT", 2)] {
+        env.send_key_press(key, None).unwrap();
+        assert_eq!(
+            env.eval::<i32>("return arrowBox:GetCursorPosition()")
+                .unwrap(),
+            cursor
+        );
+    }
+    env.exec("arrowBox:SetMultiLine(true); arrowBox:SetText('aaaa\\naaaa\\naaaa'); arrowBox:SetCursorPosition(7)").unwrap();
+    for (key, cursor) in [("UP", 2), ("DOWN", 7), ("DOWN", 12)] {
+        env.send_key_press(key, None).unwrap();
+        assert_eq!(
+            env.eval::<i32>("return arrowBox:GetCursorPosition()")
+                .unwrap(),
+            cursor
+        );
+    }
+    env.exec("assert(arrowBox:GetText() == 'aaaa\\naaaa\\naaaa')")
+        .unwrap();
+}
+
+fn wrath_arrow_alt_mode_controls_engine_motion() {
+    let env = focused_editbox();
+    env.exec("arrowBox:SetAltArrowKeyMode(true)").unwrap();
+    env.send_key_press("LEFT", None).unwrap();
+    env.exec("assert(arrowBox:GetCursorPosition() == 2)")
+        .unwrap();
+    env.send_key_press("ALT-LEFT", None).unwrap();
+    env.exec("assert(arrowBox:GetCursorPosition() == 1); A_Admin.SetAltKeyDown(true)")
+        .unwrap();
+    env.send_key_press("RIGHT", None).unwrap();
+    env.exec("A_Admin.SetAltKeyDown(false); assert(arrowBox:GetCursorPosition() == 2); arrowBox:SetAltArrowKeyMode(false)").unwrap();
+    env.send_key_press("LEFT", None).unwrap();
+    env.exec("assert(arrowBox:GetCursorPosition() == 1)")
+        .unwrap();
+}
+
+#[test]
+fn wrath_xml_ignore_arrows_aliases_alt_mode_before_onload() {
+    if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Wrath {
+        return;
+    }
+    let env = WowLuaEnv::new().unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(
+        dir.path().join("Arrow.xml"),
+        r#"<Ui>
+        <EditBox name="WrathArrowTemplate" virtual="true" ignoreArrows="true">
+            <Scripts><OnLoad>self.altAtLoad=self:GetAltArrowKeyMode()</OnLoad></Scripts>
+        </EditBox>
+        <EditBox name="WrathArrowEnabled" inherits="WrathArrowTemplate"/>
+        <EditBox name="WrathArrowDisabled" inherits="WrathArrowTemplate" ignoreArrows="false"/>
+    </Ui>"#,
+    )
+    .unwrap();
+    let toc = dir.path().join("Arrow.toc");
+    std::fs::write(&toc, "## Title: Wrath arrow mode\nArrow.xml\n").unwrap();
+    let loaded = wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
+    assert!(loaded.warnings.is_empty(), "SETUP: {:?}", loaded.warnings);
+    env.exec(
+        r#"
+        assert(WrathArrowEnabled:GetAltArrowKeyMode() and WrathArrowEnabled.altAtLoad)
+        assert(not WrathArrowDisabled:GetAltArrowKeyMode() and not WrathArrowDisabled.altAtLoad)
+        WrathArrowEnabled:SetText('abcd'); WrathArrowEnabled:SetCursorPosition(2)
+        WrathArrowEnabled:SetFocus()
+    "#,
+    )
+    .unwrap();
+    env.send_key_press("LEFT", None).unwrap();
+    env.exec("assert(WrathArrowEnabled:GetCursorPosition()==2)")
+        .unwrap();
+    env.send_key_press("ALT-LEFT", None).unwrap();
+    env.exec("assert(WrathArrowEnabled:GetCursorPosition()==1)")
+        .unwrap();
+}
+
 #[test]
 fn editbox_arrow_pressed_accepts_set_hook_get_has_and_clearing() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        return wrath_arrow_script_is_unknown();
+    }
     let env = focused_editbox();
     env.exec(
         r#"
@@ -56,6 +153,9 @@ fn editbox_arrow_pressed_accepts_set_hook_get_has_and_clearing() {
 
 #[test]
 fn editbox_arrow_pressed_dispatches_four_keys_and_preserves_cursor_editing() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        return wrath_arrows_move_caret_and_lines();
+    }
     let env = focused_editbox();
     env.exec(
         r#"
@@ -90,6 +190,9 @@ fn editbox_arrow_pressed_dispatches_four_keys_and_preserves_cursor_editing() {
 
 #[test]
 fn editbox_arrow_pressed_alt_mode_requires_alt_and_releases_plain_arrows_to_bindings() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        return wrath_arrow_alt_mode_controls_engine_motion();
+    }
     let env = focused_editbox();
     env.exec(
         r#"
@@ -134,6 +237,23 @@ fn editbox_arrow_pressed_alt_mode_requires_alt_and_releases_plain_arrows_to_bind
 
 #[test]
 fn editbox_arrow_pressed_original_blizzard_xml_and_autocomplete_consumer() {
+    use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
+    // Audited all seven shipped caches on 2026-10-18. These six define and
+    // bind AutoCompleteEditBox_OnArrowPressed in Blizzard_AutoComplete.
+    // Wrath FrameXML/AutoComplete.lua and .xml have neither the function nor
+    // an OnArrowPressed binding; this consumer is not its engine oracle.
+    let shipped_arrow_consumer = matches!(
+        ACTIVE,
+        ClientProfile::Retail
+            | ClientProfile::Ptr
+            | ClientProfile::Mists
+            | ClientProfile::Era
+            | ClientProfile::Anniversary
+            | ClientProfile::WowForever
+    );
+    if !shipped_arrow_consumer {
+        return;
+    }
     let env = WowLuaEnv::new().unwrap();
     let root = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
     for path in [

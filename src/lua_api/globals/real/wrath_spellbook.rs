@@ -1,0 +1,207 @@
+//! Wrath's single class-tab projection of existing known-spell membership.
+//! Skill-line metadata and spell-level ordering are not supplied by this model.
+
+use std::ffi::{CStr, CString};
+
+use crate::lua_api::game_data::CLASS_LABELS;
+use crate::lua_api::methods::{borrow_state, create_string};
+use crate::lua_api::state::SimState;
+use crate::lua_bridge::stack_val;
+use crate::spells;
+use rilua::vm::state::LuaState;
+use rilua::{LuaApiMut, LuaError, LuaResult, RuntimeError, Val};
+
+pub(super) fn register_actions(lua: &mut rilua::Lua) -> crate::Result<()> {
+    LuaApiMut::register_function(lua, "GetKnownSlotFromHighestRankSlot", get_known_slot)?;
+    LuaApiMut::register_function(lua, "UpdateSpells", update_spells)?;
+    Ok(())
+}
+
+fn get_known_slot(state: &mut LuaState) -> LuaResult<u32> {
+    // No fractional rounding is modeled: only authenticated integer slots map.
+    let compact_index = numeric_argument(state)
+        .filter(|number| number.fract() == 0.0)
+        .map(|number| number as usize)
+        .and_then(|slot| slot.checked_sub(1));
+    let known_slot = {
+        let sim = borrow_state(state)?;
+        let full = ordered_known_spells(&sim);
+        let compact = compact_slots(&full);
+        // HashSet membership has unique IDs, so this is the first full match.
+        compact_index
+            .and_then(|index| compact.get(index))
+            .map_or(0, |full_index| full_index + 1)
+    };
+    state.push(Val::Num(known_slot as f64));
+    Ok(1)
+}
+
+fn update_spells(state: &mut LuaState) -> LuaResult<u32> {
+    // Views are derived, but native notification is unconditional and synchronous.
+    crate::lua_api::script_helpers::fire_named_event_state(state, "SPELLS_CHANGED", &[]);
+    Ok(0)
+}
+
+pub(super) fn get_spell_tab_info(state: &mut LuaState) -> LuaResult<u32> {
+    let index = numeric_argument(state).ok_or_else(tab_usage_error)? as i32;
+    if index != 1 {
+        state.push(Val::Nil);
+        state.push(Val::Nil);
+        for _ in 0..4 {
+            state.push(Val::Num(0.0));
+        }
+        return Ok(6);
+    }
+    let (label, full_count, compact_count) = {
+        let sim = borrow_state(state)?;
+        let class_index = sim.player.class_index.clamp(1, CLASS_LABELS.len() as i32);
+        let full = ordered_known_spells(&sim);
+        let compact = compact_slots(&full);
+        (
+            CLASS_LABELS[class_index as usize - 1],
+            full.len(),
+            compact.len(),
+        )
+    };
+    push_tab_info(state, label, full_count, compact_count);
+    Ok(6)
+}
+
+fn push_tab_info(state: &mut LuaState, label: &str, full_count: usize, compact_count: usize) {
+    let name = create_string(state, label);
+    let icon = create_string(state, "Interface\\Icons\\Spell_Holy_PowerWordShield");
+    state.push(name);
+    state.push(icon);
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(full_count as f64));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(compact_count as f64));
+}
+
+fn tab_usage_error() -> LuaError {
+    LuaError::Runtime(RuntimeError {
+        message: "Usage: GetSpellTabInfo(index)".into(),
+        level: 1,
+        traceback: vec![],
+    })
+}
+
+fn numeric_argument(state: &LuaState) -> Option<f64> {
+    match stack_val(state, 1) {
+        Val::Num(number) => Some(number),
+        Val::Str(reference) => {
+            let string = state.gc.string_arena.get(reference)?;
+            parse_numeric_string(string.data())
+        }
+        _ => None,
+    }
+}
+
+fn parse_numeric_string(bytes: &[u8]) -> Option<f64> {
+    let string = CString::new(bytes).ok()?;
+    let mut end = std::ptr::null_mut();
+    // CString supplies the terminator; strtod returns an end pointer inside it.
+    let number = unsafe { libc::strtod(string.as_ptr(), &mut end) };
+    if end == string.as_ptr().cast_mut() {
+        return None;
+    }
+    // strtod's end pointer remains valid while the owning CString is alive.
+    let remaining = unsafe { CStr::from_ptr(end) }.to_bytes();
+    remaining
+        .iter()
+        .all(u8::is_ascii_whitespace)
+        .then_some(number)
+}
+
+fn ordered_known_spells(sim: &SimState) -> Vec<u32> {
+    let mut full: Vec<_> = sim.known_spells.iter().copied().collect();
+    // ID only breaks otherwise equal keys for deterministic HashSet projection.
+    full.sort_unstable_by_key(|&id| (spell_sort_key(id), id));
+    full
+}
+
+fn spell_sort_key(id: u32) -> (&'static str, i32, &'static str) {
+    let Some(spell) = spells::get_spell(id) else {
+        // INFERRED: missing metadata is an independent rank-zero boundary.
+        return ("", 0, "");
+    };
+    (spell.name, parse_rank(spell.subtext), spell.subtext)
+}
+
+fn compact_slots(full: &[u32]) -> Vec<usize> {
+    let mut compact = Vec::new();
+    for (slot, &id) in full.iter().enumerate() {
+        let continues_rank_run = compact
+            .last()
+            .is_some_and(|&previous| same_ranked_name(full[previous], id));
+        if continues_rank_run {
+            *compact.last_mut().expect("existing rank run") = slot;
+        } else {
+            compact.push(slot);
+        }
+    }
+    compact
+}
+
+fn same_ranked_name(first: u32, second: u32) -> bool {
+    spells::get_spell(first)
+        .zip(spells::get_spell(second))
+        .is_some_and(|(first, second)| {
+            first.name == second.name
+                && parse_rank(first.subtext) != 0
+                && parse_rank(second.subtext) != 0
+        })
+}
+
+fn parse_rank(subtext: &str) -> i32 {
+    let mut rank = 0;
+    // Committed spell metadata has ranks <= 4; native overflow is unmodeled.
+    for byte in subtext.bytes() {
+        if byte.is_ascii_digit() {
+            rank = rank * 10 + i32::from(byte - b'0');
+        } else if rank != 0 {
+            break;
+        }
+    }
+    rank
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{compact_slots, ordered_known_spells, parse_rank};
+    use crate::lua_api::state::SimState;
+
+    #[test]
+    fn ordered_and_compact_views_choose_rank_not_spell_id() {
+        let mut state = SimState::default();
+        state.known_spells = [1248891, 1248890, 1248888, 6603].into();
+        let full = ordered_known_spells(&state);
+        assert_eq!(full, [6603, 1248891, 1248890, 1248888]);
+        let compact: Vec<_> = compact_slots(&full)
+            .into_iter()
+            .map(|slot| full[slot])
+            .collect();
+        assert_eq!(compact, [6603, 1248888]);
+    }
+
+    #[test]
+    fn rank_parser_matches_authenticated_ascii_runs() {
+        for (subtext, expected) in [
+            ("Rank 2/4", 2),
+            ("Rank 0/4", 4),
+            ("abc00def02/4", 2),
+            ("Rank 24", 24),
+            ("2 Rank 4", 2),
+            ("Rank -2", 2),
+            ("+2", 2),
+            ("2-4", 2),
+            ("0002", 2),
+            ("000", 0),
+            ("no digits", 0),
+            ("", 0),
+            ("２", 0),
+        ] {
+            assert_eq!(parse_rank(subtext), expected, "{subtext:?}");
+        }
+    }
+}

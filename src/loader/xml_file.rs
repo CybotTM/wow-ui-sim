@@ -360,8 +360,8 @@ fn process_script(
             return Ok(0);
         };
         let script_path = resolve_path_with_fallback(xml_dir, ctx.addon_root, file);
-        load_lua_file(env, &script_path, ctx, timing)?;
-        return Ok(1);
+        let result = load_lua_file(env, &script_path, ctx, timing).map(|_| 1);
+        return continue_wrath_parent_after_child(file, result);
     }
 
     let Some(inline) = &s.inline else {
@@ -485,7 +485,24 @@ fn process_include(
         }
         Ok(1)
     } else {
-        load_xml_file(env, &include_path, ctx, timing)
+        let result = load_xml_file(env, &include_path, ctx, timing);
+        continue_wrath_parent_after_child(file, result)
+    }
+}
+
+fn continue_wrath_parent_after_child(
+    file: &str,
+    result: Result<usize, LoadError>,
+) -> Result<usize, LoadError> {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+        return result;
+    }
+    match result {
+        Ok(count) => Ok(count),
+        Err(error) => {
+            tracing::warn!("Included file error ({}): {}", file, error);
+            Ok(0)
+        }
     }
 }
 

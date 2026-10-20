@@ -37,6 +37,7 @@ pub(in super::super) fn clear(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     if let Some(data) = sim.message_frames.get_mut(&id) {
         data.messages.clear();
+        data.pending_wrath_messages.clear();
         data.scroll_offset = 0;
     }
     Ok(0)
@@ -116,7 +117,15 @@ pub(super) fn set_time_visible(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let v = val_to_f64(stack_val(state, 2));
     let mut sim = borrow_state_mut(state)?;
-    sim.message_frames.entry(id).or_default().time_visible = v;
+    let data = sim.message_frames.entry(id).or_default();
+    data.time_visible = v;
+    for message in &mut data.messages {
+        if let Some(timers) = &mut message.wrath_timers
+            && timers.time_left != 0.0
+        {
+            timers.time_left = v;
+        }
+    }
     Ok(0)
 }
 
@@ -136,7 +145,15 @@ pub(super) fn set_fade_duration(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let v = val_to_f64(stack_val(state, 2));
     let mut sim = borrow_state_mut(state)?;
-    sim.message_frames.entry(id).or_default().fade_duration = v;
+    let data = sim.message_frames.entry(id).or_default();
+    data.fade_duration = v;
+    for message in &mut data.messages {
+        if let Some(timers) = &mut message.wrath_timers
+            && timers.fade_left != 0.0
+        {
+            timers.fade_left = v;
+        }
+    }
     Ok(0)
 }
 

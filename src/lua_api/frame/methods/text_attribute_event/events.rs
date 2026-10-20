@@ -263,6 +263,9 @@ pub(super) fn get_script(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let handler_name = val_to_string(state, stack_val(state, 2))
         .ok_or_else(|| runtime_error("GetScript: handler name required"))?;
+    if is_wrath_editbox_arrow(state, frame_id, &handler_name)? {
+        ensure_script_supported(state, frame_id, &handler_name)?;
+    }
     let binding = binding_args::optional_script_binding_from_stack(state, 3)?;
     let handler =
         get_rilua_script_binding(state, frame_id, &handler_name, binding).unwrap_or(Val::Nil);
@@ -274,6 +277,10 @@ pub(super) fn has_script(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let handler_name = val_to_string(state, stack_val(state, 2))
         .ok_or_else(|| runtime_error("HasScript: handler name required"))?;
+    if is_wrath_editbox_arrow(state, frame_id, &handler_name)? {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
     // HasScript reports whether the object *type* supports the handler, not
     // whether a handler is currently bound (use GetScript for that). This
     // matches the live client, including animations — e.g.
@@ -304,6 +311,18 @@ pub(super) fn hook_script(state: &mut LuaState) -> LuaResult<u32> {
     imply_mouse_enabled_for_mouse_handler(state, frame_id, &handler_name)?;
     state.push(Val::Bool(true));
     Ok(1)
+}
+
+fn is_wrath_editbox_arrow(state: &LuaState, frame_id: u64, handler_name: &str) -> LuaResult<bool> {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath
+        || handler_name != "OnArrowPressed"
+    {
+        return Ok(false);
+    }
+    Ok(borrow_state(state)?
+        .widgets
+        .get(frame_id)
+        .is_some_and(|frame| frame.widget_type == WidgetType::EditBox))
 }
 
 fn ensure_script_supported(state: &LuaState, frame_id: u64, handler_name: &str) -> LuaResult<()> {
@@ -401,8 +420,11 @@ fn is_widget_specific_script_handler(
         }
         "OnDoubleClick" => true,
         "OnEnable" | "OnDisable" => supports_enable_disable_script(widget_type),
-        "OnArrowPressed"
-        | "OnTextChanged"
+        "OnArrowPressed" => {
+            widget_type == WidgetType::EditBox
+                && crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath
+        }
+        "OnTextChanged"
         | "OnTextSet"
         | "OnEditFocusGained"
         | "OnEditFocusLost"
