@@ -21,9 +21,15 @@ Original checkbox rescans by name, not currency ID; duplicate names may select t
 
 `tests/currency_unused_mutations.rs` loads original cached Retail TokenUI, collapses the preceding original header, invokes the original inactive checkbox and observes selected ID, API status, unchanged backpack membership and original provider status in both directions. A real TokenEntryTemplate drives original UpdatePopup and checks discovered-checkbox visibility. Direct API controls cover invalid/header/ID targets, missing supplied rows, repeated requests and fresh-environment isolation. No copied/replaced consumer.
 
+## Implementation
+
+`src/c_api/item_spell/c_currency.rs` registers the Retail mutator and changes the existing `SimState.currency_info` row's `is_type_unused` boolean by displayed index. List status fields read that same supplied row; there is no second unused-membership store or synthetic grouping. `src/c_api/currency_list.rs` and existing active catalog order are unchanged.
+
 ## Proof
 
-Pending behavioral RED, producer, GREEN, touched-module before/after preservation, clean stock Retail startup, warning-free build and formatting.
+Behavioral RED reached from tests-only Rust scope `bd45dfd02`: original checkbox completed setter/rescan/update but failed its unused-flag assertion; original UpdatePopup hid the discovered currency checkbox. Repeated positive mutation also failed; invalid/no-op controls passed. No missing-method/setup exception counted as RED. Private handoff `b5-unused` holds source hashes, exact commands and worktree-only ELF binding.
+
+GREEN, touched-module before/after preservation, clean stock Retail startup, warning-free build and formatting remain pending.
 
 ## Out of scope
 
