@@ -7,7 +7,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn transmog_shared_dir() -> PathBuf {
@@ -133,6 +134,8 @@ fn fresh_game_env() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&transmog_shared_dir()).expect("TransmogShared TOC resolves");
@@ -143,7 +146,9 @@ fn find_toc_file_resolves_bare_toc() {
          in find_toc_file at src/loader/mod.rs:65-95"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_load_on_demand_with_two_dependencies() {
     let toc = TocFile::from_file(&transmog_shared_toc()).expect("TOC parses");
@@ -188,7 +193,9 @@ fn toc_is_load_on_demand_with_two_dependencies() {
     );
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_restricts_to_in_world_only() {
     let toc = TocFile::from_file(&transmog_shared_toc()).expect("TOC parses");
@@ -208,7 +215,9 @@ fn allow_load_game_restricts_to_in_world_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_four_directives_and_single_body_file() {
     let raw = std::fs::read_to_string(transmog_shared_toc()).expect("TOC reads utf-8");
@@ -254,6 +263,7 @@ fn toc_raw_bytes_pin_four_directives_and_single_body_file() {
     assert!(!raw.contains("## LoadFirst"));
     assert!(!raw.contains("[Family]"));
     assert!(!raw.contains(".xml"));
+}
 }
 
 #[test]
