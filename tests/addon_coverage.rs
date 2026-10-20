@@ -314,6 +314,10 @@ fn all_blizzard_addon_load_errors_are_tracked_per_addon_name() {
             env.set_screen_size(1024.0, 768.0);
             env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
             reset_template_state();
+            if let Some(toc) = wow_ui_sim::client_profile::blizzard_ui_framexml_toc() {
+                load_addon(&env.loader_env(), &toc)
+                    .expect("profile FrameXML should load before addons");
+            }
 
             let cached_addon_roots = cached_blizzard_addon_roots();
             let manifest_addon_roots = active_manifest_blizzard_addon_roots();
