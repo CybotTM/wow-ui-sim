@@ -257,6 +257,7 @@ fn blizzard_poi_button_toc_lists_six_files_in_canonical_order() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_poi_button_appears_in_game_screen_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -268,6 +269,7 @@ fn blizzard_poi_button_appears_in_game_screen_eager_discovery() {
          consumer addon (Blizzard_WorldMap, Blizzard_ObjectiveTracker, \
          Blizzard_QuestSuperTracking) needs the POIButtonTemplate / POIButtonOwnerTemplate"
     );
+}
 }
 
 #[test]
@@ -291,6 +293,7 @@ fn blizzard_poi_button_does_not_appear_in_glue_screen_eager_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_poi_button_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -303,6 +306,7 @@ fn blizzard_poi_button_appears_in_full_addon_inventory() {
          inventory at src/loader/mod.rs:309-343 lists every parseable Blizzard_* TOC \
          regardless of screen / game-type / LoadOnDemand filters"
     );
+}
 }
 
 prefork_full_ui_case! {
