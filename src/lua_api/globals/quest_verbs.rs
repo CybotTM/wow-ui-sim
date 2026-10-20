@@ -97,7 +97,7 @@ fn append_quest_log_entry(quest_log: &mut Vec<u32>, quest_id: u32) {
 
 #[cfg(feature = "client-wrath")]
 fn accept_quest(state: &mut LuaState) -> LuaResult<u32> {
-    let (index, giver) = {
+    let index = {
         let mut sim = borrow_state_mut(state)?;
         if !super::group_queries::unit_exists_in_state(&sim, "player") {
             return Ok(0);
@@ -105,42 +105,39 @@ fn accept_quest(state: &mut LuaState) -> LuaResult<u32> {
         let Some(offer) = sim.pending_quest_offer.take() else {
             return Ok(0);
         };
-        // INFERRED ordering pending native confirmation: clear before dispatch so
-        // the original OnHide -> CloseQuest re-entry cannot emit a second finish.
-        let giver = std::mem::take(&mut sim.gossip.giver_guid);
         let id = offer.quest_id as u32;
-        let index = if sim.quest_log_entries.entries.len() >= 25 {
+        if sim.quest_log_entries.entries.len() >= 25 {
             None
         } else {
             append_quest_log_entry(&mut sim.quest_log, id);
             sim.quest_log_entries.entries.push(offer);
             Some(sim.quest_log_entries.entries.len())
-        };
-        (index, giver)
+        }
     };
     publish_accept_response(state, index)?;
-    finish_wrath_quest_dialog(state, giver)?;
+    finish_wrath_quest_dialog(state)?;
     Ok(0)
 }
 
 #[cfg(feature = "client-wrath")]
-pub(super) fn finish_wrath_quest_dialog(state: &mut LuaState, cleared_giver: u64) -> LuaResult<()> {
-    if cleared_giver == 0 {
-        return Ok(());
+pub(super) fn finish_wrath_quest_dialog(state: &mut LuaState) -> LuaResult<()> {
+    {
+        let mut sim = borrow_state_mut(state)?;
+        if sim.gossip.giver_guid == 0 {
+            return Ok(());
+        }
+        // Authenticated 12340 order: NPC/inform, interaction, synchronous event.
+        sim.gossip.giver_guid = 0;
+        sim.gossip.inform_guid = 0;
+        sim.gossip.interact_guid = 0;
     }
     super::state_backed_queries::dispatch_event_now(state, "QUEST_FINISHED", &[])
 }
 
 #[cfg(feature = "client-wrath")]
 fn close_wrath_quest(state: &mut LuaState) -> LuaResult<u32> {
-    let giver = {
-        let mut sim = borrow_state_mut(state)?;
-        sim.pending_quest_offer = None;
-        // CloseQuest retains current quest/phase, sent latch and pending claim.
-        // INFERRED clear-before-emit ordering; native confirmation is pending.
-        std::mem::take(&mut sim.gossip.giver_guid)
-    };
-    finish_wrath_quest_dialog(state, giver)?;
+    // CloseQuest retains current quest/phase, sent latch and pending requests.
+    finish_wrath_quest_dialog(state)?;
     Ok(0)
 }
 

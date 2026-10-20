@@ -133,6 +133,8 @@ pub mod wrath_legacy_state;
 #[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_quest_dialog;
 #[cfg(feature = "client-wrath")]
+pub(crate) mod wrath_spellbook;
+#[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_startup_queries;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_voice;

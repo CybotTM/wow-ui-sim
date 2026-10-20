@@ -426,8 +426,6 @@ fn apply_feature_progression_defaults(lua: &mut rilua::Lua) -> crate::Result<()>
     temporary::pvp_talent_defaults::apply_bootstrap(lua)?;
     temporary::quest_objective_defaults::apply_bootstrap(lua)?;
     temporary::quest_progress_requirements::apply_bootstrap(lua)?;
-    #[cfg(feature = "client-wrath")]
-    temporary::wrath_quest_choice_feedback::apply_bootstrap(lua)?;
     temporary::reincarnation_defaults::apply_bootstrap(lua)?;
     temporary::scenario_defaults::apply_bootstrap(lua)?;
     temporary::seconds_formatter_defaults::apply_bootstrap(lua)?;

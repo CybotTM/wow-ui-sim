@@ -425,6 +425,9 @@ pub struct SimState {
     pub weapon_enchants: [Vec<crate::c_api::weapon_enchants::WeaponEnchant>; 3],
     pub sound_manager: Option<SoundManager>,
     pub last_sound_kit_requested: Option<u32>,
+    /// Last formatted Wrath UI error requested by the modeled quest feedback path.
+    #[cfg(feature = "client-wrath")]
+    pub last_ui_error_message: Option<String>,
     /// Last legacy string bytes, including unknown/ambiguous names; no playback implied.
     #[cfg(feature = "client-wrath")]
     pub last_sound_name_requested: Option<Vec<u8>>,

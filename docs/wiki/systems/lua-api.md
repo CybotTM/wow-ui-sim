@@ -35,7 +35,9 @@ Wrath `quest_verbs.rs` separates marking from its server-response simulation and
 
 ### Wrath dialog request/response plumbing
 
-`globals/real/wrath_quest_dialog.rs` separates pending detail offers from the active dialog's `(quest ID, Progress/Rewards)` tuple. Native dialog readers use that identity, not unrelated log selection. Offer and acceptance adapters consume pending requests; accepted choices are simulator receipts, not inventory grants. `GossipState.giver_guid` is the sole concrete giver input. Native request eligibility uses supplied player presence, dialog phase and response latch before choice handling. CloseQuest preserves the dialog/latch while clearing the concrete giver; accepted responses use the abandon notifier and a separate supplied-cache-hit completion path. [Owning contract](../../specs/wrath-quest-turn-in.md#staged-producer-proof) owns executed A/B boundaries, pending/final GREEN status and provisional clear-before-emit ordering.
+`globals/real/wrath_quest_dialog.rs` separates pending detail offers from the active dialog's `(quest ID, Progress/Rewards)` tuple. Native dialog readers use that identity, not unrelated log selection. Offer and acceptance adapters consume pending requests; accepted choices are simulator receipts, not inventory grants. `GossipState.giver_guid` is the sole concrete giver input. Native request eligibility uses supplied player presence, dialog phase and response latch before choice handling. CloseQuest preserves dialog/latch/current snapshot and pending requests. The authenticated 12340 finish boundary is NPC-zero no-op; otherwise clear NPC/inform identities, then the quest interact target, then emit synchronous FINISHED. Original Hide → OnHide → CloseQuest reentry sees zero and emits nothing. Quest interaction identity is separate from soft-interact targeting. Accepted responses use the abandon notifier and a separate supplied-cache-hit completion path. [Owning contract](../../specs/wrath-quest-turn-in.md) owns historical A/B proof, W1b verification status, native feedback requirements, and remaining inference/model gaps. Clear-before-emit is now laptop-authenticated source evidence, not native capture.
+
+`finish_wrath_quest_dialog` owns the current-NPC guard and ordered clearing; accept/close/completion callers no longer pass pre-cleared giver tokens. Real `QuestChooseRewardError` in the Wrath dialog module replaces the temporary no-op: VM global-string lookup, last-message recording before synchronous one-string UI_ERROR_MESSAGE, and the existing first-class `c_api::c_sound` name-only request. Empty text records without emission. W1b proves all37 turn-in cases (seven new regressions included) plus41 Wrath-specific preservation cases; generic controls and final gates are pending. Unsupported localization policy, sound mapping/audio gaps and current proof remain in the [contract](../../specs/wrath-quest-turn-in.md#w1b-authenticated-facts-reconciliation--2026-10-19).
 
 ## Forever supplied quest difficulty
 
@@ -470,8 +472,15 @@ Historical `e4caa4899` adds empty-default `SimState.item_cooldowns: HashMap<u32,
 
 The [TokenUI contract](../../specs/wrath-legacy-currency-tokenui.md) owns positional tuples, original-consumer tests and unresolved unused-category ordering. No native currency catalog is inferred. The [minimap/XML contract](../../specs/wrath-minimap-xml-labels.md) separately owns local-ping publication, template trust selection and explicit temporary coordinate/attack policies.
 
+## Wrath single-class spellbook projection
+
+`src/lua_api/globals/real/wrath_spellbook.rs` derives ordered known IDs and compact full-slot indices from the existing `SimState.known_spells` HashSet on demand. No parallel membership or persistent compact store is added. `spell_tabs.rs` selects this producer only for Wrath; other-profile function bodies remain unchanged.
+
+The [owning contract](../../specs/wrath-spellbook-tabs.md) tracks original-consumer/API proof, inferred missing-metadata policy and unmodeled skill-line/level inputs. Cursor ordering is a separate follow-up: the historical back-to-back DebugTools diagnostic does not authenticate synchronous cursor callbacks, and no cursor producer is included.
+
 ## Sources
 
+- [Wrath spellbook views](../../specs/wrath-spellbook-tabs.md) — bounded one-tab model, native contract and proof limits
 - [Wrath supplied objectives](../../specs/wrath-quest-objectives.md) — legacy snapshot reads, bounded consumer proof and native input-model gaps
 
 - [Wrath legacy currency](../../specs/wrath-legacy-currency-tokenui.md) — supplied model and original-consumer contract

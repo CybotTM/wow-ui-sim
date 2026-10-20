@@ -17,6 +17,7 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         ("IsQuestFlaggedCompleted", is_quest_flagged_completed),
         ("CompleteQuest", request_reward_offer),
         ("GetQuestReward", send_reward_claim),
+        ("QuestChooseRewardError", choose_reward_error),
         ("GetTitleText", get_title_text),
         ("GetQuestBackgroundMaterial", get_background_material),
         ("GetNumQuestChoices", get_num_choices),
@@ -138,6 +139,29 @@ fn send_reward_claim(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn choose_reward_error(state: &mut LuaState) -> LuaResult<u32> {
+    crate::c_api::c_sound::request_named_sound(state, b"igQuestFailed".to_vec(), None)?;
+    let key = create_string(state, "ERR_QUEST_MUST_CHOOSE");
+    let globals = Val::Table(state.global);
+    let message = state.gettable(globals, key)?;
+    let Val::Str(reference) = message else {
+        // INFERRED: unavailable/non-string localization has no display text.
+        return Ok(0);
+    };
+    let text = state
+        .gc
+        .string_arena
+        .get(reference)
+        .ok_or_else(|| rilua::runtime_error("ERR_QUEST_MUST_CHOOSE string was collected"))?;
+    let text = String::from_utf8_lossy(text.data()).into_owned();
+    let nonempty = !text.is_empty();
+    borrow_state_mut(state)?.last_ui_error_message = Some(text);
+    if nonempty {
+        dispatch_event_now(state, "UI_ERROR_MESSAGE", &[message])?;
+    }
+    Ok(0)
+}
+
 fn reward_argument(state: &LuaState) -> LuaResult<f64> {
     match stack_val(state, 1) {
         Val::Num(value) => Ok(value),
@@ -232,18 +256,16 @@ pub(crate) fn accept_response(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn finish_completed_dialog(state: &mut LuaState) -> LuaResult<()> {
-    let giver = {
-        let mut sim = borrow_state_mut(state)?;
+    {
+        let sim = borrow_state(state)?;
         let dialog = &sim.quest_log_entries.readiness;
         if !dialog.completion_callback_cache_hit || dialog.next_quest_id != 0 {
             return Ok(());
         }
-        // INFERRED clear-before-emit ordering, pending native confirmation.
-        std::mem::take(&mut sim.gossip.giver_guid)
-    };
+    }
     // The supplied inline callback and mirror notification are separate paths.
     // Their invocation here is simulator scheduling, not a native total order.
-    crate::lua_api::globals::quest_verbs::finish_wrath_quest_dialog(state, giver)
+    crate::lua_api::globals::quest_verbs::finish_wrath_quest_dialog(state)
 }
 
 fn get_title_text(state: &mut LuaState) -> LuaResult<u32> {
