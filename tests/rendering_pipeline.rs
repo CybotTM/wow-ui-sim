@@ -384,7 +384,7 @@ fn layer4_quad_batch_direct_push() {
 
 #[test]
 fn layer4_texture_widget_with_file_data_id_emits_texture_request() {
-    let env = env_with_shared_xml();
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"

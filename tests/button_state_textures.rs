@@ -5,9 +5,7 @@
 //! HighlightTexture, DisabledTexture) that should only render when the
 //! button is in the corresponding state.
 
-use crate::common;
-
-use common::env_with_shared_xml;
+use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};
 
 /// Helper: build a quad batch for a named subtree with given button state.
@@ -95,7 +93,7 @@ fn glyph_vertex_count(batch: &wow_ui_sim::render::QuadBatch) -> usize {
 /// In pressed state, PushedTexture renders but NormalTexture does not.
 #[test]
 fn normal_vs_pressed_texture() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -151,7 +149,7 @@ fn normal_vs_pressed_texture() {
 
 #[test]
 fn state_texture_child_stays_hidden_when_button_is_hidden() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -177,7 +175,7 @@ fn state_texture_child_stays_hidden_when_button_is_hidden() {
 /// HighlightTexture renders only when hovered.
 #[test]
 fn highlight_texture_only_when_hovered() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -219,7 +217,7 @@ fn highlight_texture_only_when_hovered() {
 
 #[test]
 fn highlight_texture_child_stays_hidden_until_hover_render_path() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -358,7 +356,7 @@ fn locked_button_highlight_renders_once_without_hover_and_unlock_restores_hover(
 /// Pressed/hovered state has no effect while disabled.
 #[test]
 fn disabled_button_shows_disabled_texture() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -432,7 +430,7 @@ fn disabled_button_shows_disabled_texture() {
 
 #[test]
 fn pressed_button_text_child_uses_pushed_text_offset() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -490,7 +488,7 @@ fn pressed_button_text_child_uses_pushed_text_offset() {
 
 #[test]
 fn lowercase_button_text_child_suppresses_direct_button_text_rendering() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -534,7 +532,7 @@ fn lowercase_button_text_child_suppresses_direct_button_text_rendering() {
 
 #[test]
 fn clearing_button_texture_hides_rendered_child_texture() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
