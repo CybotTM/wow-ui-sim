@@ -5,6 +5,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 const ROOT: &str = "Blizzard_AddOnList";
 const MATCHING_ADDON: &str = "SearchFilterUniqueNeedle";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn search_box_filters_rows_to_single_matching_addon() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -54,6 +56,7 @@ fn search_box_filters_rows_to_single_matching_addon() {
             "The single filtered row must be the explicitly registered matching probe addon"
         );
     });
+}
 }
 
 fn register_probe_addons(env: &wow_ui_sim::lua_api::WowLuaEnv) {

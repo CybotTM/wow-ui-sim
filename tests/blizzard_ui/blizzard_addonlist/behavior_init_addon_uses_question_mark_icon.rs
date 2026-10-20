@@ -6,6 +6,8 @@ use wow_ui_sim::lua_api::AddonInfo;
 const ROOT: &str = "Blizzard_AddOnList";
 const ICON_FALLBACK_ADDON: &str = "AddonListIconFallbackProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn init_addon_uses_question_mark_icon_when_icon_metadata_is_absent() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -45,6 +47,7 @@ fn init_addon_uses_question_mark_icon_when_icon_metadata_is_absent() {
             "`AddonList_InitAddon` must preserve the addon title after the fallback icon; got {title_text:?}"
         );
     });
+}
 }
 
 fn seed_icon_fallback_probe_addon(env: &wow_ui_sim::lua_api::WowLuaEnv) {

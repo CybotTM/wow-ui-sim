@@ -4,6 +4,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
 const ROOT: &str = "Blizzard_AddOnList";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn enable_all_and_disable_all_buttons_flip_addon_enable_states() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -65,6 +67,7 @@ fn enable_all_and_disable_all_buttons_flip_addon_enable_states() {
             "`DisableAllButton:Click()` must disable every AddOnList entry"
         );
     });
+}
 }
 
 fn register_probe_addons(env: &wow_ui_sim::lua_api::WowLuaEnv) {

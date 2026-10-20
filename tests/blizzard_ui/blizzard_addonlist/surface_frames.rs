@@ -82,6 +82,7 @@ fn addon_list_frame_matches_game_xml_surface(env: &WowLuaEnv) {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn addon_list_frame_uses_glue_parent_in_glue() {
     with_blizzard_addon_glue_smoke_shape(&[GLUE_PARENT_ROOT, ROOT], &[], |env, _loaded| {
@@ -90,7 +91,9 @@ fn addon_list_frame_uses_glue_parent_in_glue() {
         assert_addon_list_surface(surface, "GlueParent");
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn addon_list_exposes_plan_parent_key_children() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -101,7 +104,10 @@ fn addon_list_exposes_plan_parent_key_children() {
         }
     });
 }
+}
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn addon_dialog_frame_matches_xml_surface() {
     with_blizzard_addon_glue_smoke_shape(&[GLUE_PARENT_ROOT, ROOT], &[], |env, _loaded| {
@@ -115,6 +121,7 @@ fn addon_dialog_frame_matches_xml_surface() {
             assert_dialog_child_surface(child, surface);
         }
     });
+}
 }
 
 prefork_full_ui_case! {

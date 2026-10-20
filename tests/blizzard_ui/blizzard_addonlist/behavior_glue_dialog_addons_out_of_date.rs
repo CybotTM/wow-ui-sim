@@ -4,6 +4,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_glue_smoke_shape;
 
 const ROOT: &str = "Blizzard_AddOnList";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn try_show_addon_dialog_shows_out_of_date_dialog_once() {
     with_blizzard_addon_glue_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -45,6 +47,7 @@ fn try_show_addon_dialog_shows_out_of_date_dialog_once() {
 
         assert_out_of_date_dialog_probe(probe);
     });
+}
 }
 
 type OutOfDateDialogProbe = (bool, bool, bool, bool, String, String, String, bool);

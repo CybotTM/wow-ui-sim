@@ -5,6 +5,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 const ROOT: &str = "Blizzard_AddOnList";
 const FRAME_HIDDEN_EVENT: &str = "AddonList.FrameHidden";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn addon_list_on_hide_triggers_frame_hidden_callback() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -18,6 +20,7 @@ fn addon_list_on_hide_triggers_frame_hidden_callback() {
             "`AddonList:OnHide()` must trigger one `{FRAME_HIDDEN_EVENT}` EventRegistry callback"
         );
     });
+}
 }
 
 fn register_frame_hidden_observer(env: &wow_ui_sim::lua_api::WowLuaEnv) {
