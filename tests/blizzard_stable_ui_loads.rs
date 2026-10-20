@@ -7,7 +7,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn stable_ui_dir() -> PathBuf {
@@ -130,6 +131,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&stable_ui_dir()).expect("Blizzard_StableUI TOC should resolve");
@@ -143,7 +146,9 @@ fn find_toc_resolves_bare_variant() {
          family are exclusive to standard retail builds"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_three_directives_with_help_plate_dependency() {
     let toc = TocFile::from_file(&stable_ui_toc()).expect("Blizzard_StableUI TOC should parse");
@@ -182,7 +187,9 @@ fn toc_declares_three_directives_with_help_plate_dependency() {
     );
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_standard_only_via_allow_load_game_type() {
     let toc = TocFile::from_file(&stable_ui_toc()).expect("TOC parses");
@@ -208,7 +215,9 @@ fn toc_is_standard_only_via_allow_load_game_type() {
     assert!(!toc.allows_screen(ScreenKind::CharacterSelect));
     assert!(!toc.allows_screen(ScreenKind::CharacterCreate));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn raw_bytes_pin_three_metadata_directives_only() {
     let raw = std::fs::read_to_string(stable_ui_toc()).expect("TOC reads utf-8");
@@ -245,7 +254,9 @@ fn raw_bytes_pin_three_metadata_directives_only() {
     assert!(!raw.contains("## AllowLoad:"));
     assert!(!raw.contains("## OnlyBetaAndPTR"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_lists_lua_before_xml_for_mixin_resolution() {
     let toc = TocFile::from_file(&stable_ui_toc()).expect("TOC parses");
@@ -281,6 +292,7 @@ fn body_lists_lua_before_xml_for_mixin_resolution() {
          when the .xml chunk processes. Reverse the order and every \
          CreateFromMixins / mixin-lookup call would see nil"
     );
+}
 }
 
 #[test]
