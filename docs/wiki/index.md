@@ -6,6 +6,10 @@
 
 [Projection notes](systems/lua-api.md#wrath-single-class-spellbook-projection) link the [contract](../specs/wrath-spellbook-tabs.md): existing known membership, derived full/compact views, original-consumer/API RED→GREEN4/4 and pending boundary/profile preservation. Native skill-line metadata and independent deferred-cursor follow-up remain outside this slice.
 
+## [2026-10-20] source | Wrath message-frame access IDs
+
+[Widget state](systems/widget-system.md#message-history-and-translation-target-state--2026-10-16) distinguishes shared storage from plain/scrolling method exposure. [Owning contract](../specs/message-frame-access-history.md) records the authenticated 12340 table, its unknown-build baseline conflict, Wrath-only metadata/count/removal behavior and unchanged Retail boundary. Runtime acceptance is separate from source publication.
+
 ## [2026-10-19] source | Wrath dialog request/response plumbing
 
 [Lua API notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [Wrath turn-in contract](../specs/wrath-quest-turn-in.md): shared feature-absence RED, executed A boundaries, complete bounded turn-in GREEN and Wrath preservation/zero-warning gates. The owning contract records exact receipts and remaining gaps; W1b's laptop-authenticated 12340 finish/reentry and feedback contract supersedes W1's inferred ordering.

@@ -11,18 +11,22 @@ pub(super) fn frame_metatable_for_widget_type(
     state: &mut LuaState,
     base_mt_ref: GcRef<Table>,
     widget_type: WidgetType,
+    plain_wrath_message_frame: bool,
 ) -> Val {
     let cache = registry_table_or_create(state, FRAME_MT_CACHE_KEY);
     // WorldFrame reports Frame but retains the otherwise complete base index.
     let key = match widget_type {
         WidgetType::WorldFrame => "WorldFrame",
+        WidgetType::MessageFrame if plain_wrath_message_frame => "WrathMessageFrame",
         _ => widget_type.as_str(),
     };
     if let cached @ Val::Table(_) = table_get_static(state, cache, key) {
         return cached;
     }
 
-    let Some(mt) = build_widget_metatable(state, base_mt_ref, widget_type) else {
+    let Some(mt) =
+        build_widget_metatable(state, base_mt_ref, widget_type, plain_wrath_message_frame)
+    else {
         return Val::Table(base_mt_ref);
     };
     table_set_static(state, cache, key, mt);
@@ -33,9 +37,16 @@ fn build_widget_metatable(
     state: &mut LuaState,
     base_mt_ref: GcRef<Table>,
     widget_type: WidgetType,
+    plain_wrath_message_frame: bool,
 ) -> Option<Val> {
     let source_index = metatable_index_table(state, base_mt_ref)?;
     let index_clone = clone_index_for_widget(state, source_index, widget_type)?;
+    if plain_wrath_message_frame {
+        crate::lua_api::frame::methods::widgets::message_frame::retain_plain_message_frame_methods(
+            state,
+            index_clone,
+        );
+    }
     let mt_clone = clone_metatable_with_index(state, base_mt_ref, index_clone)?;
     Some(Val::Table(mt_clone))
 }

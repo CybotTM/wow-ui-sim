@@ -6,12 +6,20 @@ Consumer-derived simulator contract for `ScrollingMessageFrame` history methods 
 
 ## What it must do
 
-- [ ] With distinct numeric access IDs and untagged messages, `GetNumMessages(id)` counts exactly the selected group, including zero for an absent ID, without mutating history. This history contract applies to ScrollingMessageFrame, not plain MessageFrame.
-- [ ] `GetNumMessages()` retains its existing total-history behavior before and after filtered reads; unfiltered text order and clear behavior remain unchanged.
-- [ ] On Wrath, retain the public consumer's `AddMessage(text, r, g, b, lineID, false, accessID, extraData)` metadata. Access ID, line ID and extraData are independent values, not alpha or a single interchangeable identifier.
-- [ ] `GetMessageInfo(i, id)` indexes the selected subsequence using one-based history order and returns `text, accessID, lineID, extraData` for the Wrath transfer consumer. Existing unfiltered simulator returns remain unchanged; this is a bounded simulator contract, not an assertion of complete Wrath API compatibility.
-- [ ] `RemoveMessagesByAccessID(id)` removes only selected entries, preserving other groups and untagged entries in order.
+- [ ] On Wrath ScrollingMessageFrame, `GetNumMessages(id)` counts the selected access-ID group without mutation; nil/omitted/zero selects total history. Unknown nonzero IDs count zero.
+- [ ] Wrath ScrollingMessageFrame `AddMessage(text, r, g, b, typeID, backFill, accessID, extraData)` stores independent type/access/extraData tokens regardless of false, true or omitted backFill. Missing tokens represent zero. The existing Rust `message_id` field stores typeID (called lineID by the public consumer); no new identifier type is implied.
+- [ ] On Wrath ScrollingMessageFrame, both `GetMessageInfo(i)` and `GetMessageInfo(i, id)` return exactly `text, accessID, typeID, extraData`, in one-based selected history order. Nil/zero ID means unfiltered. Invalid/missing indices raise Lua errors, not an empty row or zero return values.
+- [ ] On Wrath, `RemoveMessagesByAccessID(id)` requires a numeric ID and returns nothing. It removes exact matches; zero removes implicit/explicit zero-ID rows, not all history. Other groups retain order.
+- [ ] Wrath plain MessageFrame exposes none of the scrolling history methods. Its own methods are the authenticated 28 listed below, plus inherited Frame/Region/ScriptObject methods. Retail plain MessageFrame and scrolling color-tuple behavior remain unchanged.
 - [ ] The unchanged public Wrath `FCF_OpenTemporaryWindow` transfer clears stale destination history, copies only the requested conversation in order, retains line/extraData tokens, recovers colors through `ChatHistory_GetChatType(extraData)`, and removes only that conversation from source history.
+
+## Authoritative 12340 scope — 2026-10-20
+
+Laptop reconstructed-source answers `message-frame-access-12340.md` and `message-frame-queue-12340-20261020.md` in the private `handoff/laptop-labels-answers-20261018/` bind these requirements to build 12340; they are not native-execution results. The complete plain table (`CSimpleMessageFrame_Scripts.cpp:337–366`) has Set/Get pairs for FontObject, Font, TextColor, ShadowColor, ShadowOffset, Spacing, JustifyH, JustifyV, InsertMode, IndentedWordWrap, Fading, TimeVisible and FadeDuration, plus AddMessage and Clear. Inheritance is Frame → Region → ScriptObject. In particular HasMessageByID, ResetMessageFadeByID, SetFadePower, GetFadePower and GetFontStringByID are absent on Wrath plain MessageFrame; ScrollingMessageFrame retains them.
+
+The [frozen Wrath diff](../wow-client-diff/method-baselines/wrath/no-retail-epoch/forbidden-0-on-update-0/diff_methods_extra.txt) marks plain GetMessageInfo (line5983), GetNumMessages (line6000), GetMaxLines (line5981), SetMaxLines (line6345), and other scrolling-only methods as EXTRA. It does not mark the five methods above EXTRA. This is a documented conflict, not evidence of 12340 presence: the [baseline policy](../wow-client-diff/method-baselines/README.md) says its native build/epoch/product are unknown. Explicitly approved resolution: authenticated 12340 source outranks that inventory for Wrath only. Frozen discovery/baseline artifacts remain untouched.
+
+Queue/Clear/GetRect/layer scheduling is not changed by this access-ID repair. The new answer authenticates enqueue and Clear-before-drain, but exact simulated update/layer timing remains a separate compatibility boundary. BackFill ordering is explicitly excluded; this lane only retains its metadata arguments.
 
 ## How it works
 
@@ -24,11 +32,14 @@ Consumer-derived simulator contract for `ScrollingMessageFrame` history methods 
 - `src/lua_api/frame/methods/widgets/message_frame/add.rs`: message ingestion; bounded Wrath history argument shape, existing short simulator calls preserved.
 - `src/lua_api/frame/methods/widgets/message_frame/getters.rs`: total/filtered count and indexed retrieval.
 - `src/lua_api/frame/methods/widgets/message_frame/transform.rs`: access-ID removal and metadata preservation across existing transforms.
-- `src/lua_api/frame/methods/widgets/message_frame/mod.rs`: method registration.
+- `src/lua_api/frame/methods/widgets/message_frame/mod.rs`: method registration and distinction between shared message methods and scrolling-only entries.
+- `src/lua_api/methods/frame_metatable.rs`: distinct Wrath plain/scrolling cached indices; XML intrinsic promotion reattaches the scrolling index.
 
 ## Tests asserting this spec
 
-`tests/c11_message_access.rs` (Wrath-only execution; historical RED and post-GREEN receipts below):
+`tests/smf_access_id.rs` covers the authenticated plain surface, both cache-creation orders, Lua/XML/runtime-template aliases, zero-ID count/removal, four-value metadata, bounds errors and native argument positions with true/omitted backFill. Retail cases preserve the plain method surface and XML history.
+
+`tests/c11_message_access.rs` (Wrath transfer cases plus a Retail color-tuple preservation case; historical RED and post-GREEN receipts below):
 
 - `c11_scrolling_message_frame_counts_only_selected_access_id`: concrete grouped counts plus empty/total/order/clear preservation.
 - `c11_plain_message_frame_queues_and_clear_cancels_before_drain_inferred`: AddMessage returns nothing; concrete active-row state stays empty before update, Clear cancels queued insertion, and a subsequent row appears on update. Plain-frame scheduling remains INFERRED; no history query is used.
@@ -73,6 +84,6 @@ Exact commands, stdout/stderr, artifact hashes, revision scope and source/proof 
 ## Out of scope
 
 - Native reconstruction or native-parity claims; labels are pointers only.
-- Retail/PTR/Mists/Forever chat argument/return migrations: populated public consumers iterate total history and filter in Lua instead, with different tuple layouts.
+- Retail/PTR/Mists/Forever chat argument/return migrations: their current tuple layouts remain unchanged.
 - Era/Anniversary consumer conclusions: caches absent. Cataclysm is unsupported and excluded.
-- Full startup, docking, private-message routing, rendering, timers, invalid arguments and out-of-range return semantics: not established by this bounded consumer.
+- Full docking, private-message routing, rendering, timers, backFill ordering and complete input-coercion parity. The new explicit invalid-history-index and missing-removal-ID errors are in scope; they do not establish complete argument-validation parity.
