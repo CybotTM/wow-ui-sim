@@ -166,6 +166,7 @@ fn toc_raw_bytes_pin_two_directives_and_two_body_files() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -183,6 +184,7 @@ fn appears_in_game_eager_discovery() {
          UIFrameManager_ManagedFrameMixin without declaring a TOC dep \
          — relies on the manager's eager load-order winning"
     );
+}
 }
 
 #[test]
