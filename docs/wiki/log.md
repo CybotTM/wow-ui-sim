@@ -2461,3 +2461,7 @@ Four original LFD/RaidFinder OnClick-body cases are RED: join and leave replacem
 ## 2026-10-19 — Original tooltip formatter capture removal
 
 CharacterFrameTab1 OnEnter is behavioral RED after formatter replacement/hook; the literal-first changed-environment case is an existing PASS control, not a fast-path claim. The function-result/three-number builder now emits call-time Lua target/formatter/argument reads. Other unproved object/value captures remain audited, untouched gaps. GREEN/preservation pending; see [[xml-template-system]].
+
+## 2026-10-19 — Bounded final XML late-binding proof
+
+At source `fb2e3961d`, lane fixtures pass Retail13/13 and Wrath8/8; both startups remain byte-identical `[]` and original GameMenu warnings/errors, including cursorOffset-nil, are empty. Retail preservation passes; Wrath retains two unchanged Retail-cache bootstrap failures, explicitly deferred by main to profile-gating before I1. [[xml-template-system]] owns exact counts, source-identity proof, the existing ignored TODO and acceptance limits. No fixture gate, ignore or vendor workaround was added here.
