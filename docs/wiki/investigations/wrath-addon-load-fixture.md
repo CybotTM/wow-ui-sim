@@ -12,7 +12,27 @@ The cached Wrath core publishes MoneyFrame helpers, scroll/check-button template
 
 Source-bound before receipts execute one test per case: Retail all-addon plus16 LoD shards pass; Wrath all-addon, prior-runtime, TimeManager and shards5,8–16 fail. The exact original TimeManager case fails again after the [harness source-binding fix](../systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20), confirming that relocation repair alone does not fix fixture ordering.
 
-FrameXML-corrected Wrath GREEN and Retail preservation remain pending. No errors are filtered, no baseline counts are increased, and no vendor or API producer behavior is changed by this correction.
+FrameXML-corrected Wrath receipts at `a1130d799` execute all 13 consumers: TimeManager and shards 5, 8, 9, 12, 14, 15, 16 pass; force-load, shards 10, 11, 13 and prior-runtime fail. The sealed ELF hashes match and all 1,791 generated absolute test-module paths point into this worktree; compiler warnings are zero. Retail after-fixture preservation remains pending. No errors are filtered or baseline counts increased.
+
+## Residual registration bug
+
+The original AuctionUI consumer (shard 10 and prior-runtime) fails at `Blizzard_AuctionUI.lua:482` (`SortAuctionClearSort`), `:281` (`GetBidderAuctionItems`) and `:187` (`CalculateAuctionDeposit`): each calls nil. These functions already exist in the simulator's legacy auction model, but its registration was Mists-only. The bounded correction publishes that unchanged model on Wrath too; no auction semantics change. The original shard is the RED; post-correction evidence remains pending.
+
+## Retained legacy gaps
+
+These are separate from fixture ordering and auction publication. They remain unchanged, with no budget relaxation:
+
+| Original cached consumer boundary | Failure | Missing modeled contract |
+|---|---|---|
+| `Blizzard_BattlefieldMinimap.lua:49` | `CreateMiniWorldMapArrowFrame` nil | Map-arrow frame creation and position presentation. |
+| `Blizzard_TalentUI.lua:266,971` | `GetActiveTalentGroup` nil | Active/player/pet talent-group state and group-count projections. |
+| `Blizzard_Calendar.lua:2340` | `ArenaTeamRoster` nil | Arena-team roster request/state/event lifecycle. |
+| `Blizzard_Calendar.lua:3771` | `CalendarEventGetTypes` nil | Calendar event-type catalog matching the original positional consumer. |
+| `Blizzard_Calendar.lua:4521` | `CalendarDefaultGuildFilter` nil | Guild invite level-filter defaults and persistence. |
+| `Blizzard_Calendar.lua:1193` | captured local `random` nil | Legacy global math alias publication before Calendar chunk execution; not a calendar-state workaround. |
+| `Blizzard_TradeSkillUI.lua:463,508` | `SetTradeSkillSubClassFilter`, `SetTradeSkillInvSlotFilter` nil | Selected trade-skill subclass/inventory-filter state and filtered recipe projection. |
+
+Shard 11 retains BattlefieldMinimap/TalentUI; shard 13 retains Calendar/TradeSkillUI. Force-load retains Calendar above its shared baseline and additional below-budget errors; full raw receipts remain in the proof ledger. These do not justify expanding this lane into legacy system implementation.
 
 ## Native limits and laptop questions
 

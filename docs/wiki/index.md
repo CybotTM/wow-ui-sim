@@ -1,6 +1,6 @@
 ## [2026-10-20] investigation | Wrath addon-load fixture ordering
 
-[Fixture diagnosis](investigations/wrath-addon-load-fixture.md) traces missing core prerequisites to omitted profile FrameXML loading. The fixture now matches production ordering; original-consumer GREEN and Retail preservation are pending, with native 3.4 claims explicitly inferred.
+[Fixture diagnosis](investigations/wrath-addon-load-fixture.md) traces missing core prerequisites to omitted profile FrameXML loading. The corrected fixture passes 8/13 original Wrath consumers. Residuals separate an existing auction-model registration gate from retained legacy gaps; Retail preservation remains pending and native 3.4 claims inferred.
 
 ## [2026-10-20] investigation | Shared-target test source binding
 
