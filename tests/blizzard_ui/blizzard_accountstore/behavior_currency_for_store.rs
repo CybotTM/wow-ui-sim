@@ -108,6 +108,7 @@ const STORE_FRONT_ID: i64 = 42;
 const CURRENCY_ID_SENTINEL: i64 = 1234;
 const FORMATTER_SENTINEL: &str = "BEHAVIOR_CURRENCY_FOR_STORE_FORMATTER_SENTINEL";
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_mixin_does_not_define_on_store_front_set() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -130,7 +131,9 @@ fn account_store_mixin_does_not_define_on_store_front_set() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_item_display_mixin_on_store_front_set_is_a_function() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -148,7 +151,9 @@ fn account_store_item_display_mixin_on_store_front_set_is_a_function() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_store_front_set_caches_store_front_id_via_initialize_store() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -188,7 +193,9 @@ fn on_store_front_set_caches_store_front_id_via_initialize_store() {
         teardown_currency_lookup_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_store_front_set_calls_request_and_get_currency_with_self_store_front_id_and_caches_currency()
 {
@@ -280,7 +287,9 @@ fn on_store_front_set_calls_request_and_get_currency_with_self_store_front_id_an
         teardown_currency_lookup_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_store_front_set_does_not_hide_footer_currency_available_when_lookup_returns_nil() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -372,6 +381,7 @@ fn on_store_front_set_does_not_hide_footer_currency_available_when_lookup_return
         teardown_format_currency_display_tracker(env);
         teardown_currency_lookup_tracker(env);
     });
+}
 }
 
 fn seed_currency_lookup_tracker(env: &WowLuaEnv, currency_id_or_nil_lua: &str) {

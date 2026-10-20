@@ -94,6 +94,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn format_currency_display_with_icon_plan_named_function_does_not_exist() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -127,7 +128,9 @@ fn format_currency_display_with_icon_plan_named_function_does_not_exist() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn format_currency_display_passes_second_positional_arg_as_currency_id_to_get_currency_info() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -185,7 +188,9 @@ fn format_currency_display_passes_second_positional_arg_as_currency_id_to_get_cu
         teardown_get_currency_info_arg_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn format_currency_display_returns_amount_space_texture_markup_with_size_twelve_twelve_zero_zero() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -231,7 +236,9 @@ fn format_currency_display_returns_amount_space_texture_markup_with_size_twelve_
         teardown_get_currency_info_arg_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn format_currency_display_returns_empty_string_when_currency_info_icon_is_nil() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -260,6 +267,7 @@ fn format_currency_display_returns_empty_string_when_currency_info_icon_is_nil()
 
         teardown_get_currency_info_arg_tracker(env);
     });
+}
 }
 
 fn seed_get_currency_info_arg_tracker(env: &WowLuaEnv) {

@@ -108,6 +108,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn update_refund_time_method_exists_on_account_store_base_card_mixin() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -126,7 +127,9 @@ fn update_refund_time_method_exists_on_account_store_base_card_mixin() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn seconds_to_time_is_a_callable_global_but_update_refund_time_does_not_invoke_it() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -189,7 +192,9 @@ fn seconds_to_time_is_a_callable_global_but_update_refund_time_does_not_invoke_i
         teardown_seconds_to_time_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn update_refund_time_does_not_set_refund_text_when_status_is_not_refundable() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -247,7 +252,9 @@ fn update_refund_time_does_not_set_refund_text_when_status_is_not_refundable() {
         teardown_refundable_stub_card(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn update_refund_time_sets_refund_text_with_localized_format_when_refundable() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -313,7 +320,9 @@ fn update_refund_time_sets_refund_text_with_localized_format_when_refundable() {
         teardown_refundable_stub_card(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_base_card_on_update_throttles_check_for_item_state_update_to_one_second_cadence() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -371,6 +380,7 @@ fn account_store_base_card_on_update_throttles_check_for_item_state_update_to_on
 
         teardown_throttle_stub_card(env);
     });
+}
 }
 
 fn seed_seconds_to_time_tracker(env: &WowLuaEnv) {

@@ -58,6 +58,7 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn toggle_with_extra_arg_flips_visibility_without_changing_store_front_id() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -166,7 +167,9 @@ fn toggle_with_extra_arg_flips_visibility_without_changing_store_front_id() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn set_store_front_id_explicitly_persists_sentinel() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -211,4 +214,5 @@ fn set_store_front_id_explicitly_persists_sentinel() {
         );
 
     });
+}
 }

@@ -94,6 +94,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn is_currency_at_warning_threshold_returns_true_when_amount_meets_or_exceeds_two_thirds_of_max_quantity()
  {
@@ -142,7 +143,9 @@ fn is_currency_at_warning_threshold_returns_true_when_amount_meets_or_exceeds_tw
         teardown_get_currency_info_stub(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn is_currency_at_warning_threshold_uses_amount_field_not_plan_named_displayed_amount_field() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -182,7 +185,9 @@ fn is_currency_at_warning_threshold_uses_amount_field_not_plan_named_displayed_a
         teardown_get_currency_info_stub(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn is_currency_at_warning_threshold_returns_false_when_currency_info_is_nil() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -215,7 +220,9 @@ fn is_currency_at_warning_threshold_returns_false_when_currency_info_is_nil() {
         teardown_get_currency_info_stub(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn is_currency_at_warning_threshold_returns_false_when_max_quantity_is_nil_for_uncapped_currency() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -252,6 +259,7 @@ fn is_currency_at_warning_threshold_returns_false_when_max_quantity_is_nil_for_u
 
         teardown_get_currency_info_stub(env);
     });
+}
 }
 
 fn seed_get_currency_info_amount_max_stub(env: &WowLuaEnv, amount: i64, max_quantity: i64) {

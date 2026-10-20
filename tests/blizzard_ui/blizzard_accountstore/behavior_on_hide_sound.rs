@@ -92,6 +92,7 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_hide_calls_play_sound_with_account_store_close_sound_kit_constant_value() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -183,7 +184,9 @@ fn on_hide_calls_play_sound_with_account_store_close_sound_kit_constant_value() 
         .expect("PlaySound restore + tracker tear-down must run cleanly");
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_hide_fires_account_store_shown_state_event_registry_with_false_payload() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -276,6 +279,7 @@ fn on_hide_fires_account_store_shown_state_event_registry_with_false_payload() {
         .expect("ShownState observer tear-down must run cleanly");
     });
 }
+}
 
 const PLAN_NAMED_HIDE_EVENT_ALIASES: &[(&str, &str)] = &[
     (
@@ -300,6 +304,7 @@ const PLAN_NAMED_HIDE_EVENT_ALIASES: &[(&str, &str)] = &[
     ),
 ];
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_hide_does_not_fire_event_registry_callbacks_for_plan_named_hide_event_aliases() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -375,7 +380,9 @@ fn on_hide_does_not_fire_event_registry_callbacks_for_plan_named_hide_event_alia
         }
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_hide_invokes_account_store_util_close_static_popups_plan_omitted_side_effect() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -433,6 +440,7 @@ fn on_hide_invokes_account_store_util_close_static_popups_plan_omitted_side_effe
         )
         .expect("CloseStaticPopups restore + tracker tear-down must run cleanly");
     });
+}
 }
 
 fn sanitize_tag(alias: &str) -> String {

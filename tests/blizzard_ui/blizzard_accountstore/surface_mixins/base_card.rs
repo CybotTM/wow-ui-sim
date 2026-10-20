@@ -119,6 +119,7 @@ const PLAN_NAMED_BASE_CARD_METHODS_ABSENT: &[(&str, &str)] = &[(
          model-scene / icon swap. PLAN's `RefreshDisplay` is a near-miss for `UpdateCardDisplay`",
 )];
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_base_card_mixin_methods_match_actual_source() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -169,7 +170,9 @@ fn account_store_base_card_mixin_methods_match_actual_source() {
         }
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_base_card_mixin_does_not_define_plan_named_methods_that_are_actually_absent() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -203,4 +206,5 @@ fn account_store_base_card_mixin_does_not_define_plan_named_methods_that_are_act
             );
         }
     });
+}
 }

@@ -91,6 +91,7 @@ const PLAN_NAMED_BUT_ABSENT: &[(&str, &str)] = &[
     ),
 ];
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_frame_publishes_expected_parentkey_children() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -183,6 +184,7 @@ fn account_store_frame_publishes_expected_parentkey_children() {
         }
     });
 }
+}
 
 const FULLSCREEN_CONTAINER_NAME: &str = "FullscreenAccountStoreContainer";
 const ACTUAL_LEAVE_BUTTON_KEY: &str = "LeaveStoreButton";
@@ -207,6 +209,7 @@ const THREE_SLICE_PARENTKEY_FINGERPRINT: &[(&str, &str)] = &[
     ),
 ];
 
+post_wrath_ui_fixture! {
 #[test]
 fn fullscreen_account_store_container_publishes_expected_button_with_three_slice_inheritance() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -307,6 +310,7 @@ fn fullscreen_account_store_container_publishes_expected_button_with_three_slice
         );
     });
 }
+}
 
 const INSET_TEMPLATE_NAME: &str = "AccountStoreInsetFrameTemplate";
 
@@ -363,6 +367,7 @@ const INSET_TEMPLATE_INHERITORS: &[(&str, &str)] = &[
     ("RightInset", "Blizzard_AccountStore.xml:100"),
 ];
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_inset_frame_template_resolves_into_both_inheritors() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -414,4 +419,5 @@ fn account_store_inset_frame_template_resolves_into_both_inheritors() {
             }
         }
     });
+}
 }

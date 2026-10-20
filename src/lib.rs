@@ -3,6 +3,12 @@
 //! A standalone environment for testing World of Warcraft addons outside the game.
 //! Embeds Lua 5.1 and implements the WoW widget API.
 
+#[cfg(test)]
+include!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/tests/common/profile_fixtures.rs"
+));
+
 #[cfg(feature = "fast-build")]
 #[allow(unused_imports)]
 use iced_dynamic;

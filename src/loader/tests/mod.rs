@@ -1,6 +1,8 @@
 //! Tests for the addon loader.
 
-mod account_store;
+post_wrath_ui_fixture! {
+    mod account_store;
+}
 mod button_text;
 mod button_textures;
 mod lua_loading;

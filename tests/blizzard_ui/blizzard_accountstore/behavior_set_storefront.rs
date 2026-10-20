@@ -83,6 +83,7 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn set_store_front_id_does_not_lookup_plan_named_dynamic_title_globals() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -128,7 +129,9 @@ fn set_store_front_id_does_not_lookup_plan_named_dynamic_title_globals() {
         }
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn set_store_front_id_does_not_resolve_title_through_plan_shape_dynamic_global_lookup() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -200,4 +203,5 @@ fn set_store_front_id_does_not_resolve_title_through_plan_shape_dynamic_global_l
              single id."
         );
     });
+}
 }

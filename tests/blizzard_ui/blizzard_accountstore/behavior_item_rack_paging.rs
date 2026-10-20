@@ -84,6 +84,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn set_page_method_exists_on_item_display_mixin() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -128,7 +129,9 @@ fn set_page_method_exists_on_item_display_mixin() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn set_page_calls_set_items_on_rack_not_refresh_directly() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -181,7 +184,9 @@ fn set_page_calls_set_items_on_rack_not_refresh_directly() {
         teardown_stub_display(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn set_page_clamps_below_one_to_one() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -227,7 +232,9 @@ fn set_page_clamps_below_one_to_one() {
         teardown_stub_display(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn set_page_clamps_above_max_to_max_page() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -276,7 +283,9 @@ fn set_page_clamps_above_max_to_max_page() {
         teardown_stub_display(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn set_page_passes_cumulative_buggy_slice_for_page_above_one() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -352,6 +361,7 @@ fn set_page_passes_cumulative_buggy_slice_for_page_above_one() {
         teardown_rack_call_trackers(env);
         teardown_stub_display(env);
     });
+}
 }
 
 fn seed_rack_call_trackers(env: &WowLuaEnv) {
