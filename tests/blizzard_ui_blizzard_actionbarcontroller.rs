@@ -33,10 +33,9 @@ post_wrath_ui_fixture! {
 mod behavior_player_entering_world_runs_update_all;
 }
 
-post_wrath_ui_fixture! {
+// Wrath ActionButton.lua handles ACTIONBAR_PAGE_CHANGED; adapt the fixture, not applicability.
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_page_changed_routes_to_update_all.rs"]
 mod behavior_page_changed_routes_to_update_all;
-}
 
 post_wrath_ui_fixture! {
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_override_skinned.rs"]
@@ -78,15 +77,13 @@ post_wrath_ui_fixture! {
 mod behavior_reset_to_default;
 }
 
-post_wrath_ui_fixture! {
+// Wrath VehicleMenuBar.lua refreshes vehicle mana on UNIT_DISPLAYPOWER.
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_unit_displaypower_updates_vehicle_mana.rs"]
 mod behavior_unit_displaypower_updates_vehicle_mana;
-}
 
-post_wrath_ui_fixture! {
+// Wrath BonusActionBarFrame.lua handles all three shapeshift refresh events.
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_shapeshift_events_update_stance_bar.rs"]
 mod behavior_shapeshift_events_update_stance_bar;
-}
 
 post_wrath_ui_fixture! {
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_possess_event_updates_possess_and_stance.rs"]
