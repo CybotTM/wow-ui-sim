@@ -196,6 +196,7 @@ fn blizzard_quest_timer_excluded_from_eager_game_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quest_timer_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -211,6 +212,7 @@ fn blizzard_quest_timer_appears_in_full_addon_inventory() {
          classic-flavor addons show up in admin / debug surfaces while still \
          being excluded from the eager retail load path"
     );
+}
 }
 
 post_wrath_ui_fixture! {
