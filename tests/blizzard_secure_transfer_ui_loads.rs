@@ -206,6 +206,7 @@ fn toc_lists_only_xml_with_two_lua_files_loaded_via_script_directives() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_on_every_screen_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -228,7 +229,9 @@ fn appears_on_every_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_two_lua_one_xml_one_toc() {
     let dir = secure_transfer_dir();
@@ -250,6 +253,7 @@ fn root_directory_holds_two_lua_one_xml_one_toc() {
          secure-env exit door for calls into the global Lua environment \
          (SendMailFrame_EnableSendMailButton, GetAppropriateTopLevelParent, etc.)"
     );
+}
 }
 
 post_wrath_ui_fixture! {
