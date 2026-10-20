@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn quest_navigation_dir() -> PathBuf {
@@ -45,6 +46,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quest_navigation_find_toc_resolves_bare_variant() {
     let resolved =
@@ -69,7 +72,9 @@ fn blizzard_quest_navigation_find_toc_resolves_bare_variant() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quest_navigation_toc_pins_eager_no_lod_no_deps() {
     let toc =
@@ -122,7 +127,9 @@ fn blizzard_quest_navigation_toc_pins_eager_no_lod_no_deps() {
     );
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quest_navigation_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(quest_navigation_toc()).expect("TOC reads utf-8");
@@ -147,7 +154,9 @@ fn blizzard_quest_navigation_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT carry any AllowLoad / AllowLoadGameType directive"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quest_navigation_toc_lists_one_xml_file() {
     let toc = TocFile::from_file(&quest_navigation_toc()).expect("TOC parses");
@@ -172,6 +181,7 @@ fn blizzard_quest_navigation_toc_lists_one_xml_file() {
         "SuperTrackedFrame.lua must exist in the addon directory even though \
          the TOC body does not list it — the XML pulls it in"
     );
+}
 }
 
 #[test]
