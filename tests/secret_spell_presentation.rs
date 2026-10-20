@@ -178,7 +178,16 @@ fn presentation_miss_and_invalid_numeric_secret_controls() {
             assert(C_Spell.GetSpellName(Missing) == 'Unknown')
             assert(select('#', C_Spell.GetSpellTexture(900002)) == 0)
             assert(C_Spell.GetSpellName(900002) == 'Unknown')
-            for _, value in ipairs({Fraction, Negative, Infinite, Nan, Overflow, SecretString, SecretBool}) do
+            assert(C_Spell.GetSpellTexture(19750.5) == 135907)
+            assert(C_Spell.GetSpellTexture(Fraction) == 135907, 'retain texture numeric truncation')
+            assert(C_Spell.GetSpellInfo(19750.5).spellID == 19750)
+            local fractionalInfo = C_Spell.GetSpellInfo(Fraction)
+            assert(fractionalInfo.name == 'Flash of Light' and issecretvalue(fractionalInfo.spellID))
+            if canaccessvalue(fractionalInfo.spellID) then
+                assert(secretunwrap(fractionalInfo.spellID) == 19750, 'resolved identity, not original fractional payload')
+            end
+            assert(not pcall(C_Spell.GetSpellName, Fraction), 'typed name rejects fractional selector')
+            for _, value in ipairs({Negative, Infinite, Nan, Overflow, SecretString, SecretBool}) do
                 assert(select('#', C_Spell.GetSpellInfo(value)) == 1)
                 assert(C_Spell.GetSpellInfo(value) == nil)
                 assert(select('#', C_Spell.GetSpellTexture(value)) == 0)
