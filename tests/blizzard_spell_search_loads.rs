@@ -6,7 +6,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn spell_search_dir() -> PathBuf {
@@ -40,6 +41,8 @@ const VIRTUAL_TEMPLATES: &[(&str, &str)] = &[
     ("SpellSearchBoxTemplate", "EditBox"),
 ];
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_load_on_demand_with_no_dependencies() {
     let toc = TocFile::from_file(&spell_search_toc()).expect("SpellSearch TOC parses");
@@ -63,7 +66,9 @@ fn toc_declares_load_on_demand_with_no_dependencies() {
         toc.dependencies()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_omits_optional_metadata_directives() {
     let toc = TocFile::from_file(&spell_search_toc()).expect("SpellSearch TOC parses");
@@ -83,7 +88,9 @@ fn toc_omits_optional_metadata_directives() {
          panels with no flavor lockout"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_two_metadata_directives_only() {
     let raw = std::fs::read_to_string(spell_search_toc()).expect("TOC reads utf-8");
@@ -113,7 +120,9 @@ fn toc_raw_bytes_pin_two_metadata_directives_only() {
     assert!(!raw.contains("## UseSecureEnvironment"));
     assert!(!raw.contains("## Version"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_resolves_to_ten_entries_in_canonical_order() {
     let toc = TocFile::from_file(&spell_search_toc()).expect("TOC parses");
@@ -153,7 +162,9 @@ fn body_resolves_to_ten_entries_in_canonical_order() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn util_lua_loads_first_to_publish_match_type_enums_before_consumers() {
     let toc = TocFile::from_file(&spell_search_toc()).expect("TOC parses");
@@ -176,7 +187,9 @@ fn util_lua_loads_first_to_publish_match_type_enums_before_consumers() {
          SpellSearchUtil.FilterType.* — so Util must run before any of them"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn source_lua_loads_before_filter_lua_for_source_type_enum_use() {
     let toc = TocFile::from_file(&spell_search_toc()).expect("TOC parses");
@@ -219,7 +232,9 @@ fn source_lua_loads_before_filter_lua_for_source_type_enum_use() {
          controller's Init runs"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn templates_xml_is_last_for_mixin_resolution() {
     let toc = TocFile::from_file(&spell_search_toc()).expect("TOC parses");
@@ -240,6 +255,7 @@ fn templates_xml_is_last_for_mixin_resolution() {
          Templates.lua MUST come immediately before so its three mixin \
          tables exist when XML scanning binds them"
     );
+}
 }
 
 #[test]
