@@ -80,13 +80,19 @@ fn invoke(env: &WowLuaEnv, code: &str, tainted: bool) {
         }
     ))
     .expect(code);
-    let value: rilua::Val = env.eval("return Selector").unwrap();
-    let lua = env.lua();
-    assert_eq!(
-        rilua::table_security::unwrap_secret(lua.state(), value).unwrap(),
-        rilua::Val::Num(19750.0),
-        "query preserves original wrapper payload"
-    );
+    for (name, expected) in [
+        ("Selector", 19750.0),
+        ("Fraction", 19750.5),
+        ("Missing", 900002.0),
+    ] {
+        let value: rilua::Val = env.eval(&format!("return {name}")).unwrap();
+        let lua = env.lua();
+        assert_eq!(
+            rilua::table_security::unwrap_secret(lua.state(), value).unwrap(),
+            rilua::Val::Num(expected),
+            "query preserves original {name} wrapper payload"
+        );
+    }
 }
 
 #[test]
