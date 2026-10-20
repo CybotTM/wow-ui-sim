@@ -11,6 +11,7 @@ fn arrow_original_49_and_lazy_children() {
     env.exec(r#"
         BattlefieldMinimap_OnLoad(BattlefieldMinimap)
         assert(PlayerMiniArrowFrame:GetObjectType() == 'Model')
+        assert(PlayerMiniArrowFrame:GetModel() == 'MinimapArrow.mdx')
         assert(PlayerMiniArrowEffectFrame:GetObjectType() == 'Model')
         assert(PlayerMiniArrowFrame:GetParent() == BattlefieldMinimap)
         assert(PlayerMiniArrowEffectFrame:GetParent() == BattlefieldMinimap)
@@ -24,6 +25,7 @@ fn arrow_original_49_and_lazy_children() {
             {{}, "CreateMiniWorldMapArrowFrame(): Couldn't find 'this' in parent object"},
             {BattlefieldMinimap:CreateTexture(), 'CreateMiniWorldMapArrowFrame(): Wrong object type, expected frame'},
         }
+        assert(not pcall(CreateMiniWorldMapArrowFrame))
         for _, case in ipairs(cases) do
             local ok, err = pcall(CreateMiniWorldMapArrowFrame, case[1])
             assert(not ok and string.find(err, case[2], 1, true), tostring(err))

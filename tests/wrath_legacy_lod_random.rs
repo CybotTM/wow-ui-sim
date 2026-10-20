@@ -18,6 +18,7 @@ fn random_original_capture_87_and_calendar_1193() {
         assert(texTop == 0 or texTop == 0.5)
         assert(texBottom == texTop + 0.5)
         assert(random == math.random)
+        assert(rawget(_G, 'randomseed') == nil)
     "#
     ))
     .unwrap();
