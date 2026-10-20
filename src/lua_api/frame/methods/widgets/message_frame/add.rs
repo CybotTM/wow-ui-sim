@@ -2,7 +2,7 @@
 
 use super::super::shared::{opt_f32, opt_string};
 use super::scroll::truncate_messages;
-use crate::lua_api::message_frame::Message;
+use crate::lua_api::message_frame::{Message, uses_wrath_row_lifecycle};
 use crate::lua_api::methods::{borrow_state_mut, frame_id_from_stack};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -77,11 +77,7 @@ pub(super) fn add_message_core_from_stack(state: &mut LuaState, id: u64, log: bo
         log_message_sim(&sim, id, &message.text);
     }
     message.timestamp = sim.start_time.elapsed().as_secs_f64();
-    let wrath_row = crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
-        && sim
-            .widgets
-            .get(id)
-            .is_some_and(|frame| frame.widget_type == crate::widget::WidgetType::MessageFrame);
+    let wrath_row = sim.widgets.get(id).is_some_and(uses_wrath_row_lifecycle);
     let data = sim.message_frames.entry(id).or_default();
     if wrath_row {
         data.pending_wrath_messages.push_back(message);

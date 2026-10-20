@@ -88,16 +88,15 @@ impl MessageFrameData {
     }
 }
 
+pub(crate) fn uses_wrath_row_lifecycle(frame: &crate::widget::Frame) -> bool {
+    crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+        && frame.widget_type == crate::widget::WidgetType::MessageFrame
+        && frame.object_type_name.as_deref() != Some("ScrollingMessageFrame")
+}
+
 pub(crate) fn update_wrath_message_frames(sim: &mut crate::lua_api::SimState, elapsed: f64) {
-    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
-        return;
-    }
     for (&id, data) in &mut sim.message_frames {
-        if sim
-            .widgets
-            .get(id)
-            .is_some_and(|frame| frame.widget_type == crate::widget::WidgetType::MessageFrame)
-        {
+        if sim.widgets.get(id).is_some_and(uses_wrath_row_lifecycle) {
             data.update_wrath_rows(elapsed);
             sim.widgets.mark_visual_dirty(id);
         }

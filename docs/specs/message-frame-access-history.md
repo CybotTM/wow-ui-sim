@@ -47,6 +47,14 @@ Historical tests/passive scaffold: `680a35a1e`; producer: `269ed6f17`. The indep
 
 **Accepted bounded GREEN receipt:** Retail `/home/osso/.local/state/wow-ui-sim/handoff/label-producers-green-private/components/label-prod-retail-labels-20261016T210501464288Z`; Wrath `/home/osso/.local/state/wow-ui-sim/handoff/label-producers-green-private/components/label-prod-wrath-labels-20261016T211404318442Z`; independent reports `/home/osso/.local/state/wow-ui-sim/verification/label-producers-green/retail-report.md` and `/home/osso/.local/state/wow-ui-sim/verification/label-producers-green/wrath-report.md`. Those reports own executed identities/counts, assertion reachability, source/artifact identity and preservation scope. Retail cannot earn Wrath-only C11/legacy quest credit. Other profiles, ordinary startup, format/check and native parity remain separate gates.
 
+## Wrath scrolling lifecycle repair — 2026-10-20
+
+`392651e97` selected the queued-row lifecycle by `WidgetType::MessageFrame`, which also represents ScrollingMessageFrame. Restore immediate scrolling history across explicit Lua creation, direct XML and runtime-template child creation. Both insertion and update use the same predicate: only Wrath MessageFrame widgets without the ScrollingMessageFrame object-type name acquire queued rows/timers. Plain MessageFrame/UIErrorsFrame remains queued.
+
+`template::set_intrinsic` stamps the existing Rust `object_type_name` for the ScrollingMessageFrame base on Wrath only: that is the only profile with this queued lifecycle. Retail identity and history output are unchanged. No new widget enum, flag, history method or access-ID API is introduced. `tests/widgets_b6_c6.rs` asserts synchronous metadata/removal and timer-free history across an update for all three creation paths; bounded runtime proof is pending.
+
+Laptop clean-room evidence `handoff/laptop-labels-answers-20261018/message-frame-access-12340.md` contains two answers agreeing on synchronous native scrolling history and absence of GetNumMessages/GetMessageInfo/RemoveMessagesByAccessID on native plain MessageFrame. Plain-frame queuing remains INFERRED because timing evidence conflicts between answers. Historical C11 plain-frame immediate-history assertions conflict with queued-row preservation; leave those tests and methods unchanged in this repair, tracking the method/access-ID gap separately. No full C11 GREEN or native-run claim follows from the scrolling repair.
+
 ## Known gaps (current cycle)
 
 - [x] Saved tests/passive-scaffold behavioral RED accepted, including whole-file bounded Wrath fixture setup and explicit failed transfer outcome.
