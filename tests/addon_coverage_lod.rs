@@ -41,7 +41,8 @@ struct LoadOnDemandAddonClosure {
 }
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn known_load_on_demand_runtime_error_counts() -> BTreeMap<String, usize> {
@@ -341,6 +342,7 @@ fn closure_runtime_failure_message(
 ) -> Option<String> {
     let state = env.state().borrow();
     let grouped_errors = grouped_errors_by_addon(&state);
+    eprintln!("Complete runtime Lua errors for {representative}: {grouped_errors:#?}");
     let actual_counts = actual_error_counts(&grouped_errors);
     let increases =
         classify_error_count_increases_from_baseline(known_runtime_counts, &actual_counts);
@@ -424,10 +426,7 @@ fn run_load_on_demand_blizzard_addon_shard_body(shard_index: usize, shard_count:
     );
 }
 
-fn run_load_on_demand_blizzard_addon_shard_without_timeout(
-    shard_index: usize,
-    shard_count: usize,
-) {
+fn run_load_on_demand_blizzard_addon_shard_without_timeout(shard_index: usize, shard_count: usize) {
     with_isolated_addon_coverage_state(|| {
         common::with_perf_lock(|| {
             run_load_on_demand_blizzard_addon_shard_body(shard_index, shard_count);

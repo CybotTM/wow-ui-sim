@@ -22,7 +22,10 @@ const PANEL_COVERAGE_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame_Mainline.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
     (
         "Blizzard_UIPanelTemplates",
         "Blizzard_UIPanelTemplates_Mainline.toc",
@@ -346,6 +349,7 @@ fn all_blizzard_addon_load_errors_are_tracked_per_addon_name() {
             let state = env.state().borrow();
             let grouped_errors = grouped_errors_by_addon(&state);
             println!("{}", format_full_per_addon_report(&grouped_errors));
+            eprintln!("Complete force-load Lua errors: {grouped_errors:#?}");
             let known_counts = known_error_counts();
             let actual_counts = actual_error_counts(&grouped_errors);
             let changes = classify_error_count_changes(&known_counts, &actual_counts);
