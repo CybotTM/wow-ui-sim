@@ -124,6 +124,18 @@ fn load_full_game_ui() -> WowLuaEnv {
 
 #[test]
 fn each_lane_addon_directory_resolves_with_a_toc() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        for file in [
+            "WorldMapFrame.xml",
+            "WorldMapFrame.lua",
+            "WorldMapFrameTemplates.xml",
+        ] {
+            assert!(toc.addon_dir.join(file).is_file());
+        }
+        assert!(parse_lane_toc("Blizzard_BattlefieldMinimap").is_load_on_demand());
+        return;
+    }
     for name in LANE_ADDONS {
         let dir = blizzard_ui_dir().join(name);
         assert!(
@@ -145,6 +157,14 @@ fn each_lane_addon_directory_resolves_with_a_toc() {
 
 #[test]
 fn map_canvas_secure_util_uses_load_first_so_it_runs_before_mapcanvas_mixin_code() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        assert!(!toc.is_load_first());
+        let xml = std::fs::read_to_string(toc.addon_dir.join("WorldMapFrame.xml")).unwrap();
+        assert!(xml.contains(r#"<Script file="WorldMapFrame.lua"/>"#));
+        assert!(xml.contains(r#"<Include file="WorldMapFrameTemplates.xml"/>"#));
+        return;
+    }
     let secure_util = parse_lane_toc("Blizzard_MapCanvasSecureUtil");
     assert!(
         secure_util.is_load_first(),
@@ -168,6 +188,16 @@ fn map_canvas_secure_util_uses_load_first_so_it_runs_before_mapcanvas_mixin_code
 
 #[test]
 fn lane_dep_edges_classify_each_addons_load_floor() {
+    if cfg!(feature = "client-wrath") {
+        let core = crate::common::native_framexml_toc();
+        let battlefield = parse_lane_toc("Blizzard_BattlefieldMinimap");
+        assert!(core.dependencies().is_empty());
+        assert!(!core.is_load_on_demand());
+        assert!(battlefield.dependencies().is_empty());
+        assert!(battlefield.is_load_on_demand());
+        assert!(core.files.contains(&PathBuf::from("WorldMapFrame.xml")));
+        return;
+    }
     let secure_util = parse_lane_toc("Blizzard_MapCanvasSecureUtil");
     let map_canvas = parse_lane_toc("Blizzard_MapCanvas");
     let shared_providers = parse_lane_toc("Blizzard_SharedMapDataProviders");
@@ -250,6 +280,16 @@ fn lane_dep_edges_classify_each_addons_load_floor() {
 
 #[test]
 fn world_map_ships_only_a_mainline_toc_so_classic_clients_could_not_load_it() {
+    if cfg!(feature = "client-wrath") {
+        let core = crate::common::native_framexml_toc();
+        assert!(core.files.contains(&PathBuf::from("WorldMapFrame.xml")));
+        assert_eq!(
+            core.metadata.get("Interface").map(String::as_str),
+            Some("30300")
+        );
+        assert!(!blizzard_ui_dir().join("Blizzard_WorldMap").exists());
+        return;
+    }
     let dir = blizzard_ui_dir().join("Blizzard_WorldMap");
     let entries: Vec<String> = std::fs::read_dir(&dir)
         .unwrap_or_else(|err| panic!("read_dir({dir:?}) failed: {err}"))
@@ -272,6 +312,22 @@ fn world_map_ships_only_a_mainline_toc_so_classic_clients_could_not_load_it() {
 
 #[test]
 fn battlefield_map_mainline_toc_uses_space_separated_required_dep_form() {
+    if cfg!(feature = "client-wrath") {
+        let toc = parse_lane_toc("Blizzard_BattlefieldMinimap");
+        assert!(toc.dependencies().is_empty());
+        assert_eq!(
+            toc.files,
+            [
+                PathBuf::from("Blizzard_BattlefieldMinimap.xml"),
+                PathBuf::from("Localization.lua")
+            ]
+        );
+        assert!(
+            toc.saved_variables_per_character()
+                .contains(&"BattlefieldMinimapOptions".to_string())
+        );
+        return;
+    }
     let toc_path = blizzard_ui_dir()
         .join("Blizzard_BattlefieldMap")
         .join("Blizzard_BattlefieldMap_Mainline.toc");
@@ -290,6 +346,13 @@ fn battlefield_map_mainline_toc_uses_space_separated_required_dep_form() {
 
 #[test]
 fn smoke_lane_addons_carry_load_on_demand_directive() {
+    if cfg!(feature = "client-wrath") {
+        let toc = parse_lane_toc("Blizzard_BattlefieldMinimap");
+        assert!(toc.is_load_on_demand());
+        assert!(toc.allows_screen(ScreenKind::Game));
+        assert!(!toc.allows_screen(ScreenKind::Login));
+        return;
+    }
     for smoke in SMOKE_LANE_ADDONS {
         let toc = parse_lane_toc(smoke);
         assert!(
@@ -305,6 +368,16 @@ fn smoke_lane_addons_carry_load_on_demand_directive() {
 
 #[test]
 fn world_map_is_eager_anchor_not_load_on_demand() {
+    if cfg!(feature = "client-wrath") {
+        assert!(!crate::common::native_framexml_toc().is_load_on_demand());
+        let env = fresh_lane_env();
+        crate::common::load_profile_framexml(&env);
+        assert!(
+            env.eval::<bool>("return WorldMapFrame ~= nil and not WorldMapFrame:IsShown()")
+                .unwrap()
+        );
+        return;
+    }
     let world_map = parse_lane_toc("Blizzard_WorldMap");
     assert!(
         !world_map.is_load_on_demand(),
@@ -339,6 +412,21 @@ fn smoke_lane_addons_do_not_appear_in_eager_game_discovery() {
 
 #[test]
 fn startup_lane_addons_appear_in_eager_game_discovery() {
+    if cfg!(feature = "client-wrath") {
+        let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
+        assert!(
+            !addons
+                .iter()
+                .any(|(name, _)| name == "Blizzard_BattlefieldMinimap")
+        );
+        let env = fresh_lane_env();
+        crate::common::load_profile_framexml(&env);
+        assert!(
+            env.eval::<bool>("return IsAddOnLoaded('FrameXML') and WorldMapFrame ~= nil")
+                .unwrap()
+        );
+        return;
+    }
     let ui = blizzard_ui_dir();
     let names: Vec<String> = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game)
         .into_iter()
@@ -403,6 +491,22 @@ fn map_canvas_secure_util_emerges_before_other_lane_addons_in_eager_order() {
 
 #[test]
 fn world_map_dependency_closure_pulls_in_canvas_secure_util_and_data_providers() {
+    if cfg!(feature = "client-wrath") {
+        let env = fresh_lane_env();
+        crate::common::load_profile_framexml(&env);
+        env.exec(
+            r#"
+            assert(type(WorldMapFrame_OnShow) == "function")
+            assert(type(WorldMapFrame_Update) == "function")
+            ShowUIPanel(WorldMapFrame)
+            assert(WorldMapFrame:IsShown())
+            HideUIPanel(WorldMapFrame)
+            assert(not WorldMapFrame:IsShown())
+        "#,
+        )
+        .expect("12340 world-map panel lifecycle");
+        return;
+    }
     let ui = blizzard_ui_dir();
     let closure: Vec<String> =
         discover_blizzard_addon_closure_for_screen(&ui, ScreenKind::Game, &["Blizzard_WorldMap"])
