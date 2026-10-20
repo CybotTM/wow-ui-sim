@@ -42,6 +42,22 @@ fn currency_unused_mutations_original_checkbox_updates_selected_currency_and_pro
 }
 
 #[test]
+fn currency_unused_mutations_original_popup_shows_discovered_currency_checkbox() {
+    with_token_ui(
+        r#"
+        local row = C_CurrencyInfo.GetCurrencyListInfo(3)
+        row.currencyIndex = 3
+        local entry = CreateFrame("Button", nil, UIParent, "TokenEntryTemplate")
+        entry:Initialize(row)
+        TokenFrame:UpdatePopup(entry)
+        assert(TokenFramePopup.InactiveCheckbox:IsShown(),
+            "B5 unused: original popup must expose a discovered currency checkbox")
+        assert(TokenFramePopup.InactiveCheckbox:GetChecked() == false)
+        "#,
+    );
+}
+
+#[test]
 fn currency_unused_mutations_ignore_non_currency_indices_and_missing_supplied_rows() {
     let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
     env.exec(
