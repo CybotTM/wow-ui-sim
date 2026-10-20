@@ -3,7 +3,8 @@
 
 use super::c_spell::{read_public_spell_identifier_at, read_spell_identifier_value};
 use crate::lua_api::globals::missing_surface::tooltip_info::tooltip_for_spell_identifier;
-use crate::lua_bridge::{stack_val, table_get_static, table_set_rust_fn_static, table_set_static};
+use crate::lua_api::methods::{table_get_static, table_set_static};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::table_security::{
     SecretPayloadKind, inspect_host_secret_number, is_secret_value, secret_payload_kind,
     wrap_host_secret_number,
