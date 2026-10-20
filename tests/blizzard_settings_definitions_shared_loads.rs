@@ -262,6 +262,7 @@ fn toc_body_first_seven_entries_are_cross_flavor_files_in_declared_order() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_on_every_screen_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -284,7 +285,9 @@ fn appears_on_every_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_eight_top_level_lua_xml_files_plus_mainline_subdir() {
     let dir = definitions_shared_dir();
@@ -329,6 +332,7 @@ fn root_directory_holds_eight_top_level_lua_xml_files_plus_mainline_subdir() {
              `[AllowLoadGameType mainline]` postfix filter"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
