@@ -4,7 +4,7 @@ use crate::common::blizzard_addon_harness::{
     build_blizzard_addon_closure_env, load_blizzard_addon_closure_into_env, new_blizzard_addon_env,
 };
 use wow_ui_sim::loader::{
-    discover_blizzard_addons_for_screen, find_toc_file, BlizzardAddonOverride,
+    BlizzardAddonOverride, discover_blizzard_addons_for_screen, find_toc_file,
 };
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
@@ -121,6 +121,8 @@ fn load_map_data_providers_closure() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_mainline_variant() {
     let resolved =
@@ -136,7 +138,9 @@ fn find_toc_file_resolves_mainline_variant() {
          data-provider family with reduced surface area"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_load_on_demand_with_no_dependencies() {
     let toc = TocFile::from_file(&map_data_providers_toc()).expect("TOC parses");
@@ -167,7 +171,9 @@ fn toc_declares_load_on_demand_with_no_dependencies() {
     );
     assert!(toc.optional_deps().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_account_saved_variable_for_glow_hub_quest_acknowledgements() {
     let toc = TocFile::from_file(&map_data_providers_toc()).expect("TOC parses");
@@ -189,7 +195,9 @@ fn toc_declares_account_saved_variable_for_glow_hub_quest_acknowledgements() {
     );
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lacks_screen_loads_only_in_game_screen() {
     let toc = TocFile::from_file(&map_data_providers_toc()).expect("TOC parses");
@@ -215,7 +223,9 @@ fn toc_lacks_screen_loads_only_in_game_screen() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_lod_with_account_sv_and_mainline_game_type() {
     let raw = std::fs::read_to_string(map_data_providers_toc())
@@ -238,7 +248,9 @@ fn toc_raw_bytes_pin_lod_with_account_sv_and_mainline_game_type() {
     assert!(!raw.contains("## OptionalDep"));
     assert!(!raw.contains("## DefaultState"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_body_lists_initialization_files_before_data_provider_xml_pairs() {
     let raw = std::fs::read_to_string(map_data_providers_toc()).expect("TOC reads utf-8");
@@ -272,7 +284,9 @@ fn toc_body_lists_initialization_files_before_data_provider_xml_pairs() {
          PinMixin OnLoad reads MapPinTags constants. Got: {first_three:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_body_count_breakdown_matches_filesystem_layout() {
     let toc = TocFile::from_file(&map_data_providers_toc()).expect("TOC parses");
@@ -303,6 +317,7 @@ fn toc_body_count_breakdown_matches_filesystem_layout() {
          family (QuestDataProvider, ContentTrackingDataProvider, \
          GroupMembersDataProvider, etc.). Got xml_count={xml_count}"
     );
+}
 }
 
 #[test]
