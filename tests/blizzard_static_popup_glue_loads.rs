@@ -109,6 +109,8 @@ fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&static_popup_glue_dir()).expect("StaticPopup_Glue TOC resolves");
@@ -119,7 +121,9 @@ fn find_toc_file_resolves_bare_toc() {
          [AllowLoadGameType] annotations (toc.rs:144-146)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dependencies_chain_pulls_three_blizzard_addons() {
     let toc = TocFile::from_file(&static_popup_glue_toc()).expect("TOC parses");
@@ -139,7 +143,9 @@ fn dependencies_chain_pulls_three_blizzard_addons() {
         toc.dependencies()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_glue_resolves_to_three_glue_screens() {
     let toc = TocFile::from_file(&static_popup_glue_toc()).expect("TOC parses");
@@ -156,7 +162,9 @@ fn allow_load_glue_resolves_to_three_glue_screens() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn no_addon_level_game_type_restriction() {
     let toc = TocFile::from_file(&static_popup_glue_toc()).expect("TOC parses");
@@ -167,7 +175,9 @@ fn no_addon_level_game_type_restriction() {
          `[AllowLoadGameType mainline]` for the Announcement files only"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     let toc = TocFile::from_file(&static_popup_glue_toc()).expect("TOC parses");
@@ -182,7 +192,9 @@ fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_three_metadata_directives() {
     let raw = std::fs::read_to_string(static_popup_glue_toc()).expect("TOC reads utf-8");
@@ -212,7 +224,9 @@ fn toc_raw_bytes_pin_three_metadata_directives() {
     assert!(!raw.contains("## AllowLoadGameType:"));
     assert!(!raw.contains("## UseSecureEnvironment"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_substitutes_family_placeholders_to_mainline() {
     let toc = TocFile::from_file(&static_popup_glue_toc()).expect("TOC parses");
@@ -251,7 +265,9 @@ fn body_substitutes_family_placeholders_to_mainline() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_orders_defs_before_logic_before_xml() {
     let toc = TocFile::from_file(&static_popup_glue_toc()).expect("TOC parses");
@@ -284,6 +300,7 @@ fn body_orders_defs_before_logic_before_xml() {
         "GlueDialog.lua before GlueDialog.xml — XML mixin=\"GlueDialogMixin\" \
          resolves at template-registration time"
     );
+}
 }
 
 #[test]
