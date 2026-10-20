@@ -93,7 +93,21 @@ fn assert_clear_preserves_other_widgets(widget_type: &str) {
 
 #[test]
 fn clear_message_frame_history_preserves_other_widgets() {
-    assert_clear_preserves_other_widgets("MessageFrame");
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"
+        PlainClear = CreateFrame('MessageFrame', 'PlainClear')
+        PlainOther = CreateFrame('MessageFrame', 'PlainOther')
+        PlainClear:AddMessage('discard')
+        PlainOther:AddMessage('keep')
+        assert(select('#', PlainClear:Clear()) == 0)
+    "#).unwrap();
+    env.fire_on_update(0.0).unwrap();
+    let sim = env.state().borrow();
+    let cleared = sim.widgets.get_id_by_name("PlainClear").unwrap();
+    let other = sim.widgets.get_id_by_name("PlainOther").unwrap();
+    assert!(sim.message_frames[&cleared].messages.is_empty());
+    assert!(sim.message_frames[&cleared].pending_wrath_messages.is_empty());
+    assert_eq!(sim.message_frames[&other].messages[0].text, "keep");
 }
 
 #[test]
@@ -206,6 +220,7 @@ fn test_insert_mode_set_get() {
 }
 
 #[test]
+#[cfg(not(feature = "client-wrath"))]
 fn test_get_message_info() {
     let env = WowLuaEnv::new().unwrap();
 
@@ -247,10 +262,10 @@ fn test_builtin_chat_frame_accepts_messages() {
     env.exec(r#"DEFAULT_CHAT_FRAME:AddMessage("Test", 1, 1, 1)"#)
         .unwrap();
 
-    let count: i32 = env
-        .eval("return DEFAULT_CHAT_FRAME:GetNumMessages()")
-        .unwrap();
-    assert_eq!(count, 1);
+    env.fire_on_update(0.0).unwrap();
+    let sim = env.state().borrow();
+    let id = sim.widgets.get_id_by_name("ChatFrame1").unwrap();
+    assert_eq!(sim.message_frames[&id].messages[0].text, "Test");
 }
 
 #[test]
@@ -416,15 +431,11 @@ fn test_add_message_stores_timestamp() {
     )
     .unwrap();
 
-    // GetMessageInfo returns (text, r, g, b, a, timestamp) — timestamp is the 6th value
-    let (before, after, ts): (f64, f64, f64) = env
-        .eval(
-            r#"
-        local _, _, _, _, _, timestamp = TestMFTimestamp:GetMessageInfo(1)
-        return _G.__before, _G.__after, timestamp
-    "#,
-        )
-        .unwrap();
+    // Timestamp remains rendering state; Wrath's history tuple contains IDs instead.
+    let (before, after): (f64, f64) = env.eval("return __before, __after").unwrap();
+    let sim = env.state().borrow();
+    let id = sim.widgets.get_id_by_name("TestMFTimestamp").unwrap();
+    let ts = sim.message_frames[&id].messages[0].timestamp;
 
     assert!(ts >= before, "timestamp {ts} should be >= before {before}");
     assert!(ts <= after, "timestamp {ts} should be <= after {after}");

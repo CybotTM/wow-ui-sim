@@ -109,16 +109,23 @@ fn b6_c6_original_consumer_queues_one_row_per_update() {
         local handler = UIErrorsFrame:GetScript('OnEvent')
         handler(UIErrorsFrame, 'UI_ERROR_MESSAGE', 'first')
         handler(UIErrorsFrame, 'UI_ERROR_MESSAGE', 'second')
-        assert(UIErrorsFrame:GetNumMessages() == 0, 'AddMessage must queue')
     "#,
     )
     .unwrap();
+    let rows = || {
+        let sim = env.state().borrow();
+        let id = sim.widgets.get_id_by_name("UIErrorsFrame").unwrap();
+        sim.message_frames[&id]
+            .messages
+            .iter()
+            .map(|message| message.text.clone())
+            .collect::<Vec<_>>()
+    };
+    assert!(rows().is_empty(), "AddMessage must queue (INFERRED timing)");
     env.fire_on_update(0.0).unwrap();
-    env.exec("assert(UIErrorsFrame:GetNumMessages() == 1, 'one insertion per update')")
-        .unwrap();
+    assert_eq!(rows(), ["first"]);
     env.fire_on_update(0.0).unwrap();
-    env.exec("assert(UIErrorsFrame:GetNumMessages() == 2)")
-        .unwrap();
+    assert_eq!(rows(), ["first", "second"]);
 }
 
 #[test]
