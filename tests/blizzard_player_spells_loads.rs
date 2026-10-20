@@ -282,6 +282,7 @@ fn blizzard_player_spells_find_toc_resolves_bare_variant() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_spells_toc_declares_load_on_demand_with_three_dependencies() {
     let toc = TocFile::from_file(&player_spells_toc()).expect("Blizzard_PlayerSpells TOC parses");
@@ -341,6 +342,7 @@ fn blizzard_player_spells_toc_declares_load_on_demand_with_three_dependencies() 
          spellbook search history is non-persistent; class spec selection is server- \
          authoritative via C_SpecializationInfo"
     );
+}
 }
 
 post_wrath_ui_fixture! {
