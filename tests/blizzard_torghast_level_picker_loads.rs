@@ -358,6 +358,7 @@ fn ui_panel_windows_entry_registered_at_boot(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn six_torghast_gossip_texture_kits_route_to_load_addon() {
     let raw = std::fs::read_to_string(
@@ -378,6 +379,7 @@ fn six_torghast_gossip_texture_kits_route_to_load_addon() {
              C_AddOns.LoadAddOn at line 16 then TryShow at line 17"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
