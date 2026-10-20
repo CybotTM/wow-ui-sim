@@ -351,6 +351,7 @@ fn family_placeholder_resolves_to_mainline_subdir_in_three_entries() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_on_every_screen_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -374,6 +375,7 @@ fn appears_on_every_screen_eager_discovery() {
              pre-login options dialog"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
