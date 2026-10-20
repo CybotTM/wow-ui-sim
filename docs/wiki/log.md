@@ -2457,3 +2457,7 @@ Four original-body Wrath KeyRing/Retail ChatConfig regressions are RED. Removed 
 ## 2026-10-19 — LFG XML callback capture removal
 
 Four original LFD/RaidFinder OnClick-body cases are RED: join and leave replacements/hooks are bypassed for category-only and category+slot calls. Removed the specialized capture builder/parser and its optimization-selection assertion; ordinary Lua now owns the unchanged bodies. GREEN/preservation pending; see [[xml-template-system]].
+
+## 2026-10-19 — Original tooltip formatter capture removal
+
+CharacterFrameTab1 OnEnter is behavioral RED after formatter replacement/hook; the literal-first changed-environment case is an existing PASS control, not a fast-path claim. The function-result/three-number builder now emits call-time Lua target/formatter/argument reads. Other unproved object/value captures remain audited, untouched gaps. GREEN/preservation pending; see [[xml-template-system]].

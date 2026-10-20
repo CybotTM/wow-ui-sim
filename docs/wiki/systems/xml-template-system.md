@@ -102,6 +102,10 @@ Global no-argument predicates and predicates receiving a global getter result no
 
 The `GetLFGMode` branch special case also uses the ordinary Lua compiler; its capture template, parser and enum variant were removed. Four original LFD/RaidFinder OnClick-body regressions independently show frozen join/leave callbacks bypassing replacements and secure hooks, with both category-only and category+slot argument checks. These behavior tests replace the old parser-selection assertion. Follow-up GREEN/preservation remains pending.
 
+### Tooltip formatter callbacks
+
+The global-method function-result/three-number builder now emits a Lua method call containing the formatter expression, instead of capturing its function, target and first global argument. Original CharacterFrameTab1 OnEnter supplies a behavioral RED after `MicroButtonTooltipText` replacement+hook; the literal-first changed-environment fixture already passes as a control and does not establish fast-path selection. Follow-up GREEN/preservation remains pending. Other object/value capture sites without runtime RED remain untouched and listed in the handoff audit.
+
 ## Name Substitution and parentKey
 
 `$parent` in frame names resolves to the actual parent name. `$parent.ScrollBox` in `relativeKey` resolves to `parent["ScrollBox"]`; `$parent.$parent.X` chains via `GetParent()`.
