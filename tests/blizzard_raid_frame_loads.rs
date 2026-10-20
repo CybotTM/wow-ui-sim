@@ -98,6 +98,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_raid_frame_find_toc_resolves_mainline_variant() {
     let resolved = find_toc_file(&raid_frame_dir()).expect("Blizzard_RaidFrame TOC resolves");
@@ -124,7 +126,9 @@ fn blizzard_raid_frame_find_toc_resolves_mainline_variant() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_raid_frame_toc_pins_eager_mainline_only_with_default_state_enabled() {
     let toc =
@@ -191,7 +195,9 @@ fn blizzard_raid_frame_toc_pins_eager_mainline_only_with_default_state_enabled()
     );
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_raid_frame_toc_declares_three_dependencies() {
     let toc = TocFile::from_file(&raid_frame_mainline_toc()).expect("TOC parses");
@@ -218,7 +224,9 @@ fn blizzard_raid_frame_toc_declares_three_dependencies() {
          UIPanels_Game → UnitFrame → FriendsFrame → RaidFrame"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_raid_frame_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(raid_frame_mainline_toc()).expect("TOC reads utf-8");
@@ -263,7 +271,9 @@ fn blizzard_raid_frame_toc_declares_metadata_in_raw_bytes() {
          Blizzard_QuickJoin / Blizzard_QuickKeybind"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_raid_frame_toc_lists_two_files_lua_then_xml() {
     let toc = TocFile::from_file(&raid_frame_mainline_toc()).expect("TOC parses");
@@ -277,6 +287,7 @@ fn blizzard_raid_frame_toc_lists_two_files_lua_then_xml() {
         "Retail 12.1.0.69497 lists the core RaidFrame Lua/XML pair followed by \
          RaidFrameSocialView and RaidInfoFrameSocialView Lua/XML pairs"
     );
+}
 }
 
 #[test]
