@@ -183,6 +183,7 @@ fn toc_raw_bytes_pin_current_three_line_contract() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -193,6 +194,7 @@ fn appears_in_game_eager_discovery() {
          it no in-world panel can resolve `parent=\"UIParent\"` and the \
          entire UI tree fails to compose"
     );
+}
 }
 
 #[test]
