@@ -237,6 +237,7 @@ fn retail_body_orders_seven_selected_entries_terminating_in_localization() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_eager_discovery_on_all_four_screens() {
     let ui = blizzard_ui_dir();
@@ -250,6 +251,7 @@ fn appears_in_eager_discovery_on_all_four_screens() {
              discovery — store panel needs to be ready on every screen"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
