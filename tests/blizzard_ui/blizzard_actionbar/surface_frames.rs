@@ -704,6 +704,7 @@ fn spell_flyout_publishes_dialog_strata_hidden_by_default() {
 /// reads both keys directly, so a regression that severs `parentKey`
 /// wiring while keeping the global name would crash every UpdateAll
 /// pass. The dual-axis pin below (global + field lookup) catches it.
+post_wrath_ui_fixture! {
 #[test]
 fn status_tracking_bar_manager_publishes_main_and_secondary_parent_key_children() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -747,4 +748,5 @@ fn status_tracking_bar_manager_publishes_main_and_secondary_parent_key_children(
             );
         }
     });
+}
 }
