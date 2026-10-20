@@ -6,7 +6,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn world_loot_dir() -> PathBuf {
@@ -51,6 +52,8 @@ fn load_world_loot_object_list(env: &WowLuaEnv) {
     );
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_variant() {
     let resolved =
@@ -64,7 +67,9 @@ fn find_toc_file_resolves_bare_variant() {
          is needed (mainline excludes it via the AllowLoadGameType filter)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_plunderstorm_only_game_type() {
     let toc = TocFile::from_file(&world_loot_toc())
@@ -101,7 +106,9 @@ fn toc_declares_plunderstorm_only_game_type() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_default_state_enabled_with_no_dependencies() {
     let toc = TocFile::from_file(&world_loot_toc())
@@ -126,7 +133,9 @@ fn toc_default_state_enabled_with_no_dependencies() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.saved_variables().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_lua_then_xml_in_order() {
     let toc = TocFile::from_file(&world_loot_toc())
@@ -146,7 +155,9 @@ fn toc_lists_lua_then_xml_in_order() {
          them by name during element instantiation"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_directives() {
     let raw = std::fs::read_to_string(world_loot_toc())
@@ -192,6 +203,7 @@ fn toc_raw_bytes_pin_directives() {
              only 5 directives + 2 body files"
         );
     }
+}
 }
 
 #[test]
