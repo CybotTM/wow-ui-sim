@@ -159,6 +159,8 @@ fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&static_popup_game_dir()).expect("StaticPopup_Game TOC resolves");
@@ -169,7 +171,9 @@ fn find_toc_file_resolves_bare_toc() {
          placeholders + [AllowLoadGameType] annotations (toc.rs:144-146)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dependencies_chain_pulls_six_blizzard_addons_via_plural_dependencies_key() {
     let toc = TocFile::from_file(&static_popup_game_toc()).expect("TOC parses");
@@ -194,7 +198,9 @@ fn dependencies_chain_pulls_six_blizzard_addons_via_plural_dependencies_key() {
         toc.dependencies()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_resolves_to_game_screen_only() {
     let toc = TocFile::from_file(&static_popup_game_toc()).expect("TOC parses");
@@ -211,7 +217,9 @@ fn allow_load_game_resolves_to_game_screen_only() {
     assert!(!toc.allows_screen(ScreenKind::CharacterSelect));
     assert!(!toc.allows_screen(ScreenKind::CharacterCreate));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn no_game_type_restriction_at_addon_level() {
     let toc = TocFile::from_file(&static_popup_game_toc()).expect("TOC parses");
@@ -222,7 +230,9 @@ fn no_game_type_restriction_at_addon_level() {
          inline annotations. None-branch returns false (toc.rs:294-302)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     let toc = TocFile::from_file(&static_popup_game_toc()).expect("TOC parses");
@@ -238,7 +248,9 @@ fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_three_metadata_directives() {
     let raw = std::fs::read_to_string(static_popup_game_toc()).expect("TOC reads utf-8");
@@ -268,7 +280,9 @@ fn toc_raw_bytes_pin_three_metadata_directives() {
     assert!(!raw.contains("## AllowLoadGameType"));
     assert!(!raw.contains("## UseSecureEnvironment"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_substitutes_family_and_filters_classic_only_entries() {
     let toc = TocFile::from_file(&static_popup_game_toc()).expect("TOC parses");
@@ -305,7 +319,9 @@ fn body_substitutes_family_and_filters_classic_only_entries() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_orders_definitions_before_logic_before_layout() {
     let toc = TocFile::from_file(&static_popup_game_toc()).expect("TOC parses");
@@ -333,6 +349,7 @@ fn body_orders_definitions_before_logic_before_layout() {
         "XML last: mixin=\"…\" attrs are resolved at template-registration \
          time, so mixin tables must already exist in _G"
     );
+}
 }
 
 #[test]
