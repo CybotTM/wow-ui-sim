@@ -820,10 +820,13 @@ fn forced_gc_preserves_stack_global_list_roots_and_caller_properties() {
                 if index == 3 then
                     for _, query in ipairs({C_TooltipInfo.GetSpellByID, C_TooltipInfo.GetMountBySpellID}) do
                         local data = query(value)
-                        assert(not issecretvalue(data) and issecretvalue(data.id))
-                        assert(data.lines[1].leftText == 'Flash of Light')
-                        if canaccessvalue(data.id) then assert(secretunwrap(data.id) == 19750)
-                        else assert(not pcall(secretunwrap, data.id)) end
+                        assert(not issecretvalue(data) and issecretvalue(data.id), 'public DTO and private identity after GC')
+                        assert(data.lines[1].leftText == 'Flash of Light', 'selected title after GC')
+                        if issecure() then
+                            assert(secretunwrap(data.id) == 19750, 'secure identity payload after GC')
+                        else
+                            assert(not pcall(secretunwrap, data.id), 'tainted identity unwrap denied after GC')
+                        end
                     end
                 else
                     TMReject(C_TooltipInfo.GetSpellByID, value)
