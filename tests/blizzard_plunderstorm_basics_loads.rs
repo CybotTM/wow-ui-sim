@@ -69,6 +69,8 @@ fn load_full_game_ui_with_plunderstorm_basics() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_basics_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&plunderstorm_basics_dir())
@@ -90,7 +92,9 @@ fn blizzard_plunderstorm_basics_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_basics_toc_declares_load_on_demand_with_allow_load_both() {
     let toc = TocFile::from_file(&plunderstorm_basics_toc())
@@ -146,7 +150,9 @@ fn blizzard_plunderstorm_basics_toc_declares_load_on_demand_with_allow_load_both
          C_WoWLabsMatchmaking.GetCurrentParty (glue-screen), both server-authoritative"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_basics_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(plunderstorm_basics_toc())
@@ -201,7 +207,9 @@ fn blizzard_plunderstorm_basics_toc_declares_metadata_in_raw_bytes() {
          flavor-gate"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_basics_toc_lists_two_files_in_canonical_order() {
     let toc = TocFile::from_file(&plunderstorm_basics_toc())
@@ -220,6 +228,7 @@ fn blizzard_plunderstorm_basics_toc_lists_two_files_in_canonical_order() {
          Blizzard_PlunderstormBasics.xml SECOND (materializes the virtual button template \
          + the named container frame)"
     );
+}
 }
 
 #[test]
