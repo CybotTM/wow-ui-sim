@@ -18,6 +18,7 @@ C_AuthChallenge.SetFrame = originalSetFrame
 return #calls, calls[1] == AuthChallengeFrame
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn auth_challenge_ui_onload_sets_auth_challenge_frame() {
     common::with_perf_lock(|| {
@@ -51,4 +52,5 @@ fn auth_challenge_ui_onload_sets_auth_challenge_frame() {
             });
         });
     });
+}
 }

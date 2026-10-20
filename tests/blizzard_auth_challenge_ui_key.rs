@@ -8,6 +8,7 @@ const KEYDOWN_PROBE_LUA: &str = r##"
 return select("#", AuthChallengeUI_OnKeyDown(AuthChallengeFrame, "ENTER"))
 "##;
 
+post_wrath_ui_fixture! {
 #[test]
 fn auth_challenge_ui_key_down_is_silent_noop() {
     common::with_perf_lock(|| {
@@ -37,4 +38,5 @@ fn auth_challenge_ui_key_down_is_silent_noop() {
             });
         });
     });
+}
 }

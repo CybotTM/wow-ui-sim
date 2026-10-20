@@ -42,6 +42,7 @@ return sameClosure,
        privateCallCount
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn auth_challenge_ui_submit_stays_in_secure_environment() {
     common::with_perf_lock(|| {
@@ -94,4 +95,5 @@ fn auth_challenge_ui_submit_stays_in_secure_environment() {
             });
         });
     });
+}
 }

@@ -42,6 +42,7 @@ return callCount,
        errorOnClick == AuthChallengeUI_Cancel
 "##;
 
+post_wrath_ui_fixture! {
 #[test]
 fn auth_challenge_ui_cancel_calls_auth_challenge_cancel_without_args() {
     common::with_perf_lock(|| {
@@ -104,4 +105,5 @@ fn auth_challenge_ui_cancel_calls_auth_challenge_cancel_without_args() {
             });
         });
     });
+}
 }
