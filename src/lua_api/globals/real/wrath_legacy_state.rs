@@ -27,6 +27,9 @@ pub struct WrathLegacyState {
     pub player_talent_group: u32,
     #[cfg(feature = "client-wrath")]
     pub inspected_talent_group: u32,
+    /// Lazily allocated model handles, retained within this environment.
+    #[cfg(feature = "client-wrath")]
+    pub mini_map_arrows: Option<(u64, u64)>,
     pub skills: Vec<Skill>,
     /// Zero denotes no selection; otherwise one-based into skills.
     pub selected_skill: usize,

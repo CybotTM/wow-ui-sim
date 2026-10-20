@@ -3,7 +3,7 @@
 #![cfg(feature = "client-wrath")]
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-fn original_lines(addon: &str, first: usize, last: usize) -> String {
+pub(crate) fn original_lines(addon: &str, first: usize, last: usize) -> String {
     let path = dirs::cache_dir().unwrap().join(format!(
         "wow-ui-sim/blizzard-ui/wrath/AddOns/{addon}/{addon}.lua"
     ));

@@ -5,6 +5,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 ## What it must do
 
 - [ ] `GetActiveTalentGroup` returns one cached group plus one; inspect precedes pet, pet returns one. Arguments follow native StringToBOOL, not Lua truthiness. No usage error.
+- [ ] `CreateMiniWorldMapArrowFrame(parent)` validates table/slot-zero/frame type, emits exact native errors, returns zero values and lazily creates two named child Models. Subsequent calls retain their original parents. Model mesh rendering is unsupported.
 - [ ] Preserve Retail publication and other profiles.
 
 ## How it works
@@ -16,6 +17,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - `src/lua_api/globals/real/wrath_talent_groups.rs`: cached group projection and StringToBOOL.
 - `src/lua_api/globals/real/wrath_legacy_state.rs`: supplied zero-based player/inspect indices, independently mutable from fixtures.
 - `src/wrath/compat_bootstrap.rs`: Wrath-only registration.
+- `src/lua_api/globals/real/wrath_minimap_arrows.rs`: parent validation and lazy child ownership.
 
 ## Tests asserting this spec
 
@@ -26,6 +28,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 
 - [ ] INFERRED default: player/inspect group zero (single-group character); native cache initialization unestablished. Approved by parent.
 - [ ] Auction catalog held: no local 12340 ItemClass/ItemSubClass DB export. Modern name constants omit DB row order, display flags, verbose names and missing-record identity. Wrath UI cache is a pinned Gethe UI-only snapshot, not an MPQ client. Exact inventory: handoff `wrath-legacy-apis/auction-catalog-gap.json`.
+- [ ] INFERRED arrow lifetime: retain handles in the environment; globals are not used as ownership. Native lifetime/forged identities remain unestablished. Model path uses the supplied `MinimapArrow.mdx` name only, not an inferred directory prefix.
 - [ ] Current-head GREEN and preservation proof pending.
 
 ## Out of scope
