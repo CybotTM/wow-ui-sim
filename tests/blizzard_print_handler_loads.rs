@@ -207,6 +207,7 @@ fn blizzard_print_handler_toc_lists_one_file() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_print_handler_appears_in_eager_discovery_for_every_screen() {
     let ui = blizzard_ui_dir();
@@ -229,7 +230,9 @@ fn blizzard_print_handler_appears_in_eager_discovery_for_every_screen() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_print_handler_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -242,6 +245,7 @@ fn blizzard_print_handler_appears_in_full_addon_inventory() {
          unfiltered inventory at src/loader/mod.rs:309-343 lists every parseable \
          Blizzard_* TOC"
     );
+}
 }
 
 prefork_full_ui_case! {
