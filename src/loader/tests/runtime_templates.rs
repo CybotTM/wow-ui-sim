@@ -573,7 +573,6 @@ fn test_anonymous_runtime_template_mixin_and_key_values_apply() {
 #[test]
 fn test_runtime_template_local_mixin_and_key_value_apply() {
     let env = WowLuaEnv::new().unwrap();
-    preload_shared_templates(&env);
     let temp_dir = std::env::temp_dir().join("wow-sim-runtime-template-local-source");
     std::fs::create_dir_all(&temp_dir).unwrap();
     let lua_path = temp_dir.join("test.lua");
