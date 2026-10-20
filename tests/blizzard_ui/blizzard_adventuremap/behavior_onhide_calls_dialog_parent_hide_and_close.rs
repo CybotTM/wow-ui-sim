@@ -5,6 +5,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 const ROOT: &str = "Blizzard_AdventureMap";
 const EXPECTED_CALL_ORDER: &str = "parent_hide,close";
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_onhide_aborts_dialog_then_closes_adventure_map() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -61,6 +63,7 @@ fn adventure_map_onhide_aborts_dialog_then_closes_adventure_map() {
             "`AdventureMapMixin:OnHide` must call the simulator-backed `C_AdventureMap.Close`"
         );
     });
+}
 }
 
 type OnHideSurface = (String, i64, i64, bool, i64);

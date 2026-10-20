@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn transmog_dir() -> PathBuf {
@@ -99,6 +100,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&transmog_dir()).expect("Transmog TOC resolves");
@@ -112,7 +115,9 @@ fn find_toc_file_resolves_bare_toc() {
          at src/loader/mod.rs:65-95"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_load_on_demand_with_thirteen_dependencies() {
     let toc = TocFile::from_file(&transmog_toc()).expect("TOC parses");
@@ -159,7 +164,9 @@ fn toc_is_load_on_demand_with_thirteen_dependencies() {
     );
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_restricts_to_in_world_only() {
     let toc = TocFile::from_file(&transmog_toc()).expect("TOC parses");
@@ -181,7 +188,9 @@ fn allow_load_game_restricts_to_in_world_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_current_directives_and_body() {
     let raw = std::fs::read_to_string(transmog_toc()).expect("TOC reads utf-8");
@@ -202,7 +211,9 @@ fn toc_raw_bytes_pin_current_directives_and_body() {
         "Retail 12.1 Transmog TOC must retain its current directives and six ordered body entries"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn family_token_substitutes_to_mainline_override_path() {
     let toc = TocFile::from_file(&transmog_toc()).expect("TOC parses");
@@ -226,7 +237,9 @@ fn family_token_substitutes_to_mainline_override_path() {
         "Retail 12.1 body must retain six ordered entries, including the bootstrap and direct main Lua entry. Got: {body:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn classic_override_file_remains_on_disk_for_other_flavors() {
     let classic_override = transmog_dir()
@@ -256,6 +269,7 @@ fn classic_override_file_remains_on_disk_for_other_flavors() {
         );
     }
 }
+}
 
 #[test]
 fn implicit_startup_dependency_promotes_transmog_only_for_game() {
@@ -267,7 +281,11 @@ fn implicit_startup_dependency_promotes_transmog_only_for_game() {
         "Transmog remains LoadOnDemand, but current Game discovery promotes its bootstrap through implicit startup dependencies"
     );
 
-    for screen in ALL_FOUR_SCREENS.iter().copied().filter(|screen| *screen != ScreenKind::Game) {
+    for screen in ALL_FOUR_SCREENS
+        .iter()
+        .copied()
+        .filter(|screen| *screen != ScreenKind::Game)
+    {
         let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), screen);
         assert!(
             !addons.iter().any(|(name, _)| name == "Blizzard_Transmog"),

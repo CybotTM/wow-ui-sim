@@ -12,6 +12,7 @@ const ARTIFACT_FRAME_CHILDREN: &[&str] = &[
     "VisitForgeOverlay",
 ];
 
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_ui_exposes_frame_and_overlay_children_after_load_addon() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -28,7 +29,9 @@ fn artifact_ui_exposes_frame_and_overlay_children_after_load_addon() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_ui_registers_uipanel_window_entry_after_load_addon() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -45,7 +48,10 @@ fn artifact_ui_registers_uipanel_window_entry_after_load_addon() {
         );
     });
 }
+}
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_ui_registers_respec_static_popup_dialogs_after_load_addon() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -61,6 +67,7 @@ fn artifact_ui_registers_respec_static_popup_dialogs_after_load_addon() {
              mismatches: {mismatches:?}"
         );
     });
+}
 }
 
 fn load_artifact_ui(env: &wow_ui_sim::lua_api::WowLuaEnv) {

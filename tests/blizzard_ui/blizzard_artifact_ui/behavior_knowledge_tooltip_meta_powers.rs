@@ -6,6 +6,8 @@ use wow_ui_sim::lua_api::state::{ArtifactArtInfo, ArtifactInfo, ColorRgb, MetaPo
 const ROOT: &str = "Blizzard_ArtifactUI";
 const ARTIFACT_ICON: &str = "Interface/Icons/inv_sword_2h_artifactashbringer_d_01";
 const ARTIFACT_TITLE: &str = "The Ashbringer";
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn knowledge_tooltip_lists_meta_power_descriptions_with_blank_separator_only_between_matches() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -22,6 +24,7 @@ fn knowledge_tooltip_lists_meta_power_descriptions_with_blank_separator_only_bet
              only non-nil meta-power descriptions; mismatches: {mismatches:?}"
         );
     });
+}
 }
 
 fn seed_viewed_artifact_with_meta_powers(env: &wow_ui_sim::lua_api::WowLuaEnv) {

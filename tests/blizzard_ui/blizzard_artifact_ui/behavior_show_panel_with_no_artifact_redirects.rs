@@ -4,6 +4,7 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_ArtifactUI";
 
+post_wrath_ui_fixture! {
 #[test]
 fn show_panel_with_no_viewed_artifact_invokes_show_failed_clear() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -21,7 +22,10 @@ fn show_panel_with_no_viewed_artifact_invokes_show_failed_clear() {
         );
     });
 }
+}
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn can_view_artifact_allows_no_viewed_artifact_at_forge_or_with_multiple_artifacts() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -54,6 +58,7 @@ fn can_view_artifact_allows_no_viewed_artifact_at_forge_or_with_multiple_artifac
             "having more than one obtained artifact should unlock ArtifactUI view",
         );
     });
+}
 }
 
 fn install_clear_probe_before_artifact_ui_load(env: &wow_ui_sim::lua_api::WowLuaEnv) {

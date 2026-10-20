@@ -108,6 +108,7 @@ const CREATURE_DISPLAY_ID_SENTINEL: i64 = 7373;
 // the default fails the fallback assertion loudly.
 const CREATURE_MODEL_SCENE_ID_FILE_LOCAL_DEFAULT: i64 = 76;
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_creature_card_mixin_does_not_define_refresh_display() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -126,7 +127,9 @@ fn account_store_creature_card_mixin_does_not_define_refresh_display() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_creature_card_mixin_update_card_display_is_a_function() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -144,7 +147,9 @@ fn account_store_creature_card_mixin_update_card_display_is_a_function() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_mount_card_mixin_is_account_store_creature_card_mixin() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -164,7 +169,9 @@ fn account_store_mount_card_mixin_is_account_store_creature_card_mixin() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn update_card_display_does_not_call_c_account_store_get_item_info() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -201,7 +208,9 @@ fn update_card_display_does_not_call_c_account_store_get_item_info() {
         teardown_get_item_info_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn update_card_display_returns_early_when_item_info_is_nil() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -240,7 +249,9 @@ fn update_card_display_returns_early_when_item_info_is_nil() {
         teardown_stub_creature_card(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn update_card_display_uses_custom_ui_model_scene_id_when_present_and_dispatches_creature_display()
 {
@@ -353,7 +364,9 @@ fn update_card_display_uses_custom_ui_model_scene_id_when_present_and_dispatches
         teardown_stub_creature_card(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn update_card_display_falls_back_to_creature_model_scene_id_when_custom_is_nil() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -397,7 +410,9 @@ fn update_card_display_falls_back_to_creature_model_scene_id_when_custom_is_nil(
         teardown_stub_creature_card(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn update_card_display_skips_creature_display_when_get_actor_by_tag_returns_nil() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -447,6 +462,7 @@ fn update_card_display_skips_creature_display_when_get_actor_by_tag_returns_nil(
 
         teardown_stub_creature_card(env);
     });
+}
 }
 
 fn seed_get_item_info_tracker(env: &WowLuaEnv) {

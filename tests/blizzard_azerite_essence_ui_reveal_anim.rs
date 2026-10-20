@@ -11,6 +11,8 @@ const MAIN_SLOT: i32 = 0;
 const PASSIVE_ONE_SLOT: i32 = 1;
 const ESSENCE_ID: i32 = 200;
 
+// AzeriteEssenceUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_essence_ui_reveal_starts_once_and_cancels() {
     common::with_perf_lock(|| {
@@ -111,6 +113,7 @@ fn blizzard_azerite_essence_ui_reveal_starts_once_and_cancels() {
             });
         });
     });
+}
 }
 
 fn seed_reveal_state(state: &mut SimState) {

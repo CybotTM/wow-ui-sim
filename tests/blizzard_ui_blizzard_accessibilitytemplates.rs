@@ -7,15 +7,20 @@
 
 use crate::common;
 
+// Wrath has no native accessibility mixin publishers; the simulator intrinsic
+// supplies only the template declaration, not the vendor mixin implementations.
+post_wrath_ui_fixture! {
 #[path = "blizzard_ui/blizzard_accessibilitytemplates/load.rs"]
 mod load;
 
 #[path = "blizzard_ui/blizzard_accessibilitytemplates/surface_globals.rs"]
 mod surface_globals;
+}
 
 #[path = "blizzard_ui/blizzard_accessibilitytemplates/surface_frames.rs"]
 mod surface_frames;
 
+post_wrath_ui_fixture! {
 #[path = "blizzard_ui/blizzard_accessibilitytemplates/surface_mixins.rs"]
 mod surface_mixins;
 
@@ -27,3 +32,4 @@ mod behavior_theme_update;
 
 #[path = "blizzard_ui/blizzard_accessibilitytemplates/behavior_user_scaled_element.rs"]
 mod behavior_user_scaled_element;
+}

@@ -1,5 +1,10 @@
 //! Shared test helpers.
 
+include!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/tests/common/profile_fixtures.rs"
+));
+
 pub mod addon_coverage_baseline;
 #[cfg(feature = "retail-12-1-0")]
 pub mod aura_container_harness;

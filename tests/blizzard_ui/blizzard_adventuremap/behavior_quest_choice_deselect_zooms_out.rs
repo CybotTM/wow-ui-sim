@@ -57,12 +57,15 @@ return pin.panCount,
        AdventureMapQuestChoiceDialog.onClosedCallback == nil
 "#;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn quest_choice_deselect_abstains_dialog_and_zooms_out() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let surface = deselect_surface(env);
         assert_deselect_surface(surface);
     });
+}
 }
 
 type DeselectSurface = (i64, bool, bool, bool, i64, i64, bool, bool);

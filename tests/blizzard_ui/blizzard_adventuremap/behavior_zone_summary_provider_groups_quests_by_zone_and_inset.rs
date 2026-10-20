@@ -116,6 +116,8 @@ return #provider.questsByZone[101],
        provider.playRevealAnims == false
 "#;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn zone_summary_provider_groups_quests_by_zone_and_inset() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -127,6 +129,7 @@ fn zone_summary_provider_groups_quests_by_zone_and_inset() {
 
         assert_zone_summary_surface(surface);
     });
+}
 }
 
 type ZoneSummarySurface = (

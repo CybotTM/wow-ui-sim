@@ -120,6 +120,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_queue_status_frame_find_toc_resolves_mainline_variant() {
     let resolved =
@@ -143,7 +145,9 @@ fn blizzard_queue_status_frame_find_toc_resolves_mainline_variant() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_queue_status_frame_toc_pins_eager_mainline_only_with_default_state_enabled() {
     let toc = TocFile::from_file(&queue_status_mainline_toc())
@@ -197,7 +201,9 @@ fn blizzard_queue_status_frame_toc_pins_eager_mainline_only_with_default_state_e
     );
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_queue_status_frame_toc_declares_action_bar_and_lfg_util_dependencies() {
     let toc = TocFile::from_file(&queue_status_mainline_toc()).expect("TOC parses");
@@ -209,7 +215,9 @@ fn blizzard_queue_status_frame_toc_declares_action_bar_and_lfg_util_dependencies
          in published order"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_queue_status_frame_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(queue_status_mainline_toc()).expect("TOC reads utf-8");
@@ -243,7 +251,9 @@ fn blizzard_queue_status_frame_toc_declares_metadata_in_raw_bytes() {
          missing the canonical version line"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_queue_status_frame_toc_lists_two_files_with_variant_subdirectory() {
     let toc = TocFile::from_file(&queue_status_mainline_toc()).expect("TOC parses");
@@ -266,7 +276,9 @@ fn blizzard_queue_status_frame_toc_lists_two_files_with_variant_subdirectory() {
          without restructuring"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_queue_status_frame_appears_in_eager_game_discovery() {
     let ui = blizzard_ui_dir();
@@ -302,7 +314,9 @@ fn blizzard_queue_status_frame_appears_in_eager_game_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_queue_status_frame_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -313,6 +327,7 @@ fn blizzard_queue_status_frame_appears_in_full_addon_inventory() {
         found,
         "Blizzard_QueueStatusFrame MUST appear in `discover_all_blizzard_addons`"
     );
+}
 }
 
 prefork_full_ui_case! {

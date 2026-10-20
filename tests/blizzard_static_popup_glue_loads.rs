@@ -109,6 +109,8 @@ fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&static_popup_glue_dir()).expect("StaticPopup_Glue TOC resolves");
@@ -119,7 +121,9 @@ fn find_toc_file_resolves_bare_toc() {
          [AllowLoadGameType] annotations (toc.rs:144-146)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dependencies_chain_pulls_three_blizzard_addons() {
     let toc = TocFile::from_file(&static_popup_glue_toc()).expect("TOC parses");
@@ -139,7 +143,9 @@ fn dependencies_chain_pulls_three_blizzard_addons() {
         toc.dependencies()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_glue_resolves_to_three_glue_screens() {
     let toc = TocFile::from_file(&static_popup_glue_toc()).expect("TOC parses");
@@ -156,7 +162,9 @@ fn allow_load_glue_resolves_to_three_glue_screens() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn no_addon_level_game_type_restriction() {
     let toc = TocFile::from_file(&static_popup_glue_toc()).expect("TOC parses");
@@ -167,7 +175,9 @@ fn no_addon_level_game_type_restriction() {
          `[AllowLoadGameType mainline]` for the Announcement files only"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     let toc = TocFile::from_file(&static_popup_glue_toc()).expect("TOC parses");
@@ -182,7 +192,9 @@ fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_three_metadata_directives() {
     let raw = std::fs::read_to_string(static_popup_glue_toc()).expect("TOC reads utf-8");
@@ -212,7 +224,9 @@ fn toc_raw_bytes_pin_three_metadata_directives() {
     assert!(!raw.contains("## AllowLoadGameType:"));
     assert!(!raw.contains("## UseSecureEnvironment"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_substitutes_family_placeholders_to_mainline() {
     let toc = TocFile::from_file(&static_popup_glue_toc()).expect("TOC parses");
@@ -251,7 +265,9 @@ fn body_substitutes_family_placeholders_to_mainline() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_orders_defs_before_logic_before_xml() {
     let toc = TocFile::from_file(&static_popup_glue_toc()).expect("TOC parses");
@@ -285,7 +301,9 @@ fn body_orders_defs_before_logic_before_xml() {
          resolves at template-registration time"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_eager_discovery_on_glue_screens_only() {
     let ui = blizzard_ui_dir();
@@ -311,6 +329,7 @@ fn appears_in_eager_discovery_on_glue_screens_only() {
              {screen:?} eager discovery"
         );
     }
+}
 }
 
 #[test]
@@ -368,6 +387,7 @@ fn is_addon_loaded_reports_false_on_game_screen() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_dialog_mixin_publishes_with_full_method_surface() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -392,7 +412,9 @@ fn glue_dialog_mixin_publishes_with_full_method_surface() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_dialog_button_mixin_publishes_on_text_scale_updated() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -414,7 +436,9 @@ fn glue_dialog_button_mixin_publishes_on_text_scale_updated() {
          scale callback consumed by TextSizeManager"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_announcement_dialog_mixin_publishes_with_two_methods() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -441,7 +465,9 @@ fn glue_announcement_dialog_mixin_publishes_with_two_methods() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_dialog_background_top_atlas_global_publishes() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -463,6 +489,7 @@ fn glue_dialog_background_top_atlas_global_publishes() {
         "Mainline atlas name pinned"
     );
 }
+}
 
 #[test]
 fn shared_glue_dialog_definitions_seed_into_dispatcher() {
@@ -481,6 +508,7 @@ fn shared_glue_dialog_definitions_seed_into_dispatcher() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn mainline_glue_dialog_definitions_seed_into_dispatcher() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -498,7 +526,9 @@ fn mainline_glue_dialog_definitions_seed_into_dispatcher() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn mainline_realm_is_full_on_cancel_overrides_in_place() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -515,7 +545,9 @@ fn mainline_realm_is_full_on_cancel_overrides_in_place() {
          CharacterSelectUtil.ChangeRealm callback"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_dialog_named_frame_materializes() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -528,6 +560,7 @@ fn glue_dialog_named_frame_materializes() {
         "GlueDialog = frame — GlueDialog.xml line 15 declares the named \
          frame mixin=GlueDialogMixin toplevel=true hidden=true"
     );
+}
 }
 
 #[test]
@@ -547,6 +580,7 @@ fn glue_dialog_button_template_materializes_via_create_frame() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn glue_announcement_dialog_named_frame_materializes_on_glue() {
     let env = load_full_ui_for(ScreenKind::Login);
@@ -561,4 +595,5 @@ fn glue_announcement_dialog_named_frame_materializes_on_glue() {
          GlueAnnouncementDialogMixin OnShow handler. Mainline-gated via \
          inline `[AllowLoadGameType mainline]` annotation"
     );
+}
 }

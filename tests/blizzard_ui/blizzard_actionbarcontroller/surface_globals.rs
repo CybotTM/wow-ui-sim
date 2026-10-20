@@ -3,6 +3,7 @@
 use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_ActionBarController";
+post_wrath_ui_fixture! {
 const ACTION_BAR_CONTROLLER_FUNCTIONS: &[&str] = &[
     "ActionBarController_GetCurrentActionBarState",
     "ActionBarController_OnLoad",
@@ -29,6 +30,7 @@ fn action_bar_controller_surface_globals_are_functions() {
             );
         }
     });
+}
 }
 
 #[test]

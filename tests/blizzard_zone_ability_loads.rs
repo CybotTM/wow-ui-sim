@@ -83,6 +83,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_mainline_only_variant() {
     let resolved =
@@ -98,7 +100,9 @@ fn find_toc_file_resolves_mainline_only_variant() {
          that does not exist on Classic flavors"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_load_with_two_required_deps() {
     let toc =
@@ -138,7 +142,9 @@ fn toc_declares_eager_load_with_two_required_deps() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.saved_variables().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_restricts_to_game_screen_and_mainline_gametype() {
     let toc =
@@ -172,7 +178,9 @@ fn toc_restricts_to_game_screen_and_mainline_gametype() {
          only fires for the inverse Classic-flavor case"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_lua_then_xml_in_body() {
     let toc =
@@ -196,7 +204,9 @@ fn toc_lists_lua_then_xml_in_body() {
          would dispatch to nothing"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_directives() {
     let raw =
@@ -236,7 +246,9 @@ fn toc_raw_bytes_pin_directives() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn directory_holds_three_entries() {
     let entries: Vec<String> = std::fs::read_dir(zone_ability_dir())
@@ -249,6 +261,7 @@ fn directory_holds_three_entries() {
         "Blizzard_ZoneAbility directory must hold exactly 3 entries (mainline toc + lua + xml). \
          No flavor subdirectory, no Localization.lua, no separate Mixins.lua. Got: {entries:?}"
     );
+}
 }
 
 #[test]
@@ -263,6 +276,7 @@ fn dep_directories_exist_on_disk() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -275,6 +289,7 @@ fn appears_in_game_eager_discovery() {
          `## AllowLoadGameType: mainline` + `## DefaultState: enabled` + no LoadOnDemand all \
          combine to make it an eagerly-discovered Game-screen addon on mainline. Got: {names:?}"
     );
+}
 }
 
 #[test]

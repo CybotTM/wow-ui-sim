@@ -4,6 +4,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
 const ROOT: &str = "Blizzard_AddOnList";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn dropdown_setup_creates_all_and_player_radios_out_of_glue() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -91,7 +93,9 @@ fn dropdown_setup_creates_all_and_player_radios_out_of_glue() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dropdown_player_radio_uses_seeded_local_character_identity() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -117,6 +121,7 @@ fn dropdown_player_radio_uses_seeded_local_character_identity() {
         assert_eq!(player_radio_text, "Uther");
         assert_eq!(player_radio_value, "Player-1-00000001");
     });
+}
 }
 
 type DropdownProbe = (

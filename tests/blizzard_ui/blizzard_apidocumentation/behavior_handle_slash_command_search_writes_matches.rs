@@ -9,6 +9,8 @@ use crate::common::panel_fixtures::{
 
 const ROOT: &str = "Blizzard_APIDocumentation";
 
+// APIDocumentation vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn search_slash_command_writes_matches_and_no_match_notice() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -73,6 +75,7 @@ fn search_slash_command_writes_matches_and_no_match_notice() {
             "search nothing must write the no-match notice"
         );
     });
+}
 }
 
 fn load_api_documentation(env: &wow_ui_sim::lua_api::WowLuaEnv) {

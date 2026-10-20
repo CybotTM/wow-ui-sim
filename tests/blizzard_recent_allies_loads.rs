@@ -62,6 +62,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recent_allies_toc_pins_eager_template_only_addon_with_spaced_title() {
     let toc = TocFile::from_file(&recent_allies_toc()).expect("Blizzard_RecentAllies TOC parse");
@@ -139,7 +141,9 @@ fn blizzard_recent_allies_toc_pins_eager_template_only_addon_with_spaced_title()
          own addons (they ship in lockstep with the client patch level)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recent_allies_toc_lists_three_files_in_dependency_order() {
     let toc = TocFile::from_file(&recent_allies_toc()).expect("Blizzard_RecentAllies TOC parse");
@@ -162,7 +166,9 @@ fn blizzard_recent_allies_toc_lists_three_files_in_dependency_order() {
         listed
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recent_allies_allows_all_screens_via_allow_load_both() {
     let toc = TocFile::from_file(&recent_allies_toc()).expect("Blizzard_RecentAllies TOC parse");
@@ -181,7 +187,9 @@ fn blizzard_recent_allies_allows_all_screens_via_allow_load_both() {
         "`## AllowLoad: both` must allow CharacterSelect"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recent_allies_appears_in_eager_game_discovery() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -196,6 +204,7 @@ fn blizzard_recent_allies_appears_in_eager_game_discovery() {
          Game-screen inventory. This is what wires the load-order edge to \
          Blizzard_FriendsFrame's OptionalDeps"
     );
+}
 }
 
 prefork_full_ui_case! {

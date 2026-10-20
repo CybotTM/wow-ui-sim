@@ -9,6 +9,8 @@ use crate::common::panel_fixtures::{
 
 const ROOT: &str = "Blizzard_APIDocumentation";
 
+// APIDocumentation vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_api_by_name_uses_requested_kind_when_names_overlap() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -54,6 +56,7 @@ fn find_api_by_name_uses_requested_kind_when_names_overlap() {
             "FindAPIByName requires apiType as its first argument in Blizzard's API"
         );
     });
+}
 }
 
 fn load_api_documentation(env: &wow_ui_sim::lua_api::WowLuaEnv) {

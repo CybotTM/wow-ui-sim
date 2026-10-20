@@ -43,6 +43,8 @@ fn artifact_ui_toc_dependency_loads_blizzard_colors_first() {
     );
 }
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_ui_is_load_on_demand_until_explicitly_loaded() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -70,6 +72,7 @@ fn artifact_ui_is_load_on_demand_until_explicitly_loaded() {
             "`{ROOT}` must report loaded after explicit `C_AddOns.LoadAddOn`"
         );
     });
+}
 }
 
 #[test]
@@ -139,6 +142,7 @@ fn artifact_appearance_tutorial_bitfield_constant_is_numeric() {
     });
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_ui_loads_cleanly_via_c_addons_load_addon() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -163,6 +167,7 @@ fn artifact_ui_loads_cleanly_via_c_addons_load_addon() {
             errors.join("\n")
         );
     });
+}
 }
 
 fn ensure_player_frame_stub(env: &wow_ui_sim::lua_api::WowLuaEnv) {

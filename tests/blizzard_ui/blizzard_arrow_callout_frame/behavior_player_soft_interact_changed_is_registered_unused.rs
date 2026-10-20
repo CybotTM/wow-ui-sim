@@ -86,6 +86,8 @@ end
 return table.concat(failures, "\n")
 "#;
 
+// Wrath has no ArrowCallout vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn player_soft_interact_changed_event_is_registered_but_currently_noop() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -106,6 +108,7 @@ fn player_soft_interact_changed_event_is_registered_but_currently_noop() {
             errors.join("\n")
         );
     });
+}
 }
 
 fn assert_lua_probe(env: &wow_ui_sim::lua_api::WowLuaEnv, probe: &str, label: &str) {

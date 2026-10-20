@@ -38,6 +38,8 @@ const ARTIFACT_UI_CONSTANTS: &[(&str, f64)] = &[
     ("ARTIFACT_ITEM_DRAG_FACTOR", 0.0065),
 ];
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_ui_exports_expected_mixin_globals_after_load_addon() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -54,7 +56,9 @@ fn artifact_ui_exports_expected_mixin_globals_after_load_addon() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_ui_exports_expected_module_helpers_and_constants_after_load_addon() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -69,6 +73,7 @@ fn artifact_ui_exports_expected_module_helpers_and_constants_after_load_addon() 
             "`{ROOT}` must expose expected module helpers and constants; mismatches: {mismatches:?}"
         );
     });
+}
 }
 
 fn load_artifact_ui(env: &wow_ui_sim::lua_api::WowLuaEnv) {

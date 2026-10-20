@@ -7,6 +7,8 @@ const ROOT: &str = "Blizzard_AddOnList";
 const NON_LOD_ADDON: &str = "AddonListNonLodProbe";
 const LOD_ADDON: &str = "AddonListLodProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn load_lod_addon_calls_load_and_sets_start_status_on_success() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -86,6 +88,7 @@ fn load_lod_addon_calls_load_and_sets_start_status_on_success() {
             "`AddonList_LoadAddOn` must set `AddonList.startStatus[index] = true` after a successful load"
         );
     });
+}
 }
 
 fn seed_probe_addons(env: &wow_ui_sim::lua_api::WowLuaEnv) {

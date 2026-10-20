@@ -249,6 +249,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_mainline_variant() {
     let resolved = find_toc_file(&unit_frame_dir()).expect("UnitFrame TOC resolves");
@@ -268,7 +270,9 @@ fn find_toc_file_resolves_mainline_variant() {
          mainline build"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_ten_dependencies() {
     let toc = TocFile::from_file(&unit_frame_toc()).expect("TOC parses");
@@ -296,7 +300,9 @@ fn toc_is_eager_with_ten_dependencies() {
     assert!(!toc.is_load_first());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_restricts_to_in_world() {
     let toc = TocFile::from_file(&unit_frame_toc()).expect("TOC parses");
@@ -316,7 +322,9 @@ fn allow_load_game_restricts_to_in_world() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_type_mainline_is_not_restricted() {
     let toc = TocFile::from_file(&unit_frame_toc()).expect("TOC parses");
@@ -327,7 +335,9 @@ fn allow_load_game_type_mainline_is_not_restricted() {
          branch at toc.rs:294-302 (standard|mainline accepted)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn classic_companion_is_restricted_on_mainline_build() {
     let classic = TocFile::from_file(&unit_frame_classic_toc()).expect("Classic TOC parses");
@@ -343,7 +353,9 @@ fn classic_companion_is_restricted_on_mainline_build() {
          silently skips this TOC at discovery time"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_directives_and_representative_body_files() {
     let raw = std::fs::read_to_string(unit_frame_toc()).expect("TOC reads utf-8");
@@ -393,6 +405,7 @@ fn toc_raw_bytes_pin_directives_and_representative_body_files() {
     assert!(!raw.contains("## OptionalDeps"));
     assert!(!raw.contains("## SavedVariables"));
 }
+}
 
 #[test]
 fn family_placeholder_resolves_to_mainline_directory() {
@@ -407,6 +420,7 @@ fn family_placeholder_resolves_to_mainline_directory() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -417,6 +431,7 @@ fn appears_in_game_eager_discovery() {
          PlayerFrame, TargetFrame, PartyFrame, RuneFrame, etc. are \
          the canonical visible-on-PLAYER_ENTERING_WORLD frames"
     );
+}
 }
 
 #[test]

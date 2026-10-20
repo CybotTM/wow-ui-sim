@@ -88,6 +88,8 @@ const DISCONNECTED_FIRST_LINE_LUA: &str = r#"
     return table.concat(failures, "\n")
 "#;
 
+// AzeriteEssenceUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_essence_ui_dependency_lines_connect_and_disconnect() {
     common::with_perf_lock(|| {
@@ -114,6 +116,7 @@ fn blizzard_azerite_essence_ui_dependency_lines_connect_and_disconnect() {
             });
         });
     });
+}
 }
 
 fn assert_connected_lines(env: &wow_ui_sim::lua_api::WowLuaEnv) {

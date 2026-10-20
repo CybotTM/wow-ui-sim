@@ -46,6 +46,8 @@ expect(pool:DoesObjectBelongToPool(callout), "released tutorial container should
 return table.concat(failures, "\n")
 "#;
 
+// Wrath has no ArrowCallout vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn close_button_acknowledges_and_hides_tutorial_callout() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -59,6 +61,7 @@ fn close_button_acknowledges_and_hides_tutorial_callout() {
             "ArrowCalloutFrame close-button behavior mismatches:\n{failures}"
         );
     });
+}
 }
 
 fn load_arrow_callout_frame(env: &wow_ui_sim::lua_api::WowLuaEnv) {

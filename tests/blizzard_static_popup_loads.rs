@@ -7,7 +7,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn static_popup_dir() -> PathBuf {
@@ -131,6 +132,8 @@ fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&static_popup_dir()).expect("StaticPopup TOC resolves");
@@ -144,7 +147,9 @@ fn find_toc_file_resolves_bare_toc() {
          Blizzard_StaticPopup_Game / Blizzard_StaticPopup_Glue siblings"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dependencies_are_empty() {
     let toc = TocFile::from_file(&static_popup_toc()).expect("TOC parses");
@@ -162,7 +167,9 @@ fn dependencies_are_empty() {
         toc.dependencies()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_both_resolves_to_all_four_screens() {
     let toc = TocFile::from_file(&static_popup_toc()).expect("TOC parses");
@@ -182,7 +189,9 @@ fn allow_load_both_resolves_to_all_four_screens() {
     assert!(toc.allows_screen(ScreenKind::CharacterSelect));
     assert!(toc.allows_screen(ScreenKind::CharacterCreate));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn no_game_type_restriction() {
     let toc = TocFile::from_file(&static_popup_toc()).expect("TOC parses");
@@ -198,7 +207,9 @@ fn no_game_type_restriction() {
          addons, not here"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     let toc = TocFile::from_file(&static_popup_toc()).expect("TOC parses");
@@ -217,7 +228,9 @@ fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_three_metadata_directives() {
     let raw = std::fs::read_to_string(static_popup_toc()).expect("TOC reads utf-8");
@@ -248,7 +261,9 @@ fn toc_raw_bytes_pin_three_metadata_directives() {
     assert!(!raw.contains("## AllowLoadGameType"));
     assert!(!raw.contains("## UseSecureEnvironment"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_lists_three_lua_files_in_dependency_order() {
     let toc = TocFile::from_file(&static_popup_toc()).expect("TOC parses");
@@ -291,7 +306,9 @@ fn body_lists_three_lua_files_in_dependency_order() {
          dialog into StaticPopupDialogs"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_orders_dispatcher_before_templates_before_definitions() {
     let toc = TocFile::from_file(&static_popup_toc()).expect("TOC parses");
@@ -327,7 +344,9 @@ fn body_orders_dispatcher_before_templates_before_definitions() {
          from StaticPopup.lua to already be declared"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_eager_discovery_on_all_four_screens() {
     let ui = blizzard_ui_dir();
@@ -350,6 +369,7 @@ fn appears_in_eager_discovery_on_all_four_screens() {
              consumer attempts StaticPopup_Show"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
@@ -432,11 +452,13 @@ fn publishes_two_mixin_tables_at_global_scope(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn publishes_two_mixin_tables_at_global_scope() {
     let env = load_full_ui_for(ScreenKind::Game);
     publishes_two_mixin_tables_at_global_scope::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -463,11 +485,13 @@ fn element_mixin_carries_four_owning_dialog_accessors(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn element_mixin_carries_four_owning_dialog_accessors() {
     let env = load_full_ui_for(ScreenKind::Game);
     element_mixin_carries_four_owning_dialog_accessors::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -492,11 +516,13 @@ fn editbox_mixin_inherits_from_element_mixin_via_create_from_mixins(env: &WowLua
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn editbox_mixin_inherits_from_element_mixin_via_create_from_mixins() {
     let env = load_full_ui_for(ScreenKind::Game);
     editbox_mixin_inherits_from_element_mixin_via_create_from_mixins::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -526,11 +552,13 @@ fn editbox_mixin_carries_five_editbox_specific_methods(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn editbox_mixin_carries_five_editbox_specific_methods() {
     let env = load_full_ui_for(ScreenKind::Game);
     editbox_mixin_carries_five_editbox_specific_methods::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -574,11 +602,13 @@ fn static_popup_timeout_sec_default_is_sixty_seconds(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn static_popup_timeout_sec_default_is_sixty_seconds() {
     let env = load_full_ui_for(ScreenKind::Game);
     static_popup_timeout_sec_default_is_sixty_seconds::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -613,11 +643,13 @@ fn generic_confirmation_dialog_is_seeded_with_handlers(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn generic_confirmation_dialog_is_seeded_with_handlers() {
     let env = load_full_ui_for(ScreenKind::Game);
     generic_confirmation_dialog_is_seeded_with_handlers::run(&env);
+}
 }
 
 prefork_full_ui_case! {

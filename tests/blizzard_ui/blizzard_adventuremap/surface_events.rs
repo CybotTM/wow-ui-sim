@@ -11,6 +11,7 @@ const DATA_PROVIDER_EVENTS: &[&str] = &[
 ];
 const QUEST_DIALOG_SHOW_EVENTS: &[&str] = &["ADVENTURE_MAP_QUEST_UPDATE", "QUEST_LOG_UPDATE"];
 
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_frame_and_quest_data_providers_register_events() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -30,7 +31,10 @@ fn adventure_map_frame_and_quest_data_providers_register_events() {
         }
     });
 }
+}
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn quest_choice_dialog_registers_events_only_while_shown() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -52,6 +56,7 @@ fn quest_choice_dialog_registers_events_only_while_shown() {
             assert_quest_dialog_event_lifecycle(event, lifecycle);
         }
     });
+}
 }
 
 type QuestDialogEventLifecycle = (bool, bool, bool);

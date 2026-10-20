@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn manipulator_dir() -> PathBuf {
@@ -108,6 +109,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&manipulator_dir()).expect("TransformManipulator TOC resolves");
@@ -119,7 +122,9 @@ fn find_toc_file_resolves_bare_toc() {
          the bare-TOC path in find_toc_file at src/loader/mod.rs:65-95"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_no_meaningful_dependencies() {
     let toc = TocFile::from_file(&manipulator_toc()).expect("TOC parses");
@@ -159,7 +164,9 @@ fn toc_is_eager_with_no_meaningful_dependencies() {
          toc.rs:default_enabled returns true"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_absent_defaults_to_game_only_screen() {
     let toc = TocFile::from_file(&manipulator_toc()).expect("TOC parses");
@@ -182,7 +189,9 @@ fn allow_load_absent_defaults_to_game_only_screen() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_five_directives_and_four_body_files() {
     let raw = std::fs::read_to_string(manipulator_toc()).expect("TOC reads utf-8");
@@ -219,7 +228,9 @@ fn toc_raw_bytes_pin_five_directives_and_four_body_files() {
     assert!(!raw.contains("## UseSecureEnvironment"));
     assert!(!raw.contains("## LoadFirst"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_lists_scale_then_rotate_pairs_in_order() {
     let toc = TocFile::from_file(&manipulator_toc()).expect("TOC parses");
@@ -244,6 +255,7 @@ fn body_lists_scale_then_rotate_pairs_in_order() {
          pair in the same shape. The 2 controls are independent: \
          neither imports the other. Got: {body:?}"
     );
+}
 }
 
 #[test]

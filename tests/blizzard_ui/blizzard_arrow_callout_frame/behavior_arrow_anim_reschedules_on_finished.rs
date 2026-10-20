@@ -147,6 +147,8 @@ end
 return table.concat(failures, "\n")
 "#;
 
+// Wrath has no ArrowCallout vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn arrow_pointer_animation_replays_until_callout_is_hidden() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -168,6 +170,7 @@ fn arrow_pointer_animation_replays_until_callout_is_hidden() {
             .expect("post-hide animation tick should run cleanly");
         assert_lua_probe(env, AFTER_HIDE_TICK_PROBE, "post-hide animation-loop tick");
     });
+}
 }
 
 fn assert_lua_probe(env: &wow_ui_sim::lua_api::WowLuaEnv, probe: &str, label: &str) {

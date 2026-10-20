@@ -7,7 +7,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn settings_dir() -> PathBuf {
@@ -22,6 +23,8 @@ fn settings_lua() -> PathBuf {
     settings_dir().join("Blizzard_Settings.lua")
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&settings_dir()).expect("Blizzard_Settings TOC resolves");
@@ -34,7 +37,9 @@ fn find_toc_file_resolves_bare_toc() {
          addons; this LoD shell exists only as a tracking marker"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_load_on_demand_with_blizzard_author_no_deps() {
     let toc = TocFile::from_file(&settings_toc()).expect("Blizzard_Settings TOC parses");
@@ -62,7 +67,9 @@ fn toc_declares_load_on_demand_with_blizzard_author_no_deps() {
     assert!(toc.saved_variables().is_empty());
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lacks_allow_load_so_falls_through_to_game_only() {
     let toc = TocFile::from_file(&settings_toc()).expect("Blizzard_Settings TOC parses");
@@ -89,7 +96,9 @@ fn toc_lacks_allow_load_so_falls_through_to_game_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_three_metadata_lines_with_single_lua_body() {
     let raw = std::fs::read_to_string(settings_toc()).expect("Blizzard_Settings TOC reads utf-8");
@@ -121,7 +130,9 @@ fn toc_raw_bytes_pin_three_metadata_lines_with_single_lua_body() {
         "TOC body must list exactly 1 file: Blizzard_Settings.lua"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn lua_body_is_a_single_global_flag_assignment() {
     let raw = std::fs::read_to_string(settings_lua()).expect("Blizzard_Settings.lua reads utf-8");
@@ -136,6 +147,7 @@ fn lua_body_is_a_single_global_flag_assignment() {
          other code here would defeat the tracking semantics: the addon must be \
          a thin lazy-load sentinel, NOT a code container"
     );
+}
 }
 
 #[test]
@@ -160,6 +172,7 @@ fn lod_addon_excluded_from_eager_discovery_on_every_screen() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_only_the_toc_and_one_lua_file() {
     let dir = settings_dir();
@@ -177,6 +190,7 @@ fn root_directory_holds_only_the_toc_and_one_lua_file() {
         "Blizzard_Settings directory must contain exactly 2 entries (1 toc + 1 \
          lua) — no XML, no helpers, no nested directories. Got: {entries:?}"
     );
+}
 }
 
 #[test]

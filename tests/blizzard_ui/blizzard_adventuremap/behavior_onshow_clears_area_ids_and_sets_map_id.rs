@@ -6,6 +6,8 @@ const ROOT: &str = "Blizzard_AdventureMap";
 const SEEDED_ADVENTURE_MAP_ID: i64 = 619;
 const STALE_AREA_TABLE_ID: i32 = 424_242;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_onshow_clears_area_ids_and_sets_map_id() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -34,6 +36,7 @@ fn adventure_map_onshow_clears_area_ids_and_sets_map_id() {
 
         assert_onshow_surface(surface);
     });
+}
 }
 
 type OnShowSurface = (i64, i64, i64, String, bool);

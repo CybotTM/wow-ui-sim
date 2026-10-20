@@ -373,6 +373,8 @@ fn smoke_tutorials_are_load_on_demand_with_current_game_discovery_exceptions() {
     );
 }
 
+// Only cached-tree/named-addon inputs absent in Wrath; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn eager_tutorial_chain_appears_in_game_discovery_in_dep_first_order() {
     let ui = blizzard_ui_dir();
@@ -409,6 +411,7 @@ fn eager_tutorial_chain_appears_in_game_discovery_in_dep_first_order() {
          machines inherit from TutorialStateMachineMixin which Tutorials publishes. \
          Got: Tutorials@{tutorials_idx}, HousingTutorials@{housing_idx}"
     );
+}
 }
 
 #[test]

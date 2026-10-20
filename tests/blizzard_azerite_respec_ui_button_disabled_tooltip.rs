@@ -23,6 +23,8 @@ AzeriteRespecFrame.respecItemLocation = { itemID = 158041, bagID = 0, slotIndex 
 AzeriteRespecFrame:UpdateAzeriteRespecButtonState()
 "#;
 
+// AzeriteRespecUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_respec_ui_button_disabled_tooltip_depends_on_money() {
     common::with_perf_lock(|| {
@@ -43,6 +45,7 @@ fn blizzard_azerite_respec_ui_button_disabled_tooltip_depends_on_money() {
             });
         });
     });
+}
 }
 
 fn seed_respec_money(env: &wow_ui_sim::lua_api::WowLuaEnv, player_money: i64) {

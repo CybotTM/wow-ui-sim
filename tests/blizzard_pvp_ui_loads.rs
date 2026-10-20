@@ -129,6 +129,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_ui_find_toc_resolves_mainline_variant() {
     let resolved = find_toc_file(&pvp_ui_dir()).expect("Blizzard_PVPUI TOC resolves");
@@ -150,7 +152,9 @@ fn blizzard_pvp_ui_find_toc_resolves_mainline_variant() {
         "There must be NO bare `Blizzard_PVPUI.toc` — variant TOCs only"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_ui_mainline_toc_pins_lod_game_only_mainline_only() {
     let toc =
@@ -192,7 +196,9 @@ fn blizzard_pvp_ui_mainline_toc_pins_lod_game_only_mainline_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_ui_mists_toc_pins_classic_flavor_restriction() {
     let toc = TocFile::from_file(&pvp_ui_mists_toc()).expect("Blizzard_PVPUI_Mists TOC parses");
@@ -217,7 +223,9 @@ fn blizzard_pvp_ui_mists_toc_pins_classic_flavor_restriction() {
         "Mists also has `## AllowLoad: game`"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_ui_mainline_declares_four_dependencies() {
     let toc =
@@ -237,7 +245,9 @@ fn blizzard_pvp_ui_mainline_declares_four_dependencies() {
     );
     assert!(toc.load_with().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_ui_mists_declares_two_dependencies_dropping_queue_display() {
     let toc = TocFile::from_file(&pvp_ui_mists_toc()).expect("Blizzard_PVPUI_Mists TOC parses");
@@ -253,7 +263,9 @@ fn blizzard_pvp_ui_mists_declares_two_dependencies_dropping_queue_display() {
          retail-only deps to fit a classic client"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_ui_toc_declares_no_saved_variables() {
     for toc_path in [pvp_ui_mainline_toc(), pvp_ui_mists_toc()] {
@@ -268,7 +280,9 @@ fn blizzard_pvp_ui_toc_declares_no_saved_variables() {
         assert!(toc.saved_variables_per_character().is_empty());
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_ui_mainline_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(pvp_ui_mainline_toc()).expect("Mainline TOC reads utf-8");
@@ -296,7 +310,9 @@ fn blizzard_pvp_ui_mainline_toc_declares_metadata_in_raw_bytes() {
         "Retail 12.1.0.69497 declares Blizzard_Plunderstorm as an optional dependency"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_ui_mainline_lists_bootstrap_then_three_files_with_variant_subdirectory() {
     let toc = TocFile::from_file(&pvp_ui_mainline_toc()).expect("Mainline TOC parses");
@@ -311,7 +327,9 @@ fn blizzard_pvp_ui_mainline_lists_bootstrap_then_three_files_with_variant_subdir
          and shared localization files"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_ui_mists_lists_bootstrap_then_three_files_with_mists_subdirectory() {
     let toc = TocFile::from_file(&pvp_ui_mists_toc()).expect("Mists TOC parses");
@@ -325,6 +343,7 @@ fn blizzard_pvp_ui_mists_lists_bootstrap_then_three_files_with_mists_subdirector
         "Retail 12.1.0.69497 Mists TOC lists its bootstrap before the flavor files \
          and shared localization"
     );
+}
 }
 
 #[test]
@@ -350,6 +369,7 @@ fn blizzard_pvp_ui_does_not_appear_in_eager_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_ui_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -358,6 +378,7 @@ fn blizzard_pvp_ui_appears_in_full_addon_inventory() {
         found,
         "Blizzard_PVPUI MUST appear in `discover_all_blizzard_addons`"
     );
+}
 }
 
 prefork_full_ui_case! {

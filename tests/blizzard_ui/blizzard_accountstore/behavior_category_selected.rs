@@ -92,6 +92,7 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn category_selected_method_is_absent_from_account_store_mixin() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -119,7 +120,9 @@ fn category_selected_method_is_absent_from_account_store_mixin() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_category_mixin_on_click_triggers_account_store_category_selected_event_with_category_id()
  {
@@ -223,7 +226,9 @@ fn account_store_category_mixin_on_click_triggers_account_store_category_selecte
         .expect("trigger/playsound tracker tear-down must run cleanly");
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_category_selected_event_has_two_subscribers_in_lane_not_one() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -262,7 +267,9 @@ fn account_store_category_selected_event_has_two_subscribers_in_lane_not_one() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn item_display_on_category_selected_uses_memorized_per_category_page_not_resetting_to_one() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -460,4 +467,5 @@ fn item_display_on_category_selected_uses_memorized_per_category_page_not_resett
         )
         .expect("C_AccountStore restore + tracker tear-down must run cleanly");
     });
+}
 }

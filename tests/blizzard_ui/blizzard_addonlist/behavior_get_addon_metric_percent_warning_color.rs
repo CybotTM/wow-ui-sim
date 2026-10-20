@@ -9,6 +9,8 @@ use wow_ui_sim::lua_api::state::AddonRuntimeMetrics;
 const ROOT: &str = "Blizzard_AddOnList";
 const WARNING_ADDON: &str = "AddonListMetricWarningProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn addon_metric_percent_wraps_warning_text_and_alert_icon() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -50,6 +52,7 @@ fn addon_metric_percent_wraps_warning_text_and_alert_icon() {
             "warning text must include `DialogIcon-AlertNew-16` markup"
         );
     });
+}
 }
 
 type MetricWarningProbe = (String, bool, String, bool);

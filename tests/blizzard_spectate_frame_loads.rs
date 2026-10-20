@@ -52,6 +52,8 @@ fn load_spectate_frame(env: &WowLuaEnv) {
         .expect("Blizzard_SpectateFrame should load via explicit Rust loader call");
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&spectate_dir()).expect("SpectateFrame TOC should resolve");
@@ -63,7 +65,9 @@ fn find_toc_resolves_bare_variant() {
          `## AllowLoadGameType: plunderstorm` rather than separate flavor TOCs"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_six_directives_and_current_dependencies() {
     let toc = TocFile::from_file(&spectate_toc()).expect("SpectateFrame TOC parses");
@@ -95,7 +99,9 @@ fn toc_declares_six_directives_and_current_dependencies() {
     );
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_plunderstorm_only_and_game_only() {
     let toc = TocFile::from_file(&spectate_toc()).expect("SpectateFrame TOC parses");
@@ -121,7 +127,9 @@ fn toc_is_plunderstorm_only_and_game_only() {
     assert!(!toc.allows_screen(ScreenKind::CharacterSelect));
     assert!(!toc.allows_screen(ScreenKind::CharacterCreate));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn raw_bytes_pin_six_metadata_directives() {
     let raw = std::fs::read_to_string(spectate_toc()).expect("TOC reads utf-8");
@@ -151,7 +159,9 @@ fn raw_bytes_pin_six_metadata_directives() {
     assert!(!raw.contains("## UseSecureEnvironment"));
     assert!(!raw.contains("## Version"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_lists_lua_before_xml() {
     let toc = TocFile::from_file(&spectate_toc()).expect("TOC parses");
@@ -189,6 +199,7 @@ fn body_lists_lua_before_xml() {
          template-registration time, so they MUST already exist as _G \
          tables when the .xml chunk is processed"
     );
+}
 }
 
 #[test]

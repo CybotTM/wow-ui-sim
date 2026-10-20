@@ -8,6 +8,8 @@ const INVALID_ITEM_ID: i32 = 11_001;
 const NO_CHOICES_ITEM_ID: i32 = 11_002;
 const VALID_ITEM_ID: i32 = 11_003;
 
+// AzeriteRespecUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_respec_ui_set_respec_item_validates_item_and_selected_powers() {
     common::with_perf_lock(|| {
@@ -112,6 +114,7 @@ fn blizzard_azerite_respec_ui_set_respec_item_validates_item_and_selected_powers
             });
         });
     });
+}
 }
 
 fn seed_azerite_respec_validation_state(env: &wow_ui_sim::lua_api::WowLuaEnv) {

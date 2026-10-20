@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn ui_parent_dir() -> PathBuf {
@@ -27,10 +28,7 @@ const GLUE_SCREENS: &[ScreenKind] = &[
 
 const TOC_DEPENDENCIES: &[&str] = &["Blizzard_SharedXMLBase"];
 
-const MIXINS: &[&str] = &[
-    "ManagedFrameMixin",
-    "ManagedFrameContainerMixin",
-];
+const MIXINS: &[&str] = &["ManagedFrameMixin", "ManagedFrameContainerMixin"];
 
 const VIRTUAL_TEMPLATES: &[&str] = &[
     "ChatBubbleTemplate",
@@ -109,6 +107,8 @@ fn ptr_mainline_excludes_mists_time_string_helper() {
     assert_helper_absent("settled startup");
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&ui_parent_dir()).expect("UIParent TOC resolves");
@@ -118,7 +118,9 @@ fn find_toc_file_resolves_bare_toc() {
         "Retail 12.1 ships one bare Blizzard_UIParent.toc; loader discovery must select it"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_shared_xml_base_dependency() {
     let toc = TocFile::from_file(&ui_parent_toc()).expect("TOC parses");
@@ -132,7 +134,9 @@ fn toc_is_eager_with_shared_xml_base_dependency() {
     assert!(!toc.is_game_type_restricted());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_without_allow_load_defaults_to_game_screen_only() {
     let toc = TocFile::from_file(&ui_parent_toc()).expect("TOC parses");
@@ -149,7 +153,9 @@ fn toc_without_allow_load_defaults_to_game_screen_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_body_resolves_to_single_ui_parent_lua_file() {
     let toc = TocFile::from_file(&ui_parent_toc()).expect("TOC parses");
@@ -159,7 +165,9 @@ fn toc_body_resolves_to_single_ui_parent_lua_file() {
         "Retail 12.1 UIParent TOC must resolve exactly one body file"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_current_three_line_contract() {
     let raw = std::fs::read_to_string(ui_parent_toc()).expect("TOC reads utf-8");
@@ -173,7 +181,9 @@ fn toc_raw_bytes_pin_current_three_line_contract() {
         "Retail 12.1 UIParent TOC must remain the current two-directive, one-body-file contract"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -184,6 +194,7 @@ fn appears_in_game_eager_discovery() {
          it no in-world panel can resolve `parent=\"UIParent\"` and the \
          entire UI tree fails to compose"
     );
+}
 }
 
 #[test]

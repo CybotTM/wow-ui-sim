@@ -5,6 +5,9 @@
 
 use crate::common;
 
+// Wrath manifest1-382/cache has no ArdenwealdGardening UI implementation.
+// These consume its button/tooltip handlers, not the independent C_* model.
+post_wrath_ui_fixture! {
 #[path = "blizzard_ui/blizzard_ardenweald_gardening/load.rs"]
 mod load;
 
@@ -40,3 +43,4 @@ mod behavior_seconds_formatter_format;
 
 #[path = "blizzard_ui/blizzard_ardenweald_gardening/behavior_remaining_seconds_zero_when_no_active.rs"]
 mod behavior_remaining_seconds_zero_when_no_active;
+}

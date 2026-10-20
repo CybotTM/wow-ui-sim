@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn ptr_feedback_dir() -> PathBuf {
@@ -65,6 +66,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&ptr_feedback_dir()).expect("Blizzard_PTRFeedback TOC resolves");
@@ -81,7 +84,9 @@ fn blizzard_ptr_feedback_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_toc_marks_addon_as_ptr_and_beta_only() {
     let toc = TocFile::from_file(&ptr_feedback_toc()).expect("Blizzard_PTRFeedback TOC parses");
@@ -95,7 +100,9 @@ fn blizzard_ptr_feedback_toc_marks_addon_as_ptr_and_beta_only() {
          discovery via `is_ptr_only()` at src/loader/mod.rs:527"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_toc_declares_eager_no_lod_with_one_dep() {
     let toc = TocFile::from_file(&ptr_feedback_toc()).expect("Blizzard_PTRFeedback TOC parses");
@@ -146,7 +153,9 @@ fn blizzard_ptr_feedback_toc_declares_eager_no_lod_with_one_dep() {
         "Zero `## OptionalDeps:` declared"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_toc_declares_one_account_wide_saved_variable() {
     let toc = TocFile::from_file(&ptr_feedback_toc()).expect("Blizzard_PTRFeedback TOC parses");
@@ -166,7 +175,9 @@ fn blizzard_ptr_feedback_toc_declares_one_account_wide_saved_variable() {
          suppressions are account-wide"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_toc_declares_metadata_in_raw_bytes() {
     let raw =
@@ -220,7 +231,9 @@ fn blizzard_ptr_feedback_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## DefaultState:`"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_toc_lists_six_files_in_canonical_order() {
     let toc = TocFile::from_file(&ptr_feedback_toc()).expect("Blizzard_PTRFeedback TOC parses");
@@ -243,6 +256,7 @@ fn blizzard_ptr_feedback_toc_lists_six_files_in_canonical_order() {
          filename lookup, not via the TOC file enumeration. The Bindings.xml \
          registers the F6 default keybinding for `PTR_IssueReporter.HandleTooltipKeypress()`"
     );
+}
 }
 
 #[test]

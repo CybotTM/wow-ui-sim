@@ -10,6 +10,8 @@ const PASSIVE_ONE_SLOT: i32 = 1;
 const PASSIVE_TWO_SLOT: i32 = 2;
 const PASSIVE_THREE_SLOT: i32 = 3;
 
+// AzeriteEssenceUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_essence_ui_setup_milestones_uses_seeded_shapes() {
     common::with_perf_lock(|| {
@@ -118,6 +120,7 @@ fn blizzard_azerite_essence_ui_setup_milestones_uses_seeded_shapes() {
             });
         });
     });
+}
 }
 
 fn seed_canonical_milestones(state: &mut SimState) {

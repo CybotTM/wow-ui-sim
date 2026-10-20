@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn print_handler_dir() -> PathBuf {
@@ -48,6 +49,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_print_handler_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&print_handler_dir()).expect("Blizzard_PrintHandler TOC resolves");
@@ -67,7 +70,9 @@ fn blizzard_print_handler_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_print_handler_toc_declares_eager_on_every_screen() {
     let toc = TocFile::from_file(&print_handler_toc()).expect("Blizzard_PrintHandler TOC parses");
@@ -119,7 +124,9 @@ fn blizzard_print_handler_toc_declares_eager_on_every_screen() {
          file-local upvalue (LOCAL_PrintHandler at line 66) reset on every reload"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_print_handler_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(print_handler_toc())
@@ -181,7 +188,9 @@ fn blizzard_print_handler_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## Version:` — unversioned"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_print_handler_toc_lists_one_file() {
     let toc = TocFile::from_file(&print_handler_toc()).expect("Blizzard_PrintHandler TOC parses");
@@ -196,7 +205,9 @@ fn blizzard_print_handler_toc_lists_one_file() {
          secondary helpers; the entire addon is a single 96-line Lua chunk"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_print_handler_appears_in_eager_discovery_for_every_screen() {
     let ui = blizzard_ui_dir();
@@ -219,7 +230,9 @@ fn blizzard_print_handler_appears_in_eager_discovery_for_every_screen() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_print_handler_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -232,6 +245,7 @@ fn blizzard_print_handler_appears_in_full_addon_inventory() {
          unfiltered inventory at src/loader/mod.rs:309-343 lists every parseable \
          Blizzard_* TOC"
     );
+}
 }
 
 prefork_full_ui_case! {

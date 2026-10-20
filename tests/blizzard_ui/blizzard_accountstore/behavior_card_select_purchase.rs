@@ -134,6 +134,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn select_card_is_a_function_that_reads_item_id_from_self_item_info_id_not_a_caller_argument() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -194,7 +195,9 @@ fn select_card_is_a_function_that_reads_item_id_from_self_item_info_id_not_a_cal
         teardown_select_card_trackers(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn select_card_purchase_path_invokes_static_popup_show_generic_confirmation_with_callback_function()
 {
@@ -275,7 +278,9 @@ fn select_card_purchase_path_invokes_static_popup_show_generic_confirmation_with
         teardown_select_card_trackers(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn select_card_purchase_callback_invokes_c_account_store_begin_purchase_with_self_item_info_id_not_caller_arg()
  {
@@ -354,7 +359,9 @@ fn select_card_purchase_callback_invokes_c_account_store_begin_purchase_with_sel
         teardown_select_card_trackers(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn select_card_purchase_path_plays_item_select_at_entry_and_item_purchase_inside_callback() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -463,6 +470,7 @@ fn select_card_purchase_path_plays_item_select_at_entry_and_item_purchase_inside
         )
         .expect("PlaySound log tear-down must run cleanly");
     });
+}
 }
 
 fn seed_select_card_trackers(env: &WowLuaEnv, item_id: i64) {
