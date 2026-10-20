@@ -11,6 +11,19 @@ fn fixture() -> WowLuaEnv {
     ).unwrap();
     env.exec(&original)
         .expect("unchanged DamageMeterEntry source");
+    let contribution = std::fs::read_to_string(
+        "/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_Contribution/Blizzard_Contribution.lua",
+    ).unwrap();
+    let setup = contribution
+        .split_once("function ContributionRewardMixin:Setup")
+        .unwrap()
+        .1;
+    let setup = setup.split_once("\nlocal function GetExtents").unwrap().0;
+    env.exec(&format!(
+        "ContributionRewardMixin = {{}}; function ContributionRewardMixin:Setup{setup}"
+    ))
+    .expect("unchanged original contribution reward setup");
+    env.exec("RewardRow = CreateFrame('Frame'); RewardRow.Icon = RewardRow:CreateTexture(); RewardRow.RewardName = RewardRow:CreateFontString(); RewardRow.PadLock = CreateFrame('Frame', nil, RewardRow)").unwrap();
     install_secrets(&env);
     env
 }
@@ -120,18 +133,54 @@ fn original_meter_name_numeric_secret_selector() {
 }
 
 #[test]
+fn original_reward_info_numeric_secret_selector_preserves_identity_secrecy() {
+    let env = fixture();
+    for tainted in [false, true] {
+        for selector in ["19750", "Selector"] {
+            invoke(
+                &env,
+                &format!(
+                    r#"
+                ContributionRewardMixin.Setup(RewardRow, {selector}, true)
+                assert(RewardRow.Icon:GetTexture() == 135907)
+                assert(RewardRow.RewardName:GetText() == 'Flash of Light')
+                assert(select('#', C_Spell.GetSpellInfo({selector})) == 1)
+                local info = C_Spell.GetSpellInfo({selector})
+                assert(not issecretvalue(info) and not issecretvalue(info.name))
+                assert(not issecretvalue(info.iconID) and not issecretvalue(info.originalIconID))
+                assert(info.name == 'Flash of Light' and info.iconID == 135907)
+                assert(issecretvalue(info.spellID) == issecretvalue({selector}))
+                if issecretvalue(info.spellID) then
+                    if {tainted} then
+                        assert(not canaccessvalue(info.spellID))
+                        assert(not pcall(secretunwrap, info.spellID))
+                    else assert(secretunwrap(info.spellID) == 19750) end
+                else assert(info.spellID == 19750) end
+            "#
+                ),
+                tainted,
+            );
+        }
+    }
+}
+
+#[test]
 fn presentation_miss_and_invalid_numeric_secret_controls() {
     let env = fixture();
     for tainted in [false, true] {
         invoke(
             &env,
             r#"
+            assert(select('#', C_Spell.GetSpellInfo(Missing)) == 1)
+            assert(C_Spell.GetSpellInfo(Missing) == nil)
             assert(select('#', C_Spell.GetSpellTexture(Missing)) == 0)
             assert(select('#', C_Spell.GetSpellName(Missing)) == 1)
             assert(C_Spell.GetSpellName(Missing) == 'Unknown')
             assert(select('#', C_Spell.GetSpellTexture(900002)) == 0)
             assert(C_Spell.GetSpellName(900002) == 'Unknown')
             for _, value in ipairs({Fraction, Negative, Infinite, Nan, Overflow, SecretString, SecretBool}) do
+                assert(select('#', C_Spell.GetSpellInfo(value)) == 1)
+                assert(C_Spell.GetSpellInfo(value) == nil)
                 assert(select('#', C_Spell.GetSpellTexture(value)) == 0)
                 assert(not pcall(C_Spell.GetSpellName, value), 'invalid typed name selector')
                 assert(issecretvalue(value), 'invalid wrapper unchanged')
