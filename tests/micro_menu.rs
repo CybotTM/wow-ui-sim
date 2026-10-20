@@ -603,6 +603,7 @@ fn micro_menu_collections_button_loads_and_opens_panel() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn micro_menu_housing_button_loads_and_opens_panel() {
     let env = setup_env();
@@ -615,6 +616,7 @@ fn micro_menu_housing_button_loads_and_opens_panel() {
         frame_is_shown(&env, "HousingDashboardFrame"),
         "HousingDashboardFrame should be shown after clicking HousingMicroButton"
     );
+}
 }
 
 #[test]

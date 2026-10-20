@@ -685,6 +685,7 @@ fn open_all_bags_opens_a_bag_frame() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
@@ -738,4 +739,5 @@ fn housing_dashboard_loads_and_opens_panel() {
             "Housing dashboard should show its empty state after the owned-house response: {result}"
         );
     }
+}
 }
