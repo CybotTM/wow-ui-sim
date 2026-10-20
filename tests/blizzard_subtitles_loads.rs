@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn subtitles_dir() -> PathBuf {
@@ -67,6 +68,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&subtitles_dir()).expect("Subtitles TOC resolves");
@@ -76,7 +79,9 @@ fn find_toc_file_resolves_bare_toc() {
         "Bare TOC — no flavor suffix; movie-subtitles addon ships universally"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_no_dependencies() {
     let toc = TocFile::from_file(&subtitles_toc()).expect("TOC parses");
@@ -99,7 +104,9 @@ fn toc_is_eager_with_no_dependencies() {
     assert!(!toc.is_game_type_restricted());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_both_surfaces_on_all_four_screens() {
     let toc = TocFile::from_file(&subtitles_toc()).expect("TOC parses");
@@ -114,7 +121,9 @@ fn allow_load_both_surfaces_on_all_four_screens() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_three_metadata_directives() {
     let raw = std::fs::read_to_string(subtitles_toc()).expect("TOC reads utf-8");
@@ -144,7 +153,9 @@ fn toc_raw_bytes_pin_three_metadata_directives() {
     assert!(!raw.contains("## LoadFirst"));
     assert!(!raw.contains("## LoadOnDemand"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_orders_lua_before_xml() {
     let toc = TocFile::from_file(&subtitles_toc()).expect("TOC parses");
@@ -168,6 +179,7 @@ fn body_orders_lua_before_xml() {
         "Lua must precede XML — mixin attribute resolves at frame \
          materialization time which happens during XML parsing"
     );
+}
 }
 
 #[test]
