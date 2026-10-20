@@ -17,6 +17,8 @@ const EXPECTED_HEIGHT: f64 = 309.0;
 const EXPECTED_STRETCH_X: f64 = NORMALIZED_WIDTH * 0.5;
 const EXPECTED_STRETCH_Y: f64 = NORMALIZED_HEIGHT * 0.5;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_inset_expand_acquires_trigger_and_pans() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -129,6 +131,7 @@ fn adventure_map_inset_expand_acquires_trigger_and_pans() {
 
         assert_inset_expand_surface(surface);
     });
+}
 }
 
 type InsetExpandSurface = (

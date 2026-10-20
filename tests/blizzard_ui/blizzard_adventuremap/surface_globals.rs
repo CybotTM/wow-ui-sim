@@ -4,6 +4,7 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
 const ROOT: &str = "Blizzard_AdventureMap";
 
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_registers_uipanel_window_entry() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -24,9 +25,11 @@ fn adventure_map_registers_uipanel_window_entry() {
         assert_uipanel_window_surface(surface);
     });
 }
+}
 
 type UIPanelWindowSurface = (String, String, i64, i64, String, bool);
 
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_exports_quest_choice_result_constants() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -47,9 +50,12 @@ fn adventure_map_exports_quest_choice_result_constants() {
         );
     });
 }
+}
 
 type QuestChoiceResultConstants = (i64, i64, i64);
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_exports_utility_helper_functions() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -65,6 +71,7 @@ fn adventure_map_exports_utility_helper_functions() {
             );
         }
     });
+}
 }
 
 const ADVENTURE_MAP_UTILITY_HELPERS: &[&str] = &[

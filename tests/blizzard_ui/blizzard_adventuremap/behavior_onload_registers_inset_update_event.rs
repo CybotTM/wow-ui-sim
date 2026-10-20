@@ -4,6 +4,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
 const ROOT: &str = "Blizzard_AdventureMap";
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_onload_registers_inset_update_event_and_pool() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -41,6 +43,7 @@ fn adventure_map_onload_registers_inset_update_event_and_pool() {
 
         assert_inset_pool_surface(surface);
     });
+}
 }
 
 type InsetPoolSurface = (

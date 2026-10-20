@@ -28,6 +28,8 @@ return shownBeforeDecline,
        AdventureMapQuestChoiceDialog.onClosedCallback == nil
 "#;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn quest_dialog_decline_distinguishes_abstain_from_decline() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -37,6 +39,7 @@ fn quest_dialog_decline_distinguishes_abstain_from_decline() {
         let decline_surface = decline_surface(env, false);
         assert_decline_surface(decline_surface, 2);
     });
+}
 }
 
 type DeclineSurface = (bool, i64, bool, bool, bool, bool);

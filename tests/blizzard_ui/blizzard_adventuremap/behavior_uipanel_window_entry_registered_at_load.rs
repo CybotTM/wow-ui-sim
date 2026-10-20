@@ -4,6 +4,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_closure;
 
 const ROOT: &str = "Blizzard_AdventureMap";
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_uipanel_window_entry_captures_close_at_load_time() {
     with_blizzard_addon_closure(&[ROOT], &[], |env, _loaded| {
@@ -35,6 +37,7 @@ fn adventure_map_uipanel_window_entry_captures_close_at_load_time() {
             "`showFailedFunc` must call the load-time `C_AdventureMap.Close` function reference"
         );
     });
+}
 }
 
 type LoadTimePanelEntry = (String, String, bool, bool);
