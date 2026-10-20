@@ -296,6 +296,7 @@ fn absent_from_glue_screens_eager_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn dep_directories_exist_on_disk() {
     for dep in TOC_DEPENDENCIES {
@@ -309,6 +310,7 @@ fn dep_directories_exist_on_disk() {
             "{dep} must have a discoverable TOC"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
