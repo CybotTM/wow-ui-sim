@@ -107,6 +107,10 @@ fn cached_faux_scrollframe_inline_offset_and_wheel_delta_sync_scrollbar() {
         assert(bar and type(sf:GetScript('OnVerticalScroll')) == 'function')
         assert(type(sf:GetScript('OnMouseWheel')) == 'function')
         bar:SetMinMaxValues(0, 234)
+        -- Wrath uses half the bar height; modern templates honor scrollStep.
+        bar:ClearAllPoints()
+        bar:SetSize(16, 22)
+        assert(bar:GetHeight() == 22, bar:GetHeight())
         bar.scrollStep = 11
         sf:SetVerticalScroll(37)
         assert(sf:GetVerticalScroll() == 37 and bar:GetValue() == 37,
