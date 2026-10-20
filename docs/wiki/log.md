@@ -2469,3 +2469,23 @@ Linked the [disabled-check contract](../specs/disabled-check-emission.md) for bo
 ## 2026-10-18 — Wrath widget state and stored-size correction
 
 Linked optional EditBox history, direct arrows, byte-mask presentation and MessageFrame row timers from [[widget-system]] to their owning contract. Added [[wrath-tooltip-stored-size]]: the queried-size oracle confused parent-fill geometry with retained dimensions; the unsupported loader change was reverted, and cached dependency repair remains distinct. Source/reconstructed authority and old-library fixture controls are not current-head/native/preservation acceptance.
+
+## 2026-10-19 — Inline XML callback late binding
+
+Updated [[xml-template-system]] with call-time function-family lookup and the distinct direct `function=` binding. All six unchanged-producer fixtures fail behaviorally at `6b03106f9`, including original Wrath GameMenu and unfiltered cursor errors. Producer `c1e98b4cc` uses Lua expressions rather than install-time callback/argument captures. Bounded GREEN: Wrath6/6, Retail5/5; both startups byte-identical `[]`. Original Wrath GameMenu warnings/errors, including cursorOffset-nil, disappear without an EditBox change. Preservation and separately committed conditional/LFG callback follow-ups remain pending; no native/full-suite claim.
+
+## 2026-10-19 — Conditional XML predicate capture removal
+
+Four original-body Wrath KeyRing/Retail ChatConfig regressions are RED. Removed conditional global predicate/getter fast-path captures so the unchanged ordinary Lua compiler owns these bodies and surrounding sequences. Removed the obsolete optimization-selection assertion, not a behavior test. Follow-up GREEN/preservation pending; see [[xml-template-system]].
+
+## 2026-10-19 — LFG XML callback capture removal
+
+Four original LFD/RaidFinder OnClick-body cases are RED: join and leave replacements/hooks are bypassed for category-only and category+slot calls. Removed the specialized capture builder/parser and its optimization-selection assertion; ordinary Lua now owns the unchanged bodies. GREEN/preservation pending; see [[xml-template-system]].
+
+## 2026-10-19 — Original tooltip formatter capture removal
+
+CharacterFrameTab1 OnEnter is behavioral RED after formatter replacement/hook; the literal-first changed-environment case is an existing PASS control, not a fast-path claim. The function-result/three-number builder now emits call-time Lua target/formatter/argument reads. Other unproved object/value captures remain audited, untouched gaps. GREEN/preservation pending; see [[xml-template-system]].
+
+## 2026-10-19 — Bounded final XML late-binding proof
+
+At source `fb2e3961d`, lane fixtures pass Retail13/13 and Wrath8/8; both startups remain byte-identical `[]` and original GameMenu warnings/errors, including cursorOffset-nil, are empty. Retail preservation passes; Wrath retains two unchanged Retail-cache bootstrap failures, explicitly deferred by main to profile-gating before I1. [[xml-template-system]] owns exact counts, source-identity proof, the existing ignored TODO and acceptance limits. No fixture gate, ignore or vendor workaround was added here.
