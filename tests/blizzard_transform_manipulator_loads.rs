@@ -258,6 +258,7 @@ fn body_lists_scale_then_rotate_pairs_in_order() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn present_only_in_game_screen_eager_discovery() {
     for screen in ALL_FOUR_SCREENS {
@@ -276,6 +277,7 @@ fn present_only_in_game_screen_eager_discovery() {
              glue screens"
         );
     }
+}
 }
 
 #[test]
