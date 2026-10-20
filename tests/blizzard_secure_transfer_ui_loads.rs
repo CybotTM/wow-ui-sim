@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn secure_transfer_dir() -> PathBuf {
@@ -79,6 +80,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved =
@@ -91,7 +94,9 @@ fn find_toc_file_resolves_bare_toc() {
          every flavor"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_both_with_secure_env_and_required_dep_singular() {
     let toc =
@@ -147,7 +152,9 @@ fn toc_declares_eager_both_with_secure_env_and_required_dep_singular() {
     assert!(toc.saved_variables().is_empty());
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_metadata_in_raw_bytes_with_underscored_title_form() {
     let raw = std::fs::read_to_string(secure_transfer_toc())
@@ -172,7 +179,9 @@ fn toc_declares_metadata_in_raw_bytes_with_underscored_title_form() {
         "TOC must NOT declare `## Author:` — relies on implicit Blizzard ownership"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_only_xml_with_two_lua_files_loaded_via_script_directives() {
     let toc =
@@ -194,6 +203,7 @@ fn toc_lists_only_xml_with_two_lua_files_loaded_via_script_directives() {
          exports the namespace through the saved secure-env reference so the secure \
          main file can call SecureTransferOutbound.*; the main file loads second"
     );
+}
 }
 
 #[test]
@@ -242,6 +252,7 @@ fn root_directory_holds_two_lua_one_xml_one_toc() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_wraps_frames_in_scoped_modifier_with_forbidden_attribute() {
     let xml_path = secure_transfer_dir().join("Blizzard_SecureTransferUI.xml");
@@ -263,6 +274,7 @@ fn xml_wraps_frames_in_scoped_modifier_with_forbidden_attribute() {
          exit door is established before the secure-env main file calls it"
     );
     assert!(raw.contains("<Script file=\"Blizzard_SecureTransferUI.lua\"/>"));
+}
 }
 
 prefork_full_ui_case! {
