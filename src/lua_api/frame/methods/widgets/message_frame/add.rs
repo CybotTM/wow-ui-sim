@@ -63,21 +63,25 @@ pub(super) fn backfill_message(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-/// Add the existing simulator message shape or the Wrath history shape.
+/// Add the profile's message shape; Wrath scrolling history uses native positions.
 pub(super) fn add_message_core_from_stack(state: &mut LuaState, id: u64, log: bool) {
     let Some(text) = opt_string(state, 2) else {
         return;
     };
-    let mut message = read_message_from_stack(state, text);
     let mut sim = match borrow_state_mut(state) {
         Ok(s) => s,
         Err(_) => return,
     };
+    let wrath_row = sim.widgets.get(id).is_some_and(uses_wrath_row_lifecycle);
+    let wrath_history = cfg!(feature = "client-wrath")
+        && sim.widgets.get(id).is_some_and(|frame| {
+            frame.object_type_name.as_deref() == Some("ScrollingMessageFrame")
+        });
+    let mut message = read_message_from_stack(state, text, wrath_history);
     if log {
         log_message_sim(&sim, id, &message.text);
     }
     message.timestamp = sim.start_time.elapsed().as_secs_f64();
-    let wrath_row = sim.widgets.get(id).is_some_and(uses_wrath_row_lifecycle);
     let data = sim.message_frames.entry(id).or_default();
     if wrath_row {
         data.pending_wrath_messages.push_back(message);
@@ -88,7 +92,7 @@ pub(super) fn add_message_core_from_stack(state: &mut LuaState, id: u64, log: bo
     data.display_dirty = true;
 }
 
-fn read_message_from_stack(state: &LuaState, text: String) -> Message {
+fn read_message_from_stack(state: &LuaState, text: String, wrath_history: bool) -> Message {
     let mut message = Message {
         text,
         r: opt_f32(state, 3).unwrap_or(1.0),
@@ -101,9 +105,8 @@ fn read_message_from_stack(state: &LuaState, text: String) -> Message {
         timestamp: 0.0,
         wrath_timers: None,
     };
-    // Public Wrath consumer: text, r, g, b, lineID, false, accessID, extraData.
-    let wrath_history =
-        cfg!(feature = "client-wrath") && matches!(stack_val(state, 7), Val::Bool(false));
+    // Wrath SMF: text, r, g, b, typeID, backFill, accessID, extraData.
+    // backFill ordering is separate; its value never selects an argument layout.
     if wrath_history {
         message.a = 1.0;
         message.message_id = read_optional_id(state, 6);

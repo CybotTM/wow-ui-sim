@@ -109,16 +109,40 @@ fn b6_c6_original_consumer_queues_one_row_per_update() {
         local handler = UIErrorsFrame:GetScript('OnEvent')
         handler(UIErrorsFrame, 'UI_ERROR_MESSAGE', 'first')
         handler(UIErrorsFrame, 'UI_ERROR_MESSAGE', 'second')
-        assert(UIErrorsFrame:GetNumMessages() == 0, 'AddMessage must queue')
     "#,
     )
     .unwrap();
+    let rows = || {
+        let sim = env.state().borrow();
+        let id = sim.widgets.get_id_by_name("UIErrorsFrame").unwrap();
+        sim.message_frames[&id]
+            .messages
+            .iter()
+            .map(|message| message.text.clone())
+            .collect::<Vec<_>>()
+    };
+    assert!(rows().is_empty(), "AddMessage must queue (INFERRED timing)");
     env.fire_on_update(0.0).unwrap();
-    env.exec("assert(UIErrorsFrame:GetNumMessages() == 1, 'one insertion per update')")
-        .unwrap();
+    assert_eq!(rows(), ["first"]);
     env.fire_on_update(0.0).unwrap();
-    env.exec("assert(UIErrorsFrame:GetNumMessages() == 2)")
-        .unwrap();
+    assert_eq!(rows(), ["second", "first"]); // Original XML uses TOP insertion.
+}
+
+#[test]
+#[cfg(feature = "client-retail")]
+fn b6_c6_retail_scrolling_history_remains_immediate_across_update() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"
+        B6Retail = CreateFrame('ScrollingMessageFrame')
+        B6Retail:AddMessage('retained', 0.25, 0.5, 0.75)
+        assert(B6Retail:GetNumMessages() == 1)
+    "#).unwrap();
+    env.fire_on_update(0.0).unwrap();
+    env.exec(r#"
+        assert(B6Retail:GetNumMessages() == 1)
+        local text, r, g, b = B6Retail:GetMessageInfo(1)
+        assert(text == 'retained' and r == 0.25 and g == 0.5 and b == 0.75)
+    "#).unwrap();
 }
 
 #[test]
