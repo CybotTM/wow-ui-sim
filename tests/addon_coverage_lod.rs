@@ -15,7 +15,7 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::settle_headless_startup;
 use wow_ui_sim::toc::TocFile;
 use wow_ui_sim::xml::{
-    clear_templates, get_template, register_intrinsic_templates, register_template, FrameXml,
+    FrameXml, clear_templates, get_template, register_intrinsic_templates, register_template,
 };
 
 const KNOWN_LOAD_ON_DEMAND_RUNTIME_ERRORS: &[(&str, usize)] = &[
@@ -517,12 +517,16 @@ fn shard_load_on_demand_addons_spreads_heavy_addons_across_shards() {
     let shards = shard_load_on_demand_addon_closures(&lod_closures, 2, &known_runtime_counts);
 
     assert_eq!(shards.len(), 2);
-    assert!(shards[0]
-        .iter()
-        .any(|closure| closure.root == "Blizzard_HeavyA"));
-    assert!(shards[1]
-        .iter()
-        .any(|closure| closure.root == "Blizzard_HeavyB"));
+    assert!(
+        shards[0]
+            .iter()
+            .any(|closure| closure.root == "Blizzard_HeavyA")
+    );
+    assert!(
+        shards[1]
+            .iter()
+            .any(|closure| closure.root == "Blizzard_HeavyB")
+    );
     assert!(
         shards.iter().any(|shard| shard.iter().any(|closure| {
             closure.root == "Blizzard_HeavyB"
