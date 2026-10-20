@@ -101,6 +101,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_mainline_variant() {
     let resolved = find_toc_file(&ui_panels_game_dir()).expect("UIPanels_Game TOC resolves");
@@ -114,7 +116,9 @@ fn find_toc_file_resolves_mainline_variant() {
          fallback ladder but _Mainline wins on the first variants pass"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_thirteen_dependencies() {
     let toc = TocFile::from_file(&ui_panels_game_mainline_toc()).expect("TOC parses");
@@ -157,7 +161,9 @@ fn toc_is_eager_with_thirteen_dependencies() {
     assert!(!toc.is_secure_env());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_restricts_to_in_world() {
     let toc = TocFile::from_file(&ui_panels_game_mainline_toc()).expect("TOC parses");
@@ -177,7 +183,9 @@ fn allow_load_game_restricts_to_in_world() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_type_mainline_is_not_restricted() {
     let toc = TocFile::from_file(&ui_panels_game_mainline_toc()).expect("TOC parses");
@@ -191,7 +199,9 @@ fn allow_load_game_type_mainline_is_not_restricted() {
          mainline build, but find_toc_file already picked _Mainline.toc"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn classic_toc_uses_load_first_directive() {
     let classic_toc_path = ui_panels_game_dir().join("Blizzard_UIPanels_Game_Classic.toc");
@@ -210,7 +220,9 @@ fn classic_toc_uses_load_first_directive() {
         "_Classic.toc has `AllowLoadGameType: classic` which IS restricted out — toc.rs:294-302 only treats `mainline`/`standard` as non-restricting"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_six_directives_and_localization_trailer() {
     let raw = std::fs::read_to_string(ui_panels_game_mainline_toc()).expect("TOC reads utf-8");
@@ -251,6 +263,7 @@ fn toc_raw_bytes_pin_six_directives_and_localization_trailer() {
     assert!(!raw.contains("## SavedVariables"));
     assert!(!raw.contains("## RequiredDep"));
     assert!(!raw.contains("[Family]"));
+}
 }
 
 #[test]
