@@ -13,6 +13,7 @@ const FLYOUT_ID: u32 = 7001;
 const FIRST_SPELL_ID: u32 = 19750;
 const SECOND_SPELL_ID: u32 = 35395;
 
+post_wrath_ui_fixture! {
 #[test]
 fn spell_flyout_toggle_shows_populates_and_hides_from_same_button() {
     test_timeout! {
@@ -27,6 +28,7 @@ fn spell_flyout_toggle_shows_populates_and_hides_from_same_button() {
         assert_flyout_hidden_after_second_toggle(env);
     });
     }
+}
 }
 
 fn seed_spell_flyout(env: &WowLuaEnv) {
