@@ -7,7 +7,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn spell_diminish_dir() -> PathBuf {
@@ -91,6 +92,8 @@ fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&spell_diminish_dir()).expect("SpellDiminishUI TOC resolves");
@@ -105,7 +108,9 @@ fn find_toc_file_resolves_bare_toc() {
          namespace are mainline-only PvP combat infrastructure"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dependencies_returns_shared_xml_via_plural_dependencies_key() {
     let toc = TocFile::from_file(&spell_diminish_toc()).expect("TOC parses");
@@ -123,7 +128,9 @@ fn dependencies_returns_shared_xml_via_plural_dependencies_key() {
         toc.dependencies()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_lowercase_resolves_correctly() {
     let toc = TocFile::from_file(&spell_diminish_toc()).expect("TOC parses");
@@ -143,7 +150,9 @@ fn allow_load_game_lowercase_resolves_correctly() {
     assert!(!toc.allows_screen(ScreenKind::CharacterSelect));
     assert!(!toc.allows_screen(ScreenKind::CharacterCreate));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_type_mainline_is_not_restricted() {
     let toc = TocFile::from_file(&spell_diminish_toc()).expect("TOC parses");
@@ -158,7 +167,9 @@ fn allow_load_game_type_mainline_is_not_restricted() {
          the UNIT_SPELL_DIMINISH_CATEGORY_STATE_UPDATED event"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     let toc = TocFile::from_file(&spell_diminish_toc()).expect("TOC parses");
@@ -176,7 +187,9 @@ fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_four_metadata_directives() {
     let raw = std::fs::read_to_string(spell_diminish_toc()).expect("TOC reads utf-8");
@@ -207,7 +220,9 @@ fn toc_raw_bytes_pin_four_metadata_directives() {
     assert!(!raw.contains("## OptionalDep"));
     assert!(!raw.contains("## UseSecureEnvironment"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_lists_lua_before_xml() {
     let toc = TocFile::from_file(&spell_diminish_toc()).expect("TOC parses");
@@ -248,6 +263,7 @@ fn body_lists_lua_before_xml() {
          tables at template-registration time, so they MUST already be \
          tables in _G when the .xml chunk is processed"
     );
+}
 }
 
 #[test]
