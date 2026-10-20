@@ -104,16 +104,87 @@ fn b6_c6_original_consumer_queues_one_row_per_update() {
         return;
     }
     let env = errors_env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local handler = UIErrorsFrame:GetScript('OnEvent')
         handler(UIErrorsFrame, 'UI_ERROR_MESSAGE', 'first')
         handler(UIErrorsFrame, 'UI_ERROR_MESSAGE', 'second')
         assert(UIErrorsFrame:GetNumMessages() == 0, 'AddMessage must queue')
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     env.fire_on_update(0.0).unwrap();
-    env.exec("assert(UIErrorsFrame:GetNumMessages() == 1, 'one insertion per update')").unwrap();
+    env.exec("assert(UIErrorsFrame:GetNumMessages() == 1, 'one insertion per update')")
+        .unwrap();
     env.fire_on_update(0.0).unwrap();
-    env.exec("assert(UIErrorsFrame:GetNumMessages() == 2)").unwrap();
+    env.exec("assert(UIErrorsFrame:GetNumMessages() == 2)")
+        .unwrap();
+}
+
+#[test]
+#[cfg(feature = "client-wrath")]
+fn b6_c6_scrolling_history_is_immediate_and_does_not_acquire_row_timers() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec("ChatHistory = CreateFrame('ScrollingMessageFrame', 'ChatHistory')")
+        .unwrap();
+    assert_scrolling_history_lifecycle(&env, "ChatHistory");
+}
+
+#[test]
+#[cfg(feature = "client-wrath")]
+fn b6_c6_xml_scrolling_history_retains_its_lifecycle() {
+    let env = WowLuaEnv::new().unwrap();
+    let directory = tempfile::tempdir().unwrap();
+    let toc = directory.path().join("ScrollingHistory.toc");
+    std::fs::write(&toc, "## Title: ScrollingHistory\nhistory.xml\n").unwrap();
+    std::fs::write(
+        directory.path().join("history.xml"),
+        r#"<Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <ScrollingMessageFrame name="XmlChatHistory"/>
+            <Frame name="HistoryOwnerTemplate" virtual="true">
+                <Frames><ScrollingMessageFrame name="$parentHistory"/></Frames>
+            </Frame>
+        </Ui>"#,
+    )
+    .unwrap();
+    let loaded = wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
+    assert!(loaded.warnings.is_empty(), "{:?}", loaded.warnings);
+    env.exec("CreateFrame('Frame', 'RuntimeHistoryOwner', nil, 'HistoryOwnerTemplate')")
+        .unwrap();
+    for name in ["XmlChatHistory", "RuntimeHistoryOwnerHistory"] {
+        assert_scrolling_history_lifecycle(&env, name);
+    }
+}
+
+#[cfg(feature = "client-wrath")]
+fn assert_scrolling_history_lifecycle(env: &WowLuaEnv, name: &str) {
+    env.exec(&format!(
+        r#"
+        local frame = {name}
+        frame:AddMessage('selected', 0, 1, 0, 71, false, 11, 81)
+        frame:AddMessage('other', 1, 0, 0, 72, false, 22, 82)
+        assert(frame:GetNumMessages() == 2, 'scrolling history must be immediate')
+        assert(frame:GetNumMessages(11) == 1)
+        local text, access, line, extra = frame:GetMessageInfo(1, 11)
+        assert(text == 'selected' and access == 11 and line == 71 and extra == 81)
+        "#
+    ))
+    .unwrap();
+    env.fire_on_update(0.0).unwrap();
+    let sim = env.state().borrow();
+    let id = sim.widgets.get_id_by_name(name).unwrap();
+    let data = &sim.message_frames[&id];
+    assert!(data.messages.iter().all(|row| row.wrath_timers.is_none()));
+    drop(sim);
+    env.exec(&format!(
+        r#"
+        local frame = {name}
+        assert(frame:GetNumMessages() == 2, 'update must not duplicate history')
+        frame:RemoveMessagesByAccessID(11)
+        assert(frame:GetNumMessages() == 1 and frame:GetMessageInfo(1) == 'other')
+        "#
+    ))
+    .unwrap();
 }
 
 #[cfg(feature = "gui")]
