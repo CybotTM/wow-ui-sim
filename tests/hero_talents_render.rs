@@ -120,6 +120,7 @@ fn parse_crop_coords(path: &str) -> Option<(f32, f32, f32, f32)> {
     Some((left, right, top, bottom))
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn hero_spec_icon_and_mask_quads_match_layout_rect() {
     let env = setup_full_ui();
@@ -218,7 +219,9 @@ fn hero_spec_icon_and_mask_quads_match_layout_rect() {
         assert_bounds_match_rect(quad_bounds(&batch, request), icon_rect, "hero spec mask");
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn hero_spec_icon_crop_request_matches_atlas_entry() {
     let env = setup_full_ui();
@@ -296,4 +299,5 @@ fn hero_spec_icon_crop_request_matches_atlas_entry() {
             && (crop_coords.3 - expected.3).abs() <= tolerance,
         "HeroSpecButton.Icon1 crop coords should match atlas entry: crop={crop_coords:?} expected={expected:?}"
     );
+}
 }

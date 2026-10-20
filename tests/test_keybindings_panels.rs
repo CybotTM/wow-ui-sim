@@ -267,6 +267,7 @@ fn keybind_n_opens_talents() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn hidden_talent_dialogs_do_not_emit_quads_after_opening_talents() {
     test_timeout! {
@@ -299,6 +300,7 @@ fn hidden_talent_dialogs_do_not_emit_quads_after_opening_talents() {
             "hidden hero talents dialog should only contribute the tiled background"
         );
     }
+}
 }
 
 // ── A → ToggleAchievementFrame() ────────────────────────────────────────
