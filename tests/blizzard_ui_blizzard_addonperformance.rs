@@ -5,6 +5,9 @@
 
 use crate::common;
 
+// Wrath manifest1-382/cache has no AddOnPerformanceMixin/controller;
+// the independent addon API and chat/timer primitives stay covered elsewhere.
+post_wrath_ui_fixture! {
 #[path = "blizzard_ui/blizzard_addonperformance/behavior_init_arms_ten_second_ticker.rs"]
 mod behavior_init_arms_ten_second_ticker;
 
@@ -52,3 +55,4 @@ mod behavior_addon_warning_predicate_returns_nil_when_unflagged;
 
 #[path = "blizzard_ui/blizzard_addonperformance/behavior_specific_message_without_addon_name_is_invalid.rs"]
 mod behavior_specific_message_without_addon_name_is_invalid;
+}
