@@ -651,6 +651,7 @@ fn smoke_tutorials_can_be_loaded_on_demand_after_eager_sweep(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn login_warning_dialogs_carries_glue_only_directives_for_regional_warning_frames() {
     let toc = parse_lane_toc("Blizzard_LoginWarningDialogs");
@@ -682,6 +683,7 @@ fn login_warning_dialogs_carries_glue_only_directives_for_regional_warning_frame
          glue-screen root frame, since every warning dialog parents to GlueParent). \
          If this list shifts, the XML inheritance / parent lookup at file-scope fails"
     );
+}
 }
 
 prefork_full_ui_case! {
