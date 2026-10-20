@@ -86,7 +86,7 @@ fn tab_usage_error() -> LuaError {
     })
 }
 
-fn numeric_argument(state: &LuaState) -> Option<f64> {
+pub(crate) fn numeric_argument(state: &LuaState) -> Option<f64> {
     match stack_val(state, 1) {
         Val::Num(number) => Some(number),
         Val::Str(reference) => {

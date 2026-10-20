@@ -8,6 +8,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - [ ] `CreateMiniWorldMapArrowFrame(parent)` validates table/slot-zero/frame type, emits exact native errors, returns zero values and lazily creates two named child Models. Subsequent calls retain their original parents. Model mesh rendering is unsupported.
 - [ ] `CalendarEventGetTypes` returns five loaded localized Calendar labels in native order; ignores arguments.
 - [ ] `CalendarDefaultGuildFilter` returns level cap twice (60/70/80 by account expansion) and existing guild-rank count; absent player returns three zeros. Ignores arguments.
+- [ ] `ArenaTeamRoster` accepts Lua-numeric values/strings, otherwise errors `Usage: ArenaTeamRoster(team)`; no modeled team => zero returns, no roster, query or immediate event.
 - [ ] Preserve Retail publication and other profiles.
 
 ## How it works
@@ -19,6 +20,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - `src/lua_api/globals/real/wrath_talent_groups.rs`: cached group projection and StringToBOOL.
 - `src/lua_api/globals/real/wrath_legacy_state.rs`: supplied zero-based player/inspect indices, independently mutable from fixtures.
 - `src/wrath/compat_bootstrap.rs`: Wrath-only registration.
+- `src/lua_api/workarounds/temporary/wrath_arena_roster.rs`: native no-team branch until membership/query lifecycle exists. Reuses existing Wrath numeric-string parser.
 - `src/lua_api/globals/real/wrath_calendar.rs`: localized label and cached context projection.
 - `src/lua_api/globals/real/wrath_minimap_arrows.rs`: parent validation and lazy child ownership.
 
