@@ -26,7 +26,7 @@ Linux-only custom test-runner core for reusing immutable parent-owned test state
 
 ### Shared-target source binding — 2026-10-20
 
-The generator emits absolute module paths. Reusing slot2 across worktrees selected another worktree's tests even after the integration executable rebuilt: this lane's new TimeManager selector ran zero tests, and panics identified the old source directory. Build-script/test-directory watches alone did not invalidate the cached generator. `crates/test-harness/build.rs` now watches `CARGO_MANIFEST_DIR` so package relocation reruns both generators. Regenerated current-worktree paths and a nonzero executed test count remain the acceptance boundary; exit zero alone is not test evidence. Runtime confirmation is pending.
+The generator emits absolute module paths. Reusing slot2 across worktrees selected another worktree's tests even after the integration executable rebuilt: this lane's new TimeManager selector ran zero tests, and panics identified the old source directory. Build-script/test-directory watches alone did not invalidate the cached generator. The initial `rerun-if-env-changed=CARGO_MANIFEST_DIR` directive is not accepted as a relocation fix: Cargo documents that this instruction observes Cargo's incoming environment, not variables Cargo sets for build scripts. `project_root()` currently reads the variable at script runtime; compile-time `env!` tracking is the next hypothesis. The [relocation regression](../../../scripts/test-harness-relocation.py) builds the real generator in two roots sharing a target, preserves source timestamps, and executes a source-path identity assertion in each. Regenerated current-worktree paths and a nonzero executed test count remain the acceptance boundary; runtime confirmation is pending.
 
 ### Dev-only automatic generation — 2026-10-11
 
@@ -111,6 +111,7 @@ Sampled process-tree RSS rose from 1,196,596 KiB to 1,523,432 KiB. This metric d
 - [Linux workload gate](../../../tests/common/workload_gate.rs) — shared/exclusive local and cross-process coordination
 - [Workload-gate conformance](../../../tests/workload_gate.rs) — overlap, exclusion, cleanup, and timeout-boundary proofs
 - [Timeout re-exec conformance](../../../tests/timeout_reexec.rs) — panic/timeout aggregation, fixture-capacity reservation, sibling continuation, visible output, and descendant cleanup proofs
+- [Cargo change detection](https://doc.rust-lang.org/cargo/reference/build-scripts.html#rerun-if-env-changed) — incoming-environment watch limitation and compile-time `env!` tracking
 - [Dev-only build registry](../../../crates/test-harness/build.rs) — `syn`/`quote` marker parsing and stable case generation
 - [Dev-only evidence](../../../data/test-perf/evidence/dev-only-harness-2026-10-11/README.md) — source, selected execution and local cache-isolation proof
 - [Build-input staging](../../../data/test-perf/evidence/dev-harness-build-inputs-2026-10-11/README.md) — Docker/native workspace inputs and bounded missing-manifest resolution proof

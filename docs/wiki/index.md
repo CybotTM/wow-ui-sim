@@ -1,6 +1,6 @@
 ## [2026-10-20] investigation | Shared-target test source binding
 
-[Harness source binding](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) records stale absolute module paths after worktree relocation, a zero-test false success, and manifest-directory invalidation. Regeneration/runtime confirmation remains pending.
+[Harness source binding](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) records stale absolute module paths after worktree relocation, a zero-test false success, and the runtime-environment-watch limitation. A two-root behavioral regression is committed; invalidation/runtime confirmation remains pending.
 
 ## [2026-10-19] source | Wrath single-class spellbook views
 
