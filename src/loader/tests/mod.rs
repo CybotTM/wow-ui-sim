@@ -3,7 +3,6 @@
 mod account_store;
 mod button_text;
 mod button_textures;
-mod fixture_independence;
 mod lua_loading;
 mod runtime_template_anchors;
 mod runtime_template_misc;
@@ -100,16 +99,8 @@ fn blizzard_ui_dir() -> PathBuf {
 
 /// Create a test environment, write XML content, load it, return context.
 pub(super) fn load_test_xml(dir_suffix: &str, xml_content: &str) -> TestCtx {
-    load_test_xml_in_env(WowLuaEnv::new().unwrap(), dir_suffix, xml_content)
-}
-
-fn load_test_xml_with_shared_templates(dir_suffix: &str, xml_content: &str) -> TestCtx {
     let env = WowLuaEnv::new().unwrap();
     preload_shared_templates(&env);
-    load_test_xml_in_env(env, dir_suffix, xml_content)
-}
-
-fn load_test_xml_in_env(env: WowLuaEnv, dir_suffix: &str, xml_content: &str) -> TestCtx {
     let temp_dir = std::env::temp_dir().join(format!("wow-sim-{}", dir_suffix));
     std::fs::create_dir_all(&temp_dir).unwrap();
     let xml_path = temp_dir.join("test.xml");
@@ -136,16 +127,8 @@ fn load_test_xml_in_env(env: WowLuaEnv, dir_suffix: &str, xml_content: &str) -> 
 
 /// Create a test environment, write a Lua file, load it, return context + addon table.
 pub(super) fn load_test_lua(dir_suffix: &str, lua_content: &str) -> (TestCtx, Val) {
-    load_test_lua_in_env(WowLuaEnv::new().unwrap(), dir_suffix, lua_content)
-}
-
-fn load_test_lua_with_shared_templates(dir_suffix: &str, lua_content: &str) -> (TestCtx, Val) {
     let env = WowLuaEnv::new().unwrap();
     preload_shared_templates(&env);
-    load_test_lua_in_env(env, dir_suffix, lua_content)
-}
-
-fn load_test_lua_in_env(env: WowLuaEnv, dir_suffix: &str, lua_content: &str) -> (TestCtx, Val) {
     let temp_dir = std::env::temp_dir().join(format!("wow-sim-{}", dir_suffix));
     std::fs::create_dir_all(&temp_dir).unwrap();
     let lua_path = temp_dir.join("test.lua");
@@ -194,17 +177,14 @@ pub(super) fn set_loading_addon_index(env: &WowLuaEnv, addon_name: &str) {
 }
 
 fn preload_shared_templates(env: &WowLuaEnv) {
-    use crate::client_profile::{ACTIVE, ClientProfile};
+    if crate::xml::get_template("ButtonFrameTemplate").is_some() {
+        return;
+    }
 
-    let variant = match ACTIVE {
-        ClientProfile::Mists | ClientProfile::Era | ClientProfile::Anniversary => "Classic",
-        ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::WowForever => "Mainline",
-        ClientProfile::Wrath => panic!("Wrath does not declare ButtonFrameTemplate"),
-    };
     let addon_root = crate::paths::default_blizzard_ui_addons_path()
         .expect("Blizzard UI cache should be synced")
         .join("Blizzard_SharedXML");
-    let xml_path = addon_root.join(variant).join("SharedUIPanelTemplates.xml");
+    let xml_path = addon_root.join("Mainline/SharedUIPanelTemplates.xml");
     let addon_table = env.create_addon_table().unwrap();
     let ctx = AddonContext::new(
         env.lua(),

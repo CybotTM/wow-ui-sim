@@ -239,7 +239,7 @@ fn test_template_inherited_parent_key_climbs_one_level_for_nested_child() {
 
 #[test]
 fn test_button_frame_template_inset_parent_key_points_to_child() {
-    let (t, _) = load_test_lua_with_shared_templates(
+    let (t, _) = load_test_lua(
         "test-g-button-frame-inset",
         r#"
         local frame = CreateFrame("Frame", "ButtonFrameInsetAccess", UIParent, "ButtonFrameTemplate")
@@ -303,7 +303,7 @@ fn test_button_frame_template_inset_parent_key_points_to_child() {
 
 #[test]
 fn test_xml_button_frame_template_inset_parent_key_points_to_child() {
-    let t = load_test_xml_with_shared_templates(
+    let t = load_test_xml(
         "test-g-xml-button-frame-inset",
         r#"<Ui>
             <Frame name="XMLButtonFrameInsetAccess" parent="UIParent" inherits="ButtonFrameTemplate"/>
