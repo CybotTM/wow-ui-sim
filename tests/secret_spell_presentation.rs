@@ -1,7 +1,7 @@
 //! P3 numeric selectors: original meter consumers, not replacement providers.
 #![cfg(all(feature = "retail-12-0-5", feature = "profile-retail"))]
 
-use rilua::LuaApiMut;
+use rilua::{LuaApi, LuaApiMut};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn fixture() -> WowLuaEnv {
