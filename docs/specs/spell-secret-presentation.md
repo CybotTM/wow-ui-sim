@@ -4,8 +4,8 @@
 
 ## What it must do
 
-- [ ] `GetSpellName`, `GetSpellTexture`, and `GetSpellInfo` select the same known database name/icon for public and authentic numeric-secret inputs in secure and ordinarily tainted callers. Presentation fields and containers remain public.
-- [ ] Explicit user policy (2026-10-20): `GetSpellInfo.spellID` stays secret for a secret numeric selector; public selection retains ordinary numeric identity. No caller-taint clearing or VM-wide unwrap changes.
+- [x] `GetSpellName`, `GetSpellTexture`, and `GetSpellInfo` select the same known database name/icon for public and authentic numeric-secret inputs in secure and ordinarily tainted callers. Presentation fields and containers remain public.
+- [x] Explicit user policy (2026-10-20): `GetSpellInfo.spellID` stays secret for a secret numeric selector; public selection retains ordinary numeric identity. No caller-taint clearing or VM-wide unwrap changes.
 - [ ] `GetSpellDescription` returns public presentation text with existing public-selector behavior.
 - [ ] Approved separate link contract: `GetSpellLink` returns a whole secret link string for secret numeric input because the link embeds identity. Public-selector results retain existing behavior. Nil misses remain nil, not secret-wrapped nil.
 - [ ] Preserve exact arity and misses: Info one nil; Texture zero values; Name one `Unknown`; Description one empty string; Link one nil. Known Texture uses current epoch's three values (two public icon IDs and nil override).
@@ -26,10 +26,16 @@
 
 `tests/secret_spell_presentation.rs`. Runtime proof and exact revisions belong in the private handoff proof ledger until executed.
 
+## Bounded Retail proof
+
+Tests `6e06a4c6c` precede producer `b5a48499c`: four behavioral failures at the original meter icon/name, reward Info and typed secret-miss boundaries; existing spell API59, cooldown restriction17 and glyph security8 controls all pass. Baseline stock startup returns `[]` with original CVar stat/hash unchanged.
+
+At description tests `4a2751af7`, the four core cases pass, including secret resolved identity and endpoint-specific fractional conversion. Original Contribution tooltip public control succeeds, then secret selection reaches `GetSpellDescription`'s typed-selector error: one distinct description RED, not a prior Info/dependency failure. Both compilations finish without warnings and their integration ELFs contain only this worktree's test paths. Description/final preservation acceptance remains pending.
+
 ## Known gaps (current cycle)
 
 - [ ] Behavioral Retail RED→GREEN and touched-module preservation pending slot admission.
-- [ ] Description original-tooltip sub-batch pending first producer GREEN.
+- [ ] Description producer now uses the same exact-u32 host selector path after original-tooltip RED; final GREEN remains pending.
 - [ ] Link sub-batch held: original GuildPerks tooltip and flyout/chat paths reach `opt_string` sinks that do not consume authentic secret strings. Keep this downstream boundary separate from selector RED; no sink widening is authorized.
 
 ## Out of scope

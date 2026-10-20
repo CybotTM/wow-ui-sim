@@ -172,7 +172,7 @@ fn register_legacy_spell_globals(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn get_spell_description(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = u32::from_stack(state, 1)?;
+    let spell_id = read_modeled_u32_spell_id(state)?;
     let description_text = {
         let sim = borrow_state(state)?;
         crate::spell_description_resolver::resolve_spell_description_or_empty(&sim, spell_id)

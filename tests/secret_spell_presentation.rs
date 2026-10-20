@@ -7,16 +7,20 @@ mod tooltip_full_env_helpers;
 use rilua::{LuaApi, LuaApiMut};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+fn read_blizzard_source(relative: &str) -> String {
+    let ui = wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )));
+    let path = ui.join(relative);
+    std::fs::read_to_string(&path).unwrap_or_else(|error| panic!("{}: {error}", path.display()))
+}
+
 fn fixture() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
-    let original = std::fs::read_to_string(
-        "/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_DamageMeter/DamageMeterEntry.lua",
-    ).unwrap();
+    let original = read_blizzard_source("Blizzard_DamageMeter/DamageMeterEntry.lua");
     env.exec(&original)
         .expect("unchanged DamageMeterEntry source");
-    let contribution = std::fs::read_to_string(
-        "/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_Contribution/Blizzard_Contribution.lua",
-    ).unwrap();
+    let contribution = read_blizzard_source("Blizzard_Contribution/Blizzard_Contribution.lua");
     let setup = contribution
         .split_once("function ContributionRewardMixin:Setup")
         .unwrap()
@@ -219,7 +223,7 @@ fn presentation_miss_and_invalid_numeric_secret_controls() {
 #[test]
 fn original_contribution_tooltip_numeric_secret_description() {
     let env = tooltip_full_env_helpers::setup_full_env();
-    let original = std::fs::read_to_string("/home/osso/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_Contribution/Blizzard_Contribution.lua").unwrap();
+    let original = read_blizzard_source("Blizzard_Contribution/Blizzard_Contribution.lua");
     env.exec(&original)
         .expect("unchanged original Contribution source");
     install_secrets(&env);
