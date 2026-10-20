@@ -73,6 +73,8 @@ fn load_character_select_screen() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved =
@@ -85,7 +87,9 @@ fn find_toc_file_resolves_bare_toc() {
          src/loader/mod.rs:65-95"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_load_on_demand_with_three_required_deps() {
     let toc = TocFile::from_file(&timerunning_toc()).expect("TOC parses");
@@ -122,7 +126,9 @@ fn toc_is_load_on_demand_with_three_required_deps() {
     assert!(!toc.is_game_type_restricted());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_glue_surfaces_on_three_glue_screens_only() {
     let toc = TocFile::from_file(&timerunning_toc()).expect("TOC parses");
@@ -147,7 +153,9 @@ fn allow_load_glue_surfaces_on_three_glue_screens_only() {
          GlueParent which do not exist in-world"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_five_metadata_directives() {
     let raw = std::fs::read_to_string(timerunning_toc()).expect("TOC reads utf-8");
@@ -180,7 +188,9 @@ fn toc_raw_bytes_pin_five_metadata_directives() {
     assert!(!raw.contains("## LoadFirst"));
     assert!(!raw.contains("## DefaultState"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_resolves_three_entries_at_addon_root() {
     let toc = TocFile::from_file(&timerunning_toc()).expect("TOC parses");
@@ -203,6 +213,7 @@ fn body_resolves_three_entries_at_addon_root() {
          subdir) in declared order: lua → xml → Localization. Got: \
          {body:?}"
     );
+}
 }
 
 #[test]
