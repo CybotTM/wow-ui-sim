@@ -333,6 +333,7 @@ fn family_placeholder_resolves_to_mainline_directory() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn game_placeholder_resolves_to_standard_directory() {
     for relative in GAME_PLACEHOLDER_RESOLVED_RELATIVES {
@@ -350,7 +351,9 @@ fn game_placeholder_resolves_to_standard_directory() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -363,6 +366,7 @@ fn appears_in_game_eager_discovery() {
          CommunitiesFrame member rows; it must be alive at \
          PLAYER_ENTERING_WORLD"
     );
+}
 }
 
 #[test]
