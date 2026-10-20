@@ -72,6 +72,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&store_ui_dir()).expect("StoreUI TOC resolves");
@@ -82,7 +84,9 @@ fn find_toc_file_resolves_bare_toc() {
          per-file game-type annotations"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_dependencies_include_shared_and_screen_scoped_addons() {
     let toc = TocFile::from_file(&store_ui_toc()).expect("TOC parses");
@@ -102,7 +106,9 @@ fn toc_dependencies_include_shared_and_screen_scoped_addons() {
          screen-scoped glue and game dependencies. Got: {deps:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_plunderstorm_as_optional_dependency() {
     let toc = TocFile::from_file(&store_ui_toc()).expect("TOC parses");
@@ -113,7 +119,9 @@ fn toc_declares_plunderstorm_as_optional_dependency() {
         "Retail 12.1.0.69497 declares Blizzard_Plunderstorm as StoreUI's optional dependency"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_uses_secure_environment() {
     let toc = TocFile::from_file(&store_ui_toc()).expect("TOC parses");
@@ -125,7 +133,9 @@ fn toc_uses_secure_environment() {
          `_G[name] or rawget(__secureenv, name)` to find StoreButtonMixin"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_allow_load_both_resolves_to_all_four_screens() {
     let toc = TocFile::from_file(&store_ui_toc()).expect("TOC parses");
@@ -138,7 +148,9 @@ fn toc_allow_load_both_resolves_to_all_four_screens() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_has_no_addon_level_game_type_restriction() {
     let toc = TocFile::from_file(&store_ui_toc()).expect("TOC parses");
@@ -149,7 +161,9 @@ fn toc_has_no_addon_level_game_type_restriction() {
          selection happens on individual body entries"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_no_load_on_demand_or_load_first() {
     let toc = TocFile::from_file(&store_ui_toc()).expect("TOC parses");
@@ -163,7 +177,9 @@ fn toc_is_eager_no_load_on_demand_or_load_first() {
     assert!(toc.saved_variables().is_empty());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_current_metadata_directives() {
     let raw = std::fs::read_to_string(store_ui_toc()).expect("TOC reads utf-8");
@@ -195,7 +211,9 @@ fn toc_raw_bytes_pin_current_metadata_directives() {
     assert!(!raw.contains("## LoadFirst"));
     assert!(!raw.contains("## Dependencies:"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn retail_body_orders_seven_selected_entries_terminating_in_localization() {
     let toc = TocFile::from_file(&store_ui_toc()).expect("TOC parses");
@@ -216,6 +234,7 @@ fn retail_body_orders_seven_selected_entries_terminating_in_localization() {
     for (i, want) in BODY_FILES.iter().enumerate() {
         assert_eq!(&body[i], want, "Body entry {i}: expected {want}");
     }
+}
 }
 
 #[test]
@@ -313,6 +332,7 @@ fn store_button_mixin_publishes_with_six_atlas_swap_methods(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn store_ui_xml_script_file_includes_chain_through_seven_lua_files() {
     let templates_xml = store_ui_dir().join("Blizzard_Shared_StoreUITemplates.xml");
@@ -360,7 +380,9 @@ fn store_ui_xml_script_file_includes_chain_through_seven_lua_files() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn store_ui_xml_wraps_body_in_scoped_modifier_forbidden() {
     let main_xml = store_ui_dir().join("Blizzard_Shared_StoreUI.xml");
@@ -375,7 +397,9 @@ fn store_ui_xml_wraps_body_in_scoped_modifier_forbidden() {
          created as a forbidden frame, paired with UseSecureEnvironment=1"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn store_ui_inbound_outbound_secure_bridge_files_exist() {
     let inbound = store_ui_dir().join("Blizzard_Shared_StoreUIInbound.lua");
@@ -402,7 +426,9 @@ fn store_ui_inbound_outbound_secure_bridge_files_exist() {
          secure-only logic (purchase flow, payment handshake, etc.)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn bare_toc_keeps_flavor_selection_on_body_entries() {
     let raw = std::fs::read_to_string(store_ui_toc()).expect("TOC reads utf-8");
@@ -417,4 +443,5 @@ fn bare_toc_keeps_flavor_selection_on_body_entries() {
          this assertion observes the cached file without claiming another \
          profile's parsed behavior"
     );
+}
 }
