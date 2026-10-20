@@ -104,6 +104,7 @@ fn blizzard_plunderstorm_prematch_ui_find_toc_resolves_bare_variant() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_prematch_ui_toc_declares_eager_plunderstorm_only() {
     let toc =
@@ -160,6 +161,7 @@ fn blizzard_plunderstorm_prematch_ui_toc_declares_eager_plunderstorm_only() {
         "Zero saved variables — pure stateless mirror; match phase is server-driven via \
          WOW_LABS_MATCH_STATE_UPDATED events; superTracking state is global"
     );
+}
 }
 
 post_wrath_ui_fixture! {
