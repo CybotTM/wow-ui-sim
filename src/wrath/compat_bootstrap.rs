@@ -23,6 +23,8 @@ pub fn init(lua: &mut rilua::Lua) -> crate::Result<()> {
     crate::lua_api::globals::real::wrath_talent_groups::register(lua)?;
     #[cfg(feature = "client-wrath")]
     crate::lua_api::globals::real::wrath_minimap_arrows::register(lua)?;
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::globals::real::wrath_calendar::register(lua)?;
     lua.exec(WRATH_COMPAT_BOOTSTRAP_LUA)?;
     Ok(())
 }

@@ -3,6 +3,26 @@
 use std::collections::{HashMap, HashSet};
 
 pub use super::legacy_skills::Skill;
+
+/// INFERRED simulator inputs, not authenticated native cache initialization.
+#[cfg(feature = "client-wrath")]
+#[derive(Debug)]
+pub struct CalendarContext {
+    pub player_present: bool,
+    /// 0=base, 1=Burning Crusade, 2=Wrath.
+    pub account_expansion: u8,
+}
+
+#[cfg(feature = "client-wrath")]
+impl Default for CalendarContext {
+    fn default() -> Self {
+        Self {
+            player_present: true,
+            account_expansion: 2,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Landmark {
     pub name: String,
@@ -30,6 +50,8 @@ pub struct WrathLegacyState {
     /// Lazily allocated model handles, retained within this environment.
     #[cfg(feature = "client-wrath")]
     pub mini_map_arrows: Option<(u64, u64)>,
+    #[cfg(feature = "client-wrath")]
+    pub calendar: CalendarContext,
     pub skills: Vec<Skill>,
     /// Zero denotes no selection; otherwise one-based into skills.
     pub selected_skill: usize,

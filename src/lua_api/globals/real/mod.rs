@@ -121,6 +121,8 @@ pub mod unit_spell_target_name;
 pub mod vehicle_possession;
 pub mod voice_chat_probes;
 #[cfg(feature = "client-wrath")]
+pub mod wrath_calendar;
+#[cfg(feature = "client-wrath")]
 pub mod wrath_legacy;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_legacy_lfg;
