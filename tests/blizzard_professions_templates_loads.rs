@@ -389,6 +389,7 @@ fn blizzard_professions_templates_does_not_appear_in_eager_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_professions_templates_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -399,6 +400,7 @@ fn blizzard_professions_templates_appears_in_full_addon_inventory() {
         found,
         "Blizzard_ProfessionsTemplates must appear in `discover_all_blizzard_addons`"
     );
+}
 }
 
 prefork_full_ui_case! {
