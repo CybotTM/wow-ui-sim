@@ -373,18 +373,6 @@ fn lane_appears_in_eager_discovery_in_dep_first_order() {
 
 #[test]
 fn shared_xml_base_loads_on_glue_screens_others_do_not() {
-    if cfg!(feature = "client-wrath") {
-        let toc = crate::common::native_framexml_toc();
-        assert!(toc.allows_screen(ScreenKind::Game));
-        for screen in [
-            ScreenKind::Login,
-            ScreenKind::CharacterSelect,
-            ScreenKind::CharacterCreate,
-        ] {
-            assert!(!toc.allows_screen(screen));
-        }
-        return;
-    }
     let ui = blizzard_ui_dir();
     let glue_screens = [
         ScreenKind::Login,
