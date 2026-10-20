@@ -45,10 +45,7 @@ const PANEL_HARNESS_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIParentPanelManager",
         "Blizzard_UIParentPanelManager_Mainline.toc",
     ),
-    (
-        "Blizzard_Settings_Shared",
-        "Blizzard_Settings_Shared.toc",
-    ),
+    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared.toc"),
     (
         "Blizzard_SettingsDefinitions_Shared",
         "Blizzard_SettingsDefinitions_Shared.toc",
@@ -75,7 +72,6 @@ const PANEL_HARNESS_ADDONS: &[(&str, &str)] = &[
 fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::paths::default_blizzard_ui_addons_path()
         .expect("Blizzard UI cache should be synced")
-
 }
 
 fn load_blizzard_addon(env: &WowLuaEnv, addon_name: &str, toc_name: &str) {
@@ -281,6 +277,7 @@ fn compact_unit_frame_runtime_template_keeps_over_heal_absorb_glow_child() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn deprecated_arena_match_frame_keeps_over_heal_absorb_glow_named_from_ancestor() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -316,6 +313,7 @@ fn deprecated_arena_match_frame_keeps_over_heal_absorb_glow_named_from_ancestor(
         has_glow,
         "ArenaEnemyMatchFrame1 should keep its named overHealAbsorbGlow through anonymous XML wrapper frames"
     );
+}
 }
 
 #[test]
