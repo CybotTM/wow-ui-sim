@@ -233,6 +233,7 @@ fn blizzard_photo_sharing_toc_lists_four_files_in_canonical_order() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_photo_sharing_appears_in_game_screen_eager_discovery_only() {
     let ui = blizzard_ui_dir();
@@ -266,7 +267,9 @@ fn blizzard_photo_sharing_appears_in_game_screen_eager_discovery_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_photo_sharing_appears_in_full_addon_inventory() {
     let ui = blizzard_ui_dir();
@@ -278,6 +281,7 @@ fn blizzard_photo_sharing_appears_in_full_addon_inventory() {
          flavor-restriction filter applies to per-screen discovery, but the \
          flavor-agnostic full-inventory walk still reports the addon as on-disk"
     );
+}
 }
 
 prefork_full_ui_case! {
