@@ -235,6 +235,7 @@ fn toc_raw_bytes_pin_directives() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn directory_holds_seven_entries() {
     let entries: Vec<String> = std::fs::read_dir(token_ui_dir())
@@ -250,6 +251,7 @@ fn directory_holds_seven_entries() {
          Got: {entries:?}"
     );
 }
+}
 
 #[test]
 fn dep_directories_exist_on_disk() {
@@ -263,6 +265,7 @@ fn dep_directories_exist_on_disk() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -275,6 +278,7 @@ fn appears_in_game_eager_discovery() {
          it in the FIRST eager pass at src/loader/mod.rs:626 alongside any LoadFirst-marked \
          addons, so it loads before non-secure addons"
     );
+}
 }
 
 #[test]
