@@ -452,11 +452,13 @@ fn publishes_two_mixin_tables_at_global_scope(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn publishes_two_mixin_tables_at_global_scope() {
     let env = load_full_ui_for(ScreenKind::Game);
     publishes_two_mixin_tables_at_global_scope::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -483,11 +485,13 @@ fn element_mixin_carries_four_owning_dialog_accessors(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn element_mixin_carries_four_owning_dialog_accessors() {
     let env = load_full_ui_for(ScreenKind::Game);
     element_mixin_carries_four_owning_dialog_accessors::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -512,11 +516,13 @@ fn editbox_mixin_inherits_from_element_mixin_via_create_from_mixins(env: &WowLua
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn editbox_mixin_inherits_from_element_mixin_via_create_from_mixins() {
     let env = load_full_ui_for(ScreenKind::Game);
     editbox_mixin_inherits_from_element_mixin_via_create_from_mixins::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -546,11 +552,13 @@ fn editbox_mixin_carries_five_editbox_specific_methods(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn editbox_mixin_carries_five_editbox_specific_methods() {
     let env = load_full_ui_for(ScreenKind::Game);
     editbox_mixin_carries_five_editbox_specific_methods::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -594,11 +602,13 @@ fn static_popup_timeout_sec_default_is_sixty_seconds(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn static_popup_timeout_sec_default_is_sixty_seconds() {
     let env = load_full_ui_for(ScreenKind::Game);
     static_popup_timeout_sec_default_is_sixty_seconds::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -633,11 +643,13 @@ fn generic_confirmation_dialog_is_seeded_with_handlers(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn generic_confirmation_dialog_is_seeded_with_handlers() {
     let env = load_full_ui_for(ScreenKind::Game);
     generic_confirmation_dialog_is_seeded_with_handlers::run(&env);
+}
 }
 
 prefork_full_ui_case! {
