@@ -278,6 +278,7 @@ fn blizzard_queue_status_frame_toc_lists_two_files_with_variant_subdirectory() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_queue_status_frame_appears_in_eager_game_discovery() {
     let ui = blizzard_ui_dir();
@@ -313,7 +314,9 @@ fn blizzard_queue_status_frame_appears_in_eager_game_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_queue_status_frame_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -324,6 +327,7 @@ fn blizzard_queue_status_frame_appears_in_full_addon_inventory() {
         found,
         "Blizzard_QueueStatusFrame MUST appear in `discover_all_blizzard_addons`"
     );
+}
 }
 
 prefork_full_ui_case! {
