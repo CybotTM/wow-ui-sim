@@ -1,17 +1,17 @@
 # Message-frame access history (C11)
 
-Historical producer `269ed6f17` replaces the passive scaffold; sealed RED/GREEN receipts remain below. The 2026-10-20 lifecycle repair and corrected C11 tests have separate bounded runtime, format and default check proof below. No complete native, full-profile or startup acceptance is implied.
+Historical producer `269ed6f17` replaces the passive scaffold; its receipts remain below. The 2026-10-20 lifecycle repair and subsequent access-ID correction have separate bounded proof below. Acceptance covers named Wrath/Retail cases and stock no-addons/no-saved-vars startup, not native execution, full-addon compatibility or every profile.
 
 Consumer-derived simulator contract for `ScrollingMessageFrame` history methods and inferred plain `MessageFrame` row lifecycle in `src/lua_api/frame/methods/widgets/message_frame/`. Public Wrath UI requires filtered scrolling-history transfer; plain-frame history queries are not native 12340 APIs. This spec makes no complete native-parity claim. Architecture context: [Lua API](../lua-api.md).
 
 ## What it must do
 
-- [ ] On Wrath ScrollingMessageFrame, `GetNumMessages(id)` counts the selected access-ID group without mutation; nil/omitted/zero selects total history. Unknown nonzero IDs count zero.
-- [ ] Wrath ScrollingMessageFrame `AddMessage(text, r, g, b, typeID, backFill, accessID, extraData)` stores independent type/access/extraData tokens regardless of false, true or omitted backFill. Missing tokens represent zero. The existing Rust `message_id` field stores typeID (called lineID by the public consumer); no new identifier type is implied.
-- [ ] On Wrath ScrollingMessageFrame, both `GetMessageInfo(i)` and `GetMessageInfo(i, id)` return exactly `text, accessID, typeID, extraData`, in one-based selected history order. Nil/zero ID means unfiltered. Invalid/missing indices raise Lua errors, not an empty row or zero return values.
-- [ ] On Wrath, `RemoveMessagesByAccessID(id)` requires a numeric ID and returns nothing. It removes exact matches; zero removes implicit/explicit zero-ID rows, not all history. Other groups retain order.
-- [ ] Wrath plain MessageFrame exposes none of the scrolling history methods. Its own methods are the authenticated 28 listed below, plus inherited Frame/Region/ScriptObject methods. Retail plain MessageFrame and scrolling color-tuple behavior remain unchanged.
-- [ ] The unchanged public Wrath `FCF_OpenTemporaryWindow` transfer clears stale destination history, copies only the requested conversation in order, retains line/extraData tokens, recovers colors through `ChatHistory_GetChatType(extraData)`, and removes only that conversation from source history.
+- [x] On Wrath ScrollingMessageFrame, `GetNumMessages(id)` counts the selected access-ID group without mutation; nil/omitted/zero selects total history. Unknown nonzero IDs count zero.
+- [x] Wrath ScrollingMessageFrame `AddMessage(text, r, g, b, typeID, backFill, accessID, extraData)` stores independent type/access/extraData tokens regardless of false, true or omitted backFill. Missing tokens represent zero. The existing Rust `message_id` field stores typeID (called lineID by the public consumer); no new identifier type is implied.
+- [x] On Wrath ScrollingMessageFrame, both `GetMessageInfo(i)` and `GetMessageInfo(i, id)` return exactly `text, accessID, typeID, extraData`, in one-based selected history order. Nil/zero ID means unfiltered. Invalid/missing indices raise Lua errors, not an empty row or zero return values.
+- [x] On Wrath, `RemoveMessagesByAccessID(id)` requires a numeric ID and returns nothing. It removes exact matches; zero removes implicit/explicit zero-ID rows, not all history. Other groups retain order.
+- [x] Wrath plain MessageFrame exposes none of the scrolling history methods. Its own methods are the authenticated 28 listed below, plus inherited Frame/Region/ScriptObject methods. Retail plain MessageFrame and scrolling color-tuple behavior remain unchanged.
+- [x] The unchanged public Wrath `FCF_OpenTemporaryWindow` transfer clears stale destination history, copies only the requested conversation in order, retains line/extraData tokens, recovers colors through `ChatHistory_GetChatType(extraData)`, and removes only that conversation from source history.
 
 ## Authoritative 12340 scope — 2026-10-20
 
@@ -29,7 +29,7 @@ Queue/Clear/GetRect/layer scheduling is not changed by this access-ID repair. Th
 ## Implementation inventory
 
 - `src/lua_api/message_frame.rs`: stored message text, colors, identifiers and history state.
-- `src/lua_api/frame/methods/widgets/message_frame/add.rs`: message ingestion; bounded Wrath history argument shape, existing short simulator calls preserved.
+- `src/lua_api/frame/methods/widgets/message_frame/add.rs`: message ingestion; unconditional native Wrath scrolling argument positions, preserving plain-frame and Retail input shapes.
 - `src/lua_api/frame/methods/widgets/message_frame/getters.rs`: total/filtered count and indexed retrieval.
 - `src/lua_api/frame/methods/widgets/message_frame/transform.rs`: access-ID removal and metadata preservation across existing transforms.
 - `src/lua_api/frame/methods/widgets/message_frame/mod.rs`: method registration and distinction between shared message methods and scrolling-only entries.
@@ -37,7 +37,7 @@ Queue/Clear/GetRect/layer scheduling is not changed by this access-ID repair. Th
 
 ## Tests asserting this spec
 
-`tests/smf_access_id.rs` covers the authenticated plain surface, both cache-creation orders, Lua/XML/runtime-template aliases, zero-ID count/removal, four-value metadata, bounds errors and native argument positions with true/omitted backFill. Retail cases preserve the plain method surface and XML history.
+`tests/smf_access_id.rs` covers the authenticated plain surface, alternating plain/scrolling construction, Lua/XML/runtime-template aliases, zero-ID count/removal, four-value metadata, bounds errors and native argument positions with true/omitted backFill. Retail cases preserve the plain method surface and XML history.
 
 `tests/c11_message_access.rs` (Wrath transfer cases plus a Retail color-tuple preservation case; historical RED and post-GREEN receipts below):
 
@@ -75,10 +75,22 @@ After test-only `8fb92fc43`, explicit ADD-admitted Wrath rebuild followed by **C
 
 Exact commands, stdout/stderr, artifact hashes, revision scope and source/proof applicability are kept in the private `wrath-msg-access` handoff (`report.md`, `proof-ledger.json`). Runtime receipts record unchanged original CVars stat/hash; each child uses a byte-exact private copy. Plain-frame timing remains INFERRED, not upgraded by simulator test success.
 
+## Access-ID correction proof — 2026-10-20
+
+Fixtures `c8606759c`, `9836481c4`, `cda399543` precede producer `748ea9311`. At `9836481c4` with unchanged master `7e5cd22bb` production, six access/surface/XML cases fail intended assertions (exposed GetNumMessages, zero filtered count, missing index error, lost true-backFill access ID, six-value tuple, XML plain exposure). The unchanged whole-file FCF transfer itself succeeds; its new post-transfer unfiltered-metadata assertion fails. Do not describe that as the transfer function failing. C6 passes 7/7 and corrected message-frame preservation passes 29/29 before the producer.
+
+After `748ea9311`, Wrath access cases6/6, C11 5/5, C6 7/7, message-frame30/30 and original empty combatlog refilter1/1 pass. The generic history-info case now runs on Wrath rather than being cfg-excluded. Color/timestamp preservation is asserted through actual stored rows or the separate Retail tuple contract, not non-native Wrath color returns. Stock Wrath `lua-errors` prints `[]`; its build emits zero compiler warnings. Four unchanged full-UI chat cases fail identically on the master producer (layout lock, scrollbar and two missing editbox cases); these are preserved failures, not passes. Earlier non-native plain-history expectations in the two message-frame cases were corrected to supported Clear/update/state observations.
+
+Retail preservation passes: access/XML2/2, real C11 color-tuple1/1, message-frame30/30, full-UI chat12/12 through prefork, and combatlog7/7 (one discovery/TOC integration case plus six full-UI prefork cases). C6 reports6/6: the new Retail lifecycle case performs real assertions; five inherited Wrath-only bodies return early and earn no Retail behavior credit. Unselected prefork fixture groups execute zero cases and earn no pass credit.
+
+Both full-feature profile builds and cargo checks exit0 with zero compiler diagnostics/warnings. `cargo fmt --all -- --check` exits0 with empty output. Stock `wow-sim --no-addons --no-saved-vars lua-errors` prints `[]` on both profiles. Before each build/check, only this worktree's harness build-script timestamp was touched; all three acceptance ELFs (Wrath integration; Retail integration/prefork) embed only this worktree's absolute tests root. Every runtime uses an isolated byte-exact CVar copy; original hash/stat remain unchanged. Controller completed all queued work and released its owned slot at14:28:02. No push, merge or PR was performed.
+
+Exact commands, revision scope, output hashes, original-CVar snapshots and strict worktree-only ELF roots are retained in the private `handoff/smf-access-id/proof-ledger.json`; this is bounded simulator proof, not native execution or complete widget-method parity. Later documentation-only edits do not invalidate the Rust-source proof at `748ea9311`.
+
 ## Known gaps (current cycle)
 
 - [x] Saved tests/passive-scaffold behavioral RED accepted, including whole-file bounded Wrath fixture setup and explicit failed transfer outcome.
-- [ ] Producer GREEN and preservation are bounded by the resolved receipts above; no Retail C11 execution or full chat lifecycle acceptance follows.
+- [x] Current access-ID correction has bounded two-profile GREEN/preservation above, including a real Retail C11 case. Complete chat lifecycle/native/full-suite acceptance remains outside that proof.
 - [ ] Requested `~/Repos/wowless/data/products/wow/uiobjects.yaml` is absent on this host; signatures were not verified from Wowless.
 
 ## Out of scope

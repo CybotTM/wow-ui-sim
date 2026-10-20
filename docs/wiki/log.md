@@ -1,6 +1,6 @@
 ## [2026-10-20] source | Wrath message-frame method and metadata boundary
 
-[Widget state](systems/widget-system.md#message-history-and-translation-target-state--2026-10-16) and [Lua API](systems/lua-api.md#container-message-history-and-transform-producers--2026-10-16) link the [access-ID contract](../specs/message-frame-access-history.md): authenticated plain-method table, distinct cached indices, native Wrath metadata and zero-ID rules, preserved Retail surface/tuple. Baseline conflicts and backFill-ordering/queue-timing exclusions remain explicit; source publication alone is not runtime acceptance.
+[Widget state](systems/widget-system.md#message-history-and-translation-target-state--2026-10-16) and [Lua API](systems/lua-api.md#container-message-history-and-transform-producers--2026-10-16) link the [access-ID contract/proof](../specs/message-frame-access-history.md#access-id-correction-proof--2026-10-20): authenticated plain-method table, distinct cached indices, native Wrath metadata/zero-ID rules and preserved Retail surface/tuple. Six-case RED→GREEN, both-profile bounded preservation, empty stock startups, zero-warning checks and formatter pass are recorded with worktree-only ELF binding and unchanged original CVars. Four Wrath chat failures reproduce on master. Native execution, universal method leaks and backFill-ordering/queue-timing changes remain excluded.
 
 ## [2026-10-19] source | Wrath readiness and placed-frame reconstruction
 

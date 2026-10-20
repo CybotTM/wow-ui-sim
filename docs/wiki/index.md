@@ -8,7 +8,7 @@
 
 ## [2026-10-20] source | Wrath message-frame access IDs
 
-[Widget state](systems/widget-system.md#message-history-and-translation-target-state--2026-10-16) distinguishes shared storage from plain/scrolling method exposure. [Owning contract](../specs/message-frame-access-history.md) records the authenticated 12340 table, its unknown-build baseline conflict, Wrath-only metadata/count/removal behavior and unchanged Retail boundary. Runtime acceptance is separate from source publication.
+[Widget state](systems/widget-system.md#message-history-and-translation-target-state--2026-10-16) distinguishes shared storage from plain/scrolling method exposure. [Owning contract](../specs/message-frame-access-history.md#access-id-correction-proof--2026-10-20) records authenticated 12340 scope, the unknown-build baseline conflict, six-case RED→GREEN, both-profile preservation/empty stock startup/zero-warning gates and four master-reproduced Wrath chat failures. Retail behavior remains unchanged; native execution and unrelated universal method leaks remain outside scope.
 
 ## [2026-10-19] source | Wrath dialog request/response plumbing
 
