@@ -9,6 +9,8 @@ use crate::common::panel_fixtures::{
 
 const ROOT: &str = "Blizzard_APIDocumentation";
 
+// APIDocumentation vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn api_documentation_loads_cleanly_and_expands_default_chat_history() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -35,7 +37,9 @@ fn api_documentation_loads_cleanly_and_expands_default_chat_history() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn api_documentation_loads_expected_mixin_tables() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -71,6 +75,7 @@ fn api_documentation_loads_expected_mixin_tables() {
             "APIDocumentation load must publish every documented mixin global as a table"
         );
     });
+}
 }
 
 fn load_api_documentation(env: &wow_ui_sim::lua_api::WowLuaEnv) {

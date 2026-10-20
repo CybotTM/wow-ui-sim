@@ -10,6 +10,8 @@ use crate::common::panel_fixtures::{
 const ROOT: &str = "Blizzard_APIDocumentation";
 const DUMP_TEXT: &str = "/dump GetTime()";
 
+// APIDocumentation vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn opendump_link_records_chat_edit_dump_command() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -88,6 +90,7 @@ fn opendump_link_records_chat_edit_dump_command() {
             "OpenDump parks the cursor just before the closing parenthesis"
         );
     });
+}
 }
 
 fn load_api_documentation(env: &wow_ui_sim::lua_api::WowLuaEnv) {

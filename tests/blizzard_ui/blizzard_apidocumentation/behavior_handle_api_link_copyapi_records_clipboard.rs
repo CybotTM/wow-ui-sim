@@ -9,6 +9,8 @@ use crate::common::panel_fixtures::{
 
 const ROOT: &str = "Blizzard_APIDocumentation";
 
+// APIDocumentation vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn copyapi_link_records_function_clipboard_string() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -67,6 +69,7 @@ fn copyapi_link_records_function_clipboard_string() {
             "APIDocumentation calls CopyToClipboard without removeMarkup"
         );
     });
+}
 }
 
 fn load_api_documentation(env: &wow_ui_sim::lua_api::WowLuaEnv) {
