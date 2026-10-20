@@ -99,6 +99,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recruit_a_friend_toc_pins_eager_game_only_with_optional_social_dependencies() {
     let toc = TocFile::from_file(&raf_toc()).expect("Blizzard_RecruitAFriend TOC parse");
@@ -177,7 +179,9 @@ fn blizzard_recruit_a_friend_toc_pins_eager_game_only_with_optional_social_depen
          the field entirely"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recruit_a_friend_toc_carries_rare_suppress_local_table_ref_directive() {
     let toc = TocFile::from_file(&raf_toc()).expect("RAF TOC parse");
@@ -199,6 +203,7 @@ fn blizzard_recruit_a_friend_toc_carries_rare_suppress_local_table_ref_directive
          a private addon table. Got metadata SuppressLocalTableRef = {:?}",
         suppress
     );
+}
 }
 
 #[test]
@@ -230,6 +235,7 @@ fn blizzard_recruit_a_friend_toc_lists_frame_and_social_view_sources() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recruit_a_friend_only_allows_game_screen_via_allow_load_game() {
     let toc = TocFile::from_file(&raf_toc()).expect("RAF TOC parse");
@@ -250,6 +256,7 @@ fn blizzard_recruit_a_friend_only_allows_game_screen_via_allow_load_game() {
         !toc.allows_screen(ScreenKind::CharacterCreate),
         "`## AllowLoad: game` MUST reject the CharacterCreate screen"
     );
+}
 }
 
 #[test]
@@ -300,7 +307,10 @@ fn blizzard_recruit_a_friend_loads_with_profile_is_enabled_surface() {
     } else {
         "false"
     };
-    assert_eq!(probe, expected, "Recruit-A-Friend is modeled disabled by default");
+    assert_eq!(
+        probe, expected,
+        "Recruit-A-Friend is modeled disabled by default"
+    );
 
     let warnings = recruit_a_friend_warnings.expect("Recruit-A-Friend addon should load");
     assert!(
