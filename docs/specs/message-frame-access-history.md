@@ -1,12 +1,12 @@
 # Message-frame access history (C11)
 
-Status: producer `269ed6f17` replaces the passive scaffold; historical behavioral RED accepted. Bounded producer GREEN accepted from the sealed component receipts below. No native, full-profile, startup, format or type-check acceptance is implied.
+Historical producer `269ed6f17` replaces the passive scaffold; sealed RED/GREEN receipts remain below. The 2026-10-20 lifecycle repair and corrected C11 tests have separate bounded runtime, format and default check proof below. No complete native, full-profile or startup acceptance is implied.
 
-Consumer-derived simulator contract for `MessageFrame` and `ScrollingMessageFrame` history methods in `src/lua_api/frame/methods/widgets/message_frame/`. Public Wrath UI requires filtered transfer; this spec makes no native-parity claim. Architecture context: [Lua API](../lua-api.md).
+Consumer-derived simulator contract for `ScrollingMessageFrame` history methods and inferred plain `MessageFrame` row lifecycle in `src/lua_api/frame/methods/widgets/message_frame/`. Public Wrath UI requires filtered scrolling-history transfer; plain-frame history queries are not native 12340 APIs. This spec makes no complete native-parity claim. Architecture context: [Lua API](../lua-api.md).
 
 ## What it must do
 
-- [ ] With distinct numeric access IDs and untagged messages, `GetNumMessages(id)` counts exactly the selected group, including zero for an absent ID, without mutating history. Both widget types share this contract.
+- [ ] With distinct numeric access IDs and untagged messages, `GetNumMessages(id)` counts exactly the selected group, including zero for an absent ID, without mutating history. This history contract applies to ScrollingMessageFrame, not plain MessageFrame.
 - [ ] `GetNumMessages()` retains its existing total-history behavior before and after filtered reads; unfiltered text order and clear behavior remain unchanged.
 - [ ] On Wrath, retain the public consumer's `AddMessage(text, r, g, b, lineID, false, accessID, extraData)` metadata. Access ID, line ID and extraData are independent values, not alpha or a single interchangeable identifier.
 - [ ] `GetMessageInfo(i, id)` indexes the selected subsequence using one-based history order and returns `text, accessID, lineID, extraData` for the Wrath transfer consumer. Existing unfiltered simulator returns remain unchanged; this is a bounded simulator contract, not an assertion of complete Wrath API compatibility.
@@ -30,7 +30,8 @@ Consumer-derived simulator contract for `MessageFrame` and `ScrollingMessageFram
 
 `tests/c11_message_access.rs` (Wrath-only execution; historical RED and post-GREEN receipts below):
 
-- `c11_message_frame_counts_only_selected_access_id` and `c11_scrolling_message_frame_counts_only_selected_access_id`: concrete grouped counts plus empty/total/order/clear preservation (no redundant standalone control).
+- `c11_scrolling_message_frame_counts_only_selected_access_id`: concrete grouped counts plus empty/total/order/clear preservation.
+- `c11_plain_message_frame_queues_and_clear_cancels_before_drain_inferred`: AddMessage returns nothing; concrete active-row state stays empty before update, Clear cancels queued insertion, and a subsequent row appears on update. Plain-frame scheduling remains INFERRED; no history query is used.
 - `c11_filtered_info_indexes_selected_history_and_returns_transfer_metadata`: filtered order and distinct metadata.
 - `c11_remove_selected_access_id_preserves_other_and_untagged_messages`: selective removal.
 - `c11_original_wrath_temporary_window_moves_only_selected_access_history`: whole unchanged cached public files, bounded chrome fixture, real history methods. Only `FCF_OpenTemporaryWindow` is captured; expected success/destination/counts are asserted with the captured consumer error in the failure diagnostic. File, digest, fixture and setup-error checks remain outside that capture.
@@ -51,9 +52,17 @@ Historical tests/passive scaffold: `680a35a1e`; producer: `269ed6f17`. The indep
 
 `392651e97` selected the queued-row lifecycle by `WidgetType::MessageFrame`, which also represents ScrollingMessageFrame. Restore immediate scrolling history across explicit Lua creation, direct XML and runtime-template child creation. Both insertion and update use the same predicate: only Wrath MessageFrame widgets without the ScrollingMessageFrame object-type name acquire queued rows/timers. Plain MessageFrame/UIErrorsFrame remains queued.
 
-`template::set_intrinsic` stamps the existing Rust `object_type_name` for the ScrollingMessageFrame base on Wrath only: that is the only profile with this queued lifecycle. Retail identity and history output are unchanged. No new widget enum, flag, history method or access-ID API is introduced. `tests/widgets_b6_c6.rs` asserts synchronous metadata/removal and timer-free history across an update for all three creation paths; bounded runtime proof is pending.
+`template::set_intrinsic` stamps the existing Rust `object_type_name` for the ScrollingMessageFrame base on Wrath only: that is the only profile with this queued lifecycle. Retail identity and history output are unchanged. No new widget enum, flag, history method or access-ID API is introduced. `tests/widgets_b6_c6.rs` asserts synchronous metadata/removal and timer-free history across an update for all three creation paths.
 
-Laptop clean-room evidence `handoff/laptop-labels-answers-20261018/message-frame-access-12340.md` contains two answers agreeing on synchronous native scrolling history and absence of GetNumMessages/GetMessageInfo/RemoveMessagesByAccessID on native plain MessageFrame. Plain-frame queuing remains INFERRED because timing evidence conflicts between answers. Historical C11 plain-frame immediate-history assertions conflict with queued-row preservation; leave those tests and methods unchanged in this repair, tracking the method/access-ID gap separately. No full C11 GREEN or native-run claim follows from the scrolling repair.
+Laptop clean-room evidence `handoff/laptop-labels-answers-20261018/message-frame-access-12340.md` contains two answers agreeing on synchronous native scrolling history and absence of GetNumMessages/GetMessageInfo/RemoveMessagesByAccessID on native plain MessageFrame. Plain-frame queuing remains INFERRED because timing evidence conflicts between answers. Historical C11 plain-frame immediate-history assertions were non-native expectations, not missing producer behavior. Explicitly authorized test-only commit `8fb92fc43` removes those assertions and retains supported AddMessage/Clear coverage with inferred scheduling. Production method registration remains unchanged; no native method-surface parity is claimed.
+
+### Bounded repair proof
+
+Fixture `1e468a530`: C11 0/5, C6 5/7. Both C6 failures report `scrolling history must be immediate`; the original temporary-window transfer observes `(true,0,0)` instead of `(true,2,3)`. Producer `c6e974619` restores the scrolling cases: unchanged C6 7/7, original empty combatlog refilter 1/1, and existing `message_frame::test_add_message_and_num_messages` 1/1 (it creates ScrollingMessageFrame; independently supplied base `391446092` receipt failed count0 vs2). Intermediate unchanged C11 is 2/5 because three tests still contain non-native plain-frame expectations.
+
+After test-only `8fb92fc43`, explicit ADD-admitted Wrath rebuild followed by **C11-only rerun passes 5/5**, including the unchanged public transfer and new inferred plain-frame Clear-before-drain case. C6/combatlog/existing insert were not redundantly rerun: production and their test files are unchanged. Default Retail history remains 30/30 before/after the producer; C11 is cfg-excluded (zero tests), not five Retail passes. Post-correction format and default full-feature cargo check exit0. No whole-profile, rendering-pixel or native-run acceptance follows.
+
+Exact commands, stdout/stderr, artifact hashes, revision scope and source/proof applicability: `/home/osso/.local/state/wow-ui-sim/handoff/wrath-msg-access/report.md` and `proof-ledger.json`. Runtime receipts record unchanged original CVars stat/hash; each child uses a byte-exact private copy. Plain-frame timing remains INFERRED, not upgraded by simulator test success.
 
 ## Known gaps (current cycle)
 
