@@ -352,6 +352,7 @@ fn body_orders_definitions_before_logic_before_layout() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_eager_discovery_on_game_screen_only() {
     let ui = blizzard_ui_dir();
@@ -376,6 +377,7 @@ fn appears_in_eager_discovery_on_game_screen_only() {
             .any(|(name, _)| name == "Blizzard_StaticPopup_Game");
         assert!(!found, "{screen:?} sweep must exclude StaticPopup_Game");
     }
+}
 }
 
 prefork_full_ui_case! {
