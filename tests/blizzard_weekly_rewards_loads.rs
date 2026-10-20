@@ -207,6 +207,7 @@ fn toc_raw_bytes_pin_minimal_directives() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn directory_holds_four_entries_with_bootstrap() {
     let entries = std::fs::read_dir(weekly_rewards_dir())
@@ -216,6 +217,7 @@ fn directory_holds_four_entries_with_bootstrap() {
         entries, 4,
         "Retail 12.1.0.69497 directory holds the TOC, bootstrap Lua, main Lua, and XML"
     );
+}
 }
 
 #[test]
