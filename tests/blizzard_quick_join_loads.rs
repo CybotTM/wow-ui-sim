@@ -8,8 +8,10 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path()
-        .unwrap_or_else(|_| wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available"))
+    wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap_or_else(|_| {
+        wow_ui_sim::paths::default_blizzard_ui_addons_path()
+            .expect("Blizzard UI cache should be available")
+    })
 }
 
 fn quick_join_dir() -> PathBuf {
@@ -92,6 +94,9 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Wrath manifest1-382/cache has no Blizzard_QuickJoin packaged input.
+// Only literal TOC/discovery snapshots; all prefork behavior stays enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_quick_join_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&quick_join_dir()).expect("Blizzard_QuickJoin TOC resolves");
@@ -296,6 +301,8 @@ fn blizzard_quick_join_appears_in_full_addon_inventory() {
         found,
         "Blizzard_QuickJoin MUST appear in `discover_all_blizzard_addons`"
     );
+}
+
 }
 
 prefork_full_ui_case! {
