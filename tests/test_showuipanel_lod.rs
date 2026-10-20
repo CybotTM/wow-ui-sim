@@ -612,6 +612,7 @@ fn professions_frame_xml_pages_are_parent_keyed() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
     test_timeout! {
@@ -658,4 +659,5 @@ fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
             "LossOfControlFrame should show the seeded loss-of-control overlay: {result}"
         );
     }
+}
 }
