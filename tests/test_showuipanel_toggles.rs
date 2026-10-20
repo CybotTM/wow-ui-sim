@@ -403,6 +403,7 @@ fn toggle_achievement_frame_opens_and_closes_achievement_panel() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn toggle_encounter_journal_opens_and_closes_panel() {
     test_timeout! {
@@ -431,6 +432,7 @@ fn toggle_encounter_journal_opens_and_closes_panel() {
             "ToggleEncounterJournal() should open and close the encounter journal panel: {result}"
         );
     }
+}
 }
 
 #[test]

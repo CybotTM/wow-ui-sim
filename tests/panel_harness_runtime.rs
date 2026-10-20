@@ -223,6 +223,7 @@ fn collections_addon_load_creates_collections_journal() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn encounter_journal_addon_load_creates_frame() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -248,6 +249,7 @@ fn encounter_journal_addon_load_creates_frame() {
         frame_exists,
         "Blizzard_EncounterJournal should create EncounterJournal when loaded"
     );
+}
 }
 
 post_wrath_ui_fixture! {
@@ -533,6 +535,7 @@ fn collections_toggle_loads_and_shows_frame() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn encounter_toggle_loads_and_shows_frame() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -551,6 +554,7 @@ fn encounter_toggle_loads_and_shows_frame() {
 
     assert!(loaded, "encounter journal toggle should load the addon");
     assert!(shown, "encounter journal toggle should show the frame");
+}
 }
 
 #[test]
@@ -588,6 +592,7 @@ fn adventure_journal_dungeon_action_opens_lfd_without_recursing() {
     assert_eq!(dungeon_type, 1201, "linked dungeon should become LFD type");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn encounter_journal_display_dungeon_instance_does_not_recurse() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -615,7 +620,9 @@ fn encounter_journal_display_dungeon_instance_does_not_recurse() {
         "dungeon display should show the encounter panel"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn encounter_journal_journeys_frame_seeds_current_major_factions_without_tww_leak() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -663,4 +670,5 @@ fn encounter_journal_journeys_frame_seeds_current_major_factions_without_tww_lea
         false,
         "current Midnight Journeys must not show War Within rows; count={count}, names={names}"
     );
+}
 }
