@@ -263,6 +263,7 @@ fn toc_raw_bytes_pin_five_directives_and_fifteen_body_files() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -275,6 +276,7 @@ fn appears_in_game_eager_discovery() {
          restrict. Has one downstream consumer: Blizzard_HousingTutorials \
          declares `## Dependencies: Blizzard_Tutorials`"
     );
+}
 }
 
 #[test]
