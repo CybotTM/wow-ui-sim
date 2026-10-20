@@ -104,6 +104,7 @@ const NEW_HONOR: i32 = 4_500;
 const NEW_HONOR_MAX: i32 = 10_000;
 const NEW_HONOR_LEVEL: i32 = 42;
 
+post_wrath_ui_fixture! {
 #[test]
 fn honor_bar_round_trips_through_honor_xp_update_event() {
     test_timeout! {
@@ -116,6 +117,7 @@ fn honor_bar_round_trips_through_honor_xp_update_event() {
         assert_post_event_status_bar_values(env);
     });
     }
+}
 }
 
 fn assert_cold_globals_resolve(env: &WowLuaEnv) {
