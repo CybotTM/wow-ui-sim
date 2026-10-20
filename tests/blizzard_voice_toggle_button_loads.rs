@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn voice_toggle_button_dir() -> PathBuf {
@@ -91,6 +92,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_variant() {
     let resolved =
@@ -112,7 +115,9 @@ fn find_toc_file_resolves_bare_variant() {
          this addon itself is single-flavor"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_one_dependency() {
     let toc = TocFile::from_file(&voice_toggle_button_toc()).expect("TOC parses");
@@ -147,7 +152,9 @@ fn toc_is_eager_with_one_dependency() {
     assert!(!toc.is_load_first());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_restricts_to_in_world() {
     let toc = TocFile::from_file(&voice_toggle_button_toc()).expect("TOC parses");
@@ -169,7 +176,9 @@ fn allow_load_game_restricts_to_in_world() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn no_allow_load_game_type_means_unrestricted() {
     let toc = TocFile::from_file(&voice_toggle_button_toc()).expect("TOC parses");
@@ -185,7 +194,9 @@ fn no_allow_load_game_type_means_unrestricted() {
          routing"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_directives_and_body_files() {
     let raw = std::fs::read_to_string(voice_toggle_button_toc()).expect("TOC reads utf-8");
@@ -232,6 +243,7 @@ fn toc_raw_bytes_pin_directives_and_body_files() {
          false; this is also what lets the addon load unmodified on \
          classic Mists builds"
     );
+}
 }
 
 #[test]
