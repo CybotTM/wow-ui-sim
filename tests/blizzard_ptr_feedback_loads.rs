@@ -285,6 +285,7 @@ fn blizzard_ptr_feedback_does_not_appear_in_eager_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -300,6 +301,7 @@ fn blizzard_ptr_feedback_appears_in_full_addon_inventory() {
          This is the canonical asymmetry: eager discovery hides PTR addons but \
          full inventory exposes them"
     );
+}
 }
 
 prefork_full_ui_case! {
