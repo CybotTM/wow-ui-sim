@@ -211,6 +211,7 @@ fn body_orders_lua_before_xml() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn present_only_in_game_screen_eager_discovery() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -237,7 +238,9 @@ fn present_only_in_game_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn objective_tracker_declares_tiered_entrance_traits_as_required_dep() {
     let toc_path = blizzard_ui_dir()
@@ -257,6 +260,7 @@ fn objective_tracker_declares_tiered_entrance_traits_as_required_dep() {
          loads. Got deps: {:?}",
         toc.dependencies()
     );
+}
 }
 
 prefork_full_ui_case! {
