@@ -419,3 +419,103 @@ fn followup_original_chat_config_observes_getter_redefinition_and_hook() {
     )
     .unwrap();
 }
+
+#[cfg(feature = "client-retail")]
+fn lfd_body() -> String {
+    let ui = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
+    original_on_click(
+        &ui.join("Blizzard_GroupFinder/Mainline/LFDFrame.xml"),
+        "$parentFindGroupButton",
+    )
+}
+
+#[cfg(feature = "client-retail")]
+fn raidfinder_body() -> String {
+    let ui = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
+    original_on_click(
+        &ui.join("Blizzard_GroupFinder/Shared/RaidFinder.xml"),
+        "$parentFindRaidButton",
+    )
+}
+
+#[cfg(feature = "client-retail")]
+fn assert_lfg_branch(body: &str, mode: &str, expected: &str) {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        LE_LFG_CATEGORY_LFD = 1
+        LE_LFG_CATEGORY_RF = 3
+        RaidFinderQueueFrame = {raid = 17}
+        function GetLFGMode(category, ...)
+            if category == 1 then
+                assert(select('#', ...) == 0, 'unexpected dungeon slot')
+            else
+                assert(category == 3 and select('#', ...) == 1 and (...) == 17,
+                    'incorrect raid category/slot')
+            end
+            return lateBoundLfgMode
+        end
+        local function old() error('old LFG callback') end
+        LeaveLFG, LeaveSingleLFG = old, old
+        LFDQueueFrame_Join, RaidFinderQueueFrame_Join = old, old
+    "#,
+    )
+    .unwrap();
+    install(&env, body);
+    env.exec(
+        r#"
+        function LeaveLFG(...)
+            assert(select('#', ...) == 1 and (...) == 1)
+            lateBoundLfgResult = 'leave-lfd'
+        end
+        function LeaveSingleLFG(...)
+            local category, slot = ...
+            assert(select('#', ...) == 2 and category == 3 and slot == 17)
+            lateBoundLfgResult = 'leave-raid'
+        end
+        function LFDQueueFrame_Join(...)
+            assert(select('#', ...) == 0)
+            lateBoundLfgResult = 'join-lfd'
+        end
+        function RaidFinderQueueFrame_Join(...)
+            assert(select('#', ...) == 0)
+            lateBoundLfgResult = 'join-raid'
+        end
+        for _, name in ipairs({'LeaveLFG', 'LeaveSingleLFG', 'LFDQueueFrame_Join', 'RaidFinderQueueFrame_Join'}) do
+            hooksecurefunc(name, function() lateBoundLfgHook = true end)
+        end
+    "#,
+    )
+    .unwrap();
+    env.exec(&format!(
+        "lateBoundLfgMode = {mode:?}; \
+         LateBoundFrame:GetScript('OnClick')(LateBoundFrame); \
+         assert(lateBoundLfgResult == {expected:?}, 'stale LFG callback'); \
+         assert(lateBoundLfgHook, 'LFG secure hook bypassed')"
+    ))
+    .unwrap();
+}
+
+#[cfg(feature = "client-retail")]
+#[test]
+fn followup_original_lfd_leave_callback_observes_redefinition_and_hook() {
+    assert_lfg_branch(&lfd_body(), "queued", "leave-lfd");
+}
+
+#[cfg(feature = "client-retail")]
+#[test]
+fn followup_original_lfd_join_callback_observes_redefinition_and_hook() {
+    assert_lfg_branch(&lfd_body(), "none", "join-lfd");
+}
+
+#[cfg(feature = "client-retail")]
+#[test]
+fn followup_original_raid_leave_callback_observes_redefinition_and_hook() {
+    assert_lfg_branch(&raidfinder_body(), "queued", "leave-raid");
+}
+
+#[cfg(feature = "client-retail")]
+#[test]
+fn followup_original_raid_join_callback_observes_redefinition_and_hook() {
+    assert_lfg_branch(&raidfinder_body(), "none", "join-raid");
+}
