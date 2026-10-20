@@ -206,6 +206,7 @@ fn toc_raw_bytes_pin_minimal_directives() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn directory_holds_two_entries() {
     let entries = std::fs::read_dir(weekly_rewards_util_dir())
@@ -218,7 +219,9 @@ fn directory_holds_two_entries() {
          from the global locale table (none used directly: this addon emits zero strings)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -231,6 +234,7 @@ fn appears_in_game_eager_discovery() {
          keeps it eligible for the eager pass, and the absent `## AllowLoad` directive defaults \
          to Game-only"
     );
+}
 }
 
 #[test]
