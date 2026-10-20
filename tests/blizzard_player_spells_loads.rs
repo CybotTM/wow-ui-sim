@@ -442,6 +442,7 @@ fn blizzard_player_spells_does_not_appear_in_eager_discovery_for_any_screen() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_spells_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -453,6 +454,7 @@ fn blizzard_player_spells_appears_in_full_addon_inventory() {
         "Blizzard_PlayerSpells must appear in `discover_all_blizzard_addons` — the full \
          inventory is a structural listing of every parseable TOC including LoD addons"
     );
+}
 }
 
 prefork_full_ui_case! {
