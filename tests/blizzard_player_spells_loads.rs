@@ -258,6 +258,8 @@ fn mainline_spellbook_keybind_opens_and_closes_without_runtime_errors() {
     mainline_spellbook_keybind_opens_and_closes_without_runtime_errors::run(&env);
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_spells_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&player_spells_dir()).expect("Blizzard_PlayerSpells TOC resolves");
@@ -277,6 +279,7 @@ fn blizzard_player_spells_find_toc_resolves_bare_variant() {
         "There must be NO `_Mainline.toc` at {} — the bare TOC is the canonical entry point",
         mainline.display()
     );
+}
 }
 
 #[test]
@@ -340,6 +343,7 @@ fn blizzard_player_spells_toc_declares_load_on_demand_with_three_dependencies() 
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_spells_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(player_spells_toc())
@@ -394,7 +398,9 @@ fn blizzard_player_spells_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## Version:` — unversioned"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_spells_toc_lists_bootstrap_then_twenty_six_files_in_canonical_order() {
     let toc = TocFile::from_file(&player_spells_toc()).expect("Blizzard_PlayerSpells TOC parses");
@@ -409,6 +415,7 @@ fn blizzard_player_spells_toc_lists_bootstrap_then_twenty_six_files_in_canonical
          files across ClassSpecializations, ClassTalents, PvPTalents, SpellBook, and the \
          root-level frame, registration, and localization entries"
     );
+}
 }
 
 #[test]
