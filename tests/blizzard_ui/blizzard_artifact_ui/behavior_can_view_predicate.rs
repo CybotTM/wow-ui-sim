@@ -4,6 +4,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_ArtifactUI";
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn can_view_artifact_is_the_or_of_forge_purchase_disabled_and_multi_artifact_state() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -23,6 +25,7 @@ fn can_view_artifact_is_the_or_of_forge_purchase_disabled_and_multi_artifact_sta
             );
         }
     });
+}
 }
 
 fn load_artifact_ui(env: &wow_ui_sim::lua_api::WowLuaEnv) {
