@@ -64,12 +64,17 @@ fn harness_uses_current_worktree() {
 def build_and_run(root, evidence):
     admit_build()
     command = ['cargo', 'test', '--manifest-path', str(root / 'Cargo.toml'),
-               '--test', 'integration', '--no-run', '-j1', '--message-format=json']
+               '--test', 'integration', '--no-run', '--offline', '-j1', '--message-format=json']
     build = subprocess.run(command, cwd=root, capture_output=True, text=True)
     (evidence / (root.name + '-build.stdout')).write_text(build.stdout)
     (evidence / (root.name + '-build.stderr')).write_text(build.stderr)
     build.check_returncode()
     records = [json.loads(line) for line in build.stdout.splitlines() if line.startswith('{')]
+    for record in records:
+        if record.get('reason') == 'build-script-executed':
+            generated = Path(record['out_dir']) / 'integration_tests.rs'
+            if generated.exists():
+                shutil.copyfile(generated, evidence / (root.name + '-integration_tests.rs'))
     binary = next(record['executable'] for record in records
                   if record.get('reason') == 'compiler-artifact'
                   and record.get('target', {}).get('name') == 'integration'
