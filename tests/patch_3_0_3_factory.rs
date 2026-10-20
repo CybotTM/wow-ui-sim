@@ -1,9 +1,9 @@
 //! Supported retail bare factory only; no historical native or synchronization proof.
 #![cfg(feature = "client-retail")]
-#[path = "common/publication_sweep.rs"]
+#[path = "common/publication_sweep_core.rs"]
 mod publication_sweep;
 
-use publication_sweep::{Entry, SweepSpec, probe_entry, run_factory_publication_sweep};
+use publication_sweep::{Entry, SweepSpec, probe_entry, run_sweep};
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -22,7 +22,7 @@ const SPEC: SweepSpec = SweepSpec {
 #[test]
 fn patch_3_0_3_exact_factory_publication_gaps() {
     let env = WowLuaEnv::new().expect("bare retail Lua environment");
-    run_factory_publication_sweep(&env, &SPEC);
+    run_sweep(&env, &SPEC, BTreeMap::new);
 }
 
 #[test]
