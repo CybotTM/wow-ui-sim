@@ -5,11 +5,14 @@
 
 use crate::common;
 
-#[path = "blizzard_ui/blizzard_animadiversionui/load.rs"]
-mod load;
-
 #[path = "blizzard_ui/blizzard_animadiversionui/surface_globals.rs"]
 mod surface_globals;
+
+// Wrath's manifest-backed FrameXML/AddOns have no AnimaDiversion UI publishers.
+// Keep the independent enum probe above on every profile.
+post_wrath_ui_fixture! {
+#[path = "blizzard_ui/blizzard_animadiversionui/load.rs"]
+mod load;
 
 #[path = "blizzard_ui/blizzard_animadiversionui/surface_frames.rs"]
 mod surface_frames;
@@ -103,3 +106,4 @@ mod behavior_data_provider_clear_effect_on_all_pins_skips_exempt;
 
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_try_show_seeds_state_and_opens_panel.rs"]
 mod behavior_try_show_seeds_state_and_opens_panel;
+}
