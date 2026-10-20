@@ -160,6 +160,7 @@ fn excluded_from_every_screen_auto_discovery_under_retail() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn classic_subdirectory_holds_bootstrap_lua_xml_and_localization() {
     let classic_dir = reforging_ui_dir().join("Classic");
@@ -179,6 +180,7 @@ fn classic_subdirectory_holds_bootstrap_lua_xml_and_localization() {
         ],
         "Retail 12.1.0.69497 ships the classic bootstrap beside the Lua, XML, and localization files"
     );
+}
 }
 
 prefork_full_ui_case! {
