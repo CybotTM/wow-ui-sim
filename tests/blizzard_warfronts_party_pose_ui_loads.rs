@@ -203,6 +203,7 @@ fn toc_raw_bytes_pin_required_directives() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn directory_holds_four_entries_with_bootstrap() {
     let entries = std::fs::read_dir(warfronts_party_pose_dir())
@@ -212,6 +213,7 @@ fn directory_holds_four_entries_with_bootstrap() {
         entries, 4,
         "Retail 12.1.0.69497 directory holds the TOC, bootstrap Lua, main Lua, and XML"
     );
+}
 }
 
 #[test]
@@ -236,6 +238,7 @@ fn excluded_from_every_screen_auto_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn dep_directory_exists_on_disk() {
     let dep_toc = party_pose_toc();
@@ -246,6 +249,7 @@ fn dep_directory_exists_on_disk() {
          test harness can pre-load it before pulling in WarfrontsPartyPoseUI",
         dep_toc.display()
     );
+}
 }
 
 prefork_full_ui_case! {
