@@ -114,7 +114,6 @@ const VIRTUAL_TEMPLATES_NOT_IN_GLOBALS: &[&str] = &[
 fn load_player_choice_after_fork(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &player_choice_toc())
         .expect("explicit load_addon for Blizzard_PlayerChoice succeeds");
-
 }
 
 fn load_full_game_ui_with_player_choice() -> WowLuaEnv {
@@ -145,6 +144,8 @@ fn load_full_game_ui_with_player_choice() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_choice_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&player_choice_dir()).expect("Blizzard_PlayerChoice TOC resolves");
@@ -164,7 +165,9 @@ fn blizzard_player_choice_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_choice_toc_declares_load_on_demand_with_split_dependency_keys() {
     let toc = TocFile::from_file(&player_choice_toc()).expect("Blizzard_PlayerChoice TOC parses");
@@ -219,7 +222,9 @@ fn blizzard_player_choice_toc_declares_load_on_demand_with_split_dependency_keys
          and reroll counts are all server-driven and never persisted client-side"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_choice_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(player_choice_toc())
@@ -275,7 +280,9 @@ fn blizzard_player_choice_toc_declares_metadata_in_raw_bytes() {
          metadata profile"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_choice_toc_lists_bootstrap_then_twenty_files_in_canonical_order() {
     let toc = TocFile::from_file(&player_choice_toc()).expect("Blizzard_PlayerChoice TOC parses");
@@ -289,6 +296,7 @@ fn blizzard_player_choice_toc_lists_bootstrap_then_twenty_files_in_canonical_ord
         "Retail 12.1.0.69497 lists its bootstrap first, then twenty PlayerChoice source files \
          in the established paired Lua-then-XML module order"
     );
+}
 }
 
 #[test]
