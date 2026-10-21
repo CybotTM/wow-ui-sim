@@ -9,6 +9,9 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::font::WowFontSystem;
 use wow_ui_sim::screen::ScreenKind;
 
+#[path = "common/wrath_spell_panels_f10.rs"]
+mod f10;
+
 const SPELLBOOK_SHA256: &str = "af2d753f865f5c04d1332eb4c667b22b7f3dd828696a7d5c4587d3c530c89c32";
 const SCROLLING_SHA256: &str = "d975f94a6d7deb8895a8ab47a2b6975cca4fd9e45f67cc15c54c8e100b37427e";
 
