@@ -35,7 +35,7 @@ Source-bound RED `d3dc2100b` reaches unchanged original DebugTools (`file diagno
 
 Producer `c7436722a`: Wrath diagnostics5/5 plus preservation62/62. Later Rust changes only adjust existing/new test expectations: missing-TOC native XML text and Retail's current pathless parse-error policy. Retail preservation61/61 passes through `637851d2a`. Integration ELFs contain only this worktree's test paths (Wrath1,026; Retail1,963; no foreign paths); every selection runs nonzero tests. Direct vector pushes establish synchronous recording by source inspection; tests observe retained records and callback effects, not an intermediate native logger.
 
-Both separately built stock binaries return `[]`, exit0, for `--no-addons --no-saved-vars lua-errors`. Child-only XDG data directories copy current persisted CVars byte-for-byte; original stat/hash remain unchanged. Formatter checks pass; builds emit no warnings. Receipts: `/home/osso/.local/state/wow-ui-sim/handoff/wrath-xml-load-diag/REPORT.md` and its proof ledger. No broad suite, independent gate or non-Retail/non-Wrath execution is claimed.
+Both separately built stock binaries return `[]`, exit0, for `--no-addons --no-saved-vars lua-errors`. Child-only XDG data directories copy current persisted CVars byte-for-byte; original stat/hash remain unchanged. Formatter checks pass; builds emit no warnings. Proof reference: commit `c36561423`, `tests/xml_load_diagnostics.rs`, filters `wrath_xml_diagnostics_` and `retail_xml_diagnostics_`. No broad suite, independent gate or non-Retail/non-Wrath execution is claimed.
 
 ## Known gaps (current cycle)
 
