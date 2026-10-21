@@ -1,6 +1,6 @@
 -- Native WatchFrame.xml uses named header/lines, not modern objective blocks.
 assert(WatchFrame:IsVisible(), "native watch frame hidden")
-assert(WatchFrameTitle:GetText() == OBJECTIVES_TRACKER_LABEL, "native watch title")
+assert(WatchFrameTitle:GetText() == OBJECTIVES_TRACKER_LABEL .. " (3)", "native watch title")
 assert(WatchFrame:GetFrameStrata() == "LOW", "native watch strata")
 assert(WatchFrame:GetWidth() == WATCHFRAME_EXPANDEDWIDTH, "native watch width")
 local point, relative, relativePoint, x, y = WatchFrameLines:GetPoint(1)
