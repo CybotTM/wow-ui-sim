@@ -53,7 +53,8 @@ pub struct AccountStoreCategoryInfo {
 /// and the `Blizzard_ActionBar/Shared/StanceBar.lua` mixin. Field shape
 /// matches the live API: `(texture, isActive, isCastable, spellID)`. The
 /// `name` field is read by `C_TooltipInfo.GetShapeshift` to render the
-/// stance tooltip header.
+/// stance tooltip header and by Wrath's native four-value projection
+/// `(texture, name, isActive, isCastable)` with numeric 1/nil flags.
 #[derive(Clone, Debug)]
 pub struct ShapeshiftForm {
     pub name: String,
@@ -76,7 +77,8 @@ pub const FIRST_PET_ACTION_SLOT: i32 = 1;
 /// `(name, texture, is_token, is_active, auto_cast_allowed, auto_cast_enabled,
 /// spell_id, _unused, passive)`. `has_action` is `false` for empty slots —
 /// the live API returns `(nil, nil, false, false, false, false, nil, false, false)`
-/// in that case.
+/// in that case. Wrath's seven-value projection inserts native subtext,
+/// emits numeric 1/nil flags and omits modern spellID/passive outputs.
 #[derive(Clone, Debug, Default)]
 pub struct PetActionSlot {
     pub has_action: bool,

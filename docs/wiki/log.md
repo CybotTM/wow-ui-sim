@@ -2,6 +2,10 @@
 
 [Fixture notes](investigations/wrath-addon-load-fixture.md) record source-bound original-consumer RED and the separate production-order correction: profile FrameXML before Blizzard addon loading. No producer, vendor or baseline change. Corrected-fixture runtime evidence remains pending.
 
+## [2026-10-20] source | Native Wrath action callback projections
+
+Updated [Lua API](systems/lua-api.md#wrath-action-callback-projections) with the shared native fixture, separate range backing model and legacy adapters; [contract](../specs/wrath-action-callback-queries.md) owns source facts, exact bounded proof and remaining model gaps. No native execution or all-profile parity claim.
+
 ## [2026-10-20] source | Wrath XML load diagnostics contract
 
 Added [diagnostic requirements](../specs/xml-load-diagnostics.md) and [loader boundary notes](systems/addon-loading.md#wrath-file-load-diagnostics), superseding the earlier X2 handler assumption with laptop-authenticated 12340 channel/text/continuation facts. Source-bound original DebugTools RED→GREEN; producer classifies at file boundaries and retains exact texts through existing warnings without a new logging/severity path. Wrath67 and Retail61 bounded passes; original genuine Lua consumer and Retail's pathless parse-error policy preserved.

@@ -19,6 +19,10 @@
 
 [Lua API projection](systems/lua-api.md#wrath-legacy-friends) links the [four-global contract](../specs/wrath-friends-legacy.md): native eight-return tuples, GUID-based selection, shared refresh response policy and original FriendsFrame RED→GREEN. Wrath5/Retail19, both stock startups, Wrath check and formatter pass; Retail check/joint F02 integration remain merge-gate work. Native transport, status flags, ignore/add/remove and other-profile publication remain excluded.
 
+## [2026-10-20] source | Native Wrath action callback fixtures
+
+[Lua API projections](systems/lua-api.md#wrath-action-callback-projections) link the [F04 query contract](../specs/wrath-action-callback-queries.md): original native callbacks, profile-specific tuple/flag projections, separate shared range snapshots and no modern Wrath range publication. The contract owns bounded proof, documented gates and model limits.
+
 ## [2026-10-20] investigation | Shared-target test source binding
 
 [Harness source binding](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) records stale absolute module paths, corrected runtime-root regression RED, rejected manifest bindings and the config-relative source-root input. Config-root relocation GREEN1+1 and a real integration build's1,791 current-worktree paths are verified; before-fixture Retail17 passes and Wrath13 failures remain separate.
