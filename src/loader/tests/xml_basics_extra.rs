@@ -101,6 +101,8 @@ fn patch_12_1_aura_widgets_parse_as_xml_elements() {
     );
 }
 
+// Preserve 03786f864's simulator policy outside authenticated Wrath 12340.
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn missing_xml_include_reports_path_to_lua_error_handler() {
     let env = WowLuaEnv::new().unwrap();

@@ -63,6 +63,10 @@ During startup, discovery loads non-LoadOnDemand roots plus explicit LoadOnDeman
 
 `LoadResult` includes per-addon timing breakdown: `io_time`, `xml_parse_time`, `lua_exec_time`, `saved_vars_time`.
 
+### Wrath file-load diagnostics
+
+The [Wrath diagnostic contract](../../specs/xml-load-diagnostics.md) supersedes the earlier X2 Lua-handler assumption. Native 12340 routes missing/unreadable XML, malformed XML and missing referenced Lua files to synchronous error-severity loader diagnostics, not ScriptErrorsFrame or canonical Lua errors. Existing `LoadResult.warnings` / `LoadDiagnostics.warnings` retain failure texts; optional context headings and FrameXML.log writing are excluded. RED tests cover the unchanged original DebugTools consumer and preserve genuine Lua errors; execution and producer work are pending. Other profiles retain current simulator routing; native modern Retail behavior is UNKNOWN.
+
 ### Opted-in addon namespace access — bounded runtime proof
 
 `d91ac3476` retains the actual shared second chunk argument before file execution in [addon loading](../../../src/loader/addon.rs). [c_addons_local_table.rs](../../../src/c_api/c_addons_local_table.rs) roots namespace records in the VM registry, not SimState, and gates `C_AddOns.GetAddOnLocalTable` on loaded state, TOC opt-in and actual Blizzard-code classification. The query authenticates the original selector and rejects insecure Blizzard access without loading a target or manufacturing a table. [Addon-local-table spec](../../specs/addon-local-table.md) owns identity/lifetime/access policies and native unknowns. All six pre-fix tests reached missing registration; later GC/security assertions were unreached. Sealed Retail `e3978fd48196` now passes all six, exit0, reaching namespace identity, mutation, GC retention and security boundaries; disabled-loader3 and namespace-freeze1 controls also pass. Numeric selectors, unload and native behavior remain unknown; [shared four-producer evidence boundary](lua-api.md#current-pet-hover-and-follower-instance-models--bounded-runtime-proof) separates earlier animation/role proof.
