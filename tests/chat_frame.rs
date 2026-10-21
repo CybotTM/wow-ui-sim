@@ -9,6 +9,9 @@
 use crate::common;
 #[path = "chat_frame/layout_lock.rs"]
 pub(crate) mod layout_lock;
+#[cfg(feature = "client-wrath")]
+#[path = "chat_frame/native_layout.rs"]
+mod native_layout;
 #[path = "chat_frame/scrollbar.rs"]
 pub(crate) mod scrollbar;
 
