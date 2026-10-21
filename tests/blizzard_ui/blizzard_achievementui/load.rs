@@ -218,6 +218,14 @@ fn achievement_ui_load_on_demand_root_executes_file_scope_code() {
 
 #[test]
 fn achievement_ui_loaded_set_contains_every_declared_toc_dependency() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        let addon = blizzard_ui_dir().join(ROOT);
+        let path = wow_ui_sim::loader::find_toc_file(&addon).expect("native AchievementUI TOC");
+        let toc = TocFile::from_file(&path).expect("parse native AchievementUI TOC");
+        assert!(toc.dependencies().is_empty());
+        assert!(toc.optional_deps().is_empty());
+        assert!(toc.is_load_on_demand());
+    }
     if crate::common::wrath_achievement_fixtures::assert_native(
         r#"
         assert(type(AchievementFrame_OnLoad) == "function")
