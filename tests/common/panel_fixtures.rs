@@ -73,7 +73,7 @@ pub fn setup_env() -> WowLuaEnv {
 
     seed_addon_search_paths(&env);
     if cfg!(feature = "client-wrath") {
-        super::load_profile_framexml(&env);
+        crate::common::load_profile_framexml(&env);
         env.apply_post_load_workarounds();
         fire_startup_events(&env);
         return env;
