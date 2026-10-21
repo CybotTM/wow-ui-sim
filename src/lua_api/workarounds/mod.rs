@@ -207,6 +207,9 @@ fn apply_runtime_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::combat_log_state::apply_bootstrap(lua)?;
     temporary::encounter_state::apply_bootstrap(lua)?;
     temporary::housing_catalog_state::apply_bootstrap(lua)?;
+    temporary::housing_owned_house_requests::apply_bootstrap(lua)?;
+    #[cfg(feature = "client-wowforever")]
+    temporary::forever_bank_capability_defaults::apply_bootstrap(lua)?;
     temporary::house_exterior_debug::apply_bootstrap(lua)?;
     temporary::map_runtime_state::apply_bootstrap(lua)?;
     temporary::perks_activities_state::apply_bootstrap(lua)?;
@@ -337,6 +340,7 @@ fn apply_core_foundation_journal_defaults(lua: &mut rilua::Lua) -> crate::Result
 
 fn apply_core_foundation_state_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::pet_battle_runtime_state::apply_bootstrap(lua)?;
+    temporary::pet_battle_action_legality_defaults::apply_bootstrap(lua)?;
     temporary::settings_surface_defaults::apply_bootstrap(lua)?;
     temporary::tooltip_data_processor_defaults::apply_bootstrap(lua)?;
     temporary::tts_settings_defaults::apply_bootstrap(lua)?;

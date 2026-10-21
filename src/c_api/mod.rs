@@ -264,7 +264,6 @@ pub mod c_spell_maw_powers;
 pub mod c_toy_box_info;
 #[cfg(feature = "retail-12-0-0")]
 pub mod c_transmog_outfit_info;
-#[cfg(feature = "retail-12-0-0")]
 pub mod c_transmog_sets;
 pub(crate) mod c_ui;
 pub mod c_ui_file_asset;
