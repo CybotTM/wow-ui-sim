@@ -28,7 +28,8 @@ Native Wrath action, stance and pet callbacks must read profile-correct query re
 - `src/c_api/c_action_bar_queries.rs` — existing Retail query registration and readers; Retail-only module.
 - `src/lua_api/state{,/sim_state}.rs` — profile-scoped snapshot storage.
 - `src/lua_api/globals/real/{shapeshift,pet_bar}.rs` — existing query producers (native shape repairs pending).
-- `src/wrath/compat_bootstrap.lua` — current nil-only legacy range shim (replacement pending).
+- `src/lua_api/globals/real/wrath_legacy/action_bar.rs` — native legacy numeric/nil range adapter over shared snapshots; no C_* registration.
+- `src/wrath/compat_bootstrap.lua` — obsolete nil-only range shim removed.
 
 ## Tests asserting this spec
 

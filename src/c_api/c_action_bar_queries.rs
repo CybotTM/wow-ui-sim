@@ -66,13 +66,7 @@ fn in_range(state: &mut LuaState) -> LuaResult<u32> {
     let token = read_target(state)?;
     let result = {
         let sim = borrow_state(state)?;
-        let unit = crate::lua_api::globals::targeting_verbs::resolve_unit_snapshot(&sim, &token);
-        unit.and_then(|unit| {
-            sim.action_bars
-                .get(&slot)
-                .and_then(|id| sim.action_spell_ranges.get(id))
-                .and_then(|range| range.in_range_by_guid.get(&unit.guid).copied())
-        })
+        super::action_spell_range::lookup_range(&sim, slot, &token)
     };
     // INFERRED: absent host range data is indeterminate even for unranged actions.
     state.push(result.map_or(Val::Nil, Val::Bool));

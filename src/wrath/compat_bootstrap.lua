@@ -552,12 +552,6 @@ if rawget(_G, "GetPreviousArenaSeason") == nil then
   end
 end
 
-if rawget(_G, "IsActionInRange") == nil then
-  function IsActionInRange(slot)
-    return nil
-  end
-end
-
 -- ─── CVar defaults for wrath options panels ──────────────────────────────────
 -- Wrath FrameXML/AudioOptionsPanels.lua reads `voiceChatMode` via
 -- BlizzardOptionsPanel_GetCVarSafe and immediately does `voiceChatMode + 1`
