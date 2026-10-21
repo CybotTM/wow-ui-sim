@@ -1,4 +1,6 @@
-//! Native 3.3.5 FrameXML fixture: no modern autocomplete libraries or adapters.
+//! Cached Wrath FrameXML fixture: no modern autocomplete libraries or adapters.
+//! Expectations outside the 12340 relay are INFERRED from cached Lua/XML,
+//! not native-client execution.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
