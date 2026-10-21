@@ -82,13 +82,13 @@ mod modern {
 
     #[test]
     fn original_aura_container_handle_can_register_and_unregister() {
-        let env = WowLuaEnv::new().unwrap();
         let cache = wow_ui_sim::blizzard_ui_sync::default_cache_addons_path().unwrap();
-        let source = std::fs::read_to_string(
-            cache.join("Blizzard_AuraContainer/Blizzard_AuraContainer.lua"),
-        )
-        .unwrap();
-        env.exec(&source).unwrap();
+        let (env, loaded) = crate::common::blizzard_addon_harness::build_blizzard_addon_closure_env(
+            &cache,
+            &["Blizzard_AuraContainer"],
+            &[],
+        );
+        assert!(loaded.iter().any(|name| name == "Blizzard_AuraContainer"));
         env.exec(
             r#"
             local frame = Mixin(CreateFrame('Frame'), AuraContainerPrivateMixin)
