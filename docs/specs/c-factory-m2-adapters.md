@@ -4,11 +4,11 @@ M2 replaces individually required factory gaps with state-backed C API bindings 
 
 ## What it must do
 
-- [ ] Outside Wrath, `C_PaperDollInfo.OffhandHasWeapon()` reads equipped slot 17 and the item catalog's weapon inventory types; absent/uncatalogued items and shields are not weapons.
-- [ ] Retail/PTR/Forever `C_SpellBook.IsSpellKnownOrInSpellBook` projects existing known-or-book membership (including off-spec book presence), with existing pet spell membership for the pet bank. The current override model remains identity-only.
-- [ ] Forever `C_ActionBar.UnregisterActionUIButton` removes the selected registered frame without removing other buttons.
-- [ ] Forever `C_CooldownViewer.IsCooldownViewerAvailable` exposes the existing supplied availability and failure reason, not an inferred class/spec policy.
-- [ ] Forever keyring capability, lifetime talent-point award history and targeting item-condition queries are named temporary false defaults until their backing systems exist.
+- [x] Outside Wrath, `C_PaperDollInfo.OffhandHasWeapon()` reads equipped slot 17/catalog identity: the concrete weapon is true; shield and empty slot are false.
+- [x] Retail/PTR/Forever default-player `C_SpellBook.IsSpellKnownOrInSpellBook` accepts seeded book membership and rejects an unknown ID. Pet/off-spec branches and identity-only overrides are source-described extensions, not separate native acceptance claims from this batch.
+- [x] Forever `C_ActionBar.UnregisterActionUIButton` removes the selected registered frame without removing other buttons.
+- [x] Forever `C_CooldownViewer.IsCooldownViewerAvailable` exposes the supplied availability and failure reason, including a host-supplied true snapshot, not an inferred class/spec policy.
+- [x] Forever keyring, lifetime talent-point award and targeting item-condition queries return documented booleans through named temporary workarounds until their backing systems exist.
 
 ## How it works
 
@@ -27,7 +27,7 @@ M2 replaces individually required factory gaps with state-backed C API bindings 
 
 ## Known gaps (current cycle)
 
-- [ ] New test-only revision RED and targeted GREEN; combined stock startup matrix.
+[Bounded proof and residuals](../wiki/systems/c-factory-startup-followup.md#bounded-proof--2026-10-21) record the completed original-member matrix. Newly exposed AmmoNeeded/GetTargetSpellID remain outside the frozen F0 list and are not implemented by this slice.
 
 ## Out of scope
 

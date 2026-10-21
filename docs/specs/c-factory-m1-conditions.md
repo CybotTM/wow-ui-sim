@@ -4,10 +4,10 @@ M1 restores only original-consumer conditions exposed by [factory removal](c-nam
 
 ## What it must do
 
-- [ ] `C_PaperDollInfo.IsRangedSlotShown()` returns one nonnil boolean on Retail, PTR, Mists, Era, Anniversary and Forever, matching their generated documentation.
-- [ ] `C_GameRules.IsHardcoreActive()` returns one nonnil boolean for the actual Mists/Era/Anniversary/Forever popup consumers; an arbitrary game-rule key must not be interpreted as native Hardcore policy.
-- [ ] Forever `C_DateAndTime.IsDayTime()` returns one nonnil boolean for the original Camelot diel consumer.
-- [ ] Each condition is a named temporary false default, preserving the old factory's false-y branch without claiming native policy. Other unknown namespace members remain nil; Wrath remains unchanged.
+- [x] `C_PaperDollInfo.IsRangedSlotShown()` returns one nonnil boolean on Retail, PTR, Mists, Era, Anniversary and Forever, matching their generated documentation.
+- [x] `C_GameRules.IsHardcoreActive()` returns one nonnil boolean for the actual Mists/Era/Anniversary/Forever popup consumers; an arbitrary game-rule key must not be interpreted as native Hardcore policy.
+- [x] Forever `C_DateAndTime.IsDayTime()` returns one nonnil boolean for the original Camelot diel consumer.
+- [x] Each condition is a named temporary workaround, not native policy. Other unknown namespace members remain nil; Wrath startup remains empty. The fixed false implementation choice is described in the linked notes, not established as native behavior.
 
 ## How it works
 
@@ -25,7 +25,7 @@ M1 restores only original-consumer conditions exposed by [factory removal](c-nam
 
 ## Known gaps (current cycle)
 
-- [ ] Observe new contract-test RED at test-only revision, then targeted GREEN and combined stock profile proof.
+[Bounded proof and residuals](../wiki/systems/c-factory-startup-followup.md#bounded-proof--2026-10-21) retain four historical pool-cascade rows per Retail/PTR without treating their old source-order hypothesis as a current IsRangedSlotShown failure. New members remain held outside the frozen F0 list.
 
 ## Out of scope
 

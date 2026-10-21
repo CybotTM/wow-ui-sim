@@ -4,14 +4,22 @@ T6 restores named original-consumer service inputs after [factory removal](c-nam
 
 ## What it must do
 
-- [ ] Retail/PTR `C_Log.LogErrorMessage(message)` uses the existing simulator console sink.
-- [ ] Era/Anniversary `C_VoiceChat.IsSpeakForMeActive()` exposes the existing independent supplied activity flag.
-- [ ] All six non-Wrath profiles' chat-type TTS preference queries return false until per-chat-type preference storage exists.
-- [ ] Retail/PTR/Forever voice-login and collectable-source tracking capability queries are named temporary false defaults; simulated channels/connection status are not authentication evidence.
-- [ ] Retail/PTR secure combat-filter reset is a named temporary void operation while no secure filter backend exists, independent of ordinary combat-log filters.
-- [ ] Era/Anniversary corpse-map position remains absent until map-keyed corpse coordinates exist; player coordinates must not substitute.
-- [ ] Forever preferred-locale ID/name lists are empty, Discord voice capability is false, and active provider uses the documented Legacy enum as a temporary presentation default. Each names its missing backing system.
-- [ ] Unknown members remain nil and Wrath's runtime surface remains unchanged.
+### State adapters
+
+- [x] Retail/PTR `C_Log.LogErrorMessage(message)` uses the existing simulator console sink.
+- [x] Era/Anniversary `C_VoiceChat.IsSpeakForMeActive()` exposes the independent supplied activity flag, including a supplied true value.
+
+### Named service gaps
+
+- [x] All six non-Wrath profiles' chat-type TTS preference queries return false until per-chat-type preference storage exists.
+- [x] Retail/PTR/Forever voice-login and collectable-source tracking queries return nonnil booleans through named temporary workarounds; channels/connection status are not authentication evidence.
+- [x] Retail/PTR secure combat-filter reset returns no values while no secure filter backend exists, independent of ordinary combat-log filters.
+- [x] Era/Anniversary corpse-map position remains absent until map-keyed corpse coordinates exist; player coordinates must not substitute.
+- [x] Forever's original preferred-locale dropdown completes without a catalog; Discord voice/provider queries return boolean/numeric shapes. Each names its missing backing system; fixed defaults are not native service-policy claims.
+
+### Preservation
+
+- [x] Unknown members remain nil and Wrath startup stays empty.
 
 ## How it works
 
@@ -30,8 +38,10 @@ T6 restores named original-consumer service inputs after [factory removal](c-nam
 
 ## Known gaps (current cycle)
 
-- [ ] New test-only revision RED and targeted GREEN; combined stock startup matrix.
-- [ ] Forever anonymous timer family remains unresolved: original callback `Blizzard_SharedXMLBase/FunctionUtil.lua:87`, unknown C_* root. Preserve its null attribution and normal/wrapped error evidence.
+[Bounded proof and residuals](../wiki/systems/c-factory-startup-followup.md#bounded-proof--2026-10-21) record the completed original-member matrix, not clean startup.
+
+- [ ] Opaque nil-call rows remain on Forever, Mists, Era and Anniversary. Only the historical F0 Forever probe identified callback source `Blizzard_SharedXMLBase/FunctionUtil.lua:87`; no current C_* root is established. Preserve null attribution and normal/wrapped rows.
+- [ ] Newly exposed AddEventFilter, MarkCharacterSettingsSaved and GetPreferredDatacenterLocalities remain held outside the frozen F0 member list.
 
 ## Out of scope
 

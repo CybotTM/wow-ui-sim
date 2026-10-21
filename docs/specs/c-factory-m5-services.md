@@ -4,11 +4,11 @@ M5 restores individually required startup inputs after [factory removal](c-names
 
 ## What it must do
 
-- [ ] Retail/PTR owned-house requests are available before the housing dashboard loads and asynchronously emit `PLAYER_HOUSE_LIST_UPDATED` with an empty list while the authoritative ownership service is absent.
-- [ ] Retail/PTR/Mists/Forever original pet action buttons remain disabled when swap/skip legality is unavailable. Named temporary predicates return false, not eligibility inferred from health alone.
-- [ ] Those profiles' pet-icon query joins the battle pet's supplied species ID to existing pet-journal icon metadata; missing owner/slot/species metadata returns no icon.
-- [ ] Forever purchased bank-tab metadata returns an empty table and player-bag bank capability returns false until their named models exist.
-- [ ] Forever `C_TransmogSets.HasAnyValidSets()` reads supplied catalog `valid_for_character` flags independently of UI filters. Other profile API publication is unchanged.
+- [x] Retail/PTR owned-house requests are available before the housing dashboard loads and asynchronously emit `PLAYER_HOUSE_LIST_UPDATED` with an empty list while the authoritative ownership service is absent.
+- [x] Retail/PTR/Mists/Forever original pet action buttons remain disabled when swap/skip legality is unavailable. Named temporary predicates return false, not eligibility inferred from health alone.
+- [x] Those profiles' pet-icon query joins the supplied battle species to pet-journal icon metadata; clearing the supplied pet record produces no icon.
+- [x] Forever purchased bank-tab and player-bag capability queries return the documented table/boolean shapes through named temporary workarounds. Their fixed empty/false implementation choices are not native bank policy.
+- [x] Forever `C_TransmogSets.HasAnyValidSets()` reads supplied catalog `valid_for_character` flags independently of UI filters. Other profile API publication is unchanged.
 
 ## How it works
 
@@ -28,7 +28,7 @@ M5 restores individually required startup inputs after [factory removal](c-names
 
 ## Known gaps (current cycle)
 
-- [ ] New test-only revision RED and targeted GREEN; combined stock startup matrix.
+[Bounded proof and residuals](../wiki/systems/c-factory-startup-followup.md#bounded-proof--2026-10-21) include a supplied validity flip independent of UI filters. New CanPurchaseBankTab and pet GetName cascades remain held outside the frozen F0 list.
 
 ## Out of scope
 
