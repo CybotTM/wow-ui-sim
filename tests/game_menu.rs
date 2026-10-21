@@ -93,20 +93,19 @@ fn test_game_menu_buttons_created_on_show() {
         // Verify the expected set is a subset of what was created.
         // Note: "Edit Mode" is absent because EditModeManagerFrame:CanEnterEditMode()
         // returns false in the headless simulator.
-        let expected = if cfg!(feature = "client-wrath") {
-            ["Video", "Sound & Voice", "Interface", "Macros", "Logout", "Exit Game", "Return to Game"]
-        } else { [
-            "Options",
-            "AddOns",
-            "Support",
-            "Macros",
-            "Log Out",
-            "Exit Game",
-            "Return to Game",
-        ] };
+        let expected: Vec<String> = if cfg!(feature = "client-wrath") {
+            let labels: String = env.eval(r#"
+                return table.concat({ VIDEOOPTIONS_MENU, SOUNDOPTIONS_MENU, UIOPTIONS_MENU,
+                    MACROS, LOGOUT, EXIT_GAME, RETURN_TO_GAME }, "|")
+            "#).unwrap();
+            labels.split('|').map(str::to_owned).collect()
+        } else {
+            ["Options", "AddOns", "Support", "Macros", "Log Out", "Exit Game", "Return to Game"]
+                .into_iter().map(str::to_owned).collect()
+        };
         for label in &expected {
             assert!(
-                texts.contains(label),
+                texts.contains(label.as_str()),
                 "Expected button '{label}' in pool; got: {texts}"
             );
         }
