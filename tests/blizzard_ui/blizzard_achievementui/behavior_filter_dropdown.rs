@@ -36,6 +36,21 @@ const FAKE_FRAME_BUILDER: &str = r#"
 
 #[test]
 fn try_show_filter_dropdown_gates_dropdown_and_layout_on_restricted_category() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        achievementFunctions = ACHIEVEMENT_FUNCTIONS
+        achievementFunctions.selectedCategory = 92
+        AchievementFrameAchievements_OnShow()
+        assert(AchievementFrameFilterDropDown:IsShown())
+        assert(AchievementFrameHeaderRightDDLInset:IsShown())
+        achievementFunctions.selectedCategory = 81
+        AchievementFrameAchievements_OnShow()
+        assert(not AchievementFrameFilterDropDown:IsShown())
+        assert(not AchievementFrameHeaderRightDDLInset:IsShown())
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: String = env
             .eval(&format!(
@@ -69,6 +84,19 @@ fn try_show_filter_dropdown_gates_dropdown_and_layout_on_restricted_category() {
 
 #[test]
 fn hide_filter_dropdown_hides_dropdown_and_lays_out_filters_unconditionally() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        AchievementFrame_ToggleAchievementFrame()
+        AchievementFrameFilterDropDown:Show()
+        AchievementFrameHeaderRightDDLInset:Show()
+        AchievementFrameAchievements:Show()
+        AchievementFrameAchievements:Hide()
+        assert(not AchievementFrameFilterDropDown:IsShown())
+        assert(not AchievementFrameHeaderRightDDLInset:IsShown())
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: String = env
             .eval(&format!(

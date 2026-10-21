@@ -100,6 +100,20 @@ type ComparisonClearProbe = (String, String, String, String, String, bool, bool,
 
 #[test]
 fn closing_comparison_pane_fires_on_hide_handler_that_calls_clear_achievement_comparison_unit() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        AchievementFrame_DisplayComparison("player")
+        assert(AchievementFrameComparison:IsShown() and AchievementFrame.isComparison)
+        AchievementFrameComparison:Hide()
+        assert(not AchievementFrame.isComparison)
+        assert(AchievementFrame:GetWidth() == 768)
+        -- The next comparison can be established after the native OnHide cleanup.
+        AchievementFrameComparison_SetUnit("player")
+        assert(AchievementFrameComparisonHeaderPortrait.unit == "player")
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: ComparisonClearProbe = env
             .eval(

@@ -36,6 +36,16 @@ const LANE_FILE_SCOPE_PANEL_REGISTRATION_KEY: &str = "AchievementFrame";
 
 #[test]
 fn achievement_ui_load_emits_no_lane_specific_lua_errors() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(AchievementFrame and AchievementFrameCategories)
+        assert(AchievementFrameCategoriesContainer.buttons[1])
+        assert(AchievementFrameAchievements.buttons[1])
+        assert(AchievementFrameComparisonContainer.buttons[1])
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
         assert!(
             loaded.iter().any(|name| name == ROOT),
@@ -84,6 +94,16 @@ const CLOSURE_LOADED_ADDONS: &[&str] = &[ROOT];
 
 #[test]
 fn achievement_ui_dependency_closure_includes_current_declared_dependencies() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(type(AchievementFrame_OnLoad) == "function")
+        assert(type(UIPanelWindows.AchievementFrame) == "table")
+        assert(IsAddOnLoaded("Blizzard_AchievementUI"))
+        assert(type(PanelTemplates_SetNumTabs) == "function")
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
         for required in PANEL_ADDON_DEPENDENCIES {
             let is_loaded: bool = env
@@ -111,6 +131,18 @@ fn achievement_ui_dependency_closure_includes_current_declared_dependencies() {
 
 #[test]
 fn achievement_ui_load_on_demand_root_executes_file_scope_code() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(type(AchievementFrame_OnLoad) == "function")
+        for _, name in ipairs({"ACHIEVEMENT_FUNCTIONS", "STAT_FUNCTIONS", "COMPARISON_ACHIEVEMENT_FUNCTIONS", "COMPARISON_STAT_FUNCTIONS", "AchievementFrameFilters"}) do
+            assert(type(_G[name]) == "table", name)
+        end
+        assert(UIPanelWindows.AchievementFrame.area == "doublewide")
+        assert(UIPanelWindows.AchievementFrame.width == 840)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
         assert!(
             loaded.iter().any(|name| name == ROOT),
@@ -186,6 +218,16 @@ fn achievement_ui_load_on_demand_root_executes_file_scope_code() {
 
 #[test]
 fn achievement_ui_loaded_set_contains_every_declared_toc_dependency() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(type(AchievementFrame_OnLoad) == "function")
+        assert(type(UIPanelWindows.AchievementFrame) == "table")
+        assert(IsAddOnLoaded("Blizzard_AchievementUI"))
+        assert(type(PanelTemplates_SetNumTabs) == "function")
+        "#,
+    ) {
+        return;
+    }
     let toc_path = blizzard_ui_dir().join(ROOT).join(ROOT_TOC_FILE);
     let toc = TocFile::from_file(&toc_path).unwrap_or_else(|e| {
         panic!(
@@ -251,6 +293,19 @@ fn achievement_ui_loaded_set_contains_every_declared_toc_dependency() {
 /// `find_runtime_addon_toc`, parses it, and runs the file chunks.
 #[test]
 fn achievement_ui_load_on_demand_triggers_via_lua_load_addon_api() {
+    if crate::common::wrath_achievement_fixtures::assert_lazy(
+        r#"
+        assert(not IsAddOnLoaded("Blizzard_AchievementUI"))
+        assert(AchievementFrame == nil)
+        local loaded, reason = LoadAddOn("Blizzard_AchievementUI")
+        assert(loaded, tostring(reason))
+        assert(IsAddOnLoaded("Blizzard_AchievementUI"))
+        assert(type(AchievementFrame_OnLoad) == "function")
+        assert(AchievementFrame and AchievementFrame.selectedTab == 1)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[], &[], |env, loaded| {
         assert!(
             !loaded.iter().any(|name| name == ROOT),

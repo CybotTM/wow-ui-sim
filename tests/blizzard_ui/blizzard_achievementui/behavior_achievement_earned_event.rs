@@ -121,6 +121,17 @@ type EarnedEventProbe = (String, String, String, String, i64, i64, String, bool)
 
 #[test]
 fn achievement_earned_event_routes_on_event_into_on_achievement_earned_and_updates_header_points() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        Admin.SetAchievementEarned(6, true)
+        AchievementFrameHeaderPoints:SetText("sentinel")
+        AchievementFrameAchievements_OnEvent(AchievementFrameAchievements, "ACHIEVEMENT_EARNED", 6)
+        assert(AchievementFrameHeaderPoints:GetText() == tostring(GetTotalAchievementPoints()))
+        assert(select(4, GetAchievementInfo(6)))
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let setup_ok: bool = env
             .eval(

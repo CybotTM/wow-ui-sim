@@ -13,6 +13,7 @@ pub mod blizzard_addon_manifest;
 mod event_helpers;
 pub mod game_menu_fixture;
 pub mod panel_fixtures;
+pub mod wrath_achievement_fixtures;
 #[cfg(target_os = "linux")]
 pub(crate) mod prefork_process;
 #[cfg(target_os = "linux")]

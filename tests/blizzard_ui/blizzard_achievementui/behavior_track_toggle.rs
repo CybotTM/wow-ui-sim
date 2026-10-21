@@ -243,6 +243,19 @@ const TRACKED_UPVALUE_HELPER: &str = r#"
 #[test]
 fn toggle_tracking_stop_branch_uses_c_content_tracking_stop_tracking_with_manual_stop_type_and_calls_set_as_tracked_false()
  {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        Admin.SetAchievementEarned(6, false)
+        AddTrackedAchievement(6)
+        AchievementFrameAchievements_OnEvent(AchievementFrameAchievements, "TRACKED_ACHIEVEMENT_UPDATE")
+        assert(GetNumTrackedAchievements() == 1)
+        AchievementButton_ToggleTracking(6)
+        assert(GetNumTrackedAchievements() == 0)
+        assert(select("#", GetTrackedAchievements()) == 0)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: StopProbe = env
             .eval(&format!(
@@ -347,6 +360,20 @@ fn toggle_tracking_stop_branch_uses_c_content_tracking_stop_tracking_with_manual
 #[test]
 fn toggle_tracking_start_branch_calls_c_content_tracking_start_tracking_returns_true_and_guards_max_count_and_completed_earned()
  {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        Admin.SetAchievementEarned(6, false)
+        assert(GetNumTrackedAchievements() == 0)
+        local added = AchievementButton_ToggleTracking(6)
+        assert(added == true and GetNumTrackedAchievements() == 1)
+        assert(GetTrackedAchievements() == 6)
+        Admin.SetAchievementEarned(503, true)
+        assert(not AchievementButton_ToggleTracking(503))
+        assert(GetNumTrackedAchievements() == 1)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: StartProbe = env
             .eval(&format!(

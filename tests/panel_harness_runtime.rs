@@ -127,6 +127,17 @@ fn load_panel_harness(env: &WowLuaEnv) {
 
 #[test]
 fn achievement_addon_reports_runtime_load_reason() {
+    if crate::common::wrath_achievement_fixtures::assert_lazy(
+        r#"
+        assert(not IsAddOnLoaded("Blizzard_AchievementUI"))
+        local loaded, reason = LoadAddOn("Blizzard_AchievementUI")
+        assert(loaded, tostring(reason))
+        assert(AchievementFrame and AchievementFrame.selectedTab == 1)
+        assert(IsAddOnLoaded("Blizzard_AchievementUI"))
+        "#,
+    ) {
+        return;
+    }
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
@@ -154,6 +165,20 @@ fn achievement_addon_reports_runtime_load_reason() {
 
 #[test]
 fn achievement_error_handling_load_matches_raw_load_addon() {
+    if crate::common::wrath_achievement_fixtures::assert_lazy(
+        r#"
+        assert(AchievementFrame == nil)
+        AchievementFrame_LoadUI()
+        assert(IsAddOnLoaded("Blizzard_AchievementUI"))
+        assert(AchievementFrame and type(AchievementFrame_OnLoad) == "function")
+        -- Native UIParentLoadAddOn is the error-reporting wrapper in this profile.
+        local loaded, reason = LoadAddOn("Blizzard_AchievementUI")
+        assert(loaded, tostring(reason))
+        assert(not AchievementFrame:IsShown())
+        "#,
+    ) {
+        return;
+    }
     let error_handling_env = WowLuaEnv::new().expect("Failed to create Lua environment");
     error_handling_env.set_screen_size(1024.0, 768.0);
     error_handling_env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
@@ -379,6 +404,20 @@ fn group_members_pin_acquire_keeps_data_provider_on_pin() {
 
 #[test]
 fn achievement_toggle_loads_and_shows_frame() {
+    if crate::common::wrath_achievement_fixtures::assert_lazy(
+        r#"
+        Admin.SetAchievementEarned(6, true)
+        assert(AchievementFrame == nil)
+        ToggleAchievementFrame()
+        assert(IsAddOnLoaded("Blizzard_AchievementUI"))
+        assert(AchievementFrame and AchievementFrame:IsShown())
+        assert(AchievementFrameSummary:IsShown())
+        ToggleAchievementFrame()
+        assert(not AchievementFrame:IsShown())
+        "#,
+    ) {
+        return;
+    }
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];

@@ -163,6 +163,22 @@ const FAKE_ROW_BUILDER: &str = r#"
 #[test]
 fn stat_template_init_non_header_calls_get_statistic_and_writes_value_skipping_dead_criteria_branch()
  {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local row = CreateFrame("Button", "F08Statistic", AchievementFrameStats, "StatTemplate")
+        GetAchievementInfo = function() return 4242, "fixture statistic", 0, false, nil, nil, nil, "", 0, "", "" end
+        GetStatistic = function(id) assert(id == 4242); return "123" end
+        AchievementFrameStats_SetStat(row, 92, 1)
+        assert(row.id == 4242 and row.value:GetText() == "123")
+        assert(row:GetText() == "fixture statistic" and not row.isHeader)
+        assert(not row.title:IsShown())
+        GetStatistic = function() return nil end
+        AchievementFrameStats_SetStat(row, 92, 1)
+        assert(row.value:GetText() == "--")
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: NonHeaderProbe = env
             .eval(&format!(
@@ -314,6 +330,19 @@ fn stat_template_init_non_header_calls_get_statistic_and_writes_value_skipping_d
 
 #[test]
 fn stat_template_init_header_branch_blanks_value_skipping_get_statistic_and_dash_fallback_on_nil() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local row = CreateFrame("Button", "F08Statistic", AchievementFrameStats, "StatTemplate")
+        row.value:SetText("sentinel")
+        GetStatistic = function() error("header must not query a statistic") end
+        AchievementFrameStats_SetHeader(row, ACHIEVEMENT_COMPARISON_STATS_SUMMARY_ID)
+        assert(row.isHeader and row.title:GetText() == ACHIEVEMENT_SUMMARY_CATEGORY)
+        assert(row.value:GetText() == "" and row:GetText() == "")
+        assert(row.title:IsShown() and not row.background:IsShown())
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: HeaderProbe = env
             .eval(&format!(
