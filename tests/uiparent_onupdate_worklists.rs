@@ -19,6 +19,7 @@ fn load_settled_game_ui() -> WowLuaEnv {
     env.set_screen_mode(ScreenKind::Game);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
 
+    common::load_profile_framexml(&env);
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
     for (name, toc_path) in &addons {
         load_addon(&env.loader_env(), toc_path)
@@ -126,10 +127,40 @@ fn button_pulse_onupdate_still_updates_active_buttons() {
     }
 }
 
+fn assert_legacy_animated_shine(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "AnimatedShineProbe", UIParent)
+        owner:SetSize(100, 100)
+        local shine = CreateFrame("Frame", "AnimatedShineProbeShine", owner, "AnimatedShineTemplate")
+        shine:SetSize(100, 100)
+        AnimatedShine_Start(owner)
+        "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        assert(math.abs(AnimatedShineProbe.timer - 0.016) < 0.000001)
+        local point, relative, relativePoint, x, y = AnimatedShineProbeShine1:GetPoint()
+        assert(point == "CENTER" and relative == AnimatedShineProbeShine)
+        assert(relativePoint == "TOPLEFT" and x > 0 and y == 0)
+        AnimatedShine_Stop(AnimatedShineProbe)
+        assert(not AnimatedShineProbeShine1:IsShown())
+        "#,
+    )
+    .unwrap();
+}
+
 #[test]
 fn animated_shine_onupdate_still_updates_active_shines() {
     test_timeout! {
         let env = load_settled_game_ui();
+
+        if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+            assert_legacy_animated_shine(&env);
+            return;
+        }
 
         env.exec(
             r#"

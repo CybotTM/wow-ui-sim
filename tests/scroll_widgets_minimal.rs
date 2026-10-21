@@ -42,7 +42,44 @@ const INLINE_REAPPLY_HOST_XML: &str = r#"
     </Ui>
 "#;
 
+// Authored anchor-inheritance specimen, not a substitute native scrollbar/mixin.
+const INLINE_CONTROL_HOST_XML: &str = r#"
+    <Ui>
+        <Frame name="InlineAnchoredControlTemplate" virtual="true">
+            <Frames>
+                <Frame parentKey="Track">
+                    <Anchors>
+                        <Anchor point="TOP"><Offset x="0" y="-19"/></Anchor>
+                        <Anchor point="BOTTOM"><Offset x="0" y="19"/></Anchor>
+                    </Anchors>
+                </Frame>
+            </Frames>
+        </Frame>
+        <Frame name="ChatFrameScrollBarHostTemplate" virtual="true">
+            <Frames>
+                <Frame parentKey="ScrollBar" inherits="InlineAnchoredControlTemplate">
+                    <Anchors>
+                        <Anchor point="TOPRIGHT"/>
+                        <Anchor point="BOTTOMRIGHT"/>
+                    </Anchors>
+                </Frame>
+            </Frames>
+        </Frame>
+    </Ui>
+"#;
+
 fn register_chatframe_scrollbar_host_template() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        let ui = parse_xml(INLINE_CONTROL_HOST_XML).unwrap();
+        for element in ui.elements {
+            let XmlElement::Frame(frame) = element else {
+                panic!("expected authored Frame template");
+            };
+            let name = frame.name.clone().unwrap();
+            register_template(&name, "Frame", frame);
+        }
+        return;
+    }
     let ui = parse_xml(CHATFRAME_SCROLLBAR_HOST_XML).unwrap();
     let XmlElement::Frame(frame) = &ui.elements[0] else {
         panic!("expected frame template");
