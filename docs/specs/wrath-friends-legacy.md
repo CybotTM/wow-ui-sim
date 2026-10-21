@@ -4,12 +4,12 @@ Wrath's original FriendsFrame consumes legacy tuples and GUID-based selection ov
 
 ## What it must do
 
-- [ ] Publish `ShowFriends`, `GetFriendInfo`, `GetSelectedFriend` and `SetSelectedFriend` on Wrath only; preserve Retail friends behavior.
-- [ ] Original `ToggleFriendsFrame(1)` / `FriendsList_Update()` displays populated online/offline rows, the offline header, and selection-dependent tell-button state without replacing the original consumers.
-- [ ] `GetFriendInfo(index or name)` returns exactly name, level, localized class, area, numeric 1-or-nil connected, status, nonempty notes-or-nil, numeric 1-or-nil recruit-a-friend flag. Numeric strings use the index path; nonnumeric names match case-insensitively.
-- [ ] Explicit null-info selectors (0, 102, unknown name) return exactly nil, 0, UNKNOWN, UNKNOWN, nil, empty string, nil, nil. Reject invalid types with `Usage: GetFriendInfo(index or name)`.
-- [ ] Selection starts at 0, retains GUID identity across display-order changes, and resolves the current ordinal or 0 if absent. Numeric strings and representable positive fractional indexes convert before subtraction. Invalid types error without changing selection; out-of-range numeric selectors clear it. Setter returns zero values and emits no event.
-- [ ] `ShowFriends` returns zero values and does not change supplied rows or selected GUID. Reuse the existing namespace refresh handler: queued `FRIENDLIST_UPDATE` is **INFERRED simulator response policy**, not synchronous native wrapper behavior.
+- [x] Publish `ShowFriends`, `GetFriendInfo`, `GetSelectedFriend` and `SetSelectedFriend` on Wrath only; preserve Retail friends behavior.
+- [x] Original `ToggleFriendsFrame(1)` / `FriendsList_Update()` displays populated online/offline rows, the offline header, and selection-dependent tell-button state without replacing the original consumers.
+- [x] `GetFriendInfo(index or name)` returns exactly name, level, localized class, area, numeric 1-or-nil connected, status, nonempty notes-or-nil, numeric 1-or-nil recruit-a-friend flag. Numeric strings use the index path; nonnumeric names match case-insensitively.
+- [x] Explicit null-info selectors (0, 102, unknown name) return exactly nil, 0, UNKNOWN, UNKNOWN, nil, empty string, nil, nil. Reject invalid types with `Usage: GetFriendInfo(index or name)`.
+- [x] Selection starts at 0, retains GUID identity across display-order changes, and resolves the current ordinal or 0 if absent. Numeric strings and representable positive fractional indexes convert before subtraction. Invalid types error without changing selection; out-of-range numeric selectors clear it. Setter returns zero values and emits no event.
+- [x] `ShowFriends` returns zero values and does not change supplied rows or selected GUID. Reuse the existing namespace refresh handler: queued `FRIENDLIST_UPDATE` is **INFERRED simulator response policy**, not synchronous native wrapper behavior.
 
 ### Evidence and limits
 
@@ -36,9 +36,15 @@ Native ShowFriends sends `CMSG_CONTACT_LIST` mask 1; the separate response path 
 - `tests/wrath_friends_legacy_contract.rs`: tuple, coercion, selection identity and refresh preservation.
 - `tests/friends_panel.rs`, `tests/system_api_seeded.rs`: Retail preservation and shared friend reads.
 
+### Bounded proof
+
+Source revision `1c4909baf`: four-test RED at `0de2c755b` reaches missing ShowFriends at original FriendsFrame.lua:258 plus missing API globals. GREEN executes four new Wrath cases and one existing namespace case. Retail preservation executes panel/keybinding 2, namespace 1, C_Social 8 and notes 8: 19 passes. All 1,802 generated module paths bind to the requested checkout for RED/GREEN/Retail. Wrath check has zero warnings; both test builds have zero warnings; formatter passes. Stock no-addon/no-saved-vars lua-errors is `[]` on both profiles under fresh child CVar copies; the original hash remains unchanged.
+
+An initial test build used a private fixture helper and was corrected before behavioral RED. The first GREEN exposed an invalid test observation of local `FriendButtons`; the corrected test observes the visible native header and rows. Neither is presented as producer failure or final acceptance evidence.
+
 ## Known gaps (current cycle)
 
-- [ ] GREEN and profile-preservation proof pending; four-test RED reaches missing ShowFriends at original FriendsFrame.lua:258 plus missing API globals.
+- [ ] Retail cargo check and joint F02+friends integration verification are deferred to the joint merge gate by the main agent; implementer admission was cancelled without starting that check. Native runtime execution and the excluded boundaries below remain unclaimed.
 
 ## Out of scope
 

@@ -502,7 +502,7 @@ The [owning contract](../../specs/wrath-spellbook-tabs.md) tracks original-consu
 
 `real/wrath_friends.rs` publishes four globals only through Wrath startup registration. Tuple reads and GUID-based selection consume the existing social friend vector; `c_api/c_friend_list.rs` owns the unchanged online-first projection and the refresh handler shared with `C_FriendList.ShowFriends`. The Lua adapter captures the VM's numeric-string conversion. Selection adds only a Wrath-specific optional GUID, not a second friends list.
 
-The [owning contract](../../specs/wrath-friends-legacy.md) records static12340 provenance, original FriendsFrame RED, response timing and unsupported status/sorting boundaries. Retail registration is unchanged; ignore/add/remove behavior is excluded.
+The [owning contract](../../specs/wrath-friends-legacy.md) records static12340 provenance, original FriendsFrame RED→GREEN, Wrath5/Retail19 bounded passes, both clean stock startups, response timing and unsupported status/sorting boundaries. Retail registration is unchanged; ignore/add/remove behavior is excluded. Retail check and joint F02 integration remain assigned to the merge gate.
 
 ## Sources
 
