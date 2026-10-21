@@ -3,6 +3,10 @@
 The Lua API layer bridges Lua addon code with the Rust simulation engine. It provides WoW-compatible globals, 300+ frame methods, C_* namespaces, and a timer system — all backed by `WowLuaEnv` and `SimState`.
 
 
+## Factory-removal world inputs — 2026-10-21
+
+[The M4 contract](../../specs/c-factory-m4-world-inputs.md) separates shared throttle/match/objective/CVar/identity state from named missing world services. `c_api::private_aura_callbacks` now owns strong environment-local registrations, per-unit removal, replacement and authored dispatch; temporary aura-content storage no longer owns callback lifecycle. Callback containers use their existing Invoke contract. Frozen original-consumer RED remains distinct from pending new-contract execution and post-batch startup proof.
+
 ## Factory-removal social inputs — 2026-10-21
 
 [The M3 contract](../../specs/c-factory-m3-social-inputs.md) owns profile scope and simulator policies. `c_api::c_guild_info` projects supplied numeric metadata plus existing guild-logo colors into independent DTOs; changing the legacy filename invalidates metadata rather than guessing a file ID. Named temporary social-service defaults cover capability systems that roster, listing and friend data do not model. Unknown members remain nil. Frozen original-consumer RED is retained; new-contract RED/GREEN and post-batch startup proof remain pending.

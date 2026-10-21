@@ -1,3 +1,7 @@
+## [2026-10-21] source | Factory-removal M4 world inputs
+
+[API ownership](systems/lua-api.md#factory-removal-world-inputs--2026-10-21) links shared setting/state publication, rooted callback removal/replacement and named missing-world-service defaults to their [contract](../specs/c-factory-m4-world-inputs.md). Original-consumer RED retained; targeted execution and final startup proof pending.
+
 ## [2026-10-21] source | Factory-removal M3 social inputs
 
 [API ownership](systems/lua-api.md#factory-removal-social-inputs--2026-10-21) links tabard DTO projection and isolated temporary capability policies to their [contract](../specs/c-factory-m3-social-inputs.md). Source integrated; original-consumer RED source equivalence retained. New contract execution and post-M3/M4 stock matrix remain pending.
