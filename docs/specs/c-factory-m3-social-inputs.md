@@ -9,6 +9,8 @@ M3 replaces observed social/group/chat/guild gaps exposed by [factory removal](c
 - [ ] `A_Admin.SetGuildTabardMetadata(fileID?, style?)` accepts a complete pair of nonnegative u32 values, clears metadata when both are absent, and rejects invalid/partial updates without changing prior state. This is a simulator input contract, not a native setter.
 - [ ] Replacing the legacy logo through `SetGuildEmblem` invalidates numeric metadata that cannot be derived from its filename. Legacy RGB/filename behavior remains intact.
 - [ ] Other observed M3 members use existing backing state where available; otherwise only explicitly named temporary inactive-service contracts, each naming its missing backing system and retirement condition. No native policy is inferred from a method name.
+- [ ] Non-Wrath documented social contracts use explicit simulator defaults until their backing services exist: no cross-faction roster, no silence restriction, chat reception allowed, LFD/GroupFinder and LFG authentication unavailable. Mists preserves its existing guild-bank storage capability; other profiles report that unmodeled capability unavailable.
+- [ ] Retail/PTR/Forever mentorship reports documented `None=0`, Recruit-a-Friend availability and legacy friend mode are disabled, and language capability follows the existing explicit legacy language list. Forever friend-tag game-type capability is disabled. These are named temporary policies, not native defaults.
 - [ ] Existing explicit methods, strict/retired surfaces and arbitrary-member nil behavior remain intact. Original startup assertions remain unchanged.
 
 ## How it works
@@ -25,6 +27,7 @@ M3 replaces observed social/group/chat/guild gaps exposed by [factory removal](c
 ## Tests asserting this spec
 
 - `tests/guild_tabard_info.rs` — documented DTO, supplied metadata, fresh mutable colors, validation/clearing and legacy state preservation.
+- `tests/c_factory_m3_social.rs` — per-profile generated-documentation return contracts and explicitly chosen temporary policies.
 - `tests/c_namespace_nil_contract.rs`, `tests/nil_symbol_access.rs` — removal contract retained.
 - `tests/startup_warnings.rs` — unchanged final startup health gate.
 
