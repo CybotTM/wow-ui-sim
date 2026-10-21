@@ -101,7 +101,9 @@ mod modern {
         assert!(loaded.iter().any(|name| name == "Blizzard_AuraContainer"));
         env.exec(
             r#"
-            local frame = Mixin(CreateFrame('Frame'), AuraContainerPrivateMixin)
+            local source = assert(__secureenv.AuraContainerPrivateMixin)
+            assert(type(source.OnLoad_Intrinsic) == 'function')
+            local frame = Mixin(CreateFrame('Frame'), source)
             frame.unitToken = 'player'
             local received
             frame.OnUnitPrivateAuraUpdate = function(_, unit, info)
