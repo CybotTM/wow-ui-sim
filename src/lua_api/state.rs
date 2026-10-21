@@ -494,7 +494,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-7")]
             quest_short_expiration_warnings: ::std::collections::HashSet::new(),
             abandon_quest_id: None,
-            tracked_achievements: ::std::collections::HashSet::new(),
+            tracked_achievements: Vec::new(),
             // Simulator initial policy matches the cached trainer panel constants.
             #[cfg(feature = "client-wrath")]
             wrath_trainer_filters: [true, true, false],

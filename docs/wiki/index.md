@@ -1,3 +1,7 @@
+## [2026-10-21] source | Wrath tracked achievements
+
+[Tracking model](systems/lua-api.md#wrath-tracked-achievements) links the [12340 contract](../specs/wrath-tracked-achievements.md): ordered unique IDs, duplicate-add events and synchronous native consumers. Current-source RED precedes the producer; GREEN/profile preservation pending. Persistence and modern-only Wrath rows remain excluded.
+
 ## [2026-10-20] source | Wrath legacy LoD native-evidence adapters
 
 [Consumer follow-up](investigations/wrath-addon-load-fixture.md#native-evidence-legacy-api-follow-up) links the [contract](../specs/wrath-legacy-lod-apis.md): cached groups, lazy arrow models, Calendar context, no-team arena and empty-catalog filter reset paths; native alias publication precedes Calendar capture. Authenticated enUS auction DBC projection and native follow-ups now implemented; initial six producer cases and stock/profile proof passed, expanded proof pending.
