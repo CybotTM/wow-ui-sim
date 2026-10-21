@@ -3,7 +3,7 @@
     feature = "retail-12-1-5",
     any(feature = "profile-retail", feature = "client-ptr")
 ))]
-use rilua::LuaApiMut;
+use rilua::{LuaApi, LuaApiMut};
 use wow_ui_sim::lua_api::{WowLuaEnv, state::AuraInfo};
 const GUID: &str = "Creature-0-1-2-3-19750-000000ABCD";
 
@@ -111,15 +111,30 @@ fn original_public_source_resolves_configured_caster_and_preserves_identity_secr
         probe()
         debug.setobjecttaint(probe,'P5CasterProbe'); expectedTaint = 'P5CasterProbe'
         probe()
+        assert(debug.getstacktaint() == nil, 'outer context before reading tainted publication')
         assert(issecretvalue(CasterSecretResult))
-        assert(secretunwrap(CasterSecretResult)=='Creature-0-1-2-3-19750-000000ABCD')
+        assert(debug.getstacktaint() == 'P5CasterProbe', 'global read taints the Lua observer')
+        assert(not pcall(secretunwrap, CasterSecretResult), 'tainted observer cannot unwrap')
     "#).expect("original consumer reaches selector and returns configured GUID with selected identity policy");
+    assert_published_caster_guid(&env);
     assert_eq!(snapshot_caster_rows(&env), before_rows);
     assert_eq!(
         env.state().borrow().current_target.as_ref().unwrap().guid,
         GUID
     );
     assert_eq!(env.state().borrow().player.buffs[0].source_unit, "target");
+}
+
+fn assert_published_caster_guid(env: &WowLuaEnv) {
+    // A Lua read of the tainted global taints its observer. Inspect the emitted
+    // result from the trusted host after that Lua context has ended instead.
+    let loader = env.loader_env();
+    let mut lua = loader.rilua_mut();
+    let result = lua.get_global_val("CasterSecretResult");
+    assert!(rilua::table_security::is_secret_value(lua.state(), result));
+    let payload = rilua::table_security::unwrap_secret(lua.state(), result).unwrap();
+    let guid = wow_ui_sim::lua_api::methods::val_to_string(lua.state(), payload).unwrap();
+    assert_eq!(guid, GUID);
 }
 
 #[test]
