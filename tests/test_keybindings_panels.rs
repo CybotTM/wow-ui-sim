@@ -87,7 +87,8 @@ fn find_first_visible_spellbook_icon_id(registry: &WidgetRegistry) -> Option<u64
             let id = registry.get_id_by_name(&format!("SpellButton{index}IconTexture"))?;
             let icon = registry.get(id)?;
             let has_texture = icon.texture.is_some() || icon.texture_file_data_id.is_some();
-            let has_area = icon.width > 0.0 && icon.height > 0.0;
+            let rect = compute_frame_rect(registry, id, 1024.0, 768.0);
+            let has_area = rect.width > 0.0 && rect.height > 0.0;
             (icon.visible && has_area && has_texture).then_some(id)
         });
     }
@@ -536,6 +537,12 @@ fn keybind_o_dispatches_toggle_friends_frame() {
 fn keybind_j_opens_guild() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.send_key_press("J", None).expect("J keybind failed");
+            assert!(frame_is_visible(&env, "GuildFrame"), "native guild tab should be visible");
+            assert!(frame_is_shown(&env, "FriendsFrame"), "native guild tab belongs to FriendsFrame");
+            return;
+        }
         env.exec(
             r#"
             _G.__guild_keybind_triggered = false

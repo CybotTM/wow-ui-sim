@@ -605,9 +605,12 @@ fn toggle_lfd_parent_frame_opens_and_closes_group_finder_panel() {
 fn toggle_character_reputation_frame_selects_and_toggles_reputation_panel() {
     test_timeout! {
         let env = setup_env();
+        if !cfg!(feature = "client-wrath") {
+            env.exec(r#"CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }"#)
+                .expect("modern character subframe fixture");
+        }
 
         let result: String = env.eval(r#"
-            CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
             if not ToggleCharacter then
                 return "missing_toggle_character"
             end

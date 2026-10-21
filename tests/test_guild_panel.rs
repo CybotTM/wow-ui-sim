@@ -149,6 +149,13 @@ fn fire_startup_events(env: &WowLuaEnv) {
 fn guild_panel_opens_without_unavailable_error() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleFriendsFrame(3)
+                assert(FriendsFrame:IsShown() and GuildFrame:IsVisible(), "native guild tab should open")
+            "#).expect("native guild tab opens without unavailable or Lua errors");
+            return;
+        }
         let result: String = env.eval(r#"
             -- Capture error messages
             local errors = {}

@@ -721,12 +721,15 @@ fn registered_ui_panel_closes_with_escape_stack() {
 fn escape_key_closes_character_frame_before_game_menu() {
     test_timeout! {
         let env = setup_env();
+        if !cfg!(feature = "client-wrath") {
+            env.exec(r#"CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }"#)
+                .expect("modern character subframe fixture");
+        }
         let panel_state: String = env.eval(r#"
             if HelpFrame:IsShown() then
                 return "help_frame_placeholder_shown"
             end
 
-            CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
             ToggleCharacter("PaperDollFrame", true)
             if not CharacterFrame:IsShown() then
                 return "not_shown"
