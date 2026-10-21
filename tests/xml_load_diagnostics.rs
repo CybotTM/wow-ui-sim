@@ -277,19 +277,26 @@ fn retail_xml_diagnostics_preserve_current_handler_and_warning_routing() {
         }
         let result = load_addon(&env.loader_env(), &addon.join(format!("{ADDON}.toc"))).unwrap();
         let captured: String = env.eval(r"return table.concat(DiagErrors, '\n')").unwrap();
-        assert!(captured.contains(filename), "{captured}");
+        // Current Retail parse errors omit the child path. Preserve that policy;
+        // only Wrath gains the native per-file diagnostic text in this change.
+        let expected_error = if filename == "Malformed.xml" {
+            "Parse error:"
+        } else {
+            filename
+        };
+        assert!(captured.contains(expected_error), "{captured}");
         assert!(
             env.state()
                 .borrow()
                 .lua_errors
                 .iter()
-                .any(|error| error.contains(filename))
+                .any(|error| error.contains(expected_error))
         );
         assert!(
             result
                 .warnings
                 .iter()
-                .any(|warning| warning.contains(filename))
+                .any(|warning| warning.contains(expected_error))
         );
         env.exec("assert(DiagParentTail == nil and DiagTocTail)")
             .unwrap();
