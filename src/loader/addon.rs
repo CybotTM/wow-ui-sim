@@ -859,7 +859,7 @@ mod tests {
             "{}: IO error: No such file or directory (os error 2)",
             addon_dir.join("Missing.lua").display()
         );
-        let xml_warning = if uses_wrath_file_diagnostics() {
+        let xml_warning = if super::uses_wrath_file_diagnostics() {
             "Couldn't open Interface\\AddOns\\MissingFiles\\Missing.xml".to_string()
         } else {
             format!(
