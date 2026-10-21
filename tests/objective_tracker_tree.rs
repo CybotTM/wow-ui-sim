@@ -49,6 +49,9 @@ fn load_settled_game_ui() -> WowLuaEnv {
     env.set_screen_mode(ScreenKind::Game);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
 
+    if cfg!(feature = "client-wrath") {
+        common::wrath_watch_fixture::seed_watch_quests(&env);
+    }
     common::load_profile_framexml(&env);
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
     for (name, toc_path) in &addons {

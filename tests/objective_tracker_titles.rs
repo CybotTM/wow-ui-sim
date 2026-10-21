@@ -21,6 +21,9 @@ fn setup_full_ui() -> WowLuaEnv {
         state.addon_base_paths = vec![ui.clone()];
     }
 
+    if cfg!(feature = "client-wrath") {
+        common::wrath_watch_fixture::seed_watch_quests(&env);
+    }
     common::load_profile_framexml(&env);
     for (name, toc_path) in &discover_blizzard_addons(&ui) {
         if let Err(err) = load_addon(&env.loader_env(), toc_path) {
