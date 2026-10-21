@@ -4,7 +4,7 @@ Window/child identities, geometry and free-function entry points in these fixtur
 
 | Shared behavior | Wrath consumer / identity |
 |---|---|
-| Character equipment/title | `ToggleCharacter`, `CharacterNameText`, globally named slot `IconTexture` children |
+| Character equipment/title/tooltip | `ToggleCharacter`, `CharacterNameText`, globally named slot `IconTexture` children and original slot hover handler with `NumLines` |
 | Spellbook/talents | `ToggleSpellBook` / `SpellBookFrame`; `ToggleTalentFrame` / `PlayerTalentFrame` |
 | Guild | `ToggleFriendsFrame(3)`, native rank dropdown and global guild information children |
 | Mail/macros/socketing | `MAIL_SHOW` consumer; `ShowMacroFrame`; `ItemSocketingFrame_OnEvent` |

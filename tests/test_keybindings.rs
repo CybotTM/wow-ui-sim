@@ -587,6 +587,14 @@ fn character_panel_inventory_tooltip_has_lines_and_closes_without_errors() {
     test_timeout! {
         let env = setup_env();
         install_test_error_handler(&env);
+        if cfg!(feature = "client-wrath") {
+            // Native slot hover/tooltip lines, not modern TooltipDataInfo mixin state.
+            env.exec(include_str!("fixtures/wrath_f03/inventory_tooltip.lua"))
+                .expect("native inventory tooltip consumer opens, populates lines and closes");
+            let errors = drain_test_errors(&env);
+            assert!(errors.is_empty(), "native inventory tooltip errors: {errors:?}");
+            return;
+        }
 
         let result: String = env
             .eval(
