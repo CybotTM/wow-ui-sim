@@ -9,8 +9,16 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 
 pub fn register(lua: &mut rilua::Lua) -> LuaResult<()> {
+    LuaApiMut::register_function(lua, "GetTradeSkillSubClasses", empty_catalog)?;
+    LuaApiMut::register_function(lua, "GetTradeSkillInvSlots", empty_catalog)?;
     LuaApiMut::register_function(lua, "SetTradeSkillSubClassFilter", reset_subclass)?;
     LuaApiMut::register_function(lua, "SetTradeSkillInvSlotFilter", reset_inventory)
+}
+
+// Fresh native counters/mask are zero. Neither native getter checks window-open
+// state; when a populated catalog is modeled, it must survive CloseTradeSkill.
+fn empty_catalog(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }
 
 fn reset_subclass(state: &mut LuaState) -> LuaResult<u32> {

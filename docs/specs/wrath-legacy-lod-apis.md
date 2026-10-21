@@ -17,6 +17,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - [x] `ArenaTeamRoster` accepts Lua-numeric values/strings, otherwise errors `Usage: ArenaTeamRoster(team)`; no modeled team => zero returns, no roster, query or immediate event.
 - [x] Trade-skill subclass/inventory setters accept number/string arg1; zero/negative/nonnumeric-string ordinals reset, return zero values and emit `TRADE_SKILL_UPDATE`. Subclass reset stores both subclass values as `0xFFFFFFFF` and inventory mask 1; inventory reset stores `0xFFFFFFFF`.
 - [x] With no profession filter catalog, positive ordinals fail native `Bad sub class ...` / `Bad inv slot ...` validation before inspecting on/off. Invalid arg1 types use exact native usage messages.
+- [ ] `GetTradeSkillSubClasses` and `GetTradeSkillInvSlots` return zero values (not nil) for the fresh empty legacy catalog, ignore args and emit no events. No window-open check; populated retained catalogs after close remain outside the modeled slice.
 - [x] Wrath publishes `random = math.random` before Calendar captures its local; no `randomseed` alias is introduced.
 - [ ] Preserve Retail publication and other profiles.
 
@@ -32,7 +33,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - `src/lua_api/globals/real/wrath_legacy_state.rs`: supplied zero-based player/inspect indices, independently mutable from fixtures.
 - `src/wrath/compat_bootstrap.rs`: Wrath-only registration.
 - `src/lua_api/globals/real/wrath_legacy.rs`: native math alias publication before original consumer chunks.
-- `src/lua_api/workarounds/temporary/wrath_trade_skill_filters.rs`: determined reset and empty-catalog validation, with observable cached masks and update event.
+- `src/lua_api/workarounds/temporary/wrath_trade_skill_filters.rs`: determined resets/validation and native fresh-empty catalog reads, with observable cached filter masks and update event.
 - `src/lua_api/workarounds/temporary/wrath_arena_roster.rs`: native no-team branch until membership/query lifecycle exists. Reuses existing Wrath numeric-string parser.
 - `src/lua_api/globals/real/wrath_calendar.rs`: localized event/repeat label catalogs, cached context and read-only invite query using the existing GetTime monotonic clock.
 - `src/lua_api/globals/real/wrath_minimap_arrows.rs`: parent validation and lazy child ownership.
@@ -45,6 +46,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - `tests/wrath_legacy_talent_group_counts.rs`: original line 267, stored zero counts, inspect priority, pet 0/1 predicate, argument conversion and no events/writes.
 - `tests/wrath_calendar_repeat_options.rs`: original repeat dropdown initializer at 3811, exact count/order and no events.
 - `tests/wrath_calendar_invite.rs`: original line 4644, pending precedence, pure model 1999/2000-ms boundaries, public monotonic-clock query and no writes/events.
+- `tests/wrath_trade_skill_catalog.rs`: unchanged dropdown callers at 470/515, fresh/reset empty catalog cardinality, ignored arguments and getter event silence.
 - Original retained LoD shards and force-load in `tests/addon_coverage{,_lod}.rs`.
 
 ### Bounded Wrath proof — 2026-10-20
