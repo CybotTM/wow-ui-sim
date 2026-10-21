@@ -1,7 +1,5 @@
-## [2026-10-20] investigation | Wrath native friends legacy surface
+## [2026-10-20] source | Wrath legacy friends
 
-[Friends diagnosis](investigations/wrath-friends-legacy-surface.md) retains the original panel and seeded identities. Raw legacy globals and their failed calls expose a producer gap despite a functioning backing namespace. The bound Rust case retains that failure; authoritative offline-nil expectations await joint producer integration, not gating.
+[Lua API projection](systems/lua-api.md#wrath-legacy-friends) links the [four-global contract](../specs/wrath-friends-legacy.md): native eight-return tuples, GUID-based selection, shared refresh response policy and original FriendsFrame RED→GREEN. Wrath5/Retail19, both stock startups, Wrath check and formatter pass; Retail check/joint F02 integration remain merge-gate work. Native transport, status flags, ignore/add/remove and other-profile publication remain excluded.
 
-## [2026-10-20] source | Wrath native chat layout preservation
-
-[Native chat diagnosis](investigations/wrath-chat-layout.md) records the corrected pre-addon original-consumer boundary. The [contract](../specs/wrath-chat-layout.md) owns bounded RED→GREEN, headless geometry and Retail preservation proof; retained baseline fixture failures remain separate.
+## [2026-10-20] investigation | Shared-target test source binding
