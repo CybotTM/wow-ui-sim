@@ -5,6 +5,8 @@ include!(concat!(
     "/tests/common/profile_fixtures.rs"
 ));
 
+#[cfg(feature = "client-wrath")]
+pub mod action_bar_fixture;
 pub mod addon_coverage_baseline;
 #[cfg(feature = "retail-12-1-0")]
 pub mod aura_container_harness;
@@ -20,6 +22,7 @@ pub(crate) mod prefork_process;
 mod timeout_reexec;
 pub(crate) mod workload_gate;
 mod workload_gate_core;
+pub mod wrath_watch_fixture;
 
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
@@ -359,6 +362,7 @@ const _: () = {
     let _ = lock_env as fn(EnvBuilder) -> LockedEnv;
     let _ = env_with_shared_xml as fn() -> WowLuaEnv;
     let _ = wrath_autocomplete::load_and_assert_native as fn(&'static str);
+    let _ = wrath_watch_fixture::seed_watch_quests as fn(&WowLuaEnv);
     let _ = template_child_name as fn(&str, &str) -> String;
     let _ = fire_addon_loaded as fn(&WowLuaEnv, &str);
     let _ = fire_player_entering_world as fn(&WowLuaEnv, bool, bool);

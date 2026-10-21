@@ -409,6 +409,13 @@ fn toc_raw_bytes_pin_directives_and_representative_body_files() {
 
 #[test]
 fn family_placeholder_resolves_to_mainline_directory() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        let xml = std::fs::read_to_string(toc.addon_dir.join("UnitFrame.xml")).unwrap();
+        assert!(xml.contains(r#"<Script file="UnitFrame.lua""#));
+        assert!(toc.addon_dir.join("UnitFrame.lua").is_file());
+        return;
+    }
     let resolved = unit_frame_dir().join(FAMILY_PLACEHOLDER_RESOLVED_RELATIVE);
     assert!(
         resolved.is_file(),
@@ -450,6 +457,22 @@ fn absent_from_glue_screens_eager_discovery() {
 
 #[test]
 fn dep_directories_exist_on_disk() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        for file in ["TextStatusBar.xml", "UnitFrame.xml"] {
+            assert!(
+                toc.files
+                    .iter()
+                    .any(|path| path == std::path::Path::new(file)),
+                "native dependency absent from committed FrameXML order: {file}"
+            );
+            assert!(
+                toc.addon_dir.join(file).is_file(),
+                "native dependency missing on disk: {file}"
+            );
+        }
+        return;
+    }
     for dep in TOC_DEPENDENCIES {
         let dir = blizzard_ui_dir().join(dep);
         assert!(

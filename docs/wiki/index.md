@@ -8,6 +8,20 @@
 ## [2026-10-20] source | Secret numeric spell-link selectors
 
 [Presentation lookup](systems/lua-api.md#numeric-secret-spell-presentation-selectors) links the [link contract](../specs/spell-secret-presentation.md#spell-link-selector-regression--2026-10-20): public-API Retail/PTR RED, whole-string identity protection, ordinary nil misses and unchanged glyph rejection. Retail/PTR GREEN and preservation are recorded in the contract; downstream sinks remain separate.
+## [2026-10-20] investigation | Wrath native friends legacy surface
+
+[Friends diagnosis](investigations/wrath-friends-legacy-surface.md) retains the original panel and seeded identities. Raw legacy globals and their failed calls expose a producer gap despite a functioning backing namespace. The bound Rust case retains that failure; authoritative offline-nil expectations await joint producer integration, not gating.
+
+## [2026-10-20] source | Wrath native chat layout preservation
+
+[Native chat diagnosis](investigations/wrath-chat-layout.md) records the corrected pre-addon original-consumer boundary. The [contract](../specs/wrath-chat-layout.md) owns bounded RED→GREEN, headless geometry and Retail preservation proof; retained baseline fixture failures remain separate.
+## [2026-10-20] source | Wrath legacy friends
+
+[Lua API projection](systems/lua-api.md#wrath-legacy-friends) links the [four-global contract](../specs/wrath-friends-legacy.md): native eight-return tuples, GUID-based selection, shared refresh response policy and original FriendsFrame RED→GREEN. Wrath5/Retail19, both stock startups, Wrath check and formatter pass; Retail check/joint F02 integration remain merge-gate work. Native transport, status flags, ignore/add/remove and other-profile publication remain excluded.
+
+## [2026-10-20] source | Native Wrath action callback fixtures
+
+[Lua API projections](systems/lua-api.md#wrath-action-callback-projections) link the [F04 query contract](../specs/wrath-action-callback-queries.md): original native callbacks, profile-specific tuple/flag projections, separate shared range snapshots and no modern Wrath range publication. The contract owns bounded proof, documented gates and model limits.
 
 ## [2026-10-20] investigation | Shared-target test source binding
 
@@ -16,6 +30,10 @@
 ## [2026-10-20] source | Numeric-secret tooltip selectors
 
 [Tooltip bridge notes](systems/lua-api.md#retail-1205-tooltip-spell-and-mount-identifiers) link the [owning contract](../specs/tooltip-spell-mount-identifiers.md#numeric-secret-original-consumer-contract): original meter OnEnter and dynamic mount arg1 RED, explicit identity/presentation policy and independent NeverSecret optionals. P3 presentation is not used to initialize the meter row. Original-consumer RED→GREEN, two-sided preservation, private identity after GC and clean stock startup are bounded Retail receipts; native parity remains INFERRED.
+
+## [2026-10-20] source | Wrath XML file diagnostic boundary
+
+[Loader notes](systems/addon-loading.md#wrath-file-load-diagnostics) link the [12340 contract](../specs/xml-load-diagnostics.md): file-open/parse failures bypass Lua errors; genuine Lua errors and other profiles retain current routing. Original DebugTools and canonical-sink RED→GREEN; Wrath67 and Retail61 bounded passes. Stock proof is recorded in the owning spec.
 
 ## [2026-10-20] source | Numeric-secret spell presentation
 

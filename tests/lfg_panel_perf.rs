@@ -35,6 +35,7 @@ fn load_benchmark_ui() -> LoadedBenchmarkUi {
 }
 
 fn load_game_ui_addons(env: &WowLuaEnv) {
+    common::load_profile_framexml(env);
     let addons =
         discover_blizzard_addons_for_screen(&perf_base_game::blizzard_ui_dir(), ScreenKind::Game);
     for (name, toc_path) in &addons {
@@ -47,6 +48,14 @@ fn load_game_ui_addons(env: &WowLuaEnv) {
 fn lfg_panel_open_gui_latency_stays_under_budget() {
     perf_test_timeout! {
             let loaded = load_benchmark_ui();
+            if cfg!(feature = "client-wrath") {
+                loaded.env.exec(r#"
+                    ToggleLFDParentFrame()
+                    assert(LFDParentFrame:IsShown(), "native LFD opener must show its panel")
+                    ToggleLFDParentFrame()
+                    assert(not LFDParentFrame:IsShown(), "native LFD opener must toggle closed")
+                "#).unwrap();
+            }
             let report = benchmark_lfg_panel_open_in_gui(loaded.env)
                 .expect("LFG panel GUI benchmark should complete");
 

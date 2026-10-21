@@ -32,7 +32,9 @@ fn read_chat_scrollbar_surface(env: &WowLuaEnv) -> ChatScrollbarSurface {
         .eval("local x, y, w, h = ChatFrame1:GetRect(); return x, y, w, h")
         .expect("ChatFrame1:GetRect failed");
     let (scroll_x, _scroll_y, scroll_w, _scroll_h): (f64, f64, f64, f64) = env
-        .eval("local x, y, w, h = ChatFrame1.ScrollBar:GetRect(); return x, y, w, h")
+        .eval(&scroll_controls_chunk(
+            "local x, y, w, h = controls:GetRect(); return x, y, w, h",
+        ))
         .expect("ChatFrame1.ScrollBar:GetRect failed");
     let (_edit_x, _edit_y, edit_w, _edit_h): (f64, f64, f64, f64) = env
         .eval("local x, y, w, h = ChatFrame1EditBox:GetRect(); return x, y, w, h")
@@ -48,23 +50,41 @@ fn read_chat_scrollbar_surface(env: &WowLuaEnv) -> ChatScrollbarSurface {
     }
 }
 
+fn scroll_controls_chunk(code: &str) -> String {
+    let controls = if cfg!(feature = "client-wrath") {
+        "ChatFrame1.buttonFrame"
+    } else {
+        "ChatFrame1.ScrollBar"
+    };
+    format!("local controls = {controls}\n{code}")
+}
+
 fn read_chat_scrollbar_points(env: &WowLuaEnv) -> String {
-    env.eval(
+    env.eval(&scroll_controls_chunk(
         r#"
             local out = {}
-            for i = 1, ChatFrame1.ScrollBar:GetNumPoints() do
-                local point, rel, relPoint, x, y = ChatFrame1.ScrollBar:GetPoint(i)
+            for i = 1, controls:GetNumPoints() do
+                local point, rel, relPoint, x, y = controls:GetPoint(i)
                 local relName = rel and rel:GetName() or "$parent"
                 table.insert(out, string.format("%s->%s:%s(%.0f,%.0f)", point, relName, relPoint, x, y))
             end
             table.sort(out)
             return table.concat(out, " | ")
         "#,
-    )
-    .expect("ChatFrame1.ScrollBar:GetPoint failed")
+    ))
+    .expect("native scrolling controls:GetPoint failed")
 }
 
 fn assert_chat_scrollbar_surface(surface: ChatScrollbarSurface, layout: &str) {
+    if cfg!(feature = "client-wrath") {
+        assert!(
+            (surface.scroll_x + surface.scroll_w - (surface.chat_x - 4.0)).abs() < 0.75,
+            "native scroll buttons must attach to left edge: {layout}"
+        );
+        assert_eq!(surface.scroll_w, 29.0);
+        assert_editbox_width_sane(&surface, layout);
+        return;
+    }
     let chat_right = surface.chat_x + surface.chat_w;
     assert_scrollbar_near_chat_right_edge(&surface, chat_right, layout);
     assert_scrollbar_width_sane(&surface, layout);

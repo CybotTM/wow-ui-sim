@@ -341,7 +341,7 @@ macro_rules! build_empty_sim_state {
             pet_bonus_slot_available: false,
             #[cfg(feature = "retail-12-0-0")]
             limited_input_allowed: [false; 4],
-            #[cfg(feature = "retail-12-0-0")]
+            #[cfg(any(feature = "retail-12-0-0", feature = "client-wrath"))]
             action_spell_ranges: Default::default(),
             #[cfg(feature = "retail-12-0-0")]
             weekly_reward_progress: Default::default(),
@@ -574,6 +574,8 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-0")]
             bnet_custom_message: String::new(),
             social_friends: default_social_friends(),
+            #[cfg(feature = "client-wrath")]
+            selected_friend_guid: None,
             auction_browse_results: default_auction_browse_results(),
             auction_replicate_items: default_auction_replicate_items(),
             auction_owned: Vec::new(),

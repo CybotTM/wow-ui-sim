@@ -19,6 +19,7 @@ fn load_settled_game_ui() -> WowLuaEnv {
     env.set_screen_mode(ScreenKind::Game);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
 
+    common::load_profile_framexml(&env);
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
     for (name, toc_path) in &addons {
         load_addon(&env.loader_env(), toc_path)
@@ -35,14 +36,12 @@ fn game_time_frame_set_date_same_day_does_not_mark_render_dirty() {
     test_timeout! {
         let env = load_settled_game_ui();
 
-        let (frame_id, normal_id, pushed_id, highlight_id) = {
+        let watched_ids: Vec<_> = {
             let state = env.state().borrow();
             let frame_id = state.widgets.get_id_by_name("GameTimeFrame").unwrap();
             let frame = state.widgets.get(frame_id).unwrap();
-            let normal_id = *frame.children_keys.get("NormalTexture").unwrap();
-            let pushed_id = *frame.children_keys.get("PushedTexture").unwrap();
-            let highlight_id = *frame.children_keys.get("HighlightTexture").unwrap();
-            (frame_id, normal_id, pushed_id, highlight_id)
+            // Native Wrath texture slots are unnamed, not modern parentKeys.
+            std::iter::once(frame_id).chain(frame.children.iter().copied()).collect()
         };
 
         env.exec("GameTimeFrame_SetDate()").unwrap();
@@ -58,10 +57,7 @@ fn game_time_frame_set_date_same_day_does_not_mark_render_dirty() {
             "same-day GameTimeFrame_SetDate should not trigger render dirties"
         );
         assert!(
-            !dirty_ids.contains(&frame_id)
-                && !dirty_ids.contains(&normal_id)
-                && !dirty_ids.contains(&pushed_id)
-                && !dirty_ids.contains(&highlight_id),
+            watched_ids.iter().all(|id| !dirty_ids.contains(id)),
             "same-day GameTimeFrame_SetDate should not dirty the button or its calendar textures (got {:?})",
             dirty_ids
         );
