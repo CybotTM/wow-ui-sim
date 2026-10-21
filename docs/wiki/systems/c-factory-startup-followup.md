@@ -18,8 +18,15 @@ The [M5 contract](../../specs/c-factory-m5-services.md) joins battle-pet species
 
 Owned-house requests move from dashboard-only preload to an early named request definition, reused by preload. The absent ownership service produces a deferred empty event response; no synchronous timer fallback remains. Forever's empty purchased-tab list and false player-bag capability name missing bank metadata/capability models rather than treating legacy bank bag counts as tab records.
 
+## T6 service inputs
+
+The [T6 contract](../../specs/c-factory-t6-services.md) binds Retail/PTR error messages to the existing console sink and exposes Era/Anniversary's independent supplied Speak For Me flag. Individually named temporary defaults cover absent chat-type TTS preferences, collectable-tracking entitlement, authenticated voice login, secure combat filters, corpse coordinates, locale catalogs, Discord voice capability and active-provider selection. Connected channels and player coordinates do not stand in for authentication or corpse state.
+
+Forever's two anonymous normal/wrapped timer rows still have an unknown C_* root; callback source `Blizzard_SharedXMLBase/FunctionUtil.lua:87` alone cannot identify a member. No guessed root is published. Combined stock evidence must retain this unresolved gap separately from attributed batch members.
+
 ## Sources
 
+- [T6 services](../../specs/c-factory-t6-services.md) — service gaps and unresolved anonymous timer attribution.
 - [M5 services](../../specs/c-factory-m5-services.md) — early ownership requests, pet icons/actions and Forever bank/set scope.
 - [M2 adapters](../../specs/c-factory-m2-adapters.md) — state bindings and temporary capability scope.
 - [M1 conditions](../../specs/c-factory-m1-conditions.md) — scope and contract.

@@ -1,3 +1,7 @@
+## [2026-10-21] source | T6 named startup services
+
+[Factory follow-up](systems/c-factory-startup-followup.md#t6-service-inputs) links real console/activity adapters, named missing service systems and the still-unattributed Forever timer family; runtime proof pending.
+
 ## [2026-10-21] source | M5 startup service/catalog inputs
 
 [Factory follow-up](systems/c-factory-startup-followup.md#m5-service-and-catalog-inputs) links early owned-house requests, species-backed pet icons, valid-set catalog state and named battle/bank capability gaps; runtime proof pending.

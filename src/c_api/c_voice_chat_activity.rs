@@ -10,8 +10,11 @@ use rilua::{LuaResult, Val};
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let publish = match ACTIVE {
         ClientProfile::Retail | ClientProfile::Ptr => cfg!(feature = "retail-12-0-5"),
-        ClientProfile::Mists | ClientProfile::WowForever => true,
-        ClientProfile::Wrath | ClientProfile::Era | ClientProfile::Anniversary => false,
+        ClientProfile::Mists
+        | ClientProfile::Era
+        | ClientProfile::Anniversary
+        | ClientProfile::WowForever => true,
+        ClientProfile::Wrath => false,
     };
     if !publish {
         return Ok(());

@@ -185,6 +185,8 @@ pub(crate) mod spell_target_defaults;
 #[cfg(not(feature = "client-wrath"))]
 pub(crate) mod startup_condition_capability_defaults;
 pub(crate) mod startup_namespace_defaults;
+#[cfg(not(feature = "client-wrath"))]
+pub(crate) mod startup_service_capability_defaults;
 pub(crate) mod startup_windows;
 pub(crate) mod static_model_info_defaults;
 pub(crate) mod static_popup_defaults;
