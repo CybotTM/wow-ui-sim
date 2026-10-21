@@ -34,7 +34,7 @@ Retail before/after preservation passes 17/17 each: force-load plus all 16 LoD s
 
 Original CVars remain byte-identical (SHA256 `3704e092febe9a79363a3d83f31c6b2e89c8cea1165b212c6a0fafaf2a22e4a0`), with matching before/after stat/hash snapshots for each runtime. No errors are filtered or baseline counts increased.
 
-Local evidence: `/home/osso/.local/state/wow-ui-sim/handoff/wrath-addon-load/takeover-3-proof-ledger.json`; earlier RED/before evidence remains in `takeover-proof-ledger.json` beside it. The pre-existing `Cargo.lock` diff is package ordering only and is preserved uncommitted.
+Proof scope at `a1130d799` and `dec4eda85`: `tests/addon_coverage.rs` (force-load) and `tests/addon_coverage_lod.rs` (LoD shards, TimeManager and `shard_14_runtime_load_survives_prior_runtime_shards_in_process`).
 
 ## Residual registration bug
 
@@ -73,7 +73,7 @@ Shard 11 retains BattlefieldMinimap/TalentUI; shard 13 retains Calendar/TradeSki
 | `Blizzard_InspectUI/PVPFrameTemplates.xml` | XML include file missing in cache | Trace manifest/include source and cache resolution; no blind vendor edits. |
 | `FrameXML/UIPanelTemplates.lua:365` | nil `self.cursorOffset` arithmetic | Trace original thumb input/state ordering; no guard justified. |
 
-Full raw receipts and `retained-legacy-boundaries.json` remain beside the proof ledger. These gaps do not justify expanding this lane into legacy system implementation.
+These gaps do not justify expanding this lane into legacy system implementation.
 
 ## Native limits and laptop questions
 
