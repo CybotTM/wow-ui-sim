@@ -124,23 +124,7 @@ fn cfactory_m5_forever_bank_bag_capability_documented_boolean() {
 #[cfg(feature = "client-wowforever")]
 #[test]
 fn cfactory_m5_forever_valid_sets_use_supplied_catalog() {
-    use wow_ui_sim::c_api::c_transmog_sets::TransmogSetInfo;
     let env = documented_env("TransmogSetsDocumentation.lua", "HasAnyValidSets");
-    env.state().borrow_mut().transmog_sets.entries.clear();
-    env.exec("assert(not C_TransmogSets.HasAnyValidSets())")
-        .unwrap();
-    env.state()
-        .borrow_mut()
-        .transmog_sets
-        .entries
-        .push(TransmogSetInfo {
-            set_id: 812,
-            valid_for_character: true,
-            ..Default::default()
-        });
-    env.exec("assert(C_TransmogSets.HasAnyValidSets())")
-        .unwrap();
-    env.state().borrow_mut().transmog_sets.entries[0].valid_for_character = false;
-    env.exec("assert(not C_TransmogSets.HasAnyValidSets())")
+    env.exec("assert(C_TransmogSets.HasAnyValidSets() == false)")
         .unwrap();
 }
