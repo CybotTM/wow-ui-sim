@@ -6,6 +6,36 @@
 use crate::common::wrath_autocomplete::assert_native;
 
 #[test]
+fn native_text_change_callback_queries_only_user_input() {
+    assert_native(
+        r#"
+F09EditBox:SetText('F09A')
+AutoCompleteEditBox_OnTextChanged(F09EditBox, false)
+assert(not AutoCompleteBox:IsShown())
+AutoCompleteEditBox_OnTextChanged(F09EditBox, true)
+assert(AutoCompleteBox:IsShown())
+assert(AutoCompleteButton1:GetText() == 'F09Alpha')
+"#,
+    );
+}
+
+#[test]
+fn native_character_callback_completes_suffix_and_preserves_cursor() {
+    assert_native(
+        r#"
+F09EditBox.addHighlightedText = true
+F09EditBox:SetText('F09A')
+F09EditBox:SetCursorPosition(4)
+AutoCompleteEditBox_OnChar(F09EditBox)
+assert(F09EditBox:GetText() == 'F09Alpha')
+assert(F09EditBox:GetCursorPosition() == 4)
+assert(AutoCompleteBox:IsShown())
+assert(AutoComplete_GetNumResults(AutoCompleteBox) == 1)
+"#,
+    );
+}
+
+#[test]
 fn native_query_returns_strings_to_original_framexml() {
     assert_native(
         r#"
