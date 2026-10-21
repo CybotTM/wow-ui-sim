@@ -482,8 +482,16 @@ fn open_trade_skill_opens_blacksmithing_panel() {
     test_timeout! {
         let env = setup_env();
         if cfg!(feature = "client-wrath") {
+            // Proves native TRADE_SKILL_SHOW consumption after supplying profession state.
+            // OpenTradeSkill's ProfessionsFrame-only producer remains a separate finding.
+            env.exec("assert(C_TradeSkillUI.OpenTradeSkill(164))")
+                .expect("supply selected Blacksmithing model state");
+            common::panel_fixtures::clear_recorded_lua_errors(&env);
+            env.fire_event("TRADE_SKILL_SHOW")
+                .expect("dispatch native trade-skill interaction event");
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native TRADE_SKILL_SHOW errors: {errors:?}");
             env.exec(r#"
-                assert(C_TradeSkillUI.OpenTradeSkill(164))
                 assert(TradeSkillFrame:IsShown(), "native trade-skill panel should open")
                 assert(GetTradeSkillLine() == "Blacksmithing", "selected profession identity")
             "#).expect("native trade-skill event consumer opens Blacksmithing");

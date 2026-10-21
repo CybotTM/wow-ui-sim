@@ -69,6 +69,16 @@ fn show_mail_frame_loads_and_populates_inbox_rows() {
     test_timeout! {
         let env = setup_env();
         if cfg!(feature = "client-wrath") {
+            // Proves native MAIL_SHOW consumption, not the admin producer's event bridge.
+            env.exec(r#"
+                A_Admin.ClearInbox()
+                A_Admin.AddMail("Thrall", "Unread Orders", "Meet me in Orgrimmar.")
+                A_Admin.AddMail("Jaina", "Arcane Invoice", "The Kirin Tor still expects payment.")
+            "#).expect("supplied inbox fixture");
+            common::panel_fixtures::clear_recorded_lua_errors(&env);
+            env.fire_event("MAIL_SHOW").expect("dispatch native mail interaction event");
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native MAIL_SHOW errors: {errors:?}");
             env.exec(include_str!("fixtures/wrath_f03/mail.lua"))
                 .expect("native mail event consumer populates inbox rows");
             return;

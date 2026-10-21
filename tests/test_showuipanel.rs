@@ -566,6 +566,12 @@ fn hide_ui_panel_hides_frame(env: &WowLuaEnv) {
 fn show_and_hide_ui_panel_toggle_registered_frame_visibility() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            // Native window-stack registration is data, not the RegisterUIPanel shim.
+            env.exec(include_str!("fixtures/wrath_f03/panel_show_hide.lua"))
+                .expect("native panel registration and show/hide visibility");
+            return;
+        }
         let result: String = env.eval(r#"
             local panel = CreateFrame("Frame", "ShowHideUIPanelTestFrame", UIParent)
             panel:SetSize(300, 400)
@@ -600,6 +606,12 @@ fn show_and_hide_ui_panel_toggle_registered_frame_visibility() {
 fn repeated_show_ui_panel_pulse_closes_active_panel_stack() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            // Native window-stack capability; the shim's attribute cache is separate.
+            env.exec(include_str!("fixtures/wrath_f03/panel_pulse.lua"))
+                .expect("native center panel displacement and stack closure");
+            return;
+        }
         let result: (bool, bool, bool, bool, bool, bool) = env.eval(r#"
             local first = CreateFrame("Frame", "AttributeDispatchPanelPulseFirst", UIParent)
             first:SetSize(300, 400)
@@ -685,6 +697,12 @@ fn register_ui_panel_populates_uipanel_windows_without_overwriting() {
 fn registered_ui_panel_closes_with_escape_stack() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            // Native CloseAllWindows stack, not RegisterUIPanel compatibility behavior.
+            env.exec(include_str!("fixtures/wrath_f03/panel_close.lua"))
+                .expect("native registered panel belongs to the escape/close stack");
+            return;
+        }
         let result: String = env.eval(r#"
             local panel = CreateFrame("Frame", "EscClosableUIPanelTestFrame", UIParent)
             panel:SetSize(300, 400)
@@ -764,6 +782,12 @@ fn escape_key_closes_character_frame_before_game_menu() {
 fn sequential_registered_ui_panels_reenter_close_stack() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            // Native data registration must keep re-opened panels in the close stack.
+            env.exec(include_str!("fixtures/wrath_f03/panel_sequential.lua"))
+                .expect("native sequential panel shows re-enter the close stack");
+            return;
+        }
         let result: String = env.eval(r#"
             local first = CreateFrame("Frame", "SequentialUIPanelFirst", UIParent)
             first:SetSize(300, 400)
