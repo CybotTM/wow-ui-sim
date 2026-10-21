@@ -24,7 +24,7 @@ fn observe_errors(env: &WowLuaEnv) {
 
 #[cfg(feature = "client-wrath")]
 fn assert_no_lua_errors(env: &WowLuaEnv) {
-    let handler_count: usize = env.eval("return #DiagErrors").unwrap();
+    let handler_count: i32 = env.eval("return #DiagErrors").unwrap();
     let state = env.state().borrow();
     assert_eq!(
         handler_count, 0,
