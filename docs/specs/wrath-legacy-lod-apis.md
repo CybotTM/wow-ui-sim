@@ -15,9 +15,10 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - [ ] `CalendarCanSendInvite` returns one boolean: pending action denies; otherwise deny only when throttle bypass is false, last invite is nonzero and elapsed milliseconds are below 2000. At 2000 ms it allows. Ignores args, no player gate, writes or events.
 - [x] `CalendarDefaultGuildFilter` returns level cap twice (60/70/80 by account expansion) and the cached guild-rank count directly (`CGGuildInfo::m_numRanks`, laptop clarification); no guild-name membership gate. Absent player returns three zeros. Ignores arguments.
 - [x] `ArenaTeamRoster` accepts Lua-numeric values/strings, otherwise errors `Usage: ArenaTeamRoster(team)`; no modeled team => zero returns, no roster, query or immediate event.
-- [x] Trade-skill subclass/inventory setters accept number/string arg1; zero/negative/nonnumeric-string ordinals reset, return zero values and emit `TRADE_SKILL_UPDATE`. Subclass reset stores both subclass values as `0xFFFFFFFF` and inventory mask 1; inventory reset stores `0xFFFFFFFF`.
+- [ ] Trade-skill subclass/inventory setters accept number/string arg1; zero/negative/nonnumeric-string ordinals reset, return zero values and emit `TRADE_SKILL_UPDATE`. Subclass reset stores mask/selected index `0xFFFFFFFF` and preserves inventory mask; inventory reset alone assigns `0xFFFFFFFF`. `SetInvTypeFilter(1)` is a rebuild helper, not an inventory-mask setter.
 - [x] With no profession filter catalog, positive ordinals fail native `Bad sub class ...` / `Bad inv slot ...` validation before inspecting on/off. Invalid arg1 types use exact native usage messages.
 - [ ] `GetTradeSkillSubClasses` and `GetTradeSkillInvSlots` return zero values (not nil) for the fresh empty legacy catalog, ignore args and emit no events. No window-open check; populated retained catalogs after close remain outside the modeled slice.
+- [ ] `GetTradeSkillSubClassFilter` / `GetTradeSkillInvSlotFilter` require numeric arguments (numeric strings accepted), ignore extras and return exactly one number 1 or nil, with exact usage/bounds messages. Zero/negative indices select aggregate state: empty subclass catalog is vacuously all; inventory aggregate requires mask exactly `FFFFFFFF`. Sentinel inventory returns nil for positive ordinals before bounds validation. Non-sentinel empty inventory ordinals error. No writes/events or open-state gate.
 - [x] Wrath publishes `random = math.random` before Calendar captures its local; no `randomseed` alias is introduced.
 - [ ] Preserve Retail publication and other profiles.
 
@@ -34,7 +35,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - `src/lua_api/globals/real/wrath_legacy_state.rs`: supplied zero-based player/inspect indices, independently mutable from fixtures.
 - `src/wrath/compat_bootstrap.rs`: Wrath-only registration.
 - `src/lua_api/globals/real/wrath_legacy.rs`: native math alias publication before original consumer chunks.
-- `src/lua_api/workarounds/temporary/wrath_trade_skill_filters.rs`: determined resets/validation and native fresh-empty catalog reads, with observable cached filter masks and update event.
+- `src/lua_api/workarounds/temporary/wrath_trade_skill_filters.rs`: native fresh-empty catalog/mask reads and reset validation; typed cached masks start at the established sentinel and subclass rebuild preserves inventory state.
 - `src/lua_api/workarounds/temporary/wrath_arena_roster.rs`: native no-team branch until membership/query lifecycle exists. Reuses existing Wrath numeric-string parser.
 - `src/lua_api/globals/real/wrath_calendar.rs`: localized event/repeat label catalogs, cached context and read-only invite query using the existing GetTime monotonic clock.
 - `src/lua_api/globals/real/wrath_minimap_arrows.rs`: parent validation and lazy child ownership.
@@ -48,6 +49,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - `tests/wrath_calendar_repeat_options.rs`: original repeat dropdown initializer at 3811, exact count/order and no events.
 - `tests/wrath_calendar_invite.rs`: original line 4644, pending precedence, pure model 1999/2000-ms boundaries, public monotonic-clock query and no writes/events.
 - `tests/wrath_trade_skill_catalog.rs`: unchanged dropdown callers at 470/515, fresh/reset empty catalog cardinality, ignored arguments and getter event silence.
+- `tests/wrath_trade_skill_filter_reads.rs`: original 476/520, numeric/nil cardinality, usage/bounds ordering, vacuous subclass aggregate and single-bit inventory preservation through subclass reset.
 - Original retained LoD shards and force-load in `tests/addon_coverage{,_lod}.rs`.
 
 ### Bounded Wrath proof — 2026-10-20
@@ -80,6 +82,8 @@ Class 2 field 3 points at string-block offset 22, `Weapon`. Weapon subclass 0 fi
 Inventory ordinal lookup is established to use the same visible displayFlags-bit-2-filtered stream (`AuctionHouse_Scripts.cpp:143–191`, laptop clean-room follow-up). Weapon ordinal 18 is unfound because only 17 rows are visible: it returns **28 values / 14 pairs**, all availability numbers 1. A found visible row without flags bit `0x200` returns zero values. No ordinal-sorting or out-of-range empty-result shortcut is permitted.
 
 Input SHA256: ItemClass `f14b09254010765ab75c3c04ddf55a4b03e75163655c5015d188b04e31fa1b20`; ItemSubClass `ed037619b6277fb2b05c3cf05233b19687a4004427d5e63a12d038804bc8b0e5`. Full metadata and derived hash live in the provenance JSON. The decoder walks little-endian 32-bit fields using the authenticated record strides and bounded NUL-terminated UTF-8 string offsets. The projection retains hidden rows for auditable flags but omits unused columns/classes; verboseName/displayName selection occurs in the same locale. Consumable subclass IDs stay `0,5,1,2,3,7,6,4,8`, not sorted.
+
+Filter-read/reset details are established by laptop clean-room `TradeSkillFrame_Scripts.cpp:106–139,700–750,796–803`, `TradeSkillFrame.cpp:249–335,1250–1263`. Fresh masks are `FFFFFFFF`, counts/slots zero. The subclass reset's `SetInvTypeFilter(1)` refreshes shown/collapsed state and rebuilds/sorts; it reads but never assigns inventory mask. Earlier literal-mask-1 interpretation is superseded, not retained as a compatibility path.
 
 ## Known gaps (current cycle)
 

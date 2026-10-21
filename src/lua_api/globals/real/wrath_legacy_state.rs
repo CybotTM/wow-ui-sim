@@ -71,6 +71,26 @@ impl Default for TalentGroupCounts {
     }
 }
 
+/// Native fresh filter masks/selection are all sentinel FFFFFFFF.
+#[cfg(feature = "client-wrath")]
+#[derive(Debug)]
+pub struct TradeSkillFilters {
+    pub subclass_mask: u32,
+    pub selected_subclass: u32,
+    pub inventory_mask: u32,
+}
+
+#[cfg(feature = "client-wrath")]
+impl Default for TradeSkillFilters {
+    fn default() -> Self {
+        Self {
+            subclass_mask: u32::MAX,
+            selected_subclass: u32::MAX,
+            inventory_mask: u32::MAX,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Landmark {
     pub name: String,
@@ -102,11 +122,8 @@ pub struct WrathLegacyState {
     pub mini_map_arrows: Option<(u64, u64)>,
     #[cfg(feature = "client-wrath")]
     pub calendar: CalendarContext,
-    /// None means no supplied/reset filter yet; never invent initial native state.
     #[cfg(feature = "client-wrath")]
-    pub trade_skill_subclass_filter: Option<(u32, u32)>,
-    #[cfg(feature = "client-wrath")]
-    pub trade_skill_inventory_filter: Option<u32>,
+    pub trade_skill_filters: TradeSkillFilters,
     pub skills: Vec<Skill>,
     /// Zero denotes no selection; otherwise one-based into skills.
     pub selected_skill: usize,

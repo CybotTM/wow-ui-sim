@@ -14,30 +14,31 @@ fn trade_original_463_508_reset_and_empty_catalog_validation() {
     "#,
     )
     .unwrap();
+    env.state()
+        .borrow_mut()
+        .wrath_legacy
+        .trade_skill_filters
+        .inventory_mask = 0x80;
     env.exec(&original_lines("Blizzard_TradeSkillUI", 463, 463))
         .unwrap();
-    assert_eq!(
-        env.state()
-            .borrow()
-            .wrath_legacy
-            .trade_skill_subclass_filter,
-        Some((u32::MAX, u32::MAX))
-    );
-    assert_eq!(
-        env.state()
-            .borrow()
-            .wrath_legacy
-            .trade_skill_inventory_filter,
-        Some(1)
-    );
+    {
+        let sim = env.state().borrow();
+        let filters = &sim.wrath_legacy.trade_skill_filters;
+        assert_eq!(
+            (filters.subclass_mask, filters.selected_subclass),
+            (u32::MAX, u32::MAX)
+        );
+        assert_eq!(filters.inventory_mask, 0x80); // subclass rebuild preserves it
+    }
     env.exec(&original_lines("Blizzard_TradeSkillUI", 508, 508))
         .unwrap();
     assert_eq!(
         env.state()
             .borrow()
             .wrath_legacy
-            .trade_skill_inventory_filter,
-        Some(u32::MAX)
+            .trade_skill_filters
+            .inventory_mask,
+        u32::MAX
     );
     env.exec(
         r#"
@@ -62,18 +63,14 @@ fn trade_original_463_508_reset_and_empty_catalog_validation() {
     "#,
     )
     .unwrap();
+    let sim = env.state().borrow();
+    let filters = &sim.wrath_legacy.trade_skill_filters;
     assert_eq!(
-        env.state()
-            .borrow()
-            .wrath_legacy
-            .trade_skill_subclass_filter,
-        Some((u32::MAX, u32::MAX))
-    );
-    assert_eq!(
-        env.state()
-            .borrow()
-            .wrath_legacy
-            .trade_skill_inventory_filter,
-        Some(u32::MAX)
+        (
+            filters.subclass_mask,
+            filters.selected_subclass,
+            filters.inventory_mask
+        ),
+        (u32::MAX, u32::MAX, u32::MAX)
     );
 }

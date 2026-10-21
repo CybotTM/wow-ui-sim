@@ -14,6 +14,7 @@ fn wrath_lod_globals_remain_unpublished_on_retail() {
             'GetAuctionItemClasses', 'GetAuctionItemSubClasses', 'GetAuctionInvTypes',
             'GetNumTalentGroups', 'CalendarEventGetRepeatOptions', 'CalendarCanSendInvite',
             'GetTradeSkillSubClasses', 'GetTradeSkillInvSlots',
+            'GetTradeSkillSubClassFilter', 'GetTradeSkillInvSlotFilter',
         }) do
             assert(rawget(_G, name) == nil, name)
         end
