@@ -6,6 +6,8 @@ local slot = CharacterHeadSlot
 local onEnter = slot:GetScript("OnEnter")
 assert(type(onEnter) == "function", "native equipment slot hover handler exists")
 onEnter(slot)
+local hasItem = GameTooltip:SetInventoryItem("player", 1)
+assert(hasItem, "supplied head-slot item is available to the native tooltip API")
 assert(GameTooltip:NumLines() > 0, "native inventory tooltip has populated lines")
 ToggleCharacter("PaperDollFrame")
 assert(not CharacterFrame:IsShown(), "native character panel closes after tooltip use")
