@@ -62,6 +62,24 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_frame_surface_matches_xml_shape() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::assert_native(
+            r#"
+assert(AutoCompleteBox:GetObjectType() == 'Frame')
+assert(AutoCompleteBox:GetParent() == UIParent)
+assert(not AutoCompleteBox:IsShown())
+assert(AutoCompleteInstructions:GetParent() == AutoCompleteBox)
+for i = 1, 5 do
+ local button = _G['AutoCompleteButton'..i]
+ assert(button:GetObjectType() == 'Button')
+ assert(button:GetParent() == AutoCompleteBox)
+ assert(button:GetFontString() ~= nil)
+end
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

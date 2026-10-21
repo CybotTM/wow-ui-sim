@@ -61,6 +61,22 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_popup_list_overflow_count_tracks_remaining_results() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::assert_native(
+            r#"
+AutoComplete_UpdateResults(AutoCompleteBox, 'A','B','C','D','E','F','G')
+assert(AutoComplete_GetNumResults(AutoCompleteBox) == 4)
+assert(AutoCompleteButton5:GetText() == CONTINUED)
+assert(not AutoCompleteButton5:IsEnabled())
+AutoComplete_UpdateResults(AutoCompleteBox, 'A','B','C','D','E')
+assert(AutoComplete_GetNumResults(AutoCompleteBox) == 5)
+assert(AutoCompleteButton5:IsEnabled())
+assert(AutoCompleteButton5:GetText() == 'E')
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

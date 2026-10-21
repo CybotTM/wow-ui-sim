@@ -38,6 +38,18 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_onload_initializes_box_state() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::assert_native(
+            r#"
+AutoComplete_OnLoad(AutoCompleteBox)
+assert(AutoCompleteBox.maxHeight == 5 * AutoCompleteButton1:GetHeight())
+assert(AutoCompleteInstructions:GetText() == '|cffbbbbbb'..PRESS_TAB..'|r')
+assert(not AutoCompleteBox:IsEventRegistered('GUILD_ROSTER_UPDATE'))
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

@@ -7,6 +7,26 @@ const EXPECTED_FLAG_ALL: f64 = 0xffff_ffff_u32 as f64;
 
 #[test]
 fn blizzard_auto_complete_constants_are_global_after_load() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::assert_native(
+            r#"
+assert(AUTOCOMPLETE_MAX_BUTTONS == 5)
+assert(AUTOCOMPLETE_FLAG_NONE == 0)
+assert(AUTOCOMPLETE_FLAG_IN_GROUP == 1)
+assert(AUTOCOMPLETE_FLAG_IN_GUILD == 2)
+assert(AUTOCOMPLETE_FLAG_FRIEND == 4)
+assert(AUTOCOMPLETE_FLAG_BNET == 8)
+assert(AUTOCOMPLETE_FLAG_INTERACTED_WITH == 16)
+assert(AUTOCOMPLETE_FLAG_ONLINE == 32)
+assert(AUTOCOMPLETE_FLAG_ALL == 4294967295)
+assert(AUTOCOMPLETE_SIMPLE_REGEX == '(.+)')
+assert(AUTOCOMPLETE_SIMPLE_FORMAT_REGEX == '%1$s')
+assert(AUTOCOMPLETE_DEFAULT_Y_OFFSET == 3)
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

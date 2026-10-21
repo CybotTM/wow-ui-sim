@@ -43,6 +43,21 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_escape_hides_only_attached_box() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::assert_native(
+            r#"
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha')
+local other = CreateFrame('EditBox', nil, UIParent)
+assert(AutoCompleteEditBox_OnEscapePressed(other) == false)
+assert(AutoCompleteBox:IsShown())
+assert(AutoCompleteEditBox_OnEscapePressed(F09EditBox) == true)
+assert(not AutoCompleteBox:IsShown())
+assert(AutoCompleteEditBox_OnEscapePressed(F09EditBox) == false)
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

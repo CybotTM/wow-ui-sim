@@ -6,6 +6,20 @@ const ROOT: &str = "Blizzard_AutoComplete";
 
 #[test]
 fn blizzard_auto_complete_list_templates_expose_documented_key_shapes() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::assert_native(
+            r#"
+local expected = {ALL={4294967295,0}, ALL_CHARS={4294967295,8}, ONLINE={32,0}, ONLINE_NOT_IN_GROUP={32,9}, ONLINE_NOT_IN_GUILD={32,10}, NOT_FRIEND={4294967295,12}, IN_GROUP={1,8}, IN_GUILD={2,8}, FRIEND={4,8}, FRIEND_NOT_GUILD={4,10}, FRIEND_AND_GUILD={6,8}}
+for name, flags in pairs(expected) do
+ local template = AUTOCOMPLETE_LIST_TEMPLATES[name]
+ assert(template.include == flags[1], name)
+ assert(template.exclude == flags[2], name)
+end
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
@@ -74,6 +88,16 @@ fn blizzard_auto_complete_list_templates_expose_documented_key_shapes() {
 
 #[test]
 fn blizzard_auto_complete_list_aliases_reference_template_entries() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::assert_native(
+            r#"
+local expected = { ALL='ALL', WHISPER='ONLINE', INVITE='ONLINE_NOT_IN_GROUP', UNINVITE='IN_GROUP', PROMOTE='IN_GROUP', TEAM_INVITE='ONLINE', GUILD_INVITE='ONLINE_NOT_IN_GUILD', GUILD_UNINVITE='IN_GUILD', GUILD_PROMOTE='IN_GUILD', GUILD_DEMOTE='IN_GUILD', GUILD_LEADER='IN_GUILD', ADDFRIEND='NOT_FRIEND', REMOVEFRIEND='FRIEND', CHANINVITE='ONLINE', MAIL='ALL_CHARS', CALENDARGUILDEVENT='FRIEND_NOT_GUILD', CALENDAREVENT='FRIEND_AND_GUILD' }
+for alias, template in pairs(expected) do assert(AUTOCOMPLETE_LIST[alias] == AUTOCOMPLETE_LIST_TEMPLATES[template], alias) end
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

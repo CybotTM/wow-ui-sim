@@ -87,6 +87,24 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_attaches_above_or_below_parent() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::assert_native(
+            r#"
+AutoComplete_Update(F09EditBox, 'F09A', 4)
+assert(AutoCompleteBox.attachPoint == 'BELOW')
+local p, rel, rp = AutoCompleteBox:GetPoint(1)
+assert(p == 'TOPLEFT' and rel == F09EditBox and rp == 'BOTTOMLEFT')
+F09EditBox:ClearAllPoints()
+F09EditBox:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', 200, 20)
+AutoComplete_Update(F09EditBox, 'F09A', 4)
+assert(AutoCompleteBox.attachPoint == 'ABOVE')
+p, rel, rp = AutoCompleteBox:GetPoint(1)
+assert(p == 'BOTTOMLEFT' and rel == F09EditBox and rp == 'TOPLEFT')
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

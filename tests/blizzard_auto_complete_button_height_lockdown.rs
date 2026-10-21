@@ -11,6 +11,20 @@ const EXPECTED_ATTACH_THRESHOLD: f64 = 13.0;
 
 #[test]
 fn blizzard_auto_complete_button_count_and_magic_offset_stay_locked() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::assert_native(
+            r#"
+assert(AUTOCOMPLETE_MAX_BUTTONS == 5)
+assert(AutoCompleteButton1:GetHeight() == 14)
+local point, relative, relativePoint, x, y = AutoCompleteButton1:GetPoint(1)
+assert(point == 'TOPLEFT' and y == -10)
+assert(AutoCompleteBox.maxHeight == 70)
+assert(AutoCompleteButton5 ~= nil and AutoCompleteButton6 == nil)
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

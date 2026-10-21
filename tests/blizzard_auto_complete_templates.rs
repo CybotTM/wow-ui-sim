@@ -48,6 +48,21 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_virtual_templates_instantiate_with_scripts() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::assert_native(
+            r#"
+assert(F09EditBox:GetObjectType() == 'EditBox')
+local handlers={OnTabPressed=AutoCompleteEditBox_OnTabPressed, OnEnterPressed=AutoCompleteEditBox_OnEnterPressed, OnTextChanged=AutoCompleteEditBox_OnTextChanged, OnChar=AutoCompleteEditBox_OnChar, OnEditFocusLost=AutoCompleteEditBox_OnEditFocusLost, OnEscapePressed=AutoCompleteEditBox_OnEscapePressed}
+for script, callback in pairs(handlers) do assert(F09EditBox:GetScript(script) == callback, script) end
+local button=CreateFrame('Button','F09TemplateButton',UIParent,'AutoCompleteButtonTemplate')
+assert(button:GetScript('OnClick') == AutoCompleteButton_OnClick)
+assert(type(button:GetScript('OnLoad')) == 'function')
+assert(button:GetHeight() == 14)
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

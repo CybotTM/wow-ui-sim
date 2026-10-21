@@ -48,6 +48,17 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_popup_list_uses_result_text_without_display_callback() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::assert_native(
+            r#"
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha', 'F09Beta')
+assert(AutoCompleteButton1:GetText() == 'F09Alpha')
+assert(AutoCompleteButton2:GetText() == 'F09Beta')
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

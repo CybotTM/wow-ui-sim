@@ -95,6 +95,21 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_popup_list_highlight_selects_one_row() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::assert_native(
+            r#"
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha', 'F09Beta')
+AutoComplete_SetSelectedIndex(AutoCompleteBox, 2)
+assert(AutoComplete_GetSelectedIndex(AutoCompleteBox) == 2)
+assert(AutoCompleteButton2:IsHighlightLocked())
+assert(not AutoCompleteButton1:IsHighlightLocked())
+AutoComplete_SetSelectedIndex(AutoCompleteBox, 0)
+assert(not AutoCompleteButton2:IsHighlightLocked())
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
