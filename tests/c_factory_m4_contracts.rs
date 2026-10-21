@@ -151,6 +151,17 @@ mod modern {
     }
 
     contract!(
+        private_raid_boss_callbacks_do_not_dispatch_plain_functions,
+        r#"
+        local called = false
+        C_UnitAurasPrivate.SetPrivateRaidBossMessageCallback(function() called = true end)
+        local ok = pcall(C_UnitAurasPrivate._TriggerPrivateRaidBossMessage, 'Warning', 'RAID_BOSS_EMOTE')
+        assert(not ok, 'plain-function callbacks must not be dispatched')
+        assert(not called, 'unsupported callback was invoked')
+        "#
+    );
+
+    contract!(
         private_raid_boss_message_callback_replaces_and_clears,
         r#"
         local old, current = 0, 0
