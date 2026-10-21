@@ -103,6 +103,13 @@ pub(crate) fn setup_env() -> WowLuaEnv {
 
 /// Fire startup events (same sequence as main.rs).
 fn fire_startup_events(env: &WowLuaEnv) {
+    if cfg!(feature = "client-wrath") {
+        wow_ui_sim::startup::fire_startup_events_for_screen(
+            env,
+            wow_ui_sim::screen::ScreenKind::Game,
+        );
+        return;
+    }
     common::fire_addon_loaded(env, "WoWUISim");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         let _ = env.fire_event(event);
@@ -298,6 +305,26 @@ fn hook_send_chat_message(env: &WowLuaEnv) {
     .expect("Failed to hook SendChatMessage");
 }
 
+fn assert_native_chat_message(env: &WowLuaEnv, expected_text: &str, expected_type: &str) {
+    {
+        let state = env.state().borrow();
+        let messages: Vec<_> = state
+            .message_log
+            .iter()
+            .filter(|entry| entry.kind == "chat")
+            .collect();
+        assert_eq!(
+            messages.len(),
+            1,
+            "native chat must send exactly one message"
+        );
+        assert_eq!(messages[0].message, expected_text);
+        assert_eq!(messages[0].channel, expected_type);
+    }
+    let cleared: String = env.eval("return ChatFrame1EditBox:GetText()").unwrap();
+    assert_eq!(cleared, "", "native chat clears the submitted editbox");
+}
+
 /// Type a string into the focused EditBox character by character.
 fn type_text(env: &WowLuaEnv, text: &str) {
     for ch in text.chars() {
@@ -360,7 +387,11 @@ fn test_chat_editbox_click_type_and_submit(env: &WowLuaEnv) {
             .expect("eval failed");
         assert!(exists, "ChatFrame1EditBox should exist after loading Blizzard UI");
 
-        hook_send_chat_message(&env);
+        if cfg!(feature = "client-wrath") {
+            env.state().borrow_mut().message_log.clear();
+        } else {
+            hook_send_chat_message(&env);
+        }
 
         let has_focus: bool = env
             .eval("return ChatFrame1EditBox:HasFocus()")
@@ -378,6 +409,10 @@ fn test_chat_editbox_click_type_and_submit(env: &WowLuaEnv) {
         env.send_key_press("ENTER", None)
             .expect("ENTER key press failed");
 
+        if cfg!(feature = "client-wrath") {
+            assert_native_chat_message(env, "hello world", "SAY");
+            return;
+        }
         assert_message_sent(&env, "hello world", "SAY");
 
         let message: String = env
