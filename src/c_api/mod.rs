@@ -24,7 +24,6 @@ pub mod action_count_info;
 pub use action_count_info::ActionUseCountInfo;
 pub mod action_macros;
 pub mod action_repeat;
-#[cfg(feature = "retail-12-0-5")]
 #[cfg(any(feature = "retail-12-0-0", feature = "client-wrath"))]
 pub mod action_spell_range;
 pub mod action_usability;
@@ -34,6 +33,7 @@ mod addon_messages;
 pub mod aura_duration;
 #[cfg(feature = "retail-12-0-5")]
 pub(crate) mod aura_entry;
+#[cfg(feature = "retail-12-0-5")]
 pub mod aura_entry_ids;
 #[cfg(feature = "aura-instance-enumeration")]
 pub(crate) mod aura_filter;
