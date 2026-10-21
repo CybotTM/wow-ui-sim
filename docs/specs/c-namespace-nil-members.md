@@ -10,7 +10,7 @@ The October 20, 2026 removal decision makes unmodeled `C_*` members nil, rather 
 
 ## How it works
 
-- [Lua API architecture](../lua-api.md)
+- [Namespace lookup and diagnostics](../wiki/systems/addon-loading.md#missing-c-members-f0-2026-10-20)
 
 ## Implementation inventory
 
@@ -22,6 +22,8 @@ The October 20, 2026 removal decision makes unmodeled `C_*` members nil, rather 
 
 - `tests/c_namespace_nil_contract.rs` — lookup/enumeration and explicit registration contract, profile independent.
 - `tests/nil_symbol_access.rs` — attributed, deduplicated nil observations.
+- `tests/namespace_member_absence.rs` and `tests/classic_startup_namespaces.rs` — strict, ordinary and constructed namespace absence.
+- `tests/guild_info_probes.rs` and `tests/housing.rs` — unknown-member nil expectations alongside unchanged explicit-state checks.
 - Embedded tests in the three Rust modules above — preserved state/actions and nil expectations.
 
 ## Known gaps (current cycle)

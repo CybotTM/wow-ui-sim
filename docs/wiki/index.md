@@ -1,3 +1,7 @@
+## [2026-10-20] source | C namespace factory removal (F0)
+
+[Namespace diagnostics](systems/addon-loading.md#missing-c-members-f0-2026-10-20) link the [nil-member contract](../specs/c-namespace-nil-members.md): five arbitrary factories removed; explicit defaults/state/actions retained. Seven-profile full-feature runtime capture is pending; no clean-startup claim or replacement model is included.
+
 ## [2026-10-20] investigation | Shared-target test source binding
 
 [Harness source binding](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) records stale absolute module paths, corrected runtime-root regression RED, rejected manifest bindings and the config-relative source-root input. Config-root relocation GREEN1+1 and a real integration build's1,791 current-worktree paths are verified; before-fixture Retail17 passes and Wrath13 failures remain separate.

@@ -137,6 +137,10 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 
 `LoadError` wraps Io, Toc, Xml, Lua variants. Recoverable loader/XML/Lua failures accumulate in `LoadResult.warnings`; typed nil-symbol observations and missing `C_*` requirements use separate fields. Path resolution tries four strategies (case-sensitive/insensitive × relative-to-xml/addon-root) before failing.
 
+### Missing C members (F0, 2026-10-20)
+
+The [nil-member contract](../../specs/c-namespace-nil-members.md) removes arbitrary member fabrication from the shared bootstrap, housing initializer and three named namespace handlers. Shared and named handlers can record missing-member diagnostics but return nil without memoizing a value. Housing merges explicit defaults without replacing namespace metatables. Explicit defaults, state and actions remain; follow-up M1–M5/T6 own exposed runtime gaps, not F0.
+
 ### Nil-Symbol Diagnostic Reconciliation
 
 Implementation: [nil-symbol reports](../../../src/loader/addon/nil_symbol_reports.rs), [publication callbacks](../../../src/lua_api/globals/compat_overrides.rs), and [named-frame publication](../../../src/lua_api/globals/create_frame/helpers_shared.rs).
@@ -159,7 +163,7 @@ Nested runtime-addon loads finalize failures, nil observations, and missing requ
 - [loader/addon.rs](../../../src/loader/addon.rs) — normal addon file execution, inline `[Bootstrap]` entries, load transactions, warning finalization, and the secure replay allowlist
 - [c_addons_runtime.rs](../../../src/c_api/c_addons_runtime.rs) — runtime addon loading, typed top-level diagnostic retention, exactly-once nested forwarding, and the scoped `Blizzard_TransmogShared` compatibility window
 - [runtime.rs](../../../src/lua_api/state_types/runtime.rs) — typed diagnostic records and public/secure attribution fields
-- [runtime surface bootstrap](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — `_G.__index` diagnostic gate, strict `C_*` namespace fallback, and raw namespace restoration
+- [runtime surface bootstrap](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — `_G.__index` diagnostic gate, nil-returning `C_*` diagnostic lookup, and raw namespace restoration
 - [secure environment](../../../src/lua_api/globals/security/secure_env.rs) — separate secure environment and secure publication recording
 - [precompiled lifecycle helpers](../../../src/loader/precompiled.rs) — raw `_G.self` receiver snapshot/restore
 - [environment cleanup restore](../../../src/lua_api/workarounds/temporary/environment_cleanup_restore.rs) — post-cleanup namespace restoration regression proof
