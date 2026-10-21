@@ -74,8 +74,7 @@ fn try_show_filter_dropdown_gates_dropdown_and_layout_on_restricted_category() {
             .expect("TryShowFilterDropdown must drive HeaderDetails.Filters");
 
         assert_eq!(
-            observations,
-            "unrestricted[show=1 hide=0 layout=1] restricted[show=0 hide=0 layout=0]",
+            observations, "unrestricted[show=1 hide=0 layout=1] restricted[show=0 hide=0 layout=0]",
             "Retail TryShowFilterDropdown shows HeaderDetails.Filters.FilterDropdown and calls \
              HeaderDetails.Filters:Layout() only when restrictedCategoryID is nil."
         );
@@ -114,8 +113,7 @@ fn hide_filter_dropdown_hides_dropdown_and_lays_out_filters_unconditionally() {
             .expect("HideFilterDropdown must drive HeaderDetails.Filters");
 
         assert_eq!(
-            observations,
-            "show=0 hide=1 layout=1",
+            observations, "show=0 hide=1 layout=1",
             "Retail HideFilterDropdown always hides HeaderDetails.Filters.FilterDropdown and \
              calls HeaderDetails.Filters:Layout(), independent of restrictedCategoryID."
         );

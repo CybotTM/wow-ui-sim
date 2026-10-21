@@ -6,6 +6,13 @@ use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 pub fn assert_native(script: &str) -> bool {
+    with_native(|env| {
+        env.exec(script)
+            .expect("native Wrath achievement consumer should satisfy its contract");
+    })
+}
+
+pub fn with_native(assertions: impl FnOnce(&WowLuaEnv)) -> bool {
     if ACTIVE != ClientProfile::Wrath {
         return false;
     }
@@ -18,11 +25,9 @@ pub fn assert_native(script: &str) -> bool {
     );
     assert_eq!(loaded, ["Blizzard_AchievementUI"]);
     super::fire_addon_loaded(&env, "Blizzard_AchievementUI");
-    let errors: Vec<_> = env.state().borrow().lua_errors.iter()
-        .filter(|message| message.contains("Achievement") || message.contains("Achivement"))
-        .cloned().collect();
-    assert!(errors.is_empty(), "native AchievementUI load errors: {errors:?}");
-    env.exec(script).expect("native Wrath achievement consumer should satisfy its contract");
+    assert_lane_errors_empty(&env);
+    assertions(&env);
+    assert_lane_errors_empty(&env);
     true
 }
 
@@ -31,8 +36,22 @@ pub fn assert_lazy(script: &str) -> bool {
         return false;
     }
     let env = load_core();
-    env.exec(script).expect("native Wrath achievement lazy-load consumer should succeed");
+    env.exec(script)
+        .expect("native Wrath achievement lazy-load consumer should succeed");
+    assert_lane_errors_empty(&env);
     true
+}
+
+fn assert_lane_errors_empty(env: &WowLuaEnv) {
+    let errors: Vec<_> = env
+        .state()
+        .borrow()
+        .lua_errors
+        .iter()
+        .filter(|message| message.contains("Achievement") || message.contains("Achivement"))
+        .cloned()
+        .collect();
+    assert!(errors.is_empty(), "native AchievementUI errors: {errors:?}");
 }
 
 const _: [fn(&str) -> bool; 2] = [assert_native, assert_lazy];

@@ -13,13 +13,13 @@ pub mod blizzard_addon_manifest;
 mod event_helpers;
 pub mod game_menu_fixture;
 pub mod panel_fixtures;
-pub mod wrath_achievement_fixtures;
 #[cfg(target_os = "linux")]
 pub(crate) mod prefork_process;
 #[cfg(target_os = "linux")]
 mod timeout_reexec;
 pub(crate) mod workload_gate;
 mod workload_gate_core;
+pub mod wrath_achievement_fixtures;
 
 use std::ops::Deref;
 use std::path::{Path, PathBuf};

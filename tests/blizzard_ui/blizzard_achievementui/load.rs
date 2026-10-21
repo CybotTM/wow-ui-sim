@@ -250,8 +250,7 @@ fn achievement_ui_loaded_set_contains_every_declared_toc_dependency() {
     declared_deps.extend(toc.optional_deps());
 
     assert_eq!(
-        declared_deps,
-        CURRENT_TOC_DEPENDENCIES,
+        declared_deps, CURRENT_TOC_DEPENDENCIES,
         "`{ROOT_TOC_FILE}` currently declares these direct dependencies. Update this source \
          contract with the TOC if retail changes it."
     );

@@ -370,6 +370,12 @@ fn toggle_tracking_start_branch_calls_c_content_tracking_start_tracking_returns_
         Admin.SetAchievementEarned(503, true)
         assert(not AchievementButton_ToggleTracking(503))
         assert(GetNumTrackedAchievements() == 1)
+        Admin.SetAchievementEarned(503, false)
+        local originalCount = GetNumTrackedAchievements
+        GetNumTrackedAchievements = function() return WATCHFRAME_MAXACHIEVEMENTS end
+        assert(not AchievementButton_ToggleTracking(503))
+        GetNumTrackedAchievements = originalCount
+        assert(GetNumTrackedAchievements() == 1)
         "#,
     ) {
         return;
