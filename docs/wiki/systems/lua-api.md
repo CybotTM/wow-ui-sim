@@ -504,6 +504,9 @@ The [TokenUI contract](../../specs/wrath-legacy-currency-tokenui.md) owns positi
 
 The [owning contract](../../specs/wrath-spellbook-tabs.md) tracks original-consumer/API proof, inferred missing-metadata policy and unmodeled skill-line/level inputs. Cursor ordering is a separate follow-up: the historical back-to-back DebugTools diagnostic does not authenticate synchronous cursor callbacks, and no cursor producer is included.
 
+## Wrath guild rank rights
+
+The legacy global now projects the existing selected rank's supplied rights positionally under `client-wrath`; the existing namespace and other profiles retain their table projection. The [contract](../../specs/wrath-guild-rank-flags.md) owns the authenticated 12340 return shape and evidence limits. F03's original native checkbox consumer reproduced the table mismatch before the correction; the contract now records native-consumer and guild-model GREEN. The contract also records paired Retail preservation and both profiles' empty stock Lua-error arrays; unrelated fixture failures remain explicit. Native unselected-rank reads and separate staged edit rights are not modeled by this bounded projection change.
 ## Retail unused currency flags
 
 `src/c_api/item_spell/c_currency.rs` resolves `SetCurrencyUnused` through the existing Retail displayed-index projection and changes `CurrencyInfo.is_type_unused`. List and ID queries read the same supplied row; list `discovered` feeds original popup visibility. No second membership store, grouping, sorting or persistence layer was added. The [owning contract](../../specs/currency-unused-mutations.md#bounded-proof) records original checkbox/popup proof and current-Retail native grouping UNKNOWN; existing [displayed-index](../../specs/currency-displayed-indices.md) and [watched](../../specs/currency-watched-mutations.md) models remain separate.
@@ -587,6 +590,8 @@ The [owning contract](../../specs/wrath-friends-legacy.md) records static12340 p
 - [Lua math extensions](../../specs/lua-math-extensions.md) — owning contract and profile-scoped declaration limits
 - [c_chromie_time.rs](../../../src/c_api/c_chromie_time.rs) — retail/PTR empty-state C_ChromieTime surface
 - [c_container.rs](../../../src/c_api/item_spell/c_container.rs) — state-backed bag-slot flags and backpack queries
+- [guild_control.rs](../../../src/lua_api/globals/guild_control.rs) — selected-rank table and native Wrath positional projections
+- [wrath_guild_rank_flags.rs](../../../tests/wrath_guild_rank_flags.rs) — original native checkbox consumer and exact positional-value assertions
 - [guild_info.rs](../../../src/lua_api/globals/guild_info.rs) — C_GuildInfo namespace registration and state-backed management methods
 - [profession_specs_defaults.rs](../../../src/lua_api/workarounds/temporary/profession_specs_defaults.rs) — temporary seeded profession-specialization fixture and supported skill-line boundary
 - [pet_battle_runtime_state.rs](../../../src/lua_api/workarounds/temporary/pet_battle_runtime_state.rs) — temporary seeded pet-battle breed-quality compatibility state

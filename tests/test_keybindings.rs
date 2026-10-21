@@ -61,7 +61,10 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_Communities", "Blizzard_Communities_Mainline.toc"),
     ("Blizzard_StoreUI", "Blizzard_StoreUI.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
-    ("Blizzard_ManagedFrameSystem", "Blizzard_ManagedFrameSystem_Mainline.toc"),
+    (
+        "Blizzard_ManagedFrameSystem",
+        "Blizzard_ManagedFrameSystem_Mainline.toc",
+    ),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
@@ -73,10 +76,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIParentPanelManager",
         "Blizzard_UIParentPanelManager_Mainline.toc",
     ),
-    (
-        "Blizzard_Settings_Shared",
-        "Blizzard_Settings_Shared.toc",
-    ),
+    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared.toc"),
     (
         "Blizzard_SettingsDefinitions_Shared",
         "Blizzard_SettingsDefinitions_Shared.toc",
@@ -131,6 +131,10 @@ fn seed_addon_search_paths(env: &WowLuaEnv) {
 }
 
 fn load_base_blizzard_addons(env: &WowLuaEnv) {
+    if cfg!(feature = "client-wrath") {
+        common::panel_fixtures::load_wrath_panel_core(env);
+        return;
+    }
     let ui = blizzard_ui_dir();
     for (name, toc) in BLIZZARD_ADDONS {
         let toc_path = ui.join(name).join(toc);
@@ -154,7 +158,9 @@ fn settle_env(env: &WowLuaEnv) {
 
 fn prepare_bag_env(env: &WowLuaEnv) {
     settle_env(env);
-    load_token_ui(env);
+    if !cfg!(feature = "client-wrath") {
+        load_token_ui(env);
+    }
     settle_env(env);
 }
 
@@ -228,7 +234,9 @@ fn bag_id_is_shown(env: &WowLuaEnv, bag_id: i32) -> bool {
         end
         for i = 1, 6 do
             local frame = _G["ContainerFrame" .. i]
-            if frame and frame:IsShown() and frame.GetBagID and frame:GetBagID() == {bag_id} then
+            local actualID = frame and frame:GetID()
+            if frame and frame.GetBagID then actualID = frame:GetBagID() end
+            if frame and frame:IsShown() and actualID == {bag_id} then
                 return true
             end
         end
@@ -276,7 +284,9 @@ fn assert_no_backpack_open_errors(env: &WowLuaEnv, context: &str) {
 fn keybind_b_opens_bags() {
     test_timeout! {
         let env = setup_settled_env();
-        load_token_ui(&env);
+        if !cfg!(feature = "client-wrath") {
+            load_token_ui(&env);
+        }
         settle_env(&env);
         env.send_key_press("B", None).expect("B keybind failed");
         assert!(
@@ -424,6 +434,11 @@ fn keybind_c_populates_character_panel_surface() {
     test_timeout! {
         let env = setup_env();
         env.send_key_press("C", None).expect("C keybind failed");
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/character_surface.lua"))
+                .expect("native character title and equipped slot textures");
+            return;
+        }
 
         let result: String = env
             .eval(
@@ -572,6 +587,14 @@ fn character_panel_inventory_tooltip_has_lines_and_closes_without_errors() {
     test_timeout! {
         let env = setup_env();
         install_test_error_handler(&env);
+        if cfg!(feature = "client-wrath") {
+            // Native slot hover/tooltip lines, not modern TooltipDataInfo mixin state.
+            env.exec(include_str!("fixtures/wrath_f03/inventory_tooltip.lua"))
+                .expect("native inventory tooltip consumer opens, populates lines and closes");
+            let errors = drain_test_errors(&env);
+            assert!(errors.is_empty(), "native inventory tooltip errors: {errors:?}");
+            return;
+        }
 
         let result: String = env
             .eval(
