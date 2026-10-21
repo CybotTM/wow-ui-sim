@@ -468,13 +468,18 @@ fn get_spell_link(state: &mut LuaState) -> LuaResult<u32> {
             "C_Spell.GetSpellLink: argument 2 rejects secret values under NeverSecret policy",
         ));
     }
-    let Some(spell_id) = numeric_spell_id(state, 1) else {
+    let Some(spell_id) = read_modeled_numeric_spell_id(state)? else {
         state.push(Val::Nil);
         return Ok(1);
     };
     match spell_link_for_id(spell_id) {
         Some(link) => {
-            let link_string = create_string(state, &link);
+            let link_string = if rilua::table_security::is_secret_value(state, stack_val(state, 1))
+            {
+                rilua::table_security::wrap_host_secret_string(state, &link)
+            } else {
+                create_string(state, &link)
+            };
             state.push(link_string);
         }
         None => state.push(Val::Nil),
