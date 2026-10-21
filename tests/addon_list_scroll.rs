@@ -370,6 +370,7 @@ fn test_minimal_scrollbar_atlas_textures() {
 
 }
 
+// INFERRED from cached profile FrameXML, not native 12340 runtime proof.
 #[cfg(feature = "client-wrath")]
 #[test]
 fn test_minimal_scrollbar_atlas_textures() {

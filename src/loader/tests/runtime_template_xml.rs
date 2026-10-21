@@ -177,6 +177,7 @@ fn test_runtime_button_template_inherits_texture_slots() {
 
 #[test]
 fn test_runtime_template_partitioned_child_binds_private_method_handlers() {
+    // INFERRED as native Wrath behavior; tests the modeled generic XML dispatcher.
     assert_partitioned_child_handlers("Frame");
 }
 

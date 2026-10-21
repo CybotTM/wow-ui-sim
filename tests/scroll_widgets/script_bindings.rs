@@ -259,7 +259,8 @@ fn bare_scrollframe_property_named_intrinsic_is_not_a_registered_binding() {
 
 #[test]
 fn cached_event_scrollframe_callbacks_precede_normal_scripts_once() {
-    // Test-owned XML isolates dispatch ordering from the modern EventScrollFrame library.
+    // INFERRED as native Wrath behavior: test-owned XML isolates modeled dispatch
+    // ordering from the modern EventScrollFrame library.
     let env = synthetic_bindings_env(
         r#"
         <Ui>

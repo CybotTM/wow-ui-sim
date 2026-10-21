@@ -92,6 +92,7 @@ fn test_forbidden_scrollbar_track_has_thumb() {
 
 }
 
+// INFERRED modeled forbidden behavior through the cached legacy template.
 #[cfg(feature = "client-wrath")]
 #[test]
 fn test_forbidden_scrollbar_track_has_thumb() {

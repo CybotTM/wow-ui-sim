@@ -9,6 +9,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[cfg(feature = "client-wrath")]
 mod checkbox_art {
+    // INFERRED from cached profile FrameXML, not native 12340 runtime proof.
     pub const TEMPLATE: &str = "UICheckButtonTemplate";
     pub const SIZE: (f32, f32) = (32.0, 32.0);
     pub const PATH_FRAGMENT: &str = "ui-checkbox";
