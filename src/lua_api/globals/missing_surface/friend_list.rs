@@ -8,9 +8,7 @@ use super::ensure_namespace;
 use crate::c_api::c_friend_list::{
     build_friend_info_table, friends_in_display_order, show_friends,
 };
-use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, table_set_static,
-};
+use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set_static};
 use crate::lua_api::state::SocialFriend;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -169,7 +167,9 @@ fn set_who_to_ui(state: &mut LuaState) -> LuaResult<u32> {
     let enabled = bool::from_stack(state, 1)?;
     #[cfg(feature = "client-wrath")]
     {
-        borrow_state_mut(state)?.who_routing.to_ui = enabled;
+        crate::lua_api::methods::borrow_state_mut(state)?
+            .who_routing
+            .to_ui = enabled;
     }
     #[cfg(not(feature = "client-wrath"))]
     let _ = enabled;
