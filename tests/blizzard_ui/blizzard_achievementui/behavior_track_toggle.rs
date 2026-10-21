@@ -368,13 +368,13 @@ fn toggle_tracking_start_branch_calls_c_content_tracking_start_tracking_returns_
         local added = AchievementButton_ToggleTracking(6)
         assert(added == true and GetNumTrackedAchievements() == 1)
         assert(GetTrackedAchievements() == 6)
-        A_Admin.SetAchievementEarned(503, true)
-        assert(not AchievementButton_ToggleTracking(503))
+        A_Admin.SetAchievementEarned(7, true)
+        assert(not AchievementButton_ToggleTracking(7))
         assert(GetNumTrackedAchievements() == 1)
-        A_Admin.SetAchievementEarned(503, false)
+        A_Admin.SetAchievementEarned(7, false)
         local originalCount = GetNumTrackedAchievements
         GetNumTrackedAchievements = function() return WATCHFRAME_MAXACHIEVEMENTS end
-        assert(not AchievementButton_ToggleTracking(503))
+        assert(not AchievementButton_ToggleTracking(7))
         GetNumTrackedAchievements = originalCount
         assert(GetNumTrackedAchievements() == 1)
         "#,
