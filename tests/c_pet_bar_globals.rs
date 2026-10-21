@@ -5,8 +5,10 @@
 //! `CastPetAction`, `TogglePetAutocast`, `CancelPetPossess`, and
 //! `PetHasActionBar`/`HasPetUI` against `state.pet_actions`.
 
-use wow_ui_sim::lua_api::state::{PetActionSlot, SpellCooldownState};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state::{PetActionSlot, SpellCooldownState};
+
+const WRATH_INFO: bool = cfg!(feature = "client-wrath");
 
 fn env_with_pet_slots() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("WowLuaEnv init");
@@ -79,6 +81,15 @@ fn get_num_pet_actions_reports_ten_slots_by_default() {
 #[test]
 fn get_pet_action_info_returns_full_nine_tuple_for_active_slot() {
     let env = env_with_pet_slots();
+    if WRATH_INFO {
+        env.exec(r#"
+            local name, subtext, texture, token, active, allowed, enabled = GetPetActionInfo(1)
+            assert(select('#', GetPetActionInfo(1)) == 7)
+            assert(name == 'Claw' and subtext == '' and texture == 'Interface/Icons/Ability_Druid_Rake')
+            assert(token == nil and active == nil and allowed == 1 and enabled == nil)
+        "#).unwrap();
+        return;
+    }
     let (
         name,
         texture,
@@ -106,6 +117,16 @@ fn get_pet_action_info_returns_full_nine_tuple_for_active_slot() {
 #[test]
 fn get_pet_action_info_empty_slot_returns_default_nine_tuple() {
     let env = env_with_pet_slots();
+    if WRATH_INFO {
+        env.exec(
+            r#"
+            assert(select('#', GetPetActionInfo(5)) == 7)
+            for i = 1, 7 do assert(select(i, GetPetActionInfo(5)) == nil) end
+        "#,
+        )
+        .unwrap();
+        return;
+    }
     let (name, texture, is_token, is_active, _aca, _ace, spell_id, _u, passive): (
         Option<String>,
         Option<String>,

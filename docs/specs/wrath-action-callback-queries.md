@@ -36,6 +36,7 @@ Native Wrath action, stance and pet callbacks must read profile-correct query re
 ## Tests asserting this spec
 
 - `tests/wrath_action_contract.rs` — sourced return shapes, unknown/invalid inputs and publication isolation.
+- `tests/{c_pet_bar_globals,c_shapeshift_globals}.rs` — direct producer oracles select native Wrath positions/arity without weakening modern assertions.
 - `tests/common/wrath_action_assertions.rs` — original native ActionButton_OnUpdate, ShapeshiftBar_UpdateState and PetActionBar_Update consumers, reached through original F04 test IDs.
 
 ## Known gaps (current cycle)
