@@ -32,8 +32,6 @@ pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
     {
         table_set_rust_fn_static(state, namespace, "GetSpecSetting", get_spec_setting)?;
         table_set_rust_fn_static(state, namespace, "SetSpecSetting", set_spec_setting)?;
-        table_set_rust_fn_static(state, namespace, "GetThrottle", get_throttle)?;
-        table_set_rust_fn_static(state, namespace, "SetThrottle", set_throttle)?;
     }
     Ok(())
 }
@@ -126,30 +124,6 @@ fn set_spec_setting(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?
         .combat_audio_spec_settings
         .insert(key, value);
-    state.push(Val::Bool(true));
-    Ok(1)
-}
-
-/// Throttles are shared across specs. INFERRED: unset reads zero.
-#[cfg(feature = "retail-12-0-0")]
-fn get_throttle(state: &mut LuaState) -> LuaResult<u32> {
-    let throttle_type = numeric_arg(state, 1, "Throttle throttleType")? as i32;
-    let value = borrow_state(state)?
-        .combat_audio_throttles
-        .get(&throttle_type)
-        .copied()
-        .unwrap_or(0.0);
-    state.push(Val::Num(value));
-    Ok(1)
-}
-
-#[cfg(feature = "retail-12-0-0")]
-fn set_throttle(state: &mut LuaState) -> LuaResult<u32> {
-    let throttle_type = numeric_arg(state, 1, "SetThrottle throttleType")? as i32;
-    let value = numeric_arg(state, 2, "SetThrottle newVal")?;
-    borrow_state_mut(state)?
-        .combat_audio_throttles
-        .insert(throttle_type, value);
     state.push(Val::Bool(true));
     Ok(1)
 }

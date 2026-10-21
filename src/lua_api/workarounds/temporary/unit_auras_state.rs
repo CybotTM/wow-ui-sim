@@ -9,7 +9,7 @@ if type(C_UnitAuras) ~= "table" then
     C_UnitAuras = {}
 end
 
-if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
+if modernGroupBuffSettings then
     if type(C_UnitAuras._groupBuffVisualAlerts) ~= "table" then
         C_UnitAuras._groupBuffVisualAlerts = {}
     end
@@ -41,7 +41,13 @@ end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
-    lua.exec(UNIT_AURAS_STATE_LUA)?;
+    let modern = cfg!(any(
+        feature = "retail-12-1-0",
+        feature = "client-wowforever"
+    ));
+    lua.exec(&format!(
+        "local modernGroupBuffSettings = {modern}\n{UNIT_AURAS_STATE_LUA}"
+    ))?;
     Ok(())
 }
 

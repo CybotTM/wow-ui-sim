@@ -16,9 +16,11 @@ M4 resolves original cached Blizzard consumers recorded by [factory removal](c-n
 
 ## Implementation inventory
 
-- `src/c_api/` — existing combat-audio, PvP, objective and identity state integration points; callback lifecycle ownership.
-- `src/lua_api/workarounds/temporary/` — explicit defaults for absent world services and existing hidden-buff setting bootstrap.
-- `src/lua_api/globals/set_cvar_verb.rs` — existing loaded CVar publication.
+- `src/c_api/combat_audio_throttle.rs`, `c_pvp.rs`, `quest_objectives/queries.rs`, `c_secrets.rs` — existing setting/snapshot projections and profile publication.
+- `src/c_api/private_aura_callbacks.{rs,lua}` — rooted environment-local callback lifecycle and authored dispatch; replaces the temporary update-callback implementation.
+- `src/c_api/c_cvar_readiness.rs` — synchronous CVar initialization invariant, formerly published by the legacy CVar registrar.
+- `src/lua_api/workarounds/temporary/world_service_defaults.rs` — named absent-world-service policies.
+- `src/lua_api/workarounds/temporary/unit_auras_state.rs` — existing hidden-buff setting bootstrap, extended to Forever.
 
 ## Tests asserting this spec
 
