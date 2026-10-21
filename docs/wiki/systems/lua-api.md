@@ -29,6 +29,12 @@ The [integrated checkpoint](../investigations/integrated-source-and-factory-proo
 
 [Path/ControlPoint](../../specs/path-control-point.md) belongs to the animation/XML subsystem, using existing target offsets and layout axes. The [owning Path proof ledger](../../specs/path-control-point.md#tests-asserting-this-spec) records recovered historical per-test GREEN; fresh startup/profile acceptance remains separately pending. Neither source inventory nor historical controls establish native or whole-handoff acceptance.
 
+## Wrath action callback projections
+
+The [native callback fixture](../../../tests/fixtures/wrath-action-callbacks.md) reuses the profile FrameXML TOC loader and original named regions/free functions; one shared selector keeps Wrath-only fixture inputs out of other profiles. Modern-only API assertions have explicit source-backed gates, not root-name heuristics.
+
+`ActionSpellRange` now lives separately from Retail namespace registration under `c_api/`; a shared lookup reads supplied spell/target GUID snapshots. `globals/real/wrath_legacy/action_bar.rs` exposes legacy range and possession readers without adding modern range publishers. Pet and stance producers project existing records differently only on Wrath; obsolete constant/nil compatibility functions are removed. The [owning contract](../../specs/wrath-action-callback-queries.md) owns authenticated 12340 shapes, bounded proof and unmodeled coercion/aura/geometry limits.
+
 ## Wrath selected quest legacy surface
 
 `quest_surface/wrath_quest_log.rs` adapts selected rich rows through a Wrath-only legacy registration table; shared reward-item serialization remains in `handlers.rs`. Supplied spell/point/faction fields live on `QuestLogEntry`. Wrath-only `QuestLogState.daily_quest_ids` stores fixed player daily fields independently of active rows and lifetime history; reset/population/refresh producers remain outside this read adapter. Quest green range uses compiled client level bands driven by the engine player's level; source provenance and bounded original-color-consumer proof stay in the owning contract. `QuestLogState::process_reward_factions` copies the selected row's faction pairs into `processed_reward_factions`, the separate shared prepared output read by faction getters; selection/dialog clearing does not implicitly rebuild that output. The [owning contract](../../specs/wrath-quest-abandon.md) records source-derived cache lifetime, empty values, pending dialog-producer coverage and exact proof status.
@@ -501,6 +507,9 @@ The [owning contract](../../specs/wrath-spellbook-tabs.md) tracks original-consu
 ## Sources
 
 - [Retail unused currency contract](../../specs/currency-unused-mutations.md) — flag scope, original consumers and held grouping.
+
+- [Wrath action callback queries](../../specs/wrath-action-callback-queries.md) — native projections, shared snapshot boundary and bounded proof
+
 - [Wrath spellbook views](../../specs/wrath-spellbook-tabs.md) — bounded one-tab model, native contract and proof limits
 - [Wrath supplied objectives](../../specs/wrath-quest-objectives.md) — legacy snapshot reads, bounded consumer proof and native input-model gaps
 

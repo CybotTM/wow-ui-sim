@@ -10,6 +10,8 @@ const ACTION_SLOT: f64 = 1.0;
 
 #[test]
 fn range_check_event_updates_registered_button_hotkey_color() {
+    wrath_action_case!(range_color);
+
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         register_action_button_for_range_checks(env);

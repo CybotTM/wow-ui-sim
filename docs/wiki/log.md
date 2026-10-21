@@ -2,6 +2,10 @@
 
 [Fixture notes](investigations/wrath-addon-load-fixture.md) record source-bound original-consumer RED and the separate production-order correction: profile FrameXML before Blizzard addon loading. No producer, vendor or baseline change. Corrected-fixture runtime evidence remains pending.
 
+## [2026-10-20] source | Native Wrath action callback projections
+
+Updated [Lua API](systems/lua-api.md#wrath-action-callback-projections) with the shared native fixture, separate range backing model and legacy adapters; [contract](../specs/wrath-action-callback-queries.md) owns source facts, exact bounded proof and remaining model gaps. No native execution or all-profile parity claim.
+
 ## [2026-10-20] investigation | Shared-target test source binding
 
 [Harness notes](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) record corrected relocation RED: the second-root invocation executes stale first-root source and fails against a runtime expected-root input. Compile-time manifest binding also failed; the forced config-relative custom input passes same-slot relocation1+1. A real Wrath integration build after foreign-checkout helper seeding has1,791 requested-worktree module paths and zero compiler warnings; exact TimeManager still executes one expected fixture-before failure. Separate before-fixture source-bound receipts show Retail17/17 passing and Wrath13/13 failing, including one executed TimeManager test; historical stale/zero-selection receipts remain invalid.
