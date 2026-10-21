@@ -7,7 +7,8 @@ fn wrath_chat_preparation_preserves_native_layout_and_editbox_state() {
         env.set_screen_size(1024.0, 768.0);
         env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
         common::load_profile_framexml(&env);
-        fire_startup_events(&env);
+        // Production prepares native chat before third-party addons and entry events.
+        // PLAYER_ENTERING_WORLD auto-applies simulator post-event workarounds.
         let snapshot = r#"
             local point, relative, relativePoint, x, y = ChatFrame1:GetPoint(1)
             local editBox = assert(ChatFrame1EditBox)
