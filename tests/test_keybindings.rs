@@ -232,7 +232,9 @@ fn bag_id_is_shown(env: &WowLuaEnv, bag_id: i32) -> bool {
         end
         for i = 1, 6 do
             local frame = _G["ContainerFrame" .. i]
-            if frame and frame:IsShown() and frame.GetBagID and frame:GetBagID() == {bag_id} then
+            local actualID = frame and frame:GetID()
+            if frame and frame.GetBagID then actualID = frame:GetBagID() end
+            if frame and frame:IsShown() and actualID == {bag_id} then
                 return true
             end
         end
@@ -428,6 +430,11 @@ fn keybind_c_populates_character_panel_surface() {
     test_timeout! {
         let env = setup_env();
         env.send_key_press("C", None).expect("C keybind failed");
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/character_surface.lua"))
+                .expect("native character title and equipped slot textures");
+            return;
+        }
 
         let result: String = env
             .eval(

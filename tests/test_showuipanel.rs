@@ -180,6 +180,11 @@ fn uipanel_windows_has_area_attributes() {
 fn key_blizzard_panels_registered() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/panel_inventory.lua"))
+                .expect("native Wrath panel slot inventory");
+            return;
+        }
         // Core Blizzard panels loaded from UIPanelWindows.lua should all be registered.
         // LoD panels (AchievementFrame, CollectionsJournal, etc.) register when their
         // addon loads — they won't be here, and that's correct WoW behavior.

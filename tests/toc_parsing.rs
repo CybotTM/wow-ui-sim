@@ -130,6 +130,18 @@ fn metadata_game_type_excludes_classic_edges_in_pinned_ptr_addons() {
 
 #[test]
 fn test_parse_blizzard_shared_xml_base() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        // INFERRED from the committed native FrameXML inventory.
+        assert_eq!(toc.name, "FrameXML");
+        assert!(toc.files.len() > 100);
+        assert_eq!(toc.files[0].to_str(), Some("GlobalStrings.lua"));
+        let ui_parent = toc.files.iter().position(|file| file == Path::new("UIParent.xml"));
+        let game_menu = toc.files.iter().position(|file| file == Path::new("GameMenuFrame.xml"));
+        assert!(ui_parent.is_some() && game_menu.is_some());
+        assert!(ui_parent < game_menu, "native UIParent must precede GameMenu");
+        return;
+    }
     let toc_path = blizzard_shared_xml_base_toc();
     let toc = TocFile::from_file(&toc_path).expect("Failed to read TOC file");
 

@@ -76,7 +76,21 @@ fn spellbook_paged_spells_frame_id(registry: &WidgetRegistry) -> Option<u64> {
     spellbook.children_keys.get("PagedSpellsFrame").copied()
 }
 
+fn spellbook_root_name() -> &'static str {
+    if cfg!(feature = "client-wrath") { "SpellBookFrame" } else { "PlayerSpellsFrame" }
+}
+
 fn find_first_visible_spellbook_icon_id(registry: &WidgetRegistry) -> Option<u64> {
+    if cfg!(feature = "client-wrath") {
+        // INFERRED: native SpellButtonTemplate publishes globally named icons.
+        return (1..=12).find_map(|index| {
+            let id = registry.get_id_by_name(&format!("SpellButton{index}IconTexture"))?;
+            let icon = registry.get(id)?;
+            let has_texture = icon.texture.is_some() || icon.texture_file_data_id.is_some();
+            let has_area = icon.width > 0.0 && icon.height > 0.0;
+            (icon.visible && has_area && has_texture).then_some(id)
+        });
+    }
     let paged_id = spellbook_paged_spells_frame_id(registry)?;
     let paged = registry.get(paged_id)?;
 
@@ -130,6 +144,14 @@ fn keybind_s_opens_spellbook() {
     test_timeout! {
         let env = setup_env();
         env.send_key_press("S", None).expect("S keybind failed");
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                assert(SpellBookFrame:IsShown(), "native spellbook should open")
+                assert(SpellBookFrame:GetWidth() == 384 and SpellBookFrame:GetHeight() == 512)
+                assert(SpellBookFrame:GetScale() == 1, "legacy book fits the viewport")
+            "#).expect("native spellbook first-open surface");
+            return;
+        }
         assert!(
             frame_is_shown(&env, "PlayerSpellsFrame"),
             "PlayerSpellsFrame should be shown after pressing S"
@@ -158,7 +180,7 @@ fn keybind_s_renders_spellbook_item_icon_quads_on_first_open() {
         let env = setup_env();
         env.send_key_press("S", None).expect("S keybind failed");
 
-        let batch = build_batch_for_root(&env, "PlayerSpellsFrame");
+        let batch = build_batch_for_root(&env, spellbook_root_name());
         let state = env.state().borrow();
         let registry = &state.widgets;
         let icon_id = find_first_visible_spellbook_icon_id(registry)
@@ -199,7 +221,7 @@ fn keybind_s_keeps_spellbook_backgrounds_below_icons_after_initial_bucket_build(
 
         env.send_key_press("S", None).expect("S keybind failed");
 
-        let batch = build_batch_for_root(&env, "PlayerSpellsFrame");
+        let batch = build_batch_for_root(&env, spellbook_root_name());
         let state = env.state().borrow();
         let registry = &state.widgets;
         let icon_id = find_first_visible_spellbook_icon_id(registry)
@@ -219,7 +241,11 @@ fn keybind_s_keeps_spellbook_backgrounds_below_icons_after_initial_bucket_build(
                 request
                     .path
                     .to_ascii_lowercase()
-                    .contains("spellbookbackgroundevergreen")
+                    .contains(if cfg!(feature = "client-wrath") {
+                        "ui-spellbookpanel-"
+                    } else {
+                        "spellbookbackgroundevergreen"
+                    })
             })
             .max_by_key(|request| request.vertex_start)
             .expect("Spellbook should emit evergreen parchment background quads");
@@ -240,6 +266,10 @@ fn keybind_n_opens_talents() {
     test_timeout! {
         let env = setup_env();
         env.send_key_press("N", None).expect("N keybind failed");
+        if cfg!(feature = "client-wrath") {
+            assert!(frame_is_shown(&env, "PlayerTalentFrame"), "native talent panel should open");
+            return;
+        }
         assert!(
             frame_is_shown(&env, "PlayerSpellsFrame"),
             "PlayerSpellsFrame should be shown after pressing N (talents tab)"
@@ -323,6 +353,11 @@ fn keybind_a_opens_achievements() {
 fn keybind_l_opens_group_finder() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.send_key_press("L", None).expect("L keybind failed");
+            assert!(frame_is_shown(&env, "LFDParentFrame"), "native dungeon finder should open");
+            return;
+        }
         env.exec(
             r#"
             assert(C_AddOns.LoadAddOn("Blizzard_GroupFinder"))
@@ -470,9 +505,12 @@ fn keybind_o_opens_social() {
 fn keybind_o_dispatches_toggle_friends_frame() {
     test_timeout! {
         let env = setup_env();
+        if !cfg!(feature = "client-wrath") {
+            env.exec(r#"assert(C_AddOns.LoadAddOn("Blizzard_FriendsFrame"))"#)
+                .expect("modern FriendsFrame addon should load");
+        }
         env.exec(
             r#"
-            assert(C_AddOns.LoadAddOn("Blizzard_FriendsFrame"))
             _G.__friends_keybind_triggered = false
             local original_toggle_friends_frame = ToggleFriendsFrame
             ToggleFriendsFrame = function(...)
