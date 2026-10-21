@@ -22,6 +22,18 @@
 
 [System notes](systems/lua-api.md#retail-unused-currency-flags) link the [proof owner](../specs/currency-unused-mutations.md#bounded-proof). Existing CurrencyInfo flags now drive the original checkbox/provider/popup; native grouping remains held rather than inferred into a synthetic catalog.
 
+## [2026-10-20] source | Numeric-secret aura duration and caster selectors
+
+[C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) link [duration](../specs/secret-selector-aura-duration.md) and [caster identity](../specs/secret-selector-aura-caster.md): original PTR pandemic and Retail/PTR caster consumers, retained duration outputs and secret-selector GUID publication. Native aura-output restriction remains held; the existing inactive-party DurationObject fixture stays separate.
+
+## [2026-10-20] source | Numeric-secret counts and usability
+
+[C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) link [count/usability](../specs/secret-selector-count-usability.md). Counts retain alias-first strict-u32 selection, usability retains raw known membership, and output predicates stay independent. Historical reject-all-number-secret requirements now point to this bounded subset; native full-grammar/secrecy claims remain excluded.
+
+## [2026-10-20] source | Numeric-secret classifications
+
+[C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) now link the [bounded classification contract](../specs/secret-selector-classification.md). Numeric host lookup does not widen shared readers or ExternalDefensive; output secrecy remains explicit simulator policy. Runtime receipts stay in the contract.
+
 ## [2026-10-19] source | Wrath readiness and placed-frame reconstruction
 
 [Reload mechanics](systems/reload-ui.md) link the [proof owner](../specs/reload-ui.md#wrath-12340-requirements): A–D bounded GREEN, two-sided C preservation and ticked original Stopwatch control. Wrath now uses readiness-driven VARIABLES_LOADED and argless PEW without synthetic WoWUISim completion. E stores character-local placed geometry in simulator units and cancels mirrors only; eight bounded runtime cases pass, with inherited-scale roundtrip and two-sided disabled-persistence control. [Final implementer gates](../specs/reload-ui.md#final-implementer-gate--2026-10-19) record full-profile Wrath23/23, both library21/21 subsets, Retail bin6/6 after test-process isolation, four warning-free checks and both startup arrays empty. Two unchanged wrong-profile Wrath binary fixtures remain explicitly non-blocking; independent integrated verification is pending. GameMenu early-binding and cursor/spellbook gaps remain separate.

@@ -107,7 +107,9 @@ end
 for _, name in ipairs({'GetAuraBaseDuration', 'GetRefreshExtendedDuration', 'GetAuraDuration', 'DoesAuraHaveExpirationTime'}) do
     local callback = registered(name)
     invalid_queries[#invalid_queries + 1] = {function() callback('target', {}) end, 'aura instance'}
-    secret_queries[#secret_queries + 1] = function() callback('target', SecretAuraID) end
+    if name ~= 'GetAuraBaseDuration' and name ~= 'GetRefreshExtendedDuration' then
+        secret_queries[#secret_queries + 1] = function() callback('target', SecretAuraID) end
+    end
 end
 invalid_queries[#invalid_queries + 1] = {function() registered('GetUnitAuraBySpellID')('target', {}) end, 'argument 2'}
 secret_queries[#secret_queries + 1] = function() registered('GetUnitAuraBySpellID')('target', SecretAuraID) end
