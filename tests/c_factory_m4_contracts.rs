@@ -92,10 +92,18 @@ mod modern {
         env.exec(
             r#"
             local frame = Mixin(CreateFrame('Frame'), AuraContainerPrivateMixin)
+            frame.unitToken = 'player'
+            local received
+            frame.OnUnitPrivateAuraUpdate = function(_, unit, info)
+                assert(unit == 'player'); received = info
+            end
             frame:OnLoad_Intrinsic()
             frame.privateAurasUpdateCallback:Register('player')
+            C_UnitAurasPrivate._TriggerPrivateAuraUpdate('player', 'Private', {isFullUpdate=true})
+            assert(received.isFullUpdate == true)
             frame.privateAurasUpdateCallback:Unregister()
             frame.privateAurasUpdateCallback:Unregister()
+            assert(C_UnitAurasPrivate._TriggerPrivateAuraUpdate('player', 'Private', {}) == 0)
         "#,
         )
         .unwrap();
@@ -107,10 +115,10 @@ mod modern {
         env.exec(
             r#"
             local first, second = 0, 0
-            local callback = C_FunctionContainers.CreateCallback(function(_, info)
+            local callback = C_FunctionContainers.CreateCallback(function(info)
                 first = first + info.amount
             end)
-            local other = C_FunctionContainers.CreateCallback(function(_, info)
+            local other = C_FunctionContainers.CreateCallback(function(info)
                 second = second + info.amount
             end)
             C_UnitAurasPrivate.AddPrivateAuraUpdateCallback('player', callback)
