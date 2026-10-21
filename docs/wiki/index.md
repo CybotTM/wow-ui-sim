@@ -1,3 +1,7 @@
+## [2026-10-21] source | Wrath positional guild rights
+
+[Legacy projection](systems/lua-api.md#wrath-guild-rank-rights) links the [12340 contract](../specs/wrath-guild-rank-flags.md): the original checkbox consumer exposes the table/positional mismatch. The Wrath-only correction preserves the existing namespace/table path; current-source GREEN and profile preservation remain pending.
+
 ## [2026-10-20] investigation | Wrath native friends legacy surface
 
 [Friends diagnosis](investigations/wrath-friends-legacy-surface.md) retains the original panel and seeded identities. Raw legacy globals and their failed calls expose a producer gap despite a functioning backing namespace. The bound Rust case retains that failure; authoritative offline-nil expectations await joint producer integration, not gating.

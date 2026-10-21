@@ -1,3 +1,7 @@
+## [2026-10-21] source | Wrath positional guild rights
+
+[Projection notes](systems/lua-api.md#wrath-guild-rank-rights) and [contract](../specs/wrath-guild-rank-flags.md) record original native checkbox RED and the bounded Wrath-only positional correction. Existing namespace/table behavior remains separate; current-source GREEN and preservation proof are pending.
+
 ## [2026-10-20] investigation | Wrath native friends legacy surface
 
 [Diagnosis](investigations/wrath-friends-legacy-surface.md) records the original native friends consumer and raw-global/call failure boundary. F02 now retains the mixed case's native UI and generic identities; producer repair belongs to a separate lane. The source-bound Rust case now executes and fails at the original consumer. Its authoritative12340 offline-connected=nil expectation is retained for joint verification with the producer lane; no isolated rebuild or producer fix is claimed.
