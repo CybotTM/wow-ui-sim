@@ -149,7 +149,7 @@ pub(crate) fn register_sound_trigger_enum(state: &mut LuaState, enums: Val) {
 #[cfg(feature = "retail-12-1-5")]
 fn get_aura_caster_guid(state: &mut LuaState) -> LuaResult<u32> {
     let unit = String::from_stack(state, 1)?;
-    let instance_id = f64::from_stack(state, 2)? as i32;
+    let (instance_id, secret_selector) = read_caster_instance(state)?;
     let exists =
         crate::lua_api::globals::group_queries::unit_exists_in_state(&*borrow_state(state)?, &unit);
     let aura = if exists {
@@ -162,11 +162,31 @@ fn get_aura_caster_guid(state: &mut LuaState) -> LuaResult<u32> {
         crate::lua_api::globals::unit_misc::existing_guid_for_unit(&sim, &aura.source_unit)
     });
     drop(sim);
-    let result = guid
-        .map(|guid| crate::lua_api::methods::create_string(state, &guid))
-        .unwrap_or(Val::Nil);
+    // Approved selector policy: identity follows a numeric-secret selector.
+    // The separate unit-aura output-restriction layer remains held.
+    let result = match guid {
+        Some(guid) if secret_selector => {
+            rilua::table_security::wrap_host_secret_string(state, &guid)
+        }
+        Some(guid) => crate::lua_api::methods::create_string(state, &guid),
+        None => Val::Nil,
+    };
     state.push(result);
     Ok(1)
+}
+
+#[cfg(feature = "retail-12-1-5")]
+fn read_caster_instance(state: &LuaState) -> LuaResult<(i32, bool)> {
+    let value = crate::lua_bridge::stack_val(state, 2);
+    let secret_selector = cfg!(any(feature = "profile-retail", feature = "client-ptr"))
+        && rilua::table_security::secret_payload_kind(state, value)
+            == Some(rilua::table_security::SecretPayloadKind::Number);
+    let instance_id = if secret_selector {
+        rilua::table_security::inspect_host_secret_number(state, value, |number| Ok(number as i32))?
+    } else {
+        f64::from_stack(state, 2)? as i32
+    };
+    Ok((instance_id, secret_selector))
 }
 
 /// Removes one of the player's own helpful auras and reports it through an

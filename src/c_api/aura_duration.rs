@@ -168,15 +168,7 @@ fn find_public_aura(state: &mut LuaState, unit: &str, instance_id: f64) -> Optio
 }
 
 fn read_public_arguments(state: &LuaState) -> LuaResult<(Option<String>, f64)> {
-    // Reject all secret inputs before conversion, resolution or unknown results.
-    // This does not implement native AllowedWhenTainted/output-secret parity.
-    for (index, name) in [(1, "unit"), (2, "aura instance"), (3, "spell identifier")] {
-        if is_secret_value(state, stack_val(state, index)) {
-            return Err(runtime_error(format!(
-                "C_UnitAuras: secret {name} access is not modeled"
-            )));
-        }
-    }
+    reject_unsupported_duration_secrets(state)?;
     let unit = match stack_val(state, 1) {
         Val::Nil => None,
         Val::Str(_) => Some(String::from_stack(state, 1)?),
@@ -186,14 +178,7 @@ fn read_public_arguments(state: &LuaState) -> LuaResult<(Option<String>, f64)> {
             ));
         }
     };
-    let instance_id = match stack_val(state, 2) {
-        Val::Num(number) if number.is_finite() => number,
-        _ => {
-            return Err(runtime_error(
-                "C_UnitAuras: aura instance must be a public finite number",
-            ));
-        }
-    };
+    let instance_id = read_duration_instance(state)?;
     match stack_val(state, 3) {
         Val::Nil | Val::Str(_) => {}
         Val::Num(number) if number.is_finite() => {}
@@ -204,4 +189,42 @@ fn read_public_arguments(state: &LuaState) -> LuaResult<(Option<String>, f64)> {
         }
     }
     Ok((unit, instance_id))
+}
+
+fn duration_instance_is_numeric_secret(state: &LuaState) -> bool {
+    cfg!(any(feature = "profile-retail", feature = "client-ptr"))
+        && rilua::table_security::secret_payload_kind(state, stack_val(state, 2))
+            == Some(rilua::table_security::SecretPayloadKind::Number)
+}
+
+fn reject_unsupported_duration_secrets(state: &LuaState) -> LuaResult<()> {
+    // Only numeric instance selectors are admitted; units and optional spells
+    // retain their existing policy before conversion or unknown results.
+    for (index, name) in [(1, "unit"), (2, "aura instance"), (3, "spell identifier")] {
+        if index == 2 && duration_instance_is_numeric_secret(state) {
+            continue;
+        }
+        if is_secret_value(state, stack_val(state, index)) {
+            return Err(runtime_error(format!(
+                "C_UnitAuras: secret {name} access is not modeled"
+            )));
+        }
+    }
+    Ok(())
+}
+
+fn read_duration_instance(state: &LuaState) -> LuaResult<f64> {
+    let value = if duration_instance_is_numeric_secret(state) {
+        rilua::table_security::inspect_host_secret_number(state, stack_val(state, 2), |number| {
+            Ok(Val::Num(number))
+        })?
+    } else {
+        stack_val(state, 2)
+    };
+    match value {
+        Val::Num(number) if number.is_finite() => Ok(number),
+        _ => Err(runtime_error(
+            "C_UnitAuras: aura instance must be a finite number",
+        )),
+    }
 }

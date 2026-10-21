@@ -738,11 +738,35 @@ fn is_spell_harmful(state: &mut LuaState) -> LuaResult<u32> {
 ///
 /// Returns `(true, false)` for known spells; `(false, false)` otherwise.
 fn is_spell_usable(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = u32::from_stack(state, 1)?;
+    let spell_id = read_usability_id(state)?;
     let known = is_known_spell_for_usability(state, spell_id);
     state.push(Val::Bool(known));
     state.push(Val::Bool(false));
     Ok(2)
+}
+
+fn read_usability_id(state: &LuaState) -> LuaResult<u32> {
+    let value = stack_val(state, 1);
+    let enabled = cfg!(all(
+        feature = "retail-12-0-5",
+        any(feature = "profile-retail", feature = "client-ptr")
+    ));
+    if enabled
+        && rilua::table_security::secret_payload_kind(state, value)
+            == Some(rilua::table_security::SecretPayloadKind::Number)
+    {
+        return rilua::table_security::inspect_host_secret_number(state, value, |number| {
+            let id = number as u32;
+            if number.is_finite() && f64::from(id) == number {
+                Ok(id)
+            } else {
+                Err(rilua::runtime_error(
+                    "expected finite integral u32 secret spell selector",
+                ))
+            }
+        });
+    }
+    u32::from_stack(state, 1)
 }
 
 fn is_known_spell_for_usability(state: &mut LuaState, spell_id: u32) -> bool {

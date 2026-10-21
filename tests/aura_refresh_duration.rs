@@ -429,7 +429,7 @@ fn malformed_arguments_error_before_missing_unit_short_circuit() {
 }
 
 #[test]
-fn actual_secret_arguments_are_rejected_without_declassification_or_taint_changes() {
+fn non_instance_secrets_remain_rejected_without_declassification_or_taint_changes() {
     let env = seeded_env();
     {
         let loader = env.loader_env();
@@ -453,8 +453,6 @@ fn actual_secret_arguments_are_rejected_without_declassification_or_taint_change
             for _, getter in ipairs({C_UnitAuras.GetAuraBaseDuration,
                                       C_UnitAuras.GetRefreshExtendedDuration}) do
                 for _, call in ipairs({
-                    function() return getter('player', SecretDurationInstance) end,
-                    function() return getter('missing-unit', SecretDurationInstance) end,
                     function() return getter('player', 101, SecretDurationSpell) end,
                     function() return getter('missing-unit', 101, SecretDurationSpell) end,
                     function() return getter(SecretDurationSpell, 101) end,
@@ -465,6 +463,9 @@ fn actual_secret_arguments_are_rejected_without_declassification_or_taint_change
                     assert(issecretvalue(SecretDurationInstance))
                     assert(issecretvalue(SecretDurationSpell))
                 end
+                assert(getter('player', SecretDurationInstance) ~= nil)
+                assert(select('#', getter('missing-unit', SecretDurationInstance)) == 1)
+                assert(getter('missing-unit', SecretDurationInstance) == nil)
                 assert(getter('player', 101) ~= nil)
                 assert(debug.getstacktaint() == before)
             end
@@ -480,7 +481,7 @@ fn actual_secret_arguments_are_rejected_without_declassification_or_taint_change
         assert(issecure())
         "#,
     )
-    .expect("INFERRED conservative rejection; not native AllowedWhenTainted parity");
+    .expect("bounded instance admission; unit/optional spell secret domains remain unchanged");
     assert_known_duration_outputs(&env);
 }
 

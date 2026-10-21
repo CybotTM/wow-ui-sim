@@ -679,14 +679,18 @@ fn secure_display_wrong_authenticated_types_report_positions_without_payload() {
 }
 
 #[test]
-fn cast_conservatively_rejects_all_six_authentic_secret_kinds_in_both_frames() {
+fn cast_accepts_numeric_secrets_but_preserves_other_kind_rejection() {
     let env = secret_fixture();
     let before = metadata(&env, &SECRETS);
     env.exec(
         r#"
         local function probe()
-            for _,v in ipairs(SCSecrets) do
-                local taint=debug.getstacktaint()
+            local taint=debug.getstacktaint()
+            assert(select('#',C_Spell.GetSpellCastCount(SCIdentifier))==1)
+            assert(C_Spell.GetSpellCastCount(SCIdentifier)==7)
+            assert(C_Spell.GetSpellCastCount(SCUnknown)==0)
+            SCReject('GetSpellCastCount',1,false,SCMax)
+            for _,v in ipairs({SCReplacement,SCNil,SCBool,SCString,SCSecretTable,SCSecretFrame,SCAlias}) do
                 local ok,err=pcall(C_Spell.GetSpellCastCount,v)
                 assert(not ok)
                 assert(type(err)=='string')

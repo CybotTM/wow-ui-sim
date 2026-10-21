@@ -14,6 +14,18 @@
 
 [Currency flag ownership](systems/lua-api.md#retail-unused-currency-flags) links the [bounded contract](../specs/currency-unused-mutations.md#bounded-proof): original checkbox/popup proof, unchanged display/watch models and held native grouping. No current-Retail group/order oracle is claimed.
 
+## [2026-10-20] source | Numeric-secret aura duration and caster selectors
+
+[C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) link [duration](../specs/secret-selector-aura-duration.md) and [caster identity](../specs/secret-selector-aura-caster.md): original PTR pandemic and Retail/PTR caster consumers, retained duration outputs and secret-selector GUID publication. Native aura-output restriction remains held; the existing inactive-party DurationObject fixture stays separate.
+
+## [2026-10-20] source | Numeric-secret counts and usability
+
+[C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) link the [count/usability contract](../specs/secret-selector-count-usability.md): original viewer count/color boundaries, local numeric authentication and unchanged independent output restrictions. Maximum-count opaque selection remains API-only proof, not a natural resource-bar secret feed.
+
+## [2026-10-20] source | Numeric-secret classifications
+
+[C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) link the [classification contract](../specs/secret-selector-classification.md): endpoint-local numeric selection, preserved ExternalDefensive permission and inferred ordinary output policy. The contract separates original-consumer proof from natural startup provenance.
+
 ## [2026-10-19] system | Wrath reload lifecycle and character layout
 
 [Reload mechanics](systems/reload-ui.md) link the [profile contract](../specs/reload-ui.md#wrath-12340-requirements): A–D bounded GREEN, two-sided saved-value and ticked original Stopwatch preservation, readiness-driven variables delivery and argless Wrath entry. Character-local placed-frame restoration and selective mirror cancellation pass E's eight bounded cases. [Final implementer gates](../specs/reload-ui.md#final-implementer-gate--2026-10-19) record 23 Wrath cases, profile preservation, four warning-free checks and both clean startups; independent integrated verification remains pending; unauthenticated conversion constants and separate GameMenu/cursor/spellbook gaps remain excluded.
