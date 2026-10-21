@@ -53,7 +53,8 @@ pub struct AccountStoreCategoryInfo {
 /// and the `Blizzard_ActionBar/Shared/StanceBar.lua` mixin. Field shape
 /// matches the live API: `(texture, isActive, isCastable, spellID)`. The
 /// `name` field is read by `C_TooltipInfo.GetShapeshift` to render the
-/// stance tooltip header.
+/// stance tooltip header and by Wrath's native four-value projection
+/// `(texture, name, isActive, isCastable)` with numeric 1/nil flags.
 #[derive(Clone, Debug)]
 pub struct ShapeshiftForm {
     pub name: String,
