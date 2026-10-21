@@ -1,6 +1,6 @@
 ## [2026-10-21] source | Wrath positional guild rights
 
-[Legacy projection](systems/lua-api.md#wrath-guild-rank-rights) links the [12340 contract](../specs/wrath-guild-rank-flags.md): the original checkbox consumer exposes the table/positional mismatch. The Wrath-only correction preserves the existing namespace/table path; current-source GREEN and profile preservation remain pending.
+[Legacy projection](systems/lua-api.md#wrath-guild-rank-rights) links the [12340 contract](../specs/wrath-guild-rank-flags.md): the original checkbox consumer exposes the table/positional mismatch. The Wrath-only correction has native-consumer and guild-model GREEN while preserving the existing namespace/table path; Retail preservation remains pending.
 
 ## [2026-10-20] investigation | Wrath native friends legacy surface
 
