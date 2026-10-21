@@ -2521,3 +2521,8 @@ CharacterFrameTab1 OnEnter is behavioral RED after formatter replacement/hook; t
 ## 2026-10-19 — Bounded final XML late-binding proof
 
 At source `fb2e3961d`, lane fixtures pass Retail13/13 and Wrath8/8; both startups remain byte-identical `[]` and original GameMenu warnings/errors, including cursorOffset-nil, are empty. Retail preservation passes; Wrath retains two unchanged Retail-cache bootstrap failures, explicitly deferred by main to profile-gating before I1. [[xml-template-system]] owns exact counts, source-identity proof, the existing ignored TODO and acceptance limits. No fixture gate, ignore or vendor workaround was added here.
+
+
+## 2026-10-20 — Secret numeric spell-link selector
+
+Public-API tests reproduce a whole-link secrecy failure on Retail and PTR before the producer change; public link, one ordinary nil miss and glyph rejection controls pass. [[lua-api]] links the owning presentation contract. The producer now opts into the existing bounded host-number inspector and wraps the complete link; GREEN is pending, with downstream sinks excluded.
