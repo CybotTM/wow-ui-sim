@@ -50,7 +50,8 @@ fn social_panel_uses_current_provider_without_legacy_wow_friend_rows() {
                 let native: String = env
                     .eval(include_str!("friends_panel/wrath.lua"))
                     .expect("native FriendsFrame consumer and friend identities");
-                assert_eq!(native, "3|2|Arthax\nSylvara|Durotan|false");
+                // friends-legacy-12340.md: offline connected is nil, not modern false.
+                assert_eq!(native, "3|2|Arthax\nSylvara|Durotan|nil");
                 return;
             }
 
