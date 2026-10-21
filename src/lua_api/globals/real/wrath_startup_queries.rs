@@ -82,7 +82,7 @@ fn tracked_achievement_id(state: &mut LuaState) -> LuaResult<i32> {
 
 fn is_tracked_achievement(state: &mut LuaState) -> LuaResult<u32> {
     let id = tracked_achievement_id(state)?;
-    let tracked = borrow_state(state)?.tracked_achievements.contains(&id);
+    let tracked = id != 0 && borrow_state(state)?.tracked_achievements.contains(&id);
     state.push(Val::Bool(tracked));
     Ok(1)
 }
