@@ -63,6 +63,7 @@ fn test_forbidden_frame_newindex_syncs_children_keys() {
 /// Template children created inside a forbidden scope should have their parentKey
 /// accessible. This reproduces the ScrollBar.lua:30 error where Track.Thumb is nil
 /// because Track was a forbidden frame and __newindex didn't sync to children_keys.
+post_wrath_ui_fixture! {
 #[test]
 fn test_forbidden_scrollbar_track_has_thumb() {
     let env = env_with_shared_xml();
@@ -87,6 +88,31 @@ fn test_forbidden_scrollbar_track_has_thumb() {
         result, "true,true",
         "Forbidden MinimalScrollBar's Track.Thumb should be accessible"
     );
+}
+
+}
+
+#[cfg(feature = "client-wrath")]
+#[test]
+fn test_forbidden_scrollbar_track_has_thumb() {
+    let env = env_with_shared_xml();
+    env.state().borrow_mut().loading_forbidden = true;
+    env.exec(
+        r#"
+        local sf = CreateFrame("ScrollFrame", "ForbiddenLegacyScroll", UIParent, "FauxScrollFrameTemplate")
+        sf:SetSize(200, 100)
+        sf:SetPoint("CENTER")
+        FauxScrollFrame_Update(sf, 20, 5, 20)
+        local bar = ForbiddenLegacyScrollScrollBar
+        local thumb = ForbiddenLegacyScrollScrollBarThumbTexture
+        assert(bar:GetParent() == sf)
+        assert(bar:GetThumbTexture() == thumb)
+        assert(thumb:GetParent() == bar)
+        assert(bar:IsForbidden() and thumb:IsForbidden())
+        "#,
+    )
+    .unwrap();
+    env.state().borrow_mut().loading_forbidden = false;
 }
 
 #[test]

@@ -840,6 +840,7 @@ fn test_scroll_button_has_textures() {
 // HybridScrollBarTemplate Tests (requires SharedXML)
 // ============================================================================
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_hybrid_scroll_template() {
     let env = env_with_shared_xml();
@@ -931,6 +932,93 @@ fn test_hybrid_scroll_template_applies_declared_thumb_texture() {
             "Interface\\Buttons\\UI-ScrollBar-Knob".to_string()
         )
     );
+}
+
+}
+
+#[cfg(feature = "client-wrath")]
+mod legacy_hybrid_fixture {
+    use super::*;
+
+    pub fn load_and_create() -> WowLuaEnv {
+        let env = env_with_shared_xml();
+        let toc_path = wow_ui_sim::client_profile::blizzard_ui_framexml_toc().unwrap();
+        let toc = wow_ui_sim::toc::TocFile::parse(
+            toc_path.parent().unwrap(),
+            "HybridScrollFrame.lua\nHybridScrollFrame.xml\n",
+        );
+        let loaded = wow_ui_sim::loader::load_addon_from_toc(&env.loader_env(), &toc).unwrap();
+        assert!(loaded.warnings.is_empty(), "{:?}", loaded.warnings);
+        env.exec(
+            r#"
+            local sf = CreateFrame("ScrollFrame", "LegacyHybrid", UIParent, "HybridScrollFrameTemplate")
+            sf:SetSize(200, 100)
+            sf:SetPoint("CENTER")
+            sf.buttonHeight = 20
+            local bar = CreateFrame("Slider", "LegacyHybridBar", sf, "HybridScrollBarTemplate")
+            HybridScrollFrame_Update(sf, 400, 140)
+            bar:SetValue(45)
+            assert(HybridScrollFrame_GetOffset(sf) == 2)
+            assert(sf:GetVerticalScroll() == 5)
+            "#,
+        )
+        .unwrap();
+        env
+    }
+
+    pub fn assert_template() {
+        let env = load_and_create();
+        env.exec(
+            r#"
+            local sf, bar = LegacyHybrid, LegacyHybridBar
+            assert(sf.scrollBar == bar)
+            assert(bar:GetThumbTexture() == LegacyHybridBarThumbTexture)
+            assert(LegacyHybridBarTop:GetParent() == bar)
+            assert(LegacyHybridBarMiddle:GetParent() == bar)
+            assert(LegacyHybridBarBottom:GetParent() == bar)
+            assert(sf.scrollUp == LegacyHybridBarScrollUpButton)
+            assert(sf.scrollDown == LegacyHybridBarScrollDownButton)
+            assert(sf.scrollUp:IsEnabled() and sf.scrollDown:IsEnabled())
+            "#,
+        )
+        .unwrap();
+    }
+
+    pub fn assert_thumb_texture() {
+        let env = load_and_create();
+        let applied: (bool, bool, f32, f32, String) = env
+            .eval(
+                r#"
+                local thumb = LegacyHybridBar:GetThumbTexture()
+                return thumb == LegacyHybridBarThumbTexture,
+                    LegacyHybridBar.thumbTexture == thumb,
+                    thumb:GetWidth(), thumb:GetHeight(), thumb:GetTextureFilePath() or ""
+                "#,
+            )
+            .unwrap();
+        assert_eq!(
+            applied,
+            (
+                true,
+                true,
+                16.0,
+                24.0,
+                "Interface\\Buttons\\UI-ScrollBar-Knob".to_string()
+            )
+        );
+    }
+}
+
+#[cfg(feature = "client-wrath")]
+#[test]
+fn test_hybrid_scroll_template() {
+    legacy_hybrid_fixture::assert_template();
+}
+
+#[cfg(feature = "client-wrath")]
+#[test]
+fn test_hybrid_scroll_template_applies_declared_thumb_texture() {
+    legacy_hybrid_fixture::assert_thumb_texture();
 }
 
 // ============================================================================
