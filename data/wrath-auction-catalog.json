@@ -1,0 +1,776 @@
+{
+  "selectors": [
+    {
+      "class_id": 2,
+      "has_subclasses": true
+    },
+    {
+      "class_id": 4,
+      "has_subclasses": true
+    },
+    {
+      "class_id": 1,
+      "has_subclasses": true
+    },
+    {
+      "class_id": 0,
+      "has_subclasses": true
+    },
+    {
+      "class_id": 16,
+      "has_subclasses": true
+    },
+    {
+      "class_id": 7,
+      "has_subclasses": true
+    },
+    {
+      "class_id": 6,
+      "has_subclasses": true
+    },
+    {
+      "class_id": 11,
+      "has_subclasses": true
+    },
+    {
+      "class_id": 9,
+      "has_subclasses": true
+    },
+    {
+      "class_id": 3,
+      "has_subclasses": true
+    },
+    {
+      "class_id": 15,
+      "has_subclasses": true
+    },
+    {
+      "class_id": 12,
+      "has_subclasses": false
+    }
+  ],
+  "classes": [
+    {
+      "class_id": 0,
+      "name": "Consumable"
+    },
+    {
+      "class_id": 1,
+      "name": "Container"
+    },
+    {
+      "class_id": 2,
+      "name": "Weapon"
+    },
+    {
+      "class_id": 3,
+      "name": "Gem"
+    },
+    {
+      "class_id": 4,
+      "name": "Armor"
+    },
+    {
+      "class_id": 6,
+      "name": "Projectile"
+    },
+    {
+      "class_id": 7,
+      "name": "Trade Goods"
+    },
+    {
+      "class_id": 9,
+      "name": "Recipe"
+    },
+    {
+      "class_id": 11,
+      "name": "Quiver"
+    },
+    {
+      "class_id": 12,
+      "name": "Quest"
+    },
+    {
+      "class_id": 15,
+      "name": "Miscellaneous"
+    },
+    {
+      "class_id": 16,
+      "name": "Glyph"
+    }
+  ],
+  "subclasses": [
+    {
+      "class_id": 0,
+      "flags": 0,
+      "display_flags": 3,
+      "name": "Consumable"
+    },
+    {
+      "class_id": 0,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Food & Drink"
+    },
+    {
+      "class_id": 0,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Potion"
+    },
+    {
+      "class_id": 0,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Elixir"
+    },
+    {
+      "class_id": 0,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Flask"
+    },
+    {
+      "class_id": 0,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Bandage"
+    },
+    {
+      "class_id": 0,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Item Enhancement"
+    },
+    {
+      "class_id": 0,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Scroll"
+    },
+    {
+      "class_id": 0,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Other"
+    },
+    {
+      "class_id": 1,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Bag"
+    },
+    {
+      "class_id": 1,
+      "flags": 0,
+      "display_flags": 4,
+      "name": "Soul Bag"
+    },
+    {
+      "class_id": 1,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Herb Bag"
+    },
+    {
+      "class_id": 1,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Enchanting Bag"
+    },
+    {
+      "class_id": 1,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Engineering Bag"
+    },
+    {
+      "class_id": 1,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Gem Bag"
+    },
+    {
+      "class_id": 1,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Mining Bag"
+    },
+    {
+      "class_id": 1,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Leatherworking Bag"
+    },
+    {
+      "class_id": 1,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Inscription Bag"
+    },
+    {
+      "class_id": 2,
+      "flags": 3,
+      "display_flags": 0,
+      "name": "One-Handed Axes"
+    },
+    {
+      "class_id": 2,
+      "flags": 3,
+      "display_flags": 0,
+      "name": "Two-Handed Axes"
+    },
+    {
+      "class_id": 2,
+      "flags": 128,
+      "display_flags": 0,
+      "name": "Bows"
+    },
+    {
+      "class_id": 2,
+      "flags": 168,
+      "display_flags": 0,
+      "name": "Guns"
+    },
+    {
+      "class_id": 2,
+      "flags": 3,
+      "display_flags": 0,
+      "name": "One-Handed Maces"
+    },
+    {
+      "class_id": 2,
+      "flags": 3,
+      "display_flags": 0,
+      "name": "Two-Handed Maces"
+    },
+    {
+      "class_id": 2,
+      "flags": 3,
+      "display_flags": 0,
+      "name": "Polearms"
+    },
+    {
+      "class_id": 2,
+      "flags": 3,
+      "display_flags": 0,
+      "name": "One-Handed Swords"
+    },
+    {
+      "class_id": 2,
+      "flags": 3,
+      "display_flags": 0,
+      "name": "Two-Handed Swords"
+    },
+    {
+      "class_id": 2,
+      "flags": 0,
+      "display_flags": 3,
+      "name": "Obsolete"
+    },
+    {
+      "class_id": 2,
+      "flags": 3,
+      "display_flags": 0,
+      "name": "Staves"
+    },
+    {
+      "class_id": 2,
+      "flags": 0,
+      "display_flags": 3,
+      "name": "One-Handed Exotics"
+    },
+    {
+      "class_id": 2,
+      "flags": 0,
+      "display_flags": 3,
+      "name": "Two-Handed Exotics"
+    },
+    {
+      "class_id": 2,
+      "flags": 5,
+      "display_flags": 0,
+      "name": "Fist Weapons"
+    },
+    {
+      "class_id": 2,
+      "flags": 2,
+      "display_flags": 1,
+      "name": "Miscellaneous"
+    },
+    {
+      "class_id": 2,
+      "flags": 3,
+      "display_flags": 0,
+      "name": "Daggers"
+    },
+    {
+      "class_id": 2,
+      "flags": 16,
+      "display_flags": 0,
+      "name": "Thrown"
+    },
+    {
+      "class_id": 2,
+      "flags": 3,
+      "display_flags": 2,
+      "name": "Spears"
+    },
+    {
+      "class_id": 2,
+      "flags": 160,
+      "display_flags": 0,
+      "name": "Crossbows"
+    },
+    {
+      "class_id": 2,
+      "flags": 256,
+      "display_flags": 0,
+      "name": "Wands"
+    },
+    {
+      "class_id": 2,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Fishing Poles"
+    },
+    {
+      "class_id": 3,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Red"
+    },
+    {
+      "class_id": 3,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Blue"
+    },
+    {
+      "class_id": 3,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Yellow"
+    },
+    {
+      "class_id": 3,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Purple"
+    },
+    {
+      "class_id": 3,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Green"
+    },
+    {
+      "class_id": 3,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Orange"
+    },
+    {
+      "class_id": 3,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Meta"
+    },
+    {
+      "class_id": 3,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Simple"
+    },
+    {
+      "class_id": 3,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Prismatic"
+    },
+    {
+      "class_id": 4,
+      "flags": 512,
+      "display_flags": 1,
+      "name": "Miscellaneous"
+    },
+    {
+      "class_id": 4,
+      "flags": 512,
+      "display_flags": 0,
+      "name": "Cloth"
+    },
+    {
+      "class_id": 4,
+      "flags": 512,
+      "display_flags": 0,
+      "name": "Leather"
+    },
+    {
+      "class_id": 4,
+      "flags": 512,
+      "display_flags": 0,
+      "name": "Mail"
+    },
+    {
+      "class_id": 4,
+      "flags": 512,
+      "display_flags": 0,
+      "name": "Plate"
+    },
+    {
+      "class_id": 4,
+      "flags": 0,
+      "display_flags": 2,
+      "name": "Bucklers"
+    },
+    {
+      "class_id": 4,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Shields"
+    },
+    {
+      "class_id": 4,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Librams"
+    },
+    {
+      "class_id": 4,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Idols"
+    },
+    {
+      "class_id": 4,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Totems"
+    },
+    {
+      "class_id": 4,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Sigils"
+    },
+    {
+      "class_id": 6,
+      "flags": 0,
+      "display_flags": 3,
+      "name": "Wand(OBSOLETE)"
+    },
+    {
+      "class_id": 6,
+      "flags": 0,
+      "display_flags": 2,
+      "name": "Bolt(OBSOLETE)"
+    },
+    {
+      "class_id": 6,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Arrow"
+    },
+    {
+      "class_id": 6,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Bullet"
+    },
+    {
+      "class_id": 6,
+      "flags": 64,
+      "display_flags": 2,
+      "name": "Thrown(OBSOLETE)"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 3,
+      "name": "Trade Goods"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Elemental"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Cloth"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Leather"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Metal & Stone"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Meat"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Herb"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Enchanting"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Jewelcrafting"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Parts"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Devices"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Explosives"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Materials"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Other"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Armor Enchantment"
+    },
+    {
+      "class_id": 7,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Weapon Enchantment"
+    },
+    {
+      "class_id": 9,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Book"
+    },
+    {
+      "class_id": 9,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Leatherworking"
+    },
+    {
+      "class_id": 9,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Tailoring"
+    },
+    {
+      "class_id": 9,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Engineering"
+    },
+    {
+      "class_id": 9,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Blacksmithing"
+    },
+    {
+      "class_id": 9,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Cooking"
+    },
+    {
+      "class_id": 9,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Alchemy"
+    },
+    {
+      "class_id": 9,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "First Aid"
+    },
+    {
+      "class_id": 9,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Enchanting"
+    },
+    {
+      "class_id": 9,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Fishing"
+    },
+    {
+      "class_id": 9,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Jewelcrafting"
+    },
+    {
+      "class_id": 9,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Inscription"
+    },
+    {
+      "class_id": 11,
+      "flags": 0,
+      "display_flags": 7,
+      "name": "Quiver(OBSOLETE)"
+    },
+    {
+      "class_id": 11,
+      "flags": 0,
+      "display_flags": 7,
+      "name": "Quiver(OBSOLETE)"
+    },
+    {
+      "class_id": 11,
+      "flags": 0,
+      "display_flags": 4,
+      "name": "Quiver"
+    },
+    {
+      "class_id": 11,
+      "flags": 0,
+      "display_flags": 4,
+      "name": "Ammo Pouch"
+    },
+    {
+      "class_id": 15,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Junk"
+    },
+    {
+      "class_id": 15,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Reagent"
+    },
+    {
+      "class_id": 15,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Pet"
+    },
+    {
+      "class_id": 15,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Holiday"
+    },
+    {
+      "class_id": 15,
+      "flags": 0,
+      "display_flags": 1,
+      "name": "Other"
+    },
+    {
+      "class_id": 15,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Mount"
+    },
+    {
+      "class_id": 16,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Warrior"
+    },
+    {
+      "class_id": 16,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Paladin"
+    },
+    {
+      "class_id": 16,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Hunter"
+    },
+    {
+      "class_id": 16,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Rogue"
+    },
+    {
+      "class_id": 16,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Priest"
+    },
+    {
+      "class_id": 16,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Death Knight"
+    },
+    {
+      "class_id": 16,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Shaman"
+    },
+    {
+      "class_id": 16,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Mage"
+    },
+    {
+      "class_id": 16,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Warlock"
+    },
+    {
+      "class_id": 16,
+      "flags": 0,
+      "display_flags": 0,
+      "name": "Druid"
+    }
+  ]
+}

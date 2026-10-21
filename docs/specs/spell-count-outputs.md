@@ -21,7 +21,7 @@ Display formatting/maximum and secret-output behavior remain Retail125-scoped. O
 ### Explicit inputs and scalar domains
 
 - [ ] Use `spell_cast_counts: HashMap<u32,u32>` with an empty default, Retail1200-gated, with cast producer available from1200 onward; exact1200 bounded GREEN5/5; current-default controls40/40. Display and secret-output policies below remain Retail125-scoped. No new Cargo feature or per-slot wrapper reuse.
-- [ ] Cast returns exactly one number from the public resolved spell identifier's explicit count, otherwise0. Never derive cast count from charges.
+- [ ] Cast returns exactly one number from the resolved declared spell identifier, otherwise0. The [numeric-secret subset](secret-selector-count-usability.md) changes selection only; never derive cast count from charges.
 - [ ] Display returns exactly one string: valid typed charge state with `max_charges > 0` supplies `current_charges`; otherwise explicit count supplies quantity. This priority is inferred, not native-verified.
 - [ ] Inferred display absence is empty string; explicitly supplied0 is `"0"`. Missing cast is0. Local u32 maximum4294967295 must remain exactly representable, not claimed as native maximum.
 - [ ] Use the existing alias-first C_Spell identity contract: actual name aliases, fixture alias, numeric-string aliases, numeric alias overrides, then public numeric identity. Do not reverse aliases, synthesize numeric-string aliases, scan slots, or require catalog acquisition for an explicit numeric key.
@@ -36,8 +36,8 @@ Display formatting/maximum and secret-output behavior remain Retail125-scoped. O
 
 ### Authentication and partial input parity
 
-- [ ] Cast uses the existing conservative public identifier helper: reject every authentic secret argument1, including secure callers, before alias/model access. Error names public API and states `secret spell identifier access is not modeled`, without private payload. Public tainted calls remain allowed.
-- [ ] Native cast `AllowedWhenTainted` secret permission remains **UNMODELED**. Conservative rejection is not NeverSecret metadata or full secret-input support and earns no input-permission credit. This is an open implementation limit, not a product exclusion.
+- [ ] Cast uses the strict public identifier helper except the Retail125/PTR [numeric-secret selector extension](secret-selector-count-usability.md). That bounded path preserves alias-first lookup and independent output restriction; all non-numeric secrets retain conservative rejection before model access. Public tainted calls remain allowed.
+- [ ] Full native cast `AllowedWhenTainted` parity remains unproven. The [numeric-secret subset](secret-selector-count-usability.md) does not widen string/other secret payloads or the shared public reader; output-predicate coverage remains independent.
 - [ ] Display authenticates all three original VM arguments, in argument order, before type validation or model lookup. Secure secret NUM/STRING identifiers resolve via Value-based alias extraction; secret NUM threshold, STR replacement and NIL defaults authenticate. No stack mutation.
 - [ ] Tainted authentic secret arguments of all six kinds (NUM, STR, NIL, BOOL, ordinary table, frame-backed table) deny at their positions before invalid public identifiers, unresolved identifiers or missing sources. No blanket ban on public tainted calls, no nil-callback guard.
 - [ ] Secure wrong-type authenticated display inputs report public API/position without payload. Denial preserves caller trust, frame/table state, secrecy metadata, roots, copies and allocation identity through GC; secure reads recover afterward.
@@ -61,7 +61,7 @@ Display formatting/maximum and secret-output behavior remain Retail125-scoped. O
 - `src/lua_api/state/sim_state.rs`: literal internal simulator spell-keyed input field, now Retail1200 gated; not native backing.
 - `src/lua_api/state.rs`: matching empty initialization, same Retail1200 gate.
 - `tests/spell_count_outputs.rs`: grouped autodiscovery scaffold, Retail125 plus Retail/PTR only; no additional Cargo test binary.
-- `src/c_api/c_spell_counts.rs`: cast producer from Retail1200 onward; display and maximum-aura producer remain Retail125-gated. Pre125 cast returns an ordinary number by simulator policy, without retroactive native secrecy proof. Cast conservatively validates public identifiers, copies explicit quantity/restriction without charge reads, then immediately pushes ordinary or typed host-secret NUM. Display authenticates all three original arguments before validation/model access, resolves the authenticated value, copies quantity/restriction under one immutable snapshot borrow, then immediately pushes ordinary or typed host-secret STR. Original wrappers remain rooted and untouched. No new state or acquisition.
+- `src/c_api/c_spell_counts.rs`: cast producer from Retail1200 onward; display and maximum-aura producer remain Retail125-gated. Pre125 cast returns an ordinary number by simulator policy, without retroactive native secrecy proof. Cast validates public identifiers plus the [bounded numeric-secret subset](secret-selector-count-usability.md), copies explicit quantity/restriction without charge reads, then immediately pushes ordinary or typed host-secret NUM. Display authenticates all three original arguments before validation/model access, resolves the authenticated value, copies quantity/restriction under one immutable snapshot borrow, then immediately pushes ordinary or typed host-secret STR. Original wrappers remain rooted and untouched. No new state or acquisition.
 - `src/c_api/mod.rs`: count module declared from Retail1200 onward.
 - `src/c_api/c_spell.rs`: cast entry from Retail1200 onward; display/maximum entries remain Retail125-gated in the existing `SPELL_QUERY_METHODS`, published once through the existing root namespace. `read_spell_identifier_at` delegates to extracted `read_spell_identifier_value`; the existing `alias_key_from_input`, alias-first body and numeric passthrough are unchanged. Authentication/strict validation belongs to the new display caller; other callers retain their policies.
 - `src/c_api/c_action_bar_counts.rs`: shared `pub(crate)` formatter plus `parse_maximum(value, api)` and `parse_replacement(state, value, api)` validators. Action and Spell pass their original display API constants for unchanged argument/error context; defaults and validation predicates remain unchanged. Both authenticate all original arguments before parsing. The formatter body remains unchanged; historical proof for that body is not fresh proof of the parameterized validators.
@@ -69,7 +69,7 @@ Display formatting/maximum and secret-output behavior remain Retail125-scoped. O
 
 ## Tests asserting this spec
 
-`tests/spell_count_outputs.rs`: 30 unchanged behavioral cases for both scalar outputs, explicit identity/state, formatting, display authentication, conservative cast rejection and authentic secret outputs/lifetimes. Main-owned compiled RED is recorded below; no producer GREEN or gates ran in the original implementation step. Current bounded output acceptance is recorded in [independent acceptance](#independent-bounded-acceptance--2026-10-02); unchecked requirement items are not a current blanket assertion of missing proof.
+`tests/spell_count_outputs.rs`: historical thirty-case scalar/provider suite, with cast numeric-secret admission updated by [P4](secret-selector-count-usability.md); display authentication and independent output/lifetime checks remain. New original-consumer and selector controls live in `tests/secret_selector_counts.rs`. Historical receipts below remain revision-scoped, not current blanket acceptance.
 
 At the original producer checkpoint, existing `tests/c_spell_probes.rs::test_spell_count_shims_return_zero` and the `spell_metadata_defaults.rs` unit tuple still expected display numeric0. Expected Retail125 control mismatch: documented display result is STRING, so the new producer returns empty STR without a source. Both tests were then untouched; the observed control failures and subsequent corrections are recorded below. Earlier/Forever numeric0 defaults remain deliberate.
 
@@ -109,7 +109,7 @@ Accounting promotes only301/309: **190 pending/157 bounded/14 partial/1 metadata
 - [x] Verify actual C API wiring and Value-based display resolution without VM bypass, declassification, callback swaps or publication.
 - [x] Obtain scoped startup reuse, Rust checks, security, readability and relevant current-profile controls.
 - [x] Promote only exact301/309 output deltas after independent bounded acceptance.
-- [ ] Keep cast AllowedWhenTainted permission gap separate and open; it does not block meaningful bounded output work or authorize expanded VM changes.
+- [ ] Keep full native cast input parity separate from the [bounded numeric-selector subset](secret-selector-count-usability.md); no VM changes or blanket reader widening.
 - [ ] Native probes deferred: real reagent/charge counts;9999/10000/equality; coercion/nil; opaque type, root copies and tainted cast permission versus display permission; width, priority, no-source, profile/UI/global privacy. These remain unknown, not native claims.
 
 ## Out of scope

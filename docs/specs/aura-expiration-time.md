@@ -61,5 +61,5 @@ Seven requirements are checked as bounded simulator proof. Two stay unchecked be
 
 - `RequiresUnitAuraAccess`, `RequiresValidUnitAuraInstance` and `SecretWhenUnitAuraRestricted`: unmodeled. The result is always public; no aura-access restriction state exists for this query.
 - Native miss/nil/type behavior and error wording: unverified.
-- `GetAuraBaseDuration` and `GetRefreshExtendedDuration` keep their existing conservative rejection of every secret argument; their cached policy is `AllowedWhenTainted` and is not part of row 365.
+- `GetAuraBaseDuration` and `GetRefreshExtendedDuration` have their own [numeric-secret instance subset](secret-selector-aura-duration.md); secret units/optional spell selectors remain outside that subset. Their AllowedWhenTainted contract is separate from row365.
 - Profiles below `retail-12-0-5`: `src/c_api/aura_duration.rs` is compiled and registered only under that feature, so the query does not exist there. The earlier `AllowedWhenTainted` policy is not modeled.

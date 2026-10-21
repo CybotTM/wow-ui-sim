@@ -41,7 +41,8 @@ struct LoadOnDemandAddonClosure {
 }
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn known_load_on_demand_runtime_error_counts() -> BTreeMap<String, usize> {
@@ -170,6 +171,9 @@ fn with_isolated_addon_coverage_state(f: impl FnOnce()) {
 
 fn load_startup_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
     reset_template_state();
+    if let Some(toc) = wow_ui_sim::client_profile::blizzard_ui_framexml_toc() {
+        load_addon(&env.loader_env(), &toc).expect("profile FrameXML should load before addons");
+    }
     let startup_addons = discover_blizzard_addons(&blizzard_ui_dir());
     let mut load_failures = Vec::new();
     for (name, toc_path) in &startup_addons {
@@ -341,6 +345,7 @@ fn closure_runtime_failure_message(
 ) -> Option<String> {
     let state = env.state().borrow();
     let grouped_errors = grouped_errors_by_addon(&state);
+    eprintln!("Complete runtime Lua errors for {representative}: {grouped_errors:#?}");
     let actual_counts = actual_error_counts(&grouped_errors);
     let increases =
         classify_error_count_increases_from_baseline(known_runtime_counts, &actual_counts);
@@ -424,10 +429,7 @@ fn run_load_on_demand_blizzard_addon_shard_body(shard_index: usize, shard_count:
     );
 }
 
-fn run_load_on_demand_blizzard_addon_shard_without_timeout(
-    shard_index: usize,
-    shard_count: usize,
-) {
+fn run_load_on_demand_blizzard_addon_shard_without_timeout(shard_index: usize, shard_count: usize) {
     with_isolated_addon_coverage_state(|| {
         common::with_perf_lock(|| {
             run_load_on_demand_blizzard_addon_shard_body(shard_index, shard_count);
@@ -439,6 +441,39 @@ fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usiz
     common::with_timeout(600, move || {
         run_load_on_demand_blizzard_addon_shard_without_timeout(shard_index, shard_count);
     })
+}
+
+#[cfg(feature = "client-wrath")]
+#[test]
+fn time_manager_renders_numeric_hour_through_original_dropdown() {
+    common::with_timeout(180, || {
+        with_isolated_addon_coverage_state(|| {
+            let env = WowLuaEnv::new().expect("Lua environment");
+            env.set_screen_size(1024.0, 768.0);
+            env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+            env.exec(
+                r#"
+                SetCVar("timeMgrUseMilitaryTime", "0")
+                SetCVar("timeMgrAlarmTime", "780")
+                SetCVar("timeMgrAlarmEnabled", "0")
+                "#,
+            )
+            .expect("concrete 1 PM alarm input");
+            load_startup_blizzard_ui(&env);
+            clear_lua_error_tracking(&env);
+
+            let (loaded, reason): (bool, Option<String>) = env
+                .eval("return C_AddOns.LoadAddOn('Blizzard_TimeManager')")
+                .expect("original TimeManager runtime load returns");
+            assert!(loaded, "TimeManager load: {reason:?}");
+            let errors = grouped_errors_by_addon(&env.state().borrow());
+            assert!(errors.is_empty(), "original TimeManager load: {errors:#?}");
+            let hour: String = env
+                .eval("return TimeManagerAlarmHourDropDownText:GetText()")
+                .expect("original dropdown's rendered hour");
+            assert_eq!(hour, "1", "native numeric hour reaches its FontString");
+        });
+    });
 }
 
 #[test]

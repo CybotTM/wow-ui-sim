@@ -1,0 +1,63 @@
+{
+  "build": 12340,
+  "locale": "enUS",
+  "client_evidence": "wow-data and wow-enus component manifests both version 12340",
+  "sources": {
+    "ItemClass.dbc": {
+      "sha256": "f14b09254010765ab75c3c04ddf55a4b03e75163655c5015d188b04e31fa1b20",
+      "records": 17,
+      "fields": 20,
+      "archive": "Data/enUS/patch-enUS.MPQ"
+    },
+    "ItemSubClass.dbc": {
+      "sha256": "ed037619b6277fb2b05c3cf05233b19687a4004427d5e63a12d038804bc8b0e5",
+      "records": 119,
+      "fields": 44,
+      "archive": "Data/enUS/patch-enUS-3.MPQ"
+    }
+  },
+  "layout_status": "established by laptop clean-room record-loader reading",
+  "layout_sources": [
+    "ItemClassRec.cpp:21-40,66",
+    "ItemSubClassRec.cpp:25-68,118-119",
+    "AuctionHouse_Scripts.cpp:29-43,98,124-127,160-163"
+  ],
+  "zero_based_fields": {
+    "ItemClass": {
+      "class_id": 0,
+      "flags": 2,
+      "enUS_name": 3
+    },
+    "ItemSubClass": {
+      "class_id": 0,
+      "subclass_id": 1,
+      "flags": 4,
+      "display_flags": 5,
+      "enUS_display_name": 10,
+      "enUS_verbose_name": 27
+    }
+  },
+  "record_sizes": {
+    "ItemClass": 80,
+    "ItemSubClass": 176
+  },
+  "string_block_sizes": {
+    "ItemClass": 158,
+    "ItemSubClass": 1226
+  },
+  "name_projection": "nonempty enUS verboseName, else enUS displayName; no other locale",
+  "subclass_order": "physical WDBC order, never sorted subclass IDs",
+  "consumable_subclass_ids_in_order": [
+    0,
+    5,
+    1,
+    2,
+    3,
+    7,
+    6,
+    4,
+    8
+  ],
+  "scope": "auction selector classes only; excludes raw DBCs and unused columns",
+  "catalog_sha256": "109e9e1c6a06758b9626f7e80201cfdbcc04725f277567e9e2a372c96521e7b9"
+}

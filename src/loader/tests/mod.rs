@@ -123,6 +123,7 @@ pub(super) fn load_test_xml(dir_suffix: &str, xml_content: &str) -> TestCtx {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
@@ -200,7 +201,14 @@ fn preload_shared_templates(env: &WowLuaEnv) {
     )
     .unwrap();
     let loader_env = env.loader_env();
-    load_xml_file(&loader_env, &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
+    load_xml_file(
+        &loader_env,
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+        &mut Vec::new(),
+    )
+    .unwrap();
 }
 
 #[test]
