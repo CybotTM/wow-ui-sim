@@ -27,7 +27,8 @@ Native Wrath action, stance and pet callbacks must read profile-correct query re
 - `src/c_api/action_spell_range.rs` — supplied spell/target snapshot type; no Lua registration.
 - `src/c_api/c_action_bar_queries.rs` — existing Retail query registration and readers; Retail-only module.
 - `src/lua_api/state{,/sim_state}.rs` — profile-scoped snapshot storage.
-- `src/lua_api/globals/real/{shapeshift,pet_bar}.rs` — existing query producers (native shape repairs pending).
+- `src/lua_api/globals/real/pet_bar.rs` — Wrath seven-value spell/token projection; modern nine-value output preserved.
+- `src/lua_api/globals/real/shapeshift.rs` — existing form query producer (native shape repair pending).
 - `src/lua_api/globals/real/wrath_legacy/action_bar.rs` — native legacy numeric/nil range adapter over shared snapshots; no C_* registration.
 - `src/wrath/compat_bootstrap.lua` — obsolete nil-only range shim removed.
 
