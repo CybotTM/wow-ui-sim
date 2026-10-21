@@ -665,9 +665,14 @@ fn micro_menu_achievement_button_loads_and_opens_panel() {
         );
     }
     let categories_bg = texture_path(&env, "AchievementFrameCategoriesBG");
+    let expected_categories_bg = if cfg!(feature = "client-wrath") {
+        r"Interface\AchievementFrame\UI-Achievement-AchievementBackground"
+    } else {
+        r"Interface\AchievementFrame\UI-Achievement-Parchment"
+    };
     assert_eq!(
-        categories_bg, r"Interface\AchievementFrame\UI-Achievement-Parchment",
-        "Achievement categories parchment texture should be assigned"
+        categories_bg, expected_categories_bg,
+        "Achievement categories texture should match its native runtime skin"
     );
 
     let header = if cfg!(feature = "client-wrath") {
