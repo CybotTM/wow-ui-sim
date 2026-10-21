@@ -2575,4 +2575,4 @@ Public-API tests reproduce a whole-link secrecy failure on Retail and PTR before
 
 ## 2026-10-21 — Wrath autocomplete fixture and query boundary
 
-[Native fixture diagnosis](investigations/wrath-autocomplete-fixture.md) records original-consumer argument-width/name-string RED, direct-result PASS, a Wrath-only modeled global and preserved modern namespace. The [contract](../specs/wrath-autocomplete-results.md) keeps producer proof pending and names held identity/recency/UTF-8 gaps.
+[Native fixture diagnosis](investigations/wrath-autocomplete-fixture.md) records valid original-consumer argument-width RED, direct-result PASS, a Wrath-only modeled global and preserved modern namespace. The initial small-mask probe's missing alias is excluded from producer RED; corrected-probe proof remains pending. The [contract](../specs/wrath-autocomplete-results.md) keeps producer proof pending and names held identity/recency/UTF-8 gaps.

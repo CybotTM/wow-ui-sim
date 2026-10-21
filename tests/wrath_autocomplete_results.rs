@@ -40,9 +40,13 @@ fn native_query_returns_strings_to_original_framexml() {
     load_and_assert_native(
         r#"
 -- Small native flags isolate the return-shape contract from argument width.
-F09EditBox.autoCompleteParams = AUTOCOMPLETE_LIST.FRIEND
+local params = AUTOCOMPLETE_LIST_TEMPLATES.FRIEND
+assert(type(params) == 'table' and params.include == AUTOCOMPLETE_FLAG_FRIEND,
+       'native friend template must exist before querying')
+F09EditBox.autoCompleteParams = params
 AutoComplete_Update(F09EditBox, 'F09A', 4)
-assert(AutoCompleteButton1:GetText() == 'F09Alpha')
+assert(AutoCompleteButton1:GetText() == 'F09Alpha',
+       'native consumer must receive the plain friend name, got '..tostring(AutoCompleteButton1:GetText()))
 assert(AutoComplete_GetNumResults(AutoCompleteBox) == 1)
 local results = {GetAutoCompleteResults('F09A', AUTOCOMPLETE_FLAG_FRIEND, AUTOCOMPLETE_FLAG_BNET, 6, 4)}
 assert(#results == 1 and results[1] == 'F09Alpha')

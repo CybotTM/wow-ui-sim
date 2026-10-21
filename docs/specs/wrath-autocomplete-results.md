@@ -38,7 +38,9 @@ Cached native FrameXML behavior differs from modern tests: selection starts at z
 - `tests/blizzard_auto_complete_*.rs` — F09 native result/editbox/button fixtures alongside unchanged modern assertions.
 - `tests/c_autocomplete.rs` — existing modern namespace preservation.
 
-Fixture-only source `c4664700f`: eleven positive-count Wrath cases executed, ten FAIL and one PASS. Original query consumers report the unsigned include mask being interpreted as an `i32` limit at argument two; the small FRIEND-mask consumer also fails its name-string assertion. Direct native result updating passes. Producer GREEN and preservation remain pending.
+Fixture-only source `c4664700f`: eleven positive-count Wrath cases executed. Nine valid query/callback RED failures report the unsigned include mask being interpreted as an `i32` limit at argument two; direct native result updating passes. One additional failure is excluded from producer RED: its missing `AUTOCOMPLETE_LIST.FRIEND` alias prevented the query. The corrected case uses `AUTOCOMPLETE_LIST_TEMPLATES.FRIEND` and requires separate RED/GREEN proof.
+
+Producer source `db793e416`: all 33 adapted original cases, five other added native cases and seven existing modern namespace cases pass. The invalid-alias probe still fails; its correction and Retail/stock/check gates remain pending.
 
 ## Known gaps (current cycle)
 

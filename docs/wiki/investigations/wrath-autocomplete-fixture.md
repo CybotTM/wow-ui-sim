@@ -4,9 +4,9 @@ F09's modern addon/mixin prerequisites prevented native autocomplete consumers f
 
 ## Root cause and correction
 
-Native `AutoComplete_Update` passes `(text, include, exclude, count, cursor)` and consumes separate returned strings. The existing global forwarded modern `(text, count, cursor, allowFullMatch, include, exclude)` arguments and returned a table. Source-bound fixture-only RED at `c4664700f` reached the original consumer: the ALL include mask failed signed-limit conversion at argument two; the small FRIEND-mask consumer failed its name-string assertion. Direct string-result updating passed.
+Native `AutoComplete_Update` passes `(text, include, exclude, count, cursor)` and consumes separate returned strings. The existing global forwarded modern `(text, count, cursor, allowFullMatch, include, exclude)` arguments and returned a table. Source-bound fixture-only RED at `c4664700f` reached the original consumer: the ALL include mask failed signed-limit conversion at argument two. Direct string-result updating passed. An initial small-mask probe used a missing list alias and never queried; it is excluded from producer RED evidence. Its corrected template-based case awaits separate RED/GREEN proof.
 
-The C API model now has a Wrath-specific query projection over existing friend GUIDs and active party identities. A real legacy-global boundary performs Lua 5.1 scalar coercion and pushes separate strings, including zero returns on misses. The modern namespace and non-Wrath global forwarder are separate; Wrath has no alternate modern-table result path. Producer proof is pending.
+The C API model now has a Wrath-specific query projection over existing friend GUIDs and active party identities. A real legacy-global boundary performs Lua 5.1 scalar coercion and pushes separate strings, including zero returns on misses. The modern namespace and non-Wrath global forwarder are separate; Wrath has no alternate modern-table result path. All 33 adapted original cases and five valid added cases pass at `db793e416`; the corrected extra probe and preservation gates remain pending.
 
 ## Coverage boundaries
 
