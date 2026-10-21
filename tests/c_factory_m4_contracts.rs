@@ -200,8 +200,8 @@ mod forever {
         "assert(C_CVar.AreCVarsLoaded() == true)"
     );
     contract!(
-        hidden_group_buffs_preserve_existing_explicit_setting,
-        "C_UnitAuras._hiddenGroupBuffs = {[456]=true}; assert(C_UnitAuras.GetHiddenGroupBuffs()[456] == true)"
+        hidden_group_buffs_project_supplied_snapshot,
+        "C_UnitAuras._hiddenGroupBuffs = {456}; local ids = C_UnitAuras.GetHiddenGroupBuffs(); assert(#ids == 1 and ids[1] == 456)"
     );
     contract!(
         hidden_buff_publication_does_not_enable_unrouted_visual_alert_apis,
