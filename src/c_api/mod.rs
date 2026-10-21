@@ -25,6 +25,8 @@ pub mod action_count_info;
 pub use action_count_info::ActionUseCountInfo;
 pub mod action_macros;
 pub mod action_repeat;
+#[cfg(any(feature = "retail-12-0-0", feature = "client-wrath"))]
+pub mod action_spell_range;
 pub mod action_usability;
 #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
 mod addon_messages;

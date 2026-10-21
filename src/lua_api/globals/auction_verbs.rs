@@ -3,7 +3,9 @@
 //! The simulator's richer auction model lives behind `C_AuctionHouse`.
 //! Mists can still load the classic auction panel, which reads the older
 //! global API. These functions expose that same backing state in the legacy
-//! row/verb shapes instead of creating a parallel stub-only panel.
+//! row/verb shapes instead of creating a parallel stub-only panel. Wrath shares
+//! the row/verb adapters, but its subclass catalog uses the authenticated DBC
+//! producer in `real::wrath_auction_catalog`, not this Mists numeric adapter.
 
 use crate::items;
 use crate::lua_api::globals::missing_surface::item_link_for_id;
@@ -55,6 +57,7 @@ fn can_send_auction_query(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+#[cfg(feature = "client-mists")]
 fn get_auction_item_sub_classes(state: &mut LuaState) -> LuaResult<u32> {
     let class_id = stack_i32(state, 1).unwrap_or(-1);
     let subclass_count = standard_subclass_count(class_id);
@@ -64,6 +67,7 @@ fn get_auction_item_sub_classes(state: &mut LuaState) -> LuaResult<u32> {
     Ok(subclass_count as u32)
 }
 
+#[cfg(feature = "client-mists")]
 fn standard_subclass_count(class_id: i32) -> i32 {
     match class_id {
         0 => 12,
@@ -600,6 +604,7 @@ fn register_auction_query_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         is_using_legacy_auction_client,
     )?;
     LuaApiMut::register_function(lua, "CanSendAuctionQuery", can_send_auction_query)?;
+    #[cfg(feature = "client-mists")]
     LuaApiMut::register_function(
         lua,
         "GetAuctionItemSubClasses",

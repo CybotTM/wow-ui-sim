@@ -1,4 +1,5 @@
 //! Wrath-only modeled legacy adapters; source-grounded positions, explicit inputs.
+mod action_bar;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
@@ -134,8 +135,10 @@ fn set_who_to_ui(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    action_bar::register(lua)?;
     // Minimap_SetPing needs the native global alias, not a missing-function placeholder.
-    lua.exec("sqrt = math.sqrt")?;
+    // 12340 FrameScript compat text publishes random, not randomseed.
+    lua.exec("sqrt = math.sqrt; random = math.random")?;
     super::legacy_skills::register_all(lua)?;
     LuaApiMut::register_function(lua, "SetMapZoom", set_map_zoom)?;
     LuaApiMut::register_function(lua, "GetCurrentMapContinent", get_current_map_continent)?;

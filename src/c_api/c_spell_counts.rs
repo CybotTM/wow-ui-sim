@@ -1,11 +1,10 @@
 //! Retail 12.0.0 cast counts and 12.0.5 display/max counts over explicit inputs.
 //! Charge priority, formatting domains and empty/zero policies are inferred.
-//! Cast secret-input permissions remain unmodeled; output restriction is separate.
+//! Numeric-secret selector permission is endpoint-local; output restriction is separate.
 
 #[cfg(feature = "retail-12-0-5")]
 use super::c_action_bar_counts::{format_display_count, parse_maximum, parse_replacement};
 use super::c_spell::read_public_spell_identifier_at;
-#[cfg(feature = "retail-12-0-5")]
 use super::c_spell::read_spell_identifier_value;
 use super::charge_state::cooldowns_are_restricted;
 #[cfg(feature = "retail-12-0-5")]
@@ -13,9 +12,7 @@ use super::charge_state::read_charge_input;
 use crate::lua_api::methods::borrow_state;
 #[cfg(feature = "retail-12-0-5")]
 use crate::lua_api::methods::{create_string, val_to_string};
-#[cfg(feature = "retail-12-0-5")]
 use crate::lua_bridge::stack_val;
-#[cfg(feature = "retail-12-0-5")]
 use rilua::runtime_error;
 use rilua::table_security::wrap_host_secret_number;
 #[cfg(feature = "retail-12-0-5")]
@@ -27,8 +24,30 @@ const CAST_API: &str = "C_Spell.GetSpellCastCount";
 #[cfg(feature = "retail-12-0-5")]
 const DISPLAY_API: &str = "C_Spell.GetSpellDisplayCount";
 
+fn read_count_identifier(state: &LuaState, api: &str) -> LuaResult<Option<u32>> {
+    let value = stack_val(state, 1);
+    let enabled = cfg!(all(
+        feature = "retail-12-0-5",
+        any(feature = "profile-retail", feature = "client-ptr")
+    ));
+    if enabled
+        && rilua::table_security::secret_payload_kind(state, value)
+            == Some(rilua::table_security::SecretPayloadKind::Number)
+    {
+        return rilua::table_security::inspect_host_secret_number(state, value, |number| {
+            if !is_unsigned_u32(number) {
+                return Err(runtime_error(format!(
+                    "{api}: argument 1 requires a finite integral u32 secret spell selector"
+                )));
+            }
+            read_spell_identifier_value(state, Val::Num(number))
+        });
+    }
+    read_public_spell_identifier_at(state, 1, api)
+}
+
 pub(crate) fn get_spell_cast_count(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = read_public_spell_identifier_at(state, 1, CAST_API)?;
+    let spell_id = read_count_identifier(state, CAST_API)?;
     let (quantity, restricted) = {
         let sim = borrow_state(state)?;
         (
@@ -53,7 +72,7 @@ const MAX_APPLICATIONS_API: &str = "C_Spell.GetSpellMaxCumulativeAuraApplication
 /// Secret only under the explicit unit-aura restriction input.
 #[cfg(feature = "retail-12-0-5")]
 pub(crate) fn get_spell_max_cumulative_aura_applications(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = read_public_spell_identifier_at(state, 1, MAX_APPLICATIONS_API)?;
+    let spell_id = read_count_identifier(state, MAX_APPLICATIONS_API)?;
     let (maximum, restricted) = {
         let sim = borrow_state(state)?;
         let maximum = spell_id
@@ -111,7 +130,6 @@ fn validate_identifier(state: &LuaState, value: Val) -> LuaResult<()> {
     }
 }
 
-#[cfg(feature = "retail-12-0-5")]
 fn is_unsigned_u32(number: f64) -> bool {
     number.is_finite() && f64::from(number as u32) == number
 }

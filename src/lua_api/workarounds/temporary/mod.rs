@@ -209,3 +209,7 @@ pub(crate) mod unit_threat_defaults;
 pub(crate) mod video_options_state;
 pub(crate) mod vignette_pin_template;
 pub(crate) mod world_service_defaults;
+#[cfg(feature = "client-wrath")]
+pub(crate) mod wrath_arena_roster;
+#[cfg(feature = "client-wrath")]
+pub(crate) mod wrath_trade_skill_filters;

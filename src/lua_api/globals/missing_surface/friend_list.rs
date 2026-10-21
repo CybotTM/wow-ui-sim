@@ -5,10 +5,10 @@
 //! probe used by the search UI.
 
 use super::ensure_namespace;
-use crate::c_api::c_friend_list::build_friend_info_table;
-use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, table_set_static,
+use crate::c_api::c_friend_list::{
+    build_friend_info_table, friends_in_display_order, show_friends,
 };
+use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set_static};
 use crate::lua_api::state::SocialFriend;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -167,17 +167,12 @@ fn set_who_to_ui(state: &mut LuaState) -> LuaResult<u32> {
     let enabled = bool::from_stack(state, 1)?;
     #[cfg(feature = "client-wrath")]
     {
-        borrow_state_mut(state)?.who_routing.to_ui = enabled;
+        crate::lua_api::methods::borrow_state_mut(state)?
+            .who_routing
+            .to_ui = enabled;
     }
     #[cfg(not(feature = "client-wrath"))]
     let _ = enabled;
-    Ok(0)
-}
-
-fn show_friends(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?
-        .events
-        .push_simple("FRIENDLIST_UPDATE");
     Ok(0)
 }
 
@@ -193,8 +188,7 @@ fn social_friend_by_display_index(
     let Some(zero_based) = usize::try_from(index - 1).ok() else {
         return Ok(None);
     };
-    let mut friends = borrow_state(state)?.social_friends.clone();
-    friends.sort_by_key(|friend| !friend.is_online);
+    let friends = friends_in_display_order(&borrow_state(state)?.social_friends);
     Ok(friends.get(zero_based).cloned())
 }
 

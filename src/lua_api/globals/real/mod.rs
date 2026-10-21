@@ -121,6 +121,12 @@ pub mod unit_spell_target_name;
 pub mod vehicle_possession;
 pub mod voice_chat_probes;
 #[cfg(feature = "client-wrath")]
+pub mod wrath_auction_catalog;
+#[cfg(feature = "client-wrath")]
+pub mod wrath_calendar;
+#[cfg(feature = "client-wrath")]
+pub(crate) mod wrath_friends;
+#[cfg(feature = "client-wrath")]
 pub mod wrath_legacy;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_legacy_lfg;
@@ -131,11 +137,15 @@ pub mod wrath_legacy_lfg;
 ))]
 pub mod wrath_legacy_state;
 #[cfg(feature = "client-wrath")]
+pub mod wrath_minimap_arrows;
+#[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_quest_dialog;
 #[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_spellbook;
 #[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_startup_queries;
+#[cfg(feature = "client-wrath")]
+pub mod wrath_talent_groups;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_voice;
 pub mod xp_honor_rest;

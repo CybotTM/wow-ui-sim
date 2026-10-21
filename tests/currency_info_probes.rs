@@ -310,7 +310,7 @@ fn get_currency_list_info_reflects_successive_existing_currency_updates() {
                        listed.iconFileID, listed.quality
                 "#,
                 if cfg!(feature = "client-retail") {
-                    10
+                    12
                 } else {
                     9
                 }

@@ -5,6 +5,9 @@
 //!
 use super::WowLuaEnv;
 
+// Wrath's native FloatingChatFrame owns placement and editbox geometry.
+const PRESERVE_NATIVE_CHAT_LAYOUT: bool = cfg!(feature = "client-wrath");
+
 /// Show ChatFrame1 and set DEFAULT_CHAT_FRAME after addon loading.
 pub fn show_chat_frame(env: &WowLuaEnv) {
     activate_chat_frame(env);
@@ -18,7 +21,25 @@ pub fn prepare_for_third_party_addons(env: &WowLuaEnv) {
 }
 
 fn activate_chat_frame(env: &WowLuaEnv) {
+    if PRESERVE_NATIVE_CHAT_LAYOUT {
+        return;
+    }
     let _ = env.exec(SHOW_CHAT_FRAME_LUA);
+}
+
+/// Preserve each caller's existing parent-frame requirement outside native Wrath.
+pub(crate) fn normalize_chat_editbox_width(env: &WowLuaEnv, require_chat_frame: bool) {
+    if PRESERVE_NATIVE_CHAT_LAYOUT {
+        return;
+    }
+    let frame_check = if require_chat_frame {
+        "and ChatFrame1"
+    } else {
+        ""
+    };
+    let _ = env.exec(&format!(
+        "if ChatFrame1EditBox {frame_check} then ChatFrame1EditBox:SetWidth(447) end"
+    ));
 }
 
 /// Initialize r,g,b on ChatTypeInfo entries.

@@ -61,6 +61,13 @@ fn setup_env() -> WowLuaEnv {
         state.addon_base_paths = vec![blizzard_ui_dir()];
     }
 
+    if cfg!(feature = "client-wrath") {
+        common::panel_fixtures::load_wrath_panel_core(&env);
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        return env;
+    }
+
     let ui = blizzard_ui_dir();
     for addon_name in PANEL_ADDONS {
         common::load_required_blizzard_addon(&env, &ui, addon_name);
@@ -107,6 +114,11 @@ fn fire_startup_events(env: &WowLuaEnv) {
 fn show_ui_panel_locks_reputation_frame_layout() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/reputation_layout.lua"))
+                .expect("native reputation panel and scroll/detail geometry");
+            return;
+        }
         let result: String = env
             .eval(
                 r#"
