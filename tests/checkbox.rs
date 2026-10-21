@@ -4,7 +4,46 @@
 use crate::common;
 
 use common::env_with_shared_xml;
-use wow_ui_sim::iced_app::{build_quad_batch_for_registry, RegistryQuadBatchParams};
+use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+#[cfg(feature = "client-wrath")]
+mod checkbox_art {
+    pub const TEMPLATE: &str = "UICheckButtonTemplate";
+    pub const SIZE: (f32, f32) = (32.0, 32.0);
+    pub const PATH_FRAGMENT: &str = "ui-checkbox";
+
+    pub fn assert_source(path: &str, _coords: Option<(f32, f32, f32, f32)>, file: &str) {
+        assert_eq!(path, format!("Interface\\Buttons\\{file}"));
+    }
+}
+
+#[cfg(not(feature = "client-wrath"))]
+mod checkbox_art {
+    pub const TEMPLATE: &str = "MinimalCheckboxTemplate";
+    pub const SIZE: (f32, f32) = (30.0, 29.0);
+    pub const PATH_FRAGMENT: &str = "minimalcheckbox";
+
+    pub fn assert_source(path: &str, coords: Option<(f32, f32, f32, f32)>, _file: &str) {
+        assert!(
+            path.to_lowercase().contains(PATH_FRAGMENT),
+            "atlas path: {path}"
+        );
+        assert!(
+            coords.is_some(),
+            "texture coordinates should be set from atlas"
+        );
+    }
+}
+
+fn create_checkbox(env: &WowLuaEnv, name: &str) {
+    let template = checkbox_art::TEMPLATE;
+    env.exec(&format!(
+        r#"local cb = CreateFrame("CheckButton", {name:?}, UIParent, {template:?})
+        cb:SetPoint("CENTER")"#
+    ))
+    .unwrap();
+}
 
 // ============================================================================
 // MinimalCheckboxTemplate
@@ -14,25 +53,21 @@ use wow_ui_sim::iced_app::{build_quad_batch_for_registry, RegistryQuadBatchParam
 fn minimal_checkbox_size() {
     let env = env_with_shared_xml();
 
-    env.exec(
-        r#"
-        local cb = CreateFrame("CheckButton", "TestMinCheckbox", UIParent, "MinimalCheckboxTemplate")
-        cb:SetPoint("CENTER")
-    "#,
-    )
-    .unwrap();
+    create_checkbox(&env, "TestMinCheckbox");
 
     let state = env.state().borrow();
     let id = state.widgets.get_id_by_name("TestMinCheckbox").unwrap();
     let frame = state.widgets.get(id).unwrap();
 
     assert_eq!(
-        frame.width, 30.0,
-        "MinimalCheckboxTemplate width should be 30"
+        frame.width,
+        checkbox_art::SIZE.0,
+        "native checkbox template width"
     );
     assert_eq!(
-        frame.height, 29.0,
-        "MinimalCheckboxTemplate height should be 29"
+        frame.height,
+        checkbox_art::SIZE.1,
+        "native checkbox template height"
     );
 }
 
@@ -40,13 +75,7 @@ fn minimal_checkbox_size() {
 fn minimal_checkbox_normal_texture_atlas() {
     let env = env_with_shared_xml();
 
-    env.exec(
-        r#"
-        local cb = CreateFrame("CheckButton", "TestMinCbNormal", UIParent, "MinimalCheckboxTemplate")
-        cb:SetPoint("CENTER")
-    "#,
-    )
-    .unwrap();
+    create_checkbox(&env, "TestMinCbNormal");
 
     let state = env.state().borrow();
     let id = state.widgets.get_id_by_name("TestMinCbNormal").unwrap();
@@ -57,28 +86,14 @@ fn minimal_checkbox_normal_texture_atlas() {
         "normal_texture should be set from checkbox-minimal atlas"
     );
     let path = frame.normal_texture.as_ref().unwrap();
-    assert!(
-        path.to_lowercase().contains("minimalcheckbox"),
-        "normal_texture path should reference minimalcheckbox: {}",
-        path
-    );
-    assert!(
-        frame.normal_tex_coords.is_some(),
-        "normal_tex_coords should be set from atlas"
-    );
+    checkbox_art::assert_source(path, frame.normal_tex_coords, "UI-CheckBox-Up");
 }
 
 #[test]
 fn minimal_checkbox_pushed_texture_atlas() {
     let env = env_with_shared_xml();
 
-    env.exec(
-        r#"
-        local cb = CreateFrame("CheckButton", "TestMinCbPushed", UIParent, "MinimalCheckboxTemplate")
-        cb:SetPoint("CENTER")
-    "#,
-    )
-    .unwrap();
+    create_checkbox(&env, "TestMinCbPushed");
 
     let state = env.state().borrow();
     let id = state.widgets.get_id_by_name("TestMinCbPushed").unwrap();
@@ -88,9 +103,10 @@ fn minimal_checkbox_pushed_texture_atlas() {
         frame.pushed_texture.is_some(),
         "pushed_texture should be set from checkbox-minimal atlas"
     );
-    assert!(
-        frame.pushed_tex_coords.is_some(),
-        "pushed_tex_coords should be set from atlas"
+    checkbox_art::assert_source(
+        frame.pushed_texture.as_ref().unwrap(),
+        frame.pushed_tex_coords,
+        "UI-CheckBox-Down",
     );
 }
 
@@ -98,13 +114,7 @@ fn minimal_checkbox_pushed_texture_atlas() {
 fn minimal_checkbox_highlight_texture_atlas() {
     let env = env_with_shared_xml();
 
-    env.exec(
-        r#"
-        local cb = CreateFrame("CheckButton", "TestMinCbHighlight", UIParent, "MinimalCheckboxTemplate")
-        cb:SetPoint("CENTER")
-    "#,
-    )
-    .unwrap();
+    create_checkbox(&env, "TestMinCbHighlight");
 
     let state = env.state().borrow();
     let id = state.widgets.get_id_by_name("TestMinCbHighlight").unwrap();
@@ -114,9 +124,10 @@ fn minimal_checkbox_highlight_texture_atlas() {
         frame.highlight_texture.is_some(),
         "highlight_texture should be set from checkbox-minimal atlas"
     );
-    assert!(
-        frame.highlight_tex_coords.is_some(),
-        "highlight_tex_coords should be set from atlas"
+    checkbox_art::assert_source(
+        frame.highlight_texture.as_ref().unwrap(),
+        frame.highlight_tex_coords,
+        "UI-CheckBox-Highlight",
     );
 }
 
@@ -124,13 +135,7 @@ fn minimal_checkbox_highlight_texture_atlas() {
 fn minimal_checkbox_checked_texture_atlas() {
     let env = env_with_shared_xml();
 
-    env.exec(
-        r#"
-        local cb = CreateFrame("CheckButton", "TestMinCbChecked", UIParent, "MinimalCheckboxTemplate")
-        cb:SetPoint("CENTER")
-    "#,
-    )
-    .unwrap();
+    create_checkbox(&env, "TestMinCbChecked");
 
     let state = env.state().borrow();
     let id = state.widgets.get_id_by_name("TestMinCbChecked").unwrap();
@@ -141,28 +146,14 @@ fn minimal_checkbox_checked_texture_atlas() {
         "checked_texture should be set from checkmark-minimal atlas"
     );
     let path = frame.checked_texture.as_ref().unwrap();
-    assert!(
-        path.to_lowercase().contains("minimalcheckbox"),
-        "checked_texture path should reference minimalcheckbox: {}",
-        path
-    );
-    assert!(
-        frame.checked_tex_coords.is_some(),
-        "checked_tex_coords should be set from atlas"
-    );
+    checkbox_art::assert_source(path, frame.checked_tex_coords, "UI-CheckBox-Check");
 }
 
 #[test]
 fn minimal_checkbox_disabled_checked_texture_atlas() {
     let env = env_with_shared_xml();
 
-    env.exec(
-        r#"
-        local cb = CreateFrame("CheckButton", "TestMinCbDisChecked", UIParent, "MinimalCheckboxTemplate")
-        cb:SetPoint("CENTER")
-    "#,
-    )
-    .unwrap();
+    create_checkbox(&env, "TestMinCbDisChecked");
 
     let state = env.state().borrow();
     let id = state.widgets.get_id_by_name("TestMinCbDisChecked").unwrap();
@@ -173,14 +164,10 @@ fn minimal_checkbox_disabled_checked_texture_atlas() {
         "disabled_checked_texture should be set from checkmark-minimal-disabled atlas"
     );
     let path = frame.disabled_checked_texture.as_ref().unwrap();
-    assert!(
-        path.to_lowercase().contains("minimalcheckbox"),
-        "disabled_checked_texture path should reference minimalcheckbox: {}",
-        path
-    );
-    assert!(
-        frame.disabled_checked_tex_coords.is_some(),
-        "disabled_checked_tex_coords should be set from atlas"
+    checkbox_art::assert_source(
+        path,
+        frame.disabled_checked_tex_coords,
+        "UI-CheckBox-Check-Disabled",
     );
 }
 
@@ -188,13 +175,7 @@ fn minimal_checkbox_disabled_checked_texture_atlas() {
 fn minimal_checkbox_set_checked_visibility() {
     let env = env_with_shared_xml();
 
-    env.exec(
-        r#"
-        local cb = CreateFrame("CheckButton", "TestMinCbVis", UIParent, "MinimalCheckboxTemplate")
-        cb:SetPoint("CENTER")
-    "#,
-    )
-    .unwrap();
+    create_checkbox(&env, "TestMinCbVis");
 
     // CheckedTexture child should exist and start hidden
     {
@@ -243,14 +224,8 @@ fn minimal_checkbox_set_checked_visibility() {
 fn minimal_checkbox_quad_batch() {
     let env = env_with_shared_xml();
 
-    env.exec(
-        r#"
-        local cb = CreateFrame("CheckButton", "TestMinCbQuad", UIParent, "MinimalCheckboxTemplate")
-        cb:SetPoint("CENTER")
-        cb:Show()
-    "#,
-    )
-    .unwrap();
+    create_checkbox(&env, "TestMinCbQuad");
+    env.exec("TestMinCbQuad:Show()").unwrap();
 
     let buckets = {
         let mut state = env.state().borrow_mut();
@@ -268,7 +243,7 @@ fn minimal_checkbox_quad_batch() {
     let checkbox_requests: Vec<_> = batch
         .texture_requests
         .iter()
-        .filter(|r| r.path.to_lowercase().contains("minimalcheckbox"))
+        .filter(|r| r.path.to_lowercase().contains(checkbox_art::PATH_FRAGMENT))
         .collect();
 
     assert!(
@@ -288,11 +263,11 @@ fn minimal_checkbox_click_toggles_checked() {
 
     // WoW toggles CheckButtons before dispatching OnClick, so the handler observes
     // the new checked state.
+    create_checkbox(&env, "TestMinCbClick");
     env.exec(
         r#"
         TestMinCbClickObserved = {}
-        local cb = CreateFrame("CheckButton", "TestMinCbClick", UIParent, "MinimalCheckboxTemplate")
-        cb:SetPoint("CENTER")
+        local cb = TestMinCbClick
         cb:SetScript("OnClick", function(self)
             table.insert(TestMinCbClickObserved, self:GetChecked())
         end)
@@ -350,13 +325,7 @@ fn assert_checked_texture_visible(
 fn minimal_checkbox_mouse_enabled_by_default() {
     let env = env_with_shared_xml();
 
-    env.exec(
-        r#"
-        local cb = CreateFrame("CheckButton", "TestMinCbMouse", UIParent, "MinimalCheckboxTemplate")
-        cb:SetPoint("CENTER")
-    "#,
-    )
-    .unwrap();
+    create_checkbox(&env, "TestMinCbMouse");
 
     // CheckButton should have mouse enabled by default (like WoW)
     let mouse_enabled: bool = env.eval("return TestMinCbMouse:IsMouseEnabled()").unwrap();
