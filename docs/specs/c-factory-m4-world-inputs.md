@@ -36,3 +36,4 @@ M4 resolves original cached Blizzard consumers recorded by [factory removal](c-n
 
 - Vendor/rilua changes, native policy inference, M1/M2/M5/T6 producers and generic fabrication.
 - New authoritative services beyond the observed gap-list requirements; temporary defaults retire when those services supply their queries.
+- Newly exposed members absent from the frozen gap-list: retain them as residuals with profile, original consumer location, stderr receipt and causal root fix; do not expand this batch.

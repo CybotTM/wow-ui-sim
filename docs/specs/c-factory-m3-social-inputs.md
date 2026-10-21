@@ -43,3 +43,4 @@ M3 replaces observed social/group/chat/guild gaps exposed by [factory removal](c
 - Guessing modern native conditions or reconstructing client code.
 - M1/M2/M4/M5/T6 producer work, except preserving their recorded failures and necessary existing state.
 - Changes to Blizzard/vendor Lua, rilua, original persisted CVars, or arbitrary member fabrication.
+- Newly exposed members absent from the frozen gap-list: retain them as residuals with profile, original consumer location, stderr receipt and causal root fix; do not expand this batch.
