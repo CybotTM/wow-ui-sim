@@ -314,6 +314,7 @@ fn test_addon_list_scroll_keeps_rows_initialized_after_update_ticks() {
 // MinimalScrollBar Atlas Texture Tests (requires SharedXML)
 // ============================================================================
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_minimal_scrollbar_atlas_textures() {
     let env = env_with_shared_xml();
@@ -365,4 +366,35 @@ fn test_minimal_scrollbar_atlas_textures() {
         forward_atlas, "minimal-scrollbar-arrow-bottom",
         "Forward button texture should have atlas set via OnLoad"
     );
+}
+
+}
+
+// INFERRED from cached profile FrameXML, not native 12340 runtime proof.
+#[cfg(feature = "client-wrath")]
+#[test]
+fn test_minimal_scrollbar_atlas_textures() {
+    let env = env_with_shared_xml();
+    env.exec(
+        r#"
+        local sf = CreateFrame("ScrollFrame", "LegacyScrollArt", UIParent, "FauxScrollFrameTemplate")
+        sf:SetSize(200, 100)
+        sf:SetPoint("CENTER")
+        assert(FauxScrollFrame_Update(sf, 20, 5, 20) == 1)
+        local bar = LegacyScrollArtScrollBar
+        local up = LegacyScrollArtScrollBarScrollUpButton
+        local down = LegacyScrollArtScrollBarScrollDownButton
+        assert(up:GetParent() == bar and down:GetParent() == bar)
+        assert(up:GetNormalTexture():GetTextureFilePath() == "Interface\\Buttons\\UI-ScrollBar-ScrollUpButton-Up")
+        assert(down:GetNormalTexture():GetTextureFilePath() == "Interface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up")
+        assert(bar:GetThumbTexture():GetTextureFilePath() == "Interface\\Buttons\\UI-ScrollBar-Knob")
+        local low, high = bar:GetMinMaxValues()
+        assert(low == 0 and high == 300)
+        assert(not up:IsEnabled() and down:IsEnabled())
+        bar:SetValue(300)
+        FauxScrollFrame_Update(sf, 20, 5, 20)
+        assert(up:IsEnabled() and not down:IsEnabled())
+        "#,
+    )
+    .unwrap();
 }

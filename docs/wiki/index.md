@@ -9,6 +9,10 @@
 
 [Presentation lookup](systems/lua-api.md#numeric-secret-spell-presentation-selectors) links the [link contract](../specs/spell-secret-presentation.md#spell-link-selector-regression--2026-10-20): public-API Retail/PTR RED, whole-string identity protection, ordinary nil misses and unchanged glyph rejection. Retail/PTR GREEN and preservation are recorded in the contract; downstream sinks remain separate.
 
+## [2026-10-20] source | Native Wrath action callback fixtures
+
+[Lua API projections](systems/lua-api.md#wrath-action-callback-projections) link the [F04 query contract](../specs/wrath-action-callback-queries.md): original native callbacks, profile-specific tuple/flag projections, separate shared range snapshots and no modern Wrath range publication. The contract owns bounded proof, documented gates and model limits.
+
 ## [2026-10-20] investigation | Shared-target test source binding
 
 [Harness source binding](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) records stale absolute module paths, corrected runtime-root regression RED, rejected manifest bindings and the config-relative source-root input. Config-root relocation GREEN1+1 and a real integration build's1,791 current-worktree paths are verified; before-fixture Retail17 passes and Wrath13 failures remain separate.
@@ -16,6 +20,10 @@
 ## [2026-10-20] source | Numeric-secret tooltip selectors
 
 [Tooltip bridge notes](systems/lua-api.md#retail-1205-tooltip-spell-and-mount-identifiers) link the [owning contract](../specs/tooltip-spell-mount-identifiers.md#numeric-secret-original-consumer-contract): original meter OnEnter and dynamic mount arg1 RED, explicit identity/presentation policy and independent NeverSecret optionals. P3 presentation is not used to initialize the meter row. Original-consumer RED→GREEN, two-sided preservation, private identity after GC and clean stock startup are bounded Retail receipts; native parity remains INFERRED.
+
+## [2026-10-20] source | Wrath XML file diagnostic boundary
+
+[Loader notes](systems/addon-loading.md#wrath-file-load-diagnostics) link the [12340 contract](../specs/xml-load-diagnostics.md): file-open/parse failures bypass Lua errors; genuine Lua errors and other profiles retain current routing. Original DebugTools and canonical-sink RED→GREEN; Wrath67 and Retail61 bounded passes. Stock proof is recorded in the owning spec.
 
 ## [2026-10-20] source | Numeric-secret spell presentation
 

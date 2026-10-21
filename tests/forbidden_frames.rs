@@ -6,7 +6,6 @@
 
 use crate::common;
 
-use common::env_with_shared_xml;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 /// Forbidden proxy __newindex must delegate to the underlying LightUserData.
@@ -60,12 +59,13 @@ fn test_forbidden_frame_newindex_syncs_children_keys() {
     );
 }
 
+post_wrath_ui_fixture! {
 /// Template children created inside a forbidden scope should have their parentKey
 /// accessible. This reproduces the ScrollBar.lua:30 error where Track.Thumb is nil
 /// because Track was a forbidden frame and __newindex didn't sync to children_keys.
 #[test]
 fn test_forbidden_scrollbar_track_has_thumb() {
-    let env = env_with_shared_xml();
+    let env = common::env_with_shared_xml();
 
     // Set forbidden loading context before creating the scrollbar
     env.state().borrow_mut().loading_forbidden = true;
@@ -86,6 +86,54 @@ fn test_forbidden_scrollbar_track_has_thumb() {
     assert_eq!(
         result, "true,true",
         "Forbidden MinimalScrollBar's Track.Thumb should be accessible"
+    );
+}
+
+}
+
+// INFERRED as native Wrath behavior; isolate modeled forbidden parentKey inheritance.
+#[cfg(feature = "client-wrath")]
+#[test]
+fn test_forbidden_scrollbar_track_has_thumb() {
+    let env = WowLuaEnv::new().unwrap();
+    let directory = tempfile::tempdir().unwrap();
+    let toc = directory.path().join("ForbiddenControl.toc");
+    std::fs::write(&toc, "## Title: Forbidden control fixture\nControl.xml\n").unwrap();
+    std::fs::write(
+        directory.path().join("Control.xml"),
+        r#"
+        <Ui>
+            <ScopedModifier forbidden="true">
+                <Frame name="FixtureForbiddenControl" virtual="true">
+                    <Frames>
+                        <Frame parentKey="Track">
+                            <Frames><Button parentKey="Thumb"/></Frames>
+                        </Frame>
+                    </Frames>
+                </Frame>
+            </ScopedModifier>
+        </Ui>
+        "#,
+    )
+    .unwrap();
+    let loaded = wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
+    assert!(loaded.warnings.is_empty(), "{:?}", loaded.warnings);
+    env.state().borrow_mut().loading_forbidden = true;
+    let hierarchy: (bool, bool, bool) = env
+        .eval(
+            r#"
+            local control = CreateFrame("Frame", nil, UIParent, "FixtureForbiddenControl")
+            local track = control.Track
+            local thumb = track and track.Thumb or nil
+            return track ~= nil, thumb ~= nil, track:IsForbidden()
+            "#,
+        )
+        .unwrap();
+    env.state().borrow_mut().loading_forbidden = false;
+    assert_eq!(
+        hierarchy,
+        (true, true, true),
+        "forbidden Frame/Track/Button parentKey chain should remain reachable"
     );
 }
 

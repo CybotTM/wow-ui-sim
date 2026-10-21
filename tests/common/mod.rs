@@ -5,6 +5,8 @@ include!(concat!(
     "/tests/common/profile_fixtures.rs"
 ));
 
+#[cfg(feature = "client-wrath")]
+pub mod action_bar_fixture;
 pub mod addon_coverage_baseline;
 #[cfg(feature = "retail-12-1-0")]
 pub mod aura_container_harness;

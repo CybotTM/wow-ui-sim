@@ -259,6 +259,93 @@ fn bare_scrollframe_property_named_intrinsic_is_not_a_registered_binding() {
 
 #[test]
 fn cached_event_scrollframe_callbacks_precede_normal_scripts_once() {
+    // INFERRED as native Wrath behavior: test-owned XML isolates modeled dispatch
+    // ordering from the modern EventScrollFrame library.
+    let env = synthetic_bindings_env(
+        r#"
+        <Ui>
+            <ScrollFrame name="FixtureEventScrollFrame" virtual="true" intrinsic="true">
+                <Scripts>
+                    <OnHorizontalScroll intrinsicOrder="precall">FixtureScrollCallback(self, 'OnHorizontalScroll', ...)</OnHorizontalScroll>
+                    <OnVerticalScroll intrinsicOrder="precall">FixtureScrollCallback(self, 'OnVerticalScroll', ...)</OnVerticalScroll>
+                    <OnScrollRangeChanged intrinsicOrder="precall">FixtureScrollCallback(self, 'OnScrollRangeChanged', ...)</OnScrollRangeChanged>
+                </Scripts>
+            </ScrollFrame>
+        </Ui>
+        "#,
+    );
+    env.exec(
+        r#"
+        local sf = CreateFrame('ScrollFrame', 'RealEventScrollBindingTarget', UIParent, 'FixtureEventScrollFrame')
+        sf:SetSize(100, 100)
+        local child = CreateFrame('Frame', nil, sf)
+        child:SetSize(100, 100)
+        child:SetPoint('TOPLEFT', sf, 'TOPLEFT')
+        sf:SetScrollChild(child)
+        local content = CreateFrame('Frame', nil, child)
+        content:SetSize(180, 220)
+        content:SetPoint('TOPLEFT', child, 'TOPLEFT')
+        CachedScrollBindingCalls = {}
+        local calls = CachedScrollBindingCalls
+        FixtureScrollCallback = function(owner, event, ...)
+                assert(owner == sf)
+                local x, y = sf:GetHorizontalScrollRange(), sf:GetVerticalScrollRange()
+                if event == 'OnScrollRangeChanged' then
+                    assert(select('#', ...) == 2)
+                    local new_x, new_y = ...
+                    assert(new_x == 80 and new_y == 120 and x == new_x and y == new_y)
+                elseif event == 'OnHorizontalScroll' then
+                    assert(select('#', ...) == 1 and (...) == 35 and sf:GetHorizontalScroll() == 35)
+                else
+                    assert(select('#', ...) == 1 and (...) == -7 and sf:GetVerticalScroll() == -7)
+                end
+                calls[#calls + 1] = event .. ':callback'
+        end
+        for _, event in ipairs({'OnHorizontalScroll', 'OnVerticalScroll', 'OnScrollRangeChanged'}) do
+            assert(type(sf:GetScript(event, 0)) == 'function', event .. ' precall missing')
+            sf:SetScript(event, function(self, ...)
+                assert(self == sf)
+                calls[#calls + 1] = event .. ':normal'
+            end)
+        end
+        sf:UpdateScrollChildRect()
+    "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        local sf = RealEventScrollBindingTarget
+        assert(sf:GetHorizontalScrollRange() == 80 and sf:GetVerticalScrollRange() == 120)
+        sf:UpdateScrollChildRect()
+    "#,
+    )
+    .unwrap();
+    env.fire_on_update(0.016).unwrap();
+    env.exec(
+        r#"
+        local sf = RealEventScrollBindingTarget
+        local calls = CachedScrollBindingCalls
+        sf:SetHorizontalScroll(35)
+        sf:SetHorizontalScroll(35)
+        sf:SetVerticalScroll(-7)
+        sf:SetVerticalScroll(-7)
+        assert(table.concat(calls, ',') == table.concat({
+            'OnScrollRangeChanged:callback', 'OnScrollRangeChanged:normal',
+            'OnHorizontalScroll:callback', 'OnHorizontalScroll:normal',
+            'OnVerticalScroll:callback', 'OnVerticalScroll:normal',
+        }, ','), table.concat(calls, ','))
+    "#,
+    )
+    .unwrap();
+    let state = env.state();
+    let state = state.borrow();
+    assert!(state.lua_errors.is_empty(), "{:?}", state.lua_errors);
+}
+
+post_wrath_ui_fixture! {
+#[test]
+fn cached_event_scrollframe_native_callback_registration() {
     let env = super::env_with_shared_xml();
     env.exec(
         r#"
@@ -327,4 +414,6 @@ fn cached_event_scrollframe_callbacks_precede_normal_scripts_once() {
     let state = env.state();
     let state = state.borrow();
     assert!(state.lua_errors.is_empty(), "{:?}", state.lua_errors);
+}
+
 }
