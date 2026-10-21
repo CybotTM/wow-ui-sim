@@ -27,10 +27,11 @@ Wrath 12340 file-open/XML-parse diagnostics belong to the loader, not Lua's erro
 - `tests/xml_load_diagnostics.rs` — diagnostic text, repeated failed attempts, original DebugTools consumer, continuation, runtime LoadAddOn and genuine-error/Retail controls.
 - `tests/batch3_wrath_include.rs` — existing nested XML/Lua continuation.
 - `src/loader/tests/xml_basics_extra.rs` — preserved non-Wrath handler/path policy from `03786f864`.
+- `src/loader/addon.rs` missing-TOC test — profile-specific XML text with unchanged missing-Lua and no-handler contracts.
 
 ## Known gaps (current cycle)
 
-- [ ] GREEN pending. Source-bound RED `d3dc2100b` reaches the unchanged original DebugTools consumer (`file diagnostic polluted original ScriptErrorsFrame`); earlier grouped RED also proves canonical sink pollution and missing retained native texts. FrameXML alone does not load DebugTools: its original TOC is explicitly loaded.
+- [ ] Retail preservation pending. Wrath GREEN5/5 plus nested include6/6 and genuine nested OnLoad1/1; source-bound RED `d3dc2100b` reaches the unchanged original DebugTools consumer (`file diagnostic polluted original ScriptErrorsFrame`); earlier grouped RED also proves canonical sink pollution and missing retained native texts. FrameXML alone does not load DebugTools: its original TOC is explicitly loaded.
 - [ ] Stock Wrath/Retail lua-errors preservation awaits execution.
 
 ## Out of scope

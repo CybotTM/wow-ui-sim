@@ -855,13 +855,18 @@ mod tests {
         assert_eq!(result.lua_files, 0);
         assert_eq!(result.xml_files, 0);
         assert_eq!(result.warnings.len(), 2);
-        assert!(
-            result
-                .warnings
-                .iter()
-                .all(|warning| warning.contains("No such file or directory")),
-            "missing TOC files should remain loader warnings: {:?}",
-            result.warnings
+        let lua_warning = format!(
+            "{}: IO error: No such file or directory (os error 2)",
+            addon_dir.join("Missing.lua").display()
         );
+        let xml_warning = if uses_wrath_file_diagnostics() {
+            "Couldn't open Interface\\AddOns\\MissingFiles\\Missing.xml".to_string()
+        } else {
+            format!(
+                "{}: IO error: No such file or directory (os error 2)",
+                addon_dir.join("Missing.xml").display()
+            )
+        };
+        assert_eq!(result.warnings, [lua_warning, xml_warning]);
     }
 }
