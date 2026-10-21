@@ -3,6 +3,10 @@
 The Lua API layer bridges Lua addon code with the Rust simulation engine. It provides WoW-compatible globals, 300+ frame methods, C_* namespaces, and a timer system — all backed by `WowLuaEnv` and `SimState`.
 
 
+## Factory-removal social inputs — 2026-10-21
+
+[The M3 contract](../../specs/c-factory-m3-social-inputs.md) owns profile scope and simulator policies. `c_api::c_guild_info` projects supplied numeric metadata plus existing guild-logo colors into independent DTOs; changing the legacy filename invalidates metadata rather than guessing a file ID. Named temporary social-service defaults cover capability systems that roster, listing and friend data do not model. Unknown members remain nil. Frozen original-consumer RED is retained; new-contract RED/GREEN and post-batch startup proof remain pending.
+
 ## Container, message history and transform producers — 2026-10-16
 
 Producer `269ed6f17` replaces passive label scaffolds. The C API models remain first-class under `src/c_api/`: `container_inventory.rs` shares split/use transitions with legacy globals, `container_actions.rs` owns environment-local eligibility/request records, and `container_quest.rs` queries current slot item identity plus supplied item metadata and rich quest-log membership. Wrath legacy quest publication projects the same result as three positional values. [Split/use](../../specs/container-split-use.md) and [quest metadata](../../specs/container-item-quest-metadata.md) own policies, historical RED and bounded GREEN receipts; these are not native gameplay/catalog claims.

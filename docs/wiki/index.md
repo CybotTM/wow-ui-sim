@@ -1,3 +1,7 @@
+## [2026-10-21] source | Factory-removal social inputs
+
+[Social ownership](systems/lua-api.md#factory-removal-social-inputs--2026-10-21) links the [M3 contract](../specs/c-factory-m3-social-inputs.md): supplied tabard metadata versus named missing-service policies. Frozen original-consumer RED is retained; new-contract execution and final startup proof remain pending.
+
 ## [2026-10-20] source | C namespace factory removal (F0)
 
 [Namespace diagnostics](systems/addon-loading.md#missing-c-members-f0-2026-10-20) link the [nil-member contract and frozen proof](../specs/c-namespace-nil-members.md#frozen-f0-proof). The proof owns the full-feature profile matrix, original-consumer gap evidence, failed health gates and unresolved callback attribution. No replacement model is included.
