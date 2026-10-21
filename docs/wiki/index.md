@@ -5,6 +5,9 @@
 ## [2026-10-20] investigation | Wrath addon-load fixture ordering
 
 [Fixture diagnosis](investigations/wrath-addon-load-fixture.md) traces missing core prerequisites to omitted profile FrameXML loading. The corrected fixture passes 8/13 original Wrath consumers; five retained failures name separate legacy gaps. Existing auction-model publication reduces AuctionUI errors5→1. Retail17 before/after and stock Wrath/Retail `lua-errors []` pass; cached Interface30300 remains distinct from native acceptance.
+## [2026-10-20] source | Secret numeric spell-link selectors
+
+[Presentation lookup](systems/lua-api.md#numeric-secret-spell-presentation-selectors) links the [link contract](../specs/spell-secret-presentation.md#spell-link-selector-regression--2026-10-20): public-API Retail/PTR RED, whole-string identity protection, ordinary nil misses and unchanged glyph rejection. Retail/PTR GREEN and preservation are recorded in the contract; downstream sinks remain separate.
 
 ## [2026-10-20] source | Native Wrath action callback fixtures
 
