@@ -162,7 +162,7 @@ fn classic_namespace_rune_onload_hides_initially_shown_control() {
 }
 
 #[test]
-fn classic_namespace_unknown_members_stay_nil_without_changing_other_factories() {
+fn classic_namespace_unknown_members_stay_nil_in_all_namespaces() {
     let env = consumer_env();
     env.exec(
         r#"
@@ -174,13 +174,13 @@ fn classic_namespace_unknown_members_stay_nil_without_changing_other_factories()
             assert(__wow_namespace(namespace) == namespace)
             assert(namespace.NotARealMethod == nil)
         end
-        -- Known existing namespace: its member factory must remain unchanged.
-        local method = C_CVar.NotARealMethod
-        assert(type(method) == 'function' and C_CVar.NotARealMethod == method)
-        assert(select('#', method()) == 1 and method() == nil)
+        assert(C_CVar.NotARealMethod == nil)
+        assert(C_CVar.NotARealMethod == nil)
+        assert(rawget(C_CVar, 'NotARealMethod') == nil)
         local unrelated = __wow_namespace()
-        assert(type(unrelated.NotARealMethod) == 'function')
-        assert(select('#', unrelated.NotARealMethod()) == 1)
+        assert(unrelated.NotARealMethod == nil)
+        assert(unrelated.NotARealMethod == nil)
+        assert(rawget(unrelated, 'NotARealMethod') == nil)
     "#,
     )
     .unwrap();
