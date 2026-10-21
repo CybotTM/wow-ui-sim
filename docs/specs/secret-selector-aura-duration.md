@@ -29,7 +29,7 @@ PTR RED `25d704534`: both selector cases and the updated legacy selector control
 
 DurationObject remains5/6 before/after: the unchanged party fixture does not activate party_group_active. No producer or fixture workaround is included. Other preservation: PTR UnitExists5/instance IDs6/admin14 and Retail UnitExists8/instance IDs6/admin14 pass.
 
-Exact argv, source-bound ELF hashes and results: `/home/osso/.local/state/wow-ui-sim/handoff/secret-sel-a/proof-ledger.jsonl`, `p5-duration-*`, `final-retail-*`.
+Selector and legacy proof: `tests/secret_selector_aura_duration.rs` and `tests/aura_refresh_duration.rs` pass at `8ef48e2dc` on PTR and `3abd293c0` on Retail.
 
 ## Known gaps (current cycle)
 

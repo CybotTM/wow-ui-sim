@@ -30,7 +30,7 @@ Retail/PTR 12.0.5+ numeric-selector compatibility in `src/c_api/c_spell_counts.r
 
 Retail RED `5ee8ff94d`: six selector cases fail at original API boundaries. Producer `98253972c` passes unrestricted original viewer count/color paths. Test-only `ba5be5354` uses permitted secure payload inspection instead of comparing wrappers directly; all six cases pass. Count30/max8/SSP1seven controls pass at the unchanged producer. Retail startup exit0 `[]`; original sources14/14 and persisted CVar stat/hash unchanged.
 
-Exact argv, source-bound ELF hashes and results: `/home/osso/.local/state/wow-ui-sim/handoff/secret-sel-a/proof-ledger.jsonl`, `p4-*`. This is bounded Retail proof, not natural secret-ID or native-secrecy proof.
+Proof at `ba5be5354`: six cases in `tests/secret_selector_counts.rs` pass, alongside controls in `tests/spell_count_outputs.rs` and `tests/spell_max_cumulative_aura_applications.rs`. This is bounded Retail proof, not natural secret-ID or native-secrecy proof.
 
 ## Known gaps (current cycle)
 

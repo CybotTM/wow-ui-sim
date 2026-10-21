@@ -29,7 +29,7 @@ Retail/PTR 12.0.5+ classification-selector compatibility in `src/c_api/c_spell_c
 - Final `6a6c5a32c`, `CARGO_INCREMENTAL=0`: three selector/original-consumer cases pass with explicit caller tags and complete classification-fact checks; public classification module remains 3/3 before/after. Integration ELF SHA256 `9390db837aeca4bbed16897c8006ff21e1b054c1581d8d5fa99431442d05096b`, 1955 embedded test-source paths, all this worktree. No zero-selection credit.
 - Retail startup returns `[]`, exit0; binary SHA256 `44776ce1507f69c44b7a34c4ec181c47e4ce1432aafbd6697d5399c9e64d3ace`. Scoped Rustfmt and Cargo fmt checks pass; all three builds have zero warnings. Fourteen original Retail/PTR source hashes and original CVar stat/hash remain unchanged.
 
-Exact commands/results/hashes are retained in `/home/osso/.local/state/wow-ui-sim/handoff/secret-sel-a/proof-ledger.jsonl` and the `p2-*` artifacts. Broader pre-existing duration-object preservation remains 5/6 (inactive-party fixture), unchanged before/after and outside classification scope. This is bounded simulator proof, not native or all-profile acceptance.
+Proof at `6a6c5a32c`: three selector/original-consumer cases in `tests/secret_selector_classification.rs` and public classification controls in `tests/p1200_rest_spell_plate.rs` pass. Broader pre-existing duration-object preservation remains 5/6 (inactive-party fixture), unchanged before/after and outside classification scope. This is bounded simulator proof, not native or all-profile acceptance.
 
 ## Known gaps (current cycle)
 

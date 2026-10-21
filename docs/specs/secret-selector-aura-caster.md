@@ -29,7 +29,7 @@ PTR RED `670b7af51`: three cases fail at typed argument2 before lookup. Producer
 
 PTR UnitExists5/instance IDs6/admin14/duration selector2 pass; Retail UnitExists8/instance IDs6/admin14/duration selector1 pass. One intermediate helper build failed on private module access and was corrected; one empty guessed filter was rejected with zero credit. Neither is behavioral acceptance evidence.
 
-Exact argv, source-bound ELF hashes and results: `/home/osso/.local/state/wow-ui-sim/handoff/secret-sel-a/proof-ledger.jsonl`, `p5-caster-*`, `final-retail-*`.
+Selector proof at `3abd293c0`: `tests/secret_selector_aura_caster.rs`, three cases pass on PTR and Retail.
 
 ## Known gaps (current cycle)
 
