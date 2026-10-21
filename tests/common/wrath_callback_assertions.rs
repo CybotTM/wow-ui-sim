@@ -309,6 +309,12 @@ fn seed_timed_aura(env: &WowLuaEnv) {
 pub fn aura_duration() {
     let env = wrath_env();
     seed_timed_aura(&env);
+    env.state().borrow().widgets.take_render_dirty_with_ids();
+    env.exec("BuffButton1:GetScript('OnUpdate')(BuffButton1, 0)")
+        .unwrap();
+    let (mask, ids) = env.state().borrow().widgets.take_render_dirty_with_ids();
+    assert_eq!(mask, 0, "settled duration tick must not dirty rendering");
+    assert!(ids.unwrap_or_default().is_empty());
     env.exec(r#"
         local button = BuffButton1
         local handler = button:GetScript("OnUpdate")
@@ -317,6 +323,7 @@ pub fn aura_duration() {
         handler(button, 0)
         assert(button.duration:GetText() == text and button.duration:IsShown())
         button.timeLeft = 30
+        BuffFrame:GetScript("OnUpdate")(BuffFrame, 0.1)
         handler(button, 0)
         assert(button.duration:GetText() == SecondsToTimeAbbrev(30))
         local r, g, b = button.duration:GetTextColor()
