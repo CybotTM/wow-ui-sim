@@ -218,8 +218,8 @@ fn wrath_xml_diagnostics_preserve_lua_compile_runtime_and_onload_errors() {
         r#"<Ui>
         <Include file="Syntax.lua"/>
         <Script file="Throw.lua"/>
-        <Frame name="DiagOnLoad"><Scripts><OnLoad>error('diag-onload')</OnLoad></Scripts></Frame>
         <Script>DiagParentTail = true</Script>
+        <Frame name="DiagOnLoad"><Scripts><OnLoad>error('diag-onload')</OnLoad></Scripts></Frame>
     </Ui>"#,
     );
     std::fs::write(addon.join("Syntax.lua"), "local =").unwrap();
