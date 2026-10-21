@@ -11,6 +11,11 @@ pub struct CalendarContext {
     pub player_present: bool,
     /// 0=base, 1=Burning Crusade, 2=Wrath.
     pub account_expansion: u8,
+    pub action_pending: bool,
+    /// INFERRED cached substitute for the native throttle CVar's unknown public name.
+    pub invite_throttle_bypass: bool,
+    /// Milliseconds on the existing GetTime monotonic clock; zero means no invite.
+    pub last_invite_time_ms: u64,
 }
 
 #[cfg(feature = "client-wrath")]
@@ -19,7 +24,28 @@ impl Default for CalendarContext {
         Self {
             player_present: true,
             account_expansion: 2,
+            action_pending: false,
+            invite_throttle_bypass: false,
+            last_invite_time_ms: 0,
         }
+    }
+}
+
+#[cfg(feature = "client-wrath")]
+impl CalendarContext {
+    const INVITE_THROTTLE_MS: u64 = 2000;
+
+    /// Native read-only predicate; an explicit clock value makes boundary tests exact.
+    pub fn can_send_invite_at(&self, now_ms: u64) -> bool {
+        if self.action_pending {
+            return false;
+        }
+        if self.invite_throttle_bypass {
+            return true;
+        }
+        let never_invited = self.last_invite_time_ms == 0;
+        let elapsed_ms = now_ms.wrapping_sub(self.last_invite_time_ms);
+        never_invited || elapsed_ms >= Self::INVITE_THROTTLE_MS
     }
 }
 
