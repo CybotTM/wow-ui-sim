@@ -1,0 +1,12 @@
+-- INFERRED global row identities from native MailFrame.lua/xml.
+A_Admin.ClearInbox()
+A_Admin.AddMail("Thrall", "Unread Orders", "Meet me in Orgrimmar.")
+A_Admin.AddMail("Jaina", "Arcane Invoice", "The Kirin Tor still expects payment.")
+A_Admin.OpenMailbox()
+assert(MailFrame:IsShown() and InboxFrame:IsShown())
+assert(GetInboxNumItems() == 2, "legacy inbox count")
+assert(MailItem1Button:IsShown() and MailItem1Button.index == 1)
+assert(MailItem1Sender:GetText() == "Thrall")
+assert(MailItem1Subject:GetText() == "Unread Orders")
+assert(MailItem2Button:IsShown())
+assert(MailItem2Sender:GetText() == "Jaina")

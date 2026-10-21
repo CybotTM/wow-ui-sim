@@ -19,6 +19,11 @@ use wow_ui_sim::loader::load_addon;
 fn show_macro_frame_loads_and_populates_selector() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/macros.lua"))
+                .expect("native macro lazy loader, selection and populated rows");
+            return;
+        }
         env.exec(
             "Constants.MacroConsts = { MAX_ACCOUNT_MACROS = 120, MAX_CHARACTER_MACROS = 30 }",
         )
@@ -63,6 +68,11 @@ fn show_macro_frame_loads_and_populates_selector() {
 fn show_mail_frame_loads_and_populates_inbox_rows() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/mail.lua"))
+                .expect("native mail event consumer populates inbox rows");
+            return;
+        }
         let result: String = env.eval(r#"
             A_Admin.ClearInbox()
             A_Admin.AddMail("Thrall", "Unread Orders", "Meet me in Orgrimmar.")
@@ -118,6 +128,11 @@ fn show_mail_frame_loads_and_populates_inbox_rows() {
 fn item_socketing_frame_loads_and_populates_socket_buttons() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/socketing.lua"))
+                .expect("native socket event consumer and seeded socket state");
+            return;
+        }
         let result: String = env.eval(r#"
             C_ItemSocketInfo._state.uiType = Enum.ItemSocketInfoUIType.ItemSocketingUI or 0
             C_ItemSocketInfo._state.isOpen = true
@@ -441,6 +456,15 @@ fn build_panel_damage_meter_details() -> DamageMeterCombatSessionSource {
 fn audio_settings_register_seeded_output_device_dropdown_options() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleDropDownMenu(1, nil, AudioOptionsSoundPanelHardwareDropDown)
+                assert(DropDownList1.numButtons == 1, "one seeded output device")
+                assert(DropDownList1Button1.value == 0, "zero-based output driver")
+                assert(DropDownList1Button1:GetText() == "Silent Output Device")
+            "#).expect("native audio dropdown enumerates the seeded output driver");
+            return;
+        }
         let result: String = env.eval(r#"
             if not Settings or not Settings.AUDIO_CATEGORY_ID then
                 return "audio_category_missing"
@@ -495,6 +519,14 @@ fn audio_settings_register_seeded_output_device_dropdown_options() {
 fn settings_open_to_interface_category_opens_settings_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                InterfaceOptionsFrame_OpenToCategory(InterfaceOptionsControlsPanel)
+                assert(InterfaceOptionsFrame:IsShown())
+                assert(InterfaceOptionsControlsPanel:IsShown(), "selected native controls category")
+            "#).expect("native interface options category opener");
+            return;
+        }
         let result: String = env.eval(r#"
             if not Settings or not Settings.OpenToCategory then
                 return "missing_settings_open_to_category"
