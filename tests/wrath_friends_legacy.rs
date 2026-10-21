@@ -9,7 +9,7 @@ use wow_ui_sim::startup::{fire_one_on_update_tick, fire_startup_events, process_
 fn load_friends_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Wrath environment");
     env.set_screen_size(1600.0, 1200.0);
-    let ui = common::blizzard_ui_dir();
+    let ui = common::panel_fixtures::blizzard_ui_dir();
     env.state().borrow_mut().addon_base_paths = vec![ui.clone()];
     common::load_profile_framexml(&env);
     for (name, toc) in discover_blizzard_addons(&ui) {
