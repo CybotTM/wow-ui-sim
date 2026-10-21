@@ -1,6 +1,6 @@
 # Native Wrath panel fixtures
 
-Window/child identities, geometry and free-function entry points in these fixtures are **INFERRED** from the committed shipped FrameXML inventory, not native-client execution. The shared loader reads the active profile's FrameXML TOC in order before dependent consumers. Retail keeps its existing fixture path.
+Window/child identities, geometry and free-function entry points in these fixtures are **INFERRED** from the committed shipped FrameXML inventory, not native-client execution. The shared loader reads the active profile's FrameXML TOC in order and loads native eager TokenUI before dependent consumers. Retail keeps its existing fixture path.
 
 | Shared behavior | Wrath consumer / identity |
 |---|---|

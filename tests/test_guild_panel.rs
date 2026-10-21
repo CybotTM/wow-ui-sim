@@ -64,7 +64,7 @@ fn setup_env() -> WowLuaEnv {
     }
 
     if cfg!(feature = "client-wrath") {
-        common::load_profile_framexml(&env);
+        common::panel_fixtures::load_wrath_panel_core(&env);
         env.apply_post_load_workarounds();
         fire_startup_events(&env);
         return env;
@@ -153,10 +153,13 @@ fn guild_panel_opens_without_unavailable_error() {
     test_timeout! {
         let env = setup_env();
         if cfg!(feature = "client-wrath") {
+            common::panel_fixtures::clear_recorded_lua_errors(&env);
             env.exec(r#"
                 ToggleFriendsFrame(3)
                 assert(FriendsFrame:IsShown() and GuildFrame:IsVisible(), "native guild tab should open")
             "#).expect("native guild tab opens without unavailable or Lua errors");
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native guild tab errors: {errors:?}");
             return;
         }
         let result: String = env.eval(r#"

@@ -70,7 +70,7 @@ pub(crate) fn setup_env() -> common::LockedEnv {
         }
 
         if cfg!(feature = "client-wrath") {
-            common::load_profile_framexml(&env);
+            common::panel_fixtures::load_wrath_panel_core(&env);
             env.apply_post_load_workarounds();
             fire_startup_events(&env);
             return env;

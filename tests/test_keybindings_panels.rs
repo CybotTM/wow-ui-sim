@@ -498,7 +498,14 @@ fn premade_group_search_result_tooltips_do_not_error() {
 fn keybind_o_opens_social() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            common::panel_fixtures::clear_recorded_lua_errors(&env);
+        }
         env.send_key_press("O", None).expect("O keybind failed");
+        if cfg!(feature = "client-wrath") {
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native friends keybind errors: {errors:?}");
+        }
         assert!(
             frame_is_shown(&env, "FriendsFrame"),
             "FriendsFrame should be shown after pressing O"
@@ -510,6 +517,9 @@ fn keybind_o_opens_social() {
 fn keybind_o_dispatches_toggle_friends_frame() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            common::panel_fixtures::clear_recorded_lua_errors(&env);
+        }
         if !cfg!(feature = "client-wrath") {
             env.exec(r#"assert(C_AddOns.LoadAddOn("Blizzard_FriendsFrame"))"#)
                 .expect("modern FriendsFrame addon should load");
@@ -525,6 +535,10 @@ fn keybind_o_dispatches_toggle_friends_frame() {
             "#
         ).expect("Failed to wrap ToggleFriendsFrame for O keybind test");
         env.send_key_press("O", None).expect("O keybind failed");
+        if cfg!(feature = "client-wrath") {
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native friends dispatch errors: {errors:?}");
+        }
         let triggered: bool = env
             .eval("return _G.__friends_keybind_triggered == true")
             .expect("Failed to read O keybind trigger flag");

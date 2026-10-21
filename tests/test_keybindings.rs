@@ -132,7 +132,7 @@ fn seed_addon_search_paths(env: &WowLuaEnv) {
 
 fn load_base_blizzard_addons(env: &WowLuaEnv) {
     if cfg!(feature = "client-wrath") {
-        common::load_profile_framexml(env);
+        common::panel_fixtures::load_wrath_panel_core(env);
         return;
     }
     let ui = blizzard_ui_dir();
@@ -284,7 +284,9 @@ fn assert_no_backpack_open_errors(env: &WowLuaEnv, context: &str) {
 fn keybind_b_opens_bags() {
     test_timeout! {
         let env = setup_settled_env();
-        load_token_ui(&env);
+        if !cfg!(feature = "client-wrath") {
+            load_token_ui(&env);
+        }
         settle_env(&env);
         env.send_key_press("B", None).expect("B keybind failed");
         assert!(

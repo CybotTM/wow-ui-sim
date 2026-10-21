@@ -67,13 +67,21 @@ pub const PANEL_ADDONS: &[&str] = &[
     "Blizzard_Minimap",
 ];
 
+/// INFERRED eager root: native CharacterFrame hides TokenFrame on every tab switch.
+/// TokenUI has no LoadOnDemand directive in the native inventory.
+pub fn load_wrath_panel_core(env: &WowLuaEnv) {
+    crate::common::load_profile_framexml(env);
+    env.exec("TokenFrame_LoadUI(); assert(TokenFrame, 'native eager TokenUI should load')")
+        .expect("native core and eager currency panel dependency");
+}
+
 pub fn setup_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
 
     seed_addon_search_paths(&env);
     if cfg!(feature = "client-wrath") {
-        crate::common::load_profile_framexml(&env);
+        load_wrath_panel_core(&env);
         env.apply_post_load_workarounds();
         fire_startup_events(&env);
         return env;
