@@ -1,17 +1,19 @@
 //! `GuildControl*` rank-admin probes, backed by `SimState::world.guild_ranks`.
 //!
-//! Real signatures:
+//! Profile-aware projections:
 //!
 //! - `GuildControlSetRank(rankIndex)`         — selects which rank subsequent
-//!                                              getters reference; no-op if
-//!                                              out of range.
+//!                                              getters reference; unsupported
+//!                                              selections clear the model sentinel.
 //! - `GuildControlGetRankName(rankIndex?)`    — returns the rank's display
 //!                                              name, or `""` if no guild /
 //!                                              out of range.
 //! - `GuildControlGetNumRanks()`              — total rank count; `0` when
 //!                                              the player has no guild.
-//! - `GuildControlGetRankFlags(rankIndex?)`   — flag table (`{ bool, bool,
-//!                                              ... }`); `{}` when none.
+//! - `GuildControlGetRankFlags(...)`         — Wrath: 17 positional `1`/nil
+//!                                              values from the selected stored rank,
+//!                                              ignoring arguments. Other profiles:
+//!                                              explicit/selected-rank boolean table.
 //! - `C_GuildInfo.GuildControlGetRankFlags(rankIndex?)` — namespace alias for
 //!                                                        the same data.
 //! - `GetNumMembersInRank(rankIndex)`         — number of roster entries with
@@ -69,7 +71,7 @@ pub fn guild_control_set_rank(state: &mut LuaState) -> LuaResult<u32> {
     if rank >= 1 && rank <= len {
         sim.world.guild_selected_rank = rank as i32;
     } else {
-        // Out-of-range selection clears, matching WoW's "no rank" state.
+        // Simulator sentinel; native unselected-rank behavior is not modeled.
         sim.world.guild_selected_rank = 0;
     }
     Ok(0)
@@ -142,6 +144,32 @@ pub fn guild_control_get_allowed_shifts(state: &mut LuaState) -> LuaResult<u32> 
 }
 
 pub fn guild_control_get_rank_flags(state: &mut LuaState) -> LuaResult<u32> {
+    if cfg!(feature = "client-wrath") {
+        return push_wrath_rank_flags(state);
+    }
+    push_rank_flags_table(state)
+}
+
+const WRATH_GUILD_RANK_FLAG_COUNT: usize = 17;
+
+fn push_wrath_rank_flags(state: &mut LuaState) -> LuaResult<u32> {
+    let enabled_flags: [bool; WRATH_GUILD_RANK_FLAG_COUNT] = {
+        let sim = borrow_state(state)?;
+        let selected_index = (sim.world.guild_selected_rank - 1) as usize;
+        let rank = sim.world.guild_ranks.get(selected_index);
+        let has_guild = sim.world.guild_name.is_some();
+        std::array::from_fn(|index| {
+            has_guild && rank.is_some_and(|rank| rank.flags.get(index) == Some(&true))
+        })
+    };
+    for enabled in enabled_flags {
+        let value = if enabled { Val::Num(1.0) } else { Val::Nil };
+        state.push(value);
+    }
+    Ok(WRATH_GUILD_RANK_FLAG_COUNT as u32)
+}
+
+fn push_rank_flags_table(state: &mut LuaState) -> LuaResult<u32> {
     let flags = resolve_rank_index(state, 1)?.and_then(|idx| {
         borrow_state(state)
             .ok()
@@ -294,7 +322,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         state,
         c_guild_info,
         "GuildControlGetRankFlags",
-        guild_control_get_rank_flags,
+        push_rank_flags_table,
     )?;
     Ok(())
 }

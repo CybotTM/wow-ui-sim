@@ -2,6 +2,18 @@
 
 [Fixture/query diagnosis](investigations/wrath-autocomplete-fixture.md) links the [bounded contract](../specs/wrath-autocomplete-results.md): original-consumer RED, native callback/result oracles and the Wrath-only legacy argument/string-result boundary. Modern-only targets remain report-only; guild/presence identity, recency and UTF-8 edges are held. Producer proof pending.
 
+## [2026-10-21] source | Wrath positional guild rights
+
+[Legacy projection](systems/lua-api.md#wrath-guild-rank-rights) links the [12340 contract](../specs/wrath-guild-rank-flags.md): the original checkbox consumer exposes the table/positional mismatch. The Wrath-only correction has native-consumer and guild-model GREEN plus paired Retail preservation of the existing namespace/table path. The contract distinguishes retained fixture failures and unmodeled lifecycle semantics.
+
+## [2026-10-20] investigation | Wrath native friends legacy surface
+
+[Friends diagnosis](investigations/wrath-friends-legacy-surface.md) retains the original panel and seeded identities. Raw legacy globals and their failed calls expose a producer gap despite a functioning backing namespace. The bound Rust case retains that failure; authoritative offline-nil expectations await joint producer integration, not gating.
+
+## [2026-10-20] source | Wrath native chat layout preservation
+
+[Native chat diagnosis](investigations/wrath-chat-layout.md) records the corrected pre-addon original-consumer boundary. The [contract](../specs/wrath-chat-layout.md) owns bounded RED→GREEN, headless geometry and Retail preservation proof; retained baseline fixture failures remain separate.
+
 ## [2026-10-20] source | Wrath legacy LoD native-evidence adapters
 
 [Consumer follow-up](investigations/wrath-addon-load-fixture.md#native-evidence-legacy-api-follow-up) links the [contract](../specs/wrath-legacy-lod-apis.md): cached groups, lazy arrow models, Calendar context, no-team arena and empty-catalog filter reset paths; native alias publication precedes Calendar capture. Authenticated enUS auction DBC projection and native follow-ups now implemented; initial six producer cases and stock/profile proof passed, expanded proof pending.
