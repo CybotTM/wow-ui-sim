@@ -4,7 +4,11 @@ prefork_full_ui_case! {
 fn chat_frame_layout_stays_locked(env: &WowLuaEnv) {
 
         let result: String = env
-            .eval(include_str!("layout_lock.lua"))
+            .eval(if cfg!(feature = "client-wrath") {
+                include_str!("wrath_layout_lock.lua")
+            } else {
+                include_str!("layout_lock.lua")
+            })
             .expect("chat frame lock eval failed");
 
         assert_eq!(

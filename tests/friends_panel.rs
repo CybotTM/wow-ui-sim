@@ -21,6 +21,7 @@ fn full_game_env_after_startup() -> WowLuaEnv {
         state.addon_base_paths = vec![blizzard_ui_dir()];
     }
 
+    common::load_profile_framexml(&env);
     load_all_blizzard_addons(&env, &blizzard_ui_dir());
     env.apply_post_load_workarounds();
     fire_startup_events(&env);
@@ -45,6 +46,14 @@ fn social_panel_uses_current_provider_without_legacy_wow_friend_rows() {
     common::with_perf_lock(|| {
         common::with_timeout(120, || {
             let env = full_game_env_after_startup();
+            if cfg!(feature = "client-wrath") {
+                let native: String = env
+                    .eval(include_str!("friends_panel/wrath.lua"))
+                    .expect("native FriendsFrame consumer and friend identities");
+                // friends-legacy-12340.md: offline connected is nil, not modern false.
+                assert_eq!(native, "3|2|Arthax\nSylvara|Durotan|nil");
+                return;
+            }
 
             let (
                 legacy_friend_system_enabled,

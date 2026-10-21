@@ -279,6 +279,26 @@ fn absent_from_glue_screens_eager_discovery() {
 
 #[test]
 fn dep_directories_exist_on_disk() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        for file in [
+            "BasicControls.xml",
+            "UIPanelTemplates.lua",
+            "UIPanelTemplates.xml",
+        ] {
+            assert!(
+                toc.files
+                    .iter()
+                    .any(|path| path == std::path::Path::new(file)),
+                "native dependency absent from committed FrameXML order: {file}"
+            );
+            assert!(
+                toc.addon_dir.join(file).is_file(),
+                "native dependency missing on disk: {file}"
+            );
+        }
+        return;
+    }
     for dep in TOC_DEPENDENCIES {
         let dir = blizzard_ui_dir().join(dep);
         assert!(
