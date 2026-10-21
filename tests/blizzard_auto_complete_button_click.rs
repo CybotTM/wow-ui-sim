@@ -52,6 +52,14 @@ F09EditBox.autoCompleteRegex = '(/whisper )([^ ]+)(.*)'
 F09EditBox.autoCompleteFormatRegex = '%2$s%1$s%4$s'
 AutoCompleteButton_OnClick(AutoCompleteButton1)
 assert(F09EditBox:GetText() == '/whisper F09Alpha hello')
+F09EditBox:SetText('/whisper F09')
+F09EditBox.addSpaceToAutoComplete = true
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha', 'F09Beta')
+AutoCompleteButton_OnClick(AutoCompleteButton2)
+local expectedText = '/whisper F09Beta '
+assert(F09EditBox:GetText() == expectedText)
+assert(F09EditBox:GetCursorPosition() == strlen(expectedText))
+assert(not AutoCompleteBox:IsShown())
 "#,
         );
         return;

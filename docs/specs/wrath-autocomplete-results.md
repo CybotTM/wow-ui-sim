@@ -13,7 +13,7 @@ Authority: laptop relay `autocomplete-results-12340.md`, 2026-10-21, static reco
 - [ ] Generic result/selection/clear behavior uses native result buttons; modern-only callback/mixin/pool/ScrollBox assertions remain intact for their existing consumers.
 - [ ] Modern `C_AutoComplete` behavior and non-Wrath global publication remain unchanged.
 
-Cached native FrameXML behavior differs from modern tests: selection starts at zero; focus loss hides without clearing the stored parent or selected index; fresh results shown after dismissal reset selection; Tab cycles selection; no arrow-dispatch, guild-roster-event, priority-color, realm-appending or custom-click-callback handler exists in that consumer. Missing authenticated native GlueXML is an evidence gap, not proof that game autocomplete cannot run on glue screens.
+Cached native FrameXML behavior differs from modern tests: selection starts at zero; focus loss hides without clearing the stored parent or selected index; an empty result update also retains the selected index until fresh results are shown; Tab cycles selection; no arrow-dispatch, guild-roster-event, priority-color, realm-appending or custom-click-callback handler exists in that consumer. Missing authenticated native GlueXML is an evidence gap, not proof that game autocomplete cannot run on glue screens.
 
 ## How it works
 

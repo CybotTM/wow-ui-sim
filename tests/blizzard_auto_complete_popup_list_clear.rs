@@ -50,10 +50,14 @@ fn blizzard_auto_complete_popup_list_clear_results_resets_visible_state() {
         common::wrath_autocomplete::assert_native(
             r#"
 AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha', 'F09Beta')
+AutoComplete_SetSelectedIndex(AutoCompleteBox, 2)
 AutoComplete_UpdateResults(AutoCompleteBox)
 assert(AutoComplete_GetNumResults(AutoCompleteBox) == 0)
 assert(not AutoCompleteBox:IsShown())
 for i=1,5 do assert(not _G['AutoCompleteButton'..i]:IsShown()) end
+assert(AutoComplete_GetSelectedIndex(AutoCompleteBox) == 2)
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha')
+assert(AutoComplete_GetSelectedIndex(AutoCompleteBox) == 0)
 "#,
         );
         return;
