@@ -13,7 +13,8 @@ for _, line in ipairs(WATCHFRAME_QUESTLINES) do
         rows = rows + 1
         assert(line:GetParent() == WatchFrameLines, "native row parent")
         local top = assert(line:GetTop(), "native row top unresolved")
-        assert(line.text:GetHeight() > 0, "native row text collapsed")
+        -- Completed quests may allocate a blank completion-text row; its text
+        -- height is not a layout invariant. Nonempty text measurement has its own case.
         if previousTop then
             assert(top < previousTop, "native rows overlap or reorder")
         end
