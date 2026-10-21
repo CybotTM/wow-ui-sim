@@ -11,6 +11,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - [ ] `GetNumTalentGroups` returns one cached player/inspect count, including zero; inspect precedes pet. Pet returns 1 only when its cached talent-tab presence and tab count are both nonzero, otherwise 0, not the tab count. Same StringToBOOL arguments, no usage error, writes or events.
 - [x] `CreateMiniWorldMapArrowFrame(parent)` validates table/slot-zero/frame type, emits exact native errors, returns zero values and lazily creates two named child Models. Subsequent calls retain their original parents. Model mesh rendering is unsupported.
 - [x] `CalendarEventGetTypes` returns five loaded localized Calendar labels in native order; ignores arguments.
+- [ ] `CalendarEventGetRepeatOptions` returns four localized strings in order: `CALENDAR_REPEAT_NEVER`, `CALENDAR_REPEAT_WEEKLY`, `CALENDAR_REPEAT_BIWEEKLY`, `CALENDAR_REPEAT_MONTHLY`; ignores arguments, no writes/events.
 - [x] `CalendarDefaultGuildFilter` returns level cap twice (60/70/80 by account expansion) and the cached guild-rank count directly (`CGGuildInfo::m_numRanks`, laptop clarification); no guild-name membership gate. Absent player returns three zeros. Ignores arguments.
 - [x] `ArenaTeamRoster` accepts Lua-numeric values/strings, otherwise errors `Usage: ArenaTeamRoster(team)`; no modeled team => zero returns, no roster, query or immediate event.
 - [x] Trade-skill subclass/inventory setters accept number/string arg1; zero/negative/nonnumeric-string ordinals reset, return zero values and emit `TRADE_SKILL_UPDATE`. Subclass reset stores both subclass values as `0xFFFFFFFF` and inventory mask 1; inventory reset stores `0xFFFFFFFF`.
@@ -32,7 +33,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - `src/lua_api/globals/real/wrath_legacy.rs`: native math alias publication before original consumer chunks.
 - `src/lua_api/workarounds/temporary/wrath_trade_skill_filters.rs`: determined reset and empty-catalog validation, with observable cached masks and update event.
 - `src/lua_api/workarounds/temporary/wrath_arena_roster.rs`: native no-team branch until membership/query lifecycle exists. Reuses existing Wrath numeric-string parser.
-- `src/lua_api/globals/real/wrath_calendar.rs`: localized label and cached context projection.
+- `src/lua_api/globals/real/wrath_calendar.rs`: localized event/repeat label catalogs and cached context projection.
 - `src/lua_api/globals/real/wrath_minimap_arrows.rs`: parent validation and lazy child ownership.
 
 ## Tests asserting this spec
@@ -41,6 +42,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - `tests/wrath_legacy_lod_auction.rs`: original AuctionUI line 380, literal enUS catalog/order, hidden rows, sparse inventory pairs and numeric/error/zero-return semantics.
 - `tests/wrath_legacy_lod_apis.rs`: original TalentUI line 266, inspect/pet precedence, argument conversion and environment-local cache.
 - `tests/wrath_legacy_talent_group_counts.rs`: original line 267, stored zero counts, inspect priority, pet 0/1 predicate, argument conversion and no events/writes.
+- `tests/wrath_calendar_repeat_options.rs`: original repeat dropdown initializer at 3811, exact count/order and no events.
 - Original retained LoD shards and force-load in `tests/addon_coverage{,_lod}.rs`.
 
 ### Bounded Wrath proof — 2026-10-20
