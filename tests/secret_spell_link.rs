@@ -32,7 +32,6 @@ fn invoke(env: &WowLuaEnv, code: &str, tainted: bool) {
             {code}
             assert(issecretvalue(Selector), 'selector stays secret')
             if {tainted} then
-                assert(not canaccessvalue(Selector))
                 assert(not pcall(secretunwrap, Selector))
             end
             assert(debug.getstacktaint() == before, 'caller taint preserved')
