@@ -77,7 +77,11 @@ fn spellbook_paged_spells_frame_id(registry: &WidgetRegistry) -> Option<u64> {
 }
 
 fn spellbook_root_name() -> &'static str {
-    if cfg!(feature = "client-wrath") { "SpellBookFrame" } else { "PlayerSpellsFrame" }
+    if cfg!(feature = "client-wrath") {
+        "SpellBookFrame"
+    } else {
+        "PlayerSpellsFrame"
+    }
 }
 
 fn find_first_visible_spellbook_icon_id(registry: &WidgetRegistry) -> Option<u64> {

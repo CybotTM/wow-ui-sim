@@ -22,10 +22,7 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML.toc"),
-    (
-        "Blizzard_SharedXMLGame",
-        "Blizzard_SharedXMLGame.toc",
-    ),
+    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame.toc"),
     (
         "Blizzard_UIPanelTemplates",
         "Blizzard_UIPanelTemplates_Mainline.toc",
@@ -52,7 +49,10 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_Communities", "Blizzard_Communities_Mainline.toc"),
     ("Blizzard_StoreUI", "Blizzard_StoreUI.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
-    ("Blizzard_ManagedFrameSystem", "Blizzard_ManagedFrameSystem_Mainline.toc"),
+    (
+        "Blizzard_ManagedFrameSystem",
+        "Blizzard_ManagedFrameSystem_Mainline.toc",
+    ),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
@@ -62,10 +62,7 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIParentPanelManager",
         "Blizzard_UIParentPanelManager_Mainline.toc",
     ),
-    (
-        "Blizzard_Settings_Shared",
-        "Blizzard_Settings_Shared.toc",
-    ),
+    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared.toc"),
     (
         "Blizzard_SettingsDefinitions_Shared",
         "Blizzard_SettingsDefinitions_Shared.toc",
@@ -74,10 +71,7 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame",
         "Blizzard_SettingsDefinitions_Frame.toc",
     ),
-    (
-        "Blizzard_FrameXMLUtil",
-        "Blizzard_FrameXMLUtil.toc",
-    ),
+    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML.toc"),

@@ -61,7 +61,10 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_Communities", "Blizzard_Communities_Mainline.toc"),
     ("Blizzard_StoreUI", "Blizzard_StoreUI.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
-    ("Blizzard_ManagedFrameSystem", "Blizzard_ManagedFrameSystem_Mainline.toc"),
+    (
+        "Blizzard_ManagedFrameSystem",
+        "Blizzard_ManagedFrameSystem_Mainline.toc",
+    ),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
@@ -73,10 +76,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIParentPanelManager",
         "Blizzard_UIParentPanelManager_Mainline.toc",
     ),
-    (
-        "Blizzard_Settings_Shared",
-        "Blizzard_Settings_Shared.toc",
-    ),
+    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared.toc"),
     (
         "Blizzard_SettingsDefinitions_Shared",
         "Blizzard_SettingsDefinitions_Shared.toc",

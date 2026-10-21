@@ -136,10 +136,19 @@ fn test_parse_blizzard_shared_xml_base() {
         assert_eq!(toc.name, "FrameXML");
         assert!(toc.files.len() > 100);
         assert_eq!(toc.files[0].to_str(), Some("GlobalStrings.lua"));
-        let ui_parent = toc.files.iter().position(|file| file == Path::new("UIParent.xml"));
-        let game_menu = toc.files.iter().position(|file| file == Path::new("GameMenuFrame.xml"));
+        let ui_parent = toc
+            .files
+            .iter()
+            .position(|file| file == Path::new("UIParent.xml"));
+        let game_menu = toc
+            .files
+            .iter()
+            .position(|file| file == Path::new("GameMenuFrame.xml"));
         assert!(ui_parent.is_some() && game_menu.is_some());
-        assert!(ui_parent < game_menu, "native UIParent must precede GameMenu");
+        assert!(
+            ui_parent < game_menu,
+            "native UIParent must precede GameMenu"
+        );
         return;
     }
     let toc_path = blizzard_shared_xml_base_toc();

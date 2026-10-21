@@ -44,7 +44,7 @@ fn selected_rank_flags_return_seventeen_number_or_nil_values_ignoring_arguments(
     env.exec(
         r#"
         local function check(...)
-            assert(select("#", ...) == 17, "native result arity retains nil positions")
+            assert(select('#', ...) == 17, "native result arity retains nil positions")
             local expected = {1, 3, 5, 7, 9, 11, 13, 14, 16}
             for index = 1, 17 do
                 local enabled = false
@@ -76,7 +76,7 @@ fn valid_selected_rank_without_guild_returns_seventeen_nils() {
     env.exec(
         r#"
         local function check(...)
-            assert(select("#", ...) == 17)
+            assert(select('#', ...) == 17)
             for index = 1, 17 do assert(select(index, ...) == nil) end
         end
         check(GuildControlGetRankFlags())

@@ -116,14 +116,17 @@ fn install_dropdown_test_helpers(env: &WowLuaEnv) {
 
 fn load_guild_control_ui(env: &WowLuaEnv) {
     if cfg!(feature = "client-wrath") {
-        env.exec(r#"
+        env.exec(
+            r#"
             A_Admin.SetGuildRanks({
                 { name = "Guild Leader", flags = {} },
                 { name = "Officer", flags = {} },
                 { name = "Member", flags = {} },
             })
             GuildControlPopupFrame_Initialize()
-        "#).expect("native guild control initialization");
+        "#,
+        )
+        .expect("native guild control initialization");
         return;
     }
     let ui = blizzard_ui_dir();
