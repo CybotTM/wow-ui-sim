@@ -60,10 +60,10 @@ fn test_forbidden_frame_newindex_syncs_children_keys() {
     );
 }
 
+post_wrath_ui_fixture! {
 /// Template children created inside a forbidden scope should have their parentKey
 /// accessible. This reproduces the ScrollBar.lua:30 error where Track.Thumb is nil
 /// because Track was a forbidden frame and __newindex didn't sync to children_keys.
-post_wrath_ui_fixture! {
 #[test]
 fn test_forbidden_scrollbar_track_has_thumb() {
     let env = env_with_shared_xml();
