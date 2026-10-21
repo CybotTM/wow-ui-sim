@@ -1,3 +1,7 @@
+## [2026-10-20] source | Numeric-secret counts and usability
+
+[C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) link the [count/usability contract](../specs/secret-selector-count-usability.md): original viewer count/color boundaries, local numeric authentication and unchanged independent output restrictions. Maximum-count opaque selection remains API-only proof, not a natural resource-bar secret feed.
+
 ## [2026-10-20] source | Numeric-secret classifications
 
 [C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) link the [classification contract](../specs/secret-selector-classification.md): endpoint-local numeric selection, preserved ExternalDefensive permission and inferred ordinary output policy. The contract separates original-consumer proof from natural startup provenance.
