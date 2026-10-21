@@ -8,7 +8,7 @@
 
 ## [2026-10-20] source | Wrath XML file diagnostic boundary
 
-[Loader notes](systems/addon-loading.md#wrath-file-load-diagnostics) link the [12340 contract](../specs/xml-load-diagnostics.md): file-open/parse failures bypass Lua errors; genuine Lua errors and other profiles retain current routing. Original DebugTools and canonical-sink RED observed; file-boundary producer implemented, GREEN pending.
+[Loader notes](systems/addon-loading.md#wrath-file-load-diagnostics) link the [12340 contract](../specs/xml-load-diagnostics.md): file-open/parse failures bypass Lua errors; genuine Lua errors and other profiles retain current routing. Original DebugTools and canonical-sink RED→GREEN; Wrath67 and Retail61 bounded passes. Stock proof is recorded in the owning spec.
 
 ## [2026-10-20] source | Numeric-secret spell presentation
 

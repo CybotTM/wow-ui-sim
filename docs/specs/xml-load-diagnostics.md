@@ -4,11 +4,11 @@ Wrath 12340 file-open/XML-parse diagnostics belong to the loader, not Lua's erro
 
 ## What it must do
 
-- [ ] Wrath missing/unreadable XML records `Couldn't open <path>`; malformed XML records `Couldn't parse XML in <path>` before processing that document's children. Missing Lua Include/external Script records `Error loading <path>`. Native severity is STATUS_ERROR; simulator retains exact texts in the existing failure-warning collection without a new severity field or emission path.
-- [ ] Record each failed attempt synchronously at discovery in loader warnings, without Lua handler calls or entries in any canonical Lua-error collection. Propagated child errors must not add duplicate parent records.
-- [ ] Use backslash client virtual paths, collapse `..`, and preserve the failed child's identity. Derivation from addon-root-relative host paths is INFERRED simulator mapping, not native path tracking.
-- [ ] Parent XML siblings, external Script inline body and TOC tail continue. Malformed XML executes no document children. Runtime LoadAddOn succeeds, marks loaded and publishes ADDON_LOADED; runtime loader diagnostics remain retained.
-- [ ] Genuine Lua compilation, execution and OnLoad failures still reach the handler and canonical Lua collectors, including the unchanged original Wrath ScriptErrorsFrame consumer. Retail XML/Script loading preserves its current routing.
+- [x] Wrath missing/unreadable XML records `Couldn't open <path>`; malformed XML records `Couldn't parse XML in <path>` before processing that document's children. Missing Lua Include/external Script records `Error loading <path>`. Native severity is STATUS_ERROR; simulator retains exact texts in the existing failure-warning collection without a new severity field or emission path.
+- [x] Record each failed attempt synchronously at discovery in loader warnings, without Lua handler calls or entries in any canonical Lua-error collection. Propagated child errors must not add duplicate parent records.
+- [x] Use backslash client virtual paths, collapse `..`, and preserve the failed child's identity. Derivation from addon-root-relative host paths is INFERRED simulator mapping, not native path tracking.
+- [x] Parent XML siblings, external Script inline body and TOC tail continue. Malformed XML executes no document children. Runtime LoadAddOn succeeds, marks loaded and publishes ADDON_LOADED; runtime loader diagnostics remain retained.
+- [x] Genuine Lua compilation, execution and OnLoad failures still reach the handler and canonical Lua collectors, including the unchanged original Wrath ScriptErrorsFrame consumer. Retail XML/Script loading preserves its current routing.
 
 ## How it works
 
@@ -29,10 +29,17 @@ Wrath 12340 file-open/XML-parse diagnostics belong to the loader, not Lua's erro
 - `src/loader/tests/xml_basics_extra.rs` — preserved non-Wrath handler/path policy from `03786f864`.
 - `src/loader/addon.rs` missing-TOC test — profile-specific XML text with unchanged missing-Lua and no-handler contracts.
 
+### Bounded proof — 2026-10-20
+
+Source-bound RED `d3dc2100b` reaches unchanged original DebugTools (`file diagnostic polluted original ScriptErrorsFrame`); earlier grouped RED also proves canonical sink pollution and missing retained texts. FrameXML alone does not load DebugTools: its original TOC is explicitly loaded.
+
+Producer `c7436722a`: Wrath diagnostics5/5 plus preservation62/62. Later Rust changes only adjust existing/new test expectations: missing-TOC native XML text and Retail's current pathless parse-error policy. Retail preservation61/61 passes through `637851d2a`. Integration ELFs contain only this worktree's test paths (Wrath1,026; Retail1,963; no foreign paths); every selection runs nonzero tests. Direct vector pushes establish synchronous recording by source inspection; tests observe retained records and callback effects, not an intermediate native logger.
+
+Both separately built stock binaries return `[]`, exit0, for `--no-addons --no-saved-vars lua-errors`. Child-only XDG data directories copy current persisted CVars byte-for-byte; original stat/hash remain unchanged. Formatter checks pass; builds emit no warnings. Receipts: `/home/osso/.local/state/wow-ui-sim/handoff/wrath-xml-load-diag/REPORT.md` and its proof ledger. No broad suite, independent gate or non-Retail/non-Wrath execution is claimed.
+
 ## Known gaps (current cycle)
 
-- [ ] Retail preservation pending. Wrath GREEN5/5 plus nested include6/6 and genuine nested OnLoad1/1; source-bound RED `d3dc2100b` reaches the unchanged original DebugTools consumer (`file diagnostic polluted original ScriptErrorsFrame`); earlier grouped RED also proves canonical sink pollution and missing retained native texts. FrameXML alone does not load DebugTools: its original TOC is explicitly loaded.
-- [ ] Stock Wrath/Retail lua-errors preservation awaits execution.
+None within the bounded file-diagnostic contract. Other-profile runtime matrices and native Retail channel authentication remain outside this change.
 
 ## Out of scope
 
