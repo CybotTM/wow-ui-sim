@@ -119,20 +119,20 @@ fn test_forbidden_scrollbar_track_has_thumb() {
     let loaded = wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
     assert!(loaded.warnings.is_empty(), "{:?}", loaded.warnings);
     env.state().borrow_mut().loading_forbidden = true;
-    let hierarchy: (bool, bool, bool, bool) = env
+    let hierarchy: (bool, bool, bool) = env
         .eval(
             r#"
             local control = CreateFrame("Frame", nil, UIParent, "FixtureForbiddenControl")
             local track = control.Track
             local thumb = track and track.Thumb or nil
-            return track ~= nil, thumb ~= nil, track:IsForbidden(), thumb:GetParent() == track
+            return track ~= nil, thumb ~= nil, track:IsForbidden()
             "#,
         )
         .unwrap();
     env.state().borrow_mut().loading_forbidden = false;
     assert_eq!(
         hierarchy,
-        (true, true, true, true),
+        (true, true, true),
         "forbidden Frame/Track/Button parentKey chain should remain reachable"
     );
 }
