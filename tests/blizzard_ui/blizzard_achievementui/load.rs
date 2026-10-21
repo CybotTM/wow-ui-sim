@@ -77,8 +77,18 @@ fn achievement_ui_load_emits_no_lane_specific_lua_errors() {
     });
 }
 
-// `## Dep: Blizzard_Plunderstorm [AllowLoadGameType plunderstorm]` is excluded.
-const CURRENT_TOC_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil"];
+// Retail/PTR filter the inline Plunderstorm dependency; Forever keeps it optional.
+const CURRENT_TOC_DEPENDENCIES: &[&str] = match wow_ui_sim::client_profile::ACTIVE {
+    wow_ui_sim::client_profile::ClientProfile::Retail
+    | wow_ui_sim::client_profile::ClientProfile::Ptr => &["Blizzard_FrameXMLUtil"],
+    wow_ui_sim::client_profile::ClientProfile::WowForever => {
+        &["Blizzard_FrameXMLUtil", "Blizzard_Plunderstorm"]
+    }
+    wow_ui_sim::client_profile::ClientProfile::Wrath
+    | wow_ui_sim::client_profile::ClientProfile::Mists
+    | wow_ui_sim::client_profile::ClientProfile::Era
+    | wow_ui_sim::client_profile::ClientProfile::Anniversary => &[],
+};
 const PANEL_ADDON_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil"];
 const STANDARD_GAME_TYPE_FILTERED_DEPENDENCIES: &[&str] = &["Blizzard_Plunderstorm"];
 const CLOSURE_LOADED_ADDONS: &[&str] = &[ROOT];
