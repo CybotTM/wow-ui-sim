@@ -45,7 +45,7 @@ Source anchor `0953c9b58`; `8c60cf5bb` changes documentation only. All seven bui
 | Anniversary | 52 | 70 |
 | Forever | 208 | 224 |
 
-Evidence: `/home/osso/.local/state/wow-ui-sim/handoff/cfactory-f0/`. `gap-list.json` preserves every stock error, original consumer location and M1–M5/T6 routing, plus Retail assertion diagnostics. Alias/cascade attributions include original-source evidence and explicitly label inference. The two anonymous normal/wrapped timer rows retain a null member rather than an invented root. Committed baselines remain unchanged; comparisons use those empty baselines, not a fresh pre-removal run. Original persisted CVars retain their initial stat and hash.
+The private F0 handoff's `gap-list.json` preserves every stock error, original consumer location and M1–M5/T6 routing, plus Retail assertion diagnostics. Alias/cascade attributions include original-source evidence and explicitly label inference. The two anonymous normal/wrapped timer rows retain a null member rather than an invented root. Committed baselines remain unchanged; comparisons use those empty baselines, not a fresh pre-removal run. Original persisted CVars retain their initial stat and hash.
 
 **F0 alone is not mergeable.** Follow-up batches must restore clean stock startup and the two failing Retail tests without reinstating arbitrary member fabrication.
 

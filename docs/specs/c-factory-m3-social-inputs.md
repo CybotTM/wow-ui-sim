@@ -4,14 +4,14 @@ M3 replaces observed social/group/chat/guild gaps exposed by [factory removal](c
 
 ## What it must do
 
-- [ ] On the six observed non-Wrath profiles, `C_GuildInfo.GetGuildTabardInfo(unit?)` returns nil when local-player numeric tabard metadata is unavailable, or for units without a supplied snapshot. Wrath keeps this unregistered member nil.
-- [ ] Supplied tabard metadata projects existing guild-logo RGB values into fresh ColorMixin objects, with numeric `emblemFileID` and `emblemStyle`, matching the cached `GuildInfoSharedDocumentation.lua` DTO.
-- [ ] `A_Admin.SetGuildTabardMetadata(fileID?, style?)` accepts a complete pair of nonnegative u32 values, clears metadata when both are absent, and rejects invalid/partial updates without changing prior state. This is a simulator input contract, not a native setter.
-- [ ] Replacing the legacy logo through `SetGuildEmblem` invalidates numeric metadata that cannot be derived from its filename. Legacy RGB/filename behavior remains intact.
-- [ ] Other observed M3 members use existing backing state where available; otherwise only explicitly named temporary inactive-service contracts, each naming its missing backing system and retirement condition. No native policy is inferred from a method name.
-- [ ] Non-Wrath documented social contracts use explicit simulator defaults until their backing services exist: no cross-faction roster, no silence restriction, chat reception allowed, LFD/GroupFinder and LFG authentication unavailable. Mists preserves its existing guild-bank storage capability; other profiles report that unmodeled capability unavailable.
-- [ ] Retail/PTR/Forever mentorship reports documented `None=0`, Recruit-a-Friend availability and legacy friend mode are disabled, and language capability follows the existing explicit legacy language list. Forever friend-tag game-type capability is disabled. These are named temporary policies, not native defaults.
-- [ ] Existing explicit methods, strict/retired surfaces and arbitrary-member nil behavior remain intact. Original startup assertions remain unchanged.
+- [x] On the six observed non-Wrath profiles, `C_GuildInfo.GetGuildTabardInfo(unit?)` returns nil when local-player numeric tabard metadata is unavailable, or for units without a supplied snapshot. Wrath keeps this unregistered member nil.
+- [x] Supplied tabard metadata projects existing guild-logo RGB values into fresh ColorMixin objects, with numeric `emblemFileID` and `emblemStyle`, matching the cached `GuildInfoSharedDocumentation.lua` DTO.
+- [x] `A_Admin.SetGuildTabardMetadata(fileID?, style?)` accepts a complete pair of nonnegative u32 values, clears metadata when both are absent, and rejects invalid/partial updates without changing prior state. This is a simulator input contract, not a native setter.
+- [x] Replacing the legacy logo through `SetGuildEmblem` invalidates numeric metadata that cannot be derived from its filename. Legacy RGB/filename behavior remains intact.
+- [x] Other observed M3 members use existing backing state where available; otherwise only explicitly named temporary inactive-service contracts, each naming its missing backing system and retirement condition. No native policy is inferred from a method name.
+- [x] Non-Wrath documented social contracts use explicit simulator defaults until their backing services exist: no cross-faction roster, no silence restriction, chat reception allowed, LFD/GroupFinder and LFG authentication unavailable. Mists preserves its existing guild-bank storage capability; other profiles report that unmodeled capability unavailable.
+- [x] Retail/PTR/Forever mentorship reports documented `None=0`, Recruit-a-Friend availability and legacy friend mode are disabled, and language capability follows the existing explicit legacy language list. Forever friend-tag game-type capability is disabled. These are named temporary policies, not native defaults.
+- [x] Existing explicit methods, strict/retired surfaces and arbitrary-member nil behavior remain intact. Original startup assertions remain unchanged.
 
 ## How it works
 
@@ -34,9 +34,15 @@ M3 replaces observed social/group/chat/guild gaps exposed by [factory removal](c
 
 ## Known gaps (current cycle)
 
-- [ ] Implement and prove the tabard snapshot behavior against the original GuildMicroButton consumer (`MainMenuBarMicroButtons.lua:1254` on Retail).
-- [ ] Resolve remaining observed M3 roots: mentorship status, cross-faction party status, guild-bank availability, friend-tag/game-type support, social mute/receive policy, language capability, legacy-friend mode, LFD/GroupFinder availability, LFG authentication and Recruit-a-Friend availability.
-- [ ] Re-capture the post-M3 frontier without hiding failures belonging to other batches.
+- [x] Implement and prove the tabard snapshot behavior against the original GuildMicroButton consumer (`MainMenuBarMicroButtons.lua:1254` on Retail).
+- [x] Resolve remaining observed M3 roots: mentorship status, cross-faction party status, guild-bank availability, friend-tag/game-type support, social mute/receive policy, language capability, legacy-friend mode, LFD/GroupFinder availability, LFG authentication and Recruit-a-Friend availability.
+- [x] Re-capture the post-M3 frontier without hiding failures belonging to other batches.
+
+## Bounded proof — 2026-10-21
+
+Tests-first producer commits `e1c4d730f` and `fffd49163` follow frozen original-consumer RED at source-equivalent `0953c9b58`; fresh Retail contract RED at `2b3b600208` additionally reproduced missing APIs. The tabard DTO uses the original cached ColorMixin, not the incomplete bootstrap color default. Final integrated source `c246449ca` includes master `342acab31`; common registration/state and loader changes required all targeted cases to rerun. See the [combined matrix](c-factory-m4-world-inputs.md#bounded-proof--2026-10-21).
+
+All assigned M3 original rows and missing-member signatures are absent from the final stock matrix. Newly reached invitation/squelch/party queries remain unfixed residuals, not extra M3 producers. This is not clean-startup or native-condition parity proof.
 
 ## Out of scope
 

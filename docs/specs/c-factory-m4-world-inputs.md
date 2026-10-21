@@ -4,11 +4,11 @@ M4 resolves original cached Blizzard consumers recorded by [factory removal](c-n
 
 ## What it must do
 
-- [ ] Documented non-Wrath combat-audio throttle reads reuse independent numeric settings, with unset zero; the existing Retail setter round-trip remains intact without publishing an unrouted setter on other profiles. Unmodeled playback enablement reports false.
-- [ ] Modern `C_PvP.IsMatchActive` projects existing match state. PTR quest objectives project existing supplied objective snapshots, including unknown-objective absence.
-- [ ] Modern private-aura callbacks retain registrations until removed for that unit and callback identity. Other units/callbacks survive removal; repeated removal is harmless. Raid-boss callback replacement and clearing retain only the current registration. Original AuraContainer callback handles can register/unregister and receive the update-info object as their first argument, as consumed by the original cached callback. Update and raid-message registrations use FunctionContainers, matching all original cached consumers; no alternate plain-function dispatch is supported.
-- [ ] Forever exposes existing loaded CVar state, hidden-group-buff snapshots and unit-identity secrecy policy through the missing public queries, without enabling unrelated visual-alert APIs or an unrouted hidden-buff setter. Hidden-buff compatibility snapshots retain their existing Lua-owned input field.
-- [ ] Named temporary policies return no supertracked vignette/target, disable hybrid minimap and expansion landing unlocks, report unknown honor rewards as nil and no calling membership. Classic map highlights return no values, PvP wait estimates are zero and numeric quest-reward-spell lists are empty. Forever experience preset is nil and quest timers are empty. Each policy names its missing backing system and retirement condition; none claims native defaults.
+- [x] Documented non-Wrath combat-audio throttle reads reuse independent numeric settings, with unset zero; the existing Retail setter round-trip remains intact without publishing an unrouted setter on other profiles. Unmodeled playback enablement reports false.
+- [x] Modern `C_PvP.IsMatchActive` projects existing match state. PTR quest objectives project existing supplied objective snapshots, including unknown-objective absence.
+- [x] Modern private-aura callbacks retain registrations until removed for that unit and callback identity. Other units/callbacks survive removal; repeated removal is harmless. Raid-boss callback replacement and clearing retain only the current registration. Original AuraContainer callback handles can register/unregister and receive the update-info object as their first argument, as consumed by the original cached callback. Update and raid-message registrations use FunctionContainers, matching all original cached consumers; no alternate plain-function dispatch is supported.
+- [x] Forever exposes existing loaded CVar state, hidden-group-buff snapshots and unit-identity secrecy policy through the missing public queries, without enabling unrelated visual-alert APIs or an unrouted hidden-buff setter. Hidden-buff compatibility snapshots retain their existing Lua-owned input field.
+- [x] Named temporary policies return no supertracked vignette/target, disable hybrid minimap and expansion landing unlocks, report unknown honor rewards as nil and no calling membership. Classic map highlights return no values, PvP wait estimates are zero and numeric quest-reward-spell lists are empty. Forever experience preset is nil and quest timers are empty. Each policy names its missing backing system and retirement condition; none claims native defaults.
 
 ## How it works
 
@@ -29,8 +29,28 @@ M4 resolves original cached Blizzard consumers recorded by [factory removal](c-n
 
 ## Known gaps (current cycle)
 
-- [ ] Capture targeted RED/GREEN per affected profile.
-- [ ] Capture one post-M3/M4 stock profile matrix and attribute rows against the frozen F0 inventory, preserving Wrath's empty startup.
+- [x] Capture targeted RED/GREEN per affected profile.
+- [x] Capture one post-M3/M4 stock profile matrix and attribute rows against the frozen F0 inventory, preserving Wrath's empty startup.
+
+## Bounded proof — 2026-10-21
+
+Producer `6809f3731` and corrections culminate in FunctionContainer-only dispatch `dd893bbcb`, after exact Retail negative cases at `6ce69730a` reproduced both unsupported function branches. All fifteen original cached registration calls use FunctionContainers. Original AuraContainer registration/removal exercises its secure mixin; no vendor change or callback fallback is retained.
+
+Final runtime source `c246449ca` includes requested master `342acab31`. Every targeted case reran because common registration/SimState/bootstrap changed; the original AuraContainer also intersects loader changes. Commands use the existing `integration` target with `sound,gui,casc,client-<profile>`, one build job and no default features. M4 cases run by exact name; stock runs `wow-sim --no-addons --no-saved-vars lua-errors` once per profile.
+
+| Profile | Targeted passed/failed | Stock unique/occurrences | Assigned M3/M4 rows remaining |
+|---|---:|---:|---:|
+| Retail | 29/0 | 73/129 | 0/0 |
+| PTR | 30/0 | 73/129 | 0/0 |
+| Forever | 37/0 | 145/156 | 0/0 |
+| Mists | 19/0 | 52/70 | 0/0 |
+| Era | 19/0 | 44/62 | 0/0 |
+| Anniversary | 19/0 | 44/62 | 0/0 |
+| Wrath | 3/0 | 0/0 | 0/0 |
+
+Zero compiler warnings; original persisted CVars stat/hash unchanged. Private proof ledger, source/profile/ELF bindings, frozen-source equivalence receipt and raw normal/ScriptErrors rows remain available in the lane handoff. The migrated lib-unit fixture was not separately executed; independent integrated gates remain parent-owned.
+
+**Not clean startup:** other-batch failures and unlisted cascades remain. Examples: `C_SuperTrack.GetSuperTrackedContent` follows the repaired vignette query at `Blizzard_QuestSuperTracking.lua:52`; `C_PvP.IsMatchComplete` follows inactive-match state at `PVPMatchResults.lua:201`; Forever `C_UnitAuras.GetGroupBuffVisualAlerts` follows hidden-buff initialization at `AuraUtil.lua:704`. All remain unfixed by scope. Raw errors, original consumer locations, stderr receipts and causal attribution are retained in the private residual report; no row is suppressed or normalized away.
 
 ## Out of scope
 

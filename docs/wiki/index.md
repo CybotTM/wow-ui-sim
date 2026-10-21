@@ -1,10 +1,10 @@
 ## [2026-10-21] source | Factory-removal world inputs
 
-[World ownership](systems/lua-api.md#factory-removal-world-inputs--2026-10-21) links the [M4 contract](../specs/c-factory-m4-world-inputs.md): shared existing-state projections, C API callback lifecycle and named missing-world-service policies. Targeted execution and the single final stock matrix remain pending.
+[World ownership](systems/lua-api.md#factory-removal-world-inputs--2026-10-21) links the [M4 contract](../specs/c-factory-m4-world-inputs.md): shared existing-state projections, C API callback lifecycle and named missing-world-service policies. The contract records integrated seven-profile targeted GREEN, one stock matrix, FunctionContainer-only dispatch and retained unlisted residuals.
 
 ## [2026-10-21] source | Factory-removal social inputs
 
-[Social ownership](systems/lua-api.md#factory-removal-social-inputs--2026-10-21) links the [M3 contract](../specs/c-factory-m3-social-inputs.md): supplied tabard metadata versus named missing-service policies. Frozen original-consumer RED is retained; new-contract execution and final startup proof remain pending.
+[Social ownership](systems/lua-api.md#factory-removal-social-inputs--2026-10-21) links the [M3 contract](../specs/c-factory-m3-social-inputs.md): supplied tabard metadata versus named missing-service policies. Frozen/fresh RED, integrated targeted GREEN and the combined stock matrix are recorded; assigned rows disappear without claiming clean startup outside Wrath.
 
 ## [2026-10-20] source | C namespace factory removal (F0)
 

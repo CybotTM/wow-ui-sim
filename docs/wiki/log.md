@@ -1,10 +1,10 @@
 ## [2026-10-21] source | Factory-removal M4 world inputs
 
-[API ownership](systems/lua-api.md#factory-removal-world-inputs--2026-10-21) links shared setting/state publication, rooted callback removal/replacement and named missing-world-service defaults to their [contract](../specs/c-factory-m4-world-inputs.md). Original-consumer RED retained; targeted execution and final startup proof pending.
+[API ownership](systems/lua-api.md#factory-removal-world-inputs--2026-10-21) links shared setting/state publication, rooted callback removal/replacement and named missing-world-service defaults to their [contract](../specs/c-factory-m4-world-inputs.md). Frozen/fresh RED and integrated seven-profile targeted GREEN precede one final stock matrix. Assigned M3/M4 signatures disappear and Wrath stays clean; other-batch errors and unlisted cascades remain. FunctionContainer-only callback cleanup has exact RED→GREEN; no native policy parity is claimed.
 
 ## [2026-10-21] source | Factory-removal M3 social inputs
 
-[API ownership](systems/lua-api.md#factory-removal-social-inputs--2026-10-21) links tabard DTO projection and isolated temporary capability policies to their [contract](../specs/c-factory-m3-social-inputs.md). Source integrated; original-consumer RED source equivalence retained. New contract execution and post-M3/M4 stock matrix remain pending.
+[API ownership](systems/lua-api.md#factory-removal-social-inputs--2026-10-21) links tabard DTO projection and isolated temporary capability policies to their [contract](../specs/c-factory-m3-social-inputs.md). Original-consumer source equivalence and fresh Retail RED retained; integrated seven-profile targeted GREEN and the combined stock matrix are recorded in the owning specs, including unfixed residual scope.
 
 ## [2026-10-20] source | C namespace factory removal (F0)
 
