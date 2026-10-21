@@ -63,7 +63,7 @@ return table.concat(failures, "\n")
 #[test]
 fn blizzard_auto_complete_frame_surface_matches_xml_shape() {
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
-        common::wrath_autocomplete::assert_native(
+        common::wrath_autocomplete::load_and_assert_native(
             r#"
 assert(AutoCompleteBox:GetObjectType() == 'Frame')
 assert(AutoCompleteBox:GetParent() == UIParent)

@@ -28,7 +28,7 @@ return true, nil
 #[test]
 fn blizzard_auto_complete_update_empty_text_hides_attached_box() {
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
-        common::wrath_autocomplete::assert_native(
+        common::wrath_autocomplete::load_and_assert_native(
             r#"
 AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha')
 AutoComplete_Update(F09EditBox, '', 0)

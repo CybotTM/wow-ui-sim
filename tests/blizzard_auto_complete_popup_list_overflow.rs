@@ -62,7 +62,7 @@ return table.concat(failures, "\n")
 #[test]
 fn blizzard_auto_complete_popup_list_overflow_count_tracks_remaining_results() {
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
-        common::wrath_autocomplete::assert_native(
+        common::wrath_autocomplete::load_and_assert_native(
             r#"
 AutoComplete_UpdateResults(AutoCompleteBox, 'A','B','C','D','E','F','G')
 assert(AutoComplete_GetNumResults(AutoCompleteBox) == 4)

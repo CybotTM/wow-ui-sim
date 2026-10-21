@@ -17,7 +17,7 @@ const FONTS_SHARED: &str = "Blizzard_Fonts_Shared";
 #[test]
 fn blizzard_auto_complete_loads_without_ingestion_errors() {
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
-        common::wrath_autocomplete::assert_native(
+        common::wrath_autocomplete::load_and_assert_native(
             r#"
 assert(type(AutoComplete_Update) == 'function')
 assert(AutoCompleteBox ~= nil)

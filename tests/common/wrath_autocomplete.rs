@@ -4,7 +4,7 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-pub fn assert_native(probe: &'static str) {
+pub fn load_and_assert_native(probe: &'static str) {
     super::with_perf_lock(|| {
         super::with_timeout(90, move || {
             let env = WowLuaEnv::new().expect("native autocomplete environment");

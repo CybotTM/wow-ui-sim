@@ -40,7 +40,7 @@ return table.concat(failures, "\n")
 #[test]
 fn blizzard_auto_complete_button_click_writes_selected_name() {
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
-        common::wrath_autocomplete::assert_native(
+        common::wrath_autocomplete::load_and_assert_native(
             r#"
 AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha', 'F09Beta')
 AutoCompleteButton_OnClick(AutoCompleteButton2)

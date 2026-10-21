@@ -12,7 +12,7 @@ const EXPECTED_ATTACH_THRESHOLD: f64 = 13.0;
 #[test]
 fn blizzard_auto_complete_button_count_and_magic_offset_stay_locked() {
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
-        common::wrath_autocomplete::assert_native(
+        common::wrath_autocomplete::load_and_assert_native(
             r#"
 assert(AUTOCOMPLETE_MAX_BUTTONS == 5)
 assert(AutoCompleteButton1:GetHeight() == 14)

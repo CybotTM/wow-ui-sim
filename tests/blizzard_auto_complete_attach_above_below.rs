@@ -88,7 +88,7 @@ return table.concat(failures, "\n")
 #[test]
 fn blizzard_auto_complete_attaches_above_or_below_parent() {
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
-        common::wrath_autocomplete::assert_native(
+        common::wrath_autocomplete::load_and_assert_native(
             r#"
 AutoComplete_Update(F09EditBox, 'F09A', 4)
 assert(AutoCompleteBox.attachPoint == 'BELOW')

@@ -49,7 +49,7 @@ return table.concat(failures, "\n")
 #[test]
 fn blizzard_auto_complete_virtual_templates_instantiate_with_scripts() {
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
-        common::wrath_autocomplete::assert_native(
+        common::wrath_autocomplete::load_and_assert_native(
             r#"
 assert(F09EditBox:GetObjectType() == 'EditBox')
 local handlers={OnTabPressed=AutoCompleteEditBox_OnTabPressed, OnEnterPressed=AutoCompleteEditBox_OnEnterPressed, OnTextChanged=AutoCompleteEditBox_OnTextChanged, OnChar=AutoCompleteEditBox_OnChar, OnEditFocusLost=AutoCompleteEditBox_OnEditFocusLost, OnEscapePressed=AutoCompleteEditBox_OnEscapePressed}

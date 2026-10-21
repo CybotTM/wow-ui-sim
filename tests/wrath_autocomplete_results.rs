@@ -3,11 +3,11 @@
 //! original FrameXML consumer; the modern table-returning API remains separate.
 #![cfg(feature = "client-wrath")]
 
-use crate::common::wrath_autocomplete::assert_native;
+use crate::common::wrath_autocomplete::load_and_assert_native;
 
 #[test]
 fn native_text_change_callback_queries_only_user_input() {
-    assert_native(
+    load_and_assert_native(
         r#"
 F09EditBox:SetText('F09A')
 AutoCompleteEditBox_OnTextChanged(F09EditBox, false)
@@ -21,7 +21,7 @@ assert(AutoCompleteButton1:GetText() == 'F09Alpha')
 
 #[test]
 fn native_character_callback_completes_suffix_and_preserves_cursor() {
-    assert_native(
+    load_and_assert_native(
         r#"
 F09EditBox.addHighlightedText = true
 F09EditBox:SetText('F09A')
@@ -37,7 +37,7 @@ assert(AutoComplete_GetNumResults(AutoCompleteBox) == 1)
 
 #[test]
 fn native_query_returns_strings_to_original_framexml() {
-    assert_native(
+    load_and_assert_native(
         r#"
 -- Small native flags isolate the return-shape contract from argument width.
 F09EditBox.autoCompleteParams = AUTOCOMPLETE_LIST.FRIEND
@@ -52,7 +52,7 @@ assert(#results == 1 and results[1] == 'F09Alpha')
 
 #[test]
 fn native_no_match_returns_zero_values_and_hides_original_box() {
-    assert_native(
+    load_and_assert_native(
         r#"
 assert(select('#', GetAutoCompleteResults('NoF09Match', AUTOCOMPLETE_FLAG_ALL, 0, 6)) == 0)
 AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha')
@@ -65,7 +65,7 @@ assert(AutoComplete_GetNumResults(AutoCompleteBox) == 0)
 
 #[test]
 fn native_positive_limit_caps_results_and_drives_continuation() {
-    assert_native(
+    load_and_assert_native(
         r#"
 assert(select('#', GetAutoCompleteResults('F09', AUTOCOMPLETE_FLAG_ALL, 0, 2)) == 2)
 AutoComplete_Update(F09EditBox, 'F09', 3)
@@ -78,7 +78,7 @@ assert(not AutoCompleteButton5:IsEnabled())
 
 #[test]
 fn native_nonpositive_limits_leave_results_uncapped() {
-    assert_native(
+    load_and_assert_native(
         r#"
 for _, limit in ipairs({0, -1}) do
  local count = select('#', GetAutoCompleteResults('F09', AUTOCOMPLETE_FLAG_ALL, 0, limit))

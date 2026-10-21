@@ -8,7 +8,7 @@ const EXPECTED_FLAG_ALL: f64 = 0xffff_ffff_u32 as f64;
 #[test]
 fn blizzard_auto_complete_constants_are_global_after_load() {
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
-        common::wrath_autocomplete::assert_native(
+        common::wrath_autocomplete::load_and_assert_native(
             r#"
 assert(AUTOCOMPLETE_MAX_BUTTONS == 5)
 assert(AUTOCOMPLETE_FLAG_NONE == 0)

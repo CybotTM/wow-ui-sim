@@ -7,7 +7,7 @@ const ROOT: &str = "Blizzard_AutoComplete";
 #[test]
 fn blizzard_auto_complete_core_handlers_are_global_functions() {
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
-        common::wrath_autocomplete::assert_native(
+        common::wrath_autocomplete::load_and_assert_native(
             r#"
 for _, name in ipairs({'AutoComplete_OnLoad', 'AutoComplete_Update', 'AutoComplete_HideIfAttachedTo', 'AutoComplete_SetSelectedIndex', 'AutoComplete_GetSelectedIndex', 'AutoComplete_GetNumResults', 'AutoComplete_UpdateResults'}) do
  assert(type(_G[name]) == 'function', name)
@@ -67,7 +67,7 @@ assert(AutoComplete_GetNumResults(AutoCompleteBox) == 1)
 #[test]
 fn blizzard_auto_complete_edit_box_and_button_handlers_are_global_functions() {
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
-        common::wrath_autocomplete::assert_native(
+        common::wrath_autocomplete::load_and_assert_native(
             r#"
 for _, name in ipairs({'AutoCompleteEditBox_OnTabPressed', 'AutoCompleteEditBox_OnEnterPressed', 'AutoCompleteEditBox_OnTextChanged', 'AutoCompleteEditBox_AddHighlightedText', 'AutoCompleteEditBox_OnChar', 'AutoCompleteEditBox_OnEditFocusLost', 'AutoCompleteEditBox_OnEscapePressed', 'AutoCompleteButton_OnClick'}) do
  assert(type(_G[name]) == 'function', name)
