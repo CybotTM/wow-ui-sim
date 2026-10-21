@@ -1,6 +1,6 @@
 ## [2026-10-20] source | Wrath XML load diagnostics contract
 
-Added [diagnostic requirements](../specs/xml-load-diagnostics.md) and [loader boundary notes](systems/addon-loading.md#wrath-file-load-diagnostics), superseding the earlier X2 handler assumption with laptop-authenticated 12340 channel/text/continuation facts. Tests written; RED/GREEN and producer pending permitted build slot.
+Added [diagnostic requirements](../specs/xml-load-diagnostics.md) and [loader boundary notes](systems/addon-loading.md#wrath-file-load-diagnostics), superseding the earlier X2 handler assumption with laptop-authenticated 12340 channel/text/continuation facts. Source-bound original DebugTools RED observed; producer now classifies at file boundaries and retains exact texts through existing warnings without a new logging/severity path. GREEN pending.
 
 ## [2026-10-20] investigation | Shared-target test source binding
 

@@ -645,8 +645,7 @@ fn test_catalog_shop_file_prefix_numeric_error_probe() {
                     &env.loader_env(),
                     &file,
                     &ctx,
-                    &mut LoadTiming::default(),
-                )
+                    &mut LoadTiming::default(), &mut Vec::new())
                 .unwrap_or_else(|error| panic!("{} should load: {error}", file.display()));
             }
             _ => continue,
@@ -743,8 +742,7 @@ fn test_catalog_shop_xml_numeric_error_without_main_onload() {
         &env.loader_env(),
         &xml_path,
         &ctx,
-        &mut LoadTiming::default(),
-    )
+        &mut LoadTiming::default(), &mut Vec::new())
     .unwrap_or_else(|error| panic!("{} should load: {error}", xml_path.display()));
     let errors = env.state().borrow().lua_errors.clone();
     let targeted: Vec<_> = errors

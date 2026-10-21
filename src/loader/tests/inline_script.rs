@@ -56,6 +56,7 @@ fn test_xml_inline_script_error_continues() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     );
     assert!(
         result.is_ok(),
@@ -262,6 +263,7 @@ fn secure_env_xml_animation_groups_attach_to_named_frames() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
@@ -344,6 +346,7 @@ fn scoped_modifier_scripts_use_given_env_for_scripts_and_mixins() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
@@ -421,6 +424,7 @@ fn scoped_modifier_scripts_use_secure_env_fallback_for_secure_addons() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
     assert!(env.state().borrow().lua_errors.is_empty());

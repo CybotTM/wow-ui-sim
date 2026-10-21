@@ -4,7 +4,7 @@ Wrath 12340 file-open/XML-parse diagnostics belong to the loader, not Lua's erro
 
 ## What it must do
 
-- [ ] Wrath missing/unreadable XML records `Couldn't open <path>`; malformed XML records `Couldn't parse XML in <path>` before processing that document's children. Missing Lua Include/external Script records `Error loading <path>`. These are error-severity diagnostics with no severity prefix in their retained text.
+- [ ] Wrath missing/unreadable XML records `Couldn't open <path>`; malformed XML records `Couldn't parse XML in <path>` before processing that document's children. Missing Lua Include/external Script records `Error loading <path>`. Native severity is STATUS_ERROR; simulator retains exact texts in the existing failure-warning collection without a new severity field or emission path.
 - [ ] Record each failed attempt synchronously at discovery in loader warnings, without Lua handler calls or entries in any canonical Lua-error collection. Propagated child errors must not add duplicate parent records.
 - [ ] Use backslash client virtual paths, collapse `..`, and preserve the failed child's identity. Derivation from addon-root-relative host paths is INFERRED simulator mapping, not native path tracking.
 - [ ] Parent XML siblings, external Script inline body and TOC tail continue. Malformed XML executes no document children. Runtime LoadAddOn succeeds, marks loaded and publishes ADDON_LOADED; runtime loader diagnostics remain retained.
@@ -20,6 +20,7 @@ Wrath 12340 file-open/XML-parse diagnostics belong to the loader, not Lua's erro
 - `src/loader/xml_file.rs` — file-boundary classification and recursive XML execution.
 - `src/loader/addon.rs` — addon warning ownership and TOC continuation.
 - `src/loader/mod.rs` — finalized diagnostics.
+- `src/loader/file_diagnostics.rs` — Wrath policy and inferred virtual-path formatting.
 
 ## Tests asserting this spec
 
@@ -29,7 +30,7 @@ Wrath 12340 file-open/XML-parse diagnostics belong to the loader, not Lua's erro
 
 ## Known gaps (current cycle)
 
-- [ ] RED/GREEN execution awaits a permitted build slot; tests are requirements, not acceptance evidence.
+- [ ] GREEN pending. Source-bound RED `d3dc2100b` reaches the unchanged original DebugTools consumer (`file diagnostic polluted original ScriptErrorsFrame`); earlier grouped RED also proves canonical sink pollution and missing retained native texts. FrameXML alone does not load DebugTools: its original TOC is explicitly loaded.
 - [ ] Stock Wrath/Retail lua-errors preservation awaits execution.
 
 ## Out of scope

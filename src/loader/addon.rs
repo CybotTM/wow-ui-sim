@@ -15,6 +15,9 @@ use super::addon_saved_variables::{
     maybe_init_saved_variables, maybe_restore_clobbered_saved_variables,
 };
 use super::error::LoadError;
+use super::file_diagnostics::{
+    is_recorded_xml_failure, record_file_diagnostic, uses_wrath_file_diagnostics,
+};
 use super::lua_file::load_lua_file;
 use super::xml_file::load_xml_file;
 use super::{LoadResult, LoadTiming};
@@ -643,10 +646,14 @@ fn load_addon_file(
 ) {
     let _nil_symbol_environment_guard = enter_nil_symbol_environment(env, ctx.use_secure_env);
     if !file.is_file() {
-        result.warnings.push(format!(
-            "{}: IO error: No such file or directory (os error 2)",
-            file.display()
-        ));
+        if uses_wrath_file_diagnostics() && file.extension().is_some_and(|ext| ext == "xml") {
+            record_file_diagnostic(&mut result.warnings, ctx, file, "Couldn't open");
+        } else {
+            result.warnings.push(format!(
+                "{}: IO error: No such file or directory (os error 2)",
+                file.display()
+            ));
+        }
         return;
     }
 
@@ -682,7 +689,7 @@ fn load_addon_xml_file(
     file: &std::path::Path,
 ) {
     let restore_add_to_secure_env = enable_secure_xml_frame_exports(env, ctx);
-    let load_result = load_xml_file(env, file, ctx, &mut result.timing);
+    let load_result = load_xml_file(env, file, ctx, &mut result.timing, &mut result.warnings);
     restore_secure_xml_frame_exports(env, restore_add_to_secure_env);
 
     match load_result {
@@ -690,6 +697,7 @@ fn load_addon_xml_file(
             result.xml_files += 1;
             result.lua_files += count;
         }
+        Err(error) if is_recorded_xml_failure(&error) => {}
         Err(error) => result
             .warnings
             .push(format!("{}: {}", file.display(), error)),
