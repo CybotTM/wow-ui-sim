@@ -177,9 +177,17 @@ fn test_runtime_button_template_inherits_texture_slots() {
 
 #[test]
 fn test_runtime_template_partitioned_child_binds_private_method_handlers() {
-    let t = load_test_xml(
-        "runtime-template-partitioned-private-method-handlers",
-        r#"
+    assert_partitioned_child_handlers("Frame");
+}
+
+#[cfg(feature = "aura-xml-widgets")]
+#[test]
+fn test_runtime_aura_container_partitioned_child_binds_private_method_handlers() {
+    assert_partitioned_child_handlers("AuraContainer");
+}
+
+fn assert_partitioned_child_handlers(widget_type: &str) {
+    let xml = r#"
         <Ui xmlns="http://www.blizzard.com/wow/ui/">
             <Script>
                 PartitionedAuraPrivateMixin = {}
@@ -211,8 +219,11 @@ fn test_runtime_template_partitioned_child_binds_private_method_handlers() {
                 </Frames>
             </Frame>
         </Ui>
-        "#,
-    );
+        "#;
+    let xml = xml
+        .replace("<AuraContainer", &format!("<{widget_type}"))
+        .replace("</AuraContainer>", &format!("</{widget_type}>"));
+    let t = load_test_xml("runtime-template-partitioned-private-method-handlers", &xml);
 
     t.assert_lua_true(
         "return PartitionedAuraContainerParent.Auras ~= nil",
