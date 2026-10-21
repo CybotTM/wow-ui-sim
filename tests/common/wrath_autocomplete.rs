@@ -1,7 +1,6 @@
 //! Native 3.3.5 FrameXML fixture: no modern autocomplete libraries or adapters.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::state_types::SocialFriend;
 
 pub fn assert_native(probe: &'static str) {
     super::with_perf_lock(|| {
@@ -21,17 +20,22 @@ pub fn assert_native(probe: &'static str) {
 
 fn seed_completion_names(env: &WowLuaEnv) {
     let names = ["F09Alpha", "F09Beta", "F09Gamma", "F09Delta", "F09Epsilon", "F09Zeta"];
-    env.state().borrow_mut().social_friends = names
+    let state = env.state();
+    let mut state = state.borrow_mut();
+    let template = state
+        .social_friends
+        .first()
+        .cloned()
+        .expect("seeded social friend fixture");
+    state.social_friends = names
         .into_iter()
         .enumerate()
-        .map(|(index, name)| SocialFriend {
-            name: name.into(),
-            level: 80,
-            area: "Dalaran".into(),
-            class_name: "Paladin".into(),
-            note: String::new(),
-            is_online: true,
-            guid: format!("Player-1-F09000{index:02X}"),
+        .map(|(index, name)| {
+            let mut friend = template.clone();
+            friend.name = name.into();
+            friend.is_online = true;
+            friend.guid = format!("Player-1-F09000{index:02X}");
+            friend
         })
         .collect();
 }
