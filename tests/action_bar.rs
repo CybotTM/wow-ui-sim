@@ -105,9 +105,7 @@ fn fire_startup_events(env: &WowLuaEnv) {
 /// PROXY_SHOW_ACTIONBAR_4/5 settings (backed by GetActionBarToggles).
 #[test]
 fn test_right_action_bars_hidden_by_default() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::right_bars_hidden();
-    }
+    wrath_action_case!(right_bars_hidden);
 
     let env = env_with_action_bar();
 
@@ -126,9 +124,7 @@ fn test_right_action_bars_hidden_by_default() {
 
 #[test]
 fn test_main_action_bar_visible_after_startup() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::main_visible();
-    }
+    wrath_action_case!(main_visible);
 
     let env = env_with_action_bar();
 
@@ -140,9 +136,7 @@ fn test_main_action_bar_visible_after_startup() {
 
 #[test]
 fn test_main_action_bar_end_caps_visible_after_startup() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::endcaps();
-    }
+    wrath_action_case!(endcaps);
 
     let env = env_with_action_bar();
 
@@ -168,9 +162,7 @@ fn test_main_action_bar_end_caps_visible_after_startup() {
 
 #[test]
 fn test_action_buttons_visible_after_startup() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::buttons_visible();
-    }
+    wrath_action_case!(buttons_visible);
 
     let env = env_with_action_bar();
 
@@ -193,9 +185,7 @@ fn test_action_buttons_visible_after_startup() {
 
 #[test]
 fn test_action_buttons_have_showgrid_attribute() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::showgrid();
-    }
+    wrath_action_case!(showgrid);
 
     let env = env_with_action_bar();
 
@@ -217,9 +207,7 @@ fn test_action_buttons_have_showgrid_attribute() {
 
 #[test]
 fn test_action_button_size() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::button_size();
-    }
+    wrath_action_case!(button_size);
 
     let env = env_with_action_bar();
 
@@ -237,9 +225,7 @@ fn test_action_button_size() {
 
 #[test]
 fn test_action_bar_env_can_bootstrap_twice_in_same_process() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::bootstrap_twice();
-    }
+    wrath_action_case!(bootstrap_twice);
 
     common::with_perf_lock(|| {
         let first = build_action_bar_env();
@@ -259,9 +245,7 @@ fn test_action_bar_env_can_bootstrap_twice_in_same_process() {
 
 #[test]
 fn test_main_action_bar_size() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::main_size();
-    }
+    wrath_action_case!(main_size);
 
     let env = env_with_action_bar();
 
@@ -322,9 +306,7 @@ fn test_enter_exit_edit_mode_core_steps() {
 
 #[test]
 fn test_status_tracking_xp_and_reputation_bars_layout_locked() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::status_layout();
-    }
+    wrath_action_case!(status_layout);
 
     let env = env_with_action_bar();
     let result: String = env
@@ -541,9 +523,7 @@ fn test_status_tracking_xp_and_reputation_bars_layout_locked() {
 
 #[test]
 fn test_bag_bar_layout_locked() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::bag_layout();
-    }
+    wrath_action_case!(bag_layout);
 
     let env = env_with_action_bar();
     let result: String = env

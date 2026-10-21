@@ -2,6 +2,9 @@
 //!
 //! Load the committed profile's FrameXML TOC in native order. Never synthesize
 //! modern mixins, parentKeys, event routers or replacement callback functions.
+#[path = "wrath_action_assertions.rs"]
+pub mod assertions;
+
 use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
 use wow_ui_sim::lua_api::WowLuaEnv;
 

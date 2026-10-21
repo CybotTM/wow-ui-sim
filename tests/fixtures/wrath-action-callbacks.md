@@ -2,6 +2,8 @@
 
 `common::action_bar_fixture::build_wrath_env` reuses `load_profile_framexml` to load the active native FrameXML TOC, then fires production startup, ACTIONBAR_SHOWGRID and UPDATE_BINDINGS. `wrath_env` holds the normal shared-workload permit. F05 can extend this fixture; do not add modern aliases/mixins/parentKeys or replace callback functions.
 
+`wrath_action_case!` centralizes native callback selection; the native fixture module compiles only on Wrath, so other profiles do not need Wrath-only snapshot fields. It never wraps prefork_full_ui_case.
+
 F04 keeps original test IDs. Wrath assertions live in `common/wrath_action_assertions.rs`; non-Wrath bodies are unchanged. Assertions use original named regions, events, callbacks and secure input dispatch. Native drag runs XML OnDragStart/OnReceiveDrag without manually assigning the icon. Wrath key down pushes only; key up calls SecureActionButton_OnClick and casts.
 
 ## Evidence-backed gates (Wrath only)

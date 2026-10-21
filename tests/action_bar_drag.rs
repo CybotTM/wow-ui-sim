@@ -144,9 +144,7 @@ fn pickup_action_accepts_ignore_removal_arg_and_place_restores_slot() {
 
 #[test]
 fn pickup_action_updates_action_button_icon_immediately() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::pickup_icon();
-    }
+    wrath_action_case!(pickup_icon);
 
     common::with_timeout(120, move || {
         let env = env_with_action_bar();
@@ -186,9 +184,7 @@ fn pickup_action_updates_action_button_icon_immediately() {
 
 #[test]
 fn action_button_drag_round_trip_keeps_spell_visible() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::drag_round_trip();
-    }
+    wrath_action_case!(drag_round_trip);
 
     common::with_timeout(120, move || {
         let env = env_with_action_bar();
@@ -242,9 +238,7 @@ fn action_button_drag_round_trip_keeps_spell_visible() {
 
 #[test]
 fn action_button_1_texture_path_resolves_to_icon_fdid() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::icon_identity();
-    }
+    wrath_action_case!(icon_identity);
 
     common::with_timeout(120, move || {
         let env = env_with_action_bar();

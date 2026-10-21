@@ -191,9 +191,7 @@ fn action_bar_load_executes_file_scope_mixin_declarations() {
 /// registry flag represents what Lua can use after startup.
 #[test]
 fn action_bar_every_declared_toc_dependency_is_loaded_after_harness_runs() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::native_dependencies();
-    }
+    wrath_action_case!(native_dependencies);
 
     let toc_path = blizzard_ui_dir().join(ROOT).join(ROOT_TOC_FILE);
     let toc = TocFile::from_file(&toc_path).unwrap_or_else(|e| {

@@ -10,9 +10,7 @@ const SPELL_ID: u32 = 853;
 
 #[test]
 fn action_button_on_enter_sets_tooltip_for_populated_slot() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::tooltip();
-    }
+    wrath_action_case!(tooltip);
 
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {

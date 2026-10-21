@@ -73,9 +73,7 @@ fn seed_action_slot(env: &WowLuaEnv, slot: u32, spell_id: u32) {
 
 #[test]
 fn action_button_down_and_up_toggle_state_and_fire_action() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::key_release_cast();
-    }
+    wrath_action_case!(key_release_cast);
 
     let env = build_action_bar_env();
     seed_action_slot(&env, 1, 19750);
@@ -135,9 +133,7 @@ fn try_use_action_button_only_fires_from_key_down() {
 
 #[test]
 fn multi_and_extra_action_dispatch_use_the_same_button_fallthrough() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::multibar_release_cast();
-    }
+    wrath_action_case!(multibar_release_cast);
 
     let env = build_action_bar_env();
     seed_action_slot(&env, 61, 19750);

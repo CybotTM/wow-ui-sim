@@ -171,9 +171,7 @@ const ROOT: &str = "Blizzard_ActionBarController";
 
 #[test]
 fn possess_bar_show_hide_round_trips_through_update_possess_bar_event() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::possess_visibility();
-    }
+    wrath_action_case!(possess_visibility);
 
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {

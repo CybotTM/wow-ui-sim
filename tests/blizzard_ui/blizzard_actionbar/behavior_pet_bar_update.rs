@@ -171,9 +171,7 @@ const SEEDED_SPELL_ID: u32 = 2649;
 
 #[test]
 fn pet_bar_update_event_repopulates_button_icon_and_shows_bar_from_seeded_pet_actions() {
-    if crate::common::action_bar_fixture::is_wrath() {
-        return crate::common::wrath_action_assertions::pet_update();
-    }
+    wrath_action_case!(pet_update);
 
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
