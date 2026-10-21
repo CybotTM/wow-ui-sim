@@ -20,8 +20,18 @@ contract!(
 #[test]
 fn combat_audio_throttles_reuse_the_setting_store() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec("assert(C_CombatAudioAlert.GetThrottle(0) == 0); assert(C_CombatAudioAlert.SetThrottle(0, 1.25)); assert(C_CombatAudioAlert.GetThrottle(0) == 1.25); assert(C_CombatAudioAlert.GetThrottle(1) == 0)").unwrap();
+    env.exec("assert(C_CombatAudioAlert.GetThrottle(0) == 0); assert(C_CombatAudioAlert.GetThrottle(1) == 0)").unwrap();
+    #[cfg(feature = "retail-12-0-0")]
+    {
+        env.exec("assert(C_CombatAudioAlert.SetThrottle(0, 1.25)); assert(C_CombatAudioAlert.GetThrottle(0) == 1.25); assert(C_CombatAudioAlert.GetThrottle(1) == 0)").unwrap();
+    }
 }
+
+#[cfg(not(feature = "retail-12-0-0"))]
+contract!(
+    throttle_read_does_not_publish_an_unrouted_setter,
+    "assert(C_CombatAudioAlert.SetThrottle == nil)"
+);
 
 #[cfg(any(
     feature = "client-mists",
@@ -191,11 +201,11 @@ mod forever {
     );
     contract!(
         hidden_group_buffs_preserve_existing_explicit_setting,
-        "C_UnitAuras.SetHiddenGroupBuffs({[456]=true}); assert(C_UnitAuras.GetHiddenGroupBuffs()[456] == true)"
+        "C_UnitAuras._hiddenGroupBuffs = {[456]=true}; assert(C_UnitAuras.GetHiddenGroupBuffs()[456] == true)"
     );
     contract!(
         hidden_buff_publication_does_not_enable_unrouted_visual_alert_apis,
-        "assert(C_UnitAuras.GetGroupBuffVisualAlerts == nil); assert(C_UnitAuras.SetGroupBuffVisualAlerts == nil)"
+        "assert(C_UnitAuras.GetGroupBuffVisualAlerts == nil); assert(C_UnitAuras.SetGroupBuffVisualAlerts == nil); assert(C_UnitAuras.SetHiddenGroupBuffs == nil)"
     );
     contract!(
         identity_secrecy_query_uses_the_existing_unit_identity_policy,

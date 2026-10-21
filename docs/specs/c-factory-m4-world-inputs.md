@@ -4,10 +4,10 @@ M4 resolves original cached Blizzard consumers recorded by [factory removal](c-n
 
 ## What it must do
 
-- [ ] Documented non-Wrath combat-audio throttles reuse independent numeric settings, with unset zero and setter round-trip; unmodeled playback enablement reports false.
+- [ ] Documented non-Wrath combat-audio throttle reads reuse independent numeric settings, with unset zero; the existing Retail setter round-trip remains intact without publishing an unrouted setter on other profiles. Unmodeled playback enablement reports false.
 - [ ] Modern `C_PvP.IsMatchActive` projects existing match state. PTR quest objectives project existing supplied objective snapshots, including unknown-objective absence.
 - [ ] Modern private-aura callbacks retain registrations until removed for that unit and callback identity. Other units/callbacks survive removal; repeated removal is harmless. Raid-boss callback replacement and clearing retain only the current registration. Original AuraContainer callback handles can register/unregister and receive the update-info object as their first argument, as consumed by the original cached callback. The existing authored trigger's source/info form for plain Lua callbacks remains intact.
-- [ ] Forever exposes existing loaded CVar state, hidden-group-buff settings and unit-identity secrecy policy through the missing public queries.
+- [ ] Forever exposes existing loaded CVar state, hidden-group-buff snapshots and unit-identity secrecy policy through the missing public queries, without enabling unrelated visual-alert APIs or an unrouted hidden-buff setter. Hidden-buff compatibility snapshots retain their existing Lua-owned input field.
 - [ ] Named temporary policies return no supertracked vignette/target, disable hybrid minimap and expansion landing unlocks, report unknown honor rewards as nil and no calling membership. Classic map highlights return no values, PvP wait estimates are zero and numeric quest-reward-spell lists are empty. Forever experience preset is nil and quest timers are empty. Each policy names its missing backing system and retirement condition; none claims native defaults.
 
 ## How it works
