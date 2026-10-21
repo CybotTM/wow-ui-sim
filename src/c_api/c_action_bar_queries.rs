@@ -1,15 +1,9 @@
 //! Spell-bound action queries. Range snapshots are host inputs keyed by unit GUID.
+pub use super::action_spell_range::ActionSpellRange;
 use crate::lua_api::methods::{borrow_state, val_to_string};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::{gc::arena::GcRef, state::LuaState, table::Table};
 use rilua::{LuaResult, Val};
-use std::collections::HashMap;
-
-#[derive(Debug, Default)]
-pub struct ActionSpellRange {
-    pub has_range_requirements: bool,
-    pub in_range_by_guid: HashMap<String, bool>,
-}
 
 pub(crate) fn register(state: &mut LuaState, ns: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, ns, "GetActionAutocast", autocast)?;

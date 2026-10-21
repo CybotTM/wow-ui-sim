@@ -87,6 +87,19 @@ fn pet_info_uses_native_seven_value_spell_and_token_shapes() {
 }
 
 #[test]
+fn range_snapshots_do_not_publish_modern_wrath_queries() {
+    let env = wrath_env();
+    env.exec(
+        r#"
+        for _, name in ipairs({"IsActionInRange", "HasRangeRequirements", "GetActionAutocast"}) do
+            assert(C_ActionBar == nil or rawget(C_ActionBar, name) == nil, name)
+        end
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn action_range_uses_native_numeric_result_and_nil_unknowns() {
     let env = wrath_env();
     env.state().borrow_mut().action_bars.insert(1, 19750);
