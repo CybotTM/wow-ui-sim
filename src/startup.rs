@@ -563,12 +563,9 @@ pub(crate) fn resize_party_state(state: &mut crate::lua_api::SimState, size: usi
 }
 
 fn normalize_headless_frame_positions(env: &WowLuaEnv) {
+    crate::lua_api::chat_init::normalize_chat_editbox_width(env, false);
     let _ = env.exec(
         r#"
-        if ChatFrame1EditBox then
-            ChatFrame1EditBox:SetWidth(447)
-        end
-
         if CompactPartyFrame then
             CompactPartyFrame:SetSize(98, 234)
         end
