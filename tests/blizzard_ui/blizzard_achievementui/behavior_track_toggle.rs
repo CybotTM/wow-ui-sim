@@ -246,8 +246,8 @@ fn toggle_tracking_stop_branch_uses_c_content_tracking_stop_tracking_with_manual
     if crate::common::wrath_achievement_fixtures::assert_native(
         r#"
         A_Admin.SetAchievementEarned(6, false)
+        -- Add must synchronously update the original handler's tracked-ID cache.
         AddTrackedAchievement(6)
-        AchievementFrameAchievements_OnEvent(AchievementFrameAchievements, "TRACKED_ACHIEVEMENT_UPDATE")
         assert(GetNumTrackedAchievements() == 1)
         AchievementButton_ToggleTracking(6)
         assert(GetNumTrackedAchievements() == 0)
