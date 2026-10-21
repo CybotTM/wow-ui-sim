@@ -92,6 +92,12 @@ fn native_tracking_validates_arguments_and_enforces_ten_entries() {
             assert(not ok and string.find(message, "Usage: RemoveTrackedAchievement(achievementID)", 1, true))
             RemoveTrackedAchievement(999999)
             assert(eventCount == 13 and GetNumTrackedAchievements() == 10)
+            -- The shared simulator setter can supply zero; native queries still reject it.
+            SetTrackedAchievement(0, true)
+            assert(IsTrackedAchievement(0) == false)
+            assert(IsTrackedAchievement() == false)
+            assert(IsTrackedAchievement("bad") == false)
+            UntrackAchievement(0)
             "##,
         )
         .expect("native tracking should validate IDs and retain its bounded ordered list");
