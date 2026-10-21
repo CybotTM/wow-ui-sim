@@ -65,7 +65,14 @@ fn xml_process_time_excludes_script_file_load_time() {
     )
     .unwrap();
     let mut timing = LoadTiming::default();
-    load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut timing).unwrap();
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut timing,
+        &mut Vec::new(),
+    )
+    .unwrap();
 
     assert!(
         timing.lua_exec_time > timing.xml_process_time,
@@ -101,6 +108,8 @@ fn patch_12_1_aura_widgets_parse_as_xml_elements() {
     );
 }
 
+// Preserve 03786f864's simulator policy outside authenticated Wrath 12340.
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn missing_xml_include_reports_path_to_lua_error_handler() {
     let env = WowLuaEnv::new().unwrap();
@@ -140,6 +149,7 @@ fn missing_xml_include_reports_path_to_lua_error_handler() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     );
 
     assert!(
@@ -557,6 +567,7 @@ fn test_xml_texture_color() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
@@ -596,6 +607,7 @@ fn test_xml_virtual_frames_skipped() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 

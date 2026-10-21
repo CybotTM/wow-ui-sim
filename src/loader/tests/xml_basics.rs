@@ -247,6 +247,7 @@ fn test_xml_scripts_function_attribute() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
@@ -318,6 +319,7 @@ fn test_xml_scripts_method_attribute() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
@@ -368,6 +370,7 @@ fn test_xml_keyvalues() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
@@ -413,6 +416,7 @@ fn test_xml_keyvalue_global_type_resolves_global_string() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
@@ -464,6 +468,7 @@ fn test_xml_keyvalues_on_fontstring_and_texture() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
@@ -545,6 +550,7 @@ fn test_xml_anchors_with_offset() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
@@ -589,6 +595,7 @@ fn test_xml_anchors_with_direct_offset_attributes() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
@@ -629,6 +636,7 @@ fn test_xml_size_with_absdimension() {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
