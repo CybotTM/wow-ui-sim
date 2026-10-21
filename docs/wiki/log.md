@@ -6,6 +6,14 @@
 
 [Widget state](systems/widget-system.md#message-history-and-translation-target-state--2026-10-16) and [Lua API](systems/lua-api.md#container-message-history-and-transform-producers--2026-10-16) link the [access-ID contract/proof](../specs/message-frame-access-history.md#access-id-correction-proof--2026-10-20): authenticated plain-method table, distinct cached indices, native Wrath metadata/zero-ID rules and preserved Retail surface/tuple. Six-case RED→GREEN, both-profile bounded preservation, empty stock startups, zero-warning checks and formatter pass are recorded with worktree-only ELF binding and unchanged original CVars. Four Wrath chat failures reproduce on master. Native execution, universal method leaks and backFill-ordering/queue-timing changes remain excluded.
 
+## [2026-10-20] source | Numeric-secret tooltip selectors
+
+[Tooltip bridge notes](systems/lua-api.md#retail-1205-tooltip-spell-and-mount-identifiers) link the [owning contract](../specs/tooltip-spell-mount-identifiers.md#numeric-secret-original-consumer-contract): original meter OnEnter and dynamic mount arg1 RED, explicit identity/presentation policy and independent NeverSecret optionals. P3 presentation is not used to initialize the meter row. Original-consumer RED→GREEN, two-sided preservation, private identity after GC and clean stock startup are bounded Retail receipts; native parity remains INFERRED.
+
+## [2026-10-20] source | Numeric-secret presentation selectors
+
+[Lua API notes](systems/lua-api.md#numeric-secret-spell-presentation-selectors) link the [owning contract](../specs/spell-secret-presentation.md): authentic-wrapper original meter/reward RED precedes opt-in host inspection and secret resolved Info identity. Public parsing, shared strict guards and action/book boundaries remain unchanged. Core GREEN precedes distinct original-tooltip description RED and its producer; the contract now retains final five-case GREEN, two-sided preservation, clean startup and formatting. Link sink and casting-producer gaps remain explicit.
+
 ## [2026-10-20] source | Retail unused currency flag boundary
 
 [System notes](systems/lua-api.md#retail-unused-currency-flags) link the [proof owner](../specs/currency-unused-mutations.md#bounded-proof). Existing CurrencyInfo flags now drive the original checkbox/provider/popup; native grouping remains held rather than inferred into a synthetic catalog.
