@@ -34,10 +34,10 @@ fn auction_subclasses_preserve_dbc_order_and_display_flags() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(r#"
         local consumables = {GetAuctionItemSubClasses('4')}
-        assert(#consumables == 9, 'expected nine consumable names, got '..#consumables)
-        -- Physical subclass IDs: 0,5,1,2,3,7,6,4,8, not sorted IDs.
+        assert(#consumables == 8, 'expected eight visible consumable names, got '..#consumables)
+        -- Raw IDs: 0,5,1,2,3,7,6,4,8; ID0 has displayFlags3 and is hidden.
         assert(table.concat(consumables, '|') ==
-            'Consumable|Food & Drink|Potion|Elixir|Flask|Bandage|Item Enhancement|Scroll|Other')
+            'Food & Drink|Potion|Elixir|Flask|Bandage|Item Enhancement|Scroll|Other')
         local armor = {GetAuctionItemSubClasses(2)}
         assert(table.concat(armor, '|') ==
             'Miscellaneous|Cloth|Leather|Mail|Plate|Shields|Librams|Idols|Totems|Sigils')
