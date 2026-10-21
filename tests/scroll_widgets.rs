@@ -994,7 +994,7 @@ mod hybrid_fixture {
                 local thumb = LegacyHybridBar:GetThumbTexture()
                 return thumb == LegacyHybridBarThumbTexture,
                     LegacyHybridBar.thumbTexture == thumb,
-                    thumb:GetWidth(), thumb:GetHeight(), thumb:GetTexture() or ""
+                    thumb:GetWidth(), thumb:GetHeight(), thumb:GetTextureFilePath() or ""
                 "#,
             )
             .unwrap();

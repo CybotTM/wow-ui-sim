@@ -98,7 +98,7 @@ fn test_forbidden_scrollbar_track_has_thumb() {
 fn test_forbidden_scrollbar_track_has_thumb() {
     let env = env_with_shared_xml();
     env.state().borrow_mut().loading_forbidden = true;
-    env.exec(
+    let hierarchy: (bool, bool, bool, bool, bool) = env.eval(
         r#"
         local sf = CreateFrame("ScrollFrame", "ForbiddenLegacyScroll", UIParent, "FauxScrollFrameTemplate")
         sf:SetSize(200, 100)
@@ -106,14 +106,21 @@ fn test_forbidden_scrollbar_track_has_thumb() {
         FauxScrollFrame_Update(sf, 20, 5, 20)
         local bar = ForbiddenLegacyScrollScrollBar
         local thumb = ForbiddenLegacyScrollScrollBarThumbTexture
-        assert(bar:GetParent() == sf)
-        assert(bar:GetThumbTexture() == thumb)
-        assert(thumb:GetParent() == bar)
-        assert(bar:IsForbidden() and thumb:IsForbidden())
+        return bar:GetParent() == sf, bar:GetThumbTexture() == thumb,
+            thumb:GetParent() == bar, bar:IsForbidden(), thumb:IsForbidden()
         "#,
     )
     .unwrap();
     env.state().borrow_mut().loading_forbidden = false;
+    assert_eq!(
+        (hierarchy.0, hierarchy.1, hierarchy.2, hierarchy.3),
+        (true, true, true, true),
+        "forbidden scrollbar must retain its reachable native child hierarchy: {hierarchy:?}"
+    );
+    eprintln!(
+        "native scrollbar/texture forbidden flags: {:?}",
+        (hierarchy.3, hierarchy.4)
+    );
 }
 
 #[test]

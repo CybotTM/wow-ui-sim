@@ -385,9 +385,9 @@ fn test_minimal_scrollbar_atlas_textures() {
         local up = LegacyScrollArtScrollBarScrollUpButton
         local down = LegacyScrollArtScrollBarScrollDownButton
         assert(up:GetParent() == bar and down:GetParent() == bar)
-        assert(up:GetNormalTexture():GetTexture() == "Interface\\Buttons\\UI-ScrollBar-ScrollUpButton-Up")
-        assert(down:GetNormalTexture():GetTexture() == "Interface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up")
-        assert(bar:GetThumbTexture():GetTexture() == "Interface\\Buttons\\UI-ScrollBar-Knob")
+        assert(up:GetNormalTexture():GetTextureFilePath() == "Interface\\Buttons\\UI-ScrollBar-ScrollUpButton-Up")
+        assert(down:GetNormalTexture():GetTextureFilePath() == "Interface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up")
+        assert(bar:GetThumbTexture():GetTextureFilePath() == "Interface\\Buttons\\UI-ScrollBar-Knob")
         local low, high = bar:GetMinMaxValues()
         assert(low == 0 and high == 300)
         assert(not up:IsEnabled() and down:IsEnabled())
