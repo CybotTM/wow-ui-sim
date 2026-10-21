@@ -95,6 +95,9 @@ fn wrath_xml_diagnostics_original_debugtools_consumer_stays_hidden() {
     let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
         .expect("pinned Wrath cache required");
     load_addon(&env.loader_env(), &toc).unwrap();
+    let debugtools = wow_ui_sim::client_profile::blizzard_ui_addons_dir()
+        .join("Blizzard_DebugTools/Blizzard_DebugTools.toc");
+    load_addon(&env.loader_env(), &debugtools).unwrap();
     env.exec(r#"
         assert(ScriptErrorsFrame and ScriptErrorsFrame_OnError, 'original DebugTools must be loaded')
         ScriptErrorsFrame:Hide()
