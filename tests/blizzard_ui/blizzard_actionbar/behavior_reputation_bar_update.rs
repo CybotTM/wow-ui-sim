@@ -184,6 +184,8 @@ const PARAGON_VALUE_MOD: f64 = 2_345.0;
 
 #[test]
 fn reputation_bar_renders_standard_paragon_and_renown_branches_from_watched_faction_data() {
+    wrath_action_case!(reputation);
+
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         assert_cold_globals_resolve(env);

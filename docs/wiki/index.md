@@ -9,6 +9,10 @@
 
 [Presentation lookup](systems/lua-api.md#numeric-secret-spell-presentation-selectors) links the [link contract](../specs/spell-secret-presentation.md#spell-link-selector-regression--2026-10-20): public-API Retail/PTR RED, whole-string identity protection, ordinary nil misses and unchanged glyph rejection. Retail/PTR GREEN and preservation are recorded in the contract; downstream sinks remain separate.
 
+## [2026-10-20] source | Native Wrath action callback fixtures
+
+[Lua API projections](systems/lua-api.md#wrath-action-callback-projections) link the [F04 query contract](../specs/wrath-action-callback-queries.md): original native callbacks, profile-specific tuple/flag projections, separate shared range snapshots and no modern Wrath range publication. The contract owns bounded proof, documented gates and model limits.
+
 ## [2026-10-20] investigation | Shared-target test source binding
 
 [Harness source binding](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) records stale absolute module paths, corrected runtime-root regression RED, rejected manifest bindings and the config-relative source-root input. Config-root relocation GREEN1+1 and a real integration build's1,791 current-worktree paths are verified; before-fixture Retail17 passes and Wrath13 failures remain separate.

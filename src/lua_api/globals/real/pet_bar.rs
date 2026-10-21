@@ -1,6 +1,10 @@
 //! State-backed pet action-bar globals consumed by `Blizzard_ActionBar/Shared/PetActionBar.lua`.
 //!
-//! Mirrors the live API shape:
+//! Modern profiles keep the live API shape below. Wrath projects the same
+//! supplied records to its native seven-value name/subtext/texture tuple;
+//! see `docs/specs/wrath-action-callback-queries.md`.
+//!
+//! Modern API shape:
 //!
 //! - `GetNumPetActions()` → `state.pet_actions.len()` (always 10).
 //! - `GetPetActionInfo(index)` → 9-tuple
@@ -26,7 +30,7 @@
 //! per-profile `HasPetUI` bootstrap guards are
 //! now no-ops — registration here runs before the bootstrap script.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, val_to_string};
 use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_api::state::PetActionSlot;
 use crate::lua_bridge::stack_val;
@@ -54,7 +58,27 @@ fn push_optional_string(state: &mut LuaState, value: Option<&str>) {
     }
 }
 
+const WRATH_INFO: bool = cfg!(feature = "client-wrath");
+
+fn push_wrath_flag(state: &mut LuaState, value: bool) {
+    state.push(if value { Val::Num(1.0) } else { Val::Nil });
+}
+
+fn push_wrath_pet_action_info(state: &mut LuaState, slot: &PetActionSlot) -> u32 {
+    push_optional_string(state, slot.name.as_deref());
+    push_optional_string(state, if slot.is_token { None } else { Some("") });
+    push_optional_string(state, slot.texture.as_deref());
+    push_wrath_flag(state, slot.is_token);
+    push_wrath_flag(state, slot.is_token && slot.is_active);
+    push_wrath_flag(state, !slot.is_token && slot.auto_cast_allowed);
+    push_wrath_flag(state, !slot.is_token && slot.auto_cast_enabled);
+    7
+}
+
 fn push_pet_action_info(state: &mut LuaState, slot: &PetActionSlot) -> u32 {
+    if WRATH_INFO {
+        return push_wrath_pet_action_info(state, slot);
+    }
     push_optional_string(state, slot.name.as_deref());
     push_optional_string(state, slot.texture.as_deref());
     state.push(Val::Bool(slot.is_token));
@@ -71,6 +95,12 @@ fn push_pet_action_info(state: &mut LuaState, slot: &PetActionSlot) -> u32 {
 }
 
 fn push_empty_pet_action_info(state: &mut LuaState) -> u32 {
+    if WRATH_INFO {
+        for _ in 0..7 {
+            state.push(Val::Nil);
+        }
+        return 7;
+    }
     state.push(Val::Nil);
     state.push(Val::Nil);
     state.push(Val::Bool(false));
@@ -90,10 +120,23 @@ fn get_num_pet_actions(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-/// `GetPetActionInfo(index)` — 9-tuple. Out-of-range returns the empty
-/// 9-tuple so consumers can pattern-match without nil-guarding the index.
+fn pet_action_info_index(state: &LuaState) -> LuaResult<Option<i32>> {
+    if !WRATH_INFO {
+        return Ok(stack_i32(state, 1));
+    }
+    let value = stack_val(state, 1);
+    let number = match value {
+        Val::Num(number) => Some(number),
+        Val::Str(_) => val_to_string(state, value).and_then(|s| s.trim().parse::<f64>().ok()),
+        _ => None,
+    }
+    .ok_or_else(|| rilua::runtime_error("Usage: GetPetActionInfo(index)"))?;
+    Ok(Some(number as i32))
+}
+
+/// Modern nine-value or native Wrath seven-value projection of supplied slots.
 fn get_pet_action_info(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(index) = stack_i32(state, 1) else {
+    let Some(index) = pet_action_info_index(state)? else {
         return Ok(push_empty_pet_action_info(state));
     };
     let Some(zero_based) = slot_index_to_zero_based(index) else {

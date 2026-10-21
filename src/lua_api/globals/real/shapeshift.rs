@@ -1,6 +1,10 @@
 //! State-backed shapeshift / stance globals consumed by `Blizzard_ActionBar/Shared/StanceBar.lua`.
 //!
-//! Mirrors the live API shape:
+//! Modern profiles keep the live API shape below. Wrath returns its native
+//! texture/name/numeric-active/numeric-castable projection; see
+//! `docs/specs/wrath-action-callback-queries.md`.
+//!
+//! Modern API shape:
 //!
 //! - `GetNumShapeshiftForms()` → `state.shapeshift_forms.len()`.
 //! - `GetShapeshiftForm()` → active 1-based form index, or `0` when none.
@@ -17,8 +21,9 @@
 //! shapeshift APIs are no-ops — registration here runs before the bootstrap
 //! script.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, val_to_string};
 use crate::lua_api::script_helpers::fire_named_event_state;
+use crate::lua_api::state::ShapeshiftForm;
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -34,19 +39,50 @@ fn form_index_to_zero_based(index: i32) -> Option<usize> {
     usize::try_from(index.checked_sub(1)?).ok()
 }
 
-fn push_form_info(
-    state: &mut LuaState,
-    texture: &str,
-    is_active: bool,
-    is_castable: bool,
-    spell_id: u32,
-) -> u32 {
-    let texture_val = create_string(state, texture);
-    state.push(texture_val);
-    state.push(Val::Bool(is_active));
-    state.push(Val::Bool(is_castable));
-    state.push(Val::Num(spell_id as f64));
+const WRATH_INFO: bool = cfg!(feature = "client-wrath");
+
+fn push_form_info(state: &mut LuaState, form: &ShapeshiftForm) -> u32 {
+    let texture = create_string(state, &form.texture);
+    state.push(texture);
+    if WRATH_INFO {
+        let name = create_string(state, &form.name);
+        state.push(name);
+        state.push(if form.is_active {
+            Val::Num(1.0)
+        } else {
+            Val::Nil
+        });
+        let castable = form.is_active || form.is_castable;
+        state.push(if castable { Val::Num(1.0) } else { Val::Nil });
+    } else {
+        state.push(Val::Bool(form.is_active));
+        state.push(Val::Bool(form.is_castable));
+        state.push(Val::Num(form.spell_id as f64));
+    }
     4
+}
+
+fn push_missing_form_info(state: &mut LuaState) -> u32 {
+    if WRATH_INFO {
+        return 0;
+    }
+    state.push(Val::Nil);
+    1
+}
+
+fn form_info_index(state: &LuaState) -> LuaResult<Option<i32>> {
+    if !WRATH_INFO {
+        return Ok(stack_i32(state, 1));
+    }
+    let value = stack_val(state, 1);
+    let number = match value {
+        Val::Num(number) => Some(number),
+        Val::Str(_) => val_to_string(state, value).and_then(|s| s.trim().parse::<f64>().ok()),
+        _ => None,
+    }
+    .filter(|number| *number != 0.0)
+    .ok_or_else(|| rilua::runtime_error("Usage: GetShapeshiftFormInfo(index)"))?;
+    Ok(Some(number as i32))
 }
 
 /// `GetNumShapeshiftForms()` — number of currently available stance/forms.
@@ -69,33 +105,22 @@ fn get_shapeshift_form(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-/// `GetShapeshiftFormInfo(index)` — `(texture, isActive, isCastable, spellID)`.
-/// Out-of-range / non-numeric indexes return `nil` (matches the bootstrap
-/// stub's previous shape).
+/// Modern or native Wrath projection of the supplied form record.
 fn get_shapeshift_form_info(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(index) = stack_i32(state, 1) else {
-        state.push(Val::Nil);
-        return Ok(1);
+    let Some(index) = form_info_index(state)? else {
+        return Ok(push_missing_form_info(state));
     };
     let Some(zero_based) = form_index_to_zero_based(index) else {
-        state.push(Val::Nil);
-        return Ok(1);
+        return Ok(push_missing_form_info(state));
     };
     let form = borrow_state(state)?
         .shapeshift_forms
         .get(zero_based)
         .cloned();
     let Some(form) = form else {
-        state.push(Val::Nil);
-        return Ok(1);
+        return Ok(push_missing_form_info(state));
     };
-    let pushed = push_form_info(
-        state,
-        &form.texture,
-        form.is_active,
-        form.is_castable,
-        form.spell_id,
-    );
+    let pushed = push_form_info(state, &form);
     Ok(pushed)
 }
 

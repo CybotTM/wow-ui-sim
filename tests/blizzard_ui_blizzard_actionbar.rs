@@ -7,6 +7,18 @@
 
 use crate::common;
 
+// 12340 has no EditMode attach/detach, HideBarArt setting, or honor XP bar.
+post_wrath_ui_fixture! {
+#[path = "blizzard_ui/blizzard_actionbar/behavior_attach_detach.rs"]
+mod behavior_attach_detach;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_battlefield_hides_xp_bar.rs"]
+mod behavior_battlefield_hides_xp_bar;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_main_bar_endcaps.rs"]
+mod behavior_main_bar_endcaps;
+}
+
 #[path = "blizzard_ui/blizzard_actionbar/load.rs"]
 mod load;
 
@@ -94,20 +106,11 @@ mod behavior_quick_keybind_mode;
 #[path = "blizzard_ui/blizzard_actionbar/behavior_main_bar_dividers.rs"]
 mod behavior_main_bar_dividers;
 
-#[path = "blizzard_ui/blizzard_actionbar/behavior_main_bar_endcaps.rs"]
-mod behavior_main_bar_endcaps;
-
-#[path = "blizzard_ui/blizzard_actionbar/behavior_attach_detach.rs"]
-mod behavior_attach_detach;
-
 #[path = "blizzard_ui/blizzard_actionbar/behavior_spell_alert_animation.rs"]
 mod behavior_spell_alert_animation;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_button_range_check.rs"]
 mod behavior_button_range_check;
-
-#[path = "blizzard_ui/blizzard_actionbar/behavior_battlefield_hides_xp_bar.rs"]
-mod behavior_battlefield_hides_xp_bar;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_resting_indicator.rs"]
 mod behavior_resting_indicator;

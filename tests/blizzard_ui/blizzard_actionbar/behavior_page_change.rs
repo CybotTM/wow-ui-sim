@@ -82,6 +82,8 @@ const ROOT: &str = "Blizzard_ActionBar";
 
 #[test]
 fn action_bar_page_up_advances_state_action_bar_page_and_fires_actionbar_page_changed() {
+    wrath_action_case!(page_change);
+
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let cold_start_page: i32 = env
             .eval("return C_ActionBar.GetActionBarPage()")
