@@ -2572,3 +2572,7 @@ Public-API tests reproduce a whole-link secrecy failure on Retail and PTR before
 ## 2026-10-20 — Bounded spell-link selector GREEN
 
 [[lua-api]] links Retail/PTR link GREEN, presentation/tooltip/glyph preservation and isolated stock Retail startup proof in the owning contract. Test-only observer corrections do not change the producer; native parity and downstream sinks remain excluded.
+
+## 2026-10-21 — Wrath autocomplete fixture and query boundary
+
+[Native fixture diagnosis](investigations/wrath-autocomplete-fixture.md) records original-consumer argument-width/name-string RED, direct-result PASS, a Wrath-only modeled global and preserved modern namespace. The [contract](../specs/wrath-autocomplete-results.md) keeps producer proof pending and names held identity/recency/UTF-8 gaps.

@@ -12,18 +12,24 @@ Authority: laptop relay `autocomplete-results-12340.md`, 2026-10-21, static reco
 - [ ] Native editbox callbacks preserve their original user-input, suffix-completion, cursor, selection and dismissal behavior without modern library replacements.
 - [ ] Generic result/selection/clear behavior uses native result buttons; modern-only callback/mixin/pool/ScrollBox assertions remain intact for their existing consumers.
 - [ ] Modern `C_AutoComplete` behavior and non-Wrath global publication remain unchanged.
+- [ ] Native projection uses existing friend GUIDs and active, cached party identities; merges flags by GUID, excludes self, and never deduplicates different identities by equal display text.
+- [ ] Context filtering honors the context CVar (ANY included bit, exclusion veto); numeric cursor defaults, full-match truthiness and ASCII center-edit matching follow the relay's bounded contract.
 
 Cached native FrameXML behavior differs from modern tests: selection starts at zero; focus loss hides without clearing the stored parent or selected index; an empty result update also retains the selected index until fresh results are shown; Tab cycles selection; no arrow-dispatch, guild-roster-event, priority-color, realm-appending or custom-click-callback handler exists in that consumer. Missing authenticated native GlueXML is an evidence gap, not proof that game autocomplete cannot run on glue screens.
 
 ## How it works
 
+- [Native autocomplete diagnosis](../wiki/investigations/wrath-autocomplete-fixture.md)
 - [Lua API and environment](../lua-api.md)
 - [Native addon loading](../addon-loading-pipeline.md)
 
 ## Implementation inventory
 
-- `src/c_api/c_auto_complete.rs` — existing modern completion model; native query adapter pending original-consumer RED.
-- `src/lua_api/workarounds/temporary/auto_complete_defaults.rs` — existing legacy forwarder and unmodeled realm defaults.
+- `src/c_api/c_auto_complete.rs` — unchanged modern completion model and Wrath model module declaration.
+- `src/c_api/c_auto_complete/wrath.rs` — GUID-backed candidate projection and native matching/filter/limit behavior.
+- `src/lua_api/globals/real/wrath_autocomplete.rs` — legacy scalar coercion and vararg string boundary.
+- `src/lua_api/globals/real/wrath_startup_queries.rs` — Wrath-only registration.
+- `src/lua_api/workarounds/temporary/auto_complete_defaults.rs` — non-Wrath result forwarder and existing unmodeled realm defaults; no alternate modern result path under Wrath.
 - `tests/common/wrath_autocomplete.rs` — loads native FrameXML and supplies six explicit social names without replacing vendor functions.
 
 ## Tests asserting this spec
@@ -32,14 +38,16 @@ Cached native FrameXML behavior differs from modern tests: selection starts at z
 - `tests/blizzard_auto_complete_*.rs` — F09 native result/editbox/button fixtures alongside unchanged modern assertions.
 - `tests/c_autocomplete.rs` — existing modern namespace preservation.
 
+Fixture-only source `c4664700f`: eleven positive-count Wrath cases executed, ten FAIL and one PASS. Original query consumers report the unsigned include mask being interpreted as an `i32` limit at argument two; the small FRIEND-mask consumer also fails its name-string assertion. Direct native result updating passes. Producer GREEN and preservation remain pending.
+
 ## Known gaps (current cycle)
 
-- [ ] Execute source-bound native consumer RED, then correct only the demonstrated Wrath query incompatibility.
 - [ ] Complete targeted Wrath proof, stock empty Lua errors, Retail before/after preservation and warning-free checks.
 
 ## Out of scope
 
 - Native execution parity: authority is static reconstruction only.
-- Whisper history, native Battle.net presence nodes and recency timestamps: no suitable native backing state established for this batch.
+- Guild candidates and friend rows without GUIDs: native identity links are unavailable; no synthetic identities or name-based merges are introduced.
+- Whisper history, native Battle.net presence nodes and recency timestamps: no suitable native backing state established for this batch. Alphabetical ordering models only native recency ties.
 - UTF-8/case-mapping and center-editing edge parity: native helper caveats remain; do not claim modern Rust character slicing reproduces them.
 - New modern-library shims, independent native popup instances, vendor or rilua modifications, and unrelated legacy global cleanup.

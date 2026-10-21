@@ -1,3 +1,7 @@
+## [2026-10-21] investigation | Wrath autocomplete native fixture
+
+[Fixture/query diagnosis](investigations/wrath-autocomplete-fixture.md) links the [bounded contract](../specs/wrath-autocomplete-results.md): original-consumer RED, native callback/result oracles and the Wrath-only legacy argument/string-result boundary. Modern-only targets remain report-only; guild/presence identity, recency and UTF-8 edges are held. Producer proof pending.
+
 ## [2026-10-20] source | Wrath legacy LoD native-evidence adapters
 
 [Consumer follow-up](investigations/wrath-addon-load-fixture.md#native-evidence-legacy-api-follow-up) links the [contract](../specs/wrath-legacy-lod-apis.md): cached groups, lazy arrow models, Calendar context, no-team arena and empty-catalog filter reset paths; native alias publication precedes Calendar capture. Authenticated enUS auction DBC projection and native follow-ups now implemented; initial six producer cases and stock/profile proof passed, expanded proof pending.
