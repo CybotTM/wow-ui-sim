@@ -176,6 +176,8 @@ pub(crate) mod spell_book_static_defaults;
 pub(crate) mod spell_metadata_defaults;
 pub(crate) mod spell_static_defaults;
 pub(crate) mod spell_target_defaults;
+#[cfg(not(feature = "client-wrath"))]
+pub(crate) mod startup_condition_capability_defaults;
 pub(crate) mod startup_namespace_defaults;
 pub(crate) mod startup_windows;
 pub(crate) mod static_model_info_defaults;
