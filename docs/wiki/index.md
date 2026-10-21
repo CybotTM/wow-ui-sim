@@ -2,6 +2,14 @@
 
 [Harness source binding](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) records stale absolute module paths, corrected runtime-root regression RED, rejected manifest bindings and the config-relative source-root input. Config-root relocation GREEN1+1 and a real integration build's1,791 current-worktree paths are verified; before-fixture Retail17 passes and Wrath13 failures remain separate.
 
+## [2026-10-20] source | Numeric-secret tooltip selectors
+
+[Tooltip bridge notes](systems/lua-api.md#retail-1205-tooltip-spell-and-mount-identifiers) link the [owning contract](../specs/tooltip-spell-mount-identifiers.md#numeric-secret-original-consumer-contract): original meter OnEnter and dynamic mount arg1 RED, explicit identity/presentation policy and independent NeverSecret optionals. P3 presentation is not used to initialize the meter row. Original-consumer RED→GREEN, two-sided preservation, private identity after GC and clean stock startup are bounded Retail receipts; native parity remains INFERRED.
+
+## [2026-10-20] source | Numeric-secret spell presentation
+
+[Host-only lookup notes](systems/lua-api.md#numeric-secret-spell-presentation-selectors) link the [presentation contract](../specs/spell-secret-presentation.md): original meter/reward selector RED, endpoint-specific conversions and explicit secret-identity/public-presentation policy. Core and description RED→GREEN, two-sided preservation and clean stock startup are bounded Retail proof; link/casting-producer holds remain separate.
+
 ## [2026-10-19] system | Wrath reload lifecycle and character layout
 
 [Reload mechanics](systems/reload-ui.md) link the [profile contract](../specs/reload-ui.md#wrath-12340-requirements): A–D bounded GREEN, two-sided saved-value and ticked original Stopwatch preservation, readiness-driven variables delivery and argless Wrath entry. Character-local placed-frame restoration and selective mirror cancellation pass E's eight bounded cases. [Final implementer gates](../specs/reload-ui.md#final-implementer-gate--2026-10-19) record 23 Wrath cases, profile preservation, four warning-free checks and both clean startups; independent integrated verification remains pending; unauthenticated conversion constants and separate GameMenu/cursor/spellbook gaps remain excluded.
