@@ -77,6 +77,13 @@ fn setup_env() -> WowLuaEnv {
         state.addon_base_paths = vec![blizzard_ui_dir()];
     }
 
+    if cfg!(feature = "client-wrath") {
+        common::load_profile_framexml(&env);
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        return env;
+    }
+
     // Load base Blizzard addons
     let ui = blizzard_ui_dir();
     for name in BLIZZARD_ADDONS {
@@ -388,6 +395,11 @@ fn micro_menu_buttons_restore_normal_texture_after_hover(env: &WowLuaEnv) {
 #[test]
 fn micro_menu_layout_stays_locked() {
     let env = setup_env();
+    if cfg!(feature = "client-wrath") {
+        env.exec(include_str!("micro_menu/wrath_layout.lua"))
+            .unwrap();
+        return;
+    }
     let result: String = env
         .eval(
             r#"
@@ -576,6 +588,12 @@ fn micro_menu_professions_button_loads_and_opens_panel() {
 #[test]
 fn micro_menu_player_spells_button_loads_and_opens_panel() {
     let env = setup_env();
+    if cfg!(feature = "client-wrath") {
+        assert!(!frame_is_shown(&env, "SpellBookFrame"));
+        click_button(&env, "SpellbookMicroButton").expect("native spellbook click");
+        assert!(frame_is_shown(&env, "SpellBookFrame"));
+        return;
+    }
     assert!(
         !frame_exists(&env, "PlayerSpellsFrame"),
         "PlayerSpellsFrame should not exist before click"
@@ -637,21 +655,27 @@ fn micro_menu_achievement_button_loads_and_opens_panel() {
         "AchievementFrame should be shown after clicking AchievementMicroButton"
     );
 
-    let background_atlas: String = env
-        .eval("return AchievementFrame.Background:GetAtlas() or ''")
-        .expect("AchievementFrame background atlas should be readable");
-    assert_eq!(
-        background_atlas, "UI-Background-Rock-Brown",
-        "AchievementFrame background should use its current atlas"
-    );
-
+    if !cfg!(feature = "client-wrath") {
+        let background_atlas: String = env
+            .eval("return AchievementFrame.Background:GetAtlas() or ''")
+            .expect("AchievementFrame background atlas should be readable");
+        assert_eq!(
+            background_atlas, "UI-Background-Rock-Brown",
+            "AchievementFrame background should use its current atlas"
+        );
+    }
     let categories_bg = texture_path(&env, "AchievementFrameCategoriesBG");
     assert_eq!(
         categories_bg, r"Interface\AchievementFrame\UI-Achievement-Parchment",
         "Achievement categories parchment texture should be assigned"
     );
 
-    let header_left = texture_path(&env, "AchievementFrame.Header.Left");
+    let header = if cfg!(feature = "client-wrath") {
+        "AchievementFrameHeaderLeft"
+    } else {
+        "AchievementFrame.Header.Left"
+    };
+    let header_left = texture_path(&env, header);
     assert_eq!(
         header_left, r"Interface\AchievementFrame\UI-Achievement-Header",
         "Achievement header texture should be assigned"
@@ -759,6 +783,13 @@ fn game_menu_buttons_display_text(env: &WowLuaEnv) {
 #[test]
 fn micro_menu_guild_button_loads_and_opens_panel() {
     let env = setup_env();
+    if cfg!(feature = "client-wrath") {
+        click_button(&env, "SocialsMicroButton").expect("native social panel click");
+        env.exec("FriendsFrameTab3:Click()")
+            .expect("native guild tab click");
+        assert!(frame_is_shown(&env, "GuildFrame"));
+        return;
+    }
     // Click may error in post-show setup; we only care that the frame exists
     let _ = click_button(&env, "GuildMicroButton");
     assert!(
@@ -770,6 +801,19 @@ fn micro_menu_guild_button_loads_and_opens_panel() {
 #[test]
 fn main_menu_performance_bar_uses_seeded_network_stats() {
     let env = setup_env();
+    if cfg!(feature = "client-wrath") {
+        env.exec(
+            r#"
+            MainMenuMicroButton.updateInterval = 0
+            local onUpdate = assert(MainMenuMicroButton:GetScript("OnUpdate"))
+            onUpdate(MainMenuMicroButton, 0)
+            local r, g, b = MainMenuBarPerformanceBar:GetVertexColor()
+            assert(r == 0 and g == 1 and b == 0, "native latency bar must stay green")
+        "#,
+        )
+        .unwrap();
+        return;
+    }
     let result: String = env
         .eval(
             r#"
