@@ -39,11 +39,13 @@ assert(AutoComplete_GetNumResults(AutoCompleteBox) == 1)
 fn native_query_returns_strings_to_original_framexml() {
     assert_native(
         r#"
-local results = {GetAutoCompleteResults('F09A', AUTOCOMPLETE_FLAG_ALL, 0, 6, 4)}
-assert(#results == 1 and results[1] == 'F09Alpha')
+-- Small native flags isolate the return-shape contract from argument width.
+F09EditBox.autoCompleteParams = AUTOCOMPLETE_LIST.FRIEND
 AutoComplete_Update(F09EditBox, 'F09A', 4)
 assert(AutoCompleteButton1:GetText() == 'F09Alpha')
 assert(AutoComplete_GetNumResults(AutoCompleteBox) == 1)
+local results = {GetAutoCompleteResults('F09A', AUTOCOMPLETE_FLAG_FRIEND, AUTOCOMPLETE_FLAG_BNET, 6, 4)}
+assert(#results == 1 and results[1] == 'F09Alpha')
 "#,
     );
 }
