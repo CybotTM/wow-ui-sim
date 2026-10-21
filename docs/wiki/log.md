@@ -1,3 +1,7 @@
+## [2026-10-20] source | Wrath native chat layout preservation
+
+[Diagnosis](investigations/wrath-chat-layout.md) and [contract](../specs/wrath-chat-layout.md) record the corrected pre-addon RED at `60fcdf225`: native `430x120/(32,130)` becomes modern `430x170/(35,50)`. A post-entry snapshot was invalid because entry automatically applies simulator workarounds. Native geometry now remains owned by FrameXML; current-source GREEN and Retail preservation remain pending.
+
 ## [2026-10-20] investigation | Shared-target test source binding
 
 [Harness notes](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) record corrected relocation RED: the second-root invocation executes stale first-root source and fails against a runtime expected-root input. Compile-time manifest binding also failed; the forced config-relative custom input passes same-slot relocation1+1. A real Wrath integration build after foreign-checkout helper seeding has1,791 requested-worktree module paths and zero compiler warnings; exact TimeManager still executes one expected fixture-before failure. Separate before-fixture source-bound receipts show Retail17/17 passing and Wrath13/13 failing, including one executed TimeManager test; historical stale/zero-selection receipts remain invalid.
