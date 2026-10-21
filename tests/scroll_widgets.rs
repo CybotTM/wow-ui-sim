@@ -942,11 +942,12 @@ mod hybrid_fixture {
     use super::*;
 
     pub fn load_and_create() -> WowLuaEnv {
-        let env = env_with_shared_xml();
+        let env = WowLuaEnv::new().unwrap();
         let toc_path = wow_ui_sim::client_profile::blizzard_ui_framexml_toc().unwrap();
         let toc = wow_ui_sim::toc::TocFile::parse(
             toc_path.parent().unwrap(),
-            "HybridScrollFrame.lua\nHybridScrollFrame.xml\n",
+            // One TOC: the loader deduplicates whole addon directories.
+            "UIPanelTemplates.lua\nUIPanelTemplates.xml\nHybridScrollFrame.lua\nHybridScrollFrame.xml\n",
         );
         let loaded = wow_ui_sim::loader::load_addon_from_toc(&env.loader_env(), &toc).unwrap();
         assert!(loaded.warnings.is_empty(), "{:?}", loaded.warnings);
