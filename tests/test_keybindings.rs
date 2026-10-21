@@ -158,7 +158,9 @@ fn settle_env(env: &WowLuaEnv) {
 
 fn prepare_bag_env(env: &WowLuaEnv) {
     settle_env(env);
-    load_token_ui(env);
+    if !cfg!(feature = "client-wrath") {
+        load_token_ui(env);
+    }
     settle_env(env);
 }
 
