@@ -30,7 +30,14 @@ fn is_action_in_range(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn is_possess_bar_visible(state: &mut LuaState) -> LuaResult<u32> {
+    let visible = borrow_state(state)?.action_bar_state.possess_bar_visible;
+    state.push(Val::Bool(visible));
+    Ok(1)
+}
+
 pub(super) fn register(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsActionInRange", is_action_in_range)?;
+    LuaApiMut::register_function(lua, "IsPossessBarVisible", is_possess_bar_visible)?;
     Ok(())
 }

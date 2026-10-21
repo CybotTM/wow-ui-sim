@@ -222,12 +222,6 @@ if IsPetAttackAction == nil then
   end
 end
 
-if IsPossessBarVisible == nil then
-  function IsPossessBarVisible()
-    return false
-  end
-end
-
 if IsStereoVideoAvailable == nil then
   function IsStereoVideoAvailable()
     return false

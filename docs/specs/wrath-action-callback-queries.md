@@ -15,6 +15,7 @@ Native Wrath action, stance and pet callbacks must read profile-correct query re
 
 - [ ] Wrath `GetShapeshiftFormInfo` returns texture, name, numeric 1/nil active and castable flags; active forms are castable. Invalid zero/nonnumeric arguments error; out-of-range forms return zero values. Native ShapeshiftBar_UpdateState checks the selected button.
 - [ ] Wrath `GetPetActionInfo` returns seven values name, subtext, texture, token, active, autocast-allowed, autocast-enabled; empty slots return seven nils and nonnumeric input errors. Spell subtext is empty when unsupplied, spell active/token flags are nil, other flags are numeric 1/nil. Token names/textures are supplied native token strings, subtext/autocast flags nil, active numeric 1/nil.
+- [ ] `IsPossessBarVisible()` returns exactly one boolean from existing supplied possess visibility; `UPDATE_BONUS_ACTIONBAR` drives the native PossessBarFrame show/hide callback without a getter-side vehicle/bonus-bar gate.
 - [ ] Non-Wrath query values and registration remain unchanged.
 
 ## How it works
@@ -29,7 +30,7 @@ Native Wrath action, stance and pet callbacks must read profile-correct query re
 - `src/lua_api/state{,/sim_state}.rs` — profile-scoped snapshot storage.
 - `src/lua_api/globals/real/pet_bar.rs` — Wrath seven-value spell/token projection; modern nine-value output preserved.
 - `src/lua_api/globals/real/shapeshift.rs` — Wrath texture/name/numeric-flags projection; modern texture/boolean-flags/spellID preserved.
-- `src/lua_api/globals/real/wrath_legacy/action_bar.rs` — native legacy numeric/nil range adapter over shared snapshots; no C_* registration.
+- `src/lua_api/globals/real/wrath_legacy/action_bar.rs` — native legacy numeric/nil range and boolean possession adapters over supplied state; no C_* registration.
 - `src/wrath/compat_bootstrap.lua` — obsolete nil-only range shim removed.
 
 ## Tests asserting this spec
@@ -39,10 +40,11 @@ Native Wrath action, stance and pet callbacks must read profile-correct query re
 
 ## Known gaps (current cycle)
 
-- [ ] Original-consumer RED and query-contract RED must precede producer behavior repairs; GREEN and Retail preservation remain pending.
+- [ ] Original-consumer RED reproduced at cd76d412f; combined GREEN and final Retail preservation remain pending.
+- [ ] Native aura-236 possession visibility exception is unmodeled: existing supplied possess boolean has no possess-spell/aura record. No missing-spell behavior is claimed.
 
 ## Out of scope
 
 Native engine execution, range geometry/eligibility computation, unsupported macro stored-target sentinel distinctions, missing spell/item records, active-icon lookup, pet command/mode inference, pet-presence reconstruction and unrelated client profiles. Existing supplied pet/form records remain fixture inputs, not a claim that modern default spell IDs are 12340 game data.
 
-Authoritative source: laptop static 12340 notes `handoff/laptop-labels-answers-20261018/{action-inrange-12340.md,pet-shapeshift-info-12340.md}` (2026-10-20). Native consumer positions: cached `FrameXML/{ActionButton.lua:458+,BonusActionBarFrame.lua:152+,PetActionBarFrame.lua:106+}`. Static reconstruction is not native execution.
+Authoritative source: laptop static 12340 notes `handoff/laptop-labels-answers-20261018/{action-inrange-12340.md,pet-shapeshift-info-12340.md,possess-bar-visible-12340.md}` (2026-10-20). Native consumer positions: cached `FrameXML/{ActionButton.lua:458+,BonusActionBarFrame.lua:152+,PetActionBarFrame.lua:106+}`. Static reconstruction is not native execution.

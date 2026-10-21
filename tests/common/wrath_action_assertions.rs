@@ -324,7 +324,7 @@ pub fn pet_update() {
 
 pub fn possess_visibility() {
     let env = wrath_env();
-    env.exec("assert(not PossessBarFrame:IsShown())").unwrap();
+    env.exec("assert(not PossessBarFrame:IsShown()); assert(type(IsPossessBarVisible()) == 'boolean' and select('#', IsPossessBarVisible()) == 1)").unwrap();
     env.state()
         .borrow_mut()
         .action_bar_state
