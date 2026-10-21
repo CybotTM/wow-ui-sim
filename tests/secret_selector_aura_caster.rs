@@ -133,8 +133,11 @@ fn assert_published_caster_guid(env: &WowLuaEnv) {
     let result = lua.get_global_val("CasterSecretResult");
     assert!(rilua::table_security::is_secret_value(lua.state(), result));
     let payload = rilua::table_security::unwrap_secret(lua.state(), result).unwrap();
-    let guid = wow_ui_sim::lua_api::methods::val_to_string(lua.state(), payload).unwrap();
-    assert_eq!(guid, GUID);
+    let rilua::Val::Str(reference) = payload else {
+        panic!("caster identity must contain a GUID string");
+    };
+    let guid = lua.state().gc.string_arena.get(reference).unwrap();
+    assert_eq!(guid.data(), GUID.as_bytes());
 }
 
 #[test]
