@@ -49,7 +49,7 @@ contract!(
 );
 
 #[cfg(any(
-    feature = "client-retail",
+    feature = "profile-retail",
     feature = "client-ptr",
     feature = "client-wowforever"
 ))]

@@ -27,7 +27,7 @@ M3 replaces observed social/group/chat/guild gaps exposed by [factory removal](c
 
 ## Tests asserting this spec
 
-- `tests/guild_tabard_info.rs` — documented DTO, supplied metadata, fresh mutable colors, validation/clearing and legacy state preservation.
+- `tests/guild_tabard_info.rs` — documented DTO with the original cached ColorMixin framework, supplied metadata, fresh mutable colors, validation/clearing and legacy state preservation; bootstrap color-stub completeness is outside this batch.
 - `tests/c_factory_m3_social.rs` — per-profile generated-documentation return contracts and explicitly chosen temporary policies.
 - `tests/c_namespace_nil_contract.rs`, `tests/nil_symbol_access.rs` — removal contract retained.
 - `tests/startup_warnings.rs` — unchanged final startup health gate.

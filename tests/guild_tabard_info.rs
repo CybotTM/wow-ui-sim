@@ -3,9 +3,18 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+fn load_guild_color_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().unwrap();
+    let cache = wow_ui_sim::blizzard_ui_sync::default_cache_addons_path().unwrap();
+    let source = std::fs::read_to_string(cache.join("Blizzard_SharedXMLBase/Color.lua")).unwrap();
+    // The DTO promises the actual ColorMixin, not the bootstrap color stub.
+    env.exec(&source).unwrap();
+    env
+}
+
 #[test]
 fn guild_tabard_info_is_nil_until_numeric_metadata_is_supplied() {
-    let env = WowLuaEnv::new().unwrap();
+    let env = load_guild_color_env();
     env.exec(
         r#"
         assert(select('#', C_GuildInfo.GetGuildTabardInfo()) == 1)
@@ -32,7 +41,7 @@ fn guild_tabard_info_is_nil_until_numeric_metadata_is_supplied() {
 
 #[test]
 fn guild_tabard_queries_return_independent_color_objects() {
-    let env = WowLuaEnv::new().unwrap();
+    let env = load_guild_color_env();
     env.exec(
         r#"
         assert(C_GuildInfo.GetGuildTabardInfo() == nil)
@@ -53,7 +62,7 @@ fn guild_tabard_queries_return_independent_color_objects() {
 
 #[test]
 fn guild_tabard_metadata_rejects_invalid_updates_and_clears_on_logo_replacement() {
-    let env = WowLuaEnv::new().unwrap();
+    let env = load_guild_color_env();
     env.exec(
         r#"
         assert(C_GuildInfo.GetGuildTabardInfo() == nil)
