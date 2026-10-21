@@ -23,14 +23,15 @@ fn seed_completion_names(env: &WowLuaEnv) {
     let names = ["F09Alpha", "F09Beta", "F09Gamma", "F09Delta", "F09Epsilon", "F09Zeta"];
     env.state().borrow_mut().social_friends = names
         .into_iter()
-        .map(|name| SocialFriend {
+        .enumerate()
+        .map(|(index, name)| SocialFriend {
             name: name.into(),
             level: 80,
             area: "Dalaran".into(),
             class_name: "Paladin".into(),
             note: String::new(),
             is_online: true,
-            guid: String::new(),
+            guid: format!("Player-1-F09000{index:02X}"),
         })
         .collect();
 }
