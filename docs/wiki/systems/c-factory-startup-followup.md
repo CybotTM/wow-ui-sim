@@ -8,8 +8,13 @@ The [condition contract](../../specs/c-factory-m1-conditions.md) deliberately su
 
 F0 original-consumer RED applies because the producer source is unchanged between its source anchor and the test-only follow-up revision. New generated-documentation tests still require their own observed RED before final GREEN acceptance. Runtime proof remains pending.
 
+## M2 state adapters
+
+The [M2 contract](../../specs/c-factory-m2-adapters.md) reuses equipped-item catalog identity, known/book/pet spell membership, action-button registration and the supplied cooldown-viewer availability snapshot. Availability is compiled as shared state but remains published only for its documented modern profiles and Forever. The temporary Forever queries name separate missing keyring capability policy, lifetime talent-point award history and active spell/item targeting metadata; none is inferred from nearby inventory, level or talent data.
+
 ## Sources
 
+- [M2 adapters](../../specs/c-factory-m2-adapters.md) — state bindings and temporary capability scope.
 - [M1 conditions](../../specs/c-factory-m1-conditions.md) — scope and contract.
 - [Nil-member contract](../../specs/c-namespace-nil-members.md) — frozen F0 error matrix and unresolved timer family.
 

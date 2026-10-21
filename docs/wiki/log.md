@@ -1,3 +1,7 @@
+## [2026-10-21] source | M2 startup state adapters
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m2-state-adapters) links equipment/spellbook/action/availability state and three Forever-only temporary capabilities; runtime acceptance pending.
+
 ## [2026-10-21] source | Named M1 startup conditions
 
 [Factory follow-up](systems/c-factory-startup-followup.md#m1-conditions) records three explicitly temporary conditions, missing backing systems and profile scope; generated-contract and stock runtime proof remain pending.

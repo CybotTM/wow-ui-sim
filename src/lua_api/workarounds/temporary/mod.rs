@@ -81,6 +81,8 @@ pub(crate) mod environment_cleanup_restore;
 pub(crate) mod equipment_set_lock_defaults;
 pub(crate) mod event_scheduler_state;
 pub(crate) mod fog_of_war_pin;
+#[cfg(feature = "client-wowforever")]
+pub(crate) mod forever_startup_capabilities;
 pub(crate) mod formatting_utility_defaults;
 pub(crate) mod frame_helper_defaults;
 pub(crate) mod game_rules_namespace_fallback;

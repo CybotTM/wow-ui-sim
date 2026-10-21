@@ -376,6 +376,8 @@ fn apply_format_and_game_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
 fn apply_inventory_and_spell_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::dye_color_defaults::apply_bootstrap(lua)?;
     temporary::inventory_query_defaults::apply_bootstrap(lua)?;
+    #[cfg(feature = "client-wowforever")]
+    temporary::forever_startup_capabilities::apply_bootstrap(lua)?;
     temporary::item_button_helper_defaults::apply_bootstrap(lua)?;
     temporary::item_targeting_defaults::apply_bootstrap(lua)?;
     temporary::item_upgrade_availability_defaults::apply_bootstrap(lua)?;
