@@ -4,11 +4,11 @@ Retail/PTR 12.1.5 caster-selector compatibility in `src/c_api/c_unit_auras.rs`; 
 
 ## What it must do
 
-- [ ] `C_UnitAuras.GetAuraCasterGUID` accepts authentic numeric-secret aura instance IDs under public unit tokens in secure/tainted callers, selecting the same stored aura and configured source GUID as a plain instance.
-- [ ] Exactly one secret-wrapped GUID is returned for a secret numeric selector; exactly one ordinary GUID for a public selector. One ordinary nil remains the result for missing aura/unit/caster identity. Secret in → secret identity out is explicitly approved simulator policy, not native-parity evidence.
-- [ ] The unchanged original AuraContainerPublicAuraSourceMixin:GetAuraCasterGUID reaches the real producer and forwards its result with all four selector/caller controls.
-- [ ] Input opacity, caller taint and source/model rows remain unchanged. Public f64→i32 instance coercion is preserved for numeric-secret selection; non-numeric-secret instances and secret unit tokens remain rejected. INFERRED: native invalid-instance conversion/failure rules are not established by these tests.
-- [ ] The existing public-selector output and unit-aura-restriction behavior remain unchanged. Implementing the documented RequiresUnitAuraAccess/SecretWhenUnitAuraRestricted layer for this endpoint is separate follow-up scope, not silently bundled into numeric-selector support.
+- [x] `C_UnitAuras.GetAuraCasterGUID` accepts authentic numeric-secret aura instance IDs under public unit tokens in secure/tainted callers, selecting the same stored aura and configured source GUID as a plain instance.
+- [x] Exactly one secret-wrapped GUID is returned for a secret numeric selector; exactly one ordinary GUID for a public selector. One ordinary nil remains the result for missing aura/unit/caster identity. Secret in → secret identity out is explicitly approved simulator policy, not native-parity evidence.
+- [x] The unchanged original AuraContainerPublicAuraSourceMixin:GetAuraCasterGUID reaches the real producer and forwards its result with all four selector/caller controls.
+- [x] Input opacity, caller taint and source/model rows remain unchanged. Public f64→i32 instance coercion is preserved for numeric-secret selection; non-numeric-secret instances and secret unit tokens remain rejected. INFERRED: native invalid-instance conversion/failure rules are not established by these tests.
+- [x] The existing public-selector output and unit-aura-restriction behavior remain unchanged. Implementing the documented RequiresUnitAuraAccess/SecretWhenUnitAuraRestricted layer for this endpoint is separate follow-up scope, not silently bundled into numeric-selector support.
 
 ## How it works
 
@@ -23,9 +23,17 @@ Retail/PTR 12.1.5 caster-selector compatibility in `src/c_api/c_unit_auras.rs`; 
 - `tests/secret_selector_aura_caster.rs`
 - `tests/unit_exists_state.rs`
 
+## Bounded proof — 2026-10-20
+
+PTR RED `670b7af51`: three cases fail at typed argument2 before lookup. Producer `130609242` passes direct selection/misses. Original-consumer observation initially fails only when Lua reads a tainted result global then attempts secure unwrapping. Test-only `3abd293c0` explicitly proves that observer taint/denial and checks the emitted secret GUID from the trusted host after Lua context exit: caster3/3 pass on PTR and Retail. No taint reset, VM change or producer workaround is used.
+
+PTR UnitExists5/instance IDs6/admin14/duration selector2 pass; Retail UnitExists8/instance IDs6/admin14/duration selector1 pass. One intermediate helper build failed on private module access and was corrected; one empty guessed filter was rejected with zero credit. Neither is behavioral acceptance evidence.
+
+Exact argv, source-bound ELF hashes and results: `/home/osso/.local/state/wow-ui-sim/handoff/secret-sel-a/proof-ledger.jsonl`, `p5-caster-*`, `final-retail-*`.
+
 ## Known gaps (current cycle)
 
-- [ ] Compiled original-consumer RED→GREEN and preservation receipts.
+No unresolved failure within this selector subset. Native unit-aura precondition/output-restriction work remains held.
 
 ## Out of scope
 

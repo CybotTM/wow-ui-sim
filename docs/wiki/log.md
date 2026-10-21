@@ -1,3 +1,7 @@
+## [2026-10-20] source | Numeric-secret aura duration and caster selectors
+
+[C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) link [duration](../specs/secret-selector-aura-duration.md) and [caster identity](../specs/secret-selector-aura-caster.md): original PTR pandemic and Retail/PTR caster consumers, retained duration outputs and secret-selector GUID publication. Native aura-output restriction remains held; the existing inactive-party DurationObject fixture stays separate.
+
 ## [2026-10-20] source | Numeric-secret counts and usability
 
 [C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) link [count/usability](../specs/secret-selector-count-usability.md). Counts retain alias-first strict-u32 selection, usability retains raw known membership, and output predicates stay independent. Historical reject-all-number-secret requirements now point to this bounded subset; native full-grammar/secrecy claims remain excluded.

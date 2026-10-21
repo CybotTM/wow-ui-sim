@@ -4,7 +4,7 @@
 
 ## What it must do
 
-- [x] PTR publishes `GetAuraCasterGUID(auraInstanceUnit, auraInstanceID)`; earlier retail preserves absence, including namespace fallback and post-load bootstrap.
+- [x] Retail/PTR 12.1.5 publishes `GetAuraCasterGUID(auraInstanceUnit, auraInstanceID)`; earlier API epochs preserve absence, including namespace fallback and post-load bootstrap.
 - [ ] Public arguments retain existing bridge validation and f64→i32 instance conversion. Retail1215/PTR numeric-secret instances use the [bounded caster selector contract](secret-selector-aura-caster.md).
 - [x] Look up the aura through the shared per-unit instance lookup, including helpful and harmful auras; identical IDs on different units do not alias.
 - [ ] Return exactly one nullable GUID with the [selected identity-secrecy policy](secret-selector-aura-caster.md); missing units/auras/unresolved source tokens remain one ordinary nil.
