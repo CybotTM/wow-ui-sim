@@ -21,7 +21,7 @@ Retail 12.0.5 row394, `C_UnitAuras.GetRefreshExtendedDuration`, and its consumer
 ### Validation and query immutability — explicitly INFERRED
 
 - [x] Unit accepts a public string or nil (nil means unknown); required instance accepts a public finite number. Missing instance, wrong types and nonfinite numeric arguments error with nonempty diagnostics, including absent-unit queries. Optional spell accepts nil or a public finite number/string; no new spell parser or additional numeric range policy.
-- [x] Conservative rejection of real secret unit/instance/spell arguments precedes absent-unit results, in secure and addon-tainted callers. Full GC preserves secret identity; rejection neither declassifies inputs nor changes caller taint. Later public queries still work. This is **not** `SecretArguments = "AllowedWhenTainted"` or native secret-output parity.
+- [ ] Secret units and optional spell selectors remain conservatively rejected before absent-unit results. Retail125/PTR numeric-secret instance selection follows the [bounded selector contract](secret-selector-aura-duration.md), preserving caller taint, wrappers, existing aura access and ordinary duration outputs. This does not establish native output-secrecy parity.
 - [x] Both getters leave aura identity/current duration/expiration, metadata, aliases and event queue unchanged. Metadata and alias mutations remain environment-local.
 
 ### Evidence boundary
@@ -73,7 +73,7 @@ Grouped filter: `aura_refresh_duration::` with `retail-12-0-5` enabled. Parent s
 | `finite_metadata_sum_overflow_never_becomes_public_infinity` | Reject nonfinite refresh output |
 | `zero_base_and_zero_cap_are_valid_explicit_metadata` | Zero input boundaries |
 | `malformed_arguments_error_before_missing_unit_short_circuit` | Wrong types, required args and nonfinite values |
-| `actual_secret_arguments_are_rejected_without_declassification_or_taint_changes` | Real secret numbers, GC, taint and recovery |
+| `non_instance_secrets_remain_rejected_without_declassification_or_taint_changes` | Numeric instance acceptance; secret unit/optional spell rejection, GC, taint and recovery |
 | `getters_leave_aura_metadata_aliases_and_events_unchanged_across_gc` | Immutable queries |
 
 ## Known gaps (current cycle)
