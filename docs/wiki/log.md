@@ -2473,3 +2473,7 @@ Updated [consumer follow-up](investigations/wrath-addon-load-fixture.md#native-e
 ## 2026-10-20 — Wrath legacy LoD bounded producer GREEN
 
 [Contract](../specs/wrath-legacy-lod-apis.md#bounded-wrath-proof--2026-10-20) records six exact producer/native cases passing at `4270e9876`, source-bound warning-free Wrath ELF and all five original consumers re-run without budget changes. BattlefieldMinimap clears errors; Calendar halves counts; held auction and new getter boundaries retain whole-addon RED. Stock/profile gates pending.
+
+## 2026-10-20 — Authenticated Wrath auction data and native follow-ups
+
+Updated [legacy producer ownership](investigations/wrath-addon-load-fixture.md#native-evidence-legacy-api-follow-up): supplied DBC hashes/record-loader mappings resolve the catalog gap without invented names; source order and 28-value inventory fall-through are retained. [Contract](../specs/wrath-legacy-lod-apis.md) also owns cached group counts, localized repeat options, read-only invite state and fresh-empty profession reads. Expanded native/profile proof pending; initial proof remains recorded.
