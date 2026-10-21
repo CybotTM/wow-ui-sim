@@ -410,6 +410,7 @@ fn achievement_frame_comparison_registers_inspect_achievement_ready_after_onload
         assert(AchievementFrameComparison:IsEventRegistered("INSPECT_ACHIEVEMENT_READY"))
         assert(AchievementFrameComparison:IsEventRegistered("ACHIEVEMENT_EARNED"))
         assert(AchievementFrameComparison:GetScript("OnEvent"))
+        AchievementFrame_DisplayComparison("player")
         AchievementFrameComparisonHeaderPoints:SetText("sentinel")
         AchievementFrameComparison_OnEvent(AchievementFrameComparison, "INSPECT_ACHIEVEMENT_READY")
         assert(AchievementFrameComparisonHeaderPoints:GetText() == tostring(GetComparisonAchievementPoints()))

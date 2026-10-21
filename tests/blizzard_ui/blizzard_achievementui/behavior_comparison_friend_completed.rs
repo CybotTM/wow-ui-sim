@@ -151,11 +151,17 @@ fn comparison_template_init_completed_writes_format_short_date_and_saturates_fri
         local row = assert(AchievementFrameComparisonContainer.buttons[1])
         row.id = nil
         GetAchievementComparisonInfo = function() return true, 6, 15, 24 end
+        local background = _G[row.friend:GetName().."Background"]
+        local incompleteTexture = background:GetTexture()
         AchievementFrameComparison_DisplayAchievement(row, 92, 1)
+        assert(background:GetTexture() ~= incompleteTexture)
         assert(row.id == 4242 and row.friend.completed)
         assert(row.friend.status:GetText() == string.format(SHORTDATE, 15, 6, 24))
         assert(row.friend.shield.points:GetText() == "10")
-        assert(_G[row.friend:GetName().."Background"]:GetTexture() == "Interface\\AchievementFrame\\UI-Achievement-Parchment-Horizontal")
+        local expected = AchievementFrame:CreateTexture()
+        expected:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Parchment-Horizontal")
+        assert(expected:GetTexture() ~= nil)
+        assert(_G[row.friend:GetName().."Background"]:GetTexture() == expected:GetTexture())
         "#,
     ) {
         return;
