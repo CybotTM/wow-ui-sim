@@ -24,7 +24,7 @@ fn load_spellbook_fixture() -> WowLuaEnv {
 
 fn assert_no_errors(env: &WowLuaEnv) {
     super::assert_no_errors(env, "F10 original consumer");
-    env.exec("assert(#F10Errors == 0, table.concat(F10Errors, '\n'))")
+    env.exec(r"assert(#F10Errors == 0, table.concat(F10Errors, '\n'))")
         .expect("no caught callback errors");
 }
 
