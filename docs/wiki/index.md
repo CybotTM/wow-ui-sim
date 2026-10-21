@@ -1,6 +1,6 @@
 ## [2026-10-21] source | Wrath tracked achievements
 
-[Tracking model](systems/lua-api.md#wrath-tracked-achievements) links the [12340 contract](../specs/wrath-tracked-achievements.md): ordered unique IDs, duplicate-add events and synchronous native consumers. Current-source RED precedes the producer; GREEN/profile preservation pending. Persistence and modern-only Wrath rows remain excluded.
+[Tracking model](systems/lua-api.md#wrath-tracked-achievements) links the [12340 contract](../specs/wrath-tracked-achievements.md): ordered unique IDs, duplicate-add events and synchronous native consumers. Current-source RED precedes the producer; merged-source Wrath54 and five shared-model controls pass. Retail72+4 retains identical statuses and existing failures; both stock captures are empty, check/fmt pass. Persistence and ten pre-existing compile-gated Wrath rows remain excluded.
 
 ## [2026-10-21] source | Wrath positional guild rights
 
