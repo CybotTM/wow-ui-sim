@@ -1,6 +1,6 @@
 ## [2026-10-20] investigation | Wrath native friends legacy surface
 
-[Diagnosis](investigations/wrath-friends-legacy-surface.md) records the original native friends consumer and raw-global/call failure boundary. F02 now retains the mixed case's native UI and generic identities; producer repair belongs to a separate lane. Current Rust-case proof remains queued; CLI diagnosis is not a replacement.
+[Diagnosis](investigations/wrath-friends-legacy-surface.md) records the original native friends consumer and raw-global/call failure boundary. F02 now retains the mixed case's native UI and generic identities; producer repair belongs to a separate lane. The source-bound Rust case now executes and fails at the original consumer. Its authoritative12340 offline-connected=nil expectation is retained for joint verification with the producer lane; no isolated rebuild or producer fix is claimed.
 
 ## [2026-10-20] source | Wrath native chat layout preservation
 

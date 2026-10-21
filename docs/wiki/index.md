@@ -1,6 +1,6 @@
 ## [2026-10-20] investigation | Wrath native friends legacy surface
 
-[Friends diagnosis](investigations/wrath-friends-legacy-surface.md) retains the original panel and seeded identities. Raw legacy globals and their failed calls expose a producer gap despite a functioning backing namespace; the current Rust fixture proof remains pending, not gated.
+[Friends diagnosis](investigations/wrath-friends-legacy-surface.md) retains the original panel and seeded identities. Raw legacy globals and their failed calls expose a producer gap despite a functioning backing namespace. The bound Rust case retains that failure; authoritative offline-nil expectations await joint producer integration, not gating.
 
 ## [2026-10-20] source | Wrath native chat layout preservation
 
