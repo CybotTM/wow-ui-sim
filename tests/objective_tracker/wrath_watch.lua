@@ -1,10 +1,9 @@
+-- Explicit test-owned native settings include completed and remote quests.
+SetCVar("trackerFilter", WATCHFRAME_FILTER_COMPLETED_QUESTS + WATCHFRAME_FILTER_REMOTE_ZONES)
+SetCVar("trackerSorting", WATCHFRAME_SORT_MANUAL)
+WatchFrame_OnEvent(WatchFrame, "VARIABLES_LOADED")
 -- Reserve enough native viewport for all three supplied quests and their rows.
 WatchFrame:SetHeight(400)
-for _, filter in ipairs({ WATCHFRAME_FILTER_COMPLETED_QUESTS, WATCHFRAME_FILTER_REMOTE_ZONES }) do
-    if bit.band(WATCHFRAME_FILTER_TYPE, filter) == 0 then
-        WatchFrame_SetFilter(nil, filter)
-    end
-end
 -- Seed watches through the native selected-log-index API, not modern blocks.
 for logIndex = 1, GetNumQuestLogEntries() do
     local title, _, _, _, isHeader = GetQuestLogTitle(logIndex)
