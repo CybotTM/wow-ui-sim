@@ -160,6 +160,10 @@ const FRAME_NAME: &str = "MainMenuBarVehicleLeaveButton";
 
 #[test]
 fn vehicle_leave_button_routes_taxi_and_vehicle_branches_through_onclicked() {
+    if crate::common::action_bar_fixture::is_wrath() {
+        return crate::common::wrath_action_assertions::vehicle_leave();
+    }
+
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let cold_button_exists: bool = env

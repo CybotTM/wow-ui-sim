@@ -18,6 +18,10 @@ const RESTED_ATLAS: &str = "UI-HUD-ExperienceBar-Fill-Rested";
 
 #[test]
 fn resting_player_uses_rested_xp_bar_atlas() {
+    if crate::common::action_bar_fixture::is_wrath() {
+        return crate::common::wrath_action_assertions::rested_color();
+    }
+
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         seed_normal_rest_state(env);

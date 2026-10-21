@@ -10,6 +10,10 @@ const ACTION_SLOT: f64 = 1.0;
 
 #[test]
 fn range_check_event_updates_registered_button_hotkey_color() {
+    if crate::common::action_bar_fixture::is_wrath() {
+        return crate::common::wrath_action_assertions::range_color();
+    }
+
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         register_action_button_for_range_checks(env);

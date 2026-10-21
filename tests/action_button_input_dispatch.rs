@@ -72,6 +72,10 @@ fn seed_action_slot(env: &WowLuaEnv, slot: u32, spell_id: u32) {
 
 #[test]
 fn action_button_down_and_up_toggle_state_and_fire_action() {
+    if crate::common::action_bar_fixture::is_wrath() {
+        return crate::common::wrath_action_assertions::key_release_cast();
+    }
+
     let env = build_action_bar_env();
     seed_action_slot(&env, 1, 19750);
     env.fire_event("ACTIONBAR_SLOT_CHANGED").unwrap();
@@ -103,6 +107,8 @@ fn action_button_down_and_up_toggle_state_and_fire_action() {
     assert_eq!(released, "NORMAL");
 }
 
+// TryUseActionButton is modern-only; native key-release casting stays covered above.
+post_wrath_ui_fixture! {
 #[test]
 fn try_use_action_button_only_fires_from_key_down() {
     let env = build_action_bar_env();
@@ -124,8 +130,14 @@ fn try_use_action_button_only_fires_from_key_down() {
     assert!(only_down_casts);
 }
 
+}
+
 #[test]
 fn multi_and_extra_action_dispatch_use_the_same_button_fallthrough() {
+    if crate::common::action_bar_fixture::is_wrath() {
+        return crate::common::wrath_action_assertions::multibar_release_cast();
+    }
+
     let env = build_action_bar_env();
     seed_action_slot(&env, 61, 19750);
     env.fire_event("ACTIONBAR_SLOT_CHANGED").unwrap();

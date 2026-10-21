@@ -260,6 +260,10 @@ const EXP_BAR_LUA: &str = "StatusTrackingBarManager.MainStatusTrackingBarContain
 
 #[test]
 fn xp_bar_round_trip_through_player_xp_update_event() {
+    if crate::common::action_bar_fixture::is_wrath() {
+        return crate::common::wrath_action_assertions::xp_update();
+    }
+
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         assert_cold_globals_resolve(env);

@@ -122,6 +122,10 @@ fn load_settled_game_ui() -> common::LockedEnv {
 
 #[test]
 fn action_button1_has_icon_hotkey_and_normal_texture() {
+    if crate::common::action_bar_fixture::is_wrath() {
+        return crate::common::wrath_action_assertions::button_children();
+    }
+
     test_timeout! {
         let env = load_settled_game_ui();
 
@@ -174,6 +178,10 @@ fn action_button1_has_icon_hotkey_and_normal_texture() {
 
 #[test]
 fn action_button1_normal_texture_uses_iconframe_atlas() {
+    if crate::common::action_bar_fixture::is_wrath() {
+        return crate::common::wrath_action_assertions::button_normal_texture();
+    }
+
     test_timeout! {
         let env = load_settled_game_ui();
 
@@ -207,6 +215,10 @@ fn action_button1_normal_texture_uses_iconframe_atlas() {
 
 #[test]
 fn action_button1_hotkey_shows_slot_one() {
+    if crate::common::action_bar_fixture::is_wrath() {
+        return crate::common::wrath_action_assertions::button_hotkey();
+    }
+
     test_timeout! {
         let env = load_settled_game_ui();
 
@@ -235,6 +247,10 @@ fn action_button1_hotkey_shows_slot_one() {
 
 #[test]
 fn main_action_bar_layout_is_locked() {
+    if crate::common::action_bar_fixture::is_wrath() {
+        return crate::common::wrath_action_assertions::main_layout();
+    }
+
     test_timeout! {
         let env = load_settled_game_ui();
 

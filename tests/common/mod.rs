@@ -5,7 +5,9 @@ include!(concat!(
     "/tests/common/profile_fixtures.rs"
 ));
 
+pub mod action_bar_fixture;
 pub mod addon_coverage_baseline;
+pub mod wrath_action_assertions;
 #[cfg(feature = "retail-12-1-0")]
 pub mod aura_container_harness;
 pub mod blizzard_addon_harness;
