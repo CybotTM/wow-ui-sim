@@ -128,7 +128,8 @@ fn original_viewer_count_uses_configured_three() {
                     local frame = NewViewer(id)
                     assert(frame:GetSpellChargeInfo() == nil, 'genuinely absent charges')
                     frame:CacheChargeValues()
-                    assert(frame.cooldownChargesCount == 3 and frame.cooldownChargesShown == true)
+                    assert(secretunwrap(frame.cooldownChargesCount) == 3, 'cached configured quantity')
+                    assert(frame.cooldownChargesShown == true, 'cached shown state')
                     assert(issecretvalue(frame.cooldownChargesCount) == {restricted})
                 end
                 assert(issecretvalue(Selector) and debug.getstacktaint() == before)
@@ -198,8 +199,10 @@ fn assert_scalar_selector_contract(api: &str, expected: u32) {
                     assert(issecretvalue(getter(id)) == {restricted})
                 end
                 if not {restricted} or not before then
-                    assert(getter(19750) == {expected} and getter(Selector) == {expected})
-                    assert(getter(900002) == 0 and getter(Missing) == 0)
+                    assert(secretunwrap(getter(19750)) == {expected}, 'public selector quantity')
+                    assert(secretunwrap(getter(Selector)) == {expected}, 'secret selector quantity')
+                    assert(secretunwrap(getter(900002)) == 0, 'public selector miss')
+                    assert(secretunwrap(getter(Missing)) == 0, 'secret selector miss')
                 end
                 for _,id in ipairs({{-1,Invalid,19750.5,Fraction,{{}},SecretText}}) do
                     assert(not pcall(getter,id))
@@ -290,8 +293,12 @@ fn count_and_aura_output_restrictions_transition_independently_for_secret_select
                     local maximum = C_Spell.GetSpellMaxCumulativeAuraApplications(id)
                     assert(issecretvalue(count) == {count_restricted})
                     assert(issecretvalue(maximum) == {aura_restricted})
-                    if not {count_restricted} or not before then assert(count == 3) end
-                    if not {aura_restricted} or not before then assert(maximum == 7) end
+                    if not {count_restricted} or not before then
+                        assert(secretunwrap(count) == 3, 'count quantity after restriction transition')
+                    end
+                    if not {aura_restricted} or not before then
+                        assert(secretunwrap(maximum) == 7, 'maximum quantity after restriction transition')
+                    end
                 end
                 assert(issecretvalue(Selector) and debug.getstacktaint() == before)
             end
