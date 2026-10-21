@@ -170,6 +170,7 @@ pub(crate) mod shared_character_services_defaults;
 pub(crate) mod shared_xml_anim_mixins;
 pub(crate) mod shared_xml_utility_defaults;
 pub(crate) mod social_queue_defaults;
+pub(crate) mod social_service_defaults;
 pub(crate) mod sound_driver_defaults;
 pub(crate) mod source_patches;
 pub(crate) mod spell_book_static_defaults;

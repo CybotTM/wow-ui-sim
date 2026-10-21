@@ -275,6 +275,7 @@ fn apply_core_foundation_catalog_defaults(lua: &mut rilua::Lua) -> crate::Result
     temporary::character_create_defaults::apply_bootstrap(lua)?;
     temporary::class_trial_defaults::apply_bootstrap(lua)?;
     temporary::startup_namespace_defaults::apply_bootstrap(lua)?;
+    temporary::social_service_defaults::apply_bootstrap(lua)?;
     temporary::click_bindings_defaults::apply_bootstrap(lua)?;
     temporary::client_info_defaults::apply_bootstrap(lua)?;
     temporary::collections_journal_namespace::apply_bootstrap(lua)?;

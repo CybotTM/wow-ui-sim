@@ -21,7 +21,8 @@ M3 replaces observed social/group/chat/guild gaps exposed by [factory removal](c
 
 - `src/lua_api/state_types/character_world.rs` — existing guild-logo RGB and filename state; numeric metadata integration point.
 - `src/lua_api/globals/real/guild_logo.rs` — existing legacy projection, retained.
-- `src/c_api/c_guild_info.rs` — planned typed tabard metadata and C query.
+- `src/c_api/c_guild_info.rs` — typed tabard metadata and C query.
+- `src/lua_api/workarounds/temporary/social_service_defaults.rs` — named missing-service policies, scoped by cached declarations.
 - `src/lua_api/workarounds/temporary/startup_namespace_defaults.rs` — existing named empty-state defaults; do not replace real state with a factory.
 
 ## Tests asserting this spec
