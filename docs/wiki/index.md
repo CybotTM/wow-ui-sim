@@ -1,6 +1,6 @@
 ## [2026-10-20] source | Secret numeric spell-link selectors
 
-[Presentation lookup](systems/lua-api.md#numeric-secret-spell-presentation-selectors) links the [link contract](../specs/spell-secret-presentation.md#spell-link-selector-regression--2026-10-20): public-API Retail/PTR RED, whole-string identity protection, ordinary nil misses and unchanged glyph rejection. GREEN is pending; downstream sinks remain separate.
+[Presentation lookup](systems/lua-api.md#numeric-secret-spell-presentation-selectors) links the [link contract](../specs/spell-secret-presentation.md#spell-link-selector-regression--2026-10-20): public-API Retail/PTR RED, whole-string identity protection, ordinary nil misses and unchanged glyph rejection. Retail/PTR GREEN and preservation are recorded in the contract; downstream sinks remain separate.
 
 ## [2026-10-20] investigation | Shared-target test source binding
 

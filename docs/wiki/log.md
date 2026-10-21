@@ -2526,3 +2526,8 @@ At source `fb2e3961d`, lane fixtures pass Retail13/13 and Wrath8/8; both startup
 ## 2026-10-20 — Secret numeric spell-link selector
 
 Public-API tests reproduce a whole-link secrecy failure on Retail and PTR before the producer change; public link, one ordinary nil miss and glyph rejection controls pass. [[lua-api]] links the owning presentation contract. The producer now opts into the existing bounded host-number inspector and wraps the complete link; GREEN is pending, with downstream sinks excluded.
+
+
+## 2026-10-20 — Bounded spell-link selector GREEN
+
+[[lua-api]] links Retail/PTR link GREEN, presentation/tooltip/glyph preservation and isolated stock Retail startup proof in the owning contract. Test-only observer corrections do not change the producer; native parity and downstream sinks remain excluded.
