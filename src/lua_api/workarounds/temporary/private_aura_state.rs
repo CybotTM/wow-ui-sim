@@ -121,7 +121,7 @@ mod tests {
         let result: String = env
             .eval(
                 r#"
-                local addedID, removedID, dispel, updateSource, updateSpell
+                local addedID, removedID, dispel, updateSpell
                 C_UnitAurasPrivate.SetPrivateAuraAnchorAddedCallback(function(anchor)
                     addedID = anchor.anchorID
                     anchor.unitToken = "mutated"
@@ -162,13 +162,12 @@ mod tests {
                         return "bad_dispel"
                     end
                 end
-                C_UnitAurasPrivate.AddPrivateAuraUpdateCallback("player", function(source, info)
-                    updateSource = source.name
+                C_UnitAurasPrivate.AddPrivateAuraUpdateCallback("player", C_FunctionContainers.CreateCallback(function(info)
                     updateSpell = info.spellID
                     info.spellID = 0
-                end)
+                end))
                 local fired = C_UnitAurasPrivate._TriggerPrivateAuraUpdate("player", { name = "source" }, { spellID = 123 })
-                if fired ~= 1 or updateSource ~= "source" or updateSpell ~= 123 then
+                if fired ~= 1 or updateSpell ~= 123 then
                     return "bad_update"
                 end
                 C_UnitAurasPrivate._state.privateAurasByUnit.player = {

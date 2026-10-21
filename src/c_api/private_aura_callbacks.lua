@@ -19,14 +19,6 @@ local function CopyPayload(value, seen)
     return copy
 end
 
-local function Invoke(callback, ...)
-    if type(callback) == "function" then
-        callback(...)
-    else
-        callback:Invoke(...)
-    end
-end
-
 function C_UnitAurasPrivate.AddPrivateAuraUpdateCallback(unitToken, callback)
     local key = tostring(unitToken or "")
     local callbacks = callbacksByUnit[key]
@@ -37,19 +29,12 @@ function C_UnitAurasPrivate.AddPrivateAuraUpdateCallback(unitToken, callback)
     callbacks[#callbacks + 1] = callback
 end
 
--- Simulator-authored injection seam; retain the existing source/info arguments.
-function C_UnitAurasPrivate._TriggerPrivateAuraUpdate(unitToken, privateSource, updateInfo)
+-- Simulator-authored injection; containers consume updateInfo first.
+function C_UnitAurasPrivate._TriggerPrivateAuraUpdate(unitToken, _privateSource, updateInfo)
     local fired = 0
     for _, callback in ipairs(callbacksByUnit[tostring(unitToken or "")] or {}) do
         local info = CopyPayload(updateInfo)
-        if type(callback) == "function" then
-            -- Retain the existing authored plain-function injection contract.
-            callback(privateSource, info)
-        else
-            -- Original AuraContainer and PrivateAuraUnitWatcher containers
-            -- consume updateInfo as their first argument, not privateSource.
-            callback:Invoke(info)
-        end
+        callback:Invoke(info)
         fired = fired + 1
     end
     return fired
@@ -72,6 +57,6 @@ if modern then
 
     -- Simulator-authored dispatch, not a native public API claim.
     function C_UnitAurasPrivate._TriggerPrivateRaidBossMessage(...)
-        if raidBossCallback ~= nil then Invoke(raidBossCallback, ...) end
+        if raidBossCallback ~= nil then raidBossCallback:Invoke(...) end
     end
 end

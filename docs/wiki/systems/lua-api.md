@@ -5,7 +5,7 @@ The Lua API layer bridges Lua addon code with the Rust simulation engine. It pro
 
 ## Factory-removal world inputs — 2026-10-21
 
-[The M4 contract](../../specs/c-factory-m4-world-inputs.md) separates shared throttle/match/objective/CVar/identity state from named missing world services. `c_api::private_aura_callbacks` now owns strong environment-local registrations, per-unit removal, replacement and authored dispatch; temporary aura-content storage no longer owns callback lifecycle. Callback containers use their existing Invoke contract. Frozen original-consumer RED remains distinct from pending new-contract execution and post-batch startup proof.
+[The M4 contract](../../specs/c-factory-m4-world-inputs.md) separates shared throttle/match/objective/CVar/identity state from named missing world services. `c_api::private_aura_callbacks` now owns strong environment-local registrations, per-unit removal, replacement and authored dispatch; temporary aura-content storage no longer owns callback lifecycle. All original cached update/raid-message consumers use FunctionContainers; dispatch uses only their Invoke contract, with updateInfo first. Unsupported plain-function dispatch was removed after exact Retail regressions reproduced it. The pre-integration seven-profile targeted matrix passed; integrated callback and post-batch startup proof remain pending.
 
 ## Factory-removal social inputs — 2026-10-21
 

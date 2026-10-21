@@ -243,13 +243,11 @@ fn private_aura_update_callbacks_and_lookup_queries_are_stateful() {
             }
 
             local callbackCalls = 0
-            local lastPrivateSource = nil
             local sawFullUpdate = false
-            C_UnitAurasPrivate.AddPrivateAuraUpdateCallback("player", function(privateSource, updateInfo)
+            C_UnitAurasPrivate.AddPrivateAuraUpdateCallback("player", C_FunctionContainers.CreateCallback(function(updateInfo)
                 callbackCalls = callbackCalls + 1
-                lastPrivateSource = privateSource
                 sawFullUpdate = updateInfo and updateInfo.isFullUpdate == true
-            end)
+            end))
 
             local fired = C_UnitAurasPrivate._TriggerPrivateAuraUpdate("player", "Private", { isFullUpdate = true })
             local allAuras = C_UnitAurasPrivate.GetAllPrivateAuras("player")
@@ -258,7 +256,7 @@ fn private_aura_update_callbacks_and_lookup_queries_are_stateful() {
             allAuras[1].spellId = 9999
             local secondRead = C_UnitAurasPrivate.GetAllPrivateAuras("player")
 
-            return fired == 1 and callbackCalls == 1 and lastPrivateSource == "Private" and sawFullUpdate,
+            return fired == 1 and callbackCalls == 1 and sawFullUpdate,
                    #allAuras == 2 and auraByID and auraByID.spellId == 1001,
                    secondRead[1].spellId == 1001
             "#,
