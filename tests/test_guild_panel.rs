@@ -115,6 +115,17 @@ fn install_dropdown_test_helpers(env: &WowLuaEnv) {
 }
 
 fn load_guild_control_ui(env: &WowLuaEnv) {
+    if cfg!(feature = "client-wrath") {
+        env.exec(r#"
+            A_Admin.SetGuildRanks({
+                { name = "Guild Leader", flags = {} },
+                { name = "Officer", flags = {} },
+                { name = "Member", flags = {} },
+            })
+            GuildControlPopupFrame_Initialize()
+        "#).expect("native guild control initialization");
+        return;
+    }
     let ui = blizzard_ui_dir();
     common::load_required_blizzard_addon(env, &ui, "Blizzard_GuildControlUI");
 }
@@ -317,6 +328,11 @@ fn guild_control_rank_settings_dropdown_shows_rank_rows() {
     test_timeout! {
         let env = setup_env();
         load_guild_control_ui(&env);
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/guild_ranks.lua"))
+                .expect("native rank selection and menu rows");
+            return;
+        }
         let result: String = env.eval(r#"
             A_Admin.SetGuildRanks({
                 { name = "Guild Leader", flags = {} },
@@ -431,6 +447,18 @@ fn guild_dropdown_materialized_buttons_have_labels() {
     test_timeout! {
         let env = setup_env();
         load_guild_control_ui(&env);
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleDropDownMenu(1, nil, GuildControlPopupFrameDropDown)
+                assert(DropDownList1:IsShown())
+                assert(DropDownList1.numButtons == 3)
+                for index, expected in ipairs({"Guild Leader", "Officer", "Member"}) do
+                    local button = _G["DropDownList1Button" .. index]
+                    assert(button:IsShown() and button:GetText() == expected, "native rank label")
+                end
+            "#).expect("native guild dropdown materializes labeled buttons");
+            return;
+        }
         let result: String = env.eval(r#"
             local checks = {
                 { "guild_control_tabs", GuildControlUI and GuildControlUI.dropdown },
@@ -585,6 +613,11 @@ fn communities_stream_dropdown_click_opens_menu() {
 fn guild_info_panel_populates_motd_details_and_challenges() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/guild_info.lua"))
+                .expect("native guild MOTD and details consumers");
+            return;
+        }
         let result: String = env.eval(r#"
             if CommunitiesFrame == nil then return "missing_communities" end
             local details = CommunitiesFrame.GuildDetailsFrame
