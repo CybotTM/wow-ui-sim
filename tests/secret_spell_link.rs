@@ -55,11 +55,11 @@ fn numeric_secret_selector_returns_whole_secret_spell_link() {
             assert(select('#', C_Spell.GetSpellLink(Selector)) == 1)
             Link = C_Spell.GetSpellLink(Selector)
             assert(issecretvalue(Link), 'whole link must be secret, not nil or public')
-            if canaccessvalue(Link) then
-                assert(secretunwrap(Link) == C_Spell.GetSpellLink(19750))
+            if issecure() then
+                assert(secretunwrap(Link) == C_Spell.GetSpellLink(19750), 'secure payload matches public link')
             else
-                assert(not pcall(secretunwrap, Link))
-                assert(not pcall(function() return Link .. 'suffix' end))
+                assert(not pcall(secretunwrap, Link), 'tainted caller cannot unwrap link')
+                assert(not pcall(function() return Link .. 'suffix' end), 'tainted caller cannot concatenate link')
             end
         "#,
             tainted,
