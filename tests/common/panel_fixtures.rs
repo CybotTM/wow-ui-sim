@@ -72,6 +72,13 @@ pub fn setup_env() -> WowLuaEnv {
     env.set_screen_size(1024.0, 768.0);
 
     seed_addon_search_paths(&env);
+    if cfg!(feature = "client-wrath") {
+        super::load_profile_framexml(&env);
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        return env;
+    }
+
     let ui = blizzard_ui_dir();
     load_panel_addons(&env);
     crate::common::load_click_binding_bootstrap(&env, &ui);

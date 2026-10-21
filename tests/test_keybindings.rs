@@ -131,6 +131,10 @@ fn seed_addon_search_paths(env: &WowLuaEnv) {
 }
 
 fn load_base_blizzard_addons(env: &WowLuaEnv) {
+    if cfg!(feature = "client-wrath") {
+        common::load_profile_framexml(env);
+        return;
+    }
     let ui = blizzard_ui_dir();
     for (name, toc) in BLIZZARD_ADDONS {
         let toc_path = ui.join(name).join(toc);

@@ -99,6 +99,13 @@ fn setup_env() -> WowLuaEnv {
         state.addon_base_paths = vec![blizzard_ui_dir()];
     }
 
+    if cfg!(feature = "client-wrath") {
+        common::load_profile_framexml(&env);
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        return env;
+    }
+
     let ui = blizzard_ui_dir();
     for (name, toc) in PANEL_ADDONS {
         let toc_path = ui.join(name).join(toc);

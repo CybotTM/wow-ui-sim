@@ -69,6 +69,13 @@ pub(crate) fn setup_env() -> common::LockedEnv {
             state.addon_base_paths = vec![ui.clone()];
         }
 
+        if cfg!(feature = "client-wrath") {
+            common::load_profile_framexml(&env);
+            env.apply_post_load_workarounds();
+            fire_startup_events(&env);
+            return env;
+        }
+
         for addon_name in BLIZZARD_ADDONS {
             common::load_required_blizzard_addon(&env, &ui, addon_name);
             env.apply_runtime_addon_load_workarounds(addon_name);
