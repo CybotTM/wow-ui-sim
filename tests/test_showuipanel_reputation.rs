@@ -114,6 +114,11 @@ fn fire_startup_events(env: &WowLuaEnv) {
 fn show_ui_panel_locks_reputation_frame_layout() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/reputation_layout.lua"))
+                .expect("native reputation panel and scroll/detail geometry");
+            return;
+        }
         let result: String = env
             .eval(
                 r#"

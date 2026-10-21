@@ -191,6 +191,18 @@ fn show_ui_panel_displaces_previous_occupant() {
 fn player_spells_panel_replaces_character_frame() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ShowUIPanel(CharacterFrame)
+                assert(CharacterFrame:IsShown())
+                ShowUIPanel(SpellBookFrame)
+                assert(SpellBookFrame:IsShown(), "legacy spellbook should open")
+                assert(CharacterFrame:IsShown(), "legacy character panel is pushable")
+                assert(GetUIPanel("left") == SpellBookFrame)
+                assert(GetUIPanel("center") == CharacterFrame)
+            "#).expect("native spellbook displaces the left slot, not the pushable character panel");
+            return;
+        }
         load_player_spells(&env);
 
         // Retail 12.1.0.69497 closes CharacterFrame when PlayerSpells opens.
@@ -214,6 +226,15 @@ fn player_spells_panel_replaces_character_frame() {
 fn toggle_spellbook_legacy_global_opens_and_closes_spellbook_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleSpellBook(BOOKTYPE_SPELL)
+                assert(SpellBookFrame:IsShown() and SpellBookFrame.bookType == BOOKTYPE_SPELL)
+                ToggleSpellBook(BOOKTYPE_SPELL)
+                assert(not SpellBookFrame:IsShown())
+            "#).expect("native spellbook toggle");
+            return;
+        }
         load_player_spells(&env);
 
         let result: String = env.eval(r#"
@@ -248,6 +269,15 @@ fn toggle_spellbook_legacy_global_opens_and_closes_spellbook_panel() {
 fn toggle_player_spells_frame_opens_and_closes_talent_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleTalentFrame()
+                assert(PlayerTalentFrame:IsShown(), "native talent panel should open")
+                ToggleTalentFrame()
+                assert(not PlayerTalentFrame:IsShown(), "native talent panel should close")
+            "#).expect("native talent lazy loader and toggle");
+            return;
+        }
         load_player_spells(&env);
 
         let result: String = env.eval(r#"
@@ -337,6 +367,11 @@ fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs_and_accepts_search
 fn collections_mount_list_count_matches_displayed_mount_count() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/mount_list.lua"))
+                .expect("native companion mount buttons match supplied mount count");
+            return;
+        }
 
         let result: String = env.eval(r#"
             if not ToggleCollectionsJournal then
@@ -446,6 +481,14 @@ fn toggle_encounter_journal_opens_and_closes_panel() {
 fn open_trade_skill_opens_blacksmithing_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                assert(C_TradeSkillUI.OpenTradeSkill(164))
+                assert(TradeSkillFrame:IsShown(), "native trade-skill panel should open")
+                assert(GetTradeSkillLine() == "Blacksmithing", "selected profession identity")
+            "#).expect("native trade-skill event consumer opens Blacksmithing");
+            return;
+        }
 
         let result: String = env.eval(r#"
             if not C_TradeSkillUI or not C_TradeSkillUI.OpenTradeSkill then
@@ -475,6 +518,15 @@ fn open_trade_skill_opens_blacksmithing_panel() {
 fn toggle_guild_frame_opens_and_closes_communities_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleFriendsFrame(3)
+                assert(FriendsFrame:IsShown() and GuildFrame:IsShown())
+                ToggleFriendsFrame(3)
+                assert(not FriendsFrame:IsShown())
+            "#).expect("native guild tab toggles through FriendsFrame");
+            return;
+        }
         let (loaded, reason): (bool, Option<String>) = env
             .eval(r#"return C_AddOns.LoadAddOn("Blizzard_Communities")"#)
             .expect("Blizzard_Communities load should return");
@@ -509,6 +561,15 @@ fn toggle_guild_frame_opens_and_closes_communities_panel() {
 fn toggle_lfd_parent_frame_opens_and_closes_group_finder_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleLFDParentFrame()
+                assert(LFDParentFrame:IsShown())
+                ToggleLFDParentFrame()
+                assert(not LFDParentFrame:IsShown())
+            "#).expect("native dungeon finder toggles without a modular addon");
+            return;
+        }
 
         let result: String = env.eval(r#"
             local loaded, reason = C_AddOns.LoadAddOn("Blizzard_GroupFinder")
@@ -584,6 +645,16 @@ fn toggle_character_reputation_frame_selects_and_toggles_reputation_panel() {
 fn character_reputation_tab_click_selects_reputation_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleCharacter("PaperDollFrame")
+                local tab = CharacterFrameTab3
+                tab:GetScript("OnClick")(tab, "LeftButton")
+                assert(CharacterFrame:IsShown() and ReputationFrame:IsShown())
+                assert(not PaperDollFrame:IsShown())
+            "#).expect("native third character tab selects reputation");
+            return;
+        }
 
         let result: String = env.eval(r#"
             CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
@@ -622,6 +693,17 @@ fn character_reputation_tab_click_selects_reputation_panel() {
 fn admin_open_mailbox_opens_and_closes_mail_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                A_Admin.ClearInbox()
+                A_Admin.AddMail("Thrall", "Unread Orders", "Meet me in Orgrimmar.")
+                A_Admin.OpenMailbox()
+                assert(MailFrame:IsShown() and InboxFrame:IsShown())
+                A_Admin.CloseMailbox()
+                assert(not MailFrame:IsShown())
+            "#).expect("native mailbox interaction opens and closes the inbox");
+            return;
+        }
 
         let result: String = env.eval(r#"
             A_Admin.ClearInbox()
