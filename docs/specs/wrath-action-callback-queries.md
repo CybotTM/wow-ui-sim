@@ -45,7 +45,7 @@ Original 38 cases all reproduced FAIL at `53bc1e85d`. Native fixture/source-boun
 
 Retail preservation: identical 122-case sets before/after, 121 PASS and one unchanged FAIL (literal missing `Blizzard_ActionBar_Mainline.toc` in the Retail cache), with identical failure cause and zero new regressions. Model-only and final stock startup `lua-errors` are `[]` on both profiles. Raw modern range publishers remain absent on Wrath. Every executed selection has positive completed-test counts; sealed ELFs contain this worktree's test paths only. Original CVars' size/mtime/inode/SHA256 are unchanged.
 
-Receipts: `/home/osso/.local/state/wow-ui-sim/handoff/wrath-fixture-f04/{REPORT.md,per-case-results.jsonl,proof-ledger.json,retail-before-after.json}`. These are bounded simulator/FrameXML proofs, not native engine execution or independent final-review acceptance.
+Receipts are retained in the private handoff for this batch. These are bounded simulator/FrameXML proofs, not native engine execution or independent final-review acceptance.
 
 ## Known gaps (current cycle)
 
