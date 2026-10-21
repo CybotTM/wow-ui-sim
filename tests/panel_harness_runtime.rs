@@ -406,7 +406,7 @@ fn group_members_pin_acquire_keeps_data_provider_on_pin() {
 fn achievement_toggle_loads_and_shows_frame() {
     if crate::common::wrath_achievement_fixtures::assert_lazy(
         r#"
-        Admin.SetAchievementEarned(6, true)
+        A_Admin.SetAchievementEarned(6, true)
         assert(AchievementFrame == nil)
         ToggleAchievementFrame()
         assert(IsAddOnLoaded("Blizzard_AchievementUI"))

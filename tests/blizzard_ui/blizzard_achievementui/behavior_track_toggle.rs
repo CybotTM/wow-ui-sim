@@ -245,7 +245,7 @@ fn toggle_tracking_stop_branch_uses_c_content_tracking_stop_tracking_with_manual
  {
     if crate::common::wrath_achievement_fixtures::assert_native(
         r#"
-        Admin.SetAchievementEarned(6, false)
+        A_Admin.SetAchievementEarned(6, false)
         AddTrackedAchievement(6)
         AchievementFrameAchievements_OnEvent(AchievementFrameAchievements, "TRACKED_ACHIEVEMENT_UPDATE")
         assert(GetNumTrackedAchievements() == 1)
@@ -363,15 +363,15 @@ fn toggle_tracking_start_branch_calls_c_content_tracking_start_tracking_returns_
  {
     if crate::common::wrath_achievement_fixtures::assert_native(
         r#"
-        Admin.SetAchievementEarned(6, false)
+        A_Admin.SetAchievementEarned(6, false)
         assert(GetNumTrackedAchievements() == 0)
         local added = AchievementButton_ToggleTracking(6)
         assert(added == true and GetNumTrackedAchievements() == 1)
         assert(GetTrackedAchievements() == 6)
-        Admin.SetAchievementEarned(503, true)
+        A_Admin.SetAchievementEarned(503, true)
         assert(not AchievementButton_ToggleTracking(503))
         assert(GetNumTrackedAchievements() == 1)
-        Admin.SetAchievementEarned(503, false)
+        A_Admin.SetAchievementEarned(503, false)
         local originalCount = GetNumTrackedAchievements
         GetNumTrackedAchievements = function() return WATCHFRAME_MAXACHIEVEMENTS end
         assert(not AchievementButton_ToggleTracking(503))
