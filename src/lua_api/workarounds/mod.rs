@@ -8,6 +8,8 @@ mod temporary;
 #[cfg(feature = "client-wrath")]
 pub(crate) use temporary::wrath_attack_action;
 pub(crate) use temporary::wrath_minimap_ping_coordinates;
+#[cfg(feature = "client-wrath")]
+pub(crate) use temporary::{wrath_arena_roster, wrath_trade_skill_filters};
 
 pub(crate) use temporary::classic_startup_defaults::register_all as register_classic_startup_defaults;
 #[cfg(any(
