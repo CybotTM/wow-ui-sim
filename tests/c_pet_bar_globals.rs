@@ -347,6 +347,19 @@ fn admin_can_seed_pet_action_slot_for_panel_tests() {
     )
     .unwrap();
 
+    if WRATH_INFO {
+        env.exec(
+            r#"
+            local name, subtext, texture = GetPetActionInfo(1)
+            assert(HasPetUI() and name == 'Claw' and subtext == '')
+            assert(texture == 'Interface/Icons/Ability_Druid_Rake')
+        "#,
+        )
+        .unwrap();
+        assert_eq!(env.state().borrow().pet_actions[0].spell_id, Some(16827));
+        return;
+    }
+
     let (has_pet_ui, name, spell_id): (bool, String, i32) = env
         .eval(
             r#"
