@@ -1,6 +1,6 @@
 ## [2026-10-20] source | C namespace factory removal (F0)
 
-[Namespace diagnostics](systems/addon-loading.md#missing-c-members-f0-2026-10-20) now return nil without memoization. Housing merges explicit defaults without replacing metatables; three named handlers retain diagnostics only. [Contract](../specs/c-namespace-nil-members.md) retains strict/retired nil semantics and explicit state/actions. Five extracted Lua bodies have RED→GREEN under system Lua 5.4 only; full-feature simulator/profile proof and exact M1–M5/T6 startup gap capture remain pending.
+[Namespace diagnostics](systems/addon-loading.md#missing-c-members-f0-2026-10-20) now return nil without memoization. Housing merges explicit defaults without replacing metatables; three named handlers retain diagnostics only. [Contract](../specs/c-namespace-nil-members.md) retains strict/retired nil semantics and explicit state/actions. Five extracted Lua bodies have RED→GREEN under system Lua 5.4; the [frozen full-feature proof](../specs/c-namespace-nil-members.md#frozen-f0-proof) now owns simulator/profile results and M1–M5/T6 runtime gaps. Health gates still fail; one anonymous callback family's root remains unresolved rather than guessed.
 
 ## [2026-10-20] investigation | Shared-target test source binding
 

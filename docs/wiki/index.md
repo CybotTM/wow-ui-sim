@@ -1,6 +1,6 @@
 ## [2026-10-20] source | C namespace factory removal (F0)
 
-[Namespace diagnostics](systems/addon-loading.md#missing-c-members-f0-2026-10-20) link the [nil-member contract](../specs/c-namespace-nil-members.md): five arbitrary factories removed; explicit defaults/state/actions retained. Seven-profile full-feature runtime capture is pending; no clean-startup claim or replacement model is included.
+[Namespace diagnostics](systems/addon-loading.md#missing-c-members-f0-2026-10-20) link the [nil-member contract and frozen proof](../specs/c-namespace-nil-members.md#frozen-f0-proof). The proof owns the full-feature profile matrix, original-consumer gap evidence, failed health gates and unresolved callback attribution. No replacement model is included.
 
 ## [2026-10-20] investigation | Shared-target test source binding
 
