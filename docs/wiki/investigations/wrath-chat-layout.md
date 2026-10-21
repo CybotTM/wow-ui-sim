@@ -1,6 +1,6 @@
 # Wrath native chat layout overwritten during preparation
 
-F02's original Wrath FrameXML fixture exposed simulator preparation replacing a successfully loaded native chat layout. The [contract](../../specs/wrath-chat-layout.md) owns requirements; current-source GREEN remains pending.
+F02's original Wrath FrameXML fixture exposed simulator preparation replacing a successfully loaded native chat layout. The [contract](../../specs/wrath-chat-layout.md) owns requirements and bounded RED→GREEN, headless and Retail preservation proof.
 
 ## Root cause and boundary
 

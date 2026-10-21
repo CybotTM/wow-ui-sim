@@ -1,6 +1,6 @@
 ## [2026-10-20] source | Wrath native chat layout preservation
 
-[Native chat diagnosis](investigations/wrath-chat-layout.md) records the pre-addon original-consumer RED and simulator normalization boundary. The [contract](../specs/wrath-chat-layout.md) separates native layout ownership from retained Retail behavior; current-source GREEN remains pending.
+[Native chat diagnosis](investigations/wrath-chat-layout.md) records the corrected pre-addon original-consumer boundary. The [contract](../specs/wrath-chat-layout.md) owns bounded RED→GREEN, headless geometry and Retail preservation proof; retained baseline fixture failures remain separate.
 
 ## [2026-10-20] investigation | Shared-target test source binding
 

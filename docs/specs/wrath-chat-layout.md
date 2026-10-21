@@ -4,10 +4,10 @@ Wrath startup keeps the geometry and editbox state produced by original `Floatin
 
 ## What it must do
 
-- [ ] Preparation before third-party addons preserves native chat dimensions, anchor, editbox dimensions and visibility.
-- [ ] Post-load and post-event preparation do not replace that native surface with simulator-authored modern geometry.
-- [ ] Headless normalization does not impose the modern editbox width on Wrath.
-- [ ] Retail chat preparation and layout remain unchanged.
+- [x] Preparation before third-party addons preserves native chat dimensions, anchor, editbox dimensions and visibility.
+- [x] Post-load and post-event preparation do not replace that native surface with simulator-authored modern geometry.
+- [x] Headless normalization does not impose the modern editbox width on Wrath.
+- [x] Retail chat preparation and layout remain unchanged in the bounded preservation cases.
 
 ## How it works
 
@@ -25,9 +25,11 @@ Wrath startup keeps the geometry and editbox state produced by original `Floatin
 - `tests/chat_frame/layout_lock.rs`, `tests/chat_frame/scrollbar.rs` — original native chat/scroll-control geometry.
 - `tests/chat_frame.rs` — chat input and Retail preservation cases.
 
+Bounded proof (2026-10-20): the corrected pre-addon original-consumer regression fails at `60fcdf225` and passes at `9bb916545`; subsequent code delta through `70e2d01cb` changes only two independent test oracles. Stock Wrath headless assertions observe native chat `430x120`, editbox `440x32`, shown=true and an empty Lua-error array. All twelve Retail chat cases pass. The 88-case Retail preservation scope has 74 passes and fourteen failures whose first messages reproduce identically on exact base `53bc1e85d`; no new failing cases were introduced. Whole-project formatting and full-feature Wrath integration checking pass with zero compiler warnings. Receipts: `~/.local/state/wow-ui-sim/handoff/wrath-fixture-f02/proof-ledger.json`.
+
 ## Known gaps (current cycle)
 
-- [ ] Current-source GREEN and Retail preservation remain pending.
+No remaining gap in this bounded preservation surface. The retained Retail fixture failures are not repaired by this contract.
 
 ## Out of scope
 
