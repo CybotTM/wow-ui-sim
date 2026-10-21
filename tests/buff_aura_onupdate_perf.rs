@@ -207,6 +207,7 @@ fn max_duration(samples: &[Duration]) -> Duration {
 
 #[test]
 fn buff_aura_onupdate_steady_state_stays_under_half_millisecond() {
+    wrath_action_case!(callbacks::aura_perf);
     perf_test_timeout! {
             let env = load_aura_perf_env();
             let samples = sample_aura_onupdate_cost(&env, PER_SAMPLE_TICKS);

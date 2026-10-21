@@ -130,6 +130,7 @@ const NUM_BUTTONS: usize = 12;
 
 #[test]
 fn main_action_bar_publishes_expected_panel_identity() {
+    wrath_action_case!(callbacks::main_identity);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{FRAME_NAME:?}])"))
@@ -190,6 +191,7 @@ fn main_action_bar_publishes_expected_panel_identity() {
 
 #[test]
 fn main_action_bar_publishes_action_button_globals_and_button_containers() {
+    wrath_action_case!(callbacks::main_buttons);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         for slot in 1..=NUM_BUTTONS {
             let action_button_name = format!("ActionButton{slot}");
@@ -313,6 +315,7 @@ const PLAN_NAMED_MULTI_BARS: &[(&str, &str)] = &[
 /// EditMode reparenting logic firing pre-load.
 #[test]
 fn multi_bars_publish_expected_panel_identity() {
+    wrath_action_case!(callbacks::multibar_identity);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         for (bar_name, xml_site) in PLAN_NAMED_MULTI_BARS {
             let frame_type: String = env
@@ -400,6 +403,7 @@ fn multi_bars_publish_expected_panel_identity() {
 /// the bar in question.
 #[test]
 fn multi_bars_publish_their_button_globals_and_button_containers() {
+    wrath_action_case!(callbacks::multibar_buttons);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         for (bar_name, xml_site) in PLAN_NAMED_MULTI_BARS {
             for slot in 1..=NUM_BUTTONS {
@@ -481,6 +485,7 @@ fn multi_bars_publish_their_button_globals_and_button_containers() {
 
 #[test]
 fn main_action_bar_does_not_publish_plan_named_button_globals() {
+    wrath_action_case!(callbacks::main_alias_absence);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         for slot in 1..=NUM_BUTTONS {
             let plan_named_button = format!("MainActionBarButton{slot}");

@@ -473,6 +473,7 @@ const STANCE_BAR_REGISTERED_EVENTS: &[&str] = &["UPDATE_SHAPESHIFT_COOLDOWN"];
 /// registered, OnEvent script wired (single arm at lua:12-14).
 #[test]
 fn stance_bar_registers_update_shapeshift_cooldown_after_onload() {
+    wrath_action_case!(callbacks::stance_events);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{STANCE_BAR_FRAME_NAME:?}])"))
@@ -568,6 +569,7 @@ const PET_ACTION_BAR_SOURCE_ADDITIONAL_EVENTS: &[&str] = &[
 /// source-additional (4), OnEvent script (1).
 #[test]
 fn pet_action_bar_registers_plan_and_source_additional_events_after_onload() {
+    wrath_action_case!(callbacks::pet_events);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{PET_ACTION_BAR_FRAME_NAME:?}])"))
@@ -668,6 +670,7 @@ const VEHICLE_LEAVE_REGISTERED_EVENTS: &[&str] = &[
 /// 5 registrations, OnEvent script (1).
 #[test]
 fn main_menu_bar_vehicle_leave_button_registers_five_events_after_onload() {
+    wrath_action_case!(callbacks::vehicle_leave_events);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{VEHICLE_LEAVE_FRAME_NAME:?}])"))

@@ -161,6 +161,7 @@ const PLAN_NAMED_BAR_HELPER_GLOBALS: &[&str] = &[
 
 #[test]
 fn action_bar_plan_named_input_globals_are_functions() {
+    wrath_action_case!(callbacks::input_globals);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         for name in PLAN_NAMED_INPUT_GLOBALS {
             let is_function = env
@@ -393,6 +394,7 @@ fn action_bar_plan_named_highlight_tracking_globals_are_functions() {
 /// be caught here even when other action-bar surface tests still pass.
 #[test]
 fn action_bar_plan_named_multibar_globals_are_functions() {
+    wrath_action_case!(callbacks::multibar_globals);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         for name in PLAN_NAMED_MULTIBAR_GLOBALS {
             let is_function = env

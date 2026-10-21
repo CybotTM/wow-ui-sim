@@ -72,6 +72,7 @@ const LANE_FILE_SCOPE_TABLES: &[&str] = &["ActionButtonUtil", "AssistedCombatMan
 
 #[test]
 fn action_bar_load_emits_no_lane_specific_lua_errors() {
+    wrath_action_case!(callbacks::load_errors);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, loaded| {
         assert!(
             loaded.iter().any(|name| name == ROOT),

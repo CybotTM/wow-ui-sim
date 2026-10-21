@@ -233,6 +233,7 @@ fn fire_startup_events(env: &WowLuaEnv) {
 
 prefork_full_ui_case! {
 fn action_button_down_sets_pushed_state(env: &WowLuaEnv) {
+    wrath_action_case!(callbacks::action_down);
 
         // ActionButtonDown calls SetButtonState("PUSHED") on the button widget
         let state_before: String = env
@@ -261,6 +262,7 @@ fn action_button_down_sets_pushed_state(env: &WowLuaEnv) {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn action_button_down_sets_pushed_state() {
+    wrath_action_case!(callbacks::action_down);
     let env = env_with_full_blizzard_ui();
     action_button_down_sets_pushed_state::run(&env);
 }
@@ -409,6 +411,7 @@ fn assert_cast_bar_shows(env: &WowLuaEnv) {
 
 prefork_full_ui_case! {
 fn cast_bar_visible_during_cast(env: &WowLuaEnv) {
+    wrath_action_case!(callbacks::casting_visible);
 
         env.exec("TargetUnit('party1')").expect("target party1");
         install_test_error_handler(&env);
@@ -439,6 +442,7 @@ fn cast_bar_visible_during_cast(env: &WowLuaEnv) {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn cast_bar_visible_during_cast() {
+    wrath_action_case!(callbacks::casting_visible);
     let env = env_with_full_blizzard_ui();
     cast_bar_visible_during_cast::run(&env);
 }
@@ -700,6 +704,7 @@ fn paladin_aura_spell_replaces_previous_paladin_aura() {
 
 prefork_full_ui_case! {
 fn paladin_aura_cast_refreshes_blizzard_buff_frame(env: &WowLuaEnv) {
+    wrath_action_case!(callbacks::aura_cast_refresh);
 
         install_test_error_handler(&env);
         env.exec(
@@ -745,6 +750,7 @@ fn paladin_aura_cast_refreshes_blizzard_buff_frame(env: &WowLuaEnv) {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn paladin_aura_cast_refreshes_blizzard_buff_frame() {
+    wrath_action_case!(callbacks::aura_cast_refresh);
     let env = env_with_full_blizzard_ui();
     paladin_aura_cast_refreshes_blizzard_buff_frame::run(&env);
 }
@@ -784,6 +790,7 @@ fn ui_error_message_wired_with_blizzard_ui() {
 
 prefork_full_ui_case! {
 fn spellcast_input_blizzard_bar_observes_delay_and_failure(env: &WowLuaEnv) {
+    wrath_action_case!(callbacks::casting_delay_failure);
 
         install_test_error_handler(&env);
         env.exec(r#"
@@ -815,6 +822,7 @@ fn spellcast_input_blizzard_bar_observes_delay_and_failure(env: &WowLuaEnv) {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn spellcast_input_blizzard_bar_observes_delay_and_failure() {
+    wrath_action_case!(callbacks::casting_delay_failure);
     let env = env_with_full_blizzard_ui();
     spellcast_input_blizzard_bar_observes_delay_and_failure::run(&env);
 }
