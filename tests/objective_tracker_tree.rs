@@ -50,6 +50,9 @@ fn load_settled_game_ui() -> WowLuaEnv {
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
 
     if cfg!(feature = "client-wrath") {
+        env.set_font_system(std::rc::Rc::new(std::cell::RefCell::new(
+            WowFontSystem::new(),
+        )));
         common::wrath_watch_fixture::seed_watch_quests(&env);
     }
     common::load_profile_framexml(&env);
