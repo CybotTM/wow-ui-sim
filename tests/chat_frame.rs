@@ -85,6 +85,7 @@ pub(crate) fn setup_env() -> WowLuaEnv {
         state.addon_base_paths = vec![ui.clone()];
     }
 
+    common::load_profile_framexml(&env);
     let addons = discover_blizzard_addons(&ui);
     for (name, toc_path) in &addons {
         if let Err(e) = load_addon(&env.loader_env(), toc_path) {
