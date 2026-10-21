@@ -194,6 +194,10 @@ mod forever {
         "C_UnitAuras.SetHiddenGroupBuffs({[456]=true}); assert(C_UnitAuras.GetHiddenGroupBuffs()[456] == true)"
     );
     contract!(
+        hidden_buff_publication_does_not_enable_unrouted_visual_alert_apis,
+        "assert(C_UnitAuras.GetGroupBuffVisualAlerts == nil); assert(C_UnitAuras.SetGroupBuffVisualAlerts == nil)"
+    );
+    contract!(
         identity_secrecy_query_uses_the_existing_unit_identity_policy,
         "assert(C_Secrets.ShouldUnitIdentityBeSecret('player') == false); assert(C_Secrets.ShouldUnitIdentityBeSecret('party1') == true)"
     );
