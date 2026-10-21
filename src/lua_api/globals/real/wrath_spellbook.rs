@@ -19,7 +19,7 @@ pub(super) fn register_actions(lua: &mut rilua::Lua) -> crate::Result<()> {
 
 fn get_known_slot(state: &mut LuaState) -> LuaResult<u32> {
     // No fractional rounding is modeled: only authenticated integer slots map.
-    let compact_index = numeric_argument(state)
+    let compact_index = numeric_argument(state, 1)
         .filter(|number| number.fract() == 0.0)
         .map(|number| number as usize)
         .and_then(|slot| slot.checked_sub(1));
@@ -43,7 +43,7 @@ fn update_spells(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn get_spell_tab_info(state: &mut LuaState) -> LuaResult<u32> {
-    let index = numeric_argument(state).ok_or_else(tab_usage_error)? as i32;
+    let index = numeric_argument(state, 1).ok_or_else(tab_usage_error)? as i32;
     if index != 1 {
         state.push(Val::Nil);
         state.push(Val::Nil);
@@ -86,8 +86,8 @@ fn tab_usage_error() -> LuaError {
     })
 }
 
-pub(crate) fn numeric_argument(state: &LuaState) -> Option<f64> {
-    match stack_val(state, 1) {
+pub(crate) fn numeric_argument(state: &LuaState, argument: i32) -> Option<f64> {
+    match stack_val(state, argument) {
         Val::Num(number) => Some(number),
         Val::Str(reference) => {
             let string = state.gc.string_arena.get(reference)?;

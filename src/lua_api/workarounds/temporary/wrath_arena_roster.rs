@@ -9,7 +9,7 @@ pub fn register(lua: &mut rilua::Lua) -> LuaResult<()> {
 }
 
 fn arena_team_roster(state: &mut LuaState) -> LuaResult<u32> {
-    if numeric_argument(state).is_none() {
+    if numeric_argument(state, 1).is_none() {
         return Err(runtime_error("Usage: ArenaTeamRoster(team)"));
     }
     Ok(0)

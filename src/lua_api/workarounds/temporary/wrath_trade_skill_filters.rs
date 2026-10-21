@@ -54,7 +54,7 @@ fn validate_reset(state: &LuaState, usage: &str, bad_ordinal: &str) -> LuaResult
         return Err(runtime_error(usage));
     }
     // lua_tonumber maps nonnumeric strings to zero, so they reset too.
-    let ordinal = numeric_argument(state).unwrap_or(0.0) as i32;
+    let ordinal = numeric_argument(state, 1).unwrap_or(0.0) as i32;
     if ordinal > 0 {
         return Err(runtime_error(bad_ordinal));
     }

@@ -77,11 +77,14 @@ fn auction_inventory_pairs_match_native_masks_and_unfound_ordinal() {
         check(2, 3, regular)
         -- An unfound ordinal intentionally falls through; it is not an error/empty result.
         check(2, 999, regular)
+        check(2, 0, regular)
         local cloth = {'INVTYPE_HEAD', 'INVTYPE_SHOULDER', 'INVTYPE_CHEST',
             'INVTYPE_WAIST', 'INVTYPE_LEGS', 'INVTYPE_FEET', 'INVTYPE_WRIST',
             'INVTYPE_HAND', 'INVTYPE_CLOAK'}
         check('2', '2', cloth)
         check(1, 999, tokens)
+        -- Exactly 17 visible weapon rows; raw DB has 21. Index 18 is unfound.
+        check(1, 18, tokens)
         assert(select('#', GetAuctionInvTypes(1, 1)) == 0)
         assert(select('#', GetAuctionInvTypes(2, 6)) == 0)
     "#,

@@ -29,6 +29,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 
 - `tools/gen_wrath_auction_catalog.py`: hash-pinned read-only WDBC decoding and minimal projection.
 - `data/wrath-auction-catalog.json`, `data/wrath-auction-catalog.provenance.json`: 12 class records, native selectors and 112 relevant subclass records, with source/derived hashes and loader-layout provenance.
+- `src/lua_api/globals/real/wrath_auction_catalog.rs`: DBC-backed selectors/names, numeric validation, native sparse inventory pairs and ordinal fall-through. The old numeric Mists adapter remains Mists-only, not a Wrath fallback.
 - `src/lua_api/globals/real/wrath_talent_groups.rs`: cached group/count projections, pet predicate and StringToBOOL.
 - `src/lua_api/globals/real/wrath_legacy_state.rs`: supplied zero-based player/inspect indices, independently mutable from fixtures.
 - `src/wrath/compat_bootstrap.rs`: Wrath-only registration.
@@ -75,6 +76,8 @@ User-supplied data-only client uses enUS and matching `wow-data`/`wow-enus` comp
 | ItemSubClass | 119 × 44 | 176 / 1226 | classID 0; subclassID 1; flags 4; displayFlags 5; enUS displayName 10; enUS verboseName 27 |
 
 Class 2 field 3 points at string-block offset 22, `Weapon`. Weapon subclass 0 field 10 points at 190 (`Axe`), while field 27 points at 194 (`One-Handed Axes`). The loader mappings are **established**, not inferred: laptop clean-room `ItemClassRec.cpp:21–40,66`, `ItemSubClassRec.cpp:25–68,118–119`; getters `AuctionHouse_Scripts.cpp:98,124–127,160–163`. Locale fields are base plus client locale; enUS index 0, enGB maps to enUS, with no alternate-locale fallback. Only the supplied enUS projection is shipped.
+
+Inventory ordinal lookup is established to use the same visible displayFlags-bit-2-filtered stream (`AuctionHouse_Scripts.cpp:143–191`, laptop clean-room follow-up). Weapon ordinal 18 is unfound because only 17 rows are visible: it returns **28 values / 14 pairs**, all availability numbers 1. A found visible row without flags bit `0x200` returns zero values. No ordinal-sorting or out-of-range empty-result shortcut is permitted.
 
 Input SHA256: ItemClass `f14b09254010765ab75c3c04ddf55a4b03e75163655c5015d188b04e31fa1b20`; ItemSubClass `ed037619b6277fb2b05c3cf05233b19687a4004427d5e63a12d038804bc8b0e5`. Full metadata and derived hash live in the provenance JSON. The decoder walks little-endian 32-bit fields using the authenticated record strides and bounded NUL-terminated UTF-8 string offsets. The projection retains hidden rows for auditable flags but omits unused columns/classes; verboseName/displayName selection occurs in the same locale. Consumable subclass IDs stay `0,5,1,2,3,7,6,4,8`, not sorted.
 

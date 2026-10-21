@@ -11,6 +11,9 @@ fn wrath_lod_globals_remain_unpublished_on_retail() {
             'GetActiveTalentGroup', 'CreateMiniWorldMapArrowFrame',
             'CalendarEventGetTypes', 'CalendarDefaultGuildFilter', 'ArenaTeamRoster',
             'SetTradeSkillSubClassFilter', 'SetTradeSkillInvSlotFilter', 'random',
+            'GetAuctionItemClasses', 'GetAuctionItemSubClasses', 'GetAuctionInvTypes',
+            'GetNumTalentGroups', 'CalendarEventGetRepeatOptions', 'CalendarCanSendInvite',
+            'GetTradeSkillSubClasses', 'GetTradeSkillInvSlots',
         }) do
             assert(rawget(_G, name) == nil, name)
         end
