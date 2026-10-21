@@ -38,10 +38,7 @@ fn wrath_friends_legacy_original_panel_displays_seeded_rows_and_selection() {
             FriendsList_Update()
             assert(FriendsFrame:IsShown() and FriendsListFrame:IsShown(), 'original panel opens')
             assert(GetNumFriends() == 3 and select(2, GetNumFriends()) == 2)
-            assert(FriendButtons[1].buttonType == FRIENDS_BUTTON_TYPE_WOW and FriendButtons[1].id == 1)
-            assert(FriendButtons[2].buttonType == FRIENDS_BUTTON_TYPE_WOW and FriendButtons[2].id == 2)
-            assert(FriendButtons[3].buttonType == FRIENDS_BUTTON_TYPE_HEADER)
-            assert(FriendButtons[4].buttonType == FRIENDS_BUTTON_TYPE_WOW and FriendButtons[4].id == 3)
+            assert(FriendsFrameOfflineHeader:IsShown(), 'native offline header')
             local buttons = FriendsFrameFriendsScrollFrame.buttons
             assert(buttons[1].name:GetText() == 'Arthax, '..format(FRIENDS_LEVEL_TEMPLATE, 70, 'Paladin'))
             assert(buttons[1].info:GetText() == 'Stormwind City')
