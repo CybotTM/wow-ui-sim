@@ -1,6 +1,6 @@
 ## [2026-10-21] source | Wrath positional guild rights
 
-[Projection notes](systems/lua-api.md#wrath-guild-rank-rights) and [contract](../specs/wrath-guild-rank-flags.md) record original native checkbox RED and the bounded Wrath-only positional correction. The contract records native-consumer and guild-model GREEN plus an empty stock Wrath Lua-error array. Retail preservation remains pending.
+[Projection notes](systems/lua-api.md#wrath-guild-rank-rights) and [contract](../specs/wrath-guild-rank-flags.md) record original native checkbox RED and the bounded Wrath-only positional correction. The contract records native-consumer and guild-model GREEN, paired Retail preservation with unchanged pre-existing fixture failures, and empty stock Lua-error arrays under both profiles.
 
 ## [2026-10-20] investigation | Wrath native friends legacy surface
 

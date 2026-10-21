@@ -7,7 +7,7 @@ Wrath's legacy `GuildControlGetRankFlags` projects selected guild rights as posi
 - [x] Under `client-wrath`, the global ignores every argument and returns exactly 17 positions from the selected rank's supplied rights: number `1` for enabled rights, nil otherwise, including trailing nils.
 - [x] The original `GuildControlCheckboxUpdate(GuildControlGetRankFlags())` consumer applies the selected rights to native checkbox children. Position 14 remains an ordinary API result even though native UI omits that checkbox.
 - [x] With a valid selected rank but no guild, return 17 nils.
-- [ ] Other profiles' global and the existing `C_GuildInfo.GuildControlGetRankFlags` table projection retain explicit-index lookup and boolean entries.
+- [x] Other profiles' global and the existing `C_GuildInfo.GuildControlGetRankFlags` table projection retain explicit-index lookup and boolean entries.
 
 Native mask order for the positional input is `0x1, 0x2, 0x4, 0x8, 0x80, 0x100, 0x10, 0x20, 0x1000, 0x2000, 0x4000, 0x8000, 0x10000, 0x20000, 0x40000, 0x80000, 0x100000`. The simulator's supplied `flags` vector is positional; it does not store a native bitmask.
 
@@ -29,9 +29,9 @@ Native mask order for the positional input is `0x1, 0x2, 0x4, 0x8, 0x80, 0x100, 
 
 ## Known gaps (current cycle)
 
-Wrath proof: all three native contract cases and all 14 existing guild-model cases pass. Stock Wrath startup reports an empty Lua-error array. This does not establish native-client execution or the excluded mutation lifecycle.
+Wrath proof: all three native contract cases and all 14 existing guild-model cases pass. Stock Wrath startup reports an empty Lua-error array. Retail preservation executes 73 paired cases: 53 pass and the same 20 pre-existing fixture failures retain identical first failure messages; the 14 guild cases pass before and after. The approved baseline is source-equivalent at `70e2d01cb`, not a fresh exact-base build. Current Retail startup also reports an empty Lua-error array.
 
-- [ ] Retail profile preservation proof is pending.
+No gaps remain in this bounded getter/projection proof. Other client profiles were not executed as a matrix; native-client execution and the excluded mutation lifecycle are not established.
 
 ## Out of scope
 

@@ -480,7 +480,7 @@ The [owning contract](../../specs/wrath-spellbook-tabs.md) tracks original-consu
 
 ## Wrath guild rank rights
 
-The legacy global now projects the existing selected rank's supplied rights positionally under `client-wrath`; the existing namespace and other profiles retain their table projection. The [contract](../../specs/wrath-guild-rank-flags.md) owns the authenticated 12340 return shape and evidence limits. F03's original native checkbox consumer reproduced the table mismatch before the correction; the contract now records native-consumer and guild-model GREEN. Retail preservation remains pending. Native unselected-rank reads and separate staged edit rights are not modeled by this bounded projection change.
+The legacy global now projects the existing selected rank's supplied rights positionally under `client-wrath`; the existing namespace and other profiles retain their table projection. The [contract](../../specs/wrath-guild-rank-flags.md) owns the authenticated 12340 return shape and evidence limits. F03's original native checkbox consumer reproduced the table mismatch before the correction; the contract now records native-consumer and guild-model GREEN. The contract also records paired Retail preservation and both profiles' empty stock Lua-error arrays; unrelated fixture failures remain explicit. Native unselected-rank reads and separate staged edit rights are not modeled by this bounded projection change.
 
 ## Sources
 
