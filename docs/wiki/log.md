@@ -20,6 +20,16 @@ Updated [Lua API](systems/lua-api.md#wrath-action-callback-projections) with the
 ## [2026-10-20] source | Wrath XML load diagnostics contract
 
 Added [diagnostic requirements](../specs/xml-load-diagnostics.md) and [loader boundary notes](systems/addon-loading.md#wrath-file-load-diagnostics), superseding the earlier X2 handler assumption with laptop-authenticated 12340 channel/text/continuation facts. Source-bound original DebugTools RED→GREEN; producer classifies at file boundaries and retains exact texts through existing warnings without a new logging/severity path. Wrath67 and Retail61 bounded passes; original genuine Lua consumer and Retail's pathless parse-error policy preserved.
+## [2026-10-20] investigation | Wrath native friends legacy surface
+
+[Diagnosis](investigations/wrath-friends-legacy-surface.md) records the original native friends consumer and raw-global/call failure boundary. F02 now retains the mixed case's native UI and generic identities; producer repair belongs to a separate lane. The source-bound Rust case now executes and fails at the original consumer. Its authoritative12340 offline-connected=nil expectation is retained for joint verification with the producer lane; no isolated rebuild or producer fix is claimed.
+
+## [2026-10-20] source | Wrath native chat layout preservation
+
+[Diagnosis](investigations/wrath-chat-layout.md) and [contract](../specs/wrath-chat-layout.md) record the corrected pre-addon RED at `60fcdf225`: native `430x120/(32,130)` becomes modern `430x170/(35,50)`. A post-entry snapshot was invalid because entry automatically applies simulator workarounds. Native geometry remains owned by FrameXML; the contract now records bounded GREEN, headless observation, Retail preservation with exact-base failure classification, and warning-free formatting/check proof.
+## [2026-10-20] source | Wrath legacy friends
+
+[Lua API ownership](systems/lua-api.md#wrath-legacy-friends) links the [four-global contract](../specs/wrath-friends-legacy.md): laptop static12340 tuples/coercion/GUID selection, shared inferred response policy, four executed RED failures including original FriendsFrame.lua:258, then Wrath5 and Retail19 passes. Both stock startups are clean, Wrath check is warning-free and formatter passes. Retail check and joint F02 integration are deferred to the merge gate; ignore/add/remove and native transport/status/sorting remain excluded.
 
 ## [2026-10-20] investigation | Shared-target test source binding
 

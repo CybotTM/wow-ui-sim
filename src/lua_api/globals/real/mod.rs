@@ -125,6 +125,8 @@ pub mod wrath_auction_catalog;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_calendar;
 #[cfg(feature = "client-wrath")]
+pub(crate) mod wrath_friends;
+#[cfg(feature = "client-wrath")]
 pub mod wrath_legacy;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_legacy_lfg;
