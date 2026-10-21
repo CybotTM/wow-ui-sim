@@ -98,6 +98,21 @@ fn cfactory_m2_forever_cooldown_viewer_reports_supplied_availability() {
     "#,
     )
     .unwrap();
+    env.state()
+        .borrow_mut()
+        .cooldown_viewer_availability
+        .is_available = true;
+    env.state()
+        .borrow_mut()
+        .cooldown_viewer_availability
+        .failure_reason = "Host supplied".into();
+    env.exec(
+        r#"
+        local available, reason = C_CooldownViewer.IsCooldownViewerAvailable()
+        assert(available == true and reason == 'Host supplied')
+    "#,
+    )
+    .unwrap();
 }
 
 #[cfg(feature = "client-wowforever")]
