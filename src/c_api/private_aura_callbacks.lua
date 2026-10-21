@@ -1,7 +1,7 @@
 C_UnitAurasPrivate = C_UnitAurasPrivate or {}
 
 -- Strong, environment-local ownership: registered callbacks survive GC until
--- removed/replaced. Snapshot dispatch permits a callback to unregister itself.
+-- removed/replaced.
 local callbacksByUnit = {}
 local raidBossCallback
 
@@ -39,14 +39,12 @@ end
 
 -- Simulator-authored injection seam; retain the existing source/info arguments.
 function C_UnitAurasPrivate._TriggerPrivateAuraUpdate(unitToken, privateSource, updateInfo)
-    local snapshot = {}
-    for index, callback in ipairs(callbacksByUnit[tostring(unitToken or "")] or {}) do
-        snapshot[index] = callback
-    end
-    for _, callback in ipairs(snapshot) do
+    local fired = 0
+    for _, callback in ipairs(callbacksByUnit[tostring(unitToken or "")] or {}) do
         Invoke(callback, privateSource, CopyPayload(updateInfo))
+        fired = fired + 1
     end
-    return #snapshot
+    return fired
 end
 
 if modern then
