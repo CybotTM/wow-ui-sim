@@ -1,7 +1,6 @@
 //! Load smoke for `Blizzard_ActionBar`.
 //!
-//! TOC reference (`Interface/BlizzardUI/Blizzard_ActionBar/
-//! Blizzard_ActionBar_Mainline.toc`):
+//! TOC reference (active profile's `Blizzard_ActionBar` TOC):
 //!
 //! ```text
 //! ## Title: Blizzard_ActionBar
@@ -42,10 +41,10 @@
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 use crate::common::panel_fixtures::blizzard_ui_dir;
+use wow_ui_sim::loader::find_toc_file;
 use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_ActionBar";
-const ROOT_TOC_FILE: &str = "Blizzard_ActionBar_Mainline.toc";
 const CURRENT_DECLARED_DEPS: &[&str] = &[
     "Blizzard_StoreUI",
     "Blizzard_QuickKeybind",
@@ -168,7 +167,7 @@ fn action_bar_load_executes_file_scope_mixin_declarations() {
 
 /// Pin the TOC-declared dependency contract via TWO independent grounds:
 ///
-/// 1. **Parser-grounded.** Parse `Blizzard_ActionBar_Mainline.toc` via
+/// 1. **Parser-grounded.** Parse the active profile's `Blizzard_ActionBar` TOC via
 ///    `TocFile::from_file` (the same parser the closure walker uses at
 ///    `src/loader/mod.rs:454` via `toc.dependencies().chain(toc.optional_deps())`)
 ///    and assert the parser-extracted dep set matches the current retail list
@@ -193,7 +192,8 @@ fn action_bar_load_executes_file_scope_mixin_declarations() {
 fn action_bar_every_declared_toc_dependency_is_loaded_after_harness_runs() {
     wrath_action_case!(native_dependencies);
 
-    let toc_path = blizzard_ui_dir().join(ROOT).join(ROOT_TOC_FILE);
+    let toc_path = find_toc_file(&blizzard_ui_dir().join(ROOT))
+        .expect("Blizzard_ActionBar TOC for active profile");
     let toc = TocFile::from_file(&toc_path).unwrap_or_else(|e| {
         panic!(
             "TOC at `{}` MUST parse cleanly. The closure walker reads this same file via \
@@ -212,7 +212,7 @@ fn action_bar_every_declared_toc_dependency_is_loaded_after_harness_runs() {
         .collect();
     assert_eq!(
         declared_deps, current_deps,
-        "Parser-extracted dep list from `{ROOT_TOC_FILE}` MUST match the current retail TOC \
+        "Parser-extracted dep list from `{ROOT}` MUST match the current retail TOC \
          BIT-FOR-BIT. The current `## Dependencies:` line declares StoreUI, QuickKeybind, \
          EditMode, UIPanels_Game, TextStatusBar, Flyout, Colors, HelpPlate, MicroMenu, PingUI, \
          and GameMenuEsc, with no `## OptionalDeps:` line."
@@ -228,7 +228,7 @@ fn action_bar_every_declared_toc_dependency_is_loaded_after_harness_runs() {
 
             assert!(
                 is_loaded,
-                "Declared TOC dependency `{dep}` (parsed from `{ROOT_TOC_FILE}` via \
+                "Declared TOC dependency `{dep}` (parsed from `{ROOT}` via \
                  `TocFile::from_file`) MUST be runtime-loaded after the startup-shape harness \
                  finishes — `C_AddOns.IsAddOnLoaded(\"{dep}\")` returned false. Each declared \
                  dep is pre-loaded by the panel-addons baseline (cross-references in this \

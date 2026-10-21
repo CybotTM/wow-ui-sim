@@ -1,7 +1,7 @@
 #![cfg(feature = "client-retail")]
 use std::path::PathBuf;
 
-use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
+use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::fire_startup_events_for_screen;
@@ -14,7 +14,8 @@ fn blizzard_ui_dir() -> PathBuf {
 }
 
 fn frame_xml_base_toc() -> PathBuf {
-    blizzard_ui_dir().join("Blizzard_FrameXMLBase/Blizzard_FrameXMLBase_Mainline.toc")
+    find_toc_file(&blizzard_ui_dir().join("Blizzard_FrameXMLBase"))
+        .expect("Blizzard_FrameXMLBase TOC for active profile")
 }
 
 fn load_full_game_ui() -> WowLuaEnv {

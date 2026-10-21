@@ -1,16 +1,16 @@
 //! Load contracts for current retail `Blizzard_AchievementUI`.
 //!
-//! Retail 12.1.0.69497 uses `Blizzard_AchievementUI_Mainline.toc`, loads on
-//! demand in the mainline game client, and declares `Blizzard_FrameXMLUtil`
+//! The active profile's `Blizzard_AchievementUI` TOC loads on demand in
+//! the mainline game client and declares `Blizzard_FrameXMLUtil`
 //! plus optional `Blizzard_Plunderstorm`. Its bootstrap precedes the Lua, XML,
 //! and localization files.
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 use crate::common::panel_fixtures::blizzard_ui_dir;
+use wow_ui_sim::loader::find_toc_file;
 use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_AchievementUI";
-const ROOT_TOC_FILE: &str = "Blizzard_AchievementUI_Mainline.toc";
 const LANE_FILE_SCOPE_MIXINS: &[&str] = &[
     "AchievementCategoryTemplateMixin",
     "AchievementCategoryTemplateButtonMixin",
@@ -186,7 +186,8 @@ fn achievement_ui_load_on_demand_root_executes_file_scope_code() {
 
 #[test]
 fn achievement_ui_loaded_set_contains_every_declared_toc_dependency() {
-    let toc_path = blizzard_ui_dir().join(ROOT).join(ROOT_TOC_FILE);
+    let toc_path = find_toc_file(&blizzard_ui_dir().join(ROOT))
+        .expect("Blizzard_AchievementUI TOC for active profile");
     let toc = TocFile::from_file(&toc_path).unwrap_or_else(|e| {
         panic!(
             "TOC at `{}` MUST parse cleanly. The closure walker reads this same file via \
@@ -202,7 +203,7 @@ fn achievement_ui_loaded_set_contains_every_declared_toc_dependency() {
     assert_eq!(
         declared_deps,
         CURRENT_TOC_DEPENDENCIES,
-        "`{ROOT_TOC_FILE}` currently declares these direct dependencies. Update this source \
+        "`{ROOT}` currently declares these direct dependencies. Update this source \
          contract with the TOC if retail changes it."
     );
 
