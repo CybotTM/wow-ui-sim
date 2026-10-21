@@ -57,6 +57,18 @@ if rawget(C_QuestInfoSystem, "GetQuestRewardSpells") == nil then
 end
 "#;
 
+const FOREVER: &str = r#"
+-- Missing host-selected Forever experience preset. Optional result.
+if rawget(C_GameRules, "GetForeverExperiencePreset") == nil then
+    function C_GameRules.GetForeverExperiencePreset() return nil end
+end
+-- Missing quest timer lifecycle/remaining-time model. Existing objective
+-- progress is not a timer snapshot.
+if rawget(C_QuestLog, "GetQuestTimers") == nil then
+    function C_QuestLog.GetQuestTimers() return {} end
+end
+"#;
+
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     if ACTIVE == ClientProfile::Wrath {
         return Ok(());
@@ -71,19 +83,7 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
         lua.exec(CLASSIC)?;
     }
     if ACTIVE == ClientProfile::WowForever {
-        lua.exec(
-            r#"
-            -- Missing host-selected Forever experience preset. Optional result.
-            if rawget(C_GameRules, "GetForeverExperiencePreset") == nil then
-                function C_GameRules.GetForeverExperiencePreset() return nil end
-            end
-            -- Missing quest timer lifecycle/remaining-time model. Existing
-            -- objective progress is not a timer snapshot.
-            if rawget(C_QuestLog, "GetQuestTimers") == nil then
-                function C_QuestLog.GetQuestTimers() return {} end
-            end
-        "#,
-        )?;
+        lua.exec(FOREVER)?;
     }
     Ok(())
 }

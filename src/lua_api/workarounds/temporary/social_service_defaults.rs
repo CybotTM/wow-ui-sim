@@ -56,6 +56,15 @@ install(C_RecruitAFriend, "IsSystemEnabled", function() return false end)
 install(C_FriendList, "IsLegacyFriendSystemEnabled", function() return false end)
 "#;
 
+// Missing Battle.net friend-tag/game-type capability policy. Only the Forever
+// cache declares this member; friend-tag data does not establish game support.
+const FOREVER: &str = r#"
+C_BattleNet = C_BattleNet or {}
+if rawget(C_BattleNet, "IsFriendTagSupportedForCurrentGameType") == nil then
+    function C_BattleNet.IsFriendTagSupportedForCurrentGameType(friendTag) return false end
+end
+"#;
+
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     if ACTIVE == ClientProfile::Wrath {
         return Ok(());
@@ -68,15 +77,7 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
         lua.exec(MODERN)?;
     }
     if ACTIVE == ClientProfile::WowForever {
-        // Missing Battle.net friend-tag/game-type capability policy. Only the
-        // Forever cache declares this member; existing friend tags are data,
-        // not evidence that a tag is supported for this game type.
-        lua.exec(r#"
-            C_BattleNet = C_BattleNet or {}
-            if rawget(C_BattleNet, "IsFriendTagSupportedForCurrentGameType") == nil then
-                function C_BattleNet.IsFriendTagSupportedForCurrentGameType(friendTag) return false end
-            end
-        "#)?;
+        lua.exec(FOREVER)?;
     }
     Ok(())
 }
