@@ -20,7 +20,7 @@ fn wrath_friends_legacy_tuple_and_name_lookup() {
         check('1')
         check('aRtHaX')
         local name, _, _, _, connected, _, note = GetFriendInfo('Durotan')
-        assert(name == 'Durotan' and connected == nil and note == nil)
+        assert(name == 'Durotan' and connected == nil and note == 'old guildie')
         for _, selector in ipairs({0, 102, 'not-a-friend'}) do
             local name, level, class, area, connected, status, note, raf = GetFriendInfo(selector)
             assert(select('#', GetFriendInfo(selector)) == 8)

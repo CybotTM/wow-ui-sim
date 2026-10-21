@@ -28,7 +28,7 @@ fn wrath_friends_legacy_original_panel_displays_seeded_rows_and_selection() {
     common::with_timeout(90, || {
         let env = load_friends_env();
         // Storage order differs from the online-first display projection.
-        env.state().borrow_mut().social_friends.rotate_right(1);
+        env.state().borrow_mut().social_friends.swap(0, 1);
         env.exec(
             r#"
             local errors = {}
@@ -45,7 +45,7 @@ fn wrath_friends_legacy_original_panel_displays_seeded_rows_and_selection() {
             local buttons = FriendsFrameFriendsScrollFrame.buttons
             assert(buttons[1].name:GetText() == 'Arthax, '..format(FRIENDS_LEVEL_TEMPLATE, 70, 'Paladin'))
             assert(buttons[1].info:GetText() == 'Stormwind City')
-            assert(buttons[2].name:GetText() == 'Sylvara, '..format(FRIENDS_LEVEL_TEMPLATE, 70, 'Hunter'))
+            assert(buttons[2].name:GetText() == 'Sylvara, '..format(FRIENDS_LEVEL_TEMPLATE, 60, 'Mage'))
             assert(buttons[4].name:GetText() == 'Durotan')
             assert(GetSelectedFriend() == 1 and FriendsFrame.selectedFriend == 1)
             assert(FriendsFrameSendMessageButton:IsEnabled())
