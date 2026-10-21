@@ -5,7 +5,8 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 pub fn register(lua: &mut rilua::Lua) -> LuaResult<()> {
-    LuaApiMut::register_function(lua, "GetActiveTalentGroup", get_active_talent_group)
+    LuaApiMut::register_function(lua, "GetActiveTalentGroup", get_active_talent_group)?;
+    LuaApiMut::register_function(lua, "GetNumTalentGroups", get_num_talent_groups)
 }
 
 fn get_active_talent_group(state: &mut LuaState) -> LuaResult<u32> {
@@ -22,6 +23,24 @@ fn get_active_talent_group(state: &mut LuaState) -> LuaResult<u32> {
         }
     };
     state.push(Val::Num(group as f64));
+    Ok(1)
+}
+
+fn get_num_talent_groups(state: &mut LuaState) -> LuaResult<u32> {
+    let inspect = string_to_bool(state, stack_val(state, 1));
+    let pet = string_to_bool(state, stack_val(state, 2));
+    let count = {
+        let sim = borrow_state(state)?;
+        let counts = &sim.wrath_legacy.talent_group_counts;
+        if inspect {
+            counts.inspected
+        } else if pet {
+            u32::from(counts.pet_tab_present && counts.pet_tab_count != 0)
+        } else {
+            counts.player
+        }
+    };
+    state.push(Val::Num(count as f64));
     Ok(1)
 }
 

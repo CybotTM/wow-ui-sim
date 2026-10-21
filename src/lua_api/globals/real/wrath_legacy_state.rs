@@ -23,6 +23,28 @@ impl Default for CalendarContext {
     }
 }
 
+/// Supplied talent-count caches; defaults are INFERRED simulator initialization.
+#[cfg(feature = "client-wrath")]
+#[derive(Debug)]
+pub struct TalentGroupCounts {
+    pub player: u32,
+    pub inspected: u32,
+    pub pet_tab_present: bool,
+    pub pet_tab_count: u32,
+}
+
+#[cfg(feature = "client-wrath")]
+impl Default for TalentGroupCounts {
+    fn default() -> Self {
+        Self {
+            player: 1,
+            inspected: 1,
+            pet_tab_present: false,
+            pet_tab_count: 0,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Landmark {
     pub name: String,
@@ -47,6 +69,8 @@ pub struct WrathLegacyState {
     pub player_talent_group: u32,
     #[cfg(feature = "client-wrath")]
     pub inspected_talent_group: u32,
+    #[cfg(feature = "client-wrath")]
+    pub talent_group_counts: TalentGroupCounts,
     /// Lazily allocated model handles, retained within this environment.
     #[cfg(feature = "client-wrath")]
     pub mini_map_arrows: Option<(u64, u64)>,

@@ -8,6 +8,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - [ ] `GetAuctionItemClasses` follows native selector order and skips missing class records; `GetAuctionItemSubClasses` validates numeric selectors, excludes displayFlags bit 2 and returns same-locale verbose/display names in DB order.
 - [ ] `GetAuctionInvTypes` validates both numeric selectors, uses flags bit `0x200` for a found subclass and preserves native unfound-ordinal fall-through, returning 14 token/1-or-nil pairs in native order.
 - [x] `GetActiveTalentGroup` returns one cached group plus one; inspect precedes pet, pet returns one. Arguments follow native StringToBOOL, not Lua truthiness. No usage error.
+- [ ] `GetNumTalentGroups` returns one cached player/inspect count, including zero; inspect precedes pet. Pet returns 1 only when its cached talent-tab presence and tab count are both nonzero, otherwise 0, not the tab count. Same StringToBOOL arguments, no usage error, writes or events.
 - [x] `CreateMiniWorldMapArrowFrame(parent)` validates table/slot-zero/frame type, emits exact native errors, returns zero values and lazily creates two named child Models. Subsequent calls retain their original parents. Model mesh rendering is unsupported.
 - [x] `CalendarEventGetTypes` returns five loaded localized Calendar labels in native order; ignores arguments.
 - [x] `CalendarDefaultGuildFilter` returns level cap twice (60/70/80 by account expansion) and the cached guild-rank count directly (`CGGuildInfo::m_numRanks`, laptop clarification); no guild-name membership gate. Absent player returns three zeros. Ignores arguments.
@@ -25,7 +26,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 
 - `tools/gen_wrath_auction_catalog.py`: hash-pinned read-only WDBC decoding and minimal projection.
 - `data/wrath-auction-catalog.json`, `data/wrath-auction-catalog.provenance.json`: 12 class records, native selectors and 112 relevant subclass records, with source/derived hashes and loader-layout provenance.
-- `src/lua_api/globals/real/wrath_talent_groups.rs`: cached group projection and StringToBOOL.
+- `src/lua_api/globals/real/wrath_talent_groups.rs`: cached group/count projections, pet predicate and StringToBOOL.
 - `src/lua_api/globals/real/wrath_legacy_state.rs`: supplied zero-based player/inspect indices, independently mutable from fixtures.
 - `src/wrath/compat_bootstrap.rs`: Wrath-only registration.
 - `src/lua_api/globals/real/wrath_legacy.rs`: native math alias publication before original consumer chunks.
@@ -39,6 +40,7 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 - `tools/tests/test_gen_wrath_auction_catalog.py`: digest rejection, raw record order, input immutability, string offsets, distinct flags and same-locale name projection.
 - `tests/wrath_legacy_lod_auction.rs`: original AuctionUI line 380, literal enUS catalog/order, hidden rows, sparse inventory pairs and numeric/error/zero-return semantics.
 - `tests/wrath_legacy_lod_apis.rs`: original TalentUI line 266, inspect/pet precedence, argument conversion and environment-local cache.
+- `tests/wrath_legacy_talent_group_counts.rs`: original line 267, stored zero counts, inspect priority, pet 0/1 predicate, argument conversion and no events/writes.
 - Original retained LoD shards and force-load in `tests/addon_coverage{,_lod}.rs`.
 
 ### Bounded Wrath proof — 2026-10-20
@@ -72,7 +74,7 @@ Input SHA256: ItemClass `f14b09254010765ab75c3c04ddf55a4b03e75163655c5015d188b04
 
 ## Known gaps (current cycle)
 
-- [ ] INFERRED default: player/inspect group zero (single-group character); native cache initialization unestablished. Approved by parent.
+- [ ] INFERRED defaults: player/inspect group indices zero and counts one (single-group character); pet tab absent/count zero. Native initialization unestablished; count defaults approved by parent. No count clamping or class-specialization substitution.
 - [ ] Auction data gap is resolved by supplied, authenticated DBCs; native API producer GREEN remains pending. The earlier UI-only Gethe cache and modern name constants were not used as a substitute catalog.
 - [ ] INFERRED arrow lifetime: retain handles in the environment; globals are not used as ownership. Native lifetime/forged identities remain unestablished. Model path uses the supplied `MinimapArrow.mdx` name only, not an inferred directory prefix.
 - [ ] INFERRED Calendar default: active player and expansion 2; native initialization unproved. Reuses existing `world.guild_ranks`, not fabricated rank content. Loaded FrameXML GlobalStrings supplies labels; missing labels/invalid supplied expansion are explicit model errors, not claimed native malformed-state behavior.
