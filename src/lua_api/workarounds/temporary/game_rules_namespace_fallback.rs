@@ -1,8 +1,7 @@
-//! Temporary `C_GameRules` namespace fallback.
+//! `C_GameRules` missing-member diagnostics and temporary cast-bar default.
 //!
-//! Game rule queries are Rust-backed by `SimState::game_rules`. A few
-//! unmodeled compatibility probes still expect missing `C_GameRules` members
-//! to resolve to no-op functions during startup.
+//! Game rule queries are Rust-backed by `SimState::game_rules`.
+//! Unmodeled members remain nil.
 
 const GAME_RULES_NAMESPACE_FALLBACK_LUA: &str = r#"
 if type(C_GameRules) ~= "table" then
@@ -20,11 +19,7 @@ local function GameRulesNamespaceFallback(t, key)
     if type(__wow_record_nil_symbol_access) == "function" then
         __wow_record_nil_symbol_access("C_GameRules", key, nil, nil)
     end
-    local fn = function()
-        return nil
-    end
-    rawset(t, key, fn)
-    return fn
+    return nil
 end
 
 local mt = getmetatable(C_GameRules)
@@ -45,7 +40,7 @@ mod tests {
     use crate::lua_api::WowLuaEnv;
 
     #[test]
-    fn preserves_rust_backed_methods_and_adds_unmodeled_member_fallback() {
+    fn preserves_rust_backed_methods_and_leaves_unmodeled_members_nil() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
         env.exec("A_Admin.SetGameRule('Hardcore', true)")
             .expect("admin game rule should set");
@@ -56,11 +51,8 @@ mod tests {
                 if not C_GameRules.IsGameRuleActive("Hardcore") then
                     return "lost_rust_method"
                 end
-                if type(C_GameRules.IsHardcoreActive) ~= "function" then
-                    return "missing_fallback"
-                end
-                if C_GameRules.IsHardcoreActive() ~= nil then
-                    return "fallback_returned_value"
+                if C_GameRules.IsHardcoreActive ~= nil then
+                    return "fabricated_member"
                 end
                 if type(GameRulesUtil) ~= "table" then
                     return "missing_util"
