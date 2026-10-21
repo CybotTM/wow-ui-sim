@@ -251,7 +251,8 @@ fn toggle_tracking_stop_branch_uses_c_content_tracking_stop_tracking_with_manual
         assert(GetNumTrackedAchievements() == 1)
         AchievementButton_ToggleTracking(6)
         assert(GetNumTrackedAchievements() == 0)
-        assert(select("#", GetTrackedAchievements()) == 0)
+        local tracked = {GetTrackedAchievements()}
+        assert(next(tracked) == nil)
         "#,
     ) {
         return;
