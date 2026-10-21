@@ -106,17 +106,11 @@ mod behavior_quick_keybind_mode;
 #[path = "blizzard_ui/blizzard_actionbar/behavior_main_bar_dividers.rs"]
 mod behavior_main_bar_dividers;
 
-
-
-
-
 #[path = "blizzard_ui/blizzard_actionbar/behavior_spell_alert_animation.rs"]
 mod behavior_spell_alert_animation;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_button_range_check.rs"]
 mod behavior_button_range_check;
-
-
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_resting_indicator.rs"]
 mod behavior_resting_indicator;

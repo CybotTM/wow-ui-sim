@@ -7,7 +7,6 @@ include!(concat!(
 
 pub mod action_bar_fixture;
 pub mod addon_coverage_baseline;
-pub mod wrath_action_assertions;
 #[cfg(feature = "retail-12-1-0")]
 pub mod aura_container_harness;
 pub mod blizzard_addon_harness;
@@ -21,6 +20,7 @@ pub(crate) mod prefork_process;
 mod timeout_reexec;
 pub(crate) mod workload_gate;
 mod workload_gate_core;
+pub mod wrath_action_assertions;
 
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
