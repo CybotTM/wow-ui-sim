@@ -80,8 +80,8 @@ fn cfactory_m5_pet_icon_projects_species_catalog() {
         (pet.species_id as i32, pet.icon)
     };
     env.state().borrow_mut().pet_battles.player_pets[0].species_id = species;
-    let actual: u32 = env.eval("return C_PetBattles.GetIcon(1, 1)").unwrap();
-    assert_eq!(actual, icon);
+    let actual: i64 = env.eval("return C_PetBattles.GetIcon(1, 1)").unwrap();
+    assert_eq!(actual, i64::from(icon));
     env.state().borrow_mut().pet_battles.player_pets.clear();
     env.exec("assert(C_PetBattles.GetIcon(1, 1) == nil)")
         .unwrap();
