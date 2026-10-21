@@ -4,6 +4,9 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 
 ## What it must do
 
+- [x] Derive the auction dataset read-only from authenticated 12340 enUS WDBC inputs, checking exact hashes/header lengths and preserving physical subclass record order. No raw DBCs or alternate-locale fallback.
+- [ ] `GetAuctionItemClasses` follows native selector order and skips missing class records; `GetAuctionItemSubClasses` validates numeric selectors, excludes displayFlags bit 2 and returns same-locale verbose/display names in DB order.
+- [ ] `GetAuctionInvTypes` validates both numeric selectors, uses flags bit `0x200` for a found subclass and preserves native unfound-ordinal fall-through, returning 14 token/1-or-nil pairs in native order.
 - [x] `GetActiveTalentGroup` returns one cached group plus one; inspect precedes pet, pet returns one. Arguments follow native StringToBOOL, not Lua truthiness. No usage error.
 - [x] `CreateMiniWorldMapArrowFrame(parent)` validates table/slot-zero/frame type, emits exact native errors, returns zero values and lazily creates two named child Models. Subsequent calls retain their original parents. Model mesh rendering is unsupported.
 - [x] `CalendarEventGetTypes` returns five loaded localized Calendar labels in native order; ignores arguments.
@@ -20,6 +23,8 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 
 ## Implementation inventory
 
+- `tools/gen_wrath_auction_catalog.py`: hash-pinned read-only WDBC decoding and minimal projection.
+- `data/wrath-auction-catalog.json`, `data/wrath-auction-catalog.provenance.json`: 12 class records, native selectors and 112 relevant subclass records, with source/derived hashes and loader-layout provenance.
 - `src/lua_api/globals/real/wrath_talent_groups.rs`: cached group projection and StringToBOOL.
 - `src/lua_api/globals/real/wrath_legacy_state.rs`: supplied zero-based player/inspect indices, independently mutable from fixtures.
 - `src/wrath/compat_bootstrap.rs`: Wrath-only registration.
@@ -31,6 +36,8 @@ Wrath-only APIs used by unchanged 3.3.5a LoD addons. Native static evidence: lap
 
 ## Tests asserting this spec
 
+- `tools/tests/test_gen_wrath_auction_catalog.py`: digest rejection, raw record order, input immutability, string offsets, distinct flags and same-locale name projection.
+- `tests/wrath_legacy_lod_auction.rs`: original AuctionUI line 380, literal enUS catalog/order, hidden rows, sparse inventory pairs and numeric/error/zero-return semantics.
 - `tests/wrath_legacy_lod_apis.rs`: original TalentUI line 266, inspect/pet precedence, argument conversion and environment-local cache.
 - Original retained LoD shards and force-load in `tests/addon_coverage{,_lod}.rs`.
 
@@ -50,15 +57,28 @@ Five original consumer cases were re-run against the unchanged error budgets; ea
 
 No consumer failure is hidden, ignored or re-budgeted. These newly reached APIs are outside this slice; no values are fabricated to bypass them.
 
+## Authenticated auction data layout
+
+User-supplied data-only client uses enUS and matching `wow-data`/`wow-enus` component manifests at build 12340. Latest containing archives are `Data/enUS/patch-enUS.MPQ` (ItemClass) and `Data/enUS/patch-enUS-3.MPQ` (ItemSubClass). Raw files stay outside Git; the derived projection is reproducible with `python3 tools/gen_wrath_auction_catalog.py /path/to/DBCs`.
+
+| WDBC | Records × fields | Record bytes / string bytes | Used zero-based fields |
+|---|---|---|---|
+| ItemClass | 17 × 20 | 80 / 158 | classID 0; enUS className 3 |
+| ItemSubClass | 119 × 44 | 176 / 1226 | classID 0; subclassID 1; flags 4; displayFlags 5; enUS displayName 10; enUS verboseName 27 |
+
+Class 2 field 3 points at string-block offset 22, `Weapon`. Weapon subclass 0 field 10 points at 190 (`Axe`), while field 27 points at 194 (`One-Handed Axes`). The loader mappings are **established**, not inferred: laptop clean-room `ItemClassRec.cpp:21–40,66`, `ItemSubClassRec.cpp:25–68,118–119`; getters `AuctionHouse_Scripts.cpp:98,124–127,160–163`. Locale fields are base plus client locale; enUS index 0, enGB maps to enUS, with no alternate-locale fallback. Only the supplied enUS projection is shipped.
+
+Input SHA256: ItemClass `f14b09254010765ab75c3c04ddf55a4b03e75163655c5015d188b04e31fa1b20`; ItemSubClass `ed037619b6277fb2b05c3cf05233b19687a4004427d5e63a12d038804bc8b0e5`. Full metadata and derived hash live in the provenance JSON. The decoder walks little-endian 32-bit fields using the authenticated record strides and bounded NUL-terminated UTF-8 string offsets. The projection retains hidden rows for auditable flags but omits unused columns/classes; verboseName/displayName selection occurs in the same locale. Consumable subclass IDs stay `0,5,1,2,3,7,6,4,8`, not sorted.
+
 ## Known gaps (current cycle)
 
 - [ ] INFERRED default: player/inspect group zero (single-group character); native cache initialization unestablished. Approved by parent.
-- [ ] Auction catalog held until the user supplies 12340 ItemClass/ItemSubClass DBCs. Laptop confirms no static rows in the source: only selectors/flags, with names read from DBCs. Modern name constants omit native DB row order, display flags, verbose names and missing-record identity. Wrath UI cache is a pinned Gethe UI-only snapshot, not an MPQ client. Exact inventory: handoff `wrath-legacy-apis/auction-catalog-gap.json`.
+- [ ] Auction data gap is resolved by supplied, authenticated DBCs; native API producer GREEN remains pending. The earlier UI-only Gethe cache and modern name constants were not used as a substitute catalog.
 - [ ] INFERRED arrow lifetime: retain handles in the environment; globals are not used as ownership. Native lifetime/forged identities remain unestablished. Model path uses the supplied `MinimapArrow.mdx` name only, not an inferred directory prefix.
 - [ ] INFERRED Calendar default: active player and expansion 2; native initialization unproved. Reuses existing `world.guild_ranks`, not fabricated rank content. Loaded FrameXML GlobalStrings supplies labels; missing labels/invalid supplied expansion are explicit model errors, not claimed native malformed-state behavior.
 - [ ] Profession subclass/inventory catalog absent. Existing Mists subclass/inventory getters return zero values; modern blacksmithing recipes lack native subclass flags/inventory masks. Positive selection, missing-on/off validation after valid selection, bit toggles/exclusivity, and recipe recomputation remain held, not approximated.
 - [ ] INFERRED native guild cache lifecycle: presumably cleared on leaving a guild; unestablished. This wrapper does not repair inconsistent guild membership/rank state.
-- [ ] Stock Wrath/Retail startup and Retail preservation gates pending.
+- [x] Initial slice: stock Wrath/Retail startup both `[]`, Retail direct plus five consumers 6/6 pass, six successful build/check phases emit zero warnings, and fmt passes. See handoff `initial-proof-complete.json`. These receipts predate the auction/follow-up implementation.
 
 ## Out of scope
 
