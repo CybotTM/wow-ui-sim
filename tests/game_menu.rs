@@ -11,6 +11,7 @@ fn menu_button_chunk(code: &str) -> String {
     let prefix = if cfg!(feature = "client-wrath") {
         r#"
         local menu_options_label = VIDEOOPTIONS_MENU
+        local function menu_button_index(_, index) return index end
         local function menu_buttons()
             local buttons = {
                 GameMenuButtonOptions, GameMenuButtonSoundOptions,
@@ -28,6 +29,7 @@ fn menu_button_chunk(code: &str) -> String {
     } else {
         r#"
         local menu_options_label = "Options"
+        local function menu_button_index(button) return button.layoutIndex end
         local function menu_buttons()
             return GameMenuFrame.buttonPool:EnumerateActive()
         end
@@ -315,7 +317,7 @@ fn test_game_menu_button_positions_vertical_layout() {
             .eval(&menu_button_chunk(r#"
                 local buttons = {}
                 for btn in menu_buttons() do
-                    table.insert(buttons, {idx = btn.layoutIndex or (#buttons + 1), top = btn:GetTop()})
+                    table.insert(buttons, {idx = menu_button_index(btn, #buttons + 1), top = btn:GetTop()})
                 end
                 table.sort(buttons, function(a, b) return a.idx < b.idx end)
 
