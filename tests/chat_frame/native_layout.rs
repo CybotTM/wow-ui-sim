@@ -24,5 +24,8 @@ fn wrath_chat_preparation_preserves_native_layout_and_editbox_state() {
         env.apply_post_load_workarounds();
         let post_load: String = env.eval(snapshot).expect("post-load chat surface");
         assert_eq!(post_load, native, "post-load chat activation must preserve native chat surface");
+        env.apply_post_event_workarounds();
+        let post_event: String = env.eval(snapshot).expect("post-event chat surface");
+        assert_eq!(post_event, native, "post-event chat activation must preserve native chat surface");
     }
 }
