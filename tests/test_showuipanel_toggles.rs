@@ -369,6 +369,7 @@ fn collections_mount_list_count_matches_displayed_mount_count() {
         let env = setup_env();
         if cfg!(feature = "client-wrath") {
             // Legacy eligibility is explicit host input, separate from journal ownership.
+            #[cfg(feature = "client-wrath")]
             {
                 let mut state = env.state().borrow_mut();
                 assert!(state.world.mounts.len() >= 2, "two catalog mounts for native fixture");
