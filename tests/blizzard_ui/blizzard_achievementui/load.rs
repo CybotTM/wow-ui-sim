@@ -1,8 +1,8 @@
 //! Load contracts for current retail `Blizzard_AchievementUI`.
 //!
 //! The active profile's `Blizzard_AchievementUI` TOC loads on demand in
-//! the mainline game client and declares `Blizzard_FrameXMLUtil`
-//! plus optional `Blizzard_Plunderstorm`. Its bootstrap precedes the Lua, XML,
+//! the mainline game client and declares `Blizzard_FrameXMLUtil`.
+//! Its Plunderstorm dependency is game-type-filtered. Its bootstrap precedes the Lua, XML,
 //! and localization files.
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
@@ -77,7 +77,8 @@ fn achievement_ui_load_emits_no_lane_specific_lua_errors() {
     });
 }
 
-const CURRENT_TOC_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil", "Blizzard_Plunderstorm"];
+// `## Dep: Blizzard_Plunderstorm [AllowLoadGameType plunderstorm]` is excluded.
+const CURRENT_TOC_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil"];
 const PANEL_ADDON_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil"];
 const STANDARD_GAME_TYPE_FILTERED_DEPENDENCIES: &[&str] = &["Blizzard_Plunderstorm"];
 const CLOSURE_LOADED_ADDONS: &[&str] = &[ROOT];

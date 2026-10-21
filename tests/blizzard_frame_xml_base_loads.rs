@@ -90,14 +90,16 @@ fn blizzard_frame_xml_base_mainline_toc_is_eager_with_two_deps_and_allow_load_ga
 
     let toc_text =
         std::fs::read_to_string(frame_xml_base_toc()).expect("Blizzard_FrameXMLBase TOC read");
-    assert!(
-        toc_text.contains("## DefaultState: enabled"),
-        "Blizzard_FrameXMLBase declares `## DefaultState: enabled` so it is not opt-in"
+    assert_eq!(
+        toc.metadata.get("DefaultState"),
+        None,
+        "Blizzard_FrameXMLBase omits DefaultState in the current Retail TOC"
     );
-    assert!(
-        toc_text.contains("## AllowLoad: Game"),
-        "Blizzard_FrameXMLBase declares `## AllowLoad: Game` — base FrameXML constants \
-         and mixins are only valid in the in-world game UI, not the glue/login screens"
+    assert!(toc.default_enabled(), "Absent DefaultState defaults to enabled");
+    assert_eq!(
+        toc.metadata.get("AllowLoad"),
+        None,
+        "Blizzard_FrameXMLBase omits AllowLoad; the loader defaults it to Game"
     );
     assert!(
         !toc_text.contains("## LoadFirst"),
