@@ -1,5 +1,8 @@
 //! P6 uses original meter OnEnter and real TooltipDataHandler, independent of P3.
-#![cfg(all(feature = "retail-12-0-5", feature = "profile-retail"))]
+#![cfg(all(
+    feature = "retail-12-0-5",
+    any(feature = "profile-retail", feature = "client-ptr")
+))]
 
 #[path = "tooltip_full_env_helpers.rs"]
 mod tooltip_full_env_helpers;

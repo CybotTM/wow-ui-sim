@@ -1,5 +1,8 @@
 //! P3 numeric selectors: original meter consumers, not replacement providers.
-#![cfg(all(feature = "retail-12-0-5", feature = "profile-retail"))]
+#![cfg(all(
+    feature = "retail-12-0-5",
+    any(feature = "profile-retail", feature = "client-ptr")
+))]
 
 #[path = "tooltip_full_env_helpers.rs"]
 mod tooltip_full_env_helpers;
