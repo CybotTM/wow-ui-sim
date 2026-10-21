@@ -102,17 +102,17 @@ mod modern {
         env.exec(
             r#"
             local source = assert(__secureenv.AuraContainerPrivateMixin)
-            assert(type(source.OnLoad_Intrinsic) == 'function')
+            assert(type(source.OnLoad_Intrinsic) == 'function', 'secure AuraContainer OnLoad unavailable')
             local frame = Mixin(CreateFrame('Frame'), source)
             frame.unitToken = 'player'
             local received
             frame.OnUnitPrivateAuraUpdate = function(_, unit, info)
-                assert(unit == 'player'); received = info
+                assert(unit == 'player', 'original callback unit mismatch'); received = info
             end
             frame:OnLoad_Intrinsic()
             frame.privateAurasUpdateCallback:Register('player')
             C_UnitAurasPrivate._TriggerPrivateAuraUpdate('player', 'Private', {isFullUpdate=true})
-            assert(received.isFullUpdate == true)
+            assert(received.isFullUpdate == true, 'original callback did not receive updateInfo')
             frame.privateAurasUpdateCallback:Unregister()
             frame.privateAurasUpdateCallback:Unregister()
             assert(C_UnitAurasPrivate._TriggerPrivateAuraUpdate('player', 'Private', {}) == 0)

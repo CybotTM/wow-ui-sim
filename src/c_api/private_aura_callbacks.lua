@@ -41,7 +41,15 @@ end
 function C_UnitAurasPrivate._TriggerPrivateAuraUpdate(unitToken, privateSource, updateInfo)
     local fired = 0
     for _, callback in ipairs(callbacksByUnit[tostring(unitToken or "")] or {}) do
-        Invoke(callback, privateSource, CopyPayload(updateInfo))
+        local info = CopyPayload(updateInfo)
+        if type(callback) == "function" then
+            -- Retain the existing authored plain-function injection contract.
+            callback(privateSource, info)
+        else
+            -- Original AuraContainer and PrivateAuraUnitWatcher containers
+            -- consume updateInfo as their first argument, not privateSource.
+            callback:Invoke(info)
+        end
         fired = fired + 1
     end
     return fired

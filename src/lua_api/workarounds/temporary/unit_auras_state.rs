@@ -23,7 +23,9 @@ if modernGroupBuffSettings then
             C_UnitAuras._groupBuffVisualAlerts = type(alerts) == "table" and alerts or {}
         end
     end
+end
 
+if hiddenGroupBuffRead then
     if type(C_UnitAuras._hiddenGroupBuffs) ~= "table" then
         C_UnitAuras._hiddenGroupBuffs = {}
     end
@@ -32,7 +34,7 @@ if modernGroupBuffSettings then
             return C_UnitAuras._hiddenGroupBuffs
         end
     end
-    if rawget(C_UnitAuras, "SetHiddenGroupBuffs") == nil then
+    if modernGroupBuffSettings and rawget(C_UnitAuras, "SetHiddenGroupBuffs") == nil then
         function C_UnitAuras.SetHiddenGroupBuffs(hiddenBuffs)
             C_UnitAuras._hiddenGroupBuffs = type(hiddenBuffs) == "table" and hiddenBuffs or {}
         end
@@ -41,12 +43,13 @@ end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
-    let modern = cfg!(any(
+    let modern = cfg!(feature = "retail-12-1-0");
+    let hidden_read = cfg!(any(
         feature = "retail-12-1-0",
         feature = "client-wowforever"
     ));
     lua.exec(&format!(
-        "local modernGroupBuffSettings = {modern}\n{UNIT_AURAS_STATE_LUA}"
+        "local modernGroupBuffSettings = {modern}\nlocal hiddenGroupBuffRead = {hidden_read}\n{UNIT_AURAS_STATE_LUA}"
     ))?;
     Ok(())
 }

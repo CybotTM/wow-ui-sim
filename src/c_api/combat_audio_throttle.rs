@@ -1,6 +1,8 @@
 //! Shared combat-audio throttle settings, independent of playback or CVars.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut};
+use crate::lua_api::methods::borrow_state;
+#[cfg(feature = "retail-12-0-0")]
+use crate::lua_api::methods::borrow_state_mut;
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -8,7 +10,9 @@ use rilua::{LuaResult, Val};
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = super::ensure_namespace(state, "C_CombatAudioAlert")?;
     table_set_rust_fn_static(state, namespace, "GetThrottle", get_throttle)?;
-    table_set_rust_fn_static(state, namespace, "SetThrottle", set_throttle)
+    #[cfg(feature = "retail-12-0-0")]
+    table_set_rust_fn_static(state, namespace, "SetThrottle", set_throttle)?;
+    Ok(())
 }
 
 fn read_number(state: &LuaState, position: i32, name: &str) -> LuaResult<f64> {
@@ -32,6 +36,7 @@ fn get_throttle(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+#[cfg(feature = "retail-12-0-0")]
 fn set_throttle(state: &mut LuaState) -> LuaResult<u32> {
     let throttle_type = read_number(state, 1, "SetThrottle throttleType")? as i32;
     let value = read_number(state, 2, "SetThrottle newVal")?;
