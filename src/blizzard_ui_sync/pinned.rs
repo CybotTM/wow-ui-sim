@@ -194,6 +194,54 @@ mod tests {
     use super::*;
 
     #[test]
+    fn pinned_ptr_selects_exact_70424_source_identity() {
+        let selected = build().unwrap();
+        assert_eq!(selected.product, "wowt");
+        assert_eq!(selected.version, "12.1.7.70424");
+        assert_eq!(selected.build_key, "328e394e14935f6e1017674de430603e");
+        assert_eq!(selected.cdn_key, "ccc89ec4bcc03f6cc1cc1c7861d9ed0f");
+        assert_eq!(
+            selected.gethe_revision,
+            "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a"
+        );
+    }
+
+    #[cfg(feature = "casc")]
+    #[test]
+    fn pinned_ptr_rejects_manifest_index_mismatch() {
+        let mut selected: Build = serde_json::from_str(INDEX).unwrap();
+        selected.files.pop();
+        assert_eq!(
+            validate_entries(&selected).unwrap_err(),
+            "PTR content index does not match its path manifest"
+        );
+    }
+
+    #[test]
+    fn pinned_ptr_rejects_previous_69594_provenance() {
+        let dir = tempfile::tempdir().unwrap();
+        let old_identity = provenance()
+            .unwrap()
+            .contents()
+            .replace("product=wowt\n", "product=wowxptr\n")
+            .replace("version=12.1.7.70424\n", "version=12.1.5.69594\n")
+            .replace(
+                "328e394e14935f6e1017674de430603e",
+                "4a9973f37906f8cfb344f8a9fe6777e0",
+            )
+            .replace(
+                "ccc89ec4bcc03f6cc1cc1c7861d9ed0f",
+                "3aa83893a3ce9b722a5f51328ad9a552",
+            )
+            .replace(
+                "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a",
+                "49b69918fcdc77e109813281e4f537d45ec7dcbf",
+            );
+        std::fs::write(dir.path().join(super::super::PROVENANCE_FILE), old_identity).unwrap();
+        assert!(!cache_matches(dir.path()));
+    }
+
+    #[test]
     fn pinned_ptr_rejects_legacy_provenance_and_accepts_exact_identity() {
         let dir = tempfile::tempdir().unwrap();
         std::fs::write(
