@@ -39,6 +39,32 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_button_click_writes_selected_name() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::load_and_assert_native(
+            r#"
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha', 'F09Beta')
+AutoCompleteButton_OnClick(AutoCompleteButton2)
+assert(F09EditBox:GetText() == 'F09Beta')
+assert(F09EditBox:GetCursorPosition() == 7)
+assert(not AutoCompleteBox:IsShown())
+F09EditBox:SetText('/whisper F09 hello')
+F09EditBox.autoCompleteRegex = '(/whisper )([^ ]+)(.*)'
+F09EditBox.autoCompleteFormatRegex = '%2$s%1$s%4$s'
+AutoCompleteButton_OnClick(AutoCompleteButton1)
+assert(F09EditBox:GetText() == '/whisper F09Alpha hello')
+F09EditBox:SetText('/whisper F09')
+F09EditBox.addSpaceToAutoComplete = true
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha', 'F09Beta')
+AutoCompleteButton_OnClick(AutoCompleteButton2)
+local expectedText = '/whisper F09Beta '
+assert(F09EditBox:GetText() == expectedText)
+assert(F09EditBox:GetCursorPosition() == strlen(expectedText))
+assert(not AutoCompleteBox:IsShown())
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

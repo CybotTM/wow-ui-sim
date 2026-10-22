@@ -87,6 +87,21 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_update_results_shows_matching_buttons() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::load_and_assert_native(
+            r#"
+AutoComplete_Update(F09EditBox, 'F09A', 4)
+assert(AutoCompleteBox:IsShown())
+assert(AutoCompleteBox.parent == F09EditBox)
+assert(AutoComplete_GetNumResults(AutoCompleteBox) == 1)
+assert(AutoComplete_GetSelectedIndex(AutoCompleteBox) == 0)
+assert(AutoCompleteButton1:GetText() == 'F09Alpha')
+for i=2,5 do assert(not _G['AutoCompleteButton'..i]:IsShown()) end
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
@@ -110,6 +125,19 @@ fn blizzard_auto_complete_update_results_shows_matching_buttons() {
 
 #[test]
 fn blizzard_auto_complete_update_results_uses_continued_indicator() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::load_and_assert_native(
+            r#"
+AutoComplete_Update(F09EditBox, 'F09', 3)
+assert(AutoCompleteButton5:IsShown())
+assert(AutoCompleteButton5:GetText() == CONTINUED)
+assert(not AutoCompleteButton5:IsEnabled())
+assert(AutoComplete_GetNumResults(AutoCompleteBox) == 4)
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
