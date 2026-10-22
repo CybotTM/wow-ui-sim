@@ -22,6 +22,7 @@ pub(crate) mod prefork_process;
 mod timeout_reexec;
 pub(crate) mod workload_gate;
 mod workload_gate_core;
+pub mod wrath_achievement_fixtures;
 pub mod wrath_watch_fixture;
 
 use std::ops::Deref;

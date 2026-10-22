@@ -598,7 +598,8 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-7")]
     pub quest_short_expiration_warnings: HashSet<u32>,
     pub abandon_quest_id: Option<u32>,
-    pub tracked_achievements: HashSet<i32>,
+    /// Unique tracked IDs in insertion order, shared by legacy tracking globals.
+    pub tracked_achievements: Vec<i32>,
     /// Supplied legacy trainer visibility: available, unavailable, used.
     #[cfg(feature = "client-wrath")]
     pub wrath_trainer_filters: [bool; 3],

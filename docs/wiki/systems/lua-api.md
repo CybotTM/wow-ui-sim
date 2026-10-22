@@ -3,6 +3,10 @@
 The Lua API layer bridges Lua addon code with the Rust simulation engine. It provides WoW-compatible globals, 300+ frame methods, C_* namespaces, and a timer system — all backed by `WowLuaEnv` and `SimState`.
 
 
+## Wrath tracked achievements
+
+`SimState.tracked_achievements` stores unique IDs in insertion order. Existing shared setters retain membership behavior; only the existing Wrath registration module publishes native add/remove/count/membership functions. Mutations release the state borrow before synchronous event dispatch, so original AchievementUI handlers see the updated list and refresh their private cache. The [12340 contract](../../specs/wrath-tracked-achievements.md) owns argument/event rules, evidence limits and bounded proof; persistence is excluded.
+
 ## C API numeric-secret selector boundaries
 
 Classification endpoints in `src/c_api/c_spell_classification.rs` inspect authentic numeric-secret selectors only inside their modeled host lookup. The shared public spell reader and VM unwrap permissions remain unchanged; ExternalDefensive keeps VM authentication. [Classification contract](../../specs/secret-selector-classification.md) owns endpoint scope, inferred output policy and revision-scoped proof. Original-consumer wrapper injection is not evidence of natural secret-ID production at startup.

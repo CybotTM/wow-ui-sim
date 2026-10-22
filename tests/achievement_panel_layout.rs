@@ -178,6 +178,28 @@ const ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA: &str = r#"
 #[test]
 #[cfg(feature = "gui")]
 fn achievement_frame_layout_stays_locked() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        A_Admin.SetAchievementEarned(6, true)
+        ToggleAchievementFrame()
+        assert(AchievementFrame:IsShown())
+        assert(AchievementFrame:GetWidth() == 768 and AchievementFrame:GetHeight() == 500)
+        assert(AchievementFrameHeader:GetWidth() == 726 and AchievementFrameHeader:GetHeight() == 106)
+        assert(AchievementFrameSummary:GetWidth() == 530)
+        assert(AchievementFrameCategoriesContainer:GetObjectType() == "ScrollFrame")
+        assert(AchievementFrameCategoriesContainer.buttons[1]:IsVisible())
+        local point, relative, relativePoint, x, y = AchievementFrameHeader:GetPoint(1)
+        assert(point == "BOTTOMLEFT" and relative == AchievementFrame and relativePoint == "TOPLEFT")
+        assert(x == 26 and y == -39)
+        assert(AchievementFrameSummary:IsVisible())
+        assert(not AchievementFrameAchievements:IsShown())
+        assert(not AchievementFrameStats:IsShown() and not AchievementFrameComparison:IsShown())
+        assert(AchievementFrameBackground:GetWidth() == 736 and AchievementFrameBackground:GetHeight() == 468)
+        assert(AchievementFrame.selectedTab == 1)
+        "#,
+    ) {
+        return;
+    }
     test_timeout! {
         let env = common::panel_fixtures::setup_env();
         let result: String = env.eval(ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA).unwrap();
@@ -191,6 +213,23 @@ fn achievement_frame_layout_stays_locked() {
 #[test]
 #[cfg(feature = "gui")]
 fn achievement_summary_empty_text_does_not_overlap_summary_entries() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        A_Admin.SetAchievementEarned(6, true)
+        ToggleAchievementFrame()
+        local empty = assert(AchievementFrameSummaryAchievementsEmptyText)
+        local first = assert(AchievementFrameSummaryAchievement1)
+        if empty:IsVisible() and first:IsVisible() then
+            local overlapX = empty:GetLeft() < first:GetRight() and empty:GetRight() > first:GetLeft()
+            local overlapY = empty:GetBottom() < first:GetTop() and empty:GetTop() > first:GetBottom()
+            assert(not (overlapX and overlapY), "native empty text overlaps first summary entry")
+        end
+        AchievementFrameSummary_UpdateAchievements(6)
+        assert(not empty:IsShown() and first:IsShown())
+        "#,
+    ) {
+        return;
+    }
     test_timeout! {
         let env = common::panel_fixtures::setup_env();
         let result: String = env
@@ -231,6 +270,24 @@ fn achievement_summary_empty_text_does_not_overlap_summary_entries() {
 #[test]
 #[cfg(feature = "gui")]
 fn achievement_frame_toggle_hides_visible_panel_tree() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        A_Admin.SetAchievementEarned(6, true)
+        ToggleAchievementFrame()
+        assert(AchievementFrame:IsShown() and AchievementFrameSummary:IsVisible())
+        ToggleAchievementFrame()
+        assert(not AchievementFrame:IsShown())
+        local function assert_hidden_tree(frame)
+            for _, child in ipairs({frame:GetChildren()}) do
+                assert(not child:IsVisible(), child:GetName() or "anonymous visible child")
+                assert_hidden_tree(child)
+            end
+        end
+        assert_hidden_tree(AchievementFrame)
+        "#,
+    ) {
+        return;
+    }
     test_timeout! {
         let env = common::panel_fixtures::setup_env();
         let result: String = env

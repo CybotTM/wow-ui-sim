@@ -206,6 +206,25 @@ const FAKE_ROW_BUILDER: &str = r#"
 
 #[test]
 fn collapse_writes_constant_collapsed_height_swaps_texture_via_helper_and_is_idempotent() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local row = CreateFrame("Button", "F08Style", AchievementFrameAchievements, "AchievementTemplate")
+        row:Expand(150)
+        assert(not row.collapsed and row:GetHeight() == 150)
+        row:Collapse()
+        assert(row.collapsed and row:GetHeight() == ACHIEVEMENTBUTTON_COLLAPSEDHEIGHT)
+        assert(not row.tracked:IsShown())
+        row:Collapse()
+        assert(row:GetHeight() == ACHIEVEMENTBUTTON_COLLAPSEDHEIGHT)
+        local tlx, tly, blx, bly, trx, try, brx, bry = F08StyleBackground:GetTexCoord()
+        local expectedTop = 1 - ACHIEVEMENTBUTTON_COLLAPSEDHEIGHT / 256
+        assert(tlx == 0 and blx == 0 and trx == 1 and brx == 1)
+        assert(math.abs(tly - expectedTop) < 0.001 and math.abs(try - expectedTop) < 0.001)
+        assert(bly == 1 and bry == 1)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: CollapseProbe = env
             .eval(&format!(
@@ -328,6 +347,21 @@ fn collapse_writes_constant_collapsed_height_swaps_texture_via_helper_and_is_ide
 #[test]
 fn expand_uses_height_parameter_directly_floors_to_guild_min_height_and_is_idempotent_at_target_height()
  {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local row = CreateFrame("Button", "F08Style", AchievementFrameAchievements, "AchievementTemplate")
+        row:Expand(150)
+        assert(not row.collapsed and row:GetHeight() == 150)
+        -- Wrath has no guild minimum: a repeat expand is ignored until collapse.
+        row:Expand(220)
+        assert(row:GetHeight() == 150)
+        row:Collapse()
+        row:Expand(220)
+        assert(row:GetHeight() == 220)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: ExpandProbe = env
             .eval(&format!(

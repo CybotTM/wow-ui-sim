@@ -106,6 +106,17 @@ type CriteriaUpdateProbe = (String, String, String, String, i64, bool, bool, boo
 
 #[test]
 fn criteria_update_event_routes_on_event_into_on_criteria_update_which_no_ops_without_selection() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        AchievementFrameAchievements.selection = nil
+        AchievementFrameAchievementsObjectives.id = 6
+        AchievementFrameAchievements_OnEvent(AchievementFrameAchievements, "CRITERIA_UPDATE")
+        assert(AchievementFrameAchievementsObjectives.id == nil)
+        assert(AchievementFrameAchievements.selection == nil)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let setup_ok: bool = env
             .eval(

@@ -1,3 +1,7 @@
+## [2026-10-21] source | Wrath tracked achievements
+
+Added [tracking model notes](systems/lua-api.md#wrath-tracked-achievements) and [contract](../specs/wrath-tracked-achievements.md), separating authenticated 12340 static facts from INFERRED cached-consumer expectations. Current-source Wrath RED54 and Retail72+4 baseline precede the producer. Final merged proof: Wrath54+5 PASS, Retail76 statuses/failures unchanged, both stock arrays empty, warning-free check and formatting PASS. Supplemental public-API zero-ID RED precedes its correction; ten existing compile-gated rows are not counted as executed.
+
 ## [2026-10-21] source | Wrath positional guild rights
 
 [Projection notes](systems/lua-api.md#wrath-guild-rank-rights) and [contract](../specs/wrath-guild-rank-flags.md) record original native checkbox RED and the bounded Wrath-only positional correction. The contract records native-consumer and guild-model GREEN, paired Retail preservation with unchanged pre-existing fixture failures, and empty stock Lua-error arrays under both profiles.

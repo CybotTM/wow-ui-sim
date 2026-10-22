@@ -178,6 +178,19 @@ type CategoryDefaultProbe = (
 
 #[test]
 fn select_default_element_data_calls_scroll_to_index_one_align_center_and_forwards_result() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        AchievementFrame_ToggleAchievementFrame()
+        local button = assert(AchievementFrameCategoriesContainer.buttons[1])
+        AchievementCategoryButton_OnClick(button)
+        assert(button.element.id == "summary" and button.isSelected)
+        assert(achievementFunctions.selectedCategory == "summary")
+        assert(AchievementFrameSummary:IsShown())
+        assert(not AchievementFrameAchievements:IsShown())
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let setup_ok: bool = env
             .eval(

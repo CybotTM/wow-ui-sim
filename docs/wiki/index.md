@@ -2,6 +2,10 @@
 
 [Fixture/query diagnosis](investigations/wrath-autocomplete-fixture.md) links the [bounded contract](../specs/wrath-autocomplete-results.md): original-consumer RED, native callback/result oracles and the Wrath-only legacy argument/string-result boundary. Original33 native cases plus six added boundaries pass; Retail67 passes before/after, both stock arrays are empty and checks warn zero. Modern-only26 targets remain report-only plus one glue evidence gap; guild/presence identity, recency and UTF-8 edges are held.
 
+## [2026-10-21] source | Wrath tracked achievements
+
+[Tracking model](systems/lua-api.md#wrath-tracked-achievements) links the [12340 contract](../specs/wrath-tracked-achievements.md): ordered unique IDs, duplicate-add events and synchronous native consumers. Current-source RED precedes the producer; merged-source Wrath54 and five shared-model controls pass. Retail72+4 retains identical statuses and existing failures; both stock captures are empty, check/fmt pass. Persistence and ten pre-existing compile-gated Wrath rows remain excluded.
+
 ## [2026-10-21] source | Wrath positional guild rights
 
 [Legacy projection](systems/lua-api.md#wrath-guild-rank-rights) links the [12340 contract](../specs/wrath-guild-rank-flags.md): the original checkbox consumer exposes the table/positional mismatch. The Wrath-only correction has native-consumer and guild-model GREEN plus paired Retail preservation of the existing namespace/table path. The contract distinguishes retained fixture failures and unmodeled lifecycle semantics.
