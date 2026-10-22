@@ -12,6 +12,7 @@ fn load_native_auction() -> WowLuaEnv {
         r#"
         local loaded, reason = C_AddOns.LoadAddOn("Blizzard_AuctionUI")
         assert(loaded, tostring(reason))
+        A_Admin.ClearAuctionBrowseResults()
         assert(AuctionFrame and AuctionFrameBrowse and AuctionFrameBid and AuctionFrameAuctions, "AuctionFrame and AuctionFrameBrowse and AuctionFrameBid and AuctionFrameAuctions")
         assert(AuctionFrameBrowse.page == 0, "AuctionFrameBrowse.page == 0")
         assert(AuctionFrameBid.page == 0, "AuctionFrameBid.page == 0")

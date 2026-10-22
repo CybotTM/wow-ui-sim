@@ -99,6 +99,10 @@ fn load_show_hide_prerequisites(env: &wow_ui_sim::lua_api::WowLuaEnv) {
 }
 
 fn load_auction_house_through_runtime(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    if cfg!(feature = "client-wrath") {
+        env.exec("A_Admin.ClearAuctionBrowseResults()")
+            .expect("isolate native auction visibility from modern sample rows");
+    }
     let (loaded, reason): (bool, Option<String>) = env
         .eval(&format!(r#"return C_AddOns.LoadAddOn("{ROOT}")"#))
         .expect("C_AddOns.LoadAddOn should return");
