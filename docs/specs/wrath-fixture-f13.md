@@ -6,6 +6,7 @@ Bounded native TOC/discovery and test-owned loader specimens. The 27 original re
 
 - [ ] Preserve the original 27 tests, their assertions, and Retail results.
 - [ ] Use original shipped Wrath FrameXML in committed TOC order for native consumers.
+- [ ] Exercise original TimeManager/AchievementUI consumers on both profiles and original TradeSkillUI on Wrath after native core prerequisites. Shipped Wrath TOCs declare LoD and no dependencies; simulator execution is not native-client loader proof.
 - [ ] Exercise generic empty-body registration, scope discovery, dependency accumulation, and file environment metadata with explicitly test-owned specimens.
 - [ ] Keep modern-only consumers enabled and report their observed failures separately.
 
