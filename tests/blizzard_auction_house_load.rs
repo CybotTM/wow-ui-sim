@@ -1,24 +1,28 @@
 use crate::common;
 
-use common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
+use common::auction_fixtures::with_auction_ui;
 use common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};
 
-const ROOT: &str = "Blizzard_AuctionHouseUI";
+const ROOT: &str = if cfg!(feature = "client-wrath") {
+    "Blizzard_AuctionUI"
+} else {
+    "Blizzard_AuctionHouseUI"
+};
 
 #[test]
 fn blizzard_auction_house_ui_lod_loads_without_ingestion_errors() {
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
-            with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
+            with_auction_ui(|env| {
                 clear_recorded_lua_errors(env);
 
                 let (loaded, reason): (bool, Option<String>) = env
-                    .eval(r#"return C_AddOns.LoadAddOn("Blizzard_AuctionHouseUI")"#)
+                    .eval(&format!(r#"return C_AddOns.LoadAddOn("{ROOT}")"#))
                     .expect("C_AddOns.LoadAddOn should return");
                 assert!(loaded, "`{ROOT}` should load: {reason:?}");
 
                 let is_loaded: bool = env
-                    .eval(r#"return C_AddOns.IsAddOnLoaded("Blizzard_AuctionHouseUI")"#)
+                    .eval(&format!(r#"return C_AddOns.IsAddOnLoaded("{ROOT}")"#))
                     .expect("C_AddOns.IsAddOnLoaded should return");
                 assert!(
                     is_loaded,
