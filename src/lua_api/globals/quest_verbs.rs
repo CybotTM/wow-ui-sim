@@ -307,9 +307,12 @@ fn set_tracked_achievement(state: &mut LuaState) -> LuaResult<u32> {
     let tracked = stack_bool(state, 2).unwrap_or(true);
     let mut st = borrow_state_mut(state)?;
     if tracked {
-        st.tracked_achievements.insert(id);
+        if !st.tracked_achievements.contains(&id) {
+            st.tracked_achievements.push(id);
+        }
     } else {
-        st.tracked_achievements.remove(&id);
+        st.tracked_achievements
+            .retain(|tracked_id| *tracked_id != id);
     }
     Ok(0)
 }
@@ -319,7 +322,9 @@ fn untrack_achievement(state: &mut LuaState) -> LuaResult<u32> {
     let Some(id) = stack_i32(state, 1) else {
         return Ok(0);
     };
-    borrow_state_mut(state)?.tracked_achievements.remove(&id);
+    borrow_state_mut(state)?
+        .tracked_achievements
+        .retain(|tracked_id| *tracked_id != id);
     Ok(0)
 }
 

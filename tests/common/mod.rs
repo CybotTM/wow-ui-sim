@@ -15,12 +15,14 @@ pub mod blizzard_addon_manifest;
 mod event_helpers;
 pub mod game_menu_fixture;
 pub mod panel_fixtures;
+pub mod wrath_autocomplete;
 #[cfg(target_os = "linux")]
 pub(crate) mod prefork_process;
 #[cfg(target_os = "linux")]
 mod timeout_reexec;
 pub(crate) mod workload_gate;
 mod workload_gate_core;
+pub mod wrath_achievement_fixtures;
 pub mod wrath_watch_fixture;
 
 use std::ops::Deref;
@@ -360,6 +362,7 @@ const _: () = {
     let _ = std::mem::size_of::<LockedEnv>();
     let _ = lock_env as fn(EnvBuilder) -> LockedEnv;
     let _ = env_with_shared_xml as fn() -> WowLuaEnv;
+    let _ = wrath_autocomplete::load_and_assert_native as fn(&'static str);
     let _ = wrath_watch_fixture::seed_watch_quests as fn(&WowLuaEnv);
     let _ = template_child_name as fn(&str, &str) -> String;
     let _ = fire_addon_loaded as fn(&WowLuaEnv, &str);

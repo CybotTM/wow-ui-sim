@@ -119,6 +119,18 @@ type ComparisonSetProbe = (String, String, String, String, String, bool, bool);
 
 #[test]
 fn display_comparison_shows_frame_directly_and_reaches_set_unit_via_proxy_wrapper() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        AchievementFrame_DisplayComparison("player")
+        assert(AchievementFrame:IsShown() and AchievementFrameComparison:IsShown())
+        assert(AchievementFrameComparisonHeaderPortrait.unit == "player")
+        assert(AchievementFrameComparisonHeaderName:GetText() == UnitName("player"))
+        assert(AchievementFrameComparisonHeaderPoints:GetText() == tostring(GetComparisonAchievementPoints()))
+        assert(AchievementFrame:GetWidth() == 890)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: ComparisonSetProbe = env
             .eval(

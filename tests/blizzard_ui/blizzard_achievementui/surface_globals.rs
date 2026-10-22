@@ -107,6 +107,17 @@ const PLAN_NAMED_ACHIEVEMENT_ROW_ABSENT: &[&str] = &[
 
 #[test]
 fn achievement_frame_plan_named_globals_are_functions() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        for _, name in ipairs({"AchievementFrame_OnLoad", "AchievementFrame_ToggleAchievementFrame", "AchievementFrame_DisplayComparison", "AchievementFrame_ForceUpdate", "AchievementFrameBaseTab_OnClick", "AchievementFrameComparisonTab_OnClick"}) do
+            assert(type(_G[name]) == "function", name)
+        end
+        AchievementFrame_OnLoad(AchievementFrame)
+        assert(AchievementFrame.selectedTab == 1 and AchievementFrame.numTabs == 2)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         for name in PLAN_NAMED_FRAME_GLOBALS {
             let is_function = env
@@ -170,6 +181,17 @@ fn achievement_frame_plan_named_globals_are_functions() {
 ///   matches the OnLoad declaration's formatting; the parser doesn't care.
 #[test]
 fn achievement_frame_categories_plan_named_globals_are_functions() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        for _, name in ipairs({"AchievementFrameCategories_OnLoad", "AchievementFrameCategories_GetCategoryList", "AchievementFrameCategories_Update", "AchievementCategoryButton_OnClick"}) do
+            assert(type(_G[name]) == "function", name)
+        end
+        AchievementFrameCategories_GetCategoryList(ACHIEVEMENTUI_CATEGORIES)
+        assert(ACHIEVEMENTUI_CATEGORIES[1].id == "summary")
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         for name in PLAN_NAMED_CATEGORIES_GLOBALS {
             let is_function = env
@@ -245,6 +267,19 @@ fn achievement_frame_categories_plan_named_globals_are_functions() {
 ///   `ScrollBox:SetDataProvider(newDataProvider)` at the end. Zero-arg.
 #[test]
 fn achievement_frame_achievements_plan_named_globals_are_functions() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        for _, name in ipairs({"AchievementFrameAchievements_OnLoad", "AchievementFrameAchievements_OnEvent", "AchievementFrameAchievements_Update", "AchievementFrameAchievements_ForceUpdate"}) do
+            assert(type(_G[name]) == "function", name)
+        end
+        AchievementFrameAchievements.selection = nil
+        AchievementFrameAchievementsObjectives.id = 6
+        AchievementFrameAchievements_OnEvent(AchievementFrameAchievements, "CRITERIA_UPDATE")
+        assert(AchievementFrameAchievementsObjectives.id == nil)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         for name in PLAN_NAMED_ACHIEVEMENTS_GLOBALS {
             let is_function = env
@@ -334,6 +369,18 @@ fn achievement_frame_achievements_plan_named_globals_are_functions() {
 /// signal to re-read the new structure and update the spec).
 #[test]
 fn achievement_frame_comparison_plan_named_globals_split_presence_absence() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(type(AchievementFrameComparison_Update) == "function")
+        assert(type(AchievementFrameComparison_UpdateStatusBars) == "function")
+        assert(AchievementFrameComparison_OnInspectReady == nil)
+        AchievementFrameComparison_UpdateStatusBars(92)
+        local total, completed = GetCategoryNumAchievements(92)
+        assert(AchievementFrameComparisonSummaryPlayerStatusBar.text:GetText() == completed.."/"..total)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         for name in PLAN_NAMED_COMPARISON_PRESENT {
             let probe = format!(r#"return type({name})"#);
@@ -437,6 +484,19 @@ fn achievement_frame_comparison_plan_named_globals_split_presence_absence() {
 /// signal to re-read the new structure and update the spec).
 #[test]
 fn achievement_row_plan_named_globals_split_presence_absence() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        for _, name in ipairs({"AchievementButton_OnClick", "AchievementButton_OnLoad", "AchievementButton_Collapse", "AchievementButton_Expand", "AchievementObjectives_DisplayCriteria"}) do
+            assert(type(_G[name]) == "function", name)
+        end
+        assert(AchievementButton_OnDoubleClick == nil)
+        local row = CreateFrame("Button", "F08SurfaceRow", AchievementFrameAchievements, "AchievementTemplate")
+        assert(row.label and row.icon and row.shield and row.plusMinus)
+        assert(row:GetScript("OnClick"))
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         for name in PLAN_NAMED_ACHIEVEMENT_ROW_PRESENT {
             let probe = format!(r#"return type({name})"#);

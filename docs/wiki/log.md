@@ -1,3 +1,7 @@
+## [2026-10-21] source | Wrath tracked achievements
+
+Added [tracking model notes](systems/lua-api.md#wrath-tracked-achievements) and [contract](../specs/wrath-tracked-achievements.md), separating authenticated 12340 static facts from INFERRED cached-consumer expectations. Current-source Wrath RED54 and Retail72+4 baseline precede the producer. Final merged proof: Wrath54+5 PASS, Retail76 statuses/failures unchanged, both stock arrays empty, warning-free check and formatting PASS. Supplemental public-API zero-ID RED precedes its correction; ten existing compile-gated rows are not counted as executed.
+
 ## [2026-10-21] source | Wrath positional guild rights
 
 [Projection notes](systems/lua-api.md#wrath-guild-rank-rights) and [contract](../specs/wrath-guild-rank-flags.md) record original native checkbox RED and the bounded Wrath-only positional correction. The contract records native-consumer and guild-model GREEN, paired Retail preservation with unchanged pre-existing fixture failures, and empty stock Lua-error arrays under both profiles.
@@ -2583,3 +2587,7 @@ Public-API tests reproduce a whole-link secrecy failure on Retail and PTR before
 ## 2026-10-20 — Bounded spell-link selector GREEN
 
 [[lua-api]] links Retail/PTR link GREEN, presentation/tooltip/glyph preservation and isolated stock Retail startup proof in the owning contract. Test-only observer corrections do not change the producer; native parity and downstream sinks remain excluded.
+
+## 2026-10-21 — Wrath autocomplete fixture and query boundary
+
+[Native fixture diagnosis](investigations/wrath-autocomplete-fixture.md) records valid original-consumer argument-width RED, direct-result PASS, a Wrath-only modeled global and preserved modern namespace. The initial small-mask probe's missing alias is excluded from producer RED; its corrected template-based consumer has separate RED→GREEN proof. The [contract](../specs/wrath-autocomplete-results.md) records original33/additional6 native passes, paired Retail67 preservation, empty stock arrays and warning-free checks while retaining modern/glue and identity/recency/UTF-8 gaps.
