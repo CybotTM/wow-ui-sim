@@ -378,6 +378,7 @@ const MAIN_ACTION_BAR_REGISTERED_EVENTS: &[&str] =
 #[test]
 fn main_action_bar_registers_action_bar_page_changed_and_neutral_faction_select_result_after_onload()
  {
+    wrath_action_case!(callbacks::main_events);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{MAIN_ACTION_BAR_FRAME_NAME:?}])"))

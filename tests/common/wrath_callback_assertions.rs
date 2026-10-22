@@ -134,7 +134,7 @@ pub fn multibar_identity() {
         for _, name in ipairs({"MultiBarBottomLeft", "MultiBarBottomRight", "MultiBarLeft", "MultiBarRight"}) do
             local bar = assert(_G[name])
             assert(bar:GetObjectType() == "Frame" and bar:GetParent() == UIParent)
-            assert(bar:GetScript("OnLoad"))
+            assert((bar:GetScript("OnLoad") ~= nil) == (name == "MultiBarLeft"), name.." native OnLoad ownership")
         end
     "#).unwrap();
 }
@@ -267,7 +267,7 @@ pub fn casting_delay_failure() {
         assert(bar.casting, "replacement cast did not start")
         assert(A_Admin.FailCasting(true))
         assert(not bar.casting and UnitCastingInfo("player") == nil)
-        assert(CastingBarFrameText:GetText() == INTERRUPTED)
+        assert(CastingBarFrameText:GetText() == "Flash of Light", "quiet STOP must not invent native interruption")
     "#,
     )
     .unwrap();
@@ -321,14 +321,14 @@ pub fn aura_duration() {
         handler(button, 0)
         local text = button.duration:GetText()
         handler(button, 0)
-        assert(button.duration:GetText() == text and button.duration:IsShown())
+        assert(button.duration:GetText() == text and button.duration:IsShown(), "settled native duration text")
         button.timeLeft = 30
         BuffFrame:GetScript("OnUpdate")(BuffFrame, 0.1)
         handler(button, 0)
-        assert(button.duration:GetText() == SecondsToTimeAbbrev(30))
+        assert(button.duration:GetText() == string.format(SecondsToTimeAbbrev(30)), "native format and argument must render together")
         local r, g, b = button.duration:GetTextColor()
         assert(r == HIGHLIGHT_FONT_COLOR.r and g == HIGHLIGHT_FONT_COLOR.g and b == HIGHLIGHT_FONT_COLOR.b)
-        assert(button:GetAlpha() == BuffFrame.BuffAlphaValue)
+        assert(button:GetAlpha() == BuffFrame.BuffAlphaValue, "native flashing alpha")
         SHOW_BUFF_DURATIONS = "0"
         handler(button, 0)
         assert(not button.duration:IsShown())
