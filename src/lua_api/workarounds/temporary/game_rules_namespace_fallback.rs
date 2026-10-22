@@ -51,7 +51,7 @@ mod tests {
                 if not C_GameRules.IsGameRuleActive("Hardcore") then
                     return "lost_rust_method"
                 end
-                if C_GameRules.IsHardcoreActive ~= nil then
+                if C_GameRules.NotAModeledRealmRule ~= nil then
                     return "fabricated_member"
                 end
                 if type(GameRulesUtil) ~= "table" then

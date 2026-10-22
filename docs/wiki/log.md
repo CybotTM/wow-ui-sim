@@ -10,6 +10,26 @@ Added [tracking model notes](systems/lua-api.md#wrath-tracked-achievements) and 
 
 [API ownership](systems/lua-api.md#factory-removal-social-inputs--2026-10-21) links tabard DTO projection and isolated temporary capability policies to their [contract](../specs/c-factory-m3-social-inputs.md). Original-consumer source equivalence and fresh Retail RED retained; integrated seven-profile targeted GREEN and the combined stock matrix are recorded in the owning specs, including unfixed residual scope.
 
+## [2026-10-21] proof | Owned C factory follow-up
+
+[Bounded follow-up proof](systems/c-factory-startup-followup.md#bounded-proof--2026-10-21) records 65 original-member cases, seven nil contracts, the single stock matrix, supplied-state checks, unchanged CVars and explicitly held cascades. Wrath stays empty; other profiles are not clean or merge-ready.
+
+## [2026-10-21] source | T6 named startup services
+
+[Factory follow-up](systems/c-factory-startup-followup.md#t6-service-inputs) links real console/activity adapters, named missing service systems and the still-unattributed Forever timer family; runtime proof pending.
+
+## [2026-10-21] source | M5 startup service/catalog inputs
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m5-service-and-catalog-inputs) links early owned-house requests, species-backed pet icons, valid-set catalog state and named battle/bank capability gaps; runtime proof pending.
+
+## [2026-10-21] source | M2 startup state adapters
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m2-state-adapters) links equipment/spellbook/action/availability state and three Forever-only temporary capabilities; runtime acceptance pending.
+
+## [2026-10-21] source | Named M1 startup conditions
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m1-conditions) records three explicitly temporary conditions, missing backing systems and profile scope; generated-contract and stock runtime proof remain pending.
+
 ## [2026-10-20] source | C namespace factory removal (F0)
 
 [Namespace diagnostics](systems/addon-loading.md#missing-c-members-f0-2026-10-20) now return nil without memoization. Housing merges explicit defaults without replacing metatables; three named handlers retain diagnostics only. [Contract](../specs/c-namespace-nil-members.md) retains strict/retired nil semantics and explicit state/actions. Five extracted Lua bodies have RED→GREEN under system Lua 5.4; the [frozen full-feature proof](../specs/c-namespace-nil-members.md#frozen-f0-proof) now owns simulator/profile results and M1–M5/T6 runtime gaps. Health gates still fail; one anonymous callback family's root remains unresolved rather than guessed.

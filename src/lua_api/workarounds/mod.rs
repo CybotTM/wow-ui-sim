@@ -209,6 +209,9 @@ fn apply_runtime_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::combat_log_state::apply_bootstrap(lua)?;
     temporary::encounter_state::apply_bootstrap(lua)?;
     temporary::housing_catalog_state::apply_bootstrap(lua)?;
+    temporary::housing_owned_house_requests::apply_bootstrap(lua)?;
+    #[cfg(feature = "client-wowforever")]
+    temporary::forever_bank_capability_defaults::apply_bootstrap(lua)?;
     temporary::house_exterior_debug::apply_bootstrap(lua)?;
     temporary::map_runtime_state::apply_bootstrap(lua)?;
     temporary::perks_activities_state::apply_bootstrap(lua)?;
@@ -342,9 +345,12 @@ fn apply_core_foundation_journal_defaults(lua: &mut rilua::Lua) -> crate::Result
 
 fn apply_core_foundation_state_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::pet_battle_runtime_state::apply_bootstrap(lua)?;
+    temporary::pet_battle_action_legality_defaults::apply_bootstrap(lua)?;
     temporary::settings_surface_defaults::apply_bootstrap(lua)?;
     temporary::tooltip_data_processor_defaults::apply_bootstrap(lua)?;
     temporary::tts_settings_defaults::apply_bootstrap(lua)?;
+    #[cfg(not(feature = "client-wrath"))]
+    temporary::startup_service_capability_defaults::apply_bootstrap(lua)?;
     temporary::ui_widget_manager_defaults::apply_bootstrap(lua)?;
     Ok(())
 }
@@ -369,6 +375,8 @@ fn apply_format_and_game_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::game_time_calendar_invites::apply_bootstrap(lua)?;
     temporary::gamepad_cursor_control_defaults::apply_bootstrap(lua)?;
     temporary::game_rules_namespace_fallback::apply_bootstrap(lua)?;
+    #[cfg(not(feature = "client-wrath"))]
+    temporary::startup_condition_capability_defaults::apply_bootstrap(lua)?;
     temporary::glue_character_select_defaults::apply_bootstrap(lua)?;
     temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
     temporary::inert_global_defaults::apply_bootstrap(lua)?;
@@ -379,6 +387,8 @@ fn apply_format_and_game_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
 fn apply_inventory_and_spell_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::dye_color_defaults::apply_bootstrap(lua)?;
     temporary::inventory_query_defaults::apply_bootstrap(lua)?;
+    #[cfg(feature = "client-wowforever")]
+    temporary::forever_startup_capabilities::apply_bootstrap(lua)?;
     temporary::item_button_helper_defaults::apply_bootstrap(lua)?;
     temporary::item_targeting_defaults::apply_bootstrap(lua)?;
     temporary::item_upgrade_availability_defaults::apply_bootstrap(lua)?;

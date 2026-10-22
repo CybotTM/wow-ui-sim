@@ -81,6 +81,10 @@ pub(crate) mod environment_cleanup_restore;
 pub(crate) mod equipment_set_lock_defaults;
 pub(crate) mod event_scheduler_state;
 pub(crate) mod fog_of_war_pin;
+#[cfg(feature = "client-wowforever")]
+pub(crate) mod forever_bank_capability_defaults;
+#[cfg(feature = "client-wowforever")]
+pub(crate) mod forever_startup_capabilities;
 pub(crate) mod formatting_utility_defaults;
 pub(crate) mod frame_helper_defaults;
 pub(crate) mod game_rules_namespace_fallback;
@@ -95,6 +99,7 @@ pub(crate) mod guild_info_namespace_fallback;
 pub(crate) mod house_exterior_debug;
 pub(crate) mod housing_catalog_state;
 pub(crate) mod housing_dashboard_preload;
+pub(crate) mod housing_owned_house_requests;
 pub(crate) mod inert_global_defaults;
 pub(crate) mod inventory_query_defaults;
 pub(crate) mod item_button_helper_defaults;
@@ -138,6 +143,7 @@ pub(crate) mod patch_12_1_inert_defaults;
 pub(crate) mod performance_metric_defaults;
 pub(crate) mod perks_activities_state;
 pub(crate) mod perks_program_defaults;
+pub(crate) mod pet_battle_action_legality_defaults;
 pub(crate) mod pet_battle_runtime_state;
 pub(crate) mod ping_defaults;
 pub(crate) mod player_location_defaults;
@@ -177,7 +183,11 @@ pub(crate) mod spell_book_static_defaults;
 pub(crate) mod spell_metadata_defaults;
 pub(crate) mod spell_static_defaults;
 pub(crate) mod spell_target_defaults;
+#[cfg(not(feature = "client-wrath"))]
+pub(crate) mod startup_condition_capability_defaults;
 pub(crate) mod startup_namespace_defaults;
+#[cfg(not(feature = "client-wrath"))]
+pub(crate) mod startup_service_capability_defaults;
 pub(crate) mod startup_windows;
 pub(crate) mod static_model_info_defaults;
 pub(crate) mod static_popup_defaults;

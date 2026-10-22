@@ -275,7 +275,6 @@ pub struct SimState {
     pub outfit_situations_enabled: bool,
     /// Explicit filter values only; native defaults and set filtering are unmodeled.
     pub transmog_set_filters: HashMap<i32, bool>,
-    #[cfg(feature = "retail-12-0-0")]
     pub transmog_sets: crate::c_api::c_transmog_sets::TransmogSets,
     #[cfg(feature = "retail-12-0-0")]
     pub transmog_custom_sets: crate::c_api::c_transmog_collection::CustomSets,
@@ -439,7 +438,6 @@ pub struct SimState {
     pub cooldown_viewer_cooldowns:
         std::collections::BTreeMap<i32, crate::c_api::c_cooldown_viewer::CooldownViewerCooldown>,
     /// Explicit supplied availability; independent of cooldown catalog and UI settings.
-    #[cfg(feature = "retail-12-0-0")]
     pub cooldown_viewer_availability: crate::c_api::c_cooldown_viewer::CooldownViewerAvailability,
     #[cfg(feature = "retail-12-1-0")]
     pub last_sound_request: Option<crate::c_api::c_sound::PlaySoundRequest>,

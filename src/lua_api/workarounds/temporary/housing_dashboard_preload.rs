@@ -22,19 +22,6 @@ if type(C_Housing) == "table" then
         end
     end
 
-    set_default("GetPlayerOwnedHouses", function()
-        local function dispatchOwnedHouses()
-            if type(FireEvent) == "function" then
-                FireEvent("PLAYER_HOUSE_LIST_UPDATED", {})
-            end
-        end
-        if type(C_Timer) == "table" and type(C_Timer.After) == "function" then
-            C_Timer.After(0, dispatchOwnedHouses)
-        else
-            dispatchOwnedHouses()
-        end
-    end)
-
     set_default("HouseFinderIgnoreNeighborhood", function()
     end)
 
@@ -160,7 +147,12 @@ end
 "#;
 
 pub(crate) fn patch(env: &LoaderEnv<'_>) {
-    let _ = env.exec(HOUSING_DASHBOARD_PRELOAD_WORKAROUND_LUA);
+    let result = env
+        .exec(super::housing_owned_house_requests::OWNED_HOUSE_REQUESTS_LUA)
+        .and_then(|()| env.exec(HOUSING_DASHBOARD_PRELOAD_WORKAROUND_LUA));
+    if let Err(error) = result {
+        eprintln!("[housing-dashboard-preload] {error}");
+    }
 }
 
 #[cfg(test)]

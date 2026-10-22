@@ -1,0 +1,93 @@
+//! Named T6 service gaps; never an arbitrary C_* member factory.
+//! Retire each default with the backing system named beside its definition.
+
+use crate::client_profile::{ACTIVE, ClientProfile};
+
+const CHAT_TYPE_TTS_PREFERENCE: &str = r#"
+-- Missing system: per-chat-type text-to-speech user preferences.
+-- Existing channel TTS flags do not establish the SAY/PARTY/etc. preference.
+if rawget(C_TTSSettings, "GetChatTypeEnabled") == nil then
+    function C_TTSSettings.GetChatTypeEnabled(_chatName)
+        return false
+    end
+end
+"#;
+
+const MODERN_SERVICE_CAPABILITIES: &str = r#"
+C_ContentTracking = C_ContentTracking or {}
+-- Missing system: collectable-source tracking capability/entitlement policy.
+if rawget(C_ContentTracking, "GetCollectableSourceTrackingEnabled") == nil then
+    function C_ContentTracking.GetCollectableSourceTrackingEnabled()
+        return false
+    end
+end
+
+-- Missing system: authenticated voice-service login session.
+-- A simulated connection status or active channel is not login evidence.
+if rawget(C_VoiceChat, "IsLoggedIn") == nil then
+    function C_VoiceChat.IsLoggedIn()
+        return false
+    end
+end
+"#;
+
+const SECURE_COMBAT_FILTERS: &str = r#"
+C_CombatLogSecure = C_CombatLogSecure or {}
+-- Missing system: secure combat-log event/filter backend.
+-- No secure filters exist to clear; do not mutate ordinary combat-log filters.
+if rawget(C_CombatLogSecure, "ClearEventFilters") == nil then
+    function C_CombatLogSecure.ClearEventFilters()
+    end
+end
+"#;
+
+const CORPSE_LOCATION: &str = r#"
+C_DeathInfo = C_DeathInfo or {}
+-- Missing system: corpse location keyed by UI map, independent of player location.
+if rawget(C_DeathInfo, "GetCorpseMapPosition") == nil then
+    function C_DeathInfo.GetCorpseMapPosition(_uiMapID)
+        return nil
+    end
+end
+"#;
+
+const FOREVER_SERVICE_CAPABILITIES: &str = r#"
+-- Missing system: preferred account locale ID/name catalog.
+if rawget(C_AccountServices, "GetPreferredLocales") == nil then
+    function C_AccountServices.GetPreferredLocales()
+        return {}, {}
+    end
+end
+
+-- Missing system: Discord-specific voice capability/settings, not service enablement.
+if rawget(C_Discord, "IsVoiceEnabled") == nil then
+    function C_Discord.IsVoiceEnabled()
+        return false
+    end
+end
+
+-- Missing system: authoritative active voice-provider selection.
+-- Legacy is a presentation default from the selected profile enum, not login state.
+if rawget(C_VoiceChat, "GetActiveVoiceProviderID") == nil then
+    function C_VoiceChat.GetActiveVoiceProviderID()
+        return Enum.VoiceProviderID.Legacy
+    end
+end
+"#;
+
+pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(CHAT_TYPE_TTS_PREFERENCE)?;
+    match ACTIVE {
+        ClientProfile::Retail | ClientProfile::Ptr => {
+            lua.exec(MODERN_SERVICE_CAPABILITIES)?;
+            lua.exec(SECURE_COMBAT_FILTERS)?;
+        }
+        ClientProfile::Era | ClientProfile::Anniversary => lua.exec(CORPSE_LOCATION)?,
+        ClientProfile::WowForever => {
+            lua.exec(MODERN_SERVICE_CAPABILITIES)?;
+            lua.exec(FOREVER_SERVICE_CAPABILITIES)?;
+        }
+        ClientProfile::Mists | ClientProfile::Wrath => {}
+    }
+    Ok(())
+}

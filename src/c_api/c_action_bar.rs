@@ -15,7 +15,6 @@ const HAS_ACTIVE_FIELD: bool = cfg!(any(
 ));
 const ACTION_COOLDOWN_HASH_FIELDS: usize = 4 + HAS_ACTIVE_FIELD as usize;
 
-#[cfg(feature = "retail-12-0-0")]
 pub(crate) fn unregister_action_ui_button(state: &mut LuaState) -> LuaResult<u32> {
     let Some(id) = crate::lua_api::methods::extract_frame_id(state, stack_val(state, 1)) else {
         return Err(rilua::runtime_error(

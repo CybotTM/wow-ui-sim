@@ -10,6 +10,26 @@
 
 [Social ownership](systems/lua-api.md#factory-removal-social-inputs--2026-10-21) links the [M3 contract](../specs/c-factory-m3-social-inputs.md): supplied tabard metadata versus named missing-service policies. Frozen/fresh RED, integrated targeted GREEN and the combined stock matrix are recorded; assigned rows disappear without claiming clean startup outside Wrath.
 
+## [2026-10-21] proof | Owned C factory follow-up
+
+[Bounded follow-up proof](systems/c-factory-startup-followup.md#bounded-proof--2026-10-21) records 65 original-member cases, seven nil contracts, the single stock matrix, supplied-state checks, unchanged CVars and explicitly held cascades. Wrath stays empty; other profiles are not clean or merge-ready.
+
+## [2026-10-21] source | T6 named startup services
+
+[Factory follow-up](systems/c-factory-startup-followup.md#t6-service-inputs) links real console/activity adapters, named missing service systems and the still-unattributed Forever timer family; runtime proof pending.
+
+## [2026-10-21] source | M5 startup service/catalog inputs
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m5-service-and-catalog-inputs) links early owned-house requests, species-backed pet icons, valid-set catalog state and named battle/bank capability gaps; runtime proof pending.
+
+## [2026-10-21] source | M2 startup state adapters
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m2-state-adapters) links equipment/spellbook/action/availability state and three Forever-only temporary capabilities; runtime acceptance pending.
+
+## [2026-10-21] source | Named M1 startup conditions
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m1-conditions) records three explicitly temporary conditions, missing backing systems and profile scope; generated-contract and stock runtime proof remain pending.
+
 ## [2026-10-20] source | C namespace factory removal (F0)
 
 [Namespace diagnostics](systems/addon-loading.md#missing-c-members-f0-2026-10-20) link the [nil-member contract and frozen proof](../specs/c-namespace-nil-members.md#frozen-f0-proof). The proof owns the full-feature profile matrix, original-consumer gap evidence, failed health gates and unresolved callback attribution. No replacement model is included.
