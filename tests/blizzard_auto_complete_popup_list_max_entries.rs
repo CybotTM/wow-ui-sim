@@ -49,6 +49,19 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_popup_list_max_entries_controls_render_limit() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::load_and_assert_native(
+            r#"
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha', 'F09Beta', 'F09Gamma', 'F09Delta', 'F09Epsilon', 'F09Zeta')
+assert(AUTOCOMPLETE_MAX_BUTTONS == 5)
+for i=1,5 do assert(_G['AutoCompleteButton'..i]:IsShown()) end
+assert(AutoCompleteButton6 == nil)
+assert(AutoComplete_GetNumResults(AutoCompleteBox) == 4)
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

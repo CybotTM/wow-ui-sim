@@ -79,6 +79,8 @@ const SPELL_ID: u32 = 853;
 
 #[test]
 fn main_bar_button_1_reflects_action_bars_slot_one_after_actionbar_slot_changed() {
+    wrath_action_case!(slot_changed);
+
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let action_field: i32 = env
             .eval("return ActionButton1.action")

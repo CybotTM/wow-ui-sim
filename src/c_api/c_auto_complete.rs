@@ -5,6 +5,9 @@
 //! can provide real entries from the state it already owns: friends, party
 //! members, Battle.net accounts, and the current account character.
 
+#[cfg(feature = "client-wrath")]
+pub(crate) mod wrath;
+
 use std::collections::HashSet;
 
 use crate::c_api::helpers::{ensure_namespace, set_table_array};

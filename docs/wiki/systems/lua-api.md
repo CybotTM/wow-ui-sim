@@ -3,6 +3,10 @@
 The Lua API layer bridges Lua addon code with the Rust simulation engine. It provides WoW-compatible globals, 300+ frame methods, C_* namespaces, and a timer system — all backed by `WowLuaEnv` and `SimState`.
 
 
+## Wrath tracked achievements
+
+`SimState.tracked_achievements` stores unique IDs in insertion order. Existing shared setters retain membership behavior; only the existing Wrath registration module publishes native add/remove/count/membership functions. Mutations release the state borrow before synchronous event dispatch, so original AchievementUI handlers see the updated list and refresh their private cache. The [12340 contract](../../specs/wrath-tracked-achievements.md) owns argument/event rules, evidence limits and bounded proof; persistence is excluded.
+
 ## C API numeric-secret selector boundaries
 
 Classification endpoints in `src/c_api/c_spell_classification.rs` inspect authentic numeric-secret selectors only inside their modeled host lookup. The shared public spell reader and VM unwrap permissions remain unchanged; ExternalDefensive keeps VM authentication. [Classification contract](../../specs/secret-selector-classification.md) owns endpoint scope, inferred output policy and revision-scoped proof. Original-consumer wrapper injection is not evidence of natural secret-ID production at startup.
@@ -28,6 +32,12 @@ At `269ed6f17`, `src/lua_api/workarounds/temporary/container_default_shapes.rs` 
 The [integrated checkpoint](../investigations/integrated-source-and-factory-proof-2026-10-09.md#executed-staged-queries-and-new-producers) owns executed baseline and current verification status. C API contracts: [availability/reason](../../specs/cooldown-viewer-availability.md), [transfer activity](../../specs/currency-transfer-activity.md), [catalog icon](../../specs/zone-ability-icon.md), [complete ButtonHeader snapshots](../../specs/ui-widget-button-header.md), [independent assisted identity/slots](../../specs/assisted-action-input.md), [modeled frequency](../../specs/profiler-clock-frequency.md), [global transcription](../../specs/voice-transcribing-input.md), and [supplied ping kits](../../specs/ping-texture-kit-input.md). Their implementations live under `src/c_api/`; specs distinguish explicit inputs, catalog lookup and simulator policies from native evidence.
 
 [Path/ControlPoint](../../specs/path-control-point.md) belongs to the animation/XML subsystem, using existing target offsets and layout axes. The [owning Path proof ledger](../../specs/path-control-point.md#tests-asserting-this-spec) records recovered historical per-test GREEN; fresh startup/profile acceptance remains separately pending. Neither source inventory nor historical controls establish native or whole-handoff acceptance.
+
+## Wrath action callback projections
+
+The [native callback fixture](../../../tests/fixtures/wrath-action-callbacks.md) reuses the profile FrameXML TOC loader and original named regions/free functions; one shared selector keeps Wrath-only fixture inputs out of other profiles. Modern-only API assertions have explicit source-backed gates, not root-name heuristics.
+
+`ActionSpellRange` now lives separately from Retail namespace registration under `c_api/`; a shared lookup reads supplied spell/target GUID snapshots. `globals/real/wrath_legacy/action_bar.rs` exposes legacy range and possession readers without adding modern range publishers. Pet and stance producers project existing records differently only on Wrath; obsolete constant/nil compatibility functions are removed. The [owning contract](../../specs/wrath-action-callback-queries.md) owns authenticated 12340 shapes, bounded proof and unmodeled coercion/aura/geometry limits.
 
 ## Wrath selected quest legacy surface
 
@@ -494,13 +504,26 @@ The [TokenUI contract](../../specs/wrath-legacy-currency-tokenui.md) owns positi
 
 The [owning contract](../../specs/wrath-spellbook-tabs.md) tracks original-consumer/API proof, inferred missing-metadata policy and unmodeled skill-line/level inputs. Cursor ordering is a separate follow-up: the historical back-to-back DebugTools diagnostic does not authenticate synchronous cursor callbacks, and no cursor producer is included.
 
+## Wrath guild rank rights
+
+The legacy global now projects the existing selected rank's supplied rights positionally under `client-wrath`; the existing namespace and other profiles retain their table projection. The [contract](../../specs/wrath-guild-rank-flags.md) owns the authenticated 12340 return shape and evidence limits. F03's original native checkbox consumer reproduced the table mismatch before the correction; the contract now records native-consumer and guild-model GREEN. The contract also records paired Retail preservation and both profiles' empty stock Lua-error arrays; unrelated fixture failures remain explicit. Native unselected-rank reads and separate staged edit rights are not modeled by this bounded projection change.
 ## Retail unused currency flags
 
 `src/c_api/item_spell/c_currency.rs` resolves `SetCurrencyUnused` through the existing Retail displayed-index projection and changes `CurrencyInfo.is_type_unused`. List and ID queries read the same supplied row; list `discovered` feeds original popup visibility. No second membership store, grouping, sorting or persistence layer was added. The [owning contract](../../specs/currency-unused-mutations.md#bounded-proof) records original checkbox/popup proof and current-Retail native grouping UNKNOWN; existing [displayed-index](../../specs/currency-displayed-indices.md) and [watched](../../specs/currency-watched-mutations.md) models remain separate.
 
+## Wrath legacy friends
+
+`real/wrath_friends.rs` publishes four globals only through Wrath startup registration. Tuple reads and GUID-based selection consume the existing social friend vector; `c_api/c_friend_list.rs` owns the unchanged online-first projection and the refresh handler shared with `C_FriendList.ShowFriends`. The Lua adapter captures the VM's numeric-string conversion. Selection adds only a Wrath-specific optional GUID, not a second friends list.
+
+The [owning contract](../../specs/wrath-friends-legacy.md) records static12340 provenance, original FriendsFrame RED→GREEN, Wrath5/Retail19 bounded passes, both clean stock startups, response timing and unsupported status/sorting boundaries. Retail registration is unchanged; ignore/add/remove behavior is excluded. Retail check and joint F02 integration remain assigned to the merge gate.
+
 ## Sources
 
+- [Wrath legacy friends contract](../../specs/wrath-friends-legacy.md) — native tuple/selection evidence and simulator-policy limits.
 - [Retail unused currency contract](../../specs/currency-unused-mutations.md) — flag scope, original consumers and held grouping.
+
+- [Wrath action callback queries](../../specs/wrath-action-callback-queries.md) — native projections, shared snapshot boundary and bounded proof
+
 - [Wrath spellbook views](../../specs/wrath-spellbook-tabs.md) — bounded one-tab model, native contract and proof limits
 - [Wrath supplied objectives](../../specs/wrath-quest-objectives.md) — legacy snapshot reads, bounded consumer proof and native input-model gaps
 
@@ -567,6 +590,8 @@ The [owning contract](../../specs/wrath-spellbook-tabs.md) tracks original-consu
 - [Lua math extensions](../../specs/lua-math-extensions.md) — owning contract and profile-scoped declaration limits
 - [c_chromie_time.rs](../../../src/c_api/c_chromie_time.rs) — retail/PTR empty-state C_ChromieTime surface
 - [c_container.rs](../../../src/c_api/item_spell/c_container.rs) — state-backed bag-slot flags and backpack queries
+- [guild_control.rs](../../../src/lua_api/globals/guild_control.rs) — selected-rank table and native Wrath positional projections
+- [wrath_guild_rank_flags.rs](../../../tests/wrath_guild_rank_flags.rs) — original native checkbox consumer and exact positional-value assertions
 - [guild_info.rs](../../../src/lua_api/globals/guild_info.rs) — C_GuildInfo namespace registration and state-backed management methods
 - [profession_specs_defaults.rs](../../../src/lua_api/workarounds/temporary/profession_specs_defaults.rs) — temporary seeded profession-specialization fixture and supported skill-line boundary
 - [pet_battle_runtime_state.rs](../../../src/lua_api/workarounds/temporary/pet_battle_runtime_state.rs) — temporary seeded pet-battle breed-quality compatibility state

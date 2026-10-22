@@ -4,11 +4,13 @@
 //! list. Character/name completion is modeled in `c_api::c_auto_complete`; this
 //! bootstrap retains legacy globals before Retail 12.0.7. At 12.0.7+, only
 //! Blizzard_DeprecatedAutoComplete owns those globals when its CVar permits them.
+//! Wrath's result global is modeled separately; never install the modern
+//! argument-layout/table-returning forwarder there.
 
 use rilua::LuaApiMut;
 
 const AUTO_COMPLETE_DEFAULTS_LUA: &str = r#"
-local publishLegacyNative = ...
+local publishLegacyNative, publishLegacyResults = ...
 C_AutoComplete = C_AutoComplete or __wow_namespace()
 if rawget(C_AutoComplete, "GetAutoCompleteRealms") == nil then
     function C_AutoComplete.GetAutoCompleteRealms()
@@ -20,7 +22,7 @@ if publishLegacyNative and GetAutoCompleteRealms == nil then
         return C_AutoComplete.GetAutoCompleteRealms()
     end
 end
-if publishLegacyNative and GetAutoCompleteResults == nil then
+if publishLegacyResults and GetAutoCompleteResults == nil then
     function GetAutoCompleteResults(name, numResults, cursorPosition, allowFullMatch, includeFlags, excludeFlags)
         return C_AutoComplete.GetAutoCompleteResults(name, numResults, cursorPosition, not not allowFullMatch, includeFlags, excludeFlags)
     end
@@ -34,7 +36,10 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     )?;
     lua.call_function(
         &bootstrap,
-        &[rilua::Val::Bool(!cfg!(feature = "retail-12-0-7"))],
+        &[
+            rilua::Val::Bool(!cfg!(feature = "retail-12-0-7")),
+            rilua::Val::Bool(!cfg!(feature = "retail-12-0-7") && !cfg!(feature = "client-wrath")),
+        ],
     )?;
     Ok(())
 }
@@ -62,7 +67,7 @@ mod tests {
         assert_eq!(global_count, 0);
     }
 
-    #[cfg(not(feature = "retail-12-0-7"))]
+    #[cfg(all(not(feature = "retail-12-0-7"), not(feature = "client-wrath")))]
     #[test]
     fn installs_legacy_results_forwarder() {
         let env = WowLuaEnv::new().expect("lua env should initialize");

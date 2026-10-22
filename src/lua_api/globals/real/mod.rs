@@ -123,7 +123,11 @@ pub mod voice_chat_probes;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_auction_catalog;
 #[cfg(feature = "client-wrath")]
+pub(crate) mod wrath_autocomplete;
+#[cfg(feature = "client-wrath")]
 pub mod wrath_calendar;
+#[cfg(feature = "client-wrath")]
+pub(crate) mod wrath_friends;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_legacy;
 #[cfg(feature = "client-wrath")]

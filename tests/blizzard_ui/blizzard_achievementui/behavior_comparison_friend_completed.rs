@@ -143,6 +143,29 @@ const FAKE_FRAME_BUILDER: &str = r#"
 
 #[test]
 fn comparison_template_init_completed_writes_format_short_date_and_saturates_friend_card() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        -- Explicit C-query inputs drive the original native row, never a fake card.
+        GetAchievementInfo = function() return 4242, "fixture achievement", 10, false, nil, nil, nil, "fixture description", 0, "Interface\\Icons\\INV_Misc_QuestionMark", "" end
+        GetPreviousAchievement = function() return nil end
+        local row = assert(AchievementFrameComparisonContainer.buttons[1])
+        row.id = nil
+        GetAchievementComparisonInfo = function() return true, 6, 15, 24 end
+        local background = _G[row.friend:GetName().."Background"]
+        local incompleteTexture = background:GetTexture()
+        AchievementFrameComparison_DisplayAchievement(row, 92, 1)
+        assert(background:GetTexture() ~= incompleteTexture)
+        assert(row.id == 4242 and row.friend.completed)
+        assert(row.friend.status:GetText() == string.format(SHORTDATE, 15, 6, 24))
+        assert(row.friend.shield.points:GetText() == "10")
+        local expected = AchievementFrame:CreateTexture()
+        expected:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Parchment-Horizontal")
+        assert(expected:GetTexture() ~= nil)
+        assert(_G[row.friend:GetName().."Background"]:GetTexture() == expected:GetTexture())
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: CompletedProbe = env
             .eval(&format!(
@@ -281,6 +304,24 @@ fn comparison_template_init_completed_writes_format_short_date_and_saturates_fri
 
 #[test]
 fn comparison_template_init_incomplete_writes_incomplete_token_and_short_circuits_on_repeat_id() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        -- Explicit C-query inputs drive the original native row, never a fake card.
+        GetAchievementInfo = function() return 4242, "fixture achievement", 10, false, nil, nil, nil, "fixture description", 0, "Interface\\Icons\\INV_Misc_QuestionMark", "" end
+        GetPreviousAchievement = function() return nil end
+        local row = assert(AchievementFrameComparisonContainer.buttons[1])
+        row.id = nil
+        local calls = 0
+        GetAchievementComparisonInfo = function() calls = calls + 1; return false end
+        AchievementFrameComparison_DisplayAchievement(row, 92, 1)
+        assert(not row.friend.completed and row.friend.status:GetText() == INCOMPLETE)
+        assert(calls == 1)
+        AchievementFrameComparison_DisplayAchievement(row, 92, 1)
+        assert(calls == 1 and row.friend.status:GetText() == INCOMPLETE)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: IncompleteProbe = env
             .eval(&format!(

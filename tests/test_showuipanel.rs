@@ -22,10 +22,7 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML.toc"),
-    (
-        "Blizzard_SharedXMLGame",
-        "Blizzard_SharedXMLGame.toc",
-    ),
+    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame.toc"),
     (
         "Blizzard_UIPanelTemplates",
         "Blizzard_UIPanelTemplates_Mainline.toc",
@@ -52,7 +49,10 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_Communities", "Blizzard_Communities_Mainline.toc"),
     ("Blizzard_StoreUI", "Blizzard_StoreUI.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
-    ("Blizzard_ManagedFrameSystem", "Blizzard_ManagedFrameSystem_Mainline.toc"),
+    (
+        "Blizzard_ManagedFrameSystem",
+        "Blizzard_ManagedFrameSystem_Mainline.toc",
+    ),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
@@ -62,10 +62,7 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIParentPanelManager",
         "Blizzard_UIParentPanelManager_Mainline.toc",
     ),
-    (
-        "Blizzard_Settings_Shared",
-        "Blizzard_Settings_Shared.toc",
-    ),
+    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared.toc"),
     (
         "Blizzard_SettingsDefinitions_Shared",
         "Blizzard_SettingsDefinitions_Shared.toc",
@@ -74,10 +71,7 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame",
         "Blizzard_SettingsDefinitions_Frame.toc",
     ),
-    (
-        "Blizzard_FrameXMLUtil",
-        "Blizzard_FrameXMLUtil.toc",
-    ),
+    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML.toc"),
@@ -97,6 +91,13 @@ fn setup_env() -> WowLuaEnv {
     {
         let mut state = env.state().borrow_mut();
         state.addon_base_paths = vec![blizzard_ui_dir()];
+    }
+
+    if cfg!(feature = "client-wrath") {
+        common::panel_fixtures::load_wrath_panel_core(&env);
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        return env;
     }
 
     let ui = blizzard_ui_dir();
@@ -173,6 +174,11 @@ fn uipanel_windows_has_area_attributes() {
 fn key_blizzard_panels_registered() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/panel_inventory.lua"))
+                .expect("native Wrath panel slot inventory");
+            return;
+        }
         // Core Blizzard panels loaded from UIPanelWindows.lua should all be registered.
         // LoD panels (AchievementFrame, CollectionsJournal, etc.) register when their
         // addon loads — they won't be here, and that's correct WoW behavior.
@@ -560,6 +566,12 @@ fn hide_ui_panel_hides_frame(env: &WowLuaEnv) {
 fn show_and_hide_ui_panel_toggle_registered_frame_visibility() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            // Native window-stack registration is data, not the RegisterUIPanel shim.
+            env.exec(include_str!("fixtures/wrath_f03/panel_show_hide.lua"))
+                .expect("native panel registration and show/hide visibility");
+            return;
+        }
         let result: String = env.eval(r#"
             local panel = CreateFrame("Frame", "ShowHideUIPanelTestFrame", UIParent)
             panel:SetSize(300, 400)
@@ -594,6 +606,12 @@ fn show_and_hide_ui_panel_toggle_registered_frame_visibility() {
 fn repeated_show_ui_panel_pulse_closes_active_panel_stack() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            // Native window-stack capability; the shim's attribute cache is separate.
+            env.exec(include_str!("fixtures/wrath_f03/panel_pulse.lua"))
+                .expect("native center panel displacement and stack closure");
+            return;
+        }
         let result: (bool, bool, bool, bool, bool, bool) = env.eval(r#"
             local first = CreateFrame("Frame", "AttributeDispatchPanelPulseFirst", UIParent)
             first:SetSize(300, 400)
@@ -679,6 +697,12 @@ fn register_ui_panel_populates_uipanel_windows_without_overwriting() {
 fn registered_ui_panel_closes_with_escape_stack() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            // Native CloseAllWindows stack, not RegisterUIPanel compatibility behavior.
+            env.exec(include_str!("fixtures/wrath_f03/panel_close.lua"))
+                .expect("native registered panel belongs to the escape/close stack");
+            return;
+        }
         let result: String = env.eval(r#"
             local panel = CreateFrame("Frame", "EscClosableUIPanelTestFrame", UIParent)
             panel:SetSize(300, 400)
@@ -709,12 +733,15 @@ fn registered_ui_panel_closes_with_escape_stack() {
 fn escape_key_closes_character_frame_before_game_menu() {
     test_timeout! {
         let env = setup_env();
+        if !cfg!(feature = "client-wrath") {
+            env.exec(r#"CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }"#)
+                .expect("modern character subframe fixture");
+        }
         let panel_state: String = env.eval(r#"
             if HelpFrame:IsShown() then
                 return "help_frame_placeholder_shown"
             end
 
-            CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
             ToggleCharacter("PaperDollFrame", true)
             if not CharacterFrame:IsShown() then
                 return "not_shown"
@@ -755,6 +782,12 @@ fn escape_key_closes_character_frame_before_game_menu() {
 fn sequential_registered_ui_panels_reenter_close_stack() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            // Native data registration must keep re-opened panels in the close stack.
+            env.exec(include_str!("fixtures/wrath_f03/panel_sequential.lua"))
+                .expect("native sequential panel shows re-enter the close stack");
+            return;
+        }
         let result: String = env.eval(r#"
             local first = CreateFrame("Frame", "SequentialUIPanelFirst", UIParent)
             first:SetSize(300, 400)

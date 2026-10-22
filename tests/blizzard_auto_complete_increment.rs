@@ -57,6 +57,24 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_increment_selection_wraps_and_guards() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::load_and_assert_native(
+            r#"
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha', 'F09Beta', 'F09Gamma')
+assert(AutoCompleteEditBox_OnTabPressed(F09EditBox) == true)
+assert(AutoComplete_GetSelectedIndex(AutoCompleteBox) == 1)
+AutoComplete_SetSelectedIndex(AutoCompleteBox, 3)
+assert(AutoCompleteEditBox_OnTabPressed(F09EditBox) == true)
+assert(AutoComplete_GetSelectedIndex(AutoCompleteBox) == 1)
+local other = CreateFrame('EditBox', nil, UIParent)
+assert(AutoCompleteEditBox_OnTabPressed(other) == false)
+AutoCompleteBox:Hide()
+assert(AutoCompleteEditBox_OnTabPressed(F09EditBox) == false)
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

@@ -63,6 +63,20 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_popup_list_resize_tracks_rows_and_overflow() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::load_and_assert_native(
+            r#"
+AutoComplete_UpdateResults(AutoCompleteBox, 'A','B')
+assert(AutoCompleteBox:GetHeight() == 2 * AutoCompleteButton1:GetHeight() + 35)
+local width=AutoCompleteBox:GetWidth()
+AutoComplete_UpdateResults(AutoCompleteBox, 'A long completion name that exceeds the minimum width', 'B','C','D','E','F')
+assert(AutoCompleteBox:GetHeight() == 5 * AutoCompleteButton1:GetHeight() + 35)
+assert(AutoCompleteBox:GetWidth() > width)
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

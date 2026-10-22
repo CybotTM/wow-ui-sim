@@ -4,6 +4,7 @@ use common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_AutoComplete";
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_color_keys_are_keyed_by_priority_enum() {
     common::with_perf_lock(|| {
@@ -62,4 +63,5 @@ fn blizzard_auto_complete_color_keys_are_keyed_by_priority_enum() {
             });
         });
     });
+}
 }

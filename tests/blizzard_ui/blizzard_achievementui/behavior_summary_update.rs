@@ -70,6 +70,20 @@ type SummaryProbe = (String, String, String, String, String, String, String);
 
 #[test]
 fn summary_update_writes_categories_status_bar_text_but_does_not_touch_header_points() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        AchievementFrameHeaderPoints:SetText("sentinel")
+        AchievementFrameSummary_Update()
+        local total, completed = GetNumCompletedAchievements()
+        assert(AchievementFrameSummaryCategoriesStatusBarText:GetText() == completed.."/"..total)
+        assert(AchievementFrameSummaryCategoriesStatusBar:GetValue() == completed)
+        local minimum, maximum = AchievementFrameSummaryCategoriesStatusBar:GetMinMaxValues()
+        assert(minimum == 0 and maximum == total)
+        assert(AchievementFrameHeaderPoints:GetText() == "sentinel")
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: SummaryProbe = env
             .eval(

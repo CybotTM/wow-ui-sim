@@ -89,6 +89,18 @@ const PLAN_NAMED_BUT_UNREGISTERED_EVENTS: &[&str] = &["CRITERIA_UPDATE", "ACHIEV
 /// for spec drift).
 #[test]
 fn achievement_frame_achievements_event_registration_split_presence_absence() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local frame = AchievementFrameAchievements
+        assert(frame:IsEventRegistered("ADDON_LOADED"))
+        for _, event in ipairs({"ACHIEVEMENT_EARNED", "CRITERIA_UPDATE", "TRACKED_ACHIEVEMENT_UPDATE"}) do
+            assert(frame:IsEventRegistered(event), event)
+        end
+        assert(frame:GetScript("OnEvent"))
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{FRAME_NAME:?}])"))
@@ -241,6 +253,20 @@ const CATEGORIES_REGISTERED_EVENT: &str = "ADDON_LOADED";
 ///    started processing the registered event for the first time).
 #[test]
 fn achievement_frame_categories_registers_addon_loaded_after_onload() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local frame = AchievementFrameCategories
+        AchievementFrameCategories_OnLoad(frame)
+        assert(frame:IsEventRegistered("ADDON_LOADED"))
+        AchievementFrameCategories_OnEvent(frame, "ADDON_LOADED", "OtherAddon")
+        assert(frame:IsEventRegistered("ADDON_LOADED"))
+        AchievementFrameCategories_OnEvent(frame, "ADDON_LOADED", "Blizzard_AchievementUI")
+        assert(not frame:IsEventRegistered("ADDON_LOADED"))
+        assert(#AchievementFrameCategoriesContainer.buttons > 0)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{CATEGORIES_FRAME_NAME:?}])"))
@@ -379,6 +405,19 @@ const COMPARISON_ONSHOW_DYNAMIC_EVENTS: &[&str] = &[
 /// at smoke time (because the frame is hidden by default).
 #[test]
 fn achievement_frame_comparison_registers_inspect_achievement_ready_after_onload() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(AchievementFrameComparison:IsEventRegistered("INSPECT_ACHIEVEMENT_READY"))
+        assert(AchievementFrameComparison:IsEventRegistered("ACHIEVEMENT_EARNED"))
+        assert(AchievementFrameComparison:GetScript("OnEvent"))
+        AchievementFrame_DisplayComparison("player")
+        AchievementFrameComparisonHeaderPoints:SetText("sentinel")
+        AchievementFrameComparison_OnEvent(AchievementFrameComparison, "INSPECT_ACHIEVEMENT_READY")
+        assert(AchievementFrameComparisonHeaderPoints:GetText() == tostring(GetComparisonAchievementPoints()))
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{COMPARISON_FRAME_NAME:?}])"))

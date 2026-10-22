@@ -6,6 +6,38 @@
 
 use crate::common::game_menu_fixture::setup_game_menu_env;
 
+/// Enumerate native buttons without installing a pool or changing vendor frames.
+fn menu_button_chunk(code: &str) -> String {
+    let prefix = if cfg!(feature = "client-wrath") {
+        r#"
+        local menu_options_label = VIDEOOPTIONS_MENU
+        local function menu_button_index(_, index) return index end
+        local function menu_buttons()
+            local buttons = {
+                GameMenuButtonOptions, GameMenuButtonSoundOptions,
+                GameMenuButtonUIOptions, GameMenuButtonKeybindings,
+                GameMenuButtonMacros, GameMenuButtonLogout,
+                GameMenuButtonQuit, GameMenuButtonContinue,
+            }
+            local index = 0
+            return function()
+                index = index + 1
+                return buttons[index]
+            end
+        end
+        "#
+    } else {
+        r#"
+        local menu_options_label = "Options"
+        local function menu_button_index(button) return button.layoutIndex end
+        local function menu_buttons()
+            return GameMenuFrame.buttonPool:EnumerateActive()
+        end
+        "#
+    };
+    format!("{prefix}\n{code}")
+}
+
 // ── Existence ───────────────────────────────────────────────────────────────
 
 #[test]
@@ -32,63 +64,62 @@ fn test_game_menu_buttons_created_on_show() {
 
         // Before Show() the pool should be empty.
         let before: i32 = env
-            .eval(
-                r#"
+            .eval(&menu_button_chunk(r#"
                 local n = 0
-                for _ in GameMenuFrame.buttonPool:EnumerateActive() do
+                for _ in menu_buttons() do
                     n = n + 1
                 end
                 return n
-            "#,
-            )
+            "#))
             .unwrap();
-        assert_eq!(before, 0, "buttonPool should be empty before Show()");
+        let expected_before = if cfg!(feature = "client-wrath") { 8 } else { 0 };
+        assert_eq!(before, expected_before, "native static buttons or modern lazy pool before Show()");
 
         env.exec("GameMenuFrame:Show()").unwrap();
 
         // Collect button texts from the active pool entries.
         let texts: String = env
-            .eval(
-                r#"
+            .eval(&menu_button_chunk(r#"
                 local found = {}
-                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
+                for btn in menu_buttons() do
                     table.insert(found, btn:GetText() or "")
                 end
                 table.sort(found)
                 return table.concat(found, "|")
-            "#,
-            )
+            "#))
             .unwrap();
 
         // These localisation keys resolve to English strings in the simulator.
         // Verify the expected set is a subset of what was created.
         // Note: "Edit Mode" is absent because EditModeManagerFrame:CanEnterEditMode()
         // returns false in the headless simulator.
-        let expected = [
-            "Options",
-            "AddOns",
-            "Support",
-            "Macros",
-            "Log Out",
-            "Exit Game",
-            "Return to Game",
-        ];
+        let expected: Vec<String> = if cfg!(feature = "client-wrath") {
+            let labels: String = env.eval(r#"
+                -- Native GameMenu OnShow calls VoiceChat_Toggle, selecting VOICE_SOUND
+                -- when the fixture's server and client voice capabilities are disabled.
+                assert(not IsVoiceChatEnabled() and not IsVoiceChatAllowedByServer())
+                return table.concat({ VIDEOOPTIONS_MENU, VOICE_SOUND, UIOPTIONS_MENU,
+                    MACROS, LOGOUT, EXIT_GAME, RETURN_TO_GAME }, "|")
+            "#).unwrap();
+            labels.split('|').map(str::to_owned).collect()
+        } else {
+            ["Options", "AddOns", "Support", "Macros", "Log Out", "Exit Game", "Return to Game"]
+                .into_iter().map(str::to_owned).collect()
+        };
         for label in &expected {
             assert!(
-                texts.contains(label),
+                texts.contains(label.as_str()),
                 "Expected button '{label}' in pool; got: {texts}"
             );
         }
 
         // At minimum 8 buttons (the required set above, Shop may be absent).
         let count: i32 = env
-            .eval(
-                r#"
+            .eval(&menu_button_chunk(r#"
                 local n = 0
-                for _ in GameMenuFrame.buttonPool:EnumerateActive() do n = n + 1 end
+                for _ in menu_buttons() do n = n + 1 end
                 return n
-            "#,
-            )
+            "#))
             .unwrap();
         assert!(
             count >= 8,
@@ -105,10 +136,9 @@ fn test_game_menu_exit_button_requests_simulator_quit() {
         env.exec("GameMenuFrame:Show()").unwrap();
 
         let result: String = env
-            .eval(
-                r#"
+            .eval(&menu_button_chunk(r#"
                 local quitButton
-                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
+                for btn in menu_buttons() do
                     if btn:GetText() == EXIT_GAME then
                         quitButton = btn
                         break
@@ -129,8 +159,7 @@ fn test_game_menu_exit_button_requests_simulator_quit() {
                 end
 
                 return A_Admin.IsSimulatorExitRequested() and "quit-requested" or "quit-not-requested"
-            "#,
-            )
+            "#))
             .unwrap();
 
         assert_eq!(result, "quit-requested");
@@ -145,10 +174,9 @@ fn test_game_menu_all_enabled_buttons_have_callable_callbacks() {
         env.exec("GameMenuFrame:Show()").unwrap();
 
         let result: String = env
-            .eval(
-                r#"
+            .eval(&menu_button_chunk(r#"
                 local failures = {}
-                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
+                for btn in menu_buttons() do
                     if btn:IsEnabled() then
                         local text = btn:GetText() or "<unnamed>"
                         local onclick = btn:GetScript("OnClick")
@@ -163,8 +191,7 @@ fn test_game_menu_all_enabled_buttons_have_callable_callbacks() {
                     end
                 end
                 return table.concat(failures, "\n")
-            "#,
-            )
+            "#))
             .unwrap();
 
         assert_eq!(result, "");
@@ -179,10 +206,9 @@ fn test_game_menu_macro_button_callback_is_callable() {
         env.exec("GameMenuFrame:Show()").unwrap();
 
         let result: String = env
-            .eval(
-                r#"
+            .eval(&menu_button_chunk(r#"
                 local macroButton
-                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
+                for btn in menu_buttons() do
                     if btn:GetText() == MACROS then
                         macroButton = btn
                         break
@@ -203,8 +229,7 @@ fn test_game_menu_macro_button_callback_is_callable() {
                 end
 
                 return type(MacroFrame) == "table" and MacroFrame:IsShown() and "macro-shown" or "macro-not-shown"
-            "#,
-            )
+            "#))
             .unwrap();
 
         assert_eq!(result, "macro-shown");
@@ -218,20 +243,20 @@ fn test_game_menu_options_button_hitbox_matches_visual_center() {
         env.exec("GameMenuFrame:Show()").unwrap();
 
         let button_debug_name: String = env
-            .eval(
-                r#"
-                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
-                    if btn:GetText() == "Options" then
+            .eval(&menu_button_chunk(r#"
+                for btn in menu_buttons() do
+                    if btn:GetText() == menu_options_label then
                         return btn:GetDebugName()
                     end
                 end
                 return ""
-            "#,
-            )
+            "#))
             .unwrap();
-        let button_id: u64 = button_debug_name
+        let button_id: u64 = if cfg!(feature = "client-wrath") {
+            env.state().borrow().widgets.get_id_by_name("GameMenuButtonOptions")
+        } else { button_debug_name
             .rsplit_once(':')
-            .and_then(|(_, id)| id.parse().ok())
+            .and_then(|(_, id)| id.parse().ok()) }
             .unwrap_or_else(|| panic!("Options button debug name should end with an internal id, got {button_debug_name:?}"));
 
         let center = {
@@ -249,10 +274,9 @@ fn test_game_menu_options_button_hitbox_matches_visual_center() {
         };
 
         let result: String = env
-            .eval(
-                r#"
-                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
-                    if btn:GetText() == "Options" then
+            .eval(&menu_button_chunk(r#"
+                for btn in menu_buttons() do
+                    if btn:GetText() == menu_options_label then
                         if not btn:IsMouseOver() then
                             return "not_mouse_over"
                         end
@@ -263,8 +287,7 @@ fn test_game_menu_options_button_hitbox_matches_visual_center() {
                     end
                 end
                 return "missing_options_button"
-            "#,
-            )
+            "#))
             .unwrap();
 
         assert_eq!(
@@ -293,11 +316,10 @@ fn test_game_menu_button_positions_vertical_layout() {
         // In a VerticalLayoutFrame, higher layoutIndex means lower on screen
         // (smaller Top value in WoW's coordinate system where Y grows upward).
         let result: String = env
-            .eval(
-                r#"
+            .eval(&menu_button_chunk(r#"
                 local buttons = {}
-                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
-                    table.insert(buttons, {idx = btn.layoutIndex, top = btn:GetTop()})
+                for btn in menu_buttons() do
+                    table.insert(buttons, {idx = menu_button_index(btn, #buttons + 1), top = btn:GetTop()})
                 end
                 table.sort(buttons, function(a, b) return a.idx < b.idx end)
 
@@ -313,8 +335,7 @@ fn test_game_menu_button_positions_vertical_layout() {
                     end
                 end
                 return result
-            "#,
-            )
+            "#))
             .unwrap();
         assert_eq!(result, "ok", "Buttons are not laid out top-to-bottom: {result}");
 
@@ -322,8 +343,7 @@ fn test_game_menu_button_positions_vertical_layout() {
         // GetLeft()/GetTop() return nil if the frame has no resolved layout yet;
         // skip the bounds check in that case.
         let bounds_result: String = env
-            .eval(
-                r#"
+            .eval(&menu_button_chunk(r#"
                 local frameLeft   = GameMenuFrame:GetLeft()
                 local frameRight  = GameMenuFrame:GetRight()
                 local frameTop    = GameMenuFrame:GetTop()
@@ -334,7 +354,7 @@ fn test_game_menu_button_positions_vertical_layout() {
                     return "skip"
                 end
 
-                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
+                for btn in menu_buttons() do
                     local l = btn:GetLeft()
                     local r = btn:GetRight()
                     local t = btn:GetTop()
@@ -352,8 +372,7 @@ fn test_game_menu_button_positions_vertical_layout() {
                     end
                 end
                 return "ok"
-            "#,
-            )
+            "#))
             .unwrap();
         assert!(
             bounds_result == "ok" || bounds_result == "skip",
@@ -405,12 +424,11 @@ fn test_game_menu_shop_button_opens_store_and_menu_can_reopen_after_store_closes
         let env = setup_game_menu_env();
 
         let result: String = env
-            .eval(
-                r#"
+            .eval(&menu_button_chunk(r#"
                 GameMenuFrame:Show()
 
                 local shopButton
-                for button in GameMenuFrame.buttonPool:EnumerateActive() do
+                for button in menu_buttons() do
                     local text = button:GetText()
                     if text == BLIZZARD_STORE then
                         shopButton = button
@@ -449,8 +467,7 @@ fn test_game_menu_shop_button_opens_store_and_menu_can_reopen_after_store_closes
                 end
 
                 return "ok"
-                "#,
-            )
+                "#))
             .unwrap();
 
         assert_eq!(result, "ok");

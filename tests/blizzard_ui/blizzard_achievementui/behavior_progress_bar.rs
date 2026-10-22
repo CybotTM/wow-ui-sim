@@ -59,6 +59,18 @@ const PLAN_NAMED_BUT_ABSENT_FUNCTION: &str = "AchievementFrame_UpdateProgressBar
 
 #[test]
 fn update_progress_bar_function_is_absent_but_underlying_apis_and_label_path_work() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(AchievementFrame_UpdateProgressBar == nil)
+        AchievementFrameHeaderPoints:SetText("sentinel")
+        AchievementFrame_OnShow(AchievementFrame)
+        assert(AchievementFrameHeaderPoints:GetObjectType() == "FontString")
+        assert(AchievementFrameHeaderPoints:GetText() == tostring(GetTotalAchievementPoints()))
+        assert(type(GetNumCompletedAchievements()) == "number")
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: (String, String, String, String, String) = env
             .eval(

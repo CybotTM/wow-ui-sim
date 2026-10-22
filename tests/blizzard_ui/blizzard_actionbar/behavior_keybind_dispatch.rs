@@ -121,6 +121,8 @@ const FLASH_OF_LIGHT_NAME: &str = "Flash of Light";
 
 #[test]
 fn action_button_down_routes_through_try_use_action_button_and_populates_state_casting() {
+    wrath_action_case!(key_release_cast);
+
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         env.state()

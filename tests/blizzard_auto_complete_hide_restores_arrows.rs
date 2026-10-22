@@ -40,6 +40,7 @@ expect(AutoCompleteBox.parent == nil, "hide must clear AutoCompleteBox.parent")
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_hide_restores_arrow_key_mode() {
     common::with_perf_lock(|| {
@@ -61,4 +62,5 @@ fn blizzard_auto_complete_hide_restores_arrow_key_mode() {
             });
         });
     });
+}
 }

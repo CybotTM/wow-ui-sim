@@ -69,6 +69,19 @@ type DoubleClickProbe = (String, String, String, String, String, bool);
 
 #[test]
 fn double_click_function_is_absent_but_focus_and_tracking_call_sites_work() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(AchievementButton_OnDoubleClick == nil)
+        local row = assert(AchievementFrameAchievements.buttons[1])
+        row.id = 6
+        AchievementFrameAchievements_SelectButton(row)
+        assert(row.selected and AchievementFrameAchievements.selection == 6)
+        assert(type(AchievementButton_ToggleTracking) == "function")
+        assert(row.tracked:GetScript("OnClick"))
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: DoubleClickProbe = env
             .eval(

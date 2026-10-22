@@ -407,6 +407,8 @@ fn assert_post_hide_flags(env: &WowLuaEnv) {
 
 #[test]
 fn multi_action_bar_show_all_grids_fans_showgrid_attribute_to_every_multibar_button() {
+    wrath_action_case!(multibar_grid);
+
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         assert_multi_bars_exist(env);

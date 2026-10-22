@@ -1,72 +1,49 @@
 use crate::common;
 
 use std::path::PathBuf;
-use wow_ui_sim::loader::load_addon;
+use wow_ui_sim::loader::{find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-const PANEL_HARNESS_ADDONS: &[(&str, &str)] = &[
-    ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
-    ("Blizzard_Colors", "Blizzard_Colors.toc"),
-    ("Blizzard_SharedXML", "Blizzard_SharedXML.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame.toc"),
-    (
-        "Blizzard_UIPanelTemplates",
-        "Blizzard_UIPanelTemplates_Mainline.toc",
-    ),
-    (
-        "Blizzard_FrameXMLBase",
-        "Blizzard_FrameXMLBase_Mainline.toc",
-    ),
-    ("Blizzard_FrameEffects", "Blizzard_FrameEffects.toc"),
-    ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
-    ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
-    ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
-    (
-        "Blizzard_AccessibilityTemplates",
-        "Blizzard_AccessibilityTemplates.toc",
-    ),
-    ("Blizzard_ObjectAPI", "Blizzard_ObjectAPI_Mainline.toc"),
-    ("Blizzard_UIParent", "Blizzard_UIParent.toc"),
-    ("Blizzard_TextStatusBar", "Blizzard_TextStatusBar.toc"),
-    ("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Mainline.toc"),
-    ("Blizzard_POIButton", "Blizzard_POIButton.toc"),
-    ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
-    ("Blizzard_StoreUI", "Blizzard_StoreUI.toc"),
-    ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
-    ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
-    ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
-    ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
-    (
-        "Blizzard_ManagedFrameSystem",
-        "Blizzard_ManagedFrameSystem_Mainline.toc",
-    ),
-    ("Blizzard_GameMenuEsc", "Blizzard_GameMenuEsc.toc"),
-    (
-        "Blizzard_UIParentPanelManager",
-        "Blizzard_UIParentPanelManager_Mainline.toc",
-    ),
-    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared.toc"),
-    (
-        "Blizzard_SettingsDefinitions_Shared",
-        "Blizzard_SettingsDefinitions_Shared.toc",
-    ),
-    (
-        "Blizzard_SettingsDefinitions_Frame",
-        "Blizzard_SettingsDefinitions_Frame.toc",
-    ),
-    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
-    ("Blizzard_Menu", "Blizzard_Menu.toc"),
-    ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
-    ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
-    ("Blizzard_TimeManager", "Blizzard_TimeManager_Mainline.toc"),
-    ("Blizzard_TimerunningUtil", "Blizzard_TimerunningUtil.toc"),
-    ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
-    ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
-    ("Blizzard_FrameXML", "Blizzard_FrameXML.toc"),
-    (
-        "Blizzard_UIPanels_Game",
-        "Blizzard_UIPanels_Game_Mainline.toc",
-    ),
+// Keep startup order explicit; let the loader select each profile's TOC.
+const PANEL_HARNESS_ADDONS: &[&str] = &[
+    "Blizzard_SharedXMLBase",
+    "Blizzard_Colors",
+    "Blizzard_SharedXML",
+    "Blizzard_SharedXMLGame",
+    "Blizzard_UIPanelTemplates",
+    "Blizzard_FrameXMLBase",
+    "Blizzard_FrameEffects",
+    "Blizzard_LoadLocale",
+    "Blizzard_Fonts_Shared",
+    "Blizzard_HelpPlate",
+    "Blizzard_AccessibilityTemplates",
+    "Blizzard_ObjectAPI",
+    "Blizzard_UIParent",
+    "Blizzard_TextStatusBar",
+    "Blizzard_MoneyFrame",
+    "Blizzard_POIButton",
+    "Blizzard_Flyout",
+    "Blizzard_StoreUI",
+    "Blizzard_MicroMenu",
+    "Blizzard_EditMode",
+    "Blizzard_GarrisonBase",
+    "Blizzard_GameTooltip",
+    "Blizzard_ManagedFrameSystem",
+    "Blizzard_GameMenuEsc",
+    "Blizzard_UIParentPanelManager",
+    "Blizzard_Settings_Shared",
+    "Blizzard_SettingsDefinitions_Shared",
+    "Blizzard_SettingsDefinitions_Frame",
+    "Blizzard_FrameXMLUtil",
+    "Blizzard_Menu",
+    "Blizzard_Minimap",
+    "Blizzard_StaticPopup",
+    "Blizzard_TimeManager",
+    "Blizzard_TimerunningUtil",
+    "Blizzard_ItemButton",
+    "Blizzard_QuickKeybind",
+    "Blizzard_FrameXML",
+    "Blizzard_UIPanels_Game",
 ];
 
 fn blizzard_ui_dir() -> PathBuf {
@@ -74,20 +51,10 @@ fn blizzard_ui_dir() -> PathBuf {
         .expect("Blizzard UI cache should be synced")
 }
 
-fn load_blizzard_addon(env: &WowLuaEnv, addon_name: &str, toc_name: &str) {
+fn load_blizzard_addon(env: &WowLuaEnv, addon_name: &str) {
     let addon_dir = blizzard_ui_dir().join(addon_name);
-    let requested = addon_dir.join(toc_name);
-    let toc_path = if requested.exists() {
-        requested
-    } else {
-        [
-            addon_dir.join(format!("{addon_name}.toc")),
-            addon_dir.join(format!("{addon_name}_Mainline.toc")),
-        ]
-        .into_iter()
-        .find(|candidate| candidate.exists())
-        .unwrap_or(requested)
-    };
+    let toc_path = find_toc_file(&addon_dir)
+        .unwrap_or_else(|| panic!("{addon_name} TOC for active profile should exist"));
     load_addon(&env.loader_env(), &toc_path)
         .unwrap_or_else(|error| panic!("{addon_name} should load in panel harness: {error}"));
     env.apply_runtime_addon_load_workarounds(addon_name);
@@ -96,8 +63,9 @@ fn load_blizzard_addon(env: &WowLuaEnv, addon_name: &str, toc_name: &str) {
 
 fn load_panel_harness(env: &WowLuaEnv) {
     let ui = blizzard_ui_dir();
-    for (addon_name, toc_name) in PANEL_HARNESS_ADDONS {
-        let toc_path = ui.join(addon_name).join(toc_name);
+    for addon_name in PANEL_HARNESS_ADDONS {
+        let toc_path = find_toc_file(&ui.join(addon_name))
+            .unwrap_or_else(|| panic!("{addon_name} TOC for active profile should exist"));
         load_addon(&env.loader_env(), &toc_path)
             .unwrap_or_else(|error| panic!("{addon_name} should load in panel harness: {error}"));
     }
@@ -127,6 +95,17 @@ fn load_panel_harness(env: &WowLuaEnv) {
 
 #[test]
 fn achievement_addon_reports_runtime_load_reason() {
+    if crate::common::wrath_achievement_fixtures::assert_lazy(
+        r#"
+        assert(not IsAddOnLoaded("Blizzard_AchievementUI"))
+        local loaded, reason = LoadAddOn("Blizzard_AchievementUI")
+        assert(loaded, tostring(reason))
+        assert(AchievementFrame and AchievementFrame.selectedTab == 1)
+        assert(IsAddOnLoaded("Blizzard_AchievementUI"))
+        "#,
+    ) {
+        return;
+    }
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
@@ -154,6 +133,20 @@ fn achievement_addon_reports_runtime_load_reason() {
 
 #[test]
 fn achievement_error_handling_load_matches_raw_load_addon() {
+    if crate::common::wrath_achievement_fixtures::assert_lazy(
+        r#"
+        assert(AchievementFrame == nil)
+        AchievementFrame_LoadUI()
+        assert(IsAddOnLoaded("Blizzard_AchievementUI"))
+        assert(AchievementFrame and type(AchievementFrame_OnLoad) == "function")
+        -- Native UIParentLoadAddOn is the error-reporting wrapper in this profile.
+        local loaded, reason = LoadAddOn("Blizzard_AchievementUI")
+        assert(loaded, tostring(reason))
+        assert(not AchievementFrame:IsShown())
+        "#,
+    ) {
+        return;
+    }
     let error_handling_env = WowLuaEnv::new().expect("Failed to create Lua environment");
     error_handling_env.set_screen_size(1024.0, 768.0);
     error_handling_env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
@@ -231,11 +224,7 @@ fn encounter_journal_addon_load_creates_frame() {
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
     load_panel_harness(&env);
 
-    load_blizzard_addon(
-        &env,
-        "Blizzard_EncounterJournal",
-        "Blizzard_EncounterJournal.toc",
-    );
+    load_blizzard_addon(&env, "Blizzard_EncounterJournal");
 
     let frame_exists: bool = env
         .eval(
@@ -259,12 +248,8 @@ fn compact_unit_frame_runtime_template_keeps_over_heal_absorb_glow_child() {
     env.set_screen_size(1024.0, 768.0);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
     load_panel_harness(&env);
-    load_blizzard_addon(&env, "Blizzard_BuffFrame", "Blizzard_BuffFrame.toc");
-    load_blizzard_addon(
-        &env,
-        "Blizzard_UnitFrame",
-        "Blizzard_UnitFrame_Mainline.toc",
-    );
+    load_blizzard_addon(&env, "Blizzard_BuffFrame");
+    load_blizzard_addon(&env, "Blizzard_UnitFrame");
 
     let has_glow: bool = env
         .eval(
@@ -290,17 +275,9 @@ fn deprecated_arena_match_frame_keeps_over_heal_absorb_glow_named_from_ancestor(
     env.set_screen_size(1024.0, 768.0);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
     load_panel_harness(&env);
-    load_blizzard_addon(&env, "Blizzard_BuffFrame", "Blizzard_BuffFrame.toc");
-    load_blizzard_addon(
-        &env,
-        "Blizzard_UnitFrame",
-        "Blizzard_UnitFrame_Mainline.toc",
-    );
-    load_blizzard_addon(
-        &env,
-        "Blizzard_Deprecated_ArenaUI",
-        "Blizzard_Deprecated_ArenaUI.toc",
-    );
+    load_blizzard_addon(&env, "Blizzard_BuffFrame");
+    load_blizzard_addon(&env, "Blizzard_UnitFrame");
+    load_blizzard_addon(&env, "Blizzard_Deprecated_ArenaUI");
 
     let has_glow: bool = env
         .eval(
@@ -328,22 +305,10 @@ fn group_members_pin_acquire_keeps_data_provider_on_pin() {
     env.set_screen_size(1024.0, 768.0);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
     load_panel_harness(&env);
-    load_blizzard_addon(
-        &env,
-        "Blizzard_MapCanvasSecureUtil",
-        "Blizzard_MapCanvasSecureUtil.toc",
-    );
-    load_blizzard_addon(&env, "Blizzard_MapCanvas", "Blizzard_MapCanvas.toc");
-    load_blizzard_addon(
-        &env,
-        "Blizzard_SharedMapDataProviders",
-        "Blizzard_SharedMapDataProviders_Mainline.toc",
-    );
-    load_blizzard_addon(
-        &env,
-        "Blizzard_BattlefieldMap",
-        "Blizzard_BattlefieldMap.toc",
-    );
+    load_blizzard_addon(&env, "Blizzard_MapCanvasSecureUtil");
+    load_blizzard_addon(&env, "Blizzard_MapCanvas");
+    load_blizzard_addon(&env, "Blizzard_SharedMapDataProviders");
+    load_blizzard_addon(&env, "Blizzard_BattlefieldMap");
 
     let probe: String = env
         .eval(
@@ -379,6 +344,20 @@ fn group_members_pin_acquire_keeps_data_provider_on_pin() {
 
 #[test]
 fn achievement_toggle_loads_and_shows_frame() {
+    if crate::common::wrath_achievement_fixtures::assert_lazy(
+        r#"
+        A_Admin.SetAchievementEarned(6, true)
+        assert(AchievementFrame == nil)
+        ToggleAchievementFrame()
+        assert(IsAddOnLoaded("Blizzard_AchievementUI"))
+        assert(AchievementFrame and AchievementFrame:IsShown())
+        assert(AchievementFrameSummary:IsShown())
+        ToggleAchievementFrame()
+        assert(not AchievementFrame:IsShown())
+        "#,
+    ) {
+        return;
+    }
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
@@ -563,13 +542,9 @@ fn adventure_journal_dungeon_action_opens_lfd_without_recursing() {
     env.set_screen_size(1024.0, 768.0);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
     load_panel_harness(&env);
-    load_blizzard_addon(&env, "Blizzard_RaidWarning", "Blizzard_RaidWarning.toc");
-    load_blizzard_addon(&env, "Blizzard_LFGUtil", "Blizzard_LFGUtil_Mainline.toc");
-    load_blizzard_addon(
-        &env,
-        "Blizzard_GroupFinder",
-        "Blizzard_GroupFinder_Mainline.toc",
-    );
+    load_blizzard_addon(&env, "Blizzard_RaidWarning");
+    load_blizzard_addon(&env, "Blizzard_LFGUtil");
+    load_blizzard_addon(&env, "Blizzard_GroupFinder");
 
     env.fire_event_with_args("AJ_DUNGEON_ACTION", &[rilua::Val::Num(1201.0)])
         .expect("AJ_DUNGEON_ACTION should not overflow or error");
