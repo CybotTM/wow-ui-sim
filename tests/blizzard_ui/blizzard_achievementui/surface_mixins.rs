@@ -180,6 +180,18 @@ const ACHIEVEMENT_TEMPLATE_PLAN_METHODS: &[(&str, u32)] = &[
 /// message instead of a confusing nil-index error inside the loop.
 #[test]
 fn achievement_category_template_mixin_exposes_plan_named_methods() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local row = CreateFrame("Button", "F08Category", AchievementFrameCategoriesContainer, "AchievementCategoryTemplate")
+        assert(row.label == F08CategoryLabel and row.background == F08CategoryBackground)
+        assert(row:GetScript("OnClick"))
+        row.element = {id = "summary"}
+        AchievementCategoryButton_OnClick(row)
+        assert(row.isSelected and achievementFunctions.selectedCategory == "summary")
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let mixin_type: String = env
             .eval(&format!(
@@ -263,6 +275,17 @@ fn achievement_category_template_mixin_exposes_plan_named_methods() {
 /// `type(AchievementCategoryTemplateButtonMixin.<method>) == "function"`.
 #[test]
 fn achievement_category_template_button_mixin_exposes_plan_named_methods() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local row = CreateFrame("Button", "F08CategoryTooltip", AchievementFrameCategoriesContainer, "AchievementCategoryTemplate")
+        assert(row:IsMouseEnabled() and row:IsMouseWheelEnabled())
+        assert(row:GetScript("OnEnter") and row:GetScript("OnLeave"))
+        AchievementFrameCategories_DisplayButton(row, {id = "summary"})
+        assert(row.label:GetText() == ACHIEVEMENT_SUMMARY_CATEGORY)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let mixin_type: String = env
             .eval(&format!("return type(_G[{CATEGORY_BUTTON_MIXIN_NAME:?}])"))
@@ -346,6 +369,21 @@ fn achievement_category_template_button_mixin_exposes_plan_named_methods() {
 /// a confusing nil-index error inside the loop.
 #[test]
 fn achievement_template_mixin_exposes_plan_named_methods() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local row = CreateFrame("Button", "F08Achievement", AchievementFrameAchievements, "AchievementTemplate")
+        for _, method in ipairs({"Collapse", "Expand", "Saturate", "Desaturate"}) do
+            assert(type(row[method]) == "function", method)
+        end
+        assert(row.collapsed and row.description and row.hiddenDescription)
+        row:Expand(150)
+        assert(not row.collapsed and row:GetHeight() == 150)
+        row:Collapse()
+        assert(row.collapsed and row:GetHeight() == ACHIEVEMENTBUTTON_COLLAPSEDHEIGHT)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let mixin_type: String = env
             .eval(&format!(
@@ -460,6 +498,20 @@ fn achievement_template_mixin_exposes_plan_named_methods() {
 /// any future method-shape pin on the same mixin.
 #[test]
 fn plan_named_table_only_mixins_exist_as_tables() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local row = assert(AchievementFrameComparisonContainer.buttons[1])
+        assert(type(row.player.Saturate) == "function")
+        assert(type(row.friend.Desaturate) == "function")
+        assert(AchievementFrameAchievementsObjectives:GetObjectType() == "Frame")
+        local stat = CreateFrame("Button", "F08StatSurface", AchievementFrameStats, "StatTemplate")
+        assert(stat.value and stat.title and stat.background)
+        assert(type(AchievementObjectives_DisplayCriteria) == "function")
+        assert(type(AchievementFrameStats_SetStat) == "function")
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         for (mixin_name, line_number, xml_site) in PLAN_NAMED_TABLE_ONLY_MIXINS {
             let mixin_type: String = env
@@ -524,6 +576,20 @@ fn plan_named_table_only_mixins_exist_as_tables() {
 /// that references it).
 #[test]
 fn achivement_button_check_mixin_exposes_plan_named_methods() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local row = CreateFrame("Button", "F08Tracked", AchievementFrameAchievements, "AchievementTemplate")
+        assert(row.tracked:GetObjectType() == "CheckButton")
+        row.tracked:SetChecked(true)
+        assert(row.tracked:GetChecked())
+        row.collapsed = nil
+        row:Collapse()
+        assert(row.tracked:GetChecked())
+        assert(row.tracked:GetScript("OnClick"))
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let mixin_type: String = env
             .eval(&format!(

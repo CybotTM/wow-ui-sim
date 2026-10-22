@@ -44,13 +44,11 @@ if not rawget(_G, "__wow_casting_bar_apply_alpha_wrapper")
     end
     rawset(_G, "__wow_casting_bar_apply_alpha_wrapper", true)
 end
-if ChatFrame1EditBox and ChatFrame1 then
-    ChatFrame1EditBox:SetWidth(447)
-end
 "#;
 
 pub(crate) fn patch(env: &WowLuaEnv) {
     let _ = env.exec(POST_EVENT_FRAME_LAYOUT_WORKAROUND_LUA);
+    crate::lua_api::chat_init::normalize_chat_editbox_width(env, true);
 }
 
 #[cfg(test)]

@@ -18,6 +18,7 @@ fn chat_frame_is_ready_before_third_party_addons_load() {
         state.addon_base_paths = vec![ui.clone()];
     }
 
+    crate::common::load_profile_framexml(&env);
     let addons = discover_blizzard_addon_closure_for_screen(
         &ui,
         ScreenKind::Game,

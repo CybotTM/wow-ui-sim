@@ -494,7 +494,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-7")]
             quest_short_expiration_warnings: ::std::collections::HashSet::new(),
             abandon_quest_id: None,
-            tracked_achievements: ::std::collections::HashSet::new(),
+            tracked_achievements: Vec::new(),
             // Simulator initial policy matches the cached trainer panel constants.
             #[cfg(feature = "client-wrath")]
             wrath_trainer_filters: [true, true, false],
@@ -574,6 +574,8 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-0")]
             bnet_custom_message: String::new(),
             social_friends: default_social_friends(),
+            #[cfg(feature = "client-wrath")]
+            selected_friend_guid: None,
             auction_browse_results: default_auction_browse_results(),
             auction_replicate_items: default_auction_replicate_items(),
             auction_owned: Vec::new(),

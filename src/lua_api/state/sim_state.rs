@@ -598,7 +598,8 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-7")]
     pub quest_short_expiration_warnings: HashSet<u32>,
     pub abandon_quest_id: Option<u32>,
-    pub tracked_achievements: HashSet<i32>,
+    /// Unique tracked IDs in insertion order, shared by legacy tracking globals.
+    pub tracked_achievements: Vec<i32>,
     /// Supplied legacy trainer visibility: available, unavailable, used.
     #[cfg(feature = "client-wrath")]
     pub wrath_trainer_filters: [bool; 3],
@@ -690,6 +691,9 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-0")]
     pub bnet_custom_message: String,
     pub social_friends: Vec<SocialFriend>,
+    /// Wrath selection retains identity when the display projection changes.
+    #[cfg(feature = "client-wrath")]
+    pub selected_friend_guid: Option<String>,
     pub auction_browse_results: Vec<AuctionBrowseResult>,
     pub auction_replicate_items: Vec<AuctionReplicateItem>,
     pub auction_owned: Vec<OwnedAuction>,
