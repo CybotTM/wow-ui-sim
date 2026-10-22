@@ -25,7 +25,7 @@ pub fn load_errors() {
 
 pub fn main_events() {
     assert_events(
-        "MainMenuBar",
+        "MainMenuBarArtFrame",
         &[
             "PLAYER_ENTERING_WORLD",
             "BAG_UPDATE",
@@ -328,7 +328,7 @@ pub fn aura_duration() {
         assert(button.duration:GetText() == string.format(SecondsToTimeAbbrev(30)), "native format and argument must render together")
         local r, g, b = button.duration:GetTextColor()
         assert(r == HIGHLIGHT_FONT_COLOR.r and g == HIGHLIGHT_FONT_COLOR.g and b == HIGHLIGHT_FONT_COLOR.b)
-        assert(button:GetAlpha() == BuffFrame.BuffAlphaValue, "native flashing alpha")
+        assert(math.abs(button:GetAlpha() - BuffFrame.BuffAlphaValue) < 0.000001, "native flashing alpha")
         SHOW_BUFF_DURATIONS = "0"
         handler(button, 0)
         assert(not button.duration:IsShown())

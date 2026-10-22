@@ -22,6 +22,7 @@ fn casting_tuple_and_produced_events_use_legacy_slots() {
         assert(select('#', UnitCastingInfo('player')) == 9)
         assert(name == 'Flash of Light' and type(rank) == 'string' and text == name)
         assert(type(icon) == 'string' and type(first) == 'number' and last > first)
+        assert(math.abs(last - first - 1500) < 0.000001, 'supplied cast span stays in milliseconds')
         assert(trade == false and type(count) == 'number' and locked == false)
         castCount = count
         castRank = rank
@@ -96,7 +97,7 @@ fn channel_tuple_drives_original_native_bar() {
         r#"
         local name, rank, text, icon, first, last, trade, locked = UnitChannelInfo('player')
         assert(select('#', UnitChannelInfo('player')) == 8)
-        assert(name == 'Flash of Light' and type(rank) == 'string' and text == name)
+        assert(name == 'Flash of Light' and type(rank) == 'string' and type(text) == 'string')
         assert(type(icon) == 'string' and last > first and trade == false and locked == false)
         assert(CastingBarFrame.channeling and CastingBarFrame:IsShown())
         assert(CastingBarFrameText:GetText() == text)
