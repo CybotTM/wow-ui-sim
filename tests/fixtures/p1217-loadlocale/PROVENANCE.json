@@ -1,0 +1,27 @@
+{
+  "repository": "https://github.com/Gethe/wow-ui-source",
+  "revision": "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a",
+  "version": "12.1.7.70424",
+  "copied": "2026-10-22",
+  "transformation": "none; byte-for-byte original fetched contents",
+  "files": [
+    {
+      "path": "Blizzard_LoadLocale.toc",
+      "source_path": "Interface/AddOns/Blizzard_LoadLocale/Blizzard_LoadLocale.toc",
+      "sha256": "e3286e5b274bbb671a01587a45b8e17d0c7e9348508aa86935d175a624d963c0",
+      "bytes": 85
+    },
+    {
+      "path": "enUS/LoadLocale.lua",
+      "source_path": "Interface/AddOns/Blizzard_LoadLocale/enUS/LoadLocale.lua",
+      "sha256": "46ad3fc6fb77df0b43dc078b3cbc659ac4dfb17d47cdfa43faaa40d23a1e0875",
+      "bytes": 136
+    },
+    {
+      "path": "enGB/LoadLocale.lua",
+      "source_path": "Interface/AddOns/Blizzard_LoadLocale/enGB/LoadLocale.lua",
+      "sha256": "dcda181dce3b1e470a1cfed2f165a47162b3b046622f991c0777bd914887fc21",
+      "bytes": 136
+    }
+  ]
+}
