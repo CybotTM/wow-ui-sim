@@ -22,6 +22,27 @@
       "source_path": "Interface/AddOns/Blizzard_LoadLocale/enGB/LoadLocale.lua",
       "sha256": "dcda181dce3b1e470a1cfed2f165a47162b3b046622f991c0777bd914887fc21",
       "bytes": 136
+    },
+    {
+      "path": "ptBR/LoadLocale.lua",
+      "source_path": "Interface/AddOns/Blizzard_LoadLocale/ptBR/LoadLocale.lua",
+      "sha256": "d399daba779a16b52752d7faf323f5a5174c9093485ad45e23722968fd178f23",
+      "bytes": 136,
+      "url": "https://raw.githubusercontent.com/Gethe/wow-ui-source/b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a/Interface/AddOns/Blizzard_LoadLocale/ptBR/LoadLocale.lua"
+    },
+    {
+      "path": "ptPT/LoadLocale.lua",
+      "source_path": "Interface/AddOns/Blizzard_LoadLocale/ptPT/LoadLocale.lua",
+      "sha256": "533bf6f74a31bb17db3582df7b2dc9f580423911f85c5a656d35cd2269eeaf07",
+      "bytes": 136,
+      "url": "https://raw.githubusercontent.com/Gethe/wow-ui-source/b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a/Interface/AddOns/Blizzard_LoadLocale/ptPT/LoadLocale.lua"
+    },
+    {
+      "path": "deDE/LoadLocale.lua",
+      "source_path": "Interface/AddOns/Blizzard_LoadLocale/deDE/LoadLocale.lua",
+      "sha256": "6b847425ee77ab3f44ddc9c044206fd441c4e304fee0cbc83117d8315c3222fc",
+      "bytes": 136,
+      "url": "https://raw.githubusercontent.com/Gethe/wow-ui-source/b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a/Interface/AddOns/Blizzard_LoadLocale/deDE/LoadLocale.lua"
     }
   ]
 }
