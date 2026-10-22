@@ -1,6 +1,6 @@
 ## [2026-10-22] investigation | Wrath F07 fixture boundaries
 
-Added [fixture diagnosis](investigations/wrath-fixture-f07.md) and [contract](../specs/wrath-fixture-f07.md). Separate original cached consumers and explicitly authored anchor XML from literal modern-only report rows; preserve historical specimen binding and UNCONFIRMED 12340 provenance. Resumed-base Wrath11 passes and modern21 fails; remaining paired proof is pending, not a producer-fix claim.
+Added [fixture diagnosis](investigations/wrath-fixture-f07.md) and [contract](../specs/wrath-fixture-f07.md). Separate original cached consumers and explicitly authored anchor XML from literal modern-only report rows; preserve historical specimen binding and UNCONFIRMED 12340 provenance. Before/after Wrath11 passes and modern21 fails unchanged; Retail32 passes both sides. Wrath stock arrays are empty, both profile checks and fmt pass without warnings. SHA-verified base executables are reused only across docs-only changes; no producer fix is claimed.
 
 ## [2026-10-21] source | Wrath tracked achievements
 

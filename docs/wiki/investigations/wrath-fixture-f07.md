@@ -18,7 +18,7 @@ The corpus case selects the directory beside Wrath's FrameXML TOC instead of mod
 
 The laptop's 2026-10-21 F07 response has no version-proven shipped 12340 UIParent.lua or UIPanelTemplates.xml. Pulse/shine functions, Shine1..4 naming and Faux empty-range/named-child declarations are all UNCONFIRMED. Expectations derived from the committed cache remain INFERRED. Lack of cache hits for modern identifiers is not authenticated native absence. No decompiled source was read.
 
-At resumed base `62ed26a45`, all 11 repairable cases already pass; only the 21 report-only rows fail. No new producer defect is reproduced, so no producer change is warranted. Historical 32-case RED receipts remain separate from this fresh baseline.
+Before at `62ed26a45` and after at docs revision `c28dfe7f7`, all 11 repairable cases pass; only the 21 unchanged report-only rows fail. Retail is 32/32 on both sides. Wrath stock returns byte-exact `[]\n` on both sides; both profile checks and fmt pass without warnings. The [contract](../../specs/wrath-fixture-f07.md#tests-asserting-this-spec) records artifact reuse and proof limits. No new producer defect is reproduced, so no producer change is warranted. Historical 32-case RED receipts remain separate from these fresh executions.
 
 ## Sources
 

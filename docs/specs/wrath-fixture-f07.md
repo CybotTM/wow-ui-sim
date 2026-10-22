@@ -9,7 +9,7 @@ F07 covers 32 existing integration cases: 11 repairable fixture rows and 21 unch
 - [x] Preserve outer child anchors and inherited inner anchors using an explicitly authored generic Frame control on Wrath; resolve `$parentBackground` against the actual parent during child-anchor reapplication.
 - [x] Load profile FrameXML before testing active button-pulse and animated-shine worklists. Wrath shine uses original free functions and named template textures; Retail retains its existing mixin fixture.
 - [x] Parse the cached Wrath FrameXML directory for the corpus case; retain the existing SharedXMLBase corpus on Retail.
-- [ ] Preserve all 32 Retail outcomes across the batch and retain all 21 modern-only Wrath failures unchanged and ungated.
+- [x] Preserve all 32 Retail outcomes across the batch and retain all 21 modern-only Wrath failures unchanged and ungated.
 
 ## How it works
 
@@ -32,12 +32,23 @@ F07 covers 32 existing integration cases: 11 repairable fixture rows and 21 unch
 
 The files above are registered under the existing `integration` target. Each F07 invocation selects one fully qualified case with `--exact` and must execute more than zero tests. The worklist cases have nested timeout-process summaries; these are not additional distinct cases.
 
-At resumed base `62ed26a4547f405dc19c52bdaff3de1b4b1d95be`, Wrath is **11 PASS / 21 FAIL**. All 11 repairable rows pass before any new producer change; the corpus parses 140 XML files. Retail at the same base is **32 PASS / 0 FAIL**. These baselines do not justify inventing a producer fix. Wrath stock `--no-addons --no-saved-vars lua-errors` returns byte-exact `[]\n` with exit 0 at that base. After counts and final profile checks remain pending.
+Resumed base: `62ed26a4547f405dc19c52bdaff3de1b4b1d95be`; after-execution docs revision: `c28dfe7f7ceae2b1bebbf10b9c40c22e2b5a7f25`. All 11 repairable rows already pass at the base, so no producer defect or new producer RED/GREEN cycle is claimed. The corpus parses 140 cached Wrath XML files.
+
+| Proof scope | Before | After |
+|---|---|---|
+| Wrath32 exact cases | 11 PASS / 21 FAIL | 11 PASS / 21 FAIL; identical rows |
+| Retail32 exact cases | 32 PASS / 0 FAIL | 32 PASS / 0 FAIL; identical rows |
+| Wrath stock `--no-addons --no-saved-vars lua-errors` | byte-exact `[]\n`, exit0 | byte-exact `[]\n`, exit0 |
+| Both profile checks: `cargo check -j1 --lib --test integration --bin wow-sim` | Not requested | PASS, no warnings |
+| `cargo fmt --all -- --check` | Prior fixture formatted | PASS |
+
+Wrath commands use `--no-default-features --features sound,gui,casc,client-wrath`; Retail uses defaults. SHA-verified base executables were reused for after runs only after confirming the continuation changed docs alone. All 128 exact invocations execute more than zero tests; original CVar stat/hash is unchanged across launches using fresh child-only copies. Checks compile the after-execution revision. Later documentation-only updates do not invalidate this code proof.
 
 ## Known gaps (current cycle)
 
 - [ ] Native 12340 provenance: the laptop's 2026-10-21 response marks the requested UIParent pulse/shine functions, texture names and Faux declarations UNCONFIRMED. No version-proven shipped UIParent.lua/UIPanelTemplates.xml was available. Cached expectations remain INFERRED, not authenticated native acceptance or absence evidence.
-- [ ] Preserve the 21 literal modern-only cases as report-only candidates, not passing tests. No new cfg exclusions, ignores or replacement capabilities are authorized.
+
+The 21 literal modern-only cases remain report-only failures, not accepted passes. Their original test-function specimens are byte-identical; no new cfg exclusions, ignores or replacement capabilities were introduced.
 
 ## Out of scope
 
