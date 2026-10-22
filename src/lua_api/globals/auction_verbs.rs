@@ -253,16 +253,24 @@ fn bid_auction_row(entry: &BidAuction) -> LegacyAuctionRow {
 }
 
 fn push_legacy_auction_row(state: &mut LuaState, row: &LegacyAuctionRow) -> LuaResult<u32> {
+    push_auction_item_fields(state, row);
+    let owner = row.owner.as_deref().unwrap_or("Player");
+    let owner = create_string(state, owner);
+    if cfg!(feature = "client-wrath") {
+        push_wrath_auction_prices(state, row, owner)
+    } else {
+        push_mists_auction_prices(state, row, owner)
+    }
+}
+
+fn push_auction_item_fields(state: &mut LuaState, row: &LegacyAuctionRow) {
     let item = items::get_item(row.item_id as u32);
     let name = item
         .map(|item| item.name.to_string())
         .unwrap_or_else(|| format!("Item {}", row.item_id));
     let icon = item.map(item_icon_file_id).unwrap_or(134400.0);
     let quality = item.map(|item| item.quality as f64).unwrap_or(0.0);
-    let owner = row.owner.as_deref().unwrap_or("Player");
     let name = create_string(state, &name);
-    let owner = create_string(state, owner);
-
     state.push(name);
     state.push(Val::Num(icon));
     state.push(Val::Num(row.quantity as f64));
@@ -274,9 +282,13 @@ fn push_legacy_auction_row(state: &mut LuaState, row: &LegacyAuctionRow) -> LuaR
     };
     state.push(usable);
     state.push(Val::Num(row.item_level as f64));
-    if cfg!(feature = "client-wrath") {
-        return push_wrath_auction_prices(state, row, owner);
-    }
+}
+
+fn push_mists_auction_prices(
+    state: &mut LuaState,
+    row: &LegacyAuctionRow,
+    owner: Val,
+) -> LuaResult<u32> {
     let level_header = create_string(state, "Item Level");
     state.push(level_header);
     state.push(Val::Num(row.min_bid as f64));
