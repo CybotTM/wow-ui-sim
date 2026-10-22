@@ -1,3 +1,7 @@
+## [2026-10-22] investigation | Wrath F07 fixture boundaries
+
+[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [32-case contract](../specs/wrath-fixture-f07.md): cached Faux named children/handlers, authored anchor control, original pulse/shine worklists and profile XML corpus. Resumed-base Wrath11 passes; modern-only21 remain unchanged failing report rows. Requested native declarations are UNCONFIRMED; no new producer defect is reproduced.
+
 ## [2026-10-21] investigation | Wrath autocomplete native fixture
 
 [Fixture/query diagnosis](investigations/wrath-autocomplete-fixture.md) links the [bounded contract](../specs/wrath-autocomplete-results.md): original-consumer RED, native callback/result oracles and the Wrath-only legacy argument/string-result boundary. Original33 native cases plus six added boundaries pass; Retail67 passes before/after, both stock arrays are empty and checks warn zero. Modern-only26 targets remain report-only plus one glue evidence gap; guild/presence identity, recency and UTF-8 edges are held.
