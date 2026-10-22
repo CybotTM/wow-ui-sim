@@ -284,7 +284,11 @@ pub fn aura_cast_refresh() {
         assert(UnitBuff("player", 1) == "Devotion Aura")
         assert(BUFF_ACTUAL_DISPLAY > 0, "native UNIT_AURA did not refresh buffs")
         assert(BuffButton1:IsShown() and BuffButton1.unit == "player")
-        assert(BuffButton1Icon:GetTexture() == select(3, UnitBuff("player", 1)))
+        local suppliedIcon = select(3, UnitBuff("player", 1))
+        local displayedIcon = BuffButton1Icon:GetTexture()
+        assert(type(suppliedIcon) == "string", "native UnitBuff publishes a filename")
+        assert(type(displayedIcon) == "string", "native BuffFrame texture getter must publish a filename, not a file ID")
+        assert(displayedIcon == suppliedIcon, "fresh native BuffFrame icon identity")
     "#,
     )
     .unwrap();
