@@ -2,6 +2,10 @@
 
 Linked [original callback/callee attribution](../specs/c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22), original-consumer RED and existing-model publication; reconciled current T6 and classification notes. Original-consumer RED→GREEN, Retail preservation, stock pair removal and final checks now recorded in the owning contract.
 
+## [2026-10-22] source | Wrath autocomplete applicability
+
+EXCL-1 applies the user decision: 26 modern-only rows are excluded on Wrath as not applicable to 3.3.5 via the existing compile gate; bodies and other profiles stay unchanged. The glue-scope row remains compiled and failing as an evidence gap. See [coverage boundaries](investigations/wrath-autocomplete-fixture.md#coverage-boundaries) and [contract](../specs/wrath-autocomplete-results.md#known-gaps-current-cycle).
+
 ## [2026-10-21] source | Wrath tracked achievements
 
 Added [tracking model notes](systems/lua-api.md#wrath-tracked-achievements) and [contract](../specs/wrath-tracked-achievements.md), separating authenticated 12340 static facts from INFERRED cached-consumer expectations. Current-source Wrath RED54 and Retail72+4 baseline precede the producer. Final merged proof: Wrath54+5 PASS, Retail76 statuses/failures unchanged, both stock arrays empty, warning-free check and formatting PASS. Supplemental public-API zero-ID RED precedes its correction; ten existing compile-gated rows are not counted as executed.

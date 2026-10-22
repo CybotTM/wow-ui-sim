@@ -4,7 +4,7 @@
 
 ## [2026-10-21] investigation | Wrath autocomplete native fixture
 
-[Fixture/query diagnosis](investigations/wrath-autocomplete-fixture.md) links the [bounded contract](../specs/wrath-autocomplete-results.md): original-consumer RED, native callback/result oracles and the Wrath-only legacy argument/string-result boundary. Original33 native cases plus six added boundaries pass; Retail67 passes before/after, both stock arrays are empty and checks warn zero. Modern-only26 targets remain report-only plus one glue evidence gap; guild/presence identity, recency and UTF-8 edges are held.
+[Fixture/query diagnosis](investigations/wrath-autocomplete-fixture.md) links the [bounded contract](../specs/wrath-autocomplete-results.md): original-consumer RED, native callback/result oracles and the Wrath-only legacy argument/string-result boundary. Original33 native cases plus six added boundaries pass; Retail67 passes before/after, both stock arrays are empty and checks warn zero. EXCL-1 excludes 26 modern-only targets on Wrath by user decision as not applicable to 3.3.5; the glue-scope row remains compiled and failing as an evidence gap. Guild/presence identity, recency and UTF-8 edges are held.
 
 ## [2026-10-21] source | Wrath tracked achievements
 

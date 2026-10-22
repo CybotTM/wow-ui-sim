@@ -10,7 +10,7 @@ The C API model now has a Wrath-specific query projection over existing friend G
 
 ## Coverage boundaries
 
-Native fixtures retain shared query, result, selection, click, clear, template and dismissal assertions. Literal modern callback setters, popup mixins/pools, scroll widgets, tooltip/icon rows and independent popup instances remain original modern assertions, not synthesized native libraries. Native GlueXML availability remains unverified.
+Native fixtures retain shared query, result, selection, click, clear, template and dismissal assertions. Literal modern callback setters, popup mixins/pools, scroll widgets, tooltip/icon rows and independent popup instances remain original modern assertions, not synthesized native libraries. By user decision (EXCL-1, 2026-10-22), 26 modern-only Blizzard_AutoComplete / AutoCompletePopupList rows are excluded on Wrath as not applicable to 3.3.5, using `post_wrath_ui_fixture!`; their bodies and other-profile compilation remain unchanged. The `blizzard_auto_complete_load::blizzard_auto_complete_allowload_both_loads_in_game_and_glue_scopes` row stays compiled and failing on Wrath as an evidence gap. Native GlueXML availability remains unverified.
 
 Build 12340 authority is the 2026-10-21 laptop relay `autocomplete-results-12340.md`, static reconstruction only. Cached Lua/XML expectations are INFERRED, not native-client execution. Guild/native-presence identity links, incomplete friend identities, whisper history, recency and UTF-8/case-helper edge parity remain outside this bounded model.
 

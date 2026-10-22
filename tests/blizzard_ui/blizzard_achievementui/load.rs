@@ -1,16 +1,16 @@
 //! Load contracts for current retail `Blizzard_AchievementUI`.
 //!
-//! Retail 12.1.0.69497 uses `Blizzard_AchievementUI_Mainline.toc`, loads on
-//! demand in the mainline game client, and declares `Blizzard_FrameXMLUtil`
-//! plus optional `Blizzard_Plunderstorm`. Its bootstrap precedes the Lua, XML,
+//! The active profile's `Blizzard_AchievementUI` TOC loads on demand in
+//! the mainline game client and declares `Blizzard_FrameXMLUtil`.
+//! Its Plunderstorm dependency is game-type-filtered. Its bootstrap precedes the Lua, XML,
 //! and localization files.
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 use crate::common::panel_fixtures::blizzard_ui_dir;
+use wow_ui_sim::loader::find_toc_file;
 use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_AchievementUI";
-const ROOT_TOC_FILE: &str = "Blizzard_AchievementUI_Mainline.toc";
 const LANE_FILE_SCOPE_MIXINS: &[&str] = &[
     "AchievementCategoryTemplateMixin",
     "AchievementCategoryTemplateButtonMixin",
@@ -87,7 +87,18 @@ fn achievement_ui_load_emits_no_lane_specific_lua_errors() {
     });
 }
 
-const CURRENT_TOC_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil", "Blizzard_Plunderstorm"];
+// Retail/PTR filter the inline Plunderstorm dependency; Forever keeps it optional.
+const CURRENT_TOC_DEPENDENCIES: &[&str] = match wow_ui_sim::client_profile::ACTIVE {
+    wow_ui_sim::client_profile::ClientProfile::Retail
+    | wow_ui_sim::client_profile::ClientProfile::Ptr => &["Blizzard_FrameXMLUtil"],
+    wow_ui_sim::client_profile::ClientProfile::WowForever => {
+        &["Blizzard_FrameXMLUtil", "Blizzard_Plunderstorm"]
+    }
+    wow_ui_sim::client_profile::ClientProfile::Wrath
+    | wow_ui_sim::client_profile::ClientProfile::Mists
+    | wow_ui_sim::client_profile::ClientProfile::Era
+    | wow_ui_sim::client_profile::ClientProfile::Anniversary => &[],
+};
 const PANEL_ADDON_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil"];
 const STANDARD_GAME_TYPE_FILTERED_DEPENDENCIES: &[&str] = &["Blizzard_Plunderstorm"];
 const CLOSURE_LOADED_ADDONS: &[&str] = &[ROOT];
@@ -236,7 +247,8 @@ fn achievement_ui_loaded_set_contains_every_declared_toc_dependency() {
     ) {
         return;
     }
-    let toc_path = blizzard_ui_dir().join(ROOT).join(ROOT_TOC_FILE);
+    let toc_path = find_toc_file(&blizzard_ui_dir().join(ROOT))
+        .expect("Blizzard_AchievementUI TOC for active profile");
     let toc = TocFile::from_file(&toc_path).unwrap_or_else(|e| {
         panic!(
             "TOC at `{}` MUST parse cleanly. The closure walker reads this same file via \
@@ -250,8 +262,9 @@ fn achievement_ui_loaded_set_contains_every_declared_toc_dependency() {
     declared_deps.extend(toc.optional_deps());
 
     assert_eq!(
-        declared_deps, CURRENT_TOC_DEPENDENCIES,
-        "`{ROOT_TOC_FILE}` currently declares these direct dependencies. Update this source \
+        declared_deps,
+        CURRENT_TOC_DEPENDENCIES,
+        "`{ROOT}` currently declares these direct dependencies. Update this source \
          contract with the TOC if retail changes it."
     );
 
