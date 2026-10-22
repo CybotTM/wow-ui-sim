@@ -1,0 +1,592 @@
+{{uitech}} {{tocright}}
+TOC files are addon manifest files, they define the information, contents, metadata, and loading conditions and behaviour of addons.
+
+Example TOC file:
+{{#tag:syntaxhighlight|
+## Interface: {{API LatestInterface}}
+## Title: My AddOn Name
+## Notes: Brief description about what My AddOn does to help people find it
+## Version: 1.0.0
+
+# This line is a comment
+
+MyFrame.xml
+MyCode.lua
+lib\MyCode.lua
+anotherfolder\MoreCode.xml
+|lang="wowtoc"}}
+
+==Rules==
+* The file extension suffix for TOC files is <code>.toc</code>.
+* The TOC file and folder name must match.
+** Example: <code>\Interface\AddOns\AddOnName\AddOnName.toc</code>
+* The TOC file can contain the following:
+** Directives as <syntaxhighlight lang="wowtoc" inline>## Directive: Value</syntaxhighlight>
+** Comments as <syntaxhighlight lang="wowtoc" inline># this is a comment</syntaxhighlight>
+** A list of files as <syntaxhighlight lang="wowtoc" inline>myFile.xml</syntaxhighlight> or <syntaxhighlight lang="wowtoc" inline>subfolder\myFile.lua</syntaxhighlight>
+*** Only Lua and XML files need to be listed (not media such as images, fonts, and sounds).
+*** Files are loaded sequentially from top to bottom.
+*** XML files can also load files with <code>{{api|t=x|Script}}</code> or <code>{{api|t=x|Include}}</code> tags.
+*** Backslashes (<code>\</code>) are recommended instead of forward slashes (<code>/</code>) for paths to prevent issues with <code>{{api|t=x|Include}}</code> tags.
+*** Whitespace before <code>#</code> will be interpreted as the start of a filename, however, the client trims whitespace around metadata values (after the colon).
+* The game reads up to the first 1024 characters of each line only.
+** Any additional characters are silently ignored.
+* Newly created/added files (and even complete addons) are detected when doing a <code>/reload</code> after the game has started.
+** If you delete or rename a TOC file already loaded by the game you will however need a full game restart.
+
+==Naming==
+Addons can ship multiple TOC files with different file name suffixes in order to load a different TOC for specific game types or their families.<ref name="WoWUIBug#68">{{Ref web|author=Meo[[File:Inv g fishingbobber 05.png|12px]]rawr|url=https://github.com/Stanzilla/WoWUIBugs/issues/68#issuecomment-889431675|title=Multiple Interface Version Support|publisher=WoWUIBugs}}</ref>
+
+The game first searches for TOC files with these suffixes (examples below), and if none are found to match its game type (or its aliases) it will default to <code>AddOnName.toc</code> without a suffix. Family suffixes have a lower priority; for example, having both <code>AddOnName_<span class="apitype">Standard</span>.toc</code> and <code>AddOnName_<span class="apitype">Mainline</span>.toc</code> will result in the former being used for {{API LatestExpansion}}, and the latter for all other Mainline-family game types.
+
+{{note|Comma-delimited [[#Interface|interface versions]] or [[#Inline directives|inline directives]] should be preferred over the use of game type specific TOC files where possible.}}
+
+{{Template:GameTypes|suffix=}}
+
+==Variables==
+TOC files support the use of variable expansions for files. They use the syntax <code>[<span class="apialt">Variable</span>]</code>, and can appear anywhere in a line.
+
+;<span class="apialt">Family</span>
+:Expands to a game type family (e.g., <span class="apitype">Mainline</span>, or <span class="apitype">Classic</span>) based on the client's game type.
+;<span class="apialt">Game</span>
+:Expands to a game type (e.g., <span class="apitype">Standard</span>, <span class="apitype">Vanilla</span>, <span class="apitype">Camelot</span>{{efn|1=The <span class="apitype">Camelot</span> value may be changed to <span class="apitype">Forever</span> in the future.}}, <span class="apitype">TBC</span>, <span class="apitype">Wrath</span>, or <span class="apitype">Mists</span>) based on the client's game type.
+;<span class="apialt">TextLocale</span>
+:Expands to a locale based on the client's configured text locale (e.g., <span class="apitype">enUS</span>, <span class="apitype">deDE</span>, or <span class="apitype">frFR</span>).
+;<span class="apialt">RegionalTextLocale</span>
+:{{supports|{{LatestPatchInfo|icon=}} {{g|{{API LatestExpansion}}}} [[{{API LatestVersion|test}}]] and {{forever-inline}} {{g|forever}}.}}
+:Expands to a region specific locale based on the client's configured text locale and region (e.g., <span class="apitype">enGB</span> and <span class="apitype">ptPT</span> in the EU region vs <span class="apitype">enUS</span> and <span class="apitype">ptBR</span> in the NA region).
+{{notelist}}
+
+{{#tag:syntaxhighlight|
+## Interface: {{API LatestInterface}}
+## Title: My Cool AddOn
+## Notes: My addon is working.
+
+# This will load "Mainline\File.lua" or "Classic\File.lua"
+# as appropriate for the client.
+[Family]\File.lua
+
+# This will load "Standard\File.lua", "Mists\File.lua", "Cata\File.lua", ...
+# as appropriate for the client.
+[Game]\File.lua
+
+# This will load "Localization\enUS.lua", "Localization\frFR.lua", ...
+# as appropriate for the client text locale.
+Localization\[TextLocale].lua
+|lang="wowtoc"}}
+
+==Inline directives==
+TOC files support the inline use of directives which define the conditions under or behaviour with which their corresponding addon directive or file will apply. They use the syntax <code>[<span class="apialt">Directive</span>]</code> or <code>[<span class="apialt">Directive</span> <span class="apitype">value</span>]</code> with case insensitive values. Multiple inline directives can be used per line, and can appear anywhere in a line.
+{{note|For reasons of compatibility, inline directives should generally only ever be used at the end of a line.}}
+
+The following directives are supported inline:
+;<span class="apialt">AllowLoad</span>
+:Restricts the addon directive or file to in-game (<span class="apitype">Game</span>), glue screen (<span class="apitype">Glue</span>), or both (<span class="apitype">Both</span>) environments.
+:{{note|Functionally inoperable for addons, as only Blizzard addons are loaded within the glue screen environment.}}
+;<span class="apialt">AllowLoadGameType</span>
+:Restricts the addon directive or file to one or multiple specific game types, delimited by commas.
+:The possible values are the same as used by the [[#AllowLoadGameType|AllowLoadGameType directive]].
+:{{warning|1=If at least 1 game type is specified and none of the game types are recognized by the client, the condition will still be satisfied. For this reason, you should additionally use <span class="apialt">ExcludeLoadGameType</span> inline to exclude game types that are not universally recognized yet.}}
+;<span class="apialt">ExcludeLoadGameType</span>
+:Similar to <code>[<span class="apialt">AllowLoadGameType</span> <span class="apitype">...</span>]</code>, but restricts the addon directive or file to the game type(s) not listed.
+;<span class="apialt">AllowLoadTextLocale</span>
+:Restricts the addon directive or file to one or more specific client text locales, delimited by commas.
+:The possible values are the same as returned by {{api|t=a|GetLocale}}, eg. "enUS" and "frFR".
+;<span class="apialt">AllowLoadEnvironment</span>
+:Restricts the addon directive or file to the global (<span class="apitype">Global</span>) or secure (<span class="apitype">Secure</span>) environment.
+:{{note|Functionally inoperable for addons, as only Blizzard addons are loaded within the secure environment.}}
+;<span class="apialt">Bootstrap</span>
+:{{supports|{{LatestPatchInfo|icon=}} {{g|{{API LatestExpansion}}}} and {{forever-inline}} {{g|forever}}.}}
+:Restricts the addon directive or file to the bootstrap process for <span class="apialt">LoadOnDemand</span> addons.
+;<span class="apialt">LoadIntoEnvironment</span>
+:Loads the file into the global (<span class="apitype">Global</span>) or secure (<span class="apitype">Secure</span>) environment.
+:{{note|Functionally inoperable for addons, as only Blizzard code can be loaded into the secure environment.}}
+
+Example:
+{{#tag:syntaxhighlight|
+## Interface: {{API LatestInterface}}
+## Title: My Cool AddOn
+## Title: My Cool AddOn in Classic [AllowLoadGameType classic]
+
+# This will only be loaded on Standard (retail).
+StandardOnly.lua [AllowLoadGameType standard]
+
+# This will only be loaded on Camelot (forever).
+ForeverOnly.lua [AllowLoadGameType camelot][ExcludeLoadGameType standard, classic]
+
+# This will only be loaded in Vanilla or TBC.
+VanillaOrTBC.lua [AllowLoadGameType vanilla, tbc]
+
+# This will only be loaded under English or French client locales.
+EnglishOrFrenchOnly.lua [AllowLoadTextLocale enUS, frFR]
+|lang="wowtoc"}}
+
+==Addon directives==
+Addon directives are lines that define the information, metadata, and loading conditions and behaviour of addons. They use the syntax <syntaxhighlight lang="wowtoc" inline>## Directive: Value</syntaxhighlight>. Generally, if an addon directive is specified multiple times, the last one (with consideration for [[#Inline directives|inline directives]]) will be used. Those that have exceptions to this rule are noted. Where multiple values are supported, they may be delimited by commas.
+
+===<span class="apialt">Interface</span>===
+<div style="margin-left:2em">Defines which interface versions the addon supports. An interface version is a single number representation of a client version (e.g., for {{API LatestVersion}}, the interface version is {{API LatestInterface}}).
+
+If an addon doesn't set an interface version that matches the client's, then it's classified as out-of-date.<!-- TODO: Check incompatible range in Forever and document. -->
+
+{{#tag:syntaxhighlight|
+# single value for the latest retail version
+## Interface: {{API LatestInterface}}
+
+# multiple values, for retail + classic + classic era
+## Interface: {{API LatestInterface|_retail_}}, {{API LatestInterface|_classic_}}, {{API LatestInterface|_classic_era_}}
+|lang="wowtoc"}}
+
+Current values per game type (and release channel):
+{{note|These values are maintained by contributors, so they may not always be up to date.}}
+{| class="darktable zebra col2-left" style="text-align:center;"
+! colspan=2 | Game type !! Interface
+|-
+| {{LatestPatchInfo|icon=beta}} || Standard Beta || {{LatestPatchInfo|interface=beta}}
+|-
+| {{LatestPatchInfo|icon=test}} || Standard Test || {{LatestPatchInfo|interface=test}}
+|-
+| {{LatestPatchInfo|icon=}} || Standard || {{LatestPatchInfo|interface=}}
+|-
+| {{mop-inline|classic=}} || Mists Test || {{LatestPatchInfo|interface=mists-test}}
+|-
+| {{mop-inline|classic=}} || Mists || {{LatestPatchInfo|interface=mists}}
+|-
+| {{cata-inline|classic=}} || Cata || {{LatestPatchInfo|interface=cata}}
+|-
+| {{wotlk-inline|classic=}} || Wrath (Titan Reforged) || {{LatestPatchInfo|interface=wrath-titan}}
+|-
+| {{wotlk-inline|classic=}} || Wrath || {{LatestPatchInfo|interface=wrath}}
+|-
+| {{bc-inline|classic=}} || TBC Test || {{LatestPatchInfo|interface=tbc-test}}
+|-
+| {{bc-inline|classic=}} || TBC || {{LatestPatchInfo|interface=tbc}}
+|-
+| {{forever-inline}} || Forever Beta || {{LatestPatchInfo|interface=camelot-beta}}
+|-
+| {{forever-inline}} || Forever Test || {{LatestPatchInfo|interface=forever-test}}
+|-
+| {{forever-inline}} || Forever || {{LatestPatchInfo|interface=forever}}
+|-
+| {{wow-inline|classic=}} || Vanilla Test || {{LatestPatchInfo|interface=vanilla-test}}
+|-
+| {{wow-inline|classic=}} || Vanilla || {{LatestPatchInfo|interface=vanilla}}
+|}
+
+The current version for the client can always be [[MACRO_dump|dumped]] within the game using [[GetBuildInfo]]:
+[[File:GetBuildInfo-Tutorial.gif|alt=Enter the text "/dump select(4, GetBuildInfo())" into the chat window to display the Interface version|left|Demonstration of obtaining the interface version from the chat window.]]{{clrl}}
+</div>
+
+===Displayed text and organization===
+The following addon directives change how an addon is organised and displayed as text in various locations within the game (e.g., the [[AddOn List]], compartment, and tooltips). Their values may be coloured using [[UI escape sequences]] (e.g., <span class="apitype">|c########|r</span>).
+
+Similar to the <span class="apialt">AllowLoadLocale</span> [[#Inline directives|inline directive]], these addon directives may also be [[Localization|localized]] by appending a hyphen and the locale code (e.g., <span class="apialt">Title-enUS</span>).
+{{note|A non-localized fallback should always be specified ''before'' localized ones, otherwise they will be unused.}}
+
+=====<span class="apialt">Title</span>=====
+<div style="margin-left:2em">
+Name displayed in the AddOn List.
+<syntaxhighlight lang="wowtoc">
+## Title: Waiting for Godot
+## Title-frFR: En attendant Godot
+</syntaxhighlight>
+</div>
+
+=====<span class="apialt">Notes</span>=====
+<div style="margin-left:2em">
+Tooltip displayed in the AddOn List.
+<syntaxhighlight lang="wowtoc">
+## Notes: This word is |cFFFF0000red|r
+## Notes-itIT: La parola è |cFFFF0000rossa|r
+</syntaxhighlight>
+</div>
+
+=====<span class="apialt">Category</span>=====
+<div style="margin-left:2em">
+Category name displayed in the AddOn List, displayed as a collapsible header entry.
+It is '''strongly recommended''' that you stick to the translated category names found on the [[Addon Categories]] page. This will ensure that your addon is consistently located with other addons in the same category across all locales.
+<syntaxhighlight lang="wowtoc">
+## Category: This is a test
+## Category-deDE: Dies ist ein Test
+</syntaxhighlight>
+</div>
+
+=====<span class="apialt">Group</span>=====
+<div style="margin-left:2em">
+Addon used for grouping multiple addons together in the AddOn List.
+
+* The value must be the name of the main addon.
+* Grouped addons are displayed in the AddOn List as indented sub-lists. These lists cannot be collapsed, unlike Categories.
+** Nested groups are not supported by the AddOn List.
+* If no Group has been manually specified, the client will attempt to automatically deduce membership of a group.
+** Installed addons will be scanned to locate pairs of addons where the base name of one addon is a complete prefix of another, and where any form of dependency relation exists between the two in either direction.
+
+<syntaxhighlight lang="wowtoc">
+## Group: FooAuras
+</syntaxhighlight>
+</div>
+
+===Displayed icons===
+The following addon directives change how an AddOn is displayed as an icon in various locations within the game (e.g., the AddOn List and compartment).
+
+=====<span class="apialt">IconTexture</span>=====
+<div style="margin-left:2em">
+Path to a texture file to be shown as the icon for this addon in the AddOn List.
+<syntaxhighlight lang="wowtoc">
+## IconTexture: Interface\Icons\TEMP
+</syntaxhighlight>
+</div>
+
+=====<span class="apialt">IconAtlas</span>=====
+<div style="margin-left:2em">
+Name of a texture atlas to be shown as the icon for this addon in the AddOn List. Has a lower priority than <span class="apialt">IconTexture</span> if both are set.
+<syntaxhighlight lang="wowtoc">
+## IconAtlas: TaskPOI-Icon
+</syntaxhighlight>
+</div>
+
+===Addon compartment integration===
+{{section|{{LatestPatchInfo|icon=}}{{forever-inline}}|'''This section concerns content related to {{g|{{API LatestExpansion}}}} and {{g|forever}}.'''}}
+The following addon directives will control the registration of the addon into the [[Addon compartment|addon compartment]] dropdown accessible from the minimap.
+
+====<span class="apialt">AddonCompartmentFunc</span>====
+<div style="margin-left:2em">
+Name of a global function to be executed when the entry for this addon has been clicked in the addon compartment.
+{{note|This directive is '''required''' to show the addon in the addon compartment dropdown when using automatic registration.}}
+<syntaxhighlight lang="wowtoc">
+## AddonCompartmentFunc: MyAddon_OnAddonCompartmentClick
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">AddonCompartmentFuncOnEnter</span>====
+<div style="margin-left:2em">
+Name of a global function to be executed when the entry for this addon has been highlighted in the addon compartment dropdown.
+<syntaxhighlight lang="wowtoc">
+## AddonCompartmentFuncOnEnter: MyAddon_OnAddonCompartmentEnter
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">AddonCompartmentFuncOnLeave</span>====
+<div style="margin-left:2em">
+Name of a global function to be executed when the entry for this addon is no longer highlighted in the addon compartment dropdown.
+<syntaxhighlight lang="wowtoc">
+## AddonCompartmentFuncOnLeave: MyAddon_OnAddonCompartmentLeave
+</syntaxhighlight>
+</div>
+
+=== Loading conditions ===
+The following addon directives control when an addon loads, and any dependencies that must or may load first.
+
+====<span class="apialt">LoadOnDemand</span>====
+<div style="margin-left:2em">
+Set to <span class="apitype">1</span> to delay loading until <code>{{api|C_AddOns.LoadAddOn}}</code> is called.
+<syntaxhighlight lang="wowtoc">
+## LoadOnDemand: 1
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">Dependencies</span>====
+<div style="margin-left:2em">
+Addons that must load first. Aliases include <span class="apialt">RequiredDeps</span> and any word beginning with <code>Dep</code>.
+{{note|This directive may be specified multiple times, with later instances appending to the list.}}
+<syntaxhighlight lang="wowtoc">
+## Dependencies: someAddOn, someOtherAddOn
+## Dep: yetAnotherAddOn
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">OptionalDeps</span>====
+<div style="margin-left:2em">
+Addons that must load first if available.
+<syntaxhighlight lang="wowtoc">
+## OptionalDeps: someAddOn, someOtherAddOn
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">LoadWith</span>====
+<div style="margin-left:2em">
+Addons that, once loaded, will trigger this one to load. Also causes this addon to behave as <span class="apialt">LoadOnDemand</span>.
+{{note|This directive may be specified multiple times, with later instances appending to the list.}}
+<syntaxhighlight lang="wowtoc">
+## LoadWith: someAddOn, someOtherAddOn
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">LoadManagers</span>====
+<div style="margin-left:2em">
+Addons that, if present, will cause this one to behave as <span class="apialt">LoadOnDemand</span>. See [[AddonLoader]] for an example.
+{{note|This directive may be specified multiple times, with later instances appending to the list.}}
+<syntaxhighlight lang="wowtoc">
+## LoadManagers: someAddOn, someOtherAddOn
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">AllowLoadGameType</span>====
+<div style="margin-left:2em">
+Restricts loading this addon to ''case-insensitive'' game types or thier families.
+{{note|This addon directive may be specified multiple times, with later instances appending to the list.}}
+<syntaxhighlight lang="wowtoc">
+## AllowLoadGameType: standard, classic
+</syntaxhighlight>
+{{note|Some game modes may be restricted to disallow loading of third-party addons.}}
+{{warning|1=If at least 1 game type is specified and none of the game types are recognized by the client, the condition will be satisfied. For this reason, you should additionally use <span class="apialt">ExcludeLoadGameType</span> to exclude game types that are not universally recognized yet.}}
+
+{{Template:GameTypes}}
+</div>
+
+====<span class="apialt">ExcludeLoadGameType</span>====
+<div style="margin-left:2em">
+Similar to <span class="apialt">AllowLoadGameType</span>, but prevents loading this addon on specific game types or their families.
+{{note|This addon directive may be specified multiple times, with later instances appending to the list.}}
+<syntaxhighlight lang="wowtoc">
+## ExcludeLoadGameType: vanilla, wrath
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">OnlyBetaAndPTR</span>====
+<div style="margin-left:2em">
+Set to <span class="apitype">1</span> if an addon should only be loadable in Beta or PTR clients.
+<syntaxhighlight lang="wowtoc">
+## OnlyBetaAndPTR: 1
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">DefaultState</span>====
+<div style="margin-left:2em">
+Set to <span class="apitype">disabled</span> to require the user to explicitly enable the addon in the [[AddOn List]].
+<syntaxhighlight lang="wowtoc">
+## DefaultState: disabled
+</syntaxhighlight>
+</div>
+
+===Saved variables===
+{{main|Saving variables between game sessions}}
+
+====<span class="apialt">LoadSavedVariablesFirst</span>====
+<div style="margin-left:2em">
+Set to <span class="apitype">1</span> if SavedVariables file(s) should be loaded before all script files for this addon.
+{{note|1=If this is set to <span class="apitype">1</span> it cannot be turned off later in the file.}}
+<syntaxhighlight lang="wowtoc">
+## LoadSavedVariablesFirst: 1
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">SavedVariables</span>====
+<div style="margin-left:2em">
+Global variables to be stored in and read from <code>WTF\[account]\SavedVariables\MyAddOn.lua</code>.
+{{note|This addon directive may be specified multiple times, with later instances appending to the list.}}
+<syntaxhighlight lang="wowtoc">
+## SavedVariables: MyAddOnNameVariableFoo, MyAddOnNameVariableBar
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">SavedVariablesPerCharacter</span>====
+<div style="margin-left:2em">
+Global variables to be stored in and read from <code>WTF\[account]\[server]\[character]\SavedVariables\MyAddOn.lua</code>.
+{{note|This directive may be specified multiple times, with later instances appending to the list.}}
+<syntaxhighlight lang="wowtoc">
+## SavedVariablesPerCharacter: MyAddOnNameCharacterVariableFoo, MyAddOnNameCharacterVariableBar
+</syntaxhighlight>
+</div>
+
+===Metadata===
+The following addon directives may be accessed using {{api|C_AddOns.GetAddOnMetadata}}.
+
+====<span class="apialt">Author</span>====
+<div style="margin-left:2em">
+The addon author's name.
+<syntaxhighlight lang="wowtoc">
+## Author: My Name
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">Version</span>====
+<div style="margin-left:2em">
+The addon version, which will be shown in the tooltip in the [[AddOn List]].
+{{note|Some automatic updating tools may prefer that this begins with a numeric version number.}}
+<syntaxhighlight lang="wowtoc">
+## Version: 1.0.0
+</syntaxhighlight>
+</div>
+
+====<span class="apialt">X-___</span>====
+<div style="margin-left:2em">
+Any custom metadata prefixed by "X-", such as "X-Date", "X-Website" or "X-Feedback"
+<syntaxhighlight lang="wowtoc">
+## X-Website: https://github.com/MyUser/MyAddOn
+</syntaxhighlight>
+</div>
+
+===Uncategorized===
+====<span class="apialt">AllowAddOnTableAccess</span>====
+<div style="margin-left:2em">
+Set to <span class="apitype">1</span> to allow the retrieval of the [[Using the AddOn namespace|namespace table]] of this addon via {{api|t=a|C_AddOns.GetAddOnLocalTable}}.
+{{note|1=If this is set to <span class="apitype">1</span>, and further instances of it will be ignored.}}
+<syntaxhighlight lang="wowtoc">
+## AllowAddOnTableAccess: 1
+</syntaxhighlight>
+</div>
+
+===Restricted===
+The following addon directives are inaccessible to third-party addons.
+
+====<span class="apialt">AllowLoad</span>====
+<div style="margin-left:2em">
+Restricts loading this addon to the [[API IsOnGlueScreen|GlueXML]] environment, [[FrameXML]] environment, or both.
+
+;<span class="apitype">Both</span>
+:Allow this addon to load without restriction in all environments.
+;<span class="apitype">Game</span>
+:Only load this addon in the FrameXML environment.
+;<span class="apitype">Glue</span>
+:Only load this addon in the GlueXML environment.
+</div>
+
+====<span class="apialt">EscalateErrorDuringLoad</span>====
+<div style="margin-left:2em">
+Boolean addon directive that appears to have no effect in public clients.
+</div>
+
+====<span class="apialt">LoadFirst</span>====
+<div style="margin-left:2em">
+Set to <span class="apitype">1</span> if a secure addon is not permitted to be disabled and should be loaded before any other addons without this flag.
+</div>
+
+====<span class="apialt">SavedVariablesMachine</span>====
+<div style="margin-left:2em">
+List of global variable names to be persisted across all accounts on the same machine.
+</div>
+
+====<span class="apialt">UseSecureEnvironment</span>====
+<div style="margin-left:2em">
+Set to <span class="apitype">1</span> if all files present in an addon should be loaded into a private function environment.
+</div>
+
+==Inline directives==
+TOC files support the inline use of a set of directives, which define the conditions under or behaviour with which their corresponding addon directive or file will apply. They use the syntax <syntaxhighlight lang="wowtoc" inline>[Directive]</syntaxhighlight> or <syntaxhighlight lang="wowtoc" inline>[Directive Value]</syntaxhighlight> with case insensitive values. Multiple inline directices can be used per line, and can appear anywhere in a line.
+{{note|For reasons of compatibility, inline directives should generally only ever be used at the end of a line.}}
+
+The following directives are supported inline:
+;<span class="apialt">AllowLoad</span>
+:Restricts the addon directive or file to in-game (<span class="apitype">Game</span>), glue screen (<span class="apitype">Glue</span>), or both (<span class="apitype">Both</span>) environments.
+:{{note|Functionally inoperable for addons, as only Blizzard addons are loaded within the glue screen environment.}}
+;<span class="apialt">AllowLoadGameType</span>
+:Restricts the addon directive or file to one or multiple specific game types, delimited by commas.
+:The possible values are the same as used by the [[#AllowLoadGameType|AllowLoadGameType directive]].
+:{{warning|1=If at least 1 game type is specified and none of the game types are recognized by the client, the condition will still be satisfied. For this reason, you should additionally use <span class="apialt">ExcludeLoadGameType</span> inline to exclude game types that are not universally recognized yet.}}
+;<span class="apialt">ExcludeLoadGameType</span>
+:Similar to <code>[<span class="apialt">AllowLoadGameType</span> <span class="apitype">...</span>]</code>, but restricts the addon directive or file to the game type(s) not listed.
+;<span class="apialt">AllowLoadTextLocale</span>
+:Restricts the addon directive or file to one or more specific client text locales, delimited by commas.
+:The possible values are the same as returned by {{api|t=a|GetLocale}}, eg. "enUS" and "frFR".
+;<span class="apialt">AllowLoadEnvironment</span>
+:Restricts the addon directive or file to the global (<span class="apitype">Global</span>) or secure (<span class="apitype">Secure</span>) environment.
+:{{note|Functionally inoperable for addons, as only Blizzard addons are loaded within the secure environment.}}
+;<span class="apialt">Bootstrap</span>
+:Restricts the addon directive or file to the bootstrap process for <span class="apialt">LoadOnDemand</span> addons.
+;<span class="apialt">LoadIntoEnvironment</span>
+:Loads the file into the global (<span class="apitype">Global</span>) or secure (<span class="apitype">Secure</span>) environment.
+:{{note|Functionally inoperable for addons, as only Blizzard code can be loaded into the secure environment.}}
+
+Example:
+{{#tag:syntaxhighlight|
+## Interface: {{API LatestInterface}}
+## Title: My Cool AddOn
+## Title: My Cool AddOn in Classic [AllowLoadGameType classic]
+
+# This will only be loaded on Standard (retail).
+StandardOnly.lua [AllowLoadGameType standard]
+
+# This will only be loaded on Camelot (forever).
+ForeverOnly.lua [AllowLoadGameType camelot][ExcludeLoadGameType standard, classic]
+
+# This will only be loaded in Vanilla or TBC.
+VanillaOrTBC.lua [AllowLoadGameType vanilla, tbc]
+
+# This will only be loaded under English or French client locales.
+EnglishOrFrenchOnly.lua [AllowLoadTextLocale enUS, frFR]
+|lang="wowtoc"}}
+
+==Patch changes==
+===Modern===
+* {{Patch 12.1.7|note=
+** Added <span class="apialt">RegionalTextLocale</span> variable.
+** Prevented use of variables in addon directives.}}
+* {{Patch 12.1.5|note=Added <span class="apitype">Standard</span> TOC suffix.}}
+* {{Patch 12.1.0|note=Added <span class="apialt">Bootstrap</span> inline directive.}}
+* {{Patch 12.0.7|note=Added inline directives and variables for addon directives.}}
+* {{Patch 12.0.0|note=Added <span class="apialt">ExcludeLoadGameType</span> directive.}}
+* {{Patch 11.2.0|note=Added the <span class="apialt">TextLocale</span> variable and <span class="apialt">AllowLoadTextLocale</span> directive.}}
+* {{Patch 11.1.7|note=Added the <span class="apialt">AllowAddOnTableAccess</span> addon directive.}}
+* {{Patch 11.1.5|note=
+**Added variables for files.
+**Added a subset of directives as inline directives for files.
+**Added the <span class="apialt">LoadSavedVariablesFirst</span> addon directive.
+**<span class="apialt">AllowLoadGameType</span> is now usable by insecure addons.}}
+* {{Patch 11.1.0|note=Added the <span class="apialt">Category</span> and <span class="apialt">Group</span> addon directives.}}
+* {{Patch 11.0.0|note=
+**Added the restricted <span class="apialt">UseSecureEnvironment</span> addon directive.
+**Removed the <span class="apialt">SuppressLocalTableRef</span> addon directive.}}
+* {{Patch 10.2.7|note=
+**Added support for comma-delimited <span class="apialt">Interface</span> versions.
+**Added the restricted <span class="apialt">SuppressLocalTableRef</span> addon directive.
+**Renamed <span class="apialt">AllowLoadByGameMode</span> and <span class="apialt">GuardedAddOn</span> directives to <span class="apialt">AllowLoadGameType</span> and <span class="apialt">LoadFirst</span>, respectively.}}
+* {{Patch 10.2.6|note=Added the restricted <span class="apialt">AllowLoadByGameMode</span> addon directive.}}
+* {{Patch 10.1.0|note=
+**Added <span class="apialt">IconAtlas</span>, <span class="apialt">IconTexture</span>, and [[Addon compartment]] related addon directives.
+**Added the restricted <span class="apialt">GuardedAddOn</span> addon directive.}}
+* {{Patch 9.1.0|note=Multiple TOC files are now supported using a suffix to disambiguate Classic, BCC and Retail.<ref name="WoWUIBug#68">{{Ref web|author=Meo[[File:Inv g fishingbobber 05.png|12px]]rawr|url=https://github.com/Stanzilla/WoWUIBugs/issues/68#issuecomment-889431675|title=Multiple Interface Version Support|publisher=WoWUIBugs}}</ref>}}
+* {{Patch 9.0.1|note=<code>[[MACRO reload|/reload]]</code> recognizes changes to TOC directives and entirely new files in the <code>Interface/AddOns/</code> directory tree.}}
+* {{Patch 4.0.1|note=<code>[[MACRO reload|/reload]]</code> recognizes changes to the file order.}}
+* {{Patch 2.1.0|note=Added the <span class="apialt">LoadManagers</span> addon directive.}}
+* {{Patch 1.11.0|note=Added the <span class="apialt">Secure</span> addon directive.}}
+* {{Patch 1.9.0|note=Added the <span class="apialt">LoadWith</span> addon directive.}}
+
+===Forever===
+* {{Patch 1.60.1|note=
+**Includes all Modern changes up to 12.1.5
+**Added <span class="apitype">Camelot</span> game type, <span class="apialt">Game</span> variable value and TOC suffix, with <span class="apitype">Forever</span> game type and TOC suffix alias.}}
+
+===Classic Progression===
+* {{Patch 5.5.4|note=Includes all Modern changes up to 12.0.7.}}
+* {{Patch 5.5.1|note=Includes all Modern changes up to 11.2.0.}}
+* {{Patch 5.5.0|note=Includes all Modern changes up to 11.1.7.}}
+* {{Patch 4.4.1|note=Includes all Modern changes up to 11.0.0.}}
+* {{Patch 4.4.0|note=
+**Includes all Modern changes up to 10.2.7.
+**The behavior of the <code>_Classic</code> TOC suffix has changed such that it now loads on all Classic clients, and not just Classic Era.}}
+* {{Patch 2.5.3|note=<code>[[MACRO reload|/reload]]</code> recognizes changes to TOC directives and entirely new files in the <code>Interface/AddOns/</code> directory tree.}}
+* {{Patch 2.5.1|note=Multiple TOC files are now supported using a suffix to disambiguate Classic, BCC and Retail.<ref name="WoWUIBug#68"/>}}
+* {{Patch 1.13.2|note=Includes all Modern changes up to 8.1.0.}}
+
+===Classic Era===
+* {{Patch 1.15.9|note=Includes all Modern changes up to 12.0.7.}}
+* {{Patch 1.15.8|note=Includes all Modern changes up to 11.2.0.}}
+* {{Patch 1.15.4|note=Includes all Modern changes up to 11.0.0.}}
+* {{Patch 1.14.0|note=
+**Includes all Classic Progression changes up to 2.5.2.
+**<code>[[MACRO reload|/reload]]</code> recognizes changes to TOC directives and entirely new files in the <code>Interface/AddOns/</code> directory tree.}}
+* {{Patch 1.13.7|note=Multiple TOC files are now supported using a suffix to disambiguate Classic, BCC and Retail.<ref name="WoWUIBug#68"/>}}
+
+===Classic Titan Reforged===
+* {{Patch 3.80.2|note=Includes all Modern changes up to 12.0.7.}}
+* {{Patch 3.80.0|note=
+**Includes all Classic Era changes up to 1.15.8.
+**The behavior of the <span class="apitype">Classic</span> TOC suffix has changed such that it now loads on all Classic clients, and not just Classic Era.
+**The legacy <span class="apitype">WOTLK</span> TOC suffix is no longer supported.}}
+
+===Classic Anniversary===
+* {{Patch 2.5.6|note=Includes all Modern changes up to 12.0.7.}}
+* {{Patch 2.5.5|note=
+** Includes all all Classic Era changes up to 1.15.8.
+**The behavior of the <span class="apitype">Classic</span> TOC suffix has changed such that it now loads on all Classic clients, and not just Classic Era.
+** The legacy <span class="apitype">BCC</span> TOC suffix is no longer supported.}}
+
+==See also==
+* {{api|C_AddOns.GetAddOnInfo}} returns basic information about an addon.
+* [[Using the AddOn namespace]] describes the parameters passed to each file.
+
+==References==
+{{Reflist}}
+
+{{apinavbox|Authoring}}
