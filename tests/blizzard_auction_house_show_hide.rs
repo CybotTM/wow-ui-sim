@@ -4,7 +4,11 @@ use crate::common;
 
 use common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};
 
-const ROOT: &str = "Blizzard_AuctionHouseUI";
+const ROOT: &str = if cfg!(feature = "client-wrath") {
+    "Blizzard_AuctionUI"
+} else {
+    "Blizzard_AuctionHouseUI"
+};
 
 #[cfg(feature = "client-ptr")]
 #[test]
@@ -36,7 +40,7 @@ fn auction_house_show_hide_round_trip_has_no_lua_errors() {
             clear_recorded_lua_errors(&env);
 
             let result: String = env
-                .eval(
+                .eval(&common::auction_fixtures::select_native_frame(
                     r#"
                     if not AuctionHouseFrame then
                         return "missing_frame"
@@ -54,7 +58,7 @@ fn auction_house_show_hide_round_trip_has_no_lua_errors() {
 
                     return "ok"
                     "#,
-                )
+                ))
                 .expect("AuctionHouseFrame ShowUIPanel/HideUIPanel probe should run");
             assert_eq!("ok", result, "`{ROOT}` show/hide result: {result}");
 
@@ -69,6 +73,9 @@ fn auction_house_show_hide_round_trip_has_no_lua_errors() {
 }
 
 fn load_show_hide_prerequisites(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    if cfg!(feature = "client-wrath") {
+        return;
+    }
     env.exec(
         r#"
         local tokenLoaded, tokenReason = C_AddOns.LoadAddOn("Blizzard_TokenUI")
@@ -93,7 +100,7 @@ fn load_show_hide_prerequisites(env: &wow_ui_sim::lua_api::WowLuaEnv) {
 
 fn load_auction_house_through_runtime(env: &wow_ui_sim::lua_api::WowLuaEnv) {
     let (loaded, reason): (bool, Option<String>) = env
-        .eval(r#"return C_AddOns.LoadAddOn("Blizzard_AuctionHouseUI")"#)
+        .eval(&format!(r#"return C_AddOns.LoadAddOn("{ROOT}")"#))
         .expect("C_AddOns.LoadAddOn should return");
     assert!(loaded, "`{ROOT}` should load: {reason:?}");
 }

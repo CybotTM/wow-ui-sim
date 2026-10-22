@@ -32,3 +32,12 @@ pub fn with_auction_ui(assertions: impl FnOnce(&WowLuaEnv)) {
         });
     }
 }
+
+/// Bind the generic visibility oracle to the original legacy frame, not a stand-in.
+pub fn select_native_frame(probe: &str) -> String {
+    if cfg!(feature = "client-wrath") {
+        format!("local AuctionHouseFrame = AuctionFrame\n{probe}")
+    } else {
+        probe.to_owned()
+    }
+}

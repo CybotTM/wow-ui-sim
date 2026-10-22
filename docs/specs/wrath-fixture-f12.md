@@ -7,6 +7,7 @@ Fixtures live in `tests/common/auction_fixtures.rs`; native cases live in
 ## What it must do
 
 - [ ] Preserve all original model probe expectations while avoiding modern UI bootstrap on Wrath.
+- [ ] Preserve the original generic show/hide probe verbatim with Wrath-only local `AuctionHouseFrame = AuctionFrame` identifier binding; no modern children or methods are adapted.
 - [ ] Load the original cached `Blizzard_AuctionUI` after ordered native FrameXML and preserve the original LoD loaded-state/error assertions.
 - [ ] Exercise native browse search, bid and owned tabs with seeded data, labels, quantities and prices (INFERRED from cached UI declarations, not authenticated client behavior).
 - [ ] Preserve Retail fixture ordering and assertions, with no baseline-pass regressions.
