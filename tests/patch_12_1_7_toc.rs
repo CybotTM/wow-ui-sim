@@ -21,11 +21,17 @@ fn p1217_selected_interface_is_visible_to_addons() {
         _ => ACTIVE_INTERFACE_VERSION,
     };
     let env = WowLuaEnv::new().unwrap();
-    assert_eq!(ACTIVE.interface_version(), expected);
     assert_eq!(
-        env.eval::<u32>("return select(4, GetBuildInfo())").unwrap(),
-        expected
+        env.eval::<i64>("return select(4, GetBuildInfo())").unwrap(),
+        i64::from(expected)
     );
+    assert_eq!(ACTIVE.interface_version(), expected);
+}
+
+#[test]
+#[cfg(feature = "client-ptr")]
+fn p1217_selected_interface_admits_current_addon() {
+    let expected = 120107;
     let addon = tempfile::tempdir().unwrap();
     let toc = TocFile::parse(addon.path(), &format!("## Interface: {expected}\n"));
     assert!(toc.supports_interface_version(ACTIVE_INTERFACE_VERSION));
