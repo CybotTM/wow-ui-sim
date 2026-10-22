@@ -18,8 +18,19 @@ Fixtures live in `tests/common/auction_fixtures.rs`; native cases live in
 - [Addon loading](../addon-loading-pipeline.md)
 - [Client profiles](../wiki/systems/client-profiles.md)
 
+## Producer scope
+
+Reconstructed 12340 evidence establishes thirteen auction row values; cached native
+browse/bid/owned consumers expose the displaced price columns in the previous
+Mists-shaped row. Wrath removes the Mists level-header/full-name columns and uses
+numeric-one/nil flags. Empty browse counts must describe the same modeled result
+vector as row lookup. Mists packing and counts remain unchanged; Retail does not
+register this legacy module. Invalid-row tuples, argument coercion, uncached item
+metadata and owner bidder-name resolution remain unmodified gaps, not parity claims.
+
 ## Implementation inventory
 
+- `src/lua_api/globals/auction_verbs.rs`: profile-specific valid-row packing and coherent Wrath browse counts.
 - `tests/common/auction_fixtures.rs`: bare Wrath model environment and native LoD fixture selection; other profiles retain their prior bootstrap.
 - `tests/blizzard_auction_house_*.rs`: exact F12 model probes and unchanged modern surface oracles.
 - `tests/wrath_auction_fixture.rs`: additive original cached AuctionUI consumer assertions.

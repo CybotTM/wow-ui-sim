@@ -135,10 +135,10 @@ fn get_num_auction_items(state: &mut LuaState) -> LuaResult<u32> {
     let count = match list_type.as_str() {
         "list" => {
             let sim = borrow_state(state)?;
-            if sim.auction_browse_results.is_empty() {
-                sim.auction_browse_items.len()
-            } else {
+            if cfg!(feature = "client-wrath") || !sim.auction_browse_results.is_empty() {
                 sim.auction_browse_results.len()
+            } else {
+                sim.auction_browse_items.len()
             }
         }
         "owner" => borrow_state(state)?.auction_owned.len(),
@@ -261,15 +261,23 @@ fn push_legacy_auction_row(state: &mut LuaState, row: &LegacyAuctionRow) -> LuaR
     let quality = item.map(|item| item.quality as f64).unwrap_or(0.0);
     let owner = row.owner.as_deref().unwrap_or("Player");
     let name = create_string(state, &name);
-    let level_header = create_string(state, "Item Level");
     let owner = create_string(state, owner);
 
     state.push(name);
     state.push(Val::Num(icon));
     state.push(Val::Num(row.quantity as f64));
     state.push(Val::Num(quality));
-    state.push(Val::Bool(true));
+    let usable = if cfg!(feature = "client-wrath") {
+        Val::Num(1.0)
+    } else {
+        Val::Bool(true)
+    };
+    state.push(usable);
     state.push(Val::Num(row.item_level as f64));
+    if cfg!(feature = "client-wrath") {
+        return push_wrath_auction_prices(state, row, owner);
+    }
+    let level_header = create_string(state, "Item Level");
     state.push(level_header);
     state.push(Val::Num(row.min_bid as f64));
     state.push(Val::Num(row.min_increment as f64));
@@ -283,6 +291,27 @@ fn push_legacy_auction_row(state: &mut LuaState, row: &LegacyAuctionRow) -> LuaR
     state.push(Val::Num(row.item_id as f64));
     state.push(Val::Bool(true));
     Ok(18)
+}
+
+/// Reconstructed 12340 rows omit Mists' level header and full-name columns.
+fn push_wrath_auction_prices(
+    state: &mut LuaState,
+    row: &LegacyAuctionRow,
+    owner: Val,
+) -> LuaResult<u32> {
+    state.push(Val::Num(row.min_bid as f64));
+    state.push(Val::Num(row.min_increment as f64));
+    state.push(Val::Num(row.buyout_amount as f64));
+    state.push(Val::Num(row.bid_amount as f64));
+    let high_bidder = if row.high_bidder {
+        Val::Num(1.0)
+    } else {
+        Val::Nil
+    };
+    state.push(high_bidder);
+    state.push(owner);
+    state.push(Val::Num(row.sale_status as f64));
+    Ok(13)
 }
 
 fn item_icon_file_id(item: &items::ItemInfo) -> f64 {
