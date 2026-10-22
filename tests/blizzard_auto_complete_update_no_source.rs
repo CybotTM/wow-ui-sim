@@ -21,6 +21,18 @@ return true, nil
 
 #[test]
 fn blizzard_auto_complete_update_without_source_returns_silently() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::load_and_assert_native(
+            r#"
+local other = CreateFrame('EditBox', nil, UIParent)
+AutoComplete_Update(other, 'F09', 3)
+assert(not AutoCompleteBox:IsShown())
+assert(AutoCompleteBox.parent == F09EditBox)
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

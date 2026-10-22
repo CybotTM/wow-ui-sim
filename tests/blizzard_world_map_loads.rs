@@ -270,6 +270,22 @@ fn toc_raw_bytes_pin_directives_and_per_file_gates() {
 
 #[test]
 fn dep_directories_exist_on_disk() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        for file in ["UIPanelTemplates.xml", "WorldMapFrame.xml"] {
+            assert!(
+                toc.files
+                    .iter()
+                    .any(|path| path == std::path::Path::new(file)),
+                "native dependency absent from committed FrameXML order: {file}"
+            );
+            assert!(
+                toc.addon_dir.join(file).is_file(),
+                "native dependency missing on disk: {file}"
+            );
+        }
+        return;
+    }
     for dep in REQUIRED_DEPS {
         let dir = blizzard_ui_dir().join(dep);
         assert!(

@@ -136,6 +136,8 @@ const TARGET_INDEX: i32 = 2;
 
 #[test]
 fn seeded_paladin_aura_forms_populate_stance_bar_buttons() {
+    wrath_action_case!(stance_icons);
+
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         env.exec("StanceBar:Update()")
@@ -176,6 +178,8 @@ fn seeded_paladin_aura_forms_populate_stance_bar_buttons() {
 
 #[test]
 fn stance_bar_select_fans_cast_shapeshift_form_and_flips_target_button_to_checked() {
+    wrath_action_case!(stance_selection);
+
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let stance_bar_exists: bool = env

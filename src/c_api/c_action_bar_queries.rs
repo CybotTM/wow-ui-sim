@@ -1,15 +1,9 @@
 //! Spell-bound action queries. Range snapshots are host inputs keyed by unit GUID.
+pub use super::action_spell_range::ActionSpellRange;
 use crate::lua_api::methods::{borrow_state, val_to_string};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::{gc::arena::GcRef, state::LuaState, table::Table};
 use rilua::{LuaResult, Val};
-use std::collections::HashMap;
-
-#[derive(Debug, Default)]
-pub struct ActionSpellRange {
-    pub has_range_requirements: bool,
-    pub in_range_by_guid: HashMap<String, bool>,
-}
 
 pub(crate) fn register(state: &mut LuaState, ns: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, ns, "GetActionAutocast", autocast)?;
@@ -72,13 +66,7 @@ fn in_range(state: &mut LuaState) -> LuaResult<u32> {
     let token = read_target(state)?;
     let result = {
         let sim = borrow_state(state)?;
-        let unit = crate::lua_api::globals::targeting_verbs::resolve_unit_snapshot(&sim, &token);
-        unit.and_then(|unit| {
-            sim.action_bars
-                .get(&slot)
-                .and_then(|id| sim.action_spell_ranges.get(id))
-                .and_then(|range| range.in_range_by_guid.get(&unit.guid).copied())
-        })
+        super::action_spell_range::lookup_range(&sim, slot, &token)
     };
     // INFERRED: absent host range data is indeterminate even for unranged actions.
     state.push(result.map_or(Val::Nil, Val::Bool));

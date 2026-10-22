@@ -1,0 +1,21 @@
+-- Native panel re-entry, independent of the RegisterUIPanel compatibility shim.
+local first = CreateFrame("Frame", "NativeSequentialFirst", UIParent)
+first:SetSize(300, 400)
+first:Hide()
+UIPanelWindows[first:GetName()] = { area = "center", pushable = 0, whileDead = 1 }
+local second = CreateFrame("Frame", "NativeSequentialSecond", UIParent)
+second:SetSize(300, 400)
+second:Hide()
+UIPanelWindows[second:GetName()] = { area = "center", pushable = 0, whileDead = 1 }
+ShowUIPanel(first)
+assert(first:IsShown(), "first native panel opens")
+CloseAllWindows()
+assert(not first:IsShown(), "first native panel closes")
+ShowUIPanel(second)
+assert(second:IsShown(), "second native panel opens")
+CloseAllWindows()
+assert(not second:IsShown(), "second native panel closes")
+ShowUIPanel(first)
+assert(first:IsShown() and GetUIPanel("center") == first, "reopened panel re-enters stack")
+CloseAllWindows()
+assert(not first:IsShown(), "reopened panel closes again")

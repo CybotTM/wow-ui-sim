@@ -194,6 +194,14 @@ fn test_blizzard_addon_load_order_snapshot() {
         let addons = discover_blizzard_addons(&ui);
         let names: Vec<&str> = addons.iter().map(|(n, _)| n.as_str()).collect();
 
+        if cfg!(feature = "client-wrath") {
+            assert_eq!(names, ["Blizzard_AchievementUI", "Blizzard_MacroUI", "Blizzard_RaidUI", "Blizzard_TokenUI", "Blizzard_TrainerUI"]);
+            let toc = common::native_framexml_toc();
+            assert_eq!(toc.metadata.get("Interface").map(String::as_str), Some("30300"));
+            assert!(toc.files.first().is_some_and(|file| file == std::path::Path::new("GlobalStrings.lua")));
+            return;
+        }
+
         #[cfg(feature = "client-ptr")]
         let expected: Vec<&str> = include_str!("fixtures/ptr-12-1-5-eager-load-order.txt")
             .lines()

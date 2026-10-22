@@ -39,6 +39,7 @@ pub fn apply_post_load_workarounds(env: &WowLuaEnv) -> Duration {
 
 pub fn load_game_ui_addons(env: &WowLuaEnv) -> Duration {
     let started = Instant::now();
+    crate::common::load_profile_framexml(env);
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
     for (name, toc_path) in &addons {
         load_addon(&env.loader_env(), toc_path)

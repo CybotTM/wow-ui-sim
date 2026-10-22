@@ -6,6 +6,19 @@ const ROOT: &str = "Blizzard_AutoComplete";
 
 #[test]
 fn blizzard_auto_complete_core_handlers_are_global_functions() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::load_and_assert_native(
+            r#"
+for _, name in ipairs({'AutoComplete_OnLoad', 'AutoComplete_Update', 'AutoComplete_HideIfAttachedTo', 'AutoComplete_SetSelectedIndex', 'AutoComplete_GetSelectedIndex', 'AutoComplete_GetNumResults', 'AutoComplete_UpdateResults'}) do
+ assert(type(_G[name]) == 'function', name)
+end
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha')
+assert(AutoComplete_GetNumResults(AutoCompleteBox) == 1)
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
@@ -53,6 +66,20 @@ fn blizzard_auto_complete_core_handlers_are_global_functions() {
 
 #[test]
 fn blizzard_auto_complete_edit_box_and_button_handlers_are_global_functions() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::load_and_assert_native(
+            r#"
+for _, name in ipairs({'AutoCompleteEditBox_OnTabPressed', 'AutoCompleteEditBox_OnEnterPressed', 'AutoCompleteEditBox_OnTextChanged', 'AutoCompleteEditBox_AddHighlightedText', 'AutoCompleteEditBox_OnChar', 'AutoCompleteEditBox_OnEditFocusLost', 'AutoCompleteEditBox_OnEscapePressed', 'AutoCompleteButton_OnClick'}) do
+ assert(type(_G[name]) == 'function', name)
+end
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha')
+AutoCompleteButton_OnClick(AutoCompleteButton1)
+assert(F09EditBox:GetText() == 'F09Alpha')
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

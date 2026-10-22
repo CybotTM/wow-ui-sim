@@ -222,12 +222,6 @@ if IsPetAttackAction == nil then
   end
 end
 
-if IsPossessBarVisible == nil then
-  function IsPossessBarVisible()
-    return false
-  end
-end
-
 if IsStereoVideoAvailable == nil then
   function IsStereoVideoAvailable()
     return false
@@ -549,12 +543,6 @@ end
 if rawget(_G, "GetPreviousArenaSeason") == nil then
   function GetPreviousArenaSeason()
     return 0
-  end
-end
-
-if rawget(_G, "IsActionInRange") == nil then
-  function IsActionInRange(slot)
-    return nil
   end
 end
 

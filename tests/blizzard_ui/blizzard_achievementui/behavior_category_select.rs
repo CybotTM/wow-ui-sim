@@ -122,6 +122,19 @@ type CategorySelectProbe = (String, String, String, String, String, String, i64,
 
 #[test]
 fn category_template_on_click_forwards_self_to_on_category_clicked_and_reload_chain_is_present() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        AchievementFrame_ToggleAchievementFrame()
+        local button = assert(AchievementFrameCategoriesContainer.buttons[2])
+        assert(button.element and type(button.element.id) == "number")
+        button:GetScript("OnClick")(button)
+        assert(button.isSelected)
+        assert(achievementFunctions.selectedCategory == button.element.id)
+        assert(AchievementFrameAchievements:IsShown())
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let setup_ok: bool = env
             .eval(

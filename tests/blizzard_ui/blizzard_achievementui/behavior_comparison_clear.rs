@@ -100,6 +100,28 @@ type ComparisonClearProbe = (String, String, String, String, String, bool, bool,
 
 #[test]
 fn closing_comparison_pane_fires_on_hide_handler_that_calls_clear_achievement_comparison_unit() {
+    if crate::common::wrath_achievement_fixtures::with_native(|env| {
+        env.state()
+            .borrow_mut()
+            .achievement_comparison_data
+            .earned
+            .insert(6);
+        env.exec(
+            r#"
+            AchievementFrame_DisplayComparison("player")
+            assert(AchievementFrameComparison:IsShown() and AchievementFrame.isComparison)
+            assert(GetComparisonAchievementPoints() == 10)
+            AchievementFrameComparison:Hide()
+            assert(not AchievementFrame.isComparison)
+            assert(AchievementFrame:GetWidth() == 768)
+            assert(GetComparisonAchievementPoints() == 0)
+            "#,
+        )
+        .expect("native comparison OnHide should clear supplied comparison state");
+        assert!(env.state().borrow().achievement_comparison_unit.is_none());
+    }) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: ComparisonClearProbe = env
             .eval(
