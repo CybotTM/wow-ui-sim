@@ -1,6 +1,6 @@
 ## [2026-10-22] investigation | Forever original opaque timer pair
 
-Linked [original callback/callee attribution](../specs/c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22), original-consumer RED and existing-model publication; reconciled current T6 and classification notes. Final runtime proof pending.
+Linked [original callback/callee attribution](../specs/c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22), original-consumer RED and existing-model publication; reconciled current T6 and classification notes. Original-consumer RED→GREEN, Retail preservation, stock pair removal and final checks now recorded in the owning contract.
 
 ## [2026-10-21] source | Wrath tracked achievements
 

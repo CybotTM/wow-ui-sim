@@ -1,6 +1,6 @@
 ## [2026-10-22] investigation | Forever original opaque timer pair
 
-[Callback attribution and proof](../specs/c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22) identifies the erased defensive-query callee and links its shared model publication. Original-consumer RED is recorded; final runtime proof remains pending.
+[Callback attribution and proof](../specs/c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22) identifies the erased defensive-query callee and links its shared model publication. Original-consumer RED→GREEN, Retail preservation and the stock pair's removal are recorded; deferred startup gaps remain separate.
 
 ## [2026-10-21] investigation | Wrath autocomplete native fixture
 
