@@ -345,7 +345,7 @@ pub struct SimState {
     pub cooldown_aura_associations:
         crate::c_api::c_unit_aura_cooldown_spells::CooldownAuraAssociations,
     /// INFERRED explicit spell flags only; no classification catalog or acquisition.
-    #[cfg(feature = "retail-12-0-5")]
+    #[cfg(feature = "aura-spell-classifications")]
     pub aura_spell_classifications:
         crate::c_api::c_unit_aura_classification::AuraSpellClassifications,
     /// INFERRED host-declared sound IDs only; no Add acquisition or playback model.

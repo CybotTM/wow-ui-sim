@@ -1,6 +1,6 @@
 # T6 explicit startup service inputs
 
-T6 restores named original-consumer service inputs after [factory removal](c-namespace-nil-members.md), without attributing the unidentified Forever timer family. [Implementation notes](../wiki/systems/c-factory-startup-followup.md#t6-service-inputs) distinguish real existing state from unavailable service capabilities.
+T6 restores named original-consumer service inputs after [factory removal](c-namespace-nil-members.md), with the original Forever timer family now [attributed to its defensive classification query](c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22). [Implementation notes](../wiki/systems/c-factory-startup-followup.md#t6-service-inputs) distinguish real existing state from unavailable service capabilities.
 
 ## What it must do
 
@@ -40,7 +40,8 @@ T6 restores named original-consumer service inputs after [factory removal](c-nam
 
 [Bounded proof and residuals](../wiki/systems/c-factory-startup-followup.md#bounded-proof--2026-10-21) record the completed original-member matrix, not clean startup.
 
-- [ ] Opaque nil-call rows remain on Forever, Mists, Era and Anniversary. Only the historical F0 Forever probe identified callback source `Blizzard_SharedXMLBase/FunctionUtil.lua:87`; no current C_* root is established. Preserve null attribution and normal/wrapped rows.
+- [x] Identify Forever's original opaque pair and publish the existing defensive classification model; [owning contract](c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22) records attribution and verification status.
+- [ ] Mists, Era and Anniversary opaque rows retain null attribution; Forever's identification is not proof of other profiles' callees.
 - [ ] Newly exposed AddEventFilter, MarkCharacterSettingsSaved and GetPreferredDatacenterLocalities remain held outside the frozen F0 member list.
 
 ## Out of scope

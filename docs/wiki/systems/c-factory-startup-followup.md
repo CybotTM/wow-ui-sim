@@ -22,7 +22,7 @@ Owned-house requests move from dashboard-only preload to an early named request 
 
 The [T6 contract](../../specs/c-factory-t6-services.md) binds Retail/PTR error messages to the existing console sink and exposes Era/Anniversary's independent supplied Speak For Me flag. Individually named temporary defaults cover absent chat-type TTS preferences, collectable-tracking entitlement, authenticated voice login, secure combat filters, corpse coordinates, locale catalogs, Discord voice capability and active-provider selection. Connected channels and player coordinates do not stand in for authentication or corpse state.
 
-Opaque normal/wrapped nil-call rows retain unknown roots. Only the historical F0 Forever probe identified callback source `Blizzard_SharedXMLBase/FunctionUtil.lua:87`; matching low-information errors on another profile do not establish that source or a C_* callee. No guessed member is published.
+Forever's original opaque pair now has [original-callback attribution and bounded closure proof](../../specs/c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22). Other profiles' matching low-information errors retain unknown roots; this does not establish their callback or C_* callee.
 
 ## Bounded proof — 2026-10-21
 
@@ -46,11 +46,11 @@ New pet GetName, bank CanPurchaseBankTab, spell GetTargetSpellID, AmmoNeeded, pr
 
 ## Sources
 
-- [T6 services](../../specs/c-factory-t6-services.md) — service gaps and unresolved anonymous timer attribution.
+- [T6 services](../../specs/c-factory-t6-services.md) — service gaps and linked original timer attribution.
 - [M5 services](../../specs/c-factory-m5-services.md) — early ownership requests, pet icons/actions and Forever bank/set scope.
 - [M2 adapters](../../specs/c-factory-m2-adapters.md) — state bindings and temporary capability scope.
 - [M1 conditions](../../specs/c-factory-m1-conditions.md) — scope and contract.
-- [Nil-member contract](../../specs/c-namespace-nil-members.md) — frozen F0 error matrix and unresolved timer family.
+- [Nil-member contract](../../specs/c-namespace-nil-members.md) — frozen F0 matrix and original Forever timer attribution/proof.
 
 ## See Also
 

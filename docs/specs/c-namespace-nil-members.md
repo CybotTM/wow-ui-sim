@@ -29,7 +29,7 @@ The October 20, 2026 removal decision makes unmodeled `C_*` members nil, rather 
 ## Known gaps (current cycle)
 
 - [x] Capture stock startup errors on all seven profiles and Retail startup tests without relaxing assertions.
-- [ ] Identify the erased callee behind Forever's anonymous timer-error family. Supplemental diagnostics locate its original callback at `Blizzard_SharedXMLBase/FunctionUtil.lua:87`; its `C_*` root remains unknown and is explicitly null under T6.
+- [x] Identify Forever's original T6 opaque timer pair: `C_UnitAuras.AuraIsBigDefensive`, called by the original private-aura watcher. [Attribution and closure](#forever-original-opaque-timer-pair--2026-10-22).
 
 ### Frozen F0 proof
 
@@ -48,6 +48,16 @@ Source anchor `0953c9b58`; `8c60cf5bb` changes documentation only. All seven bui
 The private F0 handoff's `gap-list.json` preserves every stock error, original consumer location and M1–M5/T6 routing, plus Retail assertion diagnostics. Alias/cascade attributions include original-source evidence and explicitly label inference. The two anonymous normal/wrapped timer rows retain a null member rather than an invented root. Committed baselines remain unchanged; comparisons use those empty baselines, not a fresh pre-removal run. Original persisted CVars retain their initial stat and hash.
 
 **F0 alone is not mergeable.** Follow-up batches must restore clean stock startup and the two failing Retail tests without reinstating arbitrary member fabrication.
+
+## Forever original opaque timer pair — 2026-10-22
+
+Fresh integrated stock at `05dcf006b` reproduces 80 unique errors / 90 occurrences, including both byte-exact F0 opaque rows at four occurrences each. Timing-enabled callback-registry inspection identifies the original `FunctionUtil.lua:87` closure's `f` as `PrivateAuraUnitWatcher:Clean` (`Blizzard_PrivateAurasUI/Blizzard_PrivateAurasUI.lua:1256`). `MarkDirty` constructs that closure at line1280 and schedules it at line1283.
+
+Replaying those unchanged callbacks with `xpcall` traceback and read-only line-hook capture identifies `player`, `party1`, `party2` and `party3` failures; `party4` succeeds. Each failing path reaches `Clean:1264` → anchor `ProcessAura:463` → `Blizzard_FrameXMLUtil/AuraUtil.lua:467`: `securecallfunction(C_UnitAuras.AuraIsBigDefensive, spellID)`. The nil function argument erases the member name in the ordinary error. The normal and ScriptErrors-wrapped rows describe the same four failures, not eight callbacks.
+
+This is the original T6 missing-member gap, **not a newly exposed CF-2 cascade**. Forever's shipped `UnitAuraDocumentation.lua:55–67` declares a required `SpellIdentifier` and nonnil boolean. The existing [explicit classification model](aura-spell-classification-identifiers.md) now publishes its defensive query on Forever through `aura-spell-classifications`; supplied flags and empty-catalog false semantics are reused unchanged. Retail retains both getters; Forever's unrelated `AuraIsPrivate` remains nil. No vendor, VM, catalog, secret policy or factory changes.
+
+`tests/cfactory_t6_opaque.rs::original_aura_util_classifies_an_unlisted_spell` executes the unmodified cached AuraUtil consumer: test-only `66336ee32` builds successfully and selects one genuine failing Forever test (`attempt to call a nil value`) before producer changes. GREEN, stock-after and final checks remain pending.
 
 ## Out of scope
 

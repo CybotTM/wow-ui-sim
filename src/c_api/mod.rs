@@ -272,7 +272,7 @@ pub(crate) mod c_ui;
 pub mod c_ui_file_asset;
 #[cfg(feature = "retail-12-0-5")]
 pub(crate) mod c_unit_aura_altered_form;
-#[cfg(feature = "retail-12-0-5")]
+#[cfg(feature = "aura-spell-classifications")]
 pub mod c_unit_aura_classification;
 #[cfg(feature = "retail-12-0-5")]
 pub mod c_unit_aura_cooldown_spells;

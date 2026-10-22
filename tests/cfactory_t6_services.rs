@@ -1,4 +1,4 @@
-//! T6 documented service contracts; anonymous Forever timer attribution remains unknown.
+//! T6 service contracts; the original timer regression lives in cfactory_t6_opaque.
 #![cfg(not(feature = "client-wrath"))]
 
 use crate::cfactory_support::{documented_env, load_original};

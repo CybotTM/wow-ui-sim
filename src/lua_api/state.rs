@@ -267,7 +267,7 @@ macro_rules! build_empty_sim_state {
             click_bindable_spells: HashSet::new(),
             #[cfg(feature = "retail-12-0-5")]
             cooldown_aura_associations: Default::default(),
-            #[cfg(feature = "retail-12-0-5")]
+            #[cfg(feature = "aura-spell-classifications")]
             aura_spell_classifications: Default::default(),
             #[cfg(feature = "retail-12-0-5")]
             private_aura_sound_registrations: Default::default(),
