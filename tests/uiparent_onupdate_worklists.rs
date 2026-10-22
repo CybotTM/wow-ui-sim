@@ -139,9 +139,13 @@ fn assert_legacy_animated_shine(env: &WowLuaEnv) {
     )
     .unwrap();
     env.fire_on_update(0.016).unwrap();
+    let timer: f64 = env.eval("return AnimatedShineProbe.timer").unwrap();
+    assert!(
+        (timer - 0.016).abs() < f64::EPSILON,
+        "active shine should consume elapsed time"
+    );
     env.exec(
         r#"
-        assert(math.abs(AnimatedShineProbe.timer - 0.016) < 0.000001)
         local point, relative, relativePoint, x, y = AnimatedShineProbeShine1:GetPoint()
         assert(point == "CENTER" and relative == AnimatedShineProbeShine)
         assert(relativePoint == "TOPLEFT" and x > 0 and y == 0)

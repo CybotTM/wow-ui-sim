@@ -1,6 +1,6 @@
-## [2026-10-22] investigation | Wrath F07 fixture boundaries
+## [2026-10-22] investigation | Wrath F07 REJECT repair
 
-[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [32-case contract](../specs/wrath-fixture-f07.md): cached Faux named children/handlers, authored anchor control, original pulse/shine worklists and profile XML corpus. Before/after Wrath11 passes and modern-only21 fails unchanged; Retail32 passes both sides. Wrath stock arrays are empty, both profile checks and fmt pass. Requested native declarations are UNCONFIRMED; no new producer defect is reproduced.
+[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [32-row contract](../specs/wrath-fixture-f07.md). Restored original shine epsilon assertion and original EventFrame/MinimalScrollBar consumer, ungated. Historical 11/21 claims are superseded; fresh counts and producer diagnosis pending. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
 
 ## [2026-10-21] investigation | Wrath autocomplete native fixture
 

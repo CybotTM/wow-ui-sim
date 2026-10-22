@@ -1,6 +1,6 @@
-## [2026-10-22] investigation | Wrath F07 fixture boundaries
+## [2026-10-22] investigation | Wrath F07 REJECT repair
 
-Added [fixture diagnosis](investigations/wrath-fixture-f07.md) and [contract](../specs/wrath-fixture-f07.md). Separate original cached consumers and explicitly authored anchor XML from literal modern-only report rows; preserve historical specimen binding and UNCONFIRMED 12340 provenance. Before/after Wrath11 passes and modern21 fails unchanged; Retail32 passes both sides. Wrath stock arrays are empty, both profile checks and fmt pass without warnings. SHA-verified base executables are reused only across docs-only changes; no producer fix is claimed.
+[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [32-row contract](../specs/wrath-fixture-f07.md). Restored original shine epsilon assertion and original EventFrame/MinimalScrollBar consumer, ungated. Historical 11/21 claims are superseded; fresh counts and producer diagnosis pending. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
 
 ## [2026-10-21] source | Wrath tracked achievements
 
