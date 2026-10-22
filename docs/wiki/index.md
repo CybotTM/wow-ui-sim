@@ -1,3 +1,7 @@
+## [2026-10-22] source | Wrath casting and aura projections
+
+[Projection notes](systems/lua-api.md#wrath-casting-and-aura-projections) link the [bounded contract](../specs/wrath-casting-aura-contracts.md): original cast/channel/party-aura consumers, catalog-backed subtext, legacy tuple/event shapes and separate metadata/transport gaps. Paired baselines and fixture RED are recorded; producer GREEN and final preservation remain pending.
+
 ## [2026-10-21] source | Wrath tracked achievements
 
 [Tracking model](systems/lua-api.md#wrath-tracked-achievements) links the [12340 contract](../specs/wrath-tracked-achievements.md): ordered unique IDs, duplicate-add events and synchronous native consumers. Current-source RED precedes the producer; merged-source Wrath54 and five shared-model controls pass. Retail72+4 retains identical statuses and existing failures; both stock captures are empty, check/fmt pass. Persistence and ten pre-existing compile-gated Wrath rows remain excluded.

@@ -54,15 +54,10 @@ fn is_player_resolution_available(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-// AuraInfo has no legacy spell-rank field. Keep the positional slot, without
-// claiming a rank or moving the modeled icon into that slot.
-pub(crate) fn push_unmodeled_aura_rank(state: &mut LuaState) {
-    state.push(Val::Nil);
-}
-
-// AuraInfo has no consolidation policy/input. Explicitly opt out for now.
+// AuraInfo has no consolidation policy/input. INFERRED opt-out until that
+// input is modeled; the native absent flag is nil, never boolean false.
 pub(crate) fn push_unmodeled_aura_consolidation(state: &mut LuaState) {
-    state.push(Val::Bool(false));
+    state.push(Val::Nil);
 }
 
 // Missing equipped-item catalog metadata cannot establish a weapon; retire
