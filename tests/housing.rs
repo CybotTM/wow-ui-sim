@@ -419,17 +419,14 @@ fn admin_no_arg_defaults_to_true() {
 }
 
 #[test]
-fn other_c_housing_members_still_resolve_via_metamethod_fallback() {
-    // Unimplemented C_Housing.* should return the stub-namespace no-op
-    // function (which returns nil), not crash with "attempt to call a nil
-    // value".
+fn other_c_housing_members_remain_nil() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
         .eval(
             r#"
-            local fn = C_Housing.SomeUnimplementedMember
-            if type(fn) ~= "function" then return "missing_function" end
-            if fn() ~= nil then return "non_nil_return" end
+            if C_Housing.SomeUnimplementedMember ~= nil then
+                return "fabricated_member"
+            end
             return "ok"
             "#,
         )

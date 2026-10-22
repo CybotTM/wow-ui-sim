@@ -417,7 +417,7 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-0")]
     pub combat_audio_spec_settings: HashMap<(i32, i32), f64>,
     /// INFERRED shared throttle seconds by throttle type; unconfigured zero.
-    #[cfg(feature = "retail-12-0-0")]
+    #[cfg(not(feature = "client-wrath"))]
     pub combat_audio_throttles: HashMap<i32, f64>,
     /// Simulator tracking membership; empty initially, independent of task records.
     pub neighborhood_tracked_tasks: BTreeSet<i32>,

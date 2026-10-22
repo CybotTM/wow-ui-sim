@@ -3,6 +3,7 @@
 //! Real/state-backed surfaces live at the root of this module. Intentionally
 //! unsupported compatibility gaps stay isolated under `permanent_shims`.
 
+pub mod c_guild_info;
 pub mod c_recruit_a_friend;
 pub(crate) mod class_catalog;
 #[cfg(any(feature = "client-era", feature = "client-anniversary"))]
@@ -327,6 +328,10 @@ pub use c_ping_cooldown::PingCooldownInterval;
 mod c_ping_texture_kits;
 #[cfg(feature = "retail-12-0-0")]
 pub use c_ping_texture_kits::PingTextureKits;
+#[cfg(any(feature = "retail-12-1-0", feature = "client-wowforever"))]
+mod c_cvar_readiness;
+#[cfg(not(feature = "client-wrath"))]
+mod combat_audio_throttle;
 #[cfg(feature = "client-mists")]
 pub mod legacy_spell_book;
 pub(crate) mod loss_of_control;
@@ -343,6 +348,7 @@ pub(crate) mod patch_12_0_5_enums;
 pub(crate) mod patch_12_1_0_enums;
 pub mod permanent_shims;
 pub mod private_aura_anchors;
+pub(crate) mod private_aura_callbacks;
 #[cfg(feature = "retail-12-0-5")]
 pub mod private_aura_sounds;
 pub(crate) mod seconds_formatter;
@@ -396,6 +402,10 @@ pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResu
     #[cfg(feature = "retail-12-0-5")]
     c_navigation::register(state)?;
     c_weather::register(state)?;
+    #[cfg(not(feature = "client-wrath"))]
+    combat_audio_throttle::register(state)?;
+    #[cfg(any(feature = "retail-12-1-0", feature = "client-wowforever"))]
+    c_cvar_readiness::register(state)?;
     c_achievement_info_relations::register(state)?;
     c_calendar::register(state)?;
     #[cfg(any(

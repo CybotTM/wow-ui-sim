@@ -7,6 +7,14 @@ The Lua API layer bridges Lua addon code with the Rust simulation engine. It pro
 
 `SimState.tracked_achievements` stores unique IDs in insertion order. Existing shared setters retain membership behavior; only the existing Wrath registration module publishes native add/remove/count/membership functions. Mutations release the state borrow before synchronous event dispatch, so original AchievementUI handlers see the updated list and refresh their private cache. The [12340 contract](../../specs/wrath-tracked-achievements.md) owns argument/event rules, evidence limits and bounded proof; persistence is excluded.
 
+## Factory-removal world inputs — 2026-10-21
+
+[The M4 contract](../../specs/c-factory-m4-world-inputs.md) separates shared throttle/match/objective/CVar/identity state from named missing world services. `c_api::private_aura_callbacks` now owns strong environment-local registrations, per-unit removal, replacement and authored dispatch; temporary aura-content storage no longer owns callback lifecycle. All original cached update/raid-message consumers use FunctionContainers; dispatch uses only their Invoke contract, with updateInfo first. Unsupported plain-function dispatch was removed after exact Retail regressions reproduced it. The [combined bounded proof](../../specs/c-factory-m4-world-inputs.md#bounded-proof--2026-10-21) records all seven integrated targeted profiles and one stock matrix: assigned rows disappear and Wrath remains clean, but unlisted cascades and other-batch failures remain.
+
+## Factory-removal social inputs — 2026-10-21
+
+[The M3 contract](../../specs/c-factory-m3-social-inputs.md) owns profile scope and simulator policies. `c_api::c_guild_info` projects supplied numeric metadata plus existing guild-logo colors into independent DTOs; changing the legacy filename invalidates metadata rather than guessing a file ID. Named temporary social-service defaults cover capability systems that roster, listing and friend data do not model. Unknown members remain nil. Frozen original-consumer and fresh Retail RED precede integrated seven-profile GREEN. The [social contract](../../specs/c-factory-m3-social-inputs.md#bounded-proof--2026-10-21) links final proof and distinguishes newly reached residual queries from this batch.
+
 ## C API numeric-secret selector boundaries
 
 Classification endpoints in `src/c_api/c_spell_classification.rs` inspect authentic numeric-secret selectors only inside their modeled host lookup. The shared public spell reader and VM unwrap permissions remain unchanged; ExternalDefensive keeps VM authentication. [Classification contract](../../specs/secret-selector-classification.md) owns endpoint scope, inferred output policy and revision-scoped proof. Original-consumer wrapper injection is not evidence of natural secret-ID production at startup.

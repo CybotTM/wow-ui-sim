@@ -2,6 +2,18 @@
 
 Added [tracking model notes](systems/lua-api.md#wrath-tracked-achievements) and [contract](../specs/wrath-tracked-achievements.md), separating authenticated 12340 static facts from INFERRED cached-consumer expectations. Current-source Wrath RED54 and Retail72+4 baseline precede the producer. Final merged proof: Wrath54+5 PASS, Retail76 statuses/failures unchanged, both stock arrays empty, warning-free check and formatting PASS. Supplemental public-API zero-ID RED precedes its correction; ten existing compile-gated rows are not counted as executed.
 
+## [2026-10-21] source | Factory-removal M4 world inputs
+
+[API ownership](systems/lua-api.md#factory-removal-world-inputs--2026-10-21) links shared setting/state publication, rooted callback removal/replacement and named missing-world-service defaults to their [contract](../specs/c-factory-m4-world-inputs.md). Frozen/fresh RED and integrated seven-profile targeted GREEN precede one final stock matrix. Assigned M3/M4 signatures disappear and Wrath stays clean; other-batch errors and unlisted cascades remain. FunctionContainer-only callback cleanup has exact RED→GREEN; no native policy parity is claimed.
+
+## [2026-10-21] source | Factory-removal M3 social inputs
+
+[API ownership](systems/lua-api.md#factory-removal-social-inputs--2026-10-21) links tabard DTO projection and isolated temporary capability policies to their [contract](../specs/c-factory-m3-social-inputs.md). Original-consumer source equivalence and fresh Retail RED retained; integrated seven-profile targeted GREEN and the combined stock matrix are recorded in the owning specs, including unfixed residual scope.
+
+## [2026-10-20] source | C namespace factory removal (F0)
+
+[Namespace diagnostics](systems/addon-loading.md#missing-c-members-f0-2026-10-20) now return nil without memoization. Housing merges explicit defaults without replacing metatables; three named handlers retain diagnostics only. [Contract](../specs/c-namespace-nil-members.md) retains strict/retired nil semantics and explicit state/actions. Five extracted Lua bodies have RED→GREEN under system Lua 5.4; the [frozen full-feature proof](../specs/c-namespace-nil-members.md#frozen-f0-proof) now owns simulator/profile results and M1–M5/T6 runtime gaps. Health gates still fail; one anonymous callback family's root remains unresolved rather than guessed.
+
 ## [2026-10-21] source | Wrath positional guild rights
 
 [Projection notes](systems/lua-api.md#wrath-guild-rank-rights) and [contract](../specs/wrath-guild-rank-flags.md) record original native checkbox RED and the bounded Wrath-only positional correction. The contract records native-consumer and guild-model GREEN, paired Retail preservation with unchanged pre-existing fixture failures, and empty stock Lua-error arrays under both profiles.

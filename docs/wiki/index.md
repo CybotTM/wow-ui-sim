@@ -2,6 +2,18 @@
 
 [Tracking model](systems/lua-api.md#wrath-tracked-achievements) links the [12340 contract](../specs/wrath-tracked-achievements.md): ordered unique IDs, duplicate-add events and synchronous native consumers. Current-source RED precedes the producer; merged-source Wrath54 and five shared-model controls pass. Retail72+4 retains identical statuses and existing failures; both stock captures are empty, check/fmt pass. Persistence and ten pre-existing compile-gated Wrath rows remain excluded.
 
+## [2026-10-21] source | Factory-removal world inputs
+
+[World ownership](systems/lua-api.md#factory-removal-world-inputs--2026-10-21) links the [M4 contract](../specs/c-factory-m4-world-inputs.md): shared existing-state projections, C API callback lifecycle and named missing-world-service policies. The contract records integrated seven-profile targeted GREEN, one stock matrix, FunctionContainer-only dispatch and retained unlisted residuals.
+
+## [2026-10-21] source | Factory-removal social inputs
+
+[Social ownership](systems/lua-api.md#factory-removal-social-inputs--2026-10-21) links the [M3 contract](../specs/c-factory-m3-social-inputs.md): supplied tabard metadata versus named missing-service policies. Frozen/fresh RED, integrated targeted GREEN and the combined stock matrix are recorded; assigned rows disappear without claiming clean startup outside Wrath.
+
+## [2026-10-20] source | C namespace factory removal (F0)
+
+[Namespace diagnostics](systems/addon-loading.md#missing-c-members-f0-2026-10-20) link the [nil-member contract and frozen proof](../specs/c-namespace-nil-members.md#frozen-f0-proof). The proof owns the full-feature profile matrix, original-consumer gap evidence, failed health gates and unresolved callback attribution. No replacement model is included.
+
 ## [2026-10-21] source | Wrath positional guild rights
 
 [Legacy projection](systems/lua-api.md#wrath-guild-rank-rights) links the [12340 contract](../specs/wrath-guild-rank-flags.md): the original checkbox consumer exposes the table/positional mismatch. The Wrath-only correction has native-consumer and guild-model GREEN plus paired Retail preservation of the existing namespace/table path. The contract distinguishes retained fixture failures and unmodeled lifecycle semantics.
