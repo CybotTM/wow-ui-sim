@@ -65,6 +65,7 @@ fn blizzard_auto_complete_allowload_both_loads_in_game_and_glue_scopes() {
     });
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_fonts_shared_loads_before_autocomplete() {
     assert_toc_declares_fonts_shared_dep();
@@ -93,6 +94,7 @@ fn blizzard_auto_complete_fonts_shared_loads_before_autocomplete() {
             });
         });
     });
+}
 }
 
 fn assert_toc_declares_fonts_shared_dep() {

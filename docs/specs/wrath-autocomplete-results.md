@@ -40,7 +40,7 @@ Cached native FrameXML behavior differs from modern tests: selection starts at z
 
 Fixture-only source `c4664700f`: eleven positive-count Wrath cases executed. Nine valid query/callback RED failures report the unsigned include mask being interpreted as an `i32` limit at argument two; direct native result updating passes. One additional failure is excluded from producer RED: its missing `AUTOCOMPLETE_LIST.FRIEND` alias prevented the query. The corrected case uses `AUTOCOMPLETE_LIST_TEMPLATES.FRIEND`: genuine original-consumer RED at `14f3c5d8b` (plain friend name was nil), GREEN at `c522c9d87`, with byte-identical corrected test source.
 
-Producer source `db793e416`: all 33 adapted original cases, five other added native cases and seven existing modern namespace cases pass. Their source is unchanged at `c522c9d87`; the corrected sixth native case passes there after merging master `342acab31`. All original 60 rows executed: 33 PASS, 26 report-only modern-target gates and one native-glue evidence gap. No runtime cfg gate was added.
+Producer source `db793e416`: all 33 adapted original cases, five other added native cases and seven existing modern namespace cases pass. Their source is unchanged at `c522c9d87`; the corrected sixth native case passes there after merging master `342acab31`. At that revision all original 60 rows executed: 33 PASS, 26 report-only modern-target failures and one native-glue evidence gap; no compile gate had yet been added.
 
 Retail preservation: all 67 bounded cases pass both before (`14f3c5d8b`, pre-producer source) and after (`c522c9d87`), with zero retained or new failures. Both current stock `lua-errors` outputs are byte-exact empty arrays. Full-feature Wrath/Retail integration checks have zero warnings; formatting passes. Every sealed ELF is source-bound, and original persisted CVar stat/hash remains unchanged. A Wrath check postprocessing regex failed after Cargo exited successfully; saved logs were recovered without rerunning Cargo.
 
@@ -48,7 +48,8 @@ These are bounded receipts, not full-suite or native-runtime parity. The identit
 
 ## Known gaps (current cycle)
 
-- [ ] Native GlueXML availability remains unverified; modern-only original targets remain report-only, not runtime passes.
+- [x] By user decision (EXCL-1, 2026-10-22), exactly 26 modern-only Blizzard_AutoComplete / AutoCompletePopupList rows use the existing `post_wrath_ui_fixture!` compile gate: excluded on Wrath as not applicable to 3.3.5, unchanged on every other profile. Test bodies remain byte-identical; exclusion is not a runtime pass.
+- [ ] `blizzard_auto_complete_load::blizzard_auto_complete_allowload_both_loads_in_game_and_glue_scopes` remains compiled and failing on Wrath as the native GlueXML evidence gap; it is not one of the 26 exclusions.
 
 ## Out of scope
 

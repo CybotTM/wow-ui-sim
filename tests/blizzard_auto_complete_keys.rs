@@ -59,6 +59,7 @@ expect(AutoCompleteBox.parent == nil, "disallowed text change must detach AutoCo
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_backspace_toggles_disallow_flag() {
     common::with_perf_lock(|| {
@@ -81,7 +82,9 @@ fn blizzard_auto_complete_backspace_toggles_disallow_flag() {
         });
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_text_changed_hides_when_disallowed() {
     common::with_perf_lock(|| {
@@ -103,4 +106,5 @@ fn blizzard_auto_complete_text_changed_hides_when_disallowed() {
             });
         });
     });
+}
 }

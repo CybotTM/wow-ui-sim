@@ -49,6 +49,7 @@ expect(AutoCompleteBox:IsEventRegistered("GUILD_ROSTER_UPDATE"),
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_guild_roster_update_requests_once_then_unregisters() {
     common::with_perf_lock(|| {
@@ -70,4 +71,5 @@ fn blizzard_auto_complete_guild_roster_update_requests_once_then_unregisters() {
             });
         });
     });
+}
 }
