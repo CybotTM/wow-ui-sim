@@ -1,6 +1,6 @@
 ## [2026-10-22] investigation | Wrath F07 REJECT repair
 
-[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [32-row contract](../specs/wrath-fixture-f07.md). Restored original shine epsilon assertion and original EventFrame/MinimalScrollBar consumer, ungated. Historical 11/21 claims are superseded; fresh counts and producer diagnosis pending. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
+[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [exact 32-row matrix](../specs/wrath-fixture-f07.md#exact-rows). Restored shine epsilon assertion passes; restored EventFrame/MinimalScrollBar consumer fails with missing track, unchanged and ungated. Fresh Wrath10 PASS/22 FAIL; Retail32 PASS/0 FAIL; stock Wrath[] and both checks/fmt pass. All invocations execute1; no producer fix or new generic test. Historical11/21 claims superseded. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
 
 ## [2026-10-21] investigation | Wrath autocomplete native fixture
 
