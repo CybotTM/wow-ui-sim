@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -11,6 +12,31 @@ from tools import gen_blizzard_ui_manifest as generator
 
 
 class PtrManifestTests(unittest.TestCase):
+    def test_refresh_selects_pinned_revision_not_branch_tip(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            upstream = root / "upstream"
+            upstream.mkdir()
+            def git(*args: str) -> str:
+                return subprocess.check_output(["git", "-C", str(upstream), *args], text=True).strip()
+            git("init", "-b", "ptr")
+            git("config", "user.name", "Fixture")
+            git("config", "user.email", "fixture@example.invalid")
+            addons = upstream / "Interface/AddOns/Example"
+            addons.mkdir(parents=True)
+            (addons / "Selected.lua").write_text("return 70424\n")
+            git("add", ".")
+            git("commit", "-m", "selected")
+            selected = git("rev-parse", "HEAD")
+            (addons / "Future.lua").write_text("return 99999\n")
+            git("add", ".")
+            git("commit", "-m", "future")
+            with mock.patch.object(generator, "GETHE_REMOTE", str(upstream)), mock.patch.object(
+                generator, "GIT_ROOT", root / "git"
+            ), mock.patch.object(generator, "CACHE_ROOT", root / "cache"):
+                generator.refresh_branch("ptr", selected)
+                self.assertEqual(generator.enumerate_files("ptr"), ["Example/Selected.lua"])
+
     def test_ptr_enumerates_ptr_not_ptr2(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
