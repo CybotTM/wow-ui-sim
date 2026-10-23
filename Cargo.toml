@@ -182,6 +182,10 @@ name = "integration"
 path = "tests/integration.rs"
 
 [[test]]
+name = "patch_12_1_7_toc"
+path = "tests/patch_12_1_7_toc.rs"
+
+[[test]]
 name = "wrath_core_labels_real_paths"
 path = "tests/wrath_core_labels_real_paths.rs"
 required-features = ["client-wrath"]
