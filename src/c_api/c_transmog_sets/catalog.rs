@@ -71,6 +71,16 @@ fn is_available(entry: &TransmogSetInfo) -> bool {
     entry.valid_for_character && (!entry.hidden_until_collected || entry.collected)
 }
 
+pub(super) fn has_any_valid(state: &mut LuaState) -> LuaResult<u32> {
+    let valid = borrow_state(state)?
+        .transmog_sets
+        .entries
+        .iter()
+        .any(|entry| entry.valid_for_character);
+    state.push(Val::Bool(valid));
+    Ok(1)
+}
+
 pub(super) fn has_available(state: &mut LuaState) -> LuaResult<u32> {
     // INFERRED: availability ignores UI filters, so a zero-result filter does
     // not hide the controls needed to recover the player's available sets.

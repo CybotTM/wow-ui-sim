@@ -221,6 +221,10 @@ fn register_modifier_keys(b: TableBuilder) -> LuaResult<TableBuilder> {
 
 fn register_guild_and_game_rules(b: TableBuilder) -> LuaResult<TableBuilder> {
     b.set_function("SetGuildEmblem", set_guild_emblem)?
+        .set_function(
+            "SetGuildTabardMetadata",
+            crate::c_api::c_guild_info::admin_set_tabard_metadata,
+        )?
         .set_function("SetGuildRanks", set_guild_ranks)?
         .set_function("SetGameRule", super::game_rules::admin_set_game_rule)?
         .set_function(

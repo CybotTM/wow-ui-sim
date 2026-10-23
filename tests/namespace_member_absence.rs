@@ -1,4 +1,4 @@
-//! Complete-bootstrap contract for the stage's strict surfaces only.
+//! Complete-bootstrap nil contract for strict, ordinary and constructed namespaces.
 use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -48,36 +48,39 @@ fn strict_namespace_missing_members_stay_nil_after_bootstrap() {
 
 #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 #[test]
-fn retail_ptr_social_ui_keeps_tip_member_factory_behavior() {
+fn retail_ptr_social_ui_keeps_explicit_member_and_unknown_nil() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(
         r#"
         assert(C_SocialUI.IsSystemEnabled() == false)
-        local synthesized = C_SocialUI.NotARealMethod
-        assert(type(synthesized) == 'function')
-        assert(C_SocialUI.NotARealMethod == synthesized)
-        assert(select('#', synthesized()) == 1 and synthesized() == nil)
+        assert(rawget(C_SocialUI, 'NotARealMethod') == nil)
+        assert(C_SocialUI.NotARealMethod == nil)
+        assert(C_SocialUI.NotARealMethod == nil)
+        assert(type(C_SocialUI.NotARealMethod) == 'nil')
         "#,
     )
     .unwrap();
 }
 
 #[test]
-fn non_strict_namespace_keeps_tip_member_factory_behavior() {
+fn non_strict_namespace_and_constructor_preserve_explicit_members_only() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(
         r#"
         assert(C_CVar.GetCVar('loadDeprecationFallbacks') == GetCVar('loadDeprecationFallbacks'))
-        local synthesized = C_CVar.NotARealMethod
-        assert(type(synthesized) == 'function')
-        assert(C_CVar.NotARealMethod == synthesized)
-        assert(select('#', synthesized()) == 1 and synthesized() == nil)
+        assert(rawget(C_CVar, 'NotARealMethod') == nil)
+        assert(C_CVar.NotARealMethod == nil)
+        assert(C_CVar.NotARealMethod == nil)
+        assert(type(C_CVar.NotARealMethod) == 'nil')
         local supplied = { ReadFixture = function() return 'registered' end }
         local namespace = __wow_namespace(supplied)
         assert(namespace == supplied and namespace.ReadFixture() == 'registered')
-        local later = namespace.NotARealMethod
-        assert(type(later) == 'function' and namespace.NotARealMethod == later)
-        assert(later() == nil)
+        assert(namespace.NotARealMethod == nil)
+        assert(namespace.NotARealMethod == nil)
+        assert(rawget(namespace, 'NotARealMethod') == nil)
+        for key in pairs(namespace) do
+            assert(key ~= 'NotARealMethod')
+        end
         "#,
     )
     .unwrap();

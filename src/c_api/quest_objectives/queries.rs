@@ -8,7 +8,9 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
-    if !ENABLED {
+    // PTR consumes this existing snapshot query too; do not enable unrelated
+    // objective mutation/legacy policies merely to publish its read surface.
+    if !ENABLED && !cfg!(feature = "client-ptr") {
         return Ok(());
     }
     let namespace = ensure_namespace(state, "C_QuestLog")?;

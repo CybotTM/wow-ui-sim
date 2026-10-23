@@ -100,13 +100,18 @@ pub(crate) fn register_interaction_tables(state: &mut LuaState) -> LuaResult<()>
     }
     register_classic_combat_tables(state)?;
     super::c_log::register_classic(state)?;
-    #[cfg(feature = "client-wowforever")]
-    super::c_log::register_error_sink(state)?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail
+            | crate::client_profile::ClientProfile::Ptr
+            | crate::client_profile::ClientProfile::WowForever
+    ) {
+        super::c_log::register_error_sink(state)?;
+    }
     #[cfg(feature = "retail-12-0-5")]
     super::c_scenario_info::register(state)?;
     #[cfg(feature = "client-retail")]
     super::c_scenario_bonus::register(state)?;
-    #[cfg(feature = "retail-12-0-0")]
     super::c_transmog_sets::register(state)?;
     #[cfg(feature = "retail-12-0-0")]
     super::c_transmog_outfit_info::register(state)?;

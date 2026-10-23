@@ -96,13 +96,17 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     ) {
         LuaApiMut::register_function(state, "IsAutoRepeatAction", is_auto_repeat_action)?;
     }
-    #[cfg(feature = "retail-12-0-0")]
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "UnregisterActionUIButton",
-        crate::c_api::c_action_bar::unregister_action_ui_button,
-    )?;
+    if cfg!(any(
+        feature = "retail-12-0-0",
+        feature = "client-wowforever"
+    )) {
+        table_set_rust_fn_static(
+            state,
+            table_ref,
+            "UnregisterActionUIButton",
+            crate::c_api::c_action_bar::unregister_action_ui_button,
+        )?;
+    }
     #[cfg(feature = "retail-12-0-0")]
     crate::c_api::c_action_bar_queries::register(state, table_ref)?;
     crate::c_api::action_macros::register(state, table_ref)?;

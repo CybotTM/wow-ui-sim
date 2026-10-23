@@ -77,18 +77,13 @@ fn no_arg_setters_default_to_true() {
 }
 
 #[test]
-fn other_c_guild_info_members_fall_through_to_namespace_metamethod() {
-    // Unimplemented C_GuildInfo.* should still resolve via the stub
-    // namespace's __index fallback (returns a no-op fn).
+fn other_c_guild_info_members_remain_nil() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
         .eval(
             r#"
-            if type(C_GuildInfo.SomeUnimplementedMember) ~= "function" then
-                return "missing"
-            end
-            if C_GuildInfo.SomeUnimplementedMember() ~= nil then
-                return "non_nil"
+            if C_GuildInfo.SomeUnimplementedMember ~= nil then
+                return "fabricated_member"
             end
             return "ok"
             "#,

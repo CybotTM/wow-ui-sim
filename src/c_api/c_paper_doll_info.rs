@@ -28,6 +28,8 @@ pub(crate) fn register_c_paper_doll_info_surface(state: &mut LuaState) -> LuaRes
         get_armor_effectiveness_against_target,
     )?;
     table_set_rust_fn_static(state, ns, "GetStaggerPercentage", get_stagger_percentage)?;
+    #[cfg(not(feature = "client-wrath"))]
+    table_set_rust_fn_static(state, ns, "OffhandHasWeapon", offhand_has_weapon)?;
     table_set_rust_fn_static(
         state,
         ns,
@@ -158,6 +160,22 @@ fn get_armor_effectiveness_against_target(state: &mut LuaState) -> LuaResult<u32
     };
 
     state.push(Val::Num(armor_effectiveness(armor, target_level)));
+    Ok(1)
+}
+
+#[cfg(not(feature = "client-wrath"))]
+fn offhand_has_weapon(state: &mut LuaState) -> LuaResult<u32> {
+    const OFFHAND_SLOT: i32 = 17;
+    const WEAPON_INVENTORY_TYPES: [u8; 4] = [13, 17, 21, 22];
+    let item_id = borrow_state(state)?
+        .player
+        .equipped_items
+        .get(&OFFHAND_SLOT)
+        .map(|item| item.item_id);
+    let is_weapon = item_id
+        .and_then(crate::items::get_item)
+        .is_some_and(|item| WEAPON_INVENTORY_TYPES.contains(&item.inventory_type));
+    state.push(Val::Bool(is_weapon));
     Ok(1)
 }
 
