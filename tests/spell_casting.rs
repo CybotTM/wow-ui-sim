@@ -570,6 +570,7 @@ fn cast_bar_respects_edit_mode_lock_setting_after_startup_fix(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn cast_bar_respects_edit_mode_lock_setting_after_startup_fix() {
@@ -577,6 +578,7 @@ fn cast_bar_respects_edit_mode_lock_setting_after_startup_fix() {
         let env = env_with_full_blizzard_ui();
         cast_bar_respects_edit_mode_lock_setting_after_startup_fix::run(&env);
     }
+}
 }
 
 #[test]

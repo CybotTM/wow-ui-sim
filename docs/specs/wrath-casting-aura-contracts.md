@@ -54,6 +54,19 @@ Final producer revision `14aed640c0629a41138e0c809a7ad56b87738170`: Wrath origin
 
 Both profiles' stock Lua-error arrays remain empty before/after. Final Wrath `cargo check` and `cargo fmt --all -- --check` pass; check has zero warnings. All counted cases have positive completed-test counts, all Retail successes include the exact named success, and child-only current CVar copies leave the persisted original stat/hash unchanged. Unchecked requirements below retain unexercised branches, not whole-batch parity claims.
 
+## Edit-only rejection repair — 2026-10-23
+
+Producer profile predicates now consult `client_profile::ACTIVE`; Wrath and
+non-Wrath branches are unchanged. The 16 modern-only original tests are excluded
+on Wrath with the established `post_wrath_ui_fixture!` gate, without assertion
+or function-body changes; all non-Wrath registrations remain intact. Master
+`dd3373d6f` is merged, retaining both sides of the wiki index/log conflicts.
+
+The runtime results above belong to the historical producer revision, not this
+repair. Fresh slot reproof is required: Wrath native 21 plus seven contracts,
+Retail original 37, and selection evidence showing the 16 absent on Wrath. No
+Cargo command, runtime execution, or slot access was performed for this repair.
+
 ## Known gaps (current cycle)
 
 - [ ] Produced channel-event zero-count and missing-record event branches lack direct producer coverage; incoming channel transport remains unmodeled.

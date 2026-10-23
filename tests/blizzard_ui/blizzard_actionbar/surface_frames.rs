@@ -572,6 +572,7 @@ const PLAN_NAMED_EVENT_ROUTING_FRAMES: &[(&str, &str)] = &[
     ),
 ];
 
+post_wrath_ui_fixture! {
 #[test]
 fn plan_named_event_routing_frames_exist_with_register_frame_surface() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -618,7 +619,9 @@ fn plan_named_event_routing_frames_exist_with_register_frame_surface() {
         }
     });
 }
+}
 
+post_wrath_ui_fixture! {
 /// Pin `SpellFlyout` identity. Declared at `Shared/SpellFlyout.xml:62`
 /// as a `toplevel="true"` `frameStrata="DIALOG"` `hidden="true"` Frame
 /// inheriting `SecureFrameTemplate, ResizeLayoutFrame, FlyoutPopupTemplate`
@@ -691,6 +694,7 @@ fn spell_flyout_publishes_dialog_strata_hidden_by_default() {
              action buttons until the player clicked elsewhere."
         );
     });
+}
 }
 
 post_wrath_ui_fixture! {

@@ -461,7 +461,9 @@ fn unit_channel_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn push_unit_cast_info(state: &mut LuaState, slot: CastSlot) -> LuaResult<u32> {
-    if cfg!(feature = "client-wrath") && !matches!(stack_val(state, 1), Val::Str(_)) {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+        && !matches!(stack_val(state, 1), Val::Str(_))
+    {
         let usage = match slot {
             CastSlot::Casting => "Usage: UnitCastingInfo(\"unit\")",
             CastSlot::Channeling => "Usage: UnitChannelInfo(\"unit\")",
@@ -511,7 +513,7 @@ fn read_cast_subtext(
     sim: &crate::lua_api::SimState,
     cast: &crate::lua_api::game_data::CastingState,
 ) -> Option<&'static str> {
-    if !cfg!(feature = "client-wrath") {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
         return Some("");
     }
     if sim.start_time.elapsed().as_secs_f64() >= cast.end_time() {
@@ -536,14 +538,15 @@ fn push_common_cast_fields(state: &mut LuaState, cast_info: &CastInfoSnapshot) {
     let spell_name_val = create_string(state, &cast_info.spell_name);
     // INFERRED: display-override and localized-channel inputs are not modeled.
     let spell_name_display_val = create_string(state, &cast_info.spell_name);
-    let icon_path_val = if cfg!(feature = "client-wrath") {
-        let filename = legacy_cast_icon_filename(&cast_info.icon_path);
-        create_string(state, &filename)
-    } else {
-        create_string(state, &cast_info.icon_path)
-    };
+    let icon_path_val =
+        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+            let filename = legacy_cast_icon_filename(&cast_info.icon_path);
+            create_string(state, &filename)
+        } else {
+            create_string(state, &cast_info.icon_path)
+        };
     state.push(spell_name_val);
-    if cfg!(feature = "client-wrath") {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         let rank = create_string(state, cast_info.spell_subtext);
         state.push(rank);
     }
@@ -556,7 +559,7 @@ fn push_common_cast_fields(state: &mut LuaState, cast_info: &CastInfoSnapshot) {
 
 fn push_cast_info(state: &mut LuaState, cast_info: &CastInfoSnapshot) -> u32 {
     push_common_cast_fields(state, cast_info);
-    if cfg!(feature = "client-wrath") {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         state.push(Val::Num(cast_info.cast_id as f64));
         state.push(Val::Bool(false));
         return 9;
@@ -585,7 +588,7 @@ fn push_cast_info(state: &mut LuaState, cast_info: &CastInfoSnapshot) -> u32 {
 
 fn push_channel_info(state: &mut LuaState, cast_info: &CastInfoSnapshot) -> u32 {
     push_common_cast_fields(state, cast_info);
-    if cfg!(feature = "client-wrath") {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         state.push(Val::Bool(false));
         return 8;
     }

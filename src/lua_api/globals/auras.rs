@@ -724,7 +724,7 @@ fn query_wrath_legacy_aura(
 }
 
 fn unit_buff(state: &mut LuaState) -> LuaResult<u32> {
-    if cfg!(feature = "client-wrath") {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         return query_wrath_legacy_aura(state, Some(AuraFilter::Helpful), "UnitBuff");
     }
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
@@ -736,7 +736,7 @@ fn unit_buff(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn unit_debuff(state: &mut LuaState) -> LuaResult<u32> {
-    if cfg!(feature = "client-wrath") {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         return query_wrath_legacy_aura(state, Some(AuraFilter::Harmful), "UnitDebuff");
     }
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
@@ -748,7 +748,7 @@ fn unit_debuff(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn unit_aura(state: &mut LuaState) -> LuaResult<u32> {
-    if cfg!(feature = "client-wrath") {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         return query_wrath_legacy_aura(state, None, "UnitAura");
     }
     // INFERRED AllowedWhenUntainted for this undeclared legacy global.
@@ -882,12 +882,12 @@ fn push_legacy_aura_result(state: &mut LuaState, aura: Option<&AuraInfo>, unit: 
     match aura {
         Some(aura) => {
             let aura_table = build_aura_table(state, aura, unit);
-            if cfg!(feature = "client-wrath") {
+            if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
                 write_wrath_legacy_aura_fields(state, aura_table, aura, unit);
             }
             push_legacy_aura_tuple(state, aura_table)
         }
-        None if cfg!(feature = "client-wrath") => 0,
+        None if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath => 0,
         None => {
             state.push(Val::Nil);
             1
@@ -989,7 +989,7 @@ fn push_legacy_aura_tuple(state: &mut LuaState, aura: Val) -> u32 {
     #[cfg(not(feature = "client-wrath"))]
     state.push(Val::Nil);
     state.push(spell_id);
-    if cfg!(feature = "client-wrath") {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         11
     } else {
         10

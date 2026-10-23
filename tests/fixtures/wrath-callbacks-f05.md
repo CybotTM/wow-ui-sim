@@ -15,10 +15,13 @@ Consumer evidence is the shipped 12340 UI. It proves what the fixture calls, not
 native producer contracts. Producer corrections require separate native-contract
 evidence and an observed failure through those consumers.
 
-## Report-only gate candidates
+## Modern-only exclusions
 
-These original tests remain registered and unchanged on Wrath. Their modern-only
-assertions have no native counterpart; failure is reported, not cfg-gated.
+These 16 original tests are excluded on Wrath through `post_wrath_ui_fixture!`;
+function bodies remain byte-identical. All non-Wrath registrations are preserved.
+Their modern-only assertions have no native counterpart. The EditMode fixture
+body and Retail prefork registration remain intact; only its non-Retail wrapper
+is excluded on Wrath.
 
 - File-scope mixin declarations; seven surface_mixins tests. Wrath uses free functions, not these mixins.
 - ActionBarActionEventsFrame and ActionBarButtonEventsFrame registration; RegisterFrame event-routing surface. Wrath registers directly on buttons.

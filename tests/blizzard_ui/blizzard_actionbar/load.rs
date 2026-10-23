@@ -144,6 +144,7 @@ fn action_bar_load_emits_no_lane_specific_lua_errors() {
     });
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn action_bar_load_executes_file_scope_mixin_declarations() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -182,6 +183,7 @@ fn action_bar_load_executes_file_scope_mixin_declarations() {
             );
         }
     });
+}
 }
 
 /// Pin the TOC-declared dependency contract via TWO independent grounds:

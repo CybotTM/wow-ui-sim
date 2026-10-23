@@ -44,6 +44,7 @@ const PLAN_NAMED_EVENTS: &[&str] = &[
 const SOURCE_ADDITIONAL_EVENTS: &[&str] =
     &["UNIT_FLAGS", "UNIT_AURA", "PLAYER_MOUNT_DISPLAY_CHANGED"];
 
+post_wrath_ui_fixture! {
 /// Pin `ActionBarButtonEventsFrame`'s post-OnLoad event-registration
 /// surface and the OnEvent script wiring. **Spec/source mismatch** —
 /// PLAN names 7 events; OnLoad at lua:203-218 registers 10 (3 extras
@@ -122,6 +123,7 @@ fn action_bar_button_events_frame_registers_plan_and_source_additional_events_af
              (lua:459)."
         );
     });
+}
 }
 
 const ACTION_EVENTS_FRAME_NAME: &str = "ActionBarActionEventsFrame";
@@ -208,6 +210,7 @@ const ACTION_EVENTS_REGISTERED: &[&str] = &[
 /// to update the spec.
 const ACTION_EVENTS_COMMENTED_OUT: &str = "ACTIONBAR_UPDATE_USABLE";
 
+post_wrath_ui_fixture! {
 /// Pin `ActionBarActionEventsFrame`'s post-OnLoad event-registration
 /// surface, the OnEvent script wiring, and the commented-out
 /// `ACTIONBAR_UPDATE_USABLE` tripwire.
@@ -328,6 +331,7 @@ fn action_bar_action_events_frame_registers_thirty_four_spell_action_events_afte
              ActionButton would lose its action-update path."
         );
     });
+}
 }
 
 const MAIN_ACTION_BAR_FRAME_NAME: &str = "MainActionBar";

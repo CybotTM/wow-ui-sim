@@ -29,7 +29,7 @@ pub(crate) fn build_player_cast_event_args(
     spell_id: u32,
     mut lua_string: impl FnMut(&str) -> Val,
 ) -> Vec<Val> {
-    if !cfg!(feature = "client-wrath") {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
         return player_cast_args(cast_id, spell_id, lua_string).to_vec();
     }
     let Some(spell) = crate::spells::get_spell(spell_id) else {

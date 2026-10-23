@@ -192,6 +192,7 @@ fn action_bar_plan_named_input_globals_are_functions() {
     });
 }
 
+post_wrath_ui_fixture! {
 /// Pin the action-highlight-tracking globals — the surface that
 /// `SpellBookFrame`, `Blizzard_PlayerSpells`, and `Blizzard_TalentUI`
 /// consume to mark "new action" indicators on action bar buttons and to
@@ -319,6 +320,7 @@ fn action_bar_plan_named_highlight_tracking_globals_are_functions() {
         }
     });
 }
+}
 
 /// Pin the multi-bar driver/visibility globals — the surface that
 /// `EditMode`, `MainMenuBar`, and addon authors consume to query and
@@ -425,6 +427,7 @@ fn action_bar_plan_named_multibar_globals_are_functions() {
     });
 }
 
+post_wrath_ui_fixture! {
 /// Pin the ExtraActionBar lifecycle/visibility globals — the surface
 /// that drives the contextual extra-action bar (vehicle abilities,
 /// encounter-specific extra buttons, world-event handout buttons like
@@ -525,7 +528,9 @@ fn action_bar_plan_named_extra_bar_globals_are_functions() {
         }
     });
 }
+}
 
+post_wrath_ui_fixture! {
 /// Pin the bar-helper globals — a mixed-publisher batch that exercises
 /// the cross-addon surface boundary. Two of the three globals are
 /// declared by a SIBLING addon (`Blizzard_UIPanels_Game`), not by
@@ -642,4 +647,5 @@ fn action_bar_plan_named_bar_helper_globals_are_functions() {
             );
         }
     });
+}
 }
