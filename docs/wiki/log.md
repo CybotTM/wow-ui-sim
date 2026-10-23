@@ -2591,3 +2591,8 @@ Public-API tests reproduce a whole-link secrecy failure on Retail and PTR before
 ## 2026-10-21 — Wrath autocomplete fixture and query boundary
 
 [Native fixture diagnosis](investigations/wrath-autocomplete-fixture.md) records valid original-consumer argument-width RED, direct-result PASS, a Wrath-only modeled global and preserved modern namespace. The initial small-mask probe's missing alias is excluded from producer RED; its corrected template-based consumer has separate RED→GREEN proof. The [contract](../specs/wrath-autocomplete-results.md) records original33/additional6 native passes, paired Retail67 preservation, empty stock arrays and warning-free checks while retaining modern/glue and identity/recency/UTF-8 gaps.
+
+
+## 2026-10-22 — F12 native AuctionUI consumer boundaries
+
+[[wrath-addon-load-fixture]] links F12's original-consumer price-column and inactive-close REDs, fixture-only sample isolation and retained modern-only oracles. Reconstructed 12340 facts are distinguished from native execution; final profile proof remains pending.
