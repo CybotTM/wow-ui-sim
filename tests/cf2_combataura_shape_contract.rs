@@ -1,33 +1,13 @@
 //! Shape-only contracts; native semantics unknown. Source predictions are not runtime proof.
-#![cfg(any(
-    feature = "client-retail",
-    feature = "client-ptr",
-    feature = "client-wowforever"
-))]
+#![cfg(any(feature = "client-wowforever"))]
 
 #[path = "common/cf2_shape.rs"]
 mod shape;
 
-// retail: Blizzard_APIDocumentationGenerated/CombatLogSecureDocumentation.lua:11 (AddEventFilter).
-// ptr: Blizzard_APIDocumentationGenerated/CombatLogSecureDocumentation.lua:11 (AddEventFilter).
-// Source-predicted FAIL: secure AddEventFilter missing; original argument forwarding only, current-entry subcheck blocked; not executed; native semantics unknown.
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
-#[test]
-fn original_combat_filter_forwarding_shape_blocker() {
-    let env = shape::load(&["Blizzard_CombatLogProcessor"]);
-    shape::check(
-        &env,
-        r#"
-
-original(CombatLogProcessor.ApplyFilterSettings, 'Blizzard_CombatLogProcessor/Blizzard_CombatLogProcessor.lua')
-local processor = CreateFromMixins(CombatLogProcessor)
-processor:ApplyFilterSettings({ filters = {{ eventList = {SPELL_DAMAGE = true} }}, settings = {} })
--- AddEventFilter has no declared parameter schema: only original forwarding is exercised.
--- ShouldShowCurrentEntry is NOT checked without normal populated ingest/current-entry state.
-
-"#,
-    );
-}
+// C1 (retail/ptr) remains blocked: no normal current-entry ingest path is established.
+// Blizzard_APIDocumentationGenerated/CombatLogSecureDocumentation.lua:102 declares
+// ShouldShowCurrentEntry's boolean; :11 declares no AddEventFilter argument schema.
+// A forwarding-only consumer call cannot claim the missing boolean shape coverage.
 
 // wowforever: Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:377 (GetGroupBuffVisualAlerts).
 // wowforever: Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:555 (SetGroupBuffVisualAlerts).
