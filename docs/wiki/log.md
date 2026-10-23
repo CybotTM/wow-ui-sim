@@ -2618,3 +2618,7 @@ Added direct finding-catalogue and coverage-ledger links to the [existing refere
 ## [2026-10-15] research | Cataclysm 15595 supplement navigation
 
 Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [reference page](reference/wowdecomp-audit.md) and index. Findings and proof limits remain in the audit. Read-only source research, not native verification; external code execution remains prohibited.
+
+## [2026-10-23] investigation | Wrath retained-failure fixture programme
+
+[Programme register](investigations/wrath-retained-fixtures.md) centralizes F01–F22 status, standing exclusion mechanics, class (a) boundaries, open decisions and F18-P1. Lane specs retain exact receipts; pending/static work is not runtime acceptance. Documentation only; no builds or tests.
