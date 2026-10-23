@@ -30,6 +30,8 @@ Tests in `tests/cf2_*_shape_contract.rs` exercise documented API shapes alongsid
 
 - [ ] `original_target_spell_context_shape_blocker` — profiles: wowforever. GetTargetSpellID missing; numeric result only, no no-target sentinel or context outcome. Shape only; native behavior/default/lifecycle unknown. Sources: wowforever: Blizzard_APIDocumentationGenerated/SpellDocumentation.lua:631 (GetTargetSpellID).
 
+- [ ] `original_pet_display_name_pair_shape_blocker` — profiles: retail, ptr, wowforever, mists. GetName missing; optional two strings and original display acceptance, no fallback names. Shape only; native behavior/default/lifecycle unknown. Sources: retail: Blizzard_APIDocumentationGenerated/PetBattlesDocumentation.lua:44 (GetName).; retail: Blizzard_APIDocumentationGenerated/BattlePetConstantsDocumentation.lua:37 (BattlePetOwner).; ptr: Blizzard_APIDocumentationGenerated/PetBattlesDocumentation.lua:44 (GetName).; ptr: Blizzard_APIDocumentationGenerated/BattlePetConstantsDocumentation.lua:37 (BattlePetOwner).; wowforever: Blizzard_APIDocumentationGenerated/PetBattlesDocumentation.lua:44 (GetName).; wowforever: Blizzard_APIDocumentationGenerated/BattlePetConstantsDocumentation.lua:37 (BattlePetOwner).; mists: Blizzard_APIDocumentationGenerated/PetBattlesDocumentation.lua:42 (GetName).; mists: Blizzard_APIDocumentationGenerated/BattlePetConstantsDocumentation.lua:37 (BattlePetOwner).
+
 ## How it works
 
 - [Consumer selection and proof boundaries](../wiki/investigations/consumer-selection-and-red-proof.md).
@@ -47,6 +49,7 @@ Tests in `tests/cf2_*_shape_contract.rs` exercise documented API shapes alongsid
 - `cf2_pvpmap_shape_contract` integration module.
 - `cf2_housing_shape_contract` integration module.
 - `cf2_forever_shape_contract` integration module.
+- `cf2_petbattle_shape_contract` integration module.
 
 ## Known gaps (current cycle)
 
