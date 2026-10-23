@@ -25,6 +25,13 @@ Sources: `Blizzard_APIDocumentationGenerated/ItemUpgradeDocumentation.lua:11-24`
 
 Sources: `Blizzard_APIDocumentationGenerated/StorePublicUIDocumentation.lua:11-24` (Retail/PTR/Forever), `:11-23` (Mists/Era/Anniversary); selected `Blizzard_SharedXML/InterfaceUtil.lua:44,48` (Retail/PTR/Forever), `:32,36` (Mists/Era/Anniversary), selected by SharedXML TOCs. Secure StoreUI is not the selected consumer on five of these profiles and is not forced into coverage.
 
+### Equipment set
+
+- [ ] Retail/PTR/Forever/Mists `C_EquipmentSet.EquipmentSetContainsLockedItems` accepts a required non-nil numeric saved-set ID and returns exactly one non-nil boolean.
+- [ ] Original `EquipmentManager_EquipSet` accepts actual results without Lua error with a normally saved set and a not-casting player; neither lock choice nor equipment mutation is prescribed.
+
+Sources: `Blizzard_APIDocumentationGenerated/EquipmentManagerDocumentation.lua:56-69` (Retail/PTR/Forever), `:53-65` (Mists); selected `Blizzard_FrameXML/Mainline/EquipmentManager.lua:260` (Retail/PTR/Forever), `Blizzard_FrameXML/Wrath/EquipmentManager.lua:308` (Mists). Retail/PTR FrameXML TOC `:99` and Forever `:105` select `[Family]/EquipmentManager.lua`; Mists TOC `:70` selects `Wrath/EquipmentManager.lua`. Request #7 now confirms the modern documented shape only; modern semantics remain native-unknown. Historical build 12340's string-name query is a separate contract and is not transferred here.
+
 ## How it works
 
 - [Runtime-selected consumers and proof classes](../wiki/investigations/consumer-selection-and-red-proof.md).
@@ -37,6 +44,8 @@ Sources: `Blizzard_APIDocumentationGenerated/StorePublicUIDocumentation.lua:11-2
 
 - `tests/api_shape_store.rs`: six-profile numeric-group/boolean shape and original InterfaceUtil acceptance.
 
+- `tests/api_shape_equipment_set.rs`: four-profile numeric-set/boolean shape and original equip-set acceptance.
+
 ## Tests asserting this spec
 
 - `api_shape_stable_active_list::stable_active_list_shape_blocker_contract` — source-predicted FAIL for missing member; not executed.
@@ -45,6 +54,8 @@ Sources: `Blizzard_APIDocumentationGenerated/StorePublicUIDocumentation.lua:11-2
 - `api_shape_item_upgrade::item_upgrade_original_item_util_contract` — expected preservation PASS on Retail/PTR/Forever/Mists if normal setup succeeds, unexecuted. Era/Anniversary upgrade-context subchecks blocked and unregistered; no consumer acceptance claimed there.
 
 - `api_shape_store::store_original_interface_util_contract` — expected preservation PASS on six profiles with legacy shop prerequisites, unexecuted.
+
+- `api_shape_equipment_set::equipment_set_original_equip_set_contract` — expected preservation PASS on Retail/PTR/Forever/Mists, unexecuted.
 
 ## Known gaps (current cycle)
 
