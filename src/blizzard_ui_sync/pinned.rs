@@ -137,7 +137,7 @@ pub(super) fn sync_to(root: &Path) -> crate::Result<super::SyncSummary> {
         .timeout(std::time::Duration::from_secs(30))
         .build()
         .map_err(|cause| crate::Error::Other(format!("create Blizzard CDN client: {cause}")))?;
-    super::invalidate_cache_if_provenance_mismatched(root, &expected)?;
+    prepare_sync_cache(root, &expected)?;
     let workers = 16.min(build.files.len()).max(1);
     let counts = std::thread::scope(|scope| {
         let handles: Vec<_> = (0..workers)
@@ -165,6 +165,12 @@ pub(super) fn sync_to(root: &Path) -> crate::Result<super::SyncSummary> {
         present,
         missing: 0,
     })
+}
+
+#[cfg(feature = "casc")]
+fn prepare_sync_cache(root: &Path, expected: &CacheProvenance) -> crate::Result<()> {
+    super::invalidate_cache_if_provenance_mismatched(root, expected)?;
+    Ok(())
 }
 
 #[cfg(feature = "casc")]
@@ -208,6 +214,70 @@ pub(super) fn sync_to(_root: &Path) -> crate::Result<super::SyncSummary> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(feature = "casc")]
+    #[test]
+    fn pinned_ptr_partial_cache_child() {
+        let Some(root) = std::env::var_os("WOW_UI_SIM_PINNED_PARTIAL_CACHE_CHILD_ROOT") else {
+            return;
+        };
+        let root = Path::new(&root);
+        prepare_sync_cache(root, &provenance().unwrap()).unwrap();
+        std::fs::create_dir_all(root).unwrap();
+        std::fs::write(root.join("partial-source"), b"saved source bytes").unwrap();
+        std::process::exit(23);
+    }
+
+    #[cfg(feature = "casc")]
+    #[test]
+    fn pinned_ptr_resumes_partial_cache_after_process_failure_without_completion() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().join("AddOns");
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "blizzard_ui_sync::pinned::tests::pinned_ptr_partial_cache_child",
+                "--nocapture",
+            ])
+            .env("WOW_UI_SIM_PINNED_PARTIAL_CACHE_CHILD_ROOT", &root)
+            .status()
+            .unwrap();
+        assert_eq!(status.code(), Some(23));
+        assert!(!root.join(super::super::COMPLETE_MARKER).exists());
+        assert_eq!(
+            std::fs::read(root.join("partial-source")).unwrap(),
+            b"saved source bytes"
+        );
+
+        prepare_sync_cache(&root, &provenance().unwrap()).unwrap();
+
+        assert_eq!(
+            std::fs::read(root.join("partial-source")).unwrap(),
+            b"saved source bytes"
+        );
+        assert!(cache_matches(&root));
+        assert!(!root.join(super::super::COMPLETE_MARKER).exists());
+    }
+
+    #[cfg(feature = "casc")]
+    #[test]
+    fn pinned_ptr_discards_stale_source_before_preparing_partial_cache() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        let stale = provenance()
+            .unwrap()
+            .contents()
+            .replace("version=12.1.7.70424\n", "version=12.1.5.69594\n");
+        std::fs::write(root.join(super::super::PROVENANCE_FILE), stale).unwrap();
+        std::fs::write(root.join(super::super::COMPLETE_MARKER), b"ok\n").unwrap();
+        std::fs::write(root.join("stale-source"), b"old source bytes").unwrap();
+
+        prepare_sync_cache(root, &provenance().unwrap()).unwrap();
+
+        assert!(!root.join("stale-source").exists());
+        assert!(!root.join(super::super::COMPLETE_MARKER).exists());
+        assert!(cache_matches(root));
+    }
 
     #[test]
     fn pinned_ptr_selects_exact_70424_source_identity() {
