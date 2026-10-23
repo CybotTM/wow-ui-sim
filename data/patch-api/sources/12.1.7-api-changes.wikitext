@@ -1,0 +1,23 @@
+{{apichanges|prev=12.1.5|12.1.7|next=12.2.0}} {{#description2:12.1.7 (70424) Oct 16 2026}}
+
+==Summary==
+* Includes API changes from [[Patch 1.60.1/API changes|Patch 1.60.1]].
+* The server ID and spawn ID portions of cast, creature, vehicle, pet, and game object GUIDs have been replaced with obfuscated values.
+** Obfuscated values are stable and unique within the current client session, but cannot be compared between clients or persisted beyond restarts.
+** The GUID string format is otherwise unchanged.
+** ''This change will be available for testing in a future build of 12.1.7.''
+* TOC directives no longer expand variables such as <span class="apitype">[Game]</span> or <span class="apitype">[Family]</span>. Instead, these lines are entirely skipped.
+** Directives containing conditional expressions such as <span class="apitype">[AllowLoadGameType ...]</span> continue to function normally.
+
+==Resources==
+* TOC: <code>120107</code>
+* <span class="blizztext">Official API patch notes:</span> [[{{PAGENAME}}/notes|Midnight 12.1.7 PTR Changes]]
+* Official development notes: [https://us.forums.blizzard.com/en/wow/t/midnight-echoes-of-the-worldcore-ptr-development-notes/2383391 Midnight: 12.1.7 PTR Development Notes]
+* Diffs: [https://github.com/Gethe/wow-ui-source/compare/12.1.5..12.1.7 wow-ui-source], [https://github.com/Ketho/BlizzardInterfaceResources/compare/12.1.5...12.1.7 BlizzardInterfaceResources]
+
+==Blue posts==
+{{api.hiddensection}}
+<details>
+<summary>Official patch notes</summary>
+{{:{{PAGENAME}}/notes}}
+</details>
