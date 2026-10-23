@@ -22,6 +22,14 @@ Tests in `tests/cf2_*_shape_contract.rs` exercise documented API shapes alongsid
 
 - [ ] `original_minimap_housing_predicates_shape_blocker` — profiles: retail, ptr, wowforever. IsInsideHouse missing; boolean predicates, original minimap accepts general interior result. Shape only; native behavior/default/lifecycle unknown. Sources: retail: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:307 (IsInsideHouse).; retail: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:352 (IsInsidePlot).; retail: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:325 (IsInsideOwnedHouse).; retail: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:343 (IsInsideOwnedPlot).; retail: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:316 (IsInsideHouseOrPlot).; retail: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:334 (IsInsideOwnedHouseOrPlot).; ptr: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:307 (IsInsideHouse).; ptr: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:352 (IsInsidePlot).; ptr: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:325 (IsInsideOwnedHouse).; ptr: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:343 (IsInsideOwnedPlot).; ptr: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:316 (IsInsideHouseOrPlot).; ptr: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:334 (IsInsideOwnedHouseOrPlot).; wowforever: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:307 (IsInsideHouse).; wowforever: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:352 (IsInsidePlot).; wowforever: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:325 (IsInsideOwnedHouse).; wowforever: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:343 (IsInsideOwnedPlot).; wowforever: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:316 (IsInsideHouseOrPlot).; wowforever: Blizzard_APIDocumentationGenerated/HousingUIDocumentation.lua:334 (IsInsideOwnedHouseOrPlot).
 
+- [ ] `original_ping_manager_shape_blocker` — profiles: wowforever. IsPingSystemEnabled missing; no availability, option-count or CVar mapping. Shape only; native behavior/default/lifecycle unknown. Sources: wowforever: Blizzard_APIDocumentationGenerated/PingManagerDocumentation.lua:44 (IsPingSystemEnabled).
+
+- [ ] `original_camelot_equipment_predicates_shape_blocker` — profiles: wowforever. AmmoNeeded missing; ranged boolean already shape-compatible, no visibility assertions. Shape only; native behavior/default/lifecycle unknown. Sources: wowforever: Blizzard_APIDocumentationGenerated/PaperDollInfoDocumentation.lua:11 (AmmoNeeded).; wowforever: Blizzard_APIDocumentationGenerated/PaperDollInfoDocumentation.lua:258 (IsRangedSlotShown).
+
+- [ ] `original_bank_purchase_shape_blocker` — profiles: wowforever. CanPurchaseBankTab missing; boolean, count and actual tab records, no eligibility/count expectations. Shape only; native behavior/default/lifecycle unknown. Sources: wowforever: Blizzard_APIDocumentationGenerated/BankDocumentation.lua:61 (CanPurchaseBankTab).; wowforever: Blizzard_APIDocumentationGenerated/BankDocumentation.lua:226 (FetchNumPurchasedBankTabs).; wowforever: Blizzard_APIDocumentationGenerated/BankDocumentation.lua:241 (FetchPurchasedBankTabData).; wowforever: Blizzard_APIDocumentationGenerated/BankDocumentation.lua:440 (BankTabData).; wowforever: Blizzard_APIDocumentationGenerated/ItemConstantsDocumentation.lua:17 (BankType).
+
+- [ ] `original_target_spell_context_shape_blocker` — profiles: wowforever. GetTargetSpellID missing; numeric result only, no no-target sentinel or context outcome. Shape only; native behavior/default/lifecycle unknown. Sources: wowforever: Blizzard_APIDocumentationGenerated/SpellDocumentation.lua:631 (GetTargetSpellID).
+
 ## How it works
 
 - [Consumer selection and proof boundaries](../wiki/investigations/consumer-selection-and-red-proof.md).
@@ -38,6 +46,7 @@ Tests in `tests/cf2_*_shape_contract.rs` exercise documented API shapes alongsid
 - `cf2_combataura_shape_contract` integration module.
 - `cf2_pvpmap_shape_contract` integration module.
 - `cf2_housing_shape_contract` integration module.
+- `cf2_forever_shape_contract` integration module.
 
 ## Known gaps (current cycle)
 
