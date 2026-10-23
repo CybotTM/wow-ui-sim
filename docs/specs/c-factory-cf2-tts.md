@@ -20,7 +20,7 @@ Slice 7 removes the original ChatFrame character-save and Forever Gamepad tempor
 
 - [ ] Load original functions/templates through the active profile-cache addon closure with no addon overrides. Preserve load errors; direct consumer invocations expose errors and compare recorded-error counts. Function/listener source provenance must identify the original files.
 - [ ] Run persistence fixtures only in an isolated child process with a sealed executable outside `deps`. A fresh child-only `XDG_DATA_HOME` contains byte-exact current persisted CVars; original stat/hash receipts before/after include launcher failures. Never reset, restore or write the host original. Cargo's automatic per-environment CVar temp files cannot establish persistence across environments.
-- [ ] Wrath shared TTS and all non-Forever Gamepad cases are explicitly N/A, never passing compatibility proof. No new hiding cfg gates, vendor edits, API substitutions, authored consumers, ignores, suppressions or weakened assertions.
+- [ ] File-level profile cfg registers TTS only on Retail, PTR, Forever, Mists, Era and Anniversary, and Gamepad only on Forever. Non-applicable profiles register no such tests, without runtime N/A returns. No hiding gates beyond registration-by-applicability, vendor edits, API substitutions, authored consumers, ignores, suppressions or weakened assertions.
 
 ## How it works
 
@@ -36,14 +36,15 @@ Slice 7 removes the original ChatFrame character-save and Forever Gamepad tempor
 - `src/lua_api/workarounds/temporary/tts_settings_defaults.rs`: explicitly temporary constant speech/voice getters and no-op setters; no saved preferences backend.
 - `src/lua_api/globals/channel_verbs.rs`: TTS channel getter constant true/setter no-op; not saved character preference storage.
 - `src/c_api/c_input_interface_style.rs`: existing Forever-only current-style state. This fixture drives original listener event payloads, not host device changes; that separate state-before-event contract is not re-proven here.
-- `tests/cf2_tts.rs`: authored original-consumer persistence and lifecycle assertions; uncompiled/unrun.
+- `tests/cf2_tts.rs`: authored original TTS persistence assertions on six non-Wrath profiles; uncompiled/unrun.
+- `tests/cf2_gamepad_temp_cvars.rs`: authored original Gamepad temporary-CVar lifecycle on Forever only; uncompiled/unrun.
 
 ## Tests asserting this spec
 
 Integration target exact selectors:
 
 - `cf2_tts::original_tts_slider_settings_survive_mark_saved_and_second_environment` — six non-Wrath profiles above.
-- `cf2_tts::original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinary_cvar` — WowForever only.
+- `cf2_gamepad_temp_cvars::original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinary_cvar` — WowForever only.
 
 Seven applicable executions. Expected first missing boundaries: original TTS MarkCharacterSettingsSaved at Retail/Forever475, PTR/Mists/Era/Anniversary472; original Gamepad RemoveTempCVar at Core.lua6. Later missing SetTempCVar and saved preference methods are in-scope lifecycle gaps, not permission to bypass original code. Setup, compile, source/provenance, timeout or unrelated API failures are not accepted RED. No RED has been observed; no producer may be committed before it is.
 

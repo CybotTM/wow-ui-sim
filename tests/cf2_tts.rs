@@ -1,7 +1,14 @@
-//! CF-2 original consumers. Authored only; RED awaits an admitted sealed runner.
+//! Original TTS persistence consumers; authored only, runtime RED not observed.
+#![cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever",
+    feature = "client-mists",
+    feature = "client-era",
+    feature = "client-anniversary",
+))]
 
 use std::path::PathBuf;
-use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn require_isolated_persistent_storage() {
@@ -72,10 +79,6 @@ fn complete_original_tts_load(env: &WowLuaEnv) {
 
 #[test]
 fn original_tts_slider_settings_survive_mark_saved_and_second_environment() {
-    if ACTIVE == ClientProfile::Wrath {
-        eprintln!("CF-2 shared TTS consumer N/A for Wrath; not passing proof");
-        return;
-    }
     let env = new_cache_env();
     // Seed the LIVE CVar store used by the Lua API, not a parallel Lua table.
     assert!(
@@ -138,94 +141,4 @@ fn assert_tts_values_and_controls(env: &WowLuaEnv) {
         "#,
     )
     .expect("original TTS update must render saved values, not constant defaults");
-}
-
-fn drive_original_input_transition(env: &WowLuaEnv, new: &str, old: &str) {
-    let errors_before = env.state().borrow().lua_errors.len();
-    env.exec(&format!(
-        "local types = Enum.InputDeviceInterfaceType; \
-         Cf2InputListener:GetScript('OnEvent')(Cf2InputListener, \
-         'INPUT_DEVICE_INTERFACE_TRANSITION', types.{new}, types.{old})"
-    ))
-    .expect("original InputUtil listener must run original Gamepad/Core callbacks");
-    assert_eq!(env.state().borrow().lua_errors.len(), errors_before);
-}
-
-fn assert_live_cvars(env: &WowLuaEnv, enemy: &str) {
-    assert_eq!(
-        env.state().borrow().cvars.get("SoftTargetEnemy").as_deref(),
-        Some(enemy)
-    );
-    assert_eq!(
-        env.state()
-            .borrow()
-            .cvars
-            .get("cameraDistanceMaxZoomFactor")
-            .as_deref(),
-        Some("1.9")
-    );
-    env.exec(&format!(
-        "assert(GetCVar('SoftTargetEnemy') == '{enemy}'); \
-         assert(C_CVar.GetCVar('SoftTargetEnemy') == '{enemy}'); \
-         assert(GetCVar('cameraDistanceMaxZoomFactor') == '1.9')"
-    ))
-    .expect("Lua and Rust must observe the same effective CVar storage");
-}
-
-#[test]
-fn original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinary_cvar() {
-    if ACTIVE != ClientProfile::WowForever {
-        eprintln!("CF-2 Gamepad/Core consumer N/A for {ACTIVE:?}; not passing proof");
-        return;
-    }
-    let env = new_cache_env();
-    assert!(env.state().borrow().cvars.set("SoftTargetEnemy", "2"));
-    assert!(
-        env.state()
-            .borrow()
-            .cvars
-            .set("cameraDistanceMaxZoomFactor", "1.9")
-    );
-    load_original_addon(&env, "Blizzard_Gamepad");
-    assert_original_function(
-        &env,
-        "InputUtil.RegisterMKBInit",
-        "Blizzard_SharedXML/InputUtil.lua",
-    );
-    env.exec(
-        r#"
-        EventUtil.TriggerOnVariablesLoaded()
-        local frame = EnumerateFrames()
-        local count = 0
-        while frame do
-            if frame:IsEventRegistered('INPUT_DEVICE_INTERFACE_TRANSITION') then
-                local handler = frame:GetScript('OnEvent')
-                local info = handler and debug.getinfo(handler, 'S')
-                if info and info.source:gsub('\\', '/'):match('Blizzard_SharedXML/InputUtil.lua$') then
-                    count = count + 1
-                    Cf2InputListener = frame
-                    print('CF-2 input listener provenance', info.source, info.linedefined, info.lastlinedefined)
-                end
-            end
-            frame = EnumerateFrames(frame)
-        end
-        assert(count == 1, 'exact original InputUtil transition listener required')
-        "#,
-    )
-    .expect("original Gamepad registration and original event listener must exist");
-    // Direct unchanged listener invocation exposes errors dispatch might record.
-    drive_original_input_transition(&env, "Mkb", "Gamepad");
-    assert_live_cvars(&env, "2");
-    drive_original_input_transition(&env, "Gamepad", "Mkb");
-    assert_live_cvars(&env, "1");
-    // A live temporary override must not replace the underlying persisted value.
-    let during_override = new_cache_env();
-    assert_live_cvars(&during_override, "2");
-    drop(during_override);
-    drive_original_input_transition(&env, "Mkb", "Gamepad");
-    assert_live_cvars(&env, "2");
-    drive_original_input_transition(&env, "Mkb", "Mkb");
-    assert_live_cvars(&env, "2");
-    drop(env);
-    assert_live_cvars(&new_cache_env(), "2");
 }
