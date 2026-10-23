@@ -25,6 +25,7 @@ The 12340 static-source findings relayed on 2026-10-21 are authoritative for the
 - [ ] Non-positive duration projects duration/expiration as zero. Party fallback records project count one, zero timing and absent caster/stealability.
 - [ ] Accept numeric-string indices and one-based indexing. Default polarity is HELPFUL; UnitBuff/UnitDebuff force their corresponding polarity. Filter spelling is case-insensitive with spaces or pipes separating components.
 - [ ] Preserve Retail outputs and all sixteen unchanged modern-only Wrath report rows; do not hide them behind new gates.
+- [ ] The original BuffFrame consumer receives a filename string from its Texture:GetTexture, not a file ID. Wrath returns one stored filename string or one nil; Retail remains file-ID-first. Do not normalize case or separators to force identity.
 
 ## How it works
 
@@ -39,12 +40,15 @@ The 12340 static-source findings relayed on 2026-10-21 are authoritative for the
 - `src/lua_api/cast_completion.rs`: completion notifications after removing the active cast.
 - `src/lua_api/globals/auras.rs`: legacy argument/filter selection and local tuple-field projection; C_UnitAuras tables and Retail paths remain unchanged.
 - `src/lua_api/workarounds/temporary/wrath_startup_defaults.rs`: isolated absent-consolidation policy; the old nil rank workaround is removed in favor of catalog metadata.
+- `src/lua_api/frame/methods/widgets/texture/atlas.rs`: runtime Wrath getter projection returns stored filename rather than the independently resolved numeric ID.
 
 ## Tests asserting this spec
 
 `tests/wrath_casting_aura_contracts.rs` covers public tuples, expiration, event payloads, numeric-string inputs and original CastingBarFrame/TargetFrame consumers. `tests/common/wrath_callback_assertions.rs` retains native action, casting and buff callbacks selected by the original F05 rows.
 
-Bound pre-producer evidence: merged baseline `6e54c3602` executes Wrath37 as 16 PASS/21 FAIL (all sixteen report-only rows fail), Retail37 as 37 PASS and both stock Lua-error arrays as empty. Fixture revision `254c42ad2` executes twelve exact cases as 1 PASS/11 FAIL, including all seven new contracts RED. Follow-up `fc67e8727` executes its four changed cases as two corrected controls PASS and two cast/channel contracts RED. Every counted case has a positive completed-test count. Producer GREEN and final preservation proof remain pending.
+Bound pre-producer evidence: merged baseline `6e54c3602` executes Wrath37 as 16 PASS/21 FAIL (all sixteen report-only rows fail), Retail37 as 37 PASS and both stock Lua-error arrays as empty. Fixture revision `254c42ad2` executes twelve exact cases as 1 PASS/11 FAIL, including all seven new contracts RED. Follow-up `fc67e8727` executes its four changed cases as two corrected controls PASS and two cast/channel contracts RED. Every counted case has a positive completed-test count. At `20f35943a`, all seven new contracts pass, Retail37 stays 37 PASS, both stock arrays remain empty and Wrath check/formatter pass. Wrath37 is 20 PASS/17 FAIL: sixteen report-only rows plus an introduced BuffFrame icon regression (UnitBuff filename versus GetTexture number 135893). Fixture `19c9a906b` reproduces that exact original-consumer failure at its explicit filename-type assertion before the getter correction; one exact completed test FAIL.
+
+Getter authority is the laptop's independently checked, reconstructed 12340 source report received 2026-10-23, not native execution. A named texture returns exactly one filename string without extension, otherwise one nil; never a number. Cache spelling can come from an earlier case-insensitive load and aliases can substitute paths. Slash/backslash equality is not promised. The bounded correction returns the stored path unchanged; fresh extensionless BuffFrame identity is tested, not unconditional latest-setter byte echo. Getter GREEN/final reruns remain pending.
 
 ## Known gaps (current cycle)
 
@@ -56,4 +60,5 @@ Bound pre-producer evidence: merged baseline `6e54c3602` executes Wrath37 as 16 
 - Trade-skill/non-interruptible flags have no supplied input. Special cast display overrides and the condition selecting localized CHANNELING text remain gaps; supplied spell name is the INFERRED display policy without those inputs.
 - The spell catalog supplies subtext but is not a separately authenticated 12340 rank catalog. Unknown aura-catalog rank uses an INFERRED empty string. Consolidation has no backing input; INFERRED opt-out uses the native absent flag, nil.
 - PLAYER/RAID matching projects existing classification fields (INFERRED). CANCELABLE/NOT_CANCELABLE matching has no backing state and remains unmodeled; recognition of filter spelling is not proof of matching semantics. Non-decimal/index-edge coercions and conflicting filter components are not covered by this batch.
+- Texture setter extension stripping, cache/alias fidelity and preservation of earlier cache spelling are not changed: the reproduced consumer supplies an extensionless filename. A mismatch beyond the getter return type requires separate evidence, not forced normalization.
 - Pet aura backing data, modern-only panels and unrelated widget/producer bugs are not repaired by this batch. Such failures require separate receipts rather than relaxed assertions or compatibility fallbacks.

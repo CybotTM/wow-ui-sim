@@ -43,7 +43,7 @@ The [native callback fixture](../../../tests/fixtures/wrath-action-callbacks.md)
 
 The [owning contract](../../specs/wrath-casting-aura-contracts.md) separates authenticated 12340 shapes, inferred metadata policies and unmodeled transport/filter inputs. Cast snapshots read shared spell subtext and their existing clock; outgoing events project the same catalog independently after cast removal. Legacy aura calls rewrite only their local tuple table over supplied aura state, leaving C_UnitAuras and other profiles' projections unchanged. The obsolete nil-rank workaround is removed; absent consolidation remains isolated as a temporary policy.
 
-Original CastingBarFrame and TargetFrame consumers establish pre-producer RED. Fixture controls bind event ownership to MainMenuBarArtFrame and compare stored alpha with float tolerance. Producer GREEN and final paired preservation remain pending in the contract; source inventory alone is not acceptance proof.
+Original CastingBarFrame and TargetFrame consumers establish pre-producer RED. Fixture controls bind event ownership to MainMenuBarArtFrame and compare stored alpha with float tolerance. Seven producer contracts pass at20f35943a, with paired Retail37 preservation and empty stock arrays. The original BuffFrame consumer exposed an introduced filename-versus-file-ID getter mismatch; its explicit type RED at19c9a906b precedes a runtime Wrath-only Texture:GetTexture projection returning the stored path. Case/separators are not normalized; cache/alias behavior is not synthesized. The owning contract records static-source authority and pending getter/final proof; source inventory alone is not acceptance proof.
 
 ## Wrath selected quest legacy surface
 

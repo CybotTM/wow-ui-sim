@@ -1,6 +1,6 @@
 ## [2026-10-22] source | Wrath casting and aura projections
 
-Added [projection notes](systems/lua-api.md#wrath-casting-and-aura-projections) and [contract](../specs/wrath-casting-aura-contracts.md) with static-source 12340 facts, original-consumer RED, unchanged modern-only failures and explicit metadata/transport limits. Producer and paired-after verification remain pending; no live-client proof is claimed.
+Added [projection notes](systems/lua-api.md#wrath-casting-and-aura-projections) and [contract](../specs/wrath-casting-aura-contracts.md) with static-source 12340 facts, original-consumer RED, unchanged modern-only failures and explicit metadata/transport limits. Seven producer contracts and Retail37 preservation pass at20f35943a. Original BuffFrame getter-type RED at19c9a906b precedes the minimal runtime Wrath filename projection; final getter proof remains pending. Reconstructed12340 source, not native execution, supplies getter authority.
 
 ## [2026-10-21] source | Wrath tracked achievements
 
