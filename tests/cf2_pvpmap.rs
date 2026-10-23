@@ -142,7 +142,8 @@ fn original_group_pin_tracks_map_display_visibility_and_live_updates() {
         eprintln!("CF-2 group-pin consumer N/A for {ACTIVE:?}; not passing proof");
         return;
     }
-    let env = load_original_consumer("Blizzard_SharedMapDataProviders");
+    // WorldMap declares both MapCanvas and SharedMapDataProviders as dependencies.
+    let env = load_original_consumer("Blizzard_WorldMap");
     {
         let mut sim = env.state().borrow_mut();
         sim.map_display_hide_icons.insert(HIDDEN_MAP, true);
