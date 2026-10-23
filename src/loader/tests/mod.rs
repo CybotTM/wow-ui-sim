@@ -5,6 +5,7 @@ mod button_text;
 mod button_textures;
 mod lua_loading;
 mod reload_factory_xml;
+mod reload_xml_cost;
 mod runtime_template_anchors;
 mod runtime_template_misc;
 mod runtime_template_parenting;
