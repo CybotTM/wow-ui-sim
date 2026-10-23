@@ -8,6 +8,9 @@
 ## [2026-10-22] investigation | Wrath F12 native AuctionUI fixtures
 
 [Native auction boundary](investigations/wrath-addon-load-fixture.md#f12-native-auctionui-fixture-boundary) links [F12](../specs/wrath-fixture-f12.md): bare model probes, unchanged modern oracles, native price-column RED and inactive-close RED. Native3 pass; original Wrath11/26 and Retail22/26 retain15/4 report-only failures, with no Retail regression. Stock/check/fmt gates pass; active close/identity/invalid-input branches remain gaps.
+## [2026-10-23] investigation | Wrath F10 separate spell panels
+
+[Consumer-boundary diagnosis](investigations/wrath-spell-panels-f10.md) links [paired results and gates](../baselines/wrath-fixture-f10.md#final-bounded-gates--2026-10-23). Original assertions stay unchanged; native analogues do not replace modern rows. Correct target routing retains invalid attempts and resolves one setup-only failure with a bounded exact retry. Cached expectations remain INFERRED; native12340 panel declarations are unconfirmed. No producer repair or full-compatibility claim.
 ## [2026-10-22] investigation | Wrath F07 REJECT repair
 
 [Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [exact 32-row matrix](../specs/wrath-fixture-f07.md#exact-rows). Restored shine epsilon assertion passes; restored EventFrame/MinimalScrollBar consumer fails with missing track, unchanged and ungated. Fresh Wrath10 PASS/22 FAIL; Retail32 PASS/0 FAIL; stock Wrath[] and both checks/fmt pass. All invocations execute1; no producer fix or new generic test. Historical11/21 claims superseded. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
