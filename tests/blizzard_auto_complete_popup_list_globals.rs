@@ -20,6 +20,7 @@ expect(type(AutoCompletePopupListMixin) == "table",
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_popup_list_mixins_are_global_tables() {
     common::with_perf_lock(|| {
@@ -41,4 +42,5 @@ fn blizzard_auto_complete_popup_list_mixins_are_global_tables() {
             });
         });
     });
+}
 }

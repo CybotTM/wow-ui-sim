@@ -448,6 +448,16 @@
       "audit_status": "source-discovered"
     },
     {
+      "pageid": null,
+      "ns": 0,
+      "title": "Patch 12.1.7/API changes",
+      "scope": "retail-history-candidate",
+      "audit_status": "source-accounted-runtime-unproven",
+      "discovered": "2026-10-22",
+      "discovery_method": "Supplemental raw-page fetch; pageid and revision ID not observed",
+      "source_accounting": "data/patch-api/sources/12.1.7-source-accounting.json"
+    },
+    {
       "pageid": 324401,
       "ns": 0,
       "title": "Patch 2.0.1/API changes",
@@ -974,6 +984,7 @@
     }
   ],
   "scope_note": "Complete MediaWiki allpages discovery for existing Patch*/API changes page titles; retail candidates require page-by-page applicability audit. No nonexistent/deleted/moved/title-variant pages are claimed covered. Work proceeds one patch page at a time.",
-  "retail_candidate_count": 98,
+  "retail_candidate_count": 99,
+  "supplemental_discovery_note": "12.1.7 added from a 2026-10-22 raw-page fetch, not an allpages refresh. Original retrieved date, batch count and patch_page_count describe the 2026-09-30 discovery only.",
   "classification_basis": "Version families: original1.x through1.12,2.x through2.4,3.x through3.3,4.x through4.3,5.x through5.4,6.x onward classified as retail history candidates; Classic rereleases and Forever separated. Candidate title classification is not page-content/client-API applicability proof."
 }

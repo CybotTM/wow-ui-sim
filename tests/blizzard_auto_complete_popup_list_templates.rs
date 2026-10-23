@@ -142,6 +142,7 @@ end
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_popup_list_templates_register_with_defaults() {
     common::with_perf_lock(|| {
@@ -163,4 +164,5 @@ fn blizzard_auto_complete_popup_list_templates_register_with_defaults() {
             });
         });
     });
+}
 }

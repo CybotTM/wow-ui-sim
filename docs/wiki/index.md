@@ -1,10 +1,17 @@
 ## [2026-10-22] investigation | Wrath F12 native AuctionUI fixtures
 
 [Native auction boundary](investigations/wrath-addon-load-fixture.md#f12-native-auctionui-fixture-boundary) links [F12](../specs/wrath-fixture-f12.md): bare model probes, unchanged modern oracles, native price-column RED and inactive-close RED. Native3 pass; original Wrath11/26 and Retail22/26 retain15/4 report-only failures, with no Retail regression. Stock/check/fmt gates pass; active close/identity/invalid-input branches remain gaps.
+## [2026-10-22] investigation | Wrath F07 REJECT repair
+
+[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [exact 32-row matrix](../specs/wrath-fixture-f07.md#exact-rows). Restored shine epsilon assertion passes; restored EventFrame/MinimalScrollBar consumer fails with missing track, unchanged and ungated. Fresh Wrath10 PASS/22 FAIL; Retail32 PASS/0 FAIL; stock Wrath[] and both checks/fmt pass. All invocations execute1; no producer fix or new generic test. Historical11/21 claims superseded. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
+
+## [2026-10-22] investigation | Patch 12.1.7 source accounting
+
+[12.1.7 source audit](investigations/patch-12-1-7-api-audit.md) freezes public body identities, P01–P12 and all 1,876 linked 1.60.1 occurrences. [Contract](../specs/patch-12-1-7-source-accounting.md) retains header disagreements, inherited UNKNOWN until I4 and deferred GUID work. Python-only validation rejects empty-register coverage; no runtime completion claimed.
 
 ## [2026-10-21] investigation | Wrath autocomplete native fixture
 
-[Fixture/query diagnosis](investigations/wrath-autocomplete-fixture.md) links the [bounded contract](../specs/wrath-autocomplete-results.md): original-consumer RED, native callback/result oracles and the Wrath-only legacy argument/string-result boundary. Original33 native cases plus six added boundaries pass; Retail67 passes before/after, both stock arrays are empty and checks warn zero. Modern-only26 targets remain report-only plus one glue evidence gap; guild/presence identity, recency and UTF-8 edges are held.
+[Fixture/query diagnosis](investigations/wrath-autocomplete-fixture.md) links the [bounded contract](../specs/wrath-autocomplete-results.md): original-consumer RED, native callback/result oracles and the Wrath-only legacy argument/string-result boundary. Original33 native cases plus six added boundaries pass; Retail67 passes before/after, both stock arrays are empty and checks warn zero. EXCL-1 excludes 26 modern-only targets on Wrath by user decision as not applicable to 3.3.5; the glue-scope row remains compiled and failing as an evidence gap. Guild/presence identity, recency and UTF-8 edges are held.
 
 ## [2026-10-21] source | Wrath tracked achievements
 
@@ -3491,6 +3498,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 
 | Page | Summary |
 |------|---------|
+| [[wowdecomp-audit]] | Read-only source research, including [Cataclysm 15595 supplement](../wowdecomp-audit/cataclysm-15595.md); audit owns findings and proof limits. No native verification; external code execution prohibited |
 | [[toc-game-type-tokens]] | Twelve observed `AllowLoadGameType` literals with local TOC line captures and cache provenance; native recognition, grammar, and BCC acceptance unproven |
 | [[api-coverage]] | ~97% C_* coverage, missing APIs by category, three-layer stub methodology |
 | [[cli-commands]] | wow-sim and wow-cli subcommands: lua-errors, run-tests, screenshot, dump-tree, audit-api |
