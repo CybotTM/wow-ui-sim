@@ -1,33 +1,10 @@
 local function __wow_noop()
 end
 
-local __wow_namespace_names = setmetatable({}, { __mode = "k" })
-local __wow_namespace_mt = {
-  __index = function(t, key)
-    if key == nil then
-      return nil
-    end
-    local removed = rawget(t, "__wow_removed_keys")
-    if type(removed) == "table" and removed[key] then
-      return nil
-    end
-    local value = function() end
-    rawset(t, key, value)
-    return value
-  end,
-}
-
-local function __wow_namespace(defaults)
-  defaults = defaults or {}
-  return setmetatable(defaults, __wow_namespace_mt)
-end
-
 local function __wow_merge_namespace(existing, defaults)
   local namespace = existing
   if type(namespace) ~= "table" then
-    namespace = __wow_namespace()
-  else
-    setmetatable(namespace, getmetatable(__wow_namespace()))
+    namespace = {}
   end
   for key, value in pairs(defaults or {}) do
     if rawget(namespace, key) == nil then

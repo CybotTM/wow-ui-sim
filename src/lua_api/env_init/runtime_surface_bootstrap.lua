@@ -100,11 +100,7 @@ local __wow_namespace_mt = {
       return nil
     end
     __wow_log_nil_symbol_access(__wow_namespace_names[t], key)
-    local fn = function()
-      return nil
-    end
-    rawset(t, key, fn)
-    return fn
+    return nil
   end,
 }
 

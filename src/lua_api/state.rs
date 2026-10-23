@@ -224,7 +224,6 @@ macro_rules! build_empty_sim_state {
             // Simulator initial policy; native default is unverified.
             outfit_situations_enabled: false,
             transmog_set_filters: HashMap::new(),
-            #[cfg(feature = "retail-12-0-0")]
             transmog_sets: crate::c_api::c_transmog_sets::TransmogSets::default(),
             #[cfg(feature = "retail-12-0-0")]
             transmog_custom_sets: crate::c_api::c_transmog_collection::CustomSets::default(),
@@ -268,7 +267,7 @@ macro_rules! build_empty_sim_state {
             click_bindable_spells: HashSet::new(),
             #[cfg(feature = "retail-12-0-5")]
             cooldown_aura_associations: Default::default(),
-            #[cfg(feature = "retail-12-0-5")]
+            #[cfg(feature = "aura-spell-classifications")]
             aura_spell_classifications: Default::default(),
             #[cfg(feature = "retail-12-0-5")]
             private_aura_sound_registrations: Default::default(),
@@ -319,7 +318,6 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "client-wrath")]
             last_sound_name_requested: None,
             cooldown_viewer_cooldowns: Default::default(),
-            #[cfg(feature = "retail-12-0-0")]
             cooldown_viewer_availability: Default::default(),
             #[cfg(feature = "retail-12-0-0")]
             spell_classifications: Default::default(),
@@ -361,7 +359,7 @@ macro_rules! build_empty_sim_state {
             combat_audio_spec_settings: HashMap::new(),
             #[cfg(feature = "retail-12-0-5")]
             combat_audio_categories: Default::default(),
-            #[cfg(feature = "retail-12-0-0")]
+            #[cfg(not(feature = "client-wrath"))]
             combat_audio_throttles: HashMap::new(),
             neighborhood_tracked_tasks: BTreeSet::new(),
             weapon_enchants: Default::default(),

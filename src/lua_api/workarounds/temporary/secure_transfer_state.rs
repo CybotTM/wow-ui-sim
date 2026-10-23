@@ -9,11 +9,7 @@ local function SecureTransferNamespaceFallback(t, key)
     if type(__wow_record_nil_symbol_access) == "function" then
         __wow_record_nil_symbol_access("C_SecureTransfer", key, nil, nil)
     end
-    local fn = function()
-        return nil
-    end
-    rawset(t, key, fn)
-    return fn
+    return nil
 end
 
 if type(C_SecureTransfer) ~= "table" then
@@ -130,7 +126,7 @@ mod tests {
     use crate::lua_api::WowLuaEnv;
 
     #[test]
-    fn installs_state_queries_actions_and_namespace_fallback() {
+    fn installs_state_queries_actions_and_leaves_unknown_members_nil() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
 
         let result: String = env
@@ -186,11 +182,8 @@ mod tests {
                 if C_SecureTransfer._state.lastAction ~= "Cancel" then
                     return "bad_last_action"
                 end
-                if type(C_SecureTransfer.SomeUnimplementedMember) ~= "function" then
-                    return "missing_fallback"
-                end
-                if C_SecureTransfer.SomeUnimplementedMember() ~= nil then
-                    return "fallback_returned_value"
+                if C_SecureTransfer.SomeUnimplementedMember ~= nil then
+                    return "fabricated_member"
                 end
                 return "ok"
                 "#,

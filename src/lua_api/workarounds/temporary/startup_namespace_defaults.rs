@@ -86,8 +86,6 @@ if rawget(_G, "C_Flyout") == nil then C_Flyout = {} end
 install(C_Flyout, "GetFlyoutTexture", function(flyoutID) end)
 
 if rawget(_G, "C_PlayerMentorship") == nil then C_PlayerMentorship = {} end
--- PlayerMentorshipConstantsDocumentation.lua:26 documents None = 0.
-install(C_PlayerMentorship, "GetMentorshipStatus", function(playerLocation) return 0 end)
 install(C_PlayerMentorship, "IsActivePlayerConsideredNewcomer", function() return false end)
 install(C_PlayerMentorship, "IsMentorRestricted", function() return true end)
 install(C_PlayerMentorship, "GetMentorLevelRequirement", function() return nil end)

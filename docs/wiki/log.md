@@ -1,6 +1,9 @@
 ## [2026-10-22] investigation | Wrath F13 native loader fixtures
 
 [Diagnosis](investigations/wrath-fixture-f13.md) and [contract](../specs/wrath-fixture-f13.md) separate three native fixture repairs from24 unchanged modern-only failures and five additive specimens. Before: Wrath0/27PASS, Retail26/27PASS (pre-existing Archaeology TOC failure); companion5PASS each. Final merged-code proof6f54e648f: Wrath3/27PASS; Retail26/27PASS with identical baseline statuses; companions5PASS each, stock empty, checks/fmt pass without compiler warnings. No producer edits.
+## [2026-10-23] investigation | Wrath F10 separate spell panels
+
+[Consumer-boundary diagnosis](investigations/wrath-spell-panels-f10.md) links [paired results and gates](../baselines/wrath-fixture-f10.md#final-bounded-gates--2026-10-23). Original assertions stay unchanged; native analogues do not replace modern rows. Correct target routing retains invalid attempts and resolves one setup-only failure with a bounded exact retry. Cached expectations remain INFERRED; native12340 panel declarations are unconfirmed. No producer repair or full-compatibility claim.
 ## [2026-10-22] investigation | Wrath F07 REJECT repair
 
 [Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [exact 32-row matrix](../specs/wrath-fixture-f07.md#exact-rows). Restored shine epsilon assertion passes; restored EventFrame/MinimalScrollBar consumer fails with missing track, unchanged and ungated. Fresh Wrath10 PASS/22 FAIL; Retail32 PASS/0 FAIL; stock Wrath[] and both checks/fmt pass. All invocations execute1; no producer fix or new generic test. Historical11/21 claims superseded. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
@@ -8,6 +11,9 @@
 ## [2026-10-22] source | Patch 12.1.7 I0 accounting
 
 Added [12.1.7 source audit](investigations/patch-12-1-7-api-audit.md) and [contract](../specs/patch-12-1-7-source-accounting.md): exact raw body hashes, supplemental index discovery, P01–P12, inherited literal IDs/counts and original header disagreements. Nine Python CLI regression fixtures pass after RED; empty API inventory never implies runtime coverage. Inherited rows stay UNKNOWN until I4; GUID rows deferred pending user decision. Historical seals and runtime/vendor code unchanged.
+## [2026-10-22] investigation | Forever original opaque timer pair
+
+Linked [original callback/callee attribution](../specs/c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22), original-consumer RED and existing-model publication; reconciled current T6 and classification notes. Original-consumer RED→GREEN, Retail preservation, stock pair removal and final checks now recorded in the owning contract.
 
 ## [2026-10-22] source | Wrath autocomplete applicability
 
@@ -16,6 +22,38 @@ EXCL-1 applies the user decision: 26 modern-only rows are excluded on Wrath as n
 ## [2026-10-21] source | Wrath tracked achievements
 
 Added [tracking model notes](systems/lua-api.md#wrath-tracked-achievements) and [contract](../specs/wrath-tracked-achievements.md), separating authenticated 12340 static facts from INFERRED cached-consumer expectations. Current-source Wrath RED54 and Retail72+4 baseline precede the producer. Final merged proof: Wrath54+5 PASS, Retail76 statuses/failures unchanged, both stock arrays empty, warning-free check and formatting PASS. Supplemental public-API zero-ID RED precedes its correction; ten existing compile-gated rows are not counted as executed.
+
+## [2026-10-21] source | Factory-removal M4 world inputs
+
+[API ownership](systems/lua-api.md#factory-removal-world-inputs--2026-10-21) links shared setting/state publication, rooted callback removal/replacement and named missing-world-service defaults to their [contract](../specs/c-factory-m4-world-inputs.md). Frozen/fresh RED and integrated seven-profile targeted GREEN precede one final stock matrix. Assigned M3/M4 signatures disappear and Wrath stays clean; other-batch errors and unlisted cascades remain. FunctionContainer-only callback cleanup has exact RED→GREEN; no native policy parity is claimed.
+
+## [2026-10-21] source | Factory-removal M3 social inputs
+
+[API ownership](systems/lua-api.md#factory-removal-social-inputs--2026-10-21) links tabard DTO projection and isolated temporary capability policies to their [contract](../specs/c-factory-m3-social-inputs.md). Original-consumer source equivalence and fresh Retail RED retained; integrated seven-profile targeted GREEN and the combined stock matrix are recorded in the owning specs, including unfixed residual scope.
+
+## [2026-10-21] proof | Owned C factory follow-up
+
+[Bounded follow-up proof](systems/c-factory-startup-followup.md#bounded-proof--2026-10-21) records 65 original-member cases, seven nil contracts, the single stock matrix, supplied-state checks, unchanged CVars and explicitly held cascades. Wrath stays empty; other profiles are not clean or merge-ready.
+
+## [2026-10-21] source | T6 named startup services
+
+[Factory follow-up](systems/c-factory-startup-followup.md#t6-service-inputs) links real console/activity adapters, named missing service systems and the still-unattributed Forever timer family; runtime proof pending.
+
+## [2026-10-21] source | M5 startup service/catalog inputs
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m5-service-and-catalog-inputs) links early owned-house requests, species-backed pet icons, valid-set catalog state and named battle/bank capability gaps; runtime proof pending.
+
+## [2026-10-21] source | M2 startup state adapters
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m2-state-adapters) links equipment/spellbook/action/availability state and three Forever-only temporary capabilities; runtime acceptance pending.
+
+## [2026-10-21] source | Named M1 startup conditions
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m1-conditions) records three explicitly temporary conditions, missing backing systems and profile scope; generated-contract and stock runtime proof remain pending.
+
+## [2026-10-20] source | C namespace factory removal (F0)
+
+[Namespace diagnostics](systems/addon-loading.md#missing-c-members-f0-2026-10-20) now return nil without memoization. Housing merges explicit defaults without replacing metatables; three named handlers retain diagnostics only. [Contract](../specs/c-namespace-nil-members.md) retains strict/retired nil semantics and explicit state/actions. Five extracted Lua bodies have RED→GREEN under system Lua 5.4; the [frozen full-feature proof](../specs/c-namespace-nil-members.md#frozen-f0-proof) now owns simulator/profile results and M1–M5/T6 runtime gaps. Health gates still fail; one anonymous callback family's root remains unresolved rather than guessed.
 
 ## [2026-10-21] source | Wrath positional guild rights
 

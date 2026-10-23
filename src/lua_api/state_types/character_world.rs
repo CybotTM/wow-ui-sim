@@ -691,6 +691,7 @@ pub struct GuildLogo {
     pub border: (f64, f64, f64),
     pub emblem: (f64, f64, f64),
     pub emblem_filename: String,
+    pub tabard_metadata: Option<crate::c_api::c_guild_info::GuildTabardMetadata>,
 }
 
 /// An active loot roll (group loot item pending a player decision).
