@@ -132,6 +132,10 @@ fn exercise_scenario_party_transitions(env: &WowLuaEnv) {
         "#,
     )
     .expect("original scenario consumer at minimum");
+    exercise_solo_scenario_recovery(env);
+}
+
+fn exercise_solo_scenario_recovery(env: &WowLuaEnv) {
     env.state().borrow_mut().party_members.clear();
     env.state().borrow_mut().party_group_active = false;
     env.exec(
