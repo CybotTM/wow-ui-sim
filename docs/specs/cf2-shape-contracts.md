@@ -1,0 +1,36 @@
+# CF2 shape-only contracts
+
+Tests in `tests/cf2_*_shape_contract.rs` exercise documented API shapes alongside runtime-selected, unchanged Blizzard consumers. User decision 2026-10-23 closes unknown native behavior as **shape-only**, not invented semantics. All tests are authored only; no build, test or runtime proof is claimed.
+
+## What it must do
+
+- [ ] `original_navigation_squelch_shape_blocker` — profiles: retail, ptr, mists. IsSquelched missing; only boolean shape, no button state. Shape only; native behavior/default/lifecycle unknown. Sources: retail: Blizzard_APIDocumentationGenerated/SocialRestrictionsDocumentation.lua:96 (IsSquelched).; ptr: Blizzard_APIDocumentationGenerated/SocialRestrictionsDocumentation.lua:71 (IsSquelched).; mists: Blizzard_APIDocumentationGenerated/SocialRestrictionsDocumentation.lua:62 (IsSquelched).
+
+- [ ] `original_lfr_visibility_shape_blocker` — profiles: mists. IsLFREnabled missing; no visibility or eligibility policy. Shape only; native behavior/default/lifecycle unknown. Sources: mists: Blizzard_APIDocumentationGenerated/LFGInfoDocumentation.lua:179 (IsLFREnabled).
+
+- [ ] `original_microbutton_invitation_records_shape_blocker` — profiles: retail, ptr, wowforever, mists, era, anniversary. GetInvitationsForSelf missing; recursive actual records, empty list allowed. Shape only; native behavior/default/lifecycle unknown. Sources: retail: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:580 (GetInvitationsForSelf).; retail: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1938 (ClubSelfInvitationInfo).; retail: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1760 (ClubInfo).; retail: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1808 (ClubMemberInfo).; ptr: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:580 (GetInvitationsForSelf).; ptr: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1938 (ClubSelfInvitationInfo).; ptr: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1760 (ClubInfo).; ptr: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1808 (ClubMemberInfo).; wowforever: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:580 (GetInvitationsForSelf).; wowforever: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1938 (ClubSelfInvitationInfo).; wowforever: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1760 (ClubInfo).; wowforever: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1808 (ClubMemberInfo).; mists: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:545 (GetInvitationsForSelf).; mists: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1839 (ClubSelfInvitationInfo).; mists: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1662 (ClubInfo).; mists: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1710 (ClubMemberInfo).; era: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:545 (GetInvitationsForSelf).; era: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1839 (ClubSelfInvitationInfo).; era: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1662 (ClubInfo).; era: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1710 (ClubMemberInfo).; anniversary: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:545 (GetInvitationsForSelf).; anniversary: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1839 (ClubSelfInvitationInfo).; anniversary: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1662 (ClubInfo).; anniversary: Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1710 (ClubMemberInfo).
+
+## How it works
+
+- [Consumer selection and proof boundaries](../wiki/investigations/consumer-selection-and-red-proof.md).
+- [Addon loading](../addon-loading-pipeline.md).
+
+## Implementation inventory
+
+- `tests/common/cf2_shape.rs`: shared arity/type/nullability/enum and original-source assertions; profile cache loading, no API replacement.
+- `tests/cf2_*_shape_contract.rs`: one file per lane, narrower per-case compile-time applicability.
+
+## Tests asserting this spec
+
+- `cf2_social_shape_contract` integration module.
+
+## Known gaps (current cycle)
+
+- [ ] All compile/runtime outcomes remain unverified under EDIT-ONLY authorization. Missing members are source-predicted shape blockers, never semantic RED.
+- [ ] Secure combat current-entry return validation needs a normal populated ingest path; none established. Do not seed private history.
+- [ ] Opaque club identifiers have documented non-nullability but no generated Lua primitive mapping here; validate non-nullability without inventing a representation.
+- [ ] Empty lists and MayReturnNothing branches do not prove populated record production. Indexed vehicle/pin checks run only for actual returned indices.
+
+## Out of scope
+
+Native defaults, state sources, matching policy, transitions, persistence, migration, mutation/event timing and eligibility are native-unknown, not test expectations. No API implementations or vendor edits. F4 account locale/locality arrays have no generated declaration and receive no shape test. NEW stable/item-upgrade/store/equipment-set lanes are outside these seven requested lane groups; inventory-flyout and profession-bag groups have no documented shape.
