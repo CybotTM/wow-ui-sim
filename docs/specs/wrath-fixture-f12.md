@@ -21,7 +21,7 @@ Fixtures live in `tests/common/auction_fixtures.rs`; native cases live in
 ## No-active close boundary
 
 - [x] Original native `AuctionFrame` OnHide must call raw `CloseAuctionHouse` without a modern namespace wrapper failure.
-- [x] With no modeled active auctioneer, closing returns zero values with no events or cleanup. Reconstructed 12340 source supports only this tested branch here; active/matching-target double-CLOSED, multisell and conditional NEW_AUCTION_UPDATE remain gaps.
+- [ ] With no modeled active auctioneer, closing returns zero values with no events or cleanup (source-inspected; native OnHide proves call/error behavior, not return arity or event absence). Reconstructed 12340 source supports only this tested branch here; active/matching-target double-CLOSED, multisell and conditional NEW_AUCTION_UPDATE remain gaps.
 
 ## Producer scope
 
