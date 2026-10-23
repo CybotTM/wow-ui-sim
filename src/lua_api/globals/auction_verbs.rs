@@ -52,6 +52,12 @@ fn is_using_legacy_auction_client(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// The modeled fixture has no active auctioneer; reconstructed 12340 close is inert.
+/// Active-session cleanup and reentrant event ordering remain unmodeled.
+fn close_inactive_auction_house(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 fn can_send_auction_query(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(true));
     Ok(1)
@@ -135,10 +141,12 @@ fn get_num_auction_items(state: &mut LuaState) -> LuaResult<u32> {
     let count = match list_type.as_str() {
         "list" => {
             let sim = borrow_state(state)?;
-            if sim.auction_browse_results.is_empty() {
-                sim.auction_browse_items.len()
-            } else {
+            if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+                || !sim.auction_browse_results.is_empty()
+            {
                 sim.auction_browse_results.len()
+            } else {
+                sim.auction_browse_items.len()
             }
         }
         "owner" => borrow_state(state)?.auction_owned.len(),
@@ -253,23 +261,43 @@ fn bid_auction_row(entry: &BidAuction) -> LegacyAuctionRow {
 }
 
 fn push_legacy_auction_row(state: &mut LuaState, row: &LegacyAuctionRow) -> LuaResult<u32> {
+    push_auction_item_fields(state, row);
+    let owner = row.owner.as_deref().unwrap_or("Player");
+    let owner = create_string(state, owner);
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        push_wrath_auction_prices(state, row, owner)
+    } else {
+        push_mists_auction_prices(state, row, owner)
+    }
+}
+
+fn push_auction_item_fields(state: &mut LuaState, row: &LegacyAuctionRow) {
     let item = items::get_item(row.item_id as u32);
     let name = item
         .map(|item| item.name.to_string())
         .unwrap_or_else(|| format!("Item {}", row.item_id));
     let icon = item.map(item_icon_file_id).unwrap_or(134400.0);
     let quality = item.map(|item| item.quality as f64).unwrap_or(0.0);
-    let owner = row.owner.as_deref().unwrap_or("Player");
     let name = create_string(state, &name);
-    let level_header = create_string(state, "Item Level");
-    let owner = create_string(state, owner);
-
     state.push(name);
     state.push(Val::Num(icon));
     state.push(Val::Num(row.quantity as f64));
     state.push(Val::Num(quality));
-    state.push(Val::Bool(true));
+    let usable = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        Val::Num(1.0)
+    } else {
+        Val::Bool(true)
+    };
+    state.push(usable);
     state.push(Val::Num(row.item_level as f64));
+}
+
+fn push_mists_auction_prices(
+    state: &mut LuaState,
+    row: &LegacyAuctionRow,
+    owner: Val,
+) -> LuaResult<u32> {
+    let level_header = create_string(state, "Item Level");
     state.push(level_header);
     state.push(Val::Num(row.min_bid as f64));
     state.push(Val::Num(row.min_increment as f64));
@@ -283,6 +311,27 @@ fn push_legacy_auction_row(state: &mut LuaState, row: &LegacyAuctionRow) -> LuaR
     state.push(Val::Num(row.item_id as f64));
     state.push(Val::Bool(true));
     Ok(18)
+}
+
+/// Reconstructed 12340 rows omit Mists' level header and full-name columns.
+fn push_wrath_auction_prices(
+    state: &mut LuaState,
+    row: &LegacyAuctionRow,
+    owner: Val,
+) -> LuaResult<u32> {
+    state.push(Val::Num(row.min_bid as f64));
+    state.push(Val::Num(row.min_increment as f64));
+    state.push(Val::Num(row.buyout_amount as f64));
+    state.push(Val::Num(row.bid_amount as f64));
+    let high_bidder = if row.high_bidder {
+        Val::Num(1.0)
+    } else {
+        Val::Nil
+    };
+    state.push(high_bidder);
+    state.push(owner);
+    state.push(Val::Num(row.sale_status as f64));
+    Ok(13)
 }
 
 fn item_icon_file_id(item: &items::ItemInfo) -> f64 {
@@ -591,6 +640,9 @@ fn set_selected_auction_item(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        LuaApiMut::register_function(lua, "CloseAuctionHouse", close_inactive_auction_house)?;
+    }
     register_auction_query_globals(lua)?;
     register_auction_item_globals(lua)?;
     register_auction_sell_globals(lua)?;
