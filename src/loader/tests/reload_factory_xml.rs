@@ -72,14 +72,18 @@ fn load_fixture(env: &WowLuaEnv, root: &Path) -> crate::Result<()> {
         false,
         false,
     )?;
-    load_xml_file(
+    let mut warnings = Vec::new();
+    let result = load_xml_file(
         &env.loader_env(),
         &root.join("factory.xml"),
         &context,
         &mut LoadTiming::default(),
-    )
-    .map(|_| ())
-    .map_err(|error| crate::Error::Other(error.to_string()))
+        &mut warnings,
+    );
+    assert!(warnings.is_empty(), "unexpected XML warnings: {warnings:?}");
+    result
+        .map(|_| ())
+        .map_err(|error| crate::Error::Other(error.to_string()))
 }
 
 fn exercise_method_handlers(env: &WowLuaEnv) {
