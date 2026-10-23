@@ -1,4 +1,12 @@
 #![cfg(feature = "gui")]
+#![cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-era",
+    feature = "client-anniversary",
+    feature = "client-wowforever"
+))]
 
 use crate::common;
 
