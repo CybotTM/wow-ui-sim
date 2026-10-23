@@ -1,6 +1,14 @@
 //! Bare Wrath auction model probes; other profiles retain their UI fixture.
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+pub fn auction_root() -> &'static str {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        "Blizzard_AuctionUI"
+    } else {
+        "Blizzard_AuctionHouseUI"
+    }
+}
+
 pub fn with_model(assertions: impl FnOnce(&WowLuaEnv)) {
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
         let env = WowLuaEnv::new().expect("auction model environment");

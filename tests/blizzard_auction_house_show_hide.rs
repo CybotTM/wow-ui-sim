@@ -2,15 +2,8 @@
 
 use crate::common;
 
+use common::auction_fixtures::auction_root;
 use common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};
-
-fn auction_addon_name() -> &'static str {
-    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
-        "Blizzard_AuctionUI"
-    } else {
-        "Blizzard_AuctionHouseUI"
-    }
-}
 
 #[cfg(feature = "client-ptr")]
 #[test]
@@ -34,9 +27,9 @@ fn ptr_auction_house_does_not_publish_snapshot_only_hide_wrapper() {
 
 #[test]
 fn auction_house_show_hide_round_trip_has_no_lua_errors() {
-    let root = auction_addon_name();
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
+            let root = auction_root();
             let env = common::panel_fixtures::setup_env();
             load_auction_house_through_runtime(&env);
             load_show_hide_prerequisites(&env);
@@ -102,7 +95,7 @@ fn load_show_hide_prerequisites(env: &wow_ui_sim::lua_api::WowLuaEnv) {
 }
 
 fn load_auction_house_through_runtime(env: &wow_ui_sim::lua_api::WowLuaEnv) {
-    let root = auction_addon_name();
+    let root = auction_root();
     if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
         env.exec("A_Admin.ClearAuctionBrowseResults()")
             .expect("isolate native auction visibility from modern sample rows");
