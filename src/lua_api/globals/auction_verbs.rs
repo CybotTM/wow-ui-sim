@@ -52,6 +52,12 @@ fn is_using_legacy_auction_client(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// The modeled fixture has no active auctioneer; reconstructed 12340 close is inert.
+/// Active-session cleanup and reentrant event ordering remain unmodeled.
+fn close_inactive_auction_house(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 fn can_send_auction_query(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(true));
     Ok(1)
@@ -632,6 +638,9 @@ fn set_selected_auction_item(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    if cfg!(feature = "client-wrath") {
+        LuaApiMut::register_function(lua, "CloseAuctionHouse", close_inactive_auction_house)?;
+    }
     register_auction_query_globals(lua)?;
     register_auction_item_globals(lua)?;
     register_auction_sell_globals(lua)?;
