@@ -1,3 +1,7 @@
+## [2026-10-22] investigation | Wrath F13 native loader fixtures
+
+[Diagnosis](investigations/wrath-fixture-f13.md) and [contract](../specs/wrath-fixture-f13.md) separate three native fixture repairs from24 unchanged modern-only failures and five additive specimens. Before: Wrath0/27PASS, Retail26/27PASS (pre-existing Archaeology TOC failure); companion5PASS each. Final proof pending; no producer edits.
+
 ## [2026-10-22] source | Wrath autocomplete applicability
 
 EXCL-1 applies the user decision: 26 modern-only rows are excluded on Wrath as not applicable to 3.3.5 via the existing compile gate; bodies and other profiles stay unchanged. The glue-scope row remains compiled and failing as an evidence gap. See [coverage boundaries](investigations/wrath-autocomplete-fixture.md#coverage-boundaries) and [contract](../specs/wrath-autocomplete-results.md#known-gaps-current-cycle).

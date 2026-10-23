@@ -457,6 +457,7 @@ fn dump_load_order() {
 fn test_paperdoll_onload_exists_for_bag_buttons() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        common::load_profile_framexml(&env);
         let ui = blizzard_ui_dir();
         let addons = discover_blizzard_addons(&ui);
 

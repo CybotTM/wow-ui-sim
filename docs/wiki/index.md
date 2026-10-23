@@ -1,3 +1,7 @@
+## [2026-10-22] investigation | Wrath F13 native loader fixtures
+
+[Diagnosis](investigations/wrath-fixture-f13.md) and [contract](../specs/wrath-fixture-f13.md) separate three native fixture repairs from24 unchanged modern-only failures and five additive specimens. Before: Wrath0/27PASS, Retail26/27PASS (pre-existing Archaeology TOC failure); companion5PASS each. Final proof pending; no producer edits.
+
 ## [2026-10-21] investigation | Wrath autocomplete native fixture
 
 [Fixture/query diagnosis](investigations/wrath-autocomplete-fixture.md) links the [bounded contract](../specs/wrath-autocomplete-results.md): original-consumer RED, native callback/result oracles and the Wrath-only legacy argument/string-result boundary. Original33 native cases plus six added boundaries pass; Retail67 passes before/after, both stock arrays are empty and checks warn zero. EXCL-1 excludes 26 modern-only targets on Wrath by user decision as not applicable to 3.3.5; the glue-scope row remains compiled and failing as an evidence gap. Guild/presence identity, recency and UTF-8 edges are held.

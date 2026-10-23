@@ -13,10 +13,13 @@ Bounded native TOC/discovery and test-owned loader specimens. The 27 original re
 ## How it works
 
 - [Addon loading pipeline](../addon-loading-pipeline.md)
+- [F13 fixture diagnosis](../wiki/investigations/wrath-fixture-f13.md)
 
 ## Implementation inventory
 
-- `tests/loader_specimens_f13.rs`: additive test-owned specimens; no Blizzard behavior claims.
+- `tests/loader_specimens_f13.rs`: additive test-owned specimens and original shipped profile consumers; not replacement credit.
+- `tests/toc_parsing.rs`: generic absolute/existing paths and Lua/XML counts select native Wrath FrameXML TOC; assertions unchanged.
+- `tests/load_order.rs`: load native profile FrameXML before the original PaperDoll symbol assertion; Retail helper is a no-op.
 
 ## Tests asserting this spec
 
@@ -26,7 +29,7 @@ Bounded native TOC/discovery and test-owned loader specimens. The 27 original re
 
 ## Known gaps (current cycle)
 
-- [ ] Exact before/after matrices and native fixture repairs await build capacity.
+- [ ] Final after matrices, stock startup and warning-free checks remain pending. Fresh before: Wrath0/27PASS; Retail26/27PASS across integration22 and prefork5. Archaeology retains its pre-existing missing Mainline TOC failure. Companion5PASS under each profile, not replacement credit.
 
 ## Out of scope
 
