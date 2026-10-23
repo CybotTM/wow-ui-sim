@@ -334,6 +334,7 @@ fn test_minimal_scrollbar_rust_children_keys() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_unnamed_scrollbox_creates_child_frames() {
     let env = env_with_shared_xml();
@@ -352,6 +353,7 @@ fn test_unnamed_scrollbox_creates_child_frames() {
         has_shadows,
         "Unnamed WowScrollBoxList should have Shadows child from template"
     );
+}
 }
 
 post_wrath_ui_fixture! {
@@ -376,6 +378,7 @@ fn test_minimal_scrollbar_track_has_thumb() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_scrollframe_template_creates_scrollbar_with_thumb() {
     let env = env_with_shared_xml();
@@ -397,6 +400,7 @@ fn test_scrollframe_template_creates_scrollbar_with_thumb() {
         result, "true",
         "ScrollFrameTemplate's ScrollBar.Track.Thumb should exist"
     );
+}
 }
 
 post_wrath_ui_fixture! {

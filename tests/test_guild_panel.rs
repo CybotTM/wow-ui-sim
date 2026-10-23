@@ -2,7 +2,9 @@ use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::lua_api::WowLuaEnv;
+post_wrath_ui_fixture! {
 use wow_ui_sim::lua_api::state::GuildMember;
+}
 
 fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
@@ -267,6 +269,7 @@ fn guild_member_rank_dropdown_generates_rank_options() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn communities_member_detail_rank_dropdown_shows_rank_rows() {
     test_timeout! {
@@ -335,6 +338,7 @@ fn communities_member_detail_rank_dropdown_shows_rank_rows() {
         );
     }
 }
+}
 
 #[test]
 fn guild_control_rank_settings_dropdown_shows_rank_rows() {
@@ -375,6 +379,7 @@ fn guild_control_rank_settings_dropdown_shows_rank_rows() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn guild_control_tab_dropdown_shows_initial_selection() {
     test_timeout! {
@@ -390,7 +395,9 @@ fn guild_control_tab_dropdown_shows_initial_selection() {
         assert_eq!(result, "Guild Ranks/Guild Ranks", "guild control tab dropdown should show its initial selected tab: {result}");
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn guild_control_rank_dropdown_omits_unassignable_leader_rank() {
     test_timeout! {
@@ -416,6 +423,7 @@ fn guild_control_rank_dropdown_omits_unassignable_leader_rank() {
             "rank dropdown should omit the unassignable guild-leader rank: {result}"
         );
     }
+}
 }
 
 #[test]
@@ -507,6 +515,7 @@ fn guild_dropdown_materialized_buttons_have_labels() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn communities_list_dropdown_materializes_subscribed_club_rows() {
     test_timeout! {
@@ -527,7 +536,9 @@ fn communities_list_dropdown_materializes_subscribed_club_rows() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn communities_stream_dropdown_shows_guild_officer_and_notification_settings() {
     test_timeout! {
@@ -565,7 +576,9 @@ fn communities_stream_dropdown_shows_guild_officer_and_notification_settings() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn communities_stream_dropdown_click_opens_menu() {
     test_timeout! {
@@ -620,6 +633,7 @@ fn communities_stream_dropdown_click_opens_menu() {
             "clicking stream dropdown should open visible menu rows: {result}"
         );
     }
+}
 }
 
 #[test]
