@@ -2,7 +2,7 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 pub fn with_model(assertions: impl FnOnce(&WowLuaEnv)) {
-    if cfg!(feature = "client-wrath") {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
         let env = WowLuaEnv::new().expect("auction model environment");
         assertions(&env);
     } else {
@@ -13,7 +13,7 @@ pub fn with_model(assertions: impl FnOnce(&WowLuaEnv)) {
 }
 
 pub fn load_ui_for_model(env: &WowLuaEnv) {
-    if cfg!(feature = "client-wrath") {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
         return;
     }
     let (loaded, reason): (bool, Option<String>) = env
@@ -23,7 +23,7 @@ pub fn load_ui_for_model(env: &WowLuaEnv) {
 }
 
 pub fn with_auction_ui(assertions: impl FnOnce(&WowLuaEnv)) {
-    if cfg!(feature = "client-wrath") {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
         let env = super::panel_fixtures::setup_env();
         assertions(&env);
     } else {
@@ -35,7 +35,7 @@ pub fn with_auction_ui(assertions: impl FnOnce(&WowLuaEnv)) {
 
 /// Bind the generic visibility oracle to the original legacy frame, not a stand-in.
 pub fn select_native_frame(probe: &str) -> String {
-    if cfg!(feature = "client-wrath") {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
         format!("local AuctionHouseFrame = AuctionFrame\n{probe}")
     } else {
         probe.to_owned()

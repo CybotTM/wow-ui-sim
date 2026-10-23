@@ -141,7 +141,9 @@ fn get_num_auction_items(state: &mut LuaState) -> LuaResult<u32> {
     let count = match list_type.as_str() {
         "list" => {
             let sim = borrow_state(state)?;
-            if cfg!(feature = "client-wrath") || !sim.auction_browse_results.is_empty() {
+            if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+                || !sim.auction_browse_results.is_empty()
+            {
                 sim.auction_browse_results.len()
             } else {
                 sim.auction_browse_items.len()
@@ -262,7 +264,7 @@ fn push_legacy_auction_row(state: &mut LuaState, row: &LegacyAuctionRow) -> LuaR
     push_auction_item_fields(state, row);
     let owner = row.owner.as_deref().unwrap_or("Player");
     let owner = create_string(state, owner);
-    if cfg!(feature = "client-wrath") {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         push_wrath_auction_prices(state, row, owner)
     } else {
         push_mists_auction_prices(state, row, owner)
@@ -281,7 +283,7 @@ fn push_auction_item_fields(state: &mut LuaState, row: &LegacyAuctionRow) {
     state.push(Val::Num(icon));
     state.push(Val::Num(row.quantity as f64));
     state.push(Val::Num(quality));
-    let usable = if cfg!(feature = "client-wrath") {
+    let usable = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         Val::Num(1.0)
     } else {
         Val::Bool(true)
@@ -638,7 +640,7 @@ fn set_selected_auction_item(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
-    if cfg!(feature = "client-wrath") {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         LuaApiMut::register_function(lua, "CloseAuctionHouse", close_inactive_auction_house)?;
     }
     register_auction_query_globals(lua)?;

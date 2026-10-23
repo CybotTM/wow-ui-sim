@@ -4,11 +4,13 @@ use crate::common;
 
 use common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};
 
-const ROOT: &str = if cfg!(feature = "client-wrath") {
-    "Blizzard_AuctionUI"
-} else {
-    "Blizzard_AuctionHouseUI"
-};
+fn auction_addon_name() -> &'static str {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        "Blizzard_AuctionUI"
+    } else {
+        "Blizzard_AuctionHouseUI"
+    }
+}
 
 #[cfg(feature = "client-ptr")]
 #[test]
@@ -32,6 +34,7 @@ fn ptr_auction_house_does_not_publish_snapshot_only_hide_wrapper() {
 
 #[test]
 fn auction_house_show_hide_round_trip_has_no_lua_errors() {
+    let root = auction_addon_name();
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             let env = common::panel_fixtures::setup_env();
@@ -60,12 +63,12 @@ fn auction_house_show_hide_round_trip_has_no_lua_errors() {
                     "#,
                 ))
                 .expect("AuctionHouseFrame ShowUIPanel/HideUIPanel probe should run");
-            assert_eq!("ok", result, "`{ROOT}` show/hide result: {result}");
+            assert_eq!("ok", result, "`{root}` show/hide result: {result}");
 
             let errors = recorded_lua_errors(&env);
             assert!(
                 errors.is_empty(),
-                "`{ROOT}` show/hide emitted Lua errors:\n{}",
+                "`{root}` show/hide emitted Lua errors:\n{}",
                 errors.join("\n")
             );
         });
@@ -73,7 +76,7 @@ fn auction_house_show_hide_round_trip_has_no_lua_errors() {
 }
 
 fn load_show_hide_prerequisites(env: &wow_ui_sim::lua_api::WowLuaEnv) {
-    if cfg!(feature = "client-wrath") {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
         return;
     }
     env.exec(
@@ -99,12 +102,13 @@ fn load_show_hide_prerequisites(env: &wow_ui_sim::lua_api::WowLuaEnv) {
 }
 
 fn load_auction_house_through_runtime(env: &wow_ui_sim::lua_api::WowLuaEnv) {
-    if cfg!(feature = "client-wrath") {
+    let root = auction_addon_name();
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
         env.exec("A_Admin.ClearAuctionBrowseResults()")
             .expect("isolate native auction visibility from modern sample rows");
     }
     let (loaded, reason): (bool, Option<String>) = env
-        .eval(&format!(r#"return C_AddOns.LoadAddOn("{ROOT}")"#))
+        .eval(&format!(r#"return C_AddOns.LoadAddOn("{root}")"#))
         .expect("C_AddOns.LoadAddOn should return");
-    assert!(loaded, "`{ROOT}` should load: {reason:?}");
+    assert!(loaded, "`{root}` should load: {reason:?}");
 }
