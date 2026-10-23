@@ -640,15 +640,21 @@ fn communities_stream_dropdown_click_opens_menu() {
 }
 }
 
+#[cfg(feature = "client-wrath")]
+#[test]
+fn native_guild_info_panel_populates_motd_details() {
+    test_timeout! {
+        let env = setup_env();
+        env.exec(include_str!("fixtures/wrath_f03/guild_info.lua"))
+            .expect("native guild MOTD and details consumers");
+    }
+}
+
+post_wrath_ui_fixture! {
 #[test]
 fn guild_info_panel_populates_motd_details_and_challenges() {
     test_timeout! {
         let env = setup_env();
-        if cfg!(feature = "client-wrath") {
-            env.exec(include_str!("fixtures/wrath_f03/guild_info.lua"))
-                .expect("native guild MOTD and details consumers");
-            return;
-        }
         let result: String = env.eval(r#"
             if CommunitiesFrame == nil then return "missing_communities" end
             local details = CommunitiesFrame.GuildDetailsFrame
@@ -717,6 +723,7 @@ fn guild_info_panel_populates_motd_details_and_challenges() {
             "Officer edit buttons should be shown when guild_is_officer: {result}"
         );
     }
+}
 }
 
 #[test]
