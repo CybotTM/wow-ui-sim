@@ -1,6 +1,6 @@
-## [2026-10-22] investigation | Wrath F10 separate spell panels
+## [2026-10-23] investigation | Wrath F10 separate spell panels
 
-[Consumer-boundary diagnosis](investigations/wrath-spell-panels-f10.md) links the [bounded results](../baselines/wrath-fixture-f10.md): unchanged original modern rows, separate cached-Wrath fixtures, explicit oracle/native-consumer failure distinction and retained producer gaps. Cached expectations remain INFERRED; native12340 panel declarations are unconfirmed. Retail's seven prefork rows need correct-target positive execution; zero-selection attempts are invalid. Runtime after/preservation gates remain pending.
+[Consumer-boundary diagnosis](investigations/wrath-spell-panels-f10.md) links [paired results and gates](../baselines/wrath-fixture-f10.md#final-bounded-gates--2026-10-23). Original assertions stay unchanged; native analogues do not replace modern rows. Correct target routing retains invalid attempts and resolves one setup-only failure with a bounded exact retry. Cached expectations remain INFERRED; native12340 panel declarations are unconfirmed. No producer repair or full-compatibility claim.
 
 ## [2026-10-22] source | Wrath autocomplete applicability
 

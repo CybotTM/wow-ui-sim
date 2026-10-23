@@ -20,7 +20,7 @@ Producer repair remains excluded. No fallback, modern-mixin shim, tolerance chan
 
 ## Target/proof boundaries
 
-Retail keeps seven original rows in existing `prefork_full_ui`; the other43 are ordinary integration registrations. A zero-selected exact integration invocation for those seven is INVALID and retained, not credited. Correct target selection must bind ELF test paths to the candidate worktree and execute each original named case positively before/after. No test moves or new gates are needed.
+Retail keeps seven original rows in existing `prefork_full_ui`; the other43 are ordinary integration registrations. A zero-selected exact integration invocation for those seven is INVALID and retained, not credited. Correct target execution binds ELF test paths to the candidate worktree and executes every original named case positively before/after. One after-run conformance setup failure occurred before the requested test; its INVALID attempt remains retained and one admitted exact retry passed. This is not a repeated actual test failure. No test moves or new gates are needed.
 
 ## Sources
 
