@@ -1,6 +1,10 @@
 //! CF-2 original-cache consumers. Source-staged; runtime RED is not yet observed.
+#![cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+))]
 
-use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::game_data::default_party;
 use wow_ui_sim::lua_api::state::LfdDungeonInfo;
@@ -11,42 +15,6 @@ fn exec_original(env: &WowLuaEnv, relative: &str) {
         .unwrap_or_else(|error| panic!("read original {}: {error}", path.display()));
     env.exec_named(&source, &format!("@{}", path.display()))
         .unwrap_or_else(|error| panic!("execute original {}: {error}", path.display()));
-}
-
-crate::post_wrath_ui_fixture! {
-    #[test]
-    fn original_guild_microbutton_has_no_unseen_invitations_with_empty_clubs() {
-        let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
-        let (env, _) = crate::common::blizzard_addon_harness::build_blizzard_addon_closure_env(
-            &ui,
-            &["Blizzard_MicroMenu"],
-            &[],
-        );
-        env.state().borrow_mut().clubs.clubs.clear();
-        env.exec(
-            r#"
-            DISPLAYED_COMMUNITIES_INVITATIONS = {}
-            local button = CreateFrame("Button", nil, UIParent)
-            Mixin(button, GuildMicroButtonMixin)
-            assert(button:HasUnseenInvitations() == false,
-                'empty supplied club state has no invitation to notify')
-            DISPLAYED_COMMUNITIES_INVITATIONS['previously-displayed-club'] = true
-            assert(button:HasUnseenInvitations() == false,
-                'display history cannot manufacture an incoming invitation')
-            local invitations = C_Club.GetInvitationsForSelf()
-            assert(type(invitations) == 'table' and next(invitations) == nil,
-                'empty supplied club state projects an empty invitation list')
-            "#,
-        )
-        .expect("original microbutton empty-invitation consumer");
-    }
-}
-
-fn has_scenario_consumer() -> bool {
-    matches!(
-        ACTIVE,
-        ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::Mists
-    )
 }
 
 fn scenario_record(id: i32, min_level: i32, max_level: i32, random: bool) -> LfdDungeonInfo {
@@ -152,10 +120,6 @@ fn exercise_solo_scenario_recovery(env: &WowLuaEnv) {
 
 #[test]
 fn original_scenario_specific_catalog_uses_lowest_party_level() {
-    if !has_scenario_consumer() {
-        eprintln!("N/A: CF-2 scenario residual is Retail/PTR/Mists only");
-        return;
-    }
     let env = WowLuaEnv::new().expect("scenario environment");
     seed_scenario_state(&env, false);
     load_scenario_widgets_and_consumer(&env);
@@ -164,10 +128,6 @@ fn original_scenario_specific_catalog_uses_lowest_party_level() {
 
 #[test]
 fn original_scenario_random_catalog_uses_lowest_party_level() {
-    if !has_scenario_consumer() {
-        eprintln!("N/A: CF-2 scenario residual is Retail/PTR/Mists only");
-        return;
-    }
     let env = WowLuaEnv::new().expect("scenario environment");
     seed_scenario_state(&env, true);
     load_scenario_widgets_and_consumer(&env);
@@ -176,10 +136,6 @@ fn original_scenario_random_catalog_uses_lowest_party_level() {
 
 #[test]
 fn original_scenario_empty_catalog_keeps_no_scenarios_cover() {
-    if !has_scenario_consumer() {
-        eprintln!("N/A: CF-2 scenario residual is Retail/PTR/Mists only");
-        return;
-    }
     let env = WowLuaEnv::new().expect("scenario environment");
     env.state().borrow_mut().lfd_dungeons.clear();
     env.state().borrow_mut().party_members.clear();

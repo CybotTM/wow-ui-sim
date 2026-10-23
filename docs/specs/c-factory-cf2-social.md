@@ -4,7 +4,7 @@ CF-2 slice 1 covers unchanged profile-cache Blizzard social and scenario consume
 
 ## What it must do
 
-### Club invitations: Retail, PTR, Forever, Mists, Era, Anniversary
+### Club invitations preservation: Retail, PTR, Forever, Mists, Era, Anniversary
 
 - [ ] With explicitly empty supplied club state, the original `GuildMicroButtonMixin:HasUnseenInvitations` returns `false`, and `C_Club.GetInvitationsForSelf` projects an empty table.
 - [ ] Existing displayed-invitation history does not manufacture an incoming invitation when supplied club state remains empty.
@@ -26,7 +26,8 @@ The scenario fixture uses existing `LfdDungeonInfo` records (`subtype_id = 4`, t
 
 ## Implementation inventory
 
-- `tests/cfactory_cf2_social.rs` — original cache consumers with real club, roster and dungeon-state inputs.
+- `tests/cfactory_cf2_social.rs` — original scenario consumers with real roster and dungeon-state inputs.
+- `tests/cfactory_cf2_social_preservation.rs` — empty club-invitation boundary preservation, not producer acceptance.
 - `src/c_api/club_model.rs` — existing club/invitation state; incoming-self semantics await native evidence.
 - `src/lua_api/game_data.rs` — existing party member levels.
 - `src/lua_api/globals/battlefield_lfg_probes.rs` — existing dungeon projection; scenario catalog functions currently return empty placeholders. Replacement modeled behavior belongs in `src/c_api/`.
@@ -34,14 +35,18 @@ The scenario fixture uses existing `LfdDungeonInfo` records (`subtype_id = 4`, t
 
 ## Tests asserting this spec
 
-`tests/cfactory_cf2_social.rs`:
+`tests/cfactory_cf2_social_preservation.rs`:
 
-- `original_guild_microbutton_has_no_unseen_invitations_with_empty_clubs`
+- `original_guild_microbutton_has_no_unseen_invitations_with_empty_clubs_preserves_boundary` — preservation only; an empty producer satisfies it.
+
+`tests/cfactory_cf2_social.rs`:
 - `original_scenario_specific_catalog_uses_lowest_party_level`
 - `original_scenario_random_catalog_uses_lowest_party_level`
 - `original_scenario_empty_catalog_keeps_no_scenarios_cover`
 
-Club registration uses the existing post-Wrath fixture macro. Scenario bodies select the three applicable profiles using runtime `ACTIVE`; other profiles print N/A and are not counted as scenario proof. No new compile-time gates are added.
+File-level profile cfg registers club preservation only on its six applicable profiles and scenarios only on Retail/PTR/Mists. Other profiles register no such tests; there are no runtime N/A returns.
+
+Club invitations have no producer acceptance until the outstanding laptop PENDING-NATIVE-ORACLE answers establish populated incoming-self inputs and transitions. No invitation producer may be written before those answers and a genuine populated RED test. Only the three scenario cases belong to the expected-RED matrix.
 
 ## Known gaps (current cycle)
 
