@@ -55,7 +55,7 @@ fn money_frame_set_type_reproduces_missing_basic_message_dialog_helper() {
 
     assert!(!ok, "MoneyFrame_SetType should reproduce the nil global");
     assert!(
-        err.contains("attempt to call a nil value"),
+        err.contains("attempt to call global 'SetBasicMessageDialogText' (a nil value)"),
         "expected a nil-call failure, got: {err}"
     );
     assert_eq!(

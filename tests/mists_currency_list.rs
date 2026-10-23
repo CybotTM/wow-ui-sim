@@ -87,7 +87,7 @@ fn token_frame_update_reproduces_missing_currency_list_size() {
     }
     assert!(!ok, "TokenFrame_Update should reproduce the nil global");
     assert!(
-        err.contains("attempt to call a nil value"),
+        err.contains("attempt to call global 'GetCurrencyListSize' (a nil value)"),
         "expected a nil-call failure"
     );
     assert_eq!(
