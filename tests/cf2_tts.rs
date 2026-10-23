@@ -8,6 +8,7 @@
     feature = "client-anniversary",
 ))]
 
+use std::collections::BTreeMap;
 use std::path::PathBuf;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -60,6 +61,10 @@ fn assert_original_function(env: &WowLuaEnv, function: &str, suffix: &str) {
 }
 
 fn complete_original_tts_load(env: &WowLuaEnv) {
+    // Observe, do not prescribe a native initial/default marker value.
+    let saved_before: bool = env
+        .eval("return C_TTSSettings.GetCharacterSettingsSaved()")
+        .expect("observe saved marker before original CheckLoad");
     let errors_before = env.state().borrow().lua_errors.len();
     env.exec(
         r#"
@@ -74,12 +79,29 @@ fn complete_original_tts_load(env: &WowLuaEnv) {
         "#,
     )
     .expect("original CheckLoad must mark character settings and update real controls");
+    assert_saved_marker_after_load(env, saved_before);
     assert_eq!(env.state().borrow().lua_errors.len(), errors_before);
+}
+
+fn assert_saved_marker_after_load(env: &WowLuaEnv, saved_before: bool) {
+    let saved_after: bool = env
+        .eval("return C_TTSSettings.GetCharacterSettingsSaved()")
+        .expect("observe saved marker after original CheckLoad");
+    assert!(saved_after, "original mark must leave settings saved");
+    if !saved_before {
+        assert_ne!(
+            saved_before, saved_after,
+            "observed unsaved-to-saved transition"
+        );
+    }
+    // An already-true marker proves preservation only. Initial/reset policy and
+    // standalone Mark producer acceptance remain PENDING-NATIVE-ORACLE.
+    eprintln!("CF-2 saved marker: {saved_before} -> {saved_after}");
 }
 
 #[test]
 fn original_tts_slider_settings_survive_mark_saved_and_second_environment() {
-    let env = new_cache_env();
+    let mut env = new_cache_env();
     // Seed the LIVE CVar store used by the Lua API, not a parallel Lua table.
     assert!(
         env.state()
@@ -100,18 +122,56 @@ fn original_tts_slider_settings_survive_mark_saved_and_second_environment() {
             "Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua",
         );
     }
-    env.exec(
-        r#"
-        assert(TextToSpeech_SetRate(TextToSpeechFrame, 4))
-        assert(TextToSpeech_SetVolume(TextToSpeechFrame, 37))
-        "#,
-    )
-    .expect("original slider callbacks must accept explicit in-range settings");
-    complete_original_tts_load(&env);
-    assert_tts_values_and_controls(&env);
-    drop(env);
+    let initial_rate: i32 = env.eval("return C_TTSSettings.GetSpeechRate()").unwrap();
+    let initial_volume: i32 = env.eval("return C_TTSSettings.GetSpeechVolume()").unwrap();
+    // Avoid a coincidental match in the copied persisted preferences, without
+    // prescribing defaults. Each selected value differs from the observed one.
+    let rates = if initial_rate == 4 { [7, 4] } else { [4, 7] };
+    let volumes = if initial_volume == 37 {
+        [63, 37]
+    } else {
+        [37, 63]
+    };
+    for (rate, volume) in rates.into_iter().zip(volumes) {
+        let before = read_live_cvars(&env);
+        env.exec(&format!(
+            "assert(TextToSpeech_SetRate(TextToSpeechFrame, {rate})); \
+             assert(TextToSpeech_SetVolume(TextToSpeechFrame, {volume}))"
+        ))
+        .expect("unchanged slider callbacks accept explicit preferences");
+        complete_original_tts_load(&env);
+        assert_tts_values_and_controls(&env, rate, volume);
+        let after = read_live_cvars(&env);
+        let rate_keys = changed_preference_keys(&before, &after, rate);
+        let volume_keys = changed_preference_keys(&before, &after, volume);
+        assert!(
+            !rate_keys.is_empty(),
+            "rate must change the live CVar store"
+        );
+        assert!(
+            !volume_keys.is_empty(),
+            "volume must change the live CVar store"
+        );
+        drop(env);
 
-    let reloaded = new_cache_env();
+        env = new_cache_env();
+        assert_reopened_tts_preferences(&env, rate, volume);
+        let reopened = read_live_cvars(&env);
+        for key in rate_keys.iter().chain(&volume_keys) {
+            assert_eq!(
+                reopened.get(key),
+                after.get(key),
+                "persisted preference {key}"
+            );
+        }
+        load_original_addon(&env, "Blizzard_ChatFrame");
+        assert_tts_values_and_controls(&env, rate, volume);
+    }
+    complete_original_tts_load(&env);
+    assert_tts_values_and_controls(&env, rates[1], volumes[1]);
+}
+
+fn assert_reopened_tts_preferences(reloaded: &WowLuaEnv, rate: i32, volume: i32) {
     assert_eq!(
         reloaded
             .state()
@@ -123,22 +183,53 @@ fn original_tts_slider_settings_survive_mark_saved_and_second_environment() {
         "second environment must reopen the same child-only persisted CVar file"
     );
     // Read BEFORE original CheckLoad can mark anything in the second environment.
-    reloaded.exec("assert(C_TTSSettings.GetCharacterSettingsSaved() == true); assert(C_TTSSettings.GetSpeechRate() == 4); assert(C_TTSSettings.GetSpeechVolume() == 37)")
-        .expect("saved character marker and actual values must survive environment destruction");
-    load_original_addon(&reloaded, "Blizzard_ChatFrame");
-    complete_original_tts_load(&reloaded);
-    assert_tts_values_and_controls(&reloaded);
+    reloaded
+        .exec(&format!(
+            "assert(C_TTSSettings.GetCharacterSettingsSaved() == true); \
+         assert(C_TTSSettings.GetSpeechRate() == {rate}); \
+         assert(C_TTSSettings.GetSpeechVolume() == {volume})"
+        ))
+        .expect("saved marker and each preference pair survive environment destruction");
 }
 
-fn assert_tts_values_and_controls(env: &WowLuaEnv) {
-    env.exec(
+fn assert_tts_values_and_controls(env: &WowLuaEnv, rate: i32, volume: i32) {
+    env.exec(&format!(
         r#"
-        assert(C_TTSSettings.GetSpeechRate() == 4)
-        assert(C_TTSSettings.GetSpeechVolume() == 37)
+        assert(C_TTSSettings.GetSpeechRate() == {rate})
+        assert(C_TTSSettings.GetSpeechVolume() == {volume})
         local controls = TextToSpeechFrame.PanelContainer
-        assert(controls.AdjustRateSlider.Slider:GetValue() == 4)
-        assert(controls.AdjustVolumeSlider.Slider:GetValue() == 37)
+        assert(controls.AdjustRateSlider.Slider:GetValue() == {rate})
+        assert(controls.AdjustVolumeSlider.Slider:GetValue() == {volume})
         "#,
-    )
-    .expect("original TTS update must render saved values, not constant defaults");
+    ))
+    .expect("original TTS controls and preference getters agree on each explicit pair");
+}
+
+fn read_live_cvars(env: &WowLuaEnv) -> BTreeMap<String, String> {
+    let state = env.state().borrow();
+    state
+        .cvars
+        .all_keys()
+        .into_iter()
+        .map(|key| {
+            let value = state.cvars.get(&key).expect("listed live CVar has a value");
+            (key, value)
+        })
+        .collect()
+}
+
+fn changed_preference_keys(
+    before: &BTreeMap<String, String>,
+    after: &BTreeMap<String, String>,
+    expected: i32,
+) -> Vec<String> {
+    // Discover observable storage keys instead of inventing native CVar names.
+    after
+        .iter()
+        .filter(|(key, value)| {
+            before.get(*key) != Some(*value)
+                && value.parse::<f64>().ok() == Some(f64::from(expected))
+        })
+        .map(|(key, _)| key.clone())
+        .collect()
 }

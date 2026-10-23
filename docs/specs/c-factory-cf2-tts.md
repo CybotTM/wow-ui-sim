@@ -6,9 +6,10 @@ Slice 7 removes the original ChatFrame character-save and Forever Gamepad tempor
 
 ### Character TTS settings
 
-- [ ] On Retail, PTR, WowForever, Mists, Era and Anniversary, unchanged cached `Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua` slider consumers accept explicit rate4/volume37 with `TTSUseCharacterSettings=1`. After original `ADDON_LOADED(Blizzard_ClientSavedVariables)`, `VARIABLES_LOADED`, `PLAYER_ENTERING_WORLD`, original CheckLoad completes its mark-saved call and updates the real slider controls to4/37 without a new Lua error.
-- [ ] With explicit absence of legacy `TEXTTOSPEECH_CONFIG`, successful original mark-saved yields `GetCharacterSettingsSaved()==true`. A second environment opened against the same isolated persistent storage reads true and4/37 **before** it can mark anything again; its unchanged original controls render4/37 after loading.
-- [ ] Values are actual saved preferences, not unchanged temporary constant getters, no-op setters or a test-only Lua table. The first environment is destroyed before the second opens. These requirements are the user-requested mark/save lifecycle; they do not establish whether setters persist before marking.
+- [ ] On Retail, PTR, WowForever, Mists, Era and Anniversary, unchanged cached `Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua` slider callbacks drive two distinct explicit rate values (4 and 7) and volume values (37 and 63), with `TTSUseCharacterSettings=1`. Order each preference so the first value differs from its observed initial value; no initial/default value is prescribed.
+- [ ] After each pair, original `ADDON_LOADED(Blizzard_ClientSavedVariables)`, `VARIABLES_LOADED`, `PLAYER_ENTERING_WORLD` completes CheckLoad and renders that pair without a new Lua error. Both getters and controls round-trip the pair. Observe changed numeric preference values in live `SimState.cvars`, discovering keys from before/after snapshots rather than inventing native CVar names.
+- [ ] Destroy and reopen the environment after each pair. Before original CheckLoad can mark again, read the saved marker and that pair, and verify the changed live CVar entries persist byte-for-byte. Load unchanged controls and confirm they render that pair. The next pair replaces the previous persisted preferences.
+- [ ] With explicit absence of legacy `TEXTTOSPEECH_CONFIG`, observe the saved marker before and after original CheckLoad: an observed false must become true; an observed true remains true. Already-true preservation cannot reject a no-op Mark. Marker-producer acceptance remains PENDING-NATIVE-ORACLE until a normal unsaved input/default/reset policy is established; the preference selector's RED count does not authorize that producer.
 
 ### Forever temporary CVars
 
@@ -46,7 +47,7 @@ Integration target exact selectors:
 - `cf2_tts::original_tts_slider_settings_survive_mark_saved_and_second_environment` — six non-Wrath profiles above.
 - `cf2_gamepad_temp_cvars::original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinary_cvar` — WowForever only.
 
-Seven applicable executions. Expected first missing boundaries: original TTS MarkCharacterSettingsSaved at Retail/Forever475, PTR/Mists/Era/Anniversary472; original Gamepad RemoveTempCVar at Core.lua6. Later missing SetTempCVar and saved preference methods are in-scope lifecycle gaps, not permission to bypass original code. Setup, compile, source/provenance, timeout or unrelated API failures are not accepted RED. No RED has been observed; no producer may be committed before it is.
+Seven applicable expected-RED executions: six preference selectors plus one Gamepad selector. Marker assertions are supplemental preservation/pending, not standalone producer acceptance. Original missing boundaries: TTS MarkCharacterSettingsSaved at Retail/Forever475, PTR/Mists/Era/Anniversary472; Gamepad RemoveTempCVar at Core.lua6. Missing pre-observation GetCharacterSettingsSaved is a prerequisite blocker, not accepted original-consumer RED. Later missing SetTempCVar and saved preference methods are in-scope lifecycle gaps, not permission to bypass original code. Setup, compile, source/provenance, timeout or unrelated API failures are not accepted RED. No RED has been observed; no producer may be committed before it is.
 
 ## Known gaps (current cycle)
 
