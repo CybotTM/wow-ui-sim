@@ -11,6 +11,13 @@ Documented shapes, not invented native behavior, are the acceptance contract for
 
 Sources: Retail/PTR `Blizzard_APIDocumentationGenerated/StableInfoDocumentation.lua:15-22,193-214`; selected `Blizzard_StableUI/Blizzard_StableUI.lua:447` via `Blizzard_StableUI/Blizzard_StableUI.toc:4`. Forever excluded: selected Camelot StableUI never calls this API despite cached Standard source and documentation.
 
+### Item upgrade
+
+- [ ] Retail/PTR/Forever/Mists/Era/Anniversary `C_ItemUpgrade.CanUpgradeItem` takes a required non-nil `ItemLocation` and returns exactly one non-nil boolean; no eligible/ineligible value is mandated.
+- [ ] Retail/PTR/Forever/Mists original ItemUtil upgrade-context branch accepts actual results with an existing equipped item and original upgrade window, without Lua error. Match versus Mismatch is not prescribed.
+
+Sources: `Blizzard_APIDocumentationGenerated/ItemUpgradeDocumentation.lua:11-24` (Retail/PTR/Forever), `:11-23` (Mists/Era/Anniversary). Selected generic `Blizzard_FrameXMLUtil/ItemUtil.lua:147` (Retail/PTR), `:214` (Forever, corrected generic file, **not Camelot**), `:142` (Mists/Era/Anniversary). FrameXMLUtil TOCs select generic ItemUtil on all six. Era/Anniversary have the utility consumer but cannot normally open its upgrade context: cached `Blizzard_ItemUpgradeUI_Mists.toc:4` restricts that window to Mists. Their context-specific subcheck stays blocked rather than forcing unselected UI or fabricating a frame.
+
 ## How it works
 
 - [Runtime-selected consumers and proof classes](../wiki/investigations/consumer-selection-and-red-proof.md).
@@ -19,9 +26,14 @@ Sources: Retail/PTR `Blizzard_APIDocumentationGenerated/StableInfoDocumentation.
 
 - `tests/api_shape_stable_active_list.rs`: Retail/PTR list/record shape and original refresh acceptance; missing member is a shape blocker, not semantic RED.
 
+- `tests/api_shape_item_upgrade.rs`: six-profile argument/boolean shape; original upgrade-context acceptance on four reachable profiles.
+
 ## Tests asserting this spec
 
 - `api_shape_stable_active_list::stable_active_list_shape_blocker_contract` — source-predicted FAIL for missing member; not executed.
+
+- `api_shape_item_upgrade::item_upgrade_boolean_contract` — expected preservation PASS on six profiles, unexecuted.
+- `api_shape_item_upgrade::item_upgrade_original_item_util_contract` — expected preservation PASS on Retail/PTR/Forever/Mists if normal setup succeeds, unexecuted. Era/Anniversary upgrade-context subchecks blocked and unregistered; no consumer acceptance claimed there.
 
 ## Known gaps (current cycle)
 
