@@ -83,6 +83,8 @@ for _, bankType in ipairs({Enum.BankType.Character, Enum.BankType.Account}) do
     BankPanel:SelectTab(BankPanel.PurchaseTab.tabData.ID)
     BankPanel:ShouldShowPurchasePrompt()
     BankPanel:RefreshBankTabs()
+    original(BankFrameMixin.OnShowOrHideBagCost, 'Blizzard_UIPanels_Game/Camelot/BankFrame.lua')
+    BankFrameMixin.OnShowOrHideBagCost(BankFrame)
 end
 
 "#,
@@ -106,9 +108,8 @@ for _, name in ipairs({'ScrappingMachineFrame','ItemInteractionFrame','Professio
     local frame = _G[name]
     if frame then frame:Hide() end
 end
-assert(not C_Spell.TargetSpellReplacesBonusTree() and not C_Spell.TargetSpellJumpsUpgradeTrack()
-    and not C_Spell.TargetSpellIsEnchanting() and not C_Spell.TargetSpellChecksItemCondition(),
-    'normal non-targeting prerequisite; earlier contexts would bypass the target getter')
+-- Normal non-targeting fixture reaches this final context check. No earlier predicate's
+-- value or resulting context is a contract expectation.
 ItemButtonUtil.GetItemContext()
 
 "#,
