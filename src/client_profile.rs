@@ -73,21 +73,7 @@ pub const ACTIVE_RETAIL_API_EPOCH: RetailApiEpoch = RetailApiEpoch::Retail12_0_7
 
 pub const RETAIL_API_INTERFACE_VERSION: u32 = ACTIVE_RETAIL_API_EPOCH.interface_version();
 
-#[cfg(any(feature = "profile-retail", feature = "client-ptr"))]
-pub const ACTIVE_INTERFACE_VERSION: u32 = RETAIL_API_INTERFACE_VERSION;
-
-#[cfg(feature = "client-wrath")]
-pub const ACTIVE_INTERFACE_VERSION: u32 = 38001;
-
-#[cfg(feature = "client-mists")]
-pub const ACTIVE_INTERFACE_VERSION: u32 = 50504;
-
-#[cfg(any(feature = "client-era", feature = "client-anniversary"))]
-pub const ACTIVE_INTERFACE_VERSION: u32 = 11507;
-
-// Forever 1.60.1's published TOC version, distinct from Era/Anniversary.
-#[cfg(feature = "client-wowforever")]
-pub const ACTIVE_INTERFACE_VERSION: u32 = 16001;
+pub const ACTIVE_INTERFACE_VERSION: u32 = ACTIVE.interface_version();
 
 impl ClientProfile {
     /// Disable Midnight secrets on the four official Classic profiles.
@@ -142,7 +128,8 @@ impl ClientProfile {
 
     pub const fn interface_version(self) -> u32 {
         match self {
-            ClientProfile::Retail | ClientProfile::Ptr => RETAIL_API_INTERFACE_VERSION,
+            ClientProfile::Retail => RETAIL_API_INTERFACE_VERSION,
+            ClientProfile::Ptr => 120107,
             ClientProfile::Wrath => 38001,
             ClientProfile::Mists => 50504,
             ClientProfile::Era | ClientProfile::Anniversary => 11507,
@@ -403,7 +390,8 @@ mod tests {
         assert!(cfg!(feature = "retail-12-0-7"));
         assert!(cfg!(feature = "retail-12-1-0"));
         assert!(cfg!(feature = "retail-12-1-5"));
-        assert_eq!(ACTIVE_INTERFACE_VERSION, 120105);
+        assert_eq!(RETAIL_API_INTERFACE_VERSION, 120105);
+        assert_eq!(ACTIVE_INTERFACE_VERSION, 120107);
     }
 
     #[test]
@@ -439,7 +427,7 @@ mod tests {
     #[cfg(feature = "client-ptr")]
     fn ptr_uses_12_1_interface_and_cache_scope() {
         assert_eq!(ACTIVE, ClientProfile::Ptr);
-        assert_eq!(ACTIVE.interface_version(), 120105);
+        assert_eq!(ACTIVE.interface_version(), 120107);
         assert_eq!(ACTIVE.cache_subdir(), "ptr");
     }
 }
