@@ -1,24 +1,20 @@
 //! Original-cache CF-2 slice 5 fixtures. Authored only; RED not observed.
 //! Populated supertracking inputs remain PENDING-NATIVE-ORACLE.
+#![cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever",
+))]
 
-use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-fn load_original_consumer(root: &str) -> Option<WowLuaEnv> {
-    let applicable = matches!(
-        ACTIVE,
-        ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::WowForever
-    );
-    if !applicable {
-        eprintln!("CF-2 housing/supertracking is N/A for {ACTIVE:?}; not coverage proof");
-        return None;
-    }
+fn load_original_consumer(root: &str) -> WowLuaEnv {
     let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
     let (env, loaded) =
         crate::common::blizzard_addon_harness::build_blizzard_addon_closure_env(&ui, &[root], &[]);
     assert!(loaded.iter().any(|name| name == root));
     eprintln!("CF-2 original consumer cache: {}", ui.display());
-    Some(env)
+    env
 }
 
 fn assert_original_source(env: &WowLuaEnv, function: &str, suffix: &str) {
@@ -37,9 +33,7 @@ fn assert_original_source(env: &WowLuaEnv, function: &str, suffix: &str) {
 
 #[test]
 fn original_minimap_overlay_follows_owned_house_interior_transitions() {
-    let Some(env) = load_original_consumer("Blizzard_Minimap") else {
-        return;
-    };
+    let env = load_original_consumer("Blizzard_Minimap");
     assert_original_source(
         &env,
         "MinimapMixin.UpdateStaticOverlayTexture",
@@ -88,10 +82,8 @@ fn original_minimap_overlay_follows_owned_house_interior_transitions() {
 }
 
 #[test]
-fn original_supertracking_refresh_publishes_its_cache_to_listeners() {
-    let Some(env) = load_original_consumer("Blizzard_FrameXMLUtil") else {
-        return;
-    };
+fn original_supertracking_refresh_publishes_its_cache_to_listeners_preserves_boundary() {
+    let env = load_original_consumer("Blizzard_FrameXMLUtil");
     assert_original_source(
         &env,
         "QuestSuperTracking_GetSuperTrackedContent",

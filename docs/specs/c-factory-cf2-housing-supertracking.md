@@ -10,7 +10,7 @@ Slice 5 restores the original cached Blizzard minimap housing overlay and quest-
 - [ ] Moving the supplied state from that interior to its exterior owned plot hides the overlay; returning inside shows it again. An owned plot alone must not imply a house interior.
 - [ ] Direct original-consumer calls add no Lua errors. Existing closure-load errors remain recorded rather than erased.
 
-### Supertracking
+### Supertracking preservation
 
 - [ ] Original `SuperTrackEventMixin:CacheCurrentSuperTrackInfo` reaches `Supertracking.OnChanged` after reading `C_SuperTrack.GetSuperTrackedContent`, without a new Lua error. The external listener receives the original frame cache once per explicit refresh.
 - [ ] **PENDING-NATIVE-ORACLE:** Seed two supported populated content type/ID pairs through the normal simulator input path; refresh the original consumer and assert both stored fields and `QuestSuperTracking_GetSuperTrackedContent(tracker)` return each exact pair. No executable populated fixture exists yet: the current simulator has no content storage or setter, and valid-ID acceptance is unresolved.
@@ -35,17 +35,17 @@ Slice 5 restores the original cached Blizzard minimap housing overlay and quest-
 `tests/cf2_housing_supertracking.rs` in the discovered `integration` target:
 
 - `original_minimap_overlay_follows_owned_house_interior_transitions`
-- `original_supertracking_refresh_publishes_its_cache_to_listeners`
+- `original_supertracking_refresh_publishes_its_cache_to_listeners_preserves_boundary`
 
-Applicable only to Retail, PTR and Forever. Runtime `client_profile::ACTIVE` excludes other profiles with an explicit N/A diagnostic; those returns are not passing compatibility evidence. Both tests are authored, uncompiled and unrun. The second is a boundary regression only: an empty/no-op producer could satisfy it, so it cannot close populated content acceptance.
+File-level cfg registers these cases only on Retail, PTR and Forever; other profiles register neither test. Both tests are authored, uncompiled and unrun. Only housing belongs to the expected-RED matrix. Supertracking is preservation only: an empty/no-op producer could satisfy it. It has no producer acceptance until the outstanding laptop PENDING-NATIVE-ORACLE answers establish normal populated inputs and genuine RED assertions. No supertracking producer may be written before those answers.
 
 ## Known gaps (current cycle)
 
 - [ ] Observe RED at original `Minimap.lua:295` (Retail/PTR) or `:262` (Forever), missing `IsInsideHouse`, after an admitted slot is granted.
-- [ ] Observe RED at original `Blizzard_QuestSuperTracking.lua:52`, missing `GetSuperTrackedContent`, after an admitted slot is granted.
+- [ ] Preserve original supertracking notification behavior; a missing-member failure at `Blizzard_QuestSuperTracking.lua:52` is not backing-producer RED acceptance.
 - [ ] **PENDING-NATIVE-ORACLE:** Determine general interior state, visited/nonowned interiors and absent-state policy. Existing owned-house state covers only the explicit fixture domain; do not substitute `inside_owned_house` as the complete general-house model.
 - [ ] **PENDING-NATIVE-ORACLE:** Determine normal content-input storage, valid IDs/catalog requirements, setter acceptance, mutation/event order and no-target tuple before authoring populated-pair transitions. Cached API documentation declares the tuple and setter arguments, not those policies.
-- [ ] Implement state-backed C_* producers only after observed RED. No temporary stopgap is authorized here.
+- [ ] Implement housing producer only after observed state-dependent RED. Supertracking producer remains prohibited until native answers and populated RED coverage exist. No temporary stopgap is authorized here.
 
 ## Out of scope
 
