@@ -259,6 +259,17 @@ impl WowLuaEnv {
 
     fn new_rilua(state: Rc<RefCell<SimState>>) -> rilua::Lua {
         let mut lua = rilua::Lua::new().expect("failed to create rilua Lua state");
+        let named_nil_global_calls = match crate::client_profile::ACTIVE {
+            crate::client_profile::ClientProfile::Wrath
+            | crate::client_profile::ClientProfile::Mists
+            | crate::client_profile::ClientProfile::Era
+            | crate::client_profile::ClientProfile::Anniversary => true,
+            crate::client_profile::ClientProfile::Retail
+            | crate::client_profile::ClientProfile::Ptr
+            | crate::client_profile::ClientProfile::WowForever => false,
+        };
+        lua.state_mut()
+            .set_named_nil_global_calls(named_nil_global_calls);
         lua.state_mut().set_app_data(WowLuaAppData::new(state));
         lua
     }
