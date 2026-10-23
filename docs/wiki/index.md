@@ -18,6 +18,9 @@
 ## [2026-10-22] investigation | Patch 12.1.7 source accounting
 
 [12.1.7 source audit](investigations/patch-12-1-7-api-audit.md) freezes public body identities, P01–P12 and all 1,876 linked 1.60.1 occurrences. [Contract](../specs/patch-12-1-7-source-accounting.md) retains header disagreements, inherited UNKNOWN until I4 and deferred GUID work. Python-only validation rejects empty-register coverage; no runtime completion claimed.
+## [2026-10-22] investigation | Forever original opaque timer pair
+
+[Callback attribution and proof](../specs/c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22) identifies the erased defensive-query callee and links its shared model publication. Original-consumer RED→GREEN, Retail preservation and the stock pair's removal are recorded; deferred startup gaps remain separate.
 
 ## [2026-10-21] investigation | Wrath autocomplete native fixture
 
@@ -26,6 +29,38 @@
 ## [2026-10-21] source | Wrath tracked achievements
 
 [Tracking model](systems/lua-api.md#wrath-tracked-achievements) links the [12340 contract](../specs/wrath-tracked-achievements.md): ordered unique IDs, duplicate-add events and synchronous native consumers. Current-source RED precedes the producer; merged-source Wrath54 and five shared-model controls pass. Retail72+4 retains identical statuses and existing failures; both stock captures are empty, check/fmt pass. Persistence and ten pre-existing compile-gated Wrath rows remain excluded.
+
+## [2026-10-21] source | Factory-removal world inputs
+
+[World ownership](systems/lua-api.md#factory-removal-world-inputs--2026-10-21) links the [M4 contract](../specs/c-factory-m4-world-inputs.md): shared existing-state projections, C API callback lifecycle and named missing-world-service policies. The contract records integrated seven-profile targeted GREEN, one stock matrix, FunctionContainer-only dispatch and retained unlisted residuals.
+
+## [2026-10-21] source | Factory-removal social inputs
+
+[Social ownership](systems/lua-api.md#factory-removal-social-inputs--2026-10-21) links the [M3 contract](../specs/c-factory-m3-social-inputs.md): supplied tabard metadata versus named missing-service policies. Frozen/fresh RED, integrated targeted GREEN and the combined stock matrix are recorded; assigned rows disappear without claiming clean startup outside Wrath.
+
+## [2026-10-21] proof | Owned C factory follow-up
+
+[Bounded follow-up proof](systems/c-factory-startup-followup.md#bounded-proof--2026-10-21) records 65 original-member cases, seven nil contracts, the single stock matrix, supplied-state checks, unchanged CVars and explicitly held cascades. Wrath stays empty; other profiles are not clean or merge-ready.
+
+## [2026-10-21] source | T6 named startup services
+
+[Factory follow-up](systems/c-factory-startup-followup.md#t6-service-inputs) links real console/activity adapters, named missing service systems and the still-unattributed Forever timer family; runtime proof pending.
+
+## [2026-10-21] source | M5 startup service/catalog inputs
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m5-service-and-catalog-inputs) links early owned-house requests, species-backed pet icons, valid-set catalog state and named battle/bank capability gaps; runtime proof pending.
+
+## [2026-10-21] source | M2 startup state adapters
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m2-state-adapters) links equipment/spellbook/action/availability state and three Forever-only temporary capabilities; runtime acceptance pending.
+
+## [2026-10-21] source | Named M1 startup conditions
+
+[Factory follow-up](systems/c-factory-startup-followup.md#m1-conditions) records three explicitly temporary conditions, missing backing systems and profile scope; generated-contract and stock runtime proof remain pending.
+
+## [2026-10-20] source | C namespace factory removal (F0)
+
+[Namespace diagnostics](systems/addon-loading.md#missing-c-members-f0-2026-10-20) link the [nil-member contract and frozen proof](../specs/c-namespace-nil-members.md#frozen-f0-proof). The proof owns the full-feature profile matrix, original-consumer gap evidence, failed health gates and unresolved callback attribution. No replacement model is included.
 
 ## [2026-10-21] source | Wrath positional guild rights
 

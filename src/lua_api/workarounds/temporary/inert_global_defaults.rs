@@ -86,11 +86,6 @@ end
 C_GuildBank = C_GuildBank or __wow_namespace()
 
 C_FriendList = C_FriendList or __wow_namespace()
-if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
-    if rawget(C_FriendList, "IsLegacyFriendSystemEnabled") == nil then
-        function C_FriendList.IsLegacyFriendSystemEnabled() return false end
-    end
-end
 if rawget(C_FriendList, "GetNumFriends") == nil then
     function C_FriendList.GetNumFriends() return 0 end
 end

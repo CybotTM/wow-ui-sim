@@ -1,8 +1,8 @@
 //! Temporary private-aura state surface.
 //!
-//! Private aura data and update callbacks remain temporary compatibility behavior.
-//! Anchor registration, warning placement and anchor callbacks are owned by
-//! c_api::private_aura_anchors.
+//! Private aura data remains temporary compatibility behavior.
+//! Anchor registration/placement belongs to c_api::private_aura_anchors;
+//! callback lifecycle and authored dispatch belong to c_api::private_aura_callbacks.
 
 const PRIVATE_AURA_STATE_LUA: &str = r#"
 if type(C_UnitAuras) ~= "table" then
@@ -23,9 +23,6 @@ local function PrivateAuraState()
     end
     if type(state.auraDataByUnit) ~= "table" then
         state.auraDataByUnit = {}
-    end
-    if type(state.updateCallbacksByUnit) ~= "table" then
-        state.updateCallbacksByUnit = {}
     end
     return state
 end
@@ -63,34 +60,6 @@ end
 if rawget(C_UnitAurasPrivate, "SetShowDispelTypeCallback") == nil then
     function C_UnitAurasPrivate.SetShowDispelTypeCallback(callback)
         C_UnitAurasPrivate._showDispelTypeCallback = callback
-    end
-end
-
-if rawget(C_UnitAurasPrivate, "AddPrivateAuraUpdateCallback") == nil then
-    function C_UnitAurasPrivate.AddPrivateAuraUpdateCallback(unitToken, callback)
-        local state = PrivateAuraState()
-        local key = tostring(unitToken or "")
-        local callbacks = state.updateCallbacksByUnit[key]
-        if type(callbacks) ~= "table" then
-            callbacks = {}
-            state.updateCallbacksByUnit[key] = callbacks
-        end
-        callbacks[#callbacks + 1] = callback
-    end
-end
-
-if rawget(C_UnitAurasPrivate, "_TriggerPrivateAuraUpdate") == nil then
-    function C_UnitAurasPrivate._TriggerPrivateAuraUpdate(unitToken, privateSource, updateInfo)
-        local state = PrivateAuraState()
-        local callbacks = state.updateCallbacksByUnit[tostring(unitToken or "")]
-        local fired = 0
-        for index = 1, #(callbacks or {}) do
-            if type(callbacks[index]) == "function" then
-                callbacks[index](privateSource, CopyPrivateAuraValue(updateInfo))
-                fired = fired + 1
-            end
-        end
-        return fired
     end
 end
 
@@ -152,7 +121,7 @@ mod tests {
         let result: String = env
             .eval(
                 r#"
-                local addedID, removedID, dispel, updateSource, updateSpell
+                local addedID, removedID, dispel, updateSpell
                 C_UnitAurasPrivate.SetPrivateAuraAnchorAddedCallback(function(anchor)
                     addedID = anchor.anchorID
                     anchor.unitToken = "mutated"
@@ -193,13 +162,12 @@ mod tests {
                         return "bad_dispel"
                     end
                 end
-                C_UnitAurasPrivate.AddPrivateAuraUpdateCallback("player", function(source, info)
-                    updateSource = source.name
+                C_UnitAurasPrivate.AddPrivateAuraUpdateCallback("player", C_FunctionContainers.CreateCallback(function(info)
                     updateSpell = info.spellID
                     info.spellID = 0
-                end)
+                end))
                 local fired = C_UnitAurasPrivate._TriggerPrivateAuraUpdate("player", { name = "source" }, { spellID = 123 })
-                if fired ~= 1 or updateSource ~= "source" or updateSpell ~= 123 then
+                if fired ~= 1 or updateSpell ~= 123 then
                     return "bad_update"
                 end
                 C_UnitAurasPrivate._state.privateAurasByUnit.player = {

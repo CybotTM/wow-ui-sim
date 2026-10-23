@@ -8,7 +8,7 @@ All model, representation, miss and security policies below are **INFERRED simul
 
 ### Explicit classification input
 
-- [x] Own a public `AuraSpellClassification` record with independent `is_big_defensive: bool` and `is_private: bool` fields and `Clone`, `Copy`, `Default` (both false). Own public `AuraSpellClassifications { pub spells: HashMap<u32, AuraSpellClassification> }`, empty `Default`, under `retail-12-0-5` with a public per-environment `SimState.aura_spell_classifications` field.
+- [x] Own a public `AuraSpellClassification` record with independent `is_big_defensive: bool` and `is_private: bool` fields and `Clone`, `Copy`, `Default` (both false). Own public `AuraSpellClassifications { pub spells: HashMap<u32, AuraSpellClassification> }`, empty `Default`, under `aura-spell-classifications` (Retail12.0.5+ and Forever) with a public per-environment `SimState.aura_spell_classifications` field.
 - [x] Use only explicitly declared resolved spell-ID records. Fixture101=(true,false),202=(false,true),303=(true,true),404=(false,false) covers both flags independently. No manufactured production catalog.
 - [x] Each API returns exactly one **public boolean**, corresponding to its independent flag; missing resolved records and unseeded public strings return false.
 - [x] Host replacement/removal and alias mutation take effect immediately. Queries leave records, aliases and caller input unchanged; environments isolate their inputs.
@@ -38,12 +38,16 @@ All model, representation, miss and security policies below are **INFERRED simul
 ## Implementation inventory
 
 - `src/c_api/c_unit_aura_classification.rs`: unchanged independent bool record/empty explicit map; sole two getters read a copied resolved-ID record or default and push the corresponding public boolean.
-- `src/lua_api/globals/register.rs`: `retail-12-0-5` registration after existing aura namespace/state initialization.
-- `src/c_api/mod.rs`: unchanged public `retail-12-0-5` module declaration.
+- `src/lua_api/globals/register.rs`: shared capability registration after existing aura namespace/state initialization; `AuraIsPrivate` publication remains Retail12.0.5+ only.
+- `src/c_api/mod.rs`: public `aura-spell-classifications` module declaration.
 - `src/lua_api/state/sim_state.rs`: public feature-gated classification input next to cooldown associations.
 - `src/lua_api/state.rs`: empty default initializer next to cooldown associations.
 - `src/c_api/c_spell.rs`: `read_public_spell_identifier_at` shares strict public validation/conservative actual-VM secret rejection across both classification getters and the cooldown getter, then calls the unchanged alias-first `read_spell_identifier_at` resolver.
 - `src/c_api/c_unit_aura_cooldown_spells.rs`: existing getter now calls the shared validator; public number/nil results and API-specific errors preserved.
+
+## Forever publication — 2026-10-22
+
+The shared capability exposes only the existing defensive getter on Forever; other profiles and Forever's unrelated nil members retain their behavior. The [original T6 callback attribution and proof](c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22) owns the stock failure boundary and original-consumer regression. No model, catalog or security policy changes.
 
 ## Tests asserting this spec
 
