@@ -62,6 +62,8 @@ AzeriteRespecFrame.ItemSlot.RefreshTooltip = function() end
 type FirstShowProbe = (i64, bool, bool, String, String, i64);
 type DropDismissalProbe = (i64, bool, String, String, i64, bool, bool);
 
+// AzeriteRespecUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_respec_ui_help_tip_dismisses_when_item_is_dropped() {
     common::with_perf_lock(|| {
@@ -84,6 +86,7 @@ fn blizzard_azerite_respec_ui_help_tip_dismisses_when_item_is_dropped() {
             });
         });
     });
+}
 }
 
 fn seed_valid_respec_item(env: &wow_ui_sim::lua_api::WowLuaEnv) {

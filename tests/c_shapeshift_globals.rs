@@ -6,8 +6,10 @@
 //! `state.shapeshift_cooldowns`. `GetNumShapeshiftForms` is exercised by
 //! `tests/social_probes.rs`.
 
-use wow_ui_sim::lua_api::state::{ShapeshiftForm, SpellCooldownState};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state::{ShapeshiftForm, SpellCooldownState};
+
+const WRATH_INFO: bool = cfg!(feature = "client-wrath");
 
 fn env_with_druid_forms() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("WowLuaEnv init");
@@ -43,7 +45,14 @@ fn seeded_paladin_exposes_three_aura_forms() {
         Option<String>,
         Option<String>,
     ) = env
-        .eval(
+        .eval(if WRATH_INFO {
+            r#"
+                local _, first = GetShapeshiftFormInfo(1)
+                local _, second = GetShapeshiftFormInfo(2)
+                local _, third = GetShapeshiftFormInfo(3)
+                return GetNumShapeshiftForms(), first, second, third
+            "#
+        } else {
             r#"
             local names = {}
             for i = 1, GetNumShapeshiftForms() do
@@ -52,8 +61,8 @@ fn seeded_paladin_exposes_three_aura_forms() {
                 names[i] = info and info.name or nil
             end
             return GetNumShapeshiftForms(), names[1], names[2], names[3]
-            "#,
-        )
+            "#
+        })
         .expect("seeded Paladin shapeshift aura probe");
 
     assert_eq!(count, 3);
@@ -75,6 +84,18 @@ fn get_shapeshift_form_cooldown_invalid_index_returns_zero_state() {
 #[test]
 fn get_shapeshift_form_info_reports_all_four_fields() {
     let env = env_with_druid_forms();
+    if WRATH_INFO {
+        env.exec(
+            r#"
+            local texture, name, active, castable = GetShapeshiftFormInfo(1)
+            assert(select('#', GetShapeshiftFormInfo(1)) == 4)
+            assert(texture == 'Interface/Icons/Ability_Racial_BearForm' and name == 'Bear Form')
+            assert(active == nil and castable == 1)
+        "#,
+        )
+        .unwrap();
+        return;
+    }
     let (texture, is_active, is_castable, spell_id): (String, bool, bool, i32) = env
         .eval("return GetShapeshiftFormInfo(1)")
         .expect("eval GetShapeshiftFormInfo");
@@ -94,8 +115,13 @@ fn get_shapeshift_form_info_out_of_range_returns_nil() {
 #[test]
 fn get_shapeshift_form_info_zero_index_returns_nil() {
     let env = env_with_druid_forms();
-    let is_nil: bool = env.eval("return GetShapeshiftFormInfo(0) == nil").unwrap();
-    assert!(is_nil, "1-based — index 0 is invalid");
+    let result: bool = if WRATH_INFO {
+        env.eval("return not pcall(GetShapeshiftFormInfo, 0)")
+            .unwrap()
+    } else {
+        env.eval("return GetShapeshiftFormInfo(0) == nil").unwrap()
+    };
+    assert!(result, "profile-specific invalid index contract");
 }
 
 #[test]

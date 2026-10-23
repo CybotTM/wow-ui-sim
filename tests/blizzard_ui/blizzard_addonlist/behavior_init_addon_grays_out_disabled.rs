@@ -7,6 +7,8 @@ const ROOT: &str = "Blizzard_AddOnList";
 const DISABLED_ADDON: &str = "AddonListDisabledColorProbe";
 const LOADABLE_ADDON: &str = "AddonListLoadableColorProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn init_addon_uses_gray_for_disabled_and_gold_for_loadable_enabled() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -71,6 +73,7 @@ fn init_addon_uses_gray_for_disabled_and_gold_for_loadable_enabled() {
             (1.0, 0.78, 0.0),
         );
     });
+}
 }
 
 fn seed_color_probe_addons(env: &wow_ui_sim::lua_api::WowLuaEnv) {

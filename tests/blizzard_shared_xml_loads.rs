@@ -113,6 +113,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&shared_xml_dir()).expect("SharedXML TOC resolves");
@@ -121,6 +123,7 @@ fn find_toc_file_resolves_bare_toc() {
         shared_xml_toc(),
         "Retail 12.1.0.69497 ships a single bare Blizzard_SharedXML.toc"
     );
+}
 }
 
 #[test]
@@ -136,6 +139,7 @@ fn profile_specific_toc_variants_are_absent() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eight_hard_deps_in_published_order() {
     let toc = TocFile::from_file(&shared_xml_toc()).expect("SharedXML TOC parses");
@@ -150,7 +154,9 @@ fn toc_declares_eight_hard_deps_in_published_order() {
     assert!(toc.saved_variables().is_empty());
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn mainline_toc_eager_load_with_allow_load_both_screens() {
     let toc = TocFile::from_file(&shared_xml_toc()).expect("Mainline TOC parses");
@@ -181,7 +187,9 @@ fn mainline_toc_eager_load_with_allow_load_both_screens() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_metadata_lines_and_no_savedvars() {
     let raw = std::fs::read_to_string(shared_xml_toc()).expect("TOC reads utf-8");
@@ -214,7 +222,9 @@ fn toc_raw_bytes_pin_metadata_lines_and_no_savedvars() {
         "TOC must retain the current HybridScrollFrame deprecation annotation"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn mainline_toc_body_starts_with_localization_machinery_then_constants() {
     let raw = std::fs::read_to_string(shared_xml_toc()).expect("TOC reads utf-8");
@@ -242,7 +252,9 @@ fn mainline_toc_body_starts_with_localization_machinery_then_constants() {
          publishes color helpers consumed by later widget files. Got: {first_three:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn mainline_toc_body_count_breakdown_matches_filesystem_layout() {
     let toc = TocFile::from_file(&shared_xml_toc()).expect("Mainline TOC parses");
@@ -275,7 +287,9 @@ fn mainline_toc_body_count_breakdown_matches_filesystem_layout() {
          Got: {xml_count}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn shared_subdir_holds_localization_and_widget_subdirs() {
     let shared_dir = shared_xml_dir().join("Shared");
@@ -308,7 +322,9 @@ fn shared_subdir_holds_localization_and_widget_subdirs() {
     assert!(shared_dir.join("LocalizationMachinery.lua").is_file());
     assert!(shared_dir.join("VASErrorLookup.lua").is_file());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn mainline_subdir_holds_retail_only_overrides() {
     let mainline_dir = shared_xml_dir().join("Mainline");
@@ -336,7 +352,9 @@ fn mainline_subdir_holds_retail_only_overrides() {
     assert!(mainline_dir.join("Sound.lua").is_file());
     assert!(mainline_dir.join("ScrollDefine.lua").is_file());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn eager_discovery_includes_addon_on_all_four_screens() {
     let ui = blizzard_ui_dir();
@@ -356,6 +374,7 @@ fn eager_discovery_includes_addon_on_all_four_screens() {
              screen, and 54+ downstream addons hard-dep on it"
         );
     }
+}
 }
 
 prefork_full_ui_case! {

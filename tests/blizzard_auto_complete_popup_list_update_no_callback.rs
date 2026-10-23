@@ -52,6 +52,7 @@ _G.__popup_no_callback_failures = table.concat(failures, "\n")
 _G.__popup_no_callback_assertsafe_messages = table.concat(assertsafeMessages or {}, "\n")
 "##;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_popup_list_update_without_callback_records_and_clears() {
     common::with_perf_lock(|| {
@@ -86,4 +87,5 @@ fn blizzard_auto_complete_popup_list_update_without_callback_records_and_clears(
             });
         });
     });
+}
 }

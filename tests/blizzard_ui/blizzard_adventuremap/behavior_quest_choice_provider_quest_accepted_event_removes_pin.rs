@@ -65,12 +65,15 @@ return fogPlayCount,
        #removedPins
 "#;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn quest_choice_provider_quest_accepted_event_removes_choice_and_fog_pins() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let surface = quest_accepted_surface(env);
         assert_quest_accepted_surface(surface);
     });
+}
 }
 
 type QuestAcceptedSurface = (i64, String, i64, String, String, bool, i64);

@@ -18,12 +18,8 @@ fn main() {
 }
 
 fn project_root() -> PathBuf {
-    let manifest_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").expect("manifest dir"));
-    manifest_dir
-        .parent()
-        .and_then(Path::parent)
-        .expect("test harness crate must live in crates/test-harness")
-        .to_path_buf()
+    // Unlike Cargo's synthesized manifest variable, this config input is tracked.
+    PathBuf::from(env!("WOW_UI_SIM_TEST_SOURCE_ROOT"))
 }
 
 fn generate_integration_test_harness() {

@@ -7,6 +7,8 @@ use wow_ui_sim::lua_api::state::{AzeriteEssenceMilestoneInfo, AzeriteEssenceStat
 const ROOT: &str = "Blizzard_AzeriteEssenceUI";
 const MAIN_SLOT: i32 = 0;
 
+// AzeriteEssenceUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_essence_ui_show_hide_callbacks_fire_once_per_transition() {
     common::with_perf_lock(|| {
@@ -73,6 +75,7 @@ fn blizzard_azerite_essence_ui_show_hide_callbacks_fire_once_per_transition() {
             });
         });
     });
+}
 }
 
 fn seed_minimal_azerite_essence_state(state: &mut SimState) {

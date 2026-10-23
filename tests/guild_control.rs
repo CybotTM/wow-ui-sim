@@ -44,8 +44,12 @@ fn no_guild_returns_no_ranks() {
     assert_eq!(count, 0);
     assert_eq!(name, "");
 
-    let flags_count: i32 = env.eval(r#"return #GuildControlGetRankFlags()"#).unwrap();
-    assert_eq!(flags_count, 0);
+    // Wrath's unselected-rank flags read is undefined natively. The separate
+    // native contract case supplies a valid selected rank before removing guild state.
+    if !cfg!(feature = "client-wrath") {
+        let flags_count: i32 = env.eval(r#"return #GuildControlGetRankFlags()"#).unwrap();
+        assert_eq!(flags_count, 0);
+    }
 }
 
 #[test]
@@ -178,6 +182,17 @@ fn out_of_range_explicit_index_returns_empty() {
 fn rank_flags_round_trip_as_boolean_array() {
     let env = WowLuaEnv::new().unwrap();
     install_three_ranks(&env);
+    if cfg!(feature = "client-wrath") {
+        env.exec(
+            r#"
+            GuildControlSetRank(2)
+            local first, second, third = GuildControlGetRankFlags()
+            assert(first == 1 and second == nil and third == 1)
+        "#,
+        )
+        .expect("Wrath returns positional stored rights, not a boolean table");
+        return;
+    }
     let flags: (bool, bool, bool) = env
         .eval(
             r#"

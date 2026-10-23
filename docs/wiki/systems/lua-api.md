@@ -3,11 +3,23 @@
 The Lua API layer bridges Lua addon code with the Rust simulation engine. It provides WoW-compatible globals, 300+ frame methods, C_* namespaces, and a timer system — all backed by `WowLuaEnv` and `SimState`.
 
 
+## Wrath tracked achievements
+
+`SimState.tracked_achievements` stores unique IDs in insertion order. Existing shared setters retain membership behavior; only the existing Wrath registration module publishes native add/remove/count/membership functions. Mutations release the state borrow before synchronous event dispatch, so original AchievementUI handlers see the updated list and refresh their private cache. The [12340 contract](../../specs/wrath-tracked-achievements.md) owns argument/event rules, evidence limits and bounded proof; persistence is excluded.
+
+## C API numeric-secret selector boundaries
+
+Classification endpoints in `src/c_api/c_spell_classification.rs` inspect authentic numeric-secret selectors only inside their modeled host lookup. The shared public spell reader and VM unwrap permissions remain unchanged; ExternalDefensive keeps VM authentication. [Classification contract](../../specs/secret-selector-classification.md) owns endpoint scope, inferred output policy and revision-scoped proof. Original-consumer wrapper injection is not evidence of natural secret-ID production at startup.
+
+Count/max endpoints in `src/c_api/c_spell_counts.rs` validate numeric-secret IDs locally before existing alias-first lookup, then retain independent quantity/restriction snapshots. Usability in `c_spell.rs` keeps its separate strict-u32 known-membership lookup. [Count/usability contract](../../specs/secret-selector-count-usability.md) owns output policies and bounded original-viewer proof; display authentication is unchanged.
+
+Aura duration getters in `aura_duration.rs` admit numeric-secret instance selectors locally while retaining public unit/optional-spell domains, existing aura-access checks and ordinary outputs; [duration contract](../../specs/secret-selector-aura-duration.md) records original PTR pandemic proof and Retail controls. Caster lookup in `c_unit_auras.rs` preserves public f64→i32 conversion and emits a secret GUID only for a numeric-secret selector, with one ordinary nil on miss; [caster contract](../../specs/secret-selector-aura-caster.md) owns the approved identity policy and original-consumer proof. Native aura-output restrictions and Retail CarryOver remain held.
+
 ## Container, message history and transform producers — 2026-10-16
 
 Producer `269ed6f17` replaces passive label scaffolds. The C API models remain first-class under `src/c_api/`: `container_inventory.rs` shares split/use transitions with legacy globals, `container_actions.rs` owns environment-local eligibility/request records, and `container_quest.rs` queries current slot item identity plus supplied item metadata and rich quest-log membership. Wrath legacy quest publication projects the same result as three positional values. [Split/use](../../specs/container-split-use.md) and [quest metadata](../../specs/container-item-quest-metadata.md) own policies, historical RED and bounded GREEN receipts; these are not native gameplay/catalog claims.
 
-Message history stores access ID, line ID and extraData separately; widget methods select/count/remove an access-ID subsequence while retaining unfiltered behavior. [Message-frame access history](../../specs/message-frame-access-history.md) owns Wrath argument shape and actual cached transfer-fixture scope. Retail excludes those five tests; source publication is not Retail runtime proof. See [[widget-system]] for storage context.
+Message history stores access ID, line ID and extraData separately. Wrath ScrollingMessageFrame count/info/removal uses those fields; unfiltered info returns the same four metadata values as filtered info. Wrath plain MessageFrame excludes the scrolling-only methods (including HasMessageByID and ResetMessageFadeByID), while Retail's existing surface and color tuple are preserved. [Message-frame access history](../../specs/message-frame-access-history.md) owns authenticated 12340 scope, the unknown-build baseline conflict, actual cached transfer-fixture coverage and proof limits. See [[widget-system]] for storage and method-index context.
 
 Animation transform attachment before template application stores independent Translation/Scale/origin configuration and one degree/radian Rotation angle. Shared motion application/restoration resolves the target and applies Translation through existing presentation offsets, alongside existing Path handling. [Animation transforms](../../specs/animation-transforms.md) owns XML, lifecycle, interpolation/restoration policy and proof limits; Scale/Rotation visual effects remain unmodeled. Existing Path/VertexColor proof is not new transform credit. See [[layout-system]] and [[xml-template-system]].
 
@@ -21,6 +33,12 @@ The [integrated checkpoint](../investigations/integrated-source-and-factory-proo
 
 [Path/ControlPoint](../../specs/path-control-point.md) belongs to the animation/XML subsystem, using existing target offsets and layout axes. The [owning Path proof ledger](../../specs/path-control-point.md#tests-asserting-this-spec) records recovered historical per-test GREEN; fresh startup/profile acceptance remains separately pending. Neither source inventory nor historical controls establish native or whole-handoff acceptance.
 
+## Wrath action callback projections
+
+The [native callback fixture](../../../tests/fixtures/wrath-action-callbacks.md) reuses the profile FrameXML TOC loader and original named regions/free functions; one shared selector keeps Wrath-only fixture inputs out of other profiles. Modern-only API assertions have explicit source-backed gates, not root-name heuristics.
+
+`ActionSpellRange` now lives separately from Retail namespace registration under `c_api/`; a shared lookup reads supplied spell/target GUID snapshots. `globals/real/wrath_legacy/action_bar.rs` exposes legacy range and possession readers without adding modern range publishers. Pet and stance producers project existing records differently only on Wrath; obsolete constant/nil compatibility functions are removed. The [owning contract](../../specs/wrath-action-callback-queries.md) owns authenticated 12340 shapes, bounded proof and unmodeled coercion/aura/geometry limits.
+
 ## Wrath selected quest legacy surface
 
 `quest_surface/wrath_quest_log.rs` adapts selected rich rows through a Wrath-only legacy registration table; shared reward-item serialization remains in `handlers.rs`. Supplied spell/point/faction fields live on `QuestLogEntry`. Wrath-only `QuestLogState.daily_quest_ids` stores fixed player daily fields independently of active rows and lifetime history; reset/population/refresh producers remain outside this read adapter. Quest green range uses compiled client level bands driven by the engine player's level; source provenance and bounded original-color-consumer proof stay in the owning contract. `QuestLogState::process_reward_factions` copies the selected row's faction pairs into `processed_reward_factions`, the separate shared prepared output read by faction getters; selection/dialog clearing does not implicitly rebuild that output. The [owning contract](../../specs/wrath-quest-abandon.md) records source-derived cache lifetime, empty values, pending dialog-producer coverage and exact proof status.
@@ -32,6 +50,12 @@ Wrath `quest_verbs.rs` separates marking from its server-response simulation and
 ### Wrath manual watch seam
 
 `QuestLogState.manual_watch_ids` is an initially empty ordered vector, separate from rich rows and Forever metadata. `quest_surface/wrath_quest_watch.rs` binds five legacy calls; each row lookup scans current rich entries by identity without visibility filtering. Mutation is bounded to 25 IDs, so a single ordered vector preserves append/removal order without a second membership index. `env_events.rs` prunes missing IDs before `QUEST_LOG_UPDATE` listeners, not during immediate abandonment; the existing unit-change/deferred-log notifier is unchanged. [Contract and proof status](../../specs/wrath-manual-watch.md) owns the input/return/event rules, original-consumer tests and explicit gaps.
+
+### Wrath dialog request/response plumbing
+
+`globals/real/wrath_quest_dialog.rs` separates pending detail offers from the active dialog's `(quest ID, Progress/Rewards)` tuple. Native dialog readers use that identity, not unrelated log selection. Offer and acceptance adapters consume pending requests; accepted choices are simulator receipts, not inventory grants. `GossipState.giver_guid` is the sole concrete giver input. Native request eligibility uses supplied player presence, dialog phase and response latch before choice handling. CloseQuest preserves dialog/latch/current snapshot and pending requests. The authenticated 12340 finish boundary is NPC-zero no-op; otherwise clear NPC/inform identities, then the quest interact target, then emit synchronous FINISHED. Original Hide → OnHide → CloseQuest reentry sees zero and emits nothing. Quest interaction identity is separate from soft-interact targeting. Accepted responses use the abandon notifier and a separate supplied-cache-hit completion path. [Owning contract](../../specs/wrath-quest-turn-in.md) owns historical A/B proof, W1b verification status, native feedback requirements, and remaining inference/model gaps. Clear-before-emit is now laptop-authenticated source evidence, not native capture.
+
+`finish_wrath_quest_dialog` owns the current-NPC guard and ordered clearing; accept/close/completion callers no longer pass pre-cleared giver tokens. Real `QuestChooseRewardError` in the Wrath dialog module replaces the temporary no-op: VM global-string lookup, last-message recording before synchronous one-string UI_ERROR_MESSAGE, and the existing first-class `c_api::c_sound` name-only request. Empty text records without emission. W1b proves all37 turn-in cases (seven new regressions included) plus41 Wrath-specific preservation cases; generic controls and final gates are pending. Unsupported localization policy, sound mapping/audio gaps and current proof remain in the [contract](../../specs/wrath-quest-turn-in.md#w1b-authenticated-facts-reconciliation--2026-10-19).
 
 ## Forever supplied quest difficulty
 
@@ -95,7 +119,7 @@ After `84dcf2723`, cast map/initializer, producer/module/registration are Retail
 
 Producer `c939971f8` covers only **EXACT301/309**, `C_Spell.GetSpellCastCount` / `GetSpellDisplayCount`; [contract, inventory and proof SSOT](../../specs/spell-count-outputs.md) owns requirements. Literal input is empty-default, spell-keyed `SimState.spell_cast_counts: HashMap<u32,u32>`. Cast reads only explicit resolved spell counts, never action-slot counts or charges. Display alone prioritizes valid charge quantity (`max_charges > 0`), then explicit counts. Reads copy a snapshot without changing maps; alias-first identity is preserved through extracted Value-based resolution. The shared pure formatter body is unchanged: default9999, replacement `"*"`, strict > threshold, equality retaining digits. Missing cast0/display empty, explicit zero `"0"`, priority, finite threshold/strict UTF8 CString domains and local u32 width are simulator inferences, not native findings.
 
-Native documentation declares cast argument1 AllowedWhenTainted and display AllowedWhenUntainted, with both outputs SecretWhenCooldownsRestricted. **Cast secret-input permission remains UNMODELED**: the existing conservative public parser rejects authentic secret argument1 even for secure callers before aliases/model, reporting the public API and unmodeled access without payload. This earns neither AllowedWhenTainted support nor NeverSecret metadata credit. Display authenticates all three original VM arguments in order before types/model; secure authenticated identifiers resolve through Value extraction, not stack-mutating declassification. Public tainted calls remain allowed; tainted authentic secrets deny before invalid/unresolved/missing inputs, with public position-only errors.
+Native documentation declares cast argument1 AllowedWhenTainted and display AllowedWhenUntainted, with both outputs SecretWhenCooldownsRestricted. Retail125/PTR cast/max numeric-secret selection now follows the [bounded selector contract](../../specs/secret-selector-count-usability.md); the strict shared public reader is unchanged and non-numeric secrets remain rejected. Display still authenticates all three original VM arguments in order before types/model, allowing secure authenticated identifiers through Value extraction without stack mutation; tainted authentic secret display arguments retain their original denial. Full native argument and selector-driven output-secrecy parity remain unproven.
 
 The existing explicit live cooldown-restriction flag under Retail125/PTR controls scalar host-secret NUM cast / STR display, including zero/empty/replacement results; unrestricted reads return ordinary scalars. Immediate roots, exact trusted-host typed payloads, bounded Lua opacity, read-only snapshots, caller trust, copies/allocation identity through GC and flag-off new-public/old-private lifetimes are proved within [independent bounded acceptance](../../specs/spell-count-outputs.md#independent-bounded-acceptance--2026-10-02), not native scalar-type or global-privacy proof. Real C_Spell entries use the sole existing registration; separate inverse gates preserve cast numeric0 before1200 and display numeric0 before125, including Forever. No new acquisition, reagent inventory, consumption, action sources or datasets; native quantity conditions, exceptions, nominal opaque type, UI/profile/global privacy and coercion/priority remain unknown. Unchanged action formatter reuse earns no neighboring action/base/Maw credit.
 
@@ -161,7 +185,13 @@ Commit `da2ec8cb8` adds only an epoch125 (`retail-12-0-5`) authentic VM-secret c
 
 [Row311 contract and saved RED SSOT](../../specs/spell-link-glyph-security.md) records genuine pre-producer **3 PASS / 5 FAIL**, compile **149.032s** and execution **1.0117s**, under `/tmp/patch-12.0.5-batch57-red-*`. Three public controls passed; five secret-boundary tests failed. Dirty-combined RED is not clean-revision proof or evidence that this commit passes. GREEN, independent acceptance and checks remain pending; no arg1, glyph-catalog or native permission credit. Current accounting remains **210 pending / 138 bounded / 14 partial; 64 capabilities**, with row311 pending. See [[patch-12-0-5-api-audit]] for broader coverage.
 
+## Numeric-secret spell presentation selectors
+
+`c_api::c_spell` opts presentation lookups into the existing host-only numeric inspector without widening the shared public reader or action/book selectors. Endpoint-specific numeric conversion stays intact; a rooted Info DTO receives a newly wrapped resolved identity, not the original potentially fractional selector. The [presentation contract](../../specs/spell-secret-presentation.md) owns the user-approved output policy, original meter/reward fixtures, description/link sub-batch limits and native-evidence gaps. Core selector GREEN precedes a distinct original-tooltip description RED. The contract retains final five-case GREEN, two-sided preservation, startup and formatting receipts. The follow-up link producer uses the same bounded numeric inspector, then wraps the entire catalog-backed link string because it embeds identity; misses remain one ordinary nil and the glyph NeverSecret guard is unchanged. Its four public-API cases reproduce Retail/PTR selector RED before implementation, then pass with complete payload checks after GC; the owning contract records profile-specific preservation and stock-startup proof. Downstream link sinks and the casting-producer hold remain separate.
+
 ## Retail 12.0.5 tooltip spell and mount identifiers
+
+The [numeric-secret extension](../../specs/tooltip-spell-mount-identifiers.md#numeric-secret-original-consumer-contract) keeps argument admission local to `c_api::c_tooltip_info_spell_mount`: authenticated host numbers feed the existing strict alias resolver; the rooted DTO receives secret identity fields after payload construction. Presentation and public-selector payloads remain unchanged. Original meter OnEnter is installed without its presentation Init, then uses actual TooltipDataHandler; native field secrecy is not inferred from argument permissions. The contract retains original-consumer RED→GREEN, two-sided preservation and clean stock startup; native output/grammar parity remains INFERRED.
 
 [Batch56 saved proof SSOT](../../specs/tooltip-spell-mount-identifiers.md#reconciled-batch56-saved-parent-green--2026-10-02) owns22 new +133 actual substring-selected controls =155 uniquePASS, startup0 `[]`, dirty provenance and inferred policies. Sole epoch125 C API handlers reuse existing payloads; public flags ignored, GetSpell alias/mount-title gaps retained. Independent acceptance and four source rows pending; no native/profile/whole-page credit.
 
@@ -256,6 +286,8 @@ Under `client-ptr`, `GetBuildInfo()` derives its reported version and build from
 ### Retail 12.0.5 aura refresh duration
 
 `c_api::aura_duration` registers both duration getters after the existing stub/aura surface at `retail-12-0-5`. Queries select existing public unblocked helpful/harmful collector records by exact unit/instance; they do not use the unfiltered `find_aura_by_instance_id`. Explicit arg3 reuses the C_Spell alias-first resolver; omission uses the matched aura spell directly. Empty environment-local metadata stays unknown, with no current-duration fallback or seeded production data. Both fields are validated before base/refresh output; refresh uses elapsed time, explicit carryover cap and finite-sum rejection. Secret guards precede conversion and unknown shortcuts without declassification/taint changes. [Duration contract](../../specs/aura-refresh-duration.md) owns inferred formula/eligibility/security policies, [saved batch38 parent proof](../../specs/aura-refresh-duration.md#reconciled-batch38-parent-proof--2026-10-01): RED **1 PASS / 17 FAIL**, GREEN **18 duration + 73 controls = 91 distinct PASS**, startup exit0 `[]`. [Independent bounded acceptance](../../specs/aura-refresh-duration.md#independent-bounded-acceptance--2026-10-01) accepted row394 only, including consumer base prerequisite and unknown metadata; two nonblocking LENGTH/COMPLEX_COND suggestions deferred (not zero issues); formula, permanence, nil and strict secret policies remain inferred, not native semantics. Existing spell queries and legacy remain unchanged; row394 bounded, totals 256/92/14 = 362. Production empty metadata returns nil until explicitly supplied; no Blizzard visual/native/all-profile claim.
+
+The later [numeric-instance selector extension](../../specs/secret-selector-aura-duration.md) admits authentic numeric-secret instances locally without widening unit/optional-spell domains or the shared resolver. It preserves existing aura-access checks and ordinary duration output; native aura output restriction and Retail CarryOver remain separate follow-ups.
 
 ### Retail 12.0.5 party ping restrictions
 
@@ -460,9 +492,42 @@ Historical `e4caa4899` adds empty-default `SimState.item_cooldowns: HashMap<u32,
 
 `ee1bc9038` projects supplied pairs unchanged through distinct ItemInfo, item-ID and bag/slot selectors; namespace enable types differ. Missing pairs are an explicit simulator policy, not native parity. Legacy equipment-slot state is unchanged. The [owning contract and bounded proof SSOT](../../specs/item-cooldowns.md#bounded-archived-green--2026-10-14) records independent archived `ffb` Retail/Mists execution, preserving genuine historical RED and later fixture/compile failures. Producer association is not current-HEAD coverage. [Current revision/gate matrix](../../specs/store-product-group-shape.md#seven-profile-saved-runtime-matrix--2026-10-14) owns corrected-fixture/profile runtime status and pending gates; native/full-parent acceptance remains unproved. Historical Store query diagnostics are not a root fix. Trace-environment and intentional visibility-error limits remain with the owning proof.
 
+## Wrath legacy currency display state
+
+`SimState.wrath_currency` stores supplied `CurrencyCategory` rows and their `CurrencyToken` children. Display indices are recomputed from expansion flags; watch enumeration scans category storage independently of expansion. The [legacy global module](../../../src/lua_api/globals/real/wrath_currency.rs) owns this model, with Wrath-only registration at the currency namespace initialization boundary. `C_CurrencyInfo` continues reading its existing independent state.
+
+The [TokenUI contract](../../specs/wrath-legacy-currency-tokenui.md) owns positional tuples, original-consumer tests and unresolved unused-category ordering. No native currency catalog is inferred. The [minimap/XML contract](../../specs/wrath-minimap-xml-labels.md) separately owns local-ping publication, template trust selection and explicit temporary coordinate/attack policies.
+
+## Wrath single-class spellbook projection
+
+`src/lua_api/globals/real/wrath_spellbook.rs` derives ordered known IDs and compact full-slot indices from the existing `SimState.known_spells` HashSet on demand. No parallel membership or persistent compact store is added. `spell_tabs.rs` selects this producer only for Wrath; other-profile function bodies remain unchanged.
+
+The [owning contract](../../specs/wrath-spellbook-tabs.md) tracks original-consumer/API proof, inferred missing-metadata policy and unmodeled skill-line/level inputs. Cursor ordering is a separate follow-up: the historical back-to-back DebugTools diagnostic does not authenticate synchronous cursor callbacks, and no cursor producer is included.
+
+## Wrath guild rank rights
+
+The legacy global now projects the existing selected rank's supplied rights positionally under `client-wrath`; the existing namespace and other profiles retain their table projection. The [contract](../../specs/wrath-guild-rank-flags.md) owns the authenticated 12340 return shape and evidence limits. F03's original native checkbox consumer reproduced the table mismatch before the correction; the contract now records native-consumer and guild-model GREEN. The contract also records paired Retail preservation and both profiles' empty stock Lua-error arrays; unrelated fixture failures remain explicit. Native unselected-rank reads and separate staged edit rights are not modeled by this bounded projection change.
+## Retail unused currency flags
+
+`src/c_api/item_spell/c_currency.rs` resolves `SetCurrencyUnused` through the existing Retail displayed-index projection and changes `CurrencyInfo.is_type_unused`. List and ID queries read the same supplied row; list `discovered` feeds original popup visibility. No second membership store, grouping, sorting or persistence layer was added. The [owning contract](../../specs/currency-unused-mutations.md#bounded-proof) records original checkbox/popup proof and current-Retail native grouping UNKNOWN; existing [displayed-index](../../specs/currency-displayed-indices.md) and [watched](../../specs/currency-watched-mutations.md) models remain separate.
+
+## Wrath legacy friends
+
+`real/wrath_friends.rs` publishes four globals only through Wrath startup registration. Tuple reads and GUID-based selection consume the existing social friend vector; `c_api/c_friend_list.rs` owns the unchanged online-first projection and the refresh handler shared with `C_FriendList.ShowFriends`. The Lua adapter captures the VM's numeric-string conversion. Selection adds only a Wrath-specific optional GUID, not a second friends list.
+
+The [owning contract](../../specs/wrath-friends-legacy.md) records static12340 provenance, original FriendsFrame RED→GREEN, Wrath5/Retail19 bounded passes, both clean stock startups, response timing and unsupported status/sorting boundaries. Retail registration is unchanged; ignore/add/remove behavior is excluded. Retail check and joint F02 integration remain assigned to the merge gate.
+
 ## Sources
 
+- [Wrath legacy friends contract](../../specs/wrath-friends-legacy.md) — native tuple/selection evidence and simulator-policy limits.
+- [Retail unused currency contract](../../specs/currency-unused-mutations.md) — flag scope, original consumers and held grouping.
+
+- [Wrath action callback queries](../../specs/wrath-action-callback-queries.md) — native projections, shared snapshot boundary and bounded proof
+
+- [Wrath spellbook views](../../specs/wrath-spellbook-tabs.md) — bounded one-tab model, native contract and proof limits
 - [Wrath supplied objectives](../../specs/wrath-quest-objectives.md) — legacy snapshot reads, bounded consumer proof and native input-model gaps
+
+- [Wrath legacy currency](../../specs/wrath-legacy-currency-tokenui.md) — supplied model and original-consumer contract
 - [Container split/use](../../specs/container-split-use.md) — supplied actions and bounded receipts
 - [Container quest metadata](../../specs/container-item-quest-metadata.md) — membership authority and bounded receipts
 - [Message-frame access history](../../specs/message-frame-access-history.md) — Wrath history/transfer boundary and receipts
@@ -525,6 +590,8 @@ Historical `e4caa4899` adds empty-default `SimState.item_cooldowns: HashMap<u32,
 - [Lua math extensions](../../specs/lua-math-extensions.md) — owning contract and profile-scoped declaration limits
 - [c_chromie_time.rs](../../../src/c_api/c_chromie_time.rs) — retail/PTR empty-state C_ChromieTime surface
 - [c_container.rs](../../../src/c_api/item_spell/c_container.rs) — state-backed bag-slot flags and backpack queries
+- [guild_control.rs](../../../src/lua_api/globals/guild_control.rs) — selected-rank table and native Wrath positional projections
+- [wrath_guild_rank_flags.rs](../../../tests/wrath_guild_rank_flags.rs) — original native checkbox consumer and exact positional-value assertions
 - [guild_info.rs](../../../src/lua_api/globals/guild_info.rs) — C_GuildInfo namespace registration and state-backed management methods
 - [profession_specs_defaults.rs](../../../src/lua_api/workarounds/temporary/profession_specs_defaults.rs) — temporary seeded profession-specialization fixture and supported skill-line boundary
 - [pet_battle_runtime_state.rs](../../../src/lua_api/workarounds/temporary/pet_battle_runtime_state.rs) — temporary seeded pet-battle breed-quality compatibility state

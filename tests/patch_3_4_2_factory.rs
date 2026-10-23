@@ -3,9 +3,7 @@
 #[path = "common/publication_sweep.rs"]
 mod publication_sweep;
 
-use publication_sweep::{
-    Entry, SweepSpec, probe_entry, run_factory_publication_sweep, run_publication_sweep,
-};
+use publication_sweep::{Entry, SweepSpec, probe_entry, run_publication_sweep, run_sweep};
 use std::collections::BTreeMap;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -40,7 +38,7 @@ fn bare_wrath_factories_probe_literal_widget_owners() {
 fn patch_3_4_2_exact_factory_publication_gaps() {
     let env = WowLuaEnv::new().expect("bare Wrath Lua environment");
     assert_eq!(wow_ui_sim::client_profile::ACTIVE_INTERFACE_VERSION, 38001);
-    run_factory_publication_sweep(&env, &SPEC);
+    run_sweep(&env, &SPEC, BTreeMap::new);
 }
 
 #[test]
@@ -120,6 +118,6 @@ fn foreign_successors_do_not_remove_wrath_publication() {
             r#"{"client_line":"wrath-classic","entries":[]}"#,
         ],
     };
-    run_factory_publication_sweep(&env, &spec);
+    run_sweep(&env, &spec, BTreeMap::new);
     assert_eq!(env.eval::<i32>("return FactoryLineControl()").unwrap(), 342);
 }

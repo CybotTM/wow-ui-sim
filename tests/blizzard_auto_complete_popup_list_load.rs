@@ -13,6 +13,7 @@ use wow_ui_sim::toc::TocFile;
 const ROOT: &str = "Blizzard_AutoCompletePopupList";
 const ROOT_TOC_FILE: &str = "Blizzard_AutoCompletePopupList.toc";
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_popup_list_lod_loads_without_ingestion_errors() {
     common::with_perf_lock(|| {
@@ -42,6 +43,7 @@ fn blizzard_auto_complete_popup_list_lod_loads_without_ingestion_errors() {
             });
         });
     });
+}
 }
 
 #[test]

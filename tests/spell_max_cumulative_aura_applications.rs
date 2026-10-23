@@ -41,9 +41,7 @@ fn seeded_env() -> WowLuaEnv {
             .spell_max_cumulative_aura_applications
             .extend([(101, 7), (202, 13)]);
         state.spell_id_aliases.clear();
-        state
-            .spell_id_aliases
-            .insert("maximum fixture".into(), 101);
+        state.spell_id_aliases.insert("maximum fixture".into(), 101);
     }
     env
 }
@@ -110,9 +108,7 @@ fn misses_return_one_zero_and_map_changes_are_live() {
     .expect("inferred zero for an undeclared spell");
     {
         let mut state = env.state().borrow_mut();
-        state
-            .spell_max_cumulative_aura_applications
-            .insert(101, 9);
+        state.spell_max_cumulative_aura_applications.insert(101, 9);
         state.spell_max_cumulative_aura_applications.remove(&202);
     }
     env.exec("AssertMaxApplications(101, 9, false); AssertMaxApplications(202, 0, false)")
@@ -207,7 +203,7 @@ fn tainted_callers_keep_their_taint_and_cannot_open_restricted_results() {
 }
 
 #[test]
-fn secret_identifiers_are_rejected_as_unmodeled_policy() {
+fn numeric_secret_identifiers_resolve_without_declassification_or_taint_changes() {
     let env = seeded_env();
     {
         let loader = env.loader_env();
@@ -222,16 +218,23 @@ fn secret_identifiers_are_rejected_as_unmodeled_policy() {
     }
     env.exec(
         r#"
-        RejectMaxApplications(SecretMaxSpell)
-        local function probe()
-            RejectMaxApplications(SecretMaxSpell)
-            assert(debug.getstacktaint() == 'MaxApplicationsSecretProbe')
+        local function probe(expectedTaint)
+            local before = debug.getstacktaint()
+            assert(before == expectedTaint)
+            AssertMaxApplications(SecretMaxSpell, 7, false)
+            assert(issecretvalue(SecretMaxSpell))
+            if before then
+                assert(not canaccessvalue(SecretMaxSpell))
+                assert(not pcall(function() return SecretMaxSpell + 0 end))
+            end
+            assert(debug.getstacktaint() == before)
         end
+        probe(nil)
         debug.setobjecttaint(probe, 'MaxApplicationsSecretProbe')
-        probe()
+        probe('MaxApplicationsSecretProbe')
         assert(issecretvalue(SecretMaxSpell) and secretunwrap(SecretMaxSpell) == 101)
         AssertMaxApplications(101, 7, false)
         "#,
     )
-    .expect("conservative rejection without declassification; public recovery");
+    .expect("numeric-secret selection preserves opacity, output policy and caller taint");
 }

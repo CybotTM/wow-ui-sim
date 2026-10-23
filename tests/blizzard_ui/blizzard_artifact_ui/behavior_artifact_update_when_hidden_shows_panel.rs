@@ -6,6 +6,8 @@ use wow_ui_sim::lua_api::state::ArtifactInfo;
 const ROOT: &str = "Blizzard_ArtifactUI";
 const ARTIFACT_ICON: &str = "Interface/Icons/inv_sword_2h_artifactashbringer_d_01";
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_update_when_hidden_auto_shows_outside_relic_forge() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -23,7 +25,9 @@ fn artifact_update_when_hidden_auto_shows_outside_relic_forge() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_update_when_hidden_does_not_show_inside_relic_forge() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -40,6 +44,7 @@ fn artifact_update_when_hidden_does_not_show_inside_relic_forge() {
              mismatches: {mismatches:?}"
         );
     });
+}
 }
 
 fn seed_hidden_artifact_panel(env: &wow_ui_sim::lua_api::WowLuaEnv, relic_forge_at_forge: bool) {

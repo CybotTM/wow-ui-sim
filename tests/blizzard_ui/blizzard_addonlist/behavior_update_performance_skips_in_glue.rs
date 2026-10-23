@@ -4,6 +4,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
 const ROOT: &str = "Blizzard_AddOnList";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn update_performance_hides_panel_in_glue_or_when_profiler_disabled() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -42,4 +44,5 @@ fn update_performance_hides_panel_in_glue_or_when_profiler_disabled() {
             "`UpdatePerformance` must hide the performance panel when the profiler is disabled"
         );
     });
+}
 }

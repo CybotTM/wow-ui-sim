@@ -8,7 +8,8 @@ use wow_ui_sim::startup::settle_headless_startup;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn ptr_feedback_glue_dir() -> PathBuf {
@@ -29,6 +30,8 @@ const PTR_FEEDBACK_GLUE_TOC_FILES: &[&str] = &[
 
 const SAVED_VARIABLES: &[&str] = &["Blizzard_PTRIssueReporter_Saved"];
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_glue_find_toc_resolves_bare_variant() {
     let resolved =
@@ -46,7 +49,9 @@ fn blizzard_ptr_feedback_glue_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_glue_toc_marks_addon_as_ptr_and_beta_only() {
     let toc =
@@ -59,7 +64,9 @@ fn blizzard_ptr_feedback_glue_toc_marks_addon_as_ptr_and_beta_only() {
          restriction so the bug-report tooling never reaches live realms"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_glue_toc_pins_glue_only_screen_gate() {
     let toc =
@@ -93,7 +100,9 @@ fn blizzard_ptr_feedback_glue_toc_pins_glue_only_screen_gate() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_glue_toc_declares_eager_no_lod_no_deps() {
     let toc =
@@ -135,7 +144,9 @@ fn blizzard_ptr_feedback_glue_toc_declares_eager_no_lod_no_deps() {
          own root in the eager-load graph (gated only by screen + PTR)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_glue_shares_saved_variable_with_game_variant() {
     let toc =
@@ -159,7 +170,9 @@ fn blizzard_ptr_feedback_glue_shares_saved_variable_with_game_variant() {
          scope to begin with)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_glue_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(ptr_feedback_glue_toc())
@@ -221,7 +234,9 @@ fn blizzard_ptr_feedback_glue_toc_declares_metadata_in_raw_bytes() {
          game type"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_glue_lists_five_files_with_cross_addon_parent_paths() {
     let toc =
@@ -252,6 +267,7 @@ fn blizzard_ptr_feedback_glue_lists_five_files_with_cross_addon_parent_paths() {
          side — keybindings are not used at the character-select screen"
     );
 }
+}
 
 #[test]
 fn blizzard_ptr_feedback_glue_does_not_appear_in_eager_discovery() {
@@ -280,6 +296,7 @@ fn blizzard_ptr_feedback_glue_does_not_appear_in_eager_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_glue_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -295,7 +312,9 @@ fn blizzard_ptr_feedback_glue_appears_in_full_addon_inventory() {
          for coverage"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ptr_feedback_glue_loads_explicitly_on_glue_screen() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -353,4 +372,5 @@ fn blizzard_ptr_feedback_glue_loads_explicitly_on_glue_screen() {
          frame at file scope, so loading just the Glue TOC is sufficient to \
          publish the entire PTR_IssueReporter namespace on a fresh env"
     );
+}
 }

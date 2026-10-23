@@ -54,17 +54,56 @@ const XML_SITE: &str = "Mainline/Blizzard_AchievementUI.xml:1505";
 /// Filter controls moved below `HeaderDetails.Filters` and are covered by a
 /// separate nested-path test.
 const PLAN_NAMED_CHILDREN: &[(&str, &str, &str)] = &[
-    ("Header", "Mainline/Blizzard_AchievementUI.xml:1505", "parentKey"),
-    ("HeaderDetails", "Mainline/Blizzard_AchievementUI.xml:1675", "parentKey"),
-    ("Categories", "Mainline/Blizzard_AchievementUI.xml:1578", "parentKey"),
-    ("Achievements", "Mainline/Blizzard_AchievementUI.xml:1518", "name-prefix"),
-    ("Stats", "Mainline/Blizzard_AchievementUI.xml:1572", "name-prefix"),
-    ("Summary", "Mainline/Blizzard_AchievementUI.xml:1625", "name-prefix"),
-    ("Comparison", "Mainline/Blizzard_AchievementUI.xml:2080", "name-prefix"),
+    (
+        "Header",
+        "Mainline/Blizzard_AchievementUI.xml:1505",
+        "parentKey",
+    ),
+    (
+        "HeaderDetails",
+        "Mainline/Blizzard_AchievementUI.xml:1675",
+        "parentKey",
+    ),
+    (
+        "Categories",
+        "Mainline/Blizzard_AchievementUI.xml:1578",
+        "parentKey",
+    ),
+    (
+        "Achievements",
+        "Mainline/Blizzard_AchievementUI.xml:1518",
+        "name-prefix",
+    ),
+    (
+        "Stats",
+        "Mainline/Blizzard_AchievementUI.xml:1572",
+        "name-prefix",
+    ),
+    (
+        "Summary",
+        "Mainline/Blizzard_AchievementUI.xml:1625",
+        "name-prefix",
+    ),
+    (
+        "Comparison",
+        "Mainline/Blizzard_AchievementUI.xml:2080",
+        "name-prefix",
+    ),
 ];
 
 #[test]
 fn achievement_frame_publishes_expected_panel_identity() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(AchievementFrame:GetObjectType() == "Frame")
+        assert(AchievementFrame:GetFrameStrata() == "MEDIUM")
+        assert(AchievementFrame:GetParent() == UIParent)
+        assert(not AchievementFrame:IsShown())
+        assert(AchievementFrame:GetWidth() == 768 and AchievementFrame:GetHeight() == 500)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{FRAME_NAME:?}])"))
@@ -136,6 +175,18 @@ fn achievement_frame_publishes_expected_panel_identity() {
 
 #[test]
 fn achievement_frame_plan_named_children_are_reachable_as_parent_properties() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        for _, name in ipairs({"AchievementFrameHeader", "AchievementFrameCategories", "AchievementFrameAchievements", "AchievementFrameStats", "AchievementFrameSummary", "AchievementFrameComparison"}) do
+            local child = assert(_G[name], name)
+            assert(child:GetParent() == AchievementFrame, name)
+        end
+        assert(AchievementFrameBackground:GetParent() == AchievementFrame)
+        assert(AchievementFrameHeaderPoints:GetObjectType() == "FontString")
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         for (key, xml_site, routing_kind) in PLAN_NAMED_CHILDREN {
             let value_type: String = env
@@ -178,6 +229,17 @@ fn achievement_frame_plan_named_children_are_reachable_as_parent_properties() {
 
 #[test]
 fn achievement_frame_filter_controls_use_current_nested_paths() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(AchievementFrameFilterDropDown:GetParent() == AchievementFrame)
+        assert(AchievementFrameHeaderRightDDLInset:GetObjectType() == "Texture")
+        assert(AchievementFrameFilterDropDown:GetWidth() == 110)
+        assert(AchievementFrameFilterDropDown:GetHeight() == 32)
+        assert(AchievementFrameFilterDropDown:GetScript("OnLoad"))
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let paths: (String, String, String) = env
             .eval(
@@ -291,6 +353,20 @@ const PLAN_NAMED_COMPARISON_PATHS: &[(&str, &str, &str)] = &[
 /// nil-index error inside the loop.
 #[test]
 fn achievement_frame_comparison_subtree_publishes_plan_named_paths() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        for _, name in ipairs({"AchievementFrameComparisonHeader", "AchievementFrameComparisonSummaryPlayer", "AchievementFrameComparisonSummaryFriend", "AchievementFrameComparisonContainer", "AchievementFrameComparisonStatsContainer"}) do
+            assert(_G[name], name)
+        end
+        assert(AchievementFrameComparisonHeaderPortrait:GetObjectType() == "Texture")
+        assert(AchievementFrameComparisonHeaderPoints:GetObjectType() == "FontString")
+        local row = assert(AchievementFrameComparisonContainer.buttons[1])
+        assert(row.player and row.friend and row.friend.status)
+        assert(row.player:GetParent() == row and row.friend:GetParent() == row)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let comparison_type: String = env
             .eval(&format!("return type(_G[{COMPARISON_FRAME_NAME:?}])"))
@@ -340,6 +416,7 @@ fn achievement_frame_comparison_subtree_publishes_plan_named_paths() {
 const SEARCH_PROGRESS_BAR_PATH: &str =
     "AchievementFrame.HeaderDetails.Filters.SearchBox.SearchProgressBar";
 
+post_wrath_ui_fixture! {
 #[test]
 fn achievement_frame_search_progress_bar_uses_nested_search_box_path() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -362,4 +439,5 @@ fn achievement_frame_search_progress_bar_uses_nested_search_box_path() {
         assert_eq!(observations.3, "function", "{SEARCH_PROGRESS_BAR_HANDLER} must be global.");
         assert_eq!(observations.4, "nil", "OnUpdate is installed only while search runs.");
     });
+}
 }

@@ -20,7 +20,38 @@
 
 - [x] Restore the file-backed EditMode cache using the initial layout name and config, without re-importing ServerSnapshot. The original EditMode consumer must select the same active layout after ReloadUI. Native reread timing/ordering is INFERRED and unasserted.
 
-Exact native event ordering remains unverified pending native evidence; tests must not invent teardown events. Existing simulator startup order is documented in [event system](../event-system.md#startup-event-sequence). Reload world-entry flags must distinguish reload from initial login.
+Wrath build 12340 chronology is authenticated by clean-room laptop reconstruction `0e4e9fe0`, independently checked at `228` (relayed 2026-10-19); this is static source evidence, not native execution. Retail engine chronology remains UNKNOWN. Existing simulator policy is documented in [event system](../event-system.md#startup-event-sequence); it is not proof of native Retail order.
+
+### Wrath 12340 requirements
+
+Verified 2026-10-19: among all seven active profile caches, only Wrath's shipped Lua calls bare `DisableAddOn` (`FrameXML/StaticPopup.lua:466`); Mists, Era, Anniversary, Forever, Retail and PTR call `C_AddOns.DisableAddOn`. Existing `register_legacy_addon_fns` is shared by every non-Retail/non-PTR profile. The added legacy registration is therefore Wrath-only and uses the exact `c_addons_disable_addon` backing function, not an alias table or workaround.
+
+| Slice | Required boundary | Current proof |
+| --- | --- | --- |
+| A prerequisite | Original StaticPopup acceptance disables its selected addon, then requests reload | Exact fixture RED `1a20ccf65`; producer `2711a473e` GREEN through original popup and C_AddOns enable-state query |
+| A | Deferred request waits outside cinematic playback; zero results, coalescing, no explicit combat rejection | Original-popup cinematic RED at `2711a473e`; GREEN 2/2 at `121e4fe47` |
+| B | Temporary protected-action allowance and argless REGEN_ENABLED precede conditional LEAVING, then LOGOUT; handlers finish before addon SV serialization | Exact fixture `fa73666b1`: three feature-absence REDs, noncombat control passes; producer `439b8e806`, GREEN 4/4 compiled `51bd62586` |
+| C | Per-addon code/bindings, account SV, character SV, then ADDON_LOADED(name), one argument | Wrath behavioral RED `06d7cbcee`, Retail payload RED `0a2e2fb3d`, and exact `f1f445ce5` scalar-clobber RED. Producer `437bca644`: Wrath 4/4 and Retail payload 1/1 GREEN at `35851e23f`; guarded-default nested/large/WTF control passes both before (`840385e82`, f1 production) and after the producer |
+| D | Both account chunks ready: VARIABLES_LOADED inline before LOGIN/argless PEW; pending chunks may defer it past entry; no synthetic WoWUISim addon event | Exact `f1f445ce5` feature REDs; producer `24ba76443`, GREEN 4/4 at `159f9f36f`. Original ticked Stopwatch OnShow/OnHide outputs pass before (sealed `35851e23f` production with `159f9f36f` fixtures) and after D. GameMenu is blocked by early-bound missing-global fast handlers and the separate cursor gap; spellbook remains an uncounted diagnostic |
+| E | Restore eligible named user-placed movable/resizable frames on new objects, excluding DontSavePosition; cancel mirror timers on LeaveWorld, retain totems/player context | Exact `f1f445ce5`: six feature REDs, disabled-persistence control PASS. Producer `f0937f6ac` plus readability `10023c3d9`: GREEN 8/8,20.84s, including inherited-scale roundtrip; disabled-persistence control passes both sides. Added scale fixture also fails missing-file on sealed pre-E `159f9f36f` production; numeric native parity is not asserted |
+
+Managed Wrath loading executes addon code before each declared saved scope, once per file rather than once per variable. Account precedes character; persisted scalars and nonempty tables overwrite code defaults. Initial WTF import retains its size limit and priority; trusted reload reads simulator storage without reimporting WTF or applying that external limit. Other profiles retain their existing SV policy. Real-addon Retail startup and LoD notifications append a boolean derived from parsed named XML bindings, including conventional `Bindings.xml`; that value derivation is INFERRED, not native evidence.
+
+Scope approval limits C to managed startup/direct-load SV ordering. C_AddOns runtime LoD persistence remains UNMODELED: `src/c_api/c_addons_runtime.rs:131,135` calls `load_addon_from_toc`, which passes no manager at `src/loader/mod.rs:492`; a new ownership seam is a separate follow-up. Slice E uses the independently verified 12340 placed-frame and file-format facts relayed 2026-10-19 from reconstruction `0e4e9fe0a4a9fa08027c5eed4b2c5e873739cfd3`. Original anchors and relative targets are NOT serialized. Save selects one corresponding frame/root point pair by minimum squared distance, with strict-first ties in TOPLEFT, TOP, TOPRIGHT, LEFT, CENTER, RIGHT, BOTTOMLEFT, BOTTOM, BOTTOMRIGHT order. Eligibility requires a named, user-placed, movable OR resizable frame, not DontSavePosition, with a queryable rect; visibility and relative-target name do not exclude it.
+
+Load resolves the new frame by name. CURRENT movable frames replace points with the stored point against the SAME root point; CURRENT resizable frames receive stored size. Each applicable operation marks user-placed. Nonnegative levels are assigned subject to the native upward-delta cap of 128, followed by layout resolution. Load does not recheck DontSavePosition. Missing frames are skipped.
+
+Native storage is character-local `layout-local.txt`, not Lua SV. The simulator uses the persistence manager's `storage_dir/<realm>/<character>/layout-local.txt`, creating directories normally only when a manager is present; disabled persistence writes nothing. Tests use temporary roots only. No test or producer may create/modify the real `~/.local/share/wow-sim` tree.
+
+The exact writer grammar is `Version: 1\n`, then per frame `Frame`, `FrameLevel`, `Anchor`, `X`, `Y`, `W`, `H` lines, each `Key: value\n`, one space, signed decimal integers and uppercase point names; no separators and final LF. Ordinary writer-generated records are the scope, not oversized-name/truncation quirks. Reader keys are case-insensitive; CR/LF/CRLF delimit lines. Unknown keys and Version values are ignored. New Frame/EOF applies records; per-frame defaults are TOPLEFT, X/Y/W/H=0, level=-1. Invalid anchors retain the current point; signed numeric prefixes stop at the first non-digit. H deliberately resets with other fields instead of reproducing an unverified reconstruction carry-over quirk.
+
+Documented simulator deviation: store its own unscaled layout units and round to nearest/ties-even. Divide displacement and resolved width/height by the frame's effective scale, including inherited parent scale; treat both axes identically. Scale itself is never saved or restored. Native uses width conversion for BOTH axes with lrintf; the DDCToNDCWidth/aspect factor A (F=1024*A) is unauthenticated and must not be guessed. Native rounding-mode parity is unmeasured. Files are round-trip equivalent in simulator units, with NO native numeric or byte parity for X/Y/W/H.
+
+Wrath startup registers a pending account-variables callback. Ready chunks dispatch VARIABLES_LOADED inline; otherwise `set_account_cvar_chunk_ready` dispatches once when both chunks are ready, including after LOGIN/PEW. Reload retires the pending callback, not account readiness. This supplied completion seam does not model account networking. Wrath omits synthetic ADDON_LOADED("WoWUISim") and PEW has no arguments; other profiles retain their startup policy.
+
+The request's unnamed taint gate/default/producer and feedback contract remain evidence-blocked. Do not invent them. SPELLS_CHANGED reload occurrence/order is UNKNOWN. General engine timer policy and full native shutdown persistence are not implemented by this bounded goal. Combat reentry notification is combat-bit conditional; its finer position among startup events is not asserted. The simulator ends the Wrath permission window in its world-entry helper after PEW; this placement is INFERRED simulator policy, not a new authenticated partial order. Combat state is never cleared to simulate this window. `InCombatLockdown` and the existing protected-frame state-change probe share the same permission predicate.
+
+Pinned Retail API docs at `b9be9379719047977fca4dba1bb1d9988e8840b3` declare ADDON_LOADED(name STRING, containsBindings BOOL) and PEW(initialLogin BOOL, reloadingUi BOOL). Reload values and containsBindings value semantics beyond type are INFERRED. These declarations do not authenticate Retail chronology or other-profile payloads. The payload slice covers only real-addon startup and C_AddOns LoD emissions. Synthetic Retail ADDON_LOADED("WoWUISim") is deliberately unchanged and remains a separate non-native simulator-policy gap.
 
 ## How it works
 
@@ -52,9 +83,25 @@ Exact native event ordering remains unverified pending native evidence; tests mu
 - `src/bin/wow_sim/main.rs`, `src/bin/wow_sim/gui_commands.rs` — dump/screenshot reload observation boundaries.
 - `src/bin/wow_sim/startup.rs` — real `--no-addons` startup with declared Blizzard SavedVariables rebuilt through App.
 
+## Final implementer gate — 2026-10-19
+
+Production Rust is `10023c3d9`; final normal-code receipts compile `ce2a122ba` (docs-only delta). Test-only `3446189b6` isolates the Retail Settings payload fixture in a child process: real startup installs a process-global tracing subscriber once. The combined six-case batch reproduced a second-initialization panic before reload, then passed unchanged consumer assertions after isolation. Production logging was not altered. This module is gated by `test` and `profile-retail`, so the other proof scopes remain valid.
+
+| Gate | Executed result |
+| --- | --- |
+| Wrath 12340 lifecycle | 23/23, no exclusions, full sound/gui/casc profile; C/D/E controls pass on both sides of their producers |
+| Wrath shared owners/startup | Library 21/21; binary 3/5, with two unchanged, out-of-profile Console/EditMode fixtures failing before ReloadUI and explicitly classified non-blocking by the integrator |
+| Retail preservation and payload | Library 21/21; binary 6/6 at `3446189b6`, including original Settings and non-default EditMode consumers |
+| Compilation and format | Wrath/Retail GUI and headless checks: 4/4, zero warnings. Full format check passes at `3446189b6` |
+| Stock startup | Wrath and Retail `--no-addons --no-saved-vars lua-errors` each emit exactly `[]` |
+
+Receipts: `final-wrath-{check,headless-check,lib,runtime-abc2,runtime-de,bin-tests,startup}-receipt.json`, `final-retail-{check,headless-check,lib-reload,lib-startup,bin-tests2,startup}-receipt.json`, `final-fmt2-receipt.json`. Original persisted CVar hash/stat and directory listing remain unchanged; each runtime uses a copied current CVar file under child-only XDG storage. All builds/runs used capacity admission, the retained shared slot, 9-GiB single-job builds and 4-GiB/90-second runtimes.
+
+The Wrath test build has one pre-existing `simple_html_tests.rs:2` unused import, byte-identical to the lane base and fixed separately by `65afa9064`; normal checks have none. No warning suppression or ignored tests were added. Full suites and native execution were not run. Independent integrated verification remains the next owner gate.
+
 ## Known gaps (current cycle)
 
-- [ ] Native teardown ordering remains unconfirmed; no native-order or target/focus-preservation assertion is made.
+- [ ] Independent integrated verification of these bounded Wrath/retail gates remains pending. Retail/other-profile native teardown ordering and target/focus preservation remain unconfirmed.
 - [ ] Keyboard/mouse model-state preservation is INFERRED and unasserted pending native lifecycle evidence. Keep `mouse_position`, `mouse_buttons` and `pressed_keys`; discard frame-ID input caches, not these model values.
 - [ ] Full Ellesmere acceptance and standalone `wow-cli` executable reruns remain separate from the bounded Unix-socket client proof.
 

@@ -62,6 +62,8 @@ expect(shortWidth ~= 226, "short text width should not be forced to the maximum 
 return table.concat(failures, "\n")
 "#;
 
+// Wrath has no ArrowCallout vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn callout_text_width_clamps_to_maximum_only_for_long_text() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -75,6 +77,7 @@ fn callout_text_width_clamps_to_maximum_only_for_long_text() {
             "ArrowCalloutFrame text-width clamp behavior mismatches:\n{failures}"
         );
     });
+}
 }
 
 fn load_arrow_callout_frame(env: &wow_ui_sim::lua_api::WowLuaEnv) {

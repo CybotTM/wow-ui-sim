@@ -7,7 +7,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn world_map_dir() -> PathBuf {
@@ -103,6 +104,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_mainline_variant() {
     let resolved = find_toc_file(&world_map_dir()).expect("Blizzard_WorldMap TOC should resolve");
@@ -115,7 +118,9 @@ fn find_toc_file_resolves_mainline_variant() {
          one"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_three_required_deps_via_singular_directive() {
     let toc = TocFile::from_file(&world_map_toc()).expect("Blizzard_WorldMap TOC should parse");
@@ -141,7 +146,9 @@ fn toc_declares_three_required_deps_via_singular_directive() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.saved_variables().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_omits_allow_load_directives() {
     let toc = TocFile::from_file(&world_map_toc()).expect("Blizzard_WorldMap TOC should parse");
@@ -170,7 +177,9 @@ fn toc_omits_allow_load_directives() {
          retail flavor"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_body_excludes_plunderstorm_files_on_mainline_build() {
     let toc = TocFile::from_file(&world_map_toc()).expect("Blizzard_WorldMap TOC should parse");
@@ -207,7 +216,9 @@ fn toc_body_excludes_plunderstorm_files_on_mainline_build() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_directives_and_per_file_gates() {
     let raw = std::fs::read_to_string(world_map_toc()).expect("Blizzard_WorldMap TOC should read");
@@ -255,9 +266,26 @@ fn toc_raw_bytes_pin_directives_and_per_file_gates() {
         );
     }
 }
+}
 
 #[test]
 fn dep_directories_exist_on_disk() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        for file in ["UIPanelTemplates.xml", "WorldMapFrame.xml"] {
+            assert!(
+                toc.files
+                    .iter()
+                    .any(|path| path == std::path::Path::new(file)),
+                "native dependency absent from committed FrameXML order: {file}"
+            );
+            assert!(
+                toc.addon_dir.join(file).is_file(),
+                "native dependency missing on disk: {file}"
+            );
+        }
+        return;
+    }
     for dep in REQUIRED_DEPS {
         let dir = blizzard_ui_dir().join(dep);
         assert!(
@@ -273,6 +301,7 @@ fn dep_directories_exist_on_disk() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -282,6 +311,7 @@ fn appears_in_game_eager_discovery() {
         "Blizzard_WorldMap must appear in Game eager discovery — eager (no LoadOnDemand), \
          not game-type-restricted at the top level, AllowLoad defaults to Game"
     );
+}
 }
 
 #[test]

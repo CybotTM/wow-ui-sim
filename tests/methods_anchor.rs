@@ -346,6 +346,9 @@ fn test_set_all_points_explicit_parent_returns_parent() {
     );
 }
 
+// Wrath root geometry is asserted in classic_region_set_all_points; native
+// nil-versus-root GetPoint representation is not supplied for that profile.
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn test_set_all_points_explicit_nil_returns_nil() {
     let env = env();

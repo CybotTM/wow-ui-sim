@@ -51,6 +51,7 @@ expect(not AutoCompleteBox:IsShown(), "AutoCompleteBox must still be hidden afte
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_button_click_custom_function_takes_over() {
     common::with_perf_lock(|| {
@@ -72,4 +73,5 @@ fn blizzard_auto_complete_button_click_custom_function_takes_over() {
             });
         });
     });
+}
 }

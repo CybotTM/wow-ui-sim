@@ -190,8 +190,8 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-0")]
     pub limited_input_allowed: [bool; 4],
     /// INFERRED empty host range inputs and tier-completion snapshots.
-    #[cfg(feature = "retail-12-0-0")]
-    pub action_spell_ranges: HashMap<u32, crate::c_api::c_action_bar_queries::ActionSpellRange>,
+    #[cfg(any(feature = "retail-12-0-0", feature = "client-wrath"))]
+    pub action_spell_ranges: HashMap<u32, crate::c_api::action_spell_range::ActionSpellRange>,
     #[cfg(feature = "retail-12-0-0")]
     pub weekly_reward_progress:
         HashMap<i32, Vec<crate::c_api::c_weekly_rewards::ActivityTierProgress>>,
@@ -425,6 +425,9 @@ pub struct SimState {
     pub weapon_enchants: [Vec<crate::c_api::weapon_enchants::WeaponEnchant>; 3],
     pub sound_manager: Option<SoundManager>,
     pub last_sound_kit_requested: Option<u32>,
+    /// Last formatted Wrath UI error requested by the modeled quest feedback path.
+    #[cfg(feature = "client-wrath")]
+    pub last_ui_error_message: Option<String>,
     /// Last legacy string bytes, including unknown/ambiguous names; no playback implied.
     #[cfg(feature = "client-wrath")]
     pub last_sound_name_requested: Option<Vec<u8>>,
@@ -595,7 +598,8 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-7")]
     pub quest_short_expiration_warnings: HashSet<u32>,
     pub abandon_quest_id: Option<u32>,
-    pub tracked_achievements: HashSet<i32>,
+    /// Unique tracked IDs in insertion order, shared by legacy tracking globals.
+    pub tracked_achievements: Vec<i32>,
     /// Supplied legacy trainer visibility: available, unavailable, used.
     #[cfg(feature = "client-wrath")]
     pub wrath_trainer_filters: [bool; 3],
@@ -637,6 +641,8 @@ pub struct SimState {
     pub pet_actions: Vec<PetActionSlot>,
     pub glyph: GlyphState,
     pub currency_info: HashMap<i32, CurrencyInfo>,
+    /// Explicit Wrath-only legacy categories; modern currency queries do not read this.
+    pub wrath_currency: super::super::globals::real::wrath_currency::CurrencyListState,
     #[cfg(feature = "client-retail")]
     pub(crate) currency_list: crate::c_api::currency_list::CurrencyListState,
     /// Explicit (War Mode applies, limit once per tooltip) flags; no inferred catalog.
@@ -685,6 +691,9 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-0")]
     pub bnet_custom_message: String,
     pub social_friends: Vec<SocialFriend>,
+    /// Wrath selection retains identity when the display projection changes.
+    #[cfg(feature = "client-wrath")]
+    pub selected_friend_guid: Option<String>,
     pub auction_browse_results: Vec<AuctionBrowseResult>,
     pub auction_replicate_items: Vec<AuctionReplicateItem>,
     pub auction_owned: Vec<OwnedAuction>,
@@ -799,6 +808,15 @@ pub struct SimState {
     pub debug_anchors: bool,
     pub simulator_exit_requested: bool,
     pub ui_reload_requested: bool,
+    /// Explicit host-supplied cinematic playback state; no playback engine implied.
+    pub cinematic_active: bool,
+    /// World entry is distinct from IsLoggedIn; supplied/transitioned by the owner.
+    pub in_world: bool,
+    /// Wrath reload's temporary protected-action phase, not the player's combat bit.
+    pub reload_allows_protected_actions: bool,
+    /// Supplied readiness of the two account CVar chunks; not a network client.
+    pub account_cvar_chunks_ready: [bool; 2],
+    pub(crate) account_cvar_callback_pending: bool,
     /// Simulator lifecycle marker, not a native event-order assertion.
     pub ui_reloaded: bool,
 }

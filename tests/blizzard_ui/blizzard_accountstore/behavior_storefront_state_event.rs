@@ -116,6 +116,7 @@ const ACTUAL_ACCOUNT_STORE_MIXIN_METHODS: &[(&str, &str)] = &[
     ("SetFullscreenMode", "Blizzard_AccountStore.lua:50-64"),
 ];
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_mixin_on_event_method_does_not_exist() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -153,7 +154,9 @@ fn account_store_mixin_on_event_method_does_not_exist() {
         }
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_frame_does_not_register_storefront_state_event() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -182,10 +185,12 @@ fn account_store_frame_does_not_register_storefront_state_event() {
         );
     });
 }
+}
 
 const ACTUAL_ACCOUNT_STORE_STATE_VALUES: &[(&str, i64)] =
     &[("Available", 0), ("Unknown", 1), ("Unavailable", 2)];
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_state_available_constant_is_zero() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -212,7 +217,9 @@ fn account_store_state_available_constant_is_zero() {
         }
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn c_account_store_get_storefront_state_is_callable_and_returns_numeric() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -252,7 +259,9 @@ fn c_account_store_get_storefront_state_is_callable_and_returns_numeric() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn firing_storefront_state_updated_does_not_invoke_a_visibility_refresh_on_account_store_frame() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -308,6 +317,7 @@ fn firing_storefront_state_updated_does_not_invoke_a_visibility_refresh_on_accou
 
         teardown_show_hide_trackers_on_account_store_frame(env);
     });
+}
 }
 
 fn seed_show_hide_trackers_on_account_store_frame(env: &WowLuaEnv) {

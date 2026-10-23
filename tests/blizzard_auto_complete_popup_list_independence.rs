@@ -76,6 +76,7 @@ expect(second.highlightedIndex == 1,
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_popup_list_instances_keep_independent_results() {
     common::with_perf_lock(|| {
@@ -97,4 +98,5 @@ fn blizzard_auto_complete_popup_list_instances_keep_independent_results() {
             });
         });
     });
+}
 }

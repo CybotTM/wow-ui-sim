@@ -44,6 +44,8 @@ pub(crate) mod methods;
 pub(crate) mod on_update;
 #[cfg(feature = "retail-12-0-7")]
 pub mod performance_inputs;
+#[cfg(feature = "client-wrath")]
+mod placed_frames;
 pub(crate) mod rect_geometry;
 #[cfg(test)]
 mod reload_factory_tests;
@@ -74,6 +76,7 @@ pub mod tooltip;
 pub(crate) mod tracked_recipes;
 pub mod workarounds;
 pub(crate) mod workarounds_editmode;
+pub(crate) mod wrath_arguments;
 
 // Re-export public types
 #[cfg(any(feature = "retail-12-1-5", feature = "client-wowforever", test))]

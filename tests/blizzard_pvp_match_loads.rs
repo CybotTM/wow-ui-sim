@@ -90,6 +90,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_match_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&pvp_match_dir()).expect("Blizzard_PVPMatch TOC resolves");
@@ -106,7 +108,9 @@ fn blizzard_pvp_match_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_match_toc_declares_explicit_load_on_demand_zero() {
     let toc = TocFile::from_file(&pvp_match_toc()).expect("Blizzard_PVPMatch TOC parses");
@@ -130,7 +134,9 @@ fn blizzard_pvp_match_toc_declares_explicit_load_on_demand_zero() {
         "TOC has no `## OnlyBetaAndPTR:` directive — ships on live realms"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_match_toc_pins_standard_game_type_as_unrestricted() {
     let toc = TocFile::from_file(&pvp_match_toc()).expect("Blizzard_PVPMatch TOC parses");
@@ -162,7 +168,9 @@ fn blizzard_pvp_match_toc_pins_standard_game_type_as_unrestricted() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_match_toc_uses_singular_required_dep_form() {
     let toc = TocFile::from_file(&pvp_match_toc()).expect("Blizzard_PVPMatch TOC parses");
@@ -185,7 +193,9 @@ fn blizzard_pvp_match_toc_uses_singular_required_dep_form() {
     );
     assert!(toc.load_with().is_empty(), "Zero `## LoadWith:` declared");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_match_toc_declares_no_saved_variables() {
     let toc = TocFile::from_file(&pvp_match_toc()).expect("Blizzard_PVPMatch TOC parses");
@@ -201,7 +211,9 @@ fn blizzard_pvp_match_toc_declares_no_saved_variables() {
         "TOC must declare zero `## SavedVariablesPerCharacter:`"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_match_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(pvp_match_toc()).expect("Blizzard_PVPMatch TOC reads utf-8");
@@ -253,7 +265,9 @@ fn blizzard_pvp_match_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## DefaultState:`"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_match_toc_lists_four_files_with_xml_pulling_companion_lua() {
     let toc = TocFile::from_file(&pvp_match_toc()).expect("Blizzard_PVPMatch TOC parses");
@@ -283,7 +297,9 @@ fn blizzard_pvp_match_toc_lists_four_files_with_xml_pulling_companion_lua() {
          \"PVPMatchTable.lua\"/>`, etc."
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_match_appears_in_eager_game_discovery() {
     let ui = blizzard_ui_dir();
@@ -313,7 +329,9 @@ fn blizzard_pvp_match_appears_in_eager_game_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_pvp_match_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -324,6 +342,7 @@ fn blizzard_pvp_match_appears_in_full_addon_inventory() {
         found,
         "Blizzard_PVPMatch MUST appear in `discover_all_blizzard_addons`"
     );
+}
 }
 
 prefork_full_ui_case! {

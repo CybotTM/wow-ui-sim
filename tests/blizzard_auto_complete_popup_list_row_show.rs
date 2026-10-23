@@ -28,6 +28,7 @@ expect(row:GetFrameLevel() == 15,
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_popup_list_row_show_sets_parent_relative_level() {
     common::with_perf_lock(|| {
@@ -49,4 +50,5 @@ fn blizzard_auto_complete_popup_list_row_show_sets_parent_relative_level() {
             });
         });
     });
+}
 }

@@ -1,3 +1,87 @@
+## [2026-10-22] investigation | Wrath F13 native loader fixtures
+
+[Diagnosis](investigations/wrath-fixture-f13.md) and [contract](../specs/wrath-fixture-f13.md) separate three native fixture repairs from24 unchanged modern-only failures and five additive specimens. Before: Wrath0/27PASS, Retail26/27PASS (pre-existing Archaeology TOC failure); companion5PASS each. Final merged-code proof6f54e648f: Wrath3/27PASS; Retail26/27PASS with identical baseline statuses; companions5PASS each, stock empty, checks/fmt pass without compiler warnings. No producer edits.
+## [2026-10-22] investigation | Wrath F07 REJECT repair
+
+[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [exact 32-row matrix](../specs/wrath-fixture-f07.md#exact-rows). Restored shine epsilon assertion passes; restored EventFrame/MinimalScrollBar consumer fails with missing track, unchanged and ungated. Fresh Wrath10 PASS/22 FAIL; Retail32 PASS/0 FAIL; stock Wrath[] and both checks/fmt pass. All invocations execute1; no producer fix or new generic test. Historical11/21 claims superseded. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
+
+## [2026-10-22] source | Patch 12.1.7 I0 accounting
+
+Added [12.1.7 source audit](investigations/patch-12-1-7-api-audit.md) and [contract](../specs/patch-12-1-7-source-accounting.md): exact raw body hashes, supplemental index discovery, P01–P12, inherited literal IDs/counts and original header disagreements. Nine Python CLI regression fixtures pass after RED; empty API inventory never implies runtime coverage. Inherited rows stay UNKNOWN until I4; GUID rows deferred pending user decision. Historical seals and runtime/vendor code unchanged.
+
+## [2026-10-22] source | Wrath autocomplete applicability
+
+EXCL-1 applies the user decision: 26 modern-only rows are excluded on Wrath as not applicable to 3.3.5 via the existing compile gate; bodies and other profiles stay unchanged. The glue-scope row remains compiled and failing as an evidence gap. See [coverage boundaries](investigations/wrath-autocomplete-fixture.md#coverage-boundaries) and [contract](../specs/wrath-autocomplete-results.md#known-gaps-current-cycle).
+
+## [2026-10-21] source | Wrath tracked achievements
+
+Added [tracking model notes](systems/lua-api.md#wrath-tracked-achievements) and [contract](../specs/wrath-tracked-achievements.md), separating authenticated 12340 static facts from INFERRED cached-consumer expectations. Current-source Wrath RED54 and Retail72+4 baseline precede the producer. Final merged proof: Wrath54+5 PASS, Retail76 statuses/failures unchanged, both stock arrays empty, warning-free check and formatting PASS. Supplemental public-API zero-ID RED precedes its correction; ten existing compile-gated rows are not counted as executed.
+
+## [2026-10-21] source | Wrath positional guild rights
+
+[Projection notes](systems/lua-api.md#wrath-guild-rank-rights) and [contract](../specs/wrath-guild-rank-flags.md) record original native checkbox RED and the bounded Wrath-only positional correction. The contract records native-consumer and guild-model GREEN, paired Retail preservation with unchanged pre-existing fixture failures, and empty stock Lua-error arrays under both profiles.
+
+## [2026-10-20] investigation | Wrath native friends legacy surface
+
+[Diagnosis](investigations/wrath-friends-legacy-surface.md) records the original native friends consumer and raw-global/call failure boundary. F02 now retains the mixed case's native UI and generic identities; producer repair belongs to a separate lane. The source-bound Rust case now executes and fails at the original consumer. Its authoritative12340 offline-connected=nil expectation is retained for joint verification with the producer lane; no isolated rebuild or producer fix is claimed.
+
+## [2026-10-20] source | Wrath native chat layout preservation
+
+[Diagnosis](investigations/wrath-chat-layout.md) and [contract](../specs/wrath-chat-layout.md) record the corrected pre-addon RED at `60fcdf225`: native `430x120/(32,130)` becomes modern `430x170/(35,50)`. A post-entry snapshot was invalid because entry automatically applies simulator workarounds. Native geometry remains owned by FrameXML; the contract now records bounded GREEN, headless observation, Retail preservation with exact-base failure classification, and warning-free formatting/check proof.
+## [2026-10-20] investigation | Wrath addon-load fixture ordering
+
+[Fixture notes](investigations/wrath-addon-load-fixture.md) record source-bound original-consumer RED and the separate production-order correction: profile FrameXML before Blizzard addon loading. No producer, vendor or baseline change. Corrected-fixture runtime evidence remains pending.
+
+## [2026-10-20] source | Native Wrath action callback projections
+
+Updated [Lua API](systems/lua-api.md#wrath-action-callback-projections) with the shared native fixture, separate range backing model and legacy adapters; [contract](../specs/wrath-action-callback-queries.md) owns source facts, exact bounded proof and remaining model gaps. No native execution or all-profile parity claim.
+
+## [2026-10-20] source | Wrath XML load diagnostics contract
+
+Added [diagnostic requirements](../specs/xml-load-diagnostics.md) and [loader boundary notes](systems/addon-loading.md#wrath-file-load-diagnostics), superseding the earlier X2 handler assumption with laptop-authenticated 12340 channel/text/continuation facts. Source-bound original DebugTools RED→GREEN; producer classifies at file boundaries and retains exact texts through existing warnings without a new logging/severity path. Wrath67 and Retail61 bounded passes; original genuine Lua consumer and Retail's pathless parse-error policy preserved.
+## [2026-10-20] investigation | Wrath native friends legacy surface
+
+[Diagnosis](investigations/wrath-friends-legacy-surface.md) records the original native friends consumer and raw-global/call failure boundary. F02 now retains the mixed case's native UI and generic identities; producer repair belongs to a separate lane. The source-bound Rust case now executes and fails at the original consumer. Its authoritative12340 offline-connected=nil expectation is retained for joint verification with the producer lane; no isolated rebuild or producer fix is claimed.
+
+## [2026-10-20] source | Wrath native chat layout preservation
+
+[Diagnosis](investigations/wrath-chat-layout.md) and [contract](../specs/wrath-chat-layout.md) record the corrected pre-addon RED at `60fcdf225`: native `430x120/(32,130)` becomes modern `430x170/(35,50)`. A post-entry snapshot was invalid because entry automatically applies simulator workarounds. Native geometry remains owned by FrameXML; the contract now records bounded GREEN, headless observation, Retail preservation with exact-base failure classification, and warning-free formatting/check proof.
+## [2026-10-20] source | Wrath legacy friends
+
+[Lua API ownership](systems/lua-api.md#wrath-legacy-friends) links the [four-global contract](../specs/wrath-friends-legacy.md): laptop static12340 tuples/coercion/GUID selection, shared inferred response policy, four executed RED failures including original FriendsFrame.lua:258, then Wrath5 and Retail19 passes. Both stock startups are clean, Wrath check is warning-free and formatter passes. Retail check and joint F02 integration are deferred to the merge gate; ignore/add/remove and native transport/status/sorting remain excluded.
+
+## [2026-10-20] investigation | Shared-target test source binding
+
+[Harness notes](systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) record corrected relocation RED: the second-root invocation executes stale first-root source and fails against a runtime expected-root input. Compile-time manifest binding also failed; the forced config-relative custom input passes same-slot relocation1+1. A real Wrath integration build after foreign-checkout helper seeding has1,791 requested-worktree module paths and zero compiler warnings; exact TimeManager still executes one expected fixture-before failure. Separate before-fixture source-bound receipts show Retail17/17 passing and Wrath13/13 failing, including one executed TimeManager test; historical stale/zero-selection receipts remain invalid.
+
+## [2026-10-20] source | Wrath message-frame method and metadata boundary
+
+[Widget state](systems/widget-system.md#message-history-and-translation-target-state--2026-10-16) and [Lua API](systems/lua-api.md#container-message-history-and-transform-producers--2026-10-16) link the [access-ID contract/proof](../specs/message-frame-access-history.md#access-id-correction-proof--2026-10-20): authenticated plain-method table, distinct cached indices, native Wrath metadata/zero-ID rules and preserved Retail surface/tuple. Six-case RED→GREEN, both-profile bounded preservation, empty stock startups, zero-warning checks and formatter pass are recorded with worktree-only ELF binding and unchanged original CVars. Four Wrath chat failures reproduce on master. Native execution, universal method leaks and backFill-ordering/queue-timing changes remain excluded.
+
+## [2026-10-20] source | Numeric-secret tooltip selectors
+
+[Tooltip bridge notes](systems/lua-api.md#retail-1205-tooltip-spell-and-mount-identifiers) link the [owning contract](../specs/tooltip-spell-mount-identifiers.md#numeric-secret-original-consumer-contract): original meter OnEnter and dynamic mount arg1 RED, explicit identity/presentation policy and independent NeverSecret optionals. P3 presentation is not used to initialize the meter row. Original-consumer RED→GREEN, two-sided preservation, private identity after GC and clean stock startup are bounded Retail receipts; native parity remains INFERRED.
+
+## [2026-10-20] source | Numeric-secret presentation selectors
+
+[Lua API notes](systems/lua-api.md#numeric-secret-spell-presentation-selectors) link the [owning contract](../specs/spell-secret-presentation.md): authentic-wrapper original meter/reward RED precedes opt-in host inspection and secret resolved Info identity. Public parsing, shared strict guards and action/book boundaries remain unchanged. Core GREEN precedes distinct original-tooltip description RED and its producer; the contract now retains final five-case GREEN, two-sided preservation, clean startup and formatting. Link sink and casting-producer gaps remain explicit.
+
+## [2026-10-20] source | Retail unused currency flag boundary
+
+[System notes](systems/lua-api.md#retail-unused-currency-flags) link the [proof owner](../specs/currency-unused-mutations.md#bounded-proof). Existing CurrencyInfo flags now drive the original checkbox/provider/popup; native grouping remains held rather than inferred into a synthetic catalog.
+
+## [2026-10-20] source | Numeric-secret aura duration and caster selectors
+
+[C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) link [duration](../specs/secret-selector-aura-duration.md) and [caster identity](../specs/secret-selector-aura-caster.md): original PTR pandemic and Retail/PTR caster consumers, retained duration outputs and secret-selector GUID publication. Native aura-output restriction remains held; the existing inactive-party DurationObject fixture stays separate.
+
+## [2026-10-20] source | Numeric-secret counts and usability
+
+[C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) link [count/usability](../specs/secret-selector-count-usability.md). Counts retain alias-first strict-u32 selection, usability retains raw known membership, and output predicates stay independent. Historical reject-all-number-secret requirements now point to this bounded subset; native full-grammar/secrecy claims remain excluded.
+
+## [2026-10-20] source | Numeric-secret classifications
+
+[C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) now link the [bounded classification contract](../specs/secret-selector-classification.md). Numeric host lookup does not widen shared readers or ExternalDefensive; output secrecy remains explicit simulator policy. Runtime receipts stay in the contract.
+
 ## [2026-10-19] evidence | Factory preservation and profile compilation
 
 [Factory contract](../specs/reload-ui.md#bounded-forever-factory-proof--2026-10-19) records matching pre/post characterization, unchanged Lua bodies, fresh VM retirement and warning-free Forever/default Retail compilation. Quiet-window wall-time and unchanged Ellesmere acceptance remain pending; startup sampling excludes the initial Blizzard/XML load.
@@ -9,6 +93,34 @@
 ## [2026-10-19] system | Reload dispatch factory prototypes
 
 [Lifecycle mechanics](systems/reload-ui.md#constant-dispatch-factories) documents VM-registry prototype anchors and fresh closure/environment bindings without changing authored Lua bodies. [Contract](../specs/reload-ui.md#dispatch-factory-isolation) tracks characterization and pending post-change proof separately; no quiet-window wall gain or full acceptance claim yet.
+
+## [2026-10-19] source | Wrath readiness and placed-frame reconstruction
+
+[Reload mechanics](systems/reload-ui.md) link the [proof owner](../specs/reload-ui.md#wrath-12340-requirements): A–D bounded GREEN, two-sided C preservation and ticked original Stopwatch control. Wrath now uses readiness-driven VARIABLES_LOADED and argless PEW without synthetic WoWUISim completion. E stores character-local placed geometry in simulator units and cancels mirrors only; eight bounded runtime cases pass, with inherited-scale roundtrip and two-sided disabled-persistence control. [Final implementer gates](../specs/reload-ui.md#final-implementer-gate--2026-10-19) record full-profile Wrath23/23, both library21/21 subsets, Retail bin6/6 after test-process isolation, four warning-free checks and both startup arrays empty. Two unchanged wrong-profile Wrath binary fixtures remain explicitly non-blocking; independent integrated verification is pending. GameMenu early-binding and cursor/spellbook gaps remain separate.
+
+## [2026-10-19] source | Managed Wrath saved-scope order and Retail addon payload
+
+[Managed restoration](systems/reload-ui.md#managed-addon-restoration) links the [contract](../specs/reload-ui.md#wrath-12340-requirements): original Stopwatch and Retail Settings consumer REDs precede the producer. Wrath now restores declared scopes once after code; real-addon Retail notifications append parsed-binding metadata. Value semantics remain INFERRED; LoD SV ownership stays UNMODELED. GREEN and two-sided preservation remain pending.
+
+## [2026-10-19] source | Wrath shutdown-before-save and combat window
+
+[Reload retirement](systems/reload-ui.md#environment-retirement) links the [12340 proof matrix](../specs/reload-ui.md#wrath-12340-requirements): original logout consumers and old-VM trace REDs, combat-entry RED, and passing noncombat control. Wrath shutdown now finishes the lifecycle callbacks before saving without erasing combat; its protected-state predicate covers the temporary window. Reentry's finer event slot remains INFERRED. GREEN is pending; missing minimap-arrow construction remains separate.
+
+## [2026-10-19] source | Wrath cinematic reload eligibility
+
+[Reload ownership](systems/reload-ui.md#request-and-ownership) links the [bounded contract](../specs/reload-ui.md#wrath-12340-requirements): exact prerequisite fixture RED, original popup disable/query GREEN, then a distinct cinematic RED at `2711a473e`. The owner guard is Wrath-only; no combat refusal or unknown taint feedback is invented. Eligibility GREEN remains pending.
+
+## [2026-10-19] source | Wrath ReloadUI facts and popup prerequisite
+
+[Reload mechanics](systems/reload-ui.md#request-and-ownership) link the [12340 contract and pending matrix](../specs/reload-ui.md#wrath-12340-requirements). Original StaticPopup acceptance exposed a missing legacy DisableAddOn endpoint; Wrath alone calls it among the seven shipped caches. Registration shares the modeled C_AddOns function. Behavioral GREEN and cinematic eligibility remain pending; Retail chronology remains UNKNOWN, with separate LoD-SV ownership and placement-unit bounds.
+
+## [2026-10-19] source | Wrath single-class spellbook views
+
+[System notes](systems/lua-api.md#wrath-single-class-spellbook-projection) link the [owning contract](../specs/wrath-spellbook-tabs.md). Two Wrath-only producers derive tab views and compact-slot mappings from existing membership and publish synchronous updates. Original-consumer/API RED→GREEN4/4 is retained with unchanged original CVar stat/hash; boundary/profile preservation remains pending. Tickless cursor evidence is not native timing proof.
+
+## [2026-10-19] source | Wrath dialog request/response plumbing
+
+[System notes](systems/lua-api.md#wrath-dialog-requestresponse-plumbing) link the [staged turn-in contract](../specs/wrath-quest-turn-in.md#staged-producer-proof): shared original-progress feature-absence RED, single concrete giver and executed A3 12-control/18-boundary gate, followed by complete bounded B GREEN, Wrath preservation and final zero-warning gates. Exact proof is tracked by the contract. W1b's authenticated laptop 12340 source-reading answers supersede W1's inference: clear NPC/inform, then interact target, then synchronous FINISHED; zero-NPC CloseQuest is a no-op. Native QuestChooseRewardError feedback supersedes the no-op contract. W1b's seven original-consumer cases reached named behavioral RED before producer edits. Real feedback and centralized finish cleanup now replace the no-op and pre-cleared-token paths; turn-in37/37 and Wrath-specific preservation41/41 pass at5a27bb24f; generic controls, startup, fmt and final Wrath check remain pending. No native capture claimed.
 
 ## [2026-10-19] evidence | ReloadUI default-retail compilation
 
@@ -41,6 +153,10 @@
 ## [2026-10-18] investigation | Original sizing and AsyncRequest proof
 
 [Mouse sizing](investigations/mouse-sizing-capture.md) records missing native capture and spurious script-drag routing, reproduced through unchanged DamageMeter callbacks. [AsyncRequest contract](../specs/timer-callback-provenance.md#original-asyncrequest-correlation--bounded-retail-proof) records isolated original TOC loading, both timing modes and negative fixture controls. Native outside-release/scale policy and full startup remain excluded.
+
+## [2026-10-19] source | Wrath legacy currency state
+
+Added [model ownership](systems/lua-api.md#wrath-legacy-currency-display-state) and links to the [legacy currency](../specs/wrath-legacy-currency-tokenui.md) and [minimap/XML](../specs/wrath-minimap-xml-labels.md) contracts. Category display indices and independent watch enumeration do not delegate to modern currency state. Source documentation only; runtime proof remains separate.
 
 ## [2026-10-18] investigation | Ellesmere timer125 secure-hook targets
 
@@ -2445,3 +2561,85 @@ Linked the [disabled-check contract](../specs/disabled-check-emission.md) for bo
 - 2026-10-19: Added Wrath manual-watch state/binding/refresh ownership to the legacy-surface wiki and owning spec; twelve genuine REDs recorded, GREEN pending.
 
 - 2026-10-19: Closed bounded N3 manual-watch proof: twelve RED→GREEN cases, zero startup errors/warnings,59 passing controls plus one unchanged generic destructive-marking failure reproduced on exact baseb88ef4c9e. Native sort/cache/progress/automatic gaps remain unmodeled; full-profile check/fmt/readability pass.
+
+## 2026-10-18 — Wrath widget state and stored-size correction
+
+Linked optional EditBox history, direct arrows, byte-mask presentation and MessageFrame row timers from [[widget-system]] to their owning contract. Added [[wrath-tooltip-stored-size]]: the queried-size oracle confused parent-fill geometry with retained dimensions; the unsupported loader change was reverted, and cached dependency repair remains distinct. Source/reconstructed authority and old-library fixture controls are not current-head/native/preservation acceptance.
+
+## 2026-10-19 — Inline XML callback late binding
+
+Updated [[xml-template-system]] with call-time function-family lookup and the distinct direct `function=` binding. All six unchanged-producer fixtures fail behaviorally at `6b03106f9`, including original Wrath GameMenu and unfiltered cursor errors. Producer `c1e98b4cc` uses Lua expressions rather than install-time callback/argument captures. Bounded GREEN: Wrath6/6, Retail5/5; both startups byte-identical `[]`. Original Wrath GameMenu warnings/errors, including cursorOffset-nil, disappear without an EditBox change. Preservation and separately committed conditional/LFG callback follow-ups remain pending; no native/full-suite claim.
+
+## 2026-10-19 — Conditional XML predicate capture removal
+
+Four original-body Wrath KeyRing/Retail ChatConfig regressions are RED. Removed conditional global predicate/getter fast-path captures so the unchanged ordinary Lua compiler owns these bodies and surrounding sequences. Removed the obsolete optimization-selection assertion, not a behavior test. Follow-up GREEN/preservation pending; see [[xml-template-system]].
+
+## 2026-10-19 — LFG XML callback capture removal
+
+Four original LFD/RaidFinder OnClick-body cases are RED: join and leave replacements/hooks are bypassed for category-only and category+slot calls. Removed the specialized capture builder/parser and its optimization-selection assertion; ordinary Lua now owns the unchanged bodies. GREEN/preservation pending; see [[xml-template-system]].
+
+## 2026-10-19 — Original tooltip formatter capture removal
+
+CharacterFrameTab1 OnEnter is behavioral RED after formatter replacement/hook; the literal-first changed-environment case is an existing PASS control, not a fast-path claim. The function-result/three-number builder now emits call-time Lua target/formatter/argument reads. Other unproved object/value captures remain audited, untouched gaps. GREEN/preservation pending; see [[xml-template-system]].
+
+## 2026-10-19 — Bounded final XML late-binding proof
+
+At source `fb2e3961d`, lane fixtures pass Retail13/13 and Wrath8/8; both startups remain byte-identical `[]` and original GameMenu warnings/errors, including cursorOffset-nil, are empty. Retail preservation passes; Wrath retains two unchanged Retail-cache bootstrap failures, explicitly deferred by main to profile-gating before I1. [[xml-template-system]] owns exact counts, source-identity proof, the existing ignored TODO and acceptance limits. No fixture gate, ignore or vendor workaround was added here.
+## 2026-10-20 — Wrath addon-load takeover
+
+Classified source-bound fixture receipts (8/13 pass), traced AuctionUI nil calls to Mists-only model registration, and recorded retained legacy boundaries in [fixture diagnosis](investigations/wrath-addon-load-fixture.md). Auction publication is now enabled for Wrath without model changes; original-consumer GREEN and preservation remain pending.
+
+## 2026-10-20 — Wrath addon-load bounded acceptance
+
+[Fixture diagnosis](investigations/wrath-addon-load-fixture.md) records all13 nonzero original consumers (8pass/5retained), unchanged-model auction publication (5→1 errors; missing class catalog retained), Retail17/17 before and after, both stock `lua-errors []`, zero-warning builds/check, fmt and unchanged CVars. Module-cfg compile repair and excluded zero-test launcher receipts remain explicit. No native-client/full-suite acceptance, baseline increases, or other legacy implementation is claimed.
+
+## 2026-10-20 — Wrath legacy LoD native-evidence producer slice
+
+Updated [consumer follow-up](investigations/wrath-addon-load-fixture.md#native-evidence-legacy-api-follow-up) with state ownership, isolated unmodeled branches, code-equivalent original-consumer RED and [held/inferred contracts](../specs/wrath-legacy-lod-apis.md). Current-head runtime proof remains pending.
+
+## 2026-10-20 — Wrath legacy LoD bounded producer GREEN
+
+[Contract](../specs/wrath-legacy-lod-apis.md#bounded-wrath-proof--2026-10-20) records six exact producer/native cases passing at `4270e9876`, source-bound warning-free Wrath ELF and all five original consumers re-run without budget changes. BattlefieldMinimap clears errors; Calendar halves counts; held auction and new getter boundaries retain whole-addon RED. Stock/profile gates pending.
+
+## 2026-10-20 — Authenticated Wrath auction data and native follow-ups
+
+Updated [legacy producer ownership](investigations/wrath-addon-load-fixture.md#native-evidence-legacy-api-follow-up): supplied DBC hashes/record-loader mappings resolve the catalog gap without invented names; source order and 28-value inventory fall-through are retained. [Contract](../specs/wrath-legacy-lod-apis.md) also owns cached group counts, localized repeat options, read-only invite state and fresh-empty profession reads. Expanded native/profile proof pending; initial proof remains recorded.
+
+
+## 2026-10-20 — Secret numeric spell-link selector
+
+Public-API tests reproduce a whole-link secrecy failure on Retail and PTR before the producer change; public link, one ordinary nil miss and glyph rejection controls pass. [[lua-api]] links the owning presentation contract. The producer now opts into the existing bounded host-number inspector and wraps the complete link; GREEN is pending, with downstream sinks excluded.
+
+
+## 2026-10-20 — Bounded spell-link selector GREEN
+
+[[lua-api]] links Retail/PTR link GREEN, presentation/tooltip/glyph preservation and isolated stock Retail startup proof in the owning contract. Test-only observer corrections do not change the producer; native parity and downstream sinks remain excluded.
+
+## 2026-10-21 — Wrath autocomplete fixture and query boundary
+
+[Native fixture diagnosis](investigations/wrath-autocomplete-fixture.md) records valid original-consumer argument-width RED, direct-result PASS, a Wrath-only modeled global and preserved modern namespace. The initial small-mask probe's missing alias is excluded from producer RED; its corrected template-based consumer has separate RED→GREEN proof. The [contract](../specs/wrath-autocomplete-results.md) records original33/additional6 native passes, paired Retail67 preservation, empty stock arrays and warning-free checks while retaining modern/glue and identity/recency/UTF-8 gaps.
+
+
+## 2026-10-22 — F12 native AuctionUI consumer boundaries
+
+[[wrath-addon-load-fixture]] links F12's original-consumer price-column and inactive-close REDs, fixture-only sample isolation and retained modern-only oracles. Reconstructed 12340 facts are distinguished from native execution; final profile proof remains pending.
+
+
+## 2026-10-23 — F12 bounded proof
+
+[F12](../specs/wrath-fixture-f12.md) records source-bound native3 GREEN, original Wrath11/26 and unchanged Retail22/26, empty stock Wrath startup, warning-free dual-profile checks and formatter success. Fifteen Wrath/four Retail failures remain visible; active close and invalid/identity branches are explicitly excluded. No vendor edits or assertion relaxation.
+## [2026-10-15] research | wowdecomp audit navigation
+
+Added [[wowdecomp-audit]] ([reference page](reference/wowdecomp-audit.md)) and index navigation to the [owning audit directory](../wowdecomp-audit/README.md); findings, provenance, security assessment and proof limits remain there. Documentation only; no external code execution.
+
+## [2026-10-15] research | Expanded wowdecomp source navigation
+
+Added direct finding-catalogue and coverage-ledger links to the [existing reference page](reference/wowdecomp-audit.md); the [audit directory](../wowdecomp-audit/README.md) remains the owner.
+
+## [2026-10-15] research | Cataclysm 15595 supplement navigation
+
+Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [reference page](reference/wowdecomp-audit.md) and index. Findings and proof limits remain in the audit. Read-only source research, not native verification; external code execution remains prohibited.
+
+## [2026-10-23] investigation | Wrath retained-failure fixture programme
+
+[Programme register](investigations/wrath-retained-fixtures.md) centralizes F01–F22 status, standing exclusion mechanics, class (a) boundaries, open decisions and F18-P1. Lane specs retain exact receipts; pending/static work is not runtime acceptance. Documentation only; no builds or tests.

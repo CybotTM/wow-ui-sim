@@ -7,6 +7,9 @@ use crate::loader::{
 };
 use crate::screen::ScreenKind;
 
+// These discover actual named addons, not same-named native frames.
+// Wrath manifest1-382/cache ships none of their required packaged addons.
+post_wrath_ui_fixture! {
 fn blizzard_ui_dir() -> PathBuf {
     crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
         "CARGO_MANIFEST_DIR"
@@ -58,6 +61,8 @@ fn character_create_screen_uses_glue_addon_set() {
     assert!(addons.iter().any(|name| name == "Blizzard_GlueXML"));
     assert!(!addons.iter().any(|name| name == "Blizzard_UIParent"));
     assert!(addons.iter().any(|name| name == "Blizzard_CharacterCreate"));
+}
+
 }
 
 struct TempBlizzardUiDir {
@@ -494,6 +499,7 @@ Core.lua
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn real_glue_load_first_addons_sort_before_non_load_first_addons() {
     let addons = addon_names(ScreenKind::Login);
@@ -511,4 +517,5 @@ fn real_glue_load_first_addons_sort_before_non_load_first_addons() {
         glue_menu_frame < login_warning_dialogs,
         "Blizzard_GlueMenuFrame is tagged LoadFirst and should sort before comparable non-LoadFirst glue addons",
     );
+}
 }

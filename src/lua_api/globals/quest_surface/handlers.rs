@@ -107,6 +107,7 @@ pub(super) fn selected_log_index(state: &LuaState) -> LuaResult<i32> {
 pub(super) fn set_selected_quest_id(state: &mut LuaState, quest_id: i32) -> LuaResult<()> {
     let selected = (quest_id > 0).then_some(quest_id as u32);
     let mut sim = borrow_state_mut(state)?;
+    #[cfg(not(feature = "client-wrath"))]
     if sim.selected_quest_log_id != selected {
         sim.quest_log_entries.readiness.dialog = None;
     }

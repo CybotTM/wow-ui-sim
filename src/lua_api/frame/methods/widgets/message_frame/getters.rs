@@ -10,7 +10,7 @@ use crate::lua_api::methods::{
 };
 use crate::lua_bridge::{IntoStack, stack_val};
 use rilua::vm::state::LuaState;
-use rilua::{LuaResult, Val};
+use rilua::{LuaResult, Val, runtime_error};
 
 const INDENTED_WORD_WRAP_FIELD: &str = "_mf_indented_word_wrap";
 
@@ -37,6 +37,7 @@ pub(in super::super) fn clear(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     if let Some(data) = sim.message_frames.get_mut(&id) {
         data.messages.clear();
+        data.pending_wrath_messages.clear();
         data.scroll_offset = 0;
     }
     Ok(0)
@@ -48,7 +49,7 @@ pub(super) fn clear_text(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn get_num_messages(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let access_id = super::add::read_optional_id(state, 2);
+    let access_id = read_history_access_id(state, 2);
     let sim = borrow_state(state)?;
     let count = sim
         .message_frames
@@ -116,7 +117,15 @@ pub(super) fn set_time_visible(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let v = val_to_f64(stack_val(state, 2));
     let mut sim = borrow_state_mut(state)?;
-    sim.message_frames.entry(id).or_default().time_visible = v;
+    let data = sim.message_frames.entry(id).or_default();
+    data.time_visible = v;
+    for message in &mut data.messages {
+        if let Some(timers) = &mut message.wrath_timers
+            && timers.time_left != 0.0
+        {
+            timers.time_left = v;
+        }
+    }
     Ok(0)
 }
 
@@ -136,7 +145,15 @@ pub(super) fn set_fade_duration(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let v = val_to_f64(stack_val(state, 2));
     let mut sim = borrow_state_mut(state)?;
-    sim.message_frames.entry(id).or_default().fade_duration = v;
+    let data = sim.message_frames.entry(id).or_default();
+    data.fade_duration = v;
+    for message in &mut data.messages {
+        if let Some(timers) = &mut message.wrath_timers
+            && timers.fade_left != 0.0
+        {
+            timers.fade_left = v;
+        }
+    }
     Ok(0)
 }
 
@@ -229,33 +246,71 @@ pub(super) fn has_message_by_id(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn get_message_info(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let index = val_to_f64(stack_val(state, 2)) as i32;
-    if let Some(access_id) = super::add::read_optional_id(state, 3) {
+    let access_id = read_history_access_id(state, 3);
+    if cfg!(feature = "client-wrath") {
+        return push_wrath_message_info(state, id, index, access_id);
+    }
+    if let Some(access_id) = access_id {
         return push_filtered_message_info(state, id, index, access_id);
     }
+    push_color_message_info(state, id, index)
+}
+
+fn read_history_access_id(state: &LuaState, index: i32) -> Option<i64> {
+    super::add::read_optional_id(state, index)
+        .filter(|id| !cfg!(feature = "client-wrath") || *id != 0)
+}
+
+fn push_wrath_message_info(
+    state: &mut LuaState,
+    id: u64,
+    index: i32,
+    access_id: Option<i64>,
+) -> LuaResult<u32> {
     let sim = borrow_state(state)?;
-    let (text, r, g, b, a, ts) = sim
+    let message = sim.message_frames.get(&id).and_then(|data| {
+        data.messages
+            .iter()
+            .filter(|message| access_id.is_none() || message.access_id == access_id)
+            .nth(index.checked_sub(1).unwrap_or(-1) as usize)
+            .cloned()
+    });
+    drop(sim);
+    let message =
+        message.ok_or_else(|| runtime_error("GetMessageInfo: message index out of range"))?;
+    let text = create_string(state, &message.text);
+    text.into_stack(state)?;
+    message.access_id.unwrap_or(0).into_stack(state)?;
+    message.message_id.unwrap_or(0).into_stack(state)?;
+    message.extra_data.unwrap_or(0).into_stack(state)?;
+    Ok(4)
+}
+
+fn push_color_message_info(state: &mut LuaState, id: u64, index: i32) -> LuaResult<u32> {
+    let sim = borrow_state(state)?;
+    let (text, values) = sim
         .message_frames
         .get(&id)
-        .and_then(|d| d.messages.get((index - 1) as usize))
-        .map(|m| {
+        .and_then(|data| data.messages.get((index - 1) as usize))
+        .map(|message| {
             (
-                m.text.clone(),
-                m.r as f64,
-                m.g as f64,
-                m.b as f64,
-                m.a as f64,
-                m.timestamp,
+                message.text.clone(),
+                [
+                    message.r as f64,
+                    message.g as f64,
+                    message.b as f64,
+                    message.a as f64,
+                    message.timestamp,
+                ],
             )
         })
-        .unwrap_or((String::new(), 1.0, 1.0, 1.0, 1.0, 0.0));
+        .unwrap_or((String::new(), [1.0, 1.0, 1.0, 1.0, 0.0]));
     drop(sim);
-    let text_val = create_string(state, &text);
-    text_val.into_stack(state)?;
-    state.push(Val::Num(r));
-    state.push(Val::Num(g));
-    state.push(Val::Num(b));
-    state.push(Val::Num(a));
-    state.push(Val::Num(ts));
+    let text = create_string(state, &text);
+    text.into_stack(state)?;
+    for value in values {
+        state.push(Val::Num(value));
+    }
     Ok(6)
 }
 

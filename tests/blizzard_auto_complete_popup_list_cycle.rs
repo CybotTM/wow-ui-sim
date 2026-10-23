@@ -58,6 +58,19 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_popup_list_cycles_highlight_with_wrap() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::load_and_assert_native(
+            r#"
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha', 'F09Beta')
+for _, index in ipairs({1,2,1}) do
+ assert(AutoCompleteEditBox_OnTabPressed(F09EditBox) == true)
+ assert(AutoComplete_GetSelectedIndex(AutoCompleteBox) == index)
+end
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

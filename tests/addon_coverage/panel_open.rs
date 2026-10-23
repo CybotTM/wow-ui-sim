@@ -100,14 +100,24 @@ fn panel_open_runtime_paths_stay_within_known_error_baseline() {
             let known_blizzard_addons = load_panel_harness_blizzard_ui(&env);
             let mut case_failures = Vec::new();
 
-            for case in PANEL_OPEN_COVERAGE_CASES {
+            // 12340 has AchievementUI but no Collections/EncounterJournal addons.
+            let cases = if cfg!(feature = "client-wrath") {
+                &PANEL_OPEN_COVERAGE_CASES[..1]
+            } else {
+                PANEL_OPEN_COVERAGE_CASES
+            };
+            for case in cases {
                 clear_lua_error_tracking(&env);
                 env.exec(case.open_lua)
                     .unwrap_or_else(|error| panic!("{} opener should run: {error}", case.name));
 
                 let addon_loaded = is_addon_loaded(&env, case.expected_addon);
                 let frame_shown = frame_is_shown(&env, case.expected_frame);
-                let known_counts = known_panel_open_runtime_error_counts(case);
+                let known_counts = if cfg!(feature = "client-wrath") {
+                    BTreeMap::new()
+                } else {
+                    known_panel_open_runtime_error_counts(case)
+                };
                 let state = env.state().borrow();
                 let grouped_errors = grouped_errors_by_addon(&state);
                 let actual_counts = actual_error_counts(&grouped_errors);

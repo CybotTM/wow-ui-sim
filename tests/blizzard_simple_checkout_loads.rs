@@ -7,7 +7,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn simple_checkout_dir() -> PathBuf {
@@ -49,6 +50,8 @@ fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&simple_checkout_dir()).expect("SimpleCheckout TOC resolves");
@@ -62,7 +65,9 @@ fn find_toc_file_resolves_bare_toc() {
          the in-game store, catalog shop, and housing editor"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dependencies_accessor_returns_all_repeated_dep_values() {
     let toc = TocFile::from_file(&simple_checkout_toc()).expect("TOC parses");
@@ -73,7 +78,9 @@ fn dependencies_accessor_returns_all_repeated_dep_values() {
         "SimpleCheckout's sole `## Dep: Blizzard_SharedXML` directive must be exposed"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn optional_deps_accessor_is_empty_without_optional_directives() {
     let toc = TocFile::from_file(&simple_checkout_toc()).expect("TOC parses");
@@ -83,7 +90,9 @@ fn optional_deps_accessor_is_empty_without_optional_directives() {
         "SimpleCheckout declares screen-specific required deps and no optional dependencies"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn raw_bytes_pin_shared_xml_dep_without_optional_directives() {
     let raw = std::fs::read_to_string(simple_checkout_toc()).expect("TOC reads utf-8");
@@ -91,7 +100,9 @@ fn raw_bytes_pin_shared_xml_dep_without_optional_directives() {
     assert!(raw.contains("## Dep: Blizzard_SharedXML"));
     assert!(!raw.contains("## OptionalDep"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_secure_environment_eager_on_both_screens() {
     let toc = TocFile::from_file(&simple_checkout_toc()).expect("TOC parses");
@@ -134,7 +145,9 @@ fn toc_is_secure_environment_eager_on_both_screens() {
         "`## AllowLoad: Both` must allow CharacterCreate"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_minimal_metadata_surface() {
     let raw = std::fs::read_to_string(simple_checkout_toc()).expect("TOC reads utf-8");
@@ -155,7 +168,9 @@ fn toc_raw_bytes_pin_minimal_metadata_surface() {
     assert!(!raw.contains("## RequiredDep"));
     assert!(!raw.contains("## OptionalDep"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_lists_three_lua_files_and_one_xml_in_order() {
     let toc = TocFile::from_file(&simple_checkout_toc()).expect("TOC parses");
@@ -194,7 +209,9 @@ fn body_lists_three_lua_files_and_one_xml_in_order() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn outbound_loads_before_main_lua_so_secure_env_table_is_published_first() {
     let toc = TocFile::from_file(&simple_checkout_toc()).expect("TOC parses");
@@ -224,7 +241,9 @@ fn outbound_loads_before_main_lua_so_secure_env_table_is_published_first() {
          order would leave the table nil at script-handler dispatch time"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_eager_discovery_on_all_four_screens() {
     let ui = blizzard_ui_dir();
@@ -249,6 +268,7 @@ fn appears_in_eager_discovery_on_all_four_screens() {
              catalog shop / housing editor on Game"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
@@ -384,11 +404,13 @@ fn publishes_two_mixin_tables_in_secure_env_only(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn publishes_two_mixin_tables_in_secure_env_only() {
     let env = load_full_ui_for(ScreenKind::Game);
     publishes_two_mixin_tables_in_secure_env_only::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -455,11 +477,13 @@ fn publishes_outbound_table_via_simulator_stub_back_reference(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn publishes_outbound_table_via_simulator_stub_back_reference() {
     let env = load_full_ui_for(ScreenKind::Game);
     publishes_outbound_table_via_simulator_stub_back_reference::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -508,11 +532,13 @@ fn xml_publishes_three_virtual_line_templates_via_create_frame(env: &WowLuaEnv) 
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn xml_publishes_three_virtual_line_templates_via_create_frame() {
     let env = load_full_ui_for(ScreenKind::Game);
     xml_publishes_three_virtual_line_templates_via_create_frame::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -539,11 +565,13 @@ fn xml_publishes_simple_checkout_frame_with_close_button_and_background(env: &Wo
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn xml_publishes_simple_checkout_frame_with_close_button_and_background() {
     let env = load_full_ui_for(ScreenKind::Game);
     xml_publishes_simple_checkout_frame_with_close_button_and_background::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -569,11 +597,13 @@ fn check_cancel_open_checkout_method_present_on_simple_checkout_frame(env: &WowL
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn check_cancel_open_checkout_method_present_on_simple_checkout_frame() {
     let env = load_full_ui_for(ScreenKind::Game);
     check_cancel_open_checkout_method_present_on_simple_checkout_frame::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -596,9 +626,11 @@ fn close_button_is_named_global_via_parent_key_synthesis(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn close_button_is_named_global_via_parent_key_synthesis() {
     let env = load_full_ui_for(ScreenKind::Game);
     close_button_is_named_global_via_parent_key_synthesis::run(&env);
+}
 }

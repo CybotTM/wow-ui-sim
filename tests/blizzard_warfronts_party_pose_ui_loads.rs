@@ -41,6 +41,8 @@ fn load_warfronts_party_pose_ui_with_dependency(env: &WowLuaEnv) {
         .expect("Blizzard_WarfrontsPartyPoseUI should load via explicit Rust loader call");
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_variant() {
     let resolved = find_toc_file(&warfronts_party_pose_dir())
@@ -52,7 +54,9 @@ fn find_toc_file_resolves_bare_variant() {
          `_Mainline.toc` variant first (miss) and falls through to the bare TOC name (hit)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_lod_with_one_required_dep() {
     let toc = TocFile::from_file(&warfronts_party_pose_toc())
@@ -92,7 +96,9 @@ fn toc_declares_lod_with_one_required_dep() {
          events keyed against the SCENARIO_COMPLETED questID; nothing persists across reloads"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_omits_allow_load_directives() {
     let toc = TocFile::from_file(&warfronts_party_pose_toc())
@@ -140,7 +146,9 @@ fn toc_omits_allow_load_directives() {
          requests them; explicit DefaultState would conflict with the on-demand contract"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_bootstrap_lua_then_xml_in_order() {
     let toc = TocFile::from_file(&warfronts_party_pose_toc())
@@ -161,7 +169,9 @@ fn toc_lists_bootstrap_lua_then_xml_in_order() {
          script binding tries to resolve the mixin table via `_G`"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_required_directives() {
     let raw = std::fs::read_to_string(warfronts_party_pose_toc())
@@ -191,7 +201,9 @@ fn toc_raw_bytes_pin_required_directives() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn directory_holds_four_entries_with_bootstrap() {
     let entries = std::fs::read_dir(warfronts_party_pose_dir())
@@ -201,6 +213,7 @@ fn directory_holds_four_entries_with_bootstrap() {
         entries, 4,
         "Retail 12.1.0.69497 directory holds the TOC, bootstrap Lua, main Lua, and XML"
     );
+}
 }
 
 #[test]
@@ -225,6 +238,7 @@ fn excluded_from_every_screen_auto_discovery() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn dep_directory_exists_on_disk() {
     let dep_toc = party_pose_toc();
@@ -235,6 +249,7 @@ fn dep_directory_exists_on_disk() {
          test harness can pre-load it before pulling in WarfrontsPartyPoseUI",
         dep_toc.display()
     );
+}
 }
 
 prefork_full_ui_case! {

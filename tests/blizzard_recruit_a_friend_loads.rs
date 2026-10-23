@@ -99,6 +99,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recruit_a_friend_toc_pins_eager_game_only_with_optional_social_dependencies() {
     let toc = TocFile::from_file(&raf_toc()).expect("Blizzard_RecruitAFriend TOC parse");
@@ -177,7 +179,9 @@ fn blizzard_recruit_a_friend_toc_pins_eager_game_only_with_optional_social_depen
          the field entirely"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recruit_a_friend_toc_carries_rare_suppress_local_table_ref_directive() {
     let toc = TocFile::from_file(&raf_toc()).expect("RAF TOC parse");
@@ -200,7 +204,9 @@ fn blizzard_recruit_a_friend_toc_carries_rare_suppress_local_table_ref_directive
         suppress
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recruit_a_friend_toc_lists_frame_and_social_view_sources() {
     let toc = TocFile::from_file(&raf_toc()).expect("RAF TOC parse");
@@ -229,7 +235,9 @@ fn blizzard_recruit_a_friend_toc_lists_frame_and_social_view_sources() {
          — this is what pulls in the .lua companion when XML parsing reaches the directive"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recruit_a_friend_only_allows_game_screen_via_allow_load_game() {
     let toc = TocFile::from_file(&raf_toc()).expect("RAF TOC parse");
@@ -251,7 +259,9 @@ fn blizzard_recruit_a_friend_only_allows_game_screen_via_allow_load_game() {
         "`## AllowLoad: game` MUST reject the CharacterCreate screen"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_recruit_a_friend_appears_in_eager_game_discovery() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -265,6 +275,7 @@ fn blizzard_recruit_a_friend_appears_in_eager_game_discovery() {
          Game-screen inventory — every loader-filter gate (load_on_demand=false / \
          ptr_only=false / game_type_restricted=false / allows_screen(Game)=true) admits it"
     );
+}
 }
 
 #[test]
@@ -300,7 +311,10 @@ fn blizzard_recruit_a_friend_loads_with_profile_is_enabled_surface() {
     } else {
         "false"
     };
-    assert_eq!(probe, expected, "Recruit-A-Friend is modeled disabled by default");
+    assert_eq!(
+        probe, expected,
+        "Recruit-A-Friend is modeled disabled by default"
+    );
 
     let warnings = recruit_a_friend_warnings.expect("Recruit-A-Friend addon should load");
     assert!(

@@ -62,12 +62,15 @@ return shownBeforeSwap,
        callbackBeforeAnchor
 "#;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn dialog_show_with_quest_swap_declines_previous_before_reanchoring() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let surface = swap_surface(env);
         assert_swap_surface(surface);
     });
+}
 }
 
 type SwapSurface = (bool, i64, bool, bool, bool, bool, bool, bool, bool, bool);

@@ -109,6 +109,7 @@ return type(state),
        state.Cooldown
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn anima_diversion_ui_registers_static_popup_globals() {
     with_blizzard_addon_startup_shape(&[ROOT], CLOSURE_OVERRIDES, |env, _loaded| {
@@ -129,6 +130,8 @@ fn anima_diversion_util_predicates_match_node_state_semantics() {
 
         assert_util_surface(surface);
     });
+}
+
 }
 
 #[test]

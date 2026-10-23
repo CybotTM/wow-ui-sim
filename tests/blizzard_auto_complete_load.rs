@@ -16,6 +16,17 @@ const FONTS_SHARED: &str = "Blizzard_Fonts_Shared";
 
 #[test]
 fn blizzard_auto_complete_loads_without_ingestion_errors() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::load_and_assert_native(
+            r#"
+assert(type(AutoComplete_Update) == 'function')
+assert(AutoCompleteBox ~= nil)
+assert(AutoCompleteButton5 ~= nil)
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -54,6 +65,7 @@ fn blizzard_auto_complete_allowload_both_loads_in_game_and_glue_scopes() {
     });
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_fonts_shared_loads_before_autocomplete() {
     assert_toc_declares_fonts_shared_dep();
@@ -82,6 +94,7 @@ fn blizzard_auto_complete_fonts_shared_loads_before_autocomplete() {
             });
         });
     });
+}
 }
 
 fn assert_toc_declares_fonts_shared_dep() {

@@ -14,7 +14,7 @@ mod transform;
 
 pub(super) use getters::clear;
 
-use crate::lua_api::methods::get_or_create_frame_fields;
+use crate::lua_api::methods::{borrow_state, get_or_create_frame_fields, table_set_static};
 use crate::lua_bridge::table_set_rust_fn;
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::LuaResult;
@@ -108,7 +108,38 @@ pub fn register_message_frame(state: &mut LuaState, metatable: GcRef<Table>) -> 
     Ok(())
 }
 
+/// Restrict only this module's methods; inherited Frame/Region methods stay intact.
+/// Authenticated 12340 plain MessageFrame table: CSimpleMessageFrame_Scripts.cpp:337–366.
+pub(crate) fn retain_plain_message_frame_methods(state: &mut LuaState, index: GcRef<Table>) {
+    for (name, _) in METHODS {
+        let shared = matches!(
+            *name,
+            "AddMessage"
+                | "SetFading"
+                | "GetFading"
+                | "SetTimeVisible"
+                | "GetTimeVisible"
+                | "SetFadeDuration"
+                | "GetFadeDuration"
+                | "SetInsertMode"
+                | "GetInsertMode"
+                | "SetIndentedWordWrap"
+                | "GetIndentedWordWrap"
+        );
+        if !shared {
+            table_set_static(state, rilua::Val::Table(index), name, rilua::Val::Nil);
+        }
+    }
+}
+
 pub(crate) fn install_message_frame_fields(state: &mut LuaState, frame_id: u64) -> LuaResult<()> {
+    let plain_wrath = borrow_state(state)?
+        .widgets
+        .get(frame_id)
+        .is_some_and(crate::lua_api::message_frame::uses_wrath_row_lifecycle);
+    if plain_wrath {
+        return Ok(());
+    }
     let fields = get_or_create_frame_fields(state, frame_id);
     if let rilua::Val::Table(fields_ref) = fields {
         table_set_rust_fn_static(state, fields_ref, "SetMaxLines", getters::set_max_lines)?;

@@ -117,6 +117,8 @@ pub struct AddonInfo {
     pub loaded: bool,
     /// Load on demand flag.
     pub load_on_demand: bool,
+    /// Whether parsed addon XML contains named binding definitions.
+    pub contains_bindings: bool,
     /// Whether `[Bootstrap]` files have already executed for this addon.
     pub bootstrap_loaded: bool,
     /// Whether the addon loads Lua/XML chunks in the secure environment.
@@ -149,6 +151,7 @@ impl Default for AddonInfo {
             enabled: false,
             loaded: false,
             load_on_demand: false,
+            contains_bindings: false,
             bootstrap_loaded: false,
             use_secure_env: false,
             security: None,

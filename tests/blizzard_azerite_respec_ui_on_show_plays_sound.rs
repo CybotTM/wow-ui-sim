@@ -5,6 +5,8 @@ use common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};
 
 const ROOT: &str = "Blizzard_AzeriteRespecUI";
 
+// AzeriteRespecUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_respec_ui_show_and_hide_play_reforge_window_sounds() {
     common::with_perf_lock(|| {
@@ -71,6 +73,7 @@ fn blizzard_azerite_respec_ui_show_and_hide_play_reforge_window_sounds() {
             });
         });
     });
+}
 }
 
 fn played_sound_at(env: &wow_ui_sim::lua_api::WowLuaEnv, index: i64) -> Option<i64> {

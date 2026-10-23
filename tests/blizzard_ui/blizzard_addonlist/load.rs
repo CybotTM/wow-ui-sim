@@ -30,6 +30,8 @@ const ROOT_TOC_FILE: &str = "Blizzard_AddOnList.toc";
 const REQUIRED_DEPS: &[&str] = &["Blizzard_SharedXML"];
 const MACHINE_SAVED_VARIABLE: &str = "g_addonCategoriesCollapsed";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn addon_list_loads_with_dependency_closure_and_no_lua_errors() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, loaded| {
@@ -46,6 +48,7 @@ fn addon_list_loads_with_dependency_closure_and_no_lua_errors() {
             errors.join("\n  ")
         );
     });
+}
 }
 
 #[test]

@@ -42,6 +42,7 @@ return #calls,
        calls[2].isShiftPressed
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn auth_challenge_ui_tab_pressed_forwards_frame_and_shift_state() {
     common::with_perf_lock(|| {
@@ -95,4 +96,5 @@ fn auth_challenge_ui_tab_pressed_forwards_frame_and_shift_state() {
             });
         });
     });
+}
 }

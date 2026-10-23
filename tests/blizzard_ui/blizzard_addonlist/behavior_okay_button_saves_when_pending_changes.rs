@@ -4,6 +4,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
 const ROOT: &str = "Blizzard_AddOnList";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn okay_button_saves_pending_changes_and_reloads_when_needed() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -78,4 +80,5 @@ fn okay_button_saves_pending_changes_and_reloads_when_needed() {
             "`AddonList.OkayButton:Click()` must hide the panel and trigger `C_AddOns.SaveAddOns()`"
         );
     });
+}
 }

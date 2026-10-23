@@ -4,6 +4,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
 const ROOT: &str = "Blizzard_AdventureMap";
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_onload_adds_standard_data_providers_in_order() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -63,6 +65,7 @@ fn adventure_map_onload_adds_standard_data_providers_in_order() {
 
         assert_provider_order(surface);
     });
+}
 }
 
 type ProviderOrderSurface = (i64, bool, bool, bool, bool);

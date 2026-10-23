@@ -69,6 +69,8 @@ fn load_full_game_ui_with_plunderstorm_basics() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_basics_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&plunderstorm_basics_dir())
@@ -90,7 +92,9 @@ fn blizzard_plunderstorm_basics_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_basics_toc_declares_load_on_demand_with_allow_load_both() {
     let toc = TocFile::from_file(&plunderstorm_basics_toc())
@@ -146,7 +150,9 @@ fn blizzard_plunderstorm_basics_toc_declares_load_on_demand_with_allow_load_both
          C_WoWLabsMatchmaking.GetCurrentParty (glue-screen), both server-authoritative"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_basics_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(plunderstorm_basics_toc())
@@ -201,7 +207,9 @@ fn blizzard_plunderstorm_basics_toc_declares_metadata_in_raw_bytes() {
          flavor-gate"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_basics_toc_lists_two_files_in_canonical_order() {
     let toc = TocFile::from_file(&plunderstorm_basics_toc())
@@ -220,6 +228,7 @@ fn blizzard_plunderstorm_basics_toc_lists_two_files_in_canonical_order() {
          Blizzard_PlunderstormBasics.xml SECOND (materializes the virtual button template \
          + the named container frame)"
     );
+}
 }
 
 #[test]
@@ -247,6 +256,7 @@ fn blizzard_plunderstorm_basics_does_not_appear_in_eager_discovery_for_any_scree
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_basics_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -259,6 +269,7 @@ fn blizzard_plunderstorm_basics_appears_in_full_addon_inventory() {
          full inventory is a structural listing of every parseable TOC including LoD \
          addons"
     );
+}
 }
 
 prefork_full_ui_case! {
@@ -277,11 +288,13 @@ prefork_full_ui_case! {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_plunderstorm_basics_is_addon_loaded_after_explicit_load() {
     let env = load_full_game_ui_with_plunderstorm_basics();
     blizzard_plunderstorm_basics_is_addon_loaded_after_explicit_load::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -309,11 +322,13 @@ prefork_full_ui_case! {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_plunderstorm_basics_publishes_two_mixins() {
     let env = load_full_game_ui_with_plunderstorm_basics();
     blizzard_plunderstorm_basics_publishes_two_mixins::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -346,11 +361,13 @@ prefork_full_ui_case! {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_plunderstorm_basics_creates_named_non_virtual_frame() {
     let env = load_full_game_ui_with_plunderstorm_basics();
     blizzard_plunderstorm_basics_creates_named_non_virtual_frame::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -375,11 +392,13 @@ prefork_full_ui_case! {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_plunderstorm_basics_does_not_leak_virtual_template_to_globals() {
     let env = load_full_game_ui_with_plunderstorm_basics();
     blizzard_plunderstorm_basics_does_not_leak_virtual_template_to_globals::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -406,9 +425,11 @@ prefork_full_ui_case! {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_plunderstorm_basics_loads_without_addon_specific_lua_errors() {
     let env = load_full_game_ui_with_plunderstorm_basics();
     blizzard_plunderstorm_basics_loads_without_addon_specific_lua_errors::run(&env);
+}
 }

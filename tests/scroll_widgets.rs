@@ -612,7 +612,10 @@ fn test_scrollframe_template_creates_scrollbar() {
     .unwrap();
 
     let has_scrollbar: bool = env
-        .eval("return TestScrollFrameTemplate.ScrollBar ~= nil")
+        .eval(&format!(
+            "return _G[{:?}] ~= nil",
+            common::template_child_name("TestScrollFrameTemplate", "ScrollBar")
+        ))
         .unwrap();
     assert!(
         has_scrollbar,
@@ -633,10 +636,16 @@ fn test_scrollbar_has_buttons() {
     .unwrap();
 
     let has_up: bool = env
-        .eval("return TestScrollBarButtons.ScrollBar.ScrollUpButton ~= nil")
+        .eval(&format!(
+            "return _G[{:?}] ~= nil",
+            common::template_child_name("TestScrollBarButtons", "ScrollBarScrollUpButton")
+        ))
         .unwrap();
     let has_down: bool = env
-        .eval("return TestScrollBarButtons.ScrollBar.ScrollDownButton ~= nil")
+        .eval(&format!(
+            "return _G[{:?}] ~= nil",
+            common::template_child_name("TestScrollBarButtons", "ScrollBarScrollDownButton")
+        ))
         .unwrap();
 
     assert!(has_up, "ScrollBar should have ScrollUpButton");
@@ -656,7 +665,10 @@ fn test_scrollbar_has_thumb_texture() {
     .unwrap();
 
     let has_thumb: bool = env
-        .eval("return TestScrollBarThumb.ScrollBar.ThumbTexture ~= nil")
+        .eval(&format!(
+            "return _G[{:?}]:GetThumbTexture() ~= nil",
+            common::template_child_name("TestScrollBarThumb", "ScrollBar")
+        ))
         .unwrap();
     assert!(has_thumb, "ScrollBar should have ThumbTexture");
 }
@@ -792,18 +804,27 @@ fn test_scroll_button_has_textures() {
     )
     .unwrap();
 
-    // Check that ScrollUpButton has its textures from UIPanelScrollUpButtonTemplate
+    // Check that ScrollUpButton has its textures from UIPanelScrollUpButtonTemplate.
+    let up_button = common::template_child_name("TestScrollBtnTex", "ScrollBarScrollUpButton");
     let has_normal: bool = env
-        .eval("return TestScrollBtnTex.ScrollBar.ScrollUpButton.Normal ~= nil")
+        .eval(&format!(
+            "return _G[{up_button:?}]:GetNormalTexture() ~= nil"
+        ))
         .unwrap();
     let has_pushed: bool = env
-        .eval("return TestScrollBtnTex.ScrollBar.ScrollUpButton.Pushed ~= nil")
+        .eval(&format!(
+            "return _G[{up_button:?}]:GetPushedTexture() ~= nil"
+        ))
         .unwrap();
     let has_disabled: bool = env
-        .eval("return TestScrollBtnTex.ScrollBar.ScrollUpButton.Disabled ~= nil")
+        .eval(&format!(
+            "return _G[{up_button:?}]:GetDisabledTexture() ~= nil"
+        ))
         .unwrap();
     let has_highlight: bool = env
-        .eval("return TestScrollBtnTex.ScrollBar.ScrollUpButton.Highlight ~= nil")
+        .eval(&format!(
+            "return _G[{up_button:?}]:GetHighlightTexture() ~= nil"
+        ))
         .unwrap();
 
     assert!(has_normal, "ScrollUpButton should have Normal texture");
@@ -819,11 +840,14 @@ fn test_scroll_button_has_textures() {
 // HybridScrollBarTemplate Tests (requires SharedXML)
 // ============================================================================
 
-#[test]
-fn test_hybrid_scroll_template() {
-    let env = env_with_shared_xml();
+#[cfg(not(feature = "client-wrath"))]
+mod hybrid_fixture {
+    use super::*;
 
-    env.exec(
+    pub fn assert_template() {
+        let env = env_with_shared_xml();
+
+        env.exec(
         r#"
         local hsb = CreateFrame("Slider", "TestHybridScrollBar", UIParent, "HybridScrollBarTemplate")
         hsb:SetSize(16, 200)
@@ -831,55 +855,54 @@ fn test_hybrid_scroll_template() {
     )
     .unwrap();
 
-    // Should have track textures
-    let has_thumb: bool = env
-        .eval("return TestHybridScrollBar.ThumbTexture ~= nil")
-        .unwrap();
-    let has_global_thumb: bool = env
-        .eval("return TestHybridScrollBarThumbTexture ~= nil")
-        .unwrap();
-    let has_top: bool = env
-        .eval("return TestHybridScrollBar.ScrollBarTop ~= nil")
-        .unwrap();
-    let has_mid: bool = env
-        .eval("return TestHybridScrollBar.ScrollBarMiddle ~= nil")
-        .unwrap();
-    let has_bot: bool = env
-        .eval("return TestHybridScrollBar.ScrollBarBottom ~= nil")
-        .unwrap();
+        // Should have track textures
+        let has_thumb: bool = env
+            .eval("return TestHybridScrollBar.ThumbTexture ~= nil")
+            .unwrap();
+        let has_global_thumb: bool = env
+            .eval("return TestHybridScrollBarThumbTexture ~= nil")
+            .unwrap();
+        let has_top: bool = env
+            .eval("return TestHybridScrollBar.ScrollBarTop ~= nil")
+            .unwrap();
+        let has_mid: bool = env
+            .eval("return TestHybridScrollBar.ScrollBarMiddle ~= nil")
+            .unwrap();
+        let has_bot: bool = env
+            .eval("return TestHybridScrollBar.ScrollBarBottom ~= nil")
+            .unwrap();
 
-    assert!(has_thumb, "HybridScrollBar should have ThumbTexture");
-    assert!(
-        has_global_thumb,
-        "HybridScrollBar ThumbTexture should be published as a named global"
-    );
-    assert!(has_top, "HybridScrollBar should have ScrollBarTop");
-    assert!(has_mid, "HybridScrollBar should have ScrollBarMiddle");
-    assert!(has_bot, "HybridScrollBar should have ScrollBarBottom");
+        assert!(has_thumb, "HybridScrollBar should have ThumbTexture");
+        assert!(
+            has_global_thumb,
+            "HybridScrollBar ThumbTexture should be published as a named global"
+        );
+        assert!(has_top, "HybridScrollBar should have ScrollBarTop");
+        assert!(has_mid, "HybridScrollBar should have ScrollBarMiddle");
+        assert!(has_bot, "HybridScrollBar should have ScrollBarBottom");
 
-    // Should have scroll buttons
-    let has_up: bool = env
-        .eval("return TestHybridScrollBar.ScrollUpButton ~= nil")
-        .unwrap();
-    let has_down: bool = env
-        .eval("return TestHybridScrollBar.ScrollDownButton ~= nil")
-        .unwrap();
+        // Should have scroll buttons
+        let has_up: bool = env
+            .eval("return TestHybridScrollBar.ScrollUpButton ~= nil")
+            .unwrap();
+        let has_down: bool = env
+            .eval("return TestHybridScrollBar.ScrollDownButton ~= nil")
+            .unwrap();
 
-    assert!(has_up, "HybridScrollBar should have ScrollUpButton");
-    assert!(has_down, "HybridScrollBar should have ScrollDownButton");
-}
+        assert!(has_up, "HybridScrollBar should have ScrollUpButton");
+        assert!(has_down, "HybridScrollBar should have ScrollDownButton");
+    }
 
-#[test]
-fn test_hybrid_scroll_template_applies_declared_thumb_texture() {
-    let env = env_with_shared_xml();
-    assert!(
-        wow_ui_sim::xml::get_template_chain("HybridScrollBarTemplate")
-            .iter()
-            .any(|entry| entry.frame.thumb_texture().is_some()),
-        "SharedXML should register HybridScrollBarTemplate's inherited ThumbTexture"
-    );
+    pub fn assert_thumb_texture() {
+        let env = env_with_shared_xml();
+        assert!(
+            wow_ui_sim::xml::get_template_chain("HybridScrollBarTemplate")
+                .iter()
+                .any(|entry| entry.frame.thumb_texture().is_some()),
+            "SharedXML should register HybridScrollBarTemplate's inherited ThumbTexture"
+        );
 
-    env.exec(
+        env.exec(
         r#"
         local hsb = CreateFrame("Slider", "TestHybridScrollBarThumbXml", UIParent, "HybridScrollBarTemplate")
         hsb:SetSize(16, 200)
@@ -887,9 +910,9 @@ fn test_hybrid_scroll_template_applies_declared_thumb_texture() {
     )
     .unwrap();
 
-    let applied: (bool, bool, f32, f32, String) = env
-        .eval(
-            r#"
+        let applied: (bool, bool, f32, f32, String) = env
+            .eval(
+                r#"
         local thumb = TestHybridScrollBarThumbXml:GetThumbTexture()
         return thumb == TestHybridScrollBarThumbXmlThumbTexture,
             TestHybridScrollBarThumbXml.thumbTexture == thumb,
@@ -897,25 +920,112 @@ fn test_hybrid_scroll_template_applies_declared_thumb_texture() {
             thumb:GetHeight(),
             thumb:GetTextureFilePath() or ""
     "#,
+            )
+            .unwrap();
+
+        assert_eq!(
+            applied,
+            (
+                true,
+                true,
+                18.0,
+                24.0,
+                "Interface\\Buttons\\UI-ScrollBar-Knob".to_string()
+            )
+        );
+    }
+}
+
+#[cfg(feature = "client-wrath")]
+mod hybrid_fixture {
+    // INFERRED from cached profile FrameXML, not native 12340 runtime proof.
+    use super::*;
+
+    pub fn load_and_create() -> WowLuaEnv {
+        let env = WowLuaEnv::new().unwrap();
+        let toc_path = wow_ui_sim::client_profile::blizzard_ui_framexml_toc().unwrap();
+        let toc = wow_ui_sim::toc::TocFile::parse(
+            toc_path.parent().unwrap(),
+            // One TOC: the loader deduplicates whole addon directories.
+            "UIPanelTemplates.lua\nUIPanelTemplates.xml\nHybridScrollFrame.lua\nHybridScrollFrame.xml\n",
+        );
+        let loaded = wow_ui_sim::loader::load_addon_from_toc(&env.loader_env(), &toc).unwrap();
+        assert!(loaded.warnings.is_empty(), "{:?}", loaded.warnings);
+        env.exec(
+            r#"
+            local sf = CreateFrame("ScrollFrame", "LegacyHybrid", UIParent, "HybridScrollFrameTemplate")
+            sf:SetSize(200, 100)
+            sf:SetPoint("CENTER")
+            sf.buttonHeight = 20
+            local bar = CreateFrame("Slider", "LegacyHybridBar", sf, "HybridScrollBarTemplate")
+            HybridScrollFrame_Update(sf, 400, 140)
+            bar:SetValue(45)
+            assert(HybridScrollFrame_GetOffset(sf) == 2)
+            assert(sf:GetVerticalScroll() == 5)
+            "#,
         )
         .unwrap();
+        env
+    }
 
-    assert_eq!(
-        applied,
-        (
-            true,
-            true,
-            18.0,
-            24.0,
-            "Interface\\Buttons\\UI-ScrollBar-Knob".to_string()
+    pub fn assert_template() {
+        let env = load_and_create();
+        env.exec(
+            r#"
+            local sf, bar = LegacyHybrid, LegacyHybridBar
+            assert(sf.scrollBar == bar)
+            assert(bar:GetThumbTexture() == LegacyHybridBarThumbTexture)
+            assert(LegacyHybridBarTop:GetParent() == bar)
+            assert(LegacyHybridBarMiddle:GetParent() == bar)
+            assert(LegacyHybridBarBottom:GetParent() == bar)
+            assert(sf.scrollUp == LegacyHybridBarScrollUpButton)
+            assert(sf.scrollDown == LegacyHybridBarScrollDownButton)
+            assert(sf.scrollUp:IsEnabled() and sf.scrollDown:IsEnabled())
+            "#,
         )
-    );
+        .unwrap();
+    }
+
+    pub fn assert_thumb_texture() {
+        let env = load_and_create();
+        let applied: (bool, bool, f32, f32, String) = env
+            .eval(
+                r#"
+                local thumb = LegacyHybridBar:GetThumbTexture()
+                return thumb == LegacyHybridBarThumbTexture,
+                    LegacyHybridBar.thumbTexture == thumb,
+                    thumb:GetWidth(), thumb:GetHeight(), thumb:GetTextureFilePath() or ""
+                "#,
+            )
+            .unwrap();
+        assert_eq!(
+            applied,
+            (
+                true,
+                true,
+                16.0,
+                24.0,
+                "Interface\\Buttons\\UI-ScrollBar-Knob".to_string()
+            )
+        );
+    }
+}
+
+#[test]
+fn test_hybrid_scroll_template() {
+    hybrid_fixture::assert_template();
+}
+
+#[test]
+fn test_hybrid_scroll_template_applies_declared_thumb_texture() {
+    hybrid_fixture::assert_thumb_texture();
 }
 
 // ============================================================================
 // TextureKitConstants Tests (requires SharedXML)
 // ============================================================================
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_texture_kit_constants_defined() {
     let env = env_with_shared_xml();
@@ -937,6 +1047,7 @@ fn test_texture_kit_constants_defined() {
         use_atlas_size,
         "TextureKitConstants.UseAtlasSize should be true"
     );
+}
 }
 
 // ============================================================================

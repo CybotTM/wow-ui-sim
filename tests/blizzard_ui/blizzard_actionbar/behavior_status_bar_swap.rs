@@ -167,6 +167,7 @@ const HOUSE_FAVOR_BAR_INDEX: i64 = 6;
 const EXPECTED_CONTAINER_COUNT: i64 = 2;
 const SEEDED_HOUSE_GUID: &str = "test-house-guid";
 
+post_wrath_ui_fixture! {
 #[test]
 fn manager_updates_bars_shown_to_priority_sorted_truncated_indices() {
     test_timeout! {
@@ -178,6 +179,7 @@ fn manager_updates_bars_shown_to_priority_sorted_truncated_indices() {
         assert_post_update_shown_bar_indices(env);
     });
     }
+}
 }
 
 fn assert_cold_manager_globals_resolve(env: &WowLuaEnv) {

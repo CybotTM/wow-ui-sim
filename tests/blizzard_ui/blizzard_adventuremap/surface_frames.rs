@@ -4,6 +4,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
 const ROOT: &str = "Blizzard_AdventureMap";
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_frame_loads_as_map_canvas_panel() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -23,9 +25,11 @@ fn adventure_map_frame_loads_as_map_canvas_panel() {
         assert_adventure_map_frame_surface(surface);
     });
 }
+}
 
 type AdventureMapFrameSurface = (String, String, String, String, String, String);
 
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_quest_choice_dialog_loads_with_mixin_and_children() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -47,6 +51,7 @@ fn adventure_map_quest_choice_dialog_loads_with_mixin_and_children() {
 
         assert_quest_choice_dialog_surface(surface);
     });
+}
 }
 
 type QuestChoiceDialogSurface = (

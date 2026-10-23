@@ -5,9 +5,9 @@
 use crate::common;
 mod render_order_support;
 
-use common::env_with_shared_xml;
 use render_order_support::*;
 use wow_ui_sim::iced_app::compute_frame_rect;
+use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::headless::render_to_image;
 
 // ============================================================================
@@ -19,7 +19,7 @@ use wow_ui_sim::render::headless::render_to_image;
 /// sibling in the same strata.
 #[test]
 fn higher_level_frame_texture_renders_after_lower_level_content() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -77,7 +77,7 @@ fn higher_level_frame_texture_renders_after_lower_level_content() {
 
 #[test]
 fn late_created_texture_invalidates_cached_strata_buckets() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -122,7 +122,7 @@ fn late_created_texture_invalidates_cached_strata_buckets() {
 
 #[test]
 fn late_created_frame_invalidates_cached_strata_buckets() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -162,7 +162,7 @@ fn late_created_frame_invalidates_cached_strata_buckets() {
 
 #[test]
 fn late_set_draw_layer_invalidates_cached_strata_buckets() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -229,7 +229,7 @@ fn late_set_draw_layer_invalidates_cached_strata_buckets() {
 
 #[test]
 fn same_draw_layer_preserves_cached_strata_buckets() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -263,7 +263,7 @@ fn same_draw_layer_preserves_cached_strata_buckets() {
 
 #[test]
 fn same_frame_strata_preserves_cached_strata_buckets() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -293,7 +293,7 @@ fn same_frame_strata_preserves_cached_strata_buckets() {
 
 #[test]
 fn replacing_existing_texture_preserves_cached_strata_buckets() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -326,7 +326,7 @@ fn replacing_existing_texture_preserves_cached_strata_buckets() {
 
 #[test]
 fn set_texture_moves_region_after_existing_same_layer_siblings() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -379,7 +379,7 @@ fn set_texture_moves_region_after_existing_same_layer_siblings() {
 
 #[test]
 fn late_set_frame_level_invalidates_cached_strata_buckets() {
-    let env = env_with_shared_xml();
+    let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
@@ -459,6 +459,7 @@ fn late_set_frame_level_invalidates_cached_strata_buckets() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn isolated_world_map_stack_opens_and_populates_world_quest_pins() {
     common::with_timeout(120, move || {
@@ -499,6 +500,7 @@ fn isolated_world_map_stack_opens_and_populates_world_quest_pins() {
             "isolated world map stack should still populate visible world quest pins"
         );
     });
+}
 }
 
 #[test]
@@ -643,6 +645,7 @@ fn pixel_delta(lhs: [u8; 4], rhs: [u8; 4]) -> u32 {
         + u32::from(lhs[2].abs_diff(rhs[2]))
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn isolated_world_map_seeded_world_quests_do_not_show_expiration_clock() {
     common::with_timeout(120, move || {
@@ -687,7 +690,9 @@ fn isolated_world_map_seeded_world_quests_do_not_show_expiration_clock() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn isolated_world_map_world_quest_circle_keeps_atlas_size() {
     common::with_timeout(120, move || {
@@ -709,4 +714,5 @@ fn isolated_world_map_world_quest_circle_keeps_atlas_size() {
             "world quest NormalTexture should keep its 32x32 atlas-sized rect, got {circle_rect:?}"
         );
     });
+}
 }

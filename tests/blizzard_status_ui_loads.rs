@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn status_ui_dir() -> PathBuf {
@@ -53,12 +54,16 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&status_ui_dir()).expect("StatusUI TOC resolves");
     assert_eq!(resolved, status_ui_toc(), "Bare TOC — no flavor suffixes");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_load_on_demand_with_no_dependencies() {
     let toc = TocFile::from_file(&status_ui_toc()).expect("TOC parses");
@@ -76,7 +81,9 @@ fn toc_is_load_on_demand_with_no_dependencies() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.saved_variables().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_has_no_allow_load_or_game_type_restriction() {
     let toc = TocFile::from_file(&status_ui_toc()).expect("TOC parses");
@@ -90,7 +97,9 @@ fn toc_has_no_allow_load_or_game_type_restriction() {
     assert!(!toc.is_load_first());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_absent_restricts_to_game_screen_only() {
     let toc = TocFile::from_file(&status_ui_toc()).expect("TOC parses");
@@ -108,7 +117,9 @@ fn allow_load_absent_restricts_to_game_screen_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_three_metadata_directives() {
     let raw = std::fs::read_to_string(status_ui_toc()).expect("TOC reads utf-8");
@@ -135,7 +146,9 @@ fn toc_raw_bytes_pin_three_metadata_directives() {
     assert!(!raw.contains("## UseSecureEnvironment"));
     assert!(!raw.contains("## LoadFirst"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_orders_lua_before_xml() {
     let toc = TocFile::from_file(&status_ui_toc()).expect("TOC parses");
@@ -158,6 +171,7 @@ fn body_orders_lua_before_xml() {
         "Lua must precede XML — `mixin=\"StatusUIMixin\"` on the virtual \
          template resolves at template-registration time"
     );
+}
 }
 
 #[test]
@@ -297,6 +311,7 @@ fn status_ui_frame_template_materializes_via_create_frame(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn declared_dependents_pin_to_load_on_demand_addons() {
     let gm_chat_toc = blizzard_ui_dir().join("Blizzard_GMChatUI/Blizzard_GMChatUI.toc");
@@ -328,4 +343,5 @@ fn declared_dependents_pin_to_load_on_demand_addons() {
         survey.is_load_on_demand(),
         "Blizzard_WowSurveyUI is LoadOnDemand — same exclusion rule"
     );
+}
 }

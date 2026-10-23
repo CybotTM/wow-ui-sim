@@ -6,6 +6,7 @@ use wow_ui_sim::lua_api::state::ArtifactInfo;
 const ROOT: &str = "Blizzard_ArtifactUI";
 const ARTIFACT_ICON: &str = "Interface/Icons/inv_sword_2h_artifactashbringer_d_01";
 
+post_wrath_ui_fixture! {
 #[test]
 fn confirm_respec_popup_watchdog_hides_popup_and_panel_when_npc_disappears() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -48,7 +49,10 @@ fn confirm_respec_popup_watchdog_hides_popup_and_panel_when_npc_disappears() {
         );
     });
 }
+}
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn confirm_respec_popup_accept_confirms_respec_before_hiding_panel() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -70,6 +74,7 @@ fn confirm_respec_popup_accept_confirms_respec_before_hiding_panel() {
             "`{ROOT}` ConfirmRespec must zero purchased artifact ranks"
         );
     });
+}
 }
 
 fn seed_respec_artifact(env: &wow_ui_sim::lua_api::WowLuaEnv, respec_npc_active: bool) {

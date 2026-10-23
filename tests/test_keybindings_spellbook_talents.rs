@@ -647,6 +647,7 @@ fn talent_panel_has_at_least_one_visible_talent_node_frame() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn talent_panel_hero_spec_button_uses_protection_hero_icon_atlases() {
     test_timeout! {
@@ -715,4 +716,5 @@ fn talent_panel_hero_spec_button_uses_protection_hero_icon_atlases() {
             "Protection hero talent picker should render atlas-backed hero icons: {result}"
         );
     }
+}
 }

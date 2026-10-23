@@ -24,7 +24,7 @@ Expose existing currency-list backing fields through `C_CurrencyInfo.GetCurrency
 ## Implementation inventory
 
 - `src/lua_api/globals/currency_data.rs` — existing `CurrencyEntry` fields and static list; unchanged.
-- `src/c_api/item_spell/c_currency.rs` — namespaced list-info projection. Retail additionally publishes `currencyListDepth` through the displayed-index contract; non-Retail retains its existing field set.
+- `src/c_api/item_spell/c_currency.rs` — namespaced list-info projection. Retail additionally publishes `currencyListDepth` through the displayed-index contract and `isTypeUnused`/`discovered` through the [unused-currency contract](currency-unused-mutations.md); non-Retail retains its existing field set.
 - `src/mists/compat_bootstrap.lua` — existing Mists legacy tuple adapter.
 - `tests/mists_currency_list.rs` — existing Mists namespace and legacy-tuple controls.
 - `tests/currency_info_probes.rs` — shared supplied-state display and missing-row regressions.

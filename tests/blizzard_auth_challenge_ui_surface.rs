@@ -32,6 +32,7 @@ fn assert_no_lua_errors(env: &WowLuaEnv, test_name: &str) {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auth_challenge_ui_publishes_expected_globals() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -50,7 +51,9 @@ fn blizzard_auth_challenge_ui_publishes_expected_globals() {
         assert_no_lua_errors(env, "global-surface test");
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auth_challenge_ui_publishes_expected_frame_tree() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -108,7 +111,9 @@ fn blizzard_auth_challenge_ui_publishes_expected_frame_tree() {
         assert_no_lua_errors(env, "frame-tree test");
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auth_challenge_ui_publishes_expected_child_frames_and_templates() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -153,4 +158,5 @@ fn blizzard_auth_challenge_ui_publishes_expected_child_frames_and_templates() {
 
         assert_no_lua_errors(env, "child-frame/template test");
     });
+}
 }

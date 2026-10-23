@@ -1,5 +1,7 @@
 //! rilua implementations for map, minimap, fog-of-war, and unit-position APIs.
 
+mod wrath_ping;
+
 use crate::lua_api::frame::methods::core_state;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, frame_id_from_stack, get_or_create_frame_fields, table_get,
@@ -616,7 +618,11 @@ where
 fn set_zoom(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let requested = stack_i32(state, 2).unwrap_or(0);
-    let clamped = requested.clamp(0, MINIMAP_ZOOM_LEVELS - 1);
+    let clamped = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        (requested as u32).min((MINIMAP_ZOOM_LEVELS - 1) as u32) as i32
+    } else {
+        requested.clamp(0, MINIMAP_ZOOM_LEVELS - 1)
+    };
     let fields = get_or_create_frame_fields(state, id);
     table_set(state, fields, MINIMAP_ZOOM_KEY, Val::Num(clamped as f64));
     Ok(0)
@@ -640,6 +646,9 @@ fn get_zoom_levels(state: &mut LuaState) -> LuaResult<u32> {
 
 fn ping_location(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        return wrath_ping::publish_local_ping(state, id);
+    }
     let x = stack_num(state, 2).unwrap_or(0.0) as f32;
     let y = stack_num(state, 3).unwrap_or(0.0) as f32;
     let mut sim = borrow_state_mut(state)?;

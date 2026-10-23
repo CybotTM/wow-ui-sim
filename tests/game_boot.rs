@@ -70,6 +70,7 @@ fn load_game_screen() -> WowLuaEnv {
     }
     wow_ui_sim::xml::register_intrinsic_templates();
 
+    common::load_profile_framexml(&env);
     let ui = blizzard_ui_dir();
     let blizzard = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
     for (name, toc_path) in &blizzard {

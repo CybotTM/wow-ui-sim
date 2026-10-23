@@ -151,10 +151,17 @@ fn heaviest_blizzard_addons_stay_within_per_addon_load_budgets() {
     perf_test_timeout! {
             let loaded = load_timed_game_addons_with_saved_vars();
             let heaviest = heaviest_addons(&loaded.per_addon_timings, HEAVIEST_ADDON_COUNT);
+            let expected_samples = if cfg!(feature = "client-wrath") {
+                assert!(loaded.per_addon_timings.iter().any(|sample| sample.name == "FrameXML"));
+                assert!(loaded.addon_count > 0);
+                HEAVIEST_ADDON_COUNT.min(loaded.addon_count)
+            } else {
+                HEAVIEST_ADDON_COUNT
+            };
             assert_eq!(
                 heaviest.len(),
-                HEAVIEST_ADDON_COUNT,
-                "expected at least {HEAVIEST_ADDON_COUNT} per-addon timing samples, got {}",
+                expected_samples,
+                "expected {expected_samples} per-addon timing samples, got {}",
                 heaviest.len()
             );
 
@@ -230,11 +237,20 @@ fn collect_heavy_addon_regressions(
     regressions
 }
 
+fn active_heavy_addon_budgets() -> &'static [(&'static str, Duration)] {
+    if cfg!(feature = "client-wrath") {
+        // Simulator guard, not a native-client timing claim.
+        &[("FrameXML", ADDON_LOADING_BUDGET)]
+    } else {
+        KNOWN_HEAVY_ADDON_BUDGETS
+    }
+}
+
 fn collect_known_heavy_addon_budget_regressions(
     timing_by_name: &BTreeMap<&str, Duration>,
 ) -> Vec<String> {
     let mut regressions = Vec::new();
-    for (name, budget) in KNOWN_HEAVY_ADDON_BUDGETS {
+    for (name, budget) in active_heavy_addon_budgets() {
         let Some(total_time) = timing_by_name.get(name).copied() else {
             regressions.push(format!("missing per-addon timing sample for {name}"));
             continue;
@@ -253,7 +269,7 @@ fn collect_known_heavy_addon_budget_regressions(
 }
 
 fn collect_new_heavy_addon_outliers(heaviest: &[PerAddonLoadTiming]) -> Vec<String> {
-    let known_heavy_addons: BTreeSet<&str> = KNOWN_HEAVY_ADDON_BUDGETS
+    let known_heavy_addons: BTreeSet<&str> = active_heavy_addon_budgets()
         .iter()
         .map(|(name, _)| *name)
         .collect();

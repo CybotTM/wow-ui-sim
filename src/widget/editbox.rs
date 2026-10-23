@@ -14,6 +14,7 @@ pub(crate) struct EditBoxLayoutSettings {
     pub spacing: f32,
     pub smooth_scaling: bool,
     pub scale: f32,
+    pub password: bool,
 }
 
 impl EditBoxLayoutSettings {
@@ -29,6 +30,7 @@ impl EditBoxLayoutSettings {
             spacing: frame.text_line_spacing * frame.effective_scale,
             smooth_scaling: frame.font_string_smooth_scaling,
             scale: frame.effective_scale,
+            password: wrath_password(frame),
         }
     }
 
@@ -57,17 +59,17 @@ pub(crate) struct EditBoxLayoutInput {
 impl EditBoxLayoutInput {
     pub fn from_frame(frame: &Frame, size: (f32, f32)) -> Self {
         Self {
-            text: frame.text.clone(),
+            text: editbox_display_text(frame),
             font: frame.font.clone(),
-            cursor: frame.editbox_cursor_pos.max(0) as usize,
+            cursor: editbox_display_cursor(frame),
             settings: EditBoxLayoutSettings::from_frame(frame, size),
         }
     }
 
     pub fn matches_frame(&self, frame: &Frame, size: (f32, f32)) -> bool {
-        let same_text = self.text == frame.text;
+        let same_text = self.text == editbox_display_text(frame);
         let same_font = self.font == frame.font;
-        let same_cursor = self.cursor == frame.editbox_cursor_pos.max(0) as usize;
+        let same_cursor = self.cursor == editbox_display_cursor(frame);
         let same_settings = self.settings == EditBoxLayoutSettings::from_frame(frame, size);
         same_text && same_font && same_cursor && same_settings
     }
@@ -119,6 +121,32 @@ impl EditBoxPresentation {
                         .sum::<usize>()
             })
     }
+}
+
+fn wrath_password(frame: &Frame) -> bool {
+    crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+        && frame.editbox_password
+}
+
+fn editbox_display_text(frame: &Frame) -> Option<String> {
+    frame.text.as_ref().map(|text| {
+        if wrath_password(frame) {
+            "*".repeat(text.len())
+        } else {
+            text.clone()
+        }
+    })
+}
+
+fn editbox_display_cursor(frame: &Frame) -> usize {
+    let scalar = frame.editbox_cursor_pos.max(0) as usize;
+    if !wrath_password(frame) {
+        return scalar;
+    }
+    let text = frame.text.as_deref().unwrap_or_default();
+    text.char_indices()
+        .nth(scalar)
+        .map_or(text.len(), |(byte, _)| byte)
 }
 
 impl Frame {

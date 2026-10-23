@@ -6,7 +6,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn shared_widget_frames_dir() -> PathBuf {
@@ -23,6 +24,9 @@ const PUBLIC_MIXINS: &[&str] = &[
     "UIWidgetCenterDisplayFrameExtraButtonMixin",
 ];
 
+// Literal cached-addon snapshots only: Wrath manifest1-382/cache contains
+// no Blizzard_SharedWidgetFrames directory. Prefork behavior stays enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved =
@@ -215,6 +219,8 @@ fn eager_discovery_includes_addon_on_game_screen_only() {
              glue-screen addon hard-deps on it"
         );
     }
+}
+
 }
 
 prefork_full_ui_case! {

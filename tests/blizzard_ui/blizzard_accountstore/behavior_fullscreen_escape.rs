@@ -96,6 +96,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_key_down_method_exists_on_fullscreen_account_store_container_mixin() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -114,7 +115,9 @@ fn on_key_down_method_exists_on_fullscreen_account_store_container_mixin() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn fullscreen_container_exposes_leave_store_button_not_plan_named_leave_button() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -150,7 +153,9 @@ fn fullscreen_container_exposes_leave_store_button_not_plan_named_leave_button()
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_key_down_with_escape_calls_account_store_util_set_account_store_shown_false() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -206,7 +211,9 @@ fn on_key_down_with_escape_calls_account_store_util_set_account_store_shown_fals
         teardown_set_account_store_shown_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_key_down_with_non_escape_keys_is_no_op_on_account_store_util_set_account_store_shown() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -243,7 +250,9 @@ fn on_key_down_with_non_escape_keys_is_no_op_on_account_store_util_set_account_s
         teardown_set_account_store_shown_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_key_down_with_escape_does_not_invoke_leave_store_button_click() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -296,6 +305,7 @@ fn on_key_down_with_escape_does_not_invoke_leave_store_button_click() {
         teardown_leave_store_button_click_tracker(env);
         teardown_set_account_store_shown_tracker(env);
     });
+}
 }
 
 fn seed_set_account_store_shown_tracker(env: &WowLuaEnv) {

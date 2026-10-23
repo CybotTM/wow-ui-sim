@@ -49,6 +49,13 @@ fn load_settled_game_ui() -> WowLuaEnv {
     env.set_screen_mode(ScreenKind::Game);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
 
+    if cfg!(feature = "client-wrath") {
+        env.set_font_system(std::rc::Rc::new(std::cell::RefCell::new(
+            WowFontSystem::new(),
+        )));
+        common::wrath_watch_fixture::seed_watch_quests(&env);
+    }
+    common::load_profile_framexml(&env);
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
     for (name, toc_path) in &addons {
         load_addon(&env.loader_env(), toc_path)
@@ -56,6 +63,10 @@ fn load_settled_game_ui() -> WowLuaEnv {
     }
 
     env.apply_post_load_workarounds();
+    if cfg!(feature = "client-wrath") {
+        env.exec(include_str!("objective_tracker/wrath_watch.lua"))
+            .unwrap();
+    }
     settle_headless_startup(&env);
     env
 }
@@ -355,6 +366,10 @@ fn objective_tracker_quest_module_header_emits_glyph_quads(env: &WowLuaEnv) {
 
 prefork_full_ui_case! {
 fn objective_tracker_frame_layout_is_locked(env: &WowLuaEnv) {
+    if cfg!(feature = "client-wrath") {
+        env.exec(include_str!("objective_tracker/wrath_layout.lua")).unwrap();
+        return;
+    }
     #[cfg(feature = "client-retail")]
     settle_prefork_game_ui(env);
 

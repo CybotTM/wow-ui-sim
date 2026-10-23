@@ -45,6 +45,8 @@ expect(pool:IsActive(originalCallout), "nil hide should leave the container acti
 return table.concat(failures, "\n")
 "#;
 
+// Wrath has no ArrowCallout vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn hide_callout_with_nil_id_leaves_existing_callouts_untouched() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -66,6 +68,7 @@ fn hide_callout_with_nil_id_leaves_existing_callouts_untouched() {
             errors.join("\n")
         );
     });
+}
 }
 
 fn load_arrow_callout_frame(env: &wow_ui_sim::lua_api::WowLuaEnv) {

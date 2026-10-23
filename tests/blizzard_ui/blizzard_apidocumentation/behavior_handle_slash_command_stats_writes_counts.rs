@@ -9,6 +9,8 @@ use crate::common::panel_fixtures::{
 
 const ROOT: &str = "Blizzard_APIDocumentation";
 
+// APIDocumentation vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn stats_slash_command_writes_seeded_counts() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -77,6 +79,7 @@ fn stats_slash_command_writes_seeded_counts() {
         assert_eq!(1, event_count, "stats must count seeded system events");
         assert_eq!(1, table_count, "stats must count seeded system tables");
     });
+}
 }
 
 fn load_api_documentation(env: &wow_ui_sim::lua_api::WowLuaEnv) {

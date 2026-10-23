@@ -96,6 +96,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn refresh_selected_card_method_does_not_exist_on_either_mixin() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -128,6 +129,7 @@ fn refresh_selected_card_method_does_not_exist_on_either_mixin() {
         );
     });
 }
+}
 
 const ACTUAL_RACK_METHODS: &[(&str, &str)] = &[
     ("SetCategoryType", "Blizzard_AccountStoreItemRack.lua:20-24"),
@@ -148,6 +150,7 @@ const ABSENT_RACK_METHODS: &[(&str, &str)] = &[
     ),
 ];
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_item_rack_mixin_methods_match_actual_source() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -195,7 +198,9 @@ fn account_store_item_rack_mixin_methods_match_actual_source() {
         }
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_event_for_matching_item_id_calls_set_item_id_with_matching_id() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -257,7 +262,9 @@ fn on_event_for_matching_item_id_calls_set_item_id_with_matching_id() {
         teardown_set_item_id_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn on_event_for_non_matching_item_id_does_not_call_set_item_id() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -297,7 +304,9 @@ fn on_event_for_non_matching_item_id_does_not_call_set_item_id() {
         teardown_set_item_id_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn set_item_id_re_reads_c_account_store_get_item_info_for_the_affected_item_id() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -344,6 +353,7 @@ fn set_item_id_re_reads_c_account_store_get_item_info_for_the_affected_item_id()
 
         teardown_get_item_info_tracker(env);
     });
+}
 }
 
 fn seed_set_item_id_tracker(env: &WowLuaEnv) {

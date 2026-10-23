@@ -105,6 +105,8 @@ fn fire_startup_events(env: &WowLuaEnv) {
 /// PROXY_SHOW_ACTIONBAR_4/5 settings (backed by GetActionBarToggles).
 #[test]
 fn test_right_action_bars_hidden_by_default() {
+    wrath_action_case!(right_bars_hidden);
+
     let env = env_with_action_bar();
 
     let results: (bool, bool) = env
@@ -122,6 +124,8 @@ fn test_right_action_bars_hidden_by_default() {
 
 #[test]
 fn test_main_action_bar_visible_after_startup() {
+    wrath_action_case!(main_visible);
+
     let env = env_with_action_bar();
 
     let visible: bool = env
@@ -132,6 +136,8 @@ fn test_main_action_bar_visible_after_startup() {
 
 #[test]
 fn test_main_action_bar_end_caps_visible_after_startup() {
+    wrath_action_case!(endcaps);
+
     let env = env_with_action_bar();
 
     let (shown, left_atlas, right_atlas): (bool, String, String) = env
@@ -156,6 +162,8 @@ fn test_main_action_bar_end_caps_visible_after_startup() {
 
 #[test]
 fn test_action_buttons_visible_after_startup() {
+    wrath_action_case!(buttons_visible);
+
     let env = env_with_action_bar();
 
     let count: i32 = env
@@ -177,6 +185,8 @@ fn test_action_buttons_visible_after_startup() {
 
 #[test]
 fn test_action_buttons_have_showgrid_attribute() {
+    wrath_action_case!(showgrid);
+
     let env = env_with_action_bar();
 
     let all_have_grid: bool = env
@@ -197,6 +207,8 @@ fn test_action_buttons_have_showgrid_attribute() {
 
 #[test]
 fn test_action_button_size() {
+    wrath_action_case!(button_size);
+
     let env = env_with_action_bar();
 
     let size: (f64, f64) = env
@@ -213,6 +225,8 @@ fn test_action_button_size() {
 
 #[test]
 fn test_action_bar_env_can_bootstrap_twice_in_same_process() {
+    wrath_action_case!(bootstrap_twice);
+
     common::with_perf_lock(|| {
         let first = build_action_bar_env();
         let first_visible: bool = first
@@ -231,6 +245,8 @@ fn test_action_bar_env_can_bootstrap_twice_in_same_process() {
 
 #[test]
 fn test_main_action_bar_size() {
+    wrath_action_case!(main_size);
+
     let env = env_with_action_bar();
 
     let size: (f64, f64) = env
@@ -250,6 +266,7 @@ fn test_main_action_bar_size() {
     );
 }
 
+post_wrath_ui_fixture! {
 /// Verify the core EditMode enter/exit flow works without pcall.
 ///
 /// AccountSettings:OnEditModeEnter/Exit are excluded — they call
@@ -285,9 +302,12 @@ fn test_enter_exit_edit_mode_core_steps() {
         failures
     );
 }
+}
 
 #[test]
 fn test_status_tracking_xp_and_reputation_bars_layout_locked() {
+    wrath_action_case!(status_layout);
+
     let env = env_with_action_bar();
     let result: String = env
         .eval(
@@ -503,6 +523,8 @@ fn test_status_tracking_xp_and_reputation_bars_layout_locked() {
 
 #[test]
 fn test_bag_bar_layout_locked() {
+    wrath_action_case!(bag_layout);
+
     let env = env_with_action_bar();
     let result: String = env
         .eval(

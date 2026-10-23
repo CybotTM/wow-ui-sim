@@ -1,5 +1,7 @@
 //! Tooltip visual rendering — sizing, data collection, and quad emission.
 
+mod wrath;
+
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
@@ -28,6 +30,8 @@ const TOOLTIP_LINE_SPACING: f32 = 2.0;
 const TOOLTIP_HEADER_FONT_SIZE: f32 = 14.0;
 const TOOLTIP_BODY_FONT_SIZE: f32 = 12.0;
 const DOUBLE_LINE_GAP: f32 = 20.0;
+// Local UI value, clean-room wow-tooltip-units-12340-facts.md, revision0e4e9fe0.
+const WRATH_DOUBLE_LINE_GAP: f32 = 38.400002;
 const TOOLTIP_CENTER_OVERLAP: f32 = 4.0;
 
 /// Pre-collected tooltip render data for a single tooltip frame.
@@ -100,7 +104,10 @@ pub fn update_tooltip_sizes(state: &mut SimState, font_system: &mut WowFontSyste
 ///
 /// Two-pass approach: first determine width from non-wrapping lines,
 /// then measure wrapped lines' heights against that width.
-fn measure_tooltip(state: &SimState, id: u64, font_system: &mut WowFontSystem) -> (f32, f32) {
+fn measure_tooltip(state: &mut SimState, id: u64, font_system: &mut WowFontSystem) -> (f32, f32) {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        return wrath::measure_tooltip(state, id, font_system);
+    }
     let td = match state.tooltips.get(&id) {
         Some(td) => td,
         None => return (0.0, 0.0),
@@ -137,6 +144,18 @@ fn measure_tooltip(state: &SimState, id: u64, font_system: &mut WowFontSystem) -
     let width = content_width + insets.left + insets.right;
     let height = total_height + insets.top + insets.bottom;
     (width, height)
+}
+
+fn tooltip_column_gap(left: &str, right: Option<&str>, effective_scale: f32) -> f32 {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+        return DOUBLE_LINE_GAP;
+    }
+    // Wrath AddDoubleLine shows each column only for nonempty text.
+    if left.is_empty() || right.is_none_or(str::is_empty) {
+        0.0
+    } else {
+        WRATH_DOUBLE_LINE_GAP * effective_scale
+    }
 }
 
 /// Measure the content width from non-wrapping tooltip lines.
@@ -531,8 +550,9 @@ fn emit_tooltip_line(
         .as_ref()
         .map(|t| measure_tooltip_text_width(tr.font_sys, t, font_size));
 
+    let gap = tooltip_column_gap(&line.left_text, line.right_text.as_deref(), eff_scale);
     let left_width = match right_width {
-        Some(rw) if rw > 0.0 => (placement.width - rw - DOUBLE_LINE_GAP).max(0.0),
+        Some(rw) if rw > 0.0 => (placement.width - rw - gap).max(0.0),
         _ => placement.width,
     };
     emit_left_tooltip_text(tr, line, placement, left_width, font_size);
@@ -595,8 +615,10 @@ fn emit_right_tooltip_text(
     right_text: &str,
     font_size: f32,
 ) {
-    let right_x = placement.x + left_width + DOUBLE_LINE_GAP;
-    let right_w = (placement.width - left_width - DOUBLE_LINE_GAP).max(0.0);
+    let effective_scale = font_size / line.font_size;
+    let gap = tooltip_column_gap(&line.left_text, line.right_text.as_deref(), effective_scale);
+    let right_x = placement.x + left_width + gap;
+    let right_w = (placement.width - left_width - gap).max(0.0);
     let right_bounds = tooltip_line_bounds(right_x, placement.y, right_w, placement.height);
     emit_tooltip_text_segments(
         tr,

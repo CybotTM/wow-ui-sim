@@ -102,6 +102,8 @@ pollster = "0.4"
 tempfile = "3"
 
 [features]
+# Opt-in installed Ellesmere AuraKit acceptance test; requires ELLESMERE_AURA_KIT_PATH.
+ellesmere-acceptance = ["client-wowforever"]
 # fast-build is opt-in because the iced dylib hits MSVC's LNK1189 object limit
 # on Windows. Local Linux dev/debug builds can use `--features fast-build` for
 # faster incremental rebuilds. Release builds should use:
@@ -180,6 +182,11 @@ name = "integration"
 path = "tests/integration.rs"
 
 [[test]]
+name = "wrath_core_labels_real_paths"
+path = "tests/wrath_core_labels_real_paths.rs"
+required-features = ["client-wrath"]
+
+[[test]]
 name = "prefork_full_ui"
 path = "tests/prefork_full_ui.rs"
 harness = false
@@ -224,6 +231,10 @@ required-features = ["client-wowforever"]
 name = "patch_12_1_audit"
 path = "patch-tests/patch_12_1.rs"
 required-features = ["client-ptr"]
+
+[[test]]
+name = "fast_handler_late_bind"
+path = "tests/fast_handler_late_bind.rs"
 
 [[test]]
 name = "frame_edit_mode_methods"
@@ -298,6 +309,31 @@ path = "tests/classic_r10r14.rs"
 [[test]]
 name = "wrath_residual_b"
 path = "tests/wrath_residual_b.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_reloadui_12340"
+path = "tests/wrath_reloadui_12340.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_quest_accept"
+path = "tests/wrath_quest_accept.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_quest_turn_in"
+path = "tests/wrath_quest_turn_in.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_quest_abandon"
+path = "tests/wrath_quest_abandon.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_quest_log_projection"
+path = "tests/wrath_quest_log_projection.rs"
 required-features = ["client-wrath"]
 
 [[test]]

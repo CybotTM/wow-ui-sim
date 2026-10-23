@@ -124,23 +124,92 @@ impl WowLuaEnv {
         self.reload_loader = Some(Rc::new(loader));
     }
 
+    /// Supply completion/readiness without implementing account-data networking.
+    pub fn set_account_cvar_chunk_ready(&self, chunk: usize, ready: bool) -> Result<()> {
+        let mut state = self.state.borrow_mut();
+        let Some(value) = state.account_cvar_chunks_ready.get_mut(chunk) else {
+            return Err(crate::Error::Other(format!(
+                "unknown account CVar chunk {chunk}"
+            )));
+        };
+        *value = ready;
+        drop(state);
+        self.dispatch_ready_account_variables()
+    }
+
+    pub(crate) fn register_account_variables_callback(&self) -> Result<()> {
+        self.state.borrow_mut().account_cvar_callback_pending = true;
+        self.dispatch_ready_account_variables()
+    }
+
+    fn dispatch_ready_account_variables(&self) -> Result<()> {
+        let dispatch = {
+            let mut state = self.state.borrow_mut();
+            let ready = state.account_cvar_chunks_ready.iter().all(|ready| *ready);
+            let dispatch = crate::client_profile::ACTIVE
+                == crate::client_profile::ClientProfile::Wrath
+                && state.account_cvar_callback_pending
+                && ready;
+            if dispatch {
+                state.account_cvar_callback_pending = false;
+            }
+            dispatch
+        };
+        if dispatch {
+            self.fire_event("VARIABLES_LOADED")?;
+        }
+        Ok(())
+    }
+
     /// Service a deferred request only after the caller has released all Lua borrows.
     pub fn service_reload(
         &mut self,
         saved_vars: &mut Option<crate::saved_variables::SavedVariablesManager>,
     ) -> Result<bool> {
-        if !self.state.borrow().ui_reload_requested {
+        let eligible = {
+            let state = self.state.borrow();
+            let cinematic_blocks = crate::client_profile::ACTIVE
+                == crate::client_profile::ClientProfile::Wrath
+                && state.cinematic_active;
+            state.ui_reload_requested && !cinematic_blocks
+        };
+        if !eligible {
             return Ok(false);
         }
+        self.fire_wrath_reload_shutdown()?;
         if let Some(manager) = saved_vars {
             manager.save_all(self.rilua_mut().state_mut())?;
+            #[cfg(feature = "client-wrath")]
+            super::placed_frames::save(self, manager)?;
             manager.retire_lua_environment();
         }
         self.rebuild_lua_environment()?;
         if let Some(loader) = self.reload_loader.clone() {
             loader(self, saved_vars)?;
         }
+        #[cfg(feature = "client-wrath")]
+        if let Some(manager) = saved_vars {
+            super::placed_frames::load(self, manager)?;
+        }
         Ok(true)
+    }
+
+    fn fire_wrath_reload_shutdown(&self) -> Result<()> {
+        if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+            return Ok(());
+        }
+        self.state.borrow_mut().reload_allows_protected_actions = true;
+        self.fire_event("PLAYER_REGEN_ENABLED")?;
+        let leaving_world = self.state.borrow().in_world;
+        if leaving_world {
+            {
+                let mut state = self.state.borrow_mut();
+                state.in_world = false;
+                state.world.mirror_timers.clear();
+            }
+            self.fire_event("PLAYER_LEAVING_WORLD")?;
+        }
+        self.fire_event("PLAYER_LOGOUT")
     }
 
     /// One-shot command owners settle a rebuilt UI before observing output.

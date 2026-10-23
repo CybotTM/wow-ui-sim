@@ -57,6 +57,8 @@ fn adventure_map_loads_with_dependency_closure_and_no_lua_errors() {
     });
 }
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_publishes_expected_mixin_tables() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, loaded| {
@@ -69,6 +71,7 @@ fn adventure_map_publishes_expected_mixin_tables() {
              {missing_or_wrong_type:?}"
         );
     });
+}
 }
 
 fn probe_missing_mixin_tables(env: &WowLuaEnv) -> Vec<String> {

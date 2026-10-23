@@ -108,6 +108,7 @@ const SEEDED_NON_REP_ACHIEVEMENT_ID: i64 = 6;
 
 type ObjectiveRepProbe = (String, String, String, String, String, bool, bool);
 
+post_wrath_ui_fixture! {
 #[test]
 fn display_criteria_branches_on_get_achievement_guild_rep_and_targets_rep_criteria_fontstring() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -246,4 +247,5 @@ fn display_criteria_branches_on_get_achievement_guild_rep_and_targets_rep_criter
              garbage standing label even when `requiresRep == false`."
         );
     });
+}
 }

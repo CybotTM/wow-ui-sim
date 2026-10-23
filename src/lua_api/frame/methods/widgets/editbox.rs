@@ -1,7 +1,10 @@
 //! EditBox and text-spacing widget methods.
 
+mod history;
 mod registration;
 mod selection;
+
+pub(super) use history::{add_history_line, clear_history, get_history_lines, set_history_lines};
 
 use super::shared::{opt_string, val_to_bool, val_to_f64};
 use crate::lua_api::frame::methods::forbidden_aspects::ensure_forbidden_aspect_absent;
@@ -619,51 +622,6 @@ pub(super) fn get_number(state: &mut LuaState) -> LuaResult<u32> {
         .unwrap_or(0.0);
     drop(sim);
     v.into_stack(state)
-}
-
-pub(super) fn add_history_line(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let text = opt_string(state, 2).unwrap_or_default();
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(f) = sim.widgets.get_mut_visual(id) {
-        f.editbox_history.push(text);
-        let max = f.editbox_history_max;
-        if max > 0 && f.editbox_history.len() > max as usize {
-            f.editbox_history.remove(0);
-        }
-    }
-    Ok(0)
-}
-
-pub(super) fn get_history_lines(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let v = sim
-        .widgets
-        .get(id)
-        .map(|f| f.editbox_history.len())
-        .unwrap_or(0);
-    drop(sim);
-    (v as f64).into_stack(state)
-}
-
-pub(super) fn set_history_lines(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let max = val_to_f64(stack_val(state, 2)) as i32;
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(f) = sim.widgets.get_mut_visual(id) {
-        f.editbox_history_max = max;
-    }
-    Ok(0)
-}
-
-pub(super) fn clear_history(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(f) = sim.widgets.get_mut_visual(id) {
-        f.editbox_history.clear();
-    }
-    Ok(0)
 }
 
 pub(super) fn get_input_language(state: &mut LuaState) -> LuaResult<u32> {

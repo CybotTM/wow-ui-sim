@@ -6,8 +6,10 @@ use crate::lua_api::methods::borrow_state_mut;
 use crate::lua_api::sim_substates::{GossipQuestRow, GossipState, QuestRewardItem};
 use crate::lua_api::state::QuestLogEntry as RichQuestLogEntry;
 use crate::lua_bridge::{FromStack, TableBuilder};
+use rilua::LuaResult;
+#[cfg(not(feature = "client-wrath"))]
+use rilua::Val;
 use rilua::vm::state::LuaState;
-use rilua::{LuaResult, Val};
 
 const DEFAULT_QUEST_ID: u32 = 80000;
 const DEFAULT_QUEST_TITLE: &str = "The Lost Expedition";
@@ -36,10 +38,27 @@ pub(super) fn register_quests(b: TableBuilder) -> LuaResult<TableBuilder> {
     } else {
         b
     };
+    let b = register_turn_in_responses(b)?;
     b.set_function("OpenQuestNpc", open_quest_npc)?
         .set_function("OpenMultiQuestNpc", open_multi_quest_npc)?
-        .set_function("TurnInSelectedQuest", turn_in_selected_quest)?
         .set_function("CloseQuestNpc", close_quest_npc)
+}
+
+#[cfg(feature = "client-wrath")]
+fn register_turn_in_responses(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function(
+        "OfferQuestReward",
+        super::real::wrath_quest_dialog::offer_response,
+    )?
+    .set_function(
+        "TurnInSelectedQuest",
+        super::real::wrath_quest_dialog::accept_response,
+    )
+}
+
+#[cfg(not(feature = "client-wrath"))]
+fn register_turn_in_responses(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("TurnInSelectedQuest", turn_in_selected_quest)
 }
 
 #[cfg(all(feature = "profile-retail", feature = "retail-12-0-5"))]
@@ -147,6 +166,7 @@ pub(super) fn close_quest_npc(state: &mut LuaState) -> LuaResult<u32> {
 /// Simulator-only selected-completed turn-in. No inventory/currency/XP grants.
 /// Cached QuestLogDocumentation declares questID, xpReward, moneyReward;
 /// zero rewards are authored policy, not inferred native reward amounts.
+#[cfg(not(feature = "client-wrath"))]
 fn turn_in_selected_quest(state: &mut LuaState) -> LuaResult<u32> {
     let turned_in = {
         let mut sim = borrow_state_mut(state)?;
@@ -163,6 +183,7 @@ fn turn_in_selected_quest(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+#[cfg(not(feature = "client-wrath"))]
 fn commit_selected_quest_turn_in(sim: &mut crate::lua_api::SimState) -> Option<i32> {
     let selected = sim.selected_quest_log_id?;
     let quest_id = i32::try_from(selected).ok()?;
@@ -176,7 +197,7 @@ fn commit_selected_quest_turn_in(sim: &mut crate::lua_api::SimState) -> Option<i
     Some(quest_id)
 }
 
-fn clear_turned_in_quest_dialog(sim: &mut crate::lua_api::SimState, quest_id: i32) {
+pub(super) fn clear_turned_in_quest_dialog(sim: &mut crate::lua_api::SimState, quest_id: i32) {
     let matches_pending = sim
         .pending_quest_offer
         .as_ref()

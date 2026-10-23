@@ -483,7 +483,7 @@ synchronous Lua callback can still block its turn; this is not preemption.
 
 **Source:** `src/iced_app/app.rs` (`GuiStartupProgress`, `advance_gui_startup`), `src/iced_app/update_runtime.rs` (`handle_process_timers`) and `src/startup.rs` (shared event sequence and headless settling).
 
-After all addons are loaded, game-screen startup includes these events in order:
+After all addons are loaded, non-Wrath game-screen startup currently uses this simulator-policy order (native Retail chronology remains UNKNOWN):
 
 1. `ADDON_LOADED` with arg `"WoWUISim"` -- signals all addons are loaded
 2. `VARIABLES_LOADED` -- SavedVariables are available
@@ -499,7 +499,9 @@ Glue screens use `src/startup.rs::fire_glue_startup_events`, not this game-login
 
 Display/scale recalculation emits `DISPLAY_SIZE_CHANGED` then `UI_SCALE_CHANGED`; at those handlers, modeled `uiScale`/`useUiScale` changes expose the new effective scale while `GetCVar()` still returns the old value. The successful CVar write and `CVAR_UPDATE` follow afterward. Startup emits the display/scale pair before `PLAYER_LOGIN` as described in the scale-event investigation.
 
-Individual addons also receive per-addon `ADDON_LOADED` events during the loading phase, fired by `fire_addon_loaded()` in `src/lua_api/globals/addon_api.rs:550-558`.
+Wrath omits the synthetic WoWUISim notification. Its two account CVar chunks drive an inline VARIABLES_LOADED callback when ready, or defer it until completion, possibly after LOGIN and argless PEW. This explicit readiness seam does not implement account networking. See the [profile contract](specs/reload-ui.md#wrath-12340-requirements).
+
+Individual addons receive per-addon `ADDON_LOADED` from `src/bin/wow_sim/addon_loading.rs` during startup and `src/c_api/c_addons_runtime.rs` for runtime loads. Wrath passes only the addon name; Retail additionally passes a binding-data-derived boolean whose value semantics remain INFERRED.
 
 ## XML Script Handler Setup
 

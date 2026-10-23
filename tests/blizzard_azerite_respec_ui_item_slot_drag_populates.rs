@@ -39,6 +39,8 @@ expect(_G.__azerite_respec_clear_cursor_count == 1, "ClearCursor should run once
 return table.concat(failures, "\n")
 "#;
 
+// AzeriteRespecUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_respec_ui_item_slot_drag_and_left_click_populate_from_cursor() {
     common::with_perf_lock(|| {
@@ -74,6 +76,7 @@ fn blizzard_azerite_respec_ui_item_slot_drag_and_left_click_populate_from_cursor
             });
         });
     });
+}
 }
 
 fn install_item_slot_spies(env: &wow_ui_sim::lua_api::WowLuaEnv) {

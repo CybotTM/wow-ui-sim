@@ -42,6 +42,11 @@ macro_rules! build_empty_sim_state {
             encounter_timeline: crate::c_api::c_encounter_timeline::Timeline::default(),
             scripts: ScriptRegistry::default(),
             ui_reload_requested: false,
+            cinematic_active: false,
+            in_world: false,
+            reload_allows_protected_actions: false,
+            account_cvar_chunks_ready: [true; 2],
+            account_cvar_callback_pending: false,
             ui_reloaded: false,
             cvars: CVarStorage::new(),
             #[cfg(feature = "client-wrath")]
@@ -310,6 +315,8 @@ macro_rules! build_empty_sim_state {
             sound_manager: $runtime.sound_manager,
             last_sound_kit_requested: $runtime.last_sound_kit_requested,
             #[cfg(feature = "client-wrath")]
+            last_ui_error_message: None,
+            #[cfg(feature = "client-wrath")]
             last_sound_name_requested: None,
             cooldown_viewer_cooldowns: Default::default(),
             #[cfg(feature = "retail-12-0-0")]
@@ -334,7 +341,7 @@ macro_rules! build_empty_sim_state {
             pet_bonus_slot_available: false,
             #[cfg(feature = "retail-12-0-0")]
             limited_input_allowed: [false; 4],
-            #[cfg(feature = "retail-12-0-0")]
+            #[cfg(any(feature = "retail-12-0-0", feature = "client-wrath"))]
             action_spell_ranges: Default::default(),
             #[cfg(feature = "retail-12-0-0")]
             weekly_reward_progress: Default::default(),
@@ -487,7 +494,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-7")]
             quest_short_expiration_warnings: ::std::collections::HashSet::new(),
             abandon_quest_id: None,
-            tracked_achievements: ::std::collections::HashSet::new(),
+            tracked_achievements: Vec::new(),
             // Simulator initial policy matches the cached trainer panel constants.
             #[cfg(feature = "client-wrath")]
             wrath_trainer_filters: [true, true, false],
@@ -534,6 +541,7 @@ macro_rules! build_empty_sim_state {
             pet_actions: vec![PetActionSlot::default(); 10],
             glyph: GlyphState::default(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
+            wrath_currency: super::globals::real::wrath_currency::CurrencyListState::default(),
             #[cfg(feature = "client-retail")]
             currency_list: crate::c_api::currency_list::CurrencyListState::default(),
             currency_war_mode_bonus: HashMap::new(),
@@ -566,6 +574,8 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-0")]
             bnet_custom_message: String::new(),
             social_friends: default_social_friends(),
+            #[cfg(feature = "client-wrath")]
+            selected_friend_guid: None,
             auction_browse_results: default_auction_browse_results(),
             auction_replicate_items: default_auction_replicate_items(),
             auction_owned: Vec::new(),

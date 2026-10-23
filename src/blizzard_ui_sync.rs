@@ -40,6 +40,7 @@ const WOWFOREVER_BLIZZARD_UI_MANIFEST: &str =
     include_str!("../data/blizzard-ui-files/wowforever.txt");
 const COMPLETE_MARKER: &str = ".wow-ui-sim-blizzard-ui-complete";
 const PROVENANCE_FILE: &str = ".wow-ui-sim-blizzard-ui-provenance";
+#[cfg(any(feature = "casc", test))]
 const PROVENANCE_SCHEMA: &str = "1";
 #[cfg(feature = "casc")]
 static CASC_CONFIGURED: OnceLock<bool> = OnceLock::new();
@@ -220,6 +221,7 @@ struct CacheProvenance {
 }
 
 impl CacheProvenance {
+    #[cfg(any(feature = "casc", test))]
     fn new(
         profile: &str,
         product: &str,
@@ -714,6 +716,7 @@ fn casc_available() -> bool {
     })
 }
 
+#[cfg(feature = "casc")]
 fn remove_missing_marker(path: &Path) {
     let extension = path.extension().and_then(|e| e.to_str()).unwrap_or("");
     let missing_marker = path.with_extension(format!("{extension}.missing"));

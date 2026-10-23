@@ -18,10 +18,16 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn clear_lines(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    let wrath = crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath;
     let mut sim = borrow_state_mut(state)?;
+    let had_lines = sim.tooltips.get(&id).is_some_and(|td| !td.lines.is_empty());
     let line_ids = {
         let td = sim.tooltips.entry(id).or_default();
         td.lines.clear();
+        if wrath {
+            td.min_width = 0.0;
+            td.wrath_texture_rows.clear();
+        }
         td.spell_id = None;
         td.unit_token = None;
         td.unit_name = None;
@@ -33,10 +39,43 @@ pub(super) fn clear_lines(state: &mut LuaState) -> LuaResult<u32> {
             .collect::<Vec<_>>()
     };
     clear_cached_tooltip_line_text(&mut sim, &line_ids);
+    if wrath {
+        hide_wrath_tooltip_children(&mut sim, id, &line_ids);
+    }
     refresh_tooltip_geometry(&mut sim, id);
     drop(sim);
-    fire_tooltip_script(state, id, "OnTooltipCleared");
+    if !wrath || had_lines {
+        fire_tooltip_script(state, id, "OnTooltipCleared");
+    }
     Ok(0)
+}
+
+fn hide_wrath_tooltip_children(
+    sim: &mut crate::lua_api::state::SimState,
+    tooltip_id: u64,
+    line_ids: &[u64],
+) {
+    for &line_id in line_ids {
+        if let Some(frame) = sim.widgets.get_mut_visual(line_id) {
+            frame.visible = false;
+            frame.width = 0.0;
+            frame.word_wrap = false;
+        }
+        sim.widgets.mark_rect_dirty(line_id);
+    }
+    let Some(name) = sim.widgets.get(tooltip_id).and_then(|f| f.name.clone()) else {
+        return;
+    };
+    let names = (1..=10)
+        .map(|index| format!("{name}Texture{index}"))
+        .chain(std::iter::once(format!("{name}StatusBar")));
+    for name in names {
+        if let Some(id) = sim.widgets.get_id_by_name(&name)
+            && let Some(frame) = sim.widgets.get_mut_visual(id)
+        {
+            frame.visible = false;
+        }
+    }
 }
 
 fn clear_cached_tooltip_line_text(sim: &mut crate::lua_api::state::SimState, line_ids: &[u64]) {
@@ -128,7 +167,11 @@ fn double_line_args(state: &mut LuaState) -> DoubleLineArgs {
         opt_f32(state, 8).unwrap_or(left_color.1),
         opt_f32(state, 9).unwrap_or(left_color.2),
     );
-    let wrap = val_to_bool(stack_val(state, 10));
+    let requested_wrap = val_to_bool(stack_val(state, 10));
+    let right_prevents_wrap = crate::client_profile::ACTIVE
+        == crate::client_profile::ClientProfile::Wrath
+        && right_text.as_deref().is_some_and(|text| !text.is_empty());
+    let wrap = requested_wrap && !right_prevents_wrap;
     DoubleLineArgs {
         left_text,
         right_text,

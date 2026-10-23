@@ -13,6 +13,9 @@ rustflags = ["-C", "link-arg=-Wl,--stack,33554432"]
 [build]
 jobs = 4
 
+[env]
+WOW_UI_SIM_TEST_SOURCE_ROOT = { value = "", relative = true, force = true }
+
 [alias]
 xtask = "run --package xtask --"
 release-current = "xtask release current"

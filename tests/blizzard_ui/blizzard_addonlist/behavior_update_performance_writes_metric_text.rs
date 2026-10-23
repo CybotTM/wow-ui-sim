@@ -9,6 +9,8 @@ use wow_ui_sim::lua_api::state::AddonRuntimeMetrics;
 const ROOT: &str = "Blizzard_AddOnList";
 const PROFILER_ADDON: &str = "AddonListProfilerMetricProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn update_performance_writes_metric_text_when_profiler_is_enabled() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -60,6 +62,7 @@ fn update_performance_writes_metric_text_when_profiler_is_enabled() {
         assert_eq!(average_text, expected_average_text);
         assert_eq!(peak_text, expected_peak_text);
     });
+}
 }
 
 type MetricTextProbe = (bool, String, String, String, String, String, String);

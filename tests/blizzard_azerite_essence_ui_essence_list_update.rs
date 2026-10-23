@@ -11,6 +11,8 @@ use wow_ui_sim::lua_api::state::{
 const ROOT: &str = "Blizzard_AzeriteEssenceUI";
 const MAIN_SLOT: i32 = 0;
 
+// AzeriteEssenceUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_essence_ui_essence_list_hides_invalid_essences_when_collapsed() {
     common::with_perf_lock(|| {
@@ -96,6 +98,7 @@ fn blizzard_azerite_essence_ui_essence_list_hides_invalid_essences_when_collapse
             });
         });
     });
+}
 }
 
 fn seed_essence_list_state(state: &mut SimState) {

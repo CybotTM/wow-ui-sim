@@ -7,6 +7,8 @@ const ROOT: &str = "Blizzard_AddOnList";
 const OUTDATED_ADDON: &str = "AddonListOutdatedProbe";
 const CURRENT_ADDON: &str = "AddonListCurrentProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn confirm_disable_addons_disables_outdated_addons_and_saves() {
     with_blizzard_addon_glue_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -67,6 +69,7 @@ fn confirm_disable_addons_disables_outdated_addons_and_saves() {
 
         assert_confirm_disable_probe(probe);
     });
+}
 }
 
 type ConfirmDisableProbe = (bool, i64, Option<i64>, i64, i64, i64);

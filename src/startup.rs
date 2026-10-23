@@ -308,12 +308,17 @@ fn fire_login_sequence(env: &WowLuaEnv, skip_is_logged_in: bool) {
     env.set_logged_in(false);
     let fire = |name| fire_simple_event(env, name);
 
-    log_with_timestamp(env, "[Startup] Firing ADDON_LOADED");
-    if let Err(e) = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string("WoWUISim")]) {
-        log_with_timestamp(env, &format!("Error firing ADDON_LOADED: {e}"));
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        if let Err(error) = env.register_account_variables_callback() {
+            log_with_timestamp(env, &format!("Error firing VARIABLES_LOADED: {error}"));
+        }
+    } else {
+        log_with_timestamp(env, "[Startup] Firing ADDON_LOADED");
+        if let Err(e) = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string("WoWUISim")]) {
+            log_with_timestamp(env, &format!("Error firing ADDON_LOADED: {e}"));
+        }
+        fire("VARIABLES_LOADED");
     }
-
-    fire("VARIABLES_LOADED");
 
     // Retail fires the display/scale pair before PLAYER_LOGIN (live probe:
     // docs/wiki/investigations/display-size-ui-scale-events.md). The first
@@ -477,11 +482,30 @@ fn fire_world_enter_sequence(env: &WowLuaEnv) {
     log_with_timestamp(env, "[Startup] Firing PLAYER_ENTERING_WORLD");
     let reloaded = env.state().borrow().ui_reloaded;
     let _profile = crate::loader::chunk_cache::GeneratedChunkScope::enter("PLAYER_ENTERING_WORLD");
-    if let Err(e) = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[Val::Bool(!reloaded), Val::Bool(reloaded)],
-    ) {
+    let payload = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        Vec::new()
+    } else {
+        vec![Val::Bool(!reloaded), Val::Bool(reloaded)]
+    };
+    if let Err(e) = env.fire_event_with_args("PLAYER_ENTERING_WORLD", &payload) {
         log_with_timestamp(env, &format!("Error firing PLAYER_ENTERING_WORLD: {e}"));
+    }
+    finish_wrath_world_entry(env);
+}
+
+fn finish_wrath_world_entry(env: &WowLuaEnv) {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+        return;
+    }
+    let in_combat = {
+        let mut state = env.state().borrow_mut();
+        state.in_world = true;
+        state.reload_allows_protected_actions = false;
+        state.player.in_combat
+    };
+    // The finer slot within EnterWorld is simulator policy, not 12340 ordering proof.
+    if in_combat {
+        fire_simple_event(env, "PLAYER_REGEN_DISABLED");
     }
 }
 
@@ -540,12 +564,9 @@ pub(crate) fn resize_party_state(state: &mut crate::lua_api::SimState, size: usi
 }
 
 fn normalize_headless_frame_positions(env: &WowLuaEnv) {
+    crate::lua_api::chat_init::normalize_chat_editbox_width(env, false);
     let _ = env.exec(
         r#"
-        if ChatFrame1EditBox then
-            ChatFrame1EditBox:SetWidth(447)
-        end
-
         if CompactPartyFrame then
             CompactPartyFrame:SetSize(98, 234)
         end

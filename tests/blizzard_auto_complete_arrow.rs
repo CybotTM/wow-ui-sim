@@ -39,6 +39,7 @@ expect(calls[2].frame == editBox and calls[2].up == false,
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_arrow_keys_route_to_increment_selection() {
     common::with_perf_lock(|| {
@@ -60,4 +61,5 @@ fn blizzard_auto_complete_arrow_keys_route_to_increment_selection() {
             });
         });
     });
+}
 }
