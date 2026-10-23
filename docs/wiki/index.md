@@ -1,6 +1,6 @@
 ## [2026-10-22] source | Wrath casting and aura projections
 
-[Projection notes](systems/lua-api.md#wrath-casting-and-aura-projections) link the [bounded contract](../specs/wrath-casting-aura-contracts.md): original cast/channel/party-aura consumers, catalog-backed subtext, legacy tuple/event shapes and separate metadata/transport gaps. Paired baselines, seven producer GREEN contracts and Retail preservation are recorded. An original BuffFrame getter-type RED precedes the runtime Wrath filename projection; getter GREEN/final proof remains pending.
+[Projection notes](systems/lua-api.md#wrath-casting-and-aura-projections) link the [bounded contract](../specs/wrath-casting-aura-contracts.md): original cast/channel/party-aura consumers, catalog-backed subtext, legacy tuple/event shapes and separate metadata/transport gaps. Paired baselines, seven producer GREEN contracts and Retail preservation are recorded. Original BuffFrame getter-type RED precedes the runtime Wrath filename projection. Final14aed640c: native21+seven contracts PASS, sixteen report-only failures unchanged, Retail37 PASS, stock arrays empty and Wrath check/formatter PASS; one Retail setup timeout passed its exact retry. Native parity and unexercised branches remain distinct.
 
 ## [2026-10-21] source | Wrath tracked achievements
 

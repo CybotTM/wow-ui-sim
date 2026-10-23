@@ -8,23 +8,23 @@ The 12340 static-source findings relayed on 2026-10-21 are authoritative for the
 
 ### Casting and channel queries
 
-- [ ] Active `UnitCastingInfo` returns nine values: name, subtext, display text, icon filename, start/end milliseconds, trade-skill boolean, numeric cast count, and non-interruptible boolean.
-- [ ] Active `UnitChannelInfo` returns eight values: the same first seven fields followed by the non-interruptible boolean, without a cast-count slot.
-- [ ] Missing/expired casts, unavailable units and absent spell records return zero values. Non-string unit arguments raise the named usage error.
-- [ ] Preserve supplied timing, empty icon strings and catalog subtext. Original `CastingBarFrame_OnEvent` must consume the legacy positions without boolean-time arithmetic errors.
+- [x] Active `UnitCastingInfo` returns nine values: name, subtext, display text, icon filename, start/end milliseconds, trade-skill boolean, numeric cast count, and non-interruptible boolean.
+- [x] Active `UnitChannelInfo` returns eight values: the same first seven fields followed by the non-interruptible boolean, without a cast-count slot.
+- [x] Missing/expired casts, unavailable units and absent spell records return zero values. Non-string unit arguments raise the named usage error.
+- [x] Preserve supplied timing, empty icon strings and catalog subtext. Original `CastingBarFrame_OnEvent` must consume the legacy positions without boolean-time arithmetic errors.
 
 ### Produced cast events
 
-- [ ] Existing Wrath START, DELAYED, FAILED and STOP producers publish unit token, spell name, subtext and numeric cast count. Completion retains that projection after clearing cast state.
+- [x] Existing Wrath START, DELAYED, FAILED and STOP producers publish unit token, spell name, subtext and numeric cast count. Completion retains that projection after clearing cast state.
 - [ ] The channel event projection uses count zero; the missing-record event contains only the unit token.
-- [ ] Quiet admin failure must not be reinterpreted as native interruption. The original bar ignores the quiet notification and consumes its ordinary STOP.
+- [x] Quiet admin failure must not be reinterpreted as native interruption. The original bar ignores the quiet notification and consumes its ordinary STOP.
 
 ### Legacy aura reads
 
 - [ ] Found `UnitAura`, `UnitBuff` and `UnitDebuff` records return eleven values, with string rank, string-or-nil icon, numeric count, seconds-based timing, optional caster, `1`/nil stealability/consolidation flags and numeric spell ID. Misses return zero values.
-- [ ] Non-positive duration projects duration/expiration as zero. Party fallback records project count one, zero timing and absent caster/stealability.
-- [ ] Accept numeric-string indices and one-based indexing. Default polarity is HELPFUL; UnitBuff/UnitDebuff force their corresponding polarity. Filter spelling is case-insensitive with spaces or pipes separating components.
-- [ ] Preserve Retail outputs and all sixteen unchanged modern-only Wrath report rows; do not hide them behind new gates.
+- [x] Non-positive duration projects duration/expiration as zero. Party fallback records project count one, zero timing and absent caster/stealability.
+- [x] Accept numeric-string indices and one-based indexing. Default polarity is HELPFUL; UnitBuff/UnitDebuff force their corresponding polarity. Filter spelling is case-insensitive with spaces or pipes separating components.
+- [x] Preserve Retail outputs and all sixteen unchanged modern-only Wrath report rows; do not hide them behind new gates.
 - [ ] The original BuffFrame consumer receives a filename string from its Texture:GetTexture, not a file ID. Wrath returns one stored filename string or one nil; Retail remains file-ID-first. Do not normalize case or separators to force identity.
 
 ## How it works
@@ -48,11 +48,16 @@ The 12340 static-source findings relayed on 2026-10-21 are authoritative for the
 
 Bound pre-producer evidence: merged baseline `6e54c3602` executes Wrath37 as 16 PASS/21 FAIL (all sixteen report-only rows fail), Retail37 as 37 PASS and both stock Lua-error arrays as empty. Fixture revision `254c42ad2` executes twelve exact cases as 1 PASS/11 FAIL, including all seven new contracts RED. Follow-up `fc67e8727` executes its four changed cases as two corrected controls PASS and two cast/channel contracts RED. Every counted case has a positive completed-test count. At `20f35943a`, all seven new contracts pass, Retail37 stays 37 PASS, both stock arrays remain empty and Wrath check/formatter pass. Wrath37 is 20 PASS/17 FAIL: sixteen report-only rows plus an introduced BuffFrame icon regression (UnitBuff filename versus GetTexture number 135893). Fixture `19c9a906b` reproduces that exact original-consumer failure at its explicit filename-type assertion before the getter correction; one exact completed test FAIL.
 
-Getter authority is the laptop's independently checked, reconstructed 12340 source report received 2026-10-23, not native execution. A named texture returns exactly one filename string without extension, otherwise one nil; never a number. Cache spelling can come from an earlier case-insensitive load and aliases can substitute paths. Slash/backslash equality is not promised. The bounded correction returns the stored path unchanged; fresh extensionless BuffFrame identity is tested, not unconditional latest-setter byte echo. Getter GREEN/final reruns remain pending.
+Getter authority is the laptop's independently checked, reconstructed 12340 source report received 2026-10-23, not native execution. A named texture returns exactly one filename string without extension, otherwise one nil; never a number. Cache spelling can come from an earlier case-insensitive load and aliases can substitute paths. Slash/backslash equality is not promised. The bounded correction returns the stored path unchanged; fresh extensionless BuffFrame identity is tested, not unconditional latest-setter byte echo.
+
+Final producer revision `14aed640c0629a41138e0c809a7ad56b87738170`: Wrath original37 = 21 PASS/16 unchanged report-only FAIL; native21 and all seven added contracts PASS. The original BuffFrame filename-type/identity assertions PASS. Retail original37 before/after = 37 PASS/0 FAIL with identical named-case statuses. One final Retail edit-mode attempt failed in mandatory prefork `conformance::bounded_workers` setup (2000ms worker timeouts), before its named case; one bounded exact retry on the same sealed revision passed. Both setup failure and retry receipts are retained; no harness or assertion was changed.
+
+Both profiles' stock Lua-error arrays remain empty before/after. Final Wrath `cargo check` and `cargo fmt --all -- --check` pass; check has zero warnings. All counted cases have positive completed-test counts, all Retail successes include the exact named success, and child-only current CVar copies leave the persisted original stat/hash unchanged. Unchecked requirements below retain unexercised branches, not whole-batch parity claims.
 
 ## Known gaps (current cycle)
 
-- [ ] Record producer GREEN, original Wrath37 after counts, paired Retail37 preservation, empty stock arrays, formatter and Wrath profile-check evidence before checking requirements above.
+- [ ] Produced channel-event zero-count and missing-record event branches lack direct producer coverage; incoming channel transport remains unmodeled.
+- [ ] Full eleven-value UnitDebuff projection and absent-texture one-nil getter arity are not independently pinned by this bounded suite; existing shared serializer code is not substituted for coverage.
 
 ## Out of scope
 
