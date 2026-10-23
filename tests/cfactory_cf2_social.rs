@@ -135,7 +135,8 @@ fn original_scenario_random_catalog_uses_lowest_party_level() {
 }
 
 #[test]
-fn original_scenario_empty_catalog_keeps_no_scenarios_cover() {
+// Preservation only: a constant empty catalog satisfies this negative control.
+fn original_scenario_empty_catalog_keeps_no_scenarios_cover_preserves_boundary() {
     let env = WowLuaEnv::new().expect("scenario environment");
     env.state().borrow_mut().lfd_dungeons.clear();
     env.state().borrow_mut().party_members.clear();

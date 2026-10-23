@@ -42,11 +42,11 @@ The scenario fixture uses existing `LfdDungeonInfo` records (`subtype_id = 4`, t
 `tests/cfactory_cf2_social.rs`:
 - `original_scenario_specific_catalog_uses_lowest_party_level`
 - `original_scenario_random_catalog_uses_lowest_party_level`
-- `original_scenario_empty_catalog_keeps_no_scenarios_cover`
+- `original_scenario_empty_catalog_keeps_no_scenarios_cover_preserves_boundary` — preservation only; a constant empty catalog satisfies it.
 
 File-level profile cfg registers club preservation only on its six applicable profiles and scenarios only on Retail/PTR/Mists. Other profiles register no such tests; there are no runtime N/A returns.
 
-Club invitations have no producer acceptance until the outstanding laptop PENDING-NATIVE-ORACLE answers establish populated incoming-self inputs and transitions. No invitation producer may be written before those answers and a genuine populated RED test. Only the three scenario cases belong to the expected-RED matrix.
+Club invitations have no producer acceptance until the outstanding laptop PENDING-NATIVE-ORACLE answers establish populated incoming-self inputs and transitions. No invitation producer may be written before those answers and a genuine populated RED test. Only the two populated scenario cases belong to the expected-RED matrix (six profile executions). Empty-catalog preservation adds three executions, excluded from RED along with the six club-preservation executions.
 
 ## Known gaps (current cycle)
 
