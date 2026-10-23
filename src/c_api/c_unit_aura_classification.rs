@@ -28,7 +28,9 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         "AuraIsBigDefensive",
         aura_is_big_defensive,
     )?;
-    table_set_rust_fn_static(state, namespace, "AuraIsPrivate", aura_is_private)
+    #[cfg(feature = "retail-12-0-5")]
+    table_set_rust_fn_static(state, namespace, "AuraIsPrivate", aura_is_private)?;
+    Ok(())
 }
 
 fn read_spell_classification(
@@ -53,6 +55,7 @@ fn aura_is_big_defensive(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+#[cfg(feature = "retail-12-0-5")]
 fn aura_is_private(state: &mut LuaState) -> LuaResult<u32> {
     let classification = read_spell_classification(state, "C_UnitAuras.AuraIsPrivate")?;
     state.push(Val::Bool(classification.is_private));
