@@ -14,6 +14,10 @@ Tests in `tests/cf2_*_shape_contract.rs` exercise documented API shapes alongsid
 
 - [ ] `original_group_buff_records_shape_blocker` — profiles: wowforever. Forever getter and setter missing; actual records only, exact enum, no required list contents. Shape only; native behavior/default/lifecycle unknown. Sources: wowforever: Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:377 (GetGroupBuffVisualAlerts).; wowforever: Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:555 (SetGroupBuffVisualAlerts).; wowforever: Blizzard_APIDocumentationGenerated/UnitConstantsDocumentation.lua:23 (GroupBuffVisualAlertInfo).; wowforever: Blizzard_APIDocumentationGenerated/VisualAlertConstantsDocumentation.lua:6 (VisualAlertType).
 
+- [ ] `original_match_enter_world_shape_blocker` — profiles: retail, ptr. IsMatchComplete missing; boolean and original event acceptance only. Shape only; native behavior/default/lifecycle unknown. Sources: retail: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:987 (IsMatchComplete).; ptr: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:946 (IsMatchComplete).
+
+- [ ] `original_vehicle_provider_shape_blocker` — profiles: mists. vehicle getters missing; optional table or zero returns, actual records only. Shape only; native behavior/default/lifecycle unknown. Sources: mists: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:87 (GetBattlefieldVehicles).; mists: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:71 (GetBattlefieldVehicleInfo).; mists: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:760 (BattlefieldVehicleInfo).
+
 ## How it works
 
 - [Consumer selection and proof boundaries](../wiki/investigations/consumer-selection-and-red-proof.md).
@@ -28,6 +32,7 @@ Tests in `tests/cf2_*_shape_contract.rs` exercise documented API shapes alongsid
 
 - `cf2_social_shape_contract` integration module.
 - `cf2_combataura_shape_contract` integration module.
+- `cf2_pvpmap_shape_contract` integration module.
 
 ## Known gaps (current cycle)
 
