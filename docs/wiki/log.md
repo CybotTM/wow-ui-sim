@@ -1,3 +1,7 @@
+## [2026-10-22] investigation | Wrath F10 separate spell panels
+
+[Consumer-boundary diagnosis](investigations/wrath-spell-panels-f10.md) links the [bounded results](../baselines/wrath-fixture-f10.md): unchanged original modern rows, separate cached-Wrath fixtures, explicit oracle/native-consumer failure distinction and retained producer gaps. Cached expectations remain INFERRED; native12340 panel declarations are unconfirmed. Retail's seven prefork rows need correct-target positive execution; zero-selection attempts are invalid. Runtime after/preservation gates remain pending.
+
 ## [2026-10-22] source | Wrath autocomplete applicability
 
 EXCL-1 applies the user decision: 26 modern-only rows are excluded on Wrath as not applicable to 3.3.5 via the existing compile gate; bodies and other profiles stay unchanged. The glue-scope row remains compiled and failing as an evidence gap. See [coverage boundaries](investigations/wrath-autocomplete-fixture.md#coverage-boundaries) and [contract](../specs/wrath-autocomplete-results.md#known-gaps-current-cycle).

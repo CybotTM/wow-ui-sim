@@ -1,6 +1,6 @@
 # Wrath fixture batch F10: separate spellbook and talent consumers
 
-Status: **NOT RUN**. Fixture/source preparation only; no slot assigned and no producer edits.
+Status: **PARTIAL runtime evidence** at merged source `93a115a93`: Wrath original50 **2 PASS / 48 FAIL**; separate native10 **5 PASS / 5 FAIL**. Retail integration43 passes; seven existing prefork-target cases, after-runs and final gates remain pending. No producer edits.
 
 The 50 retained modern tests remain byte-for-byte unchanged. A native analogue
 never substitutes for the original row or establishes that it passed. Potential
@@ -17,8 +17,9 @@ existing spellbook digest bind consumer bytes.
 
 Laptop 12340 spellbook facts establish six `GetSpellTabInfo` returns and the
 full/compact distinction; these tests choose the full-ranks view. Cached-file
-selectors, geometry, UI lifecycle, and talent behavior are **INFERRED**, pending
-laptop confirmation and runtime execution. No unknown native edge behavior is
+selectors, geometry, UI lifecycle, and talent behavior remain **INFERRED**.
+Laptop 12340 panel declarations are **UNCONFIRMED**; cached-consumer runtime
+execution does not authenticate native-client parity. No unknown native edge behavior is
 encoded as a producer requirement. Missing native talent state, tooltip backing,
 or lifecycle semantics must first produce an observed original-consumer RED.
 
@@ -28,22 +29,23 @@ Only the shared capability below is covered, not modern routing/art/metadata.
 
 | New native case (under `wrath_spellbook_tabinfo::f10`) | F10 original intent | Proof |
 |---|---|---|
-| `talent_root_remains_hidden_after_native_addon_load` | `blizzard_player_spells_loads::blizzard_player_spells_panel_root_is_hidden_after_load` | NOT RUN |
-| `talent_addon_reports_loaded_after_explicit_native_load` | `blizzard_player_spells_loads::blizzard_player_spells_is_addon_loaded_after_explicit_load` | NOT RUN |
-| `spellbook_shows_supplied_spell_on_first_native_open` | `spellbook::spellbook_spells_visible_on_first_open` | NOT RUN |
-| `first_spell_icon_is_ancestor_visible` | `spellbook::spellbook_icon_textures_in_ancestor_visible` | NOT RUN |
-| `first_spell_button_has_nonzero_resolved_geometry` | `spellbook_layout::spellbook_spell_items_have_nonzero_rect` | NOT RUN |
-| `first_spell_icon_matches_native_spellbook_texture` | `test_keybindings_spellbook_talents::spellbook_first_visible_item_icon_matches_spellbook_texture` | NOT RUN |
-| `first_open_formats_native_spellbook_page_label` | `test_keybindings_spellbook_talents::spellbook_paging_label_is_formatted_on_first_open` | NOT RUN |
-| `first_spell_hover_populates_native_tooltip` | `spellbook_layout::spellbook_hover_shows_spell_tooltip` | NOT RUN |
-| `native_spellbook_toggle_closes_on_second_call` | `test_keybindings_spellbook_talents::keybind_s_toggles_spellbook_closed_on_second_press` | NOT RUN |
-| `native_talent_panel_has_visible_talent_button` | `test_keybindings_spellbook_talents::talent_panel_has_at_least_one_visible_talent_node_frame` | NOT RUN |
+| `talent_root_remains_hidden_after_native_addon_load` | `blizzard_player_spells_loads::blizzard_player_spells_panel_root_is_hidden_after_load` | Before PASS; after pending |
+| `talent_addon_reports_loaded_after_explicit_native_load` | `blizzard_player_spells_loads::blizzard_player_spells_is_addon_loaded_after_explicit_load` | Before PASS; after pending |
+| `spellbook_shows_supplied_spell_on_first_native_open` | `spellbook::spellbook_spells_visible_on_first_open` | Before FAIL; after pending |
+| `first_spell_icon_is_ancestor_visible` | `spellbook::spellbook_icon_textures_in_ancestor_visible` | Before FAIL; after pending |
+| `first_spell_button_has_nonzero_resolved_geometry` | `spellbook_layout::spellbook_spell_items_have_nonzero_rect` | Before PASS; after pending |
+| `first_spell_icon_matches_native_spellbook_texture` | `test_keybindings_spellbook_talents::spellbook_first_visible_item_icon_matches_spellbook_texture` | Before FAIL; after pending |
+| `first_open_formats_native_spellbook_page_label` | `test_keybindings_spellbook_talents::spellbook_paging_label_is_formatted_on_first_open` | Before PASS; after pending |
+| `first_spell_hover_populates_native_tooltip` | `spellbook_layout::spellbook_hover_shows_spell_tooltip` | Before FAIL; after pending |
+| `native_spellbook_toggle_closes_on_second_call` | `test_keybindings_spellbook_talents::keybind_s_toggles_spellbook_closed_on_second_press` | Before PASS; after pending |
+| `native_talent_panel_has_visible_talent_button` | `test_keybindings_spellbook_talents::talent_panel_has_at_least_one_visible_talent_node_frame` | Before FAIL; after pending |
 
 ## Unchanged report-only gate candidates
 
 Historical RED receipts are evidence from revision `773fab374`, not new runs.
-Every pre-edit function matches that revision's bytes. All 50 original rows are
-still unresolved for Wrath until executed; none is claimed GREEN by this batch.
+Every pre-edit function matches that revision's bytes. Current Wrath execution
+retains 48 FAIL; the two direct thin-dispatch routing cases already PASS. They are
+not a new native panel capability. No gate or forced failure was introduced.
 
 - `blizzard_player_spells_loads::blizzard_player_spells_is_addon_loaded_after_explicit_load` — Literal modern Blizzard_PlayerSpells addon, panel, mixins, namespace, or template contract.
 - `blizzard_player_spells_loads::blizzard_player_spells_loads_without_unrelated_lua_errors` — Literal modern Blizzard_PlayerSpells addon, panel, mixins, namespace, or template contract.
@@ -95,3 +97,13 @@ still unresolved for Wrath until executed; none is claimed GREEN by this batch.
 - `test_showuipanel_lod_player_spells::raw_spellbook_toggle_hands_off_to_blizzard_playerspells_util_on_first_load` — Literal modern Blizzard_PlayerSpells LoD handoff/prewarm contract; native spellbook and talents are separate.
 - `test_showuipanel_lod_player_spells::raw_toggle_spellbook_frame_loads_blizzard_player_spells_and_shows_spellbook` — Literal modern Blizzard_PlayerSpells LoD handoff/prewarm contract; native spellbook and talents are separate.
 - `test_showuipanel_lod_player_spells::startup_prewarm_loads_blizzard_player_spells_and_keeps_it_hidden` — Literal modern Blizzard_PlayerSpells LoD handoff/prewarm contract; native spellbook and talents are separate.
+
+## Observed runtime boundaries
+
+The [F10 investigation](../wiki/investigations/wrath-spell-panels-f10.md) records
+which assertions fail and which native consumers were reached. Name-oracle
+failure is not independently native-consumer RED; icon-path diagnosis remains
+source-derived rather than instrumented. Producer repair is outside this fixture
+batch. Retail's original seven `blizzard_player_spells_loads` rows belong to the
+existing `prefork_full_ui` target; zero-selected integration attempts are INVALID,
+not PASS. No test moved between targets and no assertion changed.
