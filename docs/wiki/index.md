@@ -1,6 +1,6 @@
 ## [2026-10-22] investigation | Wrath F12 native AuctionUI fixtures
 
-[Native auction boundary](investigations/wrath-addon-load-fixture.md#f12-native-auctionui-fixture-boundary) links [F12](../specs/wrath-fixture-f12.md): bare model probes, unchanged modern oracles, native price-column RED and inactive-close RED. Active close/identity/invalid-input branches remain gaps; final gates pending.
+[Native auction boundary](investigations/wrath-addon-load-fixture.md#f12-native-auctionui-fixture-boundary) links [F12](../specs/wrath-fixture-f12.md): bare model probes, unchanged modern oracles, native price-column RED and inactive-close RED. Native3 pass; original Wrath11/26 and Retail22/26 retain15/4 report-only failures, with no Retail regression. Stock/check/fmt gates pass; active close/identity/invalid-input branches remain gaps.
 
 ## [2026-10-21] investigation | Wrath autocomplete native fixture
 

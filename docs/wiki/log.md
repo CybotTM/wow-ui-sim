@@ -2596,3 +2596,8 @@ Public-API tests reproduce a whole-link secrecy failure on Retail and PTR before
 ## 2026-10-22 — F12 native AuctionUI consumer boundaries
 
 [[wrath-addon-load-fixture]] links F12's original-consumer price-column and inactive-close REDs, fixture-only sample isolation and retained modern-only oracles. Reconstructed 12340 facts are distinguished from native execution; final profile proof remains pending.
+
+
+## 2026-10-23 — F12 bounded proof
+
+[F12](../specs/wrath-fixture-f12.md) records source-bound native3 GREEN, original Wrath11/26 and unchanged Retail22/26, empty stock Wrath startup, warning-free dual-profile checks and formatter success. Fifteen Wrath/four Retail failures remain visible; active close and invalid/identity branches are explicitly excluded. No vendor edits or assertion relaxation.
