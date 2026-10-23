@@ -1,5 +1,9 @@
 //! Shape-only contracts; native semantics unknown. Source predictions are not runtime proof.
-#![cfg(any(feature = "client-wowforever"))]
+#![cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 
 #[path = "common/cf2_shape.rs"]
 mod shape;
@@ -9,12 +13,16 @@ mod shape;
 // ShouldShowCurrentEntry's boolean; :11 declares no AddEventFilter argument schema.
 // A forwarding-only consumer call cannot claim the missing boolean shape coverage.
 
+// retail: Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:377/555 (getter/setter).
+// ptr: Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:376/533 (getter/setter).
+// retail/ptr: Blizzard_APIDocumentationGenerated/UnitConstantsDocumentation.lua:23 (GroupBuffVisualAlertInfo).
+// retail/ptr: Blizzard_APIDocumentationGenerated/VisualAlertConstantsDocumentation.lua:6 (VisualAlertType).
+// Source-predicted PASS on retail/ptr: existing table getter and void setter preserve shapes, not native semantics.
 // wowforever: Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:377 (GetGroupBuffVisualAlerts).
 // wowforever: Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:555 (SetGroupBuffVisualAlerts).
 // wowforever: Blizzard_APIDocumentationGenerated/UnitConstantsDocumentation.lua:23 (GroupBuffVisualAlertInfo).
 // wowforever: Blizzard_APIDocumentationGenerated/VisualAlertConstantsDocumentation.lua:6 (VisualAlertType).
 // Source-predicted FAIL: Forever getter and setter missing; actual records only, exact enum, no required list contents; not executed; native semantics unknown.
-#[cfg(any(feature = "client-wowforever"))]
 #[test]
 fn original_group_buff_records_shape_blocker() {
     let env = shape::load(&["Blizzard_FrameXMLUtil"]);

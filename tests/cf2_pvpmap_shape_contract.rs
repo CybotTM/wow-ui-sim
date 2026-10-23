@@ -2,7 +2,10 @@
 #![cfg(any(
     feature = "client-retail",
     feature = "client-ptr",
-    feature = "client-mists"
+    feature = "client-wowforever",
+    feature = "client-mists",
+    feature = "client-era",
+    feature = "client-anniversary"
 ))]
 
 #[path = "common/cf2_shape.rs"]
@@ -10,8 +13,13 @@ mod shape;
 
 // retail: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:987 (IsMatchComplete).
 // ptr: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:946 (IsMatchComplete).
+// wowforever: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:987 (IsMatchComplete).
 // Source-predicted FAIL: IsMatchComplete missing; boolean and original event acceptance only; not executed; native semantics unknown.
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn original_match_enter_world_shape_blocker() {
     let env = shape::load(&["Blizzard_PVPMatch"]);
@@ -31,11 +39,16 @@ frame:OnEvent('PLAYER_ENTERING_WORLD')
     );
 }
 
+// retail: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:300/283/1660 (vehicle getters/record).
+// ptr: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:281/264/1619 (vehicle getters/record).
+// wowforever: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:300/283/1670 (vehicle getters/record).
+// era/anniversary: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:96/80/769 (vehicle getters/record).
+// All six profiles declare both queries MayReturnNothing and the same record fields.
+// WorldMap requires SharedMapDataProviders; selected Mainline/Classic TOCs include VehicleDataProvider.xml.
 // mists: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:87 (GetBattlefieldVehicles).
 // mists: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:71 (GetBattlefieldVehicleInfo).
 // mists: Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:760 (BattlefieldVehicleInfo).
 // Source-predicted FAIL: vehicle getters missing; optional table or zero returns, actual records only; not executed; native semantics unknown.
-#[cfg(any(feature = "client-mists"))]
 #[test]
 fn original_vehicle_provider_shape_blocker() {
     let env = shape::load(&["Blizzard_WorldMap"]);

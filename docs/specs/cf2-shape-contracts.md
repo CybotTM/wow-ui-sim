@@ -4,13 +4,14 @@
 
 ## What it must do
 
-Every case must assert documented arity/types/nullability and applicable enum membership, invoke the unchanged selected consumer without a new Lua error, and register only on evidenced profiles. Missing members are source-predicted shape blockers, not observed failures. Existing loader errors are retained; new consumer errors fail the case.
+Every case must assert documented arity/types/nullability and applicable enum membership, invoke the unchanged selected consumer without a new Lua error, and register on every profile with both a generated declaration and a runtime-selected original consumer. TOC AllowLoad/AllowLoadGameType/ExcludeLoadGameType restrictions and selected Family/Game paths determine applicability; cached source alone does not. Missing members are source-predicted shape blockers, not observed failures. Existing loader errors are retained; new consumer errors fail the case.
 
 ### social: `original_navigation_squelch_shape_blocker`
 
 - [ ] Profiles: retail, ptr, mists. No arguments → exactly one non-nil boolean. No silence mapping or button-state expectation.
 - Native behavior/defaults/lifecycle: **unknown**; no semantic values asserted.
 - Original consumer: `Blizzard_GroupFinder/Mainline/LFGList.lua:189 (retail/ptr); Classic/LFGList.lua:94 (mists)`.
+- Forever excluded despite its declaration: `Blizzard_GroupFinder/Blizzard_GroupFinder.toc:10` has `ExcludeLoadGameType: camelot`; `src/toc/mod.rs:64-76,481-483` makes that exclusion active. Its cached Mainline LFGList is not runtime-selected. This corrects the earlier requested Forever registration.
 - Documentation: retail: `Blizzard_APIDocumentationGenerated/SocialRestrictionsDocumentation.lua:96 (IsSquelched)`; ptr: `Blizzard_APIDocumentationGenerated/SocialRestrictionsDocumentation.lua:71 (IsSquelched)`; mists: `Blizzard_APIDocumentationGenerated/SocialRestrictionsDocumentation.lua:62 (IsSquelched)`.
 - Unexecuted prediction: **FAIL** — IsSquelched missing; only boolean shape, no button state.
 
@@ -24,7 +25,7 @@ Every case must assert documented arity/types/nullability and applicable enum me
 
 ### social: `original_microbutton_invitation_records_shape_blocker`
 
-- [ ] Profiles: retail, ptr, wowforever, mists, era, anniversary. No arguments → exactly one non-nil table; recursively validate actual ClubSelfInvitationInfo, ClubInfo and ClubMemberInfo records, nullable fields and enum membership. No nonempty-list requirement. Opaque IDs: documented non-nullability only.
+- [ ] Profiles: retail, ptr, wowforever, mists, era, anniversary. No arguments → exactly one non-nil table; recursively validate actual ClubSelfInvitationInfo, ClubInfo and ClubMemberInfo records, nullable fields and enum membership. No nonempty-list requirement. Opaque IDs: documented non-nullability only. `favoriteTimeStamp` and `joinTime` are nullable `BigUInteger`; Lua primitive representation is **native-unknown**. Assert only documented nullability, never number/string representation (`ClubDocumentation.lua:1772-1773` retail/ptr/wowforever; `:1674-1675` mists/era/anniversary).
 - Native behavior/defaults/lifecycle: **unknown**; no semantic values asserted.
 - Original consumer: `Blizzard_MicroMenu/Mainline/MainMenuBarMicroButtons.lua:1230 (retail/ptr), :1386 (wowforever); Classic/MainMenuBarMicroButtons.lua:520 (mists/era/anniversary)`.
 - Documentation: retail/ptr/wowforever: `Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:580 (GetInvitationsForSelf)`; retail/ptr/wowforever: `Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1938 (ClubSelfInvitationInfo)`; retail/ptr/wowforever: `Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1760 (ClubInfo)`; retail/ptr/wowforever: `Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1808 (ClubMemberInfo)`; mists/era/anniversary: `Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:545 (GetInvitationsForSelf)`; mists/era/anniversary: `Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1839 (ClubSelfInvitationInfo)`; mists/era/anniversary: `Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1662 (ClubInfo)`; mists/era/anniversary: `Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1710 (ClubMemberInfo)`.
@@ -32,26 +33,29 @@ Every case must assert documented arity/types/nullability and applicable enum me
 
 ### combataura: `original_group_buff_records_shape_blocker`
 
-- [ ] Profiles: wowforever. Getter: no arguments → exactly one non-nil table; actual entries require numeric spellID and VisualAlertType visualValue. Assert exact ten enum names/values 1–10. Setter auxiliary: actual record table → no returns. No setter/event timing expectation or synthetic changed payload.
+- [ ] Profiles: retail, ptr, wowforever. Getter: no arguments → exactly one non-nil table; actual entries require numeric spellID and VisualAlertType visualValue. Assert exact ten enum names/values 1–10. Setter auxiliary: actual record table → no returns. No setter/event timing expectation or synthetic changed payload.
 - Native behavior/defaults/lifecycle: **unknown**; no semantic values asserted.
 - Original consumer: `Blizzard_FrameXMLUtil/AuraUtil.lua:704`.
-- Documentation: wowforever: `Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:377 (GetGroupBuffVisualAlerts)`; wowforever: `Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:555 (SetGroupBuffVisualAlerts)`; wowforever: `Blizzard_APIDocumentationGenerated/UnitConstantsDocumentation.lua:23 (GroupBuffVisualAlertInfo)`; wowforever: `Blizzard_APIDocumentationGenerated/VisualAlertConstantsDocumentation.lua:6 (VisualAlertType)`.
-- Unexecuted prediction: **FAIL** — Forever getter and setter missing; actual records only, exact enum, no required list contents.
+- Selection: retail/ptr `Blizzard_FrameXMLUtil/Blizzard_FrameXMLUtil.toc:5,15` allows Game and loads AuraUtil.lua without game-type exclusion.
+- Documentation: retail/ptr use the same record and enum schemas cited below; retail getter/setter `UnitAuraDocumentation.lua:377/555`, ptr `:376/533`. wowforever: `Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:377 (GetGroupBuffVisualAlerts)`; wowforever: `Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:555 (SetGroupBuffVisualAlerts)`; wowforever: `Blizzard_APIDocumentationGenerated/UnitConstantsDocumentation.lua:23 (GroupBuffVisualAlertInfo)`; wowforever: `Blizzard_APIDocumentationGenerated/VisualAlertConstantsDocumentation.lua:6 (VisualAlertType)`.
+- Unexecuted prediction: retail/ptr **PASS** — existing table getter and void setter are shape-compatible preservation, not native semantics. Forever **FAIL** — getter and setter missing. Actual records only, exact enum, no required list contents.
 
 ### pvpmap: `original_match_enter_world_shape_blocker`
 
-- [ ] Profiles: retail, ptr. No arguments → exactly one non-nil boolean. Inactive match is a fixture input so the original OR expression reaches completion; no transition/subscription result asserted. Forever excluded.
+- [ ] Profiles: retail, ptr, wowforever. No arguments → exactly one non-nil boolean. Inactive match is a fixture input so the original OR expression reaches completion; no transition/subscription result asserted.
 - Native behavior/defaults/lifecycle: **unknown**; no semantic values asserted.
 - Original consumer: `Blizzard_PVPMatch/PVPMatchResults.lua:201`.
-- Documentation: retail: `Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:987 (IsMatchComplete)`; ptr: `Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:946 (IsMatchComplete)`.
+- Selection: Forever `Blizzard_PVPMatch/Blizzard_PVPMatch.toc:4,7` allows camelot and loads PVPMatchResults.xml; XML `:3` loads PVPMatchResults.lua. No TOC game-type exclusion.
+- Documentation: retail/wowforever: `Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:987 (IsMatchComplete)`; ptr: `Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:946 (IsMatchComplete)`.
 - Unexecuted prediction: **FAIL** — IsMatchComplete missing; boolean and original event acceptance only.
 
 ### pvpmap: `original_vehicle_provider_shape_blocker`
 
-- [ ] Profiles: mists. Numeric map ID → zero returns OR exactly one non-nil table. Validate all actual records: x/y/facing/textureWidth/textureHeight numbers, name/atlas strings, four boolean flags. Indexed query uses actual index/map ID and likewise permits zero returns. Original pin calls only when an indexed record exists; no count/order/lifetime expectation.
+- [ ] Profiles: retail, ptr, wowforever, mists, era, anniversary. Numeric map ID → zero returns OR exactly one non-nil table. Validate all actual records: x/y/facing/textureWidth/textureHeight numbers, name/atlas strings, four boolean flags. Indexed query uses actual index/map ID and likewise permits zero returns. Original pin calls only when an indexed record exists; no count/order/lifetime expectation.
 - Native behavior/defaults/lifecycle: **unknown**; no semantic values asserted.
 - Original consumer: `Blizzard_SharedMapDataProviders/VehicleDataProvider.lua:31,58,76`.
-- Documentation: mists: `Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:87 (GetBattlefieldVehicles)`; mists: `Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:71 (GetBattlefieldVehicleInfo)`; mists: `Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:760 (BattlefieldVehicleInfo)`.
+- Selection: retail/ptr/wowforever WorldMap_Mainline.toc `:3` requires SharedMapDataProviders; selected SharedMapDataProviders_Mainline.toc `:5-6,26` allows Game/mainline and includes VehicleDataProvider.xml. Era/anniversary WorldMap_Vanilla.toc `:3,5-6` requires that provider and allows Game/vanilla; SharedMapDataProviders_Classic.toc `:5-6,21` allows Game/vanilla and includes the same XML. No added root/provider TOC excludes the active game type. XML `:3` loads the unchanged provider. Both queries are MayReturnNothing with identical record fields in every registered profile.
+- Documentation: `Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua` (list getter/indexed getter/record): retail `:300/283/1660`, ptr `:281/264/1619`, wowforever `:300/283/1670`, era/anniversary `:96/80/769`. mists: `Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:87 (GetBattlefieldVehicles)`; mists: `Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:71 (GetBattlefieldVehicleInfo)`; mists: `Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua:760 (BattlefieldVehicleInfo)`.
 - Unexecuted prediction: **FAIL** — vehicle getters missing; optional table or zero returns, actual records only.
 
 ### housing: `original_supertracking_pair_shape_blocker`
@@ -72,10 +76,11 @@ Every case must assert documented arity/types/nullability and applicable enum me
 
 ### forever: `original_ping_manager_shape_blocker`
 
-- [ ] Profiles: wowforever. No arguments → exactly one non-nil boolean; original manager OnLoad accepts it. No options count, availability or CVar alias expectation.
+- [ ] Profiles: retail, ptr, wowforever. No arguments → exactly one non-nil boolean; original manager OnLoad accepts it. No options count, availability or CVar alias expectation.
 - Native behavior/defaults/lifecycle: **unknown**; no semantic values asserted.
 - Original consumer: `Blizzard_CompactRaidFrames/Mainline/Blizzard_CompactRaidFrameManager.lua:163`.
-- Documentation: wowforever: `Blizzard_APIDocumentationGenerated/PingManagerDocumentation.lua:44 (IsPingSystemEnabled)`.
+- Selection: retail/ptr `Blizzard_CompactRaidFrames/Blizzard_CompactRaidFrames.toc:6` loads `[Family]` manager, selected Mainline by `src/toc/mod.rs:227-235`; no AllowLoad or game-type exclusion. Explicit root Blizzard_Menu.toc `:5` allows Both with no game-type restriction.
+- Documentation: retail/ptr/wowforever: `Blizzard_APIDocumentationGenerated/PingManagerDocumentation.lua:44 (IsPingSystemEnabled)`.
 - Unexecuted prediction: **FAIL** — IsPingSystemEnabled missing; no availability, option-count or CVar mapping.
 
 ### forever: `original_camelot_equipment_predicates_shape_blocker`
@@ -158,7 +163,7 @@ Every case must assert documented arity/types/nullability and applicable enum me
 
 - [ ] Compilation, original-consumer setup and all runtime results remain unverified under EDIT-ONLY authorization. A setup/provenance/other-callee failure is not proof of the predicted target gap.
 - [ ] C1 retail/ptr: Blizzard_APIDocumentationGenerated/CombatLogSecureDocumentation.lua:102 declares ShouldShowCurrentEntry (no arguments → one non-nil boolean). Normal populated ingest/current-entry path is not established. No executable contract or passing count. AddEventFilter (:11) has no parameter schema; a forwarding-only call cannot replace the boolean subcheck. No private-history seed.
-- [ ] Club IDs/member IDs/invitation IDs and Discord IDs: generated declarations provide names/nullability, not a Lua primitive mapping here. Validate non-nullability; do not invent a representation. Modern optional DiscordChatInfo recursively uses Blizzard_APIDocumentationGenerated/DiscordConstantsDocumentation.lua:42 and ClubDocumentation.lua:1843; older profiles have no Discord field declaration.
+- [ ] Club IDs/member IDs/invitation IDs, Discord IDs and nullable BigUInteger favoriteTimeStamp/joinTime: generated declarations provide names/nullability, not an established Lua primitive mapping here. BigUInteger representation remains native-unknown. Validate non-nullability; do not invent a representation. Modern optional DiscordChatInfo recursively uses Blizzard_APIDocumentationGenerated/DiscordConstantsDocumentation.lua:42 and ClubDocumentation.lua:1843; older profiles have no Discord field declaration.
 - [ ] Empty lists/MayReturnNothing validate only the observed shape. Populated records/indexed pins are conditional coverage, not claimed when absent. Mists PvpInfoDocumentation.lua:74 also marks the indexed query MayReturnNothing, correcting the earlier plan's nonoptional indexed-return wording.
 - [ ] H1 setter/input validation and C2 changed-event lifecycle are not covered: no invented valid content IDs or fabricated getter/event linkage. TTS cases require sealed executables outside deps, fresh child-only copied XDG_DATA_HOME and original CVar stat/hash receipts; they do not assert persistence.
 

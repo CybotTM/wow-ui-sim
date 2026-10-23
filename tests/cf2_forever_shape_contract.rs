@@ -1,12 +1,20 @@
 //! Shape-only contracts; native semantics unknown. Source predictions are not runtime proof.
-#![cfg(any(feature = "client-wowforever"))]
+#![cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 
 #[path = "common/cf2_shape.rs"]
 mod shape;
 
-// wowforever: Blizzard_APIDocumentationGenerated/PingManagerDocumentation.lua:44 (IsPingSystemEnabled).
+// retail/ptr/wowforever: Blizzard_APIDocumentationGenerated/PingManagerDocumentation.lua:44 (IsPingSystemEnabled).
 // Source-predicted FAIL: IsPingSystemEnabled missing; no availability, option-count or CVar mapping; not executed; native semantics unknown.
-#[cfg(any(feature = "client-wowforever"))]
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn original_ping_manager_shape_blocker() {
     let env = shape::load(&["Blizzard_Menu", "Blizzard_CompactRaidFrames"]);

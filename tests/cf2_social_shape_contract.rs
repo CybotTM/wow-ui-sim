@@ -143,8 +143,9 @@ local clubSchema = {
 {'clubType', 'opaque', false},
 {'avatarId', 'number', false},
 {'memberCount', 'number', true},
-{'favoriteTimeStamp', 'number', true},
-{'joinTime', 'number', true},
+-- BigUInteger's Lua primitive representation is native-unknown; nullability only.
+{'favoriteTimeStamp', 'opaque', true},
+{'joinTime', 'opaque', true},
 {'socialQueueingEnabled', 'boolean', true},
 {'crossFaction', 'boolean', true}
 }
