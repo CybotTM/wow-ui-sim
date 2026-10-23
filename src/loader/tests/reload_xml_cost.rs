@@ -54,19 +54,34 @@ fn load_xml_fixture(env: &WowLuaEnv, root: &Path) -> crate::Result<()> {
 fn assert_fresh_regions(env: &WowLuaEnv) {
     env.exec(&format!(
         r#"
-        assert(ReloadCostOldSentinel == nil)
+        assert(ReloadCostOldSentinel == nil,
+            'ReloadCostOldSentinel: expected nil, actual ' .. tostring(ReloadCostOldSentinel))
         local seen = {{}}
         for index = 0, {} do
-            local frame = _G['ReloadCost' .. index]
-            assert(frame and frame:GetParent() == UIParent)
+            local name = 'ReloadCost' .. index
+            local frame = _G[name]
+            assert(frame, name .. ': expected frame, actual ' .. tostring(frame))
+            assert(frame:GetParent() == UIParent,
+                name .. ': expected parent UIParent, actual ' .. tostring(frame:GetParent()))
             local ink = frame.Ink
-            assert(ink and ink:GetParent() == frame and not seen[ink])
+            local region = name .. '.Ink'
+            assert(ink, region .. ': expected region, actual ' .. tostring(ink))
+            assert(ink:GetParent() == frame,
+                region .. ': expected parent ' .. tostring(frame) .. ', actual ' .. tostring(ink:GetParent()))
+            assert(not seen[ink],
+                region .. ': expected distinct region, actual reused ' .. tostring(ink))
             seen[ink] = true
-            assert(ink:GetWidth() == 32 and ink:GetHeight() == 16)
-            assert(ink:GetDrawLayer() == 'BACKGROUND')
+            local width, height = ink:GetWidth(), ink:GetHeight()
+            assert(width == 32 and height == 16,
+                region .. ': expected size 32x16, actual ' .. tostring(width) .. 'x' .. tostring(height))
+            local layer = ink:GetDrawLayer()
+            assert(layer == 'BACKGROUND',
+                region .. ': expected draw layer BACKGROUND, actual ' .. tostring(layer))
         end
         ReloadCost0.Ink:SetWidth(7)
-        assert(ReloadCost1.Ink:GetWidth() == 32)
+        local width = ReloadCost1.Ink:GetWidth()
+        assert(width == 32,
+            'ReloadCost1.Ink: expected independent width 32, actual ' .. tostring(width))
         "#,
         INSTANCE_COUNT - 1
     ))
