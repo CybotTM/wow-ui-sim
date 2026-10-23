@@ -18,6 +18,13 @@ Sources: Retail/PTR `Blizzard_APIDocumentationGenerated/StableInfoDocumentation.
 
 Sources: `Blizzard_APIDocumentationGenerated/ItemUpgradeDocumentation.lua:11-24` (Retail/PTR/Forever), `:11-23` (Mists/Era/Anniversary). Selected generic `Blizzard_FrameXMLUtil/ItemUtil.lua:147` (Retail/PTR), `:214` (Forever, corrected generic file, **not Camelot**), `:142` (Mists/Era/Anniversary). FrameXMLUtil TOCs select generic ItemUtil on all six. Era/Anniversary have the utility consumer but cannot normally open its upgrade context: cached `Blizzard_ItemUpgradeUI_Mists.toc:4` restricts that window to Mists. Their context-specific subcheck stays blocked rather than forcing unselected UI or fabricating a frame.
 
+### Store
+
+- [ ] Retail/PTR/Forever/Mists/Era/Anniversary `C_StorePublic.DoesGroupHavePurchaseableProducts` accepts a required non-nil numeric group ID and returns exactly one non-nil boolean.
+- [ ] Original `StoreInterfaceUtil.OpenToSubscriptionProduct` accepts the actual group-query result without Lua error on its normal legacy-shop path. Shop2 bypass is a blocked prerequisite, not a passing group-query test. Direct shape checks cover both original category IDs; the second original call remains conditional on the first actual result.
+
+Sources: `Blizzard_APIDocumentationGenerated/StorePublicUIDocumentation.lua:11-24` (Retail/PTR/Forever), `:11-23` (Mists/Era/Anniversary); selected `Blizzard_SharedXML/InterfaceUtil.lua:44,48` (Retail/PTR/Forever), `:32,36` (Mists/Era/Anniversary), selected by SharedXML TOCs. Secure StoreUI is not the selected consumer on five of these profiles and is not forced into coverage.
+
 ## How it works
 
 - [Runtime-selected consumers and proof classes](../wiki/investigations/consumer-selection-and-red-proof.md).
@@ -28,12 +35,16 @@ Sources: `Blizzard_APIDocumentationGenerated/ItemUpgradeDocumentation.lua:11-24`
 
 - `tests/api_shape_item_upgrade.rs`: six-profile argument/boolean shape; original upgrade-context acceptance on four reachable profiles.
 
+- `tests/api_shape_store.rs`: six-profile numeric-group/boolean shape and original InterfaceUtil acceptance.
+
 ## Tests asserting this spec
 
 - `api_shape_stable_active_list::stable_active_list_shape_blocker_contract` — source-predicted FAIL for missing member; not executed.
 
 - `api_shape_item_upgrade::item_upgrade_boolean_contract` — expected preservation PASS on six profiles, unexecuted.
 - `api_shape_item_upgrade::item_upgrade_original_item_util_contract` — expected preservation PASS on Retail/PTR/Forever/Mists if normal setup succeeds, unexecuted. Era/Anniversary upgrade-context subchecks blocked and unregistered; no consumer acceptance claimed there.
+
+- `api_shape_store::store_original_interface_util_contract` — expected preservation PASS on six profiles with legacy shop prerequisites, unexecuted.
 
 ## Known gaps (current cycle)
 
