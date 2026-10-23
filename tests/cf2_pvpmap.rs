@@ -49,7 +49,7 @@ fn assert_enter_world_registration(env: &WowLuaEnv, expected: bool) {
 }
 
 #[test]
-fn original_match_results_enter_world_ignores_explicit_inactive_match() {
+fn original_match_results_enter_world_tracks_inactive_active_and_completed_match() {
     let env = load_original_consumer("Blizzard_PVPMatch");
     {
         let mut sim = env.state().borrow_mut();
@@ -58,17 +58,13 @@ fn original_match_results_enter_world_ignores_explicit_inactive_match() {
     }
     create_match_event_fixture(&env);
     assert_enter_world_registration(&env, false);
-}
-
-#[test]
-fn original_match_results_enter_world_subscribes_for_active_and_completed_matches() {
-    let env = load_original_consumer("Blizzard_PVPMatch");
+    env.exec("Cf2MatchResults:UnregisterAllEvents()")
+        .expect("reset real registration output before active snapshot");
     {
         let mut sim = env.state().borrow_mut();
         sim.pvp_match_active = true;
         sim.pvp_catalog.match_completed = false;
     }
-    create_match_event_fixture(&env);
     assert_enter_world_registration(&env, true);
     env.exec("Cf2MatchResults:UnregisterAllEvents()")
         .expect("reset real registration output between match snapshots");

@@ -39,8 +39,7 @@ CF-2 slice 4 covers the original cached Blizzard match-results event condition, 
 
 Integration harness discovers both files:
 
-- `cf2_pvpmap::original_match_results_enter_world_ignores_explicit_inactive_match` — Retail/PTR.
-- `cf2_pvpmap::original_match_results_enter_world_subscribes_for_active_and_completed_matches` — Retail/PTR.
+- `cf2_pvpmap::original_match_results_enter_world_tracks_inactive_active_and_completed_match` — Retail/PTR. One selector observes inactive/not-completed, active/not-completed, then inactive/completed on the same seeded state, rejecting either constant completion result.
 - `cf2_group_map_icons::original_group_pin_tracks_map_display_visibility_and_live_updates` — Era/Anniversary.
 
 File-level cfg lists exactly each file's applicable profiles; excluded profiles register no such tests. Authored, uncompiled and unrun. Fixtures call complete original functions loaded through the profile-cache addon closure. Real widget outputs are minimal presentation fixtures, not alternate consumers. Existing addon-load errors remain recorded; direct consumer calls must succeed without adding errors.
