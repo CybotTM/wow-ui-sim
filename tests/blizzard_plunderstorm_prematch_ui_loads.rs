@@ -308,11 +308,13 @@ prefork_full_ui_case! {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_plunderstorm_prematch_ui_is_addon_loaded_after_explicit_load() {
     let env = load_full_game_ui_with_prematch_ui();
     blizzard_plunderstorm_prematch_ui_is_addon_loaded_after_explicit_load::run(&env);
+}
 }
 
 prefork_full_ui_case! {

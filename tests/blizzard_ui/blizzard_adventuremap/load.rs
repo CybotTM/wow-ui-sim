@@ -37,6 +37,7 @@ const MIXIN_TABLES: &[&str] = &[
     "AdventureMapQuestRewardMixin",
 ];
 
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_loads_with_dependency_closure_and_no_lua_errors() {
     assert_toc_declares_required_dependencies();
@@ -55,6 +56,7 @@ fn adventure_map_loads_with_dependency_closure_and_no_lua_errors() {
             errors.join("\n  ")
         );
     });
+}
 }
 
 // Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
