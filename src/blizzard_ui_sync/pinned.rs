@@ -32,8 +32,24 @@ fn build() -> crate::Result<&'static Build> {
     BUILD
         .get_or_init(|| {
             let build: Build = serde_json::from_str(INDEX).map_err(|cause| cause.to_string())?;
-            if build.schema != 1 || build.product != "wowxptr" {
-                return Err("unsupported PTR content-index schema or product".into());
+            let identity = [
+                build.product.as_str(),
+                build.version.as_str(),
+                build.build_key.as_str(),
+                build.cdn_key.as_str(),
+                build.install_key.as_str(),
+                build.gethe_revision.as_str(),
+            ];
+            let expected = [
+                "wowt",
+                "12.1.7.70424",
+                "328e394e14935f6e1017674de430603e",
+                "ccc89ec4bcc03f6cc1cc1c7861d9ed0f",
+                "531a6f831c609097179d4bc49731007b",
+                "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a",
+            ];
+            if build.schema != 1 || identity != expected {
+                return Err("unsupported PTR content-index schema or source identity".into());
             }
             #[cfg(feature = "casc")]
             validate_entries(&build)?;

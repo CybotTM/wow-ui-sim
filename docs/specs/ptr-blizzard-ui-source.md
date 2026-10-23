@@ -4,7 +4,7 @@ PTR selects `wowt` **12.1.7.70424** using an immutable Blizzard CDN content inde
 
 ## What it must do
 
-- [ ] Reject previous `wowxptr` 69594 cache provenance for the selected `wowt` 70424 build, even when required files exist; Rust execution pending.
+- [ ] Require exact schema/product/version/build/CDN/install/Gethe identity for `wowt` 70424 and reject previous `wowxptr` 69594 cache provenance, even when required files exist; Rust GREEN pending.
 - [x] Verify encoded BLTE identity and decoded content size/hash before accepting source bytes.
 - [x] Require exact HTTP partial-content ranges; reject full-archive or wrong-range responses.
 - [x] Retry transient HTTP failures with bounded backoff and respect `Retry-After`.
