@@ -98,3 +98,34 @@ Residual failures must be traced after the corrected fixture executes; missing-c
 
 - [Addon loading](../../addon-loading-pipeline.md) — loader behavior.
 - [Harness source binding](../systems/prefork-test-harness.md#shared-target-source-binding--2026-10-20) — separate stale-source and zero-selection failure.
+
+
+## F12 native AuctionUI fixture boundary
+
+The [F12 contract](../../specs/wrath-fixture-f12.md) separates pure auction-model
+probes from original cached AuctionUI consumers. Pure probes keep their Lua oracles
+but no longer require modern AuctionHouseUI on Wrath. LoD loaded/error checks use
+`Blizzard_AuctionUI` after native FrameXML. The generic visibility probe retains its
+bytes and binds a local `AuctionHouseFrame` identifier to native `AuctionFrame`;
+modern mixin/child/token/provider assertions remain unchanged report-only failures.
+
+Original browse, bidder and owned tab callbacks exposed Mists' eighteen-column row
+being read as the legacy thirteen-column tuple: browse buyout and bidder/owned bid
+prices fail at their original native widget fields. The Wrath projection removes
+the level-header/full-name columns, preserves numeric sale status and uses one/nil
+rather than booleans. Mists' eighteen-value sequence is retained. The initial RED
+and message-labeled RED both precede the producer. New native tests are additive,
+not replacements for modern-only original rows.
+
+Native AuctionFrame_Show first exposes default modern browse samples even in
+bid/owned tests. Clearing those sample rows isolates the requested native fixture;
+the default sample producer remains unchanged. Native OnHide then exposes a generated
+CloseAuctionHouse wrapper calling nil. A second bound original-consumer RED precedes
+the raw Wrath registration of the reconstructed no-active-auctioneer zero-return
+branch. Active cleanup, matching-target double-CLOSED and multisell ordering remain
+unmodeled; no active-session semantics are claimed. Reconstructed 12340 source
+supports these boundary decisions, but is not a native execution receipt.
+
+Invalid-row tuples, argument validation/coercion, case-insensitive types, required
+level/texture projection and bidder/owner identity remain separate producer gaps.
+Final profile/build/startup results belong to the F12 contract, not this diagnosis.
