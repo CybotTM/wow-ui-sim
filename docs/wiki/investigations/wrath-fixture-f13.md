@@ -1,6 +1,6 @@
 # Wrath F13 loader fixtures
 
-[Contract](../../specs/wrath-fixture-f13.md): preserve the original 27 retained consumers and assertions. Fresh pre-repair Wrath0/27PASS, Retail26/27PASS (pre-existing missing Archaeology Mainline TOC). Five additive companions pass on both profiles and do not replace missing modern consumers. Final repair proof pending.
+[Contract](../../specs/wrath-fixture-f13.md): preserve the original 27 retained consumers and assertions. Fresh pre-repair Wrath0/27PASS, Retail26/27PASS (pre-existing missing Archaeology Mainline TOC). Five additive companions pass on both profiles and do not replace missing modern consumers. Final merged-code proof at `6f54e648f`: Wrath3PASS/24FAIL, Retail26PASS/1sameFAIL; companions5PASS each. Wrath stock returns an empty error array; both profile checks and formatting pass without compiler warnings. No producer RED/GREEN claimed.
 
 ## Root cause and bounded repair
 
