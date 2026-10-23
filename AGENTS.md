@@ -31,6 +31,7 @@
 
 - Before treating missing CASC mappings as a blocker, follow [the mapping refresh workflow](docs/updating-blizzard-ui-to-a-new-patch.md): refresh and regenerate the listfile, rebuild, then investigate residual misses.
 
+- Before claiming RED or applicability, prove the original consumer is runtime-selected (TOC flavor/[Game]/[Family]/AllowLoad/ExcludeLoadGameType), and that each RED selector alone rejects constant/no-op producers; otherwise label it preservation. See [consumer selection and RED proof](docs/wiki/investigations/consumer-selection-and-red-proof.md).
 - Do not jump to local UI or output-layer patches just because they are the fastest visible fix.
 - Treat render/layout/UI mismatches as evidence first, not as proof that the render/layout/UI layer is the right fix target.
 - If a framework or Blizzard/vendor path is behaving badly, prefer fixing the simulator/model/input state first unless evidence shows the downstream layer itself is wrong.

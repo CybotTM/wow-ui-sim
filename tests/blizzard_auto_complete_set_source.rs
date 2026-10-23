@@ -29,6 +29,7 @@ end
 return true, nil
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_set_source_stores_source_and_params() {
     common::with_perf_lock(|| {
@@ -51,4 +52,5 @@ fn blizzard_auto_complete_set_source_stores_source_and_params() {
             });
         });
     });
+}
 }

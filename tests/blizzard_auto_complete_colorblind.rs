@@ -39,6 +39,7 @@ expect(normalText:match("^|cff%x%x%x%x%x%xAlice|r$") ~= nil,
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_colorblind_mode_appends_priority_label() {
     common::with_perf_lock(|| {
@@ -60,4 +61,5 @@ fn blizzard_auto_complete_colorblind_mode_appends_priority_label() {
             });
         });
     });
+}
 }

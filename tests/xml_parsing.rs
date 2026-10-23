@@ -78,7 +78,17 @@ fn test_parse_color_swatch_xml() {
 #[test]
 fn test_parse_all_xml_in_shared_xml_base() {
     // Try to parse all XML files in the directory
-    let dir = blizzard_dir();
+    let dir = if wow_ui_sim::client_profile::ACTIVE
+        == wow_ui_sim::client_profile::ClientProfile::Wrath
+    {
+        wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+            .expect("native FrameXML cache should be synced")
+            .parent()
+            .unwrap()
+            .to_path_buf()
+    } else {
+        blizzard_dir()
+    };
     let mut parsed = 0;
     let mut failed = Vec::new();
 

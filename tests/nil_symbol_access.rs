@@ -57,7 +57,13 @@ fn repeated_missing_global_lookup_is_logged_once() {
 fn missing_c_namespace_lookup_is_logged_with_addon_name() {
     let env = env_with_loading_addon("TestAddon");
 
-    env.exec("local _ = C_Container.MissingMethod")
+    env.exec(
+        r#"
+        assert(C_Container.MissingMethod == nil)
+        assert(C_Container.MissingMethod == nil)
+        assert(rawget(C_Container, "MissingMethod") == nil)
+        "#,
+    )
         .expect("missing namespace lookup should not error");
 
     let records = env.state().borrow().nil_symbol_accesses.clone();

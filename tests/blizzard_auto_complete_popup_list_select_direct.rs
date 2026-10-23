@@ -51,6 +51,7 @@ end
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_popup_list_select_result_invokes_callback_directly() {
     common::with_perf_lock(|| {
@@ -72,4 +73,5 @@ fn blizzard_auto_complete_popup_list_select_result_invokes_callback_directly() {
             });
         });
     });
+}
 }

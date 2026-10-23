@@ -14,6 +14,7 @@ const SIMULATED_RAID_MIN_COMPANIONS: usize = 6;
 pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     register_legacy_friend_count(lua)?;
     super::wrath_friends::register_all(lua)?;
+    super::wrath_autocomplete::register_all(lua)?;
     LuaApiMut::register_function(lua, "GetTrackedAchievements", get_tracked_achievements)?;
     LuaApiMut::register_function(
         lua,

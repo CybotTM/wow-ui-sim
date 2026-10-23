@@ -8,6 +8,15 @@ fn blizzard_shared_xml_base_toc() -> PathBuf {
     .join("Blizzard_SharedXMLBase/Blizzard_SharedXMLBase.toc")
 }
 
+fn file_inventory_toc() -> PathBuf {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+            .expect("native FrameXML TOC should be synced")
+    } else {
+        blizzard_shared_xml_base_toc()
+    }
+}
+
 const ACE3_TOC: &str = "/home/osso/Projects/wow/reference-addons/Ace3/Ace3.toc";
 
 fn is_mainline_profile() -> bool {
@@ -198,7 +207,7 @@ fn test_parse_ace3() {
 
 #[test]
 fn test_file_paths_absolute() {
-    let toc_path = blizzard_shared_xml_base_toc();
+    let toc_path = file_inventory_toc();
     let toc = TocFile::from_file(&toc_path).expect("Failed to read TOC file");
 
     let paths = toc.file_paths();
@@ -211,7 +220,7 @@ fn test_file_paths_absolute() {
 
 #[test]
 fn test_lua_and_xml_files() {
-    let toc_path = blizzard_shared_xml_base_toc();
+    let toc_path = file_inventory_toc();
     let toc = TocFile::from_file(&toc_path).expect("Failed to read TOC file");
 
     let lua_count = toc

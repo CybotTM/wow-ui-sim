@@ -81,6 +81,7 @@ AutoComplete_UpdateResults = originalUpdateResults
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_appends_matching_realm_names() {
     common::with_perf_lock(|| {
@@ -102,4 +103,5 @@ fn blizzard_auto_complete_appends_matching_realm_names() {
             });
         });
     });
+}
 }

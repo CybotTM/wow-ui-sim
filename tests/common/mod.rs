@@ -8,6 +8,7 @@ include!(concat!(
 #[cfg(feature = "client-wrath")]
 pub mod action_bar_fixture;
 pub mod addon_coverage_baseline;
+pub mod auction_fixtures;
 #[cfg(feature = "retail-12-1-0")]
 pub mod aura_container_harness;
 pub mod blizzard_addon_harness;
@@ -15,6 +16,7 @@ pub mod blizzard_addon_manifest;
 mod event_helpers;
 pub mod game_menu_fixture;
 pub mod panel_fixtures;
+pub mod wrath_autocomplete;
 #[cfg(target_os = "linux")]
 pub(crate) mod prefork_process;
 #[cfg(target_os = "linux")]
@@ -361,6 +363,7 @@ const _: () = {
     let _ = std::mem::size_of::<LockedEnv>();
     let _ = lock_env as fn(EnvBuilder) -> LockedEnv;
     let _ = env_with_shared_xml as fn() -> WowLuaEnv;
+    let _ = wrath_autocomplete::load_and_assert_native as fn(&'static str);
     let _ = wrath_watch_fixture::seed_watch_quests as fn(&WowLuaEnv);
     let _ = template_child_name as fn(&str, &str) -> String;
     let _ = fire_addon_loaded as fn(&WowLuaEnv, &str);
