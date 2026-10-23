@@ -224,6 +224,7 @@ fn c_club_returns_guild() {
     assert_eq!(result, "ok", "C_Club should return guild: {result}");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn guild_member_rank_dropdown_generates_rank_options() {
     test_timeout! {
@@ -267,6 +268,7 @@ fn guild_member_rank_dropdown_generates_rank_options() {
             "rank dropdown should show visible assignable guild ranks: {result}"
         );
     }
+}
 }
 
 post_wrath_ui_fixture! {
@@ -426,6 +428,7 @@ fn guild_control_rank_dropdown_omits_unassignable_leader_rank() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn guild_dropdown_descriptions_have_elements() {
     test_timeout! {
@@ -461,6 +464,7 @@ fn guild_dropdown_descriptions_have_elements() {
             "guild dropdown descriptions must expose elements: {result}"
         );
     }
+}
 }
 
 #[test]
