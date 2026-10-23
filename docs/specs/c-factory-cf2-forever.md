@@ -37,7 +37,7 @@ Slice 6 covers six missing C API members consumed by the original WowForever Bli
 
 ## Tests asserting this spec
 
-- `tests/cf2_forever.rs::original_guild_control_discord_radio_tracks_live_enablement` — authored, uncompiled/unrun, expected missing `IsEnabled` at original GuildControlUI line 70. Applies only to WowForever; other-profile N/A returns are not passing proof.
+- `tests/cf2_forever.rs::original_guild_control_discord_radio_tracks_live_enablement` — authored, uncompiled/unrun, expected missing `IsEnabled` at original GuildControlUI line 70. File-level cfg registers it only on WowForever; other profiles register no such test, with no runtime N/A return.
 - No executable populated fixture yet for the five pending members. Future acceptance requires native evidence and normal live model seed paths first; nil-boundary smoke tests alone cannot close them.
 
 ## Known gaps (current cycle)

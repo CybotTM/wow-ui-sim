@@ -1,6 +1,6 @@
 //! CF-2 Forever original consumer regression. Authored only; RED awaits a slot.
+#![cfg(any(feature = "client-wowforever",))]
 
-use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn load_original_guild_control() -> WowLuaEnv {
@@ -103,10 +103,6 @@ fn assert_original_discord_radio(env: &WowLuaEnv, enabled: bool) {
 
 #[test]
 fn original_guild_control_discord_radio_tracks_live_enablement() {
-    if ACTIVE != ClientProfile::WowForever {
-        eprintln!("CF-2 Forever guild consumer N/A for {ACTIVE:?}; not passing proof");
-        return;
-    }
     let env = load_original_guild_control();
     install_original_guild_menu_generator(&env);
     assert_original_discord_radio(&env, false);
