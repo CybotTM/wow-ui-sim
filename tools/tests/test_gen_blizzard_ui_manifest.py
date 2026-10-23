@@ -24,7 +24,7 @@ class PtrManifestTests(unittest.TestCase):
             git("config", "user.email", "fixture@example.invalid")
             addons = upstream / "Interface/AddOns/Example"
             addons.mkdir(parents=True)
-            (addons / "Selected.lua").write_text("return 70424\n")
+            (addons / "Selected.lua").write_text("return 70493\n")
             git("add", ".")
             git("commit", "-m", "selected")
             selected = git("rev-parse", "HEAD")

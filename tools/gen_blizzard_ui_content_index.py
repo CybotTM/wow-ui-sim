@@ -9,10 +9,11 @@ import struct
 import subprocess
 from pathlib import Path
 
+# Superseded Gethe pin: resolve the exact 70493 revision before regeneration.
 PINNED_GETHE_REVISION = "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a"
-PINNED_VERSION = "12.1.7.70424"
-PINNED_BUILD_KEY = "328e394e14935f6e1017674de430603e"
-PINNED_CDN_KEY = "ccc89ec4bcc03f6cc1cc1c7861d9ed0f"
+PINNED_VERSION = "12.1.7.70493"
+PINNED_BUILD_KEY = "fc3eaa61ff0ade6bf35dbab9727bc161"
+PINNED_CDN_KEY = "c13b476a09cb3262797a6fdc88103036"
 SCHEMA = 1
 
 
@@ -245,7 +246,7 @@ def verify_pinned_metadata(prefix: Path) -> tuple[dict[str, str], dict[str, str]
     build = read_config(build_config_path)
     cdn = read_config(cdn_config_path)
     if (
-        build.get("build-name") != "WOW-70424patch12.1.7_PTR"
+        build.get("build-name") != "WOW-70493patch12.1.7_PTR"
         or build.get("build-uid") != "wowt"
     ):
         raise ValueError("metadata is not the pinned wowt 12.1.7 build")

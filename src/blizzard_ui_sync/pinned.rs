@@ -42,9 +42,11 @@ fn build() -> crate::Result<&'static Build> {
             ];
             let expected = [
                 "wowt",
-                "12.1.7.70424",
-                "328e394e14935f6e1017674de430603e",
-                "ccc89ec4bcc03f6cc1cc1c7861d9ed0f",
+                "12.1.7.70493",
+                "fc3eaa61ff0ade6bf35dbab9727bc161",
+                "c13b476a09cb3262797a6fdc88103036",
+                // Superseded install/Gethe pins: replace from authenticated 70493 metadata.
+                // The committed 70424 index must remain rejected until regenerated.
                 "531a6f831c609097179d4bc49731007b",
                 "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a",
             ];
@@ -267,7 +269,7 @@ mod tests {
         let stale = provenance()
             .unwrap()
             .contents()
-            .replace("version=12.1.7.70424\n", "version=12.1.5.69594\n");
+            .replace("version=12.1.7.70493\n", "version=12.1.5.69594\n");
         std::fs::write(root.join(super::super::PROVENANCE_FILE), stale).unwrap();
         std::fs::write(root.join(super::super::COMPLETE_MARKER), b"ok\n").unwrap();
         std::fs::write(root.join("stale-source"), b"old source bytes").unwrap();
@@ -280,12 +282,12 @@ mod tests {
     }
 
     #[test]
-    fn pinned_ptr_selects_exact_70424_source_identity() {
+    fn pinned_ptr_selects_exact_70493_source_identity() {
         let selected = build().unwrap();
         assert_eq!(selected.product, "wowt");
-        assert_eq!(selected.version, "12.1.7.70424");
-        assert_eq!(selected.build_key, "328e394e14935f6e1017674de430603e");
-        assert_eq!(selected.cdn_key, "ccc89ec4bcc03f6cc1cc1c7861d9ed0f");
+        assert_eq!(selected.version, "12.1.7.70493");
+        assert_eq!(selected.build_key, "fc3eaa61ff0ade6bf35dbab9727bc161");
+        assert_eq!(selected.cdn_key, "c13b476a09cb3262797a6fdc88103036");
         assert_eq!(
             selected.gethe_revision,
             "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a"
@@ -310,13 +312,13 @@ mod tests {
             .unwrap()
             .contents()
             .replace("product=wowt\n", "product=wowxptr\n")
-            .replace("version=12.1.7.70424\n", "version=12.1.5.69594\n")
+            .replace("version=12.1.7.70493\n", "version=12.1.5.69594\n")
             .replace(
-                "328e394e14935f6e1017674de430603e",
+                "fc3eaa61ff0ade6bf35dbab9727bc161",
                 "4a9973f37906f8cfb344f8a9fe6777e0",
             )
             .replace(
-                "ccc89ec4bcc03f6cc1cc1c7861d9ed0f",
+                "c13b476a09cb3262797a6fdc88103036",
                 "3aa83893a3ce9b722a5f51328ad9a552",
             )
             .replace(

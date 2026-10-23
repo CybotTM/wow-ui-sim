@@ -1,6 +1,6 @@
 # Patch 12.1.7 source accounting
 
-Slice I0 freezes the public 12.1.7 source, its linked current 1.60.1 inventory and the TOC reference under `data/patch-api/sources/12.1.7-*`. Target: **12.1.7 build 70424, interface 120107**. Exact body SHA-256 identities replace unavailable MediaWiki revision IDs; no revision number is invented. [Investigation and reproduction](../wiki/investigations/patch-12-1-7-api-audit.md). This is source accounting, not implemented API coverage.
+Slice I0 freezes the public 12.1.7 source, its linked current 1.60.1 inventory and the TOC reference under `data/patch-api/sources/12.1.7-*`. Frozen page target: **12.1.7 build 70424, interface 120107**. The selected runtime source moved to **wowt 12.1.7.70493** on 2026-10-23; [source pin and regeneration](ptr-blizzard-ui-source.md) own that target. Frozen bodies/provenance remain historical, not 70493 evidence. Exact body SHA-256 identities replace unavailable MediaWiki revision IDs; no revision number is invented. [Investigation and reproduction](../wiki/investigations/patch-12-1-7-api-audit.md). This is source accounting, not implemented API coverage.
 
 ## What it must do
 

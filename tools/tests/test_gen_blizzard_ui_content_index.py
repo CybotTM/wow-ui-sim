@@ -128,7 +128,7 @@ class ContentIndexTests(unittest.TestCase):
         write_config(
             prefix.with_name(prefix.name + "-build-config.txt"),
             {
-                "build-name": "WOW-70424patch12.1.7_PTR",
+                "build-name": "WOW-70493patch12.1.7_PTR",
                 "build-uid": "wowt",
                 "install": "06feedbc851542370f3d2081fce81e19 21c1e5624dd78f5487c97caea43bf035",
                 "download": hashlib.md5(download_path.read_bytes()).hexdigest(),
@@ -160,7 +160,7 @@ class ContentIndexTests(unittest.TestCase):
         self.assertEqual(index["gethe_revision"], PINNED_GETHE_REVISION)
         self.assertEqual(index["version"], PINNED_VERSION)
         self.assertEqual(index["product"], "wowt")
-        self.assertEqual(index["version"], "12.1.7.70424")
+        self.assertEqual(index["version"], "12.1.7.70493")
         self.assertEqual(index["gethe_revision"], "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a")
         build_key, cdn_key = self.fixture_keys(prefix)
         self.assertEqual(index["build_key"], build_key)
@@ -193,7 +193,7 @@ class ContentIndexTests(unittest.TestCase):
     def test_rejects_old_build_even_with_authenticated_config(self) -> None:
         prefix, source, _ = self.make_fixture()
         config = prefix.with_name(prefix.name + "-build-config.txt")
-        config.write_text(config.read_text().replace("WOW-70424patch12.1.7_PTR", "WOW-69594patch12.1.5_XPTR"))
+        config.write_text(config.read_text().replace("WOW-70493patch12.1.7_PTR", "WOW-69594patch12.1.5_XPTR"))
         with self.assertRaisesRegex(ValueError, "not the pinned"):
             self.build_fixture_index(prefix, source)
 
