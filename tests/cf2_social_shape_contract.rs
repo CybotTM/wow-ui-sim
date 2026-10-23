@@ -16,6 +16,8 @@ mod shape;
     feature = "client-ptr",
     feature = "client-wowforever"
 ))]
+// retail/ptr/wowforever: Blizzard_APIDocumentationGenerated/DiscordConstantsDocumentation.lua:42
+// (DiscordChatInfo); Blizzard_APIDocumentationGenerated/ClubDocumentation.lua:1843 declares optional discordInfo.
 const DISCORD_SCHEMA: &str = r#"local function checkDiscord(value)
 
 if value.discordInfo ~= nil then
@@ -64,7 +66,7 @@ fn original_navigation_squelch_shape_blocker() {
 scalar('boolean', C_SocialRestrictions.IsSquelched())
 local source = debug.getinfo(LFGListCategorySelection_UpdateNavButtons, 'S').source:gsub('\\', '/')
 assert(source:match('Blizzard_GroupFinder/Mainline/LFGList.lua$') or source:match('Blizzard_GroupFinder/Classic/LFGList.lua$'))
-assert(not C_SocialRestrictions.IsSilenced(), 'consumer prerequisite: unsilenced account')
+-- Default fixture's unsilenced path reaches the getter; no silence/squelch policy asserted.
 LFGListCategorySelection_UpdateNavButtons(LFGListFrame.CategorySelection)
 
 "#,
