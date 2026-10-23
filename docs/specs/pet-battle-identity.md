@@ -29,7 +29,7 @@ These are populated-fixture compatibility requirements, not evidence of native i
 - `cf2_petbattle_identity::original_display_reads_names_by_owner_and_one_based_slot`
 - `cf2_petbattle_identity::original_display_tracks_rename_and_species_label_transitions`
 
-Both tests use runtime `client_profile::ACTIVE` selection. Wrath, Era and Anniversary have no applicable CF-2 pet-battle residual; those executions explicitly report non-applicability and do not constitute compatibility proof.
+File-level profile cfg registers both tests only on Retail, PTR, Forever and Mists. Wrath, Era and Anniversary register neither test; no runtime N/A success or fail-fast path exists.
 
 ## Known gaps (current cycle)
 

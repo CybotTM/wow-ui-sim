@@ -1,6 +1,11 @@
 //! Original cached pet-battle display consumer; populated identity fixtures only.
+#![cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever",
+    feature = "client-mists",
+))]
 
-use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::state::PetBattlePet;
 
@@ -14,17 +19,7 @@ struct DisplayIdentity<'a> {
     species: &'a str,
 }
 
-fn load_original_pet_battle_consumer() -> Option<WowLuaEnv> {
-    match ACTIVE {
-        ClientProfile::Retail
-        | ClientProfile::Ptr
-        | ClientProfile::WowForever
-        | ClientProfile::Mists => {}
-        ClientProfile::Wrath | ClientProfile::Era | ClientProfile::Anniversary => {
-            eprintln!("CF-2 pet-battle consumer is not applicable to {ACTIVE:?}");
-            return None;
-        }
-    }
+fn load_original_pet_battle_consumer() -> WowLuaEnv {
     let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
     let env = crate::common::blizzard_addon_harness::new_blizzard_addon_env(&ui);
     seed_pet_identities(&env);
@@ -37,7 +32,7 @@ fn load_original_pet_battle_consumer() -> Option<WowLuaEnv> {
     assert!(loaded.iter().any(|name| name == "Blizzard_PetBattleUI"));
     eprintln!("CF-2 original consumer cache: {}", ui.display());
     create_identity_display_fixture(&env);
-    Some(env)
+    env
 }
 
 fn seed_pet_identities(env: &WowLuaEnv) {
@@ -128,9 +123,7 @@ fn assert_original_display(env: &WowLuaEnv, expected: DisplayIdentity<'_>) {
 
 #[test]
 fn original_display_reads_names_by_owner_and_one_based_slot() {
-    let Some(env) = load_original_pet_battle_consumer() else {
-        return;
-    };
+    let env = load_original_pet_battle_consumer();
     for expected in [
         DisplayIdentity {
             owner: 1,
@@ -163,9 +156,7 @@ fn original_display_reads_names_by_owner_and_one_based_slot() {
 
 #[test]
 fn original_display_tracks_rename_and_species_label_transitions() {
-    let Some(env) = load_original_pet_battle_consumer() else {
-        return;
-    };
+    let env = load_original_pet_battle_consumer();
     for name in ["Pip", "Oak Mouse", "Pip Again"] {
         env.state().borrow_mut().pet_battles.player_pets[0].name = name.into();
         assert_original_display(
