@@ -4,7 +4,6 @@ use std::path::{Path, PathBuf};
 use wow_ui_sim::client_profile::{ACTIVE, ACTIVE_INTERFACE_VERSION, ClientProfile};
 use wow_ui_sim::loader::{find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::toc::TocFile;
 
 fn write_addon(root: &Path, contents: &str) -> PathBuf {
     let addon = root.join("Blizzard_LoadLocale");
@@ -31,6 +30,8 @@ fn p1217_selected_interface_is_visible_to_addons() {
 #[test]
 #[cfg(feature = "client-ptr")]
 fn p1217_selected_interface_admits_current_addon() {
+    use wow_ui_sim::toc::TocFile;
+
     let expected = 120107;
     let addon = tempfile::tempdir().unwrap();
     let toc = TocFile::parse(addon.path(), &format!("## Interface: {expected}\n"));
