@@ -1,0 +1,142 @@
+{
+  "schema": "patch-source-accounting/v1",
+  "patch": "12.1.7",
+  "coverage": "source-accounting-only; runtime coverage incomplete",
+  "provenance": "data/patch-api/sources/12.1.7-api-changes.provenance.json",
+  "direct": [
+    {
+      "id": "P01",
+      "change": "Includes API changes from 1.60.1",
+      "status": "UNKNOWN until I4",
+      "source": "data/patch-api/sources/12.1.7-api-changes.wikitext",
+      "lines": [
+        4
+      ]
+    },
+    {
+      "id": "P02",
+      "change": "Cast GUID server/spawn obfuscation",
+      "status": "DEFERRED: user decision and future-build oracle",
+      "source": "data/patch-api/sources/12.1.7-api-changes.wikitext",
+      "lines": [
+        5,
+        8
+      ]
+    },
+    {
+      "id": "P03",
+      "change": "Creature GUID server/spawn obfuscation",
+      "status": "DEFERRED: user decision and future-build oracle",
+      "source": "data/patch-api/sources/12.1.7-api-changes.wikitext",
+      "lines": [
+        5,
+        8
+      ]
+    },
+    {
+      "id": "P04",
+      "change": "Vehicle GUID server/spawn obfuscation",
+      "status": "DEFERRED: user decision and future-build oracle",
+      "source": "data/patch-api/sources/12.1.7-api-changes.wikitext",
+      "lines": [
+        5,
+        8
+      ]
+    },
+    {
+      "id": "P05",
+      "change": "Pet GUID server/spawn obfuscation",
+      "status": "DEFERRED: user decision and future-build oracle",
+      "source": "data/patch-api/sources/12.1.7-api-changes.wikitext",
+      "lines": [
+        5,
+        8
+      ]
+    },
+    {
+      "id": "P06",
+      "change": "Game object GUID server/spawn obfuscation",
+      "status": "DEFERRED: user decision and future-build oracle",
+      "source": "data/patch-api/sources/12.1.7-api-changes.wikitext",
+      "lines": [
+        5,
+        8
+      ]
+    },
+    {
+      "id": "P07",
+      "change": "Session stability/uniqueness, cross-client/restart incomparability; unchanged GUID format",
+      "status": "DEFERRED: user decision and future-build oracle",
+      "source": "data/patch-api/sources/12.1.7-api-changes.wikitext",
+      "lines": [
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "id": "P08",
+      "change": "Skip variable-bearing addon directives entirely",
+      "status": "PENDING I2a: metadata rejection",
+      "source": "data/patch-api/sources/12.1.7-api-changes.wikitext",
+      "lines": [
+        9
+      ]
+    },
+    {
+      "id": "P09",
+      "change": "Preserve conditional directives including AllowLoadGameType",
+      "status": "PENDING I2a: preservation proof",
+      "source": "data/patch-api/sources/12.1.7-api-changes.wikitext",
+      "lines": [
+        10
+      ]
+    },
+    {
+      "id": "P10",
+      "change": "RegionalTextLocale file variable from configured text locale and region",
+      "status": "PENDING I2b: shared PTR/Forever capability",
+      "source": "data/patch-api/sources/12.1.7-toc-format.wikitext",
+      "lines": [
+        55,
+        56,
+        57,
+        512,
+        513
+      ]
+    },
+    {
+      "id": "P11",
+      "change": "Preserve existing Game/Family/TextLocale file variables",
+      "status": "PENDING I2b: preservation proof",
+      "source": "data/patch-api/sources/12.1.7-toc-format.wikitext",
+      "lines": [
+        46,
+        47,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54
+      ]
+    },
+    {
+      "id": "P12",
+      "change": "Interface/epoch 120107; page build 70424",
+      "status": "PENDING I1/I3: target selection and source pin",
+      "source": "data/patch-api/sources/12.1.7-api-changes.wikitext",
+      "lines": [
+        1,
+        13
+      ]
+    }
+  ],
+  "inherited": {
+    "patch": "1.60.1",
+    "path": "data/patch-api/sources/12.1.7-inherited-1.60.1.json",
+    "status": "UNKNOWN until I4",
+    "occurrences": 1876
+  },
+  "guid_decision": "DEFERRED pending user decision; announced behavior unavailable in documented build 70424"
+}

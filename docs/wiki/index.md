@@ -1,6 +1,13 @@
 ## [2026-10-22] investigation | Wrath F13 native loader fixtures
 
 [Diagnosis](investigations/wrath-fixture-f13.md) and [contract](../specs/wrath-fixture-f13.md) separate three native fixture repairs from24 unchanged modern-only failures and five additive specimens. Before: Wrath0/27PASS, Retail26/27PASS (pre-existing Archaeology TOC failure); companion5PASS each. Final proof pending; no producer edits.
+## [2026-10-22] investigation | Wrath F07 REJECT repair
+
+[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [exact 32-row matrix](../specs/wrath-fixture-f07.md#exact-rows). Restored shine epsilon assertion passes; restored EventFrame/MinimalScrollBar consumer fails with missing track, unchanged and ungated. Fresh Wrath10 PASS/22 FAIL; Retail32 PASS/0 FAIL; stock Wrath[] and both checks/fmt pass. All invocations execute1; no producer fix or new generic test. Historical11/21 claims superseded. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
+
+## [2026-10-22] investigation | Patch 12.1.7 source accounting
+
+[12.1.7 source audit](investigations/patch-12-1-7-api-audit.md) freezes public body identities, P01–P12 and all 1,876 linked 1.60.1 occurrences. [Contract](../specs/patch-12-1-7-source-accounting.md) retains header disagreements, inherited UNKNOWN until I4 and deferred GUID work. Python-only validation rejects empty-register coverage; no runtime completion claimed.
 
 ## [2026-10-21] investigation | Wrath autocomplete native fixture
 
@@ -3491,6 +3498,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 
 | Page | Summary |
 |------|---------|
+| [[wowdecomp-audit]] | Read-only source research, including [Cataclysm 15595 supplement](../wowdecomp-audit/cataclysm-15595.md); audit owns findings and proof limits. No native verification; external code execution prohibited |
 | [[toc-game-type-tokens]] | Twelve observed `AllowLoadGameType` literals with local TOC line captures and cache provenance; native recognition, grammar, and BCC acceptance unproven |
 | [[api-coverage]] | ~97% C_* coverage, missing APIs by category, three-layer stub methodology |
 | [[cli-commands]] | wow-sim and wow-cli subcommands: lua-errors, run-tests, screenshot, dump-tree, audit-api |
