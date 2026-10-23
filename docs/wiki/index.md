@@ -1,6 +1,13 @@
+## [2026-10-23] investigation | Wrath retained-failure fixture programme
+
+[Programme register](investigations/wrath-retained-fixtures.md) centralizes F01–F22 status, standing exclusion mechanics, class (a) boundaries, open decisions and F18-P1. Lane specs retain exact receipts; pending/static work is not runtime acceptance. Documentation only; no builds or tests.
+
 ## [2026-10-22] investigation | Wrath F13 native loader fixtures
 
 [Diagnosis](investigations/wrath-fixture-f13.md) and [contract](../specs/wrath-fixture-f13.md) separate three native fixture repairs from24 unchanged modern-only failures and five additive specimens. Before: Wrath0/27PASS, Retail26/27PASS (pre-existing Archaeology TOC failure); companion5PASS each. Final merged-code proof6f54e648f: Wrath3/27PASS; Retail26/27PASS with identical baseline statuses; companions5PASS each, stock empty, checks/fmt pass without compiler warnings. No producer edits.
+## [2026-10-22] investigation | Wrath F12 native AuctionUI fixtures
+
+[Native auction boundary](investigations/wrath-addon-load-fixture.md#f12-native-auctionui-fixture-boundary) links [F12](../specs/wrath-fixture-f12.md): bare model probes, unchanged modern oracles, native price-column RED and inactive-close RED. Native3 pass; original Wrath11/26 and Retail22/26 retain15/4 report-only failures, with no Retail regression. Stock/check/fmt gates pass; active close/identity/invalid-input branches remain gaps.
 ## [2026-10-22] investigation | Wrath F07 REJECT repair
 
 [Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [exact 32-row matrix](../specs/wrath-fixture-f07.md#exact-rows). Restored shine epsilon assertion passes; restored EventFrame/MinimalScrollBar consumer fails with missing track, unchanged and ungated. Fresh Wrath10 PASS/22 FAIL; Retail32 PASS/0 FAIL; stock Wrath[] and both checks/fmt pass. All invocations execute1; no producer fix or new generic test. Historical11/21 claims superseded. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.

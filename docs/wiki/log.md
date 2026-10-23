@@ -2607,6 +2607,15 @@ Public-API tests reproduce a whole-link secrecy failure on Retail and PTR before
 
 [Native fixture diagnosis](investigations/wrath-autocomplete-fixture.md) records valid original-consumer argument-width RED, direct-result PASS, a Wrath-only modeled global and preserved modern namespace. The initial small-mask probe's missing alias is excluded from producer RED; its corrected template-based consumer has separate RED→GREEN proof. The [contract](../specs/wrath-autocomplete-results.md) records original33/additional6 native passes, paired Retail67 preservation, empty stock arrays and warning-free checks while retaining modern/glue and identity/recency/UTF-8 gaps.
 
+
+## 2026-10-22 — F12 native AuctionUI consumer boundaries
+
+[[wrath-addon-load-fixture]] links F12's original-consumer price-column and inactive-close REDs, fixture-only sample isolation and retained modern-only oracles. Reconstructed 12340 facts are distinguished from native execution; final profile proof remains pending.
+
+
+## 2026-10-23 — F12 bounded proof
+
+[F12](../specs/wrath-fixture-f12.md) records source-bound native3 GREEN, original Wrath11/26 and unchanged Retail22/26, empty stock Wrath startup, warning-free dual-profile checks and formatter success. Fifteen Wrath/four Retail failures remain visible; active close and invalid/identity branches are explicitly excluded. No vendor edits or assertion relaxation.
 ## [2026-10-15] research | wowdecomp audit navigation
 
 Added [[wowdecomp-audit]] ([reference page](reference/wowdecomp-audit.md)) and index navigation to the [owning audit directory](../wowdecomp-audit/README.md); findings, provenance, security assessment and proof limits remain there. Documentation only; no external code execution.
@@ -2618,3 +2627,7 @@ Added direct finding-catalogue and coverage-ledger links to the [existing refere
 ## [2026-10-15] research | Cataclysm 15595 supplement navigation
 
 Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [reference page](reference/wowdecomp-audit.md) and index. Findings and proof limits remain in the audit. Read-only source research, not native verification; external code execution remains prohibited.
+
+## [2026-10-23] investigation | Wrath retained-failure fixture programme
+
+[Programme register](investigations/wrath-retained-fixtures.md) centralizes F01–F22 status, standing exclusion mechanics, class (a) boundaries, open decisions and F18-P1. Lane specs retain exact receipts; pending/static work is not runtime acceptance. Documentation only; no builds or tests.
