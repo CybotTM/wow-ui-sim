@@ -202,12 +202,14 @@ fn original_group_buff_manager_reads_api_then_maps_supplied_alert_records() {
             {spellID = 1459, visualValue = Enum.VisualAlertType.MarchingAnts},
             {spellID = 21562, visualValue = Enum.VisualAlertType.FlashRed},
         })
-        assert(manager:GetGroupBuffVisualAlert(1459) == Enum.VisualAlertType.MarchingAnts)
-        assert(manager:GetGroupBuffVisualAlert(21562) == Enum.VisualAlertType.FlashRed)
+        -- Concrete values from cached VisualAlertConstantsDocumentation.lua;
+        -- nil/missing enum members must not make nil == nil look successful.
+        assert(manager:GetGroupBuffVisualAlert(1459) == 1, 'MarchingAnts value')
+        assert(manager:GetGroupBuffVisualAlert(21562) == 8, 'FlashRed value')
         manager:OnGroupBuffVisualAlertsChanged({
             {spellID = 1459, visualValue = Enum.VisualAlertType.FlashBlue},
         })
-        assert(manager:GetGroupBuffVisualAlert(1459) == Enum.VisualAlertType.FlashBlue)
+        assert(manager:GetGroupBuffVisualAlert(1459) == 10, 'FlashBlue replacement value')
         assert(manager:GetGroupBuffVisualAlert(21562) == nil, 'replace, not merge, alert records')
         "#,
     )
