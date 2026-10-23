@@ -1,0 +1,39 @@
+{
+  "patch": "12.1.7",
+  "retrieved": "2026-10-22",
+  "method": "Browser raw-page fetch; offline import verified against fetch-receipt body hashes",
+  "identity_note": "Revision IDs were not returned. SHA-256 of exact UTF-8 body bytes is the frozen identity; no revision number invented.",
+  "target": {
+    "version": "12.1.7",
+    "build": 70424,
+    "interface": 120107
+  },
+  "sources": [
+    {
+      "path": "data/patch-api/sources/12.1.7-api-changes.wikitext",
+      "source_url": "https://warcraft.wiki.gg/wiki/Patch_12.1.7/API_changes?action=raw",
+      "sha256": "8c7081afc2b249188f96e5032d7e8a78803a72953562406ab22845492d26c22c",
+      "bytes": 1542,
+      "revid": null
+    },
+    {
+      "path": "data/patch-api/sources/12.1.7-inherited-1.60.1.wikitext",
+      "source_url": "https://warcraft.wiki.gg/wiki/Patch_1.60.1/API_changes?action=raw",
+      "sha256": "470ec0cb303d5e5756b51f12b0a21d805cc5126cee044c80223b674c5f9f8941",
+      "bytes": 120979,
+      "revid": null
+    },
+    {
+      "path": "data/patch-api/sources/12.1.7-toc-format.wikitext",
+      "source_url": "https://warcraft.wiki.gg/wiki/TOC_format?action=raw",
+      "sha256": "1be73ae99d92d15cea78fd15d0cb754b0aa920e267ac79316e0ff1a6d3890e21",
+      "bytes": 33451,
+      "revid": null
+    }
+  ],
+  "limits": [
+    "Direct HTTP requests returned 403; browser raw fetch succeeded without authentication.",
+    "Optional API_changes/notes raw endpoint returned 404; excluded as non-authoritative.",
+    "Unexpanded wikitext templates are not rendered or transcluded source proof."
+  ]
+}

@@ -1,6 +1,13 @@
 ## [2026-10-23] investigation | Wrath F10 separate spell panels
 
 [Consumer-boundary diagnosis](investigations/wrath-spell-panels-f10.md) links [paired results and gates](../baselines/wrath-fixture-f10.md#final-bounded-gates--2026-10-23). Original assertions stay unchanged; native analogues do not replace modern rows. Correct target routing retains invalid attempts and resolves one setup-only failure with a bounded exact retry. Cached expectations remain INFERRED; native12340 panel declarations are unconfirmed. No producer repair or full-compatibility claim.
+## [2026-10-22] investigation | Wrath F07 REJECT repair
+
+[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [exact 32-row matrix](../specs/wrath-fixture-f07.md#exact-rows). Restored shine epsilon assertion passes; restored EventFrame/MinimalScrollBar consumer fails with missing track, unchanged and ungated. Fresh Wrath10 PASS/22 FAIL; Retail32 PASS/0 FAIL; stock Wrath[] and both checks/fmt pass. All invocations execute1; no producer fix or new generic test. Historical11/21 claims superseded. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
+
+## [2026-10-22] source | Patch 12.1.7 I0 accounting
+
+Added [12.1.7 source audit](investigations/patch-12-1-7-api-audit.md) and [contract](../specs/patch-12-1-7-source-accounting.md): exact raw body hashes, supplemental index discovery, P01–P12, inherited literal IDs/counts and original header disagreements. Nine Python CLI regression fixtures pass after RED; empty API inventory never implies runtime coverage. Inherited rows stay UNKNOWN until I4; GUID rows deferred pending user decision. Historical seals and runtime/vendor code unchanged.
 
 ## [2026-10-22] source | Wrath autocomplete applicability
 
@@ -2599,3 +2606,15 @@ Public-API tests reproduce a whole-link secrecy failure on Retail and PTR before
 ## 2026-10-21 — Wrath autocomplete fixture and query boundary
 
 [Native fixture diagnosis](investigations/wrath-autocomplete-fixture.md) records valid original-consumer argument-width RED, direct-result PASS, a Wrath-only modeled global and preserved modern namespace. The initial small-mask probe's missing alias is excluded from producer RED; its corrected template-based consumer has separate RED→GREEN proof. The [contract](../specs/wrath-autocomplete-results.md) records original33/additional6 native passes, paired Retail67 preservation, empty stock arrays and warning-free checks while retaining modern/glue and identity/recency/UTF-8 gaps.
+
+## [2026-10-15] research | wowdecomp audit navigation
+
+Added [[wowdecomp-audit]] ([reference page](reference/wowdecomp-audit.md)) and index navigation to the [owning audit directory](../wowdecomp-audit/README.md); findings, provenance, security assessment and proof limits remain there. Documentation only; no external code execution.
+
+## [2026-10-15] research | Expanded wowdecomp source navigation
+
+Added direct finding-catalogue and coverage-ledger links to the [existing reference page](reference/wowdecomp-audit.md); the [audit directory](../wowdecomp-audit/README.md) remains the owner.
+
+## [2026-10-15] research | Cataclysm 15595 supplement navigation
+
+Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [reference page](reference/wowdecomp-audit.md) and index. Findings and proof limits remain in the audit. Read-only source research, not native verification; external code execution remains prohibited.
