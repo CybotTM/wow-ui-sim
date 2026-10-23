@@ -4045,3 +4045,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-16] evidence | QL-1 / QL-2 saved integration checkpoint
 
 [Owning receipt](../baselines/quest-lifecycle.md) records the saved9fc3d15f9 component/startup proof and the later275f9f09b rebase/B5 preservation gate. Earlier REDs and temporary-domain limitations remain distinct.
+
+## [2026-10-23] investigation | Consumer selection and standalone RED
+
+[Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.

@@ -2669,3 +2669,7 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 ## [2026-10-23] investigation | Wrath retained-failure fixture programme
 
 [Programme register](investigations/wrath-retained-fixtures.md) centralizes F01–F22 status, standing exclusion mechanics, class (a) boundaries, open decisions and F18-P1. Lane specs retain exact receipts; pending/static work is not runtime acceptance. Documentation only; no builds or tests.
+
+## [2026-10-23] investigation | Consumer selection and standalone RED
+
+[Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
