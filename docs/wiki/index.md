@@ -1,3 +1,7 @@
+## [2026-10-24] design | Generated data crate boundary
+
+[Crate split](design/generated-data-crates.md) preserves the root facade and selected tables while isolating common catalogs from profile features. Static staging only; timings and runtime proof pending.
+
 ## [2026-10-24] source | Patch 12.1.7 I4b conditional static selection
 
 [Conditional source evidence](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection): 460 conditional PTR obligations, 5,168 UNKNOWN cells; zero effective promotions before the exact I3 source commit merges. All runtime proof stages remain UNKNOWN.

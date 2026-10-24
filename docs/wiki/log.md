@@ -1,3 +1,7 @@
+## [2026-10-24] design | Generated data crate boundary
+
+[Crate split](design/generated-data-crates.md) preserves the root facade and selected tables while isolating common catalogs from profile features. Static staging only; timings and runtime proof pending.
+
 ## [2026-10-24] proof | Bounded reload XML source reuse
 
 [Contract matrix](../specs/reload-ui.md#generated-xml-layer-reconstruction) records Forever RED16 at0d1e54849, then Forever/default Retail0/0 reload compiles at23f1f629a.27 exact cases/profile, zero-warning builds/checks and formatting pass; current CVars remain unchanged. [Mechanics](systems/reload-ui.md#generated-xml-layer-arguments) retain VM-local objects and XML ordering. Stock startup, paired timing and full Ellesmere acceptance remain separate.
