@@ -20,7 +20,7 @@
     "client-ptr"
   ],
   "interface": 120107,
-  "evidence_root": "/home/osso/.local/state/wow-ui-sim/verification/p1217-merged",
+  "evidence_root": "~/.local/state/wow-ui-sim/verification/p1217-merged",
   "build_command_path": "ptr-bin-build-launcher.json",
   "build_receipt": "ptr-bin-build/wow-sim-sealed.json",
   "manifest_sha256": "ba4414999237ad7b50de73a2a61d7dd18fee31b2f2c3b70d5a21ad3cdc34d328",
