@@ -1,3 +1,17 @@
+## [2026-10-24] source | Patch 12.1.7 I4a inherited worklist
+
+[Inherited accounting](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist): 1,876 immutable occurrences, 63 opposing sweep intersections and 233 lexical test-candidate rows. All 5,628 profile applicability cells remain UNKNOWN pending accepted source/selection evidence. Grouped I4b worklist, zero Cargo; not runtime acceptance.
+
+## [2026-10-24] system | CF-2 supplied club self invitations
+
+[Club model update](systems/club-membership.md#incoming-self-invitations-cf-2) links the [bounded contract](../specs/club-self-invitations.md): empty-by-default supplied incoming rows, original selected Retail MicroMenu selector and static standalone mutant contradictions. Edit-only staging; no builds/tests/slots or runtime acceptance. Other CF-2 members remain separate.
+
+## [2026-10-24] source | Wrath relic class capability
+
+[Lua API notes](systems/lua-api.md#wrath-relic-class-capability) link the
+[contract](../specs/wrath-unit-has-relic-slot.md): runtime-only Wrath publication,
+numeric 1/nil, explicit class DB flags and native token vocabulary. Native class
+mapping remains unknown. Producer and tests staged only; no build/slot/runtime proof.
 ## [2026-10-24] source | Reload XML instance arguments
 
 [Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): Forever RED16 precedes parameterized identities, then Forever/default Retail compile0 sources on both reloads.27 exact cases/profile, zero-warning checks and formatting pass; no stock-startup or full-workload acceptance claim.
