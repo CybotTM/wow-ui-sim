@@ -1,3 +1,10 @@
+## [2026-10-24] investigation | Companion cooldown req-13 arbitration
+
+[Cooldown investigation](investigations/wrath-companion-cooldown.md) records
+ordered own/category/GCD endpoint arbitration, accepted-held sticky enable,
+shared flag2, absent player and supplied critter paths. Nine original-consumer
+selectors staged; static contradictions are not executed RED/GREEN proof.
+
 ## [2026-10-22] source | Wrath F07 applicability
 ## [2026-10-22] source | Wrath casting and aura projections
 

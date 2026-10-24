@@ -1,13 +1,13 @@
 # Wrath S49 companion projection
 
-Legacy mount companion queries project explicit host inputs through the original cached PetPaperDollFrame consumer. Source: `src/lua_api/globals/real/wrath_legacy/companions.rs`. See [legacy fixture architecture](../wiki/reference/blizzard-ui-test-lanes.md).
+Legacy companion queries project explicit host inputs through the original cached PetPaperDollFrame consumer. Source: `src/lua_api/globals/real/wrath_legacy/companions.rs`. See [legacy fixture architecture](../wiki/reference/blizzard-ui-test-lanes.md).
 
 ## What it must do
 
 - [x] Count owned companions intersected with explicit host eligibility, independently of modern journal usability. Missing creature metadata does not remove a known eligible mount from the count.
-- [x] Return exactly five info positions for supplied mount metadata: numeric creature ID, optional cached name, spell ID, optional texture path, active numeric one or nil. Missing metadata or out-of-range position returns zero values, never fabricated identity.
+- [x] Return exactly five info positions for supplied mount/critter metadata: numeric creature ID, optional cached name, spell ID, optional texture path, active numeric one or nil. Missing metadata or out-of-range position returns zero values, never fabricated identity.
 - [ ] Sort resolved creature names case-insensitively and refresh original buttons inline after explicit companion events. Cooldown producer is staged; original-consumer proof still requires execution and retains independent error blockers.
-- [ ] Return companion cooldown start/duration in seconds and numeric enable, with idle `(0, 0, 1)`, from existing spell timers, host category membership and matching start-recovery state. Implementation/tests staged; runtime proof deferred.
+- [ ] Return companion cooldown start/duration in seconds and numeric enable, with idle `(0, 0, 1)`, from ordered host spell history, category flags and matching start-recovery state. Implementation/tests staged; runtime proof deferred.
 - [x] Preserve Retail's original journal oracle; register the projection only when client_profile::ACTIVE is Wrath.
 
 ## How it works
@@ -17,8 +17,9 @@ Legacy mount companion queries project explicit host inputs through the original
 
 ## Implementation inventory
 
-- `src/lua_api/globals/real/wrath_legacy/companions.rs`: selected owned/eligible mount list, count/info projection and runtime-profile registration.
-- `src/lua_api/globals/real/wrath_legacy_state.rs`: spell-keyed CompanionMetadata host input; default map empty.
+- `src/lua_api/globals/real/wrath_legacy/companions.rs`: selected owned/eligible mount/critter lists, count/info projection and runtime-profile registration.
+- `src/lua_api/globals/real/wrath_legacy_state.rs`: explicit metadata, critter spell joins, category flags and ordered CompanionRecovery history; empty defaults.
+- `src/lua_api/globals/real/wrath_legacy/companions/recovery.rs`: req-13 endpoint arbitration and ordered own/category/GCD branches.
 - `src/lua_api/globals/real/wrath_legacy.rs`: delegates companion registration before shared compat bootstrap.
 
 ## Tests asserting this spec
@@ -36,34 +37,50 @@ S49 creature IDs91001/91002 are labelled host fixture data, **not** native creat
 
 ## Cooldown scope and proof boundary
 
-The Wrath runtime `client_profile::ACTIVE` registration adds `GetCompanionCooldown`. It selects the same owned/eligible sorted mount spell as the info query, without requiring creature metadata. Wrong/missing category or zero/non-numeric index raises the usage error; negative or out-of-range indices return no values. Supported decimal numeric-string indices are converted. Missing critter spell joins return no values, not fabricated timers.
+The Wrath runtime `client_profile::ACTIVE` registration adds `GetCompanionCooldown`.
+It selects the same owned/eligible name-sorted spell as info for MOUNT or CRITTER.
+Critter species-to-spell joins are explicit host input, never journal-ID aliases.
+Info uses the supplied spell-keyed creature metadata for original critter rows.
+Wrong/missing category or zero/non-numeric index raises the usage error; negative
+or out-of-range indices return no values. Decimal numeric-string indices work.
+Explicit active-player absence returns zero Lua values for both categories, not
+idle values: the original consumer then leaves a populated button's timer intact.
 
-Timing reads the existing `spell_cooldowns` and `spell_cooldown_categories`
-directly; it must not call the generic unconditional-GCD helper. The existing
-`gcd` interval contributes only when a supplied non-absent per-spell
-start-recovery category equals its supplied `gcd_category`. Absent applicability
-is UNKNOWN, not permission to apply a global GCD. Supplied on-hold markers
-produce numeric enable=0 on the selected spell/category recovery; other active
-intervals and ordinary idle use numeric enable=1. No second timer store exists.
-Missing generated spell records or supplied excluded-effect (78/47) markers
-return the wrapper's initialized `(0,0,1)`.
+### Accepted req-13 arbitration
 
-### Q5 evidence and UNKNOWN ledger
+Accepted `laptop-answers-req-13.md` arrived during this repair. The previous
+unsupported arbitration assumption and simultaneous-timer assertions are replaced
+with its source-derived rule. Times are wrapping unsigned 32-bit milliseconds;
+accept when the signed difference `candidateEnd - latest` is nonnegative, including
+equality with initial `now`. `RecoverySelection::accept` isolates the comparison.
+A host-supplied `Vec<CompanionRecovery>` supplies native Head/Next order, without
+HashMap iteration or inferred cast chronology. Each node visits own → category
+(matching nonzero category OR source SpellCategory flag 0x2) → matching start
+recovery/GCD. Equal endpoints overwrite, including across nodes. GCD always
+competes when category matches and its recovery time is nonzero, even category0.
 
-Q5 establishes own, same-category, shared-flag and matching start-recovery
-paths, but does not specify their complete arbitration/tie rules, which shared
-categories can affect a different category, on-hold clock/output evolution,
-or simultaneous hold/GCD precedence. Do not infer those rules from this model.
-The minimal supplied-state representation retains latest-ending intervals for
-own/same-category/matching GCD (including existing longer-own assertions).
-No shared-flag expansion, separate category timer, fabricated spell effect
-catalog, hold freeze/resume mutation, or native precedence claim is added.
-`cooldowns_on_hold`, `cooldown_excluded_spells`, start-recovery membership and
-GCD category are explicit host inputs, empty/absent by default; those defaults
-are simulator initialization, not native character state. Generated spell
-availability is the local record-presence oracle, not proof of native cache
-availability. Companion active-player absence and critter spell joins remain
-unmodeled. Full Q5 helper equivalence remains unproved for these dimensions.
+Held own comparison uses `now + recovery + 1`, but emits `(now, 1ms)`; held
+category uses `(now, categoryRecovery)`. Only accepted held own/category candidates
+set numeric enable0, which stays0 even if a non-held/GCD interval wins later.
+Rejected held candidates do not alter enable. Ordinary idle is `(0,0,1)`.
+Missing generated spell records or supplied excluded-effect78/47 markers return
+initialized idle. No candidate acceptance is inferred from the helper's Boolean.
+
+Ordered history replaces this producer's use of generic `spell_cooldowns`/global
+`gcd`: those maps cannot express independent category timing, node order or held
+comparison endpoints. They remain untouched for other APIs; there is no generic
+fallback. Target category and start-recovery membership remain explicit inputs.
+History/category flags/critter joins default empty and player absence defaults
+false as simulator initialization, not evidence about native character state.
+
+### Evidence and remaining UNKNOWNs
+
+Req-11 Q5 and req-13 are accepted static clean-room evidence, not native runtime
+certification. Actual spell/category records, native populated history/order and
+authentic default critter spell/creature joins remain unsupplied. Rune applicability
+is UNKNOWN; conditional rune recovery remains unimplemented, as requested. Full
+helper/native equivalence is not claimed. Generated spell availability is only the
+local record-presence oracle. No native data is invented.
 
 Each cooldown selector now loads selected original FrameXML and drives
 PetPaperDollFrame's original updater, observing real cooldown visibility and
@@ -78,4 +95,4 @@ See [source review and implementation limits](../wiki/investigations/wrath-compa
 
 ## Out of scope
 
-Populated critter spell/creature joins, native learn/cache actions, pending-cache gating, event emission/order, complete numeric coercion, paging and authentic default catalog rows require separate evidence/work. Existing critter counts are preserved. Missing-name ordering is unspecified. Producer never calls the consumer directly or mutates buttons. Non-Wrath shared compat behavior remains unchanged.
+Authentic default critter spell/creature joins, native learn/cache actions, pending-cache gating, event emission/order, complete numeric coercion, paging and authentic default catalog rows require separate evidence/work. Existing critter counts are preserved. Missing-name ordering is unspecified. Producer never calls the consumer directly or mutates buttons. Non-Wrath shared compat behavior remains unchanged.

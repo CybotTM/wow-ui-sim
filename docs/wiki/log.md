@@ -1,3 +1,11 @@
+## [2026-10-24] investigation | Companion S1/S2 and accepted req-13
+
+[Cooldown notes](investigations/wrath-companion-cooldown.md) replace guessed
+arbitration with req-13 ordered-history signed endpoint/tie and sticky-enable
+rules. Shared source-category flags, absent-player zero returns and supplied
+critter spell joins now have original-consumer selectors. Static contradiction
+table only; edit-only work, no runtime proof. Rune applicability remains UNKNOWN.
+
 ## [2026-10-24] investigation | Companion pre-review repair
 
 [Cooldown notes](investigations/wrath-companion-cooldown.md) now bind each cooldown

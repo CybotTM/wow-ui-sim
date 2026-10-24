@@ -8,6 +8,8 @@ use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 
+mod recovery;
+
 #[derive(Clone, Copy)]
 enum CompanionKind {
     Critter,
@@ -45,18 +47,37 @@ fn selected_mounts(sim: &SimState) -> Vec<&MountData> {
     mounts
 }
 
-fn count_owned_critters(sim: &SimState) -> usize {
-    let owned_species: std::collections::HashSet<i32> = sim
+fn selected_critters(sim: &SimState) -> Vec<i32> {
+    let owned_species: std::collections::BTreeSet<i32> = sim
         .world
         .pets
         .iter()
         .filter(|pet| pet.is_collected)
         .map(|pet| pet.species_id as i32)
+        .filter(|species| sim.wrath_legacy.eligible_critters.contains(species))
         .collect();
-    sim.wrath_legacy
-        .eligible_critters
-        .intersection(&owned_species)
-        .count()
+    let mut species: Vec<_> = owned_species.into_iter().collect();
+    // Resolved creature-name ordering; species order breaks unresolved/equal names
+    // deterministically as simulator policy, not a native tie rule.
+    species.sort_by_cached_key(|id| {
+        sim.wrath_legacy
+            .critter_spells
+            .get(id)
+            .and_then(|spell| sim.wrath_legacy.companion_metadata.get(spell))
+            .and_then(|row| row.name.as_ref())
+            .map(|name| name.to_lowercase())
+    });
+    species
+}
+
+fn selected_companion_spell(sim: &SimState, kind: CompanionKind, index: usize) -> Option<u32> {
+    match kind {
+        CompanionKind::Mount => selected_mounts(sim).get(index).map(|mount| mount.spell_id),
+        CompanionKind::Critter => selected_critters(sim)
+            .get(index)
+            .and_then(|species| sim.wrath_legacy.critter_spells.get(species))
+            .copied(),
+    }
 }
 
 fn get_num_companions(state: &mut LuaState) -> LuaResult<u32> {
@@ -65,18 +86,21 @@ fn get_num_companions(state: &mut LuaState) -> LuaResult<u32> {
         let sim = borrow_state(state)?;
         match kind {
             CompanionKind::Mount => selected_mounts(&sim).len(),
-            CompanionKind::Critter => count_owned_critters(&sim),
+            CompanionKind::Critter => selected_critters(&sim).len(),
         }
     };
     state.push(Val::Num(count as f64));
     Ok(1)
 }
 
-fn read_mount_info(sim: &SimState, index: usize) -> Option<(u32, CompanionMetadata)> {
-    let mounts = selected_mounts(sim);
-    let mount = mounts.get(index)?;
-    let metadata = sim.wrath_legacy.companion_metadata.get(&mount.spell_id)?;
-    Some((mount.spell_id, metadata.clone()))
+fn read_companion_info(
+    sim: &SimState,
+    kind: CompanionKind,
+    index: usize,
+) -> Option<(u32, CompanionMetadata)> {
+    let spell_id = selected_companion_spell(sim, kind, index)?;
+    let metadata = sim.wrath_legacy.companion_metadata.get(&spell_id)?;
+    Some((spell_id, metadata.clone()))
 }
 
 fn get_companion_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -87,10 +111,10 @@ fn get_companion_info(state: &mut LuaState) -> LuaResult<u32> {
     }
     let row = {
         let sim = borrow_state(state)?;
-        match kind {
-            CompanionKind::Mount if index >= 1.0 => read_mount_info(&sim, index as usize - 1),
-            // Critter spell/creature joins remain unsupplied, never alias species IDs.
-            _ => None,
+        if index >= 1.0 {
+            read_companion_info(&sim, kind, index as usize - 1)
+        } else {
+            None
         }
     };
     let Some((spell_id, metadata)) = row else {
@@ -130,86 +154,23 @@ fn read_cooldown_index(state: &LuaState) -> LuaResult<f64> {
     }
 }
 
-// Q5 supplies the selection paths, not arbitration/tie or hold-clock semantics.
-// Latest-ending supplied intervals retain the existing simulator representation;
-// see the spec's UNKNOWN ledger. Never apply an unclassified global GCD.
-fn active_recovery(sim: &SimState, spell_id: u32, now: f64) -> (f64, f64, f64) {
-    let Some(timer) = sim.spell_cooldowns.get(&spell_id) else {
-        return (0.0, 0.0, 1.0);
-    };
-    if timer.start + timer.duration <= now {
-        return (0.0, 0.0, 1.0);
-    }
-    let enable = if sim.wrath_legacy.cooldowns_on_hold.contains(&spell_id) {
-        0.0
-    } else {
-        1.0
-    };
-    (timer.start, timer.duration, enable)
-}
-
-fn later_recovery(best: (f64, f64, f64), candidate: (f64, f64, f64)) -> (f64, f64, f64) {
-    if candidate.0 + candidate.1 > best.0 + best.1 {
-        candidate
-    } else {
-        best
-    }
-}
-
-fn companion_cooldown_times(sim: &SimState, spell_id: u32, now: f64) -> (f64, f64, f64) {
-    if crate::spell_lookup::get_spell(spell_id).is_none()
-        || sim
-            .wrath_legacy
-            .cooldown_excluded_spells
-            .contains(&spell_id)
-    {
-        return (0.0, 0.0, 1.0);
-    }
-    let own = active_recovery(sim, spell_id, now);
-    let category = sim.spell_cooldown_categories.get(&spell_id);
-    let same_category = sim
-        .spell_cooldown_categories
-        .iter()
-        .filter(|(_, source_category)| Some(*source_category) == category)
-        .map(|(source_spell, _)| active_recovery(sim, *source_spell, now))
-        .fold(own, later_recovery);
-    later_recovery(same_category, matching_start_recovery(sim, spell_id, now))
-}
-
-fn matching_start_recovery(sim: &SimState, spell_id: u32, now: f64) -> (f64, f64, f64) {
-    let Some(category) = sim
-        .wrath_legacy
-        .spell_start_recovery_categories
-        .get(&spell_id)
-    else {
-        return (0.0, 0.0, 1.0);
-    };
-    if sim.wrath_legacy.gcd_category != Some(*category) {
-        return (0.0, 0.0, 1.0);
-    }
-    match sim.gcd {
-        Some((start, duration)) if start + duration > now => (start, duration, 1.0),
-        _ => (0.0, 0.0, 1.0),
-    }
-}
-
 fn get_companion_cooldown(state: &mut LuaState) -> LuaResult<u32> {
     let kind = read_companion_kind(state)
         .map_err(|_| runtime_error("Usage: GetCompanionCooldown(type, index)"))?;
     let index = read_cooldown_index(state)?;
     let (start, duration, enable) = {
         let sim = borrow_state(state)?;
-        let mount = match kind {
-            CompanionKind::Mount if index >= 1.0 => {
-                selected_mounts(&sim).get(index as usize - 1).copied()
-            }
-            // No critter-to-spell input exists yet; never alias species IDs.
-            _ => None,
-        };
-        let Some(mount) = mount else {
+        if sim.wrath_legacy.companion_player_absent || index < 1.0 {
+            return Ok(0);
+        }
+        let Some(spell_id) = selected_companion_spell(&sim, kind, index as usize - 1) else {
             return Ok(0);
         };
-        companion_cooldown_times(&sim, mount.spell_id, sim.start_time.elapsed().as_secs_f64())
+        recovery::companion_cooldown_times(
+            &sim,
+            spell_id,
+            sim.start_time.elapsed().as_millis() as u32,
+        )
     };
     state.push(Val::Num(start));
     state.push(Val::Num(duration));
