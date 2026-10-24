@@ -8,7 +8,6 @@
     feature = "client-anniversary",
 ))]
 
-use std::collections::BTreeMap;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[path = "common/cf2_cvar_storage.rs"]
@@ -79,8 +78,8 @@ fn assert_saved_marker_after_load(env: &WowLuaEnv, saved_before: bool) {
             "observed unsaved-to-saved transition"
         );
     }
-    // An already-true marker proves preservation only. Initial/reset policy and
-    // standalone Mark producer acceptance remain PENDING-NATIVE-ORACLE.
+    // An already-true marker proves preservation only; fresh=false is a
+    // user-approved model, not evidence of native initial/reset policy.
     eprintln!("CF-2 saved marker: {saved_before} -> {saved_after}");
 }
 
@@ -90,6 +89,8 @@ fn original_tts_slider_settings_survive_mark_saved_and_second_environment() {
         "cf2_tts::original_tts_slider_settings_survive_mark_saved_and_second_environment",
         || {
             let mut env = new_cache_env();
+            env.exec("assert(C_TTSSettings.GetCharacterSettingsSaved() == false)")
+                .expect("user-approved model starts unsaved in fresh isolated storage");
             // Seed the LIVE CVar store used by the Lua API, not a parallel Lua table.
             assert!(
                 env.state()
@@ -131,7 +132,6 @@ fn original_tts_slider_settings_survive_mark_saved_and_second_environment() {
             let rates = [4, 7];
             let volumes = [37, 63];
             for (rate, volume) in rates.into_iter().zip(volumes) {
-                let before = read_live_cvars(&env);
                 env.exec(&format!(
                     "assert(TextToSpeech_SetRate(TextToSpeechFrame, {rate})); \
              assert(TextToSpeech_SetVolume(TextToSpeechFrame, {volume}))"
@@ -139,29 +139,12 @@ fn original_tts_slider_settings_survive_mark_saved_and_second_environment() {
                 .expect("unchanged slider callbacks accept explicit preferences");
                 complete_original_tts_load(&env);
                 assert_tts_values_and_controls(&env, rate, volume);
-                let after = read_live_cvars(&env);
-                let rate_keys = changed_preference_keys(&before, &after, rate);
-                let volume_keys = changed_preference_keys(&before, &after, volume);
-                assert!(
-                    !rate_keys.is_empty(),
-                    "rate must change the live CVar store"
-                );
-                assert!(
-                    !volume_keys.is_empty(),
-                    "volume must change the live CVar store"
-                );
+                set_other_preferences(&env, rate);
                 drop(env);
 
                 env = new_cache_env();
                 assert_reopened_tts_preferences(&env, rate, volume);
-                let reopened = read_live_cvars(&env);
-                for key in rate_keys.iter().chain(&volume_keys) {
-                    assert_eq!(
-                        reopened.get(key),
-                        after.get(key),
-                        "persisted preference {key}"
-                    );
-                }
+                assert_other_preferences(&env, rate);
                 load_original_addon(&env, "Blizzard_ChatFrame");
                 assert_tts_values_and_controls(&env, rate, volume);
             }
@@ -206,31 +189,36 @@ fn assert_tts_values_and_controls(env: &WowLuaEnv, rate: i32, volume: i32) {
     .expect("original TTS controls and preference getters agree on each explicit pair");
 }
 
-fn read_live_cvars(env: &WowLuaEnv) -> BTreeMap<String, String> {
-    let state = env.state().borrow();
-    state
-        .cvars
-        .all_keys()
-        .into_iter()
-        .map(|key| {
-            let value = state.cvars.get(&key).expect("listed live CVar has a value");
-            (key, value)
-        })
-        .collect()
+fn set_other_preferences(env: &WowLuaEnv, pair: i32) {
+    env.exec(&format!(
+        r#"
+        local enabled = {pair} == 7
+        C_TTSSettings.SetVoiceOption(Enum.TtsVoiceType.Standard, {pair})
+        C_TTSSettings.SetVoiceOptionName(Enum.TtsVoiceType.Alternate, 'fixture-{pair}')
+        C_TTSSettings.SetSetting(Enum.TtsBoolSetting.NarrateMyMessages, enabled)
+        C_TTSSettings.SetChatTypeEnabled('SAY', enabled)
+        C_TTSSettings.SetChannelEnabled({{
+            name = 'fixture', shortcut = 'f', localID = 3,
+            instanceID = 4, zoneChannelID = 5, channelType = 1,
+        }}, enabled)
+        "#,
+    ))
+    .expect("write both values of other persisted preferences");
 }
 
-fn changed_preference_keys(
-    before: &BTreeMap<String, String>,
-    after: &BTreeMap<String, String>,
-    expected: i32,
-) -> Vec<String> {
-    // Discover observable storage keys instead of inventing native CVar names.
-    after
-        .iter()
-        .filter(|(key, value)| {
-            before.get(*key) != Some(*value)
-                && value.parse::<f64>().ok() == Some(f64::from(expected))
-        })
-        .map(|(key, _)| key.clone())
-        .collect()
+fn assert_other_preferences(env: &WowLuaEnv, pair: i32) {
+    env.exec(&format!(
+        r#"
+        local enabled = {pair} == 7
+        assert(C_TTSSettings.GetVoiceOptionID(Enum.TtsVoiceType.Standard) == {pair})
+        assert(C_TTSSettings.GetVoiceOptionName(Enum.TtsVoiceType.Alternate) == 'fixture-{pair}')
+        assert(C_TTSSettings.GetSetting(Enum.TtsBoolSetting.NarrateMyMessages) == enabled)
+        assert(C_TTSSettings.GetChatTypeEnabled('SAY') == enabled)
+        assert(C_TTSSettings.GetChannelEnabled({{
+            name = 'fixture', shortcut = 'f', localID = 3,
+            instanceID = 4, zoneChannelID = 5, channelType = 1,
+        }}) == enabled)
+        "#,
+    ))
+    .expect("other preferences survive environment recreation through getters");
 }

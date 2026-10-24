@@ -1,152 +1,74 @@
 # CF-2 cross-profile TTS persistence and temporary-CVar lifecycle
 
-Slice 7 removes the original ChatFrame character-save and Forever Gamepad temporary-CVar gaps. Modeled `C_*` settings/lifecycle producers belong in `src/c_api/`; the effective CVar store remains `SimState.cvars`. This EDIT-ONLY delivery contains tests and contract, not producers or runtime proof. See [Lua API architecture](../wiki/systems/lua-api.md) and [input-style contract](forever-input-interface-style.md).
+Slice 7 covers original ChatFrame character-save and Forever Gamepad temporary-CVar gaps. Modeled `C_*` producers belong in `src/c_api/`; ordinary CVars remain `SimState.cvars`. Delivery is edit-only: authored tests and staged producers, no runtime RED/GREEN. See [Lua API architecture](../wiki/systems/lua-api.md).
 
 ## What it must do
 
 ### Character TTS settings
 
-- [ ] On Retail, PTR, WowForever, Mists, Era and Anniversary, unchanged cached `Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua` slider callbacks drive two distinct explicit rate values (4 and 7) and volume values (37 and 63), with `TTSUseCharacterSettings=1`. Order each preference so the first value differs from its observed initial value; no initial/default value is prescribed.
-- [ ] After each pair, original `ADDON_LOADED(Blizzard_ClientSavedVariables)`, `VARIABLES_LOADED`, `PLAYER_ENTERING_WORLD` completes CheckLoad and renders that pair without a new Lua error. Both getters and controls round-trip the pair. Observe changed numeric preference values in live `SimState.cvars`, discovering keys from before/after snapshots rather than inventing native CVar names.
-- [ ] Destroy and reopen the environment after each pair. Before original CheckLoad can mark again, read the saved marker and that pair, and verify the changed live CVar entries persist byte-for-byte. Load unchanged controls and confirm they render that pair. The next pair replaces the previous persisted preferences.
-- [ ] With explicit absence of legacy `TEXTTOSPEECH_CONFIG`, observe the saved marker before and after original CheckLoad: an observed false must become true; an observed true remains true. Already-true preservation cannot reject a no-op Mark. Marker-producer acceptance remains PENDING-NATIVE-ORACLE until a normal unsaved input/default/reset policy is established; the preference selector's RED count does not authorize that producer.
+- [ ] Retail, PTR, WowForever, Mists, Era and Anniversary load unchanged cached ChatFrame consumers. Original slider callbacks drive rate0/volume0, then rate4/volume37 and rate7/volume63 with `TTSUseCharacterSettings=1`. Each numerical selector independently rejects constant/no-op producers.
+- [ ] After each pair, original ADDON_LOADED(Blizzard_ClientSavedVariables), VARIABLES_LOADED and PLAYER_ENTERING_WORLD complete CheckLoad without new Lua errors. Getters and original UpdateSliders controls agree on the pair.
+- [ ] Destroy and recreate the environment after each pair. Before original CheckLoad can mark again, C_TTSSettings getters observe saved=true and the persisted rate/volume, voice ID/name, boolean setting, chat type and supplied channel record. Both pairs replace earlier values, including false/true preferences. Original controls then render the persisted pair.
+- [ ] A fresh isolated store starts with saved=false; MarkCharacterSettingsSaved returns no values and makes it true. Original CheckLoad exercises this transition. The marker persists through environment recreation. This is a **user-approved non-native model**, not a native default/lifetime finding.
+- [ ] Persist preferences and marker using existing simulator storage infrastructure, scoped to the active client profile. Do not expose preference storage as public CVars. TTSUseCharacterSettings remains the ordinary account/character selector CVar.
 
 ### Forever temporary CVars
 
-- [ ] Seed ordinary `SoftTargetEnemy=2` and unrelated `cameraDistanceMaxZoomFactor=1.9` through the existing live CVar store. Original `Blizzard_Gamepad/Core.lua` Mkb callback removes temporary values even at initial/no-overlay entry without changing either persisted value.
-- [ ] Drive the unchanged original InputUtil transition listener into Gamepad then Mkb. Original Gamepad initialization temporarily exposes `SoftTargetEnemy=1`; original removal restores2. Lua global/namespace reads and Rust CVarStorage agree, unrelated ordinary value remains1.9, and repeated Mkb removal leaves2.
-- [ ] A second environment opened while the temporary override is active reads persisted2, not temporary1. Reopening after removal also reads2/1.9. Temporary state must not overwrite persisted ordinary settings.
+- [ ] Seed ordinary SoftTargetEnemy=2 and unrelated cameraDistanceMaxZoomFactor=1.9 through the live CVar store. Original Blizzard_Gamepad/Core.lua Mkb callback removes temporary values even without an overlay, preserving both ordinary values.
+- [ ] Original InputUtil transitions Gamepad then Mkb. Gamepad exposes SoftTargetEnemy=1 temporarily; removal restores2. Lua and Rust CVar reads agree, unrelated value remains1.9, repeated removal preserves2.
+- [ ] A second environment during the override reads persisted2, not temporary1. Reopening after removal reads2/1.9. Temporary values never overwrite ordinary persistence.
 
 ### Fixture safety and applicability
 
-- [ ] Load original functions/templates through the active profile-cache addon closure with no addon overrides. Preserve load errors; direct consumer invocations expose errors and compare recorded-error counts. Function/listener source provenance must identify the original files.
-- [ ] Run persistence fixtures only in an isolated child process with a sealed executable outside `deps`. A fresh child-only `XDG_DATA_HOME` contains byte-exact current persisted CVars; original stat/hash receipts before/after include launcher failures. Never reset, restore or write the host original. Cargo's automatic per-environment CVar temp files cannot establish persistence across environments.
-- [ ] File-level profile cfg registers TTS only on Retail, PTR, Forever, Mists, Era and Anniversary, and Gamepad only on Forever. Non-applicable profiles register no such tests, without runtime N/A returns. No hiding gates beyond registration-by-applicability, vendor edits, API substitutions, authored consumers, ignores, suppressions or weakened assertions.
+- [ ] Load original functions/templates through the profile-cache addon closure without overrides; assert source provenance and retain load errors.
+- [ ] Persistence cases reexecute an exact selector in a case-owned child process outside deps. Explicit empty CVar fixture and child-only XDG_DATA_HOME prevent ambient/user preference reads. Environments in one case share the same fixture; unrelated cases do not. External verification launchers separately preserve current host CVar bytes and stat/hash receipts before/after, including launcher failures; never reset/restore/write the original.
+- [ ] File-level cfg registers TTS on the six non-Wrath profiles and Gamepad only on Forever. No runtime N/A shortcuts, ignored tests, suppressions, vendor edits or authored replacement consumers.
+
+## User decisions — 2026-10-24
+
+The earlier live-CVar-key oracle is withdrawn: original sources do not establish rate/volume preference keys. Remove its nonempty changed-key assertions and dependent reopened-key comparisons; preserve all getter, control, provenance, error-count and selector-CVar assertions. Getter-based cross-environment persistence remains required and extends to other preferences.
+
+Fresh saved=false, Mark=>true and persistence are approved simulator behavior, not native evidence. Existing SetDefaultSettings behavior resets only the selected preference table and preserves the marker; native reset semantics remain unknown. These decisions supersede earlier ASK-USER text and the earlier prohibition on edit-only producer staging. No builds, slots or runtime claims are authorized by this delivery.
 
 ## How it works
 
-- [Lua API architecture](../wiki/systems/lua-api.md)
-- [Existing Forever input-style ownership](forever-input-interface-style.md)
-- [Original C namespace boundary](c-namespace-nil-members.md)
-
-## Implementation inventory
-
-- `src/cvars.rs`: live effective defaults, registered defaults and persisted ordinary override store; no temporary override layer/removal exists at this base. `src/cvar_storage.rs` does not exist.
-- `src/lua_api/state/sim_state.rs`: owns `cvars`; constructor in `src/lua_api/state.rs` opens storage.
-- `src/lua_api/globals/set_cvar_verb.rs`: existing modeled ordinary CVar reads/writes; namespace has no SetTempCVar/RemoveTempCVar registration.
-- `src/lua_api/workarounds/temporary/tts_settings_defaults.rs`: explicitly temporary constant speech/voice getters and no-op setters; no saved preferences backend.
-- `src/lua_api/globals/channel_verbs.rs`: TTS channel getter constant true/setter no-op; not saved character preference storage.
-- `src/c_api/c_input_interface_style.rs`: existing Forever-only current-style state. This fixture drives original listener event payloads, not host device changes; that separate state-before-event contract is not re-proven here.
-- `tests/cf2_tts.rs`: authored original TTS persistence assertions on six non-Wrath profiles; uncompiled/unrun.
-- `tests/cf2_gamepad_temp_cvars.rs`: authored original Gamepad temporary-CVar lifecycle on Forever only; uncompiled/unrun.
-
-## Tests asserting this spec
-
-Integration target exact selectors:
-
-- `cf2_tts::original_tts_slider_settings_survive_mark_saved_and_second_environment` — six non-Wrath profiles above.
-- `cf2_gamepad_temp_cvars::original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinary_cvar` — WowForever only.
-
-Seven applicable expected-RED executions: six preference selectors plus one Gamepad selector. Marker assertions are supplemental preservation/pending, not standalone producer acceptance. Original missing boundaries: TTS MarkCharacterSettingsSaved at Retail/Forever475, PTR/Mists/Era/Anniversary472; Gamepad RemoveTempCVar at Core.lua6. Missing pre-observation GetCharacterSettingsSaved is a prerequisite blocker, not accepted original-consumer RED. Later missing SetTempCVar and saved preference methods are in-scope lifecycle gaps, not permission to bypass original code. Setup, compile, source/provenance, timeout or unrelated API failures are not accepted RED. No RED has been observed; no producer may be committed before it is.
-
-## Known gaps (current cycle)
-
-- [ ] Admitted compile and observed original-consumer RED, then separate backing-model producer commit and identical GREEN. No Cargo build/test/check is authorized in this edit-only phase.
-- [ ] PENDING-NATIVE-ORACLE: exact account/character identity and storage selection when `TTSUseCharacterSettings` changes; initial saved flag/defaults, persistence timing before/after mark, default reset and legacy migration policy. Original TTS lines296–361 (Retail/Forever; other profiles offset−3) temporarily select character settings, migrate then restore the CVar; CheckLoad457–479/454–476 queries saved state only for nondefault legacy input and marks unconditionally. Those lines do not settle ownership/default/save-timing details. No such defaults or account-switch assertions are invented.
-- [ ] PENDING-NATIVE-ORACLE: unknown/invalid/read-only/secure CVar behavior, normal writes while temporary override is active, CVAR_UPDATE ordering/counts, temporary overlay priority across multiple writers. Original Forever Gamepad Core.lua1–43 sets/removes known names by mode; it does not settle those policies. Current tests cover explicit known ordinary values, original mode overrides and removal only.
-
-## Out of scope
-
-Audio synthesis/host gamepad integration, general settings UI compatibility, other CF-2 rows, native default discovery, broad profile/startup health, invented compatibility shims, and producer implementation before observed RED. Voice/channel/boolean catalogs, multi-character/account switching and legacy migration require evidence beyond this bounded explicit speech-setting fixture.
-
-## Edit-only preference producer staging — 2026-10-24
-
-The requested producer stage does **not** authorize the older persistence oracle above.
-All original CVar/reopen assertions stay intact pending ASK-USER; no public preference
-CVar names or cross-environment saved-marker lifetime have been established.
-
-### Static RED contradiction matrix (not executed)
-
-Each of the following selectors independently loads runtime-selected ChatFrame Lua:
-Retail/PTR ChatFrame TOC shared Lua/XML; Mists ChatFrame_Mists TOC permits mists and
-includes the same shared consumer. Original source provenance is checked, including
-slider OnValueChanged callbacks. No producer substitution or vendor edit is used.
-
-| Exact integration selector | Contradiction to constant/no-op rate/volume producer | Marker limitation |
-|---|---|---|
-| `cf2_tts::original_tts_slider_settings_survive_mark_saved_and_second_environment` | Explicit zero then 4/37 and 7/63 require unequal getter results; original CheckLoad/UpdateSliders read back controls. Constant volume100 fails at zero; any constant/no-op cannot meet both pairs. | CVar-change and reopen oracles are ASK-USER, not producer acceptance. |
-| `cf2_tts_shape_contract::original_tts_numeric_preferences_contract` | Original SetRate/SetVolume callbacks require rate4 then7 and volume37 then63 before UpdateSliders assertions. | No marker claim. |
-| `cf2_tts_shape_contract::original_tts_saved_settings_shape_blocker` | Exact bool/void shapes first, then independent original-callback two-pair checks. | Bool shape alone accepts constant bool/no-op Mark. |
-| `cf2_tts_shape_contract::original_tts_saved_settings_consumer_blocker` | Original CheckLoad first with supplied legacy settings, loaded flag and saved=true; then independent two-pair checks. | Constant-false fails after Mark; constant-true + no-op Mark is observationally equivalent without an unsaved/reset oracle. |
-
-The unchanged base shim returns100/0 and ignores setters. Each new two-pair
-prerequisite therefore contradicts it at the original callback read-back boundary.
-This is static proof, **not observed runtime RED**. Rejecting constant-true saved
-markers in every selector is impossible under the currently documented contract;
-no initial=false assertion, reset oracle, or native-parity claim is introduced.
-
-`cf2_tts_shape_contract::original_tts_documented_preference_pairs_contract` adds
-supplemental explicit-input voice ID/name, boolean setting, chat type and supplied
-channel-record round trips. Original voice/chat/channel setters are provenance-checked;
-its numerical prerequisite independently rejects constant/no-op rate/volume producers.
-It does not claim native voice-name defaults, cross-name/ID mapping, channel-key encoding,
-marker defaults or persistence. Saved-shape and saved-consumer selectors retain their
-respective shape/CheckLoad failures **before** numerical checks to avoid masking them.
+- [Lua API architecture](../wiki/systems/lua-api.md#tts-preference-model-edit-only-staging)
+- [Forever input-style ownership](forever-input-interface-style.md)
+- [C namespace boundary](c-namespace-nil-members.md)
 
 ### Staged producer contract and evidence limits
 
-`src/c_api/c_tts_settings.rs` installs a C API model implemented as private Lua
-upvalue tables in `c_tts_settings.lua`, owned by each Lua environment. No SimState
-field, disk file, host preference read, or public preference CVar is added.
-Registration belongs to environment C API initialization, not workaround installation.
-The constant shim and its shim-specific unit tests are removed, as are the old
-constant channel/chat-type preference producers. No undocumented SetVoiceOptionID
-alias is retained; original UI/API docs use SetVoiceOption.
+C_TTSSettings uses private Lua preference tables for account and character selection. Existing SavedVariables serialization/storage persists those tables and the marker in a profile-scoped simulator model file, isolated with the owning CVar store. No public preference CVar, alternate producer or fallback shim is added. Mutating setters and Mark save immediately; environment initialization restores before any original consumer executes. Storage errors are surfaced, not silently ignored.
 
-- Rate/volume round-trip numeric values in the UI-supported domains [-10,10] and
-  [0,100]. The UI converts numeric strings before calling the documented numeric
-  setters. Invalid direct setter semantics are UNKNOWN; the model rejects values
-  outside its supported domain rather than inventing clamping.
-- Original Shared/TextToSpeechFrame.lua `DefaultLegacySettings` (lines5-39 in all
-  six TTS caches) establishes rate0, volume100, standard/alternate IDs0/1,
-  four true boolean options, NarrateMyMessages=false, the explicit enabled-chat-type
-  set and empty enabled channels. These are **legacy UI default evidence**, not
-  an observed modern C++ default/reset oracle. Model initialization/reset uses that
-  exact source set, without promoting migration's false fallback values to defaults.
-- Documented bool newVal arguments default false when omitted; explicit false and
-  true are stored. Voice IDs and supplied names are stored, resolving the opposite
-  representation only through the existing C_VoiceChat.GetTtsVoices catalogue.
-  Default voice **names** are UNKNOWN; missing catalogue matches produce an explicit
-  UNKNOWN error, never an invented name/ID. This is a supported-input limit, not
-  asserted native error behavior.
-- Original migration selects character preferences with TTSUseCharacterSettings
-  and restores the selector. The model therefore separates account/character tables
-  within one environment. Supplied ChatChannelInfo records round-trip by all six
-  documented fields; identity across changed metadata remains UNKNOWN. Legacy
-  channel keys are retained verbatim; key-to-record alias encoding is UNKNOWN and
-  deliberately not guessed. SetChannelKeyEnabled-to-GetChannelEnabled migration
-  acceptance remains incomplete pending that contract.
-- **ASK-USER:** minimal saved-marker assumption is unsaved at environment creation,
-  Mark=true, preference reset leaves the marker alone. Only original CheckLoad's
-  post-mark true is asserted, never initial=false, reset, account/character ownership
-  or cross-environment persistence. Those native policies remain UNKNOWN. No bool
-  signature can reject a constant-true/no-op marker without an additional oracle.
+Original Shared/TextToSpeechFrame.lua DefaultLegacySettings (lines5–39 in all six cached TTS profiles) supplies legacy UI defaults: rate0, volume100, Standard/Alternate IDs0/1, four true boolean options, NarrateMyMessages=false, the 18 enabled chat types and empty channels. Initialization/reset uses that source set; these are not proven modern native C++ defaults. Original TextToSpeechCommands.lua lines1–5 supplies UI ranges [-10,10] and [0,100]. Unsupported direct setter values reject explicitly; native invalid-input policy is unknown.
 
-### Persistence evidence boundary
+Documented omitted bool newVal defaults false. Supplied voice IDs/names persist; the opposite representation resolves only through existing C_VoiceChat.GetTtsVoices rows. No default voice name is invented; absent catalogue matches produce explicit UNKNOWN errors. Supplied ChatChannelInfo records round-trip by all six documented fields. Legacy channel keys persist verbatim; key-to-record encoding and identity across changed metadata remain unknown.
 
-All seven profile caches were searched, including generated API documentation,
-CVar references and Settings definitions (Wrath's current cache has no TTS consumer).
-No rate/volume/voice/chat/channel preference or saved-marker public CVar mapping was
-found. Original Settings definitions expose `textToSpeech`, `remoteTextToSpeech`,
-`remoteTextToSpeechVoice`, and screen-narration-specific rate/volume CVars; these
-control distinct features, not C_TTSSettings speech preferences. The only selector
-used around C_TTSSettings migration is `TTSUseCharacterSettings`. API signatures
-publish no storage names. Search absence is not proof of native internal storage.
+All seven available profile caches were searched for preference CVar mappings. No rate/volume/voice/chat/channel or marker mapping was found; Wrath's sparse cache has no TTS consumer. Settings definitions for textToSpeech, remoteTextToSpeech, remoteTextToSpeechVoice and accessibility screen narration do not establish C_TTSSettings preference keys. Search absence is not proof of native internals. No decompiled source was read.
 
-**ASK-USER:** retain or revise the unsupported live-CVar oracle in cf2_tts.rs
-(before/after snapshots, nonempty rate_keys/volume_keys assertions and reopened-key
-comparisons; original lines143-152 and following loop). Reopen assertions in
-assert_reopened_tts_preferences (original185-192: saved=true, rate and volume) also
-need a documented persistence/lifetime contract. All remain unchanged and are
-expected to fail after the callback setup blocker is removed. No CVar storage or
-cross-environment persistence is implemented to satisfy them.
+## Tests asserting this spec
+
+Integration target selectors (authored, unexecuted):
+
+| Selector | Contradiction / proof boundary |
+|---|---|
+| cf2_tts::original_tts_slider_settings_survive_mark_saved_and_second_environment | Original sliders/CheckLoad/UpdateSliders plus two getter-based reopen pairs, other preferences and approved fresh=false marker. |
+| cf2_tts_shape_contract::original_tts_numeric_preferences_contract | Original numerical callbacks independently require4/37 then7/63 and matching controls. |
+| cf2_tts_shape_contract::original_tts_saved_settings_shape_blocker | Bool/void shape preflight first, then independent numerical contradiction. Bool shape alone accepts constant bool. |
+| cf2_tts_shape_contract::original_tts_saved_settings_consumer_blocker | Original CheckLoad first with nondefault legacy input, then independent numerical contradiction. Constant-true/no-op Mark remains indistinguishable within this selector alone. |
+| cf2_tts_shape_contract::original_tts_documented_preference_pairs_contract | Independent numerical contradiction plus explicit voice, bool, chat and channel round trips. No default/reset/native persistence claim. |
+
+Forever additionally registers cf2_gamepad_temp_cvars::original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinary_cvar; its producer is outside this TTS change.
+
+Original missing boundaries at the pre-producer base: MarkCharacterSettingsSaved at Retail/Forever475 and PTR/Mists/Era/Anniversary472; Gamepad RemoveTempCVar at Core.lua6. Missing pre-observation getter is a prerequisite blocker, not accepted original-consumer RED. Setup, compilation, provenance, timeout and unrelated API failures are not RED.
+
+## Known gaps
+
+- [ ] Run admitted original-consumer RED and identical final GREEN; no build/test/check has run in this edit-only delivery. Keep test changes separate from producer commits for later source-bound replay.
+- [ ] Native account/character ownership, fresh/reset marker policy, save timing, legacy migration and multi-character/account switching remain unproven. Approved persistence semantics do not establish native parity.
+- [ ] Channel-key-to-record migration and changed-metadata identity remain incomplete; no speculative aliases.
+- [ ] Gamepad invalid/read-only/secure CVar behavior, ordinary writes during overlays, event ordering and multiple-writer priority remain outside the bounded fixture.
+
+## Out of scope
+
+Audio synthesis, host gamepad integration, general settings UI compatibility, other CF-2 rows, native default discovery, broad profile/startup health, invented compatibility shims, and full account/character migration.
