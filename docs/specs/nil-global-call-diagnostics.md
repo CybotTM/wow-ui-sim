@@ -24,7 +24,9 @@ Simulator environments configure rilua's host-owned diagnostic switch at VM crea
 
 ## Known gaps (current cycle)
 
-- [ ] Edit-only proposal: behavioral RED/GREEN, profile registration and reload preservation remain unexecuted.
+- [ ] Static READY-FOR-SLOT only: behavioral RED/GREEN, executed profile registration and reload preservation remain unexecuted.
+
+[Parent slot recipe](../nil-global-call-slot-recipe.md) preserves the exact OLD source/pin separately from master-integrated GREEN, with durable exit capture, exact selectors, protected CVar copies and paired stock comparison. No build or slot proof was run during staging.
 
 ## Out of scope
 
