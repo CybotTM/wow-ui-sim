@@ -39,7 +39,7 @@ fn learned_mount_refreshes_original_companion_buttons_inline() {
         env.exec(&format!("S49_FIRST_SPELL = {first_spell}; S49_SECOND_SPELL = {second_spell}"))
             .expect("publish fixture expectations, not API replacements");
         common::panel_fixtures::clear_recorded_lua_errors(&env);
-        env.exec(include_str!("fixtures/wrath_f03/mount_list.lua"))
+        env.exec(include_str!("fixtures/wrath_s49/companion_list.lua"))
             .expect("one supplied mount reaches original companion frames");
         // Host state setup, not a claim that a journal mutation is native learning.
         env.state().borrow_mut().world.mounts[1].is_collected = true;
