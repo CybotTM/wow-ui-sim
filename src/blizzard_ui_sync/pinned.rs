@@ -140,12 +140,14 @@ pub(super) fn sync_to(root: &Path) -> crate::Result<super::SyncSummary> {
         .build()
         .map_err(|cause| crate::Error::Other(format!("create Blizzard CDN client: {cause}")))?;
     prepare_sync_cache(root, &expected)?;
+    let roots = vec!["https://us.cdn.blizzard.com/tpr/wow/".to_owned()];
     let workers = 16.min(build.files.len()).max(1);
     let counts = std::thread::scope(|scope| {
         let handles: Vec<_> = (0..workers)
             .map(|worker| {
                 let client = &client;
-                scope.spawn(move || sync_worker(root, client, &build.files, worker, workers))
+                let roots = &roots;
+                scope.spawn(move || sync_worker(root, client, &build.files, roots, worker, workers))
             })
             .collect();
         handles
@@ -180,6 +182,7 @@ fn sync_worker(
     root: &Path,
     client: &reqwest::blocking::Client,
     entries: &[super::pinned_download::ContentEntry],
+    roots: &[String],
     worker: usize,
     workers: usize,
 ) -> crate::Result<(usize, usize)> {
@@ -201,7 +204,7 @@ fn sync_worker(
                 )));
             }
         }
-        let content = super::pinned_download::download_entry(client, entry)?;
+        let content = super::pinned_download::download_entry(client, entry, roots)?;
         super::write_extracted_casc_path(&destination, &content)?;
         extracted += 1;
     }
