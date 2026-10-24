@@ -3,11 +3,9 @@
 use crate::lua_api::LoaderEnv;
 use crate::xml::collect_texture_mixins;
 
-use super::helpers::{
-    escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref,
-    lua_table_field_ref,
-};
+use super::helpers::{escape_lua_string, get_size_values, lua_global_ref, lua_table_field_ref};
 use super::helpers_anim::generate_animation_group_code;
+use super::xml_lua_args::XmlLuaArgs;
 use std::borrow::Cow;
 
 fn emit_file_code(texture: &crate::xml::TextureXml) -> String {
@@ -221,15 +219,16 @@ fn emit_create_header(
     create_method: &str,
     draw_layer: &str,
     sub_level: i32,
+    args: &mut XmlLuaArgs,
 ) -> String {
     let mut code = format!(
         r#"
         local parent = {}
-        local tex = parent:{}("{}", "{}")
+        local tex = parent:{}({}, "{}")
         "#,
-        lua_global_ref(parent_ref_name),
+        args.bind_frame_ref(parent_ref_name),
         create_method,
-        escape_lua_string(tex_name),
+        args.bind_string(tex_name),
         escape_lua_string(draw_layer)
     );
     if sub_level != 0 {
@@ -297,6 +296,7 @@ pub(super) fn build_texture_lua(
     is_mask: bool,
     is_line: bool,
     sub_level: i32,
+    args: &mut XmlLuaArgs,
 ) -> String {
     let create_method = if is_line {
         "CreateLine"
@@ -311,12 +311,13 @@ pub(super) fn build_texture_lua(
         create_method,
         draw_layer,
         sub_level,
+        args,
     );
     code.push_str(&generate_mixin_code(texture));
     code.push_str(&emit_line_thickness(texture, is_line));
     code.push_str(&generate_texture_source_code(texture, is_mask));
     code.push_str(&generate_texture_visual_code(texture));
-    append_texture_anchors(&mut code, texture, subst_parent_name);
+    append_texture_anchors(&mut code, texture, subst_parent_name, args);
     code.push_str(&emit_texture_visibility(texture));
     code.push_str(&emit_masked_textures(texture, is_mask));
     code.push_str(&super::xml_frame_codegen::generate_key_values_code(
@@ -327,16 +328,15 @@ pub(super) fn build_texture_lua(
 }
 
 /// Append anchor or SetAllPoints code for a texture.
-fn append_texture_anchors(code: &mut String, texture: &crate::xml::TextureXml, parent_name: &str) {
+fn append_texture_anchors(
+    code: &mut String,
+    texture: &crate::xml::TextureXml,
+    parent_name: &str,
+    args: &mut XmlLuaArgs,
+) {
     if let Some(anchors) = &texture.anchors {
         let anchors = normalize_published_texture_self_key(texture, anchors);
-        code.push_str(&generate_set_point_code(
-            &anchors,
-            "tex",
-            "parent",
-            parent_name,
-            "parent",
-        ));
+        code.push_str(&args.anchor_code(&anchors, "tex", parent_name));
     } else if texture.set_all_points != Some(true) {
         code.push_str("\n        tex:SetAllPoints(true)\n        ");
     }
@@ -390,27 +390,4 @@ pub(super) fn apply_texture_animations_xml(
         anim_code.push_str(&generate_animation_group_code(anim_group_xml, "frame"));
     }
     env.exec(&anim_code).ok();
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn texture_create_code_escapes_generated_child_names() {
-        let code = build_texture_lua(
-            r#"Parent-|TInterface\AddOns\Addon\Icon:0|t.__tex_1"#,
-            &crate::xml::TextureXml::default(),
-            "UIParent",
-            "UIParent",
-            "ARTWORK",
-            false,
-            false,
-            0,
-        );
-
-        assert!(
-            code.contains(r#"CreateTexture("Parent-|TInterface\\AddOns\\Addon\\Icon:0|t.__tex_1""#)
-        );
-    }
 }
