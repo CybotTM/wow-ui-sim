@@ -431,20 +431,26 @@ mod tests {
     }
 
     #[test]
-    fn fontstring_create_code_escapes_generated_child_names() {
-        let code = build_fontstring_create_code(
-            &FontStringXml::default(),
+    fn xml_fontstring_direct_creation_preserves_backslashes_in_names() {
+        let env = WowLuaEnv::new().unwrap();
+        let name = r#"Parent-|TInterface\AddOns\Addon\Icon:0|t.__fs_1"#;
+        let fontstring = FontStringXml {
+            name: Some(name.into()),
+            ..Default::default()
+        };
+        create_fontstring_from_xml_with_ref(
+            &env.loader_env(),
+            &fontstring,
+            "UIParent",
             "UIParent",
             "ARTWORK",
             0,
-            r#"Parent-|TInterface\AddOns\Addon\Icon:0|t.__fs_1"#,
-        );
-
-        assert!(
-            code.contains(
-                r#"CreateFontString("Parent-|TInterface\\AddOns\\Addon\\Icon:0|t.__fs_1""#
-            )
-        );
+        )
+        .unwrap();
+        let actual: String = env
+            .eval(r#"return _G["Parent-|TInterface\\AddOns\\Addon\\Icon:0|t.__fs_1"]:GetName()"#)
+            .unwrap();
+        assert_eq!(actual, name);
     }
 
     #[test]
