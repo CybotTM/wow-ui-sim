@@ -5,6 +5,8 @@
 
 #[cfg(feature = "client-wowforever")]
 use crate::lua_api::methods::{create_table, table_set};
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
