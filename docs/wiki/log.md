@@ -2704,3 +2704,6 @@ Added supplied-state system/contract and selected original-consumer tests. Retir
 ## 2026-10-24 — CF-2 club self invitations (edit-only)
 
 Updated [[club-membership]] and [bounded contract](../specs/club-self-invitations.md) with supplied incoming snapshot projection, Retail TOC/XML/Lua selection and static standalone contradictions. No runtime RED/GREEN, builds, slots or other-profile acceptance claimed.
+## 2026-10-24 — Wrath relic capability staging
+
+Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-relic-class-capability) and [spec](../specs/wrath-unit-has-relic-slot.md). Class flags remain explicit inputs; unknown class mappings not invented. Edit-only, no runtime acceptance.
