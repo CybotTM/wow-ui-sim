@@ -26,16 +26,23 @@ local function default_preferences()
     }
 end
 
-local account = default_preferences()
-local character = default_preferences()
--- ASK-USER: initial/reset/lifetime are undocumented. Minimal CheckLoad assumption:
--- initially unsaved in this environment, Mark makes it saved; preference reset leaves it alone.
-local characterSettingsSaved = false
+local data = __tts_saved_value
+local persist = __tts_persist
+__tts_saved_value, __tts_persist = nil, nil
+if data == nil then
+    -- User-approved non-native model: fresh storage is unsaved, Mark makes it saved.
+    data = {account = default_preferences(), character = default_preferences(), saved = false}
+end
+assert(type(data.account) == "table" and type(data.character) == "table"
+    and type(data.saved) == "boolean", "invalid persisted TTS model")
+local function save_preferences()
+    persist(data)
+end
 local function preferences()
     if GetCVarBool("TTSUseCharacterSettings") then
-        return character
+        return data.character
     end
-    return account
+    return data.account
 end
 
 local function require_number(value, minimum, maximum)
@@ -64,12 +71,14 @@ function C_TTSSettings.GetSpeechRate()
 end
 function C_TTSSettings.SetSpeechRate(value)
     preferences().rate = require_number(value, -10, 10)
+    save_preferences()
 end
 function C_TTSSettings.GetSpeechVolume()
     return preferences().volume
 end
 function C_TTSSettings.SetSpeechVolume(value)
     preferences().volume = require_number(value, 0, 100)
+    save_preferences()
 end
 
 local function voice_selection(voiceType)
@@ -108,10 +117,12 @@ function C_TTSSettings.SetVoiceOption(voiceType, voiceID)
     voice_selection(voiceType)
     assert(type(voiceID) == "number", "C_TTSSettings requires a numeric voice ID")
     preferences().voices[voiceType] = {id = voiceID}
+    save_preferences()
 end
 function C_TTSSettings.SetVoiceOptionName(voiceType, voiceName)
     voice_selection(voiceType)
     preferences().voices[voiceType] = {name = require_string(voiceName)}
+    save_preferences()
 end
 
 function C_TTSSettings.GetSetting(setting)
@@ -122,12 +133,14 @@ end
 function C_TTSSettings.SetSetting(setting, value)
     C_TTSSettings.GetSetting(setting)
     preferences().settings[setting] = bool_value(value)
+    save_preferences()
 end
 function C_TTSSettings.GetChatTypeEnabled(chatName)
     return preferences().chatTypes[require_string(chatName)] == true
 end
 function C_TTSSettings.SetChatTypeEnabled(chatName, value)
     preferences().chatTypes[require_string(chatName)] = bool_value(value)
+    save_preferences()
 end
 
 -- ChatConstantsDocumentation.lua: ChatChannelInfo. Round-trip a supplied record by value.
@@ -171,22 +184,26 @@ function C_TTSSettings.SetChannelEnabled(info, value)
     else
         table.insert(preferences().channels, {info = copy, enabled = enabled})
     end
+    save_preferences()
 end
 function C_TTSSettings.SetChannelKeyEnabled(key, value)
     -- Preserve supplied legacy keys without inventing how C++ encodes channel identity.
     preferences().channelKeys[require_string(key)] = bool_value(value)
+    save_preferences()
 end
 
 function C_TTSSettings.SetDefaultSettings()
     if GetCVarBool("TTSUseCharacterSettings") then
-        character = default_preferences()
+        data.character = default_preferences()
     else
-        account = default_preferences()
+        data.account = default_preferences()
     end
+    save_preferences()
 end
 function C_TTSSettings.GetCharacterSettingsSaved()
-    return characterSettingsSaved
+    return data.saved
 end
 function C_TTSSettings.MarkCharacterSettingsSaved()
-    characterSettingsSaved = true
+    data.saved = true
+    save_preferences()
 end

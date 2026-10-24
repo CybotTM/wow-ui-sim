@@ -2684,3 +2684,12 @@ Added [model ownership](systems/lua-api.md#tts-preference-model-edit-only-stagin
 and linked [contract](../specs/c-factory-cf2-tts.md): legacy-source defaults,
 original-callback static RED, bool/void saved API, UNKNOWN names/keys and ASK-USER
 persistence/marker assumptions. Edit-only; no runtime or native acceptance.
+
+## [2026-10-24] source | TTS approved persistence decisions
+
+Updated [model mechanics](systems/lua-api.md#tts-preference-model-edit-only-staging)
+and [contract](../specs/c-factory-cf2-tts.md#user-decisions--2026-10-24): reuse
+SavedVariables serialization for profile-isolated private preferences and marker;
+replace the public-CVar oracle with getter-based reopen checks. Fresh=false/Mark=true
+is explicitly user-approved, non-native. Relocated the TTS index entry away from
+master's concurrent Reload XML insertion; no merge performed. No builds or runtime proof.

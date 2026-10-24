@@ -678,11 +678,17 @@ Exact403/328 bounded acceptance: [combined evidence SSOT](../../specs/private-au
 
 ## TTS preference model (edit-only staging)
 
-`src/c_api/c_tts_settings.rs` installs environment-owned Lua upvalue preference
-state from `c_tts_settings.lua` during C API initialization. It replaces constant
-speech/voice and chat/channel preference stubs; ordinary chat channel membership
-remains separate. No disk persistence or public preference CVar keys are added.
+`src/c_api/c_tts_settings.rs` restores private Lua upvalue preference tables
+before original consumers execute and captures a private Rust persistence function.
+Each setter/Mark/reset writes the aggregate account/character tables and saved marker
+through `SavedVariablesManager`'s serializer. Its data-only parser restores the table
+without global publication or Lua execution. Storage lives under the owning CVar
+file's extensionless directory, then active profile cache subdirectory and
+`SavedVariables/TTSSettings.lua`; CVar test isolation therefore isolates these files
+too. Bootstrap transfer globals are removed after capture. No public preference
+CVars or alternate producers exist; ordinary chat channel membership stays separate.
+
 The [TTS contract](../../specs/c-factory-cf2-tts.md#staged-producer-contract-and-evidence-limits)
-owns default evidence, supported pairs, source-backed selection, UNKNOWN mappings
-and ASK-USER saved-marker/persistence policies. Original consumer RED is authored,
-not executed. Native parity and all-profile preservation remain unverified.
+owns default evidence, supported pairs, selection, UNKNOWN mappings and the approved
+non-native fresh=false/Mark=true persistent marker model. Original consumer RED/GREEN
+is authored, not executed. Native parity and all-profile preservation remain unverified.

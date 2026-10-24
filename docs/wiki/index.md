@@ -1,10 +1,3 @@
-## [2026-10-24] source | TTS preference producer staging
-
-[Environment-owned C API model](systems/lua-api.md#tts-preference-model-edit-only-staging)
-links the [bounded contract](../specs/c-factory-cf2-tts.md#staged-producer-contract-and-evidence-limits).
-Original slider/CheckLoad RED is authored; no build/runtime proof. No preference-CVar
-mapping found; persistence, marker reset and channel-key encoding remain explicit gaps.
-
 ## [2026-10-22] source | Wrath F07 applicability
 ## [2026-10-22] source | Wrath casting and aura projections
 
@@ -4060,3 +4053,11 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-23] investigation | Consumer selection and standalone RED
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
+
+## [2026-10-24] source | TTS preference persistence staging
+
+[Private persisted C API model](systems/lua-api.md#tts-preference-model-edit-only-staging)
+links the [bounded contract](../specs/c-factory-cf2-tts.md#user-decisions--2026-10-24).
+User-approved getter-based persistence and non-native fresh=false/Mark=true marker
+replace the unsupported public-CVar oracle. Existing SavedVariables serialization
+is reused; original-consumer runtime RED/GREEN remains unexecuted.
