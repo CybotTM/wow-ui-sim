@@ -20,6 +20,26 @@ The old VM's self-reference and font handle are cleared before it drops. A fresh
 
 The launch pipeline installs a reload loader on the environment. It reuses Blizzard/third-party addon loading and post-load bootstrap, preserving original launch options. The initial EditMode layout name and a copied WTF config seed a clean cache reader with no old `Val` handles; the file-backed cache is reread for the fresh VM even when Lua SavedVariables are disabled. Native reread timing/ordering is INFERRED and unasserted. ServerSnapshot character/enable imports and initial party reseeding are still skipped on reload. No addon-specific sentinel cleanup exists.
 
+## Constant dispatch factories
+
+[`load_constant_factory`](../../../src/lua_api/script_helpers.rs) stores an unexecuted Lua-function anchor in the active VM registry, indexed by exact chunk name and source. The anchor roots the prepared prototype and its interned constants in that VM; no prototype or Lua handle lives in a process-global cache. HookScript and direct/indirect attribute dispatch retain their original Lua source, chunk names and invocation/error policies.
+
+Each use allocates a new Lua closure from the prototype, binds it to the current global table and initializes independent nil top-level upvalues, matching `load_bytes`. The global table is shared within a VM; each closure's environment binding is independent. Returning/executing the anchor would let callback `setfenv` changes contaminate later calls, so the anchor is never exposed to dispatch. Nested hook closures and their captured arguments are still created by normal Lua execution.
+
+The single constant `template-method-handler` factory also uses this path through [`load_constant_chunk`](../../../src/loader/chunk_cache.rs). Its exact source-derived generated chunk name is unchanged, and the builder still disables dynamic global slots while loading. Factory execution still creates a new method-name capture for each XML handler; inherited/chained handlers retain their existing execution policy. Generated chunks keep the existing bytecode path; layer instance identities now travel as arguments rather than source literals. No mutable closure cache or arbitrary Lua-text normalization is introduced.
+
+Reload replaces the VM registry, so the prototype cache begins empty without a model-state reset or extra cleanup path. The [contract](../../specs/reload-ui.md#dispatch-factory-isolation) records matched before/after characterization and profile compilation; paired wall-time and full acceptance remain separate. Factory characterization does not authenticate native lifecycle ordering.
+
+## Generated XML layer arguments
+
+[`XmlLuaArgs`](../../../src/loader/xml_lua_args.rs) binds child names, parent references and resolved relativeTo names into a fresh invocation table. Texture, MaskTexture, Line and FontString producers emit table-slot expressions at those exact identity sites; XML properties and authored handlers remain generated normally. The shared anchor emitter accepts a reference emitter so non-layer callers keep their previous literal references.
+
+[`LoaderEnv`](../../../src/lua_api/loader_env.rs) still loads through the existing exact-source bytecode cache, disables global slots and applies the same secure/scoped loading environment. Each execution receives a new table of strings/numbers, accessed through chunk varargs without introducing lexical locals that could shadow authored handlers. No Lua table, frame, closure or prototype is cached across VMs. The batch retains XML order and all post-exec attachment, animation and text-sync steps; standalone XML FontStrings use the same parameterized producer.
+
+The [contract](../../specs/reload-ui.md#generated-xml-layer-reconstruction) records the Forever16-compilation prerequisite RED and bounded Forever/default Retail GREEN at `23f1f629a`: both reloads compile0 sources on each profile;27 exact cases/profile and both zero-warning checks pass, with shared formatting proof and unchanged original CVars. The initial fixture failure was implicit SetAllPoints against an unsized parent, fixed with an explicit TOPLEFT anchor without weakening size or freshness assertions. This optimization does not establish full-workload savings or native reload chronology.
+
+The cost harness uses a distinct exact libtest selector for reconstruction so profiling/cache OnceLocks cannot inherit state from unrelated tests, and supplies a fresh cache directory. The budget parent has no environment-selected early return. A regression reexecutes that parent with the former child marker set and requires both zero-compile/budget1 observations. Subprocesses use the current test executable with native wait/kill/reap and concurrent pipe draining, not PATH-resolved `timeout`. These harness changes are formatted only; their new behavioral proof remains pending.
+
 ## Managed addon restoration
 
 Wrath's loader defers [SavedVariables](../../../src/saved_variables.rs) until addon code finishes. It registers declarations, then reads account and character scopes once each, allowing persisted scalars/tables to overwrite code defaults. Initial WTF imports remain capped and read-only; freshly serialized reload storage bypasses that import cap and stale WTF. Other profiles keep their prior loading policy. The C_AddOns runtime route still passes no persistence manager; LoD restore/registration is UNMODELED, not silently bridged by a copied manager.
@@ -41,6 +61,7 @@ The [Wrath 12340 requirements](../../specs/reload-ui.md#wrath-12340-requirements
 ## Sources
 
 - [Request producer](../../../src/c_api/c_ui.rs) and [environment](../../../src/lua_api/env.rs) — deferred request and VM retirement.
+- [Dispatch helpers](../../../src/lua_api/script_helpers.rs) — per-VM prototype rooting and per-use closure construction.
 - [UI-owned state](../../../src/lua_api/state/ui_reload.rs) — reset boundary.
 - [Launch bootstrap](../../../src/bin/wow_sim/startup.rs) — real addon reload loader.
 - [App](../../../src/iced_app/app.rs) and [IPC boundary](../../../src/iced_app/update_servers.rs) — cache/startup reset and response-before-rebuild sequencing.

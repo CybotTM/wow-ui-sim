@@ -361,6 +361,7 @@ fn full_login_load_emits_no_addon_specific_lua_errors() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn is_addon_loaded_reports_true_on_each_glue_screen() {
     for screen in GLUE_SCREENS {
@@ -373,6 +374,7 @@ fn is_addon_loaded_reports_true_on_each_glue_screen() {
             "After {screen:?} eager sweep, IsAddOnLoaded must report true"
         );
     }
+}
 }
 
 #[test]
