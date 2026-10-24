@@ -8,7 +8,7 @@
 - [ ] Owner 1 selects the player roster; owner 2 the enemy roster. Slots are one-based. Changing owner/slot or replacing names must be visible on the next call and original `PET_BATTLE_PET_CHANGED` consumer refresh.
 - [ ] Preserve distinct battle names independently of journal custom aliases. When the supplied battle name equals the species name, the original tooltip hides its species label; when they differ, it shows the current species label.
 - [ ] Use zero results as the **documented-optional representation** (`MayReturnNothing`) for absent roster/species inputs and invalid selectors. Do not manufacture names or return a partial pair. These selected conditions are simulator policy, not verified native invalid-input behavior.
-- [ ] Keep all other CF-2 residuals unchanged. Conditional Retail stock acceptance removes exactly the two GetName error keys (one occurrence each) from 36/42, yielding 34/40, with no other raw-key/count changes. SuperTrack is independent and not included.
+- [ ] Keep all other CF-2 residuals unchanged. Retail stock acceptance compares against a freshly built merged-master map and removes exactly its two GetName error keys (one occurrence each), with all other raw-key/count changes classified and explained. Historical totals are not integrated acceptance targets. SuperTrack is independent and not included.
 
 ## How it works
 

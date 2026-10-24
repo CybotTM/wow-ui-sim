@@ -2702,6 +2702,13 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 
 Added [pet name projection](systems/pet-battle-names.md) and [contract](../specs/pet-battle-names.md), traced four profile TOCs through original XML/event/name consumers. No build/runtime proof claimed; parent owns frozen RED/GREEN and stock accounting.
 
+## 2026-10-24 — PTR 70493 source refresh
+
+Updated client-profiles runtime-cache/source identity and epoch links from the authenticated 70493 source contract and exact failing startup baseline. Original 4cc resume and host RED precede producer changes; decoded range/content proof and partial-provenance completion remain distinct from compatibility. Retail master 36/42 exact preservation accepted; Forever paired master 78/82 exact preservation accepted; source/CVar guards unchanged.
+## [2026-10-24] source | Combat-log filter record staging
+
+[Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
+
 ## 2026-10-24 | CF-2 SuperTrack edit-only staging
 
 Added supplied-state system/contract and selected original-consumer tests. Retired overlapping target defaults; priority remains explicitly unsupported. Runtime RED/GREEN, mutants and profile preservation remain slot obligations.
@@ -2711,3 +2718,11 @@ Updated [[club-membership]] and [bounded contract](../specs/club-self-invitation
 ## 2026-10-24 — Wrath relic capability staging
 
 Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-relic-class-capability) and [spec](../specs/wrath-unit-has-relic-slot.md). Class flags remain explicit inputs; unknown class mappings not invented. Edit-only, no runtime acceptance.
+
+## [2026-10-24] source | Patch 12.1.7 I4a inherited accounting
+
+Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance), [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist) and index for immutable companion accounting, explicit per-profile UNKNOWN source/selection/proof boundaries and grouped I4b selectors. I0 artifacts unchanged; no builds, cache observations or native/runtime acceptance.
+
+## 2026-10-24 — Patch 12.1.7 I4b static staging
+
+- Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations), [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection) and index for I3-dependent selected-source obligations. Exact pin/cache authentication, mixed-status rejection controls and separate runtime limits; no effective applicability promotion before the source dependency merges.
