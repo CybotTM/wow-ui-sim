@@ -228,6 +228,8 @@ impl Default for MovementSpeeds {
 /// "level 70 paladin" preset lives in [`PlayerState::seeded`].
 #[derive(Debug, Clone, Default)]
 pub struct PlayerState {
+    /// Explicit active-player input for the native guild-info permission predicate.
+    pub present: bool,
     pub name: String,
     /// Simulator name policy; defaults false, not an inferred native default.
     pub regional_unique_names_enabled: bool,
@@ -328,6 +330,7 @@ impl PlayerState {
         let equipped_items = default_equipped_items();
         let stats = CharacterStats::compute(&equipped_items, 2);
         Self {
+            present: true,
             health: 100_000,
             health_max: 100_000,
             class_index: 2,
@@ -490,6 +493,10 @@ pub struct WorldState {
     /// Whether the current instance is an arena battleground. Drives
     /// `IsBattlefieldArena`.
     pub battlefield_arena: bool,
+    /// Numeric active-player guild identity; zero means no guild.
+    pub guild_id: u64,
+    /// Zero-based active-player rank into the existing guild_ranks rights cache.
+    pub guild_player_rank: usize,
     pub guild_name: Option<String>,
     pub guild_rank: Option<String>,
     pub guild_num_members: i32,
