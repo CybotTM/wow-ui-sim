@@ -7,6 +7,13 @@
 //! housing/favor state, and blueprint import/export calls produce simulator
 //! share codes that can be round-tripped in tests.
 
+/// Supplied spatial housing state, independent of ownership.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum HousingArea {
+    HouseInterior,
+    PlotExterior,
+}
+
 mod basic_mode;
 pub mod catalog;
 #[cfg(feature = "retail-12-0-0")]
