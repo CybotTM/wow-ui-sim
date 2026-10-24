@@ -36,13 +36,13 @@ fn original_combat_processor_applies_selected_event_settings_preserves_boundary(
     let env = load_original_consumer("Blizzard_CombatLogProcessor");
     assert_original_source(
         &env,
-        "CombatLogProcessor.ApplyFilterSettings",
+        "rawget(__secureenv, 'CombatLogProcessor').ApplyFilterSettings",
         "Blizzard_CombatLogProcessor/Blizzard_CombatLogProcessor.lua",
     );
     let errors_before = env.state().borrow().lua_errors.len();
     env.exec(
         r#"
-        local processor = CreateFromMixins(CombatLogProcessor)
+        local processor = CreateFromMixins(rawget(__secureenv, 'CombatLogProcessor'))
         local selected = {
             filters = {{eventList = {SPELL_DAMAGE = true, SPELL_HEAL = false}}},
             settings = {},
