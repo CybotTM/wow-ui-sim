@@ -2,7 +2,7 @@
 
 Wrath exposes the modeled legacy non-C_* global in
 `src/lua_api/globals/real/wrath_relic_slot.rs`. Native authority: accepted laptop
-answer Q1 in `/home/osso/.local/state/wow-ui-sim/handoff/laptop-labels-answers-20261018/laptop-answers-req-11.md`.
+answer Q1 in `laptop-answers-req-11.md` (private artifact location in lane handoff).
 See [Lua API implementation notes](../wiki/systems/lua-api.md#wrath-relic-class-capability).
 Status: staged, edit-only; no compilation or runtime acceptance claimed.
 
