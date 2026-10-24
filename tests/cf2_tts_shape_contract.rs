@@ -139,7 +139,6 @@ fn original_tts_saved_settings_shape_blocker() {
         "cf2_tts_shape_contract::original_tts_saved_settings_shape_blocker",
         || {
             let env = shape::load(&["Blizzard_ChatFrame"]);
-            assert_original_tts_preference_round_trips(&env);
             shape::check(
                 &env,
                 r#"
@@ -149,12 +148,13 @@ assert(select('#', C_TTSSettings.MarkCharacterSettingsSaved()) == 0)
 
 "#,
             );
+            assert_original_tts_preference_round_trips(&env);
         },
     );
 }
 
 // Keep direct shape preflights from masking the original CheckLoad boundary.
-// Numeric round trips reject constant/no-op preferences before CheckLoad.
+// Keep CheckLoad before numeric acceptance so preference RED cannot mask its API boundary.
 // Constant-true saved markers remain indistinguishable: ASK-USER initial/reset oracle.
 #[test]
 fn original_tts_saved_settings_consumer_blocker() {
@@ -162,7 +162,6 @@ fn original_tts_saved_settings_consumer_blocker() {
         "cf2_tts_shape_contract::original_tts_saved_settings_consumer_blocker",
         || {
             let env = shape::load(&["Blizzard_ChatFrame"]);
-            assert_original_tts_preference_round_trips(&env);
             shape::check(
                 &env,
                 r#"
@@ -180,6 +179,57 @@ assert(TextToSpeechFrame.loaded == true)
 assert(C_TTSSettings.GetCharacterSettingsSaved() == true)
 TextToSpeechFrame_UpdateSliders(TextToSpeechFrame)
 
+"#,
+            );
+            assert_original_tts_preference_round_trips(&env);
+        },
+    );
+}
+
+#[test]
+fn original_tts_documented_preference_pairs_contract() {
+    storage::run_isolated(
+        "cf2_tts_shape_contract::original_tts_documented_preference_pairs_contract",
+        || {
+            let env = shape::load(&["Blizzard_ChatFrame"]);
+            assert_original_tts_preference_round_trips(&env);
+            shape::check(
+                &env,
+                r#"
+original(TextToSpeech_SetSelectedVoice, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
+original(TextToSpeechFrame_SetChatTypeEnabled, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
+original(TextToSpeechFrame_SetChannelEnabled, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
+for _, voiceType in ipairs({Enum.TtsVoiceType.Standard, Enum.TtsVoiceType.Alternate}) do
+    for _, id in ipairs({7, 9}) do
+        TextToSpeech_SetSelectedVoice({voiceID=id}, voiceType)
+        assert(C_TTSSettings.GetVoiceOptionID(voiceType) == id)
+    end
+end
+-- Explicit names need no invented catalogue/default. Cross name/ID resolution is not asserted.
+for _, name in ipairs({'Supplied voice A', 'Supplied voice B'}) do
+    C_TTSSettings.SetVoiceOptionName(Enum.TtsVoiceType.Standard, name)
+    assert(C_TTSSettings.GetVoiceOptionName(Enum.TtsVoiceType.Standard) == name)
+end
+for _, setting in ipairs({
+    Enum.TtsBoolSetting.PlaySoundSeparatingChatLineBreaks,
+    Enum.TtsBoolSetting.AddCharacterNameToSpeech,
+    Enum.TtsBoolSetting.PlayActivitySoundWhenNotFocused,
+    Enum.TtsBoolSetting.AlternateSystemVoice,
+    Enum.TtsBoolSetting.NarrateMyMessages,
+}) do
+    for _, enabled in ipairs({false, true}) do
+        assert(select('#', C_TTSSettings.SetSetting(setting, enabled)) == 0)
+        assert(C_TTSSettings.GetSetting(setting) == enabled)
+    end
+end
+local channel = {name='TTS fixture', shortcut='TTS', localID=7, instanceID=19, zoneChannelID=0, channelType=0}
+for _, enabled in ipairs({false, true, false}) do
+    assert(TextToSpeechFrame_SetChatTypeEnabled('SAY', enabled) == enabled)
+    assert(TextToSpeechFrame_GetChatTypeEnabled('SAY') == enabled)
+    assert(TextToSpeechFrame_SetChannelEnabled(channel, enabled) == enabled)
+    assert(C_TTSSettings.GetChannelEnabled(channel) == enabled)
+end
+-- Do not assert initial/reset marker policy or native channelKey encoding.
 "#,
             );
         },

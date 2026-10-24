@@ -76,11 +76,19 @@ slider OnValueChanged callbacks. No producer substitution or vendor edit is used
 |---|---|---|
 | `cf2_tts::original_tts_slider_settings_survive_mark_saved_and_second_environment` | Explicit zero then 4/37 and 7/63 require unequal getter results; original CheckLoad/UpdateSliders read back controls. Constant volume100 fails at zero; any constant/no-op cannot meet both pairs. | CVar-change and reopen oracles are ASK-USER, not producer acceptance. |
 | `cf2_tts_shape_contract::original_tts_numeric_preferences_contract` | Original SetRate/SetVolume callbacks require rate4 then7 and volume37 then63 before UpdateSliders assertions. | No marker claim. |
-| `cf2_tts_shape_contract::original_tts_saved_settings_shape_blocker` | Same independent original-callback two-pair prerequisite, then exact bool/void shapes. | Bool shape alone accepts constant bool/no-op Mark. |
-| `cf2_tts_shape_contract::original_tts_saved_settings_consumer_blocker` | Same two-pair prerequisite, then original CheckLoad with supplied legacy settings, loaded flag and saved=true assertion. | Constant-false fails after Mark; constant-true + no-op Mark is observationally equivalent without an unsaved/reset oracle. |
+| `cf2_tts_shape_contract::original_tts_saved_settings_shape_blocker` | Exact bool/void shapes first, then independent original-callback two-pair checks. | Bool shape alone accepts constant bool/no-op Mark. |
+| `cf2_tts_shape_contract::original_tts_saved_settings_consumer_blocker` | Original CheckLoad first with supplied legacy settings, loaded flag and saved=true; then independent two-pair checks. | Constant-false fails after Mark; constant-true + no-op Mark is observationally equivalent without an unsaved/reset oracle. |
 
 The unchanged base shim returns100/0 and ignores setters. Each new two-pair
 prerequisite therefore contradicts it at the original callback read-back boundary.
 This is static proof, **not observed runtime RED**. Rejecting constant-true saved
 markers in every selector is impossible under the currently documented contract;
 no initial=false assertion, reset oracle, or native-parity claim is introduced.
+
+`cf2_tts_shape_contract::original_tts_documented_preference_pairs_contract` adds
+supplemental explicit-input voice ID/name, boolean setting, chat type and supplied
+channel-record round trips. Original voice/chat/channel setters are provenance-checked;
+its numerical prerequisite independently rejects constant/no-op rate/volume producers.
+It does not claim native voice-name defaults, cross-name/ID mapping, channel-key encoding,
+marker defaults or persistence. Saved-shape and saved-consumer selectors retain their
+respective shape/CheckLoad failures **before** numerical checks to avoid masking them.
