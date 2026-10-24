@@ -4,6 +4,8 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::state::AuraInfo;
 
+const ARENA_SOURCE: &str = "Blizzard_UnitFrame/Mainline/CompactArenaFrame.lua";
+
 fn load_original_consumer(root: &str) -> WowLuaEnv {
     let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
     let env = crate::common::blizzard_addon_harness::new_blizzard_addon_env(&ui);
@@ -51,11 +53,7 @@ fn select_original_debuff(env: &WowLuaEnv) {
         "Cf2AuraDebuff.SetUnit",
         "Cf2AuraDebuff:GetScript('OnEvent')",
     ] {
-        assert_original_source(
-            env,
-            function,
-            "Blizzard_UnitFrame/Mainline/CompactArenaFrame.lua",
-        );
+        assert_original_source(env, function, ARENA_SOURCE);
     }
     assert_original_source(
         env,
