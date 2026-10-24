@@ -175,11 +175,13 @@ pub(super) fn dispatch_attribute_changed(
     value: Val,
     secure_dispatch: bool,
 ) {
-    let Ok(dispatcher) = state.load(
+    let Ok(dispatcher) = crate::lua_api::script_helpers::load_constant_factory(
+        state,
         r#"
         local handler, frame, name, value = ...
         handler(frame, name, value)
         "#,
+        "=(string)",
     ) else {
         return;
     };
@@ -199,7 +201,8 @@ pub(super) fn dispatch_attribute_changed(
 }
 
 fn dispatch_direct_attribute_changed(state: &mut LuaState, frame: Val, name: Val, value: Val) {
-    let Ok(dispatcher) = state.load(
+    let Ok(dispatcher) = crate::lua_api::script_helpers::load_constant_factory(
+        state,
         r#"
         local frame, name, value = ...
         local env = debug.getfenv(frame)
@@ -215,6 +218,7 @@ fn dispatch_direct_attribute_changed(state: &mut LuaState, frame: Val, name: Val
             handler(frame, name, value)
         end
         "#,
+        "=(string)",
     ) else {
         return;
     };

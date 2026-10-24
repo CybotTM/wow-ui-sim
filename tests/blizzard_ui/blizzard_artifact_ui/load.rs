@@ -12,6 +12,7 @@ use wow_ui_sim::toc::TocFile;
 const ROOT: &str = "Blizzard_ArtifactUI";
 const COLORS: &str = "Blizzard_Colors";
 
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_ui_toc_dependency_loads_blizzard_colors_first() {
     let toc = TocFile::from_file(&artifact_ui_toc()).expect("Blizzard_ArtifactUI TOC should parse");
@@ -41,6 +42,7 @@ fn artifact_ui_toc_dependency_loads_blizzard_colors_first() {
         "`{COLORS}` must be loaded before `{ROOT}` in the dependency-aware loader closure: \
          {loaded_names:?}"
     );
+}
 }
 
 // ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.

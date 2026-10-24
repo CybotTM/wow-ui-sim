@@ -175,15 +175,11 @@ pub mod c_pvp_crowd_control;
 pub mod c_quest_hub;
 #[cfg(feature = "retail-12-0-5")]
 pub mod c_quest_info_system;
-#[cfg(any(
-    feature = "client-retail",
-    feature = "client-ptr",
-    feature = "client-wowforever"
-))]
-mod c_quest_log;
+pub mod c_quest_log;
 #[cfg(feature = "client-wowforever")]
 mod c_quest_log_watches;
 pub mod c_quest_offer;
+pub mod c_super_track;
 pub mod container_quest;
 #[cfg(feature = "client-wowforever")]
 pub use c_quest_log_watches::QuestWatchType;
@@ -242,6 +238,7 @@ pub(crate) mod class_talent_commands;
 mod club_inputs;
 mod club_members;
 pub mod club_model;
+pub mod club_self_invitations;
 pub(crate) mod crafting_execution;
 pub(crate) mod crafting_input;
 pub(crate) mod crafting_plan;
@@ -393,6 +390,14 @@ pub(crate) use registration::{
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;
 
+fn supports_super_tracking() -> bool {
+    use crate::client_profile::{ACTIVE, ClientProfile};
+    matches!(
+        ACTIVE,
+        ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::WowForever
+    )
+}
+
 pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResult<()> {
     c_loot_history::register_c_loot_history(state)?;
     c_date_and_time::register(state)?;
@@ -407,12 +412,10 @@ pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResu
     c_cvar_readiness::register(state)?;
     c_achievement_info_relations::register(state)?;
     c_calendar::register(state)?;
-    #[cfg(any(
-        feature = "client-retail",
-        feature = "client-ptr",
-        feature = "client-wowforever"
-    ))]
-    c_quest_log::register(state)?;
+    if supports_super_tracking() {
+        c_quest_log::register(state)?;
+        c_super_track::register(state)?;
+    }
     c_garrison_damage_classes::register(state)?;
     #[cfg(feature = "client-retail")]
     c_garrison_trees::register(state)?;

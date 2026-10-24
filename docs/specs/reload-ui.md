@@ -10,6 +10,33 @@
 - [x] Preserve modeled server/session/player/world/party state and process IPC/texture/font resources. Clear GUI frame-ID, input and render caches before drawing the new UI.
 - [x] Service reloads requested by Lua IPC, GUI shortcut, slash commands, events and timers only after the active Lua call unwinds; subsequent IPC commands use the new environment and retain print-output isolation.
 
+### Dispatch factory isolation
+
+- [x] Reuse constant simulator factories only for identical source and chunk names within the active VM. Each use must receive a fresh closure, current-global environment binding and independent top-level upvalues; no old-VM prototype or object may survive reload through this cache.
+- [x] Preserve HookScript order, self/arguments, solo-hook result passthrough, chained-result discard and error boundaries; preserve direct/indirect attribute callbacks, per-frame state and observable taint before and after reload.
+- [x] Preserve real XML method-handler inheritance/chaining order, result passthrough, per-frame method/upvalue isolation and fresh frame/script state after ReloadUI when reusing its constant factory prototype.
+
+### Generated XML layer reconstruction
+
+- [x] Reuse identical generated layer operations across instance identities and fresh ReloadUI VMs. Sixteen identical texture operations may compile at most one source chunk per reload, measured after warm initial loading over two real reconstructions.
+- [x] Pass instance names, parent references and substituted relativeTo targets as invocation data; preserve creation order, named/anonymous identity, parentKeys/arrays, region properties, anchors, scripts, scoped environments and fresh objects. Never rewrite authored Lua or retain old-VM handles to obtain reuse.
+
+Forever prerequisite RED at `0d1e54849`: both real reload behaviors complete, then the first budget assertion reports16 source compiles against1. Seven factory and15 reload/XML preservation controls pass. Retail RED was not measured.
+
+At `23f1f629a`, the producer supplies fresh invocation argument tables through the existing bytecode path. Exact selector: `loader::tests::reload_xml_cost::reload_xml_layer_reconstruction_bounds_source_compiles`.
+
+| Bounded capability | Forever | Default Retail |
+| --- | --- | --- |
+| Sixteen identical layer instances, two real ReloadUI reconstructions | Source compiles0,0; budget1 | Source compiles0,0; budget1 |
+| Hook/attribute/XML-method factories: order, arguments, returns, private state, taint, errors and VM retirement | 7/7 PASS | 7/7 PASS |
+| Existing IPC/app reload and XML property/anchor/name controls | 15/15 PASS | 15/15 PASS |
+| Mixed Texture/MaskTexture/Line/FontString order, arrays, names and anchors; standalone FontString name/text/mixin controls | 4/4 PASS | 4/4 PASS |
+| Library build, cargo check and shared cargo fmt --check | PASS; zero compiler warnings | PASS; zero compiler warnings |
+
+Each profile executes27 exact cases, zero ignored, with fresh child-only XDG data copied from current CVars; original CVar stat/hash stay unchanged. This proves bounded compile reuse and preservation, not stock-startup cleanliness, native chronology, paired wall-time savings or unchanged full Ellesmere acceptance.
+
+The budget parent must always execute its assertion, even when `WOW_SIM_RELOAD_XML_COST_CHILD` is inherited. Reconstruction runs through a distinct exact-test selector in a fresh process with parent-controlled profiling/cache settings, not an environment-selected parent branch. The marker regression requires both budget observations with source compiles0 and budget1. Re-proof after the verifier fix is pending; the table above remains historical evidence at `23f1f629a`.
+
 ### File-backed client state
 
 - [x] Restore the file-backed EditMode cache using the initial layout name and config, without re-importing ServerSnapshot. The original EditMode consumer must select the same active layout after ReloadUI. Native reread timing/ordering is INFERRED and unasserted.
@@ -58,6 +85,8 @@ Pinned Retail API docs at `b9be9379719047977fca4dba1bb1d9988e8840b3` declare ADD
 - `src/c_api/c_ui.rs` — modeled `C_UI.Reload`, also called by Blizzard’s public `ReloadUI` wrapper.
 - `src/lua_api/globals/state_backed_queries.rs` — legacy Lua `ReloadUI` registration sharing the request producer.
 - `src/lua_api/env.rs` — Lua VM construction and handle retirement.
+- `src/lua_api/script_helpers.rs` — VM-local factory prototype anchors and fresh closure construction for HookScript and attribute dispatch.
+- `src/loader/chunk_cache.rs` and `src/lua_api/globals/create_frame/template_chain/` — exact-name constant XML method factory loading with dynamic global slots disabled, as before.
 - `src/bin/wow_sim/startup.rs` — real startup/addon-loading pipeline.
 - `src/startup.rs` — startup event dispatch.
 - `src/saved_variables.rs` — declared-variable persistence.
@@ -68,6 +97,8 @@ Pinned Retail API docs at `b9be9379719047977fca4dba1bb1d9988e8840b3` declare ADD
 
 ## Tests asserting this spec
 
+- `src/lua_api/reload_factory_tests.rs` — callback arguments/results/errors, hook/frame/upvalue isolation, environment rebinding, closure taint and real deferred VM retirement. Pre-change and post-change characterization pass.
+- `src/loader/tests/reload_factory_xml.rs` — real XML templates and method handlers, inherited/chained order, independent frame state/method replacement, returns and fresh VM retirement. Pre-change and post-change characterization pass.
 - `src/iced_app/app_tests.rs` — shortcut sentinel/frame/VM retirement and Lua-requested SavedVariables persistence.
 - `src/lua_server/exec_tests.rs` — public Unix Exec request, reload, subsequent fresh environment and print output.
 - `src/bin/wow_sim/main.rs`, `src/bin/wow_sim/gui_commands.rs` — dump/screenshot reload observation boundaries.
@@ -110,6 +141,14 @@ Historical RED: four original freshness assertions on `f254e22ee`; dump/screensh
 | Preservation | Existing yielded startup/texture tests pass; modeled level, zone, party count and font/texture allocations survive | No native session-parity claim |
 
 Both GREEN runtimes use child-only XDG directories with copied current CVars; original CVar hash/stat remain unchanged. `cargo fmt --check` passes. Full-default retail `cargo check -j1` passes with zero warnings at `f5f124f93` (same Rust as `79f52bb3f`), including `wow-sim`, `wow-cli`, library and auxiliary binaries. Default features: `sound`, `gui`, `casc`, `client-retail`. Private proof: `final-check-proof.json`.
+
+### Bounded Forever factory proof — 2026-10-19
+
+Seven characterization cases pass before the cache at `534888bc0` and after it at `c4dfdea66`, zero ignored. They exercise real Lua calls and XML templates, not compile counts: hook order/self/arguments/results, per-frame captures, error boundaries, direct/indirect attribute dispatch, caller-environment isolation, observable callback taint and fresh-VM retirement through ReloadUI. Cached prototype ownership is additionally source-inspected: anchors exist only in the active VM registry; no process-global Lua/prototype handle is introduced.
+
+The four factory Lua source byte strings match `84dac6715` exactly; native chunk names and invocation policies are unchanged. `cargo fmt --check` and zero-warning Forever (`--no-default-features --features sound,gui,casc,client-wowforever`) and default Retail `cargo check -j1` pass on `c4dfdea66`. Current CVars are copied only into child XDG directories; original metadata/hash remain unchanged. Evidence: private `handoff/reload-perf/{final-pipeline-proof.json,factory-lua-integrity.json}`. Retail has compilation proof here, not a new Retail behavioral run.
+
+Quiet-window paired untraced timing and the unchanged full Ellesmere acceptance remain separate pending proof; the existing a14 failure must not be relabeled PASS. Startup profiling lacks0–8.8s, including the initial Blizzard/XML load0.283–5.628s.
 
 ## Out of scope
 

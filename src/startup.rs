@@ -481,6 +481,7 @@ fn fire_world_enter_sequence(env: &WowLuaEnv) {
 
     log_with_timestamp(env, "[Startup] Firing PLAYER_ENTERING_WORLD");
     let reloaded = env.state().borrow().ui_reloaded;
+    let _profile = crate::loader::chunk_cache::GeneratedChunkScope::enter("PLAYER_ENTERING_WORLD");
     let payload = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         Vec::new()
     } else {

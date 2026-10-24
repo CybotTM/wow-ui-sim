@@ -241,6 +241,7 @@ fn shared_xml_toc_lists_selector_files_in_its_body() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_emits_no_lua_errors_despite_empty_body() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -264,7 +265,9 @@ fn explicit_load_emits_no_lua_errors_despite_empty_body() {
         load_errors.join("\n  ")
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn is_addon_loaded_transitions_false_to_true_after_explicit_load() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -298,4 +301,5 @@ fn is_addon_loaded_transitions_false_to_true_after_explicit_load() {
          AddOn state machine; downstream callers can use this to gate behavior \
          on the shell's nominal presence"
     );
+}
 }

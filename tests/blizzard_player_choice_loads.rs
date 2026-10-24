@@ -401,11 +401,13 @@ fn blizzard_player_choice_is_addon_loaded_after_explicit_load(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_is_addon_loaded_after_explicit_load() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_is_addon_loaded_after_explicit_load::run(&env);
+}
 }
 
 prefork_full_ui_case! {

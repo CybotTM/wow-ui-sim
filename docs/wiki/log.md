@@ -1,3 +1,15 @@
+## [2026-10-24] proof | Bounded reload XML source reuse
+
+[Contract matrix](../specs/reload-ui.md#generated-xml-layer-reconstruction) records Forever RED16 at0d1e54849, then Forever/default Retail0/0 reload compiles at23f1f629a.27 exact cases/profile, zero-warning builds/checks and formatting pass; current CVars remain unchanged. [Mechanics](systems/reload-ui.md#generated-xml-layer-arguments) retain VM-local objects and XML ordering. Stock startup, paired timing and full Ellesmere acceptance remain separate.
+
+## [2026-10-24] source | Reload XML instance arguments
+
+[Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): real16-compilation RED precedes parameterized layer identities through the existing bytecode cache. Profile GREEN remains pending; no full-workload acceptance claim.
+
+## [2026-10-22] source | Wrath F07 applicability
+## [2026-10-22] source | Wrath casting and aura projections
+
+Added [projection notes](systems/lua-api.md#wrath-casting-and-aura-projections) and [contract](../specs/wrath-casting-aura-contracts.md) with static-source 12340 facts, original-consumer RED, unchanged modern-only failures and explicit metadata/transport limits. Seven producer contracts and Retail37 preservation pass at20f35943a. Original BuffFrame getter-type RED at19c9a906b precedes the minimal runtime Wrath filename projection. Final14aed640c records native21+seven contracts PASS, sixteen unchanged report-only failures, Retail37 PASS, empty stock arrays and passing Wrath check/formatter. A mandatory Retail prefork setup timeout passed on one exact retry without source/harness changes; failure receipt retained. Reconstructed12340 source, not native execution, supplies getter authority.
 ## [2026-10-22] investigation | Wrath F13 native loader fixtures
 
 [Diagnosis](investigations/wrath-fixture-f13.md) and [contract](../specs/wrath-fixture-f13.md) separate three native fixture repairs from24 unchanged modern-only failures and five additive specimens. Before: Wrath0/27PASS, Retail26/27PASS (pre-existing Archaeology TOC failure); companion5PASS each. Final merged-code proof6f54e648f: Wrath3/27PASS; Retail26/27PASS with identical baseline statuses; companions5PASS each, stock empty, checks/fmt pass without compiler warnings. No producer edits.
@@ -6,7 +18,7 @@
 [Consumer-boundary diagnosis](investigations/wrath-spell-panels-f10.md) links [paired results and gates](../baselines/wrath-fixture-f10.md#final-bounded-gates--2026-10-23). Original assertions stay unchanged; native analogues do not replace modern rows. Correct target routing retains invalid attempts and resolves one setup-only failure with a bounded exact retry. Cached expectations remain INFERRED; native12340 panel declarations are unconfirmed. No producer repair or full-compatibility claim.
 ## [2026-10-22] investigation | Wrath F07 REJECT repair
 
-[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [exact 32-row matrix](../specs/wrath-fixture-f07.md#exact-rows). Restored shine epsilon assertion passes; restored EventFrame/MinimalScrollBar consumer fails with missing track, unchanged and ungated. Fresh Wrath10 PASS/22 FAIL; Retail32 PASS/0 FAIL; stock Wrath[] and both checks/fmt pass. All invocations execute1; no producer fix or new generic test. Historical11/21 claims superseded. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
+[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [exact 32-row matrix](../specs/wrath-fixture-f07.md#exact-rows). EXCL-2 excludes the 22 historical Wrath failures by user decision using `post_wrath_ui_fixture!`; the 10 passing rows stay ungated and all bodies/other profiles remain unchanged. Fresh exclusion proof awaits a granted build slot. Historical pre-exclusion proof: Wrath10 PASS/22 FAIL, Retail32 PASS/0 FAIL; stock Wrath[] and both checks/fmt pass. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
 
 ## [2026-10-22] source | Patch 12.1.7 I0 accounting
 
@@ -119,6 +131,18 @@ Added [diagnostic requirements](../specs/xml-load-diagnostics.md) and [loader bo
 ## [2026-10-20] source | Numeric-secret classifications
 
 [C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) now link the [bounded classification contract](../specs/secret-selector-classification.md). Numeric host lookup does not widen shared readers or ExternalDefensive; output secrecy remains explicit simulator policy. Runtime receipts stay in the contract.
+
+## [2026-10-19] evidence | Factory preservation and profile compilation
+
+[Factory contract](../specs/reload-ui.md#bounded-forever-factory-proof--2026-10-19) records matching pre/post characterization, unchanged Lua bodies, fresh VM retirement and warning-free Forever/default Retail compilation. Quiet-window wall-time and unchanged Ellesmere acceptance remain pending; startup sampling excludes the initial Blizzard/XML load.
+
+## [2026-10-19] system | Constant XML method factory reuse
+
+[Prototype mechanics](systems/reload-ui.md#constant-dispatch-factories) includes the one measured XML method factory, preserving exact source/chunk identity, fresh captures and slot-disable policy. [Contract](../specs/reload-ui.md#dispatch-factory-isolation) links real-XML pre-change characterization; post-change and quiet-window proof remain pending. Generated frame-ID churn stays unchanged.
+
+## [2026-10-19] system | Reload dispatch factory prototypes
+
+[Lifecycle mechanics](systems/reload-ui.md#constant-dispatch-factories) documents VM-registry prototype anchors and fresh closure/environment bindings without changing authored Lua bodies. [Contract](../specs/reload-ui.md#dispatch-factory-isolation) tracks characterization and pending post-change proof separately; no quiet-window wall gain or full acceptance claim yet.
 
 ## [2026-10-19] source | Wrath readiness and placed-frame reconstruction
 
@@ -2673,3 +2697,13 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 ## [2026-10-23] investigation | Consumer selection and standalone RED
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
+
+## 2026-10-24 | CF-2 SuperTrack edit-only staging
+
+Added supplied-state system/contract and selected original-consumer tests. Retired overlapping target defaults; priority remains explicitly unsupported. Runtime RED/GREEN, mutants and profile preservation remain slot obligations.
+## 2026-10-24 — CF-2 club self invitations (edit-only)
+
+Updated [[club-membership]] and [bounded contract](../specs/club-self-invitations.md) with supplied incoming snapshot projection, Retail TOC/XML/Lua selection and static standalone contradictions. No runtime RED/GREEN, builds, slots or other-profile acceptance claimed.
+## 2026-10-24 — Wrath relic capability staging
+
+Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-relic-class-capability) and [spec](../specs/wrath-unit-has-relic-slot.md). Class flags remain explicit inputs; unknown class mappings not invented. Edit-only, no runtime acceptance.

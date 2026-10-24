@@ -3,6 +3,34 @@
 The Lua API layer bridges Lua addon code with the Rust simulation engine. It provides WoW-compatible globals, 300+ frame methods, C_* namespaces, and a timer system — all backed by `WowLuaEnv` and `SimState`.
 
 
+
+## Wrath relic class capability
+
+`real::wrath_relic_slot` publishes `UnitHasRelicSlot` from shared registration
+only under a runtime `ACTIVE == Wrath` predicate. It does not alter Forever's
+separate, native-unverified implementation. This is a modeled non-C_* global,
+not a C API namespace or a compatibility stub.
+
+`SimState.wrath_relic_slot.class_flags` holds explicit class DB flags keyed by
+class index. The producer reads the resolved player's current class and bit 8,
+never gear. Missing records return one nil; present capability returns numeric
+1. No class mask is seeded because the accepted native Q1 leaves that mapping
+unknown. GREEN's original-panel fixture supplies its two flag records explicitly.
+
+The native vocabulary is filtered before shared player/target/focus/party
+resolution. `units` holds supplied lowercase token or complete-chain snapshots
+for identities not represented there; GUID lookup uses known snapshots and the
+player/party identities. No token establishes presence on its own, and no new
+unit relationship graph is inferred. Numbers pass argument validation and yield
+nil: their numeric text cannot name a modeled unit token or GUID. Native
+argument/return requirements and evidence limits live in the
+[owning spec](../../specs/wrath-unit-has-relic-slot.md).
+
+Edit-only staging: original consumer plus three contract tests authored, none
+compiled or run. S49 also reached this missing API at PaperDollFrame.lua:1094;
+its original empty-error oracle is unchanged. Private handoff owns pending
+RED/GREEN, checks and exact stock-preservation receipts.
+
 ## Wrath tracked achievements
 
 `SimState.tracked_achievements` stores unique IDs in insertion order. Existing shared setters retain membership behavior; only the existing Wrath registration module publishes native add/remove/count/membership functions. Mutations release the state borrow before synchronous event dispatch, so original AchievementUI handlers see the updated list and refresh their private cache. The [12340 contract](../../specs/wrath-tracked-achievements.md) owns argument/event rules, evidence limits and bounded proof; persistence is excluded.
@@ -46,6 +74,12 @@ The [integrated checkpoint](../investigations/integrated-source-and-factory-proo
 The [native callback fixture](../../../tests/fixtures/wrath-action-callbacks.md) reuses the profile FrameXML TOC loader and original named regions/free functions; one shared selector keeps Wrath-only fixture inputs out of other profiles. Modern-only API assertions have explicit source-backed gates, not root-name heuristics.
 
 `ActionSpellRange` now lives separately from Retail namespace registration under `c_api/`; a shared lookup reads supplied spell/target GUID snapshots. `globals/real/wrath_legacy/action_bar.rs` exposes legacy range and possession readers without adding modern range publishers. Pet and stance producers project existing records differently only on Wrath; obsolete constant/nil compatibility functions are removed. The [owning contract](../../specs/wrath-action-callback-queries.md) owns authenticated 12340 shapes, bounded proof and unmodeled coercion/aura/geometry limits.
+
+## Wrath casting and aura projections
+
+The [owning contract](../../specs/wrath-casting-aura-contracts.md) separates authenticated 12340 shapes, inferred metadata policies and unmodeled transport/filter inputs. Cast snapshots read shared spell subtext and their existing clock; outgoing events project the same catalog independently after cast removal. Legacy aura calls rewrite only their local tuple table over supplied aura state, leaving C_UnitAuras and other profiles' projections unchanged. The obsolete nil-rank workaround is removed; absent consolidation remains isolated as a temporary policy.
+
+Original CastingBarFrame and TargetFrame consumers establish pre-producer RED. Fixture controls bind event ownership to MainMenuBarArtFrame and compare stored alpha with float tolerance. Seven producer contracts pass at20f35943a, with paired Retail37 preservation and empty stock arrays. The original BuffFrame consumer exposed an introduced filename-versus-file-ID getter mismatch; its explicit type RED at19c9a906b precedes a runtime Wrath-only Texture:GetTexture projection returning the stored path. Case/separators are not normalized; cache/alias behavior is not synthesized. At final producer14aed640c, native21 plus seven contracts pass; only the sixteen unchanged modern-only rows fail. Retail37 statuses remain all PASS, both stock captures stay empty, and Wrath check/formatter pass. One mandatory Retail prefork setup timeout passed on one exact retry without harness changes. The owning contract retains static-source limits and unexercised branches; bounded simulator proof is not native parity.
 
 ## Wrath selected quest legacy surface
 

@@ -16,9 +16,18 @@ Successful changed notes emit MEMBER_UPDATED; role/kick operations emit document
 
 Guild chat stores opaque author IDs and retains historical author snapshots. Seeded conversations bind authors once, not by current roster order. Missing author snapshots report errors rather than fabricating Unknown members. String representation, projection-time fixture binding and initial missing guild rank 1 are INFERRED.
 
+## Incoming self invitations (CF-2)
+
+Edit-only staged 2026-10-24; not runtime-accepted. [Bounded contract and standalone contradiction table](../../specs/club-self-invitations.md) own the requirements and deferred proof.
+
+`ClubState.self_invitations` is an explicit supplied active-player snapshot list, empty by user requirement. It is separate from each club's outgoing `Invitation` list and subscribed membership: receiving an invitation does not create a club or member. `club_self_invitations.rs` projects fresh arrays/records without allocating opaque IDs, syncing the guild, mutating state or emitting events. Required ClubInfo fields come from InvitedClub; existing Member projection handles inviter/leaders. Nilable ClubInfo metadata stays absent. Native token encoding and uninitialized-club failure semantics are not inferred.
+
+Retail selection is `_Mainline` TOC → Mainline/MainMenuBarMicroButtons.lua + XML → XML-created GuildMicroButton → original HasUnseenInvitations :1230. The staged selector loads the normal selected dependency closure, checks provenance, and changes supplied invitations/displayed club IDs through both outcomes; no Lua API or consumer is replaced. Other profiles have no claimed consumer proof from this lane. Prior 2026-10-05 membership evidence does not cover this addition.
+
 ## Sources
 
 - [Contract](../../specs/club-membership.md).
+- [Self-invitation contract](../../specs/club-self-invitations.md): ClubDocumentation.lua :580–588, :1760–1776, :1808–1844, :1938–1946 and selected Retail MicroMenu :1229–1238; only these generated docs and consumer ground the new contract.
 - `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_APIDocumentationGenerated/ClubDocumentation.lua`: declarations, privileges, event payloads.
 - Cached `Blizzard_Communities/CommunitiesMemberList.lua:632–743`: ID-keyed lookups, presence/role updates, invitation cancellation.
 
