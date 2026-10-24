@@ -59,7 +59,7 @@ timing, so hidden timing is deliberately not asserted.
 | Selector (`wrath_s49_companion::`) | Consumer observations rejecting constant/no-op producers |
 |---|---|
 | learned_mount_refreshes_original_companion_buttons_inline | Visible 90.25/300.5 → visible 95/400 → hidden idle, plus unchanged row/event/error assertions |
-| companion_cooldown_own_timer_seconds_and_expiry | Hidden idle → visible 90.25/300.5 → hidden on-hold → visible same timer → hidden expired |
+| companion_cooldown_own_timer_seconds_and_expiry | Hidden idle/on-hold → visible 90.25/300.5 → hidden excluded → visible same timer → hidden expired |
 | companion_cooldown_shared_category_tracks_existing_spell_state | Hidden different category → visible 80.5/250.25 matching category → visible 95/400 own → visible peer again → hidden cleared |
 | companion_cooldown_gcd_and_longer_spell_interval | Hidden idle/unclassified/mismatched GCD → visible 99.25/120.5 matching start-recovery category → visible 90.5/400.25 own → visible GCD again → hidden expired |
 
