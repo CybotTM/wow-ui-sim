@@ -9,27 +9,12 @@
 ))]
 
 use std::collections::BTreeMap;
-use std::path::PathBuf;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-fn require_isolated_persistent_storage() {
-    // Cargo's deps convention gives EACH environment a different CVar file.
-    // Persistence proof instead requires the recipe's sealed, isolated process.
-    let executable = std::env::current_exe().expect("locate sealed test executable");
-    assert!(
-        !executable.parent().is_some_and(|p| p.ends_with("deps")),
-        "run sealed outside deps; per-environment temporary stores cannot prove persistence"
-    );
-    let isolated = PathBuf::from(
-        std::env::var_os("CF2_TTS_ISOLATED_DATA_HOME")
-            .expect("runner must attest child-only copied CVar storage"),
-    );
-    assert!(isolated.is_absolute());
-    assert_eq!(std::env::var_os("XDG_DATA_HOME"), Some(isolated.into()));
-}
+#[path = "common/cf2_cvar_storage.rs"]
+mod storage;
 
 fn new_cache_env() -> WowLuaEnv {
-    require_isolated_persistent_storage();
     let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
     eprintln!("CF-2 original consumer cache: {}", ui.display());
     crate::common::blizzard_addon_harness::new_blizzard_addon_env(&ui)
@@ -101,74 +86,86 @@ fn assert_saved_marker_after_load(env: &WowLuaEnv, saved_before: bool) {
 
 #[test]
 fn original_tts_slider_settings_survive_mark_saved_and_second_environment() {
-    let mut env = new_cache_env();
-    // Seed the LIVE CVar store used by the Lua API, not a parallel Lua table.
-    assert!(
-        env.state()
-            .borrow()
-            .cvars
-            .set("TTSUseCharacterSettings", "1")
-    );
-    load_original_addon(&env, "Blizzard_ChatFrame");
-    for function in [
-        "TextToSpeech_SetRate",
-        "TextToSpeech_SetVolume",
-        "TextToSpeechFrame_OnEvent",
-        "TextToSpeechFrame_CheckLoad",
-    ] {
-        assert_original_function(
-            &env,
-            function,
-            "Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua",
-        );
-    }
-    let initial_rate: i32 = env.eval("return C_TTSSettings.GetSpeechRate()").unwrap();
-    let initial_volume: i32 = env.eval("return C_TTSSettings.GetSpeechVolume()").unwrap();
-    // Avoid a coincidental match in the copied persisted preferences, without
-    // prescribing defaults. Each selected value differs from the observed one.
-    let rates = if initial_rate == 4 { [7, 4] } else { [4, 7] };
-    let volumes = if initial_volume == 37 {
-        [63, 37]
-    } else {
-        [37, 63]
-    };
-    for (rate, volume) in rates.into_iter().zip(volumes) {
-        let before = read_live_cvars(&env);
-        env.exec(&format!(
-            "assert(TextToSpeech_SetRate(TextToSpeechFrame, {rate})); \
-             assert(TextToSpeech_SetVolume(TextToSpeechFrame, {volume}))"
-        ))
-        .expect("unchanged slider callbacks accept explicit preferences");
-        complete_original_tts_load(&env);
-        assert_tts_values_and_controls(&env, rate, volume);
-        let after = read_live_cvars(&env);
-        let rate_keys = changed_preference_keys(&before, &after, rate);
-        let volume_keys = changed_preference_keys(&before, &after, volume);
-        assert!(
-            !rate_keys.is_empty(),
-            "rate must change the live CVar store"
-        );
-        assert!(
-            !volume_keys.is_empty(),
-            "volume must change the live CVar store"
-        );
-        drop(env);
-
-        env = new_cache_env();
-        assert_reopened_tts_preferences(&env, rate, volume);
-        let reopened = read_live_cvars(&env);
-        for key in rate_keys.iter().chain(&volume_keys) {
-            assert_eq!(
-                reopened.get(key),
-                after.get(key),
-                "persisted preference {key}"
+    storage::run_isolated(
+        "cf2_tts::original_tts_slider_settings_survive_mark_saved_and_second_environment",
+        || {
+            let mut env = new_cache_env();
+            // Seed the LIVE CVar store used by the Lua API, not a parallel Lua table.
+            assert!(
+                env.state()
+                    .borrow()
+                    .cvars
+                    .set("TTSUseCharacterSettings", "1")
             );
-        }
-        load_original_addon(&env, "Blizzard_ChatFrame");
-        assert_tts_values_and_controls(&env, rate, volume);
-    }
-    complete_original_tts_load(&env);
-    assert_tts_values_and_controls(&env, rates[1], volumes[1]);
+            load_original_addon(&env, "Blizzard_ChatFrame");
+            for function in [
+                "TextToSpeech_SetRate",
+                "TextToSpeech_SetVolume",
+                "TextToSpeechFrame_OnEvent",
+                "TextToSpeechFrame_CheckLoad",
+            ] {
+                assert_original_function(
+                    &env,
+                    function,
+                    "Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua",
+                );
+            }
+            // Explicit inputs, not copied host preferences or prescribed native defaults.
+            env.exec(
+        "assert(TextToSpeech_SetRate(TextToSpeechFrame, 0));          assert(TextToSpeech_SetVolume(TextToSpeechFrame, 0))",
+    )
+    .expect("seed live preferences through original slider callbacks");
+            assert_eq!(
+                env.eval::<i32>("return C_TTSSettings.GetSpeechRate()")
+                    .unwrap(),
+                0
+            );
+            assert_eq!(
+                env.eval::<i32>("return C_TTSSettings.GetSpeechVolume()")
+                    .unwrap(),
+                0
+            );
+            let rates = [4, 7];
+            let volumes = [37, 63];
+            for (rate, volume) in rates.into_iter().zip(volumes) {
+                let before = read_live_cvars(&env);
+                env.exec(&format!(
+                    "assert(TextToSpeech_SetRate(TextToSpeechFrame, {rate})); \
+             assert(TextToSpeech_SetVolume(TextToSpeechFrame, {volume}))"
+                ))
+                .expect("unchanged slider callbacks accept explicit preferences");
+                complete_original_tts_load(&env);
+                assert_tts_values_and_controls(&env, rate, volume);
+                let after = read_live_cvars(&env);
+                let rate_keys = changed_preference_keys(&before, &after, rate);
+                let volume_keys = changed_preference_keys(&before, &after, volume);
+                assert!(
+                    !rate_keys.is_empty(),
+                    "rate must change the live CVar store"
+                );
+                assert!(
+                    !volume_keys.is_empty(),
+                    "volume must change the live CVar store"
+                );
+                drop(env);
+
+                env = new_cache_env();
+                assert_reopened_tts_preferences(&env, rate, volume);
+                let reopened = read_live_cvars(&env);
+                for key in rate_keys.iter().chain(&volume_keys) {
+                    assert_eq!(
+                        reopened.get(key),
+                        after.get(key),
+                        "persisted preference {key}"
+                    );
+                }
+                load_original_addon(&env, "Blizzard_ChatFrame");
+                assert_tts_values_and_controls(&env, rate, volume);
+            }
+            complete_original_tts_load(&env);
+            assert_tts_values_and_controls(&env, rates[1], volumes[1]);
+        },
+    );
 }
 
 fn assert_reopened_tts_preferences(reloaded: &WowLuaEnv, rate: i32, volume: i32) {

@@ -1,27 +1,12 @@
 //! Original Forever temporary-CVar lifecycle; authored only, RED not observed.
 #![cfg(any(feature = "client-wowforever"))]
 
-use std::path::PathBuf;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-fn require_isolated_persistent_storage() {
-    // Cargo's deps convention gives EACH environment a different CVar file.
-    // Persistence proof instead requires the recipe's sealed, isolated process.
-    let executable = std::env::current_exe().expect("locate sealed test executable");
-    assert!(
-        !executable.parent().is_some_and(|p| p.ends_with("deps")),
-        "run sealed outside deps; per-environment temporary stores cannot prove persistence"
-    );
-    let isolated = PathBuf::from(
-        std::env::var_os("CF2_TTS_ISOLATED_DATA_HOME")
-            .expect("runner must attest child-only copied CVar storage"),
-    );
-    assert!(isolated.is_absolute());
-    assert_eq!(std::env::var_os("XDG_DATA_HOME"), Some(isolated.into()));
-}
+#[path = "common/cf2_cvar_storage.rs"]
+mod storage;
 
 fn new_cache_env() -> WowLuaEnv {
-    require_isolated_persistent_storage();
     let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
     eprintln!("CF-2 original consumer cache: {}", ui.display());
     crate::common::blizzard_addon_harness::new_blizzard_addon_env(&ui)
@@ -86,21 +71,24 @@ fn assert_live_cvars(env: &WowLuaEnv, enemy: &str) {
 
 #[test]
 fn original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinary_cvar() {
-    let env = new_cache_env();
-    assert!(env.state().borrow().cvars.set("SoftTargetEnemy", "2"));
-    assert!(
-        env.state()
-            .borrow()
-            .cvars
-            .set("cameraDistanceMaxZoomFactor", "1.9")
-    );
-    load_original_addon(&env, "Blizzard_Gamepad");
-    assert_original_function(
-        &env,
-        "InputUtil.RegisterMKBInit",
-        "Blizzard_SharedXML/InputUtil.lua",
-    );
-    env.exec(
+    storage::run_isolated(
+        "cf2_gamepad_temp_cvars::original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinary_cvar",
+        || {
+            let env = new_cache_env();
+            assert!(env.state().borrow().cvars.set("SoftTargetEnemy", "2"));
+            assert!(
+                env.state()
+                    .borrow()
+                    .cvars
+                    .set("cameraDistanceMaxZoomFactor", "1.9")
+            );
+            load_original_addon(&env, "Blizzard_Gamepad");
+            assert_original_function(
+                &env,
+                "InputUtil.RegisterMKBInit",
+                "Blizzard_SharedXML/InputUtil.lua",
+            );
+            env.exec(
         r#"
         EventUtil.TriggerOnVariablesLoaded()
         local frame = EnumerateFrames()
@@ -121,19 +109,21 @@ fn original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinar
         "#,
     )
     .expect("original Gamepad registration and original event listener must exist");
-    // Direct unchanged listener invocation exposes errors dispatch might record.
-    drive_original_input_transition(&env, "Mkb", "Gamepad");
-    assert_live_cvars(&env, "2");
-    drive_original_input_transition(&env, "Gamepad", "Mkb");
-    assert_live_cvars(&env, "1");
-    // A live temporary override must not replace the underlying persisted value.
-    let during_override = new_cache_env();
-    assert_live_cvars(&during_override, "2");
-    drop(during_override);
-    drive_original_input_transition(&env, "Mkb", "Gamepad");
-    assert_live_cvars(&env, "2");
-    drive_original_input_transition(&env, "Mkb", "Mkb");
-    assert_live_cvars(&env, "2");
-    drop(env);
-    assert_live_cvars(&new_cache_env(), "2");
+            // Direct unchanged listener invocation exposes errors dispatch might record.
+            drive_original_input_transition(&env, "Mkb", "Gamepad");
+            assert_live_cvars(&env, "2");
+            drive_original_input_transition(&env, "Gamepad", "Mkb");
+            assert_live_cvars(&env, "1");
+            // A live temporary override must not replace the underlying persisted value.
+            let during_override = new_cache_env();
+            assert_live_cvars(&during_override, "2");
+            drop(during_override);
+            drive_original_input_transition(&env, "Mkb", "Gamepad");
+            assert_live_cvars(&env, "2");
+            drive_original_input_transition(&env, "Mkb", "Mkb");
+            assert_live_cvars(&env, "2");
+            drop(env);
+            assert_live_cvars(&new_cache_env(), "2");
+        },
+    );
 }

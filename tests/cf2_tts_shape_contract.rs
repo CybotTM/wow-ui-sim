@@ -11,23 +11,8 @@
 #[path = "common/cf2_shape.rs"]
 mod shape;
 
-fn require_child_storage() {
-    let executable = std::env::current_exe().expect("sealed executable");
-    assert!(
-        !executable
-            .parent()
-            .is_some_and(|path| path.ends_with("deps")),
-        "seal outside deps and use child-only copied CVar storage"
-    );
-    let isolated = std::path::PathBuf::from(
-        std::env::var_os("CF2_TTS_ISOLATED_DATA_HOME").expect("child storage attestation"),
-    );
-    assert!(isolated.is_absolute());
-    assert_eq!(
-        std::env::var_os("XDG_DATA_HOME"),
-        Some(isolated.into_os_string())
-    );
-}
+#[path = "common/cf2_cvar_storage.rs"]
+mod storage;
 // retail: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:65 (GetSpeechRate).
 // retail: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:74 (GetSpeechVolume).
 // retail: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:165 (SetSpeechRate).
@@ -63,11 +48,13 @@ fn require_child_storage() {
 ))]
 #[test]
 fn original_tts_numeric_preferences_contract() {
-    require_child_storage();
-    let env = shape::load(&["Blizzard_ChatFrame"]);
-    shape::check(
-        &env,
-        r#"
+    storage::run_isolated(
+        "cf2_tts_shape_contract::original_tts_numeric_preferences_contract",
+        || {
+            let env = shape::load(&["Blizzard_ChatFrame"]);
+            shape::check(
+                &env,
+                r#"
 
 local rate = scalar('number', C_TTSSettings.GetSpeechRate())
 local volume = scalar('number', C_TTSSettings.GetSpeechVolume())
@@ -89,6 +76,8 @@ volumeCallback(volumeSlider, volume)
 TextToSpeechFrame_UpdateSliders(TextToSpeechFrame)
 
 "#,
+            );
+        },
     );
 }
 
@@ -115,11 +104,13 @@ TextToSpeechFrame_UpdateSliders(TextToSpeechFrame)
 ))]
 #[test]
 fn original_tts_saved_settings_shape_blocker() {
-    require_child_storage();
-    let env = shape::load(&["Blizzard_ChatFrame"]);
-    shape::check(
-        &env,
-        r#"
+    storage::run_isolated(
+        "cf2_tts_shape_contract::original_tts_saved_settings_shape_blocker",
+        || {
+            let env = shape::load(&["Blizzard_ChatFrame"]);
+            shape::check(
+                &env,
+                r#"
 
 scalar('boolean', C_TTSSettings.GetCharacterSettingsSaved())
 assert(select('#', C_TTSSettings.MarkCharacterSettingsSaved()) == 0)
@@ -134,6 +125,8 @@ TextToSpeechFrame_OnEvent(TextToSpeechFrame, 'VARIABLES_LOADED')
 TextToSpeechFrame_OnEvent(TextToSpeechFrame, 'PLAYER_ENTERING_WORLD')
 
 "#,
+            );
+        },
     );
 }
 
@@ -143,11 +136,13 @@ TextToSpeechFrame_OnEvent(TextToSpeechFrame, 'PLAYER_ENTERING_WORLD')
 #[cfg(any(feature = "client-wowforever"))]
 #[test]
 fn original_gamepad_temp_cvar_shape_blocker() {
-    require_child_storage();
-    let env = shape::load(&["Blizzard_Gamepad"]);
-    shape::check(
-        &env,
-        r#"
+    storage::run_isolated(
+        "cf2_tts_shape_contract::original_gamepad_temp_cvar_shape_blocker",
+        || {
+            let env = shape::load(&["Blizzard_Gamepad"]);
+            shape::check(
+                &env,
+                r#"
 
 -- Original Gamepad/Core.lua passes a number to the documented nullable cstring parameter.
 assert(select('#', C_CVar.SetTempCVar('SoftTargetEnemy', 1)) == 0)
@@ -173,5 +168,7 @@ end
 assert(reached, 'normal original Gamepad transition listener prerequisite')
 
 "#,
+            );
+        },
     );
 }
