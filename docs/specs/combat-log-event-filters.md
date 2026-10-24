@@ -18,6 +18,8 @@ Stage Retail/PTR AddEventFilter and sibling ClearEventFilters in `src/c_api/c_co
 
 - `src/c_api/c_combat_log.rs`: namespace filter-record ownership and diagnostic query.
 - `src/lua_api/env_init/mod.rs`: register before secure environment capture and legacy alias creation.
+- `src/lua_api/workarounds/temporary/combat_log_state.rs`: exclude Retail/PTR from legacy no-op Add and enablement-resetting Clear; preserve other profiles.
+- `src/lua_api/workarounds/temporary/startup_service_capability_defaults.rs`: remove replaced secure-clear no-op.
 
 ## Tests asserting this spec
 

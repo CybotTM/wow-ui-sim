@@ -1,4 +1,4 @@
-//! Forever combat-log publication boundaries from the pinned API documentation.
+//! Combat-log filter records and profile publication boundaries.
 //!
 //! Current-event data belongs to Internal/Secure, not public C_CombatLog. Mark
 //! the public member absent before generic namespace lookup can synthesize it.
@@ -26,3 +26,53 @@ pub(crate) fn register_publication(state: &mut LuaState) -> LuaResult<()> {
     table_set(state, Val::Table(public), "__wow_removed_keys", removed);
     Ok(())
 }
+
+
+/// Retain opaque filter requests; native matching and validation are UNKNOWN.
+/// The documentation declares restricted Add/Clear functions without signatures.
+/// See docs/specs/combat-log-event-filters.md before adding interpretation here.
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+pub(crate) fn register_filters(lua: &mut rilua::Lua) -> LuaResult<()> {
+    lua.exec(FILTER_RECORDS_LUA)
+}
+
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+const FILTER_RECORDS_LUA: &str = r#"
+local queries = {}
+
+local function CopyFilterArguments(record)
+    local copy = { n = record.n }
+    for index = 1, record.n do
+        copy[index] = record[index]
+    end
+    return copy
+end
+
+local function RegisterFilterRecords(namespace)
+    local filters = {}
+    namespace.AddEventFilter = function(...)
+        filters[#filters + 1] = { n = select("#", ...), ... }
+    end
+    namespace.ClearEventFilters = function()
+        filters = {}
+    end
+    queries[namespace] = function()
+        local snapshot = {}
+        for index, record in ipairs(filters) do
+            snapshot[index] = CopyFilterArguments(record)
+        end
+        return snapshot
+    end
+end
+
+RegisterFilterRecords(C_CombatLog)
+RegisterFilterRecords(C_CombatLogSecure)
+
+-- Simulator diagnostic only, not a native filter query API. Keep records rooted
+-- in closures, not untraced Rust Val fields. Public/secure stores stay separate.
+function __wow_get_combat_log_event_filters(namespace)
+    local query = queries[namespace]
+    assert(query, "combat-log filter query requires a registered namespace")
+    return query()
+end
+"#;
