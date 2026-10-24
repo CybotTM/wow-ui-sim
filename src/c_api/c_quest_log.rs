@@ -16,12 +16,14 @@ pub struct QuestAdditionalHighlights {
     pub treasures: bool,
 }
 
-#[cfg(any(
-    feature = "client-retail",
-    feature = "client-ptr",
-    feature = "client-wowforever"
-))]
 pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
+    let namespace = ensure_namespace(state, "C_QuestLog")?;
+    table_set_rust_fn_static(
+        state,
+        namespace,
+        "GetQuestAdditionalHighlights",
+        additional_highlights,
+    )?;
     #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
     {
         let namespace = ensure_namespace(state, "C_QuestLog")?;
@@ -94,4 +96,26 @@ fn get_quest_difficulty_level(state: &mut LuaState) -> LuaResult<u32> {
     })?;
     state.push(Val::Num(f64::from(level)));
     Ok(1)
+}
+
+/// Supplied rows only. Unknown/zero-ID native behavior is an evidence gap.
+fn additional_highlights(state: &mut LuaState) -> LuaResult<u32> {
+    let quest_id = validate_supplied_relation_id(stack_val(state, 1), "questID must be a number")?
+        .ok_or_else(|| rilua::runtime_error("questID must be a finite i32 integer"))?;
+    let row = borrow_state(state)?
+        .quest_log_entries
+        .additional_highlights
+        .get(&quest_id)
+        .copied()
+        .ok_or_else(|| {
+            rilua::runtime_error(format!(
+                "C_QuestLog.GetQuestAdditionalHighlights: no supplied row for questID {quest_id}"
+            ))
+        })?;
+    state.push(Val::Num(f64::from(row.ui_map_id)));
+    state.push(Val::Bool(row.world_quests));
+    state.push(Val::Bool(row.world_quests_elite));
+    state.push(Val::Bool(row.dungeons));
+    state.push(Val::Bool(row.treasures));
+    Ok(5)
 }

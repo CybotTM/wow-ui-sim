@@ -389,6 +389,14 @@ pub(crate) use registration::{
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;
 
+fn supports_super_tracking() -> bool {
+    use crate::client_profile::{ACTIVE, ClientProfile};
+    matches!(
+        ACTIVE,
+        ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::WowForever
+    )
+}
+
 pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResult<()> {
     c_loot_history::register_c_loot_history(state)?;
     c_date_and_time::register(state)?;
@@ -403,12 +411,10 @@ pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResu
     c_cvar_readiness::register(state)?;
     c_achievement_info_relations::register(state)?;
     c_calendar::register(state)?;
-    #[cfg(any(
-        feature = "client-retail",
-        feature = "client-ptr",
-        feature = "client-wowforever"
-    ))]
-    c_quest_log::register(state)?;
+    if supports_super_tracking() {
+        c_quest_log::register(state)?;
+        c_super_track::register(state)?;
+    }
     c_garrison_damage_classes::register(state)?;
     #[cfg(feature = "client-retail")]
     c_garrison_trees::register(state)?;
