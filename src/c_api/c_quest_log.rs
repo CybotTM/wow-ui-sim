@@ -6,6 +6,21 @@ use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
+/// Supplied per-quest outputs; no default tuple for unknown IDs.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QuestAdditionalHighlights {
+    pub ui_map_id: i32,
+    pub world_quests: bool,
+    pub world_quests_elite: bool,
+    pub dungeons: bool,
+    pub treasures: bool,
+}
+
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
     #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
     {

@@ -578,6 +578,7 @@ pub struct SimState {
     pub artifact_relic_items: HashSet<i32>,
     pub quest_log: Vec<u32>,
     pub quest_log_entries: QuestLogState,
+    pub super_track: crate::c_api::c_super_track::SuperTrackState,
     /// Explicit ordinary-watch metadata; seeded once, not derived on every query.
     #[cfg(feature = "client-wowforever")]
     pub quest_watch_types: HashMap<i32, crate::c_api::QuestWatchType>,

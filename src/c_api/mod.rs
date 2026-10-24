@@ -175,15 +175,11 @@ pub mod c_pvp_crowd_control;
 pub mod c_quest_hub;
 #[cfg(feature = "retail-12-0-5")]
 pub mod c_quest_info_system;
-#[cfg(any(
-    feature = "client-retail",
-    feature = "client-ptr",
-    feature = "client-wowforever"
-))]
-mod c_quest_log;
+pub mod c_quest_log;
 #[cfg(feature = "client-wowforever")]
 mod c_quest_log_watches;
 pub mod c_quest_offer;
+pub mod c_super_track;
 pub mod container_quest;
 #[cfg(feature = "client-wowforever")]
 pub use c_quest_log_watches::QuestWatchType;
