@@ -42,6 +42,26 @@ The historical slot at `97e759f7d` passed the three guild-info selectors, but F1
 
 The existing rank-settings dropdown row remains blocked on missing bank permission and withdrawal-limit getters after valid leader startup selects Officer. Original FriendsFrame.lua:1647/:1678 requires both. Existing bank state has money/current tab/items, but no rank/tab permissions or rank withdrawal limit. Parent holds implementation until laptop12340 facts arrive; no stub/default is invented. See the classification page for exact source boundaries and re-proof requirements.
 
+## Bank permission model
+
+Verified 2026-10-24: static staging only. [Bank contract](../../specs/wrath-guild-bank-rank-permissions.md). Laptop answer `guildbank-perms-12340.md` (SHA256 `f58e304a7d9c20813f23d871f9666547d0af3924d66f341eeed044b0b1588951`) supplies authoritative reconstructed native semantics; no decompiled source was read here.
+
+The existing native TOC/loader selection above also selects the dropdown consumer. `GuildControlPopupFrameDropDownButton_OnClick` selects the control rank, calls `GuildControlPopupframe_Update`, then sets the closed label. `GuildBankTabPermissionsTab_OnClick` selects the tab and calls that same original update. Tests do not replace either consumer or getter. The existing leader setup avoids the special rank1 UI branch by selecting Officer/Member for observations; the second selector changes the player's rank to Officer before clicking Member as well.
+
+### Static contradiction table
+
+Each of the two `test_guild_panel` selectors independently executes all observations below through the original consumers. These are static contradictions, not executed RED proof.
+
+| Selected rank/tab | Required checkboxes view/deposit/edit; stack; gold | Contradiction |
+|---|---|---|
+| Officer/1 | true/false/false;11;12 | Reject all-enabled, swapped edit/stack and zero/no-op output. |
+| Officer/2 | true/false/true;12;12 | Same rank, different tab rejects tab-constant masks/stacks. |
+| Member/2 | false/false/false;22;98 | Reject any rank-constant money or permissions, always-enabled and player-rank lookup (player remains leader or Officer). |
+| Member/1 | true/true/true;21;98 | Reject all-disabled or tab-only projections. |
+| Officer/1 again | true/false/false;11;12 | Reject stale rank/last-value readers; dropdown selected ID and displayed name must also change back. |
+
+Every constant tab tuple contradicts at least two rows; every constant money output contradicts12 versus98. No-return/no-op cannot yield distinct numeric editbox strings. Direct API cases separately reject boolean permission markers, validate nil slots and arity, isolate rights bits2/4 even without view, exercise normalization, usage errors, negative money and host replacement of rank0. Missing-input errors are explicitly simulator policy, not native parity.
+
 ## Sources
 
 - Accepted laptop answer: `/home/osso/.local/state/wow-ui-sim/handoff/laptop-labels-answers-20261018/laptop-answers-req-12.md` (read fully; static reconstruction, not native runtime certification).

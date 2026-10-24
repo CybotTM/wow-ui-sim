@@ -366,14 +366,54 @@ fn communities_member_detail_rank_dropdown_shows_rank_rows() {
 }
 }
 
+fn supply_bank_rank_permissions(env: &WowLuaEnv) {
+    use wow_ui_sim::lua_api::state::GuildBankRankPermissions;
+    env.state().borrow_mut().world.guild_bank_rank_permissions = [
+        (
+            0,
+            GuildBankRankPermissions {
+                money_per_day: 0,
+                tab_rights: [-1; 6],
+                tab_stacks_per_day: [-1; 6],
+            },
+        ),
+        (
+            1,
+            GuildBankRankPermissions {
+                money_per_day: 123_456,
+                tab_rights: [1, 5, 0, 7, 3, 6],
+                tab_stacks_per_day: [11, 12, 13, 14, 15, 16],
+            },
+        ),
+        (
+            2,
+            GuildBankRankPermissions {
+                money_per_day: 987_654,
+                tab_rights: [7, 0, 5, 2, 1, 3],
+                tab_stacks_per_day: [21, 22, 23, 24, 25, 26],
+            },
+        ),
+    ]
+    .into_iter()
+    .collect();
+}
+
 #[test]
 fn guild_control_rank_settings_dropdown_shows_rank_rows() {
     test_timeout! {
         let env = setup_guild_leader_env();
+        if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+            supply_bank_rank_permissions(&env);
+        }
         load_guild_control_ui(&env);
         if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+            common::panel_fixtures::clear_recorded_lua_errors(&env);
             env.exec(include_str!("fixtures/wrath_f03/guild_ranks.lua"))
                 .expect("native rank selection and menu rows");
+            env.exec(include_str!("fixtures/wrath_f03/bank_rank_permissions.lua"))
+                .expect("selected rank inputs reach original bank widgets");
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native bank widget errors: {errors:?}");
             return;
         }
         let result: String = env.eval(r#"
@@ -405,12 +445,13 @@ fn guild_control_rank_settings_dropdown_shows_rank_rows() {
     }
 }
 
-/// Consumer-boundary RED only until native bank permission facts/model arrive.
+/// Original nonleader consumer reads the selected control rank, not player rank.
 #[cfg(feature = "client-wrath")]
 #[test]
 fn native_nonleader_rank_dropdown_completes_bank_permission_update() {
     test_timeout! {
         let env = setup_guild_leader_env();
+        supply_bank_rank_permissions(&env);
         load_guild_control_ui(&env);
         {
             let mut state = env.state().borrow_mut();
@@ -428,6 +469,8 @@ fn native_nonleader_rank_dropdown_completes_bank_permission_update() {
             assert(UIDropDownMenu_GetSelectedID(GuildControlPopupFrameDropDown) == 2)
             assert(GuildControlPopupFrameDropDownText:GetText() == "Officer")
         "#).expect("original dropdown click completes native bank permission update");
+        env.exec(include_str!("fixtures/wrath_f03/bank_rank_permissions.lua"))
+            .expect("nonleader selection projects varying stored bank permissions");
         let errors = common::panel_fixtures::recorded_lua_errors(&env);
         assert!(errors.is_empty(), "native nonleader dropdown errors: {errors:?}");
     }
