@@ -2697,3 +2697,8 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 ## [2026-10-23] investigation | Consumer selection and standalone RED
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
+
+## [2026-10-24] source | Combat-log filter record staging
+
+[Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
+

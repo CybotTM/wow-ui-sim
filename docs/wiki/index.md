@@ -1,3 +1,7 @@
+## [2026-10-24] source | Combat-log filter record staging
+
+[Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
+
 ## [2026-10-24] source | Reload XML instance arguments
 
 [Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): Forever RED16 precedes parameterized identities, then Forever/default Retail compile0 sources on both reloads.27 exact cases/profile, zero-warning checks and formatting pass; no stock-startup or full-workload acceptance claim.
