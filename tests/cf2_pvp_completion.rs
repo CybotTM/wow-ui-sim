@@ -19,9 +19,9 @@ fn load_original_match_consumer() -> WowLuaEnv {
         r#"
         assert(PVPMatchResults, 'selected XML must instantiate the original results frame')
         local handler = PVPMatchResults:GetScript('OnEvent')
-        assert(handler == PVPMatchResultsMixin.OnEvent and handler == PVPMatchResults.OnEvent,
-            'selected XML must retain the installed original OnEvent method')
-        local info = debug.getinfo(handler, 'S')
+        assert(type(handler) == 'function' and PVPMatchResults.OnEvent == PVPMatchResultsMixin.OnEvent,
+            'selected XML must retain the original OnEvent method and an installed script')
+        local info = debug.getinfo(PVPMatchResults.OnEvent, 'S')
         local suffix = 'Blizzard_PVPMatch/PVPMatchResults.lua'
         local source = info.source:gsub('\\', '/')
         assert(info.what == 'Lua' and source:sub(-#suffix) == suffix,
@@ -37,9 +37,25 @@ fn assert_enter_world_registration(env: &WowLuaEnv, expected: bool) {
     let errors_before = env.state().borrow().lua_errors.len();
     env.exec("PVPMatchResults:UnregisterAllEvents()")
         .expect("reset real subscriptions before every snapshot");
-    // Call the unchanged closure directly: dispatch must not swallow the RED error.
-    env.exec("PVPMatchResults:GetScript('OnEvent')(PVPMatchResults, 'PLAYER_ENTERING_WORLD')")
-        .expect("original entering-world consumer must read supplied completion state");
+    // Observe the original method without replacing the installed XML wrapper.
+    // Call through that wrapper directly so dispatch cannot swallow the RED error.
+    env.exec(
+        r#"
+        assert(debug.gethook() == nil, 'fixture must not replace an existing hook')
+        local original = PVPMatchResultsMixin.OnEvent
+        local calls = 0
+        debug.sethook(function(event)
+            if event == 'call' and debug.getinfo(2, 'f').func == original then
+                calls = calls + 1
+            end
+        end, 'c')
+        local ok, err = pcall(PVPMatchResults:GetScript('OnEvent'), PVPMatchResults, 'PLAYER_ENTERING_WORLD')
+        debug.sethook()
+        assert(calls == 1, 'installed XML script must dispatch the original OnEvent method exactly once')
+        assert(ok, err)
+        "#,
+    )
+    .expect("original entering-world consumer must read supplied completion state");
     for event in [
         "PVP_MATCH_COMPLETE",
         "TREASURE_PICKER_CACHE_FLUSH",
