@@ -50,9 +50,9 @@ fn seed_mount_inputs(env: &WowLuaEnv) -> (u32, u32) {
 fn supplied_companion_metadata_preserves_identity_and_optional_slots() {
     let env = WowLuaEnv::new().expect("create explicit-input environment");
     let (first_spell, _) = seed_mount_inputs(&env);
-    let creature: u32 = env.eval("return GetCompanionInfo('mount', 1)").unwrap();
+    let creature: f64 = env.eval("return GetCompanionInfo('mount', 1)").unwrap();
     assert_eq!(
-        creature, 91001,
+        creature, 91001.0,
         "supplied creature identity, not journal ID"
     );
     env.state()
