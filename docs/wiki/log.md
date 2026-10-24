@@ -2707,3 +2707,7 @@ Updated [[club-membership]] and [bounded contract](../specs/club-self-invitation
 ## 2026-10-24 — Wrath relic capability staging
 
 Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-relic-class-capability) and [spec](../specs/wrath-unit-has-relic-slot.md). Class flags remain explicit inputs; unknown class mappings not invented. Edit-only, no runtime acceptance.
+
+## 2026-10-24 — CF-2 party minimum staging
+
+Linked party-minimum contract and selected ScenarioFinder XML/Lua proof recipe in consumer-selection notes/index. Both standalone selectors vary supplied roster and catalog bounds. No builds, observed RED/GREEN, stock capture or producer changes; Mists IsLFREnabled remains a separate possible setup blocker.

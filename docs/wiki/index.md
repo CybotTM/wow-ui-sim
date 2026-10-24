@@ -1,3 +1,7 @@
+## [2026-10-24] staged | CF-2 supplied party minimum
+
+[Original-consumer staging](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) links the [bounded contract](../specs/party-min-level-scenario-availability.md): selected GroupFinder XML/Lua provenance, independent roster/catalog transitions and explicit Mists LFR blocker. Tests/spec only; no compiled listing, observed RED or producer implementation.
+
 ## [2026-10-24] system | CF-2 supplied club self invitations
 
 [Club model update](systems/club-membership.md#incoming-self-invitations-cf-2) links the [bounded contract](../specs/club-self-invitations.md): empty-by-default supplied incoming rows, original selected Retail MicroMenu selector and static standalone mutant contradictions. Edit-only staging; no builds/tests/slots or runtime acceptance. Other CF-2 members remain separate.

@@ -34,3 +34,9 @@ Empty-catalog, empty-invitation, notification-only and already-saved-marker chec
 
 - [[addon-loading]] — runtime loading and dependency closure.
 - [[blizzard-ui-test-lanes]] — unit versus addon-bootstrap boundaries.
+
+## CF-2 party minimum staging
+
+The [bounded contract](../../specs/party-min-level-scenario-availability.md) and `tests/cfactory_cf2_social.rs` upgrade the earlier forced-file/presentation fixtures to normal dependency-closure loading with no TOC overrides. Retail/PTR select `Blizzard_GroupFinder_Mainline.toc`; Mists selects `Blizzard_GroupFinder_Classic.toc`. All three parsed chains include `Shared/ScenarioFinder_Shared.lua` and `Shared/ScenarioFinder.xml`. Tests require original frame parenting, cover/label children, XML OnShow/OnEvent bindings and shared-Lua source provenance before the first availability observation. Runtime provenance and RED are still **pending**, not established by these static assertions.
+
+Each selector independently varies member and player levels and replaces catalog level bounds while preserving IDs. The shared Lua captures `allScenarios = GetScenariosChoiceOrder()` at file load, so fixtures seed before normal loading and later replace records under those captured IDs; do not re-execute the file to refresh that local. Threshold50→55→65 and cover transitions reject constant catalogs, while ordinary-dungeon distractors reject unfiltered projections. Mists setup diagnostics mentioning IsLFREnabled are an explicit blocker, not party-minimum RED. No producer change before admitted, observed RED.
