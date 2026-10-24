@@ -57,6 +57,18 @@ I4a deliberately rejects any claimed selected-source receipt or promoted proof s
 
 These candidate publisher groups overlap until ownership is resolved; they are not 4,536 additional rows. PTR, Forever and Retail need separate accepted configurations, at most three first-gate configurations after harness preparation, not per-row builds. Runtime work must list actual discovered selectors and record source/build/fixture identities. The I4a deliverable performs none of those builds and reserves no slot.
 
+## I4b: conditional selected-source obligations
+
+Verified static staging: 2026-10-24. The [conditional contract](../../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection) owns counts and limitations. The [I4b overlay](../../../data/patch-api/sources/12.1.7-inherited-static.json) supplements, rather than mutates, I0/I4a. Its applicability decisions depend on unmerged I3 commit `e30d17b106ce76a872c2bdfe69f95b4ec215fd06`; no decision is effective on the stale 69594 I4b base.
+
+The initial blocker was source identity, not missing simulator APIs. The parent authorized read-only use of I3's committed 70493 pin/manifest and private cache. Every one of its 4,578 files matched the pinned content size and MD5 content key. `tools/patch_12_1_7_static.py` requires exact pin/manifest SHA-256 values, matching cache provenance/completion and unchanged I0 hashes. An incomplete cache fails with exact missing paths instead of producing an empty scan or false absence result.
+
+The tool traces runtime-selected PTR TOC flavor, Game/Family, allow/exclude filters, locale, public environment and document-level XML chains. It records concrete selected declarations, exact native API calls, structured generated documentation and literal event/CVar consumers. Game, LoD and Glue remain separate; a source-selected LoD publisher is not a successfully loaded addon. Generated API documentation establishes only its documented source contract, not a callable factory or native screen binding. Source text is scanned with comments/strings separated and local owners excluded; it is not a full Lua resolver. Dynamic aliases/arguments/assignments and secure-pass ordering remain unproved.
+
+Each occurrence keeps its own disposition. The three added PvPObjectiveBanner declarations have selected witnesses; the three removed occurrences retain surviving-definition evidence but remain UNKNOWN. No native retirement is inferred from a public diff list, and no source absence is inferred from missing supported witnesses. Retail and Forever remain independent, unpromoted profiles. All original-consumer execution, behavior, publication and native proof fields remain UNKNOWN.
+
+The [static fixtures](../../../tools/test_patch_12_1_7_static.py) reject constant/accept-all outputs, unselected flavors, wrong Game/Family/filter/locale/environment, private/local/comment/string observations, namespace suffix attribution, nested non-document XML scripts, stale pins, missing/changed cache files and receipt/dependency corruption. RED used a disposable accept-all scaffold, then focused counterexamples before implementation fixes. These are classifier/validator controls, not producer RED or runtime acceptance. No builds, slots or vendor writes were used.
+
 ## Sources
 
 - [12.1.7 raw patch text](../../../data/patch-api/sources/12.1.7-api-changes.wikitext) — direct prose, target and inherited link.
@@ -65,6 +77,8 @@ These candidate publisher groups overlap until ownership is resolved; they are n
 - [Source ledger](../../../data/patch-api/sources/12.1.7-source-accounting.json) — P01–P12 and deferred/UNKNOWN statuses.
 - [Inherited occurrence triage](../../../data/patch-api/sources/12.1.7-inherited-1.60.1.json) — full per-occurrence linkage and bounded lexical candidates.
 - [I4a validator](../../../tools/validate_patch_12_1_7_inherited.py) and [disposable controls](../../../tools/test_patch_12_1_7_inherited.py) — accounting/proof-separation boundary only.
+- [I4b classifier/validator](../../../tools/patch_12_1_7_static.py) and [static overlay](../../../data/patch-api/sources/12.1.7-inherited-static.json) — exact I3-dependent selected-source obligations, not runtime credit.
+- [Runtime TOC selection](../../../src/loader/mod.rs), [TOC filters](../../../src/toc/mod.rs) and [XML path resolution](../../../src/loader/helpers.rs) — current simulator source-selection semantics.
 
 ## See Also
 

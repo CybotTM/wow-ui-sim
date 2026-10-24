@@ -60,6 +60,30 @@ I3 has not accepted source revision `e30d17b106ce76a872c2bdfe69f95b4ec215fd06`: 
 
 `python3 -B tools/test_patch_12_1_7_inherited.py` exercises real validator CLI mutations in disposable roots. `python3 -B tools/validate_patch_12_1_7_inherited.py` validates the companion and unchanged I0 boundary. Historical joins use bounded existing registers, so unrelated later patch additions do not expand this audit. I4b owns accepted-source binding, selected Game/Glue/LoD ownership and grouped runtime observations; no producer or native-parity implementation belongs to I4a.
 
+## I4b conditional static selection
+
+The separate `data/patch-api/sources/12.1.7-inherited-static.json` overlays **only static PTR applicability**. It does not rewrite the I0 or I4a ledgers. Its 1,876 exact occurrence IDs each retain independent PTR/Forever/Retail dispositions. On base `7e786472d`, effective resolutions remain **zero**. The staged `CONDITIONAL_APPLICABLE` cells take effect **only after p1217-source `e30d17b106ce76a872c2bdfe69f95b4ec215fd06` merges**. They do not assert I3 runtime acceptance.
+
+- [x] Bind to the exact I3 `wowt 12.1.7.70493` content-index SHA-256 `e84a8de626166c53d7cccbe0cba65e141488f8cf315d4b03a36c4f181585da00` and 4,578-path PTR manifest SHA-256 `ba4414999237ad7b50de73a2a61d7dd18fee31b2f2c3b70d5a21ad3cdc34d328`; authenticate every file's pinned size and content key plus cache provenance/completion before deriving any cells. Stale 69594 inputs and missing/changed files fail explicitly.
+- [x] Select PTR Mainline/generic/Standard TOCs in runtime order, including underscore/hyphen and case rules, Game/Family substitutions, game-type allow/exclude, enUS, public environment, Game/Glue/Both and LoD. Follow document-level XML includes/scripts, with relative/addon-root/case path resolution. Record each witness's exact symbol, file/line/text/hash, owner, selected TOC, include chain and screen/load group.
+- [x] Accept added-row static obligations from selected Lua declarations, exact native API calls, structured generated API/event documentation, and literal CVar/event consumers. Documentation establishes a source contract, **not a native factory or execution**. A selected declaration establishes an applicable publisher, not a successful addon load or global publication. No current-value/default/effect or producer proof follows.
+- [x] Keep every removed occurrence UNKNOWN: 985 have selected surviving spelling witnesses, but removal/republication/alias provenance is not resolved. All six opposing-banner IDs survive: three added declarations are conditional; the three removed occurrences remain UNKNOWN. No simultaneous presence/absence requirement is invented.
+- [x] Reject constant all-applicable/all-UNKNOWN/not-applicable overlays, altered dependencies/receipts/IDs, unselected files, namespace suffixes, locals/comments/strings, private environments, nonselected locales, stale pins and incomplete caches. These are static-classifier/validator controls, **not simulator producer RED**.
+
+| Conditional PTR source obligations | Resolved on I3 merge | PTR UNKNOWN |
+|---|---:|---:|
+| Globals | 168 | 17 |
+| FrameXML | 253 | 1,259 |
+| Events | 23 | 4 |
+| CVars / typed command | 16 / 0 | 128 / 1 |
+| Widgets | 0 | 7 |
+
+Conditional total: **460 resolved / 5,168 UNKNOWN** across three profiles (PTR 460/1,416; Forever 0/1,876; Retail 0/1,876). All runtime publication, behavior, original-consumer execution and native proof stages stay UNKNOWN. Witness groups overlap: 332 Game, 207 LoD and 122 Glue row memberships; these are not extra resolved cells. API documentation uses its own selected LoD publisher, not an observed factory or the documented API's native screen availability.
+
+The 88 enumerated source-selection exclusions comprise 86 non-public/non-enUS entries and two TOC paths absent from the **complete** pinned manifest; none supplies absence credit. Whole secure-addon passes are not modeled by this static tool, even when a global override might exist. Widget owner/factory construction, typed command registration, dynamic consumer arguments/aliases/assignments and all removal applicability remain open. No allocator dump, TTS/hardware change, source synchronization or runtime execution occurs.
+
+Reproduce with `python3 -B tools/test_patch_12_1_7_static.py`. Validate the real companion with `python3 -B tools/patch_12_1_7_static.py --source-root <I3-checkout> --cache <authenticated-70493-AddOns>`; `--write` regenerates it from those read-only inputs. There is no cache fallback. Source decoding preserves every byte through a Latin-1 view of ASCII syntax, including non-UTF-8 comments; receipt hashes cover original bytes. The exact I3 pin and private cache are external inputs, not duplicated vendor source in this branch. I4a remains a sealed all-UNKNOWN accounting baseline; this conditional overlay is the later static disposition source.
+
 ## How it works
 
 - [Source import, validator and evidence limits](../wiki/investigations/patch-12-1-7-api-audit.md).
@@ -81,7 +105,8 @@ I3 has not accepted source revision `e30d17b106ce76a872c2bdfe69f95b4ec215fd06`: 
 
 - [ ] I1–I3: epoch selection, metadata rejection, regional file loading and exact PTR source refresh/runtime proof.
 - [x] I4a: lossless inherited accounting and per-profile UNKNOWN worklist; zero Cargo.
-- [ ] I4b and later: all 1,876 inherited applicability/behavior classifications remain UNKNOWN; lexical candidates are not implementation credit.
+- [x] I4b static staging: 460 conditional PTR source obligations, effective only after the exact I3 dependency merges; 5,168 conditional UNKNOWN cells. Effective resolutions on the I4b base remain zero.
+- [ ] I4b runtime and later: successful publisher/LoD loads, native factories, registration/defaults, all behavior and original-consumer execution remain unverified; static receipts are not implementation credit.
 - [ ] I5: GUID timing decision and native oracle; P02–P07 remain deferred.
 - [ ] I6: independent runtime/profile acceptance. A source-only validator success cannot satisfy it.
 
