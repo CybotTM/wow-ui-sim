@@ -2677,3 +2677,7 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 ## [2026-10-23] investigation | Consumer selection and standalone RED
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
+
+## 2026-10-24 — PTR70493 source refresh
+
+Updated client-profiles runtime-cache/source identity and epoch links from the authenticated70493 source contract and exact failing startup baseline. Original4cc resume and host RED precede producer changes; decoded range/content proof and partial-provenance completion remain distinct from compatibility. Retail master36/42 exact preservation accepted; Forever paired preservation pending.
