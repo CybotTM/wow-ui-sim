@@ -3,6 +3,34 @@
 The Lua API layer bridges Lua addon code with the Rust simulation engine. It provides WoW-compatible globals, 300+ frame methods, C_* namespaces, and a timer system — all backed by `WowLuaEnv` and `SimState`.
 
 
+
+## Wrath relic class capability
+
+`real::wrath_relic_slot` publishes `UnitHasRelicSlot` from shared registration
+only under a runtime `ACTIVE == Wrath` predicate. It does not alter Forever's
+separate, native-unverified implementation. This is a modeled non-C_* global,
+not a C API namespace or a compatibility stub.
+
+`SimState.wrath_relic_slot.class_flags` holds explicit class DB flags keyed by
+class index. The producer reads the resolved player's current class and bit 8,
+never gear. Missing records return one nil; present capability returns numeric
+1. No class mask is seeded because the accepted native Q1 leaves that mapping
+unknown. GREEN's original-panel fixture supplies its two flag records explicitly.
+
+The native vocabulary is filtered before shared player/target/focus/party
+resolution. `units` holds supplied lowercase token or complete-chain snapshots
+for identities not represented there; GUID lookup uses known snapshots and the
+player/party identities. No token establishes presence on its own, and no new
+unit relationship graph is inferred. Numbers pass argument validation and yield
+nil: their numeric text cannot name a modeled unit token or GUID. Native
+argument/return requirements and evidence limits live in the
+[owning spec](../../specs/wrath-unit-has-relic-slot.md).
+
+Edit-only staging: original consumer plus three contract tests authored, none
+compiled or run. S49 also reached this missing API at PaperDollFrame.lua:1094;
+its original empty-error oracle is unchanged. Private handoff owns pending
+RED/GREEN, checks and exact stock-preservation receipts.
+
 ## Wrath tracked achievements
 
 `SimState.tracked_achievements` stores unique IDs in insertion order. Existing shared setters retain membership behavior; only the existing Wrath registration module publishes native add/remove/count/membership functions. Mutations release the state borrow before synchronous event dispatch, so original AchievementUI handlers see the updated list and refresh their private cache. The [12340 contract](../../specs/wrath-tracked-achievements.md) owns argument/event rules, evidence limits and bounded proof; persistence is excluded.

@@ -6,9 +6,19 @@
 
 [Club model update](systems/club-membership.md#incoming-self-invitations-cf-2) links the [bounded contract](../specs/club-self-invitations.md): empty-by-default supplied incoming rows, original selected Retail MicroMenu selector and static standalone mutant contradictions. Edit-only staging; no builds/tests/slots or runtime acceptance. Other CF-2 members remain separate.
 
+## [2026-10-24] source | Wrath relic class capability
+
+[Lua API notes](systems/lua-api.md#wrath-relic-class-capability) link the
+[contract](../specs/wrath-unit-has-relic-slot.md): runtime-only Wrath publication,
+numeric 1/nil, explicit class DB flags and native token vocabulary. Native class
+mapping remains unknown. Producer and tests staged only; no build/slot/runtime proof.
 ## [2026-10-24] source | Reload XML instance arguments
 
 [Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): Forever RED16 precedes parameterized identities, then Forever/default Retail compile0 sources on both reloads.27 exact cases/profile, zero-warning checks and formatting pass; no stock-startup or full-workload acceptance claim.
+
+## [2026-10-24] staged | SuperTrack supplied state
+
+[Ownership and native gaps](systems/super-track-state.md) links the [contract](../specs/super-track-state.md). Original-consumer RED tests and separate producer staged; no builds or runtime proof.
 
 ## [2026-10-22] source | Wrath F07 applicability
 ## [2026-10-22] source | Wrath casting and aura projections
