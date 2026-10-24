@@ -4,13 +4,13 @@ PTR targets `wowt` **12.1.7.70493** (user decision 2026-10-23) using an immutabl
 
 ## What it must do
 
-- [x] Require exact schema/product/version/build/CDN/install/Gethe identity for `wowt` 70493 and reject every other build, even when required files exist. All identity constants and generated inputs now come from authenticated 70493 metadata and exact Gethe revision; the exact Rust identity selector and all17 pinned tests pass with zero warnings.
+- [x] Require exact schema/product/version/build/CDN/install/Gethe identity for `wowt` 70493 and reject every other build, even when required files exist. All identity constants and generated inputs now come from authenticated 70493 metadata and exact Gethe revision; the exact Rust identity selector and all 17 pinned tests pass with zero warnings.
 - [x] Verify encoded BLTE identity and decoded content size/hash before accepting source bytes.
 - [x] Require exact HTTP partial-content ranges; reject full-archive or wrong-range responses.
 - [x] Retry transient HTTP failures with bounded backoff and respect `Retry-After`.
 - [x] Regenerate the real 70493 index/path manifest and mapping before synchronizing its complete source set; do not relabel the historical 4,570-entry 70424 snapshot. Write completion only after all entries succeed and reuse only hash-matching files. Historical 70424 acquisition hit CDN GET failures and lost partial files between launches; exact `4cc5d9b30` process-boundary RED now confirms that the second preparation deletes a saved partial file after child exit 23. Preparation now persists exact provenance before workers write files, without a completion marker; mismatched provenance still invalidates stale source. The process-boundary resume and stale-source invalidation tests now pass on historical 70424 inputs. These are producer controls, not 70424 runtime acceptance.
 - [x] Discover every advertised CDN host/HTTPS server alias across all product CDN rows; preserve path/scheme, deduplicate and prefer HTTPS. Try the next advertised endpoint on transport, range or content failure while preserving pinned BLTE/content verification, exact bounded ranges, per-endpoint transient retries and `Retry-After`. Discovery failure is explicit, never a hard-coded or Gethe content fallback. The empty-reply/valid-second-host regression was observed RED before implementation; post-fix 17-test producer GREEN passes on historical inputs with zero warnings and unchanged CVars.
-- [ ] Load PTR startup and representative panels against the selected cache. The existing baseline belongs to 69594, not 70493; capture waits for the matching epoch lane. A completed cache is not compatibility proof.
+- [ ] Load PTR startup and representative panels against the selected cache. The exact 70493 stock capture after master/toc integration is committed at the fixed baseline path: 436 records / 618 occurrences, exit 1. This remains failing compatibility inventory; representative-panel/native acceptance is not claimed. A completed cache is not compatibility proof.
 
 ## How it works
 

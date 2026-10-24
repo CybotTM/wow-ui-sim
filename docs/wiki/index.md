@@ -2,7 +2,7 @@
 
 ## [2026-10-24] source | PTR70493 authenticated source and resume
 
-[Profile runtime cache](systems/client-profiles.md#runtime-cache) links the [70493 source proof](../ptr-cdn-content-index.md): original process-failure and advertised-host RED→GREEN, authenticated 4,578-entry regeneration, schema2 partial provenance and unchanged306-file supported resume. [Actual startup](../baselines/README.md#ptr-70493-authenticated-source-capture--2026-10-24) retains436 errors/618 occurrences after master/toc integration; no clean-startup or I4 claim. Retail preserves exact master36/42 residual; Forever paired proof pending.
+[Profile runtime cache](systems/client-profiles.md#runtime-cache) links the [70493 source proof](../ptr-cdn-content-index.md): original process-failure and advertised-host RED→GREEN, authenticated 4,578-entry regeneration, schema2 partial provenance and unchanged 306-file supported resume. [Actual startup](../baselines/README.md#ptr-70493-authenticated-source-capture--2026-10-24) retains 436 errors / 618 occurrences after master/toc integration; no clean-startup or I4 claim. Retail preserves exact master 36/42 residual; Forever preserves exact fresh-master 78/82 residual; both have zero-warning compile/check gates.
 
 ## [2026-10-22] source | Wrath casting and aura projections
 

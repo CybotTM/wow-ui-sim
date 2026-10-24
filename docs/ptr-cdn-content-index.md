@@ -6,7 +6,7 @@
 
 Selected target as of **2026-10-23**: product `wowt`, version **12.1.7.70493**, BuildId **70493**. The versions record (sequence `4097283`) advertises build config `fc3eaa61ff0ade6bf35dbab9727bc161`, CDN config `c13b476a09cb3262797a6fdc88103036`, product config `8e1095475b945aa02fd3f2a2d22993b7`. Two small versions/cdns GETs reconfirmed these identities; the handoff receipt is `p1217-source/retarget-70493-metadata.json`.
 
-**Authenticated regeneration completed.** The 70493 index and path manifest contain 4,578 files; limited mapping contains 146,853 rows. Install content key `bb46ab983520a2617d8b2119662ef38b` comes from the hash-verified build config, not ProductConfig. Exact public Gethe revision `2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af` reports 70493 and has the matching full AddOns inventory. Historical 70424 evidence below is unchanged. Runtime exact-identity GREEN and complete isolated provenance sync remain pending. No `wowxptr`, `ptr2`, branch-head or Gethe content fallback.
+**Authenticated regeneration completed.** The 70493 index and path manifest contain 4,578 files; limited mapping contains 146,853 rows. Install content key `bb46ab983520a2617d8b2119662ef38b` comes from the hash-verified build config, not ProductConfig. Exact public Gethe revision `2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af` reports 70493 and has the matching full AddOns inventory. Historical 70424 evidence below is unchanged. Exact-identity GREEN and complete isolated provenance sync are recorded below. No `wowxptr`, `ptr2`, branch-head or Gethe content fallback.
 
 ## Inputs
 
@@ -60,4 +60,15 @@ Receipts live under verification `p1217-source-slot1-20261023/sync-70493-resume/
 
 ## Integrated 70493 startup inventory
 
-Master/toc integration at `0bfecb54689d374f4b4d0162af7cb7ffb1b44457` builds with zero warnings. Stock startup against the same verified private cache exits 1 with 436 records / 618 occurrences. The exact JSON and provenance metadata are the [fixed PTR baseline](baselines/README.md#ptr-70493-authenticated-source-capture--2026-10-24); this is failing compatibility inventory, not source-integrity failure or clean startup. All 4,578 source hashes/provenance and original CVars are unchanged across capture. Retail/Forever preservation remains pending; I4 is excluded.
+Master/toc integration at `0bfecb54689d374f4b4d0162af7cb7ffb1b44457` builds with zero warnings. Stock startup against the same verified private cache exits 1 with 436 records / 618 occurrences. The exact JSON and provenance metadata are the [fixed PTR baseline](baselines/README.md#ptr-70493-authenticated-source-capture--2026-10-24); this is failing compatibility inventory, not source-integrity failure or clean startup. All 4,578 source hashes/provenance and original CVars are unchanged across capture. Retail/Forever preservation is recorded below; I4 is excluded.
+
+## Retail and Forever preservation
+
+At `f72878ebf`, full-feature source-sync tests pass under Retail (63) and Forever (58). Both profile lib-test builds, CLI/SIM builds and `cargo check --lib --bins` report zero compiler warnings; `cargo fmt --check` passes. Every standalone invocation uses a fresh copy of the current persisted CVars; original stat/hash and all selected source-cache bytes remain unchanged.
+
+| Profile | Stock records / occurrences | Exact preservation basis | Delta |
+|---|---:|---|---|
+| Retail | 36 / 42, exit 1 | Parent-supplied master CF-2 map `handoff/wrath-fixture-f05/runtime-reproof-slot3/retail-followup/stock-errors.json` | added[], removed[], changed_counts{} |
+| Forever | 78 / 82, exit 1 | Fresh untouched master `1aaff4c944a2aac3c7fa33c6be77e2a8309a58b5`, identical private selected cache | added[], removed[], changed_counts{} |
+
+Tracked Retail/Forever `[]` inventories are stale for that master basis. They are not overwritten here, and existing CF-2 residuals are not repaired or credited to this source update. The Forever master rebuild was performed only after its tracked-baseline mismatch. Exact maps and source/CVar guards live in verification `preserve-retail/master-exact-comparison.json` and `forever-master-capture/master-exact-comparison.json`, beneath the same source-lane epoch. These are preservation results, not clean startup or native compatibility. Final PTR check is recorded in the lane report; no all-profile/full-suite or I4 acceptance is implied.
