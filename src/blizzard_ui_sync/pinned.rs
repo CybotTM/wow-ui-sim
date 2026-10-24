@@ -172,7 +172,7 @@ pub(super) fn sync_to(root: &Path) -> crate::Result<super::SyncSummary> {
 #[cfg(feature = "casc")]
 fn prepare_sync_cache(root: &Path, expected: &CacheProvenance) -> crate::Result<()> {
     super::invalidate_cache_if_provenance_mismatched(root, expected)?;
-    Ok(())
+    super::write_cache_provenance(root, expected)
 }
 
 #[cfg(feature = "casc")]
