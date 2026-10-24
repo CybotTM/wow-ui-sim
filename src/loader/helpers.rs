@@ -310,22 +310,7 @@ fn strip_parent_prefix(segment: &str) -> Option<&str> {
 /// - `parent_expr`: Lua expression for $parent in relativeKey (e.g. `"parent"` or a frame name)
 /// - `parent_name`: actual parent name for $parent substitution in relativeTo strings
 /// - `default_relative`: value when no relativeTo is specified (e.g. `"nil"` or `"parent"`)
-pub fn resolve_anchor_relative(
-    anchor: &crate::xml::AnchorXml,
-    parent_expr: &str,
-    parent_name: &str,
-    default_relative: &str,
-) -> String {
-    resolve_anchor_relative_with_refs(
-        anchor,
-        parent_expr,
-        parent_name,
-        default_relative,
-        &mut lua_global_ref,
-    )
-}
-
-fn resolve_anchor_relative_with_refs(
+fn resolve_anchor_relative(
     anchor: &crate::xml::AnchorXml,
     parent_expr: &str,
     parent_name: &str,
@@ -383,7 +368,7 @@ pub(super) fn generate_set_point_code_with_refs(
         let point = anchor.point.as_deref().unwrap_or("TOPLEFT");
         let relative_point = anchor.relative_point.as_deref().unwrap_or(point);
         let (x, y) = resolve_anchor_offset(anchor);
-        let rel = resolve_anchor_relative_with_refs(
+        let rel = resolve_anchor_relative(
             anchor,
             parent_expr,
             parent_name,
