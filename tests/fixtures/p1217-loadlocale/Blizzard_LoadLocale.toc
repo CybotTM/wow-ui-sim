@@ -1,0 +1,3 @@
+## Title: Blizzard_LoadLocale
+## AllowLoad: Both
+[RegionalTextLocale]\LoadLocale.lua

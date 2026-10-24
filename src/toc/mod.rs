@@ -141,13 +141,26 @@ fn metadata_key_allows_repeats(key: &str) -> bool {
     )
 }
 
+/// PTR 12.1.7 ignores whole metadata directives containing file variables.
+/// Inline conditionals are not variables and retain their existing handling.
+fn is_variable_metadata(line: &str) -> bool {
+    match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Ptr => {
+            ["[Family]", "[Game]", "[TextLocale]", "[RegionalTextLocale]"]
+                .iter()
+                .any(|variable| line.contains(variable))
+        }
+        _ => false,
+    }
+}
+
 /// Process a `## Key: Value` metadata line into the map.
 ///
 /// Skips `Interface` lines whose value consists entirely of unresolved
 /// `@toc-version-*@` packager tokens — the `#@debug@` block in the TOC
 /// provides the real fallback version for source-form TOC files.
 fn insert_metadata(metadata: &mut HashMap<String, String>, rest: &str) {
-    if !is_allowed_game_type(rest) {
+    if is_variable_metadata(rest) || !is_allowed_game_type(rest) {
         return;
     }
     let Some((key, value)) = rest.split_once(':') else {
@@ -263,6 +276,14 @@ impl ParsedFileEntries {
         if !is_allowed_game_type(line) && !is_mists_game_menu_shared_file(addon_dir, line) {
             return;
         }
+        let line = match crate::client_profile::ACTIVE {
+            crate::client_profile::ClientProfile::Ptr
+            | crate::client_profile::ClientProfile::WowForever => {
+                // The simulator currently uses the enUS text locale and US region.
+                line.replace("[RegionalTextLocale]", "enUS")
+            }
+            _ => line.to_owned(),
+        };
         let line = line.replace("[TextLocale]", "enUS");
         let line = line.replace("[Family]", family_subdir());
         let line = line.replace("[Game]", game_subdir());
