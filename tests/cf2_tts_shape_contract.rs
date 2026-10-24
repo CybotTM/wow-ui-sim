@@ -67,7 +67,7 @@ assert(C_TTSSettings.GetSpeechVolume() == 63)
 // anniversary: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:71 (GetSpeechVolume).
 // anniversary: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:156 (SetSpeechRate).
 // anniversary: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:165 (SetSpeechVolume).
-// Source-predicted PASS: numeric getters and void setters already shape-compatible; original sliders only, no round-trip values; not executed; native semantics unknown.
+// Base shim is shape-compatible but contradicts the two explicit original-callback pairs; not executed.
 #[cfg(any(
     feature = "client-retail",
     feature = "client-ptr",
@@ -124,7 +124,7 @@ TextToSpeechFrame_UpdateSliders(TextToSpeechFrame)
 // era: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:108 (MarkCharacterSettingsSaved).
 // anniversary: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:25 (GetCharacterSettingsSaved).
 // anniversary: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:108 (MarkCharacterSettingsSaved).
-// Source-predicted FAIL: saved getter and marker missing; boolean and void calls, original CheckLoad accepts actual result; not executed; native semantics unknown.
+// Base source lacks saved getter/marker; preserve bool/void shape checks before numerical acceptance.
 #[cfg(any(
     feature = "client-retail",
     feature = "client-ptr",
@@ -169,7 +169,7 @@ fn original_tts_saved_settings_consumer_blocker() {
 original(TextToSpeechFrame_CheckLoad, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
 original(TextToSpeechFrame_OnEvent, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
 -- Supplied legacy settings exercise the original saved-getter branch for either boolean.
--- No expected migration result, ownership, saved flag, default or persistence is asserted.
+-- No expected migration values, ownership, initial/reset marker policy or persistence is asserted.
 TEXTTOSPEECH_CONFIG = {speechRate=4, speechVolume=37, enabledChatTypes={}, enabledChannelTypes={}}
 assert(not TextToSpeechFrame.loaded, 'normal unloaded frame prerequisite')
 TextToSpeechFrame_OnEvent(TextToSpeechFrame, 'ADDON_LOADED', 'Blizzard_ClientSavedVariables')

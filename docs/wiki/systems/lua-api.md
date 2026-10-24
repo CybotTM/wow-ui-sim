@@ -675,3 +675,14 @@ The [owning contract](../../specs/wrath-friends-legacy.md) records static12340 p
 - [[client-profiles]] — cumulative `retail-12-1-5` feature selection for PTR
 
 Exact403/328 bounded acceptance: [combined evidence SSOT](../../specs/private-aura-sound-removal.md#independent-bounded-acceptance--2026-10-02), with [arg2-only space scope](../../specs/string-util-space-limit-security.md). Native and whole-page/goal acceptance excluded.
+
+## TTS preference model (edit-only staging)
+
+`src/c_api/c_tts_settings.rs` installs environment-owned Lua upvalue preference
+state from `c_tts_settings.lua` during C API initialization. It replaces constant
+speech/voice and chat/channel preference stubs; ordinary chat channel membership
+remains separate. No disk persistence or public preference CVar keys are added.
+The [TTS contract](../../specs/c-factory-cf2-tts.md#staged-producer-contract-and-evidence-limits)
+owns default evidence, supported pairs, source-backed selection, UNKNOWN mappings
+and ASK-USER saved-marker/persistence policies. Original consumer RED is authored,
+not executed. Native parity and all-profile preservation remain unverified.

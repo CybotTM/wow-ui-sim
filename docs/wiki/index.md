@@ -1,3 +1,10 @@
+## [2026-10-24] source | TTS preference producer staging
+
+[Environment-owned C API model](systems/lua-api.md#tts-preference-model-edit-only-staging)
+links the [bounded contract](../specs/c-factory-cf2-tts.md#staged-producer-contract-and-evidence-limits).
+Original slider/CheckLoad RED is authored; no build/runtime proof. No preference-CVar
+mapping found; persistence, marker reset and channel-key encoding remain explicit gaps.
+
 ## [2026-10-22] source | Wrath F07 applicability
 ## [2026-10-22] source | Wrath casting and aura projections
 

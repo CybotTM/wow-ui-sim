@@ -171,3 +171,12 @@ Every case must assert documented arity/types/nullability and applicable enum me
 ## Out of scope
 
 Native defaults/state sources, filtering policy, transitions, mutation/event timing, eligibility, ownership, persistence and migration semantics remain unknown. No producer/vendor changes. F4 account locale/locality arrays have no generated declaration and receive no fabricated shape test. NEW stable/item-upgrade/store/equipment-set lanes are outside these seven requested lane groups. Inventory-flyout and profession-bag groups have no documented shape.
+
+## TTS producer-stage amendment — 2026-10-24
+
+The earlier TTS shape-only predictions and blanket no-producer statement are
+historical. [Bounded TTS contract](c-factory-cf2-tts.md#edit-only-preference-producer-staging--2026-10-24)
+now owns the source-backed preference model, independent two-value callback RED,
+shape/CheckLoad partition, supplemental documented pairs and ASK-USER persistence
+boundary. Existing selector names remain stable. Runtime results remain unverified;
+this amendment does not extend any other lane's scope or native-parity claims.
