@@ -23,15 +23,7 @@ fn print_selected_loader_chain(ui: &Path) {
     let closure =
         discover_blizzard_addon_closure_for_screen_with_overrides(ui, ScreenKind::Game, ROOTS, &[]);
     for (addon, toc_path) in &closure {
-        let contents = std::fs::read_to_string(toc_path).expect("read selected TOC receipt");
-        let toc = TocFile::parse(toc_path.parent().unwrap(), &contents);
-        assert!(toc.allows_screen(ScreenKind::Game));
-        assert!(!toc.is_game_type_restricted());
-        eprintln!("CF-2 {ACTIVE:?} selected {addon}: {}", toc_path.display());
-        eprintln!(
-            "CF-2 metadata {:?}; selected files {:?}",
-            toc.metadata, toc.files
-        );
+        read_and_print_selected_toc(addon, toc_path);
     }
     for (addon, expected) in [
         ("Blizzard_WorldMap", "Blizzard_WorldMap_Vanilla.toc"),
@@ -52,6 +44,18 @@ fn print_selected_loader_chain(ui: &Path) {
     }
 }
 
+fn read_and_print_selected_toc(addon: &str, toc_path: &Path) {
+    let contents = std::fs::read_to_string(toc_path).expect("read selected TOC receipt");
+    let toc = TocFile::parse(toc_path.parent().unwrap(), &contents);
+    assert!(toc.allows_screen(ScreenKind::Game));
+    assert!(!toc.is_game_type_restricted());
+    eprintln!("CF-2 {ACTIVE:?} selected {addon}: {}", toc_path.display());
+    eprintln!(
+        "CF-2 metadata {:?}; selected files {:?}",
+        toc.metadata, toc.files
+    );
+}
+
 fn load_original_group_pin() -> WowLuaEnv {
     let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
     print_selected_loader_chain(&ui);
@@ -64,6 +68,11 @@ fn load_original_group_pin() -> WowLuaEnv {
         "CF-2 initial loading diagnostics: {:?}",
         env.state().borrow().lua_errors
     );
+    instantiate_original_xml_pin(&env);
+    env
+}
+
+fn instantiate_original_xml_pin(env: &WowLuaEnv) {
     env.exec(
         r#"
         local info = debug.getinfo(GroupMembersPinMixin.OnMapChanged, 'S')
@@ -85,7 +94,6 @@ fn load_original_group_pin() -> WowLuaEnv {
         "#,
     )
     .expect("selected TOC/XML world map and original GroupMembersPinTemplate setup");
-    env
 }
 
 fn assert_original_group_pin(env: &WowLuaEnv, map: i32, shown: bool) {
