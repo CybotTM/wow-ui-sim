@@ -2740,6 +2740,10 @@ Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-re
 
 Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance), [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist) and index for immutable companion accounting, explicit per-profile UNKNOWN source/selection/proof boundaries and grouped I4b selectors. I0 artifacts unchanged; no builds, cache observations or native/runtime acceptance.
 
+## [2026-10-24] investigation | S49 same-build refresh and CSV truncation
+
+[Refresh boundary](investigations/wrath-companion-cooldown.md#same-build-spelltrait-refresh-and-csv-boundary) records 70391-only trait/spell receipts, 426 CSV-native dangling occurrences and zero generator-introduced references. Provisional descriptions expose physical-line CRLF truncation. Logical-record reader/loader fixes and concrete tests are staged, not executed; corrected regeneration and runtime GREEN await a released slot.
+
 ## 2026-10-24 — Patch 12.1.7 I4b static staging
 
 - Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations), [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection) and index for I3-dependent selected-source obligations. Exact pin/cache authentication, mixed-status rejection controls and separate runtime limits; no effective applicability promotion before the source dependency merges.

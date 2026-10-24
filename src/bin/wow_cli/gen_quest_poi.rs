@@ -9,9 +9,10 @@
 //! Generates: data/quest_ui_map.rs
 
 use super::csv_util::parse_csv_line;
+use super::csv_util::read_csv_records;
 use std::collections::{BTreeSet, HashMap};
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufReader, Write};
 use std::path::Path;
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -76,8 +77,7 @@ fn collect_quest_map(
     // Per quest: (turnin_ui_map_id, first_ui_map_id)
     let mut entries: HashMap<u32, (Option<u32>, Option<u32>)> = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue; // skip header
         }

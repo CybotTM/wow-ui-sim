@@ -12,11 +12,12 @@
 //!
 //! Generates: data/spells.rs, data/spell_descriptions.rs, data/spell_power.rs
 
+use super::csv_util::read_csv_records;
 use super::csv_util::{escape_str, parse_csv_line, wow_data_dir};
 use super::gen_spells_power::{SpellPowerRow, load_spell_power, write_spell_power};
 use std::collections::{BTreeSet, HashMap};
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufReader, Write};
 use std::path::Path;
 
 const SPELL_NAME_COLUMN: usize = 1;
@@ -332,8 +333,7 @@ fn load_spell_text_column(
     let reader = BufReader::new(file);
     let mut map = HashMap::new();
 
-    for line in reader.lines().skip(1) {
-        let line = line?;
+    for line in read_csv_records(reader)?.into_iter().skip(1) {
         let fields = parse_csv_line(&line);
         if fields.len() > value_column
             && let Ok(id) = fields[0].parse::<u32>()
@@ -442,8 +442,7 @@ fn load_spell_effect_targets(path: &Path) -> Result<HashMap<u32, u8>, Box<dyn st
     let reader = BufReader::new(file);
     let mut map = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -474,8 +473,7 @@ fn load_spell_misc(path: &Path) -> Result<HashMap<u32, (u32, u32)>, Box<dyn std:
     let reader = BufReader::new(file);
     let mut map = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }

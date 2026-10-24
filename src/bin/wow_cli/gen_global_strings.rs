@@ -5,9 +5,10 @@
 //!
 //! Generates: data/global_strings.rs
 
+use super::csv_util::read_csv_records;
 use super::csv_util::{parse_csv_line, wow_data_dir};
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufReader, Write};
 use std::path::Path;
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -62,8 +63,7 @@ fn write_string_entries(
 ) -> Result<u32, Box<dyn std::error::Error>> {
     let mut count = 0u32;
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }

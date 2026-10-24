@@ -39,6 +39,31 @@ Request11 Q3/Q4 remain UNKNOWN: no authentic fixture pairs, no verified values f
 
 GetCompanionCooldown's nil-call boundary has a staged producer, not a demonstrated GREEN. UnitHasRelicSlot at PaperDollFrame.lua:1094 belongs to wrath-relic-slot. Independent pre-existing cursorOffset at UIPanelTemplates.lua:365 remains untouched. The original final empty-error assertion remains unchanged and may still fail. The unsupplied default creature metadata also keeps the original default-catalog mount oracle unresolved. Earlier Wrath clean stock and Retail exact36unique/42occurrence preservation receipts do not prove this new revision.
 
+## Same-build spell/trait refresh and CSV boundary
+
+Verified 2026-10-24: generated-data commit `70f185cd8` refreshes traits first,
+then spells/descriptions/power from the same 70391 exports. The
+[per-file receipt](../../../data/spell-catalog/70391-refresh-source.json) records
+input/output hashes and generator source identity. All 58,685 imported trait
+rows and 5,709 SpellInfo rows match their CSV fields. There are 426 dangling
+trait spell-reference occurrences across 184 IDs, all already absent from the
+70391 SpellName CSV; none is introduced by generator selection. Definition
+121056 still refers to 316099; definition 108697 now refers to 1252217.
+`override_icon` is a fileDataID, not a spell reference. These are CSV-relative
+claims: spell export receipts report unreadable records and do not certify
+complete native content. Trait inputs have authenticated content and zero
+unreadable records.
+
+The frozen generator exposed a separate physical-line parsing defect: 1,481
+emitted descriptions omit text after embedded CRLF. Its output is provisional,
+not an accepted correct refresh. Concrete reader/loader regression tests are
+staged in `f540a448a`. CSV generators now use the shared logical-record reader,
+which retains embedded CRLF bytes; the atlas semicolon listfile is not CSV and
+keeps physical-line parsing. Fresh binary build, test RED/GREEN and regeneration
+remain slot-gated. Do not regenerate with the frozen pre-fix binary. Existing
+selection still omits Brown Horse 458; its RED and catalog/species selection
+repair remain required before original-consumer GREEN.
+
 ## Sources
 
 - [Companion spec](../../specs/wrath-s49-companion-producer-design.md) — scope and acceptance boundaries

@@ -5,9 +5,10 @@
 //!
 //! Generates: data/manifest_interface_data.rs
 
+use super::csv_util::read_csv_records;
 use super::csv_util::{escape_str, parse_csv_line};
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufReader, Write};
 use std::path::Path;
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -148,8 +149,7 @@ fn load_manifest(path: &Path) -> Result<Vec<(u32, String)>, Box<dyn std::error::
     let reader = BufReader::new(file);
     let mut entries = Vec::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }

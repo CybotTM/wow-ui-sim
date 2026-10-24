@@ -1,3 +1,7 @@
+## [2026-10-24] investigation | S49 70391 refresh and logical CSV records
+
+[Refresh boundary](investigations/wrath-companion-cooldown.md#same-build-spelltrait-refresh-and-csv-boundary) links the per-file receipt, CSV-native dangling references and the physical-line CRLF truncation. Root fix and concrete tests staged; fresh generator, corrected regeneration and S49 runtime GREEN remain slot-gated.
+
 ## [2026-10-24] investigation | Companion cooldown req-13 arbitration
 
 [Cooldown investigation](investigations/wrath-companion-cooldown.md) records
