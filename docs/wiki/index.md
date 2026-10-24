@@ -4,6 +4,10 @@
 ordered own/category/GCD endpoint arbitration, accepted-held sticky enable,
 shared flag2, absent player and supplied critter paths. Nine original-consumer
 selectors staged; static contradictions are not executed RED/GREEN proof.
+## [2026-10-24] system | CF-2 supplied club self invitations
+
+[Club model update](systems/club-membership.md#incoming-self-invitations-cf-2) links the [bounded contract](../specs/club-self-invitations.md): empty-by-default supplied incoming rows, original selected Retail MicroMenu selector and static standalone mutant contradictions. Edit-only staging; no builds/tests/slots or runtime acceptance. Other CF-2 members remain separate.
+
 ## [2026-10-24] source | Wrath relic class capability
 
 [Lua API notes](systems/lua-api.md#wrath-relic-class-capability) link the
