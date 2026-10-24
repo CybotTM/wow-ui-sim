@@ -52,4 +52,6 @@ The existing rank-settings dropdown row remains blocked on missing bank permissi
 
 ## Deferred proof
 
-Tests scaffold: `f4b84832e`; producers: `a88a41395`; explicit guild-tab fixture input: `bb7812ba3`. Only touched-file rustfmt and static diff checks performed. Handoff `/home/osso/.local/state/wow-ui-sim/handoff/wrath-guild-info/SLOT-RECIPE.md` specifies future Wrath RED/GREEN, tracked stock comparison and exact Retail36/42 message/count map preservation.
+Tests scaffold: `f4b84832e`; producers: `a88a41395`; adapted integrated source: `97e759f7d`; static explicit-state repairs: `c55f58ae5`. The saved slot REPORT records three GREEN producer cases, failing F1 and17 preservation regressions, not accepted GREEN for the repair. The new original nonleader dropdown completion selector is staged before any bank producer. It is a missing-call boundary test, not yet a permission-data discriminator; native facts and concrete varying inputs/widget assertions must precede either getter.
+
+Current instructions and exact per-profile lists are in [the repair matrix](../../baselines/wrath-guild-info-green-blockers.md) and `/home/osso/.local/state/wow-ui-sim/handoff/wrath-guild-info/slot0-run/static-green-repairs/`. The old SLOT-RECIPE is historical: its36/42 Retail map and earlier source binding are superseded by REPORT's requested master34/38 reference and the new bound revision. This continuation uses no builds, slots, runtime tests or agents; bank getters remain an explicit held gap.

@@ -1,3 +1,7 @@
+## [2026-10-24] static repair | Wrath guild-info GREEN blockers
+
+[Exact matrix](../baselines/wrath-guild-info-green-blockers.md) classifies all17 saved regressions as missing supplied inputs, preserving every assertion. F1 supplies its display rank before load; a separate initialized-state contract pins no synthetic guild. Original nonleader dropdown completion RED is staged, not executed or a permission-value discriminator. Both bank getters remain held for native facts and a real permission model. Seven exact profile lists are recorded; Wrath/Retail are required lane gates. No builds, slots, agents or new runtime proof.
+
 ## [2026-10-24] investigation | Wrath guild-info staging
 
 [Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md): existing cache/rank-right reuse, Wrath-only empty/no-guild initialization, two original OnShow branch selectors, static contradiction/selection proof and batch3 seed prerequisites. Edit-only; RED/GREEN, stock and Retail36/42 preservation remain deferred.

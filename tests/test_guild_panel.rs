@@ -405,6 +405,34 @@ fn guild_control_rank_settings_dropdown_shows_rank_rows() {
     }
 }
 
+/// Consumer-boundary RED only until native bank permission facts/model arrive.
+#[cfg(feature = "client-wrath")]
+#[test]
+fn native_nonleader_rank_dropdown_completes_bank_permission_update() {
+    test_timeout! {
+        let env = setup_guild_leader_env();
+        load_guild_control_ui(&env);
+        {
+            let mut state = env.state().borrow_mut();
+            state.world.guild_rank = Some("Officer".into());
+            state.world.guild_player_rank = 1;
+            state.world.guild_members[0].rank_index = 2;
+        }
+        common::panel_fixtures::clear_recorded_lua_errors(&env);
+        env.exec(r#"
+            assert(not IsGuildLeader(), "exercise the native nonleader branch")
+            ToggleDropDownMenu(1, nil, GuildControlPopupFrameDropDown)
+            assert(DropDownList1:IsShown() and DropDownList1.numButtons == 3)
+            local officer = DropDownList1Button2
+            officer:GetScript("OnClick")(officer, "LeftButton")
+            assert(UIDropDownMenu_GetSelectedID(GuildControlPopupFrameDropDown) == 2)
+            assert(GuildControlPopupFrameDropDownText:GetText() == "Officer")
+        "#).expect("original dropdown click completes native bank permission update");
+        let errors = common::panel_fixtures::recorded_lua_errors(&env);
+        assert!(errors.is_empty(), "native nonleader dropdown errors: {errors:?}");
+    }
+}
+
 post_wrath_ui_fixture! {
 #[test]
 fn guild_control_tab_dropdown_shows_initial_selection() {

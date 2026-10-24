@@ -1,6 +1,6 @@
 ## [2026-10-24] investigation | Wrath guild-info staging
 
-[Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md): existing cache/rank-right reuse, Wrath-only empty/no-guild initialization, two original OnShow branch selectors, static contradiction/selection proof and batch3 seed prerequisites. Edit-only; RED/GREEN, stock and Retail36/42 preservation remain deferred.
+[Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md) and [17-row repair matrix](../baselines/wrath-guild-info-green-blockers.md). Historical three-selector GREEN passed; explicit fixture repairs and F1 display rank now await re-proof. Original nonleader dropdown RED is staged; bank permission/withdrawal getters are held for laptop facts and a real model. No new build/slot use; stock/check and actual Retail34/38 comparison remain pending.
 ## [2026-10-24] system | CF-2 supplied club self invitations
 
 [Club model update](systems/club-membership.md#incoming-self-invitations-cf-2) links the [bounded contract](../specs/club-self-invitations.md): empty-by-default supplied incoming rows, original selected Retail MicroMenu selector and static standalone mutant contradictions. Edit-only staging; no builds/tests/slots or runtime acceptance. Other CF-2 members remain separate.
