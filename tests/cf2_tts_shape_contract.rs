@@ -1,4 +1,4 @@
-//! Shape-only contracts; native semantics unknown. Source predictions are not runtime proof.
+//! Original TTS preference round trips plus documented shapes; runtime proof deferred.
 #![cfg(any(
     feature = "client-retail",
     feature = "client-ptr",
@@ -13,6 +13,36 @@ mod shape;
 
 #[path = "common/cf2_cvar_storage.rs"]
 mod storage;
+
+fn assert_original_tts_preference_round_trips(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    shape::check(
+        env,
+        r#"
+original(TextToSpeech_SetRate, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
+original(TextToSpeech_SetVolume, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
+original(TextToSpeechFrame_UpdateSliders, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
+local controls = TextToSpeechFrame.PanelContainer
+original(controls.AdjustRateSlider.Slider:GetScript('OnValueChanged'), 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
+original(controls.AdjustVolumeSlider.Slider:GetScript('OnValueChanged'), 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
+for _, pair in ipairs({{4, 37}, {7, 63}}) do
+    assert(TextToSpeech_SetRate(TextToSpeechFrame, pair[1]))
+    assert(TextToSpeech_SetVolume(TextToSpeechFrame, pair[2]))
+    assert(C_TTSSettings.GetSpeechRate() == pair[1], 'original rate callback must store its input')
+    assert(C_TTSSettings.GetSpeechVolume() == pair[2], 'original volume callback must store its input')
+    TextToSpeechFrame_UpdateSliders(TextToSpeechFrame)
+    assert(controls.AdjustRateSlider.Slider:GetValue() == pair[1])
+    assert(controls.AdjustVolumeSlider.Slider:GetValue() == pair[2])
+end
+assert(not TextToSpeech_SetRate(TextToSpeechFrame, -11))
+assert(not TextToSpeech_SetRate(TextToSpeechFrame, 11))
+assert(not TextToSpeech_SetVolume(TextToSpeechFrame, -1))
+assert(not TextToSpeech_SetVolume(TextToSpeechFrame, 101))
+assert(C_TTSSettings.GetSpeechRate() == 7)
+assert(C_TTSSettings.GetSpeechVolume() == 63)
+"#,
+    );
+}
+
 // retail: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:65 (GetSpeechRate).
 // retail: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:74 (GetSpeechVolume).
 // retail: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:165 (SetSpeechRate).
@@ -52,6 +82,7 @@ fn original_tts_numeric_preferences_contract() {
         "cf2_tts_shape_contract::original_tts_numeric_preferences_contract",
         || {
             let env = shape::load(&["Blizzard_ChatFrame"]);
+            assert_original_tts_preference_round_trips(&env);
             shape::check(
                 &env,
                 r#"
@@ -108,6 +139,7 @@ fn original_tts_saved_settings_shape_blocker() {
         "cf2_tts_shape_contract::original_tts_saved_settings_shape_blocker",
         || {
             let env = shape::load(&["Blizzard_ChatFrame"]);
+            assert_original_tts_preference_round_trips(&env);
             shape::check(
                 &env,
                 r#"
@@ -122,13 +154,15 @@ assert(select('#', C_TTSSettings.MarkCharacterSettingsSaved()) == 0)
 }
 
 // Keep direct shape preflights from masking the original CheckLoad boundary.
-// This is a consumer reachability candidate, not a saved-state semantic oracle.
+// Numeric round trips reject constant/no-op preferences before CheckLoad.
+// Constant-true saved markers remain indistinguishable: ASK-USER initial/reset oracle.
 #[test]
 fn original_tts_saved_settings_consumer_blocker() {
     storage::run_isolated(
         "cf2_tts_shape_contract::original_tts_saved_settings_consumer_blocker",
         || {
             let env = shape::load(&["Blizzard_ChatFrame"]);
+            assert_original_tts_preference_round_trips(&env);
             shape::check(
                 &env,
                 r#"
@@ -142,6 +176,9 @@ assert(not TextToSpeechFrame.loaded, 'normal unloaded frame prerequisite')
 TextToSpeechFrame_OnEvent(TextToSpeechFrame, 'ADDON_LOADED', 'Blizzard_ClientSavedVariables')
 TextToSpeechFrame_OnEvent(TextToSpeechFrame, 'VARIABLES_LOADED')
 TextToSpeechFrame_OnEvent(TextToSpeechFrame, 'PLAYER_ENTERING_WORLD')
+assert(TextToSpeechFrame.loaded == true)
+assert(C_TTSSettings.GetCharacterSettingsSaved() == true)
+TextToSpeechFrame_UpdateSliders(TextToSpeechFrame)
 
 "#,
             );

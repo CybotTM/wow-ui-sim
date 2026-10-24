@@ -197,6 +197,7 @@ fn assert_tts_values_and_controls(env: &WowLuaEnv, rate: i32, volume: i32) {
         r#"
         assert(C_TTSSettings.GetSpeechRate() == {rate})
         assert(C_TTSSettings.GetSpeechVolume() == {volume})
+        TextToSpeechFrame_UpdateSliders(TextToSpeechFrame)
         local controls = TextToSpeechFrame.PanelContainer
         assert(controls.AdjustRateSlider.Slider:GetValue() == {rate})
         assert(controls.AdjustVolumeSlider.Slider:GetValue() == {volume})
