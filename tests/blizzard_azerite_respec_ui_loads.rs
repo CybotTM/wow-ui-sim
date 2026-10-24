@@ -5,6 +5,7 @@ use common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};
 
 const ROOT: &str = "Blizzard_AzeriteRespecUI";
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_respec_ui_lod_loads_without_declared_dependencies() {
     common::with_perf_lock(|| {
@@ -34,4 +35,5 @@ fn blizzard_azerite_respec_ui_lod_loads_without_declared_dependencies() {
             });
         });
     });
+}
 }

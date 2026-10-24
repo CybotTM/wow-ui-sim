@@ -43,6 +43,19 @@ pub(super) fn load_template(
     result
 }
 
+pub(super) fn load_constant_template(
+    state: &mut LuaState,
+    source: &'static str,
+    tag: &str,
+) -> LuaResult<rilua::Function> {
+    let saved_slots = state.global_slots.take();
+    let cache_tag = format!("{tag}-no-global-slots");
+    let result = crate::loader::chunk_cache::load_constant_chunk(state, source, &cache_tag)
+        .map_err(|error| rilua::runtime_error(error.to_string()));
+    state.global_slots = saved_slots;
+    result
+}
+
 fn build_set_alpha_handler(state: &mut LuaState, alpha: f64) -> LuaResult<Val> {
     let builder = load_template(
         state,

@@ -555,6 +555,7 @@ fn closure_has_unloaded_addons_checks_full_dependency_closure() {
     assert!(closure_has_unloaded_addons(&env, &closure));
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn generic_trait_ui_runtime_load_survives_prior_force_load_process_state() {
     common::with_perf_lock(|| {
@@ -590,7 +591,9 @@ fn generic_trait_ui_runtime_load_survives_prior_force_load_process_state() {
         })
     })
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn contribution_runtime_load_survives_post_startup_state() {
     with_isolated_addon_coverage_state(|| {
@@ -621,6 +624,7 @@ fn contribution_runtime_load_survives_post_startup_state() {
             })
         })
     });
+}
 }
 
 #[test]

@@ -522,6 +522,70 @@ fn test_layer_child_names_escape_backslashes_in_generated_lua() {
 }
 
 #[test]
+fn layer_argument_bindings_preserve_region_types_order_and_names() {
+    let frames: String = (0..2).map(|index| format!(r#"
+        <Frame name="Parent-|TInterface\AddOns\Addon\Icon:0|t{index}" parent="UIParent">
+            <Size x="100" y="80"/>
+            <Layers><Layer level="ARTWORK" textureSubLevel="2">
+                <Texture name="$parentIcon" parentKey="Icon" parentArray="Regions">
+                    <Size x="32" y="16"/>
+                    <Color r="0.25" g="0.5" b="0.75" a="1"/>
+                    <Anchors><Anchor point="TOPLEFT"/></Anchors>
+                </Texture>
+                <MaskTexture name="$parentMask" parentKey="Mask">
+                    <Size x="32" y="16"/>
+                    <Anchors><Anchor point="CENTER" relativeTo="$parentIcon"/></Anchors>
+                    <MaskedTextures><MaskedTexture childKey="Icon"/></MaskedTextures>
+                </MaskTexture>
+                <Line name="$parentStroke" parentKey="Stroke" thickness="3">
+                    <Size x="24" y="8"/>
+                    <Anchors><Anchor point="TOPLEFT" relativeTo="$ParentIcon" x="4" y="-2"/></Anchors>
+                </Line>
+                <FontString name="$parentLabel" parentKey="Label" parentArray="Regions" text="bound text">
+                    <Anchors><Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="7"/></Anchors>
+                    <Scripts><OnLoad>self.iconAtLoad = self:GetParent().Icon</OnLoad></Scripts>
+                </FontString>
+            </Layer></Layers>
+        </Frame>"#)).collect();
+    let ctx = load_test_xml("layer-argument-bindings", &format!("<Ui>{frames}</Ui>"));
+    ctx.env.exec(r#"
+        local first
+        for index = 0, 1 do
+            local name = 'Parent-|TInterface\\AddOns\\Addon\\Icon:0|t' .. index
+            local parent = _G[name]
+            assert(parent, name)
+            assert(parent.Icon:GetName() == name .. 'Icon')
+            assert(parent.Mask:GetObjectType() == 'MaskTexture')
+            assert(parent.Stroke:GetObjectType() == 'Line')
+            assert(parent.Label:GetObjectType() == 'FontString')
+            assert(parent.Icon:GetParent() == parent)
+            assert(parent.Label:GetParent() == parent)
+            assert(parent.Regions[1] == parent.Icon)
+            assert(parent.Regions[2] == parent.Label)
+            assert(#parent.Regions == 2)
+            assert(parent.Label.iconAtLoad == parent.Icon)
+            assert(parent.Label:GetText() == 'bound text')
+            assert(parent.Icon:GetMaskTexture(1) == parent.Mask)
+            assert(parent.Icon:GetNumMaskTextures() == 1)
+            assert(parent.Stroke:GetThickness() == 3)
+            local point, relative, relativePoint, x, y = parent.Stroke:GetPoint()
+            assert(point == 'TOPLEFT' and relative == parent.Icon and x == 4 and y == -2)
+            point, relative, relativePoint, x, y = parent.Label:GetPoint()
+            assert(point == 'LEFT' and relative == parent.Icon and relativePoint == 'RIGHT' and x == 7 and y == 0)
+            local layer, subLevel = parent.Icon:GetDrawLayer()
+            assert(layer == 'ARTWORK' and subLevel == 2)
+            if first then
+                assert(parent.Icon ~= first.Icon and parent.Label ~= first.Label)
+                first.Icon:SetWidth(5)
+                assert(parent.Icon:GetWidth() == 32)
+            end
+            first = parent
+        end
+    "#).unwrap();
+    assert!(ctx.env.state().borrow().lua_errors.is_empty());
+}
+
+#[test]
 fn test_xml_anchors_with_offset() {
     let env = WowLuaEnv::new().unwrap();
     let temp_dir = std::env::temp_dir().join("wow-sim-test-offset");
