@@ -47,7 +47,7 @@ fn recognizes_token(token: &str) -> bool {
     ]
     .iter()
     .any(|prefix| {
-        base.strip_prefix(prefix)
+        base.strip_prefix(*prefix)
             .is_some_and(|index| !index.is_empty() && index.bytes().all(|b| b.is_ascii_digit()))
     })
 }
