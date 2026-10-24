@@ -2701,4 +2701,3 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 ## [2026-10-24] source | Combat-log filter record staging
 
 [Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
-
