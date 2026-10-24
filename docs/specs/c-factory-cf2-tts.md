@@ -92,3 +92,61 @@ its numerical prerequisite independently rejects constant/no-op rate/volume prod
 It does not claim native voice-name defaults, cross-name/ID mapping, channel-key encoding,
 marker defaults or persistence. Saved-shape and saved-consumer selectors retain their
 respective shape/CheckLoad failures **before** numerical checks to avoid masking them.
+
+### Staged producer contract and evidence limits
+
+`src/c_api/c_tts_settings.rs` installs a C API model implemented as private Lua
+upvalue tables in `c_tts_settings.lua`, owned by each Lua environment. No SimState
+field, disk file, host preference read, or public preference CVar is added.
+Registration belongs to environment C API initialization, not workaround installation.
+The constant shim and its shim-specific unit tests are removed, as are the old
+constant channel/chat-type preference producers. No undocumented SetVoiceOptionID
+alias is retained; original UI/API docs use SetVoiceOption.
+
+- Rate/volume round-trip numeric values in the UI-supported domains [-10,10] and
+  [0,100]. The UI converts numeric strings before calling the documented numeric
+  setters. Invalid direct setter semantics are UNKNOWN; the model rejects values
+  outside its supported domain rather than inventing clamping.
+- Original Shared/TextToSpeechFrame.lua `DefaultLegacySettings` (lines5-39 in all
+  six TTS caches) establishes rate0, volume100, standard/alternate IDs0/1,
+  four true boolean options, NarrateMyMessages=false, the explicit enabled-chat-type
+  set and empty enabled channels. These are **legacy UI default evidence**, not
+  an observed modern C++ default/reset oracle. Model initialization/reset uses that
+  exact source set, without promoting migration's false fallback values to defaults.
+- Documented bool newVal arguments default false when omitted; explicit false and
+  true are stored. Voice IDs and supplied names are stored, resolving the opposite
+  representation only through the existing C_VoiceChat.GetTtsVoices catalogue.
+  Default voice **names** are UNKNOWN; missing catalogue matches produce an explicit
+  UNKNOWN error, never an invented name/ID. This is a supported-input limit, not
+  asserted native error behavior.
+- Original migration selects character preferences with TTSUseCharacterSettings
+  and restores the selector. The model therefore separates account/character tables
+  within one environment. Supplied ChatChannelInfo records round-trip by all six
+  documented fields; identity across changed metadata remains UNKNOWN. Legacy
+  channel keys are retained verbatim; key-to-record alias encoding is UNKNOWN and
+  deliberately not guessed. SetChannelKeyEnabled-to-GetChannelEnabled migration
+  acceptance remains incomplete pending that contract.
+- **ASK-USER:** minimal saved-marker assumption is unsaved at environment creation,
+  Mark=true, preference reset leaves the marker alone. Only original CheckLoad's
+  post-mark true is asserted, never initial=false, reset, account/character ownership
+  or cross-environment persistence. Those native policies remain UNKNOWN. No bool
+  signature can reject a constant-true/no-op marker without an additional oracle.
+
+### Persistence evidence boundary
+
+All seven profile caches were searched, including generated API documentation,
+CVar references and Settings definitions (Wrath's current cache has no TTS consumer).
+No rate/volume/voice/chat/channel preference or saved-marker public CVar mapping was
+found. Original Settings definitions expose `textToSpeech`, `remoteTextToSpeech`,
+`remoteTextToSpeechVoice`, and screen-narration-specific rate/volume CVars; these
+control distinct features, not C_TTSSettings speech preferences. The only selector
+used around C_TTSSettings migration is `TTSUseCharacterSettings`. API signatures
+publish no storage names. Search absence is not proof of native internal storage.
+
+**ASK-USER:** retain or revise the unsupported live-CVar oracle in cf2_tts.rs
+(before/after snapshots, nonempty rate_keys/volume_keys assertions and reopened-key
+comparisons; original lines143-152 and following loop). Reopen assertions in
+assert_reopened_tts_preferences (original185-192: saved=true, rate and volume) also
+need a documented persistence/lifetime contract. All remain unchanged and are
+expected to fail after the callback setup blocker is removed. No CVar storage or
+cross-environment persistence is implemented to satisfy them.
