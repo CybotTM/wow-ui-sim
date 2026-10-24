@@ -497,3 +497,20 @@ fn load_spell_misc(path: &Path) -> Result<HashMap<u32, (u32, u32)>, Box<dyn std:
     }
     Ok(map)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::load_spell_descriptions;
+    use std::io::Write;
+
+    #[test]
+    fn spell_descriptions_preserve_embedded_crlf() {
+        let mut csv = tempfile::NamedTempFile::new().unwrap();
+        csv.write_all(b"ID,Subtext,Description\r\n7,,\"First line\r\n\r\nLast, \"\"quoted\"\" line\"\r\n8,,After\r\n")
+            .unwrap();
+        let descriptions = load_spell_descriptions(csv.path()).unwrap();
+        assert_eq!(descriptions.len(), 2);
+        assert_eq!(descriptions[&7], "First line\r\n\r\nLast, \"quoted\" line");
+        assert_eq!(descriptions[&8], "After");
+    }
+}

@@ -82,3 +82,22 @@ pub fn wow_data_dir() -> std::path::PathBuf {
         .expect("No home dir")
         .join("Projects/wow/data")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{parse_csv_line, read_csv_records};
+    use std::io::{BufReader, Cursor};
+
+    #[test]
+    fn csv_records_preserve_embedded_crlf_and_following_row() {
+        let input = b"ID,Text\r\n7,\"First\r\n\r\nLast, \"\"quoted\"\"\"\r\n8,After";
+        let records = read_csv_records(BufReader::new(Cursor::new(input))).unwrap();
+        assert_eq!(records.len(), 3);
+        assert_eq!(records[0], "ID,Text");
+        assert_eq!(
+            parse_csv_line(&records[1]),
+            ["7", "First\r\n\r\nLast, \"quoted\""]
+        );
+        assert_eq!(parse_csv_line(&records[2]), ["8", "After"]);
+    }
+}
