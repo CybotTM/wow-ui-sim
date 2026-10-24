@@ -1,6 +1,6 @@
 # Wrath S49 companion projection
 
-Legacy mount companion queries project explicit host inputs through the original cached PetPaperDollFrame consumer. Source: `src/lua_api/globals/real/wrath_legacy/companions.rs`. See [legacy fixture architecture](../wiki/systems/blizzard-ui-test-lanes.md).
+Legacy mount companion queries project explicit host inputs through the original cached PetPaperDollFrame consumer. Source: `src/lua_api/globals/real/wrath_legacy/companions.rs`. See [legacy fixture architecture](../wiki/reference/blizzard-ui-test-lanes.md).
 
 ## What it must do
 
