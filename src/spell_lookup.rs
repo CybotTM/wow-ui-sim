@@ -87,6 +87,18 @@ pub fn get_spell(id: u32) -> Option<&'static SpellInfo> {
     spells::get_spell(id).or_else(|| supplemental_spell(id))
 }
 
+#[cfg(test)]
+mod tests {
+    use super::get_spell;
+
+    #[test]
+    fn brown_horse_has_catalog_spell_metadata() {
+        let spell = get_spell(458).expect("Brown Horse must have generated spell backing");
+        assert_eq!(spell.name, "Brown Horse");
+        assert_eq!(spell.icon_file_data_id, 132261);
+    }
+}
+
 fn supplemental_spell(id: u32) -> Option<&'static SpellInfo> {
     SUPPLEMENTAL_SPELLS
         .iter()
