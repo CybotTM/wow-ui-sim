@@ -673,6 +673,7 @@ fn test_scrollbar_has_thumb_texture() {
     assert!(has_thumb, "ScrollBar should have ThumbTexture");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_legacy_scrollbar_supports_scrollutil_percentage_api() {
     let env = env_with_shared_xml();
@@ -698,11 +699,13 @@ fn test_legacy_scrollbar_supports_scrollutil_percentage_api() {
         .unwrap();
     assert_eq!(scroll_percentage, 0.5);
 }
+}
 
 // ============================================================================
 // ListScrollFrameTemplate Tests (requires SharedXML)
 // ============================================================================
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_scrollbar_track_textures() {
     let env = env_with_shared_xml();
@@ -729,6 +732,7 @@ fn test_scrollbar_track_textures() {
         has_bot,
         "ListScrollFrame should have ScrollBarBottom texture"
     );
+}
 }
 
 // ============================================================================
@@ -1054,6 +1058,7 @@ fn test_texture_kit_constants_defined() {
 // WowScrollBoxList Tests (requires SharedXML)
 // ============================================================================
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_scrollboxlist_creates_child_frames() {
     let env = env_with_shared_xml();
@@ -1087,7 +1092,9 @@ fn test_scrollboxlist_creates_child_frames() {
         "WowScrollBoxList should have DragDelegate child"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_scrollboxlist_shadows_have_textures() {
     let env = env_with_shared_xml();
@@ -1112,7 +1119,9 @@ fn test_scrollboxlist_shadows_have_textures() {
     assert!(has_lower, "Shadows should have Lower texture");
     assert!(has_upper, "Shadows should have Upper texture");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_scrollboxlist_keyvalues() {
     let env = env_with_shared_xml();
@@ -1134,7 +1143,9 @@ fn test_scrollboxlist_keyvalues() {
         "canInterpolateScroll should be false from template KeyValues"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_scrollboxlist_mixin_methods() {
     let env = env_with_shared_xml();
@@ -1165,7 +1176,9 @@ fn test_scrollboxlist_mixin_methods() {
         "GetScrollTarget() should return the ScrollTarget child frame"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_scrollboxlist_rust_children_keys() {
     let env = env_with_shared_xml();
@@ -1204,7 +1217,9 @@ fn test_scrollboxlist_rust_children_keys() {
         "Rust children_keys should have DragDelegate"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_scrollboxlist_callbacks_and_foreach_frame_are_stateful() {
     let env = env_with_shared_xml();
@@ -1270,7 +1285,9 @@ fn test_scrollboxlist_callbacks_and_foreach_frame_are_stateful() {
 
     assert_eq!(result, "1|true|true|First,Second|true");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_scrollboxlist_interpolate_scroll_round_trip() {
     let env = env_with_shared_xml();
@@ -1293,4 +1310,5 @@ fn test_scrollboxlist_interpolate_scroll_round_trip() {
         .unwrap();
 
     assert_eq!(result, "false|true|false|false");
+}
 }
