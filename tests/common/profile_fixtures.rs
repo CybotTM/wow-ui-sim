@@ -5,10 +5,10 @@
 /// into another profile's fixture. Modern test bodies remain unchanged.
 #[macro_export]
 macro_rules! wrath_action_case {
-    ($callback:ident) => {
+    ($($callback:ident)::+) => {
         #[cfg(feature = "client-wrath")]
         if $crate::common::action_bar_fixture::is_wrath() {
-            return $crate::common::action_bar_fixture::assertions::$callback();
+            return $crate::common::action_bar_fixture::assertions::$($callback)::+();
         }
     };
 }

@@ -7,6 +7,7 @@ const ROOT: &str = "Blizzard_ActionBarController";
 
 #[test]
 fn unit_displaypower_updates_override_vehicle_power_bar() {
+    wrath_action_case!(callbacks::vehicle_power);
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         env.exec(

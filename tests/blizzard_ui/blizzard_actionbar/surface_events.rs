@@ -44,6 +44,7 @@ const PLAN_NAMED_EVENTS: &[&str] = &[
 const SOURCE_ADDITIONAL_EVENTS: &[&str] =
     &["UNIT_FLAGS", "UNIT_AURA", "PLAYER_MOUNT_DISPLAY_CHANGED"];
 
+post_wrath_ui_fixture! {
 /// Pin `ActionBarButtonEventsFrame`'s post-OnLoad event-registration
 /// surface and the OnEvent script wiring. **Spec/source mismatch** —
 /// PLAN names 7 events; OnLoad at lua:203-218 registers 10 (3 extras
@@ -122,6 +123,7 @@ fn action_bar_button_events_frame_registers_plan_and_source_additional_events_af
              (lua:459)."
         );
     });
+}
 }
 
 const ACTION_EVENTS_FRAME_NAME: &str = "ActionBarActionEventsFrame";
@@ -208,6 +210,7 @@ const ACTION_EVENTS_REGISTERED: &[&str] = &[
 /// to update the spec.
 const ACTION_EVENTS_COMMENTED_OUT: &str = "ACTIONBAR_UPDATE_USABLE";
 
+post_wrath_ui_fixture! {
 /// Pin `ActionBarActionEventsFrame`'s post-OnLoad event-registration
 /// surface, the OnEvent script wiring, and the commented-out
 /// `ACTIONBAR_UPDATE_USABLE` tripwire.
@@ -329,6 +332,7 @@ fn action_bar_action_events_frame_registers_thirty_four_spell_action_events_afte
         );
     });
 }
+}
 
 const MAIN_ACTION_BAR_FRAME_NAME: &str = "MainActionBar";
 const MAIN_ACTION_BAR_XML_SITE: &str = "Mainline/MainActionBar.xml:29";
@@ -378,6 +382,7 @@ const MAIN_ACTION_BAR_REGISTERED_EVENTS: &[&str] =
 #[test]
 fn main_action_bar_registers_action_bar_page_changed_and_neutral_faction_select_result_after_onload()
  {
+    wrath_action_case!(callbacks::main_events);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{MAIN_ACTION_BAR_FRAME_NAME:?}])"))
@@ -473,6 +478,7 @@ const STANCE_BAR_REGISTERED_EVENTS: &[&str] = &["UPDATE_SHAPESHIFT_COOLDOWN"];
 /// registered, OnEvent script wired (single arm at lua:12-14).
 #[test]
 fn stance_bar_registers_update_shapeshift_cooldown_after_onload() {
+    wrath_action_case!(callbacks::stance_events);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{STANCE_BAR_FRAME_NAME:?}])"))
@@ -568,6 +574,7 @@ const PET_ACTION_BAR_SOURCE_ADDITIONAL_EVENTS: &[&str] = &[
 /// source-additional (4), OnEvent script (1).
 #[test]
 fn pet_action_bar_registers_plan_and_source_additional_events_after_onload() {
+    wrath_action_case!(callbacks::pet_events);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{PET_ACTION_BAR_FRAME_NAME:?}])"))
@@ -668,6 +675,7 @@ const VEHICLE_LEAVE_REGISTERED_EVENTS: &[&str] = &[
 /// 5 registrations, OnEvent script (1).
 #[test]
 fn main_menu_bar_vehicle_leave_button_registers_five_events_after_onload() {
+    wrath_action_case!(callbacks::vehicle_leave_events);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{VEHICLE_LEAVE_FRAME_NAME:?}])"))

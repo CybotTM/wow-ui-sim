@@ -465,7 +465,11 @@ pub(super) fn get_texture(state: &mut LuaState) -> LuaResult<u32> {
             frame.and_then(|frame| frame.texture.clone()),
         )
     };
-    let value = if let Some(file_id) = file_id {
+    let value = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        path.as_deref()
+            .map(|filename| create_string(state, filename))
+            .unwrap_or(Val::Nil)
+    } else if let Some(file_id) = file_id {
         Val::Num(file_id as f64)
     } else if let Some(path) = path {
         create_string(state, &path)

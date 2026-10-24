@@ -9,6 +9,7 @@ const SEEDED_ACTION_BAR_PAGE: i32 = 3;
 
 #[test]
 fn actionbar_page_changed_refreshes_main_bar_action_page() {
+    wrath_action_case!(callbacks::page_event);
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         seed_stale_main_bar_page(env);
