@@ -49,3 +49,11 @@ Core metadata used eight bounded GETs. All 1,422 selected archive footer identit
 | `data/blizzard-ui-builds/ptr.json` | `e84a8de626166c53d7cccbe0cba65e141488f8cf315d4b03a36c4f181585da00` |
 | `data/blizzard-ui-files/ptr.txt` | `ba4414999237ad7b50de73a2a61d7dd18fee31b2f2c3b70d5a21ad3cdc34d328` |
 | `data/wow-ui-sim-listfile.csv` | `a86b1ee3173d04cb1e2d60128411d0d38a6bbcbc123af1f8c402be2fe9a9e36f` |
+
+## 70493 source and interrupted-resume proof
+
+At `a9b56d78e`, the exact 70493 identity selector and all 17 pinned producer tests pass; 9 Python generator tests pass. Historical 4cc resume RED and host empty-reply RED precede their respective fixes. All associated PTR compiles report zero warnings.
+
+A sealed CLI (SHA256 `e0c8d685d3b96b3d8e459a41fbdebe215e54fef904b21b637dd0259dd517e295`) performed supported CDN synchronization into a private cache. A 1.030s interrupted launch exited124 with 306 content-verified files, exact schema2 provenance and no completion marker. The next supported launch completed in 8.959s: 4,272 extracted, 306 already present. All 306 prior file mtimes remained unchanged; all 4,578 files matched decoded sizes/content keys, none missing or corrupt. Completion bytes are `ok\n`, provenance SHA256 `5dc36452b60d6f159ca3ad423322ad36a83a30a1881488193aca63bcfc6221b2`. Original persisted CVar stat/hash stayed unchanged across both launches. The separate first full acquisition completed in 14.180s and is not interruption evidence.
+
+Receipts live under verification `p1217-source-slot1-20261023/sync-70493-resume/`; `complete-proof.json` links final integrity/launch receipts. The private cache remains there for integrated startup. Supported sync integrity does not establish startup/panel compatibility; integrated PTR startup follows the master/toc merge, with Retail/Forever preservation still pending.
