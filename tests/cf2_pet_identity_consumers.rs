@@ -76,14 +76,19 @@ fn original_consumer() -> WowLuaEnv {
     assert_selected_consumer();
     let ui = blizzard_ui_dir();
     let env = new_blizzard_addon_env(&ui);
-    supply_names(&env);
     let loaded = load_blizzard_addon_closure_into_env(
         &env,
         &ui,
-        &["Blizzard_SharedXMLGame", "Blizzard_PetBattleUI"],
+        &[
+            "Blizzard_SharedXMLGame",
+            "Blizzard_TextStatusBar",
+            "Blizzard_PetBattleUI",
+        ],
         &[],
     );
     assert!(loaded.iter().any(|name| name == "Blizzard_PetBattleUI"));
+    env.apply_post_load_workarounds();
+    supply_names(&env);
     env.exec("assert(PetBattlePrimaryUnitTooltip and PetBattlePrimaryUnitTooltip.Name and PetBattlePrimaryUnitTooltip.SpeciesName)")
         .expect("original XML tooltip and its name fields");
     env
