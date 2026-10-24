@@ -19,6 +19,21 @@ pub fn run_isolated(selector: &str, body: impl FnOnce()) {
         return;
     }
 
+    let output = run_fixture_case(selector, &executable);
+    print!("{}", String::from_utf8_lossy(&output.stdout));
+    eprint!("{}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "isolated case {selector}: {}",
+        output.status
+    );
+    assert!(
+        String::from_utf8_lossy(&output.stdout).contains("running 1 test\n"),
+        "isolated invocation must select exactly one test"
+    );
+}
+
+fn run_fixture_case(selector: &str, executable: &std::path::Path) -> std::process::Output {
     let fixture = tempfile::tempdir().expect("create case-owned CVar fixture");
     let child = fixture
         .path()
@@ -29,24 +44,10 @@ pub fn run_isolated(selector: &str, body: impl FnOnce()) {
     let storage = data.join("wow-sim");
     std::fs::create_dir_all(&storage).expect("create child-only CVar directory");
     std::fs::write(storage.join("cvars.json"), b"{}").expect("seed empty CVar overrides");
-    let output = Command::new(child)
+    Command::new(child)
         .args([selector, "--exact", "--nocapture"])
         .env("XDG_DATA_HOME", data)
         .env_remove("CF2_TTS_ISOLATED_DATA_HOME")
         .output()
-        .expect("run exact selector with case-owned storage");
-    print!("{}", String::from_utf8_lossy(&output.stdout));
-    eprint!("{}", String::from_utf8_lossy(&output.stderr));
-    assert!(
-        output.status.success(),
-        "isolated case {selector}: {}",
-        output.status
-    );
-    assert!(
-        String::from_utf8_lossy(&output.stdout).contains(
-            "running 1 test
-"
-        ),
-        "isolated invocation must select exactly one test"
-    );
+        .expect("run exact selector with case-owned storage")
 }

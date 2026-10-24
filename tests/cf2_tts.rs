@@ -112,9 +112,12 @@ fn original_tts_slider_settings_survive_mark_saved_and_second_environment() {
             }
             // Explicit inputs, not copied host preferences or prescribed native defaults.
             env.exec(
-        "assert(TextToSpeech_SetRate(TextToSpeechFrame, 0));          assert(TextToSpeech_SetVolume(TextToSpeechFrame, 0))",
-    )
-    .expect("seed live preferences through original slider callbacks");
+                r#"
+                assert(TextToSpeech_SetRate(TextToSpeechFrame, 0))
+                assert(TextToSpeech_SetVolume(TextToSpeechFrame, 0))
+                "#,
+            )
+            .expect("seed live preferences through original slider callbacks");
             assert_eq!(
                 env.eval::<i32>("return C_TTSSettings.GetSpeechRate()")
                     .unwrap(),
