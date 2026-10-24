@@ -58,6 +58,10 @@ const GUILD_ADDONS: &[&str] = &[
 
 fn setup_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    load_guild_ui(env)
+}
+
+fn load_guild_ui(env: WowLuaEnv) -> WowLuaEnv {
     env.set_screen_size(1024.0, 768.0);
 
     {
@@ -644,7 +648,14 @@ fn communities_stream_dropdown_click_opens_menu() {
 #[test]
 fn native_guild_info_panel_populates_motd_details() {
     test_timeout! {
-        let env = setup_env();
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        {
+            // Supply membership and received cache state before native UI loading.
+            let mut state = env.state().borrow_mut();
+            state.world.guild_name = Some("Heroes of Azeroth".into());
+            state.world.guild_info_text = "Mythic-focused guild recruiting".into();
+        }
+        let env = load_guild_ui(env);
         env.exec(include_str!("fixtures/wrath_f03/guild_info.lua"))
             .expect("native guild MOTD and details consumers");
     }
