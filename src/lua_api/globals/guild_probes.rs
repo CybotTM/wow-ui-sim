@@ -391,7 +391,11 @@ fn register_guild_permission_queries(lua: &mut rilua::Lua) -> crate::Result<()> 
     LuaApiMut::register_function(lua, "CanGuildRemove", can_guild_remove)?;
     LuaApiMut::register_function(lua, "CanEditPublicNote", can_edit_public_note)?;
     LuaApiMut::register_function(lua, "CanEditMOTD", can_edit_motd)?;
-    LuaApiMut::register_function(lua, "CanEditGuildInfo", can_edit_guild_info)?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        super::real::wrath_guild_info::register_all(lua)?;
+    } else {
+        LuaApiMut::register_function(lua, "CanEditGuildInfo", can_edit_guild_info)?;
+    }
     LuaApiMut::register_function(lua, "CanGuildPromote", can_guild_promote)?;
     LuaApiMut::register_function(lua, "CanGuildDemote", can_guild_demote)?;
     LuaApiMut::register_function(lua, "IsGuildLeader", is_guild_leader)?;

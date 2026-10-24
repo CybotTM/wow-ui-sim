@@ -44,6 +44,15 @@ pub fn seeded_world_state() -> WorldState {
         random_epic_bg_info: Some(default_random_epic_bg_info()),
         ..WorldState::default()
     };
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        // Native initialized cache, no membership, and no received rank rights.
+        ws.guild_info_text.clear();
+        ws.guild_name = None;
+        ws.guild_rank = None;
+        ws.guild_num_members = 0;
+        ws.guild_members.clear();
+        ws.guild_ranks.clear();
+    }
     apply_collection_defaults(&mut ws);
     ws
 }
