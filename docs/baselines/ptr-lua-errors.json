@@ -24,14 +24,6 @@
     "count": 1
   },
   {
-    "message": "@Interface/AddOns/Blizzard_FrameXMLUtil/Mainline/Blizzard_QuestSuperTracking.lua: ...rd_FrameXMLUtil/Mainline/Blizzard_QuestSuperTracking.lua:52: attempt to call field 'GetSuperTrackedContent' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: ?",
-    "count": 2
-  },
-  {
-    "message": "Lua Error: @Interface/AddOns/Blizzard_FrameXMLUtil/Mainline/Blizzard_QuestSuperTracking.lua: ...rd_FrameXMLUtil/Mainline/Blizzard_QuestSuperTracking.lua:52: attempt to call field 'GetSuperTrackedContent' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: ?\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:59: in function 'GetErrorData'\n[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:72: in function <[Interface/AddOns/Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua]:71>\n?: ?",
-    "count": 2
-  },
-  {
     "message": "@Interface/AddOns/Blizzard_EditMode/Mainline/EditModePresetLayouts.lua: table index is nil\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: ?",
     "count": 1
   },
