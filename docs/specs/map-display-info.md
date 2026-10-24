@@ -22,6 +22,20 @@
 
 `retail-12-1-0` gates this surface. `client-retail` includes it; `client-ptr` includes `retail-12-1-5`, which includes it. Earlier epoch features alone do not enable the getter. Cached Retail/PTR declarations establish source applicability; separate PTR runtime receipts below establish bounded simulator execution, not earlier-profile/native parity.
 
+## CF-2 D — staged Classic publication (2026-10-24)
+
+- [ ] Era and Anniversary must publish this existing per-map projection without enabling a Retail epoch or publishing it on unrelated profiles. Profile decisions use `client_profile::ACTIVE`, never `cfg!`.
+- [ ] Their normally selected original `GroupMembersPinTemplate` must hide on supplied map84=true and show/bind map85=false; revisits, independent live changes, and opposite inputs in another environment must remain observable through original `GroupMembersPinMixin:OnMapChanged`.
+- [ ] Preserve zero returns for absent/removed input, exactly one supplied false boolean, and existing Retail/PTR numeric/security behavior. Do not add Classic coercion claims, defaults, map-flag heuristics, catalogs, Lua setters, or another store.
+
+`tests/cf2_group_map_icons.rs` stages one populated consumer selector, registered only for Era/Anniversary. It loads normal `Blizzard_UIPanels_Game` and `Blizzard_WorldMap` TOC closures without overrides, uses the original XML WorldMapFrame and its `AcquirePin('GroupMembersPinTemplate', provider)`, and prints selected TOCs/metadata/files plus original Lua function provenance and initial loading diagnostics. No surrogate map/frame, replacement consumer, vendor edit, or forced cached-file execution is used.
+
+Selection to reproduce independently in both profiles: `Blizzard_WorldMap_Vanilla.toc` (game, vanilla; RequiredDep MapCanvas + SharedMapDataProviders) → `Blizzard_SharedMapDataProviders_Classic.toc` (game, vanilla/tbc) → `GroupMembersDataProvider.xml` → original Lua `OnMapChanged` lines112–123, target call114. `Blizzard_UIPanels_Game_Classic.toc` supplies `Classic/UnitPositionFrameTemplates.xml`; the pin is the selected XML-derived UnitPositionFrame, not a hand-mixed fixture. The provider's supplied player pin size0 disables only unrelated ping work; original `ShouldShowUnit` is retained.
+
+The consumer selector alone observes hidden/shown states, both selected map IDs when shown, revisits, per-map changes, restoration, and two environments with opposing inputs. Constant true fails shown85; constant false/nil/zero returns fail hidden84; stale or wrong-map input fails opposing-map/live-update observations. These are authored counterexamples, **not executed mutation or RED/GREEN proof**. A setup error before call114 is a blocker, not RED. Separate arity coverage is preservation, not consumer acceptance.
+
+Static staging leaves `src/c_api/c_map.rs` and all producer code unchanged. No compilation, runtime selection, RED/GREEN, stock delta, full-suite, prefork, or native parity is claimed. The existing applicability section above describes the current producer; narrow Classic publication remains pending accepted RED in an admitted slot.
+
 ## Tests asserting this spec
 
 `tests/c_map_probes.rs`, gated by `retail-12-1-0`:
@@ -32,7 +46,12 @@
 - `get_map_display_info_untainted_secret_returns_one_supplied_bool`
 - `get_map_display_info_tainted_caller_accepts_ordinary_and_rejects_secret`
 
-All five executed PASS in the saved default integration artifact. Security tests use an authentic host-secret number and stamped addon closure; taint/wrapper preservation is asserted. Map 85 is a test-only catalog fixture, not a native map fact.
+Staged Classic selectors (not yet compiled/executed):
+
+- `cf2_group_map_icons::original_group_pin_tracks_map_display_visibility_and_live_updates` — populated original-consumer candidate; must independently RED/GREEN on Era and Anniversary.
+- `cf2_group_map_icons::map_display_absence_removal_and_supplied_false_preserve_return_arity` — simulator-input preservation, not original-consumer RED.
+
+All five Retail-epoch probes executed PASS in the saved default integration artifact. Security tests use an authentic host-secret number and stamped addon closure; taint/wrapper preservation is asserted. Map 85 is a test-only catalog fixture, not a native map fact.
 
 ## Admitted evidence
 
