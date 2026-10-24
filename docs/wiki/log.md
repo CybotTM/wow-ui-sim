@@ -1,3 +1,7 @@
+## [2026-10-24] source | CF-2 club unread staging
+
+[Shared stream model](systems/club-membership.md#unread-streams-cf-2) and [contract](../specs/club-unread.md) record original FrameXMLUtil/MicroMenu consumers, static callable-mutant contradictions and the schema-first RED commit. Four unread endpoints replace the empty-settings shim; existing stream queries share Club snapshots. No builds/tests/slots or native-parity claim; Retail/PTR/Forever proof deferred.
+
 ## [2026-10-24] proof | Bounded reload XML source reuse
 
 [Contract matrix](../specs/reload-ui.md#generated-xml-layer-reconstruction) records Forever RED16 at0d1e54849, then Forever/default Retail0/0 reload compiles at23f1f629a.27 exact cases/profile, zero-warning builds/checks and formatting pass; current CVars remain unchanged. [Mechanics](systems/reload-ui.md#generated-xml-layer-arguments) retain VM-local objects and XML ordering. Stock startup, paired timing and full Ellesmere acceptance remain separate.

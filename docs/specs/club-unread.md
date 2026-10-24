@@ -31,7 +31,7 @@ Original `Blizzard_FrameXMLUtil/CommunitiesUtil.lua` :185–242 supplies the per
 
 ## Tests asserting this spec
 
-`tests/cf2_club_unread.rs` is discovered by the existing integration test harness. All three selectors compile for Retail, PTR and Forever. No test was run during staging.
+`tests/cf2_club_unread.rs` is discovered by the existing integration test harness. All three selectors are enabled for Retail, PTR and Forever; compilation is unverified. Schema/test commit `02ea638a0` precedes producer publication, so the original-consumer RED is not intended to depend on missing Rust types. No test was run during staging.
 
 ### Selection evidence (static only)
 
