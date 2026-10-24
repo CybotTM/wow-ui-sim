@@ -136,11 +136,12 @@ pub(super) fn sync_to(root: &Path) -> crate::Result<super::SyncSummary> {
     let build = build()?;
     let expected = provenance()?;
     let client = reqwest::blocking::Client::builder()
+        .redirect(reqwest::redirect::Policy::none())
         .timeout(std::time::Duration::from_secs(30))
         .build()
         .map_err(|cause| crate::Error::Other(format!("create Blizzard CDN client: {cause}")))?;
     prepare_sync_cache(root, &expected)?;
-    let roots = vec!["https://us.cdn.blizzard.com/tpr/wow/".to_owned()];
+    let roots = super::pinned_cdn::fetch_roots(&client, &build.product)?;
     let workers = 16.min(build.files.len()).max(1);
     let counts = std::thread::scope(|scope| {
         let handles: Vec<_> = (0..workers)

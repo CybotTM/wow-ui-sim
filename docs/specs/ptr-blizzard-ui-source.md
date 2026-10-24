@@ -8,7 +8,8 @@ PTR targets `wowt` **12.1.7.70493** (user decision 2026-10-23) using an immutabl
 - [x] Verify encoded BLTE identity and decoded content size/hash before accepting source bytes.
 - [x] Require exact HTTP partial-content ranges; reject full-archive or wrong-range responses.
 - [x] Retry transient HTTP failures with bounded backoff and respect `Retry-After`.
-- [ ] Regenerate the real 70493 index/path manifest and mapping before synchronizing its complete source set; do not relabel the committed 4,570-entry 70424 snapshot. Write completion only after all entries succeed and reuse only hash-matching files. Historical 70424 acquisition hit CDN GET failures and lost partial files between launches; exact `4cc5d9b30` process-boundary RED now confirms that the second preparation deletes a saved partial file after child exit 23. Preparation now persists exact provenance before workers write files, without a completion marker; mismatched provenance still invalidates stale source. Historical-input producer GREEN and advertised-host iteration remain pending before regeneration/sync.
+- [ ] Regenerate the real 70493 index/path manifest and mapping before synchronizing its complete source set; do not relabel the committed 4,570-entry 70424 snapshot. Write completion only after all entries succeed and reuse only hash-matching files. Historical 70424 acquisition hit CDN GET failures and lost partial files between launches; exact `4cc5d9b30` process-boundary RED now confirms that the second preparation deletes a saved partial file after child exit 23. Preparation now persists exact provenance before workers write files, without a completion marker; mismatched provenance still invalidates stale source. The process-boundary resume and stale-source invalidation tests now pass on historical 70424 inputs. These are producer controls, not 70424 runtime acceptance.
+- [x] Discover every advertised CDN host/HTTPS server alias across all product CDN rows; preserve path/scheme, deduplicate and prefer HTTPS. Try the next advertised endpoint on transport, range or content failure while preserving pinned BLTE/content verification, exact bounded ranges, per-endpoint transient retries and `Retry-After`. Discovery failure is explicit, never a hard-coded or Gethe content fallback. The empty-reply/valid-second-host regression was observed RED before implementation; post-fix GREEN remains pending.
 - [ ] Load PTR startup and representative panels against the selected cache. The existing baseline belongs to 69594, not 70493; capture waits for the matching epoch lane. A completed cache is not compatibility proof.
 
 ## How it works
@@ -22,7 +23,8 @@ PTR targets `wowt` **12.1.7.70493** (user decision 2026-10-23) using an immutabl
 - `data/blizzard-ui-builds/ptr.json`: Blizzard build/config identity, Gethe revision, and source encoding/content keys with archive locations.
 - `data/blizzard-ui-files/ptr.txt`: matching complete source path inventory.
 - `src/blizzard_ui_sync/pinned.rs`: provenance, cache validation and bounded parallel synchronization.
-- `src/blizzard_ui_sync/pinned_download.rs`: range retrieval and BLTE/content validation.
+- `src/blizzard_ui_sync/pinned_download.rs`: advertised-root iteration, shared metadata/range request retries and BLTE/content validation.
+- `src/blizzard_ui_sync/pinned_cdn.rs`: bounded product CDN discovery and endpoint selection.
 - `Cargo.toml`: direct `cascette-formats` dependency reuses the already-pinned BLTE decoder; `httpdate` parses HTTP-date `Retry-After` values.
 
 ## Tests asserting this spec

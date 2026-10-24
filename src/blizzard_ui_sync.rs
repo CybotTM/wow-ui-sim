@@ -4,6 +4,8 @@
 mod locale;
 mod pinned;
 #[cfg(feature = "casc")]
+mod pinned_cdn;
+#[cfg(feature = "casc")]
 mod pinned_download;
 mod profile_cache;
 mod wrath_download;
