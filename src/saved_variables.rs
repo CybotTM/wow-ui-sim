@@ -14,6 +14,9 @@
 #[cfg(test)]
 #[path = "saved_variables_details_tests.rs"]
 mod saved_variables_details_tests;
+#[cfg(test)]
+#[path = "saved_variables_model_tests.rs"]
+mod saved_variables_model_tests;
 #[path = "saved_variables_parse.rs"]
 mod saved_variables_parse;
 #[path = "saved_variables_serialize.rs"]
