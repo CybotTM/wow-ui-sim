@@ -6,7 +6,6 @@
 ))]
 
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::game_data::default_party;
 use wow_ui_sim::lua_api::state::LfdDungeonInfo;
 
 fn exec_original(env: &WowLuaEnv, relative: &str) {
@@ -48,7 +47,7 @@ fn scenario_record(id: i32, min_level: i32, max_level: i32, random: bool) -> Lfd
 fn seed_scenario_state(env: &WowLuaEnv, random: bool) {
     let mut state = env.state().borrow_mut();
     state.player.level = 60;
-    let mut member = default_party().into_iter().next().expect("party seed");
+    let mut member = state.party_members.first().expect("party seed").clone();
     member.level = 49;
     member.connected = true;
     state.party_members = vec![member];

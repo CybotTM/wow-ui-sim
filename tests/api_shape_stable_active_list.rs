@@ -10,7 +10,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 #[test]
 fn stable_active_list_shape_blocker_contract() {
     crate::common::with_timeout(90, || {
-        let ui = crate::common::blizzard_ui_dir();
+        let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
         let env = crate::common::blizzard_addon_harness::new_blizzard_addon_env(&ui);
         env.exec(
             r#"
