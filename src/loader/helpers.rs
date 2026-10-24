@@ -316,18 +316,34 @@ pub fn resolve_anchor_relative(
     parent_name: &str,
     default_relative: &str,
 ) -> String {
+    resolve_anchor_relative_with_refs(
+        anchor,
+        parent_expr,
+        parent_name,
+        default_relative,
+        &mut lua_global_ref,
+    )
+}
+
+fn resolve_anchor_relative_with_refs(
+    anchor: &crate::xml::AnchorXml,
+    parent_expr: &str,
+    parent_name: &str,
+    default_relative: &str,
+    global_ref: &mut impl FnMut(&str) -> String,
+) -> String {
     if let Some(key) = anchor.relative_key.as_deref() {
-        resolve_relative_key(key, parent_expr)
-    } else {
-        match anchor.relative_to.as_deref() {
-            Some("$parent") => parent_expr.to_string(),
-            Some(r) if r.contains("$parent") || r.contains("$Parent") => lua_global_ref(
-                &r.replace("$parent", parent_name)
-                    .replace("$Parent", parent_name),
-            ),
-            Some(r) => lua_global_ref(r),
-            None => default_relative.to_string(),
+        return resolve_relative_key(key, parent_expr);
+    }
+    match anchor.relative_to.as_deref() {
+        Some("$parent") => parent_expr.to_string(),
+        Some(name) => {
+            let name = name
+                .replace("$parent", parent_name)
+                .replace("$Parent", parent_name);
+            global_ref(&name)
         }
+        None => default_relative.to_string(),
     }
 }
 
@@ -344,12 +360,36 @@ pub fn generate_set_point_code(
     parent_name: &str,
     default_relative: &str,
 ) -> String {
+    generate_set_point_code_with_refs(
+        anchors,
+        target_var,
+        parent_expr,
+        parent_name,
+        default_relative,
+        lua_global_ref,
+    )
+}
+
+pub(super) fn generate_set_point_code_with_refs(
+    anchors: &crate::xml::AnchorsXml,
+    target_var: &str,
+    parent_expr: &str,
+    parent_name: &str,
+    default_relative: &str,
+    mut global_ref: impl FnMut(&str) -> String,
+) -> String {
     let mut code = String::new();
     for anchor in &anchors.anchors {
         let point = anchor.point.as_deref().unwrap_or("TOPLEFT");
         let relative_point = anchor.relative_point.as_deref().unwrap_or(point);
         let (x, y) = resolve_anchor_offset(anchor);
-        let rel = resolve_anchor_relative(anchor, parent_expr, parent_name, default_relative);
+        let rel = resolve_anchor_relative_with_refs(
+            anchor,
+            parent_expr,
+            parent_name,
+            default_relative,
+            &mut global_ref,
+        );
         // relativeKey chains can reference frames that don't exist yet at load
         if anchor.relative_key.is_some() {
             let key = anchor.relative_key.as_deref().unwrap_or_default();

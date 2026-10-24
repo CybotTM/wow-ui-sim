@@ -16,6 +16,13 @@
 - [x] Preserve HookScript order, self/arguments, solo-hook result passthrough, chained-result discard and error boundaries; preserve direct/indirect attribute callbacks, per-frame state and observable taint before and after reload.
 - [x] Preserve real XML method-handler inheritance/chaining order, result passthrough, per-frame method/upvalue isolation and fresh frame/script state after ReloadUI when reusing its constant factory prototype.
 
+### Generated XML layer reconstruction
+
+- [ ] Reuse identical generated layer operations across instance identities and fresh ReloadUI VMs. Sixteen identical texture operations may compile at most one source chunk per reload, measured after warm initial loading over two real reconstructions.
+- [ ] Pass instance names, parent references and substituted relativeTo targets as invocation data; preserve creation order, named/anonymous identity, parentKeys/arrays, region properties, anchors, scripts, scoped environments and fresh objects. Never rewrite authored Lua or retain old-VM handles to obtain reuse.
+
+Repaired-fixture prerequisite at `0d1e54849`: both reload behaviors complete, then the first budget assertion reports16 source compiles against1. Seven factory and15 reload/XML preservation controls pass. The source producer now supplies per-invocation argument tables through the existing bytecode path; Forever/default Retail GREEN and new mixed-region preservation remain pending. This bounded compile-count proof is not paired wall-time or unchanged Ellesmere acceptance.
+
 ### File-backed client state
 
 - [x] Restore the file-backed EditMode cache using the initial layout name and config, without re-importing ServerSnapshot. The original EditMode consumer must select the same active layout after ReloadUI. Native reread timing/ordering is INFERRED and unasserted.

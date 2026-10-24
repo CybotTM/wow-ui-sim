@@ -2,9 +2,10 @@
 
 use super::error::LoadError;
 use super::helpers::{
-    escape_lua_string, generate_scripts_code_for_target, generate_set_point_code, get_size_values,
-    lua_global_ref, lua_table_field_ref, resolve_child_name, resolve_lua_escapes,
+    escape_lua_string, generate_scripts_code_for_target, get_size_values, lua_table_field_ref,
+    resolve_child_name, resolve_lua_escapes,
 };
+use super::xml_lua_args::XmlLuaArgs;
 use crate::lua_api::LoaderEnv;
 
 /// Resolve a text key through the global strings table.
@@ -127,15 +128,16 @@ fn build_fontstring_create_code(
     draw_layer: &str,
     sub_level: i32,
     fs_name: &str,
+    args: &mut XmlLuaArgs,
 ) -> String {
     let inherits = fontstring.inherits.as_deref().unwrap_or("");
     let mut code = format!(
         r#"
         local parent = {}
-        local fs = parent:CreateFontString("{}", "{}", {})
+        local fs = parent:CreateFontString({}, "{}", {})
         "#,
-        lua_global_ref(parent_ref_name),
-        escape_lua_string(fs_name),
+        args.bind_frame_ref(parent_ref_name),
+        args.bind_string(fs_name),
         escape_lua_string(draw_layer),
         if inherits.is_empty() {
             "nil".to_string()
@@ -175,13 +177,14 @@ fn build_fontstring_extra_code(
     fontstring: &crate::xml::FontStringXml,
     parent_name: &str,
     resolved_text: &Option<String>,
+    args: &mut XmlLuaArgs,
 ) -> String {
     let mut code = String::new();
     append_fontstring_font_code(&mut code, fontstring);
     append_fontstring_text_code(&mut code, resolved_text);
     code.push_str(&generate_fontstring_visual_code(fontstring));
     code.push_str(&generate_fontstring_parent_code(fontstring));
-    append_fontstring_anchor_code(&mut code, fontstring, parent_name);
+    append_fontstring_anchor_code(&mut code, fontstring, parent_name, args);
     append_fontstring_key_values_code(&mut code, fontstring);
     append_fontstring_scripts_code(&mut code, fontstring);
     append_fontstring_alpha_visibility_code(&mut code, fontstring);
@@ -210,15 +213,10 @@ fn append_fontstring_anchor_code(
     code: &mut String,
     fontstring: &crate::xml::FontStringXml,
     parent_name: &str,
+    args: &mut XmlLuaArgs,
 ) {
     if let Some(anchors) = &fontstring.anchors {
-        code.push_str(&generate_set_point_code(
-            anchors,
-            "fs",
-            "parent",
-            parent_name,
-            "parent",
-        ));
+        code.push_str(&args.anchor_code(anchors, "fs", parent_name));
     } else if fontstring.set_all_points != Some(true) {
         let default_point = default_fontstring_anchor_point(fontstring);
         code.push_str(&format!(
@@ -306,14 +304,22 @@ pub(super) fn build_fontstring_lua(
     sub_level: i32,
     fs_name: &str,
     resolved_text: &Option<String>,
+    args: &mut XmlLuaArgs,
 ) -> String {
-    let mut code =
-        build_fontstring_create_code(fontstring, parent_ref_name, draw_layer, sub_level, fs_name);
+    let mut code = build_fontstring_create_code(
+        fontstring,
+        parent_ref_name,
+        draw_layer,
+        sub_level,
+        fs_name,
+        args,
+    );
     code.push_str(&generate_fontstring_mixin_code(fontstring));
     code.push_str(&build_fontstring_extra_code(
         fontstring,
         subst_parent_name,
         resolved_text,
+        args,
     ));
     code
 }
@@ -333,6 +339,7 @@ pub fn create_fontstring_from_xml_with_ref(
 
     let fs_name = resolve_child_name(fontstring.name.as_deref(), parent_name, "__fs_");
     let resolved_text = resolve_fontstring_text(fontstring.text.as_deref());
+    let mut args = XmlLuaArgs::default();
     let lua_code = build_fontstring_lua(
         fontstring,
         parent_ref_name,
@@ -341,9 +348,10 @@ pub fn create_fontstring_from_xml_with_ref(
         sub_level,
         &fs_name,
         &resolved_text,
+        &mut args,
     );
 
-    env.exec(&lua_code).map_err(|e| {
+    env.exec_with_args(&lua_code, &args.values).map_err(|e| {
         LoadError::Lua(format!(
             "Failed to create fontstring {} on {}: {}",
             fs_name, parent_name, e
