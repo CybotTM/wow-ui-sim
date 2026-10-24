@@ -118,7 +118,7 @@ fn getter_results_preserve_native_arity_types_ignored_arguments_and_cache_indepe
         let mut sim = env.state().borrow_mut();
         sim.world.guild_id = 0;
         sim.world.guild_info_text = "retained cache without membership".into();
-        sim.events.clear();
+        sim.events.drain();
     }
     env.exec(
         r#"
