@@ -32,6 +32,38 @@ fn assert_original_source(env: &WowLuaEnv, function: &str, suffix: &str) {
     .expect("original cached consumer provenance");
 }
 
+fn select_original_debuff(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        assert(CompactArenaFrame and #CompactArenaFrame.memberUnitFrames > 0)
+        local member = CompactArenaFrame.memberUnitFrames[1]
+        Cf2AuraDebuff = member.DebuffFrame
+        assert(Cf2AuraDebuff and Cf2AuraDebuff:GetParent() == member,
+            'must use the existing normal arena member child')
+        assert(Cf2AuraDebuff.Update == ArenaUnitFrameDebuffMixin.Update)
+        assert(Cf2AuraDebuff.SetUnit == ArenaUnitFrameDebuffMixin.SetUnit)
+        assert(Cf2AuraDebuff:GetScript('OnEvent') == ArenaUnitFrameDebuffMixin.OnEvent)
+        "#,
+    )
+    .expect("normal arena member, child and installed handler identity");
+    for function in [
+        "Cf2AuraDebuff.Update",
+        "Cf2AuraDebuff.SetUnit",
+        "Cf2AuraDebuff:GetScript('OnEvent')",
+    ] {
+        assert_original_source(
+            env,
+            function,
+            "Blizzard_UnitFrame/Mainline/CompactArenaFrame.lua",
+        );
+    }
+    assert_original_source(
+        env,
+        "Cf2AuraDebuff:GetParent().UpdatePrivateAuras",
+        "Blizzard_UnitFrame/Shared/CompactUnitFrame.lua",
+    );
+}
+
 fn fixture_aura(id: i32) -> AuraInfo {
     AuraInfo {
         name: format!("CF-2 blocked aura {id}"),
@@ -66,26 +98,11 @@ fn seed_blockable_auras(env: &WowLuaEnv) {
 
 #[test]
 fn original_arena_cleanup_restores_selected_unit_aura_enumeration() {
-    let env = load_original_consumer("Blizzard_UnitFrame");
+    let env = load_original_consumer("Blizzard_CompactRaidFrames");
     seed_blockable_auras(&env);
-    assert_original_source(
-        &env,
-        "ArenaUnitFrameDebuffMixin.Update",
-        "Blizzard_UnitFrame/Mainline/CompactArenaFrame.lua",
-    );
-    assert_original_source(
-        &env,
-        "BasePrivateAuraBehaviorMixin.UpdatePrivateAuras",
-        "Blizzard_UnitFrame/Shared/CompactUnitFrame.lua",
-    );
+    select_original_debuff(&env);
     env.exec(
         r#"
-        -- All behavior comes from original mixins; real widgets hold output.
-        -- BasePrivateAuraBehaviorMixin is Blizzard's own no-anchor behavior.
-        Cf2AuraParent = CreateFrame('Frame', nil, UIParent)
-        Mixin(Cf2AuraParent, BasePrivateAuraBehaviorMixin)
-        Cf2AuraDebuff = CreateFrame('Frame', nil, Cf2AuraParent, 'ArenaUnitFrameDebuffTemplate')
-        Cf2AuraDebuff.unitToken = 'party1'
         assert(C_LossOfControl.GetActiveLossOfControlDataCountByUnit('party1') == 0,
             'fixture must use no-loss-of-control branch')
         C_UnitAuras.AddBlockedAura('player', 101)
@@ -96,7 +113,7 @@ fn original_arena_cleanup_restores_selected_unit_aura_enumeration() {
         Cf2AuraDebuff:Show()
         "#,
     )
-    .expect("real arena output fixture and existing public blocked-aura seeding");
+    .expect("existing public blocked-aura seeding on the normal arena member");
     let errors_before = env.state().borrow().lua_errors.len();
     env.exec(
         r#"
@@ -106,6 +123,7 @@ fn original_arena_cleanup_restores_selected_unit_aura_enumeration() {
                 C_UnitAuras.AddBlockedAura('party1', 202)
                 assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil)
             end
+            Cf2AuraDebuff:SetUnit('party1')
             Cf2AuraDebuff:Update()
             assert(Cf2AuraDebuff.auraData == nil, 'no active loss-of-control aura')
             assert(not Cf2AuraDebuff:IsShown(), 'original cleanup hides stale debuff widget')
@@ -114,6 +132,24 @@ fn original_arena_cleanup_restores_selected_unit_aura_enumeration() {
             assert(C_UnitAuras.GetAuraDataByIndex('party1', 3, 'HELPFUL') == nil)
             assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil,
                 'clearing party1 must preserve another unit block')
+        end
+        -- Opposite populated selection rejects an always-party1 producer independently.
+        for pass = 1, 2 do
+            C_UnitAuras.AddBlockedAura('party1', 201)
+            C_UnitAuras.AddBlockedAura('party1', 202)
+            C_UnitAuras.AddBlockedAura('player', 101)
+            assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil)
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
+            assert(C_LossOfControl.GetActiveLossOfControlDataCountByUnit('player') == 0)
+            Cf2AuraDebuff:SetUnit('player')
+            Cf2AuraDebuff:Update()
+            Cf2AuraDebuff:Update()
+            assert(Cf2AuraDebuff.auraData == nil)
+            assert(not Cf2AuraDebuff:IsShown())
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL').auraInstanceID == 101)
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 2, 'HELPFUL') == nil)
+            assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil,
+                'clearing player must preserve populated party blocks')
         end
         "#,
     )
@@ -131,18 +167,12 @@ fn original_arena_cleanup_restores_selected_unit_aura_enumeration() {
 /// changing this policy cannot weaken the assigned-unit acceptance selector.
 #[test]
 fn original_arena_unassigned_unit_rejects_nil_best_guess() {
-    let env = load_original_consumer("Blizzard_UnitFrame");
+    let env = load_original_consumer("Blizzard_CompactRaidFrames");
     seed_blockable_auras(&env);
-    assert_original_source(
-        &env,
-        "ArenaUnitFrameDebuffMixin.Update",
-        "Blizzard_UnitFrame/Mainline/CompactArenaFrame.lua",
-    );
+    select_original_debuff(&env);
     env.exec(
         r#"
-        local parent = CreateFrame('Frame', nil, UIParent)
-        Mixin(parent, BasePrivateAuraBehaviorMixin)
-        local debuff = CreateFrame('Frame', nil, parent, 'ArenaUnitFrameDebuffTemplate')
+        local debuff = Cf2AuraDebuff
         assert(type(C_UnitAuras.ClearBlockedAuras) == 'function',
             'nil rejection must come from the real endpoint, not a missing member')
         C_UnitAuras.AddBlockedAura('player', 101)
@@ -172,6 +202,25 @@ fn original_arena_unassigned_unit_rejects_nil_best_guess() {
         assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL').auraInstanceID == 201)
         assert(C_UnitAuras.GetAuraDataByIndex('party1', 2, 'HELPFUL').auraInstanceID == 202)
         assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
+
+        -- Re-populate both buckets and reverse selection after nil recovery.
+        for pass = 1, 2 do
+            C_UnitAuras.AddBlockedAura('party1', 201)
+            C_UnitAuras.AddBlockedAura('party1', 202)
+            C_UnitAuras.AddBlockedAura('player', 101)
+            assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil)
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
+            assert(C_LossOfControl.GetActiveLossOfControlDataCountByUnit('player') == 0)
+            debuff:SetUnit('player')
+            debuff:Update()
+            debuff:Update()
+            assert(debuff.auraData == nil)
+            assert(not debuff:IsShown())
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL').auraInstanceID == 101)
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 2, 'HELPFUL') == nil)
+            assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil,
+                'clearing player must preserve populated party blocks')
+        end
         "#,
     )
     .expect("best-guess nil rejection isolated from assigned-unit cleanup acceptance");

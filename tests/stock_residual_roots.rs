@@ -121,6 +121,24 @@ fn original_raid_manager_initializes_divider_pools_after_arena_cleanup() {
             assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil,
                 'selected-unit cleanup must not clear another unit block')
         end
+        -- Reverse selection with both units blocked to reject hardcoded party1 cleanup.
+        for pass = 1, 2 do
+            C_UnitAuras.AddBlockedAura('party1', 201)
+            C_UnitAuras.AddBlockedAura('party1', 202)
+            C_UnitAuras.AddBlockedAura('player', 101)
+            assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil)
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
+            assert(C_LossOfControl.GetActiveLossOfControlDataCountByUnit('player') == 0)
+            StockResidualDebuff:SetUnit('player')
+            StockResidualDebuff:Update()
+            StockResidualDebuff:Update()
+            assert(StockResidualDebuff.auraData == nil)
+            assert(not StockResidualDebuff:IsShown())
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL').auraInstanceID == 101)
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 2, 'HELPFUL') == nil)
+            assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil,
+                'clearing player must preserve populated party blocks')
+        end
 
         -- Explicit SetUnit(nil)/Update acceptance remains a native-evidence gap.
         -- Do not turn this assigned-unit selector into an invented nil policy.

@@ -7,7 +7,8 @@ Retail/PTR original `ArenaUnitFrameDebuffMixin.Update` and the original CompactR
 ## Required behavior
 
 - `C_UnitAuras.ClearBlockedAuras(unit)` removes display blocks for the selected unit from the same effective block set used by `AddBlockedAura` and visible enumeration. Existing backing is `C_UnitAuras._blockedAuras`; do not clear the unused `SimState.blocked_auras_by_unit` field or introduce a second store.
-- Clearing party1 restores supplied aura instance IDs201/202; player101 remains blocked. Repeated clears and re-block/re-clear preserve aura DTOs and other units.
+- Clearing party1 restores supplied aura instance IDs201/202; player101 remains blocked. Each selector must independently re-block both units, then clear player101 while party201/202 stay blocked. Repeated clears and re-block/re-clear preserve aura DTOs and other units.
+- All selectors use the existing `CompactArenaFrame.memberUnitFrames[1].DebuffFrame` from the normal CompactRaidFrames dependency closure, with original parent, methods and installed OnEvent handler. No substitute parent/child or private-aura mixin replacement; assigned transitions use original SetUnit/Update.
 - Original raid-manager OnLoad must continue through both divider-pool assignments. Original GROUP_ROSTER_UPDATE then PLAYER_ENTERING_WORLD, options-flow updates, pool acquire/release/reacquire must complete. Tests must retain initial OnLoad errors; no manually supplied pools.
 - Place the endpoint under `src/c_api/`, with only the narrow existing-state sharing changes necessary. No invented native defaults or ambient inputs.
 
@@ -17,9 +18,9 @@ Retail/PTR original `ArenaUnitFrameDebuffMixin.Update` and the original CompactR
 
 | Selector in integration target | Profiles | Required observations | Current proof |
 |---|---|---|---|
-| `cf2_combat_aura_controls::original_arena_cleanup_restores_selected_unit_aura_enumeration` | Retail/PTR | Original selected arena cleanup; party201/202 restored, player101 blocked, repeat and re-block passes, unchanged DTOs | Authored; execution pending |
-| `stock_residual_roots::original_raid_manager_initializes_divider_pools_after_arena_cleanup` | Retail/PTR | Initial selected XML OnLoad retained; real arena child; assigned-unit transitions; original roster/world order; real divider pools acquire/release/reacquire | Authored; execution pending |
-| `cf2_combat_aura_controls::original_arena_unassigned_unit_rejects_nil_best_guess` | Retail/PTR | Assigned clear first; original SetUnit(nil) rejects; omitted input rejects; blocks survive rejection and reassignment clears correctly | Authored best guess; execution pending |
+| `cf2_combat_aura_controls::original_arena_cleanup_restores_selected_unit_aura_enumeration` | Retail/PTR | Existing arena member child and installed handler provenance; party201/202 restored with player blocked, then player101 restored with party blocked; repeat/re-block passes, unchanged DTOs | Authored; execution pending |
+| `stock_residual_roots::original_raid_manager_initializes_divider_pools_after_arena_cleanup` | Retail/PTR | Initial selected XML OnLoad retained; real arena child; both populated party/player selections preserve opposite blocks; original roster/world order; real divider pools acquire/release/reacquire | Authored; execution pending |
+| `cf2_combat_aura_controls::original_arena_unassigned_unit_rejects_nil_best_guess` | Retail/PTR | Existing arena member; assigned clear before/after original SetUnit(nil) rejection; omitted input rejects; both populated party/player selections preserve opposite blocks | Authored best guess; execution pending |
 
 Existing B-AURA and U-DIVIDER test ownership was adopted rather than reimplemented. The U-DIVIDER case retains the normal initial load, not a repaired/recreated manager after failed initialization.
 
@@ -35,7 +36,7 @@ Source-selected `CompactArenaFrameMixin.RefreshMembers` assigns `"arena"..index`
 
 ## Runtime selection
 
-For Retail/PTR, normal game-screen closure starts at `Blizzard_CompactRaidFrames`, depends on `Blizzard_RaidFrame` and `Blizzard_UnitFrame`, and selects the Mainline manager via `[Family]`. `Blizzard_UnitFrame_Mainline.toc` has `AllowLoad: Game`, `AllowLoadGameType: mainline` and selects Mainline CompactArenaFrame Lua/XML. Tests load this closure without overrides and assert original debug source provenance. Source selection is not observed runtime acceptance until the tests execute.
+For Retail/PTR, normal game-screen closure starts at `Blizzard_CompactRaidFrames`, depends on `Blizzard_RaidFrame` and `Blizzard_UnitFrame`, and selects the Mainline manager via `[Family]`. `Blizzard_UnitFrame_Mainline.toc` has `AllowLoad: Game`, `AllowLoadGameType: mainline` and selects Mainline CompactArenaFrame Lua/XML. All three selectors load this closure without overrides and assert original debug source provenance. Aura-controls also assert the existing child's SetUnit/Update and installed OnEvent identity/provenance, plus the real parent's private-aura method provenance. Source selection is not observed runtime acceptance until the tests execute.
 
 ## Full-stock gate
 
