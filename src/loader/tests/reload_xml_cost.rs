@@ -25,6 +25,7 @@ fn write_xml_fixture(root: &Path) {
                         <Texture parentKey="Ink">
                             <Size x="32" y="16"/>
                             <Color r="0.25" g="0.5" b="0.75" a="1"/>
+                            <Anchors><Anchor point="TOPLEFT"/></Anchors>
                         </Texture>
                     </Layer></Layers>
                 </Frame>"#
@@ -125,6 +126,10 @@ fn assert_reload_compile_budget(stderr: &str) {
                     .any(|field| field == "phase=xml-frame")
             })
             .count();
+        eprintln!(
+            "[reload-xml-cost] reload={} source_compiles={compiles} budget={MAX_SOURCE_COMPILES_PER_RELOAD}",
+            index + 1
+        );
         assert!(
             compiles <= MAX_SOURCE_COMPILES_PER_RELOAD,
             "reload {} compiled {compiles} generated XML chunks for {INSTANCE_COUNT} identical \
