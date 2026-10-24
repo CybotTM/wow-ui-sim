@@ -148,4 +148,12 @@ pub struct WrathLegacyState {
     /// Spell -> supplied creature metadata; empty until the host supplies it.
     /// Native metadata for the default mount catalog is unresolved.
     pub companion_metadata: HashMap<u32, CompanionMetadata>,
+    /// Supplied Q5 on-hold recovery markers; timing stays in spell_cooldowns.
+    pub cooldowns_on_hold: HashSet<u32>,
+    /// Supplied spell effects 78/47; generated spell data lacks effect kinds.
+    pub cooldown_excluded_spells: HashSet<u32>,
+    /// Supplied start-recovery membership, distinct from ordinary categories.
+    pub spell_start_recovery_categories: HashMap<u32, i32>,
+    /// Category of the existing gcd interval; None means applicability unknown.
+    pub gcd_category: Option<i32>,
 }

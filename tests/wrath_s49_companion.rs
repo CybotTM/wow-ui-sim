@@ -186,6 +186,10 @@ fn companion_cooldown_own_timer_seconds_and_expiry() {
         .companion_metadata
         .clear();
     assert_companion_cooldown(&env, 90.25, 300.5);
+    env.state().borrow_mut().wrath_legacy.cooldown_excluded_spells.insert(spell);
+    assert_companion_cooldown(&env, 0.0, 0.0);
+    env.state().borrow_mut().wrath_legacy.cooldown_excluded_spells.remove(&spell);
+    assert_companion_cooldown(&env, 90.25, 300.5);
     env.exec(
         r#"
         assert(select('#', GetCompanionCooldown('MOUNT', 1)) == 3)
