@@ -254,6 +254,18 @@ class StaticSelectionTests(unittest.TestCase):
             ["CONDITIONAL_APPLICABLE", "UNKNOWN", "CONDITIONAL_APPLICABLE", "UNKNOWN"],
         )
 
+    def test_prefix_colon_locale_gate_is_exclusion_not_missing_cache(self):
+        files = {
+            "Blizzard_A/Blizzard_A.toc": "[AllowLoadTextLocale: zhCN] Chinese.lua\n",
+            "Blizzard_A/Chinese.lua": "function ChineseOnly() end\n",
+        }
+        result = self.overlay([row("ChineseOnly")], files)
+        self.assertEqual(result["entries"][0]["ptr"]["applicability"], "UNKNOWN")
+        self.assertEqual(
+            [gap["reason"] for gap in result["selection_gaps"]],
+            ["non-public environment or non-enUS file; no global witness"],
+        )
+
     def test_nested_frame_script_file_is_not_a_document_include(self):
         files = {
             "Blizzard_A/Blizzard_A.toc": "A.xml\n",

@@ -394,8 +394,7 @@
     {
       "path": "Blizzard_FullscreenBrowser/Blizzard_FullscreenBrowser.toc",
       "line": 7,
-      "target": "",
-      "reason": "TOC entry missing from pin"
+      "reason": "non-public environment or non-enUS file; no global witness"
     },
     {
       "path": "Blizzard_PingUI/Blizzard_PingUI.toc",
@@ -420,8 +419,7 @@
     {
       "path": "Blizzard_FullscreenBrowser/Blizzard_FullscreenBrowser.toc",
       "line": 8,
-      "target": "",
-      "reason": "TOC entry missing from pin"
+      "reason": "non-public environment or non-enUS file; no global witness"
     },
     {
       "path": "Blizzard_PingUI/Blizzard_PingUI.toc",

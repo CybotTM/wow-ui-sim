@@ -159,7 +159,7 @@ def xml_file_elements(tree):
 
 
 def public_file_entry(raw, metadata):
-    locale = re.search(r"\[AllowLoadTextLocale\s+([^]]*)]", raw)
+    locale = re.search(r"\[AllowLoadTextLocale([^]]*)]", raw)
     if locale and "enUS" not in re.split(r"[,\s]+", locale[1].strip()):
         return False
     lower = raw.lower()
