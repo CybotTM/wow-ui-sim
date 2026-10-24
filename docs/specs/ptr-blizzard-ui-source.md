@@ -1,15 +1,16 @@
 # Pinned PTR Blizzard UI source
 
-PTR 12.1.5.69594 uses an immutable Blizzard CDN content index, independent of the locally installed retail/PTR product. Gethe supplies source path discovery and revision identity, never runtime replacement bytes. Retail and Classic source acquisition remain unchanged.
+PTR targets `wowt` **12.1.7.70493** (user decision 2026-10-23) using an immutable Blizzard CDN content index, independent of the locally installed retail/PTR product. The exact build/config/Gethe identities and generation evidence live in the [content-index contract](../ptr-cdn-content-index.md#selected-identity-and-regeneration-evidence). Gethe supplies source path discovery and revision identity, never runtime replacement bytes. Retail and Classic source acquisition remain unchanged.
 
 ## What it must do
 
-- [x] Reject old `wowt` cache provenance for the pinned `wowxptr` build, even when required files exist.
+- [x] Require exact schema/product/version/build/CDN/install/Gethe identity for `wowt` 70493 and reject every other build, even when required files exist. All identity constants and generated inputs now come from authenticated 70493 metadata and exact Gethe revision; the exact Rust identity selector and all 17 pinned tests pass with zero warnings.
 - [x] Verify encoded BLTE identity and decoded content size/hash before accepting source bytes.
 - [x] Require exact HTTP partial-content ranges; reject full-archive or wrong-range responses.
 - [x] Retry transient HTTP failures with bounded backoff and respect `Retry-After`.
-- [x] Synchronize all 4,025 pinned source entries, write completion only after all entries succeed, and reuse only hash-matching files.
-- [ ] Load PTR startup and representative panels against this cache; the current baseline has six unresolved pixel-rounding error records, so a completed cache is not compatibility proof.
+- [x] Regenerate the real 70493 index/path manifest and mapping before synchronizing its complete source set; do not relabel the historical 4,570-entry 70424 snapshot. Write completion only after all entries succeed and reuse only hash-matching files. Historical 70424 acquisition hit CDN GET failures and lost partial files between launches; exact `4cc5d9b30` process-boundary RED now confirms that the second preparation deletes a saved partial file after child exit 23. Preparation now persists exact provenance before workers write files, without a completion marker; mismatched provenance still invalidates stale source. The process-boundary resume and stale-source invalidation tests now pass on historical 70424 inputs. These are producer controls, not 70424 runtime acceptance.
+- [x] Discover every advertised CDN host/HTTPS server alias across all product CDN rows; preserve path/scheme, deduplicate and prefer HTTPS. Try the next advertised endpoint on transport, range or content failure while preserving pinned BLTE/content verification, exact bounded ranges, per-endpoint transient retries and `Retry-After`. Discovery failure is explicit, never a hard-coded or Gethe content fallback. The empty-reply/valid-second-host regression was observed RED before implementation; post-fix 17-test producer GREEN passes on historical inputs with zero warnings and unchanged CVars.
+- [ ] Load PTR startup and representative panels against the selected cache. The exact 70493 stock capture after master/toc integration is committed at the fixed baseline path: 436 records / 618 occurrences, exit 1. This remains failing compatibility inventory; representative-panel/native acceptance is not claimed. A completed cache is not compatibility proof.
 
 ## How it works
 
@@ -22,7 +23,8 @@ PTR 12.1.5.69594 uses an immutable Blizzard CDN content index, independent of th
 - `data/blizzard-ui-builds/ptr.json`: Blizzard build/config identity, Gethe revision, and source encoding/content keys with archive locations.
 - `data/blizzard-ui-files/ptr.txt`: matching complete source path inventory.
 - `src/blizzard_ui_sync/pinned.rs`: provenance, cache validation and bounded parallel synchronization.
-- `src/blizzard_ui_sync/pinned_download.rs`: range retrieval and BLTE/content validation.
+- `src/blizzard_ui_sync/pinned_download.rs`: advertised-root iteration, shared metadata/range request retries and BLTE/content validation.
+- `src/blizzard_ui_sync/pinned_cdn.rs`: bounded product CDN discovery and endpoint selection.
 - `Cargo.toml`: direct `cascette-formats` dependency reuses the already-pinned BLTE decoder; `httpdate` parses HTTP-date `Retry-After` values.
 
 ## Tests asserting this spec
@@ -30,7 +32,7 @@ PTR 12.1.5.69594 uses an immutable Blizzard CDN content index, independent of th
 - `src/blizzard_ui_sync/pinned.rs`: exact versus legacy provenance.
 - `src/blizzard_ui_sync/pinned_download.rs`: decoded bytes, corrupt encoding/content, local HTTP range and transient-response behavior.
 
-## Known gaps (current cycle)
+## Historical 69594 proof (not 70493 acceptance)
 
 - [ ] Resolve native pixel-rounding behavior from the selected [live PTR probe](../addons/PixelRoundingProbe/README.md), then prove startup and representative panels. Three ClassNameplate initializers account for the remaining six records, down from 109 after the math/table/timer/string/Curio fixes.
 

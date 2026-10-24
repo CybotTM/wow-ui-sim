@@ -4,6 +4,8 @@
 mod locale;
 mod pinned;
 #[cfg(feature = "casc")]
+mod pinned_cdn;
+#[cfg(feature = "casc")]
 mod pinned_download;
 mod profile_cache;
 mod wrath_download;
@@ -683,21 +685,23 @@ fn run_casc_async<T>(future: impl std::future::Future<Output = T>) -> T {
         .block_on(future)
 }
 
-fn write_complete_marker(root: &Path, expected_provenance: &CacheProvenance) -> crate::Result<()> {
+fn write_cache_provenance(root: &Path, expected_provenance: &CacheProvenance) -> crate::Result<()> {
     std::fs::create_dir_all(root).map_err(|error| {
         crate::Error::Other(format!(
             "could not create Blizzard UI cache directory {}: {error}",
             root.display()
         ))
     })?;
-    std::fs::write(root.join(PROVENANCE_FILE), expected_provenance.contents()).map_err(
-        |error| {
-            crate::Error::Other(format!(
-                "could not write Blizzard UI cache provenance in {}: {error}",
-                root.display()
-            ))
-        },
-    )?;
+    std::fs::write(root.join(PROVENANCE_FILE), expected_provenance.contents()).map_err(|error| {
+        crate::Error::Other(format!(
+            "could not write Blizzard UI cache provenance in {}: {error}",
+            root.display()
+        ))
+    })
+}
+
+fn write_complete_marker(root: &Path, expected_provenance: &CacheProvenance) -> crate::Result<()> {
+    write_cache_provenance(root, expected_provenance)?;
     std::fs::write(root.join(COMPLETE_MARKER), b"ok\n").map_err(|error| {
         crate::Error::Other(format!(
             "could not write Blizzard UI cache marker in {}: {error}",

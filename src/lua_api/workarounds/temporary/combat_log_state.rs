@@ -103,6 +103,8 @@ end
 C_CombatLog._state = CombatLogState()
 C_CombatLogSecure._state = C_CombatLog._state
 
+-- Retail/PTR filter records are owned by c_api::c_combat_log.
+if publishLegacyFilters then
 if rawget(C_CombatLog, "AddEventFilter") == nil then
     function C_CombatLog.AddEventFilter(_filter)
         return true
@@ -114,6 +116,8 @@ if rawget(C_CombatLog, "ClearEventFilters") == nil then
         CombatLogState().filteredEventsEnabled = false
         return true
     end
+end
+
 end
 
 if rawget(C_CombatLog, "DoesObjectMatchFilter") == nil then
@@ -372,8 +376,12 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
             | crate::client_profile::ClientProfile::Anniversary
             | crate::client_profile::ClientProfile::Wrath
     );
+    let publish_legacy_filters = !matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail | crate::client_profile::ClientProfile::Ptr
+    );
     let source = format!(
-        "local publishLegacyCurrentEvent = {publish_legacy}\nlocal publishLegacyGlobals = {publish_globals}\nlocal publishClassicEmptyHistory = {classic_empty_history}\n{COMBAT_LOG_STATE_LUA}"
+        "local publishLegacyCurrentEvent = {publish_legacy}\nlocal publishLegacyGlobals = {publish_globals}\nlocal publishClassicEmptyHistory = {classic_empty_history}\nlocal publishLegacyFilters = {publish_legacy_filters}\n{COMBAT_LOG_STATE_LUA}"
     );
     lua.exec(&source)?;
     Ok(())
