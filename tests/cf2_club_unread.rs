@@ -190,7 +190,7 @@ fn original_community_unread_helpers_clear_supplied_markers() {
             .eval("return not not CommunitiesUtil.DoesCommunityHaveUnreadMessages('club-a')")
             .expect("original helper after preference replacement");
         assert_eq!(unread, filter == Some(2));
-        let count: usize = env
+        let count: i32 = env
             .eval("return #C_Club.GetClubStreamNotificationSettings('club-a')")
             .expect("only supplied preferences become rows");
         assert_eq!(count, if filter.is_some() { 2 } else { 1 });
