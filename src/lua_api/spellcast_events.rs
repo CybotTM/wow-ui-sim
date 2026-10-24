@@ -23,6 +23,33 @@ pub(crate) fn player_cast_args(
     ]
 }
 
+pub(crate) fn build_player_cast_event_args(
+    event: &str,
+    cast_id: u32,
+    spell_id: u32,
+    mut lua_string: impl FnMut(&str) -> Val,
+) -> Vec<Val> {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+        return player_cast_args(cast_id, spell_id, lua_string).to_vec();
+    }
+    let Some(spell) = crate::spells::get_spell(spell_id) else {
+        return vec![lua_string("player")];
+    };
+    let channel_event = matches!(
+        event,
+        "UNIT_SPELLCAST_CHANNEL_START"
+            | "UNIT_SPELLCAST_CHANNEL_UPDATE"
+            | "UNIT_SPELLCAST_CHANNEL_STOP"
+    );
+    let cast_count = if channel_event { 0 } else { cast_id };
+    vec![
+        lua_string("player"),
+        lua_string(spell.name),
+        lua_string(spell.subtext),
+        Val::Num(cast_count as f64),
+    ]
+}
+
 pub(crate) fn fire_player_cast_start(state: &mut LuaState, cast_id: u32, spell_id: u32) {
     #[cfg(feature = "player-cast-durations")]
     {
@@ -66,7 +93,8 @@ pub(crate) fn fire_player_cast_event(
     cast_id: u32,
     spell_id: u32,
 ) {
-    let args = player_cast_args(cast_id, spell_id, |text| create_string(state, text));
+    let args =
+        build_player_cast_event_args(event, cast_id, spell_id, |text| create_string(state, text));
     fire_named_event_state(state, event, &args);
 }
 
