@@ -352,11 +352,13 @@ fn is_addon_loaded_reports_true_after_eager_sweep(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn is_addon_loaded_reports_true_after_eager_sweep() {
     let env = load_full_ui_for(ScreenKind::Game);
     is_addon_loaded_reports_true_after_eager_sweep::run(&env);
+}
 }
 
 prefork_full_ui_case! {

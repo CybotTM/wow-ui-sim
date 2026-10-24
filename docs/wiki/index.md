@@ -1,3 +1,11 @@
+## [2026-10-24] source | Reload XML instance arguments
+
+[Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): Forever RED16 precedes parameterized identities, then Forever/default Retail compile0 sources on both reloads.27 exact cases/profile, zero-warning checks and formatting pass; no stock-startup or full-workload acceptance claim.
+
+## [2026-10-24] staged | SuperTrack supplied state
+
+[Ownership and native gaps](systems/super-track-state.md) links the [contract](../specs/super-track-state.md). Original-consumer RED tests and separate producer staged; no builds or runtime proof.
+
 ## [2026-10-22] source | Wrath F07 applicability
 
 ## [2026-10-24] source | PTR70493 authenticated source and resume
@@ -158,7 +166,7 @@
 
 ## [2026-10-19] system | Deferred fresh-environment ReloadUI
 
-[Reload lifecycle](systems/reload-ui.md) documents owner-serviced VM retirement, retained session state, SavedVariables readback and IPC boundaries. [Contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) records 69 targeted retail passes, original EditMode consumer continuity, historical behavioral RED and unconfirmed native event order.
+[Reload lifecycle](systems/reload-ui.md) documents owner-serviced VM retirement, retained session state, SavedVariables readback, IPC boundaries and VM-local native/XML dispatch-factory prototype lifetime. [Lifecycle contract](../specs/reload-ui.md#bounded-retail-proof--2026-10-19) records 69 targeted retail passes, original EditMode consumer continuity and historical behavioral RED; [factory proof](../specs/reload-ui.md#bounded-forever-factory-proof--2026-10-19) records matched before/after Forever behavior and profile compilation. Native event order and full Ellesmere acceptance remain separate.
 
 ## [2026-10-19] source | Wrath supplied objective reads
 

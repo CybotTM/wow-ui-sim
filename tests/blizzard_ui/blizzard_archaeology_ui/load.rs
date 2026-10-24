@@ -28,6 +28,7 @@ fn archaeology_ui_loads_cleanly_with_no_recorded_lua_errors() {
 
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn archaeology_ui_declared_toc_dependencies_are_loaded_after_harness_runs() {
     let declared_dependencies = parse_declared_dependencies();
@@ -52,6 +53,7 @@ fn archaeology_ui_declared_toc_dependencies_are_loaded_after_harness_runs() {
             );
         }
     });
+}
 }
 
 fn parse_declared_dependencies() -> Vec<String> {

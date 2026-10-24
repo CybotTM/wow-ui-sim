@@ -799,21 +799,6 @@ fn minimap_tracking_defaults_are_not_c_api_temporary_shims() {
 }
 
 #[test]
-fn super_track_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = c_api_temporary_shims_source();
-    let c_api = include_str!("../src/c_api/mod.rs");
-
-    assert!(
-        !temporary_shims.contains("c_super_track"),
-        "unmodeled C_SuperTrack no-active-target defaults belong in lua_api::workarounds::temporary"
-    );
-    assert!(
-        !c_api.contains("c_super_track"),
-        "C_SuperTrack no-active-target defaults should not be wired through c_api registration"
-    );
-}
-
-#[test]
 fn trade_info_defaults_are_not_c_api_temporary_shims() {
     let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
