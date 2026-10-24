@@ -27,10 +27,10 @@ fn bank_permissions_project_selected_rank_bits_limits_and_no_events() {
     let env = WowLuaEnv::new().unwrap();
     supply_bank_permissions(&env);
     env.state().borrow_mut().world.guild_player_rank = 0;
-    env.state().borrow_mut().event_queue.drain();
+    env.state().borrow_mut().events.drain();
     env.exec(include_str!("fixtures/wrath_f03/bank_contract.lua"))
         .expect("supplied selected rank, native tuple and normalized tab results");
-    assert!(env.state().borrow_mut().event_queue.drain().is_empty());
+    assert!(env.state().borrow_mut().events.drain().is_empty());
     assert!(!env.state().borrow().guild_bank_frame_open);
 }
 
