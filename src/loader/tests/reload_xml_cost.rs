@@ -1,13 +1,17 @@
 //! Bound generated-code compilation during real XML reconstruction after reload.
 
 use super::{AddonContext, LoadTiming, WowLuaEnv, load_xml_file};
+use std::io::Read;
 use std::path::Path;
-use std::process::Command;
+use std::process::{Command, Output};
 use std::rc::Rc;
+use std::thread;
+use std::time::{Duration, Instant};
 
 const TEST_NAME: &str =
     "loader::tests::reload_xml_cost::reload_xml_layer_reconstruction_bounds_source_compiles";
-const CHILD_ENV: &str = "WOW_SIM_RELOAD_XML_COST_CHILD";
+const CHILD_TEST_NAME: &str =
+    "loader::tests::reload_xml_cost::reload_xml_layer_reconstruction_child";
 const RELOAD_BEGIN: &str = "[reload-xml-cost-begin]";
 const RELOAD_END: &str = "[reload-xml-cost-end]";
 const INSTANCE_COUNT: usize = 16;
@@ -140,29 +144,105 @@ fn assert_reload_compile_budget(stderr: &str) {
 }
 
 #[test]
-fn reload_xml_layer_reconstruction_bounds_source_compiles() {
-    if std::env::var_os(CHILD_ENV).is_some() {
-        reconstruct_xml_across_reloads();
-        return;
-    }
-    // Fresh process: profiling/cache OnceLocks must not inherit other tests.
-    // Fresh cache: unrelated previous runs must not hide ID-key churn.
-    let cache = tempfile::tempdir().unwrap();
-    let output = Command::new("timeout")
-        .arg("90")
-        .arg(std::env::current_exe().unwrap())
-        .args(["--exact", TEST_NAME, "--nocapture", "--test-threads=1"])
-        .env(CHILD_ENV, "1")
-        .env("WOW_SIM_PROFILE_GENERATED_CHUNKS", "1")
-        .env("WOW_SIM_ENABLE_BYTECODE_CACHE", "1")
-        .env("XDG_CACHE_HOME", cache.path())
-        .output()
+fn reload_xml_layer_reconstruction_child() {
+    reconstruct_xml_across_reloads();
+}
+
+fn exact_test_command(test_name: &str) -> Command {
+    let mut command = Command::new(std::env::current_exe().unwrap());
+    command.args(["--exact", test_name, "--nocapture", "--test-threads=1"]);
+    command
+}
+
+fn read_test_output(mut pipe: impl Read + Send + 'static) -> thread::JoinHandle<Vec<u8>> {
+    thread::spawn(move || {
+        let mut bytes = Vec::new();
+        pipe.read_to_end(&mut bytes).unwrap();
+        bytes
+    })
+}
+
+fn run_bounded_test(mut command: Command) -> Output {
+    use std::process::Stdio;
+
+    let mut child = command
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
         .unwrap();
+    let stdout = read_test_output(child.stdout.take().unwrap());
+    let stderr = read_test_output(child.stderr.take().unwrap());
+    let started = Instant::now();
+    let status = loop {
+        if let Some(status) = child.try_wait().unwrap() {
+            break status;
+        }
+        if started.elapsed() >= Duration::from_secs(90) {
+            child.kill().unwrap();
+            child.wait().unwrap();
+            panic!("XML/reload test exceeded 90 seconds");
+        }
+        thread::sleep(Duration::from_millis(10));
+    };
+    Output {
+        status,
+        stdout: stdout.join().unwrap(),
+        stderr: stderr.join().unwrap(),
+    }
+}
+
+fn successful_test_stderr(output: Output) -> String {
     let stderr = String::from_utf8(output.stderr).unwrap();
     assert!(
         output.status.success(),
         "XML/reload behavior failed before cost assertion:\n{}\n{stderr}",
         String::from_utf8_lossy(&output.stdout)
     );
+    assert!(
+        String::from_utf8_lossy(&output.stdout).contains("1 passed; 0 failed; 0 ignored;"),
+        "exact child selector must execute one test"
+    );
+    stderr
+}
+
+#[test]
+fn reload_xml_parent_marker_does_not_skip_compile_budget() {
+    let mut command = exact_test_command(TEST_NAME);
+    // Set only the subprocess environment; never mutate the parallel test runner.
+    command.env("WOW_SIM_RELOAD_XML_COST_CHILD", "1");
+    let stderr = successful_test_stderr(run_bounded_test(command));
+    let observations: Vec<_> = stderr
+        .lines()
+        .filter(|line| line.starts_with("[reload-xml-cost] "))
+        .collect();
+    assert_eq!(
+        observations.len(),
+        RELOAD_COUNT,
+        "parent must assert both reload budgets"
+    );
+    for (index, observation) in observations.iter().enumerate() {
+        assert_eq!(
+            *observation,
+            format!(
+                "[reload-xml-cost] reload={} source_compiles=0 budget=1",
+                index + 1
+            )
+        );
+    }
+}
+
+#[test]
+fn reload_xml_layer_reconstruction_bounds_source_compiles() {
+    // Fresh process: profiling/cache OnceLocks must not inherit other tests.
+    // Fresh cache: unrelated previous runs must not hide ID-key churn.
+    // Only an exact, distinct test selector enters reconstruction. No ambient
+    // marker can select a branch that skips this parent's budget assertion.
+    let cache = tempfile::tempdir().unwrap();
+    let mut command = exact_test_command(CHILD_TEST_NAME);
+    command
+        .env("WOW_SIM_PROFILE_GENERATED_CHUNKS", "1")
+        .env("WOW_SIM_ENABLE_BYTECODE_CACHE", "1")
+        .env("XDG_CACHE_HOME", cache.path());
+    let stderr = successful_test_stderr(run_bounded_test(command));
     assert_reload_compile_budget(&stderr);
 }

@@ -35,6 +35,8 @@ At `23f1f629a`, the producer supplies fresh invocation argument tables through t
 
 Each profile executes27 exact cases, zero ignored, with fresh child-only XDG data copied from current CVars; original CVar stat/hash stay unchanged. This proves bounded compile reuse and preservation, not stock-startup cleanliness, native chronology, paired wall-time savings or unchanged full Ellesmere acceptance.
 
+The budget parent must always execute its assertion, even when `WOW_SIM_RELOAD_XML_COST_CHILD` is inherited. Reconstruction runs through a distinct exact-test selector in a fresh process with parent-controlled profiling/cache settings, not an environment-selected parent branch. The marker regression requires both budget observations with source compiles0 and budget1. Re-proof after the verifier fix is pending; the table above remains historical evidence at `23f1f629a`.
+
 ### File-backed client state
 
 - [x] Restore the file-backed EditMode cache using the initial layout name and config, without re-importing ServerSnapshot. The original EditMode consumer must select the same active layout after ReloadUI. Native reread timing/ordering is INFERRED and unasserted.
