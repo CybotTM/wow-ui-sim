@@ -338,6 +338,7 @@ fn create_club(state: &mut LuaState) -> LuaResult<u32> {
                 members: vec![owner],
                 candidates: Default::default(),
                 invitations: Vec::new(),
+                streams: Vec::new(),
             },
         );
         id
