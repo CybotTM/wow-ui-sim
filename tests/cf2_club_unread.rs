@@ -18,10 +18,11 @@ fn load_original_consumers() -> WowLuaEnv {
 
     let ui = blizzard_ui_dir();
     let toc_path = find_toc_file(&ui.join("Blizzard_MicroMenu")).expect("selected MicroMenu TOC");
-    assert_eq!(
-        toc_path.file_name().unwrap(),
-        "Blizzard_MicroMenu_Mainline.toc"
-    );
+    let expected_toc = match wow_ui_sim::client_profile::ACTIVE {
+        wow_ui_sim::client_profile::ClientProfile::WowForever => "Blizzard_MicroMenu.toc",
+        _ => "Blizzard_MicroMenu_Mainline.toc",
+    };
+    assert_eq!(toc_path.file_name().unwrap(), expected_toc);
     let toc = TocFile::from_file(&toc_path).expect("parse selected TOC");
     assert!(toc.allows_screen(ScreenKind::Game));
     assert!(!toc.is_game_type_restricted());
