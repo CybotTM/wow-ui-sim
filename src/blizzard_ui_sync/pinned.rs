@@ -234,6 +234,28 @@ mod tests {
 
     #[cfg(feature = "casc")]
     #[test]
+    fn pinned_ptr_partial_cache_child_ignores_ambient_root() {
+        let dir = tempfile::tempdir().unwrap();
+        let outside = dir.path().join("ambient-outside-cache");
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "blizzard_ui_sync::pinned::tests::pinned_ptr_partial_cache_child",
+                "--nocapture",
+            ])
+            .env("WOW_UI_SIM_PINNED_PARTIAL_CACHE_CHILD_ROOT", &outside)
+            .stdin(std::process::Stdio::null())
+            .status()
+            .unwrap();
+        assert!(!outside.exists(), "ambient root must not be written");
+        assert!(
+            status.success(),
+            "ordinary helper execution must return normally"
+        );
+    }
+
+    #[cfg(feature = "casc")]
+    #[test]
     fn pinned_ptr_resumes_partial_cache_after_process_failure_without_completion() {
         let dir = tempfile::tempdir().unwrap();
         let root = dir.path().join("AddOns");
