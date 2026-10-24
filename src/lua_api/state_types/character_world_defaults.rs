@@ -17,7 +17,7 @@ struct GuildEventSeed {
 }
 
 /// Build the sim's seeded default `WorldState` — Stormwind zone,
-/// "Heroes of Azeroth" guild, populated collections. `WorldState::default`
+/// "Heroes of Azeroth" guild (except Wrath), populated collections. `WorldState::default`
 /// still returns a fully zero/empty state (the derived `Default`); this
 /// function is what `SimState::Default` reaches for.
 pub fn seeded_world_state() -> WorldState {

@@ -10,7 +10,8 @@
 //! - `CanGuildRemove()`             -> true when the player is in a guild
 //! - `CanEditPublicNote()`          -> true when the player is in a guild
 //! - `CanEditMOTD()`                -> `world.guild_is_officer` when in a guild
-//! - `CanEditGuildInfo()`           -> one-or-nil from `world.guild_is_officer`
+//! - `CanEditGuildInfo()` -> Wrath number1/nil from player guild/rank rights;
+//!   other profiles retain the membership/officer probe.
 //! - `IsGuildLeader()`              -> `guild_members[0].rank_index == 1` (the
 //!   "self is first guild member" hack mirrors `c_club_get_member_info_for_self`).
 //! - `CanGuildPromote()` / `CanGuildDemote()` -> true when the player is the
