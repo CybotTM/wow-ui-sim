@@ -161,7 +161,7 @@ class ContentIndexTests(unittest.TestCase):
         self.assertEqual(index["version"], PINNED_VERSION)
         self.assertEqual(index["product"], "wowt")
         self.assertEqual(index["version"], "12.1.7.70493")
-        self.assertEqual(index["gethe_revision"], "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a")
+        self.assertEqual(index["gethe_revision"], "2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af")
         build_key, cdn_key = self.fixture_keys(prefix)
         self.assertEqual(index["build_key"], build_key)
         self.assertEqual(index["cdn_key"], cdn_key)

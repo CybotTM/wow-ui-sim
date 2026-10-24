@@ -9,8 +9,7 @@ import struct
 import subprocess
 from pathlib import Path
 
-# Superseded Gethe pin: resolve the exact 70493 revision before regeneration.
-PINNED_GETHE_REVISION = "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a"
+PINNED_GETHE_REVISION = "2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af"
 PINNED_VERSION = "12.1.7.70493"
 PINNED_BUILD_KEY = "fc3eaa61ff0ade6bf35dbab9727bc161"
 PINNED_CDN_KEY = "c13b476a09cb3262797a6fdc88103036"

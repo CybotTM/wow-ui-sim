@@ -1,6 +1,6 @@
 {
-  "build_key": "328e394e14935f6e1017674de430603e",
-  "cdn_key": "ccc89ec4bcc03f6cc1cc1c7861d9ed0f",
+  "build_key": "fc3eaa61ff0ade6bf35dbab9727bc161",
+  "cdn_key": "c13b476a09cb3262797a6fdc88103036",
   "files": [
     {
       "archive": "502b9153cbce4cd21ffdc8984cef930d",
@@ -543,14 +543,14 @@
       "size": 174
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "4441497669b4427e8372cac3a45c3d74",
-      "content_size": 12731,
-      "encoding_key": "07b1fb2bf044eab4099cc9eb86571378",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "6452a912118de8c16717689ed48ed0de",
+      "content_size": 13043,
+      "encoding_key": "96d33ddaa6904b10c6ad55150b78b768",
       "file_data_id": 4637037,
-      "offset": 144227047,
+      "offset": 31814542,
       "path": "Blizzard_APIDocumentationGenerated/BattleNetDocumentation.lua",
-      "size": 1477
+      "size": 1500
     },
     {
       "archive": "8b9eecfedfb2bffd867a30d4e3723dcd",
@@ -623,14 +623,14 @@
       "size": 534
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "b9e65b45146136d7fa232ed3c848e967",
-      "content_size": 21858,
-      "encoding_key": "c4dd32df1e2e18ff9d52c5e4b78f76e0",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "6b1e7251455ca521fac0759412c14c14",
+      "content_size": 21895,
+      "encoding_key": "dffdbba4b03978674e02cbd0349aeb6d",
       "file_data_id": 4637036,
-      "offset": 145854979,
+      "offset": 221155232,
       "path": "Blizzard_APIDocumentationGenerated/Blizzard_APIDocumentationGenerated.toc",
-      "size": 4109
+      "size": 4114
     },
     {
       "archive": "8b9eecfedfb2bffd867a30d4e3723dcd",
@@ -1513,6 +1513,16 @@
       "size": 1035
     },
     {
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "fe4fbb3011b74a5cccaedfab9acc5c97",
+      "content_size": 290,
+      "encoding_key": "f8dd093ab9886a8385b724f03598304b",
+      "file_data_id": 8552587,
+      "offset": 32282796,
+      "path": "Blizzard_APIDocumentationGenerated/DeathRecapConstantsDocumentation.lua",
+      "size": 224
+    },
+    {
       "archive": "8b9eecfedfb2bffd867a30d4e3723dcd",
       "content_key": "761d849ea9142b75debe70ee3fd19295",
       "content_size": 1568,
@@ -2253,14 +2263,14 @@
       "size": 280
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "867282016912fc3556f595cf20531f89",
-      "content_size": 1210,
-      "encoding_key": "9724902a8b8c862bf49c89bfcaa3c0ef",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "7e291d9aede447e67d8798f565a11173",
+      "content_size": 1047,
+      "encoding_key": "ed857a3e69aa9b037cb8d71ca63bf1ad",
       "file_data_id": 6914158,
-      "offset": 202647548,
+      "offset": 32113328,
       "path": "Blizzard_APIDocumentationGenerated/GamepadTargetingDocumentation.lua",
-      "size": 438
+      "size": 414
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -2683,14 +2693,14 @@
       "size": 308
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "9c401b1f7eb9ba1244e8758072fcadbd",
-      "content_size": 7078,
-      "encoding_key": "e45d1021b02831744cbe093bbd96dd18",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "5ffd6f98326f03658ee374e660bec3a1",
+      "content_size": 7428,
+      "encoding_key": "9944ed807528f8d3b88cf88fc3bb093a",
       "file_data_id": 5200988,
-      "offset": 201501903,
+      "offset": 31827937,
       "path": "Blizzard_APIDocumentationGenerated/InputDocumentation.lua",
-      "size": 1056
+      "size": 1077
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -2983,14 +2993,14 @@
       "size": 613
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "a89ff0fc7eeff9e60377dc62db682036",
-      "content_size": 413,
-      "encoding_key": "108306362eb43a481efa8fa34156c93a",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "482c2dc87a9c60a5b84a231f226c0bd1",
+      "content_size": 430,
+      "encoding_key": "4f9e72c596fad36318cd8107213dc043",
       "file_data_id": 4637118,
-      "offset": 201385908,
+      "offset": 220604157,
       "path": "Blizzard_APIDocumentationGenerated/LevelConstantsDocumentation.lua",
-      "size": 240
+      "size": 251
     },
     {
       "archive": "8b9eecfedfb2bffd867a30d4e3723dcd",
@@ -3443,14 +3453,14 @@
       "size": 558
     },
     {
-      "archive": "8b9eecfedfb2bffd867a30d4e3723dcd",
-      "content_key": "840863cd25cd8f5d23e19e3388658dff",
-      "content_size": 6610,
-      "encoding_key": "dd50ebf2bb2f5059a4659d36f29897b3",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "e97aab2c90cf1a9cd3a6e0708e0546f5",
+      "content_size": 6855,
+      "encoding_key": "12691c86f15f2e0ba8779e1013cd575b",
       "file_data_id": 4637146,
-      "offset": 218474017,
+      "offset": 220604408,
       "path": "Blizzard_APIDocumentationGenerated/MinimapDocumentation.lua",
-      "size": 1055
+      "size": 1067
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -3823,14 +3833,14 @@
       "size": 1112
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "c46a7bc9f53330222fc766134974e51f",
-      "content_size": 5506,
-      "encoding_key": "c004727544f675871b7ecdb3ebb9b6ca",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "c7d60a728dcf1eea279928d8326dec51",
+      "content_size": 5923,
+      "encoding_key": "5610a58cd3bbda83d55e006cd9368bce",
       "file_data_id": 4637151,
-      "offset": 201397998,
+      "offset": 220605475,
       "path": "Blizzard_APIDocumentationGenerated/PetInfoDocumentation.lua",
-      "size": 1018
+      "size": 1079
     },
     {
       "archive": "8b9eecfedfb2bffd867a30d4e3723dcd",
@@ -4133,14 +4143,14 @@
       "size": 430
     },
     {
-      "archive": "db472fabb25451725f60fc1d2309b5cf",
-      "content_key": "38838e2b4ff469988ee74a03afd58437",
-      "content_size": 50403,
-      "encoding_key": "7fc1fda8defb2022beb2221d662fba57",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "5f737a25e4a16d59c22d84c7f98335da",
+      "content_size": 50502,
+      "encoding_key": "96e8f30d56d53f06e6dee0885ac4dce4",
       "file_data_id": 4637170,
-      "offset": 65676455,
+      "offset": 31816042,
       "path": "Blizzard_APIDocumentationGenerated/PvpInfoDocumentation.lua",
-      "size": 5144
+      "size": 5152
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -6033,24 +6043,24 @@
       "size": 254
     },
     {
-      "archive": "8b9eecfedfb2bffd867a30d4e3723dcd",
-      "content_key": "8d84eb50649fe73c019925ba7a329bfa",
-      "content_size": 5811,
-      "encoding_key": "9e3452a1da01c18e5f86a936cdff7dda",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "7ffaf948ee9bbf926b33d60fed4f91a9",
+      "content_size": 5883,
+      "encoding_key": "20cae845765988b968048b7955a5cd14",
       "file_data_id": 4637279,
-      "offset": 218591340,
+      "offset": 220606554,
       "path": "Blizzard_APIDocumentationGenerated/UIModelInfoDocumentation.lua",
-      "size": 872
+      "size": 892
     },
     {
-      "archive": "8b9eecfedfb2bffd867a30d4e3723dcd",
-      "content_key": "ef346dfbc24d6a9cba5b6503d87d87a5",
-      "content_size": 2901,
-      "encoding_key": "779effe662f07921afe0699e2776ac7f",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "13b0726b772750412b9bd8fe8287c8ad",
+      "content_size": 2990,
+      "encoding_key": "67d6695577b49378e91521007ab5f5e3",
       "file_data_id": 5203722,
-      "offset": 218687360,
+      "offset": 220622460,
       "path": "Blizzard_APIDocumentationGenerated/UIModelInfoSharedDocumentation.lua",
-      "size": 680
+      "size": 698
     },
     {
       "archive": "8b9eecfedfb2bffd867a30d4e3723dcd",
@@ -6903,14 +6913,24 @@
       "size": 711
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "7ba8d6c5af8acd575140fb68ca613987",
-      "content_size": 2598,
-      "encoding_key": "dfbfaaea6b807e0e4dac3520e9743f7d",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "9fadbed8af5cd7da8e2c50d7df9f9209",
+      "content_size": 2660,
+      "encoding_key": "80562366ef784124cc41d6640b0a7b4b",
       "file_data_id": 8268279,
-      "offset": 145868015,
+      "offset": 221159599,
       "path": "Blizzard_ActionBar/Blizzard_ActionBar.toc",
-      "size": 641
+      "size": 647
+    },
+    {
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "1885a8e06accbdffb4124bdfcc9156b2",
+      "content_size": 88,
+      "encoding_key": "d64990ee1ba8c7e1512bf659e9477c1c",
+      "file_data_id": 8552586,
+      "offset": 32282670,
+      "path": "Blizzard_ActionBar/Camelot/ActionButtonOverrides.lua",
+      "size": 126
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -6923,24 +6943,24 @@
       "size": 208
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "9e4a808591d55111191bb1a105b62f2e",
-      "content_size": 577,
-      "encoding_key": "d56f06c294f7a19fdef9fb60ea41deee",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "815c11caafc7a4ae26fbe5d84a147615",
+      "content_size": 1756,
+      "encoding_key": "0dbc8299649deaf9c890d50ee8ad3359",
       "file_data_id": 7950560,
-      "offset": 203358850,
+      "offset": 221005545,
       "path": "Blizzard_ActionBar/Camelot/MainMenuBarEndCaps.lua",
-      "size": 274
+      "size": 696
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "4900071578f3c51957dfa6841a1dc9fb",
-      "content_size": 1290,
-      "encoding_key": "74fee1cab61291a07ce37cf16ce544b1",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "cfa76966cbd44cbdb7f9025b49001aa4",
+      "content_size": 1394,
+      "encoding_key": "9d66027f998ae997ca2ee5d73a0852be",
       "file_data_id": 7406645,
-      "offset": 204035095,
+      "offset": 221126708,
       "path": "Blizzard_ActionBar/Camelot/MainMenuBarEndCaps.xml",
-      "size": 521
+      "size": 532
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -7073,14 +7093,14 @@
       "size": 1311
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "b314fc7b3c5010ce94d4b0d2bc1dba56",
-      "content_size": 68474,
-      "encoding_key": "17e8a898f2d6dcb8a608d0fbce219100",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "f4b6f300a95f197e7e5466db4eae3a37",
+      "content_size": 68611,
+      "encoding_key": "70558bfdaf194931c8c4da602d266e56",
       "file_data_id": 7430825,
-      "offset": 145238622,
+      "offset": 220931309,
       "path": "Blizzard_ActionBar/Shared/ActionButton.lua",
-      "size": 14039
+      "size": 14061
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -7273,14 +7293,14 @@
       "size": 712
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "99fed0616a33ecba89d51be34e070de8",
-      "content_size": 14428,
-      "encoding_key": "70bf06484b12770c338b39e60144c684",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "1fbf03f1fd9549d6faded5e923045c5d",
+      "content_size": 14109,
+      "encoding_key": "f4738e6501d9a97ab42fa310cf033f53",
       "file_data_id": 8271387,
-      "offset": 145525796,
+      "offset": 221056602,
       "path": "Blizzard_ActionBar/WoWHack/ActionButtonOverrides.lua",
-      "size": 2713
+      "size": 2623
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -7423,24 +7443,24 @@
       "size": 409
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "3b07017e9b457e7f158d80ad9388688d",
-      "content_size": 10623,
-      "encoding_key": "284737f00a2b830cb31f5fc18f2e130b",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "5029cbfb55ca28bc988116ab6d237b84",
+      "content_size": 11564,
+      "encoding_key": "ef3ddfe6d1eb2def950bddd563e57b5a",
       "file_data_id": 8166691,
-      "offset": 238555873,
+      "offset": 32243900,
       "path": "Blizzard_AddFriend/AddFriendTemplates.lua",
-      "size": 2316
+      "size": 2478
     },
     {
-      "archive": "a5b89870eca306a088d67f17aacfa477",
-      "content_key": "58cefa1cd6c96dab9decfe21bab5407c",
-      "content_size": 19931,
-      "encoding_key": "2157b914e7d6c394e421b446994a7159",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "d283aa2efba59ab0716527a182c61bf6",
+      "content_size": 20248,
+      "encoding_key": "a53eb707da9fbad86834caa0ba2e984d",
       "file_data_id": 8166693,
-      "offset": 170045184,
+      "offset": 32336892,
       "path": "Blizzard_AddFriend/AddFriendTemplates.xml",
-      "size": 2984
+      "size": 3014
     },
     {
       "archive": "4b8215f98f1aba635052efee282cc69a",
@@ -9233,14 +9253,14 @@
       "size": 223
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "c64832648df337f14208c78fa5811b26",
-      "content_size": 9136,
-      "encoding_key": "a0eee8e8feb8a12c3638d552e40b1aa1",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "15600de7ea88f39cf3cde1bdab11dfe4",
+      "content_size": 9352,
+      "encoding_key": "9a263aab2ac7d6cf3535d2ab03dcccdc",
       "file_data_id": 7680486,
-      "offset": 145373659,
+      "offset": 32233729,
       "path": "Blizzard_BarbershopUI/Mainline/Blizzard_BarberShopUI.lua",
-      "size": 2394
+      "size": 2486
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -9793,14 +9813,14 @@
       "size": 325
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "a43b1e88bd891747743717164d85930b",
-      "content_size": 52713,
-      "encoding_key": "60894d4f33f358b2f5953f5a3eda995c",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "14124032159dbb315500150d417f422d",
+      "content_size": 53413,
+      "encoding_key": "5890052966af8e52c70ff50d262dc5db",
       "file_data_id": 6686485,
-      "offset": 144878785,
+      "offset": 220825042,
       "path": "Blizzard_CatalogShop/Blizzard_CatalogShop.lua",
-      "size": 11432
+      "size": 11548
     },
     {
       "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
@@ -9813,14 +9833,14 @@
       "size": 315
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "e5cf5d6931020fa9c7955593adcbdb15",
-      "content_size": 30290,
-      "encoding_key": "9374508080c8ec44686111802a0ee4ed",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "5ec26c4aa52920e7541b653787069d1d",
+      "content_size": 30124,
+      "encoding_key": "0d7a96e9da1f9d0ed9d2f3950557f3da",
       "file_data_id": 6686490,
-      "offset": 145731455,
+      "offset": 221122644,
       "path": "Blizzard_CatalogShop/Blizzard_CatalogShop.xml",
-      "size": 4091
+      "size": 4064
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -9843,14 +9863,14 @@
       "size": 8833
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "1f42a15c2f877e58a74d9e608a61e2f7",
-      "content_size": 40118,
-      "encoding_key": "6148e8e5d0f6296549b67be59e8bcd1e",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "af19c7c2eaee14244ddeabb7c32682b8",
+      "content_size": 39846,
+      "encoding_key": "fb242b50fb716b0f7d8e76121d7a744e",
       "file_data_id": 6686488,
-      "offset": 145725941,
+      "offset": 221117174,
       "path": "Blizzard_CatalogShop/Blizzard_CatalogShop_Elements.xml",
-      "size": 5514
+      "size": 5470
     },
     {
       "archive": "4492a30fea184197f665aa4596211313",
@@ -9903,14 +9923,14 @@
       "size": 736
     },
     {
-      "archive": "32d5ef1047895273a6c890df79691ba3",
-      "content_key": "50b482ffdc8a20b2f246b17bdfe0b622",
-      "content_size": 22637,
-      "encoding_key": "1d44fb469298ecaa0b80c6c035df452a",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "4a3aad83baf0270a0096cdb0f59dd429",
+      "content_size": 12335,
+      "encoding_key": "15121e877107c0aaf0e25d7b962bf221",
       "file_data_id": 6686482,
-      "offset": 184240265,
+      "offset": 220822418,
       "path": "Blizzard_CatalogShop/Blizzard_CatalogShop_Model.lua",
-      "size": 4409
+      "size": 2624
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -10063,14 +10083,14 @@
       "size": 169
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "c20cdbdf1a0b2b8e837707b959c03828",
-      "content_size": 25411,
-      "encoding_key": "c21213b78d5d0cb2f850c438c75c4064",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "fe4368dc320f33872418ea18b67d504d",
+      "content_size": 25652,
+      "encoding_key": "87cd2ee546b8216b164b096614f2eaf4",
       "file_data_id": 7513299,
-      "offset": 145292914,
+      "offset": 220962495,
       "path": "Blizzard_CatalogShopSharedTemplates/Blizzard_CatalogShop_SharedProductCards.lua",
-      "size": 4777
+      "size": 4833
     },
     {
       "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
@@ -10103,14 +10123,14 @@
       "size": 2108
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "999c83c2cbaea60dc0ead7af0982ebf5",
-      "content_size": 58615,
-      "encoding_key": "c75d2fcfbca20a7cb21196e1d8aabe5c",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "cb758e37bf4e922132155372c899ce20",
+      "content_size": 60520,
+      "encoding_key": "77b780f3f4c6f3a94af8078f557d687c",
       "file_data_id": 7513303,
-      "offset": 145299799,
+      "offset": 220967328,
       "path": "Blizzard_CatalogShopSharedUtil/Blizzard_CatalogShop_SharedUtil.lua",
-      "size": 10540
+      "size": 10806
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -10503,14 +10523,14 @@
       "size": 916
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "111478214b0ebf40c4097a4a1a0cb680",
-      "content_size": 40165,
-      "encoding_key": "068a7486e860b6be83d9ff46aa7ee710",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "33dc06fd7ecad30fa6a981176f305ba9",
+      "content_size": 39759,
+      "encoding_key": "6a1e6fa0ac3e86d58bb87810414da196",
       "file_data_id": 8462824,
-      "offset": 145557029,
+      "offset": 221060442,
       "path": "Blizzard_Channels/Mainline/ChannelFrame.lua",
-      "size": 8631
+      "size": 8494
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -10703,24 +10723,24 @@
       "size": 209
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "8a8925a25f727355b9f6f16892b3b360",
-      "content_size": 117034,
-      "encoding_key": "5ee99319f69409e4cd58cb27e90020eb",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "379e50fdb23174a1520137aa0cf24282",
+      "content_size": 117702,
+      "encoding_key": "fda4223f4e3427bf0a986ac387ff398c",
       "file_data_id": 8209459,
-      "offset": 145492200,
+      "offset": 221032132,
       "path": "Blizzard_CharacterCreate/Camelot/Blizzard_CharacterCreate.lua",
-      "size": 23025
+      "size": 23299
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "920538326f81a46555193b55016d70e2",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "3acf70076217169593ec35b1216ca4a8",
       "content_size": 31207,
-      "encoding_key": "f77cbb4e6be5d04156d71dd21dc162c7",
+      "encoding_key": "dc177db60272b37bfd0aceeb7ae79f89",
       "file_data_id": 8209458,
-      "offset": 145824795,
+      "offset": 32339906,
       "path": "Blizzard_CharacterCreate/Camelot/Blizzard_CharacterCreate.xml",
-      "size": 4677
+      "size": 4678
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -10733,14 +10753,14 @@
       "size": 1210
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "729cc0ae05fcd09244d89d9ab17a2885",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "6c76e219875e8d7e98ff062b973d6421",
       "content_size": 5292,
-      "encoding_key": "d906560384e14da58fed02c8193340ad",
+      "encoding_key": "99c1f3a6ebf28f5825ddaa0999848d8a",
       "file_data_id": 8245746,
-      "offset": 204216142,
+      "offset": 32344584,
       "path": "Blizzard_CharacterCreate/Camelot/Blizzard_CharacterCreate_Templates.xml",
-      "size": 1417
+      "size": 1418
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -10773,34 +10793,34 @@
       "size": 230
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "d626b26f66d75890ed6f84a82928004f",
-      "content_size": 30627,
-      "encoding_key": "9321d502f7db1d2b73e9d255944fd2bd",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "edcbcf601a1fae29bf0e3eac14595ca7",
+      "content_size": 34415,
+      "encoding_key": "d635d40e656f4e56a1e0f5abefe418bb",
       "file_data_id": 8261796,
-      "offset": 145519392,
+      "offset": 32269671,
       "path": "Blizzard_CharacterCustomize/Camelot/Blizzard_CharacterCustomize.lua",
-      "size": 6404
+      "size": 7348
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "45f5161a11b29b6a97941f7f269b5d3a",
-      "content_size": 15403,
-      "encoding_key": "33de7024a7a8936e555e125e4742c1da",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "04a04cb7ed1fc9b460c8f020e461c6de",
+      "content_size": 16284,
+      "encoding_key": "7d55db5b8b9d3b19aa9e4d1b39949337",
       "file_data_id": 8261794,
-      "offset": 204220938,
+      "offset": 32346002,
       "path": "Blizzard_CharacterCustomize/Camelot/Blizzard_CharacterCustomize.xml",
-      "size": 2695
+      "size": 2815
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "68947548d6289e665b4d0daa053f9a4e",
-      "content_size": 566,
-      "encoding_key": "f222a0526cf90f5b4f9c7b4f3841b6ba",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "b8dc9ad86af63c7ff05ce7cb26da82f7",
+      "content_size": 454,
+      "encoding_key": "2389de9d3c2624393531f2fd9ea00d7f",
       "file_data_id": 7389912,
-      "offset": 204032976,
+      "offset": 32320693,
       "path": "Blizzard_CharacterCustomize/Camelot/Blizzard_CharacterCustomizeTemplates.xml",
-      "size": 397
+      "size": 334
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -11303,14 +11323,14 @@
       "size": 5234
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "e1e639203eaa3c97a4cb176c9e32080f",
-      "content_size": 13628,
-      "encoding_key": "e242116667513a77d308ec2b2502fcd1",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "8ba972ccccce67b44241a45fadc0f703",
+      "content_size": 13856,
+      "encoding_key": "a2e7d5a596bf16e32acdb429c9a6b822",
       "file_data_id": 7150911,
-      "offset": 202843374,
+      "offset": 220873695,
       "path": "Blizzard_ChatFrameBase/Mainline/SlashCommandsOverrides.lua",
-      "size": 3176
+      "size": 3236
     },
     {
       "archive": "beecfbc81b9267707c836ff24dd7b603",
@@ -11943,12 +11963,12 @@
       "size": 9848
     },
     {
-      "archive": "a4cd35c4112257bd976741c184bf64c5",
+      "archive": "ec6749dcc5ceac1e20215d33f0b471d1",
       "content_key": "b7f776a556579bfd2681a625c0f45607",
       "content_size": 26287,
       "encoding_key": "593fdaa1d24592acf2af70c3431ac195",
       "file_data_id": 5614065,
-      "offset": 55215770,
+      "offset": 49776558,
       "path": "Blizzard_Collections/Classic/Blizzard_Wardrobe.xml",
       "size": 3912
     },
@@ -12233,24 +12253,24 @@
       "size": 1867
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "e6469396daebed7b61c1b2e595b32a01",
-      "content_size": 8949,
-      "encoding_key": "8cd187c1153ab388a4604d233c2695b0",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "c5101c9c177112823f85bb9078b4b8ce",
+      "content_size": 10858,
+      "encoding_key": "ee2383c69d23e3ddd3568cc5365f8e31",
       "file_data_id": 8124269,
-      "offset": 203399822,
+      "offset": 221010192,
       "path": "Blizzard_ColorPickerFrame/Mainline/ColorPickerFrame.lua",
-      "size": 2270
+      "size": 2707
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "5cc3c3ca0f84518fe9af4d844ecea94d",
-      "content_size": 7941,
-      "encoding_key": "0471e8f22a01e69f41aeb621c678dfb9",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "e687259a7ef5d88b35ee8a453820fab8",
+      "content_size": 8637,
+      "encoding_key": "bf1d22dff042866eddfb582b083d92d8",
       "file_data_id": 8124270,
-      "offset": 238718927,
+      "offset": 221142083,
       "path": "Blizzard_ColorPickerFrame/Mainline/ColorPickerFrame.xml",
-      "size": 1923
+      "size": 2066
     },
     {
       "archive": "0b10fd3ebe92b72aa0e6a932d76d7a9d",
@@ -12463,14 +12483,14 @@
       "size": 477
     },
     {
-      "archive": "431d3797c76df782e43a8ddb22c78e43",
-      "content_key": "b41898d596f56b0adeacaa5f3f0ea9e7",
-      "content_size": 46131,
-      "encoding_key": "2c8e9b464f716a245e09f0f0101bf25c",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "5eabbb190ac7bae383b980e7fe40674f",
+      "content_size": 46163,
+      "encoding_key": "8da5ea98cc015fcc3e7e1522a29bc78d",
       "file_data_id": 7035947,
-      "offset": 62017265,
+      "offset": 220860153,
       "path": "Blizzard_CombatLogProcessor/Blizzard_CombatLogProcessor.lua",
-      "size": 7885
+      "size": 7899
     },
     {
       "archive": "beecfbc81b9267707c836ff24dd7b603",
@@ -13083,12 +13103,12 @@
       "size": 482
     },
     {
-      "archive": "0d75ed5bf2a8b0449a40e019ed4a63be",
+      "archive": "960ae1abe8b4c0a8b2ed3bcff3ff87b1",
       "content_key": "7e5921999a93c3970c656967f3a9e691",
       "content_size": 19361,
       "encoding_key": "c15b5bdd0817b3d0ae89123e375aaf38",
       "file_data_id": 1936185,
-      "offset": 102181187,
+      "offset": 75797308,
       "path": "Blizzard_Communities/CommunitiesChatFrame.lua",
       "size": 4241
     },
@@ -13593,14 +13613,14 @@
       "size": 94
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "98460a101a5f909ba19bdfa40d45e072",
-      "content_size": 49848,
-      "encoding_key": "be83d0e53b961e682f53009606b8055f",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "b468c56466836b4234dd6dc3ca0e1e55",
+      "content_size": 49788,
+      "encoding_key": "35c78f44abf2b5bcfeb2b54af1cbd278",
       "file_data_id": 7557024,
-      "offset": 238469478,
+      "offset": 220979554,
       "path": "Blizzard_CompactRaidFrames/Mainline/Blizzard_CompactRaidFrameManager.lua",
-      "size": 9761
+      "size": 9747
     },
     {
       "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
@@ -14573,14 +14593,14 @@
       "size": 174
     },
     {
-      "archive": "9071c6225c436d0bfca046bfb5212497",
-      "content_key": "a36230caba12d936582a375a3ea203f2",
-      "content_size": 10932,
-      "encoding_key": "24585a2271d7da0efdd6a8e77c60ffdc",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "5193ecd208b7312609d4da5e0320a79b",
+      "content_size": 10975,
+      "encoding_key": "f4e87755921c473742d8753b2d667854",
       "file_data_id": 8286085,
-      "offset": 29869316,
+      "offset": 32279145,
       "path": "Blizzard_DeathRecap/Mainline/Blizzard_DeathRecap.lua",
-      "size": 2712
+      "size": 2719
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -14693,14 +14713,14 @@
       "size": 550
     },
     {
-      "archive": "a5b89870eca306a088d67f17aacfa477",
-      "content_key": "d82270ef4cff49d46109037e2dfd4fa9",
-      "content_size": 8183,
-      "encoding_key": "2bfbc06ffd3acade720f105aaeb36075",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "84ef1ebe88b839aca9dc51eaaf67da34",
+      "content_size": 8631,
+      "encoding_key": "a56b41e76b7d2b5d7cc5db3ea3ca114e",
       "file_data_id": 1687972,
-      "offset": 112546189,
+      "offset": 220563417,
       "path": "Blizzard_DebugTools/Blizzard_TableInspectorAttributeDataProvider.lua",
-      "size": 1813
+      "size": 1978
     },
     {
       "archive": "08756e07d6e7c1cb55f962d53d865961",
@@ -16403,14 +16423,14 @@
       "size": 143
     },
     {
-      "archive": "0b10fd3ebe92b72aa0e6a932d76d7a9d",
-      "content_key": "441a4831d00c4a59398d59ed38f71c22",
-      "content_size": 3158,
-      "encoding_key": "def22ec168703af2b0f0496f65190322",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "4357112ce9689b7f61955adda8994707",
+      "content_size": 3525,
+      "encoding_key": "ce88f54b7e93e8d510f63a8070e85b9a",
       "file_data_id": 4675161,
-      "offset": 75637993,
+      "offset": 220607446,
       "path": "Blizzard_ExpansionLandingPage/Blizzard_ExpansionLandingPage.lua",
-      "size": 850
+      "size": 945
     },
     {
       "archive": "047a776bee0ffa0e7472308ca01c9d3f",
@@ -17143,14 +17163,14 @@
       "size": 6339
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "ec3970d04045dfc9e4a3e0c6f9a23082",
-      "content_size": 7543,
-      "encoding_key": "7b04d8f036e656e0d4f1c9063f997f3d",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "1a387728d4122341abccdb057069f788",
+      "content_size": 7571,
+      "encoding_key": "b81b1eef02256bf5ddd9b433f351203c",
       "file_data_id": 8268590,
-      "offset": 204225913,
+      "offset": 221145819,
       "path": "Blizzard_FrameXML/Camelot/EquipmentFlyout.xml",
-      "size": 1744
+      "size": 1747
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -17393,14 +17413,14 @@
       "size": 1211
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "750382525ef771d4927ca7984965351d",
-      "content_size": 512,
-      "encoding_key": "6c7812c85ceebf392985bb06fc1d3774",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "6da05bdecdd8cdb48523b3da2245de3a",
+      "content_size": 535,
+      "encoding_key": "de992f773ea19be092fe0f300012e6b1",
       "file_data_id": 5614164,
-      "offset": 202299496,
+      "offset": 32013967,
       "path": "Blizzard_FrameXML/GhostFrame.lua",
-      "size": 330
+      "size": 336
     },
     {
       "archive": "a5b89870eca306a088d67f17aacfa477",
@@ -17413,24 +17433,24 @@
       "size": 684
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "11fcce409a9615fca71c53cba6186f42",
-      "content_size": 1925,
-      "encoding_key": "ef33545d0eee1e668d612827232e2a8f",
+      "archive": "bf740327ed02d0aac886508a3c31a7e0",
+      "content_key": "7b7578891883f9f9679abcad1ae8cad0",
+      "content_size": 4144,
+      "encoding_key": "f54e68171a29b263c190566af7e92c84",
       "file_data_id": 5612349,
-      "offset": 201581501,
+      "offset": 220613756,
       "path": "Blizzard_FrameXML/GuildInviteFrame.lua",
-      "size": 785
+      "size": 1311
     },
     {
-      "archive": "a5b89870eca306a088d67f17aacfa477",
-      "content_key": "7944e6dffd69b3851dce3d5c8de809c4",
-      "content_size": 5766,
-      "encoding_key": "4f1b95054c802ee6c71fa1090bd4cd20",
+      "archive": "bf740327ed02d0aac886508a3c31a7e0",
+      "content_key": "11340466a4feebca9e96169f66f83679",
+      "content_size": 6058,
+      "encoding_key": "a4629f0f8d8a78056cd4dda3ef02e438",
       "file_data_id": 5612955,
-      "offset": 112848024,
+      "offset": 220682991,
       "path": "Blizzard_FrameXML/GuildInviteFrame.xml",
-      "size": 1517
+      "size": 1491
     },
     {
       "archive": "f42cb70927cf539e79bc12ed67a14c50",
@@ -17813,14 +17833,14 @@
       "size": 5886
     },
     {
-      "archive": "0b10fd3ebe92b72aa0e6a932d76d7a9d",
-      "content_key": "9790fd6e430cd019990359db0a17fcb8",
-      "content_size": 12814,
-      "encoding_key": "a5f243b672bb2fdd0b618be47f6f3266",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "dbe8fd13fd97457f2d472744c10a5d4a",
+      "content_size": 12791,
+      "encoding_key": "8aa51bc9f5c4e420c668ee443480425c",
       "file_data_id": 5613530,
-      "offset": 77558253,
+      "offset": 32304793,
       "path": "Blizzard_FrameXML/Mainline/TutorialFrame.xml",
-      "size": 2550
+      "size": 2536
     },
     {
       "archive": "04906fb7b3d5a1512359e6393eb7fdae",
@@ -18003,14 +18023,14 @@
       "size": 2166
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "77dfe2d5ea087e36b7d8548310dab253",
-      "content_size": 18092,
-      "encoding_key": "605a6d9b8cef8ceaccc9de5f5cf19f22",
+      "archive": "bf740327ed02d0aac886508a3c31a7e0",
+      "content_key": "f3e6f5aa44263c8803d80a89c2a6235b",
+      "content_size": 18410,
+      "encoding_key": "f74ab8a09eef8be14bc551b6ddac2039",
       "file_data_id": 5612390,
-      "offset": 201598896,
+      "offset": 220623303,
       "path": "Blizzard_FrameXML/RewardTrackTemplates.lua",
-      "size": 4227
+      "size": 4264
     },
     {
       "archive": "a5b89870eca306a088d67f17aacfa477",
@@ -18753,14 +18773,14 @@
       "size": 1313
     },
     {
-      "archive": "9125ee8f552507a02bb30e057a2af438",
-      "content_key": "3d27d64a9a99a2f1dd624b8abc2930ba",
-      "content_size": 1767,
-      "encoding_key": "4688b0fd9d464d9a8e9a854ff44e6ffa",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "705c8d2e6654e8263963812209949585",
+      "content_size": 5163,
+      "encoding_key": "860b34c760ca82692c160893bd11cdf6",
       "file_data_id": 6036440,
-      "offset": 67881595,
+      "offset": 220806359,
       "path": "Blizzard_FrameXMLUtil/Mainline/MinimapUtil.lua",
-      "size": 632
+      "size": 1807
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -19684,13 +19704,13 @@
     },
     {
       "archive": "bf740327ed02d0aac886508a3c31a7e0",
-      "content_key": "6d1764bc2419e515a8c1e9a2d3ae6783",
-      "content_size": 35645,
-      "encoding_key": "c0ea2b33bc175a64736620e697e7443b",
+      "content_key": "87a4b54dcd6d6f20201f7a7467b18772",
+      "content_size": 35409,
+      "encoding_key": "475900664384fad8900ffceb2d468b61",
       "file_data_id": 5612388,
-      "offset": 275037,
+      "offset": 220615067,
       "path": "Blizzard_GameTooltip/Mainline/GameTooltip.lua",
-      "size": 8316
+      "size": 8236
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -19853,14 +19873,14 @@
       "size": 391
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "9c439251fe6e0cf5fd958e4255fe5fdc",
-      "content_size": 20595,
-      "encoding_key": "24b0e97c50c1df43f78ddf5eaf979e9b",
+      "archive": "bf740327ed02d0aac886508a3c31a7e0",
+      "content_key": "d6f10d0e08b16f84040aa1c6eb0a23de",
+      "content_size": 20506,
+      "encoding_key": "d1df175f17a0a93fbb9e6b656d18d5a8",
       "file_data_id": 6840487,
-      "offset": 202595112,
+      "offset": 220646526,
       "path": "Blizzard_Gamepad/UI/PersistentInputLegend/GamepadPersistentInputLegend.lua",
-      "size": 4557
+      "size": 4543
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -19873,14 +19893,14 @@
       "size": 640
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "5f009fc545630ea070adc4dd2d061855",
-      "content_size": 36300,
-      "encoding_key": "15d2fa64a48b7ec63d8dafbb849e708c",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "06c56635abe3b47129e0366c79bc5b43",
+      "content_size": 36489,
+      "encoding_key": "d33de04121063978eb3405b3ff2710e8",
       "file_data_id": 8131543,
-      "offset": 145453686,
+      "offset": 221022995,
       "path": "Blizzard_Gamepad/UI/Radials/GamepadRadial.lua",
-      "size": 7932
+      "size": 7996
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -19893,24 +19913,24 @@
       "size": 1567
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "5cdd3241ef445312e6218f5587324640",
-      "content_size": 6646,
-      "encoding_key": "1abdb3a8be4de91bc7723b512a883a20",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "d4b34427a9d265b54057ceddaaaf1c6c",
+      "content_size": 6958,
+      "encoding_key": "d31f710a88bc2be0eb665baecc844c32",
       "file_data_id": 6429360,
-      "offset": 144846815,
+      "offset": 32058201,
       "path": "Blizzard_Gamepad/UI/Reticle/GamepadReticle.lua",
-      "size": 1796
+      "size": 1846
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "bbca9dd0ccd508fe05ce6bfc94f1bfc4",
-      "content_size": 5300,
-      "encoding_key": "e8f8446c70998c966a3ddc61cbef4ff6",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "28c4ce177687eee19b2600aac2f2e4e1",
+      "content_size": 5334,
+      "encoding_key": "1352c9857d03f9ffd827b41d58b56f02",
       "file_data_id": 6429359,
-      "offset": 145724720,
+      "offset": 32309962,
       "path": "Blizzard_Gamepad/UI/Reticle/GamepadReticle.xml",
-      "size": 1221
+      "size": 1234
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -19953,14 +19973,14 @@
       "size": 1269
     },
     {
-      "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
-      "content_key": "1ad60a110430c7e0f6e7950e9bfdab69",
-      "content_size": 42656,
-      "encoding_key": "31bde90cce93e88017d6fae7d62e3551",
+      "archive": "bf740327ed02d0aac886508a3c31a7e0",
+      "content_key": "eb6769f470b11eba19b4e0c82a8022b7",
+      "content_size": 41697,
+      "encoding_key": "f57c73a1d4bf323f3a0e62926edd1689",
       "file_data_id": 7050698,
-      "offset": 130664057,
+      "offset": 220651069,
       "path": "Blizzard_GamepadActionBars/ActionBarEditFrame.lua",
-      "size": 8552
+      "size": 8334
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -20153,14 +20173,14 @@
       "size": 337
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "7e75297b9a4b597d29d350ff896e099f",
-      "content_size": 21921,
-      "encoding_key": "067cf511363836cfbc9b47ef2899e604",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "cc984a9258be07b59f985ec736aab249",
+      "content_size": 23783,
+      "encoding_key": "3b5cb7d3c27f82c5e06f5375f7288104",
       "file_data_id": 7050703,
-      "offset": 144987620,
+      "offset": 220868052,
       "path": "Blizzard_GamepadActionBars/MainActionBarFrame.lua",
-      "size": 5101
+      "size": 5643
     },
     {
       "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
@@ -20283,14 +20303,14 @@
       "size": 413
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "ea8260febc97e8f1ad7b4c32166e96d1",
-      "content_size": 34432,
-      "encoding_key": "e1f2012789d8e81fa8eff765ab0c666a",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "0388487da3b6610facf1f180964c2029",
+      "content_size": 30470,
+      "encoding_key": "994fc0b3a836c0f7cef57150869dc8fe",
       "file_data_id": 7375357,
-      "offset": 145222110,
+      "offset": 220913771,
       "path": "Blizzard_GamepadSharedUtility/FrameControlsManager.lua",
-      "size": 8305
+      "size": 7520
     },
     {
       "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
@@ -20393,14 +20413,14 @@
       "size": 915
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "c6291862b5fbfe33f3e9b589126a2710",
-      "content_size": 14960,
-      "encoding_key": "681a19f5af39821583718571502f9d0b",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "fbb0a9c1d2a4e8d21cdf43c88bf550c7",
+      "content_size": 15014,
+      "encoding_key": "c48c4e1f2595a0a6c7b59e212e287918",
       "file_data_id": 6220154,
-      "offset": 144787043,
+      "offset": 32033278,
       "path": "Blizzard_GamepadSharedUtility/InputPrompts/InputLegendPromptGroup.lua",
-      "size": 3637
+      "size": 3658
     },
     {
       "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
@@ -20483,24 +20503,24 @@
       "size": 379
     },
     {
-      "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
-      "content_key": "07ac71a62ddb0d0f2c386b18750e2b79",
-      "content_size": 25985,
-      "encoding_key": "4e962a293d78c352de20d78a602e0185",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "0501a8d29edb3ec1dd2755960480ad36",
+      "content_size": 26089,
+      "encoding_key": "1f4fd1858dd0668d43bc1edcc4a5ffd5",
       "file_data_id": 7419446,
-      "offset": 130824322,
+      "offset": 32176552,
       "path": "Blizzard_GamepadSharedUtility/PromptedBindings/PromptedBinding.lua",
-      "size": 5047
+      "size": 5058
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "caf0085580ecd54c4a45bc271d5e9779",
-      "content_size": 17477,
-      "encoding_key": "0a923817052e03e5864f1f9af5dd0f69",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "ba3c04c4c5906757649d486732313187",
+      "content_size": 16697,
+      "encoding_key": "6a679ee6837df36d6829b1c341a33b30",
       "file_data_id": 7419447,
-      "offset": 238424202,
+      "offset": 220927331,
       "path": "Blizzard_GamepadSharedUtility/PromptedBindings/PromptedBindingFooter.lua",
-      "size": 4122
+      "size": 3978
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -20543,24 +20563,24 @@
       "size": 290
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "c9703a3b301e7739ccfb427a0d1bda76",
-      "content_size": 121,
-      "encoding_key": "d62d746b557b0ecfd157e921b0d9019b",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "e70e7e6b8a4615f7134ef036c5321291",
+      "content_size": 149,
+      "encoding_key": "e9179c86ea3dec584dfdbb3d44c3bc06",
       "file_data_id": 8547108,
-      "offset": 145876651,
+      "offset": 32355974,
       "path": "Blizzard_GamepadSharedUtilitySecure/Blizzard_GamepadSharedUtilitySecure.toc",
-      "size": 138
+      "size": 153
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "5b0e680da5f4bc37d937062520c1eee7",
-      "content_size": 2292,
-      "encoding_key": "83399dfb85f6a9a7102262a56cb8783c",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "7f53f93e7db1b4dd318efe0fbe2fe894",
+      "content_size": 2711,
+      "encoding_key": "92d8fcb8f468472c899405df630453db",
       "file_data_id": 8547109,
-      "offset": 145604472,
+      "offset": 32281864,
       "path": "Blizzard_GamepadSharedUtilitySecure/SecureBaseDialog.lua",
-      "size": 600
+      "size": 806
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -20593,14 +20613,14 @@
       "size": 1248
     },
     {
-      "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
-      "content_key": "7d635426f4a8b3d8615dcd05d4852bff",
-      "content_size": 55698,
-      "encoding_key": "e2c2216308d4adda296783f6b0888386",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "88482ed6329a6c6d8f83c0fa8d429b27",
+      "content_size": 55860,
+      "encoding_key": "14bc1f45dfee2cbe237d6d7d124a76c7",
       "file_data_id": 6188143,
-      "offset": 130572979,
+      "offset": 32021241,
       "path": "Blizzard_GamepadSmartNavigation/SmartNavigation.lua",
-      "size": 11953
+      "size": 12037
     },
     {
       "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
@@ -21563,14 +21583,14 @@
       "size": 229
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "d76314cf0369695436e460f78d024fa1",
-      "content_size": 8252,
-      "encoding_key": "8f503388f755e561f4c543577b92c865",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "cb4e81961e0a30799b70950703b001cf",
+      "content_size": 8245,
+      "encoding_key": "979e6c5130be299bdabb30856567daae",
       "file_data_id": 8286096,
-      "offset": 145870656,
+      "offset": 221160246,
       "path": "Blizzard_GlueXML/Blizzard_GlueXML.toc",
-      "size": 1276
+      "size": 1278
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -21593,34 +21613,34 @@
       "size": 108
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "ca9dfd431770b33902d30839f75171e4",
-      "content_size": 9148,
-      "encoding_key": "ba8b5a5e20cbcd9be634747c9e08e602",
-      "file_data_id": 8490763,
-      "offset": 238619873,
-      "path": "Blizzard_GlueXML/Camelot/CharacterCopy.lua",
-      "size": 2045
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "8e799ad063062ccfa27d8cfd1403fe3b",
+      "content_size": 108,
+      "encoding_key": "2d2662f2662877c7a4bc6328cfeb35fd",
+      "file_data_id": 8561792,
+      "offset": 221082579,
+      "path": "Blizzard_GlueXML/Camelot/CharacterCopyOverrides.lua",
+      "size": 122
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "dfc9a5eb0daa023cc57dc175f42d2de2",
-      "content_size": 4460,
-      "encoding_key": "2fd8f7c149496b3ea53d6ffd932cd022",
-      "file_data_id": 8490764,
-      "offset": 238735085,
-      "path": "Blizzard_GlueXML/Camelot/CharacterCopy.xml",
-      "size": 1034
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "a8041c60f2104276565c9d9f9e8fa20f",
+      "content_size": 266,
+      "encoding_key": "f57ecca72979e29a89eb28411feb7ef2",
+      "file_data_id": 8558473,
+      "offset": 221082387,
+      "path": "Blizzard_GlueXML/Camelot/CharacterSelect.lua",
+      "size": 192
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "0d901e1ab98fd90b24eaffed1fbdfe93",
-      "content_size": 591,
-      "encoding_key": "445f62e69fab769a647aaf639aeb5883",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "e30beaea1e68ef598c59335640ae5f23",
+      "content_size": 1563,
+      "encoding_key": "e222d4d3fd464ba1139a8675bf2e016d",
       "file_data_id": 8269570,
-      "offset": 203561567,
+      "offset": 221055431,
       "path": "Blizzard_GlueXML/Camelot/CharacterSelect/CharacterSelectList.lua",
-      "size": 342
+      "size": 609
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -21643,14 +21663,14 @@
       "size": 149
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "b3e373b4259e7c21ee7a23865716b642",
-      "content_size": 2694,
-      "encoding_key": "ee1d3b79e21b32622468aabe91251ae5",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "3afed8daa0a63e606f983c1f50599761",
+      "content_size": 2972,
+      "encoding_key": "a214f8e456e38ba741431f100bb88abd",
       "file_data_id": 8280381,
-      "offset": 203563606,
+      "offset": 221059422,
       "path": "Blizzard_GlueXML/Camelot/CharacterSelect/CharacterSelectUtil.lua",
-      "size": 793
+      "size": 856
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -21723,24 +21743,24 @@
       "size": 3389
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "a35a71451e98dc882ecf56202c2e478a",
-      "content_size": 9169,
-      "encoding_key": "00052b7b00b8b9238104fcbff20474fa",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "175d2113ce9242ce324c2d1fd882f390",
+      "content_size": 9838,
+      "encoding_key": "479640d0ed4ff311e91e43895738d815",
       "file_data_id": 8490765,
-      "offset": 238621918,
+      "offset": 221068936,
       "path": "Blizzard_GlueXML/Mainline/CharacterCopy.lua",
-      "size": 2047
+      "size": 2222
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "948f6cc309fdf7dc7506d77d44a53fc1",
-      "content_size": 4455,
-      "encoding_key": "70873ab85efbfb1c4e411c9f7b5625dc",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "f7e1d60285c31fb291851b7beb8dd519",
+      "content_size": 4437,
+      "encoding_key": "82493ef7c2cf7059e2f9f2425e436fe0",
       "file_data_id": 8490766,
-      "offset": 238736119,
+      "offset": 221153110,
       "path": "Blizzard_GlueXML/Mainline/CharacterCopy.xml",
-      "size": 1026
+      "size": 1019
     },
     {
       "archive": "88461ab86eff13c19e16d857c4fa48e6",
@@ -21753,24 +21773,24 @@
       "size": 446
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "53ae04652fd0d017ec7605dbd0ad5662",
-      "content_size": 119048,
-      "encoding_key": "7fd1d9a88aa5e929607b5c3795a7c5a2",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "679106c1b509b9a51fe11af5307bdb03",
+      "content_size": 120214,
+      "encoding_key": "209f9b75495211af955a4aca07c15bb7",
       "file_data_id": 5612621,
-      "offset": 144430565,
+      "offset": 220643374,
       "path": "Blizzard_GlueXML/Mainline/CharacterSelect.lua",
-      "size": 23868
+      "size": 24114
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "0b3f8fd59e97a4aa61bcdc34878b4d9a",
-      "content_size": 46631,
-      "encoding_key": "0f18b5f4d84ac33b21b19e08aae74a5a",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "a32501f9b6ee73f0babd35caa5eb409f",
+      "content_size": 46741,
+      "encoding_key": "2beafbbe0ce9048c7a196b5757172b43",
       "file_data_id": 5613496,
-      "offset": 238650389,
+      "offset": 221107012,
       "path": "Blizzard_GlueXML/Mainline/CharacterSelect.xml",
-      "size": 7464
+      "size": 7478
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -21783,24 +21803,24 @@
       "size": 1350
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "3b4bd7a85ec5baccfd08a34ea87ff669",
-      "content_size": 25169,
-      "encoding_key": "3c4cfdc0568bb6aca10925d62bcebb74",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "9b177c663f03fdb2e9998ca01aba9761",
+      "content_size": 25343,
+      "encoding_key": "3110f3a03d8384f04309cddb5e4bc51c",
       "file_data_id": 5614223,
-      "offset": 144749948,
+      "offset": 220779464,
       "path": "Blizzard_GlueXML/Mainline/CharacterSelect/CharacterSelectList.lua",
-      "size": 5804
+      "size": 5846
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "118b13cd5b89758a90cc6efabe7e7718",
-      "content_size": 6577,
-      "encoding_key": "0ec03096e9110340154189384438d59e",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "4ffd4843c448047336a8eeeac67e4f25",
+      "content_size": 6576,
+      "encoding_key": "a03cad90f71c62e24c211671751ec7f3",
       "file_data_id": 5614211,
-      "offset": 203890945,
+      "offset": 221115565,
       "path": "Blizzard_GlueXML/Mainline/CharacterSelect/CharacterSelectList.xml",
-      "size": 1612
+      "size": 1609
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -22183,14 +22203,14 @@
       "size": 1350
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "476c3349e5c1e80408f487fe6f4fed83",
-      "content_size": 11277,
-      "encoding_key": "2556b7f31793e248722a690bb151278f",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "e912771eb822b3ec2c48f7ee6b6592d5",
+      "content_size": 11282,
+      "encoding_key": "86940053816e1eb8b76717fd1895fee5",
       "file_data_id": 5612892,
-      "offset": 144487268,
+      "offset": 31924759,
       "path": "Blizzard_GlueXML/Mainline/CreditsFrame.lua",
-      "size": 2715
+      "size": 2717
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -22853,14 +22873,14 @@
       "size": 156
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "bacb83c5c5034b1fd12f07b325c7754b",
-      "content_size": 58276,
-      "encoding_key": "0f95797df4a74045254aafb7d82cb976",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "86e3a32b0d034d417cf55a5e16823e43",
+      "content_size": 58513,
+      "encoding_key": "74c2e726448e42edba5516b997f38026",
       "file_data_id": 6365511,
-      "offset": 144807008,
+      "offset": 220808166,
       "path": "Blizzard_GroupFinder_VanillaStyle/Blizzard_LFGVanilla_Browse.lua",
-      "size": 11920
+      "size": 11974
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -22883,14 +22903,14 @@
       "size": 1526
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "6a46aaf7ec60b8a55c4b95c32be56e1e",
-      "content_size": 9580,
-      "encoding_key": "15a0996395bc0632d1caaaaa74ab2a9e",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "a0f582414eddb21b5080ac296f1f4768",
+      "content_size": 9160,
+      "encoding_key": "f6d2ef37d4de548efe3b8d598d8c0b0d",
       "file_data_id": 6365514,
-      "offset": 144828269,
+      "offset": 220820140,
       "path": "Blizzard_GroupFinder_VanillaStyle/Blizzard_LFGVanilla_ParentFrame.lua",
-      "size": 2476
+      "size": 2278
     },
     {
       "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
@@ -22953,32 +22973,32 @@
       "size": 519
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "160da353a88094de00579a86eea64cd9",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "dd173c92ce0dd4a8974569d49771dd6a",
       "content_size": 24529,
-      "encoding_key": "a7270131134a61762fa61238985486ec",
+      "encoding_key": "e36cbbbc66856c3bdcecd566c8fe08e9",
       "file_data_id": 7789360,
-      "offset": 145795350,
+      "offset": 221127240,
       "path": "Blizzard_GroupFinder_VanillaStyle/Mainline/Blizzard_LFGVanilla_Browse.xml",
-      "size": 3780
+      "size": 3779
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "023d39784fd27d9a08e644acfa77e6e8",
-      "content_size": 24847,
-      "encoding_key": "2003c5386e57fd066b3b809ef5ec1ac1",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "d1f6593ea5fd33bb185cd8a856a11145",
+      "content_size": 24913,
+      "encoding_key": "e73ffd0f48ac0a1c4ad841bb85b22afc",
       "file_data_id": 7789361,
-      "offset": 145799130,
+      "offset": 221131019,
       "path": "Blizzard_GroupFinder_VanillaStyle/Mainline/Blizzard_LFGVanilla_Listing.xml",
-      "size": 4551
+      "size": 4587
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "e572cd669c664ec39cfd51aa87ba5fcf",
-      "content_size": 5018,
-      "encoding_key": "e9b13d2dc718ca99c53543f4a0676f95",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "3f5ffb13e3f858b918105274437ab466",
+      "content_size": 4943,
+      "encoding_key": "02aa192f37a1e4382326075873909ff1",
       "file_data_id": 7789362,
-      "offset": 145803681,
+      "offset": 221135606,
       "path": "Blizzard_GroupFinder_VanillaStyle/Mainline/Blizzard_LFGVanilla_ParentFrame.xml",
       "size": 1258
     },
@@ -24123,14 +24143,14 @@
       "size": 208
     },
     {
-      "archive": "35d33b7b60a64cecb52db5ab40098fc1",
-      "content_key": "82821986f2785c4e0ec04a82f0894885",
-      "content_size": 19410,
-      "encoding_key": "4358c2b4357094efae4fe569dfb5401a",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "dfe672fc06cb21d2587f9dcb824ad112",
+      "content_size": 19368,
+      "encoding_key": "eaaf724a480dec352d8160cbf2908a05",
       "file_data_id": 6024402,
-      "offset": 21164450,
+      "offset": 32307329,
       "path": "Blizzard_HousingCornerstone/Blizzard_HousingCornerstone.xml",
-      "size": 2637
+      "size": 2633
     },
     {
       "archive": "f6d0ed0ba10e19cdc43e4fc6fbe3cca1",
@@ -24913,14 +24933,14 @@
       "size": 421
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "9ba467845fe7e18e5cd7601c3fdeef9a",
-      "content_size": 12740,
-      "encoding_key": "cf6c0d47ed6dc785c03a531143568850",
+      "archive": "bf740327ed02d0aac886508a3c31a7e0",
+      "content_key": "3d09a08c10232db8c61fef16db2be694",
+      "content_size": 12470,
+      "encoding_key": "cd03ff6ff71577e3812bd4d50d3b6dc5",
       "file_data_id": 8280384,
-      "offset": 145528664,
+      "offset": 220677250,
       "path": "Blizzard_InspectUI/Camelot/Blizzard_InspectUI.lua",
-      "size": 3303
+      "size": 3227
     },
     {
       "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
@@ -25053,14 +25073,14 @@
       "size": 1274
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "9cdebf7160fab7800081af6f063d1cda",
-      "content_size": 11295,
-      "encoding_key": "72938622e39f13f66b5692b77effffe6",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "d81eda339415714dd7dcbc425103214b",
+      "content_size": 11442,
+      "encoding_key": "884e6bd21510f515f7e445721dc9bda4",
       "file_data_id": 8124381,
-      "offset": 145436567,
+      "offset": 221012899,
       "path": "Blizzard_InspectUI/Mainline/InspectPaperDollFrame.lua",
-      "size": 3028
+      "size": 3062
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -25903,24 +25923,24 @@
       "size": 2610
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "666918d99ccb93d8e1e61c22f49f4204",
-      "content_size": 6038,
-      "encoding_key": "380955e4354f3bfa4e7ca62a24a3f459",
+      "archive": "bf740327ed02d0aac886508a3c31a7e0",
+      "content_key": "2d510e8e76108f910d078a6425e82075",
+      "content_size": 6138,
+      "encoding_key": "2981bdb15804dd757376ffd750f46c8e",
       "file_data_id": 7881816,
-      "offset": 204158860,
+      "offset": 220687068,
       "path": "Blizzard_LegacySystem/Blizzard_LegacyRewardTrack.xml",
-      "size": 1460
+      "size": 1469
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "783e41db7fabd2117c5b265358356643",
-      "content_size": 23539,
-      "encoding_key": "fad7ea255f8d9eec7273692a41a60d6b",
+      "archive": "bf740327ed02d0aac886508a3c31a7e0",
+      "content_key": "c556a15a20b0957ca87d9e20bbc12e09",
+      "content_size": 23157,
+      "encoding_key": "af311ff058560df788ea94a90e5a1a0b",
       "file_data_id": 7725442,
-      "offset": 145378582,
+      "offset": 220670099,
       "path": "Blizzard_LegacySystem/Blizzard_LegacySystem.lua",
-      "size": 4366
+      "size": 4298
     },
     {
       "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
@@ -25993,24 +26013,24 @@
       "size": 346
     },
     {
-      "archive": "db472fabb25451725f60fc1d2309b5cf",
-      "content_key": "241ea778b0a55e911a62314e6d617373",
-      "content_size": 9703,
-      "encoding_key": "943d768f6f9dee931913a8c9855dfbf5",
+      "archive": "bf740327ed02d0aac886508a3c31a7e0",
+      "content_key": "648bb4b834260f5f7a34e86d387d6906",
+      "content_size": 10669,
+      "encoding_key": "053e91600f1ee87a8217834b1aff34ac",
       "file_data_id": 7725445,
-      "offset": 66157406,
+      "offset": 220674397,
       "path": "Blizzard_LegacySystem/Blizzard_LegacyTree.lua",
-      "size": 2604
+      "size": 2853
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "d13836123119b62ba7c69d56fe60bbeb",
-      "content_size": 13474,
-      "encoding_key": "5394b29f88e6471c741c490f1de1768d",
+      "archive": "bf740327ed02d0aac886508a3c31a7e0",
+      "content_key": "20621ebbeaff452b9b12d09abc7f2f96",
+      "content_size": 13880,
+      "encoding_key": "857c9bd976e377f11adf9444514f8b8b",
       "file_data_id": 7725447,
-      "offset": 238693343,
+      "offset": 220684482,
       "path": "Blizzard_LegacySystem/Blizzard_LegacyTree.xml",
-      "size": 2527
+      "size": 2586
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -26393,14 +26413,14 @@
       "size": 1703
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "e260841eb0e9650dc19e5e87244c3ff0",
-      "content_size": 16104,
-      "encoding_key": "d53a9bae01fa03e0cd424a96c245b083",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "44309afbf30d73497278596ffaceb49b",
+      "content_size": 16135,
+      "encoding_key": "381dbbf345eaa07dd8fc5285586cef41",
       "file_data_id": 7465623,
-      "offset": 145288751,
+      "offset": 220958776,
       "path": "Blizzard_MainMenuBarBagButtons/Shared/MainMenuBarBagButtons.lua",
-      "size": 3684
+      "size": 3719
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -26883,14 +26903,14 @@
       "size": 527
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "4de81443fd2a3819f488e875309b139b",
-      "content_size": 88699,
-      "encoding_key": "0a09139df3d29738b39525050613c408",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "fcf980f3f1e958814974db0607fded31",
+      "content_size": 90543,
+      "encoding_key": "11f151c640a565b4b85a26452692a5a3",
       "file_data_id": 5911606,
-      "offset": 202386892,
+      "offset": 220785310,
       "path": "Blizzard_Menu/Menu.lua",
-      "size": 20574
+      "size": 21049
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -27003,14 +27023,14 @@
       "size": 351
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "4d24da936044ad0c11772ff1fec2f951",
-      "content_size": 67271,
-      "encoding_key": "95ef05464a260f7d6b910f95114b9c6b",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "f7e58b9854be0b46006bc51f031c4940",
+      "content_size": 67536,
+      "encoding_key": "3f066c4220b8ddf41333d039626276b3",
       "file_data_id": 7465598,
-      "offset": 145272485,
+      "offset": 220945370,
       "path": "Blizzard_MicroMenu/Mainline/MainMenuBarMicroButtons.lua",
-      "size": 13336
+      "size": 13406
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -27113,14 +27133,14 @@
       "size": 670
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "d29ef017ddfd5b98e5ec44275bd10344",
-      "content_size": 2572,
-      "encoding_key": "815b03a946776ac66dadeb106eecaaea",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "f038376807ce68a7b52fd6afd2e2f02e",
+      "content_size": 2594,
+      "encoding_key": "931c6dd81c5441bfab2fc34506e87566",
       "file_data_id": 8199123,
-      "offset": 145472219,
+      "offset": 221031180,
       "path": "Blizzard_Minimap/Camelot/Diel.lua",
-      "size": 886
+      "size": 952
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -27143,14 +27163,14 @@
       "size": 818
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "9ccc2368e45889681de2cf23353c5fa4",
-      "content_size": 3092,
-      "encoding_key": "901d5b3d1e440ad94524eae7d637cc03",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "158e4e12bd64729755572a4980400586",
+      "content_size": 3427,
+      "encoding_key": "d77056e8538d029191a7551af9d910cb",
       "file_data_id": 8539480,
-      "offset": 145597564,
+      "offset": 221080096,
       "path": "Blizzard_Minimap/Camelot/Minimap.lua",
-      "size": 1036
+      "size": 1124
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -27353,14 +27373,14 @@
       "size": 688
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "f07de7a49a68d4b67c0509d35e695127",
-      "content_size": 2973,
-      "encoding_key": "ca26671d59149abac86fefc06eba6488",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "6b004454cdabbaf64901d683798f2edf",
+      "content_size": 4097,
+      "encoding_key": "bf53a1c08cfbac8f180557400b005318",
       "file_data_id": 8542081,
-      "offset": 145602141,
+      "offset": 221081220,
       "path": "Blizzard_Minimap/Shared/ExternalEventURLMinimapButton.lua",
-      "size": 897
+      "size": 1167
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -27763,14 +27783,14 @@
       "size": 1292
     },
     {
-      "archive": "db472fabb25451725f60fc1d2309b5cf",
-      "content_key": "d52a4949b2c9e85d668551acdde91a96",
-      "content_size": 274,
-      "encoding_key": "256400b22e74a562750db60614e795a1",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "e64c138119b31787c78fcc3e958235e5",
+      "content_size": 209,
+      "encoding_key": "577626864fdc6fc8df49a0aa1d89f84f",
       "file_data_id": 8415609,
-      "offset": 66236278,
+      "offset": 221060278,
       "path": "Blizzard_NamePlates/Camelot/Blizzard_NamePlateFrameOptionsOverrides.lua",
-      "size": 195
+      "size": 164
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -28133,14 +28153,14 @@
       "size": 2676
     },
     {
-      "archive": "0095ab2008815140eadb0adfb4b033e5",
-      "content_key": "1124fda9a8abab663cdccdf5000d9eb4",
-      "content_size": 14589,
-      "encoding_key": "60273aeddce5ca3c98659bae9865a07b",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "c0b246c9fcf01f4eb2b69df48ed8dfcb",
+      "content_size": 14687,
+      "encoding_key": "65a96f34f782df9ecc077279b13243ae",
       "file_data_id": 4761969,
-      "offset": 118964183,
+      "offset": 220608391,
       "path": "Blizzard_NewPlayerExperience/Blizzard_TutorialServices.lua",
-      "size": 3582
+      "size": 3632
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -28163,14 +28183,14 @@
       "size": 5980
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "749f69ab201e03944194f391777e4237",
-      "content_size": 18746,
-      "encoding_key": "515215ff4956ca1d9633bb6fe8945166",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "e9f371ec98c5f9cadb27ba832134b855",
+      "content_size": 18832,
+      "encoding_key": "bc465a751998cb0455e7aafec59cfbd9",
       "file_data_id": 8529186,
-      "offset": 145586267,
+      "offset": 221072646,
       "path": "Blizzard_NewPlayerExperience/Camelot/Blizzard_TutorialData.lua",
-      "size": 3334
+      "size": 3374
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -28203,14 +28223,14 @@
       "size": 337
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "bc8b2818d0047466494af5a0e3df74db",
-      "content_size": 17098,
-      "encoding_key": "25f2ff474e351a0f6894a862feee3a76",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "e3c6f39d6c388d85f1a01ea47fd71e63",
+      "content_size": 17152,
+      "encoding_key": "2b117607e9cd41f3a990edbeeef60019",
       "file_data_id": 8529190,
-      "offset": 145592222,
+      "offset": 221076020,
       "path": "Blizzard_NewPlayerExperience/Mainline/Blizzard_TutorialData.lua",
-      "size": 4060
+      "size": 4076
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -29133,14 +29153,14 @@
       "size": 8262
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "600a6901f2061b733e52d6e4452c01f2",
-      "content_size": 6834,
-      "encoding_key": "f680782af86cf77479e3ecb733829492",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "53fd4f38b4b9bb4b6bcc7ee17f6ff608",
+      "content_size": 6633,
+      "encoding_key": "c5a723c438470bda96489a1d355025bd",
       "file_data_id": 8496374,
-      "offset": 238623965,
+      "offset": 221071158,
       "path": "Blizzard_PTRFeedback/Blizzard_PTRFeedback_Gamepad.lua",
-      "size": 1533
+      "size": 1488
     },
     {
       "archive": "a5b89870eca306a088d67f17aacfa477",
@@ -29153,14 +29173,14 @@
       "size": 3409
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "960fc0e29cefac46c9a16575779eca74",
-      "content_size": 41638,
-      "encoding_key": "ba1315a306a8a4353555b674eadd4739",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "835b343e46f8b75658d23e2d46b5c0b4",
+      "content_size": 41848,
+      "encoding_key": "508bcbfbef06b3732203947a0ec69cb2",
       "file_data_id": 2921880,
-      "offset": 237857572,
+      "offset": 220575708,
       "path": "Blizzard_PTRFeedback/Blizzard_Reports.lua",
-      "size": 6748
+      "size": 6769
     },
     {
       "archive": "db472fabb25451725f60fc1d2309b5cf",
@@ -29193,14 +29213,24 @@
       "size": 1198
     },
     {
-      "archive": "db472fabb25451725f60fc1d2309b5cf",
-      "content_key": "4e1235a5f66c9584998eb8c11645a620",
-      "content_size": 226,
-      "encoding_key": "31f5e299a9b86a61eac59fa8fe17a2cd",
+      "archive": "17c7b16e563308a6f691bd8c12c2a60a",
+      "content_key": "262e74d0eefdc2e4db6f951e132423b4",
+      "content_size": 289,
+      "encoding_key": "3b70c0ab68b916f284cc238d11c5282f",
       "file_data_id": 3006806,
-      "offset": 247870328,
+      "offset": 22864182,
       "path": "Blizzard_PVPMatch/Blizzard_PVPMatch.toc",
-      "size": 193
+      "size": 220
+    },
+    {
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "389b9b3f4495091288419ec46e6f9f2d",
+      "content_size": 991,
+      "encoding_key": "9071cb053cd52d03490dd437dbc11ffd",
+      "file_data_id": 8552588,
+      "offset": 32283020,
+      "path": "Blizzard_PVPMatch/Camelot/PVPMatchTableOverrides.lua",
+      "size": 453
     },
     {
       "archive": "f6d0ed0ba10e19cdc43e4fc6fbe3cca1",
@@ -29243,14 +29273,14 @@
       "size": 1344
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "ef0542096fa9b7180dddf61fb6272ece",
-      "content_size": 15749,
-      "encoding_key": "d42618c688a74e4030bd2705ddbcf118",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "93473901fdf305f143b485a398b046da",
+      "content_size": 16431,
+      "encoding_key": "5c5f4902970f8a6a4241aba90e2dce49",
       "file_data_id": 3006817,
-      "offset": 201257551,
+      "offset": 31810885,
       "path": "Blizzard_PVPMatch/PVPMatchTable.lua",
-      "size": 3498
+      "size": 3657
     },
     {
       "archive": "f42cb70927cf539e79bc12ed67a14c50",
@@ -29523,14 +29553,14 @@
       "size": 213
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "db6c0d9e060e9200cb8e3b1a9e268da3",
-      "content_size": 45579,
-      "encoding_key": "991b3b2f68d2788a8c185182f32d6311",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "766109d6b3d7be6392b71630dfeef712",
+      "content_size": 44935,
+      "encoding_key": "f85968511213c37f5bb6e368de0cc2a8",
       "file_data_id": 4317994,
-      "offset": 238632610,
+      "offset": 221087352,
       "path": "Blizzard_PerksProgram/Blizzard_PerksProgram.xml",
-      "size": 5697
+      "size": 5631
     },
     {
       "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
@@ -29563,14 +29593,14 @@
       "size": 1919
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "2d67ba61f6774a7133ce488c61e1fc6b",
-      "content_size": 36839,
-      "encoding_key": "8fd5942d3fcc6045ba531b5bf2a2a263",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "13698e7be378bc50ea291829021b4fc1",
+      "content_size": 36759,
+      "encoding_key": "9a441255cbfc0ac0ef0fb4977a2b8795",
       "file_data_id": 4318004,
-      "offset": 237895752,
+      "offset": 220597707,
       "path": "Blizzard_PerksProgram/Blizzard_PerksProgramModel.lua",
-      "size": 6525
+      "size": 6450
     },
     {
       "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
@@ -30023,12 +30053,12 @@
       "size": 1477
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "52bdf16cf6a8c5aa540db45cbe129bc9",
-      "content_size": 28270,
-      "encoding_key": "8f9654fb159d90f9b307453d03f75aad",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "6ec9175a1fe1916a2210b32200b5dbe8",
+      "content_size": 28280,
+      "encoding_key": "6dbb3cefed19c8e05cd00f2c68c465df",
       "file_data_id": 4070223,
-      "offset": 144141726,
+      "offset": 220582477,
       "path": "Blizzard_PlayerChoice/Blizzard_PlayerChoiceOptionBase.lua",
       "size": 6308
     },
@@ -30163,24 +30193,24 @@
       "size": 547
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "b73a12c1a281c0b936899db98327c5b1",
-      "content_size": 45656,
-      "encoding_key": "89f2183ec0bacf0b4ea17fc80da8ec7f",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "001194896df4096c3f66d65f6c17704d",
+      "content_size": 45432,
+      "encoding_key": "dd61b283d854ae27584b85af2354e1b5",
       "file_data_id": 5408600,
-      "offset": 144310074,
+      "offset": 220623158,
       "path": "Blizzard_PlayerSpells/Blizzard_PlayerSpellsFrame.lua",
-      "size": 9264
+      "size": 9251
     },
     {
-      "archive": "fc38aa47b0a35784d64ca2dda722ad7a",
-      "content_key": "26ab0535fbd667546b7022b379820e09",
-      "content_size": 423,
-      "encoding_key": "a5bbc9fa9e410a00f50d7be12321a7a5",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "c95dc4ed1fa1964174373414b477c3fe",
+      "content_size": 453,
+      "encoding_key": "3ad2961f439d491cabb9b7be326fdeeb",
       "file_data_id": 5408616,
-      "offset": 90768657,
+      "offset": 220632409,
       "path": "Blizzard_PlayerSpells/Blizzard_PlayerSpellsRegistration.lua",
-      "size": 276
+      "size": 280
     },
     {
       "archive": "0b10fd3ebe92b72aa0e6a932d76d7a9d",
@@ -30193,24 +30223,24 @@
       "size": 227
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "1378287a5372e84ddea9fb317314d80b",
-      "content_size": 2868,
-      "encoding_key": "35e9211deb6e9607f0385bef4fd3a96e",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "49c2f58bd209a9f417ce947d2e84f3ed",
+      "content_size": 2244,
+      "encoding_key": "23ccea32111c7c44371e688e288e1794",
       "file_data_id": 7345815,
-      "offset": 203041012,
+      "offset": 220913077,
       "path": "Blizzard_PlayerSpells/Camelot/Blizzard_PlayerSpellsFrame.lua",
-      "size": 937
+      "size": 694
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "b58472f9dd1d300c2740d4c2126eb8c0",
-      "content_size": 2664,
-      "encoding_key": "b73cdd4f2cd9a48825b5199699c196ef",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "d3e167c9258c14598336d1398ed75a1f",
+      "content_size": 2725,
+      "encoding_key": "6fb4fc7237690562314fe6db8be1c667",
       "file_data_id": 8124519,
-      "offset": 204193212,
+      "offset": 221144149,
       "path": "Blizzard_PlayerSpells/Camelot/Blizzard_PlayerSpellsFrame.xml",
-      "size": 835
+      "size": 851
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -30233,24 +30263,24 @@
       "size": 636
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "5fe8af16b132e657e13d0e2f482b73fc",
-      "content_size": 12036,
-      "encoding_key": "ae807093f809820a0699ecf349435f2f",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "5e7e582c6ee32095eaf33772e53b6061",
+      "content_size": 12071,
+      "encoding_key": "d668ea46051eaf1230a8cdb5e5099aab",
       "file_data_id": 7928019,
-      "offset": 145405644,
+      "offset": 221002178,
       "path": "Blizzard_PlayerSpells/Camelot/ClassTalents/Blizzard_ClassTalentsFrame.lua",
-      "size": 3438
+      "size": 3367
     },
     {
-      "archive": "db472fabb25451725f60fc1d2309b5cf",
-      "content_key": "899b964d12b2f2e54fa458f3cb11cb1c",
-      "content_size": 30049,
-      "encoding_key": "143df6e02f35da1dc9189b58fdc57357",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "e662d8652addd90080aed93bfa7ae4d4",
+      "content_size": 30031,
+      "encoding_key": "09c67e7da36a56a21ba3fb2a69a87179",
       "file_data_id": 7928018,
-      "offset": 66292194,
+      "offset": 221136864,
       "path": "Blizzard_PlayerSpells/Camelot/ClassTalents/Blizzard_ClassTalentsFrame.xml",
-      "size": 4127
+      "size": 4118
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -30473,14 +30503,14 @@
       "size": 379
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "98a4af117a8c9bcdb86f49beac15fe0a",
-      "content_size": 2549,
-      "encoding_key": "f53908a21c840dd08a78854972e9821c",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "e0ffecf5c1c0639be1eaf3c9f5cda6e4",
+      "content_size": 2611,
+      "encoding_key": "56dbe7dc8a081e756497274a63e00e9e",
       "file_data_id": 8124520,
-      "offset": 204194047,
+      "offset": 221145000,
       "path": "Blizzard_PlayerSpells/Mainline/Blizzard_PlayerSpellsFrame.xml",
-      "size": 800
+      "size": 819
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -30803,14 +30833,14 @@
       "size": 126
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "75b3acc4bf6684a88db9ad50d25da072",
-      "content_size": 50041,
-      "encoding_key": "c34d19d9b37c0c6798e02c4b36167776",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "8ef6846ffcddf7ccb1b7933680c12741",
+      "content_size": 50104,
+      "encoding_key": "a36b9f9ccac4730bc70c1fc5e3c041f1",
       "file_data_id": 5121209,
-      "offset": 201489045,
+      "offset": 220612023,
       "path": "Blizzard_PrivateAurasUI/Blizzard_PrivateAurasUI.lua",
-      "size": 10420
+      "size": 10437
     },
     {
       "archive": "0b10fd3ebe92b72aa0e6a932d76d7a9d",
@@ -30983,14 +31013,14 @@
       "size": 1314
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "1f7e6825b48caded9725b0325112f73d",
-      "content_size": 42506,
-      "encoding_key": "a2f89b80da672775df728f49bae87988",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "389bd18f89e7f242de8669b46dfa3290",
+      "content_size": 42132,
+      "encoding_key": "1ae47e2cba33ee6298a9441ff7dc2f7f",
       "file_data_id": 4280184,
-      "offset": 144188260,
+      "offset": 220588785,
       "path": "Blizzard_Professions/Blizzard_ProfessionsFrame.lua",
-      "size": 8994
+      "size": 8922
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -31143,14 +31173,14 @@
       "size": 125
     },
     {
-      "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
-      "content_key": "f5dc3f5e057f068aeb7e4c2664686243",
-      "content_size": 4544,
-      "encoding_key": "5f6eab51f200c84ceb00e7e43e46feaa",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "a66dd148e3617ff47d7beaec0f6e13f6",
+      "content_size": 4127,
+      "encoding_key": "7bbc2b8df3aaa8e50772a89a9f913bc0",
       "file_data_id": 7539160,
-      "offset": 130860131,
+      "offset": 220978134,
       "path": "Blizzard_Professions/Camelot/Blizzard_ProfessionsFrame.lua",
-      "size": 1613
+      "size": 1420
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -31903,24 +31933,24 @@
       "size": 208
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "e6cc4b7a74dea571cb85be31d3bb0a93",
-      "content_size": 2059,
-      "encoding_key": "09e6d32ceab8170784f31ca36929d61b",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "1041cfb00bbf38c83f32b0df917c4cbd",
+      "content_size": 3181,
+      "encoding_key": "58b260a4541f90d8e9a0ca6eb4789b5d",
       "file_data_id": 7967682,
-      "offset": 203381883,
+      "offset": 221006241,
       "path": "Blizzard_QueueStatusFrame/Camelot/QueueStatusFrameOverrides.lua",
-      "size": 904
+      "size": 1107
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "032bdcdda49f7bae735131324d3e33ff",
-      "content_size": 49312,
-      "encoding_key": "c6e105baa1a41b87ce84b461a20e2039",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "412394ac03d9e67ad8b995df32330128",
+      "content_size": 49505,
+      "encoding_key": "90474e21a38a5aaa827ba57b5796539e",
       "file_data_id": 5612406,
-      "offset": 144358111,
+      "offset": 220632689,
       "path": "Blizzard_QueueStatusFrame/Mainline/QueueStatusFrame.lua",
-      "size": 10624
+      "size": 10685
     },
     {
       "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
@@ -32873,34 +32903,34 @@
       "size": 1608
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "3a632d75d36feb72a24de321f8978e36",
-      "content_size": 6786,
-      "encoding_key": "6435bbee201d0c0ae2d42ca87ceb0c4a",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "945b33982705325839b865082b8d62b8",
+      "content_size": 6902,
+      "encoding_key": "5de016f632fe1e2c63e5c088f5c0aa72",
       "file_data_id": 8033657,
-      "offset": 145418544,
+      "offset": 221007348,
       "path": "Blizzard_ScribeUI/Blizzard_ScribeUI.lua",
-      "size": 1877
+      "size": 1900
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "3dd0dba8eb7647eeabf45c0cf557ed75",
-      "content_size": 381,
-      "encoding_key": "ec84db48e9927cca9baaff1cdac9d07a",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "29d3d8a8a832fdf430e6723625431d9c",
+      "content_size": 428,
+      "encoding_key": "94e8e70b7890eaf990f5b64cc5f4d896",
       "file_data_id": 8033660,
-      "offset": 145865352,
+      "offset": 221159346,
       "path": "Blizzard_ScribeUI/Blizzard_ScribeUI.toc",
-      "size": 229
+      "size": 253
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "9e2f327aa925ab304d42fa711678bd81",
-      "content_size": 2645,
-      "encoding_key": "0a1cb64b3a67315acd1df170b8a51d3e",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "dff51b62be0b72bac28fe454407f423b",
+      "content_size": 3103,
+      "encoding_key": "a87f0defd70eed832e91bf1bcf1b56f2",
       "file_data_id": 8033661,
-      "offset": 145810905,
+      "offset": 221140982,
       "path": "Blizzard_ScribeUI/Blizzard_ScribeUI.xml",
-      "size": 991
+      "size": 1101
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -33153,14 +33183,14 @@
       "size": 119
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "cf8881b36d93b41a50552ee56e805d24",
-      "content_size": 1243,
-      "encoding_key": "368977b0e79c1bb7e233ce9b660767c9",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "e00ae42fbf70be4a36d90d9e44c1098c",
+      "content_size": 1075,
+      "encoding_key": "8afa97595bf7ad66cca9866ed532485f",
       "file_data_id": 8037772,
-      "offset": 238530611,
+      "offset": 221009248,
       "path": "Blizzard_SettingsDefinitions_Frame/Camelot/NameplatesOverrides.lua",
-      "size": 526
+      "size": 470
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -33353,14 +33383,14 @@
       "size": 871
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "493310bc918570581af921d1bdd2ab94",
-      "content_size": 1246,
-      "encoding_key": "dc5e206b7d8ded4627aca062630c94d3",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "32336b81d7d08c8957215b3930b74102",
+      "content_size": 1160,
+      "encoding_key": "561a66af377d8c5ceaa00f0b3d0a29de",
       "file_data_id": 8037773,
-      "offset": 238531137,
+      "offset": 221009718,
       "path": "Blizzard_SettingsDefinitions_Frame/Mainline/NameplatesOverrides.lua",
-      "size": 490
+      "size": 474
     },
     {
       "archive": "431d3797c76df782e43a8ddb22c78e43",
@@ -33383,14 +33413,14 @@
       "size": 1336
     },
     {
-      "archive": "db472fabb25451725f60fc1d2309b5cf",
-      "content_key": "fc5c433d4f0581d4858275b461244a1b",
-      "content_size": 39313,
-      "encoding_key": "fac64e5f2d399a895e922a7ae44ab669",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "4884d42b2ad43b8a29bb14008b243495",
+      "content_size": 39238,
+      "encoding_key": "6addb35c94295f12602792bf27118570",
       "file_data_id": 7406654,
-      "offset": 66087848,
+      "offset": 220921291,
       "path": "Blizzard_SettingsDefinitions_Frame/Nameplates.lua",
-      "size": 6052
+      "size": 6040
     },
     {
       "archive": "90925bca099f4b85ebd5356c97fff619",
@@ -33513,14 +33543,14 @@
       "size": 2453
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "ac8340d861aaf299b26e1603c499627e",
-      "content_size": 74866,
-      "encoding_key": "a3b1d76bf0e4aa11a6362f0bacd3e2be",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "895f8a9081dbd42f295222b7c8d41dba",
+      "content_size": 75266,
+      "encoding_key": "9db6280698b3a24b06d1919b284979e3",
       "file_data_id": 5612913,
-      "offset": 144489983,
+      "offset": 220671354,
       "path": "Blizzard_SettingsDefinitions_Shared/Graphics.lua",
-      "size": 12608
+      "size": 12640
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -33723,14 +33753,14 @@
       "size": 4300
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "6d05ecd7106b02c6ea940affb3b12acb",
-      "content_size": 3516,
-      "encoding_key": "f898ac574c9ca6b3776c06e1a3ca9300",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "2a5ce9c83b6ca6789f047b7a4b94b416",
+      "content_size": 3574,
+      "encoding_key": "282637bfb2700ed5cc193ed4f0ae9f11",
       "file_data_id": 5613766,
-      "offset": 145696597,
+      "offset": 221114490,
       "path": "Blizzard_Settings_Shared/Blizzard_Keybindings.xml",
-      "size": 1053
+      "size": 1075
     },
     {
       "archive": "85e51f375ededb256fe30fd5ae884d53",
@@ -35483,34 +35513,34 @@
       "size": 579
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "58b2513681da93eacf947d0ac1c8cc41",
-      "content_size": 1237,
-      "encoding_key": "cd260786ae069abfc06912f2d6c7fabc",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "eddf55cacf77e1fac5d922ee06bdba13",
+      "content_size": 1582,
+      "encoding_key": "6acfe94a63a07355708bb2eaf7ceabaa",
       "file_data_id": 8269817,
-      "offset": 203562058,
+      "offset": 221056040,
       "path": "Blizzard_SharedXML/Camelot/ProgressBars/ColoredProgressBar.lua",
-      "size": 402
+      "size": 562
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "86b2a94a4a1f96cc769bc66e02dc4e55",
-      "content_size": 1309,
-      "encoding_key": "e3b3c04861ebfdeb40912e50f6967945",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "8422c44d302ca592b67f2300bb7d9363",
+      "content_size": 1619,
+      "encoding_key": "d428ec86ad669fedfbda87eb5a28c860",
       "file_data_id": 8269816,
-      "offset": 145829472,
+      "offset": 32348817,
       "path": "Blizzard_SharedXML/Camelot/ProgressBars/ColoredProgressBar.xml",
-      "size": 561
+      "size": 682
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "b83b23ebff7a7a6c81d3cddb277a49d2",
-      "content_size": 145,
-      "encoding_key": "8ea5ba3cf12bef74713d857391d7e4c4",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "27114d101ba5000839ec403a235428cf",
+      "content_size": 229,
+      "encoding_key": "8e2de46474c748104c99d1fa0931e813",
       "file_data_id": 8280076,
-      "offset": 145528509,
+      "offset": 221059225,
       "path": "Blizzard_SharedXML/Camelot/SharedUIPanelTemplates.lua",
-      "size": 155
+      "size": 197
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -36043,24 +36073,24 @@
       "size": 493
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "fcc893038377ed3350364ca491568788",
-      "content_size": 69614,
-      "encoding_key": "cc8bcf6291035f60ba4d3aacb06c5927",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "b4318de53b7afd429441239c5bba0ac5",
+      "content_size": 69746,
+      "encoding_key": "b4b25a9dece8ae881850924235e7341f",
       "file_data_id": 5613825,
-      "offset": 144710707,
+      "offset": 220753322,
       "path": "Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.lua",
-      "size": 14078
+      "size": 14096
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "8836bb927197f5165c473f8e0c42983e",
-      "content_size": 92986,
-      "encoding_key": "49244b7a373d5339f168978e0d69091f",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "95235d8f28658e4b132494f0394b078a",
+      "content_size": 92991,
+      "encoding_key": "2edc2d9586044bc64b4ac51373998cf1",
       "file_data_id": 5613380,
-      "offset": 145667957,
+      "offset": 221093507,
       "path": "Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.xml",
-      "size": 13518
+      "size": 13505
     },
     {
       "archive": "431d3797c76df782e43a8ddb22c78e43",
@@ -36203,14 +36233,14 @@
       "size": 1181
     },
     {
-      "archive": "7c3f827f756b07fc2a8225985d253d25",
-      "content_key": "b994cd1bcdb483daf501c7cf5b2f2790",
-      "content_size": 4606,
-      "encoding_key": "39cb0ae1cd61249624c401bf53570b64",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "39b2ffb91a518655695ed5c4d3df084b",
+      "content_size": 8418,
+      "encoding_key": "04476c459bbe556c6031bacac74d079b",
       "file_data_id": 5614062,
-      "offset": 125765081,
+      "offset": 220767418,
       "path": "Blizzard_SharedXML/ModelSceneActorMixin.lua",
-      "size": 1213
+      "size": 2417
     },
     {
       "archive": "7c3f827f756b07fc2a8225985d253d25",
@@ -36243,24 +36273,24 @@
       "size": 857
     },
     {
-      "archive": "84dfda021bd2cfc2917f56c9c20a9949",
-      "content_key": "603faf019e7158cf1c7007e4e44a40c6",
-      "content_size": 17121,
-      "encoding_key": "0ba8b3dc0331ce2e5019080137e2a7c9",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "04761054301132d8b889ed510b2c3237",
+      "content_size": 25099,
+      "encoding_key": "ea061bb509c7ebf56df530cf0fe74ec5",
       "file_data_id": 5613716,
-      "offset": 145291563,
+      "offset": 220723801,
       "path": "Blizzard_SharedXML/ModelSceneMixin.lua",
-      "size": 3860
+      "size": 5950
     },
     {
-      "archive": "84dfda021bd2cfc2917f56c9c20a9949",
-      "content_key": "9ac02752cb39627498a99cc3ccae925e",
-      "content_size": 1561,
-      "encoding_key": "b359c4089eed9d545539f0cc34ebe7b3",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "0055db3782003262b0d16e2b448a3ac4",
+      "content_size": 1524,
+      "encoding_key": "0df4a0fe9320221fc755816a5632f298",
       "file_data_id": 5613247,
-      "offset": 145325792,
+      "offset": 221092983,
       "path": "Blizzard_SharedXML/ModelSceneMixin.xml",
-      "size": 546
+      "size": 524
     },
     {
       "archive": "7c3f827f756b07fc2a8225985d253d25",
@@ -39003,14 +39033,14 @@
       "size": 174
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "8469273b6dbe77f1861577a3f24633be",
-      "content_size": 14161,
-      "encoding_key": "ea25eea72f1eb9641ef6ef323afb5c40",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "1ca77cce921a3ada3c3867bf417b5afd",
+      "content_size": 14442,
+      "encoding_key": "b182493f95c2e604dfeaef0a5ff97b29",
       "file_data_id": 7864765,
-      "offset": 145395407,
+      "offset": 220998694,
       "path": "Blizzard_StableUI/Camelot/Blizzard_StableUI.lua",
-      "size": 3375
+      "size": 3484
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -39093,14 +39123,14 @@
       "size": 7009
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "49382270e1c6ba7c65d7ed2ffa514e07",
-      "content_size": 10755,
-      "encoding_key": "d666884f4eafce798bf5d224ad0b3c1d",
+      "archive": "bf740327ed02d0aac886508a3c31a7e0",
+      "content_key": "0d0991a9b855ae402efd1b7c83906341",
+      "content_size": 9908,
+      "encoding_key": "f6b74f1dd744551898b916716fac7bcb",
       "file_data_id": 7375359,
-      "offset": 145230415,
+      "offset": 220667526,
       "path": "Blizzard_StaticPopup/StaticPopupGamepad.lua",
-      "size": 2782
+      "size": 2573
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -39153,14 +39183,14 @@
       "size": 2768
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "cf2b3430fac77ea44e3252e8fee64a74",
-      "content_size": 100128,
-      "encoding_key": "1ab5d714c29993e6607dd7234430968f",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "aca644a93fd9a04a84d0e2f49a28cc8d",
+      "content_size": 100605,
+      "encoding_key": "e26f13b58defe08ca9559536339f9671",
       "file_data_id": 6859356,
-      "offset": 144953546,
+      "offset": 220836590,
       "path": "Blizzard_StaticPopup_Game/GameDialogDefs.lua",
-      "size": 15109
+      "size": 15140
     },
     {
       "archive": "0b10fd3ebe92b72aa0e6a932d76d7a9d",
@@ -39183,14 +39213,14 @@
       "size": 412
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "a1d0a8b382af90d8541b4e3d24cf5637",
-      "content_size": 48007,
-      "encoding_key": "4cc33edde33d5771b8d7994ebe589ad5",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "450d8988bd09595d946f4659b3897b96",
+      "content_size": 48251,
+      "encoding_key": "5b37d40dec725423d094b1d3df244313",
       "file_data_id": 6859357,
-      "offset": 144968655,
+      "offset": 220851730,
       "path": "Blizzard_StaticPopup_Game/Mainline/GameDialogDefs.lua",
-      "size": 8403
+      "size": 8423
     },
     {
       "archive": "be6d5a9619482a11c39c16f6b15e7a3d",
@@ -39963,14 +39993,14 @@
       "size": 613
     },
     {
-      "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
-      "content_key": "7c522d9eec3155545f5c9ee9c79fd1d1",
-      "content_size": 11818,
-      "encoding_key": "d046940d36808dcb0936a219c7332e0b",
+      "archive": "bf740327ed02d0aac886508a3c31a7e0",
+      "content_key": "6cacd99dd706f7b3f851a545b95ca6eb",
+      "content_size": 12011,
+      "encoding_key": "991b00edde401ffd1eed4b154e967b1a",
       "file_data_id": 8356429,
-      "offset": 238575013,
+      "offset": 220680477,
       "path": "Blizzard_SwingTimer/Blizzard_SwingTimer.lua",
-      "size": 2471
+      "size": 2514
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -40323,14 +40353,14 @@
       "size": 92
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "0b606271ffb55a4ee7655fc59475be21",
-      "content_size": 30663,
-      "encoding_key": "2acb82a8857c40206eab2d0d17745aee",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "70d18b11078932cf9a7df7ce5dfe8b42",
+      "content_size": 30180,
+      "encoding_key": "c24d4090f2eabe9ffd8a4c5b8e02ad9c",
       "file_data_id": 8124439,
-      "offset": 145441014,
+      "offset": 221015961,
       "path": "Blizzard_TrainerUI/Mainline/Blizzard_TrainerUI.lua",
-      "size": 7227
+      "size": 7034
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -41113,34 +41143,34 @@
       "size": 1941
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "72aae6e9b9301bd39b90f8be3efb2775",
-      "content_size": 13415,
-      "encoding_key": "07001e7cb8e20a4029c2e571528c8463",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "bcb692ccd053c1099a79e4b72e93b233",
+      "content_size": 13353,
+      "encoding_key": "28f44f76de8dfb8ab5a1856a10c0a028",
       "file_data_id": 7552263,
-      "offset": 145325983,
+      "offset": 32201888,
       "path": "Blizzard_UIPanels_Game/Camelot/BankFrame.lua",
-      "size": 3363
+      "size": 3355
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "58d857dbe6d82c23631f08680c6fb10a",
-      "content_size": 5174,
-      "encoding_key": "5612efde0c5c6e9005cbdf3c24a1f03a",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "11c1e30030c1cabd04834b7717f16f2b",
+      "content_size": 5266,
+      "encoding_key": "1718ba3bd04f08de9658a11583993213",
       "file_data_id": 7552262,
-      "offset": 204063415,
+      "offset": 32321027,
       "path": "Blizzard_UIPanels_Game/Camelot/BankFrame.xml",
-      "size": 1513
+      "size": 1547
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "4e284c43c50891da966af1699a1c2313",
-      "content_size": 42113,
-      "encoding_key": "89b70756a694edcc6c6940774a427fff",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "5bcca3cb958eda5f17e9262f95e171d7",
+      "content_size": 41562,
+      "encoding_key": "c970952ada17e25e829367dacfe03958",
       "file_data_id": 7264396,
-      "offset": 145168460,
+      "offset": 220876931,
       "path": "Blizzard_UIPanels_Game/Camelot/CharacterFrame.lua",
-      "size": 9483
+      "size": 9297
     },
     {
       "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
@@ -41163,14 +41193,14 @@
       "size": 348
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "20bef7bae109f518a52b7188092c3ea7",
-      "content_size": 787,
-      "encoding_key": "ec3b9bb1174ebcf8a15aad174b664a80",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "13dcb26b2b4c6448e09579e2a53f4508",
+      "content_size": 335,
+      "encoding_key": "b019203579b8e49d39873db0b3918fbb",
       "file_data_id": 8154520,
-      "offset": 203460002,
+      "offset": 221030991,
       "path": "Blizzard_UIPanels_Game/Camelot/ContainerFrame.lua",
-      "size": 422
+      "size": 189
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -41213,24 +41243,24 @@
       "size": 1219
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "9aac424f5d81c7c5539f48fa71e3afb6",
-      "content_size": 129595,
-      "encoding_key": "6cda809bb61f1230506bab7b5de45925",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "bab7bed28d9b3bae6758db3ed95c4dbb",
+      "content_size": 130095,
+      "encoding_key": "90f57c6298f598dae6ebb10e6a111ac1",
       "file_data_id": 7300285,
-      "offset": 145178557,
+      "offset": 220886228,
       "path": "Blizzard_UIPanels_Game/Camelot/PaperDollFrame.lua",
-      "size": 26678
+      "size": 26849
     },
     {
-      "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
-      "content_key": "f91f5bed31a6f455fc74a24725f4eeaa",
-      "content_size": 37172,
-      "encoding_key": "8dd2b2d9f4065a1b76a841afdb2faeb3",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "97372dee5f75617cac1f7208a561174e",
+      "content_size": 37276,
+      "encoding_key": "d12a961e12c50ad0e53bbefb424e8421",
       "file_data_id": 8268598,
-      "offset": 131048755,
+      "offset": 221147566,
       "path": "Blizzard_UIPanels_Game/Camelot/PaperDollFrame.xml",
-      "size": 5503
+      "size": 5544
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -41443,12 +41473,12 @@
       "size": 3391
     },
     {
-      "archive": "a4cd35c4112257bd976741c184bf64c5",
+      "archive": "ec6749dcc5ceac1e20215d33f0b471d1",
       "content_key": "ae4d961d1482d746d67c2cb0d65bbf5f",
       "content_size": 15297,
       "encoding_key": "86024997122d5714fa90b1facb8de13e",
       "file_data_id": 5633640,
-      "offset": 55177844,
+      "offset": 49738632,
       "path": "Blizzard_UIPanels_Game/Cata/SpellBookFrame.lua",
       "size": 3884
     },
@@ -41573,14 +41603,14 @@
       "size": 2673
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "4df1a648968e2d652ef91e973601b43f",
-      "content_size": 115595,
-      "encoding_key": "1e32c1fffd3723846d4352ebe3b76dcd",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "26091e7bafd2c985ea676be8a1ad7526",
+      "content_size": 115162,
+      "encoding_key": "ee3d66c5310a9c12e4e77763a208cc1e",
       "file_data_id": 5613773,
-      "offset": 144658572,
+      "offset": 220729751,
       "path": "Blizzard_UIPanels_Game/Mainline/ContainerFrame.lua",
-      "size": 23665
+      "size": 23571
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -41693,14 +41723,14 @@
       "size": 904
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "3f856a41d28c5e3a68ef062c3599bea4",
-      "content_size": 5071,
-      "encoding_key": "220ddf2d435906ec670328c06c9e86c7",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "dc70bd576692c28ff7cf4d9dc2f4895e",
+      "content_size": 5107,
+      "encoding_key": "040b8bf504e3b1056900894caac03cee",
       "file_data_id": 5612734,
-      "offset": 201783570,
+      "offset": 220669931,
       "path": "Blizzard_UIPanels_Game/Mainline/GossipFrame.lua",
-      "size": 1413
+      "size": 1423
     },
     {
       "archive": "befb99ab64b7e6af9cf6c55a58a5b041",
@@ -41723,14 +41753,14 @@
       "size": 95
     },
     {
-      "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
-      "content_key": "d98b8cb9880b859182f7a64d6ae5774f",
-      "content_size": 47821,
-      "encoding_key": "cddb860e61a7c9ed600821313935a04b",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "f654082ddbe13ce29737d4483b21e24e",
+      "content_size": 48571,
+      "encoding_key": "5f66ef9d82b7e8f522da74e6d15fef5b",
       "file_data_id": 5613246,
-      "offset": 130513216,
+      "offset": 220683994,
       "path": "Blizzard_UIPanels_Game/Mainline/GroupLootFrame.lua",
-      "size": 10718
+      "size": 10903
     },
     {
       "archive": "4c2ee5f1eebd1bd1ff587a88491c93ae",
@@ -41873,14 +41903,14 @@
       "size": 1645
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "190dee47f2d6037fd4268b0e39866431",
-      "content_size": 46914,
-      "encoding_key": "c953908a6161d4c1cf51156a3909d809",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "b38a1d0f78b77c4633e2c14a87da4270",
+      "content_size": 46854,
+      "encoding_key": "e849050532973380550225f846d91588",
       "file_data_id": 5614091,
-      "offset": 144740307,
+      "offset": 220769835,
       "path": "Blizzard_UIPanels_Game/Mainline/MerchantFrame.lua",
-      "size": 9641
+      "size": 9629
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -41913,14 +41943,14 @@
       "size": 1067
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "8498c83fc2b07558ee3772ee2214bdf3",
-      "content_size": 110290,
-      "encoding_key": "49144740f57930e9becf87fd1af75494",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "ac513b7099540db7cc7f092764375a03",
+      "content_size": 110366,
+      "encoding_key": "987174c9a3fd929963a0e52e7ebdb010",
       "file_data_id": 5613418,
-      "offset": 144601173,
+      "offset": 220701576,
       "path": "Blizzard_UIPanels_Game/Mainline/PaperDollFrame.lua",
-      "size": 22208
+      "size": 22225
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -41973,14 +42003,14 @@
       "size": 1438
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "4edcdcdf25d20cddd9f57260678e7d5e",
-      "content_size": 32383,
-      "encoding_key": "f6d4bdf1f8cdbf0998904df5b61d6a77",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "e605b7023ff61cb1a900de7ffed4826b",
+      "content_size": 32457,
+      "encoding_key": "0a471c213b078a53facf6dd661c84bee",
       "file_data_id": 5613339,
-      "offset": 144591332,
+      "offset": 220694897,
       "path": "Blizzard_UIPanels_Game/Mainline/QuestFrame.lua",
-      "size": 6667
+      "size": 6679
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -42323,14 +42353,14 @@
       "size": 529
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "cf7af7bb82fda09862b5beab65498860",
-      "content_size": 10478,
-      "encoding_key": "2b81beb4194ad5280371d9fbbf7fae0e",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "cdb8c3747b6cdda80b20416e4355f267",
+      "content_size": 10526,
+      "encoding_key": "7a55cd18cd752448c3886401b30c9a77",
       "file_data_id": 5612702,
-      "offset": 201779730,
+      "offset": 220667488,
       "path": "Blizzard_UIPanels_Game/Shared/GossipFrameShared.lua",
-      "size": 2437
+      "size": 2443
     },
     {
       "archive": "08756e07d6e7c1cb55f962d53d865961",
@@ -43713,14 +43743,14 @@
       "size": 510
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "5aebee97b106ac2cfd5d66626163779b",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "7934aabbc55b457a62ac60f0f793d7bf",
       "content_size": 4116,
-      "encoding_key": "b72541e7c8eaa6a2d7fe5b0e7239e39c",
+      "encoding_key": "56db04423085ab53f3a11814d881814e",
       "file_data_id": 8124450,
-      "offset": 145449350,
+      "offset": 32242685,
       "path": "Blizzard_UnitFrame/Camelot/TargetFrame.lua",
-      "size": 1214
+      "size": 1215
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -44123,14 +44153,14 @@
       "size": 2766
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "09ea50dc20b0b02ffeaae63eb965ed09",
-      "content_size": 30148,
-      "encoding_key": "b314126eaa3de6b122bc6157057e3534",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "d0c1bc29cc6d9f454eb6ad58efeec598",
+      "content_size": 30184,
+      "encoding_key": "ed2ab24b774753c2bf7b2cf4e3513379",
       "file_data_id": 7557100,
-      "offset": 145347025,
+      "offset": 32205243,
       "path": "Blizzard_UnitFrame/Mainline/PartyMemberFrame.lua",
-      "size": 5338
+      "size": 5347
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -44153,24 +44183,24 @@
       "size": 1890
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "b491658cd8082e10550a842dfe9c1676",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "66f23e0eac490aeb9a98d78bb8969339",
       "content_size": 29153,
-      "encoding_key": "be105c3a5dead73d8f131ddca53f59c3",
+      "encoding_key": "66aaa7a1fe6388cb6432b088d30f07ad",
       "file_data_id": 7557101,
-      "offset": 145352363,
+      "offset": 32210590,
       "path": "Blizzard_UnitFrame/Mainline/PlayerFrame.lua",
-      "size": 5603
+      "size": 5607
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "98385cfd78e54941ab85d3baf3d90094",
-      "content_size": 22556,
-      "encoding_key": "c2f495363516188ae79cdacf6a2dc009",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "74b8037845c2ad891124dd9eb6f60434",
+      "content_size": 22691,
+      "encoding_key": "dafb6b7712c78833def6477852e0154c",
       "file_data_id": 7557104,
-      "offset": 145775910,
+      "offset": 32322574,
       "path": "Blizzard_UnitFrame/Mainline/PlayerFrame.xml",
-      "size": 3933
+      "size": 3936
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -44273,14 +44303,14 @@
       "size": 1513
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "e92b350e63fb6a8a1a853ef146b7c137",
-      "content_size": 44856,
-      "encoding_key": "d1704d7b31e682f734e6cdcb6a1cb69e",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "7d62e6183118fc264ff70c85429c9ab5",
+      "content_size": 44924,
+      "encoding_key": "b5918a7ebce5fcf375e9411648fec6cb",
       "file_data_id": 7557110,
-      "offset": 145359800,
+      "offset": 220989301,
       "path": "Blizzard_UnitFrame/Mainline/TargetFrame.lua",
-      "size": 9386
+      "size": 9393
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -44373,14 +44403,14 @@
       "size": 942
     },
     {
-      "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
-      "content_key": "e2e0ac7edd98bb9ec0ed9f0f521392e9",
-      "content_size": 37848,
-      "encoding_key": "714a736b2b301155e3abdb37b0e47599",
+      "archive": "fec38b920798e78bd38f6d16f598a1c8",
+      "content_key": "b1f8b4476d53a26f637747d6b0beac5d",
+      "content_size": 38016,
+      "encoding_key": "e8034373bebb0dfb2e3ddc830a45be92",
       "file_data_id": 7557116,
-      "offset": 203259674,
+      "offset": 32225156,
       "path": "Blizzard_UnitFrame/Mainline/UnitFrame.lua",
-      "size": 8552
+      "size": 8573
     },
     {
       "archive": "829b4ddfb3e31a11179cab3da9eb869e",
@@ -45273,6 +45303,56 @@
       "size": 896
     },
     {
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "55d339869cd2315cd75acdbbee7776b7",
+      "content_size": 202,
+      "encoding_key": "b9860ea7a602cf36dd73f13323a5a92d",
+      "file_data_id": 8561795,
+      "offset": 221161524,
+      "path": "Blizzard_WoWHackTutorials/Blizzard_WoWHackTutorials.toc",
+      "size": 155
+    },
+    {
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "6c5a568f70dd0438c1defef5d4be788a",
+      "content_size": 402,
+      "encoding_key": "ef606ba12e26e1861bd9ca7f89ff5561",
+      "file_data_id": 8561793,
+      "offset": 221082701,
+      "path": "Blizzard_WoWHackTutorials/WoWHackTutorialHighlights.lua",
+      "size": 244
+    },
+    {
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "77c74fd0259920fa743d6964c9bceb68",
+      "content_size": 3599,
+      "encoding_key": "dfbe17151e4f8a2d02c444ea970b5e00",
+      "file_data_id": 8561794,
+      "offset": 221154129,
+      "path": "Blizzard_WoWHackTutorials/WoWHackTutorialHighlights.xml",
+      "size": 824
+    },
+    {
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "816c122a92c20913d3e1508505869f76",
+      "content_size": 9888,
+      "encoding_key": "07268dff48cac2bccc795b4bc4bab53b",
+      "file_data_id": 8561796,
+      "offset": 221082945,
+      "path": "Blizzard_WoWHackTutorials/WoWHackTutorials.lua",
+      "size": 2195
+    },
+    {
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "dc5efd7a816917f628cfca889fd729d9",
+      "content_size": 376,
+      "encoding_key": "e7b0d0bd122e45743beac1c8758ec249",
+      "file_data_id": 8561797,
+      "offset": 221154953,
+      "path": "Blizzard_WoWHackTutorials/WoWHackTutorials.xml",
+      "size": 279
+    },
+    {
       "archive": "112681a9d5624bbdf750a88ced1b0abe",
       "content_key": "045c5e69bf876af28ff51230ff5756ce",
       "content_size": 6799,
@@ -45303,14 +45383,14 @@
       "size": 695
     },
     {
-      "archive": "829b4ddfb3e31a11179cab3da9eb869e",
-      "content_key": "eafb7fed6a62552e3048c554f8b04e35",
-      "content_size": 54755,
-      "encoding_key": "084a290332d8826ed49381fda94868b6",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "d299dcb079a5ed731b49a80b98b87fe9",
+      "content_size": 54279,
+      "encoding_key": "028a27b98854b89992f428468e908216",
       "file_data_id": 1983862,
-      "offset": 144106289,
+      "offset": 220565395,
       "path": "Blizzard_WorldMap/Blizzard_WorldMap.lua",
-      "size": 10511
+      "size": 10313
     },
     {
       "archive": "0c5189c7e7f3e8b01c19d383215fd09e",
@@ -45333,14 +45413,14 @@
       "size": 6822
     },
     {
-      "archive": "bf740327ed02d0aac886508a3c31a7e0",
-      "content_key": "3b05457dec37213669911307f2c87931",
-      "content_size": 10982,
-      "encoding_key": "1f91c22f2b6a93cca58e717a791fdc21",
+      "archive": "57ce50e34891a0e2b94d52493dfbf6d0",
+      "content_key": "356356ad5c6c2678a93d63235068ffef",
+      "content_size": 11073,
+      "encoding_key": "2d93877cfde2033ab1a3c43e73991be0",
       "file_data_id": 2012781,
-      "offset": 291736,
+      "offset": 221085140,
       "path": "Blizzard_WorldMap/Blizzard_WorldMapTemplates.xml",
-      "size": 2190
+      "size": 2212
     },
     {
       "archive": "4b65bb81949de8bdc0137fac86aa7f6c",
@@ -45703,9 +45783,9 @@
       "size": 96
     }
   ],
-  "gethe_revision": "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a",
-  "install_key": "531a6f831c609097179d4bc49731007b",
+  "gethe_revision": "2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af",
+  "install_key": "bb46ab983520a2617d8b2119662ef38b",
   "product": "wowt",
   "schema": 1,
-  "version": "12.1.7.70424"
+  "version": "12.1.7.70493"
 }

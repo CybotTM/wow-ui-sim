@@ -113,6 +113,7 @@
 8268279;interface/addons/Blizzard_ActionBar/Blizzard_ActionBar.toc
 7831514;interface/addons/blizzard_actionbar/blizzard_actionbar_classic.toc
 6716595;interface/addons/blizzard_actionbar/blizzard_actionbar_mainline.toc
+8552586;interface/addons/blizzard_actionbar/camelot/actionbuttonoverrides.lua
 8547102;interface/addons/blizzard_actionbar/camelot/extraactionbaroverrides.lua
 7950560;interface/addons/blizzard_actionbar/camelot/mainmenubarendcaps.lua
 7406645;interface/addons/blizzard_actionbar/camelot/mainmenubarendcaps.xml
@@ -399,6 +400,7 @@
 4637098;interface/addons/blizzard_apidocumentationgenerated/dateandtimedocumentation.lua
 5735635;interface/addons/blizzard_apidocumentationgenerated/deathalertdocumentation.lua
 4637078;interface/addons/blizzard_apidocumentationgenerated/deathinfodocumentation.lua
+8552587;interface/addons/blizzard_apidocumentationgenerated/deathrecapconstantsdocumentation.lua
 7036082;interface/addons/blizzard_apidocumentationgenerated/deathrecapdocumentation.lua
 5544413;interface/addons/blizzard_apidocumentationgenerated/debugtoggledocumentation.lua
 5910530;interface/addons/blizzard_apidocumentationgenerated/delvesconstantsdocumentation.lua
@@ -2661,6 +2663,8 @@
 8539473;interface/addons/blizzard_gluexml/camelot/accountreactivateoverrides.lua
 8490763;interface/addons/blizzard_gluexml/camelot/charactercopy.lua
 8490764;interface/addons/blizzard_gluexml/camelot/charactercopy.xml
+8561792;interface/addons/blizzard_gluexml/camelot/charactercopyoverrides.lua
+8558473;interface/addons/blizzard_gluexml/camelot/characterselect.lua
 8269570;interface/addons/blizzard_gluexml/camelot/characterselect/characterselectlist.lua
 8269572;interface/addons/blizzard_gluexml/camelot/characterselect/characterselectlistbackground.xml
 8269571;interface/addons/blizzard_gluexml/camelot/characterselect/characterselecttemplates.lua
@@ -3947,6 +3951,7 @@
 3592443;interface/addons/blizzard_ptrfeedbackglue/blizzard_ptrfeedbackglue.toc
 3592445;interface/addons/blizzard_ptrfeedbackglue/blizzard_reports_glue.lua
 3006806;interface/addons/blizzard_pvpmatch/blizzard_pvpmatch.toc
+8552588;interface/addons/blizzard_pvpmatch/camelot/pvpmatchtableoverrides.lua
 3006814;interface/addons/blizzard_pvpmatch/pvpmatchresults.lua
 3006812;interface/addons/blizzard_pvpmatch/pvpmatchresults.xml
 3006804;interface/addons/blizzard_pvpmatch/pvpmatchscoreboard.lua
@@ -5723,6 +5728,11 @@
 7288650;interface/addons/blizzard_wowhackitembar/blizzard_wowhackitembar.lua
 7235536;interface/addons/blizzard_wowhackitembar/blizzard_wowhackitembar.toc
 7235537;interface/addons/blizzard_wowhackitembar/blizzard_wowhackitembar.xml
+8561795;interface/addons/blizzard_wowhacktutorials/blizzard_wowhacktutorials.toc
+8561793;interface/addons/blizzard_wowhacktutorials/wowhacktutorialhighlights.lua
+8561794;interface/addons/blizzard_wowhacktutorials/wowhacktutorialhighlights.xml
+8561796;interface/addons/blizzard_wowhacktutorials/wowhacktutorials.lua
+8561797;interface/addons/blizzard_wowhacktutorials/wowhacktutorials.xml
 7340194;interface/addons/blizzard_wowsurveyui/blizzard_wowsurveyui.lua
 7340195;interface/addons/blizzard_wowsurveyui/blizzard_wowsurveyui.toc
 7340196;interface/addons/blizzard_wowsurveyui/blizzard_wowsurveyui.xml

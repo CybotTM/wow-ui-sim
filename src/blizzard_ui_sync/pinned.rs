@@ -45,10 +45,8 @@ fn build() -> crate::Result<&'static Build> {
                 "12.1.7.70493",
                 "fc3eaa61ff0ade6bf35dbab9727bc161",
                 "c13b476a09cb3262797a6fdc88103036",
-                // Superseded install/Gethe pins: replace from authenticated 70493 metadata.
-                // The committed 70424 index must remain rejected until regenerated.
-                "531a6f831c609097179d4bc49731007b",
-                "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a",
+                "bb46ab983520a2617d8b2119662ef38b",
+                "2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af",
             ];
             if build.schema != 1 || identity != expected {
                 return Err("unsupported PTR content-index schema or source identity".into());
@@ -294,7 +292,7 @@ mod tests {
         assert_eq!(selected.cdn_key, "c13b476a09cb3262797a6fdc88103036");
         assert_eq!(
             selected.gethe_revision,
-            "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a"
+            "2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af"
         );
     }
 
@@ -326,7 +324,7 @@ mod tests {
                 "3aa83893a3ce9b722a5f51328ad9a552",
             )
             .replace(
-                "b87363e0770c2f15b1e2f154de8ad3b0cf3ea90a",
+                "2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af",
                 "49b69918fcdc77e109813281e4f537d45ec7dcbf",
             );
         std::fs::write(dir.path().join(super::super::PROVENANCE_FILE), old_identity).unwrap();
