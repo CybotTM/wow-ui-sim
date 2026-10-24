@@ -1,6 +1,6 @@
 ## [2026-10-24] source | Reload XML instance arguments
 
-[Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): real16-compilation RED precedes parameterized layer identities through the existing bytecode cache. Profile GREEN remains pending; no full-workload acceptance claim.
+[Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): Forever RED16 precedes parameterized identities, then Forever/default Retail compile0 sources on both reloads.27 exact cases/profile, zero-warning checks and formatting pass; no stock-startup or full-workload acceptance claim.
 
 ## [2026-10-23] investigation | Wrath retained-failure fixture programme
 

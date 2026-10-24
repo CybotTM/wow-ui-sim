@@ -36,7 +36,7 @@ Reload replaces the VM registry, so the prototype cache begins empty without a m
 
 [`LoaderEnv`](../../../src/lua_api/loader_env.rs) still loads through the existing exact-source bytecode cache, disables global slots and applies the same secure/scoped loading environment. Each execution receives a new table of strings/numbers, accessed through chunk varargs without introducing lexical locals that could shadow authored handlers. No Lua table, frame, closure or prototype is cached across VMs. The batch retains XML order and all post-exec attachment, animation and text-sync steps; standalone XML FontStrings use the same parameterized producer.
 
-The [contract](../../specs/reload-ui.md#generated-xml-layer-reconstruction) records the actual16-compilation prerequisite RED and pending profile GREEN. The initial fixture failure was implicit SetAllPoints against an unsized parent, fixed with an explicit TOPLEFT anchor without weakening size or freshness assertions. This optimization does not establish full-workload savings or native reload chronology.
+The [contract](../../specs/reload-ui.md#generated-xml-layer-reconstruction) records the Forever16-compilation prerequisite RED and bounded Forever/default Retail GREEN at `23f1f629a`: both reloads compile0 sources on each profile;27 exact cases/profile and both zero-warning checks pass, with shared formatting proof and unchanged original CVars. The initial fixture failure was implicit SetAllPoints against an unsized parent, fixed with an explicit TOPLEFT anchor without weakening size or freshness assertions. This optimization does not establish full-workload savings or native reload chronology.
 
 ## Managed addon restoration
 

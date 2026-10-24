@@ -18,10 +18,22 @@
 
 ### Generated XML layer reconstruction
 
-- [ ] Reuse identical generated layer operations across instance identities and fresh ReloadUI VMs. Sixteen identical texture operations may compile at most one source chunk per reload, measured after warm initial loading over two real reconstructions.
-- [ ] Pass instance names, parent references and substituted relativeTo targets as invocation data; preserve creation order, named/anonymous identity, parentKeys/arrays, region properties, anchors, scripts, scoped environments and fresh objects. Never rewrite authored Lua or retain old-VM handles to obtain reuse.
+- [x] Reuse identical generated layer operations across instance identities and fresh ReloadUI VMs. Sixteen identical texture operations may compile at most one source chunk per reload, measured after warm initial loading over two real reconstructions.
+- [x] Pass instance names, parent references and substituted relativeTo targets as invocation data; preserve creation order, named/anonymous identity, parentKeys/arrays, region properties, anchors, scripts, scoped environments and fresh objects. Never rewrite authored Lua or retain old-VM handles to obtain reuse.
 
-Repaired-fixture prerequisite at `0d1e54849`: both reload behaviors complete, then the first budget assertion reports16 source compiles against1. Seven factory and15 reload/XML preservation controls pass. The source producer now supplies per-invocation argument tables through the existing bytecode path; Forever/default Retail GREEN and new mixed-region preservation remain pending. This bounded compile-count proof is not paired wall-time or unchanged Ellesmere acceptance.
+Forever prerequisite RED at `0d1e54849`: both real reload behaviors complete, then the first budget assertion reports16 source compiles against1. Seven factory and15 reload/XML preservation controls pass. Retail RED was not measured.
+
+At `23f1f629a`, the producer supplies fresh invocation argument tables through the existing bytecode path. Exact selector: `loader::tests::reload_xml_cost::reload_xml_layer_reconstruction_bounds_source_compiles`.
+
+| Bounded capability | Forever | Default Retail |
+| --- | --- | --- |
+| Sixteen identical layer instances, two real ReloadUI reconstructions | Source compiles0,0; budget1 | Source compiles0,0; budget1 |
+| Hook/attribute/XML-method factories: order, arguments, returns, private state, taint, errors and VM retirement | 7/7 PASS | 7/7 PASS |
+| Existing IPC/app reload and XML property/anchor/name controls | 15/15 PASS | 15/15 PASS |
+| Mixed Texture/MaskTexture/Line/FontString order, arrays, names and anchors; standalone FontString name/text/mixin controls | 4/4 PASS | 4/4 PASS |
+| Library build, cargo check and shared cargo fmt --check | PASS; zero compiler warnings | PASS; zero compiler warnings |
+
+Each profile executes27 exact cases, zero ignored, with fresh child-only XDG data copied from current CVars; original CVar stat/hash stay unchanged. This proves bounded compile reuse and preservation, not stock-startup cleanliness, native chronology, paired wall-time savings or unchanged full Ellesmere acceptance.
 
 ### File-backed client state
 

@@ -1,3 +1,7 @@
+## [2026-10-24] proof | Bounded reload XML source reuse
+
+[Contract matrix](../specs/reload-ui.md#generated-xml-layer-reconstruction) records Forever RED16 at0d1e54849, then Forever/default Retail0/0 reload compiles at23f1f629a.27 exact cases/profile, zero-warning builds/checks and formatting pass; current CVars remain unchanged. [Mechanics](systems/reload-ui.md#generated-xml-layer-arguments) retain VM-local objects and XML ordering. Stock startup, paired timing and full Ellesmere acceptance remain separate.
+
 ## [2026-10-24] source | Reload XML instance arguments
 
 [Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): real16-compilation RED precedes parameterized layer identities through the existing bytecode cache. Profile GREEN remains pending; no full-workload acceptance claim.
