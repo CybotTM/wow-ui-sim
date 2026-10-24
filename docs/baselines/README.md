@@ -2,6 +2,12 @@
 
 Validation artifacts for supported client profiles.
 
+## PTR 70493 authenticated-source capture — 2026-10-24
+
+[`ptr-lua-errors.json`](ptr-lua-errors.json) is the exact stock `lua-errors` stdout captured at `0bfecb54689d374f4b4d0162af7cb7ffb1b44457` after merging master/toc into the source lane. Build `wowt 12.1.7.70493`, Interface 120107; 4,578 source files match pinned decoded size/hash. [Metadata](ptr-lua-errors.meta.json) binds build/CDN/install/Gethe identity, manifest/index/mapping/cache-provenance hashes, sealed ELF, child-only environment, unchanged source/CVar guards and retained service result.
+
+**FAILING inventory: 436 records / 618 occurrences, exit 1.** This is not clean startup or I4/panel/native acceptance. The error list is byte-identical captured stdout (SHA256 `c8d23aa49be28356363bc6221618122e040f69d63dd4a4412384ece9f2364428`), not hand edited. Previous 69594 baseline remains in Git at `1edff1749e4b6e0ac59358ae0f76dfe180f7b0de`; no renamed copy was added. Historical re-pin/control sections below retain their original source epochs and do not describe this 70493 capture.
+
 ## rilua re-pin baseline refresh — 2026-10-17
 
 This is the historical re-pin-only capture; the [combined Wrath inventory](#wrath-lua-errors) below supersedes its Wrath row.
