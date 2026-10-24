@@ -52,6 +52,15 @@ pub fn seeded_world_state() -> WorldState {
         ws.guild_num_members = 0;
         ws.guild_members.clear();
         ws.guild_ranks.clear();
+        // Initial world-entry image; received host rows replace these seeds.
+        ws.guild_bank_rank_permissions.insert(
+            0,
+            super::GuildBankRankPermissions {
+                money_per_day: 0,
+                tab_rights: [-1; 6],
+                tab_stacks_per_day: [-1; 6],
+            },
+        );
     }
     apply_collection_defaults(&mut ws);
     ws

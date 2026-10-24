@@ -560,6 +560,9 @@ pub struct WorldState {
     /// guild. Drives `GuildControlGetNumRanks` / `GuildControlGetRankName` /
     /// `GuildControlGetRankFlags`.
     pub guild_ranks: Vec<GuildRank>,
+    /// Host-received bank permissions by zero-based control rank. Missing rows
+    /// are unavailable input, not zero permissions. Wrath seeds only rank 0.
+    pub guild_bank_rank_permissions: HashMap<usize, GuildBankRankPermissions>,
     /// 1-based rank index currently "selected" by `GuildControlSetRank`.
     /// `GuildControlGetRankName()` / `GetRankFlags()` without an explicit
     /// index return the selected rank's fields. `0` = nothing selected.
@@ -689,6 +692,15 @@ pub struct MacroInfo {
 pub struct GuildRank {
     pub name: String,
     pub flags: Vec<bool>,
+}
+
+/// Received guild-bank limits/rights for one rank (build 12340).
+/// No Default: nonleader/server values must be supplied, not invented.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GuildBankRankPermissions {
+    pub money_per_day: i64,
+    pub tab_rights: [i32; 6],
+    pub tab_stacks_per_day: [i32; 6],
 }
 
 /// Guild tabard crest data returned by `GetGuildLogoInfo()`.

@@ -48,6 +48,8 @@ Verified 2026-10-24: static staging only. [Bank contract](../../specs/wrath-guil
 
 The existing native TOC/loader selection above also selects the dropdown consumer. `GuildControlPopupFrameDropDownButton_OnClick` selects the control rank, calls `GuildControlPopupframe_Update`, then sets the closed label. `GuildBankTabPermissionsTab_OnClick` selects the tab and calls that same original update. Tests do not replace either consumer or getter. The existing leader setup avoids the special rank1 UI branch by selecting Officer/Member for observations; the second selector changes the player's rank to Officer before clicking Member as well.
 
+`WorldState.guild_bank_rank_permissions` is an explicit host input map keyed by zero-based control rank. Each `GuildBankRankPermissions` row contains `money_per_day`, six `tab_rights` and six `tab_stacks_per_day`; no `Default` fills unknown server rows. The Wrath seeded world models the initial world-entry image with only rank0: money0, masks/stacks -1. It does not create membership or rank-name rows. Host receipt replaces map entries directly; no packet/event/reset lifecycle is fabricated. Keeping this input independent of display rank names also lets rank0 exist before a roster arrives. Bank server updates after rank mutations remain outside scope.
+
 ### Static contradiction table
 
 Each of the two `test_guild_panel` selectors independently executes all observations below through the original consumers. These are static contradictions, not executed RED proof.
