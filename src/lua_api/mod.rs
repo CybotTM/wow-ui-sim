@@ -47,6 +47,8 @@ pub mod performance_inputs;
 #[cfg(feature = "client-wrath")]
 mod placed_frames;
 pub(crate) mod rect_geometry;
+#[cfg(test)]
+mod reload_factory_tests;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod script_helpers;
 #[cfg(feature = "forbidden-aspects")]

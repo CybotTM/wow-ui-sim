@@ -94,6 +94,7 @@ pub struct QuestRewardCurrency {
 #[derive(Debug, Clone, Default)]
 pub struct QuestLogState {
     pub entries: Vec<QuestLogEntry>,
+    pub additional_highlights: HashMap<i32, crate::c_api::c_quest_log::QuestAdditionalHighlights>,
     /// Build-12340 manual append order; IDs survive row reorder until log refresh.
     #[cfg(feature = "client-wrath")]
     pub manual_watch_ids: Vec<i32>,
@@ -200,6 +201,7 @@ impl QuestLogState {
             manual_watch_ids: Vec::new(),
             objective_progress: crate::c_api::quest_objectives::seeded_progress(),
             background_materials: HashMap::new(),
+            additional_highlights: HashMap::new(),
             readiness: Default::default(),
             offer: Default::default(),
             processed_reward_factions: Vec::new(),

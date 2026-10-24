@@ -255,6 +255,7 @@ fn explicit_load_emits_no_lua_errors_and_publishes_global_flag() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn is_addon_loaded_transitions_false_to_true_after_explicit_load() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -287,6 +288,7 @@ fn is_addon_loaded_transitions_false_to_true_after_explicit_load() {
          explicit load — the AddOn state machine flips loaded=true after \
          executing the body, regardless of how trivial the body is"
     );
+}
 }
 
 post_wrath_ui_fixture! {

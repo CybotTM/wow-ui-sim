@@ -13,6 +13,7 @@ use super::helpers::resolve_child_name;
 use super::xml_fontstring::{
     build_fontstring_lua, resolve_fontstring_text, sync_fontstring_text_to_rust,
 };
+use super::xml_lua_args::XmlLuaArgs;
 use super::xml_texture::{apply_texture_animations_xml, build_texture_lua};
 
 struct CollectedTexture<'a> {
@@ -39,11 +40,16 @@ struct ParentKeyAttachment {
     parent_array: Option<String>,
 }
 
-fn exec_batch(env: &LoaderEnv<'_>, batch: &str, parent_name: &str) -> Result<(), LoadError> {
-    if batch.is_empty() {
+struct LayerBatch {
+    code: String,
+    args: XmlLuaArgs,
+}
+
+fn exec_batch(env: &LoaderEnv<'_>, batch: &LayerBatch, parent_name: &str) -> Result<(), LoadError> {
+    if batch.code.is_empty() {
         return Ok(());
     }
-    env.exec(batch)
+    env.exec_with_args(&batch.code, &batch.args.values)
         .map_err(|e| LoadError::Lua(format!("layer children on {}: {}", parent_name, e)))
 }
 
@@ -86,7 +92,7 @@ fn append_single_texture<'a>(
     ct: &CollectedTexture<'a>,
     parent_name: &str,
     name_parent: &str,
-    batch: &mut String,
+    batch: &mut LayerBatch,
     attachments: &mut Vec<ParentKeyAttachment>,
     anim_entries: &mut Vec<AnimEntry<'a>>,
     timing: &mut LoadTiming,
@@ -102,10 +108,11 @@ fn append_single_texture<'a>(
         ct.is_mask,
         ct.is_line,
         ct.sub_level,
+        &mut batch.args,
     );
-    batch.push_str("do ");
-    batch.push_str(&code);
-    batch.push_str(" end\n");
+    batch.code.push_str("do ");
+    batch.code.push_str(&code);
+    batch.code.push_str(" end\n");
     push_parent_key_attachment(
         attachments,
         tex_name.clone(),
@@ -131,7 +138,7 @@ fn append_layer_children_code<'a>(
     frame: &'a xml::FrameXml,
     parent_ref_name: &str,
     name_parent: &str,
-    batch: &mut String,
+    batch: &mut LayerBatch,
     attachments: &mut Vec<ParentKeyAttachment>,
     anim_entries: &mut Vec<AnimEntry<'a>>,
     text_syncs: &mut Vec<TextSync>,
@@ -165,7 +172,7 @@ fn append_layer_element_code<'a>(
     name_parent: &str,
     draw_layer: &str,
     sub_level: i32,
-    batch: &mut String,
+    batch: &mut LayerBatch,
     attachments: &mut Vec<ParentKeyAttachment>,
     anim_entries: &mut Vec<AnimEntry<'a>>,
     text_syncs: &mut Vec<TextSync>,
@@ -210,7 +217,7 @@ fn append_single_fontstring(
     name_parent: &str,
     draw_layer: &str,
     sub_level: i32,
-    batch: &mut String,
+    batch: &mut LayerBatch,
     attachments: &mut Vec<ParentKeyAttachment>,
     text_syncs: &mut Vec<TextSync>,
     timing: &mut LoadTiming,
@@ -228,10 +235,11 @@ fn append_single_fontstring(
         sub_level,
         &fs_name,
         &resolved_text,
+        &mut batch.args,
     );
-    batch.push_str("do ");
-    batch.push_str(&code);
-    batch.push_str(" end\n");
+    batch.code.push_str("do ");
+    batch.code.push_str(&code);
+    batch.code.push_str(" end\n");
     push_parent_key_attachment(
         attachments,
         fs_name.clone(),
@@ -456,7 +464,10 @@ pub fn create_layer_children_batched_with_name_parent(
     name_parent: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
-    let mut batch = String::with_capacity(4096);
+    let mut batch = LayerBatch {
+        code: String::with_capacity(4096),
+        args: XmlLuaArgs::default(),
+    };
     let mut attachments: Vec<ParentKeyAttachment> = Vec::new();
     let mut text_syncs: Vec<TextSync> = Vec::new();
     let mut anim_entries: Vec<AnimEntry<'_>> = Vec::new();

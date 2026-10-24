@@ -27,6 +27,7 @@ mod xml_frame_codegen;
 pub(crate) mod xml_frame_extras;
 pub(crate) mod xml_layer_batch;
 mod xml_lifecycle;
+mod xml_lua_args;
 mod xml_texture;
 
 use crate::blizzard_ui_sync::is_builtin_addon_folder;
