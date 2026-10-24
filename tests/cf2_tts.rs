@@ -145,6 +145,10 @@ fn original_tts_slider_settings_survive_mark_saved_and_second_environment() {
                 env = new_cache_env();
                 assert_reopened_tts_preferences(&env, rate, volume);
                 assert_other_preferences(&env, rate);
+                // Name->ID resolution needs a supplied voice catalogue (not modeled).
+                // Persistence was observed above; keep original UI reads ID-backed.
+                env.exec("C_TTSSettings.SetVoiceOption(Enum.TtsVoiceType.Alternate, 1)")
+                    .expect("return alternate voice to the original UI's supported ID input");
                 load_original_addon(&env, "Blizzard_ChatFrame");
                 assert_tts_values_and_controls(&env, rate, volume);
             }
