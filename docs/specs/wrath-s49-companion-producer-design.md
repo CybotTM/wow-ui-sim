@@ -7,7 +7,7 @@ Legacy mount companion queries project explicit host inputs through the original
 - [x] Count owned companions intersected with explicit host eligibility, independently of modern journal usability. Missing creature metadata does not remove a known eligible mount from the count.
 - [x] Return exactly five info positions for supplied mount metadata: numeric creature ID, optional cached name, spell ID, optional texture path, active numeric one or nil. Missing metadata or out-of-range position returns zero values, never fabricated identity.
 - [ ] Sort resolved creature names case-insensitively and refresh original buttons inline after explicit companion events. Cooldown producer is staged; original-consumer proof still requires execution and retains independent error blockers.
-- [ ] Return companion cooldown start/duration in seconds and numeric enable, with idle `(0, 0, 1)`, from existing spell timers, host category membership and GCD. Implementation/tests staged; runtime proof deferred.
+- [ ] Return companion cooldown start/duration in seconds and numeric enable, with idle `(0, 0, 1)`, from existing spell timers, host category membership and matching start-recovery state. Implementation/tests staged; runtime proof deferred.
 - [x] Preserve Retail's original journal oracle; register the projection only when client_profile::ACTIVE is Wrath.
 
 ## How it works
@@ -38,9 +38,41 @@ S49 creature IDs91001/91002 are labelled host fixture data, **not** native creat
 
 The Wrath runtime `client_profile::ACTIVE` registration adds `GetCompanionCooldown`. It selects the same owned/eligible sorted mount spell as the info query, without requiring creature metadata. Wrong/missing category or zero/non-numeric index raises the usage error; negative or out-of-range indices return no values. Supported decimal numeric-string indices are converted. Missing critter spell joins return no values, not fabricated timers.
 
-Timing reuses `spell_cooldown_times` (own timer plus GCD) and selects the latest-ending interval among existing same-category spell timers via `spell_cooldown_categories`. Intervals already use seconds; no new store, conversion from milliseconds, timer mutation or vendor change. Category membership is the existing host input; the model has no native shared-category flags, separate category recovery interval, per-spell start-recovery eligibility, excluded-effect metadata, active-player absence abstraction or on-hold/disabled enable state. These remain native-parity gaps; supplied modeled timers report numeric enable=1. Do not claim enable=0 or complete native helper equivalence.
+Timing reads the existing `spell_cooldowns` and `spell_cooldown_categories`
+directly; it must not call the generic unconditional-GCD helper. The existing
+`gcd` interval contributes only when a supplied non-absent per-spell
+start-recovery category equals its supplied `gcd_category`. Absent applicability
+is UNKNOWN, not permission to apply a global GCD. Supplied on-hold markers
+produce numeric enable=0 on the selected spell/category recovery; other active
+intervals and ordinary idle use numeric enable=1. No second timer store exists.
+Missing generated spell records or supplied excluded-effect (78/47) markers
+return the wrapper's initialized `(0,0,1)`.
 
-Each new cooldown selector independently checks idle and changing non-idle intervals: own/expiry, same-category membership/own precedence, GCD/own precedence. Constants and no-op producers cannot satisfy any selector; rejection is statically reasoned, not executed. Existing S49 final `errors.is_empty()` assertion and the original master mount oracle remain unchanged. Retail exact36/42 full message→count map preservation and Wrath stock startup must be rechecked after a later admitted build.
+### Q5 evidence and UNKNOWN ledger
+
+Q5 establishes own, same-category, shared-flag and matching start-recovery
+paths, but does not specify their complete arbitration/tie rules, which shared
+categories can affect a different category, on-hold clock/output evolution,
+or simultaneous hold/GCD precedence. Do not infer those rules from this model.
+The minimal supplied-state representation retains latest-ending intervals for
+own/same-category/matching GCD (including existing longer-own assertions).
+No shared-flag expansion, separate category timer, fabricated spell effect
+catalog, hold freeze/resume mutation, or native precedence claim is added.
+`cooldowns_on_hold`, `cooldown_excluded_spells`, start-recovery membership and
+GCD category are explicit host inputs, empty/absent by default; those defaults
+are simulator initialization, not native character state. Generated spell
+availability is the local record-presence oracle, not proof of native cache
+availability. Companion active-player absence and critter spell joins remain
+unmodeled. Full Q5 helper equivalence remains unproved for these dimensions.
+
+Each cooldown selector now loads selected original FrameXML and drives
+PetPaperDollFrame's original updater, observing real cooldown visibility and
+changing start/duration. Direct tuple/argument checks remain contract tests.
+The original row/event selector also changes a supplied timer twice and clears
+it, without weakening its row or final error assertions. See the wiki's static
+contradiction table; executed RED/GREEN is deferred until wrath-relic-slot merges.
+Retail exact36/42 full message→count preservation and Wrath stock startup still
+require admitted runtime proof.
 
 See [source review and implementation limits](../wiki/investigations/wrath-companion-cooldown.md).
 

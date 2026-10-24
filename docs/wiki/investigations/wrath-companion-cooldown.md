@@ -6,9 +6,19 @@ GetCompanionCooldown is staged for the selected legacy companion consumer, using
 
 The prior lane report binds FrameXML.toc → PetPaperDollFrame.xml → PetPaperDollFrame.lua with no flavor/exclusion gates; its populated original button reaches line429, calling GetCompanionCooldown. The adapter registers only under runtime `client_profile::ACTIVE == Wrath` and chooses the same owned/eligible sorted mount spell. Creature-name metadata is not required by cooldown lookup.
 
-Accepted laptop request11 Q5 gives seconds for start/duration, numeric enable, idle `(0,0,1)`, own cooldown, shared-category and start-recovery/GCD paths. The implementation reuses `SimState.spell_cooldowns`, `spell_cooldown_categories`, `gcd` and `action_bar_api::spell_cooldown_times`; category peers contribute their latest-ending active interval. No parallel cooldown store or vendor patch. Three staged selectors each change the relevant host state and assert idle plus distinct non-idle output, independently rejecting a constant/no-op contract. Execution and type checking remain pending.
+Accepted laptop request11 Q5 gives seconds, numeric enable and ordinary idle
+`(0,0,1)`. Own and same-category recovery use existing spell/category state.
+Start recovery uses existing `gcd` only with matching supplied per-spell and GCD
+categories; unrelated/unclassified GCDs cannot affect the result. Supplied
+on-hold markers supply numeric enable=0; generated missing spell records and
+supplied effects 78/47 return initialized idle outputs. No duplicate timer store.
 
-The existing state lacks native shared-category flags, separate category intervals, per-spell GCD eligibility, excluded-effect fields and on-hold/disabled enable state. It also has no companion active-player absence projection. Native helper parity is therefore incomplete; modeled timers return numeric enable1. Critter spell joins remain unsupplied. Decimal numeric-string index conversion is supported; complete native numeric coercion is not claimed.
+[Spec UNKNOWN ledger](../../specs/wrath-s49-companion-producer-design.md#q5-evidence-and-unknown-ledger)
+records Q5's unspecified shared-flag relationships, arbitration, tie and hold-clock
+semantics. The latest-ending supplied-interval representation is not a claim
+of native arbitration. Shared-flag expansion and active-player absence remain
+gaps. No authentic catalog effect/creature data is invented. Critter spell joins
+remain unsupplied; full native numeric coercion is not claimed.
 
 ## Creature-ID source review
 

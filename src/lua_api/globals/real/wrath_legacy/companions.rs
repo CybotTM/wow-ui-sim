@@ -1,6 +1,5 @@
 //! Legacy companion projection from explicit host eligibility and creature metadata.
 use crate::client_profile::{ACTIVE, ClientProfile};
-use crate::lua_api::globals::action_bar_api::spell_cooldown_times;
 use crate::lua_api::globals::real::wrath_legacy_state::CompanionMetadata;
 use crate::lua_api::methods::{borrow_state, create_string, val_to_string};
 use crate::lua_api::state::SimState;
@@ -131,31 +130,74 @@ fn read_cooldown_index(state: &LuaState) -> LuaResult<f64> {
     }
 }
 
-fn companion_cooldown_times(sim: &SimState, spell_id: u32, now: f64) -> (f64, f64) {
-    let own = spell_cooldown_times(sim, spell_id, now);
-    let Some(category) = sim.spell_cooldown_categories.get(&spell_id) else {
-        return own;
+// Q5 supplies the selection paths, not arbitration/tie or hold-clock semantics.
+// Latest-ending supplied intervals retain the existing simulator representation;
+// see the spec's UNKNOWN ledger. Never apply an unclassified global GCD.
+fn active_recovery(sim: &SimState, spell_id: u32, now: f64) -> (f64, f64, f64) {
+    let Some(timer) = sim.spell_cooldowns.get(&spell_id) else {
+        return (0.0, 0.0, 1.0);
     };
-    // Reuse host category membership and existing spell timers; no companion store.
-    // Category flags and per-spell start-recovery eligibility are not modeled.
-    sim.spell_cooldown_categories
+    if timer.start + timer.duration <= now {
+        return (0.0, 0.0, 1.0);
+    }
+    let enable = if sim.wrath_legacy.cooldowns_on_hold.contains(&spell_id) {
+        0.0
+    } else {
+        1.0
+    };
+    (timer.start, timer.duration, enable)
+}
+
+fn later_recovery(best: (f64, f64, f64), candidate: (f64, f64, f64)) -> (f64, f64, f64) {
+    if candidate.0 + candidate.1 > best.0 + best.1 {
+        candidate
+    } else {
+        best
+    }
+}
+
+fn companion_cooldown_times(sim: &SimState, spell_id: u32, now: f64) -> (f64, f64, f64) {
+    if crate::spell_lookup::get_spell(spell_id).is_none()
+        || sim
+            .wrath_legacy
+            .cooldown_excluded_spells
+            .contains(&spell_id)
+    {
+        return (0.0, 0.0, 1.0);
+    }
+    let own = active_recovery(sim, spell_id, now);
+    let category = sim.spell_cooldown_categories.get(&spell_id);
+    let same_category = sim
+        .spell_cooldown_categories
         .iter()
-        .filter(|(_, source_category)| *source_category == category)
-        .map(|(source_spell, _)| spell_cooldown_times(sim, *source_spell, now))
-        .fold(own, |best, candidate| {
-            if candidate.0 + candidate.1 > best.0 + best.1 {
-                candidate
-            } else {
-                best
-            }
-        })
+        .filter(|(_, source_category)| Some(*source_category) == category)
+        .map(|(source_spell, _)| active_recovery(sim, *source_spell, now))
+        .fold(own, later_recovery);
+    later_recovery(same_category, matching_start_recovery(sim, spell_id, now))
+}
+
+fn matching_start_recovery(sim: &SimState, spell_id: u32, now: f64) -> (f64, f64, f64) {
+    let Some(category) = sim
+        .wrath_legacy
+        .spell_start_recovery_categories
+        .get(&spell_id)
+    else {
+        return (0.0, 0.0, 1.0);
+    };
+    if sim.wrath_legacy.gcd_category != Some(*category) {
+        return (0.0, 0.0, 1.0);
+    }
+    match sim.gcd {
+        Some((start, duration)) if start + duration > now => (start, duration, 1.0),
+        _ => (0.0, 0.0, 1.0),
+    }
 }
 
 fn get_companion_cooldown(state: &mut LuaState) -> LuaResult<u32> {
     let kind = read_companion_kind(state)
         .map_err(|_| runtime_error("Usage: GetCompanionCooldown(type, index)"))?;
     let index = read_cooldown_index(state)?;
-    let (start, duration) = {
+    let (start, duration, enable) = {
         let sim = borrow_state(state)?;
         let mount = match kind {
             CompanionKind::Mount if index >= 1.0 => {
@@ -171,8 +213,7 @@ fn get_companion_cooldown(state: &mut LuaState) -> LuaResult<u32> {
     };
     state.push(Val::Num(start));
     state.push(Val::Num(duration));
-    // Existing cooldown state has no on-hold/disabled marker (native enable=0).
-    state.push(Val::Num(1.0));
+    state.push(Val::Num(enable));
     Ok(3)
 }
 
