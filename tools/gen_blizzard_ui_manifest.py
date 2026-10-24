@@ -6,7 +6,7 @@ Gethe branch's `Interface/AddOns` tree — no filtering. A Gethe branch already
 is the per-client dump, so the branch tree maps 1:1 to a profile manifest:
 
     retail      -> live
-    ptr         -> ptr2
+    ptr         -> ptr
     mists       -> classic          (current Classic is Mists of Pandaria)
     era         -> classic_era
     anniversary -> classic_anniversary
@@ -18,7 +18,8 @@ AddOns and FrameXML roots rather than Interface/AddOns. Wrath enumeration
 validates that local snapshot; it never refreshes another profile's branch.
 
 By default the script refreshes branch-backed snapshots from upstream
-(shallow) before enumerating, so their manifests match the current branch build. Pass --no-refresh to enumerate the existing cache as-is.
+(shallow). PTR checks out the immutable revision in its committed content index;
+other profiles follow their branch. Pass --no-refresh to enumerate the existing cache as-is.
 
 The community listfile is deliberately NOT used as a source: it is a periodic
 snapshot and lags new/renamed files after a patch. The Gethe branch tree is the
@@ -40,7 +41,7 @@ GETHE_REMOTE = "https://github.com/Gethe/wow-ui-source.git"
 # profile manifest name -> Gethe branch
 PROFILE_BRANCH = {
     "retail": "live",
-    "ptr": "ptr2",
+    "ptr": "ptr",
     "mists": "classic",
     "era": "classic_era",
     "anniversary": "classic_anniversary",
@@ -69,7 +70,7 @@ def run(cmd: list[str], cwd: Path | None = None) -> None:
     subprocess.run(cmd, cwd=cwd, check=True)
 
 
-def refresh_branch(branch: str) -> None:
+def refresh_branch(branch: str, revision: str | None = None) -> None:
     """Shallow-checkout `branch` and sync its Interface tree into the cache."""
     work = GIT_ROOT / branch
     if (work / ".git").is_dir():
@@ -83,6 +84,10 @@ def refresh_branch(branch: str) -> None:
                 "--branch", branch, GETHE_REMOTE, str(work),
             ]
         )
+
+    if revision is not None:
+        run(["git", "-C", str(work), "fetch", "--depth", "1", "origin", revision])
+        run(["git", "-C", str(work), "reset", "--hard", "FETCH_HEAD"])
 
     dest = CACHE_ROOT / branch
     dest.mkdir(parents=True, exist_ok=True)
@@ -150,7 +155,11 @@ def main() -> None:
                 f"unknown profile '{profile}'; known: {', '.join(SUPPORTED_PROFILES)}"
             )
         if not args.no_refresh:
-            refresh_branch(branch)
+            revision = None
+            if profile == "ptr":
+                pin = json.loads((REPO_ROOT / "data/blizzard-ui-builds/ptr.json").read_text())
+                revision = pin["gethe_revision"]
+            refresh_branch(branch, revision)
         entries = enumerate_files(branch)
         out = write_manifest(profile, entries)
         version = (CACHE_ROOT / branch / "version.txt").read_text().strip() \

@@ -25,6 +25,11 @@ mapping remains unknown. Producer and tests staged only; no build/slot/runtime p
 [Ownership and native gaps](systems/super-track-state.md) links the [contract](../specs/super-track-state.md). Original-consumer RED tests and separate producer staged; no builds or runtime proof.
 
 ## [2026-10-22] source | Wrath F07 applicability
+
+## [2026-10-24] source | PTR70493 authenticated source and resume
+
+[Profile runtime cache](systems/client-profiles.md#runtime-cache) links the [70493 source proof](../ptr-cdn-content-index.md): original process-failure and advertised-host RED→GREEN, authenticated 4,578-entry regeneration, schema2 partial provenance and unchanged 306-file supported resume. [Actual startup](../baselines/README.md#ptr-70493-authenticated-source-capture--2026-10-24) retains 436 errors / 618 occurrences after master/toc integration; no clean-startup or I4 claim. Retail preserves exact master 36/42 residual; Forever preserves exact fresh-master 78/82 residual; both have zero-warning compile/check gates.
+
 ## [2026-10-22] source | Wrath casting and aura projections
 
 [Projection notes](systems/lua-api.md#wrath-casting-and-aura-projections) link the [bounded contract](../specs/wrath-casting-aura-contracts.md): original cast/channel/party-aura consumers, catalog-backed subtext, legacy tuple/event shapes and separate metadata/transport gaps. Paired baselines, seven producer GREEN contracts and Retail preservation are recorded. Original BuffFrame getter-type RED precedes the runtime Wrath filename projection. Final14aed640c: native21+seven contracts PASS, sixteen report-only failures unchanged, Retail37 PASS, stock arrays empty and Wrath check/formatter PASS; one Retail setup timeout passed its exact retry. Native parity and unexercised branches remain distinct.
