@@ -2,6 +2,10 @@
 
 [Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): Forever RED16 precedes parameterized identities, then Forever/default Retail compile0 sources on both reloads.27 exact cases/profile, zero-warning checks and formatting pass; no stock-startup or full-workload acceptance claim.
 
+## [2026-10-24] staged | SuperTrack supplied state
+
+[Ownership and native gaps](systems/super-track-state.md) links the [contract](../specs/super-track-state.md). Original-consumer RED tests and separate producer staged; no builds or runtime proof.
+
 ## [2026-10-22] source | Wrath F07 applicability
 ## [2026-10-22] source | Wrath casting and aura projections
 
