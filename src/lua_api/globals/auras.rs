@@ -662,7 +662,71 @@ fn reset_aura_data_provider(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn legacy_aura_usage(name: &str) -> rilua::LuaError {
+    rilua::runtime_error(format!("Usage: {name}(\"unit\", index [, \"filter\"])"))
+}
+
+fn read_wrath_aura_arguments(
+    state: &LuaState,
+    name: &str,
+) -> LuaResult<(String, f64, Vec<String>)> {
+    let unit = String::from_stack(state, 1).map_err(|_| legacy_aura_usage(name))?;
+    let index = match stack_val(state, 2) {
+        Val::Num(index) => index,
+        Val::Str(_) => String::from_stack(state, 2)
+            .map_err(|_| legacy_aura_usage(name))?
+            .trim()
+            .parse::<f64>()
+            .map_err(|_| legacy_aura_usage(name))?,
+        _ => return Err(legacy_aura_usage(name)),
+    };
+    let filter = Option::<String>::from_stack(state, 3)
+        .map_err(|_| legacy_aura_usage(name))?
+        .unwrap_or_default();
+    let filters = filter
+        .split([' ', '|'])
+        .map(str::to_ascii_uppercase)
+        .collect();
+    Ok((unit, index, filters))
+}
+
+fn matches_wrath_supplied_aura_flags(aura: &AuraInfo, filters: &[String]) -> bool {
+    // INFERRED: map qualifiers to the model's explicit classifications.
+    // CANCELABLE/NOT_CANCELABLE have no backing facts; matching remains a gap.
+    let player_matches =
+        !filters.iter().any(|filter| filter == "PLAYER") || aura.is_from_player_or_player_pet;
+    let raid_matches = !filters.iter().any(|filter| filter == "RAID") || aura.is_raid;
+    player_matches && raid_matches
+}
+
+fn query_wrath_legacy_aura(
+    state: &mut LuaState,
+    forced_filter: Option<AuraFilter>,
+    name: &str,
+) -> LuaResult<u32> {
+    let (unit, index, filters) = read_wrath_aura_arguments(state, name)?;
+    let harmful = filters.iter().any(|filter| filter == "HARMFUL");
+    let default_filter = if harmful {
+        AuraFilter::Harmful
+    } else {
+        AuraFilter::Helpful
+    };
+    let filter = forced_filter.unwrap_or(default_filter);
+    let aura = if index >= 1.0 {
+        collect_visible_unit_auras(state, &unit, filter)
+            .into_iter()
+            .filter(|aura| matches_wrath_supplied_aura_flags(aura, &filters))
+            .nth(index as usize - 1)
+    } else {
+        None
+    };
+    Ok(push_legacy_aura_result(state, aura.as_ref(), &unit))
+}
+
 fn unit_buff(state: &mut LuaState) -> LuaResult<u32> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        return query_wrath_legacy_aura(state, Some(AuraFilter::Helpful), "UnitBuff");
+    }
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let index = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
     let aura = collect_visible_unit_auras(state, &unit, AuraFilter::Helpful)
@@ -672,6 +736,9 @@ fn unit_buff(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn unit_debuff(state: &mut LuaState) -> LuaResult<u32> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        return query_wrath_legacy_aura(state, Some(AuraFilter::Harmful), "UnitDebuff");
+    }
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let index = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
     let aura = collect_visible_unit_auras(state, &unit, AuraFilter::Harmful)
@@ -681,6 +748,9 @@ fn unit_debuff(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn unit_aura(state: &mut LuaState) -> LuaResult<u32> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        return query_wrath_legacy_aura(state, None, "UnitAura");
+    }
     // INFERRED AllowedWhenUntainted for this undeclared legacy global.
     #[cfg(feature = "retail-12-0-7")]
     let unit = crate::lua_api::unsupported_unit_inputs::authenticate_unit_arguments(state)?;
@@ -812,13 +882,77 @@ fn push_legacy_aura_result(state: &mut LuaState, aura: Option<&AuraInfo>, unit: 
     match aura {
         Some(aura) => {
             let aura_table = build_aura_table(state, aura, unit);
+            if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+                write_wrath_legacy_aura_fields(state, aura_table, aura, unit);
+            }
             push_legacy_aura_tuple(state, aura_table)
         }
+        None if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath => 0,
         None => {
             state.push(Val::Nil);
             1
         }
     }
+}
+
+fn write_wrath_legacy_aura_fields(state: &mut LuaState, table: Val, aura: &AuraInfo, unit: &str) {
+    let party_fallback = super::unit_api::parse_party_index(unit).is_some();
+    let icon = crate::manifest_interface_data::get_texture_path(aura.icon as u32)
+        .map(|path| {
+            let filename = format!("Interface\\{}", path.replace('/', "\\"));
+            create_string(state, &filename)
+        })
+        .unwrap_or(Val::Nil);
+    // INFERRED: an aura absent from the shared catalog has unspecified rank metadata.
+    let rank_text =
+        crate::spells::get_spell(aura.spell_id as u32).map_or("", |spell| spell.subtext);
+    let rank = create_string(state, rank_text);
+    let count = if party_fallback { 1 } else { aura.applications };
+    table_set(state, table, "icon", icon);
+    table_set(state, table, "rank", rank);
+    table_set(state, table, "applications", Val::Num(count as f64));
+    write_wrath_legacy_aura_timing(state, table, aura, party_fallback);
+    write_wrath_legacy_aura_origin(state, table, aura, party_fallback);
+}
+
+fn write_wrath_legacy_aura_timing(
+    state: &mut LuaState,
+    table: Val,
+    aura: &AuraInfo,
+    party_fallback: bool,
+) {
+    let duration = if party_fallback || aura.duration <= 0.0 {
+        0.0
+    } else {
+        aura.duration
+    };
+    let expiration = if duration > 0.0 {
+        aura.expiration_time
+    } else {
+        0.0
+    };
+    table_set(state, table, "duration", Val::Num(duration));
+    table_set(state, table, "expirationTime", Val::Num(expiration));
+}
+
+fn write_wrath_legacy_aura_origin(
+    state: &mut LuaState,
+    table: Val,
+    aura: &AuraInfo,
+    party_fallback: bool,
+) {
+    let source = if party_fallback || aura.source_unit.is_empty() {
+        Val::Nil
+    } else {
+        create_string(state, &aura.source_unit)
+    };
+    let stealable = if !party_fallback && aura.is_stealable {
+        Val::Num(1.0)
+    } else {
+        Val::Nil
+    };
+    table_set(state, table, "sourceUnit", source);
+    table_set(state, table, "isStealable", stealable);
 }
 
 fn push_legacy_aura_tuple(state: &mut LuaState, aura: Val) -> u32 {
@@ -839,7 +973,10 @@ fn push_legacy_aura_tuple(state: &mut LuaState, aura: Val) -> u32 {
 
     state.push(name);
     #[cfg(feature = "client-wrath")]
-    crate::lua_api::workarounds::wrath_startup_defaults::push_unmodeled_aura_rank(state);
+    {
+        let rank = table_get(state, aura, "rank");
+        state.push(rank);
+    }
     state.push(icon);
     state.push(applications);
     state.push(dispel_name);
@@ -852,7 +989,7 @@ fn push_legacy_aura_tuple(state: &mut LuaState, aura: Val) -> u32 {
     #[cfg(not(feature = "client-wrath"))]
     state.push(Val::Nil);
     state.push(spell_id);
-    if cfg!(feature = "client-wrath") {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         11
     } else {
         10

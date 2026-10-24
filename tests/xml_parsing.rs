@@ -8,6 +8,7 @@ fn blizzard_dir() -> PathBuf {
     .join("Blizzard_SharedXMLBase")
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_parse_callback_registrant_xml() {
     let path = blizzard_dir().join("CallbackRegistrant.xml");
@@ -38,7 +39,9 @@ fn test_parse_callback_registrant_xml() {
     assert!(has_script, "Expected Script element");
     assert!(has_frame, "Expected Frame element");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_parse_color_swatch_xml() {
     let path = blizzard_dir().join("ColorSwatch.xml");
@@ -73,6 +76,7 @@ fn test_parse_color_swatch_xml() {
         }
     }
     panic!("ColorSwatchTemplate frame not found");
+}
 }
 
 #[test]

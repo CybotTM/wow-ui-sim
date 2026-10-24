@@ -110,6 +110,7 @@ const PLAN_NAMED_MIXIN_FRAMES: &[MixinPin] = &[
     },
 ];
 
+post_wrath_ui_fixture! {
 /// Pin per-frame mixin application. The double-pin (frame.method is
 /// function AND frame.method == mixin.method) catches two regressions:
 /// missing `Mixin(frame, MixinName)` codegen call vs. mixin source-load
@@ -150,6 +151,7 @@ fn plan_named_frames_have_their_mixins_applied() {
             }
         }
     });
+}
 }
 
 #[test]
@@ -205,6 +207,7 @@ fn edit_mode_action_bar_seeds_callable_base_method_aliases() {
     });
 }
 
+post_wrath_ui_fixture! {
 /// Pin that `ExtraActionBarFrame` has NO mixin — XML at
 /// `Shared/ExtraActionBar.xml:93` lacks `mixin=`, no
 /// `ExtraActionBarFrameMixin` global exists; behavioral wiring is the
@@ -239,6 +242,7 @@ fn extra_action_bar_frame_publishes_no_mixin_only_a_script_handler() {
             "Expected `_G.ExtraActionBar_OnLoad` function (`Shared/ExtraActionBar.lua:5`), got `{on_load_handler_type}`"
         );
     });
+}
 }
 
 const ACTION_BAR_MIXIN_LUA_SITE: &str = "Shared/ActionBar.lua:1";
@@ -279,6 +283,7 @@ const ACTION_BAR_MIXIN_SOURCE_ADDITIONAL_METHODS: &[&str] = &[
 /// `ResizeLayoutFrame` template inheritance.
 const ACTION_BAR_MIXIN_PLAN_NAMED_ABSENT_METHODS: &[&str] = &["SetSpellFlyoutDirection", "Layout"];
 
+post_wrath_ui_fixture! {
 /// Pin `ActionBarMixin`'s method-surface contract. **Bidirectional
 /// spec/source mismatch.** PLAN names 7; source declares 12 (5 match,
 /// 7 source-additional, 2 PLAN-named absent). 15 assertions total.
@@ -356,6 +361,7 @@ fn action_bar_mixin_publishes_plan_named_and_source_additional_methods() {
         }
     });
 }
+}
 
 const ACTION_BUTTON_LUA_SITE: &str = "Shared/ActionButton.lua";
 
@@ -421,6 +427,7 @@ const ACTION_BAR_BUTTON_SOURCE_ADDITIONAL_METHODS: &[&str] = &[
     "ActionBarButtonMixin_OnDragStart",
 ];
 
+post_wrath_ui_fixture! {
 /// Pin `ActionBarButtonMixin` and `BaseActionButtonMixin` method
 /// surfaces. **Spec/source mismatch — PLAN names 10 methods, but only
 /// 1 (`UpdateButtonArt`) actually lives on the named mixins.** The
@@ -531,6 +538,7 @@ fn action_bar_button_and_base_action_button_mixins_pin_plan_named_and_source_add
         }
     });
 }
+}
 
 /// One per-mixin row. PLAN says "are tables with the mixin methods
 /// documented in the analyzer inventory" — the contract is the FULL
@@ -632,6 +640,7 @@ const MIXIN_INVENTORY: &[MixinInventory] = &[
     },
 ];
 
+post_wrath_ui_fixture! {
 /// Pin the analyzer-inventory method surface for the seven bar/button
 /// mixins PLAN names. 61 assertions = 7 mixin-table existence + 54
 /// methods. `MainActionBarMixin:UpdateEndCaps` is a Shared stub
@@ -674,6 +683,7 @@ fn analyzer_inventory_mixins_publish_their_documented_methods() {
         }
     });
 }
+}
 
 /// Status-tracking and spell-flyout mixins PLAN names as "tables".
 /// Existence-only contract — no method inventory.
@@ -691,6 +701,7 @@ const STATUS_AND_FLYOUT_BAR_MIXINS: &[(&str, &str)] = &[
     ("HouseFavorBarMixin", "Mainline/HouseFavorBar.lua:11"),
 ];
 
+post_wrath_ui_fixture! {
 /// Pin the 11 PLAN-named status-tracking/spell-flyout mixins as tables.
 /// Single test loops `STATUS_AND_FLYOUT_BAR_MIXINS` and asserts each
 /// global's `type` is `"table"` after addon load. 11 assertions total.
@@ -709,6 +720,7 @@ fn status_tracking_and_flyout_bar_mixins_publish_as_tables() {
             );
         }
     });
+}
 }
 
 /// Pin `AssistedCombatManager` as a table with all 8 PLAN-named
@@ -783,6 +795,7 @@ const EVENT_AND_WATCHER_FRAME_MIXINS: &[&str] = &[
     "MainMenuBarVehicleLeaveButtonMixin",
 ];
 
+post_wrath_ui_fixture! {
 /// Pin the 6 event-routing/refresh-watcher mixins as tables. 6
 /// assertions; nil reading on any row means the source file failed to
 /// load past the `MixinName = {}` line.
@@ -799,4 +812,5 @@ fn event_and_watcher_frame_mixins_publish_as_tables() {
             );
         }
     });
+}
 }

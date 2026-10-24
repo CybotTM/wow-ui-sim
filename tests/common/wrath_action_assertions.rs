@@ -1,6 +1,9 @@
 //! F04 assertions against original 12340 FrameXML consumers.
 //! Native source: ActionButton.lua, ActionBarFrame.xml, MainMenuBar.xml,
 //! BonusActionBarFrame.lua, MultiActionBars.lua and PetActionBarFrame.lua.
+#[path = "wrath_callback_assertions.rs"]
+pub mod callbacks;
+
 use super::{build_wrath_env, wrath_env};
 use rilua::Val;
 use wow_ui_sim::lua_api::{WowLuaEnv, state::PetActionSlot};
