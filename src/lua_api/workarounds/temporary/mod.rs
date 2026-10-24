@@ -52,7 +52,6 @@ pub(crate) mod chat_window_defaults;
 pub(crate) mod class_trial_defaults;
 pub(crate) mod click_bindings_defaults;
 pub(crate) mod client_info_defaults;
-#[cfg(feature = "retail-12-0-7")]
 pub(crate) mod collections_journal_namespace;
 pub(crate) mod color_defaults;
 pub(crate) mod combat_log_state;
