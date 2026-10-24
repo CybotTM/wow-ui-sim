@@ -18,15 +18,10 @@ const MODERN: &str = r#"
 local function install(namespace, name, fn)
     if rawget(namespace, name) == nil then namespace[name] = fn end
 end
-C_SuperTrack = C_SuperTrack or {}
 C_Minimap = C_Minimap or {}
 C_PvP = C_PvP or {}
 C_PlayerInfo = C_PlayerInfo or {}
 C_QuestLog = C_QuestLog or {}
--- Missing quest/vignette navigation target state, like the existing explicit
--- no-target defaults. Do not synthesize a GUID or a populated navigation DTO.
-install(C_SuperTrack, "GetSuperTrackedVignette", function() return nil end)
-install(C_SuperTrack, "IsSuperTrackingAnything", function() return false end)
 -- Missing hybrid-minimap world presentation capability.
 install(C_Minimap, "ShouldUseHybridMinimap", function() return false end)
 -- Missing honor-level reward catalog. The documented result is optional.

@@ -17,6 +17,11 @@ use std::rc::Rc;
 
 use super::state::SimState;
 
+pub(crate) enum GeneratedChunkArg {
+    String(String),
+    Number(f64),
+}
+
 pub struct LoaderEnv<'a> {
     lua: Rc<std::cell::RefCell<rilua::Lua>>,
     state: Rc<std::cell::RefCell<SimState>>,
@@ -101,14 +106,24 @@ impl<'a> LoaderEnv<'a> {
     }
 
     pub fn exec(&self, code: &str) -> Result<()> {
-        self.exec_chunk(code, true)
+        self.exec_chunk(code, true, &[])
     }
 
     pub fn exec_public(&self, code: &str) -> Result<()> {
-        self.exec_chunk(code, false)
+        self.exec_chunk(code, false, &[])
     }
 
-    fn exec_chunk(&self, code: &str, use_loading_environment: bool) -> Result<()> {
+    /// Execute generated code with a fresh argument table and no additional Lua locals.
+    pub(crate) fn exec_with_args(&self, code: &str, args: &[GeneratedChunkArg]) -> Result<()> {
+        self.exec_chunk(code, true, args)
+    }
+
+    fn exec_chunk(
+        &self,
+        code: &str,
+        use_loading_environment: bool,
+        args: &[GeneratedChunkArg],
+    ) -> Result<()> {
         self.with_state(|state| {
             let func = Self::load_dynamic_chunk_without_slots(state, code, "loader-exec")?;
             if use_loading_environment {
@@ -117,10 +132,15 @@ impl<'a> LoaderEnv<'a> {
                 }
                 apply_loading_scoped_fenv_state(state, &func)?;
             }
+            let args = if args.is_empty() {
+                Vec::new()
+            } else {
+                vec![create_generated_args_table(state, args)?]
+            };
             crate::lua_api::script_helpers::call_void_function_state(
                 state,
                 Val::Function(func.gc_ref()),
-                &[],
+                &args,
             )
             .map_err(crate::Error::Other)?;
             Ok(())
@@ -232,6 +252,26 @@ impl<'a> LoaderEnv<'a> {
     pub fn state(&self) -> &Rc<std::cell::RefCell<SimState>> {
         &self.state
     }
+}
+
+fn create_generated_args_table(state: &mut LuaState, args: &[GeneratedChunkArg]) -> Result<Val> {
+    let table_ref = state
+        .gc
+        .alloc_table(rilua::vm::table::Table::with_sizes(args.len(), 0));
+    for (index, arg) in args.iter().enumerate() {
+        let value = match arg {
+            GeneratedChunkArg::String(text) => create_string(state, text),
+            GeneratedChunkArg::Number(number) => Val::Num(*number),
+        };
+        let table = state.gc.tables.get_mut(table_ref).ok_or_else(|| {
+            crate::Error::Other("generated XML arguments table is invalid".into())
+        })?;
+        table
+            .raw_set(Val::Num((index + 1) as f64), value, &state.gc.string_arena)
+            .map_err(|error| crate::Error::Other(error.to_string()))?;
+    }
+    state.gc.barrier_back(table_ref);
+    Ok(Val::Table(table_ref))
 }
 
 pub(crate) fn apply_loading_scoped_fenv_state(state: &mut LuaState, func: &Function) -> Result<()> {

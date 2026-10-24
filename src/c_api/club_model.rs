@@ -131,6 +131,8 @@ impl Club {
 
 #[derive(Clone, Debug)]
 pub struct ClubState {
+    /// Supplied incoming invitations for the active player; no rows by default.
+    pub self_invitations: Vec<super::club_self_invitations::SelfInvitation>,
     pub clubs: BTreeMap<String, Club>,
     /// INFERRED host inputs for RequiresClubsInitialized / HasRestrictions.
     /// Restrictions deny mutations without events; queries remain available.
@@ -144,6 +146,7 @@ pub struct ClubState {
 impl Default for ClubState {
     fn default() -> Self {
         Self {
+            self_invitations: Vec::new(),
             clubs: BTreeMap::new(),
             initialized: true,
             restriction_reason: 0,

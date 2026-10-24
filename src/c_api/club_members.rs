@@ -30,6 +30,10 @@ pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
         ("SendInvitation", send_invitation),
         ("RevokeInvitation", revoke_invitation),
         ("GetInvitationsForClub", invitations),
+        (
+            "GetInvitationsForSelf",
+            super::club_self_invitations::get_invitations_for_self,
+        ),
         ("RequestInvitationsForClub", request_invitations),
         ("IsRestricted", restriction),
         ("AreMembersReady", members_ready),
