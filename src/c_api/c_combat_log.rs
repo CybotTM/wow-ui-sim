@@ -27,17 +27,18 @@ pub(crate) fn register_publication(state: &mut LuaState) -> LuaResult<()> {
     Ok(())
 }
 
-
 /// Retain opaque filter requests; native matching and validation are UNKNOWN.
 /// The documentation declares restricted Add/Clear functions without signatures.
 /// See docs/specs/combat-log-event-filters.md before adding interpretation here.
 #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 pub(crate) fn register_filters(lua: &mut rilua::Lua) -> LuaResult<()> {
+    super::ensure_namespace(lua.state_mut(), "C_CombatLog")?;
+    super::ensure_namespace(lua.state_mut(), "C_CombatLogSecure")?;
     lua.exec(FILTER_RECORDS_LUA)
 }
 
 #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
-const FILTER_RECORDS_LUA: &str = r#"
+const FILTER_RECORDS_LUA: &str = r##"
 local queries = {}
 
 local function CopyFilterArguments(record)
@@ -75,4 +76,4 @@ function __wow_get_combat_log_event_filters(namespace)
     assert(query, "combat-log filter query requires a registered namespace")
     return query()
 end
-"#;
+"##;
