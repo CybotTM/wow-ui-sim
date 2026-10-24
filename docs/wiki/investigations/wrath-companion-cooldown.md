@@ -62,7 +62,10 @@ which retains embedded CRLF bytes; the atlas semicolon listfile is not CSV and
 keeps physical-line parsing. Fresh binary build, test RED/GREEN and regeneration
 remain slot-gated. Do not regenerate with the frozen pre-fix binary. Existing
 selection still omits Brown Horse 458; its RED and catalog/species selection
-repair remain required before original-consumer GREEN.
+repair remain required before original-consumer GREEN. Additive
+`trait_spell_catalog` contracts stage nil-info/no-texture queries for all 184
+missing IDs, empty description for 316099 and revised 108697→1252217 lookup.
+They are unrun API contracts, not original-consumer RED evidence.
 
 ## Sources
 
