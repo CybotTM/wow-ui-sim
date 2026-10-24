@@ -68,8 +68,8 @@ Every constant tab tuple contradicts at least two rows; every constant money out
 
 ## Sources
 
-- Accepted laptop answer: `/home/osso/.local/state/wow-ui-sim/handoff/laptop-labels-answers-20261018/laptop-answers-req-12.md` (read fully; static reconstruction, not native runtime certification).
-- Batch3 diagnosis: `/home/osso/.local/state/wow-ui-sim/handoff/wrath-excl-batch3/FAIL-DIAG.md` and unchanged `tests/fixtures/wrath_f03/guild_info.lua`.
+- Accepted laptop answer: `~/.local/state/wow-ui-sim/handoff/laptop-labels-answers-20261018/laptop-answers-req-12.md` (read fully; static reconstruction, not native runtime certification).
+- Batch3 diagnosis: `~/.local/state/wow-ui-sim/handoff/wrath-excl-batch3/FAIL-DIAG.md` and unchanged `tests/fixtures/wrath_f03/guild_info.lua`.
 - `src/client_profile.rs`, `src/toc/mod.rs`, `src/loader/addon.rs`, `tests/common/mod.rs` — selection and execution chain.
 - `src/lua_api/globals/real/wrath_guild_info.rs`, `guild_probes.rs`, `guild_info.rs`, `state_types/character_world{,_defaults}.rs` — producer/model/defaults.
 - [Consumer selection and RED proof](consumer-selection-and-red-proof.md); [[addon-loading]]; [[lua-api]].
@@ -78,4 +78,4 @@ Every constant tab tuple contradicts at least two rows; every constant money out
 
 Tests scaffold: `f4b84832e`; producers: `a88a41395`; adapted integrated source: `97e759f7d`; static explicit-state repairs: `c55f58ae5`. The saved slot REPORT records three GREEN producer cases, failing F1 and17 preservation regressions, not accepted GREEN for the repair. The original nonleader dropdown selector preceded bank producers. Both dropdown rows now contain the independently discriminating supplied bank-input observations above; the input-only revision precedes getter registration. They have not been compiled or run.
 
-Current instructions and exact per-profile lists are in [the repair matrix](../../baselines/wrath-guild-info-green-blockers.md) and `/home/osso/.local/state/wow-ui-sim/handoff/wrath-guild-info/slot0-run/static-green-repairs/`. The old SLOT-RECIPE is historical: its36/42 Retail map and earlier source binding are superseded by REPORT's requested master34/38 reference and the new bound revision. This continuation uses no builds, slots, runtime tests or agents; bank getter implementation is staged, while runtime acceptance remains open.
+Current instructions and exact per-profile lists are in [the repair matrix](../../baselines/wrath-guild-info-green-blockers.md) and `~/.local/state/wow-ui-sim/handoff/wrath-guild-info/slot0-run/static-green-repairs/`. The old SLOT-RECIPE is historical: its36/42 Retail map and earlier source binding are superseded by REPORT's requested master34/38 reference and the new bound revision. This continuation uses no builds, slots, runtime tests or agents; bank getter implementation is staged, while runtime acceptance remains open.

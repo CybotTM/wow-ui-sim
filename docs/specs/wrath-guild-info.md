@@ -10,7 +10,7 @@
 
 ## Evidence and boundaries
 
-Accepted laptop answer: `/home/osso/.local/state/wow-ui-sim/handoff/laptop-labels-answers-20261018/laptop-answers-req-12.md`, read fully. Static reconstructed build12340 evidence, not native execution. No decompiled source read in this lane.
+Accepted laptop answer: `~/.local/state/wow-ui-sim/handoff/laptop-labels-answers-20261018/laptop-answers-req-12.md`, read fully. Static reconstructed build12340 evidence, not native execution. No decompiled source read in this lane.
 
 Native SetGuildInfoText does not mutate the received cache. This change implements no setter, packets, request throttling, automatic server refresh, leave/rejoin reset policy or unknown behavior. Direct simulator state / existing `A_Admin.SetGuildInfoText` supplies received cache content; it is not a client setter or a modeled network reception. Existing C_GuildInfo mutation semantics are unchanged.
 
