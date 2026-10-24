@@ -1,3 +1,10 @@
+## [2026-10-24] source | Wrath relic class capability
+
+[Lua API notes](systems/lua-api.md#wrath-relic-class-capability) link the
+[contract](../specs/wrath-unit-has-relic-slot.md): runtime-only Wrath publication,
+numeric 1/nil, explicit class DB flags and native token vocabulary. Native class
+mapping remains unknown. Producer and tests staged only; no build/slot/runtime proof.
+
 ## [2026-10-22] source | Wrath F07 applicability
 ## [2026-10-22] source | Wrath casting and aura projections
 

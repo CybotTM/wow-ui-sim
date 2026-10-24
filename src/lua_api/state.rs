@@ -302,6 +302,7 @@ macro_rules! build_empty_sim_state {
                 any(feature = "profile-retail", feature = "client-ptr")
             ))]
             instance_identity: Default::default(),
+            wrath_relic_slot: Default::default(),
             current_target: $runtime.current_target,
             previous_target: None,
             current_focus: $runtime.current_focus,
