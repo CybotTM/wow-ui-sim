@@ -30,7 +30,7 @@ Both selectors in `tests/cfactory_cf2_social.rs`, automatically discovered by th
 - `cfactory_cf2_social::original_scenario_specific_catalog_uses_lowest_party_level`
 - `cfactory_cf2_social::original_scenario_random_catalog_uses_lowest_party_level`
 
-Each runs all roster, boundary, replacement-catalog and supplied-solo observations independently. Registered on Retail/PTR/Mists; no runtime success-return for unsupported profiles. Compilation and executable listing remain pending admission.
+Each runs all roster, boundary, replacement-catalog and supplied-solo observations independently under two disjoint catalog-ID sets. The random selector also shrinks its scenario count from two to one, rejecting a constant nonzero count. Registered on Retail/PTR/Mists; no runtime success-return for unsupported profiles. Compilation and executable listing remain pending admission.
 
 ## Known gaps (current cycle)
 

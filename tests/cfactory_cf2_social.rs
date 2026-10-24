@@ -44,17 +44,17 @@ fn scenario_record(id: i32, min_level: i32, max_level: i32, random: bool) -> Lfd
     }
 }
 
-fn supply_catalog(env: &WowLuaEnv, random: bool, lower_bound: i32) {
-    let mut ordinary = scenario_record(910003, 1, 100, random);
+fn supply_catalog(env: &WowLuaEnv, random: bool, lower_bound: i32, id_offset: i32) {
+    let mut ordinary = scenario_record(910003 + id_offset, 1, 100, random);
     ordinary.subtype_id = 1; // Ordinary dungeon cannot open the scenario cover.
     env.state().borrow_mut().lfd_dungeons = vec![
-        scenario_record(910002, 80, 90, random),
-        scenario_record(910001, lower_bound, 70, random),
+        scenario_record(910002 + id_offset, 80, 90, random),
+        scenario_record(910001 + id_offset, lower_bound, 70, random),
         ordinary,
     ];
 }
 
-fn supply_party(env: &WowLuaEnv, random: bool) {
+fn supply_party(env: &WowLuaEnv, random: bool, id_offset: i32) {
     let mut member = default_party()
         .into_iter()
         .next()
@@ -67,7 +67,7 @@ fn supply_party(env: &WowLuaEnv, random: bool) {
         state.party_members = vec![member];
         state.party_group_active = true;
     }
-    supply_catalog(env, random, 50);
+    supply_catalog(env, random, 50, id_offset);
 }
 
 fn assert_selected_toc(ui: &std::path::Path) {
@@ -90,11 +90,11 @@ fn assert_selected_toc(ui: &std::path::Path) {
     eprintln!("CF-2 selected GroupFinder TOC: {}", toc_path.display());
 }
 
-fn load_selected_scenario(random: bool) -> WowLuaEnv {
+fn load_selected_scenario(random: bool, id_offset: i32) -> WowLuaEnv {
     let ui = blizzard_ui_dir();
     assert_selected_toc(&ui);
     let env = new_blizzard_addon_env(&ui);
-    supply_party(&env, random);
+    supply_party(&env, random, id_offset);
     wow_ui_sim::xml::register_intrinsic_templates();
     let loaded = load_blizzard_addon_closure_into_env(
         &env,
@@ -200,15 +200,26 @@ fn exercise_party_minimum(env: &WowLuaEnv) {
     assert_availability(env, 91, None, false);
 }
 
-fn exercise_catalog_replacement(env: &WowLuaEnv, random: bool) {
+fn exercise_catalog_replacement(env: &WowLuaEnv, random: bool, id_offset: i32) {
     env.state().borrow_mut().player.level = 60;
     env.state().borrow_mut().party_members[0].level = 50;
-    supply_catalog(env, random, 55);
+    supply_catalog(env, random, 55, id_offset);
     assert_availability(env, 50, Some(55), false);
     env.state().borrow_mut().party_members[0].level = 55;
     assert_availability(env, 55, None, true);
-    supply_catalog(env, random, 65);
+    supply_catalog(env, random, 65, id_offset);
     assert_availability(env, 55, Some(65), false);
+    if random {
+        env.state()
+            .borrow_mut()
+            .lfd_dungeons
+            .retain(|row| row.dungeon_id != 910002 + id_offset);
+        assert_availability(env, 55, Some(65), false);
+    }
+    exercise_supplied_solo_recovery(env, random, id_offset);
+}
+
+fn exercise_supplied_solo_recovery(env: &WowLuaEnv, random: bool, id_offset: i32) {
     // Supplied solo policy only, not native ungrouped/category edge parity.
     {
         let mut state = env.state().borrow_mut();
@@ -216,20 +227,24 @@ fn exercise_catalog_replacement(env: &WowLuaEnv, random: bool) {
         state.party_group_active = false;
     }
     assert_availability(env, 60, Some(65), false);
-    supply_catalog(env, random, 50);
+    supply_catalog(env, random, 50, id_offset);
     assert_availability(env, 60, None, true);
 }
 
 #[test]
 fn original_scenario_specific_catalog_uses_lowest_party_level() {
-    let env = load_selected_scenario(false);
-    exercise_party_minimum(&env);
-    exercise_catalog_replacement(&env, false);
+    for id_offset in [0, 10000] {
+        let env = load_selected_scenario(false, id_offset);
+        exercise_party_minimum(&env);
+        exercise_catalog_replacement(&env, false, id_offset);
+    }
 }
 
 #[test]
 fn original_scenario_random_catalog_uses_lowest_party_level() {
-    let env = load_selected_scenario(true);
-    exercise_party_minimum(&env);
-    exercise_catalog_replacement(&env, true);
+    for id_offset in [0, 10000] {
+        let env = load_selected_scenario(true, id_offset);
+        exercise_party_minimum(&env);
+        exercise_catalog_replacement(&env, true, id_offset);
+    }
 }
