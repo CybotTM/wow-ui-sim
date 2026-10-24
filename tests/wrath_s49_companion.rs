@@ -98,6 +98,16 @@ fn learned_mount_refreshes_original_companion_buttons_inline() {
         common::panel_fixtures::clear_recorded_lua_errors(&env);
         env.exec(include_str!("fixtures/wrath_s49/companion_list.lua"))
             .expect("one supplied mount reaches original companion frames");
+        env.state().borrow_mut().spell_cooldowns.insert(
+            first_spell, SpellCooldownState { start: 90.25, duration: 300.5 },
+        );
+        assert_companion_cooldown(&env, 90.25, 300.5);
+        env.state().borrow_mut().spell_cooldowns.insert(
+            first_spell, SpellCooldownState { start: 95.0, duration: 400.0 },
+        );
+        assert_companion_cooldown(&env, 95.0, 400.0);
+        env.state().borrow_mut().spell_cooldowns.clear();
+        assert_companion_cooldown(&env, 0.0, 0.0);
         // Host state setup, not a claim that a journal mutation is native learning.
         env.state().borrow_mut().world.mounts[1].is_collected = true;
         env.fire_event("COMPANION_LEARNED")
@@ -116,15 +126,35 @@ fn learned_mount_refreshes_original_companion_buttons_inline() {
 }
 
 // Request-11 Q5: native wrapper returns seconds and a numeric enable.
-// Each selector observes idle and changing non-idle results independently.
+// Each selector loads runtime-selected original FrameXML, then observes widgets.
 fn cooldown_env() -> (WowLuaEnv, u32) {
-    let env = WowLuaEnv::new().expect("create cooldown environment");
+    let env = common::panel_fixtures::setup_env();
     let (spell, _) = seed_mount_inputs(&env);
     env.state().borrow_mut().start_time -= std::time::Duration::from_secs(100);
+    env.exec(&format!("S49_FIRST_SPELL = {spell}"))
+        .expect("publish fixture expectation");
+    env.exec(include_str!("fixtures/wrath_s49/companion_list.lua"))
+        .expect("selected original companion rows");
     (env, spell)
 }
 
 fn assert_companion_cooldown(env: &WowLuaEnv, start: f64, duration: f64) {
+    env.exec(&format!(
+        r#"
+        PetPaperDollFrame_UpdateCompanionCooldowns()
+        local cooldown = CompanionButton1Cooldown
+        assert(cooldown:IsShown() == ({start} > 0 and {duration} > 0),
+            "original cooldown visibility")
+        if {duration} > 0 then
+            local actualStart, actualDuration = cooldown:GetCooldownTimes()
+            assert(actualStart == {start} * 1000, "original cooldown start")
+            assert(actualDuration == {duration} * 1000, "original cooldown duration")
+        end
+        "#
+    ))
+    .expect("original selected consumer applies changing cooldown");
+    // Direct API contract assertion, not the RED-through-consumer proof.
+
     let result: (f64, f64, f64) = env
         .eval("return GetCompanionCooldown('mount', '1')")
         .expect("three numeric cooldown results, including numeric-convertible index");
@@ -133,6 +163,7 @@ fn assert_companion_cooldown(env: &WowLuaEnv, start: f64, duration: f64) {
 
 #[test]
 fn companion_cooldown_own_timer_seconds_and_expiry() {
+    test_timeout! {
     let (env, spell) = cooldown_env();
     assert_companion_cooldown(&env, 0.0, 0.0);
     env.state().borrow_mut().spell_cooldowns.insert(
@@ -142,6 +173,12 @@ fn companion_cooldown_own_timer_seconds_and_expiry() {
             duration: 300.5,
         },
     );
+    env.state().borrow_mut().wrath_legacy.cooldowns_on_hold.insert(spell);
+    env.exec("PetPaperDollFrame_UpdateCompanionCooldowns(); assert(not CompanionButton1Cooldown:IsShown())")
+        .expect("original timer hides on-hold recovery");
+    let held: (f64, f64, f64) = env.eval("return GetCompanionCooldown('MOUNT', 1)").unwrap();
+    assert_eq!(held, (90.25, 300.5, 0.0), "direct numeric-enable contract");
+    env.state().borrow_mut().wrath_legacy.cooldowns_on_hold.remove(&spell);
     // Cooldown lookup needs the selected spell, not creature-name metadata.
     env.state()
         .borrow_mut()
@@ -170,10 +207,12 @@ fn companion_cooldown_own_timer_seconds_and_expiry() {
         },
     );
     assert_companion_cooldown(&env, 0.0, 0.0);
+    }
 }
 
 #[test]
 fn companion_cooldown_shared_category_tracks_existing_spell_state() {
+    test_timeout! {
     let (env, spell) = cooldown_env();
     // Synthetic host cooldown source/category, not a native companion fixture pair.
     let source_spell = 990001;
@@ -207,13 +246,23 @@ fn companion_cooldown_shared_category_tracks_existing_spell_state() {
     assert_companion_cooldown(&env, 80.5, 250.25);
     env.state().borrow_mut().spell_cooldowns.clear();
     assert_companion_cooldown(&env, 0.0, 0.0);
+    }
 }
 
 #[test]
 fn companion_cooldown_gcd_and_longer_spell_interval() {
+    test_timeout! {
     let (env, spell) = cooldown_env();
     assert_companion_cooldown(&env, 0.0, 0.0);
     env.state().borrow_mut().gcd = Some((99.25, 120.5));
+    assert_companion_cooldown(&env, 0.0, 0.0);
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.wrath_legacy.spell_start_recovery_categories.insert(spell, 801);
+        sim.wrath_legacy.gcd_category = Some(802);
+    }
+    assert_companion_cooldown(&env, 0.0, 0.0);
+    env.state().borrow_mut().wrath_legacy.gcd_category = Some(801);
     assert_companion_cooldown(&env, 99.25, 120.5);
     env.state().borrow_mut().spell_cooldowns.insert(
         spell,
@@ -227,4 +276,5 @@ fn companion_cooldown_gcd_and_longer_spell_interval() {
     assert_companion_cooldown(&env, 99.25, 120.5);
     env.state().borrow_mut().gcd = Some((1.0, 2.0));
     assert_companion_cooldown(&env, 0.0, 0.0);
+    }
 }

@@ -28,10 +28,34 @@ GetCompanionCooldown's nil-call boundary has a staged producer, not a demonstrat
 - [Companion producer](../../../src/lua_api/globals/real/wrath_legacy/companions.rs) — runtime selection and timer projection
 - [Spell generator](../../../src/bin/wow_cli/gen_spells.rs) — retained source fields
 - [Generated spell schema](../../../data/spells.rs) — no effect-misc field
-- Accepted `/home/osso/.local/state/wow-ui-sim/handoff/laptop-labels-answers-20261018/laptop-answers-req-11.md`, Q2–Q5 — laptop clean-room evidence; no decompiled client source read in this lane
-- `/home/osso/.local/state/wow-ui-sim/handoff/wrath-s49-companion/REPORT.md` and `slot2-release-main.json` — prior consumer proof and released slot
+- Accepted `handoff/laptop-labels-answers-20261018/laptop-answers-req-11.md`, Q2–Q5 — laptop clean-room evidence; no decompiled client source read in this lane
+- `handoff/wrath-s49-companion/REPORT.md` and `slot2-release-main.json` — prior consumer proof and released slot
 
 ## See Also
 
 - [[consumer-selection-and-red-proof]] — selected consumers and standalone rejection
 - [[blizzard-ui-test-lanes]] — original addon-bootstrap consumer tests
+
+## Static selector contradiction table (not executed RED)
+
+All four selectors load active Wrath FrameXML.toc → PetPaperDollFrame.xml →
+PetPaperDollFrame.lua through panel_fixtures::setup_env. No foreign variant or
+replacement consumer is loaded. Original updater :429 feeds the real
+CompanionButton1Cooldown via CooldownFrame_SetTimer. Direct tuple checks are
+contract tests, not consumer proof. Timings below are seconds; widget getters
+are asserted in milliseconds. Idle/on-hold hides without clearing retained
+timing, so hidden timing is deliberately not asserted.
+
+| Selector (`wrath_s49_companion::`) | Consumer observations rejecting constant/no-op producers |
+|---|---|
+| learned_mount_refreshes_original_companion_buttons_inline | Visible 90.25/300.5 → visible 95/400 → hidden idle, plus unchanged row/event/error assertions |
+| companion_cooldown_own_timer_seconds_and_expiry | Hidden idle → visible 90.25/300.5 → hidden on-hold → visible same timer → hidden expired |
+| companion_cooldown_shared_category_tracks_existing_spell_state | Hidden different category → visible 80.5/250.25 matching category → visible 95/400 own → visible peer again → hidden cleared |
+| companion_cooldown_gcd_and_longer_spell_interval | Hidden idle/unclassified/mismatched GCD → visible 99.25/120.5 matching start-recovery category → visible 90.5/400.25 own → visible GCD again → hidden expired |
+
+Each row independently requires hidden and visible states plus timer changes.
+Constant idle/nil/no-return and no-op producers cannot create the visible timer;
+constant active producers cannot satisfy visibility transitions or distinct
+timing pairs. These are static contradictions only; UnitHasRelicSlot still
+blocks original panel setup until wrath-relic-slot merges. Existing
+cursorOffset/error assertions remain intact.
