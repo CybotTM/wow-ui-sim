@@ -222,12 +222,27 @@ mod tests {
     #[cfg(feature = "casc")]
     #[test]
     fn pinned_ptr_partial_cache_child() {
-        let Some(root) = std::env::var_os("WOW_UI_SIM_PINNED_PARTIAL_CACHE_CHILD_ROOT") else {
+        use std::io::{IsTerminal, Read};
+
+        let args: Vec<_> = std::env::args().collect();
+        let explicitly_selected = args.windows(2).any(|args| {
+            args == [
+                "--exact",
+                "blizzard_ui_sync::pinned::tests::pinned_ptr_partial_cache_child",
+            ]
+        });
+        let mut input = std::io::stdin();
+        if !explicitly_selected || input.is_terminal() {
             return;
-        };
-        let root = Path::new(&root);
-        prepare_sync_cache(root, &provenance().unwrap()).unwrap();
-        std::fs::create_dir_all(root).unwrap();
+        }
+        let mut message = String::new();
+        input.read_to_string(&mut message).unwrap();
+        if message.is_empty() {
+            return;
+        }
+        let root: std::path::PathBuf = serde_json::from_str(&message).unwrap();
+        prepare_sync_cache(&root, &provenance().unwrap()).unwrap();
+        std::fs::create_dir_all(&root).unwrap();
         std::fs::write(root.join("partial-source"), b"saved source bytes").unwrap();
         std::process::exit(23);
     }
@@ -259,15 +274,18 @@ mod tests {
     fn pinned_ptr_resumes_partial_cache_after_process_failure_without_completion() {
         let dir = tempfile::tempdir().unwrap();
         let root = dir.path().join("AddOns");
-        let status = std::process::Command::new(std::env::current_exe().unwrap())
+        let mut child = std::process::Command::new(std::env::current_exe().unwrap())
             .args([
                 "--exact",
                 "blizzard_ui_sync::pinned::tests::pinned_ptr_partial_cache_child",
                 "--nocapture",
             ])
-            .env("WOW_UI_SIM_PINNED_PARTIAL_CACHE_CHILD_ROOT", &root)
-            .status()
+            .stdin(std::process::Stdio::piped())
+            .spawn()
             .unwrap();
+        let message = serde_json::to_vec(&root).unwrap();
+        std::io::Write::write_all(&mut child.stdin.take().unwrap(), &message).unwrap();
+        let status = child.wait().unwrap();
         assert_eq!(status.code(), Some(23));
         assert!(!root.join(super::super::COMPLETE_MARKER).exists());
         assert_eq!(
