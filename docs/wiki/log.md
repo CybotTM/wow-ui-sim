@@ -1,4 +1,7 @@
 ## [2026-10-22] source | Wrath F07 applicability
+## [2026-10-22] source | Wrath casting and aura projections
+
+Added [projection notes](systems/lua-api.md#wrath-casting-and-aura-projections) and [contract](../specs/wrath-casting-aura-contracts.md) with static-source 12340 facts, original-consumer RED, unchanged modern-only failures and explicit metadata/transport limits. Seven producer contracts and Retail37 preservation pass at20f35943a. Original BuffFrame getter-type RED at19c9a906b precedes the minimal runtime Wrath filename projection. Final14aed640c records native21+seven contracts PASS, sixteen unchanged report-only failures, Retail37 PASS, empty stock arrays and passing Wrath check/formatter. A mandatory Retail prefork setup timeout passed on one exact retry without source/harness changes; failure receipt retained. Reconstructed12340 source, not native execution, supplies getter authority.
 ## [2026-10-22] investigation | Wrath F13 native loader fixtures
 
 [Diagnosis](investigations/wrath-fixture-f13.md) and [contract](../specs/wrath-fixture-f13.md) separate three native fixture repairs from24 unchanged modern-only failures and five additive specimens. Before: Wrath0/27PASS, Retail26/27PASS (pre-existing Archaeology TOC failure); companion5PASS each. Final merged-code proof6f54e648f: Wrath3/27PASS; Retail26/27PASS with identical baseline statuses; companions5PASS each, stock empty, checks/fmt pass without compiler warnings. No producer edits.
