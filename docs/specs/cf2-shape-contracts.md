@@ -125,11 +125,12 @@ Every case must assert documented arity/types/nullability and applicable enum me
 
 ### tts: `original_tts_saved_settings_shape_blocker`
 
-- [ ] Profiles: retail, ptr, wowforever, mists, era, anniversary. Saved getter: no arguments → exactly one non-nil boolean; marker: no arguments → no returns. Supplied legacy input drives original CheckLoad for either boolean; no expected flag value, migration or persistence result.
+- [ ] Profiles: retail, ptr, wowforever, mists, era, anniversary. Saved getter: no arguments → exactly one non-nil boolean; marker: no arguments → no returns. Keep these direct API assertions separate from the original-consumer sequence so a shape preflight cannot mask its first failure. No expected flag value, migration or persistence result.
 - Native behavior/defaults/lifecycle: **unknown**; no semantic values asserted.
 - Original consumer: `Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua:469,475 (retail/wowforever); :466,472 (ptr/mists/era/anniversary)`.
 - Documentation: retail/ptr/wowforever: `Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:26 (GetCharacterSettingsSaved)`; retail/ptr/wowforever: `Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:113 (MarkCharacterSettingsSaved)`; mists/era/anniversary: `Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:25 (GetCharacterSettingsSaved)`; mists/era/anniversary: `Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:108 (MarkCharacterSettingsSaved)`.
 - Unexecuted prediction: **FAIL** — saved getter and marker missing; boolean and void calls, original CheckLoad accepts actual result.
+- [ ] `original_tts_saved_settings_consumer_blocker` independently owns the existing provenance checks, supplied legacy settings and original OnEvent/CheckLoad sequence. Partition only; no new semantic assertions. Consumer execution remains unverified; this is not a constant/no-op-rejecting saved-state oracle.
 
 ### tts: `original_gamepad_temp_cvar_shape_blocker`
 
