@@ -210,7 +210,7 @@ fn wowforever_profile_reports_build_identity_and_finite_event_validation() {
         identity,
         (
             "1.60.1".to_owned(),
-            "70374".to_owned(),
+            "70532".to_owned(),
             "Jun 17 2026".to_owned(), // Temporary default, not a sourced native build date.
             16001,
         )
