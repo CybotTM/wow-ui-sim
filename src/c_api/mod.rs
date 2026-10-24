@@ -242,6 +242,7 @@ pub(crate) mod class_talent_commands;
 mod club_inputs;
 mod club_members;
 pub mod club_model;
+pub mod club_self_invitations;
 pub(crate) mod crafting_execution;
 pub(crate) mod crafting_input;
 pub(crate) mod crafting_plan;
