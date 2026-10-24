@@ -128,6 +128,7 @@ pub(crate) mod wrath_autocomplete;
 pub mod wrath_calendar;
 #[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_friends;
+pub(crate) mod wrath_guild_bank;
 pub(crate) mod wrath_guild_info;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_legacy;

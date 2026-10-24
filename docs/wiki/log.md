@@ -1,3 +1,7 @@
+## [2026-10-24] static stage | Wrath bank selected-rank permissions
+
+[Contract](../specs/wrath-guild-bank-rank-permissions.md) and [model/contradictions](investigations/wrath-guild-info.md#bank-permission-model) record accepted laptop12340 evidence, explicit host rank rows, initial rank0 seed, selected-rank projections and independently discriminating original dropdown tests. No compile, runtime tests or slot use. Prior held-producer statements below describe the earlier stage; current acceptance remains pending parent RED/GREEN.
+
 ## [2026-10-24] static repair | Wrath guild-info GREEN blockers
 
 [Exact matrix](../baselines/wrath-guild-info-green-blockers.md) classifies all17 saved regressions as missing supplied inputs, preserving every assertion. F1 supplies its display rank before load; a separate initialized-state contract pins no synthetic guild. Original nonleader dropdown completion RED is staged, not executed or a permission-value discriminator. Both bank getters remain held for native facts and a real permission model. Seven exact profile lists are recorded; Wrath/Retail are required lane gates. No builds, slots, agents or new runtime proof.

@@ -394,6 +394,7 @@ fn register_guild_permission_queries(lua: &mut rilua::Lua) -> crate::Result<()> 
     LuaApiMut::register_function(lua, "CanEditMOTD", can_edit_motd)?;
     if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         super::real::wrath_guild_info::register_all(lua)?;
+        super::real::wrath_guild_bank::register_all(lua)?;
     } else {
         LuaApiMut::register_function(lua, "CanEditGuildInfo", can_edit_guild_info)?;
     }
