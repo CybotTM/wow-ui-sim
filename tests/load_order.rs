@@ -15,6 +15,7 @@ fn blizzard_ui_dir() -> PathBuf {
     )))
 }
 
+post_wrath_ui_fixture! {
 /// Blizzard_ObjectAPI (which defines ItemMixin) must load before Blizzard_FrameXML
 /// (which uses ItemMixin in EventToastManager.lua:669).
 #[test]
@@ -47,6 +48,7 @@ fn test_object_api_loads_before_frame_xml() {
         );
     }
 }
+}
 
 post_wrath_ui_fixture! {
 /// ItemMixin (from Blizzard_ObjectAPI) must be defined when Blizzard_FrameXML loads.
@@ -76,6 +78,7 @@ fn test_item_mixin_available_for_event_toast_manager() {
 }
 }
 
+post_wrath_ui_fixture! {
 /// Blizzard_UIPanels_Game (which defines PaperDollItemSlotButton_OnLoad) must
 /// load before Blizzard_MainMenuBarBagButtons (whose OnLoad calls it).
 /// ActionBar depends on UIPanels_Game, and ActionBar sorts before BagButtons
@@ -102,7 +105,9 @@ fn test_uipanels_game_loads_before_bag_buttons() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 /// Blizzard_ItemButton and Blizzard_FrameXMLUtil must both load before
 /// Blizzard_FrameXML, which uses surfaces from each addon.
 #[test]
@@ -130,7 +135,9 @@ fn test_item_button_and_framexmlutil_load_before_framexml() {
         }
     }
 }
+}
 
+post_wrath_ui_fixture! {
 /// Startup consumers must pull their load-on-demand publisher addons without
 /// promoting unrelated load-on-demand addons into eager discovery.
 #[test]
@@ -178,6 +185,7 @@ fn test_startup_publishers_load_before_consumers() {
             "built-in non-LoD Deprecated_PaperDoll is a Game startup addon"
         );
     }
+}
 }
 
 /// Snapshot of the full resolved Blizzard addon load order.

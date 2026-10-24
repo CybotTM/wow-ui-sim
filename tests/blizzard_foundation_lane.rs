@@ -161,6 +161,7 @@ fn lane_dep_edges_pin_canonical_chain() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn shared_xml_game_repeated_singular_deps_are_accumulated() {
     let game = parse_lane_toc("Blizzard_SharedXMLGame");
@@ -178,6 +179,7 @@ fn shared_xml_game_repeated_singular_deps_are_accumulated() {
         std::fs::read_to_string(lane_toc("Blizzard_SharedXMLGame")).expect("SharedXMLGame reads");
     assert!(raw.contains("## Dep: Blizzard_SharedXML"));
     assert!(raw.contains("## Dep: Blizzard_Colors"));
+}
 }
 
 #[test]
@@ -230,6 +232,7 @@ fn shared_xml_base_publishes_global_env_overrides_for_diagnostic_files() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn shared_xml_diagnostic_files_carry_allow_load_environment_global_in_raw_form() {
     let shared = parse_lane_toc("Blizzard_SharedXML");
@@ -267,6 +270,7 @@ fn shared_xml_diagnostic_files_carry_allow_load_environment_global_in_raw_form()
         Some(false),
         "`[AllowLoadEnvironment Global]` marks a global-only load pass"
     );
+}
 }
 
 #[test]

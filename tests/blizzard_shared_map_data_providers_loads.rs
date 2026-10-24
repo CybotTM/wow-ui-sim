@@ -391,6 +391,7 @@ fn explicit_load_emits_no_addon_specific_lua_errors() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn is_addon_loaded_transitions_false_to_true_after_explicit_load() {
     let ui = blizzard_ui_dir();
@@ -415,6 +416,7 @@ fn is_addon_loaded_transitions_false_to_true_after_explicit_load() {
         "C_AddOns.IsAddOnLoaded must be true after explicit load — the AddOn \
          state machine flips loaded=true after executing the body"
     );
+}
 }
 
 #[test]

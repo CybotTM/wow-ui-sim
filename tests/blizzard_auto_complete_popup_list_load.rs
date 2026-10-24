@@ -46,6 +46,7 @@ fn blizzard_auto_complete_popup_list_lod_loads_without_ingestion_errors() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auto_complete_popup_list_allowload_both_loads_in_game_and_glue_scopes() {
     assert_toc_allows_game_and_glue_scopes();
@@ -61,6 +62,7 @@ fn blizzard_auto_complete_popup_list_allowload_both_loads_in_game_and_glue_scope
             });
         });
     });
+}
 }
 
 fn assert_toc_allows_game_and_glue_scopes() {

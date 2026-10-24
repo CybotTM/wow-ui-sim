@@ -10,14 +10,15 @@ pub fn load_chunk<L: LuaApiMut>(
     code: &str,
     tag: &str,
 ) -> Result<rilua::Function, LoadError> {
-    let hash = bytecode_cache::content_hash(code.as_bytes(), tag);
-    let chunk_name = format!("@generated/{tag}/{hash:016x}");
+    let (hash, chunk_name) = build_generated_chunk_identity(code, tag);
+    let profile_start = start_generated_chunk_profile();
 
     if !bytecode_cache::is_disabled() {
         if let Some(result) = bytecode_cache::with_cached_bytecode(hash, |bytecode| {
             LuaApiMut::load_bytes(lua, bytecode, &chunk_name)
         }) && let Ok(func) = result
         {
+            profile_generated_chunk(profile_start, tag, hash, code.len(), "replay");
             return Ok(func);
         }
     }
@@ -28,7 +29,70 @@ pub fn load_chunk<L: LuaApiMut>(
         let bytecode = crate::loader::bytecode::dump_function(lua.state_mut(), &func)?;
         bytecode_cache::put(hash, &bytecode);
     }
+    profile_generated_chunk(profile_start, tag, hash, code.len(), "compile");
     Ok(func)
+}
+
+/// Instantiate a fresh constant factory without replaying its bytecode per use.
+pub(crate) fn load_constant_chunk<L: LuaApiMut>(
+    lua: &mut L,
+    code: &'static str,
+    tag: &str,
+) -> Result<rilua::Function, LoadError> {
+    let (hash, chunk_name) = build_generated_chunk_identity(code, tag);
+    let profile_start = start_generated_chunk_profile();
+    let function =
+        crate::lua_api::script_helpers::load_constant_factory(lua.state_mut(), code, &chunk_name)
+            .map_err(|error| LoadError::Lua(error.to_string()))?;
+    profile_generated_chunk(profile_start, tag, hash, code.len(), "prototype");
+    Ok(function)
+}
+
+fn build_generated_chunk_identity(code: &str, tag: &str) -> (u64, String) {
+    let hash = bytecode_cache::content_hash(code.as_bytes(), tag);
+    (hash, format!("@generated/{tag}/{hash:016x}"))
+}
+
+std::thread_local! {
+    static PROFILE_PHASE: std::cell::Cell<&'static str> = const { std::cell::Cell::new("other") };
+}
+
+pub(crate) struct GeneratedChunkScope(&'static str);
+
+impl GeneratedChunkScope {
+    pub(crate) fn enter(phase: &'static str) -> Option<Self> {
+        start_generated_chunk_profile()
+            .map(|_| Self(PROFILE_PHASE.with(|current| current.replace(phase))))
+    }
+}
+
+impl Drop for GeneratedChunkScope {
+    fn drop(&mut self) {
+        PROFILE_PHASE.with(|current| current.set(self.0));
+    }
+}
+
+pub(crate) fn start_generated_chunk_profile() -> Option<std::time::Instant> {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    ENABLED
+        .get_or_init(|| std::env::var_os("WOW_SIM_PROFILE_GENERATED_CHUNKS").is_some())
+        .then(std::time::Instant::now)
+}
+
+pub(crate) fn profile_generated_chunk(
+    started: Option<std::time::Instant>,
+    tag: &str,
+    hash: u64,
+    bytes: usize,
+    mode: &str,
+) {
+    if let Some(started) = started {
+        crate::logging::eprintln_elapsed(&format!(
+            "[generated-chunk] tag={tag} key={hash:016x} bytes={bytes} mode={mode} us={} phase={}",
+            started.elapsed().as_micros(),
+            PROFILE_PHASE.with(|current| current.get())
+        ));
+    }
 }
 
 #[cfg(test)]

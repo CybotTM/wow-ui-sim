@@ -1,3 +1,11 @@
+## [2026-10-24] proof | Bounded reload XML source reuse
+
+[Contract matrix](../specs/reload-ui.md#generated-xml-layer-reconstruction) records Forever RED16 at0d1e54849, then Forever/default Retail0/0 reload compiles at23f1f629a.27 exact cases/profile, zero-warning builds/checks and formatting pass; current CVars remain unchanged. [Mechanics](systems/reload-ui.md#generated-xml-layer-arguments) retain VM-local objects and XML ordering. Stock startup, paired timing and full Ellesmere acceptance remain separate.
+
+## [2026-10-24] source | Reload XML instance arguments
+
+[Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): real16-compilation RED precedes parameterized layer identities through the existing bytecode cache. Profile GREEN remains pending; no full-workload acceptance claim.
+
 ## [2026-10-22] source | Wrath F07 applicability
 ## [2026-10-22] source | Wrath casting and aura projections
 
@@ -123,6 +131,18 @@ Added [diagnostic requirements](../specs/xml-load-diagnostics.md) and [loader bo
 ## [2026-10-20] source | Numeric-secret classifications
 
 [C API selector boundaries](systems/lua-api.md#c-api-numeric-secret-selector-boundaries) now link the [bounded classification contract](../specs/secret-selector-classification.md). Numeric host lookup does not widen shared readers or ExternalDefensive; output secrecy remains explicit simulator policy. Runtime receipts stay in the contract.
+
+## [2026-10-19] evidence | Factory preservation and profile compilation
+
+[Factory contract](../specs/reload-ui.md#bounded-forever-factory-proof--2026-10-19) records matching pre/post characterization, unchanged Lua bodies, fresh VM retirement and warning-free Forever/default Retail compilation. Quiet-window wall-time and unchanged Ellesmere acceptance remain pending; startup sampling excludes the initial Blizzard/XML load.
+
+## [2026-10-19] system | Constant XML method factory reuse
+
+[Prototype mechanics](systems/reload-ui.md#constant-dispatch-factories) includes the one measured XML method factory, preserving exact source/chunk identity, fresh captures and slot-disable policy. [Contract](../specs/reload-ui.md#dispatch-factory-isolation) links real-XML pre-change characterization; post-change and quiet-window proof remain pending. Generated frame-ID churn stays unchanged.
+
+## [2026-10-19] system | Reload dispatch factory prototypes
+
+[Lifecycle mechanics](systems/reload-ui.md#constant-dispatch-factories) documents VM-registry prototype anchors and fresh closure/environment bindings without changing authored Lua bodies. [Contract](../specs/reload-ui.md#dispatch-factory-isolation) tracks characterization and pending post-change proof separately; no quiet-window wall gain or full acceptance claim yet.
 
 ## [2026-10-19] source | Wrath readiness and placed-frame reconstruction
 
@@ -2681,3 +2701,13 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 ## 2026-10-24 — CF-2 pet-battle name staging
 
 Added [pet name projection](systems/pet-battle-names.md) and [contract](../specs/pet-battle-names.md), traced four profile TOCs through original XML/event/name consumers. No build/runtime proof claimed; parent owns frozen RED/GREEN and stock accounting.
+
+## 2026-10-24 | CF-2 SuperTrack edit-only staging
+
+Added supplied-state system/contract and selected original-consumer tests. Retired overlapping target defaults; priority remains explicitly unsupported. Runtime RED/GREEN, mutants and profile preservation remain slot obligations.
+## 2026-10-24 — CF-2 club self invitations (edit-only)
+
+Updated [[club-membership]] and [bounded contract](../specs/club-self-invitations.md) with supplied incoming snapshot projection, Retail TOC/XML/Lua selection and static standalone contradictions. No runtime RED/GREEN, builds, slots or other-profile acceptance claimed.
+## 2026-10-24 — Wrath relic capability staging
+
+Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-relic-class-capability) and [spec](../specs/wrath-unit-has-relic-slot.md). Class flags remain explicit inputs; unknown class mappings not invented. Edit-only, no runtime acceptance.
