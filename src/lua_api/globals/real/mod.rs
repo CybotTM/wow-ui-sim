@@ -144,6 +144,7 @@ pub mod wrath_legacy_state;
 pub mod wrath_minimap_arrows;
 #[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_quest_dialog;
+pub mod wrath_relic_slot;
 #[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_spellbook;
 #[cfg(feature = "client-wrath")]

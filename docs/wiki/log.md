@@ -2716,3 +2716,14 @@ Added supplied-state system/contract and selected original-consumer tests. Retir
 ## 2026-10-24 — CF-2 club self invitations (edit-only)
 
 Updated [[club-membership]] and [bounded contract](../specs/club-self-invitations.md) with supplied incoming snapshot projection, Retail TOC/XML/Lua selection and static standalone contradictions. No runtime RED/GREEN, builds, slots or other-profile acceptance claimed.
+## 2026-10-24 — Wrath relic capability staging
+
+Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-relic-class-capability) and [spec](../specs/wrath-unit-has-relic-slot.md). Class flags remain explicit inputs; unknown class mappings not invented. Edit-only, no runtime acceptance.
+
+## [2026-10-24] source | Patch 12.1.7 I4a inherited accounting
+
+Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance), [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist) and index for immutable companion accounting, explicit per-profile UNKNOWN source/selection/proof boundaries and grouped I4b selectors. I0 artifacts unchanged; no builds, cache observations or native/runtime acceptance.
+
+## 2026-10-24 — Patch 12.1.7 I4b static staging
+
+- Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations), [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection) and index for I3-dependent selected-source obligations. Exact pin/cache authentication, mixed-status rejection controls and separate runtime limits; no effective applicability promotion before the source dependency merges.

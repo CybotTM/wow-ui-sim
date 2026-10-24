@@ -35,6 +35,40 @@ The regression was written RED before the validator: no source-accounting valida
 
 No Cargo, simulator startup, native execution, vendor synchronization or profile acceptance was performed. Source accounting is the proof level, not API compatibility. Future I1–I6 work must not reinterpret I0's accounted rows as completed runtime work.
 
+## I4a: immutable companion, not applicability acceptance
+
+Verified static accounting: 2026-10-24. The [I4a contract](../../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist) owns counts, pending source identity and acceptance limits. The [companion](../../../data/patch-api/sources/12.1.7-inherited-applicability.json) retains every literal occurrence with three independent profile records. No I0 bytes or historical seals change. No source-cache, decompiled-source or runtime observations were used.
+
+The validator first verifies frozen I0 hashes and reuses its raw-text reparse, then compares exact occurrence records, kind/domain, header disagreements, profile/proof states and historical joins. Source identity fields include optional defaults verbatim. Candidate test references require exact full-symbol occurrence at the recorded line and carry `LEXICAL_ONLY`; neither those references nor the old source candidates establish behavior, registration or selected ownership. Existing narrower behavior tests are not erased, but they receive no new inherited acceptance credit here.
+
+Historical sweep joins are recomputed by exact `(section, symbol)` from 14 bounded primary registers, retaining old ID/direction/profile and known-gap membership. Every intersection opposes the inherited direction. Gap membership is not a fresh measurement. The separate 2.4.0 register-only identity is checked without inventing a sweep. Later unrelated patch files are ignored, not admitted to historical scope.
+
+I4a deliberately rejects any claimed selected-source receipt or promoted proof status: I3 has not been accepted and this slice supplies no such observation. Resolving one later requires an evidenced follow-up schema/validator change, not changing `UNKNOWN` to `PASS`. [Consumer selection](consumer-selection-and-red-proof.md) governs TOC flavor, Game/Family, restrictions, XML/Lua chain, owner/screen/LoD and callable-consumer proof; a cached Standard or Camelot hit alone cannot satisfy it.
+
+### I4b grouped worklist (proposed selectors, not registered tests)
+
+| Group | Rows per profile | Pending evidence |
+|---|---:|---|
+| `p1217_inherited_factory_publication` | 364 | 185 globals, seven widgets, 27 events, 144 CVars, one typed command; raw vs ordinary lookup, constructible factory, accepted name vs real producer, stated default obligations separately. Do not execute allocator dump or enable disabled TTS/hardware. |
+| `p1217_inherited_game_publication` | 1,512 candidates | Accepted selected Game publisher/chain, local/global identity, removal/successor/alias provenance; reconcile all six repeated-banner IDs. |
+| `p1217_inherited_lod_publication` | Same 1,512, partition pending | Selected LoD owner and explicit successful load receipt; startup is not LoD acceptance. |
+| `p1217_inherited_glue_publication` | Same 1,512, partition pending | Genuinely selected Glue publisher, separately from Game; never force-load unselected files. |
+| `p1217_inherited_negative_controls` | All 1,876 | Identity omissions, raw-fallback trap, wrong defaults, permissive unknown-event control, unsupported factory; each later claimed producer RED independently rejects constants/no-ops. |
+
+These candidate publisher groups overlap until ownership is resolved; they are not 4,536 additional rows. PTR, Forever and Retail need separate accepted configurations, at most three first-gate configurations after harness preparation, not per-row builds. Runtime work must list actual discovered selectors and record source/build/fixture identities. The I4a deliverable performs none of those builds and reserves no slot.
+
+## I4b: conditional selected-source obligations
+
+Verified static staging: 2026-10-24. The [conditional contract](../../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection) owns counts and limitations. The [I4b overlay](../../../data/patch-api/sources/12.1.7-inherited-static.json) supplements, rather than mutates, I0/I4a. Its applicability decisions depend on unmerged I3 commit `e30d17b106ce76a872c2bdfe69f95b4ec215fd06`; no decision is effective on the stale 69594 I4b base.
+
+The initial blocker was source identity, not missing simulator APIs. The parent authorized read-only use of I3's committed 70493 pin/manifest and private cache. Every one of its 4,578 files matched the pinned content size and MD5 content key. `tools/patch_12_1_7_static.py` requires exact pin/manifest SHA-256 values, matching cache provenance/completion and unchanged I0 hashes. An incomplete cache fails with exact missing paths instead of producing an empty scan or false absence result. Prefix-style `[AllowLoadTextLocale: zhCN]` browser entries are locale exclusions, not missing paths; a focused RED fixture prevents that diagnostic confusion.
+
+The tool traces runtime-selected PTR TOC flavor, Game/Family, allow/exclude filters, locale, public environment and document-level XML chains. It records concrete selected declarations, exact native API calls, structured generated documentation and literal event/CVar consumers. Game, LoD and Glue remain separate; a source-selected LoD publisher is not a successfully loaded addon. Generated API documentation establishes only its documented source contract, not a callable factory or native screen binding. Source text is scanned with comments/strings separated and local owners excluded; it is not a full Lua resolver. Dynamic aliases/arguments/assignments and secure-pass ordering remain unproved.
+
+Each occurrence keeps its own disposition. The three added PvPObjectiveBanner declarations have selected witnesses; the three removed occurrences retain surviving-definition evidence but remain UNKNOWN. No native retirement is inferred from a public diff list, and no source absence is inferred from missing supported witnesses. Retail and Forever remain independent, unpromoted profiles. All original-consumer execution, behavior, publication and native proof fields remain UNKNOWN.
+
+The [static fixtures](../../../tools/test_patch_12_1_7_static.py) reject constant/accept-all outputs, unselected flavors, wrong Game/Family/filter/locale/environment, private/local/comment/string observations, namespace suffix attribution, nested non-document XML scripts, stale pins, missing/changed cache files and receipt/dependency corruption. RED used a disposable accept-all scaffold, then focused counterexamples before implementation fixes. These are classifier/validator controls, not producer RED or runtime acceptance. No builds, slots or vendor writes were used.
+
 ## Sources
 
 - [12.1.7 raw patch text](../../../data/patch-api/sources/12.1.7-api-changes.wikitext) — direct prose, target and inherited link.
@@ -42,6 +76,9 @@ No Cargo, simulator startup, native execution, vendor synchronization or profile
 - [Current linked 1.60.1 raw text](../../../data/patch-api/sources/12.1.7-inherited-1.60.1.wikitext) — inherited literal inventory and unchanged header disagreements.
 - [Source ledger](../../../data/patch-api/sources/12.1.7-source-accounting.json) — P01–P12 and deferred/UNKNOWN statuses.
 - [Inherited occurrence triage](../../../data/patch-api/sources/12.1.7-inherited-1.60.1.json) — full per-occurrence linkage and bounded lexical candidates.
+- [I4a validator](../../../tools/validate_patch_12_1_7_inherited.py) and [disposable controls](../../../tools/test_patch_12_1_7_inherited.py) — accounting/proof-separation boundary only.
+- [I4b classifier/validator](../../../tools/patch_12_1_7_static.py) and [static overlay](../../../data/patch-api/sources/12.1.7-inherited-static.json) — exact I3-dependent selected-source obligations, not runtime credit.
+- [Runtime TOC selection](../../../src/loader/mod.rs), [TOC filters](../../../src/toc/mod.rs) and [XML path resolution](../../../src/loader/helpers.rs) — current simulator source-selection semantics.
 
 ## See Also
 
