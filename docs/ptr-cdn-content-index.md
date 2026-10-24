@@ -6,7 +6,7 @@
 
 Selected target as of **2026-10-23**: product `wowt`, version **12.1.7.70493**, BuildId **70493**. The versions record (sequence `4097283`) advertises build config `fc3eaa61ff0ade6bf35dbab9727bc161`, CDN config `c13b476a09cb3262797a6fdc88103036`, product config `8e1095475b945aa02fd3f2a2d22993b7`. Two small versions/cdns GETs reconfirmed these identities; the handoff receipt is `p1217-source/retarget-70493-metadata.json`.
 
-**Authenticated regeneration completed.** The70493 index and path manifest contain 4,578 files; limited mapping contains 146,853 rows. Install content key `bb46ab983520a2617d8b2119662ef38b` comes from the hash-verified build config, not ProductConfig. Exact public Gethe revision `2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af` reports70493 and has the matching full AddOns inventory. Historical70424 evidence below is unchanged. Runtime exact-identity GREEN and complete isolated provenance sync remain pending. No `wowxptr`, `ptr2`, branch-head or Gethe content fallback.
+**Authenticated regeneration completed.** The 70493 index and path manifest contain 4,578 files; limited mapping contains 146,853 rows. Install content key `bb46ab983520a2617d8b2119662ef38b` comes from the hash-verified build config, not ProductConfig. Exact public Gethe revision `2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af` reports 70493 and has the matching full AddOns inventory. Historical 70424 evidence below is unchanged. Runtime exact-identity GREEN and complete isolated provenance sync remain pending. No `wowxptr`, `ptr2`, branch-head or Gethe content fallback.
 
 ## Inputs
 
@@ -40,9 +40,9 @@ python3 -m unittest tools.tests.test_gen_blizzard_ui_content_index
 
 Runtime identity and range/content tests: [source contract](specs/ptr-blizzard-ui-source.md). No builds/tests or cache sync occurred during the retarget.
 
-##70493 authenticated inputs and generation receipt
+## 70493 authenticated inputs and generation receipt
 
-Core metadata used eight bounded GETs. All1,422 selected archive footer identities were verified against the new CDN config (126,589,736 bytes);1,419 identical historical indexes were reused by immutable key and three fetched. Neutral descriptor `0001F3F600000000` selects `vfs-857`, content `e72b48c0960595af517ebe8c3b3a50d6`; enUS descriptor `0000000200000000` selects `vfs-2`, content `552876516b47a8d78cc9a50d55666997`. Both are authenticated70493 root members; encoded keys and decoded sizes/hashes were verified. Fresh community mapping SHA256: `ff025c8956bfc030cd45d57fb4178c2b132406518873bb288727fa61a03215e1`. All acquisition outputs and generator stdout/stderr/argv receipts remain in the lane verification root `p1217-source-slot1-20261023/acquire-70493/`; source-generation receipt binds the complete generated file hashes. Generator source/cache refresh used a lane-private HOME; no shared source/runtime cache was changed.
+Core metadata used eight bounded GETs. All 1,422 selected archive footer identities were verified against the new CDN config (126,589,736 bytes); 1,419 identical historical indexes were reused by immutable key and three fetched. Neutral descriptor `0001F3F600000000` selects `vfs-857`, content `e72b48c0960595af517ebe8c3b3a50d6`; enUS descriptor `0000000200000000` selects `vfs-2`, content `552876516b47a8d78cc9a50d55666997`. Both are authenticated 70493 root members; encoded keys and decoded sizes/hashes were verified. Fresh community mapping SHA256: `ff025c8956bfc030cd45d57fb4178c2b132406518873bb288727fa61a03215e1`. All acquisition outputs and generator stdout/stderr/argv receipts remain in the lane verification root `p1217-source-slot1-20261023/acquire-70493/`; source-generation receipt binds the complete generated file hashes. Generator source/cache refresh used a lane-private HOME; no shared source/runtime cache was changed.
 
 | Generated file | SHA256 |
 |---|---|
