@@ -6,7 +6,8 @@ Legacy mount companion queries project explicit host inputs through the original
 
 - [x] Count owned companions intersected with explicit host eligibility, independently of modern journal usability. Missing creature metadata does not remove a known eligible mount from the count.
 - [x] Return exactly five info positions for supplied mount metadata: numeric creature ID, optional cached name, spell ID, optional texture path, active numeric one or nil. Missing metadata or out-of-range position returns zero values, never fabricated identity.
-- [ ] Sort resolved creature names case-insensitively and refresh original buttons inline after explicit companion events. Current consumer proof is blocked by GetCompanionCooldown.
+- [ ] Sort resolved creature names case-insensitively and refresh original buttons inline after explicit companion events. Cooldown producer is staged; original-consumer proof still requires execution and retains independent error blockers.
+- [ ] Return companion cooldown start/duration in seconds and numeric enable, with idle `(0, 0, 1)`, from existing spell timers, host category membership and GCD. Implementation/tests staged; runtime proof deferred.
 - [x] Preserve Retail's original journal oracle; register the projection only when client_profile::ACTIVE is Wrath.
 
 ## How it works
@@ -29,9 +30,19 @@ S49 creature IDs91001/91002 are labelled host fixture data, **not** native creat
 
 ## Known gaps (current cycle)
 
-- [ ] GetCompanionCooldown is missing at selected PetPaperDollFrame.lua:429; await laptop request11 Q5 before implementation.
-- [ ] Default spell-to-creature metadata is unresolved (laptop request11). Missing metadata blocks populated default-catalog consumers, not explicit host-input tests. Original master oracle stays byte-identical.
+- [ ] Execute staged GetCompanionCooldown selectors and original consumer at PetPaperDollFrame.lua:429. Source-derived contract is accepted laptop request11 Q5; no executed RED/GREEN claim in this edit-only cycle.
+- [ ] Default spell-to-creature metadata remains unsupplied. Request11 Q2 identifies `Spell.effectMiscValue[0]`, pushed even when zero; cache holds only the name. `data/spells.rs::SpellInfo` and `src/bin/wow_cli/gen_spells.rs` do not retain that field, so the explicit host input remains. Q3/Q4 provide no authentic fixture pairs or values for spells458/23338. Missing metadata blocks populated default-catalog consumers, not explicit host-input tests. Original master oracle stays byte-identical.
 - [ ] Independent UnitHasRelicSlot and scrolling-edit cursorOffset errors remain visible. Do not hide them or weaken S49's unchanged final empty-error assertion.
+
+## Cooldown scope and proof boundary
+
+The Wrath runtime `client_profile::ACTIVE` registration adds `GetCompanionCooldown`. It selects the same owned/eligible sorted mount spell as the info query, without requiring creature metadata. Wrong/missing category or zero/non-numeric index raises the usage error; negative or out-of-range indices return no values. Supported decimal numeric-string indices are converted. Missing critter spell joins return no values, not fabricated timers.
+
+Timing reuses `spell_cooldown_times` (own timer plus GCD) and selects the latest-ending interval among existing same-category spell timers via `spell_cooldown_categories`. Intervals already use seconds; no new store, conversion from milliseconds, timer mutation or vendor change. Category membership is the existing host input; the model has no native shared-category flags, separate category recovery interval, per-spell start-recovery eligibility, excluded-effect metadata, active-player absence abstraction or on-hold/disabled enable state. These remain native-parity gaps; supplied modeled timers report numeric enable=1. Do not claim enable=0 or complete native helper equivalence.
+
+Each new cooldown selector independently checks idle and changing non-idle intervals: own/expiry, same-category membership/own precedence, GCD/own precedence. Constants and no-op producers cannot satisfy any selector; rejection is statically reasoned, not executed. Existing S49 final `errors.is_empty()` assertion and the original master mount oracle remain unchanged. Retail exact36/42 full message→count map preservation and Wrath stock startup must be rechecked after a later admitted build.
+
+See [source review and implementation limits](../wiki/investigations/wrath-companion-cooldown.md).
 
 ## Out of scope
 

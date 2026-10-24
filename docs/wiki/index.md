@@ -4053,3 +4053,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-23] investigation | Consumer selection and standalone RED
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
+
+## Wrath companion cooldown source review
+
+- [[wrath-companion-cooldown]] — staged companion cooldown adapter, standalone rejection contracts, creature effect-misc data gap and retained consumer blockers; edit-only, no runtime proof.
