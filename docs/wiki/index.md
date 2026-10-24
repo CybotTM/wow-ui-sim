@@ -1,4 +1,7 @@
 ## [2026-10-22] source | Wrath F07 applicability
+## [2026-10-22] source | Wrath casting and aura projections
+
+[Projection notes](systems/lua-api.md#wrath-casting-and-aura-projections) link the [bounded contract](../specs/wrath-casting-aura-contracts.md): original cast/channel/party-aura consumers, catalog-backed subtext, legacy tuple/event shapes and separate metadata/transport gaps. Paired baselines, seven producer GREEN contracts and Retail preservation are recorded. Original BuffFrame getter-type RED precedes the runtime Wrath filename projection. Final14aed640c: native21+seven contracts PASS, sixteen report-only failures unchanged, Retail37 PASS, stock arrays empty and Wrath check/formatter PASS; one Retail setup timeout passed its exact retry. Native parity and unexercised branches remain distinct.
 ## [2026-10-23] investigation | Wrath retained-failure fixture programme
 
 [Programme register](investigations/wrath-retained-fixtures.md) centralizes F01–F22 status, standing exclusion mechanics, class (a) boundaries, open decisions and F18-P1. Lane specs retain exact receipts; pending/static work is not runtime acceptance. Documentation only; no builds or tests.

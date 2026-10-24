@@ -260,6 +260,7 @@ fn leave_instance_group_button_queries_group_state_even_when_mutators_noop() {
 
 #[test]
 fn buff_button_onupdate_still_formats_duration_and_reapplies_font_decisions_after_noop_text() {
+    wrath_action_case!(callbacks::aura_duration);
     test_timeout! {
         let env = load_buff_audit_env();
         env.exec(
