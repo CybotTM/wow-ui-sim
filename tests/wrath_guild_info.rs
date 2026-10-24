@@ -6,6 +6,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn setup() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
+    supply(&env, "fixture roster text", false);
     common::load_profile_framexml(&env);
     env.exec(
         r#"
@@ -35,6 +36,8 @@ fn setup() -> WowLuaEnv {
 fn supply(env: &WowLuaEnv, text: &str, editable: bool) {
     let mut sim = env.state().borrow_mut();
     sim.player.present = true;
+    sim.world.guild_name = Some("Guild info fixture".into());
+    sim.world.guild_rank = Some("Officer".into());
     sim.world.guild_id = 73;
     sim.world.guild_player_rank = 1;
     sim.world.guild_info_text = text.into();
