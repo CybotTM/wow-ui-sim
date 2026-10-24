@@ -35,6 +35,28 @@ The regression was written RED before the validator: no source-accounting valida
 
 No Cargo, simulator startup, native execution, vendor synchronization or profile acceptance was performed. Source accounting is the proof level, not API compatibility. Future I1–I6 work must not reinterpret I0's accounted rows as completed runtime work.
 
+## I4a: immutable companion, not applicability acceptance
+
+Verified static accounting: 2026-10-24. The [I4a contract](../../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist) owns counts, pending source identity and acceptance limits. The [companion](../../../data/patch-api/sources/12.1.7-inherited-applicability.json) retains every literal occurrence with three independent profile records. No I0 bytes or historical seals change. No source-cache, decompiled-source or runtime observations were used.
+
+The validator first verifies frozen I0 hashes and reuses its raw-text reparse, then compares exact occurrence records, kind/domain, header disagreements, profile/proof states and historical joins. Source identity fields include optional defaults verbatim. Candidate test references require exact full-symbol occurrence at the recorded line and carry `LEXICAL_ONLY`; neither those references nor the old source candidates establish behavior, registration or selected ownership. Existing narrower behavior tests are not erased, but they receive no new inherited acceptance credit here.
+
+Historical sweep joins are recomputed by exact `(section, symbol)` from 14 bounded primary registers, retaining old ID/direction/profile and known-gap membership. Every intersection opposes the inherited direction. Gap membership is not a fresh measurement. The separate 2.4.0 register-only identity is checked without inventing a sweep. Later unrelated patch files are ignored, not admitted to historical scope.
+
+I4a deliberately rejects any claimed selected-source receipt or promoted proof status: I3 has not been accepted and this slice supplies no such observation. Resolving one later requires an evidenced follow-up schema/validator change, not changing `UNKNOWN` to `PASS`. [Consumer selection](consumer-selection-and-red-proof.md) governs TOC flavor, Game/Family, restrictions, XML/Lua chain, owner/screen/LoD and callable-consumer proof; a cached Standard or Camelot hit alone cannot satisfy it.
+
+### I4b grouped worklist (proposed selectors, not registered tests)
+
+| Group | Rows per profile | Pending evidence |
+|---|---:|---|
+| `p1217_inherited_factory_publication` | 364 | 185 globals, seven widgets, 27 events, 144 CVars, one typed command; raw vs ordinary lookup, constructible factory, accepted name vs real producer, stated default obligations separately. Do not execute allocator dump or enable disabled TTS/hardware. |
+| `p1217_inherited_game_publication` | 1,512 candidates | Accepted selected Game publisher/chain, local/global identity, removal/successor/alias provenance; reconcile all six repeated-banner IDs. |
+| `p1217_inherited_lod_publication` | Same 1,512, partition pending | Selected LoD owner and explicit successful load receipt; startup is not LoD acceptance. |
+| `p1217_inherited_glue_publication` | Same 1,512, partition pending | Genuinely selected Glue publisher, separately from Game; never force-load unselected files. |
+| `p1217_inherited_negative_controls` | All 1,876 | Identity omissions, raw-fallback trap, wrong defaults, permissive unknown-event control, unsupported factory; each later claimed producer RED independently rejects constants/no-ops. |
+
+These candidate publisher groups overlap until ownership is resolved; they are not 4,536 additional rows. PTR, Forever and Retail need separate accepted configurations, at most three first-gate configurations after harness preparation, not per-row builds. Runtime work must list actual discovered selectors and record source/build/fixture identities. The I4a deliverable performs none of those builds and reserves no slot.
+
 ## Sources
 
 - [12.1.7 raw patch text](../../../data/patch-api/sources/12.1.7-api-changes.wikitext) — direct prose, target and inherited link.
@@ -42,6 +64,7 @@ No Cargo, simulator startup, native execution, vendor synchronization or profile
 - [Current linked 1.60.1 raw text](../../../data/patch-api/sources/12.1.7-inherited-1.60.1.wikitext) — inherited literal inventory and unchanged header disagreements.
 - [Source ledger](../../../data/patch-api/sources/12.1.7-source-accounting.json) — P01–P12 and deferred/UNKNOWN statuses.
 - [Inherited occurrence triage](../../../data/patch-api/sources/12.1.7-inherited-1.60.1.json) — full per-occurrence linkage and bounded lexical candidates.
+- [I4a validator](../../../tools/validate_patch_12_1_7_inherited.py) and [disposable controls](../../../tools/test_patch_12_1_7_inherited.py) — accounting/proof-separation boundary only.
 
 ## See Also
 
