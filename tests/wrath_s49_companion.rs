@@ -1,6 +1,7 @@
 #![cfg(feature = "client-wrath")]
 
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::globals::real::wrath_legacy_state::CompanionMetadata;
 
 use crate::common;
 
@@ -25,10 +26,65 @@ fn seed_mount_inputs(env: &WowLuaEnv) -> (u32, u32) {
         .iter()
         .map(|mount| mount.mount_id as i32)
         .collect();
-    (
-        state.world.mounts[0].spell_id,
-        state.world.mounts[1].spell_id,
-    )
+    let first_spell = state.world.mounts[0].spell_id;
+    let second_spell = state.world.mounts[1].spell_id;
+    // Explicit fixture identities, NOT claims about native creatures for these spells.
+    for (spell, creature_id, name) in [
+        (first_spell, 91001, "Zulu S49"),
+        (second_spell, 91002, "alpha S49"),
+    ] {
+        state.wrath_legacy.companion_metadata.insert(
+            spell,
+            CompanionMetadata {
+                creature_id,
+                name: Some(name.into()),
+                icon_path: None,
+                active: false,
+            },
+        );
+    }
+    (first_spell, second_spell)
+}
+
+#[test]
+fn supplied_companion_metadata_preserves_identity_and_optional_slots() {
+    let env = WowLuaEnv::new().expect("create explicit-input environment");
+    let (first_spell, _) = seed_mount_inputs(&env);
+    let creature: u32 = env.eval("return GetCompanionInfo('mount', 1)").unwrap();
+    assert_eq!(
+        creature, 91001,
+        "supplied creature identity, not journal ID"
+    );
+    env.state()
+        .borrow_mut()
+        .wrath_legacy
+        .companion_metadata
+        .clear();
+    env.exec("assert(GetNumCompanions('MOUNT') == 1); assert(select('#', GetCompanionInfo('MOUNT', 1)) == 0)")
+        .expect("missing metadata never invents creature identity or drops known count");
+    env.state()
+        .borrow_mut()
+        .wrath_legacy
+        .companion_metadata
+        .insert(
+            first_spell,
+            CompanionMetadata {
+                creature_id: 92001,
+                name: None,
+                icon_path: Some(r"Interface\Icons\FixtureCompanion".into()),
+                active: true,
+            },
+        );
+    env.exec(&format!(
+        r#"
+        assert(select('#', GetCompanionInfo('MOUNT', 1)) == 5)
+        local creature, name, spell, icon, active = GetCompanionInfo('MOUNT', 1)
+        assert(creature == 92001 and name == nil and spell == {first_spell})
+        assert(icon == [[Interface\Icons\FixtureCompanion]] and active == 1)
+        assert(select('#', GetCompanionInfo('MOUNT', 2)) == 0)
+    "#
+    ))
+    .expect("exact positional metadata and nil slots");
 }
 
 #[test]

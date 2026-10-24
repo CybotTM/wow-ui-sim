@@ -107,6 +107,15 @@ pub struct Battlefield {
     /// Separate explicit input: never copied from max_players.
     pub max_group: i32,
 }
+/// Explicit host creature-cache input, not journal IDs or native default metadata.
+#[derive(Clone, Debug)]
+pub struct CompanionMetadata {
+    pub creature_id: u32,
+    pub name: Option<String>,
+    pub icon_path: Option<String>,
+    pub active: bool,
+}
+
 #[derive(Debug, Default)]
 pub struct WrathLegacyState {
     /// Cached zero-based dual-spec groups, not class specialization indices.
@@ -136,4 +145,7 @@ pub struct WrathLegacyState {
     /// Explicit eligibility IDs in the shared mount/species identity domain.
     pub eligible_mounts: HashSet<i32>,
     pub eligible_critters: HashSet<i32>,
+    /// Spell -> supplied creature metadata; empty until the host supplies it.
+    /// Native metadata for the default mount catalog is unresolved.
+    pub companion_metadata: HashMap<u32, CompanionMetadata>,
 }
