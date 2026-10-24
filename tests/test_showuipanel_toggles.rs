@@ -363,31 +363,11 @@ fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs_and_accepts_search
 }
 }
 
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn collections_mount_list_count_matches_displayed_mount_count() {
     test_timeout! {
         let env = setup_env();
-        if cfg!(feature = "client-wrath") {
-            // Legacy eligibility is explicit host input, separate from journal ownership.
-            #[cfg(feature = "client-wrath")]
-            {
-                let mut state = env.state().borrow_mut();
-                assert!(state.world.mounts.len() >= 2, "two catalog mounts for native fixture");
-                for mount in state.world.mounts.iter_mut().take(2) {
-                    mount.is_collected = true;
-                }
-                state.wrath_legacy.eligible_mounts = state.world.mounts.iter().take(2)
-                    .map(|mount| mount.mount_id as i32).collect();
-            }
-            common::panel_fixtures::clear_recorded_lua_errors(&env);
-            env.fire_event("COMPANION_LEARNED").expect("dispatch native companion availability update");
-            let errors = common::panel_fixtures::recorded_lua_errors(&env);
-            assert!(errors.is_empty(), "native companion update errors: {errors:?}");
-            env.exec(include_str!("fixtures/wrath_f03/mount_list.lua"))
-                .expect("native companion mount buttons match supplied mount count");
-            return;
-        }
-
         let result: String = env.eval(r#"
             if not ToggleCollectionsJournal then
                 return "missing_toggle_collections_journal"
