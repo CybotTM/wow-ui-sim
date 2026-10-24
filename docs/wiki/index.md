@@ -1,3 +1,7 @@
+## [2026-10-24] system | CF-2 supplied club self invitations
+
+[Club model update](systems/club-membership.md#incoming-self-invitations-cf-2) links the [bounded contract](../specs/club-self-invitations.md): empty-by-default supplied incoming rows, original selected Retail MicroMenu selector and static standalone mutant contradictions. Edit-only staging; no builds/tests/slots or runtime acceptance. Other CF-2 members remain separate.
+
 ## [2026-10-22] source | Wrath F07 applicability
 ## [2026-10-22] source | Wrath casting and aura projections
 

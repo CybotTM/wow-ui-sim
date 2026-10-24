@@ -2677,3 +2677,7 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 ## [2026-10-23] investigation | Consumer selection and standalone RED
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
+
+## 2026-10-24 — CF-2 club self invitations (edit-only)
+
+Updated [[club-membership]] and [bounded contract](../specs/club-self-invitations.md) with supplied incoming snapshot projection, Retail TOC/XML/Lua selection and static standalone contradictions. No runtime RED/GREEN, builds, slots or other-profile acceptance claimed.

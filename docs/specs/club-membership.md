@@ -33,6 +33,10 @@
 
 - [ ] Unrelated baseline chat filter failure remains: `c_api_surface::chat_info_no_state_defaults_are_not_c_api_temporary_shims` (`tests/c_api_surface.rs:602`). It fails on untouched master `a55b2509c` and on this branch; excluded parallel chat work is not modified.
 
+## Incoming self-invitation slice
+
+The separate [CF-2 self-invitation contract](club-self-invitations.md) covers GetInvitationsForSelf. It is edit-only staged, not covered by the historical membership runtime proof below.
+
 ## Out of scope
 
 - Live community service/network transport, persistence and native server validation are absent.
