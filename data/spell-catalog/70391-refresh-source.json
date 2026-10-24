@@ -1,0 +1,423 @@
+{
+  "verified": "2026-10-24",
+  "identity": {
+    "product": "wow",
+    "build_key": "334a36cf5f3c32a5f7a167405487fa14",
+    "build": "12.1.5.70391",
+    "build_config_sha256": "f30cdd30bcbb613795557606c0015411640ffa4a2710f7419ea75dae345c964d",
+    "root_content_key": "25c68dd1c7597cccd94252085c3367ed",
+    "encoding_content_key": "8d0576391f8e80ce55940381fc3f674a",
+    "extraction_source": "authenticated-local-CASC-content-root"
+  },
+  "schema_commit": "d6f50d4f351193e84226aa62a36faa0f58528afa",
+  "source_revision_before_generation": "ddf9dc73a",
+  "generator_binary_sha256": "f6ad4bb0f9ccda428cb6f411701148dc2f74c451102611ca11bbaa2ffccbb77e",
+  "generator_sources": {
+    "src/bin/wow_cli/csv_util.rs": "536950d26a093b42e73ad502692598bf700fcfe4c565ae9fc5309c63c7e3ffe4",
+    "src/bin/wow_cli/gen_spells.rs": "3508e5faf492bc8bbe1d2251da77e4406b0b96c413c420900b29e3901baba84a",
+    "src/bin/wow_cli/gen_spells_power.rs": "0a262da17aad48997ef03290c1ffa6eb9cc3a0705a641533179c4b7fe1f34553",
+    "src/bin/wow_cli/gen_traits.rs": "5f2a8892b018f2180085790e883b6f19f2804e6360f4d4bb578eff749c19c7b4",
+    "src/bin/wow_cli/gen_traits_load.rs": "a9847500e135982da65a71e0ebd596f9726a9b7ec546cf30f1e7b96f03433db4",
+    "src/bin/wow_cli/gen_traits_emit.rs": "23cb75ed5344543c3fcdcd9964f1822c76d0d1db1d2ef773c04d9d055347defb"
+  },
+  "format_command": "rustfmt --edition 2024 --config skip_children=true data/traits.rs data/spells.rs data/spell_descriptions.rs data/spell_power.rs",
+  "inputs": [
+    {
+      "table": "Spell",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/Spell.csv",
+      "sha256": "2d3bdfef700fc8e762a20a5430bdb6402cdeada48a4f0ccd2b92c431cf61f772",
+      "bytes": 23940598,
+      "receipt": {
+        "layout": "E3D134FB",
+        "rows": 416202,
+        "unreadable_records": 37,
+        "id_column": "ID",
+        "fdid": 1140089,
+        "db2_sha256": "9aaa44efd2875764232396ec89418eb61f0f0cb7c50fc78503df029e617c1fbc",
+        "schema_sha256": "aa9e78af83c1d5d11979ca2f370c82270072d437bef572e38e6d91b68fde1399",
+        "csv_sha256": "2d3bdfef700fc8e762a20a5430bdb6402cdeada48a4f0ccd2b92c431cf61f772",
+        "content_authenticated": false
+      }
+    },
+    {
+      "table": "SpellEffect",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/SpellEffect.csv",
+      "sha256": "cfeb5b99be323da7e3c23f7d6b956247eafeb255d41135e57aac6b3abe16a115",
+      "bytes": 57702094,
+      "receipt": {
+        "layout": "5362E3D4",
+        "rows": 632510,
+        "unreadable_records": 160,
+        "id_column": "ID",
+        "fdid": 1140088,
+        "db2_sha256": "1ee2097927f9bf94b5f0269c59e8775fb8bf416218a2df768936935e33ace3da",
+        "schema_sha256": "f1a486829103b7da0e37243c830ce3b95d101d96c4bd0a698517a90326b2311b",
+        "csv_sha256": "cfeb5b99be323da7e3c23f7d6b956247eafeb255d41135e57aac6b3abe16a115",
+        "content_authenticated": false
+      }
+    },
+    {
+      "table": "SpellMisc",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/SpellMisc.csv",
+      "sha256": "f09e793705340f96cb8941ddafcbe6c2e0328bb1d25c6f02c1422fde16469658",
+      "bytes": 46315248,
+      "receipt": {
+        "layout": "434B3607",
+        "rows": 419787,
+        "unreadable_records": 128,
+        "id_column": "ID",
+        "fdid": 1003144,
+        "db2_sha256": "4ca73fadfe87f9ac11350894834f9699daae154e53be7d1c0ca9d45f662f6e3a",
+        "schema_sha256": "bbc0aeac591315f857037e4e4ec825131542d521255375175d4242cd98225e35",
+        "csv_sha256": "f09e793705340f96cb8941ddafcbe6c2e0328bb1d25c6f02c1422fde16469658",
+        "content_authenticated": false
+      }
+    },
+    {
+      "table": "SpellName",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/SpellName.csv",
+      "sha256": "a6b1af7f9075d88edd2584ab69f7613f3f5faeecd6f6407912f37e4e92ebbd72",
+      "bytes": 11070842,
+      "receipt": {
+        "layout": "782EE721",
+        "rows": 416203,
+        "unreadable_records": 101,
+        "id_column": "ID",
+        "fdid": 1990283,
+        "db2_sha256": "3589919aa926f4ff8c5d71d7542a817a7395f331d0ccba15317d70bb57c9dfc3",
+        "schema_sha256": "5f3cbcdf957152668d5e033c1c4ff79a7b436e2e45b8521270ca7e64cc028629",
+        "csv_sha256": "a6b1af7f9075d88edd2584ab69f7613f3f5faeecd6f6407912f37e4e92ebbd72",
+        "content_authenticated": false
+      }
+    },
+    {
+      "table": "SpellPower",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/SpellPower.csv",
+      "sha256": "651b3b5d3fdd80365fc6765cf174e5f3f44d3b6e2b94e1ca87a6e0c14a622c1a",
+      "bytes": 234482,
+      "receipt": {
+        "layout": "61AD223F",
+        "rows": 5723,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 982806,
+        "db2_sha256": "39153855efa4dd8ab44dc0dab0af4f8a884da9d8226b75f414b028c298f18b9a",
+        "schema_sha256": "e4b9d04a983cebc71df080c3200ac672eb0847cfb7999ee5fdb71adad80584c3",
+        "csv_sha256": "651b3b5d3fdd80365fc6765cf174e5f3f44d3b6e2b94e1ca87a6e0c14a622c1a",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitCond",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitCond.csv",
+      "sha256": "e0a5cd644ae77682d385f4d37ac8d4bd7a1a85fa4ab02068d94a89fe92838ecb",
+      "bytes": 512455,
+      "receipt": {
+        "layout": "BFDD1994",
+        "rows": 10971,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4543085,
+        "db2_sha256": "8502ce258e61793bb93b3965ecca510e6dc4032ab5fb1de00383eccbc66f037f",
+        "schema_sha256": "5129860cf31b3fe935987c152451da3a77dfc1705656678e5f8ab89e36b4f040",
+        "csv_sha256": "e0a5cd644ae77682d385f4d37ac8d4bd7a1a85fa4ab02068d94a89fe92838ecb",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitCurrency",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitCurrency.csv",
+      "sha256": "b446df124d325c0dd98a3b7ca7a6859c56aa71a8a40d066685dd79bfa9d60824",
+      "bytes": 24799,
+      "receipt": {
+        "layout": "7E04D40D",
+        "rows": 1361,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4524216,
+        "db2_sha256": "5f88d89b3489bcad299b6aa4374126c4077aee7a9b3ba39e24361ec8d1f67683",
+        "schema_sha256": "d48305e2f6a0ef157ce44ffe474f4ee2215e90f6c8e84778f28d20ec635ba9bc",
+        "csv_sha256": "b446df124d325c0dd98a3b7ca7a6859c56aa71a8a40d066685dd79bfa9d60824",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitDefinition",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitDefinition.csv",
+      "sha256": "51923f4bc70c67241e6a22477f2edc1c9e4a07e4197bab63bcbefec387536224",
+      "bytes": 927337,
+      "receipt": {
+        "layout": "060A9F4C",
+        "rows": 17042,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420327,
+        "db2_sha256": "29b691fc35d7e9f2385f738dba93aa2b53e69102a197df8172874d2c8d4f0ece",
+        "schema_sha256": "2aea4884cee8cb68b45d22deeef21412731fbcd7b10880a682c57f32d2519593",
+        "csv_sha256": "51923f4bc70c67241e6a22477f2edc1c9e4a07e4197bab63bcbefec387536224",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitEdge",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitEdge.csv",
+      "sha256": "c46d2621c5cc71000268b28d292dc68e9fab512848102b3a11ac35c25aa0f681",
+      "bytes": 180061,
+      "receipt": {
+        "layout": "907C9B77",
+        "rows": 7280,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420308,
+        "db2_sha256": "7c7e65f873c07adcbf9381512a8aacec9d6e8906a83875cfe30168d97c915e04",
+        "schema_sha256": "e74c14f178433a840f56cc7fbed442aa823751f255d5397de8cba031fece3173",
+        "csv_sha256": "c46d2621c5cc71000268b28d292dc68e9fab512848102b3a11ac35c25aa0f681",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitNode",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitNode.csv",
+      "sha256": "99db876119193b85283e28fa8f992c6597a38ff0639343ad09e6859825d67624",
+      "bytes": 294462,
+      "receipt": {
+        "layout": "A01A518A",
+        "rows": 11878,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420297,
+        "db2_sha256": "09aa98ce8872f108ec10dd0dc7d0a9bc03bfbf0a2107a1575e9c3f73bd9db333",
+        "schema_sha256": "cce7edc0de29b84ad052cd5840befa91e70ab5fd591d1f95f34f8435ec70f430",
+        "csv_sha256": "99db876119193b85283e28fa8f992c6597a38ff0639343ad09e6859825d67624",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitNodeEntry",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitNodeEntry.csv",
+      "sha256": "1c78846f7c3cb919f9692807d09d9991d0e8eb78c4d0afb76e35606bebd7d910",
+      "bytes": 355536,
+      "receipt": {
+        "layout": "733B015D",
+        "rows": 17150,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420298,
+        "db2_sha256": "4d2c01a2b7ebc29cfd1c903b1f1d288838dec1b7c93e0b7642d084786c2dad24",
+        "schema_sha256": "fd1b85c3707d5a06ef44e1b25309a611d1d3d4e94c2f25ee93a05716e86a34bf",
+        "csv_sha256": "1c78846f7c3cb919f9692807d09d9991d0e8eb78c4d0afb76e35606bebd7d910",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitNodeGroupXTraitCond",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitNodeGroupXTraitCond.csv",
+      "sha256": "822432b6f0f0d21bb76b0ed78fb1636e34bf9b09a1c37715fdfb3fb36dbed813",
+      "bytes": 45865,
+      "receipt": {
+        "layout": "3F06B639",
+        "rows": 2438,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4543090,
+        "db2_sha256": "fdabb7ced607b372fb97d559af4d8ecf639e91172bd8c257211dd7d8ae81b899",
+        "schema_sha256": "62895653744d17061bebbb387dcd07f55a4543f14c139361209b2df6f5ec51c0",
+        "csv_sha256": "822432b6f0f0d21bb76b0ed78fb1636e34bf9b09a1c37715fdfb3fb36dbed813",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitNodeGroupXTraitNode",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitNodeGroupXTraitNode.csv",
+      "sha256": "8cd0288420c8f57c62c020c78d16a0f06e48fd246a4535ecea42be19fd6ecf6f",
+      "bytes": 428802,
+      "receipt": {
+        "layout": "B9288EB8",
+        "rows": 19076,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420302,
+        "db2_sha256": "7226bd8e0332af750baf01a3b4a11809490ec807877f0968a4e8d108a2d1b540",
+        "schema_sha256": "7e0df34cd6a2cf5fb96fa1d39d7683cca1070c1bbd835b09020b640585d254b7",
+        "csv_sha256": "8cd0288420c8f57c62c020c78d16a0f06e48fd246a4535ecea42be19fd6ecf6f",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitNodeXTraitCond",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitNodeXTraitCond.csv",
+      "sha256": "1164b0374589aedac9131fda26e75acdb36c4c8dccc0970e5f964f0b7d4101fc",
+      "bytes": 156224,
+      "receipt": {
+        "layout": "E2160AA8",
+        "rows": 8026,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4543092,
+        "db2_sha256": "538e5ce15d10aa9281dddacc632a863fb6f954e5c59220a72d626f96e69249f4",
+        "schema_sha256": "fc4b33b8a62bb62e1b01762081ee08c441a400ace4f783e1a16d5123b4d3433e",
+        "csv_sha256": "1164b0374589aedac9131fda26e75acdb36c4c8dccc0970e5f964f0b7d4101fc",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitNodeXTraitNodeEntry",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitNodeXTraitNodeEntry.csv",
+      "sha256": "8d89da657da3e2c946ed6f796d4c9eeccf2ecfe846615b8d81f53da1385fa394",
+      "bytes": 339949,
+      "receipt": {
+        "layout": "802ED455",
+        "rows": 14127,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420304,
+        "db2_sha256": "7eb256186188e83b8f17ac63e42d7a3e92ec03520ffaff05d08f8ab3f56116e7",
+        "schema_sha256": "ab2bb5dabe16ef35c56684a6d6f0c0f2ee4e5d6a646359514cd04691c5926bb6",
+        "csv_sha256": "8d89da657da3e2c946ed6f796d4c9eeccf2ecfe846615b8d81f53da1385fa394",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitSubTree",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitSubTree.csv",
+      "sha256": "7bb535aa8d66acea4c46e6bfbb3c43767f41969c55753230386a9eac8b423c85",
+      "bytes": 13650,
+      "receipt": {
+        "layout": "716FF6FB",
+        "rows": 87,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 5534447,
+        "db2_sha256": "1f6e4d9b0bdeee9dc06bf95f06c68221973c0268008b927fda3524a7b8bb925a",
+        "schema_sha256": "f586800ad52f551f788c5c832322f305a6c45328325322d758dbdbe9c34a6c20",
+        "csv_sha256": "7bb535aa8d66acea4c46e6bfbb3c43767f41969c55753230386a9eac8b423c85",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitTree",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitTree.csv",
+      "sha256": "0ac331f7938b7f7d6118ab47bfbbefeba19348380b170d33a1f3eaa891805154",
+      "bytes": 6412,
+      "receipt": {
+        "layout": "FBCDBA8F",
+        "rows": 196,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420305,
+        "db2_sha256": "5db170a7326ef4a5948f685b658d4c34cfc34e4da14b54cd906a54fea0668782",
+        "schema_sha256": "2882f84c866eff06d173686ea7f19f5e02c277e8ce4a1a1fbad6cb8d0fa337c5",
+        "csv_sha256": "0ac331f7938b7f7d6118ab47bfbbefeba19348380b170d33a1f3eaa891805154",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitTreeXTraitCurrency",
+      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitTreeXTraitCurrency.csv",
+      "sha256": "62337910a3ad941258230741fafe1c03c869f0652db0825ebde1fd875cd92084",
+      "bytes": 22762,
+      "receipt": {
+        "layout": "E093CD62",
+        "rows": 1307,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4524218,
+        "db2_sha256": "5858b3246f2d469a5a08d7e47129b3e75799b980016d7216c714348c61291666",
+        "schema_sha256": "f4430b3eb6a9aebe161239042d96d71cfcc04b91c76d0321f85d1763f162fdde",
+        "csv_sha256": "62337910a3ad941258230741fafe1c03c869f0652db0825ebde1fd875cd92084",
+        "content_authenticated": true
+      }
+    }
+  ],
+  "outputs": {
+    "data/traits.rs": {
+      "sha256": "d6fb8d026ca0406b1ccc7bd9d49a27a7db5ea5a2cfb590babe6df3a2754facc8",
+      "csv_inputs": [
+        "TraitCond",
+        "TraitCurrency",
+        "TraitDefinition",
+        "TraitEdge",
+        "TraitNode",
+        "TraitNodeEntry",
+        "TraitNodeGroupXTraitCond",
+        "TraitNodeGroupXTraitNode",
+        "TraitNodeXTraitCond",
+        "TraitNodeXTraitNodeEntry",
+        "TraitSubTree",
+        "TraitTree",
+        "TraitTreeXTraitCurrency"
+      ],
+      "selection_inputs": [],
+      "command": [
+        "wow-cli",
+        "generate",
+        "traits"
+      ]
+    },
+    "data/spells.rs": {
+      "sha256": "7aa77413966654822a27d4e24803709d73fcaaf7e2b7670300f846d2330daf7f",
+      "csv_inputs": [
+        "SpellName",
+        "Spell",
+        "SpellMisc",
+        "SpellPower",
+        "SpellEffect"
+      ],
+      "selection_inputs": [
+        "data/traits.rs",
+        "src/lua_api/globals/spellbook_data.rs",
+        "src/bin/wow_cli/gen_spells.rs"
+      ],
+      "command": [
+        "wow-cli",
+        "generate",
+        "spells"
+      ]
+    },
+    "data/spell_descriptions.rs": {
+      "sha256": "04aeeb5b4b6e2c601275329c60ecdcb643355eff6e87bf3816e940896a380e75",
+      "csv_inputs": [
+        "SpellName",
+        "Spell",
+        "SpellMisc",
+        "SpellPower",
+        "SpellEffect"
+      ],
+      "selection_inputs": [
+        "data/traits.rs",
+        "src/lua_api/globals/spellbook_data.rs",
+        "src/bin/wow_cli/gen_spells.rs"
+      ],
+      "command": [
+        "wow-cli",
+        "generate",
+        "spells"
+      ]
+    },
+    "data/spell_power.rs": {
+      "sha256": "22190fe0f998795bc63d40380c2aebba5c69aa042b64c7f2798c6b7e7d7a8fe7",
+      "csv_inputs": [
+        "SpellName",
+        "Spell",
+        "SpellMisc",
+        "SpellPower",
+        "SpellEffect"
+      ],
+      "selection_inputs": [
+        "data/traits.rs",
+        "src/lua_api/globals/spellbook_data.rs",
+        "src/bin/wow_cli/gen_spells.rs"
+      ],
+      "command": [
+        "wow-cli",
+        "generate",
+        "spells"
+      ]
+    }
+  },
+  "limits": [
+    "All generated rows use 70391 CSVs; unchanged generator policy still omits mount/species catalogs, including spell458. S49 GREEN is not established.",
+    "Trait CSVs have authenticated content and no unreadable records. SpellName/Spell/SpellMisc/SpellEffect CSV receipts report unreadable records and content_authenticated=false; export hash/build binding is not complete-native-content certification.",
+    "CSV-native dangling references are retained, not fabricated or removed. Cross-check distinguishes CSV absence from generator omission."
+  ]
+}
