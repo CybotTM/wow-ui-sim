@@ -114,6 +114,25 @@ fn original_tts_saved_settings_shape_blocker() {
 
 scalar('boolean', C_TTSSettings.GetCharacterSettingsSaved())
 assert(select('#', C_TTSSettings.MarkCharacterSettingsSaved()) == 0)
+
+"#,
+            );
+        },
+    );
+}
+
+// Keep direct shape preflights from masking the original CheckLoad boundary.
+// This is a consumer reachability candidate, not a saved-state semantic oracle.
+#[test]
+fn original_tts_saved_settings_consumer_blocker() {
+    storage::run_isolated(
+        "cf2_tts_shape_contract::original_tts_saved_settings_consumer_blocker",
+        || {
+            let env = shape::load(&["Blizzard_ChatFrame"]);
+            shape::check(
+                &env,
+                r#"
+
 original(TextToSpeechFrame_CheckLoad, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
 original(TextToSpeechFrame_OnEvent, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
 -- Supplied legacy settings exercise the original saved-getter branch for either boolean.
