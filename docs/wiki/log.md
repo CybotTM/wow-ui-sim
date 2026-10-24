@@ -1,3 +1,7 @@
+## [2026-10-24] investigation | Wrath guild-info staging
+
+[Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md): existing cache/rank-right reuse, Wrath-only empty/no-guild initialization, two original OnShow branch selectors, static contradiction/selection proof and batch3 seed prerequisites. Edit-only; RED/GREEN, stock and Retail36/42 preservation remain deferred.
+
 ## [2026-10-24] proof | Bounded reload XML source reuse
 
 [Contract matrix](../specs/reload-ui.md#generated-xml-layer-reconstruction) records Forever RED16 at0d1e54849, then Forever/default Retail0/0 reload compiles at23f1f629a.27 exact cases/profile, zero-warning builds/checks and formatting pass; current CVars remain unchanged. [Mechanics](systems/reload-ui.md#generated-xml-layer-arguments) retain VM-local objects and XML ordering. Stock startup, paired timing and full Ellesmere acceptance remain separate.

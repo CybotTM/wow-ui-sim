@@ -1,3 +1,7 @@
+## [2026-10-24] investigation | Wrath guild-info staging
+
+[Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md): existing cache/rank-right reuse, Wrath-only empty/no-guild initialization, two original OnShow branch selectors, static contradiction/selection proof and batch3 seed prerequisites. Edit-only; RED/GREEN, stock and Retail36/42 preservation remain deferred.
+
 ## [2026-10-24] source | Reload XML instance arguments
 
 [Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): Forever RED16 precedes parameterized identities, then Forever/default Retail compile0 sources on both reloads.27 exact cases/profile, zero-warning checks and formatting pass; no stock-startup or full-workload acceptance claim.
