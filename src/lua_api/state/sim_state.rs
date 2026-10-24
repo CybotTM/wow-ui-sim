@@ -1,6 +1,7 @@
 use super::*;
 
 pub struct SimState {
+    pub wrath_relic_slot: crate::lua_api::globals::real::wrath_relic_slot::RelicSlotState,
     pub plain_global_inputs: crate::lua_api::globals::real::publication_12_0_0::PlainGlobalInputs,
     pub(crate) private_aura_anchors: crate::c_api::private_aura_anchors::PrivateAuraAnchors,
     /// Explicit pending records only; empty default and lifecycle are simulator policy.
@@ -578,6 +579,7 @@ pub struct SimState {
     pub artifact_relic_items: HashSet<i32>,
     pub quest_log: Vec<u32>,
     pub quest_log_entries: QuestLogState,
+    pub super_track: crate::c_api::c_super_track::SuperTrackState,
     /// Explicit ordinary-watch metadata; seeded once, not derived on every query.
     #[cfg(feature = "client-wowforever")]
     pub quest_watch_types: HashMap<i32, crate::c_api::QuestWatchType>,

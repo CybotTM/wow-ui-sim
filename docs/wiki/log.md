@@ -2701,3 +2701,13 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 ## [2026-10-24] source | Combat-log filter record staging
 
 [Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
+
+## 2026-10-24 | CF-2 SuperTrack edit-only staging
+
+Added supplied-state system/contract and selected original-consumer tests. Retired overlapping target defaults; priority remains explicitly unsupported. Runtime RED/GREEN, mutants and profile preservation remain slot obligations.
+## 2026-10-24 — CF-2 club self invitations (edit-only)
+
+Updated [[club-membership]] and [bounded contract](../specs/club-self-invitations.md) with supplied incoming snapshot projection, Retail TOC/XML/Lua selection and static standalone contradictions. No runtime RED/GREEN, builds, slots or other-profile acceptance claimed.
+## 2026-10-24 — Wrath relic capability staging
+
+Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-relic-class-capability) and [spec](../specs/wrath-unit-has-relic-slot.md). Class flags remain explicit inputs; unknown class mappings not invented. Edit-only, no runtime acceptance.

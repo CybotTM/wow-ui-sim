@@ -302,6 +302,7 @@ macro_rules! build_empty_sim_state {
                 any(feature = "profile-retail", feature = "client-ptr")
             ))]
             instance_identity: Default::default(),
+            wrath_relic_slot: Default::default(),
             current_target: $runtime.current_target,
             previous_target: None,
             current_focus: $runtime.current_focus,
@@ -481,6 +482,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "client-wowforever")]
             quest_watch_types: crate::c_api::seed_quest_watch_types(&quest_log_entries.entries),
             quest_log_entries,
+            super_track: Default::default(),
             quest_war_mode_eligibility: HashSet::new(),
             pending_quest_offer: None,
             quest_choice_id: None,
