@@ -63,6 +63,7 @@ fn register_inline_reapply_host_template() {
     register_template("InlineReapplyHostTemplate", "Frame", host.clone());
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_minimal_scrollbar_child_structure() {
     let env = env_with_shared_xml();
@@ -90,7 +91,9 @@ fn test_minimal_scrollbar_child_structure() {
     assert!(has_back, "MinimalScrollBar should have Back stepper");
     assert!(has_forward, "MinimalScrollBar should have Forward stepper");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_minimal_scrollbar_track_textures() {
     let env = env_with_shared_xml();
@@ -155,7 +158,9 @@ fn test_minimal_scrollbar_track_textures() {
         "Track.Middle atlas metadata should enable vertical tiling"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_minimal_scrollbar_thumb_textures() {
     let env = env_with_shared_xml();
@@ -190,7 +195,9 @@ fn test_minimal_scrollbar_thumb_textures() {
         "Thumb.Begin atlas"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_minimal_scrollbar_keyvalues() {
     let env = env_with_shared_xml();
@@ -213,7 +220,9 @@ fn test_minimal_scrollbar_keyvalues() {
         .unwrap();
     assert_eq!(min_thumb, 23.0, "minThumbExtent should be 23");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_minimal_scrollbar_mixin_accessors() {
     let env = env_with_shared_xml();
@@ -246,7 +255,9 @@ fn test_minimal_scrollbar_mixin_accessors() {
         .unwrap();
     assert!(forward_matches, "GetForwardStepper() should return Forward");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_minimal_scrollbar_stepper_sizes() {
     let env = env_with_shared_xml();
@@ -273,7 +284,9 @@ fn test_minimal_scrollbar_stepper_sizes() {
     assert_eq!(fwd_w, 17.0, "Forward button width");
     assert_eq!(fwd_h, 11.0, "Forward button height");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_minimal_scrollbar_rust_children_keys() {
     let env = env_with_shared_xml();
@@ -314,7 +327,9 @@ fn test_minimal_scrollbar_rust_children_keys() {
         "Track's Rust children_keys should have Thumb"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_unnamed_scrollbox_creates_child_frames() {
     let env = env_with_shared_xml();
@@ -334,7 +349,9 @@ fn test_unnamed_scrollbox_creates_child_frames() {
         "Unnamed WowScrollBoxList should have Shadows child from template"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_minimal_scrollbar_track_has_thumb() {
     let env = env_with_shared_xml();
@@ -354,7 +371,9 @@ fn test_minimal_scrollbar_track_has_thumb() {
         "MinimalScrollBar Track should have Thumb child"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_scrollframe_template_creates_scrollbar_with_thumb() {
     let env = env_with_shared_xml();
@@ -377,7 +396,9 @@ fn test_scrollframe_template_creates_scrollbar_with_thumb() {
         "ScrollFrameTemplate's ScrollBar.Track.Thumb should exist"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_inherited_minimal_scrollbar_child_keeps_inline_outer_anchors() {
     let env = env_with_shared_xml();
@@ -426,6 +447,7 @@ fn test_inherited_minimal_scrollbar_child_keeps_inline_outer_anchors() {
         "BOTTOMRIGHT->$parent:BOTTOMRIGHT(0,0) | TOPRIGHT->$parent:TOPRIGHT(0,0) || BOTTOM->$parent:BOTTOM(0,19) | TOP->$parent:TOP(0,-19)",
         "outer scrollbar anchors should stay TOPRIGHT/BOTTOMRIGHT while Track keeps TOP/BOTTOM: {result}"
     );
+}
 }
 
 #[test]

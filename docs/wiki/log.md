@@ -1,3 +1,4 @@
+## [2026-10-22] source | Wrath F07 applicability
 ## [2026-10-22] investigation | Wrath F13 native loader fixtures
 
 [Diagnosis](investigations/wrath-fixture-f13.md) and [contract](../specs/wrath-fixture-f13.md) separate three native fixture repairs from24 unchanged modern-only failures and five additive specimens. Before: Wrath0/27PASS, Retail26/27PASS (pre-existing Archaeology TOC failure); companion5PASS each. Final merged-code proof6f54e648f: Wrath3/27PASS; Retail26/27PASS with identical baseline statuses; companions5PASS each, stock empty, checks/fmt pass without compiler warnings. No producer edits.
@@ -6,7 +7,7 @@
 [Consumer-boundary diagnosis](investigations/wrath-spell-panels-f10.md) links [paired results and gates](../baselines/wrath-fixture-f10.md#final-bounded-gates--2026-10-23). Original assertions stay unchanged; native analogues do not replace modern rows. Correct target routing retains invalid attempts and resolves one setup-only failure with a bounded exact retry. Cached expectations remain INFERRED; native12340 panel declarations are unconfirmed. No producer repair or full-compatibility claim.
 ## [2026-10-22] investigation | Wrath F07 REJECT repair
 
-[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [exact 32-row matrix](../specs/wrath-fixture-f07.md#exact-rows). Restored shine epsilon assertion passes; restored EventFrame/MinimalScrollBar consumer fails with missing track, unchanged and ungated. Fresh Wrath10 PASS/22 FAIL; Retail32 PASS/0 FAIL; stock Wrath[] and both checks/fmt pass. All invocations execute1; no producer fix or new generic test. Historical11/21 claims superseded. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
+[Fixture diagnosis](investigations/wrath-fixture-f07.md) links the [exact 32-row matrix](../specs/wrath-fixture-f07.md#exact-rows). EXCL-2 excludes the 22 historical Wrath failures by user decision using `post_wrath_ui_fixture!`; the 10 passing rows stay ungated and all bodies/other profiles remain unchanged. Fresh exclusion proof awaits a granted build slot. Historical pre-exclusion proof: Wrath10 PASS/22 FAIL, Retail32 PASS/0 FAIL; stock Wrath[] and both checks/fmt pass. Native12340 provenance UNCONFIRMED; cached expectations INFERRED.
 
 ## [2026-10-22] source | Patch 12.1.7 I0 accounting
 
