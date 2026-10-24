@@ -36,14 +36,12 @@ pub struct CooldownViewerCooldown {
 }
 
 /// Explicit host availability, not a class/spec eligibility inference.
-#[cfg(feature = "retail-12-0-0")]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CooldownViewerAvailability {
     pub is_available: bool,
     pub failure_reason: String,
 }
 
-#[cfg(feature = "retail-12-0-0")]
 impl Default for CooldownViewerAvailability {
     fn default() -> Self {
         Self {
@@ -55,21 +53,24 @@ impl Default for CooldownViewerAvailability {
 
 pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = ensure_namespace(state, "C_CooldownViewer")?;
-    #[cfg(feature = "retail-12-0-0")]
-    {
+    if cfg!(any(
+        feature = "retail-12-0-0",
+        feature = "client-wowforever"
+    )) {
         table_set_rust_fn_static(
             state,
             namespace,
             "IsCooldownViewerAvailable",
             query_availability,
         )?;
-        table_set_rust_fn_static(
-            state,
-            namespace,
-            "GetValidAlertTypes",
-            get_valid_alert_types,
-        )?;
     }
+    #[cfg(feature = "retail-12-0-0")]
+    table_set_rust_fn_static(
+        state,
+        namespace,
+        "GetValidAlertTypes",
+        get_valid_alert_types,
+    )?;
     table_set_rust_fn_static(
         state,
         namespace,
@@ -84,7 +85,6 @@ pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
     )
 }
 
-#[cfg(feature = "retail-12-0-0")]
 fn query_availability(state: &mut LuaState) -> LuaResult<u32> {
     let availability = borrow_state(state)?.cooldown_viewer_availability.clone();
     state.push(Val::Bool(availability.is_available));

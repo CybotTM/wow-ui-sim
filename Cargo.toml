@@ -120,7 +120,7 @@ intern-stats = ["rilua/intern-stats"]
 # features select one runtime profile and point at the current API epoch for
 # that channel.
 retail-12-0-0 = ["aura-instance-enumeration"]
-retail-12-0-5 = ["retail-12-0-0", "native-duration-formatting", "base-spell-relationships"]
+retail-12-0-5 = ["retail-12-0-0", "native-duration-formatting", "base-spell-relationships", "aura-spell-classifications"]
 retail-12-0-7 = ["retail-12-0-5"]
 retail-12-1-0 = ["retail-12-0-7", "aura-xml-widgets", "on-update-modes", "player-cast-durations", "forbidden-aspects", "numeric-rule-formatters", "aura-containers"]
 retail-12-1-5 = ["retail-12-1-0", "timed-signal-maps", "forbidden-animation-aspects"]
@@ -128,6 +128,8 @@ retail-12-1-5 = ["retail-12-1-0", "timed-signal-maps", "forbidden-animation-aspe
 native-duration-formatting = ["dep:cc", "dep:pkg-config", "dep:vcpkg"]
 # Existing specialization relationship model shared by Retail 12.0.5+ and Forever.
 base-spell-relationships = []
+# Existing explicit defensive spell classification shared with Forever.
+aura-spell-classifications = []
 # Shared keyed timer capability used by PTR and Forever.
 timed-signal-maps = []
 # Shared XML aliases and intrinsic mappings for aura frames/buttons.
@@ -158,7 +160,7 @@ client-wrath = []
 client-mists = ["prefork-full-ui"]
 client-era = []
 client-anniversary = []
-client-wowforever = ["timed-signal-maps", "aura-xml-widgets", "on-update-modes", "player-cast-durations", "forbidden-animation-aspects", "numeric-rule-formatters", "aura-containers", "native-duration-formatting", "base-spell-relationships"]
+client-wowforever = ["timed-signal-maps", "aura-xml-widgets", "on-update-modes", "player-cast-durations", "forbidden-animation-aspects", "numeric-rule-formatters", "aura-containers", "native-duration-formatting", "base-spell-relationships", "aura-spell-classifications"]
 
 [profile.release]
 lto = false
@@ -180,6 +182,10 @@ harness = false
 [[test]]
 name = "integration"
 path = "tests/integration.rs"
+
+[[test]]
+name = "patch_12_1_7_toc"
+path = "tests/patch_12_1_7_toc.rs"
 
 [[test]]
 name = "wrath_core_labels_real_paths"

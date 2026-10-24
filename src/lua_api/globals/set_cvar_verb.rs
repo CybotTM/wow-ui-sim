@@ -28,8 +28,6 @@ const CVAR_DATA_MASK: u8 = 0x3F;
 const CVAR_DATA_TAG: u8 = 0x40;
 const DEFAULT_CVAR_BITFIELD_VERSION: u8 = b'0';
 const C_CVAR_FUNCTIONS: &[(&str, RustFn)] = &[
-    #[cfg(feature = "retail-12-1-0")]
-    ("AreCVarsLoaded", are_cvars_loaded),
     ("GetCVar", get_cvar),
     ("SetCVar", set_cvar),
     ("GetCVarBool", get_cvar_bool),
@@ -39,12 +37,6 @@ const C_CVAR_FUNCTIONS: &[(&str, RustFn)] = &[
     ("SetCVarBitfield", set_cvar_bitfield),
     ("ResetTestCVars", reset_test_cvars),
 ];
-
-#[cfg(feature = "retail-12-1-0")]
-fn are_cvars_loaded(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(true));
-    Ok(1)
-}
 
 fn required_string(state: &mut LuaState, index: i32) -> Option<String> {
     Option::<String>::from_stack(state, index)

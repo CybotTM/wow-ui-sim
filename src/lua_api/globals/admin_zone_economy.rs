@@ -279,6 +279,7 @@ pub(super) fn set_guild_emblem(state: &mut LuaState) -> LuaResult<u32> {
     let emblem_b = Option::<f64>::from_stack(state, 10)?.unwrap_or(0.0);
     let mut st = borrow_state_mut(state)?;
     let logo = &mut st.world.guild_logo;
+    logo.tabard_metadata = None;
     logo.emblem_filename = filename;
     logo.background = (bkg_r, bkg_g, bkg_b);
     logo.border = (border_r, border_g, border_b);
