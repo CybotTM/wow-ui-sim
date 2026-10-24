@@ -14,10 +14,7 @@ mod shape;
 #[path = "common/cf2_cvar_storage.rs"]
 mod storage;
 
-fn assert_original_tts_preference_round_trips(env: &wow_ui_sim::lua_api::WowLuaEnv) {
-    shape::check(
-        env,
-        r#"
+const ORIGINAL_TTS_PREFERENCE_ROUND_TRIPS: &str = r#"
 original(TextToSpeech_SetRate, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
 original(TextToSpeech_SetVolume, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
 original(TextToSpeechFrame_UpdateSliders, 'Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua')
@@ -39,9 +36,7 @@ assert(not TextToSpeech_SetVolume(TextToSpeechFrame, -1))
 assert(not TextToSpeech_SetVolume(TextToSpeechFrame, 101))
 assert(C_TTSSettings.GetSpeechRate() == 7)
 assert(C_TTSSettings.GetSpeechVolume() == 63)
-"#,
-    );
-}
+"#;
 
 // retail: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:65 (GetSpeechRate).
 // retail: Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua:74 (GetSpeechVolume).
@@ -82,7 +77,7 @@ fn original_tts_numeric_preferences_contract() {
         "cf2_tts_shape_contract::original_tts_numeric_preferences_contract",
         || {
             let env = shape::load(&["Blizzard_ChatFrame"]);
-            assert_original_tts_preference_round_trips(&env);
+            shape::check(&env, ORIGINAL_TTS_PREFERENCE_ROUND_TRIPS);
             shape::check(
                 &env,
                 r#"
@@ -148,7 +143,7 @@ assert(select('#', C_TTSSettings.MarkCharacterSettingsSaved()) == 0)
 
 "#,
             );
-            assert_original_tts_preference_round_trips(&env);
+            shape::check(&env, ORIGINAL_TTS_PREFERENCE_ROUND_TRIPS);
         },
     );
 }
@@ -181,7 +176,7 @@ TextToSpeechFrame_UpdateSliders(TextToSpeechFrame)
 
 "#,
             );
-            assert_original_tts_preference_round_trips(&env);
+            shape::check(&env, ORIGINAL_TTS_PREFERENCE_ROUND_TRIPS);
         },
     );
 }
@@ -192,7 +187,7 @@ fn original_tts_documented_preference_pairs_contract() {
         "cf2_tts_shape_contract::original_tts_documented_preference_pairs_contract",
         || {
             let env = shape::load(&["Blizzard_ChatFrame"]);
-            assert_original_tts_preference_round_trips(&env);
+            shape::check(&env, ORIGINAL_TTS_PREFERENCE_ROUND_TRIPS);
             shape::check(
                 &env,
                 r#"
