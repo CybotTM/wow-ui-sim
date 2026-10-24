@@ -2,6 +2,7 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::globals::real::wrath_legacy_state::CompanionMetadata;
+use wow_ui_sim::lua_api::state::SpellCooldownState;
 
 use crate::common;
 
@@ -112,4 +113,118 @@ fn learned_mount_refreshes_original_companion_buttons_inline() {
         let errors = common::panel_fixtures::recorded_lua_errors(&env);
         assert!(errors.is_empty(), "S49 original consumer errors: {errors:?}");
     }
+}
+
+// Request-11 Q5: native wrapper returns seconds and a numeric enable.
+// Each selector observes idle and changing non-idle results independently.
+fn cooldown_env() -> (WowLuaEnv, u32) {
+    let env = WowLuaEnv::new().expect("create cooldown environment");
+    let (spell, _) = seed_mount_inputs(&env);
+    env.state().borrow_mut().start_time -= std::time::Duration::from_secs(100);
+    (env, spell)
+}
+
+fn assert_companion_cooldown(env: &WowLuaEnv, start: f64, duration: f64) {
+    let result: (f64, f64, f64) = env
+        .eval("return GetCompanionCooldown('mount', '1')")
+        .expect("three numeric cooldown results, including numeric-convertible index");
+    assert_eq!(result, (start, duration, 1.0));
+}
+
+#[test]
+fn companion_cooldown_own_timer_seconds_and_expiry() {
+    let (env, spell) = cooldown_env();
+    assert_companion_cooldown(&env, 0.0, 0.0);
+    env.state().borrow_mut().spell_cooldowns.insert(
+        spell,
+        SpellCooldownState {
+            start: 90.25,
+            duration: 300.5,
+        },
+    );
+    // Cooldown lookup needs the selected spell, not creature-name metadata.
+    env.state()
+        .borrow_mut()
+        .wrath_legacy
+        .companion_metadata
+        .clear();
+    assert_companion_cooldown(&env, 90.25, 300.5);
+    env.exec(
+        r#"
+        assert(select('#', GetCompanionCooldown('MOUNT', 1)) == 3)
+        for _, args in ipairs({{}, {'other', 1}, {'MOUNT'}, {'MOUNT', 0}, {'MOUNT', 'bad'}}) do
+            local ok, err = pcall(GetCompanionCooldown, unpack(args))
+            assert(not ok and string.find(err, 'Usage: GetCompanionCooldown(type, index)', 1, true))
+        end
+        assert(select('#', GetCompanionCooldown('MOUNT', -1)) == 0)
+        assert(select('#', GetCompanionCooldown('MOUNT', 2)) == 0)
+        assert(select('#', GetCompanionCooldown('CRITTER', 1)) == 0)
+    "#,
+    )
+    .expect("native validation and absent selected spell return counts");
+    env.state().borrow_mut().spell_cooldowns.insert(
+        spell,
+        SpellCooldownState {
+            start: 1.0,
+            duration: 2.0,
+        },
+    );
+    assert_companion_cooldown(&env, 0.0, 0.0);
+}
+
+#[test]
+fn companion_cooldown_shared_category_tracks_existing_spell_state() {
+    let (env, spell) = cooldown_env();
+    // Synthetic host cooldown source/category, not a native companion fixture pair.
+    let source_spell = 990001;
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.spell_cooldown_categories.insert(spell, 701);
+        sim.spell_cooldown_categories.insert(source_spell, 702);
+        sim.spell_cooldowns.insert(
+            source_spell,
+            SpellCooldownState {
+                start: 80.5,
+                duration: 250.25,
+            },
+        );
+    }
+    assert_companion_cooldown(&env, 0.0, 0.0);
+    env.state()
+        .borrow_mut()
+        .spell_cooldown_categories
+        .insert(source_spell, 701);
+    assert_companion_cooldown(&env, 80.5, 250.25);
+    env.state().borrow_mut().spell_cooldowns.insert(
+        spell,
+        SpellCooldownState {
+            start: 95.0,
+            duration: 400.0,
+        },
+    );
+    assert_companion_cooldown(&env, 95.0, 400.0);
+    env.state().borrow_mut().spell_cooldowns.remove(&spell);
+    assert_companion_cooldown(&env, 80.5, 250.25);
+    env.state().borrow_mut().spell_cooldowns.clear();
+    assert_companion_cooldown(&env, 0.0, 0.0);
+}
+
+#[test]
+fn companion_cooldown_gcd_and_longer_spell_interval() {
+    let (env, spell) = cooldown_env();
+    assert_companion_cooldown(&env, 0.0, 0.0);
+    env.state().borrow_mut().gcd = Some((99.25, 120.5));
+    assert_companion_cooldown(&env, 99.25, 120.5);
+    env.state().borrow_mut().spell_cooldowns.insert(
+        spell,
+        SpellCooldownState {
+            start: 90.5,
+            duration: 400.25,
+        },
+    );
+    assert_companion_cooldown(&env, 90.5, 400.25);
+    env.state().borrow_mut().spell_cooldowns.clear();
+    assert_companion_cooldown(&env, 99.25, 120.5);
+    env.state().borrow_mut().gcd = Some((1.0, 2.0));
+    assert_companion_cooldown(&env, 0.0, 0.0);
 }
