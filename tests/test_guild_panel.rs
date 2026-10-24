@@ -61,6 +61,25 @@ fn setup_env() -> WowLuaEnv {
     load_guild_ui(env)
 }
 
+/// Supply the guild branch before native startup; this is not the Wrath default.
+fn setup_guild_leader_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        let mut state = env.state().borrow_mut();
+        state.world.guild_name = Some("Heroes of Azeroth".into());
+        state.world.guild_rank = Some("Guild Leader".into());
+        state.world.guild_id = 73;
+        state.world.guild_player_rank = 0;
+        state.world.guild_num_members = 1;
+        state.world.guild_members = vec![wow_ui_sim::lua_api::state::GuildMember {
+            name: "Uther".into(),
+            rank_index: 1,
+            online: true,
+        }];
+    }
+    load_guild_ui(env)
+}
+
 fn load_guild_ui(env: WowLuaEnv) -> WowLuaEnv {
     env.set_screen_size(1024.0, 768.0);
 
@@ -69,7 +88,7 @@ fn load_guild_ui(env: WowLuaEnv) -> WowLuaEnv {
         state.addon_base_paths = vec![blizzard_ui_dir()];
     }
 
-    if cfg!(feature = "client-wrath") {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
         common::panel_fixtures::load_wrath_panel_core(&env);
         env.apply_post_load_workarounds();
         fire_startup_events(&env);
@@ -121,7 +140,7 @@ fn install_dropdown_test_helpers(env: &WowLuaEnv) {
 }
 
 fn load_guild_control_ui(env: &WowLuaEnv) {
-    if cfg!(feature = "client-wrath") {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
         env.exec(
             r#"
             A_Admin.SetGuildRanks({
@@ -157,8 +176,8 @@ fn fire_startup_events(env: &WowLuaEnv) {
 #[test]
 fn guild_panel_opens_without_unavailable_error() {
     test_timeout! {
-        let env = setup_env();
-        if cfg!(feature = "client-wrath") {
+        let env = setup_guild_leader_env();
+        if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
             common::panel_fixtures::clear_recorded_lua_errors(&env);
             env.exec(r#"
                 ToggleFriendsFrame(3)
@@ -213,6 +232,7 @@ fn c_club_is_enabled() {
 #[test]
 fn c_club_returns_guild() {
     let env = WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().world.guild_name = Some("Heroes of Azeroth".into());
     let result: String = env
         .eval(
             r#"
@@ -349,9 +369,9 @@ fn communities_member_detail_rank_dropdown_shows_rank_rows() {
 #[test]
 fn guild_control_rank_settings_dropdown_shows_rank_rows() {
     test_timeout! {
-        let env = setup_env();
+        let env = setup_guild_leader_env();
         load_guild_control_ui(&env);
-        if cfg!(feature = "client-wrath") {
+        if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
             env.exec(include_str!("fixtures/wrath_f03/guild_ranks.lua"))
                 .expect("native rank selection and menu rows");
             return;
@@ -474,9 +494,9 @@ fn guild_dropdown_descriptions_have_elements() {
 #[test]
 fn guild_dropdown_materialized_buttons_have_labels() {
     test_timeout! {
-        let env = setup_env();
+        let env = setup_guild_leader_env();
         load_guild_control_ui(&env);
-        if cfg!(feature = "client-wrath") {
+        if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
             env.exec(r#"
                 ToggleDropDownMenu(1, nil, GuildControlPopupFrameDropDown)
                 assert(DropDownList1:IsShown())
@@ -653,6 +673,7 @@ fn native_guild_info_panel_populates_motd_details() {
             // Supply membership and received cache state before native UI loading.
             let mut state = env.state().borrow_mut();
             state.world.guild_name = Some("Heroes of Azeroth".into());
+            state.world.guild_rank = Some("Member".into());
             state.world.guild_info_text = "Mythic-focused guild recruiting".into();
         }
         let env = load_guild_ui(env);

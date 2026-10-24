@@ -16,7 +16,7 @@ Native SetGuildInfoText does not mutate the received cache. This change implemen
 
 ## Tests and proof
 
-`tests/wrath_guild_info.rs`: two independently discriminating original-consumer selectors and one exact return-contract selector. Tests/model input scaffolding precede producer commit. No builds/tests authorized: RED/GREEN is **staged, not observed**. Selection trace, contradiction table and deferred verification are in [investigation](../wiki/investigations/wrath-guild-info.md).
+`tests/wrath_guild_info.rs`: two independently discriminating original-consumer selectors and one exact return-contract selector. Tests/model input scaffolding precede producer commit. Historical slot proof at `97e759f7d` passed all three selectors but found F1 and preservation input gaps. The [17-row classification and fixture repairs](../baselines/wrath-guild-info-green-blockers.md) preserve all existing assertions, supply membership/ranks/roster explicitly and add F1's display rank before load. The initialized-state preservation case separately pins absent synthetic membership/ranks/roster. No builds/tests are authorized for these repairs: their GREEN remains pending. Selection trace and proof limits are in [investigation](../wiki/investigations/wrath-guild-info.md).
 
 ## Implementation
 

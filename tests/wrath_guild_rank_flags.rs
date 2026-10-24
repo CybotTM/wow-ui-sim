@@ -8,6 +8,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 fn seed_selected_rank(env: &WowLuaEnv) {
     env.exec(
         r#"
+        A_Admin.SetGuildInfo("Rank rights fixture", "Officer", 2)
         A_Admin.SetGuildRanks({
             { name = "Leader", flags = { false, true } },
             { name = "Officer", flags = {

@@ -38,7 +38,9 @@ Existing A_Admin cache/ranks inputs remain usable; numeric ID/rank and presence 
 
 ## Batch3 path and blockers
 
-The getter removes the originally reported nil compatibility path. **Unchanged batch3 is not predicted PASS.** Its native fixture does not supply membership or cached text; it depended on seeded Heroes of Azeroth/Mythic text. With required no-guild initialization, native `ToggleFriendsFrame(3)` returns immediately, so the fixture's FriendsFrame/GuildFrame visibility assertion can fail earlier. Even after supplying membership, empty info cannot satisfy its unchanged Mythic-text assertion. Fixture owner must explicitly supply its expected membership and received cache (and numeric ID/player rank/rights if editability is asserted). No assertion is weakened and no fixture is changed here. Other Wrath tests relying on seeded membership/ranks need paired verification; they are not silently counted as passes.
+The historical slot at `97e759f7d` passed the three guild-info selectors, but F1 failed at FriendsFrame.lua:309: it supplied name/cache, not the display rank formatted before the guild subframe opens. The static repair adds `Some("Member")` before native loading; the original F1 Lua fixture and assertions stay unchanged. The [17-row classification](../../baselines/wrath-guild-info-green-blockers.md) supplies membership/ranks/roster in affected setups instead of restoring synthetic Wrath defaults. All 17 are class(a); none establishes a native-default producer contradiction. These repairs have no executed GREEN proof.
+
+The existing rank-settings dropdown row remains blocked on missing bank permission and withdrawal-limit getters after valid leader startup selects Officer. Original FriendsFrame.lua:1647/:1678 requires both. Existing bank state has money/current tab/items, but no rank/tab permissions or rank withdrawal limit. Parent holds implementation until laptop12340 facts arrive; no stub/default is invented. See the classification page for exact source boundaries and re-proof requirements.
 
 ## Sources
 

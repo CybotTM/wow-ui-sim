@@ -95,6 +95,19 @@ fn native_info_onshow_uses_player_presence_guild_id_and_player_rank_rights() {
 }
 
 #[test]
+fn initialized_world_has_no_synthetic_guild_membership_or_roster() {
+    let env = WowLuaEnv::new().unwrap();
+    let state = env.state().borrow();
+    assert_eq!(state.world.guild_name, None);
+    assert_eq!(state.world.guild_rank, None);
+    assert_eq!(state.world.guild_id, 0);
+    assert_eq!(state.world.guild_num_members, 0);
+    assert!(state.world.guild_ranks.is_empty());
+    assert!(state.world.guild_members.is_empty());
+    assert!(state.world.guild_info_text.is_empty());
+}
+
+#[test]
 fn getter_results_preserve_native_arity_types_ignored_arguments_and_cache_independence() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(
