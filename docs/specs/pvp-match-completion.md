@@ -6,7 +6,7 @@ Retail/PTR `C_PvP.IsMatchComplete` must project the existing supplied completion
 
 - [ ] Publish `C_PvP.IsMatchComplete` for runtime `client_profile::ACTIVE` Retail/PTR, returning exactly `SimState.pvp_catalog.match_completed` without mutation.
 - [ ] Preserve the existing `HasMatchStarted` active-queue-or-completed behavior; do not alias completion to activity or queue status.
-- [ ] One original-consumer selector covers inactive/incomplete → active/incomplete → inactive/complete → inactive/incomplete snapshots, resetting actual registrations between snapshots.
+- [ ] One selector uses the normal XML-created `PVPMatchResults`, retaining its installed original `OnEvent` script and asserting handler identity/provenance. It covers inactive/incomplete → active/incomplete → inactive/complete → inactive/incomplete snapshots, resetting actual registrations between snapshots without replacing scripts or repairing presentation.
 - [ ] Assert original active-event subscriptions and unchanged hidden presentation. The selector independently rejects constant true and constant false.
 - [ ] Obtain independent Retail/PTR RED at the original completion call before producer edits, then GREEN and complete own-base stock-map comparisons against master571284aaa.
 
@@ -23,7 +23,7 @@ Retail/PTR `C_PvP.IsMatchComplete` must project the existing supplied completion
 
 ## Tests asserting this spec
 
-- `tests/cf2_pvp_completion.rs`: adapted from the staged `cf2_pvpmap` original event recipe. Explicit `retail-12-0-0` compile gate matches the existing input's availability; runtime profile assertion admits only Retail/PTR. Not compiled or executed yet.
+- `tests/cf2_pvp_completion.rs`: directly invokes the normal XML-created frame's installed original event script so failures cannot be swallowed by dispatch; no surrogate frame, manual Mixin or SetScript. Explicit `retail-12-0-0` compile gate matches the existing input's availability; runtime profile assertion admits only Retail/PTR. Not compiled or executed yet.
 
 ## Known gaps (current cycle)
 

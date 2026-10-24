@@ -18,17 +18,15 @@ fn load_original_match_consumer() -> WowLuaEnv {
     env.exec(
         r#"
         assert(PVPMatchResults, 'selected XML must instantiate the original results frame')
-        local info = debug.getinfo(PVPMatchResultsMixin.OnEvent, 'S')
+        local handler = PVPMatchResults:GetScript('OnEvent')
+        assert(handler == PVPMatchResultsMixin.OnEvent and handler == PVPMatchResults.OnEvent,
+            'selected XML must retain the installed original OnEvent method')
+        local info = debug.getinfo(handler, 'S')
         local suffix = 'Blizzard_PVPMatch/PVPMatchResults.lua'
         local source = info.source:gsub('\\', '/')
         assert(info.what == 'Lua' and source:sub(-#suffix) == suffix,
             'must invoke the original cached event consumer')
         print('CF-2 consumer provenance', source, info.linedefined, info.lastlinedefined)
-        -- Isolate registration outputs without replacing the handler or any API.
-        Cf2MatchResults = CreateFrame('Frame', nil, UIParent)
-        Mixin(Cf2MatchResults, PVPMatchResultsMixin)
-        Cf2MatchResults:SetScript('OnEvent', Cf2MatchResults.OnEvent)
-        Cf2MatchResults:Hide()
         "#,
     )
     .expect("selected XML and original match event provenance");
@@ -37,10 +35,10 @@ fn load_original_match_consumer() -> WowLuaEnv {
 
 fn assert_enter_world_registration(env: &WowLuaEnv, expected: bool) {
     let errors_before = env.state().borrow().lua_errors.len();
-    env.exec("Cf2MatchResults:UnregisterAllEvents()")
+    env.exec("PVPMatchResults:UnregisterAllEvents()")
         .expect("reset real subscriptions before every snapshot");
     // Call the unchanged closure directly: dispatch must not swallow the RED error.
-    env.exec("Cf2MatchResults:OnEvent('PLAYER_ENTERING_WORLD')")
+    env.exec("PVPMatchResults:GetScript('OnEvent')(PVPMatchResults, 'PLAYER_ENTERING_WORLD')")
         .expect("original entering-world consumer must read supplied completion state");
     for event in [
         "PVP_MATCH_COMPLETE",
@@ -54,12 +52,12 @@ fn assert_enter_world_registration(env: &WowLuaEnv, expected: bool) {
     ] {
         let registered: bool = env
             .eval(&format!(
-                "return Cf2MatchResults:IsEventRegistered('{event}')"
+                "return PVPMatchResults:IsEventRegistered('{event}')"
             ))
             .unwrap();
         assert_eq!(registered, expected, "{event} subscription");
     }
-    let shown: bool = env.eval("return Cf2MatchResults:IsShown()").unwrap();
+    let shown: bool = env.eval("return PVPMatchResults:IsShown()").unwrap();
     assert!(
         !shown,
         "entering world subscribes without displaying results"
