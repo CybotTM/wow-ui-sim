@@ -190,6 +190,66 @@ class MountedDepInfoTests(unittest.TestCase):
             self.assertIn("src/lib.rs", inputs[record["executable"]])
         self.assertEqual(len(self.module.find_stale_artifacts(self.current, {}, {})), 4)
 
+    def load_slot1_integration_bins(self):
+        fixture = Path(__file__).parent / "fixtures/slot-build-dep-info/slot-1-integration-bins.json"
+        entries = json.loads(fixture.read_text())
+        for entry in entries:
+            serialized = json.dumps(entry).replace(
+                "/home/osso/.cache/wow-ui-sim-targets/slot-1", str(self.target))
+            serialized = serialized.replace(
+                "/home/osso/.cache/wow-ui-sim-srcmount/slot-1", str(self.mount))
+            entry = json.loads(serialized)
+            dep_info = Path(entry["dep_info_path"])
+            dep_info.parent.mkdir(parents=True, exist_ok=True)
+            dep_info.write_text(entry["dep_info"])
+            hashed_binary = dep_info.with_suffix("")
+            hashed_binary.write_bytes(b"rebuilt utility")
+            hashed_binary.chmod(0o755)
+            Path(entry["record"]["executable"]).hardlink_to(hashed_binary)
+            self.current["reported_artifacts"].append(entry["record"])
+
+    def test_real_slot1_integration_bins_use_hashed_dep_info(self):
+        self.load_slot1_integration_bins()
+        inputs, errors = self.read_inputs(["src/bin/bench_spellbook.rs"])
+        self.assertEqual(errors, [])
+        executable = str(self.target / "debug/bench_spellbook")
+        self.assertIn("src/bin/bench_spellbook.rs", inputs[executable])
+        self.assertEqual(self.module.find_stale_artifacts(self.current, {}, {}),
+                         ["debug/bench_spellbook"])
+        hashes = {"debug/bench_spellbook": "rebuilt"}
+        self.assertEqual(self.module.find_stale_artifacts(self.current, {}, hashes), [])
+
+    def test_hashed_dep_info_takes_precedence_over_uplifted_dep_info(self):
+        self.load_slot1_integration_bins()
+        for record in self.current["reported_artifacts"]:
+            Path(record["executable"]).with_suffix(".d").write_text("invalid uplift")
+        _, errors = self.read_inputs(["src/bin/bench_spellbook.rs"])
+        self.assertEqual(errors, [])
+
+    def test_reported_hashed_filename_selects_dep_info_without_hardlink(self):
+        self.load_slot1_integration_bins()
+        record = self.current["reported_artifacts"][-1]
+        binary = Path(record["executable"])
+        hashed = next((binary.parent / "deps").glob("bench_spellbook-*"))
+        if hashed.suffix == ".d":
+            hashed = hashed.with_suffix("")
+        record["filenames"].append(str(hashed))
+        binary.unlink()
+        binary.write_bytes(b"copied uplift")
+        binary.chmod(0o755)
+        _, errors = self.read_inputs(["src/bin/bench_spellbook.rs"])
+        self.assertEqual(errors, [])
+
+    def test_unrelated_package_without_dep_info_does_not_block_content_diff(self):
+        self.add_dep_info("debug/known", "known: src/lib.rs\n")
+        self.current["reported_artifacts"].append({
+            "executable": str(self.target / "debug/unrelated"), "fresh": False,
+            "package_id": "unrelated", "manifest_path": str(self.mount / "other/Cargo.toml"),
+        })
+        self.current["package_roots"]["unrelated"] = [str(self.mount / "other")]
+        _, errors = self.read_inputs(["src/lib.rs"])
+        self.assertEqual(errors, [])
+
     def test_make_continuation_separates_adjacent_input_words(self):
         binary = self.target / "debug/continued"
         content = (f"{binary}: {self.mount}/src/first.rs\\\n"

@@ -170,7 +170,7 @@ def parse_dep_info(content, worktree):
 
 
 def read_dep_info_snapshot(slot, worktree):
-    files, executables = {}, []
+    files, executables, identities = {}, [], {}
     for directory, children, names in os.walk(slot):
         children[:] = [name for name in children
                        if not name.startswith(".") and name not in {"incremental", "receipts"}]
@@ -178,21 +178,32 @@ def read_dep_info_snapshot(slot, worktree):
             path = Path(directory) / name
             if path.is_file() and (path.stat().st_mode & 0o111 or path.suffix == ".exe"):
                 executables.append(str(path))
+                stat = path.stat()
+                identities.setdefault((stat.st_dev, stat.st_ino), []).append(str(path))
             if path.suffix != ".d":
                 continue
             try:
                 files[str(path)] = parse_dep_info(path.read_text(), worktree)
             except (OSError, UnicodeError, ValueError) as error:
                 files[str(path)] = {"error": str(error)}
-    return {"files": files, "executables": executables}
+    aliases = {path: paths for paths in identities.values() for path in paths}
+    return {"files": files, "executables": executables, "aliases": aliases}
 
 
 def target_dep_inputs(record, snapshot, allow_missing=False):
     artifacts = {os.path.abspath(path) for path in
                  [record["executable"], *record.get("filenames", [])]}
+    # Cargo may report only the uplifted bin, while rustc writes deps/<name>-<hash>.d.
+    # Snapshot hard-link identities bind that bin to the correct metadata hash.
+    aliases = snapshot.get("aliases", {})
+    artifacts.update(alias for path in list(artifacts) for alias in aliases.get(path, []))
     candidates = {str(Path(path).with_suffix(".d")) for path in artifacts}
     matches = {name: info for name, info in snapshot["files"].items()
                if name in candidates or artifacts.intersection(info.get("outputs", []))}
+    rustc_matches = {name: info for name, info in matches.items()
+                     if Path(name).parent.name == "deps"}
+    if rustc_matches:
+        matches = rustc_matches
     if not matches and not allow_missing:
         raise ValueError(f"missing dep-info for {record['executable']}")
     inputs = set()
@@ -231,6 +242,22 @@ def repo_relative_inputs(current, inputs):
     return relative
 
 
+def target_may_intersect_content_diff(current, record):
+    changed = set(current["content_changed_paths"])
+    if not changed:
+        return False
+    build_inputs = repo_relative_inputs(current, package_build_inputs(current, record))
+    if changed.intersection(build_inputs):
+        return True
+    roots = current["package_roots"].get(record.get("package_id"), [])
+    if not roots and record.get("manifest_path"):
+        roots = [str(Path(record["manifest_path"]).parent)]
+    if not roots:
+        return True
+    relative_roots = repo_relative_inputs(current, roots)
+    return any(Path(name).is_relative_to(root) for name in changed for root in relative_roots)
+
+
 def read_target_inputs(current, before, after):
     targets, errors = {}, []
     for record in current["reported_artifacts"]:
@@ -248,7 +275,7 @@ def read_target_inputs(current, before, after):
             inputs.update(repo_relative_inputs(current, package_build_inputs(current, record)))
             targets[executable] = sorted(inputs)
         except ValueError as error:
-            if current["content_changed_paths"]:
+            if target_may_intersect_content_diff(current, record):
                 errors.append(str(error))
     mapped = set().union(*targets.values())
     changed = current["content_changed_paths"]
