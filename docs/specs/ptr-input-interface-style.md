@@ -4,12 +4,12 @@ PTR 12.1.7.70493 declares `C_InputInterfaceStyle.GetCurrentStyle()` in generated
 
 ## What it must do
 
-- [ ] PTR publishes `GetCurrentStyle()` with a non-nil `InputDeviceInterfaceType` result from the environment's existing supplied input style.
-- [ ] PTR publishes the documented enum members `Mkb = 0` and `Gamepad = 1`.
-- [ ] Original, runtime-selected `InputUtil` predicates and immediate setup/init callbacks distinguish explicit MKB, Gamepad, then MKB inputs in one selector.
-- [ ] Preserve existing Forever publication and leave Retail and Classic publication unchanged. The checked Retail manifest and generated input docs do not declare this namespace or enum.
+- [x] PTR publishes `GetCurrentStyle()` with a non-nil `InputDeviceInterfaceType` result from the environment's existing supplied input style.
+- [x] PTR publishes the documented enum members `Mkb = 0` and `Gamepad = 1`.
+- [x] Original, runtime-selected `InputUtil` predicates and immediate setup/init callbacks distinguish explicit MKB, Gamepad, then MKB inputs in one selector.
+- [x] Preserve existing Forever publication and leave Retail and Classic publication unchanged. The checked Retail manifest and generated input docs do not declare this namespace or enum.
 
-- [ ] PTR accepts `INPUT_DEVICE_INTERFACE_TRANSITION` through the strict `all(client-ptr, retail-12-1-5)` epoch exception. Loading the original SharedXML closure must produce no Lua errors; its listener must report registration true and an unrelated event false. Retail and Forever event validity remain unchanged.
+- [x] PTR accepts `INPUT_DEVICE_INTERFACE_TRANSITION` through the strict `all(client-ptr, retail-12-1-5)` epoch exception. Loading the original SharedXML closure must produce no Lua errors; its listener must report registration true and an unrelated event false. Retail and Forever event validity remain unchanged.
 
 ## SharedXML listener assumption
 
@@ -34,12 +34,12 @@ Decision key: `sharedxml_twice_default_20261025`.
 
 ## Tests asserting this spec
 
-- `tests/ptr_input_interface_style.rs::ptr_input_util_observes_supplied_styles_and_initializes_matching_subscribers` — original SharedXML dependency closure through runtime TOC selection; both styles and the shared InputUtil top-level event registration in one selector. The event-validity source pair follows the earlier namespace publication; execution is deferred until main assigns a slot.
-- `tests/wowforever_input_style.rs` — existing Forever preservation cases; not executed in this lane.
+- `tests/ptr_input_interface_style.rs::ptr_input_util_observes_supplied_styles_and_initializes_matching_subscribers` — original SharedXML dependency closure through runtime TOC selection; both styles and the shared InputUtil top-level event registration in one selector. The final corrected selector passes on merged source `8798e6012`; detached producer-only RED `c779d1882` fails at the original rejected event with byte-identical tests. Each phase has one exact list and one exact run.
+- `tests/wowforever_input_style.rs` — prior slot-2 preservation: three pass; case 1 fails on missing `C_GamePad.IsEnabled`. The 70532 API declaration exists, but no backing capability state is modeled. This is a report-only API gap, not a fixture repair; no Forever runtime rerun is claimed here.
 
 ## Known gaps (current cycle)
 
-- [ ] Execute source-bound RED and GREEN, compile/warning checks, stock comparison and Forever/Retail preservation after slot authorization. No runtime proof is claimed here.
+- [x] Current merged-source PTR GREEN and producer-only RED executed; PTR all-target check passes with only the three allowed `fast_handler_late_bind.rs` dead-code warnings; Retail all-target check passes with zero warnings. Exact source/cache/CVar/CPU receipts are linked from the [investigation](../wiki/investigations/ptr-input-interface-style.md#approved-twice-final-proof-2026-10-25). Historical stock/Forever evidence is not replaced by a new runtime claim.
 - [ ] Laptop questions: native initial style, relation to the style CVar and physical device state, same-style event behavior, and synchronous transition delivery. Existing simulator policy is not native evidence.
 
 ## Out of scope

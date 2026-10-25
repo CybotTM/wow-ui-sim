@@ -56,7 +56,7 @@ One independently claimed RED selector: `ptr_input_util_observes_supplied_styles
 | No-op style input / getter ignores supplied state | Both different values are required in the same environment. |
 | Incorrect enum values | Explicit documented numeric assertions reject them. |
 
-The selector tests immediate registration behavior, not event-delivery timing, physical devices or every startup widget. The original source stage did not execute these assertions. Slot-2 execution below reaches an earlier listener-count blocker; the style assertions remain unreached.
+The selector tests immediate registration behavior, not event-delivery timing, physical devices or every startup widget. The original source stage did not execute these assertions. Historical slot-2 execution reached an earlier listener-count blocker; those style assertions were unreached then. The approved-twice GREEN below now reaches and passes them.
 
 ## PTR event-validity extension (2026-10-25)
 
@@ -70,7 +70,7 @@ An unconditional RegisterEvent success without recording fails the listener-coun
 
 ## User decision: two environments (2026-10-25)
 
-Decision `sharedxml_twice_default_20261025` corrects the PTR test expectation from one listener to two, one per environment. Every other assertion remains unchanged. Normal loading and secure replay stand; this correction does not establish native parity. The earlier one-listener requirement below is historical.
+Decision `sharedxml_twice_default_20261025` corrects the PTR test expectation from one listener to two, one per environment. Every other assertion remains unchanged. Normal loading and secure replay stand; this correction does not establish native parity. The one-listener requirement in the event-validity stage is historical.
 
 REVISIT: Assumed twice (normal + secure replay) per user decision 2026-10-25; native count unproven (benlla-re 5875, Clank 5.0.3 audit game-engine acd869efa). Re-check once Retail is decompiled.
 
@@ -78,7 +78,17 @@ Final merge `e98809b2a` includes master `f1f3c930d` and its phase-2 crate split.
 
 Forever case 1 is a missing documented API, not a fixture issue. The 70532 `GamePadDocumentation.lua` declares `C_GamePad.IsEnabled()` returning one non-nil boolean (source SHA256 `b42cbb4b4a10a2106c116126f7fe93acb652020b1affafcbec47533957519c35`). The raw C API registration omits it; existing state models mapped sticks and hover policy, not global capability. `GamePadEnable` exists as a CVar, but its relation to this query is unproven. No constant, new capability state or assumed CVar link is added. This case remains report-only under the user's state-backed-fix condition.
 
-Current proof will be recorded in `/home/osso/.local/state/wow-ui-sim/handoff/ptr-input-interface-style/twice-run/REPORT.md`; the slot-2 results below remain historical evidence.
+## Approved-twice final proof (2026-10-25)
+
+Merged source `8798e6012` passes the corrected PTR selector: exactly one `--exact --list`, then one `--exact` run, one test passed. Every other test byte is unchanged from `e71d70b91`. This reaches no-load-error, two-listener, original handler-source, positive/negative event-registration and explicit MKB → Gamepad → MKB query/setup/init assertions. Two listeners remain an approved assumption, not native proof.
+
+Producer-only detached RED `c779d1882` removes only the eight-line PTR/epoch acceptance block from the root event facade. Its test blob matches GREEN. Exactly one list and one run produce exit 101 at the original shared InputUtil rejected event; callback-helper and icon-texture failures follow. The runtime error names the original chunk without a line number; the unchanged pinned source registers the event at line 30. No substituted consumer or diagnostic seam is used.
+
+PTR and Retail each receive one `check --all-targets`, both exit 0. PTR has only `find_original_frame`, `original_on_click` and `original_script` dead-code warnings in `tests/fast_handler_late_bind.rs`; Retail has zero warnings. Workspace formatting passes. There is no new stock, full-suite, Forever runtime, host-device or native-count claim.
+
+All builds use `slot-build.py`, slot 2, `CAPACITY_ID=lead_ptr_input_twice`, literal ADD admission and `-j1`. All four build units are `exited` with captured CPU counters before mode0600 ownership is released. The private PTR70493 cache matches all 4,578 authenticated source files; all four sealed test invocations use separate fresh CVar copies with unchanged original O_NOATIME stat/hash guards.
+
+Full report and exact argv/artifact/CPU/guard receipts: `/home/osso/.local/state/wow-ui-sim/handoff/ptr-input-interface-style/twice-run/REPORT.md`. The following slot-2 results remain historical evidence.
 
 ## Slot-2 execution (2026-10-25)
 
