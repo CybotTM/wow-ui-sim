@@ -22,7 +22,7 @@ Owned-house requests move from dashboard-only preload to an early named request 
 
 The [T6 contract](../../specs/c-factory-t6-services.md) binds Retail/PTR error messages to the existing console sink and exposes Era/Anniversary's independent supplied Speak For Me flag. Individually named temporary defaults cover absent chat-type TTS preferences, collectable-tracking entitlement, authenticated voice login, secure combat filters, corpse coordinates, locale catalogs, Discord voice capability and active-provider selection. Connected channels and player coordinates do not stand in for authentication or corpse state.
 
-Forever's original opaque pair now has [original-callback attribution and bounded closure proof](../../specs/c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22). Other profiles' matching low-information errors retain unknown roots; this does not establish their callback or C_* callee.
+Forever's original opaque pair now has [original-callback attribution and bounded closure proof](../../specs/c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22). Era/Anniversary now have [independent original-callback attribution](../investigations/classic-startup-producer-cascades.md#opaque-private-aura-timers) to the same defensive getter; their capability repair awaits runtime GREEN. Other profiles' matching low-information errors retain unknown roots.
 
 ## Bounded proof — 2026-10-21
 
