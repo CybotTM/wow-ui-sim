@@ -30,7 +30,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] PTR eight-state proof is **BLOCKED-ON `ptr-input-interface-style` merge**, not an endpoint defect; the next short PTR runtime is scheduled separately. Retail GREEN03ee43f44, producer-only RED6ed438196, both interior selectors on both Retail sides, six callable mutants and final Retail/PTR all-target checks pass their required gates. [Exact evidence and limits](../wiki/systems/housing-spatial-presence.md#accepted-retail-proof-and-ptr-dependency).
+- [ ] PTR eight-state proof is **BLOCKED-ON `ptr-input-interface-style` merge**, not an endpoint defect; the next short PTR runtime is scheduled separately. Retail GREEN 03ee43f44, producer-only RED 6ed438196, both interior selectors on both Retail sides, six callable mutants and final Retail/PTR all-target checks pass their required gates. [Exact evidence and limits](../wiki/systems/housing-spatial-presence.md#accepted-retail-proof-and-ptr-dependency).
 - [ ] Forever selects the original Mainline consumer plus Camelot wrapper, but its housing-controls TOC is restricted to `standard`; current Forever game types are `camelot, mainline`. Do not transplant that excluded bootstrap or count an absent Forever selector as passing.
 - [ ] Obtain native plot-boundary/transition semantics from host aso before claiming native parity; use the exact questions in the handoff REPORT.
 - [ ] Paired stock startup comparison must isolate this endpoint's delta, retaining all unrelated residual errors.

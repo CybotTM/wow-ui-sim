@@ -64,28 +64,28 @@ Source hashes and original-consumer RED receipts are in `/home/osso/.local/state
 
 After SHARD_TRANSFER admission, the original PTR world event reaches `CloseAllWindows` in `UIParentPanelManager.lua:1180`, but `CloseAllBags` is nil: original `ContainerFrame.lua:10` aborted earlier on missing `C_ActionBar.ShouldShowKeyring`. This is the observed original-consumer RED, not a missing fixture load. The pinned `ActionBarFrameDocumentation.lua:1022–1028` declares a non-null boolean without arguments. User authorization covers this exact namespace, not a C_Container alias.
 
-The [keyring capability contract](../../specs/ptr-keyring-capability.md) projects an explicit input in existing `ActionBarStateInfo`; no key-count, preference or native eligibility rule is guessed. The C API owns the runtime ACTIVE gate and getter. Native eligibility remains unknown. The new GREEN and original selector rerun are pending; any further unrelated missing API is a reported blocker, not permission to expand scope.
+The [keyring capability contract](../../specs/ptr-keyring-capability.md) projects an explicit input in existing `ActionBarStateInfo`; no key-count, preference or native eligibility rule is guessed. The C API owns the runtime ACTIVE gate and getter. Native eligibility remains unknown. At that implementation checkpoint, GREEN was pending. The accepted-proof section records the later results; further unrelated missing APIs are dependencies, not permission to expand scope.
 
 ## Bootstrap observer lifetime
 
 Retail 21f338ac1 reaches None and visiting-interior decisions without event diagnostics, then fails the third visiting-plot loader count (0 rather than 1). The fixture's direct bootstrap-file execution omitted loader bookkeeping. The first real controls load re-executes its `[Bootstrap]` file and replaces `HousingControls_LoadUI`, discarding the previously installed hook. This is an observer-lifetime fixture failure, not evidence that spatial presence rejects plots.
 
-The approved fixture repair replaces direct HousingControls bootstrap execution with existing `loader::load_addon_bootstrap_from_toc` before observers. The real bootstrap phase records `bootstrap_loaded`; production's normal load already skips previously loaded bootstrap entries. Assertions, vendor bytes and production code are unchanged. RED/GREEN use identical repaired tests. Current paired rerun and mutants are pending. PTR's separate C_InputInterfaceStyle dependency remains deferred.
+The approved fixture repair replaces direct HousingControls bootstrap execution with existing `loader::load_addon_bootstrap_from_toc` before observers. The real bootstrap phase records `bootstrap_loaded`; production's normal load already skips previously loaded bootstrap entries. Assertions, vendor bytes and production code are unchanged. RED/GREEN use identical repaired tests. The paired Retail rerun and mutants are proved below. PTR's separate C_InputInterfaceStyle dependency remains deferred.
 
 ## Accepted Retail proof and PTR dependency
 
-Verified 2026-10-25. Final master input is f1f3c930d, merged once at59a8f8acc. Executed repaired fixture GREEN03ee43f44 and producer-only RED6ed438196 have identical test trees and housing test SHA256 `cdf5c6c4cf8bac9869ed0248d6a54b3732ea234ddd65f927b7aaae99d55828b5`. Only the endpoint registration/function is subtracted in RED. No assertion, production loader or vendor change repairs the fixture.
+Verified 2026-10-25. Final master input is f1f3c930d, merged once at 59a8f8acc. Executed repaired fixture GREEN 03ee43f44 and producer-only RED 6ed438196 have identical test trees and housing test SHA256 `cdf5c6c4cf8bac9869ed0248d6a54b3732ea234ddd65f927b7aaae99d55828b5`. Only the endpoint registration/function is subtracted in RED. No assertion, production loader or vendor change repairs the fixture.
 
-| Capability / boundary | Retail | PTR70493 private cache |
+| Capability / boundary | Retail | PTR 70493 private cache |
 |---|---|---|
-| Original eight-state world consumer | PASS, loader counts0,1,1,0,1,1,0,1 | BLOCKED-ON `ptr-input-interface-style` merge; separate short rerun scheduled |
+| Original eight-state world consumer | PASS, loader counts 0,1,1,0,1,1,0,1 | BLOCKED-ON `ptr-input-interface-style` merge; separate short rerun scheduled |
 | Original missing-producer RED | Original Mainline:843 rejects missing IsInsideHouseOrPlot | Deferred with dependency; prior startup failures are not endpoint RED |
-| Interior preservation | Both exact selectors pass on repaired GREEN and RED | Both exact selectors pass on production21f338ac1; their source/production is unchanged by03ee fixture repair |
+| Interior preservation | Both exact selectors pass on repaired GREEN and RED | Both exact selectors pass on production 21f338ac1; their source/production is unchanged by 03ee fixture repair |
 | Nullable current-house shape, event gate, keyring capability | Concrete shape and Retail publication tests pass | Concrete shape, SHARD registration and false→true→false keyring capability pass |
-| Final all-target check at03ee43f44 | Exit0, zero warnings | Exit0, only three allowed fast_handler_late_bind dead_code warnings |
+| Final all-target check at 03ee43f44 | Exit 0, zero warnings | Exit 0, only three allowed fast_handler_late_bind dead_code warnings |
 
 All six Retail callable mutants are rejected by the same exact selector with passing GREEN control. Always-true fails at None; always-false and ownership-only fail at visiting interior; house-only fails at visiting plot. Nil and no-return fail the one-non-nil-boolean check after the first original None event, not a visiting-branch assertion. Unique sealed binaries and source SHAs are recorded. PTR mutants are not acceptance evidence without PTR GREEN.
 
 The PTR keyring fix gets past original ContainerFrame:10. Its next unconditional input-style query at line14 reaches missing `C_InputInterfaceStyle` in original SharedXML/Mainline/InputUtil.lua:12; the file aborts before publishing CloseAllBags, and the original Game handler subsequently fails UIParentPanelManager:1180. The separate `ptr-input-interface-style` lane owns this dependency. User direction is to report it and schedule a later PTR rerun, without another master merge or unrelated API expansion here.
 
-Every runtime proof uses an exact listing, one exact run, a fresh byte-exact current CVar copy and O_NOATIME original-file guards. Retail4028 and private PTR4580 pinned cache files remain byte-identical. Full source/runtime/check/CPU receipts and the final matrix are in `/home/osso/.local/state/wow-ui-sim/handoff/cf2-housing-plot/slot1-run2/REPORT.md`. No new stock-startup comparison, Forever acceptance or native housing-policy parity is claimed.
+Every runtime proof uses an exact listing, one exact run, a fresh byte-exact current CVar copy and O_NOATIME original-file guards. Retail 4028 and private PTR 4580 pinned cache files remain byte-identical. Full source/runtime/check/CPU receipts and the final matrix are in `/home/osso/.local/state/wow-ui-sim/handoff/cf2-housing-plot/slot1-run2/REPORT.md`. No new stock-startup comparison, Forever acceptance or native housing-policy parity is claimed.
