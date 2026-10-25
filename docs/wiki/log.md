@@ -27,6 +27,9 @@ selector to original PetPaperDollFrame widget observations. Matching supplied
 start-recovery categories gate GCD; on-hold state controls numeric enable.
 Static-only contradiction table and Q5 UNKNOWN ledger retained. Runtime remains
 blocked until wrath-relic-slot merges; unchanged error assertions still apply.
+## [2026-10-24] static stage | CF-2 PvP completion
+
+Updated [consumer evidence](investigations/consumer-selection-and-red-proof.md#cf-2-supplied-pvp-match-completion) and [contract](../specs/pvp-match-completion.md) with the Retail/PTR supplied-state producer, unchanged original-consumer selector, paired producer-only subtraction and standalone constant/no-op contradictions. Existing HasMatchStarted and Forever remain unchanged. No build, runtime test, slot, push or native-parity claim.
 ## [2026-10-25] build | Debug metadata and persistent-slot incremental reuse
 
 Dev/test profiles use `debug = 0` (cherry-pick `7a49b872c`); source-line backtraces are unavailable. The sim-data optimization level is unchanged. [Slot builds](../remote-builds.md#local-slot-builds) enable incremental compilation only through the fixed per-slot BindPaths source path. Python RED/GREEN evidence is recorded in `/home/osso/.local/state/wow-ui-sim/handoff/ct-incr-debug0/REPORT.md`; no Rust build was run.

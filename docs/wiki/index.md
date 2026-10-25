@@ -22,6 +22,9 @@
 ordered own/category/GCD endpoint arbitration, accepted-held sticky enable,
 shared flag2, absent player and supplied critter paths. Nine original-consumer
 selectors staged; static contradictions are not executed RED/GREEN proof.
+## [2026-10-24] static stage | CF-2 PvP completion
+
+[State projection and original consumer](investigations/consumer-selection-and-red-proof.md#cf-2-supplied-pvp-match-completion) link the [contract](../specs/pvp-match-completion.md): Retail/PTR read the existing completion snapshot; Forever is excluded. Paired RED removes only the producer with identical tests. Static constant/no-op contradictions are documented; runtime selection, RED/GREEN and current private PTR cache proof remain pending.
 Historical utility-command replay requires `--features tools`; see the [replay note](../../README.md#utility-binary-builds) for the three preserved evidence examples.
 
 ## [2026-10-25] investigation | Compile binary selection
