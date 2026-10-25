@@ -1,3 +1,5 @@
+Historical utility-command replay requires `--features tools`; see the [replay note](../../README.md#utility-binary-builds) for the three preserved evidence examples.
+
 ## [2026-10-25] investigation | Compile binary selection
 
 [Source findings](investigations/compile-bin-lockwatch.md) and [contract](../specs/integration-bin-selection.md): opt-in utility bins preserve wow-sim test consumers and operational builders. Static-only; no slot/build/CPU proof.

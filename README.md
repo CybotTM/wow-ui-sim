@@ -100,9 +100,12 @@ The other five binaries require `--features tools`: `wow-cli`,
 `bench_talents`. The two existing GUI-gated benches also require `gui`.
 Use `cargo build --bin wow-cli --features tools` or
 `cargo build --bins --features tools` for utility builds.
-The release aliases and `scripts/build-host.py --bin wow-cli` enable this
+The release aliases and `scripts/build-host.py --bin wow-cli --features tools` enable this
 feature automatically. Docker and full-suite test selection do not need it.
+Build before using bare `wow-cli` commands; do not pass `--features tools` to the executable itself. For direct runs, use `cargo run --bin wow-cli --features tools -- <args>`.
 See [the build contract](docs/specs/integration-bin-selection.md).
+
+Historical replay: add `--features tools` before `--` to the recorded Cargo utility commands in [patch audit milestone tests](docs/specs/patch-api-audit-manifest.md), [Mists world-map startup](docs/wiki/investigations/mists-world-map-startup.md), and [Windows port builds](docs/wiki/investigations/windows-port-build.md); original evidence is unchanged.
 
 ## Writing Tests
 

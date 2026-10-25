@@ -1,6 +1,6 @@
 # Compile bin selection and lockfile watches
 
-Source-inspected on 2026-10-25 at `50e19162b5d287d994b66dacd37b0ef34a2eb802`.
+Rebased and source-inspected on 2026-10-25 against `b2ca0becd60a3e3630da8d74133ac1851bab212f`.
 This change is static-only; compilation and CPU-time savings are unverified.
 
 ## Integration binaries
@@ -20,6 +20,18 @@ Checked-in utility build scripts enable it explicitly. Direct Cargo utility
 commands now need `--features tools`; default `cargo build` no longer builds
 utilities. Docker still requests only headless `wow-sim`. `deploy.sh` only
 installs the full-suite Python controller and does not compile simulator bins.
+
+## Lockfile after the data-crate merge
+
+Master already includes Cargo normalization in `91a4e437e`. Two offline
+`/usr/bin/cargo metadata --format-version 1` runs with Cargo 1.99.0 leave the
+lock bytes unchanged. All 781 sorted complete package records and non-package
+fields match the new master exactly, including `sim-data` and `sim-data-profile`.
+The stale 779-package lock commit is dropped; no additional normalization or
+lock-related CPU saving is claimed. The compiler identity watch remains intact.
+
+Current utility commands include `--features tools`; historical commands remain
+unchanged with a [replay note](../../../README.md#utility-binary-builds).
 
 ## Sources
 
