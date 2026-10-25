@@ -153,10 +153,31 @@ fn forever_original_game_housing_consumer_reads_spatial_state() {
                 .unwrap(),
             area.is_some()
         );
-        env.exec("assert(GameEvent.HandlePlayerEnteringWorld(nil, 'PLAYER_ENTERING_WORLD', false, false) == true)").unwrap();
+        if area.is_none() {
+            env.exec("assert(GameEvent.HandlePlayerEnteringWorld(nil, 'PLAYER_ENTERING_WORLD', false, false) == true)").unwrap();
+        } else {
+            // 70532 Blizzard_HousingControls.toc: ## AllowLoadGameType: standard.
+            // The sole HousingControls_LoadUI publisher is excluded from camelot.
+            let error = env.eval::<String>(r#"
+                assert(HousingControls_LoadUI == nil)
+                local ok, error = pcall(GameEvent.HandlePlayerEnteringWorld, nil, 'PLAYER_ENTERING_WORLD', false, false)
+                assert(not ok)
+                return error
+            "#).unwrap();
+            assert_eq!(
+                error,
+                "...ce/AddOns/Blizzard_Game/Mainline/EventImplementation.lua:852: attempt to call a nil value"
+            );
+        }
     }
+    let ui = wow_ui_sim::blizzard_ui_sync::default_cache_addons_path().unwrap();
+    let toc = wow_ui_sim::toc::TocFile::from_file(
+        &ui.join("Blizzard_HousingControls/Blizzard_HousingControls.toc"),
+    )
+    .unwrap();
+    assert!(toc.is_game_type_restricted());
     assert!(
-        env.eval::<bool>("return C_AddOns.IsAddOnLoaded('Blizzard_HousingControls')")
+        !env.eval::<bool>("return C_AddOns.IsAddOnLoaded('Blizzard_HousingControls')")
             .unwrap()
     );
 }
@@ -210,6 +231,92 @@ fn forever_original_gamepad_core_removes_temporary_cvars() {
             .is_empty()
     );
     assert_eq!(env.state().borrow().cvars.get("SoftTargetEnemy"), saved);
+}
+
+#[test]
+fn forever_original_bank_tabs_project_maximum_state() {
+    let env = startup();
+    let bank_type = env.eval::<i32>("return BankPanel.bankType").unwrap();
+    env.exec(
+        r#"
+        BankPanel:RefreshBankTabs()
+        assert(BankPanel.PurchaseTab:IsShown())
+        assert(C_Bank.HasMaxBankTabs(BankPanel.bankType) == false)
+        "#,
+    )
+    .unwrap();
+    env.state()
+        .borrow_mut()
+        .forever_startup
+        .max_bank_tab_types
+        .insert(bank_type);
+    env.exec(
+        r#"
+        BankPanel:RefreshBankTabs()
+        assert(not BankPanel.PurchaseTab:IsShown())
+        assert(C_Bank.HasMaxBankTabs(BankPanel.bankType) == true)
+        assert(select('#', C_Bank.HasMaxBankTabs(BankPanel.bankType)) == 1)
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn forever_original_tts_checkboxes_project_bool_settings() {
+    let env = startup();
+    env.exec(
+        r#"
+        TextToSpeechFrame_Update(TextToSpeechFrame)
+        assert(not TextToSpeechFrame.PanelContainer.AddCharacterNameToSpeechCheckButton:GetChecked())
+        assert(not TextToSpeechFrame.PanelContainer.NarrateMyMessagesCheckButton:GetChecked())
+        "#,
+    ).unwrap();
+    {
+        let mut state = env.state().borrow_mut();
+        state.forever_startup.enabled_tts_settings.extend([1, 4]);
+    }
+    env.exec(
+        r#"
+        assert(Enum.TtsBoolSetting.AddCharacterNameToSpeech == 1)
+        assert(Enum.TtsBoolSetting.NarrateMyMessages == 4)
+        TextToSpeechFrame_Update(TextToSpeechFrame)
+        assert(TextToSpeechFrame.PanelContainer.AddCharacterNameToSpeechCheckButton:GetChecked())
+        assert(TextToSpeechFrame.PanelContainer.NarrateMyMessagesCheckButton:GetChecked())
+        assert(not TextToSpeechFrame.PanelContainer.UseAlternateVoiceForSystemMessagesCheckButton:GetChecked())
+        assert(C_TTSSettings.GetSetting(Enum.TtsBoolSetting.AddCharacterNameToSpeech) == true)
+        assert(C_TTSSettings.GetSetting(Enum.TtsBoolSetting.AlternateSystemVoice) == false)
+        assert(select('#', C_TTSSettings.GetSetting(Enum.TtsBoolSetting.AlternateSystemVoice)) == 1)
+        "#,
+    ).unwrap();
+}
+
+#[test]
+fn forever_original_ping_menu_projects_party_restriction() {
+    let env = startup();
+    env.state().borrow_mut().forever_startup.ping_enabled = true;
+    for restriction in [0, 3] {
+        env.state().borrow_mut().party_ping_restriction = restriction;
+        let selected = env
+            .eval::<i32>(
+                r#"
+            CompactRaidFrameManager_OnLoad(CompactRaidFrameManager)
+            local dropdown = CompactRaidFrameManager.displayFrame.RestrictPingsDropdown
+            dropdown:GenerateMenu()
+            local description = dropdown:GetMenuDescription()
+            local selected, count = nil, 0
+            for _, entry in description:EnumerateElementDescriptions() do
+                if entry:IsSelected() then
+                    selected, count = entry:GetData(), count + 1
+                end
+            end
+            assert(count == 1)
+            assert(Enum.RestrictPingsTo.None == 0 and Enum.RestrictPingsTo.TankHealer == 3)
+            return selected
+            "#,
+            )
+            .unwrap();
+        assert_eq!(selected, i32::from(restriction));
+    }
 }
 
 #[test]
