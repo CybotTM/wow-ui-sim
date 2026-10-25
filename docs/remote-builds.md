@@ -29,7 +29,11 @@ The Python profile launcher preserves `live`/`retail`, `ptr`, `mists`, and `all`
 Use `scripts/slot-build.py` for shared-slot Cargo builds. It bind-mounts the lane
 worktree at `/home/osso/.cache/wow-ui-sim-srcmount/slot-N` inside an unprivileged
 user service, paired with target `/home/osso/.cache/wow-ui-sim-targets/slot-N` and
-`CARGO_INCREMENTAL=0`. Keep normalized `Cargo.lock` bytes identical between lanes
+`CARGO_INCREMENTAL=1`. Incremental reuse depends on that fixed BindPaths source
+path per persistent target slot; do not build through changing worktree paths.
+The [stable-path experiment](/home/osso/.local/state/wow-ui-sim/handoff/compile-throughput-20261025/stablepath-experiment.md)
+measured lower touch/edit CPU with incremental enabled. Its single-slot cache
+size is not a long-run growth bound. Keep normalized `Cargo.lock` bytes identical between lanes
 ([ordering evidence](wiki/investigations/compile-bin-lockwatch.md#cargolock-watch)).
 
 Coordinate slot ownership before launch. For new claims, the claimant writes
