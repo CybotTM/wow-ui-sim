@@ -1,3 +1,7 @@
+## [2026-10-25] investigation | Forever startup supplied inputs
+
+[Startup gaps](investigations/forever-startup-gaps.md) records the 76-message reproduction, eight original-consumer RED→GREEN selectors and explicit native-unknown target/locality boundaries. First repaired capture:40 raw messages; remaining service fixes and final acceptance pending.
+
 ## [2026-10-25] fix | Byte-preserving Lua cache usability
 
 [Source-byte validation](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) separates byte-oriented Lua from UTF-8 XML/TOC/XSD. Runtime TOC loading already passes raw bytes to rilua. Regression fixtures preserve a literal `0x92` through cache checks and loaded strings.
