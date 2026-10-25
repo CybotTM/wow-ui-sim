@@ -44,8 +44,28 @@ the laptop. Locality declaration/behavior is also pending that evidence.
 The first repaired stock capture had 40 raw messages. It exposed
 `C_Bank.FetchBankLockedReason` (nullable documented enum) and
 `SOCIAL_UI_RAID_LIST_SYSTEM_STATUS_UPDATED` (documented payload-free event).
-Remaining Discord/Ping/Housing/TTS/temp-CVar work, final counts, all-target
-checks and slot release remain pending; this is not a clean-startup claim.
+The completed supplied models include Discord, ping/restriction, spatial
+housing, TTS save/bool settings, temporary scalar CVars and optional bank offers.
+All 21 exact selectors pass at `1fcbddf67`. The [current baseline and per-record
+classification](../../baselines/README.md#forever-lua-errors) retain only the two
+approved native-unknown boundaries. Startup is not clean; no native idle value
+or locality catalog was invented. Profile checks and release evidence belong to
+the lane report.
+
+## Excluded and unmodeled branches
+
+The user approved correcting the positive housing expectation after proving
+`Blizzard_HousingControls.toc` declares `## AllowLoadGameType: standard`. That
+excludes camelot and the sole `HousingControls_LoadUI` bootstrap publisher. The
+test retains both boolean projection branches and asserts the exact missing
+publisher error and unloaded state; no loading or vendor changes are made.
+
+Optional bank offers are covered as absent and supplied paid five-field rows.
+Native pricing, affordability and free-offer purchase actions are not modeled.
+External URL network launch, native buff-rank expansion and TTS persistence also
+remain outside this startup/shape boundary. Laptop evidence disposition for
+both retained baseline symbols: **laptop aso source-only audit 2026-10-25:
+native-unknown**.
 
 ## Sources
 

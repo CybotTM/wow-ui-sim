@@ -1,6 +1,6 @@
 ## [2026-10-25] investigation | Forever startup supplied inputs
 
-[Startup gaps](investigations/forever-startup-gaps.md) records the 76-message reproduction, eight original-consumer RED→GREEN selectors and explicit native-unknown target/locality boundaries. First repaired capture:40 raw messages; remaining service fixes and final acceptance pending.
+[Startup gaps](investigations/forever-startup-gaps.md) links the byte-exact 70532 baseline, 21 passing exact selectors and explicit native-unknown target/locality boundaries. Known registration/model gaps are repaired; startup retains only approved native-unknown residue. Positive housing is a tested excluded-publisher boundary, not a loader fix. Profile checks and slot release remain pending.
 
 ## [2026-10-25] fix | Byte-preserving Lua cache usability
 

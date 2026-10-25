@@ -166,7 +166,34 @@ That capture's historical metadata bound the observation to source, manifest has
 
 ## Forever Lua Errors
 
-Current saved corrected-enUS `1.60.1.70374` capture at runtime/build source `40a010b5a`: **10 records / 14 occurrences, exit1**, still FAIL; all remaining records are Gamepad storage/empty-map errors, first nil player-storage arithmetic. The missing rich quest80002 error is absent after watch/log reconciliation. Historical source704's12/16 JSON remains privately retained as `baseline-before-watch.json` beside the current watch receipt; query coherence is not whole-startup acceptance. Historical c2bf/build57 capture **22 records / 26 occurrences, exit1**, first nil `Enum.VoiceProviderID`, remains privately retained beside current receipts. Source136 post-enum capture **58 records / 58 occurrences, exit1**, first failure missing `import`, remains privately retained. Baseline JSON copying belongs to main; this documentation update does not rewrite or authenticate the tracked JSON. Historical source `9a6ea924e` capture was **166 records / 238 occurrences, exit1**. Preset line1272 and setting-display-map cascade no longer appear; other preset errors remain. Counts are unique records/occurrences, not root-cause counts.
+Current 70532 stock capture at runtime source `1fcbddf67`: **26 records / 26
+occurrences, exit1; startup is not clean.** The JSON is byte-identical captured
+stdout (SHA256 `3f730c6ab7e75bf0c95c73239af1e60519633beea8988d6d2e6f0176bbe22abd`).
+[Metadata](wowforever-lua-errors.meta.json) classifies every record by index and
+message hash, and binds the source, ELF, copied cache, manifest and CVar guards.
+
+| Native-unknown residue | Raw records / occurrences | Reason |
+|---|---:|---|
+| `C_Spell.GetTargetSpellID` | 24 / 24 | Non-null numeric return is documented, but no idle sentinel is known; no target is supplied. Repaired bag consumers now reach this query. |
+| `C_AccountServices.GetPreferredDatacenterLocalities` | 2 / 2 | Selected callers exist, but no 70532 API declaration/publisher or native registration/return evidence is available. |
+
+Disposition: **laptop aso source-only audit 2026-10-25: native-unknown**. Only
+these expressly approved gaps are retained: 13 underlying errors and 13
+ScriptErrors reports, without deduplication or normalization. No native return
+value or locality catalog was invented. The old tracked `[]` was not a clean
+capture of this 70532 cache: the lane reproduced 76/76 and reduced it to 26/26
+(74 exact messages removed, 24 added explicit target-unknown messages, 2 unchanged;
+net 50 fewer occurrences). [The contract](../specs/forever-startup-inputs.md)
+defines the supplied models and excluded housing consumer.
+
+All 21 exact selected-consumer/preservation selectors pass at that runtime source
+(19 new, 2 preservation). This is not native parity, full-suite, GUI or all-profile
+runtime acceptance. Profile compilation gates and slot release are recorded in
+`/home/osso/.local/state/wow-ui-sim/handoff/forever-startup-gaps/REPORT.md`.
+
+### Historical 70374 capture
+
+Historical saved corrected-enUS `1.60.1.70374` capture at runtime/build source `40a010b5a`: **10 records / 14 occurrences, exit1**, still FAIL; all remaining records are Gamepad storage/empty-map errors, first nil player-storage arithmetic. The missing rich quest80002 error is absent after watch/log reconciliation. Historical source704's12/16 JSON remains privately retained as `baseline-before-watch.json` beside the current watch receipt; query coherence is not whole-startup acceptance. Historical c2bf/build57 capture **22 records / 26 occurrences, exit1**, first nil `Enum.VoiceProviderID`, remains privately retained beside current receipts. Source136 post-enum capture **58 records / 58 occurrences, exit1**, first failure missing `import`, remains privately retained. Baseline JSON copying belongs to main; this documentation update does not rewrite or authenticate the tracked JSON. Historical source `9a6ea924e` capture was **166 records / 238 occurrences, exit1**. Preset line1272 and setting-display-map cascade no longer appear; other preset errors remain. Counts are unique records/occurrences, not root-cause counts.
 
 The two historical captures (source136 and `9a6ea924e`) report 272 Blizzard addons loaded and 1658/1658 bytecode-cache hits. Different explicit CASC/product environment settings and unresealed external cache inputs prevent whole-input equivalence, archive acceptance or controlled performance claims. See [verified receipts](#verified-scoped-receipts--2026-10-15) for attribution and the [locale owner](../specs/casc-loading.md#locale-checkpoint--october-15-2026) for acquisition scope. Clean startup remains open.
 
