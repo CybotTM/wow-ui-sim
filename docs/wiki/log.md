@@ -8,6 +8,9 @@ Updated [CASC cache](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) a
 ## [2026-10-25] staged | Forever verified non-resident Gethe sources
 
 [Cache rule](systems/casc-asset-cache.md#forever-mapped-non-resident-sources) and [contract](../specs/casc-loading.md#forever-mapped-non-resident-ui-sources) record immutable same-build Gethe blobs only for mapped EKeys absent from local indexes, raw CKey/MD5 validation and per-file provenance. Resident CASC and unmapped failures remain separate. Static tests/code committed separately; execution and stock startup remain pending.
+## [2026-10-24] static producer | CF-2 Classic map display
+
+[Map display model](investigations/map-display-info-model.md#cf-2-classic-publication--static-producer-2026-10-24) records Era/Anniversary publication through the existing backing state and numeric/security parser. Tests are unchanged; static GREEN/RED source custody is separate from pending runtime acceptance. No build, test or slot.
 ## [2026-10-25] investigation | S49 rejected refresh repair
 
 [Companion spell backing](investigations/wrath-companion-cooldown.md#s49-reject-repair-static-2026-10-25): portable receipt paths and seeded-mount selector regression staged; generated catalogs and runtime proof still await a slot.
