@@ -187,7 +187,7 @@ fn wowforever_profile_identity_and_manifest_are_distinct() {
     assert!(!cfg!(feature = "retail-12-0-0"));
     assert!(!cfg!(feature = "client-anniversary"));
     let entries: Vec<_> = wow_ui_sim::blizzard_ui_sync::manifest_entries().collect();
-    assert_eq!(entries.len(), 4434);
+    assert_eq!(entries.len(), 4486);
     assert!(entries.contains(&"Blizzard_FrameXML/Camelot/StackSplitFrame.xml"));
     assert!(entries.contains(&"Blizzard_FrameXMLBase/Blizzard_FrameXMLBase.toc"));
     assert!(

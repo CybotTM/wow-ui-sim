@@ -40,6 +40,10 @@ Historical utility-command replay requires `--features tools`; see the [replay n
 
 [Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
 
+## [2026-10-24] source | Forever 70532 acceptance epoch
+
+[Selected-build checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records installed beta identity, exact Gethe revision, 4,486 source paths and refreshed mappings. [Profile contract](../specs/client-profiles.md) retains temporary date fields and pending execution; historical 70374 receipts are not 70532 proof. Runtime sync/baseline and all-target warning gates await slot and resolver integration.
+
 ## [2026-10-24] system | CF-2 supplied club self invitations
 
 [Club model update](systems/club-membership.md#incoming-self-invitations-cf-2) links the [bounded contract](../specs/club-self-invitations.md): empty-by-default supplied incoming rows, original selected Retail MicroMenu selector and static standalone mutant contradictions. Edit-only staging; no builds/tests/slots or runtime acceptance. Other CF-2 members remain separate.

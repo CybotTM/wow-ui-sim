@@ -29,7 +29,7 @@ Profile → Gethe branch:
 | mists | `classic` (current Classic = Mists of Pandaria) |
 | era | `classic_era` |
 | anniversary | `classic_anniversary` |
-| wowforever | `forever` (current selected target 1.60.1.70374; distinct runtime profile, cache, and manifest) |
+| wowforever | `forever` (current selected target 1.60.1.70532; distinct runtime profile, cache, and manifest) |
 
 ## Retail selected target — October 16, 2026
 
@@ -86,6 +86,30 @@ provenance, baseline and startup are pending a released build slot after
 club-unread-integrate and S49. No runtime acceptance is claimed.
 The manifest and baseline remain pending their valid capture/co-commit.
 No CDN, borrowed keyring/root, fabricated data or decompiled source is used.
+
+### Historical beta selection — October 24, 2026
+
+User decision `forever_target_build_20261024` starts a new acceptance epoch for
+installed `wow_classic_beta` **1.60.1.70532**, active build key
+`ad1802f4455e427ed8b7769aab25b0c0`. Read-only `.product.db` decoding selects
+that exact record; its build config independently identifies
+`WOW-70532patch1.60.1_Beta` and hashes to the selected build key. This proves
+installed metadata/config identity, not complete or playable content.
+
+Gethe `forever` revision `ca8368f2f2380cbe696854f7f2646387c278a61b`
+reports `1.60.1.70532`. The unmodified generator produces the full **4,486-path**
+manifest (+55/-3 from 70374); all 4,486 copied source blobs match the Git tree.
+The refreshed community listfile and explicit-source limited generator produce
+146,753 rows (+55/-1), with no unmapped Forever manifest entry.
+Forever has no profile-only sync exclusion or hardcoded required-entry list.
+
+Runtime acquisition/provenance, baseline recapture and all-target warning proof
+are pending an authorized build slot and main's asset-resolver absent-keyring-row
+fix. Do not add a synthetic `.build.info` row or change the dependency pin in
+this source lane. The 70374 receipts below remain historical; neither their
+successful acquisition nor any older clean/failing capture establishes 70532
+startup acceptance. The manifest and new baseline must be committed together
+after the supported sync and byte-exact capture.
 
 <a id="current-selected-target--october-15-2026"></a>
 

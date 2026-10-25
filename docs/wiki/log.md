@@ -43,6 +43,10 @@ Dev/test profiles use `debug = 0` (cherry-pick `7a49b872c`); source-line backtra
 
 [Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md): existing cache/rank-right reuse, Wrath-only empty/no-guild initialization, two original OnShow branch selectors, static contradiction/selection proof and batch3 seed prerequisites. Edit-only; RED/GREEN, stock and Retail36/42 preservation remain deferred.
 
+## [2026-10-24] source | Forever 70532 static refresh
+
+[New target](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) follows the user's installed-build decision: Gethe ca8368f, manifest +55/-3 and limited listfile +55/-1. All 4,486 source blobs match Git and all paths map. Build identity selects 70532; no build, runtime sync, baseline recapture or warning-free proof yet. Prior 70374 evidence remains historical.
+
 ## [2026-10-24] proof | Bounded reload XML source reuse
 
 [Contract matrix](../specs/reload-ui.md#generated-xml-layer-reconstruction) records Forever RED16 at0d1e54849, then Forever/default Retail0/0 reload compiles at23f1f629a.27 exact cases/profile, zero-warning builds/checks and formatting pass; current CVars remain unchanged. [Mechanics](systems/reload-ui.md#generated-xml-layer-arguments) retain VM-local objects and XML ordering. Stock startup, paired timing and full Ellesmere acceptance remain separate.
