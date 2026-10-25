@@ -113,8 +113,14 @@ fn get_club_members_entry_has_required_fields() {
 #[test]
 fn get_club_members_returns_member_ids_for_member_info_lookup() {
     let env = env();
-    let (count, first_id, first_name, second_id, second_name): (i32, String, String, String, String) =
-        env.eval(
+    let (count, first_id, first_name, second_id, second_name): (
+        i32,
+        String,
+        String,
+        String,
+        String,
+    ) = env
+        .eval(
             r#"
             local members = C_Club.GetClubMembers('guild-0')
             local first = C_Club.GetMemberInfo('guild-0', members[1])
@@ -313,6 +319,7 @@ fn guild_message_info_round_trips_by_message_id() {
     assert!(beginning);
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn club_unread_message_queries_have_safe_defaults() {
     let env = env();
@@ -330,6 +337,7 @@ fn club_unread_message_queries_have_safe_defaults() {
     assert!(!any_unread);
     assert_eq!(stream_marker_type, "nil");
     assert_eq!(settings_count, 0);
+}
 }
 
 #[test]
