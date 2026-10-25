@@ -22,7 +22,7 @@ Measured on 2026-10-24 in one reused slot with `CARGO_INCREMENTAL=0`, `-j1`, ide
 | Rebuild frontend / codegen | 60.78 / 352.00 s | 54.43 / 198.63 s |
 | Rebuild maximum child RSS | 6,189,056 KiB | 2,717,272 KiB |
 
-Initial common/selected data units took 50.20/7.36 s; both were reused on the touched-root rebuild. Wrath check explicitly reported common `sim-data` Fresh after Retail check. Rebuild wall decreased 37.5%; peak child RSS decreased 56.1%. Python `resource.RUSAGE_CHILDREN` records RSS; cgroup MemoryPeak is retained separately and is not RSS. `/usr/bin/time` was unavailable; its failed launch preceded Cargo and is excluded.
+Initial common/selected data units took 50.20/7.36 s; both were reused on the touched-root rebuild. Wrath check explicitly reported common `sim-data` Fresh after Retail check. Rebuild wall decreased 37.5%; peak child RSS decreased 56.1%, from 5.902 → 2.591 GiB. Python `resource.RUSAGE_CHILDREN` records RSS; cgroup MemoryPeak is retained separately and is not RSS. `/usr/bin/time` was unavailable; its failed launch preceded Cargo and is excluded.
 
 Retail and Wrath checks passed without warnings. All 94 bounded Rust tests passed: 53 integration cases plus 37 common catalog and four selected global-string unit cases. Six generator Python tests passed. The Lua refresh-manifest case preserves generated Lua evidence; it does not itself test the moved Rust catalogs. All 23 moved Rust files retain original SHA-256. Root exactly-one-profile validation is byte-identical. Docker COPY wiring and seven-profile feature resolution were checked statically; no image or seven-profile runtime suite was run.
 
