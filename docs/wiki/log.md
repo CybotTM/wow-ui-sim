@@ -2837,3 +2837,5 @@ Added the nonblocking [slot launcher](../../scripts/slot-build.py) and
 per slot, exact `.owner` match and literal capacity ADD admission. Focused Python
 tests only; no compile or service launch. The normalized lock matches the saved
 Cargo rewrite byte-for-byte; runtime acceptance remains pending.
+
+2026-10-25: Staged the [landable I4 first batch](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair), with original-consumer transitions and aggregate staging tests retained only on the lane.

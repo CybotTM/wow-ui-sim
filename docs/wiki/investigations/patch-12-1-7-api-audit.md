@@ -4,6 +4,14 @@ Runtime target update: 2026-10-23. [Selected source](../../specs/ptr-blizzard-ui
 
 Verified: 2026-10-22. Slice I0 accounts for the public source for **12.1.7 / 70424 / TOC 120107** without implementing its runtime changes. The [source-accounting spec](../../specs/patch-12-1-7-source-accounting.md) owns P01–P12, inherited category counts, header discrepancies and outstanding slices. All inherited applicability and behavior remain UNKNOWN until I4; GUID work remains deferred pending the user decision.
 
+## I4 first bounded producer repair
+
+The lane's authenticated 70493 discovery found 169 publication gaps. This [bounded contract](../../specs/ptr-i4-first-green.md) lands only Collections `C_Spell.GetItemCooldown` and GhostFrame `CanPortGraveyard`, backed by existing supplied state. SmartNavigation and RecentAllies remain prerequisite-blocked, not downstream producer REDs.
+
+The landing branch retains supplied-state tests and adds independent original-consumer transition selectors. They authenticate source bytes, load Game-selected TOC closures, and require absent/supplied/changed/removed cooldown transitions and false/true/false ghost availability. Constant nil/false producers cannot pass these selectors. Native cooldown eligibility and graveyard policy remain unknown.
+
+All aggregate 173-shape tests remain unchanged on `ptr-i4-runtime` only; they are deliberately excluded from this landing packet, not ignored or weakened. Fresh RED/GREEN, stock and check evidence remain pending until the canonical slot guard is repaired.
+
 ## Empty inventory is not patch coverage
 
 The direct page has prose and a link to 1.60.1, but no function/event/enum/CVar/widget tables. The existing `tools/gen_patch_wikitext_register.py` successfully emits `entries: []` and `header_counts: []` for it. This correctly describes the direct inventory, not complete patch coverage. No dummy API rows or invented aliases are added to make it nonempty.

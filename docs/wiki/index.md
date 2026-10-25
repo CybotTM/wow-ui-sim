@@ -1,3 +1,7 @@
+## [2026-10-25] staged | PTR I4 landable first batch
+
+[Bounded producer repair](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair) links the [contract](../specs/ptr-i4-first-green.md): two supplied-state producers and independent original-consumer transitions. Aggregate 173-shape tests remain on the lane only. Fresh slot proof is pending.
+
 ## [2026-10-24] staged | Mists pet display identity
 
 [Pet identity notes](systems/pet-battle-names.md#mists-display-identity) link the [contract](../specs/mists-pet-display-id.md): supplied optional per-pet display identity, Mists-only publication and static nil receiver trace. Existing name selectors remain unchanged; constant/value projection coverage and all new runtime proof remain pending.
