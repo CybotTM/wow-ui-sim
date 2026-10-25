@@ -68,7 +68,8 @@ Each unit writes `slot-N/receipts/UNIT.json` with its source identity, changed
 paths, command, result and executable SHA256 values. Cargo JSON artifact messages
 must reach the helper's stdout reader; existing `json` and
 `json-render-diagnostics` formats are retained, otherwise the helper selects
-`json-render-diagnostics`. Do not hide Cargo stdout inside a command wrapper.
+`json-render-diagnostics`. Do not hide Cargo stdout inside a command wrapper:
+explicit binary and `--no-run` builds fail when no executable message is received.
 After a Rust diff, a successful build whose executable hashes all match the
 previous build fails with `stale artifacts`; the receipt retains the failure.
 Identical hashes can also result from edits that do not affect generated code;

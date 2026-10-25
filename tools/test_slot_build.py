@@ -238,6 +238,14 @@ class SourceFreshnessTests(unittest.TestCase):
                 "debug/probe": hashlib.sha256(b"A binary").hexdigest()})
             self.assertEqual(receipt["returncode"], code)
 
+    def test_binary_build_with_hidden_cargo_stdout_is_rejected(self):
+        current = self.prepare()
+        current["cargo"] = ["cargo", "test", "--no-run"]
+        receipt = self.slot / "receipt.json"
+        with self.assertRaisesRegex(ValueError, "missing executable artifact messages"):
+            self.module.finish_build(self.slot, receipt, current, None, {}, 0)
+        self.assertEqual(json.loads(receipt.read_text())["result"], "missing-artifacts")
+
     def test_changed_artifacts_and_identity_are_recorded(self):
         previous = self.prepare()
         previous["artifacts"] = {"debug/probe": "abc"}

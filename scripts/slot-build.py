@@ -107,10 +107,20 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
     old_hashes = set((previous or {}).get("artifacts", {}).values())
     stale = bool(returncode == 0 and rust_changed and artifacts and old_hashes
                  and set(artifacts.values()).issubset(old_hashes))
-    current = dict(current, artifacts=artifacts, returncode=returncode,
-                   result="stale-artifacts" if stale else ("success" if returncode == 0 else "failed"))
+    cargo = current.get("cargo", [])
+    expects_binary = ("check" not in cargo and any(
+        arg in {"--no-run", "--bin", "--bins"} or arg.startswith("--bin=") for arg in cargo))
+    missing = returncode == 0 and expects_binary and not artifacts
+    result = "success" if returncode == 0 else "failed"
+    if stale:
+        result = "stale-artifacts"
+    elif missing:
+        result = "missing-artifacts"
+    current = dict(current, artifacts=artifacts, returncode=returncode, result=result)
     write_json(receipt, current)
     write_json(slot / ".source-identity.json", current)
+    if missing:
+        raise ValueError(f"missing executable artifact messages: forward Cargo JSON stdout; see {receipt}")
     if stale:
         raise ValueError(f"stale artifacts: Rust source changed but all binary SHA256 values "
                          f"match the previous build; see {receipt}")
