@@ -51,3 +51,11 @@ These are static contradictions, NOT observed mutation or RED proof. A setup/clo
 
 - [Consumer selection and RED proof](../investigations/consumer-selection-and-red-proof.md).
 - [House-interior presence](../../specs/house-interior-presence.md).
+
+## Current-house shape and PTR startup
+
+The continuation uses authenticated Retail 12.1.5.70448 and private PTR 12.1.7.70493 caches, unchanged from the prior slot run. Both declare nullable `HouseInfo`; the exact fields and host-input contract are in the [current-house spec](../../specs/current-house-info.md). `HousingState.current_house_info` is an optional supplied row, projected by `src/c_api/c_housing/current_house.rs` on Retail/PTR only. No row is inferred from spatial presence, ownership or tracked selection. Native acquisition, nil-selection, validation and coherence remain **native-unknown**.
+
+Merged-master original-consumer RED (fixture 4abbc60a0) reaches `Blizzard_HousingControls.lua:105` through original Game Mainline:844 and fails on missing `GetCurrentHouseInfo`. Original `Blizzard_HousingTutorialsData.lua` and `Blizzard_HousingTutorialsUtil.lua` loads remove the independent missing-utility fixture error without changing assertions. PTR separately fails Game startup registration on `SHARD_TRANSFER`, leaving original world completion at zero. Its pinned `SystemDocumentation.lua:175–178` explicitly declares that event. Root `src/event/valid_events.rs` extends registration and validity only when `client_profile::ACTIVE` is PTR; the feature-neutral `sim-event` crate remains unchanged.
+
+Source hashes and original-consumer RED receipts are in `/home/osso/.local/state/wow-ui-sim/handoff/cf2-housing-plot/slot1-run2/`. GREEN, paired missing-producer proof and mutants remain pending at this implementation checkpoint; no native-parity claim.

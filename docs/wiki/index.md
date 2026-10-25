@@ -1,3 +1,7 @@
+## [2026-10-25] implementation | Housing plot blocker boundary
+
+[Current-house shape and startup](systems/housing-spatial-presence.md#current-house-shape-and-ptr-startup) links the [nullable snapshot contract](../specs/current-house-info.md): original tutorial data/utility fixture loads, state-backed documented HouseInfo and declared PTR-only SHARD_TRANSFER. Merged original-consumer RED observed; GREEN and final proof pending. Native policy remains unknown.
+
 ## [2026-10-24] staged | Housing house-or-plot presence
 
 [Spatial model and selected consumer](systems/housing-spatial-presence.md) links the [contract](../specs/house-or-plot-presence.md): existing area input, Retail/PTR registered-world-event selector, constant/no-op contradictions and Forever downstream TOC restriction. Static staging only; no compilation or runtime proof.
