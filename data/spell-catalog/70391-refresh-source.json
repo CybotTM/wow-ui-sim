@@ -10,15 +10,45 @@
     "extraction_source": "authenticated-local-CASC-content-root"
   },
   "schema_commit": "d6f50d4f351193e84226aa62a36faa0f58528afa",
-  "source_revision_before_generation": "13517c10b89b71c7279cfdc2f6034a472d429e82",
-  "generator_binary_sha256": "bfb8717ec90bc32b75b5f0958cc09efc0530e6b96ba13cb0cfdd4ab68387e808",
+  "source_revision_before_generation": "c53d49f281976a3b9540d419dffca3efc069ba48",
+  "generator_binary_sha256": "643b19e5ec9b8156929f4f70f739e1950e9e18782e750a06d8b449aa165cf8d4",
   "generator_sources": {
+    "src/bin/wow_cli/audit_api/gap.rs": "1ea37c73a7988a7c40915fff122ce43d45602da7084a17527a43e1bd6bfc5e1f",
+    "src/bin/wow_cli/audit_api/gap/gap_tests.rs": "9b7bc94cb981d4567057be89393308ef006c310e8011149338dd27ebc56f6e3d",
+    "src/bin/wow_cli/audit_api/mod.rs": "9c2cf4da0036b7e0d6af650dc1e5e178057687353c01cc36629b51ab4bacb287",
+    "src/bin/wow_cli/audit_api/output.rs": "ec6d237b557079a42f1ae04bdc9e088781ab36c287965591aae698074af9cdc0",
+    "src/bin/wow_cli/audit_api/patch_manifest.rs": "f00c3c280bdc1c3f632241a532890c91efeb0afa120ffacbd72fd5bf20b871ff",
+    "src/bin/wow_cli/audit_api/patch_source_index.rs": "6c2f82f68707af5acf20814038efc8029ffcd753e95ddf5c1973a13948f5ba07",
+    "src/bin/wow_cli/audit_api/scanner.rs": "8e25d0e9b797fc4b5f0875d382ff77451be42289460054f53d67cce75ef9e3ad",
     "src/bin/wow_cli/csv_util.rs": "3b1cb1f752ca890cfd20b2925610b54e4c5c8fa31b5ae8111bc69e41f6712ae1",
-    "src/bin/wow_cli/gen_spells.rs": "2794a084466f7e81ed4fbb9abe675a1a1e8d683fe86d90a8a6b9310e04611fbe",
+    "src/bin/wow_cli/gen_atlas.rs": "90dd7cccd65e12bb862c84de0315895898005a29086e18e0943378b3bcd2af93",
+    "src/bin/wow_cli/gen_atlas_tests.rs": "185a6b54dce862225268d6049bfdd08fb3ea975c398f5d9148640cca5d5185a6",
+    "src/bin/wow_cli/gen_currencies.rs": "8e1fa87f3468f59fc71567ff3399fcf1733929c2afa5d2426cf0bb5fb94e7af0",
+    "src/bin/wow_cli/gen_encounter_journal.rs": "38a9c4be39ad43ebc95ef4b1732a8b809c020c15ee15df5abdc5769e55097109",
+    "src/bin/wow_cli/gen_global_strings.rs": "46ae784431de66e3dbfc9a94ba24fa8c31f53d930fc8b52bcd39615325a84dd5",
+    "src/bin/wow_cli/gen_items.rs": "9833fbe2ebd48df6f7ba6a314b2fd6be3836f0fe707655854a3a2f1c1b6305b6",
+    "src/bin/wow_cli/gen_manifest.rs": "c47eb072aca0fcdfc557b3c70558cac305c055bb3779a7fa1ae068abb65102bc",
+    "src/bin/wow_cli/gen_map_art.rs": "35fcb3126b89e66abb1b68979ed90dd7501bb25b95a31793bf7ba2e4d51e52f7",
+    "src/bin/wow_cli/gen_patch_api_docs/evaluate.rs": "cb2cbce5e1111ba3428f2871808703b17783560634d4d530f7b98b9c4a643302",
+    "src/bin/wow_cli/gen_patch_api_docs/mod.rs": "6dd552751843d41ce5f3ffa712ced93c0b034a3837d5b666f6aaa8818476ea1b",
+    "src/bin/wow_cli/gen_patch_api_docs/records.rs": "cde0e29304c511b3dc7fced9323dbf295aa259be170577027adc4210d4902a8c",
+    "src/bin/wow_cli/gen_patch_api_docs/snapshot.rs": "2952f89981f243dcc3392ec2d79bbf9dabcdeb6286332397470ce542af4ac64e",
+    "src/bin/wow_cli/gen_patch_api_docs/tests.rs": "36cc94cdadf3d1f19c71b856abf4c74a2b6ecba3a9b729edbeb5152c9d5fa2e6",
+    "src/bin/wow_cli/gen_quest_poi.rs": "e7f7055f5afc8beb8d3444a4f9ea3926ead56cd52645e3d4fae1c27a078f0dc4",
+    "src/bin/wow_cli/gen_spells.rs": "e68824561f54541929fd2d8bca98984b6c5249d7d5057baa2a13b113972fa7aa",
     "src/bin/wow_cli/gen_spells_power.rs": "f8ece2e3ade0231f7583439e51a8ded0a5f2e805eb19d0ecafe08cec5eab7710",
     "src/bin/wow_cli/gen_traits.rs": "927e92a3899c90213b420f3cf5a25a9f34e3250d5e120b3e5ce086bcc9396232",
+    "src/bin/wow_cli/gen_traits_emit.rs": "23cb75ed5344543c3fcdcd9964f1822c76d0d1db1d2ef773c04d9d055347defb",
     "src/bin/wow_cli/gen_traits_load.rs": "21ca2e6d5402a1d098840a35b931142dbc47206693b704e886ba3f8aede13df9",
-    "src/bin/wow_cli/gen_traits_emit.rs": "23cb75ed5344543c3fcdcd9964f1822c76d0d1db1d2ef773c04d9d055347defb"
+    "src/bin/wow_cli/gen_zones.rs": "3ea82338d99a1f3afb7cbddfd10a885dc3cbcfaf274f565cfa4f61daf6ac120e",
+    "src/bin/wow_cli/global_slot_coverage.rs": "5a822c4d078c50451b9e7f49898ad8770041eabcae3b9f838e17ec6df6094840",
+    "src/bin/wow_cli/main.rs": "137b757a6fb5fe096f624a395c98b5baec5592531ea6f1a18d374457f72a99fa",
+    "src/bin/wow_cli/startup_intern_stats.rs": "c8991f74f4be873f186791dc0bb08d5436af02b086f2cc32f4bfc38f83ea458a",
+    "src/client_profile.rs": "a23f899ad7ed8722071b881f9c6decfe45eadbbcedf79175947c014d4acd7f20",
+    "src/lib.rs": "3caa04c98a76e500ef2c97fb51bd37611aabb3edbae0c504bdb36a699fb49303",
+    "src/lua_api/state.rs": "aab2ab674827dd0898b81952a0a966515276c5989d1b5fb96147aae7c2d9d6f3",
+    "src/lua_api/state_defaults.rs": "aefff3ec55bf1b6a94a77ea04e88d8ff19b318a697660a77974675b7ac2352fe",
+    "src/lua_api/state_types/character_world_defaults.rs": "0bd49cbe926b1aa03ed70b52d0749094372e4b15ee16dae082758bca104cb141"
   },
   "format_command": "rustfmt --edition 2024 --config skip_children=true crates/sim-data/data/traits.rs crates/sim-data/data/spells.rs crates/sim-data/data/spell_descriptions.rs crates/sim-data/data/spell_power.rs",
   "inputs": [
@@ -349,13 +379,13 @@
       ],
       "selection_inputs": [],
       "command": [
-        "$S49_GENERATION_EVIDENCE/wow-cli-fresh",
+        "$S49_GENERATION_EVIDENCE/wow-cli-sealed",
         "generate",
         "traits"
       ]
     },
     "crates/sim-data/data/spells.rs": {
-      "sha256": "7aa77413966654822a27d4e24803709d73fcaaf7e2b7670300f846d2330daf7f",
+      "sha256": "426e5cac25fbf943557aa25ac08721f1e202483c6f1ff409fd9c3f8754b5c766",
       "csv_inputs": [
         "SpellName",
         "Spell",
@@ -366,16 +396,20 @@
       "selection_inputs": [
         "crates/sim-data/data/traits.rs",
         "src/lua_api/globals/spellbook_data.rs",
-        "src/bin/wow_cli/gen_spells.rs"
+        "src/bin/wow_cli/gen_spells.rs",
+        "src/lua_api/state_defaults.rs",
+        "src/lua_api/state.rs",
+        "src/lua_api/state_types/character_world_defaults.rs"
       ],
       "command": [
-        "$S49_GENERATION_EVIDENCE/wow-cli-fresh",
+        "$S49_GENERATION_EVIDENCE/wow-cli-sealed",
         "generate",
         "spells"
-      ]
+      ],
+      "selection_traits_revision": "c53d49f281976a3b9540d419dffca3efc069ba48"
     },
     "crates/sim-data/data/spell_descriptions.rs": {
-      "sha256": "2aab9d60e96dd16e6d8ec63b18eac30bde48f74a5b4e91c3b4d55c80e4594163",
+      "sha256": "3d82759bde91b9e30a51a49d65ef0419d81d47c546d596a19b0896358a9832b8",
       "csv_inputs": [
         "SpellName",
         "Spell",
@@ -386,13 +420,17 @@
       "selection_inputs": [
         "crates/sim-data/data/traits.rs",
         "src/lua_api/globals/spellbook_data.rs",
-        "src/bin/wow_cli/gen_spells.rs"
+        "src/bin/wow_cli/gen_spells.rs",
+        "src/lua_api/state_defaults.rs",
+        "src/lua_api/state.rs",
+        "src/lua_api/state_types/character_world_defaults.rs"
       ],
       "command": [
-        "$S49_GENERATION_EVIDENCE/wow-cli-fresh",
+        "$S49_GENERATION_EVIDENCE/wow-cli-sealed",
         "generate",
         "spells"
-      ]
+      ],
+      "selection_traits_revision": "c53d49f281976a3b9540d419dffca3efc069ba48"
     },
     "crates/sim-data/data/spell_power.rs": {
       "sha256": "22190fe0f998795bc63d40380c2aebba5c69aa042b64c7f2798c6b7e7d7a8fe7",
@@ -406,24 +444,35 @@
       "selection_inputs": [
         "crates/sim-data/data/traits.rs",
         "src/lua_api/globals/spellbook_data.rs",
-        "src/bin/wow_cli/gen_spells.rs"
+        "src/bin/wow_cli/gen_spells.rs",
+        "src/lua_api/state_defaults.rs",
+        "src/lua_api/state.rs",
+        "src/lua_api/state_types/character_world_defaults.rs"
       ],
       "command": [
-        "$S49_GENERATION_EVIDENCE/wow-cli-fresh",
+        "$S49_GENERATION_EVIDENCE/wow-cli-sealed",
         "generate",
         "spells"
-      ]
+      ],
+      "selection_traits_revision": "c53d49f281976a3b9540d419dffca3efc069ba48"
     }
   },
   "limits": [
-    "All generated rows use 70391 CSVs; unchanged generator policy still omits mount/species catalogs, including spell458. S49 GREEN is not established.",
+    "Seeded mount summon spells are selected; BattlePetSpecies joins remain outside this repair. S49 consumer GREEN requires separate runtime proof.",
     "Trait CSVs have authenticated content and no unreadable records. SpellName/Spell/SpellMisc/SpellEffect CSV receipts report unreadable records and content_authenticated=false; export hash/build binding is not complete-native-content certification.",
     "CSV-native dangling references are retained, not fabricated or removed. Cross-check distinguishes CSV absence from generator omission."
   ],
   "generator": {
-    "revision": "13517c10b89b71c7279cfdc2f6034a472d429e82",
-    "sha256": "bfb8717ec90bc32b75b5f0958cc09efc0530e6b96ba13cb0cfdd4ab68387e808",
+    "revision": "c53d49f281976a3b9540d419dffca3efc069ba48",
+    "sha256": "643b19e5ec9b8156929f4f70f739e1950e9e18782e750a06d8b449aa165cf8d4",
     "sources": {
+      "src/bin/wow_cli/audit_api/gap.rs": "1ea37c73a7988a7c40915fff122ce43d45602da7084a17527a43e1bd6bfc5e1f",
+      "src/bin/wow_cli/audit_api/gap/gap_tests.rs": "9b7bc94cb981d4567057be89393308ef006c310e8011149338dd27ebc56f6e3d",
+      "src/bin/wow_cli/audit_api/mod.rs": "9c2cf4da0036b7e0d6af650dc1e5e178057687353c01cc36629b51ab4bacb287",
+      "src/bin/wow_cli/audit_api/output.rs": "ec6d237b557079a42f1ae04bdc9e088781ab36c287965591aae698074af9cdc0",
+      "src/bin/wow_cli/audit_api/patch_manifest.rs": "f00c3c280bdc1c3f632241a532890c91efeb0afa120ffacbd72fd5bf20b871ff",
+      "src/bin/wow_cli/audit_api/patch_source_index.rs": "6c2f82f68707af5acf20814038efc8029ffcd753e95ddf5c1973a13948f5ba07",
+      "src/bin/wow_cli/audit_api/scanner.rs": "8e25d0e9b797fc4b5f0875d382ff77451be42289460054f53d67cce75ef9e3ad",
       "src/bin/wow_cli/csv_util.rs": "3b1cb1f752ca890cfd20b2925610b54e4c5c8fa31b5ae8111bc69e41f6712ae1",
       "src/bin/wow_cli/gen_atlas.rs": "90dd7cccd65e12bb862c84de0315895898005a29086e18e0943378b3bcd2af93",
       "src/bin/wow_cli/gen_atlas_tests.rs": "185a6b54dce862225268d6049bfdd08fb3ea975c398f5d9148640cca5d5185a6",
@@ -433,8 +482,13 @@
       "src/bin/wow_cli/gen_items.rs": "9833fbe2ebd48df6f7ba6a314b2fd6be3836f0fe707655854a3a2f1c1b6305b6",
       "src/bin/wow_cli/gen_manifest.rs": "c47eb072aca0fcdfc557b3c70558cac305c055bb3779a7fa1ae068abb65102bc",
       "src/bin/wow_cli/gen_map_art.rs": "35fcb3126b89e66abb1b68979ed90dd7501bb25b95a31793bf7ba2e4d51e52f7",
+      "src/bin/wow_cli/gen_patch_api_docs/evaluate.rs": "cb2cbce5e1111ba3428f2871808703b17783560634d4d530f7b98b9c4a643302",
+      "src/bin/wow_cli/gen_patch_api_docs/mod.rs": "6dd552751843d41ce5f3ffa712ced93c0b034a3837d5b666f6aaa8818476ea1b",
+      "src/bin/wow_cli/gen_patch_api_docs/records.rs": "cde0e29304c511b3dc7fced9323dbf295aa259be170577027adc4210d4902a8c",
+      "src/bin/wow_cli/gen_patch_api_docs/snapshot.rs": "2952f89981f243dcc3392ec2d79bbf9dabcdeb6286332397470ce542af4ac64e",
+      "src/bin/wow_cli/gen_patch_api_docs/tests.rs": "36cc94cdadf3d1f19c71b856abf4c74a2b6ecba3a9b729edbeb5152c9d5fa2e6",
       "src/bin/wow_cli/gen_quest_poi.rs": "e7f7055f5afc8beb8d3444a4f9ea3926ead56cd52645e3d4fae1c27a078f0dc4",
-      "src/bin/wow_cli/gen_spells.rs": "2794a084466f7e81ed4fbb9abe675a1a1e8d683fe86d90a8a6b9310e04611fbe",
+      "src/bin/wow_cli/gen_spells.rs": "e68824561f54541929fd2d8bca98984b6c5249d7d5057baa2a13b113972fa7aa",
       "src/bin/wow_cli/gen_spells_power.rs": "f8ece2e3ade0231f7583439e51a8ded0a5f2e805eb19d0ecafe08cec5eab7710",
       "src/bin/wow_cli/gen_traits.rs": "927e92a3899c90213b420f3cf5a25a9f34e3250d5e120b3e5ce086bcc9396232",
       "src/bin/wow_cli/gen_traits_emit.rs": "23cb75ed5344543c3fcdcd9964f1822c76d0d1db1d2ef773c04d9d055347defb",
@@ -442,9 +496,14 @@
       "src/bin/wow_cli/gen_zones.rs": "3ea82338d99a1f3afb7cbddfd10a885dc3cbcfaf274f565cfa4f61daf6ac120e",
       "src/bin/wow_cli/global_slot_coverage.rs": "5a822c4d078c50451b9e7f49898ad8770041eabcae3b9f838e17ec6df6094840",
       "src/bin/wow_cli/main.rs": "137b757a6fb5fe096f624a395c98b5baec5592531ea6f1a18d374457f72a99fa",
-      "src/bin/wow_cli/startup_intern_stats.rs": "c8991f74f4be873f186791dc0bb08d5436af02b086f2cc32f4bfc38f83ea458a"
+      "src/bin/wow_cli/startup_intern_stats.rs": "c8991f74f4be873f186791dc0bb08d5436af02b086f2cc32f4bfc38f83ea458a",
+      "src/client_profile.rs": "a23f899ad7ed8722071b881f9c6decfe45eadbbcedf79175947c014d4acd7f20",
+      "src/lib.rs": "3caa04c98a76e500ef2c97fb51bd37611aabb3edbae0c504bdb36a699fb49303",
+      "src/lua_api/state.rs": "aab2ab674827dd0898b81952a0a966515276c5989d1b5fb96147aae7c2d9d6f3",
+      "src/lua_api/state_defaults.rs": "aefff3ec55bf1b6a94a77ea04e88d8ff19b318a697660a77974675b7ac2352fe",
+      "src/lua_api/state_types/character_world_defaults.rs": "0bd49cbe926b1aa03ed70b52d0749094372e4b15ee16dae082758bca104cb141"
     }
   },
-  "generation_source_revision": "13517c10b89b71c7279cfdc2f6034a472d429e82",
+  "generation_source_revision": "c53d49f281976a3b9540d419dffca3efc069ba48",
   "input_provenance_sha256": "85c36b42ceb4bf4724f9d108c61bef0c2c30edeeeaf89ee767b6f537da1bf33b"
 }
