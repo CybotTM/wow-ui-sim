@@ -56,6 +56,16 @@ One independently claimed RED selector: `ptr_input_util_observes_supplied_styles
 
 The selector tests immediate registration behavior, not event-delivery timing, physical devices or every startup widget. Original consumer execution, constant contradictions and GREEN outcome still require future authorized runtime proof.
 
+## PTR event-validity extension (2026-10-25)
+
+The earlier namespace GREEN `9ea7c4c52` does not make the transition event registrable. PTR uses the strict generated event table; the existing Forever-only entry cannot authorize PTR. The narrow repair adds this event to the existing epoch additions under `all(client-ptr, retail-12-1-5)` in `src/event/valid_events.rs`, without changing Retail, Forever or dispatch policy.
+
+Declaration: `/home/osso/.local/state/wow-ui-sim/handoff/cf2-aura-cleanup/ptr-cache-12.1.7.70493/wow-ui-sim/blizzard-ui/ptr/AddOns/Blizzard_APIDocumentationGenerated/InputDocumentation.lua:341-348` declares the literal name, `SynchronousEvent = true`, and non-nil `newMode`/`oldMode` enum payloads. The same cache's `Blizzard_SharedXML/Blizzard_SharedXML.toc:34-35` selects Mainline then shared InputUtil; `Blizzard_SharedXML/InputUtil.lua:28-30` creates the forbidden listener and registers the event at top level.
+
+After merging master with both wiki sides retained, event RED `16c75aeda` extends only the existing test file. Event GREEN `0bd666459` changes only the validator; test bytes are identical. Both already include the earlier C API publication. The normal closure loader must report no Lua errors and leave exactly one registered listener. The test retrieves its existing frame reference because forbidden frames are hidden from enumeration, checks `IsEventRegistered` true for the transition and false for `PLAYER_LOGIN`, and checks that its OnEvent handler comes from the original shared InputUtil. No vendor code or API is replaced or wrapped.
+
+An unconditional RegisterEvent success without recording fails the listener-count assertion. Constant-true event validation fails the unknown-event registration rejection; constant-false validation fails the original top-level load. A constant true/false IsEventRegistered fails one of the positive/negative queries. Existing MKB → Gamepad → MKB assertions still reject constant style getters. These are static contradictions, not executed mutation receipts. Source staging and static checks are the only proof so far; runtime RED/GREEN, stock comparison against master and PTR all-target checking await main's slot assignment.
+
 ## Laptop questions
 
 1. What is the native initial style with no connected controller and with a controller? Existing simulator MKB default is policy only.

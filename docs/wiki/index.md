@@ -1,3 +1,7 @@
+## [2026-10-25] static stage | PTR input event validity
+
+[Original-consumer extension](investigations/ptr-input-interface-style.md#ptr-event-validity-extension-2026-10-25) records the documented PTR epoch exception, load-error and listener registration assertions, and the new event-only RED/GREEN pair above the existing namespace publication. No slot, compilation or runtime proof.
+
 ## [2026-10-24] static stage | PTR input interface style
 
 [Selected consumer and contradiction table](investigations/ptr-input-interface-style.md) link the [contract](../specs/ptr-input-interface-style.md): authenticated PTR70493 docs, original SharedXML runtime-selection selector and existing state model. Separate test-first and GREEN source phases expose the existing model to PTR through ACTIVE; no build, slot or runtime RED/GREEN.

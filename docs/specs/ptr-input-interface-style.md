@@ -9,6 +9,8 @@ PTR 12.1.7.70493 declares `C_InputInterfaceStyle.GetCurrentStyle()` in generated
 - [ ] Original, runtime-selected `InputUtil` predicates and immediate setup/init callbacks distinguish explicit MKB, Gamepad, then MKB inputs in one selector.
 - [ ] Preserve existing Forever publication and leave Retail and Classic publication unchanged. The checked Retail manifest and generated input docs do not declare this namespace or enum.
 
+- [ ] PTR accepts `INPUT_DEVICE_INTERFACE_TRANSITION` through the strict `all(client-ptr, retail-12-1-5)` epoch exception. Loading the original SharedXML closure must produce no Lua errors; its listener must report registration true and an unrelated event false. Retail and Forever event validity remain unchanged.
+
 ## How it works
 
 - [Selection, backing state and static contradiction table](../wiki/investigations/ptr-input-interface-style.md).
@@ -20,9 +22,11 @@ PTR 12.1.7.70493 declares `C_InputInterfaceStyle.GetCurrentStyle()` in generated
 - `src/c_api/registration.rs` — profile publication boundary; GREEN selects PTR and existing Forever through `client_profile::ACTIVE`.
 - `src/lua_api/globals/real/input_interface.rs` — existing Forever legacy query over the same style field; unchanged.
 
+- `src/event/valid_events.rs` — narrow `all(client-ptr, retail-12-1-5)` event exception. Declaration: `/home/osso/.local/state/wow-ui-sim/handoff/cf2-aura-cleanup/ptr-cache-12.1.7.70493/wow-ui-sim/blizzard-ui/ptr/AddOns/Blizzard_APIDocumentationGenerated/InputDocumentation.lua:341-348` names `INPUT_DEVICE_INTERFACE_TRANSITION`, marks it synchronous, and declares non-nil `newMode`/`oldMode` input-style enums. This does not change queued delivery policy.
+
 ## Tests asserting this spec
 
-- `tests/ptr_input_interface_style.rs::ptr_input_util_observes_supplied_styles_and_initializes_matching_subscribers` — original SharedXML dependency closure through runtime TOC selection; both styles in one selector. Written before the producer change, not executed in this static lane.
+- `tests/ptr_input_interface_style.rs::ptr_input_util_observes_supplied_styles_and_initializes_matching_subscribers` — original SharedXML dependency closure through runtime TOC selection; both styles and the shared InputUtil top-level event registration in one selector. The event-validity source pair follows the earlier namespace publication; execution is deferred until main assigns a slot.
 - `tests/wowforever_input_style.rs` — existing Forever preservation cases; not executed in this lane.
 
 ## Known gaps (current cycle)
