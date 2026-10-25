@@ -62,7 +62,7 @@ The selector tests immediate registration behavior, not event-delivery timing, p
 
 The earlier namespace GREEN `9ea7c4c52` does not make the transition event registrable. PTR uses the strict generated event table; the existing Forever-only entry cannot authorize PTR. The narrow repair adds this event to the existing epoch additions under `all(client-ptr, retail-12-1-5)` in `src/event/valid_events.rs`, without changing Retail, Forever or dispatch policy.
 
-Declaration: `/home/osso/.local/state/wow-ui-sim/handoff/cf2-aura-cleanup/ptr-cache-12.1.7.70493/wow-ui-sim/blizzard-ui/ptr/AddOns/Blizzard_APIDocumentationGenerated/InputDocumentation.lua:341-348` declares the literal name, `SynchronousEvent = true`, and non-nil `newMode`/`oldMode` enum payloads. The same cache's `Blizzard_SharedXML/Blizzard_SharedXML.toc:34-35` selects Mainline then shared InputUtil; `Blizzard_SharedXML/InputUtil.lua:28-30` creates the forbidden listener and registers the event at top level.
+Declaration: `Blizzard_APIDocumentationGenerated/InputDocumentation.lua:341-348 in the pinned PTR70493 cache` declares the literal name, `SynchronousEvent = true`, and non-nil `newMode`/`oldMode` enum payloads. The same cache's `Blizzard_SharedXML/Blizzard_SharedXML.toc:34-35` selects Mainline then shared InputUtil; `Blizzard_SharedXML/InputUtil.lua:28-30` creates the forbidden listener and registers the event at top level.
 
 After merging master with both wiki sides retained, event RED `16c75aeda` extends only the existing test file. Event GREEN `0bd666459` changes only the validator; test bytes are identical. Both already include the earlier C API publication. The normal closure loader must report no Lua errors and leave exactly one registered listener. The test retrieves its existing frame reference because forbidden frames are hidden from enumeration, checks `IsEventRegistered` true for the transition and false for `PLAYER_LOGIN`, and checks that its OnEvent handler comes from the original shared InputUtil. No vendor code or API is replaced or wrapped.
 
@@ -88,7 +88,7 @@ PTR and Retail each receive one `check --all-targets`, both exit 0. PTR has only
 
 All builds use `slot-build.py`, slot 2, `CAPACITY_ID=lead_ptr_input_twice`, literal ADD admission and `-j1`. All four build units are `exited` with captured CPU counters before mode0600 ownership is released. The private PTR70493 cache matches all 4,578 authenticated source files; all four sealed test invocations use separate fresh CVar copies with unchanged original O_NOATIME stat/hash guards.
 
-Full report and exact argv/artifact/CPU/guard receipts: `/home/osso/.local/state/wow-ui-sim/handoff/ptr-input-interface-style/twice-run/REPORT.md`. The following slot-2 results remain historical evidence.
+Full report and exact argv/artifact/CPU/guard receipts: the lane's private `twice-run/REPORT.md` handoff report. The following slot-2 results remain historical evidence.
 
 ## Slot-2 execution (2026-10-25)
 
@@ -106,7 +106,7 @@ No loader semantics or assertions were changed. Main asked the laptop whether na
 
 Source-bound private PTR70493 sync authenticated all 4,578 files. Raw stock master/GREEN error maps contain 430/300 unique messages and 610/414 occurrences: 230 keys disappear, 100 appear, and six shared-key counts change. Event-registration, callback-helper and missing-input-namespace errors disappear, but stock startup is not clean. The full per-message successor classification is evidence, not a claim that every raw delta is a new regression.
 
-Exact commands, artifact hashes, CVar/O_NOATIME guards, full stacks, raw maps and CPU counters are retained in `/home/osso/.local/state/wow-ui-sim/handoff/ptr-input-interface-style/slot2-run/REPORT.md`. No native default, same-style, hardware or synchronous-delivery parity is established.
+Exact commands, artifact hashes, CVar/O_NOATIME guards, full stacks, raw maps and CPU counters are retained in the lane's private `slot2-run/REPORT.md` handoff report. No native default, same-style, hardware or synchronous-delivery parity is established.
 
 ## Laptop questions
 

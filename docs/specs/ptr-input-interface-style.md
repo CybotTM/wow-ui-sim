@@ -30,7 +30,7 @@ Decision key: `sharedxml_twice_default_20261025`.
 - `src/c_api/registration.rs` — profile publication boundary; GREEN selects PTR and existing Forever through `client_profile::ACTIVE`.
 - `src/lua_api/globals/real/input_interface.rs` — existing Forever legacy query over the same style field; unchanged.
 
-- `src/event/valid_events.rs` — narrow `all(client-ptr, retail-12-1-5)` event exception. Declaration: `/home/osso/.local/state/wow-ui-sim/handoff/cf2-aura-cleanup/ptr-cache-12.1.7.70493/wow-ui-sim/blizzard-ui/ptr/AddOns/Blizzard_APIDocumentationGenerated/InputDocumentation.lua:341-348` names `INPUT_DEVICE_INTERFACE_TRANSITION`, marks it synchronous, and declares non-nil `newMode`/`oldMode` input-style enums. This does not change queued delivery policy.
+- `src/event/valid_events.rs` — narrow `all(client-ptr, retail-12-1-5)` event exception. Declaration: `Blizzard_APIDocumentationGenerated/InputDocumentation.lua:341-348 in the pinned PTR70493 cache` names `INPUT_DEVICE_INTERFACE_TRANSITION`, marks it synchronous, and declares non-nil `newMode`/`oldMode` input-style enums. This does not change queued delivery policy.
 
 ## Tests asserting this spec
 
