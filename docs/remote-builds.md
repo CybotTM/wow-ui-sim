@@ -24,6 +24,31 @@ scripts/start-profile.sh all
 
 The Python profile launcher preserves `live`/`retail`, `ptr`, `mists`, and `all`, selecting profile-specific Cargo features. `WOW_SIM_START_RELEASE=1`, `WOW_SIM_START_FOREGROUND=1` (single profile only), and `WOW_SIM_START_NO_BUILD=1` retain their meanings. Background logs and helper PIDs appear in `target/profile-runs/`; a printed PID is not GUI readiness proof.
 
+## Local slot builds
+
+Use `scripts/slot-build.py` for shared-slot Cargo builds. It bind-mounts the lane
+worktree at `/home/osso/.cache/wow-ui-sim-srcmount/slot-N` inside an unprivileged
+user service, paired with target `/home/osso/.cache/wow-ui-sim-targets/slot-N` and
+`CARGO_INCREMENTAL=0`. Keep normalized `Cargo.lock` bytes identical between lanes
+([ordering evidence](wiki/investigations/compile-bin-lockwatch.md#cargolock-watch)).
+
+Coordinate slot ownership before launch. For new claims, the claimant writes
+`slot-N/.owner` with mode `0600`, containing exactly the `--owner` string, without
+a newline; remove it on release. Existing JSON markers remain unchanged for
+running lanes. This helper checks ownership; it does not claim or release slots.
+It checks `capacity.sh` once with `CAPACITY_ID` from `--capacity-id` and refuses
+anything except a literal `ADD` verdict. It does not poll for admission.
+
+```sh
+/home/osso/Projects/wow/wow-ui-sim/scripts/slot-build.py --slot 2 --worktree /home/osso/.worktrees/wow-ui-sim-lane --unit lane-build --owner lane-owner --capacity-id lane-capacity -- /usr/bin/cargo test --test integration --no-run
+/home/osso/Projects/wow/wow-ui-sim/scripts/slot-build.py --status lane-build
+```
+
+Launch prints the unit name without waiting for the build. The retained service
+runs in `agents.slice` with `MemoryMax=9G` and `MemorySwapMax=0`. Status prints
+`SubState`, `Result`, `CPUUsageNSec`, and `WallTimeSec` (elapsed while running).
+Use the helper from the checkout that contains it; it builds `--worktree`.
+
 ## Host selection and dependencies
 
 `python3 scripts/build-host.py --save-build-host desktop` saves the shared default in `~/.config/game-engine/build-host`; use `local` to change it. The configured default is desktop. Explicit `--build-host` overrides it for one invocation. Host failure is an error, never a host fallback.

@@ -2765,3 +2765,11 @@ Updated the [bank investigation](investigations/wrath-guild-info.md#accepted-run
 ## 2026-10-24 — Wrath guild-bank current-master integration
 
 [Bounded refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 merges master08b423c5c: Wrath/Retail all-target checks0warnings, five bank exact PASS, Wrath stock[], fresh Retail30/34 unchanged with no added/removed keys. All13 CVar receipts preserve original stat/hash; slot0 released. Historical RED/GREEN matrix not repeated.
+
+## 2026-10-25 — Stable-path slot build adoption (static)
+
+Added the nonblocking [slot launcher](../../scripts/slot-build.py) and
+[usage/owner contract](../remote-builds.md#local-slot-builds): fixed source mount
+per slot, exact `.owner` match and literal capacity ADD admission. Focused Python
+tests only; no compile or service launch. The normalized lock matches the saved
+Cargo rewrite byte-for-byte; runtime acceptance remains pending.
