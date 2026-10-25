@@ -7,7 +7,7 @@ Normal builds **and runs** use `scripts/build-host.py`. `desktop` means native R
 ```sh
 python3 scripts/build-host.py --run
 python3 scripts/build-host.py --build-host local --run
-python3 scripts/build-host.py --bin wow-cli --run -- --no-addons --no-saved-vars lua-errors
+python3 scripts/build-host.py --bin wow-cli --features tools --run -- --no-addons --no-saved-vars lua-errors
 python3 scripts/build-host.py --check
 python3 scripts/build-host.py --test --test integration FILTER -- --nocapture
 python3 scripts/build-host.py --no-default-features --features sound,gui,casc,client-ptr --check
