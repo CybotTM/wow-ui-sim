@@ -209,7 +209,7 @@ impl WidgetRegistry {
     }
 
     /// Inspect active anchors only, not historical reverse dirty dependencies.
-    pub fn anchor_chain_reaches_region(&self, start_id: u64) -> bool {
+    pub(crate) fn anchor_chain_reaches_region(&self, start_id: u64) -> bool {
         let mut pending = vec![start_id];
         let mut seen = FxHashSet::default();
 

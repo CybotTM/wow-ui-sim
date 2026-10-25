@@ -5,7 +5,7 @@ mod anchor_edits;
 mod pixel_scale;
 mod size_changes;
 
-pub use size_changes::has_queryable_rect;
+pub(crate) use size_changes::has_queryable_rect;
 mod storage;
 
 use super::Frame;
@@ -432,12 +432,12 @@ impl WidgetRegistry {
     }
 
     /// IDs of all registered `EditBox` widgets.
-    pub fn iter_editbox_ids(&self) -> impl Iterator<Item = u64> + '_ {
+    pub(crate) fn iter_editbox_ids(&self) -> impl Iterator<Item = u64> + '_ {
         self.editbox_ids.iter().copied()
     }
 
     /// Invalidate font-dependent presentation caches without losing pending input events.
-    pub fn invalidate_editbox_presentations(&mut self) {
+    pub(crate) fn invalidate_editbox_presentations(&mut self) {
         for id in &self.editbox_ids {
             if let Some(presentation) = self
                 .widgets

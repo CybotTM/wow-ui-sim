@@ -1,26 +1,11 @@
-//! Widget system implementing WoW's UI object hierarchy.
-
-mod anchor;
-pub mod editbox;
-mod editbox_history;
-mod frame;
-mod frame_enums;
-mod frame_size;
-mod frame_types;
-mod registry;
+//! Profile-neutral widget types and identities.
+pub mod anchor;
+pub mod frame_enums;
+pub mod frame_types;
 pub mod simple_html;
-
-pub use crate::atlas::NineSliceAtlasInfo;
 pub use anchor::{Anchor, AnchorPoint};
-pub use editbox::EditBoxPresentation;
-pub use frame::{
-    AlphaGradient, AttributeValue, Backdrop, Color, Frame, Gradient, LineAnchor,
-    MinimapBlobLayerStyle, MinimapBlobRingStyle, TextJustify, TextOutline,
-};
 pub use frame_enums::{DrawLayer, FrameStrata};
-pub use frame_types::TextSegment;
-pub use registry::has_queryable_rect;
-pub use registry::{AnchorCyclePath, RenderDirtyBatch, RenderDirtySource, WidgetRegistry};
+pub use frame_types::*;
 
 use std::sync::atomic::{AtomicU64, Ordering};
 

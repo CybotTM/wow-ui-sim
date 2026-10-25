@@ -47,7 +47,7 @@ pub mod inspector_server_stub;
 pub use sim_data::items;
 mod key_names;
 pub mod keybinding_cache;
-pub use sim_widget::layout;
+pub mod layout;
 pub mod limited_listfile;
 pub mod loader;
 pub use sim_texture::logging;
@@ -94,7 +94,7 @@ pub mod startup;
 pub mod texture;
 pub mod toc;
 pub use sim_data::traits;
-pub use sim_widget::widget;
+pub mod widget;
 #[cfg(any(
     feature = "client-wrath",
     feature = "client-mists",

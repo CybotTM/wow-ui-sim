@@ -3,7 +3,7 @@
 use super::{Frame, TextJustify};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct EditBoxLayoutSettings {
+pub(crate) struct EditBoxLayoutSettings {
     pub font_size: f32,
     pub width: f32,
     pub height: f32,
@@ -18,7 +18,7 @@ pub struct EditBoxLayoutSettings {
 }
 
 impl EditBoxLayoutSettings {
-    fn from_frame(frame: &Frame, size: (f32, f32), wrath: bool) -> Self {
+    fn from_frame(frame: &Frame, size: (f32, f32)) -> Self {
         Self {
             font_size: frame.font_size * frame.effective_scale,
             width: size.0,
@@ -30,7 +30,7 @@ impl EditBoxLayoutSettings {
             spacing: frame.text_line_spacing * frame.effective_scale,
             smooth_scaling: frame.font_string_smooth_scaling,
             scale: frame.effective_scale,
-            password: wrath_password(frame, wrath),
+            password: wrath_password(frame),
         }
     }
 
@@ -49,7 +49,7 @@ impl EditBoxLayoutSettings {
 }
 
 #[derive(Debug)]
-pub struct EditBoxLayoutInput {
+pub(crate) struct EditBoxLayoutInput {
     pub text: Option<String>,
     pub font: Option<String>,
     pub cursor: usize,
@@ -57,20 +57,20 @@ pub struct EditBoxLayoutInput {
 }
 
 impl EditBoxLayoutInput {
-    pub fn from_frame(frame: &Frame, size: (f32, f32), wrath: bool) -> Self {
+    pub fn from_frame(frame: &Frame, size: (f32, f32)) -> Self {
         Self {
-            text: editbox_display_text(frame, wrath),
+            text: editbox_display_text(frame),
             font: frame.font.clone(),
-            cursor: editbox_display_cursor(frame, wrath),
-            settings: EditBoxLayoutSettings::from_frame(frame, size, wrath),
+            cursor: editbox_display_cursor(frame),
+            settings: EditBoxLayoutSettings::from_frame(frame, size),
         }
     }
 
-    pub fn matches_frame(&self, frame: &Frame, size: (f32, f32), wrath: bool) -> bool {
-        let same_text = self.text == editbox_display_text(frame, wrath);
+    pub fn matches_frame(&self, frame: &Frame, size: (f32, f32)) -> bool {
+        let same_text = self.text == editbox_display_text(frame);
         let same_font = self.font == frame.font;
-        let same_cursor = self.cursor == editbox_display_cursor(frame, wrath);
-        let same_settings = self.settings == EditBoxLayoutSettings::from_frame(frame, size, wrath);
+        let same_cursor = self.cursor == editbox_display_cursor(frame);
+        let same_settings = self.settings == EditBoxLayoutSettings::from_frame(frame, size);
         same_text && same_font && same_cursor && same_settings
     }
 
@@ -82,23 +82,23 @@ impl EditBoxLayoutInput {
 
 #[derive(Debug, Default)]
 pub struct EditBoxPresentation {
-    pub input: Option<EditBoxLayoutInput>,
-    pub shaped_text: Option<cosmic_text::Buffer>,
+    pub(crate) input: Option<EditBoxLayoutInput>,
+    pub(crate) shaped_text: Option<cosmic_text::Buffer>,
     /// Frame-local x/y/width/height; y is negative below the frame's top edge.
-    pub cursor_geometry: Option<(f32, f32, f32, f32)>,
+    pub(crate) cursor_geometry: Option<(f32, f32, f32, f32)>,
     text_changed: bool,
     user_input: bool,
 }
 
 impl EditBoxPresentation {
-    pub fn mark_text_changed(&mut self, user_input: Option<bool>) {
+    pub(crate) fn mark_text_changed(&mut self, user_input: Option<bool>) {
         self.text_changed = true;
         if let Some(user_input) = user_input {
             self.user_input = user_input;
         }
     }
 
-    pub fn take_text_change(&mut self) -> Option<bool> {
+    pub(crate) fn take_text_change(&mut self) -> Option<bool> {
         if !self.text_changed {
             return None;
         }
@@ -123,13 +123,14 @@ impl EditBoxPresentation {
     }
 }
 
-fn wrath_password(frame: &Frame, wrath: bool) -> bool {
-    wrath && frame.editbox_password
+fn wrath_password(frame: &Frame) -> bool {
+    crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+        && frame.editbox_password
 }
 
-fn editbox_display_text(frame: &Frame, wrath: bool) -> Option<String> {
+fn editbox_display_text(frame: &Frame) -> Option<String> {
     frame.text.as_ref().map(|text| {
-        if wrath_password(frame, wrath) {
+        if wrath_password(frame) {
             "*".repeat(text.len())
         } else {
             text.clone()
@@ -137,9 +138,9 @@ fn editbox_display_text(frame: &Frame, wrath: bool) -> Option<String> {
     })
 }
 
-fn editbox_display_cursor(frame: &Frame, wrath: bool) -> usize {
+fn editbox_display_cursor(frame: &Frame) -> usize {
     let scalar = frame.editbox_cursor_pos.max(0) as usize;
-    if !wrath_password(frame, wrath) {
+    if !wrath_password(frame) {
         return scalar;
     }
     let text = frame.text.as_deref().unwrap_or_default();
@@ -149,12 +150,12 @@ fn editbox_display_cursor(frame: &Frame, wrath: bool) -> usize {
 }
 
 impl Frame {
-    pub fn editbox_presentation_mut(&mut self) -> &mut EditBoxPresentation {
+    pub(crate) fn editbox_presentation_mut(&mut self) -> &mut EditBoxPresentation {
         self.editbox_presentation
             .get_or_insert_with(Default::default)
     }
 
-    pub fn mark_editbox_text_changed(&mut self, user_input: Option<bool>) {
+    pub(crate) fn mark_editbox_text_changed(&mut self, user_input: Option<bool>) {
         self.editbox_presentation_mut()
             .mark_text_changed(user_input);
     }

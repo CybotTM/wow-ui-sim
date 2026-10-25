@@ -1,6 +1,5 @@
-//! Profile-neutral widget state and co-located layout.
+//! Profile-neutral widget types, identities and geometry.
 pub mod atlas;
-pub mod layout;
 pub mod widget;
 
 /// Blend mode for quad rendering.

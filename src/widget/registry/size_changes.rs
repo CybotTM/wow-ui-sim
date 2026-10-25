@@ -7,13 +7,13 @@ use crate::widget::{Frame, WidgetType};
 const SIZE_EPSILON: f32 = 1e-3;
 
 /// Whether `GetSize` reads the resolved layout rect instead of the explicit size.
-pub fn has_queryable_rect(frame: &Frame, id: u64) -> bool {
+pub(crate) fn has_queryable_rect(frame: &Frame, id: u64) -> bool {
     !frame.anchors.is_empty() || frame.name.as_deref() == Some("UIParent") || id == 1
 }
 
 impl WidgetRegistry {
     /// The frame-unit size `GetSize` reports from the frame's current layout state.
-    pub fn resolved_size(&self, id: u64) -> (f32, f32) {
+    pub(crate) fn resolved_size(&self, id: u64) -> (f32, f32) {
         let Some(frame) = self.get(id) else {
             return (0.0, 0.0);
         };
@@ -39,7 +39,7 @@ impl WidgetRegistry {
 
     /// Called whenever layout resolution writes a frame's rect: queue OnSizeChanged
     /// when the resolved size differs from the last size reported to scripts.
-    pub fn note_layout_size(&mut self, id: u64) {
+    pub(crate) fn note_layout_size(&mut self, id: u64) {
         let size = self.resolved_size(id);
         let Some(frame) = self.widgets.get_mut(&id) else {
             return;
@@ -57,7 +57,7 @@ impl WidgetRegistry {
     }
 
     /// Take queued size changes in id order, with the size each reports.
-    pub fn drain_size_changes(&mut self) -> Vec<(u64, (f32, f32))> {
+    pub(crate) fn drain_size_changes(&mut self) -> Vec<(u64, (f32, f32))> {
         if self.size_changed_ids.is_empty() {
             return Vec::new();
         }

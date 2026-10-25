@@ -29,7 +29,7 @@ impl AnchorEditBaseline {
 
 impl WidgetRegistry {
     /// Canvas size used to resolve rects when settling anchor edits.
-    pub fn set_layout_canvas_size(&mut self, width: f32, height: f32) {
+    pub(crate) fn set_layout_canvas_size(&mut self, width: f32, height: f32) {
         self.layout_canvas_size = Some((width, height));
     }
 
