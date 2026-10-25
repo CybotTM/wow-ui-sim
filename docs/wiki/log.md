@@ -1,3 +1,7 @@
+## [2026-10-24] staged | Housing house-or-plot presence
+
+Added [spatial presence model](systems/housing-spatial-presence.md) and [contract](../specs/house-or-plot-presence.md), original registered-event selector, profile TOC evidence and static contradiction matrix. Runtime/compile gates remain pending; Forever's selected consumer and excluded downstream controls bootstrap are distinct.
+
 ## [2026-10-24] proof | Bounded reload XML source reuse
 
 [Contract matrix](../specs/reload-ui.md#generated-xml-layer-reconstruction) records Forever RED16 at0d1e54849, then Forever/default Retail0/0 reload compiles at23f1f629a.27 exact cases/profile, zero-warning builds/checks and formatting pass; current CVars remain unchanged. [Mechanics](systems/reload-ui.md#generated-xml-layer-arguments) retain VM-local objects and XML ordering. Stock startup, paired timing and full Ellesmere acceptance remain separate.

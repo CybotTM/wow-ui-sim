@@ -1,3 +1,7 @@
+## [2026-10-24] staged | Housing house-or-plot presence
+
+[Spatial model and selected consumer](systems/housing-spatial-presence.md) links the [contract](../specs/house-or-plot-presence.md): existing area input, Retail/PTR registered-world-event selector, constant/no-op contradictions and Forever downstream TOC restriction. Static staging only; no compilation or runtime proof.
+
 ## [2026-10-24] source | Patch 12.1.7 I4b conditional static selection
 
 [Conditional source evidence](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection): 460 conditional PTR obligations, 5,168 UNKNOWN cells; zero effective promotions before the exact I3 source commit merges. All runtime proof stages remain UNKNOWN.
