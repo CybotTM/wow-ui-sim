@@ -1,6 +1,6 @@
 ## [2026-10-24] design | Generated data crate boundary
 
-[Crate split](design/generated-data-crates.md) preserves the root facade and selected tables while isolating common catalogs from profile features. Static staging only; timings and runtime proof pending.
+[Crate split](design/generated-data-crates.md) preserves the root facade and selected tables while isolating common catalogs from profile features. Same-slot touched-root rebuild 413.80→258.52 s; peak child RSS6,189,056→2,717,272 KiB. Retail/Wrath checks and94 bounded Rust tests pass; all23 generated files retain their hashes. Single warm-dependency samples, not a cold-build or full-profile claim.
 
 ## [2026-10-24] source | Patch 12.1.7 I4b conditional static selection
 

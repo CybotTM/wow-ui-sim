@@ -12,7 +12,21 @@ Root re-exports preserve existing paths and type identity. Generators write to e
 
 ## Proof status
 
-Static extraction staged on 2026-10-24. Runtime preservation and timing measurements are pending a released build slot. No speedup is claimed from line counts.
+Measured on 2026-10-24 in one reused slot with `CARGO_INCREMENTAL=0`, `-j1`, identical toolchain/configuration, 9 GiB memory cap and no swap. These are single warm-dependency samples, not cold builds or a full profile matrix.
+
+| Measurement | Pinned master 08b423c5c | Extracted source |
+|---|---:|---:|
+| Initial build wall | 438.51 s | 335.44 s |
+| Root library unit | 435.61 s | 260.06 s |
+| Touched-source rebuild wall | 413.80 s | 258.52 s |
+| Rebuild frontend / codegen | 60.78 / 352.00 s | 54.43 / 198.63 s |
+| Rebuild maximum child RSS | 6,189,056 KiB | 2,717,272 KiB |
+
+Initial common/selected data units took 50.20/7.36 s; both were reused on the touched-root rebuild. Wrath check explicitly reported common `sim-data` Fresh after Retail check. Rebuild wall decreased 37.5%; peak child RSS decreased 56.1%. Python `resource.RUSAGE_CHILDREN` records RSS; cgroup MemoryPeak is retained separately and is not RSS. `/usr/bin/time` was unavailable; its failed launch preceded Cargo and is excluded.
+
+Retail and Wrath checks passed without warnings. All 94 bounded Rust tests passed: 53 integration cases plus 37 common catalog and four selected global-string unit cases. Six generator Python tests passed. The Lua refresh-manifest case preserves generated Lua evidence; it does not itself test the moved Rust catalogs. All 23 moved Rust files retain original SHA-256. Root exactly-one-profile validation is byte-identical. Docker COPY wiring and seven-profile feature resolution were checked statically; no image or seven-profile runtime suite was run.
+
+Data unit tests now belong to their owning packages; run `cargo test -p sim-data -p sim-data-profile` with the selected-data feature set appropriate to the desired variant. Root integration discovery is unchanged. Full commands, source bindings, HTML timings, output and proof ledger live at `/home/osso/.local/state/wow-ui-sim/handoff/crate-split/`. The measured Rust source is unchanged through 91a4e437e; intervening lock commits only normalize serialization.
 
 ## Sources
 
