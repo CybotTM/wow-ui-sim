@@ -1,3 +1,7 @@
+## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
+
+[Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
+
 ## [2026-10-24] source | Patch 12.1.7 I4b conditional static selection
 
 [Conditional source evidence](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection): 460 conditional PTR obligations, 5,168 UNKNOWN cells; zero effective promotions before the exact I3 source commit merges. All runtime proof stages remain UNKNOWN.
