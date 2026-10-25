@@ -22,7 +22,8 @@ fn load_consumers(root_name: &str, screen: ScreenKind, hardcore: bool) -> WowLua
         if name == root_name {
             for warning in result.warnings {
                 eprintln!("original consumer warning: {warning}");
-                let target_gap = warning.contains("IsHardcoreActive")
+                let target_gap = warning.contains("GameDialogDefs.lua:3512:")
+                    || warning.contains("IsHardcoreActive")
                     || warning.contains("RecentAlliesInteractionCategoryFilter");
                 assert!(!target_gap, "{warning}");
             }

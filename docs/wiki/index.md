@@ -1,3 +1,7 @@
+## [2026-10-25] prerequisites | PTR I4 GameRules and RecentAllies
+
+[Original consumer boundaries](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) link the [bounded supplied-input contract](../specs/ptr-i4-game-rules.md). Initial RED proves three missing queries and two enum prerequisites; setter/preset remain blocked upstream. Enum-only implementation is staged; six function producers and GREEN remain pending.
+
 ## [2026-10-25] implementation | PTR I4 first bounded producer repair
 
 [Two reached boundaries](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair) link the [supplied-state contract](../specs/ptr-i4-first-green.md): item cooldown records and graveyard availability, PTR-only additions, native-unknown limits and unchanged aggregate I4 obligations. Runtime acceptance is separate.

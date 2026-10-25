@@ -10,6 +10,7 @@ pub(crate) mod class_catalog;
 pub(crate) mod classic_startup_data;
 #[cfg(feature = "client-retail")]
 pub(crate) mod currency_list;
+pub(crate) mod ptr_i4_game_rules;
 pub mod quest_objectives;
 pub mod quest_readiness;
 pub(crate) mod quest_reward_currencies;

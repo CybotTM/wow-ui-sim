@@ -1,3 +1,7 @@
+## [2026-10-25] prerequisites | PTR I4 GameRules and RecentAllies
+
+[Source-bound original RED](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) records Barbershop, CharacterCreate and RecentAllies boundaries plus upstream setter/preset blockers. Only documented enum prerequisites are implemented in this step; six function producers and GREEN remain pending.
+
 ## [2026-10-25] staged | PTR I4 runtime shapes
 
 [Original-consumer staging](investigations/patch-12-1-7-api-audit.md#i4-runtime-test-staging) records four ordinary recipe selectors and independent PTR/Retail/Forever registers. 363 observations and five PTR consumer shape cases do not close native behavior, CVar scope/defaults, Glue contexts or 214 static UNKNOWN rows. Runtime execution and pre-repair baselines remain pending.

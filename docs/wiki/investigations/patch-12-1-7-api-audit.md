@@ -14,6 +14,12 @@ The first authenticated 70493 runtime discovery persisted all 1,876 observations
 
 The [bounded contract](../../specs/ptr-i4-first-green.md) publishes these two endpoints using the existing item cooldown records and supplied graveyard availability. The item query is explicitly shape-only where native eligibility is unknown. New supplied-state tests failed at both missing calls before implementation. Aggregate I4 tests remain unchanged and cannot pass while the other 167 shapes and three blocked consumers remain. Runtime GREEN and stock/check proof are recorded separately in the lane evidence, not implied by this implementation entry.
 
+## I4 GameRules and RecentAllies prerequisites
+
+Verified 2026-10-25: [batch2 contract](../../specs/ptr-i4-game-rules.md) and [original-consumer tests](../../../tests/ptr_i4_batch2.rs) bind actual game/glue TOC selection. Initial executions reach missing AccountHasSDEnabled at Barbershop line269, IsSDHDToggleEnabled at line261, IsSelfFoundAllowed at CharacterCreate line2366, and RecentAlliesInteractionCategoryFilter at RecentAlliesUtil line4. The SD setter is first blocked by its documented usage-location enum at line273; the preset default is first blocked by the toggle query at GraphicsOverrides line78. Those two are not downstream API REDs. The hardcore popup diagnostic is retained before its missing producer is repaired.
+
+The first producer step publishes only the two proven enum prerequisites and metadata from the pinned 70493 APIDocumentation. Six function producers and runtime GREEN remain pending. No native capability defaults, telemetry policy, argument restrictions or secret handling are inferred.
+
 ## Empty inventory is not patch coverage
 
 The direct page has prose and a link to 1.60.1, but no function/event/enum/CVar/widget tables. The existing `tools/gen_patch_wikitext_register.py` successfully emits `entries: []` and `header_counts: []` for it. This correctly describes the direct inventory, not complete patch coverage. No dummy API rows or invented aliases are added to make it nonempty.
