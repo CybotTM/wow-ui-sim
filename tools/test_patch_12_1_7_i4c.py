@@ -67,6 +67,23 @@ class I4cTests(unittest.TestCase):
                     else "Blizzard_B/Blizzard_B.toc",
                 )
 
+    def test_file_game_filters_reject_only_the_original_filtered_publishers(self):
+        files = self.fixture()
+        files["Blizzard_A/Blizzard_A_Mainline.toc"] += (
+            "Classic.lua [AllowLoadGameType cata, mists]\nExcluded.lua [ExcludeLoadGameType mainline]\nAllowed.lua [AllowLoadGameType mainline, standard]\n"
+        )
+        files["Blizzard_A/Classic.lua"] = "function ClassicOnly() end\n"
+        files["Blizzard_A/Excluded.lua"] = "function ExcludedOnly() end\n"
+        files["Blizzard_A/Allowed.lua"] = "function Allowed() end\n"
+        for symbol in ["ClassicOnly", "ExcludedOnly"]:
+            state = self.state(symbol, files=files)
+            self.assertEqual(state["applicability"], "CONDITIONAL_UNSELECTED_PUBLISHER")
+            self.assertEqual(state["reason_code"], "FILE_GAME_TYPE")
+        self.assertEqual(
+            self.state("Allowed", files=files)["applicability"],
+            "CONDITIONAL_APPLICABLE",
+        )
+
     def test_selected_occurrence_overrides_excluded_occurrence(self):
         files = self.fixture()
         files["Blizzard_A/Public.lua"] += "\nfunction CamelotOnly() end\n"
