@@ -1,3 +1,11 @@
+## [2026-10-25] maintenance | Utility command admission and lock rebase
+
+[Findings](investigations/compile-bin-lockwatch.md) record rebase to `b2ca0becd`, current command feature admission, preserved historical evidence, and two offline metadata runs: 781 unchanged package records and stable lock bytes. Master already normalized the lock; no compile or CPU proof.
+
+## [2026-10-25] investigation | Compile binary selection
+
+[Source findings](investigations/compile-bin-lockwatch.md) and [contract](../specs/integration-bin-selection.md): opt-in utility bins preserve wow-sim test consumers and operational builders. Static-only; no slot/build/CPU proof.
+
 ## [2026-10-24] design | Generated data crate boundary
 
 [Crate split](design/generated-data-crates.md) preserves the root facade and selected tables while isolating common catalogs from profile features. Same-slot touched-root rebuild 413.80→258.52 s; peak child RSS6,189,056→2,717,272 KiB. Retail/Wrath checks and94 bounded Rust tests pass; all23 generated files retain their hashes. Single warm-dependency samples, not a cold-build or full-profile claim.
@@ -2757,3 +2765,11 @@ Updated the [bank investigation](investigations/wrath-guild-info.md#accepted-run
 ## 2026-10-24 — Wrath guild-bank current-master integration
 
 [Bounded refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 merges master08b423c5c: Wrath/Retail all-target checks0warnings, five bank exact PASS, Wrath stock[], fresh Retail30/34 unchanged with no added/removed keys. All13 CVar receipts preserve original stat/hash; slot0 released. Historical RED/GREEN matrix not repeated.
+
+## 2026-10-25 — Stable-path slot build adoption (static)
+
+Added the nonblocking [slot launcher](../../scripts/slot-build.py) and
+[usage/owner contract](../remote-builds.md#local-slot-builds): fixed source mount
+per slot, exact `.owner` match and literal capacity ADD admission. Focused Python
+tests only; no compile or service launch. The normalized lock matches the saved
+Cargo rewrite byte-for-byte; runtime acceptance remains pending.
