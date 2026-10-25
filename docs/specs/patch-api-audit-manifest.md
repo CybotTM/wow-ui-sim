@@ -419,7 +419,7 @@ For each endpoint, sort source paths by UTF-8 bytes. Feed SHA-256, for each file
 The checked-in `data/patch-api/sources/12.1.5-register.json` compares Gethe `12.1.0.69587` (`a89e9d0ceb7f6cd31e8fc5ca7df1a338ac0b1b58`, 612 files) with `12.1.5.69594` (`49b69918fcdc77e109813281e4f537d45ec7dcbf`, 622 files). It contains **262 added, 185 changed, and 2 removed occurrences (449 total)**. This endpoint documentation delta does not establish first introduction, runtime behavior, intermediate changes, FrameXML helper changes, or unavailable CVar/GlobalString contracts. Documentation-only prose is excluded; a documented type/security change remains an occurrence even if runtime behavior is unchanged.
 
 ```text
-cargo build --bin wow-cli
+cargo build --bin wow-cli --features tools
 ./target/debug/wow-cli generate patch-api-docs \
   --repository /home/osso/.cache/wow-ui-sim/wow-ui-source-git/ptr2 \
   --base-commit a89e9d0ceb7f6cd31e8fc5ca7df1a338ac0b1b58 \

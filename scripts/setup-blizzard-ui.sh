@@ -15,4 +15,4 @@ if [ -n "$PROFILE" ]; then
 fi
 
 cd "$REPO_ROOT"
-cargo run --quiet --bin wow-cli -- casc sync-blizzard-ui
+cargo run --quiet --bin wow-cli --features tools -- casc sync-blizzard-ui

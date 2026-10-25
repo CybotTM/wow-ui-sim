@@ -76,7 +76,7 @@ build_release_binaries() {
         --bin wow-cli \
         --bin panel-visual-metrics \
         --no-default-features \
-        --features "sound,gui,casc,client-mists"
+        --features "sound,gui,casc,client-mists,tools"
 }
 
 zero_lua_errors() {
