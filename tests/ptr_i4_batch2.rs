@@ -1,0 +1,191 @@
+//! PTR 70493 original consumers; supplied inputs do not establish native policy.
+use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
+use wow_ui_sim::loader::{discover_blizzard_addon_closure_for_screen_with_overrides, load_addon};
+use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::screen::ScreenKind;
+
+fn load_consumers(root_name: &str, screen: ScreenKind, hardcore: bool) -> WowLuaEnv {
+    let root = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
+    let env = match screen {
+        ScreenKind::Game => crate::common::blizzard_addon_harness::new_blizzard_addon_env(&root),
+        _ => crate::common::blizzard_addon_harness::new_blizzard_addon_glue_env(&root),
+    };
+    env.state().borrow_mut().game_rules.hardcore_active = hardcore;
+    let selected =
+        discover_blizzard_addon_closure_for_screen_with_overrides(&root, screen, &[root_name], &[]);
+    assert!(selected.iter().any(|(name, _)| name == root_name));
+    for (name, toc) in selected {
+        let result = load_addon(&env.loader_env(), &toc).unwrap();
+        if name == root_name {
+            for warning in result.warnings {
+                eprintln!("original consumer warning: {warning}");
+                let target_gap = warning.contains("IsHardcoreActive")
+                    || warning.contains("RecentAlliesInteractionCategoryFilter");
+                assert!(!target_gap, "{warning}");
+            }
+        }
+    }
+    env
+}
+
+#[test]
+fn hardcore_popup_consumes_changed_supplied_mode() {
+    if ACTIVE != ClientProfile::Ptr {
+        return;
+    }
+    for active in [false, true] {
+        let env = load_consumers("Blizzard_StaticPopup_Game", ScreenKind::Game, active);
+        assert_eq!(
+            env.eval::<bool>("return StaticPopupDialogs.HARDCORE_DEATH ~= nil")
+                .unwrap(),
+            active
+        );
+    }
+}
+
+#[test]
+fn barbershop_visibility_consumes_toggle_capability() {
+    if ACTIVE != ClientProfile::Ptr {
+        return;
+    }
+    let env = load_consumers("Blizzard_BarbershopUI", ScreenKind::Game, false);
+    env.exec("I4Toggle = CreateFrame('CheckButton'); I4Toggle:Hide()")
+        .unwrap();
+    for enabled in [true, false, true] {
+        env.state().borrow_mut().game_rules.sd_hd_toggle_enabled = enabled;
+        env.exec("BarberShopSDToggleMixin.OnLoad(I4Toggle)")
+            .unwrap();
+        assert_eq!(
+            env.eval::<bool>("return I4Toggle:IsShown()").unwrap(),
+            enabled
+        );
+    }
+}
+
+#[test]
+fn barbershop_checked_state_consumes_account_sd() {
+    if ACTIVE != ClientProfile::Ptr {
+        return;
+    }
+    let env = load_consumers("Blizzard_BarbershopUI", ScreenKind::Game, false);
+    env.exec("I4Toggle = CreateFrame('CheckButton')").unwrap();
+    for enabled in [true, false, true] {
+        env.state().borrow_mut().game_rules.account_has_sd_enabled = enabled;
+        env.exec("BarberShopSDToggleMixin.OnShow(I4Toggle)")
+            .unwrap();
+        assert_eq!(
+            env.eval::<bool>("return not not I4Toggle:GetChecked()")
+                .unwrap(),
+            !enabled
+        );
+    }
+}
+
+#[test]
+fn barbershop_click_updates_supplied_sd_selection() {
+    if ACTIVE != ClientProfile::Ptr {
+        return;
+    }
+    let env = load_consumers("Blizzard_BarbershopUI", ScreenKind::Game, false);
+    env.exec("I4Toggle = CreateFrame('CheckButton')").unwrap();
+    for checked in [false, true, false] {
+        env.exec(&format!(
+            "I4Toggle:SetChecked({checked}); BarberShopSDToggleMixin.OnClick(I4Toggle)"
+        ))
+        .unwrap();
+        let state = env.state().borrow();
+        assert_eq!(state.game_rules.account_has_sd_enabled, !checked);
+        // 70493 GameRulesDocumentation: BarberShop = 2.
+        assert_eq!(state.game_rules.sd_toggle_usage_location, Some(2));
+    }
+    let other = WowLuaEnv::new().unwrap();
+    assert!(!other.state().borrow().game_rules.account_has_sd_enabled);
+    assert_eq!(
+        other.state().borrow().game_rules.sd_toggle_usage_location,
+        None
+    );
+}
+
+#[test]
+fn character_create_consumes_self_found_capability() {
+    if ACTIVE != ClientProfile::Ptr {
+        return;
+    }
+    let env = load_consumers(
+        "Blizzard_CharacterCreate",
+        ScreenKind::CharacterSelect,
+        false,
+    );
+    for allowed in [true, false, true] {
+        env.state().borrow_mut().game_rules.self_found_allowed = allowed;
+        env.exec("CharacterCreateSelfFoundButtonMixin.CheckSelfFoundButton(CharacterCreateSelfFoundButton)").unwrap();
+        assert_eq!(
+            env.eval::<bool>("return CharacterCreateSelfFoundButton:IsShown()")
+                .unwrap(),
+            allowed
+        );
+    }
+}
+
+#[test]
+fn graphics_default_consumes_supplied_experience_preset() {
+    if ACTIVE != ClientProfile::Ptr {
+        return;
+    }
+    let env = load_consumers("Blizzard_Settings_Shared", ScreenKind::Game, false);
+    env.state().borrow_mut().game_rules.sd_hd_toggle_enabled = true;
+    env.exec("I4Category = Settings.RegisterVerticalLayoutCategory('I4 models'); GraphicsOverrides.CreateHDSDToggleOptions(I4Category)").unwrap();
+    for preset in [Some(0), Some(1), None, Some(0)] {
+        env.state()
+            .borrow_mut()
+            .game_rules
+            .forever_experience_preset = preset;
+        assert_eq!(env.eval::<bool>("return Settings.GetSetting('PROXY_CHARACTER_MODELS_TOGGLE'):GetDefaultValueDerived()").unwrap(), preset == Some(0));
+    }
+}
+
+#[test]
+fn recent_allies_original_labels_consume_documented_enum() {
+    if ACTIVE != ClientProfile::Ptr {
+        return;
+    }
+    let env = load_consumers("Blizzard_RecentAllies", ScreenKind::Game, false);
+    env.exec(r#"
+        local names = {'Professions', 'PvP', 'Raiding', 'Dungeons', 'Delves', 'Questing'}
+        local labels = {
+            SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_PROFESSIONS,
+            SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_PVP,
+            SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_RAIDING,
+            SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_DUNGEONS,
+            SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_DELVE,
+            SOCIAL_UI_BATTLE_NET_FRIEND_TAG_LABEL_QUESTING,
+        }
+        for index, name in ipairs(names) do
+            assert(RecentAlliesUtil.GetLabelForInteractionCategoryFilter(index - 1) == labels[index])
+            assert(Enum.RecentAlliesInteractionCategoryFilter[name] == index - 1)
+        end
+        assert(RecentAlliesUtil.GetLabelForInteractionCategoryFilter(77) == '')
+        local meta = Enum.RecentAlliesInteractionCategoryFilterMeta
+        assert(meta.MinValue == 0 and meta.MaxValue == 5 and meta.NumValues == 6)
+    "#).unwrap();
+}
+
+#[test]
+fn non_ptr_publication_is_unchanged() {
+    if ACTIVE == ClientProfile::Ptr {
+        return;
+    }
+    let env = WowLuaEnv::new().unwrap();
+    if ACTIVE == ClientProfile::Retail {
+        env.exec(
+            r#"
+            for _, name in ipairs({'IsHardcoreActive', 'IsSDHDToggleEnabled', 'AccountHasSDEnabled',
+                'SetSDHDToggleValue', 'IsSelfFoundAllowed', 'GetForeverExperiencePreset'}) do
+                assert(rawget(C_GameRules, name) == nil, name)
+            end
+            assert(rawget(Enum, 'RecentAlliesInteractionCategoryFilter') == nil)
+        "#,
+        )
+        .unwrap();
+    }
+}

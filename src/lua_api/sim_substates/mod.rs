@@ -122,6 +122,15 @@ pub struct GameRulesState {
     pub glue_screen_name: String,
     /// Sparse rule store keyed by rule name. Missing key = inactive.
     pub rules: HashMap<String, GameRuleValue>,
+    /// Supplied PTR capabilities, not inferred native realm/account defaults.
+    pub hardcore_active: bool,
+    pub self_found_allowed: bool,
+    pub sd_hd_toggle_enabled: bool,
+    pub account_has_sd_enabled: bool,
+    /// Supplied documented enum value; absent means no preset was supplied.
+    pub forever_experience_preset: Option<i32>,
+    /// Last supplied SD/HD selection origin, with no native telemetry policy.
+    pub sd_toggle_usage_location: Option<i32>,
 }
 
 impl Default for GameRulesState {
@@ -130,6 +139,12 @@ impl Default for GameRulesState {
             active_game_mode: 0,
             glue_screen_name: "CharacterSelect".into(),
             rules: HashMap::new(),
+            hardcore_active: false,
+            self_found_allowed: false,
+            sd_hd_toggle_enabled: false,
+            account_has_sd_enabled: false,
+            forever_experience_preset: None,
+            sd_toggle_usage_location: None,
         }
     }
 }
