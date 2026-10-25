@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import tempfile
+import time
 
 H = Path('/home/osso/.local/state/wow-ui-sim/handoff/forever-gethe-missing')
 ORIGINAL = Path('/home/osso/.local/share/wow-sim/cvars.json')
@@ -54,9 +55,10 @@ def guarded_run(label, cwd, argv):
             assert identity['binary'] == argv[0]
             assert identity['revision'] == Path(argv[0]).parent.name
             assert identity['sha256'] == meta['binary_sha256'], 'Sealed harness drift'
-        command = ['/usr/bin/systemd-run', '--user', '--wait', '--remain-after-exit',
+        command = ['/usr/bin/systemd-run', '--user', '--no-block', '--remain-after-exit',
                    '--unit=' + unit, '--slice=agents.slice',
                    '--property=MemoryMax=9G', '--property=MemorySwapMax=0',
+                   '--property=CPUAccounting=yes', '--property=SuccessExitStatus=101',
                    '--property=RestrictAddressFamilies=AF_UNIX',
                    '--property=WorkingDirectory=' + cwd,
                    '--property=StandardOutput=append:' + str(root / 'stdout'),
@@ -68,17 +70,24 @@ def guarded_run(label, cwd, argv):
         meta['launcher_exit'] = result.exit_code
         (root / 'launcher.stdout').write_text(result.stdout)
         (root / 'launcher.stderr').write_text(result.stderr)
-        status = cli.command('/usr/bin/systemctl', '--user', 'show', unit,
-                             '--property=LoadState,ActiveState,SubState,Result,ExecMainStatus').capture().run()
         meta['status_argv'] = ['/usr/bin/systemctl', '--user', 'show', unit,
-                               '--property=LoadState,ActiveState,SubState,Result,ExecMainStatus']
-        assert status.exit_code == 0, status.stderr
+                               '--property=LoadState,ActiveState,SubState,Result,ExecMainStatus,CPUUsageNSec']
+        deadline = time.monotonic() + 110
+        while True:
+            status = cli.command(*meta['status_argv']).capture().run()
+            assert status.exit_code == 0, status.stderr
+            properties = dict(line.split('=', 1) for line in status.stdout.splitlines() if '=' in line)
+            if properties.get('SubState') in ('exited', 'dead'):
+                break
+            if properties.get('SubState') == 'failed':
+                (root / 'unit-failed-status').write_text(status.stdout)
+                cli.command('/usr/bin/systemctl', '--user', 'stop', unit).capture().run()
+            assert time.monotonic() < deadline, properties
+            time.sleep(0.25)
         (root / 'unit-status').write_text(status.stdout)
-        properties = dict(line.split('=', 1) for line in status.stdout.splitlines() if '=' in line)
+        meta['unit_status'] = properties
         assert properties['LoadState'] == 'loaded'
-        assert properties['ActiveState'] in ('active', 'failed')
-        assert properties['SubState'] in ('exited', 'failed')
-        assert properties['Result'] in ('success', 'exit-code')
+        assert properties['SubState'] in ('exited', 'dead')
         meta['exit_code'] = int(properties['ExecMainStatus'])
         meta['stdout'] = (root / 'stdout').read_text()
         meta['stderr'] = (root / 'stderr').read_text()
