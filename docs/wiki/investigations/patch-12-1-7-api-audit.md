@@ -1,5 +1,7 @@
 # Patch 12.1.7 API source audit
 
+Runtime target update: 2026-10-23. [Selected source](../../specs/ptr-blizzard-ui-source.md) is now wowt **12.1.7.70493**; authenticated manifest regeneration and startup proof remain pending. The following I0 capture and all frozen 70424 references are historical, not new-build evidence.
+
 Verified: 2026-10-22. Slice I0 accounts for the public source for **12.1.7 / 70424 / TOC 120107** without implementing its runtime changes. The [source-accounting spec](../../specs/patch-12-1-7-source-accounting.md) owns P01–P12, inherited category counts, header discrepancies and outstanding slices. All inherited applicability and behavior remain UNKNOWN until I4; GUID work remains deferred pending the user decision.
 
 ## Empty inventory is not patch coverage

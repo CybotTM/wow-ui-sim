@@ -2710,6 +2710,13 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
 
+## 2026-10-24 — PTR 70493 source refresh
+
+Updated client-profiles runtime-cache/source identity and epoch links from the authenticated 70493 source contract and exact failing startup baseline. Original 4cc resume and host RED precede producer changes; decoded range/content proof and partial-provenance completion remain distinct from compatibility. Retail master 36/42 exact preservation accepted; Forever paired master 78/82 exact preservation accepted; source/CVar guards unchanged.
+## [2026-10-24] source | Combat-log filter record staging
+
+[Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
+
 ## 2026-10-24 | CF-2 SuperTrack edit-only staging
 
 Added supplied-state system/contract and selected original-consumer tests. Retired overlapping target defaults; priority remains explicitly unsupported. Runtime RED/GREEN, mutants and profile preservation remain slot obligations.
