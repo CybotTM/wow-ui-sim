@@ -39,6 +39,8 @@ The complete static candidate inventory is retained in the lane handoff's `call-
 
 GREEN registers the existing namespace and enum when `client_profile::ACTIVE` is PTR or Forever. It preserves the existing model, getter, default and transition policy; Retail and Classic do not enter this registration path.
 
+Slot compilation exposed three stale Forever-only compile gates: the module, state field and initializer. The backing model now compiles on every profile, as required by the runtime `ACTIVE` branch. Namespace publication remains PTR/Forever-only. This removes the repeated compile gates without adding a new feature or changing modeled values. The original PTR compile failure is recorded in the slot-2 handoff.
+
 The staged test uses the existing setter before observing each of MKB → Gamepad → MKB. It asserts the original InputUtil query, both booleans and all four immediate setup/init counters. It does not replace or wrap any original helper. No new passive production scaffold is needed: the setter already exists.
 
 ## Static contradiction table
