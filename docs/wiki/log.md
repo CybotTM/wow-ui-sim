@@ -1,3 +1,7 @@
+## [2026-10-24] static producer | CF-2 Classic map display
+
+[Map display model](investigations/map-display-info-model.md#cf-2-classic-publication--static-producer-2026-10-24) records Era/Anniversary publication through the existing backing state and numeric/security parser. Tests are unchanged; static GREEN/RED source custody is separate from pending runtime acceptance. No build, test or slot.
+
 ## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
 
 [Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
