@@ -10,7 +10,7 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table as RiluaTable;
 use rilua::vm::value::Userdata;
 
-use crate::lua_bridge::IntoStack;
+use crate::IntoStack;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FrameIdentity {

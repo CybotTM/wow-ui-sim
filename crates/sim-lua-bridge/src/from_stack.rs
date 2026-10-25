@@ -39,7 +39,7 @@ pub(crate) fn abs_index(state: &LuaState, index: i32) -> usize {
 ///
 /// Returns `Val::Nil` for out-of-bounds positions.
 #[inline]
-pub(crate) fn stack_val(state: &LuaState, index: i32) -> Val {
+pub fn stack_val(state: &LuaState, index: i32) -> Val {
     let abs = abs_index(state, index);
     if abs < state.stack.len() && abs < state.top {
         state.stack[abs]
@@ -265,7 +265,7 @@ impl FromStack for i64 {
     }
 }
 
-pub(crate) fn val_to_i32(value: Val, index: i32) -> LuaResult<i32> {
+pub fn val_to_i32(value: Val, index: i32) -> LuaResult<i32> {
     let n = num_to_int(value, index)?;
     i32::try_from(n).map_err(|_| {
         runtime_error(format!(
