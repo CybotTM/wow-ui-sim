@@ -54,6 +54,11 @@ GuildPreferredPlaySettings source but has no declaration in this build's generat
 API documentation. Its native contract remains unconfirmed. Do not infer a
 catalog or native return from that consumer alone.
 
+Evidence disposition: **laptop aso source-only audit 2026-10-25: native-unknown**
+for both locality registration/returns and the idle target-spell return. Preserve
+these as classified baseline residue; do not invent an idle target ID or locality
+catalog to obtain a clean startup.
+
 ## Acceptance
 
 Original selected consumers must reject missing/constant producers and project
