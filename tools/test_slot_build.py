@@ -30,7 +30,7 @@ class SlotBuildTests(unittest.TestCase):
              "--unit=lane-build", "--slice=agents.slice",
              "--property=MemoryMax=9G", "--property=MemorySwapMax=0",
              "--property=CPUAccounting=yes",
-             "--setenv=CARGO_INCREMENTAL=0",
+             "--setenv=CARGO_INCREMENTAL=1",
              "--setenv=CARGO_TARGET_DIR=/home/osso/.cache/wow-ui-sim-targets/slot-2",
              "--property=BindPaths=/home/osso/.worktrees/lane:/home/osso/.cache/wow-ui-sim-srcmount/slot-2",
              "--working-directory=/home/osso/.cache/wow-ui-sim-srcmount/slot-2",
