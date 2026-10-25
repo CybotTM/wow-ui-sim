@@ -9,9 +9,11 @@ build = "build.rs"
 autotests = false
 
 [workspace]
-members = [".", "xtask", "crates/test-harness"]
+members = [".", "xtask", "crates/test-harness", "crates/sim-data", "crates/sim-data-profile"]
 
 [dependencies]
+sim-data = { path = "crates/sim-data" }
+sim-data-profile = { path = "crates/sim-data-profile" }
 icu_casemap = { version = "=2.1.1", default-features = false, features = ["compiled_data"] }
 icu_locale_core = { version = "=2.1.1", default-features = false, features = ["alloc"] }
 icu_locale = { version = "=2.1.1", default-features = false, features = ["compiled_data"] }
@@ -78,16 +80,27 @@ path = "src/bin/wow_sim/main.rs"
 [[bin]]
 name = "wow-cli"
 path = "src/bin/wow_cli/main.rs"
+required-features = ["tools"]
 
 [[bin]]
 name = "bench_spellbook"
 path = "src/bin/bench_spellbook.rs"
-required-features = ["gui"]
+required-features = ["gui", "tools"]
 
 [[bin]]
 name = "bench_steady_state"
 path = "src/bin/bench_steady_state.rs"
-required-features = ["gui"]
+required-features = ["gui", "tools"]
+
+[[bin]]
+name = "bench_talents"
+path = "src/bin/bench_talents.rs"
+required-features = ["tools"]
+
+[[bin]]
+name = "panel-visual-metrics"
+path = "src/bin/panel-visual-metrics.rs"
+required-features = ["tools"]
 
 [[example]]
 name = "casc_smoke"
@@ -102,6 +115,8 @@ pollster = "0.4"
 tempfile = "3"
 
 [features]
+# Non-test utility binaries; integration tests need only wow-sim.
+tools = []
 # Opt-in installed Ellesmere AuraKit acceptance test; requires ELLESMERE_AURA_KIT_PATH.
 ellesmere-acceptance = ["client-wowforever"]
 # fast-build is opt-in because the iced dylib hits MSVC's LNK1189 object limit
@@ -123,7 +138,7 @@ retail-12-0-0 = ["aura-instance-enumeration"]
 retail-12-0-5 = ["retail-12-0-0", "native-duration-formatting", "base-spell-relationships", "aura-spell-classifications"]
 retail-12-0-7 = ["retail-12-0-5"]
 retail-12-1-0 = ["retail-12-0-7", "aura-xml-widgets", "on-update-modes", "player-cast-durations", "forbidden-aspects", "numeric-rule-formatters", "aura-containers"]
-retail-12-1-5 = ["retail-12-1-0", "timed-signal-maps", "forbidden-animation-aspects"]
+retail-12-1-5 = ["retail-12-1-0", "timed-signal-maps", "forbidden-animation-aspects", "sim-data-profile/retail-12-1-5"]
 # Private ICU duration rendering; this capability does not publish C_Intl.
 native-duration-formatting = ["dep:cc", "dep:pkg-config", "dep:vcpkg"]
 # Existing specialization relationship model shared by Retail 12.0.5+ and Forever.
@@ -135,7 +150,7 @@ timed-signal-maps = []
 # Shared XML aliases and intrinsic mappings for aura frames/buttons.
 aura-xml-widgets = []
 # Shared modeled AuraContainer option processors, enums and base aura secrecy queries.
-aura-containers = ["aura-instance-enumeration"]
+aura-containers = ["aura-instance-enumeration", "sim-data-profile/aura-containers"]
 # Public aura ID queries shared by Retail 12.0+ and native aura containers.
 aura-instance-enumeration = []
 # Shared numeric frame update scheduling for Mainline and Forever.
@@ -153,14 +168,14 @@ prefork-full-ui = []
 # Client profile features — exactly one profile marker must be enabled. The
 # public client-retail bundle preserves the current retail epoch; profile-retail
 # allows historical retail epoch tests against the same retail source cache.
-profile-retail = []
+profile-retail = ["sim-data-profile/profile-retail"]
 client-retail = ["profile-retail", "retail-12-1-5", "prefork-full-ui"]
 client-ptr = ["retail-12-1-5"]
 client-wrath = []
 client-mists = ["prefork-full-ui"]
-client-era = []
-client-anniversary = []
-client-wowforever = ["timed-signal-maps", "aura-xml-widgets", "on-update-modes", "player-cast-durations", "forbidden-animation-aspects", "numeric-rule-formatters", "aura-containers", "native-duration-formatting", "base-spell-relationships", "aura-spell-classifications"]
+client-era = ["sim-data-profile/client-era"]
+client-anniversary = ["sim-data-profile/client-anniversary"]
+client-wowforever = ["timed-signal-maps", "aura-xml-widgets", "on-update-modes", "player-cast-durations", "forbidden-animation-aspects", "numeric-rule-formatters", "aura-containers", "native-duration-formatting", "base-spell-relationships", "aura-spell-classifications", "sim-data-profile/client-wowforever"]
 
 [profile.release]
 lto = false

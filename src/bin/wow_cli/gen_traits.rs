@@ -1,9 +1,9 @@
 //! Generator for traits.rs from WoW CSV exports.
 //!
-//! Reads 21 Trait* CSV files from ~/Projects/wow/data/ and generates data/traits.rs
+//! Reads 21 Trait* CSV files from ~/Projects/wow/data/ and generates crates/sim-data/data/traits.rs
 //! with PHF maps for the talent tree system (Dragonflight+).
 //!
-//! Generates: data/traits.rs
+//! Generates: crates/sim-data/data/traits.rs
 //!
 //! Split across modules:
 //!   - gen_traits_load: CSV parsing and raw data structures
@@ -20,7 +20,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let (tree_infos, node_infos) = gen_traits_emit::denormalize(&data);
 
     std::fs::create_dir_all("data")?;
-    let output_path = Path::new("data/traits.rs");
+    let output_path = Path::new("crates/sim-data/data/traits.rs");
     let mut out = File::create(output_path)?;
 
     gen_traits_emit::write_header(&mut out)?;

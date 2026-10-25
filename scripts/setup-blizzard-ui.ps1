@@ -17,7 +17,7 @@ if ($Profile -ne "") {
 
 Push-Location $RepoRoot
 try {
-    cargo run --quiet --bin wow-cli -- casc sync-blizzard-ui
+    cargo run --quiet --bin wow-cli --features tools -- casc sync-blizzard-ui
 }
 finally {
     Pop-Location
