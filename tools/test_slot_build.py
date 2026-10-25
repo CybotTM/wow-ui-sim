@@ -231,12 +231,19 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertIn("src/main.rs", current["changed_paths"])
         self.assertGreater(source.stat().st_mtime_ns, 1_000_000_000)
 
+    def add_reported_executable(self, current, fresh=False):
+        current.update(worktree=str(self.tree), slot=str(self.slot),
+                       package_roots={"probe": [str(self.tree)]},
+                       reported_artifacts=[{"package_id": "probe", "fresh": fresh,
+                                            "executable": str(self.slot / "debug/probe")}])
+
     def test_identical_artifacts_after_rust_change_fail_with_receipt(self):
         previous = self.prepare()
         previous["artifacts"] = {"debug/probe": "abc"}
         (self.tree / "src/main.rs").write_text("changed")
         current = self.prepare(previous)
         receipt = self.slot / "receipt.json"
+        self.add_reported_executable(current)
         with self.assertRaisesRegex(ValueError, "stale artifacts"):
             self.module.finish_build(self.slot, receipt, current, previous,
                                      {"debug/probe": "abc"}, 0)
@@ -317,7 +324,8 @@ class SourceFreshnessTests(unittest.TestCase):
             "slot": str(self.slot), "worktree": str(self.tree), "owner": "test-owner",
             "unit": "wrapped", "receipt": str(receipt),
             "cargo": [sys.executable, str(wrapper), str(self.slot / "compile.stdout")]}))
-        self.assertEqual(self.module.execute_build(request), 0)
+        with self.assertRaisesRegex(ValueError, "no Cargo compiler-artifact"):
+            self.module.execute_build(request)
         self.assertEqual(json.loads(receipt.read_text())["artifacts"], {
             "debug/probe": hashlib.sha256(b"binary").hexdigest()})
         self.assertEqual((self.slot / "compile.stdout").read_text(),
@@ -326,7 +334,8 @@ class SourceFreshnessTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "stale artifacts"):
             self.module.execute_build(request)
 
-    def run_mixed_output_pair(self, changed_input, changed_outputs):
+    def run_mixed_output_pair(self, changed_input, changed_outputs, fresh=False,
+                              reported_names=None):
         import sys
         (self.slot / ".owner").write_text("test-owner")
         emitter = (
@@ -337,9 +346,17 @@ class SourceFreshnessTests(unittest.TestCase):
             '    path.parent.mkdir(parents=True, exist_ok=True)\n'
             '    path.write_text(content)\n'
             '    if path.suffix != ".rmeta": path.chmod(0o755)\n'
+            'for name in json.loads(sys.argv[5]):\n'
+            '    print(json.dumps({"reason":"compiler-artifact", "package_id":sys.argv[3],\n'
+            '        "executable":str(slot/name) if not name.endswith(".rmeta") else None,\n'
+            '        "fresh":sys.argv[4] == "yes"}))\n'
         )
         request = self.slot / "request.json"
         receipt = self.slot / "receipt.json"
+        metadata = json.loads(subprocess.check_output(
+            ["cargo", "metadata", "--no-deps", "--format-version", "1", "--offline"],
+            cwd=self.tree))
+        package_id = metadata["packages"][0]["id"]
         outputs = {"debug/probe": "A binary", "debug/other": "A other",
                    "debug/deps/probe.rmeta": "A metadata"}
         for phase in ["A", "B"]:
@@ -352,7 +369,10 @@ class SourceFreshnessTests(unittest.TestCase):
                 "slot": str(self.slot), "worktree": str(self.tree),
                 "owner": "test-owner", "unit": "mixed-output", "receipt": str(receipt),
                 "cargo": [sys.executable, "-c", emitter, str(self.slot),
-                          json.dumps(outputs)]}))
+                          json.dumps(outputs), package_id,
+                          "yes" if fresh and phase == "B" else "no",
+                          json.dumps(reported_names if phase == "B" and reported_names
+                                     is not None else list(outputs))]}))
             result = subprocess.run(
                 [sys.executable, str(self.module.__file__), "--execute", str(request)],
                 capture_output=True)
@@ -361,9 +381,39 @@ class SourceFreshnessTests(unittest.TestCase):
                 first = json.loads(receipt.read_text())
         return result, first, json.loads(receipt.read_text())
 
-    def test_changed_metadata_cannot_certify_unchanged_executable(self):
+    def test_fresh_report_rejects_even_changed_executable_bytes(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/probe": "B binary", "debug/other": "B other"},
+            fresh=True)
+        self.assertNotEqual(first["artifacts"]["debug/probe"],
+                            second["artifacts"]["debug/probe"])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(second["result"], "stale-artifacts")
+
+    def test_unreported_same_package_executable_is_not_judged(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/other": "B other"})
+        self.assertEqual(first["artifacts"]["debug/probe"],
+                         second["artifacts"]["debug/probe"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_library_record_does_not_require_unreported_executables(self):
         result, first, second = self.run_mixed_output_pair(
             "src/main.rs", {"debug/deps/probe.rmeta": "B metadata"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(second["result"], "success")
+
+    def test_no_reported_artifact_fails_for_changed_package_inputs(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/probe": "B binary", "debug/other": "B other"},
+            reported_names=[])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(b"no Cargo compiler-artifact records", result.stderr)
+
+    def test_changed_metadata_cannot_certify_unchanged_executable(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/deps/probe.rmeta": "B metadata"},
+            reported_names=["debug/probe", "debug/deps/probe.rmeta"])
         self.assertEqual(second["changed_paths"], ["src/main.rs"])
         self.assertEqual(first["artifacts"]["debug/probe"],
                          second["artifacts"]["debug/probe"])
@@ -375,7 +425,8 @@ class SourceFreshnessTests(unittest.TestCase):
 
     def test_changed_executable_cannot_certify_another_unchanged_executable(self):
         result, first, second = self.run_mixed_output_pair(
-            "src/main.rs", {"debug/probe": "B binary"})
+            "src/main.rs", {"debug/probe": "B binary"},
+            reported_names=["debug/probe", "debug/other"])
         self.assertNotEqual(first["artifacts"]["debug/probe"],
                             second["artifacts"]["debug/probe"])
         self.assertEqual(first["artifacts"]["debug/other"],
@@ -385,7 +436,8 @@ class SourceFreshnessTests(unittest.TestCase):
 
     def test_build_input_change_rejects_unchanged_executable(self):
         result, first, second = self.run_mixed_output_pair(
-            "Cargo.toml", {"debug/deps/probe.rmeta": "B metadata"})
+            "Cargo.toml", {"debug/deps/probe.rmeta": "B metadata"},
+            reported_names=["debug/probe", "debug/deps/probe.rmeta"])
         self.assertEqual(second["changed_paths"], ["Cargo.toml"])
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(second["result"], "stale-artifacts")
@@ -398,9 +450,80 @@ class SourceFreshnessTests(unittest.TestCase):
                          second["artifacts"]["debug/deps/probe.rmeta"])
         self.assertEqual(second["result"], "success")
 
+    def run_test_only_pair(self, report_application):
+        import hashlib
+        import sys
+        (self.slot / ".owner").write_text("test-owner")
+        (self.tree / "app").mkdir()
+        self.git("mv", "src", "app/src")
+        self.git("mv", "Cargo.toml", "app/Cargo.toml")
+        (self.tree / "Cargo.toml").write_text(
+            '[workspace]\nmembers=["app", "tests"]\nresolver="2"\n')
+        (self.tree / "tests").mkdir()
+        source = self.tree / "tests/foo.rs"
+        source.write_text("#[test] fn foo() {}")
+        (self.tree / "tests/Cargo.toml").write_text(
+            '[package]\nname="tests"\nversion="0.1.0"\n'
+            '[[test]]\nname="foo"\npath="foo.rs"\n')
+        self.git("add", ".")
+        self.git("commit", "-qm", "test A")
+        metadata = json.loads(subprocess.check_output(
+            ["cargo", "metadata", "--no-deps", "--format-version", "1", "--offline"],
+            cwd=self.tree))
+        packages = {p["name"]: p["id"] for p in metadata["packages"]}
+        emitter = (
+            'import json,sys; from pathlib import Path\n'
+            'slot,phase,report,app_id,test_id=sys.argv[1:]\n'
+            'binary=Path(slot)/"debug/wow-sim"\n'
+            'test_binary=Path(slot)/"debug/deps/foo-test"\n'
+            'if phase == "A":\n'
+            '    binary.parent.mkdir(parents=True,exist_ok=True)\n'
+            '    binary.write_bytes(b"unchanged application executable")\n'
+            '    binary.chmod(0o755)\n'
+            'test_binary.parent.mkdir(parents=True,exist_ok=True)\n'
+            'test_binary.write_bytes(("test executable " + phase).encode())\n'
+            'test_binary.chmod(0o755)\n'
+            'if phase == "A" or report == "yes":\n'
+            '    print(json.dumps({"reason":"compiler-artifact", "package_id":app_id,\n'
+            '        "executable":str(binary), "fresh":phase == "B"}))\n'
+            'print(json.dumps({"reason":"compiler-artifact", "package_id":test_id,\n'
+            '    "executable":str(test_binary), "fresh":False}))\n'
+        )
+        request = self.slot / "request.json"
+        receipt = self.slot / "receipt.json"
+        binary = self.slot / "debug/wow-sim"
+        for phase in ["A", "B"]:
+            if phase == "B":
+                before = binary.stat()
+                digest = hashlib.sha256(binary.read_bytes()).hexdigest()
+                source.write_text("#[test] fn foo() { assert_eq!(2, 2); }")
+                self.git("commit", "-qam", "test B only")
+            request.write_text(json.dumps({
+                "slot": str(self.slot), "worktree": str(self.tree),
+                "owner": "test-owner", "unit": "test-only", "receipt": str(receipt),
+                "cargo": [sys.executable, "-c", emitter, str(self.slot), phase,
+                          "yes" if report_application else "no", packages["probe"],
+                          packages["tests"]]}))
+            result = subprocess.run([sys.executable, "-B", str(self.module.__file__),
+                                     "--execute", str(request)], capture_output=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        saved = json.loads(receipt.read_text())
+        self.assertEqual(saved["changed_paths"], ["tests/foo.rs"])
+        self.assertEqual(saved["result"], "success")
+        self.assertEqual(binary.stat().st_mtime_ns, before.st_mtime_ns)
+        self.assertEqual(binary.stat().st_ctime_ns, before.st_ctime_ns)
+        self.assertEqual(hashlib.sha256(binary.read_bytes()).hexdigest(), digest)
+
+    def test_test_only_diff_ignores_unreported_application(self):
+        self.run_test_only_pair(False)
+
+    def test_test_only_diff_ignores_fresh_disjoint_application(self):
+        self.run_test_only_pair(True)
+
     def test_worker_preserves_binary_streams_and_launcher_arguments(self):
         import sys
         (self.slot / ".owner").write_text("test-owner")
+        self.module.write_json(self.slot / ".source-identity.json", self.prepare())
         request = self.slot / "request.json"
         request.write_text(json.dumps({
             "slot": str(self.slot), "worktree": str(self.tree), "owner": "test-owner",
@@ -414,12 +537,22 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertEqual(result.stdout, b"stdout\xff\x00")
         self.assertEqual(result.stderr, b"stderr\xfe\x00")
 
+    def test_hidden_stream_allows_diff_outside_package_roots(self):
+        current = self.prepare()
+        self.add_reported_executable(current)
+        current.update(changed_paths=["README.md"], reported_artifacts=[],
+                       package_roots={"probe": [str(self.tree / "app")]})
+        receipt = self.slot / "receipt.json"
+        self.module.finish_build(self.slot, receipt, current, None, {}, 0)
+        self.assertEqual(json.loads(receipt.read_text())["result"], "success")
+
     def test_changed_artifacts_and_identity_are_recorded(self):
         previous = self.prepare()
         previous["artifacts"] = {"debug/probe": "abc"}
         (self.tree / "src/main.rs").write_text("changed")
         current = self.prepare(previous)
         receipt = self.slot / "receipt.json"
+        self.add_reported_executable(current)
         self.module.finish_build(self.slot, receipt, current, previous,
                                  {"debug/probe": "def"}, 0)
         saved = json.loads(receipt.read_text())

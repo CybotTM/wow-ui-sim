@@ -73,24 +73,29 @@ this conservative full refresh is only needed when prior source is unknown.
 
 Each unit writes `slot-N/receipts/UNIT.json` with its source identity, changed
 paths, command, result and artifact SHA256 values. The command arguments and
-stdout/stderr are passed through unchanged, including wrappers that capture Cargo
-JSON internally. After the child exits, the worker scans the slot for executables
-and compiled libraries whose mtime or ctime is at least the child start time.
-It also rehashes previously recorded artifacts, including unchanged files that
-Cargo might incorrectly consider fresh. Receipt, hidden, and incremental
-subdirectories are excluded from discovery. Empty discovery does not turn a
-successful child into a failure; an empty map is not artifact freshness proof.
-After any recorded input diff, each executable must differ from its own previous
-path's SHA256. An unchanged executable fails the run with `stale artifacts` even
-when another executable, library or `.rmeta` changed; the receipt retains the
-failure. Known library suffixes are excluded from this executable check; all other
-recorded outputs are treated as executables. Library-only builds/checks still fail
-if every recorded output is unchanged at its own previous path.
-No disjoint-input or `fresh=false` exception is inferred: wrappers can capture
-Cargo evidence, and package roots alone do not prove transitive input isolation.
-All changed paths are conservatively treated as possible build inputs. Identical
-code or disjoint edits can therefore fail closed and require investigation, not
-acceptance based on Cargo exit 0.
+stdout/stderr bytes are passed through unchanged, including wrappers that capture
+Cargo JSON internally. The worker reads visible stdout for this build's Cargo
+`compiler-artifact` records, without changing the submitted arguments. Use Cargo's
+JSON message format to expose those records. Receipts retain the records and each
+package's metadata-derived manifest-parent and path-dependency roots.
+
+Only executables in this build's records are judged. If the diff intersects that
+executable's package roots, the run fails with `stale artifacts` when Cargo reports
+`fresh=true` **or** its SHA256 equals the previous hash at the same path. A changed
+library, `.rmeta`, or another executable cannot certify it. Unreported executables
+and executables with disjoint package inputs are not judged. This is package-root
+selection, not a target dependency graph: a test edit within an application's
+package root still intersects that package. Identical rebuilt bytes also fail.
+The existing conservative root derivation and source mtime refresh are unchanged.
+
+When no compiler-artifact record is visible (for example, a wrapper captures Cargo
+stdout), a successful child fails closed only if the diff intersects package inputs.
+A visible library-only record is available evidence, not an executable to judge.
+A hidden stream with no package-input diff does not fail. Wrappers remain supported,
+but captured output or filesystem hashes cannot substitute for the missing records.
+For receipt evidence, the worker still scans newly touched executables/libraries
+and rehashes previous paths. Receipt, hidden, and incremental subdirectories are
+excluded from discovery. Those discovered paths do not select freshness candidates.
 Checks can record library artifacts without an executable. Inspect the retained
 unit's terminal result as well as its receipt; launch success is not build success.
 

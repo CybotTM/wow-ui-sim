@@ -118,26 +118,48 @@ def write_json(path, value):
     temporary.replace(path)
 
 
-def find_stale_artifacts(changed_paths, previous_artifacts, artifacts):
-    if not changed_paths:
-        return []
-    unchanged = {name for name, digest in artifacts.items()
-                 if previous_artifacts.get(name) == digest}
-    # Discovery records libraries and executables. Treat anything not known to
-    # be a library as an executable; never use another output's hash as proof.
-    unchanged_executables = sorted(name for name in unchanged
-                                   if Path(name).suffix not in LIBRARY_SUFFIXES)
-    if unchanged_executables:
-        return unchanged_executables
-    # Preserve the identical-output guard for library-only builds/checks.
-    return sorted(unchanged) if unchanged == artifacts.keys() else []
+def read_package_roots(worktree):
+    result = subprocess.run(
+        ["cargo", "metadata", "--no-deps", "--format-version", "1", "--offline"],
+        cwd=worktree, capture_output=True, check=False)
+    if result.returncode:
+        # Match the existing all-tracked-input policy when metadata is unavailable.
+        return {None: [str(worktree)]}
+    packages = json.loads(result.stdout)["packages"]
+    return {package["id"]: [str(Path(package["manifest_path"]).parent),
+                           *(dep["path"] for dep in package["dependencies"]
+                             if dep.get("path"))]
+            for package in packages}
+
+
+def package_inputs_changed(current, roots):
+    worktree = Path(current["worktree"])
+    return any((worktree / name).is_relative_to(root)
+               for name in current["changed_paths"] for root in roots)
+
+
+def find_stale_artifacts(current, previous_artifacts, artifacts):
+    stale = []
+    for record in current["reported_artifacts"]:
+        executable = record.get("executable")
+        roots = current["package_roots"].get(record.get("package_id"), [])
+        if not executable or not package_inputs_changed(current, roots):
+            continue
+        name = os.path.relpath(executable, current["slot"])
+        same_hash = name in artifacts and previous_artifacts.get(name) == artifacts[name]
+        if record.get("fresh") is True or same_hash:
+            stale.append(name)
+    return sorted(set(stale))
 
 
 def finish_build(slot, receipt, current, previous, artifacts, returncode):
     previous_artifacts = (previous or {}).get("artifacts", {})
     stale_paths = find_stale_artifacts(
-        current["changed_paths"], previous_artifacts, artifacts) if returncode == 0 else []
-    stale = bool(stale_paths)
+        current, previous_artifacts, artifacts) if returncode == 0 else []
+    roots = [root for roots in current["package_roots"].values() for root in roots]
+    missing_evidence = (returncode == 0 and not current["reported_artifacts"]
+                        and package_inputs_changed(current, roots))
+    stale = bool(stale_paths) or missing_evidence
     result = "success" if returncode == 0 else "failed"
     if stale:
         result = "stale-artifacts"
@@ -145,13 +167,25 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
     write_json(receipt, current)
     write_json(slot / ".source-identity.json", current)
     if stale:
-        raise ValueError(f"stale artifacts: inputs changed but artifact SHA256 values "
-                         f"match the same previous paths: {stale_paths}; see {receipt}")
+        reason = ("no Cargo compiler-artifact records visible for changed package inputs"
+                  if missing_evidence else f"fresh=true or unchanged SHA256: {stale_paths}")
+        raise ValueError(f"stale artifacts: {reason}; see {receipt}")
 
 
-def collect_artifacts(slot, started_ns, previous):
-    # Previously recorded paths also matter when Cargo incorrectly reports them
-    # fresh. New outputs are discovered independently of launcher/JSON streams.
+def hash_artifacts(slot, paths):
+    artifacts = {}
+    for path in sorted(paths):
+        if path.is_file() and not path.is_symlink():
+            with path.open("rb") as stream:
+                artifacts[os.path.relpath(path, slot)] = hashlib.file_digest(
+                    stream, "sha256").hexdigest()
+    return artifacts
+
+
+def collect_artifacts(slot, started_ns, previous, records):
+    # Retain discovery/hash evidence for capturing wrappers. Only current Cargo
+    # records select executables for the freshness decision.
+
     paths = {slot / name for name in (previous or {}).get("artifacts", {})}
     for directory, children, files in os.walk(slot):
         children[:] = [name for name in children
@@ -165,13 +199,23 @@ def collect_artifacts(slot, started_ns, previous):
                         or path.suffix == ".exe")
             if artifact and max(stat.st_mtime_ns, stat.st_ctime_ns) >= started_ns:
                 paths.add(path)
-    artifacts = {}
-    for path in sorted(paths):
-        if path.is_file() and not path.is_symlink():
-            with path.open("rb") as stream:
-                artifacts[str(path.relative_to(slot))] = hashlib.file_digest(
-                    stream, "sha256").hexdigest()
-    return artifacts
+    paths.update(Path(record["executable"]) for record in records if record.get("executable"))
+    return hash_artifacts(slot, paths)
+
+
+def run_build_command(command):
+    records = []
+    with subprocess.Popen(command, stdout=subprocess.PIPE) as child:
+        for line in child.stdout:
+            sys.stdout.buffer.write(line)
+            sys.stdout.buffer.flush()
+            try:
+                record = json.loads(line)
+            except (ValueError, UnicodeDecodeError):
+                continue
+            if isinstance(record, dict) and record.get("reason") == "compiler-artifact":
+                records.append(record)
+        return child.wait(), records
 
 
 def execute_build(request_path):
@@ -182,15 +226,17 @@ def execute_build(request_path):
     previous = json.loads(state.read_text()) if state.exists() else None
     worktree = Path(request["worktree"])
     current = prepare_source(worktree, previous)
-    current.update(unit=request["unit"], cargo=request["cargo"], worktree=str(worktree))
+    current.update(unit=request["unit"], cargo=request["cargo"], worktree=str(worktree),
+                   slot=str(slot), package_roots=read_package_roots(worktree))
     # An interrupted/failed build may already have replaced fingerprints. Record
     # its input identity before Cargo starts, not only after successful builds.
     write_json(state, dict(current, artifacts={}, result="building"))
     receipt = Path(request["receipt"])
     write_json(receipt, dict(current, artifacts={}, result="building"))
     started_ns = time.time_ns()
-    returncode = subprocess.run(request["cargo"], check=False).returncode
-    artifacts = collect_artifacts(slot, started_ns, previous)
+    returncode, records = run_build_command(request["cargo"])
+    current["reported_artifacts"] = records
+    artifacts = collect_artifacts(slot, started_ns, previous, records)
     finish_build(slot, receipt, current, previous, artifacts, returncode)
     return returncode
 
