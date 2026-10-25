@@ -146,6 +146,8 @@ pub struct ActionHighlightState {
 /// override bar is only active while a vehicle/possess override is mounted.
 #[derive(Clone, Debug)]
 pub struct ActionBarStateInfo {
+    /// Supplied keyring UI capability; false is empty-host policy, not a native default.
+    pub keyring_ui_enabled: bool,
     pub busy: bool,
     pub current_state: i32,
     /// Drives `C_ActionBar.IsPossessBarVisible()`. True while a
@@ -161,6 +163,7 @@ pub struct ActionBarStateInfo {
 impl Default for ActionBarStateInfo {
     fn default() -> Self {
         Self {
+            keyring_ui_enabled: false,
             busy: false,
             current_state: 1,
             possess_bar_visible: false,

@@ -1,3 +1,7 @@
+## [2026-10-25] implementation | PTR keyring startup boundary
+
+[Original startup RED](systems/housing-spatial-presence.md#ptr-keyring-startup-boundary) links the [PTR capability contract](../specs/ptr-keyring-capability.md). Declared C_ActionBar.ShouldShowKeyring projects supplied action-bar state, without a C_Container alias or invented native constant. Original-consumer GREEN remains pending.
+
 ## [2026-10-25] implementation | Housing plot blocker boundary
 
 [Current-house shape and startup](systems/housing-spatial-presence.md#current-house-shape-and-ptr-startup) links the [nullable snapshot contract](../specs/current-house-info.md): original tutorial data/utility fixture loads, state-backed documented HouseInfo and declared PTR-only SHARD_TRANSFER. Merged original-consumer RED observed; GREEN and final proof pending. Native policy remains unknown.
