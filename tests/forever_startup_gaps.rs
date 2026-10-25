@@ -42,7 +42,10 @@ fn forever_original_consumers_register_70532_events() {
         "EXTERNAL_EVENT_LAUNCH_URL_RESULT",
         "SOCIAL_UI_SOCIAL_QUEUE_SYSTEM_STATUS_UPDATED",
     ] {
-        assert!(!state.lua_errors.iter().any(|error| error.contains(event)), "{event}");
+        assert!(
+            !state.lua_errors.iter().any(|error| error.contains(event)),
+            "{event}"
+        );
     }
 }
 
@@ -50,8 +53,14 @@ fn forever_original_consumers_register_70532_events() {
 fn forever_original_group_buff_consumer_projects_supplied_alerts() {
     let env = startup();
     env.state().borrow_mut().forever_startup.group_buff_alerts = vec![
-        GroupBuffAlert { spell_id: 21562, visual_value: 1 },
-        GroupBuffAlert { spell_id: 1459, visual_value: 2 },
+        GroupBuffAlert {
+            spell_id: 21562,
+            visual_value: 1,
+        },
+        GroupBuffAlert {
+            spell_id: 1459,
+            visual_value: 2,
+        },
     ];
     env.exec(
         r#"
@@ -62,10 +71,15 @@ fn forever_original_group_buff_consumer_projects_supplied_alerts() {
         assert(consumer:GetGroupBuffVisualAlert(999999) == nil)
         local rows = C_UnitAuras.GetGroupBuffVisualAlerts()
         assert(#rows == 2 and rows[1].spellID == 21562 and rows[2].visualValue == 2)
-        assert(select("#", C_UnitAuras.GetGroupBuffVisualAlerts()) == 1)
+        assert(select('#', C_UnitAuras.GetGroupBuffVisualAlerts()) == 1)
         "#,
-    ).unwrap();
-    env.state().borrow_mut().forever_startup.group_buff_alerts.clear();
+    )
+    .unwrap();
+    env.state()
+        .borrow_mut()
+        .forever_startup
+        .group_buff_alerts
+        .clear();
     env.exec(
         r#"
         local consumer = CreateFromMixins(GroupBuffMixin)
@@ -73,7 +87,8 @@ fn forever_original_group_buff_consumer_projects_supplied_alerts() {
         assert(consumer:GetGroupBuffVisualAlert(21562) == nil)
         assert(#C_UnitAuras.GetGroupBuffVisualAlerts() == 0)
         "#,
-    ).unwrap();
+    )
+    .unwrap();
 }
 
 #[test]
@@ -85,9 +100,12 @@ fn forever_original_external_event_consumer_projects_url_state() {
         urlProbe:Refresh()
         assert(not urlProbe:IsShown())
         "#,
-    ).unwrap();
+    )
+    .unwrap();
     env.state().borrow_mut().forever_startup.external_event = Some(ExternalEvent {
-        url: "https://example.invalid/event".to_owned(), can_show: true, is_new: true,
+        url: "https://example.invalid/event".to_owned(),
+        can_show: true,
+        is_new: true,
     });
     env.exec(
         r#"
@@ -95,11 +113,18 @@ fn forever_original_external_event_consumer_projects_url_state() {
         assert(urlProbe:IsShown())
         assert(urlProbe.SpellEffectModelScene:IsShown())
         assert(C_ExternalEventURL.CanShow() and C_ExternalEventURL.HasURL() and C_ExternalEventURL.IsNew())
-        assert(select("#", C_ExternalEventURL.HasURL()) == 1)
+        assert(select('#', C_ExternalEventURL.HasURL()) == 1)
         "#,
     ).unwrap();
-    env.state().borrow_mut().forever_startup.external_event.as_mut().unwrap().can_show = false;
-    env.exec("urlProbe:Refresh(); assert(not urlProbe:IsShown())").unwrap();
+    env.state()
+        .borrow_mut()
+        .forever_startup
+        .external_event
+        .as_mut()
+        .unwrap()
+        .can_show = false;
+    env.exec("urlProbe:Refresh(); assert(not urlProbe:IsShown())")
+        .unwrap();
 }
 
 #[test]
@@ -108,9 +133,20 @@ fn forever_original_gamepad_reticle_projects_cursor_visibility() {
     for visible in [true, false] {
         env.state().borrow_mut().forever_startup.cursor_visible = visible;
         env.exec("GamepadReticle:OnUpdate()").unwrap();
-        assert_eq!(env.eval::<bool>("return GamepadReticle.Icons:IsShown()").unwrap(), !visible);
-        assert_eq!(env.eval::<bool>("return GamepadReticle.SwingTimer.enabledCursorVis").unwrap(), !visible);
-        assert_eq!(env.eval::<bool>("return IsCursorVisible()").unwrap(), visible);
+        assert_eq!(
+            env.eval::<bool>("return GamepadReticle.Icons:IsShown()")
+                .unwrap(),
+            !visible
+        );
+        assert_eq!(
+            env.eval::<bool>("return GamepadReticle.SwingTimer.enabledCursorVis")
+                .unwrap(),
+            !visible
+        );
+        assert_eq!(
+            env.eval::<bool>("return IsCursorVisible()").unwrap(),
+            visible
+        );
     }
 }
 
@@ -126,17 +162,23 @@ fn forever_original_bank_consumer_uses_bank_type_permissions() {
         bankProbe.PurchaseTab.IsSelected = bankProbe.PurchaseTab.GetChecked
         assert(bankProbe:ShouldShowPurchasePrompt() == false)
         "#,
-    ).unwrap();
+    )
+    .unwrap();
     let bank_type = env.eval::<i32>("return Enum.BankType.Character").unwrap();
-    env.state().borrow_mut().forever_startup.purchasable_bank_types.insert(bank_type);
+    env.state()
+        .borrow_mut()
+        .forever_startup
+        .purchasable_bank_types
+        .insert(bank_type);
     env.exec(
         r#"
         assert(bankProbe:ShouldShowPurchasePrompt() == true)
         bankProbe.bankType = Enum.BankType.Account
         assert(bankProbe:ShouldShowPurchasePrompt() == false)
-        assert(select("#", C_Bank.CanPurchaseBankTab(Enum.BankType.Character)) == 1)
+        assert(select('#', C_Bank.CanPurchaseBankTab(Enum.BankType.Character)) == 1)
         "#,
-    ).unwrap();
+    )
+    .unwrap();
 }
 
 #[test]
@@ -149,30 +191,35 @@ fn forever_original_pvp_consumer_uses_completion_state() {
         PVPMatchResultsMixin.OnEvent(pvpProbe, "PLAYER_ENTERING_WORLD")
         assert(not pvpProbe:IsEventRegistered("PVP_MATCH_COMPLETE"))
         "#,
-    ).unwrap();
+    )
+    .unwrap();
     env.state().borrow_mut().forever_startup.match_complete = true;
     env.exec(
         r#"
         PVPMatchResultsMixin.OnEvent(pvpProbe, "PLAYER_ENTERING_WORLD")
         assert(pvpProbe:IsEventRegistered("PVP_MATCH_COMPLETE"))
         assert(C_PvP.IsMatchComplete() == true)
-        assert(select("#", C_PvP.IsMatchComplete()) == 1)
+        assert(select('#', C_PvP.IsMatchComplete()) == 1)
         "#,
-    ).unwrap();
+    )
+    .unwrap();
 }
 
 #[test]
 fn forever_original_item_context_uses_supplied_target_spell() {
     let env = startup();
     env.state().borrow_mut().forever_startup.target_spell_id = Some(6991);
-    env.exec("assert(ItemButtonUtil.GetItemContext() == ItemButtonUtil.ItemContextEnum.FeedPet)").unwrap();
+    env.exec("assert(ItemButtonUtil.GetItemContext() == ItemButtonUtil.ItemContextEnum.FeedPet)")
+        .unwrap();
     env.state().borrow_mut().forever_startup.target_spell_id = Some(19750);
-    env.exec("assert(ItemButtonUtil.GetItemContext() ~= ItemButtonUtil.ItemContextEnum.FeedPet)").unwrap();
+    env.exec("assert(ItemButtonUtil.GetItemContext() ~= ItemButtonUtil.ItemContextEnum.FeedPet)")
+        .unwrap();
     env.state().borrow_mut().forever_startup.target_spell_id = None;
     env.exec(
         r#"
         local ok, message = pcall(C_Spell.GetTargetSpellID)
         assert(not ok and string.find(message, "native%-unknown"))
         "#,
-    ).unwrap();
+    )
+    .unwrap();
 }
