@@ -32,7 +32,37 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     }
     let paper_doll = ensure_namespace(state, "C_PaperDollInfo")?;
     table_set_rust_fn_static(state, paper_doll, "AmmoNeeded", ammo_needed)?;
-    register_group_buffs(state)
+    register_group_buffs(state)?;
+    register_external_event(state)
+}
+
+fn register_external_event(state: &mut LuaState) -> LuaResult<()> {
+    let external = ensure_namespace(state, "C_ExternalEventURL")?;
+    table_set_rust_fn_static(state, external, "CanShow", external_can_show)?;
+    table_set_rust_fn_static(state, external, "HasURL", external_has_url)?;
+    table_set_rust_fn_static(state, external, "IsNew", external_is_new)
+}
+
+fn external_can_show(state: &mut LuaState) -> LuaResult<u32> {
+    push_external_flag(state, |event| event.can_show)
+}
+
+fn external_has_url(state: &mut LuaState) -> LuaResult<u32> {
+    push_external_flag(state, |event| !event.url.is_empty())
+}
+
+fn external_is_new(state: &mut LuaState) -> LuaResult<u32> {
+    push_external_flag(state, |event| event.is_new)
+}
+
+fn push_external_flag(state: &mut LuaState, query: fn(&ExternalEvent) -> bool) -> LuaResult<u32> {
+    let value = borrow_state(state)?
+        .forever_startup
+        .external_event
+        .as_ref()
+        .is_some_and(query);
+    state.push(Val::Bool(value));
+    Ok(1)
 }
 
 fn register_group_buffs(state: &mut LuaState) -> LuaResult<()> {
