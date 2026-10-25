@@ -1,6 +1,6 @@
 ## [2026-10-25] proof | Forever native-unknown-only baseline
 
-[Baseline](../baselines/README.md#forever-lua-errors) and [consumer scope](investigations/forever-startup-gaps.md) bind 21 passing exact selectors and the stock capture at `1fcbddf67`. No idle sentinel or locality catalog is invented; housing's excluded positive publisher is explicit. Profile checks and slot release remain pending.
+[Baseline](../baselines/README.md#forever-lua-errors) and [consumer scope](investigations/forever-startup-gaps.md) bind 21 passing exact selectors and the stock capture at `1fcbddf67`. No idle sentinel or locality catalog is invented; housing's excluded positive publisher is explicit. One all-target check per requested profile passes at `b910efd8d`: Retail zero warnings, Forever/PTR three expressly allowed inherited dead-code warnings each. Formatting passes; no warning suppression or source change to the separately owned late-bind test is retained.
 
 ## [2026-10-25] investigation | Forever startup supplied inputs
 

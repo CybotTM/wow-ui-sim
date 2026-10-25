@@ -188,8 +188,13 @@ defines the supplied models and excluded housing consumer.
 
 All 21 exact selected-consumer/preservation selectors pass at that runtime source
 (19 new, 2 preservation). This is not native parity, full-suite, GUI or all-profile
-runtime acceptance. Profile compilation gates and slot release are recorded in
-`/home/osso/.local/state/wow-ui-sim/handoff/forever-startup-gaps/REPORT.md`.
+runtime acceptance. One all-target check per profile passes at `b910efd8d`:
+Retail has zero warnings; Forever/PTR each have the same three inherited
+`dead_code` warnings in `tests/fast_handler_late_bind.rs`. The parent clarified
+on 2026-10-25 that this warning set is allowed on Forever too and belongs to a
+separate seven-profile lane. This branch leaves that file unchanged and does
+not suppress warnings. Formatting passes. Full command, CPU and release receipts
+are in `/home/osso/.local/state/wow-ui-sim/handoff/forever-startup-gaps/REPORT.md`.
 
 ### Historical 70374 capture
 
