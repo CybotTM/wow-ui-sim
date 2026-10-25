@@ -445,7 +445,7 @@ class SourceFreshnessTests(unittest.TestCase):
         result, first, second = self.run_mixed_output_pair(
             "src/main.rs", {"debug/probe": "B binary"},
             reported_names=["debug/probe"],
-            before_second=lambda: (self.slot / "debug/probe.d").write_bytes(b"\\xff"))
+            before_second=lambda: (self.slot / "debug/probe.d").write_bytes(bytes([255])))
         self.assertNotEqual(result.returncode, 0)
         self.assertIn(b"unreadable dep-info", result.stderr)
         self.assertEqual(second["result"], "stale-artifacts")
@@ -562,10 +562,8 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertEqual(second["result"], "stale-artifacts")
 
     def test_lockfile_is_an_input_even_when_absent_from_dep_info(self):
-        # Metadata writes the lockfile before phase A; only phase B edits it.
-        subprocess.check_output(
-            ["cargo", "metadata", "--no-deps", "--format-version", "1", "--offline"],
-            cwd=self.tree)
+        (self.tree / "Cargo.lock").write_text(
+            'version = 4\n[[package]]\nname = "probe"\nversion = "0.1.0"\n')
         self.git("add", ".")
         self.git("commit", "-qm", "lockfile")
         result, first, second = self.run_mixed_output_pair(
