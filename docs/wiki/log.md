@@ -1,6 +1,9 @@
 ## [2026-10-24] static stage | PTR input interface style
 
 [Selected consumer and contradiction table](investigations/ptr-input-interface-style.md) link the [contract](../specs/ptr-input-interface-style.md): authenticated PTR70493 docs, original SharedXML runtime-selection selector and existing state model. Separate test-first and GREEN source phases expose the existing model to PTR through ACTIVE; no build, slot or runtime RED/GREEN.
+## [2026-10-24] source | CF-2 club unread staging
+
+[Shared stream model](systems/club-membership.md#unread-streams-cf-2) and [contract](../specs/club-unread.md) record original FrameXMLUtil/MicroMenu consumers, static callable-mutant contradictions and the schema-first RED commit. Four unread endpoints replace the empty-settings shim; existing stream queries share Club snapshots. No builds/tests/slots or native-parity claim; Retail/PTR/Forever proof deferred.
 
 ## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
 
@@ -2716,6 +2719,10 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 ## [2026-10-23] investigation | Consumer selection and standalone RED
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
+
+## 2026-10-24 — CF-2 pet-battle name staging
+
+Added [pet name projection](systems/pet-battle-names.md) and [contract](../specs/pet-battle-names.md), traced four profile TOCs through original XML/event/name consumers. No build/runtime proof claimed; parent owns frozen RED/GREEN and stock accounting.
 
 ## 2026-10-24 — PTR 70493 source refresh
 
