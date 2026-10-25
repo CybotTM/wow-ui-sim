@@ -54,6 +54,12 @@ fn load_original_world_handler() -> WowLuaEnv {
         "Blizzard_HousingControls",
         "Blizzard_HousingControls_Bootstrap.lua",
     );
+    for file in [
+        "Blizzard_HousingTutorialsData.lua",
+        "Blizzard_HousingTutorialsUtil.lua",
+    ] {
+        crate::common::load_blizzard_addon_bootstrap(&env, &ui, "Blizzard_HousingTutorials", file);
+    }
     install_branch_observers(&env);
     env
 }
