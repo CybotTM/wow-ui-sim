@@ -76,16 +76,17 @@ fn original_consumer() -> WowLuaEnv {
     assert_selected_consumer();
     let ui = blizzard_ui_dir();
     let env = new_blizzard_addon_env(&ui);
-    let loaded = load_blizzard_addon_closure_into_env(
+    load_blizzard_addon_closure_into_env(
         &env,
         &ui,
         &[
             "Blizzard_SharedXMLGame",
+            "Blizzard_FrameXML",
             "Blizzard_TextStatusBar",
-            "Blizzard_PetBattleUI",
         ],
         &[],
     );
+    let loaded = load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_PetBattleUI"], &[]);
     assert!(loaded.iter().any(|name| name == "Blizzard_PetBattleUI"));
     env.apply_post_load_workarounds();
     supply_names(&env);
