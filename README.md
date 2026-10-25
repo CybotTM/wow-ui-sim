@@ -92,6 +92,18 @@ docker run --rm \
   ghcr.io/osso/wow-ui-sim --no-saved-vars run-tests MyAddon
 ```
 
+## Utility binary builds
+
+Integration tests build `wow-sim` only unless utility features are requested.
+The other five binaries require `--features tools`: `wow-cli`,
+`panel-visual-metrics`, `bench_spellbook`, `bench_steady_state`, and
+`bench_talents`. The two existing GUI-gated benches also require `gui`.
+Use `cargo build --bin wow-cli --features tools` or
+`cargo build --bins --features tools` for utility builds.
+The release aliases and `scripts/build-host.py --bin wow-cli` enable this
+feature automatically. Docker and full-suite test selection do not need it.
+See [the build contract](docs/specs/integration-bin-selection.md).
+
 ## Writing Tests
 
 Test files go in `tests/` under your addon directory. Available assertions:

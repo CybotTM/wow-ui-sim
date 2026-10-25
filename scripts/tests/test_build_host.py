@@ -460,12 +460,19 @@ class BuildHostTests(unittest.TestCase):
                 "wow-cli",
                 "--no-default-features",
                 "--features",
-                "sound,gui,client-mists,fast-build",
+                "sound,gui,client-mists,fast-build,tools",
             ],
         )
         self.assertTrue(second["release"])
         self.assertEqual(first["key"], second["key"])
         self.assertEqual(second["host"], "local")
+
+    def test_cli_build_without_explicit_features_enables_tools(self):
+        self.invoke("--build-host", "local", "--bin", "wow-cli")
+        self.assertEqual(
+            self.request()["cargo_args"],
+            ["build", "--bin", "wow-cli", "--features", "tools"],
+        )
 
     def test_native_test_preserves_cargo_separator_features_and_failure(self):
         self.put(
@@ -549,7 +556,7 @@ class BuildHostTests(unittest.TestCase):
                 "wow-cli",
                 "--no-default-features",
                 "--features",
-                "client-era",
+                "client-era,tools",
             ],
         )
         self.assertIsNone(self.request()["runtime_args"])

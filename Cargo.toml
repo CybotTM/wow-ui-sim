@@ -80,16 +80,27 @@ path = "src/bin/wow_sim/main.rs"
 [[bin]]
 name = "wow-cli"
 path = "src/bin/wow_cli/main.rs"
+required-features = ["tools"]
 
 [[bin]]
 name = "bench_spellbook"
 path = "src/bin/bench_spellbook.rs"
-required-features = ["gui"]
+required-features = ["gui", "tools"]
 
 [[bin]]
 name = "bench_steady_state"
 path = "src/bin/bench_steady_state.rs"
-required-features = ["gui"]
+required-features = ["gui", "tools"]
+
+[[bin]]
+name = "bench_talents"
+path = "src/bin/bench_talents.rs"
+required-features = ["tools"]
+
+[[bin]]
+name = "panel-visual-metrics"
+path = "src/bin/panel-visual-metrics.rs"
+required-features = ["tools"]
 
 [[example]]
 name = "casc_smoke"
@@ -104,6 +115,8 @@ pollster = "0.4"
 tempfile = "3"
 
 [features]
+# Non-test utility binaries; integration tests need only wow-sim.
+tools = []
 # Opt-in installed Ellesmere AuraKit acceptance test; requires ELLESMERE_AURA_KIT_PATH.
 ellesmere-acceptance = ["client-wowforever"]
 # fast-build is opt-in because the iced dylib hits MSVC's LNK1189 object limit
