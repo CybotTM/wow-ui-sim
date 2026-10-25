@@ -34,6 +34,16 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 - [ ] Encoding-key downloads retry typed transport failures at most three times with exponential backoff and jitter. HTTP status and decode failures remain explicit failures.
 - [x] Linux Zenity startup errors render as plain text, including literal `<profile>` paths.
 
+### Forever mapped, non-resident UI sources
+
+- [ ] For Forever only, sync selects Gethe bytes only when the active enUS root maps the manifest FDID to a CKey, the encoding table maps that CKey to an EKey, and the selected local indexes contain no entry for that EKey. Resident entries keep the existing CASC route; absent root/encoding mappings keep the existing failure path. Read/decode errors for resident data do not select Gethe.
+- [ ] The committed `data/blizzard-ui-builds/wowforever.json` pins the exact Gethe revision and build version, following the existing pinned source convention. Its version must equal the installed profile build. Read blobs from that immutable revision in the existing `wow-ui-sim/wow-ui-source-git/forever` cache, not from a moving branch or working-tree export. Read that revision's `version.txt` and require the same version. Sync does not fetch or change the source checkout.
+- [ ] Hash the raw Gethe bytes with MD5 and require equality with the root/encoding CKey before any destination write. Do not normalize newlines or text. A mismatch fails with the manifest path, FDID, expected CKey and actual Gethe MD5. Missing pinned blobs and mismatched versions fail explicitly.
+- [ ] Cache provenance identifies the pinned revision/version and records every substituted file as a `gethe_file=` JSON record with `path`, `fdid`, `ckey`, `gethe_revision`, and `source: "gethe"`. Reused substituted files are reverified and recorded on sync; resident files produce no Gethe record. Completion is published only after all entries succeed.
+- [ ] This rule exists because the selected Forever streaming installation has authenticated root/encoding mappings for UI content absent from local indexes (observed FDID 8379893). It is not a general fallback or CDN repair. Retire it when a supported local acquisition path reliably supplies the full selected UI manifest; remove the pin and route together and recapture the stock startup baseline.
+
+Static implementation and fixture tests are staged; execution remains pending. The fixture selector is `blizzard_ui_sync::gethe_missing::tests::`.
+
 ### GUI resolution-cache preparation
 
 - [ ] Before `run_iced_ui`, an enabled CASC installation prepares the selected product/build resolution cache at `ASSET_RESOLVER_CACHE_DIR` when set, otherwise the resolver default cache root. `WOW_PRODUCT` overrides the client-profile product selection.
