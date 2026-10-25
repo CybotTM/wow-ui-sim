@@ -240,7 +240,7 @@ class MountedDepInfoTests(unittest.TestCase):
         _, errors = self.read_inputs(["src/bin/bench_spellbook.rs"])
         self.assertEqual(errors, [])
 
-    def test_unrelated_package_without_dep_info_does_not_block_content_diff(self):
+    def test_unrelated_repo_package_without_dep_info_fails_closed(self):
         self.add_dep_info("debug/known", "known: src/lib.rs\n")
         self.current["reported_artifacts"].append({
             "executable": str(self.target / "debug/unrelated"), "fresh": False,
@@ -248,7 +248,7 @@ class MountedDepInfoTests(unittest.TestCase):
         })
         self.current["package_roots"]["unrelated"] = [str(self.mount / "other")]
         _, errors = self.read_inputs(["src/lib.rs"])
-        self.assertEqual(errors, [])
+        self.assertIn("missing dep-info", "; ".join(errors))
 
     def test_make_continuation_separates_adjacent_input_words(self):
         binary = self.target / "debug/continued"
@@ -275,17 +275,17 @@ class MountedDepInfoTests(unittest.TestCase):
                     self.module.finish_build(self.target, self.target / "receipt.json",
                                              self.current, None, {}, 0)
 
-    def test_unmappable_dep_info_does_not_reject_identical_content(self):
+    def test_unmappable_dep_info_rejects_even_identical_content(self):
         binary = self.target / "debug/external"
         self.add_dep_info("debug/external", f"{binary}: /registry/input.rs\n")
         self.current["changed_paths"] = ["src/lib.rs"]
         snapshot = self.module.read_dep_info_snapshot(self.target, self.tree)
         inputs, errors = self.module.read_target_inputs(self.current, snapshot, snapshot)
-        self.assertEqual(errors, [])
+        self.assertIn("zero repo-relative inputs", "; ".join(errors))
         self.current.update(target_inputs=inputs, dep_info_errors=errors)
         receipt = self.target / "receipt.json"
-        self.module.finish_build(self.target, receipt, self.current, None, {}, 0)
-        self.assertEqual(json.loads(receipt.read_text())["result"], "success")
+        with self.assertRaisesRegex(ValueError, "zero repo-relative inputs"):
+            self.module.finish_build(self.target, receipt, self.current, None, {}, 0)
 
     def test_complete_dep_info_allows_diff_outside_compiler_inputs(self):
         binary = self.target / "debug/unrelated"
@@ -318,24 +318,27 @@ class MountedDepInfoTests(unittest.TestCase):
         self.current = value
         return value["previous"], value["artifacts"]
 
-    def test_real_slot0_library_diff_maps_and_accepts_rebuilt_executables(self):
+    def test_real_slot0_library_diff_accepts_rebuilt_library_on_own_inputs(self):
         previous, artifacts = self.load_slot0_ptr_build()
         inputs, errors = self.read_inputs(self.current["content_changed_paths"])
         self.assertEqual(errors, [])
-        for record in self.current["reported_artifacts"]:
-            if record.get("executable"):
-                self.assertIn("src/c_api/ptr_i4_game_rules.rs", inputs[record["executable"]])
-                self.assertIn("src/lua_api/globals/game_rules.rs", inputs[record["executable"]])
+        library = self.current["reported_artifacts"][0]
+        library_inputs = inputs[library["filenames"][0]]
+        self.assertIn("src/c_api/ptr_i4_game_rules.rs", library_inputs)
+        self.assertIn("src/lua_api/globals/game_rules.rs", library_inputs)
+        for record in self.current["reported_artifacts"][1:]:
+            self.assertNotIn("src/c_api/ptr_i4_game_rules.rs", inputs[record["executable"]])
         self.module.finish_build(self.target, self.target / "receipt.json",
                                  self.current, previous, artifacts, 0)
         self.assertEqual(json.loads((self.target / "receipt.json").read_text())["result"],
                          "success")
 
-    def test_real_slot0_library_diff_rejects_each_stale_executable(self):
+    def test_real_slot0_executable_own_diff_rejects_each_unchanged_hash(self):
         previous, artifacts = self.load_slot0_ptr_build()
-        self.read_inputs(self.current["content_changed_paths"])
-        for name in artifacts:
+        for name, source in [("debug/wow-sim", "src/bin/wow_sim/main.rs"),
+                             ("debug/deps/integration-0702448e9a6092df", "tests/integration.rs")]:
             with self.subTest(name=name):
+                self.read_inputs([source])
                 unchanged = dict(artifacts, **{name: previous["artifacts"][name]})
                 self.assertEqual(self.module.find_stale_artifacts(
                     self.current, previous["artifacts"], unchanged), [name])
@@ -345,11 +348,13 @@ class MountedDepInfoTests(unittest.TestCase):
         changed = ["src/lua_api/env_init/runtime_surface_bootstrap.lua"]
         inputs, errors = self.read_inputs(changed)
         self.assertEqual(errors, [])
-        for record in self.current["reported_artifacts"]:
-            if record.get("executable"):
-                self.assertIn(changed[0], inputs[record["executable"]])
-        self.assertEqual(len(self.module.find_stale_artifacts(
-            self.current, previous["artifacts"], previous["artifacts"])), 2)
+        library = self.current["reported_artifacts"][0]
+        self.assertIn(changed[0], inputs[library["filenames"][0]])
+        library["fresh"] = True
+        self.assertEqual(self.module.find_stale_artifacts(
+            self.current, previous["artifacts"], previous["artifacts"]),
+            ["debug/deps/integration-0702448e9a6092df",
+             "debug/deps/libwow_ui_sim-45d2a5ba882881e5.rlib"])
 
     def test_real_slot0_fresh_library_requires_previous_dep_info(self):
         self.load_slot0_ptr_build()
@@ -362,7 +367,7 @@ class MountedDepInfoTests(unittest.TestCase):
         _, errors = self.module.read_target_inputs(self.current, before, after)
         self.assertTrue(errors, "fresh library cannot certify missing previous inputs")
 
-    def test_transitive_path_library_input_rejects_unchanged_executable(self):
+    def test_transitive_path_library_is_judged_without_executable_mapping(self):
         binary = self.target / "debug/probe"
         self.add_dep_info("debug/probe", f"{binary}: {self.mount}/src/main.rs\n")
         self.current["package_roots"]["probe"].append(str(self.mount / "dep"))
@@ -382,10 +387,121 @@ class MountedDepInfoTests(unittest.TestCase):
             })
         inputs, errors = self.read_inputs(["leaf/data/config.lua"])
         self.assertEqual(errors, [])
-        self.assertIn("leaf/data/config.lua", inputs[str(binary)])
-        self.assertEqual(self.module.find_stale_artifacts(
-            self.current, {"debug/probe": "same"}, {"debug/probe": "same"}),
-            ["debug/probe"])
+        self.assertNotIn("leaf/data/config.lua", inputs[str(binary)])
+        self.assertIn("leaf/data/config.lua", inputs[str(self.target / "debug/deps/libleaf-123.rlib")])
+        hashes = {"debug/probe": "same"}
+        self.assertEqual(self.module.find_stale_artifacts(self.current, hashes, hashes), [])
+        self.current["reported_artifacts"][-1]["fresh"] = True
+        self.assertEqual(self.module.find_stale_artifacts(self.current, hashes, hashes),
+                         ["debug/deps/libleaf-123.rlib"])
+
+    def test_fix11_real_sim_toc_fresh_library_rejects_its_own_change(self):
+        previous, artifacts = self.load_slot0_ptr_build()
+        artifact = self.target / "debug/deps/libsim_toc-c9659c1ae6dcefe3.rlib"
+        artifact.with_name("sim_toc-c9659c1ae6dcefe3.d").write_text(
+            f"{artifact}: crates/sim-toc/src/lib.rs\n")
+        self.current["reported_artifacts"].append({
+            "package_id": f"path+file://{self.mount}/crates/sim-toc#0.1.0",
+            "manifest_path": str(self.mount / "crates/sim-toc/Cargo.toml"),
+            "target": {"name": "sim_toc", "kind": ["lib"]},
+            "filenames": [str(artifact)], "executable": None, "fresh": True,
+        })
+        self.read_inputs(["crates/sim-toc/src/lib.rs"])
+        with self.assertRaisesRegex(ValueError, "stale artifacts"):
+            self.module.finish_build(self.target, self.target / "receipt.json",
+                                     self.current, previous, previous["artifacts"], 0)
+        self.assertEqual(json.loads((self.target / "receipt.json").read_text())["result"],
+                         "stale-artifacts")
+
+    def test_fix11_dev_only_library_does_not_require_normal_bin_rebuild(self):
+        (self.tree / "src").mkdir()
+        (self.tree / "src/main.rs").write_text("fn main() {}")
+        (self.tree / "dep/src").mkdir(parents=True)
+        (self.tree / "dep/src/lib.rs").write_text("pub fn helper() {}")
+        (self.tree / "Cargo.toml").write_text(
+            '[package]\nname="app"\nversion="0.1.0"\nedition="2021"\n'
+            '[dev-dependencies]\ndep={path="dep"}\n')
+        (self.tree / "dep/Cargo.toml").write_text(
+            '[package]\nname="dep"\nversion="0.1.0"\nedition="2021"\n')
+        roots = self.module.read_package_roots(self.tree)
+        app_id = next(key for key in roots if "#app@" in key)
+        binary = self.target / "debug/app"
+        self.add_dep_info("debug/app", f"{binary}: {self.mount}/src/main.rs\n")
+        self.current["reported_artifacts"][0]["package_id"] = app_id
+        self.current["package_roots"] = {
+            key: [path.replace(str(self.tree), str(self.mount)) for path in paths]
+            for key, paths in roots.items()}
+        artifact = self.target / "debug/deps/libdep-123.rlib"
+        artifact.parent.mkdir(parents=True, exist_ok=True)
+        artifact.with_name("dep-123.d").write_text(
+            f"{artifact}: {self.mount}/dep/src/lib.rs\n")
+        self.current["reported_artifacts"].append({
+            "package_id": f"path+file://{self.mount}/dep#0.1.0",
+            "manifest_path": str(self.mount / "dep/Cargo.toml"),
+            "target": {"name": "dep", "kind": ["lib"]},
+            "filenames": [str(artifact)], "executable": None, "fresh": False,
+        })
+        self.read_inputs(["dep/src/lib.rs"])
+        hashes = {"debug/app": "same"}
+        try:
+            self.module.finish_build(self.target, self.target / "receipt.json",
+                                     self.current, {"artifacts": hashes}, hashes, 0)
+        except ValueError as error:
+            self.fail(f"dev-only library must not require a normal bin rebuild: {error}")
+        self.assertEqual(json.loads((self.target / "receipt.json").read_text())["result"],
+                         "success")
+
+    def test_fix11_explicit_external_records_are_excluded(self):
+        for source in ["registry+https://index.crates.io/dep#0.1.0",
+                       "git+https://example.org/dep#123"]:
+            with self.subTest(source=source):
+                self.current["reported_artifacts"] = [{
+                    "package_id": source, "manifest_path": "/external/dep/Cargo.toml",
+                    "target": {"name": "dep", "src_path": "/external/dep/src/lib.rs"},
+                    "filenames": [str(self.target / "debug/deps/libdep-123.rlib")],
+                    "executable": None, "fresh": True,
+                }]
+                _, errors = self.read_inputs(["src/lib.rs"])
+                self.assertEqual(errors, [])
+                self.module.finish_build(self.target, self.target / "receipt.json",
+                                         self.current, None, {}, 0)
+
+    def test_fix11_repo_owned_libraries_fail_closed_for_zero_or_missing_inputs(self):
+        utility = self.source_root / "ct-bins-slot-2"
+        for root in [self.tree, self.mount, utility]:
+            for ownership_field in ["manifest_path", "src_path"]:
+                for bad_inputs in [None, "/registry/external.rs"]:
+                    with self.subTest(root=root, field=ownership_field, inputs=bad_inputs):
+                        artifact = self.target / "debug/deps/libdep-123.rlib"
+                        dep_info = artifact.with_name("dep-123.d")
+                        artifact.parent.mkdir(parents=True, exist_ok=True)
+                        dep_info.unlink(missing_ok=True)
+                        if bad_inputs:
+                            dep_info.write_text(f"{artifact}: {bad_inputs}\n")
+                        record = {
+                            "package_id": f"path+file://{root}#dep@0.1.0",
+                            "target": {"name": "dep", "kind": ["lib"]},
+                            "filenames": [str(artifact)], "executable": None, "fresh": False,
+                        }
+                        if ownership_field == "manifest_path":
+                            record["manifest_path"] = str(root / "Cargo.toml")
+                        else:
+                            record["target"]["src_path"] = str(root / "src/lib.rs")
+                        self.current["reported_artifacts"] = [record]
+                        self.read_inputs([])
+                        with self.assertRaisesRegex(ValueError, "dep-info|zero repo-relative"):
+                            self.module.finish_build(self.target, self.target / "receipt.json",
+                                                     self.current, None, {}, 0)
+
+    def test_fix11_unread_source_change_is_informational(self):
+        binary = self.target / "debug/app"
+        self.add_dep_info("debug/app", f"{binary}: {self.mount}/src/main.rs\n")
+        self.read_inputs(["src/unused.rs", "docs/spec.md", "tools/helper.py"])
+        self.module.finish_build(self.target, self.target / "receipt.json",
+                                 self.current, None, {}, 0)
+        receipt = json.loads((self.target / "receipt.json").read_text())
+        self.assertEqual(receipt["result"], "success")
+        self.assertIn("src/unused.rs", receipt["unread_package_paths"])
 
     def test_real_slot0_missing_library_dep_info_fails_closed(self):
         self.load_slot0_ptr_build()
@@ -663,6 +779,7 @@ class SourceFreshnessTests(unittest.TestCase):
             'for name in json.loads(sys.argv[5]):\n'
             '    print(json.dumps({"reason":"compiler-artifact", "package_id":sys.argv[3],\n'
             '        "executable":str(slot/name) if not name.endswith(".rmeta") else None,\n'
+            '        "filenames":[str(slot/name)],\n'
             '        "fresh":name in json.loads(sys.argv[4])}))\n'
         )
         request = self.slot / "request.json"
@@ -673,8 +790,7 @@ class SourceFreshnessTests(unittest.TestCase):
         package_id = metadata["packages"][0]["id"]
         outputs = {"debug/probe": "A binary", "debug/other": "A other",
                    "debug/deps/probe.rmeta": "A metadata"}
-        dep_inputs = {**{name: [str(self.tree / "src/main.rs")]
-                         for name in outputs if not name.endswith(".rmeta")},
+        dep_inputs = {**{name: [str(self.tree / "src/main.rs")] for name in outputs},
                       **(dep_inputs or {})}
         for phase in ["A", "B"]:
             if phase == "B":

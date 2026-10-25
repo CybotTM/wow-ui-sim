@@ -205,7 +205,7 @@ def target_dep_inputs(record, snapshot, allow_missing=False):
     if rustc_matches:
         matches = rustc_matches
     if not matches and not allow_missing:
-        raise ValueError(f"missing dep-info for {record['executable']}")
+        raise ValueError(f"missing dep-info for {artifact_path(record)}")
     inputs = set()
     for name, info in matches.items():
         if "error" in info:
@@ -242,77 +242,41 @@ def repo_relative_inputs(current, inputs):
     return relative
 
 
-def target_may_intersect_content_diff(current, record):
-    changed = set(current["content_changed_paths"])
-    if not changed:
+def artifact_path(record):
+    if record.get("executable"):
+        return record["executable"]
+    filenames = record.get("filenames", [])
+    return filenames[0] if filenames else record.get("target", {}).get("name", "unknown")
+
+
+def is_repo_artifact(current, record):
+    if record.get("package_id", "").startswith(("registry+", "git+")):
         return False
-    build_inputs = repo_relative_inputs(current, package_build_inputs(current, record))
-    if changed.intersection(build_inputs):
-        return True
-    roots = current["package_roots"].get(record.get("package_id"), [])
-    if not roots and record.get("manifest_path"):
-        roots = [str(Path(record["manifest_path"]).parent)]
-    if not roots:
-        return True
-    relative_roots = repo_relative_inputs(current, roots)
-    return any(Path(name).is_relative_to(root) for name in changed for root in relative_roots)
+    paths = [path for path in [record.get("manifest_path"),
+                              record.get("target", {}).get("src_path")] if path]
+    # Records without ownership metadata cannot prove that they are external.
+    return not paths or bool(repo_relative_inputs(current, paths))
 
 
-def package_libraries(current, record):
-    # Cargo supplies a package's library to its bins/integration tests, and its
-    # path dependencies to every target. Follow those libraries transitively.
-    libraries = [item for item in current["reported_artifacts"]
-                 if set(item.get("target", {}).get("kind", [])) & {"lib", "rlib", "proc-macro"}]
-    pending, seen = [record], set()
-    while pending:
-        target = pending.pop()
-        package_id = target.get("package_id")
-        if package_id in seen:
-            continue
-        seen.add(package_id)
-        roots = current["package_roots"].get(package_id, [])
-        for library in libraries:
-            manifest = library.get("manifest_path")
-            if (library.get("package_id") == package_id
-                    or (manifest and str(Path(manifest).parent) in roots)):
-                yield library
-                pending.append(library)
-
-
-def read_library_inputs(current, record, before, after):
-    inputs = set()
-    for library in package_libraries(current, record):
-        dependencies = target_dep_inputs(library, after)
-        dependencies.update(target_dep_inputs(
-            library, before, allow_missing=library.get("fresh") is False))
-        if not repo_relative_inputs(current, dependencies):
-            raise ValueError(f"zero repo-relative inputs for {library['target']['name']}")
-        dependencies.update(package_build_inputs(current, library))
-        inputs.update(dependencies)
-    return inputs
+def read_record_inputs(current, record, before, after):
+    inputs = repo_relative_inputs(current, target_dep_inputs(record, after))
+    if not inputs:
+        raise ValueError(f"zero repo-relative inputs for {artifact_path(record)}")
+    previous = target_dep_inputs(record, before, allow_missing=record.get("fresh") is False)
+    inputs.update(repo_relative_inputs(current, previous))
+    inputs.update(repo_relative_inputs(current, package_build_inputs(current, record)))
+    return sorted(inputs)
 
 
 def read_target_inputs(current, before, after):
     targets, errors = {}, []
     for record in current["reported_artifacts"]:
-        executable = record.get("executable")
-        if not executable:
+        if not is_repo_artifact(current, record):
             continue
         try:
-            inputs = target_dep_inputs(record, after)
-            if executable in before["executables"]:
-                inputs.update(target_dep_inputs(
-                    record, before, allow_missing=record.get("fresh") is False))
-            inputs = repo_relative_inputs(current, inputs)
-            if not inputs:
-                raise ValueError(f"zero repo-relative inputs for {executable}")
-            library_inputs = read_library_inputs(current, record, before, after)
-            inputs.update(repo_relative_inputs(current, library_inputs))
-            inputs.update(repo_relative_inputs(current, package_build_inputs(current, record)))
-            targets[executable] = sorted(inputs)
+            targets[artifact_path(record)] = read_record_inputs(current, record, before, after)
         except ValueError as error:
-            if target_may_intersect_content_diff(current, record):
-                errors.append(str(error))
+            errors.append(str(error))
     return targets, errors
 
 
@@ -321,17 +285,29 @@ def find_stale_artifacts(current, previous_artifacts, artifacts):
     changed = set(current["changed_paths"])
     content_changed = set(current["content_changed_paths"])
     for record in current["reported_artifacts"]:
-        executable = record.get("executable")
-        inputs = current["target_inputs"].get(executable, [])
-        if not executable or not changed.intersection(inputs):
+        path = artifact_path(record)
+        inputs = current["target_inputs"].get(path, [])
+        if not changed.intersection(inputs):
             continue
-        name = os.path.relpath(executable, current["slot"])
+        name = os.path.relpath(path, current["slot"])
+        if record.get("fresh") is not False:
+            stale.append(name)
+            continue
+        if not record.get("executable"):
+            continue
         changed_hash = name in artifacts and previous_artifacts.get(name) != artifacts[name]
         needs_changed_hash = bool(content_changed.intersection(inputs))
-        if (record.get("fresh") is not False or name not in artifacts
-                or (needs_changed_hash and not changed_hash)):
+        if name not in artifacts or (needs_changed_hash and not changed_hash):
             stale.append(name)
     return sorted(set(stale))
+
+
+def unread_package_paths(current):
+    inputs = {name for names in current["target_inputs"].values() for name in names}
+    roots = {root for paths in current["package_roots"].values() for root in paths}
+    roots = repo_relative_inputs(current, roots)
+    return sorted(name for name in set(current["content_changed_paths"]) - inputs
+                  if any(Path(name).is_relative_to(root) for root in roots))
 
 
 def finish_build(slot, receipt, current, previous, artifacts, returncode):
@@ -346,7 +322,8 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
     result = "success" if returncode == 0 else "failed"
     if stale:
         result = "stale-artifacts"
-    current = dict(current, artifacts=artifacts, returncode=returncode, result=result)
+    current = dict(current, artifacts=artifacts, returncode=returncode, result=result,
+                   unread_package_paths=unread_package_paths(current))
     write_json(receipt, current)
     write_json(slot / ".source-identity.json", current)
     if result == "success":
