@@ -39,6 +39,12 @@ Verified2026-10-10, saved epoch225705: Wrath/Mists/Era/Anniversary/Forever each 
 
 All15 source endpoint snapshots equal3845 captured inputs; nine current applicable files match. Wrath/Mists/Era submissions name0ed37cd1a, Anniversary/Forever d19b4cf09: identical captured inputs, not one revision/current-whole-tree proof. Native API presence/secret policy, broader startup/CLI/GUI/profile acceptance and arbitrary catalog IDs remain unknown. Older historicalRetail12.0.7 ordinary2 and Retail93/PTR91 remain separate; suite714 four failures unchanged.
 
+## CF-2 Classic publication — static producer, 2026-10-24
+
+The selected Vanilla WorldMap group-pin consumer calls `C_Map.GetMapDisplayInfo`, but the getter's compile gate previously excluded Era and Anniversary. `src/c_api/c_map.rs` now registers the same existing producer on these two profiles using `client_profile::ACTIVE`. Its parser/getter compile gates are removed; the Retail-epoch method-table entry remains unchanged. No second store, default value, map-flag rule, Lua setter or replacement consumer is added. Each invocation reads the current environment's `map_display_hide_icons` entry and preserves absent/removed zero returns and supplied-false arity.
+
+The [contract](../../specs/map-display-info.md#cf-2-d--static-classic-producer-2026-10-24) records the unchanged selected XML pin selectors and static constant/no-op contradictions. Runtime loader selection, call114 RED, GREEN and Retail/PTR preservation still require admitted execution. Existing receipts above apply only to their saved revisions. Classic malformed-input/native coercion and authenticated native secret semantics remain unknown; this work preserves the existing simulator parser rather than asserting new parity.
+
 ## Sources
 
 - [Map contract](../../specs/map-display-info.md) — default86 PASS, current P8011 PASS and independently audited PTR84 PASS.

@@ -122,7 +122,6 @@ pub mod c_garrison_trees;
 pub mod c_glue;
 pub mod c_housing;
 pub mod c_housing_bundles;
-#[cfg(feature = "client-wowforever")]
 pub mod c_input_interface_style;
 pub mod c_instance_encounter;
 pub mod c_intl;
@@ -181,6 +180,7 @@ mod c_quest_log_watches;
 pub mod c_quest_offer;
 pub mod c_super_track;
 pub mod container_quest;
+pub mod forever_startup;
 #[cfg(feature = "client-wowforever")]
 pub use c_quest_log_watches::QuestWatchType;
 #[cfg(feature = "client-wowforever")]

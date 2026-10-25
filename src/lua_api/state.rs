@@ -29,7 +29,6 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-5")]
             nameplate_hit_test_insets:
                 crate::c_api::c_nameplate_manager::NamePlateHitTestInsets::default(),
-            #[cfg(feature = "client-wowforever")]
             input_interface_style:
                 crate::c_api::c_input_interface_style::InputInterfaceStyle::default(),
             #[cfg(feature = "client-wowforever")]
@@ -438,6 +437,7 @@ macro_rules! build_empty_sim_state {
             pressed_keys: HashSet::new(),
             game_rules: GameRulesState::default(),
             discord: DiscordState::default(),
+            forever_startup: Default::default(),
             player_choice: PlayerChoiceState::default(),
             housing_service_enabled: true,
             housing: HousingState::default(),

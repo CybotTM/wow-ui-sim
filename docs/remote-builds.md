@@ -49,9 +49,88 @@ anything except a literal `ADD` verdict. It does not poll for admission.
 ```
 
 Launch prints the unit name without waiting for the build. The retained service
-runs in `agents.slice` with `MemoryMax=9G` and `MemorySwapMax=0`. Status prints
+runs in `agents.slice` with `MemoryMax=9G` and `MemorySwapMax=0`.
+`RUSTC_WRAPPER` is set to an empty value so Cargo configuration cannot select
+sccache instead of the incremental compiler. Status prints
 `SubState`, `Result`, `CPUUsageNSec`, and `WallTimeSec` (elapsed while running).
 Use the helper from the checkout that contains it; it builds `--worktree`.
+
+### Source freshness and receipts
+
+The fixed source mount hides worktree changes from Cargo's path identity. Older
+file mtimes can therefore reuse another tree's artifacts, even with incremental
+compilation disabled. The helper records HEAD, a binary dirty-diff hash (including
+untracked file contents), dirty paths, and per-target artifact hashes in
+`slot-N/.verified-source-identity.json` only after the child exits zero and the
+guard accepts. The separate `slot-N/.source-identity.json` records attempts,
+including building, failed, and rejected runs; it never supplies the content or
+artifact baseline. Existing attempt-only slots have no verified baseline and
+receive the conservative unknown-source checks.
+Before Cargo starts, a changed verified identity refreshes mtimes for the
+HEAD-to-HEAD diff and both trees' dirty/untracked paths without changing bytes.
+An unknown baseline or unsuccessful previous attempt derives input roots from
+offline `cargo metadata --no-deps`:
+package manifest directories and path dependency directories, plus root
+`build.rs`, `Cargo.toml`, and `Cargo.lock`. All tracked files under those roots
+are refreshed. This repository's root package also covers build-script inputs
+in `build/`, `installer/`, `native/intl/`, and `tests/`. If metadata fails, all
+tracked files are refreshed. A root package therefore also refreshes its docs;
+this conservative full refresh is needed when prior source is unknown or the
+previous build did not succeed.
+
+Each unit writes `slot-N/receipts/UNIT.json` with its source identity, changed
+paths (`changed_paths`, the mtime refresh set), content changes
+(`content_changed_paths`), command, result and artifact SHA256 values. The command arguments and
+stdout/stderr bytes are passed through unchanged, including wrappers that capture
+Cargo JSON internally. The worker reads visible stdout for this build's Cargo
+`compiler-artifact` records, without changing the submitted arguments. Use Cargo's
+JSON message format to expose those records. Receipts retain the records and each
+package's metadata-derived manifest-parent and path-dependency roots.
+
+Only executables in this build's records are judged. The worker snapshots Cargo
+`.d` dep-info before the child starts and reads it again after the child exits.
+It uses each record's `filenames` and `executable` paths to find rustc's
+`deps/<name>-<metadata-hash>.d`, including hard-linked hashed executables when Cargo
+reports only the uplifted binary. Each snapshot retains its own hard-link mapping;
+other metadata hashes are not guessed by name. The uplifted binary's adjacent `.d`
+is used only when no matching rustc dep-info exists. Missing dep-info for a package
+whose roots and build inputs cannot intersect the content diff does not block the build.
+Each target's inputs are the union
+of its previous and current dep-info, plus its package's `build.rs`, `Cargo.toml`,
+and `Cargo.lock` and the workspace `Cargo.lock`. Receipts retain these inputs as
+repo-relative paths. The worker strips the slot's fixed source mount, its
+`ct-bins-slot-N` utility mount (both under the launcher's `SOURCE_ROOT`), or the
+original worktree root after parsing Make escaping and line continuations.
+Inputs outside these roots are ignored. When content changes could affect a target,
+missing or unreadable dep-info fails closed. Missing previous dep-info is allowed
+when Cargo reports `fresh=false` and valid current dep-info exists; unreadable
+previous dep-info still fails. Zero repo-relative inputs fail before package inputs
+are added. If a non-empty content diff intersects none of the reported executables'
+mapped inputs, the run fails closed. With no content diff, unmappable dep-info does
+not reject an identical-source repair. Library-only records keep their existing policy.
+
+Content changes are computed from the last successfully verified source identity,
+not the latest attempt or the mtime refresh set. Failed and rejected builds never
+advance that baseline, so retrying cannot erase a pending content diff. When the content diff intersects a
+target's inputs, Cargo must report `fresh=false` **and**
+its SHA256 must differ from the previous hash at the same path. Otherwise the run
+fails with `stale artifacts`. A changed library, `.rmeta`, or another executable
+cannot certify it. Unreported executables and targets with disjoint inputs are
+not judged. A test-only edit therefore does not reject an unaffected fresh bin,
+even within the same package. Targets affected only by mtime refresh require
+`fresh=false` and a current hash, but identical rebuilt bytes are accepted.
+The existing conservative root derivation and source mtime refresh are unchanged.
+
+When no compiler-artifact record is visible (for example, a wrapper captures Cargo
+stdout), a successful child fails closed only if the diff intersects package inputs.
+A visible library-only record is available evidence, not an executable to judge.
+A hidden stream with no package-input diff does not fail. Wrappers remain supported,
+but captured output or filesystem hashes cannot substitute for the missing records.
+For receipt evidence, the worker still scans newly touched executables/libraries
+and rehashes previous paths. Receipt, hidden, and incremental subdirectories are
+excluded from discovery. Those discovered paths do not select freshness candidates.
+Checks can record library artifacts without an executable. Inspect the retained
+unit's terminal result as well as its receipt; launch success is not build success.
 
 ## Host selection and dependencies
 

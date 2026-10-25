@@ -15,7 +15,6 @@ pub struct SimState {
     >,
     #[cfg(feature = "retail-12-0-5")]
     pub(crate) nameplate_hit_test_insets: crate::c_api::c_nameplate_manager::NamePlateHitTestInsets,
-    #[cfg(feature = "client-wowforever")]
     pub(crate) input_interface_style: crate::c_api::c_input_interface_style::InputInterfaceStyle,
     /// Explicit mapped-stick input; None means no configured snapshot, not device absence.
     #[cfg(feature = "client-wowforever")]
@@ -603,6 +602,8 @@ pub struct SimState {
     /// Supplied legacy trainer visibility: available, unavailable, used.
     #[cfg(feature = "client-wrath")]
     pub wrath_trainer_filters: [bool; 3],
+    /// Host inputs for Forever 70532; other profiles do not publish these probes.
+    pub forever_startup: crate::c_api::forever_startup::StartupInputs,
     pub bank_frame_open: bool,
     pub guild_bank_frame_open: bool,
     pub bank_purchased_slots: i32,

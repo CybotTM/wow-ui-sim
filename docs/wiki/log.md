@@ -17,6 +17,29 @@
 ## [2026-10-24] staged | Housing house-or-plot presence
 
 Added [spatial presence model](systems/housing-spatial-presence.md) and [contract](../specs/house-or-plot-presence.md), original registered-event selector, profile TOC evidence and static contradiction matrix. Runtime/compile gates remain pending; Forever's selected consumer and excluded downstream controls bootstrap are distinct.
+## [2026-10-25] decision | PTR SharedXML executes twice
+
+[User decision](investigations/ptr-input-interface-style.md#user-decision-two-environments-2026-10-25) corrects only the PTR listener expectation to two, one per normal/secure environment. Native modern count remains unproven; Retail decompilation is the revisit boundary. [Final proof](investigations/ptr-input-interface-style.md#approved-twice-final-proof-2026-10-25): exact PTR GREEN passes, producer-only RED rejects the original event, PTR/Retail all-target checks pass with allowed-three/zero warnings. Forever case 1 is a documented missing API without capability state; report-only. Slot 2 released.
+
+## [2026-10-25] runtime proof | PTR input listener environment count
+
+[Slot-2 results](investigations/ptr-input-interface-style.md#slot-2-execution-2026-10-25): RED reaches the original rejected event; GREEN records two listeners via normal/secure replay and is blocked by a native answer. Forever 3/4 pass; both all-target gates pass with the allowed inherited warnings. Raw stock maps retain all successor errors.
+
+## [2026-10-25] static stage | PTR input event validity
+
+[Original-consumer extension](investigations/ptr-input-interface-style.md#ptr-event-validity-extension-2026-10-25) records the documented PTR epoch exception, load-error and listener registration assertions, and the new event-only RED/GREEN pair above the existing namespace publication. No slot, compilation or runtime proof.
+
+## [2026-10-24] static stage | PTR input interface style
+
+[Selected consumer and contradiction table](investigations/ptr-input-interface-style.md) link the [contract](../specs/ptr-input-interface-style.md): authenticated PTR70493 docs, original SharedXML runtime-selection selector and existing state model. Separate test-first and GREEN source phases expose the existing model to PTR through ACTIVE; no build, slot or runtime RED/GREEN.
+## [2026-10-25] proof | Forever native-unknown-only baseline
+
+[Baseline](../baselines/README.md#forever-lua-errors) and [consumer scope](investigations/forever-startup-gaps.md) bind 21 passing exact selectors and the stock capture at `1fcbddf67`. No idle sentinel or locality catalog is invented; housing's excluded positive publisher is explicit. One all-target check per requested profile passes at `b910efd8d`: Retail zero warnings, Forever/PTR three expressly allowed inherited dead-code warnings each. Formatting passes; no warning suppression or source change to the separately owned late-bind test is retained.
+
+## [2026-10-25] investigation | Forever startup supplied inputs
+
+[Startup gaps](investigations/forever-startup-gaps.md) records the 76-message reproduction, eight original-consumer RED→GREEN selectors and explicit native-unknown target/locality boundaries. First repaired capture:40 raw messages; remaining service fixes and final acceptance pending.
+
 ## [2026-10-25] fix | Byte-preserving Lua source/cache boundary
 
 Updated [CASC cache](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) and [contract](../specs/casc-loading.md#blizzard-ui-source-bytes): Lua cache reads/content markers are byte-based; XML/TOC/XSD remain strict UTF-8. Production TOC/addon loading was already raw-byte safe. Exact fixture tests cover sync and runtime boundaries.
@@ -27,6 +50,9 @@ Updated [CASC cache](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) a
 ## [2026-10-25] staged | Forever verified non-resident Gethe sources
 
 [Cache rule](systems/casc-asset-cache.md#forever-mapped-non-resident-sources) and [contract](../specs/casc-loading.md#forever-mapped-non-resident-ui-sources) record immutable same-build Gethe blobs only for mapped EKeys absent from local indexes, raw CKey/MD5 validation and per-file provenance. Resident CASC and unmapped failures remain separate. Static tests/code committed separately; execution and stock startup remain pending.
+## [2026-10-24] static producer | CF-2 Classic map display
+
+[Map display model](investigations/map-display-info-model.md#cf-2-classic-publication--static-producer-2026-10-24) records Era/Anniversary publication through the existing backing state and numeric/security parser. Tests are unchanged; static GREEN/RED source custody is separate from pending runtime acceptance. No build, test or slot.
 ## [2026-10-25] investigation | S49 rejected refresh repair
 
 [Companion spell backing](investigations/wrath-companion-cooldown.md#s49-reject-repair-static-2026-10-25): portable receipt paths and seeded-mount selector regression staged; generated catalogs and runtime proof still await a slot.
@@ -2835,6 +2861,9 @@ Updated the [bank investigation](investigations/wrath-guild-info.md#accepted-run
 
 [Bounded refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 merges master08b423c5c: Wrath/Retail all-target checks0warnings, five bank exact PASS, Wrath stock[], fresh Retail30/34 unchanged with no added/removed keys. All13 CVar receipts preserve original stat/hash; slot0 released. Historical RED/GREEN matrix not repeated.
 
+## 2026-10-24 — Mists pet display identity
+
+- Updated [pet identity](systems/pet-battle-names.md#mists-display-identity) and added the [contract](../specs/mists-pet-display-id.md). Static consumer/receiver trace, optional supplied identity and native-return questions; no runtime proof.
 ## 2026-10-25 — Stable-path slot build adoption (static)
 
 Added the nonblocking [slot launcher](../../scripts/slot-build.py) and

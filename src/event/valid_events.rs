@@ -75,10 +75,22 @@ fn is_ptr_shard_transfer(name: &str) -> bool {
 }
 
 pub fn is_registerable_event(name: &str) -> bool {
-    is_ptr_shard_transfer(name) || sim_event::is_registerable_event(name, POLICY)
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Ptr
+    ) && POLICY.retail_12_1_5
+        && name == "INPUT_DEVICE_INTERFACE_TRANSITION"
+    {
+        return true;
+    }
+    is_ptr_shard_transfer(name)
+        || crate::c_api::forever_startup::accepts_event(name)
+        || sim_event::is_registerable_event(name, POLICY)
 }
 pub fn is_valid_event(name: &str) -> bool {
-    is_ptr_shard_transfer(name) || sim_event::is_valid_event(name, POLICY)
+    is_ptr_shard_transfer(name)
+        || crate::c_api::forever_startup::accepts_event(name)
+        || sim_event::is_valid_event(name, POLICY)
 }
 
 #[cfg(all(test, feature = "profile-retail"))]
