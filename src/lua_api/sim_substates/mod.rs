@@ -214,6 +214,8 @@ impl Default for PetBattleState {
 #[derive(Debug, Clone, PartialEq)]
 pub struct PetBattlePet {
     pub name: String,
+    /// Supplied model/skin identity; None means unknown simulator input.
+    pub display_id: Option<i32>,
     pub species_id: i32,
     pub level: i32,
     pub max_health: i32,
@@ -234,6 +236,7 @@ impl PetBattlePet {
     pub fn default_player() -> Self {
         Self {
             name: "Squirrel".into(),
+            display_id: None,
             species_id: 39,
             level: 1,
             max_health: 289,
@@ -250,6 +253,7 @@ impl PetBattlePet {
     pub fn default_enemy() -> Self {
         Self {
             name: "Rabbit".into(),
+            display_id: None,
             species_id: 87,
             level: 1,
             max_health: 305,

@@ -123,7 +123,6 @@ pub mod c_garrison_trees;
 pub mod c_glue;
 pub mod c_housing;
 pub mod c_housing_bundles;
-#[cfg(feature = "client-wowforever")]
 pub mod c_input_interface_style;
 pub mod c_instance_encounter;
 pub mod c_intl;
