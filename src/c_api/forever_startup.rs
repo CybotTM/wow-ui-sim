@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 use crate::c_api::helpers::ensure_namespace;
 use crate::client_profile::{ACTIVE, ClientProfile};
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_table_with_fields, table_set_num,
+    borrow_state, borrow_state_mut, create_string, create_table_with_fields, table_set_num,
 };
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -155,6 +155,12 @@ fn register_character_queries(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, bank, "CanPurchaseBankTab", can_purchase_bank_tab)?;
     table_set_rust_fn_static(state, bank, "FetchBankLockedReason", bank_locked_reason)?;
     table_set_rust_fn_static(state, bank, "HasMaxBankTabs", has_max_bank_tabs)?;
+    table_set_rust_fn_static(
+        state,
+        bank,
+        "FetchNextPurchasableBankTabData",
+        next_bank_tab,
+    )?;
     let pvp = ensure_namespace(state, "C_PvP")?;
     table_set_rust_fn_static(state, pvp, "IsMatchComplete", match_complete)?;
     let spell = ensure_namespace(state, "C_Spell")?;
@@ -175,6 +181,36 @@ fn can_purchase_bank_tab(state: &mut LuaState) -> LuaResult<u32> {
         .contains(&bank_type);
     state.push(Val::Bool(allowed));
     Ok(1)
+}
+
+fn next_bank_tab(state: &mut LuaState) -> LuaResult<u32> {
+    let bank_type = i32::from_stack(state, 1)?;
+    let offer = borrow_state(state)?
+        .forever_startup
+        .next_bank_tabs
+        .get(&bank_type)
+        .cloned();
+    let value = offer
+        .as_ref()
+        .map_or(Val::Nil, |offer| create_bank_offer_table(state, offer));
+    state.push(value);
+    Ok(1)
+}
+
+fn create_bank_offer_table(state: &mut LuaState, offer: &PurchasableBankTab) -> Val {
+    let title = create_string(state, &offer.purchase_prompt_title);
+    let body = create_string(state, &offer.purchase_prompt_body);
+    let confirmation = create_string(state, &offer.purchase_prompt_confirmation);
+    create_table_with_fields(
+        state,
+        &[
+            ("tabCost", Val::Num(offer.tab_cost as f64)),
+            ("canAfford", Val::Bool(offer.can_afford)),
+            ("purchasePromptTitle", title),
+            ("purchasePromptBody", body),
+            ("purchasePromptConfirmation", confirmation),
+        ],
+    )
 }
 
 fn has_max_bank_tabs(state: &mut LuaState) -> LuaResult<u32> {
