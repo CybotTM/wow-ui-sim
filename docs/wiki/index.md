@@ -13,6 +13,10 @@
 ## [2026-10-24] static stage | PTR input interface style
 
 [Selected consumer and contradiction table](investigations/ptr-input-interface-style.md) link the [contract](../specs/ptr-input-interface-style.md): authenticated PTR70493 docs, original SharedXML runtime-selection selector and existing state model. Separate test-first and GREEN source phases expose the existing model to PTR through ACTIVE; no build, slot or runtime RED/GREEN.
+## [2026-10-25] investigation | Forever startup supplied inputs
+
+[Startup gaps](investigations/forever-startup-gaps.md) links the byte-exact 70532 baseline, 21 passing exact selectors and explicit native-unknown target/locality boundaries. Known registration/model gaps are repaired; startup retains only approved native-unknown residue. Positive housing is a tested excluded-publisher boundary, not a loader fix. All-target Forever/Retail/PTR checks pass under the clarified inherited-warning allowance; the lane report owns CPU and release receipts.
+
 ## [2026-10-25] fix | Byte-preserving Lua cache usability
 
 [Source-byte validation](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) separates byte-oriented Lua from UTF-8 XML/TOC/XSD. Runtime TOC loading already passes raw bytes to rilua. Regression fixtures preserve a literal `0x92` through cache checks and loaded strings.
@@ -68,6 +72,10 @@ Historical utility-command replay requires `--features tools`; see the [replay n
 ## [2026-10-24] source | Patch 12.1.7 I4a inherited worklist
 
 [Inherited accounting](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist): 1,876 immutable occurrences, 63 opposing sweep intersections and 233 lexical test-candidate rows. All 5,628 profile applicability cells remain UNKNOWN pending accepted source/selection evidence. Grouped I4b worklist, zero Cargo; not runtime acceptance.
+## [2026-10-24] static producer | CF-2 Classic map display
+
+[Map display model](investigations/map-display-info-model.md#cf-2-classic-publication--static-producer-2026-10-24) links the [contract](../specs/map-display-info.md): Era/Anniversary runtime publication reuses the existing per-map backing state and parser. Original XML pin tests remain unchanged; runtime RED/GREEN and preservation are pending. No build, test or slot.
+
 ## [2026-10-24] source | Combat-log filter record staging
 
 [Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.

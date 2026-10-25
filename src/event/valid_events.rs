@@ -76,10 +76,11 @@ pub fn is_registerable_event(name: &str) -> bool {
     {
         return true;
     }
-    sim_event::is_registerable_event(name, POLICY)
+    crate::c_api::forever_startup::accepts_event(name)
+        || sim_event::is_registerable_event(name, POLICY)
 }
 pub fn is_valid_event(name: &str) -> bool {
-    sim_event::is_valid_event(name, POLICY)
+    crate::c_api::forever_startup::accepts_event(name) || sim_event::is_valid_event(name, POLICY)
 }
 
 #[cfg(all(test, feature = "profile-retail"))]

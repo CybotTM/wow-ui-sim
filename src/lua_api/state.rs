@@ -437,6 +437,7 @@ macro_rules! build_empty_sim_state {
             pressed_keys: HashSet::new(),
             game_rules: GameRulesState::default(),
             discord: DiscordState::default(),
+            forever_startup: Default::default(),
             player_choice: PlayerChoiceState::default(),
             housing_service_enabled: true,
             housing: HousingState::default(),

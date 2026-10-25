@@ -602,6 +602,8 @@ pub struct SimState {
     /// Supplied legacy trainer visibility: available, unavailable, used.
     #[cfg(feature = "client-wrath")]
     pub wrath_trainer_filters: [bool; 3],
+    /// Host inputs for Forever 70532; other profiles do not publish these probes.
+    pub forever_startup: crate::c_api::forever_startup::StartupInputs,
     pub bank_frame_open: bool,
     pub guild_bank_frame_open: bool,
     pub bank_purchased_slots: i32,
