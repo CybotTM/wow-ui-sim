@@ -1,3 +1,7 @@
+## [2026-10-24] static stage | PTR input interface style
+
+[Selected consumer and contradiction table](investigations/ptr-input-interface-style.md) link the [contract](../specs/ptr-input-interface-style.md): authenticated PTR70493 docs, original SharedXML runtime-selection selector and existing state model. Tests are staged before producer publication; no build, slot or runtime RED/GREEN.
+
 ## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
 
 [Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.

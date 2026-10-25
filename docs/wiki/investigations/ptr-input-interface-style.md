@@ -1,0 +1,75 @@
+# PTR input interface style
+
+Static investigation of the PTR 12.1.7.70493 startup failure at original `Blizzard_SharedXML/Mainline/InputUtil.lua:12`. The namespace has a real existing simulator model, but registration is Forever-only. The [contract](../../specs/ptr-input-interface-style.md) stages PTR publication. RED/GREEN are source phases, not executed test results.
+
+## Source declarations
+
+Authenticated private CF-2 cache provenance selects version `12.1.7.70493`, Gethe revision `2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af`, manifest SHA-256 `ba4414999237ad7b50de73a2a61d7dd18fee31b2f2c3b70d5a21ad3cdc34d328`. Files read in this investigation were hash-checked against that run's inventory, not copied into the repository.
+
+- `InputInterfaceStyleDocumentation.lua`: one function, `GetCurrentStyle() -> style: InputDeviceInterfaceType`, non-nil, Environment All. Its Events and Tables sections are empty.
+- `InputConstantsDocumentation.lua`: `InputDeviceInterfaceType.Mkb = 0`, `.Gamepad = 1`.
+- `InputDocumentation.lua`: `INPUT_DEVICE_INTERFACE_TRANSITION(newMode, oldMode)`, both non-nil input-style enums, marked synchronous. It does not document initial style or same-style behavior.
+- Checked Retail manifest lacks `InputInterfaceStyleDocumentation.lua`; checked Retail generated `InputConstantsDocumentation.lua` lacks this enum, and its shared `InputUtil.lua` lacks the new style helpers. Do not publish this PTR API on Retail on this evidence.
+
+## Original consumer selection
+
+PTR TOC lookup prefers `_Mainline`/`-Mainline`, then generic, then `_Standard`/`-Standard`. Its game-type set is `mainline, standard`; `[Family]` resolves to `Mainline`, `[Game]` to `Standard`.
+
+`Blizzard_SharedXML/Blizzard_SharedXML.toc` is generic, non-LoD, `AllowLoad: Both`, without an addon-level game exclusion. It selects `[Family]\\InputUtil.lua` followed by `InputUtil.lua`, without per-entry filters. Runtime closure loading, not forced evaluation of a cached Mainline file, supplies both original sources to the staged test.
+
+`Blizzard_CompactRaidFrames/Blizzard_CompactRaidFrames.toc` is generic, non-LoD, game-screen eligible and depends on `Blizzard_RaidFrame`. It selects the Mainline manager Lua/XML pair. The XML installs `CompactRaidFrameManager_OnLoad`; that function calls `CompactRaidFrameManager_Collapse`, which calls `InputUtil.IsGamepadUIEnabled()` at line 352. The predicate calls the missing namespace at InputUtil line 12. OnLoad later registers gamepad setup/init handlers. Collapse needs the boolean branch to leave the MKB forward toggle visible without running the gamepad icon path; it does not need a physical controller.
+
+## Consumer needs
+
+The complete static candidate inventory is retained in the lane handoff's `call-sites.tsv` and `source-audit.json`. It separates selected startup files from glue, LoD and unselected variants. It records source line, function-context candidate, operation and need for every lexical reference; selected handlers are not all claimed executed during startup.
+
+| Original source | Need |
+| --- | --- |
+| Mainline InputUtil lines 4, 12, 16 | Current enum, equality to Gamepad and Mkb. These are the only direct namespace calls in the scanned PTR UI. |
+| Shared InputUtil lines 106, 121 | Immediate Init/Setup only when the subscriber's style equals current style; the manager uses this path. Uninit is deferred until an event. |
+| InputDeviceIconSetManager Init | Current enum selects Generic versus active gamepad label set; the file calls Init at top level. Device-map queries are separate APIs. |
+| CompactRaidFrameManager lines 337, 352, 360, 379, 398 | Expand/collapse controls, binding/ground-targeting/smart-nav guards. Setup/Init registrations at 515–517 use the same state. |
+| StatusTrackingManager GetExpectedWidth; Mainline overrides | MKB versus gamepad width/layout. Other selected UI references use the same predicate or subscriber registration, not additional namespace members. |
+
+`IsGamepadUISupported` is different: it checks whether CVar `InputDeviceInterfaceStyle` exists. It does not query current style and is not changed here. Alias/reference rows and conditional handlers are candidates, not runtime invocation evidence. Full original CompactRaidFrameManager startup remains a future stock-run check, not a claim made by the SharedXML selector.
+
+## Existing state and minimal repair
+
+`SimState.input_interface_style` already stores `InputInterfaceStyle::{Mkb, Gamepad}`. The existing C API getter reads that field; `set_input_interface_style` updates it and queues the documented new/old payload. The legacy Forever `IsUsingGamepad` reads the same field. Mapped sticks, capability probes, frame gamepad-enable flags and hover policy are separate state, not current interface style.
+
+The staged test uses the existing setter before observing each of MKB → Gamepad → MKB. It asserts the original InputUtil query, both booleans and all four immediate setup/init counters. It does not replace or wrap any original helper. No new passive production scaffold is needed: the setter already exists.
+
+## Static contradiction table
+
+One independently claimed RED selector: `ptr_input_util_observes_supplied_styles_and_initializes_matching_subscribers`. These are static contradictions, not executed mutants.
+
+| Candidate producer | Contradiction within that selector |
+| --- | --- |
+| Namespace/member missing | Original InputUtil.GetCurrentInterfaceStyle cannot return the supplied MKB value. |
+| Constant Mkb / 0 | Gamepad iteration must return 1 and run only gamepad setup/init. |
+| Constant Gamepad / 1 | First and final MKB iterations must return 0 and run only MKB setup/init. |
+| Constant nil / false / true / other value | Exact numeric return assertion rejects it. |
+| No-op style input / getter ignores supplied state | Both different values are required in the same environment. |
+| Incorrect enum values | Explicit documented numeric assertions reject them. |
+
+The selector tests immediate registration behavior, not event-delivery timing, physical devices or every startup widget. Original consumer execution, constant contradictions and GREEN outcome still require future authorized runtime proof.
+
+## Laptop questions
+
+1. What is the native initial style with no connected controller and with a controller? Existing simulator MKB default is policy only.
+2. How does the style CVar interact with active device, capability and device hotplug state? This patch does not infer those links.
+3. Does reselecting the same style emit an event, and exactly when is the documented synchronous event delivered? The existing queued/no-transition policy is not established as native parity.
+
+No values are invented to answer these questions. No default, event policy, CVar or host-device behavior changes are part of this repair.
+
+## Sources
+
+- [C API model](../../../src/c_api/c_input_interface_style.rs), [registration](../../../src/c_api/registration.rs) and [legacy query](../../../src/lua_api/globals/real/input_interface.rs).
+- [TOC selection](../../../src/loader/mod.rs) and [file filters/substitution](../../../src/toc/mod.rs).
+- [Staged original-consumer selector](../../../tests/ptr_input_interface_style.rs).
+- [Committed PTR manifest](../../../data/blizzard-ui-files/ptr.txt) and [Retail manifest](../../../data/blizzard-ui-files/retail.txt).
+
+## See Also
+
+- [[consumer-selection-and-red-proof]] — applicability and standalone contradictions.
+- [[client-profiles]] — profile publication and cache provenance.
