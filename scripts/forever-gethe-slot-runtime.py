@@ -73,6 +73,7 @@ def guarded_run(label, cwd, argv):
         meta['status_argv'] = ['/usr/bin/systemctl', '--user', 'show', unit,
                                '--property=LoadState,ActiveState,SubState,Result,ExecMainStatus,CPUUsageNSec']
         deadline = time.monotonic() + 110
+        failed_properties = None
         while True:
             status = cli.command(*meta['status_argv']).capture().run()
             assert status.exit_code == 0, status.stderr
@@ -81,14 +82,16 @@ def guarded_run(label, cwd, argv):
                 break
             if properties.get('SubState') == 'failed':
                 (root / 'unit-failed-status').write_text(status.stdout)
-                cli.command('/usr/bin/systemctl', '--user', 'stop', unit).capture().run()
+                failed_properties = properties
+                reset = cli.command('/usr/bin/systemctl', '--user', 'reset-failed', unit).capture().run()
+                assert reset.exit_code == 0, reset.stderr
             assert time.monotonic() < deadline, properties
             time.sleep(0.25)
         (root / 'unit-status').write_text(status.stdout)
         meta['unit_status'] = properties
-        assert properties['LoadState'] == 'loaded'
+        meta['execution_status'] = failed_properties or properties
         assert properties['SubState'] in ('exited', 'dead')
-        meta['exit_code'] = int(properties['ExecMainStatus'])
+        meta['exit_code'] = int(meta['execution_status']['ExecMainStatus'])
         meta['stdout'] = (root / 'stdout').read_text()
         meta['stderr'] = (root / 'stderr').read_text()
     except Exception as error:
