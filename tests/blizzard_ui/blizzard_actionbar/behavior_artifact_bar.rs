@@ -109,7 +109,7 @@
 //! - `state.equipped_artifact = Some(ArtifactInfo { item_id: 211_993,
 //!   total_xp: 350, points_spent: 2, tier: 1, ... })`. `item_id = 211_993`
 //!   ("Entombed Seraph's Casque") is one of the equipment IDs already
-//!   present in `data/items.rs`. The actual identity does not matter —
+//!   present in `crates/sim-data/data/items.rs`. The actual identity does not matter —
 //!   the test pins XP-bar behavior, not artifact metadata — but the ID
 //!   MUST be in the items DB so that `Item:CreateFromItemID(itemID)` →
 //!   `ContinueOnItemLoad` clears `IsItemEmpty()` (which calls
