@@ -10,7 +10,8 @@
 //! - `CanGuildRemove()`             -> true when the player is in a guild
 //! - `CanEditPublicNote()`          -> true when the player is in a guild
 //! - `CanEditMOTD()`                -> `world.guild_is_officer` when in a guild
-//! - `CanEditGuildInfo()`           -> one-or-nil from `world.guild_is_officer`
+//! - `CanEditGuildInfo()` -> Wrath number1/nil from player guild/rank rights;
+//!   other profiles retain the membership/officer probe.
 //! - `IsGuildLeader()`              -> `guild_members[0].rank_index == 1` (the
 //!   "self is first guild member" hack mirrors `c_club_get_member_info_for_self`).
 //! - `CanGuildPromote()` / `CanGuildDemote()` -> true when the player is the
@@ -391,7 +392,12 @@ fn register_guild_permission_queries(lua: &mut rilua::Lua) -> crate::Result<()> 
     LuaApiMut::register_function(lua, "CanGuildRemove", can_guild_remove)?;
     LuaApiMut::register_function(lua, "CanEditPublicNote", can_edit_public_note)?;
     LuaApiMut::register_function(lua, "CanEditMOTD", can_edit_motd)?;
-    LuaApiMut::register_function(lua, "CanEditGuildInfo", can_edit_guild_info)?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        super::real::wrath_guild_info::register_all(lua)?;
+        super::real::wrath_guild_bank::register_all(lua)?;
+    } else {
+        LuaApiMut::register_function(lua, "CanEditGuildInfo", can_edit_guild_info)?;
+    }
     LuaApiMut::register_function(lua, "CanGuildPromote", can_guild_promote)?;
     LuaApiMut::register_function(lua, "CanGuildDemote", can_guild_demote)?;
     LuaApiMut::register_function(lua, "IsGuildLeader", is_guild_leader)?;

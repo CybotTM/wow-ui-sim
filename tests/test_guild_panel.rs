@@ -2,7 +2,9 @@ use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::lua_api::WowLuaEnv;
+post_wrath_ui_fixture! {
 use wow_ui_sim::lua_api::state::GuildMember;
+}
 
 fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
@@ -56,6 +58,29 @@ const GUILD_ADDONS: &[&str] = &[
 
 fn setup_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    load_guild_ui(env)
+}
+
+/// Supply the guild branch before native startup; this is not the Wrath default.
+fn setup_guild_leader_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        let mut state = env.state().borrow_mut();
+        state.world.guild_name = Some("Heroes of Azeroth".into());
+        state.world.guild_rank = Some("Guild Leader".into());
+        state.world.guild_id = 73;
+        state.world.guild_player_rank = 0;
+        state.world.guild_num_members = 1;
+        state.world.guild_members = vec![wow_ui_sim::lua_api::state::GuildMember {
+            name: "Uther".into(),
+            rank_index: 1,
+            online: true,
+        }];
+    }
+    load_guild_ui(env)
+}
+
+fn load_guild_ui(env: WowLuaEnv) -> WowLuaEnv {
     env.set_screen_size(1024.0, 768.0);
 
     {
@@ -63,7 +88,7 @@ fn setup_env() -> WowLuaEnv {
         state.addon_base_paths = vec![blizzard_ui_dir()];
     }
 
-    if cfg!(feature = "client-wrath") {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
         common::panel_fixtures::load_wrath_panel_core(&env);
         env.apply_post_load_workarounds();
         fire_startup_events(&env);
@@ -115,7 +140,7 @@ fn install_dropdown_test_helpers(env: &WowLuaEnv) {
 }
 
 fn load_guild_control_ui(env: &WowLuaEnv) {
-    if cfg!(feature = "client-wrath") {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
         env.exec(
             r#"
             A_Admin.SetGuildRanks({
@@ -151,8 +176,8 @@ fn fire_startup_events(env: &WowLuaEnv) {
 #[test]
 fn guild_panel_opens_without_unavailable_error() {
     test_timeout! {
-        let env = setup_env();
-        if cfg!(feature = "client-wrath") {
+        let env = setup_guild_leader_env();
+        if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
             common::panel_fixtures::clear_recorded_lua_errors(&env);
             env.exec(r#"
                 ToggleFriendsFrame(3)
@@ -207,6 +232,7 @@ fn c_club_is_enabled() {
 #[test]
 fn c_club_returns_guild() {
     let env = WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().world.guild_name = Some("Heroes of Azeroth".into());
     let result: String = env
         .eval(
             r#"
@@ -222,6 +248,7 @@ fn c_club_returns_guild() {
     assert_eq!(result, "ok", "C_Club should return guild: {result}");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn guild_member_rank_dropdown_generates_rank_options() {
     test_timeout! {
@@ -266,7 +293,9 @@ fn guild_member_rank_dropdown_generates_rank_options() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn communities_member_detail_rank_dropdown_shows_rank_rows() {
     test_timeout! {
@@ -335,15 +364,56 @@ fn communities_member_detail_rank_dropdown_shows_rank_rows() {
         );
     }
 }
+}
+
+fn supply_bank_rank_permissions(env: &WowLuaEnv) {
+    use wow_ui_sim::lua_api::state::GuildBankRankPermissions;
+    env.state().borrow_mut().world.guild_bank_rank_permissions = [
+        (
+            0,
+            GuildBankRankPermissions {
+                money_per_day: 0,
+                tab_rights: [-1; 6],
+                tab_stacks_per_day: [-1; 6],
+            },
+        ),
+        (
+            1,
+            GuildBankRankPermissions {
+                money_per_day: 123_456,
+                tab_rights: [1, 5, 0, 7, 3, 6],
+                tab_stacks_per_day: [11, 12, 13, 14, 15, 16],
+            },
+        ),
+        (
+            2,
+            GuildBankRankPermissions {
+                money_per_day: 987_654,
+                tab_rights: [7, 0, 5, 2, 1, 3],
+                tab_stacks_per_day: [21, 22, 23, 24, 25, 26],
+            },
+        ),
+    ]
+    .into_iter()
+    .collect();
+}
 
 #[test]
 fn guild_control_rank_settings_dropdown_shows_rank_rows() {
     test_timeout! {
-        let env = setup_env();
+        let env = setup_guild_leader_env();
+        if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+            supply_bank_rank_permissions(&env);
+        }
         load_guild_control_ui(&env);
-        if cfg!(feature = "client-wrath") {
+        if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+            common::panel_fixtures::clear_recorded_lua_errors(&env);
             env.exec(include_str!("fixtures/wrath_f03/guild_ranks.lua"))
                 .expect("native rank selection and menu rows");
+            env.exec(include_str!("fixtures/wrath_f03/bank_rank_permissions.lua"))
+                .expect("selected rank inputs reach original bank widgets");
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native bank widget errors: {errors:?}");
             return;
         }
         let result: String = env.eval(r#"
@@ -375,6 +445,38 @@ fn guild_control_rank_settings_dropdown_shows_rank_rows() {
     }
 }
 
+/// Original nonleader consumer reads the selected control rank, not player rank.
+#[cfg(feature = "client-wrath")]
+#[test]
+fn native_nonleader_rank_dropdown_completes_bank_permission_update() {
+    test_timeout! {
+        let env = setup_guild_leader_env();
+        supply_bank_rank_permissions(&env);
+        load_guild_control_ui(&env);
+        {
+            let mut state = env.state().borrow_mut();
+            state.world.guild_rank = Some("Officer".into());
+            state.world.guild_player_rank = 1;
+            state.world.guild_members[0].rank_index = 2;
+        }
+        common::panel_fixtures::clear_recorded_lua_errors(&env);
+        env.exec(r#"
+            assert(not IsGuildLeader(), "exercise the native nonleader branch")
+            ToggleDropDownMenu(1, nil, GuildControlPopupFrameDropDown)
+            assert(DropDownList1:IsShown() and DropDownList1.numButtons == 3)
+            local officer = DropDownList1Button2
+            officer:GetScript("OnClick")(officer, "LeftButton")
+            assert(UIDropDownMenu_GetSelectedID(GuildControlPopupFrameDropDown) == 2)
+            assert(GuildControlPopupFrameDropDownText:GetText() == "Officer")
+        "#).expect("original dropdown click completes native bank permission update");
+        env.exec(include_str!("fixtures/wrath_f03/bank_rank_permissions.lua"))
+            .expect("nonleader selection projects varying stored bank permissions");
+        let errors = common::panel_fixtures::recorded_lua_errors(&env);
+        assert!(errors.is_empty(), "native nonleader dropdown errors: {errors:?}");
+    }
+}
+
+post_wrath_ui_fixture! {
 #[test]
 fn guild_control_tab_dropdown_shows_initial_selection() {
     test_timeout! {
@@ -390,7 +492,9 @@ fn guild_control_tab_dropdown_shows_initial_selection() {
         assert_eq!(result, "Guild Ranks/Guild Ranks", "guild control tab dropdown should show its initial selected tab: {result}");
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn guild_control_rank_dropdown_omits_unassignable_leader_rank() {
     test_timeout! {
@@ -417,7 +521,9 @@ fn guild_control_rank_dropdown_omits_unassignable_leader_rank() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn guild_dropdown_descriptions_have_elements() {
     test_timeout! {
@@ -454,13 +560,14 @@ fn guild_dropdown_descriptions_have_elements() {
         );
     }
 }
+}
 
 #[test]
 fn guild_dropdown_materialized_buttons_have_labels() {
     test_timeout! {
-        let env = setup_env();
+        let env = setup_guild_leader_env();
         load_guild_control_ui(&env);
-        if cfg!(feature = "client-wrath") {
+        if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
             env.exec(r#"
                 ToggleDropDownMenu(1, nil, GuildControlPopupFrameDropDown)
                 assert(DropDownList1:IsShown())
@@ -507,6 +614,7 @@ fn guild_dropdown_materialized_buttons_have_labels() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn communities_list_dropdown_materializes_subscribed_club_rows() {
     test_timeout! {
@@ -527,7 +635,9 @@ fn communities_list_dropdown_materializes_subscribed_club_rows() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn communities_stream_dropdown_shows_guild_officer_and_notification_settings() {
     test_timeout! {
@@ -565,7 +675,9 @@ fn communities_stream_dropdown_shows_guild_officer_and_notification_settings() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn communities_stream_dropdown_click_opens_menu() {
     test_timeout! {
@@ -621,16 +733,31 @@ fn communities_stream_dropdown_click_opens_menu() {
         );
     }
 }
+}
 
+#[cfg(feature = "client-wrath")]
+#[test]
+fn native_guild_info_panel_populates_motd_details() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        {
+            // Supply membership and received cache state before native UI loading.
+            let mut state = env.state().borrow_mut();
+            state.world.guild_name = Some("Heroes of Azeroth".into());
+            state.world.guild_rank = Some("Member".into());
+            state.world.guild_info_text = "Mythic-focused guild recruiting".into();
+        }
+        let env = load_guild_ui(env);
+        env.exec(include_str!("fixtures/wrath_f03/guild_info.lua"))
+            .expect("native guild MOTD and details consumers");
+    }
+}
+
+post_wrath_ui_fixture! {
 #[test]
 fn guild_info_panel_populates_motd_details_and_challenges() {
     test_timeout! {
         let env = setup_env();
-        if cfg!(feature = "client-wrath") {
-            env.exec(include_str!("fixtures/wrath_f03/guild_info.lua"))
-                .expect("native guild MOTD and details consumers");
-            return;
-        }
         let result: String = env.eval(r#"
             if CommunitiesFrame == nil then return "missing_communities" end
             local details = CommunitiesFrame.GuildDetailsFrame
@@ -699,6 +826,7 @@ fn guild_info_panel_populates_motd_details_and_challenges() {
             "Officer edit buttons should be shown when guild_is_officer: {result}"
         );
     }
+}
 }
 
 #[test]

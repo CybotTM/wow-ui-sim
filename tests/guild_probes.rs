@@ -11,7 +11,7 @@ fn env() -> WowLuaEnv {
 #[test]
 fn is_in_guild_true_when_guild_name_is_seeded() {
     let env = env();
-    // Default seeded world has a guild_name.
+    env.state().borrow_mut().world.guild_name = Some("Heroes of Azeroth".into());
     assert!(env.state().borrow().world.guild_name.is_some());
     let b: bool = env.eval("return IsInGuild()").unwrap();
     assert!(b);
@@ -28,6 +28,7 @@ fn is_in_guild_false_after_clearing_guild_name() {
 #[test]
 fn can_guild_invite_tracks_guild_membership() {
     let env = env();
+    env.state().borrow_mut().world.guild_name = Some("Heroes of Azeroth".into());
     let seeded: bool = env.eval("return CanGuildInvite()").unwrap();
     assert!(seeded);
     env.state().borrow_mut().world.guild_name = None;
@@ -37,14 +38,32 @@ fn can_guild_invite_tracks_guild_membership() {
 
 #[test]
 fn guild_edit_permissions_track_officer_status() {
+    use wow_ui_sim::lua_api::state::GuildRank;
+
     let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.player.present = true;
+        state.world.guild_name = Some("Heroes of Azeroth".into());
+        state.world.guild_id = 73;
+        state.world.guild_player_rank = 0;
+        state.world.guild_ranks = vec![GuildRank {
+            name: "Member".into(),
+            flags: vec![false; 17],
+        }];
+    }
     let (seeded_motd, seeded_info): (bool, bool) = env
         .eval("return CanEditMOTD(), CanEditGuildInfo() ~= nil")
         .unwrap();
     assert!(!seeded_motd, "seeded member rank cannot edit the MOTD");
     assert!(!seeded_info, "seeded member rank cannot edit guild info");
 
-    env.state().borrow_mut().world.guild_is_officer = true;
+    {
+        let mut state = env.state().borrow_mut();
+        state.world.guild_is_officer = true;
+        // Wrath reads stored right13, not the simulator's officer shortcut.
+        state.world.guild_ranks[0].flags[12] = true;
+    }
     let (officer_motd, officer_info): (bool, bool) = env
         .eval("return CanEditMOTD(), CanEditGuildInfo() ~= nil")
         .unwrap();
@@ -187,7 +206,21 @@ fn get_num_guild_members_counts_roster() {
 
 #[test]
 fn seeded_guild_roster_has_one_online_and_one_offline_member() {
+    use wow_ui_sim::lua_api::state::GuildMember;
+
     let env = env();
+    env.state().borrow_mut().world.guild_members = vec![
+        GuildMember {
+            name: "Uther".into(),
+            rank_index: 1,
+            online: true,
+        },
+        GuildMember {
+            name: "Jaina".into(),
+            rank_index: 2,
+            online: false,
+        },
+    ];
     let (total, online, first_online, second_online): (i32, i32, bool, bool) = env
         .eval(
             r#"

@@ -1,6 +1,20 @@
 ## [2026-10-25] source | Forever wowf product selection
 
 [Selected-target checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records wowf 1.60.1.70532 / build2582289d81e380163c7a13472df4cb81, repaired live desktop indexes, idle Syncthing and authenticated local root/encoding. Selector/regression now expect wowf. Builds, offline sync, baseline and startup await a released slot after club-unread-integrate and S49; static work is not runtime acceptance.
+## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
+
+[Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
+## [2026-10-24] static stage | Wrath bank selected-rank permissions
+
+[Contract](../specs/wrath-guild-bank-rank-permissions.md) and [model/contradictions](investigations/wrath-guild-info.md#bank-permission-model) record accepted laptop12340 evidence, explicit host rank rows, initial rank0 seed, selected-rank projections and independently discriminating original dropdown tests. No compile, runtime tests or slot use. Prior held-producer statements below describe the earlier stage; current acceptance remains pending parent RED/GREEN.
+
+## [2026-10-24] static repair | Wrath guild-info GREEN blockers
+
+[Exact matrix](../baselines/wrath-guild-info-green-blockers.md) classifies all17 saved regressions as missing supplied inputs, preserving every assertion. F1 supplies its display rank before load; a separate initialized-state contract pins no synthetic guild. Original nonleader dropdown completion RED is staged, not executed or a permission-value discriminator. Both bank getters remain held for native facts and a real permission model. Seven exact profile lists are recorded; Wrath/Retail are required lane gates. No builds, slots, agents or new runtime proof.
+
+## [2026-10-24] investigation | Wrath guild-info staging
+
+[Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md): existing cache/rank-right reuse, Wrath-only empty/no-guild initialization, two original OnShow branch selectors, static contradiction/selection proof and batch3 seed prerequisites. Edit-only; RED/GREEN, stock and Retail36/42 preservation remain deferred.
 
 ## [2026-10-24] proof | Bounded reload XML source reuse
 
@@ -2702,9 +2716,35 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
 
+## 2026-10-24 — PTR 70493 source refresh
+
+Updated client-profiles runtime-cache/source identity and epoch links from the authenticated 70493 source contract and exact failing startup baseline. Original 4cc resume and host RED precede producer changes; decoded range/content proof and partial-provenance completion remain distinct from compatibility. Retail master 36/42 exact preservation accepted; Forever paired master 78/82 exact preservation accepted; source/CVar guards unchanged.
+## [2026-10-24] source | Combat-log filter record staging
+
+[Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
+
 ## 2026-10-24 | CF-2 SuperTrack edit-only staging
 
 Added supplied-state system/contract and selected original-consumer tests. Retired overlapping target defaults; priority remains explicitly unsupported. Runtime RED/GREEN, mutants and profile preservation remain slot obligations.
 ## 2026-10-24 — CF-2 club self invitations (edit-only)
 
 Updated [[club-membership]] and [bounded contract](../specs/club-self-invitations.md) with supplied incoming snapshot projection, Retail TOC/XML/Lua selection and static standalone contradictions. No runtime RED/GREEN, builds, slots or other-profile acceptance claimed.
+## 2026-10-24 — Wrath relic capability staging
+
+Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-relic-class-capability) and [spec](../specs/wrath-unit-has-relic-slot.md). Class flags remain explicit inputs; unknown class mappings not invented. Edit-only, no runtime acceptance.
+
+## [2026-10-24] source | Patch 12.1.7 I4a inherited accounting
+
+Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance), [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist) and index for immutable companion accounting, explicit per-profile UNKNOWN source/selection/proof boundaries and grouped I4b selectors. I0 artifacts unchanged; no builds, cache observations or native/runtime acceptance.
+
+## 2026-10-24 — Patch 12.1.7 I4b static staging
+
+- Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations), [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection) and index for I3-dependent selected-source obligations. Exact pin/cache authentication, mixed-status rejection controls and separate runtime limits; no effective applicability promotion before the source dependency merges.
+
+## 2026-10-24 — Wrath guild-bank proof reconciliation
+
+Updated the [bank investigation](investigations/wrath-guild-info.md#accepted-runtime-proof), contract, baseline classification and index from static/pending to verifier8738-accepted saved RED/GREEN. Current-master08b423c5c integration remains separate; historical Retail counts are not its expectation.
+
+## 2026-10-24 — Wrath guild-bank current-master integration
+
+[Bounded refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 merges master08b423c5c: Wrath/Retail all-target checks0warnings, five bank exact PASS, Wrath stock[], fresh Retail30/34 unchanged with no added/removed keys. All13 CVar receipts preserve original stat/hash; slot0 released. Historical RED/GREEN matrix not repeated.

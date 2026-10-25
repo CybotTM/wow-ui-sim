@@ -22,6 +22,7 @@ fn compact_raid_group_type_enum_matches_edit_mode_unit_frame_indices() {
     assert_eq!(arena, edit_arena);
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn unit_frame_edit_mode_setting_meta_includes_big_defensive_icon_size() {
     let env = WowLuaEnv::new().expect("create Lua environment");
@@ -52,6 +53,7 @@ fn unit_frame_edit_mode_setting_meta_includes_big_defensive_icon_size() {
     assert_eq!(min_value, 0);
     assert_eq!(max_value, 22);
     assert_eq!(num_values, 23);
+}
 }
 
 #[test]
@@ -142,6 +144,7 @@ fn status_tracking_bar_edit_mode_setting_ids_match_live_docs() {
     assert_eq!(num_values, 4);
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn edit_mode_account_setting_ids_include_raid_warning_and_loss_of_control() {
     let env = WowLuaEnv::new().expect("create Lua environment");
@@ -174,6 +177,7 @@ fn edit_mode_account_setting_ids_include_raid_warning_and_loss_of_control() {
     assert_eq!(min_value, 0);
     assert_eq!(max_value, 35);
     assert_eq!(num_values, 36);
+}
 }
 
 #[test]
@@ -213,6 +217,7 @@ fn encounter_events_icon_direction_matches_blizzard_docs() {
     assert_eq!(num_values, 4);
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn edit_mode_profile_option_enums_match_blizzard_docs() {
     let env = WowLuaEnv::new().expect("create Lua environment");
@@ -350,4 +355,5 @@ fn edit_mode_profile_option_enums_match_blizzard_docs() {
         "#,
     )
     .expect("profile option enums should match Blizzard generated docs");
+}
 }

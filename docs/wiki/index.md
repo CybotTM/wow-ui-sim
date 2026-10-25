@@ -1,20 +1,52 @@
 ## [2026-10-25] source | Forever wowf product selection
 
 [Selected-target checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records wowf 1.60.1.70532 / build2582289d81e380163c7a13472df4cb81, repaired live desktop indexes, idle Syncthing and authenticated local root/encoding. Selector/regression now expect wowf. Builds, offline sync, baseline and startup await a released slot after club-unread-integrate and S49; static work is not runtime acceptance.
+## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
+
+[Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
+## [2026-10-24] investigation | Wrath guild-info staging
+
+[Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md) and [17-row repair matrix](../baselines/wrath-guild-info-green-blockers.md). Historical three-selector GREEN passed; explicit fixture repairs and F1 display rank now await re-proof. Original nonleader dropdown RED is staged; bank permission/withdrawal getters are held for laptop facts and a real model. No new build/slot use; stock/check and actual Retail34/38 comparison remain pending.
+
+## [2026-10-24] source | Patch 12.1.7 I4b conditional static selection
+
+[Conditional source evidence](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection): 460 conditional PTR obligations, 5,168 UNKNOWN cells; zero effective promotions before the exact I3 source commit merges. All runtime proof stages remain UNKNOWN.
+
+## [2026-10-24] source | Patch 12.1.7 I4a inherited worklist
+
+[Inherited accounting](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist): 1,876 immutable occurrences, 63 opposing sweep intersections and 233 lexical test-candidate rows. All 5,628 profile applicability cells remain UNKNOWN pending accepted source/selection evidence. Grouped I4b worklist, zero Cargo; not runtime acceptance.
+## [2026-10-24] source | Combat-log filter record staging
+
+[Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
 
 ## [2026-10-24] system | CF-2 supplied club self invitations
 
 [Club model update](systems/club-membership.md#incoming-self-invitations-cf-2) links the [bounded contract](../specs/club-self-invitations.md): empty-by-default supplied incoming rows, original selected Retail MicroMenu selector and static standalone mutant contradictions. Edit-only staging; no builds/tests/slots or runtime acceptance. Other CF-2 members remain separate.
 
+## [2026-10-24] source | Wrath relic class capability
+
+[Lua API notes](systems/lua-api.md#wrath-relic-class-capability) link the
+[contract](../specs/wrath-unit-has-relic-slot.md): runtime-only Wrath publication,
+numeric 1/nil, explicit class DB flags and native token vocabulary. Native class
+mapping remains unknown. Producer and tests staged only; no build/slot/runtime proof.
 ## [2026-10-24] source | Reload XML instance arguments
 
 [Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): Forever RED16 precedes parameterized identities, then Forever/default Retail compile0 sources on both reloads.27 exact cases/profile, zero-warning checks and formatting pass; no stock-startup or full-workload acceptance claim.
+
+## [2026-10-24] proof | Wrath bank selected-rank permissions
+
+[Accepted runtime proof](investigations/wrath-guild-info.md#accepted-runtime-proof) links the [contract](../specs/wrath-guild-bank-rank-permissions.md): five bank RED→GREEN selectors, Wrath56 and paired Retail53 preservation pass; verifier8738 ACCEPT. Both original dropdown selectors project varying rank/tab widget values. [Current-master refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 also passes: both all-target checks warn zero, five bank cases pass, Wrath stock[], Retail master08b423c5c/merged30 keys/34 occurrences unchanged with no additions; slot0 released.
 
 ## [2026-10-24] staged | SuperTrack supplied state
 
 [Ownership and native gaps](systems/super-track-state.md) links the [contract](../specs/super-track-state.md). Original-consumer RED tests and separate producer staged; no builds or runtime proof.
 
 ## [2026-10-22] source | Wrath F07 applicability
+
+## [2026-10-24] source | PTR70493 authenticated source and resume
+
+[Profile runtime cache](systems/client-profiles.md#runtime-cache) links the [70493 source proof](../ptr-cdn-content-index.md): original process-failure and advertised-host RED→GREEN, authenticated 4,578-entry regeneration, schema2 partial provenance and unchanged 306-file supported resume. [Actual startup](../baselines/README.md#ptr-70493-authenticated-source-capture--2026-10-24) retains 436 errors / 618 occurrences after master/toc integration; no clean-startup or I4 claim. Retail preserves exact master 36/42 residual; Forever preserves exact fresh-master 78/82 residual; both have zero-warning compile/check gates.
+
 ## [2026-10-22] source | Wrath casting and aura projections
 
 [Projection notes](systems/lua-api.md#wrath-casting-and-aura-projections) link the [bounded contract](../specs/wrath-casting-aura-contracts.md): original cast/channel/party-aura consumers, catalog-backed subtext, legacy tuple/event shapes and separate metadata/transport gaps. Paired baselines, seven producer GREEN contracts and Retail preservation are recorded. Original BuffFrame getter-type RED precedes the runtime Wrath filename projection. Final14aed640c: native21+seven contracts PASS, sixteen report-only failures unchanged, Retail37 PASS, stock arrays empty and Wrath check/formatter PASS; one Retail setup timeout passed its exact retry. Native parity and unexercised branches remain distinct.
