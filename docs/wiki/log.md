@@ -17,6 +17,10 @@ selector to original PetPaperDollFrame widget observations. Matching supplied
 start-recovery categories gate GCD; on-hold state controls numeric enable.
 Static-only contradiction table and Q5 UNKNOWN ledger retained. Runtime remains
 blocked until wrath-relic-slot merges; unchanged error assertions still apply.
+## [2026-10-25] build | Debug metadata and persistent-slot incremental reuse
+
+Dev/test profiles use `debug = 0` (cherry-pick `7a49b872c`); source-line backtraces are unavailable. The sim-data optimization level is unchanged. [Slot builds](../remote-builds.md#local-slot-builds) enable incremental compilation only through the fixed per-slot BindPaths source path. Python RED/GREEN evidence is recorded in `/home/osso/.local/state/wow-ui-sim/handoff/ct-incr-debug0/REPORT.md`; no Rust build was run.
+
 ## [2026-10-25] maintenance | Utility command admission and lock rebase
 
 [Findings](investigations/compile-bin-lockwatch.md) record rebase to `b2ca0becd`, current command feature admission, preserved historical evidence, and two offline metadata runs: 781 unchanged package records and stable lock bytes. Master already normalized the lock; no compile or CPU proof.
@@ -2794,3 +2798,11 @@ Updated the [bank investigation](investigations/wrath-guild-info.md#accepted-run
 ## 2026-10-24 — Wrath guild-bank current-master integration
 
 [Bounded refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 merges master08b423c5c: Wrath/Retail all-target checks0warnings, five bank exact PASS, Wrath stock[], fresh Retail30/34 unchanged with no added/removed keys. All13 CVar receipts preserve original stat/hash; slot0 released. Historical RED/GREEN matrix not repeated.
+
+## 2026-10-25 — Stable-path slot build adoption (static)
+
+Added the nonblocking [slot launcher](../../scripts/slot-build.py) and
+[usage/owner contract](../remote-builds.md#local-slot-builds): fixed source mount
+per slot, exact `.owner` match and literal capacity ADD admission. Focused Python
+tests only; no compile or service launch. The normalized lock matches the saved
+Cargo rewrite byte-for-byte; runtime acceptance remains pending.
