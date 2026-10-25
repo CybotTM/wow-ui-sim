@@ -621,7 +621,7 @@ fn blizzard_ping_ui_publishes_required_localized_strings(env: &WowLuaEnv) {
             .unwrap_or_else(|err| panic!("type(_G.{key}) probe failed: {err}"));
         assert_eq!(
             kind, "string",
-            "_G.{key} must publish as a string — `data/global_strings.rs` ships the \
+            "_G.{key} must publish as a string — `crates/sim-data-profile/data/global_strings.rs` ships the \
              enUS localization for all 11 PING_TYPE_* / PING_FAILED_* keys consumed by \
              Blizzard_PingManager.lua's wedge-info table and \
              Blizzard_PingUI.lua's `C_PingSecure.DisplayError(PING_FAILED_GENERIC)` \

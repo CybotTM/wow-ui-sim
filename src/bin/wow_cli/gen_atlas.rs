@@ -7,7 +7,7 @@
 //!   - UiTextureAtlasElementSliceData.csv
 //!   - listfile.csv
 //!
-//! Generates: data/atlas.rs
+//! Generates: crates/sim-data-profile/data/atlas.rs
 
 #[cfg(test)]
 #[path = "gen_atlas_tests.rs"]
@@ -26,9 +26,9 @@ pub struct Options {
     csv_dir: Option<PathBuf>,
     #[arg(long)]
     listfile: Option<PathBuf>,
-    #[arg(long, default_value = "data/atlas.rs")]
+    #[arg(long, default_value = "crates/sim-data-profile/data/atlas.rs")]
     output: PathBuf,
-    #[arg(long, default_value = "data/atlas_elements.rs")]
+    #[arg(long, default_value = "crates/sim-data-profile/data/atlas_elements.rs")]
     elements_output: PathBuf,
 }
 

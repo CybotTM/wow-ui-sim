@@ -5,7 +5,7 @@
 //!   - ItemModifiedAppearance.csv
 //!   - ItemAppearance.csv
 //!
-//! Generates: data/items.rs
+//! Generates: crates/sim-data/data/items.rs
 
 use super::csv_util::{escape_str, parse_csv_line, read_csv_records, wow_data_dir};
 use std::collections::{BTreeSet, HashMap, HashSet};
@@ -27,7 +27,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let icon_map = build_icon_map(&wow_data, &required_ids)?;
 
     std::fs::create_dir_all("data")?;
-    let output_path = Path::new("data/items.rs");
+    let output_path = Path::new("crates/sim-data/data/items.rs");
     let mut out = File::create(output_path)?;
 
     write_header(&mut out)?;

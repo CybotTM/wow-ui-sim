@@ -1,3 +1,7 @@
+## [2026-10-24] design | Generated data crate boundary
+
+[Crate split](design/generated-data-crates.md) preserves the root facade and selected tables while isolating common catalogs from profile features. Same-slot touched-root rebuild 413.80→258.52 s; peak child RSS6,189,056→2,717,272 KiB. Retail/Wrath checks and94 bounded Rust tests pass; all23 generated files retain their hashes. Single warm-dependency samples, not a cold-build or full-profile claim.
+
 ## [2026-10-24] system | CF-2 supplied unread streams
 
 [Club stream ownership](systems/club-membership.md#unread-streams-cf-2) links the [bounded unread contract](../specs/club-unread.md): one supplied club/stream model, original MicroMenu and CommunitiesUtil selectors, settings/marker/clear siblings and explicit UNKNOWN native policies. RED/schema and publication staged separately; no build, slot or runtime proof. Retail/PTR/Forever preservation remains pending.

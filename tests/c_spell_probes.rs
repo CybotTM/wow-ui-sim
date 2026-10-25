@@ -33,7 +33,7 @@ fn formatted_player_attack_power_damage(env: &WowLuaEnv, formula: &str) -> Strin
 #[test]
 fn test_get_spell_info_known_returns_table() {
     let env = env();
-    // Spell 116 = Frostbolt (exists in data/spells.rs)
+    // Spell 116 = Frostbolt (exists in crates/sim-data/data/spells.rs)
     let name: String = env
         .eval("local info = C_Spell.GetSpellInfo(116); return info.name")
         .unwrap();
