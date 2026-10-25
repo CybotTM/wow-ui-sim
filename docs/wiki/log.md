@@ -2843,3 +2843,7 @@ Added the nonblocking [slot launcher](../../scripts/slot-build.py) and
 per slot, exact `.owner` match and literal capacity ADD admission. Focused Python
 tests only; no compile or service launch. The normalized lock matches the saved
 Cargo rewrite byte-for-byte; runtime acceptance remains pending.
+
+## [2026-10-25] integration | CF-2 TTS fixture deferrals
+
+[Restoration inventory](investigations/cf2-tts-integration.md) records thirteen whole-file deferrals, their passing cases and origin owners, plus the failing mixed-file Gamepad exception. Current Forever TTS cases pass; two newly passing Forever files remain unchanged. Final profile gates remain separate.
