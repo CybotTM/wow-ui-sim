@@ -11,6 +11,14 @@ PTR 12.1.7.70493 declares `C_InputInterfaceStyle.GetCurrentStyle()` in generated
 
 - [ ] PTR accepts `INPUT_DEVICE_INTERFACE_TRANSITION` through the strict `all(client-ptr, retail-12-1-5)` epoch exception. Loading the original SharedXML closure must produce no Lua errors; its listener must report registration true and an unrelated event false. Retail and Forever event validity remain unchanged.
 
+## SharedXML listener assumption
+
+The PTR selector expects two listeners, one per environment, without changing normal loading or secure replay. This is an approved expectation correction, not native-count proof.
+
+REVISIT: Assumed twice (normal + secure replay) per user decision 2026-10-25; native count unproven (benlla-re 5875, Clank 5.0.3 audit game-engine acd869efa). Re-check once Retail is decompiled.
+
+Decision key: `sharedxml_twice_default_20261025`.
+
 ## How it works
 
 - [Selection, backing state and static contradiction table](../wiki/investigations/ptr-input-interface-style.md).

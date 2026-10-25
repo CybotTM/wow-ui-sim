@@ -38,9 +38,12 @@ fn ptr_input_util_observes_supplied_styles_and_initializes_matching_subscribers(
                     .contains("INPUT_DEVICE_INTERFACE_TRANSITION")
             })
             .collect();
+        // REVISIT: Assumed twice (normal + secure replay) per user decision 2026-10-25;
+        // native count unproven (benlla-re 5875, Clank 5.0.3 audit game-engine acd869efa).
+        // Re-check once Retail is decompiled.
         assert_eq!(
             listeners.len(),
-            1,
+            2,
             "original InputUtil listener must register"
         );
         listeners[0]

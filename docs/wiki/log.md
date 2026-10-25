@@ -1,3 +1,7 @@
+## [2026-10-25] decision | PTR SharedXML executes twice
+
+[User decision](investigations/ptr-input-interface-style.md#user-decision-two-environments-2026-10-25) corrects only the PTR listener expectation to two, one per normal/secure environment. Native modern count remains unproven; Retail decompilation is the revisit boundary. Fresh merged-source verification is pending.
+
 ## [2026-10-25] runtime proof | PTR input listener environment count
 
 [Slot-2 results](investigations/ptr-input-interface-style.md#slot-2-execution-2026-10-25): RED reaches the original rejected event; GREEN records two listeners via normal/secure replay and is blocked by a native answer. Forever 3/4 pass; both all-target gates pass with the allowed inherited warnings. Raw stock maps retain all successor errors.

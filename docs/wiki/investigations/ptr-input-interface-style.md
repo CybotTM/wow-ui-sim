@@ -68,6 +68,14 @@ After merging master with both wiki sides retained, event RED `16c75aeda` extend
 
 An unconditional RegisterEvent success without recording fails the listener-count assertion. Constant-true event validation fails the unknown-event registration rejection; constant-false validation fails the original top-level load. A constant true/false IsEventRegistered fails one of the positive/negative queries. Existing MKB → Gamepad → MKB assertions still reject constant style getters. These are static contradictions, not executed mutation receipts. These contradictions were source-only at staging. Slot-2 results follow; no mutation runs are claimed.
 
+## User decision: two environments (2026-10-25)
+
+Decision `sharedxml_twice_default_20261025` corrects the PTR test expectation from one listener to two, one per environment. Every other assertion remains unchanged. Normal loading and secure replay stand; this correction does not establish native parity. The earlier one-listener requirement below is historical.
+
+REVISIT: Assumed twice (normal + secure replay) per user decision 2026-10-25; native count unproven (benlla-re 5875, Clank 5.0.3 audit game-engine acd869efa). Re-check once Retail is decompiled.
+
+Current proof will be recorded in `/home/osso/.local/state/wow-ui-sim/handoff/ptr-input-interface-style/twice-run/REPORT.md`; the slot-2 results below remain historical evidence.
+
 ## Slot-2 execution (2026-10-25)
 
 Code GREEN `a3987cfbc` includes one `--no-ff` merge of master `8784a49cd` (`7f463e73f`) and the separate compile-gate correction. Producer-only RED `63b91c8f4` removes only the four validator lines. Both retain test blob `5abd258ee6a8dee0538a0cf6ce384022de21fda6`.
