@@ -172,7 +172,6 @@ pub enum ScriptHandler {
 }
 
 impl ScriptHandler {
-    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<Self> {
         SCRIPT_HANDLERS_BY_NAME
             .iter()
