@@ -66,7 +66,30 @@ previously existed; no other profile's baseline is rewritten.
 
 ## Matching the installed Forever build
 
-### Current selected target — October 15, 2026
+### Current selected target — October 25, 2026
+
+The selected non-beta product is `wowf` **1.60.1.70532**, build key
+`2582289d81e380163c7a13472df4cb81`; its build config identifies
+`WOW-70532patch1.60.1_Retail` / `build-uid = wowf`.
+After desktop Scan and Repair, read-only latest-generation index inspection
+selects live root and encoding entries. Syncthing `wow-install` reached idle
+with needFiles/needBytes zero; all 16 newest desktop index names and sizes
+match locally. Independent local BLTE header/chunk verification and decoded
+MD5 checks pass for root `6e2657526d320facacb6f3dfff62d8a2` and encoding
+`7a54801f1a74da76cef250d8dd12351e`; the metadata/index/archive snapshot
+remained unchanged. Verified October 25, 2026, 01:18 UTC.
+
+`src/asset_resolver_config.rs` now selects `wowf` for Forever; its product
+regression expects `wowf`. Historical beta fixtures remain unchanged.
+The new selector's Rust execution/check proof, lane-private offline cache sync,
+provenance, baseline and startup are pending a released build slot after
+club-unread-integrate and S49. No runtime acceptance is claimed.
+The manifest and baseline remain pending their valid capture/co-commit.
+No CDN, borrowed keyring/root, fabricated data or decompiled source is used.
+
+<a id="current-selected-target--october-15-2026"></a>
+
+### Historical selected target — October 15, 2026
 
 The installed-product reader reports
 `product="wow_classic_beta" version="1.60.1.70374"`, exit 0.
