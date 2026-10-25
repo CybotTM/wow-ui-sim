@@ -163,10 +163,20 @@ fn require_version(expected: &str, actual: &str) -> crate::Result<()> {
 
 fn read_pinned_blob(tree: &GetheTree, path: &str) -> crate::Result<Vec<u8>> {
     let object = format!("{}:{path}", tree.revision);
-    Err(crate::Error::Other(format!(
-        "nonresident Gethe source is not enabled: {object} in {}",
-        tree.root.display()
-    )))
+    let output = std::process::Command::new("git")
+        .args(["--no-optional-locks", "-C"])
+        .arg(&tree.root)
+        .args(["show", &object])
+        .output()
+        .map_err(|cause| crate::Error::Other(format!("read Gethe {object}: {cause}")))?;
+    if !output.status.success() {
+        return Err(crate::Error::Other(format!(
+            "read Gethe {object} in {}: {}",
+            tree.root.display(),
+            String::from_utf8_lossy(&output.stderr).trim()
+        )));
+    }
+    Ok(output.stdout)
 }
 
 fn write_verified_file(destination: &Path, bytes: &[u8]) -> crate::Result<EntrySyncResult> {
