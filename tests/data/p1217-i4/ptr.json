@@ -742,8 +742,7 @@
       "row_class": "runtime",
       "native_behavior": "unknown",
       "ptr_static": "CONDITIONAL_APPLICABLE",
-      "assertion": "selected-source-publication-shape",
-      "shape": "function",
+      "assertion": "observe-only; original witness is Glue, not Game",
       "source": [
         {
           "path": "Blizzard_GlueXML/Mainline/CharacterServicesPaidCharacterTransfer.lua",
@@ -753,7 +752,8 @@
           "screen": "glue",
           "kind": "lua-call"
         }
-      ]
+      ],
+      "context_blocker": "No selected Game witness; require separate real Glue environment, do not infer native Game publication."
     },
     "wt-global-api-C_DateAndTime.IsDayTime-128": {
       "inherited_direction": "added",

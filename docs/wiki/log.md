@@ -1,3 +1,7 @@
+## [2026-10-25] staged | PTR I4 runtime shapes
+
+[Original-consumer staging](investigations/patch-12-1-7-api-audit.md#i4-runtime-test-staging) records four ordinary recipe selectors and independent PTR/Retail/Forever registers. 363 observations and five PTR consumer shape cases do not close native behavior, CVar scope/defaults, Glue contexts or 214 static UNKNOWN rows. Runtime execution and pre-repair baselines remain pending.
+
 ## [2026-10-25] fix | Byte-preserving Lua source/cache boundary
 
 Updated [CASC cache](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) and [contract](../specs/casc-loading.md#blizzard-ui-source-bytes): Lua cache reads/content markers are byte-based; XML/TOC/XSD remain strict UTF-8. Production TOC/addon loading was already raw-byte safe. Exact fixture tests cover sync and runtime boundaries.

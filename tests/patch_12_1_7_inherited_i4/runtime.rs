@@ -75,10 +75,15 @@ fn load_consumers(root: &Path, register: &Value) -> (WowLuaEnv, Value) {
         .iter()
         .map(|value| value.as_str().unwrap())
         .collect();
+    let loads = load_selected_addons(&env, root, &roots);
+    (env, loads)
+}
+
+fn load_selected_addons(env: &WowLuaEnv, root: &Path, roots: &[&str]) -> Value {
     let selected = discover_blizzard_addon_closure_for_screen_with_overrides(
         root,
         ScreenKind::Game,
-        &roots,
+        roots,
         &[],
     );
     let loads: BTreeMap<_, _> = selected
@@ -92,13 +97,13 @@ fn load_consumers(root: &Path, register: &Value) -> (WowLuaEnv, Value) {
             )
         })
         .collect();
-    for name in roots {
+    for &name in roots {
         assert!(
             loads.contains_key(name),
             "original root not runtime-selected: {name}"
         );
     }
-    (env, json!(loads))
+    json!(loads)
 }
 
 fn observe_row(env: &WowLuaEnv, row: &Value, register: &Value) -> Value {
@@ -138,10 +143,7 @@ fn observe_consumers(env: &WowLuaEnv, register: &Value) -> BTreeMap<String, Valu
         .collect()
 }
 
-fn collect_observations() -> Value {
-    let register = read_register();
-    let root = read_cache_root(&register);
-    let (env, loads) = load_consumers(&root, &register);
+fn observe_inventory(env: &WowLuaEnv, register: &Value) -> BTreeMap<String, Value> {
     let inventory: Value = serde_json::from_str(INVENTORY).unwrap();
     let rows = inventory["entries"].as_array().unwrap();
     let ids: BTreeSet<_> = rows.iter().map(|row| row["id"].as_str().unwrap()).collect();
@@ -150,15 +152,21 @@ fn collect_observations() -> Value {
         (1876, 1876),
         "literal row identity loss"
     );
-    let observations: BTreeMap<_, _> = rows
-        .iter()
+    rows.iter()
         .map(|row| {
             (
                 row["id"].as_str().unwrap().to_owned(),
-                observe_row(&env, row, &register),
+                observe_row(env, row, register),
             )
         })
-        .collect();
+        .collect()
+}
+
+fn load_runtime_observations() -> Value {
+    let register = read_register();
+    let root = read_cache_root(&register);
+    let (env, loads) = load_consumers(&root, &register);
+    let observations = observe_inventory(&env, &register);
     json!({"schema": "p1217-i4-runtime-v1", "profile": profile(),
         "source_revision": std::env::var("P1217_SOURCE_SHA").expect("bind test source SHA"),
         "elf_sha256": std::env::var("P1217_ELF_SHA256").expect("bind sealed ELF"),
@@ -203,29 +211,58 @@ fn assert_preservation(result: &Value) {
     );
     let bytes = std::fs::read(path).expect("read pre-repair baseline");
     let baseline: Value = serde_json::from_slice(&bytes).expect("parse baseline");
-    for field in [
-        "schema",
-        "profile",
-        "register_sha256",
-        "observations",
-        "consumers",
-        "loads",
-    ] {
+    assert_eq!(baseline["observations"].as_object().unwrap().len(), 1876);
+    let before_cases: BTreeSet<_> = baseline["consumers"].as_object().unwrap().keys().collect();
+    let after_cases: BTreeSet<_> = result["consumers"].as_object().unwrap().keys().collect();
+    assert_eq!(before_cases, after_cases, "baseline consumer identity loss");
+    for field in ["schema", "profile", "register_sha256", "loads"] {
         assert_eq!(
             result[field], baseline[field],
             "own-profile preservation changed: {field}"
         );
     }
+    assert_observation_preservation(result, &baseline);
+    assert_consumer_preservation(result, &baseline);
+}
+
+fn assert_observation_preservation(result: &Value, baseline: &Value) {
+    for (id, before) in baseline["observations"].as_object().unwrap() {
+        let after = &result["observations"][id];
+        let repaired_shape = ACTIVE == ClientProfile::Ptr && after["expected"]["shape"].is_string();
+        // PTR has an explicit target shape, already asserted above; all other rows
+        // preserve their pre-repair observation. Historical directions grant no waiver.
+        if !repaired_shape {
+            assert_eq!(after, before, "own-profile observation changed: {id}");
+        }
+    }
+}
+
+fn assert_consumer_preservation(result: &Value, baseline: &Value) {
+    for (name, before) in baseline["consumers"].as_object().unwrap() {
+        let after = &result["consumers"][name];
+        let repaired_case = ACTIVE == ClientProfile::Ptr && before["ok"] == false;
+        if repaired_case {
+            assert_eq!(
+                after["ok"], true,
+                "PTR original consumer still fails: {name}"
+            );
+        } else {
+            assert_eq!(
+                after, before,
+                "own-profile original consumer changed: {name}"
+            );
+        }
+    }
 }
 
 pub(super) fn capture() {
-    let result = collect_observations();
+    let result = load_runtime_observations();
     write_observations(&result);
     eprintln!("I4 baseline measured only; no API/consumer/native acceptance asserted");
 }
 
 pub(super) fn run(preservation: bool) {
-    let result = collect_observations();
+    let result = load_runtime_observations();
     write_observations(&result);
     if ACTIVE == ClientProfile::Ptr {
         assert_ptr_shapes(&result);

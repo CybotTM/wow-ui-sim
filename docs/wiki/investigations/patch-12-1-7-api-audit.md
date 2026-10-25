@@ -4,6 +4,10 @@ Runtime target update: 2026-10-23. [Selected source](../../specs/ptr-blizzard-ui
 
 Verified: 2026-10-22. Slice I0 accounts for the public source for **12.1.7 / 70424 / TOC 120107** without implementing its runtime changes. The [source-accounting spec](../../specs/patch-12-1-7-source-accounting.md) owns P01–P12, inherited category counts, header discrepancies and outstanding slices. All inherited applicability and behavior remain UNKNOWN until I4; GUID work remains deferred pending the user decision.
 
+## I4 runtime test staging
+
+Staged 2026-10-25 on `489df2822`: [runtime contract](../../specs/patch-12-1-7-inherited-runtime.md) and [ordinary integration selectors](../../../tests/patch_12_1_7_inherited_i4.rs) now replace the four absent recipe selectors. The three profile registers bind separate source bytes and observations. They preserve 1,876 occurrence IDs, probe 180 runtime plus 183 declaration candidates, and retain all 214 I4c PTR UNKNOWN rows. Five PTR original-consumer cases cover documented call/nullable shapes only; no native capability/default/security/event-order parity follows. Retail/Forever pre-repair baselines and actual RED execution remain pending. RegionalTextLocale already has bounded default-US original-consumer proof on master and is preservation, not a new missing producer. Glue-only witnesses do not create Game publication assertions.
+
 ## Empty inventory is not patch coverage
 
 The direct page has prose and a link to 1.60.1, but no function/event/enum/CVar/widget tables. The existing `tools/gen_patch_wikitext_register.py` successfully emits `entries: []` and `header_counts: []` for it. This correctly describes the direct inventory, not complete patch coverage. No dummy API rows or invented aliases are added to make it nonempty.
