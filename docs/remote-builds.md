@@ -87,43 +87,55 @@ Cargo JSON internally. The worker reads visible stdout for this build's Cargo
 JSON message format to expose those records. Receipts retain the records and each
 package's metadata-derived manifest-parent and path-dependency roots.
 
-Only executables in this build's records are judged. The worker snapshots Cargo
-`.d` dep-info before the child starts and reads it again after the child exits.
+Every repo-owned compiler-artifact record is judged on its own inputs, including
+libraries, binaries and tests. Ownership comes from `manifest_path` or target
+`src_path` under the worktree, fixed source mount or utility mount. Registry and
+Git package sources (`registry+`/`git+`) are external and excluded. Records without
+ownership paths cannot prove they are external and are checked.
+
+The worker snapshots Cargo `.d` dep-info before the child starts and reads it
+again after the child exits.
 It uses each record's `filenames` and `executable` paths to find rustc's
 `deps/<name>-<metadata-hash>.d`, including hard-linked hashed executables when Cargo
 reports only the uplifted binary. Each snapshot retains its own hard-link mapping;
 other metadata hashes are not guessed by name. The uplifted binary's adjacent `.d`
-is used only when no matching rustc dep-info exists. Missing dep-info for a package
-whose roots and build inputs cannot intersect the content diff does not block the build.
-Each target's inputs are the union
-of its previous and current dep-info, plus its package's `build.rs`, `Cargo.toml`,
-and `Cargo.lock` and the workspace `Cargo.lock`. Receipts retain these inputs as
+is used only when no matching rustc dep-info exists. Each record's inputs include
+only its own previous and current dep-info. No executable-to-library linkage is
+guessed: Cargo fingerprints rebuild dependents when a library rebuilds. The guard
+checks each library's own compiler inputs for the stale-mtime hazard. Inputs include
+`include_str!`/`include_bytes!` files, not only Rust sources. Each record's
+package adds its `build.rs`, `Cargo.toml`, and `Cargo.lock`, plus the workspace
+`Cargo.lock`. Receipts retain these inputs as
 repo-relative paths. The worker strips the slot's fixed source mount, its
 `ct-bins-slot-N` utility mount (both under the launcher's `SOURCE_ROOT`), or the
 original worktree root after parsing Make escaping and line continuations.
-Inputs outside these roots are ignored. When content changes could affect a target,
-missing or unreadable dep-info fails closed. Missing previous dep-info is allowed
-when Cargo reports `fresh=false` and valid current dep-info exists; unreadable
-previous dep-info still fails. Zero repo-relative inputs fail before package inputs
-are added. If a non-empty content diff intersects none of the reported executables'
-mapped inputs, the run fails closed. With no content diff, unmappable dep-info does
-not reject an identical-source repair. Library-only records keep their existing policy.
+Inputs outside these roots are ignored. Missing or unreadable dep-info for a
+repo-owned record fails closed, even with no content diff. Missing previous
+dep-info is allowed when Cargo reports `fresh=false` and valid current dep-info
+exists; unreadable previous dep-info still fails. Zero current repo-relative
+inputs fail before package inputs are added. A content diff outside all valid
+record inputs does not make any artifact stale; this includes documentation,
+tools and non-embedded runtime files. Receipts record unmatched content changes
+under metadata-derived package roots as informational `unread_package_paths`.
+This includes unread Rust source paths and does not reject the build.
 
 Content changes are computed from the last successfully verified source identity,
 not the latest attempt or the mtime refresh set. Failed and rejected builds never
 advance that baseline, so retrying cannot erase a pending content diff. When the content diff intersects a
-target's inputs, Cargo must report `fresh=false` **and**
-its SHA256 must differ from the previous hash at the same path. Otherwise the run
-fails with `stale artifacts`. A changed library, `.rmeta`, or another executable
-cannot certify it. Unreported executables and targets with disjoint inputs are
-not judged. A test-only edit therefore does not reject an unaffected fresh bin,
-even within the same package. Targets affected only by mtime refresh require
-`fresh=false` and a current hash, but identical rebuilt bytes are accepted.
+record's own inputs, Cargo must report `fresh=false`. If that record is an
+executable, its SHA256 must also differ from the previous hash at the same path.
+Otherwise the run fails with `stale artifacts`. Libraries do not require changed
+hashes. A changed library, `.rmeta`, or another executable cannot certify an
+executable whose own inputs changed. Unreported artifacts and records with
+disjoint inputs are not judged for freshness. A test-only edit therefore does not
+reject an unaffected fresh bin, even within the same package. Records affected
+only by mtime refresh require `fresh=false`; executables also require a current
+hash, but identical rebuilt bytes are accepted.
 The existing conservative root derivation and source mtime refresh are unchanged.
 
 When no compiler-artifact record is visible (for example, a wrapper captures Cargo
 stdout), a successful child fails closed only if the diff intersects package inputs.
-A visible library-only record is available evidence, not an executable to judge.
+A visible library-only record is checked on its own dep-info and freshness.
 A hidden stream with no package-input diff does not fail. Wrappers remain supported,
 but captured output or filesystem hashes cannot substitute for the missing records.
 For receipt evidence, the worker still scans newly touched executables/libraries
