@@ -1,6 +1,17 @@
 ## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
 
 [Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
+## [2026-10-24] static stage | Wrath bank selected-rank permissions
+
+[Contract](../specs/wrath-guild-bank-rank-permissions.md) and [model/contradictions](investigations/wrath-guild-info.md#bank-permission-model) record accepted laptop12340 evidence, explicit host rank rows, initial rank0 seed, selected-rank projections and independently discriminating original dropdown tests. No compile, runtime tests or slot use. Prior held-producer statements below describe the earlier stage; current acceptance remains pending parent RED/GREEN.
+
+## [2026-10-24] static repair | Wrath guild-info GREEN blockers
+
+[Exact matrix](../baselines/wrath-guild-info-green-blockers.md) classifies all17 saved regressions as missing supplied inputs, preserving every assertion. F1 supplies its display rank before load; a separate initialized-state contract pins no synthetic guild. Original nonleader dropdown completion RED is staged, not executed or a permission-value discriminator. Both bank getters remain held for native facts and a real permission model. Seven exact profile lists are recorded; Wrath/Retail are required lane gates. No builds, slots, agents or new runtime proof.
+
+## [2026-10-24] investigation | Wrath guild-info staging
+
+[Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md): existing cache/rank-right reuse, Wrath-only empty/no-guild initialization, two original OnShow branch selectors, static contradiction/selection proof and batch3 seed prerequisites. Edit-only; RED/GREEN, stock and Retail36/42 preservation remain deferred.
 
 ## [2026-10-24] proof | Bounded reload XML source reuse
 
@@ -2726,3 +2737,11 @@ Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4a-immutable-co
 ## 2026-10-24 — Patch 12.1.7 I4b static staging
 
 - Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations), [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection) and index for I3-dependent selected-source obligations. Exact pin/cache authentication, mixed-status rejection controls and separate runtime limits; no effective applicability promotion before the source dependency merges.
+
+## 2026-10-24 — Wrath guild-bank proof reconciliation
+
+Updated the [bank investigation](investigations/wrath-guild-info.md#accepted-runtime-proof), contract, baseline classification and index from static/pending to verifier8738-accepted saved RED/GREEN. Current-master08b423c5c integration remains separate; historical Retail counts are not its expectation.
+
+## 2026-10-24 — Wrath guild-bank current-master integration
+
+[Bounded refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 merges master08b423c5c: Wrath/Retail all-target checks0warnings, five bank exact PASS, Wrath stock[], fresh Retail30/34 unchanged with no added/removed keys. All13 CVar receipts preserve original stat/hash; slot0 released. Historical RED/GREEN matrix not repeated.

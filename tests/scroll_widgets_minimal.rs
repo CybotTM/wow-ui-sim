@@ -5,6 +5,7 @@ use crate::common;
 use common::env_with_shared_xml;
 use wow_ui_sim::xml::{XmlElement, parse_xml, register_template};
 
+post_wrath_ui_fixture! {
 const CHATFRAME_SCROLLBAR_HOST_XML: &str = r#"
     <Ui>
         <Frame name="ChatFrameScrollBarHostTemplate" virtual="true">
@@ -19,6 +20,8 @@ const CHATFRAME_SCROLLBAR_HOST_XML: &str = r#"
         </Frame>
     </Ui>
 "#;
+
+}
 
 const INLINE_REAPPLY_HOST_XML: &str = r#"
     <Ui>
@@ -42,12 +45,14 @@ const INLINE_REAPPLY_HOST_XML: &str = r#"
     </Ui>
 "#;
 
+post_wrath_ui_fixture! {
 fn register_chatframe_scrollbar_host_template() {
     let ui = parse_xml(CHATFRAME_SCROLLBAR_HOST_XML).unwrap();
     let XmlElement::Frame(frame) = &ui.elements[0] else {
         panic!("expected frame template");
     };
     register_template("ChatFrameScrollBarHostTemplate", "Frame", frame.clone());
+}
 }
 
 fn register_inline_reapply_host_template() {

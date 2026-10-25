@@ -17,7 +17,7 @@ struct GuildEventSeed {
 }
 
 /// Build the sim's seeded default `WorldState` — Stormwind zone,
-/// "Heroes of Azeroth" guild, populated collections. `WorldState::default`
+/// "Heroes of Azeroth" guild (except Wrath), populated collections. `WorldState::default`
 /// still returns a fully zero/empty state (the derived `Default`); this
 /// function is what `SimState::Default` reaches for.
 pub fn seeded_world_state() -> WorldState {
@@ -44,6 +44,24 @@ pub fn seeded_world_state() -> WorldState {
         random_epic_bg_info: Some(default_random_epic_bg_info()),
         ..WorldState::default()
     };
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        // Native initialized cache, no membership, and no received rank rights.
+        ws.guild_info_text.clear();
+        ws.guild_name = None;
+        ws.guild_rank = None;
+        ws.guild_num_members = 0;
+        ws.guild_members.clear();
+        ws.guild_ranks.clear();
+        // Initial world-entry image; received host rows replace these seeds.
+        ws.guild_bank_rank_permissions.insert(
+            0,
+            super::GuildBankRankPermissions {
+                money_per_day: 0,
+                tab_rights: [-1; 6],
+                tab_stacks_per_day: [-1; 6],
+            },
+        );
+    }
     apply_collection_defaults(&mut ws);
     ws
 }

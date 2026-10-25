@@ -1,5 +1,6 @@
 use super::env_with_protection_ui;
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_class_talent_edges_render_below_visible_talent_buttons() {
     let env = env_with_protection_ui();
@@ -148,7 +149,9 @@ fn test_class_talent_edges_render_below_visible_talent_buttons() {
         "class talent edges should render below endpoint icons; violations={icon_details}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_button_frame_level_change_relevels_connected_edges_on_update() {
     let env = env_with_protection_ui();
@@ -220,6 +223,7 @@ fn test_button_frame_level_change_relevels_connected_edges_on_update() {
         new_edge_level, expected_edge_level,
         "connected edge should be re-leveled after button frame-level updates"
     );
+}
 }
 
 post_wrath_ui_fixture! {
