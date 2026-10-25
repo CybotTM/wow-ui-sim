@@ -2,6 +2,9 @@
 import contextlib
 import importlib.util
 import io
+import json
+import os
+import time
 from pathlib import Path
 import subprocess
 import tempfile
@@ -82,6 +85,125 @@ class SlotBuildTests(unittest.TestCase):
         self.assertEqual(stdout.getvalue(),
                          "SubState=exited\nResult=success\nCPUUsageNSec=434560000\n"
                          "WallTimeSec=1.075731\n")
+
+
+class SourceFreshnessTests(unittest.TestCase):
+    def setUp(self):
+        SlotBuildTests.setUp(self)
+        self.tree = self.slot / "tree"
+        self.tree.mkdir()
+        self.git("init", "-q")
+        self.git("config", "user.email", "test@example.com")
+        self.git("config", "user.name", "Test")
+        (self.tree / "src").mkdir()
+        (self.tree / "src/main.rs").write_text('fn main() { println!("A"); }')
+        (self.tree / "Cargo.toml").write_text('[package]\nname="probe"\nversion="0.1.0"\n')
+        self.git("add", ".")
+        self.git("commit", "-qm", "A")
+
+    def git(self, *args):
+        return subprocess.check_output(["git", "-C", str(self.tree), *args])
+
+    def prepare(self, previous=None):
+        self.assertTrue(callable(getattr(self.module, "prepare_source", None)),
+                        "launcher does not invalidate older source mtimes")
+        return self.module.prepare_source(self.tree, previous)
+
+    def test_older_changed_file_is_touched_without_changing_bytes(self):
+        previous = self.prepare()
+        source = self.tree / "src/main.rs"
+        source.write_text('fn main() { println!("B"); }')
+        self.git("commit", "-qam", "B")
+        os.utime(source, (1, 1))
+        content = source.read_bytes()
+        before = time.time_ns()
+        current = self.prepare(previous)
+        self.assertGreaterEqual(source.stat().st_mtime_ns, before)
+        self.assertEqual(source.read_bytes(), content)
+        self.assertEqual(current["changed_paths"], ["src/main.rs"])
+        self.assertNotEqual(current["identity"], previous["identity"])
+
+    def test_unchanged_identity_does_not_touch_sources(self):
+        previous = self.prepare()
+        source = self.tree / "src/main.rs"
+        os.utime(source, (1, 1))
+        self.prepare(previous)
+        self.assertEqual(source.stat().st_mtime_ns, 1_000_000_000)
+
+    def test_dirty_untracked_and_reverted_paths_are_invalidated(self):
+        previous = self.prepare()
+        (self.tree / "src/main.rs").write_text("dirty A")
+        (self.tree / "src/new.rs").write_text("untracked A")
+        dirty = self.prepare(previous)
+        self.git("checkout", "--", "src/main.rs")
+        (self.tree / "src/new.rs").write_text("untracked B")
+        for name in ["src/main.rs", "src/new.rs"]:
+            os.utime(self.tree / name, (1, 1))
+        current = self.prepare(dirty)
+        self.assertNotEqual(current["identity"], dirty["identity"])
+        self.assertEqual(current["changed_paths"], ["src/main.rs", "src/new.rs"])
+        self.assertTrue(all((self.tree / p).stat().st_mtime_ns > 1_000_000_000
+                            for p in current["changed_paths"]))
+
+    def test_unknown_commit_invalidates_crate_inputs_not_docs(self):
+        (self.tree / "data").mkdir()
+        (self.tree / "data/input.csv").write_text("input")
+        (self.tree / "README.md").write_text("docs")
+        self.git("add", ".")
+        self.git("commit", "-qm", "inputs")
+        previous = self.prepare()
+        previous["identity"]["head"] = "0" * 40
+        for name in ["src/main.rs", "data/input.csv", "README.md"]:
+            os.utime(self.tree / name, (1, 1))
+        current = self.prepare(previous)
+        self.assertIn("data/input.csv", current["changed_paths"])
+        self.assertGreater((self.tree / "src/main.rs").stat().st_mtime_ns, 1_000_000_000)
+        self.assertEqual((self.tree / "README.md").stat().st_mtime_ns, 1_000_000_000)
+
+    def test_identical_artifacts_after_rust_change_fail_with_receipt(self):
+        previous = self.prepare()
+        previous["artifacts"] = {"debug/probe": "abc"}
+        (self.tree / "src/main.rs").write_text("changed")
+        current = self.prepare(previous)
+        receipt = self.slot / "receipt.json"
+        with self.assertRaisesRegex(ValueError, "stale artifacts"):
+            self.module.finish_build(self.slot, receipt, current, previous,
+                                     {"debug/probe": "abc"}, 0)
+        self.assertEqual(json.loads(receipt.read_text())["result"], "stale-artifacts")
+
+    def test_worker_records_real_artifact_bytes_and_propagates_failure(self):
+        import hashlib
+        import sys
+        binary = self.slot / "debug/probe"
+        binary.parent.mkdir()
+        binary.write_bytes(b"A binary")
+        (self.slot / ".owner").write_text("test-owner")
+        emitter = ('import json,sys; print(json.dumps({"reason":"compiler-artifact",'
+                   '"executable":sys.argv[1]})); sys.exit(int(sys.argv[2]))')
+        request = self.slot / "request.json"
+        for code in [0, 7]:
+            request.write_text(json.dumps({
+                "slot": str(self.slot), "worktree": str(self.tree),
+                "owner": "test-owner", "unit": "test-unit",
+                "cargo": [sys.executable, "-c", emitter, str(binary), str(code)],
+                "receipt": str(self.slot / "receipt.json")}))
+            self.assertEqual(self.module.execute_build(request), code)
+            receipt = json.loads((self.slot / "receipt.json").read_text())
+            self.assertEqual(receipt["artifacts"], {
+                "debug/probe": hashlib.sha256(b"A binary").hexdigest()})
+            self.assertEqual(receipt["returncode"], code)
+
+    def test_changed_artifacts_and_identity_are_recorded(self):
+        previous = self.prepare()
+        previous["artifacts"] = {"debug/probe": "abc"}
+        (self.tree / "src/main.rs").write_text("changed")
+        current = self.prepare(previous)
+        receipt = self.slot / "receipt.json"
+        self.module.finish_build(self.slot, receipt, current, previous,
+                                 {"debug/probe": "def"}, 0)
+        saved = json.loads(receipt.read_text())
+        self.assertEqual(saved["artifacts"], {"debug/probe": "def"})
+        self.assertEqual(saved["identity"], current["identity"])
 
 
 if __name__ == "__main__":
