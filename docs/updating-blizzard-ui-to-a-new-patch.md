@@ -25,7 +25,7 @@ Profile → Gethe branch:
 | Profile | Branch |
 |---------|--------|
 | retail | `live` |
-| ptr | `ptr2` (pinned at `49b69918fcdc77e109813281e4f537d45ec7dcbf` for 12.1.5.69594) |
+| ptr | `ptr` (immutable revision in `data/blizzard-ui-builds/ptr.json`; [selected identity](ptr-cdn-content-index.md#selected-identity-and-regeneration-evidence)) |
 | mists | `classic` (current Classic = Mists of Pandaria) |
 | era | `classic_era` |
 | anniversary | `classic_anniversary` |
@@ -142,8 +142,8 @@ python3 tools/gen_blizzard_ui_manifest.py                 # all profiles
 python3 tools/gen_blizzard_ui_manifest.py retail --no-refresh   # reuse existing cache
 ```
 
-For non-pinned retail/Classic products, sanity-check the reported version and active build key against the requested `.product.db` record. The resolver selects the exact product code through cascette's shared parser (`currentVersionStr` field 7, `activeBuildKey` field 14, optional `activeInstallKey` field 16); it does not use `.build.info` as authority or fallback. This is simulator policy, not a native-launcher or complete-content guarantee. PTR 12.1.5 is different: its committed
-`data/blizzard-ui-builds/ptr.json` pins the official `wowxptr` build/config identity
+For non-pinned retail/Classic products, sanity-check the reported version and active build key against the requested `.product.db` record. The resolver selects the exact product code through cascette's shared parser (`currentVersionStr` field 7, `activeBuildKey` field 14, optional `activeInstallKey` field 16); it does not use `.build.info` as authority or fallback. This is simulator policy, not a native-launcher or complete-content guarantee. PTR is different: its committed
+`data/blizzard-ui-builds/ptr.json` pins the official `wowt` build/config identity
 and Gethe revision because this machine has no matching local PTR install.
 
 ### 3. Regenerate the bundled limited listfile
@@ -185,7 +185,7 @@ compatibility.
 
 The manifests and limited listfile are `include_str!`'d at compile time, so
 rebuild before syncing. Non-pinned sync compares its active profile, requested CASC product, `.product.db` version/active-build identity, and compiled manifest hash with cache provenance. PTR
-12.1.5 instead compares its pinned `wowxptr` build/config, Gethe revision, manifest,
+12.1.7 instead compares its pinned `wowt` build/config, Gethe revision, manifest,
 and content-index hashes; it downloads exact CDN archive ranges and verifies both BLTE
 and decoded-content keys. A mismatch automatically removes only that profile's
 `AddOns` cache before extraction; do not delete the cache manually.
@@ -197,7 +197,7 @@ python3 scripts/test-retail-casc-isolation.py
 ```
 
 A pass means every retail manifest entry resolves against installed retail CASC.
-For PTR 12.1.5, `wow-cli casc sync-blizzard-ui` must report the complete pinned entry
+For PTR 12.1.7, `wow-cli casc sync-blizzard-ui` must report the complete pinned entry
 count; then run `lua-errors` and capture its baseline. The cache alone is not startup
 acceptance. The isolation script reports the exact list of any retail `missing or
 unusable` entries.
@@ -241,7 +241,7 @@ Commit each manifest/listfile data regeneration separately with added/removed
 counts and exact installed/source identity. Commit producer fixes with their
 regressions and owning specs, then document executed startup/preservation proof.
 Refresh an existing profile baseline only from the matching isolated runtime,
-not from source acquisition alone. PTR 12.1.5 also commits its
+not from source acquisition alone. PTR 12.1.7 also commits its
 regenerated `data/blizzard-ui-builds/ptr.json`; see [PTR CDN content index](ptr-cdn-content-index.md).
 
 ## Notes

@@ -77,6 +77,8 @@ pub(super) fn init_lua_state(
     #[cfg(feature = "retail-12-0-7")]
     super::globals::real::performance_inputs::register(lua)?;
     trace_debug_getter_values(lua, "before_temporary_bootstrap");
+    #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+    crate::c_api::c_combat_log::register_filters(lua)?;
     crate::lua_api::workarounds::apply_temporary_bootstrap(lua)?;
     trace_debug_getter_values(lua, "after_temporary_bootstrap");
     super::globals::real::heal_prediction::register(lua)?;
