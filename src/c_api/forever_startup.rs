@@ -4,7 +4,9 @@ use std::collections::{HashMap, HashSet};
 
 use crate::c_api::helpers::ensure_namespace;
 use crate::client_profile::{ACTIVE, ClientProfile};
-use crate::lua_api::methods::{borrow_state, create_table_with_fields, table_set_num};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_table_with_fields, table_set_num,
+};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -35,7 +37,63 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, paper_doll, "AmmoNeeded", ammo_needed)?;
     register_group_buffs(state)?;
     register_external_event(state)?;
-    register_character_queries(state)
+    register_character_queries(state)?;
+    register_services(state)
+}
+
+fn register_services(state: &mut LuaState) -> LuaResult<()> {
+    let discord = ensure_namespace(state, "C_Discord")?;
+    table_set_rust_fn_static(state, discord, "IsEnabled", discord_enabled)?;
+    let ping = ensure_namespace(state, "C_Ping")?;
+    table_set_rust_fn_static(state, ping, "IsPingSystemEnabled", ping_enabled)?;
+    let housing = ensure_namespace(state, "C_Housing")?;
+    table_set_rust_fn_static(state, housing, "IsInsideHouseOrPlot", inside_house_or_plot)?;
+    let tts = ensure_namespace(state, "C_TTSSettings")?;
+    table_set_rust_fn_static(
+        state,
+        tts,
+        "GetCharacterSettingsSaved",
+        character_tts_settings_saved,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        tts,
+        "MarkCharacterSettingsSaved",
+        mark_character_tts_settings_saved,
+    )
+}
+
+fn discord_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let enabled = borrow_state(state)?.cvars.get_bool("discordClientEnabled");
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
+fn ping_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let enabled = borrow_state(state)?.forever_startup.ping_enabled;
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
+fn inside_house_or_plot(state: &mut LuaState) -> LuaResult<u32> {
+    let inside = borrow_state(state)?.housing.current_housing_area.is_some();
+    state.push(Val::Bool(inside));
+    Ok(1)
+}
+
+fn character_tts_settings_saved(state: &mut LuaState) -> LuaResult<u32> {
+    let saved = borrow_state(state)?
+        .forever_startup
+        .character_tts_settings_saved;
+    state.push(Val::Bool(saved));
+    Ok(1)
+}
+
+fn mark_character_tts_settings_saved(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?
+        .forever_startup
+        .character_tts_settings_saved = true;
+    Ok(0)
 }
 
 fn register_character_queries(state: &mut LuaState) -> LuaResult<()> {
