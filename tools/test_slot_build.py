@@ -287,15 +287,75 @@ class MountedDepInfoTests(unittest.TestCase):
         self.module.finish_build(self.target, receipt, self.current, None, {}, 0)
         self.assertEqual(json.loads(receipt.read_text())["result"], "success")
 
-    def test_nonempty_diff_without_any_mapped_target_fails_closed(self):
+    def test_complete_dep_info_allows_diff_outside_compiler_inputs(self):
         binary = self.target / "debug/unrelated"
         self.add_dep_info("debug/unrelated", f"{binary}: {self.mount}/src/other.rs\n")
-        inputs, errors = self.read_inputs(["src/lib.rs"])
-        self.assertTrue(errors, "no reported target covers the diff")
-        self.assertIn("no reported target maps changed inputs", "; ".join(errors))
-        with self.assertRaisesRegex(ValueError, "no reported target maps changed inputs"):
-            self.module.finish_build(self.target, self.target / "receipt.json",
-                                     self.current, None, {}, 0)
+        for changed in ["src/unused.rs", "docs/spec.md", "runtime/not-embedded.lua"]:
+            with self.subTest(changed=changed):
+                _, errors = self.read_inputs([changed])
+                self.assertEqual(errors, [])
+                self.module.finish_build(self.target, self.target / "receipt.json",
+                                         self.current, None, {}, 0)
+
+    def load_slot0_ptr_build(self):
+        fixture = Path(__file__).parent / "fixtures/slot-build-dep-info/slot-0-ptr-i4b2-five-build.json"
+        value = json.loads(fixture.read_text())
+        serialized = json.dumps(value).replace(value["worktree"], str(self.tree))
+        serialized = serialized.replace(value["slot"], str(self.target))
+        serialized = serialized.replace("/home/osso/.cache/wow-ui-sim-srcmount/slot-0",
+                                        str(self.mount))
+        value = json.loads(serialized)
+        for name, content in value.pop("dep_info").items():
+            path = self.target / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content)
+        for name, aliases in value.pop("aliases").items():
+            binary = self.target / name
+            binary.write_bytes(b"rebuilt")
+            binary.chmod(0o755)
+            for alias in aliases:
+                (self.target / alias).hardlink_to(binary)
+        self.current = value
+        return value["previous"], value["artifacts"]
+
+    def test_real_slot0_library_diff_maps_and_accepts_rebuilt_executables(self):
+        previous, artifacts = self.load_slot0_ptr_build()
+        inputs, errors = self.read_inputs(self.current["content_changed_paths"])
+        self.assertEqual(errors, [])
+        for record in self.current["reported_artifacts"]:
+            if record.get("executable"):
+                self.assertIn("src/c_api/ptr_i4_game_rules.rs", inputs[record["executable"]])
+                self.assertIn("src/lua_api/globals/game_rules.rs", inputs[record["executable"]])
+        self.module.finish_build(self.target, self.target / "receipt.json",
+                                 self.current, previous, artifacts, 0)
+        self.assertEqual(json.loads((self.target / "receipt.json").read_text())["result"],
+                         "success")
+
+    def test_real_slot0_library_diff_rejects_each_stale_executable(self):
+        previous, artifacts = self.load_slot0_ptr_build()
+        self.read_inputs(self.current["content_changed_paths"])
+        for name in artifacts:
+            with self.subTest(name=name):
+                unchanged = dict(artifacts, **{name: previous["artifacts"][name]})
+                self.assertEqual(self.module.find_stale_artifacts(
+                    self.current, previous["artifacts"], unchanged), [name])
+
+    def test_real_slot0_embedded_lua_is_a_compiler_input(self):
+        previous, artifacts = self.load_slot0_ptr_build()
+        changed = ["src/lua_api/env_init/runtime_surface_bootstrap.lua"]
+        inputs, errors = self.read_inputs(changed)
+        self.assertEqual(errors, [])
+        for record in self.current["reported_artifacts"]:
+            if record.get("executable"):
+                self.assertIn(changed[0], inputs[record["executable"]])
+        self.assertEqual(len(self.module.find_stale_artifacts(
+            self.current, previous["artifacts"], previous["artifacts"])), 2)
+
+    def test_real_slot0_missing_library_dep_info_fails_closed(self):
+        self.load_slot0_ptr_build()
+        (self.target / "debug/deps/wow_ui_sim-45d2a5ba882881e5.d").unlink()
+        _, errors = self.read_inputs(self.current["content_changed_paths"])
+        self.assertTrue(errors)
 
 
 class SourceFreshnessTests(unittest.TestCase):

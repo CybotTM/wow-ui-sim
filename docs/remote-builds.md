@@ -95,9 +95,13 @@ reports only the uplifted binary. Each snapshot retains its own hard-link mappin
 other metadata hashes are not guessed by name. The uplifted binary's adjacent `.d`
 is used only when no matching rustc dep-info exists. Missing dep-info for a package
 whose roots and build inputs cannot intersect the content diff does not block the build.
-Each target's inputs are the union
-of its previous and current dep-info, plus its package's `build.rs`, `Cargo.toml`,
-and `Cargo.lock` and the workspace `Cargo.lock`. Receipts retain these inputs as
+Each executable's inputs include its previous and current dep-info and the
+dep-info of its reported package library and path-dependency libraries, followed
+transitively through the metadata-derived package roots. Hashed rustc dep-info
+describes one crate, not the libraries linked into it. Library inputs include
+`include_str!`/`include_bytes!` files, not only Rust sources. Each contributing
+package adds its `build.rs`, `Cargo.toml`, and `Cargo.lock`, plus the workspace
+`Cargo.lock`. Receipts retain these inputs as
 repo-relative paths. The worker strips the slot's fixed source mount, its
 `ct-bins-slot-N` utility mount (both under the launcher's `SOURCE_ROOT`), or the
 original worktree root after parsing Make escaping and line continuations.
@@ -105,9 +109,11 @@ Inputs outside these roots are ignored. When content changes could affect a targ
 missing or unreadable dep-info fails closed. Missing previous dep-info is allowed
 when Cargo reports `fresh=false` and valid current dep-info exists; unreadable
 previous dep-info still fails. Zero repo-relative inputs fail before package inputs
-are added. If a non-empty content diff intersects none of the reported executables'
-mapped inputs, the run fails closed. With no content diff, unmappable dep-info does
-not reject an identical-source repair. Library-only records keep their existing policy.
+are added. A content diff outside all valid mapped inputs does not make an
+executable stale; this includes documentation and non-embedded runtime files.
+Missing, unreadable, or zero-repo-input dep-info still fails closed when the
+content diff could affect that target. With no content diff, unmappable dep-info
+does not reject an identical-source repair. Library-only records keep their existing policy.
 
 Content changes are computed from the last successfully verified source identity,
 not the latest attempt or the mtime refresh set. Failed and rejected builds never

@@ -192,7 +192,7 @@ def read_dep_info_snapshot(slot, worktree):
 
 def target_dep_inputs(record, snapshot, allow_missing=False):
     artifacts = {os.path.abspath(path) for path in
-                 [record["executable"], *record.get("filenames", [])]}
+                 [record.get("executable"), *record.get("filenames", [])] if path}
     # Cargo may report only the uplifted bin, while rustc writes deps/<name>-<hash>.d.
     # Snapshot hard-link identities bind that bin to the correct metadata hash.
     aliases = snapshot.get("aliases", {})
@@ -258,6 +258,39 @@ def target_may_intersect_content_diff(current, record):
     return any(Path(name).is_relative_to(root) for name in changed for root in relative_roots)
 
 
+def package_libraries(current, record):
+    # Cargo supplies a package's library to its bins/integration tests, and its
+    # path dependencies to every target. Follow those libraries transitively.
+    libraries = [item for item in current["reported_artifacts"]
+                 if set(item.get("target", {}).get("kind", [])) & {"lib", "rlib", "proc-macro"}]
+    pending, seen = [record], set()
+    while pending:
+        target = pending.pop()
+        package_id = target.get("package_id")
+        if package_id in seen:
+            continue
+        seen.add(package_id)
+        roots = current["package_roots"].get(package_id, [])
+        for library in libraries:
+            manifest = library.get("manifest_path")
+            if (library.get("package_id") == package_id
+                    or (manifest and str(Path(manifest).parent) in roots)):
+                yield library
+                pending.append(library)
+
+
+def read_library_inputs(current, record, before, after):
+    inputs = set()
+    for library in package_libraries(current, record):
+        dependencies = target_dep_inputs(library, after)
+        dependencies.update(target_dep_inputs(library, before, allow_missing=True))
+        if not repo_relative_inputs(current, dependencies):
+            raise ValueError(f"zero repo-relative inputs for {library['target']['name']}")
+        dependencies.update(package_build_inputs(current, library))
+        inputs.update(dependencies)
+    return inputs
+
+
 def read_target_inputs(current, before, after):
     targets, errors = {}, []
     for record in current["reported_artifacts"]:
@@ -272,15 +305,13 @@ def read_target_inputs(current, before, after):
             inputs = repo_relative_inputs(current, inputs)
             if not inputs:
                 raise ValueError(f"zero repo-relative inputs for {executable}")
+            library_inputs = read_library_inputs(current, record, before, after)
+            inputs.update(repo_relative_inputs(current, library_inputs))
             inputs.update(repo_relative_inputs(current, package_build_inputs(current, record)))
             targets[executable] = sorted(inputs)
         except ValueError as error:
             if target_may_intersect_content_diff(current, record):
                 errors.append(str(error))
-    mapped = set().union(*targets.values())
-    changed = current["content_changed_paths"]
-    if targets and changed and not mapped.intersection(changed):
-        errors.append("no reported target maps changed inputs")
     return targets, errors
 
 
