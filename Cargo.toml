@@ -9,9 +9,10 @@ build = "build.rs"
 autotests = false
 
 [workspace]
-members = [".", "xtask", "crates/test-harness", "crates/sim-data", "crates/sim-data-profile", "crates/sim-lua-bridge", "crates/sim-event"]
+members = [".", "xtask", "crates/test-harness", "crates/sim-data", "crates/sim-data-profile", "crates/sim-lua-bridge", "crates/sim-event", "crates/sim-toc"]
 
 [dependencies]
+sim-toc = { path = "crates/sim-toc" }
 sim-event = { path = "crates/sim-event" }
 sim-lua-bridge = { path = "crates/sim-lua-bridge" }
 sim-data = { path = "crates/sim-data" }
