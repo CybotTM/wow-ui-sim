@@ -28,6 +28,14 @@ Each independently claimed RED selector must reject a constant/no-op producer on
 
 Empty-catalog, empty-invitation, notification-only and already-saved-marker checks can preserve useful boundaries while allowing no-op producers. Label and count them as preservation, not producer RED; keep missing native or backing-state evidence explicit.
 
+## CF-2 selected-unit aura cleanup
+
+[Cleanup contract](../../specs/clear-blocked-auras.md) covers the existing normal CompactRaidFrames → RaidFrame → UnitFrame closure on Retail/PTR. The C API producer removes selected-unit entries from the existing effective `_blockedAuras` table; AddBlockedAura and enumeration still share that exact table. No shadow state, vendor changes or new default aura records are introduced. Publication uses `client_profile::ACTIVE` and does not extend other profiles.
+
+Each of the three unchanged selectors restores party201/202 while player101 stays blocked, then restores player101 while party201/202 stay blocked. A constant return/no-op cannot restore the first selection; always-party1 fails the reverse selection; always-player fails the first selection; global clear violates opposite-unit preservation. Re-blocking rules out one-shot cleanup. The separate nil selector additionally requires a callable endpoint and rejection before mutation, under the user-authorized non-native best guess. These are static contradictions, not executed mutation or RED/GREEN proof. Initial manager errors and original pool creation/event ordering remain acceptance gates; no pool is supplied by the producer.
+
+Static producer delivery does not establish native nil/invalid/secret/taint semantics, actual PTR70493 runtime selection or stock deltas. The slot must use the authenticated lane-private 12.1.7 PTR cache; historical 12.1.5 line receipts are not current runtime proof.
+
 ## Sources
 
 - [TOC resolver](../../../src/toc/mod.rs) and [loader selection](../../../src/loader/mod.rs) — selection rules verified against source.

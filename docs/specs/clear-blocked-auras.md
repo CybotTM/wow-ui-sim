@@ -14,7 +14,7 @@ Retail/PTR original `ArenaUnitFrameDebuffMixin.Update` and the original CompactR
 
 ## Acceptance and status
 
-**Tests staged only; no compilation, observed RED, producer change or GREEN yet.** Each original-consumer selector must independently reject constant/no-op/wrong-unit implementations through concrete visibility observations. Missing-member failure alone does not establish that proof.
+**Producer and unchanged tests staged; static-only delivery. No compilation or observed RED/GREEN.** Retail/PTR publication uses `client_profile::ACTIVE`. The endpoint deletes selected-unit keys from the existing live block table in place; it does not replace the table, touch aura DTOs, change the provider or create shadow state. An absent block table has no blocks to remove. No additional profile publication, unit-existence policy or native validation/security parity is claimed. Each original-consumer selector must independently reject constant/no-op/wrong-unit implementations through concrete visibility observations. Missing-member failure alone does not establish that proof.
 
 | Selector in integration target | Profiles | Required observations | Current proof |
 |---|---|---|---|
@@ -26,11 +26,11 @@ Existing B-AURA and U-DIVIDER test ownership was adopted rather than reimplement
 
 ## Best-guess nil policy — non-native
 
-User authorized a reasoned best guess on2026-10-24, pending user-supplied Retail native findings. **Guess: reject nil/omitted unit using the existing required-string argument conversion, before mutating any blocks; do not silently no-op or clear globally.** Implement only after observed RED. The earlier producer-preparation patch's inferred nil no-op policy is not adopted.
+User authorized a reasoned best guess on2026-10-24, pending user-supplied Retail native findings. **Guess: reject nil/omitted unit using the existing required-string argument conversion, before mutating any blocks; do not silently no-op or clear globally.** Implemented under explicit static-only authorization; observed RED/GREEN remains a later slot gate. The earlier producer-preparation patch's inferred nil no-op policy is not adopted.
 
 Basis: generated UnitAuraDocumentation declares ClearBlockedAuras.unit as UnitTokenRestrictedForAddOns with Nilable=false and no returns. Existing `src/c_api/c_unit_auras.rs::is_private_aura_filtered_out_by_instance_id` uses required `String::from_stack`; that conversion rejects nil and nonstrings. `c_unit_aura_spell_queries.rs::read_public_unit` instead explicitly accepts nil for a query with no modeled unit. Siblings are not uniform; required mutation input and documented non-nilability favor strict conversion here. Legacy AddBlockedAura accepts missing unit as an empty-string key, but that legacy permissiveness is not native evidence and does not justify an empty-token mutation for this new endpoint. Unknown string tokens have no matching block entries unless previously blocked; do not invent unit validation or player substitution.
 
-The separate nil selector tests the original widget transition and omitted direct call, with assigned-unit cleanup before and after to reject constant/no-op/wrong-unit implementations. This policy must be labeled BEST GUESS, non-native in the future producer's code comment and replaced if authorized Retail evidence contradicts it. No decompiled source is read by this lane.
+The separate nil selector tests the original widget transition and omitted direct call, with assigned-unit cleanup before and after to reject constant/no-op/wrong-unit implementations. This policy must be labeled BEST GUESS, non-native in the producer's code comment and replaced if authorized Retail evidence contradicts it. No decompiled source is read by this lane.
 
 Source-selected `CompactArenaFrameMixin.RefreshMembers` assigns `"arena"..index` before `DebuffFrame:SetUnit`; the historical stock ClearBlockedAuras stack includes that path. Stock records do not record argument values. Therefore none of the historical eight keys/ten occurrences per profile is established to depend on nil handling. Whether other initial ordering reaches nil requires runtime evidence; initial diagnostics must not be cleared to avoid it.
 
