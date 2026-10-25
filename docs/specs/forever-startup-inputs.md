@@ -24,12 +24,14 @@ unknown.
 - External-event probes return non-null booleans from the supplied optional URL,
   availability and newness. No network launch is simulated without a modeled
   launch result.
-- Bank purchase flags and optional `BankLockedReason` values are supplied per
-  documented `BankType`; absence of a lock row returns one nil. Housing presence
-  reads the existing spatial `HousingArea`, independently of ownership.
+- Bank purchase/max-tab flags and optional `BankLockedReason` values are supplied
+  per documented `BankType`; absence of a lock row returns one nil. Housing
+  presence reads the existing spatial `HousingArea`, independently of ownership.
 - Discord enablement reads the existing `discordClientEnabled` CVar. Ping
-  availability is an explicit host flag. TTS save marking sets a local saved
-  flag, and its getter reads that same flag; no persistence policy is inferred.
+  availability and `RestrictPingsTo` are explicit Forever host inputs; Retail's
+  feature-gated restriction model is unchanged. TTS bool settings are supplied as
+  enabled `TtsBoolSetting` values. Save marking sets a local saved flag, and its
+  getter reads that same flag; no persistence policy is inferred.
 - `C_CVar.RemoveTempCVar(name)` removes the host's lower-case temporary scalar
   entry without writing saved CVars. `GetCVar`/`GetCVarBool` and their namespace
   counterparts see the temporary scalar before the saved/base value. This does
@@ -58,6 +60,16 @@ Evidence disposition: **laptop aso source-only audit 2026-10-25: native-unknown*
 for both locality registration/returns and the idle target-spell return. Preserve
 these as classified baseline residue; do not invent an idle target ID or locality
 catalog to obtain a clean startup.
+
+## Excluded housing UI
+
+70532 `Blizzard_HousingControls.toc` declares `## AllowLoadGameType: standard`.
+Forever's camelot profile therefore excludes its bootstrap, the sole publisher
+of `HousingControls_LoadUI`. The original GameEvent handler's true housing branch
+is blocked on that missing Lua publisher. Tests must retain both boolean
+projection branches and assert the exact excluded-publisher failure/unloaded
+state; they must not bypass the TOC or fabricate a loader. This test expectation
+was approved on 2026-10-25 after the old load-success assertion was disproved.
 
 ## Acceptance
 
