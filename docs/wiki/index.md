@@ -2,6 +2,13 @@
 
 [Club stream ownership](systems/club-membership.md#unread-streams-cf-2) links the [bounded unread contract](../specs/club-unread.md): one supplied club/stream model, original MicroMenu and CommunitiesUtil selectors, settings/marker/clear siblings and explicit UNKNOWN native policies. RED/schema and publication staged separately; no build, slot or runtime proof. Retail/PTR/Forever preservation remains pending.
 
+## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
+
+[Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
+## [2026-10-24] investigation | Wrath guild-info staging
+
+[Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md) and [17-row repair matrix](../baselines/wrath-guild-info-green-blockers.md). Historical three-selector GREEN passed; explicit fixture repairs and F1 display rank now await re-proof. Original nonleader dropdown RED is staged; bank permission/withdrawal getters are held for laptop facts and a real model. No new build/slot use; stock/check and actual Retail34/38 comparison remain pending.
+
 ## [2026-10-24] source | Patch 12.1.7 I4b conditional static selection
 
 [Conditional source evidence](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection): 460 conditional PTR obligations, 5,168 UNKNOWN cells; zero effective promotions before the exact I3 source commit merges. All runtime proof stages remain UNKNOWN.
@@ -26,6 +33,10 @@ mapping remains unknown. Producer and tests staged only; no build/slot/runtime p
 ## [2026-10-24] source | Reload XML instance arguments
 
 [Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): Forever RED16 precedes parameterized identities, then Forever/default Retail compile0 sources on both reloads.27 exact cases/profile, zero-warning checks and formatting pass; no stock-startup or full-workload acceptance claim.
+
+## [2026-10-24] proof | Wrath bank selected-rank permissions
+
+[Accepted runtime proof](investigations/wrath-guild-info.md#accepted-runtime-proof) links the [contract](../specs/wrath-guild-bank-rank-permissions.md): five bank RED→GREEN selectors, Wrath56 and paired Retail53 preservation pass; verifier8738 ACCEPT. Both original dropdown selectors project varying rank/tab widget values. [Current-master refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 also passes: both all-target checks warn zero, five bank cases pass, Wrath stock[], Retail master08b423c5c/merged30 keys/34 occurrences unchanged with no additions; slot0 released.
 
 ## [2026-10-24] staged | SuperTrack supplied state
 
