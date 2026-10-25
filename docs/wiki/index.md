@@ -1,6 +1,20 @@
 ## [2026-10-24] staged | CF-2 supplied party minimum
 
 [Original-consumer staging](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) links the [bounded contract](../specs/party-min-level-scenario-availability.md): selected GroupFinder XML/Lua provenance, independent roster/catalog transitions and explicit Mists LFR blocker. Tests/spec only; no compiled listing, observed RED or producer implementation.
+## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
+
+[Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
+
+## [2026-10-24] source | Patch 12.1.7 I4b conditional static selection
+
+[Conditional source evidence](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection): 460 conditional PTR obligations, 5,168 UNKNOWN cells; zero effective promotions before the exact I3 source commit merges. All runtime proof stages remain UNKNOWN.
+
+## [2026-10-24] source | Patch 12.1.7 I4a inherited worklist
+
+[Inherited accounting](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist): 1,876 immutable occurrences, 63 opposing sweep intersections and 233 lexical test-candidate rows. All 5,628 profile applicability cells remain UNKNOWN pending accepted source/selection evidence. Grouped I4b worklist, zero Cargo; not runtime acceptance.
+## [2026-10-24] source | Combat-log filter record staging
+
+[Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
 
 ## [2026-10-24] system | CF-2 supplied club self invitations
 
@@ -21,6 +35,11 @@ mapping remains unknown. Producer and tests staged only; no build/slot/runtime p
 [Ownership and native gaps](systems/super-track-state.md) links the [contract](../specs/super-track-state.md). Original-consumer RED tests and separate producer staged; no builds or runtime proof.
 
 ## [2026-10-22] source | Wrath F07 applicability
+
+## [2026-10-24] source | PTR70493 authenticated source and resume
+
+[Profile runtime cache](systems/client-profiles.md#runtime-cache) links the [70493 source proof](../ptr-cdn-content-index.md): original process-failure and advertised-host RED→GREEN, authenticated 4,578-entry regeneration, schema2 partial provenance and unchanged 306-file supported resume. [Actual startup](../baselines/README.md#ptr-70493-authenticated-source-capture--2026-10-24) retains 436 errors / 618 occurrences after master/toc integration; no clean-startup or I4 claim. Retail preserves exact master 36/42 residual; Forever preserves exact fresh-master 78/82 residual; both have zero-warning compile/check gates.
+
 ## [2026-10-22] source | Wrath casting and aura projections
 
 [Projection notes](systems/lua-api.md#wrath-casting-and-aura-projections) link the [bounded contract](../specs/wrath-casting-aura-contracts.md): original cast/channel/party-aura consumers, catalog-backed subtext, legacy tuple/event shapes and separate metadata/transport gaps. Paired baselines, seven producer GREEN contracts and Retail preservation are recorded. Original BuffFrame getter-type RED precedes the runtime Wrath filename projection. Final14aed640c: native21+seven contracts PASS, sixteen report-only failures unchanged, Retail37 PASS, stock arrays empty and Wrath check/formatter PASS; one Retail setup timeout passed its exact retry. Native parity and unexercised branches remain distinct.

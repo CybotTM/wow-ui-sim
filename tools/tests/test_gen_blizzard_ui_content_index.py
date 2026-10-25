@@ -128,8 +128,8 @@ class ContentIndexTests(unittest.TestCase):
         write_config(
             prefix.with_name(prefix.name + "-build-config.txt"),
             {
-                "build-name": "WOW-69594patch12.1.5_XPTR",
-                "build-uid": "wowxptr",
+                "build-name": "WOW-70493patch12.1.7_PTR",
+                "build-uid": "wowt",
                 "install": "06feedbc851542370f3d2081fce81e19 21c1e5624dd78f5487c97caea43bf035",
                 "download": hashlib.md5(download_path.read_bytes()).hexdigest(),
                 "vfs-root": hashlib.md5(root_path.read_bytes()).hexdigest(),
@@ -159,7 +159,9 @@ class ContentIndexTests(unittest.TestCase):
         self.assertEqual(index["schema"], 1)
         self.assertEqual(index["gethe_revision"], PINNED_GETHE_REVISION)
         self.assertEqual(index["version"], PINNED_VERSION)
-        self.assertEqual(index["product"], "wowxptr")
+        self.assertEqual(index["product"], "wowt")
+        self.assertEqual(index["version"], "12.1.7.70493")
+        self.assertEqual(index["gethe_revision"], "2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af")
         build_key, cdn_key = self.fixture_keys(prefix)
         self.assertEqual(index["build_key"], build_key)
         self.assertEqual(index["cdn_key"], cdn_key)
@@ -180,6 +182,26 @@ class ContentIndexTests(unittest.TestCase):
         self.assertRegex(index["files"][0]["archive"], r"^[0-9a-f]{32}$")
         output.write_text(json.dumps(index, sort_keys=True) + "\n")
         self.assertEqual(json.loads(output.read_text()), index)
+
+    def test_rejects_old_product_even_with_authenticated_config(self) -> None:
+        prefix, source, _ = self.make_fixture()
+        config = prefix.with_name(prefix.name + "-build-config.txt")
+        config.write_text(config.read_text().replace("build-uid = wowt", "build-uid = wowxptr"))
+        with self.assertRaisesRegex(ValueError, "not the pinned"):
+            self.build_fixture_index(prefix, source)
+
+    def test_rejects_old_build_even_with_authenticated_config(self) -> None:
+        prefix, source, _ = self.make_fixture()
+        config = prefix.with_name(prefix.name + "-build-config.txt")
+        config.write_text(config.read_text().replace("WOW-70493patch12.1.7_PTR", "WOW-69594patch12.1.5_XPTR"))
+        with self.assertRaisesRegex(ValueError, "not the pinned"):
+            self.build_fixture_index(prefix, source)
+
+    def test_rejects_incomplete_source_coverage(self) -> None:
+        prefix, source, _ = self.make_fixture()
+        (source / "Missing.lua").write_text("return 42\n")
+        with self.assertRaisesRegex(ValueError, "missing source records"):
+            self.build_fixture_index(prefix, source)
 
     def test_uses_unique_content_key_when_listfile_lacks_new_file_data_id(self) -> None:
         prefix, source, _ = self.make_fixture()

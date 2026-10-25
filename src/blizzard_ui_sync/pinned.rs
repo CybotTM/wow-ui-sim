@@ -32,8 +32,24 @@ fn build() -> crate::Result<&'static Build> {
     BUILD
         .get_or_init(|| {
             let build: Build = serde_json::from_str(INDEX).map_err(|cause| cause.to_string())?;
-            if build.schema != 1 || build.product != "wowxptr" {
-                return Err("unsupported PTR content-index schema or product".into());
+            let identity = [
+                build.product.as_str(),
+                build.version.as_str(),
+                build.build_key.as_str(),
+                build.cdn_key.as_str(),
+                build.install_key.as_str(),
+                build.gethe_revision.as_str(),
+            ];
+            let expected = [
+                "wowt",
+                "12.1.7.70493",
+                "fc3eaa61ff0ade6bf35dbab9727bc161",
+                "c13b476a09cb3262797a6fdc88103036",
+                "bb46ab983520a2617d8b2119662ef38b",
+                "2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af",
+            ];
+            if build.schema != 1 || identity != expected {
+                return Err("unsupported PTR content-index schema or source identity".into());
             }
             #[cfg(feature = "casc")]
             validate_entries(&build)?;
@@ -118,16 +134,19 @@ pub(super) fn sync_to(root: &Path) -> crate::Result<super::SyncSummary> {
     let build = build()?;
     let expected = provenance()?;
     let client = reqwest::blocking::Client::builder()
+        .redirect(reqwest::redirect::Policy::none())
         .timeout(std::time::Duration::from_secs(30))
         .build()
         .map_err(|cause| crate::Error::Other(format!("create Blizzard CDN client: {cause}")))?;
-    super::invalidate_cache_if_provenance_mismatched(root, &expected)?;
+    prepare_sync_cache(root, &expected)?;
+    let roots = super::pinned_cdn::fetch_roots(&client, &build.product)?;
     let workers = 16.min(build.files.len()).max(1);
     let counts = std::thread::scope(|scope| {
         let handles: Vec<_> = (0..workers)
             .map(|worker| {
                 let client = &client;
-                scope.spawn(move || sync_worker(root, client, &build.files, worker, workers))
+                let roots = &roots;
+                scope.spawn(move || sync_worker(root, client, &build.files, roots, worker, workers))
             })
             .collect();
         handles
@@ -152,10 +171,17 @@ pub(super) fn sync_to(root: &Path) -> crate::Result<super::SyncSummary> {
 }
 
 #[cfg(feature = "casc")]
+fn prepare_sync_cache(root: &Path, expected: &CacheProvenance) -> crate::Result<()> {
+    super::invalidate_cache_if_provenance_mismatched(root, expected)?;
+    super::write_cache_provenance(root, expected)
+}
+
+#[cfg(feature = "casc")]
 fn sync_worker(
     root: &Path,
     client: &reqwest::blocking::Client,
     entries: &[super::pinned_download::ContentEntry],
+    roots: &[String],
     worker: usize,
     workers: usize,
 ) -> crate::Result<(usize, usize)> {
@@ -177,7 +203,7 @@ fn sync_worker(
                 )));
             }
         }
-        let content = super::pinned_download::download_entry(client, entry)?;
+        let content = super::pinned_download::download_entry(client, entry, roots)?;
         super::write_extracted_casc_path(&destination, &content)?;
         extracted += 1;
     }
@@ -192,6 +218,158 @@ pub(super) fn sync_to(_root: &Path) -> crate::Result<super::SyncSummary> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(feature = "casc")]
+    #[test]
+    fn pinned_ptr_partial_cache_child() {
+        use std::io::{IsTerminal, Read};
+
+        let args: Vec<_> = std::env::args().collect();
+        let explicitly_selected = args.windows(2).any(|args| {
+            args == [
+                "--exact",
+                "blizzard_ui_sync::pinned::tests::pinned_ptr_partial_cache_child",
+            ]
+        });
+        let mut input = std::io::stdin();
+        if !explicitly_selected || input.is_terminal() {
+            return;
+        }
+        let mut message = String::new();
+        input.read_to_string(&mut message).unwrap();
+        if message.is_empty() {
+            return;
+        }
+        let root: std::path::PathBuf = serde_json::from_str(&message).unwrap();
+        prepare_sync_cache(&root, &provenance().unwrap()).unwrap();
+        std::fs::create_dir_all(&root).unwrap();
+        std::fs::write(root.join("partial-source"), b"saved source bytes").unwrap();
+        std::process::exit(23);
+    }
+
+    #[cfg(feature = "casc")]
+    #[test]
+    fn pinned_ptr_partial_cache_child_ignores_ambient_root() {
+        let dir = tempfile::tempdir().unwrap();
+        let outside = dir.path().join("ambient-outside-cache");
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "blizzard_ui_sync::pinned::tests::pinned_ptr_partial_cache_child",
+                "--nocapture",
+            ])
+            .env("WOW_UI_SIM_PINNED_PARTIAL_CACHE_CHILD_ROOT", &outside)
+            .stdin(std::process::Stdio::null())
+            .status()
+            .unwrap();
+        assert!(!outside.exists(), "ambient root must not be written");
+        assert!(
+            status.success(),
+            "ordinary helper execution must return normally"
+        );
+    }
+
+    #[cfg(feature = "casc")]
+    #[test]
+    fn pinned_ptr_resumes_partial_cache_after_process_failure_without_completion() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().join("AddOns");
+        let mut child = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "blizzard_ui_sync::pinned::tests::pinned_ptr_partial_cache_child",
+                "--nocapture",
+            ])
+            .stdin(std::process::Stdio::piped())
+            .spawn()
+            .unwrap();
+        let message = serde_json::to_vec(&root).unwrap();
+        std::io::Write::write_all(&mut child.stdin.take().unwrap(), &message).unwrap();
+        let status = child.wait().unwrap();
+        assert_eq!(status.code(), Some(23));
+        assert!(!root.join(super::super::COMPLETE_MARKER).exists());
+        assert_eq!(
+            std::fs::read(root.join("partial-source")).unwrap(),
+            b"saved source bytes"
+        );
+
+        prepare_sync_cache(&root, &provenance().unwrap()).unwrap();
+
+        assert_eq!(
+            std::fs::read(root.join("partial-source")).unwrap(),
+            b"saved source bytes"
+        );
+        assert!(cache_matches(&root));
+        assert!(!root.join(super::super::COMPLETE_MARKER).exists());
+    }
+
+    #[cfg(feature = "casc")]
+    #[test]
+    fn pinned_ptr_discards_stale_source_before_preparing_partial_cache() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        let stale = provenance()
+            .unwrap()
+            .contents()
+            .replace("version=12.1.7.70493\n", "version=12.1.5.69594\n");
+        std::fs::write(root.join(super::super::PROVENANCE_FILE), stale).unwrap();
+        std::fs::write(root.join(super::super::COMPLETE_MARKER), b"ok\n").unwrap();
+        std::fs::write(root.join("stale-source"), b"old source bytes").unwrap();
+
+        prepare_sync_cache(root, &provenance().unwrap()).unwrap();
+
+        assert!(!root.join("stale-source").exists());
+        assert!(!root.join(super::super::COMPLETE_MARKER).exists());
+        assert!(cache_matches(root));
+    }
+
+    #[test]
+    fn pinned_ptr_selects_exact_70493_source_identity() {
+        let selected = build().unwrap();
+        assert_eq!(selected.product, "wowt");
+        assert_eq!(selected.version, "12.1.7.70493");
+        assert_eq!(selected.build_key, "fc3eaa61ff0ade6bf35dbab9727bc161");
+        assert_eq!(selected.cdn_key, "c13b476a09cb3262797a6fdc88103036");
+        assert_eq!(
+            selected.gethe_revision,
+            "2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af"
+        );
+    }
+
+    #[cfg(feature = "casc")]
+    #[test]
+    fn pinned_ptr_rejects_manifest_index_mismatch() {
+        let mut selected: Build = serde_json::from_str(INDEX).unwrap();
+        selected.files.pop();
+        assert_eq!(
+            validate_entries(&selected).unwrap_err(),
+            "PTR content index does not match its path manifest"
+        );
+    }
+
+    #[test]
+    fn pinned_ptr_rejects_previous_69594_provenance() {
+        let dir = tempfile::tempdir().unwrap();
+        let old_identity = provenance()
+            .unwrap()
+            .contents()
+            .replace("product=wowt\n", "product=wowxptr\n")
+            .replace("version=12.1.7.70493\n", "version=12.1.5.69594\n")
+            .replace(
+                "fc3eaa61ff0ade6bf35dbab9727bc161",
+                "4a9973f37906f8cfb344f8a9fe6777e0",
+            )
+            .replace(
+                "c13b476a09cb3262797a6fdc88103036",
+                "3aa83893a3ce9b722a5f51328ad9a552",
+            )
+            .replace(
+                "2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af",
+                "49b69918fcdc77e109813281e4f537d45ec7dcbf",
+            );
+        std::fs::write(dir.path().join(super::super::PROVENANCE_FILE), old_identity).unwrap();
+        assert!(!cache_matches(dir.path()));
+    }
 
     #[test]
     fn pinned_ptr_rejects_legacy_provenance_and_accepts_exact_identity() {
