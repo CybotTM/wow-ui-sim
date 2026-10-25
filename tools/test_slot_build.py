@@ -152,7 +152,58 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertIn("src/main.rs", current["changed_paths"])
         self.assertGreater(source.stat().st_mtime_ns, 1_000_000_000)
 
-    def test_unknown_commit_invalidates_crate_inputs_not_docs(self):
+    def test_unknown_refresh_includes_workspace_and_path_dependency_inputs(self):
+        inputs = ["iced-wgpu-patched/src/lib.rs", "iced-dynamic/src/lib.rs",
+                  "xtask/src/main.rs", "examples/probe.rs", "assets/icon.bin"]
+        for name in inputs:
+            path = self.tree / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("input")
+        self.git("add", ".")
+        self.git("commit", "-qm", "additional inputs")
+        for name in inputs:
+            os.utime(self.tree / name, (1, 1))
+        current = self.prepare()
+        for name in inputs:
+            self.assertIn(name, current["changed_paths"])
+            self.assertGreater((self.tree / name).stat().st_mtime_ns, 1_000_000_000)
+            self.assertEqual((self.tree / name).read_text(), "input")
+
+    def test_metadata_failure_refreshes_every_tracked_file(self):
+        (self.tree / "Cargo.toml").write_text("invalid manifest")
+        (self.tree / "outside-input.bin").write_bytes(b"input")
+        self.git("add", ".")
+        self.git("commit", "-qm", "unavailable metadata")
+        os.utime(self.tree / "outside-input.bin", (1, 1))
+        current = self.prepare()
+        self.assertIn("outside-input.bin", current["changed_paths"])
+        self.assertGreater((self.tree / "outside-input.bin").stat().st_mtime_ns,
+                           1_000_000_000)
+
+    def test_virtual_workspace_uses_metadata_member_and_dependency_roots(self):
+        (self.tree / "Cargo.toml").write_text(
+            '[workspace]\nmembers=["app"]\nexclude=["path-library"]\nresolver="2"\n')
+        for name, manifest in {
+            "app": '[package]\nname="app"\nversion="0.1.0"\n'
+                   '[dependencies]\npath-library={path="../path-library"}\n',
+            "path-library": '[package]\nname="path-library"\nversion="0.1.0"\n',
+        }.items():
+            root = self.tree / name
+            (root / "src").mkdir(parents=True)
+            (root / "src/lib.rs").write_text("pub fn input() {}")
+            (root / "Cargo.toml").write_text(manifest)
+        (self.tree / "README.md").write_text("docs")
+        self.git("add", ".")
+        self.git("commit", "-qm", "virtual workspace")
+        for name in ["app/src/lib.rs", "path-library/src/lib.rs", "README.md"]:
+            os.utime(self.tree / name, (1, 1))
+        current = self.prepare()
+        for name in ["app/src/lib.rs", "path-library/src/lib.rs"]:
+            self.assertIn(name, current["changed_paths"])
+            self.assertGreater((self.tree / name).stat().st_mtime_ns, 1_000_000_000)
+        self.assertEqual((self.tree / "README.md").stat().st_mtime_ns, 1_000_000_000)
+
+    def test_unknown_commit_refreshes_root_package_including_docs(self):
         (self.tree / "data").mkdir()
         (self.tree / "data/input.csv").write_text("input")
         (self.tree / "README.md").write_text("docs")
@@ -165,7 +216,7 @@ class SourceFreshnessTests(unittest.TestCase):
         current = self.prepare(previous)
         self.assertIn("data/input.csv", current["changed_paths"])
         self.assertGreater((self.tree / "src/main.rs").stat().st_mtime_ns, 1_000_000_000)
-        self.assertEqual((self.tree / "README.md").stat().st_mtime_ns, 1_000_000_000)
+        self.assertGreater((self.tree / "README.md").stat().st_mtime_ns, 1_000_000_000)
 
     def test_interrupted_build_invalidates_inputs_even_at_same_identity(self):
         previous = self.prepare()
@@ -197,6 +248,7 @@ class SourceFreshnessTests(unittest.TestCase):
             'source,binary=map(Path,sys.argv[1:3]); '
             'old=binary.exists() and source.stat().st_mtime_ns <= binary.stat().st_mtime_ns; '
             'None if old else binary.write_bytes(source.read_bytes()); '
+            'binary.chmod(0o755); '
             'print(json.dumps({"reason":"compiler-artifact","executable":str(binary)}))'
         )
         request = self.slot / "request.json"
@@ -223,7 +275,9 @@ class SourceFreshnessTests(unittest.TestCase):
         binary.parent.mkdir()
         binary.write_bytes(b"A binary")
         (self.slot / ".owner").write_text("test-owner")
-        emitter = ('import json,sys; print(json.dumps({"reason":"compiler-artifact",'
+        emitter = ('import json,sys,os; from pathlib import Path; '
+                   'Path(sys.argv[1]).chmod(0o755); os.utime(sys.argv[1], None); '
+                   'print(json.dumps({"reason":"compiler-artifact",'
                    '"executable":sys.argv[1]})); sys.exit(int(sys.argv[2]))')
         request = self.slot / "request.json"
         for code in [0, 7]:
@@ -238,13 +292,51 @@ class SourceFreshnessTests(unittest.TestCase):
                 "debug/probe": hashlib.sha256(b"A binary").hexdigest()})
             self.assertEqual(receipt["returncode"], code)
 
-    def test_binary_build_with_hidden_cargo_stdout_is_rejected(self):
-        current = self.prepare()
-        current["cargo"] = ["cargo", "test", "--no-run"]
+    def test_capturing_wrappers_record_hashes_and_reject_identical_binary(self):
+        import hashlib
+        import sys
+        binary = self.slot / "debug/probe"
+        binary.parent.mkdir()
+        (self.slot / ".owner").write_text("test-owner")
+        # This process redirects its own streams, like cargo-exec.py; no Cargo
+        # messages are visible to the worker. Its argv must remain untouched.
+        wrapper = self.slot / "wrapper.py"
+        wrapper.write_text(
+            'import os,sys; from pathlib import Path\n'
+            'assert len(sys.argv) == 2, sys.argv\n'
+            'os.dup2(os.open(sys.argv[1], os.O_WRONLY|os.O_CREAT, 0o600), 1)\n'
+            f'p=Path({str(binary)!r}); p.write_bytes(b"binary"); p.chmod(0o755)\n'
+            'print("captured cargo output")\n')
+        request = self.slot / "request.json"
         receipt = self.slot / "receipt.json"
-        with self.assertRaisesRegex(ValueError, "missing executable artifact messages"):
-            self.module.finish_build(self.slot, receipt, current, None, {}, 0)
-        self.assertEqual(json.loads(receipt.read_text())["result"], "missing-artifacts")
+        request.write_text(json.dumps({
+            "slot": str(self.slot), "worktree": str(self.tree), "owner": "test-owner",
+            "unit": "wrapped", "receipt": str(receipt),
+            "cargo": [sys.executable, str(wrapper), str(self.slot / "compile.stdout")]}))
+        self.assertEqual(self.module.execute_build(request), 0)
+        self.assertEqual(json.loads(receipt.read_text())["artifacts"], {
+            "debug/probe": hashlib.sha256(b"binary").hexdigest()})
+        self.assertEqual((self.slot / "compile.stdout").read_text(),
+                         "captured cargo output\n")
+        (self.tree / "src/main.rs").write_text("changed Rust")
+        with self.assertRaisesRegex(ValueError, "stale artifacts"):
+            self.module.execute_build(request)
+
+    def test_worker_preserves_binary_streams_and_launcher_arguments(self):
+        import sys
+        (self.slot / ".owner").write_text("test-owner")
+        request = self.slot / "request.json"
+        request.write_text(json.dumps({
+            "slot": str(self.slot), "worktree": str(self.tree), "owner": "test-owner",
+            "unit": "streams", "receipt": str(self.slot / "receipt.json"),
+            "cargo": [sys.executable, "-c",
+                      'import os,sys; assert len(sys.argv)==1; '
+                      'os.write(1,b"stdout\\xff\\x00"); os.write(2,b"stderr\\xfe\\x00")']}))
+        result = subprocess.run([sys.executable, str(self.module.__file__),
+                                 "--execute", str(request)], capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, b"stdout\xff\x00")
+        self.assertEqual(result.stderr, b"stderr\xfe\x00")
 
     def test_changed_artifacts_and_identity_are_recorded(self):
         previous = self.prepare()

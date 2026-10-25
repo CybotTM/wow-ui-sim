@@ -65,9 +65,24 @@ def source_identity(worktree):
     return {"head": head, "dirty_sha256": digest.hexdigest()}, sorted(dirty)
 
 
-def crate_input(path):
-    return (path.split("/", 1)[0] in {"src", "crates", "tests", "data", "build", "installer"}
-            or path in {"build.rs", "Cargo.toml", "Cargo.lock"})
+def full_source_inputs(worktree):
+    tracked = {os.fsdecode(p) for p in git(worktree, "ls-files", "-z").split(b"\0") if p}
+    result = subprocess.run(
+        ["cargo", "metadata", "--no-deps", "--format-version", "1", "--offline"],
+        cwd=worktree, capture_output=True, check=False)
+    if result.returncode:
+        return tracked
+    metadata = json.loads(result.stdout)
+    roots = set()
+    for package in metadata["packages"]:
+        roots.add(Path(package["manifest_path"]).parent)
+        roots.update(Path(dep["path"]) for dep in package["dependencies"] if dep.get("path"))
+    # The root package covers build.rs's build/, installer/, native/intl/ and
+    # Cargo.lock, plus test-harness/build.rs's tests reads, without a whitelist.
+    inputs = {"build.rs", "Cargo.toml", "Cargo.lock"} & tracked
+    inputs.update(name for name in tracked
+                  if any((worktree / name).is_relative_to(root) for root in roots))
+    return inputs
 
 
 def prepare_source(worktree, previous):
@@ -83,8 +98,7 @@ def prepare_source(worktree, previous):
                 previous["identity"]["head"], identity["head"], "--").split(b"\0") if p)
             changed.update(previous["dirty_paths"])
         except (subprocess.CalledProcessError, KeyError, ValueError):
-            changed.update(os.fsdecode(p) for p in git(
-                worktree, "ls-files", "-z").split(b"\0") if p and crate_input(os.fsdecode(p)))
+            changed.update(full_source_inputs(worktree))
         changed.update(dirty)
         now = time.time_ns()
         for name in sorted(changed):
@@ -107,23 +121,40 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
     old_hashes = set((previous or {}).get("artifacts", {}).values())
     stale = bool(returncode == 0 and rust_changed and artifacts and old_hashes
                  and set(artifacts.values()).issubset(old_hashes))
-    cargo = current.get("cargo", [])
-    expects_binary = ("check" not in cargo and any(
-        arg in {"--no-run", "--bin", "--bins"} or arg.startswith("--bin=") for arg in cargo))
-    missing = returncode == 0 and expects_binary and not artifacts
     result = "success" if returncode == 0 else "failed"
     if stale:
         result = "stale-artifacts"
-    elif missing:
-        result = "missing-artifacts"
     current = dict(current, artifacts=artifacts, returncode=returncode, result=result)
     write_json(receipt, current)
     write_json(slot / ".source-identity.json", current)
-    if missing:
-        raise ValueError(f"missing executable artifact messages: forward Cargo JSON stdout; see {receipt}")
     if stale:
-        raise ValueError(f"stale artifacts: Rust source changed but all binary SHA256 values "
+        raise ValueError(f"stale artifacts: Rust source changed but all artifact SHA256 values "
                          f"match the previous build; see {receipt}")
+
+
+def collect_artifacts(slot, started_ns, previous):
+    # Previously recorded paths also matter when Cargo incorrectly reports them
+    # fresh. New outputs are discovered independently of launcher/JSON streams.
+    paths = {slot / name for name in (previous or {}).get("artifacts", {})}
+    for directory, children, files in os.walk(slot):
+        children[:] = [name for name in children
+                       if not name.startswith(".") and name not in {"incremental", "receipts"}]
+        for name in files:
+            path = Path(directory) / name
+            if path.is_symlink() or not path.is_file():
+                continue
+            stat = path.stat()
+            artifact = (stat.st_mode & 0o111 or path.suffix in
+                        {".rlib", ".rmeta", ".so", ".a", ".dll", ".exe", ".dylib"})
+            if artifact and max(stat.st_mtime_ns, stat.st_ctime_ns) >= started_ns:
+                paths.add(path)
+    artifacts = {}
+    for path in sorted(paths):
+        if path.is_file() and not path.is_symlink():
+            with path.open("rb") as stream:
+                artifacts[str(path.relative_to(slot))] = hashlib.file_digest(
+                    stream, "sha256").hexdigest()
+    return artifacts
 
 
 def execute_build(request_path):
@@ -140,34 +171,9 @@ def execute_build(request_path):
     write_json(state, dict(current, artifacts={}, result="building"))
     receipt = Path(request["receipt"])
     write_json(receipt, dict(current, artifacts={}, result="building"))
-    cargo = request["cargo"]
-    formats = [arg.split("=", 1)[1] for arg in cargo if arg.startswith("--message-format=")]
-    if "--message-format" in cargo:
-        formats.append(cargo[cargo.index("--message-format") + 1])
-    if formats and formats not in [["json"], ["json-render-diagnostics"]]:
-        raise ValueError("slot-build requires JSON Cargo messages for artifact receipts")
-    if not formats:
-        cargo = list(cargo)
-        position = cargo.index("--") if "--" in cargo else len(cargo)
-        cargo.insert(position, "--message-format=json-render-diagnostics")
-    artifacts = {}
-    with subprocess.Popen(cargo,
-                          stdout=subprocess.PIPE, text=True) as process:
-        for line in process.stdout:
-            print(line, end="", flush=True)
-            try:
-                message = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if not isinstance(message, dict):
-                continue
-            binary = message.get("executable")
-            if message.get("reason") == "compiler-artifact" and binary:
-                path = Path(binary)
-                with path.open("rb") as stream:
-                    artifacts[str(path.relative_to(slot))] = hashlib.file_digest(
-                        stream, "sha256").hexdigest()
-        returncode = process.wait()
+    started_ns = time.time_ns()
+    returncode = subprocess.run(request["cargo"], check=False).returncode
+    artifacts = collect_artifacts(slot, started_ns, previous)
     finish_build(slot, receipt, current, previous, artifacts, returncode)
     return returncode
 

@@ -61,20 +61,28 @@ compilation disabled. The helper records HEAD, a binary dirty-diff hash (includi
 untracked file contents), and dirty paths in `slot-N/.source-identity.json`.
 Before Cargo starts, a changed identity refreshes mtimes for the HEAD-to-HEAD diff
 and both trees' dirty/untracked paths without changing bytes. An unknown or failed
-previous build refreshes tracked crate inputs under `src`, `crates`, `tests`,
-`data`, `build`, and `installer`, plus the root Cargo files and `build.rs`.
+previous build derives input roots from offline `cargo metadata --no-deps`:
+package manifest directories and path dependency directories, plus root
+`build.rs`, `Cargo.toml`, and `Cargo.lock`. All tracked files under those roots
+are refreshed. This repository's root package also covers build-script inputs
+in `build/`, `installer/`, `native/intl/`, and `tests/`. If metadata fails, all
+tracked files are refreshed. A root package therefore also refreshes its docs;
+this conservative full refresh is only needed when prior source is unknown.
 
 Each unit writes `slot-N/receipts/UNIT.json` with its source identity, changed
-paths, command, result and executable SHA256 values. Cargo JSON artifact messages
-must reach the helper's stdout reader; existing `json` and
-`json-render-diagnostics` formats are retained, otherwise the helper selects
-`json-render-diagnostics`. Do not hide Cargo stdout inside a command wrapper:
-explicit binary and `--no-run` builds fail when no executable message is received.
-After a Rust diff, a successful build whose executable hashes all match the
+paths, command, result and artifact SHA256 values. The command arguments and
+stdout/stderr are passed through unchanged, including wrappers that capture Cargo
+JSON internally. After the child exits, the worker scans the slot for executables
+and compiled libraries whose mtime or ctime is at least the child start time.
+It also rehashes previously recorded artifacts, including unchanged files that
+Cargo might incorrectly consider fresh. Receipt, hidden, and incremental
+subdirectories are excluded from discovery. Empty discovery does not turn a
+successful child into a failure; an empty map is not artifact freshness proof.
+After a Rust diff, a successful build whose artifact hashes all match the
 previous build fails with `stale artifacts`; the receipt retains the failure.
 Identical hashes can also result from edits that do not affect generated code;
 this strict check requires investigation, not acceptance based on Cargo exit 0.
-Checks without executable artifacts record an empty hash map. Inspect the retained
+Checks can record library artifacts without an executable. Inspect the retained
 unit's terminal result as well as its receipt; launch success is not build success.
 
 ## Host selection and dependencies
