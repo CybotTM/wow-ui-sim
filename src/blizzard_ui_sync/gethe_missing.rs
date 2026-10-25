@@ -66,13 +66,9 @@ pub(super) fn sync_manifest_entry(
     entry: &str,
     provenance: &mut CacheProvenance,
 ) -> crate::Result<EntrySyncResult> {
-    let Some(file) = read_mapped_file(entry)? else {
-        // No root/encoding mapping retains the existing failure path, not Gethe.
-        return super::sync_manifest_entry(root, entry);
-    };
     let destination = root.join(entry);
     let (result, record) = sync_mapped_file(
-        &file,
+        || read_mapped_file(entry),
         &destination,
         || super::sync_manifest_entry(root, entry),
         load_pinned_tree,
@@ -115,16 +111,20 @@ fn load_pinned_tree() -> crate::Result<GetheTree> {
 }
 
 fn sync_mapped_file(
-    file: &MappedFile,
+    lookup: impl FnOnce() -> crate::Result<Option<MappedFile>>,
     destination: &Path,
     read_local: impl FnOnce() -> crate::Result<EntrySyncResult>,
     load_gethe: impl FnOnce() -> crate::Result<GetheTree>,
 ) -> crate::Result<(EntrySyncResult, Option<Substitution>)> {
+    let Some(file) = lookup()? else {
+        // No root/encoding mapping retains the existing failure path, not Gethe.
+        return Ok((read_local()?, None));
+    };
     if file.resident {
         return Ok((read_local()?, None));
     }
     let tree = load_gethe()?;
-    let bytes = read_verified_gethe(&tree, file)?;
+    let bytes = read_verified_gethe(&tree, &file)?;
     let result = write_verified_file(destination, &bytes)?;
     let record = Substitution {
         path: file.path.clone(),
@@ -163,20 +163,10 @@ fn require_version(expected: &str, actual: &str) -> crate::Result<()> {
 
 fn read_pinned_blob(tree: &GetheTree, path: &str) -> crate::Result<Vec<u8>> {
     let object = format!("{}:{path}", tree.revision);
-    let output = std::process::Command::new("git")
-        .args(["--no-optional-locks", "-C"])
-        .arg(&tree.root)
-        .args(["show", &object])
-        .output()
-        .map_err(|cause| crate::Error::Other(format!("read Gethe {object}: {cause}")))?;
-    if !output.status.success() {
-        return Err(crate::Error::Other(format!(
-            "read Gethe {object} in {}: {}",
-            tree.root.display(),
-            String::from_utf8_lossy(&output.stderr).trim()
-        )));
-    }
-    Ok(output.stdout)
+    Err(crate::Error::Other(format!(
+        "nonresident Gethe source is not enabled: {object} in {}",
+        tree.root.display()
+    )))
 }
 
 fn write_verified_file(destination: &Path, bytes: &[u8]) -> crate::Result<EntrySyncResult> {

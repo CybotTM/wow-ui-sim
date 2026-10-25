@@ -65,8 +65,13 @@ fn nonresident_matching_gethe_is_written_and_recorded() {
     let output = tempfile::tempdir().unwrap();
     let destination = output.path().join(ENTRY);
     let revision = tree.revision.clone();
-    let (result, record) =
-        sync_mapped_file(&file(false), &destination, || unreachable!(), || Ok(tree)).unwrap();
+    let (result, record) = sync_mapped_file(
+        || Ok(Some(file(false))),
+        &destination,
+        || unreachable!(),
+        || Ok(tree),
+    )
+    .unwrap();
     assert!(matches!(result, super::super::EntrySyncResult::Extracted));
     assert_eq!(std::fs::read(&destination).unwrap(), b"hello");
     let record = record.unwrap();
@@ -94,9 +99,14 @@ fn nonresident_mismatching_gethe_fails_without_writing() {
     let (_source, tree) = fixture(VERSION, b"wrong");
     let output = tempfile::tempdir().unwrap();
     let destination = output.path().join(ENTRY);
-    let error = sync_mapped_file(&file(false), &destination, || unreachable!(), || Ok(tree))
-        .err()
-        .unwrap();
+    let error = sync_mapped_file(
+        || Ok(Some(file(false))),
+        &destination,
+        || unreachable!(),
+        || Ok(tree),
+    )
+    .err()
+    .unwrap();
     assert_eq!(
         error.to_string(),
         "Gethe MD5 mismatch for Blizzard_Test/Example.lua (FDID 8379893): CKey=5d41402abc4b2a76b9719d911017c592, Gethe=2bda2998d9b0ee197da142a0447f6725"
@@ -110,7 +120,7 @@ fn resident_uses_casc_with_no_gethe_tree() {
     let destination = output.path().join(ENTRY);
     let missing_tree = output.path().join("absent-gethe");
     let (result, record) = sync_mapped_file(
-        &file(true),
+        || Ok(Some(file(true))),
         &destination,
         || {
             super::super::write_extracted_casc_path(&destination, b"resident CASC bytes")?;
@@ -135,9 +145,14 @@ fn mismatched_gethe_version_fails_without_writing() {
     let (_source, tree) = fixture("1.60.1.70374", b"hello");
     let output = tempfile::tempdir().unwrap();
     let destination = output.path().join(ENTRY);
-    let error = sync_mapped_file(&file(false), &destination, || unreachable!(), || Ok(tree))
-        .err()
-        .unwrap();
+    let error = sync_mapped_file(
+        || Ok(Some(file(false))),
+        &destination,
+        || unreachable!(),
+        || Ok(tree),
+    )
+    .err()
+    .unwrap();
     assert_eq!(
         error.to_string(),
         "Gethe version mismatch: expected 1.60.1.70532, found 1.60.1.70374"
@@ -156,7 +171,13 @@ fn pinned_revision_ignores_modified_working_tree_bytes() {
     std::fs::write(source.path().join("version.txt"), b"wrong version").unwrap();
     let output = tempfile::tempdir().unwrap();
     let destination = output.path().join(ENTRY);
-    sync_mapped_file(&file(false), &destination, || unreachable!(), || Ok(tree)).unwrap();
+    sync_mapped_file(
+        || Ok(Some(file(false))),
+        &destination,
+        || unreachable!(),
+        || Ok(tree),
+    )
+    .unwrap();
     assert_eq!(std::fs::read(destination).unwrap(), b"hello");
 }
 
@@ -165,8 +186,13 @@ fn substitution_provenance_preserves_identity_comparison() {
     let (_source, tree) = fixture(VERSION, b"hello");
     let output = tempfile::tempdir().unwrap();
     let destination = output.path().join(ENTRY);
-    let (_, record) =
-        sync_mapped_file(&file(false), &destination, || unreachable!(), || Ok(tree)).unwrap();
+    let (_, record) = sync_mapped_file(
+        || Ok(Some(file(false))),
+        &destination,
+        || unreachable!(),
+        || Ok(tree),
+    )
+    .unwrap();
     let base = "schema=1\ngethe_revision=pinned\n";
     let mut provenance = super::super::CacheProvenance {
         contents: base.to_owned(),
