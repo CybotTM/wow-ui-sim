@@ -62,6 +62,10 @@ local function bool_value(value)
 end
 
 local function require_string(value)
+    if type(value) == "number" then
+        -- Lua 5.1 C-API string arguments use the VM's number formatting.
+        return value .. ""
+    end
     assert(type(value) == "string", "C_TTSSettings requires a string")
     return value
 end
