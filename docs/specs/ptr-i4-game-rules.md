@@ -23,7 +23,7 @@ PTR 12.1.7.70493 exposes six GameRules queries/mutations from supplied state, pl
 
 ## Tests asserting this spec
 
-- `tests/ptr_i4_batch2.rs`: original selected game/glue consumer behavior and Retail publication preservation.
+- `tests/ptr_i4_batch2.rs`: original selected game/glue consumer behavior, post-consumer return type/arity checks and Retail publication preservation. Mutation is checked before the additional setter arity call.
 
 ## Known gaps (current cycle)
 

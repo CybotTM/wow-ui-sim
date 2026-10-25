@@ -51,6 +51,13 @@ fn assert_selected_consumer(toc: &std::path::Path, name: &str) {
     eprintln!("runtime-selected original consumer: {name}/{relative}");
 }
 
+fn assert_boolean_query_shape(env: &WowLuaEnv, query: &str) {
+    env.exec(&format!(
+        "assert(type(C_GameRules.{query}()) == 'boolean'); assert(select('#', C_GameRules.{query}()) == 1)"
+    ))
+    .unwrap();
+}
+
 #[test]
 fn hardcore_popup_consumes_changed_supplied_mode() {
     if ACTIVE != ClientProfile::Ptr {
@@ -58,6 +65,7 @@ fn hardcore_popup_consumes_changed_supplied_mode() {
     }
     for active in [false, true] {
         let env = load_consumers("Blizzard_StaticPopup_Game", ScreenKind::Game, active);
+        assert_boolean_query_shape(&env, "IsHardcoreActive");
         assert_eq!(
             env.eval::<bool>("return StaticPopupDialogs.HARDCORE_DEATH ~= nil")
                 .unwrap(),
@@ -78,6 +86,7 @@ fn barbershop_visibility_consumes_toggle_capability() {
         env.state().borrow_mut().game_rules.sd_hd_toggle_enabled = enabled;
         env.exec("BarberShopSDToggleMixin.OnLoad(I4Toggle)")
             .unwrap();
+        assert_boolean_query_shape(&env, "IsSDHDToggleEnabled");
         assert_eq!(
             env.eval::<bool>("return I4Toggle:IsShown()").unwrap(),
             enabled
@@ -96,6 +105,7 @@ fn barbershop_checked_state_consumes_account_sd() {
         env.state().borrow_mut().game_rules.account_has_sd_enabled = enabled;
         env.exec("BarberShopSDToggleMixin.OnShow(I4Toggle)")
             .unwrap();
+        assert_boolean_query_shape(&env, "AccountHasSDEnabled");
         assert_eq!(
             env.eval::<bool>("return not not I4Toggle:GetChecked()")
                 .unwrap(),
@@ -116,10 +126,14 @@ fn barbershop_click_updates_supplied_sd_selection() {
             "I4Toggle:SetChecked({checked}); BarberShopSDToggleMixin.OnClick(I4Toggle)"
         ))
         .unwrap();
-        let state = env.state().borrow();
-        assert_eq!(state.game_rules.account_has_sd_enabled, !checked);
-        // 70493 GameRulesDocumentation: BarberShop = 2.
-        assert_eq!(state.game_rules.sd_toggle_usage_location, Some(2));
+        {
+            let state = env.state().borrow();
+            assert_eq!(state.game_rules.account_has_sd_enabled, !checked);
+            // 70493 GameRulesDocumentation: BarberShop = 2.
+            assert_eq!(state.game_rules.sd_toggle_usage_location, Some(2));
+        }
+        // Check arity only after checking the original consumer's mutation.
+        env.exec("assert(select('#', C_GameRules.SetSDHDToggleValue(not I4Toggle:GetChecked(), Enum.SdToggleUsageLocationUI.BarberShop)) == 0)").unwrap();
     }
     let other = WowLuaEnv::new().unwrap();
     assert!(!other.state().borrow().game_rules.account_has_sd_enabled);
@@ -142,6 +156,7 @@ fn character_create_consumes_self_found_capability() {
     for allowed in [true, false, true] {
         env.state().borrow_mut().game_rules.self_found_allowed = allowed;
         env.exec("CharacterCreateSelfFoundButtonMixin.CheckSelfFoundButton(CharacterCreateSelfFoundButton)").unwrap();
+        assert_boolean_query_shape(&env, "IsSelfFoundAllowed");
         assert_eq!(
             env.eval::<bool>("return CharacterCreateSelfFoundButton:IsShown()")
                 .unwrap(),
@@ -164,6 +179,13 @@ fn graphics_default_consumes_supplied_experience_preset() {
             .game_rules
             .forever_experience_preset = preset;
         assert_eq!(env.eval::<bool>("return Settings.GetSetting('PROXY_CHARACTER_MODELS_TOGGLE'):GetDefaultValueDerived()").unwrap(), preset == Some(0));
+        assert_eq!(
+            env.eval::<Option<i32>>("return C_GameRules.GetForeverExperiencePreset()")
+                .unwrap(),
+            preset
+        );
+        env.exec("assert(select('#', C_GameRules.GetForeverExperiencePreset()) == 1)")
+            .unwrap();
     }
 }
 

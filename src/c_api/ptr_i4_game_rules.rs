@@ -10,31 +10,16 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         return Ok(());
     }
     let namespace = super::helpers::ensure_namespace(state, "C_GameRules")?;
-    table_set_rust_fn(state, namespace, "IsHardcoreActive", is_hardcore_active)?;
-    table_set_rust_fn(
-        state,
-        namespace,
-        "IsSelfFoundAllowed",
-        is_self_found_allowed,
-    )?;
-    table_set_rust_fn(
-        state,
-        namespace,
-        "IsSDHDToggleEnabled",
-        is_sd_hd_toggle_enabled,
-    )?;
-    table_set_rust_fn(
-        state,
-        namespace,
-        "AccountHasSDEnabled",
-        account_has_sd_enabled,
-    )?;
-    table_set_rust_fn(
-        state,
-        namespace,
-        "SetSDHDToggleValue",
-        set_sd_hd_toggle_value,
-    )?;
+    let functions: &[(&str, rilua::RustFn)] = &[
+        ("IsHardcoreActive", is_hardcore_active),
+        ("IsSelfFoundAllowed", is_self_found_allowed),
+        ("IsSDHDToggleEnabled", is_sd_hd_toggle_enabled),
+        ("AccountHasSDEnabled", account_has_sd_enabled),
+        ("SetSDHDToggleValue", set_sd_hd_toggle_value),
+    ];
+    for &(name, function) in functions {
+        table_set_rust_fn(state, namespace, name, function)?;
+    }
     let enums = super::helpers::ensure_global_table(state, "Enum");
     register_usage_locations(state, enums);
     register_recent_allies_categories(state, enums);
