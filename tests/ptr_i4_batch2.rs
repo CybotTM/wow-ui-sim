@@ -15,6 +15,9 @@ fn load_consumers(root_name: &str, screen: ScreenKind, hardcore: bool) -> WowLua
         discover_blizzard_addon_closure_for_screen_with_overrides(&root, screen, &[root_name], &[]);
     assert!(selected.iter().any(|(name, _)| name == root_name));
     for (name, toc) in selected {
+        if name == root_name {
+            assert_selected_consumer(&toc, root_name);
+        }
         let result = load_addon(&env.loader_env(), &toc).unwrap();
         if name == root_name {
             for warning in result.warnings {
@@ -26,6 +29,25 @@ fn load_consumers(root_name: &str, screen: ScreenKind, hardcore: bool) -> WowLua
         }
     }
     env
+}
+
+fn assert_selected_consumer(toc: &std::path::Path, name: &str) {
+    let relative = match name {
+        "Blizzard_StaticPopup_Game" => "GameDialogDefs.lua",
+        "Blizzard_BarbershopUI" => "Mainline/Blizzard_BarberShopUI.lua",
+        "Blizzard_CharacterCreate" => "Mainline/Blizzard_CharacterCreate.lua",
+        "Blizzard_Settings_Shared" => "Mainline/GraphicsOverrides.lua",
+        "Blizzard_RecentAllies" => "Blizzard_RecentAlliesUtil.lua",
+        _ => panic!("unexpected consumer root: {name}"),
+    };
+    let parsed = wow_ui_sim::toc::TocFile::from_file(toc).unwrap();
+    assert!(
+        parsed
+            .files
+            .iter()
+            .any(|path| path == std::path::Path::new(relative))
+    );
+    eprintln!("runtime-selected original consumer: {name}/{relative}");
 }
 
 #[test]
