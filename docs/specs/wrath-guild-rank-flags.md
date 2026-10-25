@@ -25,7 +25,7 @@ Native mask order for the positional input is `0x1, 0x2, 0x4, 0x8, 0x80, 0x100, 
 
 - `tests/wrath_guild_rank_flags.rs` — original native checkbox consumer, exact result arity/types, ignored arguments, position 14 and no-guild results.
 - `tests/guild_control.rs` — selected-rank data and preserved namespace/table behavior.
-- `tests/test_guild_panel.rs` — native rank menu consumers; [bank-rank permissions](wrath-guild-bank-rank-permissions.md) have separate accepted RED/GREEN proof; current-master integration remains a separate refresh.
+- `tests/test_guild_panel.rs` — native rank menu consumers; [bank-rank permissions](wrath-guild-bank-rank-permissions.md) have separate accepted RED/GREEN proof; the bounded current-master integration refresh also passes, without repeating the historical matrix.
 
 ## Known gaps (current cycle)
 

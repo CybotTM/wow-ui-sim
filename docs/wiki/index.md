@@ -29,7 +29,7 @@ mapping remains unknown. Producer and tests staged only; no build/slot/runtime p
 
 ## [2026-10-24] proof | Wrath bank selected-rank permissions
 
-[Accepted runtime proof](investigations/wrath-guild-info.md#accepted-runtime-proof) links the [contract](../specs/wrath-guild-bank-rank-permissions.md): five bank RED→GREEN selectors, Wrath56 and paired Retail53 preservation pass; verifier8738 ACCEPT. Both original dropdown selectors project varying rank/tab widget values. Saved stock/check proof covers master12fb7c3b3/GREEN469f6ffed; fresh master08b423c5c integration is a separate open gate.
+[Accepted runtime proof](investigations/wrath-guild-info.md#accepted-runtime-proof) links the [contract](../specs/wrath-guild-bank-rank-permissions.md): five bank RED→GREEN selectors, Wrath56 and paired Retail53 preservation pass; verifier8738 ACCEPT. Both original dropdown selectors project varying rank/tab widget values. [Current-master refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 also passes: both all-target checks warn zero, five bank cases pass, Wrath stock[], Retail master08b423c5c/merged30 keys/34 occurrences unchanged with no additions; slot0 released.
 
 ## [2026-10-24] staged | SuperTrack supplied state
 

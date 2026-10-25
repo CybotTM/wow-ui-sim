@@ -1,6 +1,6 @@
 # Wrath guild-info consumers and producers
 
-Verified: 2026-10-24. [Contract](../../specs/wrath-guild-info.md). [Accepted runtime proof](#accepted-runtime-proof) supersedes the earlier static staging; fresh current-master integration remains separate.
+Verified: 2026-10-24. [Contract](../../specs/wrath-guild-info.md). [Accepted runtime proof](#accepted-runtime-proof) supersedes the earlier static staging; the [current-master refresh](#current-master-integration-proof) also passes.
 
 ## Selected original consumer
 
@@ -44,7 +44,7 @@ The existing rank-settings dropdown row was blocked on missing bank permission a
 
 ## Bank permission model
 
-Verified 2026-10-24: saved compiled RED/GREEN accepted by verifier8738; current-master refresh remains separate. [Bank contract](../../specs/wrath-guild-bank-rank-permissions.md). Laptop answer `guildbank-perms-12340.md` (SHA256 `f58e304a7d9c20813f23d871f9666547d0af3924d66f341eeed044b0b1588951`) supplies authoritative reconstructed native semantics; no decompiled source was read here.
+Verified 2026-10-24: saved compiled RED/GREEN accepted by verifier8738; current-master refresh also passes below. [Bank contract](../../specs/wrath-guild-bank-rank-permissions.md). Laptop answer `guildbank-perms-12340.md` (SHA256 `f58e304a7d9c20813f23d871f9666547d0af3924d66f341eeed044b0b1588951`) supplies authoritative reconstructed native semantics; no decompiled source was read here.
 
 The existing native TOC/loader selection above also selects the dropdown consumer. `GuildControlPopupFrameDropDownButton_OnClick` selects the control rank, calls `GuildControlPopupframe_Update`, then sets the closed label. `GuildBankTabPermissionsTab_OnClick` selects the tab and calls that same original update. Tests do not replace either consumer or getter. The existing leader setup avoids the special rank1 UI branch by selecting Officer/Member for observations; the second selector changes the player's rank to Officer before clicking Member as well.
 
@@ -80,4 +80,8 @@ Verified 2026-10-24 by verifier8738: GREEN `469f6ffed`, producer-minus RED `9f18
 
 Wrath RED51 PASS/5 bank FAIL; GREEN56 PASS. Retail53 PASS on each revision. All218 exact runs have prior exact listings and CVar-safe receipts. Both original dropdown selectors reach the selected original consumer and pass varying rank/tab widget assertions in GREEN. The three direct API cases cover projection, invalid arguments and initial/replacement inputs; the invalid-argument case alone does not prove successful value projection. Wrath stock on master `12fb7c3b3` and GREEN is empty. Retail stock is equal at32 unique/36 occurrences on that exact pair, not clean startup. Both all-target checks and formatting pass without warnings.
 
-Current-master integration is a separate open gate: merge exact master `08b423c5c`, run merged Wrath/Retail all-target checks, the five bank selectors, fresh merged Wrath stock and fresh Retail stock on both master and merged HEAD. Master's combat-log filter change invalidates the old Retail count as an expectation. The full218-run RED/GREEN matrix need not repeat. See [baseline classification](../../baselines/wrath-guild-info-green-blockers.md#proof-limits). No native runtime certification or seven-profile/full-suite acceptance is claimed.
+### Current-master integration proof
+
+Verified 2026-10-24 at `14606d868`, after merging exact master `08b423c5c` as `2a6ac587c`: Wrath/Retail `check --all-targets` pass with zero warnings, five bank selectors each list exactly once and pass one exact run, fresh merged Wrath stock is `[]`, and formatting passes. Fresh Retail master/merged inventories are identical at30 keys/34 occurrences: unchanged30, removed0, added0, count-changed0. This is preserved Retail failure (exit1), not clean startup. Master's combat-log filter change removed the older missing-filter pair;32/36 is not the current expectation.
+
+Evidence: `~/.local/state/wow-ui-sim/handoff/wrath-guild-info/bank-perms/INTEGRATION-REPORT.md` and `integration-refresh-20261024/`. All13 runtime receipts preserve original CVar stat/hash with fresh byte-exact child copies. Slot0 was explicitly reassigned by main after club-unread release, then released with a receipt; slot3 was not used. Every build was separately admitted and terminal before artifact use. The first Wrath check submission predates a two-Markdown-file amendment; compiler inputs are unchanged. Later proof-status documentation also does not change compiler/runtime inputs. The accepted218-run matrix was not repeated. See [baseline classification](../../baselines/wrath-guild-info-green-blockers.md#proof-limits). No native runtime certification or seven-profile/full-suite acceptance is claimed.
