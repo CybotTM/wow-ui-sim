@@ -74,6 +74,10 @@ Decision `sharedxml_twice_default_20261025` corrects the PTR test expectation fr
 
 REVISIT: Assumed twice (normal + secure replay) per user decision 2026-10-25; native count unproven (benlla-re 5875, Clank 5.0.3 audit game-engine acd869efa). Re-check once Retail is decompiled.
 
+Final merge `e98809b2a` includes master `f1f3c930d` and its phase-2 crate split. The narrow PTR/epoch event exception stays in `src/event/valid_events.rs`, above the feature-neutral `sim-event` policy call; the other event rules are inherited unchanged. Wiki index/log conflicts retain both sides through line-based union.
+
+Forever case 1 is a missing documented API, not a fixture issue. The 70532 `GamePadDocumentation.lua` declares `C_GamePad.IsEnabled()` returning one non-nil boolean (source SHA256 `b42cbb4b4a10a2106c116126f7fe93acb652020b1affafcbec47533957519c35`). The raw C API registration omits it; existing state models mapped sticks and hover policy, not global capability. `GamePadEnable` exists as a CVar, but its relation to this query is unproven. No constant, new capability state or assumed CVar link is added. This case remains report-only under the user's state-backed-fix condition.
+
 Current proof will be recorded in `/home/osso/.local/state/wow-ui-sim/handoff/ptr-input-interface-style/twice-run/REPORT.md`; the slot-2 results below remain historical evidence.
 
 ## Slot-2 execution (2026-10-25)
