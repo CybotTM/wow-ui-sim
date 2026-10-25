@@ -84,6 +84,31 @@ All 88 enumerated source-selection exclusions are non-public/non-enUS entries, i
 
 Reproduce with `python3 -B tools/test_patch_12_1_7_static.py`. Validate the real companion with `python3 -B tools/patch_12_1_7_static.py --source-root <I3-checkout> --cache <authenticated-70493-AddOns>`; `--write` regenerates it from those read-only inputs. There is no cache fallback. Source decoding preserves every byte through a Latin-1 view of ASCII syntax, including non-UTF-8 comments; receipt hashes cover original bytes. The exact I3 pin and private cache are external inputs, not duplicated vendor source in this branch. I4a remains a sealed all-UNKNOWN accounting baseline; this conditional overlay is the later static disposition source.
 
+## I4c: removal contradictions and excluded publishers
+
+`data/patch-api/sources/12.1.7-inherited-i4c.json` supersedes the I4b static dispositions without changing I0/I4a/I4b bytes. It uses the same exact authenticated 70493 corpus and I3 dependency. That dependency is an ancestor of the I4c base `08b423c5c`; this is source availability, not a fresh runtime acceptance claim.
+
+- [x] Preserve all 1,876 occurrence IDs and three independent profile cells. Resolve only conditional static applicability; publication, behavior, native retirement and successful original-consumer execution remain unproved.
+- [x] Distinguish selected additions (`CONDITIONAL_APPLICABLE`), selected source contradicting a literal removal (`CONDITIONAL_REMOVAL_CONTRADICTED`), and explicitly excluded FrameXML publishers (`CONDITIONAL_UNSELECTED_PUBLISHER`). The last two are not new presence/absence assertions about the live native surface.
+- [x] Record every selected declaration or direct identifier/function assignment with its source receipt and TOC/XML chain. Exclude local owners and function parameters. Trace rejected addon/file game filters, TOC flavors and actual pinned Game/Family siblings. All recognized declarations must have explicit exclusion receipts before granting excluded-publisher disposition; secure-environment uncertainty stays UNKNOWN.
+- [x] Index literal spellings across all authenticated pinned text, including comments/strings. A missing spelling proves only bounded literal-source absence, never native retirement, dynamic-global absence or an alias relationship. Such cells retain UNKNOWN with the exact runtime question.
+- [x] Keep native APIs, events, CVar registration/defaults, typed commands and widget factories UNKNOWN without supported selected witnesses. An unselected native consumer cannot establish native inapplicability. Retail/Forever require independent source proof, not copied PTR decisions.
+
+| PTR disposition | I4b | I4c |
+|---|---:|---:|
+| Selected additions | 460 | 467 |
+| Selected source contradicts literal removal | 0 | 987 |
+| Explicitly excluded publisher | 0 | 208 |
+| UNKNOWN | 1,416 | 214 |
+
+I4c decides **1,202 additional cells**: **1,662 conditional static dispositions / 3,966 UNKNOWN** across profiles. The extra selected additions are seven literal `UnitFrameUtil` assignments to secure delegates. The two additional surviving removals are `LFD_CURRENT_FILTER` and `SCENARIOS_CURRENT_FILTER` assignments. Of the excluded publishers, 206 are added rows; removed `FormatProfession` is file-game-filtered and `ToyBox_UpdateProgressBar` is in the unselected Classic family branch.
+
+For all **1,060 removed occurrences**, 987 contradict a literal-source retirement obligation, two have explicitly excluded publishers, and 71 remain UNKNOWN. Those 71 comprise 64 absent literal spellings and seven spellings without a supported selected declaration; none earns native removal credit. All six opposing banner occurrences retain separate directions and source dispositions. No replacement, alias, signature or behavior is invented.
+
+The 214 PTR UNKNOWN cells have reason codes and exact runtime questions: five added literal-source absences, 71 unresolved removals, 121 CVar registrations, one typed command registration, nine native API/event questions and seven widget factories. Retail and Forever each retain 1,876 UNKNOWN cells requiring their own selected source first.
+
+`python3 -B tools/test_patch_12_1_7_i4c.py` checks concrete synthetic selection boundaries and actual checked-in occurrence dispositions. `python3 -B tools/patch_12_1_7_i4c.py --source-root <70493-checkout> --cache <authenticated-70493-AddOns>` recomputes every receipt, exclusion, reason, question and occurrence from authenticated inputs; `--write` regenerates only I4c. The I4b authentication and I0/I4a validation controls remain applicable. No build, slot, cache synchronization or vendor write is required.
+
 ## How it works
 
 - [Source import, validator and evidence limits](../wiki/investigations/patch-12-1-7-api-audit.md).
@@ -106,7 +131,8 @@ Reproduce with `python3 -B tools/test_patch_12_1_7_static.py`. Validate the real
 - [ ] I1–I3: epoch selection, metadata rejection, regional file loading and exact PTR source refresh/runtime proof.
 - [x] I4a: lossless inherited accounting and per-profile UNKNOWN worklist; zero Cargo.
 - [x] I4b static staging: 460 conditional PTR source obligations, effective only after the exact I3 dependency merges; 5,168 conditional UNKNOWN cells. Effective resolutions on the I4b base remain zero.
-- [ ] I4b runtime and later: successful publisher/LoD loads, native factories, registration/defaults, all behavior and original-consumer execution remain unverified; static receipts are not implementation credit.
+- [x] I4c static classification: 1,202 additional source dispositions; 3,966 cells remain UNKNOWN with source/runtime questions. No native removal is claimed.
+- [ ] I4b/I4c runtime and later: successful publisher/LoD loads, native factories, registration/defaults, all behavior and original-consumer execution remain unverified; static receipts are not implementation credit.
 - [ ] I5: GUID timing decision and native oracle; P02–P07 remain deferred.
 - [ ] I6: independent runtime/profile acceptance. A source-only validator success cannot satisfy it.
 
