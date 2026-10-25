@@ -16,7 +16,6 @@ pub enum AnchorPoint {
 }
 
 impl AnchorPoint {
-    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<Self> {
         Some(if s.eq_ignore_ascii_case("CENTER") {
             Self::Center

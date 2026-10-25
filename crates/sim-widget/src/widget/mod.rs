@@ -1,13 +1,14 @@
 //! Widget system implementing WoW's UI object hierarchy.
 
 mod anchor;
-pub(crate) mod editbox;
+pub mod editbox;
 mod editbox_history;
 mod frame;
 mod frame_enums;
 mod frame_size;
 mod frame_types;
 mod registry;
+pub mod simple_html;
 
 pub use crate::atlas::NineSliceAtlasInfo;
 pub use anchor::{Anchor, AnchorPoint};
@@ -18,7 +19,7 @@ pub use frame::{
 };
 pub use frame_enums::{DrawLayer, FrameStrata};
 pub use frame_types::TextSegment;
-pub(crate) use registry::has_queryable_rect;
+pub use registry::has_queryable_rect;
 pub use registry::{AnchorCyclePath, RenderDirtyBatch, RenderDirtySource, WidgetRegistry};
 
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -86,7 +87,6 @@ const WIDGET_TYPE_NAMES: [&str; 20] = [
 ];
 
 impl WidgetType {
-    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<Self> {
         // WoW Lua uses both PascalCase ("Button") and ALLCAPS ("BUTTON")
         // for frame type names, so match case-insensitively.

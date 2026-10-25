@@ -14,19 +14,19 @@ impl Default for LayoutPixelScale {
 }
 
 impl WidgetRegistry {
-    pub(crate) fn with_screen_size(width: f32, height: f32) -> Self {
+    pub fn with_screen_size(width: f32, height: f32) -> Self {
         let mut registry = Self::default();
         registry.set_layout_physical_height(height);
         registry.set_layout_canvas_size(width, height);
         registry
     }
 
-    pub(crate) fn set_layout_physical_height(&mut self, height: f32) {
+    pub fn set_layout_physical_height(&mut self, height: f32) {
         self.layout_pixel_scale = LayoutPixelScale(height / UI_REFERENCE_HEIGHT);
         self.clear_all_layout_rects();
     }
 
-    pub(crate) fn round_layout_value(&self, frame: &Frame, value: f32) -> f32 {
+    pub fn round_layout_value(&self, frame: &Frame, value: f32) -> f32 {
         if !frame.round_layout_to_nearest_pixel {
             return value;
         }

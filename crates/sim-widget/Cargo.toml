@@ -1,0 +1,9 @@
+[package]
+name = "sim-widget"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-only"
+
+[dependencies]
+cosmic-text = "0.15"
+rustc-hash = "2.1.2"

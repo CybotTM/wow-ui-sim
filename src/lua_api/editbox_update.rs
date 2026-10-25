@@ -105,15 +105,16 @@ fn read_layout_refresh(sim: &Rc<RefCell<SimState>>, id: u64) -> LayoutRefresh {
         return LayoutRefresh::Unavailable;
     };
     let size = (rect.width, rect.height);
+    let wrath = crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath;
     let unchanged = frame
         .editbox_presentation
         .as_ref()
         .and_then(|presentation| presentation.input.as_ref())
-        .is_some_and(|input| input.matches_frame(frame, size));
+        .is_some_and(|input| input.matches_frame(frame, size, wrath));
     if unchanged {
         LayoutRefresh::Unchanged
     } else {
-        LayoutRefresh::Changed(EditBoxLayoutInput::from_frame(frame, size))
+        LayoutRefresh::Changed(EditBoxLayoutInput::from_frame(frame, size, wrath))
     }
 }
 

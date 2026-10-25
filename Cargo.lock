@@ -5510,6 +5510,14 @@ name = "sim-toc"
 version = "0.1.0"
 
 [[package]]
+name = "sim-widget"
+version = "0.1.0"
+dependencies = [
+ "cosmic-text",
+ "rustc-hash 2.1.2",
+]
+
+[[package]]
 name = "sim-xml"
 version = "0.1.0"
 dependencies = [
@@ -7786,6 +7794,7 @@ dependencies = [
  "sim-event",
  "sim-lua-bridge",
  "sim-toc",
+ "sim-widget",
  "sim-xml",
  "tar",
  "tempfile",

@@ -15,7 +15,7 @@ pub struct Frame {
     /// Widget type.
     pub widget_type: WidgetType,
     /// SimpleHTML styles shared by measurement, rendering and pointer dispatch.
-    pub simple_html: Option<Box<crate::lua_api::simple_html::SimpleHtmlData>>,
+    pub simple_html: Option<Box<crate::widget::simple_html::SimpleHtmlData>>,
     /// Original type name for GetObjectType() when mapped to a generic WidgetType.
     /// E.g., "ArchaeologyDigSiteFrame" maps to WidgetType::Frame but GetObjectType
     /// should still return "ArchaeologyDigSiteFrame".
@@ -603,9 +603,8 @@ impl Default for Frame {
     }
 }
 
-#[cfg(any(feature = "gui", feature = "retail-12-0-5"))]
 impl Frame {
-    pub(crate) fn cooldown_elapsed_since_start(&self, elapsed_secs: f64) -> f64 {
+    pub fn cooldown_elapsed_since_start(&self, elapsed_secs: f64) -> f64 {
         let mod_rate = if self.cooldown_mod_rate > 0.0 {
             self.cooldown_mod_rate
         } else {
@@ -614,7 +613,7 @@ impl Frame {
         (elapsed_secs - self.cooldown_start) * mod_rate
     }
 
-    pub(crate) fn cooldown_remaining_seconds(&self, elapsed_secs: f64) -> Option<f64> {
+    pub fn cooldown_remaining_seconds(&self, elapsed_secs: f64) -> Option<f64> {
         if self.cooldown_hide_countdown || self.cooldown_duration <= 0.0 {
             return None;
         }
@@ -630,12 +629,12 @@ impl Frame {
 }
 
 impl Frame {
-    pub(crate) fn editbox_selection(&self) -> Option<std::ops::Range<usize>> {
+    pub fn editbox_selection(&self) -> Option<std::ops::Range<usize>> {
         self.editbox_highlight_range
             .and_then(|(start, end)| (start != end).then(|| start as usize..end as usize))
     }
 
-    pub(crate) fn take_editbox_selection(&mut self) -> Option<std::ops::Range<usize>> {
+    pub fn take_editbox_selection(&mut self) -> Option<std::ops::Range<usize>> {
         let selection = self.editbox_selection();
         self.editbox_highlight_range = None;
         selection

@@ -2,7 +2,7 @@
 
 use rustc_hash::{FxHashMap, FxHashSet};
 
-#[path = "iced_app/layout_line.rs"]
+#[path = "layout_line.rs"]
 mod layout_line;
 #[path = "layout_render_eligibility.rs"]
 mod layout_render_eligibility;
@@ -13,7 +13,7 @@ use crate::LayoutRect;
 use crate::widget::{AnchorPoint, WidgetRegistry, WidgetType};
 use layout_line::resolve_line_frame_rect;
 pub use layout_render_eligibility::{frame_has_layout_anchor, frame_has_render_layout};
-pub(crate) use layout_slider_thumb::resolved_slider_thumb_rect;
+pub use layout_slider_thumb::resolved_slider_thumb_rect;
 
 /// Offset contributed by the designated scroll-child edge, in screen pixels.
 fn scroll_edge_offset(child: &crate::widget::Frame, parent: &crate::widget::Frame) -> (f32, f32) {
@@ -131,7 +131,7 @@ impl LayoutCache {
     /// Claim `id` for a stored-rect rewrite in this pass. Rects depend only on
     /// registry state, never on stored `layout_rect`s, so a second rewrite in
     /// the same pass would produce the same result.
-    pub(crate) fn claim_recompute(&mut self, id: u64) -> bool {
+    pub fn claim_recompute(&mut self, id: u64) -> bool {
         self.recomputed.insert(id)
     }
 
