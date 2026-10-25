@@ -1,6 +1,6 @@
 //! `C_EncounterJournal` namespace and `EJ_*` legacy globals — the data
 //! surface behind the Adventure Guide. Backed by static tables in
-//! `data/encounter_journal.rs` (regenerated via `wow-cli generate
+//! `crates/sim-data/data/encounter_journal.rs` (regenerated via `wow-cli generate
 //! encounter-journal`) and per-session state in `SimState.encounter_journal`.
 //!
 //! Schema parity:

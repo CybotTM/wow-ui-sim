@@ -157,7 +157,7 @@ fn account_save_result_error_variants_route_to_localized_strings() {
                  captures the second argument when `which == \"OKAY_MUST_ACCEPT\"`. A mismatch \
                  here means either: (a) the elseif chain selected the wrong branch (variant \
                  swap or comparison drift), or (b) the localized global string was retuned in \
-                 data/global_strings.rs without updating the addon mapping, or (c) for the \
+                 crates/sim-data-profile/data/global_strings.rs without updating the addon mapping, or (c) for the \
                  `UnknownError` case specifically, the final `else` clause was lost or replaced \
                  with an explicit elseif. Got: `{captured_text}`, expected: `{expected_text}`."
             );

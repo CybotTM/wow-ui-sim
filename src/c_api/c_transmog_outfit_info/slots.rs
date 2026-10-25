@@ -541,7 +541,7 @@ fn atlas_suffix(slot: i32) -> &'static str {
 
 fn unassigned_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let slot = read_slot(state)?;
-    // INFERRED slot-to-atlas assignment; atlas identities exist in data/atlas.rs.
+    // INFERRED slot-to-atlas assignment; atlas identities exist in crates/sim-data-profile/data/atlas.rs.
     let atlas = create_string(
         state,
         &format!("transmog-gearslot-unassigned-{}", atlas_suffix(slot)),

@@ -298,7 +298,7 @@ fn update_refund_time_sets_refund_text_with_localized_format_when_refundable() {
             text_contains_localized_prefix,
             "Expected the captured RefundText text to contain the localized prefix \
              \"Time left to refund:\" — `ACCOUNT_STORE_REFUND_TEXT_FORMAT` resolves to \
-             \"Time left to refund: |cffffffff%s|r\" per `data/global_strings.rs:22796`. \
+             \"Time left to refund: |cffffffff%s|r\" per `crates/sim-data-profile/data/global_strings.rs:22796`. \
              Line 221 reads `self.RefundText:SetText(ACCOUNT_STORE_REFUND_TEXT_FORMAT:format(timeString))`. \
              A false reading would prove either the localization key changed (forcing a \
              re-pin against the new prefix) or the format-call shape changed (e.g. the \

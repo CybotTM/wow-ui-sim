@@ -1,4 +1,4 @@
-//! Generator for data/encounter_journal.rs from WoW Journal* CSV exports.
+//! Generator for crates/sim-data/data/encounter_journal.rs from WoW Journal* CSV exports.
 //!
 //! Reads from ~/Projects/wow/data/:
 //!   - JournalTier.csv
@@ -10,7 +10,7 @@
 //!   - JournalEncounterItem.csv
 //!   - Map.csv  (only for instance_type lookup on instance map IDs)
 //!
-//! Generates: data/encounter_journal.rs
+//! Generates: crates/sim-data/data/encounter_journal.rs
 
 use super::csv_util::{escape_str, parse_csv_line, read_csv_records, wow_data_dir};
 use std::collections::HashMap;
@@ -38,7 +38,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     tier_instances.sort_by_key(|t| (t.tier_order, t.order_index, t.instance_id));
 
     std::fs::create_dir_all("data")?;
-    let output_path = Path::new("data/encounter_journal.rs");
+    let output_path = Path::new("crates/sim-data/data/encounter_journal.rs");
     let mut out = File::create(output_path)?;
     write_module(
         &mut out,
@@ -51,7 +51,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         &tier_instances,
     )?;
 
-    println!("Generated data/encounter_journal.rs:");
+    println!("Generated crates/sim-data/data/encounter_journal.rs:");
     println!("  tiers:          {}", tiers.len());
     println!("  instances:      {}", instances.len());
     println!("  encounters:     {}", encounters.len());
