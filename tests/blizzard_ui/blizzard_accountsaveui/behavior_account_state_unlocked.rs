@@ -27,7 +27,7 @@
 //! `ConfirmationEditBoxMatches` (Blizzard_SharedXML/StringUtil.lua:5-7)
 //! does a case-insensitive comparison via `strupper`. The simulator
 //! loads `ACCOUNT_SAVE_CONFIRM_STRING = "LOCK ACCOUNT"` from
-//! `data/global_strings.rs` via `register_all_ui_strings`, so the
+//! `crates/sim-data-profile/data/global_strings.rs` via `register_all_ui_strings`, so the
 //! match check is fully exercised by setting the editbox text.
 //!
 //! Three observables are pinned for the unlocked branch:
@@ -64,7 +64,7 @@ fn update_account_state_unlocked_branch_pins_state_and_button_follows_match() {
                 r#"
                 assert(AccountSaveFrame, "AccountSaveFrame global must exist after Blizzard_AccountSaveUI load")
                 assert(ACCOUNT_SAVE_CONFIRM_STRING == "LOCK ACCOUNT",
-                       "ACCOUNT_SAVE_CONFIRM_STRING must equal `LOCK ACCOUNT` (loaded from data/global_strings.rs)")
+                       "ACCOUNT_SAVE_CONFIRM_STRING must equal `LOCK ACCOUNT` (loaded from crates/sim-data-profile/data/global_strings.rs)")
 
                 AccountSaveFrame.LockEditBox:Hide()
                 AccountSaveFrame.LockEditBox:SetText("")

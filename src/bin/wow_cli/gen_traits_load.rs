@@ -1,9 +1,10 @@
 //! CSV loaders for trait data.
 
+use super::csv_util::read_csv_records;
 use super::csv_util::{parse_csv_line, wow_data_dir};
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{BufRead, BufReader};
+use std::io::BufReader;
 use std::path::Path;
 
 // ── Raw CSV structs ──
@@ -208,8 +209,7 @@ fn load_pair_csv(
     let reader = BufReader::new(file);
     let mut map: HashMap<u32, Vec<u32>> = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -237,8 +237,7 @@ fn load_trees(data_dir: &Path) -> Result<Vec<RawTree>, Box<dyn std::error::Error
     let reader = BufReader::new(file);
     let mut trees = Vec::new();
     // TitleText_lang,ID,TraitSystemID,TraitTreeID,FirstTraitNodeID,PlayerConditionID,Flags,...
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -264,8 +263,7 @@ fn load_nodes(data_dir: &Path) -> Result<Vec<RawNode>, Box<dyn std::error::Error
     let reader = BufReader::new(file);
     let mut nodes = Vec::new();
     // ID,TraitTreeID,PosX,PosY,Type,Flags,TraitSubTreeID
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -291,8 +289,7 @@ fn load_entries(data_dir: &Path) -> Result<Vec<RawEntry>, Box<dyn std::error::Er
     let reader = BufReader::new(file);
     let mut entries = Vec::new();
     // ID,TraitDefinitionID,MaxRanks,NodeEntryType,TraitSubTreeID
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -316,8 +313,7 @@ fn load_definitions(data_dir: &Path) -> Result<Vec<RawDefinition>, Box<dyn std::
     let reader = BufReader::new(file);
     let mut defs = Vec::new();
     // OverrideName_lang,OverrideSubtext_lang,OverrideDescription_lang,ID,SpellID,OverrideIcon,OverridesSpellID,VisibleSpellID
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -344,8 +340,7 @@ fn load_edges(data_dir: &Path) -> Result<Vec<RawEdge>, Box<dyn std::error::Error
     let reader = BufReader::new(file);
     let mut edges = Vec::new();
     // ID,VisualStyle,LeftTraitNodeID,RightTraitNodeID,Type
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -367,8 +362,7 @@ fn load_conds(data_dir: &Path) -> Result<Vec<RawCond>, Box<dyn std::error::Error
     let file = File::open(data_dir.join("TraitCond.csv"))?;
     let reader = BufReader::new(file);
     let mut conds = Vec::new();
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -401,8 +395,7 @@ fn load_sub_trees(data_dir: &Path) -> Result<Vec<RawSubTree>, Box<dyn std::error
     let reader = BufReader::new(file);
     let mut trees = Vec::new();
     // Name_lang,Description_lang,ID,UiTextureAtlasElementID,TraitTreeID
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -426,8 +419,7 @@ fn load_currencies(data_dir: &Path) -> Result<Vec<RawCurrency>, Box<dyn std::err
     let reader = BufReader::new(file);
     let mut currencies = Vec::new();
     // ID,Type,CurrencyTypesID,Flags,...
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }

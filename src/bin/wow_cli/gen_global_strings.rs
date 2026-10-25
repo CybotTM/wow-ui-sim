@@ -3,11 +3,12 @@
 //! Reads from ~/Projects/wow/data/:
 //!   - GlobalStrings.csv
 //!
-//! Generates: data/global_strings.rs
+//! Generates: crates/sim-data-profile/data/global_strings.rs
 
+use super::csv_util::read_csv_records;
 use super::csv_util::{parse_csv_line, wow_data_dir};
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufReader, Write};
 use std::path::Path;
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -19,7 +20,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let reader = BufReader::new(file);
 
     std::fs::create_dir_all("data")?;
-    let output_path = Path::new("data/global_strings.rs");
+    let output_path = Path::new("crates/sim-data-profile/data/global_strings.rs");
     let mut out = File::create(output_path)?;
 
     write_header(&mut out)?;
@@ -62,8 +63,7 @@ fn write_string_entries(
 ) -> Result<u32, Box<dyn std::error::Error>> {
     let mut count = 0u32;
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }

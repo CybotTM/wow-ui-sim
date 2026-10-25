@@ -20,7 +20,21 @@
 
 ## Current feature applicability
 
-`retail-12-1-0` gates this surface. `client-retail` includes it; `client-ptr` includes `retail-12-1-5`, which includes it. Earlier epoch features alone do not enable the getter. Cached Retail/PTR declarations establish source applicability; separate PTR runtime receipts below establish bounded simulator execution, not earlier-profile/native parity.
+The `retail-12-1-0` method-table entry preserves existing epoch publication. `client-retail` includes it; `client-ptr` includes `retail-12-1-5`, which includes it. A separate runtime `client_profile::ACTIVE` decision publishes the same producer on Era and Anniversary without enabling a Retail epoch. Earlier epoch features alone do not enable the getter on other profiles. Cached Retail/PTR declarations establish source applicability; separate PTR runtime receipts below establish bounded simulator execution, not earlier-profile/native parity.
+
+## CF-2 D — static Classic producer (2026-10-24)
+
+- [x] Source publication for Era and Anniversary reuses the existing per-map projection without enabling a Retail epoch or adding publication on unrelated profiles. The Classic decision uses `client_profile::ACTIVE`. Runtime acceptance remains pending.
+- [ ] Their normally selected original `GroupMembersPinTemplate` must hide on supplied map84=true and show/bind map85=false; revisits, independent live changes, and opposite inputs in another environment must remain observable through original `GroupMembersPinMixin:OnMapChanged`.
+- [ ] Preserve zero returns for absent/removed input, exactly one supplied false boolean, and existing Retail/PTR numeric/security behavior. Do not add Classic coercion claims, defaults, map-flag heuristics, catalogs, Lua setters, or another store.
+
+`tests/cf2_group_map_icons.rs` stages one populated consumer selector, registered only for Era/Anniversary. It loads normal `Blizzard_UIPanels_Game` and `Blizzard_WorldMap` TOC closures without overrides, uses the original XML WorldMapFrame and its `AcquirePin('GroupMembersPinTemplate', provider)`, and prints selected TOCs/metadata/files plus original Lua function provenance and initial loading diagnostics. No surrogate map/frame, replacement consumer, vendor edit, or forced cached-file execution is used.
+
+Selection to reproduce independently in both profiles: `Blizzard_WorldMap_Vanilla.toc` (game, vanilla; RequiredDep MapCanvas + SharedMapDataProviders) → `Blizzard_SharedMapDataProviders_Classic.toc` (game, vanilla/tbc) → `GroupMembersDataProvider.xml` → original Lua `OnMapChanged` lines112–123, target call114. `Blizzard_UIPanels_Game_Classic.toc` supplies `Classic/UnitPositionFrameTemplates.xml`; the pin is the selected XML-derived UnitPositionFrame, not a hand-mixed fixture. The provider's supplied player pin size0 disables only unrelated ping work; original `ShouldShowUnit` is retained.
+
+The consumer selector alone observes hidden/shown states, both selected map IDs when shown, revisits, per-map changes, restoration, and two environments with opposing inputs. Constant true fails shown85; constant false/nil/zero returns fail hidden84; stale or wrong-map input fails opposing-map/live-update observations. These are authored counterexamples, **not executed mutation or RED/GREEN proof**. A setup error before call114 is a blocker, not RED. Separate arity coverage is preservation, not consumer acceptance.
+
+Static producer work removes only the parser/getter compile gates and registers that same backing-state projection for Era and Anniversary. The existing Retail-epoch registration, parser validation/security, per-environment store and return policy are unchanged. Tests remain byte-identical to merged staging. No compilation, runtime selection, RED/GREEN, stock delta, full-suite, prefork, or native parity is claimed; the two unchecked requirements above remain execution obligations.
 
 ## Tests asserting this spec
 
@@ -32,7 +46,12 @@
 - `get_map_display_info_untainted_secret_returns_one_supplied_bool`
 - `get_map_display_info_tainted_caller_accepts_ordinary_and_rejects_secret`
 
-All five executed PASS in the saved default integration artifact. Security tests use an authentic host-secret number and stamped addon closure; taint/wrapper preservation is asserted. Map 85 is a test-only catalog fixture, not a native map fact.
+Staged Classic selectors (not yet compiled/executed):
+
+- `cf2_group_map_icons::original_group_pin_tracks_map_display_visibility_and_live_updates` — populated original-consumer candidate; must independently RED/GREEN on Era and Anniversary.
+- `cf2_group_map_icons::map_display_absence_removal_and_supplied_false_preserve_return_arity` — simulator-input preservation, not original-consumer RED.
+
+All five Retail-epoch probes executed PASS in the saved default integration artifact. Security tests use an authentic host-secret number and stamped addon closure; taint/wrapper preservation is asserted. Map 85 is a test-only catalog fixture, not a native map fact.
 
 ## Admitted evidence
 
@@ -61,7 +80,7 @@ Exact independent P801 report: `/home/osso/.local/state/wow-ui-sim/verification/
 ## Known gaps (current cycle)
 
 - [x] Final PTR independent audit admits 84 actual PASS, including all five MapDisplay targets.
-- [x] Wrath/Mists/Era/Anniversary/Forever shared-state compile checks exit 0 with source equality; current getter excluded. Six dependency manifest deprecations per profile remain. No runtime/native acceptance.
+- [x] Wrath/Mists/Era/Anniversary/Forever shared-state compile checks exit 0 with source equality; getter excluded in those saved checks. Era/Anniversary publication added later has no runtime or compile receipt yet. Six dependency manifest deprecations per profile remain. No runtime/native acceptance.
 - [ ] Authenticated native WoW ordinary/secret behavior and runtime return secrecy unverified. `SecretArguments = "AllowedWhenUntainted"` is declaration evidence, not runtime secrecy proof.
 
 ## Out of scope

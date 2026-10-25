@@ -7,12 +7,13 @@
 //!   - UiTextureAtlasElementSliceData.csv
 //!   - listfile.csv
 //!
-//! Generates: data/atlas.rs
+//! Generates: crates/sim-data-profile/data/atlas.rs
 
 #[cfg(test)]
 #[path = "gen_atlas_tests.rs"]
 mod tests;
 
+use super::csv_util::read_csv_records;
 use super::csv_util::{parse_csv_line, wow_data_dir};
 use std::collections::HashMap;
 use std::fs::File;
@@ -26,9 +27,9 @@ pub struct Options {
     csv_dir: Option<PathBuf>,
     #[arg(long)]
     listfile: Option<PathBuf>,
-    #[arg(long, default_value = "data/atlas.rs")]
+    #[arg(long, default_value = "crates/sim-data-profile/data/atlas.rs")]
     output: PathBuf,
-    #[arg(long, default_value = "data/atlas_elements.rs")]
+    #[arg(long, default_value = "crates/sim-data-profile/data/atlas_elements.rs")]
     elements_output: PathBuf,
 }
 
@@ -533,11 +534,11 @@ fn load_atlas(path: &Path) -> Result<HashMap<u32, AtlasEntry>, Box<dyn std::erro
     let reader = BufReader::new(file);
     let mut map = HashMap::new();
 
-    let mut lines = reader.lines();
-    let header = lines.next().ok_or("empty atlas CSV")??;
+    let mut records = read_csv_records(reader)?.into_iter();
+    let header = records.next().ok_or("empty atlas CSV")?;
     let columns = AtlasColumns::parse(&header)?;
-    for (index, line) in lines.enumerate() {
-        let (id, entry) = columns.parse_row(&line?, index + 2)?;
+    for (index, record) in records.enumerate() {
+        let (id, entry) = columns.parse_row(&record, index + 2)?;
         map.insert(id, entry);
     }
     Ok(map)
@@ -615,8 +616,7 @@ fn load_elements(path: &Path) -> Result<HashMap<u32, String>, Box<dyn std::error
     let reader = BufReader::new(file);
     let mut map = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -689,8 +689,7 @@ fn load_members(path: &Path) -> Result<Vec<MemberEntry>, Box<dyn std::error::Err
     let reader = BufReader::new(file);
     let mut entries = Vec::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -733,8 +732,7 @@ fn load_slices(
     let reader = BufReader::new(file);
     let mut entries = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
