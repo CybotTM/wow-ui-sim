@@ -88,19 +88,29 @@ def full_source_inputs(worktree):
     return inputs
 
 
-def prepare_source(worktree, previous):
+def read_content_changes(worktree, identity, dirty, previous):
+    if previous and identity == previous.get("identity"):
+        return set()
+    try:
+        if not previous:
+            raise ValueError("no previous source")
+        paths = git(worktree, "diff", "--name-only", "--no-renames", "-z",
+                    previous["identity"]["head"], identity["head"], "--")
+        changed = {os.fsdecode(p) for p in paths.split(b"\0") if p}
+        changed.update(previous["dirty_paths"])
+    except (subprocess.CalledProcessError, KeyError, ValueError):
+        changed = full_source_inputs(worktree)
+    return changed.union(dirty)
+
+
+def prepare_source(worktree, previous, attempted=None):
     identity, dirty = source_identity(worktree)
-    changed = set()
-    if (not previous or identity != previous.get("identity")
-            or previous.get("result", "success") != "success"):
-        try:
-            if not previous or previous.get("result", "success") != "success":
-                raise ValueError("no previous source")
-            changed.update(os.fsdecode(p) for p in git(
-                worktree, "diff", "--name-only", "--no-renames", "-z",
-                previous["identity"]["head"], identity["head"], "--").split(b"\0") if p)
-            changed.update(previous["dirty_paths"])
-        except (subprocess.CalledProcessError, KeyError, ValueError):
+    content_changed = read_content_changes(worktree, identity, dirty, previous)
+    changed = set(content_changed)
+    last_attempt = attempted if attempted is not None else previous
+    retry = bool(last_attempt and last_attempt.get("result", "success") != "success")
+    if not previous or identity != previous.get("identity") or retry:
+        if retry:
             changed.update(full_source_inputs(worktree))
         changed.update(dirty)
         now = time.time_ns()
@@ -109,7 +119,8 @@ def prepare_source(worktree, previous):
             if path.is_file() and not path.is_symlink():
                 os.utime(path, ns=(path.stat().st_atime_ns, now))
     return {"identity": identity, "dirty_paths": dirty,
-            "changed_paths": sorted(changed)}
+            "changed_paths": sorted(changed),
+            "content_changed_paths": sorted(content_changed)}
 
 
 def write_json(path, value):
@@ -159,7 +170,7 @@ def parse_dep_info(content, worktree):
 
 
 def read_dep_info_snapshot(slot, worktree):
-    files, executables = {}, []
+    files, executables, identities = {}, [], {}
     for directory, children, names in os.walk(slot):
         children[:] = [name for name in children
                        if not name.startswith(".") and name not in {"incremental", "receipts"}]
@@ -167,23 +178,34 @@ def read_dep_info_snapshot(slot, worktree):
             path = Path(directory) / name
             if path.is_file() and (path.stat().st_mode & 0o111 or path.suffix == ".exe"):
                 executables.append(str(path))
+                stat = path.stat()
+                identities.setdefault((stat.st_dev, stat.st_ino), []).append(str(path))
             if path.suffix != ".d":
                 continue
             try:
                 files[str(path)] = parse_dep_info(path.read_text(), worktree)
             except (OSError, UnicodeError, ValueError) as error:
                 files[str(path)] = {"error": str(error)}
-    return {"files": files, "executables": executables}
+    aliases = {path: paths for paths in identities.values() for path in paths}
+    return {"files": files, "executables": executables, "aliases": aliases}
 
 
-def target_dep_inputs(record, snapshot):
+def target_dep_inputs(record, snapshot, allow_missing=False):
     artifacts = {os.path.abspath(path) for path in
-                 [record["executable"], *record.get("filenames", [])]}
+                 [record.get("executable"), *record.get("filenames", [])] if path}
+    # Cargo may report only the uplifted bin, while rustc writes deps/<name>-<hash>.d.
+    # Snapshot hard-link identities bind that bin to the correct metadata hash.
+    aliases = snapshot.get("aliases", {})
+    artifacts.update(alias for path in list(artifacts) for alias in aliases.get(path, []))
     candidates = {str(Path(path).with_suffix(".d")) for path in artifacts}
     matches = {name: info for name, info in snapshot["files"].items()
                if name in candidates or artifacts.intersection(info.get("outputs", []))}
-    if not matches:
-        raise ValueError(f"missing dep-info for {record['executable']}")
+    rustc_matches = {name: info for name, info in matches.items()
+                     if Path(name).parent.name == "deps"}
+    if rustc_matches:
+        matches = rustc_matches
+    if not matches and not allow_missing:
+        raise ValueError(f"missing dep-info for {artifact_path(record)}")
     inputs = set()
     for name, info in matches.items():
         if "error" in info:
@@ -208,7 +230,8 @@ def package_build_inputs(current, record):
 def repo_relative_inputs(current, inputs):
     worktree = Path(current["worktree"])
     mount = SOURCE_ROOT / Path(current["slot"]).name
-    roots = [mount, worktree]
+    utility_mount = SOURCE_ROOT / f"ct-bins-{Path(current['slot']).name}"
+    roots = [mount, utility_mount, worktree]
     relative = set()
     for name in inputs:
         path = Path(os.path.abspath(worktree / name))
@@ -219,42 +242,72 @@ def repo_relative_inputs(current, inputs):
     return relative
 
 
+def artifact_path(record):
+    if record.get("executable"):
+        return record["executable"]
+    filenames = record.get("filenames", [])
+    return filenames[0] if filenames else record.get("target", {}).get("name", "unknown")
+
+
+def is_repo_artifact(current, record):
+    if record.get("package_id", "").startswith(("registry+", "git+")):
+        return False
+    paths = [path for path in [record.get("manifest_path"),
+                              record.get("target", {}).get("src_path")] if path]
+    # Records without ownership metadata cannot prove that they are external.
+    return not paths or bool(repo_relative_inputs(current, paths))
+
+
+def read_record_inputs(current, record, before, after):
+    inputs = repo_relative_inputs(current, target_dep_inputs(record, after))
+    if not inputs:
+        raise ValueError(f"zero repo-relative inputs for {artifact_path(record)}")
+    previous = target_dep_inputs(record, before, allow_missing=record.get("fresh") is False)
+    inputs.update(repo_relative_inputs(current, previous))
+    inputs.update(repo_relative_inputs(current, package_build_inputs(current, record)))
+    return sorted(inputs)
+
+
 def read_target_inputs(current, before, after):
     targets, errors = {}, []
     for record in current["reported_artifacts"]:
-        executable = record.get("executable")
-        if not executable:
+        if not is_repo_artifact(current, record):
             continue
         try:
-            inputs = target_dep_inputs(record, after)
-            if executable in before["executables"]:
-                inputs.update(target_dep_inputs(record, before))
-            inputs = repo_relative_inputs(current, inputs)
-            if not inputs:
-                raise ValueError(f"zero repo-relative inputs for {executable}")
-            inputs.update(repo_relative_inputs(current, package_build_inputs(current, record)))
-            targets[executable] = sorted(inputs)
+            targets[artifact_path(record)] = read_record_inputs(current, record, before, after)
         except ValueError as error:
             errors.append(str(error))
-    mapped = set().union(*targets.values())
-    if targets and current["changed_paths"] and not mapped.intersection(current["changed_paths"]):
-        errors.append("no reported target maps changed inputs")
     return targets, errors
 
 
 def find_stale_artifacts(current, previous_artifacts, artifacts):
     stale = []
     changed = set(current["changed_paths"])
+    content_changed = set(current["content_changed_paths"])
     for record in current["reported_artifacts"]:
-        executable = record.get("executable")
-        inputs = current["target_inputs"].get(executable, [])
-        if not executable or not changed.intersection(inputs):
+        path = artifact_path(record)
+        inputs = current["target_inputs"].get(path, [])
+        if not changed.intersection(inputs):
             continue
-        name = os.path.relpath(executable, current["slot"])
+        name = os.path.relpath(path, current["slot"])
+        if record.get("fresh") is not False:
+            stale.append(name)
+            continue
+        if not record.get("executable"):
+            continue
         changed_hash = name in artifacts and previous_artifacts.get(name) != artifacts[name]
-        if record.get("fresh") is not False or not changed_hash:
+        needs_changed_hash = bool(content_changed.intersection(inputs))
+        if name not in artifacts or (needs_changed_hash and not changed_hash):
             stale.append(name)
     return sorted(set(stale))
+
+
+def unread_package_paths(current):
+    inputs = {name for names in current["target_inputs"].values() for name in names}
+    roots = {root for paths in current["package_roots"].values() for root in paths}
+    roots = repo_relative_inputs(current, roots)
+    return sorted(name for name in set(current["content_changed_paths"]) - inputs
+                  if any(Path(name).is_relative_to(root) for root in roots))
 
 
 def finish_build(slot, receipt, current, previous, artifacts, returncode):
@@ -269,9 +322,12 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
     result = "success" if returncode == 0 else "failed"
     if stale:
         result = "stale-artifacts"
-    current = dict(current, artifacts=artifacts, returncode=returncode, result=result)
+    current = dict(current, artifacts=artifacts, returncode=returncode, result=result,
+                   unread_package_paths=unread_package_paths(current))
     write_json(receipt, current)
     write_json(slot / ".source-identity.json", current)
+    if result == "success":
+        write_json(slot / ".verified-source-identity.json", current)
     if stale:
         reason = ("no Cargo compiler-artifact records visible for changed package inputs"
                   if missing_evidence else f"missing fresh=false or changed SHA256: {stale_paths}")
@@ -292,7 +348,7 @@ def hash_artifacts(slot, paths):
 
 def collect_artifacts(slot, started_ns, previous, records):
     # Retain discovery/hash evidence for capturing wrappers. Only current Cargo
-    # records select executables for the freshness decision.
+    # records select artifacts for the freshness decision.
 
     paths = {slot / name for name in (previous or {}).get("artifacts", {})}
     for directory, children, files in os.walk(slot):
@@ -331,13 +387,15 @@ def execute_build(request_path):
     slot = Path(request["slot"])
     check_owner(slot, request["owner"])
     state = slot / ".source-identity.json"
-    previous = json.loads(state.read_text()) if state.exists() else None
+    verified = slot / ".verified-source-identity.json"
+    previous = json.loads(verified.read_text()) if verified.exists() else None
+    attempted = json.loads(state.read_text()) if state.exists() else None
     worktree = Path(request["worktree"])
-    current = prepare_source(worktree, previous)
+    current = prepare_source(worktree, previous, attempted)
     current.update(unit=request["unit"], cargo=request["cargo"], worktree=str(worktree),
                    slot=str(slot), package_roots=read_package_roots(worktree))
-    # An interrupted/failed build may already have replaced fingerprints. Record
-    # its input identity before Cargo starts, not only after successful builds.
+    # Attempts can replace Cargo fingerprints, but cannot certify source content.
+    # Only finish_build advances the separate verified baseline after acceptance.
     write_json(state, dict(current, artifacts={}, result="building"))
     receipt = Path(request["receipt"])
     write_json(receipt, dict(current, artifacts={}, result="building"))
