@@ -16,8 +16,8 @@ DEFAULT_SOURCE = (
     else Path.home() / ".cache/asset-resolver/data"
 ) / "community-listfile.csv"
 DEFAULT_OUTPUT = ROOT / "data/wow-ui-sim-listfile.csv"
-MANIFEST_PATH = ROOT / "data/manifest_interface_data.rs"
-ATLAS_PATH = ROOT / "data/atlas.rs"
+MANIFEST_PATH = ROOT / "crates/sim-data/data/manifest_interface_data.rs"
+ATLAS_PATH = ROOT / "crates/sim-data-profile/data/atlas.rs"
 BLIZZARD_UI_FILE_MANIFEST_DIR = ROOT / "data/blizzard-ui-files"
 LISTFILE_OVERRIDES = ROOT / "data/listfile-overrides.csv"
 SCAN_PATHS = [

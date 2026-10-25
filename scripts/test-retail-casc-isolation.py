@@ -88,7 +88,7 @@ def prepare_cache(requested: Path | None) -> tuple[Path, bool]:
 
 def build_wow_cli() -> None:
     subprocess.run(
-        ["cargo", "build", "--bin", "wow-cli"],
+        ["cargo", "build", "--bin", "wow-cli", "--features", "tools"],
         cwd=REPO_ROOT,
         check=True,
     )

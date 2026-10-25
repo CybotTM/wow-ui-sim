@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "data/db2/wowforever-1.60.1.69913/GlobalStrings.csv"
-OUTPUT = ROOT / "data/global_strings_wowforever.rs"
+OUTPUT = ROOT / "crates/sim-data-profile/data/global_strings_wowforever.rs"
 
 
 def read_strings(source):

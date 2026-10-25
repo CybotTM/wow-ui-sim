@@ -62,7 +62,7 @@ fn lock_string_match_drives_save_button_through_on_text_changed() {
                 r#"
                 assert(AccountSaveFrame, "AccountSaveFrame global must exist after Blizzard_AccountSaveUI load")
                 assert(ACCOUNT_SAVE_CONFIRM_STRING == "LOCK ACCOUNT",
-                       "ACCOUNT_SAVE_CONFIRM_STRING must equal `LOCK ACCOUNT` (data/global_strings.rs)")
+                       "ACCOUNT_SAVE_CONFIRM_STRING must equal `LOCK ACCOUNT` (crates/sim-data-profile/data/global_strings.rs)")
 
                 AccountSaveFrame:UpdateAccountState()
 
