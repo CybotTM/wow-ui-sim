@@ -204,7 +204,7 @@ visual_metrics_bin() {
 build_visual_metrics() {
     if [ ! -x "$(visual_metrics_bin)" ]; then
         echo "Building panel-visual-metrics in $CARGO_TARGET_DIR"
-        cargo build --bin panel-visual-metrics
+        cargo build --bin panel-visual-metrics --features tools
     fi
 }
 
