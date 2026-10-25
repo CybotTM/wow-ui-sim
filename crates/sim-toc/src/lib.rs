@@ -148,9 +148,6 @@ fn metadata_key_allows_repeats(key: &str) -> bool {
     )
 }
 
-/// PTR 12.1.7 ignores whole metadata directives containing file variables.
-/// Inline conditionals are not variables and retain their existing handling.
-
 /// Process a `## Key: Value` metadata line into the map.
 ///
 /// Skips `Interface` lines whose value consists entirely of unresolved

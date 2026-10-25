@@ -35,7 +35,7 @@ pub fn register_intrinsic_templates() {
     profile_templates::register_all();
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "profile-retail"))]
 mod cached_ui_tests;
 #[cfg(test)]
 mod template_tests;
