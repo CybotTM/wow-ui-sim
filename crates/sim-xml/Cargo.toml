@@ -1,0 +1,16 @@
+[package]
+name = "sim-xml"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-only"
+
+[features]
+aura-xml-widgets = []
+
+[dependencies]
+quick-xml = { version = "0.37", features = ["serialize"] }
+serde = { version = "1.0", features = ["derive"] }
+regex = "1"
+thiserror = "2.0"
+tracing = "0.1"
+rilua = { git = "https://github.com/Osso/rilua.git", rev = "b2629b6329484945cb14e43b0e5590ee308c5df4" }

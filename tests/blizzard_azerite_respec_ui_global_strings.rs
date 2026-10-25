@@ -12,7 +12,7 @@
 //! `NOT_ENOUGH_GOLD_FOR_AZERITE_RESPEC`).
 //!
 //! The simulator resolves these globals through the auto-generated
-//! `data/global_strings.rs`. This test pins the contract — a future
+//! `crates/sim-data-profile/data/global_strings.rs`. This test pins the contract — a future
 //! regeneration that drops any of them would render `nil` in the
 //! addon's title bar and error messages.
 
@@ -67,7 +67,7 @@ fn azerite_respec_tutorial_text_matches_canonical_blizzard_text() {
     let value: String = env.eval("return AZERITE_RESPEC_TUTORIAL_TEXT").unwrap();
     assert_eq!(
         value, "Drag a piece of Azerite Armor here to reforge its powers.",
-        "AZERITE_RESPEC_TUTORIAL_TEXT shows in the empty-slot frame and is canonicalized in data/global_strings.rs"
+        "AZERITE_RESPEC_TUTORIAL_TEXT shows in the empty-slot frame and is canonicalized in crates/sim-data-profile/data/global_strings.rs"
     );
 }
 

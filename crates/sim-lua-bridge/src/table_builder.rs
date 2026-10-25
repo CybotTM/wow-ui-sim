@@ -1,0 +1,196 @@
+//! [`TableBuilder`]: fluent builder for creating and populating Lua tables.
+
+use rilua::LuaError;
+use rilua::LuaResult;
+use rilua::RuntimeError;
+use rilua::Val;
+use rilua::vm::closure::{Closure, RustClosure, RustFn};
+use rilua::vm::gc::arena::GcRef;
+use rilua::vm::state::LuaState;
+use rilua::vm::table::Table as RiluaTable;
+use rilua::vm::value::Userdata;
+
+use crate::IntoStack;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct FrameIdentity {
+    pub index: u32,
+    pub generation: u32,
+}
+
+// ---------------------------------------------------------------------------
+// Free helper (also used by macros)
+// ---------------------------------------------------------------------------
+
+/// Register a named `RustFn` on an existing table `GcRef`.
+///
+/// Used by the `define_methods!` and `define_functions!` macros so they
+/// do not need to go through a full `TableBuilder`.
+///
+/// Prefer [`table_set_rust_fn_static`] when `name` is a compile-time
+/// literal — the pointer-keyed static intern cache short-circuits
+/// the content hash on every repeat call.
+pub fn table_set_rust_fn(
+    state: &mut LuaState,
+    table_ref: GcRef<RiluaTable>,
+    name: &str,
+    func: RustFn,
+) -> LuaResult<()> {
+    let key_ref = state.gc.intern_string(name.as_bytes());
+    install_rust_fn(state, table_ref, key_ref, name, func)
+}
+
+/// Same as [`table_set_rust_fn`] but routes the key through
+/// `intern_string_static`, skipping the content-hash lookup when the
+/// pointer is already in the static intern cache. Use this whenever
+/// `name` is a compile-time literal.
+pub fn table_set_rust_fn_static(
+    state: &mut LuaState,
+    table_ref: GcRef<RiluaTable>,
+    name: &'static str,
+    func: RustFn,
+) -> LuaResult<()> {
+    let name_bytes: &'static [u8] = name.as_bytes();
+    let key_ref = state.gc.intern_string_static(name_bytes);
+    install_rust_fn(state, table_ref, key_ref, name, func)
+}
+
+fn install_rust_fn(
+    state: &mut LuaState,
+    table_ref: GcRef<RiluaTable>,
+    key_ref: GcRef<rilua::vm::string::LuaString>,
+    name: &str,
+    func: RustFn,
+) -> LuaResult<()> {
+    let key = Val::Str(key_ref);
+    let closure = Closure::Rust(RustClosure::new(func, name));
+    let closure_ref = state.gc.alloc_closure(closure);
+    let stack_slot = state.top;
+    state.ensure_stack(stack_slot + 1);
+    state.stack_set(stack_slot, Val::Function(closure_ref));
+    state.top = stack_slot + 1;
+    let table = state
+        .gc
+        .tables
+        .get_mut(table_ref)
+        .ok_or_else(table_collected_error)?;
+    let result = table.raw_set(key, Val::Function(closure_ref), &state.gc.string_arena);
+    state.gc.barrier_back(table_ref);
+    state.top = stack_slot;
+    result
+}
+
+fn table_collected_error() -> LuaError {
+    LuaError::Runtime(RuntimeError {
+        message: "table has been collected".into(),
+        level: 0,
+        traceback: vec![],
+    })
+}
+
+/// Allocate a Lua table with wow-ui-sim's frame backing metadata attached.
+///
+/// The returned table is still a normal Lua table: Lua code can `rawset`,
+/// iterate, and attach a metatable as usual.
+///
+/// Pre-sizes hash part to 64 slots for typical frame properties/children.
+/// Methods are accessed via metatable __index, not stored directly.
+pub fn create_frame_table(state: &mut LuaState, index: u32, generation: u32) -> GcRef<RiluaTable> {
+    let identity_ref = state
+        .gc
+        .alloc_userdata(Userdata::new(Box::new(FrameIdentity { index, generation })));
+
+    let mut table = RiluaTable::with_sizes(0, 64);
+    table.set_backing(Some((index, generation)));
+    table
+        .raw_set(
+            Val::Num(0.0),
+            Val::Userdata(identity_ref),
+            &state.gc.string_arena,
+        )
+        .expect("numeric frame identity slot should be settable");
+    state.gc.alloc_table(table)
+}
+
+// ---------------------------------------------------------------------------
+// TableBuilder
+// ---------------------------------------------------------------------------
+
+/// Fluent builder for creating Lua tables with typed values and Rust functions.
+///
+/// ```rust,ignore
+/// let t = TableBuilder::new(state)
+///     .set("version", "1.0")?
+///     .set_function("GetVersion", |_state| { ... })?
+///     .build();
+/// ```
+pub struct TableBuilder<'a> {
+    state: &'a mut LuaState,
+    table_ref: GcRef<RiluaTable>,
+}
+
+impl<'a> TableBuilder<'a> {
+    /// Allocates a new empty table and returns a builder for it.
+    pub fn new(state: &'a mut LuaState) -> Self {
+        let table_ref = state.gc.alloc_table(RiluaTable::new());
+        Self { state, table_ref }
+    }
+
+    /// Set a string-keyed entry to any value implementing [`IntoStack`].
+    ///
+    /// `IntoStack` is used only to convert the value to `Val`; no stack
+    /// slot is consumed — the value is pushed and immediately popped to
+    /// set the table entry.
+    pub fn set(self, key: &str, value: impl IntoStack) -> LuaResult<Self> {
+        let val = value_to_table_entry(self.state, value)?;
+        let key_ref = self.state.gc.intern_string(key.as_bytes());
+        let k = Val::Str(key_ref);
+        let table = self
+            .state
+            .gc
+            .tables
+            .get_mut(self.table_ref)
+            .ok_or_else(table_collected_error)?;
+        table.raw_set(k, val, &self.state.gc.string_arena)?;
+        Ok(self)
+    }
+
+    /// Set a string-keyed entry to a named Rust function.
+    pub fn set_function(self, name: &str, func: RustFn) -> LuaResult<Self> {
+        table_set_rust_fn(self.state, self.table_ref, name, func)?;
+        Ok(self)
+    }
+
+    /// Return the underlying `GcRef` for direct use with the macro helpers.
+    pub fn table_ref(&self) -> GcRef<RiluaTable> {
+        self.table_ref
+    }
+
+    /// Finish building and return the table as a `Val::Table`.
+    pub fn build(self) -> Val {
+        Val::Table(self.table_ref)
+    }
+}
+
+fn value_to_table_entry(state: &mut LuaState, value: impl IntoStack) -> LuaResult<Val> {
+    let save_top = state.top;
+    let count = value.into_stack(state)?;
+    let val = match count {
+        0 => Val::Nil,
+        1 => state.stack[save_top],
+        _ => {
+            state.top = save_top;
+            return Err(table_builder_value_error(count));
+        }
+    };
+    state.top = save_top;
+    Ok(val)
+}
+
+fn table_builder_value_error(count: u32) -> LuaError {
+    LuaError::Runtime(RuntimeError {
+        message: format!("table builder values must push exactly 0 or 1 Lua values, got {count}"),
+        level: 0,
+        traceback: vec![],
+    })
+}

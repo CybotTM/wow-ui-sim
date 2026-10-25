@@ -223,6 +223,8 @@ def cargo_arguments(binary, no_default_features, features, mode="build", test_ar
     arguments = [mode]
     if mode != "test":
         arguments.extend(["--bin", binary])
+        if binary == "wow-cli":
+            features = ",".join(filter(None, (features, "tools")))
     if no_default_features:
         arguments.append("--no-default-features")
     if features:

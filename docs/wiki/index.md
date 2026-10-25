@@ -1,3 +1,66 @@
+## [2026-10-25] fix | Byte-preserving Lua cache usability
+
+[Source-byte validation](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) separates byte-oriented Lua from UTF-8 XML/TOC/XSD. Runtime TOC loading already passes raw bytes to rilua. Regression fixtures preserve a literal `0x92` through cache checks and loaded strings.
+
+## [2026-10-25] source | Forever wowf product selection
+
+[Selected-target checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records wowf 1.60.1.70532 / build2582289d81e380163c7a13472df4cb81, repaired live desktop indexes, idle Syncthing and authenticated local root/encoding. Selector/regression now expect wowf. Builds, offline sync, baseline and startup await a released slot after club-unread-integrate and S49; static work is not runtime acceptance.
+## [2026-10-25] staged | Forever verified non-resident Gethe sources
+
+[Cache rule](systems/casc-asset-cache.md#forever-mapped-non-resident-sources) and [contract](../specs/casc-loading.md#forever-mapped-non-resident-ui-sources) record immutable same-build Gethe blobs only for mapped EKeys absent from local indexes, raw CKey/MD5 validation and per-file provenance. Resident CASC and unmapped failures remain separate. Static tests/code committed separately; execution and stock startup remain pending.
+## [2026-10-25] investigation | S49 rejected refresh repair
+
+[Companion spell backing](investigations/wrath-companion-cooldown.md#s49-reject-repair-static-2026-10-25): portable receipt paths and seeded-mount selector regression staged; generated catalogs and runtime proof still await a slot.
+
+## [2026-10-24] investigation | S49 70391 refresh and logical CSV records
+
+[Refresh boundary](investigations/wrath-companion-cooldown.md#same-build-spelltrait-refresh-and-csv-boundary) links the per-file receipt, CSV-native dangling references and the physical-line CRLF truncation. Root fix and concrete tests staged; fresh generator, corrected regeneration and S49 runtime GREEN remain slot-gated.
+
+## [2026-10-24] investigation | Companion cooldown req-13 arbitration
+
+[Cooldown investigation](investigations/wrath-companion-cooldown.md) records
+ordered own/category/GCD endpoint arbitration, accepted-held sticky enable,
+shared flag2, absent player and supplied critter paths. Nine original-consumer
+selectors staged; static contradictions are not executed RED/GREEN proof.
+## [2026-10-24] static stage | CF-2 PvP completion
+
+[State projection and original consumer](investigations/consumer-selection-and-red-proof.md#cf-2-supplied-pvp-match-completion) link the [contract](../specs/pvp-match-completion.md): Retail/PTR read the existing completion snapshot; Forever is excluded. Paired RED removes only the producer with identical tests. Static constant/no-op contradictions are documented; runtime selection, RED/GREEN and current private PTR cache proof remain pending.
+Historical utility-command replay requires `--features tools`; see the [replay note](../../README.md#utility-binary-builds) for the three preserved evidence examples.
+
+## [2026-10-25] investigation | Compile binary selection
+
+[Source findings](investigations/compile-bin-lockwatch.md) and [contract](../specs/integration-bin-selection.md): opt-in utility bins preserve wow-sim test consumers and operational builders. Static-only; no slot/build/CPU proof.
+
+## [2026-10-24] design | Generated data crate boundary
+
+[Crate split](design/generated-data-crates.md) preserves the root facade and selected tables while isolating common catalogs from profile features. Same-slot touched-root rebuild 413.80→258.52 s; peak child RSS6,189,056→2,717,272 KiB. Retail/Wrath checks and94 bounded Rust tests pass; all23 generated files retain their hashes. Single warm-dependency samples, not a cold-build or full-profile claim.
+
+## [2026-10-24] system | CF-2 supplied unread streams
+
+[Club stream ownership](systems/club-membership.md#unread-streams-cf-2) links the [bounded unread contract](../specs/club-unread.md): one supplied club/stream model, original MicroMenu and CommunitiesUtil selectors, settings/marker/clear siblings and explicit UNKNOWN native policies. RED/schema and publication staged separately; no build, slot or runtime proof. Retail/PTR/Forever preservation remains pending.
+
+## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
+
+[Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
+## [2026-10-24] investigation | Wrath guild-info staging
+
+[Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md) and [17-row repair matrix](../baselines/wrath-guild-info-green-blockers.md). Historical three-selector GREEN passed; explicit fixture repairs and F1 display rank now await re-proof. Original nonleader dropdown RED is staged; bank permission/withdrawal getters are held for laptop facts and a real model. No new build/slot use; stock/check and actual Retail34/38 comparison remain pending.
+
+## [2026-10-24] source | Patch 12.1.7 I4b conditional static selection
+
+[Conditional source evidence](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection): 460 conditional PTR obligations, 5,168 UNKNOWN cells; zero effective promotions before the exact I3 source commit merges. All runtime proof stages remain UNKNOWN.
+
+## [2026-10-24] source | Patch 12.1.7 I4a inherited worklist
+
+[Inherited accounting](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist): 1,876 immutable occurrences, 63 opposing sweep intersections and 233 lexical test-candidate rows. All 5,628 profile applicability cells remain UNKNOWN pending accepted source/selection evidence. Grouped I4b worklist, zero Cargo; not runtime acceptance.
+## [2026-10-24] source | Combat-log filter record staging
+
+[Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
+
+## [2026-10-24] source | Forever 70532 acceptance epoch
+
+[Selected-build checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records installed beta identity, exact Gethe revision, 4,486 source paths and refreshed mappings. [Profile contract](../specs/client-profiles.md) retains temporary date fields and pending execution; historical 70374 receipts are not 70532 proof. Runtime sync/baseline and all-target warning gates await slot and resolver integration.
+
 ## [2026-10-24] system | CF-2 supplied club self invitations
 
 [Club model update](systems/club-membership.md#incoming-self-invitations-cf-2) links the [bounded contract](../specs/club-self-invitations.md): empty-by-default supplied incoming rows, original selected Retail MicroMenu selector and static standalone mutant contradictions. Edit-only staging; no builds/tests/slots or runtime acceptance. Other CF-2 members remain separate.
@@ -12,11 +75,20 @@ mapping remains unknown. Producer and tests staged only; no build/slot/runtime p
 
 [Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): Forever RED16 precedes parameterized identities, then Forever/default Retail compile0 sources on both reloads.27 exact cases/profile, zero-warning checks and formatting pass; no stock-startup or full-workload acceptance claim.
 
+## [2026-10-24] proof | Wrath bank selected-rank permissions
+
+[Accepted runtime proof](investigations/wrath-guild-info.md#accepted-runtime-proof) links the [contract](../specs/wrath-guild-bank-rank-permissions.md): five bank RED→GREEN selectors, Wrath56 and paired Retail53 preservation pass; verifier8738 ACCEPT. Both original dropdown selectors project varying rank/tab widget values. [Current-master refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 also passes: both all-target checks warn zero, five bank cases pass, Wrath stock[], Retail master08b423c5c/merged30 keys/34 occurrences unchanged with no additions; slot0 released.
+
 ## [2026-10-24] staged | SuperTrack supplied state
 
 [Ownership and native gaps](systems/super-track-state.md) links the [contract](../specs/super-track-state.md). Original-consumer RED tests and separate producer staged; no builds or runtime proof.
 
 ## [2026-10-22] source | Wrath F07 applicability
+
+## [2026-10-24] source | PTR70493 authenticated source and resume
+
+[Profile runtime cache](systems/client-profiles.md#runtime-cache) links the [70493 source proof](../ptr-cdn-content-index.md): original process-failure and advertised-host RED→GREEN, authenticated 4,578-entry regeneration, schema2 partial provenance and unchanged 306-file supported resume. [Actual startup](../baselines/README.md#ptr-70493-authenticated-source-capture--2026-10-24) retains 436 errors / 618 occurrences after master/toc integration; no clean-startup or I4 claim. Retail preserves exact master 36/42 residual; Forever preserves exact fresh-master 78/82 residual; both have zero-warning compile/check gates.
+
 ## [2026-10-22] source | Wrath casting and aura projections
 
 [Projection notes](systems/lua-api.md#wrath-casting-and-aura-projections) link the [bounded contract](../specs/wrath-casting-aura-contracts.md): original cast/channel/party-aura consumers, catalog-backed subtext, legacy tuple/event shapes and separate metadata/transport gaps. Paired baselines, seven producer GREEN contracts and Retail preservation are recorded. Original BuffFrame getter-type RED precedes the runtime Wrath filename projection. Final14aed640c: native21+seven contracts PASS, sixteen report-only failures unchanged, Retail37 PASS, stock arrays empty and Wrath check/formatter PASS; one Retail setup timeout passed its exact retry. Native parity and unexercised branches remain distinct.
@@ -4079,3 +4151,7 @@ links the [bounded contract](../specs/c-factory-cf2-tts.md#user-decisions--2026-
 User-approved getter-based persistence and non-native fresh=false/Mark=true marker
 replace the unsupported public-CVar oracle. Existing SavedVariables serialization
 is reused; original-consumer runtime RED/GREEN remains unexecuted.
+## Wrath companion cooldown source review
+- [[wrath-companion-cooldown]] — staged companion cooldown adapter, standalone rejection contracts, creature effect-misc data gap and retained consumer blockers; edit-only, no runtime proof.
+## [2026-10-24] source | CF-2 pet-battle names staging
+[State projection and selected consumers](systems/pet-battle-names.md) links the [contract](../specs/pet-battle-names.md). Original-consumer tests precede producer; runtime RED/GREEN, mutants and exact stock diff remain pending under edit-only staging.

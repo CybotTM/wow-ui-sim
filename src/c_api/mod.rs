@@ -89,7 +89,7 @@ pub mod c_club;
 #[cfg(feature = "retail-12-0-0")]
 pub(crate) mod c_combat_audio_alert;
 #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
-mod c_combat_log;
+pub(crate) mod c_combat_log;
 mod c_combat_text;
 pub(crate) mod c_console;
 pub mod c_cooldown_viewer;
@@ -239,6 +239,7 @@ mod club_inputs;
 mod club_members;
 pub mod club_model;
 pub mod club_self_invitations;
+mod club_unread;
 pub(crate) mod crafting_execution;
 pub(crate) mod crafting_input;
 pub(crate) mod crafting_plan;

@@ -21,16 +21,6 @@ if rawget(C_VoiceChat, "IsLoggedIn") == nil then
 end
 "#;
 
-const SECURE_COMBAT_FILTERS: &str = r#"
-C_CombatLogSecure = C_CombatLogSecure or {}
--- Missing system: secure combat-log event/filter backend.
--- No secure filters exist to clear; do not mutate ordinary combat-log filters.
-if rawget(C_CombatLogSecure, "ClearEventFilters") == nil then
-    function C_CombatLogSecure.ClearEventFilters()
-    end
-end
-"#;
-
 const CORPSE_LOCATION: &str = r#"
 C_DeathInfo = C_DeathInfo or {}
 -- Missing system: corpse location keyed by UI map, independent of player location.
@@ -69,7 +59,6 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     match ACTIVE {
         ClientProfile::Retail | ClientProfile::Ptr => {
             lua.exec(MODERN_SERVICE_CAPABILITIES)?;
-            lua.exec(SECURE_COMBAT_FILTERS)?;
         }
         ClientProfile::Era | ClientProfile::Anniversary => lua.exec(CORPSE_LOCATION)?,
         ClientProfile::WowForever => {

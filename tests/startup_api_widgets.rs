@@ -238,6 +238,7 @@ fn editbox_exposes_backing_fontstring_region() {
     assert!(same_as_text_key);
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn reputation_filter_dropdown_opens_with_blizzard_menu_renderer() {
     let env = env();
@@ -299,6 +300,7 @@ fn reputation_filter_dropdown_opens_with_blizzard_menu_renderer() {
     assert!(is_open, "dropdown should report open");
     assert!(has_menu, "dropdown should retain the opened menu");
     assert!(manager_open, "Menu.GetManager should track the opened menu");
+}
 }
 
 #[test]

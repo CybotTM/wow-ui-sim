@@ -606,6 +606,7 @@ fn test_transmog_sets_get_base_set_id() {
     assert_eq!(id, 0);
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_transmog_sets_get_variant_sets_empty() {
     let env = env();
@@ -613,6 +614,7 @@ fn test_transmog_sets_get_variant_sets_empty() {
         .eval("return #C_TransmogSets.GetVariantSets(1)")
         .unwrap();
     assert_eq!(count, 0);
+}
 }
 
 #[test]

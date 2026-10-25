@@ -1,6 +1,28 @@
 use super::*;
 
 #[test]
+fn toc_loads_non_utf8_lua_bytes_unchanged() {
+    let addon = tempfile::tempdir().unwrap();
+    let root = addon.path();
+    let path = root.join("Core.lua");
+    let bytes = include_bytes!("../../../tests/fixtures/non_utf8.lua");
+    std::fs::write(&path, bytes).unwrap();
+    std::fs::write(root.join("ByteProbe.toc"), "Core.lua\n").unwrap();
+
+    // Exercise source compilation and bytecode replay through the real TOC loader.
+    for _ in 0..2 {
+        let env = WowLuaEnv::new().unwrap();
+        let result = load_addon(&env.loader_env(), &root.join("ByteProbe.toc")).unwrap();
+        assert!(result.warnings.is_empty(), "{:?}", result.warnings);
+        assert_eq!(result.lua_files, 1);
+        let mut lua = env.rilua_mut();
+        let value = lua.get_global_val("LuaByteProbe");
+        assert_eq!(lua.val_as_bytes(value).unwrap(), b"before\x92after");
+        assert_eq!(std::fs::read(&path).unwrap(), bytes);
+    }
+}
+
+#[test]
 fn toc_utf8_bom_metadata_does_not_become_a_missing_file_warning() {
     let env = WowLuaEnv::new().unwrap();
     let addon = tempfile::tempdir().unwrap();

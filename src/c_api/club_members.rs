@@ -51,7 +51,7 @@ pub(super) fn sync_guild(state: &LuaState) -> LuaResult<()> {
     Ok(())
 }
 
-fn string_arg(state: &mut LuaState, index: i32) -> LuaResult<String> {
+pub(super) fn string_arg(state: &mut LuaState, index: i32) -> LuaResult<String> {
     let value = unwrap_secret(state, stack_val(state, index))?;
     crate::lua_api::methods::val_to_string(state, value)
         .filter(|id| !id.is_empty())
@@ -74,7 +74,7 @@ pub(super) fn guild_member_arg(state: &mut LuaState) -> LuaResult<Option<Member>
         .cloned())
 }
 
-fn read_club(state: &mut LuaState) -> LuaResult<Option<Club>> {
+pub(super) fn read_club(state: &mut LuaState) -> LuaResult<Option<Club>> {
     let id = string_arg(state, 1)?;
     sync_guild(state)?;
     let sim = borrow_state(state)?;
@@ -338,6 +338,7 @@ fn create_club(state: &mut LuaState) -> LuaResult<u32> {
                 members: vec![owner],
                 candidates: Default::default(),
                 invitations: Vec::new(),
+                streams: Vec::new(),
             },
         );
         id
