@@ -1,6 +1,6 @@
 # Patch 12.1.7 source accounting
 
-Slice I0 freezes the public 12.1.7 source, its linked current 1.60.1 inventory and the TOC reference under `data/patch-api/sources/12.1.7-*`. Target: **12.1.7 build 70424, interface 120107**. Exact body SHA-256 identities replace unavailable MediaWiki revision IDs; no revision number is invented. [Investigation and reproduction](../wiki/investigations/patch-12-1-7-api-audit.md). This is source accounting, not implemented API coverage.
+Slice I0 freezes the public 12.1.7 source, its linked current 1.60.1 inventory and the TOC reference under `data/patch-api/sources/12.1.7-*`. Frozen page target: **12.1.7 build 70424, interface 120107**. The selected runtime source moved to **wowt 12.1.7.70493** on 2026-10-23; [source pin and regeneration](ptr-blizzard-ui-source.md) own that target. Frozen bodies/provenance remain historical, not 70493 evidence. Exact body SHA-256 identities replace unavailable MediaWiki revision IDs; no revision number is invented. [Investigation and reproduction](../wiki/investigations/patch-12-1-7-api-audit.md). This is source accounting, not implemented API coverage.
 
 ## What it must do
 
@@ -44,6 +44,46 @@ P01 links the current frozen 1.60.1 page, not the separately sealed historical a
 
 No standalone enum table appears. **Every inherited row is UNKNOWN until I4** resolves row-specific PTR applicability, publication, behavior and native/original-consumer proof. Forever implementations are reuse candidates, not automatic PTR credit. Retail 12.1.5 remains unchanged without row-specific evidence. The [existing 1.60.1 spec](patch-1-60-1-source-accounting.md) and its immutable seals remain unchanged; source accounting never upgrades their behavioral gaps.
 
+## I4a inherited applicability worklist
+
+The companion `data/patch-api/sources/12.1.7-inherited-applicability.json` extends accounting without changing any I0 source, ledger or status bytes. Base revision: `571284aaa8bb29f17d27e90110e4f863921d9330`. Its 1,876 records retain complete literal occurrences, all six opposite-direction PvPObjectiveBanner IDs, 816 additions/1,060 removals, header disagreements, 144 CVars and the distinct `dumpSmallAlloc` command.
+
+- [x] Validate exact IDs and literal fields against the frozen source, not counts alone; retain independent PTR/Forever/Retail applicability, publication, behavior, original-consumer and native statuses.
+- [x] Retain 63 exact opposing-direction sweep intersections across 14 Retail modules, plus the register-only `GetArmorPenetration` reference. These provide no inherited-direction completion credit.
+- [x] Retain 233 rows with exact-symbol lexical test candidates, separately from the 122 original source-candidate rows. Strings/comments and old assertions are discovery only; namespace suffix matches grant zero credit.
+- [x] Reject disposable occurrence/default/kind corruption, direction collapse, command confusion, wrong namespace, unselected consumers, lexical upgrades, wrong-profile/build evidence and old-direction completion credit.
+- [x] Preserve permanent unsupported 3D effects for the actor method; publication/factory status remains UNKNOWN.
+
+**Accounting resolved: 1,876/1,876. Applicability resolved: 0/5,628 profile cells; unresolved: 1,876 per profile.** Selected publisher ownership, TOC chains and source binding are unresolved for every row. `literal_owner` records only a spelling prefix, not a proven selected addon. Proposed selector names are grouping work, not existing Rust selectors or applicability decisions. A fully UNKNOWN map is valid accounting, not closure of I4.
+
+I3 has not accepted source revision `e30d17b106ce76a872c2bdfe69f95b4ec215fd06`: required PTR **wowt 12.1.7.70493**, Gethe `2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af`, 4,578 files. The base still pins **wowxptr 12.1.5.69594**, Gethe `49b69918fcdc77e109813281e4f537d45ec7dcbf`, 4,025 files. No PTR cache was read as 12.1.7. Public page build 70424 remains separate from the pending runtime pin. Forever needs its own accepted 1.60.1 source/selection receipts; Retail remains 12.1.5 preservation, never a surrogate.
+
+`python3 -B tools/test_patch_12_1_7_inherited.py` exercises real validator CLI mutations in disposable roots. `python3 -B tools/validate_patch_12_1_7_inherited.py` validates the companion and unchanged I0 boundary. Historical joins use bounded existing registers, so unrelated later patch additions do not expand this audit. I4b owns accepted-source binding, selected Game/Glue/LoD ownership and grouped runtime observations; no producer or native-parity implementation belongs to I4a.
+
+## I4b conditional static selection
+
+The separate `data/patch-api/sources/12.1.7-inherited-static.json` overlays **only static PTR applicability**. It does not rewrite the I0 or I4a ledgers. Its 1,876 exact occurrence IDs each retain independent PTR/Forever/Retail dispositions. On base `7e786472d`, effective resolutions remain **zero**. The staged `CONDITIONAL_APPLICABLE` cells take effect **only after p1217-source `e30d17b106ce76a872c2bdfe69f95b4ec215fd06` merges**. They do not assert I3 runtime acceptance.
+
+- [x] Bind to the exact I3 `wowt 12.1.7.70493` content-index SHA-256 `e84a8de626166c53d7cccbe0cba65e141488f8cf315d4b03a36c4f181585da00` and 4,578-path PTR manifest SHA-256 `ba4414999237ad7b50de73a2a61d7dd18fee31b2f2c3b70d5a21ad3cdc34d328`; authenticate every file's pinned size and content key plus cache provenance/completion before deriving any cells. Stale 69594 inputs and missing/changed files fail explicitly.
+- [x] Select PTR Mainline/generic/Standard TOCs in runtime order, including underscore/hyphen and case rules, Game/Family substitutions, game-type allow/exclude, enUS, public environment, Game/Glue/Both and LoD. Follow document-level XML includes/scripts, with relative/addon-root/case path resolution. Record each witness's exact symbol, file/line/text/hash, owner, selected TOC, include chain and screen/load group.
+- [x] Accept added-row static obligations from selected Lua declarations, exact native API calls, structured generated API/event documentation, and literal CVar/event consumers. Documentation establishes a source contract, **not a native factory or execution**. A selected declaration establishes an applicable publisher, not a successful addon load or global publication. No current-value/default/effect or producer proof follows.
+- [x] Keep every removed occurrence UNKNOWN: 985 have selected surviving spelling witnesses, but removal/republication/alias provenance is not resolved. All six opposing-banner IDs survive: three added declarations are conditional; the three removed occurrences remain UNKNOWN. No simultaneous presence/absence requirement is invented.
+- [x] Reject constant all-applicable/all-UNKNOWN/not-applicable overlays, altered dependencies/receipts/IDs, unselected files, namespace suffixes, locals/comments/strings, private environments, nonselected locales, stale pins and incomplete caches. These are static-classifier/validator controls, **not simulator producer RED**.
+
+| Conditional PTR source obligations | Resolved on I3 merge | PTR UNKNOWN |
+|---|---:|---:|
+| Globals | 168 | 17 |
+| FrameXML | 253 | 1,259 |
+| Events | 23 | 4 |
+| CVars / typed command | 16 / 0 | 128 / 1 |
+| Widgets | 0 | 7 |
+
+Conditional total: **460 resolved / 5,168 UNKNOWN** across three profiles (PTR 460/1,416; Forever 0/1,876; Retail 0/1,876). All runtime publication, behavior, original-consumer execution and native proof stages stay UNKNOWN. Witness groups overlap: 332 Game, 207 LoD and 122 Glue row memberships; these are not extra resolved cells. API documentation uses its own selected LoD publisher, not an observed factory or the documented API's native screen availability.
+
+All 88 enumerated source-selection exclusions are non-public/non-enUS entries, including two prefix-style `[AllowLoadTextLocale: zhCN]` browser entries. No pinned cache file is missing; none of these exclusions supplies absence credit. Whole secure-addon passes are not modeled by this static tool, even when a global override might exist. Widget owner/factory construction, typed command registration, dynamic consumer arguments/aliases/assignments and all removal applicability remain open. No allocator dump, TTS/hardware change, source synchronization or runtime execution occurs.
+
+Reproduce with `python3 -B tools/test_patch_12_1_7_static.py`. Validate the real companion with `python3 -B tools/patch_12_1_7_static.py --source-root <I3-checkout> --cache <authenticated-70493-AddOns>`; `--write` regenerates it from those read-only inputs. There is no cache fallback. Source decoding preserves every byte through a Latin-1 view of ASCII syntax, including non-UTF-8 comments; receipt hashes cover original bytes. The exact I3 pin and private cache are external inputs, not duplicated vendor source in this branch. I4a remains a sealed all-UNKNOWN accounting baseline; this conditional overlay is the later static disposition source.
+
 ## How it works
 
 - [Source import, validator and evidence limits](../wiki/investigations/patch-12-1-7-api-audit.md).
@@ -64,7 +104,9 @@ No standalone enum table appears. **Every inherited row is UNKNOWN until I4** re
 ## Known gaps (current cycle)
 
 - [ ] I1–I3: epoch selection, metadata rejection, regional file loading and exact PTR source refresh/runtime proof.
-- [ ] I4: all 1,876 inherited applicability/behavior classifications remain UNKNOWN; lexical candidates are not implementation credit.
+- [x] I4a: lossless inherited accounting and per-profile UNKNOWN worklist; zero Cargo.
+- [x] I4b static staging: 460 conditional PTR source obligations, effective only after the exact I3 dependency merges; 5,168 conditional UNKNOWN cells. Effective resolutions on the I4b base remain zero.
+- [ ] I4b runtime and later: successful publisher/LoD loads, native factories, registration/defaults, all behavior and original-consumer execution remain unverified; static receipts are not implementation credit.
 - [ ] I5: GUID timing decision and native oracle; P02–P07 remain deferred.
 - [ ] I6: independent runtime/profile acceptance. A source-only validator success cannot satisfy it.
 
