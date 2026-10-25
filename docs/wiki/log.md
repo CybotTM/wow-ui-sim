@@ -2761,3 +2761,11 @@ Updated the [bank investigation](investigations/wrath-guild-info.md#accepted-run
 ## 2026-10-25 | ingest | Phase-3 core crate boundaries
 
 Recorded static widget/layout, texture decoding and GPU cuts in [core boundaries](design/core-crate-boundaries.md); retained asset/font cycles and unproven build/CPU status are explicit.
+
+## [2026-10-25] correction | Phase 3 move-only rejection repair
+
+[Crate boundaries](design/core-crate-boundaries.md) now retain Frame/EditBox/layout
+and coupled GPU ownership in root to preserve the original profile predicate,
+signatures and three exact cfg guards. Neutral types and quads remain extracted.
+The handoff recipe warms each revision once, separately recorded, then measures
+mtime-only lib.rs and c_club.rs rebuilds. Static-only handoff; no CPU/build proof.

@@ -48,6 +48,14 @@ share the production root atomic. The GPU ownership cut was reduced rather than
 changing test-hook availability. Assertions and function names are unchanged. The root integration and binary files are
 unchanged. Compilation, test execution and compile-CPU proof await a main-owned slot.
 
+## Measurement handoff
+
+The repaired slot recipe uses no cleaning. Warm each revision exactly once with
+lib+integration and retain that CPU receipt separately. Measure library-only after
+an mtime-only touch to `src/lib.rs`; measure root+integration after an mtime-only
+touch to `src/c_api/c_club.rs`. Preserve source hashes and per-service CPU/freshness
+records for both revisions. These measurements are pending, not static evidence.
+
 ## Sources
 
 - [Widget boundary](../../../crates/sim-widget/README.md)
