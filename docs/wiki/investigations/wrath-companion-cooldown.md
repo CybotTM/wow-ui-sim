@@ -67,6 +67,25 @@ repair remain required before original-consumer GREEN. Additive
 missing IDs, empty description for 316099 and revised 108697→1252217 lookup.
 They are unrun API contracts, not original-consumer RED evidence.
 
+## S49 REJECT repair (static, 2026-10-25)
+
+The later `6919ecc76` / `de53244c4` refresh supersedes the provisional outputs
+above and repairs multiline descriptions, but still omits mount spell 458.
+The seeded first mount supplies 458 to the original companion tests; recovery
+validates `spell_lookup::get_spell` before reading history. Thus the Brown Horse
+assertion is required, not an unrelated test. The selector now unions all seeded
+mount spell IDs from `SimState::default().world.mounts`; no ownership filter or
+hand-added spell row is used. Nine distinct IDs have a generator regression.
+Regeneration and all new test execution remain pending; this is not S49 GREEN.
+See the [seeded backing contract](../../specs/wrath-s49-companion-producer-design.md#seeded-mount-spell-backing).
+
+The [refresh receipt](../../../data/spell-catalog/70391-refresh-source.json) now
+uses `$WOW_DATA_EXPORT/12.1.5.70391/` for CSV source paths and
+`$S49_GENERATION_EVIDENCE/` for the sealed generator command. These are named
+external roots, not literal filesystem paths. Only its 22 path strings changed;
+all old output/source/binary hashes still describe the pre-selector generation.
+The next slot must replace that provenance from fresh receipts, not relabel it.
+
 ## Sources
 
 - [Companion spec](../../specs/wrath-s49-companion-producer-design.md) — scope and acceptance boundaries

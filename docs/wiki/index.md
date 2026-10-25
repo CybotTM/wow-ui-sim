@@ -1,3 +1,7 @@
+## [2026-10-25] investigation | S49 rejected refresh repair
+
+[Companion spell backing](investigations/wrath-companion-cooldown.md#s49-reject-repair-static-2026-10-25): portable receipt paths and seeded-mount selector regression staged; generated catalogs and runtime proof still await a slot.
+
 ## [2026-10-24] investigation | S49 70391 refresh and logical CSV records
 
 [Refresh boundary](investigations/wrath-companion-cooldown.md#same-build-spelltrait-refresh-and-csv-boundary) links the per-file receipt, CSV-native dangling references and the physical-line CRLF truncation. Root fix and concrete tests staged; fresh generator, corrected regeneration and S49 runtime GREEN remain slot-gated.

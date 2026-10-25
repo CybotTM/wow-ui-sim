@@ -22,6 +22,20 @@ Legacy companion queries project explicit host inputs through the original cache
 - `src/lua_api/globals/real/wrath_legacy/companions/recovery.rs`: req-13 endpoint arbitration and ordered own/category/GCD branches.
 - `src/lua_api/globals/real/wrath_legacy.rs`: delegates companion registration before shared compat bootstrap.
 
+## Seeded mount spell backing
+
+The compact spell generator must select every summon spell in the simulator's
+seeded mount catalog, including uncollected or unusable mounts. Selection must
+not depend on current ownership. Rows still require authoritative SpellName
+input; unknown IDs must not receive invented metadata. BattlePetSpecies joins
+and creature metadata are outside this repair.
+
+`src/bin/wow_cli/gen_spells.rs::tests::required_spells_include_the_seeded_mount_catalog`
+asserts the nine distinct seeded spell IDs, including Brown Horse 458.
+`src/spell_lookup.rs::tests::brown_horse_has_catalog_spell_metadata` retains the
+name/icon contract. Both require slot execution; current generated data remains
+pre-repair until regeneration.
+
 ## Tests asserting this spec
 
 - `tests/wrath_s49_companion.rs`: explicit metadata, identity, optional slots, missing metadata, out-of-range position; original consumer list transitions.

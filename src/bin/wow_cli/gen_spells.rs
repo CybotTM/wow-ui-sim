@@ -352,6 +352,7 @@ fn load_spell_text_column(
 /// Sources:
 /// - `crates/sim-data/data/traits.rs`: spell_id, overrides_spell_id, visible_spell_id, override_icon fields
 /// - `src/lua_api/globals/spellbook_data.rs`: spell(N) and passive(N) calls
+/// - Seeded mount catalog: every summon spell, regardless of collection/usability
 /// - Hardcoded baseline: action bar spells, trinket/item procs not covered elsewhere
 /// - Addon compatibility: spell names that installed addons index directly during load
 fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Error>> {
@@ -368,20 +369,32 @@ fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Err
         "src/lua_api/globals/spellbook_data.rs",
         &["spell(", "passive("],
     )?;
+    let mount_ids: BTreeSet<u32> = wow_ui_sim::lua_api::SimState::default()
+        .world
+        .mounts
+        .iter()
+        .map(|mount| mount.spell_id)
+        .collect();
     let baseline_ids: BTreeSet<u32> = BASELINE_SPELL_IDS.iter().copied().collect();
     let addon_compat_ids: BTreeSet<u32> = ADDON_COMPAT_SPELL_IDS.iter().copied().collect();
 
     println!(
-        "Required spell IDs: {} (traits: {}, spellbook: {}, baseline: {}, addon compat: {})",
-        trait_ids.len() + spellbook_ids.len() + baseline_ids.len() + addon_compat_ids.len(),
+        "Required spell IDs: {} (traits: {}, spellbook: {}, mounts: {}, baseline: {}, addon compat: {})",
+        trait_ids.len()
+            + spellbook_ids.len()
+            + mount_ids.len()
+            + baseline_ids.len()
+            + addon_compat_ids.len(),
         trait_ids.len(),
         spellbook_ids.len(),
+        mount_ids.len(),
         baseline_ids.len(),
         addon_compat_ids.len(),
     );
 
     let mut all = trait_ids;
     all.extend(&spellbook_ids);
+    all.extend(&mount_ids);
     all.extend(&baseline_ids);
     all.extend(&addon_compat_ids);
     println!("Required spell IDs (deduplicated): {}", all.len());
@@ -498,8 +511,19 @@ fn load_spell_misc(path: &Path) -> Result<HashMap<u32, (u32, u32)>, Box<dyn std:
 
 #[cfg(test)]
 mod tests {
-    use super::load_spell_descriptions;
+    use super::{collect_required_spell_ids, load_spell_descriptions};
+    use std::collections::BTreeSet;
     use std::io::Write;
+
+    #[test]
+    fn required_spells_include_the_seeded_mount_catalog() {
+        let required = collect_required_spell_ids().unwrap();
+        // Includes Brown Horse, a duplicate summon spell, and the uncollected Brutosaur.
+        let mount_spells = BTreeSet::from([
+            458, 23338, 40192, 61425, 72286, 93326, 122708, 171851, 264058,
+        ]);
+        assert!(mount_spells.is_subset(&required));
+    }
 
     #[test]
     fn spell_descriptions_preserve_embedded_crlf() {

@@ -1,3 +1,7 @@
+## [2026-10-25] investigation | S49 rejected refresh repair
+
+[Companion spell backing](investigations/wrath-companion-cooldown.md#s49-reject-repair-static-2026-10-25): portable receipt paths and seeded-mount selector regression staged; generated catalogs and runtime proof still await a slot.
+
 ## [2026-10-24] investigation | Companion S1/S2 and accepted req-13
 
 [Cooldown notes](investigations/wrath-companion-cooldown.md) replace guessed
