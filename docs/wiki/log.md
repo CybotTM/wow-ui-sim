@@ -1,3 +1,13 @@
+## [2026-10-25] fix | Byte-preserving Lua source/cache boundary
+
+Updated [CASC cache](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) and [contract](../specs/casc-loading.md#blizzard-ui-source-bytes): Lua cache reads/content markers are byte-based; XML/TOC/XSD remain strict UTF-8. Production TOC/addon loading was already raw-byte safe. Exact fixture tests cover sync and runtime boundaries.
+
+## [2026-10-25] source | Forever wowf product selection
+
+[Selected-target checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records wowf 1.60.1.70532 / build2582289d81e380163c7a13472df4cb81, repaired live desktop indexes, idle Syncthing and authenticated local root/encoding. Selector/regression now expect wowf. Builds, offline sync, baseline and startup await a released slot after club-unread-integrate and S49; static work is not runtime acceptance.
+## [2026-10-25] staged | Forever verified non-resident Gethe sources
+
+[Cache rule](systems/casc-asset-cache.md#forever-mapped-non-resident-sources) and [contract](../specs/casc-loading.md#forever-mapped-non-resident-ui-sources) record immutable same-build Gethe blobs only for mapped EKeys absent from local indexes, raw CKey/MD5 validation and per-file provenance. Resident CASC and unmapped failures remain separate. Static tests/code committed separately; execution and stock startup remain pending.
 ## [2026-10-25] investigation | S49 rejected refresh repair
 
 [Companion spell backing](investigations/wrath-companion-cooldown.md#s49-reject-repair-static-2026-10-25): portable receipt paths and seeded-mount selector regression staged; generated catalogs and runtime proof still await a slot.
@@ -51,6 +61,10 @@ Dev/test profiles use `debug = 0` (cherry-pick `7a49b872c`); source-line backtra
 ## [2026-10-24] investigation | Wrath guild-info staging
 
 [Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md): existing cache/rank-right reuse, Wrath-only empty/no-guild initialization, two original OnShow branch selectors, static contradiction/selection proof and batch3 seed prerequisites. Edit-only; RED/GREEN, stock and Retail36/42 preservation remain deferred.
+
+## [2026-10-24] source | Forever 70532 static refresh
+
+[New target](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) follows the user's installed-build decision: Gethe ca8368f, manifest +55/-3 and limited listfile +55/-1. All 4,486 source blobs match Git and all paths map. Build identity selects 70532; no build, runtime sync, baseline recapture or warning-free proof yet. Prior 70374 evidence remains historical.
 
 ## [2026-10-24] proof | Bounded reload XML source reuse
 
