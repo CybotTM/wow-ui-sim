@@ -225,12 +225,6 @@ pub fn collect_metadata_lists(metadata: &HashMap<String, String>, keys: &[&str])
         .collect()
 }
 
-/// Resolve the `[Family]` TOC substitution per active client profile. Retail
-/// and Forever vendors ship a `Mainline/` subdir; mists ship `Classic/`. Wrath
-/// FrameXML doesn't use the substitution, so the value there doesn't matter.
-
-/// Resolve the `[Game]` TOC substitution per active client profile.
-
 #[derive(Default)]
 struct ParsedFileEntries {
     files: Vec<PathBuf>,
