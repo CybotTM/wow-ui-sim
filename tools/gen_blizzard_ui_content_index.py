@@ -1,4 +1,4 @@
-"""Build the pinned PTR 12.1.5 Blizzard CDN content index from offline metadata."""
+"""Build the pinned PTR 12.1.7 Blizzard CDN content index from offline metadata."""
 
 from __future__ import annotations
 
@@ -9,10 +9,10 @@ import struct
 import subprocess
 from pathlib import Path
 
-PINNED_GETHE_REVISION = "49b69918fcdc77e109813281e4f537d45ec7dcbf"
-PINNED_VERSION = "12.1.5.69594"
-PINNED_BUILD_KEY = "4a9973f37906f8cfb344f8a9fe6777e0"
-PINNED_CDN_KEY = "3aa83893a3ce9b722a5f51328ad9a552"
+PINNED_GETHE_REVISION = "2cdbc7ff511ec6a8c2f4f8341accd1da44a3c9af"
+PINNED_VERSION = "12.1.7.70493"
+PINNED_BUILD_KEY = "fc3eaa61ff0ade6bf35dbab9727bc161"
+PINNED_CDN_KEY = "c13b476a09cb3262797a6fdc88103036"
 SCHEMA = 1
 
 
@@ -245,10 +245,10 @@ def verify_pinned_metadata(prefix: Path) -> tuple[dict[str, str], dict[str, str]
     build = read_config(build_config_path)
     cdn = read_config(cdn_config_path)
     if (
-        build.get("build-name") != "WOW-69594patch12.1.5_XPTR"
-        or build.get("build-uid") != "wowxptr"
+        build.get("build-name") != "WOW-70493patch12.1.7_PTR"
+        or build.get("build-uid") != "wowt"
     ):
-        raise ValueError("metadata is not the pinned wowxptr 12.1.5 build")
+        raise ValueError("metadata is not the pinned wowt 12.1.7 build")
 
     root_path = metadata_path(prefix, "vfs-root.bin")
     verify_pinned_file(root_path, config_content_key(build, "vfs-root"), "TVFS root")
@@ -340,7 +340,7 @@ def build_content_index(
         raise ValueError("build config has no install content key")
     return {
         "schema": SCHEMA,
-        "product": "wowxptr",
+        "product": "wowt",
         "version": PINNED_VERSION,
         "build_key": PINNED_BUILD_KEY,
         "cdn_key": PINNED_CDN_KEY,
