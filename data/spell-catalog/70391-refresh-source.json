@@ -24,7 +24,7 @@
   "inputs": [
     {
       "table": "Spell",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/Spell.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/Spell.csv",
       "sha256": "2d3bdfef700fc8e762a20a5430bdb6402cdeada48a4f0ccd2b92c431cf61f772",
       "bytes": 23940598,
       "receipt": {
@@ -41,7 +41,7 @@
     },
     {
       "table": "SpellEffect",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/SpellEffect.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/SpellEffect.csv",
       "sha256": "cfeb5b99be323da7e3c23f7d6b956247eafeb255d41135e57aac6b3abe16a115",
       "bytes": 57702094,
       "receipt": {
@@ -58,7 +58,7 @@
     },
     {
       "table": "SpellMisc",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/SpellMisc.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/SpellMisc.csv",
       "sha256": "f09e793705340f96cb8941ddafcbe6c2e0328bb1d25c6f02c1422fde16469658",
       "bytes": 46315248,
       "receipt": {
@@ -75,7 +75,7 @@
     },
     {
       "table": "SpellName",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/SpellName.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/SpellName.csv",
       "sha256": "a6b1af7f9075d88edd2584ab69f7613f3f5faeecd6f6407912f37e4e92ebbd72",
       "bytes": 11070842,
       "receipt": {
@@ -92,7 +92,7 @@
     },
     {
       "table": "SpellPower",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/SpellPower.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/SpellPower.csv",
       "sha256": "651b3b5d3fdd80365fc6765cf174e5f3f44d3b6e2b94e1ca87a6e0c14a622c1a",
       "bytes": 234482,
       "receipt": {
@@ -109,7 +109,7 @@
     },
     {
       "table": "TraitCond",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitCond.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitCond.csv",
       "sha256": "e0a5cd644ae77682d385f4d37ac8d4bd7a1a85fa4ab02068d94a89fe92838ecb",
       "bytes": 512455,
       "receipt": {
@@ -126,7 +126,7 @@
     },
     {
       "table": "TraitCurrency",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitCurrency.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitCurrency.csv",
       "sha256": "b446df124d325c0dd98a3b7ca7a6859c56aa71a8a40d066685dd79bfa9d60824",
       "bytes": 24799,
       "receipt": {
@@ -143,7 +143,7 @@
     },
     {
       "table": "TraitDefinition",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitDefinition.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitDefinition.csv",
       "sha256": "51923f4bc70c67241e6a22477f2edc1c9e4a07e4197bab63bcbefec387536224",
       "bytes": 927337,
       "receipt": {
@@ -160,7 +160,7 @@
     },
     {
       "table": "TraitEdge",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitEdge.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitEdge.csv",
       "sha256": "c46d2621c5cc71000268b28d292dc68e9fab512848102b3a11ac35c25aa0f681",
       "bytes": 180061,
       "receipt": {
@@ -177,7 +177,7 @@
     },
     {
       "table": "TraitNode",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitNode.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitNode.csv",
       "sha256": "99db876119193b85283e28fa8f992c6597a38ff0639343ad09e6859825d67624",
       "bytes": 294462,
       "receipt": {
@@ -194,7 +194,7 @@
     },
     {
       "table": "TraitNodeEntry",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitNodeEntry.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitNodeEntry.csv",
       "sha256": "1c78846f7c3cb919f9692807d09d9991d0e8eb78c4d0afb76e35606bebd7d910",
       "bytes": 355536,
       "receipt": {
@@ -211,7 +211,7 @@
     },
     {
       "table": "TraitNodeGroupXTraitCond",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitNodeGroupXTraitCond.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitNodeGroupXTraitCond.csv",
       "sha256": "822432b6f0f0d21bb76b0ed78fb1636e34bf9b09a1c37715fdfb3fb36dbed813",
       "bytes": 45865,
       "receipt": {
@@ -228,7 +228,7 @@
     },
     {
       "table": "TraitNodeGroupXTraitNode",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitNodeGroupXTraitNode.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitNodeGroupXTraitNode.csv",
       "sha256": "8cd0288420c8f57c62c020c78d16a0f06e48fd246a4535ecea42be19fd6ecf6f",
       "bytes": 428802,
       "receipt": {
@@ -245,7 +245,7 @@
     },
     {
       "table": "TraitNodeXTraitCond",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitNodeXTraitCond.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitNodeXTraitCond.csv",
       "sha256": "1164b0374589aedac9131fda26e75acdb36c4c8dccc0970e5f964f0b7d4101fc",
       "bytes": 156224,
       "receipt": {
@@ -262,7 +262,7 @@
     },
     {
       "table": "TraitNodeXTraitNodeEntry",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitNodeXTraitNodeEntry.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitNodeXTraitNodeEntry.csv",
       "sha256": "8d89da657da3e2c946ed6f796d4c9eeccf2ecfe846615b8d81f53da1385fa394",
       "bytes": 339949,
       "receipt": {
@@ -279,7 +279,7 @@
     },
     {
       "table": "TraitSubTree",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitSubTree.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitSubTree.csv",
       "sha256": "7bb535aa8d66acea4c46e6bfbb3c43767f41969c55753230386a9eac8b423c85",
       "bytes": 13650,
       "receipt": {
@@ -296,7 +296,7 @@
     },
     {
       "table": "TraitTree",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitTree.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitTree.csv",
       "sha256": "0ac331f7938b7f7d6118ab47bfbbefeba19348380b170d33a1f3eaa891805154",
       "bytes": 6412,
       "receipt": {
@@ -313,7 +313,7 @@
     },
     {
       "table": "TraitTreeXTraitCurrency",
-      "source": "/home/osso/.worktrees/db2-follow-proof/exports/db2/12.1.5.70391/TraitTreeXTraitCurrency.csv",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitTreeXTraitCurrency.csv",
       "sha256": "62337910a3ad941258230741fafe1c03c869f0652db0825ebde1fd875cd92084",
       "bytes": 22762,
       "receipt": {
@@ -349,7 +349,7 @@
       ],
       "selection_inputs": [],
       "command": [
-        "/home/osso/.local/state/wow-ui-sim/handoff/s49-rebase-simdata/slot1-run/wow-cli-fresh",
+        "$S49_GENERATION_EVIDENCE/wow-cli-fresh",
         "generate",
         "traits"
       ]
@@ -369,7 +369,7 @@
         "src/bin/wow_cli/gen_spells.rs"
       ],
       "command": [
-        "/home/osso/.local/state/wow-ui-sim/handoff/s49-rebase-simdata/slot1-run/wow-cli-fresh",
+        "$S49_GENERATION_EVIDENCE/wow-cli-fresh",
         "generate",
         "spells"
       ]
@@ -389,7 +389,7 @@
         "src/bin/wow_cli/gen_spells.rs"
       ],
       "command": [
-        "/home/osso/.local/state/wow-ui-sim/handoff/s49-rebase-simdata/slot1-run/wow-cli-fresh",
+        "$S49_GENERATION_EVIDENCE/wow-cli-fresh",
         "generate",
         "spells"
       ]
@@ -409,7 +409,7 @@
         "src/bin/wow_cli/gen_spells.rs"
       ],
       "command": [
-        "/home/osso/.local/state/wow-ui-sim/handoff/s49-rebase-simdata/slot1-run/wow-cli-fresh",
+        "$S49_GENERATION_EVIDENCE/wow-cli-fresh",
         "generate",
         "spells"
       ]
