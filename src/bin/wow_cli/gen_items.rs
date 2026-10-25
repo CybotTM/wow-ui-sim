@@ -10,7 +10,7 @@
 use super::csv_util::{escape_str, parse_csv_line, read_csv_records, wow_data_dir};
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufReader, Write};
 use std::path::Path;
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -364,8 +364,10 @@ fn parse_appearance_icons(
 ) -> Result<HashMap<u32, u32>, Box<dyn std::error::Error>> {
     let file = File::open(wow_data.join("ItemAppearance.csv"))?;
     let mut map: HashMap<u32, u32> = HashMap::new();
-    for (i, line) in BufReader::new(file).lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(BufReader::new(file))?
+        .into_iter()
+        .enumerate()
+    {
         if i == 0 {
             continue;
         }
@@ -390,8 +392,10 @@ fn resolve_item_icons(
 ) -> Result<HashMap<u32, u32>, Box<dyn std::error::Error>> {
     let file = File::open(wow_data.join("ItemModifiedAppearance.csv"))?;
     let mut icon_map: HashMap<u32, u32> = HashMap::new();
-    for (i, line) in BufReader::new(file).lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(BufReader::new(file))?
+        .into_iter()
+        .enumerate()
+    {
         if i == 0 {
             continue;
         }
@@ -426,8 +430,7 @@ fn build_item_map(
     let mut count = 0u32;
     let mut skipped = 0u32;
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }

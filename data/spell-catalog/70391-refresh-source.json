@@ -1,0 +1,509 @@
+{
+  "verified": "2026-10-25",
+  "identity": {
+    "product": "wow",
+    "build_key": "334a36cf5f3c32a5f7a167405487fa14",
+    "build": "12.1.5.70391",
+    "build_config_sha256": "f30cdd30bcbb613795557606c0015411640ffa4a2710f7419ea75dae345c964d",
+    "root_content_key": "25c68dd1c7597cccd94252085c3367ed",
+    "encoding_content_key": "8d0576391f8e80ce55940381fc3f674a",
+    "extraction_source": "authenticated-local-CASC-content-root"
+  },
+  "schema_commit": "d6f50d4f351193e84226aa62a36faa0f58528afa",
+  "source_revision_before_generation": "c53d49f281976a3b9540d419dffca3efc069ba48",
+  "generator_binary_sha256": "643b19e5ec9b8156929f4f70f739e1950e9e18782e750a06d8b449aa165cf8d4",
+  "generator_sources": {
+    "src/bin/wow_cli/audit_api/gap.rs": "1ea37c73a7988a7c40915fff122ce43d45602da7084a17527a43e1bd6bfc5e1f",
+    "src/bin/wow_cli/audit_api/gap/gap_tests.rs": "9b7bc94cb981d4567057be89393308ef006c310e8011149338dd27ebc56f6e3d",
+    "src/bin/wow_cli/audit_api/mod.rs": "9c2cf4da0036b7e0d6af650dc1e5e178057687353c01cc36629b51ab4bacb287",
+    "src/bin/wow_cli/audit_api/output.rs": "ec6d237b557079a42f1ae04bdc9e088781ab36c287965591aae698074af9cdc0",
+    "src/bin/wow_cli/audit_api/patch_manifest.rs": "f00c3c280bdc1c3f632241a532890c91efeb0afa120ffacbd72fd5bf20b871ff",
+    "src/bin/wow_cli/audit_api/patch_source_index.rs": "6c2f82f68707af5acf20814038efc8029ffcd753e95ddf5c1973a13948f5ba07",
+    "src/bin/wow_cli/audit_api/scanner.rs": "8e25d0e9b797fc4b5f0875d382ff77451be42289460054f53d67cce75ef9e3ad",
+    "src/bin/wow_cli/csv_util.rs": "3b1cb1f752ca890cfd20b2925610b54e4c5c8fa31b5ae8111bc69e41f6712ae1",
+    "src/bin/wow_cli/gen_atlas.rs": "90dd7cccd65e12bb862c84de0315895898005a29086e18e0943378b3bcd2af93",
+    "src/bin/wow_cli/gen_atlas_tests.rs": "185a6b54dce862225268d6049bfdd08fb3ea975c398f5d9148640cca5d5185a6",
+    "src/bin/wow_cli/gen_currencies.rs": "8e1fa87f3468f59fc71567ff3399fcf1733929c2afa5d2426cf0bb5fb94e7af0",
+    "src/bin/wow_cli/gen_encounter_journal.rs": "38a9c4be39ad43ebc95ef4b1732a8b809c020c15ee15df5abdc5769e55097109",
+    "src/bin/wow_cli/gen_global_strings.rs": "46ae784431de66e3dbfc9a94ba24fa8c31f53d930fc8b52bcd39615325a84dd5",
+    "src/bin/wow_cli/gen_items.rs": "9833fbe2ebd48df6f7ba6a314b2fd6be3836f0fe707655854a3a2f1c1b6305b6",
+    "src/bin/wow_cli/gen_manifest.rs": "c47eb072aca0fcdfc557b3c70558cac305c055bb3779a7fa1ae068abb65102bc",
+    "src/bin/wow_cli/gen_map_art.rs": "35fcb3126b89e66abb1b68979ed90dd7501bb25b95a31793bf7ba2e4d51e52f7",
+    "src/bin/wow_cli/gen_patch_api_docs/evaluate.rs": "cb2cbce5e1111ba3428f2871808703b17783560634d4d530f7b98b9c4a643302",
+    "src/bin/wow_cli/gen_patch_api_docs/mod.rs": "6dd552751843d41ce5f3ffa712ced93c0b034a3837d5b666f6aaa8818476ea1b",
+    "src/bin/wow_cli/gen_patch_api_docs/records.rs": "cde0e29304c511b3dc7fced9323dbf295aa259be170577027adc4210d4902a8c",
+    "src/bin/wow_cli/gen_patch_api_docs/snapshot.rs": "2952f89981f243dcc3392ec2d79bbf9dabcdeb6286332397470ce542af4ac64e",
+    "src/bin/wow_cli/gen_patch_api_docs/tests.rs": "36cc94cdadf3d1f19c71b856abf4c74a2b6ecba3a9b729edbeb5152c9d5fa2e6",
+    "src/bin/wow_cli/gen_quest_poi.rs": "e7f7055f5afc8beb8d3444a4f9ea3926ead56cd52645e3d4fae1c27a078f0dc4",
+    "src/bin/wow_cli/gen_spells.rs": "e68824561f54541929fd2d8bca98984b6c5249d7d5057baa2a13b113972fa7aa",
+    "src/bin/wow_cli/gen_spells_power.rs": "f8ece2e3ade0231f7583439e51a8ded0a5f2e805eb19d0ecafe08cec5eab7710",
+    "src/bin/wow_cli/gen_traits.rs": "927e92a3899c90213b420f3cf5a25a9f34e3250d5e120b3e5ce086bcc9396232",
+    "src/bin/wow_cli/gen_traits_emit.rs": "23cb75ed5344543c3fcdcd9964f1822c76d0d1db1d2ef773c04d9d055347defb",
+    "src/bin/wow_cli/gen_traits_load.rs": "21ca2e6d5402a1d098840a35b931142dbc47206693b704e886ba3f8aede13df9",
+    "src/bin/wow_cli/gen_zones.rs": "3ea82338d99a1f3afb7cbddfd10a885dc3cbcfaf274f565cfa4f61daf6ac120e",
+    "src/bin/wow_cli/global_slot_coverage.rs": "5a822c4d078c50451b9e7f49898ad8770041eabcae3b9f838e17ec6df6094840",
+    "src/bin/wow_cli/main.rs": "137b757a6fb5fe096f624a395c98b5baec5592531ea6f1a18d374457f72a99fa",
+    "src/bin/wow_cli/startup_intern_stats.rs": "c8991f74f4be873f186791dc0bb08d5436af02b086f2cc32f4bfc38f83ea458a",
+    "src/client_profile.rs": "a23f899ad7ed8722071b881f9c6decfe45eadbbcedf79175947c014d4acd7f20",
+    "src/lib.rs": "3caa04c98a76e500ef2c97fb51bd37611aabb3edbae0c504bdb36a699fb49303",
+    "src/lua_api/state.rs": "aab2ab674827dd0898b81952a0a966515276c5989d1b5fb96147aae7c2d9d6f3",
+    "src/lua_api/state_defaults.rs": "aefff3ec55bf1b6a94a77ea04e88d8ff19b318a697660a77974675b7ac2352fe",
+    "src/lua_api/state_types/character_world_defaults.rs": "0bd49cbe926b1aa03ed70b52d0749094372e4b15ee16dae082758bca104cb141"
+  },
+  "format_command": "rustfmt --edition 2024 --config skip_children=true crates/sim-data/data/traits.rs crates/sim-data/data/spells.rs crates/sim-data/data/spell_descriptions.rs crates/sim-data/data/spell_power.rs",
+  "inputs": [
+    {
+      "table": "Spell",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/Spell.csv",
+      "sha256": "2d3bdfef700fc8e762a20a5430bdb6402cdeada48a4f0ccd2b92c431cf61f772",
+      "bytes": 23940598,
+      "receipt": {
+        "layout": "E3D134FB",
+        "rows": 416202,
+        "unreadable_records": 37,
+        "id_column": "ID",
+        "fdid": 1140089,
+        "db2_sha256": "9aaa44efd2875764232396ec89418eb61f0f0cb7c50fc78503df029e617c1fbc",
+        "schema_sha256": "aa9e78af83c1d5d11979ca2f370c82270072d437bef572e38e6d91b68fde1399",
+        "csv_sha256": "2d3bdfef700fc8e762a20a5430bdb6402cdeada48a4f0ccd2b92c431cf61f772",
+        "content_authenticated": false
+      }
+    },
+    {
+      "table": "SpellEffect",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/SpellEffect.csv",
+      "sha256": "cfeb5b99be323da7e3c23f7d6b956247eafeb255d41135e57aac6b3abe16a115",
+      "bytes": 57702094,
+      "receipt": {
+        "layout": "5362E3D4",
+        "rows": 632510,
+        "unreadable_records": 160,
+        "id_column": "ID",
+        "fdid": 1140088,
+        "db2_sha256": "1ee2097927f9bf94b5f0269c59e8775fb8bf416218a2df768936935e33ace3da",
+        "schema_sha256": "f1a486829103b7da0e37243c830ce3b95d101d96c4bd0a698517a90326b2311b",
+        "csv_sha256": "cfeb5b99be323da7e3c23f7d6b956247eafeb255d41135e57aac6b3abe16a115",
+        "content_authenticated": false
+      }
+    },
+    {
+      "table": "SpellMisc",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/SpellMisc.csv",
+      "sha256": "f09e793705340f96cb8941ddafcbe6c2e0328bb1d25c6f02c1422fde16469658",
+      "bytes": 46315248,
+      "receipt": {
+        "layout": "434B3607",
+        "rows": 419787,
+        "unreadable_records": 128,
+        "id_column": "ID",
+        "fdid": 1003144,
+        "db2_sha256": "4ca73fadfe87f9ac11350894834f9699daae154e53be7d1c0ca9d45f662f6e3a",
+        "schema_sha256": "bbc0aeac591315f857037e4e4ec825131542d521255375175d4242cd98225e35",
+        "csv_sha256": "f09e793705340f96cb8941ddafcbe6c2e0328bb1d25c6f02c1422fde16469658",
+        "content_authenticated": false
+      }
+    },
+    {
+      "table": "SpellName",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/SpellName.csv",
+      "sha256": "a6b1af7f9075d88edd2584ab69f7613f3f5faeecd6f6407912f37e4e92ebbd72",
+      "bytes": 11070842,
+      "receipt": {
+        "layout": "782EE721",
+        "rows": 416203,
+        "unreadable_records": 101,
+        "id_column": "ID",
+        "fdid": 1990283,
+        "db2_sha256": "3589919aa926f4ff8c5d71d7542a817a7395f331d0ccba15317d70bb57c9dfc3",
+        "schema_sha256": "5f3cbcdf957152668d5e033c1c4ff79a7b436e2e45b8521270ca7e64cc028629",
+        "csv_sha256": "a6b1af7f9075d88edd2584ab69f7613f3f5faeecd6f6407912f37e4e92ebbd72",
+        "content_authenticated": false
+      }
+    },
+    {
+      "table": "SpellPower",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/SpellPower.csv",
+      "sha256": "651b3b5d3fdd80365fc6765cf174e5f3f44d3b6e2b94e1ca87a6e0c14a622c1a",
+      "bytes": 234482,
+      "receipt": {
+        "layout": "61AD223F",
+        "rows": 5723,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 982806,
+        "db2_sha256": "39153855efa4dd8ab44dc0dab0af4f8a884da9d8226b75f414b028c298f18b9a",
+        "schema_sha256": "e4b9d04a983cebc71df080c3200ac672eb0847cfb7999ee5fdb71adad80584c3",
+        "csv_sha256": "651b3b5d3fdd80365fc6765cf174e5f3f44d3b6e2b94e1ca87a6e0c14a622c1a",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitCond",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitCond.csv",
+      "sha256": "e0a5cd644ae77682d385f4d37ac8d4bd7a1a85fa4ab02068d94a89fe92838ecb",
+      "bytes": 512455,
+      "receipt": {
+        "layout": "BFDD1994",
+        "rows": 10971,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4543085,
+        "db2_sha256": "8502ce258e61793bb93b3965ecca510e6dc4032ab5fb1de00383eccbc66f037f",
+        "schema_sha256": "5129860cf31b3fe935987c152451da3a77dfc1705656678e5f8ab89e36b4f040",
+        "csv_sha256": "e0a5cd644ae77682d385f4d37ac8d4bd7a1a85fa4ab02068d94a89fe92838ecb",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitCurrency",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitCurrency.csv",
+      "sha256": "b446df124d325c0dd98a3b7ca7a6859c56aa71a8a40d066685dd79bfa9d60824",
+      "bytes": 24799,
+      "receipt": {
+        "layout": "7E04D40D",
+        "rows": 1361,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4524216,
+        "db2_sha256": "5f88d89b3489bcad299b6aa4374126c4077aee7a9b3ba39e24361ec8d1f67683",
+        "schema_sha256": "d48305e2f6a0ef157ce44ffe474f4ee2215e90f6c8e84778f28d20ec635ba9bc",
+        "csv_sha256": "b446df124d325c0dd98a3b7ca7a6859c56aa71a8a40d066685dd79bfa9d60824",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitDefinition",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitDefinition.csv",
+      "sha256": "51923f4bc70c67241e6a22477f2edc1c9e4a07e4197bab63bcbefec387536224",
+      "bytes": 927337,
+      "receipt": {
+        "layout": "060A9F4C",
+        "rows": 17042,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420327,
+        "db2_sha256": "29b691fc35d7e9f2385f738dba93aa2b53e69102a197df8172874d2c8d4f0ece",
+        "schema_sha256": "2aea4884cee8cb68b45d22deeef21412731fbcd7b10880a682c57f32d2519593",
+        "csv_sha256": "51923f4bc70c67241e6a22477f2edc1c9e4a07e4197bab63bcbefec387536224",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitEdge",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitEdge.csv",
+      "sha256": "c46d2621c5cc71000268b28d292dc68e9fab512848102b3a11ac35c25aa0f681",
+      "bytes": 180061,
+      "receipt": {
+        "layout": "907C9B77",
+        "rows": 7280,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420308,
+        "db2_sha256": "7c7e65f873c07adcbf9381512a8aacec9d6e8906a83875cfe30168d97c915e04",
+        "schema_sha256": "e74c14f178433a840f56cc7fbed442aa823751f255d5397de8cba031fece3173",
+        "csv_sha256": "c46d2621c5cc71000268b28d292dc68e9fab512848102b3a11ac35c25aa0f681",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitNode",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitNode.csv",
+      "sha256": "99db876119193b85283e28fa8f992c6597a38ff0639343ad09e6859825d67624",
+      "bytes": 294462,
+      "receipt": {
+        "layout": "A01A518A",
+        "rows": 11878,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420297,
+        "db2_sha256": "09aa98ce8872f108ec10dd0dc7d0a9bc03bfbf0a2107a1575e9c3f73bd9db333",
+        "schema_sha256": "cce7edc0de29b84ad052cd5840befa91e70ab5fd591d1f95f34f8435ec70f430",
+        "csv_sha256": "99db876119193b85283e28fa8f992c6597a38ff0639343ad09e6859825d67624",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitNodeEntry",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitNodeEntry.csv",
+      "sha256": "1c78846f7c3cb919f9692807d09d9991d0e8eb78c4d0afb76e35606bebd7d910",
+      "bytes": 355536,
+      "receipt": {
+        "layout": "733B015D",
+        "rows": 17150,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420298,
+        "db2_sha256": "4d2c01a2b7ebc29cfd1c903b1f1d288838dec1b7c93e0b7642d084786c2dad24",
+        "schema_sha256": "fd1b85c3707d5a06ef44e1b25309a611d1d3d4e94c2f25ee93a05716e86a34bf",
+        "csv_sha256": "1c78846f7c3cb919f9692807d09d9991d0e8eb78c4d0afb76e35606bebd7d910",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitNodeGroupXTraitCond",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitNodeGroupXTraitCond.csv",
+      "sha256": "822432b6f0f0d21bb76b0ed78fb1636e34bf9b09a1c37715fdfb3fb36dbed813",
+      "bytes": 45865,
+      "receipt": {
+        "layout": "3F06B639",
+        "rows": 2438,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4543090,
+        "db2_sha256": "fdabb7ced607b372fb97d559af4d8ecf639e91172bd8c257211dd7d8ae81b899",
+        "schema_sha256": "62895653744d17061bebbb387dcd07f55a4543f14c139361209b2df6f5ec51c0",
+        "csv_sha256": "822432b6f0f0d21bb76b0ed78fb1636e34bf9b09a1c37715fdfb3fb36dbed813",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitNodeGroupXTraitNode",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitNodeGroupXTraitNode.csv",
+      "sha256": "8cd0288420c8f57c62c020c78d16a0f06e48fd246a4535ecea42be19fd6ecf6f",
+      "bytes": 428802,
+      "receipt": {
+        "layout": "B9288EB8",
+        "rows": 19076,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420302,
+        "db2_sha256": "7226bd8e0332af750baf01a3b4a11809490ec807877f0968a4e8d108a2d1b540",
+        "schema_sha256": "7e0df34cd6a2cf5fb96fa1d39d7683cca1070c1bbd835b09020b640585d254b7",
+        "csv_sha256": "8cd0288420c8f57c62c020c78d16a0f06e48fd246a4535ecea42be19fd6ecf6f",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitNodeXTraitCond",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitNodeXTraitCond.csv",
+      "sha256": "1164b0374589aedac9131fda26e75acdb36c4c8dccc0970e5f964f0b7d4101fc",
+      "bytes": 156224,
+      "receipt": {
+        "layout": "E2160AA8",
+        "rows": 8026,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4543092,
+        "db2_sha256": "538e5ce15d10aa9281dddacc632a863fb6f954e5c59220a72d626f96e69249f4",
+        "schema_sha256": "fc4b33b8a62bb62e1b01762081ee08c441a400ace4f783e1a16d5123b4d3433e",
+        "csv_sha256": "1164b0374589aedac9131fda26e75acdb36c4c8dccc0970e5f964f0b7d4101fc",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitNodeXTraitNodeEntry",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitNodeXTraitNodeEntry.csv",
+      "sha256": "8d89da657da3e2c946ed6f796d4c9eeccf2ecfe846615b8d81f53da1385fa394",
+      "bytes": 339949,
+      "receipt": {
+        "layout": "802ED455",
+        "rows": 14127,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420304,
+        "db2_sha256": "7eb256186188e83b8f17ac63e42d7a3e92ec03520ffaff05d08f8ab3f56116e7",
+        "schema_sha256": "ab2bb5dabe16ef35c56684a6d6f0c0f2ee4e5d6a646359514cd04691c5926bb6",
+        "csv_sha256": "8d89da657da3e2c946ed6f796d4c9eeccf2ecfe846615b8d81f53da1385fa394",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitSubTree",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitSubTree.csv",
+      "sha256": "7bb535aa8d66acea4c46e6bfbb3c43767f41969c55753230386a9eac8b423c85",
+      "bytes": 13650,
+      "receipt": {
+        "layout": "716FF6FB",
+        "rows": 87,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 5534447,
+        "db2_sha256": "1f6e4d9b0bdeee9dc06bf95f06c68221973c0268008b927fda3524a7b8bb925a",
+        "schema_sha256": "f586800ad52f551f788c5c832322f305a6c45328325322d758dbdbe9c34a6c20",
+        "csv_sha256": "7bb535aa8d66acea4c46e6bfbb3c43767f41969c55753230386a9eac8b423c85",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitTree",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitTree.csv",
+      "sha256": "0ac331f7938b7f7d6118ab47bfbbefeba19348380b170d33a1f3eaa891805154",
+      "bytes": 6412,
+      "receipt": {
+        "layout": "FBCDBA8F",
+        "rows": 196,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4420305,
+        "db2_sha256": "5db170a7326ef4a5948f685b658d4c34cfc34e4da14b54cd906a54fea0668782",
+        "schema_sha256": "2882f84c866eff06d173686ea7f19f5e02c277e8ce4a1a1fbad6cb8d0fa337c5",
+        "csv_sha256": "0ac331f7938b7f7d6118ab47bfbbefeba19348380b170d33a1f3eaa891805154",
+        "content_authenticated": true
+      }
+    },
+    {
+      "table": "TraitTreeXTraitCurrency",
+      "source": "$WOW_DATA_EXPORT/12.1.5.70391/TraitTreeXTraitCurrency.csv",
+      "sha256": "62337910a3ad941258230741fafe1c03c869f0652db0825ebde1fd875cd92084",
+      "bytes": 22762,
+      "receipt": {
+        "layout": "E093CD62",
+        "rows": 1307,
+        "unreadable_records": 0,
+        "id_column": "ID",
+        "fdid": 4524218,
+        "db2_sha256": "5858b3246f2d469a5a08d7e47129b3e75799b980016d7216c714348c61291666",
+        "schema_sha256": "f4430b3eb6a9aebe161239042d96d71cfcc04b91c76d0321f85d1763f162fdde",
+        "csv_sha256": "62337910a3ad941258230741fafe1c03c869f0652db0825ebde1fd875cd92084",
+        "content_authenticated": true
+      }
+    }
+  ],
+  "outputs": {
+    "crates/sim-data/data/traits.rs": {
+      "sha256": "d6fb8d026ca0406b1ccc7bd9d49a27a7db5ea5a2cfb590babe6df3a2754facc8",
+      "csv_inputs": [
+        "TraitCond",
+        "TraitCurrency",
+        "TraitDefinition",
+        "TraitEdge",
+        "TraitNode",
+        "TraitNodeEntry",
+        "TraitNodeGroupXTraitCond",
+        "TraitNodeGroupXTraitNode",
+        "TraitNodeXTraitCond",
+        "TraitNodeXTraitNodeEntry",
+        "TraitSubTree",
+        "TraitTree",
+        "TraitTreeXTraitCurrency"
+      ],
+      "selection_inputs": [],
+      "command": [
+        "$S49_GENERATION_EVIDENCE/wow-cli-sealed",
+        "generate",
+        "traits"
+      ]
+    },
+    "crates/sim-data/data/spells.rs": {
+      "sha256": "426e5cac25fbf943557aa25ac08721f1e202483c6f1ff409fd9c3f8754b5c766",
+      "csv_inputs": [
+        "SpellName",
+        "Spell",
+        "SpellMisc",
+        "SpellPower",
+        "SpellEffect"
+      ],
+      "selection_inputs": [
+        "crates/sim-data/data/traits.rs",
+        "src/lua_api/globals/spellbook_data.rs",
+        "src/bin/wow_cli/gen_spells.rs",
+        "src/lua_api/state_defaults.rs",
+        "src/lua_api/state.rs",
+        "src/lua_api/state_types/character_world_defaults.rs"
+      ],
+      "command": [
+        "$S49_GENERATION_EVIDENCE/wow-cli-sealed",
+        "generate",
+        "spells"
+      ],
+      "selection_traits_revision": "c53d49f281976a3b9540d419dffca3efc069ba48"
+    },
+    "crates/sim-data/data/spell_descriptions.rs": {
+      "sha256": "3d82759bde91b9e30a51a49d65ef0419d81d47c546d596a19b0896358a9832b8",
+      "csv_inputs": [
+        "SpellName",
+        "Spell",
+        "SpellMisc",
+        "SpellPower",
+        "SpellEffect"
+      ],
+      "selection_inputs": [
+        "crates/sim-data/data/traits.rs",
+        "src/lua_api/globals/spellbook_data.rs",
+        "src/bin/wow_cli/gen_spells.rs",
+        "src/lua_api/state_defaults.rs",
+        "src/lua_api/state.rs",
+        "src/lua_api/state_types/character_world_defaults.rs"
+      ],
+      "command": [
+        "$S49_GENERATION_EVIDENCE/wow-cli-sealed",
+        "generate",
+        "spells"
+      ],
+      "selection_traits_revision": "c53d49f281976a3b9540d419dffca3efc069ba48"
+    },
+    "crates/sim-data/data/spell_power.rs": {
+      "sha256": "22190fe0f998795bc63d40380c2aebba5c69aa042b64c7f2798c6b7e7d7a8fe7",
+      "csv_inputs": [
+        "SpellName",
+        "Spell",
+        "SpellMisc",
+        "SpellPower",
+        "SpellEffect"
+      ],
+      "selection_inputs": [
+        "crates/sim-data/data/traits.rs",
+        "src/lua_api/globals/spellbook_data.rs",
+        "src/bin/wow_cli/gen_spells.rs",
+        "src/lua_api/state_defaults.rs",
+        "src/lua_api/state.rs",
+        "src/lua_api/state_types/character_world_defaults.rs"
+      ],
+      "command": [
+        "$S49_GENERATION_EVIDENCE/wow-cli-sealed",
+        "generate",
+        "spells"
+      ],
+      "selection_traits_revision": "c53d49f281976a3b9540d419dffca3efc069ba48"
+    }
+  },
+  "limits": [
+    "Seeded mount summon spells are selected; BattlePetSpecies joins remain outside this repair. S49 consumer GREEN requires separate runtime proof.",
+    "Trait CSVs have authenticated content and no unreadable records. SpellName/Spell/SpellMisc/SpellEffect CSV receipts report unreadable records and content_authenticated=false; export hash/build binding is not complete-native-content certification.",
+    "CSV-native dangling references are retained, not fabricated or removed. Cross-check distinguishes CSV absence from generator omission."
+  ],
+  "generator": {
+    "revision": "c53d49f281976a3b9540d419dffca3efc069ba48",
+    "sha256": "643b19e5ec9b8156929f4f70f739e1950e9e18782e750a06d8b449aa165cf8d4",
+    "sources": {
+      "src/bin/wow_cli/audit_api/gap.rs": "1ea37c73a7988a7c40915fff122ce43d45602da7084a17527a43e1bd6bfc5e1f",
+      "src/bin/wow_cli/audit_api/gap/gap_tests.rs": "9b7bc94cb981d4567057be89393308ef006c310e8011149338dd27ebc56f6e3d",
+      "src/bin/wow_cli/audit_api/mod.rs": "9c2cf4da0036b7e0d6af650dc1e5e178057687353c01cc36629b51ab4bacb287",
+      "src/bin/wow_cli/audit_api/output.rs": "ec6d237b557079a42f1ae04bdc9e088781ab36c287965591aae698074af9cdc0",
+      "src/bin/wow_cli/audit_api/patch_manifest.rs": "f00c3c280bdc1c3f632241a532890c91efeb0afa120ffacbd72fd5bf20b871ff",
+      "src/bin/wow_cli/audit_api/patch_source_index.rs": "6c2f82f68707af5acf20814038efc8029ffcd753e95ddf5c1973a13948f5ba07",
+      "src/bin/wow_cli/audit_api/scanner.rs": "8e25d0e9b797fc4b5f0875d382ff77451be42289460054f53d67cce75ef9e3ad",
+      "src/bin/wow_cli/csv_util.rs": "3b1cb1f752ca890cfd20b2925610b54e4c5c8fa31b5ae8111bc69e41f6712ae1",
+      "src/bin/wow_cli/gen_atlas.rs": "90dd7cccd65e12bb862c84de0315895898005a29086e18e0943378b3bcd2af93",
+      "src/bin/wow_cli/gen_atlas_tests.rs": "185a6b54dce862225268d6049bfdd08fb3ea975c398f5d9148640cca5d5185a6",
+      "src/bin/wow_cli/gen_currencies.rs": "8e1fa87f3468f59fc71567ff3399fcf1733929c2afa5d2426cf0bb5fb94e7af0",
+      "src/bin/wow_cli/gen_encounter_journal.rs": "38a9c4be39ad43ebc95ef4b1732a8b809c020c15ee15df5abdc5769e55097109",
+      "src/bin/wow_cli/gen_global_strings.rs": "46ae784431de66e3dbfc9a94ba24fa8c31f53d930fc8b52bcd39615325a84dd5",
+      "src/bin/wow_cli/gen_items.rs": "9833fbe2ebd48df6f7ba6a314b2fd6be3836f0fe707655854a3a2f1c1b6305b6",
+      "src/bin/wow_cli/gen_manifest.rs": "c47eb072aca0fcdfc557b3c70558cac305c055bb3779a7fa1ae068abb65102bc",
+      "src/bin/wow_cli/gen_map_art.rs": "35fcb3126b89e66abb1b68979ed90dd7501bb25b95a31793bf7ba2e4d51e52f7",
+      "src/bin/wow_cli/gen_patch_api_docs/evaluate.rs": "cb2cbce5e1111ba3428f2871808703b17783560634d4d530f7b98b9c4a643302",
+      "src/bin/wow_cli/gen_patch_api_docs/mod.rs": "6dd552751843d41ce5f3ffa712ced93c0b034a3837d5b666f6aaa8818476ea1b",
+      "src/bin/wow_cli/gen_patch_api_docs/records.rs": "cde0e29304c511b3dc7fced9323dbf295aa259be170577027adc4210d4902a8c",
+      "src/bin/wow_cli/gen_patch_api_docs/snapshot.rs": "2952f89981f243dcc3392ec2d79bbf9dabcdeb6286332397470ce542af4ac64e",
+      "src/bin/wow_cli/gen_patch_api_docs/tests.rs": "36cc94cdadf3d1f19c71b856abf4c74a2b6ecba3a9b729edbeb5152c9d5fa2e6",
+      "src/bin/wow_cli/gen_quest_poi.rs": "e7f7055f5afc8beb8d3444a4f9ea3926ead56cd52645e3d4fae1c27a078f0dc4",
+      "src/bin/wow_cli/gen_spells.rs": "e68824561f54541929fd2d8bca98984b6c5249d7d5057baa2a13b113972fa7aa",
+      "src/bin/wow_cli/gen_spells_power.rs": "f8ece2e3ade0231f7583439e51a8ded0a5f2e805eb19d0ecafe08cec5eab7710",
+      "src/bin/wow_cli/gen_traits.rs": "927e92a3899c90213b420f3cf5a25a9f34e3250d5e120b3e5ce086bcc9396232",
+      "src/bin/wow_cli/gen_traits_emit.rs": "23cb75ed5344543c3fcdcd9964f1822c76d0d1db1d2ef773c04d9d055347defb",
+      "src/bin/wow_cli/gen_traits_load.rs": "21ca2e6d5402a1d098840a35b931142dbc47206693b704e886ba3f8aede13df9",
+      "src/bin/wow_cli/gen_zones.rs": "3ea82338d99a1f3afb7cbddfd10a885dc3cbcfaf274f565cfa4f61daf6ac120e",
+      "src/bin/wow_cli/global_slot_coverage.rs": "5a822c4d078c50451b9e7f49898ad8770041eabcae3b9f838e17ec6df6094840",
+      "src/bin/wow_cli/main.rs": "137b757a6fb5fe096f624a395c98b5baec5592531ea6f1a18d374457f72a99fa",
+      "src/bin/wow_cli/startup_intern_stats.rs": "c8991f74f4be873f186791dc0bb08d5436af02b086f2cc32f4bfc38f83ea458a",
+      "src/client_profile.rs": "a23f899ad7ed8722071b881f9c6decfe45eadbbcedf79175947c014d4acd7f20",
+      "src/lib.rs": "3caa04c98a76e500ef2c97fb51bd37611aabb3edbae0c504bdb36a699fb49303",
+      "src/lua_api/state.rs": "aab2ab674827dd0898b81952a0a966515276c5989d1b5fb96147aae7c2d9d6f3",
+      "src/lua_api/state_defaults.rs": "aefff3ec55bf1b6a94a77ea04e88d8ff19b318a697660a77974675b7ac2352fe",
+      "src/lua_api/state_types/character_world_defaults.rs": "0bd49cbe926b1aa03ed70b52d0749094372e4b15ee16dae082758bca104cb141"
+    }
+  },
+  "generation_source_revision": "c53d49f281976a3b9540d419dffca3efc069ba48",
+  "input_provenance_sha256": "85c36b42ceb4bf4724f9d108c61bef0c2c30edeeeaf89ee767b6f537da1bf33b"
+}

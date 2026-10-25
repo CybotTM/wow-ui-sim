@@ -1,3 +1,22 @@
+## [2026-10-25] investigation | S49 rejected refresh repair
+
+[Companion spell backing](investigations/wrath-companion-cooldown.md#s49-reject-repair-static-2026-10-25): portable receipt paths and seeded-mount selector regression staged; generated catalogs and runtime proof still await a slot.
+
+## [2026-10-24] investigation | Companion S1/S2 and accepted req-13
+
+[Cooldown notes](investigations/wrath-companion-cooldown.md) replace guessed
+arbitration with req-13 ordered-history signed endpoint/tie and sticky-enable
+rules. Shared source-category flags, absent-player zero returns and supplied
+critter spell joins now have original-consumer selectors. Static contradiction
+table only; edit-only work, no runtime proof. Rune applicability remains UNKNOWN.
+
+## [2026-10-24] investigation | Companion pre-review repair
+
+[Cooldown notes](investigations/wrath-companion-cooldown.md) now bind each cooldown
+selector to original PetPaperDollFrame widget observations. Matching supplied
+start-recovery categories gate GCD; on-hold state controls numeric enable.
+Static-only contradiction table and Q5 UNKNOWN ledger retained. Runtime remains
+blocked until wrath-relic-slot merges; unchanged error assertions still apply.
 ## [2026-10-25] build | Debug metadata and persistent-slot incremental reuse
 
 Dev/test profiles use `debug = 0` (cherry-pick `7a49b872c`); source-line backtraces are unavailable. The sim-data optimization level is unchanged. [Slot builds](../remote-builds.md#local-slot-builds) enable incremental compilation only through the fixed per-slot BindPaths source path. Python RED/GREEN evidence is recorded in `/home/osso/.local/state/wow-ui-sim/handoff/ct-incr-debug0/REPORT.md`; no Rust build was run.
@@ -2733,6 +2752,12 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
 
+## [2026-10-24] investigation | Wrath companion cooldown and creature-ID source
+
+[Source review](investigations/wrath-companion-cooldown.md) records accepted laptop request11 Q2/Q5, existing cooldown-state reuse, absent generated effect-misc data, and retained UnitHasRelicSlot/cursorOffset blockers. Tests and producer staged separately; no build, test, slot use or runtime-success claim.
+## 2026-10-24 | CF-2 SuperTrack edit-only staging
+
+Added supplied-state system/contract and selected original-consumer tests. Retired overlapping target defaults; priority remains explicitly unsupported. Runtime RED/GREEN, mutants and profile preservation remain slot obligations.
 ## 2026-10-24 — CF-2 pet-battle name staging
 
 Added [pet name projection](systems/pet-battle-names.md) and [contract](../specs/pet-battle-names.md), traced four profile TOCs through original XML/event/name consumers. No build/runtime proof claimed; parent owns frozen RED/GREEN and stock accounting.
@@ -2757,6 +2782,10 @@ Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-re
 ## [2026-10-24] source | Patch 12.1.7 I4a inherited accounting
 
 Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance), [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist) and index for immutable companion accounting, explicit per-profile UNKNOWN source/selection/proof boundaries and grouped I4b selectors. I0 artifacts unchanged; no builds, cache observations or native/runtime acceptance.
+
+## [2026-10-24] investigation | S49 same-build refresh and CSV truncation
+
+[Refresh boundary](investigations/wrath-companion-cooldown.md#same-build-spelltrait-refresh-and-csv-boundary) records 70391-only trait/spell receipts, 426 CSV-native dangling occurrences and zero generator-introduced references. Provisional descriptions expose physical-line CRLF truncation. Logical-record reader/loader fixes and concrete tests are staged, not executed; corrected regeneration and runtime GREEN await a released slot.
 
 ## 2026-10-24 — Patch 12.1.7 I4b static staging
 
