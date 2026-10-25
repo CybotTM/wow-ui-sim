@@ -26,7 +26,7 @@ Initial common/selected data units took 50.20/7.36 s; both were reused on the to
 
 Retail and Wrath checks passed without warnings. All 94 bounded Rust tests passed: 53 integration cases plus 37 common catalog and four selected global-string unit cases. Six generator Python tests passed. The Lua refresh-manifest case preserves generated Lua evidence; it does not itself test the moved Rust catalogs. All 23 moved Rust files retain original SHA-256. Root exactly-one-profile validation is byte-identical. Docker COPY wiring and seven-profile feature resolution were checked statically; no image or seven-profile runtime suite was run.
 
-Data unit tests now belong to their owning packages; run `cargo test -p sim-data -p sim-data-profile` with the selected-data feature set appropriate to the desired variant. Root integration discovery is unchanged. Full commands, source bindings, HTML timings, output and proof ledger live at `/home/osso/.local/state/wow-ui-sim/handoff/crate-split/`. The measured Rust source is unchanged through 91a4e437e; intervening lock commits only normalize serialization.
+Data unit tests now belong to their owning packages; run `cargo test -p sim-data -p sim-data-profile` with the selected-data feature set appropriate to the desired variant. Root integration discovery is unchanged. The lane handoff retains the full commands, source bindings, HTML timings, output and proof ledger. The measured Rust source is unchanged through 91a4e437e; intervening lock commits only normalize serialization.
 
 ## Sources
 
