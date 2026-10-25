@@ -8,6 +8,12 @@ Verified: 2026-10-22. Slice I0 accounts for the public source for **12.1.7 / 704
 
 Staged 2026-10-25 on `489df2822`: [runtime contract](../../specs/patch-12-1-7-inherited-runtime.md) and [ordinary integration selectors](../../../tests/patch_12_1_7_inherited_i4.rs) now replace the four absent recipe selectors. The three profile registers bind separate source bytes and observations. They preserve 1,876 occurrence IDs, probe 180 runtime plus 183 declaration candidates, and retain all 214 I4c PTR UNKNOWN rows. Five PTR original-consumer cases cover documented call/nullable shapes only; no native capability/default/security/event-order parity follows. Retail/Forever pre-repair baselines and actual RED execution remain pending. RegionalTextLocale already has bounded default-US original-consumer proof on master and is preservation, not a new missing producer. Glue-only witnesses do not create Game publication assertions.
 
+## I4 first bounded producer repair
+
+The first authenticated 70493 runtime discovery persisted all 1,876 observations and found 169 publication gaps. Only Collections `C_Spell.GetItemCooldown` and GhostFrame `CanPortGraveyard` reached their exact missing producer boundaries. SmartNavigation remained blocked by module import, and RecentAllies by missing enum publication; those are not downstream producer REDs.
+
+The [bounded contract](../../specs/ptr-i4-first-green.md) publishes these two endpoints using the existing item cooldown records and supplied graveyard availability. The item query is explicitly shape-only where native eligibility is unknown. New supplied-state tests failed at both missing calls before implementation. Aggregate I4 tests remain unchanged and cannot pass while the other 167 shapes and three blocked consumers remain. Runtime GREEN and stock/check proof are recorded separately in the lane evidence, not implied by this implementation entry.
+
 ## Empty inventory is not patch coverage
 
 The direct page has prose and a link to 1.60.1, but no function/event/enum/CVar/widget tables. The existing `tools/gen_patch_wikitext_register.py` successfully emits `entries: []` and `header_counts: []` for it. This correctly describes the direct inventory, not complete patch coverage. No dummy API rows or invented aliases are added to make it nonempty.

@@ -1,3 +1,7 @@
+## [2026-10-25] implementation | PTR I4 first bounded producer repair
+
+[Two reached boundaries](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair) link the [supplied-state contract](../specs/ptr-i4-first-green.md): item cooldown records and graveyard availability, PTR-only additions, native-unknown limits and unchanged aggregate I4 obligations. Runtime acceptance is separate.
+
 ## [2026-10-25] staged | PTR I4 runtime shapes
 
 [Runtime staging](investigations/patch-12-1-7-api-audit.md#i4-runtime-test-staging) links the [contract](../specs/patch-12-1-7-inherited-runtime.md): four ordinary selectors, independent profile registers, original consumer shapes and retained UNKNOWN boundaries. Runtime RED and pre-repair preservation baselines are not yet measured.
