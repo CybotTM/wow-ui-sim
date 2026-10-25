@@ -51,8 +51,8 @@
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;
 
-use crate::lua_bridge::FromMethodSelf;
-use crate::lua_bridge::IntoStack;
+use crate::FromMethodSelf;
+use crate::IntoStack;
 
 #[doc(hidden)]
 pub fn push_lua_result<R: IntoStack>(state: &mut LuaState, result: LuaResult<R>) -> LuaResult<u32> {
@@ -100,14 +100,14 @@ macro_rules! define_methods {
                             $crate::__lua_bridge_extract_method_args!(state, __idx, $($arg_pat : $arg_ty),*);
                             let _ = __idx;
 
-                            let __result = $crate::lua_bridge::run_method_body::<$frame_ty, _, _>(
+                            let __result = $crate::run_method_body::<$frame_ty, _, _>(
                                 state,
                                 1,
                                 |$frame_pat| $body,
                             );
-                            $crate::lua_bridge::push_lua_result(state, __result)
+                            $crate::push_lua_result(state, __result)
                         }
-                        $crate::lua_bridge::table_set_rust_fn_static($state, $table, $name, __method)?;
+                        $crate::table_set_rust_fn_static($state, $table, $name, __method)?;
                     }
                 )*
                 Ok(())
@@ -126,7 +126,7 @@ macro_rules! define_methods {
 macro_rules! __lua_bridge_extract_args {
     ($state:expr, $idx:ident,) => {};
     ($state:expr, $idx:ident, $arg_pat:ident : $arg_ty:ty $(, $rest_pat:ident : $rest_ty:ty)* $(,)?) => {
-        let $arg_pat: $arg_ty = <$arg_ty as $crate::lua_bridge::FromStack>::from_stack($state, $idx)?;
+        let $arg_pat: $arg_ty = <$arg_ty as $crate::FromStack>::from_stack($state, $idx)?;
         $idx += 1;
         $crate::__lua_bridge_extract_args!($state, $idx, $($rest_pat : $rest_ty),*);
     };
@@ -137,7 +137,7 @@ macro_rules! __lua_bridge_extract_args {
 macro_rules! __lua_bridge_extract_method_args {
     ($state:expr, $idx:ident,) => {};
     ($state:expr, $idx:ident, $arg_pat:ident : $arg_ty:ty $(, $rest_pat:ident : $rest_ty:ty)* $(,)?) => {
-        let $arg_pat: $arg_ty = <$arg_ty as $crate::lua_bridge::FromStack>::from_stack($state, $idx)?;
+        let $arg_pat: $arg_ty = <$arg_ty as $crate::FromStack>::from_stack($state, $idx)?;
         $idx += 1;
         $crate::__lua_bridge_extract_method_args!($state, $idx, $($rest_pat : $rest_ty),*);
     };
@@ -155,9 +155,9 @@ macro_rules! __lua_bridge_define_function_entries {
     ($state:expr, $table:expr, $name:literal => || $(-> $ret_ty:ty)? $body:block $(, $($rest:tt)*)?) => {{
         fn __func(state: &mut ::rilua::vm::state::LuaState) -> ::rilua::LuaResult<u32> {
             let __result: ::rilua::LuaResult<_> = $body;
-            $crate::lua_bridge::push_lua_result(state, __result)
+            $crate::push_lua_result(state, __result)
         }
-        $crate::lua_bridge::table_set_rust_fn_static($state, $table, $name, __func)?;
+        $crate::table_set_rust_fn_static($state, $table, $name, __func)?;
         $crate::__lua_bridge_define_function_entries!($state, $table $(, $($rest)*)?)
     }};
     ($state:expr, $table:expr, $name:literal => |$first_pat:ident : $first_ty:ty $(, $arg_pat:ident : $arg_ty:ty)* $(,)?| $(-> $ret_ty:ty)? $body:block $(, $($rest:tt)*)?) => {{
@@ -167,9 +167,9 @@ macro_rules! __lua_bridge_define_function_entries {
             let _ = __idx;
 
             let __result: ::rilua::LuaResult<_> = $body;
-            $crate::lua_bridge::push_lua_result(state, __result)
+            $crate::push_lua_result(state, __result)
         }
-        $crate::lua_bridge::table_set_rust_fn_static($state, $table, $name, __func)?;
+        $crate::table_set_rust_fn_static($state, $table, $name, __func)?;
         $crate::__lua_bridge_define_function_entries!($state, $table $(, $($rest)*)?)
     }};
 }

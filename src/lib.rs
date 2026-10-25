@@ -52,7 +52,11 @@ pub mod limited_listfile;
 pub mod loader;
 pub mod logging;
 pub mod lua_api;
-pub mod lua_bridge;
+pub use sim_lua_bridge as lua_bridge;
+pub use sim_lua_bridge::{
+    __lua_bridge_define_function_entries, __lua_bridge_extract_args,
+    __lua_bridge_extract_method_args, define_functions, define_methods,
+};
 pub mod lua_errors;
 #[cfg(unix)]
 pub mod lua_server;
