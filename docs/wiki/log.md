@@ -1,3 +1,7 @@
+## [2026-10-24] source | CF-2 club unread staging
+
+[Shared stream model](systems/club-membership.md#unread-streams-cf-2) and [contract](../specs/club-unread.md) record original FrameXMLUtil/MicroMenu consumers, static callable-mutant contradictions and the schema-first RED commit. Four unread endpoints replace the empty-settings shim; existing stream queries share Club snapshots. No builds/tests/slots or native-parity claim; Retail/PTR/Forever proof deferred.
+
 ## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
 
 [Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
