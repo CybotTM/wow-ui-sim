@@ -40,6 +40,26 @@ fn forever_paper_doll_initializes_real_equipment_buttons() {
 }
 
 #[test]
+fn forever_ammo_visibility_uses_character_requirement() {
+    let env = WowLuaEnv::new().unwrap();
+    load_source(&env, "Blizzard_FrameXML/Camelot/EquipmentFlyout.lua");
+    load_source(&env, "Blizzard_ItemButton/Shared/ItemButtonTemplate.lua");
+    load_source(&env, "Blizzard_ItemButton/Mainline/ItemButtonTemplate.lua");
+    load_source(&env, "Blizzard_UIPanels_Game/Camelot/PaperDollFrame.lua");
+    env.exec(
+        r#"
+        CharacterFrame = CreateFrame("Frame")
+        CharacterFrame.LeftPaneHost = CreateFrame("Frame", nil, CharacterFrame)
+        local button = CreateFrame("Button", "CharacterAmmoSlot")
+        button.icon = button:CreateTexture()
+        PaperDollItemSlotButton_OnLoad(button)
+        assert(not button:IsShown(), "character without ammo requirement hides slot")
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn forever_inventory_namespace_reuses_existing_slot_contract() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(
