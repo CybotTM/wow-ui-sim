@@ -1,6 +1,6 @@
 # PTR input interface style
 
-Static investigation of the PTR 12.1.7.70493 startup failure at original `Blizzard_SharedXML/Mainline/InputUtil.lua:12`. The namespace has a real existing simulator model, but registration is Forever-only. The [contract](../../specs/ptr-input-interface-style.md) stages PTR publication. RED/GREEN are source phases, not executed test results.
+Static investigation of the PTR 12.1.7.70493 startup failure at original `Blizzard_SharedXML/Mainline/InputUtil.lua:12`. At the base revision, the namespace has a real existing simulator model, but registration is Forever-only. The [contract](../../specs/ptr-input-interface-style.md) stages PTR publication. RED/GREEN are source phases, not executed test results.
 
 ## Source declarations
 
@@ -36,6 +36,8 @@ The complete static candidate inventory is retained in the lane handoff's `call-
 ## Existing state and minimal repair
 
 `SimState.input_interface_style` already stores `InputInterfaceStyle::{Mkb, Gamepad}`. The existing C API getter reads that field; `set_input_interface_style` updates it and queues the documented new/old payload. The legacy Forever `IsUsingGamepad` reads the same field. Mapped sticks, capability probes, frame gamepad-enable flags and hover policy are separate state, not current interface style.
+
+GREEN registers the existing namespace and enum when `client_profile::ACTIVE` is PTR or Forever. It preserves the existing model, getter, default and transition policy; Retail and Classic do not enter this registration path.
 
 The staged test uses the existing setter before observing each of MKB → Gamepad → MKB. It asserts the original InputUtil query, both booleans and all four immediate setup/init counters. It does not replace or wrap any original helper. No new passive production scaffold is needed: the setter already exists.
 

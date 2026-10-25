@@ -12,8 +12,13 @@ use rilua::LuaResult;
 use rilua::vm::state::LuaState;
 
 pub(crate) fn register_spell_and_widget_tables(state: &mut LuaState) -> LuaResult<()> {
-    #[cfg(feature = "client-wowforever")]
-    super::c_input_interface_style::register(state)?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Ptr
+            | crate::client_profile::ClientProfile::WowForever
+    ) {
+        super::c_input_interface_style::register(state)?;
+    }
     #[cfg(feature = "client-wowforever")]
     super::c_gamepad_ui::register(state)?;
     #[cfg(feature = "client-wowforever")]

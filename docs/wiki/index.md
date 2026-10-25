@@ -1,6 +1,6 @@
 ## [2026-10-24] static stage | PTR input interface style
 
-[Selected consumer and contradiction table](investigations/ptr-input-interface-style.md) link the [contract](../specs/ptr-input-interface-style.md): authenticated PTR70493 docs, original SharedXML runtime-selection selector and existing state model. Tests are staged before producer publication; no build, slot or runtime RED/GREEN.
+[Selected consumer and contradiction table](investigations/ptr-input-interface-style.md) link the [contract](../specs/ptr-input-interface-style.md): authenticated PTR70493 docs, original SharedXML runtime-selection selector and existing state model. Separate test-first and GREEN source phases expose the existing model to PTR through ACTIVE; no build, slot or runtime RED/GREEN.
 
 ## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
 

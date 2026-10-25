@@ -17,7 +17,7 @@ PTR 12.1.7.70493 declares `C_InputInterfaceStyle.GetCurrentStyle()` in generated
 ## Implementation inventory
 
 - `src/c_api/c_input_interface_style.rs` — existing state-backed getter, enum publication and supplied-style transition input.
-- `src/c_api/registration.rs` — profile publication boundary; RED retains Forever-only registration.
+- `src/c_api/registration.rs` — profile publication boundary; GREEN selects PTR and existing Forever through `client_profile::ACTIVE`.
 - `src/lua_api/globals/real/input_interface.rs` — existing Forever legacy query over the same style field; unchanged.
 
 ## Tests asserting this spec
