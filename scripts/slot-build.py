@@ -103,13 +103,14 @@ def read_content_changes(worktree, identity, dirty, previous):
     return changed.union(dirty)
 
 
-def prepare_source(worktree, previous):
+def prepare_source(worktree, previous, attempted=None):
     identity, dirty = source_identity(worktree)
     content_changed = read_content_changes(worktree, identity, dirty, previous)
     changed = set(content_changed)
-    if (not previous or identity != previous.get("identity")
-            or previous.get("result", "success") != "success"):
-        if previous and previous.get("result", "success") != "success":
+    last_attempt = attempted if attempted is not None else previous
+    retry = bool(last_attempt and last_attempt.get("result", "success") != "success")
+    if not previous or identity != previous.get("identity") or retry:
+        if retry:
             changed.update(full_source_inputs(worktree))
         changed.update(dirty)
         now = time.time_ns()
@@ -289,6 +290,8 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
     current = dict(current, artifacts=artifacts, returncode=returncode, result=result)
     write_json(receipt, current)
     write_json(slot / ".source-identity.json", current)
+    if result == "success":
+        write_json(slot / ".verified-source-identity.json", current)
     if stale:
         reason = ("no Cargo compiler-artifact records visible for changed package inputs"
                   if missing_evidence else f"missing fresh=false or changed SHA256: {stale_paths}")
@@ -348,13 +351,15 @@ def execute_build(request_path):
     slot = Path(request["slot"])
     check_owner(slot, request["owner"])
     state = slot / ".source-identity.json"
-    previous = json.loads(state.read_text()) if state.exists() else None
+    verified = slot / ".verified-source-identity.json"
+    previous = json.loads(verified.read_text()) if verified.exists() else None
+    attempted = json.loads(state.read_text()) if state.exists() else None
     worktree = Path(request["worktree"])
-    current = prepare_source(worktree, previous)
+    current = prepare_source(worktree, previous, attempted)
     current.update(unit=request["unit"], cargo=request["cargo"], worktree=str(worktree),
                    slot=str(slot), package_roots=read_package_roots(worktree))
-    # An interrupted/failed build may already have replaced fingerprints. Record
-    # its input identity before Cargo starts, not only after successful builds.
+    # Attempts can replace Cargo fingerprints, but cannot certify source content.
+    # Only finish_build advances the separate verified baseline after acceptance.
     write_json(state, dict(current, artifacts={}, result="building"))
     receipt = Path(request["receipt"])
     write_json(receipt, dict(current, artifacts={}, result="building"))

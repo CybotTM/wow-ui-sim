@@ -60,10 +60,16 @@ Use the helper from the checkout that contains it; it builds `--worktree`.
 The fixed source mount hides worktree changes from Cargo's path identity. Older
 file mtimes can therefore reuse another tree's artifacts, even with incremental
 compilation disabled. The helper records HEAD, a binary dirty-diff hash (including
-untracked file contents), and dirty paths in `slot-N/.source-identity.json`.
-Before Cargo starts, a changed identity refreshes mtimes for the HEAD-to-HEAD diff
-and both trees' dirty/untracked paths without changing bytes. An unknown or failed
-previous build derives input roots from offline `cargo metadata --no-deps`:
+untracked file contents), dirty paths, and per-target artifact hashes in
+`slot-N/.verified-source-identity.json` only after the child exits zero and the
+guard accepts. The separate `slot-N/.source-identity.json` records attempts,
+including building, failed, and rejected runs; it never supplies the content or
+artifact baseline. Existing attempt-only slots have no verified baseline and
+receive the conservative unknown-source checks.
+Before Cargo starts, a changed verified identity refreshes mtimes for the
+HEAD-to-HEAD diff and both trees' dirty/untracked paths without changing bytes.
+An unknown baseline or unsuccessful previous attempt derives input roots from
+offline `cargo metadata --no-deps`:
 package manifest directories and path dependency directories, plus root
 `build.rs`, `Cargo.toml`, and `Cargo.lock`. All tracked files under those roots
 are refreshed. This repository's root package also covers build-script inputs
@@ -98,8 +104,9 @@ are added. If a non-empty content diff intersects none of the reported executabl
 mapped inputs, the run fails closed. With no content diff, unmappable dep-info does
 not reject an identical-source repair. Library-only records keep their existing policy.
 
-Content changes are computed from the previous source identity, regardless of its
-build result, not from the mtime refresh set. When the content diff intersects a
+Content changes are computed from the last successfully verified source identity,
+not the latest attempt or the mtime refresh set. Failed and rejected builds never
+advance that baseline, so retrying cannot erase a pending content diff. When the content diff intersects a
 target's inputs, Cargo must report `fresh=false` **and**
 its SHA256 must differ from the previous hash at the same path. Otherwise the run
 fails with `stale artifacts`. A changed library, `.rmeta`, or another executable

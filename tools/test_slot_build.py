@@ -522,9 +522,10 @@ class SourceFreshnessTests(unittest.TestCase):
                       **(dep_inputs or {})}
         for phase in ["A", "B"]:
             if phase == "B":
-                comment = "//" if changed_input.endswith(".rs") else "#"
-                with (self.tree / changed_input).open("a") as stream:
-                    stream.write(f"\n{comment} changed build input\n")
+                if changed_input:
+                    comment = "//" if changed_input.endswith(".rs") else "#"
+                    with (self.tree / changed_input).open("a") as stream:
+                        stream.write(f"\n{comment} changed build input\n")
                 outputs = changed_outputs
                 if before_second:
                     before_second()
@@ -596,15 +597,100 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(second["result"], "stale-artifacts")
 
-    def test_stale_receipt_recovers_with_identical_rebuilt_bytes(self):
+    def run_failed_build_retry(self, remove_dep_info=False, commit_source=False):
+        import sys
+        (self.slot / ".owner").write_text("test-owner")
+        binary = self.slot / "debug/probe"
+        source = self.tree / "src/main.rs"
+        request = self.slot / "request.json"
+        receipt = self.slot / "receipt.json"
+        emitter = (
+            'import json,sys; from pathlib import Path\n'
+            'binary,source=map(Path,sys.argv[1:3])\n'
+            'phase=sys.argv[3]\n'
+            'if phase == "A":\n'
+            '    binary.parent.mkdir(parents=True)\n'
+            '    binary.write_bytes(b"A binary")\n'
+            '    binary.chmod(0o755)\n'
+            '    binary.with_suffix(".d").write_text(f"{binary}: {source}\\n")\n'
+            'if phase == "failed": sys.exit(7)\n'
+            'print(json.dumps({"reason":"compiler-artifact",\n'
+            '    "executable":str(binary), "fresh":phase == "missing"}))\n'
+        )
+        results, receipts = [], []
+        for phase in ("A", "failed", "missing" if remove_dep_info else "retry"):
+            if phase == "failed":
+                source.write_text('fn main() { println!("B"); }')
+                if commit_source:
+                    self.git("commit", "-qam", "B")
+            if phase == "missing":
+                binary.with_suffix(".d").unlink()
+            request.write_text(json.dumps({
+                "slot": str(self.slot), "worktree": str(self.tree),
+                "owner": "test-owner", "unit": phase, "receipt": str(receipt),
+                "cargo": [sys.executable, "-B", "-c", emitter,
+                          str(binary), str(source), phase]}))
+            results.append(subprocess.run(
+                [sys.executable, "-B", str(self.module.__file__), "--execute", str(request)],
+                capture_output=True))
+            receipts.append(json.loads(receipt.read_text()))
+        self.assertEqual(results[0].returncode, 0, results[0].stderr)
+        self.assertEqual(results[1].returncode, 7, results[1].stderr)
+        self.assertEqual(receipts[0]["artifacts"], receipts[2]["artifacts"])
+        self.assertNotEqual(receipts[0]["identity"], receipts[2]["identity"])
+        return results[2], receipts
+
+    def test_failed_build_retry_rejects_unchanged_binary(self):
+        result, receipts = self.run_failed_build_retry(commit_source=True)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn(b"stale artifacts", result.stderr)
+        self.assertIn("src/main.rs", receipts[2]["content_changed_paths"])
+        verified = json.loads((self.slot / ".verified-source-identity.json").read_text())
+        self.assertEqual(verified, receipts[0])
+        attempted = json.loads((self.slot / ".source-identity.json").read_text())
+        self.assertEqual(attempted, receipts[2])
+
+    def test_failed_build_retry_rejects_missing_current_dep_info(self):
+        result, receipts = self.run_failed_build_retry(remove_dep_info=True)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn(b"missing dep-info", result.stderr)
+        self.assertIn("src/main.rs", receipts[2]["content_changed_paths"])
+
+    def test_rejected_build_retry_does_not_advance_verified_content(self):
         result, first, stale = self.run_mixed_output_pair(
             "src/main.rs", {"debug/probe": "A binary"},
             reported_names=["debug/probe"])
         self.assertNotEqual(result.returncode, 0)
-        self.assertEqual(stale["result"], "stale-artifacts")
-        # The repair receipt has the same source SHA and artifact bytes, as in
-        # classic-resid-red-era-{captures-build,repair-artifacts}.json.
         import sys
+        result = subprocess.run(
+            [sys.executable, "-B", str(self.module.__file__), "--execute",
+             str(self.slot / "request.json")], capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(b"stale artifacts", result.stderr)
+        verified = json.loads((self.slot / ".verified-source-identity.json").read_text())
+        self.assertEqual(verified, first)
+        self.assertNotEqual(verified["identity"], stale["identity"])
+
+    def test_stale_receipt_recovers_with_identical_rebuilt_bytes(self):
+        def mark_interrupted_attempt():
+            state = self.slot / ".source-identity.json"
+            previous = json.loads(state.read_text())
+            previous["result"] = "building"
+            state.write_text(json.dumps(previous))
+
+        result, first, stale = self.run_mixed_output_pair(
+            None, {"debug/probe": "A binary"}, fresh=True,
+            reported_names=["debug/probe"], before_second=mark_interrupted_attempt)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(stale["result"], "stale-artifacts")
+        self.assertEqual(stale["identity"], first["identity"])
+        self.assertEqual(stale["content_changed_paths"], [])
+        self.assertIn("src/main.rs", stale["changed_paths"])
+        import sys
+        request = self.slot / "request.json"
+        command = json.loads(request.read_text())
+        command["cargo"][6] = "[]"  # Rebuild rather than report fresh=true.
+        request.write_text(json.dumps(command))
         for attempt in range(2):
             with self.subTest(attempt=attempt):
                 result = subprocess.run(
