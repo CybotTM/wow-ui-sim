@@ -499,6 +499,56 @@ mod tests {
     }
 
     #[test]
+    fn non_utf8_lua_cache_entry_preserves_bytes() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("MainMenuBar.lua");
+        let bytes = include_bytes!("../../tests/fixtures/non_utf8.lua");
+        std::fs::write(&path, bytes).unwrap();
+
+        assert!(cache_entry_is_usable(
+            "Blizzard_ActionBar/Classic/MainMenuBar.lua",
+            &path
+        ));
+        assert_eq!(std::fs::read(&path).unwrap(), bytes);
+        std::fs::remove_file(&path).unwrap();
+        assert!(!cache_entry_is_usable(
+            "Blizzard_ActionBar/Classic/MainMenuBar.lua",
+            &path
+        ));
+    }
+
+    #[test]
+    fn non_utf8_lua_cache_content_marker_preserves_bytes() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("MainMenuBar.lua");
+        let bytes = include_bytes!("../../tests/fixtures/non_utf8.lua");
+        std::fs::write(&path, bytes).unwrap();
+
+        assert!(super::file_contains(
+            &path,
+            "function MainMenuBar_SetMaxLevelBarShown(shown)"
+        ));
+        assert!(!super::file_contains(&path, "absent marker"));
+        assert_eq!(std::fs::read(&path).unwrap(), bytes);
+    }
+
+    #[test]
+    fn non_utf8_text_cache_entries_remain_unusable() {
+        let root = tempfile::tempdir().unwrap();
+        let bytes = include_bytes!("../../tests/fixtures/non_utf8.lua");
+        for entry in [
+            "Blizzard_Probe/Probe.xml",
+            "Blizzard_Probe/Probe.toc",
+            "Probe.xsd",
+        ] {
+            let path = root.path().join(PathBuf::from(entry).file_name().unwrap());
+            std::fs::write(&path, bytes).unwrap();
+            assert!(!cache_entry_is_usable(entry, &path), "{entry}");
+            assert_eq!(std::fs::read(&path).unwrap(), bytes);
+        }
+    }
+
+    #[test]
     #[cfg(feature = "profile-retail")]
     fn retail_requires_runeforge_util_cache_entries() {
         let required = required_profile_cache_entries();
