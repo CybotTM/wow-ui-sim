@@ -20,16 +20,20 @@ fn load_consumers(root_name: &str, screen: ScreenKind, hardcore: bool) -> WowLua
         }
         let result = load_addon(&env.loader_env(), &toc).unwrap();
         if name == root_name {
-            for warning in result.warnings {
-                eprintln!("original consumer warning: {warning}");
-                let target_gap = warning.contains("GameDialogDefs.lua:3512:")
-                    || warning.contains("IsHardcoreActive")
-                    || warning.contains("RecentAlliesInteractionCategoryFilter");
-                assert!(!target_gap, "{warning}");
-            }
+            report_and_reject_target_gaps(&result.warnings);
         }
     }
     env
+}
+
+fn report_and_reject_target_gaps(warnings: &[String]) {
+    for warning in warnings {
+        eprintln!("original consumer warning: {warning}");
+        let target_gap = warning.contains("GameDialogDefs.lua:3512:")
+            || warning.contains("IsHardcoreActive")
+            || warning.contains("RecentAlliesInteractionCategoryFilter");
+        assert!(!target_gap, "{warning}");
+    }
 }
 
 fn assert_selected_consumer(toc: &std::path::Path, name: &str) {
