@@ -72,7 +72,7 @@ native-unknown**.
 - [Startup input contract](../../specs/forever-startup-inputs.md).
 - [Profile selection](../systems/client-profiles.md).
 - [Consumer-selection proof rules](consumer-selection-and-red-proof.md).
-- Lane evidence: `/home/osso/.local/state/wow-ui-sim/handoff/forever-startup-gaps/REPORT.md`.
+- Private Forever startup slot-run report and capture receipts.
 
 ## See Also
 

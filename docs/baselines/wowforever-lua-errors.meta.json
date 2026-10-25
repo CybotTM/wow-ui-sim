@@ -42,9 +42,9 @@
   "provenance_sha256": "15f21fe01cff933a1d79a1977fb6fd06776ff0a4fec17ea86a7eb2179c2b32aa",
   "original_cvar_sha256": "3704e092febe9a79363a3d83f31c6b2e89c8cea1165b212c6a0fafaf2a22e4a0",
   "original_cvar_stat_hash_unchanged": true,
-  "runtime_cache_copy": "/home/osso/.local/state/wow-ui-sim/handoff/forever-startup-gaps/runtime-cache-wowf",
-  "capture_evidence": "/home/osso/.local/state/wow-ui-sim/handoff/forever-startup-gaps/stock-accepted",
-  "test_results_evidence": "/home/osso/.local/state/wow-ui-sim/handoff/forever-startup-gaps/accepted-test-results.json",
+  "runtime_cache_copy": "Private runtime cache copied for the slot run",
+  "capture_evidence": "Private slot-run stock-accepted stdout, stderr and CVar guards",
+  "test_results_evidence": "Private slot-run accepted-test-results.json",
   "before_after": {
     "before_messages": 76,
     "before_occurrences": 76,

@@ -194,7 +194,7 @@ Retail has zero warnings; Forever/PTR each have the same three inherited
 on 2026-10-25 that this warning set is allowed on Forever too and belongs to a
 separate seven-profile lane. This branch leaves that file unchanged and does
 not suppress warnings. Formatting passes. Full command, CPU and release receipts
-are in `/home/osso/.local/state/wow-ui-sim/handoff/forever-startup-gaps/REPORT.md`.
+are retained in the private Forever startup slot-run report and receipts.
 
 ### Historical 70374 capture
 
