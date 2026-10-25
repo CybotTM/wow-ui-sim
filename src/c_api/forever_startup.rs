@@ -38,7 +38,33 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     register_group_buffs(state)?;
     register_external_event(state)?;
     register_character_queries(state)?;
-    register_services(state)
+    register_services(state)?;
+    let cvar = ensure_namespace(state, "C_CVar")?;
+    table_set_rust_fn_static(state, cvar, "RemoveTempCVar", remove_temporary_cvar)
+}
+
+fn remove_temporary_cvar(state: &mut LuaState) -> LuaResult<u32> {
+    let name = String::from_stack(state, 1)?;
+    borrow_state_mut(state)?
+        .forever_startup
+        .temporary_cvars
+        .remove(&name.to_lowercase());
+    Ok(0)
+}
+
+/// Current scalar read: Forever's explicit temporary overlay precedes saved values.
+pub(crate) fn read_current_cvar(state: &LuaState, name: &str) -> LuaResult<Option<String>> {
+    let sim = borrow_state(state)?;
+    if ACTIVE == ClientProfile::WowForever {
+        if let Some(value) = sim
+            .forever_startup
+            .temporary_cvars
+            .get(&name.to_lowercase())
+        {
+            return Ok(Some(value.clone()));
+        }
+    }
+    Ok(sim.cvars.get(name))
 }
 
 fn register_services(state: &mut LuaState) -> LuaResult<()> {

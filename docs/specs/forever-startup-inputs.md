@@ -24,6 +24,16 @@ unknown.
 - External-event probes return non-null booleans from the supplied optional URL,
   availability and newness. No network launch is simulated without a modeled
   launch result.
+- Bank purchase flags and optional `BankLockedReason` values are supplied per
+  documented `BankType`; absence of a lock row returns one nil. Housing presence
+  reads the existing spatial `HousingArea`, independently of ownership.
+- Discord enablement reads the existing `discordClientEnabled` CVar. Ping
+  availability is an explicit host flag. TTS save marking sets a local saved
+  flag, and its getter reads that same flag; no persistence policy is inferred.
+- `C_CVar.RemoveTempCVar(name)` removes the host's lower-case temporary scalar
+  entry without writing saved CVars. `GetCVar`/`GetCVarBool` and their namespace
+  counterparts see the temporary scalar before the saved/base value. This does
+  not establish native mutation events, validation or other temporary-CVar APIs.
 - `C_Spell.GetTargetSpellID()` requires a supplied numeric identifier. An absent
   input is explicit native-unknown, not an invented no-target sentinel.
 
@@ -31,8 +41,10 @@ unknown.
 
 Accept the documented `SECURE_TRANSFER_CONFIRM_TAKE_MAIL_MONEY`,
 `SHARD_TRANSFER_CANCELLED`, `EXTERNAL_EVENT_LAUNCH_URL_RESULT` and
-`SOCIAL_UI_SOCIAL_QUEUE_SYSTEM_STATUS_UPDATED` names for Forever only. URL launch
-result has one non-null boolean payload; the other three have no payload. This
+`SOCIAL_UI_SOCIAL_QUEUE_SYSTEM_STATUS_UPDATED` names for Forever only. Also accept
+`EXTERNAL_EVENT_URL_CHANGED` and the subsequently exposed
+`SOCIAL_UI_RAID_LIST_SYSTEM_STATUS_UPDATED`. URL launch result has one non-null
+boolean payload; the other five have no payload. This
 adds registration support, not native event-generation policy.
 
 ## Unknown residue
