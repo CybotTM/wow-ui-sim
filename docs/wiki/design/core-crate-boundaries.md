@@ -12,8 +12,8 @@ savings and seven-profile compatibility are not yet measured.
   compiled; its root callers retain their capability guards.
 - `sim-texture`: BLP/RGBA decoding, dimensions, crop/cache operations, directory
   observations and shared logging statics. No client or CASC dependency.
-- `sim-render`: markup stripping and font measurement arithmetic; with `gui`, GPU
-  atlas, quad batches, pipeline, shader primitive/program and canvas drawing.
+- `sim-render`: markup stripping and font measurement arithmetic; with `gui`, quad
+  batches and canvas drawing. GPU atlas/pipeline/primitive/program remain in root.
   GPU code consumes texture/widget values, not Lua or simulator state.
 
 Only `gui` is forwarded to the new leaves, to preserve optional GPU dependencies.
@@ -35,11 +35,10 @@ above those root types. Font/markup measurement stays below Lua, not in Lua APIs
 ## Test boundaries and proof
 
 Widget/layout unit tests move with their code. Texture manager/preload and
-renderer-crossing tests remain in root. Five shader manager/crop cases stay in the
-root primitive facade; twelve GPU-only cases move with the primitive and retain
-its cfg(test) pipeline snapshots. Assertions and function names are unchanged.
-The existing BC test swap hook is unconditional/public across the crate boundary;
-it still uses the same leaf atomic. The root integration and binary files are
+renderer-crossing tests remain in root. All shader cases and their cfg(test) pipeline snapshots remain in root.
+The BC test swap hook and re-export retain their exact #[cfg(test)] guards and
+share the production root atomic. The GPU ownership cut was reduced rather than
+changing test-hook availability. Assertions and function names are unchanged. The root integration and binary files are
 unchanged. Compilation, test execution and compile-CPU proof await a main-owned slot.
 
 ## Sources

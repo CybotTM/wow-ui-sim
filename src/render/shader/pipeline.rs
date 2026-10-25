@@ -431,7 +431,7 @@ impl WowUiPipeline {
     }
 
     #[cfg(test)]
-    pub fn uploaded_vertices(&self, slot: usize) -> &[QuadVertex] {
+    pub(crate) fn uploaded_vertices(&self, slot: usize) -> &[QuadVertex] {
         &self.strata_buffers[slot].last_uploaded_vertices
     }
 }

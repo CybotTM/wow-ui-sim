@@ -3,12 +3,13 @@
 //! This module provides wgpu-based rendering using iced's `shader::Primitive` trait,
 //! replacing the CPU-bound canvas rendering with GPU-accelerated quad batching.
 
-pub use sim_render::shader::atlas;
-pub use sim_render::shader::atlas_bc;
-pub(crate) use sim_render::shader::pipeline;
+pub mod atlas;
+pub mod atlas_bc;
+mod atlas_bind_groups;
+mod pipeline;
 pub mod primitive;
 mod primitive_textures;
-pub(crate) use sim_render::shader::program;
+mod program;
 pub(crate) use sim_render::shader::quad;
 pub(crate) use sim_render::shader::quad_batch_extras;
 pub(crate) use sim_render::shader::quad_nine_slice;
