@@ -136,4 +136,5 @@ fn is_all_template_versions(value: &str) -> bool {
 }
 
 #[cfg(test)]
+#[path = "../../crates/sim-toc/src/selected_profile_tests.rs"]
 mod tests;

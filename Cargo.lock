@@ -5495,6 +5495,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "sim-event"
+version = "0.1.0"
+
+[[package]]
+name = "sim-lua-bridge"
+version = "0.1.0"
+dependencies = [
+ "rilua",
+]
+
+[[package]]
+name = "sim-toc"
+version = "0.1.0"
+
+[[package]]
+name = "sim-xml"
+version = "0.1.0"
+dependencies = [
+ "quick-xml 0.37.5",
+ "regex",
+ "rilua",
+ "serde",
+ "thiserror 2.0.17",
+ "tracing",
+]
+
+[[package]]
 name = "simd-adler32"
 version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7756,6 +7783,10 @@ dependencies = [
  "sha2",
  "sim-data",
  "sim-data-profile",
+ "sim-event",
+ "sim-lua-bridge",
+ "sim-toc",
+ "sim-xml",
  "tar",
  "tempfile",
  "thiserror 2.0.17",
