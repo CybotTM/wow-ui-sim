@@ -1,6 +1,6 @@
-# Wrath guild-info consumer and producer staging
+# Wrath guild-info consumers and producers
 
-Verified: 2026-10-24 (static inspection only). [Contract](../../specs/wrath-guild-info.md). No builds, tests or slot use; no executed RED/GREEN claim.
+Verified: 2026-10-24. [Contract](../../specs/wrath-guild-info.md). [Accepted runtime proof](#accepted-runtime-proof) supersedes the earlier static staging; fresh current-master integration remains separate.
 
 ## Selected original consumer
 
@@ -16,7 +16,7 @@ Wrath cache SHA256:
 | FriendsFrame.xml | `97a2b0f11858e552636abe30874b62480d1a207ee15cb79f1e0138b4cec17b90` |
 | FriendsFrame.lua | `b5c136066c8e0df4ba46b48c9b37249509e6c315f7e02d10f4428c42a1deab69` |
 
-This is static runtime-selection evidence, not proof the staged tests loaded/executed successfully.
+This selection evidence is complemented by the accepted exact runtime receipts below.
 
 ## Static contradiction table
 
@@ -38,13 +38,13 @@ Existing A_Admin cache/ranks inputs remain usable; numeric ID/rank and presence 
 
 ## Batch3 path and blockers
 
-The historical slot at `97e759f7d` passed the three guild-info selectors, but F1 failed at FriendsFrame.lua:309: it supplied name/cache, not the display rank formatted before the guild subframe opens. The static repair adds `Some("Member")` before native loading; the original F1 Lua fixture and assertions stay unchanged. The [17-row classification](../../baselines/wrath-guild-info-green-blockers.md) supplies membership/ranks/roster in affected setups instead of restoring synthetic Wrath defaults. All 17 are class(a); none establishes a native-default producer contradiction. These repairs have no executed GREEN proof.
+The historical slot at `97e759f7d` passed the three guild-info selectors, but F1 failed at FriendsFrame.lua:309: it supplied name/cache, not the display rank formatted before the guild subframe opens. The static repair adds `Some("Member")` before native loading; the original F1 Lua fixture and assertions stay unchanged. The [17-row classification](../../baselines/wrath-guild-info-green-blockers.md) supplies membership/ranks/roster in affected setups instead of restoring synthetic Wrath defaults. All 17 are class(a); none establishes a native-default producer contradiction. These repairs pass in the accepted 56-row Wrath GREEN matrix; see [accepted runtime proof](#accepted-runtime-proof).
 
-The existing rank-settings dropdown row was blocked on missing bank permission and withdrawal-limit getters after valid leader startup selected Officer. Original FriendsFrame.lua:1647/:1677 requires both. The accepted laptop answer now permits the staged [bank permission model](#bank-permission-model); both dropdown rows still need compiled RED/GREEN proof.
+The existing rank-settings dropdown row was blocked on missing bank permission and withdrawal-limit getters after valid leader startup selected Officer. Original FriendsFrame.lua:1647/:1677 requires both. The accepted laptop answer now permits the staged [bank permission model](#bank-permission-model); both dropdown rows now have accepted compiled RED/GREEN proof.
 
 ## Bank permission model
 
-Verified 2026-10-24: static staging only. [Bank contract](../../specs/wrath-guild-bank-rank-permissions.md). Laptop answer `guildbank-perms-12340.md` (SHA256 `f58e304a7d9c20813f23d871f9666547d0af3924d66f341eeed044b0b1588951`) supplies authoritative reconstructed native semantics; no decompiled source was read here.
+Verified 2026-10-24: saved compiled RED/GREEN accepted by verifier8738; current-master refresh remains separate. [Bank contract](../../specs/wrath-guild-bank-rank-permissions.md). Laptop answer `guildbank-perms-12340.md` (SHA256 `f58e304a7d9c20813f23d871f9666547d0af3924d66f341eeed044b0b1588951`) supplies authoritative reconstructed native semantics; no decompiled source was read here.
 
 The existing native TOC/loader selection above also selects the dropdown consumer. `GuildControlPopupFrameDropDownButton_OnClick` selects the control rank, calls `GuildControlPopupframe_Update`, then sets the closed label. `GuildBankTabPermissionsTab_OnClick` selects the tab and calls that same original update. Tests do not replace either consumer or getter. The existing leader setup avoids the special rank1 UI branch by selecting Officer/Member for observations; the second selector changes the player's rank to Officer before clicking Member as well.
 
@@ -54,7 +54,7 @@ The existing native TOC/loader selection above also selects the dropdown consume
 
 ### Static contradiction table
 
-Each of the two `test_guild_panel` selectors independently executes all observations below through the original consumers. These are static contradictions, not executed RED proof.
+Each of the two `test_guild_panel` selectors independently executes all observations below through the original consumers. Both selectors fail in producer-minus RED at the missing tab getter in original FriendsFrame.lua:1647 and pass in GREEN. The varying observations below reject constant/no-op outputs. The downstream withdrawal boundary is not an independently reached RED.
 
 | Selected rank/tab | Required checkboxes view/deposit/edit; stack; gold | Contradiction |
 |---|---|---|
@@ -74,8 +74,10 @@ Every constant tab tuple contradicts at least two rows; every constant money out
 - `src/lua_api/globals/real/wrath_guild_info.rs`, `guild_probes.rs`, `guild_info.rs`, `state_types/character_world{,_defaults}.rs` — producer/model/defaults.
 - [Consumer selection and RED proof](consumer-selection-and-red-proof.md); [[addon-loading]]; [[lua-api]].
 
-## Deferred proof
+## Accepted runtime proof
 
-Tests scaffold: `f4b84832e`; producers: `a88a41395`; adapted integrated source: `97e759f7d`; static explicit-state repairs: `c55f58ae5`. The saved slot REPORT records three GREEN producer cases, failing F1 and17 preservation regressions, not accepted GREEN for the repair. The original nonleader dropdown selector preceded bank producers. Both dropdown rows now contain the independently discriminating supplied bank-input observations above; the input-only revision precedes getter registration. They have not been compiled or run.
+Verified 2026-10-24 by verifier8738: GREEN `469f6ffed`, producer-minus RED `9f180b154`; identical tests trees `8d0252ed8`. Evidence: `~/.local/state/wow-ui-sim/handoff/wrath-guild-info/bank-perms/slot3-run-20261024/`; independent report: `~/.local/state/wow-ui-sim/verification/wrath-guild-bank/report.md`.
 
-Current instructions and exact per-profile lists are in [the repair matrix](../../baselines/wrath-guild-info-green-blockers.md) and `~/.local/state/wow-ui-sim/handoff/wrath-guild-info/slot0-run/static-green-repairs/`. The old SLOT-RECIPE is historical: its36/42 Retail map and earlier source binding are superseded by REPORT's requested master34/38 reference and the new bound revision. This continuation uses no builds, slots, runtime tests or agents; bank getter implementation is staged, while runtime acceptance remains open.
+Wrath RED51 PASS/5 bank FAIL; GREEN56 PASS. Retail53 PASS on each revision. All218 exact runs have prior exact listings and CVar-safe receipts. Both original dropdown selectors reach the selected original consumer and pass varying rank/tab widget assertions in GREEN. The three direct API cases cover projection, invalid arguments and initial/replacement inputs; the invalid-argument case alone does not prove successful value projection. Wrath stock on master `12fb7c3b3` and GREEN is empty. Retail stock is equal at32 unique/36 occurrences on that exact pair, not clean startup. Both all-target checks and formatting pass without warnings.
+
+Current-master integration is a separate open gate: merge exact master `08b423c5c`, run merged Wrath/Retail all-target checks, the five bank selectors, fresh merged Wrath stock and fresh Retail stock on both master and merged HEAD. Master's combat-log filter change invalidates the old Retail count as an expectation. The full218-run RED/GREEN matrix need not repeat. See [baseline classification](../../baselines/wrath-guild-info-green-blockers.md#proof-limits). No native runtime certification or seven-profile/full-suite acceptance is claimed.

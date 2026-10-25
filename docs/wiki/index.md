@@ -27,9 +27,9 @@ mapping remains unknown. Producer and tests staged only; no build/slot/runtime p
 
 [Reload mechanics](systems/reload-ui.md#generated-xml-layer-arguments) links the [bounded contract](../specs/reload-ui.md#generated-xml-layer-reconstruction): Forever RED16 precedes parameterized identities, then Forever/default Retail compile0 sources on both reloads.27 exact cases/profile, zero-warning checks and formatting pass; no stock-startup or full-workload acceptance claim.
 
-## [2026-10-24] staged | Wrath bank selected-rank permissions
+## [2026-10-24] proof | Wrath bank selected-rank permissions
 
-[Model and static contradictions](investigations/wrath-guild-info.md#bank-permission-model) link the [contract](../specs/wrath-guild-bank-rank-permissions.md): supplied rank money/six masks/six stack limits, native rank0 initial image and Wrath-only legacy getters. Both original dropdown selectors now reject constants through varying widget observations. No builds or executed RED/GREEN; slot recipe is deferred.
+[Accepted runtime proof](investigations/wrath-guild-info.md#accepted-runtime-proof) links the [contract](../specs/wrath-guild-bank-rank-permissions.md): five bank RED→GREEN selectors, Wrath56 and paired Retail53 preservation pass; verifier8738 ACCEPT. Both original dropdown selectors project varying rank/tab widget values. Saved stock/check proof covers master12fb7c3b3/GREEN469f6ffed; fresh master08b423c5c integration is a separate open gate.
 
 ## [2026-10-24] staged | SuperTrack supplied state
 

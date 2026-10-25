@@ -4,12 +4,12 @@ Wrath's legacy bank permission readers project explicit selected-control-rank in
 
 ## What it must do
 
-- [ ] Only Wrath registers `GetGuildBankTabPermissions` and `GetGuildBankWithdrawLimit` through the new modeled path; other profiles retain their existing surfaces.
-- [ ] Tab getter returns exactly four values: numeric1/nil for masks1,2,4, then the supplied numeric stack limit. Normalize by integer conversion, subtract1, narrow to8 bits; normalized indices >=6 return nil,nil,nil,0 without rank access. Missing/non-number-convertible argument raises a usage error; extra arguments are ignored.
-- [ ] Money getter returns exactly one number: nonnegative supplied limit integer-divided by10000, negative unchanged. Extra arguments are ignored.
-- [ ] Both read the selected control rank (Lua one-based), not player rank, membership or bank-frame visibility. Neither emits events.
-- [ ] Host input supplies each received rank's money, six masks and six stack limits. Initial world-entry rank0 has masks/stacks -1 and money0; supplied data replaces the initial image, including rank0. No other native default is invented.
-- [ ] Original FriendsFrame dropdown/tab consumers update visible labels, checked states and stack/gold edit text from varying supplied ranks/tabs.
+- [x] Only Wrath registers `GetGuildBankTabPermissions` and `GetGuildBankWithdrawLimit` through the new modeled path; other profiles retain their existing surfaces.
+- [x] Tab getter returns exactly four values: numeric1/nil for masks1,2,4, then the supplied numeric stack limit. Normalize by integer conversion, subtract1, narrow to8 bits; normalized indices >=6 return nil,nil,nil,0 without rank access. Missing/non-number-convertible argument raises a usage error; extra arguments are ignored.
+- [x] Money getter returns exactly one number: nonnegative supplied limit integer-divided by10000, negative unchanged. Extra arguments are ignored.
+- [x] Both read the selected control rank (Lua one-based), not player rank, membership or bank-frame visibility. Neither emits events.
+- [x] Host input supplies each received rank's money, six masks and six stack limits. Initial world-entry rank0 has masks/stacks -1 and money0; supplied data replaces the initial image, including rank0. No other native default is invented.
+- [x] Original FriendsFrame dropdown/tab consumers update visible labels, checked states and stack/gold edit text from varying supplied ranks/tabs.
 
 ## How it works
 
@@ -28,7 +28,8 @@ Wrath's legacy bank permission readers project explicit selected-control-rank in
 
 ## Known gaps (current cycle)
 
-- [ ] No compilation or runtime tests authorized. Static staging is not executed TDD RED/GREEN; parent must build input-only RED before producer GREEN and run focused profile checks.
+- [x] Saved proof at GREEN `469f6ffed` and producer-minus RED `9f180b154`: five bank selectors fail in RED and pass in GREEN; Wrath preservation56 and Retail53 pass in GREEN. Verifier8738 accepted these receipts. See the [proof status](../wiki/investigations/wrath-guild-info.md#accepted-runtime-proof).
+- [ ] Current-master integration refresh: merged Wrath/Retail checks, five merged bank selectors, fresh Wrath stock and Retail stock compared with exact master `08b423c5c`. Historical stock counts are not the current expectation.
 - [ ] Non-native simulator policy: a valid tab with no selected/supplied rank raises an explicit unavailable-input error instead of inventing a numeric limit. Native rank -1 is source-undefined; tests do not assert its result.
 
 ## Out of scope

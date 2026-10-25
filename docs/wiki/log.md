@@ -2734,3 +2734,7 @@ Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4a-immutable-co
 ## 2026-10-24 — Patch 12.1.7 I4b static staging
 
 - Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4b-conditional-selected-source-obligations), [contract](../specs/patch-12-1-7-source-accounting.md#i4b-conditional-static-selection) and index for I3-dependent selected-source obligations. Exact pin/cache authentication, mixed-status rejection controls and separate runtime limits; no effective applicability promotion before the source dependency merges.
+
+## 2026-10-24 — Wrath guild-bank proof reconciliation
+
+Updated the [bank investigation](investigations/wrath-guild-info.md#accepted-runtime-proof), contract, baseline classification and index from static/pending to verifier8738-accepted saved RED/GREEN. Current-master08b423c5c integration remains separate; historical Retail counts are not its expectation.
