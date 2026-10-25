@@ -73,7 +73,7 @@ def crate_input(path):
 def prepare_source(worktree, previous):
     identity, dirty = source_identity(worktree)
     changed = set()
-    if (not previous or identity != previous["identity"]
+    if (not previous or identity != previous.get("identity")
             or previous.get("result", "success") != "success"):
         try:
             if not previous or previous.get("result", "success") != "success":

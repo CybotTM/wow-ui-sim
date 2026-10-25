@@ -145,6 +145,13 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertTrue(all((self.tree / p).stat().st_mtime_ns > 1_000_000_000
                             for p in current["changed_paths"]))
 
+    def test_unknown_identity_refreshes_all_tracked_crate_inputs(self):
+        source = self.tree / "src/main.rs"
+        os.utime(source, (1, 1))
+        current = self.prepare({"artifacts": {"debug/probe": "old"}})
+        self.assertIn("src/main.rs", current["changed_paths"])
+        self.assertGreater(source.stat().st_mtime_ns, 1_000_000_000)
+
     def test_unknown_commit_invalidates_crate_inputs_not_docs(self):
         (self.tree / "data").mkdir()
         (self.tree / "data/input.csv").write_text("input")
