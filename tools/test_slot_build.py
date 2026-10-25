@@ -33,12 +33,16 @@ class SlotBuildTests(unittest.TestCase):
              "--unit=lane-build", "--slice=agents.slice",
              "--property=MemoryMax=9G", "--property=MemorySwapMax=0",
              "--property=CPUAccounting=yes",
-             "--setenv=CARGO_INCREMENTAL=1",
+             "--setenv=CARGO_INCREMENTAL=1", "--setenv=RUSTC_WRAPPER=",
              "--setenv=CARGO_TARGET_DIR=/home/osso/.cache/wow-ui-sim-targets/slot-2",
              "--property=BindPaths=/home/osso/.worktrees/lane:/home/osso/.cache/wow-ui-sim-srcmount/slot-2",
              "--working-directory=/home/osso/.cache/wow-ui-sim-srcmount/slot-2",
              "--", "cargo", "test", "--no-run"],
         )
+
+    def test_launch_disables_configured_rustc_wrapper(self):
+        argv = self.module.build_argv(0, self.slot, "wrapper-test", ["cargo", "build"])
+        self.assertIn("--setenv=RUSTC_WRAPPER=", argv[:argv.index("--")])
 
     def test_matching_owner_is_accepted(self):
         (self.slot / ".owner").write_text("lane-owner")
@@ -321,6 +325,78 @@ class SourceFreshnessTests(unittest.TestCase):
         (self.tree / "src/main.rs").write_text("changed Rust")
         with self.assertRaisesRegex(ValueError, "stale artifacts"):
             self.module.execute_build(request)
+
+    def run_mixed_output_pair(self, changed_input, changed_outputs):
+        import sys
+        (self.slot / ".owner").write_text("test-owner")
+        emitter = (
+            'import json,sys; from pathlib import Path\n'
+            'slot=Path(sys.argv[1])\n'
+            'for name,content in json.loads(sys.argv[2]).items():\n'
+            '    path=slot/name\n'
+            '    path.parent.mkdir(parents=True, exist_ok=True)\n'
+            '    path.write_text(content)\n'
+            '    if path.suffix != ".rmeta": path.chmod(0o755)\n'
+        )
+        request = self.slot / "request.json"
+        receipt = self.slot / "receipt.json"
+        outputs = {"debug/probe": "A binary", "debug/other": "A other",
+                   "debug/deps/probe.rmeta": "A metadata"}
+        for phase in ["A", "B"]:
+            if phase == "B":
+                comment = "//" if changed_input.endswith(".rs") else "#"
+                with (self.tree / changed_input).open("a") as stream:
+                    stream.write(f"\n{comment} changed build input\n")
+                outputs = changed_outputs
+            request.write_text(json.dumps({
+                "slot": str(self.slot), "worktree": str(self.tree),
+                "owner": "test-owner", "unit": "mixed-output", "receipt": str(receipt),
+                "cargo": [sys.executable, "-c", emitter, str(self.slot),
+                          json.dumps(outputs)]}))
+            result = subprocess.run(
+                [sys.executable, str(self.module.__file__), "--execute", str(request)],
+                capture_output=True)
+            if phase == "A":
+                self.assertEqual(result.returncode, 0, result.stderr)
+                first = json.loads(receipt.read_text())
+        return result, first, json.loads(receipt.read_text())
+
+    def test_changed_metadata_cannot_certify_unchanged_executable(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/deps/probe.rmeta": "B metadata"})
+        self.assertEqual(second["changed_paths"], ["src/main.rs"])
+        self.assertEqual(first["artifacts"]["debug/probe"],
+                         second["artifacts"]["debug/probe"])
+        self.assertNotEqual(first["artifacts"]["debug/deps/probe.rmeta"],
+                            second["artifacts"]["debug/deps/probe.rmeta"])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(b"stale artifacts", result.stderr)
+        self.assertEqual(second["result"], "stale-artifacts")
+
+    def test_changed_executable_cannot_certify_another_unchanged_executable(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/probe": "B binary"})
+        self.assertNotEqual(first["artifacts"]["debug/probe"],
+                            second["artifacts"]["debug/probe"])
+        self.assertEqual(first["artifacts"]["debug/other"],
+                         second["artifacts"]["debug/other"])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(second["result"], "stale-artifacts")
+
+    def test_build_input_change_rejects_unchanged_executable(self):
+        result, first, second = self.run_mixed_output_pair(
+            "Cargo.toml", {"debug/deps/probe.rmeta": "B metadata"})
+        self.assertEqual(second["changed_paths"], ["Cargo.toml"])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(second["result"], "stale-artifacts")
+
+    def test_changed_executables_allow_unchanged_library_metadata(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/probe": "B binary", "debug/other": "B other"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(first["artifacts"]["debug/deps/probe.rmeta"],
+                         second["artifacts"]["debug/deps/probe.rmeta"])
+        self.assertEqual(second["result"], "success")
 
     def test_worker_preserves_binary_streams_and_launcher_arguments(self):
         import sys

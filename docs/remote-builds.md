@@ -49,7 +49,9 @@ anything except a literal `ADD` verdict. It does not poll for admission.
 ```
 
 Launch prints the unit name without waiting for the build. The retained service
-runs in `agents.slice` with `MemoryMax=9G` and `MemorySwapMax=0`. Status prints
+runs in `agents.slice` with `MemoryMax=9G` and `MemorySwapMax=0`.
+`RUSTC_WRAPPER` is set to an empty value so Cargo configuration cannot select
+sccache instead of the incremental compiler. Status prints
 `SubState`, `Result`, `CPUUsageNSec`, and `WallTimeSec` (elapsed while running).
 Use the helper from the checkout that contains it; it builds `--worktree`.
 
@@ -78,10 +80,17 @@ It also rehashes previously recorded artifacts, including unchanged files that
 Cargo might incorrectly consider fresh. Receipt, hidden, and incremental
 subdirectories are excluded from discovery. Empty discovery does not turn a
 successful child into a failure; an empty map is not artifact freshness proof.
-After a Rust diff, a successful build whose artifact hashes all match the
-previous build fails with `stale artifacts`; the receipt retains the failure.
-Identical hashes can also result from edits that do not affect generated code;
-this strict check requires investigation, not acceptance based on Cargo exit 0.
+After any recorded input diff, each executable must differ from its own previous
+path's SHA256. An unchanged executable fails the run with `stale artifacts` even
+when another executable, library or `.rmeta` changed; the receipt retains the
+failure. Known library suffixes are excluded from this executable check; all other
+recorded outputs are treated as executables. Library-only builds/checks still fail
+if every recorded output is unchanged at its own previous path.
+No disjoint-input or `fresh=false` exception is inferred: wrappers can capture
+Cargo evidence, and package roots alone do not prove transitive input isolation.
+All changed paths are conservatively treated as possible build inputs. Identical
+code or disjoint edits can therefore fail closed and require investigation, not
+acceptance based on Cargo exit 0.
 Checks can record library artifacts without an executable. Inspect the retained
 unit's terminal result as well as its receipt; launch success is not build success.
 

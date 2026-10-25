@@ -13,6 +13,7 @@ import time
 TARGET_ROOT = Path("/home/osso/.cache/wow-ui-sim-targets")
 SOURCE_ROOT = Path("/home/osso/.cache/wow-ui-sim-srcmount")
 CAPACITY = "/home/osso/.worktrees/logs/capacity.sh"
+LIBRARY_SUFFIXES = {".rlib", ".rmeta", ".so", ".a", ".dll", ".dylib"}
 
 
 def check_owner(slot, owner):
@@ -39,7 +40,8 @@ def build_argv(slot, worktree, unit, cargo):
         f"--unit={unit}", "--slice=agents.slice",
         "--property=MemoryMax=9G", "--property=MemorySwapMax=0",
         "--property=CPUAccounting=yes",
-        "--setenv=CARGO_INCREMENTAL=1", f"--setenv=CARGO_TARGET_DIR={target}",
+        "--setenv=CARGO_INCREMENTAL=1", "--setenv=RUSTC_WRAPPER=",
+        f"--setenv=CARGO_TARGET_DIR={target}",
         f"--property=BindPaths={worktree}:{mount}",
         f"--working-directory={mount}", "--", *cargo,
     ]
@@ -116,11 +118,26 @@ def write_json(path, value):
     temporary.replace(path)
 
 
+def find_stale_artifacts(changed_paths, previous_artifacts, artifacts):
+    if not changed_paths:
+        return []
+    unchanged = {name for name, digest in artifacts.items()
+                 if previous_artifacts.get(name) == digest}
+    # Discovery records libraries and executables. Treat anything not known to
+    # be a library as an executable; never use another output's hash as proof.
+    unchanged_executables = sorted(name for name in unchanged
+                                   if Path(name).suffix not in LIBRARY_SUFFIXES)
+    if unchanged_executables:
+        return unchanged_executables
+    # Preserve the identical-output guard for library-only builds/checks.
+    return sorted(unchanged) if unchanged == artifacts.keys() else []
+
+
 def finish_build(slot, receipt, current, previous, artifacts, returncode):
-    rust_changed = any(p.endswith(".rs") for p in current["changed_paths"])
-    old_hashes = set((previous or {}).get("artifacts", {}).values())
-    stale = bool(returncode == 0 and rust_changed and artifacts and old_hashes
-                 and set(artifacts.values()).issubset(old_hashes))
+    previous_artifacts = (previous or {}).get("artifacts", {})
+    stale_paths = find_stale_artifacts(
+        current["changed_paths"], previous_artifacts, artifacts) if returncode == 0 else []
+    stale = bool(stale_paths)
     result = "success" if returncode == 0 else "failed"
     if stale:
         result = "stale-artifacts"
@@ -128,8 +145,8 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
     write_json(receipt, current)
     write_json(slot / ".source-identity.json", current)
     if stale:
-        raise ValueError(f"stale artifacts: Rust source changed but all artifact SHA256 values "
-                         f"match the previous build; see {receipt}")
+        raise ValueError(f"stale artifacts: inputs changed but artifact SHA256 values "
+                         f"match the same previous paths: {stale_paths}; see {receipt}")
 
 
 def collect_artifacts(slot, started_ns, previous):
@@ -144,8 +161,8 @@ def collect_artifacts(slot, started_ns, previous):
             if path.is_symlink() or not path.is_file():
                 continue
             stat = path.stat()
-            artifact = (stat.st_mode & 0o111 or path.suffix in
-                        {".rlib", ".rmeta", ".so", ".a", ".dll", ".exe", ".dylib"})
+            artifact = (stat.st_mode & 0o111 or path.suffix in LIBRARY_SUFFIXES
+                        or path.suffix == ".exe")
             if artifact and max(stat.st_mtime_ns, stat.st_ctime_ns) >= started_ns:
                 paths.add(path)
     artifacts = {}
