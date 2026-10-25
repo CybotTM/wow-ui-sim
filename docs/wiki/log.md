@@ -1,3 +1,7 @@
+## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
+
+[Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
+
 ## [2026-10-24] proof | Bounded reload XML source reuse
 
 [Contract matrix](../specs/reload-ui.md#generated-xml-layer-reconstruction) records Forever RED16 at0d1e54849, then Forever/default Retail0/0 reload compiles at23f1f629a.27 exact cases/profile, zero-warning builds/checks and formatting pass; current CVars remain unchanged. [Mechanics](systems/reload-ui.md#generated-xml-layer-arguments) retain VM-local objects and XML ordering. Stock startup, paired timing and full Ellesmere acceptance remain separate.

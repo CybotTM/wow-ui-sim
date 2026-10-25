@@ -71,6 +71,18 @@ Each occurrence keeps its own disposition. The three added PvPObjectiveBanner de
 
 The [static fixtures](../../../tools/test_patch_12_1_7_static.py) reject constant/accept-all outputs, unselected flavors, wrong Game/Family/filter/locale/environment, private/local/comment/string observations, namespace suffix attribution, nested non-document XML scripts, stale pins, missing/changed cache files and receipt/dependency corruption. RED used a disposable accept-all scaffold, then focused counterexamples before implementation fixes. These are classifier/validator controls, not producer RED or runtime acceptance. No builds, slots or vendor writes were used.
 
+## I4c: distinguish removal intent from selected source
+
+Verified static classification: 2026-10-24. The [I4c contract](../../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers) owns counts and status meanings. Its [overlay](../../../data/patch-api/sources/12.1.7-inherited-i4c.json) is now the static disposition source; the earlier overlays remain immutable historical evidence. I3's exact source dependency is present in the I4c base, and every pinned cache file was authenticated again. No runtime was launched.
+
+The main UNKNOWN class was not a missing implementation: most inherited FrameXML removals still have original selected Mainline definitions. Those definitions contradict a literal-source retirement obligation on PTR. Two extra surviving names use direct assignments rather than function declaration syntax. These observations cannot identify why a historical diff called a name removed, nor establish actual post-load globals. A repeated added/removed occurrence therefore receives separate source applicability rather than contradictory simultaneous runtime assertions.
+
+[The classifier](../../../tools/patch_12_1_7_i4c.py) reuses I4b's authentication and selected-source tracing. It adds exact assignments, conservative local/parameter exclusion and rejected-TOC tracing. Excluded publishers need original pinned file edges, selected-TOC hashes and a concrete flavor/game restriction or substituted sibling. One excluded definition cannot hide another declaration with unresolved environment selection. An excluded consumer of a native function does not establish native absence.
+
+A complete authenticated text inventory also records whether each exact literal spelling occurs anywhere, including comments and strings. **Absent literal spelling is not retirement proof.** Dynamic global construction, aliases, native registration and unresolved script environments remain explicit questions. The remaining removed-row work must observe original loaded owners or native catalogs; it must not synthesize names, force-load Classic/Camelot files, or infer aliases from similar spellings.
+
+[Static fixtures](../../../tools/test_patch_12_1_7_i4c.py) exercise selected aliases, opposing occurrences, all four explicit exclusion routes, local/parameter/comment/string traps, unresolved secure publishers, native-consumer non-credit and receipt/question/status/ID mutations. Concrete checked-in examples cover both filter aliases, secure delegates, the two excluded removed publishers and opposite banner directions. These are static-classifier tests, not simulator producer RED/GREEN. [Consumer-selection rules](consumer-selection-and-red-proof.md) still govern any later runtime acceptance.
+
 ## Sources
 
 - [12.1.7 raw patch text](../../../data/patch-api/sources/12.1.7-api-changes.wikitext) — direct prose, target and inherited link.
@@ -80,6 +92,7 @@ The [static fixtures](../../../tools/test_patch_12_1_7_static.py) reject constan
 - [Inherited occurrence triage](../../../data/patch-api/sources/12.1.7-inherited-1.60.1.json) — full per-occurrence linkage and bounded lexical candidates.
 - [I4a validator](../../../tools/validate_patch_12_1_7_inherited.py) and [disposable controls](../../../tools/test_patch_12_1_7_inherited.py) — accounting/proof-separation boundary only.
 - [I4b classifier/validator](../../../tools/patch_12_1_7_static.py) and [static overlay](../../../data/patch-api/sources/12.1.7-inherited-static.json) — exact I3-dependent selected-source obligations, not runtime credit.
+- [I4c classifier/validator](../../../tools/patch_12_1_7_i4c.py) and [static dispositions](../../../data/patch-api/sources/12.1.7-inherited-i4c.json) — source survival, explicit publisher exclusions and exact unresolved questions; no native retirement credit.
 - [Runtime TOC selection](../../../src/loader/mod.rs), [TOC filters](../../../src/toc/mod.rs) and [XML path resolution](../../../src/loader/helpers.rs) — current simulator source-selection semantics.
 
 ## See Also
