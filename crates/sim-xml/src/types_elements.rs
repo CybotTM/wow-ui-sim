@@ -108,7 +108,7 @@ pub struct TextureXml {
     #[serde(rename = "Color")]
     pub color: Option<ColorXml>,
     #[serde(rename = "Gradient")]
-    pub gradient: Option<crate::xml::GradientXml>,
+    pub gradient: Option<crate::GradientXml>,
     #[serde(rename = "Animations")]
     pub animations: Option<AnimationsXml>,
     #[serde(rename = "Scripts")]

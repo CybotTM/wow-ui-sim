@@ -4,9 +4,9 @@ use rilua::LuaResult;
 use rilua::Val;
 use rilua::vm::state::LuaState;
 
-use crate::lua_bridge::FromStack;
-use crate::lua_bridge::IntoStack;
-use crate::lua_bridge::from_stack::abs_index;
+use crate::FromStack;
+use crate::IntoStack;
+use crate::from_stack::abs_index;
 
 /// Bridge equivalent of mlua's `MultiValue`.
 #[derive(Debug, Clone, Default)]

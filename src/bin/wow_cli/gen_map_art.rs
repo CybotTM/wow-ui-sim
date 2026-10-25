@@ -9,9 +9,10 @@
 //! Generates: crates/sim-data/data/map_art.rs
 
 use super::csv_util::parse_csv_line;
+use super::csv_util::read_csv_records;
 use std::collections::{BTreeMap, HashMap};
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufReader, Write};
 use std::path::Path;
 
 type TileMaps = HashMap<(u32, u32), BTreeMap<(u32, u32), u32>>;
@@ -66,8 +67,7 @@ fn load_style_layers(
     let reader = BufReader::new(file);
     let mut map: HashMap<u32, Vec<StyleLayer>> = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -102,8 +102,7 @@ fn load_art_style(path: &Path) -> Result<HashMap<u32, u32>, Box<dyn std::error::
     let reader = BufReader::new(file);
     let mut map = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -129,8 +128,7 @@ fn load_tiles(path: &Path) -> Result<TileMaps, Box<dyn std::error::Error>> {
     // key: (artID, layerIndex), value: BTreeMap<(row, col), fileDataID>
     let mut map: TileMaps = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -159,8 +157,7 @@ fn load_map_art(path: &Path) -> Result<BTreeMap<u32, u32>, Box<dyn std::error::E
     let reader = BufReader::new(file);
     let mut map = BTreeMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }

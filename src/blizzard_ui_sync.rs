@@ -1,6 +1,8 @@
 //! Profile-scoped Blizzard UI source synchronization.
 
 #[cfg(feature = "casc")]
+mod gethe_missing;
+#[cfg(feature = "casc")]
 mod locale;
 mod pinned;
 #[cfg(feature = "casc")]
@@ -189,10 +191,11 @@ fn sync_blizzard_ui_entries<'a>(
         missing: 0,
     };
     let mut last_missing_entry: Option<String> = None;
+    let mut provenance = expected_provenance.clone();
 
     for entry in entries {
         summary.total += 1;
-        match sync_manifest_entry(root, entry)? {
+        match sync_profile_manifest_entry(root, entry, &mut provenance)? {
             EntrySyncResult::Present => summary.present += 1,
             EntrySyncResult::Extracted => summary.extracted += 1,
             EntrySyncResult::Missing => {
@@ -211,7 +214,7 @@ fn sync_blizzard_ui_entries<'a>(
         });
     }
 
-    write_complete_marker(root, expected_provenance)?;
+    write_complete_marker(root, &provenance)?;
     #[cfg(feature = "casc")]
     release_cdn_downloader()?;
     Ok(summary)
@@ -254,14 +257,18 @@ fn expected_cache_provenance() -> crate::Result<CacheProvenance> {
         let product = crate::asset_resolver_config::active_profile_casc_product();
         let build_identity = read_active_build_identity(install_root, product)?;
         let manifest_sha256 = format!("{:x}", Sha256::digest(active_blizzard_ui_manifest()));
-        return Ok(CacheProvenance::new(
+        let mut provenance = CacheProvenance::new(
             crate::client_profile::ACTIVE.cache_subdir(),
             product,
             &build_identity.version,
             &build_identity.build_key,
             &build_identity.install_key,
             &manifest_sha256,
-        ));
+        );
+        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::WowForever {
+            gethe_missing::append_source_identity(&mut provenance, &build_identity.version)?;
+        }
+        return Ok(provenance);
     }
 
     #[cfg(not(feature = "casc"))]
@@ -285,7 +292,7 @@ fn invalidate_cache_if_provenance_mismatched(
 ) -> crate::Result<bool> {
     let provenance_path = root.join(PROVENANCE_FILE);
     let provenance_matches = std::fs::read_to_string(provenance_path)
-        .is_ok_and(|actual| actual == expected_provenance.contents());
+        .is_ok_and(|actual| cache_provenance_matches(&actual, expected_provenance));
     if provenance_matches || !root.exists() {
         return Ok(false);
     }
@@ -299,11 +306,41 @@ fn invalidate_cache_if_provenance_mismatched(
     Ok(true)
 }
 
+fn cache_provenance_matches(actual: &str, expected: &CacheProvenance) -> bool {
+    #[cfg(feature = "casc")]
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::WowForever {
+        return gethe_missing::provenance_matches(actual, expected.contents());
+    }
+    actual == expected.contents()
+}
+
 enum EntrySyncResult {
     Present,
     Extracted,
     Missing,
 }
+
+#[cfg(feature = "casc")]
+fn sync_profile_manifest_entry(
+    root: &Path,
+    entry: &str,
+    provenance: &mut CacheProvenance,
+) -> crate::Result<EntrySyncResult> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::WowForever {
+        return gethe_missing::sync_manifest_entry(root, entry, provenance);
+    }
+    sync_manifest_entry(root, entry)
+}
+
+#[cfg(not(feature = "casc"))]
+fn sync_profile_manifest_entry(
+    root: &Path,
+    entry: &str,
+    _provenance: &mut CacheProvenance,
+) -> crate::Result<EntrySyncResult> {
+    sync_manifest_entry(root, entry)
+}
+
 fn sync_manifest_entry(root: &Path, entry: &str) -> crate::Result<EntrySyncResult> {
     let out_path = root.join(entry);
     if entry_is_present_and_usable(entry, &out_path) {

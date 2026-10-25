@@ -27,12 +27,29 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 - [ ] Preserve root version and full-width content flags, including high bits, when parsing/selecting variants; do not flatten root records to a last-variant map.
 - [ ] Record `locale=enUS` and `content_filter=none` in UI-cache provenance. Sync invalidates locale-blind caches even when build identity and manifest match, before reusing files.
 
+### Blizzard UI source bytes
+
+- [x] Lua cache usability requires a readable file, not UTF-8 encoding. Sync must preserve authenticated source bytes without normalization or transcoding.
+- [x] Profile-specific source content checks match byte sequences without requiring the whole Lua file to decode as UTF-8.
+- [x] The runtime loads Lua source bytes into rilua; string literals retain their original bytes through source compilation and bytecode replay.
+- [x] XML, TOC and XSD cache validation still requires UTF-8. TOC and XML runtime text parsing is unchanged.
+
 ### Source sync transport
 
 - [ ] A sync operation reuses one CDN session and archive index set across file downloads instead of re-querying product metadata per file, then releases them before GUI startup.
 - [ ] Initialization checks every archive index in the selected CDN configuration, reusing individual cached index files; an interrupted index download is not accepted as a complete set.
 - [ ] Encoding-key downloads retry typed transport failures at most three times with exponential backoff and jitter. HTTP status and decode failures remain explicit failures.
 - [x] Linux Zenity startup errors render as plain text, including literal `<profile>` paths.
+
+### Forever mapped, non-resident UI sources
+
+- [ ] For Forever only, sync selects Gethe bytes only when the active enUS root maps the manifest FDID to a CKey, the encoding table maps that CKey to an EKey, and the selected local indexes contain no entry for that EKey. Resident entries keep the existing CASC route; absent root/encoding mappings keep the existing failure path. Read/decode errors for resident data do not select Gethe.
+- [ ] The committed `data/blizzard-ui-builds/wowforever.json` pins the exact Gethe revision and build version, following the existing pinned source convention. Its version must equal the installed profile build. Read blobs from that immutable revision in the existing `wow-ui-sim/wow-ui-source-git/forever` cache, not from a moving branch or working-tree export. Read that revision's `version.txt` and require the same version. Sync does not fetch or change the source checkout.
+- [ ] Hash the raw Gethe bytes with MD5 and require equality with the root/encoding CKey before any destination write. Do not normalize newlines or text. A mismatch fails with the manifest path, FDID, expected CKey and actual Gethe MD5. Missing pinned blobs and mismatched versions fail explicitly.
+- [ ] Cache provenance identifies the pinned revision/version and records every substituted file as a `gethe_file=` JSON record with `path`, `fdid`, `ckey`, `gethe_revision`, and `source: "gethe"`. Reused substituted files are reverified and recorded on sync; resident files produce no Gethe record. Completion is published only after all entries succeed.
+- [ ] This rule exists because the selected Forever streaming installation has authenticated root/encoding mappings for UI content absent from local indexes (observed FDID 8379893). It is not a general fallback or CDN repair. Retire it when a supported local acquisition path reliably supplies the full selected UI manifest; remove the pin and route together and recapture the stock startup baseline.
+
+Static implementation and fixture tests are staged; execution remains pending. The fixture selector is `blizzard_ui_sync::gethe_missing::tests::`.
 
 ### GUI resolution-cache preparation
 

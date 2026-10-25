@@ -29,7 +29,7 @@ Profile → Gethe branch:
 | mists | `classic` (current Classic = Mists of Pandaria) |
 | era | `classic_era` |
 | anniversary | `classic_anniversary` |
-| wowforever | `forever` (current selected target 1.60.1.70374; distinct runtime profile, cache, and manifest) |
+| wowforever | `forever` (current selected target 1.60.1.70532; distinct runtime profile, cache, and manifest) |
 
 ## Retail selected target — October 16, 2026
 
@@ -66,7 +66,54 @@ previously existed; no other profile's baseline is rewritten.
 
 ## Matching the installed Forever build
 
-### Current selected target — October 15, 2026
+### Current selected target — October 25, 2026
+
+The selected non-beta product is `wowf` **1.60.1.70532**, build key
+`2582289d81e380163c7a13472df4cb81`; its build config identifies
+`WOW-70532patch1.60.1_Retail` / `build-uid = wowf`.
+After desktop Scan and Repair, read-only latest-generation index inspection
+selects live root and encoding entries. Syncthing `wow-install` reached idle
+with needFiles/needBytes zero; all 16 newest desktop index names and sizes
+match locally. Independent local BLTE header/chunk verification and decoded
+MD5 checks pass for root `6e2657526d320facacb6f3dfff62d8a2` and encoding
+`7a54801f1a74da76cef250d8dd12351e`; the metadata/index/archive snapshot
+remained unchanged. Verified October 25, 2026, 01:18 UTC.
+
+`src/asset_resolver_config.rs` now selects `wowf` for Forever; its product
+regression expects `wowf`. Historical beta fixtures remain unchanged.
+The new selector's Rust execution/check proof, lane-private offline cache sync,
+provenance, baseline and startup are pending a released build slot after
+club-unread-integrate and S49. No runtime acceptance is claimed.
+The manifest and baseline remain pending their valid capture/co-commit.
+No CDN, borrowed keyring/root, fabricated data or decompiled source is used.
+
+### Historical beta selection — October 24, 2026
+
+User decision `forever_target_build_20261024` starts a new acceptance epoch for
+installed `wow_classic_beta` **1.60.1.70532**, active build key
+`ad1802f4455e427ed8b7769aab25b0c0`. Read-only `.product.db` decoding selects
+that exact record; its build config independently identifies
+`WOW-70532patch1.60.1_Beta` and hashes to the selected build key. This proves
+installed metadata/config identity, not complete or playable content.
+
+Gethe `forever` revision `ca8368f2f2380cbe696854f7f2646387c278a61b`
+reports `1.60.1.70532`. The unmodified generator produces the full **4,486-path**
+manifest (+55/-3 from 70374); all 4,486 copied source blobs match the Git tree.
+The refreshed community listfile and explicit-source limited generator produce
+146,753 rows (+55/-1), with no unmapped Forever manifest entry.
+Forever has no profile-only sync exclusion or hardcoded required-entry list.
+
+Runtime acquisition/provenance, baseline recapture and all-target warning proof
+are pending an authorized build slot and main's asset-resolver absent-keyring-row
+fix. Do not add a synthetic `.build.info` row or change the dependency pin in
+this source lane. The 70374 receipts below remain historical; neither their
+successful acquisition nor any older clean/failing capture establishes 70532
+startup acceptance. The manifest and new baseline must be committed together
+after the supported sync and byte-exact capture.
+
+<a id="current-selected-target--october-15-2026"></a>
+
+### Historical selected target — October 15, 2026
 
 The installed-product reader reports
 `product="wow_classic_beta" version="1.60.1.70374"`, exit 0.
