@@ -1,3 +1,7 @@
+## [2026-10-25] fix | Byte-preserving Lua cache usability
+
+[Source-byte validation](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) separates byte-oriented Lua from UTF-8 XML/TOC/XSD. Runtime TOC loading already passes raw bytes to rilua. Regression fixtures preserve a literal `0x92` through cache checks and loaded strings.
+
 ## [2026-10-25] source | Forever wowf product selection
 
 [Selected-target checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records wowf 1.60.1.70532 / build2582289d81e380163c7a13472df4cb81, repaired live desktop indexes, idle Syncthing and authenticated local root/encoding. Selector/regression now expect wowf. Builds, offline sync, baseline and startup await a released slot after club-unread-integrate and S49; static work is not runtime acceptance.

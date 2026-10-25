@@ -302,7 +302,7 @@ pub(super) fn sync_entry_belongs_to_active_profile(entry: &str) -> bool {
 }
 
 pub(super) fn cache_entry_is_usable(entry: &str, path: &Path) -> bool {
-    if text_manifest_entry(entry) && !is_valid_utf8_file(path) {
+    if text_manifest_entry(entry) && !manifest_source_is_readable(entry, path) {
         return false;
     }
 
@@ -351,8 +351,12 @@ fn text_manifest_entry(entry: &str) -> bool {
         || lower.ends_with(".xsd")
 }
 
-fn is_valid_utf8_file(path: &Path) -> bool {
-    std::fs::read_to_string(path).is_ok()
+fn manifest_source_is_readable(entry: &str, path: &Path) -> bool {
+    let Ok(bytes) = std::fs::read(path) else {
+        return false;
+    };
+    // Lua source is byte-oriented; XML, TOC and XSD still require UTF-8.
+    entry.to_ascii_lowercase().ends_with(".lua") || std::str::from_utf8(&bytes).is_ok()
 }
 
 fn retail_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
@@ -472,7 +476,12 @@ fn mists_world_map_xml_is_usable(path: &Path) -> bool {
 }
 
 fn file_contains(path: &Path, needle: &str) -> bool {
-    std::fs::read_to_string(path).is_ok_and(|contents| contents.contains(needle))
+    std::fs::read(path).is_ok_and(|contents| {
+        needle.is_empty()
+            || contents
+                .windows(needle.len())
+                .any(|window| window == needle.as_bytes())
+    })
 }
 
 #[cfg(test)]
@@ -626,13 +635,15 @@ mod tests {
     fn text_manifest_entries_reject_binary_cache_data() {
         let root = unique_temp_dir("binary-text-entry");
         std::fs::create_dir_all(&root).expect("create temp root");
-        let lua_path = root.join("Bad.lua");
-        std::fs::write(&lua_path, [0xff, 0xfe, 0xfd]).expect("write binary lua");
-
-        assert!(
-            !cache_entry_is_usable("Blizzard_Test/Bad.lua", &lua_path),
-            "text manifest entries must reject binary cache contents"
-        );
+        for extension in ["xml", "toc", "xsd"] {
+            let entry = format!("Blizzard_Test/Bad.{extension}");
+            let path = root.join(format!("Bad.{extension}"));
+            std::fs::write(&path, [0xff, 0xfe, 0xfd]).expect("write binary text fixture");
+            assert!(
+                !cache_entry_is_usable(&entry, &path),
+                "text manifest entry {entry} must reject binary cache contents"
+            );
+        }
 
         std::fs::remove_dir_all(root).expect("remove temp root");
     }

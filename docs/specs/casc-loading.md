@@ -27,6 +27,13 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 - [ ] Preserve root version and full-width content flags, including high bits, when parsing/selecting variants; do not flatten root records to a last-variant map.
 - [ ] Record `locale=enUS` and `content_filter=none` in UI-cache provenance. Sync invalidates locale-blind caches even when build identity and manifest match, before reusing files.
 
+### Blizzard UI source bytes
+
+- [x] Lua cache usability requires a readable file, not UTF-8 encoding. Sync must preserve authenticated source bytes without normalization or transcoding.
+- [x] Profile-specific source content checks match byte sequences without requiring the whole Lua file to decode as UTF-8.
+- [x] The runtime loads Lua source bytes into rilua; string literals retain their original bytes through source compilation and bytecode replay.
+- [x] XML, TOC and XSD cache validation still requires UTF-8. TOC and XML runtime text parsing is unchanged.
+
 ### Source sync transport
 
 - [ ] A sync operation reuses one CDN session and archive index set across file downloads instead of re-querying product metadata per file, then releases them before GUI startup.

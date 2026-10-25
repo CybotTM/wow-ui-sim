@@ -130,6 +130,12 @@ To add a genuinely required retail file:
 
 When removing an unavailable entry, first prove it is not reachable from the retail TOC/dependency graph. Extraction failure alone is insufficient because a valid retail file may require an updated FDID or listfile override.
 
+## Blizzard UI Lua source bytes
+
+Lua source is byte-oriented. Cache usability reads Lua as bytes, and profile content markers search byte sequences. XML, TOC and XSD retain strict UTF-8 validation. The runtime addon loader already uses `std::fs::read` and rilua's `load_bytes`; no vendor-byte conversion is required. See the [source-byte contract](../../specs/casc-loading.md#blizzard-ui-source-bytes).
+
+The Forever `Blizzard_NewPlayerExperience/Camelot/Blizzard_TutorialData.lua` resident source contains byte `0x92` at offset 13118 (raw MD5 `749f69ab201e03944194f391777e4237`). Treating every Lua file as UTF-8 caused sync to reject this authenticated file and withhold completion/provenance. The non-UTF-8 fixture tests exercise production cache usability, content-marker checking and TOC loading, including an exact loaded-byte assertion. Runtime loading needed no production change.
+
 ## Failure modes
 
 - **Resolution sqlite missing or stale**: `asset-resolver` logs the open failure, extracts current `root.bin` / `encoding.bin`, rebuilds `resolution.sqlite`, then reopens it. If rebuild fails, CASC lookup fails with the underlying read/build error.
