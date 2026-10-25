@@ -1,5 +1,7 @@
 //! Profile-scoped Blizzard UI source synchronization.
 
+#[cfg(all(test, feature = "casc"))]
+mod gethe_missing;
 #[cfg(feature = "casc")]
 mod locale;
 mod pinned;
