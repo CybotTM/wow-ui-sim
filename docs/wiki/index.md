@@ -1,3 +1,7 @@
+## [2026-10-24] system | CF-2 supplied unread streams
+
+[Club stream ownership](systems/club-membership.md#unread-streams-cf-2) links the [bounded unread contract](../specs/club-unread.md): one supplied club/stream model, original MicroMenu and CommunitiesUtil selectors, settings/marker/clear siblings and explicit UNKNOWN native policies. RED/schema and publication staged separately; no build, slot or runtime proof. Retail/PTR/Forever preservation remains pending.
+
 ## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
 
 [Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
@@ -4102,3 +4106,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-23] investigation | Consumer selection and standalone RED
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
+
+## [2026-10-24] source | CF-2 pet-battle names staging
+
+[State projection and selected consumers](systems/pet-battle-names.md) links the [contract](../specs/pet-battle-names.md). Original-consumer tests precede producer; runtime RED/GREEN, mutants and exact stock diff remain pending under edit-only staging.
