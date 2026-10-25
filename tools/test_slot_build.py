@@ -106,7 +106,7 @@ class MountedDepInfoTests(unittest.TestCase):
         self.current = {
             "worktree": str(self.tree), "slot": str(self.target),
             "package_roots": {"probe": [str(self.mount)]},
-            "changed_paths": [], "reported_artifacts": [],
+            "changed_paths": [], "content_changed_paths": [], "reported_artifacts": [],
         }
 
     def add_dep_info(self, name, content):
@@ -135,6 +135,7 @@ class MountedDepInfoTests(unittest.TestCase):
 
     def read_inputs(self, changed):
         self.current["changed_paths"] = changed
+        self.current["content_changed_paths"] = changed
         snapshot = self.module.read_dep_info_snapshot(self.target, self.tree)
         inputs, errors = self.module.read_target_inputs(self.current, snapshot, snapshot)
         self.current.update(target_inputs=inputs, dep_info_errors=errors)
@@ -174,6 +175,21 @@ class MountedDepInfoTests(unittest.TestCase):
         self.assertEqual(self.module.find_stale_artifacts(self.current, {}, {}),
                          ["debug/escaped"])
 
+    def test_real_utility_dep_info_maps_ct_bins_slot_mount(self):
+        fixture = Path(__file__).parent / "fixtures/slot-build-dep-info/ct-bins-utility.d"
+        content = fixture.read_text().replace(
+            "/home/osso/.cache/wow-ui-sim-targets/slot-2", str(self.target))
+        content = content.replace("/home/osso/.cache/wow-ui-sim-srcmount",
+                                  str(self.source_root))
+        for name in ["bench_spellbook", "bench_steady_state", "bench_talents",
+                     "panel-visual-metrics"]:
+            self.add_dep_info("debug/" + name, content.replace("bench_spellbook", name))
+        inputs, errors = self.read_inputs(["src/lib.rs"])
+        self.assertEqual(errors, [])
+        for record in self.current["reported_artifacts"]:
+            self.assertIn("src/lib.rs", inputs[record["executable"]])
+        self.assertEqual(len(self.module.find_stale_artifacts(self.current, {}, {})), 4)
+
     def test_make_continuation_separates_adjacent_input_words(self):
         binary = self.target / "debug/continued"
         content = (f"{binary}: {self.mount}/src/first.rs\\\n"
@@ -187,7 +203,7 @@ class MountedDepInfoTests(unittest.TestCase):
                          ["debug/continued"])
 
     def test_zero_repo_inputs_fail_closed_before_package_inputs_are_added(self):
-        for changed in [[], ["Cargo.toml"]]:
+        for changed in [["src/lib.rs"], ["Cargo.toml"]]:
             with self.subTest(changed=changed):
                 self.current["reported_artifacts"] = []
                 binary = self.target / "debug/external"
@@ -198,6 +214,18 @@ class MountedDepInfoTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "zero repo-relative inputs"):
                     self.module.finish_build(self.target, self.target / "receipt.json",
                                              self.current, None, {}, 0)
+
+    def test_unmappable_dep_info_does_not_reject_identical_content(self):
+        binary = self.target / "debug/external"
+        self.add_dep_info("debug/external", f"{binary}: /registry/input.rs\n")
+        self.current["changed_paths"] = ["src/lib.rs"]
+        snapshot = self.module.read_dep_info_snapshot(self.target, self.tree)
+        inputs, errors = self.module.read_target_inputs(self.current, snapshot, snapshot)
+        self.assertEqual(errors, [])
+        self.current.update(target_inputs=inputs, dep_info_errors=errors)
+        receipt = self.target / "receipt.json"
+        self.module.finish_build(self.target, receipt, self.current, None, {}, 0)
+        self.assertEqual(json.loads(receipt.read_text())["result"], "success")
 
     def test_nonempty_diff_without_any_mapped_target_fails_closed(self):
         binary = self.target / "debug/unrelated"
@@ -494,9 +522,10 @@ class SourceFreshnessTests(unittest.TestCase):
                       **(dep_inputs or {})}
         for phase in ["A", "B"]:
             if phase == "B":
-                comment = "//" if changed_input.endswith(".rs") else "#"
-                with (self.tree / changed_input).open("a") as stream:
-                    stream.write(f"\n{comment} changed build input\n")
+                if changed_input:
+                    comment = "//" if changed_input.endswith(".rs") else "#"
+                    with (self.tree / changed_input).open("a") as stream:
+                        stream.write(f"\n{comment} changed build input\n")
                 outputs = changed_outputs
                 if before_second:
                     before_second()
@@ -550,14 +579,141 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertIn(b"dep-info", result.stderr)
         self.assertEqual(second["result"], "stale-artifacts")
 
-    def test_missing_previous_dep_info_fails_even_when_child_recreates_it(self):
+    def test_missing_previous_dep_info_accepts_rebuilt_child_with_new_dep_info(self):
         result, first, second = self.run_mixed_output_pair(
             "src/main.rs", {"debug/probe": "B binary"},
             reported_names=["debug/probe"],
             before_second=lambda: (self.slot / "debug/probe.d").unlink())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(second["result"], "success")
+        self.assertNotEqual(first["artifacts"]["debug/probe"],
+                            second["artifacts"]["debug/probe"])
+
+    def test_missing_previous_dep_info_still_rejects_fresh_child(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/probe": "B binary"}, fresh=True,
+            reported_names=["debug/probe"],
+            before_second=lambda: (self.slot / "debug/probe.d").unlink())
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn(b"missing dep-info", result.stderr)
         self.assertEqual(second["result"], "stale-artifacts")
+
+    def run_failed_build_retry(self, remove_dep_info=False, commit_source=False):
+        import sys
+        (self.slot / ".owner").write_text("test-owner")
+        binary = self.slot / "debug/probe"
+        source = self.tree / "src/main.rs"
+        request = self.slot / "request.json"
+        receipt = self.slot / "receipt.json"
+        emitter = (
+            'import json,sys; from pathlib import Path\n'
+            'binary,source=map(Path,sys.argv[1:3])\n'
+            'phase=sys.argv[3]\n'
+            'if phase == "A":\n'
+            '    binary.parent.mkdir(parents=True)\n'
+            '    binary.write_bytes(b"A binary")\n'
+            '    binary.chmod(0o755)\n'
+            '    binary.with_suffix(".d").write_text(f"{binary}: {source}\\n")\n'
+            'if phase == "failed": sys.exit(7)\n'
+            'print(json.dumps({"reason":"compiler-artifact",\n'
+            '    "executable":str(binary), "fresh":phase == "missing"}))\n'
+        )
+        results, receipts = [], []
+        for phase in ("A", "failed", "missing" if remove_dep_info else "retry"):
+            if phase == "failed":
+                source.write_text('fn main() { println!("B"); }')
+                if commit_source:
+                    self.git("commit", "-qam", "B")
+            if phase == "missing":
+                binary.with_suffix(".d").unlink()
+            request.write_text(json.dumps({
+                "slot": str(self.slot), "worktree": str(self.tree),
+                "owner": "test-owner", "unit": phase, "receipt": str(receipt),
+                "cargo": [sys.executable, "-B", "-c", emitter,
+                          str(binary), str(source), phase]}))
+            results.append(subprocess.run(
+                [sys.executable, "-B", str(self.module.__file__), "--execute", str(request)],
+                capture_output=True))
+            receipts.append(json.loads(receipt.read_text()))
+            verified = json.loads((self.slot / ".verified-source-identity.json").read_text())
+            self.assertEqual(verified, receipts[0])
+        self.assertEqual(results[0].returncode, 0, results[0].stderr)
+        self.assertEqual(results[1].returncode, 7, results[1].stderr)
+        self.assertEqual(receipts[0]["artifacts"], receipts[2]["artifacts"])
+        self.assertNotEqual(receipts[0]["identity"], receipts[2]["identity"])
+        return results[2], receipts
+
+    def test_failed_build_retry_rejects_unchanged_binary(self):
+        result, receipts = self.run_failed_build_retry(commit_source=True)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn(b"stale artifacts", result.stderr)
+        self.assertIn("src/main.rs", receipts[2]["content_changed_paths"])
+        verified = json.loads((self.slot / ".verified-source-identity.json").read_text())
+        self.assertEqual(verified, receipts[0])
+        attempted = json.loads((self.slot / ".source-identity.json").read_text())
+        self.assertEqual(attempted, receipts[2])
+
+    def test_failed_build_retry_rejects_missing_current_dep_info(self):
+        result, receipts = self.run_failed_build_retry(remove_dep_info=True)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn(b"missing dep-info", result.stderr)
+        self.assertIn("src/main.rs", receipts[2]["content_changed_paths"])
+
+    def test_rejected_build_retry_does_not_advance_verified_content(self):
+        result, first, stale = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/probe": "A binary"},
+            reported_names=["debug/probe"])
+        self.assertNotEqual(result.returncode, 0)
+        import sys
+        result = subprocess.run(
+            [sys.executable, "-B", str(self.module.__file__), "--execute",
+             str(self.slot / "request.json")], capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(b"stale artifacts", result.stderr)
+        verified = json.loads((self.slot / ".verified-source-identity.json").read_text())
+        self.assertEqual(verified, first)
+        self.assertNotEqual(verified["identity"], stale["identity"])
+
+    def test_stale_receipt_recovers_with_identical_rebuilt_bytes(self):
+        def mark_interrupted_attempt():
+            state = self.slot / ".source-identity.json"
+            previous = json.loads(state.read_text())
+            previous["result"] = "building"
+            state.write_text(json.dumps(previous))
+
+        result, first, stale = self.run_mixed_output_pair(
+            None, {"debug/probe": "A binary"}, fresh=True,
+            reported_names=["debug/probe"], before_second=mark_interrupted_attempt)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(stale["result"], "stale-artifacts")
+        self.assertEqual(stale["identity"], first["identity"])
+        self.assertEqual(stale["content_changed_paths"], [])
+        self.assertIn("src/main.rs", stale["changed_paths"])
+        import sys
+        request = self.slot / "request.json"
+        command = json.loads(request.read_text())
+        command["cargo"][6] = "[]"  # Rebuild rather than report fresh=true.
+        request.write_text(json.dumps(command))
+        for attempt in range(2):
+            with self.subTest(attempt=attempt):
+                result = subprocess.run(
+                    [sys.executable, "-B", str(self.module.__file__), "--execute",
+                     str(self.slot / "request.json")], capture_output=True)
+                saved = json.loads((self.slot / "receipt.json").read_text())
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(saved["result"], "success")
+                self.assertEqual(saved["identity"], stale["identity"])
+                self.assertEqual(saved["artifacts"]["debug/probe"],
+                                 stale["artifacts"]["debug/probe"])
+
+    def test_stale_receipt_with_new_content_still_requires_changed_bytes(self):
+        previous = self.prepare()
+        previous.update(result="stale-artifacts", artifacts={"debug/probe": "same"})
+        (self.tree / "src/main.rs").write_text("new content after stale result")
+        current = self.prepare(previous)
+        self.add_reported_executable(current)
+        with self.assertRaisesRegex(ValueError, "stale artifacts"):
+            self.module.finish_build(self.slot, self.slot / "receipt.json", current,
+                                     previous, {"debug/probe": "same"}, 0)
 
     def test_unreadable_previous_dep_info_fails_even_when_child_replaces_it(self):
         result, first, second = self.run_mixed_output_pair(
@@ -598,6 +754,7 @@ class SourceFreshnessTests(unittest.TestCase):
         current = {"worktree": str(self.tree), "slot": str(self.slot),
                    "package_roots": {"probe": [str(self.tree)]},
                    "changed_paths": ["src/space #$.rs"],
+                   "content_changed_paths": ["src/space #$.rs"],
                    "reported_artifacts": [{"package_id": "probe", "fresh": True,
                                            "executable": str(binary)}]}
         snapshot = self.module.read_dep_info_snapshot(self.slot, self.tree)
@@ -775,7 +932,8 @@ class SourceFreshnessTests(unittest.TestCase):
     def test_worker_preserves_binary_streams_and_launcher_arguments(self):
         import sys
         (self.slot / ".owner").write_text("test-owner")
-        self.module.write_json(self.slot / ".source-identity.json", self.prepare())
+        verified = dict(self.prepare(), result="success", artifacts={})
+        self.module.write_json(self.slot / ".verified-source-identity.json", verified)
         request = self.slot / "request.json"
         request.write_text(json.dumps({
             "slot": str(self.slot), "worktree": str(self.tree), "owner": "test-owner",
