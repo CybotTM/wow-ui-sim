@@ -172,7 +172,7 @@ fn is_paladin_aura_spell(spell_id: u32) -> bool {
 }
 
 /// Classify a spell by its target type using the `implicit_target` field
-/// from SpellEffect.db2 (auto-generated into `data/spells.rs`).
+/// from SpellEffect.db2 (auto-generated into `crates/sim-data/data/spells.rs`).
 ///
 /// ImplicitTarget_0 values (from first effect, DifficultyID=0):
 ///   1=CASTER, 6=TARGET_ENEMY, 18=DEST_CASTER, 21=TARGET_ALLY,

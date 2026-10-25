@@ -299,6 +299,7 @@ fn deprecated_arena_match_frame_keeps_over_heal_absorb_glow_named_from_ancestor(
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn group_members_pin_acquire_keeps_data_provider_on_pin() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -340,6 +341,7 @@ fn group_members_pin_acquire_keeps_data_provider_on_pin() {
         probe.contains("pin=true") && probe.contains("backref=true"),
         "GroupMembersDataProvider should keep the acquired pin wired to its data provider ({probe})"
     );
+}
 }
 
 #[test]
@@ -536,6 +538,7 @@ fn encounter_toggle_loads_and_shows_frame() {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_journal_dungeon_action_opens_lfd_without_recursing() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -565,6 +568,7 @@ fn adventure_journal_dungeon_action_opens_lfd_without_recursing() {
         "AJ_DUNGEON_ACTION should select the LFD parent frame"
     );
     assert_eq!(dungeon_type, 1201, "linked dungeon should become LFD type");
+}
 }
 
 post_wrath_ui_fixture! {

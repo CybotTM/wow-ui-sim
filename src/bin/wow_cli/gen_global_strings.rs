@@ -3,7 +3,7 @@
 //! Reads from ~/Projects/wow/data/:
 //!   - GlobalStrings.csv
 //!
-//! Generates: data/global_strings.rs
+//! Generates: crates/sim-data-profile/data/global_strings.rs
 
 use super::csv_util::read_csv_records;
 use super::csv_util::{parse_csv_line, wow_data_dir};
@@ -20,7 +20,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let reader = BufReader::new(file);
 
     std::fs::create_dir_all("data")?;
-    let output_path = Path::new("data/global_strings.rs");
+    let output_path = Path::new("crates/sim-data-profile/data/global_strings.rs");
     let mut out = File::create(output_path)?;
 
     write_header(&mut out)?;

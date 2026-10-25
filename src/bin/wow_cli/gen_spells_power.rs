@@ -111,7 +111,7 @@ pub(super) fn load_spell_power(
     Ok(map)
 }
 
-/// Generate data/spell_power.rs with static arrays + phf map.
+/// Generate crates/sim-data/data/spell_power.rs with static arrays + phf map.
 pub(super) fn write_spell_power(
     out: &mut File,
     spell_power: &HashMap<u32, Vec<SpellPowerRow>>,

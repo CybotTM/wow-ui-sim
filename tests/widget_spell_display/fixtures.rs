@@ -8,7 +8,7 @@ pub(super) const ID: f64 = 761_301.0;
 pub(super) const SET_ID: f64 = 431.0;
 
 /// Explicit host fixture. Enums literal in BOTH cached Retail/PTR declarations.
-/// 35395 is existing data/spells.rs:16092 Crusader Strike, icon135891; not a widget catalog.
+/// 35395 is existing crates/sim-data/data/spells.rs:16092 Crusader Strike, icon135891; not a widget catalog.
 pub(super) fn supplied_record() -> SpellDisplayRecord {
     SpellDisplayRecord {
         spell_info: WidgetSpellInfoRecord {

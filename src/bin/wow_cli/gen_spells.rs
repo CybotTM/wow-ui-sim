@@ -10,7 +10,7 @@
 //!   - SpellEffect.csv (ID, ..., DifficultyID[2], EffectIndex[3],
 //!     ImplicitTarget_0[34], SpellID[36])
 //!
-//! Generates: data/spells.rs, data/spell_descriptions.rs, data/spell_power.rs
+//! Generates: crates/sim-data/data/spells.rs, crates/sim-data/data/spell_descriptions.rs, crates/sim-data/data/spell_power.rs
 
 use super::csv_util::read_csv_records;
 use super::csv_util::{escape_str, parse_csv_line, wow_data_dir};
@@ -107,7 +107,7 @@ fn generate_spell_table(
     spell_data: &SpellData,
     required_ids: &BTreeSet<u32>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let output_path = Path::new("data/spells.rs");
+    let output_path = Path::new("crates/sim-data/data/spells.rs");
     let mut out = File::create(output_path)?;
     write_header(&mut out)?;
     let count = build_spell_map(
@@ -129,7 +129,7 @@ fn generate_spell_descriptions(
     spell_data: &SpellData,
     required_ids: &BTreeSet<u32>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let descriptions_path = Path::new("data/spell_descriptions.rs");
+    let descriptions_path = Path::new("crates/sim-data/data/spell_descriptions.rs");
     let mut desc_out = File::create(descriptions_path)?;
     let description_count =
         write_spell_descriptions(&mut desc_out, &spell_data.spell_descriptions, required_ids)?;
@@ -142,7 +142,7 @@ fn generate_spell_power_table(
     spell_data: &SpellData,
     required_ids: &BTreeSet<u32>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let power_path = Path::new("data/spell_power.rs");
+    let power_path = Path::new("crates/sim-data/data/spell_power.rs");
     let mut power_out = File::create(power_path)?;
     // Only include power data for required spells
     let filtered_power: HashMap<u32, Vec<SpellPowerRow>> = spell_data
@@ -350,13 +350,13 @@ fn load_spell_text_column(
 /// Collect all spell IDs the simulator actually needs.
 ///
 /// Sources:
-/// - `data/traits.rs`: spell_id, overrides_spell_id, visible_spell_id, override_icon fields
+/// - `crates/sim-data/data/traits.rs`: spell_id, overrides_spell_id, visible_spell_id, override_icon fields
 /// - `src/lua_api/globals/spellbook_data.rs`: spell(N) and passive(N) calls
 /// - Hardcoded baseline: action bar spells, trinket/item procs not covered elsewhere
 /// - Addon compatibility: spell names that installed addons index directly during load
 fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Error>> {
     let trait_ids = collect_ids_from_file(
-        "data/traits.rs",
+        "crates/sim-data/data/traits.rs",
         &[
             "spell_id: ",
             "overrides_spell_id: ",

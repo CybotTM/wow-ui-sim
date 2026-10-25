@@ -19,6 +19,7 @@ use wow_ui_sim::widget::{Frame, WidgetRegistry};
 // Native 12.1.0.69587 capture: the HIGH no-portrait child stays at raised
 // level zero while the MEDIUM SpellBook and its descendants share a positive
 // raised level. The observed global ordinals (18/20) are not fixture inputs.
+post_wrath_ui_fixture! {
 fn create_native_raised_spellbook_fixture() -> WowLuaEnv {
     let env = setup_full_ui();
     env.set_screen_size(1906.0, 960.0);
@@ -65,7 +66,9 @@ fn create_native_raised_spellbook_fixture() -> WowLuaEnv {
     .expect("native raw strata and levels remain unchanged by normal book opening");
     env
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn native_raised_spellbook_shares_positive_level_without_raising_unit_overlay() {
     test_timeout! {
@@ -79,7 +82,9 @@ fn native_raised_spellbook_shares_positive_level_without_raising_unit_overlay() 
         assert_eq!(book, panel, "raw-level-100 child must share the panel's raised level");
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn native_raised_spellbook_paper_renders_after_high_strata_unit_overlay() {
     test_timeout! {
@@ -125,6 +130,7 @@ fn native_raised_spellbook_paper_renders_after_high_strata_unit_overlay() {
         assert!(overlay_draw < paper_draw,
             "native raised SpellBook must cover the HIGH unit overlay: overlay draw={overlay_draw}, paper draw={paper_draw}");
     }
+}
 }
 
 fn find_first_visible_spell_item_button_children(
@@ -379,6 +385,7 @@ fn debug_spellbook_first_open_state() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn spellbook_spells_visible_on_first_open() {
     test_timeout! {
@@ -419,7 +426,9 @@ fn spellbook_spells_visible_on_first_open() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn spellbook_spell_items_in_ancestor_visible() {
     test_timeout! {
@@ -455,6 +464,7 @@ fn spellbook_spell_items_in_ancestor_visible() {
             &missing[..missing.len().min(10)]
         );
     }
+}
 }
 
 #[test]

@@ -6,7 +6,7 @@
 //!   - UiMapArtStyleLayer.csv (styleID → layer dimensions)
 //!   - UiMapArtTile.csv    (artID + layerIndex → fileDataIDs)
 //!
-//! Generates: data/map_art.rs
+//! Generates: crates/sim-data/data/map_art.rs
 
 use super::csv_util::parse_csv_line;
 use super::csv_util::read_csv_records;
@@ -49,7 +49,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     // mapID → artID (PhaseID=0 only)
     let map_art = load_map_art(&db2_dir.join("UiMapXMapArt.csv"))?;
 
-    let output_path = Path::new("data/map_art.rs");
+    let output_path = Path::new("crates/sim-data/data/map_art.rs");
     std::fs::create_dir_all("data")?;
     let mut out = File::create(output_path)?;
 

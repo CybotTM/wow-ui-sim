@@ -124,7 +124,7 @@ fn set_store_front_id_does_not_lookup_plan_named_dynamic_title_globals() {
                  global-string seeding accidentally created the global (worth investigating \
                  because it would shadow a future Blizzard rename), or (c) the per-id \
                  dynamic pattern was added as part of a localization refactor (look at the \
-                 latest `data/global_strings.rs` to confirm)."
+                 latest `crates/sim-data-profile/data/global_strings.rs` to confirm)."
             );
         }
     });

@@ -3,7 +3,7 @@
 //! Reads: ~/Downloads/ManifestInterfaceData.12.0.1.65769.csv
 //!   Columns: ID, FilePath, FileName
 //!
-//! Generates: data/manifest_interface_data.rs
+//! Generates: crates/sim-data/data/manifest_interface_data.rs
 
 use super::csv_util::read_csv_records;
 use super::csv_util::{escape_str, parse_csv_line};
@@ -20,7 +20,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     println!("ManifestInterfaceData: {} entries", entries.len());
 
     std::fs::create_dir_all("data")?;
-    let output_path = Path::new("data/manifest_interface_data.rs");
+    let output_path = Path::new("crates/sim-data/data/manifest_interface_data.rs");
     let mut out = File::create(output_path)?;
 
     write_header(&mut out)?;
