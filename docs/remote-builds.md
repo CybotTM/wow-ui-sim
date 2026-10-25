@@ -53,6 +53,29 @@ runs in `agents.slice` with `MemoryMax=9G` and `MemorySwapMax=0`. Status prints
 `SubState`, `Result`, `CPUUsageNSec`, and `WallTimeSec` (elapsed while running).
 Use the helper from the checkout that contains it; it builds `--worktree`.
 
+### Source freshness and receipts
+
+The fixed source mount hides worktree changes from Cargo's path identity. Older
+file mtimes can therefore reuse another tree's artifacts, even with incremental
+compilation disabled. The helper records HEAD, a binary dirty-diff hash (including
+untracked file contents), and dirty paths in `slot-N/.source-identity.json`.
+Before Cargo starts, a changed identity refreshes mtimes for the HEAD-to-HEAD diff
+and both trees' dirty/untracked paths without changing bytes. An unknown or failed
+previous build refreshes tracked crate inputs under `src`, `crates`, `tests`,
+`data`, `build`, and `installer`, plus the root Cargo files and `build.rs`.
+
+Each unit writes `slot-N/receipts/UNIT.json` with its source identity, changed
+paths, command, result and executable SHA256 values. Cargo JSON artifact messages
+must reach the helper's stdout reader; existing `json` and
+`json-render-diagnostics` formats are retained, otherwise the helper selects
+`json-render-diagnostics`. Do not hide Cargo stdout inside a command wrapper.
+After a Rust diff, a successful build whose executable hashes all match the
+previous build fails with `stale artifacts`; the receipt retains the failure.
+Identical hashes can also result from edits that do not affect generated code;
+this strict check requires investigation, not acceptance based on Cargo exit 0.
+Checks without executable artifacts record an empty hash map. Inspect the retained
+unit's terminal result as well as its receipt; launch success is not build success.
+
 ## Host selection and dependencies
 
 `python3 scripts/build-host.py --save-build-host desktop` saves the shared default in `~/.config/game-engine/build-host`; use `local` to change it. The configured default is desktop. Explicit `--build-host` overrides it for one invocation. Host failure is an error, never a host fallback.

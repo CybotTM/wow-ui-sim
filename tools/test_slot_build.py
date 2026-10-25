@@ -160,6 +160,15 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertGreater((self.tree / "src/main.rs").stat().st_mtime_ns, 1_000_000_000)
         self.assertEqual((self.tree / "README.md").stat().st_mtime_ns, 1_000_000_000)
 
+    def test_interrupted_build_invalidates_inputs_even_at_same_identity(self):
+        previous = self.prepare()
+        previous["result"] = "building"
+        source = self.tree / "src/main.rs"
+        os.utime(source, (1, 1))
+        current = self.prepare(previous)
+        self.assertIn("src/main.rs", current["changed_paths"])
+        self.assertGreater(source.stat().st_mtime_ns, 1_000_000_000)
+
     def test_identical_artifacts_after_rust_change_fail_with_receipt(self):
         previous = self.prepare()
         previous["artifacts"] = {"debug/probe": "abc"}
@@ -170,6 +179,35 @@ class SourceFreshnessTests(unittest.TestCase):
             self.module.finish_build(self.slot, receipt, current, previous,
                                      {"debug/probe": "abc"}, 0)
         self.assertEqual(json.loads(receipt.read_text())["result"], "stale-artifacts")
+
+    def test_worker_rebuilds_older_tree_in_same_persistent_target(self):
+        import sys
+        binary = self.slot / "debug/probe"
+        binary.parent.mkdir()
+        (self.slot / ".owner").write_text("test-owner")
+        compiler = (
+            'import json,sys; from pathlib import Path; '
+            'source,binary=map(Path,sys.argv[1:3]); '
+            'old=binary.exists() and source.stat().st_mtime_ns <= binary.stat().st_mtime_ns; '
+            'None if old else binary.write_bytes(source.read_bytes()); '
+            'print(json.dumps({"reason":"compiler-artifact","executable":str(binary)}))'
+        )
+        request = self.slot / "request.json"
+        request.write_text(json.dumps({
+            "slot": str(self.slot), "worktree": str(self.tree), "owner": "test-owner",
+            "unit": "pair", "receipt": str(self.slot / "pair.json"),
+            "cargo": [sys.executable, "-c", compiler, str(self.tree / "src/main.rs"),
+                      str(binary), "--message-format=json"]}))
+        self.assertEqual(self.module.execute_build(request), 0)
+        first = json.loads((self.slot / "pair.json").read_text())
+        source = self.tree / "src/main.rs"
+        source.write_text('fn main() { println!("B"); }')
+        self.git("commit", "-qam", "older B")
+        os.utime(source, (1, 1))
+        self.assertEqual(self.module.execute_build(request), 0)
+        second = json.loads((self.slot / "pair.json").read_text())
+        self.assertNotEqual(first["artifacts"], second["artifacts"])
+        self.assertEqual(binary.read_bytes(), source.read_bytes())
 
     def test_worker_records_real_artifact_bytes_and_propagates_failure(self):
         import hashlib
