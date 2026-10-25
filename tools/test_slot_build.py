@@ -234,6 +234,8 @@ class SourceFreshnessTests(unittest.TestCase):
     def add_reported_executable(self, current, fresh=False):
         current.update(worktree=str(self.tree), slot=str(self.slot),
                        package_roots={"probe": [str(self.tree)]},
+                       target_inputs={str(self.slot / "debug/probe"):
+                                      [str(self.tree / "src/main.rs")]},
                        reported_artifacts=[{"package_id": "probe", "fresh": fresh,
                                             "executable": str(self.slot / "debug/probe")}])
 
@@ -260,7 +262,8 @@ class SourceFreshnessTests(unittest.TestCase):
             'old=binary.exists() and source.stat().st_mtime_ns <= binary.stat().st_mtime_ns; '
             'None if old else binary.write_bytes(source.read_bytes()); '
             'binary.chmod(0o755); '
-            'print(json.dumps({"reason":"compiler-artifact","executable":str(binary)}))'
+            'binary.with_suffix(".d").write_text(str(binary) + ": " + str(source) + "\\n"); '
+            'print(json.dumps({"reason":"compiler-artifact","executable":str(binary),"fresh":False}))'
         )
         request = self.slot / "request.json"
         request.write_text(json.dumps({
@@ -285,11 +288,12 @@ class SourceFreshnessTests(unittest.TestCase):
         binary = self.slot / "debug/probe"
         binary.parent.mkdir()
         binary.write_bytes(b"A binary")
+        binary.with_suffix(".d").write_text(f"{binary}: {self.tree / 'src/main.rs'}\n")
         (self.slot / ".owner").write_text("test-owner")
         emitter = ('import json,sys,os; from pathlib import Path; '
                    'Path(sys.argv[1]).chmod(0o755); os.utime(sys.argv[1], None); '
                    'print(json.dumps({"reason":"compiler-artifact",'
-                   '"executable":sys.argv[1]})); sys.exit(int(sys.argv[2]))')
+                   '"executable":sys.argv[1],"fresh":False})); sys.exit(int(sys.argv[2]))')
         request = self.slot / "request.json"
         for code in [0, 7]:
             request.write_text(json.dumps({
@@ -335,7 +339,8 @@ class SourceFreshnessTests(unittest.TestCase):
             self.module.execute_build(request)
 
     def run_mixed_output_pair(self, changed_input, changed_outputs, fresh=False,
-                              reported_names=None):
+                              reported_names=None, dep_inputs=None, second_dep_inputs=None,
+                              before_second=None):
         import sys
         (self.slot / ".owner").write_text("test-owner")
         emitter = (
@@ -346,10 +351,17 @@ class SourceFreshnessTests(unittest.TestCase):
             '    path.parent.mkdir(parents=True, exist_ok=True)\n'
             '    path.write_text(content)\n'
             '    if path.suffix != ".rmeta": path.chmod(0o755)\n'
+            'for name,inputs in json.loads(sys.argv[6]).items():\n'
+            '    path=(slot/name).with_suffix(".d")\n'
+            '    if inputs is None:\n'
+            '        path.unlink(missing_ok=True)\n'
+            '    else:\n'
+            '        path.parent.mkdir(parents=True,exist_ok=True)\n'
+            '        path.write_text(str(slot/name) + ": " + " ".join(inputs) + "\\n")\n'
             'for name in json.loads(sys.argv[5]):\n'
             '    print(json.dumps({"reason":"compiler-artifact", "package_id":sys.argv[3],\n'
             '        "executable":str(slot/name) if not name.endswith(".rmeta") else None,\n'
-            '        "fresh":sys.argv[4] == "yes"}))\n'
+            '        "fresh":name in json.loads(sys.argv[4])}))\n'
         )
         request = self.slot / "request.json"
         receipt = self.slot / "receipt.json"
@@ -359,20 +371,28 @@ class SourceFreshnessTests(unittest.TestCase):
         package_id = metadata["packages"][0]["id"]
         outputs = {"debug/probe": "A binary", "debug/other": "A other",
                    "debug/deps/probe.rmeta": "A metadata"}
+        dep_inputs = {**{name: [str(self.tree / "src/main.rs")]
+                         for name in outputs if not name.endswith(".rmeta")},
+                      **(dep_inputs or {})}
         for phase in ["A", "B"]:
             if phase == "B":
                 comment = "//" if changed_input.endswith(".rs") else "#"
                 with (self.tree / changed_input).open("a") as stream:
                     stream.write(f"\n{comment} changed build input\n")
                 outputs = changed_outputs
+                if before_second:
+                    before_second()
             request.write_text(json.dumps({
                 "slot": str(self.slot), "worktree": str(self.tree),
                 "owner": "test-owner", "unit": "mixed-output", "receipt": str(receipt),
                 "cargo": [sys.executable, "-c", emitter, str(self.slot),
                           json.dumps(outputs), package_id,
-                          "yes" if fresh and phase == "B" else "no",
+                          json.dumps((list(dep_inputs) if fresh is True else fresh or [])
+                                     if phase == "B" else []),
                           json.dumps(reported_names if phase == "B" and reported_names
-                                     is not None else list(outputs))]}))
+                                     is not None else list(outputs)),
+                          json.dumps(second_dep_inputs if phase == "B" and
+                                     second_dep_inputs is not None else dep_inputs)]}))
             result = subprocess.run(
                 [sys.executable, str(self.module.__file__), "--execute", str(request)],
                 capture_output=True)
@@ -380,6 +400,95 @@ class SourceFreshnessTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 first = json.loads(receipt.read_text())
         return result, first, json.loads(receipt.read_text())
+
+    def test_same_package_test_edit_does_not_judge_fresh_bin(self):
+        (self.tree / "tests").mkdir()
+        (self.tree / "tests/x.rs").write_text("#[test] fn x() {}")
+        self.git("add", ".")
+        self.git("commit", "-qm", "test target")
+        result, first, second = self.run_mixed_output_pair(
+            "tests/x.rs", {"debug/other": "B test"}, fresh=["debug/probe"],
+            reported_names=["debug/probe", "debug/other"],
+            dep_inputs={"debug/probe": [str(self.tree / "src/main.rs")],
+                        "debug/other": [str(self.tree / "tests/x.rs")]})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(first["artifacts"]["debug/probe"],
+                         second["artifacts"]["debug/probe"])
+
+    def test_reported_affected_target_requires_a_current_hash(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/deps/probe.rmeta": "B metadata"},
+            reported_names=["debug/probe"],
+            before_second=lambda: (self.slot / "debug/probe").unlink())
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(second["result"], "stale-artifacts")
+
+    def test_missing_dep_info_fails_closed(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/probe": "B binary"},
+            reported_names=["debug/probe"],
+            second_dep_inputs={"debug/probe": None})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(b"dep-info", result.stderr)
+        self.assertEqual(second["result"], "stale-artifacts")
+
+    def test_missing_previous_dep_info_fails_even_when_child_recreates_it(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/probe": "B binary"},
+            reported_names=["debug/probe"],
+            before_second=lambda: (self.slot / "debug/probe.d").unlink())
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(b"missing dep-info", result.stderr)
+        self.assertEqual(second["result"], "stale-artifacts")
+
+    def test_unreadable_previous_dep_info_fails_even_when_child_replaces_it(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/probe": "B binary"},
+            reported_names=["debug/probe"],
+            before_second=lambda: (self.slot / "debug/probe.d").write_bytes(b"\\xff"))
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(b"unreadable dep-info", result.stderr)
+        self.assertEqual(second["result"], "stale-artifacts")
+
+    def test_previous_dep_info_cannot_be_erased_by_child(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/probe": "B binary"}, fresh=True,
+            reported_names=["debug/probe"],
+            second_dep_inputs={"debug/probe": [str(self.tree / "unrelated.rs")]})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(second["result"], "stale-artifacts")
+
+    def test_new_dep_info_is_unioned_with_previous_inputs(self):
+        result, first, second = self.run_mixed_output_pair(
+            "src/main.rs", {"debug/probe": "B binary"}, fresh=True,
+            reported_names=["debug/probe"],
+            dep_inputs={"debug/probe": [str(self.tree / "unrelated.rs")]},
+            second_dep_inputs={"debug/probe": [str(self.tree / "src/main.rs")]})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(second["result"], "stale-artifacts")
+
+    def test_deps_dep_info_handles_relative_escaped_paths_and_continuations(self):
+        source = self.tree / "src/space #$.rs"
+        source.write_text("pub fn input() {}")
+        binary = self.slot / "debug/deps/probe-012345"
+        binary.parent.mkdir(parents=True)
+        binary.write_bytes(b"binary")
+        dep_info = binary.with_suffix(".d")
+        dep_info.write_text(
+            f"{binary}: src/main.rs \\\n src/space\\ #$$.rs\n\n"
+            "src/main.rs:\n\n# env-dep:EXAMPLE=value\n")
+        current = {"worktree": str(self.tree), "slot": str(self.slot),
+                   "package_roots": {"probe": [str(self.tree)]},
+                   "changed_paths": ["src/space #$.rs"],
+                   "reported_artifacts": [{"package_id": "probe", "fresh": True,
+                                           "executable": str(binary)}]}
+        snapshot = self.module.read_dep_info_snapshot(self.slot, self.tree)
+        current["target_inputs"], errors = self.module.read_target_inputs(
+            current, snapshot, snapshot)
+        self.assertEqual(errors, [])
+        self.assertIn(str(source), current["target_inputs"][str(binary)])
+        self.assertEqual(self.module.find_stale_artifacts(current, {}, {}),
+                         ["debug/deps/probe-012345"])
 
     def test_fresh_report_rejects_even_changed_executable_bytes(self):
         result, first, second = self.run_mixed_output_pair(
@@ -442,6 +551,29 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(second["result"], "stale-artifacts")
 
+    def test_build_script_is_an_input_even_when_absent_from_dep_info(self):
+        (self.tree / "build.rs").write_text("fn main() {}")
+        self.git("add", ".")
+        self.git("commit", "-qm", "build script")
+        result, first, second = self.run_mixed_output_pair(
+            "build.rs", {"debug/deps/probe.rmeta": "B metadata"},
+            reported_names=["debug/probe"])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(second["result"], "stale-artifacts")
+
+    def test_lockfile_is_an_input_even_when_absent_from_dep_info(self):
+        # Metadata writes the lockfile before phase A; only phase B edits it.
+        subprocess.check_output(
+            ["cargo", "metadata", "--no-deps", "--format-version", "1", "--offline"],
+            cwd=self.tree)
+        self.git("add", ".")
+        self.git("commit", "-qm", "lockfile")
+        result, first, second = self.run_mixed_output_pair(
+            "Cargo.lock", {"debug/deps/probe.rmeta": "B metadata"},
+            reported_names=["debug/probe"])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(second["result"], "stale-artifacts")
+
     def test_changed_executables_allow_unchanged_library_metadata(self):
         result, first, second = self.run_mixed_output_pair(
             "src/main.rs", {"debug/probe": "B binary", "debug/other": "B other"})
@@ -483,6 +615,10 @@ class SourceFreshnessTests(unittest.TestCase):
             'test_binary.parent.mkdir(parents=True,exist_ok=True)\n'
             'test_binary.write_bytes(("test executable " + phase).encode())\n'
             'test_binary.chmod(0o755)\n'
+            f'binary.with_suffix(".d").write_text(str(binary) + ": " + '
+            f'{str(self.tree / "app/src/main.rs")!r} + "\\n")\n'
+            f'test_binary.with_suffix(".d").write_text(str(test_binary) + ": " + '
+            f'{str(source)!r} + "\\n")\n'
             'if phase == "A" or report == "yes":\n'
             '    print(json.dumps({"reason":"compiler-artifact", "package_id":app_id,\n'
             '        "executable":str(binary), "fresh":phase == "B"}))\n'

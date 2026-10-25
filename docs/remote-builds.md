@@ -79,13 +79,21 @@ Cargo JSON internally. The worker reads visible stdout for this build's Cargo
 JSON message format to expose those records. Receipts retain the records and each
 package's metadata-derived manifest-parent and path-dependency roots.
 
-Only executables in this build's records are judged. If the diff intersects that
-executable's package roots, the run fails with `stale artifacts` when Cargo reports
-`fresh=true` **or** its SHA256 equals the previous hash at the same path. A changed
-library, `.rmeta`, or another executable cannot certify it. Unreported executables
-and executables with disjoint package inputs are not judged. This is package-root
-selection, not a target dependency graph: a test edit within an application's
-package root still intersects that package. Identical rebuilt bytes also fail.
+Only executables in this build's records are judged. The worker snapshots Cargo
+`.d` dep-info before the child starts and reads it again after the child exits.
+It matches the artifact's adjacent `.d` file or dependency rules naming the
+artifact under the profile's `deps/` directory. Each target's inputs are the union
+of its previous and current dep-info, plus its package's `build.rs`, `Cargo.toml`,
+and `Cargo.lock` and the workspace `Cargo.lock`. Receipts retain these target inputs.
+Missing or unreadable dep-info fails closed, including missing previous dep-info
+for an executable present before the child starts.
+
+When the diff intersects a target's inputs, Cargo must report `fresh=false` **and**
+its SHA256 must differ from the previous hash at the same path. Otherwise the run
+fails with `stale artifacts`. A changed library, `.rmeta`, or another executable
+cannot certify it. Unreported executables and targets with disjoint inputs are
+not judged. A test-only edit therefore does not reject an unaffected fresh bin,
+even within the same package. Identical rebuilt bytes still fail by policy.
 The existing conservative root derivation and source mtime refresh are unchanged.
 
 When no compiler-artifact record is visible (for example, a wrapper captures Cargo

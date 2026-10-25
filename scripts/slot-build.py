@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -138,16 +139,101 @@ def package_inputs_changed(current, roots):
                for name in current["changed_paths"] for root in roots)
 
 
-def find_stale_artifacts(current, previous_artifacts, artifacts):
-    stale = []
+def dep_info_words(value):
+    words = re.findall(r"(?:\\.|[^\s\\])+", value)
+    return [re.sub(r"\\([ #\\:])", r"\1", word).replace("$$", "$")
+            for word in words]
+
+
+def parse_dep_info(content, worktree):
+    outputs, inputs = set(), set()
+    for line in content.replace("\\\n", "").splitlines():
+        target, separator, sources = line.partition(": ")
+        if not separator or not sources.strip():
+            continue
+        outputs.update(os.path.abspath(worktree / word) for word in dep_info_words(target))
+        inputs.update(os.path.abspath(worktree / word) for word in dep_info_words(sources))
+    if not outputs or not inputs:
+        raise ValueError("no dependency rules")
+    return {"outputs": sorted(outputs), "inputs": sorted(inputs)}
+
+
+def read_dep_info_snapshot(slot, worktree):
+    files, executables = {}, []
+    for directory, children, names in os.walk(slot):
+        children[:] = [name for name in children
+                       if not name.startswith(".") and name not in {"incremental", "receipts"}]
+        for name in names:
+            path = Path(directory) / name
+            if path.is_file() and (path.stat().st_mode & 0o111 or path.suffix == ".exe"):
+                executables.append(str(path))
+            if path.suffix != ".d":
+                continue
+            try:
+                files[str(path)] = parse_dep_info(path.read_text(), worktree)
+            except (OSError, UnicodeError, ValueError) as error:
+                files[str(path)] = {"error": str(error)}
+    return {"files": files, "executables": executables}
+
+
+def target_dep_inputs(record, snapshot):
+    artifacts = {os.path.abspath(path) for path in
+                 [record["executable"], *record.get("filenames", [])]}
+    candidates = {str(Path(path).with_suffix(".d")) for path in artifacts}
+    matches = {name: info for name, info in snapshot["files"].items()
+               if name in candidates or artifacts.intersection(info.get("outputs", []))}
+    if not matches:
+        raise ValueError(f"missing dep-info for {record['executable']}")
+    inputs = set()
+    for name, info in matches.items():
+        if "error" in info:
+            raise ValueError(f"unreadable dep-info {name}: {info['error']}")
+        inputs.update(info["inputs"])
+    return inputs
+
+
+def package_build_inputs(current, record):
+    manifest = record.get("manifest_path")
+    roots = current["package_roots"].get(record.get("package_id"), [])
+    package = Path(current["worktree"])
+    if manifest:
+        package = Path(manifest).parent
+    elif roots:
+        package = Path(roots[0])
+    inputs = {str(package / name) for name in ("build.rs", "Cargo.toml", "Cargo.lock")}
+    inputs.add(str(Path(current["worktree"]) / "Cargo.lock"))
+    return inputs
+
+
+def read_target_inputs(current, before, after):
+    targets, errors = {}, []
     for record in current["reported_artifacts"]:
         executable = record.get("executable")
-        roots = current["package_roots"].get(record.get("package_id"), [])
-        if not executable or not package_inputs_changed(current, roots):
+        if not executable:
+            continue
+        try:
+            inputs = target_dep_inputs(record, after)
+            if executable in before["executables"]:
+                inputs.update(target_dep_inputs(record, before))
+            inputs.update(package_build_inputs(current, record))
+            targets[executable] = sorted(inputs)
+        except ValueError as error:
+            errors.append(str(error))
+    return targets, errors
+
+
+def find_stale_artifacts(current, previous_artifacts, artifacts):
+    stale = []
+    changed = {os.path.abspath(Path(current["worktree"]) / name)
+               for name in current["changed_paths"]}
+    for record in current["reported_artifacts"]:
+        executable = record.get("executable")
+        inputs = current["target_inputs"].get(executable, [])
+        if not executable or not changed.intersection(inputs):
             continue
         name = os.path.relpath(executable, current["slot"])
-        same_hash = name in artifacts and previous_artifacts.get(name) == artifacts[name]
-        if record.get("fresh") is True or same_hash:
+        changed_hash = name in artifacts and previous_artifacts.get(name) != artifacts[name]
+        if record.get("fresh") is not False or not changed_hash:
             stale.append(name)
     return sorted(set(stale))
 
@@ -159,7 +245,8 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
     roots = [root for roots in current["package_roots"].values() for root in roots]
     missing_evidence = (returncode == 0 and not current["reported_artifacts"]
                         and package_inputs_changed(current, roots))
-    stale = bool(stale_paths) or missing_evidence
+    dep_info_errors = current.get("dep_info_errors", []) if returncode == 0 else []
+    stale = bool(stale_paths) or missing_evidence or bool(dep_info_errors)
     result = "success" if returncode == 0 else "failed"
     if stale:
         result = "stale-artifacts"
@@ -168,7 +255,9 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
     write_json(slot / ".source-identity.json", current)
     if stale:
         reason = ("no Cargo compiler-artifact records visible for changed package inputs"
-                  if missing_evidence else f"fresh=true or unchanged SHA256: {stale_paths}")
+                  if missing_evidence else f"missing fresh=false or changed SHA256: {stale_paths}")
+        if dep_info_errors:
+            reason = "; ".join(dep_info_errors)
         raise ValueError(f"stale artifacts: {reason}; see {receipt}")
 
 
@@ -233,9 +322,13 @@ def execute_build(request_path):
     write_json(state, dict(current, artifacts={}, result="building"))
     receipt = Path(request["receipt"])
     write_json(receipt, dict(current, artifacts={}, result="building"))
+    before = read_dep_info_snapshot(slot, worktree)
     started_ns = time.time_ns()
     returncode, records = run_build_command(request["cargo"])
     current["reported_artifacts"] = records
+    after = read_dep_info_snapshot(slot, worktree)
+    current["target_inputs"], current["dep_info_errors"] = read_target_inputs(
+        current, before, after)
     artifacts = collect_artifacts(slot, started_ns, previous, records)
     finish_build(slot, receipt, current, previous, artifacts, returncode)
     return returncode
