@@ -17,7 +17,7 @@ PTR 12.1.7.70493 exposes six GameRules queries/mutations from supplied state, pl
 ## Implementation inventory
 
 - `src/lua_api/sim_substates/mod.rs`: supplied GameRules capability fields.
-- `src/c_api/ptr_i4_game_rules.rs`: PTR finite declarations; queries and mutation are pending.
+- `src/c_api/ptr_i4_game_rules.rs`: PTR finite declarations, capability queries and supplied SD mutation. Preset query is pending.
 - `src/c_api/mod.rs`: module declaration.
 - `src/lua_api/globals/game_rules.rs`: existing registration calls the C API packet.
 
@@ -27,7 +27,7 @@ PTR 12.1.7.70493 exposes six GameRules queries/mutations from supplied state, pl
 
 ## Known gaps (current cycle)
 
-- [ ] Six function producers remain pending. Initial execution reaches three missing query calls, two prerequisite blockers and the original RecentAllies enum failure. The hardcore test also observes the missing original popup conditional; its diagnostic assertion is being made explicit before producer work.
+- [ ] Capability queries and SD mutation are implemented after original-line RED; their GREEN and the preset query remain pending. Enum-only replay proves setter RED at Barbershop line273 and hardcore RED at popup line3512. The RecentAllies labels selector passes with the documented enum.
 - [ ] Runtime GREEN, stock error comparison and profile warning/format gates remain pending.
 
 ## Out of scope

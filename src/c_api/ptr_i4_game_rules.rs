@@ -1,16 +1,77 @@
-//! Finite PTR 70493 declarations used by original I4 consumers.
+//! Supplied PTR GameRules inputs and finite 70493 consumer declarations.
 use crate::client_profile::{ACTIVE, ClientProfile};
-use crate::lua_api::methods::{create_table, table_set};
-use rilua::Val;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table, table_set};
+use crate::lua_bridge::{FromStack, table_set_rust_fn};
 use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
 
-pub(crate) fn register(state: &mut LuaState) {
+pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     if ACTIVE != ClientProfile::Ptr {
-        return;
+        return Ok(());
     }
+    let namespace = super::helpers::ensure_namespace(state, "C_GameRules")?;
+    table_set_rust_fn(state, namespace, "IsHardcoreActive", is_hardcore_active)?;
+    table_set_rust_fn(
+        state,
+        namespace,
+        "IsSelfFoundAllowed",
+        is_self_found_allowed,
+    )?;
+    table_set_rust_fn(
+        state,
+        namespace,
+        "IsSDHDToggleEnabled",
+        is_sd_hd_toggle_enabled,
+    )?;
+    table_set_rust_fn(
+        state,
+        namespace,
+        "AccountHasSDEnabled",
+        account_has_sd_enabled,
+    )?;
+    table_set_rust_fn(
+        state,
+        namespace,
+        "SetSDHDToggleValue",
+        set_sd_hd_toggle_value,
+    )?;
     let enums = super::helpers::ensure_global_table(state, "Enum");
     register_usage_locations(state, enums);
     register_recent_allies_categories(state, enums);
+    Ok(())
+}
+
+fn is_hardcore_active(state: &mut LuaState) -> LuaResult<u32> {
+    let active = borrow_state(state)?.game_rules.hardcore_active;
+    state.push(Val::Bool(active));
+    Ok(1)
+}
+
+fn is_self_found_allowed(state: &mut LuaState) -> LuaResult<u32> {
+    let allowed = borrow_state(state)?.game_rules.self_found_allowed;
+    state.push(Val::Bool(allowed));
+    Ok(1)
+}
+
+fn is_sd_hd_toggle_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let enabled = borrow_state(state)?.game_rules.sd_hd_toggle_enabled;
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
+fn account_has_sd_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let enabled = borrow_state(state)?.game_rules.account_has_sd_enabled;
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
+fn set_sd_hd_toggle_value(state: &mut LuaState) -> LuaResult<u32> {
+    let set_to_sd = bool::from_stack(state, 1)?;
+    let usage_location = i32::from_stack(state, 2)?;
+    let mut sim = borrow_state_mut(state)?;
+    sim.game_rules.account_has_sd_enabled = set_to_sd;
+    sim.game_rules.sd_toggle_usage_location = Some(usage_location);
+    Ok(0)
 }
 
 fn register_usage_locations(state: &mut LuaState, enums: Val) {

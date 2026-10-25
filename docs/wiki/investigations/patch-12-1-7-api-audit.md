@@ -18,7 +18,7 @@ The [bounded contract](../../specs/ptr-i4-first-green.md) publishes these two en
 
 Verified 2026-10-25: [batch2 contract](../../specs/ptr-i4-game-rules.md) and [original-consumer tests](../../../tests/ptr_i4_batch2.rs) bind actual game/glue TOC selection. Initial executions reach missing AccountHasSDEnabled at Barbershop line269, IsSDHDToggleEnabled at line261, IsSelfFoundAllowed at CharacterCreate line2366, and RecentAlliesInteractionCategoryFilter at RecentAlliesUtil line4. The SD setter is first blocked by its documented usage-location enum at line273; the preset default is first blocked by the toggle query at GraphicsOverrides line78. Those two are not downstream API REDs. The hardcore popup diagnostic is retained before its missing producer is repaired.
 
-The first producer step publishes only the two proven enum prerequisites and metadata from the pinned 70493 APIDocumentation. Six function producers and runtime GREEN remain pending. No native capability defaults, telemetry policy, argument restrictions or secret handling are inferred.
+The first producer step publishes the two proven enum prerequisites and metadata from the pinned 70493 APIDocumentation. Its exact replay passes the original RecentAllies labels selector, then reaches the missing setter at Barbershop line273 and the missing hardcore query at popup line3512. Five state-backed functions are now implemented after these and the earlier direct query REDs. Their GREEN and the preset query remain pending. No native capability defaults, telemetry policy, argument restrictions or secret handling are inferred.
 
 ## Empty inventory is not patch coverage
 

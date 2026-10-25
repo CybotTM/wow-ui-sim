@@ -1,3 +1,7 @@
+## [2026-10-25] implementation | PTR I4 supplied GameRules inputs
+
+[Five original-line RED boundaries](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) precede capability queries and SD selection mutation. Enum-only replay passes RecentAllies labels. Preset query and final runtime/check acceptance remain pending.
+
 ## [2026-10-25] prerequisites | PTR I4 GameRules and RecentAllies
 
 [Source-bound original RED](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) records Barbershop, CharacterCreate and RecentAllies boundaries plus upstream setter/preset blockers. Only documented enum prerequisites are implemented in this step; six function producers and GREEN remain pending.
