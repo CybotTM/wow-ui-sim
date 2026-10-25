@@ -1,6 +1,6 @@
 # PTR input interface style
 
-Static investigation of the PTR 12.1.7.70493 startup failure at original `Blizzard_SharedXML/Mainline/InputUtil.lua:12`. At the base revision, the namespace has a real existing simulator model, but registration is Forever-only. The [contract](../../specs/ptr-input-interface-style.md) stages PTR publication. RED/GREEN are source phases, not executed test results.
+Static investigation of the PTR 12.1.7.70493 startup failure at original `Blizzard_SharedXML/Mainline/InputUtil.lua:12`. At the base revision, the namespace has a real existing simulator model, but registration is Forever-only. The [contract](../../specs/ptr-input-interface-style.md) stages PTR publication. The slot-2 results below supersede the original source-only stage; the PTR selector is blocked by a native environment-count question.
 
 ## Source declarations
 
@@ -56,7 +56,7 @@ One independently claimed RED selector: `ptr_input_util_observes_supplied_styles
 | No-op style input / getter ignores supplied state | Both different values are required in the same environment. |
 | Incorrect enum values | Explicit documented numeric assertions reject them. |
 
-The selector tests immediate registration behavior, not event-delivery timing, physical devices or every startup widget. Original consumer execution, constant contradictions and GREEN outcome still require future authorized runtime proof.
+The selector tests immediate registration behavior, not event-delivery timing, physical devices or every startup widget. The original source stage did not execute these assertions. Slot-2 execution below reaches an earlier listener-count blocker; the style assertions remain unreached.
 
 ## PTR event-validity extension (2026-10-25)
 
@@ -66,7 +66,25 @@ Declaration: `/home/osso/.local/state/wow-ui-sim/handoff/cf2-aura-cleanup/ptr-ca
 
 After merging master with both wiki sides retained, event RED `16c75aeda` extends only the existing test file. Event GREEN `0bd666459` changes only the validator; test bytes are identical. Both already include the earlier C API publication. The normal closure loader must report no Lua errors and leave exactly one registered listener. The test retrieves its existing frame reference because forbidden frames are hidden from enumeration, checks `IsEventRegistered` true for the transition and false for `PLAYER_LOGIN`, and checks that its OnEvent handler comes from the original shared InputUtil. No vendor code or API is replaced or wrapped.
 
-An unconditional RegisterEvent success without recording fails the listener-count assertion. Constant-true event validation fails the unknown-event registration rejection; constant-false validation fails the original top-level load. A constant true/false IsEventRegistered fails one of the positive/negative queries. Existing MKB → Gamepad → MKB assertions still reject constant style getters. These are static contradictions, not executed mutation receipts. Source staging and static checks are the only proof so far; runtime RED/GREEN, stock comparison against master and PTR all-target checking await main's slot assignment.
+An unconditional RegisterEvent success without recording fails the listener-count assertion. Constant-true event validation fails the unknown-event registration rejection; constant-false validation fails the original top-level load. A constant true/false IsEventRegistered fails one of the positive/negative queries. Existing MKB → Gamepad → MKB assertions still reject constant style getters. These are static contradictions, not executed mutation receipts. These contradictions were source-only at staging. Slot-2 results follow; no mutation runs are claimed.
+
+## Slot-2 execution (2026-10-25)
+
+Code GREEN `a3987cfbc` includes one `--no-ff` merge of master `8784a49cd` (`7f463e73f`) and the separate compile-gate correction. Producer-only RED `63b91c8f4` removes only the four validator lines. Both retain test blob `5abd258ee6a8dee0538a0cf6ce384022de21fda6`.
+
+| Boundary | Observed result |
+| --- | --- |
+| PTR RED, one exact case | Exit 101: original `InputUtil.lua:30` rejects the event; original `InputDeviceIconSetManager.lua:14` then lacks the callback helper. |
+| PTR GREEN, one exact case | Exit 101: no closure Lua errors, then two registered listeners instead of the asserted one. Later registration/style assertions are unreached. **BLOCKED-BY-NATIVE-ANSWER**. |
+| Two-listener diagnosis | Unnamed frame 386 registers during `load_addon_internal` normal pass (`addon.rs:230`); unnamed frame 673 registers during `maybe_replay_blizzard_lua_in_secure_env` (`addon.rs:585`, caller line238). Both Lua stacks identify the same original `InputUtil.lua:30`. There is one vendor registration line; the simulator deliberately replays SharedXML in the secure environment. |
+| Forever preservation | Three exact cases pass: transition-time query, immediate vendor callbacks, transition/environment isolation. Capability/frame-flag independence fails before style assertions because `C_GamePad.IsEnabled` is nil. Its producer and test are unchanged from the merged master. |
+| All-target compilation | PTR and Forever each pass once on code GREEN; only the three allowed inherited `fast_handler_late_bind.rs` dead-code warnings occur. |
+
+No loader semantics or assertions were changed. Main asked the laptop whether native PTR executes this listener once globally or once per public/secure environment. Diagnostic instrumentation was committed only on a detached proof chain and is absent from the lane branch.
+
+Source-bound private PTR70493 sync authenticated all 4,578 files. Raw stock master/GREEN error maps contain 430/300 unique messages and 610/414 occurrences: 230 keys disappear, 100 appear, and six shared-key counts change. Event-registration, callback-helper and missing-input-namespace errors disappear, but stock startup is not clean. The full per-message successor classification is evidence, not a claim that every raw delta is a new regression.
+
+Exact commands, artifact hashes, CVar/O_NOATIME guards, full stacks, raw maps and CPU counters are retained in `/home/osso/.local/state/wow-ui-sim/handoff/ptr-input-interface-style/slot2-run/REPORT.md`. No native default, same-style, hardware or synchronous-delivery parity is established.
 
 ## Laptop questions
 

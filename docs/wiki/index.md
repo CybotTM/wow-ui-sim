@@ -1,3 +1,7 @@
+## [2026-10-25] runtime proof | PTR input listener environment count
+
+[Slot-2 results](investigations/ptr-input-interface-style.md#slot-2-execution-2026-10-25): RED reaches the original rejected event; GREEN records two listeners via normal/secure replay and is blocked by a native answer. Forever 3/4 pass; both all-target gates pass with the allowed inherited warnings. Raw stock maps retain all successor errors.
+
 ## [2026-10-25] static stage | PTR input event validity
 
 [Original-consumer extension](investigations/ptr-input-interface-style.md#ptr-event-validity-extension-2026-10-25) records the documented PTR epoch exception, load-error and listener registration assertions, and the new event-only RED/GREEN pair above the existing namespace publication. No slot, compilation or runtime proof.
