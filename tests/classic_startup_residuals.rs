@@ -52,6 +52,22 @@ fn classic_original_startup_timers_complete_without_lua_errors() {
         .eval::<String>(
             r#"
         local labels = {}
+        local function describe(fn, depth)
+            if depth > 4 then return end
+            for i = 1, 20 do
+                local name, value = debug.getupvalue(fn, i)
+                if not name then break end
+                local label = string.rep(' ', depth) .. name .. '=' .. tostring(value)
+                if type(value) == 'function' then
+                    local info = debug.getinfo(value, 'S')
+                    label = label .. ' ' .. tostring(info.source) .. ':' .. tostring(info.linedefined)
+                elseif type(value) == 'table' and value.GetName then
+                    label = label .. ' frame=' .. tostring(value:GetName())
+                end
+                labels[#labels + 1] = label
+                if type(value) == 'function' then describe(value, depth + 1) end
+            end
+        end
         local registry = debug.getregistry()
         for id, callback in pairs(registry.__rilua_timer_callbacks or {}) do
             local info = debug.getinfo(callback, 'S')
@@ -62,8 +78,8 @@ fn classic_original_startup_timers_complete_without_lua_errors() {
                 .. ':' .. tostring(info and info.linedefined)
                 .. ' original=' .. tostring(originalInfo and originalInfo.source)
                 .. ':' .. tostring(originalInfo and originalInfo.linedefined)
+            if original then describe(original, 1) end
         end
-        table.sort(labels)
         return table.concat(labels, '\n')
     "#,
         )
