@@ -15,6 +15,10 @@ Selection authority: `src/loader/mod.rs::active_profile_toc_suffixes` and `src/t
 
 Retail/PTR original Mainline handler lines769–848 include query at843. Forever Mainline handler starts782 and queries at851; Camelot handler line3 invokes its inherited Mainline closure. Shared EventRouting registers PLAYER_ENTERING_WORLD on a private frame; Startup initializes routing. Generated docs are available on demand, not loaded merely because the Game consumer runs.
 
+## Producer staging
+
+`src/c_api/c_housing/presence.rs` registers both spatial getters under one shared Retail/PTR/Forever module gate. The existing interior predicate is unchanged. The broader query returns `current_housing_area.is_some()` because the existing enum has exactly interior and plot-exterior variants. It returns one `Val::Bool`; no mutation, default fabrication or ownership fallback occurs. `location.inside_plot` remains an older independent input and is not silently reconciled by a getter. Runtime proof is pending.
+
 ## State and original-consumer selectors
 
 `tests/cf2_housing_plot.rs` loads real panel dependencies and the selected Game closure. It checks TOC eligibility and original handler source, then fires registered PLAYER_ENTERING_WORLD. `hooksecurefunc` observers count original handler completion and actual original `HousingControls_LoadUI` calls without changing return values. The selected public housing bootstrap executes with its original addon vararg. Shape checks run AFTER the event, so missing API RED must originate in the real handler, not a direct getter probe.

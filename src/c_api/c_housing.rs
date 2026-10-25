@@ -26,6 +26,12 @@ pub mod location;
 mod market;
 #[cfg(feature = "retail-12-0-7")]
 pub(crate) mod patch_12_0_7;
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
+mod presence;
 
 use crate::c_api::helpers::ensure_namespace;
 #[cfg(feature = "retail-12-1-0")]
@@ -76,13 +82,13 @@ pub(crate) fn register_c_housing_surface(state: &mut LuaState) -> LuaResult<()> 
     basic_mode::register(state)?;
     #[cfg(feature = "retail-12-0-5")]
     inspect_mode::register(state)?;
-    let housing = ensure_namespace(state, "C_Housing")?;
     #[cfg(any(
         feature = "client-retail",
         feature = "client-ptr",
         feature = "client-wowforever"
     ))]
-    crate::lua_bridge::table_set_rust_fn_static(state, housing, "IsInsideHouse", is_inside_house)?;
+    presence::register(state)?;
+    let housing = ensure_namespace(state, "C_Housing")?;
     if cfg!(feature = "retail-12-0-0") {
         market::register(state, housing)?;
     }
@@ -101,20 +107,6 @@ pub(crate) fn register_c_housing_surface(state: &mut LuaState) -> LuaResult<()> 
         decor,
         layout,
     )
-}
-
-#[cfg(any(
-    feature = "client-retail",
-    feature = "client-ptr",
-    feature = "client-wowforever"
-))]
-fn is_inside_house(state: &mut LuaState) -> LuaResult<u32> {
-    let inside = crate::lua_api::methods::borrow_state(state)?
-        .housing
-        .current_housing_area
-        == Some(HousingArea::HouseInterior);
-    state.push(rilua::Val::Bool(inside));
-    Ok(1)
 }
 
 #[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]

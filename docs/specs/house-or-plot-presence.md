@@ -18,7 +18,8 @@
 
 ## Implementation inventory
 
-- `src/c_api/c_housing.rs`: existing area type and namespace registration.
+- `src/c_api/c_housing.rs`: existing area type and shared three-profile spatial-query module gate.
+- `src/c_api/c_housing/presence.rs`: unchanged interior projection plus house-or-plot projection and registration; no state mutation.
 - `src/lua_api/state/support_types.rs`: existing optional area and independent ownership flags; no new state needed.
 - `tests/cf2_housing_plot.rs`: original registered-world-event branch observations and post-consumer return-shape assertions, Retail/PTR only.
 
