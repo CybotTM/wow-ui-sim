@@ -57,6 +57,19 @@ fn forever_ammo_visibility_uses_character_requirement() {
         "#,
     )
     .unwrap();
+    env.state().borrow_mut().forever_startup.ammo_required = true;
+    env.exec(
+        r#"
+        CharacterAmmoSlot:Show()
+        PaperDollItemSlotButton_OnLoad(CharacterAmmoSlot)
+        assert(CharacterAmmoSlot:IsShown(), "supplied ammo requirement keeps slot")
+        assert(CharacterAmmoSlot:GetID() == 0)
+        assert(CharacterAmmoSlot.icon:GetTexture() == 136510)
+        assert(select("#", C_PaperDollInfo.AmmoNeeded()) == 1)
+        assert(type(C_PaperDollInfo.AmmoNeeded()) == "boolean")
+        "#,
+    )
+    .unwrap();
 }
 
 #[test]
