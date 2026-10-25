@@ -295,7 +295,10 @@ fn forever_original_ping_menu_projects_party_restriction() {
     let env = startup();
     env.state().borrow_mut().forever_startup.ping_enabled = true;
     for restriction in [0, 3] {
-        env.state().borrow_mut().party_ping_restriction = restriction;
+        env.state()
+            .borrow_mut()
+            .forever_startup
+            .party_ping_restriction = restriction;
         let selected = env
             .eval::<i32>(
                 r#"

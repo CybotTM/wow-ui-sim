@@ -19,6 +19,7 @@ pub struct StartupInputs {
     pub ammo_required: bool,
     pub cursor_visible: bool,
     pub ping_enabled: bool,
+    pub party_ping_restriction: u8,
     pub purchasable_bank_types: HashSet<i32>,
     pub bank_locked_reasons: HashMap<i32, i32>,
     pub max_bank_tab_types: HashSet<i32>,
