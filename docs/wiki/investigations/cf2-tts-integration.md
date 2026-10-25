@@ -4,7 +4,7 @@ Verified: 2026-10-25. TTS integration defers whole non-TTS test files that fail 
 
 ## Restoration inventory
 
-The source checkpoint is `5327a3797`. Historical seven-profile module receipts are from `93c0220b6`; Forever was rebuilt at the checkpoint and each registered case was discovered and run separately. Passing cases below are the union across registered profiles, not an all-profile claim. All paths in the table are under `tests/`; names omit their file's module prefix.
+The source checkpoint is `5327a3797`. Historical seven-profile module receipts are from `93c0220b6`; Forever was rebuilt at the checkpoint and each registered case was discovered and run separately against a private wowf 1.60.1.70532 cache. Earlier 70374 runtime receipts are stale input evidence, not acceptance. Passing cases below are the union across registered profiles, not an all-profile claim. All paths in the table are under `tests/`; names omit their file's module prefix.
 
 | Deferred file | Origin commit / owner | Cases that passed within the removed file |
 |---|---|---|
@@ -30,7 +30,11 @@ Only `cf2_tts_shape_contract::original_gamepad_temp_cvar_shape_blocker` is remov
 
 ## Evidence boundaries
 
-The five original-consumer TTS cases pass on the checkpoint's Forever build. Final seven-profile exact-selector, stock-map, warning and formatting gates are separate from this deferral decision. Wrath does not register these CF-2 fixtures. The saved-marker model is user-approved, not native initial/reset evidence.
+The five original-consumer TTS cases pass on the checkpoint's Forever build with 70532 inputs. Its exact raw stock map matches the accepted master map: 26 messages, 26 occurrences, zero additions or removals. Final seven-profile exact-selector, stock-map, warning and formatting gates are separate from this deferral decision. Wrath does not register these CF-2 fixtures. The saved-marker model is user-approved, not native initial/reset evidence.
+
+## Alternate voice oracle correction
+
+Master's temporary `tts_settings_defaults.rs` returns zero for every voice type. The new model uses the pinned Blizzard legacy UI defaults instead: `Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua:11` sets `ttsVoiceOptionAlternateDefault = 1`; its migration at line 332 also selects 1 when no Alternate setting is supplied. All six available TTS consumer caches contain this default. `TTSSettingsDocumentation.lua` documents the enum argument and numeric return, but no native default. The legacy `c_system_api::test_c_tts_settings_get_voice_option_id` oracle is therefore corrected from 0 to 1, with the source cited in the test. This is UI-default evidence, not native default parity; Wrath has no original TTS consumer cache.
 
 ## Sources
 

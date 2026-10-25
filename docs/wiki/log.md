@@ -2847,3 +2847,7 @@ Cargo rewrite byte-for-byte; runtime acceptance remains pending.
 ## [2026-10-25] integration | CF-2 TTS fixture deferrals
 
 [Restoration inventory](investigations/cf2-tts-integration.md) records thirteen whole-file deferrals, their passing cases and origin owners, plus the failing mixed-file Gamepad exception. Current Forever TTS cases pass; two newly passing Forever files remain unchanged. Final profile gates remain separate.
+
+## [2026-10-25] test | TTS Alternate UI default oracle
+
+[Source-backed correction](investigations/cf2-tts-integration.md#alternate-voice-oracle-correction) changes the legacy voiceType1 test from0 to1. Pinned Blizzard legacy UI defaults and migration support1; APIDocumentation does not establish native default parity. Forever70532 TTS cases and exact26/26 master stock comparison pass.

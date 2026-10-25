@@ -219,7 +219,9 @@ fn test_c_tts_settings_get_voice_option_id() {
     let id: i32 = env
         .eval("return C_TTSSettings.GetVoiceOptionID(1)")
         .unwrap();
-    assert_eq!(id, 0);
+    // Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua:11,332 sets Alternate to 1.
+    // This is the legacy UI default, not a claim of native default parity.
+    assert_eq!(id, 1);
 }
 
 #[test]
