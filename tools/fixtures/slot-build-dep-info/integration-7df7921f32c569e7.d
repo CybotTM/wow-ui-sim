@@ -1,0 +1,2 @@
+/home/osso/.cache/wow-ui-sim-targets/slot-0/debug/deps/integration-7df7921f32c569e7.d: tests/integration.rs /home/osso/.cache/wow-ui-sim-srcmount/slot-0/tests/fast_handler_late_bind.rs /home/osso/.cache/wow-ui-sim-srcmount/slot-0/tests/../Cargo.lock
+/home/osso/.cache/wow-ui-sim-targets/slot-0/debug/deps/integration-7df7921f32c569e7: tests/integration.rs /home/osso/.cache/wow-ui-sim-srcmount/slot-0/tests/fast_handler_late_bind.rs /home/osso/.cache/wow-ui-sim-srcmount/slot-0/tests/../Cargo.lock
