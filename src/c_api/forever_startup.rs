@@ -34,6 +34,19 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, paper_doll, "AmmoNeeded", ammo_needed)
 }
 
+/// 70532 APIDocumentation event names; registration is not event generation.
+pub(crate) fn accepts_event(name: &str) -> bool {
+    ACTIVE == ClientProfile::WowForever
+        && matches!(
+            name,
+            "SECURE_TRANSFER_CONFIRM_TAKE_MAIL_MONEY"
+                | "SHARD_TRANSFER_CANCELLED"
+                | "EXTERNAL_EVENT_LAUNCH_URL_RESULT"
+                | "EXTERNAL_EVENT_URL_CHANGED"
+                | "SOCIAL_UI_SOCIAL_QUEUE_SYSTEM_STATUS_UPDATED"
+        )
+}
+
 fn ammo_needed(state: &mut LuaState) -> LuaResult<u32> {
     let required = borrow_state(state)?.forever_startup.ammo_required;
     state.push(Val::Bool(required));
