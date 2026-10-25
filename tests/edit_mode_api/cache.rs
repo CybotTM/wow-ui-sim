@@ -400,6 +400,7 @@ fn edit_mode_wtf_cache_decodes_frame_point_numbers_like_wow() {
     assert_eq!(cast_bar_point, "CENTER");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn edit_mode_account_cache_preserves_all_legacy_values_and_fills_new_defaults() {
     let _env_guard = EnvVarGuard::unset(EDIT_MODE_LAYOUT_ENV);
@@ -454,6 +455,7 @@ fn edit_mode_account_cache_preserves_all_legacy_values_and_fills_new_defaults() 
         "0=1,1=20,2=1,3=1,4=0,5=0,6=0,7=1,8=0,9=1,10=0,11=0,12=1,13=0,14=0,15=0,16=0,17=0,18=0,19=0,20=0,21=0,22=0,23=1,24=0,25=0,26=0,27=0,28=1,29=1,30=1,31=1,32=1,33=1,34=1,35=1",
         "legacy account cache values should be preserved and newer profile options should be default-filled"
     );
+}
 }
 
 #[test]

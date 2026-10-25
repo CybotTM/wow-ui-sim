@@ -21,6 +21,7 @@ fn content_tracking_defaults_are_empty_and_inactive() {
     assert_eq!(result, "ok");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn neighborhood_initiative_defaults_have_empty_tracked_ids_shape() {
     let env = env();
@@ -41,4 +42,5 @@ fn neighborhood_initiative_defaults_have_empty_tracked_ids_shape() {
         .expect("neighborhood initiative defaults should be callable");
 
     assert_eq!(result, "ok");
+}
 }

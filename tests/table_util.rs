@@ -1,12 +1,15 @@
+post_wrath_ui_fixture! {
 use std::fs;
 
 use wow_ui_sim::loader::load_addon;
+}
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn frozen_addon_namespace_does_not_freeze_callback_state_or_later_addons() {
     let directory = tempfile::tempdir().unwrap();
@@ -87,6 +90,7 @@ fn frozen_addon_namespace_does_not_freeze_callback_state_or_later_addons() {
     )
     .expect("callback state, closure strings and children survive full GC");
     assert!(env.state().borrow().lua_errors.is_empty());
+}
 }
 
 #[test]

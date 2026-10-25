@@ -10,7 +10,10 @@ use crate::common;
 use common::panel_fixtures::{
     clear_recorded_lua_errors, player_spells_panel_debug_snapshot, recorded_lua_errors, setup_env,
 };
-use wow_ui_sim::startup::{prewarm_player_spells_spellbook, run_extra_update_ticks};
+use wow_ui_sim::startup::run_extra_update_ticks;
+post_wrath_ui_fixture! {
+use wow_ui_sim::startup::prewarm_player_spells_spellbook;
+}
 use wow_ui_sim::traits::{TRAIT_CURRENCY_DB, TRAIT_TREE_DB};
 
 fn open_talents(env: &wow_ui_sim::lua_api::WowLuaEnv) {
@@ -37,6 +40,7 @@ fn max_points_for_currency(currency_id: u32) -> u32 {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn startup_prewarm_loads_blizzard_player_spells_and_keeps_it_hidden() {
     test_timeout! {
@@ -86,7 +90,9 @@ fn startup_prewarm_loads_blizzard_player_spells_and_keeps_it_hidden() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn raw_toggle_spellbook_frame_loads_blizzard_player_spells_and_shows_spellbook() {
     test_timeout! {
@@ -153,7 +159,9 @@ fn raw_toggle_spellbook_frame_loads_blizzard_player_spells_and_shows_spellbook()
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn keybind_s_loads_blizzard_player_spells_and_shows_spellbook() {
     test_timeout! {
@@ -217,7 +225,9 @@ fn keybind_s_loads_blizzard_player_spells_and_shows_spellbook() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn raw_spellbook_toggle_hands_off_to_blizzard_playerspells_util_on_first_load() {
     test_timeout! {
@@ -291,7 +301,9 @@ fn raw_spellbook_toggle_hands_off_to_blizzard_playerspells_util_on_first_load() 
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn keybind_n_loads_blizzard_player_spells_and_shows_talents() {
     test_timeout! {
@@ -357,6 +369,7 @@ fn keybind_n_loads_blizzard_player_spells_and_shows_talents() {
             "Pressing N should demand-load Blizzard_PlayerSpells and show the talents tab: {result}"
         );
     }
+}
 }
 
 post_wrath_ui_fixture! {

@@ -649,6 +649,7 @@ fn test_greatsword_recipe_has_three_reagents() {
     assert_eq!(count, 3);
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_professions_util_resolves_basic_reagents_from_recipe_schematic() {
     test_timeout! {
@@ -669,6 +670,7 @@ fn test_professions_util_resolves_basic_reagents_from_recipe_schematic() {
         assert_eq!(count, 3);
         assert_eq!(reagent_ids, "210934,210937,210935");
     }
+}
 }
 
 #[test]

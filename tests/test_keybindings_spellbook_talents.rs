@@ -12,6 +12,7 @@ use keybindings_panels_detail::{
 
 // These regressions use the ordered startup loader, not setup_env's injected
 // ClickBinding bootstrap, so Escape runs against production panel bookkeeping.
+post_wrath_ui_fixture! {
 #[test]
 fn specialization_escape_after_micro_button_and_tab_click_closes_panel() {
     test_timeout! {
@@ -28,7 +29,9 @@ fn specialization_escape_after_micro_button_and_tab_click_closes_panel() {
         assert_specialization_escape_closes_panel(&env);
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn specialization_escape_after_direct_open_closes_panel() {
     test_timeout! {
@@ -38,7 +41,9 @@ fn specialization_escape_after_direct_open_closes_panel() {
         assert_specialization_escape_closes_panel(&env);
     }
 }
+}
 
+post_wrath_ui_fixture! {
 fn setup_specialization_escape_env() -> common::LockedEnv {
     common::lock_env(|| {
         use wow_ui_sim::screen::ScreenKind;
@@ -108,9 +113,11 @@ fn assert_specialization_escape_closes_panel(env: &wow_ui_sim::lua_api::WowLuaEn
         state.lua_errors
     );
 }
+}
 
 // ── S → Spellbook panel opens without errors ─────────────────────────────
 
+post_wrath_ui_fixture! {
 #[test]
 fn keybind_s_opens_spellbook_no_errors() {
     test_timeout! {
@@ -132,7 +139,9 @@ fn keybind_s_opens_spellbook_no_errors() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn keybind_s_opens_spellbook_tab_on_first_press() {
     test_timeout! {
@@ -168,6 +177,7 @@ fn keybind_s_opens_spellbook_tab_on_first_press() {
             "Pressing S should show the spellbook tab on the first open: {result}"
         );
     }
+}
 }
 
 #[test]
@@ -302,6 +312,7 @@ fn keybind_s_dispatches_directly_to_playerspellsutil_toggle_spellbook_frame() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn keybind_s_toggles_spellbook_closed_on_second_press() {
     test_timeout! {
@@ -329,7 +340,9 @@ fn keybind_s_toggles_spellbook_closed_on_second_press() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn spellbook_panel_spell_tooltip_has_lines_after_tab_switch_and_closes_without_errors() {
     test_timeout! {
@@ -409,7 +422,9 @@ fn spellbook_panel_spell_tooltip_has_lines_after_tab_switch_and_closes_without_e
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn spellbook_first_visible_item_icon_matches_spellbook_texture() {
     test_timeout! {
@@ -469,7 +484,9 @@ fn spellbook_first_visible_item_icon_matches_spellbook_texture() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn spellbook_paging_label_is_formatted_on_first_open() {
     test_timeout! {
@@ -519,7 +536,9 @@ fn spellbook_paging_label_is_formatted_on_first_open() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn talent_panel_switches_spec_tabs_and_closes_without_errors() {
     test_timeout! {
@@ -588,7 +607,9 @@ fn talent_panel_switches_spec_tabs_and_closes_without_errors() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn talent_panel_has_at_least_one_visible_talent_node_frame() {
     test_timeout! {
@@ -645,6 +666,7 @@ fn talent_panel_has_at_least_one_visible_talent_node_frame() {
             "Talent panel should expose at least one visible active talent button frame: {result}"
         );
     }
+}
 }
 
 post_wrath_ui_fixture! {
