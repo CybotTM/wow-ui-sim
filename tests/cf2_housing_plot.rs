@@ -128,6 +128,31 @@ fn assert_world_branch(env: &WowLuaEnv, expected: bool) {
 }
 
 #[test]
+fn ptr_talent_button_reaches_original_world_event() {
+    if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Ptr {
+        return;
+    }
+    let env = load_original_world_handler();
+    let before = env.state().borrow().lua_errors.len();
+    env.fire_event_with_args(
+        "PLAYER_ENTERING_WORLD",
+        &[rilua::Val::Bool(false), rilua::Val::Bool(false)],
+    )
+    .expect("fire original registered world event");
+    let errors = env.state().borrow().lua_errors[before..].to_vec();
+    assert!(
+        !errors.iter().any(|error| error.contains("HasPlayerEarnedATalentPoint")),
+        "original talent microbutton must accept the supplied history: {errors:?}"
+    );
+    env.exec(
+        "assert(TalentMicroButton.talentsOnly); \
+         assert(not TalentMicroButton:IsEnabled()); \
+         assert(TalentMicroButton.minLevel == TalentMicroButton:GetTalentUnlockLevel())",
+    )
+    .expect("empty host award history disables the original talent button");
+}
+
+#[test]
 fn original_world_event_branches_on_house_plot_absence_and_reentry() {
     use HousingArea::{HouseInterior, PlotExterior};
 
