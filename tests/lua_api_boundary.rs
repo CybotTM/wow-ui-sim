@@ -49,7 +49,10 @@ fn modeled_c_social_returns_friend_status_defaults() {
         .unwrap();
     assert!(!afk, "seeded friends should not be AFK");
     assert!(!dnd, "seeded friends should not be DND");
-    assert_eq!(raf_link_type, 0, "seeded friends use the default RAF link type");
+    assert_eq!(
+        raf_link_type, 0,
+        "seeded friends use the default RAF link type"
+    );
 }
 
 #[test]
@@ -64,7 +67,10 @@ fn modeled_c_chat_bubbles_returns_empty_default_collection() {
         )
         .unwrap();
     assert_eq!(count, 0, "the default simulator state has no chat bubbles");
-    assert!(first_is_nil, "the empty bubble collection has no first entry");
+    assert!(
+        first_is_nil,
+        "the empty bubble collection has no first entry"
+    );
 }
 
 #[test]
@@ -85,7 +91,10 @@ fn modeled_c_character_services_have_no_active_boosts_by_default() {
             "return C_CharacterServices.GetActiveCharacterUpgradeBoostType(), C_CharacterServices.GetActiveClassTrialBoostType()",
         )
         .unwrap();
-    assert!(upgrade.is_none(), "no character upgrade boost is active by default");
+    assert!(
+        upgrade.is_none(),
+        "no character upgrade boost is active by default"
+    );
     assert!(trial.is_none(), "no class trial boost is active by default");
 }
 
@@ -95,7 +104,10 @@ fn modeled_c_report_system_allocates_positive_report_token() {
     let token: i64 = env
         .eval("return C_ReportSystem.InitiateReportPlayer('cheating')")
         .unwrap();
-    assert!(token > 0, "a new player report should receive a positive token");
+    assert!(
+        token > 0,
+        "a new player report should receive a positive token"
+    );
 }
 
 #[test]
@@ -111,7 +123,10 @@ fn modeled_c_summon_info_exposes_inactive_request_shape() {
         )
         .unwrap();
     assert!(reason_missing, "an inactive summon has no reason");
-    assert_eq!(time_left, 0, "an inactive summon has no remaining confirmation time");
+    assert_eq!(
+        time_left, 0,
+        "an inactive summon has no remaining confirmation time"
+    );
     assert!(
         !skips_start,
         "an inactive summon does not skip the starting experience"
@@ -139,11 +154,18 @@ fn modeled_c_account_services_returns_disabled_save_result() {
             "#,
         )
         .unwrap();
-    assert!(!started, "saving is disabled in the default simulator state");
-    assert_eq!(result_code, 10, "a disabled save returns the unavailable result code");
+    assert!(
+        !started,
+        "saving is disabled in the default simulator state"
+    );
+    assert_eq!(
+        result_code, 10,
+        "a disabled save returns the unavailable result code"
+    );
     assert!(!locked, "a disabled save does not lock the account");
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn modeled_c_battle_net_reports_enabled_retail_friend_features() {
     let env = env();
@@ -154,4 +176,5 @@ fn modeled_c_battle_net_reports_enabled_retail_friend_features() {
         .unwrap();
     assert!(friend_tags_enabled, "retail friend tags should be enabled");
     assert!(list_supported, "the Battle.net friend list should be supported");
+}
 }
