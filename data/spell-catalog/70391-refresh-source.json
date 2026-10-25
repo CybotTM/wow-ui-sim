@@ -1,5 +1,5 @@
 {
-  "verified": "2026-10-24",
+  "verified": "2026-10-25",
   "identity": {
     "product": "wow",
     "build_key": "334a36cf5f3c32a5f7a167405487fa14",
@@ -10,17 +10,17 @@
     "extraction_source": "authenticated-local-CASC-content-root"
   },
   "schema_commit": "d6f50d4f351193e84226aa62a36faa0f58528afa",
-  "source_revision_before_generation": "ddf9dc73a",
-  "generator_binary_sha256": "f6ad4bb0f9ccda428cb6f411701148dc2f74c451102611ca11bbaa2ffccbb77e",
+  "source_revision_before_generation": "13517c10b89b71c7279cfdc2f6034a472d429e82",
+  "generator_binary_sha256": "bfb8717ec90bc32b75b5f0958cc09efc0530e6b96ba13cb0cfdd4ab68387e808",
   "generator_sources": {
-    "src/bin/wow_cli/csv_util.rs": "536950d26a093b42e73ad502692598bf700fcfe4c565ae9fc5309c63c7e3ffe4",
-    "src/bin/wow_cli/gen_spells.rs": "3508e5faf492bc8bbe1d2251da77e4406b0b96c413c420900b29e3901baba84a",
-    "src/bin/wow_cli/gen_spells_power.rs": "0a262da17aad48997ef03290c1ffa6eb9cc3a0705a641533179c4b7fe1f34553",
-    "src/bin/wow_cli/gen_traits.rs": "5f2a8892b018f2180085790e883b6f19f2804e6360f4d4bb578eff749c19c7b4",
-    "src/bin/wow_cli/gen_traits_load.rs": "a9847500e135982da65a71e0ebd596f9726a9b7ec546cf30f1e7b96f03433db4",
+    "src/bin/wow_cli/csv_util.rs": "3b1cb1f752ca890cfd20b2925610b54e4c5c8fa31b5ae8111bc69e41f6712ae1",
+    "src/bin/wow_cli/gen_spells.rs": "2794a084466f7e81ed4fbb9abe675a1a1e8d683fe86d90a8a6b9310e04611fbe",
+    "src/bin/wow_cli/gen_spells_power.rs": "f8ece2e3ade0231f7583439e51a8ded0a5f2e805eb19d0ecafe08cec5eab7710",
+    "src/bin/wow_cli/gen_traits.rs": "927e92a3899c90213b420f3cf5a25a9f34e3250d5e120b3e5ce086bcc9396232",
+    "src/bin/wow_cli/gen_traits_load.rs": "21ca2e6d5402a1d098840a35b931142dbc47206693b704e886ba3f8aede13df9",
     "src/bin/wow_cli/gen_traits_emit.rs": "23cb75ed5344543c3fcdcd9964f1822c76d0d1db1d2ef773c04d9d055347defb"
   },
-  "format_command": "rustfmt --edition 2024 --config skip_children=true data/traits.rs data/spells.rs data/spell_descriptions.rs data/spell_power.rs",
+  "format_command": "rustfmt --edition 2024 --config skip_children=true crates/sim-data/data/traits.rs crates/sim-data/data/spells.rs crates/sim-data/data/spell_descriptions.rs crates/sim-data/data/spell_power.rs",
   "inputs": [
     {
       "table": "Spell",
@@ -330,7 +330,7 @@
     }
   ],
   "outputs": {
-    "data/traits.rs": {
+    "crates/sim-data/data/traits.rs": {
       "sha256": "d6fb8d026ca0406b1ccc7bd9d49a27a7db5ea5a2cfb590babe6df3a2754facc8",
       "csv_inputs": [
         "TraitCond",
@@ -349,12 +349,12 @@
       ],
       "selection_inputs": [],
       "command": [
-        "wow-cli",
+        "/home/osso/.local/state/wow-ui-sim/handoff/s49-rebase-simdata/slot1-run/wow-cli-fresh",
         "generate",
         "traits"
       ]
     },
-    "data/spells.rs": {
+    "crates/sim-data/data/spells.rs": {
       "sha256": "7aa77413966654822a27d4e24803709d73fcaaf7e2b7670300f846d2330daf7f",
       "csv_inputs": [
         "SpellName",
@@ -364,18 +364,18 @@
         "SpellEffect"
       ],
       "selection_inputs": [
-        "data/traits.rs",
+        "crates/sim-data/data/traits.rs",
         "src/lua_api/globals/spellbook_data.rs",
         "src/bin/wow_cli/gen_spells.rs"
       ],
       "command": [
-        "wow-cli",
+        "/home/osso/.local/state/wow-ui-sim/handoff/s49-rebase-simdata/slot1-run/wow-cli-fresh",
         "generate",
         "spells"
       ]
     },
-    "data/spell_descriptions.rs": {
-      "sha256": "04aeeb5b4b6e2c601275329c60ecdcb643355eff6e87bf3816e940896a380e75",
+    "crates/sim-data/data/spell_descriptions.rs": {
+      "sha256": "2aab9d60e96dd16e6d8ec63b18eac30bde48f74a5b4e91c3b4d55c80e4594163",
       "csv_inputs": [
         "SpellName",
         "Spell",
@@ -384,17 +384,17 @@
         "SpellEffect"
       ],
       "selection_inputs": [
-        "data/traits.rs",
+        "crates/sim-data/data/traits.rs",
         "src/lua_api/globals/spellbook_data.rs",
         "src/bin/wow_cli/gen_spells.rs"
       ],
       "command": [
-        "wow-cli",
+        "/home/osso/.local/state/wow-ui-sim/handoff/s49-rebase-simdata/slot1-run/wow-cli-fresh",
         "generate",
         "spells"
       ]
     },
-    "data/spell_power.rs": {
+    "crates/sim-data/data/spell_power.rs": {
       "sha256": "22190fe0f998795bc63d40380c2aebba5c69aa042b64c7f2798c6b7e7d7a8fe7",
       "csv_inputs": [
         "SpellName",
@@ -404,12 +404,12 @@
         "SpellEffect"
       ],
       "selection_inputs": [
-        "data/traits.rs",
+        "crates/sim-data/data/traits.rs",
         "src/lua_api/globals/spellbook_data.rs",
         "src/bin/wow_cli/gen_spells.rs"
       ],
       "command": [
-        "wow-cli",
+        "/home/osso/.local/state/wow-ui-sim/handoff/s49-rebase-simdata/slot1-run/wow-cli-fresh",
         "generate",
         "spells"
       ]
@@ -419,5 +419,32 @@
     "All generated rows use 70391 CSVs; unchanged generator policy still omits mount/species catalogs, including spell458. S49 GREEN is not established.",
     "Trait CSVs have authenticated content and no unreadable records. SpellName/Spell/SpellMisc/SpellEffect CSV receipts report unreadable records and content_authenticated=false; export hash/build binding is not complete-native-content certification.",
     "CSV-native dangling references are retained, not fabricated or removed. Cross-check distinguishes CSV absence from generator omission."
-  ]
+  ],
+  "generator": {
+    "revision": "13517c10b89b71c7279cfdc2f6034a472d429e82",
+    "sha256": "bfb8717ec90bc32b75b5f0958cc09efc0530e6b96ba13cb0cfdd4ab68387e808",
+    "sources": {
+      "src/bin/wow_cli/csv_util.rs": "3b1cb1f752ca890cfd20b2925610b54e4c5c8fa31b5ae8111bc69e41f6712ae1",
+      "src/bin/wow_cli/gen_atlas.rs": "90dd7cccd65e12bb862c84de0315895898005a29086e18e0943378b3bcd2af93",
+      "src/bin/wow_cli/gen_atlas_tests.rs": "185a6b54dce862225268d6049bfdd08fb3ea975c398f5d9148640cca5d5185a6",
+      "src/bin/wow_cli/gen_currencies.rs": "8e1fa87f3468f59fc71567ff3399fcf1733929c2afa5d2426cf0bb5fb94e7af0",
+      "src/bin/wow_cli/gen_encounter_journal.rs": "38a9c4be39ad43ebc95ef4b1732a8b809c020c15ee15df5abdc5769e55097109",
+      "src/bin/wow_cli/gen_global_strings.rs": "46ae784431de66e3dbfc9a94ba24fa8c31f53d930fc8b52bcd39615325a84dd5",
+      "src/bin/wow_cli/gen_items.rs": "9833fbe2ebd48df6f7ba6a314b2fd6be3836f0fe707655854a3a2f1c1b6305b6",
+      "src/bin/wow_cli/gen_manifest.rs": "c47eb072aca0fcdfc557b3c70558cac305c055bb3779a7fa1ae068abb65102bc",
+      "src/bin/wow_cli/gen_map_art.rs": "35fcb3126b89e66abb1b68979ed90dd7501bb25b95a31793bf7ba2e4d51e52f7",
+      "src/bin/wow_cli/gen_quest_poi.rs": "e7f7055f5afc8beb8d3444a4f9ea3926ead56cd52645e3d4fae1c27a078f0dc4",
+      "src/bin/wow_cli/gen_spells.rs": "2794a084466f7e81ed4fbb9abe675a1a1e8d683fe86d90a8a6b9310e04611fbe",
+      "src/bin/wow_cli/gen_spells_power.rs": "f8ece2e3ade0231f7583439e51a8ded0a5f2e805eb19d0ecafe08cec5eab7710",
+      "src/bin/wow_cli/gen_traits.rs": "927e92a3899c90213b420f3cf5a25a9f34e3250d5e120b3e5ce086bcc9396232",
+      "src/bin/wow_cli/gen_traits_emit.rs": "23cb75ed5344543c3fcdcd9964f1822c76d0d1db1d2ef773c04d9d055347defb",
+      "src/bin/wow_cli/gen_traits_load.rs": "21ca2e6d5402a1d098840a35b931142dbc47206693b704e886ba3f8aede13df9",
+      "src/bin/wow_cli/gen_zones.rs": "3ea82338d99a1f3afb7cbddfd10a885dc3cbcfaf274f565cfa4f61daf6ac120e",
+      "src/bin/wow_cli/global_slot_coverage.rs": "5a822c4d078c50451b9e7f49898ad8770041eabcae3b9f838e17ec6df6094840",
+      "src/bin/wow_cli/main.rs": "137b757a6fb5fe096f624a395c98b5baec5592531ea6f1a18d374457f72a99fa",
+      "src/bin/wow_cli/startup_intern_stats.rs": "c8991f74f4be873f186791dc0bb08d5436af02b086f2cc32f4bfc38f83ea458a"
+    }
+  },
+  "generation_source_revision": "13517c10b89b71c7279cfdc2f6034a472d429e82",
+  "input_provenance_sha256": "85c36b42ceb4bf4724f9d108c61bef0c2c30edeeeaf89ee767b6f537da1bf33b"
 }
