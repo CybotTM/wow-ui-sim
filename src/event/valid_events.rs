@@ -68,6 +68,14 @@ const POLICY: ValidationPolicy = ValidationPolicy {
     },
 };
 pub fn is_registerable_event(name: &str) -> bool {
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Ptr
+    ) && POLICY.retail_12_1_5
+        && name == "INPUT_DEVICE_INTERFACE_TRANSITION"
+    {
+        return true;
+    }
     crate::c_api::forever_startup::accepts_event(name)
         || sim_event::is_registerable_event(name, POLICY)
 }
