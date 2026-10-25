@@ -27,6 +27,11 @@ unknown.
 - Bank purchase/max-tab flags and optional `BankLockedReason` values are supplied
   per documented `BankType`; absence of a lock row returns one nil. Housing
   presence reads the existing spatial `HousingArea`, independently of ownership.
+  Optional per-bank-type `PurchasableBankTabData` rows supply `tabCost`,
+  `canAfford`, `purchasePromptTitle`, `purchasePromptBody` and
+  `purchasePromptConfirmation`; absent rows return one nil. The original
+  Camelot first-slot consumer is covered for absent and paid offers. Free-offer
+  purchase actions and native pricing/affordability policy are not modeled.
 - Discord enablement reads the existing `discordClientEnabled` CVar. Ping
   availability and `RestrictPingsTo` are explicit Forever host inputs; Retail's
   feature-gated restriction model is unchanged. TTS bool settings are supplied as

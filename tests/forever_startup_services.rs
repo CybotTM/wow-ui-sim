@@ -1,6 +1,7 @@
 #![cfg(feature = "client-wowforever")]
 
 use wow_ui_sim::c_api::c_housing::HousingArea;
+use wow_ui_sim::c_api::forever_startup::PurchasableBankTab;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn load_startup(env: &WowLuaEnv) {
@@ -320,6 +321,52 @@ fn forever_original_ping_menu_projects_party_restriction() {
             .unwrap();
         assert_eq!(selected, i32::from(restriction));
     }
+}
+
+#[test]
+fn forever_original_bank_first_slot_reads_optional_offer() {
+    let env = startup();
+    env.exec(
+        r#"
+        BankFrame:PurchaseFirstSlot()
+        assert(C_Bank.FetchNextPurchasableBankTabData(Enum.BankType.Character) == nil)
+        assert(select('#', C_Bank.FetchNextPurchasableBankTabData(Enum.BankType.Character)) == 1)
+        "#,
+    )
+    .unwrap();
+    let bank_type = env.eval::<i32>("return Enum.BankType.Character").unwrap();
+    env.state()
+        .borrow_mut()
+        .forever_startup
+        .next_bank_tabs
+        .insert(
+            bank_type,
+            PurchasableBankTab {
+                tab_cost: 4200,
+                can_afford: false,
+                purchase_prompt_title: "Bank tab offer".to_owned(),
+                purchase_prompt_body: "A supplied paid tab".to_owned(),
+                purchase_prompt_confirmation: "Confirm tab offer".to_owned(),
+            },
+        );
+    env.exec(
+        r#"
+        BankFrame:PurchaseFirstSlot()
+        local data = C_Bank.FetchNextPurchasableBankTabData(Enum.BankType.Character)
+        assert(data.tabCost == 4200 and data.canAfford == false)
+        assert(data.purchasePromptTitle == "Bank tab offer")
+        assert(data.purchasePromptBody == "A supplied paid tab")
+        assert(data.purchasePromptConfirmation == "Confirm tab offer")
+        assert(C_Bank.FetchNextPurchasableBankTabData(Enum.BankType.Account) == nil)
+        "#,
+    )
+    .unwrap();
+    env.state()
+        .borrow_mut()
+        .forever_startup
+        .next_bank_tabs
+        .clear();
+    env.exec("BankFrame:PurchaseFirstSlot(); assert(C_Bank.FetchNextPurchasableBankTabData(Enum.BankType.Character) == nil)").unwrap();
 }
 
 #[test]

@@ -23,6 +23,7 @@ pub struct StartupInputs {
     pub purchasable_bank_types: HashSet<i32>,
     pub bank_locked_reasons: HashMap<i32, i32>,
     pub max_bank_tab_types: HashSet<i32>,
+    pub next_bank_tabs: HashMap<i32, PurchasableBankTab>,
     pub enabled_tts_settings: HashSet<i32>,
     pub match_complete: bool,
     pub target_spell_id: Option<i32>,
@@ -284,6 +285,16 @@ fn ammo_needed(state: &mut LuaState) -> LuaResult<u32> {
     let required = borrow_state(state)?.forever_startup.ammo_required;
     state.push(Val::Bool(required));
     Ok(1)
+}
+
+/// Supplied 70532 PurchasableBankTabData; no price or affordability policy is inferred.
+#[derive(Debug, Clone)]
+pub struct PurchasableBankTab {
+    pub tab_cost: u64,
+    pub can_afford: bool,
+    pub purchase_prompt_title: String,
+    pub purchase_prompt_body: String,
+    pub purchase_prompt_confirmation: String,
 }
 
 #[derive(Debug)]
