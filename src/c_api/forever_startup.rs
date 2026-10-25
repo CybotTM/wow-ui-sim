@@ -5,9 +5,9 @@ use std::collections::{HashMap, HashSet};
 use crate::c_api::helpers::ensure_namespace;
 use crate::client_profile::{ACTIVE, ClientProfile};
 use crate::lua_api::methods::{borrow_state, create_table_with_fields, table_set_num};
-use crate::lua_bridge::table_set_rust_fn_static;
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
-use rilua::{LuaResult, Val};
+use rilua::{LuaApiMut, LuaResult, Val};
 
 /// Explicit inputs for 70532 consumers whose native policy is not established.
 /// Empty collections mean the host supplied no entries; false flags describe
@@ -33,7 +33,49 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let paper_doll = ensure_namespace(state, "C_PaperDollInfo")?;
     table_set_rust_fn_static(state, paper_doll, "AmmoNeeded", ammo_needed)?;
     register_group_buffs(state)?;
-    register_external_event(state)
+    register_external_event(state)?;
+    register_character_queries(state)
+}
+
+fn register_character_queries(state: &mut LuaState) -> LuaResult<()> {
+    LuaApiMut::register_function(state, "IsCursorVisible", cursor_visible)?;
+    let bank = ensure_namespace(state, "C_Bank")?;
+    table_set_rust_fn_static(state, bank, "CanPurchaseBankTab", can_purchase_bank_tab)?;
+    let pvp = ensure_namespace(state, "C_PvP")?;
+    table_set_rust_fn_static(state, pvp, "IsMatchComplete", match_complete)?;
+    let spell = ensure_namespace(state, "C_Spell")?;
+    table_set_rust_fn_static(state, spell, "GetTargetSpellID", target_spell_id)
+}
+
+fn cursor_visible(state: &mut LuaState) -> LuaResult<u32> {
+    let visible = borrow_state(state)?.forever_startup.cursor_visible;
+    state.push(Val::Bool(visible));
+    Ok(1)
+}
+
+fn can_purchase_bank_tab(state: &mut LuaState) -> LuaResult<u32> {
+    let bank_type = i32::from_stack(state, 1)?;
+    let allowed = borrow_state(state)?
+        .forever_startup
+        .purchasable_bank_types
+        .contains(&bank_type);
+    state.push(Val::Bool(allowed));
+    Ok(1)
+}
+
+fn match_complete(state: &mut LuaState) -> LuaResult<u32> {
+    let complete = borrow_state(state)?.forever_startup.match_complete;
+    state.push(Val::Bool(complete));
+    Ok(1)
+}
+
+fn target_spell_id(state: &mut LuaState) -> LuaResult<u32> {
+    let id = borrow_state(state)?.forever_startup.target_spell_id;
+    let id = id.ok_or_else(|| rilua::runtime_error(
+        "native-unknown: C_Spell.GetTargetSpellID has no supplied target or documented no-target value"
+    ))?;
+    state.push(Val::Num(f64::from(id)));
+    Ok(1)
 }
 
 fn register_external_event(state: &mut LuaState) -> LuaResult<()> {
