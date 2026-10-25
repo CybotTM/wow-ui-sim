@@ -92,8 +92,9 @@ libraries, binaries and tests. Ownership comes from `manifest_path` or target
 `src_path` under the worktree, fixed source mount or utility mount. Registry and
 Git package sources (`registry+`/`git+`) are external and excluded. Records without
 ownership paths cannot prove they are external and are checked.
-The worker snapshots Cargo
-`.d` dep-info before the child starts and reads it again after the child exits.
+
+The worker snapshots Cargo `.d` dep-info before the child starts and reads it
+again after the child exits.
 It uses each record's `filenames` and `executable` paths to find rustc's
 `deps/<name>-<metadata-hash>.d`, including hard-linked hashed executables when Cargo
 reports only the uplifted binary. Each snapshot retains its own hard-link mapping;
@@ -126,9 +127,10 @@ executable, its SHA256 must also differ from the previous hash at the same path.
 Otherwise the run fails with `stale artifacts`. Libraries do not require changed
 hashes. A changed library, `.rmeta`, or another executable cannot certify an
 executable whose own inputs changed. Unreported artifacts and records with
-disjoint inputs are not judged for freshness. A test-only edit therefore does not reject an unaffected fresh bin,
-even within the same package. Targets affected only by mtime refresh require
-`fresh=false` and a current hash, but identical rebuilt bytes are accepted.
+disjoint inputs are not judged for freshness. A test-only edit therefore does not
+reject an unaffected fresh bin, even within the same package. Records affected
+only by mtime refresh require `fresh=false`; executables also require a current
+hash, but identical rebuilt bytes are accepted.
 The existing conservative root derivation and source mtime refresh are unchanged.
 
 When no compiler-artifact record is visible (for example, a wrapper captures Cargo

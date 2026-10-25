@@ -348,7 +348,7 @@ def hash_artifacts(slot, paths):
 
 def collect_artifacts(slot, started_ns, previous, records):
     # Retain discovery/hash evidence for capturing wrappers. Only current Cargo
-    # records select executables for the freshness decision.
+    # records select artifacts for the freshness decision.
 
     paths = {slot / name for name in (previous or {}).get("artifacts", {})}
     for directory, children, files in os.walk(slot):
