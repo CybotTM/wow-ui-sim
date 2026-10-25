@@ -13,6 +13,42 @@
 ## [2026-10-24] static stage | PTR input interface style
 
 [Selected consumer and contradiction table](investigations/ptr-input-interface-style.md) link the [contract](../specs/ptr-input-interface-style.md): authenticated PTR70493 docs, original SharedXML runtime-selection selector and existing state model. Separate test-first and GREEN source phases expose the existing model to PTR through ACTIVE; no build, slot or runtime RED/GREEN.
+## [2026-10-25] fix | Byte-preserving Lua source/cache boundary
+
+Updated [CASC cache](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) and [contract](../specs/casc-loading.md#blizzard-ui-source-bytes): Lua cache reads/content markers are byte-based; XML/TOC/XSD remain strict UTF-8. Production TOC/addon loading was already raw-byte safe. Exact fixture tests cover sync and runtime boundaries.
+
+## [2026-10-25] source | Forever wowf product selection
+
+[Selected-target checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records wowf 1.60.1.70532 / build2582289d81e380163c7a13472df4cb81, repaired live desktop indexes, idle Syncthing and authenticated local root/encoding. Selector/regression now expect wowf. Builds, offline sync, baseline and startup await a released slot after club-unread-integrate and S49; static work is not runtime acceptance.
+## [2026-10-25] staged | Forever verified non-resident Gethe sources
+
+[Cache rule](systems/casc-asset-cache.md#forever-mapped-non-resident-sources) and [contract](../specs/casc-loading.md#forever-mapped-non-resident-ui-sources) record immutable same-build Gethe blobs only for mapped EKeys absent from local indexes, raw CKey/MD5 validation and per-file provenance. Resident CASC and unmapped failures remain separate. Static tests/code committed separately; execution and stock startup remain pending.
+## [2026-10-25] investigation | S49 rejected refresh repair
+
+[Companion spell backing](investigations/wrath-companion-cooldown.md#s49-reject-repair-static-2026-10-25): portable receipt paths and seeded-mount selector regression staged; generated catalogs and runtime proof still await a slot.
+
+## [2026-10-24] investigation | Companion S1/S2 and accepted req-13
+
+[Cooldown notes](investigations/wrath-companion-cooldown.md) replace guessed
+arbitration with req-13 ordered-history signed endpoint/tie and sticky-enable
+rules. Shared source-category flags, absent-player zero returns and supplied
+critter spell joins now have original-consumer selectors. Static contradiction
+table only; edit-only work, no runtime proof. Rune applicability remains UNKNOWN.
+
+## [2026-10-24] investigation | Companion pre-review repair
+
+[Cooldown notes](investigations/wrath-companion-cooldown.md) now bind each cooldown
+selector to original PetPaperDollFrame widget observations. Matching supplied
+start-recovery categories gate GCD; on-hold state controls numeric enable.
+Static-only contradiction table and Q5 UNKNOWN ledger retained. Runtime remains
+blocked until wrath-relic-slot merges; unchanged error assertions still apply.
+## [2026-10-24] static stage | CF-2 PvP completion
+
+Updated [consumer evidence](investigations/consumer-selection-and-red-proof.md#cf-2-supplied-pvp-match-completion) and [contract](../specs/pvp-match-completion.md) with the Retail/PTR supplied-state producer, unchanged original-consumer selector, paired producer-only subtraction and standalone constant/no-op contradictions. Existing HasMatchStarted and Forever remain unchanged. No build, runtime test, slot, push or native-parity claim.
+## [2026-10-25] build | Debug metadata and persistent-slot incremental reuse
+
+Dev/test profiles use `debug = 0` (cherry-pick `7a49b872c`); source-line backtraces are unavailable. The sim-data optimization level is unchanged. [Slot builds](../remote-builds.md#local-slot-builds) enable incremental compilation only through the fixed per-slot BindPaths source path. Python RED/GREEN evidence is recorded in `/home/osso/.local/state/wow-ui-sim/handoff/ct-incr-debug0/REPORT.md`; no Rust build was run.
+
 ## [2026-10-25] maintenance | Utility command admission and lock rebase
 
 [Findings](investigations/compile-bin-lockwatch.md) record rebase to `b2ca0becd`, current command feature admission, preserved historical evidence, and two offline metadata runs: 781 unchanged package records and stable lock bytes. Master already normalized the lock; no compile or CPU proof.
@@ -43,6 +79,10 @@
 ## [2026-10-24] investigation | Wrath guild-info staging
 
 [Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md): existing cache/rank-right reuse, Wrath-only empty/no-guild initialization, two original OnShow branch selectors, static contradiction/selection proof and batch3 seed prerequisites. Edit-only; RED/GREEN, stock and Retail36/42 preservation remain deferred.
+
+## [2026-10-24] source | Forever 70532 static refresh
+
+[New target](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) follows the user's installed-build decision: Gethe ca8368f, manifest +55/-3 and limited listfile +55/-1. All 4,486 source blobs match Git and all paths map. Build identity selects 70532; no build, runtime sync, baseline recapture or warning-free proof yet. Prior 70374 evidence remains historical.
 
 ## [2026-10-24] proof | Bounded reload XML source reuse
 
@@ -2744,6 +2784,12 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
 
+## [2026-10-24] investigation | Wrath companion cooldown and creature-ID source
+
+[Source review](investigations/wrath-companion-cooldown.md) records accepted laptop request11 Q2/Q5, existing cooldown-state reuse, absent generated effect-misc data, and retained UnitHasRelicSlot/cursorOffset blockers. Tests and producer staged separately; no build, test, slot use or runtime-success claim.
+## 2026-10-24 | CF-2 SuperTrack edit-only staging
+
+Added supplied-state system/contract and selected original-consumer tests. Retired overlapping target defaults; priority remains explicitly unsupported. Runtime RED/GREEN, mutants and profile preservation remain slot obligations.
 ## 2026-10-24 — CF-2 pet-battle name staging
 
 Added [pet name projection](systems/pet-battle-names.md) and [contract](../specs/pet-battle-names.md), traced four profile TOCs through original XML/event/name consumers. No build/runtime proof claimed; parent owns frozen RED/GREEN and stock accounting.
@@ -2768,6 +2814,10 @@ Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-re
 ## [2026-10-24] source | Patch 12.1.7 I4a inherited accounting
 
 Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance), [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist) and index for immutable companion accounting, explicit per-profile UNKNOWN source/selection/proof boundaries and grouped I4b selectors. I0 artifacts unchanged; no builds, cache observations or native/runtime acceptance.
+
+## [2026-10-24] investigation | S49 same-build refresh and CSV truncation
+
+[Refresh boundary](investigations/wrath-companion-cooldown.md#same-build-spelltrait-refresh-and-csv-boundary) records 70391-only trait/spell receipts, 426 CSV-native dangling occurrences and zero generator-introduced references. Provisional descriptions expose physical-line CRLF truncation. Logical-record reader/loader fixes and concrete tests are staged, not executed; corrected regeneration and runtime GREEN await a released slot.
 
 ## 2026-10-24 — Patch 12.1.7 I4b static staging
 

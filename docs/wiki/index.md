@@ -13,6 +13,33 @@
 ## [2026-10-24] static stage | PTR input interface style
 
 [Selected consumer and contradiction table](investigations/ptr-input-interface-style.md) link the [contract](../specs/ptr-input-interface-style.md): authenticated PTR70493 docs, original SharedXML runtime-selection selector and existing state model. Separate test-first and GREEN source phases expose the existing model to PTR through ACTIVE; no build, slot or runtime RED/GREEN.
+## [2026-10-25] fix | Byte-preserving Lua cache usability
+
+[Source-byte validation](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) separates byte-oriented Lua from UTF-8 XML/TOC/XSD. Runtime TOC loading already passes raw bytes to rilua. Regression fixtures preserve a literal `0x92` through cache checks and loaded strings.
+
+## [2026-10-25] source | Forever wowf product selection
+
+[Selected-target checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records wowf 1.60.1.70532 / build2582289d81e380163c7a13472df4cb81, repaired live desktop indexes, idle Syncthing and authenticated local root/encoding. Selector/regression now expect wowf. Builds, offline sync, baseline and startup await a released slot after club-unread-integrate and S49; static work is not runtime acceptance.
+## [2026-10-25] staged | Forever verified non-resident Gethe sources
+
+[Cache rule](systems/casc-asset-cache.md#forever-mapped-non-resident-sources) and [contract](../specs/casc-loading.md#forever-mapped-non-resident-ui-sources) record immutable same-build Gethe blobs only for mapped EKeys absent from local indexes, raw CKey/MD5 validation and per-file provenance. Resident CASC and unmapped failures remain separate. Static tests/code committed separately; execution and stock startup remain pending.
+## [2026-10-25] investigation | S49 rejected refresh repair
+
+[Companion spell backing](investigations/wrath-companion-cooldown.md#s49-reject-repair-static-2026-10-25): portable receipt paths and seeded-mount selector regression staged; generated catalogs and runtime proof still await a slot.
+
+## [2026-10-24] investigation | S49 70391 refresh and logical CSV records
+
+[Refresh boundary](investigations/wrath-companion-cooldown.md#same-build-spelltrait-refresh-and-csv-boundary) links the per-file receipt, CSV-native dangling references and the physical-line CRLF truncation. Root fix and concrete tests staged; fresh generator, corrected regeneration and S49 runtime GREEN remain slot-gated.
+
+## [2026-10-24] investigation | Companion cooldown req-13 arbitration
+
+[Cooldown investigation](investigations/wrath-companion-cooldown.md) records
+ordered own/category/GCD endpoint arbitration, accepted-held sticky enable,
+shared flag2, absent player and supplied critter paths. Nine original-consumer
+selectors staged; static contradictions are not executed RED/GREEN proof.
+## [2026-10-24] static stage | CF-2 PvP completion
+
+[State projection and original consumer](investigations/consumer-selection-and-red-proof.md#cf-2-supplied-pvp-match-completion) link the [contract](../specs/pvp-match-completion.md): Retail/PTR read the existing completion snapshot; Forever is excluded. Paired RED removes only the producer with identical tests. Static constant/no-op contradictions are documented; runtime selection, RED/GREEN and current private PTR cache proof remain pending.
 Historical utility-command replay requires `--features tools`; see the [replay note](../../README.md#utility-binary-builds) for the three preserved evidence examples.
 
 ## [2026-10-25] investigation | Compile binary selection
@@ -44,6 +71,10 @@ Historical utility-command replay requires `--features tools`; see the [replay n
 ## [2026-10-24] source | Combat-log filter record staging
 
 [Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
+
+## [2026-10-24] source | Forever 70532 acceptance epoch
+
+[Selected-build checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records installed beta identity, exact Gethe revision, 4,486 source paths and refreshed mappings. [Profile contract](../specs/client-profiles.md) retains temporary date fields and pending execution; historical 70374 receipts are not 70532 proof. Runtime sync/baseline and all-target warning gates await slot and resolver integration.
 
 ## [2026-10-24] system | CF-2 supplied club self invitations
 
@@ -4128,6 +4159,9 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
 
+## Wrath companion cooldown source review
+
+- [[wrath-companion-cooldown]] — staged companion cooldown adapter, standalone rejection contracts, creature effect-misc data gap and retained consumer blockers; edit-only, no runtime proof.
 ## [2026-10-24] source | CF-2 pet-battle names staging
 
 [State projection and selected consumers](systems/pet-battle-names.md) links the [contract](../specs/pet-battle-names.md). Original-consumer tests precede producer; runtime RED/GREEN, mutants and exact stock diff remain pending under edit-only staging.

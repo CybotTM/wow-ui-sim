@@ -1,5 +1,6 @@
 //! Wrath-only modeled legacy adapters; source-grounded positions, explicit inputs.
 mod action_bar;
+mod companions;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
@@ -85,44 +86,6 @@ fn get_battlefield_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(row.max_group as f64));
     Ok(3)
 }
-fn count_owned_critters(sim: &crate::lua_api::state::SimState) -> usize {
-    let owned_species: std::collections::HashSet<i32> = sim
-        .world
-        .pets
-        .iter()
-        .filter(|pet| pet.is_collected)
-        .map(|pet| pet.species_id as i32)
-        .collect();
-    sim.wrath_legacy
-        .eligible_critters
-        .intersection(&owned_species)
-        .count()
-}
-fn count_owned_mounts(sim: &crate::lua_api::state::SimState) -> usize {
-    sim.world
-        .mounts
-        .iter()
-        .filter(|mount| mount.is_collected)
-        .filter(|mount| {
-            sim.wrath_legacy
-                .eligible_mounts
-                .contains(&(mount.mount_id as i32))
-        })
-        .count()
-}
-fn get_num_companions(state: &mut LuaState) -> LuaResult<u32> {
-    let kind = String::from_stack(state, 1)?;
-    let count = {
-        let sim = borrow_state(state)?;
-        match kind.as_str() {
-            "CRITTER" => count_owned_critters(&sim),
-            "MOUNT" => count_owned_mounts(&sim),
-            _ => return Err(runtime_error("GetNumCompanions expects CRITTER or MOUNT")),
-        }
-    };
-    state.push(Val::Num(count as f64));
-    Ok(1)
-}
 fn set_who_to_ui(state: &mut LuaState) -> LuaResult<u32> {
     let flag = i32::from_stack(state, 1)?;
     let enabled = match flag {
@@ -151,7 +114,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         request_battleground_info,
     )?;
     LuaApiMut::register_function(lua, "GetBattlefieldInfo", get_battlefield_info)?;
-    LuaApiMut::register_function(lua, "GetNumCompanions", get_num_companions)?;
+    companions::register(lua)?;
     LuaApiMut::register_function(lua, "SetWhoToUI", set_who_to_ui)?;
     LuaApiMut::register_function(lua, "SendWho", crate::c_api::who_routing::send_who)?;
     Ok(())
