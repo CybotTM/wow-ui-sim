@@ -1,6 +1,8 @@
 //! XML handlers must observe globals when invoked, not when installed.
 #[cfg(any(feature = "client-retail", feature = "client-wrath"))]
-use original_scripts::{original_on_click, original_script};
+use original_scripts::original_on_click;
+#[cfg(feature = "client-retail")]
+use original_scripts::original_script;
 use wow_ui_sim::loader::{LoadTiming, create_frame_from_xml};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::xml::{XmlElement, parse_xml};
