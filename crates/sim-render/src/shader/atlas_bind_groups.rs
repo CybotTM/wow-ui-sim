@@ -1,6 +1,6 @@
 use super::atlas::NUM_TIERS;
 
-pub(super) fn create_texture_sampler(device: &wgpu::Device) -> wgpu::Sampler {
+pub fn create_texture_sampler(device: &wgpu::Device) -> wgpu::Sampler {
     device.create_sampler(&wgpu::SamplerDescriptor {
         label: Some("WoW UI Texture Sampler"),
         address_mode_u: wgpu::AddressMode::ClampToEdge,
@@ -26,10 +26,7 @@ fn create_glyph_sampler(device: &wgpu::Device) -> wgpu::Sampler {
     })
 }
 
-pub(super) fn create_glyph_atlas(
-    device: &wgpu::Device,
-    size: u32,
-) -> (wgpu::Texture, wgpu::TextureView) {
+pub fn create_glyph_atlas(device: &wgpu::Device, size: u32) -> (wgpu::Texture, wgpu::TextureView) {
     let texture = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("Glyph Atlas"),
         size: wgpu::Extent3d {
@@ -149,7 +146,7 @@ fn create_atlas_bind_group_entries<'a>(
     ]
 }
 
-pub(super) fn create_atlas_bind_groups(
+pub fn create_atlas_bind_groups(
     device: &wgpu::Device,
     tier_views: [&wgpu::TextureView; NUM_TIERS],
     glyph_view: &wgpu::TextureView,

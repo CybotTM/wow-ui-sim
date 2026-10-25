@@ -9,9 +9,10 @@ build = "build.rs"
 autotests = false
 
 [workspace]
-members = ["crates/sim-texture", "crates/sim-widget", ".", "xtask", "crates/test-harness", "crates/sim-data", "crates/sim-data-profile", "crates/sim-lua-bridge", "crates/sim-event", "crates/sim-toc", "crates/sim-xml"]
+members = ["crates/sim-render", "crates/sim-texture", "crates/sim-widget", ".", "xtask", "crates/test-harness", "crates/sim-data", "crates/sim-data-profile", "crates/sim-lua-bridge", "crates/sim-event", "crates/sim-toc", "crates/sim-xml"]
 
 [dependencies]
+sim-render = { path = "crates/sim-render" }
 sim-texture = { path = "crates/sim-texture" }
 sim-widget = { path = "crates/sim-widget" }
 sim-xml = { path = "crates/sim-xml" }
@@ -119,7 +120,7 @@ ellesmere-acceptance = ["client-wowforever"]
 # to produce a fully static binary not tied to a specific rustc version.
 default = ["sound", "gui", "casc", "client-retail"]
 sound = ["rodio", "casc"]
-gui = ["casc", "dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp", "dep:winapi"]
+gui = ["sim-render/gui", "casc", "dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp", "dep:winapi"]
 casc = ["dep:asset-resolver", "dep:cascette-client-storage", "dep:cascette-crypto", "dep:cascette-formats", "dep:casc-extract"]
 fast-build = ["gui", "dep:iced-dynamic"]
 rehash-stats = ["rilua/rehash-stats"]

@@ -36,6 +36,13 @@ COPY xtask/ xtask/
 COPY crates/test-harness/ crates/test-harness/
 COPY crates/sim-data/ crates/sim-data/
 COPY crates/sim-data-profile/ crates/sim-data-profile/
+COPY crates/sim-lua-bridge/ crates/sim-lua-bridge/
+COPY crates/sim-event/ crates/sim-event/
+COPY crates/sim-toc/ crates/sim-toc/
+COPY crates/sim-xml/ crates/sim-xml/
+COPY crates/sim-widget/ crates/sim-widget/
+COPY crates/sim-texture/ crates/sim-texture/
+COPY crates/sim-render/ crates/sim-render/
 
 # Cargo validates explicitly declared targets before fetching dependencies.
 # Derive empty sources from the manifest so adding targets cannot stale a list.

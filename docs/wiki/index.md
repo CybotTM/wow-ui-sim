@@ -1,3 +1,7 @@
+## [2026-10-25] design | Core crate boundaries
+
+[Widget, decoding and GPU boundaries](design/core-crate-boundaries.md) record profile-neutral leaves, root re-exports and retained font/asset composition. Static staging only; seven-profile and compile-CPU proof await a slot.
+
 ## [2026-10-24] design | Generated data crate boundary
 
 [Crate split](design/generated-data-crates.md) preserves the root facade and selected tables while isolating common catalogs from profile features. Same-slot touched-root rebuild 413.80→258.52 s; peak child RSS6,189,056→2,717,272 KiB. Retail/Wrath checks and94 bounded Rust tests pass; all23 generated files retain their hashes. Single warm-dependency samples, not a cold-build or full-profile claim.

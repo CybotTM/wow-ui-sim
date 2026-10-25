@@ -21,8 +21,7 @@ pub fn is_bc_supported() -> bool {
 }
 
 /// Override BC support flag for tests.
-#[cfg(test)]
-pub(crate) fn set_bc_supported_for_tests(supported: bool) -> bool {
+pub fn set_bc_supported_for_tests(supported: bool) -> bool {
     BC_SUPPORTED.swap(supported, std::sync::atomic::Ordering::Relaxed)
 }
 
@@ -36,14 +35,14 @@ pub enum BcFormat {
 }
 
 impl BcFormat {
-    pub(super) fn bytes_per_block(self) -> u32 {
+    pub fn bytes_per_block(self) -> u32 {
         match self {
             BcFormat::Bc1 => 8,
             BcFormat::Bc3 => 16,
         }
     }
 
-    pub(super) fn wgpu_format(self) -> wgpu::TextureFormat {
+    pub fn wgpu_format(self) -> wgpu::TextureFormat {
         match self {
             BcFormat::Bc1 => wgpu::TextureFormat::Bc1RgbaUnormSrgb,
             BcFormat::Bc3 => wgpu::TextureFormat::Bc3RgbaUnormSrgb,
@@ -58,11 +57,11 @@ impl BcFormat {
     }
 }
 
-impl From<crate::texture::BcTextureFormat> for BcFormat {
-    fn from(value: crate::texture::BcTextureFormat) -> Self {
+impl From<crate::texture_data::BcTextureFormat> for BcFormat {
+    fn from(value: crate::texture_data::BcTextureFormat) -> Self {
         match value {
-            crate::texture::BcTextureFormat::Bc1 => Self::Bc1,
-            crate::texture::BcTextureFormat::Bc3 => Self::Bc3,
+            crate::texture_data::BcTextureFormat::Bc1 => Self::Bc1,
+            crate::texture_data::BcTextureFormat::Bc3 => Self::Bc3,
         }
     }
 }
@@ -102,9 +101,9 @@ impl BcTextureEntry {
 }
 
 /// A single BC-format atlas (BC1 or BC3).
-pub(super) struct BcAtlasTier {
-    pub(super) texture: wgpu::Texture,
-    pub(super) view: wgpu::TextureView,
+pub struct BcAtlasTier {
+    pub texture: wgpu::Texture,
+    pub view: wgpu::TextureView,
     grid_size: u32,
     next_slot: u32,
 }
@@ -173,15 +172,15 @@ impl BcAtlasTier {
         }
     }
 
-    pub(super) fn reset(&mut self) {
+    pub fn reset(&mut self) {
         self.next_slot = 0;
     }
 
-    pub(super) fn is_full(&self) -> bool {
+    pub fn is_full(&self) -> bool {
         self.next_slot >= self.grid_size * self.grid_size
     }
 
-    pub(super) fn allocate_slot(&mut self) -> Option<(u32, u32)> {
+    pub fn allocate_slot(&mut self) -> Option<(u32, u32)> {
         if self.is_full() {
             return None;
         }
@@ -194,14 +193,14 @@ impl BcAtlasTier {
         (grid_x * BC_CELL_SIZE, grid_y * BC_CELL_SIZE)
     }
 
-    pub(super) fn uv_offset(&self, grid_x: u32, grid_y: u32) -> (f32, f32) {
+    pub fn uv_offset(&self, grid_x: u32, grid_y: u32) -> (f32, f32) {
         let cell_uv = BC_CELL_SIZE as f32 / BC_ATLAS_SIZE as f32;
         (grid_x as f32 * cell_uv, grid_y as f32 * cell_uv)
     }
 }
 
 /// Detect BC texture compression support and create BC1/BC3 atlas tiers.
-pub(super) fn init_bc_atlases(device: &wgpu::Device) -> (BcAtlasTier, BcAtlasTier, bool) {
+pub fn init_bc_atlases(device: &wgpu::Device) -> (BcAtlasTier, BcAtlasTier, bool) {
     let has_bc_support = device
         .features()
         .contains(wgpu::Features::TEXTURE_COMPRESSION_BC);
@@ -232,7 +231,7 @@ pub(super) fn init_bc_atlases(device: &wgpu::Device) -> (BcAtlasTier, BcAtlasTie
 }
 
 /// Write BC-compressed data into an allocated atlas slot.
-pub(super) fn write_bc_slot(
+pub fn write_bc_slot(
     queue: &wgpu::Queue,
     atlas: &BcAtlasTier,
     grid_x: u32,
@@ -273,7 +272,7 @@ pub(super) fn write_bc_slot(
 }
 
 /// Build a BcTextureEntry from an allocated slot's grid coordinates.
-pub(super) fn build_bc_entry(
+pub fn build_bc_entry(
     atlas: &BcAtlasTier,
     format: BcFormat,
     grid_x: u32,

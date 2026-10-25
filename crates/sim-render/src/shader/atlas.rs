@@ -20,8 +20,7 @@ use super::atlas_bind_groups::{
 
 pub use super::atlas_bc::{BC_CELL_SIZE, BcFormat, BcTextureEntry, is_bc_supported};
 
-#[cfg(test)]
-pub(crate) use super::atlas_bc::set_bc_supported_for_tests;
+pub use super::atlas_bc::set_bc_supported_for_tests;
 
 /// Cell sizes for each tier.
 pub const TIER_SIZES: [u32; 5] = [64, 128, 256, 512, 2048];

@@ -5506,6 +5506,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "sim-render"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "iced",
+ "pollster",
+ "sim-texture",
+ "sim-widget",
+ "wgpu",
+]
+
+[[package]]
 name = "sim-texture"
 version = "0.1.0"
 dependencies = [
@@ -7802,6 +7814,7 @@ dependencies = [
  "sim-data-profile",
  "sim-event",
  "sim-lua-bridge",
+ "sim-render",
  "sim-texture",
  "sim-toc",
  "sim-widget",
