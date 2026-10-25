@@ -634,6 +634,8 @@ class SourceFreshnessTests(unittest.TestCase):
                 [sys.executable, "-B", str(self.module.__file__), "--execute", str(request)],
                 capture_output=True))
             receipts.append(json.loads(receipt.read_text()))
+            verified = json.loads((self.slot / ".verified-source-identity.json").read_text())
+            self.assertEqual(verified, receipts[0])
         self.assertEqual(results[0].returncode, 0, results[0].stderr)
         self.assertEqual(results[1].returncode, 7, results[1].stderr)
         self.assertEqual(receipts[0]["artifacts"], receipts[2]["artifacts"])
@@ -930,7 +932,8 @@ class SourceFreshnessTests(unittest.TestCase):
     def test_worker_preserves_binary_streams_and_launcher_arguments(self):
         import sys
         (self.slot / ".owner").write_text("test-owner")
-        self.module.write_json(self.slot / ".source-identity.json", self.prepare())
+        verified = dict(self.prepare(), result="success", artifacts={})
+        self.module.write_json(self.slot / ".verified-source-identity.json", verified)
         request = self.slot / "request.json"
         request.write_text(json.dumps({
             "slot": str(self.slot), "worktree": str(self.tree), "owner": "test-owner",
