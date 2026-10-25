@@ -29,6 +29,12 @@ fn load_original_world_handler() -> WowLuaEnv {
     eprintln!("CF2 housing plot selected TOC: {}", toc_path.display());
     let env = new_blizzard_addon_env(&ui);
     crate::common::panel_fixtures::load_panel_addons(&env);
+    crate::common::load_blizzard_addon_bootstrap(
+        &env,
+        &ui,
+        "Blizzard_BoostTutorial",
+        "Blizzard_BoostTutorial_Bootstrap.lua",
+    );
     let loaded = load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_Game"], &[]);
     assert!(loaded.iter().any(|name| name == "Blizzard_Game"));
     let controls_path =
