@@ -4,10 +4,10 @@
 
 ## What it must do
 
-- [ ] On PTR, return exactly one non-nil boolean with no arguments, matching authenticated 12.1.7.70493 `ActionBarFrameDocumentation.lua:1022–1028`.
-- [ ] Project `SimState.action_bar_state.keyring_ui_enabled`, including changes false → true → false. The empty host sets false; this is simulator policy, not an observed native constant/default.
-- [ ] Gate the addition with `client_profile::ACTIVE`; do not expand Retail publication or create a `C_Container` alias.
-- [ ] Let original `ContainerFrame.lua:10` continue past its keyring query, so it can publish `CloseAllBags` for the original world-event consumer.
+- [x] On PTR, return exactly one non-nil boolean with no arguments, matching authenticated 12.1.7.70493 `ActionBarFrameDocumentation.lua:1022–1028`.
+- [x] Project `SimState.action_bar_state.keyring_ui_enabled`, including changes false → true → false. The empty host sets false; this is simulator policy, not an observed native constant/default.
+- [x] Gate the addition with `client_profile::ACTIVE`; do not expand Retail publication or create a `C_Container` alias.
+- [x] Let original `ContainerFrame.lua:10` continue past its keyring query. Later publication of `CloseAllBags` also depends on the separate input-interface-style API.
 
 ## How it works
 
@@ -25,7 +25,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] New PTR GREEN and original eight-state rerun pending.
+- [ ] PTR original eight-state rerun waits for the separate `ptr-input-interface-style` merge: `ContainerFrame.lua:14` now reaches missing `C_InputInterfaceStyle` through original `InputUtil.lua:12`. This dependency is not a defect of the keyring query.
 
 ## Out of scope
 

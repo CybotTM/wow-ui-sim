@@ -1,6 +1,6 @@
 # Housing spatial presence
 
-The existing `HousingArea` enum has `HouseInterior` and `PlotExterior`. `HousingState.current_housing_area` is optional supplied world state, independent of `inside_owned_house` / `inside_owned_plot`. The existing `IsInsideHouse` getter matches only the interior. This lane stages the broader query without adding another plot flag. See the [house-or-plot contract](../../specs/house-or-plot-presence.md) and [interior contract](../../specs/house-interior-presence.md).
+The existing `HousingArea` enum has `HouseInterior` and `PlotExterior`. `HousingState.current_housing_area` is optional supplied world state, independent of `inside_owned_house` / `inside_owned_plot`. The existing `IsInsideHouse` getter matches only the interior. The broader query uses that same area without adding another plot flag. See the [house-or-plot contract](../../specs/house-or-plot-presence.md) and [interior contract](../../specs/house-interior-presence.md).
 
 ## Profile selection (static, 2026-10-24)
 
@@ -15,9 +15,9 @@ Selection authority: `src/loader/mod.rs::active_profile_toc_suffixes` and `src/t
 
 Retail/PTR original Mainline handler lines769–848 include query at843. Forever Mainline handler starts782 and queries at851; Camelot handler line3 invokes its inherited Mainline closure. Shared EventRouting registers PLAYER_ENTERING_WORLD on a private frame; Startup initializes routing. Generated docs are available on demand, not loaded merely because the Game consumer runs.
 
-## Producer staging
+## Producer
 
-`src/c_api/c_housing/presence.rs` registers both spatial getters under one shared Retail/PTR/Forever module gate. The existing interior predicate is unchanged. The broader query returns `current_housing_area.is_some()` because the existing enum has exactly interior and plot-exterior variants. It returns one `Val::Bool`; no mutation, default fabrication or ownership fallback occurs. `location.inside_plot` remains an older independent input and is not silently reconciled by a getter. Runtime proof is pending.
+`src/c_api/c_housing/presence.rs` registers both spatial getters under one shared Retail/PTR/Forever module gate. The existing interior predicate is unchanged. The broader query returns `current_housing_area.is_some()` because the existing enum has exactly interior and plot-exterior variants. It returns one `Val::Bool`; no mutation, default fabrication or ownership fallback occurs. `location.inside_plot` remains an older independent input and is not silently reconciled by a getter. Retail original-consumer proof is complete; PTR acceptance depends on the separately owned input-interface-style lane (see the accepted-proof section).
 
 ## State and original-consumer selectors
 
@@ -39,7 +39,7 @@ Selector: `cf2_housing_plot::original_world_event_branches_on_house_plot_absence
 | Stale first result | None -> interior -> plot -> None -> owned plot -> owned interior -> None -> visiting plot; expected0,1,1,0,1,1,0,1 |
 | Missing/unimplemented API | Original event diagnostic or incomplete original handler; expected boundary is Mainline EventImplementation:843 |
 
-These are static contradictions, NOT observed mutation or RED proof. A setup/closure/earlier-handler failure does not count as RED. The deferred slot run must show the original :843 boundary and actual branch counts.
+These rows describe the planned contradictions. The accepted Retail proof below records actual failure boundaries, including nil/no-return rejection by the post-consumer shape check rather than a later visiting branch. A setup/earlier-handler failure never counts as endpoint RED.
 
 ## Sources
 
@@ -71,3 +71,21 @@ The [keyring capability contract](../../specs/ptr-keyring-capability.md) project
 Retail 21f338ac1 reaches None and visiting-interior decisions without event diagnostics, then fails the third visiting-plot loader count (0 rather than 1). The fixture's direct bootstrap-file execution omitted loader bookkeeping. The first real controls load re-executes its `[Bootstrap]` file and replaces `HousingControls_LoadUI`, discarding the previously installed hook. This is an observer-lifetime fixture failure, not evidence that spatial presence rejects plots.
 
 The approved fixture repair replaces direct HousingControls bootstrap execution with existing `loader::load_addon_bootstrap_from_toc` before observers. The real bootstrap phase records `bootstrap_loaded`; production's normal load already skips previously loaded bootstrap entries. Assertions, vendor bytes and production code are unchanged. RED/GREEN use identical repaired tests. Current paired rerun and mutants are pending. PTR's separate C_InputInterfaceStyle dependency remains deferred.
+
+## Accepted Retail proof and PTR dependency
+
+Verified 2026-10-25. Final master input is f1f3c930d, merged once at59a8f8acc. Executed repaired fixture GREEN03ee43f44 and producer-only RED6ed438196 have identical test trees and housing test SHA256 `cdf5c6c4cf8bac9869ed0248d6a54b3732ea234ddd65f927b7aaae99d55828b5`. Only the endpoint registration/function is subtracted in RED. No assertion, production loader or vendor change repairs the fixture.
+
+| Capability / boundary | Retail | PTR70493 private cache |
+|---|---|---|
+| Original eight-state world consumer | PASS, loader counts0,1,1,0,1,1,0,1 | BLOCKED-ON `ptr-input-interface-style` merge; separate short rerun scheduled |
+| Original missing-producer RED | Original Mainline:843 rejects missing IsInsideHouseOrPlot | Deferred with dependency; prior startup failures are not endpoint RED |
+| Interior preservation | Both exact selectors pass on repaired GREEN and RED | Both exact selectors pass on production21f338ac1; their source/production is unchanged by03ee fixture repair |
+| Nullable current-house shape, event gate, keyring capability | Concrete shape and Retail publication tests pass | Concrete shape, SHARD registration and false→true→false keyring capability pass |
+| Final all-target check at03ee43f44 | Exit0, zero warnings | Exit0, only three allowed fast_handler_late_bind dead_code warnings |
+
+All six Retail callable mutants are rejected by the same exact selector with passing GREEN control. Always-true fails at None; always-false and ownership-only fail at visiting interior; house-only fails at visiting plot. Nil and no-return fail the one-non-nil-boolean check after the first original None event, not a visiting-branch assertion. Unique sealed binaries and source SHAs are recorded. PTR mutants are not acceptance evidence without PTR GREEN.
+
+The PTR keyring fix gets past original ContainerFrame:10. Its next unconditional input-style query at line14 reaches missing `C_InputInterfaceStyle` in original SharedXML/Mainline/InputUtil.lua:12; the file aborts before publishing CloseAllBags, and the original Game handler subsequently fails UIParentPanelManager:1180. The separate `ptr-input-interface-style` lane owns this dependency. User direction is to report it and schedule a later PTR rerun, without another master merge or unrelated API expansion here.
+
+Every runtime proof uses an exact listing, one exact run, a fresh byte-exact current CVar copy and O_NOATIME original-file guards. Retail4028 and private PTR4580 pinned cache files remain byte-identical. Full source/runtime/check/CPU receipts and the final matrix are in `/home/osso/.local/state/wow-ui-sim/handoff/cf2-housing-plot/slot1-run2/REPORT.md`. No new stock-startup comparison, Forever acceptance or native housing-policy parity is claimed.

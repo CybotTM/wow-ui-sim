@@ -6,7 +6,8 @@
 
 - [ ] On Retail, PTR and Forever, return exactly one non-nil boolean with no arguments: true for supplied `HouseInterior` OR `PlotExterior`; false for absent area.
 - [ ] Use the existing spatial area; do not infer presence from ownership, selected house GUID, neighborhood map, or legacy independent plot flags.
-- [ ] Original selected `GameEvent.HandlePlayerEnteringWorld` loads housing controls for visiting/owned interiors and visiting/owned plots, but not absent area; clearing and reentry change the next event decision.
+- [x] On Retail, original selected `GameEvent.HandlePlayerEnteringWorld` loads housing controls for visiting/owned interiors and visiting/owned plots, but not absent area; clearing and reentry change the next event decision.
+- [ ] Prove the same original eight-state consumer on PTR after its separate input-interface-style dependency merges.
 - [ ] Preserve existing `IsInsideHouse` behavior and publication scope; do not expand Classic API publication.
 
 `HousingUIDocumentation.lua` declares `isInside: bool`, `Nilable = false`, and no Arguments. The two area variants are simulator inputs, not native enum values. None is the empty simulator-world policy already used by the interior lane, not a native login default.
@@ -29,7 +30,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Compilation, runtime RED/GREEN and actual mutant execution are pending. Static staging only; no builds/tests/slots authorized.
+- [ ] PTR eight-state proof is **BLOCKED-ON `ptr-input-interface-style` merge**, not an endpoint defect; the next short PTR runtime is scheduled separately. Retail GREEN03ee43f44, producer-only RED6ed438196, both interior selectors on both Retail sides, six callable mutants and final Retail/PTR all-target checks pass their required gates. [Exact evidence and limits](../wiki/systems/housing-spatial-presence.md#accepted-retail-proof-and-ptr-dependency).
 - [ ] Forever selects the original Mainline consumer plus Camelot wrapper, but its housing-controls TOC is restricted to `standard`; current Forever game types are `camelot, mainline`. Do not transplant that excluded bootstrap or count an absent Forever selector as passing.
 - [ ] Obtain native plot-boundary/transition semantics from host aso before claiming native parity; use the exact questions in the handoff REPORT.
 - [ ] Paired stock startup comparison must isolate this endpoint's delta, retaining all unrelated residual errors.

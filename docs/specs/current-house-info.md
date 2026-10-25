@@ -4,11 +4,11 @@
 
 ## What it must do
 
-- [ ] Return exactly one nullable `HouseInfo` with no arguments, as declared by both pinned profiles' `HousingUIDocumentation.lua`.
-- [ ] Project supplied `plotID:number` and nullable `houseName:string`, `ownerName:string`, `plotCost:number`, `neighborhoodName:string`, `moveOutTime:time_t`, `plotReserved:bool`, `neighborhoodGUID:WOWGUID`, `houseGUID:WOWGUID`, as declared by `HousingUISharedDocumentation.lua`.
-- [ ] Return one nil for an unsupplied simulator snapshot; do not fabricate fields from area, ownership or tracked-house selection. This is a host-input policy, not a native default or native nil-selection claim.
-- [ ] Preserve absent optional fields and both boolean values; reflect replacement/clearing of the supplied snapshot.
-- [ ] Admit `SHARD_TRANSFER` registration/validity on PTR only through `client_profile::ACTIVE`, matching pinned 12.1.7.70493 `SystemDocumentation.lua`; preserve other profiles' existing event policy.
+- [x] Return exactly one nullable `HouseInfo` with no arguments, as declared by both pinned profiles' `HousingUIDocumentation.lua`.
+- [x] Project supplied `plotID:number` and nullable `houseName:string`, `ownerName:string`, `plotCost:number`, `neighborhoodName:string`, `moveOutTime:time_t`, `plotReserved:bool`, `neighborhoodGUID:WOWGUID`, `houseGUID:WOWGUID`, as declared by `HousingUISharedDocumentation.lua`.
+- [x] Return one nil for an unsupplied simulator snapshot; do not fabricate fields from area, ownership or tracked-house selection. This is a host-input policy, not a native default or native nil-selection claim.
+- [x] Preserve absent optional fields and both boolean values; reflect replacement/clearing of the supplied snapshot.
+- [x] Admit `SHARD_TRANSFER` registration/validity on PTR only through `client_profile::ACTIVE`, matching pinned 12.1.7.70493 `SystemDocumentation.lua`; preserve other profiles' existing event policy.
 
 ## How it works
 
@@ -27,7 +27,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Current merged Retail/PTR GREEN, preservation, mutation and all-target proof pending.
+- [ ] PTR original eight-state acceptance is blocked on the separate `ptr-input-interface-style` merge; a short rerun is scheduled separately. Retail GREEN, paired RED, six mutants and both final profile checks are recorded in the linked wiki.
 
 ## Out of scope
 

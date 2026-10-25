@@ -1,3 +1,7 @@
+## [2026-10-25] proof | Retail housing plot and PTR dependency
+
+[Accepted proof and limits](systems/housing-spatial-presence.md#accepted-retail-proof-and-ptr-dependency): repaired original Retail eight-state consumer GREEN, missing-producer RED, both interior selectors on both sides and six callable mutants. Final repaired-source checks are Retail zero warnings/PTR three allowed warnings. PTR eight-state acceptance is BLOCKED-ON the separate input-interface-style merge; no native policy or current PTR GREEN claim.
+
 ## [2026-10-25] fixture | Housing bootstrap observer lifetime
 
 [Observed third-state failure and repair](systems/housing-spatial-presence.md#bootstrap-observer-lifetime): use the real bootstrap load phase so the first full addon load cannot replace the observed publisher. Assertions and production/vendor code are unchanged; paired repaired-fixture proof remains pending.
