@@ -48,12 +48,8 @@ fn load_original_world_handler() -> WowLuaEnv {
             .iter()
             .any(|path| { path.ends_with("Blizzard_HousingControls_Bootstrap.lua") })
     );
-    crate::common::load_blizzard_addon_bootstrap(
-        &env,
-        &ui,
-        "Blizzard_HousingControls",
-        "Blizzard_HousingControls_Bootstrap.lua",
-    );
+    wow_ui_sim::loader::load_addon_bootstrap_from_toc(&env.loader_env(), &controls)
+        .expect("load original housing bootstrap through the real startup phase");
     for file in [
         "Blizzard_HousingTutorialsData.lua",
         "Blizzard_HousingTutorialsUtil.lua",
