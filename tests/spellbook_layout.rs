@@ -136,6 +136,7 @@ fn check_rect(registry: &WidgetRegistry, name: &str, sw: f32, sh: f32, expected:
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn spellbook_passive_item_border_and_icon_match_master_geometry() {
     test_timeout! {
@@ -262,7 +263,9 @@ fn spellbook_passive_item_border_and_icon_match_master_geometry() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn spellbook_texture_requests_match_between_opens() {
     test_timeout! {
@@ -303,7 +306,9 @@ fn spellbook_texture_requests_match_between_opens() {
             "Should have same icon texture count between opens");
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn spellbook_frame_positions() {
     test_timeout! {
@@ -354,7 +359,9 @@ fn spellbook_frame_positions() {
         }
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn spellbook_layout_stays_locked() {
     test_timeout! {
@@ -567,6 +574,7 @@ fn spellbook_layout_stays_locked() {
 
         assert_eq!(result, "ok", "Spellbook layout should remain locked: {result}");
     }
+}
 }
 
 #[test]
