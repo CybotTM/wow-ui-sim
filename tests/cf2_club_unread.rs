@@ -19,7 +19,8 @@ fn load_original_consumers() -> WowLuaEnv {
     let ui = blizzard_ui_dir();
     let toc_path = find_toc_file(&ui.join("Blizzard_MicroMenu")).expect("selected MicroMenu TOC");
     let expected_toc = match wow_ui_sim::client_profile::ACTIVE {
-        wow_ui_sim::client_profile::ClientProfile::WowForever => "Blizzard_MicroMenu.toc",
+        wow_ui_sim::client_profile::ClientProfile::Ptr
+        | wow_ui_sim::client_profile::ClientProfile::WowForever => "Blizzard_MicroMenu.toc",
         _ => "Blizzard_MicroMenu_Mainline.toc",
     };
     assert_eq!(toc_path.file_name().unwrap(), expected_toc);

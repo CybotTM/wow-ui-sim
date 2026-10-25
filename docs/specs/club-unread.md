@@ -39,6 +39,10 @@ Retail MicroMenu `_Mainline.toc` permits mainline + Game, depends on Communities
 
 MicroMenu :1240–1246 calls GetInvitationsForSelf then the single-line CommunitiesUtil aggregate wrapper (:186), then SetShown (Forever: SetHasNotification). There is **no further C_Club nil call downstream** on this direct path. Related helpers (:189–242) additionally reach existing GetSubscribedClubs/GetStreams, the empty-settings shim, missing GetStreamViewMarker and missing AdvanceStreamViewMarker. Only these documented siblings are staged; unrelated C_Club calls elsewhere are not widened into this lane.
 
+### Current-master integration source binding (2026-10-24)
+
+PTR master `08b423c5c` pins wowt 12.1.7.70493. Its supported private-cache sync contains 4,578 files and selects generic `Blizzard_MicroMenu.toc`, whose `[Family]` entries resolve to Mainline. `GuildMicroButtonMixin:UpdateNotificationIcon` at :1483–1489 calls the same CommunitiesUtil aggregate wrapper (:185–187); sibling settings/marker/clear helpers remain :205–242. The paired integrated RED/GREEN tests expect this generic PTR TOC and retain every behavior assertion and original Lua provenance check. The historical 12.1.5 `_Mainline.toc` evidence above is not current PTR runtime proof. Integrated runtime acceptance is recorded separately in the bounded handoff report.
+
 ### Standalone static contradiction table
 
 Every row names the exact selector that alone rejects the callable mutant. These are static contradictions, not executed mutation proof.
