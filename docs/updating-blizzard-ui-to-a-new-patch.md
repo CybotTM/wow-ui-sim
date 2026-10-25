@@ -214,7 +214,7 @@ and decoded-content keys. A mismatch automatically removes only that profile's
 `AddOns` cache before extraction; do not delete the cache manually.
 
 ```bash
-cargo build --bin wow-cli
+cargo build --bin wow-cli --features tools
 # Retail-only isolation test (fresh cache, non-retail flavors masked):
 python3 scripts/test-retail-casc-isolation.py
 ```

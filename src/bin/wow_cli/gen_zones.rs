@@ -3,7 +3,7 @@
 //! Reads from ~/Projects/wow/data/:
 //!   - AreaTable.csv
 //!
-//! Generates: data/zones.rs
+//! Generates: crates/sim-data/data/zones.rs
 
 use super::csv_util::{escape_str, parse_csv_line, wow_data_dir};
 use std::fs::File;
@@ -19,7 +19,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let reader = BufReader::new(file);
 
     std::fs::create_dir_all("data")?;
-    let output_path = Path::new("data/zones.rs");
+    let output_path = Path::new("crates/sim-data/data/zones.rs");
     let mut out = File::create(output_path)?;
 
     write_header(&mut out)?;

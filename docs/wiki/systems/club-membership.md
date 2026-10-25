@@ -24,9 +24,20 @@ Edit-only staged 2026-10-24; not runtime-accepted. [Bounded contract and standal
 
 Retail selection is `_Mainline` TOC → Mainline/MainMenuBarMicroButtons.lua + XML → XML-created GuildMicroButton → original HasUnseenInvitations :1230. The staged selector loads the normal selected dependency closure, checks provenance, and changes supplied invitations/displayed club IDs through both outcomes; no Lua API or consumer is replaced. Other profiles have no claimed consumer proof from this lane. Prior 2026-10-05 membership evidence does not cover this addition.
 
+## Unread streams (CF-2)
+
+Edit-only staged 2026-10-24; runtime proof pending. [Contract, selection evidence and static contradictions](../../specs/club-unread.md) own the requirements and UNKNOWN native policies.
+
+Each Club now owns supplied Stream snapshots (descriptor, optional notification filter and optional last-read time). Existing GetStreams/GetStreamInfo/IsSubscribedToStream project those snapshots; the separate hardcoded guild stream builder is removed. Legacy roster synchronization retains stream snapshots, creating the previous guild/officer descriptors only on initial guild projection. It supplies neither notification preferences nor unread timestamps. New communities have no supplied streams until host fixtures provide them.
+
+`club_unread.rs` publishes aggregate unread, settings, marker and advance endpoints. Aggregate is INFERRED from original CommunitiesUtil's All-filter/non-nil-marker predicate over subscribed clubs; it is not native aggregate proof. Settings omit absent preferences instead of inventing them; the temporary empty-settings shim is removed. Advancing a supplied unread marker clears it before synchronous documented event consumers run. Event trigger/idempotence policy is a local modeled choice, not native parity. No duplicate unread flag/store, generated timestamps, mention detection, transport or vendor edits.
+
+RED schema/test commit `02ea638a0` carries compiling data definitions and original consumer selectors separately from publication. Retail/PTR/Forever original MicroMenu consumers and shared guild preservation selectors are staged, not executed. Later admitted verification must distinguish source/provenance setup blockers from producer RED and compare full stock key/count maps against the prior invitation producer's GREEN map.
+
 ## Sources
 
 - [Contract](../../specs/club-membership.md).
+- [Unread contract](../../specs/club-unread.md): generated ClubDocumentation declarations and original FrameXMLUtil/MicroMenu consumer evidence; no decompiled source.
 - [Self-invitation contract](../../specs/club-self-invitations.md): ClubDocumentation.lua :580–588, :1760–1776, :1808–1844, :1938–1946 and selected Retail MicroMenu :1229–1238; only these generated docs and consumer ground the new contract.
 - `~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/Blizzard_APIDocumentationGenerated/ClubDocumentation.lua`: declarations, privileges, event payloads.
 - Cached `Blizzard_Communities/CommunitiesMemberList.lua:632–743`: ID-keyed lookups, presence/role updates, invitation cancellation.

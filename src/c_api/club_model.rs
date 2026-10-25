@@ -45,6 +45,44 @@ pub struct Invitation {
     pub inviter_id: String,
 }
 
+/// Supplied stream snapshot owned by its club, not a separate unread store.
+#[derive(Clone, Debug)]
+pub struct Stream {
+    pub id: u64,
+    pub name: String,
+    pub subject: String,
+    pub stream_type: u8,
+    pub leaders_and_moderators_only: bool,
+    pub creation_time: u64,
+    /// No supplied preference means no notification-setting row, not All.
+    pub notification_filter: Option<u8>,
+    /// Documented nil/current marker; Some(time) means the stream is unread.
+    pub last_read_time: Option<u64>,
+}
+
+impl Stream {
+    // Existing simulator guild stream descriptors; no notification preference or
+    // unread marker is fabricated when projecting the legacy roster initially.
+    fn guild_streams() -> Vec<Self> {
+        [
+            (1, "Guild", "General guild chat", false),
+            (2, "Officer", "Officer chat", true),
+        ]
+        .into_iter()
+        .map(|(id, name, subject, officers_only)| Self {
+            id,
+            name: name.into(),
+            subject: subject.into(),
+            stream_type: id as u8,
+            leaders_and_moderators_only: officers_only,
+            creation_time: 1_700_000_000_000_000,
+            notification_filter: None,
+            last_read_time: None,
+        })
+        .collect()
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Club {
     pub id: String,
@@ -56,6 +94,7 @@ pub struct Club {
     /// Server-supplied candidates; sending an invitation never invents membership.
     pub candidates: BTreeMap<String, Member>,
     pub invitations: Vec<Invitation>,
+    pub streams: Vec<Stream>,
 }
 
 impl Club {
@@ -177,9 +216,12 @@ impl ClubState {
         };
         let old = self.clubs.remove(GUILD_ID);
         let is_initial = old.is_none();
-        let mut by_name: BTreeMap<_, _> = old
+        let (old_members, streams) = match old {
+            Some(club) => (club.members, club.streams),
+            None => (Vec::new(), Stream::guild_streams()),
+        };
+        let mut by_name: BTreeMap<_, _> = old_members
             .into_iter()
-            .flat_map(|club| club.members)
             .map(|member| (member.name.clone(), member))
             .collect();
         let members: Vec<Member> = roster
@@ -202,6 +244,7 @@ impl ClubState {
                 members,
                 candidates: BTreeMap::new(),
                 invitations: Vec::new(),
+                streams,
             },
         );
     }

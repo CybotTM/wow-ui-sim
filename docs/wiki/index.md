@@ -4,6 +4,19 @@
 ## [2026-10-25] staged | Forever verified non-resident Gethe sources
 
 [Cache rule](systems/casc-asset-cache.md#forever-mapped-non-resident-sources) and [contract](../specs/casc-loading.md#forever-mapped-non-resident-ui-sources) record immutable same-build Gethe blobs only for mapped EKeys absent from local indexes, raw CKey/MD5 validation and per-file provenance. Resident CASC and unmapped failures remain separate. Static tests/code committed separately; execution and stock startup remain pending.
+Historical utility-command replay requires `--features tools`; see the [replay note](../../README.md#utility-binary-builds) for the three preserved evidence examples.
+
+## [2026-10-25] investigation | Compile binary selection
+
+[Source findings](investigations/compile-bin-lockwatch.md) and [contract](../specs/integration-bin-selection.md): opt-in utility bins preserve wow-sim test consumers and operational builders. Static-only; no slot/build/CPU proof.
+
+## [2026-10-24] design | Generated data crate boundary
+
+[Crate split](design/generated-data-crates.md) preserves the root facade and selected tables while isolating common catalogs from profile features. Same-slot touched-root rebuild 413.80→258.52 s; peak child RSS6,189,056→2,717,272 KiB. Retail/Wrath checks and94 bounded Rust tests pass; all23 generated files retain their hashes. Single warm-dependency samples, not a cold-build or full-profile claim.
+
+## [2026-10-24] system | CF-2 supplied unread streams
+
+[Club stream ownership](systems/club-membership.md#unread-streams-cf-2) links the [bounded unread contract](../specs/club-unread.md): one supplied club/stream model, original MicroMenu and CommunitiesUtil selectors, settings/marker/clear siblings and explicit UNKNOWN native policies. RED/schema and publication staged separately; no build, slot or runtime proof. Retail/PTR/Forever preservation remains pending.
 
 ## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
 
@@ -4105,3 +4118,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-23] investigation | Consumer selection and standalone RED
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
+
+## [2026-10-24] source | CF-2 pet-battle names staging
+
+[State projection and selected consumers](systems/pet-battle-names.md) links the [contract](../specs/pet-battle-names.md). Original-consumer tests precede producer; runtime RED/GREEN, mutants and exact stock diff remain pending under edit-only staging.
