@@ -42,6 +42,7 @@ fn register_character_queries(state: &mut LuaState) -> LuaResult<()> {
     LuaApiMut::register_function(state, "IsCursorVisible", cursor_visible)?;
     let bank = ensure_namespace(state, "C_Bank")?;
     table_set_rust_fn_static(state, bank, "CanPurchaseBankTab", can_purchase_bank_tab)?;
+    table_set_rust_fn_static(state, bank, "FetchBankLockedReason", bank_locked_reason)?;
     let pvp = ensure_namespace(state, "C_PvP")?;
     table_set_rust_fn_static(state, pvp, "IsMatchComplete", match_complete)?;
     let spell = ensure_namespace(state, "C_Spell")?;
@@ -61,6 +62,17 @@ fn can_purchase_bank_tab(state: &mut LuaState) -> LuaResult<u32> {
         .purchasable_bank_types
         .contains(&bank_type);
     state.push(Val::Bool(allowed));
+    Ok(1)
+}
+
+fn bank_locked_reason(state: &mut LuaState) -> LuaResult<u32> {
+    let bank_type = i32::from_stack(state, 1)?;
+    let reason = borrow_state(state)?
+        .forever_startup
+        .bank_locked_reasons
+        .get(&bank_type)
+        .copied();
+    state.push(reason.map_or(Val::Nil, |reason| Val::Num(f64::from(reason))));
     Ok(1)
 }
 
@@ -143,6 +155,7 @@ pub(crate) fn accepts_event(name: &str) -> bool {
                 | "EXTERNAL_EVENT_LAUNCH_URL_RESULT"
                 | "EXTERNAL_EVENT_URL_CHANGED"
                 | "SOCIAL_UI_SOCIAL_QUEUE_SYSTEM_STATUS_UPDATED"
+                | "SOCIAL_UI_RAID_LIST_SYSTEM_STATUS_UPDATED"
         )
 }
 
