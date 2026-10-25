@@ -2749,3 +2749,7 @@ Updated the [bank investigation](investigations/wrath-guild-info.md#accepted-run
 ## 2026-10-24 — Wrath guild-bank current-master integration
 
 [Bounded refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 merges master08b423c5c: Wrath/Retail all-target checks0warnings, five bank exact PASS, Wrath stock[], fresh Retail30/34 unchanged with no added/removed keys. All13 CVar receipts preserve original stat/hash; slot0 released. Historical RED/GREEN matrix not repeated.
+
+## 2026-10-24 — Mists pet display identity
+
+- Updated [pet identity](systems/pet-battle-names.md#mists-display-identity) and added the [contract](../specs/mists-pet-display-id.md). Static consumer/receiver trace, optional supplied identity and native-return questions; no runtime proof.
