@@ -9,9 +9,10 @@ build = "build.rs"
 autotests = false
 
 [workspace]
-members = ["crates/sim-widget", ".", "xtask", "crates/test-harness", "crates/sim-data", "crates/sim-data-profile", "crates/sim-lua-bridge", "crates/sim-event", "crates/sim-toc", "crates/sim-xml"]
+members = ["crates/sim-texture", "crates/sim-widget", ".", "xtask", "crates/test-harness", "crates/sim-data", "crates/sim-data-profile", "crates/sim-lua-bridge", "crates/sim-event", "crates/sim-toc", "crates/sim-xml"]
 
 [dependencies]
+sim-texture = { path = "crates/sim-texture" }
 sim-widget = { path = "crates/sim-widget" }
 sim-xml = { path = "crates/sim-xml" }
 sim-toc = { path = "crates/sim-toc" }

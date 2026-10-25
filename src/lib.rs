@@ -50,7 +50,7 @@ pub mod keybinding_cache;
 pub use sim_widget::layout;
 pub mod limited_listfile;
 pub mod loader;
-pub mod logging;
+pub use sim_texture::logging;
 pub mod lua_api;
 pub use sim_lua_bridge as lua_bridge;
 pub use sim_lua_bridge::{

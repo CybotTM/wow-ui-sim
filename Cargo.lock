@@ -5506,6 +5506,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sim-texture"
+version = "0.1.0"
+dependencies = [
+ "dirs",
+ "image 0.25.9",
+ "image-blp",
+]
+
+[[package]]
 name = "sim-toc"
 version = "0.1.0"
 
@@ -7793,6 +7802,7 @@ dependencies = [
  "sim-data-profile",
  "sim-event",
  "sim-lua-bridge",
+ "sim-texture",
  "sim-toc",
  "sim-widget",
  "sim-xml",
