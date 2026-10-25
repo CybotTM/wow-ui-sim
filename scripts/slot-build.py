@@ -29,13 +29,14 @@ def check_capacity(capacity_id):
 
 def build_argv(slot, worktree, unit, cargo):
     target = TARGET_ROOT / f"slot-{slot}"
+    # Incremental reuse requires this fixed BindPaths source path per target slot.
     mount = SOURCE_ROOT / f"slot-{slot}"
     return [
         "/usr/bin/systemd-run", "--user", "--no-block", "--remain-after-exit",
         f"--unit={unit}", "--slice=agents.slice",
         "--property=MemoryMax=9G", "--property=MemorySwapMax=0",
         "--property=CPUAccounting=yes",
-        "--setenv=CARGO_INCREMENTAL=0", f"--setenv=CARGO_TARGET_DIR={target}",
+        "--setenv=CARGO_INCREMENTAL=1", f"--setenv=CARGO_TARGET_DIR={target}",
         f"--property=BindPaths={worktree}:{mount}",
         f"--working-directory={mount}", "--", *cargo,
     ]
