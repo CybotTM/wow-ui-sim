@@ -88,19 +88,28 @@ def full_source_inputs(worktree):
     return inputs
 
 
+def read_content_changes(worktree, identity, dirty, previous):
+    if previous and identity == previous.get("identity"):
+        return set()
+    try:
+        if not previous:
+            raise ValueError("no previous source")
+        paths = git(worktree, "diff", "--name-only", "--no-renames", "-z",
+                    previous["identity"]["head"], identity["head"], "--")
+        changed = {os.fsdecode(p) for p in paths.split(b"\0") if p}
+        changed.update(previous["dirty_paths"])
+    except (subprocess.CalledProcessError, KeyError, ValueError):
+        changed = full_source_inputs(worktree)
+    return changed.union(dirty)
+
+
 def prepare_source(worktree, previous):
     identity, dirty = source_identity(worktree)
-    changed = set()
+    content_changed = read_content_changes(worktree, identity, dirty, previous)
+    changed = set(content_changed)
     if (not previous or identity != previous.get("identity")
             or previous.get("result", "success") != "success"):
-        try:
-            if not previous or previous.get("result", "success") != "success":
-                raise ValueError("no previous source")
-            changed.update(os.fsdecode(p) for p in git(
-                worktree, "diff", "--name-only", "--no-renames", "-z",
-                previous["identity"]["head"], identity["head"], "--").split(b"\0") if p)
-            changed.update(previous["dirty_paths"])
-        except (subprocess.CalledProcessError, KeyError, ValueError):
+        if previous and previous.get("result", "success") != "success":
             changed.update(full_source_inputs(worktree))
         changed.update(dirty)
         now = time.time_ns()
@@ -109,7 +118,8 @@ def prepare_source(worktree, previous):
             if path.is_file() and not path.is_symlink():
                 os.utime(path, ns=(path.stat().st_atime_ns, now))
     return {"identity": identity, "dirty_paths": dirty,
-            "changed_paths": sorted(changed)}
+            "changed_paths": sorted(changed),
+            "content_changed_paths": sorted(content_changed)}
 
 
 def write_json(path, value):
@@ -176,13 +186,13 @@ def read_dep_info_snapshot(slot, worktree):
     return {"files": files, "executables": executables}
 
 
-def target_dep_inputs(record, snapshot):
+def target_dep_inputs(record, snapshot, allow_missing=False):
     artifacts = {os.path.abspath(path) for path in
                  [record["executable"], *record.get("filenames", [])]}
     candidates = {str(Path(path).with_suffix(".d")) for path in artifacts}
     matches = {name: info for name, info in snapshot["files"].items()
                if name in candidates or artifacts.intersection(info.get("outputs", []))}
-    if not matches:
+    if not matches and not allow_missing:
         raise ValueError(f"missing dep-info for {record['executable']}")
     inputs = set()
     for name, info in matches.items():
@@ -208,7 +218,8 @@ def package_build_inputs(current, record):
 def repo_relative_inputs(current, inputs):
     worktree = Path(current["worktree"])
     mount = SOURCE_ROOT / Path(current["slot"]).name
-    roots = [mount, worktree]
+    utility_mount = SOURCE_ROOT / f"ct-bins-{Path(current['slot']).name}"
+    roots = [mount, utility_mount, worktree]
     relative = set()
     for name in inputs:
         path = Path(os.path.abspath(worktree / name))
@@ -228,16 +239,19 @@ def read_target_inputs(current, before, after):
         try:
             inputs = target_dep_inputs(record, after)
             if executable in before["executables"]:
-                inputs.update(target_dep_inputs(record, before))
+                inputs.update(target_dep_inputs(
+                    record, before, allow_missing=record.get("fresh") is False))
             inputs = repo_relative_inputs(current, inputs)
             if not inputs:
                 raise ValueError(f"zero repo-relative inputs for {executable}")
             inputs.update(repo_relative_inputs(current, package_build_inputs(current, record)))
             targets[executable] = sorted(inputs)
         except ValueError as error:
-            errors.append(str(error))
+            if current["content_changed_paths"]:
+                errors.append(str(error))
     mapped = set().union(*targets.values())
-    if targets and current["changed_paths"] and not mapped.intersection(current["changed_paths"]):
+    changed = current["content_changed_paths"]
+    if targets and changed and not mapped.intersection(changed):
         errors.append("no reported target maps changed inputs")
     return targets, errors
 
@@ -245,6 +259,7 @@ def read_target_inputs(current, before, after):
 def find_stale_artifacts(current, previous_artifacts, artifacts):
     stale = []
     changed = set(current["changed_paths"])
+    content_changed = set(current["content_changed_paths"])
     for record in current["reported_artifacts"]:
         executable = record.get("executable")
         inputs = current["target_inputs"].get(executable, [])
@@ -252,7 +267,9 @@ def find_stale_artifacts(current, previous_artifacts, artifacts):
             continue
         name = os.path.relpath(executable, current["slot"])
         changed_hash = name in artifacts and previous_artifacts.get(name) != artifacts[name]
-        if record.get("fresh") is not False or not changed_hash:
+        needs_changed_hash = bool(content_changed.intersection(inputs))
+        if (record.get("fresh") is not False or name not in artifacts
+                or (needs_changed_hash and not changed_hash)):
             stale.append(name)
     return sorted(set(stale))
 

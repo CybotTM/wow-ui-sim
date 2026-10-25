@@ -69,10 +69,12 @@ package manifest directories and path dependency directories, plus root
 are refreshed. This repository's root package also covers build-script inputs
 in `build/`, `installer/`, `native/intl/`, and `tests/`. If metadata fails, all
 tracked files are refreshed. A root package therefore also refreshes its docs;
-this conservative full refresh is only needed when prior source is unknown.
+this conservative full refresh is needed when prior source is unknown or the
+previous build did not succeed.
 
 Each unit writes `slot-N/receipts/UNIT.json` with its source identity, changed
-paths, command, result and artifact SHA256 values. The command arguments and
+paths (`changed_paths`, the mtime refresh set), content changes
+(`content_changed_paths`), command, result and artifact SHA256 values. The command arguments and
 stdout/stderr bytes are passed through unchanged, including wrappers that capture
 Cargo JSON internally. The worker reads visible stdout for this build's Cargo
 `compiler-artifact` records, without changing the submitted arguments. Use Cargo's
@@ -85,21 +87,26 @@ It matches the artifact's adjacent `.d` file or dependency rules naming the
 artifact under the profile's `deps/` directory. Each target's inputs are the union
 of its previous and current dep-info, plus its package's `build.rs`, `Cargo.toml`,
 and `Cargo.lock` and the workspace `Cargo.lock`. Receipts retain these inputs as
-repo-relative paths. The worker strips either the slot's fixed source mount
-(derived from the launcher's `SOURCE_ROOT`) or the original worktree root after
-parsing Make escaping and line continuations. Inputs outside both roots are ignored.
-Missing or unreadable dep-info fails closed, including missing previous dep-info
-for an executable present before the child starts. An executable with zero
-repo-relative dep-info inputs also fails, before package inputs are added. If a
-non-empty diff intersects none of the reported executables' mapped inputs, the
-run fails closed. Library-only records keep their existing non-executable policy.
+repo-relative paths. The worker strips the slot's fixed source mount, its
+`ct-bins-slot-N` utility mount (both under the launcher's `SOURCE_ROOT`), or the
+original worktree root after parsing Make escaping and line continuations.
+Inputs outside these roots are ignored. When content changes could affect a target,
+missing or unreadable dep-info fails closed. Missing previous dep-info is allowed
+when Cargo reports `fresh=false` and valid current dep-info exists; unreadable
+previous dep-info still fails. Zero repo-relative inputs fail before package inputs
+are added. If a non-empty content diff intersects none of the reported executables'
+mapped inputs, the run fails closed. With no content diff, unmappable dep-info does
+not reject an identical-source repair. Library-only records keep their existing policy.
 
-When the diff intersects a target's inputs, Cargo must report `fresh=false` **and**
+Content changes are computed from the previous source identity, regardless of its
+build result, not from the mtime refresh set. When the content diff intersects a
+target's inputs, Cargo must report `fresh=false` **and**
 its SHA256 must differ from the previous hash at the same path. Otherwise the run
 fails with `stale artifacts`. A changed library, `.rmeta`, or another executable
 cannot certify it. Unreported executables and targets with disjoint inputs are
 not judged. A test-only edit therefore does not reject an unaffected fresh bin,
-even within the same package. Identical rebuilt bytes still fail by policy.
+even within the same package. Targets affected only by mtime refresh require
+`fresh=false` and a current hash, but identical rebuilt bytes are accepted.
 The existing conservative root derivation and source mtime refresh are unchanged.
 
 When no compiler-artifact record is visible (for example, a wrapper captures Cargo
