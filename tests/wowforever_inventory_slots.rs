@@ -16,6 +16,7 @@ fn forever_paper_doll_initializes_real_equipment_buttons() {
     load_source(&env, "Blizzard_ItemButton/Shared/ItemButtonTemplate.lua");
     load_source(&env, "Blizzard_ItemButton/Mainline/ItemButtonTemplate.lua");
     load_source(&env, "Blizzard_UIPanels_Game/Camelot/PaperDollFrame.lua");
+    env.state().borrow_mut().forever_startup.ammo_required = true;
     env.exec(
         r#"
         CharacterFrame = CreateFrame("Frame")
