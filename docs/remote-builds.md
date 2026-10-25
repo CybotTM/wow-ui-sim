@@ -89,8 +89,13 @@ package's metadata-derived manifest-parent and path-dependency roots.
 
 Only executables in this build's records are judged. The worker snapshots Cargo
 `.d` dep-info before the child starts and reads it again after the child exits.
-It matches the artifact's adjacent `.d` file or dependency rules naming the
-artifact under the profile's `deps/` directory. Each target's inputs are the union
+It uses each record's `filenames` and `executable` paths to find rustc's
+`deps/<name>-<metadata-hash>.d`, including hard-linked hashed executables when Cargo
+reports only the uplifted binary. Each snapshot retains its own hard-link mapping;
+other metadata hashes are not guessed by name. The uplifted binary's adjacent `.d`
+is used only when no matching rustc dep-info exists. Missing dep-info for a package
+whose roots and build inputs cannot intersect the content diff does not block the build.
+Each target's inputs are the union
 of its previous and current dep-info, plus its package's `build.rs`, `Cargo.toml`,
 and `Cargo.lock` and the workspace `Cargo.lock`. Receipts retain these inputs as
 repo-relative paths. The worker strips the slot's fixed source mount, its

@@ -1,0 +1,256 @@
+[
+  {
+    "record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/osso/.cache/wow-ui-sim-srcmount/slot-1#wow-ui-sim@0.1.0",
+      "manifest_path": "/home/osso/.cache/wow-ui-sim-srcmount/slot-1/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "panel-visual-metrics",
+        "src_path": "/home/osso/.cache/wow-ui-sim-srcmount/slot-1/src/bin/panel-visual-metrics.rs",
+        "edition": "2024",
+        "required-features": [
+          "tools"
+        ],
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "1",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "aura-containers",
+        "aura-instance-enumeration",
+        "aura-spell-classifications",
+        "aura-xml-widgets",
+        "base-spell-relationships",
+        "casc",
+        "client-ptr",
+        "forbidden-animation-aspects",
+        "forbidden-aspects",
+        "gui",
+        "native-duration-formatting",
+        "numeric-rule-formatters",
+        "on-update-modes",
+        "player-cast-durations",
+        "retail-12-0-0",
+        "retail-12-0-5",
+        "retail-12-0-7",
+        "retail-12-1-0",
+        "retail-12-1-5",
+        "rodio",
+        "sound",
+        "timed-signal-maps",
+        "tools"
+      ],
+      "filenames": [
+        "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/panel-visual-metrics"
+      ],
+      "executable": "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/panel-visual-metrics",
+      "fresh": false
+    },
+    "dep_info_path": "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/deps/panel_visual_metrics-6519344219c828b6.d",
+    "dep_info": "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/deps/panel_visual_metrics-6519344219c828b6.d: src/bin/panel-visual-metrics.rs\n\n/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/deps/panel_visual_metrics-6519344219c828b6: src/bin/panel-visual-metrics.rs\n\nsrc/bin/panel-visual-metrics.rs:\n"
+  },
+  {
+    "record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/osso/.cache/wow-ui-sim-srcmount/slot-1#wow-ui-sim@0.1.0",
+      "manifest_path": "/home/osso/.cache/wow-ui-sim-srcmount/slot-1/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "bench_steady_state",
+        "src_path": "/home/osso/.cache/wow-ui-sim-srcmount/slot-1/src/bin/bench_steady_state.rs",
+        "edition": "2024",
+        "required-features": [
+          "gui",
+          "tools"
+        ],
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "1",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "aura-containers",
+        "aura-instance-enumeration",
+        "aura-spell-classifications",
+        "aura-xml-widgets",
+        "base-spell-relationships",
+        "casc",
+        "client-ptr",
+        "forbidden-animation-aspects",
+        "forbidden-aspects",
+        "gui",
+        "native-duration-formatting",
+        "numeric-rule-formatters",
+        "on-update-modes",
+        "player-cast-durations",
+        "retail-12-0-0",
+        "retail-12-0-5",
+        "retail-12-0-7",
+        "retail-12-1-0",
+        "retail-12-1-5",
+        "rodio",
+        "sound",
+        "timed-signal-maps",
+        "tools"
+      ],
+      "filenames": [
+        "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/bench_steady_state"
+      ],
+      "executable": "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/bench_steady_state",
+      "fresh": false
+    },
+    "dep_info_path": "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/deps/bench_steady_state-9364be71f2719f46.d",
+    "dep_info": "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/deps/bench_steady_state-9364be71f2719f46.d: src/bin/bench_steady_state.rs\n\n/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/deps/bench_steady_state-9364be71f2719f46: src/bin/bench_steady_state.rs\n\nsrc/bin/bench_steady_state.rs:\n"
+  },
+  {
+    "record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/osso/.cache/wow-ui-sim-srcmount/slot-1#wow-ui-sim@0.1.0",
+      "manifest_path": "/home/osso/.cache/wow-ui-sim-srcmount/slot-1/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "bench_talents",
+        "src_path": "/home/osso/.cache/wow-ui-sim-srcmount/slot-1/src/bin/bench_talents.rs",
+        "edition": "2024",
+        "required-features": [
+          "tools"
+        ],
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "1",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "aura-containers",
+        "aura-instance-enumeration",
+        "aura-spell-classifications",
+        "aura-xml-widgets",
+        "base-spell-relationships",
+        "casc",
+        "client-ptr",
+        "forbidden-animation-aspects",
+        "forbidden-aspects",
+        "gui",
+        "native-duration-formatting",
+        "numeric-rule-formatters",
+        "on-update-modes",
+        "player-cast-durations",
+        "retail-12-0-0",
+        "retail-12-0-5",
+        "retail-12-0-7",
+        "retail-12-1-0",
+        "retail-12-1-5",
+        "rodio",
+        "sound",
+        "timed-signal-maps",
+        "tools"
+      ],
+      "filenames": [
+        "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/bench_talents"
+      ],
+      "executable": "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/bench_talents",
+      "fresh": false
+    },
+    "dep_info_path": "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/deps/bench_talents-8fd2733ad87286c6.d",
+    "dep_info": "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/deps/bench_talents-8fd2733ad87286c6.d: src/bin/bench_talents.rs\n\n/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/deps/bench_talents-8fd2733ad87286c6: src/bin/bench_talents.rs\n\nsrc/bin/bench_talents.rs:\n"
+  },
+  {
+    "record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/osso/.cache/wow-ui-sim-srcmount/slot-1#wow-ui-sim@0.1.0",
+      "manifest_path": "/home/osso/.cache/wow-ui-sim-srcmount/slot-1/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "bench_spellbook",
+        "src_path": "/home/osso/.cache/wow-ui-sim-srcmount/slot-1/src/bin/bench_spellbook.rs",
+        "edition": "2024",
+        "required-features": [
+          "gui",
+          "tools"
+        ],
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "1",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "aura-containers",
+        "aura-instance-enumeration",
+        "aura-spell-classifications",
+        "aura-xml-widgets",
+        "base-spell-relationships",
+        "casc",
+        "client-ptr",
+        "forbidden-animation-aspects",
+        "forbidden-aspects",
+        "gui",
+        "native-duration-formatting",
+        "numeric-rule-formatters",
+        "on-update-modes",
+        "player-cast-durations",
+        "retail-12-0-0",
+        "retail-12-0-5",
+        "retail-12-0-7",
+        "retail-12-1-0",
+        "retail-12-1-5",
+        "rodio",
+        "sound",
+        "timed-signal-maps",
+        "tools"
+      ],
+      "filenames": [
+        "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/bench_spellbook"
+      ],
+      "executable": "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/bench_spellbook",
+      "fresh": false
+    },
+    "dep_info_path": "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/deps/bench_spellbook-19648d658575c1b5.d",
+    "dep_info": "/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/deps/bench_spellbook-19648d658575c1b5.d: src/bin/bench_spellbook.rs\n\n/home/osso/.cache/wow-ui-sim-targets/slot-1/debug/deps/bench_spellbook-19648d658575c1b5: src/bin/bench_spellbook.rs\n\nsrc/bin/bench_spellbook.rs:\n"
+  }
+]
