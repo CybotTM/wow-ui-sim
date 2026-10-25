@@ -4,11 +4,11 @@ Retail/PTR `C_PvP.IsMatchComplete` must project the existing supplied completion
 
 ## What it must do
 
-- [ ] Publish `C_PvP.IsMatchComplete` for runtime `client_profile::ACTIVE` Retail/PTR, returning exactly `SimState.pvp_catalog.match_completed` without mutation.
-- [ ] Preserve the existing `HasMatchStarted` active-queue-or-completed behavior; do not alias completion to activity or queue status.
+- [x] Publish `C_PvP.IsMatchComplete` for runtime `client_profile::ACTIVE` Retail/PTR, returning exactly `SimState.pvp_catalog.match_completed` without mutation.
+- [x] Preserve the existing `HasMatchStarted` active-queue-or-completed behavior; do not alias completion to activity or queue status.
 - [ ] One selector uses the normal XML-created `PVPMatchResults`, retaining its installed `OnEvent` script, asserting the frame method equals the original mixin method with original-file provenance, and observing that script call the method exactly once. It covers inactive/incomplete → active/incomplete → inactive/complete → inactive/incomplete snapshots, resetting actual registrations between snapshots without replacing scripts or repairing presentation.
 - [ ] Assert original active-event subscriptions and unchanged hidden presentation. The selector independently rejects constant true and constant false.
-- [ ] Obtain independent Retail/PTR RED at the original completion call before producer edits, then GREEN and complete own-base stock-map comparisons against master571284aaa.
+- [ ] Obtain independent Retail/PTR RED at the original completion call, then GREEN and complete own-base stock-map comparisons against master571284aaa. The authorized static producer stage precedes runtime execution; no observed RED/GREEN is claimed.
 
 ## How it works
 
@@ -17,8 +17,9 @@ Retail/PTR `C_PvP.IsMatchComplete` must project the existing supplied completion
 
 ## Implementation inventory
 
-- `src/c_api/c_pvp/catalog.rs`: existing completion input and `HasMatchStarted`; completion producer remains absent pending RED.
-- `src/c_api/c_pvp.rs`: namespace publication boundary.
+- `src/c_api/c_pvp/catalog.rs`: existing supplied completion input and unchanged `HasMatchStarted`.
+- `src/c_api/c_pvp.rs`: GREEN publishes a read-only `IsMatchComplete` callback only for runtime ACTIVE Retail/PTR, inside the input's `retail-12-0-0` availability gate. It pushes the supplied boolean directly. No new default, activity alias, queue inference, reset or lifecycle policy is added. Forever receives no publication from this producer.
+- The paired RED is GREEN with only that registration and callback removed. Its tests and documentation are identical; this inventory describes GREEN, not the producer-subtracted control.
 - `src/lua_api/state/sim_state.rs`: existing epoch-gated `pvp_catalog` storage.
 
 ## Tests asserting this spec
@@ -27,8 +28,21 @@ Retail/PTR `C_PvP.IsMatchComplete` must project the existing supplied completion
 
 ## Known gaps (current cycle)
 
-- [ ] Slot admission, observed RED, producer, GREEN, constant-producer mutation proofs, zero-new-warning test-target checks and actual stock deltas remain pending.
+- [ ] Slot admission, observed RED/GREEN, executed constant/no-op mutation proofs, zero-new-warning test-target checks and actual stock deltas remain pending. The producer is statically implemented; no build or runtime acceptance is claimed.
 - [ ] Forever's selected original consumer needs an explicit normal completion input/publication contract; its current epoch has no `pvp_catalog` field. No Forever API or compatibility claim in this slice.
+
+## Static selector discrimination
+
+The original-consumer selector is `cf2_pvp_completion::original_match_results_enter_world_tracks_inactive_active_and_completed_match`. Each row below describes that same selector, separately for Retail and PTR. These are source-level contradictions, not executed mutant kills. Runtime provenance and dispatch checks must first succeed in the selected profile cache.
+
+| Profile | Constant true | Constant false | No-op (zero returns/nil or absent publication) |
+|---|---|---|---|
+| Retail | Snapshot 1 incorrectly registers eight active events | Snapshot 3 omits eight required active events | Snapshot 3 omits events; an absent/noncallable API can instead error at the original completion call |
+| PTR | Snapshot 1 incorrectly registers eight active events | Snapshot 3 omits eight required active events | Snapshot 3 omits events; an absent/noncallable API can instead error at the original completion call |
+
+Snapshot 2 uses independent activity and short-circuits the completion call. Snapshot 4 checks the return to incomplete state. The unchanged hidden-presentation and no-new-error assertions remain additional constraints.
+
+`p1200_rest_catalogs::p1200_rest_pvp_catalog_empty` and `pvp_info::pvp_info_methods_use_seeded_world_and_locklist_state` are preservation selectors. Neither reads `IsMatchComplete`; neither independently rejects its constant/no-op replacements. They do not count as producer RED.
 
 ## Out of scope
 

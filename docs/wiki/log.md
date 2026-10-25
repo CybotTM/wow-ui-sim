@@ -1,3 +1,7 @@
+## [2026-10-24] static stage | CF-2 PvP completion
+
+Updated [consumer evidence](investigations/consumer-selection-and-red-proof.md#cf-2-supplied-pvp-match-completion) and [contract](../specs/pvp-match-completion.md) with the Retail/PTR supplied-state producer, unchanged original-consumer selector, paired producer-only subtraction and standalone constant/no-op contradictions. Existing HasMatchStarted and Forever remain unchanged. No build, runtime test, slot, push or native-parity claim.
+
 ## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
 
 [Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
