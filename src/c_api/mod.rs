@@ -39,7 +39,6 @@ pub mod aura_entry_ids;
 #[cfg(feature = "aura-instance-enumeration")]
 pub(crate) mod aura_filter;
 pub mod bag_info;
-pub mod forever_startup;
 pub mod c_account_services;
 pub(crate) mod c_achievement_info_relations;
 pub(crate) mod c_action_bar;
@@ -182,6 +181,7 @@ mod c_quest_log_watches;
 pub mod c_quest_offer;
 pub mod c_super_track;
 pub mod container_quest;
+pub mod forever_startup;
 #[cfg(feature = "client-wowforever")]
 pub use c_quest_log_watches::QuestWatchType;
 #[cfg(feature = "client-wowforever")]

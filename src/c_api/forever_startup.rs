@@ -75,9 +75,16 @@ fn register_services(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, discord, "IsEnabled", discord_enabled)?;
     let ping = ensure_namespace(state, "C_Ping")?;
     table_set_rust_fn_static(state, ping, "IsPingSystemEnabled", ping_enabled)?;
+    let party = ensure_namespace(state, "C_PartyInfo")?;
+    table_set_rust_fn_static(state, party, "GetRestrictPings", party_ping_restriction)?;
     let housing = ensure_namespace(state, "C_Housing")?;
     table_set_rust_fn_static(state, housing, "IsInsideHouseOrPlot", inside_house_or_plot)?;
+    register_tts_settings(state)
+}
+
+fn register_tts_settings(state: &mut LuaState) -> LuaResult<()> {
     let tts = ensure_namespace(state, "C_TTSSettings")?;
+    table_set_rust_fn_static(state, tts, "GetSetting", tts_bool_setting)?;
     table_set_rust_fn_static(
         state,
         tts,
@@ -100,6 +107,22 @@ fn discord_enabled(state: &mut LuaState) -> LuaResult<u32> {
 
 fn ping_enabled(state: &mut LuaState) -> LuaResult<u32> {
     let enabled = borrow_state(state)?.forever_startup.ping_enabled;
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
+fn party_ping_restriction(state: &mut LuaState) -> LuaResult<u32> {
+    let restriction = borrow_state(state)?.forever_startup.party_ping_restriction;
+    state.push(Val::Num(f64::from(restriction)));
+    Ok(1)
+}
+
+fn tts_bool_setting(state: &mut LuaState) -> LuaResult<u32> {
+    let setting = i32::from_stack(state, 1)?;
+    let enabled = borrow_state(state)?
+        .forever_startup
+        .enabled_tts_settings
+        .contains(&setting);
     state.push(Val::Bool(enabled));
     Ok(1)
 }
@@ -130,6 +153,7 @@ fn register_character_queries(state: &mut LuaState) -> LuaResult<()> {
     let bank = ensure_namespace(state, "C_Bank")?;
     table_set_rust_fn_static(state, bank, "CanPurchaseBankTab", can_purchase_bank_tab)?;
     table_set_rust_fn_static(state, bank, "FetchBankLockedReason", bank_locked_reason)?;
+    table_set_rust_fn_static(state, bank, "HasMaxBankTabs", has_max_bank_tabs)?;
     let pvp = ensure_namespace(state, "C_PvP")?;
     table_set_rust_fn_static(state, pvp, "IsMatchComplete", match_complete)?;
     let spell = ensure_namespace(state, "C_Spell")?;
@@ -149,6 +173,16 @@ fn can_purchase_bank_tab(state: &mut LuaState) -> LuaResult<u32> {
         .purchasable_bank_types
         .contains(&bank_type);
     state.push(Val::Bool(allowed));
+    Ok(1)
+}
+
+fn has_max_bank_tabs(state: &mut LuaState) -> LuaResult<u32> {
+    let bank_type = i32::from_stack(state, 1)?;
+    let has_max = borrow_state(state)?
+        .forever_startup
+        .max_bank_tab_types
+        .contains(&bank_type);
+    state.push(Val::Bool(has_max));
     Ok(1)
 }
 
