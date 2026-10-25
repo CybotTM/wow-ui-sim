@@ -71,6 +71,8 @@ fn forever_original_group_buff_consumer_projects_supplied_alerts() {
         assert(consumer:GetGroupBuffVisualAlert(999999) == nil)
         local rows = C_UnitAuras.GetGroupBuffVisualAlerts()
         assert(#rows == 2 and rows[1].spellID == 21562 and rows[2].visualValue == 2)
+        assert(Enum.VisualAlertType.MarchingAnts == 1)
+        assert(Enum.VisualAlertType.MarchingAntsCyan == 2)
         assert(select('#', C_UnitAuras.GetGroupBuffVisualAlerts()) == 1)
         "#,
     )
@@ -99,6 +101,9 @@ fn forever_original_external_event_consumer_projects_url_state() {
         urlProbe = CreateFrame("Button", nil, UIParent, "ExternalEventURLMinimapButtonTemplate")
         urlProbe:Refresh()
         assert(not urlProbe:IsShown())
+        assert(not C_ExternalEventURL.CanShow())
+        assert(not C_ExternalEventURL.HasURL())
+        assert(not C_ExternalEventURL.IsNew())
         "#,
     )
     .unwrap();
@@ -122,7 +127,25 @@ fn forever_original_external_event_consumer_projects_url_state() {
         .external_event
         .as_mut()
         .unwrap()
-        .can_show = false;
+        .is_new = false;
+    env.exec("urlProbe:Refresh(); assert(not urlProbe.SpellEffectModelScene:IsShown())")
+        .unwrap();
+    env.state()
+        .borrow_mut()
+        .forever_startup
+        .external_event
+        .as_mut()
+        .unwrap()
+        .url
+        .clear();
+    env.exec("urlProbe:Refresh(); assert(not urlProbe:IsShown()); assert(not C_ExternalEventURL.HasURL())")
+        .unwrap();
+    {
+        let mut state = env.state().borrow_mut();
+        let event = state.forever_startup.external_event.as_mut().unwrap();
+        event.url = "https://example.invalid/second".to_owned();
+        event.can_show = false;
+    }
     env.exec("urlProbe:Refresh(); assert(not urlProbe:IsShown())")
         .unwrap();
 }

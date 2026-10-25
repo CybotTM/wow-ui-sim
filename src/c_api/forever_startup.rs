@@ -18,6 +18,7 @@ pub struct StartupInputs {
     pub cursor_visible: bool,
     pub ping_enabled: bool,
     pub purchasable_bank_types: HashSet<i32>,
+    pub bank_locked_reasons: HashMap<i32, i32>,
     pub match_complete: bool,
     pub target_spell_id: Option<i32>,
     pub character_tts_settings_saved: bool,
