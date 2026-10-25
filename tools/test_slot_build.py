@@ -351,6 +351,42 @@ class MountedDepInfoTests(unittest.TestCase):
         self.assertEqual(len(self.module.find_stale_artifacts(
             self.current, previous["artifacts"], previous["artifacts"])), 2)
 
+    def test_real_slot0_fresh_library_requires_previous_dep_info(self):
+        self.load_slot0_ptr_build()
+        library = self.current["reported_artifacts"][0]
+        self.assertEqual(library["target"]["name"], "wow_ui_sim")
+        library["fresh"] = True
+        before = self.module.read_dep_info_snapshot(self.target, self.tree)
+        del before["files"][str(self.target / "debug/deps/wow_ui_sim-45d2a5ba882881e5.d")]
+        after = self.module.read_dep_info_snapshot(self.target, self.tree)
+        _, errors = self.module.read_target_inputs(self.current, before, after)
+        self.assertTrue(errors, "fresh library cannot certify missing previous inputs")
+
+    def test_transitive_path_library_input_rejects_unchanged_executable(self):
+        binary = self.target / "debug/probe"
+        self.add_dep_info("debug/probe", f"{binary}: {self.mount}/src/main.rs\n")
+        self.current["package_roots"]["probe"].append(str(self.mount / "dep"))
+        self.current["package_roots"]["dep"] = [
+            str(self.mount / "dep"), str(self.mount / "leaf")]
+
+        self.current["package_roots"]["leaf"] = [str(self.mount / "leaf")]
+        for name, source in [("dep", "dep/src/lib.rs"), ("leaf", "leaf/data/config.lua")]:
+            artifact = self.target / f"debug/deps/lib{name}-123.rlib"
+            artifact.parent.mkdir(parents=True, exist_ok=True)
+            artifact.with_name(f"{name}-123.d").write_text(
+                f"{artifact}: {self.mount}/{source}\n")
+            self.current["reported_artifacts"].append({
+                "package_id": name, "manifest_path": str(self.mount / name / "Cargo.toml"),
+                "target": {"name": name, "kind": ["lib"]},
+                "filenames": [str(artifact)], "executable": None, "fresh": False,
+            })
+        inputs, errors = self.read_inputs(["leaf/data/config.lua"])
+        self.assertEqual(errors, [])
+        self.assertIn("leaf/data/config.lua", inputs[str(binary)])
+        self.assertEqual(self.module.find_stale_artifacts(
+            self.current, {"debug/probe": "same"}, {"debug/probe": "same"}),
+            ["debug/probe"])
+
     def test_real_slot0_missing_library_dep_info_fails_closed(self):
         self.load_slot0_ptr_build()
         (self.target / "debug/deps/wow_ui_sim-45d2a5ba882881e5.d").unlink()

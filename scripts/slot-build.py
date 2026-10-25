@@ -283,7 +283,8 @@ def read_library_inputs(current, record, before, after):
     inputs = set()
     for library in package_libraries(current, record):
         dependencies = target_dep_inputs(library, after)
-        dependencies.update(target_dep_inputs(library, before, allow_missing=True))
+        dependencies.update(target_dep_inputs(
+            library, before, allow_missing=library.get("fresh") is False))
         if not repo_relative_inputs(current, dependencies):
             raise ValueError(f"zero repo-relative inputs for {library['target']['name']}")
         dependencies.update(package_build_inputs(current, library))
