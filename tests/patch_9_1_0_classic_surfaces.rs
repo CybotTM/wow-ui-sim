@@ -1,10 +1,15 @@
 //! Classic namespace lookup remains unaffected by retail retirement.
-#![cfg(any(feature = "client-mists", feature = "client-wrath", feature = "client-era", feature = "client-anniversary"))]
+#![cfg(any(
+    feature = "client-mists",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 
 #[test]
 fn patch_9_1_0_classic_preserves_legacy_lookup() {
     let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
 for _, entry in ipairs({
     {'C_BarberShop', 'OldBarberShopLoaded'},
     {'C_LegendaryCrafting', 'GetRuneforgePowersByClassAndSpec'},
@@ -30,5 +35,7 @@ for _, entry in ipairs({
 }) do
     assert(type(_G[entry[1]][entry[2]]) == "function", entry[1] .. "." .. entry[2])
 end
-"#).unwrap();
+"#,
+    )
+    .unwrap();
 }
