@@ -2,6 +2,14 @@
 
 [Original-consumer staging](investigations/patch-12-1-7-api-audit.md#i4-runtime-test-staging) records four ordinary recipe selectors and independent PTR/Retail/Forever registers. 363 observations and five PTR consumer shape cases do not close native behavior, CVar scope/defaults, Glue contexts or 214 static UNKNOWN rows. Runtime execution and pre-repair baselines remain pending.
 
+## [2026-10-25] proof | Forever native-unknown-only baseline
+
+[Baseline](../baselines/README.md#forever-lua-errors) and [consumer scope](investigations/forever-startup-gaps.md) bind 21 passing exact selectors and the stock capture at `1fcbddf67`. No idle sentinel or locality catalog is invented; housing's excluded positive publisher is explicit. One all-target check per requested profile passes at `b910efd8d`: Retail zero warnings, Forever/PTR three expressly allowed inherited dead-code warnings each. Formatting passes; no warning suppression or source change to the separately owned late-bind test is retained.
+
+## [2026-10-25] investigation | Forever startup supplied inputs
+
+[Startup gaps](investigations/forever-startup-gaps.md) records the 76-message reproduction, eight original-consumer RED→GREEN selectors and explicit native-unknown target/locality boundaries. First repaired capture:40 raw messages; remaining service fixes and final acceptance pending.
+
 ## [2026-10-25] fix | Byte-preserving Lua source/cache boundary
 
 Updated [CASC cache](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) and [contract](../specs/casc-loading.md#blizzard-ui-source-bytes): Lua cache reads/content markers are byte-based; XML/TOC/XSD remain strict UTF-8. Production TOC/addon loading was already raw-byte safe. Exact fixture tests cover sync and runtime boundaries.

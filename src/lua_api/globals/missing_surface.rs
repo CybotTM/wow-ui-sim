@@ -79,7 +79,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_world_namespace_surfaces(state)?;
     register_social_namespace_surfaces(state)?;
     register_group_activity_surfaces(state)?;
-    Ok(())
+    c_api::forever_startup::register(state)
 }
 
 fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {

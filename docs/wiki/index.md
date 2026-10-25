@@ -2,6 +2,10 @@
 
 [Runtime staging](investigations/patch-12-1-7-api-audit.md#i4-runtime-test-staging) links the [contract](../specs/patch-12-1-7-inherited-runtime.md): four ordinary selectors, independent profile registers, original consumer shapes and retained UNKNOWN boundaries. Runtime RED and pre-repair preservation baselines are not yet measured.
 
+## [2026-10-25] investigation | Forever startup supplied inputs
+
+[Startup gaps](investigations/forever-startup-gaps.md) links the byte-exact 70532 baseline, 21 passing exact selectors and explicit native-unknown target/locality boundaries. Known registration/model gaps are repaired; startup retains only approved native-unknown residue. Positive housing is a tested excluded-publisher boundary, not a loader fix. All-target Forever/Retail/PTR checks pass under the clarified inherited-warning allowance; the lane report owns CPU and release receipts.
+
 ## [2026-10-25] fix | Byte-preserving Lua cache usability
 
 [Source-byte validation](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) separates byte-oriented Lua from UTF-8 XML/TOC/XSD. Runtime TOC loading already passes raw bytes to rilua. Regression fixtures preserve a literal `0x92` through cache checks and loaded strings.
