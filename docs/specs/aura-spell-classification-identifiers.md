@@ -8,7 +8,7 @@ All model, representation, miss and security policies below are **INFERRED simul
 
 ### Explicit classification input
 
-- [x] Own a public `AuraSpellClassification` record with independent `is_big_defensive: bool` and `is_private: bool` fields and `Clone`, `Copy`, `Default` (both false). Own public `AuraSpellClassifications { pub spells: HashMap<u32, AuraSpellClassification> }`, empty `Default`, under `aura-spell-classifications` (Retail12.0.5+ and Forever) with a public per-environment `SimState.aura_spell_classifications` field.
+- [x] Own a public `AuraSpellClassification` record with independent `is_big_defensive: bool` and `is_private: bool` fields and `Clone`, `Copy`, `Default` (both false). Own public `AuraSpellClassifications { pub spells: HashMap<u32, AuraSpellClassification> }`, empty `Default`, under `aura-spell-classifications` (Retail12.0.5+, Forever, Era and Anniversary) with a public per-environment `SimState.aura_spell_classifications` field.
 - [x] Use only explicitly declared resolved spell-ID records. Fixture101=(true,false),202=(false,true),303=(true,true),404=(false,false) covers both flags independently. No manufactured production catalog.
 - [x] Each API returns exactly one **public boolean**, corresponding to its independent flag; missing resolved records and unseeded public strings return false.
 - [x] Host replacement/removal and alias mutation take effect immediately. Queries leave records, aliases and caller input unchanged; environments isolate their inputs.
@@ -48,6 +48,12 @@ All model, representation, miss and security policies below are **INFERRED simul
 ## Forever publication — 2026-10-22
 
 The shared capability exposes only the existing defensive getter on Forever; other profiles and Forever's unrelated nil members retain their behavior. The [original T6 callback attribution and proof](c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22) owns the stock failure boundary and original-consumer regression. No model, catalog or security policy changes.
+
+## Era/Anniversary publication — 2026-10-25
+
+Both pinned profiles declare `AuraIsBigDefensive` in `Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:50`, with required `SpellIdentifier` at line55 and nonnil boolean at line60. Only these two profiles gain the existing `aura-spell-classifications` capability; `AuraIsPrivate` publication remains unchanged.
+
+The [Classic callback investigation](../wiki/investigations/classic-startup-producer-cascades.md#opaque-private-aura-timers) owns the original timer attribution. `tests/classic_startup_residuals.rs` stages the stock queued-callback boundary; `tests/cfactory_t6_opaque.rs` preserves original AuraUtil supplied-true/miss behavior and unrelated-member absence. No new model, functions, catalog, identifier policy or native classifications. Runtime GREEN and profile checks are pending; the missing-call reproduction alone does not reject a constant-false implementation.
 
 ## Tests asserting this spec
 
