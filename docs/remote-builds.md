@@ -84,9 +84,15 @@ Only executables in this build's records are judged. The worker snapshots Cargo
 It matches the artifact's adjacent `.d` file or dependency rules naming the
 artifact under the profile's `deps/` directory. Each target's inputs are the union
 of its previous and current dep-info, plus its package's `build.rs`, `Cargo.toml`,
-and `Cargo.lock` and the workspace `Cargo.lock`. Receipts retain these target inputs.
+and `Cargo.lock` and the workspace `Cargo.lock`. Receipts retain these inputs as
+repo-relative paths. The worker strips either the slot's fixed source mount
+(derived from the launcher's `SOURCE_ROOT`) or the original worktree root after
+parsing Make escaping and line continuations. Inputs outside both roots are ignored.
 Missing or unreadable dep-info fails closed, including missing previous dep-info
-for an executable present before the child starts.
+for an executable present before the child starts. An executable with zero
+repo-relative dep-info inputs also fails, before package inputs are added. If a
+non-empty diff intersects none of the reported executables' mapped inputs, the
+run fails closed. Library-only records keep their existing non-executable policy.
 
 When the diff intersects a target's inputs, Cargo must report `fresh=false` **and**
 its SHA256 must differ from the previous hash at the same path. Otherwise the run

@@ -147,7 +147,7 @@ def dep_info_words(value):
 
 def parse_dep_info(content, worktree):
     outputs, inputs = set(), set()
-    for line in content.replace("\\\n", "").splitlines():
+    for line in content.replace("\\\n", " ").splitlines():
         target, separator, sources = line.partition(": ")
         if not separator or not sources.strip():
             continue
@@ -205,6 +205,20 @@ def package_build_inputs(current, record):
     return inputs
 
 
+def repo_relative_inputs(current, inputs):
+    worktree = Path(current["worktree"])
+    mount = SOURCE_ROOT / Path(current["slot"]).name
+    roots = [mount, worktree]
+    relative = set()
+    for name in inputs:
+        path = Path(os.path.abspath(worktree / name))
+        for root in roots:
+            if path.is_relative_to(root):
+                relative.add(str(path.relative_to(root)))
+                break
+    return relative
+
+
 def read_target_inputs(current, before, after):
     targets, errors = {}, []
     for record in current["reported_artifacts"]:
@@ -215,17 +229,22 @@ def read_target_inputs(current, before, after):
             inputs = target_dep_inputs(record, after)
             if executable in before["executables"]:
                 inputs.update(target_dep_inputs(record, before))
-            inputs.update(package_build_inputs(current, record))
+            inputs = repo_relative_inputs(current, inputs)
+            if not inputs:
+                raise ValueError(f"zero repo-relative inputs for {executable}")
+            inputs.update(repo_relative_inputs(current, package_build_inputs(current, record)))
             targets[executable] = sorted(inputs)
         except ValueError as error:
             errors.append(str(error))
+    mapped = set().union(*targets.values())
+    if targets and current["changed_paths"] and not mapped.intersection(current["changed_paths"]):
+        errors.append("no reported target maps changed inputs")
     return targets, errors
 
 
 def find_stale_artifacts(current, previous_artifacts, artifacts):
     stale = []
-    changed = {os.path.abspath(Path(current["worktree"]) / name)
-               for name in current["changed_paths"]}
+    changed = set(current["changed_paths"])
     for record in current["reported_artifacts"]:
         executable = record.get("executable")
         inputs = current["target_inputs"].get(executable, [])

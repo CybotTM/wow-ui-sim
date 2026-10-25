@@ -91,6 +91,125 @@ class SlotBuildTests(unittest.TestCase):
                          "WallTimeSec=1.075731\n")
 
 
+class MountedDepInfoTests(unittest.TestCase):
+    def setUp(self):
+        SlotBuildTests.setUp(self)
+        self.tree = self.slot / "worktree"
+        self.tree.mkdir()
+        self.target = self.slot / "targets/slot-2"
+        self.target.mkdir(parents=True)
+        self.source_root = self.slot / "source-mounts"
+        self.mount = self.source_root / "slot-2"
+        source_patch = patch.object(self.module, "SOURCE_ROOT", self.source_root)
+        source_patch.start()
+        self.addCleanup(source_patch.stop)
+        self.current = {
+            "worktree": str(self.tree), "slot": str(self.target),
+            "package_roots": {"probe": [str(self.mount)]},
+            "changed_paths": [], "reported_artifacts": [],
+        }
+
+    def add_dep_info(self, name, content):
+        binary = self.target / name
+        binary.parent.mkdir(parents=True, exist_ok=True)
+        binary.write_bytes(b"unchanged executable")
+        binary.chmod(0o755)
+        binary.with_suffix(".d").write_text(content)
+        self.current["reported_artifacts"].append({
+            "executable": str(binary), "fresh": True, "package_id": "probe",
+            "manifest_path": str(self.mount / "Cargo.toml"),
+        })
+        return str(binary)
+
+    def load_real_fixtures(self):
+        fixtures = Path(__file__).parent / "fixtures/slot-build-dep-info"
+        names = ["debug/wow-sim", "debug/wow-cli",
+                 "debug/deps/integration-7df7921f32c569e7"]
+        for name in names:
+            content = (fixtures / (Path(name).name + ".d")).read_text()
+            content = content.replace("/home/osso/.cache/wow-ui-sim-targets/slot-0",
+                                      str(self.target))
+            content = content.replace("/home/osso/.cache/wow-ui-sim-srcmount/slot-0",
+                                      str(self.mount))
+            self.add_dep_info(name, content)
+
+    def read_inputs(self, changed):
+        self.current["changed_paths"] = changed
+        snapshot = self.module.read_dep_info_snapshot(self.target, self.tree)
+        inputs, errors = self.module.read_target_inputs(self.current, snapshot, snapshot)
+        self.current.update(target_inputs=inputs, dep_info_errors=errors)
+        return inputs, errors
+
+    def test_real_mounted_lib_diff_judges_both_application_targets(self):
+        self.load_real_fixtures()
+        inputs, errors = self.read_inputs(["src/lib.rs"])
+        self.assertEqual(errors, [])
+        self.assertIn("src/lib.rs", inputs[str(self.target / "debug/wow-sim")])
+        hashes = {name: "same" for name in ["debug/wow-sim", "debug/wow-cli",
+                  "debug/deps/integration-7df7921f32c569e7"]}
+        self.assertEqual(self.module.find_stale_artifacts(self.current, hashes, hashes),
+                         ["debug/wow-cli", "debug/wow-sim"])
+
+    def test_real_mounted_test_diff_judges_only_integration_target(self):
+        self.load_real_fixtures()
+        inputs, errors = self.read_inputs(["tests/fast_handler_late_bind.rs"])
+        self.assertEqual(errors, [])
+        self.assertEqual(self.module.find_stale_artifacts(self.current, {}, {}),
+                         ["debug/deps/integration-7df7921f32c569e7"])
+
+    def test_mounted_and_worktree_escaped_inputs_are_repo_relative(self):
+        binary = self.target / "debug/escaped"
+        content = (f"{binary}: {self.mount}/src/space\\ name$$.rs \\\n"
+                   f" {self.tree}/src/worktree\\ name$$.rs \\\n"
+                   " src/relative\\ name$$.rs /registry/external.rs "
+                   "/toolchain/lib.rs /home/osso/.cargo/git/checkouts/lib.rs "
+                   f"{self.mount}-other/src/outside.rs\n")
+        executable = self.add_dep_info("debug/escaped", content)
+        inputs, errors = self.read_inputs(["src/space name$.rs"])
+        self.assertEqual(errors, [])
+        self.assertEqual(set(inputs[executable]), {
+            "src/space name$.rs", "src/worktree name$.rs", "src/relative name$.rs",
+            "build.rs", "Cargo.toml", "Cargo.lock",
+        })
+        self.assertEqual(self.module.find_stale_artifacts(self.current, {}, {}),
+                         ["debug/escaped"])
+
+    def test_make_continuation_separates_adjacent_input_words(self):
+        binary = self.target / "debug/continued"
+        content = (f"{binary}: {self.mount}/src/first.rs\\\n"
+                   f"{self.mount}/src/second.rs\n")
+        executable = self.add_dep_info("debug/continued", content)
+        inputs, errors = self.read_inputs(["src/second.rs"])
+        self.assertEqual(errors, [])
+        self.assertIn("src/first.rs", inputs[executable])
+        self.assertIn("src/second.rs", inputs[executable])
+        self.assertEqual(self.module.find_stale_artifacts(self.current, {}, {}),
+                         ["debug/continued"])
+
+    def test_zero_repo_inputs_fail_closed_before_package_inputs_are_added(self):
+        for changed in [[], ["Cargo.toml"]]:
+            with self.subTest(changed=changed):
+                self.current["reported_artifacts"] = []
+                binary = self.target / "debug/external"
+                self.add_dep_info("debug/external", f"{binary}: /registry/input.rs\n")
+                inputs, errors = self.read_inputs(changed)
+                self.assertTrue(errors, "external-only dep-info must fail closed")
+                self.assertIn("zero repo-relative inputs", "; ".join(errors))
+                with self.assertRaisesRegex(ValueError, "zero repo-relative inputs"):
+                    self.module.finish_build(self.target, self.target / "receipt.json",
+                                             self.current, None, {}, 0)
+
+    def test_nonempty_diff_without_any_mapped_target_fails_closed(self):
+        binary = self.target / "debug/unrelated"
+        self.add_dep_info("debug/unrelated", f"{binary}: {self.mount}/src/other.rs\n")
+        inputs, errors = self.read_inputs(["src/lib.rs"])
+        self.assertTrue(errors, "no reported target covers the diff")
+        self.assertIn("no reported target maps changed inputs", "; ".join(errors))
+        with self.assertRaisesRegex(ValueError, "no reported target maps changed inputs"):
+            self.module.finish_build(self.target, self.target / "receipt.json",
+                                     self.current, None, {}, 0)
+
+
 class SourceFreshnessTests(unittest.TestCase):
     def setUp(self):
         SlotBuildTests.setUp(self)
@@ -234,8 +353,7 @@ class SourceFreshnessTests(unittest.TestCase):
     def add_reported_executable(self, current, fresh=False):
         current.update(worktree=str(self.tree), slot=str(self.slot),
                        package_roots={"probe": [str(self.tree)]},
-                       target_inputs={str(self.slot / "debug/probe"):
-                                      [str(self.tree / "src/main.rs")]},
+                       target_inputs={str(self.slot / "debug/probe"): ["src/main.rs"]},
                        reported_artifacts=[{"package_id": "probe", "fresh": fresh,
                                             "executable": str(self.slot / "debug/probe")}])
 
@@ -486,7 +604,7 @@ class SourceFreshnessTests(unittest.TestCase):
         current["target_inputs"], errors = self.module.read_target_inputs(
             current, snapshot, snapshot)
         self.assertEqual(errors, [])
-        self.assertIn(str(source), current["target_inputs"][str(binary)])
+        self.assertIn("src/space #$.rs", current["target_inputs"][str(binary)])
         self.assertEqual(self.module.find_stale_artifacts(current, {}, {}),
                          ["debug/deps/probe-012345"])
 
