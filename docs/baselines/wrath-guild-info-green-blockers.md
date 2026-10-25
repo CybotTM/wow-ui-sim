@@ -1,6 +1,6 @@
 # Wrath guild-info GREEN blocker classification
 
-Verified: 2026-10-24. The historical classification below explains the fixture repairs. Compiled proof at GREEN `469f6ffed` / RED `9f180b154` is accepted by verifier8738: Wrath GREEN56 PASS, RED51 PASS/5 bank FAIL; Retail53 PASS on each. See [accepted runtime proof](../wiki/investigations/wrath-guild-info.md#accepted-runtime-proof) for receipts and proof limits. Current-master integration remains a separate refresh.
+Verified: 2026-10-24. The historical classification below explains the fixture repairs. Compiled proof at GREEN `469f6ffed` / RED `9f180b154` is accepted by verifier8738: Wrath GREEN56 PASS, RED51 PASS/5 bank FAIL; Retail53 PASS on each. See [accepted runtime proof](../wiki/investigations/wrath-guild-info.md#accepted-runtime-proof) for receipts and proof limits. The bounded current-master refresh also passes; see [integration proof](../wiki/investigations/wrath-guild-info.md#current-master-integration-proof).
 
 ## Decision and evidence
 
@@ -52,4 +52,4 @@ All fixture repairs pass in the accepted GREEN matrix. The following list descri
 
 The new bank stage adds three Wrath-only exact `wrath_guild_rank_flags::bank_permissions_*` identities to the previous53 (now56); other profiles retain53. The bank-perms handoff supplies a separate five-selector RED/GREEN recipe and marks the old lists as preservation inputs, not current registration inventories.
 
-The saved run retains all statuses/first failures and separately reports the two bank dropdown selectors. Wrath stock is empty on exact master `12fb7c3b3` and GREEN; Retail stock on that pair is equal at32 unique/36 occurrences. Neither34/38 nor36/42 is the fresh expectation. Current-master integration must compare fresh Retail stock on exact master `08b423c5c` and merged HEAD, plus merged Wrath stock, five bank selectors and both all-target checks. See the [guild-info investigation](../wiki/investigations/wrath-guild-info.md).
+The saved run retains all statuses/first failures and separately reports the two bank dropdown selectors. Wrath stock is empty on exact master `12fb7c3b3` and GREEN; Retail stock on that pair is equal at32 unique/36 occurrences. Neither34/38 nor36/42 is the fresh expectation. The current-master refresh at `14606d868` compares fresh Retail stock on exact master `08b423c5c` with merged code: both30 keys/34 occurrences, unchanged30/removed0/added0/count-changed0. Merged Wrath stock is[], five exact bank selectors pass, and both all-target checks plus formatting pass with zero compiler warnings. Retail remains a preserved startup failure, not clean startup; no full matrix repeat. See the [guild-info investigation](../wiki/investigations/wrath-guild-info.md).

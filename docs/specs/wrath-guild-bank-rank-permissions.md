@@ -29,7 +29,7 @@ Wrath's legacy bank permission readers project explicit selected-control-rank in
 ## Known gaps (current cycle)
 
 - [x] Saved proof at GREEN `469f6ffed` and producer-minus RED `9f180b154`: five bank selectors fail in RED and pass in GREEN; Wrath preservation56 and Retail53 pass in GREEN. Verifier8738 accepted these receipts. See the [proof status](../wiki/investigations/wrath-guild-info.md#accepted-runtime-proof).
-- [ ] Current-master integration refresh: merged Wrath/Retail checks, five merged bank selectors, fresh Wrath stock and Retail stock compared with exact master `08b423c5c`. Historical stock counts are not the current expectation.
+- [x] Current-master integration refresh at `14606d868` (merged master `08b423c5c`): Wrath/Retail all-target checks pass without warnings, five bank exact cases pass, fresh Wrath stock is `[]`. Fresh Retail master/merged stock is identical:30 keys/34 occurrences, unchanged30/removed0/added0/count-changed0. See [integration proof](../wiki/investigations/wrath-guild-info.md#current-master-integration-proof).
 - [ ] Non-native simulator policy: a valid tab with no selected/supplied rank raises an explicit unavailable-input error instead of inventing a numeric limit. Native rank -1 is source-undefined; tests do not assert its result.
 
 ## Out of scope

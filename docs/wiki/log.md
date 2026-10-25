@@ -2741,3 +2741,7 @@ Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4a-immutable-co
 ## 2026-10-24 — Wrath guild-bank proof reconciliation
 
 Updated the [bank investigation](investigations/wrath-guild-info.md#accepted-runtime-proof), contract, baseline classification and index from static/pending to verifier8738-accepted saved RED/GREEN. Current-master08b423c5c integration remains separate; historical Retail counts are not its expectation.
+
+## 2026-10-24 — Wrath guild-bank current-master integration
+
+[Bounded refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 merges master08b423c5c: Wrath/Retail all-target checks0warnings, five bank exact PASS, Wrath stock[], fresh Retail30/34 unchanged with no added/removed keys. All13 CVar receipts preserve original stat/hash; slot0 released. Historical RED/GREEN matrix not repeated.
