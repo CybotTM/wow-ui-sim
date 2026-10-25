@@ -468,20 +468,72 @@ fn get_random_scenario_best_choice(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// Keep catalog order and the supplied specific/random distinction. Other
+/// profiles retain their existing empty scenario surface.
+fn scenario_dungeons(
+    sim: &crate::lua_api::state::SimState,
+    random: bool,
+) -> impl Iterator<Item = &LfdDungeonInfo> {
+    const SCENARIO_SUBTYPE: i32 = 4; // LFG_SUBTYPEID_SCENARIO
+    let modeled_profile = matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail | crate::client_profile::ClientProfile::Ptr
+    );
+    sim.lfd_dungeons.iter().filter(move |dungeon| {
+        modeled_profile && dungeon.subtype_id == SCENARIO_SUBTYPE && dungeon.is_random == random
+    })
+}
+
 fn get_scenarios_choice_order(state: &mut LuaState) -> LuaResult<u32> {
-    let t = create_table(state);
-    state.push(t);
+    let ids: Vec<_> = {
+        let sim = borrow_state(state)?;
+        scenario_dungeons(&sim, false)
+            .map(|dungeon| dungeon.dungeon_id)
+            .collect()
+    };
+    let result = create_table(state);
+    for (index, id) in ids.into_iter().enumerate() {
+        crate::c_api::helpers::set_table_array(
+            state,
+            result,
+            (index + 1) as i64,
+            Val::Num(id as f64),
+        );
+    }
+    state.push(result);
     Ok(1)
 }
 
 fn get_num_random_scenarios(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
+    let count = {
+        let sim = borrow_state(state)?;
+        scenario_dungeons(&sim, true).count()
+    };
+    state.push(Val::Num(count as f64));
     Ok(1)
 }
 
 fn get_random_scenario_info(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
-    Ok(1)
+    let Some(index) = stack_i32(state, 1).and_then(|index| index.checked_sub(1)) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let dungeon = {
+        let sim = borrow_state(state)?;
+        scenario_dungeons(&sim, true).nth(index as usize).cloned()
+    };
+    let Some(dungeon) = dungeon else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let name = create_string(state, &dungeon.name);
+    state.push(Val::Num(dungeon.dungeon_id as f64));
+    state.push(name);
+    state.push(Val::Num(dungeon.type_id as f64));
+    state.push(Val::Num(dungeon.subtype_id as f64));
+    state.push(Val::Num(dungeon.min_level as f64));
+    state.push(Val::Num(dungeon.max_level as f64));
+    Ok(6)
 }
 
 /// `GetLFGDungeonRewards(dungeonID)` → 7 numbers describing rewards. The

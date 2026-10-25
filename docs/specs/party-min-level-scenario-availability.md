@@ -18,8 +18,8 @@
 ## Implementation inventory
 
 - `tests/cfactory_cf2_social.rs` — staged original selected-consumer selectors; no observed RED yet.
-- `src/c_api/c_party_info.rs` — existing party query integration point; GetMinLevel remains absent at staging.
-- `src/lua_api/globals/battlefield_lfg_probes.rs` — existing scenario globals return empty placeholders; replacement awaits observed RED.
+- `src/c_api/c_party_info.rs` — Retail/PTR `GetMinLevel` reads the supplied player and, when active, party roster. Registration uses `client_profile::ACTIVE`; no Mists behavior is added.
+- `src/lua_api/globals/battlefield_lfg_probes.rs` — Retail/PTR scenario projections reuse `lfd_dungeons`, retaining order and filtering subtype4 plus the supplied random flag. Specific choices exclude random rows; random count/info use random rows. Info exposes the six supplied fields read by the original availability consumer. Other profiles retain their empty surface. No new catalog or defaults.
 - `src/lua_api/state_types/collections.rs` — existing `LfdDungeonInfo` catalog records, reused without a second catalog.
 - `src/lua_api/game_data.rs`, `src/lua_api/state/sim_state.rs` — existing player/party inputs, no second roster.
 
@@ -34,9 +34,9 @@ Each runs all roster, boundary, replacement-catalog and supplied-solo observatio
 
 ## Known gaps (current cycle)
 
-- [ ] Acquire an authorized build-slot marker and literal capacity `| ADD:`; compile/list selectors and observe each Retail/PTR RED at the original GetMinLevel call before producer changes.
-- [ ] Implement the smallest shared minimum and scenario catalog projections, then prove both independent selectors GREEN on each applicable profile, with zero new warnings including test targets.
-- [ ] Mists remains part of the goal, but explicitly BLOCKED if original GroupFinder setup hits unresolved `C_LFGInfo.IsLFREnabled` policy. Preserve diagnostics; do not call that setup failure producer RED or install an availability shim.
+- [ ] Future slot owner must obtain admission, compile/list selectors and observe each Retail/PTR RED using the direct GREEN-child revision that removes only the producer. Static implementation was explicitly authorized before runtime RED; neither phase has executed.
+- [ ] Prove both independent selectors GREEN on Retail/PTR, with zero new warnings including test targets. Producer implementation and formatter checks alone do not establish passing behavior.
+- [ ] Mists is BLOCKED on unresolved `C_LFGInfo.IsLFREnabled`. Preserve diagnostics; do not call that setup failure producer RED or add Mists behavior in this lane.
 - [ ] Compare complete own-base and producer stock message→count maps for each applicable profile, including additions and surviving count changes. Historical opportunity2 keys/2 occurrences is not a guaranteed delta or prefork pass.
 
 ## Out of scope

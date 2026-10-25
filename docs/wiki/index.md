@@ -1,6 +1,6 @@
 ## [2026-10-24] staged | CF-2 supplied party minimum
 
-[Original-consumer staging](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) links the [bounded contract](../specs/party-min-level-scenario-availability.md): selected GroupFinder XML/Lua provenance, independent roster/catalog transitions and explicit Mists LFR blocker. Tests/spec only; no compiled listing, observed RED or producer implementation.
+[Original-consumer staging](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) links the [bounded contract](../specs/party-min-level-scenario-availability.md): Retail/PTR supplied party minimum and scenario catalog producer prepared statically, with unchanged selected-consumer tests and producer-only RED child. No compiled listing, observed RED/GREEN or stock proof. Mists remains LFR-blocked; no behavior added.
 ## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
 
 [Removal and publisher classification](investigations/patch-12-1-7-api-audit.md#i4c-distinguish-removal-intent-from-selected-source) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4c-removal-contradictions-and-excluded-publishers): 1,202 more static cells decided; 3,966 remain UNKNOWN. Surviving declarations contradict literal retirement, explicit TOC exclusions stay source-only, and absent spellings receive no native removal credit. No runtime/build/slot.
