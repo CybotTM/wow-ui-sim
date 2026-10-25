@@ -13,7 +13,7 @@ fn register_mists_templates() {}
 #[cfg(feature = "client-mists")]
 fn register_mists_legacy_item_button_template() {
     let template = parse_mists_legacy_item_button_template();
-    super::template::register_template("ItemButtonTemplate", "Button", template);
+    super::register_template("ItemButtonTemplate", "Button", template);
 }
 
 #[cfg(feature = "client-mists")]

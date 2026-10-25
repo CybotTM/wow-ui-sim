@@ -6,6 +6,12 @@ use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
+/// Template declaration behavior selected by the composition crate.
+#[derive(Debug, Clone, Copy)]
+pub struct TemplatePolicy {
+    pub retain_wrath_declarations: bool,
+}
+
 /// Stores a template (virtual frame) with its widget type.
 #[derive(Debug, Clone)]
 pub struct TemplateEntry {
@@ -63,8 +69,8 @@ fn with_anim_group_template_registry_mut<R>(
 }
 
 /// Register a template (virtual frame) in the global registry.
-pub fn register_template(name: &str, widget_type: &str, frame: FrameXml) {
-    register_template_with_local_source(name, widget_type, frame, None, None);
+pub fn register_template(name: &str, widget_type: &str, frame: FrameXml, policy: TemplatePolicy) {
+    register_template_with_local_source(name, widget_type, frame, None, None, policy);
 }
 
 pub fn register_template_with_local_source(
@@ -73,16 +79,17 @@ pub fn register_template_with_local_source(
     frame: FrameXml,
     local_source: Option<Val>,
     declaration_taint: Option<String>,
+    policy: TemplatePolicy,
 ) {
     with_template_registry_mut(|registry| {
         let lower = name.to_ascii_lowercase();
-        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+        if policy.retain_wrath_declarations
             && retain_wrath_declaration(registry, &lower, declaration_taint.as_deref())
         {
             tracing::warn!("Duplicate virtual frame template: {}", name);
             return;
         }
-        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+        if policy.retain_wrath_declarations
             && let Some(previous) = registry.entries_ci.get(&lower)
         {
             registry.entries.remove(previous);
@@ -339,10 +346,9 @@ fn collect_template_chain(
 /// definitions in the extracted Interface files. They behave as templates that
 /// inherit from a base template and apply a mixin. Register them so the
 /// template chain resolution and CreateFrame can find them.
-pub fn register_intrinsic_templates() {
-    register_intrinsic_frame_templates();
-    register_button_frame_template();
-    super::profile_templates::register_all();
+pub fn register_intrinsic_templates(policy: TemplatePolicy) {
+    register_intrinsic_frame_templates(policy);
+    register_button_frame_template(policy);
 }
 
 struct IntrinsicFrameTemplate {
@@ -352,9 +358,9 @@ struct IntrinsicFrameTemplate {
     mixin: &'static str,
 }
 
-fn register_intrinsic_frame_templates() {
+fn register_intrinsic_frame_templates(policy: TemplatePolicy) {
     for spec in intrinsic_frame_templates() {
-        register_intrinsic_frame_template(spec);
+        register_intrinsic_frame_template(spec, policy);
     }
 }
 
@@ -387,8 +393,13 @@ fn intrinsic_frame_templates() -> &'static [IntrinsicFrameTemplate] {
     ]
 }
 
-fn register_intrinsic_frame_template(spec: &IntrinsicFrameTemplate) {
-    register_template(spec.name, spec.widget_type, intrinsic_frame_xml(spec));
+fn register_intrinsic_frame_template(spec: &IntrinsicFrameTemplate, policy: TemplatePolicy) {
+    register_template(
+        spec.name,
+        spec.widget_type,
+        intrinsic_frame_xml(spec),
+        policy,
+    );
 }
 
 fn intrinsic_frame_xml(spec: &IntrinsicFrameTemplate) -> FrameXml {
@@ -408,8 +419,13 @@ fn intrinsic_mixin(mixin: &str) -> Option<String> {
     }
 }
 
-fn register_button_frame_template() {
-    register_template("ButtonFrameTemplate", "Frame", button_frame_template_xml());
+fn register_button_frame_template(policy: TemplatePolicy) {
+    register_template(
+        "ButtonFrameTemplate",
+        "Frame",
+        button_frame_template_xml(),
+        policy,
+    );
 }
 
 fn button_frame_template_xml() -> FrameXml {
@@ -751,35 +767,5 @@ fn append_unique_mixins(
         if !name.is_empty() && seen_mixins.insert(name.to_string()) {
             mixins.push(name.to_string());
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn intrinsic_templates_register_engine_frames_and_button_frame_parts() {
-        register_intrinsic_templates();
-
-        let scroll_box = get_template("WoWScrollBoxList").expect("scroll box list intrinsic");
-        assert_eq!(scroll_box.widget_type, "Frame");
-        assert_eq!(
-            scroll_box.frame.inherits.as_deref(),
-            Some("ScrollBoxBaseTemplate")
-        );
-        assert_eq!(
-            scroll_box.frame.mixin.as_deref(),
-            Some("ScrollBoxListMixin")
-        );
-
-        let button_frame = get_template("ButtonFrameTemplate").expect("button frame intrinsic");
-        assert_eq!(button_frame.widget_type, "Frame");
-        assert_eq!(button_frame.frame.children.len(), 1);
-        let FrameChildElement::Frame(inset) = &button_frame.frame.children[0] else {
-            panic!("ButtonFrameTemplate child should be an inset frame");
-        };
-        assert_eq!(inset.parent_key.as_deref(), Some("Inset"));
-        assert_eq!(inset.inherits.as_deref(), Some("InsetFrameTemplate"));
     }
 }

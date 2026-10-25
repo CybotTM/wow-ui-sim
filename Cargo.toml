@@ -9,9 +9,13 @@ build = "build.rs"
 autotests = false
 
 [workspace]
-members = [".", "xtask", "crates/test-harness", "crates/sim-data", "crates/sim-data-profile"]
+members = [".", "xtask", "crates/test-harness", "crates/sim-data", "crates/sim-data-profile", "crates/sim-lua-bridge", "crates/sim-event", "crates/sim-toc", "crates/sim-xml"]
 
 [dependencies]
+sim-xml = { path = "crates/sim-xml" }
+sim-toc = { path = "crates/sim-toc" }
+sim-event = { path = "crates/sim-event" }
+sim-lua-bridge = { path = "crates/sim-lua-bridge" }
 sim-data = { path = "crates/sim-data" }
 sim-data-profile = { path = "crates/sim-data-profile" }
 icu_casemap = { version = "=2.1.1", default-features = false, features = ["compiled_data"] }
@@ -148,7 +152,7 @@ aura-spell-classifications = []
 # Shared keyed timer capability used by PTR and Forever.
 timed-signal-maps = []
 # Shared XML aliases and intrinsic mappings for aura frames/buttons.
-aura-xml-widgets = []
+aura-xml-widgets = ["sim-xml/aura-xml-widgets"]
 # Shared modeled AuraContainer option processors, enums and base aura secrecy queries.
 aura-containers = ["aura-instance-enumeration", "sim-data-profile/aura-containers"]
 # Public aura ID queries shared by Retail 12.0+ and native aura containers.

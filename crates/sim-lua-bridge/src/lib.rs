@@ -22,9 +22,8 @@ pub use from_stack::FrameObject;
 pub use from_stack::FrameRef;
 pub use from_stack::FromMethodSelf;
 pub use from_stack::FromStack;
-pub(crate) use from_stack::stack_val;
-#[cfg(feature = "retail-12-1-0")]
-pub(crate) use from_stack::val_to_i32;
+pub use from_stack::stack_val;
+pub use from_stack::val_to_i32;
 pub use into_stack::IntoStack;
 #[doc(hidden)]
 pub use macros::push_lua_result;
@@ -34,5 +33,5 @@ pub use multivalue::MultiValue;
 pub use table_builder::FrameIdentity;
 pub use table_builder::TableBuilder;
 pub use table_builder::create_frame_table;
-pub(crate) use table_builder::table_set_rust_fn;
-pub(crate) use table_builder::table_set_rust_fn_static;
+pub use table_builder::table_set_rust_fn;
+pub use table_builder::table_set_rust_fn_static;
