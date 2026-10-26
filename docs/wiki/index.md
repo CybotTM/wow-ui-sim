@@ -1,6 +1,6 @@
 ## [2026-10-25] investigation | Classic opaque aura timers
 
-[Original callback attribution](investigations/classic-startup-producer-cascades.md#opaque-private-aura-timers) resolves four erased nil calls to the declared defensive query. Existing-model Era/Anniversary capability repair is staged; runtime GREEN and checks remain pending. TTS is separately owned.
+[Original callback attribution](investigations/classic-startup-producer-cascades.md#opaque-private-aura-timers) resolves four erased nil calls to the declared defensive query. The [completion matrix](../specs/aura-spell-classification-identifiers.md#classic-completion-proof--2026-10-25) records both-profile RED/GREEN and AuraUtil preservation, exact stock improvement with no additions, and Era/Anniversary/Retail all-target checks. TTS remains separately owned.
 
 ## [2026-10-25] investigation | Forever startup supplied inputs
 

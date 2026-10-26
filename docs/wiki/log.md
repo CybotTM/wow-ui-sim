@@ -1,3 +1,7 @@
+## [2026-10-25] proof | Classic defensive aura timer completion
+
+The [completion matrix](../specs/aura-spell-classification-identifiers.md#classic-completion-proof--2026-10-25) records Era/Anniversary stock-timer RED/GREEN, original AuraUtil preservation and exact stock differences with no additions. Era/Anniversary all-target checks retain only the three permitted dead-code warnings; Retail has none. Known TTS residue remains separately owned, so no baseline is changed.
+
 ## [2026-10-25] investigation | Classic opaque aura timers
 
 [Original callback attribution](investigations/classic-startup-producer-cascades.md#opaque-private-aura-timers) resolves four erased nil calls to the declared defensive query. Existing-model Era/Anniversary capability repair is staged; runtime GREEN and checks remain pending. TTS is separately owned.
