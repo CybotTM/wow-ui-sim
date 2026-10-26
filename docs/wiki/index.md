@@ -1,6 +1,6 @@
-## [2026-10-26] implementation | Forever temporary CVars
+## [2026-10-26] proof | Forever temporary CVars
 
-[Single overlay and original listener identity](systems/forever-temporary-cvars.md) links the [contract](../specs/c-factory-cf2-tts.md#forever-temporary-cvars): original Gamepad/TargetLogic RED, one effective/persisted store, original normal/secure listener discrimination, and explicit unsupported nil diagnostic. Four exact Forever GREEN cases pass; warning checks are pending. Historical nil shape stays deferred.
+[Single overlay and original listener identity](systems/forever-temporary-cvars.md) links the [contract](../specs/c-factory-cf2-tts.md#forever-temporary-cvars): original Gamepad/TargetLogic RED, one effective/persisted store, original normal/secure listener discrimination, and explicit unsupported nil diagnostic. Four exact Forever GREEN cases, protected stock at 26/26→26/26 with no raw changes, formatting and all seven zero-warning all-target checks pass. Historical nil shape stays deferred.
 
 ## [2026-10-25] implementation | PTR Edit Mode declarations
 

@@ -1,6 +1,6 @@
-## [2026-10-26] implementation | Forever temporary CVars
+## [2026-10-26] proof | Forever temporary CVars
 
-[Single overlay and original listener identity](systems/forever-temporary-cvars.md) records original Gamepad/TargetLogic RED, persisted-file protection, authenticated normal/secure replay listeners, and the explicit unmodelled nil diagnostic. Four exact Forever GREEN cases pass at70e4d148b; warning checks are pending. Accepted TTS bytes and historical nil deferral are unchanged.
+[Single overlay and original listener identity](systems/forever-temporary-cvars.md) records original Gamepad/TargetLogic RED, persisted-file protection, authenticated normal/secure replay listeners, and the explicit unmodelled nil diagnostic. Four exact Forever GREEN cases pass at 70e4d148b. Stock remains byte-identical at 26/26→26/26, formatting passes and all seven canonical all-target checks have zero warnings at 6f50f3002. Accepted TTS bytes and historical nil deferral are unchanged.
 
 ## [2026-10-25] proof | Mists supplied map display
 
