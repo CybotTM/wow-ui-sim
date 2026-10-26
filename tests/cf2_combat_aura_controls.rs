@@ -44,15 +44,15 @@ fn select_original_debuff(env: &WowLuaEnv) {
             'must use the existing normal arena member child')
         assert(Cf2AuraDebuff.Update == ArenaUnitFrameDebuffMixin.Update, 'original Update identity')
         assert(Cf2AuraDebuff.SetUnit == ArenaUnitFrameDebuffMixin.SetUnit, 'original SetUnit identity')
-        assert(Cf2AuraDebuff:GetScript('OnEvent') == ArenaUnitFrameDebuffMixin.OnEvent,
-            'original installed OnEvent identity')
+        assert(type(Cf2AuraDebuff:GetScript('OnEvent')) == 'function',
+            'original XML must install an event handler')
         "#,
     )
     .expect("normal arena member, child and installed handler identity");
     for function in [
         "Cf2AuraDebuff.Update",
         "Cf2AuraDebuff.SetUnit",
-        "Cf2AuraDebuff:GetScript('OnEvent')",
+        "ArenaUnitFrameDebuffMixin.OnEvent",
     ] {
         assert_original_source(env, function, ARENA_SOURCE);
     }
@@ -61,6 +61,36 @@ fn select_original_debuff(env: &WowLuaEnv) {
         "Cf2AuraDebuff:GetParent().UpdatePrivateAuras",
         "Blizzard_UnitFrame/Shared/CompactUnitFrame.lua",
     );
+}
+
+fn assert_installed_event_clears_selected_auras(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        C_UnitAuras.AddBlockedAura('player', 101)
+        C_UnitAuras.AddBlockedAura('party1', 201)
+        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
+        local debuff = Cf2AuraDebuff
+        local handler = debuff:GetScript('OnEvent')
+        handler(debuff, 'UNRELATED_EVENT')
+        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
+        assert(debug.gethook() == nil, 'must not replace an existing hook')
+        local original = ArenaUnitFrameDebuffMixin.OnEvent
+        local calls = 0
+        debug.sethook(function(event)
+            if event == 'call' and debug.getinfo(2, 'f').func == original then
+                calls = calls + 1
+            end
+        end, 'c')
+        local ok, err = pcall(handler, debuff, 'LOSS_OF_CONTROL_UPDATE')
+        debug.sethook()
+        assert(ok, err)
+        assert(calls == 1, 'installed XML handler must execute the original OnEvent body once')
+        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL').auraInstanceID == 101)
+        assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil,
+            'original matching-event branch clears only the selected unit')
+        "#,
+    )
+    .expect("installed XML event dispatch executes original event-specific aura cleanup");
 }
 
 fn fixture_aura(id: i32) -> AuraInfo {
@@ -153,6 +183,7 @@ fn original_arena_cleanup_restores_selected_unit_aura_enumeration() {
         "#,
     )
     .expect("original arena cleanup must clear selected unit blocks without error");
+    assert_installed_event_clears_selected_auras(&env);
     assert_eq!(env.state().borrow().lua_errors.len(), errors_before);
     let state = env.state().borrow();
     assert_eq!(state.player.buffs[0].aura_instance_id, 101);
