@@ -1,6 +1,6 @@
-## [2026-10-26] staged | Supplied pet specialization catalog
+## [2026-10-26] runtime proof | Supplied pet specialization catalog
 
-[Selected consumer and supplied-state contract](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog) distinguish PTR OnLoad1205, Retail Refresh and unselected Forever Standard UI. The getter follows observed original PTR OnLoad1205/Refresh1217 RED and preserves a strict unknown default; supplied GREEN, Retail and final proof remain pending.
+[Selected consumer and supplied-state contract](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog) distinguish PTR OnLoad1205, Retail Refresh and unselected Forever Standard UI. Five original-consumer RED/GREEN pairs cover PTR installed OnLoad and Retail/PTR Refresh plus unset recovery. PTR stock122/138 has only two attributed unknown-state key replacements; Retail remains0/0. Seven all-target gates remain pending; other-profile absence will be compiled but not executed here.
 
 ## [2026-10-26] implementation | Supplied voice settings access
 

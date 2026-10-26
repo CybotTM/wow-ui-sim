@@ -4,11 +4,11 @@ Retail/PTR accept supplied `PetSpecInfo` lists for `C_StableInfo.GetAvailablePet
 
 ## What it must do
 
-- [ ] Publish the getter and `A_Admin.SetAvailablePetSpecInfos` only on Retail/PTR using ACTIVE. Pinned Retail `StableInfoDocumentation.lua:24–31,216–224` and PTR70493 `:28–35,243–251` declare zero arguments and a nonnil array of records with nonnil `specID:number`, `specIndex:luaIndex`, `specializationName:string`.
-- [ ] Copy complete supplied records into environment-local state, preserve supplied order and return fresh records/arrays. Replacement is atomic. Validate finite specID, positive integral u32 specIndex and UTF-8 name as simulator input policy, not native validation parity.
-- [ ] Accept explicitly supplied empty lists; nil clears an observation. Unset/cleared queries raise `native-unknown: C_StableInfo.GetAvailablePetSpecInfos has no supplied list or documented default`. No native catalog or default-empty policy is inferred.
-- [ ] Original selected PTR specialization OnLoad responds to empty/single/multiple supplied catalogs. Original Retail/PTR Refresh projects supplied names, indexes and selected spec IDs across changes and independent environments.
-- [ ] Keep Forever and Wrath/Mists/Era/Anniversary publication unchanged.
+- [x] Publish the getter and `A_Admin.SetAvailablePetSpecInfos` only on Retail/PTR using ACTIVE. Pinned Retail `StableInfoDocumentation.lua:24–31,216–224` and PTR70493 `:28–35,243–251` declare zero arguments and a nonnil array of records with nonnil `specID:number`, `specIndex:luaIndex`, `specializationName:string`.
+- [x] Copy complete supplied records into environment-local state, preserve supplied order and return fresh records/arrays. Replacement is atomic. Validate finite specID, positive integral u32 specIndex and UTF-8 name as simulator input policy, not native validation parity.
+- [x] Accept explicitly supplied empty lists; nil clears an observation. Unset/cleared queries raise `native-unknown: C_StableInfo.GetAvailablePetSpecInfos has no supplied list or documented default`. No native catalog or default-empty policy is inferred.
+- [x] Original selected PTR specialization OnLoad responds to empty/single/multiple supplied catalogs. Original Retail/PTR Refresh projects supplied names, indexes and selected spec IDs across changes and independent environments.
+- [ ] Keep Forever and Wrath/Mists/Era/Anniversary publication unchanged. Static ACTIVE gating is present; absence tests will be compiled but not executed in this lane; runtime coverage awaits I1 frozen-SHA.
 
 ## How it works
 
@@ -29,7 +29,9 @@ Retail/PTR accept supplied `PetSpecInfo` lists for `C_StableInfo.GetAvailablePet
 
 ## Known gaps (current cycle)
 
-- [ ] Original-consumer RED/GREEN, paired stock and seven zero-warning all-target checks remain pending.
+Five original-consumer RED/GREEN pairs pass with byte-identical tests: PTR installed OnLoad1205, PTR/Retail Refresh1217/1229 and unset/clear recovery through each original entry. Four supplementary input/copy cases pass. PTR stock122/138 remains122/138 with exactly two attributed nil-member→native-unknown replacements, count1 each, and no surviving count drift. Retail stock remains0/0 with byte-identical raw output. These are supplied observations, not native catalog/default policy.
+
+- [ ] Seven zero-warning all-target checks remain pending.
 
 ## Out of scope
 

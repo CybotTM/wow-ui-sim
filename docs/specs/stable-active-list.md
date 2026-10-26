@@ -48,4 +48,4 @@ No open gates within the supplied active-list scope. Retail/PTR exact lane selec
 
 ## Out of scope
 
-Native acquisition, ordering, default membership, empty-state policy, validation rules and event timing are unknown. Admin validation is a simulator input contract only. Full-closure zero-errors, full Refresh completion and the secondary-pet `GetStablePetInfo` query remain unclaimed. PTR's `GetAvailablePetSpecInfos` OnLoad gap at Standard StableUI.lua:1205 remains out of scope. Forever's Camelot stable reads and Wrath/Mists/Era/Anniversary remain unchanged.
+Native acquisition, ordering, default membership, empty-state policy, validation rules and event timing are unknown. Admin validation is a simulator input contract only. Full-closure zero-errors, full Refresh completion and the secondary-pet `GetStablePetInfo` query remain unclaimed. PTR specialization observations at Standard StableUI.lua:1205 are covered separately by the [supplied catalog contract](stable-pet-spec-infos.md); native initial membership remains unknown. Forever's Camelot stable reads and Wrath/Mists/Era/Anniversary remain unchanged.
