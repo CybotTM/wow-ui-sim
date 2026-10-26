@@ -1,6 +1,6 @@
 ## [2026-10-26] staged | Supplied item-upgrade eligibility
 
-[Location observations](systems/item-upgrade-eligibility.md) link the [contract](../specs/item-upgrade-eligibility.md). The restored generic ItemUtil fixture supplies a shown-frame context without claiming upgrade-window acceptance. Independent supplied locations, movement/removal, explicit missing-input diagnostics and isolation are staged; runtime proof is pending.
+[Location observations](systems/item-upgrade-eligibility.md) link the [contract](../specs/item-upgrade-eligibility.md). The restored generic ItemUtil fixture supplies a shown-frame context without claiming upgrade-window acceptance. Independent supplied locations, movement/removal, explicit missing-input diagnostics and isolation are staged. The added SetReagentCount regression reproduces stale true after remove/recreate; the mutation path now invalidates those inputs. Final expanded profile proof is pending.
 
 ## [2026-10-26] implementation | PTR SwingTimer declarations
 
