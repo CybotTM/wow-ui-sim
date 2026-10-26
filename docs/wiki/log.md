@@ -1,6 +1,6 @@
 ## [2026-10-25] Retail/PTR proof | CF-2 party minimum
 
-[Original consumers](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) pass both exact RED→GREEN selectors on R/P; stock12/14→10/12 and244/312→242/310 has no additions/count changes. Lane tests remain isolated from removed TTS tests. Private fixture/producer imports and PTR TOC selection are repaired. R/P checks have zero warnings; Era gate pending.
+[Original consumers](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) pass both exact RED→GREEN selectors on R/P; stock12/14→10/12 and244/312→242/310 has no additions/count changes. Lane tests remain isolated from removed TTS tests. Private fixture/producer imports and PTR TOC selection are repaired. R/P/Era all-target checks have zero warnings; formatting/readability and all 28 original-CVar guards pass. Mists remains deferred.
 
 ## [2026-10-24] static producer | CF-2 party minimum
 

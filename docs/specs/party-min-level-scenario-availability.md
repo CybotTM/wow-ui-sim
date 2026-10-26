@@ -39,7 +39,7 @@ Each runs all roster, boundary, replacement-catalog and supplied-solo observatio
 ## Known gaps (current cycle)
 
 - [x] Both Retail/PTR selectors independently list one case and fail at original `ScenarioFinder_Shared.lua:58`, after original XML bindings and Lua provenance. Tests are byte-identical across the producer-only sibling pair.
-- [ ] Finish the Era zero-warning all-target gate. Both independent selectors pass GREEN on Retail/PTR; their all-target checks have zero compiler warnings. Empty-catalog preservation passes in both phases/profiles.
+- [x] Both independent selectors pass GREEN on Retail/PTR. Retail/PTR/Era all-target checks have zero compiler warnings, including test targets. Empty-catalog preservation passes in both phases/profiles; full workspace formatting passes.
 - [ ] Mists is BLOCKED on unresolved `C_LFGInfo.IsLFREnabled`. Preserve diagnostics; do not call that setup failure producer RED or add Mists behavior in this lane.
 - [x] Compare complete producer-equivalent pinned-master and GREEN stock maps: Retail12/14→10/12, PTR244/312→242/310. Each removes only the original GetMinLevel primary/reporter pair; no additions or changed surviving counts. All launches use fresh current CVar copies with unchanged-original guards.
 
