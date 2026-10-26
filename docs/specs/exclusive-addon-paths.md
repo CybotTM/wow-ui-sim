@@ -4,12 +4,12 @@
 
 ## What it must do
 
-- [ ] Repeated `--addons-path DIR` arguments replace all default third-party candidates, in argument order.
-- [ ] With no CLI roots, `WOW_SIM_ADDONS_PATH_EXCLUSIVE=1` (or `true`) restricts discovery to `WOW_SIM_ADDONS_PATH`. An unset or empty path selects no third-party roots, not default candidates.
-- [ ] With neither exclusive option, discovery retains its existing ordered union of candidates. False/zero does not enable exclusive mode.
-- [ ] Existing roots are deduplicated by canonical path; nonexistent roots do not trigger default discovery in exclusive mode.
-- [ ] Exclusive selection also limits explicit `C_AddOns.LoadAddOn` and test-file lookup. Ambient `Interface/TestAddOns` is not searched in exclusive mode.
-- [ ] Blizzard UI still uses its separate profile cache, and `run-tests` still resolves bundled TestFramework without exposing other bundled addons.
+- [x] Repeated `--addons-path DIR` arguments replace all default third-party candidates, in argument order.
+- [x] With no CLI roots, `WOW_SIM_ADDONS_PATH_EXCLUSIVE=1` (or `true`) restricts discovery to `WOW_SIM_ADDONS_PATH`. An unset or empty path selects no third-party roots, not default candidates.
+- [x] With neither exclusive option, discovery retains its existing ordered union of candidates. False/zero does not enable exclusive mode.
+- [x] Existing roots are deduplicated by canonical path; nonexistent roots do not trigger default discovery in exclusive mode.
+- [x] Exclusive selection also limits explicit `C_AddOns.LoadAddOn` and test-file lookup. Ambient `Interface/TestAddOns` is not searched in exclusive mode.
+- [x] Blizzard UI still uses its separate profile cache, and `run-tests` still resolves bundled TestFramework without exposing other bundled addons.
 
 ## How it works
 
@@ -31,7 +31,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] RED/GREEN and seven-profile checks pending.
+None. Ordinary loader/CLI RED and nine targeted GREEN cases pass. A full CLI startup acceptance run passes three assertions covering repeated roots, dependencies and ambient/environment exclusion. All seven canonical all-target checks have zero compiler warnings. Retail default stock is unchanged at 8 raw keys / 10 occurrences. InTimeBL's default and environment-exclusive runs each pass 10 unit, 4 generator and 4 simulator assertions; its separate missing challenge-mode getter is outside this feature.
 
 ## Out of scope
 

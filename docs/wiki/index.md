@@ -1,6 +1,6 @@
 ## [2026-10-26] feature | Exclusive addon test roots
 
-[CLI usage](reference/cli-commands.md#run-tests-addon) links the [selection contract](../specs/exclusive-addon-paths.md): explicit roots replace third-party discovery, retain bundled TestFramework and keep Blizzard UI separate. Loader/CLI RED and nine targeted GREEN cases pass. Seven-profile checks and InTimeBL smoke proof are pending.
+[CLI usage](reference/cli-commands.md#run-tests-addon) links the [selection contract](../specs/exclusive-addon-paths.md): explicit roots replace third-party discovery, retain bundled TestFramework and keep Blizzard UI separate. Loader/CLI RED, nine targeted GREEN cases and full CLI startup acceptance pass. All seven canonical all-target checks have zero compiler warnings; Retail stock stays 8/10. InTimeBL passes both smoke modes while exclusive discovery drops from 66 addons to only InTimeBL. Its missing challenge-mode getter remains a separate API gap.
 
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 

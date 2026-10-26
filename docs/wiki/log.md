@@ -1,6 +1,6 @@
 ## [2026-10-26] feature | Exclusive addon test roots
 
-[CLI reference](reference/cli-commands.md#run-tests-addon) and [contract](../specs/exclusive-addon-paths.md) document repeatable CLI roots and environment-only isolation. Candidate discovery, explicit addon loading and test lookup share the selected roots; bundled TestFramework is located explicitly. Ordinary loader/CLI RED and nine targeted GREEN cases pass; profile and smoke gates are pending.
+[CLI reference](reference/cli-commands.md#run-tests-addon) and [contract](../specs/exclusive-addon-paths.md) document repeatable CLI roots and environment-only isolation. Candidate discovery, explicit addon loading and test lookup share the selected roots; bundled TestFramework is located explicitly. Ordinary loader/CLI RED, nine targeted GREEN cases, three full CLI acceptance assertions and all seven zero-warning canonical all-target checks pass. Retail stock remains exactly 8 raw keys / 10 occurrences. Both InTimeBL runs pass 10 unit, 4 generator and 4 simulator assertions; exclusive discovery loads only InTimeBL rather than 66 candidates. The observed missing C_ChallengeMode.GetActiveChallengeMapID remains report-only, outside the CLI feature.
 
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
