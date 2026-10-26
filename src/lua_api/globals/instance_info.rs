@@ -1,4 +1,4 @@
-//! Instance + mirror-timer probe globals backed by `SimState.world`.
+//! Instance, mirror-timer and supplied elapsed-timer globals.
 //!
 //! Migrates 3 entries off `GLOBAL_ZERO_STUBS`:
 //!
@@ -15,8 +15,9 @@
 //! - `GetMirrorTimerProgress(name)` → current progress for the timer
 //!   with the matching `name`, or nil when absent.
 //! - `GetWorldElapsedTimers()`      → no active timer IDs by default.
-//! - `GetWorldElapsedTime(id)`      → `(id, 0, 0)` so scenario / challenge
-//!   timer probes avoid nil arithmetic when no timer state is seeded.
+//! - `GetWorldElapsedTime(id)`      → supplied `(name, elapsed, type)`, or no
+//!   results when absent on the six challenge profiles. Excluded Wrath retains
+//!   its old ungrounded `(id, 0, 0)` placeholder for a separate lane.
 //! - `GetNumSavedInstances()` / `GetNumSavedWorldBosses()` → zero, because
 //!   no raid-lock backing store is seeded by default.
 //! - `GetSavedInstanceInfo(index)` / `GetSavedWorldBossInfo(index)` → no
