@@ -96,16 +96,25 @@ fn original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinar
                 "InputUtil.RegisterMKBInit",
                 "Blizzard_SharedXML/InputUtil.lua",
             );
+            eprintln!(
+                "registered input listener IDs: {:?}",
+                env.state()
+                    .borrow()
+                    .widgets
+                    .get_event_listeners("INPUT_DEVICE_INTERFACE_TRANSITION")
+            );
             env.exec(
         r#"
         EventUtil.TriggerOnVariablesLoaded()
         -- InputUtil's original listener is forbidden, so public EnumerateFrames omits it.
         local frames = assert(debug.getregistry().__frame_refs, 'real frame cache required')
         local count = 0
+        local diagnostics = {}
         for _, frame in pairs(frames) do
             if frame:IsEventRegistered('INPUT_DEVICE_INTERFACE_TRANSITION') then
                 local handler = frame:GetScript('OnEvent')
                 local info = handler and debug.getinfo(handler, 'S')
+                table.insert(diagnostics, tostring(frame:GetName()) .. ':' .. tostring(info and info.source))
                 if info and info.source:gsub('\\', '/'):match('Blizzard_SharedXML/InputUtil.lua$') then
                     count = count + 1
                     Cf2InputListener = frame
@@ -113,7 +122,7 @@ fn original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinar
                 end
             end
         end
-        assert(count == 1, 'exact original InputUtil transition listener required')
+        assert(count == 1, 'exact original InputUtil transition listener required: '..count..' candidates='..table.concat(diagnostics, ';'))
         "#,
     )
     .expect("original Gamepad registration and original event listener must exist");
