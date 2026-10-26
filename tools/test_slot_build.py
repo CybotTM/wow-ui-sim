@@ -561,6 +561,58 @@ class SourceFreshnessTests(unittest.TestCase):
             capture_output=True)
         return result, json.loads(receipt.read_text())
 
+    def build_directory_library(self):
+        directory = self.tree / "tests/nested"
+        directory.mkdir(parents=True)
+        (directory / "case.rs").write_text("original case")
+        self.git("add", ".")
+        self.git("commit", "-qm", "directory build input")
+        mutation = ('binary.write_bytes(source.read_bytes() + '
+                    '(source.parent.parent / "tests/nested/case.rs").read_bytes()); '
+                    'binary.with_suffix(".d").write_text('
+                    'str(binary)+": src/main.rs tests\\n")')
+        result, receipt = self.run_library_step("retail", mutation=mutation)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return receipt
+
+    def test_directory_input_unchanged_tree_reuses_certificate(self):
+        first = self.build_directory_library()
+        # Content, not timestamps, determines freshness.
+        os.utime(self.tree / "tests/nested/case.rs", (1, 1))
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(receipt["artifact_certificates"], first["artifact_certificates"])
+        output = self.slot / "debug/deps/libprobe-retail.rmeta"
+        self.assertTrue(output.read_bytes().endswith(b"original case"))
+
+    def assert_directory_change_rejected(self, change):
+        self.build_directory_library()
+        output = self.slot / "debug/deps/libprobe-retail.rmeta"
+        original = output.read_bytes()
+        change(self.tree / "tests/nested")
+        # Advance the slot-wide source baseline with an unrelated profile.
+        result, _ = self.run_library_step("forever")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertEqual(output.read_bytes(), original)
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+
+    def test_directory_input_changed_nested_file_rejects_reuse(self):
+        self.assert_directory_change_rejected(
+            lambda directory: (directory / "case.rs").write_text("changed case"))
+
+    def test_directory_input_added_file_rejects_reuse(self):
+        self.assert_directory_change_rejected(
+            lambda directory: (directory / "added.rs").write_text("added case"))
+
+    def test_directory_input_removed_file_rejects_reuse(self):
+        self.assert_directory_change_rejected(
+            lambda directory: (directory / "case.rs").unlink())
+
     def test_profile_switch_cannot_certify_an_older_library(self):
         result, _ = self.run_library_step("retail")
         self.assertEqual(result.returncode, 0, result.stderr)
