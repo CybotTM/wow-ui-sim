@@ -44,6 +44,43 @@ fn load_edit_mode() -> (WowLuaEnv, PathBuf) {
 }
 
 #[test]
+fn complete_display_info_initializes_original_system_maps() {
+    let (env, root) = load_edit_mode();
+    let source =
+        std::fs::read_to_string(root.join("Shared/EditModeSettingDisplayInfo.lua")).unwrap();
+    env.exec_named(
+        &source,
+        "@Interface/AddOns/Blizzard_EditMode/Shared/EditModeSettingDisplayInfo.lua",
+    )
+    .expect("complete unchanged original PTR display-info initialization");
+    env.exec(
+        r#"
+        local manager = EditModeSettingDisplayInfoManager
+        assert(type(manager.GetSystemSettingDisplayInfoMap) == 'function')
+        assert(Enum.EditModeSystem.SwingTimer == 29)
+        local swing = manager:GetSystemSettingDisplayInfoMap(29)
+        assert(swing[0].setting == 0 and swing[0].minValue == 50)
+        assert(swing[0].maxValue == 200 and swing[0].stepSize == 10)
+        assert(swing[0]:ConvertValueForDisplay(3) == 80)
+        assert(swing[1].minValue == 50 and swing[1].maxValue == 100)
+        assert(swing[3].minValue == 213 and swing[3].maxValue == 852)
+        assert(swing[4].minValue == 15 and swing[4].maxValue == 60)
+        assert(swing[5].type == Enum.EditModeSettingDisplayType.Checkbox)
+        assert(swing[6].type == Enum.EditModeSettingDisplayType.Checkbox)
+        local visibility = swing[2].options
+        assert(#visibility == 3)
+        assert(visibility[1].value == 0 and visibility[2].value == 1)
+        assert(visibility[3].value == 2)
+        local loss = manager:GetSystemSettingDisplayInfoMap(28)
+        assert(loss[0].minValue == 50 and loss[0].maxValue == 150)
+        assert(loss[0].stepSize == 10)
+        assert(manager:GetSystemSettingDisplayInfoMap(2) ~= nil)
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn boss_growth_dropdown_consumes_three_declared_directions() {
     let (env, root) = load_edit_mode();
     // The complete selected file has other declaration gaps. Exercise its unchanged
