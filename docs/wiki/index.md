@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Supplied active loss-of-control state
+
+[Active-effect model](systems/lua-api.md#active-loss-of-control-state) links the [contract](../specs/active-loss-of-control.md): empty per-unit state, declared record shapes, explicit admin input and Wrath absence. Retail original-consumer RED/GREEN passes; existing event-overlay assertions pass after supplied input; stock remains 12/14. Remaining profile/check gates are pending.
+
 ## [2026-10-25] implementation | PTR Edit Mode declarations
 
 [Two original boundaries](investigations/ptr-edit-mode-declarations.md) link the [contract](../specs/ptr-edit-mode-declarations.md): declaration-backed boss directions and Gamepad preset, independent exact RED/GREEN and 270/376→268/374 stock. Display-info:800 SwingTimerSetting is the traced successor, not part of this slice. The module compiles on all profiles and publishes only when ACTIVE is PTR. PTR/Retail/Era full-feature all-target checks pass with zero warnings and separate accepted source-binding receipts; formatting and readability pass.

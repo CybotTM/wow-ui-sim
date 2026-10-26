@@ -179,6 +179,12 @@ Saved pre-producer RED at `d0c7969641adf566502d840d9651ed54c8fedca5` selected28:
 
 No producer GREEN, acceptance, profile/global privacy, UI or data parity claim. Current checkpoint remains **194 pending / 153 bounded / 14 partial / 1 metadata; 362 IDs; 72 capabilities**. Separate233/239 acceptance `5523335834f0b3ed26d1c1168f2551b82419111a` adds no proof here;237/241 stay uncredited.
 
+## Active loss-of-control state
+
+`C_LossOfControl` reads an empty-default per-unit `SimState.active_loss_of_control` map, not the spell-cooldown `LossOfControlInfo` map. [Contract and pinned declarations](../../specs/active-loss-of-control.md) define the record and `A_Admin` input. The existing registrar omits Wrath, where no pinned declaration or consumer exists; all other registrations remain in place. Input does not synthesize events or infer aura effects. Duration objects require supplied start/duration fields.
+
+The original selected `LossOfControlFrame:UpdateDisplay` fails the seeded producer's empty-world assertion and passes the corrected empty → supplied → removed visibility/count transition on Retail. The existing manually fired ADDED overlay test passes after explicit input, with unchanged display assertions. Retail stock retains 12 keys / 14 occurrences with no raw additions/removals. Other profile and all-target acceptance is pending; this is not a native acquisition, expiry, secrecy, or event-policy claim.
+
 ## Retail 12.0.5 action loss-of-control cooldown info
 
 Producer `831aa8553` implements **EXACT239**, `C_ActionBar.GetActionLossOfControlCooldownInfo`, not237 (`GetActionDisplayCount`). [Contract, inventory and corrected RED SSOT](../../specs/action-loss-control-cooldown-info.md) owns requirements and evidence. Read-only selection follows existing action slot → spell → typed `spell_loss_of_control` map; no new state or acquisition. A fresh five-field snapshot copies `startTime`, `duration`, `modRate`, `isActive`, and `shouldReplaceNormalCooldown`. Missing records use inferred inactive `(0,0,1,false,false)`; flags copy verbatim, without activation, GCD selection or expiry calculation.

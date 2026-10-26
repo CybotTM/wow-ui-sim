@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Supplied active loss of control
+
+[Model and proof checkpoint](systems/lua-api.md#active-loss-of-control-state) links the [contract](../specs/active-loss-of-control.md). Retail original-display RED/GREEN and explicit overlay fixture pass; stock remains 12/14 without changed keys. Profile/check gates remain open.
+
 ## [2026-10-25] proof | Mists supplied map display
 
 [Original group-provider proof](investigations/map-display-info-model.md#mists-original-onload-consumer--2026-10-25) passes exact corrected RED and supplied-state GREEN plus return-arity preservation. Stock 10/16→8/14 has no additions. Mists/Retail/Era/Anniversary all-target checks pass with zero warnings; formatting and readability pass. The actual OnLoad boundary precedes post-load fog-pin mutation; the separate defect is recorded, not fixed.
