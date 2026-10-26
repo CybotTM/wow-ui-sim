@@ -2,7 +2,7 @@
 
 use crate::lua_api::globals::group_queries::relationships::is_group_leader;
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, call_function_state};
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
@@ -35,6 +35,7 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetPartyMember", get_party_member)?;
     LuaApiMut::register_function(lua, "GetPartyLeaderIndex", get_party_leader_index)?;
     LuaApiMut::register_function(lua, "GetBagName", get_bag_name)?;
+    LuaApiMut::register_function(lua, "SetBagPortraitTexture", set_bag_portrait_texture)?;
     super::legacy_gamma::register_all(lua)?;
     super::wrath_voice::register_all(lua)?;
     crate::lua_api::workarounds::wrath_startup_defaults::register_all(lua)?;
@@ -190,6 +191,24 @@ fn is_raid_leader(state: &mut LuaState) -> LuaResult<u32> {
     };
     state.push(Val::Bool(leader));
     Ok(1)
+}
+
+fn set_bag_portrait_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let texture = stack_val(state, 1);
+    let bag = i32::from_stack(state, 2)?;
+    let icon = {
+        let sim = borrow_state(state)?;
+        sim.bag_info
+            .get(&bag)
+            .and_then(|info| info.item_id)
+            .and_then(crate::items::get_item)
+            .map(|item| Val::Num(f64::from(item.icon_file_data_id)))
+            .unwrap_or(Val::Nil)
+    };
+    let key = state.gc.intern_string(b"SetTexture");
+    let setter = state.gettable(texture, Val::Str(key))?;
+    call_function_state(state, setter, &[texture, icon])?;
+    Ok(0)
 }
 
 fn get_bag_name(state: &mut LuaState) -> LuaResult<u32> {
