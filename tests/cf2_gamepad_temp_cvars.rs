@@ -99,9 +99,10 @@ fn original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinar
             env.exec(
         r#"
         EventUtil.TriggerOnVariablesLoaded()
-        local frame = EnumerateFrames()
+        -- InputUtil's original listener is forbidden, so public EnumerateFrames omits it.
+        local frames = assert(debug.getregistry().__frame_refs, 'real frame cache required')
         local count = 0
-        while frame do
+        for _, frame in pairs(frames) do
             if frame:IsEventRegistered('INPUT_DEVICE_INTERFACE_TRANSITION') then
                 local handler = frame:GetScript('OnEvent')
                 local info = handler and debug.getinfo(handler, 'S')
@@ -111,7 +112,6 @@ fn original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinar
                     print('CF-2 input listener provenance', info.source, info.linedefined, info.lastlinedefined)
                 end
             end
-            frame = EnumerateFrames(frame)
         end
         assert(count == 1, 'exact original InputUtil transition listener required')
         "#,
@@ -203,6 +203,8 @@ fn original_target_logic_temp_cvar_tracks_supplied_combat_without_persisting() {
                 "Blizzard_GamepadTargeting/TargetLogic.lua",
             );
             let persisted = read_persisted_cvars();
+            env.exec("TargetUnit('enemy1')")
+                .expect("supply hostile target");
             env.state()
                 .borrow_mut()
                 .current_target
