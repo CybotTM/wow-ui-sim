@@ -27,3 +27,9 @@ native equipment eligibility are outside this contract.
 `FrameXML/EquipmentManager.lua:280` consumer. As a scenario default, zero gem
 IDs are empty sockets, trailing empty sockets return no values, and an empty
 slot returns no values. Exact native return behavior is unknown.
+
+For carried items, the legacy cooldown query uses the existing item cooldown
+model. Durability is an optional current/max pair on the bag item; an absent
+pair returns no values. Gem IDs come from the item hyperlink. These supplied
+observations support the same original equipment-location consumer; absent
+fields are scenario defaults, not established native policy.
