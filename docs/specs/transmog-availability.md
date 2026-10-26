@@ -30,7 +30,7 @@ Retail/PTR and Mists use one explicitly supplied environment-local availability 
 
 ## Known gaps (current cycle)
 
-- [ ] Complete seven zero-warning all-target checks. All eight RED/GREEN pairs, seventeen legacy cases, two Mists cases and both paired stock maps are already verified.
+None within the approved supplied-state slice. All seven full-feature all-target checks pass with zero JSON/plain compiler warnings; eight RED/GREEN pairs, seventeen legacy cases, two Mists cases and both paired stock maps are verified.
 
 ## Out of scope
 
