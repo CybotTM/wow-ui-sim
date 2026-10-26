@@ -1,0 +1,145 @@
+use std::io::Read;
+use std::path::Path;
+use std::process::{Command, Output};
+
+const ADDON: &str = "RunTestsOutputFixture";
+const FILE: &str = "failure_output.lua";
+
+fn run_fixture(source: &str) -> Output {
+    let root = tempfile::tempdir().expect("create run-tests fixture");
+    let addons = root.path().join("AddOns");
+    let addon = addons.join(ADDON);
+    let tests = addon.join("tests");
+    std::fs::create_dir_all(&tests).expect("create fixture tests directory");
+    std::fs::write(
+        addon.join(format!("{ADDON}.toc")),
+        format!(
+            "## Interface: {}\n## Title: {ADDON}\n",
+            wow_ui_sim::toc::ACTIVE_INTERFACE_VERSION
+        ),
+    )
+    .expect("write fixture TOC");
+    std::fs::write(tests.join(FILE), source).expect("write fixture tests");
+    let data = root.path().join("data");
+    copy_current_cvars(&data);
+    Command::new("timeout")
+        .args(["90", env!("CARGO_BIN_EXE_wow-sim")])
+        .args(["--no-addons", "--no-saved-vars", "--addons-path"])
+        .arg(addons)
+        .args(["run-tests", ADDON])
+        .env("XDG_DATA_HOME", data)
+        .env("WOW_SIM_WTF_PATH", root.path().join("wtf"))
+        .output()
+        .expect("run bounded real run-tests command")
+}
+
+fn copy_current_cvars(data: &Path) {
+    let source = dirs::data_local_dir()
+        .expect("locate current CVar directory")
+        .join("wow-sim/cvars.json");
+    let mut options = std::fs::OpenOptions::new();
+    options.read(true);
+    #[cfg(target_os = "linux")]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.custom_flags(libc::O_NOATIME);
+    }
+    let mut file = match options.open(&source) {
+        Ok(file) => file,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return,
+        Err(error) => panic!("open current CVar file {}: {error}", source.display()),
+    };
+    let mut bytes = Vec::new();
+    file.read_to_end(&mut bytes).expect("read current CVars");
+    let storage = data.join("wow-sim");
+    std::fs::create_dir_all(&storage).expect("create child-only CVar directory");
+    std::fs::write(storage.join("cvars.json"), bytes).expect("copy current CVars byte-for-byte");
+}
+
+fn assert_failure(output: &Output, name: &str, error: &str, summary: &str) {
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let captured = format!("{stdout}\n{stderr}");
+    assert_eq!(output.status.code(), Some(1), "{captured}");
+    for required in [FILE, name, error] {
+        assert!(
+            captured.contains(required),
+            "missing {required}: {captured}"
+        );
+    }
+    let plain = stderr
+        .replace("\x1b[31m", "")
+        .replace("\x1b[32m", "")
+        .replace("\x1b[0m", "");
+    let failure = format!("  ✗ {FILE} > {name}\n    {error}\n");
+    assert_eq!(plain.matches(&failure).count(), 1, "{captured}");
+    assert!(plain.contains(summary), "{captured}");
+    assert!(
+        plain.find(&failure).unwrap() < plain.find(summary).unwrap(),
+        "{captured}"
+    );
+}
+
+#[test]
+fn sync_failure_reaches_process_output() {
+    let output = run_fixture(
+        "test('passing sync', function() assertEquals(42, 6 * 7) end)\n\
+         test('failing sync', function() error('sync failure detail', 0) end)",
+    );
+    assert_failure(
+        &output,
+        "failing sync",
+        "sync failure detail",
+        "2 tests, 1 passed, 1 failed",
+    );
+}
+
+#[test]
+fn async_failure_reaches_process_output() {
+    let output = run_fixture(
+        "async_test('passing async', function(done) done() end)\n\
+         async_test('failing async', function(done)\n\
+             C_Timer.After(0, function()\n\
+                 done(function() error('async failure detail', 0) end)\n\
+             end)\n\
+         end)",
+    );
+    assert_failure(
+        &output,
+        "failing async",
+        "async failure detail",
+        "2 tests, 1 passed, 1 failed",
+    );
+}
+
+#[test]
+fn sync_failure_after_async_registration_reaches_process_output() {
+    let output = run_fixture(
+        "async_test('passing async', function(done) done() end)\n\
+         test('failing mixed sync', function() error('mixed sync failure detail', 0) end)",
+    );
+    assert_failure(
+        &output,
+        "failing mixed sync",
+        "mixed sync failure detail",
+        "2 tests, 1 passed, 1 failed",
+    );
+}
+
+#[test]
+fn passing_tests_keep_success_summary_and_exit_code() {
+    let output = run_fixture(
+        "test('passing sync', function() assertEquals(42, 6 * 7) end)\n\
+         async_test('passing async', function(done) done() end)",
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(output.status.success(), "{stderr}");
+    assert!(
+        stderr.contains(&format!("  \x1b[32m✓\x1b[0m {FILE} (2 tests)")),
+        "{stderr}"
+    );
+    assert!(
+        stderr.contains("2 tests, \x1b[32m2 passed\x1b[0m, \x1b[31m0 failed\x1b[0m"),
+        "{stderr}"
+    );
+}
