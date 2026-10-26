@@ -81,6 +81,10 @@ class CertifiedSuiteTests(unittest.TestCase):
                          "print('guard rejected: owner mismatch', file=sys.stderr)\n"
                          "sys.exit(1)\n")
 
+    def latest_attempt(self):
+        results = self.home / "Projects/wow/full-suite-results"
+        return max(results.glob(f"{self.sha}-ptr-attempt-*.json"), key=lambda p: p.stat().st_mtime_ns)
+
     def test_failed_launcher_with_unknown_unit_retains_owner(self):
         write_executable(self.bin / 'systemctl', "import sys\nsys.exit(1)\n")
         process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
@@ -90,7 +94,7 @@ class CertifiedSuiteTests(unittest.TestCase):
         self.assertTrue((self.slot / '.owner').exists())
         argv = json.loads((self.home / 'slot-argv.json').read_text())
         unit = argv[argv.index('--unit') + 1]
-        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        record = json.loads(self.latest_attempt().read_text())
         self.assertEqual(record['status'], 'FAILED')
         self.assertIn(f'slot 2 retained: unit {unit}', record['error'])
 
@@ -111,7 +115,7 @@ class CertifiedSuiteTests(unittest.TestCase):
                                  env=self.env, capture_output=True, text=True, timeout=10)
         self.assertNotEqual(process.returncode, 0)
         self.assertTrue((self.slot / '.owner').exists())
-        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        record = json.loads(self.latest_attempt().read_text())
         self.assertEqual(record['status'], 'FAILED')
         self.assertIn('slot 2 retained: unit full-suite-test-', record['error'])
 
@@ -125,7 +129,7 @@ class CertifiedSuiteTests(unittest.TestCase):
         process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
                                   '--profile', 'ptr', '--target-dir', str(self.slot)],
                                  env=self.env, capture_output=True, text=True, timeout=10)
-        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertNotEqual(process.returncode, 0, process.stderr)
         self.assertTrue((self.home / 'stopped').exists())
         self.assertFalse((self.slot / '.owner').exists())
 
@@ -133,7 +137,7 @@ class CertifiedSuiteTests(unittest.TestCase):
         write_executable(self.bin / 'systemctl', "print('LoadState=not-found')\n")
         subprocess.run([sys.executable, str(RUNNER), 'run', self.sha, '--profile', 'ptr',
                         '--target-dir', str(self.slot)], env=self.env, capture_output=True, text=True, timeout=10)
-        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        record = json.loads(self.latest_attempt().read_text())
         self.assertEqual(record['steps']['build']['status'], 'FAILED')
         self.assertEqual(record['steps']['integration']['status'], 'not_run')
         self.assertEqual(record['steps']['prefork']['status'], 'not_applicable')
@@ -152,7 +156,7 @@ class CertifiedSuiteTests(unittest.TestCase):
                         '--target-dir', str(self.slot)], env=self.env, capture_output=True, text=True, timeout=10)
         self.assertEqual(prior.read_text(), content)
         self.assertEqual((results / 'master-latest-ptr.json').read_text(), content)
-        record = json.loads((results / f'{self.sha}-ptr.json').read_text())
+        record = json.loads(self.latest_attempt().read_text())
         self.assertEqual(record['status'], 'FAILED')
 
     def test_failed_same_sha_rerun_preserves_pass_and_records_attempt(self):
@@ -165,7 +169,7 @@ class CertifiedSuiteTests(unittest.TestCase):
         previous_log.write_text('passed log\n')
         process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha, '--profile', 'ptr',
                                   '--target-dir', str(self.slot)], env=self.env, capture_output=True, text=True, timeout=10)
-        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertNotEqual(process.returncode, 0, process.stderr)
         self.assertEqual(prior.read_text(), content)
         self.assertEqual(previous_log.read_text(), 'passed log\n')
         attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
@@ -215,7 +219,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
                     (self.home / name).unlink(missing_ok=True)
                 process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot), failure],
                                          env=self.env, capture_output=True, text=True, timeout=10)
-                self.assertEqual(process.returncode, 0, process.stderr)
+                self.assertNotEqual(process.returncode, 0, process.stderr)
                 self.assertTrue((self.home / 'owner-at-stop').exists(), 'unit was not stopped before release')
                 self.assertEqual((self.home / 'owner-at-stop').read_text(), 'True')
                 self.assertFalse((self.slot / '.owner').exists())
@@ -223,7 +227,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
                                  env=dict(self.env, UNKNOWN_UNIT='1'), capture_output=True, text=True, timeout=10)
         self.assertNotEqual(process.returncode, 0)
         self.assertTrue((self.slot / '.owner').exists())
-        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        record = json.loads(self.latest_attempt().read_text())
         self.assertIn('state unknown', record['error'])
 
     def test_log_open_and_close_failures_record_receipts(self):
@@ -247,14 +251,11 @@ def injected(path, *args, **kwargs):
 builtins.open = injected
 sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
 ''')
-        path = self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json'
         for failure in ('open', 'close'):
             with self.subTest(failure=failure):
-                path.unlink(missing_ok=True)
                 process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot), failure],
                                          env=self.env, capture_output=True, text=True, timeout=10)
-                self.assertTrue(path.exists(), process.stderr)
-                record = json.loads(path.read_text())
+                record = json.loads(self.latest_attempt().read_text())
                 self.assertEqual(record['status'], 'FAILED')
                 self.assertIn(f'injected log {failure} failure', json.dumps(record))
                 self.assertFalse((self.slot / '.owner').exists())
@@ -277,15 +278,15 @@ spec.loader.exec_module(runner)
 runner.build = lambda *args: {"reported_artifacts": [{"executable": "/unused", "profile": {"test": True}, "target": {"name": name, "kind": [kind]}} for name, kind in [("integration", "test"), ("wow_ui_sim", "lib")]]}
 runner.run_step = lambda *args: ({"exit": 0}, "")
 runner.confirm_terminated = lambda *args: None
-original = runner.write_result
-def injected(path, result):
+original = runner.Path.replace
+def injected(path, target):
     fault = sys.argv[4]
-    if fault == "baseline-write" and path.name == "master-latest-ptr.json":
+    if fault == "baseline-write" and target.name == "master-latest-ptr.json":
         raise OSError("injected baseline promotion failure")
-    if fault == "canonical-write" and path.name == sys.argv[2] + "-ptr.json":
+    if fault == "canonical-write" and target.name == sys.argv[2] + "-ptr.json":
         raise OSError("injected canonical promotion failure")
-    return original(path, result)
-runner.write_result = injected
+    return original(path, target)
+runner.Path.replace = injected
 sys.exit(runner.run("master", 1, sys.argv[3], "ptr"))
 ''')
         process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot), fault],
@@ -375,9 +376,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
 ''')
         process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
                                  env=self.env, capture_output=True, text=True, timeout=10)
-        path = self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json'
-        self.assertTrue(path.exists(), process.stderr)
-        record = json.loads(path.read_text())
+        record = json.loads(self.latest_attempt().read_text())
         self.assertEqual(record['status'], 'FAILED')
         self.assertIn('persistent log failure', record['error'])
         self.assertIn('persistent log failure', record['log_error'])
@@ -450,7 +449,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
                                  env=self.env, capture_output=True, text=True, timeout=10)
         self.assertNotEqual(process.returncode, 0)
         self.assertTrue((self.slot / '.owner').exists())
-        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        record = json.loads(self.latest_attempt().read_text())
         self.assertIn('state unknown', record['error'])
         self.assertIn('cvar log failure', record['cleanup_error'])
 
@@ -474,9 +473,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
                                 env=self.env, capture_output=True, text=True, timeout=10)
-        path = self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json'
-        self.assertTrue(path.exists(), result.stderr)
-        receipt = json.loads(path.read_text())
+        receipt = json.loads(self.latest_attempt().read_text())
         self.assertIn('FAILED', json.dumps(receipt).upper())
         self.assertIn('guard', json.dumps(receipt).lower())
         self.assertFalse(any(step.get('exit') == 0 for step in receipt['steps'].values()))
@@ -499,7 +496,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         again = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
                                 '--profile', 'ptr', '--target-dir', str(self.slot)],
                                env=self.env, capture_output=True, text=True, timeout=10)
-        self.assertEqual(again.returncode, 0, again.stderr)
+        self.assertNotEqual(again.returncode, 0, again.stderr)
         second = json.loads((self.home / 'slot-argv.json').read_text())
         self.assertEqual(second[second.index('--worktree') + 1], str(worktree))
 
@@ -548,7 +545,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         self.assertEqual(process.returncode, 0, stderr)
         self.assertTrue(receipt.exists())
         self.assertEqual(json.loads(receipt.read_text())['status'], 'PASSED')
-        log = (self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.log').read_text()
+        log = Path(json.loads(receipt.read_text())['log']).read_text()
         self.assertIn('cvar-before', log)
         self.assertIn('cvar-after', log)
         self.assertEqual((self.home / '.local/share/wow-sim/cvars.json').read_text(), '{}')
@@ -590,7 +587,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
                                   '--profile', 'ptr', '--target-dir', str(self.slot)],
                                  env=self.env, capture_output=True, text=True, timeout=10)
         self.assertEqual(process.returncode, 0, process.stderr)
-        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        record = json.loads(self.latest_attempt().read_text())
         self.assertEqual(record['status'], 'FAILED')
         self.assertEqual(record['steps']['integration']['exit'], 7)
         self.assertEqual(record['steps']['integration']['status'], 'FAILED')
@@ -606,11 +603,11 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         rerun = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
                                 '--profile', 'ptr', '--target-dir', str(self.slot)],
                                env=self.env, capture_output=True, text=True, timeout=10)
-        self.assertEqual(rerun.returncode, 0, rerun.stderr)
+        self.assertNotEqual(rerun.returncode, 0, rerun.stderr)
         self.assertEqual(canonical.read_text(), passed)
         attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
-        self.assertEqual(len(attempts), 1)
-        self.assertEqual(json.loads(attempts[0].read_text())['steps']['integration']['exit'], 7)
+        self.assertEqual(len(attempts), 2)
+        self.assertEqual(json.loads(self.latest_attempt().read_text())['steps']['integration']['exit'], 7)
 
     def test_failed_certification_never_runs_test_binaries(self):
         write_executable(self.bin / 'slot-build.py',
@@ -627,8 +624,8 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
                                 env=self.env, capture_output=True, text=True, timeout=10)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        self.assertNotEqual(result.returncode, 0, result.stderr)
+        record = json.loads(self.latest_attempt().read_text())
         self.assertEqual(record['status'], 'FAILED')
         self.assertIn('bad input', record['error'])
         self.assertEqual(record['steps']['build']['status'], 'FAILED')
@@ -652,7 +649,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         self.assertEqual((self.slot / '.owner').read_text(), f'full-suite {self.sha[:12]} ptr')
         argv = json.loads((self.home / 'slot-argv.json').read_text())
         unit = argv[argv.index('--unit') + 1]
-        result = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        result = json.loads(self.latest_attempt().read_text())
         self.assertEqual(result['status'], 'FAILED')
         self.assertIn(f'slot 2 retained: unit {unit} state unknown', result['error'])
 

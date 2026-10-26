@@ -241,6 +241,40 @@ def write_result(path, result):
         temporary.unlink(missing_ok=True)
 
 
+def promote_result(canonical, baseline, result):
+    destinations = ([baseline] if baseline else []) + [canonical]
+    staged = {}
+    backups = {}
+    replaced = []
+    try:
+        for path in destinations:
+            with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as stream:
+                staged[path] = Path(stream.name)
+                stream.write(json.dumps(result, indent=2) + "\n")
+                stream.flush()
+                os.fsync(stream.fileno())
+        for path in destinations:
+            if path.exists() or path.is_symlink():
+                with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as stream:
+                    backup = Path(stream.name)
+                backup.unlink()
+                os.link(path, backup, follow_symlinks=False)
+                backups[path] = backup
+        for path in destinations:
+            staged[path].replace(path)
+            replaced.append(path)
+    except BaseException:
+        for path in reversed(replaced):
+            if path in backups:
+                backups[path].replace(path)
+            else:
+                path.unlink(missing_ok=True)
+        raise
+    finally:
+        for path in (*staged.values(), *backups.values()):
+            path.unlink(missing_ok=True)
+
+
 def run(ref, build_jobs, target_dir, profile="retail"):
     target_dir = validate_target_dir(target_dir)
     RESULTS.mkdir(parents=True, exist_ok=True)
@@ -254,12 +288,10 @@ def run(ref, build_jobs, target_dir, profile="retail"):
         result = {"ref": ref, "sha": sha, "profile": profile, "started": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "steps": steps, "failures": failures}
         phase = "setup"
         output_path = RESULTS / f"{sha}-{profile}.json"
-        previous_pass = output_path.exists() and json.loads(output_path.read_text()).get("status") == "PASSED"
         attempt = f"{sha}-{profile}-attempt-{time.time_ns()}"
-        log_path = RESULTS / (f"{attempt}.log" if previous_pass else f"{sha}-{profile}.log")
+        log_path = RESULTS / f"{attempt}.log"
         result["log"] = str(log_path)
         owner = None
-        exit_code = 0
         try:
             with open(log_path, "w") as log:
                 try:
@@ -298,7 +330,6 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                     if hasattr(error, "cleanup_error"):
                         result["cleanup_error"] = error.cleanup_error
                     owner = None  # Keep the live or unknown claim for reconciliation.
-                    exit_code = 1
                     try:
                         log.write(f"FAILED: {error}\n")
                     except OSError as log_error:
@@ -317,24 +348,31 @@ def run(ref, build_jobs, target_dir, profile="retail"):
             result["log_error"] = str(error)
             result.setdefault("error", str(error))
         result["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
-        result["new_failures"] = new_failures(result)
-        if previous_pass:
-            output_path = RESULTS / f"{attempt}.json"
-        write_result(output_path, result)
+        attempt_path = RESULTS / f"{attempt}.json"
+        try:
+            result["new_failures"] = new_failures(result)
+        except (OSError, ValueError, KeyError) as error:
+            result["status"] = "FAILED"
+            result["error"] = f"baseline comparison failed: {error}"
+        # Record before releasing ownership, so receipt storage failure retains it.
+        write_result(attempt_path, result)
         if owner is not None:
             try:
                 release_slot(target_dir, sha, profile, owner)
             except (OSError, ValueError) as error:
                 result["status"] = "FAILED"
                 result["error"] = f"slot release failed: {error}"
-                write_result(output_path, result)
-        if result["status"] == "PASSED" and previous_pass:
-            write_result(RESULTS / f"{sha}-{profile}.json", result)
-            output_path.unlink()
-        if result["status"] == "PASSED" and ref in ("origin/master", "master"):
-            write_result(RESULTS / f"master-latest-{profile}.json", result)
+        if result["status"] == "PASSED":
+            try:
+                baseline = RESULTS / f"master-latest-{profile}.json" if ref in ("origin/master", "master") else None
+                promote_result(output_path, baseline, result)
+            except (OSError, ValueError) as error:
+                result["status"] = "FAILED"
+                result["error"] = f"promotion failed: {error}"
+        write_result(attempt_path, result)
         print(json.dumps(result, indent=2))
-        return exit_code
+        return 0 if result["status"] == "PASSED" else 1
+
 
 
 def submit(ref, build_jobs, target_dir, profile="retail"):
