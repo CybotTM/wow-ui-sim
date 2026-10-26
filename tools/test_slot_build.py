@@ -1189,7 +1189,7 @@ class SourceFreshnessTests(unittest.TestCase):
             'None if old else binary.write_bytes(source.read_bytes()); '
             'binary.chmod(0o755); '
             'binary.with_suffix(".d").write_text(str(binary) + ": " + str(source) + "\\n"); '
-            'print(json.dumps({"reason":"compiler-artifact","executable":str(binary),"fresh":False}))'
+            f'print(json.dumps({{"reason":"compiler-artifact","package_id":{f"path+file://{self.tree}#probe@0.1.0"!r},"executable":str(binary),"fresh":False}}))'
         )
         request = self.slot / "request.json"
         request.write_text(json.dumps({
@@ -1219,6 +1219,7 @@ class SourceFreshnessTests(unittest.TestCase):
         emitter = ('import json,sys,os; from pathlib import Path; '
                    'Path(sys.argv[1]).chmod(0o755); os.utime(sys.argv[1], None); '
                    'print(json.dumps({"reason":"compiler-artifact",'
+                   f'"package_id":{f"path+file://{self.tree}#probe@0.1.0"!r},'
                    '"executable":sys.argv[1],"fresh":False})); sys.exit(int(sys.argv[2]))')
         request = self.slot / "request.json"
         for code in [0, 7]:
@@ -1394,7 +1395,7 @@ class SourceFreshnessTests(unittest.TestCase):
             '    binary.chmod(0o755)\n'
             '    binary.with_suffix(".d").write_text(f"{binary}: {source}\\n")\n'
             'if phase == "failed": sys.exit(7)\n'
-            'print(json.dumps({"reason":"compiler-artifact",\n'
+            f'print(json.dumps({{"reason":"compiler-artifact", "package_id":{f"path+file://{self.tree}#probe@0.1.0"!r},\n'
             '    "executable":str(binary), "fresh":phase == "missing"}))\n'
         )
         results, receipts = [], []

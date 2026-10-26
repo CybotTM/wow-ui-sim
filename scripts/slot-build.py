@@ -550,7 +550,7 @@ def lock_closure_digest(lock_bytes, package_id):
         return matches[0]
 
     roots = [p for p in packages if p["name"] == name and p["version"] == version
-             and p.get("source") == source]
+             and (p.get("source", "").split("#", 1)[0] if source else p.get("source")) == source]
     if len(roots) != 1:
         raise ValueError(f"ambiguous or missing lock package: {name} {version}")
     pending = roots
@@ -821,8 +821,9 @@ def execute_build(request_path, cap_gib=60, recent_hours=2):
     check_owner(slot, request["owner"])
     marker = slot / ".unverified-fingerprints"
     if marker.exists():
-        for fingerprint in slot.glob("*/.fingerprint"):
-            shutil.rmtree(fingerprint)
+        for pattern in ("*/.fingerprint", "*/*/.fingerprint"):
+            for fingerprint in slot.glob(pattern):
+                shutil.rmtree(fingerprint)
         marker.unlink()
     with redirect_stdout(sys.stderr):
         prune_slot(slot, request["owner"], cap_gib * 1024 ** 3, recent_hours)
