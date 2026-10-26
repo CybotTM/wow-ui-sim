@@ -118,5 +118,6 @@ fn original_settings_closure_preservation_boundary() {
         local category = Settings.RegisterVerticalLayoutCategory('Engraving preservation')
         local ok, boundary = pcall(InterfaceOverrides.AdjustDisplaySettings, category)
         print('settings preservation outcome', ok, tostring(boundary))
+        assert(ok == true, tostring(boundary))
     "#).expect("attempt complete original selected settings consumer without substitutes");
 }
