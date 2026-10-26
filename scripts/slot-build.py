@@ -307,11 +307,11 @@ def snapshot_source_hashes(current, snapshot):
 
 def certify_record(current, record, previous, source_before, artifacts, snapshot):
     path = artifact_path(record)
-    inputs = current["target_inputs"].get(path)
-    if not inputs:
+    required = repo_relative_inputs(current, target_dep_inputs(record, snapshot))
+    inputs = required | repo_relative_inputs(current, package_build_inputs(current, record))
+    if not required:
         raise ValueError(f"missing compiler inputs for {path}")
     hashes = read_input_hashes(Path(current["worktree"]), inputs)
-    required = repo_relative_inputs(current, target_dep_inputs(record, snapshot))
     if any(hashes.get(name) is None for name in required):
         raise ValueError(f"missing compiler input content for {path}")
     if any(name not in source_before or source_before[name] != digest

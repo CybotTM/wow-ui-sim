@@ -137,7 +137,9 @@ The slot-wide identity is only a source-refresh baseline, not proof that every
 cached profile or metadata hash was built from that tree. Each reported repo-owned
 output also needs an `artifact_certificates` entry keyed by its exact slot-relative
 output path. The certificate contains the output SHA256 and content SHA256 values
-for its own normalized dep-info and package inputs. Certificates for unreported
+for its current normalized dep-info and package inputs. Previous-only dep-info
+inputs remain in stale-decision evidence, not the rebuilt output's certificate.
+Certificates for unreported
 outputs retain their original input hashes across unrelated builds. A `fresh=true`
 record must match its own certificate, including its complete input set and output
 bytes, even when the slot-wide content diff is empty. A missing certificate fails

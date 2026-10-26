@@ -577,6 +577,27 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertEqual(receipt["result"], "stale-artifacts")
         self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
 
+    def test_rebuilt_library_with_fewer_inputs_allows_immediate_fresh_reuse(self):
+        old = self.tree / "src/old.rs"
+        old.write_text("pub fn old() {}")
+        self.git("add", ".")
+        self.git("commit", "-qm", "add old module")
+        result, _ = self.run_library_step(
+            "retail", mutation='binary.with_suffix(".d").write_text('
+            'str(binary)+": src/main.rs src/old.rs\\n")')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        old.unlink()
+        self.git("commit", "-qam", "remove old module")
+        result, receipt = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = str(self.slot / "debug/deps/libprobe-retail.rmeta")
+        self.assertIn("src/old.rs", receipt["target_inputs"][output])
+        rebuilt = (self.slot / "debug/deps/libprobe-retail.rmeta").read_bytes()
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(receipt["result"], "success")
+        self.assertEqual(Path(output).read_bytes(), rebuilt)
+
     def test_fresh_library_without_content_certificate_fails_closed(self):
         result, _ = self.run_library_step("retail")
         self.assertEqual(result.returncode, 0, result.stderr)
