@@ -1725,7 +1725,12 @@ class SourceFreshnessTests(unittest.TestCase):
                                  "--execute", str(request)], capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, b"stdout\xff\x00")
-        self.assertEqual(result.stderr, b"stderr\xfe\x00")
+        pruning_line, child_stderr = result.stderr.split(b"\n", 1)
+        pruning = json.loads(pruning_line)
+        self.assertEqual(pruning["slot"], str(self.slot))
+        self.assertFalse(pruning["dry_run"])
+        self.assertEqual(pruning["removed"], [])
+        self.assertEqual(child_stderr, b"stderr\xfe\x00")
 
     def test_hidden_stream_allows_diff_outside_package_roots(self):
         current = self.prepare()
