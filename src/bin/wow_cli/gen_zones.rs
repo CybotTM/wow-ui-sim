@@ -3,11 +3,11 @@
 //! Reads from ~/Projects/wow/data/:
 //!   - AreaTable.csv
 //!
-//! Generates: data/zones.rs
+//! Generates: crates/sim-data/data/zones.rs
 
-use super::csv_util::{escape_str, parse_csv_line, wow_data_dir};
+use super::csv_util::{escape_str, parse_csv_line, read_csv_records, wow_data_dir};
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufReader, Write};
 use std::path::Path;
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -19,7 +19,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let reader = BufReader::new(file);
 
     std::fs::create_dir_all("data")?;
-    let output_path = Path::new("data/zones.rs");
+    let output_path = Path::new("crates/sim-data/data/zones.rs");
     let mut out = File::create(output_path)?;
 
     write_header(&mut out)?;
@@ -40,8 +40,7 @@ fn build_area_map(
     let mut count = 0u32;
     let mut skipped = 0u32;
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }

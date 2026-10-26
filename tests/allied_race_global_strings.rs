@@ -4,7 +4,7 @@
 //! reads `_G["RACE_INFO_"..fileString]`) and the inline XML string
 //! references at `Blizzard_AlliedRacesFrameUI.xml:145` (`text="RACIAL_TRAITS"`)
 //! and `:163` (`KeyValue title=ALLIED_RACE_UNLOCK_TEXT`). The simulator
-//! resolves these via `data/global_strings.rs` (auto-generated from
+//! resolves these via `crates/sim-data-profile/data/global_strings.rs` (auto-generated from
 //! `GlobalStrings.csv`); this test pins the contract so a future
 //! regeneration that drops them is caught immediately.
 

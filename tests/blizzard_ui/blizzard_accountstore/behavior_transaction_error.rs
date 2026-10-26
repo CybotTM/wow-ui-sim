@@ -55,7 +55,7 @@
 //!
 //! 5. **The localized text is `ACCOUNT_STORE_INCOMPLETE_TRANSACTION`.**
 //!    Resolves to `"The transaction could not be completed."` per
-//!    `data/global_strings.rs:23806`. The string is wrapped in
+//!    `crates/sim-data-profile/data/global_strings.rs:23806`. The string is wrapped in
 //!    `NORMAL_FONT_COLOR:WrapTextInColorCode(...)` which produces a
 //!    `|cAARRGGBB...|r` color-code escape. The popup `text` field is
 //!    therefore `"|cFFFFD200The transaction could not be completed.|r"`
@@ -209,7 +209,7 @@ fn assert_popup_field_equals_okay(env: &WowLuaEnv) {
     assert_eq!(
         button1, okay_value,
         "Expected `StaticPopupDialogs[{POPUP_KEY:?}].button1 == OKAY` (the global at \
-         `data/global_strings.rs` resolves to the localized string for \"Okay\"), got \
+         `crates/sim-data-profile/data/global_strings.rs` resolves to the localized string for \"Okay\"), got \
          `{button1}` vs OKAY=`{okay_value}`. The button1 field controls the single-button \
          acknowledgment text; a regression to `nil` would suppress the OK button entirely."
     );
@@ -276,7 +276,7 @@ fn transaction_error_popup_text_contains_localized_string() {
             popup_text.contains(LOCALIZED_TEXT_SUBSTRING),
             "Expected `StaticPopupDialogs[{POPUP_KEY:?}].text` to contain the substring \
              {LOCALIZED_TEXT_SUBSTRING:?} (the resolved value of `ACCOUNT_STORE_INCOMPLETE_TRANSACTION` \
-             from `data/global_strings.rs:23806`), got {popup_text:?}. The actual string is \
+             from `crates/sim-data-profile/data/global_strings.rs:23806`), got {popup_text:?}. The actual string is \
              wrapped in `|cffXXXXXX...|r` color-code escapes by \
              `NORMAL_FONT_COLOR:WrapTextInColorCode(...)`, so a substring match is the right \
              granularity — it pins the localized message without depending on the exact RGB \

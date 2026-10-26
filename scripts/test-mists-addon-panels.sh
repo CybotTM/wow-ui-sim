@@ -251,7 +251,7 @@ fi
 mkdir -p "$OUT_DIR"
 if [ "$SKIP_BUILD" -eq 0 ]; then
     echo "Building Mists panel binaries in $CARGO_TARGET_DIR"
-    cargo build --bin wow-sim --bin panel-visual-metrics --no-default-features --features "sound,gui,casc,client-mists"
+    cargo build --bin wow-sim --bin panel-visual-metrics --no-default-features --features "sound,gui,casc,client-mists,tools"
 fi
 validate_runner_binaries
 trap cleanup_active_addon_on_exit EXIT

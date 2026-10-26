@@ -10,13 +10,14 @@
 //!   - SpellEffect.csv (ID, ..., DifficultyID[2], EffectIndex[3],
 //!     ImplicitTarget_0[34], SpellID[36])
 //!
-//! Generates: data/spells.rs, data/spell_descriptions.rs, data/spell_power.rs
+//! Generates: crates/sim-data/data/spells.rs, crates/sim-data/data/spell_descriptions.rs, crates/sim-data/data/spell_power.rs
 
+use super::csv_util::read_csv_records;
 use super::csv_util::{escape_str, parse_csv_line, wow_data_dir};
 use super::gen_spells_power::{SpellPowerRow, load_spell_power, write_spell_power};
 use std::collections::{BTreeSet, HashMap};
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufReader, Write};
 use std::path::Path;
 
 const SPELL_NAME_COLUMN: usize = 1;
@@ -106,7 +107,7 @@ fn generate_spell_table(
     spell_data: &SpellData,
     required_ids: &BTreeSet<u32>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let output_path = Path::new("data/spells.rs");
+    let output_path = Path::new("crates/sim-data/data/spells.rs");
     let mut out = File::create(output_path)?;
     write_header(&mut out)?;
     let count = build_spell_map(
@@ -128,7 +129,7 @@ fn generate_spell_descriptions(
     spell_data: &SpellData,
     required_ids: &BTreeSet<u32>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let descriptions_path = Path::new("data/spell_descriptions.rs");
+    let descriptions_path = Path::new("crates/sim-data/data/spell_descriptions.rs");
     let mut desc_out = File::create(descriptions_path)?;
     let description_count =
         write_spell_descriptions(&mut desc_out, &spell_data.spell_descriptions, required_ids)?;
@@ -141,7 +142,7 @@ fn generate_spell_power_table(
     spell_data: &SpellData,
     required_ids: &BTreeSet<u32>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let power_path = Path::new("data/spell_power.rs");
+    let power_path = Path::new("crates/sim-data/data/spell_power.rs");
     let mut power_out = File::create(power_path)?;
     // Only include power data for required spells
     let filtered_power: HashMap<u32, Vec<SpellPowerRow>> = spell_data
@@ -332,8 +333,7 @@ fn load_spell_text_column(
     let reader = BufReader::new(file);
     let mut map = HashMap::new();
 
-    for line in reader.lines().skip(1) {
-        let line = line?;
+    for line in read_csv_records(reader)?.into_iter().skip(1) {
         let fields = parse_csv_line(&line);
         if fields.len() > value_column
             && let Ok(id) = fields[0].parse::<u32>()
@@ -350,13 +350,14 @@ fn load_spell_text_column(
 /// Collect all spell IDs the simulator actually needs.
 ///
 /// Sources:
-/// - `data/traits.rs`: spell_id, overrides_spell_id, visible_spell_id, override_icon fields
+/// - `crates/sim-data/data/traits.rs`: spell_id, overrides_spell_id, visible_spell_id, override_icon fields
 /// - `src/lua_api/globals/spellbook_data.rs`: spell(N) and passive(N) calls
+/// - Seeded mount catalog: every summon spell, regardless of collection/usability
 /// - Hardcoded baseline: action bar spells, trinket/item procs not covered elsewhere
 /// - Addon compatibility: spell names that installed addons index directly during load
 fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Error>> {
     let trait_ids = collect_ids_from_file(
-        "data/traits.rs",
+        "crates/sim-data/data/traits.rs",
         &[
             "spell_id: ",
             "overrides_spell_id: ",
@@ -368,20 +369,32 @@ fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Err
         "src/lua_api/globals/spellbook_data.rs",
         &["spell(", "passive("],
     )?;
+    let mount_ids: BTreeSet<u32> = wow_ui_sim::lua_api::SimState::default()
+        .world
+        .mounts
+        .iter()
+        .map(|mount| mount.spell_id)
+        .collect();
     let baseline_ids: BTreeSet<u32> = BASELINE_SPELL_IDS.iter().copied().collect();
     let addon_compat_ids: BTreeSet<u32> = ADDON_COMPAT_SPELL_IDS.iter().copied().collect();
 
     println!(
-        "Required spell IDs: {} (traits: {}, spellbook: {}, baseline: {}, addon compat: {})",
-        trait_ids.len() + spellbook_ids.len() + baseline_ids.len() + addon_compat_ids.len(),
+        "Required spell IDs: {} (traits: {}, spellbook: {}, mounts: {}, baseline: {}, addon compat: {})",
+        trait_ids.len()
+            + spellbook_ids.len()
+            + mount_ids.len()
+            + baseline_ids.len()
+            + addon_compat_ids.len(),
         trait_ids.len(),
         spellbook_ids.len(),
+        mount_ids.len(),
         baseline_ids.len(),
         addon_compat_ids.len(),
     );
 
     let mut all = trait_ids;
     all.extend(&spellbook_ids);
+    all.extend(&mount_ids);
     all.extend(&baseline_ids);
     all.extend(&addon_compat_ids);
     println!("Required spell IDs (deduplicated): {}", all.len());
@@ -442,8 +455,7 @@ fn load_spell_effect_targets(path: &Path) -> Result<HashMap<u32, u8>, Box<dyn st
     let reader = BufReader::new(file);
     let mut map = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -474,8 +486,7 @@ fn load_spell_misc(path: &Path) -> Result<HashMap<u32, (u32, u32)>, Box<dyn std:
     let reader = BufReader::new(file);
     let mut map = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -496,4 +507,32 @@ fn load_spell_misc(path: &Path) -> Result<HashMap<u32, (u32, u32)>, Box<dyn std:
         map.entry(spell_id).or_insert((icon, school));
     }
     Ok(map)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{collect_required_spell_ids, load_spell_descriptions};
+    use std::collections::BTreeSet;
+    use std::io::Write;
+
+    #[test]
+    fn required_spells_include_the_seeded_mount_catalog() {
+        let required = collect_required_spell_ids().unwrap();
+        // Includes Brown Horse, a duplicate summon spell, and the uncollected Brutosaur.
+        let mount_spells = BTreeSet::from([
+            458, 23338, 40192, 61425, 72286, 93326, 122708, 171851, 264058,
+        ]);
+        assert!(mount_spells.is_subset(&required));
+    }
+
+    #[test]
+    fn spell_descriptions_preserve_embedded_crlf() {
+        let mut csv = tempfile::NamedTempFile::new().unwrap();
+        csv.write_all(b"ID,Subtext,Description\r\n7,,\"First line\r\n\r\nLast, \"\"quoted\"\" line\"\r\n8,,After\r\n")
+            .unwrap();
+        let descriptions = load_spell_descriptions(csv.path()).unwrap();
+        assert_eq!(descriptions.len(), 2);
+        assert_eq!(descriptions[&7], "First line\r\n\r\nLast, \"quoted\" line");
+        assert_eq!(descriptions[&8], "After");
+    }
 }

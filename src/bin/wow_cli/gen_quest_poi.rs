@@ -6,12 +6,13 @@
 //! Only includes quest IDs referenced by the simulator's quest data
 //! (same sampling pattern as gen_spells.rs).
 //!
-//! Generates: data/quest_ui_map.rs
+//! Generates: crates/sim-data/data/quest_ui_map.rs
 
 use super::csv_util::parse_csv_line;
+use super::csv_util::read_csv_records;
 use std::collections::{BTreeSet, HashMap};
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufReader, Write};
 use std::path::Path;
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -25,7 +26,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let reader = BufReader::new(file);
 
     std::fs::create_dir_all("data")?;
-    let output_path = Path::new("data/quest_ui_map.rs");
+    let output_path = Path::new("crates/sim-data/data/quest_ui_map.rs");
     let mut out = File::create(output_path)?;
 
     let quest_map = collect_quest_map(reader, &required_ids)?;
@@ -41,13 +42,13 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 ///
 /// Sources:
 /// - `src/lua_api/globals/c_quest_api.rs`: quest_id fields in QUEST_LOG
-/// - `data/quest_poi_blobs.rs`: quest_id fields in POI blob data
+/// - `crates/sim-data/data/quest_poi_blobs.rs`: quest_id fields in POI blob data
 fn collect_required_quest_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Error>> {
     let mut ids = BTreeSet::new();
 
     for path in &[
         "src/lua_api/globals/c_quest_api.rs",
-        "data/quest_poi_blobs.rs",
+        "crates/sim-data/data/quest_poi_blobs.rs",
     ] {
         let src = std::fs::read_to_string(path)?;
         for line in src.lines() {
@@ -76,8 +77,7 @@ fn collect_quest_map(
     // Per quest: (turnin_ui_map_id, first_ui_map_id)
     let mut entries: HashMap<u32, (Option<u32>, Option<u32>)> = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue; // skip header
         }

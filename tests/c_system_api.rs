@@ -187,9 +187,55 @@ fn test_c_voice_chat_get_tts_voices_empty() {
 // C_TTSSettings
 // ============================================================================
 
+fn assert_tts_settings_applicability(env: &WowLuaEnv) -> bool {
+    use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
+
+    if ACTIVE == ClientProfile::Wrath {
+        assert!(
+            env.eval::<bool>("return rawget(_G, 'C_TTSSettings') == nil")
+                .unwrap()
+        );
+        return false;
+    }
+    true
+}
+
+#[test]
+fn test_c_tts_settings_publication_matches_profile() {
+    use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
+
+    let env = env();
+    if ACTIVE == ClientProfile::Wrath {
+        assert!(
+            env.eval::<bool>("return rawget(_G, 'C_TTSSettings') == nil")
+                .unwrap()
+        );
+        return;
+    }
+    env.eval::<()>(
+        r#"
+        local namespace = rawget(_G, "C_TTSSettings")
+        assert(type(namespace) == "table")
+        for _, name in ipairs({
+            "GetSpeechRate", "SetSpeechRate", "GetSpeechVolume", "SetSpeechVolume",
+            "GetVoiceOptionID", "GetVoiceOptionName", "SetVoiceOption", "SetVoiceOptionName",
+            "GetSetting", "SetSetting", "GetChatTypeEnabled", "SetChatTypeEnabled",
+            "GetChannelEnabled", "SetChannelEnabled", "SetChannelKeyEnabled",
+            "SetDefaultSettings", "GetCharacterSettingsSaved", "MarkCharacterSettingsSaved",
+        }) do
+            assert(type(rawget(namespace, name)) == "function", name)
+        end
+        "#,
+    )
+    .unwrap();
+}
+
 #[test]
 fn test_c_tts_settings_get_speech_rate() {
     let env = env();
+    if !assert_tts_settings_applicability(&env) {
+        return;
+    }
     let rate: i32 = env.eval("return C_TTSSettings.GetSpeechRate()").unwrap();
     assert_eq!(rate, 0);
 }
@@ -197,12 +243,18 @@ fn test_c_tts_settings_get_speech_rate() {
 #[test]
 fn test_c_tts_settings_set_speech_rate_noop() {
     let env = env();
+    if !assert_tts_settings_applicability(&env) {
+        return;
+    }
     env.eval::<()>("C_TTSSettings.SetSpeechRate(5)").unwrap();
 }
 
 #[test]
 fn test_c_tts_settings_get_speech_volume() {
     let env = env();
+    if !assert_tts_settings_applicability(&env) {
+        return;
+    }
     let volume: i32 = env.eval("return C_TTSSettings.GetSpeechVolume()").unwrap();
     assert_eq!(volume, 100);
 }
@@ -210,21 +262,32 @@ fn test_c_tts_settings_get_speech_volume() {
 #[test]
 fn test_c_tts_settings_set_speech_volume_noop() {
     let env = env();
+    if !assert_tts_settings_applicability(&env) {
+        return;
+    }
     env.eval::<()>("C_TTSSettings.SetSpeechVolume(50)").unwrap();
 }
 
 #[test]
 fn test_c_tts_settings_get_voice_option_id() {
     let env = env();
+    if !assert_tts_settings_applicability(&env) {
+        return;
+    }
     let id: i32 = env
         .eval("return C_TTSSettings.GetVoiceOptionID(1)")
         .unwrap();
-    assert_eq!(id, 0);
+    // Blizzard_ChatFrame/Shared/TextToSpeechFrame.lua:11,332 sets Alternate to 1.
+    // This is the legacy UI default, not a claim of native default parity.
+    assert_eq!(id, 1);
 }
 
 #[test]
 fn test_c_tts_settings_set_voice_option_noop() {
     let env = env();
+    if !assert_tts_settings_applicability(&env) {
+        return;
+    }
     env.eval::<()>("C_TTSSettings.SetVoiceOption(1, 2)")
         .unwrap();
 }

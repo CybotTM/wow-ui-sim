@@ -29,7 +29,6 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-5")]
             nameplate_hit_test_insets:
                 crate::c_api::c_nameplate_manager::NamePlateHitTestInsets::default(),
-            #[cfg(feature = "client-wowforever")]
             input_interface_style:
                 crate::c_api::c_input_interface_style::InputInterfaceStyle::default(),
             #[cfg(feature = "client-wowforever")]
@@ -438,6 +437,7 @@ macro_rules! build_empty_sim_state {
             pressed_keys: HashSet::new(),
             game_rules: GameRulesState::default(),
             discord: DiscordState::default(),
+            forever_startup: Default::default(),
             player_choice: PlayerChoiceState::default(),
             housing_service_enabled: true,
             housing: HousingState::default(),
@@ -574,6 +574,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-0")]
             bnet_custom_message: String::new(),
             social_friends: default_social_friends(),
+            social_restrictions: SocialRestrictionsState::default(),
             #[cfg(feature = "client-wrath")]
             selected_friend_guid: None,
             auction_browse_results: default_auction_browse_results(),
@@ -608,6 +609,7 @@ macro_rules! build_empty_sim_state {
             factions: Vec::new(),
             selected_faction_index: 0,
             watched_faction_index: 0,
+            battlefield_vehicles: ::std::collections::HashMap::new(),
             battlefield_queue: BattlefieldQueue::default(),
             battlefield_minimap_visible: false,
             chat_channels: Vec::new(),
@@ -618,6 +620,7 @@ macro_rules! build_empty_sim_state {
             pending_duel: None,
             pending_resurrect: None,
             corpse_available: false,
+            corpse_map_positions: HashMap::new(),
             active_trade: None,
             open_panels: ::std::collections::HashSet::new(),
             is_party_lfg: false,
@@ -729,8 +732,8 @@ pub use super::state_types::{
     PlayerChoiceOptionRewardInfo, PlayerChoiceRewardCurrencyInfo, PlayerChoiceRewardItemInfo,
     PlayerChoiceRewardReputationInfo, PlayerChoiceState, PlayerState, PlayerXpState, PvpHonorState,
     SEEDED_LOCAL_CHARACTER_GUID, SEEDED_LOCAL_CHARACTER_NAME, ScenarioState, ScenarioStep,
-    SecondaryPowerState, SocialFriend, SummonRequestState, TokenAuctionInfo, WorldState,
-    WowTokenState,
+    SecondaryPowerState, SocialFriend, SocialRestrictionsState, SummonRequestState,
+    TokenAuctionInfo, WorldState, WowTokenState,
 };
 #[cfg(feature = "client-retail")]
 pub use super::state_types::{EffectiveAttackPower, PowerRegen, WeaponAttackPower};

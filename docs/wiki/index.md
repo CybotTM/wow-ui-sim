@@ -1,6 +1,109 @@
 ## [2026-10-24] static producer | CF-2 selected-unit aura cleanup
 
 [Consumer and contradiction proof](investigations/consumer-selection-and-red-proof.md#cf-2-selected-unit-aura-cleanup) links the [contract](../specs/clear-blocked-auras.md): Retail/PTR clear the existing effective unit block set in place; three unchanged original-consumer selectors discriminate constant/no-op/wrong-unit/global clears. Nil rejection stays a separate authorized non-native policy. No build, test, slot or native-parity proof.
+## [2026-10-25] investigation | Mists battlefield vehicles
+
+[Original vehicle consumer](investigations/mists-battlefield-vehicles.md) links the [contract](../specs/mists-battlefield-vehicles.md): pinned API declarations, selected WorldMap provider/pins and supplied per-map state. Original-consumer missing-call RED and supplied-pin GREEN pass. Both raw captures contain 12 keys / 18 occurrences; vehicle errors are replaced by individually traced existing DeathMap provider errors. Exact base reproduces the 12/18 BEFORE map, and byte-identical paired producer-only RED fails as required. Mists/Retail all-target checks pass with three inherited/zero warnings; formatting and readability pass.
+
+## [2026-10-25] proof | PTR I4 batch2 landing
+
+[Eight exact consumer pairs](investigations/patch-12-1-7-api-audit.md#batch2-landing-proof) pass GREEN and fail producer-only RED at original Blizzard lines. Stock296/410→272/378 retains ten individually traced successor keys. Retail/PTR all-target checks meet zero/known-three warning limits; formatting and Retail absence pass. Preset and aggregate tests remain outside the normal suite. Slot1 is released; the current merge-tree has only a wiki-log conflict for main.
+
+## [2026-10-25] implementation | PTR supplied WoWHack mode
+
+[Original consumer REDs](investigations/patch-12-1-7-api-audit.md#supplied-wowhack-mode) reach MicroMenu207 and UIErrorsFrame12. The [contract](../specs/ptr-i4-game-rules.md) uses existing active-mode state and enum data; both exact consumer GREENs pass. Final merged stock/check acceptance remains pending.
+
+## [2026-10-25] prerequisites | PTR I4 GameRules and RecentAllies
+
+[Original consumer boundaries](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) link the [bounded supplied-input contract](../specs/ptr-i4-game-rules.md). Original-line RED now proves five function boundaries after enum prerequisites; RecentAllies labels pass. Five supplied-state producers are implemented; final merged acceptance remains pending. Preset support and aggregate I4 tests are excluded from this landing packet and retained for follow-up.
+
+## [2026-10-25] proof | Forever explicit gamepad capability
+
+[Capability state and wrapper proof](systems/gamepad-mapped-state.md#explicit-enabled-capability) links the [contract](../specs/forever-gamepad-enabled.md): existing GamePadEnable CVar input, independent of mapped sticks; original secure restricted wrapper RED/GREEN, unchanged 26/26 Forever stock. Retail/PTR exact absence controls pass; their stock maps remain 16/18 and 296/410. All three all-target checks and formatting pass under the pre-I1 warning allowance. Native device detection remains unknown; startup is not clean.
+
+## [2026-10-25] investigation | PTR regional names
+
+[Sequential original-consumer proof](investigations/ptr-regional-names.md) reaches regional and surname RED separately, then passes both supplied-policy transitions. PTR stock 296/410→272/348 clears the UnitFrame155 family; all 6 added raw keys are traced. Forever 70532 remains 26/26 and preservation passes. The [contract](../specs/regional-unique-names.md) and all three profile checks pass; native policies are not inferred.
+
+## [2026-10-25] runtime proof | PTR I4 landable first batch
+
+[Bounded producer repair](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair) links the [contract](../specs/ptr-i4-first-green.md): four exact RED/GREEN pairs include the original Collections and GhostFrame transitions. Stock 298→296 raw keys has zero additions; Retail/PTR checks meet zero/known-three warning limits and formatting passes. Aggregate 173-shape tests remain on the lane only; native policy remains unknown.
+
+## [2026-10-25] investigation | Classic opaque aura timers
+
+[Original callback attribution](investigations/classic-startup-producer-cascades.md#opaque-private-aura-timers) resolves four erased nil calls to the declared defensive query. The [completion matrix](../specs/aura-spell-classification-identifiers.md#classic-completion-proof--2026-10-25) records both-profile RED/GREEN and AuraUtil preservation, exact stock improvement with no additions, and Era/Anniversary/Retail all-target checks. TTS remains separately owned.
+
+## [2026-10-25] proof | Supplied social squelch
+
+[Original LFG controls](investigations/consumer-selection-and-red-proof.md#supplied-social-squelch) link the [contract](../specs/social-squelch.md): environment-local input on Retail/PTR/Mists. Final exact RED/GREEN proves both original buttons and tooltips across false/true/false, exact bool and isolation. Each stock squelch pair is removed with no added keys; all-target checks pass under the zero/allowed-three warning contract.
+
+## [2026-10-25] decision | PTR SharedXML executes twice
+
+[User decision](investigations/ptr-input-interface-style.md#user-decision-two-environments-2026-10-25) corrects only the PTR listener expectation to two, one per normal/secure environment. Native modern count remains unproven; Retail decompilation is the revisit boundary. [Final proof](investigations/ptr-input-interface-style.md#approved-twice-final-proof-2026-10-25): exact PTR GREEN passes, producer-only RED rejects the original event, PTR/Retail all-target checks pass with allowed-three/zero warnings. Forever case 1 is a documented missing API without capability state; report-only. Slot 2 released.
+
+## [2026-10-25] runtime proof | PTR input listener environment count
+
+[Slot-2 results](investigations/ptr-input-interface-style.md#slot-2-execution-2026-10-25): RED reaches the original rejected event; GREEN records two listeners via normal/secure replay and is blocked by a native answer. Forever 3/4 pass; both all-target gates pass with the allowed inherited warnings. Raw stock maps retain all successor errors.
+
+## [2026-10-25] static stage | PTR input event validity
+
+[Original-consumer extension](investigations/ptr-input-interface-style.md#ptr-event-validity-extension-2026-10-25) records the documented PTR epoch exception, load-error and listener registration assertions, and the new event-only RED/GREEN pair above the existing namespace publication. No slot, compilation or runtime proof.
+
+## [2026-10-24] static stage | PTR input interface style
+
+[Selected consumer and contradiction table](investigations/ptr-input-interface-style.md) link the [contract](../specs/ptr-input-interface-style.md): authenticated PTR70493 docs, original SharedXML runtime-selection selector and existing state model. Separate test-first and GREEN source phases expose the existing model to PTR through ACTIVE; no build, slot or runtime RED/GREEN.
+
+## [2026-10-24] staged | Mists pet display identity
+
+[Pet identity notes](systems/pet-battle-names.md#mists-display-identity) link the [contract](../specs/mists-pet-display-id.md): supplied optional per-pet display identity, Mists-only publication and static nil receiver trace. Existing name selectors remain unchanged; constant/value projection coverage and all new runtime proof remain pending.
+## [2026-10-25] fix | TTS profile publication
+
+[Publication boundary](investigations/cf2-tts-integration.md#publication-gate-repair) records the Wrath namespace RED, six declaring profiles, approved positive-absence legacy applicability and55 fresh exact GREEN cases. Wrath/Retail all-target checks, zero-error sparse Wrath stock and formatting pass.
+
+## [2026-10-25] investigation | Forever startup supplied inputs
+
+[Startup gaps](investigations/forever-startup-gaps.md) links the byte-exact 70532 baseline, 21 passing exact selectors and explicit native-unknown target/locality boundaries. Known registration/model gaps are repaired; startup retains only approved native-unknown residue. Positive housing is a tested excluded-publisher boundary, not a loader fix. All-target Forever/Retail/PTR checks pass under the clarified inherited-warning allowance; the lane report owns CPU and release receipts.
+
+## [2026-10-25] fix | Byte-preserving Lua cache usability
+
+[Source-byte validation](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) separates byte-oriented Lua from UTF-8 XML/TOC/XSD. Runtime TOC loading already passes raw bytes to rilua. Regression fixtures preserve a literal `0x92` through cache checks and loaded strings.
+
+## [2026-10-25] source | Forever wowf product selection
+
+[Selected-target checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records wowf 1.60.1.70532 / build2582289d81e380163c7a13472df4cb81, repaired live desktop indexes, idle Syncthing and authenticated local root/encoding. Selector/regression now expect wowf. Builds, offline sync, baseline and startup await a released slot after club-unread-integrate and S49; static work is not runtime acceptance.
+## [2026-10-25] staged | Forever verified non-resident Gethe sources
+
+[Cache rule](systems/casc-asset-cache.md#forever-mapped-non-resident-sources) and [contract](../specs/casc-loading.md#forever-mapped-non-resident-ui-sources) record immutable same-build Gethe blobs only for mapped EKeys absent from local indexes, raw CKey/MD5 validation and per-file provenance. Resident CASC and unmapped failures remain separate. Static tests/code committed separately; execution and stock startup remain pending.
+## [2026-10-25] investigation | S49 rejected refresh repair
+
+[Companion spell backing](investigations/wrath-companion-cooldown.md#s49-reject-repair-static-2026-10-25): portable receipt paths and seeded-mount selector regression staged; generated catalogs and runtime proof still await a slot.
+
+## [2026-10-24] investigation | S49 70391 refresh and logical CSV records
+
+[Refresh boundary](investigations/wrath-companion-cooldown.md#same-build-spelltrait-refresh-and-csv-boundary) links the per-file receipt, CSV-native dangling references and the physical-line CRLF truncation. Root fix and concrete tests staged; fresh generator, corrected regeneration and S49 runtime GREEN remain slot-gated.
+
+## [2026-10-24] investigation | Companion cooldown req-13 arbitration
+
+[Cooldown investigation](investigations/wrath-companion-cooldown.md) records
+ordered own/category/GCD endpoint arbitration, accepted-held sticky enable,
+shared flag2, absent player and supplied critter paths. Nine original-consumer
+selectors staged; static contradictions are not executed RED/GREEN proof.
+## [2026-10-24] static stage | CF-2 PvP completion
+
+[State projection and original consumer](investigations/consumer-selection-and-red-proof.md#cf-2-supplied-pvp-match-completion) link the [contract](../specs/pvp-match-completion.md): Retail/PTR read the existing completion snapshot; Forever is excluded. Paired RED removes only the producer with identical tests. Static constant/no-op contradictions are documented; runtime selection, RED/GREEN and current private PTR cache proof remain pending.
+Historical utility-command replay requires `--features tools`; see the [replay note](../../README.md#utility-binary-builds) for the three preserved evidence examples.
+
+## [2026-10-25] investigation | Compile binary selection
+
+[Source findings](investigations/compile-bin-lockwatch.md) and [contract](../specs/integration-bin-selection.md): opt-in utility bins preserve wow-sim test consumers and operational builders. Static-only; no slot/build/CPU proof.
+
+## [2026-10-24] design | Generated data crate boundary
+
+[Crate split](design/generated-data-crates.md) preserves the root facade and selected tables while isolating common catalogs from profile features. Same-slot touched-root rebuild 413.80→258.52 s; peak child RSS6,189,056→2,717,272 KiB. Retail/Wrath checks and94 bounded Rust tests pass; all23 generated files retain their hashes. Single warm-dependency samples, not a cold-build or full-profile claim.
+
+## [2026-10-24] system | CF-2 supplied unread streams
+
+[Club stream ownership](systems/club-membership.md#unread-streams-cf-2) links the [bounded unread contract](../specs/club-unread.md): one supplied club/stream model, original MicroMenu and CommunitiesUtil selectors, settings/marker/clear siblings and explicit UNKNOWN native policies. RED/schema and publication staged separately; no build, slot or runtime proof. Retail/PTR/Forever preservation remains pending.
 
 ## [2026-10-24] source | Patch 12.1.7 I4c static dispositions
 
@@ -16,9 +119,17 @@
 ## [2026-10-24] source | Patch 12.1.7 I4a inherited worklist
 
 [Inherited accounting](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance) links the [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist): 1,876 immutable occurrences, 63 opposing sweep intersections and 233 lexical test-candidate rows. All 5,628 profile applicability cells remain UNKNOWN pending accepted source/selection evidence. Grouped I4b worklist, zero Cargo; not runtime acceptance.
+## [2026-10-24] static producer | CF-2 Classic map display
+
+[Map display model](investigations/map-display-info-model.md#cf-2-classic-publication--static-producer-2026-10-24) links the [contract](../specs/map-display-info.md): Era/Anniversary runtime publication reuses the existing per-map backing state and parser. Original XML pin tests remain unchanged; runtime RED/GREEN and preservation are pending. No build, test or slot.
+
 ## [2026-10-24] source | Combat-log filter record staging
 
 [Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
+
+## [2026-10-24] source | Forever 70532 acceptance epoch
+
+[Selected-build checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records installed beta identity, exact Gethe revision, 4,486 source paths and refreshed mappings. [Profile contract](../specs/client-profiles.md) retains temporary date fields and pending execution; historical 70374 receipts are not 70532 proof. Runtime sync/baseline and all-target warning gates await slot and resolver integration.
 
 ## [2026-10-24] system | CF-2 supplied club self invitations
 
@@ -4102,3 +4213,31 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-23] investigation | Consumer selection and standalone RED
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
+
+## [2026-10-24] source | TTS preference persistence staging
+
+[Private persisted C API model](systems/lua-api.md#tts-preference-model-edit-only-staging)
+links the [bounded contract](../specs/c-factory-cf2-tts.md#user-decisions--2026-10-24).
+User-approved getter-based persistence and non-native fresh=false/Mark=true marker
+replace the unsupported public-CVar oracle. Existing SavedVariables serialization
+is reused; original-consumer runtime RED/GREEN remains unexecuted.
+## Wrath companion cooldown source review
+- [[wrath-companion-cooldown]] — staged companion cooldown adapter, standalone rejection contracts, creature effect-misc data gap and retained consumer blockers; edit-only, no runtime proof.
+## [2026-10-24] source | CF-2 pet-battle names staging
+[State projection and selected consumers](systems/pet-battle-names.md) links the [contract](../specs/pet-battle-names.md). Original-consumer tests precede producer; runtime RED/GREEN, mutants and exact stock diff remain pending under edit-only staging.
+
+## [2026-10-25] Mists corpse map position
+
+[Supplied corpse observations](systems/mists-corpse-map-position.md) bind the pinned nilable vector query to the original DeathMapDataProvider and selected Wrath XML pin. Exact original-consumer GREEN and producer-only RED pass their expected boundaries with identical test bytes. Stock remains 12/18: two corpse keys clear and two existing GroupMembers GetMapDisplayInfo keys are individually traced. Mists/Retail all-target checks have zero warnings; fmt passes.
+
+## [2026-10-25] integration | CF-2 TTS fixture deferrals
+
+[Restoration inventory](investigations/cf2-tts-integration.md) records thirteen whole-file deferrals, their passing cases and origin owners, plus the failing mixed-file Gamepad exception. Current Forever TTS cases pass; two newly passing Forever files remain unchanged. Final profile gates remain separate.
+
+## [2026-10-25] test | TTS Alternate UI default oracle
+
+[Source-backed correction](investigations/cf2-tts-integration.md#alternate-voice-oracle-correction) changes the legacy voiceType1 test from0 to1. Pinned Blizzard legacy UI defaults and migration support1; APIDocumentation does not establish native default parity. Forever70532 TTS cases and exact26/26 master stock comparison pass.
+
+## [2026-10-25] verification | TTS bounded integration
+
+[Bounded proof matrix](investigations/cf2-tts-integration.md#bounded-verification) records37 passing exact cases, seven all-target checks with the clarified inherited-warning allowance, seven raw stock comparisons and source-backed Mists additions. Fresh library reuse has dep-info content identity; native parity and full-suite acceptance remain excluded.

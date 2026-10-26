@@ -15,7 +15,6 @@ pub struct SimState {
     >,
     #[cfg(feature = "retail-12-0-5")]
     pub(crate) nameplate_hit_test_insets: crate::c_api::c_nameplate_manager::NamePlateHitTestInsets,
-    #[cfg(feature = "client-wowforever")]
     pub(crate) input_interface_style: crate::c_api::c_input_interface_style::InputInterfaceStyle,
     /// Explicit mapped-stick input; None means no configured snapshot, not device absence.
     #[cfg(feature = "client-wowforever")]
@@ -603,6 +602,8 @@ pub struct SimState {
     /// Supplied legacy trainer visibility: available, unavailable, used.
     #[cfg(feature = "client-wrath")]
     pub wrath_trainer_filters: [bool; 3],
+    /// Host inputs for Forever 70532; other profiles do not publish these probes.
+    pub forever_startup: crate::c_api::forever_startup::StartupInputs,
     pub bank_frame_open: bool,
     pub guild_bank_frame_open: bool,
     pub bank_purchased_slots: i32,
@@ -691,6 +692,7 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-0")]
     pub bnet_custom_message: String,
     pub social_friends: Vec<SocialFriend>,
+    pub social_restrictions: SocialRestrictionsState,
     /// Wrath selection retains identity when the display projection changes.
     #[cfg(feature = "client-wrath")]
     pub selected_friend_guid: Option<String>,
@@ -724,6 +726,11 @@ pub struct SimState {
     pub factions: Vec<FactionEntry>,
     pub selected_faction_index: i32,
     pub watched_faction_index: i32,
+    /// Explicit map observations, visible only while is_active_battlefield is true.
+    pub battlefield_vehicles: ::std::collections::HashMap<
+        i32,
+        Vec<crate::c_api::c_pvp::battlefield_vehicles::BattlefieldVehicle>,
+    >,
     pub battlefield_queue: BattlefieldQueue,
     pub battlefield_minimap_visible: bool,
     pub chat_channels: Vec<ChatChannel>,
@@ -734,6 +741,8 @@ pub struct SimState {
     pub pending_duel: Option<String>,
     pub pending_resurrect: Option<String>,
     pub corpse_available: bool,
+    /// Supplied corpse coordinates by UI map; never inferred from player position.
+    pub corpse_map_positions: HashMap<i32, (f64, f64)>,
     pub active_trade: Option<TradeState>,
     pub open_panels: ::std::collections::HashSet<String>,
     pub is_party_lfg: bool,

@@ -52,8 +52,6 @@ pub(crate) mod chat_window_defaults;
 pub(crate) mod class_trial_defaults;
 pub(crate) mod click_bindings_defaults;
 pub(crate) mod client_info_defaults;
-#[cfg(feature = "retail-12-0-7")]
-pub(crate) mod club_notification_defaults;
 pub(crate) mod collections_journal_namespace;
 pub(crate) mod color_defaults;
 pub(crate) mod combat_log_state;
@@ -206,7 +204,6 @@ pub(crate) mod trade_skill_ui_fallbacks;
 pub(crate) mod transmog_outfit_slot_defaults;
 pub(crate) mod transmog_sets_defaults;
 pub(crate) mod transmog_util_defaults;
-pub(crate) mod tts_settings_defaults;
 pub(crate) mod ui_frame_manager_defaults;
 pub(crate) mod ui_parent_panel_toggles;
 pub(crate) mod ui_widget_manager_defaults;

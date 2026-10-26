@@ -7,7 +7,7 @@ Normal builds **and runs** use `scripts/build-host.py`. `desktop` means native R
 ```sh
 python3 scripts/build-host.py --run
 python3 scripts/build-host.py --build-host local --run
-python3 scripts/build-host.py --bin wow-cli --run -- --no-addons --no-saved-vars lua-errors
+python3 scripts/build-host.py --bin wow-cli --features tools --run -- --no-addons --no-saved-vars lua-errors
 python3 scripts/build-host.py --check
 python3 scripts/build-host.py --test --test integration FILTER -- --nocapture
 python3 scripts/build-host.py --no-default-features --features sound,gui,casc,client-ptr --check
@@ -24,6 +24,161 @@ scripts/start-profile.sh all
 
 The Python profile launcher preserves `live`/`retail`, `ptr`, `mists`, and `all`, selecting profile-specific Cargo features. `WOW_SIM_START_RELEASE=1`, `WOW_SIM_START_FOREGROUND=1` (single profile only), and `WOW_SIM_START_NO_BUILD=1` retain their meanings. Background logs and helper PIDs appear in `target/profile-runs/`; a printed PID is not GUI readiness proof.
 
+## Local slot builds
+
+Use `scripts/slot-build.py` for shared-slot Cargo builds. It bind-mounts the lane
+worktree at `~/.cache/wow-ui-sim-srcmount/slot-N` inside an unprivileged
+user service, paired with target `~/.cache/wow-ui-sim-targets/slot-N` and
+`CARGO_INCREMENTAL=1`. Incremental reuse depends on that fixed BindPaths source
+path per persistent target slot; do not build through changing worktree paths.
+The stable-path experiment
+(`~/.local/state/wow-ui-sim/handoff/compile-throughput-20261025/stablepath-experiment.md`)
+measured lower touch/edit CPU with incremental enabled. Its single-slot cache
+size is not a long-run growth bound. Keep normalized `Cargo.lock` bytes identical between lanes
+([ordering evidence](wiki/investigations/compile-bin-lockwatch.md#cargolock-watch)).
+
+Coordinate slot ownership before launch. For new claims, the claimant writes
+`slot-N/.owner` with mode `0600`, containing exactly the `--owner` string, without
+a newline; remove it on release. Existing JSON markers remain unchanged for
+running lanes. This helper checks ownership; it does not claim or release slots.
+It checks `capacity.sh` once with `CAPACITY_ID` from `--capacity-id` and refuses
+anything except a literal `ADD` verdict. It does not poll for admission.
+
+```sh
+scripts/slot-build.py --slot 2 --worktree "$HOME/.worktrees/wow-ui-sim-lane" --unit lane-build --owner lane-owner --capacity-id lane-capacity -- /usr/bin/cargo test --test integration --no-run
+scripts/slot-build.py --status lane-build
+```
+
+Launch prints the unit name without waiting for the build. The retained service
+runs in `agents.slice` with `MemoryMax=9G` and `MemorySwapMax=0`.
+`RUSTC_WRAPPER` is set to an empty value so Cargo configuration cannot select
+sccache instead of the incremental compiler. Status prints
+`SubState`, `Result`, `CPUUsageNSec`, and `WallTimeSec` (elapsed while running).
+Use the helper from the checkout that contains it; it builds `--worktree`.
+
+### Source freshness and receipts
+
+The fixed source mount hides worktree changes from Cargo's path identity. Older
+file mtimes can therefore reuse another tree's artifacts, even with incremental
+compilation disabled. The helper records HEAD, a binary dirty-diff hash (including
+untracked file contents), dirty paths, and per-target artifact hashes in
+`slot-N/.verified-source-identity.json` only after the child exits zero and the
+guard accepts. The separate `slot-N/.source-identity.json` records attempts,
+including building, failed, and rejected runs; it never supplies the content or
+artifact baseline. Existing attempt-only slots have no verified baseline and
+receive the conservative unknown-source checks.
+Before Cargo starts, a changed verified identity refreshes mtimes for the
+HEAD-to-HEAD diff and both trees' dirty/untracked paths without changing bytes.
+An unknown baseline or unsuccessful previous attempt derives input roots from
+offline `cargo metadata --no-deps`:
+package manifest directories and path dependency directories, plus root
+`build.rs`, `Cargo.toml`, and `Cargo.lock`. All tracked files under those roots
+are refreshed. This repository's root package also covers build-script inputs
+in `build/`, `installer/`, `native/intl/`, and `tests/`. If metadata fails, all
+tracked files are refreshed. A root package therefore also refreshes its docs;
+this conservative full refresh is needed when prior source is unknown or the
+previous build did not succeed.
+
+Each unit writes `slot-N/receipts/UNIT.json` with its source identity, changed
+paths (`changed_paths`, the mtime refresh set), content changes
+(`content_changed_paths`), command, result and artifact SHA256 values. The command arguments and
+stdout/stderr bytes are passed through unchanged, including wrappers that capture
+Cargo JSON internally. The worker reads visible stdout for this build's Cargo
+`compiler-artifact` records, without changing the submitted arguments. Use Cargo's
+JSON message format to expose those records. Receipts retain the records and each
+package's metadata-derived manifest-parent and path-dependency roots.
+
+Every repo-owned compiler-artifact record is judged on its own inputs, including
+libraries, binaries and tests. Ownership comes from `manifest_path` or target
+`src_path` under the worktree, fixed source mount or utility mount. Registry and
+Git package sources (`registry+`/`git+`) are external and excluded. Records without
+ownership paths cannot prove they are external and are checked.
+
+The worker snapshots Cargo `.d` dep-info before the child starts and reads it
+again after the child exits.
+It uses each record's `filenames` and `executable` paths to find rustc's
+`deps/<name>-<metadata-hash>.d`, including hard-linked hashed executables when Cargo
+reports only the uplifted binary. Each snapshot retains its own hard-link mapping;
+other metadata hashes are not guessed by name. The uplifted binary's adjacent `.d`
+is used only when no matching rustc dep-info exists. Each record's inputs include
+only its own previous and current dep-info. No executable-to-library linkage is
+guessed: Cargo fingerprints rebuild dependents when a library rebuilds. The guard
+checks each library's own compiler inputs for the stale-mtime hazard. Inputs include
+`include_str!`/`include_bytes!` files, not only Rust sources. Each record's
+package adds its `build.rs`, `Cargo.toml`, and `Cargo.lock`, plus the workspace
+`Cargo.lock`. Receipts retain these inputs as
+repo-relative paths. The worker strips the slot's fixed source mount, its
+`ct-bins-slot-N` utility mount (both under the launcher's `SOURCE_ROOT`), or the
+original worktree root after parsing Make escaping and line continuations.
+Inputs outside these roots are ignored. Missing or unreadable dep-info for a
+repo-owned record fails closed, even with no content diff. Missing previous
+dep-info is allowed when Cargo reports `fresh=false` and valid current dep-info
+exists; unreadable previous dep-info still fails. Zero current repo-relative
+inputs fail before package inputs are added. A content diff outside all valid
+record inputs does not make any artifact stale; this includes documentation,
+tools and non-embedded runtime files. Receipts record unmatched content changes
+under metadata-derived package roots as informational `unread_package_paths`.
+This includes unread Rust source paths and does not reject the build.
+
+Content changes are computed from the last successfully verified source identity,
+not the latest attempt or the mtime refresh set. Failed and rejected builds never
+advance that baseline, so retrying cannot erase a pending content diff. When the content diff intersects a
+record's own inputs, Cargo must report `fresh=false`. If that record is an
+executable, its SHA256 must also differ from the previous hash at the same path.
+Otherwise the run fails with `stale artifacts`. Libraries do not require changed
+hashes. A changed library, `.rmeta`, or another executable cannot certify an
+executable whose own inputs changed. Unreported artifacts and records with
+disjoint inputs are not judged for freshness. A test-only edit therefore does not
+reject an unaffected fresh bin, even within the same package. Records affected
+only by mtime refresh require `fresh=false`; executables also require a current
+hash, but identical rebuilt bytes are accepted.
+The existing conservative root derivation and source mtime refresh are unchanged.
+
+The slot-wide identity is only a source-refresh baseline, not proof that every
+cached profile or metadata hash was built from that tree. Each reported repo-owned
+output also needs an `artifact_certificates` entry keyed by its exact slot-relative
+output path. The certificate contains the output SHA256 and content SHA256 values
+for its current normalized dep-info and package inputs. Previous-only dep-info
+inputs remain in stale-decision evidence, not the rebuilt output's certificate.
+Certificates for unreported
+outputs retain their original input hashes across unrelated builds. A `fresh=true`
+record must match its own certificate, including its complete input set and output
+bytes, even when the slot-wide content diff is empty. A missing certificate fails
+closed; old receipts do not certify fresh outputs. A `fresh=false` record with valid
+dep-info and output hashes can establish a certificate. Rebuild the affected Cargo
+artifact before retrying; changing receipt identities does not provide proof.
+
+The worker hashes tracked/untracked source files, known source dep-info inputs and
+package manifests before launching the child. It hashes each record's source inputs
+again afterward and rejects changed or previously unsnapshotted source inputs.
+Dep-info input spellings retain `..` components and are resolved with
+`os.path.realpath(strict=False)` before classification. Source and current-slot
+inputs must also exist at their original, unnormalized spelling, so a removed
+ancestor cannot be hidden by resolution.
+Inputs inside the resolved source mounts keep repo-relative certificate keys.
+All other inputs anywhere inside the current slot's resolved target directory
+are required to exist and are content-hashed, using resolved absolute paths as
+certificate keys. This includes target-triple layouts, any `build/<package>/out/`
+depth, and external symlink aliases to slot-local files. These generated inputs
+can be created or replaced by the child; their final hashes must match the
+certificate on fresh reuse. Resolved paths outside the source mounts and current
+slot remain external, including other slots, toolchain and registry inputs. Missing current compiler inputs
+fail closed. Optional absent package files are represented by null hashes. Certificates advance only with an accepted
+build, alongside the verified identity. Failed or rejected attempts cannot certify
+an output. All reported filenames are hashed, including untouched `.rmeta` files,
+not just executables or newly modified files.
+
+When no compiler-artifact record is visible (for example, a wrapper captures Cargo
+stdout), a successful child fails closed only if the diff intersects package inputs.
+A visible library-only record is checked on its own dep-info and freshness.
+A hidden stream with no package-input diff does not fail. Wrappers remain supported,
+but captured output or filesystem hashes cannot substitute for the missing records.
+For receipt evidence, the worker still scans newly touched executables/libraries
+and rehashes previous paths. Receipt, hidden, and incremental subdirectories are
+excluded from discovery. Those discovered paths do not select freshness candidates.
+Checks can record library artifacts without an executable. Inspect the retained
+unit's terminal result as well as its receipt; launch success is not build success.
+
 ## Host selection and dependencies
 
 `python3 scripts/build-host.py --save-build-host desktop` saves the shared default in `~/.config/game-engine/build-host`; use `local` to change it. The configured default is desktop. Explicit `--build-host` overrides it for one invocation. Host failure is an error, never a host fallback.
@@ -32,7 +187,7 @@ Shared snapshot, selection, and native execution helpers live in `/syncthing/Syn
 
 ## Source, cache, and lifetime
 
-Desktop source and Cargo targets persist under `/home/osso-test/.cache/native-builds/<key>/`. Snapshots include current working edits and selected owned compile/runtime inputs, not only committed source. `crates/` includes internal workspace packages such as the dev-only test harness: Cargo resolves their manifests even for binary-only builds. The helper is not thereby a production compilation dependency. [Staged input proof](../data/test-perf/evidence/dev-harness-build-inputs-2026-10-11/README.md) records missing-manifest failures and corrected local workspace resolution; it is not a desktop build/transport pass. Previously supplied files are pruned without deleting app-owned runtime directories; content changes receive fresh mtimes, including A/B/A changes. Builds do not hold a runtime lock for the app's lifetime.
+Desktop source and Cargo targets persist under `~/.cache/native-builds/<key>/` on desktop. Snapshots include current working edits and selected owned compile/runtime inputs, not only committed source. `crates/` includes internal workspace packages such as the dev-only test harness: Cargo resolves their manifests even for binary-only builds. The helper is not thereby a production compilation dependency. [Staged input proof](../data/test-perf/evidence/dev-harness-build-inputs-2026-10-11/README.md) records missing-manifest failures and corrected local workspace resolution; it is not a desktop build/transport pass. Previously supplied files are pruned without deleting app-owned runtime directories; content changes receive fresh mtimes, including A/B/A changes. Builds do not hold a runtime lock for the app's lifetime.
 
 Runtime Blizzard caches remain host-local and profile-scoped under `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns`; desktop resolves that home as `osso-test`. Host selection does not populate or migrate those caches. SSH leases control remote cleanup. Source SCP has a 60-second attempt limit and at most three transient attempts; permanent failures fail immediately.
 
@@ -40,7 +195,7 @@ Runtime Blizzard caches remain host-local and profile-scoped under `~/.cache/wow
 
 Measure CPU usage and capacity over the same cgroup scope. On October16,2026, local `agents.slice/cpu.max` was `max 100000` and main `nproc` reported32 CPUs; a measurement service with `CPUQuota=20%` reported1 from `nproc`, while `nproc --all` reported32. The then-current local capacity helper paired slice-wide CPU counters with a `nproc` denominator when the slice quota was unlimited, so a smaller polling-service quota produced a misleading `agents 9.9/1 CPU` verdict. This is not evidence that the slice has a one-core limit.
 
-Main temporarily removed only its polling unit's quota, preserving its PID, low priority, bounded memory and normal queue/memory/pressure admission; actual build limits and guards stayed separate. The shared helper was subsequently changed by the other main session to use `getconf _NPROCESSORS_ONLN` for an unlimited host-wide slice, retiring the need for that wrapper workaround. Main inspected the changed quota expression and observed `getconf` returning32 in the same20%-quota service boundary. This is bounded source/probe evidence, not a complete shared-helper gate. Receipts: `/home/osso/.local/state/wow-ui-sim/handoff/iconbackground-capacity-scope-main-disposition.md` and `/home/osso/.local/state/wow-ui-sim/handoff/capacity-getconf-shared-fix-20261016T112030751633Z.json`. No FIFO bypass or host-slice policy change; no Cargo bottleneck or jobs12 speedup claim.
+Main temporarily removed only its polling unit's quota, preserving its PID, low priority, bounded memory and normal queue/memory/pressure admission; actual build limits and guards stayed separate. The shared helper was subsequently changed by the other main session to use `getconf _NPROCESSORS_ONLN` for an unlimited host-wide slice, retiring the need for that wrapper workaround. Main inspected the changed quota expression and observed `getconf` returning32 in the same20%-quota service boundary. This is bounded source/probe evidence, not a complete shared-helper gate. Receipts: `~/.local/state/wow-ui-sim/handoff/iconbackground-capacity-scope-main-disposition.md` and `~/.local/state/wow-ui-sim/handoff/capacity-getconf-shared-fix-20261016T112030751633Z.json`. No FIFO bypass or host-slice policy change; no Cargo bottleneck or jobs12 speedup claim.
 
 ## Evidence and pending runtime proof
 

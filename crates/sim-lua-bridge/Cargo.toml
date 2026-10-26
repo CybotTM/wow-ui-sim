@@ -1,0 +1,8 @@
+[package]
+name = "sim-lua-bridge"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-only"
+
+[dependencies]
+rilua = { git = "https://github.com/Osso/rilua.git", rev = "b2629b6329484945cb14e43b0e5590ee308c5df4" }

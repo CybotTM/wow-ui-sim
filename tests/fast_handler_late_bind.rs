@@ -1,5 +1,8 @@
 //! XML handlers must observe globals when invoked, not when installed.
-use std::path::Path;
+#[cfg(any(feature = "client-retail", feature = "client-wrath"))]
+use original_scripts::original_on_click;
+#[cfg(feature = "client-retail")]
+use original_scripts::original_script;
 use wow_ui_sim::loader::{LoadTiming, create_frame_from_xml};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::xml::{XmlElement, parse_xml};
@@ -255,42 +258,48 @@ fn original_wrath_game_menu_resolves_later_framexml_globals() {
     );
 }
 
-fn find_original_frame<'a>(
-    frame: &'a wow_ui_sim::xml::FrameXml,
-    name: &str,
-) -> Option<&'a wow_ui_sim::xml::FrameXml> {
-    if frame.name.as_deref() == Some(name) {
-        return Some(frame);
+#[cfg(any(feature = "client-retail", feature = "client-wrath"))]
+mod original_scripts {
+    use std::path::Path;
+    use wow_ui_sim::xml::parse_xml;
+
+    fn find_original_frame<'a>(
+        frame: &'a wow_ui_sim::xml::FrameXml,
+        name: &str,
+    ) -> Option<&'a wow_ui_sim::xml::FrameXml> {
+        if frame.name.as_deref() == Some(name) {
+            return Some(frame);
+        }
+        frame
+            .all_frame_elements()
+            .into_iter()
+            .find_map(|(child, _)| find_original_frame(child, name))
     }
-    frame
-        .all_frame_elements()
-        .into_iter()
-        .find_map(|(child, _)| find_original_frame(child, name))
-}
 
-fn original_on_click(path: &Path, name: &str) -> String {
-    original_script(path, name, "OnClick")
-}
+    pub(super) fn original_on_click(path: &Path, name: &str) -> String {
+        original_script(path, name, "OnClick")
+    }
 
-fn original_script(path: &Path, name: &str, handler: &str) -> String {
-    let source = std::fs::read_to_string(path).unwrap();
-    let ui = parse_xml(&source).unwrap();
-    let frame = ui
-        .elements
-        .iter()
-        .filter_map(|element| element.as_frame_data())
-        .find_map(|(frame, _)| find_original_frame(frame, name))
-        .unwrap_or_else(|| panic!("missing original frame {name} in {}", path.display()));
-    let scripts = frame.scripts().expect("original scripts");
-    let handlers = match handler {
-        "OnClick" => &scripts.on_click,
-        "OnEnter" => &scripts.on_enter,
-        _ => panic!("unsupported original script {handler}"),
-    };
-    handlers
-        .last()
-        .and_then(|script| script.body.clone())
-        .expect("original inline body")
+    pub(super) fn original_script(path: &Path, name: &str, handler: &str) -> String {
+        let source = std::fs::read_to_string(path).unwrap();
+        let ui = parse_xml(&source).unwrap();
+        let frame = ui
+            .elements
+            .iter()
+            .filter_map(|element| element.as_frame_data())
+            .find_map(|(frame, _)| find_original_frame(frame, name))
+            .unwrap_or_else(|| panic!("missing original frame {name} in {}", path.display()));
+        let scripts = frame.scripts().expect("original scripts");
+        let handlers = match handler {
+            "OnClick" => &scripts.on_click,
+            "OnEnter" => &scripts.on_enter,
+            _ => panic!("unsupported original script {handler}"),
+        };
+        handlers
+            .last()
+            .and_then(|script| script.body.clone())
+            .expect("original inline body")
+    }
 }
 
 #[cfg(feature = "client-wrath")]

@@ -10,6 +10,7 @@ pub(crate) mod class_catalog;
 pub(crate) mod classic_startup_data;
 #[cfg(feature = "client-retail")]
 pub(crate) mod currency_list;
+pub(crate) mod ptr_i4_game_rules;
 pub mod quest_objectives;
 pub mod quest_readiness;
 pub(crate) mod quest_reward_currencies;
@@ -100,6 +101,7 @@ pub mod c_cursor;
 pub mod c_curve_util;
 pub mod c_damage_meter;
 pub(crate) mod c_date_and_time;
+pub(crate) mod c_death_info;
 pub mod c_death_recap;
 #[cfg(not(feature = "retail-12-0-0"))]
 pub(crate) mod c_debug;
@@ -122,7 +124,6 @@ pub mod c_garrison_trees;
 pub mod c_glue;
 pub mod c_housing;
 pub mod c_housing_bundles;
-#[cfg(feature = "client-wowforever")]
 pub mod c_input_interface_style;
 pub mod c_instance_encounter;
 pub mod c_intl;
@@ -166,6 +167,7 @@ pub mod c_ping_secure;
 pub mod c_player_choice;
 #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 pub(crate) mod c_player_info_guid;
+pub(crate) mod c_player_info_name_policy;
 pub mod c_player_interaction_manager;
 #[cfg(feature = "retail-12-0-0")]
 pub mod c_prey;
@@ -181,6 +183,7 @@ mod c_quest_log_watches;
 pub mod c_quest_offer;
 pub mod c_super_track;
 pub mod container_quest;
+pub mod forever_startup;
 #[cfg(feature = "client-wowforever")]
 pub use c_quest_log_watches::QuestWatchType;
 #[cfg(feature = "client-wowforever")]
@@ -195,6 +198,7 @@ pub mod c_scenario_info;
 pub mod c_secrets;
 pub mod c_settings_util;
 pub mod c_social;
+mod c_social_restrictions;
 pub mod c_sound;
 pub mod c_spec;
 pub mod c_spell;
@@ -239,6 +243,7 @@ mod club_inputs;
 mod club_members;
 pub mod club_model;
 pub mod club_self_invitations;
+mod club_unread;
 pub(crate) mod crafting_execution;
 pub(crate) mod crafting_input;
 pub(crate) mod crafting_plan;
@@ -369,6 +374,7 @@ pub(crate) mod forever_finite_constants;
 #[cfg(feature = "client-wowforever")]
 mod gamepad_action_bar_constants;
 
+pub(crate) mod c_tts_settings;
 mod helpers;
 #[cfg(feature = "retail-12-0-0")]
 mod patch_retired_members;
@@ -399,6 +405,7 @@ fn supports_super_tracking() -> bool {
 }
 
 pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResult<()> {
+    c_social_restrictions::register(state)?;
     c_loot_history::register_c_loot_history(state)?;
     c_date_and_time::register(state)?;
     #[cfg(feature = "retail-12-0-5")]
@@ -455,6 +462,7 @@ fn register_token_texture_xml_tables(state: &mut LuaState) -> LuaResult<()> {
     c_string_util::register_c_string_util(state)?;
     c_string_util_decimal::register_escape_decimal_non_printables(state)?;
     c_pvp::register_c_pvp_surface(state)?;
+    c_death_info::register(state)?;
     c_ping_secure::register_c_ping_secure_surface(state)?;
     #[cfg(feature = "retail-12-0-0")]
     c_ping_cooldown::register(state)?;
