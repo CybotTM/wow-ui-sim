@@ -1,6 +1,6 @@
 ## [2026-10-26] bounded proof | Shared ammo requirement observation
 
-[Selected slot boundary and stock attribution](investigations/forever-startup-gaps.md#shared-ptrforever-ammo-observation) link the [supplied-input contract](../specs/forever-startup-inputs.md): PTR/Forever only, one optional boolean, no inferred default. PTR original XML transitions/isolation/exact unset/recovery pass with identical predecessor RED. Stock PTR122/138→122/138 replaces40 error keys; Forever26/26→44/44 adds40 named keys and masks22 downstream reports. Corrected Forever proof and seven-profile gates remain pending.
+[Selected slot boundary and stock attribution](investigations/forever-startup-gaps.md#shared-ptrforever-ammo-observation) link the [supplied-input contract](../specs/forever-startup-inputs.md): PTR/Forever only, one optional boolean, no inferred default. PTR/Forever original XML transitions/isolation/exact unset/recovery pass with identical predecessor REDs; two existing Forever preservation cases pass. Stock PTR122/138→122/138 replaces40 error keys; Forever26/26→44/44 adds40 named keys and masks22 downstream reports. All seven full-feature all-target checks have zero compiler warnings;23 CVar guards and10 input hashes are unchanged. Startup is not clean; native defaults remain unknown.
 
 ## [2026-10-26] implementation | Shared transmog availability
 

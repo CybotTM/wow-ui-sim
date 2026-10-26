@@ -1,6 +1,6 @@
 ## [2026-10-26] bounded proof | Shared ammo requirement observation
 
-[Original slot and exact error probe](investigations/forever-startup-gaps.md#shared-ptrforever-ammo-observation): PTR XML-bound RED/GREEN passes transitions/isolation/unset recovery; the asserted-failure xpcall follows `mists_scenario_minlevel` and preserves exact error/frame assertions. Stock PTR122/138→122/138 and Forever26/26→44/44 has complete per-key attribution, not clean startup. Corrected Forever proof and seven-profile gates remain pending.
+[Original slots and exact error probes](investigations/forever-startup-gaps.md#shared-ptrforever-ammo-observation): both PTR/Forever XML-bound RED/GREEN pairs and two existing Forever preservation cases pass. The asserted-failure xpcall follows `mists_scenario_minlevel`, with false status, exact message and original frame assertions. Stock PTR122/138→122/138 and Forever26/26→44/44 has complete per-key attribution, not clean startup. All seven full-feature all-target checks have zero Cargo JSON/plain compiler warnings;23 CVar guards and10 pinned-input hashes are unchanged. No native ammo default or derivation is inferred.
 
 ## [2026-10-26] implementation | Shared transmog supplied input
 

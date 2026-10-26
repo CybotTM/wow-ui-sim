@@ -35,6 +35,8 @@ invalidate intersecting proof.
 
 ## Shared PTR/Forever ammo observation
 
+Verified 2026-10-26.
+
 The [input contract](../../specs/forever-startup-inputs.md#supplied-state-not-native-policy)
 requires an optional supplied boolean, not the former Forever default false.
 Only PTR and Forever publish AmmoNeeded. PTR's selected TOC entries52/59 load
@@ -56,16 +58,25 @@ reports disappear because earlier slot/BagSlotCluster initialization stops. Thos
 removed reports are masked, not repaired. Each raw addition/removal is attributed
 in the private ammo-needed handoff; neither startup is clean.
 
-The PTR original XML-bound test passes false/true/false, two-environment isolation,
-exact unset failure at Mainline1702, and recovery. Its identical predecessor test
-fails at that original missing-member call. Unfiltered closure diagnostics remain
-visible; this proves the slot boundary, not complete closure initialization.
-Forever corrected original-consumer proof and seven-profile checks remain pending.
+Both original XML-bound tests pass false/true/false, two-environment isolation,
+exact unset failure and recovery. PTR proves Mainline1702; Forever proves both
+Camelot1952 and the XML delegate3654. Identical predecessor tests fail at PTR's
+missing member and Forever's silent unset success respectively. Unfiltered PTR
+closure diagnostics remain visible; this proves the slot boundary, not complete
+closure initialization. Both existing Forever inventory-slot preservation tests
+also pass. All seven full-feature all-target checks pass with zero Cargo JSON/plain
+compiler warnings. All 23 launch CVar guards and 10 pinned-input hashes are unchanged;
+formatting and manual changed-line readability review pass.
+
+The loader propagates the failed BagSlotCluster child creation and stops later
+XML elements (`xml_frame/setup.rs`, `xml_frame/finalize.rs`, `xml_file.rs`). This
+explains the lost bag event registrations and later GamepadBackpackButton reports;
+the target-spell API itself was not changed.
 
 The unset probe follows the existing `mists_scenario_minlevel` precedent:
 `env.exec` alone does not retain a native-error traceback. An asserted-failure
 `xpcall` captures status, exact error message and `debug.traceback` separately.
-The test must reject successful calls and non-exact messages; Forever additionally
+The test rejects successful calls and non-exact messages; Forever additionally
 requires both original1952 and XML-delegate3654 frames. No production error
 handling or vendor callback is changed.
 
@@ -108,6 +119,7 @@ native-unknown**.
 
 - [Startup input contract](../../specs/forever-startup-inputs.md).
 - [Profile selection](../systems/client-profiles.md).
+- [XML loading pipeline](../../addon-loading-pipeline.md) and [loader error propagation](../../../src/loader/xml_file.rs).
 - [Consumer-selection proof rules](consumer-selection-and-red-proof.md).
 - Private Forever startup slot-run report and capture receipts.
 
