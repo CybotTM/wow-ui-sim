@@ -1,3 +1,7 @@
+## [2026-10-25] investigation | PTR regional names
+
+[Sequential original-consumer RED](investigations/ptr-regional-names.md) distinguishes the regional nil-call from its surname successor with byte-identical tests and separate producer revisions. Supplied policy implementation is staged; complete GREEN and preservation remain pending.
+
 ## [2026-10-25] proof | Classic defensive aura timer completion
 
 The [completion matrix](../specs/aura-spell-classification-identifiers.md#classic-completion-proof--2026-10-25) records Era/Anniversary stock-timer RED/GREEN, original AuraUtil preservation and exact stock differences with no additions. Era/Anniversary all-target checks retain only the three permitted dead-code warnings; Retail has none. Known TTS residue remains separately owned, so no baseline is changed.
