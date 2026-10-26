@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | PTR SwingTimer declarations
 
-[Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) reaches the exact Scale RED at800/801. Both pinned declaration families and metadata are added through the existing runtime-only PTR gate; full-constructor GREEN, paired stock and checks remain pending.
+[Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) reaches the exact Scale RED at800/801. Both pinned declaration families and metadata pass unchanged full-constructor GREEN through the existing runtime-only PTR gate. Exact master/GREEN stock stays216/282, with both new raw keys traced to the absent SwingTimer system map key at797. That next boundary remains unfixed. PTR/Retail/Era all-target checks have separate accepted receipts and zero warnings; formatting/readability pass.
 
 ## [2026-10-25] proof | Mists supplied map display
 

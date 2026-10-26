@@ -9,9 +9,9 @@ PTR publishes four finite Edit Mode enum families through `src/c_api/ptr_edit_mo
 - [x] Publish PTR `Enum.EditModePresetLayouts` as Modern=0, Classic=1, Gamepad=2, with NumValues=3, MinValue=0, MaxValue=2 metadata.
 - [x] Let the original preset manager index supplied Modern, Classic and Gamepad maps separately, preserve Gamepad system data and return independent anchor copies.
 
-- [ ] Publish PTR `Enum.EditModeSwingTimerSetting` as Scale=0, Opacity=1, Visibility=2, Width=3, Height=4, ShowBarTitle=5, ShowTime=6, with NumValues=7, MinValue=0, MaxValue=6 metadata.
-- [ ] Publish PTR `Enum.EditModeSwingTimerVisibility` as Always=0, InCombat=1, Hidden=2, with NumValues=3, MinValue=0, MaxValue=2 metadata.
-- [ ] Preserve all seven setting identifiers and three visibility choices through the complete original SwingTimer constructor.
+- [x] Publish PTR `Enum.EditModeSwingTimerSetting` as Scale=0, Opacity=1, Visibility=2, Width=3, Height=4, ShowBarTitle=5, ShowTime=6, with NumValues=7, MinValue=0, MaxValue=6 metadata.
+- [x] Publish PTR `Enum.EditModeSwingTimerVisibility` as Always=0, InCombat=1, Hidden=2, with NumValues=3, MinValue=0, MaxValue=2 metadata.
+- [x] Preserve all seven setting identifiers and three visibility choices through the complete original SwingTimer constructor.
 
 ## How it works
 

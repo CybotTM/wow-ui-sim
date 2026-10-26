@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | PTR SwingTimer declarations
 
-[Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) links the [contract](../specs/ptr-edit-mode-declarations.md): all seven setting identifiers, three visibility choices and their metadata are declared only on PTR by this module. Original Scale-boundary RED is observed; full-constructor GREEN and stock/check proof are pending.
+[Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) links the [contract](../specs/ptr-edit-mode-declarations.md): all seven setting identifiers, three visibility choices and their metadata pass byte-identical original Scale-boundary RED/full-constructor GREEN. Stock stays216/282 with both replacement raw keys traced to the absent SwingTimer system key; that next boundary is unfixed. PTR/Retail/Era separate all-target receipts have zero warnings; formatting/readability pass. Other profiles keep their existing declaration paths.
 
 ## [2026-10-25] implementation | PTR Edit Mode declarations
 
