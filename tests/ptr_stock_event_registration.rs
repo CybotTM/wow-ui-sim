@@ -30,13 +30,15 @@ fn load_selected_consumers() -> WowLuaEnv {
     env
 }
 
-fn assert_consumer_registers(mixin: &str, event: &str) {
+fn assert_consumer_registers(mixin: &str, source: &str, event: &str) {
     let env = load_selected_consumers();
     let lua = format!(
         r#"
         local frame = CreateFrame("Frame")
         local consumer = assert({mixin}, "consumer not loaded by selected TOC")
-        local ok, trace = xpcall(function() consumer.OnLoad(frame) end, debug.traceback)
+        local info = debug.getinfo(consumer.OnLoad, "S")
+        assert(info.source:find("{source}", 1, true), info.source)
+        local _, trace = xpcall(function() consumer.OnLoad(frame) end, debug.traceback)
         assert(frame:IsEventRegistered("{event}"), trace or "consumer did not register event")
     "#
     );
@@ -48,16 +50,25 @@ fn assert_consumer_registers(mixin: &str, event: &str) {
 fn voice_transcription_registers_active_provider_event() {
     assert_consumer_registers(
         "VoiceChatTranscriptionButtonMixin",
+        "VoiceChatTranscriptionButton.lua",
         "VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED",
     );
 }
 
 #[test]
 fn shard_transfer_toast_registers_imminent_event() {
-    assert_consumer_registers("ShardTransferImminentMixin", "SHARD_TRANSFER_IMMINENT");
+    assert_consumer_registers(
+        "ShardTransferImminentMixin",
+        "SocialToast.lua",
+        "SHARD_TRANSFER_IMMINENT",
+    );
 }
 
 #[test]
 fn pet_happiness_indicator_registers_happiness_event() {
-    assert_consumer_registers("PetHappinessIndicatorMixin", "UNIT_HAPPINESS");
+    assert_consumer_registers(
+        "PetHappinessIndicatorMixin",
+        "PetHappiness.lua",
+        "UNIT_HAPPINESS",
+    );
 }
