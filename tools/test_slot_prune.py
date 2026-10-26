@@ -111,6 +111,13 @@ class SlotPruneTests(unittest.TestCase):
         self.assertFalse(any(path.exists() for path in paths))
         self.assertTrue(newer.exists())
 
+    def test_crate_name_starting_with_lib_keeps_dep_info_in_unit(self):
+        paths = self.artifact("libloading")
+        os.utime(paths[1], (self.now, self.now))
+        result, _ = self.prune(cap=MIB)
+        self.assertEqual(result["removed"], [])
+        self.assertTrue(all(path.exists() for path in paths))
+
     def test_previous_successful_receipt_protects_whole_unit(self):
         paths = self.artifact("alpha")
         receipt = {"result": "success", "reported_artifacts": [
