@@ -62,6 +62,14 @@ LATER_AUDIT_REPLACEMENTS = {
         'ca385ab6271755b60fe494629ebaf9ea3f9b27a4c004ca9127aa74403b9641df':
             '2583b5b920e816d42b6f5a3c694f51ef3f23382fd42b4e5e3fd16700037504b0',
     },
+    # Privacy overlay: f9eeca84a63a2b556a3cd47c57466ffaa1dedb84.
+    # Exact before/after hashes from privacy-corrections-2026-10-13/
+    # retail-correction-manifest.json; never rewrite the redacted public log.
+    'data/patch-api/evidence/10.0.0-session-2026-10-07/p1000-startup-stderr.txt': {
+        # Historical bytes: 465c908ce6c88b70a94f4ee6fdb6c0928c69a42e.
+        '4fb8e141198cdccbcab7f30dc480987627b0caeaea3921da42b12f27b1f490f0':
+            'e2d33e8f7a49df8b32ab921b482c60c30c63ba8a92b819dae51333b3f32b41e7',
+    },
     # Integration replaced the 53-gap result with 51 gaps but retained its old
     # sweep table. Each stage must read its own exact snapshot, not mix them.
     # Later bytes: 1d2417266cc4164ac52cfee6525a4b74735638bd.

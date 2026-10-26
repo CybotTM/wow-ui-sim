@@ -124,7 +124,8 @@ class PatchAuditValidationTests(unittest.TestCase):
             for accepted in (old, current):
                 target.write_bytes(accepted)
                 self.assertTrue(preserved_input_matches(root, path, digest))
-            for rejected in (current + b'\n', json.dumps(json.loads(current)[1:]).encode()):
+            mutations = (current + b'\n', json.dumps(json.loads(current)[1:]).encode())
+            for rejected in mutations:
                 target.write_bytes(rejected)
                 self.assertFalse(preserved_input_matches(root, path, digest))
             target.write_bytes(current)
@@ -146,6 +147,36 @@ class PatchAuditValidationTests(unittest.TestCase):
             target = root / path
             target.parent.mkdir(parents=True)
             target.write_bytes((ROOT / path).read_bytes() + b'\n')
+            self.assertFalse(preserved_input_matches(root, path, digest))
+
+    def test_p1000_redacted_proof_log_keeps_historical_digest(self):
+        path = ('data/patch-api/evidence/10.0.0-session-2026-10-07/'
+                'p1000-startup-stderr.txt')
+        revision = '465c908ce6c88b70a94f4ee6fdb6c0928c69a42e'
+        original = git_bytes(ROOT, 'show', f'{revision}:{path}')
+        current = (ROOT / path).read_bytes()
+        manifest = ROOT / ('data/patch-api/evidence/privacy-corrections-2026-10-13/'
+                           'retail-correction-manifest.json')
+        correction = next(
+            row for row in json.loads(manifest.read_bytes())['changed_payloads']
+            if row['path'] == path
+        )
+        digest = hashlib.sha256(original).hexdigest()
+        self.assertEqual(digest, correction['before_public_sha256'])
+        self.assertEqual(
+            hashlib.sha256(current).hexdigest(), correction['after_public_sha256']
+        )
+        self.assertEqual(
+            hashlib.sha256(read_audit_bytes(ROOT, ROOT / path, revision)).hexdigest(),
+            digest,
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / path
+            target.parent.mkdir(parents=True)
+            target.write_bytes(current)
+            self.assertTrue(preserved_input_matches(root, path, digest))
+            target.write_bytes(current + b'\n')
             self.assertFalse(preserved_input_matches(root, path, digest))
 
     def test_unrecorded_json_change_is_rejected(self):
