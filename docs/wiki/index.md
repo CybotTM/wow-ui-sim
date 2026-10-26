@@ -1,6 +1,6 @@
-## [2026-10-26] implementation | Supplied StorePublic eligibility
+## [2026-10-26] proof | Supplied StorePublic eligibility
 
-[Environment-local observations](systems/store-public-eligibility.md) link the [contract](../specs/store-public-eligibility.md). Retail exact original-helper RED rejects list-length eligibility with no setup diagnostics. The producer replaces only that adapter with supplied per-group observations and named missing-input errors; enabled/visibility defaults stay separate. GREEN, stock and profile checks are pending. Outbound recording sinks do not establish a working storefront; classic subscription selection remains blocked.
+[Final merged proof](systems/store-public-eligibility.md#final-proof-2026-10-26) links the [contract](../specs/store-public-eligibility.md): supplied per-group observations replace only the guessed adapter. Six original-helper/direct-input RED→GREEN pairs, Wrath absence and preserved defaults pass. All seven exact-17baa3e9a stock maps are unchanged, and seven all-target checks have zero warnings. All 68 runtime CVar guards pass. Recording sinks prove helper control flow, not a working storefront; classic subscription selection remains blocked.
 
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 

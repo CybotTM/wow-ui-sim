@@ -1,6 +1,6 @@
-## [2026-10-26] implementation | Supplied StorePublic eligibility
+## [2026-10-26] proof | Supplied StorePublic eligibility
 
-[Model and limits](systems/store-public-eligibility.md): declared six-profile query reads explicit environment-local group observations instead of secure list length; missing input is distinct from false. Retail original-helper and direct-input RED are recorded. GREEN, stock and seven-profile checks remain pending; no storefront or native-policy acceptance claim.
+[Final proof and limits](systems/store-public-eligibility.md#final-proof-2026-10-26): GREEN `23eb582af` and RED `ec6ab6a76` integrate master `17baa3e9a` with identical tests. Six original-helper/direct-input pairs, Wrath absence, preserved defaults, seven unchanged raw stock pairs and seven zero-warning all-target checks pass. All 68 protected runtime invocations preserve host CVar bytes/stat. Missing input is distinct from false; native policy and working storefront remain unclaimed.
 
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 

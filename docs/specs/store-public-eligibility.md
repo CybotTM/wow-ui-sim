@@ -4,11 +4,11 @@
 
 ## What it must do
 
-- [ ] Publish only on Retail, PTR, Forever, Mists, Era and Anniversary. Wrath is a declaration-negative control, not a claim about native Wrath.
-- [ ] Return exactly one non-null boolean for each supplied group ID, independent of secure-product membership and catalog DTOs.
-- [ ] Keep observations environment-local and updateable. Missing observations raise `missing-input: C_StorePublic.DoesGroupHavePurchaseableProducts groupID=<id> has no supplied eligibility observation`, never false.
-- [ ] Let the selected original subscription helper choose subscription, game time or web redirect according to independent supplied observations, preserving subscription priority and transitions.
-- [ ] Preserve enabled/visibility defaults without building purchase policy or publishing classic subscription selection.
+- [x] Publish only on Retail, PTR, Forever, Mists, Era and Anniversary. Wrath is a declaration-negative control, not a claim about native Wrath.
+- [x] Return exactly one non-null boolean for each supplied group ID, independent of secure-product membership and catalog DTOs.
+- [x] Keep observations environment-local and updateable. Missing observations raise `missing-input: C_StorePublic.DoesGroupHavePurchaseableProducts groupID=<id> has no supplied eligibility observation`, never false.
+- [x] Let the selected original subscription helper choose subscription, game time or web redirect according to independent supplied observations, preserving subscription priority and transitions.
+- [x] Preserve enabled/visibility defaults without building purchase policy or publishing classic subscription selection.
 
 ## How it works
 
@@ -28,7 +28,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Profile-specific runtime proof and zero-warning checks remain pending until recorded.
+None for the supplied-input contract. [Final proof](../wiki/systems/store-public-eligibility.md#final-proof-2026-10-26) covers all six declared profiles, Wrath absence, seven unchanged stock pairs and seven zero-warning all-target checks.
 
 ## Out of scope
 

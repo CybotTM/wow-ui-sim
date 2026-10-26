@@ -16,11 +16,25 @@ Each declaring profile selects `Blizzard_SharedXML/InterfaceUtil.lua` through it
 
 Fixed secure lists contradict the supplied eligibility observations through subscription/game-time/web transitions; a second list arrangement preserves those outcomes. Separate direct assertions test arity and boolean shape, updates, missing-input recovery and two-environment isolation. Original helper conditions alone do not prove strict shape and shape assertions alone do not reject constant producers.
 
-## Proof state
+## Final proof (2026-10-26)
 
-Retail RED at `6c5d12610` has an accepted slot-build receipt. Both exact selector lists contain one case. The selected original SharedXML helper has no setup diagnostics and fails because the old adapter chooses `gametime,toggle` for supplied `(true,false)` against fixed contradictory lists. The separate direct input test fails on the supplied-observation assertion. This is producer RED, not a missing storefront dependency.
+Master `17baa3e9a` was merged once into each sibling. GREEN `23eb582af` and producer-subtracted RED `ec6ab6a76` have byte-identical integration tests and inline default tests. The integration source SHA256 is `06cada4728844e5dfd92ed0c267b7e0479b8ee3215f50293b9ecfe89b3c67231`.
 
-The producer-subtracted RED sibling is `312f2fc17`, with byte-identical integration and inline default tests. The follow-up logging change emits original query lines before the outcome assertions; the historical Retail executable predates that logging change. The legacy group-501 assertion is retained with explicit supplied eligibility, not inferred from its seeded product list. GREEN execution, fresh current-byte RED, other profiles, paired stock and all-target checks are pending. No native eligibility policy, coercion, secrecy parity, storefront or purchase completion is implied.
+Each declared profile has two exact one-case lists/runs on each side. Original-helper RED reaches the selected InterfaceUtil query lines with no setup errors and rejects `gametime,toggle` for supplied `(true,false)` against fixed contradictory lists. Direct-input RED rejects the supplied-value mismatch. GREEN covers ten original-helper observations, subscription priority, missing second input, membership-only mutation, strict return shape, updates, missing-input recovery and two environments. The legacy group-501 assertion remains, with explicit supplied input rather than catalog inference. Retail/Wrath default-unit cases also pass.
+
+| Profile | Original query lines | Helper/direct proof | Stock keys/occurrences, master → GREEN | All-target warnings |
+|---|---|---|---|---|
+| Retail | 44/48 | RED → GREEN | 8/10 → 8/10 | 0 |
+| PTR | 44/48 | RED → GREEN | 134/154 → 134/154 | 0 |
+| Forever | 44/48 | RED → GREEN | 26/26 → 26/26 | 0 |
+| Mists | 32/36 | RED → GREEN | 6/12 → 6/12 | 0 |
+| Era | 32/36 | RED → GREEN | 0/0 → 0/0 | 0 |
+| Anniversary | 32/36 | RED → GREEN | 0/0 → 0/0 | 0 |
+| Wrath | Not selected | Query absence passes | 0/0 → 0/0 | 0 |
+
+All seven stock pairs use exact master `17baa3e9a` executables, compiled-revision/receipt/SHA256/argv bindings and equal current-CVar input hashes. Every raw key and count is unchanged; no new emitter or masking-predecessor chain was exposed. All 68 final runtime invocations preserve original CVar bytes and stat fields under O_NOATIME guards. Profile-cache provenance and the six declaration/consumer hashes are unchanged.
+
+Each profile has a separate accepted canonical all-target check receipt with zero Cargo JSON and plain warnings. Formatting and manual changed-line Rust readability pass. Historical pre-integration runs are not substituted for this matrix. No native eligibility policy, coercion, secrecy parity, storefront or purchase completion is implied.
 
 ## Sources
 
