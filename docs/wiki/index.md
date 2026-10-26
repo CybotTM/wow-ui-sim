@@ -1,3 +1,7 @@
+## [2026-10-25] RED proof | CF-2 party minimum
+
+[Original-consumer proof](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) now reaches the missing GetMinLevel call independently through specific and random Retail selectors. Original frame/bindings/provenance pass; empty-catalog preservation passes. Pinned-master stock is 12/14. GREEN and PTR acceptance remain pending; Mists is a separate LFR-input boundary.
+
 ## [2026-10-24] staged | CF-2 supplied party minimum
 
 [Original-consumer staging](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) links the [bounded contract](../specs/party-min-level-scenario-availability.md): Retail/PTR supplied party minimum and scenario catalog producer prepared statically, with unchanged selected-consumer tests and producer-only RED child. No compiled listing, observed RED/GREEN or stock proof. Mists remains LFR-blocked; no behavior added.

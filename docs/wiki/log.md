@@ -1,3 +1,7 @@
+## [2026-10-25] RED proof | CF-2 party minimum
+
+[Original consumer](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) rejects missing GetMinLevel at Shared/ScenarioFinder_Shared.lua:58 in each exact Retail selector. Test custody is isolated from removed TTS tests; the staged private fixture import and PTR TOC-name assumption are repaired. GREEN/PTR/check acceptance is pending.
+
 ## [2026-10-24] static producer | CF-2 party minimum
 
 [Producer and proof limits](investigations/consumer-selection-and-red-proof.md#static-producer-preparation) update the [contract](../specs/party-min-level-scenario-availability.md): Retail/PTR supplied roster minimum and subtype/random-filtered scenario projections, no new defaults or test edits. Producer-only RED child prepared for future slots; no runtime or compiler proof. Mists remains blocked on IsLFREnabled.

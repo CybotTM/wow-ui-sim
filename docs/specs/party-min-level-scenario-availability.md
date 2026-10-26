@@ -38,7 +38,7 @@ Each runs all roster, boundary, replacement-catalog and supplied-solo observatio
 
 ## Known gaps (current cycle)
 
-- [ ] Future slot owner must obtain admission, compile/list selectors and observe each Retail/PTR RED using the direct GREEN-child revision that removes only the producer. Static implementation was explicitly authorized before runtime RED; neither phase has executed.
+- [ ] Complete PTR original-consumer RED. Both Retail selectors independently list one case and fail at the original missing GetMinLevel boundary; preservation passes. Tests are byte-identical across the producer-only sibling pair.
 - [ ] Prove both independent selectors GREEN on Retail/PTR, with zero new warnings including test targets. Producer implementation and formatter checks alone do not establish passing behavior.
 - [ ] Mists is BLOCKED on unresolved `C_LFGInfo.IsLFREnabled`. Preserve diagnostics; do not call that setup failure producer RED or add Mists behavior in this lane.
 - [ ] Compare complete own-base and producer stock message→count maps for each applicable profile, including additions and surviving count changes. Historical opportunity2 keys/2 occurrences is not a guaranteed delta or prefork pass.
