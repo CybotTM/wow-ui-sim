@@ -405,9 +405,11 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
                                  env=self.env, capture_output=True, text=True, timeout=10)
         self.assertNotEqual(process.returncode, 0, process.stderr)
-        path = self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json'
-        self.assertTrue(path.exists(), process.stderr)
-        record = json.loads(path.read_text())
+        results = self.home / 'Projects/wow/full-suite-results'
+        self.assertFalse((results / f'{self.sha}-ptr.json').exists())
+        attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
+        self.assertEqual(len(attempts), 1)
+        record = json.loads(attempts[0].read_text())
         self.assertEqual(record['status'], 'FAILED')
         self.assertIn('persistent log failure', record['error'])
         self.assertIn('persistent log failure', record['log_error'])
