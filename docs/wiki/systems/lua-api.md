@@ -187,7 +187,13 @@ Producer `95f8d1350` and test source `958b233d2` pass the original selected Reta
 
 All seven stock maps are exactly unchanged against the master producer: Retail 12/14, PTR 232/300, Mists 6/12, Forever 26/26, and Era/Anniversary/Wrath 0/0 (keys/occurrences). Separate canonical all-target receipts pass with zero JSON/plain compiler warnings on every profile. Formatting and manual readability pass. No native acquisition, expiry, secrecy, or automatic event-policy claim is made.
 
-PTR consumer proof is deferred: original OnLoad aborts at `Blizzard_EditMode/Shared/EditModeSystemTemplates.lua:27` because `GetSystemSettingDisplayInfoMap` is missing; the later data path fails at `Blizzard_FrameXML/LossOfControlFrame.lua:183` on uninitialized `secondsWidth`. The display-info chunk must reach its method declaration at line 1628 before this consumer can be proved. No fixture initialization replaces that aborted step. The native TOC family selection and Retail-only proof scope are recorded in the contract.
+### Restored PTR original-consumer proof (2026-10-26)
+
+The [Edit Mode display-info repair](../investigations/ptr-edit-mode-declarations.md) merged in `eed3f51ef` removes the earlier `EditModeSystemTemplates.lua:27` missing-map abort and `LossOfControlFrame.lua:183` uninitialized-width cascade. New `tests/ptr_loss_of_control_consumer.rs` verifies the original OnLoad width before invoking the original display methods; no fixture initializes widths or replaces a consumer method. Its Game-selected TOC authenticates `Blizzard_FrameXML.toc:135–137`, with XML:4,109–112 binding the original mixin/scripts. The [contract](../../specs/active-loss-of-control.md#consumer-proof) records reauthenticated declarations and consumer lines.
+
+Both exact selectors have byte-identical producer-subtraction RED/GREEN. Each RED fails the empty-state original-consumer expectation at original Lua:229 because PTR LOC registration is omitted; no admin call is reached. GREEN completes empty hide → supplied show/text/icon/spell/priority/time → clear hide, and two loaded environments remain independent when adding/clearing each player's state. Empty checks first show the frame so an inert UpdateDisplay cannot pass. GREEN production code is byte-equivalent to base master; no new producer is needed. The new proof uses the same declared active-index1 fixture as Retail, supplied record input and explicit UpdateDisplay, not native acquisition/event synthesis.
+
+Paired source-bound headless PTR stock captures remain exactly134 keys/154 occurrences, with no added/removed keys or count changes. Existing startup errors remain; runtime exit1 is not a clean-startup claim. Seven-profile compilation gates for this tests-only extension are recorded separately from the historical model proof above.
 
 ## Retail 12.0.5 action loss-of-control cooldown info
 
