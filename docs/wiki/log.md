@@ -1,6 +1,6 @@
-## [2026-10-26] preparation | Mists transmog supplied input
+## [2026-10-26] implementation | Mists transmog supplied input
 
-[Contract and selected display branch](systems/mists-transmog-enabled.md): separate unset-by-default Mists input, original real Settings controls, and explicit modern/Forever exclusions. Executable proof pending.
+[Contract and selected display branch](systems/mists-transmog-enabled.md): both producer-free RED cases fail at original line4 after a clean addon closure load. The producer now reads an environment-local supplied boolean, raises a named error when unset, and publishes only on Mists. GREEN and final checks are pending; BEFORE stock is6/12.
 
 ## [2026-10-26] investigation | Mists engraving supplied inputs
 

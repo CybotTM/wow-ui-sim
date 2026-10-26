@@ -1,6 +1,6 @@
 # Mists supplied transmog availability
 
-The [contract](../../specs/mists-transmog-enabled.md) adds no inferred native default. Mists owns a separate environment-local `Option<bool>` in `c_api`; the modern default-true field remains unchanged. Executable proof is pending.
+The [contract](../../specs/mists-transmog-enabled.md) adds no inferred native default. Mists owns a separate environment-local `Option<bool>` in `c_api`; the modern default-true field remains unchanged. Registration uses `client_profile::ACTIVE`; a supplied value returns one boolean, and absent input raises the named error instead of choosing a display branch. Both exact original-consumer RED cases fail at `InterfaceOverrides.lua:4` without the producer. GREEN execution is pending.
 
 ## Declaration and selected consumer
 

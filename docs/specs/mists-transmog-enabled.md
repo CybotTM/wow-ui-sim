@@ -16,13 +16,14 @@ Mists `C_TransmogOutfitInfo.IsTransmogEnabled()` reads an explicitly supplied en
 
 ## Implementation inventory
 
-- `src/c_api/mists_transmog.rs`: Mists-specific supplied availability model.
+- `src/c_api/mists_transmog.rs`: Mists-specific supplied availability model, ACTIVE gate and query.
+- `src/c_api/registration.rs`: registers the query without ungating the modern outfit module.
 - `src/lua_api/state/sim_state.rs` and `state.rs`: per-environment model storage and construction.
 - `tests/mists_transmog_enabled.rs`: original selected consumer and real Settings controls.
 
 ## Tests asserting this spec
 
-`tests/mists_transmog_enabled.rs`: enabled-first and disabled-first selectors each observe both branches, transitions, independent environments and named unset recovery. Execution is pending.
+`tests/mists_transmog_enabled.rs`: enabled-first and disabled-first selectors each observe both branches, transitions, independent environments and named unset recovery. Both exact producer-free RED cases reach the missing original query at `InterfaceOverrides.lua:4`. GREEN execution is pending.
 
 ## Known gaps (current cycle)
 

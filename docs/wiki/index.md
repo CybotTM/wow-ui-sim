@@ -1,6 +1,6 @@
-## [2026-10-26] preparation | Mists transmog supplied input
+## [2026-10-26] implementation | Mists transmog supplied input
 
-[Contract and selected display branch](systems/mists-transmog-enabled.md): separate unset-by-default Mists input, original real Settings controls, and explicit modern/Forever exclusions. Executable proof pending.
+[Contract and selected display branch](systems/mists-transmog-enabled.md): Mists-only ACTIVE registration reads a separate unset-by-default input. Both exact RED cases reach the original missing query at line4; GREEN is pending. Real Settings controls and modern/Forever exclusions remain unchanged.
 
 ## [2026-10-26] investigation | Mists engraving supplied inputs
 
