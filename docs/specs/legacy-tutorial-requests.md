@@ -4,10 +4,10 @@
 
 ## What it must do
 
-- [ ] Publish only on Mists, Era, Anniversary and Wrath, whose pinned UI has selected legacy consumers.
-- [ ] Record each supplied numeric tutorial identifier in call order, including repeated requests, without sharing requests between environments.
-- [ ] Do not invent tutorial events, flag transitions, UI presentation or persistence. This is a call recorder, not complete native tutorial behavior.
-- [ ] Move the unchanged old Mists storage flow beyond the original `ContainerFrame_Shared.lua:976` call; report successor failures separately.
+- [x] Publish only on Mists, Era, Anniversary and Wrath, whose pinned UI has selected legacy consumers.
+- [x] Record each supplied numeric tutorial identifier in call order, including repeated requests, without sharing requests between environments.
+- [x] Do not invent tutorial events, flag transitions, UI presentation or persistence. This is a call recorder, not complete native tutorial behavior.
+- [x] Move the unchanged old Mists storage flow beyond the original `ContainerFrame_Shared.lua:976` call; report successor failures separately.
 
 The consumers discard all results. Returning no Lua values is the bounded simulator contract, not a claim about unobserved native return arity.
 
@@ -28,7 +28,9 @@ The consumers discard all results. Returning no Lua values is the bounded simula
 
 ## Known gaps (current cycle)
 
-- [ ] Executed GREEN and compiler/stock proof are pending.
+The four affected profiles pass request-history and publication tests. Their stock maps are byte-identical before/after (Mists 6/12; Era, Anniversary and Wrath 0/0). All seven all-target checks have zero compiler warnings.
+
+The unchanged old storage-flow test still exits101: the Lua body now completes all assertions, but callback/startup errors fail the process-status check. Its next newly exposed boundary is missing `C_Engraving` at original `ContainerFrame_Shared.lua:315`. That successor is outside this lane.
 
 ## Out of scope
 
