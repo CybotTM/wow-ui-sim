@@ -18,30 +18,26 @@ fn supplied_rune() -> EngravingData {
     }
 }
 
-fn supplied_env(enabled: bool) -> WowLuaEnv {
+fn supplied_inputs() -> EngravingInputs {
+    let mut inputs = EngravingInputs {
+        enabled: Some(true),
+        mode_enabled: Some(true),
+        current_rune: Some(None),
+        ..EngravingInputs::default()
+    };
+    for slot in 1..=36 {
+        inputs.inventory_eligibility.insert((0, slot), true);
+        inputs.inventory_runes.insert((0, slot), None);
+        inputs.current_cast_eligibility.insert((0, slot), false);
+    }
+    inputs.inventory_runes.insert((0, 1), Some(supplied_rune()));
+    inputs
+}
+
+fn supplied_env() -> WowLuaEnv {
     let ui = blizzard_ui_dir();
     let env = new_blizzard_addon_env(&ui);
-    {
-        let mut state = env.state().borrow_mut();
-        state.engraving.enabled = Some(enabled);
-        state.engraving.mode_enabled = Some(true);
-        state.engraving.current_rune = Some(None);
-        for slot in 1..=36 {
-            state
-                .engraving
-                .inventory_eligibility
-                .insert((0, slot), true);
-            state.engraving.inventory_runes.insert((0, slot), None);
-            state
-                .engraving
-                .current_cast_eligibility
-                .insert((0, slot), false);
-        }
-        state
-            .engraving
-            .inventory_runes
-            .insert((0, 1), Some(supplied_rune()));
-    }
+    env.state().borrow_mut().engraving = supplied_inputs();
     load_blizzard_addon_closure_into_env(
         &env,
         &ui,
@@ -52,6 +48,12 @@ fn supplied_env(enabled: bool) -> WowLuaEnv {
         ],
         &[],
     );
+    open_original_bag(&env);
+    assert_no_engraving_errors(&env);
+    env
+}
+
+fn open_original_bag(env: &WowLuaEnv) {
     env.exec(r#"
         SetCVar("alwaysShowRuneIcons", "0")
         A_Admin.ClearBags()
@@ -60,7 +62,16 @@ fn supplied_env(enabled: bool) -> WowLuaEnv {
         assert(ContainerFrame1:GetID() == 0 and ContainerFrame1:IsShown())
         local source = debug.getinfo(ContainerFrame_RefreshRuneIcons, "S").source:gsub("\\", "/")
         assert(source:find("Blizzard_UIPanels_Game/Classic/ContainerFrame_Shared.lua", 1, true), source)
+        EngravingBagButtons = {}
+        for index = 1, ContainerFrame1.size do
+            local button = _G["ContainerFrame1Item" .. index]
+            EngravingBagButtons[button:GetID()] = button
+        end
+        assert(EngravingBagButtons[1] and EngravingBagButtons[2])
     "#).expect("load and open the original Mists bag with pre-startup supplied input");
+}
+
+fn assert_no_engraving_errors(env: &WowLuaEnv) {
     let engraving_errors: Vec<_> = env
         .state()
         .borrow()
@@ -70,26 +81,25 @@ fn supplied_env(enabled: bool) -> WowLuaEnv {
         .cloned()
         .collect();
     assert!(engraving_errors.is_empty(), "{engraving_errors:#?}");
-    env
 }
 
 #[test]
 fn original_bag_rune_icons_follow_supplied_mode_availability_and_slots() {
-    let env = supplied_env(true);
+    let env = supplied_env();
     env.exec(r#"
         ContainerFrame_RefreshRuneIcons(ContainerFrame1, C_Engraving.GetEngravingModeEnabled())
-        assert(ContainerFrame1Item1SubIconTexture:IsShown())
-        assert(ContainerFrame1Item1SubIconTexture:GetTexture() == 134400)
-        assert(ContainerFrame1Item2SubIconTexture:GetTexture() == "Interface\\PaperDoll\\UI-Backpack-EmptySlot")
+        assert(EngravingBagButtons[1].subicon:IsShown())
+        assert(EngravingBagButtons[1].subicon:GetTexture() == 134400)
+        assert(EngravingBagButtons[2].subicon:GetTexture() == "Interface\\PaperDoll\\UI-Backpack-EmptySlot")
     "#).unwrap();
     env.state().borrow_mut().engraving.mode_enabled = Some(false);
     env.exec(
         r#"
         ContainerFrame_RefreshRuneIcons(ContainerFrame1, C_Engraving.GetEngravingModeEnabled())
-        assert(not ContainerFrame1Item1SubIconTexture:IsShown())
+        assert(not EngravingBagButtons[1].subicon:IsShown())
         SetCVar("alwaysShowRuneIcons", "1")
         ContainerFrame_RefreshRuneIcons(ContainerFrame1, C_Engraving.GetEngravingModeEnabled())
-        assert(ContainerFrame1Item1SubIconTexture:IsShown())
+        assert(EngravingBagButtons[1].subicon:IsShown())
         SetCVar("alwaysShowRuneIcons", "0")
     "#,
     )
@@ -103,8 +113,8 @@ fn original_bag_rune_icons_follow_supplied_mode_availability_and_slots() {
     env.exec(
         r#"
         ContainerFrame_RefreshRuneIcons(ContainerFrame1, C_Engraving.GetEngravingModeEnabled())
-        assert(not ContainerFrame1Item1SubIconTexture:IsShown())
-        assert(ContainerFrame1Item2SubIconTexture:IsShown())
+        assert(not EngravingBagButtons[1].subicon:IsShown())
+        assert(EngravingBagButtons[2].subicon:IsShown())
     "#,
     )
     .unwrap();
@@ -112,7 +122,7 @@ fn original_bag_rune_icons_follow_supplied_mode_availability_and_slots() {
     env.exec(
         r#"
         ContainerFrame_RefreshRuneIcons(ContainerFrame1, C_Engraving.GetEngravingModeEnabled())
-        assert(not ContainerFrame1Item2SubIconTexture:IsShown())
+        assert(not EngravingBagButtons[2].subicon:IsShown())
     "#,
     )
     .unwrap();
@@ -120,10 +130,10 @@ fn original_bag_rune_icons_follow_supplied_mode_availability_and_slots() {
 
 #[test]
 fn original_bag_targeting_projects_supplied_current_cast_eligibility() {
-    let env = supplied_env(true);
+    let env = supplied_env();
     env.exec(r#"
         ContainerFrame_EngravingTargetingModeChanged(ContainerFrame1, C_Engraving.GetCurrentRuneCast() ~= nil)
-        assert(not ContainerFrame1Item1IconTexture:IsDesaturated())
+        assert(not EngravingBagButtons[1].icon:IsDesaturated())
     "#).unwrap();
     {
         let mut state = env.state().borrow_mut();
@@ -135,13 +145,13 @@ fn original_bag_targeting_projects_supplied_current_cast_eligibility() {
     }
     env.exec(r#"
         ContainerFrame_EngravingTargetingModeChanged(ContainerFrame1, C_Engraving.GetCurrentRuneCast() ~= nil)
-        assert(not ContainerFrame1Item1IconTexture:IsDesaturated())
-        assert(ContainerFrame1Item2IconTexture:IsDesaturated())
+        assert(not EngravingBagButtons[1].icon:IsDesaturated())
+        assert(EngravingBagButtons[2].icon:IsDesaturated())
     "#).unwrap();
     env.state().borrow_mut().engraving.current_rune = Some(None);
     env.exec(r#"
         ContainerFrame_EngravingTargetingModeChanged(ContainerFrame1, C_Engraving.GetCurrentRuneCast() ~= nil)
-        assert(not ContainerFrame1Item2IconTexture:IsDesaturated())
+        assert(not EngravingBagButtons[2].icon:IsDesaturated())
     "#).unwrap();
 }
 
