@@ -90,7 +90,9 @@ fn original_xml_slot_supplied_transitions_isolation_and_unset() {
     }
     supply(&first, None);
     let error = first
-        .exec("InvokeOriginalAmmoSlot()")
+        .exec(
+            "local ok, reason = xpcall(InvokeOriginalAmmoSlot, debug.traceback); if not ok then error(reason, 0) end",
+        )
         .expect_err("unset input must fail through the original XML-bound slot")
         .to_string();
     assert!(error.contains(UNSUPPLIED), "{error}");
