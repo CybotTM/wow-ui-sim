@@ -10,9 +10,9 @@ mod pipeline;
 pub mod primitive;
 mod primitive_textures;
 mod program;
-mod quad;
-mod quad_batch_extras;
-mod quad_nine_slice;
+pub(crate) use sim_render::shader::quad;
+pub(crate) use sim_render::shader::quad_batch_extras;
+pub(crate) use sim_render::shader::quad_nine_slice;
 
 pub use atlas::{GLYPH_ATLAS_TEX_INDEX, GpuTextureAtlas, TextureEntry};
 pub use atlas_bc::{BcFormat, BcTextureEntry};

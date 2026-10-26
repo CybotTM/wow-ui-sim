@@ -3129,3 +3129,15 @@ Reconciled tracked specs and wiki against merged master `35dedb8b6` and the two 
 ## 2026-10-26 — Forever Camelot spellbook
 
 Recorded [supplied observations](systems/forever-camelot-spellbook.md), selected-constructor ordering, three exact RED/GREEN pairs, unchanged 26/26 stock and seven zero-warning all-target checks. Linked the shared availability model and retained the item-browsing/device-startup limits.
+
+## 2026-10-25 | ingest | Phase-3 core crate boundaries
+
+Recorded static widget/layout, texture decoding and GPU cuts in [core boundaries](design/core-crate-boundaries.md); retained asset/font cycles and unproven build/CPU status are explicit.
+
+## [2026-10-25] correction | Phase 3 move-only rejection repair
+
+[Crate boundaries](design/core-crate-boundaries.md) now retain Frame/EditBox/layout
+and coupled GPU ownership in root to preserve the original profile predicate,
+signatures and three exact cfg guards. Neutral types and quads remain extracted.
+The handoff recipe warms each revision once, separately recorded, then measures
+mtime-only lib.rs and c_club.rs rebuilds. Static-only handoff; no CPU/build proof.

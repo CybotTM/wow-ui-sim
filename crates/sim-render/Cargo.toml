@@ -1,0 +1,18 @@
+[package]
+name = "sim-render"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-only"
+
+[dependencies]
+sim-widget = { path = "../sim-widget" }
+sim-texture = { path = "../sim-texture" }
+iced = { version = "0.14.0", optional = true, features = ["advanced", "canvas", "image", "tokio", "wgpu"] }
+wgpu = { version = "27.0", optional = true }
+bytemuck = { version = "1.21", features = ["derive"], optional = true }
+
+[dev-dependencies]
+pollster = "0.4"
+
+[features]
+gui = ["dep:iced", "dep:wgpu", "dep:bytemuck"]
