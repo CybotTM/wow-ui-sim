@@ -1,6 +1,24 @@
 # Mists engraving inputs
 
-The old Mists storage-flow test reaches the original shared bag's missing `C_Engraving.GetEngravingModeEnabled` call. The [bounded contract](../../specs/mists-engraving-inputs.md) covers the seven normal bag/settings members with explicit supplied state, not invented native inactive values.
+The [bounded contract](../../specs/mists-engraving-inputs.md) covers the seven normal Mists bag/settings members with supplied state, not invented native inactive values. This page is the source of truth for shared availability and the merged Mists settings proof.
+
+## Shared availability and input supply
+
+Verified: 2026-10-26, merged master `35dedb8b6` (including Era lane `f8736cc49`). `src/c_api/c_engraving.rs::register` publishes `C_Engraving.IsEngravingEnabled` on Mists, Era and Anniversary only. Retail, PTR, Wrath and Forever do not receive this modeled API. The other six modeled members are Mists-only.
+
+The reader returns one environment-local supplied boolean from `EngravingInputs.enabled: Option<bool>` in `src/c_api/engraving_inputs.rs`. `None` raises exactly `C_Engraving.IsEngravingEnabled: unsupplied input`; `Some(false)` is a supplied value, not an unset value. Rust callers supply it through simulator state, for example `env.state().borrow_mut().engraving.enabled = Some(true)`, as in `tests/mists_engraving_settings.rs` and `tests/era_engraving.rs`. No Lua admin setter exists. No startup seed, inactive default or seasonal policy is inferred. Native availability values remain unknown on all three profiles.
+
+### Merged settings proof and stock effects
+
+`tests/mists_engraving_settings.rs` exercises the selected original `Classic/InterfaceOverrides.lua:138` through complete `AdjustDisplaySettings` construction. GREEN `3cb3c664f` and producer-subtracted RED `f20300e2d` have byte-identical tests. Both opposite-order selectors fail RED at the missing member and pass GREEN with supplied true/false, real rune-checkbox counts, tail preview-control construction, typed CVar reads/writes/rejection and environment isolation. A third GREEN selector proves the named unset error at original138 and supplied recovery. These observations reject either constant boolean producer. The earlier missing-transmog display-settings blocker is resolved; full SettingsRegistrar and visible-panel interaction remain unproved.
+
+| Profile | Bound stock unique keys / occurrences | Evidence scope |
+|---|---|---|
+| Mists | 8/14 before and after; raw key/count maps identical | Paired settings-lane binaries; not clean startup |
+| Era | 0/0 → 2/2 | [Original OnLoad unset error and reporter echo](era-engraving-availability.md#evidence-and-limits) |
+| Anniversary | 0/0 → 2/2 | Same two individually attributed keys as Era |
+
+The Mists comparison inherits two ScenarioFinder missing-GetMinLevel keys replaced by named unsupplied-input keys relative to the older global-strings reference, with totals unchanged; this is not an engraving delta. The seven final settings-lane all-target checks pass with zero JSON/plain compiler warnings/errors; they prove compilation, not seven-profile runtime parity. No new runtime run is claimed for this documentation reconciliation.
 
 ## Selected consumers
 
@@ -26,9 +44,9 @@ Mists `Blizzard_CharacterFrame.toc:18–21` selects Cata/PaperDollFrame.lua, not
 
 ## Supplied input boundary
 
-Absence of input is not supplied false/nil. Tests supply state before loading addons. Each reached query must reject missing input explicitly. Refresh requests have an observable simulator count, not inferred native refresh side effects. The old storage-flow test must stay byte-identical: a named unsupplied-state failure is boundary advancement only. Separate supplied tests establish actual overlay and targeting behavior. Complete settings remains blocked before engraving at `InterfaceOverrides.lua:4`, where `C_TransmogOutfitInfo.IsTransmogEnabled` is absent. Its selector was removed on main's direction. No settings-path GREEN, copied vendor excerpt or adjacent shim is claimed.
+Absence of input is not supplied false/nil. Tests supply state before loading addons. Each reached query must reject missing input explicitly. Refresh requests have an observable simulator count, not inferred native refresh side effects. The old storage-flow test must stay byte-identical: a named unsupplied-state failure is boundary advancement only. Separate supplied tests establish actual overlay and targeting behavior. The original bag lane did not prove settings construction. The later [merged settings proof](#merged-settings-proof-and-stock-effects) closes that bounded constructor path without copied vendor excerpts or adjacent shims.
 
-## Proof status
+## Historical bag-lane proof
 
 Producer `f7a9227b8` registers exactly seven members only when `client_profile::ACTIVE` is Mists. Corrected tests are byte-identical in RED `e97b841e7` and GREEN `eb3dca9dc`; their whole-tree difference contains only the producer module and registrar file. Each exact list selects one test, followed by one exact run. Both bag selectors reject the missing namespace at the original `ContainerFrame_OnShow` line315. All three GREEN cases pass: original overlay, original targeting, and direct projection/missing-input/isolation.
 
@@ -36,7 +54,7 @@ The overlay exercises true/false mode and availability, per-slot eligibility, pr
 
 The unchanged old storage test still fails, now with `C_Engraving.GetEngravingModeEnabled: unsupplied input` at original315 instead of a missing namespace. This is the accepted boundary advance, not a passing storage-flow claim.
 
-Bound Mists stock maps remain6 keys/12 occurrences, with no added, removed or count-changed raw keys. BEFORE `c50e6386a` is base `e98282ab8` plus scaffold types and the default-initialized environment field, with no producer; it is not a separately rebuilt exact master. AFTER `f7a9227b8` adds the producer. Later changes are test/documentation-only. The existing generic `(string):1` pair remains unattributed; no new key needs a masking-predecessor trace.
+At this earlier bag-lane checkpoint, Mists stock maps were6 keys/12 occurrences, with no added, removed or count-changed raw keys; the [merged settings checkpoint](#merged-settings-proof-and-stock-effects) supersedes these totals. BEFORE `c50e6386a` is base `e98282ab8` plus scaffold types and the default-initialized environment field, with no producer; it is not a separately rebuilt exact master. AFTER `f7a9227b8` adds the producer. Later changes are test/documentation-only. The existing generic `(string):1` pair remains unattributed; no new key needs a masking-predecessor trace.
 
 All seven full-feature all-target checks pass with zero JSON/plain warnings: Mists at `eb3dca9dc`, the other six at documentation-only successor `81d59b62c`. Their Rust/test inputs are identical. This proves compilation, not runtime parity on the other six profiles. Formatting and manual changed-Rust readability pass. Runtime invocations use fresh byte-exact child CVar copies and O_NOATIME source snapshots; originals are not reset/restored.
 
@@ -52,10 +70,15 @@ The inherited empty-texture assertion expected a path string, contrary to the es
 
 - [Feature contract](../../specs/mists-engraving-inputs.md)
 - [Original consumer and direct tests](../../../tests/mists_engraving.rs)
+- [Merged settings tests](../../../tests/mists_engraving_settings.rs)
+- [Shared registrar](../../../src/c_api/c_engraving.rs) and [supplied input](../../../src/c_api/engraving_inputs.rs)
 - [Established texture round-trip contract](../../../tests/methods_texture.rs)
 - [Selected consumer proof rules](consumer-selection-and-red-proof.md)
 - [Original storage-flow predecessor](invented-query-defaults.md#legacy-tutorial-request-boundary)
 
 ## See Also
 
+- [[era-engraving-availability]] — original XML availability proof and unset-stock attribution.
+- [[mists-global-strings]] — preceding display-settings label boundary.
+- [[mists-transmog-enabled]] — preceding supplied display branch.
 - [Addon loading pipeline](../../addon-loading-pipeline.md)

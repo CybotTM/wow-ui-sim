@@ -28,7 +28,7 @@
 
 ## [2026-10-26] investigation | Mists engraving supplied inputs
 
-[Selected original consumers](investigations/mists-engraving-inputs.md) now have three exact corrected-input GREEN cases and producer-free RED with byte-identical tests. Seven Mists-only members project supplied state; missing input raises a named error and refresh records only a local request. Original bag slot IDs and the established GetTexture fileID contract corrected fixture assumptions without changing vendor/texture behavior. Stock stays 6/12; old storage remains a named-boundary failure. Settings is blocked at the earlier missing IsTransmogEnabled call. All seven full-feature all-target checks pass with zero JSON/plain warnings; no other-profile runtime parity is claimed.
+[Selected original consumers](investigations/mists-engraving-inputs.md) now have three exact corrected-input GREEN cases and producer-free RED with byte-identical tests. At this historical bag-lane checkpoint, seven Mists-only members projected supplied state; later [shared availability and settings proof](investigations/mists-engraving-inputs.md#shared-availability-and-input-supply) supersedes the publication inventory and display-settings blocker below. Original bag slot IDs and the established GetTexture fileID contract corrected fixture assumptions without changing vendor/texture behavior. Stock stays 6/12; old storage remains a named-boundary failure. Settings was blocked at the earlier missing IsTransmogEnabled call; the linked successor resolves it. All seven full-feature all-target checks pass with zero JSON/plain warnings; no other-profile runtime parity is claimed.
 
 ## [2026-10-26] proof | Supplied equipment-set locked items
 
@@ -3109,3 +3109,11 @@ Added the [supplied bool/string contract](../specs/mists-scenario-finder.md) and
 ## 2026-10-26 — Pinned Mists global strings and reputation exposure
 
 Added the [70268 contract](../specs/mists-global-strings.md) and [source/consumer investigation](investigations/mists-global-strings.md). Full decrypted DB2/CSV agreement covers19,914 rows, including the second section; one byte-identical original-consumer selector rejects the foreign table at Setting34 and passes through131/138 with the real pinned setting name. Stock6/12→8/14 exposes an unchanged Retail temporary reputation seed, not a fabricated-label requirement. Pinned API declarations prevent an unsupported account-wide-concept absence claim; a whole-cache Lua/XML scan finds only the missing label's use and no definition. All seven full-feature all-target checks pass with zero JSON/plain compiler warnings. These checks do not establish other profiles' full runtime localization parity.
+
+## [2026-10-26] reconciliation | Merged engraving availability and settings
+
+Reconciled tracked specs and wiki against merged master `35dedb8b6` and the two lane reports. [Shared engraving availability](investigations/mists-engraving-inputs.md#shared-availability-and-input-supply) is the source of truth for profile publication, literal Rust input supply, the absent Lua admin setter and native-unknown values. [Merged settings proof and stock effects](investigations/mists-engraving-inputs.md#merged-settings-proof-and-stock-effects) replaces the obsolete Mists display-settings blocker and links Era/Anniversary error attribution. Historical receipts remain labeled historical. Documentation only; no new build or runtime proof is claimed.
+
+## 2026-10-26 — Forever Camelot spellbook
+
+Recorded [supplied observations](systems/forever-camelot-spellbook.md), selected-constructor ordering, three exact RED/GREEN pairs, unchanged 26/26 stock and seven zero-warning all-target checks. Linked the shared availability model and retained the item-browsing/device-startup limits.

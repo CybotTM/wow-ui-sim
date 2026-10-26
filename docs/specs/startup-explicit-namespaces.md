@@ -7,8 +7,7 @@
 - [x] `C_ProductChoice.GetChoices()` returns a fresh empty identifier array pending
   a product-entitlement catalog; original OnLoad initializes the reward panel,
   and login/update handlers complete without creating reward alerts.
-- [x] `C_Engraving.IsEngravingEnabled()` returns false pending engraving availability
-  state; the original rune control OnLoad hides an initially shown control.
+- [x] Replace the former engraving false default with [supplied availability](era-engraving-availability.md); the original rune control reflects the supplied value or reports a named unset error.
 - [x] Unknown members remain nil on these three Era/Anniversary namespaces, even
   after exported-constructor reuse. Existing non-strict factories remain unchanged.
 
@@ -17,11 +16,11 @@ GetNumItems and GetChoices are consumer-inferred number/array queries: Classic
 caches omit their generated documentation. These policies are not client defaults.
 
 `workarounds/temporary/classic_startup_defaults.rs` owns the empty loot/product
-queries and engraving availability; the Era/Anniversary registration gate is shared.
-Their superseded Lua paths were removed during integration. The engraving block
-was relocated unchanged from `src/era/compat_bootstrap.lua` on 2026-10-17, retaining
-its rawget guards, missing-system/retirement comment and false policy. Strict
-namespace policy remains in the runtime bootstrap. The fresh b6c603498 Era gate
+queries. Its former engraving block was relocated from `src/era/compat_bootstrap.lua`
+on 2026-10-17, then removed by the [supplied availability implementation](era-engraving-availability.md).
+The [shared contract and input supply](../wiki/investigations/mists-engraving-inputs.md#shared-availability-and-input-supply)
+now govern engraving; no false default remains. Strict namespace policy remains
+in the runtime bootstrap. The following receipts describe the historical default, not current engraving behavior. The fresh b6c603498 Era gate
 passes all five unchanged namespace tests, including original rune-control hiding
 and strict/factory preservation, plus the original empty-history startup test.
 No fresh Anniversary or whole-profile acceptance is inferred. Retire each default when its named system is modeled under c_api. Retail's encounter/time API and active
@@ -49,13 +48,17 @@ and full startup acceptance are outside this bounded extension.
 ### Explicit consumer exclusions
 
 `Blizzard_UIPanels_Game/Classic/ContainerFrame_Shared.lua:54,95,315-316,1078,1088-1089,1111`
-bag/rune events and bag-generation paths remain unsupported:
+bag/rune events and bag-generation paths remain unsupported on Era/Anniversary:
 `C_Engraving.GetEngravingModeEnabled`, `GetCurrentRuneCast`, and `RefreshRunesList`
 remain nil. The first two are called without an availability guard;
 `alwaysShowRuneIcons=1` can reach RefreshRunesList even with availability false.
-Forced engraving UI and PaperDoll engraving interaction paths also remain excluded.
+Mists has a separate [supplied bag/settings model](mists-engraving-inputs.md).
+Forced engraving UI and PaperDoll engraving interaction paths remain excluded;
+Era/Anniversary's original rune-control OnLoad is covered by the availability spec.
 `Blizzard_SettingsDefinitions_Frame/Classic/InterfaceOverrides.lua:136` uses
-IsEngravingEnabled and skips its setting when false; that is not bag/rune coverage.
+IsEngravingEnabled and skips its setting when supplied false; that is not bag/rune coverage.
+See the [later Mists constructor proof](../wiki/investigations/mists-engraving-inputs.md#merged-settings-proof-and-stock-effects)
+for the resolved display-settings blocker.
 
 ### Comparison boundaries
 

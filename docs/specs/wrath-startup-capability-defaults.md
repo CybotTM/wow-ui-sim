@@ -68,7 +68,7 @@ Rebased on `e90d921cc`, whose committed Wrath baseline is exactly equal to the i
 | Wrath startup | 22 records / 30 occurrences → 15 / 21, exit1. Seven original records removed, no new records. The numeric-only PlaySound aggregate rises6→7 as further original work runs; TargetFrame.lua:232 is its representative stack, not every occurrence. The [combined raw-stack disclosure](../baselines/README.md#wrath-lua-errors) distinguishes TargetFrame and CombatLog callers. |
 | Retail preservation | Both existing combo tests pass; same-file speed controls and identical-source admin/query trace pass. Exact d4/current trace equality:535 bytes, SHA-256 `27356d533851e86f9773b22db33b73efd8e66ff41e5be53791fba2aa17bff983`. Separate startup[]. |
 | Forever preservation | Five unchanged target-bound model cases plus the corrected original-consumer case pass. That stale fixture fails on the old library too; its corrected event-handler form passes on both. Separate startup[]. |
-| Era engraving relocation | Five existing namespace cases plus original empty-history startup/advance control pass; original guarded false policy and strict inventory preserved. |
+| Historical Era engraving relocation | Five existing namespace cases plus original empty-history startup/advance control passed at that checkpoint. The guarded false policy is superseded by [supplied availability](era-engraving-availability.md); strict inventory remains. |
 
 Whole `cargo fmt --check`, default `cargo check` and Wrath `cargo check` pass. Wrath retains the base's existing Tank/Healer/Damage dead-code warning; no new diagnostic or suppression. Retail/Forever compiler dependency records exclude the later Wrath-only module changes; their receipts are not relabeled as whole-tree or binary identity.
 

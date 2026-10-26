@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """Launch an admitted Cargo build through a stable per-slot source mount."""
 import argparse
+from contextlib import contextmanager, ExitStack
+import fcntl
 import hashlib
 import json
 import os
 import re
+import shutil
+import math
+import stat
 from pathlib import Path
 import subprocess
 import sys
@@ -20,6 +25,180 @@ LIBRARY_SUFFIXES = {".rlib", ".rmeta", ".so", ".a", ".dll", ".dylib"}
 def check_owner(slot, owner):
     if (slot / ".owner").read_text() != owner:
         raise ValueError(f"slot owner mismatch: {slot / '.owner'}")
+
+
+def disk_inventory(slot):
+    """Allocated bytes and mtimes, without following symlinks or double-counting links."""
+    entries = {}
+    for directory, children, files in os.walk(slot):
+        for name in children + files:
+            path = Path(directory) / name
+            stat = path.lstat()
+            entries[path] = stat
+    return entries
+
+
+def artifact_units(slot, entries):
+    # Fingerprint package names can differ from bin/test names. Join aliases
+    # only at the same hash; incremental's independent hashes remain separate.
+    parents, members = {}, {}
+
+    def root(key):
+        parents.setdefault(key, key)
+        if parents[key] != key:
+            parents[key] = root(parents[key])
+        return parents[key]
+
+    def alias(base, name, artifact_hash):
+        key = (base, name.replace("-", "_"), artifact_hash)
+        return root(key)
+
+    prefixes = ("test-integration-test-", "test-example-", "test-bench-",
+                "test-lib-", "test-bin-", "run-build-script-", "build-script-",
+                "example-", "lib-", "bin-")
+    for path in entries:
+        if path.parent.name not in {".fingerprint", "deps", "build", "incremental"}:
+            continue
+        kind = path.parent.name
+        match = re.fullmatch(r"(.+)-([a-z0-9]+)(?:\..*)?", path.name)
+        if not match:
+            continue
+        name = match[1]
+        library_output = path.suffixes and path.suffixes[0] in LIBRARY_SUFFIXES
+        if kind == "deps" and library_output and name.startswith("lib"):
+            name = name[3:]
+        base = path.parent.parent
+        key = alias(base, name, match[2])
+        if kind == ".fingerprint" and not path.is_symlink():
+            for marker in path.iterdir():
+                marker_name = marker.name.removeprefix("dep-").removesuffix(".json")
+                for prefix in prefixes:
+                    if marker_name.startswith(prefix):
+                        other = alias(base, marker_name[len(prefix):], match[2])
+                        parents[root(other)] = root(key)
+                        break
+        members[path] = key
+    units = {}
+    for path, key in members.items():
+        units.setdefault(root(key), []).append(path)
+    return list(units.values())
+
+
+def previous_artifact_paths(slot):
+    receipt = slot / ".verified-source-identity.json"
+    if not receipt.exists():
+        return set()
+    previous = json.loads(receipt.read_text())
+    paths = {slot / name for name in previous.get("artifacts", {})}
+    for record in previous.get("reported_artifacts", []):
+        paths.update(Path(name) for name in
+                     [record.get("executable"), *record.get("filenames", [])] if name)
+    return paths
+
+
+def profile_lock_paths(slot):
+    paths = set()
+    for directory, children, files in os.walk(slot):
+        if ".cargo-lock" in files or set(children) & {
+                ".fingerprint", "deps", "build", "incremental"}:
+            paths.add(Path(directory) / ".cargo-lock")
+    return paths
+
+
+@contextmanager
+def hold_pruning_locks(slot, owner, dry_run):
+    with ExitStack() as locks:
+        if not dry_run:
+            check_owner(slot, owner)
+            for path in sorted(profile_lock_paths(slot)):
+                stream = locks.enter_context(path.open("a+b"))
+                try:
+                    fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError as error:
+                    raise ValueError(f"slot build lock busy: {path}") from error
+        yield
+
+
+def receipt_artifact_identities(paths):
+    identities = set()
+    for path in paths:
+        try:
+            info = path.lstat()
+        except FileNotFoundError:
+            # A removed receipt output has no current inode to protect.
+            continue
+        identities.add((info.st_dev, info.st_ino))
+    return identities
+
+
+def prune_slot(slot, owner, cap_bytes, recent_hours=2, dry_run=False, now=None):
+    with hold_pruning_locks(slot, owner, dry_run):
+        return prune_locked_slot(slot, owner, cap_bytes, recent_hours, dry_run, now)
+
+
+def prune_locked_slot(slot, owner, cap_bytes, recent_hours, dry_run, now):
+    if cap_bytes <= 0 or not math.isfinite(cap_bytes):
+        raise ValueError("slot cap must be positive and finite")
+    if recent_hours < 0 or not math.isfinite(recent_hours):
+        raise ValueError("recent hours must be nonnegative and finite")
+    if not dry_run:
+        check_owner(slot, owner)
+    entries = disk_inventory(slot)
+    inodes = {(stat.st_dev, stat.st_ino): stat.st_blocks * 512
+              for stat in entries.values()}
+    total = sum(inodes.values())
+    result = {"slot": str(slot), "dry_run": dry_run, "total_bytes": total,
+              "remaining_bytes": total, "watermark_bytes": int(cap_bytes * .8),
+              "removed": []}
+    if total <= cap_bytes:
+        print(json.dumps(result), flush=True)
+        return result
+    protected = previous_artifact_paths(slot)
+    protected_inodes = receipt_artifact_identities(protected)
+    cutoff = (time.time() if now is None else now) - recent_hours * 3600
+    candidates = []
+    units = artifact_units(slot, entries)
+    membership = {path: index for index, paths in enumerate(units) for path in paths}
+    contents = [{} for _ in units]
+    for path, info in entries.items():
+        ancestor = path
+        while ancestor != slot and ancestor not in membership:
+            ancestor = ancestor.parent
+        if ancestor in membership:
+            contents[membership[ancestor]][path] = info
+    for paths, covered in zip(units, contents):
+        newest = max(stat.st_mtime for stat in covered.values())
+        identities = {(stat.st_dev, stat.st_ino) for stat in covered.values()}
+        if newest >= cutoff or protected.intersection(covered) or identities & protected_inodes:
+            continue
+        # Only count blocks that disappear: uplifted binaries can have hard links
+        # outside the unit (or even outside this slot).
+        links, metadata = {}, {}
+        for info in covered.values():
+            identity = (info.st_dev, info.st_ino)
+            links[identity] = links.get(identity, 0) + 1
+            metadata[identity] = info
+        freed = sum(inodes[identity] for identity, count in links.items()
+                    if count >= metadata[identity].st_nlink
+                    or stat.S_ISDIR(metadata[identity].st_mode))
+        candidates.append((newest, sorted(paths), freed))
+    for _, paths, freed in sorted(candidates):
+        if result["remaining_bytes"] < result["watermark_bytes"]:
+            break
+        manifest = {"paths": [str(path) for path in paths], "size_bytes": freed}
+        if not dry_run:
+            check_owner(slot, owner)
+            # Cargo profile locks remain held through the whole-unit deletion.
+            for path in paths:
+                if path.is_dir() and not path.is_symlink():
+                    shutil.rmtree(path)
+                else:
+                    path.unlink()
+        result["removed"].append(manifest)
+        result["remaining_bytes"] -= freed
+        print(json.dumps(dict(manifest, dry_run=dry_run)), flush=True)
+    print(json.dumps(result), flush=True)
+    return result
 
 
 def check_capacity(capacity_id):
@@ -510,10 +689,11 @@ def run_build_command(command):
         return child.wait(), records
 
 
-def execute_build(request_path):
+def execute_build(request_path, cap_gib=60, recent_hours=2):
     request = json.loads(request_path.read_text())
     slot = Path(request["slot"])
     check_owner(slot, request["owner"])
+    prune_slot(slot, request["owner"], cap_gib * 1024 ** 3, recent_hours)
     state = slot / ".source-identity.json"
     verified = slot / ".verified-source-identity.json"
     previous = json.loads(verified.read_text()) if verified.exists() else None
@@ -568,10 +748,26 @@ def main(argv=None):
     parser.add_argument("--unit")
     parser.add_argument("--owner")
     parser.add_argument("--capacity-id")
+    parser.add_argument("--slot-cap-gib", type=float, default=60,
+                        help="prune above this allocated size (default: 60 GiB)")
+    parser.add_argument("--prune-recent-hours", type=float, default=2,
+                        help="retain units modified within this age (default: 2 hours)")
+    parser.add_argument("--prune-dry-run", action="store_true",
+                        help="list pruning for --slot read-only; no owner claim required")
     parser.add_argument("cargo", nargs=argparse.REMAINDER)
     args = parser.parse_args(argv)
     if args.execute:
-        return execute_build(args.execute)
+        return execute_build(args.execute, args.slot_cap_gib, args.prune_recent_hours)
+    if args.prune_dry_run:
+        if args.slot is None:
+            parser.error("--prune-dry-run requires --slot")
+        prune_slot(TARGET_ROOT / f"slot-{args.slot}", None,
+                   args.slot_cap_gib * 1024 ** 3, args.prune_recent_hours, dry_run=True)
+        return
+    if not math.isfinite(args.slot_cap_gib) or args.slot_cap_gib <= 0:
+        parser.error("--slot-cap-gib must be positive and finite")
+    if not math.isfinite(args.prune_recent_hours) or args.prune_recent_hours < 0:
+        parser.error("--prune-recent-hours must be nonnegative and finite")
     if args.status:
         if any([args.slot is not None, args.worktree, args.unit,
                 args.owner, args.capacity_id, args.cargo]):
@@ -597,7 +793,9 @@ def main(argv=None):
     write_json(request, {"slot": str(target), "worktree": str(worktree),
                          "owner": args.owner, "unit": args.unit, "cargo": cargo,
                          "receipt": str(request.with_name(f"{args.unit}.json"))})
-    worker = [sys.executable, str(Path(__file__).resolve()), "--execute", str(request)]
+    worker = [sys.executable, str(Path(__file__).resolve()), "--execute", str(request),
+              "--slot-cap-gib", str(args.slot_cap_gib),
+              "--prune-recent-hours", str(args.prune_recent_hours)]
     subprocess.run(build_argv(args.slot, worktree, args.unit, worker), check=True)
     print(args.unit)
 

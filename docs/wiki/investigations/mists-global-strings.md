@@ -10,7 +10,7 @@ The [contract](../../specs/mists-global-strings.md) and [provenance manifest](..
 
 ## Executed bounded consumer proof
 
-`tests/mists_global_strings.rs` checks the runtime-selected Classic TOC and original Lua provenance. One exact byte-identical selector fails at original Setting.lua:34 on the producer-selection RED sibling and passes with the Mists table. A non-aborting original-function line observer proves131 and138; no pcall, hook exit, or vendor replacement masks the native error. The real `showTargetCastbar` setting has the pinned name `Show Enemy Cast Bar` (ID51586) and Boolean type, and both following controls exist. Unsupplied engraving at original138 remains a separate boundary. This does not prove a full SettingsRegistrar pass or visible-panel interaction.
+`tests/mists_global_strings.rs` checks the runtime-selected Classic TOC and original Lua provenance. One exact byte-identical selector fails at original Setting.lua:34 on the producer-selection RED sibling and passes with the Mists table. A non-aborting original-function line observer proves131 and138; no pcall, hook exit, or vendor replacement masks the native error. The real `showTargetCastbar` setting has the pinned name `Show Enemy Cast Bar` (ID51586) and Boolean type, and both following controls exist. The later [engraving settings proof](mists-engraving-inputs.md#merged-settings-proof-and-stock-effects) completes this constructor with supplied availability; unset availability still raises its named error. This does not prove a full SettingsRegistrar pass or visible-panel interaction.
 
 ## Stock exposure and ungrounded seed gap
 
