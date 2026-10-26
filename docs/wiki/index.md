@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Mists supplied scenario eligibility
+
+[Environment-local bool/string input](systems/mists-scenario-finder.md) links the [contract](../specs/mists-scenario-finder.md). Allowed-first and denied-first original PVEFrame entry selectors reject the missing producer at270; the LFR test also rejects its former accepted successor error. The separate supplied-input producer is committed; GREEN, stock comparison and seven-profile checks remain pending.
+
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
 [Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.

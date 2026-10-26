@@ -3018,3 +3018,7 @@ Recorded [declarations and original consumers](investigations/ptr-edit-mode-decl
 ## 2026-10-26 — Restored PTR loss-of-control consumer proof
 
 Updated the [active-effect model](systems/lua-api.md#restored-ptr-original-consumer-proof-2026-10-26) and [contract](../specs/active-loss-of-control.md#consumer-proof): reauthenticated pinned PTR declarations/selection, original OnLoad prerequisite, two exact byte-identical subtraction RED/GREEN cases, empty/supplied/clear display behavior and two-environment isolation. No producer change; bound PTR stock remains134/154 with no raw-key/count deltas. All seven separate full-feature canonical all-target checks have zero JSON/plain compiler warnings; formatting and changed-line readability pass.
+
+## 2026-10-26 — Mists supplied scenario finder eligibility
+
+Added the [supplied bool/string contract](../specs/mists-scenario-finder.md) and [environment-local model](systems/mists-scenario-finder.md). Pinned Mists declaration and selected original PVEFrame270 support a separate optional input, not party-level/catalog inference. Both original entry selectors and the advanced LFR callback regression reject the missing producer at270. The producer is committed; runtime GREEN and final gates remain pending.

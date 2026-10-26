@@ -12,6 +12,10 @@ Pinned Mists 5.5.4.70268 `Blizzard_APIDocumentationGenerated/LFGInfoDocumentatio
 
 The regression verifies the selected TOC, original XML button identity, parent and script binding, and Lua source provenance before observing availability. Runtime RED at the original line229 reports the missing function. Initial GREEN reaches the separate missing `CanPlayerUseScenarioFinder` at line270 (declared in the same pinned documentation at line51). The parent approved bounding this slice there: a line observer checks the LFR visibility and hidden-gap anchor before line270 executes; the test then accepts only that exact named downstream error. Missing LFR at line229 is rethrown, never accepted. The revised byte-identical pair passes GREEN and fails RED at line229. Ten supplied-state observations span both booleans, levels1/90, two environments and unset recovery. Each callback proves visibility and the false-gap anchor before line270, then requires the exact named successor error. No Blizzard source is edited or replaced.
 
+## Scenario successor advance
+
+The [scenario eligibility lane](mists-scenario-finder.md) supplies a separate bool/string tuple. The current LFR regression retains its pre270 observer and every original visibility/gap-anchor assertion, but now requires full callback completion past270 instead of accepting the old missing-function error. The revised test has executed missing-scenario-producer RED at270; successor-advance GREEN is pending. The earlier proof above records the historical LFR-only boundary, not the current test acceptance.
+
 ## Stock residual
 
 Paired Mists stock at integrated master and the producer is 6 keys/12 occurrences on fresh copies of the current persisted CVar bytes. Exactly the missing-function OnLoad key and its reporter copy become named unsupplied-availability keys, count1 each; all surviving keys/counts are unchanged. This is explicit missing-input reporting, not clean startup or native-default acceptance.
