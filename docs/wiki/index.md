@@ -4370,4 +4370,4 @@ is reused; original-consumer runtime RED/GREEN remains unexecuted.
 
 ## [2026-10-26] implementation | Mists supplied party minimum
 
-[Supplied minimum](systems/mists-scenario-finder.md#supplied-active-party-minimum) links the [bounded contract](../specs/mists-party-minimum.md). Original58 producer-subtracted RED is observed; empty-catalog preservation and direct85/90/isolation GREEN remain pending. Catalog discrimination is blocked.
+[Supplied minimum](systems/mists-scenario-finder.md#supplied-active-party-minimum) links the [bounded contract](../specs/mists-party-minimum.md). Three exact producer-subtracted REDs and three GREENs prove the original58 boundary, empty-catalog preservation, direct85/90/isolation and explicit errors. Stock stays6/12 with two individually traced diagnostic replacements; catalog discrimination is blocked. Seven-profile checks are pending.

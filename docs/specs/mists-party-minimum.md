@@ -5,10 +5,10 @@ Mists `C_PartyInfo.GetMinLevel()` returns an environment-local supplied number. 
 ## What it must do
 
 - [ ] Publish only on Mists, using `client_profile::ACTIVE`; leave Retail/PTR producers unchanged.
-- [ ] Return exactly `SimState.mists_party_min_level: Option<f64>` when supplied. Do not infer from seeded player/party levels, scenario eligibility or catalog thresholds.
-- [ ] None raises `native-unknown: C_PartyInfo.GetMinLevel has no supplied active-party minimum or documented default`.
-- [ ] Only the omitted-category call is supported. An explicit argument raises `unsupported: C_PartyInfo.GetMinLevel explicit category`; no category lookup is invented. Both errors are simulator policies, not native wording.
-- [ ] With a supplied minimum, the selected original `ScenarioFinder_Shared.lua:58` must complete through the empty-catalog branch with its original cover shown and `NO_SCENARIO_AVAILABLE` label. This is preservation, not output discrimination.
+- [x] Return exactly `SimState.mists_party_min_level: Option<f64>` when supplied. Do not infer from seeded player/party levels, scenario eligibility or catalog thresholds.
+- [x] None raises `native-unknown: C_PartyInfo.GetMinLevel has no supplied active-party minimum or documented default`.
+- [x] Only the omitted-category call is supported. An explicit argument raises `unsupported: C_PartyInfo.GetMinLevel explicit category`; no category lookup is invented. Both errors are simulator policies, not native wording.
+- [x] With a supplied minimum, the selected original `ScenarioFinder_Shared.lua:58` must complete through the empty-catalog branch with its original cover shown and `NO_SCENARIO_AVAILABLE` label. This is preservation, not output discrimination.
 
 ## How it works
 
