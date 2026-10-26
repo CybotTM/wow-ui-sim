@@ -334,7 +334,7 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                         log.write(f"FAILED: {error}\n")
                     except OSError as log_error:
                         result["log_error"] = str(log_error)
-                except (OSError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as error:
+                except Exception as error:
                     result["steps"].setdefault(phase, {})["status"] = "FAILED"
                     result["status"] = "FAILED"
                     result["error"] = str(error)
@@ -342,7 +342,7 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                         log.write(f"FAILED: {error}\n")
                     except OSError as log_error:
                         result["log_error"] = str(log_error)
-        except OSError as error:
+        except Exception as error:
             result["steps"].setdefault(phase, {})["status"] = "FAILED"
             result["status"] = "FAILED"
             result["log_error"] = str(error)
@@ -351,7 +351,7 @@ def run(ref, build_jobs, target_dir, profile="retail"):
         attempt_path = RESULTS / f"{attempt}.json"
         try:
             result["new_failures"] = new_failures(result)
-        except (OSError, ValueError, KeyError) as error:
+        except Exception as error:
             result["status"] = "FAILED"
             result["error"] = f"baseline comparison failed: {error}"
         # Record before releasing ownership, so receipt storage failure retains it.
@@ -359,14 +359,14 @@ def run(ref, build_jobs, target_dir, profile="retail"):
         if owner is not None:
             try:
                 release_slot(target_dir, sha, profile, owner)
-            except (OSError, ValueError) as error:
+            except Exception as error:
                 result["status"] = "FAILED"
                 result["error"] = f"slot release failed: {error}"
         if result["status"] == "PASSED":
             try:
                 baseline = RESULTS / f"master-latest-{profile}.json" if ref in ("origin/master", "master") else None
                 promote_result(output_path, baseline, result)
-            except (OSError, ValueError) as error:
+            except Exception as error:
                 result["status"] = "FAILED"
                 result["error"] = f"promotion failed: {error}"
         write_result(attempt_path, result)
