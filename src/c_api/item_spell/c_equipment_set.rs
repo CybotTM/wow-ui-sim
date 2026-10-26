@@ -62,7 +62,7 @@ pub(super) fn register_c_equipment_set(state: &mut LuaState) -> LuaResult<()> {
     for &(name, func) in C_EQUIPMENT_SET_METHODS {
         table_set_rust_fn_static(state, table_ref, name, func)?;
     }
-    Ok(())
+    crate::c_api::equipment_set_locks::register_query(state)
 }
 
 // ── helpers ─────────────────────────────────────────────────────────

@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Equipment-set supplied lock query
+
+[Saved-set projection](systems/equipment-set-locks.md) replaces the constant-false path on R/P/F/M, with explicit native-unknown errors and strict boolean admin inputs. Original Retail equipment/membership/error REDs and the nil-observation RED were observed before the producer change. Final four-profile acceptance is pending; W/E/A and item upgrades remain excluded.
+
 ## [2026-10-26] staged | Supplied equipment-set lock inputs
 
 [Item-ID observations](systems/equipment-set-locks.md) back simulator admin supply/clear methods on R/P/F/M. The missing-admin Retail RED was observed; original-consumer query RED/GREEN and four-profile gates remain pending. No native lock/default policy is claimed.

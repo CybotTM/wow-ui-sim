@@ -5,7 +5,7 @@
 ## What it must do
 
 - [ ] Publish the numeric saved-set-ID query on Retail/PTR/Forever/Mists. Preserve excluded Wrath/Era/Anniversary behavior.
-- [ ] `A_Admin.SetEquipmentItemLock(itemID, locked)` supplies or replaces one explicit boolean observation. `A_Admin.ClearEquipmentItemLock(itemID)` removes only that observation; neither operation equips gear or infers native event timing.
+- [ ] `A_Admin.SetEquipmentItemLock(itemID, locked)` supplies or replaces one explicit boolean observation; missing/nil/non-boolean inputs error without mutation. `A_Admin.ClearEquipmentItemLock(itemID)` removes only that observation; neither operation equips gear or infers native event timing.
 - [ ] Join observations to the current saved set's slot-to-item-ID contents. With an observation for every referenced item, return exactly one boolean: whether any referenced item is locked. A lock outside the saved set does not affect the result; resaving changes membership immediately.
 - [ ] Unknown sets and missing observations raise explicit simulator errors prefixed `native-unknown: C_EquipmentSet.EquipmentSetContainsLockedItems`. Clearing an observation restores the missing-observation error. This wording is simulator policy, not a native error contract.
 - [ ] The original runtime-selected `EquipmentManager_EquipSet` rejects locked saved sets without changing equipment or starting a swap, equips unlocked sets, and follows replacements/relocking without leaking observations between environments.
