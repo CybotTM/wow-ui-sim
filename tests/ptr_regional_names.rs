@@ -89,6 +89,7 @@ mod original_consumer {
         env.exec("assert(select('#', RegionalUniqueNamesEnabled()) == 1); assert(select('#', C_PlayerInfo.ShouldDisplaySurname()) == 1)").unwrap();
         env.state().borrow_mut().player.regional_unique_names_enabled = true;
         env.state().borrow_mut().player.should_display_surname = None;
+        assert_display(&env, "target", "Mira-Stone");
         env.exec(r#"
             RegionalNameFrame.unit = 'player'
             local ok, message = pcall(UnitFrame_Update, RegionalNameFrame)
