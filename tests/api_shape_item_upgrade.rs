@@ -126,7 +126,7 @@ fn original_item_util_tracks_supplied_eligibility_movement_removal_and_isolation
             CheckUpgrade(firstLocation, true)
             C_Container.PickupContainerItem(0, 1)
             DeleteCursorItem()
-            A_Admin.AddBagItem(0, 1, 19019, 1)
+            A_Admin.AddBagItem(0, 1, 6948, 1)
             CheckUpgradeUnknown(firstLocation)
         "#).expect("supplied location eligibility must drive original ItemUtil through lifecycle");
         second.exec(r#"
