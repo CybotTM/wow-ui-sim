@@ -4,7 +4,7 @@ Mists `C_LFGInfo.IsLFREnabled` reads `SimState.lfr_availability: Option<bool>`. 
 
 ## Publication and unknown input
 
-`c_lfg_info` publishes the separate `lfr_availability` C API module only when `client_profile::ACTIVE` is Mists. Supplied true/false returns one boolean. None raises a named `native-unknown` missing-input error, following the Forever target-spell diagnostic convention. This explicit simulator policy was approved because native defaults are unknown and the declaration excludes nil; it does not claim native error behavior.
+`c_lfg_info` publishes the separate `lfr_availability` C API module only when `client_profile::ACTIVE` is Mists. The stock Mists scenario supplies true as a best guess; this is not native proof. Supplied true/false returns one boolean. None raises a named `native-unknown` missing-input error, following the Forever target-spell diagnostic convention. This explicit simulator policy was approved because native defaults are unknown and the declaration excludes nil; it does not claim native error behavior.
 
 ## Original consumer boundary
 
@@ -16,9 +16,9 @@ The regression verifies the selected TOC, original XML button identity, parent a
 
 The [scenario eligibility lane](mists-scenario-finder.md) supplies a separate bool/string tuple. The current LFR regression retains its pre270 observer and every original visibility/gap-anchor assertion, but now requires full callback completion past270 instead of accepting the old missing-function error. The byte-identical revised test fails missing-scenario-producer RED at270 and passes full-callback GREEN with all ten LFR observations. Stock remains6/12 without raw-key/count changes; all seven profiles have zero-warning all-target checks for the shared input/producer change. The earlier proof above records the historical LFR-only boundary, not the current test acceptance.
 
-## Stock residual
+## Historical stock residual
 
-Paired Mists stock at integrated master and the producer is 6 keys/12 occurrences on fresh copies of the current persisted CVar bytes. Exactly the missing-function OnLoad key and its reporter copy become named unsupplied-availability keys, count1 each; all surviving keys/counts are unchanged. This is explicit missing-input reporting, not clean startup or native-default acceptance.
+Before the stock-default change, paired Mists stock at integrated master and the producer was 6 keys/12 occurrences on fresh copies of the current persisted CVar bytes. Exactly the missing-function OnLoad key and its reporter copy become named unsupplied-availability keys, count1 each; all surviving keys/counts are unchanged. This is explicit missing-input reporting, not clean startup or native-default acceptance.
 
 ## Verification scope
 
