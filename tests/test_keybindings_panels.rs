@@ -11,6 +11,7 @@ mod keybindings_panels_detail;
 mod token_ui_fixtures;
 
 use keybindings_panels_detail::{frame_is_shown, setup_env};
+use wow_ui_sim::client_profile::{self, ClientProfile};
 use wow_ui_sim::iced_app::{
     RegistryQuadBatchParams, build_quad_batch_for_registry, compute_frame_rect,
 };
@@ -76,8 +77,64 @@ fn spellbook_paged_spells_frame_id(registry: &WidgetRegistry) -> Option<u64> {
     spellbook.children_keys.get("PagedSpellsFrame").copied()
 }
 
+fn is_wrath() -> bool {
+    client_profile::ACTIVE == ClientProfile::Wrath
+}
+
+fn record_native_binding_caller(env: &WowLuaEnv, function: &str) {
+    env.exec(&format!(
+        r#"
+        local original = assert(_G[{function:?}])
+        _G[{function:?}] = function(...)
+            local caller = debug.getinfo(2, 'Sl')
+            NativeBindingCaller = caller.source
+            NativeBindingLine = caller.currentline
+            return original(...)
+        end
+        "#
+    ))
+    .expect("instrument native binding target");
+}
+
+fn assert_native_binding_caller(env: &WowLuaEnv, line: u32) {
+    env.exec(&format!("assert(NativeBindingCaller and NativeBindingCaller:match('FrameXML/Bindings%.xml$') and NativeBindingLine == {line}, 'binding must execute the native XML body on its original line')"))
+        .expect("native binding source");
+}
+
+// Native Bindings.xml:635-637; SpellBookFrame.lua:14-29.
+fn press_spellbook_key(env: &WowLuaEnv) {
+    if is_wrath() {
+        env.exec("assert(SetBinding('S', 'TOGGLESPELLBOOK')); assert(GetBindingAction('S') == 'TOGGLESPELLBOOK')")
+            .expect("bind native spellbook action");
+        record_native_binding_caller(env, "ToggleSpellBook");
+        assert!(
+            !frame_is_shown(env, "SpellBookFrame"),
+            "spellbook starts closed"
+        );
+    }
+    env.send_key_press("S", None).expect("S keybind failed");
+    if is_wrath() {
+        assert_native_binding_caller(env, 636);
+        env.exec(
+            r#"
+            assert(SpellBookFrame:IsShown(), "S must open the native book")
+            assert(SpellBookFrame.bookType == BOOKTYPE_SPELL, "S selects spells, not pets")
+        "#,
+        )
+        .expect("native spellbook key transition");
+    }
+}
+
+fn close_wrath_panel(env: &WowLuaEnv, key: &str, root: &str) {
+    if is_wrath() {
+        env.send_key_press(key, None)
+            .expect("second keypress failed");
+        assert!(!frame_is_shown(env, root), "second {key} must close {root}");
+    }
+}
+
 fn spellbook_root_name() -> &'static str {
-    if cfg!(feature = "client-wrath") {
+    if is_wrath() {
         "SpellBookFrame"
     } else {
         "PlayerSpellsFrame"
@@ -85,7 +142,7 @@ fn spellbook_root_name() -> &'static str {
 }
 
 fn find_first_visible_spellbook_icon_id(registry: &WidgetRegistry) -> Option<u64> {
-    if cfg!(feature = "client-wrath") {
+    if is_wrath() {
         // INFERRED: native SpellButtonTemplate publishes globally named icons.
         return (1..=12).find_map(|index| {
             let id = registry.get_id_by_name(&format!("SpellButton{index}IconTexture"))?;
@@ -148,13 +205,14 @@ fn find_visible_spellbook_icon_in_item(registry: &WidgetRegistry, item_id: u64) 
 fn keybind_s_opens_spellbook() {
     test_timeout! {
         let env = setup_env();
-        env.send_key_press("S", None).expect("S keybind failed");
-        if cfg!(feature = "client-wrath") {
+        press_spellbook_key(&env);
+        if is_wrath() {
             env.exec(r#"
                 assert(SpellBookFrame:IsShown(), "native spellbook should open")
                 assert(SpellBookFrame:GetWidth() == 384 and SpellBookFrame:GetHeight() == 512)
                 assert(SpellBookFrame:GetScale() == 1, "legacy book fits the viewport")
             "#).expect("native spellbook first-open surface");
+            close_wrath_panel(&env, "S", "SpellBookFrame");
             return;
         }
         assert!(
@@ -183,7 +241,7 @@ fn keybind_s_opens_spellbook() {
 fn keybind_s_renders_spellbook_item_icon_quads_on_first_open() {
     test_timeout! {
         let env = setup_env();
-        env.send_key_press("S", None).expect("S keybind failed");
+        press_spellbook_key(&env);
 
         let batch = build_batch_for_root(&env, spellbook_root_name());
         let state = env.state().borrow();
@@ -212,6 +270,8 @@ fn keybind_s_renders_spellbook_item_icon_quads_on_first_open() {
             "First visible spellbook icon quad should come from an icon texture, got {}",
             icon_request.path
         );
+        drop(state);
+        close_wrath_panel(&env, "S", "SpellBookFrame");
     }
 }
 
@@ -224,7 +284,7 @@ fn keybind_s_keeps_spellbook_backgrounds_below_icons_after_initial_bucket_build(
             let _ = state.get_strata_buckets();
         }
 
-        env.send_key_press("S", None).expect("S keybind failed");
+        press_spellbook_key(&env);
 
         let batch = build_batch_for_root(&env, spellbook_root_name());
         let state = env.state().borrow();
@@ -246,7 +306,7 @@ fn keybind_s_keeps_spellbook_backgrounds_below_icons_after_initial_bucket_build(
                 request
                     .path
                     .to_ascii_lowercase()
-                    .contains(if cfg!(feature = "client-wrath") {
+                    .contains(if is_wrath() {
                         "ui-spellbookpanel-"
                     } else {
                         "spellbookbackgroundevergreen"
@@ -261,6 +321,8 @@ fn keybind_s_keeps_spellbook_backgrounds_below_icons_after_initial_bucket_build(
             last_background_request.vertex_start,
             icon_request.vertex_start
         );
+        drop(state);
+        close_wrath_panel(&env, "S", "SpellBookFrame");
     }
 }
 
@@ -270,9 +332,16 @@ fn keybind_s_keeps_spellbook_backgrounds_below_icons_after_initial_bucket_build(
 fn keybind_n_opens_talents() {
     test_timeout! {
         let env = setup_env();
+        if is_wrath() {
+            env.exec("assert(SetBinding('N', 'TOGGLETALENTS')); assert(GetBindingAction('N') == 'TOGGLETALENTS')").expect("bind native talent action");
+            record_native_binding_caller(&env, "ToggleTalentFrame");
+            assert!(!frame_is_shown(&env, "PlayerTalentFrame"), "talents start closed");
+        }
         env.send_key_press("N", None).expect("N keybind failed");
-        if cfg!(feature = "client-wrath") {
+        if is_wrath() {
+            assert_native_binding_caller(&env, 645);
             assert!(frame_is_shown(&env, "PlayerTalentFrame"), "native talent panel should open");
+            close_wrath_panel(&env, "N", "PlayerTalentFrame");
             return;
         }
         assert!(
@@ -358,9 +427,14 @@ fn keybind_a_opens_achievements() {
 fn keybind_l_opens_group_finder() {
     test_timeout! {
         let env = setup_env();
-        if cfg!(feature = "client-wrath") {
+        if is_wrath() {
+            env.exec("assert(SetBinding('L', 'TOGGLELFGPARENT')); assert(GetBindingAction('L') == 'TOGGLELFGPARENT')").expect("bind native dungeon finder action");
+            record_native_binding_caller(&env, "ToggleLFDParentFrame");
+            assert!(!frame_is_shown(&env, "LFDParentFrame"), "dungeon finder starts closed");
             env.send_key_press("L", None).expect("L keybind failed");
+            assert_native_binding_caller(&env, 695);
             assert!(frame_is_shown(&env, "LFDParentFrame"), "native dungeon finder should open");
+            close_wrath_panel(&env, "L", "LFDParentFrame");
             return;
         }
         env.exec(
@@ -498,11 +572,11 @@ fn premade_group_search_result_tooltips_do_not_error() {
 fn keybind_o_opens_social() {
     test_timeout! {
         let env = setup_env();
-        if cfg!(feature = "client-wrath") {
+        if is_wrath() {
             common::panel_fixtures::clear_recorded_lua_errors(&env);
         }
         env.send_key_press("O", None).expect("O keybind failed");
-        if cfg!(feature = "client-wrath") {
+        if is_wrath() {
             let errors = common::panel_fixtures::recorded_lua_errors(&env);
             assert!(errors.is_empty(), "native friends keybind errors: {errors:?}");
         }
@@ -517,10 +591,10 @@ fn keybind_o_opens_social() {
 fn keybind_o_dispatches_toggle_friends_frame() {
     test_timeout! {
         let env = setup_env();
-        if cfg!(feature = "client-wrath") {
+        if is_wrath() {
             common::panel_fixtures::clear_recorded_lua_errors(&env);
         }
-        if !cfg!(feature = "client-wrath") {
+        if !is_wrath() {
             env.exec(r#"assert(C_AddOns.LoadAddOn("Blizzard_FriendsFrame"))"#)
                 .expect("modern FriendsFrame addon should load");
         }
@@ -535,7 +609,7 @@ fn keybind_o_dispatches_toggle_friends_frame() {
             "#
         ).expect("Failed to wrap ToggleFriendsFrame for O keybind test");
         env.send_key_press("O", None).expect("O keybind failed");
-        if cfg!(feature = "client-wrath") {
+        if is_wrath() {
             let errors = common::panel_fixtures::recorded_lua_errors(&env);
             assert!(errors.is_empty(), "native friends dispatch errors: {errors:?}");
         }
@@ -555,10 +629,17 @@ fn keybind_o_dispatches_toggle_friends_frame() {
 fn keybind_j_opens_guild() {
     test_timeout! {
         let env = setup_env();
-        if cfg!(feature = "client-wrath") {
+        if is_wrath() {
+            env.exec("assert(SetBinding('J', 'TOGGLEGUILDTAB')); assert(GetBindingAction('J') == 'TOGGLEGUILDTAB')").expect("bind native guild action");
+            record_native_binding_caller(&env, "ToggleFriendsFrame");
+            assert!(!frame_is_shown(&env, "FriendsFrame"), "friends starts closed");
             env.send_key_press("J", None).expect("J keybind failed");
+            assert_native_binding_caller(&env, 686);
             assert!(frame_is_visible(&env, "GuildFrame"), "native guild tab should be visible");
             assert!(frame_is_shown(&env, "FriendsFrame"), "native guild tab belongs to FriendsFrame");
+            env.exec("assert(FriendsFrame.selectedTab == 3, 'J selects the guild tab')")
+                .expect("native Bindings.xml:685-687 guild selection");
+            close_wrath_panel(&env, "J", "FriendsFrame");
             return;
         }
         env.exec(
