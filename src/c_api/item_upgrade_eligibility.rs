@@ -110,7 +110,8 @@ fn clear_eligibility(state: &mut LuaState) -> LuaResult<u32> {
     let slot = read_item_slot(state, location).ok_or_else(|| {
         rilua::runtime_error("ClearItemUpgradeEligibility requires an item location or nil")
     })?;
-    discard_location(&mut borrow_state_mut(state)?, slot);
+    let mut sim = borrow_state_mut(state)?;
+    discard_location(&mut sim, slot);
     Ok(0)
 }
 
