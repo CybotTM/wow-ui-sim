@@ -1,6 +1,6 @@
 ## [2026-10-26] investigation | Mists engraving supplied inputs
 
-[Consumer inventory](investigations/mists-engraving-inputs.md) separates seven normal Mists bag/settings members from load-on-demand and Vanilla-only callers. The [contract](../specs/mists-engraving-inputs.md) requires explicit inputs and named missing-input errors. State/test scaffolding exists; executable RED/GREEN and compiler/stock evidence are pending slot admission.
+[Original bag and targeting proof](investigations/mists-engraving-inputs.md) covers seven Mists-only supplied-state members under the [contract](../specs/mists-engraving-inputs.md). Corrected byte-identical RED/GREEN tests pass all three GREEN cases; the unchanged storage test reaches a named unsupplied-state boundary. Stock remains 6/12. Complete settings is blocked before engraving at missing IsTransmogEnabled; no settings-path proof is claimed. Mists compilation passes; six profile checks remain.
 
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 

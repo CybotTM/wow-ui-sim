@@ -1,6 +1,6 @@
 ## [2026-10-26] investigation | Mists engraving supplied inputs
 
-[Selected consumers](investigations/mists-engraving-inputs.md) establish seven normal Mists members with pinned declarations. Vanilla equipment and LoD engraving UI are excluded from this slice. Explicit pre-startup input and the unchanged storage-flow boundary are specified; build-slot admission is pending and no passing implementation is claimed.
+[Selected original consumers](investigations/mists-engraving-inputs.md) now have three exact corrected-input GREEN cases and producer-free RED with byte-identical tests. Seven Mists-only members project supplied state; missing input raises a named error and refresh records only a local request. Original bag slot IDs and the established GetTexture fileID contract corrected fixture assumptions without changing vendor/texture behavior. Stock stays 6/12; old storage remains a named-boundary failure. Settings is blocked at the earlier missing IsTransmogEnabled call. Mists compilation passes; six profile checks remain.
 
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 

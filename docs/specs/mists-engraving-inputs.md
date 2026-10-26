@@ -4,11 +4,11 @@ The normal Mists bag and settings consumers read explicit environment-local engr
 
 ## What it must do
 
-- [ ] Publish only the seven members reached by the normal Mists bag/settings flow, gated by `client_profile::ACTIVE`. Do not change other profiles.
-- [ ] Project supplied availability, engraving mode, optional current rune, per-inventory-slot eligibility, optional per-slot rune, and current-cast per-slot eligibility. An unsupplied input must raise an explicit error naming the query; supplied false/nil is not missing input.
-- [ ] Return the pinned `EngravingData` fields and independent Lua tables. `RefreshRunesList` records an observable simulator refresh request with no Lua results; it does not invent native catalog refresh effects.
-- [ ] Drive the original selected `ContainerFrame_Shared.lua` overlay and desaturation functions, with input supplied before addon loading. Cover true/false, present/nil, slot discrimination, repeated refresh requests and environment isolation. The complete original settings consumer remains blocked before engraving; no settings-path proof is claimed.
-- [ ] Keep the old storage-flow test unchanged. Without supplied input its named unsupplied-state error is boundary advancement, not a passing storage-flow claim.
+- [x] Publish only the seven members reached by the normal Mists bag/settings flow, gated by `client_profile::ACTIVE`. Do not change other profiles.
+- [x] Project supplied availability, engraving mode, optional current rune, per-inventory-slot eligibility, optional per-slot rune, and current-cast per-slot eligibility. An unsupplied input must raise an explicit error naming the query; supplied false/nil is not missing input.
+- [x] Return the pinned `EngravingData` fields and independent Lua tables. `RefreshRunesList` records an observable simulator refresh request with no Lua results; it does not invent native catalog refresh effects.
+- [x] Drive the original selected `ContainerFrame_Shared.lua` overlay and desaturation functions, with input supplied before addon loading. Cover true/false, present/nil, slot discrimination, repeated refresh requests and environment isolation. The complete original settings consumer remains blocked before engraving; no settings-path proof is claimed.
+- [x] Keep the old storage-flow test unchanged. Without supplied input its named unsupplied-state error is boundary advancement, not a passing storage-flow claim.
 
 ## How it works
 
@@ -27,9 +27,10 @@ The normal Mists bag and settings consumers read explicit environment-local engr
 
 ## Known gaps (current cycle)
 
-- [ ] Execute producer-subtracted RED and supplied GREEN with byte-identical tests.
+- [x] Execute producer-subtracted RED and supplied GREEN with byte-identical tests: corrected RED `e97b841e7`, GREEN `eb3dca9dc`; all three exact GREEN cases pass.
 - [ ] The complete original `InterfaceOverrides.AdjustDisplaySettings` stops at line4 because `C_TransmogOutfitInfo.IsTransmogEnabled` is absent. That separate producer is outside this scope. Do not substitute copied vendor excerpts or claim settings-path GREEN.
-- [ ] Bind stock changes to original emitters and finish seven-profile zero-warning all-target checks.
+- [x] Compare bound stock maps: scaffold/no-producer `c50e6386a` and producer `f7a9227b8` both have 6 raw keys/12 occurrences, with no raw-key/count changes.
+- [ ] Finish seven-profile zero-warning all-target checks; corrected-source Mists passes, six profiles remain.
 
 ## Out of scope
 
