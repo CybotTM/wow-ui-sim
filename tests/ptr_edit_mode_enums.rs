@@ -91,10 +91,11 @@ fn swing_timer_constructor_consumes_seven_declared_settings() {
         std::fs::read_to_string(root.join("Shared/EditModeSettingDisplayInfo.lua")).unwrap();
     let system = source.find("\t[Enum.EditModeSystem.SwingTimer] =").unwrap();
     let start = system + source[system..].find("\t\t-- Scale").unwrap();
-    let end = start
+    let next = start
         + source[start..]
-            .find("\n\t},\n\n\t[Enum.EditModeSystem.VehicleSeatIndicator]")
+            .find("\t[Enum.EditModeSystem.VehicleSeatIndicator]")
             .unwrap();
+    let end = start + source[start..next].rfind("\t},").unwrap();
     let padding = "\n".repeat(
         source[..start]
             .bytes()
