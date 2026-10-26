@@ -52,6 +52,9 @@ fn original_smart_navigation_and_debug_share_completed_utility_and_find_buttons(
         assert(rawequal(Utility, import("Blizzard_GamepadSmartNavigation.Utility")))
         collectgarbage("collect")
         assert(rawequal(Utility, import("Blizzard_GamepadSmartNavigation.Utility")))
+        local ok, err = pcall(import, "Blizzard_GamepadSmartNavigation.MissingUtilityProbe")
+        assert(not ok and tostring(err):find(
+            "Invalid import: No module with that name exists", 1, true))
         local source = debug.getinfo(Utility.FindButtonGroups, "S").source:gsub("\\", "/")
         assert(source:find("Blizzard_GamepadSmartNavigation/Utility.lua", 1, true))
 
@@ -116,4 +119,25 @@ fn original_smart_navigation_rejects_unfinished_utility_without_autoloading() {
         result.warnings
     );
     assert!(env.eval::<bool>("SmartNavigationMixin == nil").unwrap());
+
+    // The same original dependency must succeed after real TOC completion.
+    // This rejects an importer that always returns the expected missing-module error.
+    let ready_env = new_blizzard_addon_env(&ui);
+    load_blizzard_addon_closure_into_env(&ready_env, &ui, &["Blizzard_SharedXML"], &[]);
+    std::fs::write(
+        &toc,
+        "## Title: Completed module probe\nUtility.lua\nSmartNavigation.lua\n",
+    )
+    .unwrap();
+    let ready = wow_ui_sim::loader::load_addon(&ready_env.loader_env(), &toc).unwrap();
+    assert!(ready.warnings.is_empty(), "{:?}", ready.warnings);
+    ready_env
+        .exec(
+            r#"
+            local utility = import("Blizzard_GamepadSmartNavigation.Utility")
+            assert(type(utility.FindButtonGroups) == "function")
+            assert(type(SmartNavigationMixin.RefreshButtonGroups) == "function")
+            "#,
+        )
+        .expect("the original module must resolve once its file has completed");
 }
