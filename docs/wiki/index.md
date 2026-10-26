@@ -10,6 +10,10 @@
 
 [Source, selected consumer and exposure gap](investigations/mists-global-strings.md) links the [70268 contract](../specs/mists-global-strings.md):19,914 complete DB2 rows, multiline-safe generation and one original Setting34 RED→original131/138 GREEN. Stock6/12→8/14 exposes the unchanged temporary Retail reputation seed's ungrounded Mists inputs; no missing label is invented. All seven full-feature all-target checks pass with zero JSON/plain compiler warnings.
 
+## [2026-10-26] implementation | Era/Anniversary supplied engraving availability
+
+[Original XML control](investigations/era-engraving-availability.md) uses the shared supplied bool reader instead of the invented false default. Both profiles have two exact original OnLoad RED101/GREEN0 selectors and passing false-input settings preservation. Stock0/0→2/2 exposes the named unset error and its ScriptErrors echo, both attributed to CharacterFrame; no default is seeded. Seven all-target checks have zero warnings. Other25 members, bags and full LoD UI remain excluded.
+
 ## [2026-10-26] implementation | Mists transmog supplied input
 
 [Contract and selected display branch](systems/mists-transmog-enabled.md): both exact original-line4 RED/GREEN cases prove supplied true/false control branches, isolation, transitions and named unset recovery. Mists stock remains6/12 with identical raw keys/counts; all seven full-feature all-target checks have zero warnings. Retail/PTR now share the [supplied observation](systems/transmog-availability.md); the Forever gap and later settings branches remain separate.

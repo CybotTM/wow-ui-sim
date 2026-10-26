@@ -6,6 +6,10 @@
 
 [Model and original callback](systems/voice-settings-access.md) record the six-profile declaration-backed query, unknown-state error and host-supplied observation. All 18 exact original-consumer GREEN/producer-free RED pairs pass with byte-identical tests; Wrath preserves absence. Seven all-target checks have zero warnings, all seven paired raw stock maps equal the supplied master baselines, and 98 final launch CVar guards are unchanged. No native readiness default, device catalog, complete initialization, timer cancellation or unsupplied forecast readiness is inferred.
 
+## [2026-10-26] implementation | Era/Anniversary supplied engraving availability
+
+[Bounded availability contract](investigations/era-engraving-availability.md) retires only the temporary false query, reusing Mists' environment-local Option<bool> and named missing-input error. Both profiles' exact original XML selectors reject constant false and pass supplied true/false, unset recovery and isolation. False-input settings remains preservation. Each stock map changes0/0→2/2: original OnLoad unset error plus ScriptErrors echo, individually traced to the removed shim. Seven all-target checks have zero JSON/plain warnings. Other25 members, bags and full LoD UI remain excluded.
+
 ## [2026-10-26] implementation | Mists transmog supplied input
 
 [Contract and selected display branch](systems/mists-transmog-enabled.md): byte-identical selectors fail producer-free RED at original line4 and pass GREEN for both real-control branches, isolation, transitions and unset recovery. The supplied-state query publishes only on Mists; no default is inferred. Bound stock is unchanged6/12; all seven all-target checks have zero warnings. Full settings, modern native-default policy and the Forever query remain outside this bounded proof.
