@@ -45,7 +45,7 @@ fn forever_name_policy_changes_vendor_first_name_and_is_isolated() {
 }
 
 #[test]
-#[cfg(not(feature = "client-wowforever"))]
+#[cfg(not(any(feature = "client-wowforever", feature = "client-ptr")))]
 fn forever_name_policy_is_not_published_on_other_profiles() {
     let env = wow_ui_sim::lua_api::WowLuaEnv::new().unwrap();
     env.exec("assert(RegionalUniqueNamesEnabled == nil)")

@@ -233,6 +233,8 @@ pub struct PlayerState {
     pub name: String,
     /// Simulator name policy; defaults false, not an inferred native default.
     pub regional_unique_names_enabled: bool,
+    /// Supplied surname visibility; None leaves the native policy unknown.
+    pub should_display_surname: Option<bool>,
     /// Configured graveyard-port availability; false for the seeded alive player.
     pub can_port_graveyard: bool,
     pub health: i32,

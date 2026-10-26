@@ -49,6 +49,9 @@ pub(crate) fn register_item_power_tables(state: &mut LuaState) -> LuaResult<()> 
 }
 
 pub(crate) fn register_character_progression_tables(state: &mut LuaState) -> LuaResult<()> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr {
+        super::c_player_info_name_policy::register(state)?;
+    }
     #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
     super::c_player_info_guid::register(state)?;
     c_barber_shop::register_c_barber_shop_surface(state)?;
