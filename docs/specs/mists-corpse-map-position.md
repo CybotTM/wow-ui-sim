@@ -4,11 +4,11 @@ Mists exposes the pinned `C_DeathInfo.GetCorpseMapPosition(uiMapID: number)` que
 
 ## What it must do
 
-- [ ] Publish the query only on Mists; do not add other DeathInfo APIs or change other profiles.
-- [ ] Return one nil result when alive, without a corpse, or without supplied coordinates for the requested map.
-- [ ] Project supplied coordinates without replacing them with the player's current map position.
-- [ ] Let the original `DeathMapDataProvider` acquire, position, show and remove its selected `CorpsePinTemplate` across state and map changes.
-- [ ] Observe the existing `RetrieveCorpse` transition without changing resurrection behavior.
+- [x] Publish the query on Mists through the active-profile gate; do not add other DeathInfo APIs.
+- [x] Return one nil result when alive, without a corpse, or without supplied coordinates for the requested map.
+- [x] Project supplied coordinates without replacing them with the player's current map position.
+- [x] Let the original `DeathMapDataProvider` acquire, position, show and remove its selected `CorpsePinTemplate` across state and map changes.
+- [x] Observe the existing `RetrieveCorpse` transition without changing resurrection behavior.
 
 ## How it works
 
@@ -27,7 +27,7 @@ Mists exposes the pinned `C_DeathInfo.GetCorpseMapPosition(uiMapID: number)` que
 
 ## Known gaps (current cycle)
 
-- [ ] Execute original-consumer RED/GREEN, producer-only RED, stock delta and warning-free checks.
+None. Original-consumer RED/GREEN, producer-only RED, raw stock delta and warning-free Mists/Retail checks are recorded in the [proof notes](../wiki/systems/mists-corpse-map-position.md#executed-proof).
 
 ## Out of scope
 

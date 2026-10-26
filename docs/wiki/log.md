@@ -2871,4 +2871,4 @@ Cargo rewrite byte-for-byte; runtime acceptance remains pending.
 
 ## [2026-10-25] Mists corpse map position
 
-[Supplied corpse observations](systems/mists-corpse-map-position.md) bind the pinned nilable vector query to the original DeathMapDataProvider and selected Wrath XML pin. Exact original-consumer RED reaches line 26; supplied-state GREEN, stock delta and warning-free checks remain pending.
+[Supplied corpse observations](systems/mists-corpse-map-position.md) bind the pinned nilable vector query to the original DeathMapDataProvider and selected Wrath XML pin. Exact original-consumer GREEN and producer-only RED pass their expected boundaries with identical test bytes. Stock remains 12/18: two corpse keys clear and two existing GroupMembers GetMapDisplayInfo keys are individually traced. Mists/Retail all-target checks have zero warnings; fmt passes.
