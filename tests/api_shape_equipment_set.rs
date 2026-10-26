@@ -76,7 +76,7 @@ fn equipment_lock_admin_inputs_do_not_equip_items() {
         A_Admin.EquipItem(1, 211993)
         A_Admin.SetEquipmentItemLock(211995, true)
         A_Admin.SetEquipmentItemLock(211995, false)
-        A_Admin.ClearEquipmentItemLocks()
+        A_Admin.ClearEquipmentItemLock(211995)
         assert(GetInventoryItemID('player', 1) == 211993, 'observations do not equip gear')
         "#,
     )
@@ -166,7 +166,7 @@ fn equipment_set_unsupplied_locks_and_unknown_sets_are_explicit_errors() {
         A_Admin.SetEquipmentItemLock(211995, false)
         expectUnknown(lockSetID, 'no supplied lock observation')
         A_Admin.SetEquipmentItemLock(211996, false)
-        A_Admin.ClearEquipmentItemLocks()
+        A_Admin.ClearEquipmentItemLock(211995)
         expectUnknown(lockSetID, 'no supplied lock observation')
         expectUnknown(987654, 'no saved set')
         C_EquipmentSet.DeleteEquipmentSet(lockSetID)
