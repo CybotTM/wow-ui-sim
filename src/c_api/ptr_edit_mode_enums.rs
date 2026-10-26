@@ -1,10 +1,14 @@
 //! PTR 12.1.7.70493 Edit Mode declarations, not Lua initialization replacements.
 
+use crate::client_profile::{ACTIVE, ClientProfile};
 use crate::lua_api::methods::{create_table, table_set};
 use rilua::Val;
 use rilua::vm::state::LuaState;
 
 pub(crate) fn register(state: &mut LuaState) {
+    if ACTIVE != ClientProfile::Ptr {
+        return;
+    }
     let enums = super::helpers::ensure_global_table(state, "Enum");
     for &(name, fields) in DECLARATIONS {
         let values = create_table(state);

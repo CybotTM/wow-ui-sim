@@ -16,8 +16,8 @@ PTR publishes two finite Edit Mode enum families through `src/c_api/ptr_edit_mod
 ## Implementation inventory
 
 - `src/c_api/ptr_edit_mode_enums.rs`: declaration-backed tables and metadata.
-- `src/c_api/mod.rs`: PTR-only module declaration.
-- `src/lua_api/env_init/enums.rs`: PTR-only hook after generated and compatibility enum initialization.
+- `src/c_api/mod.rs`: unconditional module declaration, compiled on every profile.
+- `src/lua_api/env_init/enums.rs`: unconditional hook after generated and compatibility enum initialization; the module returns without changes unless `ACTIVE == ClientProfile::Ptr`.
 
 ## Tests asserting this spec
 
