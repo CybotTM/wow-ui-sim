@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | Era/Anniversary supplied engraving availability
 
-[Original XML control](investigations/era-engraving-availability.md) uses the shared supplied bool reader instead of the invented false default. Only availability is published on these profiles; the other25 declared members, bags and full LoD EngravingUI remain excluded. Original Era RED rejects constant false; GREEN, stock and seven-profile acceptance are pending.
+[Original XML control](investigations/era-engraving-availability.md) uses the shared supplied bool reader instead of the invented false default. Both profiles have two exact original OnLoad RED101/GREEN0 selectors and passing false-input settings preservation. Stock0/0→2/2 exposes the named unset error and its ScriptErrors echo, both attributed to CharacterFrame; no default is seeded. Seven all-target checks have zero warnings. Other25 members, bags and full LoD UI remain excluded.
 
 ## [2026-10-26] implementation | Mists transmog supplied input
 

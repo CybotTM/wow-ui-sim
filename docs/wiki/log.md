@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | Era/Anniversary supplied engraving availability
 
-[Bounded availability contract](investigations/era-engraving-availability.md) retires only the temporary false query, reusing Mists' environment-local Option<bool> and named missing-input error. Original Era XML OnLoad rejects old constant false in both exact selectors. Full settings is preservation; other25 members, bags and full LoD UI are excluded. Remaining acceptance is pending.
+[Bounded availability contract](investigations/era-engraving-availability.md) retires only the temporary false query, reusing Mists' environment-local Option<bool> and named missing-input error. Both profiles' exact original XML selectors reject constant false and pass supplied true/false, unset recovery and isolation. False-input settings remains preservation. Each stock map changes0/0→2/2: original OnLoad unset error plus ScriptErrors echo, individually traced to the removed shim. Seven all-target checks have zero JSON/plain warnings. Other25 members, bags and full LoD UI remain excluded.
 
 ## [2026-10-26] implementation | Mists transmog supplied input
 

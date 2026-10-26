@@ -10,7 +10,16 @@ Both Era and Anniversary select vanilla/classic game types (`src/toc/mod.rs`), F
 
 ## Evidence and limits
 
-`tests/era_engraving.rs` loads the selected original addon closure with availability supplied before XML loading. Two selectors exercise opposite initial values, transitions, independent environments, named unset errors and recovery through the XML-bound OnLoad. Era producer-free `1aba02ad7` rejects true at the original control (both selectors exit101); the settings preservation attempt completes without errors with supplied false. Further profile/GREEN/stock/compiler evidence is pending.
+`tests/era_engraving.rs` loads the selected original addon closure with availability supplied before XML loading. Two selectors exercise opposite initial values, transitions, independent environments, named unset errors and recovery through the XML-bound OnLoad. Executed producer-free RED `1aba02ad7` and producer GREEN `c4d9e5b2e` have byte-identical tests. All four exact original-consumer pairs are RED101/GREEN0. All four settings preservation calls (two profiles, both sides) complete `AdjustDisplaySettings` with supplied false and no collected closure diagnostics.
+
+| Capability | Proof level |
+|---|---|
+| Supplied true/false and one-bool arity | Original XML load-time OnLoad plus retrieved XML-bound handler and direct result observations, both profiles |
+| Unset/recovery and environment isolation | Named error at original load-time and bound callback; supplied recovery and independent environments, both profiles |
+| Settings false-input attempt | Complete original closure and consumer call return normally; preservation only, no assertion of all control behavior |
+| Other profiles | Seven full-feature all-target checks, zero JSON/plain warnings/errors; compilation proof, not runtime parity |
+
+Each profile's master-equivalent stock map changes0 unique/0 occurrences to2/2. The first raw key is `[OnLoad] RuneFrameControlButton: C_Engraving.IsEngravingEnabled: unsupplied input`, reported by `src/loader/precompiled.rs:23–30` from the original PaperDollFrame.lua951 query bound by XML722. The second is its `Lua Error:` echo, formatted at `Blizzard_ScriptErrors.lua:71–80` and recorded through addframetext. Each has count1 and both are attributed to Blizzard_CharacterFrame. The removed `classic_startup_defaults.rs` false policy (predecessor lines10–18, return at16) formerly let the same original951 query hide the control without reporting an error. These are explicit accepted consequences of requiring supplied input, not stock cleanup or clean-startup claims. No key is removed or otherwise count-changed.
 
 Do not interpret the settings preservation attempt as full-settings behavior proof. Bags and full LoD EngravingUI remain excluded, as do the other25 declared C_Engraving members on these two profiles. Compiler checks are not runtime parity proof for other profiles. No stock input is supplied merely to suppress a newly exposed error.
 
