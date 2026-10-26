@@ -21,7 +21,10 @@ fn load_original_settings(engraving: Option<bool>, transmog: bool) -> WowLuaEnv 
     let toc = TocFile::from_file(&toc_path).unwrap();
     assert!(toc.allows_screen(ScreenKind::Game));
     assert!(!toc.is_game_type_restricted());
-    assert_eq!(toc.files[1], "Classic/InterfaceOverrides.lua");
+    assert_eq!(
+        toc.files[1],
+        std::path::Path::new("Classic/InterfaceOverrides.lua")
+    );
     let env = new_blizzard_addon_env(&ui);
     {
         let mut state = env.state().borrow_mut();
