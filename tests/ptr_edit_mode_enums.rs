@@ -72,8 +72,18 @@ fn complete_display_info_initializes_original_system_maps() {
         assert(visibility[1].value == 0 and visibility[2].value == 1)
         assert(visibility[3].value == 2)
         local loss = manager:GetSystemSettingDisplayInfoMap(28)
-        assert(loss[0].minValue == 50 and loss[0].maxValue == 150)
+        assert(loss[0].minValue == 50 and loss[0].maxValue == 200)
         assert(loss[0].stepSize == 10)
+        local group = manager:GetSystemSettingDisplayInfoMap(27)
+        assert(group[0].minValue == 50 and group[0].maxValue == 150)
+        assert(group[0].stepSize == 5)
+        local cap = manager:GetSystemSettingDisplayInfoMap(26)
+        assert(cap[0].type == Enum.EditModeSettingDisplayType.Checkbox)
+        local gamepad = manager:GetSystemSettingDisplayInfoMap(30)
+        for setting = 0, 4 do
+            assert(gamepad[setting].setting == setting)
+            assert(gamepad[setting].type == Enum.EditModeSettingDisplayType.Checkbox)
+        end
         assert(manager:GetSystemSettingDisplayInfoMap(2) ~= nil)
     "#,
     )
