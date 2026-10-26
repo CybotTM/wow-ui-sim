@@ -26,6 +26,10 @@ The already-present elapsed-timer globals keep their publication scope. `WorldSt
 
 Retail selects `Blizzard_ObjectiveTracker.toc` and `Blizzard_ChallengesUI_Mainline.toc`. PTR selects unified `Blizzard_ObjectiveTracker.toc` and `Blizzard_ChallengesUI.toc` (Standard family). Forever selects the objective tracker but its `camelot` game type excludes the ChallengesUI TOC (`standard, mists` only). Scenario criteria and timer proof use the unmodified selected `Blizzard_ScenarioObjectiveTracker.lua`, original XML frames and method identity. Mists has a Mists ChallengesUI and legacy WorldStateFrame timer consumer; Era/Anniversary exclude that mists-only TOC. Wrath is excluded.
 
+## Inactive keystone boundary
+
+The inactive `GetActiveKeystoneInfo` return is unimplemented pending native evidence. Its declaration has three non-nil outputs, and selected callers use them without an active-run guard. The simulator reports this gap explicitly instead of inventing a tuple. `GetDeathCount` returns nothing when inactive; the active-map query returns nil.
+
 ## InTimeBL boundary
 
 Core reads map ID and active flag on addon load/start/resync, key level and deaths on start, `(name, elapsed)` from world timer 1, and map time limit from result 3. Tracker reads the current scenario step count and each indexed criteria record; it distinguishes weighted forces from boss criteria (165, or 0 with total=1), uses `quantityString`, `totalQuantity`, `assetID`, completion and description. Recorder reads the last completion snapshot. Forecast refresh uses a one-second `C_Timer.NewTicker` and `GetTime()-startTime`, so a controllable common clock is required for deterministic minutes-long acceptance.

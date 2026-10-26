@@ -76,7 +76,6 @@ pub(crate) mod c_battle_net_invite;
 pub mod c_calendar;
 pub mod c_catalog_shop;
 pub mod c_catalog_shop_products;
-#[cfg(feature = "retail-12-0-0")]
 pub mod c_challenge_mode;
 pub mod c_character_services;
 pub mod c_chat_bubbles;
@@ -182,6 +181,7 @@ pub mod c_quest_log;
 mod c_quest_log_watches;
 pub mod c_quest_offer;
 pub mod c_super_track;
+pub(crate) mod challenge_run;
 pub mod container_quest;
 pub mod forever_startup;
 mod lfr_availability;

@@ -120,8 +120,12 @@ fn register_challenge_mode_surface(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_challenge_map_handlers(state: &mut LuaState, ns: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn_static(state, ns, "GetMapTable", challenge_get_map_table)?;
-    table_set_rust_fn_static(state, ns, "GetMapUIInfo", challenge_get_map_ui_info)?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        table_set_rust_fn_static(state, ns, "GetMapTable", challenge_get_map_table)?;
+        table_set_rust_fn_static(state, ns, "GetMapUIInfo", challenge_get_map_ui_info)?;
+    } else {
+        crate::c_api::challenge_run::register_maps(state, ns)?;
+    }
     table_set_rust_fn_static(state, ns, "GetAffixInfo", get_affix_info)?;
     table_set_rust_fn_static(
         state,

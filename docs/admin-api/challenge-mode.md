@@ -1,6 +1,6 @@
 # Challenge runs and forecast fixtures
 
-**Implementation pending.** These interfaces are the lane's proposed contract, not currently available admin calls.
+Phase A supplies state through the interfaces below. Runtime acceptance is pending. Phase B remains unimplemented.
 
 These calls supply fixture state. They do not generate native dungeon catalogues, affixes, enemy credit, death penalties or time limits. Each environment has its own state. See the [contract](../specs/challenge-mode-run.md) for profile publication.
 
