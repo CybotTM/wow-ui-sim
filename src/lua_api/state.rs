@@ -455,6 +455,7 @@ macro_rules! build_empty_sim_state {
             lfr_availability: None,
             mists_transmog: Default::default(),
             scenario_finder_availability: None,
+            mists_party_min_level: None,
             lfg_category_info: default_lfg_category_info(),
             lfg_active_categories: ::std::collections::HashSet::new(),
             lfg_queued_dungeons: ::std::collections::HashMap::new(),

@@ -563,6 +563,8 @@ pub struct SimState {
     pub mists_transmog: crate::c_api::mists_transmog::MistsTransmogAvailability,
     /// Supplied Mists scenario eligibility and failure reason; None leaves policy unknown.
     pub scenario_finder_availability: Option<(bool, String)>,
+    /// Supplied Mists active-party minimum; None leaves native policy unknown.
+    pub mists_party_min_level: Option<f64>,
     pub lfg_category_info: std::collections::HashMap<i32, LfgCategoryInfo>,
     pub lfg_active_categories: std::collections::HashSet<i32>,
     pub lfg_queued_dungeons: std::collections::HashMap<i32, std::collections::BTreeSet<i32>>,
