@@ -350,6 +350,8 @@ pub mod private_aura_anchors;
 pub(crate) mod private_aura_callbacks;
 #[cfg(feature = "retail-12-0-5")]
 pub mod private_aura_sounds;
+#[cfg(feature = "client-ptr")]
+pub(crate) mod ptr_edit_mode_enums;
 pub(crate) mod seconds_formatter;
 #[cfg(feature = "base-spell-relationships")]
 pub mod spell_base;
