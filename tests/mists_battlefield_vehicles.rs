@@ -12,20 +12,48 @@ fn load_original_vehicle_provider() -> WowLuaEnv {
     let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
     let roots = &["Blizzard_WorldMap"];
     let closure = discover_blizzard_addon_closure_for_screen_with_overrides(
-        &ui, ScreenKind::Game, roots, &[],
+        &ui,
+        ScreenKind::Game,
+        roots,
+        &[],
     );
     for (name, expected) in [
         ("Blizzard_WorldMap", "Blizzard_WorldMap_Mists.toc"),
-        ("Blizzard_SharedMapDataProviders", "Blizzard_SharedMapDataProviders_Mists.toc"),
+        (
+            "Blizzard_SharedMapDataProviders",
+            "Blizzard_SharedMapDataProviders_Mists.toc",
+        ),
     ] {
-        let (_, toc) = closure.iter().find(|(addon, _)| addon == name).expect("selected dependency");
+        let (_, toc) = closure
+            .iter()
+            .find(|(addon, _)| addon == name)
+            .expect("selected dependency");
         assert_eq!(toc.file_name().unwrap().to_str().unwrap(), expected);
         eprintln!("selected {name}: {}", toc.display());
     }
-    let (env, loaded) = crate::common::blizzard_addon_harness::build_blizzard_addon_closure_env(&ui, roots, &[]);
-    assert!(loaded.iter().any(|name| name == "Blizzard_WorldMap"));
-    eprintln!("initial load diagnostics: {:?}", env.state().borrow().lua_errors);
-    env.exec(r#"
+    // WorldMap's TOC omits implicit eager dependencies. Use stock discovery order,
+    // not hand-loaded Lua or replacement provider methods.
+    let env = WowLuaEnv::new().expect("vehicle consumer environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![ui.clone()];
+    for addon in
+        wow_ui_sim::loader::discover_blizzard_startup_addons_for_screen(&ui, ScreenKind::Game)
+    {
+        wow_ui_sim::loader::load_startup_addon(
+            &env.loader_env(),
+            &addon.toc_path,
+            addon.kind,
+            None,
+        )
+        .expect("original startup addon load");
+    }
+    env.apply_post_load_workarounds();
+    eprintln!(
+        "initial load diagnostics: {:?}",
+        env.state().borrow().lua_errors
+    );
+    env.exec(
+        r#"
         assert(WorldMapFrame and WorldMapFrame.pinPools, 'original XML map initialized')
         for provider in pairs(WorldMapFrame.dataProviders) do
             if provider.RefreshAllData == VehicleDataProviderMixin.RefreshAllData then
@@ -40,15 +68,25 @@ fn load_original_vehicle_provider() -> WowLuaEnv {
         print('vehicle consumer provenance', source, info.linedefined, info.lastlinedefined)
         WorldMapFrame.mapID = 84
         assert(C_Map.GetMapInfo(84).mapType >= Enum.UIMapType.Zone, 'zone gate must reach API')
-    "#).expect("selected original WorldMap vehicle provider");
+    "#,
+    )
+    .expect("selected original WorldMap vehicle provider");
     env
 }
 
 fn supplied_vehicle(name: &str, x: f64) -> BattlefieldVehicle {
     BattlefieldVehicle {
-        x, y: 0.75, name: name.into(), is_occupied: true,
-        atlas: "Vehicle-SiegeEngine".into(), texture_width: 37.0, texture_height: 29.0,
-        facing: 0.375, is_player: false, is_alive: true, should_draw_below_player_blips: false,
+        x,
+        y: 0.75,
+        name: name.into(),
+        is_occupied: true,
+        atlas: "Vehicle-SiegeEngine".into(),
+        texture_width: 37.0,
+        texture_height: 29.0,
+        facing: 0.375,
+        is_player: false,
+        is_alive: true,
+        should_draw_below_player_blips: false,
     }
 }
 
@@ -62,7 +100,11 @@ fn refresh_and_count(env: &WowLuaEnv, expected: i32) {
         return count
     "#).unwrap();
     assert_eq!(count, expected);
-    assert_eq!(env.state().borrow().lua_errors.len(), before, "pin acquisition must not hide a sibling API failure");
+    assert_eq!(
+        env.state().borrow().lua_errors.len(),
+        before,
+        "pin acquisition must not hide a sibling API failure"
+    );
 }
 
 #[test]
@@ -76,7 +118,10 @@ fn original_world_map_vehicle_provider_projects_supplied_state_and_removal() {
         let mut player = supplied_vehicle("player fixture", 0.3);
         player.is_player = true;
         sim.is_active_battlefield = true;
-        sim.battlefield_vehicles.insert(84, vec![dead, supplied_vehicle("supplied siege", 0.625), player]);
+        sim.battlefield_vehicles.insert(
+            84,
+            vec![dead, supplied_vehicle("supplied siege", 0.625), player],
+        );
     }
     refresh_and_count(&env, 1);
     env.exec(r#"
@@ -104,7 +149,10 @@ fn original_world_map_vehicle_provider_projects_supplied_state_and_removal() {
     env.exec("assert(select('#', C_PvP.GetBattlefieldVehicles(84)) == 0)")
         .expect("outside a battlefield returns no values even with old observations");
     env.state().borrow_mut().is_active_battlefield = true;
-    env.state().borrow_mut().battlefield_vehicles.insert(84, vec![]);
+    env.state()
+        .borrow_mut()
+        .battlefield_vehicles
+        .insert(84, vec![]);
     refresh_and_count(&env, 0);
     env.exec("assert(type(C_PvP.GetBattlefieldVehicles(84)) == 'table' and #C_PvP.GetBattlefieldVehicles(84) == 0)")
         .expect("explicit empty observation returns an empty array");
