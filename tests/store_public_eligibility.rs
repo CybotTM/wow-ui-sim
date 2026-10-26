@@ -125,6 +125,8 @@ fn original_subscription_helper_tracks_supplied_group_eligibility() {
             .contains("groupID=37 has no supplied eligibility observation"),
         "{missing}"
     );
+    // Restore and observe the tuple before changing membership alone.
+    assert_choice(&env, true, false, "subscription,toggle");
     // Membership changes cannot change the same supplied eligibility result.
     env.exec("__wow_store_state.productsByGroup[156] = {1003}; __wow_store_state.productsByGroup[37] = {}").unwrap();
     assert_choice(&env, true, false, "subscription,toggle");
