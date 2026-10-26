@@ -71,6 +71,9 @@ pub(crate) fn setup_env() -> common::LockedEnv {
 
         if cfg!(feature = "client-wrath") {
             common::panel_fixtures::load_wrath_panel_core(&env);
+            env.state().borrow_mut().known_spells = [6603, 635, 19750].into();
+            env.exec("A_Admin.SetGuildInfo('Binding fixture', 'Member', 1); SetCVar('ShowAllSpellRanks', '1'); assert(IsInGuild()); assert(GetNumSpellTabs() > 0)")
+                .expect("seed Wrath binding panel state");
             env.apply_post_load_workarounds();
             fire_startup_events(&env);
             return env;

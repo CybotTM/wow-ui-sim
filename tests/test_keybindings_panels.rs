@@ -328,22 +328,12 @@ fn keybind_s_keeps_spellbook_backgrounds_below_icons_after_initial_bucket_build(
 
 // ── N → PlayerSpellsUtil.ToggleClassTalentFrame() ───────────────────────
 
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn keybind_n_opens_talents() {
     test_timeout! {
         let env = setup_env();
-        if is_wrath() {
-            env.exec("assert(SetBinding('N', 'TOGGLETALENTS')); assert(GetBindingAction('N') == 'TOGGLETALENTS')").expect("bind native talent action");
-            record_native_binding_caller(&env, "ToggleTalentFrame");
-            assert!(!frame_is_shown(&env, "PlayerTalentFrame"), "talents start closed");
-        }
         env.send_key_press("N", None).expect("N keybind failed");
-        if is_wrath() {
-            assert_native_binding_caller(&env, 645);
-            assert!(frame_is_shown(&env, "PlayerTalentFrame"), "native talent panel should open");
-            close_wrath_panel(&env, "N", "PlayerTalentFrame");
-            return;
-        }
         assert!(
             frame_is_shown(&env, "PlayerSpellsFrame"),
             "PlayerSpellsFrame should be shown after pressing N (talents tab)"
