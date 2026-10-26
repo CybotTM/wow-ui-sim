@@ -492,13 +492,15 @@ fn get_scenarios_choice_order(state: &mut LuaState) -> LuaResult<u32> {
             .collect()
     };
     let result = create_table(state);
-    for (index, id) in ids.into_iter().enumerate() {
-        crate::c_api::helpers::set_table_array(
-            state,
-            result,
-            (index + 1) as i64,
-            Val::Num(id as f64),
-        );
+    if let Val::Table(table_ref) = result {
+        for (index, id) in ids.into_iter().enumerate() {
+            crate::lua_api::methods::table_set_num(
+                state,
+                table_ref,
+                (index + 1) as f64,
+                Val::Num(id as f64),
+            );
+        }
     }
     state.push(result);
     Ok(1)
