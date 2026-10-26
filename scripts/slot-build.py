@@ -530,17 +530,21 @@ class LockClosureRejected(ValueError):
 
 def lock_closure_digest(lock_bytes, package_id):
     packages = tomllib.loads(lock_bytes.decode())["package"]
-    fragment = package_id.rsplit("#", 1)[-1]
-    if "@" not in fragment:
+    if "#" not in package_id:
         raise ValueError(f"unrecognized package ID: {package_id}")
-    name, version = fragment.rsplit("@", 1)
-    source = package_id.split("#", 1)[0]
+    source, fragment = package_id.rsplit("#", 1)
+    if "@" in fragment:
+        name, version = fragment.rsplit("@", 1)
+    elif source.startswith("path+file://"):
+        name, version = Path(source.removeprefix("path+file://")).name, fragment
+    else:
+        raise ValueError(f"unrecognized package ID: {package_id}")
     source = None if source.startswith("path+") else source
 
     def resolve(name, version=None, source=None):
         matches = [p for p in packages if p["name"] == name
                    and (version is None or p["version"] == version)
-                   and (source is None or p.get("source") == source)]
+                   and (source is None or p.get("source", "").split("#", 1)[0] == source)]
         if len(matches) != 1:
             raise ValueError(f"ambiguous or missing lock package: {name} {version}")
         return matches[0]
@@ -562,7 +566,11 @@ def lock_closure_digest(lock_bytes, package_id):
             if not match:
                 raise ValueError(f"invalid lock dependency: {dependency}")
             pending.append(resolve(*match.groups()))
-    return hashlib.sha256(json.dumps(sorted(entries), separators=(",", ":")).encode()).hexdigest()
+    content = [(p["name"], p["version"], p.get("source", ""),
+                p.get("checksum", ""), sorted(p.get("dependencies", [])))
+               for p in packages
+               if (p["name"], p["version"], p.get("source", "")) in entries]
+    return hashlib.sha256(json.dumps(sorted(content), separators=(",", ":")).encode()).hexdigest()
 
 
 def certify_record(current, record, previous, source_before, artifacts, snapshot):
@@ -600,8 +608,10 @@ def certify_record(current, record, previous, source_before, artifacts, snapshot
         certificate = {"inputs": hashes, "sha256": artifacts[name]}
         package_id = record.get("package_id", "")
         lock_path = Path(current["worktree"]) / "Cargo.lock"
-        if "#" in package_id and "@" in package_id and lock_path.exists():
+        try:
             certificate["lock_closure"] = lock_closure_digest(lock_path.read_bytes(), package_id)
+        except (OSError, ValueError, KeyError) as error:
+            raise LockClosureRejected(f"unverifiable lock closure for {output}: {error}") from error
         old = previous.get(name)
         if record.get("fresh") is not False:
             comparable = dict(old) if old else {}
@@ -712,13 +722,28 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
             continue
         outputs = {Path(p) for p in [record.get("executable"), *record.get("filenames", [])] if p}
         fingerprints = set()
+        identified = False
         for output in outputs:
-            match = re.search(r"-([a-z0-9]+)(?:\.[^.]+)*$", output.name)
-            if match:
-                profile = output.parent.parent if output.parent.name == "deps" else output.parent
-                package = record.get("package_id", "").rsplit("#", 1)[-1].split("@", 1)[0]
-                if package:
-                    fingerprints.add(profile / ".fingerprint" / f"{package}-{match.group(1)}")
+            if output.parent.parent.name == "build":
+                fingerprint = output.parent.name
+                profile = output.parent.parent.parent
+            elif output.parent.name == "deps":
+                match = re.search(r"-([a-f0-9]+)(?:\.[^.]+)*$", output.name)
+                profile = output.parent.parent
+                package_id = record.get("package_id", "")
+                source, _, fragment = package_id.rpartition("#")
+                package = (fragment.split("@", 1)[0] if "@" in fragment
+                           else Path(source.removeprefix("path+file://")).name)
+                fingerprint = f"{package}-{match.group(1)}" if match and package else ""
+            else:
+                fingerprint = ""
+            if fingerprint:
+                candidate = profile / ".fingerprint" / fingerprint
+                if candidate.is_dir():
+                    fingerprints.add(candidate)
+                    identified = True
+        if not identified:
+            (slot / ".unverified-fingerprints").touch()
         for path in sorted(outputs | fingerprints):
             if not path.is_relative_to(slot):
                 continue
@@ -794,6 +819,11 @@ def execute_build(request_path, cap_gib=60, recent_hours=2):
     request = json.loads(request_path.read_text())
     slot = Path(request["slot"])
     check_owner(slot, request["owner"])
+    marker = slot / ".unverified-fingerprints"
+    if marker.exists():
+        for fingerprint in slot.glob("*/.fingerprint"):
+            shutil.rmtree(fingerprint)
+        marker.unlink()
     with redirect_stdout(sys.stderr):
         prune_slot(slot, request["owner"], cap_gib * 1024 ** 3, recent_hours)
     state = slot / ".source-identity.json"

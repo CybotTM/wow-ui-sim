@@ -169,7 +169,7 @@ only by mtime refresh require `fresh=false`; executables also require a current
 hash, but identical rebuilt bytes are accepted.
 For a fresh artifact, a root `Cargo.lock` change does not reject reuse when its
 package and transitive dependency closure is unchanged. The closure digest covers
-sorted package name, version and source entries. Other input checks are unchanged.
+each reachable package's name, version, source, checksum, and sorted dependency list. Other input checks are unchanged.
 The existing conservative root derivation and source mtime refresh are unchanged.
 
 The slot-wide identity is only a source-refresh baseline, not proof that every
@@ -188,7 +188,7 @@ SHA256 matches the certificate's lock input. A missing revision, failed Git read
 or digest mismatch rejects the fresh artifact. A changed closure also rejects it.
 For those lock-closure rejections, the worker evicts the rejected record's outputs
 and matching fingerprint entries and records them in `evicted_artifacts` in the
-receipt. Other rejection behavior is unchanged. A `fresh=false` record with valid
+receipt. If no fingerprint can be identified, the worker marks the slot; before the next build it removes all profile fingerprint directories so Cargo cannot reuse unverified outputs. Other rejection behavior is unchanged. A `fresh=false` record with valid
 dep-info and output hashes can establish a certificate. Changing receipt identities
 does not provide proof.
 
