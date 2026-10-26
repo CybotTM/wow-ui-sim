@@ -564,7 +564,7 @@ pub struct SimState {
     /// Supplied Mists LFR service availability; None leaves native policy unknown.
     pub lfr_availability: Option<bool>,
     /// Mists-only supplied input, distinct from the modern transmog policy.
-    pub mists_transmog: crate::c_api::mists_transmog::MistsTransmogAvailability,
+    pub transmog_availability: crate::c_api::transmog_availability::TransmogAvailability,
     /// Supplied Mists scenario eligibility and failure reason; None leaves policy unknown.
     pub scenario_finder_availability: Option<(bool, String)>,
     /// Supplied Mists active-party minimum; None leaves native policy unknown.

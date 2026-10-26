@@ -3,18 +3,30 @@ use wow_ui_sim::lua_api::{WowLuaEnv, state::AppearanceSourceInfo};
 
 fn env() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
-    env.state().borrow_mut().transmog_appearance_sources.insert(190001, AppearanceSourceInfo {
-        category: 1, item_appearance_id: 90001, can_have_illusion: false,
-        icon: 135771, is_collected: true, item_link: String::new(), transmoglink: String::new(),
-        source_type: None, item_subclass: 0, ignore_model_attachment_checks_for_illusion: false,
-    });
+    env.state().borrow_mut().transmog_availability.enabled = Some(true);
+    env.state().borrow_mut().transmog_appearance_sources.insert(
+        190001,
+        AppearanceSourceInfo {
+            category: 1,
+            item_appearance_id: 90001,
+            can_have_illusion: false,
+            icon: 135771,
+            is_collected: true,
+            item_link: String::new(),
+            transmoglink: String::new(),
+            source_type: None,
+            item_subclass: 0,
+            ignore_model_attachment_checks_for_illusion: false,
+        },
+    );
     env
 }
 
 #[test]
 fn transmog_outfit_transactions_custom_set_stages_and_prices_slots() {
     let env = env();
-    env.eval::<()>(r#"
+    env.eval::<()>(
+        r#"
         local api = C_TransmogOutfitInfo
         api.AddNewOutfit('Raid',135771)
         api.ChangeViewedOutfit(api.GetOutfitInfoByName('Raid').outfitID)
@@ -28,7 +40,9 @@ fn transmog_outfit_transactions_custom_set_stages_and_prices_slots() {
         assert(api.GetItemModifiedAppearanceEffectiveCategory(999999) == 0)
         assert(api.GetUnassignedAtlasForSlot(0) == 'transmog-gearslot-unassigned-head')
         assert(api.GetUnassignedDisplayAtlasForSlot(0) == 'transmog-appearance-unassigned-head')
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
@@ -58,7 +72,8 @@ fn transmog_outfit_transactions_failed_apply_preserves_pending_and_money() {
         sim.player.money = 49;
         sim.transmog_outfits.slot_cost = 50;
     }
-    env.eval::<()>(r#"
+    env.eval::<()>(
+        r#"
         local api = C_TransmogOutfitInfo
         api.AddNewOutfit('Raid',135771)
         api.ChangeViewedOutfit(api.GetOutfitInfoByName('Raid').outfitID)
@@ -72,12 +87,17 @@ fn transmog_outfit_transactions_failed_apply_preserves_pending_and_money() {
         api.SetPendingTransmog(0,0,0,999999,1)
         assert(not pcall(api.CommitAndApplyAllPending,false))
         assert(GetMoney() == 49 and api.HasPendingOutfitTransmogs())
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     env.state().borrow_mut().player.money = 100;
-    env.eval::<()>(r#"
+    env.eval::<()>(
+        r#"
         local api = C_TransmogOutfitInfo
         api.SetPendingTransmog(0,0,0,190001,1)
         api.CommitAndApplyAllPending(false)
         assert(GetMoney() == 50 and not api.HasPendingOutfitTransmogs())
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }

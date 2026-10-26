@@ -9,7 +9,7 @@ use rilua::{LuaResult, Val, runtime_error};
 
 /// Host-supplied availability for one environment.
 #[derive(Debug, Default)]
-pub struct MistsTransmogAvailability {
+pub struct TransmogAvailability {
     pub enabled: Option<bool>,
 }
 
@@ -22,7 +22,7 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn is_transmog_enabled(state: &mut LuaState) -> LuaResult<u32> {
-    let input = borrow_state(state)?.mists_transmog.enabled;
+    let input = borrow_state(state)?.transmog_availability.enabled;
     let enabled = input.ok_or_else(|| {
         runtime_error(
             "C_TransmogOutfitInfo.IsTransmogEnabled: transmog availability has not been supplied",

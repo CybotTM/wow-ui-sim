@@ -379,8 +379,14 @@ fn cancel_temporary_enchantment_clears_only_temporary_weapon_enchants() {
     env.exec("C_PaperDollInfo.CancelTemporaryEnchantment(16); C_PaperDollInfo.CancelTemporaryEnchantment(5)")
         .unwrap();
     let state = env.state().borrow();
-    let main_hand: Vec<u32> = state.weapon_enchants[0].iter().map(|e| e.enchant_id).collect();
-    let off_hand: Vec<u32> = state.weapon_enchants[1].iter().map(|e| e.enchant_id).collect();
+    let main_hand: Vec<u32> = state.weapon_enchants[0]
+        .iter()
+        .map(|e| e.enchant_id)
+        .collect();
+    let off_hand: Vec<u32> = state.weapon_enchants[1]
+        .iter()
+        .map(|e| e.enchant_id)
+        .collect();
     assert_eq!(main_hand, vec![3368]);
     assert_eq!(off_hand, vec![7002]);
 }
@@ -404,11 +410,16 @@ fn transmog_slot_availability_follows_player_class() {
 }
 
 #[test]
-fn transmog_enabled_reads_account_availability() {
+fn transmog_enabled_reads_supplied_availability() {
     let env = WowLuaEnv::new().unwrap();
-    let enabled: bool = env.eval("return C_TransmogOutfitInfo.IsTransmogEnabled()").unwrap();
-    env.state().borrow_mut().transmog_enabled = false;
-    let disabled: bool = env.eval("return C_TransmogOutfitInfo.IsTransmogEnabled()").unwrap();
+    env.state().borrow_mut().transmog_availability.enabled = Some(true);
+    let enabled: bool = env
+        .eval("return C_TransmogOutfitInfo.IsTransmogEnabled()")
+        .unwrap();
+    env.state().borrow_mut().transmog_availability.enabled = Some(false);
+    let disabled: bool = env
+        .eval("return C_TransmogOutfitInfo.IsTransmogEnabled()")
+        .unwrap();
     assert!(enabled);
     assert!(!disabled);
 }
