@@ -123,6 +123,22 @@ fn original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinar
             drive_original_input_transition(&env, "Gamepad", "Mkb");
             assert_live_cvars(&env, "1");
             assert_eq!(
+                env.state()
+                    .borrow()
+                    .cvars
+                    .get("SoftTargetFriend")
+                    .as_deref(),
+                Some("0")
+            );
+            assert_eq!(
+                env.state()
+                    .borrow()
+                    .cvars
+                    .get("SoftTargetInteractRange")
+                    .as_deref(),
+                Some("20")
+            );
+            assert_eq!(
                 read_persisted_cvars(),
                 persisted,
                 "temp callbacks must not rewrite the saved file"
