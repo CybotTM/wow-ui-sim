@@ -26,6 +26,11 @@ fn load_original_world_map() -> WowLuaEnv {
         )
         .expect("original startup addon load");
     }
+    assert_original_group_pin(&env);
+    env
+}
+
+fn assert_original_group_pin(env: &WowLuaEnv) {
     env.exec(
         r#"
         assert(WorldMapFrame and WorldMapFrame.pinPools, 'original XML WorldMap initialized')
@@ -47,7 +52,6 @@ fn load_original_world_map() -> WowLuaEnv {
         "#,
     )
     .expect("original WorldMap consumer selection");
-    env
 }
 
 #[test]
