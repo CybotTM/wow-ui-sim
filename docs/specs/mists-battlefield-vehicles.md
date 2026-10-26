@@ -25,7 +25,7 @@ Mists exposes supplied battlefield map observations through `C_PvP`. The pinned 
 
 ## Known gaps (current cycle)
 
-- [ ] Complete the required Mists/Retail all-target checks and exact paired producer-only RED proof.
+- [ ] Complete the required Retail all-target check; Mists checking and exact paired producer-only RED proof pass.
 
 ## Out of scope
 
