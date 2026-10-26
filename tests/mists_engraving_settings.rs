@@ -110,12 +110,16 @@ fn assert_typed_rune_cvar(env: &WowLuaEnv) {
         assert(setting:GetValue() == false and C_CVar.GetCVar('alwaysShowRuneIcons') == '0')
         setting:SetValue(true)
         assert(setting:GetValue() == true and C_CVar.GetCVar('alwaysShowRuneIcons') == '1')
-        local ok, message = pcall(setting.SetValue, setting, '0')
-        assert(not ok and message:find("requires 'boolean' type", 1, true), tostring(message))
-        assert(C_CVar.GetCVar('alwaysShowRuneIcons') == '1')
         "#,
     )
     .expect("real boolean CVar setting reads and writes typed values");
+    let error = env
+        .exec("EngravingRuneSetting:SetValue('0')")
+        .expect_err("the real boolean setting must reject a string")
+        .to_string();
+    assert!(error.contains("requires 'boolean' type"), "{error}");
+    env.exec("assert(C_CVar.GetCVar('alwaysShowRuneIcons') == '1')")
+        .expect("rejected writes must leave the CVar unchanged");
 }
 
 fn exercise_fresh_settings(initial: bool) {
@@ -174,14 +178,35 @@ fn original_settings_disabled_first_isolated_supplied_inputs() {
 #[test]
 fn original_settings_requires_supplied_engraving() {
     let unsupplied = load_original_settings(None, true);
+    unsupplied
+        .exec(
+            r#"
+            EngravingDisplayLines = {}
+            local display = InterfaceOverrides.AdjustDisplaySettings
+            -- Observe the original consumer without replacing or stopping it.
+            debug.sethook(function(_, line)
+                if debug.getinfo(2, 'f').func == display then
+                    EngravingDisplayLines[line] = true
+                end
+            end, 'l')
+            "#,
+        )
+        .unwrap();
     let error = unsupplied
         .eval::<(i32, i32)>("return ObserveEngravingSettings()")
         .expect_err("unsupplied engraving must not choose a settings branch")
         .to_string();
+    unsupplied.exec("debug.sethook()").unwrap();
+    eprintln!("unsupplied original-consumer boundary: {error}");
     assert!(
-        error.contains("InterfaceOverrides.lua:138:")
-            && error.contains("C_Engraving.IsEngravingEnabled: unsupplied input"),
+        error.contains("C_Engraving.IsEngravingEnabled: unsupplied input"),
         "{error}"
+    );
+    // Native errors do not carry a Lua line suffix; observe the caller directly.
+    assert!(
+        unsupplied
+            .eval::<bool>("return EngravingDisplayLines[138] == true")
+            .unwrap()
     );
     // Earlier CVar variables are already registered in the failed environment.
     // Recovery is deliberately a fresh environment, never a registry reset.
