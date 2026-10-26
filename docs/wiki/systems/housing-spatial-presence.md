@@ -44,7 +44,7 @@ These rows describe the planned contradictions. The accepted Retail proof below 
 ## Sources
 
 - `src/c_api/c_housing.rs`, `src/lua_api/state/support_types.rs`, `src/c_api/c_housing/location.rs` — inspected existing model; older independent location flags are not fallback spatial inputs.
-- Profile-scoped Blizzard runtime cache TOCs, Mainline/Shared/Camelot handlers and HousingUIDocumentation.lua — source hashes recorded in `/home/osso/.local/state/wow-ui-sim/handoff/cf2-housing-plot/consumer-source-hashes.json`.
+- Profile-scoped Blizzard runtime cache TOCs, Mainline/Shared/Camelot handlers and HousingUIDocumentation.lua — source hashes recorded in `<handoff>/cf2-housing-plot/consumer-source-hashes.json`.
 - [House-or-plot contract](../../specs/house-or-plot-presence.md) — assertions and exclusions.
 
 ## See Also
@@ -58,7 +58,7 @@ The continuation uses authenticated Retail 12.1.5.70448 and private PTR 12.1.7.7
 
 Merged-master original-consumer RED (fixture 4abbc60a0) reaches `Blizzard_HousingControls.lua:105` through original Game Mainline:844 and fails on missing `GetCurrentHouseInfo`. Original `Blizzard_HousingTutorialsData.lua` and `Blizzard_HousingTutorialsUtil.lua` loads remove the independent missing-utility fixture error without changing assertions. PTR separately fails Game startup registration on `SHARD_TRANSFER`, leaving original world completion at zero. Its pinned `SystemDocumentation.lua:175–178` explicitly declares that event. Root `src/event/valid_events.rs` extends registration and validity only when `client_profile::ACTIVE` is PTR; the feature-neutral `sim-event` crate remains unchanged.
 
-Source hashes and original-consumer RED receipts are in `/home/osso/.local/state/wow-ui-sim/handoff/cf2-housing-plot/slot1-run2/`. GREEN, paired missing-producer proof and mutants remain pending at this implementation checkpoint; no native-parity claim.
+Source hashes and original-consumer RED receipts are in `<handoff>/cf2-housing-plot/slot1-run2/`. GREEN, paired missing-producer proof and mutants remain pending at this implementation checkpoint; no native-parity claim.
 
 ## PTR keyring startup boundary
 
@@ -88,4 +88,10 @@ All six Retail callable mutants are rejected by the same exact selector with pas
 
 The PTR keyring fix gets past original ContainerFrame:10. Its next unconditional input-style query at line14 reaches missing `C_InputInterfaceStyle` in original SharedXML/Mainline/InputUtil.lua:12; the file aborts before publishing CloseAllBags, and the original Game handler subsequently fails UIParentPanelManager:1180. The separate `ptr-input-interface-style` lane owns this dependency. User direction is to report it and schedule a later PTR rerun, without another master merge or unrelated API expansion here.
 
-Every runtime proof uses an exact listing, one exact run, a fresh byte-exact current CVar copy and O_NOATIME original-file guards. Retail 4028 and private PTR 4580 pinned cache files remain byte-identical. Full source/runtime/check/CPU receipts and the final matrix are in `/home/osso/.local/state/wow-ui-sim/handoff/cf2-housing-plot/slot1-run2/REPORT.md`. No new stock-startup comparison, Forever acceptance or native housing-policy parity is claimed.
+Every runtime proof uses an exact listing, one exact run, a fresh byte-exact current CVar copy and O_NOATIME original-file guards. Retail 4028 and private PTR 4580 pinned cache files remain byte-identical. Full source/runtime/check/CPU receipts and the final matrix are in `<handoff>/cf2-housing-plot/slot1-run2/REPORT.md`. No new stock-startup comparison, Forever acceptance or native housing-policy parity is claimed.
+
+## PTR talent-award startup boundary
+
+After merging the input-interface-style lane, PTR's original world event passes the ContainerFrame input dependency but aborts at `MainMenuBarMicroButtons.lua:1016`, called by Shared Game `HandlePlayerEnteringWorld:311` through Mainline `:783`. The actual endpoint is `C_SpecializationInfo.HasPlayerEarnedATalentPoint`, not C_ClassTalents. Pinned 70493 `SpecializationInfoDocumentation.lua:331–337` declares no arguments and one non-null bool `hasEarned`; the prior PTR runtime inventory already lists this missing endpoint. Retail's pinned microbutton has no such call; no Retail producer exists to enable.
+
+The [shape-only contract](../../specs/ptr-talent-award-history.md) supplies lifetime history in existing talent state and projects it through a PTR ACTIVE gate. Current ranks, unspent points and level do not establish lifetime awards. Empty host history is false; native acquisition and policy remain unknown. The new registered-world-event selector first fails at the original missing call before any standalone probe. Its producer GREEN and housing rerun are pending at this commit.

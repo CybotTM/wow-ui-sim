@@ -150,6 +150,24 @@ fn ptr_talent_button_reaches_original_world_event() {
          assert(TalentMicroButton.minLevel == TalentMicroButton:GetTalentUnlockLevel())",
     )
     .expect("empty host award history disables the original talent button");
+    for has_earned in [true, false] {
+        env.state().borrow_mut().talents.has_earned_talent_point = has_earned;
+        env.fire_event_with_args(
+            "PLAYER_ENTERING_WORLD",
+            &[rilua::Val::Bool(false), rilua::Val::Bool(false)],
+        )
+        .expect("reenter through the original event with supplied award history");
+        let enabled: bool = env.eval("return TalentMicroButton:IsEnabled()").unwrap();
+        let minimum_absent: bool = env.eval("return TalentMicroButton.minLevel == nil").unwrap();
+        assert_eq!(enabled, has_earned);
+        assert_eq!(minimum_absent, has_earned);
+        env.exec(&format!(
+            "assert(select('#', C_SpecializationInfo.HasPlayerEarnedATalentPoint()) == 1); \
+             assert(type(C_SpecializationInfo.HasPlayerEarnedATalentPoint()) == 'boolean'); \
+             assert(C_SpecializationInfo.HasPlayerEarnedATalentPoint() == {has_earned})"
+        ))
+        .expect("supplied history projects one non-null boolean after the consumer");
+    }
 }
 
 #[test]
