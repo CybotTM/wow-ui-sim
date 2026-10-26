@@ -454,6 +454,7 @@ macro_rules! build_empty_sim_state {
             can_use_premade_group: true,
             lfr_availability: None,
             transmog_availability: Default::default(),
+            forever_outfits: None,
             scenario_finder_availability: None,
             mists_party_min_level: None,
             lfg_category_info: default_lfg_category_info(),

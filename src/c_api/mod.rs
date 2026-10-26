@@ -187,6 +187,7 @@ pub mod container_quest;
 pub mod engraving_inputs;
 pub mod forever_startup;
 mod lfr_availability;
+pub mod outfit_entry;
 mod scenario_finder_availability;
 pub mod store_public_eligibility;
 pub mod transmog_availability;
