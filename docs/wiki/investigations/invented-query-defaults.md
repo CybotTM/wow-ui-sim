@@ -2,6 +2,16 @@
 
 The first audit batch separates finite filter bounds from environment-local inventories. A callable query or a seeded demonstration row is not evidence of a native default. The Mists tab and RAF version producers now use empty-by-default supplied catalogs. Original-consumer producer-only RED/GREEN, four stock comparisons, formatting and all seven zero-warning all-target checks pass. The preserved old Mists storage flow has a separately reproduced pre-existing tutorial failure.
 
+## Legacy tutorial request boundary
+
+Follow-up contract: [legacy tutorial requests](../../specs/legacy-tutorial-requests.md). The old Mists storage-flow test is preserved byte-for-byte. Producer-absent scaffold c906cd025 fails at original `Blizzard_UIPanels_Game/Classic/ContainerFrame_Shared.lua:976`, before its guild-bank assertions.
+
+Pinned Mists/Era/Anniversary selected consumers are Classic ContainerFrame_Shared:976 (authenticator ID51, defined at line32), Classic QuestFrame:441/445 (2/10), Classic WorldFrame:68/76 (4/57), Classic MainMenuBarBagButtons:220/223 (59/58) and Classic MainMenuBar:74 (50). Wrath QuestMapFrame:204/326/330 (11/2/10) is additionally selected on Mists, but excluded on Era/Anniversary. Mainline MainMenuBarBagButtons:283/285 exists in those caches but is not selected. The old Wrath cache instead calls from FrameXML/MainMenuBarBagButtons:162/165 (59/58) and InterfaceOptionsPanels.xml:3683–3686 (42/2/3/1).
+
+Every call is a standalone statement with one numeric identifier. None uses results. No pinned tree defines the global. Mists `Blizzard_FrameXML_Mists.toc:36–37` already selects Classic TutorialFrame Lua/XML; it defines the event listener, not TriggerTutorial. Generated TutorialDocumentation has an empty Functions table and separately declares TUTORIAL_TRIGGER with tutorialIndex/forceShow. This does not establish native event admission or flag/display policy.
+
+The bounded implementation records requests in environment-local state and publishes only on those four profiles. It does not infer event, flag, UI or persistence behavior. GREEN and compiler/stock proof remain pending.
+
 ## Transmog: unresolved filter bound, unchanged
 
 `GetNumTransmogSources` is not the number of appearance-source records. Original `Blizzard_Collections/Mainline/Blizzard_Wardrobe.lua:67–69` uses its result as a source-filter index bound and calls `IsValidTransmogSource` for each index. `bf08cd368` changed an appearance-count implementation to the fixed bound 7 for this consumer.
