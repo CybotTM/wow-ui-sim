@@ -166,6 +166,8 @@ fn supplied_active_list_is_a_snapshot_with_explicit_unknown_and_validation() {
     let env = load_original_stable();
     env.exec(
         r#"
+        local ok, reason = pcall(StableFrame.ActivePetList.Refresh, StableFrame.ActivePetList)
+        assert(not ok and tostring(reason):find('native-unknown: C_StableInfo.GetActivePetList', 1, true), tostring(reason))
         local pet = suppliedPet(3, 'Snapshot observation')
         A_Admin.SetActivePetList({pet})
         pet.name = 'Caller mutation'
