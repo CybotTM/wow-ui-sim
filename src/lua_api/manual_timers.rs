@@ -55,7 +55,10 @@ fn take_next_due(state: &LuaState, blocked: &HashSet<u64>) -> LuaResult<Option<P
 
 #[cfg(feature = "timed-signal-maps")]
 fn drain_signals(state: &mut LuaState) -> LuaResult<usize> {
-    let signals = crate::c_api::timed_signal_map::take_due_signals(&mut borrow_state_mut(state)?);
+    let signals = {
+        let mut sim = borrow_state_mut(state)?;
+        crate::c_api::timed_signal_map::take_due_signals(&mut sim)
+    };
     let mut fired = 0;
     for signal in signals {
         let callback = get_timer_callback(state, signal.id);

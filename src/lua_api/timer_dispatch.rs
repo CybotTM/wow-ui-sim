@@ -15,7 +15,7 @@ pub(crate) fn fire(
     arg: Option<Val>,
 ) {
     let started = Instant::now();
-    let (source, addon, previous) = callback_context(state, owner, id);
+    let (source, addon, previous) = enter_callback_owner(state, owner, id);
     if let Some(source) = &source {
         source.log_entry(addon.as_deref(), id);
     }
@@ -31,12 +31,13 @@ pub(crate) fn fire(
     if let Some(source) = source {
         source.log_return(addon.as_deref(), id, started.elapsed(), failed);
     }
-    if let Some(app) = state.app_data::<WowLuaAppData>() {
-        super::env_init::record_addon_time(&app.sim_state, owner, &started);
-    }
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .expect("timer callback requires simulator app data");
+    super::env_init::record_addon_time(&app.sim_state, owner, &started);
 }
 
-fn callback_context(
+fn enter_callback_owner(
     state: &LuaState,
     owner: Option<u16>,
     id: u64,

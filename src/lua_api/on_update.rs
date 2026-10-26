@@ -61,7 +61,10 @@ fn begin_tick(state: &mut LuaState, elapsed: f64) -> crate::Result<()> {
     super::channeling::tick(state)?;
     #[cfg(feature = "retail-12-1-0")]
     crate::c_api::c_encounter_timeline::begin_tick(state, elapsed)?;
-    super::message_frame::update_wrath_message_frames(&mut borrow_state_mut(state)?, elapsed);
+    {
+        let mut sim = borrow_state_mut(state)?;
+        super::message_frame::update_wrath_message_frames(&mut sim, elapsed);
+    }
     super::editbox_update::flush_state(state)?;
     super::script_helpers::reconcile_on_update_runtime_cache_if_dirty(state);
     Ok(())

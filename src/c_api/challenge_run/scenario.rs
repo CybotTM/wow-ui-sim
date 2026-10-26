@@ -18,6 +18,7 @@ const NUMBERS: [&str; 8] = [
     "duration",
     "elapsed",
 ];
+const CRITERIA_ID_INDEX: usize = 5;
 const FLAGS: [&str; 4] = ["completed", "failed", "isWeightedProgress", "isFormatted"];
 
 /// The pinned 14-field record; numeric/boolean defaults come from the declaration.
@@ -93,7 +94,7 @@ fn store_criteria(
         .iter()
         .enumerate()
         .filter(|(i, row)| old.and_then(|rows| rows.get(*i)) != Some(*row))
-        .map(|(_, row)| row.numbers[5])
+        .map(|(_, row)| row.numbers[CRITERIA_ID_INDEX])
         .collect();
     sim.challenge_run.criteria.insert(step.step_id, criteria);
     sim.scenario.current_step = step.step_id;
@@ -117,12 +118,12 @@ fn step_criterion(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn push_criterion(state: &mut LuaState, step: i32, index: i32) -> LuaResult<u32> {
-    let row = usize::try_from(index.saturating_sub(1))
-        .ok()
-        .and_then(|index| {
-            let sim = borrow_state(state).ok()?;
-            sim.challenge_run.criteria.get(&step)?.get(index).cloned()
-        });
+    let row = {
+        let sim = borrow_state(state)?;
+        usize::try_from(index.saturating_sub(1))
+            .ok()
+            .and_then(|index| sim.challenge_run.criteria.get(&step)?.get(index).cloned())
+    };
     let Some(row) = row.filter(|_| index > 0) else {
         return Ok(0);
     };
