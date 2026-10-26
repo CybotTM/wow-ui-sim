@@ -17,7 +17,9 @@ A_Admin.SetWorldElapsedTime(timerID, elapsedSeconds)
 A_Admin.AdvanceWorldElapsedTime(timerID, deltaSeconds)
 ```
 
-`mapInfo` supplies `name`, `id`, `timeLimit`, optional `texture`, `backgroundTexture`, and `mapID`. `run` supplies `mapChallengeModeID`, `eventMapID`, `level`, `affixIDs`, `wasActiveKeystoneCharged`, `numDeaths`, and `timeLost`. A run must be clear before another start. Completion uses the documented `ChallengeCompletionInfo` fields, including milliseconds in `time`; it does not calculate a score or upgrade.
+`mapInfo` requires `name` (string), `id` (integer), `timeLimit` (finite nonnegative seconds), `backgroundTexture` (number), and `mapID` (integer). Only `texture` is optional (number or nil); omission returns nil in getter result 4. `backgroundTexture` must be supplied; the simulator does not invent a texture value. The pinned Retail/PTR `ChallengeModeInfoDocumentation.lua:178-179` declares `texture` as nilable and `backgroundTexture` as non-nilable. See the [map metadata contract](../specs/challenge-mode-run.md#map-metadata-validation).
+
+`run` supplies `mapChallengeModeID`, `eventMapID`, `level`, `affixIDs`, `wasActiveKeystoneCharged`, `numDeaths`, and `timeLost`. A run must be clear before another start. Completion uses the documented `ChallengeCompletionInfo` fields, including milliseconds in `time`; it does not calculate a score or upgrade.
 
 `stepInfo` supplies `stepID`, `title`, and `description`. Its ordered rows replace the previous rows for that step and select that step as current. Each criterion requires `criteriaID`, `description`, and `quantityString`; the other declared fields have the documented defaults: zero for numbers and false for booleans. Fields are `criteriaType`, `completed`, `quantity`, `totalQuantity`, `flags`, `assetID`, `duration`, `elapsed`, `failed`, `isWeightedProgress`, and `isFormatted`. Quantity text is supplied, not derived from quantity or locale.
 
