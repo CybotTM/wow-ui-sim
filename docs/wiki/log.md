@@ -1,6 +1,6 @@
-## [2026-10-26] staged | Shared ammo requirement observation
+## [2026-10-26] bounded proof | Shared ammo requirement observation
 
-[Selected slot boundary](investigations/forever-startup-gaps.md#shared-ptrforever-ammo-observation) links the [supplied-input contract](../specs/forever-startup-inputs.md): PTR/Forever only, one optional boolean and a named unset error instead of an inferred native default. Original XML-bound transitions, isolation/unset recovery, stock attribution and seven-profile gates remain pending.
+[Original slot and exact error probe](investigations/forever-startup-gaps.md#shared-ptrforever-ammo-observation): PTR XML-bound RED/GREEN passes transitions/isolation/unset recovery; the asserted-failure xpcall follows `mists_scenario_minlevel` and preserves exact error/frame assertions. Stock PTR122/138→122/138 and Forever26/26→44/44 has complete per-key attribution, not clean startup. Corrected Forever proof and seven-profile gates remain pending.
 
 ## [2026-10-26] implementation | Shared transmog supplied input
 

@@ -49,7 +49,25 @@ No native ammo derivation or default is established. Unsupplied PTR startup
 replaces nil-call keys with named errors. Unsupplied Forever startup can gain
 named errors because the removed false previously masked missing observations;
 earlier baseline counts below are historical, not acceptance of this change.
-Runtime proof for this revision is pending.
+The current paired stock packet is PTR122 keys/138 occurrences before and after,
+with40 nil-call raw keys replaced by40 named missing-input keys. Forever changes
+from26/26 to44/44:40 named ammo errors are added and22 downstream target-spell
+reports disappear because earlier slot/BagSlotCluster initialization stops. Those
+removed reports are masked, not repaired. Each raw addition/removal is attributed
+in the private ammo-needed handoff; neither startup is clean.
+
+The PTR original XML-bound test passes false/true/false, two-environment isolation,
+exact unset failure at Mainline1702, and recovery. Its identical predecessor test
+fails at that original missing-member call. Unfiltered closure diagnostics remain
+visible; this proves the slot boundary, not complete closure initialization.
+Forever corrected original-consumer proof and seven-profile checks remain pending.
+
+The unset probe follows the existing `mists_scenario_minlevel` precedent:
+`env.exec` alone does not retain a native-error traceback. An asserted-failure
+`xpcall` captures status, exact error message and `debug.traceback` separately.
+The test must reject successful calls and non-exact messages; Forever additionally
+requires both original1952 and XML-delegate3654 frames. No production error
+handling or vendor callback is changed.
 
 ## Historical startup packet and unknown consumers
 
