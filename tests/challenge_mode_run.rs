@@ -171,6 +171,13 @@ fn load_map_icon() -> WowLuaEnv {
             return {name='Supplied dungeon', id=9001, timeLimit=1500,
                 texture=236393, backgroundTexture=629538, mapID=789}
         end
+        A_Admin.SetChallengeModeMapInfo(9001, {name='Previous dungeon', id=9002,
+            timeLimit=1800, backgroundTexture=627119, mapID=790})
+        local name, id, limit, texture, background, map = C_ChallengeMode.GetMapUIInfo(9001)
+        assert(name == 'Previous dungeon' and id == 9002 and limit == 1800)
+        assert(texture == nil and background == 627119 and map == 790)
+        icon:SetUp({id=9001, level=5}, true)
+        assert(icon.Icon:GetTexture() == nil and icon.HighestLevel:GetText() == '5')
         A_Admin.SetChallengeModeMapInfo(9001, suppliedMap())
         function checkSuppliedMap()
             local name, id, limit, texture, background, map = C_ChallengeMode.GetMapUIInfo(9001)
