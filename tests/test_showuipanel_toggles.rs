@@ -719,15 +719,42 @@ fn character_reputation_tab_click_selects_reputation_panel() {
 fn admin_open_mailbox_opens_and_closes_mail_panel() {
     test_timeout! {
         let env = setup_env();
-        if cfg!(feature = "client-wrath") {
+        if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+            common::panel_fixtures::clear_recorded_lua_errors(&env);
+            // FrameXML/MailFrame.lua:28-30,44-59,79-82 owns these native events.
+            // FrameXML/MailFrame.xml:373 declares the initially hidden root.
             env.exec(r#"
                 A_Admin.ClearInbox()
                 A_Admin.AddMail("Thrall", "Unread Orders", "Meet me in Orgrimmar.")
+                assert(not MailFrame:IsShown(), "mailbox starts closed")
+
+                local events = {}
+                local observer = CreateFrame("Frame")
+                observer:RegisterEvent("MAIL_SHOW")
+                observer:RegisterEvent("MAIL_CLOSED")
+                observer:SetScript("OnEvent", function(_, event)
+                    events[event] = true
+                end)
+
                 A_Admin.OpenMailbox()
-                assert(MailFrame:IsShown() and InboxFrame:IsShown())
+                assert(events.MAIL_SHOW, "admin open must publish native MAIL_SHOW")
+                assert(MailFrame:IsShown() and InboxFrame:IsShown(), "native inbox opens")
+                assert(MailFrame.selectedTab == 1, "native open selects inbox tab")
                 A_Admin.CloseMailbox()
-                assert(not MailFrame:IsShown())
-            "#).expect("native mailbox interaction opens and closes the inbox");
+                assert(events.MAIL_CLOSED, "admin close must publish native MAIL_CLOSED")
+                assert(not MailFrame:IsShown(), "native mailbox closes")
+
+                events.MAIL_SHOW = nil
+                A_Admin.OpenMailbox()
+                assert(events.MAIL_SHOW, "reopen must publish native MAIL_SHOW again")
+                assert(MailFrame:IsShown() and InboxFrame:IsShown(), "native inbox reopens")
+                events.MAIL_CLOSED = nil
+                A_Admin.CloseMailbox()
+                assert(events.MAIL_CLOSED, "second close publishes native MAIL_CLOSED")
+                assert(not MailFrame:IsShown(), "reopened native mailbox closes")
+            "#).expect("native mailbox interaction opens and closes the inbox twice");
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native mailbox interaction errors: {errors:?}");
             return;
         }
 
