@@ -1,8 +1,9 @@
 # Widget, texture and render crate boundaries
 
 The root facade preserves API paths while reusable state and rendering code compile
-without selecting a client profile. These cuts are statically staged; compile CPU
-savings and seven-profile compatibility are not yet measured.
+without selecting a client profile. All seven profile all-target checks pass with
+zero warnings; Retail stock startup is unchanged. Measured compile effect is mixed
+(see Measurements); no repeatable gain is claimed.
 
 ## Ownership
 
@@ -46,15 +47,24 @@ renderer-crossing tests remain in root. All shader cases and their cfg(test) pip
 The BC test swap hook and re-export retain their exact #[cfg(test)] guards and
 share the production root atomic. The GPU ownership cut was reduced rather than
 changing test-hook availability. Assertions and function names are unchanged. The root integration and binary files are
-unchanged. Compilation, test execution and compile-CPU proof await a main-owned slot.
+unchanged. Proof covers compilation of all seven profiles (all targets, zero warnings)
+and Retail stock startup; the Rust test suites were not executed for this cut.
 
-## Measurement handoff
+## Measurements
 
-The repaired slot recipe uses no cleaning. Warm each revision exactly once with
-lib+integration and retain that CPU receipt separately. Measure library-only after
-an mtime-only touch to `src/lib.rs`; measure root+integration after an mtime-only
-touch to `src/c_api/c_club.rs`. Preserve source hashes and per-service CPU/freshness
-records for both revisions. These measurements are pending, not static evidence.
+Warm incremental rebuilds, Retail, same slot, master `3b369ee1a` versus this split;
+single sample each, CPU seconds (wall seconds):
+
+| Workload | Master | Split |
+|---|---:|---:|
+| Root crate, mtime-only touch | 46.6 (58.6) | 40.6 (51.2) |
+| Root crate, one-line edit | 50.5 (69.9) | 36.4 (53.6) |
+| Integration tests, mtime-only touch | 46.5 (55.8) | 54.0 (62.1) |
+| Integration tests, one-line edit | 58.9 (65.5) | 51.4 (58.1) |
+
+Limits: one sample per cell on a shared host, so load noise is not bounded; the
+integration touch regressed while the other three improved. Cold builds were not
+measured, and the initial warm-ups reused unequal existing caches.
 
 ## Sources
 
