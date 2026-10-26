@@ -96,6 +96,33 @@ fn equipment_lock_admin_inputs_do_not_equip_items() {
 }
 
 #[test]
+fn equipment_lock_admin_requires_explicit_boolean() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        A_Admin.SetEquipmentItemLock(211995, true)
+        local attempts = {
+            function() A_Admin.SetEquipmentItemLock(211995) end,
+            function() A_Admin.SetEquipmentItemLock(211995, nil) end,
+            function() A_Admin.SetEquipmentItemLock(211995, 0) end,
+            function() A_Admin.SetEquipmentItemLock(211995, 'false') end,
+            function() A_Admin.SetEquipmentItemLock(211995, {}) end,
+        }
+        for _, attempt in ipairs(attempts) do
+            local ok, message = pcall(attempt)
+            assert(not ok, 'admin must not turn unsupplied or non-boolean data into a lock observation')
+            assert(message:find('explicit boolean lock observation', 1, true), message)
+        end
+        "#,
+    )
+    .unwrap();
+    assert_eq!(
+        env.state().borrow().equipment_manager.item_lock_observations.get(&211995),
+        Some(&true)
+    );
+}
+
+#[test]
 fn equipment_set_original_equip_set_contract() {
     let env = load_equipment_consumer();
     env.exec(
