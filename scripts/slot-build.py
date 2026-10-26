@@ -397,6 +397,14 @@ def certify_artifacts(current, previous, source_before, artifacts, snapshot):
     return certificates, errors
 
 
+def matched_input_changes(current, inputs, changes):
+    inputs = set(inputs)
+    worktree = Path(current["worktree"])
+    return {name for name in changes if name in inputs or any(
+        str(parent) in inputs and (worktree / parent).is_dir()
+        for parent in Path(name).parents)}
+
+
 def find_stale_artifacts(current, previous_artifacts, artifacts):
     stale = []
     changed = set(current["changed_paths"])
@@ -404,7 +412,7 @@ def find_stale_artifacts(current, previous_artifacts, artifacts):
     for record in current["reported_artifacts"]:
         path = artifact_path(record)
         inputs = current["target_inputs"].get(path, [])
-        if not changed.intersection(inputs):
+        if not matched_input_changes(current, inputs, changed):
             continue
         name = os.path.relpath(path, current["slot"])
         if record.get("fresh") is not False:
@@ -413,7 +421,7 @@ def find_stale_artifacts(current, previous_artifacts, artifacts):
         if not record.get("executable"):
             continue
         changed_hash = name in artifacts and previous_artifacts.get(name) != artifacts[name]
-        needs_changed_hash = bool(content_changed.intersection(inputs))
+        needs_changed_hash = bool(matched_input_changes(current, inputs, content_changed))
         if name not in artifacts or (needs_changed_hash and not changed_hash):
             stale.append(name)
     return sorted(set(stale))
@@ -423,7 +431,9 @@ def unread_package_paths(current):
     inputs = {name for names in current["target_inputs"].values() for name in names}
     roots = {root for paths in current["package_roots"].values() for root in paths}
     roots = repo_relative_inputs(current, roots)
-    return sorted(name for name in set(current["content_changed_paths"]) - inputs
+    changes = set(current["content_changed_paths"])
+    read_changes = matched_input_changes(current, inputs, changes)
+    return sorted(name for name in changes - read_changes
                   if any(Path(name).is_relative_to(root) for root in roots))
 
 

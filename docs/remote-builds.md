@@ -154,7 +154,10 @@ changes, additions, removals and renames below the directory change its digest.
 Symlinks follow filesystem resolution, including symlink-sensitive `..` traversal;
 missing targets and directory cycles fail closed. Directory digest values use a
 `tree-sha256:` prefix to distinguish trees from files, including inside nested
-trees. Existing file digest values are unchanged.
+trees. Existing file digest values are unchanged. A changed descendant also
+matches the directory input in mtime-refresh checks, content-change checks and
+unread-input reporting. Thus nested edits retain the changed-output-SHA
+requirement for rebuilt executables, not only certificate checks for fresh reuse.
 
 The worker hashes tracked/untracked source files, their parent directories, known
 source dep-info inputs and package manifests before launching the child. Parent
