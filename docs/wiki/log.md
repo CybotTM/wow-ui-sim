@@ -1,6 +1,6 @@
-## [2026-10-26] staged | Supplied item-upgrade eligibility
+## [2026-10-26] proof | Supplied item-upgrade eligibility
 
-[Location observations](systems/item-upgrade-eligibility.md) link the [contract](../specs/item-upgrade-eligibility.md). The restored generic ItemUtil fixture supplies a shown-frame context without claiming upgrade-window acceptance. Independent supplied locations, movement/removal, explicit missing-input diagnostics and isolation are staged. The added SetReagentCount regression reproduces stale true after remove/recreate; the mutation path now invalidates those inputs. Final expanded profile proof is pending.
+[Final six-profile proof](systems/item-upgrade-eligibility.md#final-proof--2026-10-26) closes the [supplied-location contract](../specs/item-upgrade-eligibility.md): original generic ItemUtil RED/GREEN, independent inputs, movement/removal, diagnostics, isolation and the reproduced SetReagentCount recreation regression. All seven all-target checks have zero JSON/plain warnings; six raw stock maps are unchanged. The three Mists/Era/Anniversary bag-helper preservation cases remain explicitly BLOCKED at the existing incompatible Blizzard_POIButton TOC, before the seed/query. The fixture supplies a shown-frame context, not an original upgrade window.
 
 ## [2026-10-26] implementation | PTR SwingTimer declarations
 

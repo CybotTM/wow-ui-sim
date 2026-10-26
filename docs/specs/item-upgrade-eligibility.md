@@ -4,11 +4,11 @@
 
 ## What it must do
 
-- [ ] Publish `C_ItemUpgrade.CanUpgradeItem` on Retail, PTR, Forever, Mists, Era and Anniversary only; leave the excluded Wrath path unchanged.
-- [ ] Resolve an actual ItemLocation through existing inventory/bag state and return exactly one supplied boolean. Supply independent eligibility at two concrete locations; no catalog policy is inferred.
-- [ ] `A_Admin.SetItemUpgradeEligibility(location, boolean)` supplies an observation for the existing item. `ClearItemUpgradeEligibility(location)` removes it; omitted/nil location clears all observations in that environment.
-- [ ] Move observations through bag/cursor/equipment swaps and backpack placement. Removal, deletion and admin replacement must not leak observations to a replacement instance, including one with the same item ID. `A_Admin.SetReagentCount` must discard observations when removing or creating bag records; remove/recreate at the same location must report missing input.
-- [ ] Report `native-unknown: C_ItemUpgrade.CanUpgradeItem has no supplied eligibility or documented default for this location` for unsupplied, empty or unsupported locations. This is a simulator diagnostic, not native validation/error behavior.
+- [x] Publish `C_ItemUpgrade.CanUpgradeItem` on Retail, PTR, Forever, Mists, Era and Anniversary only; leave the excluded Wrath path unchanged.
+- [x] Resolve an actual ItemLocation through existing inventory/bag state and return exactly one supplied boolean. Supply independent eligibility at two concrete locations; no catalog policy is inferred.
+- [x] `A_Admin.SetItemUpgradeEligibility(location, boolean)` supplies an observation for the existing item. `ClearItemUpgradeEligibility(location)` removes it; omitted/nil location clears all observations in that environment.
+- [x] Move observations through bag/cursor/equipment swaps and backpack placement. Removal, deletion and admin replacement must not leak observations to a replacement instance, including one with the same item ID. `A_Admin.SetReagentCount` must discard observations when removing or creating bag records; remove/recreate at the same location must report missing input.
+- [x] Report `native-unknown: C_ItemUpgrade.CanUpgradeItem has no supplied eligibility or documented default for this location` for unsupplied, empty or unsupported locations. This is a simulator diagnostic, not native validation/error behavior.
 
 Pinned declarations: `Blizzard_APIDocumentationGenerated/ItemUpgradeDocumentation.lua:11–24` on Retail/PTR/Forever and `:11–23` on Mists/Era/Anniversary. Required `ItemLocation` argument; one non-nil boolean result. Generic `Blizzard_FrameXMLUtil/ItemUtil.lua` query lines rechecked on 2026-10-26: Retail147, PTR/Forever217, Mists/Era/Anniversary142. Forever's Camelot utility is not this consumer.
 
@@ -33,7 +33,8 @@ The normally selected FrameXMLUtil/ObjectAPI closure is loaded without source ov
 
 ## Known gaps (current cycle)
 
-- [ ] Execute byte-identical original-consumer RED/GREEN on every declaring profile, bound stock pairs and seven zero-warning canonical checks.
+- [x] Execute byte-identical original-consumer RED/GREEN on all six declaring profiles, bound stock pairs and seven zero-warning canonical checks. See [the final proof](../wiki/systems/item-upgrade-eligibility.md#final-proof--2026-10-26).
+- [ ] Bag-helper preservation on Mists/Era/Anniversary is BLOCKED before the added seed/query: the existing fixture requires Blizzard_POIButton, which has no compatible TOC. Both final branches and earlier RED receipts stop at this same setup boundary. No assertions or applicability gates were weakened.
 
 ## Out of scope
 
