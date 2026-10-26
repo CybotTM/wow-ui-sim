@@ -162,8 +162,10 @@ def parse_dep_info(content, worktree):
         target, separator, sources = line.partition(": ")
         if not separator or not sources.strip():
             continue
-        outputs.update(os.path.abspath(worktree / word) for word in dep_info_words(target))
-        inputs.update(os.path.abspath(worktree / word) for word in dep_info_words(sources))
+        outputs.update(os.path.realpath(worktree / word, strict=False)
+                       for word in dep_info_words(target))
+        # Keep symlink-sensitive /.. traversal until classification and existence checks.
+        inputs.update(str(worktree / word) for word in dep_info_words(sources))
     if not outputs or not inputs:
         raise ValueError("no dependency rules")
     return {"outputs": sorted(outputs), "inputs": sorted(inputs)}
@@ -191,7 +193,7 @@ def read_dep_info_snapshot(slot, worktree):
 
 
 def target_dep_inputs(record, snapshot, allow_missing=False):
-    artifacts = {os.path.abspath(path) for path in
+    artifacts = {os.path.realpath(path, strict=False) for path in
                  [record.get("executable"), *record.get("filenames", [])] if path}
     # Cargo may report only the uplifted bin, while rustc writes deps/<name>-<hash>.d.
     # Snapshot hard-link identities bind that bin to the correct metadata hash.
@@ -231,10 +233,11 @@ def repo_relative_inputs(current, inputs):
     worktree = Path(current["worktree"])
     mount = SOURCE_ROOT / Path(current["slot"]).name
     utility_mount = SOURCE_ROOT / f"ct-bins-{Path(current['slot']).name}"
-    roots = [Path(os.path.realpath(root)) for root in (mount, utility_mount, worktree)]
+    roots = [Path(os.path.realpath(root, strict=False))
+             for root in (mount, utility_mount, worktree)]
     relative = set()
     for name in inputs:
-        path = Path(os.path.realpath(worktree / name))
+        path = Path(os.path.realpath(worktree / name, strict=False))
         for root in roots:
             if path.is_relative_to(root):
                 relative.add(str(path.relative_to(root)))
@@ -243,10 +246,10 @@ def repo_relative_inputs(current, inputs):
 
 
 def generated_input_paths(current, inputs):
-    slot = Path(os.path.realpath(current["slot"]))
+    slot = Path(os.path.realpath(current["slot"], strict=False))
     generated = set()
     for name in inputs:
-        path = Path(os.path.realpath(Path(current["worktree"]) / name))
+        path = Path(os.path.realpath(Path(current["worktree"]) / name, strict=False))
         if path.is_relative_to(slot) and not repo_relative_inputs(current, [str(path)]):
             generated.add(str(path))
     return generated
@@ -325,6 +328,12 @@ def certify_record(current, record, previous, source_before, artifacts, snapshot
         raise ValueError(f"missing compiler inputs for {path}")
     generated = generated_input_paths(current, compiler_inputs)
     required.update(generated)
+    for name in compiler_inputs:
+        if not (repo_relative_inputs(current, [name])
+                or generated_input_paths(current, [name])):
+            continue
+        if not os.path.exists(Path(current["worktree"]) / name):
+            raise ValueError(f"missing compiler input content for {path}: {name}")
     inputs = required | repo_relative_inputs(current, package_build_inputs(current, record))
     hashes = read_input_hashes(Path(current["worktree"]), inputs)
     if any(hashes.get(name) is None for name in required):

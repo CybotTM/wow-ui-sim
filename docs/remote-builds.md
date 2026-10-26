@@ -151,7 +151,10 @@ artifact before retrying; changing receipt identities does not provide proof.
 The worker hashes tracked/untracked source files, known source dep-info inputs and
 package manifests before launching the child. It hashes each record's source inputs
 again afterward and rejects changed or previously unsnapshotted source inputs.
-Every dep-info input is resolved with `os.path.realpath` before classification.
+Dep-info input spellings retain `..` components and are resolved with
+`os.path.realpath(strict=False)` before classification. Source and current-slot
+inputs must also exist at their original, unnormalized spelling, so a removed
+ancestor cannot be hidden by resolution.
 Inputs inside the resolved source mounts keep repo-relative certificate keys.
 All other inputs anywhere inside the current slot's resolved target directory
 are required to exist and are content-hashed, using resolved absolute paths as

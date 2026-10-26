@@ -651,6 +651,62 @@ class SourceFreshnessTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(receipt["result"], "stale-artifacts")
 
+    def test_symlink_parent_input_into_source_rejects_stale_reuse(self):
+        nested = self.tree / "nested"
+        nested.mkdir()
+        actual = self.tree / "extra.rs"
+        actual.write_text("actual v1")
+        self.git("add", ".")
+        self.git("commit", "-qm", "add actual input")
+        bridge = self.slot / "bridge"
+        bridge.symlink_to(nested, target_is_directory=True)
+        spelling = bridge / ".." / "extra.rs"
+        decoy = self.slot / "extra.rs"
+        decoy.write_text("decoy unchanged")
+        self.assertEqual(spelling.read_bytes(), actual.read_bytes())
+        self.build_generated_library(spelling)
+        output = self.slot / "debug/deps/libprobe-retail.rmeta"
+        original = output.read_bytes()
+        self.assertTrue(original.endswith(b"actual v1"))
+        actual.write_text("actual v2")
+        self.git("commit", "-qam", "change actual input")
+        other, _ = self.run_library_step("forever")
+        self.assertEqual(other.returncode, 0, other.stderr)
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(output.read_bytes(), original)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        certificate = receipt["artifact_certificates"][str(output.relative_to(self.slot))]
+        self.assertIn("extra.rs", certificate["inputs"])
+        self.assertNotIn(str(decoy), certificate["inputs"])
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+
+    def test_removed_input_ancestor_rejects_fresh_reuse(self):
+        actual = self.slot / "present.rs"
+        actual.write_text("compiler input v1")
+        ancestor = self.slot / "ancestor"
+        ancestor.mkdir()
+        spelling = ancestor / ".." / "present.rs"
+        self.assertEqual(spelling.read_bytes(), actual.read_bytes())
+        self.build_generated_library(spelling)
+        output = self.slot / "debug/deps/libprobe-retail.rmeta"
+        original = output.read_bytes()
+        self.assertTrue(original.endswith(b"compiler input v1"))
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        ancestor.rmdir()
+        self.assertFalse(spelling.exists())
+        with self.assertRaises(FileNotFoundError):
+            spelling.read_bytes()
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(output.read_bytes(), original)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertTrue(receipt["dep_info_errors"])
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+
     def test_target_triple_generated_input_is_guarded(self):
         generated = self.slot / "x86_64-unknown-linux-gnu/debug/build/probe-hash/out/generated.rs"
         generated.parent.mkdir(parents=True)
