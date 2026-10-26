@@ -308,8 +308,8 @@ def input_content_digest(path, cache, ancestors=frozenset()):
         for child in sorted(path.iterdir(), key=lambda child: os.fsencode(child.name)):
             name = os.fsencode(child.name)
             content = input_content_digest(child, cache, ancestors | {resolved})
-            digest.update(len(name).to_bytes(8, "big") + name + bytes.fromhex(content))
-        value = digest.hexdigest()
+            digest.update(len(name).to_bytes(8, "big") + name + content.encode("ascii") + b"\0")
+        value = "tree-sha256:" + digest.hexdigest()
     else:
         with path.open("rb") as stream:
             value = hashlib.file_digest(stream, "sha256").hexdigest()

@@ -152,8 +152,9 @@ Directory dep-info inputs are certified as recursive content trees. Entries are
 sorted by relative name and hashed with length-delimited names and content digests;
 changes, additions, removals and renames below the directory change its digest.
 Symlinks follow filesystem resolution, including symlink-sensitive `..` traversal;
-missing targets and directory cycles fail closed. Existing file digest values are
-unchanged.
+missing targets and directory cycles fail closed. Directory digest values use a
+`tree-sha256:` prefix to distinguish trees from files, including inside nested
+trees. Existing file digest values are unchanged.
 
 The worker hashes tracked/untracked source files, their parent directories, known
 source dep-info inputs and package manifests before launching the child. Parent
