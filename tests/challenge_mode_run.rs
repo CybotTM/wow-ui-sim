@@ -64,12 +64,22 @@ fn original_challenge_timer_reads_supplied_run_and_reset() {
     "#,
     )
     .unwrap();
-    env.exec(START).unwrap();
     env.exec(
         r#"
-        assert(ScenarioObjectiveTracker.ChallengeModeBlock.StatusBar:GetValue() == 1380)
-        A_Admin.CompleteChallengeRun({mapChallengeModeID=9001, level=12,
-            time=1234000, onTime=true, keystoneUpgradeLevels=2})
+        A_Admin.SetChallengeModeMapInfo(9002, {name='Second supplied dungeon', id=9002,
+            timeLimit=1800, texture=321, backgroundTexture=654, mapID=987})
+        A_Admin.StartChallengeRun({mapChallengeModeID=9002, level=5, affixIDs={9},
+            wasActiveKeystoneCharged=false, numDeaths=1, timeLost=8})
+        A_Admin.StartWorldElapsedTimer(2, 'Second timer', 1, 330)
+        local block = ScenarioObjectiveTracker.ChallengeModeBlock
+        assert(block.timerID == 2 and block.timeLimit == 1800)
+        assert(block.StatusBar:GetValue() == 1470)
+        assert(block.Level:GetText():find('5', 1, true) and block.wasDepleted)
+        assert(block.deathCount == 1 and block.timeLost == 8)
+        assert(select(2, C_ChallengeMode.GetActiveKeystoneInfo())[1] == 9)
+        A_Admin.CompleteChallengeRun({mapChallengeModeID=9002, level=5,
+            time=1234000, onTime=true, keystoneUpgradeLevels=2, practiceRun=false,
+            isMapRecord=false, isAffixRecord=false, isEligibleForScore=true, members={}})
         assert(C_ChallengeMode.GetChallengeCompletionInfo().time == 1234000)
         assert(not C_ChallengeMode.IsChallengeModeActive())
         assert(not ScenarioObjectiveTracker.ChallengeModeBlock:IsActive())
@@ -92,6 +102,7 @@ fn original_scenario_criteria_render_order_quantity_and_completion() {
         local block = ScenarioObjectiveTracker.ObjectivesBlock
         assert(block:GetExistingLine(1).Text:GetText() == '0/1 First boss')
         assert(block:GetExistingLine(2).Text:GetText() == 'Enemy forces')
+        assert(block:GetExistingLine(2).progressBar.Bar:GetValue() == 25)
         assert(C_ScenarioInfo.GetCriteriaInfo(2).quantityString == '25%')
         assert(C_ScenarioInfo.GetCriteriaInfoByStep(1, 1).criteriaID == 901)
         A_Admin.SetScenarioCriteria({stepID=1, title='Fixture stage', description='Fixture objectives'}, {
@@ -101,6 +112,7 @@ fn original_scenario_criteria_render_order_quantity_and_completion() {
         })
         ScenarioObjectiveTracker:UpdateCriteria(2)
         assert(block:GetExistingLine(1).Text:GetText() == '1/1 First boss')
+        assert(block:GetExistingLine(2).progressBar.Bar:GetValue() == 70)
         assert(C_ScenarioInfo.GetCriteriaInfo(1).completed)
         assert(C_ScenarioInfo.GetCriteriaInfo(2).quantity == 70)
         assert(C_ScenarioInfo.GetCriteriaInfo(3) == nil)
@@ -113,9 +125,39 @@ fn original_scenario_criteria_render_order_quantity_and_completion() {
     independent.exec("assert(C_ScenarioInfo.GetCriteriaInfo(1) == nil); assert(C_ChallengeMode.GetActiveChallengeMapID() == nil)").unwrap();
 }
 
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[test]
+fn original_challenges_dungeon_icon_reads_supplied_map_metadata() {
+    let ui = blizzard_ui_dir();
+    let env = new_blizzard_addon_env(&ui);
+    let loaded = load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_ChallengesUI"], &[]);
+    assert!(loaded.iter().any(|name| name == "Blizzard_ChallengesUI"));
+    env.exec(
+        r#"
+        local icon = CreateFrame('Frame', nil, UIParent, 'ChallengesDungeonIconFrameTemplate')
+        assert(icon.SetUp == ChallengesDungeonIconMixin.SetUp)
+        local source = debug.getinfo(icon.SetUp, 'S').source:gsub('\\\\', '/')
+        assert(source:find('Blizzard_ChallengesUI/', 1, true), source)
+        A_Admin.SetChallengeModeMapInfo(9001, {name='First supplied dungeon', id=9001,
+            timeLimit=1500, texture=123, backgroundTexture=456, mapID=789})
+        icon:SetUp({id=9001, level=12}, true)
+        assert(icon.Icon:GetTexture() == 123 and icon.HighestLevel:GetText() == '12')
+        A_Admin.SetChallengeModeMapInfo(9001, {name='Changed supplied dungeon', id=9001,
+            timeLimit=1800, texture=321, backgroundTexture=654, mapID=987})
+        icon:SetUp({id=9001, level=5}, true)
+        assert(icon.Icon:GetTexture() == 321 and icon.HighestLevel:GetText() == '5')
+        local name, id, limit, texture, background, map = C_ChallengeMode.GetMapUIInfo(9001)
+        assert(name == 'Changed supplied dungeon' and id == 9001 and limit == 1800)
+        assert(texture == 321 and background == 654 and map == 987)
+    "#,
+    )
+    .unwrap();
+}
+
 #[test]
 fn challenge_admin_events_observe_updated_state_and_reject_invalid_input() {
     let env = WowLuaEnv::new().unwrap();
+    let errors_before = env.state().borrow().lua_errors.len();
     env.exec(r#"
         local events = {}
         local f = CreateFrame('Frame')
@@ -144,4 +186,5 @@ fn challenge_admin_events_observe_updated_state_and_reject_invalid_input() {
         assert(not pcall(A_Admin.AdvanceWorldElapsedTime, 1, -1))
         assert(not pcall(A_Admin.StartWorldElapsedTimer, 1, 'bad', 1, 0))
     "#).unwrap();
+    assert_eq!(env.state().borrow().lua_errors.len(), errors_before);
 }

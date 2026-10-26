@@ -63,6 +63,37 @@ fn manual_clock_drains_deadlines_and_repeated_tickers_in_order() {
 }
 
 #[test]
+fn manual_clock_opt_in_preserves_pending_delays_and_animation_progress() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        local count = 0
+        C_Timer.After(30, function() count=count+1 end)
+        A_Admin.SetManualClock(1000)
+        A_Admin.AdvanceTime(1)
+        assert(count == 0, 'switching clock epoch must not expire a new callback')
+        local frame = CreateFrame('Frame')
+        frame:SetAlpha(0)
+        local group = frame:CreateAnimationGroup()
+        group:SetToFinalAlpha(true)
+        local alpha = group:CreateAnimation('Alpha')
+        alpha:SetFromAlpha(0)
+        alpha:SetToAlpha(1)
+        alpha:SetDuration(2)
+        local finished = false
+        group:SetScript('OnFinished', function() finished=true end)
+        group:Play()
+        A_Admin.AdvanceTime(2)
+        assert(finished and not group:IsPlaying())
+        assert(frame:GetAlpha() == 1)
+        A_Admin.AdvanceTime(30)
+        assert(count == 1)
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn manual_clock_rejects_invalid_deltas_without_advancing_or_dispatching() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(
