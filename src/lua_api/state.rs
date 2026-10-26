@@ -446,6 +446,7 @@ macro_rules! build_empty_sim_state {
             housing_service_enabled: true,
             housing: HousingState::default(),
             catalog_shop_products: Default::default(),
+            store_public_eligibility: Default::default(),
             housing_bundles: Default::default(),
             pet_battles: PetBattleState::default(),
             pet: PetState::default(),
@@ -455,6 +456,7 @@ macro_rules! build_empty_sim_state {
             lfr_availability: None,
             mists_transmog: Default::default(),
             scenario_finder_availability: None,
+            mists_party_min_level: None,
             lfg_category_info: default_lfg_category_info(),
             lfg_active_categories: ::std::collections::HashSet::new(),
             lfg_queued_dungeons: ::std::collections::HashMap::new(),
@@ -671,8 +673,9 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-5")]
             voice_chat_speak_requests: Vec::new(),
             spell_activation_overlays: ::std::collections::HashSet::new(),
-            #[cfg(feature = "retail-12-0-0")]
             challenge_completion: Default::default(),
+            challenge_run: Default::default(),
+            manual_clock: None,
             known_spells: ::std::collections::HashSet::new(),
             harmful_spells: ::std::collections::HashSet::new(),
             helpful_spells: ::std::collections::HashSet::new(),

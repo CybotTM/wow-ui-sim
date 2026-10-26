@@ -1,3 +1,11 @@
+## [2026-10-26] implementation | Supplied voice settings access
+
+[Original audio polling boundary](systems/voice-settings-access.md) links the [contract](../specs/voice-settings-access.md): six declaring profiles, environment-local optional observation and named unset error; Wrath remains absent. Eighteen exact original-consumer GREEN/producer-free RED pairs pass, seven full-feature all-target checks have zero warnings, and all raw stock maps are unchanged at the supplied master baselines. All 98 final launch CVar guards are unchanged. Full device initialization, timer cancellation and unsupplied forecast readiness are not claimed.
+
+## [2026-10-26] bounded proof | Pinned Mists global strings
+
+[Source, selected consumer and exposure gap](investigations/mists-global-strings.md) links the [70268 contract](../specs/mists-global-strings.md):19,914 complete DB2 rows, multiline-safe generation and one original Setting34 RED→original131/138 GREEN. Stock6/12→8/14 exposes the unchanged temporary Retail reputation seed's ungrounded Mists inputs; no missing label is invented. All seven full-feature all-target checks pass with zero JSON/plain compiler warnings.
+
 ## [2026-10-26] implementation | Mists transmog supplied input
 
 [Contract and selected display branch](systems/mists-transmog-enabled.md): both exact original-line4 RED/GREEN cases prove supplied true/false control branches, isolation, transitions and named unset recovery. Mists stock remains6/12 with identical raw keys/counts; all seven full-feature all-target checks have zero warnings. Modern default-true policy, the Forever gap and later settings branches remain separate.
@@ -17,6 +25,19 @@
 ## [2026-10-26] staged | Supplied equipment-set lock inputs
 
 [Item-ID observations](systems/equipment-set-locks.md) back simulator admin supply/clear methods on R/P/F/M. The missing-admin Retail RED was observed; original-consumer query RED/GREEN and four-profile gates remain pending. No native lock/default policy is claimed.
+
+## [2026-10-26] proof | Supplied StorePublic eligibility
+
+[Final merged proof](systems/store-public-eligibility.md#final-proof-2026-10-26) links the [contract](../specs/store-public-eligibility.md): supplied per-group observations replace only the guessed adapter. Six original-helper/direct-input RED→GREEN pairs, Wrath absence and preserved defaults pass. All seven exact-17baa3e9a stock maps are unchanged, and seven all-target checks have zero warnings. All 68 runtime CVar guards pass. Recording sinks prove helper control flow, not a working storefront; classic subscription selection remains blocked.
+
+## [2026-10-26] proof | Complete PTR Mainline preset construction
+
+[Whole original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-mainline-preset-construction) links the [two-family contract](../specs/ptr-edit-mode-declarations.md): pinned EndCap and SwingTimer indices, byte-identical first-EndCap RED/whole-preset GREEN, distinct records and exact anchors in all three maps. Paired17baa stock134/154→130/148 removes four raw keys with no additions; event-route ClearBlockedAuras disappearance is not an API repair. All seven all-target checks have zero JSON/plain compiler warnings; formatting/readability and nine original-CVar guards pass. Native layout policy and full Edit Mode lifecycle remain outside this proof.
+
+## [2026-10-26] bounded proof | Supplied challenge runs and manual clock
+
+[State, clock and final evidence](systems/challenge-mode-run.md) link the [challenge contract](../specs/challenge-mode-run.md) and [clock contract](../specs/manual-simulation-clock.md): paired original timer/icon proof, seven-profile clock cases, corrected legacy probes, unchanged six-profile stock, seven zero-warning checks and unchanged InTimeBL smoke/forecast acceptance. Original criteria initialization remains BLOCKED for a separate lane; inactive keystone returns stay unimplemented. Global forecast Lua errors are disclosed, not called clean.
+
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 
 [Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) links the [bounded contract](../specs/legacy-tutorial-requests.md): Mists/Era/Anniversary/Wrath standalone numeric requests, no missing Lua definition, no result use, no inferred tutorial policy. Unchanged old Mists storage-flow RED reaches ContainerFrame_Shared:976; GREEN completes its Lua assertions but still fails on collected callback/startup errors, with C_Engraving:315 next. Four-profile recorder/publication tests pass, all four stock maps are byte-identical, and all seven all-target checks have zero warnings.
@@ -4367,3 +4388,7 @@ is reused; original-consumer runtime RED/GREEN remains unexecuted.
 ## [2026-10-25] verification | TTS bounded integration
 
 [Bounded proof matrix](investigations/cf2-tts-integration.md#bounded-verification) records37 passing exact cases, seven all-target checks with the clarified inherited-warning allowance, seven raw stock comparisons and source-backed Mists additions. Fresh library reuse has dep-info content identity; native parity and full-suite acceptance remain excluded.
+
+## [2026-10-26] implementation | Mists supplied party minimum
+
+[Supplied minimum](systems/mists-scenario-finder.md#supplied-active-party-minimum) links the [bounded contract](../specs/mists-party-minimum.md). Three exact producer-subtracted REDs and three GREENs prove the original58 boundary, empty-catalog preservation, direct85/90/isolation and explicit errors. Stock stays6/12 with two individually traced diagnostic replacements; catalog discrimination is blocked. All seven full-feature all-target checks pass with zero compiler warnings. Formatting/readability pass; other-profile runtime parity is not claimed.

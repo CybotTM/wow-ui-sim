@@ -149,7 +149,7 @@ fn query_duration(state: &mut LuaState, extended: bool) -> LuaResult<Option<f64>
         return Ok(None);
     }
     Ok(if extended {
-        metadata.refresh_duration(&aura, sim.start_time.elapsed().as_secs_f64())
+        metadata.refresh_duration(&aura, sim.clock_elapsed().as_secs_f64())
     } else {
         Some(metadata.base_duration_seconds)
     })

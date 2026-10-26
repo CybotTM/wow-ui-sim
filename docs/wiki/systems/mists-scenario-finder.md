@@ -31,6 +31,14 @@ All seven profiles have separate full-feature all-target checks with zero Cargo 
 - `src/c_api/scenario_finder_availability.rs` — supplied tuple query and explicit unset error.
 - `src/c_api/c_lfg_info.rs` — profile publication boundary.
 
+## Supplied active-party minimum
+
+The [Mists minimum contract](../../specs/mists-party-minimum.md) adds `SimState.mists_party_min_level: Option<f64>`, initially None. The Mists-only `C_PartyInfo.GetMinLevel()` producer returns that observation exactly. It rejects explicit arguments and raises a named native-unknown error for None; it does not infer from player levels, roster or eligibility. Retail/PTR keep their existing producer.
+
+Pinned Mists 5.5.4.70268 `PartyInfoDocumentation.lua:125–135` declares the query; line130 specifies the active party when category is omitted. The selected original `ScenarioFinder_Shared.lua:58` fails without the producer. Tests supply85/90 and exercise the original empty-catalog cover and label, plus direct value/count/isolation and clearing. Empty-catalog output is preservation, not minimum-sensitive presentation. Catalog discrimination remains blocked pending native contracts for the four legacy catalog queries. Three exact cases fail on the producer-subtracted sibling and pass with the Mists producer. Error-only calls use `xpcall` with `debug.traceback` to retain the original58 boundary; no consumer or query is replaced. The fixture logs existing closure-load errors; assertions require no new errors during the supplied calls, not a clean dependency closure.
+
+Paired stock stays6 keys/12 occurrences. The two ScenarioFinder event keys change from absent `GetMinLevel` to the named unsupplied error at the same original58 call; four other raw keys/counts are unchanged. This is diagnostic replacement, not startup cleanup or downstream catalog advancement. All seven full-feature all-target checks pass with zero Cargo JSON and plain compiler warnings. An initial Retail check exposed a profile-gated import; the producer now uses a qualified state accessor, with no new cfg or suppression. The final Mists integration executable is byte-identical before and after qualification and all three exact GREEN cases pass again. Formatting and changed-line readability pass. Retail/PTR runtime parity is not claimed.
+
 ## See Also
 
 - [Mists LFR availability](mists-lfr-availability.md)

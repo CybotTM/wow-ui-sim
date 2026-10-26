@@ -139,7 +139,7 @@ fn start_crafting_cast(state: &mut LuaState, plan: &CraftPlan) {
     let Ok(mut sim) = borrow_state_mut(state) else {
         return;
     };
-    let now = sim.start_time.elapsed().as_secs_f64();
+    let now = sim.clock_elapsed().as_secs_f64();
     let cast_id = sim.next_cast_id;
     sim.next_cast_id = sim.next_cast_id.wrapping_add(1);
     #[cfg(feature = "retail-12-1-0")]

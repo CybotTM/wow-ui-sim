@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Supplied voice settings access
+
+[Model and original callback](systems/voice-settings-access.md) record the six-profile declaration-backed query, unknown-state error and host-supplied observation. All 18 exact original-consumer GREEN/producer-free RED pairs pass with byte-identical tests; Wrath preserves absence. Seven all-target checks have zero warnings, all seven paired raw stock maps equal the supplied master baselines, and 98 final launch CVar guards are unchanged. No native readiness default, device catalog, complete initialization, timer cancellation or unsupplied forecast readiness is inferred.
+
 ## [2026-10-26] implementation | Mists transmog supplied input
 
 [Contract and selected display branch](systems/mists-transmog-enabled.md): byte-identical selectors fail producer-free RED at original line4 and pass GREEN for both real-control branches, isolation, transitions and unset recovery. The supplied-state query publishes only on Mists; no default is inferred. Bound stock is unchanged6/12; all seven all-target checks have zero warnings. Full settings, modern native-default policy and the Forever query remain outside this bounded proof.
@@ -17,6 +21,19 @@
 ## [2026-10-26] staged | Supplied equipment-set lock inputs
 
 [Item-ID observations](systems/equipment-set-locks.md) back simulator admin supply/clear methods on R/P/F/M. The missing-admin Retail RED was observed; original-consumer query RED/GREEN and four-profile gates remain pending. No native lock/default policy is claimed.
+
+## [2026-10-26] proof | Supplied StorePublic eligibility
+
+[Final proof and limits](systems/store-public-eligibility.md#final-proof-2026-10-26): GREEN `23eb582af` and RED `ec6ab6a76` integrate master `17baa3e9a` with identical tests. Six original-helper/direct-input pairs, Wrath absence, preserved defaults, seven unchanged raw stock pairs and seven zero-warning all-target checks pass. All 68 protected runtime invocations preserve host CVar bytes/stat. Missing input is distinct from false; native policy and working storefront remain unclaimed.
+
+## [2026-10-26] proof | Complete PTR Mainline preset construction
+
+[Original preset proof](investigations/ptr-edit-mode-declarations.md#complete-original-mainline-preset-construction) records declared EndCap/SwingTimer indices and metadata, first-read RED/unchanged whole-file GREEN, concrete settings/anchors and shared maps. Stock134/154→130/148 has no added keys; original ClearBlockedAuras remains missing, and the stateful original SetUnit replay explains why fewer event-route errors do not prove an API repair. Newer aura stock124/140 is a different production base. Seven separate all-target receipts have zero JSON/plain compiler warnings; formatting/readability and all nine current-byte CVar guards pass.
+
+## [2026-10-26] bounded proof | Challenge run clock
+
+[Final scoped evidence](systems/challenge-mode-run.md) records original timer/icon RED/GREEN, six-profile criteria query state, all seven clock/check profiles, protected stock equality and both InTimeBL modes. The two invented-default probes now use strict absence or supplied map metadata without dropping unrelated assertions. Original criteria initialization is BLOCKED at undeclared ShouldShowCriteria; no exception is swallowed. Inactive key shape remains unknown, and forecast voice/ambient errors remain visible.
+
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 
 [Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) records the four legacy profiles, the already-selected TutorialFrame listener, and the absent native global. Original Mists storage-flow RED remains unchanged; bounded state recorder adds no event/flag/UI policy. GREEN advances past976 through all Lua assertions, but the test still fails its collected-error gate (C_Engraving:315 next). Four-profile state/publication tests pass, stock maps are byte-identical, and all seven canonical all-target checks have zero warnings.
@@ -3064,3 +3081,11 @@ Updated the [active-effect model](systems/lua-api.md#restored-ptr-original-consu
 ## 2026-10-26 — Mists supplied scenario finder eligibility
 
 Added the [supplied bool/string contract](../specs/mists-scenario-finder.md) and [environment-local model](systems/mists-scenario-finder.md). Pinned Mists declaration and selected original PVEFrame270 support a separate optional input, not party-level/catalog inference. Both original entry selectors and the advanced LFR callback regression reject the missing producer at270 and pass byte-identical full-callback GREEN. Supplied tuples, reasons, level independence, two-environment isolation and unset recovery pass. The LFR successor advance retains every visibility/gap assertion. Mists stock stays6/12 without additions, removals or count changes. All seven full-feature all-target checks have zero JSON/plain warnings; formatting and manual Rust readability pass. Native policy, catalog production and broader startup cleanup remain outside scope.
+
+## [2026-10-26] implementation | Mists supplied party minimum
+
+[Supplied minimum](systems/mists-scenario-finder.md#supplied-active-party-minimum) links the [bounded contract](../specs/mists-party-minimum.md). Three exact producer-subtracted REDs and three GREENs prove the original58 boundary, empty-catalog preservation, direct85/90/isolation and explicit errors. Stock stays6/12 with two individually traced diagnostic replacements; catalog discrimination is blocked. All seven full-feature all-target checks pass with zero compiler warnings. Formatting/readability pass; other-profile runtime parity is not claimed.
+
+## 2026-10-26 — Pinned Mists global strings and reputation exposure
+
+Added the [70268 contract](../specs/mists-global-strings.md) and [source/consumer investigation](investigations/mists-global-strings.md). Full decrypted DB2/CSV agreement covers19,914 rows, including the second section; one byte-identical original-consumer selector rejects the foreign table at Setting34 and passes through131/138 with the real pinned setting name. Stock6/12→8/14 exposes an unchanged Retail temporary reputation seed, not a fabricated-label requirement. Pinned API declarations prevent an unsupported account-wide-concept absence claim; a whole-cache Lua/XML scan finds only the missing label's use and no definition. All seven full-feature all-target checks pass with zero JSON/plain compiler warnings. These checks do not establish other profiles' full runtime localization parity.

@@ -1,0 +1,31 @@
+{
+  "build": "5.5.4.70268",
+  "profile": "mists",
+  "locale": "enUS",
+  "file_data_id": 1394440,
+  "content_key": "7feb3e49aa1d9ca1e0253ca7837ef750",
+  "encoding_key": "9d5150546f957d4d35e2936d251ea84f",
+  "db2_sha256": "e71f5424775e8911697db48e026ffbd25507a82902ba0a21a56ef40f9a6d36bf",
+  "csv_sha256": "8e1af596c2a882b9f70d52a27dfa2ad255752b40a45eb2a506ff785b629aae03",
+  "generator": "tools/gen_mists_global_strings.py",
+  "generator_sha256": "c5e2dcbdcb4b6386a1ac83c69ad835efea50b4c5110270a1a6ab59c741078a0e",
+  "algorithm_reference": "tools/gen_forever_global_strings.py",
+  "algorithm_reference_sha256": "a7146ce3b164760436fe56b5b52d99715979cc6f80205a59571457f507520428",
+  "rows": 19914,
+  "sections": [
+    19913,
+    1
+  ],
+  "decrypted_section_key_id": "409FC8B6C2286508",
+  "source": {
+    "product": "wow_classic",
+    "build_key": "b7f315a3ceceeb68a4a9015093032774",
+    "cdn_config_key": "014e7d95f4886872b1ffb61755752395",
+    "archive": "e1dadd69e3f83aaebe1a572b4349b602",
+    "archive_offset": 131819179,
+    "encoded_size": 462955,
+    "blte_sha256": "afd660efb752b948366efbeeabbe6b388a8793b74cbf53f979dcbf3a83a6ce23",
+    "all_chunk_md5s_verified": true
+  },
+  "regenerate": "python3 tools/gen_mists_global_strings.py"
+}

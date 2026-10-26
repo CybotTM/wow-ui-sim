@@ -362,8 +362,9 @@ pub struct SimState {
     #[cfg(feature = "base-spell-relationships")]
     pub base_spell_relationships: crate::c_api::spell_base::BaseSpellRelationships,
     pub spell_activation_overlays: HashSet<u32>,
-    #[cfg(feature = "retail-12-0-0")]
     pub challenge_completion: crate::c_api::c_challenge_mode::ChallengeCompletionInfo,
+    pub(crate) challenge_run: crate::c_api::challenge_run::ChallengeState,
+    pub(crate) manual_clock: Option<crate::lua_api::manual_clock::ManualClock>,
     pub spell_loss_of_control: HashMap<u32, LossOfControlInfo>,
     pub active_loss_of_control:
         HashMap<String, Vec<crate::c_api::c_loss_of_control::ActiveLossOfControlData>>,
@@ -534,6 +535,9 @@ pub struct SimState {
     pub crafting: CraftingState,
     pub net_stats: NetStats,
     pub store_frame_shown: bool,
+    /// Host observations; absence is not evidence of an ineligible group.
+    pub store_public_eligibility:
+        crate::c_api::store_public_eligibility::GroupEligibilityObservations,
     pub timerunning_season_id: Option<u32>,
     pub timerunning_season_seconds_remaining: u64,
     pub modifier_keys: ModifierKeys,
@@ -563,6 +567,8 @@ pub struct SimState {
     pub mists_transmog: crate::c_api::mists_transmog::MistsTransmogAvailability,
     /// Supplied Mists scenario eligibility and failure reason; None leaves policy unknown.
     pub scenario_finder_availability: Option<(bool, String)>,
+    /// Supplied Mists active-party minimum; None leaves native policy unknown.
+    pub mists_party_min_level: Option<f64>,
     pub lfg_category_info: std::collections::HashMap<i32, LfgCategoryInfo>,
     pub lfg_active_categories: std::collections::HashSet<i32>,
     pub lfg_queued_dungeons: std::collections::HashMap<i32, std::collections::BTreeSet<i32>>,

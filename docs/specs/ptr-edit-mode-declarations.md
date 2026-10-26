@@ -20,6 +20,15 @@ PTR publishes declaration-backed Edit Mode enums through `src/c_api/ptr_edit_mod
 - The unchanged whole `EditModeSettingDisplayInfo.lua` must complete and publish `GetSystemSettingDisplayInfoMap`, with the original per-system keys and setting values.
 - Do not publish unread account settings or metadata for this boundary. Stop at a non-declaration failure rather than replacing Blizzard functions or strings.
 
+## Complete PTR Mainline preset index declarations
+
+- Publish only `Enum.EditModeMainActionBarEndCapSystemIndices` as EndCapLeft=1 and EndCapRight=2, with `Enum.EditModeMainActionBarEndCapSystemIndicesMeta` NumValues=2, MinValue=1, MaxValue=2. The pinned PTR 12.1.7.70493 `Blizzard_APIDocumentationGenerated/EditModeManagerConstantsDocumentation.lua:560–568` declares this exact name, metadata and values. Do not publish a shortened alias.
+- Keep publication in the existing C API module and runtime `client_profile::ACTIVE` PTR gate. Preserve other profiles and unrelated members.
+- The unchanged selected Mainline preset endcap constructor at `EditModePresetLayouts.lua:630–655` must retain distinct records at indices1/2, each with Hidden=0, and its original anchors: RIGHT/MainActionBar/LEFT/(30,5) and LEFT/BagsBar/RIGHT/(-30,5).
+- Publish `Enum.EditModeSwingTimerSystemIndices` as MainHand=1, OffHand=2, Ranged=3, with `Enum.EditModeSwingTimerSystemIndicesMeta` NumValues=3, MinValue=1, MaxValue=3. The same pinned PTR document at719–728 declares the exact name, metadata and values.
+- The whole unchanged selected Mainline `EditModePresetLayouts.lua` must complete. All three preset maps must preserve the original two EndCap records and three distinct SwingTimer records, settings and exact per-index anchors, including Gamepad's original Width/Height overrides. Producer-subtracted RED must stop at the first EndCap read (physical631); byte-identical GREEN must reach the end of the file.
+- This is complete preset construction, not a native default-layout policy or full Edit Mode lifecycle claim. No other declaration family is included.
+
 ## How it works
 
 - [Declaration and consumer evidence](../wiki/investigations/ptr-edit-mode-declarations.md).
@@ -32,12 +41,12 @@ PTR publishes declaration-backed Edit Mode enums through `src/c_api/ptr_edit_mod
 
 ## Tests asserting this spec
 
-- `tests/ptr_edit_mode_enums.rs`: original selected dropdowns, complete SwingTimer settings constructor, independently reached original preset manager, unchanged whole-file display-info initialization and original LossOfControl XML OnLoad completion.
+- `tests/ptr_edit_mode_enums.rs`: original selected dropdowns, complete SwingTimer settings constructor, independently reached original preset manager, unchanged whole-file display-info initialization and original LossOfControl XML OnLoad completion, and complete unchanged Mainline preset construction with distinct EndCap and SwingTimer records across all three maps.
 
 ## Known gaps (current cycle)
 
 - [x] Complete original display-info initialization and the original LossOfControl OnLoad both pass byte-identical producer-only RED/GREEN selectors.
-- [ ] Native preset defaults and other Edit Mode lifecycle behavior remain outside this contract. The separate Mainline preset now stops at missing EditModeMainActionBarEndCapSystemIndices; display-info does not read that family.
+- [ ] Native preset defaults and other Edit Mode lifecycle behavior remain outside this contract. Full Edit Mode lifecycle and native default-layout behavior are not covered by complete preset construction. Its complete constructor has the separate two-family contract above; display-info does not read either index family.
 
 ## Out of scope
 

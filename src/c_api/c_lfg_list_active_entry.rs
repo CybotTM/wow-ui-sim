@@ -12,7 +12,6 @@ use crate::lua_api::state_types::LfgActiveEntry;
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
-use std::time::Instant;
 
 fn number_field(state: &mut LuaState, data: Val, name: &str) -> LuaResult<Option<f64>> {
     match table_get(state, data, name) {
@@ -81,7 +80,7 @@ fn read_create_data(state: &mut LuaState) -> LuaResult<LfgActiveEntry> {
         required_item_level: number_field(state, data, "requiredItemLevel")?.unwrap_or(0.0),
         required_pvp_rating: number_field(state, data, "requiredPvpRating")?.unwrap_or(0.0),
         censored: false,
-        created_at: Instant::now(),
+        created_at: borrow_state(state)?.clock_now(),
     })
 }
 
@@ -171,11 +170,15 @@ pub(crate) fn get_active_entry_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(info);
     let ids = u32_array_table(state, &entry.activity_ids);
     table_set(state, info, "activityIDs", ids);
-    set_entry_fields(state, info, &entry);
+    let elapsed = borrow_state(state)?
+        .clock_now()
+        .saturating_duration_since(entry.created_at)
+        .as_secs() as f64;
+    set_entry_fields(state, info, &entry, elapsed);
     Ok(1)
 }
 
-fn set_entry_fields(state: &mut LuaState, info: Val, entry: &LfgActiveEntry) {
+fn set_entry_fields(state: &mut LuaState, info: Val, entry: &LfgActiveEntry, elapsed: f64) {
     // INFERRED: title/comment/voice come from the protected entry-creation
     // edit boxes, which are not modeled, so they publish as empty strings.
     for name in ["name", "comment", "voiceChat"] {
@@ -190,7 +193,7 @@ fn set_entry_fields(state: &mut LuaState, info: Val, entry: &LfgActiveEntry) {
         ("requiredPvpRating", entry.required_pvp_rating),
         ("playstyle", f64::from(entry.playstyle)),
         // INFERRED: duration is whole seconds since the listing was created.
-        ("duration", entry.created_at.elapsed().as_secs() as f64),
+        ("duration", elapsed),
     ] {
         table_set(state, info, name, Val::Num(value));
     }

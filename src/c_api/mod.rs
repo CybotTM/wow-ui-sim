@@ -76,7 +76,6 @@ pub(crate) mod c_battle_net_invite;
 pub mod c_calendar;
 pub mod c_catalog_shop;
 pub mod c_catalog_shop_products;
-#[cfg(feature = "retail-12-0-0")]
 pub mod c_challenge_mode;
 pub mod c_character_services;
 pub mod c_chat_bubbles;
@@ -183,12 +182,14 @@ pub mod c_quest_log;
 mod c_quest_log_watches;
 pub mod c_quest_offer;
 pub mod c_super_track;
+pub(crate) mod challenge_run;
 pub mod container_quest;
 pub mod engraving_inputs;
 pub mod forever_startup;
 mod lfr_availability;
 pub mod mists_transmog;
 mod scenario_finder_availability;
+pub mod store_public_eligibility;
 #[cfg(feature = "client-wowforever")]
 pub use c_quest_log_watches::QuestWatchType;
 #[cfg(feature = "client-wowforever")]
@@ -238,6 +239,7 @@ pub(crate) mod c_transmog_collection;
 pub(crate) mod c_voice_chat_activity;
 #[cfg(feature = "retail-12-0-5")]
 pub mod c_voice_chat_channels;
+mod c_voice_chat_settings;
 #[cfg(feature = "retail-12-0-0")]
 mod c_voice_chat_volume;
 #[cfg(feature = "retail-12-0-5")]
