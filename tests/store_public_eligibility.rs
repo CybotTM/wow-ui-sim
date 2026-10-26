@@ -66,25 +66,38 @@ fn load_original_helper() -> WowLuaEnv {
 
 fn assert_choice(env: &WowLuaEnv, subscription: bool, game_time: bool, expected: &str) {
     supply(env, subscription, game_time);
-    let line = if matches!(ACTIVE, ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::WowForever) {
+    let errors_before = env.state().borrow().lua_errors.len();
+    let line = if matches!(
+        ACTIVE,
+        ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::WowForever
+    ) {
         44
     } else {
         32
     };
-    let script = format!(r#"
+    let script = format!(
+        r#"
         local result, calls, lines = observeStoreHelper()
         assert(result == {has_product}, 'helper return for supplied observations')
         assert(calls == '{expected}', 'outbound choice: '..calls)
         assert(lines[{line}], 'original subscription query line')
         assert(not not lines[{second}] == {second_reached}, 'original game-time query reachability')
         print('original query lines', {line}, {second}, lines[{second}])
-    "#, has_product = subscription || game_time, second = line + 4, second_reached = !subscription);
-    env.exec(&script).expect("original helper must consume supplied eligibility");
+    "#,
+        has_product = subscription || game_time,
+        second = line + 4,
+        second_reached = !subscription
+    );
+    env.exec(&script)
+        .expect("original helper must consume supplied eligibility");
+    assert_eq!(env.state().borrow().lua_errors.len(), errors_before);
 }
 
 #[test]
 fn original_subscription_helper_tracks_supplied_group_eligibility() {
-    if ACTIVE == ClientProfile::Wrath { return; }
+    if ACTIVE == ClientProfile::Wrath {
+        return;
+    }
     let env = load_original_helper();
     // Fixed secure lists deliberately contradict the supplied observations.
     env.exec("__wow_store_state.productsByGroup[156] = {}; __wow_store_state.productsByGroup[37] = {1003}").unwrap();
@@ -93,6 +106,25 @@ fn original_subscription_helper_tracks_supplied_group_eligibility() {
     assert_choice(&env, false, false, "sound,url:22");
     assert_choice(&env, true, false, "subscription,toggle");
     assert_choice(&env, true, true, "subscription,toggle");
+    env.state()
+        .borrow_mut()
+        .store_public_eligibility
+        .remove(&37);
+    env.exec("local result, calls = observeStoreHelper(); assert(result and calls == 'subscription,toggle')")
+        .expect("subscription priority must not require a game-time observation");
+    env.state()
+        .borrow_mut()
+        .store_public_eligibility
+        .insert(156, false);
+    let missing = env
+        .exec("observeStoreHelper()")
+        .expect_err("original second query must expose missing game-time input");
+    assert!(
+        missing
+            .to_string()
+            .contains("groupID=37 has no supplied eligibility observation"),
+        "{missing}"
+    );
     // Membership changes cannot change the same supplied eligibility result.
     env.exec("__wow_store_state.productsByGroup[156] = {1003}; __wow_store_state.productsByGroup[37] = {}").unwrap();
     assert_choice(&env, true, false, "subscription,toggle");
@@ -105,11 +137,15 @@ fn original_subscription_helper_tracks_supplied_group_eligibility() {
 fn supplied_group_shape_updates_missing_input_and_environment_isolation() {
     let first = WowLuaEnv::new().unwrap();
     if ACTIVE == ClientProfile::Wrath {
-        first.exec("assert(rawget(C_StorePublic, 'DoesGroupHavePurchaseableProducts') == nil)").unwrap();
+        first
+            .exec("assert(rawget(C_StorePublic, 'DoesGroupHavePurchaseableProducts') == nil)")
+            .unwrap();
         return;
     }
     supply(&first, true, false);
-    first.exec(r#"
+    first
+        .exec(
+            r#"
         assert(type(C_StorePublic.DoesGroupHavePurchaseableProducts) == 'function')
         local function checkResult(expected, ...)
             assert(select('#', ...) == 1, 'one result')
@@ -118,7 +154,9 @@ fn supplied_group_shape_updates_missing_input_and_environment_isolation() {
         end
         checkResult(true, C_StorePublic.DoesGroupHavePurchaseableProducts(156))
         checkResult(false, C_StorePublic.DoesGroupHavePurchaseableProducts(37))
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     let second = WowLuaEnv::new().unwrap();
     assert_missing(&second, 156);
     supply(&second, false, true);
@@ -126,16 +164,27 @@ fn supplied_group_shape_updates_missing_input_and_environment_isolation() {
     first.exec("assert(not C_StorePublic.DoesGroupHavePurchaseableProducts(156)); assert(C_StorePublic.DoesGroupHavePurchaseableProducts(37))").unwrap();
     supply(&first, true, false);
     second.exec("assert(not C_StorePublic.DoesGroupHavePurchaseableProducts(156)); assert(C_StorePublic.DoesGroupHavePurchaseableProducts(37))").unwrap();
-    first.state().borrow_mut().store_public_eligibility.remove(&156);
+    first
+        .state()
+        .borrow_mut()
+        .store_public_eligibility
+        .remove(&156);
     assert_missing(&first, 156);
     assert_missing(&first, 999);
     supply(&first, false, false);
-    first.exec("assert(not C_StorePublic.DoesGroupHavePurchaseableProducts(156))").unwrap();
+    first
+        .exec("assert(not C_StorePublic.DoesGroupHavePurchaseableProducts(156))")
+        .unwrap();
 }
 
 fn assert_missing(env: &WowLuaEnv, group: i32) {
-    let error = env.exec(&format!("C_StorePublic.DoesGroupHavePurchaseableProducts({group})"))
+    let error = env
+        .exec(&format!(
+            "C_StorePublic.DoesGroupHavePurchaseableProducts({group})"
+        ))
         .expect_err("missing input must not silently return false");
-    let expected = format!("missing-input: C_StorePublic.DoesGroupHavePurchaseableProducts groupID={group} has no supplied eligibility observation");
+    let expected = format!(
+        "missing-input: C_StorePublic.DoesGroupHavePurchaseableProducts groupID={group} has no supplied eligibility observation"
+    );
     assert!(error.to_string().contains(&expected), "{error}");
 }
