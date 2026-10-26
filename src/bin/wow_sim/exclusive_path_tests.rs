@@ -123,15 +123,44 @@ fn exclusive_run_tests_finds_selected_tests_and_bundled_framework() {
 }
 
 #[test]
+fn exclusive_environment_without_a_root_does_not_restore_candidates() {
+    if std::env::var_os("WOW_SIM_EMPTY_EXCLUSIVE_CHILD").is_some() {
+        assert!(wow_ui_sim::paths::default_addons_paths().is_empty());
+        let args = Args::try_parse_from(["wow-sim", "run-tests", "Fixture"]).unwrap();
+        assert!(args.read_addon_paths().is_empty());
+        return;
+    }
+    for value in ["1", "true"] {
+        let output = Command::new(std::env::current_exe().unwrap())
+            .args(["--exact", "exclusive_path_tests::exclusive_environment_without_a_root_does_not_restore_candidates", "--nocapture"])
+            .env("WOW_SIM_EMPTY_EXCLUSIVE_CHILD", "1")
+            .env("WOW_SIM_ADDONS_PATH_EXCLUSIVE", value)
+            .env_remove("WOW_SIM_ADDONS_PATH")
+            .output().unwrap();
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+    }
+}
+
+#[test]
 fn repeated_cli_addon_paths_are_accepted() {
+    let temp = tempfile::tempdir().unwrap();
+    let first = temp.path().join("first");
+    let second = temp.path().join("second");
+    std::fs::create_dir(&first).unwrap();
+    std::fs::create_dir(&second).unwrap();
     let args = Args::try_parse_from([
         "wow-sim",
         "--addons-path",
-        "first",
+        first.to_str().unwrap(),
         "--addons-path",
-        "second",
+        second.to_str().unwrap(),
         "run-tests",
         "Fixture",
-    ]);
-    assert!(args.is_ok(), "repeatable exclusive roots: {:?}", args.err());
+    ])
+    .expect("repeatable exclusive roots");
+    assert_eq!(args.read_addon_paths(), vec![first, second]);
 }

@@ -433,6 +433,7 @@ fn load_startup_addons(
     });
     startup_trace::time_load_step("load third-party addons", || {
         addon_loading::load_third_party_addons(
+            &args.read_addon_paths(),
             args.skip_addons(),
             args.is_test_command(),
             env,
