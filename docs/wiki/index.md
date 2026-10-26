@@ -1,3 +1,7 @@
+## [2026-10-26] preparation | Mists transmog supplied input
+
+[Contract and selected display branch](systems/mists-transmog-enabled.md): separate unset-by-default Mists input, original real Settings controls, and explicit modern/Forever exclusions. Executable proof pending.
+
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 
 [Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) links the [bounded contract](../specs/legacy-tutorial-requests.md): Mists/Era/Anniversary/Wrath standalone numeric requests, no missing Lua definition, no result use, no inferred tutorial policy. Unchanged old Mists storage-flow RED reaches ContainerFrame_Shared:976; GREEN completes its Lua assertions but still fails on collected callback/startup errors, with C_Engraving:315 next. Four-profile recorder/publication tests pass, all four stock maps are byte-identical, and all seven all-target checks have zero warnings.
