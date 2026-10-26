@@ -201,7 +201,11 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                             result["steps"][name] = {"status": "not_applicable", "reason": "prefork_full_ui supports only Retail/Mists"}
                             continue
                         binary = test_artifact(receipt, artifact, kind)
-                        command = ["systemd-run", "--user", "--scope", "-p", "MemoryMax=9G", "-p", "MemorySwapMax=0", "--", binary]
+                        mount = Path.home() / ".cache/wow-ui-sim-srcmount" / target_dir.name
+                        command = ["systemd-run", "--user", "--wait", "--pipe", "--collect", "--quiet",
+                                   "-p", "MemoryMax=9G", "-p", "MemorySwapMax=0",
+                                   "-p", f"BindPaths={checkout}:{mount}", f"--working-directory={mount}",
+                                   *(f"--setenv={name}" for name in env), "--", binary]
                         result["steps"][name], output = run_step(name, command, checkout, log, env)
                         result["failures"][name] = sorted(set(FAILED.findall(output)))
                 result["status"] = "FAILED" if any(step.get("exit", 0) for step in result["steps"].values()) else "PASSED"
