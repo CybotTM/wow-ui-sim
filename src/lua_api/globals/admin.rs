@@ -96,6 +96,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     let builder = register_world(builder)?;
     let builder = register_collections_pvp(builder)?;
     let builder = register_inventory_misc(builder)?;
+    let builder = crate::c_api::equipment_set_locks::register_admin(builder)?;
     let builder = builder.set_function(
         "SetHousingCatalogVariantStoredCount",
         crate::c_api::c_housing::catalog::set_variant_stored_count,

@@ -1,3 +1,7 @@
+## [2026-10-26] staged | Supplied equipment-set lock inputs
+
+[Item-ID observations](systems/equipment-set-locks.md) back simulator admin supply/clear methods on R/P/F/M. The missing-admin Retail RED was observed; original-consumer query RED/GREEN and four-profile gates remain pending. No native lock/default policy is claimed.
+
 ## [2026-10-26] implementation | PTR SwingTimer declarations
 
 [Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) links the [contract](../specs/ptr-edit-mode-declarations.md): all seven setting identifiers, three visibility choices and their metadata pass byte-identical original Scale-boundary RED/full-constructor GREEN. Stock stays216/282 with both replacement raw keys traced to the absent SwingTimer system key; that next boundary is unfixed. PTR/Retail/Era separate all-target receipts have zero warnings; formatting/readability pass. Other profiles keep their existing declaration paths.

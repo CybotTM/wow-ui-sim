@@ -787,6 +787,9 @@ pub struct EquipmentSet {
 #[derive(Debug, Clone, Default)]
 pub struct EquipmentManagerState {
     pub sets: Vec<EquipmentSet>,
+    /// Explicit item-ID observations, shared by saved copies of the same ID.
+    /// Absence is unknown, not an implicit unlocked observation.
+    pub item_lock_observations: HashMap<u32, bool>,
     /// Next id handed out by `CreateEquipmentSet`. Starts at 1.
     pub next_id: i32,
     /// Slots flagged via `IgnoreSlotForSave` for the *next* save. The
@@ -804,6 +807,7 @@ impl EquipmentManagerState {
         Self {
             sets: Vec::new(),
             next_id: 1,
+            item_lock_observations: HashMap::new(),
             ignored_slots_pending_save: HashSet::new(),
             last_used_set_id: None,
         }
