@@ -117,3 +117,22 @@ fn original_wrath_flyout_tracks_slot_candidates_by_location() {
     }
 }
 
+
+#[test]
+fn original_wrath_equipment_location_reads_socketed_gems() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("initialize Wrath Lua environment");
+        load_wrath_inventory(&env);
+        env.state().borrow_mut().player.equipped_items.get_mut(&12)
+            .expect("fixture ring is equipped").gem_ids = [40111, 40112, 0];
+        env.exec(r#"
+            local id, _, _, _, _, _, _, _, _, _, _, _, gem1, gem2, gem3 =
+                EquipmentManager_GetItemInfoByLocation(ITEM_INVENTORY_LOCATION_PLAYER + 12)
+            assert(id == 49803)
+            assert(gem1 == 40111 and gem2 == 40112 and gem3 == nil,
+                "original equipment consumer must return supplied socketed gem IDs")
+            assert(select("#", GetInventoryItemGems(19)) == 0,
+                "empty equipment slot returns no gems")
+        "#).expect("Wrath equipment location consumes modeled socketed gems");
+    }
+}
