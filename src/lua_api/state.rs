@@ -619,6 +619,7 @@ macro_rules! build_empty_sim_state {
             pending_duel: None,
             pending_resurrect: None,
             corpse_available: false,
+            corpse_map_positions: HashMap::new(),
             active_trade: None,
             open_panels: ::std::collections::HashSet::new(),
             is_party_lfg: false,
