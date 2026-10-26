@@ -524,6 +524,10 @@ def snapshot_source_hashes(current, snapshot):
     return read_input_hashes(worktree, names)
 
 
+class LockClosureRejected(ValueError):
+    pass
+
+
 def lock_closure_digest(lock_bytes, package_id):
     packages = tomllib.loads(lock_bytes.decode())["package"]
     fragment = package_id.rsplit("#", 1)[-1]
@@ -541,7 +545,11 @@ def lock_closure_digest(lock_bytes, package_id):
             raise ValueError(f"ambiguous or missing lock package: {name} {version}")
         return matches[0]
 
-    pending = [resolve(name, version, source)]
+    roots = [p for p in packages if p["name"] == name and p["version"] == version
+             and p.get("source") == source]
+    if len(roots) != 1:
+        raise ValueError(f"ambiguous or missing lock package: {name} {version}")
+    pending = roots
     entries = set()
     while pending:
         package = pending.pop()
@@ -606,7 +614,9 @@ def certify_record(current, record, previous, source_before, artifacts, snapshot
                             raise ValueError("legacy lock digest mismatch")
                         comparable["lock_closure"] = lock_closure_digest(lock, package_id)
                     except (OSError, subprocess.CalledProcessError, ValueError, KeyError):
-                        raise ValueError(f"unverifiable legacy lock for {output}") from None
+                        raise LockClosureRejected(f"unverifiable legacy lock for {output}") from None
+                if comparable["lock_closure"] != certificate["lock_closure"]:
+                    raise LockClosureRejected(f"lock closure changed for {output}")
                 comparable["inputs"] = dict(comparable["inputs"], **{"Cargo.lock": hashes.get("Cargo.lock")})
             if comparable != certificate:
                 raise ValueError(f"uncertified fresh artifact {output}; rebuild required")
@@ -632,7 +642,8 @@ def certify_artifacts(current, previous, source_before, artifacts, snapshot):
                 current["closure_verified"].append(artifact_path(record))
         except (OSError, ValueError, KeyError, tomllib.TOMLDecodeError) as error:
             errors.append(str(error))
-            current["rejected_artifacts"].append(artifact_path(record))
+            if isinstance(error, LockClosureRejected):
+                current["rejected_artifacts"].append(artifact_path(record))
     return certificates, errors
 
 
@@ -693,8 +704,8 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
     result = "success" if returncode == 0 else "failed"
     if stale:
         result = "stale-artifacts"
-    rejected = set(stale_paths) | {os.path.relpath(path, slot)
-                                   for path in current.get("rejected_artifacts", [])}
+    rejected = {os.path.relpath(path, slot)
+                for path in current.get("rejected_artifacts", [])}
     evicted = []
     for record in current["reported_artifacts"]:
         if os.path.relpath(artifact_path(record), slot) not in rejected:
@@ -702,10 +713,12 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
         outputs = {Path(p) for p in [record.get("executable"), *record.get("filenames", [])] if p}
         fingerprints = set()
         for output in outputs:
-            match = re.search(r"-([a-z0-9]+)(?:\.|$)", output.name)
+            match = re.search(r"-([a-z0-9]+)(?:\.[^.]+)*$", output.name)
             if match:
                 profile = output.parent.parent if output.parent.name == "deps" else output.parent
-                fingerprints.update((profile / ".fingerprint").glob(f"*-{match.group(1)}"))
+                package = record.get("package_id", "").rsplit("#", 1)[-1].split("@", 1)[0]
+                if package:
+                    fingerprints.add(profile / ".fingerprint" / f"{package}-{match.group(1)}")
         for path in sorted(outputs | fingerprints):
             if not path.is_relative_to(slot):
                 continue
