@@ -98,6 +98,17 @@ class CertifiedSuiteTests(unittest.TestCase):
         self.assertEqual(subprocess.check_output(['git', '-C', str(worktree), 'rev-parse', 'HEAD'],
                                                  env=self.env, text=True).strip(), self.sha)
         self.assertEqual((worktree / 'source').read_text(), 'frozen source\n')
+        self.assertEqual(subprocess.check_output(['git', '-C', str(worktree), 'status', '--porcelain'],
+                                                 env=self.env, text=True), '')
+        self.assertFalse((self.slot / '.owner').exists())
+        released = self.home / f'.local/state/wow-ui-sim/handoff/full-suite/{self.sha[:12]}-ptr/slot-2.owner.released'
+        self.assertEqual(released.read_text(), f'full-suite {self.sha[:12]} ptr')
+        again = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                '--profile', 'ptr', '--target-dir', str(self.slot)],
+                               env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(again.returncode, 0, again.stderr)
+        second = json.loads((self.home / 'slot-argv.json').read_text())
+        self.assertEqual(second[second.index('--worktree') + 1], str(worktree))
 
     def test_result_waits_for_certified_build_and_test_execution(self):
         test_binary = self.slot / 'integration-test'
@@ -144,6 +155,10 @@ class CertifiedSuiteTests(unittest.TestCase):
         self.assertEqual(process.returncode, 0, stderr)
         self.assertTrue(receipt.exists())
         self.assertEqual(json.loads(receipt.read_text())['status'], 'PASSED')
+        log = (self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.log').read_text()
+        self.assertIn('cvar-before', log)
+        self.assertIn('cvar-after', log)
+        self.assertEqual((self.home / '.local/share/wow-sim/cvars.json').read_text(), '{}')
         unit = json.loads((self.home / 'test-unit.json').read_text())
         self.assertIn('MemoryMax=9G', unit)
         self.assertIn('MemorySwapMax=0', unit)
