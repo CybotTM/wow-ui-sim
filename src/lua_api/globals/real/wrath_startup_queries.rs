@@ -32,6 +32,13 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     // unrelated WoWLabs matchmaking party used by the earlier registration.
     LuaApiMut::register_function(lua, "IsPartyLeader", is_party_leader)?;
     LuaApiMut::register_function(lua, "UnitIsPartyLeader", unit_is_party_leader)?;
+    LuaApiMut::register_function(lua, "UnitIsTapped", unit_is_tapped)?;
+    LuaApiMut::register_function(lua, "UnitIsTappedByPlayer", unit_is_tapped_by_player)?;
+    LuaApiMut::register_function(
+        lua,
+        "UnitIsTappedByAllThreatList",
+        unit_is_tapped_by_all_threat_list,
+    )?;
     LuaApiMut::register_function(lua, "GetPartyMember", get_party_member)?;
     LuaApiMut::register_function(lua, "GetPartyLeaderIndex", get_party_leader_index)?;
     LuaApiMut::register_function(lua, "GetBagName", get_bag_name)?;
@@ -254,6 +261,49 @@ fn get_party_member(state: &mut LuaState) -> LuaResult<u32> {
     };
     state.push(Val::Bool(present));
     Ok(1)
+}
+
+fn read_unit_tap_flag(
+    state: &mut LuaState,
+    usage: &'static str,
+    select: impl FnOnce(crate::lua_api::state::WrathUnitTapState) -> bool,
+) -> LuaResult<u32> {
+    if !matches!(stack_val(state, 1), Val::Str(_)) {
+        return Err(runtime_error(usage));
+    }
+    let unit = String::from_stack(state, 1)?;
+    let flag = {
+        let sim = borrow_state(state)?;
+        if super::super::group_queries::unit_exists_in_state(&sim, &unit) {
+            let guid = super::super::unit_misc::guid_for_unit(&sim, &unit);
+            select(
+                sim.wrath_unit_tap_states
+                    .get(&guid)
+                    .copied()
+                    .unwrap_or_default(),
+            )
+        } else {
+            false
+        }
+    };
+    state.push(if flag { Val::Num(1.0) } else { Val::Nil });
+    Ok(1)
+}
+
+fn unit_is_tapped(state: &mut LuaState) -> LuaResult<u32> {
+    read_unit_tap_flag(state, "Usage: UnitIsTapped(unit)", |tap| tap.tapped)
+}
+
+fn unit_is_tapped_by_player(state: &mut LuaState) -> LuaResult<u32> {
+    read_unit_tap_flag(state, "Usage: UnitIsTappedByPlayer(unit)", |tap| {
+        tap.by_player
+    })
+}
+
+fn unit_is_tapped_by_all_threat_list(state: &mut LuaState) -> LuaResult<u32> {
+    read_unit_tap_flag(state, "Usage: UnitIsTappedByAllThreatList(unit)", |tap| {
+        tap.by_all_threat_list
+    })
 }
 
 fn unit_is_party_leader(state: &mut LuaState) -> LuaResult<u32> {
