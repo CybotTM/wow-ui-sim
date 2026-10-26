@@ -1830,6 +1830,81 @@ class LockClosureTransitionTests(unittest.TestCase):
             previous["identity"]["head"] = revision
         path.write_text(json.dumps(previous))
 
+    def test_path_version_only_transition_accepts_and_evicts(self):
+        self.setup_transition()
+        self.package_id = f"path+file://{self.tree}/probe#0.1.0"
+        # Create a certificate with the actual Cargo path-ID form.
+        error, _ = self.execute(False)
+        self.assertIsNone(error, error)
+        self.change_lock()
+        error, _ = self.execute(True)
+        self.assertIsNone(error, error)
+        (self.tree / "Cargo.lock").write_text(self.lock_text("2.0.0", "middle"))
+        self.git("add", "Cargo.lock")
+        self.git("commit", "-qm", "change closure")
+        error, _ = self.execute(True)
+        self.assertIsNotNone(error)
+        self.assertFalse(self.output.exists())
+        self.assertFalse(self.fingerprint.exists())
+
+    def test_duplicate_name_version_resolves_source(self):
+        lock = b'''version = 3
+[[package]]
+name = "probe"
+version = "0.1.0"
+dependencies = ["storage 0.2.0 (git+https://example.org/repo?rev=abc)"]
+[[package]]
+name = "storage"
+version = "0.2.0"
+source = "registry+https://example.org/index"
+[[package]]
+name = "storage"
+version = "0.2.0"
+source = "git+https://example.org/repo?rev=abc#abc"
+'''
+        digest = self.module.lock_closure_digest(lock, "path+file:///tmp/probe#probe@0.1.0")
+        changed_other = lock.replace(b'example.org/index', b'other.org/index')
+        self.assertEqual(digest, self.module.lock_closure_digest(changed_other, "path+file:///tmp/probe#probe@0.1.0"))
+
+    def test_checksum_and_dependency_edges_change_digest(self):
+        lock = b'''version = 3
+[[package]]
+name = "probe"
+version = "0.1.0"
+dependencies = ["a", "b"]
+[[package]]
+name = "a"
+version = "1.0.0"
+checksum = "one"
+dependencies = ["b"]
+[[package]]
+name = "b"
+version = "1.0.0"
+'''
+        package = "path+file:///tmp/probe#probe@0.1.0"
+        digest = self.module.lock_closure_digest(lock, package)
+        self.assertNotEqual(digest, self.module.lock_closure_digest(lock.replace(b'"one"', b'"two"'), package))
+        self.assertNotEqual(digest, self.module.lock_closure_digest(lock.replace(b'dependencies = ["b"]', b'dependencies = []'), package))
+
+    def test_build_script_parent_fingerprint_is_evicted(self):
+        self.setup_transition("middle")
+        self.output.unlink()
+        self.fingerprint.unlink()
+        self.output = self.slot / "debug/build/probe-abc123/build-script-build"
+        self.output.parent.mkdir(parents=True)
+        self.output.write_bytes(b"build script")
+        self.output.with_suffix(".d").write_text(f"{self.output}: {self.tree}/src/main.rs\n")
+        self.fingerprint = self.slot / "debug/.fingerprint/probe-abc123/build-script-build-script-build"
+        self.fingerprint.parent.mkdir(parents=True)
+        self.fingerprint.write_text("fingerprint")
+        error, _ = self.execute(False)
+        self.assertIsNone(error, error)
+        self.change_lock("middle")
+        error, _ = self.execute(True)
+        self.assertIsNotNone(error)
+        self.assertFalse(self.output.exists())
+        self.assertFalse(self.fingerprint.exists())
+
     def test_unrelated_lock_change_accepts_certificate_and_stale_check(self):
         self.setup_transition()
         self.change_lock()
