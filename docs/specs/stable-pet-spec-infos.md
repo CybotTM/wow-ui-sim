@@ -17,7 +17,7 @@ Retail/PTR accept supplied `PetSpecInfo` lists for `C_StableInfo.GetAvailablePet
 
 ## Implementation inventory
 
-- `src/c_api/c_stable_info/pet_spec_infos.rs`: supplied record validation and admin input; getter delivery follows original-consumer RED.
+- `src/c_api/c_stable_info/pet_spec_infos.rs`: supplied record validation, admin input and profile-gated getter.
 - `src/c_api/c_stable_info.rs`: stable namespace registration.
 - `src/lua_api/state/sim_state.rs`, `src/lua_api/state.rs`: environment-local optional observation.
 - `src/lua_api/globals/admin.rs`: simulator input registration.

@@ -57,7 +57,7 @@ At frozen master `9a104c448`, stock maps are Retail16/18, PTR296/410 and Mists12
 
 The [supplied catalog contract](../../specs/stable-pet-spec-infos.md) keeps unknown membership distinct from an observed empty list. PTR70493 selects Standard StableUI through its standard/camelot TOC and `[Game]` substitution; the specialization dropdown at XML373 inherits the menu template's OnLoad, which invokes original Lua1203 and queries the catalog at1205. Retail's original OnLoad1221 does not query it: use Refresh1227 for producer proof. Forever selects Camelot and never consumes this getter, despite its generated declaration.
 
-Initial delivery stages only environment-local optional records and the Retail/PTR admin input. Getter delivery and original-consumer runtime proof are pending. No default list or native specialization identity is inferred.
+The producer returns fresh arrays/records from environment-local optional observations and raises a named native-unknown error when unset. PTR's installed original OnLoad1205 and Refresh1217 selectors each failed producer-free RED after successful admin input; supplied GREEN and Retail proof remain pending. Both siblings retain the inert input scaffold, so stock defaults remain master-equivalent. No default list or native specialization identity is inferred.
 
 ## Supplied modern stable active list
 

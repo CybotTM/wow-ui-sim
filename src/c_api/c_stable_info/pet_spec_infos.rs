@@ -1,9 +1,13 @@
 //! Supplied specialization observations, not a native catalog or initial-state policy.
 //! Retail StableInfoDocumentation.lua:24–31,216–224; PTR 70493:28–35,243–251.
 
+use crate::c_api::helpers::set_table_array;
 use crate::client_profile::{ACTIVE, ClientProfile};
-use crate::lua_api::methods::{borrow_state_mut, table_get, val_to_string};
-use crate::lua_bridge::{TableBuilder, stack_val};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
+    val_to_string,
+};
+use crate::lua_bridge::{TableBuilder, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
 
@@ -13,6 +17,39 @@ pub struct PetSpecInfo {
     pub spec_id: f64,
     pub spec_index: u32,
     pub specialization_name: String,
+}
+
+const UNKNOWN_LIST: &str = "native-unknown: C_StableInfo.GetAvailablePetSpecInfos has no supplied list or documented default";
+
+pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
+    if matches!(ACTIVE, ClientProfile::Retail | ClientProfile::Ptr) {
+        let namespace = super::ensure_namespace(state, "C_StableInfo")?;
+        table_set_rust_fn_static(state, namespace, "GetAvailablePetSpecInfos", get_list)?;
+    }
+    Ok(())
+}
+
+fn get_list(state: &mut LuaState) -> LuaResult<u32> {
+    let observation = borrow_state(state)?
+        .stable_pet_spec_infos
+        .clone()
+        .ok_or_else(|| runtime_error(UNKNOWN_LIST))?;
+    let list = create_table(state);
+    for (index, record) in observation.iter().enumerate() {
+        let row = create_table(state);
+        table_set(state, row, "specID", Val::Num(record.spec_id));
+        table_set(
+            state,
+            row,
+            "specIndex",
+            Val::Num(f64::from(record.spec_index)),
+        );
+        let name = create_string(state, &record.specialization_name);
+        table_set(state, row, "specializationName", name);
+        set_table_array(state, list, (index + 1) as i64, row);
+    }
+    state.push(list);
+    Ok(1)
 }
 
 pub(crate) fn register_admin(builder: TableBuilder) -> LuaResult<TableBuilder> {

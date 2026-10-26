@@ -1,6 +1,6 @@
 ## [2026-10-26] staged | Supplied pet specialization catalog
 
-[Consumer investigation](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog) links the supplied-list contract and records the strict unknown default. Input scaffold follows observed missing-admin RED; original-consumer RED and producer remain pending.
+[Consumer investigation](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog) links the supplied-list contract and records the strict unknown default. The input scaffold passes its targeted test. Getter delivery follows observed original PTR OnLoad1205/Refresh1217 RED; supplied GREEN, Retail and final gates remain pending.
 
 ## [2026-10-26] implementation | Supplied voice settings access
 

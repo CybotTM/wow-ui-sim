@@ -1,6 +1,6 @@
 ## [2026-10-26] staged | Supplied pet specialization catalog
 
-[Selected consumer and supplied-state contract](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog) distinguish PTR OnLoad1205, Retail Refresh and unselected Forever Standard UI. The optional input/admin scaffold is staged; producer and runtime proof remain pending.
+[Selected consumer and supplied-state contract](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog) distinguish PTR OnLoad1205, Retail Refresh and unselected Forever Standard UI. The getter follows observed original PTR OnLoad1205/Refresh1217 RED and preserves a strict unknown default; supplied GREEN, Retail and final proof remain pending.
 
 ## [2026-10-26] implementation | Supplied voice settings access
 
