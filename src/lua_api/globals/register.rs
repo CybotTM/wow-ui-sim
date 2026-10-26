@@ -298,6 +298,7 @@ fn register_actor_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::real::player_identity::register_all(lua)?;
     super::unit_stats::register_all(lua)?;
     super::real::combat_stats::register_all(lua)?;
+    super::real::wrath_inventory_candidates::register_all(lua)?;
     super::real::wrath_relic_slot::register_all(lua)?;
     #[cfg(feature = "client-wowforever")]
     super::real::forever_stat_contributions::register_all(lua)?;

@@ -131,6 +131,7 @@ pub mod wrath_calendar;
 pub(crate) mod wrath_friends;
 pub(crate) mod wrath_guild_bank;
 pub(crate) mod wrath_guild_info;
+pub mod wrath_inventory_candidates;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_legacy;
 #[cfg(feature = "client-wrath")]
