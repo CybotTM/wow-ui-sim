@@ -46,14 +46,18 @@ fn assert_original_scenario(env: &WowLuaEnv, can_use: bool, reason: &str, level:
     assert_eq!(env.state().borrow().lua_errors.len(), errors_before);
 }
 
-#[test]
-fn original_pve_frame_tracks_supplied_scenario_eligibility_and_isolation() {
+fn exercise_original_scenario_and_isolation(initially_allowed: bool) {
     let first = prepare_scenario_presentation();
-    assert_original_scenario(&first, true, "allowed supplied reason", 1);
+    assert_original_scenario(&first, initially_allowed, "initial supplied reason", 1);
     assert_original_scenario(&first, false, "scenario service unavailable", 90);
     assert_original_scenario(&first, true, "", 90);
     let second = prepare_scenario_presentation();
-    assert_original_scenario(&second, false, "other environment restriction", 1);
+    assert_original_scenario(
+        &second,
+        !initially_allowed,
+        "other environment restriction",
+        1,
+    );
     assert_original_scenario(&second, true, "other allowed reason", 1);
     assert_original_scenario(&second, false, "changed restriction", 90);
     first
@@ -72,4 +76,14 @@ fn original_pve_frame_tracks_supplied_scenario_eligibility_and_isolation() {
     assert!(error.to_string().contains("native-unknown: C_LFGInfo.CanPlayerUseScenarioFinder has no supplied availability or documented default"), "{error}");
     assert_original_scenario(&first, false, "supplied after unset", 90);
     assert_original_scenario(&first, true, "", 90);
+}
+
+#[test]
+fn original_pve_frame_scenario_allowed_then_transitions_and_isolation() {
+    exercise_original_scenario_and_isolation(true);
+}
+
+#[test]
+fn original_pve_frame_scenario_denied_then_transitions_and_isolation() {
+    exercise_original_scenario_and_isolation(false);
 }
