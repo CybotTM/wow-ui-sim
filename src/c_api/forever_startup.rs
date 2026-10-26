@@ -33,6 +33,13 @@ pub struct StartupInputs {
 }
 
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
+    if matches!(
+        ACTIVE,
+        ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::WowForever
+    ) {
+        let ping = ensure_namespace(state, "C_Ping")?;
+        table_set_rust_fn_static(state, ping, "IsPingSystemEnabled", ping_enabled)?;
+    }
     if ACTIVE != ClientProfile::WowForever {
         return Ok(());
     }
@@ -78,8 +85,6 @@ pub(crate) fn read_current_cvar(state: &LuaState, name: &str) -> LuaResult<Optio
 fn register_services(state: &mut LuaState) -> LuaResult<()> {
     let discord = ensure_namespace(state, "C_Discord")?;
     table_set_rust_fn_static(state, discord, "IsEnabled", discord_enabled)?;
-    let ping = ensure_namespace(state, "C_Ping")?;
-    table_set_rust_fn_static(state, ping, "IsPingSystemEnabled", ping_enabled)?;
     let party = ensure_namespace(state, "C_PartyInfo")?;
     table_set_rust_fn_static(state, party, "GetRestrictPings", party_ping_restriction)?;
     let housing = ensure_namespace(state, "C_Housing")?;

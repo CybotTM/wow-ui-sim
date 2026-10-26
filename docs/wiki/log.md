@@ -14,6 +14,13 @@
 
 [CLI reference](reference/cli-commands.md#run-tests-addon) and [contract](../specs/exclusive-addon-paths.md) document repeatable CLI roots and environment-only isolation. Candidate discovery, explicit addon loading and test lookup share the selected roots; bundled TestFramework is located explicitly. Ordinary loader/CLI RED, nine targeted GREEN cases, three full CLI acceptance assertions and all seven zero-warning canonical all-target checks pass. Retail stock remains exactly 8 raw keys / 10 occurrences. Both InTimeBL runs pass 10 unit, 4 generator and 4 simulator assertions; exclusive discovery loads only InTimeBL rather than 66 candidates. The observed missing C_ChallengeMode.GetActiveChallengeMapID remains report-only, outside the CLI feature.
 
+## [2026-10-25] investigation | Aura XML event identity
+
+[Fixture boundary](investigations/consumer-selection-and-red-proof.md#cf-2-selected-unit-aura-cleanup) identifies the installed XML delegating wrapper, not a changed Blizzard mixin. The corrected event proof retains target assertions and observes original body dispatch plus event-specific aura visibility. Execution remains pending.
+
+## [2026-10-24] static producer | CF-2 selected-unit aura cleanup
+
+[Consumer and contradiction proof](investigations/consumer-selection-and-red-proof.md#cf-2-selected-unit-aura-cleanup) links the [contract](../specs/clear-blocked-auras.md): Retail/PTR clear the existing effective unit block set in place; three unchanged original-consumer selectors discriminate constant/no-op/wrong-unit/global clears. Nil rejection stays a separate authorized non-native policy. No build, test, slot or native-parity proof.
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
 [Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.

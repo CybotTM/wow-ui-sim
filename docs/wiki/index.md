@@ -18,6 +18,13 @@
 
 [CLI usage](reference/cli-commands.md#run-tests-addon) links the [selection contract](../specs/exclusive-addon-paths.md): explicit roots replace third-party discovery, retain bundled TestFramework and keep Blizzard UI separate. Loader/CLI RED, nine targeted GREEN cases and full CLI startup acceptance pass. All seven canonical all-target checks have zero compiler warnings; Retail stock stays 8/10. InTimeBL passes both smoke modes while exclusive discovery drops from 66 addons to only InTimeBL. Its missing challenge-mode getter remains a separate API gap.
 
+## [2026-10-25] investigation | Aura XML event identity
+
+[Fixture boundary](investigations/consumer-selection-and-red-proof.md#cf-2-selected-unit-aura-cleanup) identifies the installed XML delegating wrapper, not a changed Blizzard mixin. The corrected event proof retains target assertions and observes original body dispatch plus event-specific aura visibility. Execution remains pending.
+
+## [2026-10-24] static producer | CF-2 selected-unit aura cleanup
+
+[Consumer and contradiction proof](investigations/consumer-selection-and-red-proof.md#cf-2-selected-unit-aura-cleanup) links the [contract](../specs/clear-blocked-auras.md): Retail/PTR clear the existing effective unit block set in place; three unchanged original-consumer selectors discriminate constant/no-op/wrong-unit/global clears. Nil rejection stays a separate authorized non-native policy. No build, test, slot or native-parity proof.
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
 [Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.
