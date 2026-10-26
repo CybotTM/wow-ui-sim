@@ -1,3 +1,7 @@
+## [2026-10-25] implementation | PTR supplied WoWHack mode
+
+[Original consumer REDs](investigations/patch-12-1-7-api-audit.md#supplied-wowhack-mode) reach MicroMenu207 and UIErrorsFrame12. The [contract](../specs/ptr-i4-game-rules.md) uses existing active-mode state and enum data; GREEN and stock acceptance remain pending.
+
 ## [2026-10-25] implementation | PTR I4 supplied GameRules inputs
 
 [Five original-line RED boundaries](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) precede capability queries and SD selection mutation. Enum-only replay passes RecentAllies labels. Preset query and final runtime/check acceptance remain pending.

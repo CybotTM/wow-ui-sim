@@ -20,6 +20,10 @@ Verified 2026-10-25: [batch2 contract](../../specs/ptr-i4-game-rules.md) and [or
 
 The first producer step publishes the two proven enum prerequisites and metadata from the pinned 70493 APIDocumentation. Its exact replay passes the original RecentAllies labels selector, then reaches the missing setter at Barbershop line273 and the missing hardcore query at popup line3512. Five state-backed functions are now implemented after these and the earlier direct query REDs. Their GREEN and the preset query remain pending. No native capability defaults, telemetry policy, argument restrictions or secret handling are inferred.
 
+### Supplied WoWHack mode
+
+The separate `IsWoWHack` extension reaches original RED at `GameRulesUtil.lua:207` through MicroMenu OnLoad/InitializeButtons and at `Blizzard_UIErrorsFrame/Mainline/UIErrorsFrame.lua:12`. Its PTR-only producer compares the existing supplied `game_rules.active_game_mode` with the existing GameMode enum declaration, without adding a numeric mode constant. Tests change Standard/WoWHack/Plunderstorm modes and observe `MicroMenu.addedButtons`, energy-message acceptance and the original error-frame anchor. Each selector rejects a constant query independently. GREEN and stock comparison remain pending; no native mode-selection policy is inferred.
+
 ## Empty inventory is not patch coverage
 
 The direct page has prose and a link to 1.60.1, but no function/event/enum/CVar/widget tables. The existing `tools/gen_patch_wikitext_register.py` successfully emits `entries: []` and `header_counts: []` for it. This correctly describes the direct inventory, not complete patch coverage. No dummy API rows or invented aliases are added to make it nonempty.

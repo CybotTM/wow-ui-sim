@@ -1,6 +1,6 @@
 # PTR I4 GameRules supplied inputs
 
-PTR 12.1.7.70493 exposes six GameRules queries/mutations from supplied state, plus finite source-published enum tables. This bounded simulator contract does not establish native capability policy. See the [I4 investigation](../wiki/investigations/patch-12-1-7-api-audit.md).
+PTR 12.1.7.70493 exposes seven GameRules queries/mutations from supplied state, plus finite source-published enum tables. This bounded simulator contract does not establish native capability policy. See the [I4 investigation](../wiki/investigations/patch-12-1-7-api-audit.md).
 
 ## What it must do
 
@@ -30,7 +30,7 @@ PTR 12.1.7.70493 exposes six GameRules queries/mutations from supplied state, pl
 
 - [ ] Capability queries and SD mutation are implemented after original-line RED; their GREEN and the preset query remain pending. Enum-only replay proves setter RED at Barbershop line273 and hardcore RED at popup line3512. The RecentAllies labels selector passes with the documented enum.
 - [ ] Runtime GREEN, stock error comparison and profile warning/format gates remain pending.
-- [ ] `IsWoWHack` original-consumer tests are staged without its producer; RED/GREEN are pending. The pinned declaration is `GameRulesDocumentation.lua:349–354`.
+- [ ] `IsWoWHack` original-consumer REDs reach GameRulesUtil207 through MicroMenu OnLoad and UIErrorsFrame12. Its producer compares the existing supplied mode with the existing GameMode enum declaration; GREEN remains pending. The pinned declaration is `GameRulesDocumentation.lua:349–354`.
 
 ## Out of scope
 
