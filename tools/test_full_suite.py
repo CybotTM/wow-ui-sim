@@ -162,6 +162,11 @@ class CertifiedSuiteTests(unittest.TestCase):
         unit = json.loads((self.home / 'test-unit.json').read_text())
         self.assertIn('MemoryMax=9G', unit)
         self.assertIn('MemorySwapMax=0', unit)
+        argv = json.loads((self.home / 'slot-argv.json').read_text())
+        worktree = Path(argv[argv.index('--worktree') + 1])
+        mount = self.home / '.cache/wow-ui-sim-srcmount/slot-2'
+        self.assertIn(f'BindPaths={worktree}:{mount}', unit)
+        self.assertIn(f'--working-directory={mount}', unit)
         self.assertTrue(all(step.get('exit', 0) == 0
                             for step in json.loads(receipt.read_text())['steps'].values()))
         argv = json.loads((self.home / 'slot-argv.json').read_text())
