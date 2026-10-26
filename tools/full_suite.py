@@ -65,7 +65,7 @@ def claim_slot(target, sha, profile):
     env = dict(os.environ, CAPACITY_ID=f"full-suite-{sha[:12]}-{profile}")
     env.pop("CAPACITY_PEEK", None)
     result = subprocess.run([str(capacity)], env=env, capture_output=True, text=True)
-    if result.returncode or not re.search(r"\|\s*ADD:", result.stdout):
+    if result.returncode or "| ADD:" not in result.stdout:
         raise ValueError(f"capacity refused: {result.stdout.strip()} {result.stderr.strip()}")
     owner = f"full-suite {sha[:12]} {profile}"
     try:
@@ -175,7 +175,8 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                             result["steps"][name] = {"status": "not_applicable", "reason": "prefork_full_ui supports only Retail/Mists"}
                             continue
                         binary = test_artifact(receipt, artifact, kind)
-                        result["steps"][name], output = run_step(name, [binary], checkout, log, env)
+                        command = ["systemd-run", "--user", "--scope", "-p", "MemoryMax=9G", "-p", "MemorySwapMax=0", "--", binary]
+                        result["steps"][name], output = run_step(name, command, checkout, log, env)
                         result["failures"][name] = sorted(set(FAILED.findall(output)))
                 result["status"] = "FAILED" if any(step.get("exit", 0) for step in result["steps"].values()) else "PASSED"
             except (OSError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as error:
