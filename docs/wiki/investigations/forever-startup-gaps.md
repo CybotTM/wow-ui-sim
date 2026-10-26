@@ -33,7 +33,54 @@ bank purchase permissions, PvP completion and target spell. Their exact RED and
 GREEN listings/executions are in the lane report. Subsequent source changes can
 invalidate intersecting proof.
 
-## Current unknowns and exposed consumers
+## Shared PTR/Forever ammo observation
+
+Verified 2026-10-26.
+
+The [input contract](../../specs/forever-startup-inputs.md#supplied-state-not-native-policy)
+requires an optional supplied boolean, not the former Forever default false.
+Only PTR and Forever publish AmmoNeeded. PTR's selected TOC entries52/59 load
+Mainline PaperDoll; Forever's53/60 load Camelot and exclude Mainline. Their
+original checks are Mainline1702 and Camelot1952. Forever's actual AmmoSlot XML
+binds `PaperDollAmmoSlotButton_OnLoad`, which delegates to the item-slot consumer;
+PTR binds an inline XML wrapper. Tests must invoke those real slot scripts,
+explicitly Show before each OnLoad replay, and observe hiding versus inventory
+initialization, isolation, and named unset/recovery behavior.
+
+No native ammo derivation or default is established. Unsupplied PTR startup
+replaces nil-call keys with named errors. Unsupplied Forever startup can gain
+named errors because the removed false previously masked missing observations;
+earlier baseline counts below are historical, not acceptance of this change.
+The current paired stock packet is PTR122 keys/138 occurrences before and after,
+with40 nil-call raw keys replaced by40 named missing-input keys. Forever changes
+from26/26 to44/44:40 named ammo errors are added and22 downstream target-spell
+reports disappear because earlier slot/BagSlotCluster initialization stops. Those
+removed reports are masked, not repaired. Each raw addition/removal is attributed
+in the private ammo-needed handoff; neither startup is clean.
+
+Both original XML-bound tests pass false/true/false, two-environment isolation,
+exact unset failure and recovery. PTR proves Mainline1702; Forever proves both
+Camelot1952 and the XML delegate3654. Identical predecessor tests fail at PTR's
+missing member and Forever's silent unset success respectively. Unfiltered PTR
+closure diagnostics remain visible; this proves the slot boundary, not complete
+closure initialization. Both existing Forever inventory-slot preservation tests
+also pass. All seven full-feature all-target checks pass with zero Cargo JSON/plain
+compiler warnings. All 23 launch CVar guards and 10 pinned-input hashes are unchanged;
+formatting and manual changed-line readability review pass.
+
+The loader propagates the failed BagSlotCluster child creation and stops later
+XML elements (`xml_frame/setup.rs`, `xml_frame/finalize.rs`, `xml_file.rs`). This
+explains the lost bag event registrations and later GamepadBackpackButton reports;
+the target-spell API itself was not changed.
+
+The unset probe follows the existing `mists_scenario_minlevel` precedent:
+`env.exec` alone does not retain a native-error traceback. An asserted-failure
+`xpcall` captures status, exact error message and `debug.traceback` separately.
+The test rejects successful calls and non-exact messages; Forever additionally
+requires both original1952 and XML-delegate3654 frames. No production error
+handling or vendor callback is changed.
+
+## Historical startup packet and unknown consumers
 
 `GetTargetSpellID` documents a non-null number but no absent-target sentinel.
 Absent supplied input raises an explicit native-unknown error. Repairing earlier
@@ -46,9 +93,10 @@ The first repaired stock capture had 40 raw messages. It exposed
 `SOCIAL_UI_RAID_LIST_SYSTEM_STATUS_UPDATED` (documented payload-free event).
 The completed supplied models include Discord, ping/restriction, spatial
 housing, TTS save/bool settings, temporary scalar CVars and optional bank offers.
-All 21 exact selectors pass at `1fcbddf67`. The [current baseline and per-record
-classification](../../baselines/README.md#forever-lua-errors) retain only the two
-approved native-unknown boundaries. Startup is not clean; no native idle value
+All 21 exact selectors passed at `1fcbddf67`. That packet's [baseline and per-record
+classification](../../baselines/README.md#forever-lua-errors) retained only two
+native-unknown boundaries; the shared optional ammo observation adds another
+explicit missing-input boundary. Startup is not clean; no native idle value
 or locality catalog was invented. Profile checks and release evidence belong to
 the lane report.
 
@@ -71,6 +119,7 @@ native-unknown**.
 
 - [Startup input contract](../../specs/forever-startup-inputs.md).
 - [Profile selection](../systems/client-profiles.md).
+- [XML loading pipeline](../../addon-loading-pipeline.md) and [loader error propagation](../../../src/loader/xml_file.rs).
 - [Consumer-selection proof rules](consumer-selection-and-red-proof.md).
 - Private Forever startup slot-run report and capture receipts.
 

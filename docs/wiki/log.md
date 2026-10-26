@@ -1,3 +1,7 @@
+## [2026-10-26] bounded proof | Shared ammo requirement observation
+
+[Original slots and exact error probes](investigations/forever-startup-gaps.md#shared-ptrforever-ammo-observation): both PTR/Forever XML-bound RED/GREEN pairs and two existing Forever preservation cases pass. The asserted-failure xpcall follows `mists_scenario_minlevel`, with false status, exact message and original frame assertions. Stock PTR122/138→122/138 and Forever26/26→44/44 has complete per-key attribution, not clean startup. All seven full-feature all-target checks have zero Cargo JSON/plain compiler warnings;23 CVar guards and10 pinned-input hashes are unchanged. No native ammo default or derivation is inferred.
+
 ## [2026-10-26] implementation | Shared transmog supplied input
 
 [Model and bounded proof](systems/transmog-availability.md) link the [contract](../specs/transmog-availability.md): the Mists Option<bool> is shared with Retail/PTR and replaces all three modern scalar reads. All eight exact Retail/PTR producer-only RED/shared-producer GREEN pairs pass with byte-identical tests; seventeen legacy cases and both original Mists selectors pass. Paired raw stock stays Retail0/0 and PTR122/138; all74 launch CVar guards are unchanged. All seven full-feature all-target checks pass with zero Cargo JSON/plain compiler warnings; later proof documentation does not change executable inputs. A pre-existing transmog bootstrap nil call is disclosed, not repaired by this lane.
