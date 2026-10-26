@@ -1,8 +1,10 @@
 """Exercise slot pruning using synthetic Cargo trees only."""
 import contextlib
+import fcntl
 import importlib.util
 import io
 import json
+import multiprocessing
 import os
 from pathlib import Path
 import tempfile
@@ -12,6 +14,13 @@ import unittest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/slot-build.py"
 MIB = 1024 * 1024
+
+
+def hold_build_lock(path, ready, release):
+    with path.open("a") as stream:
+        fcntl.flock(stream, fcntl.LOCK_EX)
+        ready.set()
+        release.wait(10)
 
 
 class SlotPruneTests(unittest.TestCase):
@@ -126,6 +135,69 @@ class SlotPruneTests(unittest.TestCase):
         result, _ = self.prune(cap=MIB)
         self.assertEqual(result["removed"], [])
         self.assertTrue(all(path.exists() for path in paths))
+
+    def test_build_lock_refuses_pruning_until_other_process_releases(self):
+        for profile in ("debug", "release", "aarch64-unknown-linux-gnu/custom"):
+            with self.subTest(profile=profile):
+                paths = self.artifact("alpha")
+                profile_dir = self.slot / profile
+                if profile != "debug":
+                    profile_dir.parent.mkdir(parents=True, exist_ok=True)
+                    (self.slot / "debug").rename(profile_dir)
+                    paths = [profile_dir / path.relative_to(self.slot / "debug")
+                             for path in paths]
+                ready, release = multiprocessing.Event(), multiprocessing.Event()
+                process = multiprocessing.Process(
+                    target=hold_build_lock,
+                    args=(profile_dir / ".cargo-lock", ready, release))
+                process.start()
+                try:
+                    self.assertTrue(ready.wait(5), "build lock holder did not start")
+                    with self.assertRaisesRegex(ValueError, "slot build lock busy.*cargo-lock"):
+                        self.prune(cap=MIB)
+                    self.assertTrue(all(path.exists() for path in paths))
+                finally:
+                    release.set()
+                    process.join(5)
+                    if process.is_alive():
+                        process.terminate()
+                        process.join(5)
+                self.assertEqual(process.exitcode, 0)
+                self.prune(cap=MIB)
+                self.assertFalse(any(path.exists() for path in paths))
+
+    def test_recent_library_sidecar_protects_every_same_hash_member(self):
+        paths = self.artifact("alpha")
+        library = self.slot / "debug/deps/libalpha-abc123.so"
+        sidecar = library.with_suffix(".so.dwp")
+        library.write_bytes(b"x" * MIB)
+        sidecar.write_bytes(b"x" * MIB)
+        self.age_tree(4)
+        os.utime(sidecar, (self.now, self.now))
+        result, _ = self.prune(cap=MIB)
+        self.assertEqual(result["removed"], [])
+        self.assertTrue(all(path.exists() for path in paths + [library, sidecar]))
+
+    def test_old_library_sidecar_is_removed_with_same_hash_unit(self):
+        paths = self.artifact("alpha")
+        sidecar = self.slot / "debug/deps/libalpha-abc123.so.dwp"
+        sidecar.write_bytes(b"x" * MIB)
+        self.age_tree(4)
+        result, _ = self.prune(cap=MIB)
+        self.assertEqual(len(result["removed"]), 1)
+        self.assertFalse(any(path.exists() for path in paths + [sidecar]))
+
+    def test_receipt_external_hardlink_protects_whole_unit(self):
+        paths = self.artifact("alpha")
+        with tempfile.TemporaryDirectory() as external:
+            alias = Path(external) / "verified.rlib"
+            os.link(paths[2], alias)
+            receipt = {"artifacts": {}, "reported_artifacts": [
+                {"filenames": [str(alias)]}]}
+            (self.slot / ".verified-source-identity.json").write_text(json.dumps(receipt))
+            result, _ = self.prune(cap=MIB)
+            self.assertEqual(result["removed"], [])
+            self.assertTrue(all(path.exists() for path in paths))
 
     def test_mismatched_owner_never_deletes(self):
         paths = self.artifact("alpha")
