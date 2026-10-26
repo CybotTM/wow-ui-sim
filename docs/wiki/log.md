@@ -1,3 +1,7 @@
+## [2026-10-25] proof | Housing texture boundary and remaining PTR dependency
+
+[Accepted texture/retail gates](systems/housing-spatial-presence.md#texture-fix-acceptance-and-remaining-ptr-dependency): original PTR template RED/GREEN, Retail eight-state preservation, both all-target checks and formatting pass. PTR housing/talent remains blocked on separately owned IsWoWHack. Raw stock additions are traced without masking.
+
 ## [2026-10-25] fix | Button atlas region lifetime
 
 [Original PTR template RED](systems/housing-spatial-presence.md#ptr-microbutton-region-lifetime) shows the shared active setter skipped region creation on a lookup miss. Restore region creation/publication before optional pixel application; no vendor or catalog fabrication. GREEN pending.
