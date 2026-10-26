@@ -630,6 +630,8 @@ pub struct SimState {
     pub loot_frame_open: bool,
     pub guild_registrar_open: bool,
     pub pet_stables_open: bool,
+    /// Supplied modern observations; None does not invent native initial membership.
+    pub stable_active_pets: Option<Vec<crate::c_api::c_stable_info::active_list::PetInfo>>,
     #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
     pub allow_recent_allies_see_location: bool,
     #[cfg(feature = "client-wowforever")]
