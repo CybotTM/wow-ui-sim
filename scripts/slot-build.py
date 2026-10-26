@@ -280,6 +280,71 @@ def read_target_inputs(current, before, after):
     return targets, errors
 
 
+def read_input_hashes(worktree, names):
+    hashes = {}
+    for name in sorted(names):
+        path = worktree / name
+        try:
+            with path.open("rb") as stream:
+                hashes[name] = hashlib.file_digest(stream, "sha256").hexdigest()
+        except FileNotFoundError:
+            hashes[name] = None
+    return hashes
+
+
+def snapshot_source_hashes(current, snapshot):
+    worktree = Path(current["worktree"])
+    names = {os.fsdecode(p) for p in git(
+        worktree, "ls-files", "--cached", "--others", "--exclude-standard", "-z").split(b"\0") if p}
+    paths = {name for info in snapshot["files"].values() for name in info.get("inputs", [])}
+    roots = {root for roots in current["package_roots"].values() for root in roots}
+    roots.add(str(worktree))
+    paths.update(str(Path(root) / name) for root in roots
+                 for name in ("build.rs", "Cargo.toml", "Cargo.lock"))
+    names.update(repo_relative_inputs(current, paths))
+    return read_input_hashes(worktree, names)
+
+
+def certify_record(current, record, previous, source_before, artifacts):
+    path = artifact_path(record)
+    inputs = current["target_inputs"].get(path)
+    if not inputs:
+        raise ValueError(f"missing compiler inputs for {path}")
+    hashes = read_input_hashes(Path(current["worktree"]), inputs)
+    if any(name not in source_before or source_before[name] != digest
+           for name, digest in hashes.items()):
+        raise ValueError(f"compiler inputs changed during build for {path}")
+    outputs = set(record.get("filenames", []))
+    if record.get("executable"):
+        outputs.add(record["executable"])
+    if not outputs:
+        raise ValueError(f"missing compiler outputs for {path}")
+    certificates = {}
+    for output in sorted(outputs):
+        name = os.path.relpath(output, current["slot"])
+        if name not in artifacts:
+            raise ValueError(f"missing output hash for {output}")
+        certificate = {"inputs": hashes, "sha256": artifacts[name]}
+        if record.get("fresh") is not False and previous.get(name) != certificate:
+            raise ValueError(f"uncertified fresh artifact {output}; rebuild required")
+        certificates[name] = certificate
+    return certificates
+
+
+def certify_artifacts(current, previous, source_before, artifacts):
+    certificates = dict((previous or {}).get("artifact_certificates", {}))
+    errors = []
+    for record in current["reported_artifacts"]:
+        if not is_repo_artifact(current, record):
+            continue
+        try:
+            certificates.update(certify_record(
+                current, record, certificates, source_before, artifacts))
+        except (OSError, ValueError) as error:
+            errors.append(str(error))
+    return certificates, errors
+
+
 def find_stale_artifacts(current, previous_artifacts, artifacts):
     stale = []
     changed = set(current["changed_paths"])
@@ -363,7 +428,8 @@ def collect_artifacts(slot, started_ns, previous, records):
                         or path.suffix == ".exe")
             if artifact and max(stat.st_mtime_ns, stat.st_ctime_ns) >= started_ns:
                 paths.add(path)
-    paths.update(Path(record["executable"]) for record in records if record.get("executable"))
+    paths.update(Path(name) for record in records
+                 for name in [record.get("executable"), *record.get("filenames", [])] if name)
     return hash_artifacts(slot, paths)
 
 
@@ -400,6 +466,7 @@ def execute_build(request_path):
     receipt = Path(request["receipt"])
     write_json(receipt, dict(current, artifacts={}, result="building"))
     before = read_dep_info_snapshot(slot, worktree)
+    source_before = snapshot_source_hashes(current, before)
     started_ns = time.time_ns()
     returncode, records = run_build_command(request["cargo"])
     current["reported_artifacts"] = records
@@ -407,6 +474,9 @@ def execute_build(request_path):
     current["target_inputs"], current["dep_info_errors"] = read_target_inputs(
         current, before, after)
     artifacts = collect_artifacts(slot, started_ns, previous, records)
+    current["artifact_certificates"], certificate_errors = certify_artifacts(
+        current, previous, source_before, artifacts)
+    current["dep_info_errors"].extend(certificate_errors)
     finish_build(slot, receipt, current, previous, artifacts, returncode)
     return returncode
 

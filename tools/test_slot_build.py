@@ -532,6 +532,77 @@ class SourceFreshnessTests(unittest.TestCase):
                         "launcher does not invalidate older source mtimes")
         return self.module.prepare_source(self.tree, previous)
 
+    def run_library_step(self, profile, fresh=False, mutation=""):
+        """Run a separate worker against persistent outputs, without Cargo."""
+        import sys
+        (self.slot / ".owner").write_text("test-owner")
+        binary = self.slot / f"debug/deps/libprobe-{profile}.rmeta"
+        emitter = (
+            'import json,sys; from pathlib import Path\n'
+            'binary,source=map(Path,sys.argv[1:3])\n'
+            'fresh=json.loads(sys.argv[3])\n'
+            'if not fresh:\n'
+            '    binary.parent.mkdir(parents=True,exist_ok=True)\n'
+            '    binary.write_bytes(source.read_bytes())\n'
+            '    binary.with_suffix(".d").write_text(str(binary)+": "+str(source)+"\\n")\n'
+            'exec(sys.argv[4])\n'
+            'print(json.dumps({"reason":"compiler-artifact","filenames":[str(binary)],\n'
+            '    "executable":None,"fresh":fresh}))\n'
+        )
+        request = self.slot / "library-request.json"
+        receipt = self.slot / "library-receipt.json"
+        request.write_text(json.dumps({
+            "slot": str(self.slot), "worktree": str(self.tree), "owner": "test-owner",
+            "unit": "library-step", "receipt": str(receipt),
+            "cargo": [sys.executable, "-c", emitter, str(binary),
+                      str(self.tree / "src/main.rs"), json.dumps(fresh), mutation]}))
+        result = subprocess.run(
+            [sys.executable, "-B", str(SCRIPT), "--execute", str(request)],
+            capture_output=True)
+        return result, json.loads(receipt.read_text())
+
+    def test_profile_switch_cannot_certify_an_older_library(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        source = self.tree / "src/main.rs"
+        source.write_text('struct PetBattlePet { display_id: u32 }')
+        self.git("commit", "-qam", "new model")
+        os.utime(source, (1, 1))
+        result, _ = self.run_library_step("forever")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+
+    def test_fresh_library_without_content_certificate_fails_closed(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        verified = self.slot / ".verified-source-identity.json"
+        previous = json.loads(verified.read_text())
+        previous.pop("artifact_certificates", None)
+        verified.write_text(json.dumps(previous))
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+
+    def test_fresh_library_requires_its_certified_output_bytes(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        result, receipt = self.run_library_step(
+            "retail", fresh=True, mutation='binary.write_bytes(b"foreign output")')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+
+    def test_library_cannot_certify_source_changed_during_child(self):
+        result, receipt = self.run_library_step(
+            "retail", mutation='source.write_text("changed after compile")')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertFalse((self.slot / ".verified-source-identity.json").exists())
+
     def test_older_changed_file_is_touched_without_changing_bytes(self):
         previous = self.prepare()
         source = self.tree / "src/main.rs"
