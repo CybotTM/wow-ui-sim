@@ -18,6 +18,10 @@ mod original_consumer {
             &[],
         );
         assert!(loaded.iter().any(|name| name == "Blizzard_UnitFrame"));
+        // Supplied separator fixture, as in the Forever preservation test.
+        // Constants publication and the native separator are not this contract.
+        env.exec("Constants.CharacterNameSeparatorConsts = { CHARACTERNAME_SURNAME_SEPARATOR = '-' }")
+            .unwrap();
         env.exec(r#"
             local info = debug.getinfo(UnitFrame_Update, 'S')
             assert(info.what == 'Lua')
