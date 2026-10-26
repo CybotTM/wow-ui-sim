@@ -29,7 +29,7 @@ class SlotPruneTests(unittest.TestCase):
         paths = [self.slot / "debug" / suffix for suffix in (
             f".fingerprint/{name}-abc123/lib-{marker or name}",
             f"deps/{name}-abc123.d", f"deps/lib{name}-abc123.rlib",
-            f"build/{name}-abc123/output", f"incremental/{name}-otherhash/session/data",
+            f"build/{name}-abc123/output", f"incremental/{name}-abc123/session/data",
         )]
         for path in paths:
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -82,19 +82,34 @@ class SlotPruneTests(unittest.TestCase):
         self.assertTrue(all(path.exists() for path in paths))
         self.assertGreater(result["remaining_bytes"], MIB)
 
-    def test_different_hashes_and_target_aliases_are_indivisible(self):
+    def test_target_alias_with_matching_hash_is_removed_with_fingerprint(self):
         paths = self.artifact("some-package", marker="some_binary")
-        alias = self.slot / "debug/deps/libsome_binary-deadbeef.rlib"
+        alias = self.slot / "debug/deps/libsome_binary-abc123.rlib"
         alias.write_bytes(b"x" * MIB)
-        incremental = self.slot / "debug/incremental/some_binary-unrelated/session"
-        incremental.mkdir(parents=True)
-        (incremental / "data").write_bytes(b"x" * MIB)
         self.age_tree(4)
         result, _ = self.prune(cap=MIB)
         self.assertEqual(len(result["removed"]), 1)
         self.assertFalse(alias.exists())
-        self.assertFalse(incremental.exists())
         self.assertFalse(any(path.exists() for path in paths))
+
+    def test_recent_independent_incremental_hash_does_not_pin_old_artifacts(self):
+        paths = self.artifact("alpha")
+        incremental = self.slot / "debug/incremental/alpha-unrelated/session"
+        incremental.mkdir(parents=True)
+        (incremental / "data").write_bytes(b"x" * MIB)
+        result, _ = self.prune(cap=2 * MIB)
+        self.assertEqual(len(result["removed"]), 1)
+        self.assertFalse(any(path.exists() for path in paths))
+        self.assertTrue(incremental.exists())
+
+    def test_newer_artifact_hash_is_not_coalesced_with_older_hash(self):
+        paths = self.artifact("alpha")
+        newer = self.slot / "debug/deps/libalpha-def456.rlib"
+        newer.write_bytes(b"x" * MIB)
+        result, _ = self.prune(cap=2 * MIB)
+        self.assertEqual(len(result["removed"]), 1)
+        self.assertFalse(any(path.exists() for path in paths))
+        self.assertTrue(newer.exists())
 
     def test_previous_successful_receipt_protects_whole_unit(self):
         paths = self.artifact("alpha")
