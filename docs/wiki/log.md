@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Mists supplied LFR availability
+
+[Original PVEFrame and optional availability](systems/mists-lfr-availability.md): original-line missing-function RED is observed; the separate C API module publishes only on ACTIVE Mists, returns supplied booleans and raises an approved named missing-input error when unset. GREEN, stock and warning gates remain pending.
+
 ## [2026-10-25] proof | Mists supplied map display
 
 [Original group-provider proof](investigations/map-display-info-model.md#mists-original-onload-consumer--2026-10-25) passes exact corrected RED and supplied-state GREEN plus return-arity preservation. Stock 10/16→8/14 has no additions. Mists/Retail/Era/Anniversary all-target checks pass with zero warnings; formatting and readability pass. The actual OnLoad boundary precedes post-load fog-pin mutation; the separate defect is recorded, not fixed.

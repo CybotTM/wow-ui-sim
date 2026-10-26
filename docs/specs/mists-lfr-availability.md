@@ -27,7 +27,7 @@ Mists `C_LFGInfo.IsLFREnabled` consumes an explicit environment-local availabili
 
 ## Known gaps (current cycle)
 
-- [ ] Original-consumer runtime RED/GREEN and stock comparison await an admitted build slot.
+- [ ] Original-consumer GREEN, paired stock comparison and warning gates remain pending; RED reaches original PVEFrame.lua:229 with a missing IsLFREnabled query.
 
 ## Out of scope
 

@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Mists supplied LFR availability
+
+[Environment-local input and original PVEFrame](systems/mists-lfr-availability.md) link the [contract](../specs/mists-lfr-availability.md). Original-line RED is observed; supplied-state producer and approved explicit unset error are implemented. GREEN, stock and warning gates remain pending.
+
 ## [2026-10-25] implementation | PTR Edit Mode declarations
 
 [Two original boundaries](investigations/ptr-edit-mode-declarations.md) link the [contract](../specs/ptr-edit-mode-declarations.md): declaration-backed boss directions and Gamepad preset, independent exact RED/GREEN and 270/376→268/374 stock. Display-info:800 SwingTimerSetting is the traced successor, not part of this slice. The module compiles on all profiles and publishes only when ACTIVE is PTR. PTR/Retail/Era full-feature all-target checks pass with zero warnings and separate accepted source-binding receipts; formatting and readability pass.
