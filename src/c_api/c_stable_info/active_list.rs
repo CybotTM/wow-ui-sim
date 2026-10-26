@@ -93,7 +93,8 @@ fn supply_list(state: &mut LuaState) -> LuaResult<u32> {
 
 fn supply_record(state: &mut LuaState) -> LuaResult<u32> {
     let index = read_ordinal(state)?;
-    let record = decode_record(state, stack_val(state, 2))?;
+    let row = stack_val(state, 2);
+    let record = decode_record(state, row)?;
     let mut sim = borrow_state_mut(state)?;
     let pets = sim
         .stable_active_pets
