@@ -5,7 +5,7 @@
 
 use crate::client_profile::{ACTIVE, ACTIVE_INTERFACE_VERSION, ClientProfile};
 use crate::lua_api::globals::lua_duration_object::duration_has_secret_values;
-use crate::lua_api::methods::{call_function, registry_get, registry_set, val_to_string};
+use crate::lua_api::methods::{registry_get, registry_set, val_to_string};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -402,10 +402,10 @@ pub(crate) fn register(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 /// Run after frame OnUpdate assignment, retaining callback taint and secret checks.
-pub(crate) fn tick(lua: &mut rilua::Lua, elapsed: f64) -> crate::Result<()> {
-    let callback = registry_get(lua.state_mut(), SCHEDULER_KEY);
+pub(crate) fn tick(state: &mut LuaState, elapsed: f64) -> crate::Result<()> {
+    let callback = registry_get(state, SCHEDULER_KEY);
     if callback != Val::Nil {
-        call_function(lua, callback, &[Val::Num(elapsed)])?;
+        crate::lua_api::methods::call_function_state(state, callback, &[Val::Num(elapsed)])?;
     }
     Ok(())
 }

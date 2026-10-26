@@ -101,7 +101,7 @@ fn read_action_cooldown_with_gcd(state: &LuaState, ignore_gcd: bool) -> LuaResul
         _ => None,
     };
     let sim = borrow_state(state)?;
-    let now = sim.start_time.elapsed().as_secs_f64();
+    let now = sim.clock_elapsed().as_secs_f64();
     Ok(slot
         .and_then(|slot| sim.action_bars.get(&slot).copied())
         .map(|spell_id| select_cooldown_duration_times(&sim, spell_id, now, ignore_gcd))

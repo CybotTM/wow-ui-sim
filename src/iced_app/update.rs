@@ -543,7 +543,8 @@ impl App {
                 .get(state.rot_damage_level)
                 .copied()
                 .unwrap_or(("Light (1%)", 0.01));
-            crate::lua_api::tick_party_health(&mut state.party_members, pct)
+            let now = state.clock_now();
+            crate::lua_api::tick_party_health(&mut state.party_members, pct, now)
         };
         for idx in changed {
             let unit_id = format!("party{idx}");

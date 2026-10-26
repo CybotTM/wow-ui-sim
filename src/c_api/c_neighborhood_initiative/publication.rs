@@ -14,7 +14,6 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, RustFn, Val};
 use serde::Serialize;
-use std::time::Instant;
 
 pub(super) fn register(state: &mut LuaState, namespace: GcRef<Table>) -> LuaResult<()> {
     for (name, callback) in [
@@ -236,9 +235,10 @@ fn defer_reply(state: &mut LuaState, deliver: RustFn) -> LuaResult<u32> {
     // INFERRED: timer delivery models the service round trip. Cached dashboard
     // OnShow registers listeners AFTER requesting. IDs capture the requested
     // neighborhood so changing the view cannot load the wrong record.
+    let fire_at = sim.clock_now();
     sim.rilua_timers.push_back(RiluaPendingTimer {
         id,
-        fire_at: Instant::now(),
+        fire_at,
         interval: None,
         remaining: None,
         cancelled: false,

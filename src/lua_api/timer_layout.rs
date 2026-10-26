@@ -30,6 +30,7 @@
 //! `string_format.rs` stays on the mlua side only.
 
 use crate::lua_api::env::WowLuaAppData;
+use crate::lua_api::methods::borrow_state;
 use crate::lua_api::next_timer_id;
 use crate::lua_bridge::{TableBuilder, stack_val};
 use rilua::vm::state::LuaState;
@@ -209,7 +210,7 @@ fn timer_after(state: &mut LuaState) -> LuaResult<u32> {
     let id = next_timer_id();
     store_timer_callback(state, id, callback);
 
-    let fire_at = Instant::now() + Duration::from_secs_f64(seconds);
+    let fire_at = borrow_state(state)?.clock_now() + Duration::from_secs_f64(seconds);
     let owner_addon = {
         let app = state
             .app_data::<WowLuaAppData>()
@@ -335,7 +336,7 @@ fn timer_new_ticker(state: &mut LuaState) -> LuaResult<u32> {
     let interval = Duration::from_secs_f64(seconds);
     let timer = RiluaPendingTimer {
         id,
-        fire_at: Instant::now() + interval,
+        fire_at: borrow_state(state)?.clock_now() + interval,
         interval: Some(interval),
         remaining: iterations,
         cancelled: false,
@@ -362,7 +363,7 @@ fn timer_new_timer(state: &mut LuaState) -> LuaResult<u32> {
 
     let timer = RiluaPendingTimer {
         id,
-        fire_at: Instant::now() + Duration::from_secs_f64(seconds),
+        fire_at: borrow_state(state)?.clock_now() + Duration::from_secs_f64(seconds),
         interval: None,
         remaining: None,
         cancelled: false,

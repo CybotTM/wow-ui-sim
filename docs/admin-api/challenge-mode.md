@@ -1,6 +1,6 @@
 # Challenge runs and forecast fixtures
 
-Phase A supplies state through the interfaces below. Runtime acceptance is pending. Phase B remains unimplemented.
+Phase A supplies challenge state. Phase B adds an explicit manual environment clock. Final runtime acceptance is pending.
 
 These calls supply fixture state. They do not generate native dungeon catalogues, affixes, enemy credit, death penalties or time limits. Each environment has its own state. See the [contract](../specs/challenge-mode-run.md) for profile publication.
 
@@ -65,4 +65,4 @@ A_Admin.SetManualClock(0)  -- explicit opt-in; do this before starting the run
 A_Admin.AdvanceTime(300) -- GetTime, OnUpdate(delta), and due C_Timer callbacks
 ```
 
-Real time remains the default. Opt in once, before supplying timed fixture state. Manual seconds and deltas must be finite and nonnegative. Pending C_Timer callbacks keep their remaining delay when the clock is enabled. `AdvanceTime` requires manual mode, advances the clock first, dispatches OnUpdate once with the delta, and drains due callbacks in deadline order. A ticker can fire several times during one large advance. Callback-created timers use the already-advanced clock. Independently created duration-object manual clocks do not advance. World elapsed timers remain explicit supplied values; advance them separately when the fixture needs both clocks to agree.
+Real time remains the default. Opt in once, before supplying timed fixture state. Manual seconds and deltas must be finite and nonnegative. Pending C_Timer callbacks keep their remaining delay when the clock is enabled. `AdvanceTime` requires manual mode, advances the clock first, dispatches OnUpdate once with the delta, and drains due callbacks in deadline order. A positive-interval ticker can fire several times during one large advance. A zero-interval ticker runs at most once per advance. A second manual-clock opt-in fails. Callback-created timers use the already-advanced clock. Independently created duration-object manual clocks do not advance. World elapsed timers remain explicit supplied values; advance them separately when the fixture needs both clocks to agree. See the [clock contract](../specs/manual-simulation-clock.md).

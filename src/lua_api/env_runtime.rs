@@ -1,13 +1,12 @@
 use super::env::WowLuaAppData;
 use super::env::WowLuaEnv;
 use super::env::next_timer_id;
-use super::env_init::{record_addon_time, update_threshold_counters};
+use super::env_init::update_threshold_counters;
 use super::state::{AddonInfo, AppFrameMetrics, LoadDiagnostics, PendingTimer, SimState};
 use super::timer_processing::{reschedule_timer, timer_should_wait};
 use crate::Result;
 use crate::font::WowFontSystem;
-use crate::lua_api::methods::{call_function as call_rilua_function, registry_get};
-use crate::lua_api::script_helpers::call_error_handler;
+use crate::lua_api::methods::registry_get;
 use crate::screen::ScreenKind;
 use rilua::{LuaApiMut, Val};
 use std::cell::RefCell;
@@ -220,7 +219,7 @@ impl WowLuaEnv {
         };
         let timer = PendingTimer {
             id,
-            fire_at: Instant::now() + Duration::from_secs_f64(seconds),
+            fire_at: self.state.borrow().clock_now() + Duration::from_secs_f64(seconds),
             interval,
             remaining: iterations,
             cancelled: false,
@@ -234,9 +233,14 @@ impl WowLuaEnv {
 
     /// Run ready timers and return how many callbacks fired.
     pub fn process_timers(&self) -> Result<usize> {
+        if self.state.borrow().manual_clock.is_some() {
+            return Ok(super::manual_timers::drain(
+                self.lua.borrow_mut().state_mut(),
+            )?);
+        }
         let signal_fired = self.process_due_timed_signals();
 
-        let now = Instant::now();
+        let now = self.state.borrow().clock_now();
         let timers = take_pending_timers(self);
         let (timer_fired, mut requeue) = process_timer_queue(self, timers, now);
         let mut state = self.state.borrow_mut();
@@ -287,49 +291,6 @@ impl WowLuaEnv {
         super::on_update::fire(self, elapsed)
     }
 
-    fn drain_addon_timing(&self) {
-        let mut lua = self.lua.borrow_mut();
-        let state = lua.state_mut();
-        let timing = registry_get(state, "__addon_timing");
-        let Val::Table(timing_ref) = timing else {
-            return;
-        };
-        let entries = state
-            .gc
-            .tables
-            .get(timing_ref)
-            .map(|table| table.hash_entries())
-            .unwrap_or_default();
-        let mut consumed_keys = Vec::new();
-        {
-            let mut sim = self.state.borrow_mut();
-            for (key, value) in entries {
-                let Val::Num(idx) = key else {
-                    continue;
-                };
-                let Val::Num(ms) = value else {
-                    continue;
-                };
-                consumed_keys.push(idx);
-                if let Some(addon) = sim.addons.get_mut(idx as usize) {
-                    addon.runtime.current_frame_ms += ms;
-                }
-            }
-        }
-        for idx in consumed_keys {
-            if let Some(table) = state.gc.tables.get_mut(timing_ref) {
-                let _ = table.raw_set(Val::Num(idx), Val::Nil, &state.gc.string_arena);
-            }
-        }
-    }
-
-    pub(crate) fn finalize_frame_metrics(&self, frame_elapsed_ms: f64) {
-        self.drain_addon_timing();
-        let mut state = self.state.borrow_mut();
-        update_app_frame_metrics(&mut state.app_frame_metrics, frame_elapsed_ms);
-        update_addon_frame_metrics(&mut state.addons);
-    }
-
     /// Fire `EDIT_MODE_LAYOUTS_UPDATED` with layout info from `C_EditMode.GetLayouts()`.
     pub fn fire_edit_mode_layouts_updated(&self) -> Result<()> {
         let Some(info) = build_edit_mode_layouts_info(self)? else {
@@ -341,7 +302,7 @@ impl WowLuaEnv {
     /// Get the time until the next timer fires, if any.
     pub fn next_timer_delay(&self) -> Option<Duration> {
         let state = self.state.borrow();
-        let now = Instant::now();
+        let now = state.clock_now();
         let timer_delay = state
             .rilua_timers
             .iter()
@@ -371,74 +332,66 @@ impl WowLuaEnv {
         callback_receives_timer: bool,
         callback_arg: Option<Val>,
     ) {
-        let start = Instant::now();
-        let source = self.timer_callback_source(timer_id);
-        let addon_name = source
-            .as_ref()
-            .and_then(|_| self.addon_folder_name(owner_addon));
-        if let Some(source) = source.as_ref() {
-            source.log_entry(addon_name.as_deref(), timer_id);
-        }
-        self.state.borrow_mut().executing_addon_index = owner_addon;
-        let call_result = {
-            let mut lua = self.lua.borrow_mut();
-            let args = if let Some(arg) = callback_arg {
-                vec![arg]
-            } else if callback_receives_timer {
-                match crate::lua_api::timer_layout::create_timer_handle_table(
-                    lua.state_mut(),
-                    timer_id,
-                ) {
-                    Ok(handle) => vec![handle],
-                    Err(error) => {
-                        call_error_handler(&mut lua, &error.to_string());
-                        Vec::new()
-                    }
-                }
-            } else {
-                Vec::new()
-            };
-            call_rilua_function(&mut lua, callback, &args)
-        };
-        let failed = call_result.is_err();
-        if let Err(error) = call_result {
-            let mut lua = self.lua.borrow_mut();
-            call_error_handler(&mut lua, &error.to_string());
-        }
-        self.state.borrow_mut().executing_addon_index = None;
-        if let Some(source) = source {
-            source.log_return(addon_name.as_deref(), timer_id, start.elapsed(), failed);
-        }
-        record_addon_time(&self.state, owner_addon, &start);
-    }
-
-    fn timer_callback_source(
-        &self,
-        timer_id: u64,
-    ) -> Option<crate::lua_api::handler_timing::TimerCallbackSource> {
-        if !crate::lua_api::handler_timing::is_enabled() {
-            return None;
-        }
-        self.state
-            .borrow()
-            .timer_callback_sources
-            .get(&timer_id)
-            .cloned()
-    }
-
-    fn addon_folder_name(&self, owner_addon: Option<u16>) -> Option<String> {
-        let addon_index = owner_addon? as usize;
-        self.state
-            .borrow()
-            .addons
-            .get(addon_index)
-            .map(|addon| addon.folder_name.clone())
+        super::timer_dispatch::fire(
+            self.lua.borrow_mut().state_mut(),
+            owner_addon,
+            callback,
+            timer_id,
+            callback_receives_timer,
+            callback_arg,
+        );
     }
 
     fn remove_timer_callback(&self, timer_id: u64) {
         let mut lua = self.lua.borrow_mut();
         crate::lua_api::timer_layout::remove_timer_callback(lua.state_mut(), timer_id);
     }
+}
+
+fn drain_addon_timing(state: &mut rilua::vm::state::LuaState) {
+    let timing = registry_get(state, "__addon_timing");
+    let Val::Table(timing_ref) = timing else {
+        return;
+    };
+    let entries = state
+        .gc
+        .tables
+        .get(timing_ref)
+        .map(|table| table.hash_entries())
+        .unwrap_or_default();
+    let mut consumed_keys = Vec::new();
+    {
+        let mut sim = crate::lua_api::methods::borrow_state_mut(state)
+            .expect("frame metrics require simulator state");
+        for (key, value) in entries {
+            let Val::Num(idx) = key else {
+                continue;
+            };
+            let Val::Num(ms) = value else {
+                continue;
+            };
+            consumed_keys.push(idx);
+            if let Some(addon) = sim.addons.get_mut(idx as usize) {
+                addon.runtime.current_frame_ms += ms;
+            }
+        }
+    }
+    for idx in consumed_keys {
+        if let Some(table) = state.gc.tables.get_mut(timing_ref) {
+            let _ = table.raw_set(Val::Num(idx), Val::Nil, &state.gc.string_arena);
+        }
+    }
+}
+
+pub(crate) fn finalize_frame_metrics_state(
+    state: &mut rilua::vm::state::LuaState,
+    frame_elapsed_ms: f64,
+) {
+    drain_addon_timing(state);
+    let mut state = crate::lua_api::methods::borrow_state_mut(state)
+        .expect("frame metrics require simulator state");
+    update_app_frame_metrics(&mut state.app_frame_metrics, frame_elapsed_ms);
+    update_addon_frame_metrics(&mut state.addons);
 }
 
 fn update_screen_widgets_for_dimensions(state: &mut SimState, width: f32, height: f32) {

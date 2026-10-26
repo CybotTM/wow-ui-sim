@@ -841,7 +841,7 @@ fn subtree_ignores_parent_alpha(
 
 /// Check if any GCD, spell, or visible Cooldown widgets are still active.
 fn has_active_cooldowns(state: &crate::lua_api::SimState) -> bool {
-    let now = state.start_time.elapsed().as_secs_f64();
+    let now = state.clock_elapsed().as_secs_f64();
     if let Some((start, dur)) = state.gcd {
         if now < start + dur {
             return true;
@@ -858,7 +858,7 @@ fn has_active_cooldowns(state: &crate::lua_api::SimState) -> bool {
 }
 
 pub(super) fn active_cooldown_widget_ids(state: &crate::lua_api::SimState) -> Vec<u64> {
-    let now = state.start_time.elapsed().as_secs_f64();
+    let now = state.clock_elapsed().as_secs_f64();
     state
         .widgets
         .cooldown_ids()

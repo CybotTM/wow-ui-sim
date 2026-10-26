@@ -667,6 +667,7 @@ macro_rules! build_empty_sim_state {
             spell_activation_overlays: ::std::collections::HashSet::new(),
             challenge_completion: Default::default(),
             challenge_run: Default::default(),
+            manual_clock: None,
             known_spells: ::std::collections::HashSet::new(),
             harmful_spells: ::std::collections::HashSet::new(),
             helpful_spells: ::std::collections::HashSet::new(),

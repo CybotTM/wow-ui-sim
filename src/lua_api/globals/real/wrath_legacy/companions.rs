@@ -166,11 +166,7 @@ fn get_companion_cooldown(state: &mut LuaState) -> LuaResult<u32> {
         let Some(spell_id) = selected_companion_spell(&sim, kind, index as usize - 1) else {
             return Ok(0);
         };
-        recovery::companion_cooldown_times(
-            &sim,
-            spell_id,
-            sim.start_time.elapsed().as_millis() as u32,
-        )
+        recovery::companion_cooldown_times(&sim, spell_id, sim.clock_elapsed().as_millis() as u32)
     };
     state.push(Val::Num(start));
     state.push(Val::Num(duration));
