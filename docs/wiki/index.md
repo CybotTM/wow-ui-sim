@@ -1,6 +1,6 @@
-## [2026-10-26] staged | Modern stable active-list observations
+## [2026-10-26] proof | Modern stable active-list observations
 
-[Selected StableUI boundary](investigations/consumer-selection-and-red-proof.md#supplied-modern-stable-active-list) links the [supplied-record contract](../specs/stable-active-list.md): Retail/PTR declarations, distinct PTR fields, original XML slot tests and explicit unknown initial state. Producer staging is authorized; runtime RED/GREEN, stock and seven-profile checks remain pending.
+[Original active-slot proof](investigations/consumer-selection-and-red-proof.md#supplied-modern-stable-active-list) links the [supplied-record contract](../specs/stable-active-list.md): Retail/PTR exact RED/GREEN, isolated supplied records and fresh snapshots. Five finite PTR constants replace two raw stock keys at unchanged134/154, with both additions traced. Historical whole-closure/full-Refresh obligations stay deferred; final Retail stock and seven-profile checks remain pending.
 
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 

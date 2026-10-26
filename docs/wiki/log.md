@@ -1,6 +1,6 @@
-## [2026-10-26] staged | Modern stable active-list observations
+## [2026-10-26] proof | Modern stable active-list observations
 
-[Selected consumer and declaration evidence](investigations/consumer-selection-and-red-proof.md#supplied-modern-stable-active-list) separates modern supplied records from Camelot reads. The [contract](../specs/stable-active-list.md) records unknown native defaults/order and pending runtime/stock/compiler proof; producer-free RED must run before GREEN.
+[Original active-slot RED/GREEN](investigations/consumer-selection-and-red-proof.md#supplied-modern-stable-active-list) proves Retail/PTR supplied transitions, isolation and snapshots through original XML slots. The [contract](../specs/stable-active-list.md) records finite PTR prerequisite chains and the explicit historical deferral. PTR stock remains134/154 with a traced two-key replacement; final Retail stock and seven-profile checks remain pending.
 
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
