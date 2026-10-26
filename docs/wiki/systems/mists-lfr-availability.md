@@ -16,6 +16,10 @@ The regression verifies the selected TOC, original XML button identity, parent a
 
 Paired Mists stock at integrated master and the producer is 6 keys/12 occurrences on fresh copies of the current persisted CVar bytes. Exactly the missing-function OnLoad key and its reporter copy become named unsupplied-availability keys, count1 each; all surviving keys/counts are unchanged. This is explicit missing-input reporting, not clean startup or native-default acceptance.
 
+## Verification scope
+
+Mists, Retail and Era full-feature all-target checks pass with zero Cargo JSON or plain compiler warnings. Publication is runtime-gated, not hidden behind a new cfg. Formatting and changed-line readability pass. Other-profile runtime behavior and a full-suite run are not claimed.
+
 ## Sources
 
 - [Contract and test inventory](../../specs/mists-lfr-availability.md)

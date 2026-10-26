@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | Mists supplied LFR availability
 
-[Original PVEFrame and optional availability](systems/mists-lfr-availability.md): original-line missing-function RED is observed; the separate C API module publishes only on ACTIVE Mists, returns supplied booleans and raises an approved named missing-input error when unset. The revised byte-identical pair passes GREEN with ten observations and fails RED at line229. A line observer proves LFR state before the exact out-of-scope scenario error. Stock remains 6/12 with two missing-input key replacements and unchanged survivors; warning gates remain pending.
+[Original PVEFrame and optional availability](systems/mists-lfr-availability.md): original-line missing-function RED is observed; the separate C API module publishes only on ACTIVE Mists, returns supplied booleans and raises an approved named missing-input error when unset. The revised byte-identical pair passes GREEN with ten observations and fails RED at line229. A line observer proves LFR state before the exact out-of-scope scenario error. Stock remains 6/12 with two missing-input key replacements and unchanged survivors. Mists/Retail/Era all-target checks have zero warnings; formatting and changed-line readability pass.
 
 ## [2026-10-25] proof | Mists supplied map display
 
