@@ -244,7 +244,6 @@ macro_rules! build_empty_sim_state {
             clubs: crate::c_api::club_model::ClubState::default(),
             spell_cooldown_categories: HashMap::new(),
             spell_cooldown_item_sources: HashMap::new(),
-            transmog_enabled: true,
             active_blocked_rolesets: Vec::new(),
             active_allowed_rolesets: Vec::new(),
             quest_hub_related_quests: HashMap::new(),
@@ -454,7 +453,7 @@ macro_rules! build_empty_sim_state {
             lfg_active_entry: None,
             can_use_premade_group: true,
             lfr_availability: None,
-            mists_transmog: Default::default(),
+            transmog_availability: Default::default(),
             scenario_finder_availability: None,
             mists_party_min_level: None,
             lfg_category_info: default_lfg_category_info(),
@@ -526,6 +525,7 @@ macro_rules! build_empty_sim_state {
             pet_stables_open: false,
             stable_active_pets: None,
             stable_pet_slots: HashMap::new(),
+            stable_pet_spec_infos: None,
             #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
             allow_recent_allies_see_location: true,
             #[cfg(feature = "client-wowforever")]

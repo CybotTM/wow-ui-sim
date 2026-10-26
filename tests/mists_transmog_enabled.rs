@@ -27,7 +27,7 @@ fn load_original_display_settings() -> WowLuaEnv {
             .any(|file| file.ends_with("Classic/InterfaceOverrides.lua"))
     );
     let env = new_blizzard_addon_env(&ui);
-    assert_eq!(env.state().borrow().mists_transmog.enabled, None);
+    assert_eq!(env.state().borrow().transmog_availability.enabled, None);
     load_blizzard_addon_closure_into_env(
         &env,
         &ui,
@@ -84,7 +84,7 @@ fn load_original_display_settings() -> WowLuaEnv {
 }
 
 fn assert_display_controls(env: &WowLuaEnv, enabled: bool) {
-    env.state().borrow_mut().mists_transmog.enabled = Some(enabled);
+    env.state().borrow_mut().transmog_availability.enabled = Some(enabled);
     let errors_before = env.state().borrow().lua_errors.len();
     let controls: i32 = env
         .eval("return ObserveTransmogDisplay()")
@@ -109,10 +109,13 @@ fn exercise_display_transitions(initial: bool) {
     }
     // Each environment registers the false-branch variables only once, as the
     // original SettingsPanel rejects duplicate registration. No sink is replaced.
-    assert_eq!(first.state().borrow().mists_transmog.enabled, Some(true));
+    assert_eq!(
+        first.state().borrow().transmog_availability.enabled,
+        Some(true)
+    );
     let retained: i32 = first.eval("return ObserveTransmogDisplay()").unwrap();
     assert_eq!(retained, 0);
-    first.state().borrow_mut().mists_transmog.enabled = None;
+    first.state().borrow_mut().transmog_availability.enabled = None;
     let error = first
         .eval::<i32>("return ObserveTransmogDisplay()")
         .expect_err("unset availability must not choose a UI branch");
@@ -124,7 +127,7 @@ fn exercise_display_transitions(initial: bool) {
     );
     assert_display_controls(&first, true);
     assert_eq!(
-        second.state().borrow().mists_transmog.enabled,
+        second.state().borrow().transmog_availability.enabled,
         Some(initial)
     );
 }

@@ -22,7 +22,7 @@ In the pinned Mists UI, `Blizzard_UIPanels_Game_Classic.toc:67–69` selects `Mi
 
 Mists `Blizzard_CharacterFrame.toc:18–21` selects Cata/PaperDollFrame.lua, not Vanilla/PaperDollFrame.lua. The latter contains equipment queries and the normal `ToggleEngravingFrame` entry. Era/Anniversary select that Vanilla file; both also select the same shared bag/settings consumers. Their generated engraving documentation is byte-identical to Mists. Wrath's complete pinned profile tree has no C_Engraving references.
 
-`Blizzard_EngravingUI` is LoadOnDemand and explicitly loadable on Mists, but has no normal Mists UI entry. Its fourteen additional query/filter/cast members are outside this normal-flow slice. Their declarations do not establish native catalog filtering, cast transitions or default values. Era/Anniversary's existing temporary false availability remains a separate gap, not native evidence.
+`Blizzard_EngravingUI` is LoadOnDemand and explicitly loadable on Mists, but has no normal Mists UI entry. Its fourteen additional query/filter/cast members are outside this normal-flow slice. Their declarations do not establish native catalog filtering, cast transitions or default values. [Era/Anniversary availability](era-engraving-availability.md) now has a separate supplied-state slice; the former temporary false policy was not native evidence.
 
 ## Supplied input boundary
 

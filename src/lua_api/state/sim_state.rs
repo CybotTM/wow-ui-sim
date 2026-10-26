@@ -306,8 +306,6 @@ pub struct SimState {
     pub spell_cooldown_categories: HashMap<u32, i32>,
     /// Item whose use started a spell's current cooldown, keyed by spell ID.
     pub spell_cooldown_item_sources: HashMap<u32, i32>,
-    /// Account-level transmog availability; the simulator enables it.
-    pub transmog_enabled: bool,
     /// `C_Roleset.ApplyRolesetFilters` blocklist, in applied order.
     pub active_blocked_rolesets: Vec<String>,
     /// `C_Roleset.ApplyRolesetFilters` allowlist, in applied order.
@@ -563,8 +561,8 @@ pub struct SimState {
     pub can_use_premade_group: bool,
     /// Supplied Mists LFR service availability; None leaves native policy unknown.
     pub lfr_availability: Option<bool>,
-    /// Mists-only supplied input, distinct from the modern transmog policy.
-    pub mists_transmog: crate::c_api::mists_transmog::MistsTransmogAvailability,
+    /// Supplied transmog availability; None leaves native policy unknown.
+    pub transmog_availability: crate::c_api::transmog_availability::TransmogAvailability,
     /// Supplied Mists scenario eligibility and failure reason; None leaves policy unknown.
     pub scenario_finder_availability: Option<(bool, String)>,
     /// Supplied Mists active-party minimum; None leaves native policy unknown.
@@ -643,6 +641,9 @@ pub struct SimState {
     pub stable_active_pets: Option<Vec<crate::c_api::c_stable_info::active_list::PetInfo>>,
     /// Missing key is unknown; None is an explicit empty slot observation.
     pub stable_pet_slots: HashMap<u32, Option<crate::c_api::c_stable_info::active_list::PetInfo>>,
+    /// Supplied specialization catalog; None is not an observed empty list.
+    pub stable_pet_spec_infos:
+        Option<Vec<crate::c_api::c_stable_info::pet_spec_infos::PetSpecInfo>>,
     #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
     pub allow_recent_allies_see_location: bool,
     #[cfg(feature = "client-wowforever")]

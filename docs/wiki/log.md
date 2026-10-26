@@ -1,6 +1,26 @@
+## [2026-10-26] implementation | Shared transmog supplied input
+
+[Model and bounded proof](systems/transmog-availability.md) link the [contract](../specs/transmog-availability.md): the Mists Option<bool> is shared with Retail/PTR and replaces all three modern scalar reads. All eight exact Retail/PTR producer-only RED/shared-producer GREEN pairs pass with byte-identical tests; seventeen legacy cases and both original Mists selectors pass. Paired raw stock stays Retail0/0 and PTR122/138; all74 launch CVar guards are unchanged. All seven full-feature all-target checks pass with zero Cargo JSON/plain compiler warnings; later proof documentation does not change executable inputs. A pre-existing transmog bootstrap nil call is disclosed, not repaired by this lane.
+
+## [2026-10-26] bounded proof | Supplied pet specialization catalog
+
+[Final supplied-catalog proof](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog): five original-consumer RED/GREEN pairs, four supplementary GREEN cases, PTR122/138 with only two attributed unknown-state replacements and byte-identical Retail0/0. Seven all-target checks have zero compiler warnings; formatting/readability,36 CVar guards and27 pinned input hashes pass. Other-profile absence is compiled-not-executed; I1 owns its runtime coverage. No native default/catalog or menu-generation claim is added.
+
+## [2026-10-26] runtime proof | Supplied pet specialization catalog
+
+[Bounded original callbacks](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog): five RED/GREEN pairs and four supplementary GREENs pass; PTR stock122/138 replaces only the nil-member primary/reporter with named-unknown keys, Retail stays0/0. Hidden Refresh skips exactly original GenerateMenu247, not getter/options/SetupMenu execution. Seven all-target gates remain pending; other-profile absence runtime is deferred to I1.
+
+## [2026-10-26] staged | Supplied pet specialization catalog
+
+[Consumer investigation](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog) links the supplied-list contract and records the strict unknown default. The input scaffold passes its targeted test. Getter delivery follows observed original PTR OnLoad1205/Refresh1217 RED; supplied GREEN, Retail and final gates remain pending.
+
 ## [2026-10-26] implementation | Supplied voice settings access
 
 [Model and original callback](systems/voice-settings-access.md) record the six-profile declaration-backed query, unknown-state error and host-supplied observation. All 18 exact original-consumer GREEN/producer-free RED pairs pass with byte-identical tests; Wrath preserves absence. Seven all-target checks have zero warnings, all seven paired raw stock maps equal the supplied master baselines, and 98 final launch CVar guards are unchanged. No native readiness default, device catalog, complete initialization, timer cancellation or unsupplied forecast readiness is inferred.
+
+## [2026-10-26] implementation | Era/Anniversary supplied engraving availability
+
+[Bounded availability contract](investigations/era-engraving-availability.md) retires only the temporary false query, reusing Mists' environment-local Option<bool> and named missing-input error. Both profiles' exact original XML selectors reject constant false and pass supplied true/false, unset recovery and isolation. False-input settings remains preservation. Each stock map changes0/0→2/2: original OnLoad unset error plus ScriptErrors echo, individually traced to the removed shim. Seven all-target checks have zero JSON/plain warnings. Other25 members, bags and full LoD UI remain excluded.
 
 ## [2026-10-26] implementation | Mists transmog supplied input
 
@@ -3089,3 +3109,7 @@ Added the [supplied bool/string contract](../specs/mists-scenario-finder.md) and
 ## 2026-10-26 — Supplied stable pet slots
 
 Added [slot observations](systems/stable-pet-info.md) and [contract](../specs/stable-pet-info.md). Original Retail consumer RED observed; GREEN and profile checks remain pending.
+
+## 2026-10-26 — Pinned Mists global strings and reputation exposure
+
+Added the [70268 contract](../specs/mists-global-strings.md) and [source/consumer investigation](investigations/mists-global-strings.md). Full decrypted DB2/CSV agreement covers19,914 rows, including the second section; one byte-identical original-consumer selector rejects the foreign table at Setting34 and passes through131/138 with the real pinned setting name. Stock6/12→8/14 exposes an unchanged Retail temporary reputation seed, not a fabricated-label requirement. Pinned API declarations prevent an unsupported account-wide-concept absence claim; a whole-cache Lua/XML scan finds only the missing label's use and no definition. All seven full-feature all-target checks pass with zero JSON/plain compiler warnings. These checks do not establish other profiles' full runtime localization parity.

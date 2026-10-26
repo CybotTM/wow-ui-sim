@@ -2,13 +2,29 @@
 
 [State and original consumer boundary](systems/stable-pet-info.md) links the [contract](../specs/stable-pet-info.md): Retail/PTR explicit unknown/empty/record observations, shared PetInfo codec and fresh snapshots. Retail original-consumer RED observed; remaining execution gates are pending. Forever is unchanged.
 
+## [2026-10-26] implementation | Shared transmog availability
+
+[Shared observation and selected interactions](systems/transmog-availability.md) link the [contract](../specs/transmog-availability.md): Retail/PTR now reuse the Mists supplied Option<bool>, with no guessed modern true default. All eight exact Retail/PTR old-producer RED/shared-producer GREEN pairs pass through original set/custom-set clicks, popup apply and direct query. Seventeen legacy cases and both Mists display cases pass; paired raw stock stays Retail0/0 and PTR122/138 with no key/count change. All seven full-feature all-target checks pass with zero compiler warnings; all74 launch CVar guards are unchanged. No selected direct-query spellbook flow or complete bootstrap acceptance is claimed.
+
+## [2026-10-26] bounded proof | Supplied pet specialization catalog
+
+[Selected consumer and supplied-state contract](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog) distinguish PTR OnLoad1205, Retail Refresh and unselected Forever Standard UI. Five original-consumer RED/GREEN pairs cover PTR installed OnLoad and Retail/PTR Refresh plus unset recovery. PTR stock122/138 has only two attributed unknown-state key replacements; Retail remains0/0. All seven all-target checks have zero compiler warnings;36 CVar guards and27 input hashes are unchanged. Other-profile absence is compiled-not-executed here and deferred to I1 runtime coverage.
+
 ## [2026-10-26] implementation | Supplied voice settings access
 
 [Original audio polling boundary](systems/voice-settings-access.md) links the [contract](../specs/voice-settings-access.md): six declaring profiles, environment-local optional observation and named unset error; Wrath remains absent. Eighteen exact original-consumer GREEN/producer-free RED pairs pass, seven full-feature all-target checks have zero warnings, and all raw stock maps are unchanged at the supplied master baselines. All 98 final launch CVar guards are unchanged. Full device initialization, timer cancellation and unsupplied forecast readiness are not claimed.
 
+## [2026-10-26] bounded proof | Pinned Mists global strings
+
+[Source, selected consumer and exposure gap](investigations/mists-global-strings.md) links the [70268 contract](../specs/mists-global-strings.md):19,914 complete DB2 rows, multiline-safe generation and one original Setting34 RED→original131/138 GREEN. Stock6/12→8/14 exposes the unchanged temporary Retail reputation seed's ungrounded Mists inputs; no missing label is invented. All seven full-feature all-target checks pass with zero JSON/plain compiler warnings.
+
+## [2026-10-26] implementation | Era/Anniversary supplied engraving availability
+
+[Original XML control](investigations/era-engraving-availability.md) uses the shared supplied bool reader instead of the invented false default. Both profiles have two exact original OnLoad RED101/GREEN0 selectors and passing false-input settings preservation. Stock0/0→2/2 exposes the named unset error and its ScriptErrors echo, both attributed to CharacterFrame; no default is seeded. Seven all-target checks have zero warnings. Other25 members, bags and full LoD UI remain excluded.
+
 ## [2026-10-26] implementation | Mists transmog supplied input
 
-[Contract and selected display branch](systems/mists-transmog-enabled.md): both exact original-line4 RED/GREEN cases prove supplied true/false control branches, isolation, transitions and named unset recovery. Mists stock remains6/12 with identical raw keys/counts; all seven full-feature all-target checks have zero warnings. Modern default-true policy, the Forever gap and later settings branches remain separate.
+[Contract and selected display branch](systems/mists-transmog-enabled.md): both exact original-line4 RED/GREEN cases prove supplied true/false control branches, isolation, transitions and named unset recovery. Mists stock remains6/12 with identical raw keys/counts; all seven full-feature all-target checks have zero warnings. Retail/PTR now share the [supplied observation](systems/transmog-availability.md); the Forever gap and later settings branches remain separate.
 
 ## [2026-10-26] investigation | Mists engraving supplied inputs
 
