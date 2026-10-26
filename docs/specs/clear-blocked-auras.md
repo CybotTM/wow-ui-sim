@@ -36,7 +36,7 @@ Source-selected `CompactArenaFrameMixin.RefreshMembers` assigns `"arena"..index`
 
 ## Runtime selection
 
-For Retail/PTR, normal game-screen closure starts at `Blizzard_CompactRaidFrames`, depends on `Blizzard_RaidFrame` and `Blizzard_UnitFrame`, and selects the Mainline manager via `[Family]`. `Blizzard_UnitFrame_Mainline.toc` has `AllowLoad: Game`, `AllowLoadGameType: mainline` and selects Mainline CompactArenaFrame Lua/XML. All three selectors load this closure without overrides and assert original debug source provenance. Aura-controls also assert the existing child's SetUnit/Update and installed OnEvent identity/provenance, plus the real parent's private-aura method provenance. Source selection is not observed runtime acceptance until the tests execute.
+For Retail/PTR, normal game-screen closure starts at `Blizzard_CompactRaidFrames`, depends on `Blizzard_RaidFrame` and `Blizzard_UnitFrame`, and selects the Mainline manager via `[Family]`. `Blizzard_UnitFrame_Mainline.toc` has `AllowLoad: Game`, `AllowLoadGameType: mainline` and selects Mainline CompactArenaFrame Lua/XML. All three selectors load this closure without overrides and assert original debug source provenance. Aura-controls assert the existing child's SetUnit/Update identity and original mixin OnEvent provenance, plus the real parent's private-aura method provenance. The installed XML OnEvent is a delegating wrapper, not the mixin function pointer. A call observer must identify the original OnEvent body during installed-handler dispatch; an unrelated event preserves blocked player101, while LOSS_OF_CONTROL_UPDATE restores player101 and preserves blocked party201. Source selection is not observed runtime acceptance until the tests execute.
 
 ## Full-stock gate
 
