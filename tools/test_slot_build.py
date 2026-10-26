@@ -1909,21 +1909,48 @@ version = "1.0.0"
         self.assertFalse(self.output.exists())
         self.assertFalse(self.fingerprint.exists())
 
-    def test_unidentified_fingerprint_marks_slot_and_clears_before_next_build(self):
+    def test_unidentified_fingerprint_fails_without_deleting_unrelated(self):
         self.setup_transition("middle")
         self.fingerprint.unlink()
         self.fingerprint.parent.rmdir()
+        other = self.slot / "debug/.fingerprint/other-456/stamp"
+        other.parent.mkdir(parents=True)
+        other.write_text("keep")
         self.change_lock("middle")
         error, _ = self.execute(True)
-        self.assertIsNotNone(error)
         self.assertFalse(self.output.exists())
-        self.assertTrue((self.slot / ".unverified-fingerprints").exists())
-        other = self.slot / "x86_64-unknown-linux-gnu/debug/.fingerprint/other/stamp"
+        self.assertTrue(other.exists())
+        self.assertIn(str(self.output), error)
+        self.assertIn("fingerprint", error)
+        self.assertIn("could not be identified", error)
+        self.execute(False)
+        self.assertTrue(other.exists())
+
+    def test_uplifted_executable_evicts_hashed_source_and_fingerprint_only(self):
+        receipt = self.setup_transition("middle")
+        uplift = self.slot / "debug/probe"
+        hashed = self.slot / "debug/deps/probe-abc123"
+        uplift.write_bytes(b"binary")
+        hashed.write_bytes(b"binary")
+        fingerprint = self.slot / "debug/.fingerprint/probe-abc123/stamp"
+        fingerprint.parent.mkdir(parents=True)
+        fingerprint.write_text("fingerprint")
+        other = self.slot / "debug/.fingerprint/other-456/stamp"
         other.parent.mkdir(parents=True)
-        other.write_text("unverified")
-        error, _ = self.execute(False)
-        self.assertIsNotNone(error)  # The fake compiler does not recreate its output.
-        self.assertFalse(other.exists())
+        other.write_text("keep")
+        receipt["reported_artifacts"] = [{"package_id": self.package_id,
+            "target": {"name": "probe", "kind": ["bin"]},
+            "executable": str(uplift), "filenames": [str(uplift)]}]
+        receipt["rejected_artifacts"] = [str(uplift)]
+        receipt["dep_info_errors"] = ["rejected fixture"]
+        with self.assertRaises(ValueError):
+            self.module.finish_build(self.slot, self.slot / "receipt.json", receipt, None, {}, 0)
+        self.assertFalse(uplift.exists())
+        self.assertFalse(hashed.exists())
+        self.assertFalse(fingerprint.exists())
+        self.assertTrue(other.exists())
+        self.assertTrue(self.output.exists())
+        self.assertTrue(self.fingerprint.exists())
 
     def test_unrelated_lock_change_accepts_certificate_and_stale_check(self):
         self.setup_transition()
