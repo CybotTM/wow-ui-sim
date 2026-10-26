@@ -66,22 +66,33 @@ fn load_equipment_consumer() -> WowLuaEnv {
     env
 }
 
-// Development input RED precedes the producer query RED. Later tests prove
-// the supplied observation values and clearing through the public consumer.
+// The preliminary missing-admin RED is input plumbing, not consumer proof.
 #[test]
 fn equipment_lock_admin_inputs_do_not_equip_items() {
     let env = WowLuaEnv::new().unwrap();
+    env.exec("A_Admin.EquipItem(1, 211993); A_Admin.SetEquipmentItemLock(211995, true)")
+        .unwrap();
+    assert_eq!(
+        env.state().borrow().equipment_manager.item_lock_observations.get(&211995),
+        Some(&true)
+    );
+    env.exec("A_Admin.SetEquipmentItemLock(211995, false); A_Admin.SetEquipmentItemLock(211996, true)")
+        .unwrap();
+    assert_eq!(
+        env.state().borrow().equipment_manager.item_lock_observations.get(&211995),
+        Some(&false)
+    );
     env.exec(
         r#"
-        A_Admin.EquipItem(1, 211993)
-        A_Admin.SetEquipmentItemLock(211995, true)
-        A_Admin.SetEquipmentItemLock(211995, false)
         A_Admin.ClearEquipmentItemLock(211995)
         assert(GetInventoryItemID('player', 1) == 211993, 'observations do not equip gear')
         "#,
     )
-    .expect("host can supply, replace and clear equipment item lock observations");
-    assert_eq!(env.state().borrow().equipment_manager.last_used_set_id, None);
+    .unwrap();
+    let sim = env.state().borrow();
+    assert!(!sim.equipment_manager.item_lock_observations.contains_key(&211995));
+    assert_eq!(sim.equipment_manager.item_lock_observations.get(&211996), Some(&true));
+    assert_eq!(sim.equipment_manager.last_used_set_id, None);
 }
 
 #[test]
