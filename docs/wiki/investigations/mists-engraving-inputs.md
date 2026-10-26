@@ -38,7 +38,7 @@ The unchanged old storage test still fails, now with `C_Engraving.GetEngravingMo
 
 Bound Mists stock maps remain6 keys/12 occurrences, with no added, removed or count-changed raw keys. BEFORE `c50e6386a` is base `e98282ab8` plus scaffold types and the default-initialized environment field, with no producer; it is not a separately rebuilt exact master. AFTER `f7a9227b8` adds the producer. Later changes are test/documentation-only. The existing generic `(string):1` pair remains unattributed; no new key needs a masking-predecessor trace.
 
-Corrected-source Mists all-target compilation has zero JSON/plain warnings. Six profile checks remain. Formatting and manual changed-Rust readability pass. Runtime invocations use fresh byte-exact child CVar copies and O_NOATIME source snapshots; originals are not reset/restored.
+All seven full-feature all-target checks pass with zero JSON/plain warnings: Mists at `eb3dca9dc`, the other six at documentation-only successor `81d59b62c`. Their Rust/test inputs are identical. This proves compilation, not runtime parity on the other six profiles. Formatting and manual changed-Rust readability pass. Runtime invocations use fresh byte-exact child CVar copies and O_NOATIME source snapshots; originals are not reset/restored.
 
 ## Fixture fidelity
 

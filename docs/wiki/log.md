@@ -1,6 +1,6 @@
 ## [2026-10-26] investigation | Mists engraving supplied inputs
 
-[Selected original consumers](investigations/mists-engraving-inputs.md) now have three exact corrected-input GREEN cases and producer-free RED with byte-identical tests. Seven Mists-only members project supplied state; missing input raises a named error and refresh records only a local request. Original bag slot IDs and the established GetTexture fileID contract corrected fixture assumptions without changing vendor/texture behavior. Stock stays 6/12; old storage remains a named-boundary failure. Settings is blocked at the earlier missing IsTransmogEnabled call. Mists compilation passes; six profile checks remain.
+[Selected original consumers](investigations/mists-engraving-inputs.md) now have three exact corrected-input GREEN cases and producer-free RED with byte-identical tests. Seven Mists-only members project supplied state; missing input raises a named error and refresh records only a local request. Original bag slot IDs and the established GetTexture fileID contract corrected fixture assumptions without changing vendor/texture behavior. Stock stays 6/12; old storage remains a named-boundary failure. Settings is blocked at the earlier missing IsTransmogEnabled call. All seven full-feature all-target checks pass with zero JSON/plain warnings; no other-profile runtime parity is claimed.
 
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 

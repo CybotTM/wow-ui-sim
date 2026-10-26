@@ -30,7 +30,7 @@ The normal Mists bag and settings consumers read explicit environment-local engr
 - [x] Execute producer-subtracted RED and supplied GREEN with byte-identical tests: corrected RED `e97b841e7`, GREEN `eb3dca9dc`; all three exact GREEN cases pass.
 - [ ] The complete original `InterfaceOverrides.AdjustDisplaySettings` stops at line4 because `C_TransmogOutfitInfo.IsTransmogEnabled` is absent. That separate producer is outside this scope. Do not substitute copied vendor excerpts or claim settings-path GREEN.
 - [x] Compare bound stock maps: scaffold/no-producer `c50e6386a` and producer `f7a9227b8` both have 6 raw keys/12 occurrences, with no raw-key/count changes.
-- [ ] Finish seven-profile zero-warning all-target checks; corrected-source Mists passes, six profiles remain.
+- [x] All seven full-feature all-target checks pass with zero JSON/plain warnings. Mists checks `eb3dca9dc`; the other six check documentation-only successor `81d59b62c`, with identical Rust/test inputs.
 
 ## Out of scope
 
