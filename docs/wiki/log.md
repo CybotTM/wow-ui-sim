@@ -2924,3 +2924,7 @@ Cargo rewrite byte-for-byte; runtime acceptance remains pending.
 ## [2026-10-25] fix | TTS publication gate
 
 [Verifier repair](investigations/cf2-tts-integration.md#publication-gate-repair) gates namespace creation and persistence by the pinned profile declarations. Wrath publication regression is RED before the fix; legacy applicability retains all TTS assertions and adds positive Wrath absence checks. Both merge-parent log histories remain intact. Checkpoint `7bc8208ca` passes55 fresh exact cases, Wrath/Retail all-target checks without warnings, zero-error sparse Wrath stock and formatting. Other historical all-target/persistence evidence is not relabeled as fresh.
+
+## 2026-10-25 — PTR Edit Mode declaration slice
+
+Recorded [declarations and original consumers](investigations/ptr-edit-mode-declarations.md), separate RED/GREEN selectors, supplied-map boundary, stock delta and the report-only SwingTimerSetting successor. Runtime ACTIVE gating preserves the single compiled implementation. PTR/Retail/Era full-feature all-target checks pass with zero JSON/plain warnings and separate accepted source-binding receipts; formatting and readability pass.

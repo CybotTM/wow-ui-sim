@@ -1,3 +1,7 @@
+## [2026-10-25] implementation | PTR Edit Mode declarations
+
+[Two original boundaries](investigations/ptr-edit-mode-declarations.md) link the [contract](../specs/ptr-edit-mode-declarations.md): declaration-backed boss directions and Gamepad preset, independent exact RED/GREEN and 270/376→268/374 stock. Display-info:800 SwingTimerSetting is the traced successor, not part of this slice. The module compiles on all profiles and publishes only when ACTIVE is PTR. PTR/Retail/Era full-feature all-target checks pass with zero warnings and separate accepted source-binding receipts; formatting and readability pass.
+
 ## [2026-10-25] investigation | Mists battlefield vehicles
 
 [Original vehicle consumer](investigations/mists-battlefield-vehicles.md) links the [contract](../specs/mists-battlefield-vehicles.md): pinned API declarations, selected WorldMap provider/pins and supplied per-map state. Original-consumer missing-call RED and supplied-pin GREEN pass. Both raw captures contain 12 keys / 18 occurrences; vehicle errors are replaced by individually traced existing DeathMap provider errors. Exact base reproduces the 12/18 BEFORE map, and byte-identical paired producer-only RED fails as required. Mists/Retail all-target checks pass with three inherited/zero warnings; formatting and readability pass.
