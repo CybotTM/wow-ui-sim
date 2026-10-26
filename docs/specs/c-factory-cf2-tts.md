@@ -1,6 +1,6 @@
 # CF-2 cross-profile TTS persistence and temporary-CVar lifecycle
 
-Slice 7 covers original ChatFrame character-save and Forever Gamepad temporary-CVar gaps. Modeled `C_*` producers belong in `src/c_api/`; ordinary CVars remain `SimState.cvars`. Delivery is edit-only: authored tests and staged producers, no runtime RED/GREEN. See [Lua API architecture](../wiki/systems/lua-api.md).
+Slice 7 covers original ChatFrame character-save and Forever Gamepad temporary-CVar gaps. Modeled `C_*` producers belong in `src/c_api/`; ordinary CVars remain `SimState.cvars`. Initial delivery was edit-only. Final bounded TTS verification and the deferred Gamepad ownership are recorded in the [integration inventory](../wiki/investigations/cf2-tts-integration.md). See [Lua API architecture](../wiki/systems/lua-api.md).
 
 ## What it must do
 
@@ -50,7 +50,7 @@ All seven available profile caches were searched for preference CVar mappings. N
 
 ## Tests asserting this spec
 
-Integration target selectors (authored, unexecuted):
+Integration target selectors (exact GREEN on all six registered profiles; [bounded proof](../wiki/investigations/cf2-tts-integration.md#bounded-verification)):
 
 | Selector | Contradiction / proof boundary |
 |---|---|
@@ -60,13 +60,13 @@ Integration target selectors (authored, unexecuted):
 | cf2_tts_shape_contract::original_tts_saved_settings_consumer_blocker | Original CheckLoad first with nondefault legacy input, then independent numerical contradiction. Constant-true/no-op Mark remains indistinguishable within this selector alone. |
 | cf2_tts_shape_contract::original_tts_documented_preference_pairs_contract | Independent numerical contradiction plus explicit voice, bool, chat and channel round trips. No default/reset/native persistence claim. |
 
-Forever additionally registers cf2_gamepad_temp_cvars::original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinary_cvar; its producer is outside this TTS change.
+The Forever Gamepad fixture `cf2_gamepad_temp_cvars::original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinary_cvar` is deferred with its producer, outside this TTS change; the integration inventory records its restoration owner.
 
 Original missing boundaries at the pre-producer base: MarkCharacterSettingsSaved at Retail/Forever475 and PTR/Mists/Era/Anniversary472; Gamepad RemoveTempCVar at Core.lua6. Missing pre-observation getter is a prerequisite blocker, not accepted original-consumer RED. Setup, compilation, provenance, timeout and unrelated API failures are not RED.
 
 ## Known gaps
 
-- [ ] Run admitted original-consumer RED and identical final GREEN; no build/test/check has run in this edit-only delivery. Keep test changes separate from producer commits for later source-bound replay.
+- [x] Run admitted exact-list/exact-run final GREEN on every registered TTS profile, paired stock comparisons and seven all-target checks. Historical RED custody remains separate from native-semantic acceptance; see the integration inventory.
 - [ ] Native account/character ownership, fresh/reset marker policy, save timing, legacy migration and multi-character/account switching remain unproven. Approved persistence semantics do not establish native parity.
 - [ ] Channel-key-to-record migration and changed-metadata identity remain incomplete; no speculative aliases.
 - [ ] Gamepad invalid/read-only/secure CVar behavior, ordinary writes during overlays, event ordering and multiple-writer priority remain outside the bounded fixture.

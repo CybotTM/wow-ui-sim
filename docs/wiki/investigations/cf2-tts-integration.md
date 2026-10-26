@@ -30,7 +30,27 @@ Only `cf2_tts_shape_contract::original_gamepad_temp_cvar_shape_blocker` is remov
 
 ## Evidence boundaries
 
-The five original-consumer TTS cases pass on the checkpoint's Forever build with 70532 inputs. Its exact raw stock map matches the accepted master map: 26 messages, 26 occurrences, zero additions or removals. Final seven-profile exact-selector, stock-map, warning and formatting gates are separate from this deferral decision. Wrath does not register these CF-2 fixtures. The saved-marker model is user-approved, not native initial/reset evidence.
+The five original-consumer TTS cases pass on the checkpoint's Forever build with 70532 inputs. Its exact raw stock map matches the accepted master map: 26 messages, 26 occurrences, zero additions or removals. Wrath does not register these CF-2 fixtures. The saved-marker model is user-approved, not native initial/reset evidence.
+
+## Bounded verification
+
+Code checkpoint `297b198b6` passes 37 exact cases: five original-consumer TTS cases on each of six registered profiles, plus the corrected legacy Alternate-voice test on all seven. Each case has exact-list discovery followed by one exact execution. All seven all-target checks pass. Retail/Wrath have zero warnings; PTR/Mists/Era/Anniversary/Forever have only the three inherited `fast_handler_late_bind` dead-code warnings. The parent explicitly accepted the Era/Anniversary allowance; the `i1-test-warnings` lane owns cleanup.
+
+Stock results retain raw message keys and counts, without headline normalization:
+
+| Profile | Master messages / occurrences | Branch messages / occurrences | Added / removed raw keys |
+|---|---:|---:|---:|
+| Retail | 16 / 18 | 14 / 16 | 0 / 2 |
+| PTR | 428 / 608 | 426 / 606 | 0 / 2 |
+| Mists | 14 / 20 | 12 / 18 | 2 / 4 |
+| Wrath | 0 / 0 | 0 / 0 | 0 / 0 |
+| Era | 4 / 10 | 2 / 8 | 0 / 2 |
+| Anniversary | 4 / 10 | 2 / 8 | 0 / 2 |
+| Forever | 26 / 26 | 26 / 26 | 0 / 0 |
+
+Saved-marker failures disappear on Retail/PTR/Mists/Era/Anniversary. Mists additionally changes the first failing WorldMap provider from GroupMembers' missing `GetMapDisplayInfo` to Vehicle's missing `GetBattlefieldVehicles`, including the Blizzard re-report. Both API gaps are unchanged; `Blizzard_MapCanvas.lua:451–454` traverses providers with `pairs`. This is a source-backed first-failure ordering explanation, not a deterministic ordering guarantee or a claim of zero raw additions. Wrath's paired zero result covers its selected sparse cache: five Blizzard addons and 2,396 frames, not broader native startup health.
+
+Retail/Wrath master maps were built at `cad1e2902`, whose runtime inputs match `5d867ef38`; the other five master maps were reused with source custody. Forever uses the verified private wowf 70532 cache. Library freshness was audited separately: fresh Retail reuse has 1,372 identical dep-info inputs, and fresh Forever reuse has 1,208; source/library-input diffs are empty across the respective source checkpoints. Other current library records were rebuilt, not blindly accepted as fresh. Native parity and full-suite acceptance remain outside this proof.
 
 ## Alternate voice oracle correction
 

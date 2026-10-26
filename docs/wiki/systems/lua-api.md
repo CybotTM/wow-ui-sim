@@ -718,5 +718,4 @@ CVars or alternate producers exist; ordinary chat channel membership stays separ
 
 The [TTS contract](../../specs/c-factory-cf2-tts.md#staged-producer-contract-and-evidence-limits)
 owns default evidence, supported pairs, selection, UNKNOWN mappings and the approved
-non-native fresh=false/Mark=true persistent marker model. Original consumer RED/GREEN
-is authored, not executed. Native parity and all-profile preservation remain unverified.
+non-native fresh=false/Mark=true persistent marker model. The [bounded integration proof](../investigations/cf2-tts-integration.md#bounded-verification) records exact original-consumer GREEN on six registered profiles, the corrected legacy oracle on all seven, stock-map deltas and warning gates. Native parity and full-suite acceptance remain unverified.

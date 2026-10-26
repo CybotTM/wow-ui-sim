@@ -2851,3 +2851,7 @@ Cargo rewrite byte-for-byte; runtime acceptance remains pending.
 ## [2026-10-25] test | TTS Alternate UI default oracle
 
 [Source-backed correction](investigations/cf2-tts-integration.md#alternate-voice-oracle-correction) changes the legacy voiceType1 test from0 to1. Pinned Blizzard legacy UI defaults and migration support1; APIDocumentation does not establish native default parity. Forever70532 TTS cases and exact26/26 master stock comparison pass.
+
+## [2026-10-25] verification | TTS bounded integration
+
+[Bounded proof matrix](investigations/cf2-tts-integration.md#bounded-verification) records37 passing exact cases, seven all-target checks with the clarified inherited-warning allowance, seven raw stock comparisons and source-backed Mists additions. Fresh library reuse has dep-info content identity; native parity and full-suite acceptance remain excluded.
