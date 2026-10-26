@@ -44,6 +44,12 @@ The [squelch contract](../../specs/social-squelch.md) adds one environment-local
 
 At frozen master `9a104c448`, stock maps are Retail16/18, PTR296/410 and Mists12/18 (keys/occurrences). GREEN code `2dc0a8759` yields14/16,294/408 and10/16 respectively: only each original squelch primary/reporter pair disappears, with no added keys or changed counts. All-target checks pass: Retail zero warnings, PTR/Mists only the three permitted `fast_handler_late_bind.rs` dead-code warnings. Twenty-two payloads retain unchanged original CVar stat/hash guards. Unrelated closure errors and stock residue remain recorded; no clean-startup claim is made.
 
+## Supplied modern stable active list
+
+The [supplied-list contract](../../specs/stable-active-list.md) separates Retail/PTR observations from Forever's Camelot `stable_reads`. Re-authenticated Retail declarations are `StableInfoDocumentation.lua:15–22,193–214`; PTR 70493 uses `:19–26,215–241` and adds five loyalty/happiness/experience fields. Retail's bare StableUI TOC selects the getter at `Blizzard_StableUI.lua:447`; PTR's `[Game]` entry selects `Standard/Blizzard_StableUI.lua:458`, not the old shared line447 citation.
+
+The staged producer preserves supplied list order, copies declared records and ability arrays, and has no initial observation. Admin replacement, ordinal update/append and removal are simulator inputs, not native ordering or pet movement rules. An unset observation raises an explicit `native-unknown` error; an explicitly supplied empty list is not a native-default claim. Tests use original XML slots and original Refresh/SetPet identities, with an observation before the separate secondary-pet `GetStablePetInfo` query. Runtime RED/GREEN, stock and compiler gates remain pending. Producer authorship before observed RED was explicitly authorized; the producer-free sibling must execute RED before any GREEN run.
+
 ## Sources
 
 - [TOC resolver](../../../src/toc/mod.rs) and [loader selection](../../../src/loader/mod.rs) — selection rules verified against source.

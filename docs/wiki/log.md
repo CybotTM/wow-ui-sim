@@ -1,3 +1,7 @@
+## [2026-10-26] staged | Modern stable active-list observations
+
+[Selected consumer and declaration evidence](investigations/consumer-selection-and-red-proof.md#supplied-modern-stable-active-list) separates modern supplied records from Camelot reads. The [contract](../specs/stable-active-list.md) records unknown native defaults/order and pending runtime/stock/compiler proof; producer-free RED must run before GREEN.
+
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
 [Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.
