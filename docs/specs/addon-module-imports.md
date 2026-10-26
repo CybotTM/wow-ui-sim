@@ -58,6 +58,7 @@ Path/dependency requirements have sixteen pure resolver tests; registry/value/pr
 - `src/loader/module_import.rs` — pure logical path and direct-dependency resolver.
 - `src/loader/addon_modules.rs` — completed-value registry, prototype-identity caller provenance, and direct Rust Forever `require` and PTR/Forever `import` installation seam.
 - `src/lua_api/env.rs` — per-VM module metadata; module values and source closures are rooted in the Lua registry.
+- `src/lua_api/mod.rs` — internal VM context re-export used by the shared registry on every profile; it does not publish Lua globals.
 - `src/loader/mod.rs` — declares the shared resolver and runtime modules; ACTIVE gates publication and completion tracking.
 - `src/loader/lua_file.rs` — registers compiled-file provenance and publishes the existing execution helper's first return only after success.
 - `src/loader/addon.rs` — loads files from the selected TOC source rather than substituting a same-named repository-local file.
