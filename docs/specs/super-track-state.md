@@ -38,3 +38,9 @@ CF-2 supplies tracked targets through `src/c_api/c_super_track.rs` and per-quest
 ## Out of scope
 
 Corpse, waypoint, scenario/party targets, priority arbitration, persistence, broader map-provider catalogs and user-facing map-pin/vignette setters. Existing highest-priority query remains a temporary unsupported nil response, retired only when native arbitration is modeled; namespace is not fully modeled. PTR readiness=false is preservation, not readiness RED.
+
+## Deferred supertracking coverage restoration
+
+`tests/cf2_supertracking_restored.rs` restores only the supertracking obligations from the deferred housing shape/boundary tests on Retail, PTR and Forever. Both exact selectors exercise supplied Appearance/101 and Achievement/202 pairs, clear, and re-entry through the selected original `Blizzard_QuestSuperTracking.lua` event/cache refresh. An external listener records the pair during notification; the original helper reads that cache. The shape selector also checks the documented zero-result absence versus populated two-number binding contract. The cache helper itself returns two fields, including two nils after clear.
+
+Declarations were re-authenticated per profile at `Blizzard_APIDocumentationGenerated/SuperTrackManagerDocumentation.lua:32–40` and `ContentTrackingTypesDocumentation.lua:60–70`. These tests preserve an existing supplied producer; they do not establish native target policy, event deduplication or arbitration, and do not restore unrelated housing tests. Runtime proof is recorded separately in the lane report.
