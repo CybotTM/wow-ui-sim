@@ -1,3 +1,7 @@
+## [2026-10-26] investigation | Mists engraving supplied inputs
+
+[Selected original consumers](investigations/mists-engraving-inputs.md) now have three exact corrected-input GREEN cases and producer-free RED with byte-identical tests. Seven Mists-only members project supplied state; missing input raises a named error and refresh records only a local request. Original bag slot IDs and the established GetTexture fileID contract corrected fixture assumptions without changing vendor/texture behavior. Stock stays 6/12; old storage remains a named-boundary failure. Settings is blocked at the earlier missing IsTransmogEnabled call. All seven full-feature all-target checks pass with zero JSON/plain warnings; no other-profile runtime parity is claimed.
+
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 
 [Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) records the four legacy profiles, the already-selected TutorialFrame listener, and the absent native global. Original Mists storage-flow RED remains unchanged; bounded state recorder adds no event/flag/UI policy. GREEN advances past976 through all Lua assertions, but the test still fails its collected-error gate (C_Engraving:315 next). Four-profile state/publication tests pass, stock maps are byte-identical, and all seven canonical all-target checks have zero warnings.
