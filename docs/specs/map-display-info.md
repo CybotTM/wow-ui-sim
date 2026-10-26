@@ -10,6 +10,16 @@
 - [x] Canonical input starts empty, without guessed defaults, map-flag derivation, or a new Lua setter.
 - [x] Tested simulator security: untainted authentic-secret input succeeds; tainted ordinary input succeeds and tainted authentic-secret input rejects.
 
+## Mists original group-provider contract
+
+Pinned Mists `Blizzard_APIDocumentationGenerated/MapDocumentation.lua:168–180` declares `GetMapDisplayInfo(uiMapID: number) -> hideIcons: bool` with `MayReturnNothing = true`. There is no return struct or struct field list. The existing scalar boolean/zero-return projection matches this declaration; no profile-specific return adapter is needed.
+
+- [ ] Publish the existing producer on Mists through the same ACTIVE registration selection used by Era/Anniversary, without a second store or a Retail epoch.
+- [ ] Supplied hide/show inputs must reach the provider and XML pin installed by the normally selected Mists WorldMap OnLoad, including map revisits, live updates and independent environments.
+- [ ] Preserve absent/removed zero results and exactly one supplied false boolean. Native input population and malformed-number parity remain excluded.
+
+`tests/mists_map_display.rs` selects `Blizzard_WorldMap_Mists.toc` and `Blizzard_SharedMapDataProviders_Mists.toc`, loads stock startup order, then finds the actual installed group provider and pin. It invokes the original provider `OnMapChanged:22–23`, reaching original pin `OnMapChanged:112–123` and the query at line114. No alternate consumer, fabricated provider, replacement method or vendor edit is used. The populated selector must reject constant true, false, nil and no-op producers on its own. Runtime proof is pending.
+
 ## How it works
 
 - [Lua API and simulator state](../lua-api.md)
