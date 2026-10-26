@@ -89,19 +89,29 @@ fn original_xml_slot_supplied_transitions_isolation_and_unset() {
         );
     }
     supply(&first, None);
-    let error = first
-        .exec(
-            "local ok, reason = xpcall(InvokeOriginalAmmoSlot, debug.traceback); if not ok then error(reason, 0) end",
+    let (ok, message, traceback): (bool, String, String) = first
+        .eval(
+            r#"
+            local message = ''
+            local ok, traceback = xpcall(InvokeOriginalAmmoSlot, function(reason)
+                message = tostring(reason)
+                return debug.traceback(reason)
+            end)
+            return ok, message, tostring(traceback)
+            "#,
         )
-        .expect_err("unset input must fail through the original XML-bound slot")
-        .to_string();
-    assert!(error.contains(UNSUPPLIED), "{error}");
+        .expect("asserted-failure probe must return its observation");
+    assert!(!ok, "unset input must fail through the original XML-bound slot");
+    assert_eq!(message, UNSUPPLIED);
     let line = match ACTIVE {
         ClientProfile::Ptr => "PaperDollFrame.lua:1702",
         ClientProfile::WowForever => "PaperDollFrame.lua:1952",
         _ => unreachable!(),
     };
-    assert!(error.contains(line), "original consumer boundary: {error}");
+    assert!(traceback.contains(line), "original consumer boundary: {traceback}");
+    if ACTIVE == ClientProfile::WowForever {
+        assert!(traceback.contains("PaperDollFrame.lua:3654"), "original XML delegate: {traceback}");
+    }
     observe_slot(&second, true);
     observe_slot(&first, true);
     observe_slot(&first, false);
