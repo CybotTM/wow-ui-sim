@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Launch an admitted Cargo build through a stable per-slot source mount."""
 import argparse
+from contextlib import contextmanager, ExitStack
+import fcntl
 import hashlib
 import json
 import os
@@ -62,7 +64,8 @@ def artifact_units(slot, entries):
         if not match:
             continue
         name = match[1]
-        if kind == "deps" and path.suffix in LIBRARY_SUFFIXES and name.startswith("lib"):
+        library_output = path.suffixes and path.suffixes[0] in LIBRARY_SUFFIXES
+        if kind == "deps" and library_output and name.startswith("lib"):
             name = name[3:]
         base = path.parent.parent
         key = alias(base, name, match[2])
@@ -93,7 +96,47 @@ def previous_artifact_paths(slot):
     return paths
 
 
+def profile_lock_paths(slot):
+    paths = set()
+    for directory, children, files in os.walk(slot):
+        if ".cargo-lock" in files or set(children) & {
+                ".fingerprint", "deps", "build", "incremental"}:
+            paths.add(Path(directory) / ".cargo-lock")
+    return paths
+
+
+@contextmanager
+def hold_pruning_locks(slot, owner, dry_run):
+    with ExitStack() as locks:
+        if not dry_run:
+            check_owner(slot, owner)
+            for path in sorted(profile_lock_paths(slot)):
+                stream = locks.enter_context(path.open("a+b"))
+                try:
+                    fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError as error:
+                    raise ValueError(f"slot build lock busy: {path}") from error
+        yield
+
+
+def receipt_artifact_identities(paths):
+    identities = set()
+    for path in paths:
+        try:
+            info = path.lstat()
+        except FileNotFoundError:
+            # A removed receipt output has no current inode to protect.
+            continue
+        identities.add((info.st_dev, info.st_ino))
+    return identities
+
+
 def prune_slot(slot, owner, cap_bytes, recent_hours=2, dry_run=False, now=None):
+    with hold_pruning_locks(slot, owner, dry_run):
+        return prune_locked_slot(slot, owner, cap_bytes, recent_hours, dry_run, now)
+
+
+def prune_locked_slot(slot, owner, cap_bytes, recent_hours, dry_run, now):
     if cap_bytes <= 0 or not math.isfinite(cap_bytes):
         raise ValueError("slot cap must be positive and finite")
     if recent_hours < 0 or not math.isfinite(recent_hours):
@@ -111,8 +154,7 @@ def prune_slot(slot, owner, cap_bytes, recent_hours=2, dry_run=False, now=None):
         print(json.dumps(result), flush=True)
         return result
     protected = previous_artifact_paths(slot)
-    protected_inodes = {(entries[path].st_dev, entries[path].st_ino)
-                        for path in protected if path in entries}
+    protected_inodes = receipt_artifact_identities(protected)
     cutoff = (time.time() if now is None else now) - recent_hours * 3600
     candidates = []
     units = artifact_units(slot, entries)
@@ -146,7 +188,7 @@ def prune_slot(slot, owner, cap_bytes, recent_hours=2, dry_run=False, now=None):
         manifest = {"paths": [str(path) for path in paths], "size_bytes": freed}
         if not dry_run:
             check_owner(slot, owner)
-            # The claim serializes builds. Remove all members, or fail explicitly.
+            # Cargo profile locks remain held through the whole-unit deletion.
             for path in paths:
                 if path.is_dir() and not path.is_symlink():
                     shutil.rmtree(path)

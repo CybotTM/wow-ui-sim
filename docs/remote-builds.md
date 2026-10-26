@@ -58,16 +58,21 @@ Use the helper from the checkout that contains it; it builds `--worktree`.
 
 ### Slot size limit
 
-Before Cargo starts, the worker checks `.owner` and prunes when allocated disk
-usage exceeds `--slot-cap-gib` (default 60 GiB), stopping below 80% of the cap
+Before Cargo starts, the worker checks `.owner` and acquires each existing
+Cargo build profile's `.cargo-lock` non-blockingly. A held lock refuses pruning
+with `slot build lock busy` and the lock path. Locks remain held from inventory
+through deletion, so Cargo cannot build in those profiles during pruning.
+The worker prunes when allocated disk usage exceeds `--slot-cap-gib` (default 60 GiB), stopping below 80% of the cap
 (default 48 GiB). Units are ordered by their newest member mtime. Fingerprints,
 matching deps files, build directories, and incremental sessions are removed
 together per name/hash within each build-profile directory. Fingerprint
 package/target aliases are joined only at the same hash. Independently hashed
 incremental directories are separate cache units; different revisions are not
-coalesced.
+coalesced. Same-hash library sidecars, including `.so.dwp`, belong to the
+library's unit; a recent sidecar protects every member.
 
-Units referenced by `.verified-source-identity.json` or modified within
+Units referenced by `.verified-source-identity.json` (by path or hardlink
+identity, including receipt paths outside the slot) or modified within
 `--prune-recent-hours` (default 2) are retained. Protected units and unclassified
 files can prevent reaching the cap; the summary reports the remaining bytes. Allocated
 bytes count hard links once; predicted reclaimed bytes exclude links retained
@@ -82,8 +87,8 @@ scripts/slot-build.py --slot 2 --prune-dry-run
 
 It prints the same removal plan and before/remaining byte totals without deleting
 anything. Inspecting an active slot gives a moving snapshot. Actual pruning
-requires the existing exclusive ownership claim; do not share a claim between
-concurrent builds. No `cargo clean` is used.
+requires the existing exclusive ownership claim and all profile locks; do not
+share a claim between concurrent builds. No `cargo clean` is used.
 
 ### Source freshness and receipts
 
