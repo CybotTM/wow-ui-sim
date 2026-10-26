@@ -22,6 +22,19 @@ fn original_smart_navigation_and_debug_share_completed_utility_and_find_buttons(
             .iter()
             .any(|name| name == "Blizzard_GamepadSmartNavigation")
     );
+    let state = env.state().borrow();
+    let import_errors: Vec<_> = state
+        .lua_errors
+        .iter()
+        .filter(|error| {
+            error.contains("import") && error.contains("Blizzard_GamepadSmartNavigation")
+        })
+        .collect();
+    assert!(
+        import_errors.is_empty(),
+        "original import failed: {import_errors:?}"
+    );
+    drop(state);
     env.exec(
         r#"
         local function utilityUpvalue(fn)
