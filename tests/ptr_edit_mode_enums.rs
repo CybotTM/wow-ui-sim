@@ -91,6 +91,50 @@ fn complete_display_info_initializes_original_system_maps() {
 }
 
 #[test]
+fn loss_of_control_original_onload_completes_with_display_info_map() {
+    let (env, edit_mode_root) = load_edit_mode();
+    let root = edit_mode_root.parent().unwrap();
+    let addons = discover_blizzard_addon_closure_for_screen_with_overrides(
+        root,
+        ScreenKind::Game,
+        &["Blizzard_FrameXML"],
+        &[],
+    );
+    let (_, toc_path) = addons
+        .iter()
+        .find(|(name, _)| name == "Blizzard_FrameXML")
+        .unwrap();
+    let toc = TocFile::from_file(toc_path).unwrap();
+    for relative in ["LossOfControlFrame.lua", "LossOfControlFrame.xml"] {
+        assert!(
+            toc.files
+                .iter()
+                .any(|path| path == std::path::Path::new(relative)),
+            "selected original {relative}"
+        );
+    }
+    for (_, toc) in addons {
+        load_addon(&env.loader_env(), &toc).unwrap();
+    }
+    env.exec(
+        r#"
+        local frame = LossOfControlFrame
+        assert(frame.system == 28)
+        local map = EditModeSettingDisplayInfoManager:GetSystemSettingDisplayInfoMap(28)
+        assert(frame.settingDisplayInfoMap == map and map[0].maxValue == 200)
+        assert(frame.Selection.system == frame)
+        assert(frame:IsEventRegistered('CVAR_UPDATE'))
+        assert(frame:IsEventRegistered('VARIABLES_LOADED'))
+        assert(frame.TimeLeft.baseNumberWidth ==
+            frame.TimeLeft.NumberText:GetStringWidth() + 6)
+        assert(frame.TimeLeft.secondsWidth == frame.TimeLeft.SecondsText:GetStringWidth())
+        assert(type(frame.Anim:GetScript('OnFinished')) == 'function')
+    "#,
+    )
+    .expect("original LossOfControlFrame OnLoad completes past system map assignment");
+}
+
+#[test]
 fn boss_growth_dropdown_consumes_three_declared_directions() {
     let (env, root) = load_edit_mode();
     // The complete selected file has other declaration gaps. Exercise its unchanged
