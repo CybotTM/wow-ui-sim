@@ -618,6 +618,12 @@ class CertifiedSuiteTests(unittest.TestCase):
         self.repo.mkdir(parents=True)
         self.slot = self.home / '.cache/wow-ui-sim-targets/slot-2'
         self.slot.mkdir(parents=True)
+        capacity = self.home / '.worktrees/logs/capacity.sh'
+        capacity.parent.mkdir(parents=True)
+        write_executable(capacity, "print('agents | ADD: available')\n")
+        cvars = self.home / '.local/share/wow-sim/cvars.json'
+        cvars.parent.mkdir(parents=True)
+        cvars.write_text('{}')
         self.env = dict(os.environ, HOME=str(self.home),
                         PATH=f"{self.bin}{os.pathsep}{os.environ['PATH']}",
                         GIT_CONFIG_NOSYSTEM='1')
@@ -661,7 +667,7 @@ class CertifiedSuiteTests(unittest.TestCase):
         self.assertEqual((worktree / 'source').read_text(), 'frozen source\n')
 
     def test_result_waits_for_certified_build_and_test_execution(self):
-        test_binary = self.bin / 'integration-test'
+        test_binary = self.slot / 'integration-test'
         write_executable(test_binary,
                          "import os, pathlib, time\n"
                          "root = pathlib.Path(os.environ['HOME'])\n"
@@ -678,7 +684,7 @@ class CertifiedSuiteTests(unittest.TestCase):
                          "unit = argv[argv.index('--unit') + 1]\n"
                          "receipt = slot / 'receipts' / (unit + '.json')\n"
                          "receipt.parent.mkdir(exist_ok=True)\n"
-                         "records = [{'executable': str(root / 'bin/integration-test'), "
+                         "records = [{'executable': str(slot / 'integration-test'), "
                          "'target': {'name': n, 'kind': [k]}, 'profile': {'test': True}} "
                          "for n, k in [('integration', 'test'), ('wow_sim', 'lib')]]\n"
                          "receipt.write_text(json.dumps({'result': 'success', 'returncode': 0, "
