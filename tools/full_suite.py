@@ -2,14 +2,15 @@
 """Run a certified full suite for one frozen commit."""
 import argparse
 import fcntl
+import hashlib
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
 import time
+from contextlib import contextmanager
 from pathlib import Path
 
 ROOT = Path.home() / "Projects/wow"
@@ -146,6 +147,34 @@ def new_failures(result):
     return {name: sorted(set(fails) - set(base["failures"].get(name, []))) for name, fails in result["failures"].items()}
 
 
+def read_cvars(source):
+    fd = os.open(source, os.O_RDONLY | os.O_NOATIME)
+    with os.fdopen(fd, "rb") as stream:
+        data = stream.read()
+        stat = os.fstat(stream.fileno())
+    return data, {"sha256": hashlib.sha256(data).hexdigest(), "device": stat.st_dev,
+                  "inode": stat.st_ino, "size": stat.st_size, "atime_ns": stat.st_atime_ns,
+                  "mtime_ns": stat.st_mtime_ns, "ctime_ns": stat.st_ctime_ns}
+
+
+@contextmanager
+def isolated_cvars(env, log):
+    source = Path(env.get("XDG_DATA_HOME", str(Path.home() / ".local/share"))) / "wow-sim/cvars.json"
+    before_data, before = read_cvars(source)
+    log.write(f"cvar-before {json.dumps(before)}\n")
+    try:
+        with tempfile.TemporaryDirectory(prefix="full-suite-cvars-") as tmp:
+            dest = Path(tmp) / "wow-sim/cvars.json"
+            dest.parent.mkdir(parents=True)
+            dest.write_bytes(before_data)
+            yield dict(env, XDG_DATA_HOME=tmp)
+    finally:
+        _, after = read_cvars(source)
+        log.write(f"cvar-after {json.dumps(after)}\n")
+        if before != after:
+            raise ValueError("persisted CVar file changed during suite")
+
+
 def run(ref, build_jobs, target_dir, profile="retail"):
     target_dir = validate_target_dir(target_dir)
     RESULTS.mkdir(parents=True, exist_ok=True)
@@ -162,14 +191,7 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                 owner = claim_slot(target_dir, sha, profile)
                 receipt = build(checkout, target_dir, sha, profile, build_jobs, owner, log)
                 env = dict(os.environ, CARGO_TARGET_DIR=str(target_dir), RUST_TEST_THREADS=JOBS, CARGO_TERM_COLOR="never")
-                source = Path(os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local/share"))) / "wow-sim/cvars.json"
-                with tempfile.TemporaryDirectory(prefix="full-suite-cvars-") as tmp:
-                    dest = Path(tmp) / "wow-sim/cvars.json"
-                    dest.parent.mkdir(parents=True)
-                    fd = os.open(source, os.O_RDONLY | os.O_NOATIME)
-                    with os.fdopen(fd, "rb") as inp, dest.open("wb") as out:
-                        shutil.copyfileobj(inp, out)
-                    env["XDG_DATA_HOME"] = tmp
+                with isolated_cvars(env, log) as env:
                     for name, artifact, kind in [("integration", "integration", "test"), ("prefork", "prefork_full_ui", "test"), ("lib", "wow_ui_sim", "lib")]:
                         if name == "prefork" and profile not in ("retail", "mists"):
                             result["steps"][name] = {"status": "not_applicable", "reason": "prefork_full_ui supports only Retail/Mists"}
