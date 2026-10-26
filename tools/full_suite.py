@@ -215,10 +215,16 @@ def isolated_cvars(env, log):
             dest.write_bytes(before_data)
             yield dict(env, XDG_DATA_HOME=tmp)
     finally:
-        _, after = read_cvars(source)
-        log.write(f"cvar-after {json.dumps(after)}\n")
-        if before != after:
-            raise ValueError("persisted CVar file changed during suite")
+        active_error = sys.exc_info()[1]
+        try:
+            _, after = read_cvars(source)
+            log.write(f"cvar-after {json.dumps(after)}\n")
+            if before != after:
+                raise ValueError("persisted CVar file changed during suite")
+        except (OSError, ValueError) as error:
+            if not isinstance(active_error, SlotStateUnknown):
+                raise
+            active_error.cleanup_error = str(error)
 
 
 def write_result(path, result):
@@ -288,6 +294,8 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                 result["steps"].setdefault(phase, {})["status"] = "FAILED"
                 result["status"] = "FAILED"
                 result["error"] = str(error)
+                if hasattr(error, "cleanup_error"):
+                    result["cleanup_error"] = error.cleanup_error
                 owner = None  # Keep the live or unknown claim for reconciliation.
                 exit_code = 1
                 try:

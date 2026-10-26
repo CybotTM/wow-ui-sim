@@ -255,6 +255,45 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         self.assertIn('persistent log failure', record['log_error'])
         self.assertFalse((self.slot / '.owner').exists())
 
+    def test_cvar_log_failure_does_not_mask_unknown_unit(self):
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "unit = sys.argv[sys.argv.index('--unit') + 1]\n"
+                         "p = root / '.cache/wow-ui-sim-targets/slot-2/receipts' / (unit + '.json')\n"
+                         "p.parent.mkdir(exist_ok=True)\n"
+                         "p.write_text(json.dumps({'result': 'success', 'returncode': 0, 'reported_artifacts': [{'executable': '/unused', 'profile': {'test': True}, 'target': {'name': 'integration', 'kind': ['test']}}]}))\n")
+        write_executable(self.bin / 'systemd-run', "import sys\nsys.exit(1)\n")
+        write_executable(self.bin / 'systemctl',
+                         "import sys\nsys.exit(1) if 'full-suite-test-' in ' '.join(sys.argv) else print('ActiveState=inactive\\nResult=success')\n")
+        script = self.home / 'cvar-log.py'
+        script.write_text('''import builtins, importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+original = builtins.open
+class Log:
+    def __init__(self, stream): self.stream = stream
+    def __enter__(self): return self
+    def __exit__(self, *args): return self.stream.__exit__(*args)
+    def write(self, value):
+        if value.startswith("cvar-after"): raise OSError("cvar log failure")
+        return self.stream.write(value)
+    def flush(self): return self.stream.flush()
+def injected(path, *args, **kwargs):
+    stream = original(path, *args, **kwargs)
+    return Log(stream) if str(path).endswith(".log") else stream
+builtins.open = injected
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertTrue((self.slot / '.owner').exists())
+        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        self.assertIn('state unknown', record['error'])
+        self.assertIn('cvar log failure', record['cleanup_error'])
+
     def test_receipt_failure_retains_owner(self):
         script = self.home / 'receipt-failure.py'
         script.write_text('''import importlib.util, sys
