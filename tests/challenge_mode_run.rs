@@ -155,6 +155,110 @@ fn original_challenges_dungeon_icon_reads_supplied_map_metadata() {
     .unwrap();
 }
 
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+fn load_map_icon() -> WowLuaEnv {
+    let ui = blizzard_ui_dir();
+    let env = new_blizzard_addon_env(&ui);
+    let loaded = load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_ChallengesUI"], &[]);
+    assert!(loaded.iter().any(|name| name == "Blizzard_ChallengesUI"));
+    env.exec(r#"
+        icon = CreateFrame('Frame', nil, UIParent, 'ChallengesDungeonIconFrameTemplate')
+        assert(icon.SetUp == ChallengesDungeonIconMixin.SetUp)
+        local source = debug.getinfo(icon.SetUp, 'S').source:gsub('\\', '/')
+        assert(source:find('Blizzard_ChallengesUI/', 1, true), source)
+        -- FileDataIDs: committed listfile, achievement_bg_wineos_underxminutes and challenges-background.
+        function suppliedMap()
+            return {name='Supplied dungeon', id=9001, timeLimit=1500,
+                texture=236393, backgroundTexture=629538, mapID=789}
+        end
+        A_Admin.SetChallengeModeMapInfo(9001, {name='Previous dungeon', id=9002,
+            timeLimit=1800, backgroundTexture=627119, mapID=790})
+        local name, id, limit, texture, background, map = C_ChallengeMode.GetMapUIInfo(9001)
+        assert(name == 'Previous dungeon' and id == 9002 and limit == 1800)
+        assert(texture == nil and background == 627119 and map == 790)
+        icon:SetUp({id=9001, level=5}, true)
+        assert(icon.Icon:GetTexture() == nil and icon.HighestLevel:GetText() == '5')
+        A_Admin.SetChallengeModeMapInfo(9001, suppliedMap())
+        function checkSuppliedMap()
+            local name, id, limit, texture, background, map = C_ChallengeMode.GetMapUIInfo(9001)
+            assert(name == 'Supplied dungeon' and id == 9001 and limit == 1500)
+            assert(texture == 236393 and background == 629538 and map == 789)
+            icon:SetUp({id=9001, level=12}, true)
+            assert(icon.Icon:GetTexture() == 236393 and icon.HighestLevel:GetText() == '12')
+        end
+        checkSuppliedMap()
+    "#).unwrap();
+    env
+}
+
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[test]
+fn original_map_icon_accepts_omitted_texture_and_supplied_background() {
+    let env = load_map_icon();
+    env.exec(
+        r#"
+        local row = suppliedMap()
+        row.texture = nil
+        A_Admin.SetChallengeModeMapInfo(9001, row)
+        local name, id, limit, texture, background, map = C_ChallengeMode.GetMapUIInfo(9001)
+        assert(name == row.name and id == row.id and limit == row.timeLimit and map == row.mapID)
+        assert(texture == nil and background == 629538)
+        assert(select('#', C_ChallengeMode.GetMapUIInfo(9001)) == 6)
+        icon:SetUp({id=9001, level=5}, true)
+        assert(icon.Icon:GetTexture() == nil and icon.HighestLevel:GetText() == '5')
+        A_Admin.SetChallengeModeMapInfo(9001, suppliedMap())
+        checkSuppliedMap()
+    "#,
+    )
+    .unwrap();
+}
+
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[test]
+fn original_map_icon_preserves_map_after_named_missing_background_error() {
+    let env = load_map_icon();
+    env.exec(r#"
+        local row = suppliedMap()
+        row.backgroundTexture = nil
+        local ok, message = pcall(A_Admin.SetChallengeModeMapInfo, 9001, row)
+        assert(not ok)
+        assert(message:find('mapInfo.backgroundTexture: expected number, got nil', 1, true), message)
+        assert(not message:find('argument -1', 1, true), message)
+        checkSuppliedMap()
+    "#).unwrap();
+}
+
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[test]
+fn original_map_icon_preserves_map_after_named_invalid_field_errors() {
+    let env = load_map_icon();
+    env.exec(r#"
+        local function reject(field, value, expected)
+            local row = suppliedMap()
+            row[field] = value
+            local ok, message = pcall(A_Admin.SetChallengeModeMapInfo, 9001, row)
+            assert(not ok, field)
+            assert(message:find('mapInfo.'..field..': '..expected, 1, true), message)
+            assert(not message:find('argument -1', 1, true), message)
+            checkSuppliedMap()
+        end
+        for _, field in ipairs({'name', 'id', 'timeLimit', 'texture', 'backgroundTexture', 'mapID'}) do
+            local expectedType = field == 'name' and 'string' or 'number'
+            reject(field, false, 'expected '..expectedType..', got boolean')
+            if field ~= 'texture' then
+                reject(field, nil, 'expected '..expectedType..', got nil')
+            end
+        end
+        reject('timeLimit', -1, 'supplied seconds must be finite and nonnegative')
+        reject('timeLimit', math.huge, 'supplied seconds must be finite and nonnegative')
+        reject('id', 1.5, 'expected integer, got non-integer number')
+        reject('mapID', 2147483648, 'expected i32')
+        local ok, message = pcall(A_Admin.SetChallengeModeMapInfo, 9001, false)
+        assert(not ok and message:find('mapInfo: expected table, got boolean', 1, true), message)
+        checkSuppliedMap()
+    "#).unwrap();
+}
+
 #[test]
 fn challenge_admin_events_observe_updated_state_and_reject_invalid_input() {
     let env = WowLuaEnv::new().unwrap();

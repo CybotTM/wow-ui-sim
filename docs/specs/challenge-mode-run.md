@@ -22,6 +22,12 @@ Paths below are relative to each profile's pinned `AddOns/Blizzard_APIDocumentat
 
 The already-present elapsed-timer globals keep their publication scope. Wrath is excluded from routing and retains its pre-existing ungrounded `(id, 0, 0)` placeholder; native Wrath elapsed-timer behavior requires a separate lane. `WorldStateInfoDocumentation.lua:64-83` declares start/stop payloads; `WorldElapsedTimerConstantsDocumentation.lua:14` declares ChallengeMode=1 on modern profiles. Admin input supplies timer types; it does not infer them.
 
+## Map metadata validation
+
+`SetChallengeModeMapInfo` accepts a supplied table. `name`, `id`, `timeLimit`, `backgroundTexture`, and `mapID` are required. Only `texture` can be omitted or nil; the getter returns nil in its fourth result without substituting an asset. The fifth result is the supplied numeric `backgroundTexture`. Retail 70448, PTR 70493 and Forever declare these two numeric results at `ChallengeModeInfoDocumentation.lua:178-179`; Mists, Era and Anniversary declare the same nilability at lines 152-153.
+
+Invalid metadata errors identify `mapInfo.<field>`, including missing required fields, wrong types, integer conversion failures and invalid time limits. They do not expose the temporary bridge stack index `argument -1`. A rejected call does not replace previously supplied metadata. The original ChallengesUI dungeon-icon consumer must observe both supplied texture values and nil after texture omission. No native dungeon-to-texture relationship is inferred.
+
 ## Selected consumers
 
 Retail selects `Blizzard_ObjectiveTracker.toc` and `Blizzard_ChallengesUI_Mainline.toc`. PTR selects unified `Blizzard_ObjectiveTracker.toc` and `Blizzard_ChallengesUI.toc` (Standard family). Forever selects the objective tracker but its `camelot` game type excludes the ChallengesUI TOC (`standard, mists` only). Scenario criteria and timer proof use the unmodified selected `Blizzard_ScenarioObjectiveTracker.lua`, original XML frames and method identity. Mists has a Mists ChallengesUI and legacy WorldStateFrame timer consumer; Era/Anniversary exclude that mists-only TOC. Wrath is excluded.

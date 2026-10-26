@@ -42,16 +42,33 @@ pub(super) fn nonnegative(value: f64) -> LuaResult<f64> {
     }
 }
 
+fn map_error(name: &str, error: rilua::LuaError) -> rilua::LuaError {
+    let message = error.to_string().replace(" at argument -1", "");
+    rilua::runtime_error(format!("mapInfo.{name}: {message}"))
+}
+
+fn map_field<T: FromStack>(state: &mut LuaState, row: Val, name: &str) -> LuaResult<T> {
+    field(state, row, name).map_err(|error| map_error(name, error))
+}
+
 pub(super) fn set_map(state: &mut LuaState) -> LuaResult<u32> {
     let id = i32::from_stack(state, 1)?;
     let row = stack_val(state, 2);
+    if !matches!(row, Val::Table(_)) {
+        return Err(rilua::runtime_error(format!(
+            "mapInfo: expected table, got {}",
+            row.type_name()
+        )));
+    }
+    let time_limit = map_field(state, row, "timeLimit")?;
+    let time_limit = nonnegative(time_limit).map_err(|error| map_error("timeLimit", error))?;
     let map = MapInfo {
-        name: field(state, row, "name")?,
-        id: field(state, row, "id")?,
-        time_limit: nonnegative(field(state, row, "timeLimit")?)?,
-        texture: field(state, row, "texture")?,
-        background: field(state, row, "backgroundTexture")?,
-        map_id: field(state, row, "mapID")?,
+        name: map_field(state, row, "name")?,
+        id: map_field(state, row, "id")?,
+        time_limit,
+        texture: map_field(state, row, "texture")?,
+        background: map_field(state, row, "backgroundTexture")?,
+        map_id: map_field(state, row, "mapID")?,
     };
     borrow_state_mut(state)?.challenge_run.maps.insert(id, map);
     Ok(0)
