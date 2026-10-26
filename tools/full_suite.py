@@ -382,21 +382,48 @@ def submit(ref, build_jobs, target_dir, profile="retail"):
     print(unit)
 
 
+def attempt_phase(attempt):
+    steps = attempt.get("steps", {})
+    for name, step in steps.items():
+        if step.get("status") == "FAILED":
+            return name
+    if attempt.get("status") == "FAILED":
+        return "setup"
+    completed = [name for name, step in steps.items()
+                 if step.get("status") not in ("not_run", "not_applicable")]
+    return completed[-1] if completed else "setup"
+
+
 def status(ref):
+    runs = [p for p in RESULTS.glob("*.json") if not p.name.startswith("master-latest")]
+    attempts = [p for p in runs if "-attempt-" in p.name]
+    canonicals = [p for p in runs if p not in attempts]
     if ref:
         sha = resolve(ref)
+    elif attempts:
+        sha = json.loads(max(attempts, key=lambda p: p.stat().st_mtime_ns).read_text())["sha"]
+    elif canonicals:
+        sha = json.loads(max(canonicals, key=lambda p: p.stat().st_mtime_ns).read_text())["sha"]
     else:
-        runs = [p for p in RESULTS.glob("*.json") if not p.name.startswith("master-latest")]
-        if not runs:
-            print("no result yet")
-            return
-        sha = json.loads(max(runs, key=lambda p: p.stat().st_mtime).read_text())["sha"]
+        print("no result yet")
+        return
     profiles = {profile: json.loads(path.read_text()) if (path := RESULTS / f"{sha}-{profile}.json").exists() else None for profile in PROFILES}
     result = {"sha": sha, "profiles": profiles}
     legacy = RESULTS / f"{sha}.json"
     if legacy.exists():
         result["legacy_retail"] = json.loads(legacy.read_text())
-    if not any(profiles.values()) and not legacy.exists():
+    selected = [p for p in attempts if p.name.startswith(f"{sha}-")]
+    if selected:
+        attempt = json.loads(max(selected, key=lambda p: p.stat().st_mtime_ns).read_text())
+        result["latest_attempt"] = {**attempt, "phase": attempt_phase(attempt)}
+    if not ref and canonicals:
+        passed = [(p, json.loads(p.read_text())) for p in canonicals]
+        passed = [(p, record) for p, record in passed if record.get("status") == "PASSED"]
+        if passed:
+            _, newest = max(passed, key=lambda item: item[0].stat().st_mtime_ns)
+            if newest["sha"] != sha:
+                result["latest_canonical"] = newest
+    if not any(profiles.values()) and not legacy.exists() and not selected:
         print("no result yet")
         return
     print(json.dumps(result, indent=2))
