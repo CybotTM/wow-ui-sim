@@ -6,6 +6,13 @@
 
 [Original consumers and shared registry](systems/addon-module-imports.md#ptr-original-consumers--2026-10-25) link the [module contract](../specs/addon-module-imports.md#ptr-original-module-consumers): each exact selector rejects constant/no-op imports, original Utility identity and behavior pass, Forever preservation passes, and all seven all-target checks have zero warnings. The checkpoint separates traced raw stock-key replacements, cfg-equivalent proof carry-over and unsupported-profile runtime limits.
 
+## [2026-10-25] Retail/PTR proof | CF-2 party minimum
+
+[Original consumers](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) pass both exact RED→GREEN selectors on R/P; stock12/14→10/12 and244/312→242/310 has no additions/count changes. Lane tests remain isolated from removed TTS tests. Private fixture/producer imports and PTR TOC selection are repaired. R/P/Era all-target checks have zero warnings; formatting/readability and all 28 original-CVar guards pass. Mists remains deferred.
+
+## [2026-10-24] static producer | CF-2 party minimum
+
+[Producer and proof limits](investigations/consumer-selection-and-red-proof.md#static-producer-preparation) update the [contract](../specs/party-min-level-scenario-availability.md): Retail/PTR supplied roster minimum and subtype/random-filtered scenario projections, no new defaults or test edits. Producer-only RED child prepared for future slots; no runtime or compiler proof. Mists remains blocked on IsLFREnabled.
 ## [2026-10-25] proof | Supplied social squelch
 
 [Original listing controls](investigations/consumer-selection-and-red-proof.md#supplied-social-squelch) pass the final three-profile false/true/false and isolation selector against byte-identical producer-only RED tests. Stock removes only the squelch pair on each profile; all-target, formatter and readability evidence is complete. Native account defaults and voice-provider policy remain excluded.
@@ -2914,6 +2921,9 @@ Updated [[club-membership]] and [bounded contract](../specs/club-self-invitation
 
 Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-relic-class-capability) and [spec](../specs/wrath-unit-has-relic-slot.md). Class flags remain explicit inputs; unknown class mappings not invented. Edit-only, no runtime acceptance.
 
+## 2026-10-24 — CF-2 party minimum staging
+
+Linked party-minimum contract and selected ScenarioFinder XML/Lua proof recipe in consumer-selection notes/index. Both standalone selectors vary supplied roster and catalog bounds. No builds, observed RED/GREEN, stock capture or producer changes; Mists IsLFREnabled remains a separate possible setup blocker.
 ## [2026-10-24] source | Patch 12.1.7 I4a inherited accounting
 
 Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance), [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist) and index for immutable companion accounting, explicit per-profile UNKNOWN source/selection/proof boundaries and grouped I4b selectors. I0 artifacts unchanged; no builds, cache observations or native/runtime acceptance.

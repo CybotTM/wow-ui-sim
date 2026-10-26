@@ -45,6 +45,14 @@
 ## [2026-10-24] staged | Housing house-or-plot presence
 
 [Spatial model and selected consumer](systems/housing-spatial-presence.md) links the [contract](../specs/house-or-plot-presence.md): existing area input, Retail/PTR registered-world-event selector, constant/no-op contradictions and Forever downstream TOC restriction. Static staging only; no compilation or runtime proof.
+
+## [2026-10-25] Retail/PTR proof | CF-2 party minimum
+
+[Original-consumer proof](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) passes specific/random RED→GREEN on Retail/PTR with original XML/Lua provenance and disjoint ID sets. Empty-catalog preservation passes. Stock R12/14→10/12 and P244/312→242/310 removes only GetMinLevel pairs, with no additions/count changes. R/P/Era all-target checks have zero warnings; formatting/readability pass. Mists remains a separate supplied-LFR boundary.
+
+## [2026-10-24] staged | CF-2 supplied party minimum
+
+[Original-consumer staging](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) links the [bounded contract](../specs/party-min-level-scenario-availability.md): Retail/PTR supplied party minimum and scenario catalog producer prepared statically, with unchanged selected-consumer tests and producer-only RED child. No compiled listing, observed RED/GREEN or stock proof. Mists remains LFR-blocked; no behavior added.
 ## [2026-10-25] investigation | Mists battlefield vehicles
 
 [Original vehicle consumer](investigations/mists-battlefield-vehicles.md) links the [contract](../specs/mists-battlefield-vehicles.md): pinned API declarations, selected WorldMap provider/pins and supplied per-map state. Original-consumer missing-call RED and supplied-pin GREEN pass. Both raw captures contain 12 keys / 18 occurrences; vehicle errors are replaced by individually traced existing DeathMap provider errors. Exact base reproduces the 12/18 BEFORE map, and byte-identical paired producer-only RED fails as required. Mists/Retail all-target checks pass with three inherited/zero warnings; formatting and readability pass.
