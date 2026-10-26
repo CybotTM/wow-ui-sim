@@ -40,7 +40,6 @@ pub mod aura_entry_ids;
 #[cfg(feature = "aura-instance-enumeration")]
 pub(crate) mod aura_filter;
 pub mod bag_info;
-pub mod engraving_inputs;
 pub mod c_account_services;
 pub(crate) mod c_achievement_info_relations;
 pub(crate) mod c_action_bar;
@@ -117,6 +116,7 @@ mod c_edit_mode;
 pub(crate) mod c_encounter_timeline;
 #[cfg(feature = "retail-12-0-0")]
 pub(crate) mod c_encounter_warnings;
+mod c_engraving;
 pub(crate) mod c_event_scheduler;
 pub(crate) mod c_friend_list;
 pub(crate) mod c_garrison_damage_classes;
@@ -184,6 +184,7 @@ mod c_quest_log_watches;
 pub mod c_quest_offer;
 pub mod c_super_track;
 pub mod container_quest;
+pub mod engraving_inputs;
 pub mod forever_startup;
 mod lfr_availability;
 #[cfg(feature = "client-wowforever")]
@@ -409,6 +410,7 @@ fn supports_super_tracking() -> bool {
 }
 
 pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResult<()> {
+    c_engraving::register(state)?;
     c_social_restrictions::register(state)?;
     c_loot_history::register_c_loot_history(state)?;
     c_date_and_time::register(state)?;

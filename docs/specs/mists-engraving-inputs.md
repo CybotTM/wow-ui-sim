@@ -16,6 +16,7 @@ The normal Mists bag and settings consumers read explicit environment-local engr
 
 ## Implementation inventory
 
+- `src/c_api/c_engraving.rs` — ACTIVE-gated Mists projections, named missing-input errors, fresh rune tables and local refresh-request recording.
 - `src/c_api/engraving_inputs.rs` — explicit state and pinned record shape.
 - `src/lua_api/state.rs`, `src/lua_api/state/sim_state.rs` — environment-local state ownership.
 
