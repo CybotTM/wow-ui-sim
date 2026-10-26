@@ -1,3 +1,7 @@
+## [2026-10-25] repair | Fog pin workaround scope
+
+[Template-only refresh](investigations/world-map-fog-of-war-overlay-model.md#post-load-workaround-scope) removes the redundant provider.pin scan that copied fog callbacks onto unrelated map pins. Original WorldMap group and highlight regressions fail independently on Retail and Mists before this repair. Native SetUiMapID callback dispatch remains missing, so the fog refresh substitute stays. GREEN, stock and all-profile checks are pending.
+
 ## [2026-10-25] proof | Supplied social squelch
 
 [Original listing controls](investigations/consumer-selection-and-red-proof.md#supplied-social-squelch) pass the final three-profile false/true/false and isolation selector against byte-identical producer-only RED tests. Stock removes only the squelch pair on each profile; all-target, formatter and readability evidence is complete. Native account defaults and voice-provider policy remain excluded.
