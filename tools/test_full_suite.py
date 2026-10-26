@@ -119,11 +119,15 @@ class CertifiedSuiteTests(unittest.TestCase):
                          "receipt.parent.mkdir(exist_ok=True)\n"
                          "records = [{'executable': str(slot / 'integration-test'), "
                          "'target': {'name': n, 'kind': [k]}, 'profile': {'test': True}} "
-                         "for n, k in [('integration', 'test'), ('wow_sim', 'lib')]]\n"
+                         "for n, k in [('integration', 'test'), ('wow_ui_sim', 'lib')]]\n"
                          "receipt.write_text(json.dumps({'result': 'success', 'returncode': 0, "
                          "'reported_artifacts': records}))\n")
         write_executable(self.bin / 'systemctl',
                          "print('SubState=exited\\nResult=success')\n")
+        write_executable(self.bin / 'systemd-run',
+                         "import json, os, pathlib, subprocess, sys\n"
+                         "(pathlib.Path(os.environ['HOME']) / 'test-unit.json').write_text(json.dumps(sys.argv[1:]))\n"
+                         "sys.exit(subprocess.call(sys.argv[sys.argv.index('--') + 1:]))\n")
         process = subprocess.Popen([sys.executable, str(RUNNER), 'run', self.sha,
                                     '--profile', 'ptr', '--target-dir', str(self.slot)],
                                    env=self.env, stdout=subprocess.PIPE,
@@ -139,6 +143,10 @@ class CertifiedSuiteTests(unittest.TestCase):
         stdout, stderr = process.communicate(timeout=10)
         self.assertEqual(process.returncode, 0, stderr)
         self.assertTrue(receipt.exists())
+        self.assertEqual(json.loads(receipt.read_text())['status'], 'PASSED')
+        unit = json.loads((self.home / 'test-unit.json').read_text())
+        self.assertIn('MemoryMax=9G', unit)
+        self.assertIn('MemorySwapMax=0', unit)
         self.assertTrue(all(step.get('exit', 0) == 0
                             for step in json.loads(receipt.read_text())['steps'].values()))
         argv = json.loads((self.home / 'slot-argv.json').read_text())
