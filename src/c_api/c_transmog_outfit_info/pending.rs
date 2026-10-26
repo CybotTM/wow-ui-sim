@@ -58,6 +58,7 @@ pub(super) fn build_pending_record(
     display: i32,
 ) -> LuaResult<ViewedOutfitSlotInfo> {
     let sim = borrow_state(state)?;
+    let enabled = sim.transmog_availability.require_enabled()?;
     let source = super::super::c_transmog_collection::read_source_info(&sim, id);
     // INFERRED: non-assigned modes need no collected source. Illusions use
     // the illusion catalog rather than item modified appearance records.
@@ -73,7 +74,7 @@ pub(super) fn build_pending_record(
         is_transmogrified: false,
         has_pending: true,
         is_pending_collected: collected,
-        can_transmogrify: sim.transmog_enabled && collected,
+        can_transmogrify: enabled && collected,
         warning: 0,
         warning_text: String::new(),
         error: if collected { 0 } else { 8 },
@@ -142,7 +143,8 @@ fn commit_slots(state: &LuaState) -> LuaResult<Vec<SlotKey>> {
     let id = sim
         .viewed_transmog_outfit_id
         .ok_or_else(|| rilua::runtime_error("no viewed outfit"))?;
-    if !sim.transmog_enabled
+    let enabled = sim.transmog_availability.require_enabled()?;
+    if !enabled
         || sim
             .transmog_outfits
             .pending_slots

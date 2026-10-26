@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Shared transmog availability
+
+[Shared observation and selected interactions](systems/transmog-availability.md) link the [contract](../specs/transmog-availability.md): Retail/PTR now reuse the Mists supplied Option<bool>, with no guessed modern true default. Four exact Retail old-producer RED cases discriminate false input through original set/custom-set clicks, popup apply and direct query. GREEN/PTR execution and final stock/check evidence are pending. No selected direct-query spellbook flow or complete bootstrap acceptance is claimed.
+
 ## [2026-10-26] implementation | Supplied voice settings access
 
 [Original audio polling boundary](systems/voice-settings-access.md) links the [contract](../specs/voice-settings-access.md): six declaring profiles, environment-local optional observation and named unset error; Wrath remains absent. Eighteen exact original-consumer GREEN/producer-free RED pairs pass, seven full-feature all-target checks have zero warnings, and all raw stock maps are unchanged at the supplied master baselines. All 98 final launch CVar guards are unchanged. Full device initialization, timer cancellation and unsupplied forecast readiness are not claimed.

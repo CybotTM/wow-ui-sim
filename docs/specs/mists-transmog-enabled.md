@@ -4,7 +4,7 @@ Mists `C_TransmogOutfitInfo.IsTransmogEnabled()` reads an explicitly supplied en
 
 ## What it must do
 
-- [x] Publish only on Mists through `client_profile::ACTIVE`, without changing modern registration.
+- [x] Publish on Mists through `client_profile::ACTIVE`. The [shared Retail/PTR contract](transmog-availability.md) now uses the same supplied observation and registrar.
 - [x] Initialize the Mists input to `None`; supplied `Some(true)` and `Some(false)` return exactly one corresponding boolean.
 - [x] Raise `C_TransmogOutfitInfo.IsTransmogEnabled: transmog availability has not been supplied` for `None`.
 - [x] The original selected Mists `InterfaceOverrides.AdjustDisplaySettings` omits helm/cloak controls for true and creates both boolean proxy checkboxes for false.
@@ -16,7 +16,7 @@ Mists `C_TransmogOutfitInfo.IsTransmogEnabled()` reads an explicitly supplied en
 
 ## Implementation inventory
 
-- `src/c_api/mists_transmog.rs`: Mists-specific supplied availability model, ACTIVE gate and query.
+- `src/c_api/transmog_availability.rs`: shared supplied availability model, ACTIVE gate and query.
 - `src/c_api/registration.rs`: registers the query without ungating the modern outfit module.
 - `src/lua_api/state/sim_state.rs` and `state.rs`: per-environment model storage and construction.
 - `tests/mists_transmog_enabled.rs`: original selected consumer and real Settings controls.
@@ -31,4 +31,4 @@ Mists `C_TransmogOutfitInfo.IsTransmogEnabled()` reads an explicitly supplied en
 
 ## Out of scope
 
-Retail/PTR retain the existing default-true `SimState.transmog_enabled`; that default is not established native policy. Forever's selected Camelot spellbook query remains a separate missing producer. No entitlement policy, account state, persistence, inferred events or native default is supplied. Later display-settings branches are not accepted by this bounded query proof.
+Retail/PTR use the [shared supplied-state contract](transmog-availability.md), not an inferred default. Forever's selected Camelot spellbook query remains a separate missing producer. No entitlement policy, account state, persistence, inferred events or native default is supplied. Later display-settings branches are not accepted by this bounded query proof.

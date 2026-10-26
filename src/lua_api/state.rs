@@ -244,7 +244,6 @@ macro_rules! build_empty_sim_state {
             clubs: crate::c_api::club_model::ClubState::default(),
             spell_cooldown_categories: HashMap::new(),
             spell_cooldown_item_sources: HashMap::new(),
-            transmog_enabled: true,
             active_blocked_rolesets: Vec::new(),
             active_allowed_rolesets: Vec::new(),
             quest_hub_related_quests: HashMap::new(),
