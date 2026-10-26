@@ -68,6 +68,9 @@ fn construct(env: &WowLuaEnv) {
 
 fn observe(env: &WowLuaEnv, expected: bool) {
     assert_eq!(env.eval::<bool>("return Category:IsAvailable()").unwrap(), expected);
+    env.exec("Book:UpdateAllSpellData(false); Category = Book.categoryMixins[#Book.categoryMixins]").unwrap();
+    let shown: bool = env.eval("return Book.CategoryTabSystem:IsTabShown(Category:GetTabID())").unwrap();
+    assert_eq!(shown, expected, "original refresh projects availability to tab visibility");
 }
 
 fn exercise_availability(initial: bool) {
