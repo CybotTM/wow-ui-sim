@@ -34,7 +34,11 @@ class SlotPruneTests(unittest.TestCase):
         for path in paths:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(b"x" * MIB)
-        self.age_tree(age)
+        stamp = self.now - age * 3600
+        for path in paths:
+            while path.name not in {".fingerprint", "deps", "build", "incremental"}:
+                os.utime(path, (stamp, stamp))
+                path = path.parent
         return paths
 
     def age_tree(self, age):
@@ -57,20 +61,15 @@ class SlotPruneTests(unittest.TestCase):
         self.assertTrue(all(path.exists() for path in paths))
 
     def test_over_cap_removes_oldest_whole_units_to_watermark(self):
-        oldest = self.artifact("alpha", age=8)
+        oldest = self.artifact("zeta", age=8)
         middle = self.artifact("beta", age=6)
-        newest = self.artifact("gamma", age=4)
-        # artifact() ages the entire fixture; restore each unit's distinct age.
-        for paths, age in [(oldest, 8), (middle, 6), (newest, 4)]:
-            for path in paths:
-                stamp = self.now - age * 3600
-                os.utime(path, (stamp, stamp))
+        newest = self.artifact("alpha", age=4)
         result, output = self.prune(cap=13 * MIB)
         self.assertFalse(any(path.exists() for path in oldest))
         self.assertTrue(all(path.exists() for path in middle + newest))
         self.assertLess(result["remaining_bytes"], 13 * MIB * .8)
         self.assertEqual(len(result["removed"]), 1)
-        self.assertIn("alpha", output)
+        self.assertIn("zeta", output)
         for entry in result["removed"]:
             self.assertGreater(entry["size_bytes"], 0)
             self.assertTrue(entry["paths"])
