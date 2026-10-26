@@ -260,59 +260,65 @@ def run(ref, build_jobs, target_dir, profile="retail"):
         result["log"] = str(log_path)
         owner = None
         exit_code = 0
-        with open(log_path, "w") as log:
-            try:
-                checkout = prepare_checkout(sha)
-                owner = claim_slot(target_dir, sha, profile)
-                phase = "build"
-                receipt = build(checkout, target_dir, sha, profile, build_jobs, owner, log)
-                phase = "setup"
-                env = dict(os.environ, CARGO_TARGET_DIR=str(target_dir), RUST_TEST_THREADS=JOBS, CARGO_TERM_COLOR="never")
-                with isolated_cvars(env, log) as env:
-                    for name, artifact, kind in [("integration", "integration", "test"), ("prefork", "prefork_full_ui", "test"), ("lib", "wow_ui_sim", "lib")]:
-                        if name == "prefork" and profile not in ("retail", "mists"):
-                            result["steps"][name] = {"status": "not_applicable", "reason": "prefork_full_ui supports only Retail/Mists"}
-                            continue
-                        phase = name
-                        binary = test_artifact(receipt, artifact, kind)
-                        mount = Path.home() / ".cache/wow-ui-sim-srcmount" / target_dir.name
-                        unit = f"full-suite-test-{sha[:12]}-{profile}-{name}-{time.time_ns()}"
-                        command = ["systemd-run", "--user", f"--unit={unit}", "--wait", "--pipe", "--collect", "--quiet",
-                                   "-p", "MemoryMax=9G", "-p", "MemorySwapMax=0",
-                                   "-p", f"BindPaths={checkout}:{mount}", f"--working-directory={mount}",
-                                   *(f"--setenv={name}" for name in env), "--", binary]
-                        try:
-                            result["steps"][name], output = run_step(name, command, checkout, log, env)
-                        finally:
-                            confirm_terminated(unit, target_dir.name.removeprefix("slot-"))
-                        if result["steps"][name]["exit"]:
-                            result["steps"][name]["status"] = "FAILED"
-                        result["failures"][name] = sorted(set(FAILED.findall(output)))
-                phase = "setup"
-                result["status"] = "FAILED" if any(step.get("exit", 0) for step in result["steps"].values()) else "PASSED"
-            except SlotStateUnknown as error:
-                result["steps"].setdefault(phase, {})["status"] = "FAILED"
-                result["status"] = "FAILED"
-                result["error"] = str(error)
-                if hasattr(error, "cleanup_error"):
-                    result["cleanup_error"] = error.cleanup_error
-                owner = None  # Keep the live or unknown claim for reconciliation.
-                exit_code = 1
+        try:
+            with open(log_path, "w") as log:
                 try:
-                    log.write(f"FAILED: {error}\n")
-                except OSError as log_error:
-                    result["log_error"] = str(log_error)
-            except (OSError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as error:
-                result["steps"].setdefault(phase, {})["status"] = "FAILED"
-                result["status"] = "FAILED"
-                result["error"] = str(error)
-                try:
-                    log.write(f"FAILED: {error}\n")
-                except OSError as log_error:
-                    result["log_error"] = str(log_error)
+                    checkout = prepare_checkout(sha)
+                    owner = claim_slot(target_dir, sha, profile)
+                    phase = "build"
+                    receipt = build(checkout, target_dir, sha, profile, build_jobs, owner, log)
+                    phase = "setup"
+                    env = dict(os.environ, CARGO_TARGET_DIR=str(target_dir), RUST_TEST_THREADS=JOBS, CARGO_TERM_COLOR="never")
+                    with isolated_cvars(env, log) as env:
+                        for name, artifact, kind in [("integration", "integration", "test"), ("prefork", "prefork_full_ui", "test"), ("lib", "wow_ui_sim", "lib")]:
+                            if name == "prefork" and profile not in ("retail", "mists"):
+                                result["steps"][name] = {"status": "not_applicable", "reason": "prefork_full_ui supports only Retail/Mists"}
+                                continue
+                            phase = name
+                            binary = test_artifact(receipt, artifact, kind)
+                            mount = Path.home() / ".cache/wow-ui-sim-srcmount" / target_dir.name
+                            unit = f"full-suite-test-{sha[:12]}-{profile}-{name}-{time.time_ns()}"
+                            command = ["systemd-run", "--user", f"--unit={unit}", "--wait", "--pipe", "--collect", "--quiet",
+                                       "-p", "MemoryMax=9G", "-p", "MemorySwapMax=0",
+                                       "-p", f"BindPaths={checkout}:{mount}", f"--working-directory={mount}",
+                                       *(f"--setenv={name}" for name in env), "--", binary]
+                            try:
+                                result["steps"][name], output = run_step(name, command, checkout, log, env)
+                            finally:
+                                confirm_terminated(unit, target_dir.name.removeprefix("slot-"))
+                            if result["steps"][name]["exit"]:
+                                result["steps"][name]["status"] = "FAILED"
+                            result["failures"][name] = sorted(set(FAILED.findall(output)))
+                    phase = "setup"
+                    result["status"] = "FAILED" if any(step.get("exit", 0) for step in result["steps"].values()) else "PASSED"
+                except SlotStateUnknown as error:
+                    result["steps"].setdefault(phase, {})["status"] = "FAILED"
+                    result["status"] = "FAILED"
+                    result["error"] = str(error)
+                    if hasattr(error, "cleanup_error"):
+                        result["cleanup_error"] = error.cleanup_error
+                    owner = None  # Keep the live or unknown claim for reconciliation.
+                    exit_code = 1
+                    try:
+                        log.write(f"FAILED: {error}\n")
+                    except OSError as log_error:
+                        result["log_error"] = str(log_error)
+                except (OSError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as error:
+                    result["steps"].setdefault(phase, {})["status"] = "FAILED"
+                    result["status"] = "FAILED"
+                    result["error"] = str(error)
+                    try:
+                        log.write(f"FAILED: {error}\n")
+                    except OSError as log_error:
+                        result["log_error"] = str(log_error)
+        except OSError as error:
+            result["steps"].setdefault(phase, {})["status"] = "FAILED"
+            result["status"] = "FAILED"
+            result["log_error"] = str(error)
+            result.setdefault("error", str(error))
         result["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
         result["new_failures"] = new_failures(result)
-        if result["status"] != "PASSED" and previous_pass:
+        if previous_pass:
             output_path = RESULTS / f"{attempt}.json"
         write_result(output_path, result)
         if owner is not None:
@@ -322,6 +328,9 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                 result["status"] = "FAILED"
                 result["error"] = f"slot release failed: {error}"
                 write_result(output_path, result)
+        if result["status"] == "PASSED" and previous_pass:
+            write_result(RESULTS / f"{sha}-{profile}.json", result)
+            output_path.unlink()
         if result["status"] == "PASSED" and ref in ("origin/master", "master"):
             write_result(RESULTS / f"master-latest-{profile}.json", result)
         print(json.dumps(result, indent=2))

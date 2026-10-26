@@ -226,6 +226,67 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
         self.assertIn('state unknown', record['error'])
 
+    def test_log_open_and_close_failures_record_receipts(self):
+        script = self.home / 'log-boundaries.py'
+        script.write_text('''import builtins, importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+original = builtins.open
+class Log:
+    def __init__(self, stream): self.stream = stream
+    def __enter__(self): return self.stream
+    def __exit__(self, *args):
+        self.stream.close()
+        raise OSError("injected log close failure")
+def injected(path, *args, **kwargs):
+    if str(path).endswith(".log"):
+        if sys.argv[4] == "open": raise OSError("injected log open failure")
+        return Log(original(path, *args, **kwargs))
+    return original(path, *args, **kwargs)
+builtins.open = injected
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        path = self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json'
+        for failure in ('open', 'close'):
+            with self.subTest(failure=failure):
+                path.unlink(missing_ok=True)
+                process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot), failure],
+                                         env=self.env, capture_output=True, text=True, timeout=10)
+                self.assertTrue(path.exists(), process.stderr)
+                record = json.loads(path.read_text())
+                self.assertEqual(record['status'], 'FAILED')
+                self.assertIn(f'injected log {failure} failure', json.dumps(record))
+                self.assertFalse((self.slot / '.owner').exists())
+
+    def test_release_failure_preserves_previous_pass(self):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True)
+        canonical = results / f'{self.sha}-ptr.json'
+        passed = json.dumps({'sha': self.sha, 'profile': 'ptr', 'status': 'PASSED', 'failures': {}})
+        canonical.write_text(passed)
+        script = self.home / 'release-failure.py'
+        script.write_text('''import importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+runner.build = lambda *args: {"reported_artifacts": [{"executable": "/unused", "profile": {"test": True}, "target": {"name": name, "kind": [kind]}} for name, kind in [("integration", "test"), ("wow_ui_sim", "lib")]]}
+runner.run_step = lambda *args: ({"exit": 0}, "")
+runner.confirm_terminated = lambda *args: None
+def fail(*args): raise OSError("injected release failure")
+runner.release_slot = fail
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(canonical.read_text(), passed, process.stderr)
+        attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
+        self.assertEqual(len(attempts), 1)
+        record = json.loads(attempts[0].read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertIn('injected release failure', record['error'])
+        self.assertTrue((self.slot / '.owner').exists())
+
     def test_persistent_log_failure_records_receipt(self):
         script = self.home / 'persistent-log.py'
         script.write_text('''import builtins, importlib.util, sys
