@@ -263,7 +263,8 @@ fn ensure_c_game_rules_table(
 
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
-    install_on_c_game_rules(lua.state_mut())
+    install_on_c_game_rules(lua.state_mut())?;
+    crate::c_api::ptr_i4_game_rules::register(lua.state_mut())
 }
 
 // ── Admin setters (exposed via admin_zone_economy) ────────────────────────────

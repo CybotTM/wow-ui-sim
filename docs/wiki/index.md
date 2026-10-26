@@ -2,6 +2,18 @@
 
 [Original vehicle consumer](investigations/mists-battlefield-vehicles.md) links the [contract](../specs/mists-battlefield-vehicles.md): pinned API declarations, selected WorldMap provider/pins and supplied per-map state. Original-consumer missing-call RED and supplied-pin GREEN pass. Both raw captures contain 12 keys / 18 occurrences; vehicle errors are replaced by individually traced existing DeathMap provider errors. Exact base reproduces the 12/18 BEFORE map, and byte-identical paired producer-only RED fails as required. Mists/Retail all-target checks pass with three inherited/zero warnings; formatting and readability pass.
 
+## [2026-10-25] proof | PTR I4 batch2 landing
+
+[Eight exact consumer pairs](investigations/patch-12-1-7-api-audit.md#batch2-landing-proof) pass GREEN and fail producer-only RED at original Blizzard lines. Stock296/410→272/378 retains ten individually traced successor keys. Retail/PTR all-target checks meet zero/known-three warning limits; formatting and Retail absence pass. Preset and aggregate tests remain outside the normal suite. Slot1 is released; the current merge-tree has only a wiki-log conflict for main.
+
+## [2026-10-25] implementation | PTR supplied WoWHack mode
+
+[Original consumer REDs](investigations/patch-12-1-7-api-audit.md#supplied-wowhack-mode) reach MicroMenu207 and UIErrorsFrame12. The [contract](../specs/ptr-i4-game-rules.md) uses existing active-mode state and enum data; both exact consumer GREENs pass. Final merged stock/check acceptance remains pending.
+
+## [2026-10-25] prerequisites | PTR I4 GameRules and RecentAllies
+
+[Original consumer boundaries](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) link the [bounded supplied-input contract](../specs/ptr-i4-game-rules.md). Original-line RED now proves five function boundaries after enum prerequisites; RecentAllies labels pass. Five supplied-state producers are implemented; final merged acceptance remains pending. Preset support and aggregate I4 tests are excluded from this landing packet and retained for follow-up.
+
 ## [2026-10-25] runtime proof | PTR I4 landable first batch
 
 [Bounded producer repair](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair) links the [contract](../specs/ptr-i4-first-green.md): four exact RED/GREEN pairs include the original Collections and GhostFrame transitions. Stock 298→296 raw keys has zero additions; Retail/PTR checks meet zero/known-three warning limits and formatting passes. Aggregate 173-shape tests remain on the lane only; native policy remains unknown.
