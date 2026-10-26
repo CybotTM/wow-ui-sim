@@ -37,7 +37,7 @@ fn assert_original_source(env: &WowLuaEnv, function: &str, suffix: &str) {
 fn select_original_debuff(env: &WowLuaEnv) {
     env.exec(
         r#"
-        assert(CompactArenaFrame and #CompactArenaFrame.memberUnitFrames > 0)
+        assert(CompactArenaFrame and #CompactArenaFrame.memberUnitFrames > 0, 'CF2 assertion original line 40')
         local member = CompactArenaFrame.memberUnitFrames[1]
         Cf2AuraDebuff = member.DebuffFrame
         assert(Cf2AuraDebuff and Cf2AuraDebuff:GetParent() == member,
@@ -68,11 +68,11 @@ fn assert_installed_event_clears_selected_auras(env: &WowLuaEnv) {
         r#"
         C_UnitAuras.AddBlockedAura('player', 101)
         C_UnitAuras.AddBlockedAura('party1', 201)
-        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
+        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil, 'CF2 assertion original line 71')
         local debuff = Cf2AuraDebuff
         local handler = debuff:GetScript('OnEvent')
         handler(debuff, 'UNRELATED_EVENT')
-        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
+        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil, 'CF2 assertion original line 75')
         assert(debug.gethook() == nil, 'must not replace an existing hook')
         local original = ArenaUnitFrameDebuffMixin.OnEvent
         local calls = 0
@@ -85,7 +85,7 @@ fn assert_installed_event_clears_selected_auras(env: &WowLuaEnv) {
         debug.sethook()
         assert(ok, err)
         assert(calls == 1, 'installed XML handler must execute the original OnEvent body once')
-        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL').auraInstanceID == 101)
+        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL').auraInstanceID == 101, 'CF2 assertion original line 88')
         assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil,
             'original matching-event branch clears only the selected unit')
         "#,
@@ -137,8 +137,8 @@ fn original_arena_cleanup_restores_selected_unit_aura_enumeration() {
         C_UnitAuras.AddBlockedAura('player', 101)
         C_UnitAuras.AddBlockedAura('party1', 201)
         C_UnitAuras.AddBlockedAura('party1', 202)
-        assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil)
-        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
+        assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil, 'CF2 assertion original line 140')
+        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil, 'CF2 assertion original line 141')
         Cf2AuraDebuff:Show()
         "#,
     )
@@ -150,15 +150,15 @@ fn original_arena_cleanup_restores_selected_unit_aura_enumeration() {
             if pass == 3 then
                 C_UnitAuras.AddBlockedAura('party1', 201)
                 C_UnitAuras.AddBlockedAura('party1', 202)
-                assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil)
+                assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil, 'CF2 assertion original line 153')
             end
             Cf2AuraDebuff:SetUnit('party1')
             Cf2AuraDebuff:Update()
             assert(Cf2AuraDebuff.auraData == nil, 'no active loss-of-control aura')
             assert(not Cf2AuraDebuff:IsShown(), 'original cleanup hides stale debuff widget')
-            assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL').auraInstanceID == 201)
-            assert(C_UnitAuras.GetAuraDataByIndex('party1', 2, 'HELPFUL').auraInstanceID == 202)
-            assert(C_UnitAuras.GetAuraDataByIndex('party1', 3, 'HELPFUL') == nil)
+            assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL').auraInstanceID == 201, 'CF2 assertion original line 159')
+            assert(C_UnitAuras.GetAuraDataByIndex('party1', 2, 'HELPFUL').auraInstanceID == 202, 'CF2 assertion original line 160')
+            assert(C_UnitAuras.GetAuraDataByIndex('party1', 3, 'HELPFUL') == nil, 'CF2 assertion original line 161')
             assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil,
                 'clearing party1 must preserve another unit block')
         end
@@ -167,16 +167,16 @@ fn original_arena_cleanup_restores_selected_unit_aura_enumeration() {
             C_UnitAuras.AddBlockedAura('party1', 201)
             C_UnitAuras.AddBlockedAura('party1', 202)
             C_UnitAuras.AddBlockedAura('player', 101)
-            assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil)
-            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
-            assert(C_LossOfControl.GetActiveLossOfControlDataCountByUnit('player') == 0)
+            assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil, 'CF2 assertion original line 170')
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil, 'CF2 assertion original line 171')
+            assert(C_LossOfControl.GetActiveLossOfControlDataCountByUnit('player') == 0, 'CF2 assertion original line 172')
             Cf2AuraDebuff:SetUnit('player')
             Cf2AuraDebuff:Update()
             Cf2AuraDebuff:Update()
-            assert(Cf2AuraDebuff.auraData == nil)
-            assert(not Cf2AuraDebuff:IsShown())
-            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL').auraInstanceID == 101)
-            assert(C_UnitAuras.GetAuraDataByIndex('player', 2, 'HELPFUL') == nil)
+            assert(Cf2AuraDebuff.auraData == nil, 'CF2 assertion original line 176')
+            assert(not Cf2AuraDebuff:IsShown(), 'CF2 assertion original line 177')
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL').auraInstanceID == 101, 'CF2 assertion original line 178')
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 2, 'HELPFUL') == nil, 'CF2 assertion original line 179')
             assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil,
                 'clearing player must preserve populated party blocks')
         end
@@ -208,11 +208,11 @@ fn original_arena_unassigned_unit_rejects_nil_best_guess() {
         C_UnitAuras.AddBlockedAura('player', 101)
         C_UnitAuras.AddBlockedAura('party1', 201)
         C_UnitAuras.AddBlockedAura('party1', 202)
-        assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil)
+        assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil, 'CF2 assertion original line 211')
         debuff:SetUnit('party1')
-        assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL').auraInstanceID == 201)
-        assert(C_UnitAuras.GetAuraDataByIndex('party1', 2, 'HELPFUL').auraInstanceID == 202)
-        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
+        assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL').auraInstanceID == 201, 'CF2 assertion original line 213')
+        assert(C_UnitAuras.GetAuraDataByIndex('party1', 2, 'HELPFUL').auraInstanceID == 202, 'CF2 assertion original line 214')
+        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil, 'CF2 assertion original line 215')
 
         C_UnitAuras.AddBlockedAura('party1', 201)
         C_UnitAuras.AddBlockedAura('party1', 202)
@@ -229,25 +229,25 @@ fn original_arena_unassigned_unit_rejects_nil_best_guess() {
             'rejected unassigned cleanup must not clear unrelated units')
         debuff:SetUnit('party1')
         debuff:Update()
-        assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL').auraInstanceID == 201)
-        assert(C_UnitAuras.GetAuraDataByIndex('party1', 2, 'HELPFUL').auraInstanceID == 202)
-        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
+        assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL').auraInstanceID == 201, 'CF2 assertion original line 232')
+        assert(C_UnitAuras.GetAuraDataByIndex('party1', 2, 'HELPFUL').auraInstanceID == 202, 'CF2 assertion original line 233')
+        assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil, 'CF2 assertion original line 234')
 
         -- Re-populate both buckets and reverse selection after nil recovery.
         for pass = 1, 2 do
             C_UnitAuras.AddBlockedAura('party1', 201)
             C_UnitAuras.AddBlockedAura('party1', 202)
             C_UnitAuras.AddBlockedAura('player', 101)
-            assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil)
-            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil)
-            assert(C_LossOfControl.GetActiveLossOfControlDataCountByUnit('player') == 0)
+            assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil, 'CF2 assertion original line 241')
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL') == nil, 'CF2 assertion original line 242')
+            assert(C_LossOfControl.GetActiveLossOfControlDataCountByUnit('player') == 0, 'CF2 assertion original line 243')
             debuff:SetUnit('player')
             debuff:Update()
             debuff:Update()
-            assert(debuff.auraData == nil)
-            assert(not debuff:IsShown())
-            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL').auraInstanceID == 101)
-            assert(C_UnitAuras.GetAuraDataByIndex('player', 2, 'HELPFUL') == nil)
+            assert(debuff.auraData == nil, 'CF2 assertion original line 247')
+            assert(not debuff:IsShown(), 'CF2 assertion original line 248')
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 1, 'HELPFUL').auraInstanceID == 101, 'CF2 assertion original line 249')
+            assert(C_UnitAuras.GetAuraDataByIndex('player', 2, 'HELPFUL') == nil, 'CF2 assertion original line 250')
             assert(C_UnitAuras.GetAuraDataByIndex('party1', 1, 'HELPFUL') == nil,
                 'clearing player must preserve populated party blocks')
         end
