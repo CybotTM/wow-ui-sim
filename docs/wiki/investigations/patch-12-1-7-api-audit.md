@@ -4,6 +4,16 @@ Runtime target update: 2026-10-23. [Selected source](../../specs/ptr-blizzard-ui
 
 Verified: 2026-10-22. Slice I0 accounts for the public source for **12.1.7 / 70424 / TOC 120107** without implementing its runtime changes. The [source-accounting spec](../../specs/patch-12-1-7-source-accounting.md) owns P01–P12, inherited category counts, header discrepancies and outstanding slices. All inherited applicability and behavior remain UNKNOWN until I4; GUID work remains deferred pending the user decision.
 
+## I4 first bounded producer repair
+
+The lane's authenticated 70493 discovery found 169 publication gaps. This [bounded contract](../../specs/ptr-i4-first-green.md) lands only Collections `C_Spell.GetItemCooldown` and GhostFrame `CanPortGraveyard`, backed by existing supplied state. SmartNavigation and RecentAllies remain prerequisite-blocked, not downstream producer REDs.
+
+The landing branch retains supplied-state tests and adds independent original-consumer transition selectors. They authenticate source bytes, load Game-selected TOC closures, and require absent/supplied/changed/removed cooldown transitions and false/true/false ghost availability. Constant nil/false producers cannot pass these selectors. Native cooldown eligibility and graveyard policy remain unknown.
+
+All aggregate 173-shape tests remain unchanged on `ptr-i4-runtime` only; they are absent from this landing packet, not ignored or weakened.
+
+Bounded proof on 2026-10-25: both siblings integrate master `7ed5a81f0`, including the PTR-input repair. GREEN `3eb4ae215` passes all four exact selectors; producer-only RED `719a15bbb` fails the unchanged original consumers at Collections line 37 and GhostFrame line 4. Supplied-state selectors also fail RED and pass GREEN. Constant/no-op rejection follows from their transition assertions; no separate mutation execution is claimed. Stock comparison against the PTR-input baseline `120379c39` is 298→296 full raw keys and 412→410 occurrences, zero additions and unchanged common-key counts. Only the GhostFrame OnLoad missing-call error and its wrapper disappear. Retail all-target checks have zero warnings; PTR has only the three inherited late-bind dead-code warnings. Formatting passes. Native policy and aggregate I4 acceptance remain unproved.
+
 ## Empty inventory is not patch coverage
 
 The direct page has prose and a link to 1.60.1, but no function/event/enum/CVar/widget tables. The existing `tools/gen_patch_wikitext_register.py` successfully emits `entries: []` and `header_counts: []` for it. This correctly describes the direct inventory, not complete patch coverage. No dummy API rows or invented aliases are added to make it nonempty.

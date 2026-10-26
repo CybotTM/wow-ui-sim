@@ -2852,3 +2852,7 @@ Added the nonblocking [slot launcher](../../scripts/slot-build.py) and
 per slot, exact `.owner` match and literal capacity ADD admission. Focused Python
 tests only; no compile or service launch. The normalized lock matches the saved
 Cargo rewrite byte-for-byte; runtime acceptance remains pending.
+
+2026-10-25: Staged the [landable I4 first batch](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair), with original-consumer transitions and aggregate staging tests retained only on the lane.
+
+2026-10-25: Completed bounded I4 landing proof after integrating PTR-input: four exact RED/GREEN pairs, original missing calls at Collections line 37 and GhostFrame line 4, stock 298→296 raw keys with zero additions, zero/known-three Retail/PTR warnings, and formatting. Aggregate I4 and native policies remain outside this acceptance.
