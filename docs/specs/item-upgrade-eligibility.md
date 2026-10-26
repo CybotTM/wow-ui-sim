@@ -5,7 +5,7 @@
 ## What it must do
 
 - [ ] Publish `C_ItemUpgrade.CanUpgradeItem` on Retail, PTR, Forever, Mists, Era and Anniversary only; leave the excluded Wrath path unchanged.
-- [ ] Resolve an actual ItemLocation through existing inventory/bag state and return exactly one supplied boolean. Two instances of the same item ID may have different eligibility.
+- [ ] Resolve an actual ItemLocation through existing inventory/bag state and return exactly one supplied boolean. Supply independent eligibility at two concrete locations; no catalog policy is inferred.
 - [ ] `A_Admin.SetItemUpgradeEligibility(location, boolean)` supplies an observation for the existing item. `ClearItemUpgradeEligibility(location)` removes it; omitted/nil location clears all observations in that environment.
 - [ ] Move observations through bag/cursor/equipment swaps and backpack placement. Removal, deletion and admin replacement must not leak observations to a replacement instance, including one with the same item ID.
 - [ ] Report `native-unknown: C_ItemUpgrade.CanUpgradeItem has no supplied eligibility or documented default for this location` for unsupplied, empty or unsupported locations. This is a simulator diagnostic, not native validation/error behavior.
@@ -25,7 +25,7 @@ Pinned declarations: `Blizzard_APIDocumentationGenerated/ItemUpgradeDocumentatio
 
 ## Tests asserting this spec
 
-- `tests/api_shape_item_upgrade.rs`: original generic ItemUtil match/mismatch through two same-ID locations, changes, moves, removal/replacement, clear and independent environments; documented boolean arity and explicit unsupported-input diagnostics.
+- `tests/api_shape_item_upgrade.rs`: original generic ItemUtil match/mismatch through two distinct items/locations, changes, moves, removal/replacement, clear and independent environments; documented boolean arity and explicit unsupported-input diagnostics.
 
 The normally selected FrameXMLUtil/ObjectAPI closure is loaded without source overrides. A plain shown `ItemUpgradeFrame` supplies the context input. It is not an original upgrade window. No Blizzard function is replaced. The old boolean-only contract is preservation, not eligibility acceptance.
 
@@ -35,4 +35,4 @@ The normally selected FrameXMLUtil/ObjectAPI closure is loaded without source ov
 
 ## Out of scope
 
-Native eligibility policy, currencies, upgrade execution, invalid-input semantics, persistence and full upgrade-window acceptance. Era/Anniversary do not select the Mists upgrade window; tests do not force-load it. Wrath and equipment-set lock behavior are excluded. Split stacks require fresh supplied observations for the new cursor stack; no native eligibility inheritance policy is inferred.
+Native eligibility policy, currencies, upgrade execution, invalid-input semantics, persistence and full upgrade-window acceptance. Era/Anniversary do not select the Mists upgrade window; tests do not force-load it. Wrath, equipment-set lock behavior and equipment-set transfers are excluded. The equipment-set producer rebuilds equipped records by item ID, without instance identity; this lane adds no identity token or equipment-set workaround. Split stacks require fresh supplied observations for the new cursor stack; no native eligibility inheritance policy is inferred.
