@@ -13,6 +13,11 @@
 ## [2026-10-24] static producer | CF-2 party minimum
 
 [Producer and proof limits](investigations/consumer-selection-and-red-proof.md#static-producer-preparation) update the [contract](../specs/party-min-level-scenario-availability.md): Retail/PTR supplied roster minimum and subtype/random-filtered scenario projections, no new defaults or test edits. Producer-only RED child prepared for future slots; no runtime or compiler proof. Mists remains blocked on IsLFREnabled.
+
+## [2026-10-25] repair | Fog pin workaround scope
+
+[Template-only refresh](investigations/world-map-fog-of-war-overlay-model.md#post-load-workaround-scope) removes the provider.pin scan that copied fog callbacks onto unrelated pins. Original WorldMap group and highlight RED/GREEN pass on Retail, Mists and Era; original Retail fog refresh preservation passes. Stock maps remain exactly 12/14, 8/14 and 0/0, with no additions. All seven all-target checks have zero warnings; formatting and readability pass. Native SetUiMapID callback dispatch remains missing, so the fog refresh substitute stays.
+
 ## [2026-10-25] proof | Supplied social squelch
 
 [Original listing controls](investigations/consumer-selection-and-red-proof.md#supplied-social-squelch) pass the final three-profile false/true/false and isolation selector against byte-identical producer-only RED tests. Stock removes only the squelch pair on each profile; all-target, formatter and readability evidence is complete. Native account defaults and voice-provider policy remain excluded.
