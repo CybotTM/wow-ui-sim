@@ -23,4 +23,6 @@ Wrath has no pinned generated API documentation or FrameXML consumer for this na
 
 ## Consumer proof
 
-The original selected `Blizzard_FrameXML/LossOfControlFrame.lua` `LossOfControlMixin:UpdateDisplay` branches on absent/present data. It must hide for the empty world, show a supplied effect, then hide after removal. The test must run unchanged on the seeded producer and corrected producer. No vendor code is replaced.
+The original selected Retail `Blizzard_FrameXML/LossOfControlFrame.lua` `LossOfControlMixin:UpdateDisplay` branches on absent/present data. It must hide for the empty world, show a supplied effect, then hide after removal. The test must run unchanged on the seeded producer and corrected producer. No vendor code is replaced.
+
+Retail `Blizzard_FrameXML.toc:126–128` selects this consumer for mists/mainline; `Blizzard_APIDocumentationGenerated/LossOfControlConstantsDocumentation.lua:10` declares active index 1. Consumer acceptance is Retail-only. All seven profiles require unchanged or individually traced stock error maps and separate zero-warning all-target checks. The [implementation proof](../wiki/systems/lua-api.md#active-loss-of-control-state) records the deferred PTR initialization dependency.

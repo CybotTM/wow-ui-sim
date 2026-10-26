@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | Supplied active loss of control
 
-[Model and proof checkpoint](systems/lua-api.md#active-loss-of-control-state) links the [contract](../specs/active-loss-of-control.md). Retail original-display RED/GREEN and explicit overlay fixture pass; stock remains 12/14 without changed keys. Profile/check gates remain open.
+[Model and final proof](systems/lua-api.md#active-loss-of-control-state) link the [contract](../specs/active-loss-of-control.md). Byte-identical Retail original-display RED/GREEN, explicit overlay fixture, and positive Wrath absence pass. All seven raw stock maps are unchanged; all seven separate all-target checks pass with zero compiler warnings. PTR consumer proof is deferred to its original display-info initialization chain without fixture replacement.
 
 ## [2026-10-25] proof | Mists supplied map display
 

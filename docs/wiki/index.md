@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | Supplied active loss-of-control state
 
-[Active-effect model](systems/lua-api.md#active-loss-of-control-state) links the [contract](../specs/active-loss-of-control.md): empty per-unit state, declared record shapes, explicit admin input and Wrath absence. Retail original-consumer RED/GREEN passes; existing event-overlay assertions pass after supplied input; stock remains 12/14. Remaining profile/check gates are pending.
+[Active-effect model and proof](systems/lua-api.md#active-loss-of-control-state) link the [contract](../specs/active-loss-of-control.md): empty per-unit state, declared record shapes, explicit admin input and executed Wrath absence. Byte-identical Retail original-consumer RED/GREEN and the existing event overlay pass. All seven raw stock maps are unchanged, and all seven separate all-target checks have zero compiler warnings. PTR consumer proof remains explicitly deferred to the upstream display-info initialization chain; no failed OnLoad step is replaced.
 
 ## [2026-10-25] implementation | PTR Edit Mode declarations
 

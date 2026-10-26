@@ -183,7 +183,11 @@ No producer GREEN, acceptance, profile/global privacy, UI or data parity claim. 
 
 `C_LossOfControl` reads an empty-default per-unit `SimState.active_loss_of_control` map, not the spell-cooldown `LossOfControlInfo` map. [Contract and pinned declarations](../../specs/active-loss-of-control.md) define the record and `A_Admin` input. The existing registrar omits Wrath, where no pinned declaration or consumer exists; all other registrations remain in place. Input does not synthesize events or infer aura effects. Duration objects require supplied start/duration fields.
 
-The original selected `LossOfControlFrame:UpdateDisplay` fails the seeded producer's empty-world assertion and passes the corrected empty → supplied → removed visibility/count transition on Retail. The existing manually fired ADDED overlay test passes after explicit input, with unchanged display assertions. Retail stock retains 12 keys / 14 occurrences with no raw additions/removals. Other profile and all-target acceptance is pending; this is not a native acquisition, expiry, secrecy, or event-policy claim.
+Producer `95f8d1350` and test source `958b233d2` pass the original selected Retail `LossOfControlFrame:UpdateDisplay` empty → supplied → removed visibility/count transition. The producer-only RED sibling uses byte-identical tests and fails the fresh-world visibility assertion before any admin input. Seven exact Retail cases pass, including the existing manually fired ADDED overlay with unchanged display assertions. PTR state/query cases and the positive Wrath absence case pass.
+
+All seven stock maps are exactly unchanged against the master producer: Retail 12/14, PTR 232/300, Mists 6/12, Forever 26/26, and Era/Anniversary/Wrath 0/0 (keys/occurrences). Separate canonical all-target receipts pass with zero JSON/plain compiler warnings on every profile. Formatting and manual readability pass. No native acquisition, expiry, secrecy, or automatic event-policy claim is made.
+
+PTR consumer proof is deferred: original OnLoad aborts at `Blizzard_EditMode/Shared/EditModeSystemTemplates.lua:27` because `GetSystemSettingDisplayInfoMap` is missing; the later data path fails at `Blizzard_FrameXML/LossOfControlFrame.lua:183` on uninitialized `secondsWidth`. The display-info chunk must reach its method declaration at line 1628 before this consumer can be proved. No fixture initialization replaces that aborted step. The native TOC family selection and Retail-only proof scope are recorded in the contract.
 
 ## Retail 12.0.5 action loss-of-control cooldown info
 
