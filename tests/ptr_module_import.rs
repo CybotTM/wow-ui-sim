@@ -27,7 +27,8 @@ fn original_smart_navigation_and_debug_share_completed_utility_and_find_buttons(
         .lua_errors
         .iter()
         .filter(|error| {
-            error.contains("import") && error.contains("Blizzard_GamepadSmartNavigation")
+            error.contains("Blizzard_GamepadSmartNavigation")
+                && (error.contains("SmartNavigation.lua:1:") || error.contains("Debug.lua:1:"))
         })
         .collect();
     assert!(
