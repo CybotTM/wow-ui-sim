@@ -185,6 +185,7 @@ pub mod c_super_track;
 pub mod container_quest;
 pub mod forever_startup;
 mod lfr_availability;
+pub mod mists_transmog;
 mod scenario_finder_availability;
 #[cfg(feature = "client-wowforever")]
 pub use c_quest_log_watches::QuestWatchType;

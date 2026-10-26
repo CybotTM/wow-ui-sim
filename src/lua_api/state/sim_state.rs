@@ -558,6 +558,8 @@ pub struct SimState {
     pub can_use_premade_group: bool,
     /// Supplied Mists LFR service availability; None leaves native policy unknown.
     pub lfr_availability: Option<bool>,
+    /// Mists-only supplied input, distinct from the modern transmog policy.
+    pub mists_transmog: crate::c_api::mists_transmog::MistsTransmogAvailability,
     /// Supplied Mists scenario eligibility and failure reason; None leaves policy unknown.
     pub scenario_finder_availability: Option<(bool, String)>,
     pub lfg_category_info: std::collections::HashMap<i32, LfgCategoryInfo>,
