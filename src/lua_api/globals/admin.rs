@@ -25,8 +25,9 @@ use rilua::{LuaResult, Val};
 // Focused sub-modules — each holds one A_Admin section and keeps the
 // entry-point file small. The parent TableBuilder chain wires these up.
 use super::admin_actionbars_bags::{
-    add_bag_item, add_guild_bank_item, clear_action_bars, clear_action_slot, clear_bags,
-    clear_guild_bank, remove_bag_item, set_action_slot, set_merchant_items, set_pet_action_slot,
+    add_bag_item, add_guild_bank_item, add_guild_bank_tab, clear_action_bars, clear_action_slot,
+    clear_bags, clear_guild_bank, clear_guild_bank_tabs, remove_bag_item, set_action_slot,
+    set_merchant_items, set_pet_action_slot,
 };
 use super::admin_addons::register_test_addon;
 use super::admin_auction_house::{
@@ -342,6 +343,16 @@ fn register_inventory_and_mail(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("ClearBags", clear_bags)?
         .set_function("AddGuildBankItem", add_guild_bank_item)?
         .set_function("ClearGuildBank", clear_guild_bank)?
+        .set_function("AddGuildBankTab", add_guild_bank_tab)?
+        .set_function("ClearGuildBankTabs", clear_guild_bank_tabs)?
+        .set_function(
+            "AddRAFVersion",
+            crate::c_api::c_recruit_a_friend::add_version_input,
+        )?
+        .set_function(
+            "ClearRAFVersions",
+            crate::c_api::c_recruit_a_friend::clear_version_inputs,
+        )?
         .set_function("AddMail", add_mail)?
         .set_function("ClearInbox", clear_inbox)?
         .set_function("OpenMailbox", open_mailbox)?

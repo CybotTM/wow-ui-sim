@@ -1,7 +1,7 @@
 //! `C_RecruitAFriend` probe surface with disabled-by-default RAF data.
 
-use super::{ensure_namespace, set_table_array};
-use crate::c_api::c_recruit_a_friend::get_summon_friend_cooldown;
+use super::ensure_namespace;
+use crate::c_api::c_recruit_a_friend::{get_raf_info, get_summon_friend_cooldown};
 use crate::lua_api::methods::{create_table, table_set};
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
@@ -38,40 +38,6 @@ fn get_raf_system_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "daysInCycle", Val::Num(0.0));
     state.push(info);
     Ok(1)
-}
-
-fn get_raf_info(state: &mut LuaState) -> LuaResult<u32> {
-    let info = create_table(state);
-    let versions = empty_versions(state);
-    table_set(state, info, "versions", versions);
-    table_set(state, info, "recruitmentInfo", Val::Nil);
-    let recruits = empty_recruits(state);
-    table_set(state, info, "recruits", recruits);
-    table_set(state, info, "claimInProgress", Val::Bool(false));
-    state.push(info);
-    Ok(1)
-}
-
-fn empty_versions(state: &mut LuaState) -> Val {
-    let versions = create_table(state);
-    let sample = create_table(state);
-    let month_count = create_table(state);
-    table_set(state, month_count, "lifetimeMonths", Val::Num(0.0));
-    table_set(state, month_count, "spentMonths", Val::Num(0.0));
-    table_set(state, month_count, "availableMonths", Val::Num(0.0));
-    table_set(state, sample, "rafVersion", Val::Num(1.0));
-    table_set(state, sample, "monthCount", month_count);
-    let rewards = create_table(state);
-    table_set(state, sample, "rewards", rewards);
-    table_set(state, sample, "nextReward", Val::Nil);
-    table_set(state, sample, "numRecruits", Val::Num(0.0));
-    table_set(state, sample, "numAffordableRewards", Val::Num(0.0));
-    set_table_array(state, versions, 1, sample);
-    versions
-}
-
-fn empty_recruits(state: &mut LuaState) -> Val {
-    create_table(state)
 }
 
 fn is_enabled(state: &mut LuaState) -> LuaResult<u32> {

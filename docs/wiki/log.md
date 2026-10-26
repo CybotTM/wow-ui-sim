@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Supplied query catalogs
+
+[Audit and contracts](investigations/invented-query-defaults.md) record pinned declarations, selected consumers, approved RAF assertion conversion and the unresolved transmog filter bound. Mists bank and RAF version rows now come from supplied catalogs. Targeted original-consumer RED is observed; GREEN/stock/check acceptance remains pending.
+
 ## [2026-10-25] proof | Mists supplied map display
 
 [Original group-provider proof](investigations/map-display-info-model.md#mists-original-onload-consumer--2026-10-25) passes exact corrected RED and supplied-state GREEN plus return-arity preservation. Stock 10/16→8/14 has no additions. Mists/Retail/Era/Anniversary all-target checks pass with zero warnings; formatting and readability pass. The actual OnLoad boundary precedes post-load fog-pin mutation; the separate defect is recorded, not fixed.
