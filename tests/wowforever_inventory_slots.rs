@@ -16,7 +16,7 @@ fn forever_paper_doll_initializes_real_equipment_buttons() {
     load_source(&env, "Blizzard_ItemButton/Shared/ItemButtonTemplate.lua");
     load_source(&env, "Blizzard_ItemButton/Mainline/ItemButtonTemplate.lua");
     load_source(&env, "Blizzard_UIPanels_Game/Camelot/PaperDollFrame.lua");
-    env.state().borrow_mut().forever_startup.ammo_required = true;
+    env.state().borrow_mut().forever_startup.ammo_required = Some(true);
     env.exec(
         r#"
         CharacterFrame = CreateFrame("Frame")
@@ -43,6 +43,7 @@ fn forever_paper_doll_initializes_real_equipment_buttons() {
 #[test]
 fn forever_ammo_visibility_uses_character_requirement() {
     let env = WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().forever_startup.ammo_required = Some(false);
     load_source(&env, "Blizzard_FrameXML/Camelot/EquipmentFlyout.lua");
     load_source(&env, "Blizzard_ItemButton/Shared/ItemButtonTemplate.lua");
     load_source(&env, "Blizzard_ItemButton/Mainline/ItemButtonTemplate.lua");
@@ -58,7 +59,7 @@ fn forever_ammo_visibility_uses_character_requirement() {
         "#,
     )
     .unwrap();
-    env.state().borrow_mut().forever_startup.ammo_required = true;
+    env.state().borrow_mut().forever_startup.ammo_required = Some(true);
     env.exec(
         r#"
         CharacterAmmoSlot:Show()

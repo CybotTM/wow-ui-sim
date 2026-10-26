@@ -16,7 +16,7 @@ use rilua::{LuaApiMut, LuaResult, Val};
 /// the empty simulator world, not an inferred native account or character.
 #[derive(Debug, Default)]
 pub struct StartupInputs {
-    pub ammo_required: bool,
+    pub ammo_required: Option<bool>,
     pub cursor_visible: bool,
     pub ping_enabled: bool,
     pub party_ping_restriction: u8,
@@ -328,7 +328,7 @@ pub(crate) fn accepts_event(name: &str) -> bool {
 
 fn ammo_needed(state: &mut LuaState) -> LuaResult<u32> {
     let required = borrow_state(state)?.forever_startup.ammo_required;
-    state.push(Val::Bool(required));
+    state.push(Val::Bool(required.unwrap_or(false)));
     Ok(1)
 }
 
