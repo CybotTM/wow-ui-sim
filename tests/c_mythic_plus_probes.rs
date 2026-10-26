@@ -53,6 +53,12 @@ fn get_current_affixes_reflects_mutation() {
 #[test]
 fn challenge_mode_map_table_seeds_mists_challenge_map() {
     let env = env();
+    // Explicit fixture metadata, not a native/default challenge catalogue.
+    env.exec(r#"
+        assert(next(C_ChallengeMode.GetMapTable()) == nil)
+        A_Admin.SetChallengeModeMapInfo(2, {name='Temple of the Jade Serpent', id=2,
+            timeLimit=1530, texture=321, backgroundTexture=654, mapID=429})
+    "#).unwrap();
     let (count, challenge_id, name, map_id): (i32, i32, String, i32) = env
         .eval(
             r#"
@@ -66,6 +72,14 @@ fn challenge_mode_map_table_seeds_mists_challenge_map() {
     assert_eq!(challenge_id, 2);
     assert_eq!(name, "Temple of the Jade Serpent");
     assert_eq!(map_id, 429);
+    let (id, limit, texture, background): (i32, f64, f64, f64) = env.eval(r#"
+        local _, id, limit, texture, background = C_ChallengeMode.GetMapUIInfo(2)
+        return id, limit, texture, background
+    "#).unwrap();
+    assert_eq!(id, 2);
+    assert_eq!(limit, 1530.0);
+    assert_eq!(texture, 321.0);
+    assert_eq!(background, 654.0);
 }
 
 #[test]

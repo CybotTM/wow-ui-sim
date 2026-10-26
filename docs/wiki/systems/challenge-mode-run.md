@@ -18,6 +18,10 @@ Duration-object manual clocks, explicit world elapsed timers and the delta-drive
 
 Initial feature RED is observed on the lane's own binary. Phase A Retail timer, map-icon, admin-event and profile-surface cases pass. The criteria fixture needs original `ScenarioObjectiveTracker:InitModule` before `UpdateCriteria`. Its first failure was an uninitialized parentModule. Original InitModule then fails at line 74 on unguarded `C_Scenario.ShouldShowCriteria`, absent from all 622 Retail and 647 PTR generated documentation files and with no Lua definition in either pinned addon tree. Original SetContainer invokes InitModule at line 78; container AddModule reaches it at Retail line 123 / PTR line 141. Original criteria rendering remains BLOCKED; no exception swallowing, vendor replacement or retired API restoration is permitted. Native clarification and any missing producer belong to a separate lane. Direct criteria snapshot tests are query proof, not original-rendering proof. All four manual clock selectors pass on the pre-integration Retail binary. Final merged paired proof, profile checks, stock and external acceptance remain pending.
 
+## Legacy probe fixture migration
+
+`startup_api_stubs::startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes` no longer decodes an invented `(7, 0, 0)` elapsed tuple on six profiles. It requires zero results for an absent supplied timer, retains the old tuple explicitly on excluded Wrath, and retains every unrelated LFG/BN assertion. `c_mythic_plus_probes::challenge_mode_map_table_seeds_mists_challenge_map` now supplies its expected map through admin instead of assuming a seeded native catalogue. Its four old assertions remain; added assertions cover the supplied map ID, time limit and texture fields. These are fixture/contract corrections, not remaining failures or a native catalogue claim.
+
 ## Sources
 
 - [Challenge contract](../../specs/challenge-mode-run.md) — pinned declarations, publication and selected consumers.
