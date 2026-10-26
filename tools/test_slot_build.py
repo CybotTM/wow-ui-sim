@@ -598,6 +598,64 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertEqual(receipt["result"], "success")
         self.assertEqual(Path(output).read_bytes(), rebuilt)
 
+    def build_generated_library(self, generated, prefix=""):
+        mutation = (prefix + f'generated=Path({str(generated)!r}); '
+                    'binary.write_bytes(source.read_bytes()+generated.read_bytes()); '
+                    'binary.with_suffix(".d").write_text('
+                    'str(binary)+": src/main.rs "+str(generated)+"\\n")')
+        result, receipt = self.run_library_step("retail", mutation=mutation)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(receipt["result"], "success")
+
+    def test_fresh_library_rejects_changed_generated_compiler_input(self):
+        generated = self.slot / "debug/build/test-harness-hash/out/integration_tests.rs"
+        generated.parent.mkdir(parents=True)
+        generated.write_text("pub const VALUE: u32 = 1;")
+        self.build_generated_library(generated)
+        output = self.slot / "debug/deps/libprobe-retail.rmeta"
+        original = output.read_bytes()
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        generated.write_text("pub const VALUE: u32 = 2;")
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(output.read_bytes(), original)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+
+    def test_library_requires_generated_compiler_input_to_exist(self):
+        generated = self.slot / "release/build/test-harness-hash/out/prefork_full_ui_cases.rs"
+        generated.parent.mkdir(parents=True)
+        generated.write_text("pub fn generated() {}")
+        self.build_generated_library(generated)
+        generated.unlink()
+        for fresh in [True, False]:
+            with self.subTest(fresh=fresh):
+                mutation = ('binary.with_suffix(".d").write_text('
+                            f'str(binary)+": src/main.rs {generated}\\n")')
+                result, receipt = self.run_library_step("retail", fresh=fresh, mutation=mutation)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(receipt["result"], "stale-artifacts")
+
+    def test_newly_generated_compiler_input_can_be_certified_and_reused(self):
+        generated = self.slot / "debug/build/test-harness-hash/out/integration_tests.rs"
+        generated.parent.mkdir(parents=True)
+        self.build_generated_library(
+            generated, prefix=f'Path({str(generated)!r}).write_text("pub fn generated() {{}}"); ')
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(receipt["result"], "success")
+
+    def test_absolute_compiler_input_outside_slot_and_sources_remains_external(self):
+        with tempfile.TemporaryDirectory() as directory:
+            external = Path(directory) / "registry.rs"
+            external.write_text("external v1")
+            self.build_generated_library(external)
+            external.unlink()
+            result, receipt = self.run_library_step("retail", fresh=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(receipt["result"], "success")
+
     def test_fresh_library_without_content_certificate_fails_closed(self):
         result, _ = self.run_library_step("retail")
         self.assertEqual(result.returncode, 0, result.stderr)

@@ -27,11 +27,12 @@ The Python profile launcher preserves `live`/`retail`, `ptr`, `mists`, and `all`
 ## Local slot builds
 
 Use `scripts/slot-build.py` for shared-slot Cargo builds. It bind-mounts the lane
-worktree at `/home/osso/.cache/wow-ui-sim-srcmount/slot-N` inside an unprivileged
-user service, paired with target `/home/osso/.cache/wow-ui-sim-targets/slot-N` and
+worktree at `~/.cache/wow-ui-sim-srcmount/slot-N` inside an unprivileged
+user service, paired with target `~/.cache/wow-ui-sim-targets/slot-N` and
 `CARGO_INCREMENTAL=1`. Incremental reuse depends on that fixed BindPaths source
 path per persistent target slot; do not build through changing worktree paths.
-The [stable-path experiment](/home/osso/.local/state/wow-ui-sim/handoff/compile-throughput-20261025/stablepath-experiment.md)
+The stable-path experiment
+(`~/.local/state/wow-ui-sim/handoff/compile-throughput-20261025/stablepath-experiment.md`)
 measured lower touch/edit CPU with incremental enabled. Its single-slot cache
 size is not a long-run growth bound. Keep normalized `Cargo.lock` bytes identical between lanes
 ([ordering evidence](wiki/investigations/compile-bin-lockwatch.md#cargolock-watch)).
@@ -44,8 +45,8 @@ It checks `capacity.sh` once with `CAPACITY_ID` from `--capacity-id` and refuses
 anything except a literal `ADD` verdict. It does not poll for admission.
 
 ```sh
-/home/osso/Projects/wow/wow-ui-sim/scripts/slot-build.py --slot 2 --worktree /home/osso/.worktrees/wow-ui-sim-lane --unit lane-build --owner lane-owner --capacity-id lane-capacity -- /usr/bin/cargo test --test integration --no-run
-/home/osso/Projects/wow/wow-ui-sim/scripts/slot-build.py --status lane-build
+scripts/slot-build.py --slot 2 --worktree "$HOME/.worktrees/wow-ui-sim-lane" --unit lane-build --owner lane-owner --capacity-id lane-capacity -- /usr/bin/cargo test --test integration --no-run
+scripts/slot-build.py --status lane-build
 ```
 
 Launch prints the unit name without waiting for the build. The retained service
@@ -147,10 +148,16 @@ closed; old receipts do not certify fresh outputs. A `fresh=false` record with v
 dep-info and output hashes can establish a certificate. Rebuild the affected Cargo
 artifact before retrying; changing receipt identities does not provide proof.
 
-The worker hashes tracked/untracked source files, known dep-info inputs and package
-manifests before launching the child. It hashes each record's inputs again afterward
-and rejects changed or previously unsnapshotted inputs. Missing current compiler
-inputs also fail closed. Optional absent package files are represented by null hashes. Certificates advance only with an accepted
+The worker hashes tracked/untracked source files, known source dep-info inputs and
+package manifests before launching the child. It hashes each record's source inputs
+again afterward and rejects changed or previously unsnapshotted source inputs.
+Dep-info inputs under the slot's `<profile>/build/<package-hash>/out/` directories
+are also required to exist and are content-hashed, using their absolute slot-local
+paths as certificate keys. These generated inputs can be created or replaced by
+the child; their final hashes must match the certificate on fresh reuse. Other
+absolute paths outside the source mounts and slot OUT_DIR directories remain
+external, including toolchain and registry inputs. Missing current compiler inputs
+fail closed. Optional absent package files are represented by null hashes. Certificates advance only with an accepted
 build, alongside the verified identity. Failed or rejected attempts cannot certify
 an output. All reported filenames are hashed, including untouched `.rmeta` files,
 not just executables or newly modified files.
@@ -174,7 +181,7 @@ Shared snapshot, selection, and native execution helpers live in `/syncthing/Syn
 
 ## Source, cache, and lifetime
 
-Desktop source and Cargo targets persist under `/home/osso-test/.cache/native-builds/<key>/`. Snapshots include current working edits and selected owned compile/runtime inputs, not only committed source. `crates/` includes internal workspace packages such as the dev-only test harness: Cargo resolves their manifests even for binary-only builds. The helper is not thereby a production compilation dependency. [Staged input proof](../data/test-perf/evidence/dev-harness-build-inputs-2026-10-11/README.md) records missing-manifest failures and corrected local workspace resolution; it is not a desktop build/transport pass. Previously supplied files are pruned without deleting app-owned runtime directories; content changes receive fresh mtimes, including A/B/A changes. Builds do not hold a runtime lock for the app's lifetime.
+Desktop source and Cargo targets persist under `~/.cache/native-builds/<key>/` on desktop. Snapshots include current working edits and selected owned compile/runtime inputs, not only committed source. `crates/` includes internal workspace packages such as the dev-only test harness: Cargo resolves their manifests even for binary-only builds. The helper is not thereby a production compilation dependency. [Staged input proof](../data/test-perf/evidence/dev-harness-build-inputs-2026-10-11/README.md) records missing-manifest failures and corrected local workspace resolution; it is not a desktop build/transport pass. Previously supplied files are pruned without deleting app-owned runtime directories; content changes receive fresh mtimes, including A/B/A changes. Builds do not hold a runtime lock for the app's lifetime.
 
 Runtime Blizzard caches remain host-local and profile-scoped under `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns`; desktop resolves that home as `osso-test`. Host selection does not populate or migrate those caches. SSH leases control remote cleanup. Source SCP has a 60-second attempt limit and at most three transient attempts; permanent failures fail immediately.
 
@@ -182,7 +189,7 @@ Runtime Blizzard caches remain host-local and profile-scoped under `~/.cache/wow
 
 Measure CPU usage and capacity over the same cgroup scope. On October16,2026, local `agents.slice/cpu.max` was `max 100000` and main `nproc` reported32 CPUs; a measurement service with `CPUQuota=20%` reported1 from `nproc`, while `nproc --all` reported32. The then-current local capacity helper paired slice-wide CPU counters with a `nproc` denominator when the slice quota was unlimited, so a smaller polling-service quota produced a misleading `agents 9.9/1 CPU` verdict. This is not evidence that the slice has a one-core limit.
 
-Main temporarily removed only its polling unit's quota, preserving its PID, low priority, bounded memory and normal queue/memory/pressure admission; actual build limits and guards stayed separate. The shared helper was subsequently changed by the other main session to use `getconf _NPROCESSORS_ONLN` for an unlimited host-wide slice, retiring the need for that wrapper workaround. Main inspected the changed quota expression and observed `getconf` returning32 in the same20%-quota service boundary. This is bounded source/probe evidence, not a complete shared-helper gate. Receipts: `/home/osso/.local/state/wow-ui-sim/handoff/iconbackground-capacity-scope-main-disposition.md` and `/home/osso/.local/state/wow-ui-sim/handoff/capacity-getconf-shared-fix-20261016T112030751633Z.json`. No FIFO bypass or host-slice policy change; no Cargo bottleneck or jobs12 speedup claim.
+Main temporarily removed only its polling unit's quota, preserving its PID, low priority, bounded memory and normal queue/memory/pressure admission; actual build limits and guards stayed separate. The shared helper was subsequently changed by the other main session to use `getconf _NPROCESSORS_ONLN` for an unlimited host-wide slice, retiring the need for that wrapper workaround. Main inspected the changed quota expression and observed `getconf` returning32 in the same20%-quota service boundary. This is bounded source/probe evidence, not a complete shared-helper gate. Receipts: `~/.local/state/wow-ui-sim/handoff/iconbackground-capacity-scope-main-disposition.md` and `~/.local/state/wow-ui-sim/handoff/capacity-getconf-shared-fix-20261016T112030751633Z.json`. No FIFO bypass or host-slice policy change; no Cargo bottleneck or jobs12 speedup claim.
 
 ## Evidence and pending runtime proof
 

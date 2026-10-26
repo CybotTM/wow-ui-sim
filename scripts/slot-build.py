@@ -242,6 +242,19 @@ def repo_relative_inputs(current, inputs):
     return relative
 
 
+def generated_input_paths(current, inputs):
+    slot = Path(current["slot"])
+    generated = set()
+    for name in inputs:
+        path = Path(os.path.abspath(Path(current["worktree"]) / name))
+        if not path.is_relative_to(slot):
+            continue
+        parts = path.relative_to(slot).parts
+        if len(parts) >= 5 and parts[1] == "build" and parts[3] == "out":
+            generated.add(str(path))
+    return generated
+
+
 def artifact_path(record):
     if record.get("executable"):
         return record["executable"]
@@ -259,11 +272,13 @@ def is_repo_artifact(current, record):
 
 
 def read_record_inputs(current, record, before, after):
-    inputs = repo_relative_inputs(current, target_dep_inputs(record, after))
+    compiler_inputs = target_dep_inputs(record, after)
+    inputs = repo_relative_inputs(current, compiler_inputs)
     if not inputs:
         raise ValueError(f"zero repo-relative inputs for {artifact_path(record)}")
     previous = target_dep_inputs(record, before, allow_missing=record.get("fresh") is False)
     inputs.update(repo_relative_inputs(current, previous))
+    inputs.update(generated_input_paths(current, previous | compiler_inputs))
     inputs.update(repo_relative_inputs(current, package_build_inputs(current, record)))
     return sorted(inputs)
 
@@ -307,15 +322,19 @@ def snapshot_source_hashes(current, snapshot):
 
 def certify_record(current, record, previous, source_before, artifacts, snapshot):
     path = artifact_path(record)
-    required = repo_relative_inputs(current, target_dep_inputs(record, snapshot))
-    inputs = required | repo_relative_inputs(current, package_build_inputs(current, record))
+    compiler_inputs = target_dep_inputs(record, snapshot)
+    required = repo_relative_inputs(current, compiler_inputs)
     if not required:
         raise ValueError(f"missing compiler inputs for {path}")
+    generated = generated_input_paths(current, compiler_inputs)
+    required.update(generated)
+    inputs = required | repo_relative_inputs(current, package_build_inputs(current, record))
     hashes = read_input_hashes(Path(current["worktree"]), inputs)
     if any(hashes.get(name) is None for name in required):
         raise ValueError(f"missing compiler input content for {path}")
+    # OUT_DIR files are produced by this build; source inputs must predate it.
     if any(name not in source_before or source_before[name] != digest
-           for name, digest in hashes.items()):
+           for name, digest in hashes.items() if name not in generated):
         raise ValueError(f"compiler inputs changed during build for {path}")
     outputs = set(record.get("filenames", []))
     if record.get("executable"):
