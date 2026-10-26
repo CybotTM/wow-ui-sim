@@ -85,6 +85,63 @@ fn boss_growth_dropdown_consumes_three_declared_directions() {
 }
 
 #[test]
+fn swing_timer_constructor_consumes_seven_declared_settings() {
+    let (env, root) = load_edit_mode();
+    let source =
+        std::fs::read_to_string(root.join("Shared/EditModeSettingDisplayInfo.lua")).unwrap();
+    let system = source.find("\t[Enum.EditModeSystem.SwingTimer] =").unwrap();
+    let start = system + source[system..].find("\t\t-- Scale").unwrap();
+    let next = start
+        + source[start..]
+            .find("\t[Enum.EditModeSystem.VehicleSeatIndicator]")
+            .unwrap();
+    let end = start + source[start..next].rfind("\t},").unwrap();
+    let padding = "\n".repeat(
+        source[..start]
+            .bytes()
+            .filter(|byte| *byte == b'\n')
+            .count(),
+    );
+    env.exec_named(
+        &format!(
+            "{padding}ObservedSwingTimerSettings = {{{}\n}}",
+            &source[start..end]
+        ),
+        "@Interface/AddOns/Blizzard_EditMode/Shared/EditModeSettingDisplayInfo.lua",
+    )
+    .expect("original SwingTimer setting constructor starting at line 800");
+    env.exec(
+        r#"
+        local options = ObservedSwingTimerSettings
+        assert(#options == 7)
+        local expected = {0, 1, 3, 4, 5, 6, 2}
+        for index, value in ipairs(expected) do
+            assert(type(options[index].setting) == 'number')
+            assert(options[index].setting == value, 'original SwingTimer setting option')
+        end
+        local visibilityOptions = options[7].options
+        assert(#visibilityOptions == 3)
+        for index, value in ipairs({0, 1, 2}) do
+            assert(type(visibilityOptions[index].value) == 'number')
+            assert(visibilityOptions[index].value == value, 'original visibility option')
+        end
+        local visibility = Enum.EditModeSwingTimerVisibility
+        assert(visibility.Always == 0 and visibility.InCombat == 1 and visibility.Hidden == 2)
+        local visibilityMeta = Enum.EditModeSwingTimerVisibilityMeta
+        assert(visibilityMeta.NumValues == 3 and visibilityMeta.MinValue == 0)
+        assert(visibilityMeta.MaxValue == 2)
+        local settings = Enum.EditModeSwingTimerSetting
+        assert(settings.Scale == 0 and settings.Opacity == 1)
+        assert(settings.Visibility == 2 and settings.Width == 3)
+        assert(settings.Height == 4 and settings.ShowBarTitle == 5 and settings.ShowTime == 6)
+        local meta = Enum.EditModeSwingTimerSettingMeta
+        assert(meta.NumValues == 7 and meta.MinValue == 0 and meta.MaxValue == 6)
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn preset_manager_indexes_declared_gamepad_layout_separately() {
     let (env, root) = load_edit_mode();
     // Supplied maps isolate this separately reached manager from the earlier

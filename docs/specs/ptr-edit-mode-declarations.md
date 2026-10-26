@@ -1,6 +1,6 @@
 # PTR Edit Mode declaration families
 
-PTR publishes two finite Edit Mode enum families through `src/c_api/ptr_edit_mode_enums.rs`. The [investigation](../wiki/investigations/ptr-edit-mode-declarations.md) explains the original consumer boundaries and initialization limits.
+PTR publishes four finite Edit Mode enum families through `src/c_api/ptr_edit_mode_enums.rs`. The [investigation](../wiki/investigations/ptr-edit-mode-declarations.md) explains the original consumer boundaries and initialization limits.
 
 ## What it must do
 
@@ -8,6 +8,10 @@ PTR publishes two finite Edit Mode enum families through `src/c_api/ptr_edit_mod
 - [x] Preserve those three distinct values through the original boss-growth dropdown constructor.
 - [x] Publish PTR `Enum.EditModePresetLayouts` as Modern=0, Classic=1, Gamepad=2, with NumValues=3, MinValue=0, MaxValue=2 metadata.
 - [x] Let the original preset manager index supplied Modern, Classic and Gamepad maps separately, preserve Gamepad system data and return independent anchor copies.
+
+- [x] Publish PTR `Enum.EditModeSwingTimerSetting` as Scale=0, Opacity=1, Visibility=2, Width=3, Height=4, ShowBarTitle=5, ShowTime=6, with NumValues=7, MinValue=0, MaxValue=6 metadata.
+- [x] Publish PTR `Enum.EditModeSwingTimerVisibility` as Always=0, InCombat=1, Hidden=2, with NumValues=3, MinValue=0, MaxValue=2 metadata.
+- [x] Preserve all seven setting identifiers and three visibility choices through the complete original SwingTimer constructor.
 
 ## How it works
 
@@ -21,7 +25,7 @@ PTR publishes two finite Edit Mode enum families through `src/c_api/ptr_edit_mod
 
 ## Tests asserting this spec
 
-- `tests/ptr_edit_mode_enums.rs`: original selected dropdown and independently reached original preset manager.
+- `tests/ptr_edit_mode_enums.rs`: original selected dropdowns, complete SwingTimer settings constructor and independently reached original preset manager.
 
 ## Known gaps (current cycle)
 
