@@ -25,6 +25,41 @@ class SlotBuildTests(unittest.TestCase):
         self.addCleanup(directory.cleanup)
         self.slot = Path(directory.name)
 
+    def test_change_matching_preserves_empty_direct_and_directory_inputs(self):
+        tree = self.slot / "worktree"
+        (tree / "src/nested").mkdir(parents=True)
+        (tree / "src/direct.rs").write_text("direct input")
+        (tree / "src/nested/child.rs").write_text("directory input")
+        changes = {"src/direct.rs", "src/nested/child.rs", "unrelated.rs"}
+        empty = str(self.slot / "debug/external")
+        direct = str(self.slot / "debug/direct")
+        directory = str(self.slot / "debug/directory")
+        current = {
+            "worktree": str(tree), "slot": str(self.slot),
+            "changed_paths": sorted(changes),
+            "content_changed_paths": sorted(changes),
+            "target_inputs": {
+                direct: ["src/direct.rs"], directory: ["src/nested"],
+            },
+            "reported_artifacts": [
+                {"executable": path, "fresh": True}
+                for path in [empty, direct, directory]
+            ],
+        }
+        self.assertEqual(self.module.matched_input_changes(current, [], changes), set())
+        self.assertEqual(self.module.matched_input_changes(
+            current, ["src/direct.rs", "src/nested"], changes),
+            {"src/direct.rs", "src/nested/child.rs"})
+        self.assertEqual(self.module.find_stale_artifacts(current, {}, {}),
+                         ["debug/direct", "debug/directory"])
+        for record in current["reported_artifacts"]:
+            record["fresh"] = False
+        previous = {"debug/direct": "before", "debug/directory": "before"}
+        self.assertEqual(self.module.find_stale_artifacts(current, previous, previous),
+                         ["debug/direct", "debug/directory"])
+        rebuilt = {"debug/direct": "after", "debug/directory": "after"}
+        self.assertEqual(self.module.find_stale_artifacts(current, previous, rebuilt), [])
+
     def test_launch_argv_keeps_source_and_target_paths_stable(self):
         self.assertEqual(
             self.module.build_argv(2, Path("/home/osso/.worktrees/lane"),
