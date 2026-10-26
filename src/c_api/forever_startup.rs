@@ -1,4 +1,4 @@
-//! Host-supplied Forever inputs. These are simulator fixtures, not native defaults.
+//! Host-supplied startup inputs. These are simulator fixtures, not native defaults.
 
 use std::collections::{HashMap, HashSet};
 
@@ -16,6 +16,7 @@ use rilua::{LuaApiMut, LuaResult, Val};
 /// the empty simulator world, not an inferred native account or character.
 #[derive(Debug, Default)]
 pub struct StartupInputs {
+    /// PTR/Forever observation; absence does not imply a native false value.
     pub ammo_required: Option<bool>,
     pub cursor_visible: bool,
     pub ping_enabled: bool,
@@ -40,11 +41,14 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         let ping = ensure_namespace(state, "C_Ping")?;
         table_set_rust_fn_static(state, ping, "IsPingSystemEnabled", ping_enabled)?;
     }
+    if matches!(ACTIVE, ClientProfile::Ptr | ClientProfile::WowForever) {
+        // Both pins declare PaperDollInfoDocumentation.lua:11–18 (no-argument bool).
+        let paper_doll = ensure_namespace(state, "C_PaperDollInfo")?;
+        table_set_rust_fn_static(state, paper_doll, "AmmoNeeded", ammo_needed)?;
+    }
     if ACTIVE != ClientProfile::WowForever {
         return Ok(());
     }
-    let paper_doll = ensure_namespace(state, "C_PaperDollInfo")?;
-    table_set_rust_fn_static(state, paper_doll, "AmmoNeeded", ammo_needed)?;
     register_group_buffs(state)?;
     register_external_event(state)?;
     register_character_queries(state)?;
@@ -328,7 +332,10 @@ pub(crate) fn accepts_event(name: &str) -> bool {
 
 fn ammo_needed(state: &mut LuaState) -> LuaResult<u32> {
     let required = borrow_state(state)?.forever_startup.ammo_required;
-    state.push(Val::Bool(required.unwrap_or(false)));
+    let required = required.ok_or_else(|| {
+        rilua::runtime_error("C_PaperDollInfo.AmmoNeeded: ammo requirement has not been supplied")
+    })?;
+    state.push(Val::Bool(required));
     Ok(1)
 }
 

@@ -3,8 +3,9 @@
 ## Scope
 
 `client_profile::ACTIVE == WowForever` publishes this additional surface, except
-`C_Ping.IsPingSystemEnabled`, which Retail and PTR also publish. Other profiles
-retain their existing registrations and behavior. Forever contracts come from
+`C_Ping.IsPingSystemEnabled`, which Retail and PTR also publish, and
+`C_PaperDollInfo.AmmoNeeded`, which PTR also publishes. Other profiles retain
+their existing registrations and behavior. Forever contracts come from
 the copied 1.60.1.70532 `Blizzard_APIDocumentationGenerated` cache. Retail/PTR
 `PingManagerDocumentation.lua:44` declares the same non-null boolean result.
 
@@ -18,8 +19,19 @@ fixtures, not claims about native defaults. Tests must vary inputs through the
 original Blizzard consumers. Native derivation and validation policies remain
 unknown.
 
-- `C_PaperDollInfo.AmmoNeeded()` returns one non-null boolean from the host's
-  character ammo requirement. PaperDoll hides the AmmoSlot only when false.
+- `C_PaperDollInfo.AmmoNeeded()` reads the single environment-local
+  `forever_startup.ammo_required: Option<bool>` on PTR and Forever. Explicit
+  `Some(false)`/`Some(true)` return exactly one boolean. `None` raises
+  `C_PaperDollInfo.AmmoNeeded: ammo requirement has not been supplied`; this is
+  simulator missing-input policy, not a native error claim. Both pinned builds
+  declare the no-argument non-null bool at
+  `Blizzard_APIDocumentationGenerated/PaperDollInfoDocumentation.lua:11–18`
+  (PTR12.1.7.70493, Forever1.60.1.70532). PaperDoll hides AmmoSlot only when
+  false; true continues initialization but does not Show a previously hidden
+  slot. No equipment/class/weapon mapping, `UnitUsesAmmo` equivalence, startup
+  seed, native default or automatic event is inferred. Removing Forever's
+  implicit false can expose stock startup errors; PTR's missing-function errors
+  become named missing-input errors, not clean startup.
 - Group-buff rows contain non-null numeric `spellID` and `visualValue` fields;
   `visualValue` uses the documented `VisualAlertType` enum. Linked-rank expansion
   requires host-supplied rows; no spell-rank policy is inferred.

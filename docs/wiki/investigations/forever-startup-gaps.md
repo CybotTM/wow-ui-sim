@@ -33,7 +33,25 @@ bank purchase permissions, PvP completion and target spell. Their exact RED and
 GREEN listings/executions are in the lane report. Subsequent source changes can
 invalidate intersecting proof.
 
-## Current unknowns and exposed consumers
+## Shared PTR/Forever ammo observation
+
+The [input contract](../../specs/forever-startup-inputs.md#supplied-state-not-native-policy)
+requires an optional supplied boolean, not the former Forever default false.
+Only PTR and Forever publish AmmoNeeded. PTR's selected TOC entries52/59 load
+Mainline PaperDoll; Forever's53/60 load Camelot and exclude Mainline. Their
+original checks are Mainline1702 and Camelot1952. Forever's actual AmmoSlot XML
+binds `PaperDollAmmoSlotButton_OnLoad`, which delegates to the item-slot consumer;
+PTR binds an inline XML wrapper. Tests must invoke those real slot scripts,
+explicitly Show before each OnLoad replay, and observe hiding versus inventory
+initialization, isolation, and named unset/recovery behavior.
+
+No native ammo derivation or default is established. Unsupplied PTR startup
+replaces nil-call keys with named errors. Unsupplied Forever startup can gain
+named errors because the removed false previously masked missing observations;
+earlier baseline counts below are historical, not acceptance of this change.
+Runtime proof for this revision is pending.
+
+## Historical startup packet and unknown consumers
 
 `GetTargetSpellID` documents a non-null number but no absent-target sentinel.
 Absent supplied input raises an explicit native-unknown error. Repairing earlier
@@ -46,9 +64,10 @@ The first repaired stock capture had 40 raw messages. It exposed
 `SOCIAL_UI_RAID_LIST_SYSTEM_STATUS_UPDATED` (documented payload-free event).
 The completed supplied models include Discord, ping/restriction, spatial
 housing, TTS save/bool settings, temporary scalar CVars and optional bank offers.
-All 21 exact selectors pass at `1fcbddf67`. The [current baseline and per-record
-classification](../../baselines/README.md#forever-lua-errors) retain only the two
-approved native-unknown boundaries. Startup is not clean; no native idle value
+All 21 exact selectors passed at `1fcbddf67`. That packet's [baseline and per-record
+classification](../../baselines/README.md#forever-lua-errors) retained only two
+native-unknown boundaries; the shared optional ammo observation adds another
+explicit missing-input boundary. Startup is not clean; no native idle value
 or locality catalog was invented. Profile checks and release evidence belong to
 the lane report.
 

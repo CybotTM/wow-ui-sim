@@ -1,3 +1,7 @@
+## [2026-10-26] staged | Shared ammo requirement observation
+
+[Selected slot boundary](investigations/forever-startup-gaps.md#shared-ptrforever-ammo-observation) links the [supplied-input contract](../specs/forever-startup-inputs.md): PTR/Forever only, one optional boolean and a named unset error instead of an inferred native default. Original XML-bound transitions, isolation/unset recovery, stock attribution and seven-profile gates remain pending.
+
 ## [2026-10-26] implementation | Shared transmog supplied input
 
 [Model and bounded proof](systems/transmog-availability.md) link the [contract](../specs/transmog-availability.md): the Mists Option<bool> is shared with Retail/PTR and replaces all three modern scalar reads. All eight exact Retail/PTR producer-only RED/shared-producer GREEN pairs pass with byte-identical tests; seventeen legacy cases and both original Mists selectors pass. Paired raw stock stays Retail0/0 and PTR122/138; all74 launch CVar guards are unchanged. All seven full-feature all-target checks pass with zero Cargo JSON/plain compiler warnings; later proof documentation does not change executable inputs. A pre-existing transmog bootstrap nil call is disclosed, not repaired by this lane.
