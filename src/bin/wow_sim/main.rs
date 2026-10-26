@@ -1,6 +1,8 @@
 mod addon_loading;
 mod cache_texture;
 mod exec_lua;
+#[cfg(test)]
+mod exclusive_path_tests;
 #[cfg(feature = "gui")]
 mod gui_commands;
 mod saved_var_config;
