@@ -1,8 +1,6 @@
 use sim_texture::resolve::*;
 use std::path::{Path, PathBuf};
 
-use super::source_index::DirectorySearch;
-
 use super::{TextureData, TextureManager, normalize_wow_path};
 
 #[cfg(feature = "casc")]
