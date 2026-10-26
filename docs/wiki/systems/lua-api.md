@@ -193,7 +193,7 @@ The [Edit Mode display-info repair](../investigations/ptr-edit-mode-declarations
 
 Both exact selectors have byte-identical producer-subtraction RED/GREEN. Each RED fails the empty-state original-consumer expectation at original Lua:229 because PTR LOC registration is omitted; no admin call is reached. GREEN completes empty hide → supplied show/text/icon/spell/priority/time → clear hide, and two loaded environments remain independent when adding/clearing each player's state. Empty checks first show the frame so an inert UpdateDisplay cannot pass. GREEN production code is byte-equivalent to base master; no new producer is needed. The new proof uses the same declared active-index1 fixture as Retail, supplied record input and explicit UpdateDisplay, not native acquisition/event synthesis.
 
-Paired source-bound headless PTR stock captures remain exactly134 keys/154 occurrences, with no added/removed keys or count changes. Existing startup errors remain; runtime exit1 is not a clean-startup claim. Seven-profile compilation gates for this tests-only extension are recorded separately from the historical model proof above.
+Paired source-bound headless PTR stock captures remain exactly134 keys/154 occurrences, with no added/removed keys or count changes. Existing startup errors remain; runtime exit1 is not a clean-startup claim. Seven separate full-feature canonical all-target checks for this tests-only extension pass with zero JSON/plain compiler warnings. The new module is cfg-excluded outside PTR; all six other profiles compile cleanly. Formatting and changed-line readability pass. These gates are separate from the historical model proof above.
 
 ## Retail 12.0.5 action loss-of-control cooldown info
 
