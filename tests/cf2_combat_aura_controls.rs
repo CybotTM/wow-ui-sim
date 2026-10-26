@@ -42,9 +42,10 @@ fn select_original_debuff(env: &WowLuaEnv) {
         Cf2AuraDebuff = member.DebuffFrame
         assert(Cf2AuraDebuff and Cf2AuraDebuff:GetParent() == member,
             'must use the existing normal arena member child')
-        assert(Cf2AuraDebuff.Update == ArenaUnitFrameDebuffMixin.Update)
-        assert(Cf2AuraDebuff.SetUnit == ArenaUnitFrameDebuffMixin.SetUnit)
-        assert(Cf2AuraDebuff:GetScript('OnEvent') == ArenaUnitFrameDebuffMixin.OnEvent)
+        assert(Cf2AuraDebuff.Update == ArenaUnitFrameDebuffMixin.Update, 'original Update identity')
+        assert(Cf2AuraDebuff.SetUnit == ArenaUnitFrameDebuffMixin.SetUnit, 'original SetUnit identity')
+        assert(Cf2AuraDebuff:GetScript('OnEvent') == ArenaUnitFrameDebuffMixin.OnEvent,
+            'original installed OnEvent identity')
         "#,
     )
     .expect("normal arena member, child and installed handler identity");
