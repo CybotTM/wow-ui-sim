@@ -1,3 +1,7 @@
+## [2026-10-26] bounded proof | Supplied pet specialization catalog
+
+[Final supplied-catalog proof](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog): five original-consumer RED/GREEN pairs, four supplementary GREEN cases, PTR122/138 with only two attributed unknown-state replacements and byte-identical Retail0/0. Seven all-target checks have zero compiler warnings; formatting/readability,36 CVar guards and27 pinned input hashes pass. Other-profile absence is compiled-not-executed; I1 owns its runtime coverage. No native default/catalog or menu-generation claim is added.
+
 ## [2026-10-26] runtime proof | Supplied pet specialization catalog
 
 [Bounded original callbacks](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog): five RED/GREEN pairs and four supplementary GREENs pass; PTR stock122/138 replaces only the nil-member primary/reporter with named-unknown keys, Retail stays0/0. Hidden Refresh skips exactly original GenerateMenu247, not getter/options/SetupMenu execution. Seven all-target gates remain pending; other-profile absence runtime is deferred to I1.
