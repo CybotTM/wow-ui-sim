@@ -11,6 +11,20 @@ Retail and PTR expose supplied `PetInfo` observations through `C_StableInfo.GetA
 - [ ] With no supplied observation, the getter raises `native-unknown: C_StableInfo.GetActivePetList has no supplied list or documented default`. Partial mutations of an unknown list fail explicitly. No placeholder pets are created.
 - [ ] Populated, add, update, remove and supplied-empty transitions reach the original selected `StableActivePetListMixin:Refresh` and its original XML slot buttons. Two independent environments retain disjoint observations.
 
+## PTR selected-consumer prerequisites
+
+The pinned PTR 70493 `PetConstantsDocumentation.lua:6–17` declares the `PetConsts_Retail` group with expressions using `Constants.PetConsts`. Publish only the five members read by selected Standard StableUI, only when ACTIVE is PTR. These are finite declarations, not inferred pet ownership or default records:
+
+| Published member | Complete pinned chain to literals |
+| --- | --- |
+| `MAX_SUMMONABLE_HUNTER_PETS` | :12 → `NUM_PET_SLOTS_THAT_NEED_LEARNED_SPELL` :11 → literal5 |
+| `EXTRA_PET_STABLE_SLOT` | :14 → `MAX_SUMMONABLE_HUNTER_PETS` :12 → learned slots :11 → literal5 |
+| `STABLED_PETS_FIRST_SLOT_INDEX` | :15 → extra slot :14 → maximum summonable :12 → learned slots :11 → literal5 |
+| `NUM_PET_SLOTS_HUNTER` | :16 → `MAX_STABLE_SLOTS` :13 literal200 + learned slots :11 literal5 → 205 |
+| `MAX_STABLE_SLOTS` | :13 → literal200; selected consumer reads it at :887 |
+
+The original consumer previously fails at Standard/Blizzard_StableUI.lua:11 before defining Refresh. The prerequisite is present in both producer-free RED and GREEN. Consumer construction, not isolated number assertions, is its proof boundary. PTR stock changes require attribution against the original base capture.
+
 ## How it works
 
 - [Consumer selection and RED requirements](../wiki/investigations/consumer-selection-and-red-proof.md).
@@ -19,6 +33,7 @@ Retail and PTR expose supplied `PetInfo` observations through `C_StableInfo.GetA
 
 - `src/c_api/c_stable_info/active_list.rs`: supplied list, validation, admin mutations and projection.
 - `src/c_api/c_stable_info.rs`: profile-scoped getter registration.
+- `src/c_api/c_stable_info/ptr_constants.rs`: declaration-backed PTR selected-consumer prerequisites.
 - `src/lua_api/state/sim_state.rs`, `src/lua_api/state.rs`: environment-local observation storage.
 - `src/lua_api/globals/admin.rs`: admin registration.
 
