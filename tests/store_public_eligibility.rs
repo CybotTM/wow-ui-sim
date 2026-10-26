@@ -78,11 +78,11 @@ fn assert_choice(env: &WowLuaEnv, subscription: bool, game_time: bool, expected:
     let script = format!(
         r#"
         local result, calls, lines = observeStoreHelper()
+        print('original query lines', {line}, lines[{line}], {second}, lines[{second}])
         assert(result == {has_product}, 'helper return for supplied observations')
         assert(calls == '{expected}', 'outbound choice: '..calls)
         assert(lines[{line}], 'original subscription query line')
         assert(not not lines[{second}] == {second_reached}, 'original game-time query reachability')
-        print('original query lines', {line}, {second}, lines[{second}])
     "#,
         has_product = subscription || game_time,
         second = line + 4,
