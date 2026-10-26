@@ -1,0 +1,119 @@
+#![cfg(feature = "client-wrath")]
+
+//! Contracts from native 12340 (laptop answer #7), not modern-client parity.
+
+use crate::common;
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn load_wrath_inventory(env: &WowLuaEnv) {
+    common::load_profile_framexml(env);
+    {
+        let mut state = env.state().borrow_mut();
+        state.player.equipped_items.clear();
+        state.bag_items.clear();
+        state.equippable_items.clear();
+        // Existing explicit equip eligibility, not invented proficiency/level state.
+        state.equippable_items.extend([49803, 49812, 49819]);
+        state.bank_frame_open = false;
+        state
+            .bag_info
+            .get_mut(&5)
+            .expect("default bag metadata includes bank bag 5")
+            .num_slots = 16;
+    }
+    env.exec(
+        r#"
+        -- Catalog fixtures: two rings and a head item, all marked equippable.
+        assert(select(9, GetItemInfo(49803)) == "INVTYPE_FINGER")
+        assert(select(9, GetItemInfo(49812)) == "INVTYPE_FINGER")
+        assert(select(9, GetItemInfo(49819)) == "INVTYPE_HEAD")
+        A_Admin.EquipItem(11, 49812)
+        A_Admin.EquipItem(12, 49803)
+        A_Admin.AddBagItem(0, 1, 49803)
+        A_Admin.AddBagItem(1, 2, 49803)
+        A_Admin.AddBagItem(0, 3, 49819)
+        A_Admin.AddBagItem(5, 1, 49812) -- populated bank bag; banker is closed
+        assert(GetContainerItemID(5, 1) == 49812, "bank candidate exists in modeled storage")
+        GearManagerDialog:Hide()
+        assert(CharacterFinger0Slot:GetID() == 11)
+        assert(type(PaperDollFrameItemFlyout_Show) == "function")
+        assert(type(EquipmentManager_EquipSet) == "function")
+        "#,
+    )
+    .expect("selected Wrath FrameXML and catalog-backed inventory fixture must load");
+}
+
+#[test]
+fn original_wrath_flyout_tracks_slot_candidates_by_location() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("initialize Wrath Lua environment");
+        load_wrath_inventory(&env);
+        env.exec(r##"
+            local function findLocation(items, wantedSlot, wantedBag)
+                for location in pairs(items) do
+                    local player, bank, bags, slot, bag = EquipmentManager_UnpackLocation(location)
+                    if not bank and slot == wantedSlot then
+                        if wantedBag == nil and player and not bags then return location end
+                        if wantedBag ~= nil and bags and bag == wantedBag then return location end
+                    end
+                end
+            end
+            local function readFlyout()
+                local shown, count = {}, 0
+                for _, button in ipairs(PaperDollFrameItemFlyout.buttons) do
+                    local location = button.location
+                    if button:IsShown() and location < PDFITEMFLYOUT_FIRST_SPECIAL_LOCATION then
+                        shown[location] = true
+                        count = count + 1
+                    end
+                end
+                return shown, count
+            end
+
+            -- Invoke the unchanged selected consumer before examining its output.
+            PaperDollFrameItemFlyout_Show(CharacterFinger0Slot)
+            local shown, count = readFlyout()
+            assert(count == 3, "flyout must show other equipped ring and both carried copies")
+            assert(findLocation(shown, 12) and findLocation(shown, 1, 0) and findLocation(shown, 2, 1))
+            assert(not findLocation(shown, 11), "consumer removes currently equipped slot")
+
+            local items = {}
+            local returned = GetInventoryItemsForSlot(11, items)
+            assert(returned == items, "producer returns the supplied populated table")
+            local current = assert(findLocation(items, 11), "current equipped location")
+            local other = assert(findLocation(items, 12), "other equipped location")
+            local carriedA = assert(findLocation(items, 1, 0), "backpack location")
+            local carriedB = assert(findLocation(items, 2, 1), "carried bag location")
+            assert(items[current] == 49812, "producer includes current equipped item")
+            assert(items[other] == 49803, "other ring slot is eligible")
+            assert(items[carriedA] == 49803 and items[carriedB] == 49803,
+                "equal item IDs at different locations are not deduplicated")
+            local total = 0
+            for location, itemID in pairs(items) do
+                assert(type(location) == "number" and type(itemID) == "number")
+                total = total + 1
+            end
+            assert(total == 4, "head item and closed-bank bag item must be absent")
+            assert(not findLocation(items, 3, 0), "equippable head item cannot enter ring slot")
+
+            -- A second observation rejects a frozen catalog and no-op producer.
+            A_Admin.RemoveBagItem(0, 1)
+            local changed = {}
+            assert(GetInventoryItemsForSlot(11, changed) == changed)
+            assert(changed[carriedA] == nil and changed[carriedB] == 49803)
+            PaperDollFrameItemFlyout_Show(CharacterFinger0Slot)
+            local refreshed, remaining = readFlyout()
+            assert(not refreshed[carriedA], "removed bag item must leave flyout")
+            assert(refreshed[other] and refreshed[carriedB])
+            assert(remaining == 2, "flyout refresh retains only live candidates")
+
+            for _, slot in ipairs({-1, 0, 20}) do
+                local outside = {}
+                assert(select("#", GetInventoryItemsForSlot(slot, outside)) == 0,
+                    "out-of-range numeric slots return no results")
+                assert(next(outside) == nil)
+            end
+        "##).expect("native 12340 (laptop answer #7): original Wrath flyout must consume live candidates");
+    }
+}
+
