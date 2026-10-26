@@ -12,11 +12,14 @@ mod token_ui_fixtures;
 
 use keybindings_panels_detail::{frame_is_shown, setup_env};
 use wow_ui_sim::client_profile::{self, ClientProfile};
+#[cfg(not(feature = "client-wrath"))]
 use wow_ui_sim::iced_app::{
     RegistryQuadBatchParams, build_quad_batch_for_registry, compute_frame_rect,
 };
 use wow_ui_sim::lua_api::WowLuaEnv;
+#[cfg(not(feature = "client-wrath"))]
 use wow_ui_sim::render::{QuadBatch, QuadVertex, TextureRequest};
+#[cfg(not(feature = "client-wrath"))]
 use wow_ui_sim::widget::WidgetRegistry;
 
 fn frame_is_visible(env: &WowLuaEnv, frame_name: &str) -> bool {
@@ -24,6 +27,7 @@ fn frame_is_visible(env: &WowLuaEnv, frame_name: &str) -> bool {
     env.eval::<bool>(&code).unwrap_or(false)
 }
 
+#[cfg(not(feature = "client-wrath"))]
 fn build_batch_for_root(env: &WowLuaEnv, root_name: &str) -> wow_ui_sim::render::QuadBatch {
     {
         let mut state = env.state().borrow_mut();
@@ -41,6 +45,7 @@ fn build_batch_for_root(env: &WowLuaEnv, root_name: &str) -> wow_ui_sim::render:
     )
 }
 
+#[cfg(not(feature = "client-wrath"))]
 fn quad_bounds_from_vertices(verts: &[QuadVertex]) -> (f32, f32, f32, f32) {
     let mut min_x = f32::INFINITY;
     let mut min_y = f32::INFINITY;
@@ -55,12 +60,14 @@ fn quad_bounds_from_vertices(verts: &[QuadVertex]) -> (f32, f32, f32, f32) {
     (min_x, min_y, max_x, max_y)
 }
 
+#[cfg(not(feature = "client-wrath"))]
 fn quad_bounds(batch: &QuadBatch, request: &TextureRequest) -> (f32, f32, f32, f32) {
     let start = request.vertex_start as usize;
     let end = start + request.vertex_count as usize;
     quad_bounds_from_vertices(&batch.vertices[start..end])
 }
 
+#[cfg(not(feature = "client-wrath"))]
 fn bounds_match_rect(bounds: (f32, f32, f32, f32), rect: wow_ui_sim::LayoutRect) -> bool {
     let tolerance = 0.1;
     (bounds.0 - rect.x).abs() <= tolerance
@@ -69,6 +76,7 @@ fn bounds_match_rect(bounds: (f32, f32, f32, f32), rect: wow_ui_sim::LayoutRect)
         && (bounds.3 - (rect.y + rect.height)).abs() <= tolerance
 }
 
+#[cfg(not(feature = "client-wrath"))]
 fn spellbook_paged_spells_frame_id(registry: &WidgetRegistry) -> Option<u64> {
     let player_spells_id = registry.get_id_by_name("PlayerSpellsFrame")?;
     let player_spells = registry.get(player_spells_id)?;
@@ -133,6 +141,7 @@ fn close_wrath_panel(env: &WowLuaEnv, key: &str, root: &str) {
     }
 }
 
+#[cfg(not(feature = "client-wrath"))]
 fn spellbook_root_name() -> &'static str {
     if is_wrath() {
         "SpellBookFrame"
@@ -141,6 +150,7 @@ fn spellbook_root_name() -> &'static str {
     }
 }
 
+#[cfg(not(feature = "client-wrath"))]
 fn find_first_visible_spellbook_icon_id(registry: &WidgetRegistry) -> Option<u64> {
     if is_wrath() {
         // INFERRED: native SpellButtonTemplate publishes globally named icons.
@@ -163,6 +173,7 @@ fn find_first_visible_spellbook_icon_id(registry: &WidgetRegistry) -> Option<u64
         .find_map(|view_frame_id| find_visible_spellbook_icon_in_view(registry, view_frame_id))
 }
 
+#[cfg(not(feature = "client-wrath"))]
 fn find_visible_spellbook_icon_in_view(
     registry: &WidgetRegistry,
     view_frame_id: u64,
@@ -179,6 +190,7 @@ fn find_visible_spellbook_icon_in_view(
         .find_map(|item_id| find_visible_spellbook_icon_in_item(registry, item_id))
 }
 
+#[cfg(not(feature = "client-wrath"))]
 fn find_visible_spellbook_icon_in_item(registry: &WidgetRegistry, item_id: u64) -> Option<u64> {
     let item = registry.get(item_id)?;
     if !item.visible || item.width <= 0.0 || item.height <= 0.0 {
@@ -237,6 +249,7 @@ fn keybind_s_opens_spellbook() {
     }
 }
 
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn keybind_s_renders_spellbook_item_icon_quads_on_first_open() {
     test_timeout! {
@@ -275,6 +288,7 @@ fn keybind_s_renders_spellbook_item_icon_quads_on_first_open() {
     }
 }
 
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn keybind_s_keeps_spellbook_backgrounds_below_icons_after_initial_bucket_build() {
     test_timeout! {
