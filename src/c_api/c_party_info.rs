@@ -65,7 +65,7 @@ fn mists_supplied_min_level(state: &mut LuaState) -> LuaResult<u32> {
             "unsupported: C_PartyInfo.GetMinLevel explicit category",
         ));
     }
-    let supplied = borrow_state(state)?.mists_party_min_level;
+    let supplied = crate::lua_api::methods::borrow_state(state)?.mists_party_min_level;
     let minimum = supplied.ok_or_else(|| {
         rilua::runtime_error(
             "native-unknown: C_PartyInfo.GetMinLevel has no supplied active-party minimum or documented default",
