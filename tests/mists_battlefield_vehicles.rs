@@ -1,13 +1,14 @@
 //! Mists-only original consumer. Retail does not publish this supplied-state API.
 #![cfg(feature = "client-mists")]
 
+use std::path::{Path, PathBuf};
 use wow_ui_sim::c_api::c_pvp::battlefield_vehicles::BattlefieldVehicle;
 use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
 use wow_ui_sim::loader::discover_blizzard_addon_closure_for_screen_with_overrides;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 
-fn load_original_vehicle_provider() -> WowLuaEnv {
+fn selected_mists_ui() -> PathBuf {
     assert_eq!(ACTIVE, ClientProfile::Mists);
     let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
     let roots = &["Blizzard_WorldMap"];
@@ -31,11 +32,15 @@ fn load_original_vehicle_provider() -> WowLuaEnv {
         assert_eq!(toc.file_name().unwrap().to_str().unwrap(), expected);
         eprintln!("selected {name}: {}", toc.display());
     }
+    ui
+}
+
+fn load_stock_ui(ui: &Path) -> WowLuaEnv {
     // WorldMap's TOC omits implicit eager dependencies. Use stock discovery order,
     // not hand-loaded Lua or replacement provider methods.
     let env = WowLuaEnv::new().expect("vehicle consumer environment");
     env.set_screen_size(1024.0, 768.0);
-    env.state().borrow_mut().addon_base_paths = vec![ui.clone()];
+    env.state().borrow_mut().addon_base_paths = vec![ui.to_path_buf()];
     for addon in
         wow_ui_sim::loader::discover_blizzard_startup_addons_for_screen(&ui, ScreenKind::Game)
     {
@@ -48,6 +53,11 @@ fn load_original_vehicle_provider() -> WowLuaEnv {
         .expect("original startup addon load");
     }
     env.apply_post_load_workarounds();
+    env
+}
+
+fn load_original_vehicle_provider() -> WowLuaEnv {
+    let env = load_stock_ui(&selected_mists_ui());
     eprintln!(
         "initial load diagnostics: {:?}",
         env.state().borrow().lua_errors
