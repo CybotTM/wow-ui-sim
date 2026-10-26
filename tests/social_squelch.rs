@@ -15,10 +15,15 @@ fn original_lfg_listing_controls_follow_supplied_squelch_transitions() {
     env.state().borrow_mut().social_restrictions.is_squelched = false;
     let loaded = load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_GroupFinder"], &[]);
     assert!(loaded.iter().any(|name| name == "Blizzard_GroupFinder"));
+    let family = if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Mists {
+        "Classic"
+    } else {
+        "Mainline"
+    };
+    env.exec(&format!("expectedLfgSource = 'Blizzard_GroupFinder/{family}/LFGList.lua'")).unwrap();
     env.exec(r#"
         local source = debug.getinfo(LFGListCategorySelection_UpdateNavButtons, "S").source:gsub("\\", "/")
-        local flavor = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Mainline" or "Classic"
-        assert(source:find("Blizzard_GroupFinder/" .. flavor .. "/LFGList.lua", 1, true), source)
+        assert(source:find(expectedLfgSource, 1, true), source)
         assert(LFGListFrame.CategorySelection.FindGroupButton)
         assert(LFGListFrame.CategorySelection.StartGroupButton)
         LFGListFrame.CategorySelection.selectedCategory = 2
