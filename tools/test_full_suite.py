@@ -660,6 +660,54 @@ class CertifiedSuiteTests(unittest.TestCase):
                                                  env=self.env, text=True).strip(), self.sha)
         self.assertEqual((worktree / 'source').read_text(), 'frozen source\n')
 
+    def test_result_waits_for_certified_build_and_test_execution(self):
+        test_binary = self.bin / 'integration-test'
+        write_executable(test_binary,
+                         "import os, pathlib, time\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "(root / 'test-started').touch()\n"
+                         "while not (root / 'test-release').exists(): time.sleep(.01)\n")
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys, time\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "argv = sys.argv[1:]\n"
+                         "(root / 'slot-argv.json').write_text(json.dumps(argv))\n"
+                         "(root / 'build-started').touch()\n"
+                         "while not (root / 'build-release').exists(): time.sleep(.01)\n"
+                         "slot = root / '.cache/wow-ui-sim-targets/slot-2'\n"
+                         "unit = argv[argv.index('--unit') + 1]\n"
+                         "receipt = slot / 'receipts' / (unit + '.json')\n"
+                         "receipt.parent.mkdir(exist_ok=True)\n"
+                         "records = [{'executable': str(root / 'bin/integration-test'), "
+                         "'target': {'name': n, 'kind': [k]}, 'profile': {'test': True}} "
+                         "for n, k in [('integration', 'test'), ('wow_sim', 'lib')]]\n"
+                         "receipt.write_text(json.dumps({'result': 'success', 'returncode': 0, "
+                         "'reported_artifacts': records}))\n")
+        write_executable(self.bin / 'systemctl',
+                         "print('SubState=exited\\nResult=success')\n")
+        process = subprocess.Popen([sys.executable, str(RUNNER), 'run', self.sha,
+                                    '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                   env=self.env, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, text=True, start_new_session=True)
+        self.addCleanup(FullSuiteWorkerTests.stop_worker, process)
+        receipt = self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json'
+        wait_for(self.home / 'build-started', process)
+        self.assertFalse(receipt.exists())
+        (self.home / 'build-release').touch()
+        wait_for(self.home / 'test-started', process)
+        self.assertFalse(receipt.exists())
+        (self.home / 'test-release').touch()
+        stdout, stderr = process.communicate(timeout=10)
+        self.assertEqual(process.returncode, 0, stderr)
+        self.assertTrue(receipt.exists())
+        self.assertTrue(all(step.get('exit', 0) == 0
+                            for step in json.loads(receipt.read_text())['steps'].values()))
+        argv = json.loads((self.home / 'slot-argv.json').read_text())
+        worktree = Path(argv[argv.index('--worktree') + 1])
+        self.assertEqual((worktree / 'source').read_bytes(), b'frozen source\n')
+        self.assertEqual(subprocess.check_output(['git', '-C', str(worktree), 'rev-parse', 'HEAD'],
+                                                 env=self.env, text=True).strip(), self.sha)
+
     def test_submit_sets_memory_limits(self):
         write_executable(self.bin / 'systemd-run',
                          "import json, os, pathlib, sys\n"
