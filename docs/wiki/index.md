@@ -2,6 +2,10 @@
 
 [Shared observation and selected interactions](systems/transmog-availability.md) link the [contract](../specs/transmog-availability.md): Retail/PTR now reuse the Mists supplied Option<bool>, with no guessed modern true default. All eight exact Retail/PTR old-producer RED/shared-producer GREEN pairs pass through original set/custom-set clicks, popup apply and direct query. Seventeen legacy cases and both Mists display cases pass; paired raw stock stays Retail0/0 and PTR122/138 with no key/count change. All seven full-feature all-target checks pass with zero compiler warnings; all74 launch CVar guards are unchanged. No selected direct-query spellbook flow or complete bootstrap acceptance is claimed.
 
+## [2026-10-26] bounded proof | Supplied pet specialization catalog
+
+[Selected consumer and supplied-state contract](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog) distinguish PTR OnLoad1205, Retail Refresh and unselected Forever Standard UI. Five original-consumer RED/GREEN pairs cover PTR installed OnLoad and Retail/PTR Refresh plus unset recovery. PTR stock122/138 has only two attributed unknown-state key replacements; Retail remains0/0. All seven all-target checks have zero compiler warnings;36 CVar guards and27 input hashes are unchanged. Other-profile absence is compiled-not-executed here and deferred to I1 runtime coverage.
+
 ## [2026-10-26] implementation | Supplied voice settings access
 
 [Original audio polling boundary](systems/voice-settings-access.md) links the [contract](../specs/voice-settings-access.md): six declaring profiles, environment-local optional observation and named unset error; Wrath remains absent. Eighteen exact original-consumer GREEN/producer-free RED pairs pass, seven full-feature all-target checks have zero warnings, and all raw stock maps are unchanged at the supplied master baselines. All 98 final launch CVar guards are unchanged. Full device initialization, timer cancellation and unsupplied forecast readiness are not claimed.

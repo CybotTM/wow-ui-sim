@@ -2,6 +2,18 @@
 
 [Model and bounded proof](systems/transmog-availability.md) link the [contract](../specs/transmog-availability.md): the Mists Option<bool> is shared with Retail/PTR and replaces all three modern scalar reads. All eight exact Retail/PTR producer-only RED/shared-producer GREEN pairs pass with byte-identical tests; seventeen legacy cases and both original Mists selectors pass. Paired raw stock stays Retail0/0 and PTR122/138; all74 launch CVar guards are unchanged. All seven full-feature all-target checks pass with zero Cargo JSON/plain compiler warnings; later proof documentation does not change executable inputs. A pre-existing transmog bootstrap nil call is disclosed, not repaired by this lane.
 
+## [2026-10-26] bounded proof | Supplied pet specialization catalog
+
+[Final supplied-catalog proof](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog): five original-consumer RED/GREEN pairs, four supplementary GREEN cases, PTR122/138 with only two attributed unknown-state replacements and byte-identical Retail0/0. Seven all-target checks have zero compiler warnings; formatting/readability,36 CVar guards and27 pinned input hashes pass. Other-profile absence is compiled-not-executed; I1 owns its runtime coverage. No native default/catalog or menu-generation claim is added.
+
+## [2026-10-26] runtime proof | Supplied pet specialization catalog
+
+[Bounded original callbacks](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog): five RED/GREEN pairs and four supplementary GREENs pass; PTR stock122/138 replaces only the nil-member primary/reporter with named-unknown keys, Retail stays0/0. Hidden Refresh skips exactly original GenerateMenu247, not getter/options/SetupMenu execution. Seven all-target gates remain pending; other-profile absence runtime is deferred to I1.
+
+## [2026-10-26] staged | Supplied pet specialization catalog
+
+[Consumer investigation](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog) links the supplied-list contract and records the strict unknown default. The input scaffold passes its targeted test. Getter delivery follows observed original PTR OnLoad1205/Refresh1217 RED; supplied GREEN, Retail and final gates remain pending.
+
 ## [2026-10-26] implementation | Supplied voice settings access
 
 [Model and original callback](systems/voice-settings-access.md) record the six-profile declaration-backed query, unknown-state error and host-supplied observation. All 18 exact original-consumer GREEN/producer-free RED pairs pass with byte-identical tests; Wrath preserves absence. Seven all-target checks have zero warnings, all seven paired raw stock maps equal the supplied master baselines, and 98 final launch CVar guards are unchanged. No native readiness default, device catalog, complete initialization, timer cancellation or unsupplied forecast readiness is inferred.
