@@ -10,6 +10,20 @@
 - [x] Canonical input starts empty, without guessed defaults, map-flag derivation, or a new Lua setter.
 - [x] Tested simulator security: untainted authentic-secret input succeeds; tainted ordinary input succeeds and tainted authentic-secret input rejects.
 
+## Mists original group-provider contract
+
+Pinned Mists `Blizzard_APIDocumentationGenerated/MapDocumentation.lua:168–180` declares `GetMapDisplayInfo(uiMapID: number) -> hideIcons: bool` with `MayReturnNothing = true`. There is no return struct or struct field list. The existing scalar boolean/zero-return projection matches this declaration; no profile-specific return adapter is needed.
+
+- [x] Publish the existing producer on Mists through the same ACTIVE registration selection used by Era/Anniversary, without a second store or a Retail epoch.
+- [x] Supplied hide/show inputs reach the provider and XML pin installed by the normally selected Mists WorldMap OnLoad, including map revisits, live updates and independent environments.
+- [x] Preserve absent/removed zero results and exactly one supplied false boolean. Native input population and malformed-number parity remain excluded.
+
+`tests/mists_map_display.rs` selects `Blizzard_WorldMap_Mists.toc` and `Blizzard_SharedMapDataProviders_Mists.toc`, loads stock startup order, then finds the actual installed group provider and pin. It invokes the original provider `OnMapChanged:22–23`, reaching original pin `OnMapChanged:112–123` and the query at line114. No alternate consumer, fabricated provider, replacement method or vendor edit is used. The populated selector rejects constant true, false, nil and no-op producers on its own. Corrected RED at `f12339876` reaches the original missing call at line114 after identity/provenance assertions pass. GREEN at `29b030439` passes the populated selector and the separate exact-arity preservation selector. Both first list exactly one case. The retained producer-only RED sibling has byte-identical tests.
+
+The selected boundary is after normal Blizzard startup addon loading, before `apply_post_load_workarounds`. Stock CLI startup runs that pass after Blizzard addons and again after third-party addons (`src/bin/wow_sim/startup.rs:424–444`); WorldMap XML OnLoad runs earlier during loading. A later, existing fog workaround overwrites multiple provider pins, including this group pin. That separate defect is excluded; this test does not claim post-workaround group-pin parity.
+
+Mists stock at the executed GREEN is 8 keys/14 occurrences versus the current base 10/16, with only the query/ScriptErrors pair removed and no additions or common-key count changes. The older 12/18 reference predates social-squelch. Mists/Retail/Era/Anniversary `cargo check --all-targets` at `3923a7699` all pass with zero warnings in Cargo JSON and plain output. Workspace formatting, explicit test formatting and changed-Rust readability pass; later documentation-only updates preserve those Rust inputs.
+
 ## How it works
 
 - [Lua API and simulator state](../lua-api.md)
@@ -20,7 +34,7 @@
 
 ## Current feature applicability
 
-The `retail-12-1-0` method-table entry preserves existing epoch publication. `client-retail` includes it; `client-ptr` includes `retail-12-1-5`, which includes it. A separate runtime `client_profile::ACTIVE` decision publishes the same producer on Era and Anniversary without enabling a Retail epoch. Earlier epoch features alone do not enable the getter on other profiles. Cached Retail/PTR declarations establish source applicability; separate PTR runtime receipts below establish bounded simulator execution, not earlier-profile/native parity.
+The `retail-12-1-0` method-table entry preserves existing epoch publication. `client-retail` includes it; `client-ptr` includes `retail-12-1-5`, which includes it. A separate runtime `client_profile::ACTIVE` decision publishes the same producer on Mists, Era and Anniversary without enabling a Retail epoch. Earlier epoch features alone do not enable the getter on other profiles. Cached Retail/PTR declarations establish source applicability; separate PTR runtime receipts below establish bounded simulator execution, not earlier-profile/native parity.
 
 ## CF-2 D — static Classic producer (2026-10-24)
 
