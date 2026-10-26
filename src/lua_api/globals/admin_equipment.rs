@@ -17,6 +17,10 @@ pub(super) fn equip_item(state: &mut LuaState) -> LuaResult<u32> {
     let slot = i32::from_stack(state, 1)?;
     let item_id = u32::from_stack(state, 2)?;
     let mut st = borrow_state_mut(state)?;
+    crate::c_api::item_upgrade_eligibility::discard_location(
+        &mut st,
+        crate::c_api::item_upgrade_eligibility::ItemSlot::Equipment(slot),
+    );
     st.player.equipped_items.insert(
         slot,
         EquippedItem {
@@ -33,6 +37,10 @@ pub(super) fn unequip_item(state: &mut LuaState) -> LuaResult<u32> {
     use crate::lua_api::state_types::CharacterStats;
     let slot = i32::from_stack(state, 1)?;
     let mut st = borrow_state_mut(state)?;
+    crate::c_api::item_upgrade_eligibility::discard_location(
+        &mut st,
+        crate::c_api::item_upgrade_eligibility::ItemSlot::Equipment(slot),
+    );
     st.player.equipped_items.remove(&slot);
     st.player.stats = CharacterStats::compute(&st.player.equipped_items, st.player.class_index);
     Ok(0)

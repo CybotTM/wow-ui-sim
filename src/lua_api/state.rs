@@ -390,6 +390,7 @@ macro_rules! build_empty_sim_state {
             action_ui_buttons: $collections.action_ui_buttons,
             cursor_item: $runtime.cursor_item,
             container_actions: Default::default(),
+            item_upgrade_eligibility: Default::default(),
             loading_addon_index: $runtime.loading_addon_index,
             loading_addon_stack: $runtime.loading_addon_stack,
             executing_addon_index: $runtime.executing_addon_index,

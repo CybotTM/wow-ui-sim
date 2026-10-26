@@ -1,3 +1,7 @@
+## [2026-10-26] staged | Supplied item-upgrade eligibility
+
+[Environment-local location observations](systems/item-upgrade-eligibility.md) link the [contract](../specs/item-upgrade-eligibility.md): real ItemLocation resolution, same-ID instance distinction, cursor/bag/equipment movement and explicit native-unknown diagnostics. Restored generic ItemUtil fixtures use a supplied shown-frame context, not an original upgrade window. Runtime proof is pending.
+
 ## [2026-10-26] implementation | PTR SwingTimer declarations
 
 [Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) links the [contract](../specs/ptr-edit-mode-declarations.md): all seven setting identifiers, three visibility choices and their metadata pass byte-identical original Scale-boundary RED/full-constructor GREEN. Stock stays216/282 with both replacement raw keys traced to the absent SwingTimer system key; that next boundary is unfixed. PTR/Retail/Era separate all-target receipts have zero warnings; formatting/readability pass. Other profiles keep their existing declaration paths.

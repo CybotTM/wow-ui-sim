@@ -480,6 +480,7 @@ pub struct SimState {
     pub action_ui_buttons: Vec<(u64, u32)>,
     pub cursor_item: Option<CursorInfo>,
     pub container_actions: crate::c_api::container_actions::ContainerActions,
+    pub item_upgrade_eligibility: crate::c_api::item_upgrade_eligibility::ItemUpgradeEligibility,
     pub loading_addon_index: Option<u16>,
     pub loading_addon_stack: Vec<u16>,
     pub executing_addon_index: Option<u16>,

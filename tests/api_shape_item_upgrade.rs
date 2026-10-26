@@ -25,13 +25,23 @@ fn load_original_item_util() -> WowLuaEnv {
     assert!(toc.allows_screen(ScreenKind::Game));
     assert!(!toc.is_game_type_restricted());
     assert!(toc.files.iter().any(|entry| entry == "ItemUtil.lua"));
-    eprintln!("selected generic ItemUtil: {} {:?}", toc_path.display(), toc.metadata);
+    eprintln!(
+        "selected generic ItemUtil: {} {:?}",
+        toc_path.display(),
+        toc.metadata
+    );
     let env = new_blizzard_addon_env(&ui);
     let loaded = load_blizzard_addon_closure_into_env(
-        &env, &ui, &["Blizzard_ObjectAPI", "Blizzard_FrameXMLUtil"], &[],
+        &env,
+        &ui,
+        &["Blizzard_ObjectAPI", "Blizzard_FrameXMLUtil"],
+        &[],
     );
     assert!(loaded.iter().any(|name| name == "Blizzard_FrameXMLUtil"));
-    eprintln!("unfiltered closure diagnostics: {:?}", env.state().borrow().lua_errors);
+    eprintln!(
+        "unfiltered closure diagnostics: {:?}",
+        env.state().borrow().lua_errors
+    );
     env.exec(r#"
         local info = debug.getinfo(ItemButtonUtil.GetItemContextMatchResultForItem, 'S')
         local suffix = 'Blizzard_FrameXMLUtil/ItemUtil.lua'
@@ -52,14 +62,14 @@ fn load_original_item_util() -> WowLuaEnv {
         equipmentLocation = ItemLocation:CreateFromEquipmentSlot(1)
         function CheckUpgrade(location, expected)
             assert(C_Item.DoesItemExist(location), 'fixture location must resolve')
+            local results = ItemButtonUtil.ItemContextMatchResult
+            local result = ItemButtonUtil.GetItemContextMatchResultForItem(location)
+            assert(result == (expected and results.Match or results.Mismatch), 'original ItemUtil supplied match')
             local function checkResult(...)
                 assert(select('#', ...) == 1 and type((...)) == 'boolean', 'documented boolean arity')
                 assert((...) == expected, 'supplied direct eligibility')
             end
             checkResult(C_ItemUpgrade.CanUpgradeItem(location))
-            local results = ItemButtonUtil.ItemContextMatchResult
-            local result = ItemButtonUtil.GetItemContextMatchResultForItem(location)
-            assert(result == (expected and results.Match or results.Mismatch), 'original ItemUtil supplied match')
         end
         function CheckUpgradeUnknown(location)
             local ok, reason = pcall(C_ItemUpgrade.CanUpgradeItem, location)
@@ -109,6 +119,15 @@ fn original_item_util_tracks_supplied_eligibility_movement_removal_and_isolation
             CheckUpgradeUnknown(movedLocation)
             A_Admin.ClearItemUpgradeEligibility()
             CheckUpgradeUnknown(secondLocation)
+            A_Admin.SetItemUpgradeEligibility(secondLocation, true)
+            A_Admin.RemoveBagItem(0, 1)
+            C_Container.PickupContainerItem(0, 2)
+            PutItemInBackpack()
+            CheckUpgrade(firstLocation, true)
+            C_Container.PickupContainerItem(0, 1)
+            DeleteCursorItem()
+            A_Admin.AddBagItem(0, 1, 19019, 1)
+            CheckUpgradeUnknown(firstLocation)
         "#).expect("supplied location eligibility must drive original ItemUtil through lifecycle");
         second.exec(r#"
             CheckUpgradeUnknown(firstLocation)
@@ -122,6 +141,8 @@ fn original_item_util_tracks_supplied_eligibility_movement_removal_and_isolation
             assert(ItemButtonUtil.GetItemContextMatchResultForItem(firstLocation) == ItemButtonUtil.ItemContextMatchResult.DoesNotApply)
         "#).expect("second environment has independent supplied eligibility");
         first.exec("CheckUpgradeUnknown(secondLocation)").unwrap();
+        assert!(first.state().borrow().lua_errors.is_empty());
+        assert!(second.state().borrow().lua_errors.is_empty());
     });
 }
 
@@ -147,6 +168,13 @@ fn item_upgrade_unresolved_and_unsupplied_inputs_report_native_unknown() {
             CheckUpgradeUnknown(firstLocation)
             A_Admin.AddBagItem(0, 1, 19019, 1)
             CheckUpgradeUnknown(firstLocation)
+            A_Admin.EquipItem(1, 19019)
+            A_Admin.SetItemUpgradeEligibility(equipmentLocation, true)
+            CheckUpgrade(equipmentLocation, true)
+            A_Admin.UnequipItem(1)
+            CheckUpgradeUnknown(equipmentLocation)
+            A_Admin.EquipItem(1, 19019)
+            CheckUpgradeUnknown(equipmentLocation)
         "#).expect("simulator errors do not invent native validation or default policy");
     });
 }

@@ -1,0 +1,38 @@
+# Supplied item-upgrade eligibility
+
+`src/c_api/item_upgrade_eligibility.rs` supplies eligibility for real bag and equipment locations. It does not calculate native upgrade policy. See [the model](../wiki/systems/item-upgrade-eligibility.md).
+
+## What it must do
+
+- [ ] Publish `C_ItemUpgrade.CanUpgradeItem` on Retail, PTR, Forever, Mists, Era and Anniversary only; leave the excluded Wrath path unchanged.
+- [ ] Resolve an actual ItemLocation through existing inventory/bag state and return exactly one supplied boolean. Two instances of the same item ID may have different eligibility.
+- [ ] `A_Admin.SetItemUpgradeEligibility(location, boolean)` supplies an observation for the existing item. `ClearItemUpgradeEligibility(location)` removes it; omitted/nil location clears all observations in that environment.
+- [ ] Move observations through bag/cursor/equipment swaps and backpack placement. Removal, deletion and admin replacement must not leak observations to a replacement instance, including one with the same item ID.
+- [ ] Report `native-unknown: C_ItemUpgrade.CanUpgradeItem has no supplied eligibility or documented default for this location` for unsupplied, empty or unsupported locations. This is a simulator diagnostic, not native validation/error behavior.
+
+Pinned declarations: `Blizzard_APIDocumentationGenerated/ItemUpgradeDocumentation.lua:11–24` on Retail/PTR/Forever and `:11–23` on Mists/Era/Anniversary. Required `ItemLocation` argument; one non-nil boolean result. Generic `Blizzard_FrameXMLUtil/ItemUtil.lua` query lines rechecked on 2026-10-26: Retail147, PTR/Forever217, Mists/Era/Anniversary142. Forever's Camelot utility is not this consumer.
+
+## How it works
+
+- [Environment-local observations and transfer boundary](../wiki/systems/item-upgrade-eligibility.md).
+
+## Implementation inventory
+
+- `src/c_api/item_upgrade_eligibility.rs`: supplied observation store, native query, admin input, transfer helpers.
+- `src/c_api/container_inventory.rs`: existing bag/equipment/cursor transfer lifecycle.
+- `src/lua_api/globals/admin_actionbars_bags.rs`, `admin_equipment.rs`, `inventory_verbs.rs`: existing inventory mutation boundaries.
+- `src/lua_api/state/sim_state.rs`: environment-local state.
+
+## Tests asserting this spec
+
+- `tests/api_shape_item_upgrade.rs`: original generic ItemUtil match/mismatch through two same-ID locations, changes, moves, removal/replacement, clear and independent environments; documented boolean arity and explicit unsupported-input diagnostics.
+
+The normally selected FrameXMLUtil/ObjectAPI closure is loaded without source overrides. A plain shown `ItemUpgradeFrame` supplies the context input. It is not an original upgrade window. No Blizzard function is replaced. The old boolean-only contract is preservation, not eligibility acceptance.
+
+## Known gaps (current cycle)
+
+- [ ] Execute byte-identical original-consumer RED/GREEN on every declaring profile, bound stock pairs and seven zero-warning canonical checks.
+
+## Out of scope
+
+Native eligibility policy, currencies, upgrade execution, invalid-input semantics, persistence and full upgrade-window acceptance. Era/Anniversary do not select the Mists upgrade window; tests do not force-load it. Wrath and equipment-set lock behavior are excluded. Split stacks require fresh supplied observations for the new cursor stack; no native eligibility inheritance policy is inferred.
