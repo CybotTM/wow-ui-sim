@@ -3,6 +3,47 @@
 use std::path::PathBuf;
 use std::process::Command;
 
+use crate::common::blizzard_addon_harness::{
+    blizzard_ui_dir, load_blizzard_addon_closure_into_env, new_blizzard_addon_env,
+};
+
+#[test]
+fn original_guild_bank_tabs_follow_empty_supplied_empty_catalog() {
+    let ui = blizzard_ui_dir();
+    let env = new_blizzard_addon_env(&ui);
+    env.state().borrow_mut().world.guild_name = None;
+    for (name, toc) in wow_ui_sim::loader::discover_blizzard_addons_for_screen(
+        &ui,
+        wow_ui_sim::screen::ScreenKind::Game,
+    ) {
+        wow_ui_sim::loader::load_addon(&env.loader_env(), &toc)
+            .unwrap_or_else(|error| panic!("load {name}: {error}"));
+    }
+    let loaded = load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_GuildBankUI"], &[]);
+    assert!(loaded.iter().any(|name| name == "Blizzard_GuildBankUI"));
+    env.exec(r##"
+        local source = debug.getinfo(GuildBankFrame.UpdateTabs, "S").source:gsub("\\", "/")
+        assert(source:find("Blizzard_GuildBankUI/TBC/Blizzard_GuildBankUI.lua", 1, true), source)
+        assert(not IsGuildLeader(), "exclude the buy-new-tab branch")
+        GuildBankFrame.mode = "bank"
+        GuildBankFrame:UpdateTabs()
+        assert(not GuildBankFrame.BankTabs[1]:IsShown(), "empty catalog must hide tab 1")
+        assert(GetNumGuildBankTabs() == 0)
+        A_Admin.AddGuildBankTab("Supplied materials", "Interface\\Icons\\INV_Misc_Bag_10", true, false, 3, 2, true)
+        GuildBankFrame:UpdateTabs()
+        assert(GuildBankFrame.BankTabs[1]:IsShown(), "supplied catalog must show tab 1")
+        assert(GuildBankFrame.BankTabs[1].Button.tooltip == "Supplied materials")
+        assert(not GuildBankFrame.BankTabs[2]:IsShown(), "only supplied tabs exist")
+        local name, icon, view, deposit, withdrawals, remaining, filtered = GetGuildBankTabInfo(1)
+        assert(name == "Supplied materials" and icon == "Interface\\Icons\\INV_Misc_Bag_10")
+        assert(view == true and deposit == false and withdrawals == 3 and remaining == 2 and filtered == true)
+        A_Admin.ClearGuildBankTabs()
+        GuildBankFrame:UpdateTabs()
+        assert(not GuildBankFrame.BankTabs[1]:IsShown(), "cleared catalog must hide tab 1")
+        assert(select("#", GetGuildBankTabInfo(1)) == 0)
+    "##).expect("original Mists guild-bank tab setup must project the supplied catalog");
+}
+
 fn wow_sim_binary() -> PathBuf {
     std::env::var_os("CARGO_BIN_EXE_wow-sim")
         .map(PathBuf::from)
@@ -28,6 +69,7 @@ fn mists_bank_and_guild_bank_support_storage_flow() {
             A_Admin.AddBagItem(0, 1, 6948, 1)
             A_Admin.AddBagItem(-1, 1, 6948, 1)
             A_Admin.ClearGuildBank()
+            A_Admin.AddGuildBankTab("General", [[Interface\Icons\INV_Misc_Bag_10]], true, true, -1, -1, false)
             A_Admin.AddGuildBankItem(1, 1, 6948, 1)
 
             FireEvent("BANKFRAME_OPENED")

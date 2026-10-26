@@ -9,8 +9,6 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, RustFn, Val};
 
 const MAX_BANK_BAG_SLOTS: i32 = 7;
-const GUILD_BANK_TAB_NAME: &str = "General";
-const GUILD_BANK_TAB_ICON: &str = "Interface\\Icons\\INV_Misc_Bag_10";
 
 pub fn register_guild_tabard_files(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetGuildTabardFiles", get_guild_tabard_files)?;
@@ -136,24 +134,27 @@ fn set_current_guild_bank_tab(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_num_guild_bank_tabs(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(1.0));
+    let count = borrow_state(state)?.guild_bank_tabs.len();
+    state.push(Val::Num(count as f64));
     Ok(1)
 }
 
 fn get_guild_bank_tab_info(state: &mut LuaState) -> LuaResult<u32> {
-    let tab = i32::from_stack(state, 1).unwrap_or(1);
-    if tab != 1 {
+    let tab = i32::from_stack(state, 1)?;
+    let Some(index) = usize::try_from(tab).ok().and_then(|tab| tab.checked_sub(1)) else {
         return Ok(0);
-    }
-    let name = create_string(state, GUILD_BANK_TAB_NAME);
-    let icon = create_string(state, GUILD_BANK_TAB_ICON);
+    };
+    let entry = borrow_state(state)?.guild_bank_tabs.get(index).cloned();
+    let Some(entry) = entry else { return Ok(0) };
+    let name = create_string(state, &entry.name);
+    let icon = create_string(state, &entry.icon);
     state.push(name);
     state.push(icon);
-    state.push(Val::Bool(true));
-    state.push(Val::Bool(true));
-    state.push(Val::Num(-1.0));
-    state.push(Val::Num(-1.0));
-    state.push(Val::Bool(false));
+    state.push(Val::Bool(entry.is_viewable));
+    state.push(Val::Bool(entry.can_deposit));
+    state.push(Val::Num(entry.withdrawal_limit as f64));
+    state.push(Val::Num(entry.remaining_withdrawals as f64));
+    state.push(Val::Bool(entry.is_filtered));
     Ok(7)
 }
 

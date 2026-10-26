@@ -5,6 +5,10 @@
 ## [2026-10-24] static producer | CF-2 selected-unit aura cleanup
 
 [Consumer and contradiction proof](investigations/consumer-selection-and-red-proof.md#cf-2-selected-unit-aura-cleanup) links the [contract](../specs/clear-blocked-auras.md): Retail/PTR clear the existing effective unit block set in place; three unchanged original-consumer selectors discriminate constant/no-op/wrong-unit/global clears. Nil rejection stays a separate authorized non-native policy. No build, test, slot or native-parity proof.
+## [2026-10-26] proof | Complete PTR Edit Mode display-info
+
+[Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.
+
 ## [2026-10-26] implementation | PTR SwingTimer declarations
 
 [Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) links the [contract](../specs/ptr-edit-mode-declarations.md): all seven setting identifiers, three visibility choices and their metadata pass byte-identical original Scale-boundary RED/full-constructor GREEN. Stock stays216/282 with both replacement raw keys traced to the absent SwingTimer system key; that next boundary is unfixed. PTR/Retail/Era separate all-target receipts have zero warnings; formatting/readability pass. Other profiles keep their existing declaration paths.
@@ -20,6 +24,14 @@
 ## [2026-10-26] implementation | Supplied active loss-of-control state
 
 [Active-effect model and proof](systems/lua-api.md#active-loss-of-control-state) link the [contract](../specs/active-loss-of-control.md): empty per-unit state, declared record shapes, explicit admin input and executed Wrath absence. Byte-identical Retail original-consumer RED/GREEN and the existing event overlay pass. All seven raw stock maps are unchanged, and all seven separate all-target checks have zero compiler warnings. PTR consumer proof remains explicitly deferred to the upstream display-info initialization chain; no failed OnLoad step is replaced.
+
+## [2026-10-26] implementation | Mists supplied LFR availability
+
+[Environment-local input and original PVEFrame](systems/mists-lfr-availability.md) link the [contract](../specs/mists-lfr-availability.md). Byte-identical original-line RED and supplied-state GREEN cover ten observations, two environments and unset recovery. Stock remains 6/12 with exactly two missing-function→named missing-input replacements. The exact scenario successor is outside this slice. Mists/Retail/Era all-target checks have zero warnings; formatting and changed-line readability pass.
+
+## [2026-10-26] proof | Supplied query catalogs
+
+[Invented-default audit](investigations/invented-query-defaults.md) distinguishes the unresolved, unchanged transmog filter bound from supplied empty-by-default Mists bank and RAF catalogs. Original-consumer RED/GREEN, unchanged four-profile stock maps and seven zero-warning all-target checks pass. The old Mists storage flow retains all assertions and a reproduced pre-existing missing TriggerTutorial blocker; the [bank](../specs/guild-bank-tab-catalog.md) and [RAF](../specs/raf-version-catalog.md) contracts state that limit.
 
 ## [2026-10-25] implementation | PTR Edit Mode declarations
 
