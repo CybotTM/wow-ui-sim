@@ -77,12 +77,14 @@ fn original_world_map_keeps_non_fog_pin_callback_after_each_pass() {
                 .borrow_mut()
                 .map_display_hide_icons
                 .insert(map, hidden);
+            let errors_before = env.state().borrow().lua_errors.len();
             env.exec(&format!(
                 "WorldMapFrame.mapID = {map}; GroupProviderUnderTest:OnMapChanged(); \
                  assert(GroupProviderUnderTest.pin:IsShown() == {}, 'original visibility');",
                 !hidden
             ))
             .expect("original group provider still consumes supplied visibility");
+            assert_eq!(env.state().borrow().lua_errors.len(), errors_before);
             if !hidden {
                 let actual: i32 = env
                     .eval("return GroupProviderUnderTest.pin:GetUiMapID()")
@@ -94,7 +96,7 @@ fn original_world_map_keeps_non_fog_pin_callback_after_each_pass() {
 }
 
 #[test]
-fn original_world_map_keeps_highlight_pin_callback_after_each_pass() {
+fn original_world_map_does_not_add_fog_callback_to_highlight_pin() {
     let env = load_original_world_map();
     env.exec(
         r#"
@@ -103,7 +105,7 @@ fn original_world_map_keeps_highlight_pin_callback_after_each_pass() {
             'original WorldMap highlight pin')
         assert(HighlightPinUnderTest.OnLoad == MapHighlightPinMixin.OnLoad, 'original highlight mixin')
         OriginalHighlightMapChanged = HighlightPinUnderTest.OnMapChanged
-        assert(type(OriginalHighlightMapChanged) == 'function', 'inherited map callback')
+        assert(OriginalHighlightMapChanged == nil, 'highlight has no map callback')
         "#,
     )
     .unwrap();
@@ -112,15 +114,16 @@ fn original_world_map_keeps_highlight_pin_callback_after_each_pass() {
         env.exec(
             r#"
             assert(HighlightPinUnderTest.OnMapChanged == OriginalHighlightMapChanged,
-                'post-load fog workaround replaced original highlight OnMapChanged')
+                'post-load fog workaround added highlight OnMapChanged')
             assert(HighlightPinUnderTest.TryFindingBestFogOfWarID == nil, 'highlight acquired fog refresh')
-            HighlightPinUnderTest:OnMapChanged()
             "#,
         )
-        .expect("original highlight callback survives and remains callable");
+        .expect("highlight pin must not acquire fog callbacks");
     }
 }
 
+// Classic WorldMap source does not install the fog provider.
+#[cfg(feature = "client-retail")]
 #[test]
 fn original_world_map_fog_pin_still_refreshes_and_clears_missing_fog() {
     let env = load_original_world_map();
