@@ -331,6 +331,8 @@ fn unit_is_party_leader(state: &mut LuaState) -> LuaResult<u32> {
             );
             is_group_leader(&sim, &leader_token)
                 && guid == super::super::unit_misc::guid_for_unit(&sim, &leader_token)
+        } else if matches!(unit.as_str(), "pet" | "vehicle") {
+            false
         } else {
             is_group_leader(&sim, &unit)
         }
