@@ -62,13 +62,14 @@ Before Cargo starts, the worker checks `.owner` and prunes when allocated disk
 usage exceeds `--slot-cap-gib` (default 60 GiB), stopping below 80% of the cap
 (default 48 GiB). Units are ordered by their newest member mtime. Fingerprints,
 matching deps files, build directories, and incremental sessions are removed
-together. Because Cargo uses different package/target names and incremental
-hashes, connected package/target aliases within each build-profile directory
-are coalesced across hashes. This favors integrity over fine-grained eviction.
+together per name/hash within each build-profile directory. Fingerprint
+package/target aliases are joined only at the same hash. Independently hashed
+incremental directories are separate cache units; different revisions are not
+coalesced.
 
 Units referenced by `.verified-source-identity.json` or modified within
 `--prune-recent-hours` (default 2) are retained. Protected units and unclassified
-files can leave usage above the cap; this is not a hard disk quota. Allocated
+files can prevent reaching the cap; the summary reports the remaining bytes. Allocated
 bytes count hard links once; predicted reclaimed bytes exclude links retained
 outside the unit. Each removal prints a JSON manifest with paths and bytes to
 the service log. Receipts and source-identity files are never removed.

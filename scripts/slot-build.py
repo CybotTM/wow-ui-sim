@@ -37,8 +37,8 @@ def disk_inventory(slot):
 
 
 def artifact_units(slot, entries):
-    # Incremental hashes differ from deps hashes, and fingerprint package names
-    # differ from bin/test names. Coalesce aliases rather than delete partial units.
+    # Fingerprint package names can differ from bin/test names. Join aliases
+    # only at the same hash; incremental's independent hashes remain separate.
     parents, members = {}, {}
 
     def root(key):
@@ -47,8 +47,8 @@ def artifact_units(slot, entries):
             parents[key] = root(parents[key])
         return parents[key]
 
-    def alias(base, name):
-        key = (base, name.replace("-", "_"))
+    def alias(base, name, artifact_hash):
+        key = (base, name.replace("-", "_"), artifact_hash)
         return root(key)
 
     prefixes = ("test-integration-test-", "test-example-", "test-bench-",
@@ -65,13 +65,13 @@ def artifact_units(slot, entries):
         if kind == "deps" and name.startswith("lib"):
             name = name[3:]
         base = path.parent.parent
-        key = alias(base, name)
+        key = alias(base, name, match[2])
         if kind == ".fingerprint" and not path.is_symlink():
             for marker in path.iterdir():
                 marker_name = marker.name.removeprefix("dep-").removesuffix(".json")
                 for prefix in prefixes:
                     if marker_name.startswith(prefix):
-                        other = alias(base, marker_name[len(prefix):])
+                        other = alias(base, marker_name[len(prefix):], match[2])
                         parents[root(other)] = root(key)
                         break
         members[path] = key
