@@ -137,7 +137,7 @@ class CertifiedSuiteTests(unittest.TestCase):
                          "receipt.write_text(json.dumps({'result': 'success', 'returncode': 0, "
                          "'reported_artifacts': records}))\n")
         write_executable(self.bin / 'systemctl',
-                         "print('SubState=exited\\nResult=success')\n")
+                         "print('ActiveState=inactive\\nSubState=exited\\nResult=success')\n")
         write_executable(self.bin / 'systemd-run',
                          "import json, os, pathlib, subprocess, sys\n"
                          "(pathlib.Path(os.environ['HOME']) / 'test-unit.json').write_text(json.dumps(sys.argv[1:]))\n"
@@ -193,7 +193,7 @@ class CertifiedSuiteTests(unittest.TestCase):
                          "'target': {'name': n, 'kind': [k]}} for n, k in "
                          "[('integration', 'test'), ('wow_ui_sim', 'lib')]]\n"
                          "receipt.write_text(json.dumps({'result': 'success', 'returncode': 0, 'reported_artifacts': records}))\n")
-        write_executable(self.bin / 'systemctl', "print('SubState=exited\\nResult=success')\n")
+        write_executable(self.bin / 'systemctl', "print('ActiveState=inactive\\nSubState=exited\\nResult=success')\n")
         write_executable(self.bin / 'systemd-run',
                          "import subprocess, sys\nsys.exit(subprocess.call(sys.argv[sys.argv.index('--') + 1:]))\n")
         process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
@@ -217,9 +217,9 @@ class CertifiedSuiteTests(unittest.TestCase):
                          "receipt.parent.mkdir(exist_ok=True)\n"
                          "receipt.write_text(json.dumps({'result': 'stale-artifacts', 'returncode': 0, 'dep_info_errors': ['bad input']}))\n")
         write_executable(self.bin / 'systemctl',
-                         "print('SubState=exited\\nResult=success')\n")
+                         "print('ActiveState=inactive\\nSubState=exited\\nResult=success')\n")
         write_executable(self.bin / 'systemctl',
-                         "print('SubState=failed\\nResult=exit-code')\n")
+                         "print('ActiveState=failed\\nSubState=failed\\nResult=exit-code')\n")
         result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
                                 env=self.env, capture_output=True, text=True, timeout=10)

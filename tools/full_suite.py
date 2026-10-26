@@ -5,6 +5,7 @@ import fcntl
 import hashlib
 import json
 import os
+import random
 import re
 import subprocess
 import sys
@@ -87,6 +88,25 @@ def release_slot(target, sha, profile, owner):
     claim.replace(dest / f"{target.name}.owner.released")
 
 
+class SlotStateUnknown(Exception):
+    pass
+
+
+def show_unit(unit, slot):
+    for attempt in range(3):
+        try:
+            state = subprocess.run(["systemctl", "--user", "show", unit, "-p", "LoadState", "-p", "ActiveState", "-p", "SubState", "-p", "Result"], capture_output=True, text=True)
+        except OSError:
+            state = None
+        if state is not None and state.returncode == 0:
+            fields = dict(line.split("=", 1) for line in state.stdout.splitlines() if "=" in line)
+            if fields.get("ActiveState") or fields.get("LoadState") == "not-found":
+                return fields
+        if attempt < 2:
+            time.sleep((0.1 * 2 ** attempt) + random.uniform(0, 0.05))
+    raise SlotStateUnknown(f"slot {slot} retained: unit {unit} state unknown")
+
+
 def build(checkout, target, sha, profile, jobs, owner, log):
     slot = target.name.removeprefix("slot-")
     unit = f"full-suite-build-{sha[:12]}-{profile}-{time.time_ns()}"
@@ -102,11 +122,8 @@ def build(checkout, target, sha, profile, jobs, owner, log):
         raise ValueError(f"slot-build guard rejected: {proc.stderr.strip() or proc.stdout.strip()}")
     receipt = target / "receipts" / f"{unit}.json"
     while True:
-        state = subprocess.run(["systemctl", "--user", "show", unit, "-p", "SubState", "-p", "Result"], capture_output=True, text=True)
-        if state.returncode:
-            raise ValueError(f"slot-build status failed: {state.stderr.strip()}")
-        fields = dict(line.split("=", 1) for line in state.stdout.splitlines() if "=" in line)
-        if fields.get("SubState") in ("exited", "failed", "dead"):
+        fields = show_unit(unit, slot)
+        if fields.get("ActiveState") in ("inactive", "failed") or fields.get("LoadState") == "not-found":
             if fields.get("Result") != "success":
                 detail = ""
                 if receipt.exists():
@@ -114,6 +131,13 @@ def build(checkout, target, sha, profile, jobs, owner, log):
                     detail = f": {failed_receipt.get('result')}: {failed_receipt.get('dep_info_errors')}"
                 raise ValueError(f"slot-build unit failed: {fields.get('Result')}{detail}")
             break
+        if fields.get("SubState") == "exited":
+            try:
+                stopped = subprocess.run(["systemctl", "--user", "stop", unit], capture_output=True, text=True)
+            except OSError as error:
+                raise SlotStateUnknown(f"slot {slot} retained: unit {unit} state unknown") from error
+            if stopped.returncode:
+                raise SlotStateUnknown(f"slot {slot} retained: unit {unit} state unknown")
         time.sleep(1)
     if not receipt.exists():
         raise ValueError("slot-build certification receipt missing")
@@ -189,6 +213,7 @@ def run(ref, build_jobs, target_dir, profile="retail"):
         output_path = RESULTS / f"{sha}-{profile}.json"
         output_path.unlink(missing_ok=True)
         owner = None
+        exit_code = 0
         with open(RESULTS / f"{sha}-{profile}.log", "w") as log:
             try:
                 checkout = prepare_checkout(sha)
@@ -209,6 +234,12 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                         result["steps"][name], output = run_step(name, command, checkout, log, env)
                         result["failures"][name] = sorted(set(FAILED.findall(output)))
                 result["status"] = "FAILED" if any(step.get("exit", 0) for step in result["steps"].values()) else "PASSED"
+            except SlotStateUnknown as error:
+                result["status"] = "FAILED"
+                result["error"] = str(error)
+                log.write(f"FAILED: {error}\n")
+                owner = None  # Keep the live or unknown claim for reconciliation.
+                exit_code = 1
             except (OSError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as error:
                 result["status"] = "FAILED"
                 result["error"] = str(error)
@@ -226,6 +257,7 @@ def run(ref, build_jobs, target_dir, profile="retail"):
         if ref in ("origin/master", "master"):
             (RESULTS / f"master-latest-{profile}.json").write_text(json.dumps(result, indent=2) + "\n")
         print(json.dumps(result, indent=2))
+        return exit_code
 
 
 def submit(ref, build_jobs, target_dir, profile="retail"):
@@ -272,7 +304,7 @@ if __name__ == "__main__":
     else:
         try:
             if args.action == "run":
-                run(args.ref, args.build_jobs, args.target_dir, args.profile)
+                raise SystemExit(run(args.ref, args.build_jobs, args.target_dir, args.profile))
             else:
                 submit(args.ref, args.build_jobs, args.target_dir, args.profile)
         except ValueError as error:
