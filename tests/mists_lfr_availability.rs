@@ -10,9 +10,8 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
-fn load_original_pve_frame() -> WowLuaEnv {
+fn assert_selected_group_finder(ui: &std::path::Path) {
     assert_eq!(ACTIVE, ClientProfile::Mists);
-    let ui = blizzard_ui_dir();
     let path = find_toc_file(&ui.join("Blizzard_GroupFinder")).unwrap();
     assert_eq!(
         path.file_name().unwrap(),
@@ -29,6 +28,11 @@ fn load_original_pve_frame() -> WowLuaEnv {
         path.display(),
         toc.metadata
     );
+}
+
+fn load_original_pve_frame() -> WowLuaEnv {
+    let ui = blizzard_ui_dir();
+    assert_selected_group_finder(&ui);
     let env = new_blizzard_addon_env(&ui);
     assert_eq!(env.state().borrow().lfr_availability, None);
     wow_ui_sim::xml::register_intrinsic_templates();
