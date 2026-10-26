@@ -461,6 +461,27 @@ pub fn dispatch_key_binding(lua: &mut rilua::Lua, key: &str) -> crate::Result<bo
     if action.is_empty() {
         return Ok(false);
     }
+    let body = borrow_state(lua.state_mut())?
+        .keybindings
+        .bodies
+        .get(&action)
+        .cloned();
+    if let Some(body) = body {
+        let state = lua.state_mut();
+        let result = LuaApiMut::load_bytes(state, body.source.as_bytes(), &body.chunk_name)
+            .map_err(|error| error.to_string())
+            .and_then(|function| {
+                crate::lua_api::script_helpers::call_void_function_state(
+                    state,
+                    Val::Function(function.gc_ref()),
+                    &[],
+                )
+            });
+        if let Err(error) = result {
+            call_error_handler_state(state, &error);
+        }
+        return Ok(true);
+    }
     let Some(ba) = BINDING_ACTIONS.iter().find(|b| b.action == action) else {
         return Ok(false);
     };

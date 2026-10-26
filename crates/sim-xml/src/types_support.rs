@@ -353,6 +353,12 @@ pub struct BindingXml {
     pub category: Option<String>,
     #[serde(rename = "@header")]
     pub header: Option<String>,
+    #[serde(rename = "$text")]
+    pub body: Option<String>,
+    #[serde(skip)]
+    pub source_path: Option<std::path::PathBuf>,
+    #[serde(skip)]
+    pub source_line: usize,
 }
 
 #[derive(Debug, Deserialize, Default, Clone)]

@@ -173,6 +173,22 @@ fn process_element(
             Ok(0)
         }
         XmlElement::Binding(binding) => {
+            if let (Some(name), Some(body), Some(path)) =
+                (&binding.name, &binding.body, &binding.source_path)
+            {
+                let body = body.trim_start();
+                if !body.is_empty() {
+                    let source = format!(
+                        "{}{body}",
+                        "\n".repeat(binding.source_line.saturating_sub(1))
+                    );
+                    let chunk_name = format!("@{}", path.display());
+                    env.state().borrow_mut().keybindings.bodies.insert(
+                        name.clone(),
+                        crate::lua_api::sim_substates::BindingBody { source, chunk_name },
+                    );
+                }
+            }
             if binding.name.is_some()
                 && let Some(addon) = env
                     .state()

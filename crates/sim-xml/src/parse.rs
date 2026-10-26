@@ -16,7 +16,59 @@ pub fn parse_xml_file(path: &std::path::Path) -> Result<UiXml, XmlLoadError> {
         path: path.to_path_buf(),
         source,
     })?;
-    Ok(parse_xml(&contents)?)
+    let mut ui = parse_xml(&contents)?;
+    if ui
+        .elements
+        .iter()
+        .any(|element| matches!(element, super::types::XmlElement::Binding(_)))
+    {
+        let locations = binding_source_lines(&contents)?;
+        let mut locations = locations.into_iter();
+        for element in &mut ui.elements {
+            if let super::types::XmlElement::Binding(binding) = element {
+                binding.source_path = Some(path.to_path_buf());
+                binding.source_line = locations.next().ok_or_else(|| {
+                    quick_xml::DeError::Custom("missing binding source location".to_string())
+                })?;
+            }
+        }
+    }
+    Ok(ui)
+}
+
+fn binding_source_lines(contents: &str) -> Result<Vec<usize>, quick_xml::DeError> {
+    use quick_xml::events::Event;
+
+    let mut reader = quick_xml::Reader::from_str(contents);
+    let mut lines = Vec::new();
+    let mut offset = 0;
+    let mut line = 1;
+    loop {
+        let event = reader
+            .read_event()
+            .map_err(quick_xml::DeError::InvalidXml)?;
+        let end = reader.buffer_position() as usize;
+        line += contents.as_bytes()[offset..end]
+            .iter()
+            .filter(|byte| **byte == b'\n')
+            .count();
+        offset = end;
+        match event {
+            Event::Start(element) | Event::Empty(element)
+                if element.name().as_ref() == b"Binding" =>
+            {
+                let leading_lines = contents[end..]
+                    .bytes()
+                    .take_while(|byte| byte.is_ascii_whitespace())
+                    .filter(|byte| *byte == b'\n')
+                    .count();
+                lines.push(line + leading_lines);
+            }
+            Event::Eof => break,
+            _ => {}
+        }
+    }
+    Ok(lines)
 }
 
 fn preprocess_xml(xml: &str) -> String {
