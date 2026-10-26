@@ -1135,6 +1135,7 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertEqual(second["result"], "stale-artifacts")
 
     def test_new_dep_info_is_unioned_with_previous_inputs(self):
+        (self.tree / "unrelated.rs").write_text("pub fn unrelated() {}")
         result, first, second = self.run_mixed_output_pair(
             "src/main.rs", {"debug/probe": "B binary"}, fresh=True,
             reported_names=["debug/probe"],
