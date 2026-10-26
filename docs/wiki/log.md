@@ -2895,4 +2895,4 @@ Cargo rewrite byte-for-byte; runtime acceptance remains pending.
 
 ## 2026-10-25 — PTR Edit Mode declaration slice
 
-Recorded [declarations and original consumers](investigations/ptr-edit-mode-declarations.md), separate RED/GREEN selectors, supplied-map boundary, stock delta and the report-only SwingTimerSetting successor. Runtime ACTIVE gating preserves the single compiled implementation; final warning checks remain pending.
+Recorded [declarations and original consumers](investigations/ptr-edit-mode-declarations.md), separate RED/GREEN selectors, supplied-map boundary, stock delta and the report-only SwingTimerSetting successor. Runtime ACTIVE gating preserves the single compiled implementation. PTR/Retail/Era full-feature all-target checks pass with zero JSON/plain warnings and separate accepted source-binding receipts; formatting and readability pass.
