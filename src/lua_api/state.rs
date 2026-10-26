@@ -450,6 +450,7 @@ macro_rules! build_empty_sim_state {
             lfg_active_entry: None,
             can_use_premade_group: true,
             lfr_availability: None,
+            scenario_finder_availability: None,
             lfg_category_info: default_lfg_category_info(),
             lfg_active_categories: ::std::collections::HashSet::new(),
             lfg_queued_dungeons: ::std::collections::HashMap::new(),
