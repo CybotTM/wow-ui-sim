@@ -187,6 +187,7 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
     let b = register_modifier_keys(b)?;
     let b = register_guild_and_game_rules(b)?;
     let b = register_services(b)?;
+    let b = register_query_catalog_inputs(b)?;
     let b = register_inventory_and_mail(b)?;
     register_vault_and_premade(b)
 }
@@ -324,6 +325,19 @@ fn register_photo_sharing(b: TableBuilder) -> LuaResult<TableBuilder> {
     )
 }
 
+fn register_query_catalog_inputs(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("AddGuildBankTab", add_guild_bank_tab)?
+        .set_function("ClearGuildBankTabs", clear_guild_bank_tabs)?
+        .set_function(
+            "AddRAFVersion",
+            crate::c_api::c_recruit_a_friend::add_version_input,
+        )?
+        .set_function(
+            "ClearRAFVersions",
+            crate::c_api::c_recruit_a_friend::clear_version_inputs,
+        )
+}
+
 fn register_inventory_and_mail(b: TableBuilder) -> LuaResult<TableBuilder> {
     let b = b
         .set_function("SetActionSlot", set_action_slot)?
@@ -343,16 +357,6 @@ fn register_inventory_and_mail(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("ClearBags", clear_bags)?
         .set_function("AddGuildBankItem", add_guild_bank_item)?
         .set_function("ClearGuildBank", clear_guild_bank)?
-        .set_function("AddGuildBankTab", add_guild_bank_tab)?
-        .set_function("ClearGuildBankTabs", clear_guild_bank_tabs)?
-        .set_function(
-            "AddRAFVersion",
-            crate::c_api::c_recruit_a_friend::add_version_input,
-        )?
-        .set_function(
-            "ClearRAFVersions",
-            crate::c_api::c_recruit_a_friend::clear_version_inputs,
-        )?
         .set_function("AddMail", add_mail)?
         .set_function("ClearInbox", clear_inbox)?
         .set_function("OpenMailbox", open_mailbox)?
