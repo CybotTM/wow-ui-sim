@@ -39,7 +39,10 @@ fn exclusive_environment_limits_real_loader_candidates() {
             .current_dir(temp.path())
             .env(CHILD_ROOT, temp.path())
             .env("WOW_SIM_ADDONS_PATH", &selected)
-            .env("WOW_SIM_ADDONS_PATH_EXCLUSIVE", if exclusive { "1" } else { "0" })
+            .env(
+                "WOW_SIM_ADDONS_PATH_EXCLUSIVE",
+                if exclusive { "1" } else { "0" },
+            )
             .output()
             .unwrap();
         assert!(
@@ -57,7 +60,9 @@ fn assert_loader_candidates(root: &Path) {
     assert!(paths.contains(&root.join("selected")));
     let mut addons = addon_loading::scan_addon_paths(&paths, &[], ScreenKind::Game);
     assert_eq!(
-        addons.iter().any(|(name, _)| name == "ExclusiveAmbientFixture"),
+        addons
+            .iter()
+            .any(|(name, _)| name == "ExclusiveAmbientFixture"),
         !exclusive,
         "ambient addon discovery must follow the selected mode"
     );
@@ -68,18 +73,28 @@ fn assert_loader_candidates(root: &Path) {
     for (_, toc) in addons {
         wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
     }
-    env.exec("assert(ExclusiveSelectedFixtureLoaded == true)").unwrap();
-    let loaded: bool = env.eval("return ExclusiveAmbientFixtureLoaded == true").unwrap();
+    env.exec("assert(ExclusiveSelectedFixtureLoaded == true)")
+        .unwrap();
+    let loaded: bool = env
+        .eval("return ExclusiveAmbientFixtureLoaded == true")
+        .unwrap();
     assert_eq!(loaded, !exclusive);
     if exclusive {
-        env.exec("assert(not C_AddOns.LoadAddOn('ExclusiveAmbientFixture'))").unwrap();
+        env.exec("assert(not C_AddOns.LoadAddOn('ExclusiveAmbientFixture'))")
+            .unwrap();
     }
 }
 
 #[test]
 fn repeated_cli_addon_paths_are_accepted() {
     let args = Args::try_parse_from([
-        "wow-sim", "--addons-path", "first", "--addons-path", "second", "run-tests", "Fixture",
+        "wow-sim",
+        "--addons-path",
+        "first",
+        "--addons-path",
+        "second",
+        "run-tests",
+        "Fixture",
     ]);
     assert!(args.is_ok(), "repeatable exclusive roots: {:?}", args.err());
 }
