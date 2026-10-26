@@ -186,25 +186,23 @@ fn forever_original_game_housing_consumer_reads_spatial_state() {
 #[test]
 fn forever_original_gamepad_core_removes_temporary_cvars() {
     let env = WowLuaEnv::new().unwrap();
-    env.state()
-        .borrow_mut()
-        .forever_startup
-        .temporary_cvars
-        .insert("softtargetenemy".to_owned(), "7".to_owned());
+    assert!(env.state().borrow().cvars.set("SoftTargetEnemy", "2"));
+    env.exec("C_CVar.SetTempCVar('SoftTargetEnemy', '7')")
+        .unwrap();
     load_startup(&env);
-    assert!(
-        env.state()
-            .borrow()
-            .forever_startup
-            .temporary_cvars
-            .is_empty()
+    assert_eq!(
+        env.state().borrow().cvars.get("SoftTargetEnemy").as_deref(),
+        Some("2")
+    );
+    assert!(env.state().borrow().cvars.set("SoftTargetEnemy", "3"));
+    env.exec("assert(GetCVar('SoftTargetEnemy') == '3'); assert(C_CVar.GetCVar('SoftTargetEnemy') == '3')").unwrap();
+    assert_eq!(
+        env.state().borrow().cvars.get("SoftTargetEnemy").as_deref(),
+        Some("3")
     );
     let saved = env.state().borrow().cvars.get("SoftTargetEnemy");
-    env.state()
-        .borrow_mut()
-        .forever_startup
-        .temporary_cvars
-        .insert("softtargetenemy".to_owned(), "9".to_owned());
+    env.exec("C_CVar.SetTempCVar('SoftTargetEnemy', '9')")
+        .unwrap();
     assert_eq!(
         env.eval::<String>("return GetCVar('SoftTargetEnemy')")
             .unwrap(),
@@ -224,14 +222,13 @@ fn forever_original_gamepad_core_removes_temporary_cvars() {
             .unwrap(),
         saved
     );
-    assert!(
-        env.state()
-            .borrow()
-            .forever_startup
-            .temporary_cvars
-            .is_empty()
-    );
     assert_eq!(env.state().borrow().cvars.get("SoftTargetEnemy"), saved);
+    assert!(env.state().borrow().cvars.set("SoftTargetEnemy", "4"));
+    env.exec("assert(GetCVar('SoftTargetEnemy') == '4'); assert(C_CVar.GetCVar('SoftTargetEnemy') == '4')").unwrap();
+    assert_eq!(
+        env.state().borrow().cvars.get("SoftTargetEnemy").as_deref(),
+        Some("4")
+    );
 }
 
 #[test]
