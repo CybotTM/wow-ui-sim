@@ -34,8 +34,7 @@ path per persistent target slot; do not build through changing worktree paths.
 The stable-path experiment
 (`~/.local/state/wow-ui-sim/handoff/compile-throughput-20261025/stablepath-experiment.md`)
 measured lower touch/edit CPU with incremental enabled. Its single-slot cache
-size is not a long-run growth bound. Keep normalized `Cargo.lock` bytes identical between lanes
-([ordering evidence](wiki/investigations/compile-bin-lockwatch.md#cargolock-watch)).
+size is not a long-run growth bound.
 
 Coordinate slot ownership before launch. For new claims, the claimant writes
 `slot-N/.owner` with mode `0600`, containing exactly the `--owner` string, without
@@ -168,6 +167,9 @@ disjoint inputs are not judged for freshness. A test-only edit therefore does no
 reject an unaffected fresh bin, even within the same package. Records affected
 only by mtime refresh require `fresh=false`; executables also require a current
 hash, but identical rebuilt bytes are accepted.
+For a fresh artifact, a root `Cargo.lock` change does not reject reuse when its
+package and transitive dependency closure is unchanged. The closure digest covers
+sorted package name, version and source entries. Other input checks are unchanged.
 The existing conservative root derivation and source mtime refresh are unchanged.
 
 The slot-wide identity is only a source-refresh baseline, not proof that every
@@ -180,9 +182,15 @@ Certificates for unreported
 outputs retain their original input hashes across unrelated builds. A `fresh=true`
 record must match its own certificate, including its complete input set and output
 bytes, even when the slot-wide content diff is empty. A missing certificate fails
-closed; old receipts do not certify fresh outputs. A `fresh=false` record with valid
-dep-info and output hashes can establish a certificate. Rebuild the affected Cargo
-artifact before retrying; changing receipt identities does not provide proof.
+closed. Certificates also record the lock closure digest. For a legacy certificate,
+the worker reads `Cargo.lock` from the recorded revision and uses it only when its
+SHA256 matches the certificate's lock input. A missing revision, failed Git read,
+or digest mismatch rejects the fresh artifact. A changed closure also rejects it.
+For those lock-closure rejections, the worker evicts the rejected record's outputs
+and matching fingerprint entries and records them in `evicted_artifacts` in the
+receipt. Other rejection behavior is unchanged. A `fresh=false` record with valid
+dep-info and output hashes can establish a certificate. Changing receipt identities
+does not provide proof.
 
 Directory dep-info inputs are certified as recursive content trees. Entries are
 sorted by relative name and hashed with length-delimited names and content digests;
