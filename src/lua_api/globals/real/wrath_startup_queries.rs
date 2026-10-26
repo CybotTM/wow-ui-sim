@@ -33,6 +33,7 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsPartyLeader", is_party_leader)?;
     LuaApiMut::register_function(lua, "GetPartyMember", get_party_member)?;
     LuaApiMut::register_function(lua, "GetPartyLeaderIndex", get_party_leader_index)?;
+    LuaApiMut::register_function(lua, "GetBagName", get_bag_name)?;
     super::legacy_gamma::register_all(lua)?;
     super::wrath_voice::register_all(lua)?;
     crate::lua_api::workarounds::wrath_startup_defaults::register_all(lua)?;
@@ -188,6 +189,28 @@ fn is_raid_leader(state: &mut LuaState) -> LuaResult<u32> {
     };
     state.push(Val::Bool(leader));
     Ok(1)
+}
+
+fn get_bag_name(state: &mut LuaState) -> LuaResult<u32> {
+    let Val::Num(index) = stack_val(state, 1) else {
+        return Err(runtime_error("Usage: GetBagName(index)"));
+    };
+    if index == 0.0 {
+        let key = state.gc.intern_string(b"BACKPACK_TOOLTIP");
+        let name = state
+            .gc
+            .tables
+            .get(state.global)
+            .map(|table| table.get_str(key, &state.gc.string_arena))
+            .unwrap_or(Val::Nil);
+        state.push(name);
+        return Ok(1);
+    }
+    if !(1.0..12.0).contains(&index) {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+    crate::c_api::item_spell::c_container_get_bag_name(state)
 }
 
 fn get_party_leader_index(state: &mut LuaState) -> LuaResult<u32> {
