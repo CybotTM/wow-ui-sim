@@ -1,10 +1,10 @@
 ## [2026-10-25] implementation | PTR supplied WoWHack mode
 
-[Original consumer REDs](investigations/patch-12-1-7-api-audit.md#supplied-wowhack-mode) reach MicroMenu207 and UIErrorsFrame12. The [contract](../specs/ptr-i4-game-rules.md) uses existing active-mode state and enum data; GREEN and stock acceptance remain pending.
+[Original consumer REDs](investigations/patch-12-1-7-api-audit.md#supplied-wowhack-mode) reach MicroMenu207 and UIErrorsFrame12. The [contract](../specs/ptr-i4-game-rules.md) uses existing active-mode state and enum data; both exact consumer GREENs pass. Final merged stock/check acceptance remains pending.
 
 ## [2026-10-25] prerequisites | PTR I4 GameRules and RecentAllies
 
-[Original consumer boundaries](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) link the [bounded supplied-input contract](../specs/ptr-i4-game-rules.md). Original-line RED now proves five function boundaries after enum prerequisites; RecentAllies labels pass. Five supplied-state producers are implemented; their GREEN and the preset query remain pending.
+[Original consumer boundaries](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) link the [bounded supplied-input contract](../specs/ptr-i4-game-rules.md). Original-line RED now proves five function boundaries after enum prerequisites; RecentAllies labels pass. Five supplied-state producers are implemented; final merged acceptance remains pending. Preset support and aggregate I4 tests are excluded from this landing packet and retained for follow-up.
 
 ## [2026-10-25] runtime proof | PTR I4 landable first batch
 

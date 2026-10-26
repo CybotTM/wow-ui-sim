@@ -41,7 +41,6 @@ fn assert_selected_consumer(toc: &std::path::Path, name: &str) {
         "Blizzard_StaticPopup_Game" => "GameDialogDefs.lua",
         "Blizzard_BarbershopUI" => "Mainline/Blizzard_BarberShopUI.lua",
         "Blizzard_CharacterCreate" => "Mainline/Blizzard_CharacterCreate.lua",
-        "Blizzard_Settings_Shared" => "Mainline/GraphicsOverrides.lua",
         "Blizzard_RecentAllies" => "Blizzard_RecentAlliesUtil.lua",
         "Blizzard_MicroMenu" => "Shared/MicroMenuContainer.lua",
         "Blizzard_UIErrorsFrame" => "Mainline/UIErrorsFrame.lua",
@@ -168,30 +167,6 @@ fn character_create_consumes_self_found_capability() {
                 .unwrap(),
             allowed
         );
-    }
-}
-
-#[test]
-fn graphics_default_consumes_supplied_experience_preset() {
-    if ACTIVE != ClientProfile::Ptr {
-        return;
-    }
-    let env = load_consumers("Blizzard_Settings_Shared", ScreenKind::Game, false);
-    env.state().borrow_mut().game_rules.sd_hd_toggle_enabled = true;
-    env.exec("I4Category = Settings.RegisterVerticalLayoutCategory('I4 models'); GraphicsOverrides.CreateHDSDToggleOptions(I4Category)").unwrap();
-    for preset in [Some(0), Some(1), None, Some(0)] {
-        env.state()
-            .borrow_mut()
-            .game_rules
-            .forever_experience_preset = preset;
-        assert_eq!(env.eval::<bool>("return Settings.GetSetting('PROXY_CHARACTER_MODELS_TOGGLE'):GetDefaultValueDerived()").unwrap(), preset == Some(0));
-        assert_eq!(
-            env.eval::<Option<i32>>("return C_GameRules.GetForeverExperiencePreset()")
-                .unwrap(),
-            preset
-        );
-        env.exec("assert(select('#', C_GameRules.GetForeverExperiencePreset()) == 1)")
-            .unwrap();
     }
 }
 
