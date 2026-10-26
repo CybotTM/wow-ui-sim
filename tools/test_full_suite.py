@@ -175,6 +175,36 @@ class CertifiedSuiteTests(unittest.TestCase):
         self.assertEqual(subprocess.check_output(['git', '-C', str(worktree), 'rev-parse', 'HEAD'],
                                                  env=self.env, text=True).strip(), self.sha)
 
+    def test_test_failures_preserve_phase_records_and_continue(self):
+        binary = self.slot / 'test-binary'
+        write_executable(binary,
+                         "import sys\nprint('test sample::fails ... FAILED')\nsys.exit(7)\n")
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "slot = root / '.cache/wow-ui-sim-targets/slot-2'\n"
+                         "unit = sys.argv[sys.argv.index('--unit') + 1]\n"
+                         "receipt = slot / 'receipts' / (unit + '.json')\n"
+                         "receipt.parent.mkdir(exist_ok=True)\n"
+                         "records = [{'executable': str(slot / 'test-binary'), 'profile': {'test': True}, "
+                         "'target': {'name': n, 'kind': [k]}} for n, k in "
+                         "[('integration', 'test'), ('wow_ui_sim', 'lib')]]\n"
+                         "receipt.write_text(json.dumps({'result': 'success', 'returncode': 0, 'reported_artifacts': records}))\n")
+        write_executable(self.bin / 'systemctl', "print('SubState=exited\\nResult=success')\n")
+        write_executable(self.bin / 'systemd-run',
+                         "import subprocess, sys\nsys.exit(subprocess.call(sys.argv[sys.argv.index('--') + 1:]))\n")
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(process.returncode, 0, process.stderr)
+        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertEqual(record['steps']['integration']['exit'], 7)
+        self.assertEqual(record['steps']['lib']['exit'], 7)
+        self.assertEqual(record['steps']['prefork']['status'], 'not_applicable')
+        self.assertEqual(record['failures'], {'integration': ['sample::fails'], 'lib': ['sample::fails']})
+        self.assertIsNone(record['new_failures'])
+
     def test_failed_certification_never_runs_test_binaries(self):
         write_executable(self.bin / 'slot-build.py',
                          "import json, os, pathlib, sys\n"
