@@ -59,7 +59,9 @@ fn original_empty_catalog_preserves_cover_after_supplied_minimum() {
     let env = load_original_scenario();
     assert_eq!(env.state().borrow().mists_party_min_level, None);
     let error = env
-        .exec("ScenarioFinderFrame_UpdateAvailability()")
+        .exec(
+            "local ok, reason = xpcall(ScenarioFinderFrame_UpdateAvailability, debug.traceback); if not ok then error(reason, 0) end",
+        )
         .expect_err("unsupplied original consumer must fail at line58");
     assert!(
         error.to_string().contains("ScenarioFinder_Shared.lua:58"),
@@ -72,7 +74,9 @@ fn original_empty_catalog_preserves_cover_after_supplied_minimum() {
     assert_empty_catalog_preservation(&env);
     env.state().borrow_mut().mists_party_min_level = None;
     let error = env
-        .exec("ScenarioFinderFrame_UpdateAvailability()")
+        .exec(
+            "local ok, reason = xpcall(ScenarioFinderFrame_UpdateAvailability, debug.traceback); if not ok then error(reason, 0) end",
+        )
         .expect_err("cleared observation restores original line58 boundary");
     let message = error.to_string();
     assert!(
