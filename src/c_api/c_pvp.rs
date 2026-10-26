@@ -1,3 +1,4 @@
+pub mod battlefield_vehicles;
 pub mod war_mode;
 
 #[cfg(all(
