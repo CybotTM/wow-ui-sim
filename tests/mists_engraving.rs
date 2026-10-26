@@ -206,6 +206,8 @@ fn original_settings_register_rune_checkbox_only_when_supplied_enabled() {
         env.exec(r#"
             local source = debug.getinfo(InterfaceOverrides.AdjustDisplaySettings, "S").source:gsub("\\", "/")
             assert(source:find("Blizzard_SettingsDefinitions_Frame/Classic/InterfaceOverrides.lua", 1, true), source)
+            FireEvent("VARIABLES_LOADED")
+            FireEvent("PLAYER_ENTERING_WORLD", true, false)
         "#).unwrap();
         let registered: bool = env
             .eval("return Settings.GetSetting('alwaysShowRuneIcons') ~= nil")
