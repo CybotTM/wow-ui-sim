@@ -32,7 +32,7 @@ PTR publishes declaration-backed Edit Mode enums through `src/c_api/ptr_edit_mod
 
 ## Tests asserting this spec
 
-- `tests/ptr_edit_mode_enums.rs`: original selected dropdowns, complete SwingTimer settings constructor and independently reached original preset manager.
+- `tests/ptr_edit_mode_enums.rs`: original selected dropdowns, complete SwingTimer settings constructor, independently reached original preset manager, unchanged whole-file display-info initialization and original LossOfControl XML OnLoad completion.
 
 ## Known gaps (current cycle)
 

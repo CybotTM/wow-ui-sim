@@ -52,7 +52,7 @@ The complete unchanged selected file fails on test-only `b777460c0`, then passes
 
 Paired stock uses master `eaf484fbc` production source (test-only build `b777460c0`) and GREEN `8a23c562e`, with byte-exact fresh CVar copies and unchanged original stat/hash. Raw maps change214 keys/280 occurrences →134/154:84 keys removed,4 added, no existing-key count changes. Two additions are the original Mainline preset's newly reached missing EndCapSystemIndices at reported630 (physical631), masked by UseHorizontalLayout's nil keyed setting at348. The other two additions are unchanged CompactRaidFrameManager dividerVerticalPool errors whose anonymous routing-frame ID changes34171→34181; exact raw keys are retained, not normalized away. Per-key traces are retained in the lane report artifacts.
 
-The complete display-info file has no remaining boundary. The separate Mainline preset still cannot initialize; its EndCapSystemIndices family is not read by display-info and is not added. Stock startup is not clean. PTR/Retail/Era final all-target receipt acceptance is pending.
+The complete display-info file has no remaining boundary. The separate Mainline preset still cannot initialize; its EndCapSystemIndices family is not read by display-info and is not added. Stock startup is not clean. PTR/Retail/Era each pass a separate accepted canonical full-feature all-target receipt at `41ec8cd64`, with zero Cargo JSON or plain Rust warnings/errors and no dep-info errors. Formatting and manual changed-Rust readability pass. The seven build/check units exited successfully, and the slot owner marker was preserved by rename on release. Later changes are documentation-only.
 
 ## Sources
 
