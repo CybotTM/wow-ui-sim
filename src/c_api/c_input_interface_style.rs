@@ -1,4 +1,5 @@
-//! Forever input style. Keyboard/mouse is the simulator's initial policy.
+//! PTR and Forever input style backed by the shared environment-local input state.
+//! Keyboard/mouse is existing simulator policy, not a documented native default.
 use crate::event::{Event, EventArg};
 use crate::lua_api::methods::{borrow_state, table_set_static};
 use crate::lua_api::state::SimState;

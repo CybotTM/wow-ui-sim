@@ -35,6 +35,7 @@ fn seeded_player_pets() -> Vec<PetBattlePet> {
 fn arcane_familiar() -> PetBattlePet {
     PetBattlePet {
         name: "Arcane Familiar".into(),
+        display_id: None,
         species_id: 1,
         level: 25,
         max_health: 1420,
@@ -51,6 +52,7 @@ fn arcane_familiar() -> PetBattlePet {
 fn clockwork_hopper() -> PetBattlePet {
     PetBattlePet {
         name: "Clockwork Hopper".into(),
+        display_id: None,
         species_id: 2,
         level: 24,
         max_health: 1180,
@@ -67,6 +69,7 @@ fn clockwork_hopper() -> PetBattlePet {
 fn frost_pup() -> PetBattlePet {
     PetBattlePet {
         name: "Frost Pup".into(),
+        display_id: None,
         species_id: 3,
         level: 23,
         max_health: 1110,
@@ -84,6 +87,7 @@ fn seeded_enemy_pets() -> Vec<PetBattlePet> {
     vec![
         PetBattlePet {
             name: "Stone Lurker".into(),
+            display_id: None,
             species_id: 4,
             level: 24,
             max_health: 1320,
@@ -97,6 +101,7 @@ fn seeded_enemy_pets() -> Vec<PetBattlePet> {
         },
         PetBattlePet {
             name: "Bog Hopper".into(),
+            display_id: None,
             species_id: 5,
             level: 24,
             max_health: 1210,
