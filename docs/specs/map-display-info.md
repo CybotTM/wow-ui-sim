@@ -22,6 +22,8 @@ Pinned Mists `Blizzard_APIDocumentationGenerated/MapDocumentation.lua:168–180`
 
 The selected boundary is after normal Blizzard startup addon loading, before `apply_post_load_workarounds`. Stock CLI startup runs that pass after Blizzard addons and again after third-party addons (`src/bin/wow_sim/startup.rs:424–444`); WorldMap XML OnLoad runs earlier during loading. A later, existing fog workaround overwrites multiple provider pins, including this group pin. That separate defect is excluded; this test does not claim post-workaround group-pin parity.
 
+Mists stock at the executed GREEN is 8 keys/14 occurrences versus the current base 10/16, with only the query/ScriptErrors pair removed and no additions or common-key count changes. The older 12/18 reference predates social-squelch. Mists/Retail/Era/Anniversary `cargo check --all-targets` at `3923a7699` all pass with zero warnings in Cargo JSON and plain output. Workspace formatting, explicit test formatting and changed-Rust readability pass; later documentation-only updates preserve those Rust inputs.
+
 ## How it works
 
 - [Lua API and simulator state](../lua-api.md)

@@ -1,6 +1,6 @@
 ## [2026-10-25] proof | Mists supplied map display
 
-[Original group-provider proof](investigations/map-display-info-model.md#mists-original-onload-consumer--2026-10-25) links the [contract](../specs/map-display-info.md#mists-original-group-provider-contract): shared-model publication, original OnLoad-boundary RED/GREEN, identical RED tests and stock 10/16→8/14 without additions. A later fog-pin overwrite remains a separate, unfixed defect; all-target gates are pending.
+[Original group-provider proof](investigations/map-display-info-model.md#mists-original-onload-consumer--2026-10-25) links the [contract](../specs/map-display-info.md#mists-original-group-provider-contract): shared-model publication, original OnLoad-boundary RED/GREEN, identical RED tests and stock 10/16→8/14 without additions. Mists/Retail/Era/Anniversary all-target checks pass with zero warnings; formatting passes. A later fog-pin overwrite remains a separate, unfixed defect.
 
 ## [2026-10-25] investigation | Mists battlefield vehicles
 
