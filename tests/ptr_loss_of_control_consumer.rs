@@ -58,7 +58,7 @@ fn assert_empty_original_display(env: &WowLuaEnv) {
         assert(not LossOfControlFrame:IsShown(), 'fresh original consumer must hide without LOC')
         "#,
     )
-    .expect("original PTR UpdateDisplay:230-240 must consume empty LOC state and hide");
+    .expect("original PTR UpdateDisplay:229-240 must consume empty LOC state and hide");
 }
 
 fn supply_player_effect(env: &WowLuaEnv) {
