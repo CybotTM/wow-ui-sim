@@ -62,7 +62,9 @@ fn loss_of_control_units_and_optional_fields_are_independent() {
 
 #[test]
 fn loss_of_control_original_display_tracks_supplied_state() {
-    if cfg!(feature = "client-wrath") {
+    // FrameXML.toc:126-128 selects this consumer only for mists/mainline.
+    use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
+    if matches!(ACTIVE, ClientProfile::Wrath | ClientProfile::Era | ClientProfile::Anniversary) {
         return;
     }
     let env = setup_env();
