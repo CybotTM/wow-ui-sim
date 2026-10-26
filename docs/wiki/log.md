@@ -1,3 +1,7 @@
+## [2026-10-25] investigation | Mists battlefield vehicles
+
+[Vehicle provider boundary](investigations/mists-battlefield-vehicles.md): confirmed pinned plural/singular signatures, selected Mists TOCs, original WorldMap provider and XML pin path. Added supplied-state schema and original-consumer fixture before publication; runtime proof pending.
+
 ## [2026-10-25] decision | PTR SharedXML executes twice
 
 [User decision](investigations/ptr-input-interface-style.md#user-decision-two-environments-2026-10-25) corrects only the PTR listener expectation to two, one per normal/secure environment. Native modern count remains unproven; Retail decompilation is the revisit boundary. [Final proof](investigations/ptr-input-interface-style.md#approved-twice-final-proof-2026-10-25): exact PTR GREEN passes, producer-only RED rejects the original event, PTR/Retail all-target checks pass with allowed-three/zero warnings. Forever case 1 is a documented missing API without capability state; report-only. Slot 2 released.

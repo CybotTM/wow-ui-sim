@@ -32,6 +32,9 @@ pub enum TrainingGroundKind {
 
 pub(crate) fn register_c_pvp_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_PvP")?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Mists {
+        battlefield_vehicles::register(state, ns)?;
+    }
     if matches!(
         crate::client_profile::ACTIVE,
         crate::client_profile::ClientProfile::Retail

@@ -1,3 +1,7 @@
+## [2026-10-25] investigation | Mists battlefield vehicles
+
+[Original vehicle consumer](investigations/mists-battlefield-vehicles.md) links the [contract](../specs/mists-battlefield-vehicles.md): pinned API declarations, selected WorldMap provider/pins and supplied per-map state. Test-first schema is committed; runtime RED/GREEN and profile gates are pending.
+
 ## [2026-10-25] runtime proof | PTR I4 landable first batch
 
 [Bounded producer repair](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair) links the [contract](../specs/ptr-i4-first-green.md): four exact RED/GREEN pairs include the original Collections and GhostFrame transitions. Stock 298→296 raw keys has zero additions; Retail/PTR checks meet zero/known-three warning limits and formatting passes. Aggregate 173-shape tests remain on the lane only; native policy remains unknown.
