@@ -234,6 +234,15 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
             }
         }
     }
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr {
+        let state = lua.state_mut();
+        let enum_table = ensure_global_table(state, "Enum");
+        let (name, entries) = crate::lua_api::globals::enum_data::VC_INIT_STATE;
+        let values = ensure_table_field(state, enum_table, name);
+        for &(variant, value) in entries {
+            table_set(state, values, variant, Val::Num(value as f64));
+        }
+    }
     lua.exec(MISSING_ENUMS_LUA)?;
     #[cfg(feature = "retail-12-1-5")]
     lua.exec(RETAIL_12_1_5_ENUM_OVERRIDES_LUA)?;
@@ -279,6 +288,10 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr {
         // PTR 12.1.7.70493 LevelConstantsDocumentation.lua:12; Retail omits this constant.
         lua.exec("Constants.LevelConstsExposed.MIN_TALENT_LEVEL = 10")?;
+        // PTR CatalogShopConstantsDocumentation.lua:89.
+        lua.exec(
+            "Constants.CatalogShopVirtualCurrencyConstants.TALEBOUND_VC_CURRENCY_CODE = 'XZC'",
+        )?;
     }
     lua.exec(COMPAT_CONSTANTS_LUA)?;
     #[cfg(feature = "client-wowforever")]
