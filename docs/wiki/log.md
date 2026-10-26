@@ -1,3 +1,7 @@
+## [2026-10-26] proof | Complete PTR Edit Mode display-info
+
+[Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked; final profile checks are pending.
+
 ## [2026-10-26] implementation | PTR SwingTimer declarations
 
 [Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) reaches the exact Scale RED at800/801. Both pinned declaration families and metadata pass unchanged full-constructor GREEN through the existing runtime-only PTR gate. Exact master/GREEN stock stays216/282, with both new raw keys traced to the absent SwingTimer system map key at797. That next boundary remains unfixed. PTR/Retail/Era all-target checks have separate accepted receipts and zero warnings; formatting/readability pass.

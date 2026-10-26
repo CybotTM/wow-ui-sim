@@ -36,7 +36,8 @@ PTR publishes declaration-backed Edit Mode enums through `src/c_api/ptr_edit_mod
 
 ## Known gaps (current cycle)
 
-- [ ] Complete display-info proof and downstream LossOfControl initialization proof are pending the declaration producer's GREEN execution. Native preset defaults and other Edit Mode lifecycle behavior remain outside this contract.
+- [x] Complete original display-info initialization and the original LossOfControl OnLoad both pass byte-identical producer-only RED/GREEN selectors.
+- [ ] Native preset defaults and other Edit Mode lifecycle behavior remain outside this contract. The separate Mainline preset now stops at missing EditModeMainActionBarEndCapSystemIndices; display-info does not read that family.
 
 ## Out of scope
 
