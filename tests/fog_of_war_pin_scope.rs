@@ -90,6 +90,34 @@ fn original_world_map_keeps_non_fog_pin_callback_after_each_pass() {
 }
 
 #[test]
+fn original_world_map_keeps_highlight_pin_callback_after_each_pass() {
+    let env = load_original_world_map();
+    env.exec(
+        r#"
+        HighlightPinUnderTest = WorldMapFrame:EnumeratePinsByTemplate('MapHighlightPinTemplate')()
+        assert(HighlightPinUnderTest and HighlightPinUnderTest:GetMap() == WorldMapFrame,
+            'original WorldMap highlight pin')
+        assert(HighlightPinUnderTest.OnLoad == MapHighlightPinMixin.OnLoad, 'original highlight mixin')
+        OriginalHighlightMapChanged = HighlightPinUnderTest.OnMapChanged
+        assert(type(OriginalHighlightMapChanged) == 'function', 'inherited map callback')
+        "#,
+    )
+    .unwrap();
+    for _ in 0..2 {
+        env.apply_post_load_workarounds();
+        env.exec(
+            r#"
+            assert(HighlightPinUnderTest.OnMapChanged == OriginalHighlightMapChanged,
+                'post-load fog workaround replaced original highlight OnMapChanged')
+            assert(HighlightPinUnderTest.TryFindingBestFogOfWarID == nil, 'highlight acquired fog refresh')
+            HighlightPinUnderTest:OnMapChanged()
+            "#,
+        )
+        .expect("original highlight callback survives and remains callable");
+    }
+}
+
+#[test]
 fn original_world_map_fog_pin_still_refreshes_and_clears_missing_fog() {
     let env = load_original_world_map();
     env.apply_post_load_workarounds();
