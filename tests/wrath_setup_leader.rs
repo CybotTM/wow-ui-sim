@@ -15,6 +15,7 @@ fn original_target_frame_tracks_party_leadership() {
         TargetFrame.showLeader = true
         TargetFrame_Update(TargetFrame)
         assert(TargetFrame.leaderIcon:IsShown(), "player leader must show icon")
+        assert(UnitIsPartyLeader("pet") == nil, "pet is not the player leader")
         A_Admin.SetPartyLeader(1)
         TargetFrame_Update(TargetFrame)
         assert(not TargetFrame.leaderIcon:IsShown(), "party leader must hide player icon")
