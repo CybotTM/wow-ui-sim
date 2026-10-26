@@ -55,8 +55,12 @@ fn load_original_group_provider() -> WowLuaEnv {
         )
         .expect("original startup addon load");
     }
-    env.apply_post_load_workarounds();
-    eprintln!("initial diagnostics: {:?}", env.state().borrow().lua_errors);
+    // WorldMap OnLoad runs during addon loading, before the stock CLI's later
+    // apply_post_load_workarounds pass. Exercise that same original-call boundary.
+    eprintln!(
+        "OnLoad-stage diagnostics: {:?}",
+        env.state().borrow().lua_errors
+    );
     assert_original_group_provider(&env);
     env
 }
