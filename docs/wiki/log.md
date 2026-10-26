@@ -1,3 +1,7 @@
+## [2026-10-25] staged | Supplied social squelch
+
+[Original listing controls](investigations/consumer-selection-and-red-proof.md#supplied-social-squelch) now have a supplied social-state getter with explicit Retail/PTR/Mists publication. Retail's original consumer fails at its missing getter in the test-first phase; final three-profile runtime and stock proof remain pending.
+
 ## [2026-10-25] proof | Classic defensive aura timer completion
 
 The [completion matrix](../specs/aura-spell-classification-identifiers.md#classic-completion-proof--2026-10-25) records Era/Anniversary stock-timer RED/GREEN, original AuraUtil preservation and exact stock differences with no additions. Era/Anniversary all-target checks retain only the three permitted dead-code warnings; Retail has none. Known TTS residue remains separately owned, so no baseline is changed.
