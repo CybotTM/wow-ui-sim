@@ -56,6 +56,24 @@ const DECLARATIONS: &[EnumFields] = &[
     ),
     ("EditModeGroupFinderSetting", &[("Size", 0)]),
     ("EditModeMainActionBarEndCapSetting", &[("Hidden", 0)]),
+    // Same pinned document: endcap indices and metadata at 560–568.
+    (
+        "EditModeMainActionBarEndCapSystemIndices",
+        &[("EndCapLeft", 1), ("EndCapRight", 2)],
+    ),
+    (
+        "EditModeMainActionBarEndCapSystemIndicesMeta",
+        &[("NumValues", 2), ("MinValue", 1), ("MaxValue", 2)],
+    ),
+    // Same pinned document: SwingTimer indices and metadata at 719–728.
+    (
+        "EditModeSwingTimerSystemIndices",
+        &[("MainHand", 1), ("OffHand", 2), ("Ranged", 3)],
+    ),
+    (
+        "EditModeSwingTimerSystemIndicesMeta",
+        &[("NumValues", 3), ("MinValue", 1), ("MaxValue", 3)],
+    ),
     (
         "EditModePersonalResourceDisplaySetting",
         &[("AllowMouseoverThrough", 15)],
