@@ -90,19 +90,23 @@ fn assert_display_controls(env: &WowLuaEnv, enabled: bool) {
         .eval("return ObserveTransmogDisplay()")
         .expect("original AdjustDisplaySettings:4 must consume supplied availability");
     assert_eq!(controls, if enabled { 0 } else { 2 });
+    let (arity, supplied): (i32, bool) = env
+        .eval("local function pack(...) return select('#', ...), ... end; return pack(C_TransmogOutfitInfo.IsTransmogEnabled())")
+        .unwrap();
+    assert_eq!((arity, supplied), (1, enabled));
     assert_eq!(env.state().borrow().lua_errors.len(), errors_before);
 }
 
 fn exercise_display_transitions(initial: bool) {
     let first = load_original_display_settings();
     assert_display_controls(&first, initial);
+    let second = load_original_display_settings();
+    assert_display_controls(&second, !initial);
     assert_display_controls(&first, !initial);
+    assert_display_controls(&second, initial);
     if initial {
         assert_display_controls(&first, true);
     }
-    let second = load_original_display_settings();
-    assert_display_controls(&second, !initial);
-    assert_display_controls(&second, initial);
     // Each environment registers the false-branch variables only once, as the
     // original SettingsPanel rejects duplicate registration. No sink is replaced.
     assert_eq!(first.state().borrow().mists_transmog.enabled, Some(true));
