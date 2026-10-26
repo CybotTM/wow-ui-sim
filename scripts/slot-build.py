@@ -578,6 +578,8 @@ def certify_artifacts(current, previous, source_before, artifacts, snapshot):
 
 def matched_input_changes(current, inputs, changes):
     inputs = set(inputs)
+    if not inputs:
+        return set()
     worktree = Path(current["worktree"])
     return {name for name in changes if name in inputs or any(
         str(parent) in inputs and (worktree / parent).is_dir()
