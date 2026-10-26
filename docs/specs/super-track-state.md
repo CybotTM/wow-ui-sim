@@ -1,6 +1,6 @@
 # Supplied SuperTrack state
 
-CF-2 supplies tracked targets through `src/c_api/c_super_track.rs` and per-quest highlights through `src/c_api/c_quest_log.rs`. [System notes](../wiki/systems/super-track-state.md) describe ownership and dispatch. Edit-only staging: all runtime requirements remain unchecked.
+CF-2 supplies tracked targets through `src/c_api/c_super_track.rs` and per-quest highlights through `src/c_api/c_quest_log.rs`. [System notes](../wiki/systems/super-track-state.md) describe ownership and dispatch. The content-only restoration below is verified; broader quest/highlight requirements remain staged.
 
 ## What it must do
 
@@ -26,12 +26,13 @@ CF-2 supplies tracked targets through `src/c_api/c_super_track.rs` and per-quest
 ## Tests asserting this spec
 
 - `tests/cf2_supertrack_consumers.rs` — five original-consumer selectors, each with state transitions; original complete chunk loaded via selected TOC, no consumer/API replacements.
+- `tests/cf2_supertracking_restored.rs` — restored content shape and original listener-time cache transitions on Retail/PTR/Forever.
 - `tests/c_super_track_probes.rs` — public shapes after bootstrap, supplied map-pin/vignette state and explicit missing-highlight-row policy.
 - Existing `tests/c_factory_m4_contracts.rs` absent-target assertions remain preservation, not producer RED.
 
 ## Known gaps (current cycle)
 
-- [ ] Execute frozen RED, relevant constant/no-op mutants, GREEN, stock error-set diff, PTR/Forever preservation and checks using the handoff SLOT-RECIPE. No runtime evidence produced during staging.
+- [ ] Execute the remaining quest/highlight packet beyond the content-only restoration below. Its broader historical staging claims are not established by the restored selectors.
 - [ ] Native untracked quest sentinel, unknown/zero highlight semantics, event timing/deduplication and cross-target coupling remain unestablished. Mutation calls synchronously notify after releasing state borrow; this is simulator policy, not native timing parity.
 - [ ] IsQuestTask is currently coupled to the static world-quest catalog. World/task rejection is covered together; independent task-only classification remains held, not mocked.
 
@@ -43,4 +44,4 @@ Corpse, waypoint, scenario/party targets, priority arbitration, persistence, bro
 
 `tests/cf2_supertracking_restored.rs` restores only the supertracking obligations from the deferred housing shape/boundary tests on Retail, PTR and Forever. Both exact selectors exercise supplied Appearance/101 and Achievement/202 pairs, clear, and re-entry through the selected original `Blizzard_QuestSuperTracking.lua` event/cache refresh. An external listener records the pair during notification; the original helper reads that cache. The shape selector also checks the documented zero-result absence versus populated two-number binding contract. The cache helper itself returns two fields, including two nils after clear.
 
-Declarations were re-authenticated per profile at `Blizzard_APIDocumentationGenerated/SuperTrackManagerDocumentation.lua:32–40` and `ContentTrackingTypesDocumentation.lua:60–70`. These tests preserve an existing supplied producer; they do not establish native target policy, event deduplication or arbitration, and do not restore unrelated housing tests. Runtime proof is recorded separately in the lane report.
+Declarations were re-authenticated per profile at `Blizzard_APIDocumentationGenerated/SuperTrackManagerDocumentation.lua:32–40` and `ContentTrackingTypesDocumentation.lua:60–70`. These tests preserve an existing supplied producer; they do not establish native target policy, event deduplication or arbitration, and do not restore unrelated housing tests. At `15f338b2f`, both exact selectors pass on all three profiles. Byte-identical tests independently reject producer-subtracted sibling `b6e8274a2` at the original listener snapshot. No producer change was needed. Stock maps match base `7576b25e1` exactly: Retail 10 unique/12 occurrences, PTR 216/282, Forever 26/26, with no added/removed keys or count changes. All three full-feature all-target checks have zero warnings; fmt and manual Rust readability checks pass. [Proof bounds and original consumer path](../wiki/systems/super-track-state.md#deferred-content-coverage-restoration) retain the distinction from native policy and the broader staged packet.

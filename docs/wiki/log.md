@@ -2971,3 +2971,7 @@ Cargo rewrite byte-for-byte; runtime acceptance remains pending.
 ## 2026-10-25 — PTR Edit Mode declaration slice
 
 Recorded [declarations and original consumers](investigations/ptr-edit-mode-declarations.md), separate RED/GREEN selectors, supplied-map boundary, stock delta and the report-only SwingTimerSetting successor. Runtime ACTIVE gating preserves the single compiled implementation. PTR/Retail/Era full-feature all-target checks pass with zero JSON/plain warnings and separate accepted source-binding receipts; formatting and readability pass.
+
+## [2026-10-26] proof | Supplied supertracking restoration
+
+[Restored content obligations](systems/super-track-state.md#deferred-content-coverage-restoration) pass two exact original-consumer selectors on Retail/PTR/Forever. Each rejects the producer-subtracted sibling with identical test bytes. Existing supplied pairs, clear/re-entry and listener-time cache state need no producer changes. Fresh base/restoration stock maps are identical at 10/12, 216/282 and 26/26; zero-warning all-target checks, fmt and manual Rust readability pass. Broader quest/highlight and native-policy obligations remain unverified by this lane.
