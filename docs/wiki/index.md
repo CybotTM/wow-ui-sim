@@ -1,3 +1,7 @@
+## [2026-10-26] investigation | Mists engraving supplied inputs
+
+[Consumer inventory](investigations/mists-engraving-inputs.md) separates seven normal Mists bag/settings members from load-on-demand and Vanilla-only callers. The [contract](../specs/mists-engraving-inputs.md) requires explicit inputs and named missing-input errors. State/test scaffolding exists; executable RED/GREEN and compiler/stock evidence are pending slot admission.
+
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 
 [Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) links the [bounded contract](../specs/legacy-tutorial-requests.md): Mists/Era/Anniversary/Wrath standalone numeric requests, no missing Lua definition, no result use, no inferred tutorial policy. Unchanged old Mists storage-flow RED reaches ContainerFrame_Shared:976; GREEN completes its Lua assertions but still fails on collected callback/startup errors, with C_Engraving:315 next. Four-profile recorder/publication tests pass, all four stock maps are byte-identical, and all seven all-target checks have zero warnings.
