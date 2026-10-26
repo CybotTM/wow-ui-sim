@@ -34,7 +34,6 @@ pub(super) fn load_original_pve_frame() -> WowLuaEnv {
     let ui = blizzard_ui_dir();
     assert_selected_group_finder(&ui);
     let env = new_blizzard_addon_env(&ui);
-    assert_eq!(env.state().borrow().lfr_availability, None);
     wow_ui_sim::xml::register_intrinsic_templates();
     let loaded = load_blizzard_addon_closure_into_env(
         &env,
@@ -141,6 +140,14 @@ fn observe_original_lfr_before_successor(env: &WowLuaEnv, available: bool) {
     "#;
     env.exec(&script)
         .expect("original PVEFrame.lua:229 must consume supplied LFR availability and complete past scenario query");
+}
+
+#[test]
+fn stock_lfr_default_reaches_original_pve_frame() {
+    let env = load_original_pve_frame();
+    env.state().borrow_mut().scenario_finder_availability = Some((true, String::new()));
+    observe_original_lfr_before_successor(&env, true);
+    assert!(env.eval::<bool>("return C_LFGInfo.IsLFREnabled()").unwrap());
 }
 
 #[test]
