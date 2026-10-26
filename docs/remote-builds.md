@@ -77,7 +77,9 @@ identity, including receipt paths outside the slot) or modified within
 files can prevent reaching the cap; the summary reports the remaining bytes. Allocated
 bytes count hard links once; predicted reclaimed bytes exclude links retained
 outside the unit. Each removal prints a JSON manifest with paths and bytes to
-the service log. Receipts and source-identity files are never removed.
+the service log. Worker pruning diagnostics use stderr, leaving stdout byte-exact
+for the launched command. Standalone `--prune-dry-run` reports use stdout.
+Receipts and source-identity files are never removed.
 
 Read-only inspection does not require ownership or launch a build:
 

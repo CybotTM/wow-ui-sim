@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Launch an admitted Cargo build through a stable per-slot source mount."""
 import argparse
-from contextlib import contextmanager, ExitStack
+from contextlib import contextmanager, ExitStack, redirect_stdout
 import fcntl
 import hashlib
 import json
@@ -693,7 +693,8 @@ def execute_build(request_path, cap_gib=60, recent_hours=2):
     request = json.loads(request_path.read_text())
     slot = Path(request["slot"])
     check_owner(slot, request["owner"])
-    prune_slot(slot, request["owner"], cap_gib * 1024 ** 3, recent_hours)
+    with redirect_stdout(sys.stderr):
+        prune_slot(slot, request["owner"], cap_gib * 1024 ** 3, recent_hours)
     state = slot / ".source-identity.json"
     verified = slot / ".verified-source-identity.json"
     previous = json.loads(verified.read_text()) if verified.exists() else None
