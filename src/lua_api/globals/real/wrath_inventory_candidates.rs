@@ -4,7 +4,7 @@ use crate::client_profile::{ACTIVE, ClientProfile};
 use crate::items;
 use crate::lua_api::methods::{borrow_state, table_set_num};
 use crate::lua_api::state::SimState;
-use crate::lua_bridge::stack_val;
+use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 
@@ -69,6 +69,25 @@ fn get_inventory_items_for_slot(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_inventory_item_gems(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = i32::from_stack(state, 1)?;
+    let gems = borrow_state(state)?
+        .player
+        .equipped_items
+        .get(&slot)
+        .map(|item| item.gem_ids)
+        .unwrap_or_default();
+    let count = gems.iter().rposition(|&id| id != 0).map_or(0, |i| i + 1);
+    for &id in &gems[..count] {
+        state.push(if id == 0 {
+            Val::Nil
+        } else {
+            Val::Num(f64::from(id))
+        });
+    }
+    Ok(count as u32)
+}
+
 pub(crate) fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     if ACTIVE == ClientProfile::Wrath {
         LuaApiMut::register_function(
@@ -76,6 +95,7 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
             "GetInventoryItemsForSlot",
             get_inventory_items_for_slot,
         )?;
+        LuaApiMut::register_function(lua, "GetInventoryItemGems", get_inventory_item_gems)?;
     }
     Ok(())
 }

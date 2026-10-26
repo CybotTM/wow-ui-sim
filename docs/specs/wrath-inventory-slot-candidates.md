@@ -22,3 +22,8 @@ numeric-slot and table cases is not established.
 consumer and observes candidate locations before and after removing one carried
 item. It rejects a constant or no-op producer. Equipment-set locking and complete
 native equipment eligibility are outside this contract.
+
+`GetInventoryItemGems` projects equipped item `gem_ids` for the original
+`FrameXML/EquipmentManager.lua:280` consumer. As a scenario default, zero gem
+IDs are empty sockets, trailing empty sockets return no values, and an empty
+slot returns no values. Exact native return behavior is unknown.
