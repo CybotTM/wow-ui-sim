@@ -641,6 +641,8 @@ pub struct SimState {
     pub pet_stables_open: bool,
     /// Supplied modern observations; None does not invent native initial membership.
     pub stable_active_pets: Option<Vec<crate::c_api::c_stable_info::active_list::PetInfo>>,
+    /// Missing key is unknown; None is an explicit empty slot observation.
+    pub stable_pet_slots: HashMap<u32, Option<crate::c_api::c_stable_info::active_list::PetInfo>>,
     #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
     pub allow_recent_allies_see_location: bool,
     #[cfg(feature = "client-wowforever")]

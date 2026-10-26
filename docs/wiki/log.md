@@ -3085,3 +3085,7 @@ Added the [supplied bool/string contract](../specs/mists-scenario-finder.md) and
 ## [2026-10-26] implementation | Mists supplied party minimum
 
 [Supplied minimum](systems/mists-scenario-finder.md#supplied-active-party-minimum) links the [bounded contract](../specs/mists-party-minimum.md). Three exact producer-subtracted REDs and three GREENs prove the original58 boundary, empty-catalog preservation, direct85/90/isolation and explicit errors. Stock stays6/12 with two individually traced diagnostic replacements; catalog discrimination is blocked. All seven full-feature all-target checks pass with zero compiler warnings. Formatting/readability pass; other-profile runtime parity is not claimed.
+
+## 2026-10-26 — Supplied stable pet slots
+
+Added [slot observations](systems/stable-pet-info.md) and [contract](../specs/stable-pet-info.md). Original Retail consumer RED observed; GREEN and profile checks remain pending.

@@ -525,6 +525,7 @@ macro_rules! build_empty_sim_state {
             guild_registrar_open: false,
             pet_stables_open: false,
             stable_active_pets: None,
+            stable_pet_slots: HashMap::new(),
             #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
             allow_recent_allies_see_location: true,
             #[cfg(feature = "client-wowforever")]

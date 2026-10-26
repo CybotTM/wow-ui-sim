@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Supplied stable pet slot observations
+
+[State and original consumer boundary](systems/stable-pet-info.md) links the [contract](../specs/stable-pet-info.md): Retail/PTR explicit unknown/empty/record observations, shared PetInfo codec and fresh snapshots. Retail original-consumer RED observed; remaining execution gates are pending. Forever is unchanged.
+
 ## [2026-10-26] implementation | Supplied voice settings access
 
 [Original audio polling boundary](systems/voice-settings-access.md) links the [contract](../specs/voice-settings-access.md): six declaring profiles, environment-local optional observation and named unset error; Wrath remains absent. Eighteen exact original-consumer GREEN/producer-free RED pairs pass, seven full-feature all-target checks have zero warnings, and all raw stock maps are unchanged at the supplied master baselines. All 98 final launch CVar guards are unchanged. Full device initialization, timer cancellation and unsupplied forecast readiness are not claimed.
