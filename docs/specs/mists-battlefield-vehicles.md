@@ -25,7 +25,7 @@ Mists exposes supplied battlefield map observations through `C_PvP`. The pinned 
 
 ## Known gaps (current cycle)
 
-- [ ] Complete the required Retail all-target check; Mists checking and exact paired producer-only RED proof pass.
+None for the bounded supplied-state contract. Mists/Retail all-target checks, formatting and exact paired producer-only RED proof pass.
 
 ## Out of scope
 
