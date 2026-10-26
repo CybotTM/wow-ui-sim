@@ -18,6 +18,41 @@
 
 [Sequential original-consumer proof](investigations/ptr-regional-names.md) distinguishes both missing calls before full GREEN. PTR clears all UnitFrame155 keys (296/410→272/348), with 6 added raw keys individually traced. Forever 70532 remains exactly 26/26; naming/graveyard preservation passes. Retail/PTR/Forever all-target checks satisfy zero/known-three warning limits.
 
+## [2026-10-25] proof | Final housing PTR/Retail acceptance
+
+[Final original-consumer proof](systems/housing-spatial-presence.md#final-ptrretail-acceptance): PTR housing GREEN/endpoint RED, talent false→true→false, Retail eight-state preservation, traced stock deltas, and zero-warning PTR/Retail all-target checks. The documented PTR unlock-level constant preserves Retail/Forever publication.
+
+## [2026-10-25] proof | Housing texture boundary and remaining PTR dependency
+
+[Accepted texture/retail gates](systems/housing-spatial-presence.md#texture-fix-acceptance-and-remaining-ptr-dependency): original PTR template RED/GREEN, Retail eight-state preservation, both all-target checks and formatting pass. PTR housing/talent remains blocked on separately owned IsWoWHack. Raw stock additions are traced without masking.
+
+## [2026-10-25] fix | Button atlas region lifetime
+
+[Original PTR template RED](systems/housing-spatial-presence.md#ptr-microbutton-region-lifetime) shows the shared active setter skipped region creation on a lookup miss. Restore region creation/publication before optional pixel application; no vendor or catalog fabrication. GREEN pending.
+
+## [2026-10-25] implementation | PTR talent-award history
+
+[Original startup RED](systems/housing-spatial-presence.md#ptr-talent-award-startup-boundary) identifies the declared C_SpecializationInfo endpoint. A supplied lifetime-history boolean avoids invented level/rank policy; the producer and false/true/false consumer test are staged for GREEN.
+
+## [2026-10-25] proof | Retail housing plot and PTR dependency
+
+[Accepted proof and limits](systems/housing-spatial-presence.md#accepted-retail-proof-and-ptr-dependency): repaired original Retail eight-state consumer GREEN, missing-producer RED, both interior selectors on both sides and six callable mutants. Final repaired-source checks are Retail zero warnings/PTR three allowed warnings. PTR eight-state acceptance is BLOCKED-ON the separate input-interface-style merge; no native policy or current PTR GREEN claim.
+
+## [2026-10-25] fixture | Housing bootstrap observer lifetime
+
+[Observed third-state failure and repair](systems/housing-spatial-presence.md#bootstrap-observer-lifetime): use the real bootstrap load phase so the first full addon load cannot replace the observed publisher. Assertions and production/vendor code are unchanged; paired repaired-fixture proof remains pending.
+
+## [2026-10-25] implementation | PTR keyring startup boundary
+
+[Original startup RED](systems/housing-spatial-presence.md#ptr-keyring-startup-boundary) links the [PTR capability contract](../specs/ptr-keyring-capability.md). Declared C_ActionBar.ShouldShowKeyring projects supplied action-bar state, without a C_Container alias or invented native constant. Original-consumer GREEN remains pending.
+
+## [2026-10-25] implementation | Housing plot blocker boundary
+
+[Current-house shape and startup](systems/housing-spatial-presence.md#current-house-shape-and-ptr-startup) links the [nullable snapshot contract](../specs/current-house-info.md): original tutorial data/utility fixture loads, state-backed documented HouseInfo and declared PTR-only SHARD_TRANSFER. Merged original-consumer RED observed; GREEN and final proof pending. Native policy remains unknown.
+
+## [2026-10-24] staged | Housing house-or-plot presence
+
+Added [spatial presence model](systems/housing-spatial-presence.md) and [contract](../specs/house-or-plot-presence.md), original registered-event selector, profile TOC evidence and static contradiction matrix. Runtime/compile gates remain pending; Forever's selected consumer and excluded downstream controls bootstrap are distinct.
 ## [2026-10-25] proof | Classic defensive aura timer completion
 
 The [completion matrix](../specs/aura-spell-classification-identifiers.md#classic-completion-proof--2026-10-25) records Era/Anniversary stock-timer RED/GREEN, original AuraUtil preservation and exact stock differences with no additions. Era/Anniversary all-target checks retain only the three permitted dead-code warnings; Retail has none. Known TTS residue remains separately owned, so no baseline is changed.

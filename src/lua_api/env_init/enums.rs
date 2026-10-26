@@ -276,6 +276,10 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     #[cfg(feature = "client-wowforever")]
     lua.exec("LE_UNIT_STAT_SPIRIT = 5")?;
     lua.exec(CONSTANTS_VALUES_LUA)?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr {
+        // PTR 12.1.7.70493 LevelConstantsDocumentation.lua:12; Retail omits this constant.
+        lua.exec("Constants.LevelConstsExposed.MIN_TALENT_LEVEL = 10")?;
+    }
     lua.exec(COMPAT_CONSTANTS_LUA)?;
     #[cfg(feature = "client-wowforever")]
     lua.exec(

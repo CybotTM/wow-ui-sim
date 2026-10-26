@@ -53,6 +53,16 @@ pub fn register_c_specialization_info(state: &mut LuaState) -> LuaResult<()> {
     // the table with a fresh one.
     let t_ref = ensure_namespace(state, "C_SpecializationInfo")?;
     register_c_specialization_info_methods(state, t_ref)?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr
+        && !holds_rust_fn(state, t_ref, "HasPlayerEarnedATalentPoint")
+    {
+        table_set_rust_fn_static(
+            state,
+            t_ref,
+            "HasPlayerEarnedATalentPoint",
+            c_spec_has_player_earned_a_talent_point,
+        )?;
+    }
     Ok(())
 }
 
@@ -89,6 +99,13 @@ fn holds_rust_fn(state: &mut LuaState, table_ref: LuaTableRef, name: &'static st
         ),
         _ => false,
     }
+}
+
+fn c_spec_has_player_earned_a_talent_point(state: &mut LuaState) -> LuaResult<u32> {
+    // Supplied lifetime history, not an inference from level or current ranks.
+    let has_earned = borrow_state(state)?.talents.has_earned_talent_point;
+    state.push(Val::Bool(has_earned));
+    Ok(1)
 }
 
 fn c_spec_get_specialization(state: &mut LuaState) -> LuaResult<u32> {

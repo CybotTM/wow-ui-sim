@@ -67,6 +67,13 @@ const POLICY: ValidationPolicy = ValidationPolicy {
         }
     },
 };
+// PTR 12.1.7.70493 SystemDocumentation.lua declares this script event.
+// Keep build-specific publication above the feature-neutral sim-event crate.
+fn is_ptr_shard_transfer(name: &str) -> bool {
+    crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr
+        && name == "SHARD_TRANSFER"
+}
+
 pub fn is_registerable_event(name: &str) -> bool {
     if matches!(
         crate::client_profile::ACTIVE,
@@ -76,11 +83,14 @@ pub fn is_registerable_event(name: &str) -> bool {
     {
         return true;
     }
-    crate::c_api::forever_startup::accepts_event(name)
+    is_ptr_shard_transfer(name)
+        || crate::c_api::forever_startup::accepts_event(name)
         || sim_event::is_registerable_event(name, POLICY)
 }
 pub fn is_valid_event(name: &str) -> bool {
-    crate::c_api::forever_startup::accepts_event(name) || sim_event::is_valid_event(name, POLICY)
+    is_ptr_shard_transfer(name)
+        || crate::c_api::forever_startup::accepts_event(name)
+        || sim_event::is_valid_event(name, POLICY)
 }
 
 #[cfg(all(test, feature = "profile-retail"))]

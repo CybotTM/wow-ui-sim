@@ -10,6 +10,41 @@
 
 [Original consumers and shared registry](systems/addon-module-imports.md#ptr-original-consumers--2026-10-25) link the [module contract](../specs/addon-module-imports.md#ptr-original-module-consumers): each exact selector rejects constant/no-op imports, original Utility identity and behavior pass, Forever preservation passes, and all seven all-target checks have zero warnings. The checkpoint separates traced raw stock-key replacements, cfg-equivalent proof carry-over and unsupported-profile runtime limits.
 
+## [2026-10-25] proof | Final housing PTR/Retail acceptance
+
+[Final original-consumer proof](systems/housing-spatial-presence.md#final-ptrretail-acceptance): PTR housing GREEN/endpoint RED, talent false→true→false, Retail eight-state preservation, traced stock deltas, and zero-warning PTR/Retail all-target checks. The documented PTR unlock-level constant preserves Retail/Forever publication.
+
+## [2026-10-25] proof | Housing texture boundary and remaining PTR dependency
+
+[Accepted texture/retail gates](systems/housing-spatial-presence.md#texture-fix-acceptance-and-remaining-ptr-dependency): original PTR template RED/GREEN, Retail eight-state preservation, both all-target checks and formatting pass. PTR housing/talent remains blocked on separately owned IsWoWHack. Raw stock additions are traced without masking.
+
+## [2026-10-25] fix | Button atlas region lifetime
+
+[Original PTR template RED](systems/housing-spatial-presence.md#ptr-microbutton-region-lifetime) shows the shared active setter skipped region creation on a lookup miss. Restore region creation/publication before optional pixel application; no vendor or catalog fabrication. GREEN pending.
+
+## [2026-10-25] implementation | PTR talent-award history
+
+[Original startup RED](systems/housing-spatial-presence.md#ptr-talent-award-startup-boundary) identifies the declared C_SpecializationInfo endpoint. A supplied lifetime-history boolean avoids invented level/rank policy; the producer and false/true/false consumer test are staged for GREEN.
+
+## [2026-10-25] proof | Retail housing plot and PTR dependency
+
+[Accepted proof and limits](systems/housing-spatial-presence.md#accepted-retail-proof-and-ptr-dependency): repaired original Retail eight-state consumer GREEN, missing-producer RED, both interior selectors on both sides and six callable mutants. Final repaired-source checks are Retail zero warnings/PTR three allowed warnings. PTR eight-state acceptance is BLOCKED-ON the separate input-interface-style merge; no native policy or current PTR GREEN claim.
+
+## [2026-10-25] fixture | Housing bootstrap observer lifetime
+
+[Observed third-state failure and repair](systems/housing-spatial-presence.md#bootstrap-observer-lifetime): use the real bootstrap load phase so the first full addon load cannot replace the observed publisher. Assertions and production/vendor code are unchanged; paired repaired-fixture proof remains pending.
+
+## [2026-10-25] implementation | PTR keyring startup boundary
+
+[Original startup RED](systems/housing-spatial-presence.md#ptr-keyring-startup-boundary) links the [PTR capability contract](../specs/ptr-keyring-capability.md). Declared C_ActionBar.ShouldShowKeyring projects supplied action-bar state, without a C_Container alias or invented native constant. Original-consumer GREEN remains pending.
+
+## [2026-10-25] implementation | Housing plot blocker boundary
+
+[Current-house shape and startup](systems/housing-spatial-presence.md#current-house-shape-and-ptr-startup) links the [nullable snapshot contract](../specs/current-house-info.md): original tutorial data/utility fixture loads, state-backed documented HouseInfo and declared PTR-only SHARD_TRANSFER. Merged original-consumer RED observed; GREEN and final proof pending. Native policy remains unknown.
+
+## [2026-10-24] staged | Housing house-or-plot presence
+
+[Spatial model and selected consumer](systems/housing-spatial-presence.md) links the [contract](../specs/house-or-plot-presence.md): existing area input, Retail/PTR registered-world-event selector, constant/no-op contradictions and Forever downstream TOC restriction. Static staging only; no compilation or runtime proof.
 ## [2026-10-25] investigation | Mists battlefield vehicles
 
 [Original vehicle consumer](investigations/mists-battlefield-vehicles.md) links the [contract](../specs/mists-battlefield-vehicles.md): pinned API declarations, selected WorldMap provider/pins and supplied per-map state. Original-consumer missing-call RED and supplied-pin GREEN pass. Both raw captures contain 12 keys / 18 occurrences; vehicle errors are replaced by individually traced existing DeathMap provider errors. Exact base reproduces the 12/18 BEFORE map, and byte-identical paired producer-only RED fails as required. Mists/Retail all-target checks pass with three inherited/zero warnings; formatting and readability pass.
