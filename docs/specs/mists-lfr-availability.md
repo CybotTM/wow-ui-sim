@@ -28,7 +28,7 @@ Mists `C_LFGInfo.IsLFREnabled` consumes an explicit environment-local availabili
 ## Known gaps (current cycle)
 
 - [ ] Native default/availability policy remains unknown. Stock intentionally reports the named missing-input residual.
-- [ ] The next original Mists consumer boundary is `CanPlayerUseScenarioFinder` at `PVEFrame.lua:270`, declared at pinned `LFGInfoDocumentation.lua:51`. It is outside this LFR slice. The test observes LFR state before that line, then accepts only its exact missing-function error.
+- [ ] The successor-boundary regression now supplies the separate [scenario finder input](mists-scenario-finder.md) and requires callback completion past `PVEFrame.lua:270`, retaining the existing pre270 LFR observer and all visibility/gap-anchor assertions. The former exact missing-function acceptance is removed. Runtime GREEN for this advance remains pending.
 
 ## Out of scope
 
