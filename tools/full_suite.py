@@ -1,50 +1,28 @@
 #!/usr/bin/env python3
-"""Run the full wow-ui-sim test suite for one commit, in the background, and record results.
-
-Usage:
-  full_suite.py run [REF] --target-dir SLOT [--build-jobs N] [--profile PROFILE]
-                             Test REF (default origin/master) now; blocks until done.
-  full_suite.py submit [REF] --target-dir SLOT [--build-jobs N] [--profile PROFILE]
-                             Same, detached via systemd-run --user; prints the unit name.
-  full_suite.py status [REF]   Print per-profile results for REF (or the latest run's SHA).
-
-Build jobs default to 1, independent of FULL_SUITE_JOBS (nextest workers, default 16).
-SLOT must resolve to one of ~/.cache/wow-ui-sim-targets/slot-{0,1,2,3}.
-Runs serialize on a lock. Each run uses a dedicated checkout and an explicitly selected
-approved target slot so agents' working copies are never touched. Results:
-RESULTS/<sha>-<profile>.json plus <sha>-<profile>.log; master runs also update
-RESULTS/master-latest-<profile>.json for same-profile NEW failure comparisons.
-Retail (default) retains Cargo default features; other profiles select explicit features.
-Integration/lib run for every profile; prefork runs only for Retail/Mists.
-"""
-
+"""Run a certified full suite for one frozen commit."""
 import argparse
 import fcntl
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
 ROOT = Path.home() / "Projects/wow"
 REPO = ROOT / "wow-ui-sim"
-CHECKOUT = ROOT / "full-suite-checkout"
 RESULTS = ROOT / "full-suite-results"
 LOCK = RESULTS / ".lock"
 JOBS = os.environ.get("FULL_SUITE_JOBS", "16")
 PROFILES = ("retail", "ptr", "wrath", "mists", "wowforever", "era", "anniversary")
-FAILED = re.compile(
-    r"^\s*(?:FAIL|SIGSEGV|SIGABRT|TIMEOUT) \[.*?\] (?:\(\s*\d+/\d+\) )?\S+ (\S+)", re.M
-)
-PREFORK_FAILED = re.compile(r"^test (\S+) \.\.\. FAILED", re.M)
+FAILED = re.compile(r"^test (\S+) \.\.\. FAILED", re.M)
 
 
 def git(*args, cwd=REPO):
-    return subprocess.run(
-        ["git", *args], cwd=cwd, check=True, capture_output=True, text=True
-    ).stdout.strip()
+    return subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True, text=True).stdout.strip()
 
 
 def resolve(ref):
@@ -53,33 +31,15 @@ def resolve(ref):
 
 
 def prepare_checkout(sha):
-    if not (CHECKOUT / ".git").exists():
-        subprocess.run(
-            ["git", "clone", "-q", "--shared", str(REPO), str(CHECKOUT)], check=True
-        )
-    git("fetch", "-q", str(REPO), sha, cwd=CHECKOUT)
-    git("checkout", "-q", "--force", sha, cwd=CHECKOUT)
-    git("clean", "-q", "-fdx", "-e", "target", cwd=CHECKOUT)
-
-
-def run_step(name, cmd, log, env):
-    cmd = [*cmd, "--offline", "--locked"]
-    start = time.monotonic()
-    proc = subprocess.run(cmd, cwd=CHECKOUT, env=env, capture_output=True, text=True)
-    output = proc.stdout + proc.stderr
-    log.write(f"===== {name}: {' '.join(cmd)} (exit {proc.returncode})\n{output}\n")
-    return {
-        "exit": proc.returncode,
-        "seconds": round(time.monotonic() - start, 1),
-        "command": cmd,
-        "environment": {
-            "WOW_SIM_TIMEOUT_FIXTURE_CAPACITY": env.get("WOW_SIM_TIMEOUT_FIXTURE_CAPACITY")
-        },
-    }, output
-
-
-def summarize(output, pattern):
-    return sorted(set(pattern.findall(output)))
+    checkout = Path.home() / ".worktrees" / f"wow-ui-sim-fullsuite-{sha[:12]}"
+    if not checkout.exists():
+        checkout.parent.mkdir(parents=True, exist_ok=True)
+        git("worktree", "add", "--detach", str(checkout), sha)
+    if git("rev-parse", "HEAD", cwd=checkout) != sha:
+        raise ValueError(f"worktree has wrong HEAD: {checkout}")
+    if git("status", "--porcelain", "--untracked-files=all", cwd=checkout):
+        raise ValueError(f"worktree has changes: {checkout}")
+    return checkout
 
 
 def validate_target_dir(value):
@@ -87,12 +47,9 @@ def validate_target_dir(value):
     if not target.is_absolute():
         raise ValueError("target dir must be absolute")
     target = target.resolve()
-    forbidden = {(REPO / "target").resolve(), (CHECKOUT / "target").resolve()}
     slots = {Path.home() / f".cache/wow-ui-sim-targets/slot-{i}" for i in range(4)}
-    if target in forbidden or target not in slots:
-        raise ValueError(
-            "target dir must resolve to an approved cache slot (0..3), not a checkout target"
-        )
+    if target not in slots:
+        raise ValueError("target dir must resolve to an approved cache slot (0..3)")
     return target
 
 
@@ -103,52 +60,90 @@ def positive_build_jobs(value):
     return jobs
 
 
-def suite_steps(build_jobs, profile):
-    features = (
-        []
-        if profile == "retail"
-        else ["--no-default-features", "--features", f"sound,gui,casc,client-{profile}"]
-    )
-    return [
-        (
-            "integration",
-            [
-                "cargo",
-                "nextest",
-                "run",
-                f"-j{build_jobs}",
-                "--test",
-                "integration",
-                "--no-fail-fast",
-                "--test-threads",
-                JOBS,
-                *features,
-            ],
-            FAILED,
-        ),
-        (
-            "prefork",
-            ["cargo", "test", f"-j{build_jobs}", "--test", "prefork_full_ui", *features]
-            if profile in ("retail", "mists")
-            else None,
-            PREFORK_FAILED,
-        ),
-        (
-            "lib",
-            [
-                "cargo",
-                "nextest",
-                "run",
-                f"-j{build_jobs}",
-                "--lib",
-                "--no-fail-fast",
-                "--test-threads",
-                JOBS,
-                *features,
-            ],
-            FAILED,
-        ),
-    ]
+def claim_slot(target, sha, profile):
+    capacity = Path.home() / ".worktrees/logs/capacity.sh"
+    env = dict(os.environ, CAPACITY_ID=f"full-suite-{sha[:12]}-{profile}")
+    env.pop("CAPACITY_PEEK", None)
+    result = subprocess.run([str(capacity)], env=env, capture_output=True, text=True)
+    if result.returncode or not re.search(r"\|\s*ADD:", result.stdout):
+        raise ValueError(f"capacity refused: {result.stdout.strip()} {result.stderr.strip()}")
+    owner = f"full-suite {sha[:12]} {profile}"
+    try:
+        fd = os.open(target / ".owner", os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError as error:
+        raise ValueError(f"slot owner already exists: {target / '.owner'}") from error
+    with os.fdopen(fd, "w") as stream:
+        stream.write(owner)
+    return owner
+
+
+def release_slot(target, sha, profile, owner):
+    claim = target / ".owner"
+    if claim.read_text() != owner:
+        raise ValueError(f"slot owner changed: {claim}")
+    dest = Path.home() / ".local/state/wow-ui-sim/handoff/full-suite" / f"{sha[:12]}-{profile}"
+    dest.mkdir(parents=True, exist_ok=True)
+    claim.replace(dest / f"{target.name}.owner.released")
+
+
+def build(checkout, target, sha, profile, jobs, owner, log):
+    slot = target.name.removeprefix("slot-")
+    unit = f"full-suite-build-{sha[:12]}-{profile}-{time.time_ns()}"
+    features = [] if profile == "retail" else ["--no-default-features", "--features", f"sound,gui,casc,client-{profile}"]
+    cmd = ["slot-build.py", "--worktree", str(checkout), "--slot", slot, "--unit", unit,
+           "--owner", owner, "--capacity-id", unit, "--", "cargo", "test", "--no-run",
+           "--all-targets", "--locked", "--offline", "--message-format=json", f"-j{jobs}", *features]
+    env = dict(os.environ, PATH=os.environ.get("PATH", "") + os.pathsep + str(REPO / "scripts"))
+    proc = subprocess.run(cmd, env=env, capture_output=True, text=True)
+    log.write(f"===== build: {' '.join(cmd)} (exit {proc.returncode})\n{proc.stdout}{proc.stderr}\n")
+    log.flush()
+    if proc.returncode:
+        raise ValueError(f"slot-build guard rejected: {proc.stderr.strip() or proc.stdout.strip()}")
+    receipt = target / "receipts" / f"{unit}.json"
+    while True:
+        state = subprocess.run(["systemctl", "--user", "show", unit, "-p", "SubState", "-p", "Result"], capture_output=True, text=True)
+        if state.returncode:
+            raise ValueError(f"slot-build status failed: {state.stderr.strip()}")
+        fields = dict(line.split("=", 1) for line in state.stdout.splitlines() if "=" in line)
+        if fields.get("SubState") in ("exited", "failed", "dead"):
+            if fields.get("Result") != "success":
+                raise ValueError(f"slot-build unit failed: {fields.get('Result')}")
+            break
+        time.sleep(1)
+    if not receipt.exists():
+        raise ValueError("slot-build certification receipt missing")
+    data = json.loads(receipt.read_text())
+    if data.get("result") != "success" or data.get("returncode") != 0:
+        raise ValueError(f"slot-build certification failed: {data.get('result')}: {data.get('dep_info_errors')}")
+    return data
+
+
+def test_artifact(receipt, name, kind):
+    matches = [r["executable"] for r in receipt.get("reported_artifacts", [])
+               if r.get("executable") and r.get("profile", {}).get("test")
+               and r.get("target", {}).get("name") == name
+               and kind in r.get("target", {}).get("kind", [])]
+    if len(matches) != 1:
+        raise ValueError(f"certified test artifact missing or ambiguous: {name}")
+    return matches[0]
+
+
+def run_step(name, cmd, checkout, log, env):
+    start = time.monotonic()
+    proc = subprocess.run(cmd, cwd=checkout, env=env, capture_output=True, text=True)
+    output = proc.stdout + proc.stderr
+    log.write(f"===== {name}: {' '.join(cmd)} (exit {proc.returncode})\n{output}\n")
+    log.flush()
+    return {"exit": proc.returncode, "seconds": round(time.monotonic() - start, 1),
+            "command": cmd, "environment": {"WOW_SIM_TIMEOUT_FIXTURE_CAPACITY": env.get("WOW_SIM_TIMEOUT_FIXTURE_CAPACITY")}}, output
+
+
+def new_failures(result):
+    base_path = RESULTS / f"master-latest-{result['profile']}.json"
+    if not base_path.exists():
+        return None
+    base = json.loads(base_path.read_text())
+    return {name: sorted(set(fails) - set(base["failures"].get(name, []))) for name, fails in result["failures"].items()}
 
 
 def run(ref, build_jobs, target_dir, profile="retail"):
@@ -157,88 +152,55 @@ def run(ref, build_jobs, target_dir, profile="retail"):
     with open(LOCK, "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         sha = resolve(ref)
-        prepare_checkout(sha)
-        env = dict(
-            os.environ,
-            CARGO_BUILD_JOBS=str(build_jobs),
-            CARGO_TARGET_DIR=str(target_dir),
-            CARGO_TERM_COLOR="never",
-        )
-        result = {
-            "ref": ref,
-            "sha": sha,
-            "profile": profile,
-            "started": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-            "steps": {},
-            "failures": {},
-        }
+        result = {"ref": ref, "sha": sha, "profile": profile, "started": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "steps": {}, "failures": {}}
+        output_path = RESULTS / f"{sha}-{profile}.json"
+        output_path.unlink(missing_ok=True)
+        owner = None
         with open(RESULTS / f"{sha}-{profile}.log", "w") as log:
-            for name, cmd, pattern in suite_steps(build_jobs, profile):
-                if cmd is None:
-                    reason = "prefork_full_ui supports only Retail/Mists"
-                    result["steps"][name] = {
-                        "status": "not_applicable",
-                        "reason": reason,
-                    }
-                    log.write(f"===== {name}: N/A ({reason})\n")
-                    continue
-                result["steps"][name], output = run_step(name, cmd, log, env)
-                result["failures"][name] = summarize(output, pattern)
+            try:
+                checkout = prepare_checkout(sha)
+                owner = claim_slot(target_dir, sha, profile)
+                receipt = build(checkout, target_dir, sha, profile, build_jobs, owner, log)
+                env = dict(os.environ, CARGO_TARGET_DIR=str(target_dir), RUST_TEST_THREADS=JOBS, CARGO_TERM_COLOR="never")
+                source = Path(os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local/share"))) / "wow-sim/cvars.json"
+                with tempfile.TemporaryDirectory(prefix="full-suite-cvars-") as tmp:
+                    dest = Path(tmp) / "wow-sim/cvars.json"
+                    dest.parent.mkdir(parents=True)
+                    fd = os.open(source, os.O_RDONLY | os.O_NOATIME)
+                    with os.fdopen(fd, "rb") as inp, dest.open("wb") as out:
+                        shutil.copyfileobj(inp, out)
+                    env["XDG_DATA_HOME"] = tmp
+                    for name, artifact, kind in [("integration", "integration", "test"), ("prefork", "prefork_full_ui", "test"), ("lib", "wow_ui_sim", "lib")]:
+                        if name == "prefork" and profile not in ("retail", "mists"):
+                            result["steps"][name] = {"status": "not_applicable", "reason": "prefork_full_ui supports only Retail/Mists"}
+                            continue
+                        binary = test_artifact(receipt, artifact, kind)
+                        result["steps"][name], output = run_step(name, [binary], checkout, log, env)
+                        result["failures"][name] = sorted(set(FAILED.findall(output)))
+                result["status"] = "FAILED" if any(step.get("exit", 0) for step in result["steps"].values()) else "PASSED"
+            except (OSError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as error:
+                result["status"] = "FAILED"
+                result["error"] = str(error)
+                log.write(f"FAILED: {error}\n")
+            finally:
+                if owner is not None:
+                    try:
+                        release_slot(target_dir, sha, profile, owner)
+                    except (OSError, ValueError) as error:
+                        result["status"] = "FAILED"
+                        result["error"] = f"slot release failed: {error}"
         result["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
         result["new_failures"] = new_failures(result)
-        (RESULTS / f"{sha}-{profile}.json").write_text(json.dumps(result, indent=2) + "\n")
+        output_path.write_text(json.dumps(result, indent=2) + "\n")
         if ref in ("origin/master", "master"):
-            (RESULTS / f"master-latest-{profile}.json").write_text(
-                json.dumps(result, indent=2) + "\n"
-            )
-        print(
-            json.dumps(
-                {k: result[k] for k in ("sha", "profile", "steps", "new_failures")}, indent=2
-            )
-        )
-
-
-def new_failures(result):
-    base_path = RESULTS / f"master-latest-{result['profile']}.json"
-    if not base_path.exists():
-        return None
-    base = json.loads(base_path.read_text())
-    return {
-        name: sorted(set(fails) - set(base["failures"].get(name, [])))
-        for name, fails in result["failures"].items()
-    }
+            (RESULTS / f"master-latest-{profile}.json").write_text(json.dumps(result, indent=2) + "\n")
+        print(json.dumps(result, indent=2))
 
 
 def submit(ref, build_jobs, target_dir, profile="retail"):
     target_dir = validate_target_dir(target_dir)
     unit = f"full-suite-{profile}-{int(time.time())}"
-    subprocess.run(
-        [
-            "systemd-run",
-            "--user",
-            f"--unit={unit}",
-            "--collect",
-            "--slice=agents.slice",
-            "-p",
-            "CPUQuota=1200%",
-            "-p",
-            "MemoryHigh=16G",
-            "-p",
-            "MemoryMax=16G",
-            f"--setenv=FULL_SUITE_JOBS={JOBS}",
-            sys.executable,
-            os.path.abspath(__file__),
-            "run",
-            ref,
-            "--profile",
-            profile,
-            "--build-jobs",
-            str(build_jobs),
-            "--target-dir",
-            str(target_dir),
-        ],
-        check=True,
-    )
+    subprocess.run(["systemd-run", "--user", f"--unit={unit}", "--collect", "--slice=agents.slice", "-p", "CPUQuota=1200%", "-p", "MemoryMax=9G", "-p", "MemorySwapMax=0", f"--setenv=FULL_SUITE_JOBS={JOBS}", sys.executable, os.path.abspath(__file__), "run", ref, "--profile", profile, "--build-jobs", str(build_jobs), "--target-dir", str(target_dir)], check=True)
     print(unit)
 
 
@@ -246,20 +208,12 @@ def status(ref):
     if ref:
         sha = resolve(ref)
     else:
-        runs = [
-            p
-            for p in RESULTS.glob("*.json")
-            if not p.name.startswith("master-latest")
-        ]
+        runs = [p for p in RESULTS.glob("*.json") if not p.name.startswith("master-latest")]
         if not runs:
             print("no result yet")
             return
-        latest = max(runs, key=lambda p: p.stat().st_mtime)
-        sha = json.loads(latest.read_text())["sha"]
-    profiles = {}
-    for profile in PROFILES:
-        path = RESULTS / f"{sha}-{profile}.json"
-        profiles[profile] = json.loads(path.read_text()) if path.exists() else None
+        sha = json.loads(max(runs, key=lambda p: p.stat().st_mtime).read_text())["sha"]
+    profiles = {profile: json.loads(path.read_text()) if (path := RESULTS / f"{sha}-{profile}.json").exists() else None for profile in PROFILES}
     result = {"sha": sha, "profiles": profiles}
     legacy = RESULTS / f"{sha}.json"
     if legacy.exists():
