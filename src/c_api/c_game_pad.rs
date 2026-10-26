@@ -1,4 +1,4 @@
-//! Bounded Forever mapped-stick queries and free-look-hover policy.
+//! Bounded Forever gamepad capability, mapped sticks and free-look-hover policy.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table, table_set_static};
 use crate::lua_api::script_helpers::fire_named_event_state;
@@ -24,6 +24,7 @@ pub struct MappedStickSnapshot {
 
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = super::ensure_namespace(state, "C_GamePad")?;
+    table_set_rust_fn_static(state, namespace, "IsEnabled", is_enabled)?;
     table_set_rust_fn_static(
         state,
         namespace,
@@ -48,6 +49,14 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         "SetAllowHoverEventsWithFreeLook",
         set_allow_hover_events_with_free_look,
     )
+}
+
+fn is_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    // Explicit supplied capability, independent of mapped sticks. Projecting the
+    // existing GamePadEnable CVar is simulator policy, not native detection.
+    let enabled = borrow_state(state)?.cvars.get_bool("GamePadEnable");
+    state.push(Val::Bool(enabled));
+    Ok(1)
 }
 
 fn get_allow_hover_events_with_free_look(state: &mut LuaState) -> LuaResult<u32> {

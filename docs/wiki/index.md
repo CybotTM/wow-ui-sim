@@ -14,6 +14,10 @@
 
 [Original consumer boundaries](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) link the [bounded supplied-input contract](../specs/ptr-i4-game-rules.md). Original-line RED now proves five function boundaries after enum prerequisites; RecentAllies labels pass. Five supplied-state producers are implemented; final merged acceptance remains pending. Preset support and aggregate I4 tests are excluded from this landing packet and retained for follow-up.
 
+## [2026-10-25] proof | Forever explicit gamepad capability
+
+[Capability state and wrapper proof](systems/gamepad-mapped-state.md#explicit-enabled-capability) links the [contract](../specs/forever-gamepad-enabled.md): existing GamePadEnable CVar input, independent of mapped sticks; original secure restricted wrapper RED/GREEN, unchanged 26/26 Forever stock. Retail/PTR exact absence controls pass; their stock maps remain 16/18 and 296/410. All three all-target checks and formatting pass under the pre-I1 warning allowance. Native device detection remains unknown; startup is not clean.
+
 ## [2026-10-25] runtime proof | PTR I4 landable first batch
 
 [Bounded producer repair](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair) links the [contract](../specs/ptr-i4-first-green.md): four exact RED/GREEN pairs include the original Collections and GhostFrame transitions. Stock 298→296 raw keys has zero additions; Retail/PTR checks meet zero/known-three warning limits and formatting passes. Aggregate 173-shape tests remain on the lane only; native policy remains unknown.
