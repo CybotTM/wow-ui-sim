@@ -34,6 +34,10 @@ The inactive `GetActiveKeystoneInfo` return is unimplemented pending native evid
 
 Core reads map ID and active flag on addon load/start/resync, key level and deaths on start, `(name, elapsed)` from world timer 1, and map time limit from result 3. Tracker reads the current scenario step count and each indexed criteria record; it distinguishes weighted forces from boss criteria (165, or 0 with total=1), uses `quantityString`, `totalQuantity`, `assetID`, completion and description. Recorder reads the last completion snapshot. Forecast refresh uses a one-second `C_Timer.NewTicker` and `GetTime()-startTime`, so a controllable common clock is required for deterministic minutes-long acceptance.
 
+## Criteria rendering boundary
+
+Original modern ScenarioObjectiveTracker initialization calls `C_Scenario.ShouldShowCriteria` unguarded at line 74. Neither pinned Retail nor PTR generated documentation declares this member or its namespace, and neither pinned addon tree defines a Lua alias. Original criteria rendering remains blocked before its query producer. Native clarification and any missing producer belong to a separate lane. Do not swallow the initialization error, replace vendor behavior or report direct query tests as rendering proof.
+
 ## Proof requirements
 
 Each original-consumer selector must contradict constant/no-op producers independently. Preserve byte-identical tests on a producer-subtracted RED sibling. Add external InTimeBL forecast acceptance without changing its sources. Final gates include all seven zero-warning checks, default-mode Retail/PTR stock with bound binary/revision/argv/receipt, individual added-key tracing, formatting and changed-code readability.

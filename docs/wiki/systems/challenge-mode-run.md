@@ -16,7 +16,7 @@ Duration-object manual clocks, explicit world elapsed timers and the delta-drive
 
 ## Evidence status
 
-Initial feature RED is observed on the lane's own binary. Phase A Retail timer, map-icon, admin-event and profile-surface cases pass. The criteria fixture needed the original `ScenarioObjectiveTracker:InitModule` before `UpdateCriteria`; its first failure was an uninitialized parentModule, not a missing producer. Final paired original-consumer RED/GREEN, manual-clock execution, profile checks, stock comparison and external forecast acceptance remain pending at this implementation checkpoint.
+Initial feature RED is observed on the lane's own binary. Phase A Retail timer, map-icon, admin-event and profile-surface cases pass. The criteria fixture needs original `ScenarioObjectiveTracker:InitModule` before `UpdateCriteria`. Its first failure was an uninitialized parentModule. Original InitModule then fails at line 74 on unguarded `C_Scenario.ShouldShowCriteria`, absent from all 622 Retail and 647 PTR generated documentation files and with no Lua definition in either pinned addon tree. Original SetContainer invokes InitModule at line 78; container AddModule reaches it at Retail line 123 / PTR line 141. Original criteria rendering remains BLOCKED; no exception swallowing, vendor replacement or retired API restoration is permitted. Native clarification and any missing producer belong to a separate lane. Direct criteria snapshot tests are query proof, not original-rendering proof. All four manual clock selectors pass on the pre-integration Retail binary. Final merged paired proof, profile checks, stock and external acceptance remain pending.
 
 ## Sources
 
