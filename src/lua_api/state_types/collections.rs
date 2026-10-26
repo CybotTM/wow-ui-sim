@@ -637,6 +637,7 @@ pub struct BagItem {
     pub item_id: u32,
     pub stack_count: i32,
     pub hyperlink: Option<String>,
+    pub durability: Option<(u32, u32)>,
 }
 
 /// An equipped item in an inventory slot.

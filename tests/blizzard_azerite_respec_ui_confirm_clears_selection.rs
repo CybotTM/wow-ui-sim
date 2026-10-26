@@ -159,6 +159,7 @@ fn seed_respec_item(env: &wow_ui_sim::lua_api::WowLuaEnv) {
             item_id: AZERITE_ITEM_ID,
             stack_count: 1,
             hyperlink: None,
+            durability: None,
         },
     );
     state

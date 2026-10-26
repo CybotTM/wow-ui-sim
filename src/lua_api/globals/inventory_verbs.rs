@@ -125,6 +125,7 @@ fn store_cursor_item_in_backpack(state: &mut LuaState, slot: i32, item_id: u32, 
                 item_id,
                 stack_count,
                 hyperlink: None,
+                durability: None,
             },
         );
         st.cursor_item = None;

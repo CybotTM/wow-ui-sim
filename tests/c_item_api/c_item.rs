@@ -306,6 +306,7 @@ fn item_location_bag_link_preserves_captured_hyperlink() {
             item_id: 6948,
             stack_count: 1,
             hyperlink: Some(captured.to_string()),
+            durability: None,
         },
     );
     let (item_link, container_link): (String, String) = env.eval(

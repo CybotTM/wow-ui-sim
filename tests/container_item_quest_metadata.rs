@@ -14,6 +14,7 @@ fn supply_item(env: &WowLuaEnv, bag: i32, slot: i32, item_id: u32) {
             item_id,
             stack_count: 1,
             hyperlink: None,
+            durability: None,
         },
     );
 }
