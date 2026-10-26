@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Supplied voice settings access
+
+[Model and original callback](systems/voice-settings-access.md) record the six-profile declaration-backed query, unknown-state error and host-supplied observation. All 18 exact original-consumer GREEN/producer-free RED pairs pass with byte-identical tests; Wrath preserves absence. Seven all-target checks have zero warnings, all seven paired raw stock maps equal the supplied master baselines, and 98 final launch CVar guards are unchanged. No native readiness default, device catalog, complete initialization, timer cancellation or unsupplied forecast readiness is inferred.
+
 ## [2026-10-26] implementation | Mists transmog supplied input
 
 [Contract and selected display branch](systems/mists-transmog-enabled.md): byte-identical selectors fail producer-free RED at original line4 and pass GREEN for both real-control branches, isolation, transitions and unset recovery. The supplied-state query publishes only on Mists; no default is inferred. Bound stock is unchanged6/12; all seven all-target checks have zero warnings. Full settings, modern native-default policy and the Forever query remain outside this bounded proof.
