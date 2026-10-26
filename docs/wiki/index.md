@@ -14,6 +14,10 @@
 
 [Active-effect model and proof](systems/lua-api.md#active-loss-of-control-state) link the [contract](../specs/active-loss-of-control.md): empty per-unit state, declared record shapes, explicit admin input and executed Wrath absence. Byte-identical Retail original-consumer RED/GREEN and the existing event overlay pass. All seven raw stock maps are unchanged, and all seven separate all-target checks have zero compiler warnings. PTR consumer proof remains explicitly deferred to the upstream display-info initialization chain; no failed OnLoad step is replaced.
 
+## [2026-10-26] implementation | Mists supplied LFR availability
+
+[Environment-local input and original PVEFrame](systems/mists-lfr-availability.md) link the [contract](../specs/mists-lfr-availability.md). Byte-identical original-line RED and supplied-state GREEN cover ten observations, two environments and unset recovery. Stock remains 6/12 with exactly two missing-function→named missing-input replacements. The exact scenario successor is outside this slice. Mists/Retail/Era all-target checks have zero warnings; formatting and changed-line readability pass.
+
 ## [2026-10-25] implementation | PTR Edit Mode declarations
 
 [Two original boundaries](investigations/ptr-edit-mode-declarations.md) link the [contract](../specs/ptr-edit-mode-declarations.md): declaration-backed boss directions and Gamepad preset, independent exact RED/GREEN and 270/376→268/374 stock. Display-info:800 SwingTimerSetting is the traced successor, not part of this slice. The module compiles on all profiles and publishes only when ACTIVE is PTR. PTR/Retail/Era full-feature all-target checks pass with zero warnings and separate accepted source-binding receipts; formatting and readability pass.

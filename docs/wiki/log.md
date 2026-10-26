@@ -10,6 +10,10 @@
 
 [Model and final proof](systems/lua-api.md#active-loss-of-control-state) link the [contract](../specs/active-loss-of-control.md). Byte-identical Retail original-display RED/GREEN, explicit overlay fixture, and positive Wrath absence pass. All seven raw stock maps are unchanged; all seven separate all-target checks pass with zero compiler warnings. PTR consumer proof is deferred to its original display-info initialization chain without fixture replacement.
 
+## [2026-10-26] implementation | Mists supplied LFR availability
+
+[Original PVEFrame and optional availability](systems/mists-lfr-availability.md): original-line missing-function RED is observed; the separate C API module publishes only on ACTIVE Mists, returns supplied booleans and raises an approved named missing-input error when unset. The revised byte-identical pair passes GREEN with ten observations and fails RED at line229. A line observer proves LFR state before the exact out-of-scope scenario error. Stock remains 6/12 with two missing-input key replacements and unchanged survivors. Mists/Retail/Era all-target checks have zero warnings; formatting and changed-line readability pass.
+
 ## [2026-10-25] proof | Mists supplied map display
 
 [Original group-provider proof](investigations/map-display-info-model.md#mists-original-onload-consumer--2026-10-25) passes exact corrected RED and supplied-state GREEN plus return-arity preservation. Stock 10/16→8/14 has no additions. Mists/Retail/Era/Anniversary all-target checks pass with zero warnings; formatting and readability pass. The actual OnLoad boundary precedes post-load fog-pin mutation; the separate defect is recorded, not fixed.
