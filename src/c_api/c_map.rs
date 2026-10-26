@@ -102,7 +102,8 @@ fn register_c_map_methods(state: &mut LuaState, table_ref: LuaTableRef) -> LuaRe
     }
     if matches!(
         crate::client_profile::ACTIVE,
-        crate::client_profile::ClientProfile::Era
+        crate::client_profile::ClientProfile::Mists
+            | crate::client_profile::ClientProfile::Era
             | crate::client_profile::ClientProfile::Anniversary
     ) {
         table_set_rust_fn_static(
