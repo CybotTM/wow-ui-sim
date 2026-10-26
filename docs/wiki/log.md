@@ -3096,4 +3096,4 @@ Added the [70268 contract](../specs/mists-global-strings.md) and [source/consume
 
 ## 2026-10-26 — Forever Camelot spellbook
 
-Added [supplied observations](systems/forever-camelot-spellbook.md), selected-constructor ordering and bounded proof status; linked the shared availability model.
+Recorded [supplied observations](systems/forever-camelot-spellbook.md), selected-constructor ordering, three exact RED/GREEN pairs, unchanged 26/26 stock and seven zero-warning all-target checks. Linked the shared availability model and retained the item-browsing/device-startup limits.
