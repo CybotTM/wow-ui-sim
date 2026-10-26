@@ -36,7 +36,6 @@ pub(crate) struct WowLuaAppData {
     /// Populated by `global_slots::install` at the end of
     /// `init_lua_state`. `None` on a fresh VM before bootstrap runs.
     pub(crate) global_slots: Option<crate::lua_api::global_slots::GlobalSlotTable>,
-    #[cfg(any(feature = "client-wowforever", test))]
     pub(crate) addon_modules: Option<crate::loader::addon_modules::ModuleRegistry>,
 }
 
@@ -49,7 +48,6 @@ impl WowLuaAppData {
             on_update_cache_dirty: true,
             hot_literals: None,
             global_slots: None,
-            #[cfg(any(feature = "client-wowforever", test))]
             addon_modules: None,
         }
     }

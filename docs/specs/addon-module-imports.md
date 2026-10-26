@@ -1,6 +1,6 @@
 # Addon module imports
 
-World of Warcraft: Forever 1.60.1 Beta exposes `require(moduleName)` as an import of an already-finished addon Lua file, not a filesystem or package loader. The `require` source contract is Warcraft Wiki revision 6879760. The added Forever `import` callable reuses simulator compatibility policy, not an established native `import=require` contract; implementation notes live in [addon module imports](../wiki/systems/addon-module-imports.md).
+World of Warcraft: Forever 1.60.1 Beta exposes `require(moduleName)` as an import of an already-finished addon Lua file, not a filesystem or package loader. The `require` source contract is Warcraft Wiki revision 6879760. The PTR and Forever `import` callable reuses simulator compatibility policy, not an established native `import=require` contract; implementation notes live in [addon module imports](../wiki/systems/addon-module-imports.md).
 
 ## What it must do
 
@@ -33,11 +33,20 @@ World of Warcraft: Forever 1.60.1 Beta exposes `require(moduleName)` as an impor
 
 These executed Forever requirements reuse simulator policy justified by vendor `import('.Utility')` after the TOC-loaded `Utility.lua` returns a table. Native import/require semantics, identity, grammar and error parity remain UNKNOWN.
 
+### PTR original module consumers
+
+- [x] Expose `import` on PTR before secure-environment copying and track completed TOC/XML modules through the same `ModuleRegistry` used by Forever.
+- [x] Resolve both original `Blizzard_GamepadSmartNavigation/SmartNavigation.lua:1` and `Debug.lua:1` imports to the original Utility table, preserving identity and callable behavior through garbage collection.
+- [x] Reject an unresolved Utility dependency even when its file exists on disk; imports do not execute it.
+
+PTR's pinned 12.1.7.70493 `Blizzard_GamepadSmartNavigation.toc:6` loads `Utility.lua` before both consumers (:8, :11). `Utility.lua:1` constructs a local table and :551 returns it. Both consumers begin with `local Utility = import(".Utility");`. `SmartNavigationMixin:RefreshButtonGroups` uses its captured table at `SmartNavigation.lua:1642`; `SmartNavigationDebug:OnUpdate` uses its captured iterators at `Debug.lua:88,92`. No generated APIDocumentation declaration or Lua definition for `import` was found in this pinned cache. These original statements justify extending the existing loader contract, not publishing a C_* API or claiming undocumented native parity.
+
 ### Profile isolation
 
-- [ ] Expose this API only for the `wowforever` profile. Other client profiles must retain their current `require` surface.
+- [x] Publish `import` in both PTR and Forever environments; preserve their existing `require` surfaces (completed-module lookup on Forever, restricted insecure lookup on PTR).
+- [ ] Keep `import` absent and preserve `require` on the five unsupported profiles. The gate and tests exist, but their runtime absence selectors were not executed in this cycle.
 
-Path/dependency requirements have sixteen pure resolver tests; registry/value/provenance requirements have fourteen actual-rilua unit tests. Fourteen current grouped integration tests exercise the real TOC/XML loader, delayed/coroutine imports, dynamic chunks, secure environments, addon varargs and existing peer-file taint behavior. Cross-profile final verification remains pending.
+Path/dependency requirements have sixteen pure resolver tests; registry/value/provenance requirements have fourteen actual-rilua unit tests. Fourteen current grouped integration tests exercise the real TOC/XML loader, delayed/coroutine imports, dynamic chunks, secure environments, addon varargs and existing peer-file taint behavior. Current original-consumer execution and seven-profile compilation are recorded in the [PTR checkpoint](../wiki/systems/addon-module-imports.md#ptr-original-consumers--2026-10-25); unsupported-profile runtime isolation remains unverified.
 
 ## How it works
 
@@ -48,12 +57,13 @@ Path/dependency requirements have sixteen pure resolver tests; registry/value/pr
 ## Implementation inventory
 
 - `src/loader/module_import.rs` — pure logical path and direct-dependency resolver.
-- `src/loader/addon_modules.rs` — completed-value registry, prototype-identity caller provenance, and direct Rust `require`/Forever `import` installation seam.
+- `src/loader/addon_modules.rs` — completed-value registry, prototype-identity caller provenance, and direct Rust Forever `require` and PTR/Forever `import` installation seam.
 - `src/lua_api/env.rs` — per-VM module metadata; module values and source closures are rooted in the Lua registry.
-- `src/loader/mod.rs` — declares the profile/test-gated resolver and runtime modules.
+- `src/lua_api/mod.rs` — internal VM context re-export used by the shared registry on every profile; it does not publish Lua globals.
+- `src/loader/mod.rs` — declares the shared resolver and runtime modules; ACTIVE gates publication and completion tracking.
 - `src/loader/lua_file.rs` — registers compiled-file provenance and publishes the existing execution helper's first return only after success.
 - `src/loader/addon.rs` — loads files from the selected TOC source rather than substituting a same-named repository-local file.
-- `src/lua_api/env_init/mod.rs` — installs Forever imports before secure-environment copying and preserves other profiles' sandbox behavior.
+- `src/lua_api/env_init/mod.rs` — installs PTR/Forever imports before secure-environment copying and preserves non-Forever `require` sandbox behavior.
 - `src/client_profile.rs` — selects the distinct Forever profile and interface version.
 
 ## Tests asserting this spec
@@ -61,6 +71,7 @@ Path/dependency requirements have sixteen pure resolver tests; registry/value/pr
 - `src/loader/module_import.rs` — sixteen unit tests for absolute/relative resolution, addon boundary rejection, direct dependency authorization, dynamic absolute exemption, malformed requests, and exact errors.
 - `src/loader/addon_modules.rs` — fourteen actual-rilua tests for completed values/GC identity and stack restoration, load boundaries, delayed/escaped closures, direct dependencies, spoofed dynamic sources, nearest dynamic origins, failed loads/replacement, non-reexecution and VM isolation.
 
+- `tests/ptr_module_import.rs` — original selected SmartNavigation/Debug closure, original Utility identity/GC and real button-group changes, missing absolute lookup, and on-disk non-TOC rejection followed by completed-file success in a fresh environment. Each selector rejects constant/no-op import producers independently.
 - `tests/addon_require.rs` — fourteen current Forever loader-boundary tests, including TOC dependencies, XML files, values, failed/self/forward imports and caller provenance.
 - `tests/forever_bug_capture.rs` — absolute local TOC loading followed by real error-capture consumers; requires the local BugGrabber/BugSack sources.
 - `tests/sandbox_dangerous_globals.rs` — profile-specific global/secure-environment exposure and absence of host package loading.
@@ -73,7 +84,7 @@ Source integrated at `012df1e45`: the binding adds only `import` registration to
 ## Known gaps (current cycle)
 
 - [x] Independent bounded import/control verification and normal vendor-method probe passed at the recorded source.
-- [ ] Cross-profile isolation and clean startup remain open; the current startup smoke is captured but failing.
+- [ ] Unsupported-profile runtime isolation and clean startup remain open. Seven-profile compilation passes, but it is not whole-client runtime acceptance.
 - [ ] Native Forever execution is not part of this task; the Wiki contract and local behavioral fixtures do not establish undocumented native edge cases.
 
 ## Out of scope
