@@ -1,6 +1,6 @@
-## [2026-10-26] implementation | Supplied stable pet slot observations
+## [2026-10-26] bounded proof | Supplied stable pet slot observations
 
-[State and original consumer boundary](systems/stable-pet-info.md) links the [contract](../specs/stable-pet-info.md): Retail/PTR explicit unknown/empty/record observations, shared PetInfo codec and fresh snapshots. Retail original-consumer RED observed; remaining execution gates are pending. Forever is unchanged.
+[State and original consumer proof](systems/stable-pet-info.md) links the [contract](../specs/stable-pet-info.md): Retail/PTR explicit unknown/empty/record observations, shared PetInfo codec and fresh snapshots. Six merged original-consumer REDs fail at the intended missing-query boundaries, and fourteen GREEN cases pass; raw stock stays Retail0/0 and PTR122/138 with zero per-key change. Seven all-target checks have zero compiler warnings; all100 launch CVar guards pass. Forever is unchanged in source, and excluded-profile raw publication is compiled-not-executed here. Full stable-window and native ownership policy remain excluded.
 
 ## [2026-10-26] implementation | Shared transmog availability
 

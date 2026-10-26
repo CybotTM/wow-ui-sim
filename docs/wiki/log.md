@@ -3108,7 +3108,7 @@ Added the [supplied bool/string contract](../specs/mists-scenario-finder.md) and
 
 ## 2026-10-26 — Supplied stable pet slots
 
-Added [slot observations](systems/stable-pet-info.md) and [contract](../specs/stable-pet-info.md). Original Retail consumer RED observed; GREEN and profile checks remain pending.
+Added [slot observations and merged proof](systems/stable-pet-info.md) with the [contract](../specs/stable-pet-info.md). Six exact original-consumer REDs fail at the intended missing-query boundaries, and fourteen GREEN cases pass at GREEN6f1f29349 / RED2c66b42ec. Stock stays Retail0/0 and PTR122/138 without per-key changes; seven all-target checks have zero JSON/plain warnings, including the approved Mists-only field repair. All100 CVar guards pass. Excluded-profile publication remains compiled-not-executed in this lane; full-window and native ownership/default policy remain separate.
 
 ## 2026-10-26 — Pinned Mists global strings and reputation exposure
 

@@ -12,6 +12,19 @@ Retail/PTR slot queries use explicit environment-local observations. The [contra
 
 The selected Retail root and PTR Standard StableUI create the original hidden `StableFrame`. Primary tests call its original `RefreshSelectedPetData`; secondary tests observe original `ActivePetList.Refresh` after secondary-button `SetPet`. These are bounded interactions, not full stable-window or 3D acceptance. Retained setup diagnostics remain visible.
 
+## Verification — 2026-10-26
+
+Merged GREEN6f1f29349 / RED2c66b42ec use byte-identical lane fixtures. Each profile has three exact original-consumer RED failures at the intended missing-query boundaries and seven exact GREEN passes. The primary selection routes cover varied slots, complete records, updates, explicit empty, unset, clearing, recovery and environment isolation. The secondary route proves original SetPet consumption only; both existing active-list fixtures also pass.
+
+| Profile | Raw stock RED → GREEN | Per-key delta |
+| --- | --- | --- |
+| Retail | 0/0 → 0/0 | 0 |
+| PTR | 122/138 → 122/138 | 0 |
+
+All seven full-feature all-target checks pass with zero Cargo JSON/plain compiler warnings. The approved Mists-only fixture repair is3af7fab2a; it changes no production source and leaves Retail/PTR runtime evidence applicable. Formatting/readability pass. All100 guarded launches (44 merged) preserve the original CVar file stat/hash. Pinned declarations and selected consumer hashes are unchanged.
+
+Outside Retail/PTR, this lane provides source gating and compilation proof, not newly executed raw-publication/runtime acceptance. That remains with I1. PTR setup diagnostics and stock errors are retained; this is not a claim of complete StableUI cleanliness or native ownership/default policy.
+
 ## Sources
 
 - [Contract](../../specs/stable-pet-info.md) and `tests/stable_pet_info.rs`.
