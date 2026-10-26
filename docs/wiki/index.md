@@ -1,6 +1,6 @@
-## [2026-10-25] RED proof | CF-2 party minimum
+## [2026-10-25] Retail proof | CF-2 party minimum
 
-[Original-consumer proof](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) now reaches the missing GetMinLevel call independently through specific and random Retail selectors. Original frame/bindings/provenance pass; empty-catalog preservation passes. Pinned-master stock is 12/14. GREEN and PTR acceptance remain pending; Mists is a separate LFR-input boundary.
+[Original-consumer proof](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) passes specific/random Retail RED→GREEN with original frame/bindings/provenance and both disjoint ID sets. Empty-catalog preservation passes. Stock12/14→10/12 removes only the original GetMinLevel pair, with no additions or changed surviving counts. PTR and final warning gates remain pending; Mists is a separate LFR-input boundary.
 
 ## [2026-10-24] staged | CF-2 supplied party minimum
 

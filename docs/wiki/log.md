@@ -1,6 +1,6 @@
-## [2026-10-25] RED proof | CF-2 party minimum
+## [2026-10-25] Retail proof | CF-2 party minimum
 
-[Original consumer](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) rejects missing GetMinLevel at Shared/ScenarioFinder_Shared.lua:58 in each exact Retail selector. Test custody is isolated from removed TTS tests; the staged private fixture import and PTR TOC-name assumption are repaired. GREEN/PTR/check acceptance is pending.
+[Original consumer](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) passes both exact Retail RED→GREEN selectors; stock12/14→10/12 has no additions/count changes. Lane tests remain isolated from removed TTS tests. Staged private fixture/producer helper imports and the PTR TOC-name assumption are repaired. PTR/final checks remain pending.
 
 ## [2026-10-24] static producer | CF-2 party minimum
 
