@@ -23,6 +23,12 @@ The source checkpoint is `5327a3797`. Historical seven-profile module receipts a
 
 `cf2_forever.rs` and `cf2_group_buff_preservation.rs` now pass their registered Forever cases after upstream producer integration and remain unchanged. Other retained files and both shared helpers remain unchanged.
 
+## Item-upgrade restoration — 2026-10-26
+
+`api_shape_item_upgrade.rs` is restored with supplied-location producers and original generic ItemUtil proof on Retail/PTR/Forever/Mists/Era/Anniversary. The historical boolean-only case is preservation, not eligibility acceptance. Its replacement covers original Match/Mismatch, movement, removal, independent environments and explicit missing-input diagnostics; a separate SetReagentCount recreation regression proves invalidation. See [final coverage and limits](../systems/item-upgrade-eligibility.md#final-proof--2026-10-26).
+
+All six original-consumer RED/GREEN pairs use identical test bytes. Seven all-target checks have zero JSON/plain warnings, and all six raw stock maps remain unchanged. The separate bag-helper preservation test passes on Retail/PTR/Forever but is BLOCKED on Mists/Era/Anniversary before its seed/query because Blizzard_POIButton has no compatible TOC. That block is not a pass or an upgrade-window acceptance claim. Accepted TTS cases are unchanged.
+
 ## Forever Gamepad restoration — 2026-10-26
 
 The non-nil obligations in `cf2_gamepad_temp_cvars.rs` are restored with the single-storage producer. The original lifecycle, saved-file assertions, original TargetLogic callback and explicit unsupported-nil diagnostic pass; the migrated legacy Core-removal case also passes. See [listener identity and proof](../systems/forever-temporary-cvars.md). Accepted TTS test bytes remain unchanged.

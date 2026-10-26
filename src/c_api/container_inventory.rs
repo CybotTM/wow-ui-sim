@@ -4,6 +4,7 @@
 //! Hyperlinks, enchants, and gems do not survive cursor transfer in this model.
 
 use crate::c_api::container_actions::ContainerUseRequest;
+use crate::c_api::item_upgrade_eligibility::{self, ItemSlot};
 use crate::lua_api::methods::borrow_state_mut;
 use crate::lua_api::state::{BagItem, CursorInfo, CursorItemOrigin, EquippedItem, SimState};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
@@ -53,6 +54,7 @@ pub(crate) fn split_container_item(state: &mut LuaState) -> LuaResult<u32> {
     }
     item.stack_count -= amount;
     let item_id = item.item_id;
+    item_upgrade_eligibility::discard_cursor(&mut sim);
     sim.cursor_item = Some(CursorInfo::Item {
         item_id,
         stack_count: amount,
@@ -98,6 +100,7 @@ pub(crate) fn pickup_container_item(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     let held = read_cursor_bag_item(&sim);
     let dropping = held.is_some();
+    item_upgrade_eligibility::swap_with_cursor(&mut sim, ItemSlot::Bag(bag, slot));
     let displaced = match held {
         Some(item) => sim.bag_items.insert((bag, slot), item),
         None => sim.bag_items.remove(&(bag, slot)),
@@ -134,7 +137,13 @@ pub(crate) fn pickup_inventory_item(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     if matches!(sim.cursor_item, Some(CursorInfo::Item { .. })) {
         equip_held_item(&mut sim, slot);
-    } else if let Some(item) = sim.player.equipped_items.remove(&slot) {
+    } else if sim.player.equipped_items.contains_key(&slot) {
+        item_upgrade_eligibility::swap_with_cursor(&mut sim, ItemSlot::Equipment(slot));
+        let item = sim
+            .player
+            .equipped_items
+            .remove(&slot)
+            .expect("checked equipment");
         sim.cursor_item = Some(create_equipped_cursor(item, slot));
     }
     Ok(0)
@@ -160,6 +169,7 @@ fn equip_held_item(sim: &mut SimState, slot: i32) {
         enchant_id: 0,
         gem_ids: [0; 3],
     };
+    item_upgrade_eligibility::swap_with_cursor(sim, ItemSlot::Equipment(slot));
     let displaced = sim.player.equipped_items.insert(slot, incoming);
     sim.cursor_item = displaced.map(|item| create_equipped_cursor(item, slot));
 }

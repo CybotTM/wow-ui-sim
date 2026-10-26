@@ -115,6 +115,10 @@ fn find_first_free_backpack_slot(state: &mut LuaState) -> Option<i32> {
 
 fn store_cursor_item_in_backpack(state: &mut LuaState, slot: i32, item_id: u32, stack_count: i32) {
     if let Ok(mut st) = borrow_state_mut(state) {
+        crate::c_api::item_upgrade_eligibility::swap_with_cursor(
+            &mut st,
+            crate::c_api::item_upgrade_eligibility::ItemSlot::Bag(0, slot),
+        );
         st.bag_items.insert(
             (0, slot),
             crate::lua_api::state::BagItem {
@@ -273,6 +277,7 @@ fn clear_cursor_payload(state: &mut LuaState) -> LuaResult<u32> {
     let Ok(mut st) = borrow_state_mut(state) else {
         return Ok(0);
     };
+    crate::c_api::item_upgrade_eligibility::discard_cursor(&mut st);
     st.cursor_item = None;
     drop(st);
     fire_named_event_state(state, "CURSOR_CHANGED", &[]);

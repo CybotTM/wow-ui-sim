@@ -10,6 +10,10 @@
 
 [Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.
 
+## [2026-10-26] proof | Supplied item-upgrade eligibility
+
+[Final six-profile coverage](systems/item-upgrade-eligibility.md#final-proof--2026-10-26) links the [contract](../specs/item-upgrade-eligibility.md): original generic ItemUtil RED/GREEN, supplied-location movement/removal, diagnostics, isolation and SetReagentCount recreation invalidation. Seven all-target checks have zero JSON/plain warnings; all six raw stock maps are unchanged. Mists/Era/Anniversary bag-helper preservation remains BLOCKED before its seed/query at the existing incompatible Blizzard_POIButton TOC. The supplied shown-frame context is not an original upgrade-window acceptance claim.
+
 ## [2026-10-26] implementation | PTR SwingTimer declarations
 
 [Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) links the [contract](../specs/ptr-edit-mode-declarations.md): all seven setting identifiers, three visibility choices and their metadata pass byte-identical original Scale-boundary RED/full-constructor GREEN. Stock stays216/282 with both replacement raw keys traced to the absent SwingTimer system key; that next boundary is unfixed. PTR/Retail/Era separate all-target receipts have zero warnings; formatting/readability pass. Other profiles keep their existing declaration paths.
