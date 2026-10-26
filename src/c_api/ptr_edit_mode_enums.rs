@@ -23,7 +23,8 @@ type EnumFields = (&'static str, &'static [(&'static str, i32)]);
 const THREE_VALUES_META: &[(&str, i32)] = &[("NumValues", 3), ("MinValue", 0), ("MaxValue", 2)];
 
 // Pinned Blizzard_APIDocumentationGenerated/EditModeManagerConstantsDocumentation.lua:
-// BossFrameGrowDirection at 111–122; EditModePresetLayouts at 639–650.
+// BossFrameGrowDirection at 111–122; EditModePresetLayouts at 639–650;
+// EditModeSwingTimerSetting at 702–717; EditModeSwingTimerVisibility at 732–743.
 const DECLARATIONS: &[EnumFields] = &[
     (
         "BossFrameGrowDirection",
@@ -35,4 +36,25 @@ const DECLARATIONS: &[EnumFields] = &[
         &[("Modern", 0), ("Classic", 1), ("Gamepad", 2)],
     ),
     ("EditModePresetLayoutsMeta", THREE_VALUES_META),
+    (
+        "EditModeSwingTimerSetting",
+        &[
+            ("Scale", 0),
+            ("Opacity", 1),
+            ("Visibility", 2),
+            ("Width", 3),
+            ("Height", 4),
+            ("ShowBarTitle", 5),
+            ("ShowTime", 6),
+        ],
+    ),
+    (
+        "EditModeSwingTimerSettingMeta",
+        &[("NumValues", 7), ("MinValue", 0), ("MaxValue", 6)],
+    ),
+    (
+        "EditModeSwingTimerVisibility",
+        &[("Always", 0), ("InCombat", 1), ("Hidden", 2)],
+    ),
+    ("EditModeSwingTimerVisibilityMeta", THREE_VALUES_META),
 ];

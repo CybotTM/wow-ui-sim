@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | PTR SwingTimer declarations
+
+[Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) reaches the exact Scale RED at800/801. Both pinned declaration families and metadata are added through the existing runtime-only PTR gate; full-constructor GREEN, paired stock and checks remain pending.
+
 ## [2026-10-25] proof | Mists supplied map display
 
 [Original group-provider proof](investigations/map-display-info-model.md#mists-original-onload-consumer--2026-10-25) passes exact corrected RED and supplied-state GREEN plus return-arity preservation. Stock 10/16→8/14 has no additions. Mists/Retail/Era/Anniversary all-target checks pass with zero warnings; formatting and readability pass. The actual OnLoad boundary precedes post-load fog-pin mutation; the separate defect is recorded, not fixed.
