@@ -556,6 +556,14 @@ class DirectoryInputDigestTests(unittest.TestCase):
         link.unlink()
         self.assertIsNone(self.digest(spelling))
 
+    def test_directory_digest_cannot_equal_file_content_digest(self):
+        root = self.slot / "tree"
+        root.mkdir()
+        directory_digest = self.digest(root)
+        root.rmdir()
+        root.write_bytes(b"directory\0")
+        self.assertNotEqual(directory_digest, self.digest(root))
+
     def test_cyclic_directory_symlink_fails_closed(self):
         root = self.slot / "tree"
         root.mkdir()
