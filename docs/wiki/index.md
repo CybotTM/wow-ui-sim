@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | Mists supplied LFR availability
 
-[Environment-local input and original PVEFrame](systems/mists-lfr-availability.md) link the [contract](../specs/mists-lfr-availability.md). Original-line RED is observed; supplied-state producer and approved explicit unset error are implemented. GREEN, stock and warning gates remain pending.
+[Environment-local input and original PVEFrame](systems/mists-lfr-availability.md) link the [contract](../specs/mists-lfr-availability.md). Byte-identical original-line RED and supplied-state GREEN cover ten observations, two environments and unset recovery. Stock remains 6/12 with exactly two missing-function→named missing-input replacements. The exact scenario successor is outside this slice; warning gates remain pending.
 
 ## [2026-10-25] implementation | PTR Edit Mode declarations
 
