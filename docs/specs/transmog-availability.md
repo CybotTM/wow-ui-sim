@@ -4,11 +4,11 @@ Retail/PTR and Mists use one explicitly supplied environment-local availability 
 
 ## What it must do
 
-- [ ] Publish `C_TransmogOutfitInfo.IsTransmogEnabled` only for Retail, PTR and Mists through `client_profile::ACTIVE`; preserve absence on the other profiles.
-- [ ] Initialize availability to None; Some(true)/Some(false) return exactly one corresponding boolean; None raises `C_TransmogOutfitInfo.IsTransmogEnabled: transmog availability has not been supplied`.
-- [ ] Modern pending staging, set/custom-set imports and application consume this same observation; collected pending records reflect supplied availability, while commit checks current availability, not only the staged record.
-- [ ] Original selected set/custom-set mouse callbacks and popup apply callbacks discriminate both boolean values, independent environments, unset rejection and recovery; failed application preserves money/pending/saved state.
-- [ ] Preserve the original Mists settings branch contract and replace old modern fixture defaults with explicit observations.
+- [x] Publish `C_TransmogOutfitInfo.IsTransmogEnabled` for Retail, PTR and Mists through `client_profile::ACTIVE`. The guard excludes the other profiles; their absence is source-reviewed, not a four-profile runtime claim.
+- [x] Initialize availability to None; Some(true)/Some(false) return exactly one corresponding boolean; None raises `C_TransmogOutfitInfo.IsTransmogEnabled: transmog availability has not been supplied`.
+- [x] Modern pending staging, set/custom-set imports and application consume this same observation; collected pending records reflect supplied availability, while commit checks current availability, not only the staged record.
+- [x] Original selected set/custom-set mouse callbacks and popup apply callbacks discriminate both boolean values, independent environments, unset rejection and recovery; failed application preserves money/pending/saved state.
+- [x] Preserve the original Mists settings branch contract and replace old modern fixture defaults with explicit observations.
 
 ## How it works
 
@@ -26,11 +26,11 @@ Retail/PTR and Mists use one explicitly supplied environment-local availability 
 
 ## Tests asserting this spec
 
-`tests/retail_transmog_enabled.rs` and `tests/mists_transmog_enabled.rs`. Exact execution evidence is recorded in the wiki, not inferred from source.
+`tests/retail_transmog_enabled.rs`: eight exact producer-only RED/GREEN pairs across Retail/PTR. `tests/mists_transmog_enabled.rs`: two original display-branch preservation passes. Seventeen targeted legacy transmog cases also pass with explicit input. [Execution scope and limits](../wiki/systems/transmog-availability.md#proof-status).
 
 ## Known gaps (current cycle)
 
-- [ ] Complete producer-only RED/GREEN, paired stock raw-map comparison and seven zero-warning all-target checks.
+- [ ] Complete seven zero-warning all-target checks. All eight RED/GREEN pairs, seventeen legacy cases, two Mists cases and both paired stock maps are already verified.
 
 ## Out of scope
 

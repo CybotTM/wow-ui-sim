@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | Shared transmog availability
 
-[Shared observation and selected interactions](systems/transmog-availability.md) link the [contract](../specs/transmog-availability.md): Retail/PTR now reuse the Mists supplied Option<bool>, with no guessed modern true default. Four exact Retail old-producer RED cases discriminate false input through original set/custom-set clicks, popup apply and direct query. GREEN/PTR execution and final stock/check evidence are pending. No selected direct-query spellbook flow or complete bootstrap acceptance is claimed.
+[Shared observation and selected interactions](systems/transmog-availability.md) link the [contract](../specs/transmog-availability.md): Retail/PTR now reuse the Mists supplied Option<bool>, with no guessed modern true default. All eight exact Retail/PTR old-producer RED/shared-producer GREEN pairs pass through original set/custom-set clicks, popup apply and direct query. Seventeen legacy cases and both Mists display cases pass; paired raw stock stays Retail0/0 and PTR122/138 with no key/count change. Seven-profile checks remain pending. No selected direct-query spellbook flow or complete bootstrap acceptance is claimed.
 
 ## [2026-10-26] implementation | Supplied voice settings access
 
@@ -8,7 +8,7 @@
 
 ## [2026-10-26] implementation | Mists transmog supplied input
 
-[Contract and selected display branch](systems/mists-transmog-enabled.md): both exact original-line4 RED/GREEN cases prove supplied true/false control branches, isolation, transitions and named unset recovery. Mists stock remains6/12 with identical raw keys/counts; all seven full-feature all-target checks have zero warnings. Modern default-true policy, the Forever gap and later settings branches remain separate.
+[Contract and selected display branch](systems/mists-transmog-enabled.md): both exact original-line4 RED/GREEN cases prove supplied true/false control branches, isolation, transitions and named unset recovery. Mists stock remains6/12 with identical raw keys/counts; all seven full-feature all-target checks have zero warnings. Retail/PTR now share the [supplied observation](systems/transmog-availability.md); the Forever gap and later settings branches remain separate.
 
 ## [2026-10-26] investigation | Mists engraving supplied inputs
 
