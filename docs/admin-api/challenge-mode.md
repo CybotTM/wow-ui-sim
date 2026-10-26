@@ -1,6 +1,6 @@
 # Challenge runs and forecast fixtures
 
-Phase A supplies challenge state. Phase B adds an explicit manual environment clock. Final runtime acceptance is pending.
+Phase A supplies challenge state. Phase B adds an explicit manual environment clock. See the [scoped runtime evidence and blocked original criteria initialization](../wiki/systems/challenge-mode-run.md#evidence-status); no complete native-UI or clean-global-runtime claim is made.
 
 These calls supply fixture state. They do not generate native dungeon catalogues, affixes, enemy credit, death penalties or time limits. Each environment has its own state. See the [contract](../specs/challenge-mode-run.md) for profile publication.
 

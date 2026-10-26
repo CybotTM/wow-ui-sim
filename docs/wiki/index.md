@@ -1,6 +1,6 @@
-## [2026-10-26] implementation | Supplied challenge runs and manual clock
+## [2026-10-26] bounded proof | Supplied challenge runs and manual clock
 
-[State and clock boundary](systems/challenge-mode-run.md) links the declaration-backed [challenge contract](../specs/challenge-mode-run.md) and explicit [clock contract](../specs/manual-simulation-clock.md). Initial feature RED and four Phase A Retail GREEN cases are observed. Final paired proof, repaired criteria fixture, clock execution, stock, profile checks and external forecast acceptance are pending. Inactive key returns and Mists legacy criteria remain explicit boundaries.
+[State, clock and final evidence](systems/challenge-mode-run.md) link the [challenge contract](../specs/challenge-mode-run.md) and [clock contract](../specs/manual-simulation-clock.md): paired original timer/icon proof, seven-profile clock cases, corrected legacy probes, unchanged six-profile stock, seven zero-warning checks and unchanged InTimeBL smoke/forecast acceptance. Original criteria initialization remains BLOCKED for a separate lane; inactive keystone returns stay unimplemented. Global forecast Lua errors are disclosed, not called clean.
 
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 

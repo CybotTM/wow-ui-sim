@@ -1,6 +1,6 @@
-## [2026-10-26] implementation | Challenge run clock
+## [2026-10-26] bounded proof | Challenge run clock
 
-[Environment-local snapshots and nested dispatch](systems/challenge-mode-run.md) describe supplied lifecycle state and opt-in shared time. Own feature RED is observed; four Phase A Retail cases pass. The criteria fixture now invokes original InitModule. Clock and final acceptance evidence remain pending; inactive key shape awaits native evidence.
+[Final scoped evidence](systems/challenge-mode-run.md) records original timer/icon RED/GREEN, six-profile criteria query state, all seven clock/check profiles, protected stock equality and both InTimeBL modes. The two invented-default probes now use strict absence or supplied map metadata without dropping unrelated assertions. Original criteria initialization is BLOCKED at undeclared ShouldShowCriteria; no exception is swallowed. Inactive key shape remains unknown, and forecast voice/ambient errors remain visible.
 
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 
