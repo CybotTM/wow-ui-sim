@@ -94,6 +94,9 @@ class CertifiedSuiteTests(unittest.TestCase):
         self.assertIn('--owner', argv)
         self.assertEqual(argv[argv.index('--slot') + 1], '2')
         self.assertIn('sound,gui,casc,client-ptr', argv)
+        self.assertEqual(argv[argv.index('--') + 1:argv.index('--') + 8],
+                         ['cargo', 'test', '--no-run', '--all-targets', '--locked',
+                          '--offline', '--message-format=json'])
         worktree = Path(argv[argv.index('--worktree') + 1])
         self.assertEqual(subprocess.check_output(['git', '-C', str(worktree), 'rev-parse', 'HEAD'],
                                                  env=self.env, text=True).strip(), self.sha)
