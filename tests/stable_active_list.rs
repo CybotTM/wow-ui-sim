@@ -160,3 +160,44 @@ fn original_active_list_tracks_supplied_records_and_isolation() {
         .unwrap();
     second.exec("observeActiveSlots({other})").unwrap();
 }
+
+#[test]
+fn supplied_active_list_is_a_snapshot_with_explicit_unknown_and_validation() {
+    let env = load_original_stable();
+    env.exec(
+        r#"
+        local pet = suppliedPet(3, 'Snapshot observation')
+        A_Admin.SetActivePetList({pet})
+        pet.name = 'Caller mutation'
+        pet.petAbilities[1] = -1
+        local observed = suppliedPet(3, 'Snapshot observation')
+        observeActiveSlots({observed})
+        local result = C_StableInfo.GetActivePetList()
+        assert(select('#', C_StableInfo.GetActivePetList()) == 1)
+        result[1].name = 'Result mutation'
+        result[1].petAbilities[1] = -2
+        result[2] = suppliedPet(1, 'Result append')
+        observeActiveSlots({observed})
+        for _, mutate in ipairs({
+            function() A_Admin.SetActivePet(0, observed) end,
+            function() A_Admin.SetActivePet(3, observed) end,
+            function() A_Admin.RemoveActivePet(2) end,
+            function() A_Admin.SetActivePetList({{slotID=1}}) end,
+            function() A_Admin.SetActivePet(1, {slotID=1}) end,
+        }) do
+            assert(not pcall(mutate), 'invalid simulator input must fail explicitly')
+            observeActiveSlots({observed})
+        end
+        A_Admin.SetActivePetList(nil)
+        assert(not pcall(A_Admin.SetActivePet, 1, observed), 'unknown ordering cannot be appended')
+        assert(not pcall(A_Admin.RemoveActivePet, 1), 'unknown membership cannot be removed')
+        local ok, reason = pcall(C_StableInfo.GetActivePetList)
+        assert(not ok and tostring(reason):find('native-unknown:', 1, true), tostring(reason))
+        A_Admin.SetActivePetList({})
+        observeActiveSlots({})
+        A_Admin.SetActivePet(1, observed)
+        observeActiveSlots({observed})
+    "#,
+    )
+    .expect("supplied observation snapshots and transactional simulator input validation");
+}
