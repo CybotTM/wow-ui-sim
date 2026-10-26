@@ -87,7 +87,18 @@ mod original_consumer {
         assert_display(&env, "player", "Ada-Lovelace");
         assert_display(&env, "target", "Mira-Stone");
         env.exec("assert(select('#', RegionalUniqueNamesEnabled()) == 1); assert(select('#', C_PlayerInfo.ShouldDisplaySurname()) == 1)").unwrap();
+        env.state().borrow_mut().player.regional_unique_names_enabled = true;
+        env.state().borrow_mut().player.should_display_surname = None;
+        env.exec(r#"
+            RegionalNameFrame.unit = 'player'
+            local ok, message = pcall(UnitFrame_Update, RegionalNameFrame)
+            assert(not ok and message:find('surname visibility has not been supplied', 1, true))
+        "#).unwrap();
         let other = WowLuaEnv::new().unwrap();
-        other.exec("assert(RegionalUniqueNamesEnabled() == false); assert(not pcall(C_PlayerInfo.ShouldDisplaySurname))").unwrap();
+        other.exec(r#"
+            assert(RegionalUniqueNamesEnabled() == false)
+            local ok, message = pcall(C_PlayerInfo.ShouldDisplaySurname)
+            assert(not ok and message:find('surname visibility has not been supplied', 1, true))
+        "#).unwrap();
     }
 }
