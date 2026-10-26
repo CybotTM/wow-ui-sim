@@ -73,12 +73,87 @@ class CertifiedSuiteTests(unittest.TestCase):
         git('remote', 'add', 'origin', str(self.repo))
         write_executable(self.bin / 'cargo',
                          "import sys\nsys.exit('unexpected cargo invocation')\n")
+        write_executable(self.bin / 'systemctl', "print('LoadState=not-found')\n")
         write_executable(self.bin / 'slot-build.py',
                          "import json, os, pathlib, sys\n"
                          "root = pathlib.Path(os.environ['HOME'])\n"
                          "(root / 'slot-argv.json').write_text(json.dumps(sys.argv[1:]))\n"
                          "print('guard rejected: owner mismatch', file=sys.stderr)\n"
                          "sys.exit(1)\n")
+
+    def test_failed_launcher_with_unknown_unit_retains_owner(self):
+        write_executable(self.bin / 'systemctl', "import sys\nsys.exit(1)\n")
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertTrue((self.slot / '.owner').exists())
+        argv = json.loads((self.home / 'slot-argv.json').read_text())
+        unit = argv[argv.index('--unit') + 1]
+        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertIn(f'slot 2 retained: unit {unit}', record['error'])
+
+    def test_failed_test_launcher_with_unknown_unit_retains_owner(self):
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "unit = sys.argv[sys.argv.index('--unit') + 1]\n"
+                         "p = root / '.cache/wow-ui-sim-targets/slot-2/receipts' / (unit + '.json')\n"
+                         "p.parent.mkdir(exist_ok=True)\n"
+                         "p.write_text(json.dumps({'result': 'success', 'returncode': 0, 'reported_artifacts': [{'executable': '/unused', 'profile': {'test': True}, 'target': {'name': 'integration', 'kind': ['test']}}]}))\n")
+        write_executable(self.bin / 'systemd-run', "import sys\nsys.exit(1)\n")
+        write_executable(self.bin / 'systemctl',
+                         "import sys\n"
+                         "sys.exit(1) if 'full-suite-test-' in ' '.join(sys.argv) else print('ActiveState=inactive\\nResult=success')\n")
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertTrue((self.slot / '.owner').exists())
+        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertIn('slot 2 retained: unit full-suite-test-', record['error'])
+
+    def test_failed_launcher_stops_active_unit_before_releasing_owner(self):
+        write_executable(self.bin / 'systemctl',
+                         "import os, pathlib, sys\n"
+                         "p = pathlib.Path(os.environ['HOME']) / 'stopped'\n"
+                         "if 'stop' in sys.argv: p.touch()\n"
+                         "elif p.exists(): print('ActiveState=inactive')\n"
+                         "else: print('ActiveState=active')\n")
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertTrue((self.home / 'stopped').exists())
+        self.assertFalse((self.slot / '.owner').exists())
+
+    def test_guard_failure_receipt_contains_all_phase_records(self):
+        write_executable(self.bin / 'systemctl', "print('LoadState=not-found')\n")
+        subprocess.run([sys.executable, str(RUNNER), 'run', self.sha, '--profile', 'ptr',
+                        '--target-dir', str(self.slot)], env=self.env, capture_output=True, text=True, timeout=10)
+        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        self.assertEqual(record['steps']['build']['status'], 'FAILED')
+        self.assertEqual(record['steps']['integration']['status'], 'not_run')
+        self.assertEqual(record['steps']['prefork']['status'], 'not_applicable')
+        self.assertEqual(record['steps']['lib']['status'], 'not_run')
+        self.assertEqual(record['failures'], {'integration': [], 'lib': []})
+
+    def test_failed_master_run_preserves_baseline_and_linked_passed_result(self):
+        write_executable(self.bin / 'systemctl', "print('LoadState=not-found')\n")
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True)
+        prior = results / ('a' * 40 + '-ptr.json')
+        content = json.dumps({'sha': 'a' * 40, 'profile': 'ptr', 'status': 'PASSED', 'failures': {'integration': ['old']}})
+        prior.write_text(content)
+        (results / 'master-latest-ptr.json').symlink_to(prior.name)
+        subprocess.run([sys.executable, str(RUNNER), 'run', 'master', '--profile', 'ptr',
+                        '--target-dir', str(self.slot)], env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(prior.read_text(), content)
+        self.assertEqual((results / 'master-latest-ptr.json').read_text(), content)
+        record = json.loads((results / f'{self.sha}-ptr.json').read_text())
+        self.assertEqual(record['status'], 'FAILED')
 
     def test_guard_rejection_records_failure_without_running_tests(self):
         result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
@@ -227,7 +302,8 @@ class CertifiedSuiteTests(unittest.TestCase):
         record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
         self.assertEqual(record['status'], 'FAILED')
         self.assertIn('bad input', record['error'])
-        self.assertEqual(record['steps'], {})
+        self.assertEqual(record['steps']['build']['status'], 'FAILED')
+        self.assertEqual(record['steps']['integration']['status'], 'not_run')
         self.assertFalse((self.slot / '.owner').exists())
 
     def test_unknown_build_unit_state_retains_slot_and_fails(self):
