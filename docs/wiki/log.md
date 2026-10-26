@@ -3110,6 +3110,10 @@ Added the [supplied bool/string contract](../specs/mists-scenario-finder.md) and
 
 [Supplied minimum](systems/mists-scenario-finder.md#supplied-active-party-minimum) links the [bounded contract](../specs/mists-party-minimum.md). Three exact producer-subtracted REDs and three GREENs prove the original58 boundary, empty-catalog preservation, direct85/90/isolation and explicit errors. Stock stays6/12 with two individually traced diagnostic replacements; catalog discrimination is blocked. All seven full-feature all-target checks pass with zero compiler warnings. Formatting/readability pass; other-profile runtime parity is not claimed.
 
+## 2026-10-26 — Supplied stable pet slots
+
+Added [slot observations and merged proof](systems/stable-pet-info.md) with the [contract](../specs/stable-pet-info.md). Six exact original-consumer REDs fail at the intended missing-query boundaries, and fourteen GREEN cases pass at GREEN6f1f29349 / RED2c66b42ec. Stock stays Retail0/0 and PTR122/138 without per-key changes; seven all-target checks have zero JSON/plain warnings, including the approved Mists-only field repair. All100 CVar guards pass. Excluded-profile publication remains compiled-not-executed in this lane; full-window and native ownership/default policy remain separate.
+
 ## 2026-10-26 — Pinned Mists global strings and reputation exposure
 
 Added the [70268 contract](../specs/mists-global-strings.md) and [source/consumer investigation](investigations/mists-global-strings.md). Full decrypted DB2/CSV agreement covers19,914 rows, including the second section; one byte-identical original-consumer selector rejects the foreign table at Setting34 and passes through131/138 with the real pinned setting name. Stock6/12→8/14 exposes an unchanged Retail temporary reputation seed, not a fabricated-label requirement. Pinned API declarations prevent an unsupported account-wide-concept absence claim; a whole-cache Lua/XML scan finds only the missing label's use and no definition. All seven full-feature all-target checks pass with zero JSON/plain compiler warnings. These checks do not establish other profiles' full runtime localization parity.

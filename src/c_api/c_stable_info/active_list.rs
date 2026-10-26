@@ -140,7 +140,7 @@ fn read_ordinal(state: &LuaState) -> LuaResult<usize> {
     }
 }
 
-fn decode_record(state: &mut LuaState, row: Val) -> LuaResult<PetInfo> {
+pub(super) fn decode_record(state: &mut LuaState, row: Val) -> LuaResult<PetInfo> {
     if !matches!(row, Val::Table(_)) {
         return Err(runtime_error(
             "active-pet observation must be a PetInfo table",
@@ -223,7 +223,7 @@ fn read_abilities(state: &mut LuaState, row: Val, key: &str) -> LuaResult<Vec<f6
         .collect()
 }
 
-fn project_record(state: &mut LuaState, pet: &PetInfo) -> Val {
+pub(super) fn project_record(state: &mut LuaState, pet: &PetInfo) -> Val {
     let row = create_table(state);
     for &(key, number) in &pet.numeric_fields {
         table_set(state, row, key, Val::Num(number));

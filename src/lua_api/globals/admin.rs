@@ -113,6 +113,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         crate::c_api::c_housing::catalog::set_variant_stored_count,
     )?;
     let builder = crate::c_api::c_stable_info::active_list::register_admin(builder)?;
+    let builder = crate::c_api::c_stable_info::pet_info::register_admin(builder)?;
     let builder = crate::c_api::c_stable_info::pet_spec_infos::register_admin(builder)?;
     let builder = crate::c_api::challenge_run::register_admin(builder)?;
     let builder = crate::lua_api::manual_clock::register_admin(builder)?;

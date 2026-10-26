@@ -51,6 +51,8 @@ fn load_original_stable() -> WowLuaEnv {
         .unwrap();
     env.exec(ORIGINAL_SLOT_OBSERVER)
         .expect("original selected StableUI XML and Lua identity");
+    env.exec("A_Admin.SetStablePetInfo(Constants.PetConsts_PostCata.EXTRA_PET_STABLE_SLOT + 1, nil)")
+        .expect("explicit empty secondary slot observation");
     env
 }
 
@@ -122,8 +124,8 @@ const ORIGINAL_SLOT_OBSERVER: &str = r#"
             local ok, reason = pcall(list.Refresh, list)
             debug.sethook()
             assert(reached, tostring(reason or 'active-slot observation not reached'))
-            -- The separate secondary-pet query is not implemented by this lane.
-            assert(not ok and tostring(reason):find("GetStablePetInfo", 1, true), tostring(reason))
+            -- The secondary slot has an explicit empty observation in this fixture.
+            assert(ok, tostring(reason))
         end
     "#;
 
