@@ -608,6 +608,7 @@ macro_rules! build_empty_sim_state {
             factions: Vec::new(),
             selected_faction_index: 0,
             watched_faction_index: 0,
+            battlefield_vehicles: ::std::collections::HashMap::new(),
             battlefield_queue: BattlefieldQueue::default(),
             battlefield_minimap_visible: false,
             chat_channels: Vec::new(),

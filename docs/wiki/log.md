@@ -29,6 +29,34 @@
 ## [2026-10-24] staged | Housing house-or-plot presence
 
 Added [spatial presence model](systems/housing-spatial-presence.md) and [contract](../specs/house-or-plot-presence.md), original registered-event selector, profile TOC evidence and static contradiction matrix. Runtime/compile gates remain pending; Forever's selected consumer and excluded downstream controls bootstrap are distinct.
+## [2026-10-25] proof | Classic defensive aura timer completion
+
+The [completion matrix](../specs/aura-spell-classification-identifiers.md#classic-completion-proof--2026-10-25) records Era/Anniversary stock-timer RED/GREEN, original AuraUtil preservation and exact stock differences with no additions. Era/Anniversary all-target checks retain only the three permitted dead-code warnings; Retail has none. Known TTS residue remains separately owned, so no baseline is changed.
+
+## [2026-10-25] investigation | Classic opaque aura timers
+
+[Original callback attribution](investigations/classic-startup-producer-cascades.md#opaque-private-aura-timers) resolves four erased nil calls to the declared defensive query. Existing-model Era/Anniversary capability repair is staged; runtime GREEN and checks remain pending. TTS is separately owned.
+
+## [2026-10-25] investigation | Mists battlefield vehicles
+
+[Vehicle provider boundary](investigations/mists-battlefield-vehicles.md): confirmed pinned plural/singular signatures, selected Mists TOCs, original WorldMap provider and XML pin path. Committed supplied-state schema and original-consumer fixture before publication. Corrected implicit startup dependencies, observed missing-call RED, then passed supplied-pin GREEN. Raw captures replace two vehicle errors with two traced existing DeathMap errors; exact base `05f95ab1c` reproduces BEFORE 12/18, paired producer-only RED fails with identical tests, and Mists all-target checking passes with three inherited warnings. Retail all-target checking passes with zero warnings; formatting and readability pass. Native vehicle population remains intentionally unmodeled.
+
+## [2026-10-25] proof | PTR I4 batch2 landing
+
+[Eight exact consumer pairs](investigations/patch-12-1-7-api-audit.md#batch2-landing-proof) pass GREEN and fail producer-only RED at original Blizzard lines. Stock296/410→272/378 retains ten individually traced successor keys. Retail/PTR all-target checks meet zero/known-three warning limits; formatting and Retail absence pass. Preset and aggregate tests remain outside the normal suite. Slot1 is released; the current merge-tree has only a wiki-log conflict for main.
+
+## [2026-10-25] implementation | PTR supplied WoWHack mode
+
+[Original consumer REDs](investigations/patch-12-1-7-api-audit.md#supplied-wowhack-mode) reach MicroMenu207 and UIErrorsFrame12. The [contract](../specs/ptr-i4-game-rules.md) uses existing active-mode state and enum data; both exact consumer GREENs pass. Final merged stock/check acceptance remains pending.
+
+## [2026-10-25] implementation | PTR I4 supplied GameRules inputs
+
+[Five original-line RED boundaries](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) precede capability queries and SD selection mutation. Enum-only replay passes RecentAllies labels. Preset query and final runtime/check acceptance remain pending.
+
+## [2026-10-25] prerequisites | PTR I4 GameRules and RecentAllies
+
+[Source-bound original RED](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) records Barbershop, CharacterCreate and RecentAllies boundaries plus upstream setter/preset blockers. Only documented enum prerequisites are implemented in this step; six function producers and GREEN remain pending.
+
 ## [2026-10-25] decision | PTR SharedXML executes twice
 
 [User decision](investigations/ptr-input-interface-style.md#user-decision-two-environments-2026-10-25) corrects only the PTR listener expectation to two, one per normal/secure environment. Native modern count remains unproven; Retail decompilation is the revisit boundary. [Final proof](investigations/ptr-input-interface-style.md#approved-twice-final-proof-2026-10-25): exact PTR GREEN passes, producer-only RED rejects the original event, PTR/Retail all-target checks pass with allowed-three/zero warnings. Forever case 1 is a documented missing API without capability state; report-only. Slot 2 released.
@@ -2883,3 +2911,7 @@ Added the nonblocking [slot launcher](../../scripts/slot-build.py) and
 per slot, exact `.owner` match and literal capacity ADD admission. Focused Python
 tests only; no compile or service launch. The normalized lock matches the saved
 Cargo rewrite byte-for-byte; runtime acceptance remains pending.
+
+2026-10-25: Staged the [landable I4 first batch](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair), with original-consumer transitions and aggregate staging tests retained only on the lane.
+
+2026-10-25: Completed bounded I4 landing proof after integrating PTR-input: four exact RED/GREEN pairs, original missing calls at Collections line 37 and GhostFrame line 4, stock 298→296 raw keys with zero additions, zero/known-three Retail/PTR warnings, and formatting. Aggregate I4 and native policies remain outside this acceptance.

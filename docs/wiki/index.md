@@ -29,6 +29,30 @@
 ## [2026-10-24] staged | Housing house-or-plot presence
 
 [Spatial model and selected consumer](systems/housing-spatial-presence.md) links the [contract](../specs/house-or-plot-presence.md): existing area input, Retail/PTR registered-world-event selector, constant/no-op contradictions and Forever downstream TOC restriction. Static staging only; no compilation or runtime proof.
+## [2026-10-25] investigation | Mists battlefield vehicles
+
+[Original vehicle consumer](investigations/mists-battlefield-vehicles.md) links the [contract](../specs/mists-battlefield-vehicles.md): pinned API declarations, selected WorldMap provider/pins and supplied per-map state. Original-consumer missing-call RED and supplied-pin GREEN pass. Both raw captures contain 12 keys / 18 occurrences; vehicle errors are replaced by individually traced existing DeathMap provider errors. Exact base reproduces the 12/18 BEFORE map, and byte-identical paired producer-only RED fails as required. Mists/Retail all-target checks pass with three inherited/zero warnings; formatting and readability pass.
+
+## [2026-10-25] proof | PTR I4 batch2 landing
+
+[Eight exact consumer pairs](investigations/patch-12-1-7-api-audit.md#batch2-landing-proof) pass GREEN and fail producer-only RED at original Blizzard lines. Stock296/410→272/378 retains ten individually traced successor keys. Retail/PTR all-target checks meet zero/known-three warning limits; formatting and Retail absence pass. Preset and aggregate tests remain outside the normal suite. Slot1 is released; the current merge-tree has only a wiki-log conflict for main.
+
+## [2026-10-25] implementation | PTR supplied WoWHack mode
+
+[Original consumer REDs](investigations/patch-12-1-7-api-audit.md#supplied-wowhack-mode) reach MicroMenu207 and UIErrorsFrame12. The [contract](../specs/ptr-i4-game-rules.md) uses existing active-mode state and enum data; both exact consumer GREENs pass. Final merged stock/check acceptance remains pending.
+
+## [2026-10-25] prerequisites | PTR I4 GameRules and RecentAllies
+
+[Original consumer boundaries](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) link the [bounded supplied-input contract](../specs/ptr-i4-game-rules.md). Original-line RED now proves five function boundaries after enum prerequisites; RecentAllies labels pass. Five supplied-state producers are implemented; final merged acceptance remains pending. Preset support and aggregate I4 tests are excluded from this landing packet and retained for follow-up.
+
+## [2026-10-25] runtime proof | PTR I4 landable first batch
+
+[Bounded producer repair](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair) links the [contract](../specs/ptr-i4-first-green.md): four exact RED/GREEN pairs include the original Collections and GhostFrame transitions. Stock 298→296 raw keys has zero additions; Retail/PTR checks meet zero/known-three warning limits and formatting passes. Aggregate 173-shape tests remain on the lane only; native policy remains unknown.
+
+## [2026-10-25] investigation | Classic opaque aura timers
+
+[Original callback attribution](investigations/classic-startup-producer-cascades.md#opaque-private-aura-timers) resolves four erased nil calls to the declared defensive query. The [completion matrix](../specs/aura-spell-classification-identifiers.md#classic-completion-proof--2026-10-25) records both-profile RED/GREEN and AuraUtil preservation, exact stock improvement with no additions, and Era/Anniversary/Retail all-target checks. TTS remains separately owned.
+
 ## [2026-10-25] decision | PTR SharedXML executes twice
 
 [User decision](investigations/ptr-input-interface-style.md#user-decision-two-environments-2026-10-25) corrects only the PTR listener expectation to two, one per normal/secure environment. Native modern count remains unproven; Retail decompilation is the revisit boundary. [Final proof](investigations/ptr-input-interface-style.md#approved-twice-final-proof-2026-10-25): exact PTR GREEN passes, producer-only RED rejects the original event, PTR/Retail all-target checks pass with allowed-three/zero warnings. Forever case 1 is a documented missing API without capability state; report-only. Slot 2 released.
