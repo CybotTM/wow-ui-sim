@@ -42,6 +42,8 @@ fn fixture_aura(id: i32) -> AuraInfo {
 }
 
 fn seed_blockable_auras(env: &WowLuaEnv) {
+    env.exec("A_Admin.ClearLossOfControl('player'); A_Admin.ClearLossOfControl('party1')")
+        .expect("supplied no-loss-of-control fixture for both selected units");
     let mut state = env.state().borrow_mut();
     state.party_group_active = true;
     state.party_leader_index = None;
