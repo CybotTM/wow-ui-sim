@@ -40,6 +40,7 @@ pub mod aura_entry_ids;
 #[cfg(feature = "aura-instance-enumeration")]
 pub(crate) mod aura_filter;
 pub mod bag_info;
+pub mod engraving_inputs;
 pub mod c_account_services;
 pub(crate) mod c_achievement_info_relations;
 pub(crate) mod c_action_bar;
