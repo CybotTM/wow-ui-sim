@@ -22,6 +22,7 @@ fn load_edit_mode() -> (WowLuaEnv, PathBuf) {
         .unwrap();
     let toc = TocFile::from_file(toc_path).unwrap();
     for relative in [
+        "Mainline/EditModePresetLayouts.lua",
         "Shared/EditModeSettingDisplayInfo.lua",
         "Shared/EditModePresetLayoutsManager.lua",
     ] {
@@ -41,6 +42,72 @@ fn load_edit_mode() -> (WowLuaEnv, PathBuf) {
         }
     }
     (env, root.join("Blizzard_EditMode"))
+}
+
+#[test]
+fn whole_mainline_preset_preserves_distinct_endcap_and_swing_timer_records() {
+    let (env, root) = load_edit_mode();
+    let source = std::fs::read_to_string(root.join("Mainline/EditModePresetLayouts.lua")).unwrap();
+    env.exec_named(
+        &source,
+        "@Interface/AddOns/Blizzard_EditMode/Mainline/EditModePresetLayouts.lua",
+    )
+    .expect("complete unchanged original Mainline preset constructors");
+    env.exec(
+        r#"
+        local modern = EDIT_MODE_MODERN_SYSTEM_MAP
+        local classic = EDIT_MODE_CLASSIC_SYSTEM_MAP
+        local gamepad = EDIT_MODE_GAMEPAD_SYSTEM_MAP
+        assert(type(modern) == 'table' and type(classic) == 'table')
+        assert(type(gamepad) == 'table' and modern ~= gamepad)
+        local caps = modern[26]
+        local left, right = caps[1], caps[2]
+        assert(left ~= nil and right ~= nil and left ~= right)
+        local count = 0
+        for _ in pairs(caps) do count = count + 1 end
+        assert(count == 2)
+        assert(left.settings[0] == 0 and right.settings[0] == 0)
+        assert(left.settings ~= right.settings)
+        local a, b = left.anchorInfo, right.anchorInfo
+        assert(a ~= b)
+        assert(a.point == 'RIGHT' and a.relativeTo == 'MainActionBar')
+        assert(a.relativePoint == 'LEFT' and a.offsetX == 30 and a.offsetY == 5)
+        assert(b.point == 'LEFT' and b.relativeTo == 'BagsBar')
+        assert(b.relativePoint == 'RIGHT' and b.offsetX == -30 and b.offsetY == 5)
+        local indices = Enum.EditModeMainActionBarEndCapSystemIndices
+        assert(indices.EndCapLeft == 1 and indices.EndCapRight == 2)
+        local meta = Enum.EditModeMainActionBarEndCapSystemIndicesMeta
+        assert(meta.NumValues == 2 and meta.MinValue == 1 and meta.MaxValue == 2)
+        assert(classic[26] == caps and gamepad[26] == caps)
+        local swingIndices = Enum.EditModeSwingTimerSystemIndices
+        assert(swingIndices.MainHand == 1 and swingIndices.OffHand == 2)
+        assert(swingIndices.Ranged == 3)
+        local swingMeta = Enum.EditModeSwingTimerSystemIndicesMeta
+        assert(swingMeta.NumValues == 3 and swingMeta.MinValue == 1)
+        assert(swingMeta.MaxValue == 3)
+        assert(classic[29] == modern[29] and gamepad[29] ~= modern[29])
+        for _, preset in ipairs({modern, classic, gamepad}) do
+            local bars = preset[29]
+            local barCount = 0
+            for _ in pairs(bars) do barCount = barCount + 1 end
+            assert(barCount == 3)
+            assert(bars[1] ~= bars[2] and bars[2] ~= bars[3] and bars[1] ~= bars[3])
+            for index, offsetY in ipairs({450, 425, 400}) do
+                local bar = bars[index]
+                local settings, anchor = bar.settings, bar.anchorInfo
+                assert(settings[0] == 5 and settings[1] == 50 and settings[2] == 0)
+                assert(settings[5] == 1 and settings[6] == 1)
+                local width = preset == gamepad and 120 or 213
+                local height = preset == gamepad and 6 or 15
+                assert(settings[3] == width and settings[4] == height)
+                assert(anchor.point == 'BOTTOM' and anchor.relativeTo == 'UIParent')
+                assert(anchor.relativePoint == 'BOTTOM' and anchor.offsetX == 0)
+                assert(anchor.offsetY == offsetY)
+            end
+        end
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
