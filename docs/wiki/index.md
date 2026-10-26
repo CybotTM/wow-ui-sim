@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | Supplied voice settings access
 
-[Original audio polling boundary](systems/voice-settings-access.md) links the [contract](../specs/voice-settings-access.md): six declaring profiles, environment-local optional observation and named unset error; Wrath remains absent. Own Retail original-line565 RED is observed; final RED/GREEN and seven-profile checks/stock remain pending. Device initialization and timer cancellation are not claimed.
+[Original audio polling boundary](systems/voice-settings-access.md) links the [contract](../specs/voice-settings-access.md): six declaring profiles, environment-local optional observation and named unset error; Wrath remains absent. Eighteen exact original-consumer GREEN/producer-free RED pairs pass, seven full-feature all-target checks have zero warnings, and all raw stock maps are unchanged at the supplied master baselines. All 98 final launch CVar guards are unchanged. Full device initialization, timer cancellation and unsupplied forecast readiness are not claimed.
 
 ## [2026-10-26] implementation | Mists transmog supplied input
 

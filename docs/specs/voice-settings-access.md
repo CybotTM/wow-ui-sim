@@ -4,9 +4,9 @@
 
 ## What it must do
 
-- [ ] Publish on Retail, PTR, Forever, Mists, Era and Anniversary; keep the member absent on Wrath.
-- [ ] Return exactly one nonnil boolean equal to the current supplied observation. `None` raises `C_VoiceChat.CanAccessSettings: settings access has not been supplied` rather than selecting a readiness default.
-- [ ] Preserve false/true transitions, unset recovery and independent environments through the original Audio.lua polling callback. Settings access is not derived from connection, permission, channel or host sound state.
+- [x] Publish on Retail, PTR, Forever, Mists, Era and Anniversary; keep the member absent on Wrath.
+- [x] Return exactly one nonnil boolean equal to the current supplied observation. `None` raises `C_VoiceChat.CanAccessSettings: settings access has not been supplied` rather than selecting a readiness default.
+- [x] Preserve false/true transitions, unset recovery and independent environments through the original Audio.lua polling callback. Settings access is not derived from connection, permission, channel or host sound state.
 
 ### Pinned declarations
 
@@ -33,9 +33,15 @@ Paths are relative to the active profile's `AddOns/Blizzard_APIDocumentationGene
 - `tests/voice_settings_access.rs`: original consumer decisions, result shape, isolation, unknown-state recovery and Wrath absence.
 - `tests/voice_settings_access/original_callback.lua`: original selected registrant and polling callback; entry observation without changing vendor callees.
 
+## Verified boundary — 2026-10-26
+
+Current-code revision `688ca21bc` and producer-free sibling `c082a2398` have byte-identical tests. Three exact original-consumer selectors per declaring profile pass GREEN and fail RED at the missing namespace member. Two non-vacuous Wrath selectors preserve raw-member absence; its initially-unset selector has no consumer and returns early. All seven full-feature all-target checks have zero compiler warnings. Paired raw stock maps are identical: Retail 0/0, PTR 124/140, Forever 26/26, Mists 6/12, Wrath/Era/Anniversary 0/0. All 98 final test-discovery, test-run and stock-launch CVar guards remain unchanged.
+
+The true branch proves entry into the original initialization function, not completion or ticker cancellation. The hook deliberately stops before separate device/settings contracts. An unsupplied forecast run is not made clean by this API; the host must supply an observation.
+
 ## Known gaps (current cycle)
 
-- [ ] Execute final producer-subtracted RED/GREEN matrix, seven zero-warning all-target checks and paired stock attribution.
+None within the supplied-observation boundary.
 
 ## Out of scope
 

@@ -12,7 +12,9 @@ In Retail Audio.lua:565, false continues polling; true enters InitVoiceSettings 
 
 The fixture loads the original dependency closure and calls the selected Audio registrant. It locates the resulting original polling callback without replacing any vendor callee. A debug call hook observes entry into the original InitVoiceSettings and stops before separate device/settings contracts. This proves the query's branch decision, not complete initialization, timer cancellation, transport or native readiness. The unset path must fail explicitly and recover after supply.
 
-Initial own Retail RED reached original Audio.lua:565 at scaffold c082a2398 with the absent namespace member. Final matrix proof is pending.
+Initial own Retail RED reached original Audio.lua:565 at scaffold `c082a2398` with the absent namespace member. Final proof at current-code `688ca21bc` uses that producer-free sibling with byte-identical tests: three exact original-consumer GREEN/RED selectors on all six declaring profiles, plus two non-vacuous Wrath raw-publication absence cases. The Wrath initially-unset selector returns without a consumer and adds no capability proof.
+
+Seven full-feature all-target checks have zero compiler warnings. All 98 protected final launch CVar guards are unchanged. Paired raw stock maps are byte-identical at Retail 0/0, PTR 124/140, Forever 26/26, Mists 6/12 and Wrath/Era/Anniversary 0/0; no added keys require masking-predecessor attribution. Formatting and changed-line readability pass. These results do not make an unsupplied forecast run clean or establish complete device initialization, timer cancellation or native readiness criteria.
 
 ## Sources
 
