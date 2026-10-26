@@ -101,6 +101,7 @@ pub mod c_cursor;
 pub mod c_curve_util;
 pub mod c_damage_meter;
 pub(crate) mod c_date_and_time;
+pub(crate) mod c_death_info;
 pub mod c_death_recap;
 #[cfg(not(feature = "retail-12-0-0"))]
 pub(crate) mod c_debug;
@@ -460,6 +461,7 @@ fn register_token_texture_xml_tables(state: &mut LuaState) -> LuaResult<()> {
     c_string_util::register_c_string_util(state)?;
     c_string_util_decimal::register_escape_decimal_non_printables(state)?;
     c_pvp::register_c_pvp_surface(state)?;
+    c_death_info::register(state)?;
     c_ping_secure::register_c_ping_secure_surface(state)?;
     #[cfg(feature = "retail-12-0-0")]
     c_ping_cooldown::register(state)?;

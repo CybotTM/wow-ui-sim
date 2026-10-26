@@ -4213,3 +4213,7 @@ The three retail 12.0.0 changed globals `LE_GAME_ERR_HOUSING_RESULT_MISSING_EXPA
 ## [2026-10-24] source | CF-2 pet-battle names staging
 
 [State projection and selected consumers](systems/pet-battle-names.md) links the [contract](../specs/pet-battle-names.md). Original-consumer tests precede producer; runtime RED/GREEN, mutants and exact stock diff remain pending under edit-only staging.
+
+## [2026-10-25] Mists corpse map position
+
+[Supplied corpse observations](systems/mists-corpse-map-position.md) bind the pinned nilable vector query to the original DeathMapDataProvider and selected Wrath XML pin. Exact original-consumer GREEN and producer-only RED pass their expected boundaries with identical test bytes. Stock remains 12/18: two corpse keys clear and two existing GroupMembers GetMapDisplayInfo keys are individually traced. Mists/Retail all-target checks have zero warnings; fmt passes.

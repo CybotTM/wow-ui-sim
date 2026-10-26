@@ -2896,3 +2896,7 @@ Cargo rewrite byte-for-byte; runtime acceptance remains pending.
 2026-10-25: Staged the [landable I4 first batch](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair), with original-consumer transitions and aggregate staging tests retained only on the lane.
 
 2026-10-25: Completed bounded I4 landing proof after integrating PTR-input: four exact RED/GREEN pairs, original missing calls at Collections line 37 and GhostFrame line 4, stock 298→296 raw keys with zero additions, zero/known-three Retail/PTR warnings, and formatting. Aggregate I4 and native policies remain outside this acceptance.
+
+## [2026-10-25] Mists corpse map position
+
+[Supplied corpse observations](systems/mists-corpse-map-position.md) bind the pinned nilable vector query to the original DeathMapDataProvider and selected Wrath XML pin. Exact original-consumer GREEN and producer-only RED pass their expected boundaries with identical test bytes. Stock remains 12/18: two corpse keys clear and two existing GroupMembers GetMapDisplayInfo keys are individually traced. Mists/Retail all-target checks have zero warnings; fmt passes.

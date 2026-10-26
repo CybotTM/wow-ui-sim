@@ -741,6 +741,8 @@ pub struct SimState {
     pub pending_duel: Option<String>,
     pub pending_resurrect: Option<String>,
     pub corpse_available: bool,
+    /// Supplied corpse coordinates by UI map; never inferred from player position.
+    pub corpse_map_positions: HashMap<i32, (f64, f64)>,
     pub active_trade: Option<TradeState>,
     pub open_panels: ::std::collections::HashSet<String>,
     pub is_party_lfg: bool,
