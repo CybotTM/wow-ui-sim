@@ -226,6 +226,51 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
         self.assertIn('state unknown', record['error'])
 
+    def test_persistent_log_failure_records_receipt(self):
+        script = self.home / 'persistent-log.py'
+        script.write_text('''import builtins, importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+original = builtins.open
+class Log:
+    def __init__(self, stream): self.stream = stream
+    def __enter__(self): return self
+    def __exit__(self, *args): return self.stream.__exit__(*args)
+    def write(self, value): raise OSError("persistent log failure")
+    def flush(self): return self.stream.flush()
+def injected(path, *args, **kwargs):
+    stream = original(path, *args, **kwargs)
+    return Log(stream) if str(path).endswith(".log") else stream
+builtins.open = injected
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        path = self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json'
+        self.assertTrue(path.exists(), process.stderr)
+        record = json.loads(path.read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertIn('persistent log failure', record['error'])
+        self.assertIn('persistent log failure', record['log_error'])
+        self.assertFalse((self.slot / '.owner').exists())
+
+    def test_receipt_failure_retains_owner(self):
+        script = self.home / 'receipt-failure.py'
+        script.write_text('''import importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+def fail(*args): raise OSError("receipt write failure")
+runner.write_result = fail
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertIn('receipt write failure', process.stderr)
+        self.assertTrue((self.slot / '.owner').exists())
+
     def test_guard_rejection_records_failure_without_running_tests(self):
         result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
                                  '--profile', 'ptr', '--target-dir', str(self.slot)],

@@ -290,24 +290,30 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                 result["error"] = str(error)
                 owner = None  # Keep the live or unknown claim for reconciliation.
                 exit_code = 1
-                log.write(f"FAILED: {error}\n")
+                try:
+                    log.write(f"FAILED: {error}\n")
+                except OSError as log_error:
+                    result["log_error"] = str(log_error)
             except (OSError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as error:
                 result["steps"].setdefault(phase, {})["status"] = "FAILED"
                 result["status"] = "FAILED"
                 result["error"] = str(error)
-                log.write(f"FAILED: {error}\n")
-            finally:
-                if owner is not None:
-                    try:
-                        release_slot(target_dir, sha, profile, owner)
-                    except (OSError, ValueError) as error:
-                        result["status"] = "FAILED"
-                        result["error"] = f"slot release failed: {error}"
+                try:
+                    log.write(f"FAILED: {error}\n")
+                except OSError as log_error:
+                    result["log_error"] = str(log_error)
         result["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
         result["new_failures"] = new_failures(result)
         if result["status"] != "PASSED" and previous_pass:
             output_path = RESULTS / f"{attempt}.json"
         write_result(output_path, result)
+        if owner is not None:
+            try:
+                release_slot(target_dir, sha, profile, owner)
+            except (OSError, ValueError) as error:
+                result["status"] = "FAILED"
+                result["error"] = f"slot release failed: {error}"
+                write_result(output_path, result)
         if result["status"] == "PASSED" and ref in ("origin/master", "master"):
             write_result(RESULTS / f"master-latest-{profile}.json", result)
         print(json.dumps(result, indent=2))
