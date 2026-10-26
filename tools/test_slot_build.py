@@ -510,6 +510,60 @@ class MountedDepInfoTests(unittest.TestCase):
         self.assertTrue(errors)
 
 
+class DirectoryInputDigestTests(unittest.TestCase):
+    setUp = SlotBuildTests.setUp
+
+    def digest(self, path):
+        return self.module.read_input_hashes(self.slot, [str(path)])[str(path)]
+
+    def test_tree_digest_is_relative_and_independent_of_creation_order(self):
+        left, right = self.slot / "left", self.slot / "right"
+        for root, names in [(left, ["a", "b"]), (right, ["b", "a"])]:
+            (root / "nested").mkdir(parents=True)
+            for name in names:
+                (root / "nested" / name).write_text(name)
+        self.assertEqual(self.digest(left), self.digest(right))
+        (right / "nested/a").rename(right / "nested/c")
+        self.assertNotEqual(self.digest(left), self.digest(right))
+
+    def test_tree_digest_follows_file_and_directory_symlinks(self):
+        root, target = self.slot / "tree", self.slot / "target"
+        root.mkdir()
+        target.mkdir()
+        value = target / "value"
+        value.write_text("original")
+        for name, referent in [("file", value), ("directory", target)]:
+            with self.subTest(name=name):
+                link = root / name
+                link.symlink_to(referent)
+                before = self.digest(root)
+                value.write_text("changed")
+                self.assertNotEqual(before, self.digest(root))
+                value.write_text("original")
+                link.unlink()
+
+    def test_directory_symlink_parent_traversal_preserves_real_input(self):
+        (self.slot / "actual/nested").mkdir(parents=True)
+        (self.slot / "actual/input").mkdir()
+        (self.slot / "actual/input/value").write_text("actual")
+        (self.slot / "input").mkdir()
+        (self.slot / "input/value").write_text("decoy")
+        link = self.slot / "link"
+        link.symlink_to(self.slot / "actual/nested")
+        spelling = link / "../input"
+        self.assertEqual(self.digest(spelling), self.digest(self.slot / "actual/input"))
+        self.assertNotEqual(self.digest(spelling), self.digest(self.slot / "input"))
+        link.unlink()
+        self.assertIsNone(self.digest(spelling))
+
+    def test_cyclic_directory_symlink_fails_closed(self):
+        root = self.slot / "tree"
+        root.mkdir()
+        (root / "loop").symlink_to(root)
+        with self.assertRaisesRegex(ValueError, "cyclic directory input"):
+            self.digest(root)
+
+
 class SourceFreshnessTests(unittest.TestCase):
     def setUp(self):
         SlotBuildTests.setUp(self)

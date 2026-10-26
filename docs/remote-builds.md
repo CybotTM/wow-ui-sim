@@ -148,8 +148,17 @@ closed; old receipts do not certify fresh outputs. A `fresh=false` record with v
 dep-info and output hashes can establish a certificate. Rebuild the affected Cargo
 artifact before retrying; changing receipt identities does not provide proof.
 
-The worker hashes tracked/untracked source files, known source dep-info inputs and
-package manifests before launching the child. It hashes each record's source inputs
+Directory dep-info inputs are certified as recursive content trees. Entries are
+sorted by relative name and hashed with length-delimited names and content digests;
+changes, additions, removals and renames below the directory change its digest.
+Symlinks follow filesystem resolution, including symlink-sensitive `..` traversal;
+missing targets and directory cycles fail closed. Existing file digest values are
+unchanged.
+
+The worker hashes tracked/untracked source files, their parent directories, known
+source dep-info inputs and package manifests before launching the child. Parent
+snapshots cover directory inputs first named by newly generated dep-info. Shared
+subtrees and files are hashed once per snapshot. It hashes each record's source inputs
 again afterward and rejects changed or previously unsnapshotted source inputs.
 Dep-info input spellings retain `..` components and are resolved with
 `os.path.realpath(strict=False)` before classification. Source and current-slot
